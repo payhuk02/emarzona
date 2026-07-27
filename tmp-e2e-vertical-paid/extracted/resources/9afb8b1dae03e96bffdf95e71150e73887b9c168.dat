@@ -1,0 +1,299 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/dashboard/DashboardOnboarding.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardOnboarding.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=8792f17d"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+var _s = $RefreshSig$();
+/**
+ * Écran d'accueil dashboard pour les comptes sans boutique (post-inscription).
+ * Composant léger : pas de stats, notifications ni realtime.
+ */ import { useNavigate } from "/node_modules/.vite/deps/react-router-dom.js?v=8792f17d";
+import { STORE_CREATE_PATH } from "/src/lib/store/store-create-path.ts";
+import { AppPageShell } from "/src/components/layout/AppPageShell.tsx";
+import { useTranslation } from "/node_modules/.vite/deps/react-i18next.js?v=dd5b9242";
+import { LayoutDashboard, ShoppingBag, Store, User } from "/node_modules/.vite/deps/lucide-react.js?v=8792f17d";
+import { Button } from "/src/components/ui/button.tsx";
+import { Card, CardContent, CardHeader, CardTitle } from "/src/components/ui/card.tsx";
+import { usePageCustomization } from "/src/hooks/usePageCustomization.ts";
+import { persistSidebarPersona } from "/src/hooks/useSidebarPersona.ts";
+import { SIDEBAR_PREF_KEYS, writeSidebarJsonPref } from "/src/lib/navigation/sidebar-prefs-storage.ts";
+export function DashboardOnboarding() {
+    _s();
+    const { t } = useTranslation();
+    const navigate = useNavigate();
+    const { getValue } = usePageCustomization('dashboard');
+    return /*#__PURE__*/ _jsxDEV(AppPageShell, {
+        hideSidebar: true,
+        hideHorizontalNav: true,
+        showUtilityBar: false,
+        children: /*#__PURE__*/ _jsxDEV("div", {
+            className: "container mx-auto p-3 sm:p-4 lg:p-6 flex min-h-screen items-center justify-center",
+            children: /*#__PURE__*/ _jsxDEV(Card, {
+                className: "border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in zoom-in-95 duration-500",
+                children: /*#__PURE__*/ _jsxDEV(CardContent, {
+                    className: "pt-8 sm:pt-12 pb-8 sm:pb-12",
+                    children: [
+                        /*#__PURE__*/ _jsxDEV(LayoutDashboard, {
+                            className: "h-12 w-12 sm:h-16 sm:w-16 mx-auto text-muted-foreground mb-4 animate-in zoom-in-95 duration-500",
+                            "aria-hidden": true
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardOnboarding.tsx",
+                            lineNumber: 27,
+                            columnNumber: 13
+                        }, this),
+                        /*#__PURE__*/ _jsxDEV("p", {
+                            className: "text-sm sm:text-base text-muted-foreground mb-2 text-center",
+                            children: getValue('dashboard.welcome', 'dashboard.welcome', 'Bienvenue sur Emarzona !')
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardOnboarding.tsx",
+                            lineNumber: 31,
+                            columnNumber: 13
+                        }, this),
+                        /*#__PURE__*/ _jsxDEV("p", {
+                            className: "text-xs sm:text-sm text-muted-foreground mb-6 text-center",
+                            children: t('dashboard.onboardingChoosePersona', 'Choisissez votre espace pour continuer.')
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardOnboarding.tsx",
+                            lineNumber: 34,
+                            columnNumber: 13
+                        }, this),
+                        /*#__PURE__*/ _jsxDEV("div", {
+                            className: "grid gap-4 md:grid-cols-2",
+                            children: [
+                                /*#__PURE__*/ _jsxDEV(Card, {
+                                    className: "border-border/50",
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV(CardHeader, {
+                                            className: "pb-2",
+                                            children: /*#__PURE__*/ _jsxDEV(CardTitle, {
+                                                className: "text-base flex items-center gap-2",
+                                                children: [
+                                                    /*#__PURE__*/ _jsxDEV(Store, {
+                                                        className: "h-4 w-4",
+                                                        "aria-hidden": true
+                                                    }, void 0, false, {
+                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardOnboarding.tsx",
+                                                        lineNumber: 42,
+                                                        columnNumber: 21
+                                                    }, this),
+                                                    t('dashboard.onboardingSellerTitle', 'Je suis vendeur')
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardOnboarding.tsx",
+                                                lineNumber: 41,
+                                                columnNumber: 19
+                                            }, this)
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardOnboarding.tsx",
+                                            lineNumber: 40,
+                                            columnNumber: 17
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV(CardContent, {
+                                            className: "pt-2",
+                                            children: [
+                                                /*#__PURE__*/ _jsxDEV("p", {
+                                                    className: "text-xs text-muted-foreground mb-3",
+                                                    children: t('dashboard.onboardingSellerDescription', 'Créez votre boutique et commencez a vendre.')
+                                                }, void 0, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardOnboarding.tsx",
+                                                    lineNumber: 47,
+                                                    columnNumber: 19
+                                                }, this),
+                                                /*#__PURE__*/ _jsxDEV(Button, {
+                                                    onClick: ()=>navigate(STORE_CREATE_PATH),
+                                                    className: "w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white min-h-[44px] text-sm touch-manipulation gap-2",
+                                                    children: [
+                                                        /*#__PURE__*/ _jsxDEV(Store, {
+                                                            className: "h-4 w-4",
+                                                            "aria-hidden": true
+                                                        }, void 0, false, {
+                                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardOnboarding.tsx",
+                                                            lineNumber: 57,
+                                                            columnNumber: 21
+                                                        }, this),
+                                                        getValue('dashboard.createStoreButton', 'dashboard.createStoreButton', 'Creer ma boutique')
+                                                    ]
+                                                }, void 0, true, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardOnboarding.tsx",
+                                                    lineNumber: 53,
+                                                    columnNumber: 19
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardOnboarding.tsx",
+                                            lineNumber: 46,
+                                            columnNumber: 17
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardOnboarding.tsx",
+                                    lineNumber: 39,
+                                    columnNumber: 15
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV(Card, {
+                                    className: "border-border/50",
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV(CardHeader, {
+                                            className: "pb-2",
+                                            children: /*#__PURE__*/ _jsxDEV(CardTitle, {
+                                                className: "text-base flex items-center gap-2",
+                                                children: [
+                                                    /*#__PURE__*/ _jsxDEV(User, {
+                                                        className: "h-4 w-4",
+                                                        "aria-hidden": true
+                                                    }, void 0, false, {
+                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardOnboarding.tsx",
+                                                        lineNumber: 70,
+                                                        columnNumber: 21
+                                                    }, this),
+                                                    t('dashboard.onboardingBuyerTitle', 'Je suis acheteur')
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardOnboarding.tsx",
+                                                lineNumber: 69,
+                                                columnNumber: 19
+                                            }, this)
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardOnboarding.tsx",
+                                            lineNumber: 68,
+                                            columnNumber: 17
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV(CardContent, {
+                                            className: "pt-2 space-y-2",
+                                            children: [
+                                                /*#__PURE__*/ _jsxDEV("p", {
+                                                    className: "text-xs text-muted-foreground mb-3",
+                                                    children: t('dashboard.onboardingBuyerDescription', 'Accedez a votre espace client ou poursuivez vos achats.')
+                                                }, void 0, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardOnboarding.tsx",
+                                                    lineNumber: 75,
+                                                    columnNumber: 19
+                                                }, this),
+                                                /*#__PURE__*/ _jsxDEV(Button, {
+                                                    variant: "outline",
+                                                    onClick: ()=>{
+                                                        persistSidebarPersona('buyer');
+                                                        writeSidebarJsonPref(SIDEBAR_PREF_KEYS.personaOnboarded, true);
+                                                        navigate('/account/hub');
+                                                    },
+                                                    className: "w-full min-h-[44px] text-sm touch-manipulation gap-2",
+                                                    children: [
+                                                        /*#__PURE__*/ _jsxDEV(User, {
+                                                            className: "h-4 w-4",
+                                                            "aria-hidden": true
+                                                        }, void 0, false, {
+                                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardOnboarding.tsx",
+                                                            lineNumber: 90,
+                                                            columnNumber: 21
+                                                        }, this),
+                                                        t('dashboard.onboardingBuyerAccount', 'Acceder a Mon Espace Client')
+                                                    ]
+                                                }, void 0, true, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardOnboarding.tsx",
+                                                    lineNumber: 81,
+                                                    columnNumber: 19
+                                                }, this),
+                                                /*#__PURE__*/ _jsxDEV(Button, {
+                                                    onClick: ()=>navigate('/marketplace'),
+                                                    className: "w-full min-h-[44px] text-sm touch-manipulation gap-2",
+                                                    children: [
+                                                        /*#__PURE__*/ _jsxDEV(ShoppingBag, {
+                                                            className: "h-4 w-4",
+                                                            "aria-hidden": true
+                                                        }, void 0, false, {
+                                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardOnboarding.tsx",
+                                                            lineNumber: 97,
+                                                            columnNumber: 21
+                                                        }, this),
+                                                        t('dashboard.onboardingBuyerMarketplace', 'Continuer mes achats')
+                                                    ]
+                                                }, void 0, true, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardOnboarding.tsx",
+                                                    lineNumber: 93,
+                                                    columnNumber: 19
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardOnboarding.tsx",
+                                            lineNumber: 74,
+                                            columnNumber: 17
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardOnboarding.tsx",
+                                    lineNumber: 67,
+                                    columnNumber: 15
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardOnboarding.tsx",
+                            lineNumber: 38,
+                            columnNumber: 13
+                        }, this)
+                    ]
+                }, void 0, true, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardOnboarding.tsx",
+                    lineNumber: 26,
+                    columnNumber: 11
+                }, this)
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardOnboarding.tsx",
+                lineNumber: 25,
+                columnNumber: 9
+            }, this)
+        }, void 0, false, {
+            fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardOnboarding.tsx",
+            lineNumber: 24,
+            columnNumber: 7
+        }, this)
+    }, void 0, false, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardOnboarding.tsx",
+        lineNumber: 23,
+        columnNumber: 5
+    }, this);
+}
+_s(DashboardOnboarding, "XyoTSyiNPAchH9vwKxT9/u04HWA=", false, function() {
+    return [
+        useTranslation,
+        useNavigate,
+        usePageCustomization
+    ];
+});
+_c = DashboardOnboarding;
+var _c;
+$RefreshReg$(_c, "DashboardOnboarding");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardOnboarding.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardOnboarding.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIkRhc2hib2FyZE9uYm9hcmRpbmcudHN4Il0sInNvdXJjZXNDb250ZW50IjpbIi8qKlxuICogw4ljcmFuIGQnYWNjdWVpbCBkYXNoYm9hcmQgcG91ciBsZXMgY29tcHRlcyBzYW5zIGJvdXRpcXVlIChwb3N0LWluc2NyaXB0aW9uKS5cbiAqIENvbXBvc2FudCBsw6lnZXIgOiBwYXMgZGUgc3RhdHMsIG5vdGlmaWNhdGlvbnMgbmkgcmVhbHRpbWUuXG4gKi9cblxuaW1wb3J0IHsgdXNlTmF2aWdhdGUgfSBmcm9tICdyZWFjdC1yb3V0ZXItZG9tJztcbmltcG9ydCB7IFNUT1JFX0NSRUFURV9QQVRIIH0gZnJvbSAnQC9saWIvc3RvcmUvc3RvcmUtY3JlYXRlLXBhdGgnO1xuaW1wb3J0IHsgQXBwUGFnZVNoZWxsIH0gZnJvbSAnQC9jb21wb25lbnRzL2xheW91dC9BcHBQYWdlU2hlbGwnO1xuaW1wb3J0IHsgdXNlVHJhbnNsYXRpb24gfSBmcm9tICdyZWFjdC1pMThuZXh0JztcbmltcG9ydCB7IExheW91dERhc2hib2FyZCwgU2hvcHBpbmdCYWcsIFN0b3JlLCBVc2VyIH0gZnJvbSAnbHVjaWRlLXJlYWN0JztcbmltcG9ydCB7IEJ1dHRvbiB9IGZyb20gJ0AvY29tcG9uZW50cy91aS9idXR0b24nO1xuaW1wb3J0IHsgQ2FyZCwgQ2FyZENvbnRlbnQsIENhcmRIZWFkZXIsIENhcmRUaXRsZSB9IGZyb20gJ0AvY29tcG9uZW50cy91aS9jYXJkJztcbmltcG9ydCB7IHVzZVBhZ2VDdXN0b21pemF0aW9uIH0gZnJvbSAnQC9ob29rcy91c2VQYWdlQ3VzdG9taXphdGlvbic7XG5pbXBvcnQgeyBwZXJzaXN0U2lkZWJhclBlcnNvbmEgfSBmcm9tICdAL2hvb2tzL3VzZVNpZGViYXJQZXJzb25hJztcbmltcG9ydCB7IFNJREVCQVJfUFJFRl9LRVlTLCB3cml0ZVNpZGViYXJKc29uUHJlZiB9IGZyb20gJ0AvbGliL25hdmlnYXRpb24vc2lkZWJhci1wcmVmcy1zdG9yYWdlJztcblxuZXhwb3J0IGZ1bmN0aW9uIERhc2hib2FyZE9uYm9hcmRpbmcoKSB7XG4gIGNvbnN0IHsgdCB9ID0gdXNlVHJhbnNsYXRpb24oKTtcbiAgY29uc3QgbmF2aWdhdGUgPSB1c2VOYXZpZ2F0ZSgpO1xuICBjb25zdCB7IGdldFZhbHVlIH0gPSB1c2VQYWdlQ3VzdG9taXphdGlvbignZGFzaGJvYXJkJyk7XG5cbiAgcmV0dXJuIChcbiAgICA8QXBwUGFnZVNoZWxsIGhpZGVTaWRlYmFyIGhpZGVIb3Jpem9udGFsTmF2IHNob3dVdGlsaXR5QmFyPXtmYWxzZX0+XG4gICAgICA8ZGl2IGNsYXNzTmFtZT1cImNvbnRhaW5lciBteC1hdXRvIHAtMyBzbTpwLTQgbGc6cC02IGZsZXggbWluLWgtc2NyZWVuIGl0ZW1zLWNlbnRlciBqdXN0aWZ5LWNlbnRlclwiPlxuICAgICAgICA8Q2FyZCBjbGFzc05hbWU9XCJib3JkZXItYm9yZGVyLzUwIGJnLWNhcmQvNTAgYmFja2Ryb3AtYmx1ci1zbSBhbmltYXRlLWluIGZhZGUtaW4gem9vbS1pbi05NSBkdXJhdGlvbi01MDBcIj5cbiAgICAgICAgICA8Q2FyZENvbnRlbnQgY2xhc3NOYW1lPVwicHQtOCBzbTpwdC0xMiBwYi04IHNtOnBiLTEyXCI+XG4gICAgICAgICAgICA8TGF5b3V0RGFzaGJvYXJkXG4gICAgICAgICAgICAgIGNsYXNzTmFtZT1cImgtMTIgdy0xMiBzbTpoLTE2IHNtOnctMTYgbXgtYXV0byB0ZXh0LW11dGVkLWZvcmVncm91bmQgbWItNCBhbmltYXRlLWluIHpvb20taW4tOTUgZHVyYXRpb24tNTAwXCJcbiAgICAgICAgICAgICAgYXJpYS1oaWRkZW5cbiAgICAgICAgICAgIC8+XG4gICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJ0ZXh0LXNtIHNtOnRleHQtYmFzZSB0ZXh0LW11dGVkLWZvcmVncm91bmQgbWItMiB0ZXh0LWNlbnRlclwiPlxuICAgICAgICAgICAgICB7Z2V0VmFsdWUoJ2Rhc2hib2FyZC53ZWxjb21lJywgJ2Rhc2hib2FyZC53ZWxjb21lJywgJ0JpZW52ZW51ZSBzdXIgRW1hcnpvbmEgIScpfVxuICAgICAgICAgICAgPC9wPlxuICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwidGV4dC14cyBzbTp0ZXh0LXNtIHRleHQtbXV0ZWQtZm9yZWdyb3VuZCBtYi02IHRleHQtY2VudGVyXCI+XG4gICAgICAgICAgICAgIHt0KCdkYXNoYm9hcmQub25ib2FyZGluZ0Nob29zZVBlcnNvbmEnLCAnQ2hvaXNpc3NleiB2b3RyZSBlc3BhY2UgcG91ciBjb250aW51ZXIuJyl9XG4gICAgICAgICAgICA8L3A+XG5cbiAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZ3JpZCBnYXAtNCBtZDpncmlkLWNvbHMtMlwiPlxuICAgICAgICAgICAgICA8Q2FyZCBjbGFzc05hbWU9XCJib3JkZXItYm9yZGVyLzUwXCI+XG4gICAgICAgICAgICAgICAgPENhcmRIZWFkZXIgY2xhc3NOYW1lPVwicGItMlwiPlxuICAgICAgICAgICAgICAgICAgPENhcmRUaXRsZSBjbGFzc05hbWU9XCJ0ZXh0LWJhc2UgZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTJcIj5cbiAgICAgICAgICAgICAgICAgICAgPFN0b3JlIGNsYXNzTmFtZT1cImgtNCB3LTRcIiBhcmlhLWhpZGRlbiAvPlxuICAgICAgICAgICAgICAgICAgICB7dCgnZGFzaGJvYXJkLm9uYm9hcmRpbmdTZWxsZXJUaXRsZScsICdKZSBzdWlzIHZlbmRldXInKX1cbiAgICAgICAgICAgICAgICAgIDwvQ2FyZFRpdGxlPlxuICAgICAgICAgICAgICAgIDwvQ2FyZEhlYWRlcj5cbiAgICAgICAgICAgICAgICA8Q2FyZENvbnRlbnQgY2xhc3NOYW1lPVwicHQtMlwiPlxuICAgICAgICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwidGV4dC14cyB0ZXh0LW11dGVkLWZvcmVncm91bmQgbWItM1wiPlxuICAgICAgICAgICAgICAgICAgICB7dChcbiAgICAgICAgICAgICAgICAgICAgICAnZGFzaGJvYXJkLm9uYm9hcmRpbmdTZWxsZXJEZXNjcmlwdGlvbicsXG4gICAgICAgICAgICAgICAgICAgICAgJ0Nyw6lleiB2b3RyZSBib3V0aXF1ZSBldCBjb21tZW5jZXogYSB2ZW5kcmUuJ1xuICAgICAgICAgICAgICAgICAgICApfVxuICAgICAgICAgICAgICAgICAgPC9wPlxuICAgICAgICAgICAgICAgICAgPEJ1dHRvblxuICAgICAgICAgICAgICAgICAgICBvbkNsaWNrPXsoKSA9PiBuYXZpZ2F0ZShTVE9SRV9DUkVBVEVfUEFUSCl9XG4gICAgICAgICAgICAgICAgICAgIGNsYXNzTmFtZT1cInctZnVsbCBiZy1ncmFkaWVudC10by1yIGZyb20tcHVycGxlLTYwMCB0by1waW5rLTYwMCBob3Zlcjpmcm9tLXB1cnBsZS03MDAgaG92ZXI6dG8tcGluay03MDAgdGV4dC13aGl0ZSBtaW4taC1bNDRweF0gdGV4dC1zbSB0b3VjaC1tYW5pcHVsYXRpb24gZ2FwLTJcIlxuICAgICAgICAgICAgICAgICAgPlxuICAgICAgICAgICAgICAgICAgICA8U3RvcmUgY2xhc3NOYW1lPVwiaC00IHctNFwiIGFyaWEtaGlkZGVuIC8+XG4gICAgICAgICAgICAgICAgICAgIHtnZXRWYWx1ZShcbiAgICAgICAgICAgICAgICAgICAgICAnZGFzaGJvYXJkLmNyZWF0ZVN0b3JlQnV0dG9uJyxcbiAgICAgICAgICAgICAgICAgICAgICAnZGFzaGJvYXJkLmNyZWF0ZVN0b3JlQnV0dG9uJyxcbiAgICAgICAgICAgICAgICAgICAgICAnQ3JlZXIgbWEgYm91dGlxdWUnXG4gICAgICAgICAgICAgICAgICAgICl9XG4gICAgICAgICAgICAgICAgICA8L0J1dHRvbj5cbiAgICAgICAgICAgICAgICA8L0NhcmRDb250ZW50PlxuICAgICAgICAgICAgICA8L0NhcmQ+XG5cbiAgICAgICAgICAgICAgPENhcmQgY2xhc3NOYW1lPVwiYm9yZGVyLWJvcmRlci81MFwiPlxuICAgICAgICAgICAgICAgIDxDYXJkSGVhZGVyIGNsYXNzTmFtZT1cInBiLTJcIj5cbiAgICAgICAgICAgICAgICAgIDxDYXJkVGl0bGUgY2xhc3NOYW1lPVwidGV4dC1iYXNlIGZsZXggaXRlbXMtY2VudGVyIGdhcC0yXCI+XG4gICAgICAgICAgICAgICAgICAgIDxVc2VyIGNsYXNzTmFtZT1cImgtNCB3LTRcIiBhcmlhLWhpZGRlbiAvPlxuICAgICAgICAgICAgICAgICAgICB7dCgnZGFzaGJvYXJkLm9uYm9hcmRpbmdCdXllclRpdGxlJywgJ0plIHN1aXMgYWNoZXRldXInKX1cbiAgICAgICAgICAgICAgICAgIDwvQ2FyZFRpdGxlPlxuICAgICAgICAgICAgICAgIDwvQ2FyZEhlYWRlcj5cbiAgICAgICAgICAgICAgICA8Q2FyZENvbnRlbnQgY2xhc3NOYW1lPVwicHQtMiBzcGFjZS15LTJcIj5cbiAgICAgICAgICAgICAgICAgIDxwIGNsYXNzTmFtZT1cInRleHQteHMgdGV4dC1tdXRlZC1mb3JlZ3JvdW5kIG1iLTNcIj5cbiAgICAgICAgICAgICAgICAgICAge3QoXG4gICAgICAgICAgICAgICAgICAgICAgJ2Rhc2hib2FyZC5vbmJvYXJkaW5nQnV5ZXJEZXNjcmlwdGlvbicsXG4gICAgICAgICAgICAgICAgICAgICAgJ0FjY2VkZXogYSB2b3RyZSBlc3BhY2UgY2xpZW50IG91IHBvdXJzdWl2ZXogdm9zIGFjaGF0cy4nXG4gICAgICAgICAgICAgICAgICAgICl9XG4gICAgICAgICAgICAgICAgICA8L3A+XG4gICAgICAgICAgICAgICAgICA8QnV0dG9uXG4gICAgICAgICAgICAgICAgICAgIHZhcmlhbnQ9XCJvdXRsaW5lXCJcbiAgICAgICAgICAgICAgICAgICAgb25DbGljaz17KCkgPT4ge1xuICAgICAgICAgICAgICAgICAgICAgIHBlcnNpc3RTaWRlYmFyUGVyc29uYSgnYnV5ZXInKTtcbiAgICAgICAgICAgICAgICAgICAgICB3cml0ZVNpZGViYXJKc29uUHJlZihTSURFQkFSX1BSRUZfS0VZUy5wZXJzb25hT25ib2FyZGVkLCB0cnVlKTtcbiAgICAgICAgICAgICAgICAgICAgICBuYXZpZ2F0ZSgnL2FjY291bnQvaHViJyk7XG4gICAgICAgICAgICAgICAgICAgIH19XG4gICAgICAgICAgICAgICAgICAgIGNsYXNzTmFtZT1cInctZnVsbCBtaW4taC1bNDRweF0gdGV4dC1zbSB0b3VjaC1tYW5pcHVsYXRpb24gZ2FwLTJcIlxuICAgICAgICAgICAgICAgICAgPlxuICAgICAgICAgICAgICAgICAgICA8VXNlciBjbGFzc05hbWU9XCJoLTQgdy00XCIgYXJpYS1oaWRkZW4gLz5cbiAgICAgICAgICAgICAgICAgICAge3QoJ2Rhc2hib2FyZC5vbmJvYXJkaW5nQnV5ZXJBY2NvdW50JywgJ0FjY2VkZXIgYSBNb24gRXNwYWNlIENsaWVudCcpfVxuICAgICAgICAgICAgICAgICAgPC9CdXR0b24+XG4gICAgICAgICAgICAgICAgICA8QnV0dG9uXG4gICAgICAgICAgICAgICAgICAgIG9uQ2xpY2s9eygpID0+IG5hdmlnYXRlKCcvbWFya2V0cGxhY2UnKX1cbiAgICAgICAgICAgICAgICAgICAgY2xhc3NOYW1lPVwidy1mdWxsIG1pbi1oLVs0NHB4XSB0ZXh0LXNtIHRvdWNoLW1hbmlwdWxhdGlvbiBnYXAtMlwiXG4gICAgICAgICAgICAgICAgICA+XG4gICAgICAgICAgICAgICAgICAgIDxTaG9wcGluZ0JhZyBjbGFzc05hbWU9XCJoLTQgdy00XCIgYXJpYS1oaWRkZW4gLz5cbiAgICAgICAgICAgICAgICAgICAge3QoJ2Rhc2hib2FyZC5vbmJvYXJkaW5nQnV5ZXJNYXJrZXRwbGFjZScsICdDb250aW51ZXIgbWVzIGFjaGF0cycpfVxuICAgICAgICAgICAgICAgICAgPC9CdXR0b24+XG4gICAgICAgICAgICAgICAgPC9DYXJkQ29udGVudD5cbiAgICAgICAgICAgICAgPC9DYXJkPlxuICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgPC9DYXJkQ29udGVudD5cbiAgICAgICAgPC9DYXJkPlxuICAgICAgPC9kaXY+XG4gICAgPC9BcHBQYWdlU2hlbGw+XG4gICk7XG59XG4iXSwibmFtZXMiOlsidXNlTmF2aWdhdGUiLCJTVE9SRV9DUkVBVEVfUEFUSCIsIkFwcFBhZ2VTaGVsbCIsInVzZVRyYW5zbGF0aW9uIiwiTGF5b3V0RGFzaGJvYXJkIiwiU2hvcHBpbmdCYWciLCJTdG9yZSIsIlVzZXIiLCJCdXR0b24iLCJDYXJkIiwiQ2FyZENvbnRlbnQiLCJDYXJkSGVhZGVyIiwiQ2FyZFRpdGxlIiwidXNlUGFnZUN1c3RvbWl6YXRpb24iLCJwZXJzaXN0U2lkZWJhclBlcnNvbmEiLCJTSURFQkFSX1BSRUZfS0VZUyIsIndyaXRlU2lkZWJhckpzb25QcmVmIiwiRGFzaGJvYXJkT25ib2FyZGluZyIsInQiLCJuYXZpZ2F0ZSIsImdldFZhbHVlIiwiaGlkZVNpZGViYXIiLCJoaWRlSG9yaXpvbnRhbE5hdiIsInNob3dVdGlsaXR5QmFyIiwiZGl2IiwiY2xhc3NOYW1lIiwiYXJpYS1oaWRkZW4iLCJwIiwib25DbGljayIsInZhcmlhbnQiLCJwZXJzb25hT25ib2FyZGVkIl0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7QUFBQTs7O0NBR0MsR0FFRCxTQUFTQSxXQUFXLFFBQVEsbUJBQW1CO0FBQy9DLFNBQVNDLGlCQUFpQixRQUFRLGdDQUFnQztBQUNsRSxTQUFTQyxZQUFZLFFBQVEsbUNBQW1DO0FBQ2hFLFNBQVNDLGNBQWMsUUFBUSxnQkFBZ0I7QUFDL0MsU0FBU0MsZUFBZSxFQUFFQyxXQUFXLEVBQUVDLEtBQUssRUFBRUMsSUFBSSxRQUFRLGVBQWU7QUFDekUsU0FBU0MsTUFBTSxRQUFRLHlCQUF5QjtBQUNoRCxTQUFTQyxJQUFJLEVBQUVDLFdBQVcsRUFBRUMsVUFBVSxFQUFFQyxTQUFTLFFBQVEsdUJBQXVCO0FBQ2hGLFNBQVNDLG9CQUFvQixRQUFRLCtCQUErQjtBQUNwRSxTQUFTQyxxQkFBcUIsUUFBUSw0QkFBNEI7QUFDbEUsU0FBU0MsaUJBQWlCLEVBQUVDLG9CQUFvQixRQUFRLHlDQUF5QztBQUVqRyxPQUFPLFNBQVNDOztJQUNkLE1BQU0sRUFBRUMsQ0FBQyxFQUFFLEdBQUdmO0lBQ2QsTUFBTWdCLFdBQVduQjtJQUNqQixNQUFNLEVBQUVvQixRQUFRLEVBQUUsR0FBR1AscUJBQXFCO0lBRTFDLHFCQUNFLFFBQUNYO1FBQWFtQixXQUFXO1FBQUNDLGlCQUFpQjtRQUFDQyxnQkFBZ0I7a0JBQzFELGNBQUEsUUFBQ0M7WUFBSUMsV0FBVTtzQkFDYixjQUFBLFFBQUNoQjtnQkFBS2dCLFdBQVU7MEJBQ2QsY0FBQSxRQUFDZjtvQkFBWWUsV0FBVTs7c0NBQ3JCLFFBQUNyQjs0QkFDQ3FCLFdBQVU7NEJBQ1ZDLGFBQVc7Ozs7OztzQ0FFYixRQUFDQzs0QkFBRUYsV0FBVTtzQ0FDVkwsU0FBUyxxQkFBcUIscUJBQXFCOzs7Ozs7c0NBRXRELFFBQUNPOzRCQUFFRixXQUFVO3NDQUNWUCxFQUFFLHFDQUFxQzs7Ozs7O3NDQUcxQyxRQUFDTTs0QkFBSUMsV0FBVTs7OENBQ2IsUUFBQ2hCO29DQUFLZ0IsV0FBVTs7c0RBQ2QsUUFBQ2Q7NENBQVdjLFdBQVU7c0RBQ3BCLGNBQUEsUUFBQ2I7Z0RBQVVhLFdBQVU7O2tFQUNuQixRQUFDbkI7d0RBQU1tQixXQUFVO3dEQUFVQyxhQUFXOzs7Ozs7b0RBQ3JDUixFQUFFLG1DQUFtQzs7Ozs7Ozs7Ozs7O3NEQUcxQyxRQUFDUjs0Q0FBWWUsV0FBVTs7OERBQ3JCLFFBQUNFO29EQUFFRixXQUFVOzhEQUNWUCxFQUNDLHlDQUNBOzs7Ozs7OERBR0osUUFBQ1Y7b0RBQ0NvQixTQUFTLElBQU1ULFNBQVNsQjtvREFDeEJ3QixXQUFVOztzRUFFVixRQUFDbkI7NERBQU1tQixXQUFVOzREQUFVQyxhQUFXOzs7Ozs7d0RBQ3JDTixTQUNDLCtCQUNBLCtCQUNBOzs7Ozs7Ozs7Ozs7Ozs7Ozs7OzhDQU1SLFFBQUNYO29DQUFLZ0IsV0FBVTs7c0RBQ2QsUUFBQ2Q7NENBQVdjLFdBQVU7c0RBQ3BCLGNBQUEsUUFBQ2I7Z0RBQVVhLFdBQVU7O2tFQUNuQixRQUFDbEI7d0RBQUtrQixXQUFVO3dEQUFVQyxhQUFXOzs7Ozs7b0RBQ3BDUixFQUFFLGtDQUFrQzs7Ozs7Ozs7Ozs7O3NEQUd6QyxRQUFDUjs0Q0FBWWUsV0FBVTs7OERBQ3JCLFFBQUNFO29EQUFFRixXQUFVOzhEQUNWUCxFQUNDLHdDQUNBOzs7Ozs7OERBR0osUUFBQ1Y7b0RBQ0NxQixTQUFRO29EQUNSRCxTQUFTO3dEQUNQZCxzQkFBc0I7d0RBQ3RCRSxxQkFBcUJELGtCQUFrQmUsZ0JBQWdCLEVBQUU7d0RBQ3pEWCxTQUFTO29EQUNYO29EQUNBTSxXQUFVOztzRUFFVixRQUFDbEI7NERBQUtrQixXQUFVOzREQUFVQyxhQUFXOzs7Ozs7d0RBQ3BDUixFQUFFLG9DQUFvQzs7Ozs7Ozs4REFFekMsUUFBQ1Y7b0RBQ0NvQixTQUFTLElBQU1ULFNBQVM7b0RBQ3hCTSxXQUFVOztzRUFFVixRQUFDcEI7NERBQVlvQixXQUFVOzREQUFVQyxhQUFXOzs7Ozs7d0RBQzNDUixFQUFFLHdDQUF3Qzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OztBQVUvRDtHQTNGZ0JEOztRQUNBZDtRQUNHSDtRQUNJYTs7O0tBSFBJIn0=

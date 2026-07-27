@@ -1,0 +1,12 @@
+import { buildFeedbackIntegration, feedbackScreenshotIntegration, feedbackModalIntegration } from "/node_modules/@sentry-internal/feedback/build/npm/esm/index.js?v=3ea6c1b9";
+
+/** Add a widget to capture user feedback to your application. */
+const feedbackSyncIntegration = buildFeedbackIntegration({
+  getModalIntegration: () => feedbackModalIntegration,
+  getScreenshotIntegration: () => feedbackScreenshotIntegration,
+});
+
+export { feedbackSyncIntegration };
+                                        
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZmVlZGJhY2tTeW5jLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi9zcmMvZmVlZGJhY2tTeW5jLnRzIl0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7XG4gIGJ1aWxkRmVlZGJhY2tJbnRlZ3JhdGlvbixcbiAgZmVlZGJhY2tNb2RhbEludGVncmF0aW9uLFxuICBmZWVkYmFja1NjcmVlbnNob3RJbnRlZ3JhdGlvbixcbn0gZnJvbSAnQHNlbnRyeS1pbnRlcm5hbC9mZWVkYmFjayc7XG5cbi8qKiBBZGQgYSB3aWRnZXQgdG8gY2FwdHVyZSB1c2VyIGZlZWRiYWNrIHRvIHlvdXIgYXBwbGljYXRpb24uICovXG5leHBvcnQgY29uc3QgZmVlZGJhY2tTeW5jSW50ZWdyYXRpb24gPSBidWlsZEZlZWRiYWNrSW50ZWdyYXRpb24oe1xuICBnZXRNb2RhbEludGVncmF0aW9uOiAoKSA9PiBmZWVkYmFja01vZGFsSW50ZWdyYXRpb24sXG4gIGdldFNjcmVlbnNob3RJbnRlZ3JhdGlvbjogKCkgPT4gZmVlZGJhY2tTY3JlZW5zaG90SW50ZWdyYXRpb24sXG59KTtcbiJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOztBQU1BO0FBQ08sTUFBTSx1QkFBQSxHQUEwQix3QkFBd0IsQ0FBQztBQUNoRSxFQUFFLG1CQUFtQixFQUFFLE1BQU0sd0JBQXdCO0FBQ3JELEVBQUUsd0JBQXdCLEVBQUUsTUFBTSw2QkFBNkI7QUFDL0QsQ0FBQzs7OzsiLCJ4X2dvb2dsZV9pZ25vcmVMaXN0IjpbMF19

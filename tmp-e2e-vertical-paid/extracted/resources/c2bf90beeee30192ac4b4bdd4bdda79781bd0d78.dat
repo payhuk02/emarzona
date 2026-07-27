@@ -1,0 +1,510 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/service/ServiceCalendarEnhanced.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/service/ServiceCalendarEnhanced.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=8792f17d"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+var _s = $RefreshSig$();
+/**
+ * Service Calendar Component - Enhanced with react-big-calendar
+ * Date: 28 Janvier 2025
+ *
+ * Version améliorée du calendrier utilisant react-big-calendar pour une meilleure UX
+ * Alternative moderne au calendrier de base
+ */ import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=8792f17d"; const useState = __vite__cjsImport3_react["useState"]; const useCallback = __vite__cjsImport3_react["useCallback"];
+import { format, parse, startOfWeek, getDay } from "/node_modules/.vite/deps/date-fns.js?v=8792f17d";
+import { fr } from "/node_modules/.vite/deps/date-fns_locale.js?v=38bab283";
+import { LazyCalendarWrapper } from "/src/components/calendar/LazyCalendarWrapper.tsx";
+import { Card, CardContent, CardHeader, CardTitle } from "/src/components/ui/card.tsx";
+import { Button } from "/src/components/ui/button.tsx";
+import { Skeleton } from "/src/components/ui/skeleton.tsx";
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from "/node_modules/.vite/deps/lucide-react.js?v=8792f17d";
+import { useQuery } from "/node_modules/.vite/deps/@tanstack_react-query.js?v=8792f17d";
+import { supabase } from "/src/integrations/supabase/client.ts";
+const SERVICE_AVAILABILITY_SLOT_FIELDS = 'id, service_product_id, day_of_week, start_time, end_time, is_active';
+// Localizer will be created inside the component with lazy-loaded calendar
+// Messages en français
+const messages = {
+    date: 'Date',
+    time: 'Heure',
+    event: 'Événement',
+    allDay: 'Journée',
+    week: 'Semaine',
+    work_week: 'Sem. travail',
+    day: 'Jour',
+    month: 'Mois',
+    agenda: 'Agenda',
+    previous: 'Précédent',
+    next: 'Suivant',
+    yesterday: 'Hier',
+    tomorrow: 'Demain',
+    today: "Aujourd'hui",
+    noEventsInRange: 'Aucun créneau disponible dans cette période.',
+    showMore: (total)=>`+ ${total} de plus`
+};
+export const ServiceCalendarEnhanced = ({ serviceId, selectedDate, onDateSelect, minDate, maxDate, disabledDates = [] })=>{
+    _s();
+    const [view, setView] = useState('month');
+    const [date, setDate] = useState(selectedDate || new Date());
+    // Fetch service product ID
+    const { data: serviceProduct } = useQuery({
+        queryKey: [
+            'service-product',
+            serviceId
+        ],
+        queryFn: async ()=>{
+            if (!serviceId) return null;
+            const { data, error } = await supabase.from('service_products').select('id, duration_minutes, max_participants').eq('product_id', serviceId).single();
+            if (error) throw error;
+            return data;
+        },
+        enabled: !!serviceId
+    });
+    // Fetch availability slots and bookings
+    const { data: calendarEvents, isLoading } = useQuery({
+        queryKey: [
+            'calendar-events',
+            serviceProduct?.id,
+            format(date, 'yyyy-MM')
+        ],
+        queryFn: async ()=>{
+            if (!serviceProduct?.id) return [];
+            const events = [];
+            // Get availability slots
+            const { data: slots } = await supabase.from('service_availability_slots').select(SERVICE_AVAILABILITY_SLOT_FIELDS).eq('service_product_id', serviceProduct.id).eq('is_active', true);
+            if (!slots || slots.length === 0) return [];
+            // Get bookings for the current month
+            const monthStart = new Date(date.getFullYear(), date.getMonth(), 1);
+            const monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+            const { data: bookings, error: bookingsError } = await supabase.from('service_bookings').select(`
+          id,
+          scheduled_date,
+          scheduled_start_time,
+          scheduled_end_time,
+          status
+        `).eq('product_id', serviceId).gte('scheduled_date', format(monthStart, 'yyyy-MM-dd')).lte('scheduled_date', format(monthEnd, 'yyyy-MM-dd')).in('status', [
+                'pending',
+                'confirmed'
+            ]);
+            const bookingRows = bookingsError ? [] : bookings ?? [];
+            // Create events for available slots
+            slots.forEach((slot)=>{
+                if (!slot.start_time) return;
+                // For each day of the week that matches this slot
+                for(let dayOffset = 0; dayOffset < 7; dayOffset++){
+                    const slotDate = new Date(monthStart);
+                    slotDate.setDate(monthStart.getDate() + dayOffset);
+                    if (slotDate.getDay() === slot.day_of_week) {
+                        // Check if there are bookings for this time slot
+                        const bookingsAtThisTime = bookingRows.filter((b)=>{
+                            const bookingDate = new Date(b.scheduled_date);
+                            return bookingDate.getDate() === slotDate.getDate() && bookingDate.getMonth() === slotDate.getMonth() && b.scheduled_start_time?.substring(0, 5) === slot.start_time?.substring(0, 5);
+                        }) || [];
+                        const availableSpots = (serviceProduct?.max_participants || 1) - bookingsAtThisTime.length;
+                        const totalSlots = serviceProduct?.max_participants || 1;
+                        let status = 'unavailable';
+                        if (availableSpots > 0) {
+                            if (availableSpots <= totalSlots * 0.3) {
+                                status = 'limited';
+                            } else {
+                                status = 'available';
+                            }
+                        } else {
+                            status = 'full';
+                        }
+                        // Create event for this time slot
+                        const [hours, minutes] = slot.start_time.split(':').map(Number);
+                        const startDateTime = new Date(slotDate);
+                        startDateTime.setHours(hours, minutes, 0, 0);
+                        const endDateTime = new Date(startDateTime);
+                        endDateTime.setMinutes(endDateTime.getMinutes() + (serviceProduct?.duration_minutes || 60));
+                        events.push({
+                            id: `slot-${slot.id}-${slotDate.toISOString()}`,
+                            title: status === 'available' ? `Disponible (${availableSpots} place${availableSpots > 1 ? 's' : ''})` : status === 'limited' ? `Limité (${availableSpots} place${availableSpots > 1 ? 's' : ''})` : 'Complet',
+                            start: startDateTime,
+                            end: endDateTime,
+                            resource: {
+                                availableSlots: availableSpots,
+                                totalSlots,
+                                status
+                            }
+                        });
+                    }
+                }
+            });
+            return events;
+        },
+        enabled: !!serviceProduct?.id
+    });
+    // Event style getter
+    const eventStyleGetter = useCallback((event)=>{
+        const status = event.resource?.status || 'unavailable';
+        const statusColors = {
+            available: {
+                bg: '#10b981',
+                text: '#ffffff',
+                border: '#059669'
+            },
+            limited: {
+                bg: '#f59e0b',
+                text: '#ffffff',
+                border: '#d97706'
+            },
+            full: {
+                bg: '#ef4444',
+                text: '#ffffff',
+                border: '#dc2626'
+            },
+            unavailable: {
+                bg: '#6b7280',
+                text: '#ffffff',
+                border: '#4b5563'
+            }
+        };
+        const color = statusColors[status] || statusColors.unavailable;
+        return {
+            style: {
+                backgroundColor: color.bg,
+                color: color.text,
+                border: `2px solid ${color.border}`,
+                borderRadius: '6px',
+                padding: '4px 8px',
+                fontSize: '0.875rem',
+                fontWeight: '500'
+            }
+        };
+    }, []);
+    // Handle event selection
+    const handleSelectEvent = useCallback((event)=>{
+        if (event.resource?.status === 'available' || event.resource?.status === 'limited') {
+            onDateSelect(event.start);
+        }
+    }, [
+        onDateSelect
+    ]);
+    // Handle date selection (for month view)
+    const handleSelectSlot = useCallback((slotInfo)=>{
+        onDateSelect(slotInfo.start);
+    }, [
+        onDateSelect
+    ]);
+    if (isLoading) {
+        return /*#__PURE__*/ _jsxDEV(Card, {
+            children: [
+                /*#__PURE__*/ _jsxDEV(CardHeader, {
+                    children: /*#__PURE__*/ _jsxDEV(Skeleton, {
+                        className: "h-6 w-48"
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/service/ServiceCalendarEnhanced.tsx",
+                        lineNumber: 254,
+                        columnNumber: 11
+                    }, this)
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/service/ServiceCalendarEnhanced.tsx",
+                    lineNumber: 253,
+                    columnNumber: 9
+                }, this),
+                /*#__PURE__*/ _jsxDEV(CardContent, {
+                    children: /*#__PURE__*/ _jsxDEV(Skeleton, {
+                        className: "h-96 w-full"
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/service/ServiceCalendarEnhanced.tsx",
+                        lineNumber: 257,
+                        columnNumber: 11
+                    }, this)
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/service/ServiceCalendarEnhanced.tsx",
+                    lineNumber: 256,
+                    columnNumber: 9
+                }, this)
+            ]
+        }, void 0, true, {
+            fileName: "/home/runner/work/emarzona/emarzona/src/components/service/ServiceCalendarEnhanced.tsx",
+            lineNumber: 252,
+            columnNumber: 7
+        }, this);
+    }
+    return /*#__PURE__*/ _jsxDEV(Card, {
+        children: [
+            /*#__PURE__*/ _jsxDEV(CardHeader, {
+                children: /*#__PURE__*/ _jsxDEV("div", {
+                    className: "flex items-center justify-between",
+                    children: [
+                        /*#__PURE__*/ _jsxDEV(CardTitle, {
+                            className: "flex items-center gap-2",
+                            children: [
+                                /*#__PURE__*/ _jsxDEV(CalendarIcon, {
+                                    className: "h-5 w-5"
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/service/ServiceCalendarEnhanced.tsx",
+                                    lineNumber: 268,
+                                    columnNumber: 13
+                                }, this),
+                                "Disponibilités"
+                            ]
+                        }, void 0, true, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/service/ServiceCalendarEnhanced.tsx",
+                            lineNumber: 267,
+                            columnNumber: 11
+                        }, this),
+                        /*#__PURE__*/ _jsxDEV("div", {
+                            className: "flex gap-1",
+                            children: [
+                                /*#__PURE__*/ _jsxDEV(Button, {
+                                    variant: "outline",
+                                    size: "icon",
+                                    onClick: ()=>{
+                                        const newDate = new Date(date);
+                                        newDate.setMonth(newDate.getMonth() - 1);
+                                        setDate(newDate);
+                                    },
+                                    "aria-label": "Mois précédent",
+                                    children: /*#__PURE__*/ _jsxDEV(ChevronLeft, {
+                                        className: "h-4 w-4"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/service/ServiceCalendarEnhanced.tsx",
+                                        lineNumber: 282,
+                                        columnNumber: 15
+                                    }, this)
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/service/ServiceCalendarEnhanced.tsx",
+                                    lineNumber: 272,
+                                    columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV(Button, {
+                                    variant: "outline",
+                                    size: "icon",
+                                    onClick: ()=>setDate(new Date()),
+                                    "aria-label": "Aujourd'hui",
+                                    children: "Aujourd'hui"
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/service/ServiceCalendarEnhanced.tsx",
+                                    lineNumber: 284,
+                                    columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV(Button, {
+                                    variant: "outline",
+                                    size: "icon",
+                                    onClick: ()=>{
+                                        const newDate = new Date(date);
+                                        newDate.setMonth(newDate.getMonth() + 1);
+                                        setDate(newDate);
+                                    },
+                                    "aria-label": "Mois suivant",
+                                    children: /*#__PURE__*/ _jsxDEV(ChevronRight, {
+                                        className: "h-4 w-4"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/service/ServiceCalendarEnhanced.tsx",
+                                        lineNumber: 302,
+                                        columnNumber: 15
+                                    }, this)
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/service/ServiceCalendarEnhanced.tsx",
+                                    lineNumber: 292,
+                                    columnNumber: 13
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/service/ServiceCalendarEnhanced.tsx",
+                            lineNumber: 271,
+                            columnNumber: 11
+                        }, this)
+                    ]
+                }, void 0, true, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/service/ServiceCalendarEnhanced.tsx",
+                    lineNumber: 266,
+                    columnNumber: 9
+                }, this)
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/service/ServiceCalendarEnhanced.tsx",
+                lineNumber: 265,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV(CardContent, {
+                children: [
+                    /*#__PURE__*/ _jsxDEV("div", {
+                        className: "h-[600px]",
+                        children: /*#__PURE__*/ _jsxDEV(LazyCalendarWrapper, {
+                            children: (calendar)=>{
+                                const localizer = calendar.dateFnsLocalizer({
+                                    format,
+                                    parse,
+                                    startOfWeek: ()=>startOfWeek(new Date(), {
+                                            locale: fr
+                                        }),
+                                    getDay,
+                                    locales: {
+                                        fr: fr
+                                    }
+                                });
+                                return /*#__PURE__*/ _jsxDEV(calendar.Calendar, {
+                                    localizer: localizer,
+                                    events: calendarEvents || [],
+                                    startAccessor: "start",
+                                    endAccessor: "end",
+                                    view: view,
+                                    onView: (nextView)=>setView(nextView),
+                                    date: date,
+                                    onNavigate: setDate,
+                                    onSelectEvent: handleSelectEvent,
+                                    onSelectSlot: handleSelectSlot,
+                                    selectable: true,
+                                    eventPropGetter: eventStyleGetter,
+                                    messages: messages,
+                                    step: 30,
+                                    timeslots: 2,
+                                    min: new Date(0, 0, 0, 8, 0, 0),
+                                    max: new Date(0, 0, 0, 20, 0, 0),
+                                    defaultDate: new Date(),
+                                    popup: true,
+                                    className: "rbc-calendar"
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/service/ServiceCalendarEnhanced.tsx",
+                                    lineNumber: 320,
+                                    columnNumber: 17
+                                }, this);
+                            }
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/service/ServiceCalendarEnhanced.tsx",
+                            lineNumber: 309,
+                            columnNumber: 11
+                        }, this)
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/service/ServiceCalendarEnhanced.tsx",
+                        lineNumber: 308,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV("div", {
+                        className: "flex flex-wrap items-center gap-3 mt-4 text-xs text-muted-foreground",
+                        children: [
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                className: "flex items-center gap-2",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "h-3 w-3 rounded bg-green-600"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/service/ServiceCalendarEnhanced.tsx",
+                                        lineNumber: 350,
+                                        columnNumber: 13
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("span", {
+                                        children: "Disponible"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/service/ServiceCalendarEnhanced.tsx",
+                                        lineNumber: 351,
+                                        columnNumber: 13
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/service/ServiceCalendarEnhanced.tsx",
+                                lineNumber: 349,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                className: "flex items-center gap-2",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "h-3 w-3 rounded bg-amber-500"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/service/ServiceCalendarEnhanced.tsx",
+                                        lineNumber: 354,
+                                        columnNumber: 13
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("span", {
+                                        children: "Limite"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/service/ServiceCalendarEnhanced.tsx",
+                                        lineNumber: 355,
+                                        columnNumber: 13
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/service/ServiceCalendarEnhanced.tsx",
+                                lineNumber: 353,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                className: "flex items-center gap-2",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "h-3 w-3 rounded bg-red-500"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/service/ServiceCalendarEnhanced.tsx",
+                                        lineNumber: 358,
+                                        columnNumber: 13
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("span", {
+                                        children: "Complet"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/service/ServiceCalendarEnhanced.tsx",
+                                        lineNumber: 359,
+                                        columnNumber: 13
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/service/ServiceCalendarEnhanced.tsx",
+                                lineNumber: 357,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/service/ServiceCalendarEnhanced.tsx",
+                        lineNumber: 348,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/service/ServiceCalendarEnhanced.tsx",
+                lineNumber: 307,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/service/ServiceCalendarEnhanced.tsx",
+        lineNumber: 264,
+        columnNumber: 5
+    }, this);
+};
+_s(ServiceCalendarEnhanced, "IoKp4bBs/ctF8JkZP6oD0XyTkhk=", false, function() {
+    return [
+        useQuery,
+        useQuery
+    ];
+});
+_c = ServiceCalendarEnhanced;
+var _c;
+$RefreshReg$(_c, "ServiceCalendarEnhanced");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/service/ServiceCalendarEnhanced.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/service/ServiceCalendarEnhanced.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIlNlcnZpY2VDYWxlbmRhckVuaGFuY2VkLnRzeCJdLCJzb3VyY2VzQ29udGVudCI6WyIvKipcbiAqIFNlcnZpY2UgQ2FsZW5kYXIgQ29tcG9uZW50IC0gRW5oYW5jZWQgd2l0aCByZWFjdC1iaWctY2FsZW5kYXJcbiAqIERhdGU6IDI4IEphbnZpZXIgMjAyNVxuICpcbiAqIFZlcnNpb24gYW3DqWxpb3LDqWUgZHUgY2FsZW5kcmllciB1dGlsaXNhbnQgcmVhY3QtYmlnLWNhbGVuZGFyIHBvdXIgdW5lIG1laWxsZXVyZSBVWFxuICogQWx0ZXJuYXRpdmUgbW9kZXJuZSBhdSBjYWxlbmRyaWVyIGRlIGJhc2VcbiAqL1xuXG5pbXBvcnQgeyB1c2VTdGF0ZSwgdXNlTWVtbywgdXNlQ2FsbGJhY2sgfSBmcm9tICdyZWFjdCc7XG5pbXBvcnQgeyBmb3JtYXQsIHBhcnNlLCBzdGFydE9mV2VlaywgZW5kT2ZXZWVrLCBnZXREYXkgfSBmcm9tICdkYXRlLWZucyc7XG5pbXBvcnQgeyBmciB9IGZyb20gJ2RhdGUtZm5zL2xvY2FsZSc7XG5pbXBvcnQgeyBMYXp5Q2FsZW5kYXJXcmFwcGVyIH0gZnJvbSAnQC9jb21wb25lbnRzL2NhbGVuZGFyL0xhenlDYWxlbmRhcldyYXBwZXInO1xuaW1wb3J0IHsgQ2FyZCwgQ2FyZENvbnRlbnQsIENhcmRIZWFkZXIsIENhcmRUaXRsZSB9IGZyb20gJ0AvY29tcG9uZW50cy91aS9jYXJkJztcbmltcG9ydCB7IEJ1dHRvbiB9IGZyb20gJ0AvY29tcG9uZW50cy91aS9idXR0b24nO1xuaW1wb3J0IHsgQmFkZ2UgfSBmcm9tICdAL2NvbXBvbmVudHMvdWkvYmFkZ2UnO1xuaW1wb3J0IHsgU2tlbGV0b24gfSBmcm9tICdAL2NvbXBvbmVudHMvdWkvc2tlbGV0b24nO1xuaW1wb3J0IHsgQ2FsZW5kYXIgYXMgQ2FsZW5kYXJJY29uLCBDaGV2cm9uTGVmdCwgQ2hldnJvblJpZ2h0IH0gZnJvbSAnbHVjaWRlLXJlYWN0JztcbmltcG9ydCB7IHVzZVF1ZXJ5IH0gZnJvbSAnQHRhbnN0YWNrL3JlYWN0LXF1ZXJ5JztcbmltcG9ydCB7IHN1cGFiYXNlIH0gZnJvbSAnQC9pbnRlZ3JhdGlvbnMvc3VwYWJhc2UvY2xpZW50JztcbmltcG9ydCB7IGNuIH0gZnJvbSAnQC9saWIvdXRpbHMnO1xuXG5jb25zdCBTRVJWSUNFX0FWQUlMQUJJTElUWV9TTE9UX0ZJRUxEUyA9XG4gICdpZCwgc2VydmljZV9wcm9kdWN0X2lkLCBkYXlfb2Zfd2Vlaywgc3RhcnRfdGltZSwgZW5kX3RpbWUsIGlzX2FjdGl2ZSc7XG5cbnR5cGUgQ2FsZW5kYXJWaWV3ID0gJ21vbnRoJyB8ICd3ZWVrJyB8ICd3b3JrX3dlZWsnIHwgJ2RheScgfCAnYWdlbmRhJztcblxuLy8gTG9jYWxpemVyIHdpbGwgYmUgY3JlYXRlZCBpbnNpZGUgdGhlIGNvbXBvbmVudCB3aXRoIGxhenktbG9hZGVkIGNhbGVuZGFyXG5cbi8vIE1lc3NhZ2VzIGVuIGZyYW7Dp2Fpc1xuY29uc3QgbWVzc2FnZXMgPSB7XG4gIGRhdGU6ICdEYXRlJyxcbiAgdGltZTogJ0hldXJlJyxcbiAgZXZlbnQ6ICfDiXbDqW5lbWVudCcsXG4gIGFsbERheTogJ0pvdXJuw6llJyxcbiAgd2VlazogJ1NlbWFpbmUnLFxuICB3b3JrX3dlZWs6ICdTZW0uIHRyYXZhaWwnLFxuICBkYXk6ICdKb3VyJyxcbiAgbW9udGg6ICdNb2lzJyxcbiAgYWdlbmRhOiAnQWdlbmRhJyxcbiAgcHJldmlvdXM6ICdQcsOpY8OpZGVudCcsXG4gIG5leHQ6ICdTdWl2YW50JyxcbiAgeWVzdGVyZGF5OiAnSGllcicsXG4gIHRvbW9ycm93OiAnRGVtYWluJyxcbiAgdG9kYXk6IFwiQXVqb3VyZCdodWlcIixcbiAgbm9FdmVudHNJblJhbmdlOiAnQXVjdW4gY3LDqW5lYXUgZGlzcG9uaWJsZSBkYW5zIGNldHRlIHDDqXJpb2RlLicsXG4gIHNob3dNb3JlOiAodG90YWw6IG51bWJlcikgPT4gYCsgJHt0b3RhbH0gZGUgcGx1c2AsXG59O1xuXG5pbnRlcmZhY2UgU2VydmljZUNhbGVuZGFyRW5oYW5jZWRQcm9wcyB7XG4gIHNlcnZpY2VJZD86IHN0cmluZztcbiAgc2VsZWN0ZWREYXRlPzogRGF0ZTtcbiAgb25EYXRlU2VsZWN0OiAoZGF0ZTogRGF0ZSkgPT4gdm9pZDtcbiAgbWluRGF0ZT86IERhdGU7XG4gIG1heERhdGU/OiBEYXRlO1xuICBkaXNhYmxlZERhdGVzPzogRGF0ZVtdO1xufVxuXG5pbnRlcmZhY2UgQ2FsZW5kYXJFdmVudCB7XG4gIGlkOiBzdHJpbmc7XG4gIHRpdGxlOiBzdHJpbmc7XG4gIHN0YXJ0OiBEYXRlO1xuICBlbmQ6IERhdGU7XG4gIHJlc291cmNlPzoge1xuICAgIGF2YWlsYWJsZVNsb3RzOiBudW1iZXI7XG4gICAgdG90YWxTbG90czogbnVtYmVyO1xuICAgIHN0YXR1czogJ2F2YWlsYWJsZScgfCAnbGltaXRlZCcgfCAnZnVsbCcgfCAndW5hdmFpbGFibGUnO1xuICB9O1xufVxuXG5leHBvcnQgY29uc3QgU2VydmljZUNhbGVuZGFyRW5oYW5jZWQgPSAoe1xuICBzZXJ2aWNlSWQsXG4gIHNlbGVjdGVkRGF0ZSxcbiAgb25EYXRlU2VsZWN0LFxuICBtaW5EYXRlLFxuICBtYXhEYXRlLFxuICBkaXNhYmxlZERhdGVzID0gW10sXG59OiBTZXJ2aWNlQ2FsZW5kYXJFbmhhbmNlZFByb3BzKSA9PiB7XG4gIGNvbnN0IFt2aWV3LCBzZXRWaWV3XSA9IHVzZVN0YXRlPENhbGVuZGFyVmlldz4oJ21vbnRoJyk7XG4gIGNvbnN0IFtkYXRlLCBzZXREYXRlXSA9IHVzZVN0YXRlKHNlbGVjdGVkRGF0ZSB8fCBuZXcgRGF0ZSgpKTtcblxuICAvLyBGZXRjaCBzZXJ2aWNlIHByb2R1Y3QgSURcbiAgY29uc3QgeyBkYXRhOiBzZXJ2aWNlUHJvZHVjdCB9ID0gdXNlUXVlcnkoe1xuICAgIHF1ZXJ5S2V5OiBbJ3NlcnZpY2UtcHJvZHVjdCcsIHNlcnZpY2VJZF0sXG4gICAgcXVlcnlGbjogYXN5bmMgKCkgPT4ge1xuICAgICAgaWYgKCFzZXJ2aWNlSWQpIHJldHVybiBudWxsO1xuICAgICAgY29uc3QgeyBkYXRhLCBlcnJvciB9ID0gYXdhaXQgc3VwYWJhc2VcbiAgICAgICAgLmZyb20oJ3NlcnZpY2VfcHJvZHVjdHMnKVxuICAgICAgICAuc2VsZWN0KCdpZCwgZHVyYXRpb25fbWludXRlcywgbWF4X3BhcnRpY2lwYW50cycpXG4gICAgICAgIC5lcSgncHJvZHVjdF9pZCcsIHNlcnZpY2VJZClcbiAgICAgICAgLnNpbmdsZSgpO1xuICAgICAgaWYgKGVycm9yKSB0aHJvdyBlcnJvcjtcbiAgICAgIHJldHVybiBkYXRhO1xuICAgIH0sXG4gICAgZW5hYmxlZDogISFzZXJ2aWNlSWQsXG4gIH0pO1xuXG4gIC8vIEZldGNoIGF2YWlsYWJpbGl0eSBzbG90cyBhbmQgYm9va2luZ3NcbiAgY29uc3QgeyBkYXRhOiBjYWxlbmRhckV2ZW50cywgaXNMb2FkaW5nIH0gPSB1c2VRdWVyeSh7XG4gICAgcXVlcnlLZXk6IFsnY2FsZW5kYXItZXZlbnRzJywgc2VydmljZVByb2R1Y3Q/LmlkLCBmb3JtYXQoZGF0ZSwgJ3l5eXktTU0nKV0sXG4gICAgcXVlcnlGbjogYXN5bmMgKCkgPT4ge1xuICAgICAgaWYgKCFzZXJ2aWNlUHJvZHVjdD8uaWQpIHJldHVybiBbXTtcblxuICAgICAgY29uc3QgZXZlbnRzOiBDYWxlbmRhckV2ZW50W10gPSBbXTtcblxuICAgICAgLy8gR2V0IGF2YWlsYWJpbGl0eSBzbG90c1xuICAgICAgY29uc3QgeyBkYXRhOiBzbG90cyB9ID0gYXdhaXQgc3VwYWJhc2VcbiAgICAgICAgLmZyb20oJ3NlcnZpY2VfYXZhaWxhYmlsaXR5X3Nsb3RzJylcbiAgICAgICAgLnNlbGVjdChTRVJWSUNFX0FWQUlMQUJJTElUWV9TTE9UX0ZJRUxEUylcbiAgICAgICAgLmVxKCdzZXJ2aWNlX3Byb2R1Y3RfaWQnLCBzZXJ2aWNlUHJvZHVjdC5pZClcbiAgICAgICAgLmVxKCdpc19hY3RpdmUnLCB0cnVlKTtcblxuICAgICAgaWYgKCFzbG90cyB8fCBzbG90cy5sZW5ndGggPT09IDApIHJldHVybiBbXTtcblxuICAgICAgLy8gR2V0IGJvb2tpbmdzIGZvciB0aGUgY3VycmVudCBtb250aFxuICAgICAgY29uc3QgbW9udGhTdGFydCA9IG5ldyBEYXRlKGRhdGUuZ2V0RnVsbFllYXIoKSwgZGF0ZS5nZXRNb250aCgpLCAxKTtcbiAgICAgIGNvbnN0IG1vbnRoRW5kID0gbmV3IERhdGUoZGF0ZS5nZXRGdWxsWWVhcigpLCBkYXRlLmdldE1vbnRoKCkgKyAxLCAwKTtcblxuICAgICAgY29uc3QgeyBkYXRhOiBib29raW5ncywgZXJyb3I6IGJvb2tpbmdzRXJyb3IgfSA9IGF3YWl0IHN1cGFiYXNlXG4gICAgICAgIC5mcm9tKCdzZXJ2aWNlX2Jvb2tpbmdzJylcbiAgICAgICAgLnNlbGVjdChcbiAgICAgICAgICBgXG4gICAgICAgICAgaWQsXG4gICAgICAgICAgc2NoZWR1bGVkX2RhdGUsXG4gICAgICAgICAgc2NoZWR1bGVkX3N0YXJ0X3RpbWUsXG4gICAgICAgICAgc2NoZWR1bGVkX2VuZF90aW1lLFxuICAgICAgICAgIHN0YXR1c1xuICAgICAgICBgXG4gICAgICAgIClcbiAgICAgICAgLmVxKCdwcm9kdWN0X2lkJywgc2VydmljZUlkISlcbiAgICAgICAgLmd0ZSgnc2NoZWR1bGVkX2RhdGUnLCBmb3JtYXQobW9udGhTdGFydCwgJ3l5eXktTU0tZGQnKSlcbiAgICAgICAgLmx0ZSgnc2NoZWR1bGVkX2RhdGUnLCBmb3JtYXQobW9udGhFbmQsICd5eXl5LU1NLWRkJykpXG4gICAgICAgIC5pbignc3RhdHVzJywgWydwZW5kaW5nJywgJ2NvbmZpcm1lZCddKTtcblxuICAgICAgY29uc3QgYm9va2luZ1Jvd3MgPSBib29raW5nc0Vycm9yID8gW10gOiAoYm9va2luZ3MgPz8gW10pO1xuXG4gICAgICAvLyBDcmVhdGUgZXZlbnRzIGZvciBhdmFpbGFibGUgc2xvdHNcbiAgICAgIHNsb3RzLmZvckVhY2goc2xvdCA9PiB7XG4gICAgICAgIGlmICghc2xvdC5zdGFydF90aW1lKSByZXR1cm47XG4gICAgICAgIC8vIEZvciBlYWNoIGRheSBvZiB0aGUgd2VlayB0aGF0IG1hdGNoZXMgdGhpcyBzbG90XG4gICAgICAgIGZvciAobGV0IGRheU9mZnNldCA9IDA7IGRheU9mZnNldCA8IDc7IGRheU9mZnNldCsrKSB7XG4gICAgICAgICAgY29uc3Qgc2xvdERhdGUgPSBuZXcgRGF0ZShtb250aFN0YXJ0KTtcbiAgICAgICAgICBzbG90RGF0ZS5zZXREYXRlKG1vbnRoU3RhcnQuZ2V0RGF0ZSgpICsgZGF5T2Zmc2V0KTtcblxuICAgICAgICAgIGlmIChzbG90RGF0ZS5nZXREYXkoKSA9PT0gc2xvdC5kYXlfb2Zfd2Vlaykge1xuICAgICAgICAgICAgLy8gQ2hlY2sgaWYgdGhlcmUgYXJlIGJvb2tpbmdzIGZvciB0aGlzIHRpbWUgc2xvdFxuICAgICAgICAgICAgY29uc3QgYm9va2luZ3NBdFRoaXNUaW1lID1cbiAgICAgICAgICAgICAgYm9va2luZ1Jvd3MuZmlsdGVyKGIgPT4ge1xuICAgICAgICAgICAgICAgIGNvbnN0IGJvb2tpbmdEYXRlID0gbmV3IERhdGUoYi5zY2hlZHVsZWRfZGF0ZSk7XG4gICAgICAgICAgICAgICAgcmV0dXJuIChcbiAgICAgICAgICAgICAgICAgIGJvb2tpbmdEYXRlLmdldERhdGUoKSA9PT0gc2xvdERhdGUuZ2V0RGF0ZSgpICYmXG4gICAgICAgICAgICAgICAgICBib29raW5nRGF0ZS5nZXRNb250aCgpID09PSBzbG90RGF0ZS5nZXRNb250aCgpICYmXG4gICAgICAgICAgICAgICAgICBiLnNjaGVkdWxlZF9zdGFydF90aW1lPy5zdWJzdHJpbmcoMCwgNSkgPT09IHNsb3Quc3RhcnRfdGltZT8uc3Vic3RyaW5nKDAsIDUpXG4gICAgICAgICAgICAgICAgKTtcbiAgICAgICAgICAgICAgfSkgfHwgW107XG5cbiAgICAgICAgICAgIGNvbnN0IGF2YWlsYWJsZVNwb3RzID1cbiAgICAgICAgICAgICAgKHNlcnZpY2VQcm9kdWN0Py5tYXhfcGFydGljaXBhbnRzIHx8IDEpIC0gYm9va2luZ3NBdFRoaXNUaW1lLmxlbmd0aDtcbiAgICAgICAgICAgIGNvbnN0IHRvdGFsU2xvdHMgPSBzZXJ2aWNlUHJvZHVjdD8ubWF4X3BhcnRpY2lwYW50cyB8fCAxO1xuXG4gICAgICAgICAgICBsZXQgc3RhdHVzOiAnYXZhaWxhYmxlJyB8ICdsaW1pdGVkJyB8ICdmdWxsJyB8ICd1bmF2YWlsYWJsZScgPSAndW5hdmFpbGFibGUnO1xuICAgICAgICAgICAgaWYgKGF2YWlsYWJsZVNwb3RzID4gMCkge1xuICAgICAgICAgICAgICBpZiAoYXZhaWxhYmxlU3BvdHMgPD0gdG90YWxTbG90cyAqIDAuMykge1xuICAgICAgICAgICAgICAgIHN0YXR1cyA9ICdsaW1pdGVkJztcbiAgICAgICAgICAgICAgfSBlbHNlIHtcbiAgICAgICAgICAgICAgICBzdGF0dXMgPSAnYXZhaWxhYmxlJztcbiAgICAgICAgICAgICAgfVxuICAgICAgICAgICAgfSBlbHNlIHtcbiAgICAgICAgICAgICAgc3RhdHVzID0gJ2Z1bGwnO1xuICAgICAgICAgICAgfVxuXG4gICAgICAgICAgICAvLyBDcmVhdGUgZXZlbnQgZm9yIHRoaXMgdGltZSBzbG90XG4gICAgICAgICAgICBjb25zdCBbaG91cnMsIG1pbnV0ZXNdID0gc2xvdC5zdGFydF90aW1lLnNwbGl0KCc6JykubWFwKE51bWJlcik7XG4gICAgICAgICAgICBjb25zdCBzdGFydERhdGVUaW1lID0gbmV3IERhdGUoc2xvdERhdGUpO1xuICAgICAgICAgICAgc3RhcnREYXRlVGltZS5zZXRIb3Vycyhob3VycywgbWludXRlcywgMCwgMCk7XG5cbiAgICAgICAgICAgIGNvbnN0IGVuZERhdGVUaW1lID0gbmV3IERhdGUoc3RhcnREYXRlVGltZSk7XG4gICAgICAgICAgICBlbmREYXRlVGltZS5zZXRNaW51dGVzKFxuICAgICAgICAgICAgICBlbmREYXRlVGltZS5nZXRNaW51dGVzKCkgKyAoc2VydmljZVByb2R1Y3Q/LmR1cmF0aW9uX21pbnV0ZXMgfHwgNjApXG4gICAgICAgICAgICApO1xuXG4gICAgICAgICAgICBldmVudHMucHVzaCh7XG4gICAgICAgICAgICAgIGlkOiBgc2xvdC0ke3Nsb3QuaWR9LSR7c2xvdERhdGUudG9JU09TdHJpbmcoKX1gLFxuICAgICAgICAgICAgICB0aXRsZTpcbiAgICAgICAgICAgICAgICBzdGF0dXMgPT09ICdhdmFpbGFibGUnXG4gICAgICAgICAgICAgICAgICA/IGBEaXNwb25pYmxlICgke2F2YWlsYWJsZVNwb3RzfSBwbGFjZSR7YXZhaWxhYmxlU3BvdHMgPiAxID8gJ3MnIDogJyd9KWBcbiAgICAgICAgICAgICAgICAgIDogc3RhdHVzID09PSAnbGltaXRlZCdcbiAgICAgICAgICAgICAgICAgICAgPyBgTGltaXTDqSAoJHthdmFpbGFibGVTcG90c30gcGxhY2Uke2F2YWlsYWJsZVNwb3RzID4gMSA/ICdzJyA6ICcnfSlgXG4gICAgICAgICAgICAgICAgICAgIDogJ0NvbXBsZXQnLFxuICAgICAgICAgICAgICBzdGFydDogc3RhcnREYXRlVGltZSxcbiAgICAgICAgICAgICAgZW5kOiBlbmREYXRlVGltZSxcbiAgICAgICAgICAgICAgcmVzb3VyY2U6IHtcbiAgICAgICAgICAgICAgICBhdmFpbGFibGVTbG90czogYXZhaWxhYmxlU3BvdHMsXG4gICAgICAgICAgICAgICAgdG90YWxTbG90cyxcbiAgICAgICAgICAgICAgICBzdGF0dXMsXG4gICAgICAgICAgICAgIH0sXG4gICAgICAgICAgICB9KTtcbiAgICAgICAgICB9XG4gICAgICAgIH1cbiAgICAgIH0pO1xuXG4gICAgICByZXR1cm4gZXZlbnRzO1xuICAgIH0sXG4gICAgZW5hYmxlZDogISFzZXJ2aWNlUHJvZHVjdD8uaWQsXG4gIH0pO1xuXG4gIC8vIEV2ZW50IHN0eWxlIGdldHRlclxuICBjb25zdCBldmVudFN0eWxlR2V0dGVyID0gdXNlQ2FsbGJhY2soKGV2ZW50OiBDYWxlbmRhckV2ZW50KSA9PiB7XG4gICAgY29uc3Qgc3RhdHVzID0gZXZlbnQucmVzb3VyY2U/LnN0YXR1cyB8fCAndW5hdmFpbGFibGUnO1xuXG4gICAgY29uc3Qgc3RhdHVzQ29sb3JzOiBSZWNvcmQ8c3RyaW5nLCB7IGJnOiBzdHJpbmc7IHRleHQ6IHN0cmluZzsgYm9yZGVyOiBzdHJpbmcgfT4gPSB7XG4gICAgICBhdmFpbGFibGU6IHsgYmc6ICcjMTBiOTgxJywgdGV4dDogJyNmZmZmZmYnLCBib3JkZXI6ICcjMDU5NjY5JyB9LFxuICAgICAgbGltaXRlZDogeyBiZzogJyNmNTllMGInLCB0ZXh0OiAnI2ZmZmZmZicsIGJvcmRlcjogJyNkOTc3MDYnIH0sXG4gICAgICBmdWxsOiB7IGJnOiAnI2VmNDQ0NCcsIHRleHQ6ICcjZmZmZmZmJywgYm9yZGVyOiAnI2RjMjYyNicgfSxcbiAgICAgIHVuYXZhaWxhYmxlOiB7IGJnOiAnIzZiNzI4MCcsIHRleHQ6ICcjZmZmZmZmJywgYm9yZGVyOiAnIzRiNTU2MycgfSxcbiAgICB9O1xuXG4gICAgY29uc3QgY29sb3IgPSBzdGF0dXNDb2xvcnNbc3RhdHVzXSB8fCBzdGF0dXNDb2xvcnMudW5hdmFpbGFibGU7XG5cbiAgICByZXR1cm4ge1xuICAgICAgc3R5bGU6IHtcbiAgICAgICAgYmFja2dyb3VuZENvbG9yOiBjb2xvci5iZyxcbiAgICAgICAgY29sb3I6IGNvbG9yLnRleHQsXG4gICAgICAgIGJvcmRlcjogYDJweCBzb2xpZCAke2NvbG9yLmJvcmRlcn1gLFxuICAgICAgICBib3JkZXJSYWRpdXM6ICc2cHgnLFxuICAgICAgICBwYWRkaW5nOiAnNHB4IDhweCcsXG4gICAgICAgIGZvbnRTaXplOiAnMC44NzVyZW0nLFxuICAgICAgICBmb250V2VpZ2h0OiAnNTAwJyxcbiAgICAgIH0sXG4gICAgfTtcbiAgfSwgW10pO1xuXG4gIC8vIEhhbmRsZSBldmVudCBzZWxlY3Rpb25cbiAgY29uc3QgaGFuZGxlU2VsZWN0RXZlbnQgPSB1c2VDYWxsYmFjayhcbiAgICAoZXZlbnQ6IENhbGVuZGFyRXZlbnQpID0+IHtcbiAgICAgIGlmIChldmVudC5yZXNvdXJjZT8uc3RhdHVzID09PSAnYXZhaWxhYmxlJyB8fCBldmVudC5yZXNvdXJjZT8uc3RhdHVzID09PSAnbGltaXRlZCcpIHtcbiAgICAgICAgb25EYXRlU2VsZWN0KGV2ZW50LnN0YXJ0KTtcbiAgICAgIH1cbiAgICB9LFxuICAgIFtvbkRhdGVTZWxlY3RdXG4gICk7XG5cbiAgLy8gSGFuZGxlIGRhdGUgc2VsZWN0aW9uIChmb3IgbW9udGggdmlldylcbiAgY29uc3QgaGFuZGxlU2VsZWN0U2xvdCA9IHVzZUNhbGxiYWNrKFxuICAgIChzbG90SW5mbzogeyBzdGFydDogRGF0ZTsgZW5kOiBEYXRlIH0pID0+IHtcbiAgICAgIG9uRGF0ZVNlbGVjdChzbG90SW5mby5zdGFydCk7XG4gICAgfSxcbiAgICBbb25EYXRlU2VsZWN0XVxuICApO1xuXG4gIGlmIChpc0xvYWRpbmcpIHtcbiAgICByZXR1cm4gKFxuICAgICAgPENhcmQ+XG4gICAgICAgIDxDYXJkSGVhZGVyPlxuICAgICAgICAgIDxTa2VsZXRvbiBjbGFzc05hbWU9XCJoLTYgdy00OFwiIC8+XG4gICAgICAgIDwvQ2FyZEhlYWRlcj5cbiAgICAgICAgPENhcmRDb250ZW50PlxuICAgICAgICAgIDxTa2VsZXRvbiBjbGFzc05hbWU9XCJoLTk2IHctZnVsbFwiIC8+XG4gICAgICAgIDwvQ2FyZENvbnRlbnQ+XG4gICAgICA8L0NhcmQ+XG4gICAgKTtcbiAgfVxuXG4gIHJldHVybiAoXG4gICAgPENhcmQ+XG4gICAgICA8Q2FyZEhlYWRlcj5cbiAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLWNlbnRlciBqdXN0aWZ5LWJldHdlZW5cIj5cbiAgICAgICAgICA8Q2FyZFRpdGxlIGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGdhcC0yXCI+XG4gICAgICAgICAgICA8Q2FsZW5kYXJJY29uIGNsYXNzTmFtZT1cImgtNSB3LTVcIiAvPlxuICAgICAgICAgICAgRGlzcG9uaWJpbGl0w6lzXG4gICAgICAgICAgPC9DYXJkVGl0bGU+XG4gICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGdhcC0xXCI+XG4gICAgICAgICAgICA8QnV0dG9uXG4gICAgICAgICAgICAgIHZhcmlhbnQ9XCJvdXRsaW5lXCJcbiAgICAgICAgICAgICAgc2l6ZT1cImljb25cIlxuICAgICAgICAgICAgICBvbkNsaWNrPXsoKSA9PiB7XG4gICAgICAgICAgICAgICAgY29uc3QgbmV3RGF0ZSA9IG5ldyBEYXRlKGRhdGUpO1xuICAgICAgICAgICAgICAgIG5ld0RhdGUuc2V0TW9udGgobmV3RGF0ZS5nZXRNb250aCgpIC0gMSk7XG4gICAgICAgICAgICAgICAgc2V0RGF0ZShuZXdEYXRlKTtcbiAgICAgICAgICAgICAgfX1cbiAgICAgICAgICAgICAgYXJpYS1sYWJlbD1cIk1vaXMgcHLDqWPDqWRlbnRcIlxuICAgICAgICAgICAgPlxuICAgICAgICAgICAgICA8Q2hldnJvbkxlZnQgY2xhc3NOYW1lPVwiaC00IHctNFwiIC8+XG4gICAgICAgICAgICA8L0J1dHRvbj5cbiAgICAgICAgICAgIDxCdXR0b25cbiAgICAgICAgICAgICAgdmFyaWFudD1cIm91dGxpbmVcIlxuICAgICAgICAgICAgICBzaXplPVwiaWNvblwiXG4gICAgICAgICAgICAgIG9uQ2xpY2s9eygpID0+IHNldERhdGUobmV3IERhdGUoKSl9XG4gICAgICAgICAgICAgIGFyaWEtbGFiZWw9XCJBdWpvdXJkJ2h1aVwiXG4gICAgICAgICAgICA+XG4gICAgICAgICAgICAgIEF1am91cmQnaHVpXG4gICAgICAgICAgICA8L0J1dHRvbj5cbiAgICAgICAgICAgIDxCdXR0b25cbiAgICAgICAgICAgICAgdmFyaWFudD1cIm91dGxpbmVcIlxuICAgICAgICAgICAgICBzaXplPVwiaWNvblwiXG4gICAgICAgICAgICAgIG9uQ2xpY2s9eygpID0+IHtcbiAgICAgICAgICAgICAgICBjb25zdCBuZXdEYXRlID0gbmV3IERhdGUoZGF0ZSk7XG4gICAgICAgICAgICAgICAgbmV3RGF0ZS5zZXRNb250aChuZXdEYXRlLmdldE1vbnRoKCkgKyAxKTtcbiAgICAgICAgICAgICAgICBzZXREYXRlKG5ld0RhdGUpO1xuICAgICAgICAgICAgICB9fVxuICAgICAgICAgICAgICBhcmlhLWxhYmVsPVwiTW9pcyBzdWl2YW50XCJcbiAgICAgICAgICAgID5cbiAgICAgICAgICAgICAgPENoZXZyb25SaWdodCBjbGFzc05hbWU9XCJoLTQgdy00XCIgLz5cbiAgICAgICAgICAgIDwvQnV0dG9uPlxuICAgICAgICAgIDwvZGl2PlxuICAgICAgICA8L2Rpdj5cbiAgICAgIDwvQ2FyZEhlYWRlcj5cbiAgICAgIDxDYXJkQ29udGVudD5cbiAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJoLVs2MDBweF1cIj5cbiAgICAgICAgICA8TGF6eUNhbGVuZGFyV3JhcHBlcj5cbiAgICAgICAgICAgIHtjYWxlbmRhciA9PiB7XG4gICAgICAgICAgICAgIGNvbnN0IGxvY2FsaXplciA9IGNhbGVuZGFyLmRhdGVGbnNMb2NhbGl6ZXIoe1xuICAgICAgICAgICAgICAgIGZvcm1hdCxcbiAgICAgICAgICAgICAgICBwYXJzZSxcbiAgICAgICAgICAgICAgICBzdGFydE9mV2VlazogKCkgPT4gc3RhcnRPZldlZWsobmV3IERhdGUoKSwgeyBsb2NhbGU6IGZyIH0pLFxuICAgICAgICAgICAgICAgIGdldERheSxcbiAgICAgICAgICAgICAgICBsb2NhbGVzOiB7IGZyOiBmciB9LFxuICAgICAgICAgICAgICB9KTtcblxuICAgICAgICAgICAgICByZXR1cm4gKFxuICAgICAgICAgICAgICAgIDxjYWxlbmRhci5DYWxlbmRhclxuICAgICAgICAgICAgICAgICAgbG9jYWxpemVyPXtsb2NhbGl6ZXJ9XG4gICAgICAgICAgICAgICAgICBldmVudHM9e2NhbGVuZGFyRXZlbnRzIHx8IFtdfVxuICAgICAgICAgICAgICAgICAgc3RhcnRBY2Nlc3Nvcj1cInN0YXJ0XCJcbiAgICAgICAgICAgICAgICAgIGVuZEFjY2Vzc29yPVwiZW5kXCJcbiAgICAgICAgICAgICAgICAgIHZpZXc9e3ZpZXd9XG4gICAgICAgICAgICAgICAgICBvblZpZXc9e25leHRWaWV3ID0+IHNldFZpZXcobmV4dFZpZXcgYXMgQ2FsZW5kYXJWaWV3KX1cbiAgICAgICAgICAgICAgICAgIGRhdGU9e2RhdGV9XG4gICAgICAgICAgICAgICAgICBvbk5hdmlnYXRlPXtzZXREYXRlfVxuICAgICAgICAgICAgICAgICAgb25TZWxlY3RFdmVudD17aGFuZGxlU2VsZWN0RXZlbnR9XG4gICAgICAgICAgICAgICAgICBvblNlbGVjdFNsb3Q9e2hhbmRsZVNlbGVjdFNsb3R9XG4gICAgICAgICAgICAgICAgICBzZWxlY3RhYmxlXG4gICAgICAgICAgICAgICAgICBldmVudFByb3BHZXR0ZXI9e2V2ZW50U3R5bGVHZXR0ZXJ9XG4gICAgICAgICAgICAgICAgICBtZXNzYWdlcz17bWVzc2FnZXN9XG4gICAgICAgICAgICAgICAgICBzdGVwPXszMH1cbiAgICAgICAgICAgICAgICAgIHRpbWVzbG90cz17Mn1cbiAgICAgICAgICAgICAgICAgIG1pbj17bmV3IERhdGUoMCwgMCwgMCwgOCwgMCwgMCl9XG4gICAgICAgICAgICAgICAgICBtYXg9e25ldyBEYXRlKDAsIDAsIDAsIDIwLCAwLCAwKX1cbiAgICAgICAgICAgICAgICAgIGRlZmF1bHREYXRlPXtuZXcgRGF0ZSgpfVxuICAgICAgICAgICAgICAgICAgcG9wdXBcbiAgICAgICAgICAgICAgICAgIGNsYXNzTmFtZT1cInJiYy1jYWxlbmRhclwiXG4gICAgICAgICAgICAgICAgLz5cbiAgICAgICAgICAgICAgKTtcbiAgICAgICAgICAgIH19XG4gICAgICAgICAgPC9MYXp5Q2FsZW5kYXJXcmFwcGVyPlxuICAgICAgICA8L2Rpdj5cblxuICAgICAgICB7LyogTGVnZW5kICovfVxuICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggZmxleC13cmFwIGl0ZW1zLWNlbnRlciBnYXAtMyBtdC00IHRleHQteHMgdGV4dC1tdXRlZC1mb3JlZ3JvdW5kXCI+XG4gICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLWNlbnRlciBnYXAtMlwiPlxuICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJoLTMgdy0zIHJvdW5kZWQgYmctZ3JlZW4tNjAwXCIgLz5cbiAgICAgICAgICAgIDxzcGFuPkRpc3BvbmlibGU8L3NwYW4+XG4gICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLWNlbnRlciBnYXAtMlwiPlxuICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJoLTMgdy0zIHJvdW5kZWQgYmctYW1iZXItNTAwXCIgLz5cbiAgICAgICAgICAgIDxzcGFuPkxpbWl0ZTwvc3Bhbj5cbiAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGdhcC0yXCI+XG4gICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImgtMyB3LTMgcm91bmRlZCBiZy1yZWQtNTAwXCIgLz5cbiAgICAgICAgICAgIDxzcGFuPkNvbXBsZXQ8L3NwYW4+XG4gICAgICAgICAgPC9kaXY+XG4gICAgICAgIDwvZGl2PlxuICAgICAgPC9DYXJkQ29udGVudD5cbiAgICA8L0NhcmQ+XG4gICk7XG59O1xuIl0sIm5hbWVzIjpbInVzZVN0YXRlIiwidXNlQ2FsbGJhY2siLCJmb3JtYXQiLCJwYXJzZSIsInN0YXJ0T2ZXZWVrIiwiZ2V0RGF5IiwiZnIiLCJMYXp5Q2FsZW5kYXJXcmFwcGVyIiwiQ2FyZCIsIkNhcmRDb250ZW50IiwiQ2FyZEhlYWRlciIsIkNhcmRUaXRsZSIsIkJ1dHRvbiIsIlNrZWxldG9uIiwiQ2FsZW5kYXIiLCJDYWxlbmRhckljb24iLCJDaGV2cm9uTGVmdCIsIkNoZXZyb25SaWdodCIsInVzZVF1ZXJ5Iiwic3VwYWJhc2UiLCJTRVJWSUNFX0FWQUlMQUJJTElUWV9TTE9UX0ZJRUxEUyIsIm1lc3NhZ2VzIiwiZGF0ZSIsInRpbWUiLCJldmVudCIsImFsbERheSIsIndlZWsiLCJ3b3JrX3dlZWsiLCJkYXkiLCJtb250aCIsImFnZW5kYSIsInByZXZpb3VzIiwibmV4dCIsInllc3RlcmRheSIsInRvbW9ycm93IiwidG9kYXkiLCJub0V2ZW50c0luUmFuZ2UiLCJzaG93TW9yZSIsInRvdGFsIiwiU2VydmljZUNhbGVuZGFyRW5oYW5jZWQiLCJzZXJ2aWNlSWQiLCJzZWxlY3RlZERhdGUiLCJvbkRhdGVTZWxlY3QiLCJtaW5EYXRlIiwibWF4RGF0ZSIsImRpc2FibGVkRGF0ZXMiLCJ2aWV3Iiwic2V0VmlldyIsInNldERhdGUiLCJEYXRlIiwiZGF0YSIsInNlcnZpY2VQcm9kdWN0IiwicXVlcnlLZXkiLCJxdWVyeUZuIiwiZXJyb3IiLCJmcm9tIiwic2VsZWN0IiwiZXEiLCJzaW5nbGUiLCJlbmFibGVkIiwiY2FsZW5kYXJFdmVudHMiLCJpc0xvYWRpbmciLCJpZCIsImV2ZW50cyIsInNsb3RzIiwibGVuZ3RoIiwibW9udGhTdGFydCIsImdldEZ1bGxZZWFyIiwiZ2V0TW9udGgiLCJtb250aEVuZCIsImJvb2tpbmdzIiwiYm9va2luZ3NFcnJvciIsImd0ZSIsImx0ZSIsImluIiwiYm9va2luZ1Jvd3MiLCJmb3JFYWNoIiwic2xvdCIsInN0YXJ0X3RpbWUiLCJkYXlPZmZzZXQiLCJzbG90RGF0ZSIsImdldERhdGUiLCJkYXlfb2Zfd2VlayIsImJvb2tpbmdzQXRUaGlzVGltZSIsImZpbHRlciIsImIiLCJib29raW5nRGF0ZSIsInNjaGVkdWxlZF9kYXRlIiwic2NoZWR1bGVkX3N0YXJ0X3RpbWUiLCJzdWJzdHJpbmciLCJhdmFpbGFibGVTcG90cyIsIm1heF9wYXJ0aWNpcGFudHMiLCJ0b3RhbFNsb3RzIiwic3RhdHVzIiwiaG91cnMiLCJtaW51dGVzIiwic3BsaXQiLCJtYXAiLCJOdW1iZXIiLCJzdGFydERhdGVUaW1lIiwic2V0SG91cnMiLCJlbmREYXRlVGltZSIsInNldE1pbnV0ZXMiLCJnZXRNaW51dGVzIiwiZHVyYXRpb25fbWludXRlcyIsInB1c2giLCJ0b0lTT1N0cmluZyIsInRpdGxlIiwic3RhcnQiLCJlbmQiLCJyZXNvdXJjZSIsImF2YWlsYWJsZVNsb3RzIiwiZXZlbnRTdHlsZUdldHRlciIsInN0YXR1c0NvbG9ycyIsImF2YWlsYWJsZSIsImJnIiwidGV4dCIsImJvcmRlciIsImxpbWl0ZWQiLCJmdWxsIiwidW5hdmFpbGFibGUiLCJjb2xvciIsInN0eWxlIiwiYmFja2dyb3VuZENvbG9yIiwiYm9yZGVyUmFkaXVzIiwicGFkZGluZyIsImZvbnRTaXplIiwiZm9udFdlaWdodCIsImhhbmRsZVNlbGVjdEV2ZW50IiwiaGFuZGxlU2VsZWN0U2xvdCIsInNsb3RJbmZvIiwiY2xhc3NOYW1lIiwiZGl2IiwidmFyaWFudCIsInNpemUiLCJvbkNsaWNrIiwibmV3RGF0ZSIsInNldE1vbnRoIiwiYXJpYS1sYWJlbCIsImNhbGVuZGFyIiwibG9jYWxpemVyIiwiZGF0ZUZuc0xvY2FsaXplciIsImxvY2FsZSIsImxvY2FsZXMiLCJzdGFydEFjY2Vzc29yIiwiZW5kQWNjZXNzb3IiLCJvblZpZXciLCJuZXh0VmlldyIsIm9uTmF2aWdhdGUiLCJvblNlbGVjdEV2ZW50Iiwib25TZWxlY3RTbG90Iiwic2VsZWN0YWJsZSIsImV2ZW50UHJvcEdldHRlciIsInN0ZXAiLCJ0aW1lc2xvdHMiLCJtaW4iLCJtYXgiLCJkZWZhdWx0RGF0ZSIsInBvcHVwIiwic3BhbiJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O0FBQUE7Ozs7OztDQU1DLEdBRUQsU0FBU0EsUUFBUSxFQUFXQyxXQUFXLFFBQVEsUUFBUTtBQUN2RCxTQUFTQyxNQUFNLEVBQUVDLEtBQUssRUFBRUMsV0FBVyxFQUFhQyxNQUFNLFFBQVEsV0FBVztBQUN6RSxTQUFTQyxFQUFFLFFBQVEsa0JBQWtCO0FBQ3JDLFNBQVNDLG1CQUFtQixRQUFRLDRDQUE0QztBQUNoRixTQUFTQyxJQUFJLEVBQUVDLFdBQVcsRUFBRUMsVUFBVSxFQUFFQyxTQUFTLFFBQVEs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

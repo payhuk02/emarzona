@@ -1,0 +1,53 @@
+import { GLOBAL_OBJ } from "/node_modules/@sentry/core/build/esm/utils/worldwide.js?v=d758aa40";
+import { addHandler, maybeInstrument, triggerHandlers } from "/node_modules/@sentry/core/build/esm/instrument/handlers.js?v=d758aa40";
+
+let _oldOnErrorHandler = null;
+
+/**
+ * Add an instrumentation handler for when an error is captured by the global error handler.
+ *
+ * Use at your own risk, this might break without changelog notice, only used internally.
+ * @hidden
+ */
+function addGlobalErrorInstrumentationHandler(handler) {
+  const type = 'error';
+  addHandler(type, handler);
+  maybeInstrument(type, instrumentError);
+}
+
+function instrumentError() {
+  _oldOnErrorHandler = GLOBAL_OBJ.onerror;
+
+  // Note: The reason we are doing window.onerror instead of window.addEventListener('error')
+  // is that we are using this handler in the Loader Script, to handle buffered errors consistently
+  GLOBAL_OBJ.onerror = function (
+    msg,
+    url,
+    line,
+    column,
+    error,
+  ) {
+    const handlerData = {
+      column,
+      error,
+      line,
+      msg,
+      url,
+    };
+    triggerHandlers('error', handlerData);
+
+    if (_oldOnErrorHandler) {
+      // eslint-disable-next-line prefer-rest-params
+      return _oldOnErrorHandler.apply(this, arguments);
+    }
+
+    return false;
+  };
+
+  GLOBAL_OBJ.onerror.__SENTRY_INSTRUMENTED__ = true;
+}
+
+export { addGlobalErrorInstrumentationHandler };
+                                       
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZ2xvYmFsRXJyb3IuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy9pbnN0cnVtZW50L2dsb2JhbEVycm9yLnRzIl0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB0eXBlIHsgSGFuZGxlckRhdGFFcnJvciB9IGZyb20gJy4uL3R5cGVzLWhvaXN0L2luc3RydW1lbnQnO1xuaW1wb3J0IHsgR0xPQkFMX09CSiB9IGZyb20gJy4uL3V0aWxzL3dvcmxkd2lkZSc7XG5pbXBvcnQgeyBhZGRIYW5kbGVyLCBtYXliZUluc3RydW1lbnQsIHRyaWdnZXJIYW5kbGVycyB9IGZyb20gJy4vaGFuZGxlcnMnO1xuXG5sZXQgX29sZE9uRXJyb3JIYW5kbGVyOiAodHlwZW9mIEdMT0JBTF9PQkopWydvbmVycm9yJ10gfCBudWxsID0gbnVsbDtcblxuLyoqXG4gKiBBZGQgYW4gaW5zdHJ1bWVudGF0aW9uIGhhbmRsZXIgZm9yIHdoZW4gYW4gZXJyb3IgaXMgY2FwdHVyZWQgYnkgdGhlIGdsb2JhbCBlcnJvciBoYW5kbGVyLlxuICpcbiAqIFVzZSBhdCB5b3VyIG93biByaXNrLCB0aGlzIG1pZ2h0IGJyZWFrIHdpdGhvdXQgY2hhbmdlbG9nIG5vdGljZSwgb25seSB1c2VkIGludGVybmFsbHkuXG4gKiBAaGlkZGVuXG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBhZGRHbG9iYWxFcnJvckluc3RydW1lbnRhdGlvbkhhbmRsZXIoaGFuZGxlcjogKGRhdGE6IEhhbmRsZXJEYXRhRXJyb3IpID0+IHZvaWQpOiB2b2lkIHtcbiAgY29uc3QgdHlwZSA9ICdlcnJvcic7XG4gIGFkZEhhbmRsZXIodHlwZSwgaGFuZGxlcik7XG4gIG1heWJlSW5zdHJ1bWVudCh0eXBlLCBpbnN0cnVtZW50RXJyb3IpO1xufVxuXG5mdW5jdGlvbiBpbnN0cnVtZW50RXJyb3IoKTogdm9pZCB7XG4gIF9vbGRPbkVycm9ySGFuZGxlciA9IEdMT0JBTF9PQkoub25lcnJvcjtcblxuICAvLyBOb3RlOiBUaGUgcmVhc29uIHdlIGFyZSBkb2luZyB3aW5kb3cub25lcnJvciBpbnN0ZWFkIG9mIHdpbmRvdy5hZGRFdmVudExpc3RlbmVyKCdlcnJvcicpXG4gIC8vIGlzIHRoYXQgd2UgYXJlIHVzaW5nIHRoaXMgaGFuZGxlciBpbiB0aGUgTG9hZGVyIFNjcmlwdCwgdG8gaGFuZGxlIGJ1ZmZlcmVkIGVycm9ycyBjb25zaXN0ZW50bHlcbiAgR0xPQkFMX09CSi5vbmVycm9yID0gZnVuY3Rpb24gKFxuICAgIG1zZzogc3RyaW5nIHwgb2JqZWN0LFxuICAgIHVybD86IHN0cmluZyxcbiAgICBsaW5lPzogbnVtYmVyLFxuICAgIGNvbHVtbj86IG51bWJlcixcbiAgICBlcnJvcj86IEVycm9yLFxuICApOiBib29sZWFuIHtcbiAgICBjb25zdCBoYW5kbGVyRGF0YTogSGFuZGxlckRhdGFFcnJvciA9IHtcbiAgICAgIGNvbHVtbixcbiAgICAgIGVycm9yLFxuICAgICAgbGluZSxcbiAgICAgIG1zZyxcbiAgICAgIHVybCxcbiAgICB9O1xuICAgIHRyaWdnZXJIYW5kbGVycygnZXJyb3InLCBoYW5kbGVyRGF0YSk7XG5cbiAgICBpZiAoX29sZE9uRXJyb3JIYW5kbGVyKSB7XG4gICAgICAvLyBlc2xpbnQtZGlzYWJsZS1uZXh0LWxpbmUgcHJlZmVyLXJlc3QtcGFyYW1zXG4gICAgICByZXR1cm4gX29sZE9uRXJyb3JIYW5kbGVyLmFwcGx5KHRoaXMsIGFyZ3VtZW50cyk7XG4gICAgfVxuXG4gICAgcmV0dXJuIGZhbHNlO1xuICB9O1xuXG4gIEdMT0JBTF9PQkoub25lcnJvci5fX1NFTlRSWV9JTlNUUlVNRU5URURfXyA9IHRydWU7XG59XG4iXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7O0FBSUEsSUFBSSxrQkFBa0IsR0FBMEMsSUFBSTs7QUFFcEU7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ08sU0FBUyxvQ0FBb0MsQ0FBQyxPQUFPLEVBQTBDO0FBQ3RHLEVBQUUsTUFBTSxJQUFBLEdBQU8sT0FBTztBQUN0QixFQUFFLFVBQVUsQ0FBQyxJQUFJLEVBQUUsT0FBTyxDQUFDO0FBQzNCLEVBQUUsZUFBZSxDQUFDLElBQUksRUFBRSxlQUFlLENBQUM7QUFDeEM7O0FBRUEsU0FBUyxlQUFlLEdBQVM7QUFDakMsRUFBRSxrQkFBQSxHQUFxQixVQUFVLENBQUMsT0FBTzs7QUFFekM7QUFDQTtBQUNBLEVBQUUsVUFBVSxDQUFDLE9BQUEsR0FBVTtBQUN2QixJQUFJLEdBQUc7QUFDUCxJQUFJLEdBQUc7QUFDUCxJQUFJLElBQUk7QUFDUixJQUFJLE1BQU07QUFDVixJQUFJLEtBQUs7QUFDVCxJQUFhO0FBQ2IsSUFBSSxNQUFNLFdBQVcsR0FBcUI7QUFDMUMsTUFBTSxNQUFNO0FBQ1osTUFBTSxLQUFLO0FBQ1gsTUFBTSxJQUFJO0FBQ1YsTUFBTSxHQUFHO0FBQ1QsTUFBTSxHQUFHO0FBQ1QsS0FBSztBQUNMLElBQUksZUFBZSxDQUFDLE9BQU8sRUFBRSxXQUFXLENBQUM7O0FBRXpDLElBQUksSUFBSSxrQkFBa0IsRUFBRTtBQUM1QjtBQUNBLE1BQU0sT0FBTyxrQkFBa0IsQ0FBQyxLQUFLLENBQUMsSUFBSSxFQUFFLFNBQVMsQ0FBQztBQUN0RCxJQUFJOztBQUVKLElBQUksT0FBTyxLQUFLO0FBQ2hCLEVBQUUsQ0FBQzs7QUFFSCxFQUFFLFVBQVUsQ0FBQyxPQUFPLENBQUMsdUJBQUEsR0FBMEIsSUFBSTtBQUNuRDs7OzsiLCJ4X2dvb2dsZV9pZ25vcmVMaXN0IjpbMF19

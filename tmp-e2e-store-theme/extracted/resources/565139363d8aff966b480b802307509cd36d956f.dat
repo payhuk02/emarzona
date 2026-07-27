@@ -1,0 +1,127 @@
+import { _INTERNAL_captureMetric } from "/node_modules/@sentry/core/build/esm/metrics/internal.js?v=3ea6c1b9";
+
+/**
+ * Options for capturing a metric.
+ */
+
+/**
+ * Capture a metric with the given type, name, and value.
+ *
+ * @param type - The type of the metric.
+ * @param name - The name of the metric.
+ * @param value - The value of the metric.
+ * @param options - Options for capturing the metric.
+ */
+function captureMetric(type, name, value, options) {
+  _INTERNAL_captureMetric(
+    { type, name, value, unit: options?.unit, attributes: options?.attributes },
+    { scope: options?.scope },
+  );
+}
+
+/**
+ * @summary Increment a counter metric.
+ *
+ * @param name - The name of the counter metric.
+ * @param value - The value to increment by (defaults to 1).
+ * @param options - Options for capturing the metric.
+ *
+ * @example
+ *
+ * ```
+ * Sentry.metrics.count('api.requests', 1, {
+ *   attributes: {
+ *     endpoint: '/api/users',
+ *     method: 'GET',
+ *     status: 200
+ *   }
+ * });
+ * ```
+ *
+ * @example With custom value
+ *
+ * ```
+ * Sentry.metrics.count('items.processed', 5, {
+ *   attributes: {
+ *     processor: 'batch-processor',
+ *     queue: 'high-priority'
+ *   }
+ * });
+ * ```
+ */
+function count(name, value = 1, options) {
+  captureMetric('counter', name, value, options);
+}
+
+/**
+ * @summary Set a gauge metric to a specific value.
+ *
+ * @param name - The name of the gauge metric.
+ * @param value - The current value of the gauge.
+ * @param options - Options for capturing the metric.
+ *
+ * @example
+ *
+ * ```
+ * Sentry.metrics.gauge('memory.usage', 1024, {
+ *   unit: 'megabyte',
+ *   attributes: {
+ *     process: 'web-server',
+ *     region: 'us-east-1'
+ *   }
+ * });
+ * ```
+ *
+ * @example Without unit
+ *
+ * ```
+ * Sentry.metrics.gauge('active.connections', 42, {
+ *   attributes: {
+ *     server: 'api-1',
+ *     protocol: 'websocket'
+ *   }
+ * });
+ * ```
+ */
+function gauge(name, value, options) {
+  captureMetric('gauge', name, value, options);
+}
+
+/**
+ * @summary Record a value in a distribution metric.
+ *
+ * @param name - The name of the distribution metric.
+ * @param value - The value to record in the distribution.
+ * @param options - Options for capturing the metric.
+ *
+ * @example
+ *
+ * ```
+ * Sentry.metrics.distribution('task.duration', 500, {
+ *   unit: 'millisecond',
+ *   attributes: {
+ *     task: 'data-processing',
+ *     priority: 'high'
+ *   }
+ * });
+ * ```
+ *
+ * @example Without unit
+ *
+ * ```
+ * Sentry.metrics.distribution('batch.size', 100, {
+ *   attributes: {
+ *     processor: 'batch-1',
+ *     type: 'async'
+ *   }
+ * });
+ * ```
+ */
+function distribution(name, value, options) {
+  captureMetric('distribution', name, value, options);
+}
+
+export { count, distribution, gauge };
+                                      
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicHVibGljLWFwaS5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4vc3JjL21ldHJpY3MvcHVibGljLWFwaS50cyJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgdHlwZSB7IFNjb3BlIH0gZnJvbSAnLi4vc2NvcGUnO1xuaW1wb3J0IHR5cGUgeyBNZXRyaWMsIE1ldHJpY1R5cGUgfSBmcm9tICcuLi90eXBlcy1ob2lzdC9tZXRyaWMnO1xuaW1wb3J0IHsgX0lOVEVSTkFMX2NhcHR1cmVNZXRyaWMgfSBmcm9tICcuL2ludGVybmFsJztcblxuLyoqXG4gKiBPcHRpb25zIGZvciBjYXB0dXJpbmcgYSBtZXRyaWMuXG4gKi9cbmV4cG9ydCBpbnRlcmZhY2UgTWV0cmljT3B0aW9ucyB7XG4gIC8qKlxuICAgKiBUaGUgdW5pdCBvZiB0aGUgbWV0cmljIHZhbHVlLlxuICAgKi9cbiAgdW5pdD86IHN0cmluZztcblxuICAvKipcbiAgICogQXJiaXRyYXJ5IHN0cnVjdHVyZWQgZGF0YSB0aGF0IHN0b3JlcyBpbmZvcm1hdGlvbiBhYm91dCB0aGUgbWV0cmljLlxuICAgKi9cbiAgYXR0cmlidXRlcz86IE1ldHJpY1snYXR0cmlidXRlcyddO1xuXG4gIC8qKlxuICAgKiBUaGUgc2NvcGUgdG8gY2FwdHVyZSB0aGUgbWV0cmljIHdpdGguXG4gICAqL1xuICBzY29wZT86IFNjb3BlO1xufVxuXG4vKipcbiAqIENhcHR1cmUgYSBtZXRyaWMgd2l0aCB0aGUgZ2l2ZW4gdHlwZSwgbmFtZSwgYW5kIHZhbHVlLlxuICpcbiAqIEBwYXJhbSB0eXBlIC0gVGhlIHR5cGUgb2YgdGhlIG1ldHJpYy5cbiAqIEBwYXJhbSBuYW1lIC0gVGhlIG5hbWUgb2YgdGhlIG1ldHJpYy5cbiAqIEBwYXJhbSB2YWx1ZSAtIFRoZSB2YWx1ZSBvZiB0aGUgbWV0cmljLlxuICogQHBhcmFtIG9wdGlvbnMgLSBPcHRpb25zIGZvciBjYXB0dXJpbmcgdGhlIG1ldHJpYy5cbiAqL1xuZnVuY3Rpb24gY2FwdHVyZU1ldHJpYyh0eXBlOiBNZXRyaWNUeXBlLCBuYW1lOiBzdHJpbmcsIHZhbHVlOiBudW1iZXIsIG9wdGlvbnM/OiBNZXRyaWNPcHRpb25zKTogdm9pZCB7XG4gIF9JTlRFUk5BTF9jYXB0dXJlTWV0cmljKFxuICAgIHsgdHlwZSwgbmFtZSwgdmFsdWUsIHVuaXQ6IG9wdGlvbnM/LnVuaXQsIGF0dHJpYnV0ZXM6IG9wdGlvbnM/LmF0dHJpYnV0ZXMgfSxcbiAgICB7IHNjb3BlOiBvcHRpb25zPy5zY29wZSB9LFxuICApO1xufVxuXG4vKipcbiAqIEBzdW1tYXJ5IEluY3JlbWVudCBhIGNvdW50ZXIgbWV0cmljLlxuICpcbiAqIEBwYXJhbSBuYW1lIC0gVGhlIG5hbWUgb2YgdGhlIGNvdW50ZXIgbWV0cmljLlxuICogQHBhcmFtIHZhbHVlIC0gVGhlIHZhbHVlIHRvIGluY3JlbWVudCBieSAoZGVmYXVsdHMgdG8gMSkuXG4gKiBAcGFyYW0gb3B0aW9ucyAtIE9wdGlvbnMgZm9yIGNhcHR1cmluZyB0aGUgbWV0cmljLlxuICpcbiAqIEBleGFtcGxlXG4gKlxuICogYGBgXG4gKiBTZW50cnkubWV0cmljcy5jb3VudCgnYXBpLnJlcXVlc3RzJywgMSwge1xuICogICBhdHRyaWJ1dGVzOiB7XG4gKiAgICAgZW5kcG9pbnQ6ICcvYXBpL3VzZXJzJyxcbiAqICAgICBtZXRob2Q6ICdHRVQnLFxuICogICAgIHN0YXR1czogMjAwXG4gKiAgIH1cbiAqIH0pO1xuICogYGBgXG4gKlxuICogQGV4YW1wbGUgV2l0aCBjdXN0b20gdmFsdWVcbiAqXG4gKiBgYGBcbiAqIFNlbnRyeS5tZXRyaWNzLmNvdW50KCdpdGVtcy5wcm9jZXNzZWQnLCA1LCB7XG4gKiAgIGF0dHJpYnV0ZXM6IHtcbiAqICAgICBwcm9jZXNzb3I6ICdiYXRjaC1wcm9jZXNzb3InLFxuICogICAgIHF1ZXVlOiAnaGlnaC1wcmlvcml0eSdcbiAqICAgfVxuICogfSk7XG4gKiBgYGBcbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIGNvdW50KG5hbWU6IHN0cmluZywgdmFsdWU6IG51bWJlciA9IDEsIG9wdGlvbnM/OiBNZXRyaWNPcHRpb25zKTogdm9pZCB7XG4gIGNhcHR1cmVNZXRyaWMoJ2NvdW50ZXInLCBuYW1lLCB2YWx1ZSwgb3B0aW9ucyk7XG59XG5cbi8qKlxuICogQHN1bW1hcnkgU2V0IGEgZ2F1Z2UgbWV0cmljIHRvIGEgc3BlY2lmaWMgdmFsdWUuXG4gKlxuICogQHBhcmFtIG5hbWUgLSBUaGUgbmFtZSBvZiB0aGUgZ2F1Z2UgbWV0cmljLlxuICogQHBhcmFtIHZhbHVlIC0gVGhlIGN1cnJlbnQgdmFsdWUgb2YgdGhlIGdhdWdlLlxuICogQHBhcmFtIG9wdGlvbnMgLSBPcHRpb25zIGZvciBjYXB0dXJpbmcgdGhlIG1ldHJpYy5cbiAqXG4gKiBAZXhhbXBsZVxuICpcbiAqIGBgYFxuICogU2VudHJ5Lm1ldHJpY3MuZ2F1Z2UoJ21lbW9yeS51c2FnZScsIDEwMjQsIHtcbiAqICAgdW5pdDogJ21lZ2FieXRlJyxcbiAqICAgYXR0cmlidXRlczoge1xuICogICAgIHByb2Nlc3M6ICd3ZWItc2VydmVyJyxcbiAqICAgICByZWdpb246ICd1cy1lYXN0LTEnXG4gKiAgIH1cbiAqIH0pO1xuICogYGBgXG4gKlxuICogQGV4YW1wbGUgV2l0aG91dCB1bml0XG4gKlxuICogYGBgXG4gKiBTZW50cnkubWV0cmljcy5nYXVnZSgnYWN0aXZlLmNvbm5lY3Rpb25zJywgNDIsIHtcbiAqICAgYXR0cmlidXRlczoge1xuICogICAgIHNlcnZlcjogJ2FwaS0xJyxcbiAqICAgICBwcm90b2NvbDogJ3dlYnNvY2tldCdcbiAqICAgfVxuICogfSk7XG4gKiBgYGBcbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIGdhdWdlKG5hbWU6IHN0cmluZywgdmFsdWU6IG51bWJlciwgb3B0aW9ucz86IE1ldHJpY09wdGlvbnMpOiB2b2lkIHtcbiAgY2FwdHVyZU1ldHJpYygnZ2F1Z2UnLCBuYW1lLCB2YWx1ZSwgb3B0aW9ucyk7XG59XG5cbi8qKlxuICogQHN1bW1hcnkgUmVjb3JkIGEgdmFsdWUgaW4gYSBkaXN0cmlidXRpb24gbWV0cmljLlxuICpcbiAqIEBwYXJhbSBuYW1lIC0gVGhlIG5hbWUgb2YgdGhlIGRpc3RyaWJ1dGlvbiBtZXRyaWMuXG4gKiBAcGFyYW0gdmFsdWUgLSBUaGUgdmFsdWUgdG8gcmVjb3JkIGluIHRoZSBkaXN0cmlidXRpb24uXG4gKiBAcGFyYW0gb3B0aW9ucyAtIE9wdGlvbnMgZm9yIGNhcHR1cmluZyB0aGUgbWV0cmljLlxuICpcbiAqIEBleGFtcGxlXG4gKlxuICogYGBgXG4gKiBTZW50cnkubWV0cmljcy5kaXN0cmlidXRpb24oJ3Rhc2suZHVyYXRpb24nLCA1MDAsIHtcbiAqICAgdW5pdDogJ21pbGxpc2Vjb25kJyxcbiAqICAgYXR0cmlidXRlczoge1xuICogICAgIHRhc2s6ICdkYXRhLXByb2Nlc3NpbmcnLFxuICogICAgIHByaW9yaXR5OiAnaGlnaCdcbiAqICAgfVxuICogfSk7XG4gKiBgYGBcbiAqXG4gKiBAZXhhbXBsZSBXaXRob3V0IHVuaXRcbiAqXG4gKiBgYGBcbiAqIFNlbnRyeS5tZXRyaWNzLmRpc3RyaWJ1dGlvbignYmF0Y2guc2l6ZScsIDEwMCwge1xuICogICBhdHRyaWJ1dGVzOiB7XG4gKiAgICAgcHJvY2Vzc29yOiAnYmF0Y2gtMScsXG4gKiAgICAgdHlwZTogJ2FzeW5jJ1xuICogICB9XG4gKiB9KTtcbiAqIGBgYFxuICovXG5leHBvcnQgZnVuY3Rpb24gZGlzdHJpYnV0aW9uKG5hbWU6IHN0cmluZywgdmFsdWU6IG51bWJlciwgb3B0aW9ucz86IE1ldHJpY09wdGlvbnMpOiB2b2lkIHtcbiAgY2FwdHVyZU1ldHJpYygnZGlzdHJpYnV0aW9uJywgbmFtZSwgdmFsdWUsIG9wdGlvbnMpO1xufVxuIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7O0FBSUE7QUFDQTtBQUNBOztBQWtCQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0EsU0FBUyxhQUFhLENBQUMsSUFBSSxFQUFjLElBQUksRUFBVSxLQUFLLEVBQVUsT0FBTyxFQUF3QjtBQUNyRyxFQUFFLHVCQUF1QjtBQUN6QixJQUFJLEVBQUUsSUFBSSxFQUFFLElBQUksRUFBRSxLQUFLLEVBQUUsSUFBSSxFQUFFLE9BQU8sRUFBRSxJQUFJLEVBQUUsVUFBVSxFQUFFLE9BQU8sRUFBRSxZQUFZO0FBQy9FLElBQUksRUFBRSxLQUFLLEVBQUUsT0FBTyxFQUFFLE9BQU87QUFDN0IsR0FBRztBQUNIOztBQUVBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNPLFNBQVMsS0FBSyxDQUFDLElBQUksRUFBVSxLQUFLLEdBQVcsQ0FBQyxFQUFFLE9BQU8sRUFBd0I7QUFDdEYsRUFBRSxhQUFhLENBQUMsU0FBUyxFQUFFLElBQUksRUFBRSxLQUFLLEVBQUUsT0FBTyxDQUFDO0FBQ2hEOztBQUVBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNPLFNBQVMsS0FBSyxDQUFDLElBQUksRUFBVSxLQUFLLEVBQVUsT0FBTyxFQUF3QjtBQUNsRixFQUFFLGFBQWEsQ0FBQyxPQUFPLEVBQUUsSUFBSSxFQUFFLEtBQUssRUFBRSxPQUFPLENBQUM7QUFDOUM7O0FBRUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ08sU0FBUyxZQUFZLENBQUMsSUFBSSxFQUFVLEtBQUssRUFBVSxPQUFPLEVBQXdCO0FBQ3pGLEVBQUUsYUFBYSxDQUFDLGNBQWMsRUFBRSxJQUFJLEVBQUUsS0FBSyxFQUFFLE9BQU8sQ0FBQztBQUNyRDs7OzsiLCJ4X2dvb2dsZV9pZ25vcmVMaXN0IjpbMF19

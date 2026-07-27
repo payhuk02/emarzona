@@ -1,0 +1,595 @@
+﻿Product wizards publish E2E	Set up job	´╗┐2026-07-20T22:04:20.1317220Z Current runner version: '2.335.1'
+Product wizards publish E2E	Set up job	2026-07-20T22:04:20.1359296Z ##[group]Runner Image Provisioner
+Product wizards publish E2E	Set up job	2026-07-20T22:04:20.1361024Z Hosted Compute Agent
+Product wizards publish E2E	Set up job	2026-07-20T22:04:20.1362064Z Version: 20260707.563
+Product wizards publish E2E	Set up job	2026-07-20T22:04:20.1363179Z Commit: 02667638d2b423fbc733a8e32a88b44996a3ba6e
+Product wizards publish E2E	Set up job	2026-07-20T22:04:20.1364507Z Build Date: 2026-07-07T19:33:50Z
+Product wizards publish E2E	Set up job	2026-07-20T22:04:20.1365740Z Worker ID: {5edceb09-9b44-4ba2-aec1-9c0bbc2dac81}
+Product wizards publish E2E	Set up job	2026-07-20T22:04:20.1367092Z Azure Region: centralus
+Product wizards publish E2E	Set up job	2026-07-20T22:04:20.1368122Z ##[endgroup]
+Product wizards publish E2E	Set up job	2026-07-20T22:04:20.1370538Z ##[group]Operating System
+Product wizards publish E2E	Set up job	2026-07-20T22:04:20.1371769Z Ubuntu
+Product wizards publish E2E	Set up job	2026-07-20T22:04:20.1372732Z 24.04.4
+Product wizards publish E2E	Set up job	2026-07-20T22:04:20.1373711Z LTS
+Product wizards publish E2E	Set up job	2026-07-20T22:04:20.1374616Z ##[endgroup]
+Product wizards publish E2E	Set up job	2026-07-20T22:04:20.1375791Z ##[group]Runner Image
+Product wizards publish E2E	Set up job	2026-07-20T22:04:20.1376865Z Image: ubuntu-24.04
+Product wizards publish E2E	Set up job	2026-07-20T22:04:20.1377946Z Version: 20260714.240.1
+Product wizards publish E2E	Set up job	2026-07-20T22:04:20.1380001Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260714.240/images/ubuntu/Ubuntu2404-Readme.md
+Product wizards publish E2E	Set up job	2026-07-20T22:04:20.1382144Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260714.240
+Product wizards publish E2E	Set up job	2026-07-20T22:04:20.1383241Z ##[endgroup]
+Product wizards publish E2E	Set up job	2026-07-20T22:04:20.1384678Z ##[group]GITHUB_TOKEN Permissions
+Product wizards publish E2E	Set up job	2026-07-20T22:04:20.1387159Z Contents: read
+Product wizards publish E2E	Set up job	2026-07-20T22:04:20.1387977Z Metadata: read
+Product wizards publish E2E	Set up job	2026-07-20T22:04:20.1388590Z Packages: read
+Product wizards publish E2E	Set up job	2026-07-20T22:04:20.1389290Z ##[endgroup]
+Product wizards publish E2E	Set up job	2026-07-20T22:04:20.1391902Z Secret source: Actions
+Product wizards publish E2E	Set up job	2026-07-20T22:04:20.1393229Z Prepare workflow directory
+Product wizards publish E2E	Set up job	2026-07-20T22:04:20.1796533Z Prepare all required actions
+Product wizards publish E2E	Set up job	2026-07-20T22:04:20.1851762Z Getting action download info
+Product wizards publish E2E	Set up job	2026-07-20T22:04:20.4565094Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+Product wizards publish E2E	Set up job	2026-07-20T22:04:20.8953916Z Download action repository 'actions/setup-node@v4' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+Product wizards publish E2E	Set up job	2026-07-20T22:04:21.0432621Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+Product wizards publish E2E	Set up job	2026-07-20T22:04:21.3574080Z Complete job name: Product wizards publish E2E
+Product wizards publish E2E	Checkout code	´╗┐2026-07-20T22:04:21.4397222Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.4406998Z ##[group]Run actions/checkout@v4
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.4407926Z with:
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.4408477Z   repository: payhuk02/emarzona
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.4412982Z   token: ***
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.4413524Z   ssh-strict: true
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.4414050Z   ssh-user: git
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.4414591Z   persist-credentials: true
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.4415171Z   clean: true
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.4415701Z   sparse-checkout-cone-mode: true
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.4416308Z   fetch-depth: 1
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.4416832Z   fetch-tags: false
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.4417366Z   show-progress: true
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.4417940Z   lfs: false
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.4418478Z   submodules: false
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.4419079Z   set-safe-directory: true
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.4419870Z   allow-unsafe-pr-checkout: false
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.4420812Z ##[endgroup]
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.5454824Z Syncing repository: payhuk02/emarzona
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.5457067Z ##[group]Getting Git version info
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.5457943Z Working directory is '/home/runner/work/emarzona/emarzona'
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.5459231Z [command]/usr/bin/git version
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.5532705Z git version 2.54.0
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.5586653Z ##[endgroup]
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.5603439Z Temporarily overriding HOME='/home/runner/work/_temp/e8b4876b-50e0-41c7-b825-8b5787d03f7a' before making global git config changes
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.5606255Z Adding repository directory to the temporary git global config as a safe directory
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.5609068Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/emarzona/emarzona
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.5669768Z Deleting the contents of '/home/runner/work/emarzona/emarzona'
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.5674304Z ##[group]Initializing the repository
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.5679392Z [command]/usr/bin/git init /home/runner/work/emarzona/emarzona
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.5853298Z hint: Using 'master' as the name for the initial branch. This default branch name
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.5855274Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.5856755Z hint: to use in all of your new repositories, which will suppress this warning,
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.5857648Z hint: call:
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.5858501Z hint:
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.5859150Z hint: 	git config --global init.defaultBranch <name>
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.5860313Z hint:
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.5861427Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.5862935Z hint: 'development'. The just-created branch can be renamed via this command:
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.5864052Z hint:
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.5864562Z hint: 	git branch -m <name>
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.5865222Z hint:
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.5865970Z hint: Disable this message with "git config set advice.defaultBranchName false"
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.5867125Z Initialized empty Git repository in /home/runner/work/emarzona/emarzona/.git/
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.5869352Z [command]/usr/bin/git remote add origin https://github.com/payhuk02/emarzona
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.5968995Z ##[endgroup]
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.5970949Z ##[group]Disabling automatic garbage collection
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.5973414Z [command]/usr/bin/git config --local gc.auto 0
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.6014043Z ##[endgroup]
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.6015614Z ##[group]Setting up auth
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.6021370Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.6073948Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.6726050Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.6766031Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.7017385Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.7057796Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.7308106Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.7351615Z ##[endgroup]
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.7352719Z ##[group]Fetching the repository
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:21.7361912Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +6a7071689c893309d242f7ae8c0dcad7e422d369:refs/remotes/origin/main
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:23.2805083Z From https://github.com/payhuk02/emarzona
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:23.2806246Z  * [new ref]         6a7071689c893309d242f7ae8c0dcad7e422d369 -> origin/main
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:23.2843809Z ##[endgroup]
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:23.2844620Z ##[group]Determining the checkout info
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:23.2846411Z ##[endgroup]
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:23.2852534Z [command]/usr/bin/git sparse-checkout disable
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:23.2952680Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:23.2987958Z ##[group]Checking out the ref
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:23.2993655Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:23.6096380Z Switched to a new branch 'main'
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:23.6101492Z branch 'main' set up to track 'origin/main'.
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:23.6116923Z ##[endgroup]
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:23.6173432Z [command]/usr/bin/git log -1 --format=%H
+Product wizards publish E2E	Checkout code	2026-07-20T22:04:23.6206366Z 6a7071689c893309d242f7ae8c0dcad7e422d369
+Product wizards publish E2E	Setup Node.js	´╗┐2026-07-20T22:04:23.6543748Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Product wizards publish E2E	Setup Node.js	2026-07-20T22:04:23.6545595Z ##[group]Run actions/setup-node@v4
+Product wizards publish E2E	Setup Node.js	2026-07-20T22:04:23.6545898Z with:
+Product wizards publish E2E	Setup Node.js	2026-07-20T22:04:23.6546120Z   node-version: 20
+Product wizards publish E2E	Setup Node.js	2026-07-20T22:04:23.6546365Z   cache: npm
+Product wizards publish E2E	Setup Node.js	2026-07-20T22:04:23.6546593Z   always-auth: false
+Product wizards publish E2E	Setup Node.js	2026-07-20T22:04:23.6546843Z   check-latest: false
+Product wizards publish E2E	Setup Node.js	2026-07-20T22:04:23.6549331Z   token: ***
+Product wizards publish E2E	Setup Node.js	2026-07-20T22:04:23.6549748Z ##[endgroup]
+Product wizards publish E2E	Setup Node.js	2026-07-20T22:04:23.8235065Z Attempting to download 20...
+Product wizards publish E2E	Setup Node.js	2026-07-20T22:04:23.8345048Z (node:2337) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+Product wizards publish E2E	Setup Node.js	2026-07-20T22:04:23.8346488Z (Use `node --trace-deprecation ...` to show where the warning was created)
+Product wizards publish E2E	Setup Node.js	2026-07-20T22:04:24.4977796Z Acquiring 20.20.2 - x64 from https://github.com/actions/node-versions/releases/download/20.20.2-23521894959/node-20.20.2-linux-x64.tar.gz
+Product wizards publish E2E	Setup Node.js	2026-07-20T22:04:24.9907888Z Extracting ...
+Product wizards publish E2E	Setup Node.js	2026-07-20T22:04:25.0027779Z [command]/usr/bin/tar xz --strip 1 --warning=no-unknown-keyword --overwrite -C /home/runner/work/_temp/e9577a28-6dc6-482f-a892-451e5da3bdad -f /home/runner/work/_temp/be615165-6367-43b5-973d-930a3d4cea35
+Product wizards publish E2E	Setup Node.js	2026-07-20T22:04:26.0890869Z Adding to the cache ...
+Product wizards publish E2E	Setup Node.js	2026-07-20T22:04:27.5907328Z ##[group]Environment details
+Product wizards publish E2E	Setup Node.js	2026-07-20T22:04:27.9477625Z node: v20.20.2
+Product wizards publish E2E	Setup Node.js	2026-07-20T22:04:27.9477984Z npm: 10.8.2
+Product wizards publish E2E	Setup Node.js	2026-07-20T22:04:27.9478210Z yarn: 1.22.22
+Product wizards publish E2E	Setup Node.js	2026-07-20T22:04:27.9478740Z ##[endgroup]
+Product wizards publish E2E	Setup Node.js	2026-07-20T22:04:27.9496702Z [command]/opt/hostedtoolcache/node/20.20.2/x64/bin/npm config get cache
+Product wizards publish E2E	Setup Node.js	2026-07-20T22:04:28.0540775Z /home/runner/.npm
+Product wizards publish E2E	Setup Node.js	2026-07-20T22:04:28.2462257Z Cache hit for: node-cache-Linux-x64-npm-a597ffd5d3de7789547a983d6be65d370cf67e02798339b748ac9d43829d2f9b
+Product wizards publish E2E	Setup Node.js	2026-07-20T22:04:28.2565906Z (node:2337) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+Product wizards publish E2E	Setup Node.js	2026-07-20T22:04:29.3990434Z Received 88080384 of 147677930 (59.6%), 84.0 MBs/sec
+Product wizards publish E2E	Setup Node.js	2026-07-20T22:04:29.8250770Z Received 147677930 of 147677930 (100.0%), 99.0 MBs/sec
+Product wizards publish E2E	Setup Node.js	2026-07-20T22:04:29.8270077Z Cache Size: ~141 MB (147677930 B)
+Product wizards publish E2E	Setup Node.js	2026-07-20T22:04:29.8325083Z [command]/usr/bin/tar -xf /home/runner/work/_temp/d433b629-df4d-406a-9869-c98fe1d6128b/cache.tzst -P -C /home/runner/work/emarzona/emarzona --use-compress-program unzstd
+Product wizards publish E2E	Setup Node.js	2026-07-20T22:04:30.2076862Z Cache restored successfully
+Product wizards publish E2E	Setup Node.js	2026-07-20T22:04:30.2155639Z Cache restored from key: node-cache-Linux-x64-npm-a597ffd5d3de7789547a983d6be65d370cf67e02798339b748ac9d43829d2f9b
+Product wizards publish E2E	Install dependencies	´╗┐2026-07-20T22:04:30.2369390Z ##[group]Run npm ci
+Product wizards publish E2E	Install dependencies	2026-07-20T22:04:30.2370009Z ^[[36;1mnpm ci^[[0m
+Product wizards publish E2E	Install dependencies	2026-07-20T22:04:30.2464259Z shell: /usr/bin/bash -e {0}
+Product wizards publish E2E	Install dependencies	2026-07-20T22:04:30.2464627Z ##[endgroup]
+Product wizards publish E2E	Install dependencies	2026-07-20T22:04:36.0873117Z npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+Product wizards publish E2E	Install dependencies	2026-07-20T22:04:36.8712538Z npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+Product wizards publish E2E	Install dependencies	2026-07-20T22:04:37.4892085Z npm warn deprecated three-mesh-bvh@0.7.8: Deprecated due to three.js version incompatibility. Please use v0.8.0, instead.
+Product wizards publish E2E	Install dependencies	2026-07-20T22:04:44.0689453Z 
+Product wizards publish E2E	Install dependencies	2026-07-20T22:04:44.0690527Z > emarzona@1.0.0 prepare
+Product wizards publish E2E	Install dependencies	2026-07-20T22:04:44.0691118Z > husky install || true
+Product wizards publish E2E	Install dependencies	2026-07-20T22:04:44.0691560Z 
+Product wizards publish E2E	Install dependencies	2026-07-20T22:04:44.1250778Z husky - install command is DEPRECATED
+Product wizards publish E2E	Install dependencies	2026-07-20T22:04:44.1491561Z 
+Product wizards publish E2E	Install dependencies	2026-07-20T22:04:44.1492590Z added 940 packages, and audited 941 packages in 14s
+Product wizards publish E2E	Install dependencies	2026-07-20T22:04:44.1493362Z 
+Product wizards publish E2E	Install dependencies	2026-07-20T22:04:44.1494314Z 195 packages are looking for funding
+Product wizards publish E2E	Install dependencies	2026-07-20T22:04:44.1495043Z   run `npm fund` for details
+Product wizards publish E2E	Install dependencies	2026-07-20T22:04:44.2167715Z 
+Product wizards publish E2E	Install dependencies	2026-07-20T22:04:44.2168958Z 22 vulnerabilities (2 low, 11 moderate, 9 high)
+Product wizards publish E2E	Install dependencies	2026-07-20T22:04:44.2169477Z 
+Product wizards publish E2E	Install dependencies	2026-07-20T22:04:44.2170067Z To address issues that do not require attention, run:
+Product wizards publish E2E	Install dependencies	2026-07-20T22:04:44.2170663Z   npm audit fix
+Product wizards publish E2E	Install dependencies	2026-07-20T22:04:44.2170891Z 
+Product wizards publish E2E	Install dependencies	2026-07-20T22:04:44.2171229Z Some issues need review, and may require choosing
+Product wizards publish E2E	Install dependencies	2026-07-20T22:04:44.2171820Z a different dependency.
+Product wizards publish E2E	Install dependencies	2026-07-20T22:04:44.2172085Z 
+Product wizards publish E2E	Install dependencies	2026-07-20T22:04:44.2172294Z Run `npm audit` for details.
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	´╗┐2026-07-20T22:04:44.3096925Z ##[group]Run sudo apt-get update
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:44.3097303Z ^[[36;1msudo apt-get update^[[0m
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:44.3097642Z ^[[36;1msudo apt-get install -y postgresql-client^[[0m
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:44.3098096Z ^[[36;1mbash scripts/apply-e2e-post-bootstrap-patches-ci.sh^[[0m
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:44.3163162Z shell: /usr/bin/bash -e {0}
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:44.3164162Z env:
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:44.3164423Z   E2E_REF: ufbztturuwwazfcvhvuu
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:44.3164763Z   POOLER_HOST: aws-1-eu-west-2.pooler.supabase.com
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:44.3165252Z   E2E_SUPABASE_DB_PASSWORD: ***
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:44.3165533Z ##[endgroup]
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:44.3976531Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:44.4306716Z Hit:2 http://azure.archive.ubuntu.com/ubuntu noble InRelease
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:44.4315875Z Hit:6 https://packages.microsoft.com/repos/azure-cli noble InRelease
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:44.4318107Z Get:3 http://azure.archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:44.4328804Z Get:7 https://packages.microsoft.com/ubuntu/24.04/prod noble InRelease [3600 B]
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:44.4390066Z Get:4 http://azure.archive.ubuntu.com/ubuntu noble-backports InRelease [126 kB]
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:44.4482979Z Get:5 http://azure.archive.ubuntu.com/ubuntu noble-security InRelease [126 kB]
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:44.5541505Z Get:8 https://dl.google.com/linux/chrome-stable/deb stable InRelease [1825 B]
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:44.6022398Z Get:9 https://packages.microsoft.com/ubuntu/24.04/prod noble/main armhf Packages [11.7 kB]
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:44.6142293Z Get:10 https://packages.microsoft.com/ubuntu/24.04/prod noble/main amd64 Packages [233 kB]
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:44.6258062Z Get:11 https://packages.microsoft.com/ubuntu/24.04/prod noble/main arm64 Packages [200 kB]
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:44.6672203Z Get:12 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 Packages [1119 kB]
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:44.6771106Z Get:13 http://azure.archive.ubuntu.com/ubuntu noble-updates/main Translation-en [273 kB]
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:44.6802611Z Get:14 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 Components [180 kB]
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:44.6818318Z Get:15 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe amd64 Packages [1662 kB]
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:44.6916010Z Get:16 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe Translation-en [328 kB]
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:44.6968229Z Get:17 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe amd64 Components [388 kB]
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:44.6980479Z Get:18 http://azure.archive.ubuntu.com/ubuntu noble-updates/restricted amd64 Packages [1270 kB]
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:44.7101028Z Get:19 http://azure.archive.ubuntu.com/ubuntu noble-updates/restricted Translation-en [290 kB]
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:44.7117518Z Get:20 http://azure.archive.ubuntu.com/ubuntu noble-updates/multiverse amd64 Components [940 B]
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:44.7461003Z Get:21 http://azure.archive.ubuntu.com/ubuntu noble-backports/main amd64 Components [5788 B]
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:44.7892296Z Get:22 http://azure.archive.ubuntu.com/ubuntu noble-backports/universe amd64 Components [10.6 kB]
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:44.8038426Z Get:23 http://azure.archive.ubuntu.com/ubuntu noble-security/main amd64 Packages [856 kB]
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:44.8104914Z Get:24 http://azure.archive.ubuntu.com/ubuntu noble-security/main Translation-en [192 kB]
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:44.8115944Z Get:25 http://azure.archive.ubuntu.com/ubuntu noble-security/main amd64 Components [44.8 kB]
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:44.8127842Z Get:26 http://azure.archive.ubuntu.com/ubuntu noble-security/universe amd64 Packages [1180 kB]
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:44.8202413Z Get:27 http://azure.archive.ubuntu.com/ubuntu noble-security/universe Translation-en [233 kB]
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:44.8239288Z Get:28 http://azure.archive.ubuntu.com/ubuntu noble-security/universe amd64 Components [76.3 kB]
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:44.8249193Z Get:29 http://azure.archive.ubuntu.com/ubuntu noble-security/restricted amd64 Packages [1166 kB]
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:44.8330660Z Get:30 http://azure.archive.ubuntu.com/ubuntu noble-security/restricted Translation-en [268 kB]
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:44.9013334Z Get:31 https://dl.google.com/linux/chrome-stable/deb stable/main amd64 Packages [1420 B]
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:50.6395907Z Fetched 10.4 MB in 1s (7802 kB/s)
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:51.3430070Z Reading package lists...
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:51.3760921Z Reading package lists...
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:51.5571970Z Building dependency tree...
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:51.5579465Z Reading state information...
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:51.7404361Z The following NEW packages will be installed:
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:51.7405124Z   postgresql-client
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:51.7591426Z 0 upgraded, 1 newly installed, 0 to remove and 64 not upgraded.
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:51.7592191Z Need to get 11.6 kB of archives.
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:51.7593175Z After this operation, 17.4 kB of additional disk space will be used.
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:51.7594032Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:51.8136825Z Get:2 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 postgresql-client all 16+257build1.1 [11.6 kB]
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:52.0881291Z Fetched 11.6 kB in 0s (176 kB/s)
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:52.1740436Z Selecting previously unselected package postgresql-client.
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:52.2668525Z (Reading database ... 
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:52.2669108Z (Reading database ... 5%
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:52.2669893Z (Reading database ... 10%
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:52.2670340Z (Reading database ... 15%
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:52.2671041Z (Reading database ... 20%
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:52.2671372Z (Reading database ... 25%
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:52.2671641Z (Reading database ... 30%
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:52.2671902Z (Reading database ... 35%
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:52.2672170Z (Reading database ... 40%
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:52.2672436Z (Reading database ... 45%
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:52.2672696Z (Reading database ... 50%
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:52.3115002Z (Reading database ... 55%
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:52.6852828Z (Reading database ... 60%
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:52.9474647Z (Reading database ... 65%
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:53.2103395Z (Reading database ... 70%
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:53.4257088Z (Reading database ... 75%
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:53.8362909Z (Reading database ... 80%
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:54.4671385Z (Reading database ... 85%
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:55.1130671Z (Reading database ... 90%
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:55.7376871Z (Reading database ... 95%
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:55.7377444Z (Reading database ... 100%
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:55.7378194Z (Reading database ... 202507 files and directories currently installed.)
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:55.7426689Z Preparing to unpack .../postgresql-client_16+257build1.1_all.deb ...
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:55.7451309Z Unpacking postgresql-client (16+257build1.1) ...
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:55.7881605Z Setting up postgresql-client (16+257build1.1) ...
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:56.8118418Z 
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:56.8119357Z Running kernel seems to be up-to-date.
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:56.8120101Z 
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:56.8120356Z No services need to be restarted.
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:56.8120644Z 
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:56.8120896Z No containers need to be restarted.
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:56.8121203Z 
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:56.8121505Z No user sessions are running outdated binaries.
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:56.8121897Z 
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:56.8122367Z No VM guests are running outdated hypervisor (qemu) binaries on this host.
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:04:57.7878845Z Applying E2E post-bootstrap patches on ufbztturuwwazfcvhvuu via pooler...
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:05:04.7537352Z  pg_advisory_lock 
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:05:04.7537862Z ------------------
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:05:04.7538440Z  
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:05:04.7539245Z (1 row)
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:05:04.7539438Z 
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:05:04.7539774Z CREATE FUNCTION
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:05:04.7540140Z CREATE FUNCTION
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:05:04.7540482Z DROP TRIGGER
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:05:04.7540821Z CREATE TRIGGER
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:05:04.7541179Z GRANT
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:05:04.7541481Z GRANT
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:05:04.7542570Z psql:scripts/e2e-post-bootstrap-patches.sql:54: NOTICE:  column "total_orders" of relation "stores" already exists, skipping
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:05:04.7544096Z psql:scripts/e2e-post-bootstrap-patches.sql:54: NOTICE:  column "total_revenue" of relation "stores" already exists, skipping
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:05:04.7545019Z ALTER TABLE
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:05:04.7546244Z psql:scripts/e2e-post-bootstrap-patches.sql:58: NOTICE:  column "store_id" of relation "service_products" already exists, skipping
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:05:04.7546827Z ALTER TABLE
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:05:04.7547046Z UPDATE 0
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:05:04.7547682Z psql:scripts/e2e-post-bootstrap-patches.sql:66: NOTICE:  relation "idx_service_products_store_id" already exists, skipping
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:05:04.7548254Z CREATE INDEX
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:05:04.7548947Z psql:scripts/e2e-post-bootstrap-patches.sql:70: NOTICE:  column "store_id" of relation "physical_products" already exists, skipping
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:05:04.7549709Z ALTER TABLE
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:05:04.7549956Z UPDATE 0
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:05:04.7550597Z psql:scripts/e2e-post-bootstrap-patches.sql:78: NOTICE:  relation "idx_physical_products_store_id" already exists, skipping
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:05:04.7551161Z CREATE INDEX
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:05:04.7551389Z CREATE FUNCTION
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:05:04.7551618Z GRANT
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:05:04.7551822Z GRANT
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:05:04.7552026Z INSERT 0 3
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:05:04.7552249Z INSERT 0 0
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:05:04.7552457Z CREATE FUNCTION
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:05:04.7552690Z CREATE FUNCTION
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:05:04.7552907Z CREATE FUNCTION
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:05:04.7553113Z GRANT
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:05:04.7553312Z GRANT
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:05:04.7553503Z GRANT
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:05:04.7553716Z CREATE FUNCTION
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:05:04.7553931Z NOTIFY
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:05:04.7554164Z  pg_advisory_unlock 
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:05:04.7554426Z --------------------
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:05:04.7554660Z  t
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:05:04.7554866Z (1 row)
+Product wizards publish E2E	Apply E2E schema patches (idempotent)	2026-07-20T22:05:04.7555287Z OK: e2e-post-bootstrap-patches.sql applied on ufbztturuwwazfcvhvuu
+Product wizards publish E2E	Validate commerce E2E secrets	´╗┐2026-07-20T22:05:04.7587623Z ##[group]Run node scripts/verify-commerce-e2e-secrets.mjs
+Product wizards publish E2E	Validate commerce E2E secrets	2026-07-20T22:05:04.7608025Z ^[[36;1mnode scripts/verify-commerce-e2e-secrets.mjs^[[0m
+Product wizards publish E2E	Validate commerce E2E secrets	2026-07-20T22:05:04.7673169Z shell: /usr/bin/bash -e {0}
+Product wizards publish E2E	Validate commerce E2E secrets	2026-07-20T22:05:04.7673484Z env:
+Product wizards publish E2E	Validate commerce E2E secrets	2026-07-20T22:05:04.7673715Z   CI: true
+Product wizards publish E2E	Validate commerce E2E secrets	2026-07-20T22:05:04.7673950Z   COMMERCE_E2E_REQUIRED: 1
+Product wizards publish E2E	Validate commerce E2E secrets	2026-07-20T22:05:04.7674537Z   VITE_SUPABASE_TEST_URL: ***
+Product wizards publish E2E	Validate commerce E2E secrets	2026-07-20T22:05:04.7674918Z   VITE_SUPABASE_URL: ***
+Product wizards publish E2E	Validate commerce E2E secrets	2026-07-20T22:05:04.7675304Z   VITE_SUPABASE_ANON_KEY: ***
+Product wizards publish E2E	Validate commerce E2E secrets	2026-07-20T22:05:04.7675699Z   VITE_SUPABASE_PUBLISHABLE_KEY: ***
+Product wizards publish E2E	Validate commerce E2E secrets	2026-07-20T22:05:04.7676137Z   SUPABASE_SERVICE_ROLE_KEY: ***
+Product wizards publish E2E	Validate commerce E2E secrets	2026-07-20T22:05:04.7676419Z ##[endgroup]
+Product wizards publish E2E	Validate commerce E2E secrets	2026-07-20T22:05:05.7945266Z Applied e2e_apply_schema_patches on project ufbztturuwwazfcvhvuu
+Product wizards publish E2E	Validate commerce E2E secrets	2026-07-20T22:05:06.2856518Z Commerce E2E secrets OK (project ufbztturuwwazfcvhvuu, service role validated)
+Product wizards publish E2E	Install Playwright Browsers	´╗┐2026-07-20T22:05:06.2983640Z ##[group]Run npx playwright install --with-deps chromium
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:06.2984113Z ^[[36;1mnpx playwright install --with-deps chromium^[[0m
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:06.3048232Z shell: /usr/bin/bash -e {0}
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:06.3048540Z ##[endgroup]
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:07.2746783Z Installing dependencies...
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:07.2884604Z Switching to root user to install dependencies...
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:07.3715419Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:07.4335465Z Hit:6 https://packages.microsoft.com/repos/azure-cli noble InRelease
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:07.4345502Z Hit:7 https://packages.microsoft.com/ubuntu/24.04/prod noble InRelease
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:07.4852035Z Hit:8 https://dl.google.com/linux/chrome-stable/deb stable InRelease
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:07.6483933Z Hit:2 http://azure.archive.ubuntu.com/ubuntu noble InRelease
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:07.6535982Z Hit:3 http://azure.archive.ubuntu.com/ubuntu noble-updates InRelease
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:07.6624211Z Hit:4 http://azure.archive.ubuntu.com/ubuntu noble-backports InRelease
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:07.6742262Z Hit:5 http://azure.archive.ubuntu.com/ubuntu noble-security InRelease
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:08.7468779Z Reading package lists...
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:08.7718509Z Reading package lists...
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:08.9652316Z Building dependency tree...
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:08.9659465Z Reading state information...
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1361770Z libatk-bridge2.0-0t64 is already the newest version (2.52.0-1build1).
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1362713Z libatk-bridge2.0-0t64 set to manually installed.
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1363486Z libatk1.0-0t64 is already the newest version (2.52.0-1build1).
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1364163Z libatk1.0-0t64 set to manually installed.
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1364878Z libatspi2.0-0t64 is already the newest version (2.52.0-1build1).
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1365573Z libatspi2.0-0t64 set to manually installed.
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1366292Z libcairo2 is already the newest version (1.18.0-3build1).
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1366926Z libcairo2 set to manually installed.
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1367623Z libcups2t64 is already the newest version (2.4.7-1.2ubuntu7.14).
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1368058Z libcups2t64 set to manually installed.
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1368510Z libdbus-1-3 is already the newest version (1.14.10-4ubuntu4.1).
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1368925Z libdbus-1-3 set to manually installed.
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1369493Z libdrm2 is already the newest version (2.4.125-1ubuntu0.1~24.04.2).
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1370389Z libdrm2 set to manually installed.
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1371090Z libgbm1 is already the newest version (25.2.8-0ubuntu0.24.04.2).
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1371751Z libgbm1 set to manually installed.
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1372430Z libglib2.0-0t64 is already the newest version (2.80.0-6ubuntu3.8).
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1373116Z libglib2.0-0t64 set to manually installed.
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1373785Z libnspr4 is already the newest version (2:4.35-1.1build1).
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1374205Z libnspr4 set to manually installed.
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1374612Z libnss3 is already the newest version (2:3.98-1ubuntu0.2).
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1375012Z libnss3 set to manually installed.
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1375441Z libpango-1.0-0 is already the newest version (1.52.1+ds-1build1).
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1375868Z libpango-1.0-0 set to manually installed.
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1376286Z libx11-6 is already the newest version (2:1.8.7-1build1).
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1376671Z libx11-6 set to manually installed.
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1377225Z libxcb1 is already the newest version (1.15-1ubuntu2).
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1377826Z libxcb1 set to manually installed.
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1378379Z libxcomposite1 is already the newest version (1:0.4.5-1build3).
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1378814Z libxcomposite1 set to manually installed.
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1379249Z libxdamage1 is already the newest version (1:1.1.6-1build1).
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1379777Z libxdamage1 set to manually installed.
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1380196Z libxext6 is already the newest version (2:1.3.4-1build2).
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1380575Z libxext6 set to manually installed.
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1381450Z libxfixes3 is already the newest version (1:6.0.0-2build1).
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1381885Z libxfixes3 set to manually installed.
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1382303Z libxkbcommon0 is already the newest version (1.6.0-1build1).
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1382708Z libxkbcommon0 set to manually installed.
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1383123Z libxrandr2 is already the newest version (2:1.5.2-2build1).
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1383503Z libxrandr2 set to manually installed.
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1383916Z xvfb is already the newest version (2:21.1.12-1ubuntu1.6).
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1384464Z fonts-noto-color-emoji is already the newest version (2.047-0ubuntu0.24.04.1).
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1385033Z libfontconfig1 is already the newest version (2.15.0-1.1ubuntu2).
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1385465Z libfontconfig1 set to manually installed.
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1385920Z libfreetype6 is already the newest version (2.13.2+dfsg-1ubuntu0.1).
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1386528Z libfreetype6 set to manually installed.
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1386966Z fonts-liberation is already the newest version (1:2.1.5-3).
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1387410Z fonts-liberation set to manually installed.
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1387838Z The following additional packages will be installed:
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1388279Z   libasound2-data xfonts-encodings xfonts-utils
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1388633Z Suggested packages:
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1388931Z   alsa-utils libasound2-plugins
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1389246Z Recommended packages:
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1389805Z   fonts-ipafont-mincho fonts-tlwg-loma alsa-ucm-conf alsa-topology-conf
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1630270Z The following NEW packages will be installed:
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1631041Z   fonts-freefont-ttf fonts-ipafont-gothic fonts-tlwg-loma-otf fonts-unifont
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1637965Z   fonts-wqy-zenhei xfonts-cyrillic xfonts-encodings xfonts-scalable
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1638609Z   xfonts-utils
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1642116Z The following packages will be upgraded:
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1646908Z   libasound2-data libasound2t64
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1857101Z 2 upgraded, 9 newly installed, 0 to remove and 62 not upgraded.
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1857878Z Need to get 21.5 MB of archives.
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1858607Z After this operation, 79.5 MB of additional disk space will be used.
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.1859440Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.2315895Z Get:2 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 fonts-ipafont-gothic all 00303-21ubuntu1 [3513 kB]
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.2922858Z Get:3 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 fonts-freefont-ttf all 20211204+svn4273-2 [5641 kB]
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.3667070Z Get:4 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 fonts-tlwg-loma-otf all 1:0.7.3-1 [107 kB]
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.4028342Z Get:5 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 fonts-unifont all 1:15.1.01-1build1 [2993 kB]
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.4576656Z Get:6 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 fonts-wqy-zenhei all 0.9.45-8 [7472 kB]
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.5372181Z Get:7 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 libasound2t64 amd64 1.2.11-1ubuntu0.3 [398 kB]
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.5752181Z Get:8 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 libasound2-data all 1.2.11-1ubuntu0.3 [21.4 kB]
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.6109800Z Get:9 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 xfonts-encodings all 1:1.0.5-0ubuntu2 [578 kB]
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.6502906Z Get:10 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 xfonts-utils amd64 1:7.7+6build3 [94.4 kB]
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.6867007Z Get:11 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 xfonts-cyrillic all 1:1.0.5+nmu1 [384 kB]
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.7180296Z Get:12 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 xfonts-scalable all 1:1.0.3-1.3 [304 kB]
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:09.9832789Z Fetched 21.5 MB in 1s (39.3 MB/s)
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:10.0045001Z Selecting previously unselected package fonts-ipafont-gothic.
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:10.0109424Z (Reading database ... 
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:10.0110338Z (Reading database ... 5%
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:10.0110783Z (Reading database ... 10%
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:10.0111216Z (Reading database ... 15%
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:10.0111627Z (Reading database ... 20%
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:10.0112675Z (Reading database ... 25%
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:10.0113125Z (Reading database ... 30%
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:10.0113549Z (Reading database ... 35%
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:10.0113824Z (Reading database ... 40%
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:10.0114100Z (Reading database ... 45%
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:10.0114357Z (Reading database ... 50%
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:10.0121123Z (Reading database ... 55%
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:10.0237870Z (Reading database ... 60%
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:10.0269411Z (Reading database ... 65%
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:10.0292789Z (Reading database ... 70%
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:10.0337227Z (Reading database ... 75%
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:10.0361471Z (Reading database ... 80%
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:10.0388767Z (Reading database ... 85%
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:10.0558071Z (Reading database ... 90%
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:10.0851090Z (Reading database ... 95%
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:10.0851522Z (Reading database ... 100%
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:10.0852009Z (Reading database ... 202510 files and directories currently installed.)
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:10.0900030Z Preparing to unpack .../00-fonts-ipafont-gothic_00303-21ubuntu1_all.deb ...
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:10.0977014Z Unpacking fonts-ipafont-gothic (00303-21ubuntu1) ...
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:10.3315914Z Selecting previously unselected package fonts-freefont-ttf.
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:10.3452050Z Preparing to unpack .../01-fonts-freefont-ttf_20211204+svn4273-2_all.deb ...
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:10.3460005Z Unpacking fonts-freefont-ttf (20211204+svn4273-2) ...
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:10.4406495Z Selecting previously unselected package fonts-tlwg-loma-otf.
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:10.4544860Z Preparing to unpack .../02-fonts-tlwg-loma-otf_1%3a0.7.3-1_all.deb ...
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:10.4552990Z Unpacking fonts-tlwg-loma-otf (1:0.7.3-1) ...
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:10.4770265Z Selecting previously unselected package fonts-unifont.
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:10.4905282Z Preparing to unpack .../03-fonts-unifont_1%3a15.1.01-1build1_all.deb ...
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:10.4911353Z Unpacking fonts-unifont (1:15.1.01-1build1) ...
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:10.6014098Z Selecting previously unselected package fonts-wqy-zenhei.
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:10.6151200Z Preparing to unpack .../04-fonts-wqy-zenhei_0.9.45-8_all.deb ...
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:10.6256327Z Unpacking fonts-wqy-zenhei (0.9.45-8) ...
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:11.1209737Z Preparing to unpack .../05-libasound2t64_1.2.11-1ubuntu0.3_amd64.deb ...
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:11.1318292Z Unpacking libasound2t64:amd64 (1.2.11-1ubuntu0.3) over (1.2.11-1ubuntu0.2) ...
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:11.1863621Z Preparing to unpack .../06-libasound2-data_1.2.11-1ubuntu0.3_all.deb ...
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:11.1881412Z Unpacking libasound2-data (1.2.11-1ubuntu0.3) over (1.2.11-1ubuntu0.2) ...
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:11.2353072Z Selecting previously unselected package xfonts-encodings.
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:11.2489102Z Preparing to unpack .../07-xfonts-encodings_1%3a1.0.5-0ubuntu2_all.deb ...
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:11.2494505Z Unpacking xfonts-encodings (1:1.0.5-0ubuntu2) ...
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:11.2779988Z Selecting previously unselected package xfonts-utils.
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:11.2914859Z Preparing to unpack .../08-xfonts-utils_1%3a7.7+6build3_amd64.deb ...
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:11.2921643Z Unpacking xfonts-utils (1:7.7+6build3) ...
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:11.3512645Z Selecting previously unselected package xfonts-cyrillic.
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:11.3648414Z Preparing to unpack .../09-xfonts-cyrillic_1%3a1.0.5+nmu1_all.deb ...
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:11.3654526Z Unpacking xfonts-cyrillic (1:1.0.5+nmu1) ...
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:11.3993736Z Selecting previously unselected package xfonts-scalable.
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:11.4127910Z Preparing to unpack .../10-xfonts-scalable_1%3a1.0.3-1.3_all.deb ...
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:11.4135056Z Unpacking xfonts-scalable (1:1.0.3-1.3) ...
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:11.4572564Z Setting up fonts-wqy-zenhei (0.9.45-8) ...
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:11.4691319Z Setting up fonts-freefont-ttf (20211204+svn4273-2) ...
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:11.4706342Z Setting up libasound2-data (1.2.11-1ubuntu0.3) ...
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:11.4722207Z Setting up libasound2t64:amd64 (1.2.11-1ubuntu0.3) ...
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:11.4738864Z Setting up fonts-tlwg-loma-otf (1:0.7.3-1) ...
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:11.4755872Z Setting up xfonts-encodings (1:1.0.5-0ubuntu2) ...
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:11.4772552Z Setting up fonts-ipafont-gothic (00303-21ubuntu1) ...
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:11.4842159Z update-alternatives: using /usr/share/fonts/opentype/ipafont-gothic/ipag.ttf to provide /usr/share/fonts/truetype/fonts-japanese-gothic.ttf (fonts-japanese-gothic.ttf) in auto mode
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:11.4856738Z Setting up fonts-unifont (1:15.1.01-1build1) ...
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:11.4872325Z Setting up xfonts-utils (1:7.7+6build3) ...
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:11.4912216Z Setting up xfonts-cyrillic (1:1.0.5+nmu1) ...
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:11.5308071Z Setting up xfonts-scalable (1:1.0.3-1.3) ...
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:11.5637884Z Processing triggers for libc-bin (2.39-0ubuntu8.7) ...
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:11.6401137Z Processing triggers for man-db (2.12.0-4build2) ...
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:11.6472402Z Not building database; man-db/auto-update is not 'true'.
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:11.6486613Z Processing triggers for fontconfig (2.15.0-1.1ubuntu2) ...
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:12.3482728Z 
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:12.3483473Z Running kernel seems to be up-to-date.
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:12.3483866Z 
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:12.3484119Z No services need to be restarted.
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:12.3484418Z 
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:12.3484654Z No containers need to be restarted.
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:12.3484951Z 
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:12.3485232Z No user sessions are running outdated binaries.
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:12.3485570Z 
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:12.3486028Z No VM guests are running outdated hypervisor (qemu) binaries on this host.
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:13.3426729Z Downloading Chrome for Testing 145.0.7632.6 (playwright chromium v1208) from https://cdn.playwright.dev/builds/cft/145.0.7632.6/linux64/chrome-linux64.zip
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:13.5986522Z |                                                                                |   0% of 167.3 MiB
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:13.9835345Z |ÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûá                                                                        |  10% of 167.3 MiB
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:14.0832821Z |ÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûá                                                                |  20% of 167.3 MiB
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:14.1639938Z |ÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûá                                                        |  30% of 167.3 MiB
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:14.2803227Z |ÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûá                                                |  40% of 167.3 MiB
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:14.4002035Z |ÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûá                                        |  50% of 167.3 MiB
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:14.5081566Z |ÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûá                                |  60% of 167.3 MiB
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:14.5905879Z |ÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûá                        |  70% of 167.3 MiB
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:14.6810625Z |ÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûá                |  80% of 167.3 MiB
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:14.7533599Z |ÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûá        |  90% of 167.3 MiB
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:14.8162900Z |ÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûá| 100% of 167.3 MiB
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:17.8625633Z Chrome for Testing 145.0.7632.6 (playwright chromium v1208) downloaded to /home/runner/.cache/ms-playwright/chromium-1208
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:17.8629287Z Downloading FFmpeg (playwright ffmpeg v1011) from https://cdn.playwright.dev/dbazure/download/playwright/builds/ffmpeg/1011/ffmpeg-linux.zip
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:18.1106628Z |                                                                                |   0% of 2.3 MiB
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:18.1402599Z |ÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûá                                                                        |  10% of 2.3 MiB
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:18.1620716Z |ÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûá                                                                |  20% of 2.3 MiB
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:18.1821922Z |ÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûá                                                        |  30% of 2.3 MiB
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:18.1931421Z |ÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûá                                                |  40% of 2.3 MiB
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:18.2131317Z |ÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûá                                        |  50% of 2.3 MiB
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:18.2255142Z |ÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûá                                |  60% of 2.3 MiB
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:18.2356316Z |ÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûá                        |  70% of 2.3 MiB
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:18.2518052Z |ÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûá                |  80% of 2.3 MiB
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:18.2813704Z |ÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûá        |  90% of 2.3 MiB
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:18.3298404Z |ÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûá| 100% of 2.3 MiB
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:18.3950833Z FFmpeg (playwright ffmpeg v1011) downloaded to /home/runner/.cache/ms-playwright/ffmpeg-1011
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:18.3955568Z Downloading Chrome Headless Shell 145.0.7632.6 (playwright chromium-headless-shell v1208) from https://cdn.playwright.dev/builds/cft/145.0.7632.6/linux64/chrome-headless-shell-linux64.zip
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:18.6584541Z |                                                                                |   0% of 110.9 MiB
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:19.0322352Z |ÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûá                                                                        |  10% of 110.9 MiB
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:19.1098946Z |ÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûá                                                                |  20% of 110.9 MiB
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:19.1790547Z |ÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûá                                                        |  30% of 110.9 MiB
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:19.2311492Z |ÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûá                                                |  40% of 110.9 MiB
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:19.4768149Z |ÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûá                                        |  50% of 110.9 MiB
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:19.5309068Z |ÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûá                                |  60% of 110.9 MiB
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:19.6024444Z |ÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûá                        |  70% of 110.9 MiB
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:19.6433909Z |ÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûá                |  80% of 110.9 MiB
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:19.6849440Z |ÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûá        |  90% of 110.9 MiB
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:19.7263071Z |ÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûáÔûá| 100% of 110.9 MiB
+Product wizards publish E2E	Install Playwright Browsers	2026-07-20T22:05:21.9222233Z Chrome Headless Shell 145.0.7632.6 (playwright chromium-headless-shell v1208) downloaded to /home/runner/.cache/ms-playwright/chromium_headless_shell-1208
+Product wizards publish E2E	Run product wizards E2E	´╗┐2026-07-20T22:05:21.9509005Z ##[group]Run npm run test:e2e:product-wizards
+Product wizards publish E2E	Run product wizards E2E	2026-07-20T22:05:21.9509432Z ^[[36;1mnpm run test:e2e:product-wizards^[[0m
+Product wizards publish E2E	Run product wizards E2E	2026-07-20T22:05:21.9574030Z shell: /usr/bin/bash -e {0}
+Product wizards publish E2E	Run product wizards E2E	2026-07-20T22:05:21.9574328Z env:
+Product wizards publish E2E	Run product wizards E2E	2026-07-20T22:05:21.9574553Z   CI: true
+Product wizards publish E2E	Run product wizards E2E	2026-07-20T22:05:21.9575359Z   VITE_SUPABASE_TEST_URL: ***
+Product wizards publish E2E	Run product wizards E2E	2026-07-20T22:05:21.9575752Z   VITE_SUPABASE_URL: ***
+Product wizards publish E2E	Run product wizards E2E	2026-07-20T22:05:21.9576137Z   VITE_SUPABASE_ANON_KEY: ***
+Product wizards publish E2E	Run product wizards E2E	2026-07-20T22:05:21.9576540Z   VITE_SUPABASE_PUBLISHABLE_KEY: ***
+Product wizards publish E2E	Run product wizards E2E	2026-07-20T22:05:21.9576950Z   SUPABASE_SERVICE_ROLE_KEY: ***
+Product wizards publish E2E	Run product wizards E2E	2026-07-20T22:05:21.9577234Z ##[endgroup]
+Product wizards publish E2E	Run product wizards E2E	2026-07-20T22:05:22.0828198Z 
+Product wizards publish E2E	Run product wizards E2E	2026-07-20T22:05:22.0829046Z > emarzona@1.0.0 test:e2e:product-wizards
+Product wizards publish E2E	Run product wizards E2E	2026-07-20T22:05:22.0830212Z > playwright test --config=playwright.artist-wizard.config.ts
+Product wizards publish E2E	Run product wizards E2E	2026-07-20T22:05:22.0830732Z 
+Product wizards publish E2E	Run product wizards E2E	2026-07-20T22:05:25.2030597Z 
+Product wizards publish E2E	Run product wizards E2E	2026-07-20T22:05:25.2031493Z Running 26 tests using 1 worker
+Product wizards publish E2E	Run product wizards E2E	2026-07-20T23:04:32.1015864Z ##[error]The operation was canceled.
+Product wizards publish E2E	Upload artist wizard report	´╗┐2026-07-20T23:04:32.1087110Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Product wizards publish E2E	Upload artist wizard report	2026-07-20T23:04:32.1088354Z ##[group]Run actions/upload-artifact@v4
+Product wizards publish E2E	Upload artist wizard report	2026-07-20T23:04:32.1088658Z with:
+Product wizards publish E2E	Upload artist wizard report	2026-07-20T23:04:32.1088912Z   name: playwright-product-wizards-report
+Product wizards publish E2E	Upload artist wizard report	2026-07-20T23:04:32.1089236Z   path: playwright-report/
+Product wizards publish E2E	Upload artist wizard report	2026-07-20T23:04:32.1089503Z   retention-days: 14
+Product wizards publish E2E	Upload artist wizard report	2026-07-20T23:04:32.1089900Z   if-no-files-found: warn
+Product wizards publish E2E	Upload artist wizard report	2026-07-20T23:04:32.1090157Z   compression-level: 6
+Product wizards publish E2E	Upload artist wizard report	2026-07-20T23:04:32.1090404Z   overwrite: false
+Product wizards publish E2E	Upload artist wizard report	2026-07-20T23:04:32.1090651Z   include-hidden-files: false
+Product wizards publish E2E	Upload artist wizard report	2026-07-20T23:04:32.1090920Z ##[endgroup]
+Product wizards publish E2E	Upload artist wizard report	2026-07-20T23:04:32.2686436Z (node:5753) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+Product wizards publish E2E	Upload artist wizard report	2026-07-20T23:04:32.2688185Z (Use `node --trace-deprecation ...` to show where the warning was created)
+Product wizards publish E2E	Upload artist wizard report	2026-07-20T23:04:32.2782423Z With the provided path, there will be 1 file uploaded
+Product wizards publish E2E	Upload artist wizard report	2026-07-20T23:04:32.2784167Z Artifact name is valid!
+Product wizards publish E2E	Upload artist wizard report	2026-07-20T23:04:32.2784790Z Root directory input is valid!
+Product wizards publish E2E	Upload artist wizard report	2026-07-20T23:04:32.5268421Z Beginning upload of artifact content to blob storage
+Product wizards publish E2E	Upload artist wizard report	2026-07-20T23:04:32.6584537Z (node:5753) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+Product wizards publish E2E	Upload artist wizard report	2026-07-20T23:04:32.8641391Z Uploaded bytes 198327
+Product wizards publish E2E	Upload artist wizard report	2026-07-20T23:04:32.9116826Z Finished uploading artifact content to blob storage!
+Product wizards publish E2E	Upload artist wizard report	2026-07-20T23:04:32.9118053Z SHA256 digest of uploaded artifact zip is 3b4cbbb933c88be042314e61528b40469f6d09c132fd0be5e06207ddb2cfda93
+Product wizards publish E2E	Upload artist wizard report	2026-07-20T23:04:32.9118795Z Finalizing artifact upload
+Product wizards publish E2E	Upload artist wizard report	2026-07-20T23:04:33.0947574Z Artifact playwright-product-wizards-report.zip successfully finalized. Artifact ID 8478474239
+Product wizards publish E2E	Upload artist wizard report	2026-07-20T23:04:33.0949180Z Artifact playwright-product-wizards-report has been successfully uploaded! Final size is 198327 bytes. Artifact ID is 8478474239
+Product wizards publish E2E	Upload artist wizard report	2026-07-20T23:04:33.0950972Z Artifact download URL: https://github.com/payhuk02/emarzona/actions/runs/29782596710/artifacts/8478474239
+Product wizards publish E2E	Post Checkout code	´╗┐2026-07-20T23:04:33.1157060Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Product wizards publish E2E	Post Checkout code	2026-07-20T23:04:33.1158273Z Post job cleanup.
+Product wizards publish E2E	Post Checkout code	2026-07-20T23:04:33.2012712Z [command]/usr/bin/git version
+Product wizards publish E2E	Post Checkout code	2026-07-20T23:04:33.2090386Z git version 2.54.0
+Product wizards publish E2E	Post Checkout code	2026-07-20T23:04:33.2131109Z Temporarily overriding HOME='/home/runner/work/_temp/bfe35bf3-8bb3-4037-9e3a-053cf70d4304' before making global git config changes
+Product wizards publish E2E	Post Checkout code	2026-07-20T23:04:33.2136930Z Adding repository directory to the temporary git global config as a safe directory
+Product wizards publish E2E	Post Checkout code	2026-07-20T23:04:33.2145722Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/emarzona/emarzona
+Product wizards publish E2E	Post Checkout code	2026-07-20T23:04:33.2176588Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Product wizards publish E2E	Post Checkout code	2026-07-20T23:04:33.2215597Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Product wizards publish E2E	Post Checkout code	2026-07-20T23:04:33.2485421Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Product wizards publish E2E	Post Checkout code	2026-07-20T23:04:33.2517482Z http.https://github.com/.extraheader
+Product wizards publish E2E	Post Checkout code	2026-07-20T23:04:33.2548673Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+Product wizards publish E2E	Post Checkout code	2026-07-20T23:04:33.2581163Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Product wizards publish E2E	Post Checkout code	2026-07-20T23:04:33.2875178Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Product wizards publish E2E	Post Checkout code	2026-07-20T23:04:33.2915229Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Product wizards publish E2E	Complete job	´╗┐2026-07-20T23:04:33.3335939Z Cleaning up orphan processes
+Product wizards publish E2E	Complete job	2026-07-20T23:04:33.3575722Z Terminate orphan process: pid (3683) (npm run test:e2e:product-wizards)
+Product wizards publish E2E	Complete job	2026-07-20T23:04:33.3605877Z Terminate orphan process: pid (3694) (sh)
+Product wizards publish E2E	Complete job	2026-07-20T23:04:33.3633635Z Terminate orphan process: pid (3695) (node)
+Product wizards publish E2E	Complete job	2026-07-20T23:04:33.3681454Z Terminate orphan process: pid (3710) (sh)
+Product wizards publish E2E	Complete job	2026-07-20T23:04:33.3708716Z Terminate orphan process: pid (3711) (node)
+Product wizards publish E2E	Complete job	2026-07-20T23:04:33.3737510Z Terminate orphan process: pid (3722) (npm run dev)
+Product wizards publish E2E	Complete job	2026-07-20T23:04:33.3767238Z Terminate orphan process: pid (3733) (sh)
+Product wizards publish E2E	Complete job	2026-07-20T23:04:33.3810363Z Terminate orphan process: pid (3734) (node)
+Product wizards publish E2E	Complete job	2026-07-20T23:04:33.3857346Z Terminate orphan process: pid (3745) (esbuild)
+Product wizards publish E2E	Complete job	2026-07-20T23:04:33.4009923Z Terminate orphan process: pid (5657) (node)
+Product wizards publish E2E	Complete job	2026-07-20T23:04:33.4054440Z Terminate orphan process: pid (5669) (chrome-headless-shell)
+Product wizards publish E2E	Complete job	2026-07-20T23:04:33.4153087Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-node@v4, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

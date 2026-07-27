@@ -1,0 +1,179 @@
+import { addHandler, maybeInstrument, timestampInSeconds, isString, triggerHandlers } from "/node_modules/@sentry/core/build/esm/index.js?v=d758aa40";
+import { WINDOW } from "/node_modules/@sentry-internal/browser-utils/build/esm/types.js?v=d758aa40";
+
+const SENTRY_XHR_DATA_KEY = '__sentry_xhr_v3__';
+
+/**
+ * Add an instrumentation handler for when an XHR request happens.
+ * The handler function is called once when the request starts and once when it ends,
+ * which can be identified by checking if it has an `endTimestamp`.
+ *
+ * Use at your own risk, this might break without changelog notice, only used internally.
+ * @hidden
+ */
+function addXhrInstrumentationHandler(handler) {
+  const type = 'xhr';
+  addHandler(type, handler);
+  maybeInstrument(type, instrumentXHR);
+}
+
+/** Exported only for tests. */
+function instrumentXHR() {
+  if (!(WINDOW ).XMLHttpRequest) {
+    return;
+  }
+
+  const xhrproto = XMLHttpRequest.prototype;
+
+  // eslint-disable-next-line @typescript-eslint/unbound-method
+  xhrproto.open = new Proxy(xhrproto.open, {
+    apply(
+      originalOpen,
+      xhrOpenThisArg,
+      xhrOpenArgArray
+
+,
+    ) {
+      // NOTE: If you are a Sentry user, and you are seeing this stack frame,
+      //       it means the error, that was caused by your XHR call did not
+      //       have a stack trace. If you are using HttpClient integration,
+      //       this is the expected behavior, as we are using this virtual error to capture
+      //       the location of your XHR call, and group your HttpClient events accordingly.
+      const virtualError = new Error();
+
+      const startTimestamp = timestampInSeconds() * 1000;
+
+      // open() should always be called with two or more arguments
+      // But to be on the safe side, we actually validate this and bail out if we don't have a method & url
+      const method = isString(xhrOpenArgArray[0]) ? xhrOpenArgArray[0].toUpperCase() : undefined;
+      const url = parseXhrUrlArg(xhrOpenArgArray[1]);
+
+      if (!method || !url) {
+        return originalOpen.apply(xhrOpenThisArg, xhrOpenArgArray);
+      }
+
+      xhrOpenThisArg[SENTRY_XHR_DATA_KEY] = {
+        method,
+        url,
+        request_headers: {},
+      };
+
+      // if Sentry key appears in URL, don't capture it as a request
+      if (method === 'POST' && url.match(/sentry_key/)) {
+        xhrOpenThisArg.__sentry_own_request__ = true;
+      }
+
+      const onreadystatechangeHandler = () => {
+        // For whatever reason, this is not the same instance here as from the outer method
+        const xhrInfo = xhrOpenThisArg[SENTRY_XHR_DATA_KEY];
+
+        if (!xhrInfo) {
+          return;
+        }
+
+        if (xhrOpenThisArg.readyState === 4) {
+          try {
+            // touching statusCode in some platforms throws
+            // an exception
+            xhrInfo.status_code = xhrOpenThisArg.status;
+          } catch {
+            /* do nothing */
+          }
+
+          const handlerData = {
+            endTimestamp: timestampInSeconds() * 1000,
+            startTimestamp,
+            xhr: xhrOpenThisArg,
+            virtualError,
+          };
+          triggerHandlers('xhr', handlerData);
+        }
+      };
+
+      if ('onreadystatechange' in xhrOpenThisArg && typeof xhrOpenThisArg.onreadystatechange === 'function') {
+        xhrOpenThisArg.onreadystatechange = new Proxy(xhrOpenThisArg.onreadystatechange, {
+          apply(originalOnreadystatechange, onreadystatechangeThisArg, onreadystatechangeArgArray) {
+            onreadystatechangeHandler();
+            return originalOnreadystatechange.apply(onreadystatechangeThisArg, onreadystatechangeArgArray);
+          },
+        });
+      } else {
+        xhrOpenThisArg.addEventListener('readystatechange', onreadystatechangeHandler);
+      }
+
+      // Intercepting `setRequestHeader` to access the request headers of XHR instance.
+      // This will only work for user/library defined headers, not for the default/browser-assigned headers.
+      // Request cookies are also unavailable for XHR, as `Cookie` header can't be defined by `setRequestHeader`.
+      xhrOpenThisArg.setRequestHeader = new Proxy(xhrOpenThisArg.setRequestHeader, {
+        apply(
+          originalSetRequestHeader,
+          setRequestHeaderThisArg,
+          setRequestHeaderArgArray,
+        ) {
+          const [header, value] = setRequestHeaderArgArray;
+
+          const xhrInfo = setRequestHeaderThisArg[SENTRY_XHR_DATA_KEY];
+
+          if (xhrInfo && isString(header) && isString(value)) {
+            xhrInfo.request_headers[header.toLowerCase()] = value;
+          }
+
+          return originalSetRequestHeader.apply(setRequestHeaderThisArg, setRequestHeaderArgArray);
+        },
+      });
+
+      return originalOpen.apply(xhrOpenThisArg, xhrOpenArgArray);
+    },
+  });
+
+  // eslint-disable-next-line @typescript-eslint/unbound-method
+  xhrproto.send = new Proxy(xhrproto.send, {
+    apply(originalSend, sendThisArg, sendArgArray) {
+      const sentryXhrData = sendThisArg[SENTRY_XHR_DATA_KEY];
+
+      if (!sentryXhrData) {
+        return originalSend.apply(sendThisArg, sendArgArray);
+      }
+
+      if (sendArgArray[0] !== undefined) {
+        sentryXhrData.body = sendArgArray[0];
+      }
+
+      const handlerData = {
+        startTimestamp: timestampInSeconds() * 1000,
+        xhr: sendThisArg,
+      };
+      triggerHandlers('xhr', handlerData);
+
+      return originalSend.apply(sendThisArg, sendArgArray);
+    },
+  });
+}
+
+/**
+ * Parses the URL argument of a XHR method to a string.
+ *
+ * See: https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/open#url
+ * url: A string or any other object with a stringifier — including a URL object — that provides the URL of the resource to send the request to.
+ *
+ * @param url - The URL argument of an XHR method
+ * @returns The parsed URL string or undefined if the URL is invalid
+ */
+function parseXhrUrlArg(url) {
+  if (isString(url)) {
+    return url;
+  }
+
+  try {
+    // If the passed in argument is not a string, it should have a `toString` method as a stringifier.
+    // If that fails, we just return undefined (like in IE11 where URL is not available)
+    return (url ).toString();
+  } catch {} // eslint-disable-line no-empty
+
+  return undefined;
+}
+
+export { SENTRY_XHR_DATA_KEY, addXhrInstrumentationHandler, instrumentXHR };
+                               
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoieGhyLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi9zcmMvaW5zdHJ1bWVudC94aHIudHMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHR5cGUgeyBIYW5kbGVyRGF0YVhociwgU2VudHJ5V3JhcHBlZFhNTEh0dHBSZXF1ZXN0IH0gZnJvbSAnQHNlbnRyeS9jb3JlJztcbmltcG9ydCB7IGFkZEhhbmRsZXIsIGlzU3RyaW5nLCBtYXliZUluc3RydW1lbnQsIHRpbWVzdGFtcEluU2Vjb25kcywgdHJpZ2dlckhhbmRsZXJzIH0gZnJvbSAnQHNlbnRyeS9jb3JlJztcbmltcG9ydCB7IFdJTkRPVyB9IGZyb20gJy4uL3R5cGVzJztcblxuZXhwb3J0IGNvbnN0IFNFTlRSWV9YSFJfREFUQV9LRVkgPSAnX19zZW50cnlfeGhyX3YzX18nO1xuXG50eXBlIFdpbmRvd1dpdGhYaHIgPSBXaW5kb3cgJiB7IFhNTEh0dHBSZXF1ZXN0PzogdHlwZW9mIFhNTEh0dHBSZXF1ZXN0IH07XG5cbi8qKlxuICogQWRkIGFuIGluc3RydW1lbnRhdGlvbiBoYW5kbGVyIGZvciB3aGVuIGFuIFhIUiByZXF1ZXN0IGhhcHBlbnMuXG4gKiBUaGUgaGFuZGxlciBmdW5jdGlvbiBpcyBjYWxsZWQgb25jZSB3aGVuIHRoZSByZXF1ZXN0IHN0YXJ0cyBhbmQgb25jZSB3aGVuIGl0IGVuZHMsXG4gKiB3aGljaCBjYW4gYmUgaWRlbnRpZmllZCBieSBjaGVja2luZyBpZiBpdCBoYXMgYW4gYGVuZFRpbWVzdGFtcGAuXG4gKlxuICogVXNlIGF0IHlvdXIgb3duIHJpc2ssIHRoaXMgbWlnaHQgYnJlYWsgd2l0aG91dCBjaGFuZ2Vsb2cgbm90aWNlLCBvbmx5IHVzZWQgaW50ZXJuYWxseS5cbiAqIEBoaWRkZW5cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIGFkZFhockluc3RydW1lbnRhdGlvbkhhbmRsZXIoaGFuZGxlcjogKGRhdGE6IEhhbmRsZXJEYXRhWGhyKSA9PiB2b2lkKTogdm9pZCB7XG4gIGNvbnN0IHR5cGUgPSAneGhyJztcbiAgYWRkSGFuZGxlcih0eXBlLCBoYW5kbGVyKTtcbiAgbWF5YmVJbnN0cnVtZW50KHR5cGUsIGluc3RydW1lbnRYSFIpO1xufVxuXG4vKiogRXhwb3J0ZWQgb25seSBmb3IgdGVzdHMuICovXG5leHBvcnQgZnVuY3Rpb24gaW5zdHJ1bWVudFhIUigpOiB2b2lkIHtcbiAgaWYgKCEoV0lORE9XIGFzIFdpbmRvd1dpdGhYaHIpLlhNTEh0dHBSZXF1ZXN0KSB7XG4gICAgcmV0dXJuO1xuICB9XG5cbiAgY29uc3QgeGhycHJvdG8gPSBYTUxIdHRwUmVxdWVzdC5wcm90b3R5cGU7XG5cbiAgLy8gZXNsaW50LWRpc2FibGUtbmV4dC1saW5lIEB0eXBlc2NyaXB0LWVzbGludC91bmJvdW5kLW1ldGhvZFxuICB4aHJwcm90by5vcGVuID0gbmV3IFByb3h5KHhocnByb3RvLm9wZW4sIHtcbiAgICBhcHBseShcbiAgICAgIG9yaWdpbmFsT3BlbixcbiAgICAgIHhock9wZW5UaGlzQXJnOiBYTUxIdHRwUmVxdWVzdCAmIFNlbnRyeVdyYXBwZWRYTUxIdHRwUmVxdWVzdCxcbiAgICAgIHhock9wZW5BcmdBcnJheTpcbiAgICAgICAgfCBbbWV0aG9kOiBzdHJpbmcsIHVybDogc3RyaW5nIHwgVVJMXVxuICAgICAgICB8IFttZXRob2Q6IHN0cmluZywgdXJsOiBzdHJpbmcgfCBVUkwsIGFzeW5jOiBib29sZWFuLCB1c2VybmFtZT86IHN0cmluZyB8IG51bGwsIHBhc3N3b3JkPzogc3RyaW5nIHwgbnVsbF0sXG4gICAgKSB7XG4gICAgICAvLyBOT1RFOiBJZiB5b3UgYXJlIGEgU2VudHJ5IHVzZXIsIGFuZCB5b3UgYXJlIHNlZWluZyB0aGlzIHN0YWNrIGZyYW1lLFxuICAgICAgLy8gICAgICAgaXQgbWVhbnMgdGhlIGVycm9yLCB0aGF0IHdhcyBjYXVzZWQgYnkgeW91ciBYSFIgY2FsbCBkaWQgbm90XG4gICAgICAvLyAgICAgICBoYXZlIGEgc3RhY2sgdHJhY2UuIElmIHlvdSBhcmUgdXNpbmcgSHR0cENsaWVudCBpbnRlZ3JhdGlvbixcbiAgICAgIC8vICAgICAgIHRoaXMgaXMgdGhlIGV4cGVjdGVkIGJlaGF2aW9yLCBhcyB3ZSBhcmUgdXNpbmcgdGhpcyB2aXJ0dWFsIGVycm9yIHRvIGNhcHR1cmVcbiAgICAgIC8vICAgICAgIHRoZSBsb2NhdGlvbiBvZiB5b3VyIFhIUiBjYWxsLCBhbmQgZ3JvdXAgeW91ciBIdHRwQ2xpZW50IGV2ZW50cyBhY2NvcmRpbmdseS5cbiAgICAgIGNvbnN0IHZpcnR1YWxFcnJvciA9IG5ldyBFcnJvcigpO1xuXG4gICAgICBjb25zdCBzdGFydFRpbWVzdGFtcCA9IHRpbWVzdGFtcEluU2Vjb25kcygpICogMTAwMDtcblxuICAgICAgLy8gb3BlbigpIHNob3VsZCBhbHdheXMgYmUgY2FsbGVkIHdpdGggdHdvIG9yIG1vcmUgYXJndW1lbnRzXG4gICAgICAvLyBCdXQgdG8gYmUgb24gdGhlIHNhZmUgc2lkZSwgd2UgYWN0dWFsbHkgdmFsaWRhdGUgdGhpcyBhbmQgYmFpbCBvdXQgaWYgd2UgZG9uJ3QgaGF2ZSBhIG1ldGhvZCAmIHVybFxuICAgICAgY29uc3QgbWV0aG9kID0gaXNTdHJpbmcoeGhyT3BlbkFyZ0FycmF5WzBdKSA/IHhock9wZW5BcmdBcnJheVswXS50b1VwcGVyQ2FzZSgpIDogdW5kZWZpbmVkO1xuICAgICAgY29uc3QgdXJsID0gcGFyc2VYaHJVcmxBcmcoeGhyT3BlbkFyZ0FycmF5WzFdKTtcblxuICAgICAgaWYgKCFtZXRob2QgfHwgIXVybCkge1xuICAgICAgICByZXR1cm4gb3JpZ2luYWxPcGVuLmFwcGx5KHhock9wZW5UaGlzQXJnLCB4aHJPcGVuQXJnQXJyYXkpO1xuICAgICAgfVxuXG4gICAgICB4aHJPcGVuVGhpc0FyZ1tTRU5UUllfWEhSX0RBVEFfS0VZXSA9IHtcbiAgICAgICAgbWV0aG9kLFxuICAgICAgICB1cmwsXG4gICAgICAgIHJlcXVlc3RfaGVhZGVyczoge30sXG4gICAgICB9O1xuXG4gICAgICAvLyBpZiBTZW50cnkga2V5IGFwcGVhcnMgaW4gVVJMLCBkb24ndCBjYXB0dXJlIGl0IGFzIGEgcmVxdWVzdFxuICAgICAgaWYgKG1ldGhvZCA9PT0gJ1BPU1QnICYmIHVybC5tYXRjaCgvc2VudHJ5X2tleS8pKSB7XG4gICAgICAgIHhock9wZW5UaGlzQXJnLl9fc2VudHJ5X293bl9yZXF1ZXN0X18gPSB0cnVlO1xuICAgICAgfVxuXG4gICAgICBjb25zdCBvbnJlYWR5c3RhdGVjaGFuZ2VIYW5kbGVyOiAoKSA9PiB2b2lkID0gKCkgPT4ge1xuICAgICAgICAvLyBGb3Igd2hhdGV2ZXIgcmVhc29uLCB0aGlzIGlzIG5vdCB0aGUgc2FtZSBpbnN0YW5jZSBoZXJlIGFzIGZyb20gdGhlIG91dGVyIG1ldGhvZFxuICAgICAgICBjb25zdCB4aHJJbmZvID0geGhyT3BlblRoaXNBcmdbU0VOVFJZX1hIUl9EQVRBX0tFWV07XG5cbiAgICAgICAgaWYgKCF4aHJJbmZvKSB7XG4gICAgICAgICAgcmV0dXJuO1xuICAgICAgICB9XG5cbiAgICAgICAgaWYgKHhock9wZW5UaGlzQXJnLnJlYWR5U3RhdGUgPT09IDQpIHtcbiAgICAgICAgICB0cnkge1xuICAgICAgICAgICAgLy8gdG91Y2hpbmcgc3RhdHVzQ29kZSBpbiBzb21lIHBsYXRmb3JtcyB0aHJvd3NcbiAgICAgICAgICAgIC8vIGFuIGV4Y2VwdGlvblxuICAgICAgICAgICAgeGhySW5mby5zdGF0dXNfY29kZSA9IHhock9wZW5UaGlzQXJnLnN0YXR1cztcbiAgICAgICAgICB9IGNhdGNoIHtcbiAgICAgICAgICAgIC8qIGRvIG5vdGhpbmcgKi9cbiAgICAgICAgICB9XG5cbiAgICAgICAgICBjb25zdCBoYW5kbGVyRGF0YTogSGFuZGxlckRhdGFYaHIgPSB7XG4gICAgICAgICAgICBlbmRUaW1lc3RhbXA6IHRpbWVzdGFtcEluU2Vjb25kcygpICogMTAwMCxcbiAgICAgICAgICAgIHN0YXJ0VGltZXN0YW1wLFxuICAgICAgICAgICAgeGhyOiB4aHJPcGVuVGhpc0FyZyxcbiAgICAgICAgICAgIHZpcnR1YWxFcnJvcixcbiAgICAgICAgICB9O1xuICAgICAgICAgIHRyaWdnZXJIYW5kbGVycygneGhyJywgaGFuZGxlckRhdGEpO1xuICAgICAgICB9XG4gICAgICB9O1xuXG4gICAgICBpZiAoJ29ucmVhZHlzdGF0ZWNoYW5nZScgaW4geGhyT3BlblRoaXNBcmcgJiYgdHlwZW9mIHhock9wZW5UaGlzQXJnLm9ucmVhZHlzdGF0ZWNoYW5nZSA9PT0gJ2Z1bmN0aW9uJykge1xuICAgICAgICB4aHJPcGVuVGhpc0FyZy5vbnJlYWR5c3RhdGVjaGFuZ2UgPSBuZXcgUHJveHkoeGhyT3BlblRoaXNBcmcub25yZWFkeXN0YXRlY2hhbmdlLCB7XG4gICAgICAgICAgYXBwbHkob3JpZ2luYWxPbnJlYWR5c3RhdGVjaGFuZ2UsIG9ucmVhZHlzdGF0ZWNoYW5nZVRoaXNBcmcsIG9ucmVhZHlzdGF0ZWNoYW5nZUFyZ0FycmF5OiB1bmtub3duW10pIHtcbiAgICAgICAgICAgIG9ucmVhZHlzdGF0ZWNoYW5nZUhhbmRsZXIoKTtcbiAgICAgICAgICAgIHJldHVybiBvcmlnaW5hbE9ucmVhZHlzdGF0ZWNoYW5nZS5hcHBseShvbnJlYWR5c3RhdGVjaGFuZ2VUaGlzQXJnLCBvbnJlYWR5c3RhdGVjaGFuZ2VBcmdBcnJheSk7XG4gICAgICAgICAgfSxcbiAgICAgICAgfSk7XG4gICAgICB9IGVsc2Uge1xuICAgICAgICB4aHJPcGVuVGhpc0FyZy5hZGRFdmVudExpc3RlbmVyKCdyZWFkeXN0YXRlY2hhbmdlJywgb25yZWFkeXN0YXRlY2hhbmdlSGFuZGxlcik7XG4gICAgICB9XG5cbiAgICAgIC8vIEludGVyY2VwdGluZyBgc2V0UmVxdWVzdEhlYWRlcmAgdG8gYWNjZXNzIHRoZSByZXF1ZXN0IGhlYWRlcnMgb2YgWEhSIGluc3RhbmNlLlxuICAgICAgLy8gVGhpcyB3aWxsIG9ubHkgd29yayBmb3IgdXNlci9saWJyYXJ5IGRlZmluZWQgaGVhZGVycywgbm90IGZvciB0aGUgZGVmYXVsdC9icm93c2VyLWFzc2lnbmVkIGhlYWRlcnMuXG4gICAgICAvLyBSZXF1ZXN0IGNvb2tpZXMgYXJlIGFsc28gdW5hdmFpbGFibGUgZm9yIFhIUiwgYXMgYENvb2tpZWAgaGVhZGVyIGNhbid0IGJlIGRlZmluZWQgYnkgYHNldFJlcXVlc3RIZWFkZXJgLlxuICAgICAgeGhyT3BlblRoaXNBcmcuc2V0UmVxdWVzdEhlYWRlciA9IG5ldyBQcm94eSh4aHJPcGVuVGhpc0FyZy5zZXRSZXF1ZXN0SGVhZGVyLCB7XG4gICAgICAgIGFwcGx5KFxuICAgICAgICAgIG9yaWdpbmFsU2V0UmVxdWVzdEhlYWRlcixcbiAgICAgICAgICBzZXRSZXF1ZXN0SGVhZGVyVGhpc0FyZzogU2VudHJ5V3JhcHBlZFhNTEh0dHBSZXF1ZXN0LFxuICAgICAgICAgIHNldFJlcXVlc3RIZWFkZXJBcmdBcnJheTogdW5rbm93bltdLFxuICAgICAgICApIHtcbiAgICAgICAgICBjb25zdCBbaGVhZGVyLCB2YWx1ZV0gPSBzZXRSZXF1ZXN0SGVhZGVyQXJnQXJyYXk7XG5cbiAgICAgICAgICBjb25zdCB4aHJJbmZvID0gc2V0UmVxdWVzdEhlYWRlclRoaXNBcmdbU0VOVFJZX1hIUl9EQVRBX0tFWV07XG5cbiAgICAgICAgICBpZiAoeGhySW5mbyAmJiBpc1N0cmluZyhoZWFkZXIpICYmIGlzU3RyaW5nKHZhbHVlKSkge1xuICAgICAgICAgICAgeGhySW5mby5yZXF1ZXN0X2hlYWRlcnNbaGVhZGVyLnRvTG93ZXJDYXNlKCldID0gdmFsdWU7XG4gICAgICAgICAgfVxuXG4gICAgICAgICAgcmV0dXJuIG9yaWdpbmFsU2V0UmVxdWVzdEhlYWRlci5hcHBseShzZXRSZXF1ZXN0SGVhZGVyVGhpc0FyZywgc2V0UmVxdWVzdEhlYWRlckFyZ0FycmF5KTtcbiAgICAgICAgfSxcbiAgICAgIH0pO1xuXG4gICAgICByZXR1cm4gb3JpZ2luYWxPcGVuLmFwcGx5KHhock9wZW5UaGlzQXJnLCB4aHJPcGVuQXJnQXJyYXkpO1xuICAgIH0sXG4gIH0pO1xuXG4gIC8vIGVzbGludC1kaXNhYmxlLW5leHQtbGluZSBAdHlwZXNjcmlwdC1lc2xpbnQvdW5ib3VuZC1tZXRob2RcbiAgeGhycHJvdG8uc2VuZCA9IG5ldyBQcm94eSh4aHJwcm90by5zZW5kLCB7XG4gICAgYXBwbHkob3JpZ2luYWxTZW5kLCBzZW5kVGhpc0FyZzogWE1MSHR0cFJlcXVlc3QgJiBTZW50cnlXcmFwcGVkWE1MSHR0cFJlcXVlc3QsIHNlbmRBcmdBcnJheTogdW5rbm93bltdKSB7XG4gICAgICBjb25zdCBzZW50cnlYaHJEYXRhID0gc2VuZFRoaXNBcmdbU0VOVFJZX1hIUl9EQVRBX0tFWV07XG5cbiAgICAgIGlmICghc2VudHJ5WGhyRGF0YSkge1xuICAgICAgICByZXR1cm4gb3JpZ2luYWxTZW5kLmFwcGx5KHNlbmRUaGlzQXJnLCBzZW5kQXJnQXJyYXkpO1xuICAgICAgfVxuXG4gICAgICBpZiAoc2VuZEFyZ0FycmF5WzBdICE9PSB1bmRlZmluZWQpIHtcbiAgICAgICAgc2VudHJ5WGhyRGF0YS5ib2R5ID0gc2VuZEFyZ0FycmF5WzBdO1xuICAgICAgfVxuXG4gICAgICBjb25zdCBoYW5kbGVyRGF0YTogSGFuZGxlckRhdGFYaHIgPSB7XG4gICAgICAgIHN0YXJ0VGltZXN0YW1wOiB0aW1lc3RhbXBJblNlY29uZHMoKSAqIDEwMDAsXG4gICAgICAgIHhocjogc2VuZFRoaXNBcmcsXG4gICAgICB9O1xuICAgICAgdHJpZ2dlckhhbmRsZXJzKCd4aHInLCBoYW5kbGVyRGF0YSk7XG5cbiAgICAgIHJldHVybiBvcmlnaW5hbFNlbmQuYXBwbHkoc2VuZFRoaXNBcmcsIHNlbmRBcmdBcnJheSk7XG4gICAgfSxcbiAgfSk7XG59XG5cbi8qKlxuICogUGFyc2VzIHRoZSBVUkwgYXJndW1lbnQgb2YgYSBYSFIgbWV0aG9kIHRvIGEgc3RyaW5nLlxuICpcbiAqIFNlZTogaHR0cHM6Ly9kZXZlbG9wZXIubW96aWxsYS5vcmcvZW4tVVMvZG9jcy9XZWIvQVBJL1hNTEh0dHBSZXF1ZXN0L29wZW4jdXJsXG4gKiB1cmw6IEEgc3RyaW5nIG9yIGFueSBvdGhlciBvYmplY3Qgd2l0aCBhIHN0cmluZ2lmaWVyIOKAlCBpbmNsdWRpbmcgYSBVUkwgb2JqZWN0IOKAlCB0aGF0IHByb3ZpZGVzIHRoZSBVUkwgb2YgdGhlIHJlc291cmNlIHRvIHNlbmQgdGhlIHJlcXVlc3QgdG8uXG4gKlxuICogQHBhcmFtIHVybCAtIFRoZSBVUkwgYXJndW1lbnQgb2YgYW4gWEhSIG1ldGhvZFxuICogQHJldHVybnMgVGhlIHBhcnNlZCBVUkwgc3RyaW5nIG9yIHVuZGVmaW5lZCBpZiB0aGUgVVJMIGlzIGludmFsaWRcbiAqL1xuZnVuY3Rpb24gcGFyc2VYaHJVcmxBcmcodXJsOiB1bmtub3duKTogc3RyaW5nIHwgdW5kZWZpbmVkIHtcbiAgaWYgKGlzU3RyaW5nKHVybCkpIHtcbiAgICByZXR1cm4gdXJsO1xuICB9XG5cbiAgdHJ5IHtcbiAgICAvLyBJZiB0aGUgcGFzc2VkIGluIGFyZ3VtZW50IGlzIG5vdCBhIHN0cmluZywgaXQgc2hvdWxkIGhhdmUgYSBgdG9TdHJpbmdgIG1ldGhvZCBhcyBhIHN0cmluZ2lmaWVyLlxuICAgIC8vIElmIHRoYXQgZmFpbHMsIHdlIGp1c3QgcmV0dXJuIHVuZGVmaW5lZCAobGlrZSBpbiBJRTExIHdoZXJlIFVSTCBpcyBub3QgYXZhaWxhYmxlKVxuICAgIHJldHVybiAodXJsIGFzIFVSTCkudG9TdHJpbmcoKTtcbiAgfSBjYXRjaCB7fSAvLyBlc2xpbnQtZGlzYWJsZS1saW5lIG5vLWVtcHR5XG5cbiAgcmV0dXJuIHVuZGVmaW5lZDtcbn1cbiJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7QUFJTyxNQUFNLG1CQUFBLEdBQXNCOztBQUluQztBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ08sU0FBUyw0QkFBNEIsQ0FBQyxPQUFPLEVBQXdDO0FBQzVGLEVBQUUsTUFBTSxJQUFBLEdBQU8sS0FBSztBQUNwQixFQUFFLFVBQVUsQ0FBQyxJQUFJLEVBQUUsT0FBTyxDQUFDO0FB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

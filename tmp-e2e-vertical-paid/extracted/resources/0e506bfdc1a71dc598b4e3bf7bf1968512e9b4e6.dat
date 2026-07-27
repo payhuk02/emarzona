@@ -1,0 +1,27 @@
+const PROVIDER_LABELS = {
+    stripe_connect: 'Stripe',
+    paypal_commerce: 'PayPal',
+    flutterwave_connect: 'Flutterwave',
+    geniuspay_platform: 'GeniusPay'
+};
+export function buildPspFallbackUserMessage(fromProvider, reason) {
+    const fromLabel = PROVIDER_LABELS[fromProvider] ?? fromProvider;
+    if (reason === 'provider_not_ready') {
+        return {
+            title: 'Changement de moyen de paiement',
+            description: `${fromLabel} n'est pas disponible pour le moment. Votre paiement sera traité via GeniusPay (mobile money).`
+        };
+    }
+    if (reason === 'provider_error') {
+        return {
+            title: 'Changement de moyen de paiement',
+            description: `Le paiement via ${fromLabel} a échoué. Nous vous redirigeons vers GeniusPay pour finaliser votre achat.`
+        };
+    }
+    return {
+        title: 'Changement de moyen de paiement',
+        description: `Votre paiement sera traité via GeniusPay au lieu de ${fromLabel}.`
+    };
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInBzcC1mYWxsYmFjay1tZXNzYWdlcy50cyJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgdHlwZSB7IFBheW1lbnRQcm92aWRlckNvZGUgfSBmcm9tICdAL3R5cGVzL3N0b3JlLXBheW1lbnQtY29ubmVjdGlvbic7XG5cbmNvbnN0IFBST1ZJREVSX0xBQkVMUzogUGFydGlhbDxSZWNvcmQ8UGF5bWVudFByb3ZpZGVyQ29kZSwgc3RyaW5nPj4gPSB7XG4gIHN0cmlwZV9jb25uZWN0OiAnU3RyaXBlJyxcbiAgcGF5cGFsX2NvbW1lcmNlOiAnUGF5UGFsJyxcbiAgZmx1dHRlcndhdmVfY29ubmVjdDogJ0ZsdXR0ZXJ3YXZlJyxcbiAgZ2VuaXVzcGF5X3BsYXRmb3JtOiAnR2VuaXVzUGF5Jyxcbn07XG5cbmV4cG9ydCBmdW5jdGlvbiBidWlsZFBzcEZhbGxiYWNrVXNlck1lc3NhZ2UoXG4gIGZyb21Qcm92aWRlcjogUGF5bWVudFByb3ZpZGVyQ29kZSxcbiAgcmVhc29uPzogc3RyaW5nXG4pOiB7IHRpdGxlOiBzdHJpbmc7IGRlc2NyaXB0aW9uOiBzdHJpbmcgfSB7XG4gIGNvbnN0IGZyb21MYWJlbCA9IFBST1ZJREVSX0xBQkVMU1tmcm9tUHJvdmlkZXJdID8/IGZyb21Qcm92aWRlcjtcblxuICBpZiAocmVhc29uID09PSAncHJvdmlkZXJfbm90X3JlYWR5Jykge1xuICAgIHJldHVybiB7XG4gICAgICB0aXRsZTogJ0NoYW5nZW1lbnQgZGUgbW95ZW4gZGUgcGFpZW1lbnQnLFxuICAgICAgZGVzY3JpcHRpb246IGAke2Zyb21MYWJlbH0gbidlc3QgcGFzIGRpc3BvbmlibGUgcG91ciBsZSBtb21lbnQuIFZvdHJlIHBhaWVtZW50IHNlcmEgdHJhaXTDqSB2aWEgR2VuaXVzUGF5IChtb2JpbGUgbW9uZXkpLmAsXG4gICAgfTtcbiAgfVxuXG4gIGlmIChyZWFzb24gPT09ICdwcm92aWRlcl9lcnJvcicpIHtcbiAgICByZXR1cm4ge1xuICAgICAgdGl0bGU6ICdDaGFuZ2VtZW50IGRlIG1veWVuIGRlIHBhaWVtZW50JyxcbiAgICAgIGRlc2NyaXB0aW9uOiBgTGUgcGFpZW1lbnQgdmlhICR7ZnJvbUxhYmVsfSBhIMOpY2hvdcOpLiBOb3VzIHZvdXMgcmVkaXJpZ2VvbnMgdmVycyBHZW5pdXNQYXkgcG91ciBmaW5hbGlzZXIgdm90cmUgYWNoYXQuYCxcbiAgICB9O1xuICB9XG5cbiAgcmV0dXJuIHtcbiAgICB0aXRsZTogJ0NoYW5nZW1lbnQgZGUgbW95ZW4gZGUgcGFpZW1lbnQnLFxuICAgIGRlc2NyaXB0aW9uOiBgVm90cmUgcGFpZW1lbnQgc2VyYSB0cmFpdMOpIHZpYSBHZW5pdXNQYXkgYXUgbGlldSBkZSAke2Zyb21MYWJlbH0uYCxcbiAgfTtcbn1cbiJdLCJuYW1lcyI6WyJQUk9WSURFUl9MQUJFTFMiLCJzdHJpcGVfY29ubmVjdCIsInBheXBhbF9jb21tZXJjZSIsImZsdXR0ZXJ3YXZlX2Nvbm5lY3QiLCJnZW5pdXNwYXlfcGxhdGZvcm0iLCJidWlsZFBzcEZhbGxiYWNrVXNlck1lc3NhZ2UiLCJmcm9tUHJvdmlkZXIiLCJyZWFzb24iLCJmcm9tTGFiZWwiLCJ0aXRsZSIsImRlc2NyaXB0aW9uIl0sIm1hcHBpbmdzIjoiQUFFQSxNQUFNQSxrQkFBZ0U7SUFDcEVDLGdCQUFnQjtJQUNoQkMsaUJBQWlCO0lBQ2pCQyxxQkFBcUI7SUFDckJDLG9CQUFvQjtBQUN0QjtBQUVBLE9BQU8sU0FBU0MsNEJBQ2RDLFlBQWlDLEVBQ2pDQyxNQUFlO0lBRWYsTUFBTUMsWUFBWVIsZUFBZSxDQUFDTSxhQUFhLElBQUlBO0lBRW5ELElBQUlDLFdBQVcsc0JBQXNCO1FBQ25DLE9BQU87WUFDTEUsT0FBTztZQUNQQyxhQUFhLEdBQUdGLFVBQVUsOEZBQThGLENBQUM7UUFDM0g7SUFDRjtJQUVBLElBQUlELFdBQVcsa0JBQWtCO1FBQy9CLE9BQU87WUFDTEUsT0FBTztZQUNQQyxhQUFhLENBQUMsZ0JBQWdCLEVBQUVGLFVBQVUsMkVBQTJFLENBQUM7UUFDeEg7SUFDRjtJQUVBLE9BQU87UUFDTEMsT0FBTztRQUNQQyxhQUFhLENBQUMsb0RBQW9ELEVBQUVGLFVBQVUsQ0FBQyxDQUFDO0lBQ2xGO0FBQ0YifQ==

@@ -1,0 +1,84 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/ui/avatar.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/ui/avatar.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=6014a254"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=6014a254"; const React = ((m) => m?.__esModule ? m : {	...typeof m === "object" && !Array.isArray(m) || typeof m === "function" ? m : {},	default: m})(__vite__cjsImport3_react);
+import * as AvatarPrimitive from "/node_modules/.vite/deps/@radix-ui_react-avatar.js?v=6014a254";
+import { cn } from "/src/lib/utils.ts";
+const Avatar = /*#__PURE__*/ React.forwardRef(_c = ({ className, ...props }, ref)=>/*#__PURE__*/ _jsxDEV(AvatarPrimitive.Root, {
+        ref: ref,
+        className: cn("relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full", className),
+        ...props
+    }, void 0, false, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/avatar.tsx",
+        lineNumber: 10,
+        columnNumber: 3
+    }, this));
+_c1 = Avatar;
+Avatar.displayName = AvatarPrimitive.Root.displayName;
+const AvatarImage = /*#__PURE__*/ React.forwardRef(_c2 = ({ className, ...props }, ref)=>/*#__PURE__*/ _jsxDEV(AvatarPrimitive.Image, {
+        ref: ref,
+        className: cn("aspect-square h-full w-full", className),
+        ...props
+    }, void 0, false, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/avatar.tsx",
+        lineNumber: 22,
+        columnNumber: 3
+    }, this));
+_c3 = AvatarImage;
+AvatarImage.displayName = AvatarPrimitive.Image.displayName;
+const AvatarFallback = /*#__PURE__*/ React.forwardRef(_c4 = ({ className, ...props }, ref)=>/*#__PURE__*/ _jsxDEV(AvatarPrimitive.Fallback, {
+        ref: ref,
+        className: cn("flex h-full w-full items-center justify-center rounded-full bg-muted", className),
+        ...props
+    }, void 0, false, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/avatar.tsx",
+        lineNumber: 30,
+        columnNumber: 3
+    }, this));
+_c5 = AvatarFallback;
+AvatarFallback.displayName = AvatarPrimitive.Fallback.displayName;
+export { Avatar, AvatarImage, AvatarFallback };
+var _c, _c1, _c2, _c3, _c4, _c5;
+$RefreshReg$(_c, "Avatar$React.forwardRef");
+$RefreshReg$(_c1, "Avatar");
+$RefreshReg$(_c2, "AvatarImage$React.forwardRef");
+$RefreshReg$(_c3, "AvatarImage");
+$RefreshReg$(_c4, "AvatarFallback$React.forwardRef");
+$RefreshReg$(_c5, "AvatarFallback");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/ui/avatar.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/ui/avatar.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImF2YXRhci50c3giXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0ICogYXMgUmVhY3QgZnJvbSBcInJlYWN0XCI7XG5pbXBvcnQgKiBhcyBBdmF0YXJQcmltaXRpdmUgZnJvbSBcIkByYWRpeC11aS9yZWFjdC1hdmF0YXJcIjtcblxuaW1wb3J0IHsgY24gfSBmcm9tIFwiQC9saWIvdXRpbHNcIjtcblxuY29uc3QgQXZhdGFyID0gUmVhY3QuZm9yd2FyZFJlZjxcbiAgUmVhY3QuRWxlbWVudFJlZjx0eXBlb2YgQXZhdGFyUHJpbWl0aXZlLlJvb3Q+LFxuICBSZWFjdC5Db21wb25lbnRQcm9wc1dpdGhvdXRSZWY8dHlwZW9mIEF2YXRhclByaW1pdGl2ZS5Sb290PlxuPigoeyBjbGFzc05hbWUsIC4uLnByb3BzIH0sIHJlZikgPT4gKFxuICA8QXZhdGFyUHJpbWl0aXZlLlJvb3RcbiAgICByZWY9e3JlZn1cbiAgICBjbGFzc05hbWU9e2NuKFwicmVsYXRpdmUgZmxleCBoLTEwIHctMTAgc2hyaW5rLTAgb3ZlcmZsb3ctaGlkZGVuIHJvdW5kZWQtZnVsbFwiLCBjbGFzc05hbWUpfVxuICAgIHsuLi5wcm9wc31cbiAgLz5cbikpO1xuQXZhdGFyLmRpc3BsYXlOYW1lID0gQXZhdGFyUHJpbWl0aXZlLlJvb3QuZGlzcGxheU5hbWU7XG5cbmNvbnN0IEF2YXRhckltYWdlID0gUmVhY3QuZm9yd2FyZFJlZjxcbiAgUmVhY3QuRWxlbWVudFJlZjx0eXBlb2YgQXZhdGFyUHJpbWl0aXZlLkltYWdlPixcbiAgUmVhY3QuQ29tcG9uZW50UHJvcHNXaXRob3V0UmVmPHR5cGVvZiBBdmF0YXJQcmltaXRpdmUuSW1hZ2U+XG4+KCh7IGNsYXNzTmFtZSwgLi4ucHJvcHMgfSwgcmVmKSA9PiAoXG4gIDxBdmF0YXJQcmltaXRpdmUuSW1hZ2UgcmVmPXtyZWZ9IGNsYXNzTmFtZT17Y24oXCJhc3BlY3Qtc3F1YXJlIGgtZnVsbCB3LWZ1bGxcIiwgY2xhc3NOYW1lKX0gey4uLnByb3BzfSAvPlxuKSk7XG5BdmF0YXJJbWFnZS5kaXNwbGF5TmFtZSA9IEF2YXRhclByaW1pdGl2ZS5JbWFnZS5kaXNwbGF5TmFtZTtcblxuY29uc3QgQXZhdGFyRmFsbGJhY2sgPSBSZWFjdC5mb3J3YXJkUmVmPFxuICBSZWFjdC5FbGVtZW50UmVmPHR5cGVvZiBBdmF0YXJQcmltaXRpdmUuRmFsbGJhY2s+LFxuICBSZWFjdC5Db21wb25lbnRQcm9wc1dpdGhvdXRSZWY8dHlwZW9mIEF2YXRhclByaW1pdGl2ZS5GYWxsYmFjaz5cbj4oKHsgY2xhc3NOYW1lLCAuLi5wcm9wcyB9LCByZWYpID0+IChcbiAgPEF2YXRhclByaW1pdGl2ZS5GYWxsYmFja1xuICAgIHJlZj17cmVmfVxuICAgIGNsYXNzTmFtZT17Y24oXCJmbGV4IGgtZnVsbCB3LWZ1bGwgaXRlbXMtY2VudGVyIGp1c3RpZnktY2VudGVyIHJvdW5kZWQtZnVsbCBiZy1tdXRlZFwiLCBjbGFzc05hbWUpfVxuICAgIHsuLi5wcm9wc31cbiAgLz5cbikpO1xuQXZhdGFyRmFsbGJhY2suZGlzcGxheU5hbWUgPSBBdmF0YXJQcmltaXRpdmUuRmFsbGJhY2suZGlzcGxheU5hbWU7XG5cbmV4cG9ydCB7IEF2YXRhciwgQXZhdGFySW1hZ2UsIEF2YXRhckZhbGxiYWNrIH07XG5cblxuXG5cblxuXG4iXSwibmFtZXMiOlsiUmVhY3QiLCJBdmF0YXJQcmltaXRpdmUiLCJjbiIsIkF2YXRhciIsImZvcndhcmRSZWYiLCJjbGFzc05hbWUiLCJwcm9wcyIsInJlZiIsIlJvb3QiLCJkaXNwbGF5TmFtZSIsIkF2YXRhckltYWdlIiwiSW1hZ2UiLCJBdmF0YXJGYWxsYmFjayIsIkZhbGxiYWNrIl0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7Ozs7OztBQUFBLFlBQVlBLFdBQVcsUUFBUTtBQUMvQixZQUFZQyxxQkFBcUIseUJBQXlCO0FBRTFELFNBQVNDLEVBQUUsUUFBUSxjQUFjO0FBRWpDLE1BQU1DLHVCQUFTSCxNQUFNSSxVQUFVLE1BRzdCLENBQUMsRUFBRUMsU0FBUyxFQUFFLEdBQUdDLE9BQU8sRUFBRUMsb0JBQzFCLFFBQUNOLGdCQUFnQk8sSUFBSTtRQUNuQkQsS0FBS0E7UUFDTEYsV0FBV0gsR0FBRyxpRUFBaUVHO1FBQzlFLEdBQUdDLEtBQUs7Ozs7Ozs7QUFHYkgsT0FBT00sV0FBVyxHQUFHUixnQkFBZ0JPLElBQUksQ0FBQ0MsV0FBVztBQUVyRCxNQUFNQyw0QkFBY1YsTUFBTUksVUFBVSxPQUdsQyxDQUFDLEVBQUVDLFNBQVMsRUFBRSxHQUFHQyxPQUFPLEVBQUVDLG9CQUMxQixRQUFDTixnQkFBZ0JVLEtBQUs7UUFBQ0osS0FBS0E7UUFBS0YsV0FBV0gsR0FBRywrQkFBK0JHO1FBQWEsR0FBR0MsS0FBSzs7Ozs7OztBQUVyR0ksWUFBWUQsV0FBVyxHQUFHUixnQkFBZ0JVLEtBQUssQ0FBQ0YsV0FBVztBQUUzRCxNQUFNRywrQkFBaUJaLE1BQU1JLFVBQVUsT0FHckMsQ0FBQyxFQUFFQyxTQUFTLEVBQUUsR0FBR0MsT0FBTyxFQUFFQyxvQkFDMUIsUUFBQ04sZ0JBQWdCWSxRQUFRO1FBQ3ZCTixLQUFLQTtRQUNMRixXQUFXSCxHQUFHLHdFQUF3RUc7UUFDckYsR0FBR0MsS0FBSzs7Ozs7OztBQUdiTSxlQUFlSCxXQUFXLEdBQUdSLGdCQUFnQlksUUFBUSxDQUFDSixXQUFXO0FBRWpFLFNBQVNOLE1BQU0sRUFBRU8sV0FBVyxFQUFFRSxjQUFjLEdBQUcifQ==

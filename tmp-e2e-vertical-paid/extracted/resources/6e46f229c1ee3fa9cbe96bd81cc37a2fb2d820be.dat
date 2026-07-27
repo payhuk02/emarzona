@@ -1,0 +1,24 @@
+/**
+ * Parse a sample rate from a given value.
+ * This will either return a boolean or number sample rate, if the sample rate is valid (between 0 and 1).
+ * If a string is passed, we try to convert it to a number.
+ *
+ * Any invalid sample rate will return `undefined`.
+ */
+function parseSampleRate(sampleRate) {
+  if (typeof sampleRate === 'boolean') {
+    return Number(sampleRate);
+  }
+
+  const rate = typeof sampleRate === 'string' ? parseFloat(sampleRate) : sampleRate;
+  if (typeof rate !== 'number' || isNaN(rate) || rate < 0 || rate > 1) {
+    return undefined;
+  }
+
+  return rate;
+}
+
+export { parseSampleRate };
+                                           
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicGFyc2VTYW1wbGVSYXRlLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi9zcmMvdXRpbHMvcGFyc2VTYW1wbGVSYXRlLnRzIl0sInNvdXJjZXNDb250ZW50IjpbIi8qKlxuICogUGFyc2UgYSBzYW1wbGUgcmF0ZSBmcm9tIGEgZ2l2ZW4gdmFsdWUuXG4gKiBUaGlzIHdpbGwgZWl0aGVyIHJldHVybiBhIGJvb2xlYW4gb3IgbnVtYmVyIHNhbXBsZSByYXRlLCBpZiB0aGUgc2FtcGxlIHJhdGUgaXMgdmFsaWQgKGJldHdlZW4gMCBhbmQgMSkuXG4gKiBJZiBhIHN0cmluZyBpcyBwYXNzZWQsIHdlIHRyeSB0byBjb252ZXJ0IGl0IHRvIGEgbnVtYmVyLlxuICpcbiAqIEFueSBpbnZhbGlkIHNhbXBsZSByYXRlIHdpbGwgcmV0dXJuIGB1bmRlZmluZWRgLlxuICovXG5leHBvcnQgZnVuY3Rpb24gcGFyc2VTYW1wbGVSYXRlKHNhbXBsZVJhdGU6IHVua25vd24pOiBudW1iZXIgfCB1bmRlZmluZWQge1xuICBpZiAodHlwZW9mIHNhbXBsZVJhdGUgPT09ICdib29sZWFuJykge1xuICAgIHJldHVybiBOdW1iZXIoc2FtcGxlUmF0ZSk7XG4gIH1cblxuICBjb25zdCByYXRlID0gdHlwZW9mIHNhbXBsZVJhdGUgPT09ICdzdHJpbmcnID8gcGFyc2VGbG9hdChzYW1wbGVSYXRlKSA6IHNhbXBsZVJhdGU7XG4gIGlmICh0eXBlb2YgcmF0ZSAhPT0gJ251bWJlcicgfHwgaXNOYU4ocmF0ZSkgfHwgcmF0ZSA8IDAgfHwgcmF0ZSA+IDEpIHtcbiAgICByZXR1cm4gdW5kZWZpbmVkO1xuICB9XG5cbiAgcmV0dXJuIHJhdGU7XG59XG4iXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDTyxTQUFTLGVBQWUsQ0FBQyxVQUFVLEVBQStCO0FBQ3pFLEVBQUUsSUFBSSxPQUFPLFVBQUEsS0FBZSxTQUFTLEVBQUU7QUFDdkMsSUFBSSxPQUFPLE1BQU0sQ0FBQyxVQUFVLENBQUM7QUFDN0IsRUFBRTs7QUFFRixFQUFFLE1BQU0sSUFBQSxHQUFPLE9BQU8sVUFBQSxLQUFlLFFBQUEsR0FBVyxVQUFVLENBQUMsVUFBVSxDQUFBLEdBQUksVUFBVTtBQUNuRixFQUFFLElBQUksT0FBTyxTQUFTLFFBQUEsSUFBWSxLQUFLLENBQUMsSUFBSSxDQUFBLElBQUssT0FBTyxDQUFBLElBQUssSUFBQSxHQUFPLENBQUMsRUFBRTtBQUN2RSxJQUFJLE9BQU8sU0FBUztBQUNwQixFQUFFOztBQUVGLEVBQUUsT0FBTyxJQUFJO0FBQ2I7Ozs7IiwieF9nb29nbGVfaWdub3JlTGlzdCI6WzBdfQ==

@@ -1,0 +1,77 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/notifications/AuthenticatedRealtimeNotifications.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/notifications/AuthenticatedRealtimeNotifications.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=02e1e75e"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"]; const _Fragment = __vite__cjsImport2_react_jsxDevRuntime["Fragment"];
+var _s = $RefreshSig$();
+import { useAuth } from "/src/contexts/AuthContext.tsx";
+import { useDeferredMount } from "/src/hooks/useDeferredMount.ts";
+import { useRealtimeNotifications } from "/src/hooks/useNotifications.ts";
+import { useNotificationBadgeSync } from "/src/hooks/useNotificationBadgeSync.ts";
+import { AutoEnablePushNotifications } from "/src/components/notifications/AutoEnablePushNotifications.tsx";
+/**
+ * Abonnement Realtime + son/vibration + push auto + badge sur toutes les pages authentifiées.
+ */ export function AuthenticatedRealtimeNotifications() {
+    _s();
+    const { user, loading } = useAuth();
+    const enabled = useDeferredMount(!loading && !!user, 500);
+    useRealtimeNotifications({
+        enabled
+    });
+    useNotificationBadgeSync({
+        enabled
+    });
+    return /*#__PURE__*/ _jsxDEV(_Fragment, {
+        children: /*#__PURE__*/ _jsxDEV(AutoEnablePushNotifications, {}, void 0, false, {
+            fileName: "/home/runner/work/emarzona/emarzona/src/components/notifications/AuthenticatedRealtimeNotifications.tsx",
+            lineNumber: 19,
+            columnNumber: 7
+        }, this)
+    }, void 0, false);
+}
+_s(AuthenticatedRealtimeNotifications, "PSYxZhDzxWzqqFbZbEYqSbD1IDo=", false, function() {
+    return [
+        useAuth,
+        useDeferredMount,
+        useRealtimeNotifications,
+        useNotificationBadgeSync
+    ];
+});
+_c = AuthenticatedRealtimeNotifications;
+var _c;
+$RefreshReg$(_c, "AuthenticatedRealtimeNotifications");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/notifications/AuthenticatedRealtimeNotifications.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/notifications/AuthenticatedRealtimeNotifications.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIkF1dGhlbnRpY2F0ZWRSZWFsdGltZU5vdGlmaWNhdGlvbnMudHN4Il0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7IHVzZUF1dGggfSBmcm9tICdAL2NvbnRleHRzL0F1dGhDb250ZXh0JztcbmltcG9ydCB7IHVzZURlZmVycmVkTW91bnQgfSBmcm9tICdAL2hvb2tzL3VzZURlZmVycmVkTW91bnQnO1xuaW1wb3J0IHsgdXNlUmVhbHRpbWVOb3RpZmljYXRpb25zIH0gZnJvbSAnQC9ob29rcy91c2VOb3RpZmljYXRpb25zJztcbmltcG9ydCB7IHVzZU5vdGlmaWNhdGlvbkJhZGdlU3luYyB9IGZyb20gJ0AvaG9va3MvdXNlTm90aWZpY2F0aW9uQmFkZ2VTeW5jJztcbmltcG9ydCB7IEF1dG9FbmFibGVQdXNoTm90aWZpY2F0aW9ucyB9IGZyb20gJ0AvY29tcG9uZW50cy9ub3RpZmljYXRpb25zL0F1dG9FbmFibGVQdXNoTm90aWZpY2F0aW9ucyc7XG5cbi8qKlxuICogQWJvbm5lbWVudCBSZWFsdGltZSArIHNvbi92aWJyYXRpb24gKyBwdXNoIGF1dG8gKyBiYWRnZSBzdXIgdG91dGVzIGxlcyBwYWdlcyBhdXRoZW50aWZpw6llcy5cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIEF1dGhlbnRpY2F0ZWRSZWFsdGltZU5vdGlmaWNhdGlvbnMoKSB7XG4gIGNvbnN0IHsgdXNlciwgbG9hZGluZyB9ID0gdXNlQXV0aCgpO1xuICBjb25zdCBlbmFibGVkID0gdXNlRGVmZXJyZWRNb3VudCghbG9hZGluZyAmJiAhIXVzZXIsIDUwMCk7XG5cbiAgdXNlUmVhbHRpbWVOb3RpZmljYXRpb25zKHsgZW5hYmxlZCB9KTtcbiAgdXNlTm90aWZpY2F0aW9uQmFkZ2VTeW5jKHsgZW5hYmxlZCB9KTtcblxuICByZXR1cm4gKFxuICAgIDw+XG4gICAgICA8QXV0b0VuYWJsZVB1c2hOb3RpZmljYXRpb25zIC8+XG4gICAgPC8+XG4gICk7XG59XG4iXSwibmFtZXMiOlsidXNlQXV0aCIsInVzZURlZmVycmVkTW91bnQiLCJ1c2VSZWFsdGltZU5vdGlmaWNhdGlvbnMiLCJ1c2VOb3RpZmljYXRpb25CYWRnZVN5bmMiLCJBdXRvRW5hYmxlUHVzaE5vdGlmaWNhdGlvbnMiLCJBdXRoZW50aWNhdGVkUmVhbHRpbWVOb3RpZmljYXRpb25zIiwidXNlciIsImxvYWRpbmciLCJlbmFibGVkIl0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7QUFBQSxTQUFTQSxPQUFPLFFBQVEseUJBQXlCO0FBQ2pELFNBQVNDLGdCQUFnQixRQUFRLDJCQUEyQjtBQUM1RCxTQUFTQyx3QkFBd0IsUUFBUSwyQkFBMkI7QUFDcEUsU0FBU0Msd0JBQXdCLFFBQVEsbUNBQW1DO0FBQzVFLFNBQVNDLDJCQUEyQixRQUFRLHlEQUF5RDtBQUVyRzs7Q0FFQyxHQUNELE9BQU8sU0FBU0M7O0lBQ2QsTUFBTSxFQUFFQyxJQUFJLEVBQUVDLE9BQU8sRUFBRSxHQUFHUDtJQUMxQixNQUFNUSxVQUFVUCxpQkFBaUIsQ0FBQ00sV0FBVyxDQUFDLENBQUNELE1BQU07SUFFckRKLHlCQUF5QjtRQUFFTTtJQUFRO0lBQ25DTCx5QkFBeUI7UUFBRUs7SUFBUTtJQUVuQyxxQkFDRTtrQkFDRSxjQUFBLFFBQUNKOzs7Ozs7QUFHUDtHQVpnQkM7O1FBQ1lMO1FBQ1ZDO1FBRWhCQztRQUNBQzs7O0tBTGNFIn0=

@@ -63,7 +63,7 @@ import { useCatalogCacheInvalidation } from '@/hooks/useCatalogCacheInvalidation
 import { useQuery } from '@tanstack/react-query';
 
 const PRODUCT_FIELDS =
-  'id, store_id, name, slug, description, short_description, price, promotional_price, currency, category_id, tags, images, image_url, meta_title, meta_description, og_image, faqs, payment_options, hide_purchase_count, hide_likes_count, hide_recommendations_count, hide_downloads_count, hide_reviews_count, hide_rating, is_active';
+  'id, store_id, name, slug, description, short_description, price, promotional_price, currency, category, category_id, tags, images, image_url, meta_title, meta_description, og_image, faqs, payment_options, hide_purchase_count, hide_likes_count, hide_recommendations_count, hide_downloads_count, hide_reviews_count, hide_rating, is_active';
 const SERVICE_PRODUCT_FIELDS =
   'id, product_id, service_type, duration_minutes, location_type, location_address, meeting_url, timezone, requires_staff, max_participants, pricing_type, deposit_required, deposit_amount, deposit_type, allow_booking_cancellation, cancellation_deadline_hours, require_approval, buffer_time_before, buffer_time_after, advance_booking_days';
 const SERVICE_AVAILABILITY_SLOT_FIELDS =
@@ -221,9 +221,10 @@ const convertToFormData = async (
     price: product.price || 0,
     currency: product.currency || 'XOF',
     promotional_price: product.promotional_price || undefined,
+    category: product.category || 'consultation',
     category_id: product.category_id || null,
     tags: product.tags || [],
-    images: product.images || [],
+    images: product.images || (product.image_url ? [product.image_url] : []),
     image_url: product.image_url || '',
 
     // Duration & Availability
@@ -609,11 +610,12 @@ export const EditServiceProductWizard = ({
         description: formData.description,
         short_description: formData.short_description,
         price: formData.price || 0,
-        promotional_price: formData.promotional_price,
+        promotional_price: formData.promotional_price || null,
         currency: formData.currency || 'XOF',
-        image_url: formData.image_url || '',
-        images: formData.images || [],
+        category: formData.category,
         category_id: formData.category_id,
+        image_url: formData.images?.[0] || null,
+        images: formData.images || [],
         tags: formData.tags || [],
         meta_title: formData.seo?.meta_title,
         meta_description: formData.seo?.meta_description,

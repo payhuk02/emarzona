@@ -1,0 +1,4 @@
+﻿npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+Initialising login role...
+unexpected status 400: {"message":"Failed to run sql query: ERROR:  42601: syntax error at or near \"´╗┐SELECT\"\nLINE 1: ´╗┐SELECT se.store_id, se.total_revenue, se.total_platform_commission, se.total_withdrawn, se.available_balance, se.updated_at\n        ^\n"}
+Try rerunning the command with --debug to troubleshoot the error.

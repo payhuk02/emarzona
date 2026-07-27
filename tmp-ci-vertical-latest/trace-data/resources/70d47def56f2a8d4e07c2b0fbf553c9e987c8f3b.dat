@@ -1,0 +1,98 @@
+import { WINDOW } from "/node_modules/@sentry-internal/browser-utils/build/esm/types.js?v=89021f86";
+import { bindReporter } from "/node_modules/@sentry-internal/browser-utils/build/esm/metrics/web-vitals/lib/bindReporter.js?v=89021f86";
+import { getVisibilityWatcher } from "/node_modules/@sentry-internal/browser-utils/build/esm/metrics/web-vitals/lib/getVisibilityWatcher.js?v=89021f86";
+import { initMetric } from "/node_modules/@sentry-internal/browser-utils/build/esm/metrics/web-vitals/lib/initMetric.js?v=89021f86";
+import { initUnique } from "/node_modules/@sentry-internal/browser-utils/build/esm/metrics/web-vitals/lib/initUnique.js?v=89021f86";
+import { LayoutShiftManager } from "/node_modules/@sentry-internal/browser-utils/build/esm/metrics/web-vitals/lib/LayoutShiftManager.js?v=89021f86";
+import { observe } from "/node_modules/@sentry-internal/browser-utils/build/esm/metrics/web-vitals/lib/observe.js?v=89021f86";
+import { runOnce } from "/node_modules/@sentry-internal/browser-utils/build/esm/metrics/web-vitals/lib/runOnce.js?v=89021f86";
+import { onFCP } from "/node_modules/@sentry-internal/browser-utils/build/esm/metrics/web-vitals/onFCP.js?v=89021f86";
+
+/*
+ * Copyright 2020 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+/** Thresholds for CLS. See https://web.dev/articles/cls#what_is_a_good_cls_score */
+const CLSThresholds = [0.1, 0.25];
+
+/**
+ * Calculates the [CLS](https://web.dev/articles/cls) value for the current page and
+ * calls the `callback` function once the value is ready to be reported, along
+ * with all `layout-shift` performance entries that were used in the metric
+ * value calculation. The reported value is a `double` (corresponding to a
+ * [layout shift score](https://web.dev/articles/cls#layout_shift_score)).
+ *
+ * If the `reportAllChanges` configuration option is set to `true`, the
+ * `callback` function will be called as soon as the value is initially
+ * determined as well as any time the value changes throughout the page
+ * lifespan.
+ *
+ * _**Important:** CLS should be continually monitored for changes throughout
+ * the entire lifespan of a page—including if the user returns to the page after
+ * it's been hidden/backgrounded. However, since browsers often [will not fire
+ * additional callbacks once the user has backgrounded a
+ * page](https://developer.chrome.com/blog/page-lifecycle-api/#advice-hidden),
+ * `callback` is always called when the page's visibility state changes to
+ * hidden. As a result, the `callback` function might be called multiple times
+ * during the same page load._
+ */
+const onCLS = (onReport, opts = {}) => {
+  // Start monitoring FCP so we can only report CLS if FCP is also reported.
+  // Note: this is done to match the current behavior of CrUX.
+  onFCP(
+    runOnce(() => {
+      const metric = initMetric('CLS', 0);
+      let report;
+      const visibilityWatcher = getVisibilityWatcher();
+
+      const layoutShiftManager = initUnique(opts, LayoutShiftManager);
+
+      const handleEntries = (entries) => {
+        for (const entry of entries) {
+          layoutShiftManager._processEntry(entry);
+        }
+
+        // If the current session value is larger than the current CLS value,
+        // update CLS and the entries contributing to it.
+        if (layoutShiftManager._sessionValue > metric.value) {
+          metric.value = layoutShiftManager._sessionValue;
+          metric.entries = layoutShiftManager._sessionEntries;
+          report();
+        }
+      };
+
+      const po = observe('layout-shift', handleEntries);
+      if (po) {
+        report = bindReporter(onReport, metric, CLSThresholds, opts.reportAllChanges);
+
+        visibilityWatcher.onHidden(() => {
+          handleEntries(po.takeRecords() );
+          report(true);
+        });
+
+        // Queue a task to report (if nothing else triggers a report first).
+        // This allows CLS to be reported as soon as FCP fires when
+        // `reportAllChanges` is true.
+        WINDOW?.setTimeout?.(report);
+      }
+    }),
+  );
+};
+
+export { CLSThresholds, onCLS };
+                                  
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZ2V0Q0xTLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi9zcmMvbWV0cmljcy93ZWItdml0YWxzL2dldENMUy50cyJdLCJzb3VyY2VzQ29udGVudCI6WyIvKlxuICogQ29weXJpZ2h0IDIwMjAgR29vZ2xlIExMQ1xuICpcbiAqIExpY2Vuc2VkIHVuZGVyIHRoZSBBcGFjaGUgTGljZW5zZSwgVmVyc2lvbiAyLjAgKHRoZSBcIkxpY2Vuc2VcIik7XG4gKiB5b3UgbWF5IG5vdCB1c2UgdGhpcyBmaWxlIGV4Y2VwdCBpbiBjb21wbGlhbmNlIHdpdGggdGhlIExpY2Vuc2UuXG4gKiBZb3UgbWF5IG9idGFpbiBhIGNvcHkgb2YgdGhlIExpY2Vuc2UgYXRcbiAqXG4gKiAgICAgaHR0cHM6Ly93d3cuYXBhY2hlLm9yZy9saWNlbnNlcy9MSUNFTlNFLTIuMFxuICpcbiAqIFVubGVzcyByZXF1aXJlZCBieSBhcHBsaWNhYmxlIGxhdyBvciBhZ3JlZWQgdG8gaW4gd3JpdGluZywgc29mdHdhcmVcbiAqIGRpc3RyaWJ1dGVkIHVuZGVyIHRoZSBMaWNlbnNlIGlzIGRpc3RyaWJ1dGVkIG9uIGFuIFwiQVMgSVNcIiBCQVNJUyxcbiAqIFdJVEhPVVQgV0FSUkFOVElFUyBPUiBDT05ESVRJT05TIE9GIEFOWSBLSU5ELCBlaXRoZXIgZXhwcmVzcyBvciBpbXBsaWVkLlxuICogU2VlIHRoZSBMaWNlbnNlIGZvciB0aGUgc3BlY2lmaWMgbGFuZ3VhZ2UgZ292ZXJuaW5nIHBlcm1pc3Npb25zIGFuZFxuICogbGltaXRhdGlvbnMgdW5kZXIgdGhlIExpY2Vuc2UuXG4gKi9cblxuaW1wb3J0IHsgV0lORE9XIH0gZnJvbSAnLi4vLi4vdHlwZXMnO1xuaW1wb3J0IHsgYmluZFJlcG9ydGVyIH0gZnJvbSAnLi9saWIvYmluZFJlcG9ydGVyJztcbmltcG9ydCB7IGdldFZpc2liaWxpdHlXYXRjaGVyIH0gZnJvbSAnLi9saWIvZ2V0VmlzaWJpbGl0eVdhdGNoZXInO1xuaW1wb3J0IHsgaW5pdE1ldHJpYyB9IGZyb20gJy4vbGliL2luaXRNZXRyaWMnO1xuaW1wb3J0IHsgaW5pdFVuaXF1ZSB9IGZyb20gJy4vbGliL2luaXRVbmlxdWUnO1xuaW1wb3J0IHsgTGF5b3V0U2hpZnRNYW5hZ2VyIH0gZnJvbSAnLi9saWIvTGF5b3V0U2hpZnRNYW5hZ2VyJztcbmltcG9ydCB7IG9ic2VydmUgfSBmcm9tICcuL2xpYi9vYnNlcnZlJztcbmltcG9ydCB7IHJ1bk9uY2UgfSBmcm9tICcuL2xpYi9ydW5PbmNlJztcbmltcG9ydCB7IG9uRkNQIH0gZnJvbSAnLi9vbkZDUCc7XG5pbXBvcnQgdHlwZSB7IENMU01ldHJpYywgTWV0cmljUmF0aW5nVGhyZXNob2xkcywgUmVwb3J0T3B0cyB9IGZyb20gJy4vdHlwZXMnO1xuXG4vKiogVGhyZXNob2xkcyBmb3IgQ0xTLiBTZWUgaHR0cHM6Ly93ZWIuZGV2L2FydGljbGVzL2NscyN3aGF0X2lzX2FfZ29vZF9jbHNfc2NvcmUgKi9cbmV4cG9ydCBjb25zdCBDTFNUaHJlc2hvbGRzOiBNZXRyaWNSYXRpbmdUaHJlc2hvbGRzID0gWzAuMSwgMC4yNV07XG5cbi8qKlxuICogQ2FsY3VsYXRlcyB0aGUgW0NMU10oaHR0cHM6Ly93ZWIuZGV2L2FydGljbGVzL2NscykgdmFsdWUgZm9yIHRoZSBjdXJyZW50IHBhZ2UgYW5kXG4gKiBjYWxscyB0aGUgYGNhbGxiYWNrYCBmdW5jdGlvbiBvbmNlIHRoZSB2YWx1ZSBpcyByZWFkeSB0byBiZSByZXBvcnRlZCwgYWxvbmdcbiAqIHdpdGggYWxsIGBsYXlvdXQtc2hpZnRgIHBlcmZvcm1hbmNlIGVudHJpZXMgdGhhdCB3ZXJlIHVzZWQgaW4gdGhlIG1ldHJpY1xuICogdmFsdWUgY2FsY3VsYXRpb24uIFRoZSByZXBvcnRlZCB2YWx1ZSBpcyBhIGBkb3VibGVgIChjb3JyZXNwb25kaW5nIHRvIGFcbiAqIFtsYXlvdXQgc2hpZnQgc2NvcmVdKGh0dHBzOi8vd2ViLmRldi9hcnRpY2xlcy9jbHMjbGF5b3V0X3NoaWZ0X3Njb3JlKSkuXG4gKlxuICogSWYgdGhlIGByZXBvcnRBbGxDaGFuZ2VzYCBjb25maWd1cmF0aW9uIG9wdGlvbiBpcyBzZXQgdG8gYHRydWVgLCB0aGVcbiAqIGBjYWxsYmFja2AgZnVuY3Rpb24gd2lsbCBiZSBjYWxsZWQgYXMgc29vbiBhcyB0aGUgdmFsdWUgaXMgaW5pdGlhbGx5XG4gKiBkZXRlcm1pbmVkIGFzIHdlbGwgYXMgYW55IHRpbWUgdGhlIHZhbHVlIGNoYW5nZXMgdGhyb3VnaG91dCB0aGUgcGFnZVxuICogbGlmZXNwYW4uXG4gKlxuICogXyoqSW1wb3J0YW50OioqIENMUyBzaG91bGQgYmUgY29udGludWFsbHkgbW9uaXRvcmVkIGZvciBjaGFuZ2VzIHRocm91Z2hvdXRcbiAqIHRoZSBlbnRpcmUgbGlmZXNwYW4gb2YgYSBwYWdl4oCUaW5jbHVkaW5nIGlmIHRoZSB1c2VyIHJldHVybnMgdG8gdGhlIHBhZ2UgYWZ0ZXJcbiAqIGl0J3MgYmVlbiBoaWRkZW4vYmFja2dyb3VuZGVkLiBIb3dldmVyLCBzaW5jZSBicm93c2VycyBvZnRlbiBbd2lsbCBub3QgZmlyZVxuICogYWRkaXRpb25hbCBjYWxsYmFja3Mgb25jZSB0aGUgdXNlciBoYXMgYmFja2dyb3VuZGVkIGFcbiAqIHBhZ2VdKGh0dHBzOi8vZGV2ZWxvcGVyLmNocm9tZS5jb20vYmxvZy9wYWdlLWxpZmVjeWNsZS1hcGkvI2FkdmljZS1oaWRkZW4pLFxuICogYGNhbGxiYWNrYCBpcyBhbHdheXMgY2FsbGVkIHdoZW4gdGhlIHBhZ2UncyB2aXNpYmlsaXR5IHN0YXRlIGNoYW5nZXMgdG9cbiAqIGhpZGRlbi4gQXMgYSByZXN1bHQsIHRoZSBgY2FsbGJhY2tgIGZ1bmN0aW9uIG1pZ2h0IGJlIGNhbGxlZCBtdWx0aXBsZSB0aW1lc1xuICogZHVyaW5nIHRoZSBzYW1lIHBhZ2UgbG9hZC5fXG4gKi9cbmV4cG9ydCBjb25zdCBvbkNMUyA9IChvblJlcG9ydDogKG1ldHJpYzogQ0xTTWV0cmljKSA9PiB2b2lkLCBvcHRzOiBSZXBvcnRPcHRzID0ge30pID0+IHtcbiAgLy8gU3RhcnQgbW9uaXRvcmluZyBGQ1Agc28gd2UgY2FuIG9ubHkgcmVwb3J0IENMUyBpZiBGQ1AgaXMgYWxzbyByZXBvcnRlZC5cbiAgLy8gTm90ZTogdGhpcyBpcyBkb25lIHRvIG1hdGNoIHRoZSBjdXJyZW50IGJlaGF2aW9yIG9mIENyVVguXG4gIG9uRkNQKFxuICAgIHJ1bk9uY2UoKCkgPT4ge1xuICAgICAgY29uc3QgbWV0cmljID0gaW5pdE1ldHJpYygnQ0xTJywgMCk7XG4gICAgICBsZXQgcmVwb3J0OiBSZXR1cm5UeXBlPHR5cGVvZiBiaW5kUmVwb3J0ZXI+O1xuICAgICAgY29uc3QgdmlzaWJpbGl0eVdhdGNoZXIgPSBnZXRWaXNpYmlsaXR5V2F0Y2hlcigpO1xuXG4gICAgICBjb25zdCBsYXlvdXRTaGlmdE1hbmFnZXIgPSBpbml0VW5pcXVlKG9wdHMsIExheW91dFNoaWZ0TWFuYWdlcik7XG5cbiAgICAgIGNvbnN0IGhhbmRsZUVudHJpZXMgPSAoZW50cmllczogTGF5b3V0U2hpZnRbXSkgPT4ge1xuICAgICAgICBmb3IgKGNvbnN0IGVudHJ5IG9mIGVudHJpZXMpIHtcbiAgICAgICAgICBsYXlvdXRTaGlmdE1hbmFnZXIuX3Byb2Nlc3NFbnRyeShlbnRyeSk7XG4gICAgICAgIH1cblxuICAgICAgICAvLyBJZiB0aGUgY3VycmVudCBzZXNzaW9uIHZhbHVlIGlzIGxhcmdlciB0aGFuIHRoZSBjdXJyZW50IENMUyB2YWx1ZSxcbiAgICAgICAgLy8gdXBkYXRlIENMUyBhbmQgdGhlIGVudHJpZXMgY29udHJpYnV0aW5nIHRvIGl0LlxuICAgICAgICBpZiAobGF5b3V0U2hpZnRNYW5hZ2VyLl9zZXNzaW9uVmFsdWUgPiBtZXRyaWMudmFsdWUpIHtcbiAgICAgICAgICBtZXRyaWMudmFsdWUgPSBsYXlvdXRTaGlmdE1hbmFnZXIuX3Nlc3Npb25WYWx1ZTtcbiAgICAgICAgICBtZXRyaWMuZW50cmllcyA9IGxheW91dFNoaWZ0TWFuYWdlci5fc2Vzc2lvbkVudHJpZXM7XG4gICAgICAgICAgcmVwb3J0KCk7XG4gICAgICAgIH1cbiAgICAgIH07XG5cbiAgICAgIGNvbnN0IHBvID0gb2JzZXJ2ZSgnbGF5b3V0LXNoaWZ0JywgaGFuZGxlRW50cmllcyk7XG4gICAgICBpZiAocG8pIHtcbiAgICAgICAgcmVwb3J0ID0gYmluZFJlcG9ydGVyKG9uUmVwb3J0LCBtZXRyaWMsIENMU1RocmVzaG9sZHMsIG9wdHMucmVwb3J0QWxsQ2hhbmdlcyk7XG5cbiAgICAgICAgdmlzaWJpbGl0eVdhdGNoZXIub25IaWRkZW4oKCkgPT4ge1xuICAgICAgICAgIGhhbmRsZUVudHJpZXMocG8udGFrZVJlY29yZHMoKSBhcyBDTFNNZXRyaWNbJ2VudHJpZXMnXSk7XG4gICAgICAgICAgcmVwb3J0KHRydWUpO1xuICAgICAgICB9KTtcblxuICAgICAgICAvLyBRdWV1ZSBhIHRhc2sgdG8gcmVwb3J0IChpZiBub3RoaW5nIGVsc2UgdHJpZ2dlcnMgYSByZXBvcnQgZmlyc3QpLlxuICAgICAgICAvLyBUaGlzIGFsbG93cyBDTFMgdG8gYmUgcmVwb3J0ZWQgYXMgc29vbiBhcyBGQ1AgZmlyZXMgd2hlblxuICAgICAgICAvLyBgcmVwb3J0QWxsQ2hhbmdlc2AgaXMgdHJ1ZS5cbiAgICAgICAgV0lORE9XPy5zZXRUaW1lb3V0Py4ocmVwb3J0KTtcbiAgICAgIH1cbiAgICB9KSxcbiAgKTtcbn07XG4iXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7OztBQUFBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTs7O0FBYUE7QUFDTyxNQUFNLGFBQWEsR0FBMkIsQ0FBQyxHQUFHLEVBQUUsSUFBSTs7QUFFL0Q7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ08sTUFBTSxLQUFBLEdBQVEsQ0FBQyxRQUFRLEVBQStCLElBQUksR0FBZSxFQUFFLEtBQUs7QUFDdkY7QUFDQTtBQUNBLEVBQUUsS0FBSztBQUNQLElBQUksT0FBTyxDQUFDLE1BQU07QUFDbEIsTUFBTSxNQUFNLFNBQVMsVUFBVSxDQUFDLEtBQUssRUFBRSxDQUFDLENBQUM7QUFDekMsTUFBTSxJQUFJLE1BQU07QUFDaEIsTUFBTSxNQUFNLGlCQUFBLEdBQW9CLG9CQUFvQixFQUFFOztBQUV0RCxNQUFNLE1BQU0scUJBQXFCLFVBQVUsQ0FBQyxJQUFJLEVBQUUsa0JBQWtCLENBQUM7O0FBRXJFLE1BQU0sTUFBTSxhQUFBLEdBQWdCLENBQUMsT0FBTyxLQUFvQjtBQUN4RCxRQUFRLEtBQUssTUFBTSxLQUFBLElBQVMsT0FBTyxFQUFFO0FBQ3JDLFVBQVUsa0JBQWtCLENBQUMsYUFBYSxDQUFDLEtBQUssQ0FBQztBQUNqRCxRQUFROztBQUVSO0FBQ0E7QUFDQSxRQUFRLElBQUksa0JBQWtCLENBQUMsZ0JBQWdCLE1BQU0sQ0FBQyxLQUFLLEVBQUU7QUFDN0QsVUFBVSxNQUFNLENBQUMsS0FBQSxHQUFRLGtCQUFrQixDQUFDLGFBQWE7QUFDekQsVUFBVSxNQUFNLENBQUMsT0FBQSxHQUFVLGtCQUFrQixDQUFDLGVBQWU7QUFDN0QsVUFBVSxNQUFNLEVBQUU7QUFDbEIsUUFBUTtBQUNSLE1BQU0sQ0FBQzs7QUFFUCxNQUFNLE1BQU0sS0FBSyxPQUFPLENBQUMsY0FBYyxFQUFFLGFBQWEsQ0FBQztBQUN2RCxNQUFNLElBQUksRUFBRSxFQUFFO0FBQ2QsUUFBUSxNQUFBLEdBQVMsWUFBWSxDQUFDLFFBQVEsRUFBRSxNQUFNLEVBQUUsYUFBYSxFQUFFLElBQUksQ0FBQyxnQkFBZ0IsQ0FBQzs7QUFFckYsUUFBUSxpQkFBaUIsQ0FBQyxRQUFRLENBQUMsTUFBTTtBQUN6QyxVQUFVLGFBQWEsQ0FBQyxFQUFFLENBQUMsV0FBVyxJQUEyQjtBQUNqRSxVQUFVLE1BQU0sQ0FBQyxJQUFJLENBQUM7QUFDdEIsUUFBUSxDQUFDLENBQUM7O0FBRVY7QUFDQTtBQUNBO0FBQ0EsUUFBUSxNQUFNLEVBQUUsVUFBVSxHQUFHLE1BQU0sQ0FBQztBQUNwQyxNQUFNO0FBQ04sSUFBSSxDQUFDLENBQUM7QUFDTixHQUFHO0FBQ0g7Ozs7IiwieF9nb29nbGVfaWdub3JlTGlzdCI6WzBdfQ==

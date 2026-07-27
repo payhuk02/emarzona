@@ -1,0 +1,240 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/errors/FormErrorBoundary.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+function _define_property(obj, key, value) {
+    if (key in obj) {
+        Object.defineProperty(obj, key, {
+            value: value,
+            enumerable: true,
+            configurable: true,
+            writable: true
+        });
+    } else {
+        obj[key] = value;
+    }
+    return obj;
+}
+import __vite__cjsImport1_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=8792f17d"; const _jsxDEV = __vite__cjsImport1_react_jsxDevRuntime["jsxDEV"];
+/**
+ * Error Boundary spécifique pour les formulaires
+ * Date : 27 octobre 2025
+ */ import __vite__cjsImport2_react from "/node_modules/.vite/deps/react.js?v=8792f17d"; const React = __vite__cjsImport2_react.__esModule ? __vite__cjsImport2_react.default : __vite__cjsImport2_react; const Component = __vite__cjsImport2_react["Component"];
+import { Alert, AlertDescription, AlertTitle } from "/src/components/ui/alert.tsx";
+import { Button } from "/src/components/ui/button.tsx";
+import { XCircle, RefreshCw } from "/node_modules/.vite/deps/lucide-react.js?v=8792f17d";
+import * as Sentry from "/node_modules/@sentry/react/build/esm/index.js?v=a52cce50";
+import { logger } from "/src/lib/logger.ts";
+export class FormErrorBoundary extends Component {
+    static getDerivedStateFromError(error) {
+        return {
+            hasError: true,
+            error
+        };
+    }
+    componentDidCatch(error, errorInfo) {
+        // Incrémenter le compteur d'erreurs
+        this.setState((prev)=>({
+                errorCount: prev.errorCount + 1
+            }));
+        // Log vers Sentry avec contexte du formulaire
+        Sentry.captureException(error, {
+            contexts: {
+                react: {
+                    componentStack: errorInfo.componentStack
+                },
+                form: {
+                    name: this.props.formName || 'unknown',
+                    errorCount: this.state.errorCount + 1
+                }
+            },
+            tags: {
+                component: 'FormErrorBoundary',
+                formName: this.props.formName || 'unknown'
+            }
+        });
+        // Callback personnalisé
+        if (this.props.onError) {
+            this.props.onError(error, errorInfo);
+        }
+        logger.error(`Form Error (${this.props.formName})`, {
+            error,
+            errorInfo
+        });
+    }
+    render() {
+        const { hasError, errorCount } = this.state;
+        const { children, formName } = this.props;
+        if (hasError) {
+            // Si trop d'erreurs consécutives, afficher un message différent
+            if (errorCount >= 3) {
+                return /*#__PURE__*/ _jsxDEV(Alert, {
+                    variant: "destructive",
+                    className: "my-4",
+                    children: [
+                        /*#__PURE__*/ _jsxDEV(XCircle, {
+                            className: "h-4 w-4"
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/errors/FormErrorBoundary.tsx",
+                            lineNumber: 95,
+                            columnNumber: 13
+                        }, this),
+                        /*#__PURE__*/ _jsxDEV(AlertTitle, {
+                            children: "Erreurs répétées détectées"
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/errors/FormErrorBoundary.tsx",
+                            lineNumber: 96,
+                            columnNumber: 13
+                        }, this),
+                        /*#__PURE__*/ _jsxDEV(AlertDescription, {
+                            className: "mt-2 space-y-3",
+                            children: [
+                                /*#__PURE__*/ _jsxDEV("p", {
+                                    children: [
+                                        "Le formulaire",
+                                        formName && ` "${formName}"`,
+                                        " rencontre des erreurs répétées. Veuillez rafraîchir la page ou contacter le support si le problème persiste."
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/errors/FormErrorBoundary.tsx",
+                                    lineNumber: 98,
+                                    columnNumber: 15
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV("div", {
+                                    className: "flex gap-2",
+                                    children: /*#__PURE__*/ _jsxDEV(Button, {
+                                        variant: "outline",
+                                        size: "sm",
+                                        onClick: ()=>window.location.reload(),
+                                        className: "gap-2",
+                                        children: [
+                                            /*#__PURE__*/ _jsxDEV(RefreshCw, {
+                                                className: "h-3 w-3"
+                                            }, void 0, false, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/errors/FormErrorBoundary.tsx",
+                                                lineNumber: 110,
+                                                columnNumber: 19
+                                            }, this),
+                                            "Rafraîchir la page"
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/errors/FormErrorBoundary.tsx",
+                                        lineNumber: 104,
+                                        columnNumber: 17
+                                    }, this)
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/errors/FormErrorBoundary.tsx",
+                                    lineNumber: 103,
+                                    columnNumber: 15
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/errors/FormErrorBoundary.tsx",
+                            lineNumber: 97,
+                            columnNumber: 13
+                        }, this)
+                    ]
+                }, void 0, true, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/errors/FormErrorBoundary.tsx",
+                    lineNumber: 94,
+                    columnNumber: 11
+                }, this);
+            }
+            return /*#__PURE__*/ _jsxDEV(Alert, {
+                variant: "destructive",
+                className: "my-4",
+                children: [
+                    /*#__PURE__*/ _jsxDEV(XCircle, {
+                        className: "h-4 w-4"
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/errors/FormErrorBoundary.tsx",
+                        lineNumber: 121,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV(AlertTitle, {
+                        children: "Erreur du formulaire"
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/errors/FormErrorBoundary.tsx",
+                        lineNumber: 122,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV(AlertDescription, {
+                        className: "mt-2 space-y-3",
+                        children: [
+                            /*#__PURE__*/ _jsxDEV("p", {
+                                children: [
+                                    "Une erreur s'est produite",
+                                    formName && ` dans le formulaire "${formName}"`,
+                                    ". Vos données n'ont pas été perdues."
+                                ]
+                            }, void 0, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/errors/FormErrorBoundary.tsx",
+                                lineNumber: 124,
+                                columnNumber: 13
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV(Button, {
+                                variant: "outline",
+                                size: "sm",
+                                onClick: this.handleReset,
+                                className: "gap-2",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV(RefreshCw, {
+                                        className: "h-3 w-3"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/errors/FormErrorBoundary.tsx",
+                                        lineNumber: 134,
+                                        columnNumber: 15
+                                    }, this),
+                                    "Réessayer"
+                                ]
+                            }, void 0, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/errors/FormErrorBoundary.tsx",
+                                lineNumber: 128,
+                                columnNumber: 13
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/errors/FormErrorBoundary.tsx",
+                        lineNumber: 123,
+                        columnNumber: 11
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/errors/FormErrorBoundary.tsx",
+                lineNumber: 120,
+                columnNumber: 9
+            }, this);
+        }
+        return children;
+    }
+    constructor(props){
+        super(props), _define_property(this, "handleReset", ()=>{
+            this.setState({
+                hasError: false,
+                error: null
+            });
+            // Callback de reset personnalisé
+            if (this.props.onReset) {
+                this.props.onReset();
+            }
+        });
+        this.state = {
+            hasError: false,
+            error: null,
+            errorCount: 0
+        };
+    }
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/errors/FormErrorBoundary.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/errors/FormErrorBoundary.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIkZvcm1FcnJvckJvdW5kYXJ5LnRzeCJdLCJzb3VyY2VzQ29udGVudCI6WyIvKipcbiAqIEVycm9yIEJvdW5kYXJ5IHNww6ljaWZpcXVlIHBvdXIgbGVzIGZvcm11bGFpcmVzXG4gKiBEYXRlIDogMjcgb2N0b2JyZSAyMDI1XG4gKi9cblxuaW1wb3J0IFJlYWN0LCB7IENvbXBvbmVudCwgRXJyb3JJbmZvIH0gZnJvbSAncmVhY3QnO1xuaW1wb3J0IHsgQWxlcnQsIEFsZXJ0RGVzY3JpcHRpb24sIEFsZXJ0VGl0bGUgfSBmcm9tICdAL2NvbXBvbmVudHMvdWkvYWxlcnQnO1xuaW1wb3J0IHsgQnV0dG9uIH0gZnJvbSAnQC9jb21wb25lbnRzL3VpL2J1dHRvbic7XG5pbXBvcnQgeyBYQ2lyY2xlLCBSZWZyZXNoQ3cgfSBmcm9tICdsdWNpZGUtcmVhY3QnO1xuaW1wb3J0ICogYXMgU2VudHJ5IGZyb20gJ0BzZW50cnkvcmVhY3QnO1xuaW1wb3J0IHsgbG9nZ2VyIH0gZnJvbSAnQC9saWIvbG9nZ2VyJztcblxuaW50ZXJmYWNlIFByb3BzIHtcbiAgY2hpbGRyZW46IFJlYWN0LlJlYWN0Tm9kZTtcbiAgZm9ybU5hbWU/OiBzdHJpbmc7XG4gIG9uRXJyb3I/OiAoZXJyb3I6IEVycm9yLCBlcnJvckluZm86IEVycm9ySW5mbykgPT4gdm9pZDtcbiAgb25SZXNldD86ICgpID0+IHZvaWQ7XG59XG5cbmludGVyZmFjZSBTdGF0ZSB7XG4gIGhhc0Vycm9yOiBib29sZWFuO1xuICBlcnJvcjogRXJyb3IgfCBudWxsO1xuICBlcnJvckNvdW50OiBudW1iZXI7XG59XG5cbmV4cG9ydCBjbGFzcyBGb3JtRXJyb3JCb3VuZGFyeSBleHRlbmRzIENvbXBvbmVudDxQcm9wcywgU3RhdGU+IHtcbiAgY29uc3RydWN0b3IocHJvcHM6IFByb3BzKSB7XG4gICAgc3VwZXIocHJvcHMpO1xuICAgIHRoaXMuc3RhdGUgPSB7XG4gICAgICBoYXNFcnJvcjogZmFsc2UsXG4gICAgICBlcnJvcjogbnVsbCxcbiAgICAgIGVycm9yQ291bnQ6IDAsXG4gICAgfTtcbiAgfVxuXG4gIHN0YXRpYyBnZXREZXJpdmVkU3RhdGVGcm9tRXJyb3IoZXJyb3I6IEVycm9yKTogUGFydGlhbDxTdGF0ZT4ge1xuICAgIHJldHVybiB7XG4gICAgICBoYXNFcnJvcjogdHJ1ZSxcbiAgICAgIGVycm9yLFxuICAgIH07XG4gIH1cblxuICBjb21wb25lbnREaWRDYXRjaChlcnJvcjogRXJyb3IsIGVycm9ySW5mbzogRXJyb3JJbmZvKSB7XG4gICAgLy8gSW5jcsOpbWVudGVyIGxlIGNvbXB0ZXVyIGQnZXJyZXVyc1xuICAgIHRoaXMuc2V0U3RhdGUoKHByZXYpID0+ICh7XG4gICAgICBlcnJvckNvdW50OiBwcmV2LmVycm9yQ291bnQgKyAxLFxuICAgIH0pKTtcblxuICAgIC8vIExvZyB2ZXJzIFNlbnRyeSBhdmVjIGNvbnRleHRlIGR1IGZvcm11bGFpcmVcbiAgICBTZW50cnkuY2FwdHVyZUV4Y2VwdGlvbihlcnJvciwge1xuICAgICAgY29udGV4dHM6IHtcbiAgICAgICAgcmVhY3Q6IHtcbiAgICAgICAgICBjb21wb25lbnRTdGFjazogZXJyb3JJbmZvLmNvbXBvbmVudFN0YWNrLFxuICAgICAgICB9LFxuICAgICAgICBmb3JtOiB7XG4gICAgICAgICAgbmFtZTogdGhpcy5wcm9wcy5mb3JtTmFtZSB8fCAndW5rbm93bicsXG4gICAgICAgICAgZXJyb3JDb3VudDogdGhpcy5zdGF0ZS5lcnJvckNvdW50ICsgMSxcbiAgICAgICAgfSxcbiAgICAgIH0sXG4gICAgICB0YWdzOiB7XG4gICAgICAgIGNvbXBvbmVudDogJ0Zvcm1FcnJvckJvdW5kYXJ5JyxcbiAgICAgICAgZm9ybU5hbWU6IHRoaXMucHJvcHMuZm9ybU5hbWUgfHwgJ3Vua25vd24nLFxuICAgICAgfSxcbiAgICB9KTtcblxuICAgIC8vIENhbGxiYWNrIHBlcnNvbm5hbGlzw6lcbiAgICBpZiAodGhpcy5wcm9wcy5vbkVycm9yKSB7XG4gICAgICB0aGlzLnByb3BzLm9uRXJyb3IoZXJyb3IsIGVycm9ySW5mbyk7XG4gICAgfVxuXG4gICAgbG9nZ2VyLmVycm9yKGBGb3JtIEVycm9yICgke3RoaXMucHJvcHMuZm9ybU5hbWV9KWAsIHsgZXJyb3IsIGVycm9ySW5mbyB9KTtcbiAgfVxuXG4gIGhhbmRsZVJlc2V0ID0gKCkgPT4ge1xuICAgIHRoaXMuc2V0U3RhdGUoe1xuICAgICAgaGFzRXJyb3I6IGZhbHNlLFxuICAgICAgZXJyb3I6IG51bGwsXG4gICAgfSk7XG4gICAgXG4gICAgLy8gQ2FsbGJhY2sgZGUgcmVzZXQgcGVyc29ubmFsaXPDqVxuICAgIGlmICh0aGlzLnByb3BzLm9uUmVzZXQpIHtcbiAgICAgIHRoaXMucHJvcHMub25SZXNldCgpO1xuICAgIH1cbiAgfTtcblxuICByZW5kZXIoKSB7XG4gICAgY29uc3QgeyBoYXNFcnJvciwgZXJyb3JDb3VudCB9ID0gdGhpcy5zdGF0ZTtcbiAgICBjb25zdCB7IGNoaWxkcmVuLCBmb3JtTmFtZSB9ID0gdGhpcy5wcm9wcztcblxuICAgIGlmIChoYXNFcnJvcikge1xuICAgICAgLy8gU2kgdHJvcCBkJ2VycmV1cnMgY29uc8OpY3V0aXZlcywgYWZmaWNoZXIgdW4gbWVzc2FnZSBkaWZmw6lyZW50XG4gICAgICBpZiAoZXJyb3JDb3VudCA+PSAzKSB7XG4gICAgICAgIHJldHVybiAoXG4gICAgICAgICAgPEFsZXJ0IHZhcmlhbnQ9XCJkZXN0cnVjdGl2ZVwiIGNsYXNzTmFtZT1cIm15LTRcIj5cbiAgICAgICAgICAgIDxYQ2lyY2xlIGNsYXNzTmFtZT1cImgtNCB3LTRcIiAvPlxuICAgICAgICAgICAgPEFsZXJ0VGl0bGU+RXJyZXVycyByw6lww6l0w6llcyBkw6l0ZWN0w6llczwvQWxlcnRUaXRsZT5cbiAgICAgICAgICAgIDxBbGVydERlc2NyaXB0aW9uIGNsYXNzTmFtZT1cIm10LTIgc3BhY2UteS0zXCI+XG4gICAgICAgICAgICAgIDxwPlxuICAgICAgICAgICAgICAgIExlIGZvcm11bGFpcmV7Zm9ybU5hbWUgJiYgYCBcIiR7Zm9ybU5hbWV9XCJgfSByZW5jb250cmUgZGVzIGVycmV1cnNcbiAgICAgICAgICAgICAgICByw6lww6l0w6llcy4gVmV1aWxsZXogcmFmcmHDrmNoaXIgbGEgcGFnZSBvdSBjb250YWN0ZXIgbGUgc3VwcG9ydCBzaVxuICAgICAgICAgICAgICAgIGxlIHByb2Jsw6htZSBwZXJzaXN0ZS5cbiAgICAgICAgICAgICAgPC9wPlxuICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggZ2FwLTJcIj5cbiAgICAgICAgICAgICAgICA8QnV0dG9uXG4gICAgICAgICAgICAgICAgICB2YXJpYW50PVwib3V0bGluZVwiXG4gICAgICAgICAgICAgICAgICBzaXplPVwic21cIlxuICAgICAgICAgICAgICAgICAgb25DbGljaz17KCkgPT4gd2luZG93LmxvY2F0aW9uLnJlbG9hZCgpfVxuICAgICAgICAgICAgICAgICAgY2xhc3NOYW1lPVwiZ2FwLTJcIlxuICAgICAgICAgICAgICAgID5cbiAgICAgICAgICAgICAgICAgIDxSZWZyZXNoQ3cgY2xhc3NOYW1lPVwiaC0zIHctM1wiIC8+XG4gICAgICAgICAgICAgICAgICBSYWZyYcOuY2hpciBsYSBwYWdlXG4gICAgICAgICAgICAgICAgPC9CdXR0b24+XG4gICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgPC9BbGVydERlc2NyaXB0aW9uPlxuICAgICAgICAgIDwvQWxlcnQ+XG4gICAgICAgICk7XG4gICAgICB9XG5cbiAgICAgIHJldHVybiAoXG4gICAgICAgIDxBbGVydCB2YXJpYW50PVwiZGVzdHJ1Y3RpdmVcIiBjbGFzc05hbWU9XCJteS00XCI+XG4gICAgICAgICAgPFhDaXJjbGUgY2xhc3NOYW1lPVwiaC00IHctNFwiIC8+XG4gICAgICAgICAgPEFsZXJ0VGl0bGU+RXJyZXVyIGR1IGZvcm11bGFpcmU8L0FsZXJ0VGl0bGU+XG4gICAgICAgICAgPEFsZXJ0RGVzY3JpcHRpb24gY2xhc3NOYW1lPVwibXQtMiBzcGFjZS15LTNcIj5cbiAgICAgICAgICAgIDxwPlxuICAgICAgICAgICAgICBVbmUgZXJyZXVyIHMnZXN0IHByb2R1aXRle2Zvcm1OYW1lICYmIGAgZGFucyBsZSBmb3JtdWxhaXJlIFwiJHtmb3JtTmFtZX1cImB9LlxuICAgICAgICAgICAgICBWb3MgZG9ubsOpZXMgbidvbnQgcGFzIMOpdMOpIHBlcmR1ZXMuXG4gICAgICAgICAgICA8L3A+XG4gICAgICAgICAgICA8QnV0dG9uXG4gICAgICAgICAgICAgIHZhcmlhbnQ9XCJvdXRsaW5lXCJcbiAgICAgICAgICAgICAgc2l6ZT1cInNtXCJcbiAgICAgICAgICAgICAgb25DbGljaz17dGhpcy5oYW5kbGVSZXNldH1cbiAgICAgICAgICAgICAgY2xhc3NOYW1lPVwiZ2FwLTJcIlxuICAgICAgICAgICAgPlxuICAgICAgICAgICAgICA8UmVmcmVzaEN3IGNsYXNzTmFtZT1cImgtMyB3LTNcIiAvPlxuICAgICAgICAgICAgICBSw6llc3NheWVyXG4gICAgICAgICAgICA8L0J1dHRvbj5cbiAgICAgICAgICA8L0FsZXJ0RGVzY3JpcHRpb24+XG4gICAgICAgIDwvQWxlcnQ+XG4gICAgICApO1xuICAgIH1cblxuICAgIHJldHVybiBjaGlsZHJlbjtcbiAgfVxufVxuXG5cblxuXG5cblxuXG4iXSwibmFtZXMiOlsiUmVhY3QiLCJDb21wb25lbnQiLCJBbGVydCIsIkFsZXJ0RGVzY3JpcHRpb24iLCJBbGVydFRpdGxlIiwiQnV0dG9uIiwiWENpcmNsZSIsIlJlZnJlc2hDdyIsIlNlbnRyeSIsImxvZ2dlciIsIkZvcm1FcnJvckJvdW5kYXJ5IiwiZ2V0RGVyaXZlZFN0YXRlRnJvbUVycm9yIiwiZXJyb3IiLCJoYXNFcnJvciIsImNvbXBvbmVudERpZENhdGNoIiwiZXJyb3JJbmZvIiwic2V0U3RhdGUiLCJwcmV2IiwiZXJyb3JDb3VudCIsImNhcHR1cmVFeGNlcHRpb24iLCJjb250ZXh0cyIsInJlYWN0IiwiY29tcG9uZW50U3RhY2siLCJmb3JtIiwibmFtZSIsInByb3BzIiwiZm9ybU5hbWUiLCJzdGF0ZSIsInRhZ3MiLCJjb21wb25lbnQiLCJvbkVycm9yIiwicmVuZGVyIiwiY2hpbGRyZW4iLCJ2YXJpYW50IiwiY2xhc3NOYW1lIiwicCIsImRpdiIsInNpemUiLCJvbkNsaWNrIiwid2luZG93IiwibG9jYXRpb24iLCJyZWxvYWQiLCJoYW5kbGVSZXNldCIsIm9uUmVzZXQiXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7O0FBQUE7OztDQUdDLEdBRUQsT0FBT0EsU0FBU0MsU0FBUyxRQUFtQixRQUFRO0FBQ3BELFNBQVNDLEtBQUssRUFBRUMsZ0JBQWdCLEVBQUVDLFVBQVUsUUFBUSx3QkFBd0I7QUFDNUUsU0FBU0MsTUFBTSxRQUFRLHlCQUF5QjtBQUNoRCxTQUFTQyxPQUFPLEVBQUVDLFNBQVMsUUFBUSxlQUFlO0FBQ2xELFlBQVlDLFlBQVksZ0JBQWdCO0FBQ3hDLFNBQVNDLE1BQU0sUUFBUSxlQUFlO0FBZXRDLE9BQU8sTUFBTUMsMEJBQTBCVDtJQVVyQyxPQUFPVSx5QkFBeUJDLEtBQVksRUFBa0I7UUFDNUQsT0FBTztZQUNMQyxVQUFVO1lBQ1ZEO1FBQ0Y7SUFDRjtJQUVBRSxrQkFBa0JGLEtBQVksRUFBRUcsU0FBb0IsRUFBRTtRQUNwRCxvQ0FBb0M7UUFDcEMsSUFBSSxDQUFDQyxRQUFRLENBQUMsQ0FBQ0MsT0FBVSxDQUFBO2dCQUN2QkMsWUFBWUQsS0FBS0MsVUFBVSxHQUFHO1lBQ2hDLENBQUE7UUFFQSw4Q0FBOEM7UUFDOUNWLE9BQU9XLGdCQUFnQixDQUFDUCxPQUFPO1lBQzdCUSxVQUFVO2dCQUNSQyxPQUFPO29CQUNMQyxnQkFBZ0JQLFVBQVVPLGNBQWM7Z0JBQzFDO2dCQUNBQyxNQUFNO29CQUNKQyxNQUFNLElBQUksQ0FBQ0MsS0FBSyxDQUFDQyxRQUFRLElBQUk7b0JBQzdCUixZQUFZLElBQUksQ0FBQ1MsS0FBSyxDQUFDVCxVQUFVLEdBQUc7Z0JBQ3RDO1lBQ0Y7WUFDQVUsTUFBTTtnQkFDSkMsV0FBVztnQkFDWEgsVUFBVSxJQUFJLENBQUNELEtBQUssQ0FBQ0MsUUFBUSxJQUFJO1lBQ25DO1FBQ0Y7UUFFQSx3QkFBd0I7UUFDeEIsSUFBSSxJQUFJLENBQUNELEtBQUssQ0FBQ0ssT0FBTyxFQUFFO1lBQ3RCLElBQUksQ0FBQ0wsS0FBSyxDQUFDSyxPQUFPLENBQUNsQixPQUFPRztRQUM1QjtRQUVBTixPQUFPRyxLQUFLLENBQUMsQ0FBQyxZQUFZLEVBQUUsSUFBSSxDQUFDYSxLQUFLLENBQUNDLFFBQVEsQ0FBQyxDQUFDLENBQUMsRUFBRTtZQUFFZDtZQUFPRztRQUFVO0lBQ3pFO0lBY0FnQixTQUFTO1FBQ1AsTUFBTSxFQUFFbEIsUUFBUSxFQUFFSyxVQUFVLEVBQUUsR0FBRyxJQUFJLENBQUNTLEtBQUs7UUFDM0MsTUFBTSxFQUFFSyxRQUFRLEVBQUVOLFFBQVEsRUFBRSxHQUFHLElBQUksQ0FBQ0QsS0FBSztRQUV6QyxJQUFJWixVQUFVO1lBQ1osZ0VBQWdFO1lBQ2hFLElBQUlLLGNBQWMsR0FBRztnQkFDbkIscUJBQ0UsUUFBQ2hCO29CQUFNK0IsU0FBUTtvQkFBY0MsV0FBVTs7c0NBQ3JDLFFBQUM1Qjs0QkFBUTRCLFdBQVU7Ozs7OztzQ0FDbkIsUUFBQzlCO3NDQUFXOzs7Ozs7c0NBQ1osUUFBQ0Q7NEJBQWlCK0IsV0FBVTs7OENBQzFCLFFBQUNDOzt3Q0FBRTt3Q0FDYVQsWUFBWSxDQUFDLEVBQUUsRUFBRUEsU0FBUyxDQUFDLENBQUM7d0NBQUM7Ozs7Ozs7OENBSTdDLFFBQUNVO29DQUFJRixXQUFVOzhDQUNiLGNBQUEsUUFBQzdCO3dDQUNDNEIsU0FBUTt3Q0FDUkksTUFBSzt3Q0FDTEMsU0FBUyxJQUFNQyxPQUFPQyxRQUFRLENBQUNDLE1BQU07d0NBQ3JDUCxXQUFVOzswREFFVixRQUFDM0I7Z0RBQVUyQixXQUFVOzs7Ozs7NENBQVk7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OztZQU83QztZQUVBLHFCQUNFLFFBQUNoQztnQkFBTStCLFNBQVE7Z0JBQWNDLFdBQVU7O2tDQUNyQyxRQUFDNUI7d0JBQVE0QixXQUFVOzs7Ozs7a0NBQ25CLFFBQUM5QjtrQ0FBVzs7Ozs7O2tDQUNaLFFBQUNEO3dCQUFpQitCLFdBQVU7OzBDQUMxQixRQUFDQzs7b0NBQUU7b0NBQ3lCVCxZQUFZLENBQUMscUJBQXFCLEVBQUVBLFNBQVMsQ0FBQyxDQUFDO29DQUFDOzs7Ozs7OzBDQUc1RSxRQUFDckI7Z0NBQ0M0QixTQUFRO2dDQUNSSSxNQUFLO2dDQUNMQyxTQUFTLElBQUksQ0FBQ0ksV0FBVztnQ0FDekJSLFdBQVU7O2tEQUVWLFFBQUMzQjt3Q0FBVTJCLFdBQVU7Ozs7OztvQ0FBWTs7Ozs7Ozs7Ozs7Ozs7Ozs7OztRQU0zQztRQUVBLE9BQU9GO0lBQ1Q7SUFwSEEsWUFBWVAsS0FBWSxDQUFFO1FBQ3hCLEtBQUssQ0FBQ0EsUUE4Q1JpQix1QkFBQUEsZUFBYztZQUNaLElBQUksQ0FBQzFCLFFBQVEsQ0FBQztnQkFDWkgsVUFBVTtnQkFDVkQsT0FBTztZQUNUO1lBRUEsaUNBQWlDO1lBQ2pDLElBQUksSUFBSSxDQUFDYSxLQUFLLENBQUNrQixPQUFPLEVBQUU7Z0JBQ3RCLElBQUksQ0FBQ2xCLEtBQUssQ0FBQ2tCLE9BQU87WUFDcEI7UUFDRjtRQXZERSxJQUFJLENBQUNoQixLQUFLLEdBQUc7WUFDWGQsVUFBVTtZQUNWRCxPQUFPO1lBQ1BNLFlBQVk7UUFDZDtJQUNGO0FBOEdGIn0=

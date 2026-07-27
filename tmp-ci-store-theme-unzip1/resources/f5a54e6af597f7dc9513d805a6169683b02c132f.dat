@@ -1,0 +1,79 @@
+import { flush } from "/node_modules/@sentry/core/build/esm/exports.js?v=d758aa40";
+import { debug } from "/node_modules/@sentry/core/build/esm/utils/debug-logger.js?v=d758aa40";
+import { vercelWaitUntil } from "/node_modules/@sentry/core/build/esm/utils/vercelWaitUntil.js?v=d758aa40";
+import { GLOBAL_OBJ } from "/node_modules/@sentry/core/build/esm/utils/worldwide.js?v=d758aa40";
+
+async function flushWithTimeout(timeout) {
+  try {
+    debug.log('Flushing events...');
+    await flush(timeout);
+    debug.log('Done flushing events');
+  } catch (e) {
+    debug.log('Error while flushing events:\n', e);
+  }
+}
+
+/**
+ *  Flushes the event queue with a timeout in serverless environments to ensure that events are sent to Sentry before the
+ *  serverless function execution ends.
+ *
+ * The function is async, but in environments that support a `waitUntil` mechanism, it will run synchronously.
+ *
+ * This function is aware of the following serverless platforms:
+ * - Cloudflare: If a Cloudflare context is provided, it will use `ctx.waitUntil()` to flush events (keeps the `this` context of `ctx`).
+ *               If a `cloudflareWaitUntil` function is provided, it will use that to flush events (looses the `this` context of `ctx`).
+ * - Vercel: It detects the Vercel environment and uses Vercel's `waitUntil` function.
+ * - Other Serverless (AWS Lambda, Google Cloud, etc.): It detects the environment via environment variables
+ *   and uses a regular `await flush()`.
+ *
+ *  @internal This function is supposed for internal Sentry SDK usage only.
+ *  @hidden
+ */
+async function flushIfServerless(
+  params
+
+ = {},
+) {
+  const { timeout = 2000 } = params;
+
+  if ('cloudflareWaitUntil' in params && typeof params?.cloudflareWaitUntil === 'function') {
+    params.cloudflareWaitUntil(flushWithTimeout(timeout));
+    return;
+  }
+
+  if ('cloudflareCtx' in params && typeof params.cloudflareCtx?.waitUntil === 'function') {
+    params.cloudflareCtx.waitUntil(flushWithTimeout(timeout));
+    return;
+  }
+
+  // Note: vercelWaitUntil only does something in Vercel Edge runtime
+  // In Node runtime, we use process.on('SIGTERM') instead
+  // @ts-expect-error This is not typed
+  if (GLOBAL_OBJ[Symbol.for('@vercel/request-context')]) {
+    // Vercel has a waitUntil equivalent that works without execution context
+    vercelWaitUntil(flushWithTimeout(timeout));
+    return;
+  }
+
+  if (typeof process === 'undefined') {
+    return;
+  }
+
+  const isServerless =
+    !!process.env.FUNCTIONS_WORKER_RUNTIME || // Azure Functions
+    !!process.env.LAMBDA_TASK_ROOT || // AWS Lambda
+    !!process.env.K_SERVICE || // Google Cloud Run
+    !!process.env.CF_PAGES || // Cloudflare Pages
+    !!process.env.VERCEL ||
+    !!process.env.NETLIFY;
+
+  if (isServerless) {
+    // Use regular flush for environments without a generic waitUntil mechanism
+    await flushWithTimeout(timeout);
+  }
+}
+
+export { flushIfServerless };
+                                             
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZmx1c2hJZlNlcnZlcmxlc3MuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy91dGlscy9mbHVzaElmU2VydmVybGVzcy50cyJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgeyBmbHVzaCB9IGZyb20gJy4uL2V4cG9ydHMnO1xuaW1wb3J0IHsgZGVidWcgfSBmcm9tICcuL2RlYnVnLWxvZ2dlcic7XG5pbXBvcnQgeyB2ZXJjZWxXYWl0VW50aWwgfSBmcm9tICcuL3ZlcmNlbFdhaXRVbnRpbCc7XG5pbXBvcnQgeyBHTE9CQUxfT0JKIH0gZnJvbSAnLi93b3JsZHdpZGUnO1xuXG50eXBlIE1pbmltYWxDbG91ZGZsYXJlQ29udGV4dCA9IHtcbiAgLy8gZXNsaW50LWRpc2FibGUtbmV4dC1saW5lIEB0eXBlc2NyaXB0LWVzbGludC9uby1leHBsaWNpdC1hbnlcbiAgd2FpdFVudGlsKHByb21pc2U6IFByb21pc2U8YW55Pik6IHZvaWQ7XG59O1xuXG5hc3luYyBmdW5jdGlvbiBmbHVzaFdpdGhUaW1lb3V0KHRpbWVvdXQ6IG51bWJlcik6IFByb21pc2U8dm9pZD4ge1xuICB0cnkge1xuICAgIGRlYnVnLmxvZygnRmx1c2hpbmcgZXZlbnRzLi4uJyk7XG4gICAgYXdhaXQgZmx1c2godGltZW91dCk7XG4gICAgZGVidWcubG9nKCdEb25lIGZsdXNoaW5nIGV2ZW50cycpO1xuICB9IGNhdGNoIChlKSB7XG4gICAgZGVidWcubG9nKCdFcnJvciB3aGlsZSBmbHVzaGluZyBldmVudHM6XFxuJywgZSk7XG4gIH1cbn1cblxuLyoqXG4gKiAgRmx1c2hlcyB0aGUgZXZlbnQgcXVldWUgd2l0aCBhIHRpbWVvdXQgaW4gc2VydmVybGVzcyBlbnZpcm9ubWVudHMgdG8gZW5zdXJlIHRoYXQgZXZlbnRzIGFyZSBzZW50IHRvIFNlbnRyeSBiZWZvcmUgdGhlXG4gKiAgc2VydmVybGVzcyBmdW5jdGlvbiBleGVjdXRpb24gZW5kcy5cbiAqXG4gKiBUaGUgZnVuY3Rpb24gaXMgYXN5bmMsIGJ1dCBpbiBlbnZpcm9ubWVudHMgdGhhdCBzdXBwb3J0IGEgYHdhaXRVbnRpbGAgbWVjaGFuaXNtLCBpdCB3aWxsIHJ1biBzeW5jaHJvbm91c2x5LlxuICpcbiAqIFRoaXMgZnVuY3Rpb24gaXMgYXdhcmUgb2YgdGhlIGZvbGxvd2luZyBzZXJ2ZXJsZXNzIHBsYXRmb3JtczpcbiAqIC0gQ2xvdWRmbGFyZTogSWYgYSBDbG91ZGZsYXJlIGNvbnRleHQgaXMgcHJvdmlkZWQsIGl0IHdpbGwgdXNlIGBjdHgud2FpdFVudGlsKClgIHRvIGZsdXNoIGV2ZW50cyAoa2VlcHMgdGhlIGB0aGlzYCBjb250ZXh0IG9mIGBjdHhgKS5cbiAqICAgICAgICAgICAgICAgSWYgYSBgY2xvdWRmbGFyZVdhaXRVbnRpbGAgZnVuY3Rpb24gaXMgcHJvdmlkZWQsIGl0IHdpbGwgdXNlIHRoYXQgdG8gZmx1c2ggZXZlbnRzIChsb29zZXMgdGhlIGB0aGlzYCBjb250ZXh0IG9mIGBjdHhgKS5cbiAqIC0gVmVyY2VsOiBJdCBkZXRlY3RzIHRoZSBWZXJjZWwgZW52aXJvbm1lbnQgYW5kIHVzZXMgVmVyY2VsJ3MgYHdhaXRVbnRpbGAgZnVuY3Rpb24uXG4gKiAtIE90aGVyIFNlcnZlcmxlc3MgKEFXUyBMYW1iZGEsIEdvb2dsZSBDbG91ZCwgZXRjLik6IEl0IGRldGVjdHMgdGhlIGVudmlyb25tZW50IHZpYSBlbnZpcm9ubWVudCB2YXJpYWJsZXNcbiAqICAgYW5kIHVzZXMgYSByZWd1bGFyIGBhd2FpdCBmbHVzaCgpYC5cbiAqXG4gKiAgQGludGVybmFsIFRoaXMgZnVuY3Rpb24gaXMgc3VwcG9zZWQgZm9yIGludGVybmFsIFNlbnRyeSBTREsgdXNhZ2Ugb25seS5cbiAqICBAaGlkZGVuXG4gKi9cbmV4cG9ydCBhc3luYyBmdW5jdGlvbiBmbHVzaElmU2VydmVybGVzcyhcbiAgcGFyYW1zOiAvLyBlc2xpbnQtZGlzYWJsZS1uZXh0LWxpbmUgQHR5cGVzY3JpcHQtZXNsaW50L25vLWV4cGxpY2l0LWFueVxuICAgIHwgeyB0aW1lb3V0PzogbnVtYmVyOyBjbG91ZGZsYXJlV2FpdFVudGlsPzogKHRhc2s6IFByb21pc2U8YW55PikgPT4gdm9pZCB9XG4gICAgfCB7IHRpbWVvdXQ/OiBudW1iZXI7IGNsb3VkZmxhcmVDdHg/OiBNaW5pbWFsQ2xvdWRmbGFyZUNvbnRleHQgfSA9IHt9LFxuKTogUHJvbWlzZTx2b2lkPiB7XG4gIGNvbnN0IHsgdGltZW91dCA9IDIwMDAgfSA9IHBhcmFtcztcblxuICBpZiAoJ2Nsb3VkZmxhcmVXYWl0VW50aWwnIGluIHBhcmFtcyAmJiB0eXBlb2YgcGFyYW1zPy5jbG91ZGZsYXJlV2FpdFVudGlsID09PSAnZnVuY3Rpb24nKSB7XG4gICAgcGFyYW1zLmNsb3VkZmxhcmVXYWl0VW50aWwoZmx1c2hXaXRoVGltZW91dCh0aW1lb3V0KSk7XG4gICAgcmV0dXJuO1xuICB9XG5cbiAgaWYgKCdjbG91ZGZsYXJlQ3R4JyBpbiBwYXJhbXMgJiYgdHlwZW9mIHBhcmFtcy5jbG91ZGZsYXJlQ3R4Py53YWl0VW50aWwgPT09ICdmdW5jdGlvbicpIHtcbiAgICBwYXJhbXMuY2xvdWRmbGFyZUN0eC53YWl0VW50aWwoZmx1c2hXaXRoVGltZW91dCh0aW1lb3V0KSk7XG4gICAgcmV0dXJuO1xuICB9XG5cbiAgLy8gTm90ZTogdmVyY2VsV2FpdFVudGlsIG9ubHkgZG9lcyBzb21ldGhpbmcgaW4gVmVyY2VsIEVkZ2UgcnVudGltZVxuICAvLyBJbiBOb2RlIHJ1bnRpbWUsIHdlIHVzZSBwcm9jZXNzLm9uKCdTSUdURVJNJykgaW5zdGVhZFxuICAvLyBAdHMtZXhwZWN0LWVycm9yIFRoaXMgaXMgbm90IHR5cGVkXG4gIGlmIChHTE9CQUxfT0JKW1N5bWJvbC5mb3IoJ0B2ZXJjZWwvcmVxdWVzdC1jb250ZXh0JyldKSB7XG4gICAgLy8gVmVyY2VsIGhhcyBhIHdhaXRVbnRpbCBlcXVpdmFsZW50IHRoYXQgd29ya3Mgd2l0aG91dCBleGVjdXRpb24gY29udGV4dFxuICAgIHZlcmNlbFdhaXRVbnRpbChmbHVzaFdpdGhUaW1lb3V0KHRpbWVvdXQpKTtcbiAgICByZXR1cm47XG4gIH1cblxuICBpZiAodHlwZW9mIHByb2Nlc3MgPT09ICd1bmRlZmluZWQnKSB7XG4gICAgcmV0dXJuO1xuICB9XG5cbiAgY29uc3QgaXNTZXJ2ZXJsZXNzID1cbiAgICAhIXByb2Nlc3MuZW52LkZVTkNUSU9OU19XT1JLRVJfUlVOVElNRSB8fCAvLyBBenVyZSBGdW5jdGlvbnNcbiAgICAhIXByb2Nlc3MuZW52LkxBTUJEQV9UQVNLX1JPT1QgfHwgLy8gQVdTIExhbWJkYVxuICAgICEhcHJvY2Vzcy5lbnYuS19TRVJWSUNFIHx8IC8vIEdvb2dsZSBDbG91ZCBSdW5cbiAgICAhIXByb2Nlc3MuZW52LkNGX1BBR0VTIHx8IC8vIENsb3VkZmxhcmUgUGFnZXNcbiAgICAhIXByb2Nlc3MuZW52LlZFUkNFTCB8fFxuICAgICEhcHJvY2Vzcy5lbnYuTkVUTElGWTtcblxuICBpZiAoaXNTZXJ2ZXJsZXNzKSB7XG4gICAgLy8gVXNlIHJlZ3VsYXIgZmx1c2ggZm9yIGVudmlyb25tZW50cyB3aXRob3V0IGEgZ2VuZXJpYyB3YWl0VW50aWwgbWVjaGFuaXNtXG4gICAgYXdhaXQgZmx1c2hXaXRoVGltZW91dCh0aW1lb3V0KTtcbiAgfVxufVxuIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7Ozs7O0FBVUEsZUFBZSxnQkFBZ0IsQ0FBQyxPQUFPLEVBQXlCO0FBQ2hFLEVBQUUsSUFBSTtBQUNOLElBQUksS0FBSyxDQUFDLEdBQUcsQ0FBQyxvQkFBb0IsQ0FBQztBQUNuQyxJQUFJLE1BQU0sS0FBSyxDQUFDLE9BQU8sQ0FBQztBQUN4QixJQUFJLEtBQUssQ0FBQyxHQUFHLENBQUMsc0JBQXNCLENBQUM7QUFDckMsRUFBRSxDQUFBLENBQUUsT0FBTyxDQUFDLEVBQUU7QUFDZCxJQUFJLEtBQUssQ0FBQyxHQUFHLENBQUMsZ0NBQWdDLEVBQUUsQ0FBQyxDQUFDO0FBQ2xELEVBQUU7QUFDRjs7QUFFQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNPLGVBQWUsaUJBQWlCO0FBQ3ZDLEVBQUU7O0FBRUUsR0FBbUUsRUFBRTtBQUN6RSxFQUFpQjtBQUNqQixFQUFFLE1BQU0sRUFBRSxPQUFBLEdBQVUsSUFBQSxFQUFLLEdBQUksTUFBTTs7QUFFbkMsRUFBRSxJQUFJLHFCQUFBLElBQXlCLE1BQUEsSUFBVSxPQUFPLE1BQU0sRUFBRSxtQkFBQSxLQUF3QixVQUFVLEVBQUU7QUFDNUYsSUFBSSxNQUFNLENBQUMsbUJBQW1CLENBQUMsZ0JBQWdCLENBQUMsT0FBTyxDQUFDLENBQUM7QUFDekQsSUFBSTtBQUNKLEVBQUU7O0FBRUYsRUFBRSxJQUFJLGVBQUEsSUFBbUIsVUFBVSxPQUFPLE1BQU0sQ0FBQyxhQUFhLEVBQUUsU0FBQSxLQUFjLFVBQVUsRUFBRTtBQUMxRixJQUFJLE1BQU0sQ0FBQyxhQUFhLENBQUMsU0FBUyxDQUFDLGdCQUFnQixDQUFDLE9BQU8sQ0FBQyxDQUFDO0FBQzdELElBQUk7QUFDSixFQUFFOztBQUVGO0FBQ0E7QUFDQTtBQUNBLEVBQUUsSUFBSSxVQUFVLENBQUMsTUFBTSxDQUFDLEdBQUcsQ0FBQyx5QkFBeUIsQ0FBQyxDQUFDLEVBQUU7QUFDekQ7QUFDQSxJQUFJLGVBQWUsQ0FBQyxnQkFBZ0IsQ0FBQyxPQUFPLENBQUMsQ0FBQztBQUM5QyxJQUFJO0FBQ0osRUFBRTs7QUFFRixFQUFFLElBQUksT0FBTyxPQUFBLEtBQVksV0FBVyxFQUFFO0FBQ3RDLElBQUk7QUFDSixFQUFFOztBQUVGLEVBQUUsTUFBTSxZQUFBO0FBQ1IsSUFBSSxDQUFDLENBQUMsT0FBTyxDQUFDLEdBQUcsQ0FBQyx3QkFBQTtBQUNsQixJQUFJLENBQUMsQ0FBQyxPQUFPLENBQUMsR0FBRyxDQUFDLGdCQUFBO0FBQ2xCLElBQUksQ0FBQyxDQUFDLE9BQU8sQ0FBQyxHQUFHLENBQUMsU0FBQTtBQUNsQixJQUFJLENBQUMsQ0FBQyxPQUFPLENBQUMsR0FBRyxDQUFDLFFBQUE7QUFDbEIsSUFBSSxDQUFDLENBQUMsT0FBTyxDQUFDLEdBQUcsQ0FBQyxNQUFBO0FBQ2xCLElBQUksQ0FBQyxDQUFDLE9BQU8sQ0FBQyxHQUFHLENBQUMsT0FBTzs7QUFFekIsRUFBRSxJQUFJLFlBQVksRUFBRTtBQUNwQjtBQUNBLElBQUksTUFBTSxnQkFBZ0IsQ0FBQyxPQUFPLENBQUM7QUFDbkMsRUFBRTtBQUNGOzs7OyIsInhfZ29vZ2xlX2lnbm9yZUxpc3QiOlswXX0=

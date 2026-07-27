@@ -1,0 +1,8 @@
+// This is a magic string replaced by rollup
+
+const SDK_VERSION = "10.46.0" ;
+
+export { SDK_VERSION };
+                                   
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidmVyc2lvbi5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4vc3JjL3V0aWxzL3ZlcnNpb24udHMiXSwic291cmNlc0NvbnRlbnQiOlsiLy8gVGhpcyBpcyBhIG1hZ2ljIHN0cmluZyByZXBsYWNlZCBieSByb2xsdXBcbmRlY2xhcmUgY29uc3QgX19TRU5UUllfU0RLX1ZFUlNJT05fXzogc3RyaW5nO1xuXG5leHBvcnQgY29uc3QgU0RLX1ZFUlNJT04gPSB0eXBlb2YgX19TRU5UUllfU0RLX1ZFUlNJT05fXyA9PT0gJ3N0cmluZycgPyBfX1NFTlRSWV9TREtfVkVSU0lPTl9fIDogJzAuMC4wLXVua25vd24uMCc7XG4iXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUE7O0FBR08sTUFBTSxXQUFBLEdBQTJELFNBQUE7Ozs7IiwieF9nb29nbGVfaWdub3JlTGlzdCI6WzBdfQ==

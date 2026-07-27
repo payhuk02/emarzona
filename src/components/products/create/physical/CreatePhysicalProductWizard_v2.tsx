@@ -210,6 +210,7 @@ export const CreatePhysicalProductWizard = ({
     compare_at_price: null,
     cost_per_item: null,
     images: [],
+    category: 'vetements',
     category_id: null,
     tags: [],
 
@@ -722,6 +723,7 @@ export const CreatePhysicalProductWizard = ({
         compare_at_price: formData.compare_at_price ?? null,
         cost_per_item: formData.cost_per_item ?? null,
         currency: 'XOF',
+        category: formData.category,
         category_id: formData.category_id,
         image_url: formData.images?.[0] || null,
         images: formData.images || [],

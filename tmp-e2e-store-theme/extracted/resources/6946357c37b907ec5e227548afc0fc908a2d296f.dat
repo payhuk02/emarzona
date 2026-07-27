@@ -1,0 +1,95 @@
+/**
+ * Hook pour le feedback haptique sur mobile
+ * Améliore l'expérience utilisateur avec des vibrations subtiles
+ */ import __vite__cjsImport0_react from "/node_modules/.vite/deps/react.js?v=6014a254"; const useCallback = __vite__cjsImport0_react["useCallback"];
+// ✅ PHASE 2: Import logger pour remplacer console.*
+import { logger } from "/src/lib/logger.ts";
+/**
+ * Hook pour utiliser le feedback haptique
+ *
+ * @example
+ * ```tsx
+ * const { triggerHaptic } = useHapticFeedback();
+ *
+ * <button onClick={() => {
+ *   triggerHaptic('medium');
+ *   handleClick();
+ * }}>
+ *   Cliquer
+ * </button>
+ * ```
+ */ export function useHapticFeedback(options = {}) {
+    const { enabled = true } = options;
+    const triggerHaptic = useCallback((type = 'medium')=>{
+        if (!enabled) return;
+        // Vérifier si l'API Vibration est disponible
+        if (!('vibrate' in navigator)) {
+            return;
+        }
+        // Patterns de vibration selon le type
+        const patterns = {
+            light: 10,
+            medium: 20,
+            heavy: 40,
+            success: [
+                20,
+                10,
+                20
+            ],
+            warning: [
+                30,
+                20,
+                30
+            ],
+            error: [
+                50,
+                30,
+                50,
+                30,
+                50
+            ]
+        };
+        const pattern = patterns[type];
+        try {
+            navigator.vibrate(pattern);
+        } catch (error) {
+            // ✅ PHASE 2: Remplacer console.debug par logger (debug level)
+            logger.debug('Haptic feedback not supported', {
+                error,
+                type
+            });
+        }
+    }, [
+        enabled
+    ]);
+    return {
+        triggerHaptic
+    };
+}
+/**
+ * Hook pour wrapper un onClick avec feedback haptique
+ *
+ * @example
+ * ```tsx
+ * const { onClickWithHaptic } = useHapticFeedback();
+ *
+ * <button onClick={onClickWithHaptic(handleClick, 'medium')}>
+ *   Cliquer
+ * </button>
+ * ```
+ */ export function useHapticOnClick() {
+    const { triggerHaptic } = useHapticFeedback();
+    const onClickWithHaptic = useCallback((handler, type = 'medium')=>{
+        return (...args)=>{
+            triggerHaptic(type);
+            return handler(...args);
+        };
+    }, [
+        triggerHaptic
+    ]);
+    return {
+        onClickWithHaptic
+    };
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInVzZUhhcHRpY0ZlZWRiYWNrLnRzIl0sInNvdXJjZXNDb250ZW50IjpbIi8qKlxuICogSG9vayBwb3VyIGxlIGZlZWRiYWNrIGhhcHRpcXVlIHN1ciBtb2JpbGVcbiAqIEFtw6lsaW9yZSBsJ2V4cMOpcmllbmNlIHV0aWxpc2F0ZXVyIGF2ZWMgZGVzIHZpYnJhdGlvbnMgc3VidGlsZXNcbiAqL1xuXG5pbXBvcnQgeyB1c2VDYWxsYmFjayB9IGZyb20gJ3JlYWN0Jztcbi8vIOKchSBQSEFTRSAyOiBJbXBvcnQgbG9nZ2VyIHBvdXIgcmVtcGxhY2VyIGNvbnNvbGUuKlxuaW1wb3J0IHsgbG9nZ2VyIH0gZnJvbSAnQC9saWIvbG9nZ2VyJztcblxudHlwZSBIYXB0aWNGZWVkYmFja1R5cGUgPSAnbGlnaHQnIHwgJ21lZGl1bScgfCAnaGVhdnknIHwgJ3N1Y2Nlc3MnIHwgJ3dhcm5pbmcnIHwgJ2Vycm9yJztcblxuaW50ZXJmYWNlIEhhcHRpY0ZlZWRiYWNrT3B0aW9ucyB7XG4gIHR5cGU/OiBIYXB0aWNGZWVkYmFja1R5cGU7XG4gIGVuYWJsZWQ/OiBib29sZWFuO1xufVxuXG4vKipcbiAqIEhvb2sgcG91ciB1dGlsaXNlciBsZSBmZWVkYmFjayBoYXB0aXF1ZVxuICpcbiAqIEBleGFtcGxlXG4gKiBgYGB0c3hcbiAqIGNvbnN0IHsgdHJpZ2dlckhhcHRpYyB9ID0gdXNlSGFwdGljRmVlZGJhY2soKTtcbiAqXG4gKiA8YnV0dG9uIG9uQ2xpY2s9eygpID0+IHtcbiAqICAgdHJpZ2dlckhhcHRpYygnbWVkaXVtJyk7XG4gKiAgIGhhbmRsZUNsaWNrKCk7XG4gKiB9fT5cbiAqICAgQ2xpcXVlclxuICogPC9idXR0b24+XG4gKiBgYGBcbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIHVzZUhhcHRpY0ZlZWRiYWNrKG9wdGlvbnM6IEhhcHRpY0ZlZWRiYWNrT3B0aW9ucyA9IHt9KSB7XG4gIGNvbnN0IHsgZW5hYmxlZCA9IHRydWUgfSA9IG9wdGlvbnM7XG5cbiAgY29uc3QgdHJpZ2dlckhhcHRpYyA9IHVzZUNhbGxiYWNrKFxuICAgICh0eXBlOiBIYXB0aWNGZWVkYmFja1R5cGUgPSAnbWVkaXVtJykgPT4ge1xuICAgICAgaWYgKCFlbmFibGVkKSByZXR1cm47XG5cbiAgICAgIC8vIFbDqXJpZmllciBzaSBsJ0FQSSBWaWJyYXRpb24gZXN0IGRpc3BvbmlibGVcbiAgICAgIGlmICghKCd2aWJyYXRlJyBpbiBuYXZpZ2F0b3IpKSB7XG4gICAgICAgIHJldHVybjtcbiAgICAgIH1cblxuICAgICAgLy8gUGF0dGVybnMgZGUgdmlicmF0aW9uIHNlbG9uIGxlIHR5cGVcbiAgICAgIGNvbnN0ICBwYXR0ZXJuczogUmVjb3JkPEhhcHRpY0ZlZWRiYWNrVHlwZSwgbnVtYmVyIHwgbnVtYmVyW10+ID0ge1xuICAgICAgICBsaWdodDogMTAsIC8vIFZpYnJhdGlvbiBsw6lnw6hyZSAoMTBtcylcbiAgICAgICAgbWVkaXVtOiAyMCwgLy8gVmlicmF0aW9uIG1veWVubmUgKDIwbXMpXG4gICAgICAgIGhlYXZ5OiA0MCwgLy8gVmlicmF0aW9uIGZvcnRlICg0MG1zKVxuICAgICAgICBzdWNjZXNzOiBbMjAsIDEwLCAyMF0sIC8vIFN1Y2Nlc3M6IHZpYnJhdGlvbiBkb3VibGVcbiAgICAgICAgd2FybmluZzogWzMwLCAyMCwgMzBdLCAvLyBXYXJuaW5nOiB2aWJyYXRpb24gdHJpcGxlXG4gICAgICAgIGVycm9yOiBbNTAsIDMwLCA1MCwgMzAsIDUwXSwgLy8gRXJyb3I6IHZpYnJhdGlvbiBtdWx0aXBsZVxuICAgICAgfTtcblxuICAgICAgY29uc3QgcGF0dGVybiA9IHBhdHRlcm5zW3R5cGVdO1xuXG4gICAgICB0cnkge1xuICAgICAgICBuYXZpZ2F0b3IudmlicmF0ZShwYXR0ZXJuKTtcbiAgICAgIH0gY2F0Y2ggKGVycm9yKSB7XG4gICAgICAgIC8vIOKchSBQSEFTRSAyOiBSZW1wbGFjZXIgY29uc29sZS5kZWJ1ZyBwYXIgbG9nZ2VyIChkZWJ1ZyBsZXZlbClcbiAgICAgICAgbG9nZ2VyLmRlYnVnKCdIYXB0aWMgZmVlZGJhY2sgbm90IHN1cHBvcnRlZCcsIHsgZXJyb3IsIHR5cGUgfSk7XG4gICAgICB9XG4gICAgfSxcbiAgICBbZW5hYmxlZF1cbiAgKTtcblxuICByZXR1cm4geyB0cmlnZ2VySGFwdGljIH07XG59XG5cbi8qKlxuICogSG9vayBwb3VyIHdyYXBwZXIgdW4gb25DbGljayBhdmVjIGZlZWRiYWNrIGhhcHRpcXVlXG4gKlxuICogQGV4YW1wbGVcbiAqIGBgYHRzeFxuICogY29uc3QgeyBvbkNsaWNrV2l0aEhhcHRpYyB9ID0gdXNlSGFwdGljRmVlZGJhY2soKTtcbiAqXG4gKiA8YnV0dG9uIG9uQ2xpY2s9e29uQ2xpY2tXaXRoSGFwdGljKGhhbmRsZUNsaWNrLCAnbWVkaXVtJyl9PlxuICogICBDbGlxdWVyXG4gKiA8L2J1dHRvbj5cbiAqIGBgYFxuICovXG5leHBvcnQgZnVuY3Rpb24gdXNlSGFwdGljT25DbGljaygpIHtcbiAgY29uc3QgeyB0cmlnZ2VySGFwdGljIH0gPSB1c2VIYXB0aWNGZWVkYmFjaygpO1xuXG4gIGNvbnN0IG9uQ2xpY2tXaXRoSGFwdGljID0gdXNlQ2FsbGJhY2soXG4gICAgPFQgZXh0ZW5kcyAoLi4uYXJnczogdW5rbm93bltdKSA9PiB1bmtub3duPihcbiAgICAgIGhhbmRsZXI6IFQsXG4gICAgICB0eXBlOiBIYXB0aWNGZWVkYmFja1R5cGUgPSAnbWVkaXVtJ1xuICAgICkgPT4ge1xuICAgICAgcmV0dXJuICguLi5hcmdzOiBQYXJhbWV0ZXJzPFQ+KSA9PiB7XG4gICAgICAgIHRyaWdnZXJIYXB0aWModHlwZSk7XG4gICAgICAgIHJldHVybiBoYW5kbGVyKC4uLmFyZ3MpO1xuICAgICAgfTtcbiAgICB9LFxuICAgIFt0cmlnZ2VySGFwdGljXVxuICApO1xuXG4gIHJldHVybiB7IG9uQ2xpY2tXaXRoSGFwdGljIH07XG59XG5cblxuXG5cblxuXG4iXSwibmFtZXMiOlsidXNlQ2FsbGJhY2siLCJsb2dnZXIiLCJ1c2VIYXB0aWNGZWVkYmFjayIsIm9wdGlvbnMiLCJlbmFibGVkIiwidHJpZ2dlckhhcHRpYyIsInR5cGUiLCJuYXZpZ2F0b3IiLCJwYXR0ZXJucyIsImxpZ2h0IiwibWVkaXVtIiwiaGVhdnkiLCJzdWNjZXNzIiwid2FybmluZyIsImVycm9yIiwicGF0dGVybiIsInZpYnJhdGUiLCJkZWJ1ZyIsInVzZUhhcHRpY09uQ2xpY2siLCJvbkNsaWNrV2l0aEhhcHRpYyIsImhhbmRsZXIiLCJhcmdzIl0sIm1hcHBpbmdzIjoiQUFBQTs7O0NBR0MsR0FFRCxTQUFTQSxXQUFXLFFBQVEsUUFBUTtBQUNwQyxvREFBb0Q7QUFDcEQsU0FBU0MsTUFBTSxRQUFRLGVBQWU7QUFTdEM7Ozs7Ozs7Ozs7Ozs7O0NBY0MsR0FDRCxPQUFPLFNBQVNDLGtCQUFrQkMsVUFBaUMsQ0FBQyxDQUFDO0lBQ25FLE1BQU0sRUFBRUMsVUFBVSxJQUFJLEVBQUUsR0FBR0Q7SUFFM0IsTUFBTUUsZ0JBQWdCTCxZQUNwQixDQUFDTSxPQUEyQixRQUFRO1FBQ2xDLElBQUksQ0FBQ0YsU0FBUztRQUVkLDZDQUE2QztRQUM3QyxJQUFJLENBQUUsQ0FBQSxhQUFhRyxTQUFRLEdBQUk7WUFDN0I7UUFDRjtRQUVBLHNDQUFzQztRQUN0QyxNQUFPQyxXQUEwRDtZQUMvREMsT0FBTztZQUNQQyxRQUFRO1lBQ1JDLE9BQU87WUFDUEMsU0FBUztnQkFBQztnQkFBSTtnQkFBSTthQUFHO1lBQ3JCQyxTQUFTO2dCQUFDO2dCQUFJO2dCQUFJO2FBQUc7WUFDckJDLE9BQU87Z0JBQUM7Z0JBQUk7Z0JBQUk7Z0JBQUk7Z0JBQUk7YUFBRztRQUM3QjtRQUVBLE1BQU1DLFVBQVVQLFFBQVEsQ0FBQ0YsS0FBSztRQUU5QixJQUFJO1lBQ0ZDLFVBQVVTLE9BQU8sQ0FBQ0Q7UUFDcEIsRUFBRSxPQUFPRCxPQUFPO1lBQ2QsOERBQThEO1lBQzlEYixPQUFPZ0IsS0FBSyxDQUFDLGlDQUFpQztnQkFBRUg7Z0JBQU9SO1lBQUs7UUFDOUQ7SUFDRixHQUNBO1FBQUNGO0tBQVE7SUFHWCxPQUFPO1FBQUVDO0lBQWM7QUFDekI7QUFFQTs7Ozs7Ozs7Ozs7Q0FXQyxHQUNELE9BQU8sU0FBU2E7SUFDZCxNQUFNLEVBQUViLGFBQWEsRUFBRSxHQUFHSDtJQUUxQixNQUFNaUIsb0JBQW9CbkIsWUFDeEIsQ0FDRW9CLFNBQ0FkLE9BQTJCLFFBQVE7UUFFbkMsT0FBTyxDQUFDLEdBQUdlO1lBQ1RoQixjQUFjQztZQUNkLE9BQU9jLFdBQVdDO1FBQ3BCO0lBQ0YsR0FDQTtRQUFDaEI7S0FBYztJQUdqQixPQUFPO1FBQUVjO0lBQWtCO0FBQzdCIn0=

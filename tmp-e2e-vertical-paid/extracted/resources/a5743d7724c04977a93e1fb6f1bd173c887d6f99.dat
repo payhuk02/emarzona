@@ -1,0 +1,528 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/reviews/ReviewSkeleton.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=8792f17d"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+/**
+ * Skeletons précis pour les reviews
+ * Date : 27 octobre 2025
+ */ import { Skeleton } from "/src/components/ui/skeleton.tsx";
+import { Card, CardContent } from "/src/components/ui/card.tsx";
+/**
+ * Skeleton pour une carte de review individuelle
+ */ export const ReviewCardSkeleton = ()=>/*#__PURE__*/ _jsxDEV(Card, {
+        className: "p-6",
+        children: /*#__PURE__*/ _jsxDEV(CardContent, {
+            className: "p-0 space-y-4",
+            children: [
+                /*#__PURE__*/ _jsxDEV("div", {
+                    className: "flex items-start gap-4",
+                    children: [
+                        /*#__PURE__*/ _jsxDEV(Skeleton, {
+                            className: "h-12 w-12 rounded-full flex-shrink-0"
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+                            lineNumber: 17,
+                            columnNumber: 9
+                        }, this),
+                        /*#__PURE__*/ _jsxDEV("div", {
+                            className: "flex-1 space-y-2",
+                            children: [
+                                /*#__PURE__*/ _jsxDEV(Skeleton, {
+                                    className: "h-4 w-32"
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+                                    lineNumber: 19,
+                                    columnNumber: 11
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV("div", {
+                                    className: "flex items-center gap-2",
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV("div", {
+                                            className: "flex gap-1",
+                                            children: [
+                                                ...Array(5)
+                                            ].map((_, i)=>/*#__PURE__*/ _jsxDEV(Skeleton, {
+                                                    className: "h-4 w-4 rounded"
+                                                }, i, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+                                                    lineNumber: 24,
+                                                    columnNumber: 17
+                                                }, this))
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+                                            lineNumber: 22,
+                                            columnNumber: 13
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV(Skeleton, {
+                                            className: "h-3 w-24"
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+                                            lineNumber: 27,
+                                            columnNumber: 13
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+                                    lineNumber: 20,
+                                    columnNumber: 11
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+                            lineNumber: 18,
+                            columnNumber: 9
+                        }, this)
+                    ]
+                }, void 0, true, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+                    lineNumber: 16,
+                    columnNumber: 7
+                }, this),
+                /*#__PURE__*/ _jsxDEV("div", {
+                    className: "space-y-2",
+                    children: [
+                        /*#__PURE__*/ _jsxDEV(Skeleton, {
+                            className: "h-4 w-full"
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+                            lineNumber: 34,
+                            columnNumber: 9
+                        }, this),
+                        /*#__PURE__*/ _jsxDEV(Skeleton, {
+                            className: "h-4 w-11/12"
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+                            lineNumber: 35,
+                            columnNumber: 9
+                        }, this),
+                        /*#__PURE__*/ _jsxDEV(Skeleton, {
+                            className: "h-4 w-4/5"
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+                            lineNumber: 36,
+                            columnNumber: 9
+                        }, this)
+                    ]
+                }, void 0, true, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+                    lineNumber: 33,
+                    columnNumber: 7
+                }, this),
+                /*#__PURE__*/ _jsxDEV("div", {
+                    className: "flex gap-2",
+                    children: [
+                        /*#__PURE__*/ _jsxDEV(Skeleton, {
+                            className: "h-20 w-20 rounded-lg"
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+                            lineNumber: 41,
+                            columnNumber: 9
+                        }, this),
+                        /*#__PURE__*/ _jsxDEV(Skeleton, {
+                            className: "h-20 w-20 rounded-lg"
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+                            lineNumber: 42,
+                            columnNumber: 9
+                        }, this)
+                    ]
+                }, void 0, true, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+                    lineNumber: 40,
+                    columnNumber: 7
+                }, this),
+                /*#__PURE__*/ _jsxDEV("div", {
+                    className: "flex items-center gap-4 pt-2",
+                    children: [
+                        /*#__PURE__*/ _jsxDEV(Skeleton, {
+                            className: "h-8 w-24"
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+                            lineNumber: 47,
+                            columnNumber: 9
+                        }, this),
+                        /*#__PURE__*/ _jsxDEV(Skeleton, {
+                            className: "h-8 w-24"
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+                            lineNumber: 48,
+                            columnNumber: 9
+                        }, this)
+                    ]
+                }, void 0, true, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+                    lineNumber: 46,
+                    columnNumber: 7
+                }, this)
+            ]
+        }, void 0, true, {
+            fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+            lineNumber: 14,
+            columnNumber: 5
+        }, this)
+    }, void 0, false, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+        lineNumber: 13,
+        columnNumber: 3
+    }, this);
+_c = ReviewCardSkeleton;
+/**
+ * Skeleton pour les statistiques de reviews
+ */ export const ReviewStatsSkeleton = ()=>/*#__PURE__*/ _jsxDEV(Card, {
+        className: "p-6",
+        children: /*#__PURE__*/ _jsxDEV(CardContent, {
+            className: "p-0 space-y-6",
+            children: [
+                /*#__PURE__*/ _jsxDEV("div", {
+                    className: "text-center space-y-2",
+                    children: [
+                        /*#__PURE__*/ _jsxDEV(Skeleton, {
+                            className: "h-12 w-24 mx-auto"
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+                            lineNumber: 62,
+                            columnNumber: 9
+                        }, this),
+                        /*#__PURE__*/ _jsxDEV("div", {
+                            className: "flex justify-center gap-1",
+                            children: [
+                                ...Array(5)
+                            ].map((_, i)=>/*#__PURE__*/ _jsxDEV(Skeleton, {
+                                    className: "h-6 w-6"
+                                }, i, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+                                    lineNumber: 65,
+                                    columnNumber: 13
+                                }, this))
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+                            lineNumber: 63,
+                            columnNumber: 9
+                        }, this),
+                        /*#__PURE__*/ _jsxDEV(Skeleton, {
+                            className: "h-4 w-32 mx-auto"
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+                            lineNumber: 68,
+                            columnNumber: 9
+                        }, this)
+                    ]
+                }, void 0, true, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+                    lineNumber: 61,
+                    columnNumber: 7
+                }, this),
+                /*#__PURE__*/ _jsxDEV("div", {
+                    className: "space-y-2",
+                    children: [
+                        ...Array(5)
+                    ].map((_, i)=>/*#__PURE__*/ _jsxDEV("div", {
+                            className: "flex items-center gap-2",
+                            children: [
+                                /*#__PURE__*/ _jsxDEV(Skeleton, {
+                                    className: "h-4 w-12"
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+                                    lineNumber: 75,
+                                    columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV(Skeleton, {
+                                    className: "h-2 flex-1"
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+                                    lineNumber: 76,
+                                    columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV(Skeleton, {
+                                    className: "h-4 w-12"
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+                                    lineNumber: 77,
+                                    columnNumber: 13
+                                }, this)
+                            ]
+                        }, i, true, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+                            lineNumber: 74,
+                            columnNumber: 11
+                        }, this))
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+                    lineNumber: 72,
+                    columnNumber: 7
+                }, this)
+            ]
+        }, void 0, true, {
+            fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+            lineNumber: 59,
+            columnNumber: 5
+        }, this)
+    }, void 0, false, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+        lineNumber: 58,
+        columnNumber: 3
+    }, this);
+_c1 = ReviewStatsSkeleton;
+/**
+ * Skeleton pour la liste de reviews
+ */ export const ReviewsListSkeleton = ({ count = 3 })=>/*#__PURE__*/ _jsxDEV("div", {
+        className: "space-y-4",
+        children: [
+            ...Array(count)
+        ].map((_, i)=>/*#__PURE__*/ _jsxDEV(ReviewCardSkeleton, {}, i, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+                lineNumber: 91,
+                columnNumber: 7
+            }, this))
+    }, void 0, false, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+        lineNumber: 89,
+        columnNumber: 3
+    }, this);
+_c2 = ReviewsListSkeleton;
+/**
+ * Skeleton pour le formulaire de review
+ */ export const ReviewFormSkeleton = ()=>/*#__PURE__*/ _jsxDEV("div", {
+        className: "space-y-6",
+        children: [
+            /*#__PURE__*/ _jsxDEV("div", {
+                className: "space-y-2",
+                children: [
+                    /*#__PURE__*/ _jsxDEV(Skeleton, {
+                        className: "h-4 w-32"
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+                        lineNumber: 103,
+                        columnNumber: 7
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV("div", {
+                        className: "flex gap-2",
+                        children: [
+                            ...Array(5)
+                        ].map((_, i)=>/*#__PURE__*/ _jsxDEV(Skeleton, {
+                                className: "h-8 w-8"
+                            }, i, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+                                lineNumber: 106,
+                                columnNumber: 11
+                            }, this))
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+                        lineNumber: 104,
+                        columnNumber: 7
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+                lineNumber: 102,
+                columnNumber: 5
+            }, this),
+            /*#__PURE__*/ _jsxDEV("div", {
+                className: "space-y-2",
+                children: [
+                    /*#__PURE__*/ _jsxDEV(Skeleton, {
+                        className: "h-4 w-24"
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+                        lineNumber: 113,
+                        columnNumber: 7
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV(Skeleton, {
+                        className: "h-10 w-full"
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+                        lineNumber: 114,
+                        columnNumber: 7
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+                lineNumber: 112,
+                columnNumber: 5
+            }, this),
+            /*#__PURE__*/ _jsxDEV("div", {
+                className: "space-y-2",
+                children: [
+                    /*#__PURE__*/ _jsxDEV(Skeleton, {
+                        className: "h-4 w-32"
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+                        lineNumber: 119,
+                        columnNumber: 7
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV(Skeleton, {
+                        className: "h-32 w-full"
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+                        lineNumber: 120,
+                        columnNumber: 7
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+                lineNumber: 118,
+                columnNumber: 5
+            }, this),
+            /*#__PURE__*/ _jsxDEV("div", {
+                className: "space-y-2",
+                children: [
+                    /*#__PURE__*/ _jsxDEV(Skeleton, {
+                        className: "h-4 w-40"
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+                        lineNumber: 125,
+                        columnNumber: 7
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV(Skeleton, {
+                        className: "h-24 w-full"
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+                        lineNumber: 126,
+                        columnNumber: 7
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+                lineNumber: 124,
+                columnNumber: 5
+            }, this),
+            /*#__PURE__*/ _jsxDEV("div", {
+                className: "flex gap-3",
+                children: [
+                    /*#__PURE__*/ _jsxDEV(Skeleton, {
+                        className: "h-10 w-24"
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+                        lineNumber: 131,
+                        columnNumber: 7
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV(Skeleton, {
+                        className: "h-10 w-32"
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+                        lineNumber: 132,
+                        columnNumber: 7
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+                lineNumber: 130,
+                columnNumber: 5
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+        lineNumber: 100,
+        columnNumber: 3
+    }, this);
+_c3 = ReviewFormSkeleton;
+/**
+ * Skeleton pour le résumé complet de reviews
+ */ export const ProductReviewsSummarySkeleton = ()=>/*#__PURE__*/ _jsxDEV("div", {
+        className: "space-y-6",
+        children: [
+            /*#__PURE__*/ _jsxDEV("div", {
+                className: "flex items-center justify-between",
+                children: [
+                    /*#__PURE__*/ _jsxDEV(Skeleton, {
+                        className: "h-8 w-48"
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+                        lineNumber: 144,
+                        columnNumber: 7
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV(Skeleton, {
+                        className: "h-10 w-32"
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+                        lineNumber: 145,
+                        columnNumber: 7
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+                lineNumber: 143,
+                columnNumber: 5
+            }, this),
+            /*#__PURE__*/ _jsxDEV("div", {
+                className: "grid grid-cols-1 lg:grid-cols-3 gap-6",
+                children: [
+                    /*#__PURE__*/ _jsxDEV("div", {
+                        className: "lg:col-span-1",
+                        children: /*#__PURE__*/ _jsxDEV(ReviewStatsSkeleton, {}, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+                            lineNumber: 152,
+                            columnNumber: 9
+                        }, this)
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+                        lineNumber: 151,
+                        columnNumber: 7
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV("div", {
+                        className: "lg:col-span-2",
+                        children: /*#__PURE__*/ _jsxDEV(ReviewsListSkeleton, {}, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+                            lineNumber: 157,
+                            columnNumber: 9
+                        }, this)
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+                        lineNumber: 156,
+                        columnNumber: 7
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+                lineNumber: 149,
+                columnNumber: 5
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx",
+        lineNumber: 141,
+        columnNumber: 3
+    }, this);
+_c4 = ProductReviewsSummarySkeleton;
+var _c, _c1, _c2, _c3, _c4;
+$RefreshReg$(_c, "ReviewCardSkeleton");
+$RefreshReg$(_c1, "ReviewStatsSkeleton");
+$RefreshReg$(_c2, "ReviewsListSkeleton");
+$RefreshReg$(_c3, "ReviewFormSkeleton");
+$RefreshReg$(_c4, "ProductReviewsSummarySkeleton");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewSkeleton.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIlJldmlld1NrZWxldG9uLnRzeCJdLCJzb3VyY2VzQ29udGVudCI6WyIvKipcbiAqIFNrZWxldG9ucyBwcsOpY2lzIHBvdXIgbGVzIHJldmlld3NcbiAqIERhdGUgOiAyNyBvY3RvYnJlIDIwMjVcbiAqL1xuXG5pbXBvcnQgeyBTa2VsZXRvbiB9IGZyb20gJ0AvY29tcG9uZW50cy91aS9za2VsZXRvbic7XG5pbXBvcnQgeyBDYXJkLCBDYXJkQ29udGVudCB9IGZyb20gJ0AvY29tcG9uZW50cy91aS9jYXJkJztcblxuLyoqXG4gKiBTa2VsZXRvbiBwb3VyIHVuZSBjYXJ0ZSBkZSByZXZpZXcgaW5kaXZpZHVlbGxlXG4gKi9cbmV4cG9ydCBjb25zdCBSZXZpZXdDYXJkU2tlbGV0b24gPSAoKSA9PiAoXG4gIDxDYXJkIGNsYXNzTmFtZT1cInAtNlwiPlxuICAgIDxDYXJkQ29udGVudCBjbGFzc05hbWU9XCJwLTAgc3BhY2UteS00XCI+XG4gICAgICB7LyogSGVhZGVyIGF2ZWMgYXZhdGFyIGV0IG5vbSAqL31cbiAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1zdGFydCBnYXAtNFwiPlxuICAgICAgICA8U2tlbGV0b24gY2xhc3NOYW1lPVwiaC0xMiB3LTEyIHJvdW5kZWQtZnVsbCBmbGV4LXNocmluay0wXCIgLz5cbiAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4LTEgc3BhY2UteS0yXCI+XG4gICAgICAgICAgPFNrZWxldG9uIGNsYXNzTmFtZT1cImgtNCB3LTMyXCIgLz5cbiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGdhcC0yXCI+XG4gICAgICAgICAgICB7LyogU3RhcnMgc2tlbGV0b24gKi99XG4gICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggZ2FwLTFcIj5cbiAgICAgICAgICAgICAge1suLi5BcnJheSg1KV0ubWFwKChfLCBpKSA9PiAoXG4gICAgICAgICAgICAgICAgPFNrZWxldG9uIGtleT17aX0gY2xhc3NOYW1lPVwiaC00IHctNCByb3VuZGVkXCIgLz5cbiAgICAgICAgICAgICAgKSl9XG4gICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgIDxTa2VsZXRvbiBjbGFzc05hbWU9XCJoLTMgdy0yNFwiIC8+XG4gICAgICAgICAgPC9kaXY+XG4gICAgICAgIDwvZGl2PlxuICAgICAgPC9kaXY+XG5cbiAgICAgIHsvKiBDb250ZW50ICovfVxuICAgICAgPGRpdiBjbGFzc05hbWU9XCJzcGFjZS15LTJcIj5cbiAgICAgICAgPFNrZWxldG9uIGNsYXNzTmFtZT1cImgtNCB3LWZ1bGxcIiAvPlxuICAgICAgICA8U2tlbGV0b24gY2xhc3NOYW1lPVwiaC00IHctMTEvMTJcIiAvPlxuICAgICAgICA8U2tlbGV0b24gY2xhc3NOYW1lPVwiaC00IHctNC81XCIgLz5cbiAgICAgIDwvZGl2PlxuXG4gICAgICB7LyogTWVkaWEgcHJldmlldyAqL31cbiAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBnYXAtMlwiPlxuICAgICAgICA8U2tlbGV0b24gY2xhc3NOYW1lPVwiaC0yMCB3LTIwIHJvdW5kZWQtbGdcIiAvPlxuICAgICAgICA8U2tlbGV0b24gY2xhc3NOYW1lPVwiaC0yMCB3LTIwIHJvdW5kZWQtbGdcIiAvPlxuICAgICAgPC9kaXY+XG5cbiAgICAgIHsvKiBBY3Rpb25zICovfVxuICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLWNlbnRlciBnYXAtNCBwdC0yXCI+XG4gICAgICAgIDxTa2VsZXRvbiBjbGFzc05hbWU9XCJoLTggdy0yNFwiIC8+XG4gICAgICAgIDxTa2VsZXRvbiBjbGFzc05hbWU9XCJoLTggdy0yNFwiIC8+XG4gICAgICA8L2Rpdj5cbiAgICA8L0NhcmRDb250ZW50PlxuICA8L0NhcmQ+XG4pO1xuXG4vKipcbiAqIFNrZWxldG9uIHBvdXIgbGVzIHN0YXRpc3RpcXVlcyBkZSByZXZpZXdzXG4gKi9cbmV4cG9ydCBjb25zdCBSZXZpZXdTdGF0c1NrZWxldG9uID0gKCkgPT4gKFxuICA8Q2FyZCBjbGFzc05hbWU9XCJwLTZcIj5cbiAgICA8Q2FyZENvbnRlbnQgY2xhc3NOYW1lPVwicC0wIHNwYWNlLXktNlwiPlxuICAgICAgey8qIEF2ZXJhZ2UgcmF0aW5nICovfVxuICAgICAgPGRpdiBjbGFzc05hbWU9XCJ0ZXh0LWNlbnRlciBzcGFjZS15LTJcIj5cbiAgICAgICAgPFNrZWxldG9uIGNsYXNzTmFtZT1cImgtMTIgdy0yNCBteC1hdXRvXCIgLz5cbiAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGp1c3RpZnktY2VudGVyIGdhcC0xXCI+XG4gICAgICAgICAge1suLi5BcnJheSg1KV0ubWFwKChfLCBpKSA9PiAoXG4gICAgICAgICAgICA8U2tlbGV0b24ga2V5PXtpfSBjbGFzc05hbWU9XCJoLTYgdy02XCIgLz5cbiAgICAgICAgICApKX1cbiAgICAgICAgPC9kaXY+XG4gICAgICAgIDxTa2VsZXRvbiBjbGFzc05hbWU9XCJoLTQgdy0zMiBteC1hdXRvXCIgLz5cbiAgICAgIDwvZGl2PlxuXG4gICAgICB7LyogUmF0aW5nIGRpc3RyaWJ1dGlvbiAqL31cbiAgICAgIDxkaXYgY2xhc3NOYW1lPVwic3BhY2UteS0yXCI+XG4gICAgICAgIHtbLi4uQXJyYXkoNSldLm1hcCgoXywgaSkgPT4gKFxuICAgICAgICAgIDxkaXYga2V5PXtpfSBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLWNlbnRlciBnYXAtMlwiPlxuICAgICAgICAgICAgPFNrZWxldG9uIGNsYXNzTmFtZT1cImgtNCB3LTEyXCIgLz5cbiAgICAgICAgICAgIDxTa2VsZXRvbiBjbGFzc05hbWU9XCJoLTIgZmxleC0xXCIgLz5cbiAgICAgICAgICAgIDxTa2VsZXRvbiBjbGFzc05hbWU9XCJoLTQgdy0xMlwiIC8+XG4gICAgICAgICAgPC9kaXY+XG4gICAgICAgICkpfVxuICAgICAgPC9kaXY+XG4gICAgPC9DYXJkQ29udGVudD5cbiAgPC9DYXJkPlxuKTtcblxuLyoqXG4gKiBTa2VsZXRvbiBwb3VyIGxhIGxpc3RlIGRlIHJldmlld3NcbiAqL1xuZXhwb3J0IGNvbnN0IFJldmlld3NMaXN0U2tlbGV0b24gPSAoeyBjb3VudCA9IDMgfTogeyBjb3VudD86IG51bWJlciB9KSA9PiAoXG4gIDxkaXYgY2xhc3NOYW1lPVwic3BhY2UteS00XCI+XG4gICAge1suLi5BcnJheShjb3VudCldLm1hcCgoXywgaSkgPT4gKFxuICAgICAgPFJldmlld0NhcmRTa2VsZXRvbiBrZXk9e2l9IC8+XG4gICAgKSl9XG4gIDwvZGl2PlxuKTtcblxuLyoqXG4gKiBTa2VsZXRvbiBwb3VyIGxlIGZvcm11bGFpcmUgZGUgcmV2aWV3XG4gKi9cbmV4cG9ydCBjb25zdCBSZXZpZXdGb3JtU2tlbGV0b24gPSAoKSA9PiAoXG4gIDxkaXYgY2xhc3NOYW1lPVwic3BhY2UteS02XCI+XG4gICAgey8qIFJhdGluZyAqL31cbiAgICA8ZGl2IGNsYXNzTmFtZT1cInNwYWNlLXktMlwiPlxuICAgICAgPFNrZWxldG9uIGNsYXNzTmFtZT1cImgtNCB3LTMyXCIgLz5cbiAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBnYXAtMlwiPlxuICAgICAgICB7Wy4uLkFycmF5KDUpXS5tYXAoKF8sIGkpID0+IChcbiAgICAgICAgICA8U2tlbGV0b24ga2V5PXtpfSBjbGFzc05hbWU9XCJoLTggdy04XCIgLz5cbiAgICAgICAgKSl9XG4gICAgICA8L2Rpdj5cbiAgICA8L2Rpdj5cblxuICAgIHsvKiBUaXRsZSAqL31cbiAgICA8ZGl2IGNsYXNzTmFtZT1cInNwYWNlLXktMlwiPlxuICAgICAgPFNrZWxldG9uIGNsYXNzTmFtZT1cImgtNCB3LTI0XCIgLz5cbiAgICAgIDxTa2VsZXRvbiBjbGFzc05hbWU9XCJoLTEwIHctZnVsbFwiIC8+XG4gICAgPC9kaXY+XG5cbiAgICB7LyogQ29udGVudCAqL31cbiAgICA8ZGl2IGNsYXNzTmFtZT1cInNwYWNlLXktMlwiPlxuICAgICAgPFNrZWxldG9uIGNsYXNzTmFtZT1cImgtNCB3LTMyXCIgLz5cbiAgICAgIDxTa2VsZXRvbiBjbGFzc05hbWU9XCJoLTMyIHctZnVsbFwiIC8+XG4gICAgPC9kaXY+XG5cbiAgICB7LyogTWVkaWEgdXBsb2FkICovfVxuICAgIDxkaXYgY2xhc3NOYW1lPVwic3BhY2UteS0yXCI+XG4gICAgICA8U2tlbGV0b24gY2xhc3NOYW1lPVwiaC00IHctNDBcIiAvPlxuICAgICAgPFNrZWxldG9uIGNsYXNzTmFtZT1cImgtMjQgdy1mdWxsXCIgLz5cbiAgICA8L2Rpdj5cblxuICAgIHsvKiBBY3Rpb25zICovfVxuICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBnYXAtM1wiPlxuICAgICAgPFNrZWxldG9uIGNsYXNzTmFtZT1cImgtMTAgdy0yNFwiIC8+XG4gICAgICA8U2tlbGV0b24gY2xhc3NOYW1lPVwiaC0xMCB3LTMyXCIgLz5cbiAgICA8L2Rpdj5cbiAgPC9kaXY+XG4pO1xuXG4vKipcbiAqIFNrZWxldG9uIHBvdXIgbGUgcsOpc3Vtw6kgY29tcGxldCBkZSByZXZpZXdzXG4gKi9cbmV4cG9ydCBjb25zdCBQcm9kdWN0UmV2aWV3c1N1bW1hcnlTa2VsZXRvbiA9ICgpID0+IChcbiAgPGRpdiBjbGFzc05hbWU9XCJzcGFjZS15LTZcIj5cbiAgICB7LyogSGVhZGVyICovfVxuICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIganVzdGlmeS1iZXR3ZWVuXCI+XG4gICAgICA8U2tlbGV0b24gY2xhc3NOYW1lPVwiaC04IHctNDhcIiAvPlxuICAgICAgPFNrZWxldG9uIGNsYXNzTmFtZT1cImgtMTAgdy0zMlwiIC8+XG4gICAgPC9kaXY+XG5cbiAgICB7LyogTGF5b3V0ICovfVxuICAgIDxkaXYgY2xhc3NOYW1lPVwiZ3JpZCBncmlkLWNvbHMtMSBsZzpncmlkLWNvbHMtMyBnYXAtNlwiPlxuICAgICAgey8qIFN0YXRzICovfVxuICAgICAgPGRpdiBjbGFzc05hbWU9XCJsZzpjb2wtc3Bhbi0xXCI+XG4gICAgICAgIDxSZXZpZXdTdGF0c1NrZWxldG9uIC8+XG4gICAgICA8L2Rpdj5cblxuICAgICAgey8qIExpc3QgKi99XG4gICAgICA8ZGl2IGNsYXNzTmFtZT1cImxnOmNvbC1zcGFuLTJcIj5cbiAgICAgICAgPFJldmlld3NMaXN0U2tlbGV0b24gLz5cbiAgICAgIDwvZGl2PlxuICAgIDwvZGl2PlxuICA8L2Rpdj5cbik7XG5cblxuXG5cblxuXG5cbiJdLCJuYW1lcyI6WyJTa2VsZXRvbiIsIkNhcmQiLCJDYXJkQ29udGVudCIsIlJldmlld0NhcmRTa2VsZXRvbiIsImNsYXNzTmFtZSIsImRpdiIsIkFycmF5IiwibWFwIiwiXyIsImkiLCJSZXZpZXdTdGF0c1NrZWxldG9uIiwiUmV2aWV3c0xpc3RTa2VsZXRvbiIsImNvdW50IiwiUmV2aWV3Rm9ybVNrZWxldG9uIiwiUHJvZHVjdFJldmlld3NTdW1tYXJ5U2tlbGV0b24iXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O0FBQUE7OztDQUdDLEdBRUQsU0FBU0EsUUFBUSxRQUFRLDJCQUEyQjtBQUNwRCxTQUFTQyxJQUFJLEVBQUVDLFdBQVcsUUFBUSx1QkFBdUI7QUFFekQ7O0NBRUMsR0FDRCxPQUFPLE1BQU1DLHFCQUFxQixrQkFDaEMsUUFBQ0Y7UUFBS0csV0FBVTtrQkFDZCxjQUFBLFFBQUNGO1lBQVlFLFdBQVU7OzhCQUVyQixRQUFDQztvQkFBSUQsV0FBVTs7c0NBQ2IsUUFBQ0o7NEJBQVNJLFdBQVU7Ozs7OztzQ0FDcEIsUUFBQ0M7NEJBQUlELFdBQVU7OzhDQUNiLFFBQUNKO29DQUFTSSxXQUFVOzs7Ozs7OENBQ3BCLFFBQUNDO29DQUFJRCxXQUFVOztzREFFYixRQUFDQzs0Q0FBSUQsV0FBVTtzREFDWjttREFBSUUsTUFBTTs2Q0FBRyxDQUFDQyxHQUFHLENBQUMsQ0FBQ0MsR0FBR0Msa0JBQ3JCLFFBQUNUO29EQUFpQkksV0FBVTttREFBYks7Ozs7Ozs7Ozs7c0RBR25CLFFBQUNUOzRDQUFTSSxXQUFVOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OEJBTTFCLFFBQUNDO29CQUFJRCxXQUFV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

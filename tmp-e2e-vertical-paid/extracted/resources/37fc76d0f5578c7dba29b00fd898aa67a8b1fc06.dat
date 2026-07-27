@@ -1,0 +1,130 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/notifications/NotificationBell.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/notifications/NotificationBell.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=8792f17d"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+var _s = $RefreshSig$();
+/**
+ * Cloche de notifications (header) — Popover compact, adapté à la topnav sombre
+ */ import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=8792f17d"; const useState = __vite__cjsImport3_react["useState"];
+import { useTranslation } from "/node_modules/.vite/deps/react-i18next.js?v=dd5b9242";
+import { Bell } from "/src/components/icons/index.ts";
+import { Button } from "/src/components/ui/button.tsx";
+import { Badge } from "/src/components/ui/badge.tsx";
+import { Popover, PopoverContent, PopoverTrigger } from "/src/components/ui/popover.tsx";
+import { useUnreadCount } from "/src/hooks/useNotifications.ts";
+import { NotificationDropdown } from "/src/components/notifications/NotificationDropdown.tsx";
+import { cn } from "/src/lib/utils.ts";
+const topNavIconBtnClass = 'topnav-icon-btn relative h-9 w-9 min-h-9 min-w-9 shrink-0 border-0 bg-transparent p-0 shadow-none hover:bg-accent/50';
+export const NotificationBell = ({ className })=>{
+    _s();
+    const { t } = useTranslation();
+    const { data: unreadCount = 0 } = useUnreadCount();
+    const [open, setOpen] = useState(false);
+    return /*#__PURE__*/ _jsxDEV(Popover, {
+        open: open,
+        onOpenChange: setOpen,
+        children: [
+            /*#__PURE__*/ _jsxDEV(PopoverTrigger, {
+                asChild: true,
+                children: /*#__PURE__*/ _jsxDEV(Button, {
+                    type: "button",
+                    variant: "ghost",
+                    size: "icon",
+                    className: cn('relative h-9 w-9 min-h-9 min-w-9 shrink-0 touch-manipulation', topNavIconBtnClass, className),
+                    "aria-label": t('sidebar.chrome.notificationsAriaLabel'),
+                    children: [
+                        /*#__PURE__*/ _jsxDEV(Bell, {
+                            className: "h-5 w-5"
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/notifications/NotificationBell.tsx",
+                            lineNumber: 41,
+                            columnNumber: 11
+                        }, this),
+                        unreadCount > 0 && /*#__PURE__*/ _jsxDEV(Badge, {
+                            variant: "destructive",
+                            className: "absolute -top-0.5 -right-0.5 h-4 min-w-4 px-1 flex items-center justify-center text-[10px] leading-none",
+                            children: unreadCount > 99 ? '99+' : unreadCount
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/notifications/NotificationBell.tsx",
+                            lineNumber: 43,
+                            columnNumber: 13
+                        }, this)
+                    ]
+                }, void 0, true, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/notifications/NotificationBell.tsx",
+                    lineNumber: 30,
+                    columnNumber: 9
+                }, this)
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/notifications/NotificationBell.tsx",
+                lineNumber: 29,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV(PopoverContent, {
+                align: "end",
+                sideOffset: 8,
+                className: "w-[min(100vw-1rem,24rem)] p-0",
+                children: /*#__PURE__*/ _jsxDEV(NotificationDropdown, {
+                    onClose: ()=>setOpen(false)
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/notifications/NotificationBell.tsx",
+                    lineNumber: 53,
+                    columnNumber: 9
+                }, this)
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/notifications/NotificationBell.tsx",
+                lineNumber: 52,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/notifications/NotificationBell.tsx",
+        lineNumber: 28,
+        columnNumber: 5
+    }, this);
+};
+_s(NotificationBell, "jX/EOJVP9xksYcnAqj06Snwiy1A=", false, function() {
+    return [
+        useTranslation,
+        useUnreadCount
+    ];
+});
+_c = NotificationBell;
+var _c;
+$RefreshReg$(_c, "NotificationBell");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/notifications/NotificationBell.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/notifications/NotificationBell.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIk5vdGlmaWNhdGlvbkJlbGwudHN4Il0sInNvdXJjZXNDb250ZW50IjpbIi8qKlxuICogQ2xvY2hlIGRlIG5vdGlmaWNhdGlvbnMgKGhlYWRlcikg4oCUIFBvcG92ZXIgY29tcGFjdCwgYWRhcHTDqSDDoCBsYSB0b3BuYXYgc29tYnJlXG4gKi9cblxuaW1wb3J0IHsgdXNlU3RhdGUgfSBmcm9tICdyZWFjdCc7XG5pbXBvcnQgeyB1c2VUcmFuc2xhdGlvbiB9IGZyb20gJ3JlYWN0LWkxOG5leHQnO1xuaW1wb3J0IHsgQmVsbCB9IGZyb20gJ0AvY29tcG9uZW50cy9pY29ucyc7XG5pbXBvcnQgeyBCdXR0b24gfSBmcm9tICdAL2NvbXBvbmVudHMvdWkvYnV0dG9uJztcbmltcG9ydCB7IEJhZGdlIH0gZnJvbSAnQC9jb21wb25lbnRzL3VpL2JhZGdlJztcbmltcG9ydCB7IFBvcG92ZXIsIFBvcG92ZXJDb250ZW50LCBQb3BvdmVyVHJpZ2dlciB9IGZyb20gJ0AvY29tcG9uZW50cy91aS9wb3BvdmVyJztcbmltcG9ydCB7IHVzZVVucmVhZENvdW50IH0gZnJvbSAnQC9ob29rcy91c2VOb3RpZmljYXRpb25zJztcbmltcG9ydCB7IE5vdGlmaWNhdGlvbkRyb3Bkb3duIH0gZnJvbSAnLi9Ob3RpZmljYXRpb25Ecm9wZG93bic7XG5pbXBvcnQgeyBjbiB9IGZyb20gJ0AvbGliL3V0aWxzJztcblxuY29uc3QgdG9wTmF2SWNvbkJ0bkNsYXNzID1cbiAgJ3RvcG5hdi1pY29uLWJ0biByZWxhdGl2ZSBoLTkgdy05IG1pbi1oLTkgbWluLXctOSBzaHJpbmstMCBib3JkZXItMCBiZy10cmFuc3BhcmVudCBwLTAgc2hhZG93LW5vbmUgaG92ZXI6YmctYWNjZW50LzUwJztcblxuaW50ZXJmYWNlIE5vdGlmaWNhdGlvbkJlbGxQcm9wcyB7XG4gIGNsYXNzTmFtZT86IHN0cmluZztcbn1cblxuZXhwb3J0IGNvbnN0IE5vdGlmaWNhdGlvbkJlbGwgPSAoeyBjbGFzc05hbWUgfTogTm90aWZpY2F0aW9uQmVsbFByb3BzKSA9PiB7XG4gIGNvbnN0IHsgdCB9ID0gdXNlVHJhbnNsYXRpb24oKTtcbiAgY29uc3QgeyBkYXRhOiB1bnJlYWRDb3VudCA9IDAgfSA9IHVzZVVucmVhZENvdW50KCk7XG4gIGNvbnN0IFtvcGVuLCBzZXRPcGVuXSA9IHVzZVN0YXRlKGZhbHNlKTtcblxuICByZXR1cm4gKFxuICAgIDxQb3BvdmVyIG9wZW49e29wZW59IG9uT3BlbkNoYW5nZT17c2V0T3Blbn0+XG4gICAgICA8UG9wb3ZlclRyaWdnZXIgYXNDaGlsZD5cbiAgICAgICAgPEJ1dHRvblxuICAgICAgICAgIHR5cGU9XCJidXR0b25cIlxuICAgICAgICAgIHZhcmlhbnQ9XCJnaG9zdFwiXG4gICAgICAgICAgc2l6ZT1cImljb25cIlxuICAgICAgICAgIGNsYXNzTmFtZT17Y24oXG4gICAgICAgICAgICAncmVsYXRpdmUgaC05IHctOSBtaW4taC05IG1pbi13LTkgc2hyaW5rLTAgdG91Y2gtbWFuaXB1bGF0aW9uJyxcbiAgICAgICAgICAgIHRvcE5hdkljb25CdG5DbGFzcyxcbiAgICAgICAgICAgIGNsYXNzTmFtZVxuICAgICAgICAgICl9XG4gICAgICAgICAgYXJpYS1sYWJlbD17dCgnc2lkZWJhci5jaHJvbWUubm90aWZpY2F0aW9uc0FyaWFMYWJlbCcpfVxuICAgICAgICA+XG4gICAgICAgICAgPEJlbGwgY2xhc3NOYW1lPVwiaC01IHctNVwiIC8+XG4gICAgICAgICAge3VucmVhZENvdW50ID4gMCAmJiAoXG4gICAgICAgICAgICA8QmFkZ2VcbiAgICAgICAgICAgICAgdmFyaWFudD1cImRlc3RydWN0aXZlXCJcbiAgICAgICAgICAgICAgY2xhc3NOYW1lPVwiYWJzb2x1dGUgLXRvcC0wLjUgLXJpZ2h0LTAuNSBoLTQgbWluLXctNCBweC0xIGZsZXggaXRlbXMtY2VudGVyIGp1c3RpZnktY2VudGVyIHRleHQtWzEwcHhdIGxlYWRpbmctbm9uZVwiXG4gICAgICAgICAgICA+XG4gICAgICAgICAgICAgIHt1bnJlYWRDb3VudCA+IDk5ID8gJzk5KycgOiB1bnJlYWRDb3VudH1cbiAgICAgICAgICAgIDwvQmFkZ2U+XG4gICAgICAgICAgKX1cbiAgICAgICAgPC9CdXR0b24+XG4gICAgICA8L1BvcG92ZXJUcmlnZ2VyPlxuICAgICAgPFBvcG92ZXJDb250ZW50IGFsaWduPVwiZW5kXCIgc2lkZU9mZnNldD17OH0gY2xhc3NOYW1lPVwidy1bbWluKDEwMHZ3LTFyZW0sMjRyZW0pXSBwLTBcIj5cbiAgICAgICAgPE5vdGlmaWNhdGlvbkRyb3Bkb3duIG9uQ2xvc2U9eygpID0+IHNldE9wZW4oZmFsc2UpfSAvPlxuICAgICAgPC9Qb3BvdmVyQ29udGVudD5cbiAgICA8L1BvcG92ZXI+XG4gICk7XG59O1xuIl0sIm5hbWVzIjpbInVzZVN0YXRlIiwidXNlVHJhbnNsYXRpb24iLCJCZWxsIiwiQnV0dG9uIiwiQmFkZ2UiLCJQb3BvdmVyIiwiUG9wb3ZlckNvbnRlbnQiLCJQb3BvdmVyVHJpZ2dlciIsInVzZVVucmVhZENvdW50IiwiTm90aWZpY2F0aW9uRHJvcGRvd24iLCJjbiIsInRvcE5hdkljb25CdG5DbGFzcyIsIk5vdGlmaWNhdGlvbkJlbGwiLCJjbGFzc05hbWUiLCJ0IiwiZGF0YSIsInVucmVhZENvdW50Iiwib3BlbiIsInNldE9wZW4iLCJvbk9wZW5DaGFuZ2UiLCJhc0NoaWxkIiwidHlwZSIsInZhcmlhbnQiLCJzaXplIiwiYXJpYS1sYWJlbCIsImFsaWduIiwic2lkZU9mZnNldCIsIm9uQ2xvc2UiXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OztBQUFBOztDQUVDLEdBRUQsU0FBU0EsUUFBUSxRQUFRLFFBQVE7QUFDakMsU0FBU0MsY0FBYyxRQUFRLGdCQUFnQjtBQUMvQyxTQUFTQyxJQUFJLFFBQVEscUJBQXFCO0FBQzFDLFNBQVNDLE1BQU0sUUFBUSx5QkFBeUI7QUFDaEQsU0FBU0MsS0FBSyxRQUFRLHdCQUF3QjtBQUM5QyxTQUFTQyxPQUFPLEVBQUVDLGNBQWMsRUFBRUMsY0FBYyxRQUFRLDBCQUEwQjtBQUNsRixTQUFTQyxjQUFjLFFBQVEsMkJBQTJCO0FBQzFELFNBQVNDLG9CQUFvQixRQUFRLHlCQUF5QjtBQUM5RCxTQUFTQyxFQUFFLFFBQVEsY0FBYztBQUVqQyxNQUFNQyxxQkFDSjtBQU1GLE9BQU8sTUFBTUMsbUJBQW1CLENBQUMsRUFBRUMsU0FBUyxFQUF5Qjs7SUFDbkUsTUFBTSxFQUFFQyxDQUFDLEVBQUUsR0FBR2I7SUFDZCxNQUFNLEVBQUVjLE1BQU1DLGNBQWMsQ0FBQyxFQUFFLEdBQUdSO0lBQ2xDLE1BQU0sQ0FBQ1MsTUFBTUMsUUFBUSxHQUFHbEIsU0FBUztJQUVqQyxxQkFDRSxRQUFDSztRQUFRWSxNQUFNQTtRQUFNRSxjQUFjRDs7MEJBQ2pDLFFBQUNYO2dCQUFlYSxPQUFPOzBCQUNyQixjQUFBLFFBQUNqQjtvQkFDQ2tCLE1BQUs7b0JBQ0xDLFNBQVE7b0JBQ1JDLE1BQUs7b0JBQ0xWLFdBQVdILEdBQ1QsZ0VBQ0FDLG9CQUNBRTtvQkFFRlcsY0FBWVYsRUFBRTs7c0NBRWQsUUFBQ1o7NEJBQUtXLFdBQVU7Ozs7Ozt3QkFDZkcsY0FBYyxtQkFDYixRQUFDWjs0QkFDQ2tCLFNBQVE7NEJBQ1JULFdBQVU7c0NBRVRHLGNBQWMsS0FBSyxRQUFRQTs7Ozs7Ozs7Ozs7Ozs7Ozs7MEJBS3BDLFFBQUNWO2dCQUFlbUIsT0FBTTtnQkFBTUMsWUFBWTtnQkFBR2IsV0FBVTswQkFDbkQsY0FBQSxRQUFDSjtvQkFBcUJrQixTQUFTLElBQU1ULFFBQVE7Ozs7Ozs7Ozs7Ozs7Ozs7O0FBSXJELEVBQUU7R0FuQ1dOOztRQUNHWDtRQUNvQk87OztLQUZ2QkkifQ==

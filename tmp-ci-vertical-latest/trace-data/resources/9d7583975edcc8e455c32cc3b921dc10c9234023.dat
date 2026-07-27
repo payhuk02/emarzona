@@ -1,0 +1,44 @@
+import { WINDOW } from "/node_modules/@sentry-internal/browser-utils/build/esm/types.js?v=89021f86";
+
+/*
+ * Copyright 2022 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+// sentry-specific change:
+// add optional param to not check for responseStart (see comment below)
+const getNavigationEntry = (checkResponseStart = true) => {
+  const navigationEntry = WINDOW.performance?.getEntriesByType?.('navigation')[0];
+  // Check to ensure the `responseStart` property is present and valid.
+  // In some cases a zero value is reported by the browser (for
+  // privacy/security reasons), and in other cases (bugs) the value is
+  // negative or is larger than the current page time. Ignore these cases:
+  // - https://github.com/GoogleChrome/web-vitals/issues/137
+  // - https://github.com/GoogleChrome/web-vitals/issues/162
+  // - https://github.com/GoogleChrome/web-vitals/issues/275
+  if (
+    // sentry-specific change:
+    // We don't want to check for responseStart for our own use of `getNavigationEntry`
+    !checkResponseStart ||
+    (navigationEntry && navigationEntry.responseStart > 0 && navigationEntry.responseStart < performance.now())
+  ) {
+    return navigationEntry;
+  }
+};
+
+export { getNavigationEntry };
+                                              
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZ2V0TmF2aWdhdGlvbkVudHJ5LmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi8uLi9zcmMvbWV0cmljcy93ZWItdml0YWxzL2xpYi9nZXROYXZpZ2F0aW9uRW50cnkudHMiXSwic291cmNlc0NvbnRlbnQiOlsiLypcbiAqIENvcHlyaWdodCAyMDIyIEdvb2dsZSBMTENcbiAqXG4gKiBMaWNlbnNlZCB1bmRlciB0aGUgQXBhY2hlIExpY2Vuc2UsIFZlcnNpb24gMi4wICh0aGUgXCJMaWNlbnNlXCIpO1xuICogeW91IG1heSBub3QgdXNlIHRoaXMgZmlsZSBleGNlcHQgaW4gY29tcGxpYW5jZSB3aXRoIHRoZSBMaWNlbnNlLlxuICogWW91IG1heSBvYnRhaW4gYSBjb3B5IG9mIHRoZSBMaWNlbnNlIGF0XG4gKlxuICogICAgIGh0dHBzOi8vd3d3LmFwYWNoZS5vcmcvbGljZW5zZXMvTElDRU5TRS0yLjBcbiAqXG4gKiBVbmxlc3MgcmVxdWlyZWQgYnkgYXBwbGljYWJsZSBsYXcgb3IgYWdyZWVkIHRvIGluIHdyaXRpbmcsIHNvZnR3YXJlXG4gKiBkaXN0cmlidXRlZCB1bmRlciB0aGUgTGljZW5zZSBpcyBkaXN0cmlidXRlZCBvbiBhbiBcIkFTIElTXCIgQkFTSVMsXG4gKiBXSVRIT1VUIFdBUlJBTlRJRVMgT1IgQ09ORElUSU9OUyBPRiBBTlkgS0lORCwgZWl0aGVyIGV4cHJlc3Mgb3IgaW1wbGllZC5cbiAqIFNlZSB0aGUgTGljZW5zZSBmb3IgdGhlIHNwZWNpZmljIGxhbmd1YWdlIGdvdmVybmluZyBwZXJtaXNzaW9ucyBhbmRcbiAqIGxpbWl0YXRpb25zIHVuZGVyIHRoZSBMaWNlbnNlLlxuICovXG5cbmltcG9ydCB7IFdJTkRPVyB9IGZyb20gJy4uLy4uLy4uL3R5cGVzJztcblxuLy8gc2VudHJ5LXNwZWNpZmljIGNoYW5nZTpcbi8vIGFkZCBvcHRpb25hbCBwYXJhbSB0byBub3QgY2hlY2sgZm9yIHJlc3BvbnNlU3RhcnQgKHNlZSBjb21tZW50IGJlbG93KVxuZXhwb3J0IGNvbnN0IGdldE5hdmlnYXRpb25FbnRyeSA9IChjaGVja1Jlc3BvbnNlU3RhcnQgPSB0cnVlKTogUGVyZm9ybWFuY2VOYXZpZ2F0aW9uVGltaW5nIHwgdm9pZCA9PiB7XG4gIGNvbnN0IG5hdmlnYXRpb25FbnRyeSA9IFdJTkRPVy5wZXJmb3JtYW5jZT8uZ2V0RW50cmllc0J5VHlwZT8uKCduYXZpZ2F0aW9uJylbMF07XG4gIC8vIENoZWNrIHRvIGVuc3VyZSB0aGUgYHJlc3BvbnNlU3RhcnRgIHByb3BlcnR5IGlzIHByZXNlbnQgYW5kIHZhbGlkLlxuICAvLyBJbiBzb21lIGNhc2VzIGEgemVybyB2YWx1ZSBpcyByZXBvcnRlZCBieSB0aGUgYnJvd3NlciAoZm9yXG4gIC8vIHByaXZhY3kvc2VjdXJpdHkgcmVhc29ucyksIGFuZCBpbiBvdGhlciBjYXNlcyAoYnVncykgdGhlIHZhbHVlIGlzXG4gIC8vIG5lZ2F0aXZlIG9yIGlzIGxhcmdlciB0aGFuIHRoZSBjdXJyZW50IHBhZ2UgdGltZS4gSWdub3JlIHRoZXNlIGNhc2VzOlxuICAvLyAtIGh0dHBzOi8vZ2l0aHViLmNvbS9Hb29nbGVDaHJvbWUvd2ViLXZpdGFscy9pc3N1ZXMvMTM3XG4gIC8vIC0gaHR0cHM6Ly9naXRodWIuY29tL0dvb2dsZUNocm9tZS93ZWItdml0YWxzL2lzc3Vlcy8xNjJcbiAgLy8gLSBodHRwczovL2dpdGh1Yi5jb20vR29vZ2xlQ2hyb21lL3dlYi12aXRhbHMvaXNzdWVzLzI3NVxuICBpZiAoXG4gICAgLy8gc2VudHJ5LXNwZWNpZmljIGNoYW5nZTpcbiAgICAvLyBXZSBkb24ndCB3YW50IHRvIGNoZWNrIGZvciByZXNwb25zZVN0YXJ0IGZvciBvdXIgb3duIHVzZSBvZiBgZ2V0TmF2aWdhdGlvbkVudHJ5YFxuICAgICFjaGVja1Jlc3BvbnNlU3RhcnQgfHxcbiAgICAobmF2aWdhdGlvbkVudHJ5ICYmIG5hdmlnYXRpb25FbnRyeS5yZXNwb25zZVN0YXJ0ID4gMCAmJiBuYXZpZ2F0aW9uRW50cnkucmVzcG9uc2VTdGFydCA8IHBlcmZvcm1hbmNlLm5vdygpKVxuICApIHtcbiAgICByZXR1cm4gbmF2aWdhdGlvbkVudHJ5O1xuICB9XG59O1xuIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7O0FBQUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBOzs7QUFJQTtBQUNBO01BQ2Esa0JBQUEsR0FBcUIsQ0FBQyxrQkFBQSxHQUFxQixJQUFJLEtBQXlDO0FBQ3JHLEVBQUUsTUFBTSxlQUFBLEdBQWtCLE1BQU0sQ0FBQyxXQUFXLEVBQUUsZ0JBQWdCLEdBQUcsWUFBWSxDQUFDLENBQUMsQ0FBQyxDQUFDO0FBQ2pGO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0EsRUFBRTtBQUNGO0FBQ0E7QUFDQSxJQUFJLENBQUMsa0JBQUE7QUFDTCxLQUFLLGVBQUEsSUFBbUIsZUFBZSxDQUFDLGdCQUFnQixDQUFBLElBQUssZUFBZSxDQUFDLGFBQUEsR0FBZ0IsV0FBVyxDQUFDLEdBQUcsRUFBRTtBQUM5RyxJQUFJO0FBQ0osSUFBSSxPQUFPLGVBQWU7QUFDMUIsRUFBRTtBQUNGOzs7OyIsInhfZ29vZ2xlX2lnbm9yZUxpc3QiOlswXX0=

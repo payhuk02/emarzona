@@ -1,0 +1,25 @@
+import { WINDOW } from "/node_modules/@sentry-internal/browser-utils/build/esm/types.js?v=3ea6c1b9";
+
+/**
+ * web-vitals 5.1.0 switched listeners to be added on the window rather than the document.
+ * Instead of having to check for window/document every time we add a listener, we can use this function.
+ */
+function addPageListener(type, listener, options) {
+  if (WINDOW.document) {
+    WINDOW.addEventListener(type, listener, options);
+  }
+}
+/**
+ * web-vitals 5.1.0 switched listeners to be removed from the window rather than the document.
+ * Instead of having to check for window/document every time we remove a listener, we can use this function.
+ */
+function removePageListener(type, listener, options) {
+  if (WINDOW.document) {
+    WINDOW.removeEventListener(type, listener, options);
+  }
+}
+
+export { addPageListener, removePageListener };
+                                           
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZ2xvYmFsTGlzdGVuZXJzLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi8uLi9zcmMvbWV0cmljcy93ZWItdml0YWxzL2xpYi9nbG9iYWxMaXN0ZW5lcnMudHMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgV0lORE9XIH0gZnJvbSAnLi4vLi4vLi4vdHlwZXMnO1xuXG4vKipcbiAqIHdlYi12aXRhbHMgNS4xLjAgc3dpdGNoZWQgbGlzdGVuZXJzIHRvIGJlIGFkZGVkIG9uIHRoZSB3aW5kb3cgcmF0aGVyIHRoYW4gdGhlIGRvY3VtZW50LlxuICogSW5zdGVhZCBvZiBoYXZpbmcgdG8gY2hlY2sgZm9yIHdpbmRvdy9kb2N1bWVudCBldmVyeSB0aW1lIHdlIGFkZCBhIGxpc3RlbmVyLCB3ZSBjYW4gdXNlIHRoaXMgZnVuY3Rpb24uXG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBhZGRQYWdlTGlzdGVuZXIodHlwZTogc3RyaW5nLCBsaXN0ZW5lcjogRXZlbnRMaXN0ZW5lciwgb3B0aW9ucz86IGJvb2xlYW4gfCBBZGRFdmVudExpc3RlbmVyT3B0aW9ucykge1xuICBpZiAoV0lORE9XLmRvY3VtZW50KSB7XG4gICAgV0lORE9XLmFkZEV2ZW50TGlzdGVuZXIodHlwZSwgbGlzdGVuZXIsIG9wdGlvbnMpO1xuICB9XG59XG4vKipcbiAqIHdlYi12aXRhbHMgNS4xLjAgc3dpdGNoZWQgbGlzdGVuZXJzIHRvIGJlIHJlbW92ZWQgZnJvbSB0aGUgd2luZG93IHJhdGhlciB0aGFuIHRoZSBkb2N1bWVudC5cbiAqIEluc3RlYWQgb2YgaGF2aW5nIHRvIGNoZWNrIGZvciB3aW5kb3cvZG9jdW1lbnQgZXZlcnkgdGltZSB3ZSByZW1vdmUgYSBsaXN0ZW5lciwgd2UgY2FuIHVzZSB0aGlzIGZ1bmN0aW9uLlxuICovXG5leHBvcnQgZnVuY3Rpb24gcmVtb3ZlUGFnZUxpc3RlbmVyKHR5cGU6IHN0cmluZywgbGlzdGVuZXI6IEV2ZW50TGlzdGVuZXIsIG9wdGlvbnM/OiBib29sZWFuIHwgQWRkRXZlbnRMaXN0ZW5lck9wdGlvbnMpIHtcbiAgaWYgKFdJTkRPVy5kb2N1bWVudCkge1xuICAgIFdJTkRPVy5yZW1vdmVFdmVudExpc3RlbmVyKHR5cGUsIGxpc3RlbmVyLCBvcHRpb25zKTtcbiAgfVxufVxuIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7O0FBRUE7QUFDQTtBQUNBO0FBQ0E7QUFDTyxTQUFTLGVBQWUsQ0FBQyxJQUFJLEVBQVUsUUFBUSxFQUFpQixPQUFPLEVBQXNDO0FBQ3BILEVBQUUsSUFBSSxNQUFNLENBQUMsUUFBUSxFQUFFO0FBQ3ZCLElBQUksTUFBTSxDQUFDLGdCQUFnQixDQUFDLElBQUksRUFBRSxRQUFRLEVBQUUsT0FBTyxDQUFDO0FBQ3BELEVBQUU7QUFDRjtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ08sU0FBUyxrQkFBa0IsQ0FBQyxJQUFJLEVBQVUsUUFBUSxFQUFpQixPQUFPLEVBQXNDO0FBQ3ZILEVBQUUsSUFBSSxNQUFNLENBQUMsUUFBUSxFQUFFO0FBQ3ZCLElBQUksTUFBTSxDQUFDLG1CQUFtQixDQUFDLElBQUksRUFBRSxRQUFRLEVBQUUsT0FBTyxDQUFDO0FBQ3ZELEVBQUU7QUFDRjs7OzsiLCJ4X2dvb2dsZV9pZ25vcmVMaXN0IjpbMF19

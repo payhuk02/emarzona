@@ -1,0 +1,155 @@
+import { getCurrentScope } from "/node_modules/@sentry/core/build/esm/currentScopes.js?v=a52cce50";
+import { DEBUG_BUILD } from "/node_modules/@sentry/core/build/esm/debug-build.js?v=a52cce50";
+import { debug } from "/node_modules/@sentry/core/build/esm/utils/debug-logger.js?v=a52cce50";
+import { getActiveSpan, spanToJSON } from "/node_modules/@sentry/core/build/esm/utils/spanUtils.js?v=a52cce50";
+
+/**
+ * Ordered LRU cache for storing feature flags in the scope context. The name
+ * of each flag in the buffer is unique, and the output of getAll() is ordered
+ * from oldest to newest.
+ */
+
+/**
+ * Max size of the LRU flag buffer stored in Sentry scope and event contexts.
+ */
+const _INTERNAL_FLAG_BUFFER_SIZE = 100;
+
+/**
+ * Max number of flag evaluations to record per span.
+ */
+const _INTERNAL_MAX_FLAGS_PER_SPAN = 10;
+
+const SPAN_FLAG_ATTRIBUTE_PREFIX = 'flag.evaluation.';
+
+/**
+ * Copies feature flags that are in current scope context to the event context
+ */
+function _INTERNAL_copyFlagsFromScopeToEvent(event) {
+  const scope = getCurrentScope();
+  const flagContext = scope.getScopeData().contexts.flags;
+  const flagBuffer = flagContext ? flagContext.values : [];
+
+  if (!flagBuffer.length) {
+    return event;
+  }
+
+  if (event.contexts === undefined) {
+    event.contexts = {};
+  }
+  event.contexts.flags = { values: [...flagBuffer] };
+  return event;
+}
+
+/**
+ * Inserts a flag into the current scope's context while maintaining ordered LRU properties.
+ * Not thread-safe. After inserting:
+ * - The flag buffer is sorted in order of recency, with the newest evaluation at the end.
+ * - The names in the buffer are always unique.
+ * - The length of the buffer never exceeds `maxSize`.
+ *
+ * @param name     Name of the feature flag to insert.
+ * @param value    Value of the feature flag.
+ * @param maxSize  Max number of flags the buffer should store. Default value should always be used in production.
+ */
+function _INTERNAL_insertFlagToScope(
+  name,
+  value,
+  maxSize = _INTERNAL_FLAG_BUFFER_SIZE,
+) {
+  const scopeContexts = getCurrentScope().getScopeData().contexts;
+  if (!scopeContexts.flags) {
+    scopeContexts.flags = { values: [] };
+  }
+  const flags = scopeContexts.flags.values;
+  _INTERNAL_insertToFlagBuffer(flags, name, value, maxSize);
+}
+
+/**
+ * Exported for tests only. Currently only accepts boolean values (otherwise no-op).
+ * Inserts a flag into a FeatureFlag array while maintaining the following properties:
+ * - Flags are sorted in order of recency, with the newest evaluation at the end.
+ * - The flag names are always unique.
+ * - The length of the array never exceeds `maxSize`.
+ *
+ * @param flags      The buffer to insert the flag into.
+ * @param name       Name of the feature flag to insert.
+ * @param value      Value of the feature flag.
+ * @param maxSize    Max number of flags the buffer should store. Default value should always be used in production.
+ */
+function _INTERNAL_insertToFlagBuffer(
+  flags,
+  name,
+  value,
+  maxSize,
+) {
+  if (typeof value !== 'boolean') {
+    return;
+  }
+
+  if (flags.length > maxSize) {
+    DEBUG_BUILD && debug.error(`[Feature Flags] insertToFlagBuffer called on a buffer larger than maxSize=${maxSize}`);
+    return;
+  }
+
+  // Check if the flag is already in the buffer - O(n)
+  const index = flags.findIndex(f => f.flag === name);
+
+  if (index !== -1) {
+    // The flag was found, remove it from its current position - O(n)
+    flags.splice(index, 1);
+  }
+
+  if (flags.length === maxSize) {
+    // If at capacity, pop the earliest flag - O(n)
+    flags.shift();
+  }
+
+  // Push the flag to the end - O(1)
+  flags.push({
+    flag: name,
+    result: value,
+  });
+}
+
+/**
+ * Records a feature flag evaluation for the active span. This is a no-op for non-boolean values.
+ * The flag and its value is stored in span attributes with the `flag.evaluation` prefix. Once the
+ * unique flags for a span reaches maxFlagsPerSpan, subsequent flags are dropped.
+ *
+ * @param name             Name of the feature flag.
+ * @param value            Value of the feature flag. Non-boolean values are ignored.
+ * @param maxFlagsPerSpan  Max number of flags a buffer should store. Default value should always be used in production.
+ */
+function _INTERNAL_addFeatureFlagToActiveSpan(
+  name,
+  value,
+  maxFlagsPerSpan = _INTERNAL_MAX_FLAGS_PER_SPAN,
+) {
+  if (typeof value !== 'boolean') {
+    return;
+  }
+
+  const span = getActiveSpan();
+  if (!span) {
+    return;
+  }
+
+  const attributes = spanToJSON(span).data;
+
+  // If the flag already exists, always update it
+  if (`${SPAN_FLAG_ATTRIBUTE_PREFIX}${name}` in attributes) {
+    span.setAttribute(`${SPAN_FLAG_ATTRIBUTE_PREFIX}${name}`, value);
+    return;
+  }
+
+  // Else, add the flag to the span if we have not reached the max number of flags
+  const numOfAddedFlags = Object.keys(attributes).filter(key => key.startsWith(SPAN_FLAG_ATTRIBUTE_PREFIX)).length;
+  if (numOfAddedFlags < maxFlagsPerSpan) {
+    span.setAttribute(`${SPAN_FLAG_ATTRIBUTE_PREFIX}${name}`, value);
+  }
+}
+
+export { _INTERNAL_FLAG_BUFFER_SIZE, _INTERNAL_MAX_FLAGS_PER_SPAN, _INTERNAL_addFeatureFlagToActiveSpan, _INTERNAL_copyFlagsFromScopeToEvent, _INTERNAL_insertFlagToScope, _INTERNAL_insertToFlagBuffer };
+                                        
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZmVhdHVyZUZsYWdzLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi9zcmMvdXRpbHMvZmVhdHVyZUZsYWdzLnRzIl0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7IGdldEN1cnJlbnRTY29wZSB9IGZyb20gJy4uL2N1cnJlbnRTY29wZXMnO1xuaW1wb3J0IHsgREVCVUdfQlVJTEQgfSBmcm9tICcuLi9kZWJ1Zy1idWlsZCc7XG5pbXBvcnQgeyB0eXBlIEV2ZW50IH0gZnJvbSAnLi4vdHlwZXMtaG9pc3QvZXZlbnQnO1xuaW1wb3J0IHsgZGVidWcgfSBmcm9tICcuL2RlYnVnLWxvZ2dlcic7XG5pbXBvcnQgeyBnZXRBY3RpdmVTcGFuLCBzcGFuVG9KU09OIH0gZnJvbSAnLi9zcGFuVXRpbHMnO1xuXG4vKipcbiAqIE9yZGVyZWQgTFJVIGNhY2hlIGZvciBzdG9yaW5nIGZlYXR1cmUgZmxhZ3MgaW4gdGhlIHNjb3BlIGNvbnRleHQuIFRoZSBuYW1lXG4gKiBvZiBlYWNoIGZsYWcgaW4gdGhlIGJ1ZmZlciBpcyB1bmlxdWUsIGFuZCB0aGUgb3V0cHV0IG9mIGdldEFsbCgpIGlzIG9yZGVyZWRcbiAqIGZyb20gb2xkZXN0IHRvIG5ld2VzdC5cbiAqL1xuXG5leHBvcnQgdHlwZSBGZWF0dXJlRmxhZyA9IHsgcmVhZG9ubHkgZmxhZzogc3RyaW5nOyByZWFkb25seSByZXN1bHQ6IGJvb2xlYW4gfTtcblxuLyoqXG4gKiBNYXggc2l6ZSBvZiB0aGUgTFJVIGZsYWcgYnVmZmVyIHN0b3JlZCBpbiBTZW50cnkgc2NvcGUgYW5kIGV2ZW50IGNvbnRleHRzLlxuICovXG5leHBvcnQgY29uc3QgX0lOVEVSTkFMX0ZMQUdfQlVGRkVSX1NJWkUgPSAxMDA7XG5cbi8qKlxuICogTWF4IG51bWJlciBvZiBmbGFnIGV2YWx1YXRpb25zIHRvIHJlY29yZCBwZXIgc3Bhbi5cbiAqL1xuZXhwb3J0IGNvbnN0IF9JTlRFUk5BTF9NQVhfRkxBR1NfUEVSX1NQQU4gPSAxMDtcblxuY29uc3QgU1BBTl9GTEFHX0FUVFJJQlVURV9QUkVGSVggPSAnZmxhZy5ldmFsdWF0aW9uLic7XG5cbi8qKlxuICogQ29waWVzIGZlYXR1cmUgZmxhZ3MgdGhhdCBhcmUgaW4gY3VycmVudCBzY29wZSBjb250ZXh0IHRvIHRoZSBldmVudCBjb250ZXh0XG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBfSU5URVJOQUxfY29weUZsYWdzRnJvbVNjb3BlVG9FdmVudChldmVudDogRXZlbnQpOiBFdmVudCB7XG4gIGNvbnN0IHNjb3BlID0gZ2V0Q3VycmVudFNjb3BlKCk7XG4gIGNvbnN0IGZsYWdDb250ZXh0ID0gc2NvcGUuZ2V0U2NvcGVEYXRhKCkuY29udGV4dHMuZmxhZ3M7XG4gIGNvbnN0IGZsYWdCdWZmZXIgPSBmbGFnQ29udGV4dCA/IGZsYWdDb250ZXh0LnZhbHVlcyA6IFtdO1xuXG4gIGlmICghZmxhZ0J1ZmZlci5sZW5ndGgpIHtcbiAgICByZXR1cm4gZXZlbnQ7XG4gIH1cblxuICBpZiAoZXZlbnQuY29udGV4dHMgPT09IHVuZGVmaW5lZCkge1xuICAgIGV2ZW50LmNvbnRleHRzID0ge307XG4gIH1cbiAgZXZlbnQuY29udGV4dHMuZmxhZ3MgPSB7IHZhbHVlczogWy4uLmZsYWdCdWZmZXJdIH07XG4gIHJldHVybiBldmVudDtcbn1cblxuLyoqXG4gKiBJbnNlcnRzIGEgZmxhZyBpbnRvIHRoZSBjdXJyZW50IHNjb3BlJ3MgY29udGV4dCB3aGlsZSBtYWludGFpbmluZyBvcmRlcmVkIExSVSBwcm9wZXJ0aWVzLlxuICogTm90IHRocmVhZC1zYWZlLiBBZnRlciBpbnNlcnRpbmc6XG4gKiAtIFRoZSBmbGFnIGJ1ZmZlciBpcyBzb3J0ZWQgaW4gb3JkZXIgb2YgcmVjZW5jeSwgd2l0aCB0aGUgbmV3ZXN0IGV2YWx1YXRpb24gYXQgdGhlIGVuZC5cbiAqIC0gVGhlIG5hbWVzIGluIHRoZSBidWZmZXIgYXJlIGFsd2F5cyB1bmlxdWUuXG4gKiAtIFRoZSBsZW5ndGggb2YgdGhlIGJ1ZmZlciBuZXZlciBleGNlZWRzIGBtYXhTaXplYC5cbiAqXG4gKiBAcGFyYW0gbmFtZSAgICAgTmFtZSBvZiB0aGUgZmVhdHVyZSBmbGFnIHRvIGluc2VydC5cbiAqIEBwYXJhbSB2YWx1ZSAgICBWYWx1ZSBvZiB0aGUgZmVhdHVyZSBmbGFnLlxuICogQHBhcmFtIG1heFNpemUgIE1heCBudW1iZXIgb2YgZmxhZ3MgdGhlIGJ1ZmZlciBzaG91bGQgc3RvcmUuIERlZmF1bHQgdmFsdWUgc2hvdWxkIGFsd2F5cyBiZSB1c2VkIGluIHByb2R1Y3Rpb24uXG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBfSU5URVJOQUxfaW5zZXJ0RmxhZ1RvU2NvcGUoXG4gIG5hbWU6IHN0cmluZyxcbiAgdmFsdWU6IHVua25vd24sXG4gIG1heFNpemU6IG51bWJlciA9IF9JTlRFUk5BTF9GTEFHX0JVRkZFUl9TSVpFLFxuKTogdm9pZCB7XG4gIGNvbnN0IHNjb3BlQ29udGV4dHMgPSBnZXRDdXJyZW50U2NvcGUoKS5nZXRTY29wZURhdGEoKS5jb250ZXh0cztcbiAgaWYgKCFzY29wZUNvbnRleHRzLmZsYWdzKSB7XG4gICAgc2NvcGVDb250ZXh0cy5mbGFncyA9IHsgdmFsdWVzOiBbXSB9O1xuICB9XG4gIGNvbnN0IGZsYWdzID0gc2NvcGVDb250ZXh0cy5mbGFncy52YWx1ZXM7XG4gIF9JTlRFUk5BTF9pbnNlcnRUb0ZsYWdCdWZmZXIoZmxhZ3MsIG5hbWUsIHZhbHVlLCBtYXhTaXplKTtcbn1cblxuLyoqXG4gKiBFeHBvcnRlZCBmb3IgdGVzdHMgb25seS4gQ3VycmVudGx5IG9ubHkgYWNjZXB0cyBib29sZWFuIHZhbHVlcyAob3RoZXJ3aXNlIG5vLW9wKS5cbiAqIEluc2VydHMgYSBmbGFnIGludG8gYSBGZWF0dXJlRmxhZyBhcnJheSB3aGlsZSBtYWludGFpbmluZyB0aGUgZm9sbG93aW5nIHByb3BlcnRpZXM6XG4gKiAtIEZsYWdzIGFyZSBzb3J0ZWQgaW4gb3JkZXIgb2YgcmVjZW5jeSwgd2l0aCB0aGUgbmV3ZXN0IGV2YWx1YXRpb24gYXQgdGhlIGVuZC5cbiAqIC0gVGhlIGZsYWcgbmFtZXMgYXJlIGFsd2F5cyB1bmlxdWUuXG4gKiAtIFRoZSBsZW5ndGggb2YgdGhlIGFycmF5IG5ldmVyIGV4Y2VlZHMgYG1heFNpemVgLlxuICpcbiAqIEBwYXJhbSBmbGFncyAgICAgIFRoZSBidWZmZXIgdG8gaW5zZXJ0IHRoZSBmbGFnIGludG8uXG4gKiBAcGFyYW0gbmFtZSAgICAgICBOYW1lIG9mIHRoZSBmZWF0dXJlIGZsYWcgdG8gaW5zZXJ0LlxuICogQHBhcmFtIHZhbHVlICAgICAgVmFsdWUgb2YgdGhlIGZlYXR1cmUgZmxhZy5cbiAqIEBwYXJhbSBtYXhTaXplICAgIE1heCBudW1iZXIgb2YgZmxhZ3MgdGhlIGJ1ZmZlciBzaG91bGQgc3RvcmUuIERlZmF1bHQgdmFsdWUgc2hvdWxkIGFsd2F5cyBiZSB1c2VkIGluIHByb2R1Y3Rpb24uXG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBfSU5URVJOQUxfaW5zZXJ0VG9GbGFnQnVmZmVyKFxuICBmbGFnczogRmVhdHVyZUZsYWdbXSxcbiAgbmFtZTogc3RyaW5nLFxuICB2YWx1ZTogdW5rbm93bixcbiAgbWF4U2l6ZTogbnVtYmVyLFxuKTogdm9pZCB7XG4gIGlmICh0eXBlb2YgdmFsdWUgIT09ICdib29sZWFuJykge1xuICAgIHJldHVybjtcbiAgfVxuXG4gIGlmIChmbGFncy5sZW5ndGggPiBtYXhTaXplKSB7XG4gICAgREVCVUdfQlVJTEQgJiYgZGVidWcuZXJyb3IoYFtGZWF0dXJlIEZsYWdzXSBpbnNlcnRUb0ZsYWdCdWZmZXIgY2FsbGVkIG9uIGEgYnVmZmVyIGxhcmdlciB0aGFuIG1heFNpemU9JHttYXhTaXplfWApO1xuICAgIHJldHVybjtcbiAgfVxuXG4gIC8vIENoZWNrIGlmIHRoZSBmbGFnIGlzIGFscmVhZHkgaW4gdGhlIGJ1ZmZlciAtIE8obilcbiAgY29uc3QgaW5kZXggPSBmbGFncy5maW5kSW5kZXgoZiA9PiBmLmZsYWcgPT09IG5hbWUpO1xuXG4gIGlmIChpbmRleCAhPT0gLTEpIHtcbiAgICAvLyBUaGUgZmxhZyB3YXMgZm91bmQsIHJlbW92ZSBpdCBmcm9tIGl0cyBjdXJyZW50IHBvc2l0aW9uIC0gTyhuKVxuICAgIGZsYWdzLnNwbGljZShpbmRleCwgMSk7XG4gIH1cblxuICBpZiAoZmxhZ3MubGVuZ3RoID09PSBtYXhTaXplKSB7XG4gICAgLy8gSWYgYXQgY2FwYWNpdHksIHBvcCB0aGUgZWFybGllc3QgZmxhZyAtIE8obilcbiAgICBmbGFncy5zaGlmdCgpO1xuICB9XG5cbiAgLy8gUHVzaCB0aGUgZmxhZyB0byB0aGUgZW5kIC0gTygxKVxuICBmbGFncy5wdXNoKHtcbiAgICBmbGFnOiBuYW1lLFxuICAgIHJlc3VsdDogdmFsdWUsXG4gIH0pO1xufVxuXG4vKipcbiAqIFJlY29yZHMgYSBmZWF0dXJlIGZsYWcgZXZhbHVhdGlvbiBmb3IgdGhlIGFjdGl2ZSBzcGFuLiBUaGlzIGlzIGEgbm8tb3AgZm9yIG5vbi1ib29sZWFuIHZhbHVlcy5cbiAqIFRoZSBmbGFnIGFuZCBpdHMgdmFsdWUgaXMgc3RvcmVkIGluIHNwYW4gYXR0cmlidXRlcyB3aXRoIHRoZSBgZmxhZy5ldmFsdWF0aW9uYCBwcmVmaXguIE9uY2UgdGhlXG4gKiB1bmlxdWUgZmxhZ3MgZm9yIGEgc3BhbiByZWFjaGVzIG1heEZsYWdzUGVyU3Bhbiwgc3Vic2VxdWVudCBmbGFncyBhcmUgZHJvcHBlZC5cbiAqXG4gKiBAcGFyYW0gbmFtZSAgICAgICAgICAgICBOYW1lIG9mIHRoZSBmZWF0dXJlIGZsYWcuXG4gKiBAcGFyYW0gdmFsdWUgICAgICAgICAgICBWYWx1ZSBvZiB0aGUgZmVhdHVyZSBmbGFnLiBOb24tYm9vbGVhbiB2YWx1ZXMgYXJlIGlnbm9yZWQuXG4gKiBAcGFyYW0gbWF4RmxhZ3NQZXJTcGFuICBNYXggbnVtYmVyIG9mIGZsYWdzIGEgYnVmZmVyIHNob3VsZCBzdG9yZS4gRGVmYXVsdCB2YWx1ZSBzaG91bGQgYWx3YXlzIGJlIHVzZWQgaW4gcHJvZHVjdGlvbi5cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIF9JTlRFUk5BTF9hZGRGZWF0dXJlRmxhZ1RvQWN0aXZlU3BhbihcbiAgbmFtZTogc3RyaW5nLFxuICB2YWx1ZTogdW5rbm93bixcbiAgbWF4RmxhZ3NQZXJTcGFuOiBudW1iZXIgPSBfSU5URVJOQUxfTUFYX0ZMQUdTX1BFUl9TUEFOLFxuKTogdm9pZCB7XG4gIGlmICh0eXBlb2YgdmFsdWUgIT09ICdib29sZWFuJykge1xuICAgIHJldHVybjtcbiAgfVxuXG4gIGNvbnN0IHNwYW4gPSBnZXRBY3RpdmVTcGFuKCk7XG4gIGlmICghc3Bhbikge1xuICAgIHJldHVybjtcbiAgfVxuXG4gIGNvbnN0IGF0dHJpYnV0ZXMgPSBzcGFuVG9KU09OKHNwYW4pLmRhdGE7XG5cbiAgLy8gSWYgdGhlIGZsYWcgYWxyZWFkeSBleGlzdHMsIGFsd2F5cyB1cGRhdGUgaXRcbiAgaWYgKGAke1NQQU5fRkxBR19BVFRSSUJVVEVfUFJFRklYfSR7bmFtZX1gIGluIGF0dHJpYnV0ZXMpIHtcbiAgICBzcGFuLnNldEF0dHJpYnV0ZShgJHtTUEFOX0ZMQUdfQVRUUklCVVRFX1BSRUZJWH0ke25hbWV9YCwgdmFsdWUpO1xuICAgIHJldHVybjtcbiAgfVxuXG4gIC8vIEVsc2UsIGFkZCB0aGUgZmxhZyB0byB0aGUgc3BhbiBpZiB3ZSBoYXZlIG5vdCByZWFjaGVkIHRoZSBtYXggbnVtYmVyIG9mIGZsYWdzXG4gIGNvbnN0IG51bU9mQWRkZWRGbGFncyA9IE9iamVjdC5rZXlzKGF0dHJpYnV0ZXMpLmZpbHRlcihrZXkgPT4ga2V5LnN0YXJ0c1dpdGgoU1BBTl9GTEFHX0FUVFJJQlVURV9QUkVGSVgpKS5sZW5ndGg7XG4gIGlmIChudW1PZkFkZGVkRmxhZ3MgPCBtYXhGbGFnc1BlclNwYW4pIHtcbiAgICBzcGFuLnNldEF0dHJpYnV0ZShgJHtTUEFOX0ZMQUdfQVRUUklCVVRFX1BSRUZJWH0ke25hbWV9YCwgdmFsdWUpO1xuICB9XG59XG4iXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7QUFNQTtBQUNBO0FBQ0E7QUFDQTtBQUNBOztBQUlBO0FBQ0E7QUFDQTtBQUNPLE1BQU0sMEJBQUEsR0FBNkI7O0FBRTFDO0FBQ0E7QUFDQTtBQUNPLE1BQU0sNEJBQUEsR0FBK0I7O0FBRTVDLE1BQU0sMEJBQUEsR0FBNkIsa0JBQWtCOztBQUVyRDtBQUNBO0FBQ0E7QUFDTyxTQUFTLG1DQUFtQyxDQUFDLEtBQUssRUFBZ0I7QUFDekUsRUFBRSxNQUFNLEtBQUEsR0FBUSxlQUFlLEVBQUU7QUFDakMsRUFBRSxNQUFNLFdBQUEsR0FBYyxLQUFLLENBQUMsWUFBWSxFQUFFLENBQUMsUUFBUSxDQUFDLEtBQUs7QUFDekQsRUFBRSxNQUFNLFVBQUEsR0FBYSxXQUFBLEdBQWMsV0FBVyxDQUFDLE1BQUEsR0FBUyxFQUFFOztBQUUxRCxFQUFFLElBQUksQ0FBQyxVQUFVLENBQUMsTUFBTSxFQUFFO0FBQzFCLElBQUksT0FBTyxLQUFLO0FBQ2hCLEVBQUU7O0FBRUYsRUFBRSxJQUFJLEtBQUssQ0FBQyxRQUFBLEtBQWEsU0FBUyxFQUFFO0FBQ3BDLElBQUksS0FBSyxDQUFDLFFBQUEsR0FBVyxFQUFFO0FBQ3ZCLEVBQUU7QUFDRixFQUFFLEtBQUssQ0FBQyxRQUFRLENBQUMsS0FBQSxHQUFRLEVBQUUsTUFBTSxFQUFFLENBQUMsR0FBRyxVQUFVLEdBQUc7QUFDcEQsRUFBRSxPQUFPLEtBQUs7QUFDZDs7QUFFQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ08sU0FBUywyQkFBMkI7QUFDM0MsRUFBRSxJQUFJO0FBQ04sRUFBRSxLQUFLO0FBQ1AsRUFBRSxPQUFPLEdBQVcsMEJBQTBCO0FBQzlDLEVBQVE7QUFDUixFQUFFLE1BQU0sYUFBQSxHQUFnQixlQUFlLEVBQUUsQ0FBQyxZQUFZLEVBQUUsQ0FBQyxRQUFRO0FBQ2pFLEVBQUUsSUFBSSxDQUFDLGFBQWEsQ0FBQyxLQUFLLEVBQUU7QUFDNUIsSUFBSSxhQUFhLENBQUMsS0FBQSxHQUFRLEVBQUUsTUFBTSxFQUFFLEVBQUMsRUFBRztBQUN4QyxFQUFFO0FBQ0YsRUFBRSxNQUFNLEtBQUEsR0FBUSxhQUFhLENBQUMsS0FBSyxDQUFDLE1BQU07QUFDMUMsRUFBRSw0QkFBNEIsQ0FBQyxLQUFLLEVBQUUsSUFBSSxFQUFFLEtBQUssRUFBRSxPQUFPLENBQUM7QUFDM0Q7O0FBRUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ08sU0FBUyw0QkFBNEI7QUFDNUMsRUFBRSxLQUFLO0FBQ1AsRUFBRSxJQUFJO0FBQ04sRUFBRSxLQUFLO0FBQ1AsRUFBRSxPQUFPO0FBQ1QsRUFBUTtBQUNSLEVBQUUsSUFBSSxPQUFPLEtBQUEsS0FBVSxTQUFTLEVBQUU7QUFDbEMsSUFBSTtBQUNKLEVBQUU7O0FBRUYsRUFBRSxJQUFJLEtBQUssQ0FBQyxNQUFBLEdBQVMsT0FBTyxFQUFFO0FBQzlCLElBQUksV0FBQSxJQUFlLEtBQUssQ0FBQyxLQUFLLENBQUMsQ0FBQywwRUFBMEUsRUFBRSxPQUFPLENBQUMsQ0FBQSxDQUFBO0FBQ0EsSUFBQTtBQUNBLEVBQUE7O0FBRUE7QUFDQSxFQUFBLE1BQUEsS0FBQSxHQUFBLEtBQUEsQ0FBQSxTQUFBLENBQUEsQ0FBQSxJQUFBLENBQUEsQ0FBQSxJQUFBLEtBQUEsSUFBQSxDQUFBOztBQUVBLEVBQUEsSUFBQSxLQUFBLEtBQUEsRUFBQSxFQUFBO0FBQ0E7QUFDQSxJQUFBLEtBQUEsQ0FBQSxNQUFBLENBQUEsS0FBQSxFQUFBLENBQUEsQ0FBQTtBQUNBLEVBQUE7O0FBRUEsRUFBQSxJQUFBLEtBQUEsQ0FBQSxNQUFBLEtBQUEsT0FBQSxFQUFBO0FBQ0E7QUFDQSxJQUFBLEtBQUEsQ0FBQSxLQUFBLEVBQUE7QUFDQSxFQUFBOztBQUVBO0FBQ0EsRUFBQSxLQUFBLENBQUEsSUFBQSxDQUFBO0FBQ0EsSUFBQSxJQUFBLEVBQUEsSUFBQTtBQUNBLElBQUEsTUFBQSxFQUFBLEtBQUE7QUFDQSxHQUFBLENBQUE7QUFDQTs7QUFFQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQSxTQUFBLG9DQUFBO0FBQ0EsRUFBQSxJQUFBO0FBQ0EsRUFBQSxLQUFBO0FBQ0EsRUFBQSxlQUFBLEdBQUEsNEJBQUE7QUFDQSxFQUFBO0FBQ0EsRUFBQSxJQUFBLE9BQUEsS0FBQSxLQUFBLFNBQUEsRUFBQTtBQUNBLElBQUE7QUFDQSxFQUFBOztBQUVBLEVBQUEsTUFBQSxJQUFBLEdBQUEsYUFBQSxFQUFBO0FBQ0EsRUFBQSxJQUFBLENBQUEsSUFBQSxFQUFBO0FBQ0EsSUFBQTtBQUNBLEVBQUE7O0FBRUEsRUFBQSxNQUFBLFVBQUEsR0FBQSxVQUFBLENBQUEsSUFBQSxDQUFBLENBQUEsSUFBQTs7QUFFQTtBQUNBLEVBQUEsSUFBQSxDQUFBLEVBQUEsMEJBQUEsQ0FBQSxFQUFBLElBQUEsQ0FBQSxDQUFBLElBQUEsVUFBQSxFQUFBO0FBQ0EsSUFBQSxJQUFBLENBQUEsWUFBQSxDQUFBLENBQUEsRUFBQSwwQkFBQSxDQUFBLEVBQUEsSUFBQSxDQUFBLENBQUEsRUFBQSxLQUFBLENBQUE7QUFDQSxJQUFBO0FBQ0EsRUFBQTs7QUFFQTtBQUNBLEVBQUEsTUFBQSxlQUFBLEdBQUEsTUFBQSxDQUFBLElBQUEsQ0FBQSxVQUFBLENBQUEsQ0FBQSxNQUFBLENBQUEsR0FBQSxJQUFBLEdBQUEsQ0FBQSxVQUFBLENBQUEsMEJBQUEsQ0FBQSxDQUFBLENBQUEsTUFBQTtBQUNBLEVBQUEsSUFBQSxlQUFBLEdBQUEsZUFBQSxFQUFBO0FBQ0EsSUFBQSxJQUFBLENBQUEsWUFBQSxDQUFBLENBQUEsRUFBQSwwQkFBQSxDQUFBLEVBQUEsSUFBQSxDQUFBLENBQUEsRUFBQSxLQUFBLENBQUE7QUFDQSxFQUFBO0FBQ0E7Ozs7IiwieF9nb29nbGVfaWdub3JlTGlzdCI6WzBdfQ==

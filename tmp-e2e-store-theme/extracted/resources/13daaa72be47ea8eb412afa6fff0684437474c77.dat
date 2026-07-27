@@ -1,0 +1,603 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/ui/LanguageSwitcher.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/ui/LanguageSwitcher.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=6014a254"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"]; const _Fragment = __vite__cjsImport2_react_jsxDevRuntime["Fragment"];
+var _s = $RefreshSig$(), _s1 = $RefreshSig$();
+/**
+ * Composant pour changer de langue
+ * Affiche un bouton avec un dropdown pour sélectionner la langue
+ * Optimisé pour mobile avec positionnement stable
+ */ import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=6014a254"; const React = __vite__cjsImport3_react.__esModule ? __vite__cjsImport3_react.default : __vite__cjsImport3_react; const useCallback = __vite__cjsImport3_react["useCallback"]; const useState = __vite__cjsImport3_react["useState"];
+import { useTranslation } from "/node_modules/.vite/deps/react-i18next.js?v=02b07ad4";
+import { Globe } from "/src/components/icons/index.ts";
+import { Loader2 } from "/node_modules/.vite/deps/lucide-react.js?v=6014a254";
+import { Button } from "/src/components/ui/button.tsx";
+import { AVAILABLE_LANGUAGES } from "/src/i18n/config.ts";
+import { cn } from "/src/lib/utils.ts";
+import { useIsMobile } from "/src/hooks/use-mobile.tsx";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "/src/components/ui/dialog.tsx";
+import { useBodyScrollLock } from "/src/hooks/use-body-scroll-lock.ts";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "/src/components/ui/dropdown-menu.tsx";
+const topNavIconBtnClass = 'topnav-icon-btn h-9 min-h-9 shrink-0 border-0 bg-transparent px-2 shadow-none hover:bg-accent/50';
+export const LanguageSwitcher = ({ className, buttonClassName, variant = 'ghost', display = 'default', showLabel = false, open: controlledOpen, onOpenChange })=>{
+    _s();
+    const { i18n } = useTranslation();
+    const isMobile = useIsMobile();
+    const [internalOpen, setInternalOpen] = useState(false);
+    const [isChanging, setIsChanging] = useState(false);
+    const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
+    // Verrouiller le scroll de fond quand le sélecteur est ouvert sur mobile
+    useBodyScrollLock(isMobile && open);
+    const handleOpenChange = (newOpen)=>{
+        if (controlledOpen === undefined) {
+            setInternalOpen(newOpen);
+        }
+        onOpenChange?.(newOpen);
+    };
+    const currentLanguage = AVAILABLE_LANGUAGES.find((lang)=>lang.code === i18n.language) || AVAILABLE_LANGUAGES[0];
+    const changeLanguage = useCallback((langCode)=>{
+        // Prévenir les doubles clics / taps
+        if (isChanging) return;
+        setIsChanging(true);
+        handleOpenChange(false);
+        // Changement immédiat (pas de délai artificiel)
+        i18n.changeLanguage(langCode);
+        localStorage.setItem('emarzona_language', langCode);
+        document.documentElement.lang = langCode;
+        // Réactiver après un court délai pour le feedback visuel
+        setTimeout(()=>{
+            setIsChanging(false);
+        }, 150);
+    }, [
+        i18n,
+        isChanging,
+        handleOpenChange
+    ]);
+    // For mobile: use a real Button (standalone, not nested in SelectTrigger)
+    const mobileTriggerButton = /*#__PURE__*/ _jsxDEV(Button, {
+        variant: variant,
+        size: "sm",
+        className: cn('gap-2 touch-manipulation', buttonClassName),
+        "aria-label": `Change language (current: ${currentLanguage.name})`,
+        "aria-haspopup": "dialog",
+        "aria-expanded": open,
+        disabled: isChanging,
+        onClick: ()=>handleOpenChange(!open),
+        children: [
+            isChanging ? /*#__PURE__*/ _jsxDEV(Loader2, {
+                className: "h-4 w-4 animate-spin",
+                "aria-hidden": "true"
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/LanguageSwitcher.tsx",
+                lineNumber: 107,
+                columnNumber: 9
+            }, this) : /*#__PURE__*/ _jsxDEV(Globe, {
+                className: "h-4 w-4",
+                "aria-hidden": "true"
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/LanguageSwitcher.tsx",
+                lineNumber: 109,
+                columnNumber: 9
+            }, this),
+            /*#__PURE__*/ _jsxDEV("span", {
+                className: "text-lg",
+                "aria-hidden": "true",
+                children: currentLanguage.flag
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/LanguageSwitcher.tsx",
+                lineNumber: 111,
+                columnNumber: 7
+            }, this),
+            showLabel && /*#__PURE__*/ _jsxDEV("span", {
+                className: "hidden sm:inline",
+                children: currentLanguage.name
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/LanguageSwitcher.tsx",
+                lineNumber: 114,
+                columnNumber: 21
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/LanguageSwitcher.tsx",
+        lineNumber: 96,
+        columnNumber: 5
+    }, this);
+    const shellBtnClass = 'h-9 min-h-9 shrink-0 gap-1.5 rounded-lg border-0 bg-transparent px-2 sm:px-2.5 shadow-none text-muted-foreground hover:text-foreground hover:bg-accent/60';
+    // Shell : compact premium pour barre utilitaire (fond clair)
+    if (display === 'shell' && !isMobile) {
+        return /*#__PURE__*/ _jsxDEV(DropdownMenu, {
+            open: open,
+            onOpenChange: handleOpenChange,
+            children: [
+                /*#__PURE__*/ _jsxDEV(DropdownMenuTrigger, {
+                    asChild: true,
+                    children: /*#__PURE__*/ _jsxDEV(Button, {
+                        type: "button",
+                        variant: "ghost",
+                        size: "sm",
+                        className: cn(shellBtnClass, buttonClassName),
+                        "aria-label": `Changer la langue (actuelle : ${currentLanguage.name})`,
+                        "aria-expanded": open,
+                        "aria-haspopup": "menu",
+                        disabled: isChanging,
+                        children: [
+                            isChanging ? /*#__PURE__*/ _jsxDEV(Loader2, {
+                                className: "h-4 w-4 animate-spin",
+                                "aria-hidden": "true"
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/LanguageSwitcher.tsx",
+                                lineNumber: 137,
+                                columnNumber: 15
+                            }, this) : /*#__PURE__*/ _jsxDEV(Globe, {
+                                className: "h-4 w-4 shrink-0",
+                                "aria-hidden": "true"
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/LanguageSwitcher.tsx",
+                                lineNumber: 139,
+                                columnNumber: 15
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("span", {
+                                className: "text-base leading-none",
+                                "aria-hidden": "true",
+                                children: currentLanguage.flag
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/LanguageSwitcher.tsx",
+                                lineNumber: 141,
+                                columnNumber: 13
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("span", {
+                                className: "hidden sm:inline text-sm font-medium uppercase",
+                                children: currentLanguage.code
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/LanguageSwitcher.tsx",
+                                lineNumber: 144,
+                                columnNumber: 13
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/LanguageSwitcher.tsx",
+                        lineNumber: 126,
+                        columnNumber: 11
+                    }, this)
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/LanguageSwitcher.tsx",
+                    lineNumber: 125,
+                    columnNumber: 9
+                }, this),
+                /*#__PURE__*/ _jsxDEV(DropdownMenuContent, {
+                    align: "end",
+                    className: "min-w-[10rem]",
+                    children: AVAILABLE_LANGUAGES.map((lang)=>/*#__PURE__*/ _jsxDEV(DropdownMenuItem, {
+                            onClick: ()=>changeLanguage(lang.code),
+                            className: cn('gap-2 cursor-pointer min-h-[44px]', currentLanguage.code === lang.code && 'bg-accent'),
+                            children: [
+                                /*#__PURE__*/ _jsxDEV("span", {
+                                    className: "text-lg",
+                                    children: lang.flag
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/LanguageSwitcher.tsx",
+                                    lineNumber: 159,
+                                    columnNumber: 15
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV("span", {
+                                    children: lang.name
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/LanguageSwitcher.tsx",
+                                    lineNumber: 160,
+                                    columnNumber: 15
+                                }, this),
+                                currentLanguage.code === lang.code && /*#__PURE__*/ _jsxDEV("span", {
+                                    className: "ml-auto text-xs text-muted-foreground",
+                                    children: "✓"
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/LanguageSwitcher.tsx",
+                                    lineNumber: 162,
+                                    columnNumber: 17
+                                }, this)
+                            ]
+                        }, lang.code, true, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/LanguageSwitcher.tsx",
+                            lineNumber: 151,
+                            columnNumber: 13
+                        }, this))
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/LanguageSwitcher.tsx",
+                    lineNumber: 149,
+                    columnNumber: 9
+                }, this)
+            ]
+        }, void 0, true, {
+            fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/LanguageSwitcher.tsx",
+            lineNumber: 124,
+            columnNumber: 7
+        }, this);
+    }
+    // Topnav : menu déroulant sans SelectTrigger (évite le fond blanc)
+    if (display === 'nav' && !isMobile) {
+        return /*#__PURE__*/ _jsxDEV(DropdownMenu, {
+            open: open,
+            onOpenChange: handleOpenChange,
+            children: [
+                /*#__PURE__*/ _jsxDEV(DropdownMenuTrigger, {
+                    asChild: true,
+                    children: /*#__PURE__*/ _jsxDEV(Button, {
+                        type: "button",
+                        variant: "ghost",
+                        size: "sm",
+                        className: cn(topNavIconBtnClass, 'gap-1.5 xl:gap-1.5 w-9 xl:w-auto px-0 xl:px-2', buttonClassName),
+                        "aria-label": `Changer la langue (actuelle : ${currentLanguage.name})`,
+                        "aria-expanded": open,
+                        "aria-haspopup": "menu",
+                        disabled: isChanging,
+                        children: [
+                            isChanging ? /*#__PURE__*/ _jsxDEV(Loader2, {
+                                className: "h-4 w-4 animate-spin",
+                                "aria-hidden": "true"
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/LanguageSwitcher.tsx",
+                                lineNumber: 191,
+                                columnNumber: 15
+                            }, this) : /*#__PURE__*/ _jsxDEV(Globe, {
+                                className: "h-4 w-4 shrink-0",
+                                "aria-hidden": "true"
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/LanguageSwitcher.tsx",
+                                lineNumber: 193,
+                                columnNumber: 15
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("span", {
+                                className: "hidden xl:inline text-sm font-medium uppercase",
+                                "aria-hidden": "true",
+                                children: currentLanguage.code
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/LanguageSwitcher.tsx",
+                                lineNumber: 195,
+                                columnNumber: 13
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/LanguageSwitcher.tsx",
+                        lineNumber: 176,
+                        columnNumber: 11
+                    }, this)
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/LanguageSwitcher.tsx",
+                    lineNumber: 175,
+                    columnNumber: 9
+                }, this),
+                /*#__PURE__*/ _jsxDEV(DropdownMenuContent, {
+                    align: "end",
+                    className: "min-w-[10rem]",
+                    children: AVAILABLE_LANGUAGES.map((lang)=>/*#__PURE__*/ _jsxDEV(DropdownMenuItem, {
+                            onClick: ()=>changeLanguage(lang.code),
+                            className: cn('gap-2 cursor-pointer min-h-[44px]', currentLanguage.code === lang.code && 'bg-accent'),
+                            children: [
+                                /*#__PURE__*/ _jsxDEV("span", {
+                                    className: "text-lg",
+                                    children: lang.flag
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/LanguageSwitcher.tsx",
+                                    lineNumber: 210,
+                                    columnNumber: 15
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV("span", {
+                                    children: lang.name
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/LanguageSwitcher.tsx",
+                                    lineNumber: 211,
+                                    columnNumber: 15
+                                }, this),
+                                currentLanguage.code === lang.code && /*#__PURE__*/ _jsxDEV("span", {
+                                    className: "ml-auto text-xs text-muted-foreground",
+                                    children: "✓"
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/LanguageSwitcher.tsx",
+                                    lineNumber: 213,
+                                    columnNumber: 17
+                                }, this)
+                            ]
+                        }, lang.code, true, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/LanguageSwitcher.tsx",
+                            lineNumber: 202,
+                            columnNumber: 13
+                        }, this))
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/LanguageSwitcher.tsx",
+                    lineNumber: 200,
+                    columnNumber: 9
+                }, this)
+            ]
+        }, void 0, true, {
+            fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/LanguageSwitcher.tsx",
+            lineNumber: 174,
+            columnNumber: 7
+        }, this);
+    }
+    // Sur mobile, utiliser un vrai bottom sheet basé sur Dialog (comme pour d'autres overlays critiques)
+    if (isMobile) {
+        return /*#__PURE__*/ _jsxDEV(_Fragment, {
+            children: [
+                mobileTriggerButton,
+                /*#__PURE__*/ _jsxDEV(Dialog, {
+                    open: open,
+                    onOpenChange: handleOpenChange,
+                    children: /*#__PURE__*/ _jsxDEV(DialogContent, {
+                        className: "p-0 pt-3 pb-4 bg-background",
+                        children: [
+                            /*#__PURE__*/ _jsxDEV(DialogHeader, {
+                                className: "px-4",
+                                children: /*#__PURE__*/ _jsxDEV(DialogTitle, {
+                                    className: "text-base font-semibold",
+                                    children: "Choisir la langue"
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/LanguageSwitcher.tsx",
+                                    lineNumber: 230,
+                                    columnNumber: 15
+                                }, this)
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/LanguageSwitcher.tsx",
+                                lineNumber: 229,
+                                columnNumber: 13
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                className: "mt-2 divide-y",
+                                children: AVAILABLE_LANGUAGES.map((lang)=>/*#__PURE__*/ _jsxDEV("button", {
+                                        type: "button",
+                                        onClick: ()=>changeLanguage(lang.code),
+                                        className: cn('w-full flex items-center gap-3 px-4 py-3 text-base min-h-[48px]', 'touch-manipulation text-left', currentLanguage.code === lang.code && 'bg-accent/70'),
+                                        children: [
+                                            /*#__PURE__*/ _jsxDEV("span", {
+                                                className: "text-xl",
+                                                children: lang.flag
+                                            }, void 0, false, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/LanguageSwitcher.tsx",
+                                                lineNumber: 244,
+                                                columnNumber: 19
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV("span", {
+                                                className: "flex-1",
+                                                children: lang.name
+                                            }, void 0, false, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/LanguageSwitcher.tsx",
+                                                lineNumber: 245,
+                                                columnNumber: 19
+                                            }, this),
+                                            currentLanguage.code === lang.code && /*#__PURE__*/ _jsxDEV("span", {
+                                                className: "ml-auto text-xs text-muted-foreground",
+                                                children: "✓"
+                                            }, void 0, false, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/LanguageSwitcher.tsx",
+                                                lineNumber: 247,
+                                                columnNumber: 21
+                                            }, this)
+                                        ]
+                                    }, lang.code, true, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/LanguageSwitcher.tsx",
+                                        lineNumber: 234,
+                                        columnNumber: 17
+                                    }, this))
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/LanguageSwitcher.tsx",
+                                lineNumber: 232,
+                                columnNumber: 13
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/LanguageSwitcher.tsx",
+                        lineNumber: 228,
+                        columnNumber: 11
+                    }, this)
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/LanguageSwitcher.tsx",
+                    lineNumber: 227,
+                    columnNumber: 9
+                }, this)
+            ]
+        }, void 0, true);
+    }
+    // Desktop / tablette : DropdownMenu (évite combobox Select sans aria-expanded sur pages auth)
+    return /*#__PURE__*/ _jsxDEV(DropdownMenu, {
+        open: open,
+        onOpenChange: handleOpenChange,
+        children: [
+            /*#__PURE__*/ _jsxDEV(DropdownMenuTrigger, {
+                asChild: true,
+                children: /*#__PURE__*/ _jsxDEV(Button, {
+                    type: "button",
+                    variant: variant,
+                    size: "sm",
+                    className: cn('gap-2 touch-manipulation', buttonClassName, className),
+                    "aria-label": `Changer la langue (actuelle : ${currentLanguage.name})`,
+                    "aria-expanded": open,
+                    "aria-haspopup": "menu",
+                    disabled: isChanging,
+                    children: [
+                        isChanging ? /*#__PURE__*/ _jsxDEV(Loader2, {
+                            className: "h-4 w-4 animate-spin",
+                            "aria-hidden": "true"
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/LanguageSwitcher.tsx",
+                            lineNumber: 273,
+                            columnNumber: 13
+                        }, this) : /*#__PURE__*/ _jsxDEV(Globe, {
+                            className: "h-4 w-4",
+                            "aria-hidden": "true"
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/LanguageSwitcher.tsx",
+                            lineNumber: 275,
+                            columnNumber: 13
+                        }, this),
+                        /*#__PURE__*/ _jsxDEV("span", {
+                            className: "text-lg",
+                            "aria-hidden": "true",
+                            children: currentLanguage.flag
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/LanguageSwitcher.tsx",
+                            lineNumber: 277,
+                            columnNumber: 11
+                        }, this),
+                        showLabel && /*#__PURE__*/ _jsxDEV("span", {
+                            className: "hidden sm:inline",
+                            children: currentLanguage.name
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/LanguageSwitcher.tsx",
+                            lineNumber: 280,
+                            columnNumber: 25
+                        }, this)
+                    ]
+                }, void 0, true, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/LanguageSwitcher.tsx",
+                    lineNumber: 262,
+                    columnNumber: 9
+                }, this)
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/LanguageSwitcher.tsx",
+                lineNumber: 261,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV(DropdownMenuContent, {
+                align: "end",
+                className: "min-w-[180px]",
+                children: AVAILABLE_LANGUAGES.map((lang)=>/*#__PURE__*/ _jsxDEV(DropdownMenuItem, {
+                        onClick: ()=>changeLanguage(lang.code),
+                        className: cn('gap-2 cursor-pointer min-h-[44px]', currentLanguage.code === lang.code && 'bg-accent'),
+                        children: [
+                            /*#__PURE__*/ _jsxDEV("span", {
+                                className: "text-lg",
+                                children: lang.flag
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/LanguageSwitcher.tsx",
+                                lineNumber: 293,
+                                columnNumber: 13
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("span", {
+                                children: lang.name
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/LanguageSwitcher.tsx",
+                                lineNumber: 294,
+                                columnNumber: 13
+                            }, this),
+                            currentLanguage.code === lang.code && /*#__PURE__*/ _jsxDEV("span", {
+                                className: "ml-auto text-xs text-muted-foreground",
+                                children: "✓"
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/LanguageSwitcher.tsx",
+                                lineNumber: 296,
+                                columnNumber: 15
+                            }, this)
+                        ]
+                    }, lang.code, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/LanguageSwitcher.tsx",
+                        lineNumber: 285,
+                        columnNumber: 11
+                    }, this))
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/LanguageSwitcher.tsx",
+                lineNumber: 283,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/LanguageSwitcher.tsx",
+        lineNumber: 260,
+        columnNumber: 5
+    }, this);
+};
+_s(LanguageSwitcher, "xDXZ7mHkvv5pEr6EEIzzzKxipwk=", false, function() {
+    return [
+        useTranslation,
+        useIsMobile,
+        useBodyScrollLock
+    ];
+});
+_c = LanguageSwitcher;
+/**
+ * Version compacte avec juste le flag
+ */ export const LanguageSwitcherCompact = ({ className })=>{
+    _s1();
+    const { i18n } = useTranslation();
+    const currentLanguage = AVAILABLE_LANGUAGES.find((lang)=>lang.code === i18n.language) || AVAILABLE_LANGUAGES[0];
+    const changeLanguage = ()=>{
+        // Toggle entre les langues disponibles
+        const currentIndex = AVAILABLE_LANGUAGES.findIndex((lang)=>lang.code === currentLanguage.code);
+        const nextIndex = (currentIndex + 1) % AVAILABLE_LANGUAGES.length;
+        const nextLang = AVAILABLE_LANGUAGES[nextIndex];
+        i18n.changeLanguage(nextLang.code);
+        localStorage.setItem('emarzona_language', nextLang.code);
+        document.documentElement.lang = nextLang.code;
+    };
+    return /*#__PURE__*/ _jsxDEV(Button, {
+        variant: "ghost",
+        size: "sm",
+        onClick: changeLanguage,
+        className: cn('gap-2 touch-manipulation', className),
+        "aria-label": `Change language (current: ${currentLanguage.name})`,
+        children: [
+            /*#__PURE__*/ _jsxDEV("span", {
+                className: "text-lg",
+                children: currentLanguage.flag
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/LanguageSwitcher.tsx",
+                lineNumber: 333,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV("span", {
+                className: "text-xs hidden sm:inline",
+                children: currentLanguage.code.toUpperCase()
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/LanguageSwitcher.tsx",
+                lineNumber: 334,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/LanguageSwitcher.tsx",
+        lineNumber: 326,
+        columnNumber: 5
+    }, this);
+};
+_s1(LanguageSwitcherCompact, "iD7vDB/EPQWin5ATG71yacngHuk=", false, function() {
+    return [
+        useTranslation
+    ];
+});
+_c1 = LanguageSwitcherCompact;
+var _c, _c1;
+$RefreshReg$(_c, "LanguageSwitcher");
+$RefreshReg$(_c1, "LanguageSwitcherCompact");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/ui/LanguageSwitcher.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/ui/LanguageSwitcher.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIkxhbmd1YWdlU3dpdGNoZXIudHN4Il0sInNvdXJjZXNDb250ZW50IjpbIi8qKlxuICogQ29tcG9zYW50IHBvdXIgY2hhbmdlciBkZSBsYW5ndWVcbiAqIEFmZmljaGUgdW4gYm91dG9uIGF2ZWMgdW4gZHJvcGRvd24gcG91ciBzw6lsZWN0aW9ubmVyIGxhIGxhbmd1ZVxuICogT3B0aW1pc8OpIHBvdXIgbW9iaWxlIGF2ZWMgcG9zaXRpb25uZW1lbnQgc3RhYmxlXG4gKi9cblxuaW1wb3J0IFJlYWN0LCB7IHVzZUNhbGxiYWNrLCB1c2VTdGF0ZSB9IGZyb20gJ3JlYWN0JztcbmltcG9ydCB7IHVzZVRyYW5zbGF0aW9uIH0gZnJvbSAncmVhY3QtaTE4bmV4dCc7XG5pbXBvcnQgeyBHbG9iZSB9IGZyb20gJ0AvY29tcG9uZW50cy9pY29ucyc7XG5pbXBvcnQgeyBMb2FkZXIyIH0gZnJvbSAnbHVjaWRlLXJlYWN0JztcbmltcG9ydCB7IEJ1dHRvbiB9IGZyb20gJ0AvY29tcG9uZW50cy91aS9idXR0b24nO1xuaW1wb3J0IHsgQVZBSUxBQkxFX0xBTkdVQUdFUywgdHlwZSBMYW5ndWFnZUNvZGUgfSBmcm9tICdAL2kxOG4vY29uZmlnJztcbmltcG9ydCB7IGNuIH0gZnJvbSAnQC9saWIvdXRpbHMnO1xuaW1wb3J0IHsgdXNlSXNNb2JpbGUgfSBmcm9tICdAL2hvb2tzL3VzZS1tb2JpbGUnO1xuaW1wb3J0IHsgTU9CSUxFX1NJREVfT0ZGU0VULCBERVNLVE9QX1NJREVfT0ZGU0VUIH0gZnJvbSAnQC9jb25zdGFudHMvbW9iaWxlJztcbmltcG9ydCB7IERpYWxvZywgRGlhbG9nQ29udGVudCwgRGlhbG9nSGVhZGVyLCBEaWFsb2dUaXRsZSB9IGZyb20gJ0AvY29tcG9uZW50cy91aS9kaWFsb2cnO1xuaW1wb3J0IHsgdXNlQm9keVNjcm9sbExvY2sgfSBmcm9tICdAL2hvb2tzL3VzZS1ib2R5LXNjcm9sbC1sb2NrJztcbmltcG9ydCB7XG4gIERyb3Bkb3duTWVudSxcbiAgRHJvcGRvd25NZW51Q29udGVudCxcbiAgRHJvcGRvd25NZW51SXRlbSxcbiAgRHJvcGRvd25NZW51VHJpZ2dlcixcbn0gZnJvbSAnQC9jb21wb25lbnRzL3VpL2Ryb3Bkb3duLW1lbnUnO1xuXG5jb25zdCB0b3BOYXZJY29uQnRuQ2xhc3MgPVxuICAndG9wbmF2LWljb24tYnRuIGgtOSBtaW4taC05IHNocmluay0wIGJvcmRlci0wIGJnLXRyYW5zcGFyZW50IHB4LTIgc2hhZG93LW5vbmUgaG92ZXI6YmctYWNjZW50LzUwJztcblxuaW50ZXJmYWNlIExhbmd1YWdlU3dpdGNoZXJQcm9wcyB7XG4gIGNsYXNzTmFtZT86IHN0cmluZztcbiAgYnV0dG9uQ2xhc3NOYW1lPzogc3RyaW5nO1xuICB2YXJpYW50PzogJ2RlZmF1bHQnIHwgJ2dob3N0JyB8ICdvdXRsaW5lJztcbiAgLyoqIGBuYXZgID0gdG9wbmF2IHNvbWJyZSB8IGBzaGVsbGAgPSBiYXJyZSB1dGlsaXRhaXJlIHpvbmUgY29udGVudSAqL1xuICBkaXNwbGF5PzogJ2RlZmF1bHQnIHwgJ25hdicgfCAnc2hlbGwnO1xuICBzaG93TGFiZWw/OiBib29sZWFuO1xuICAvKipcbiAgICogw4l0YXQgY29udHLDtGzDqSBkJ291dmVydHVyZSBkdSBtZW51XG4gICAqL1xuICBvcGVuPzogYm9vbGVhbjtcbiAgLyoqXG4gICAqIENhbGxiYWNrIHF1YW5kIGwnw6l0YXQgZCdvdXZlcnR1cmUgY2hhbmdlXG4gICAqL1xuICBvbk9wZW5DaGFuZ2U/OiAob3BlbjogYm9vbGVhbikgPT4gdm9pZDtcbn1cblxuZXhwb3J0IGNvbnN0IExhbmd1YWdlU3dpdGNoZXI6IFJlYWN0LkZDPExhbmd1YWdlU3dpdGNoZXJQcm9wcz4gPSAoe1xuICBjbGFzc05hbWUsXG4gIGJ1dHRvbkNsYXNzTmFtZSxcbiAgdmFyaWFudCA9ICdnaG9zdCcsXG4gIGRpc3BsYXkgPSAnZGVmYXVsdCcsXG4gIHNob3dMYWJlbCA9IGZhbHNlLFxuICBvcGVuOiBjb250cm9sbGVkT3BlbixcbiAgb25PcGVuQ2hhbmdlLFxufSkgPT4ge1xuICBjb25zdCB7IGkxOG4gfSA9IHVzZVRyYW5zbGF0aW9uKCk7XG4gIGNvbnN0IGlzTW9iaWxlID0gdXNlSXNNb2JpbGUoKTtcbiAgY29uc3QgW2ludGVybmFsT3Blbiwgc2V0SW50ZXJuYWxPcGVuXSA9IHVzZVN0YXRlKGZhbHNlKTtcbiAgY29uc3QgW2lzQ2hhbmdpbmcsIHNldElzQ2hhbmdpbmddID0gdXNlU3RhdGUoZmFsc2UpO1xuXG4gIGNvbnN0IG9wZW4gPSBjb250cm9sbGVkT3BlbiAhPT0gdW5kZWZpbmVkID8gY29udHJvbGxlZE9wZW4gOiBpbnRlcm5hbE9wZW47XG4gIC8vIFZlcnJvdWlsbGVyIGxlIHNjcm9sbCBkZSBmb25kIHF1YW5kIGxlIHPDqWxlY3RldXIgZXN0IG91dmVydCBzdXIgbW9iaWxlXG4gIHVzZUJvZHlTY3JvbGxMb2NrKGlzTW9iaWxlICYmIG9wZW4pO1xuXG4gIGNvbnN0IGhhbmRsZU9wZW5DaGFuZ2UgPSAobmV3T3BlbjogYm9vbGVhbikgPT4ge1xuICAgIGlmIChjb250cm9sbGVkT3BlbiA9PT0gdW5kZWZpbmVkKSB7XG4gICAgICBzZXRJbnRlcm5hbE9wZW4obmV3T3Blbik7XG4gICAgfVxuICAgIG9uT3BlbkNoYW5nZT8uKG5ld09wZW4pO1xuICB9O1xuXG4gIGNvbnN0IGN1cnJlbnRMYW5ndWFnZSA9XG4gICAgQVZBSUxBQkxFX0xBTkdVQUdFUy5maW5kKGxhbmcgPT4gbGFuZy5jb2RlID09PSBpMThuLmxhbmd1YWdlKSB8fCBBVkFJTEFCTEVfTEFOR1VBR0VTWzBdO1xuXG4gIGNvbnN0IGNoYW5nZUxhbmd1YWdlID0gdXNlQ2FsbGJhY2soXG4gICAgKGxhbmdDb2RlOiBMYW5ndWFnZUNvZGUpID0+IHtcbiAgICAgIC8vIFByw6l2ZW5pciBsZXMgZG91YmxlcyBjbGljcyAvIHRhcHNcbiAgICAgIGlmIChpc0NoYW5naW5nKSByZXR1cm47XG5cbiAgICAgIHNldElzQ2hhbmdpbmcodHJ1ZSk7XG4gICAgICBoYW5kbGVPcGVuQ2hhbmdlKGZhbHNlKTtcblxuICAgICAgLy8gQ2hhbmdlbWVudCBpbW3DqWRpYXQgKHBhcyBkZSBkw6lsYWkgYXJ0aWZpY2llbClcbiAgICAgIGkxOG4uY2hhbmdlTGFuZ3VhZ2UobGFuZ0NvZGUpO1xuICAgICAgbG9jYWxTdG9yYWdlLnNldEl0ZW0oJ2VtYXJ6b25hX2xhbmd1YWdlJywgbGFuZ0NvZGUpO1xuICAgICAgZG9jdW1lbnQuZG9jdW1lbnRFbGVtZW50LmxhbmcgPSBsYW5nQ29kZTtcblxuICAgICAgLy8gUsOpYWN0aXZlciBhcHLDqHMgdW4gY291cnQgZMOpbGFpIHBvdXIgbGUgZmVlZGJhY2sgdmlzdWVsXG4gICAgICBzZXRUaW1lb3V0KCgpID0+IHtcbiAgICAgICAgc2V0SXNDaGFuZ2luZyhmYWxzZSk7XG4gICAgICB9LCAxNTApO1xuICAgIH0sXG4gICAgW2kxOG4sIGlzQ2hhbmdpbmcsIGhhbmRsZU9wZW5DaGFuZ2VdXG4gICk7XG5cbiAgLy8gRm9yIG1vYmlsZTogdXNlIGEgcmVhbCBCdXR0b24gKHN0YW5kYWxvbmUsIG5vdCBuZXN0ZWQgaW4gU2VsZWN0VHJpZ2dlcilcbiAgY29uc3QgbW9iaWxlVHJpZ2dlckJ1dHRvbiA9IChcbiAgICA8QnV0dG9uXG4gICAgICB2YXJpYW50PXt2YXJpYW50fVxuICAgICAgc2l6ZT1cInNtXCJcbiAgICAgIGNsYXNzTmFtZT17Y24oJ2dhcC0yIHRvdWNoLW1hbmlwdWxhdGlvbicsIGJ1dHRvbkNsYXNzTmFtZSl9XG4gICAgICBhcmlhLWxhYmVsPXtgQ2hhbmdlIGxhbmd1YWdlIChjdXJyZW50OiAke2N1cnJlbnRMYW5ndWFnZS5uYW1lfSlgfVxuICAgICAgYXJpYS1oYXNwb3B1cD1cImRpYWxvZ1wiXG4gICAgICBhcmlhLWV4cGFuZGVkPXtvcGVufVxuICAgICAgZGlzYWJsZWQ9e2lzQ2hhbmdpbmd9XG4gICAgICBvbkNsaWNrPXsoKSA9PiBoYW5kbGVPcGVuQ2hhbmdlKCFvcGVuKX1cbiAgICA+XG4gICAgICB7aXNDaGFuZ2luZyA/IChcbiAgICAgICAgPExvYWRlcjIgY2xhc3NOYW1lPVwiaC00IHctNCBhbmltYXRlLXNwaW5cIiBhcmlhLWhpZGRlbj1cInRydWVcIiAvPlxuICAgICAgKSA6IChcbiAgICAgICAgPEdsb2JlIGNsYXNzTmFtZT1cImgtNCB3LTRcIiBhcmlhLWhpZGRlbj1cInRydWVcIiAvPlxuICAgICAgKX1cbiAgICAgIDxzcGFuIGNsYXNzTmFtZT1cInRleHQtbGdcIiBhcmlhLWhpZGRlbj1cInRydWVcIj5cbiAgICAgICAge2N1cnJlbnRMYW5ndWFnZS5mbGFnfVxuICAgICAgPC9zcGFuPlxuICAgICAge3Nob3dMYWJlbCAmJiA8c3BhbiBjbGFzc05hbWU9XCJoaWRkZW4gc206aW5saW5lXCI+e2N1cnJlbnRMYW5ndWFnZS5uYW1lfTwvc3Bhbj59XG4gICAgPC9CdXR0b24+XG4gICk7XG5cbiAgY29uc3Qgc2hlbGxCdG5DbGFzcyA9XG4gICAgJ2gtOSBtaW4taC05IHNocmluay0wIGdhcC0xLjUgcm91bmRlZC1sZyBib3JkZXItMCBiZy10cmFuc3BhcmVudCBweC0yIHNtOnB4LTIuNSBzaGFkb3ctbm9uZSB0ZXh0LW11dGVkLWZvcmVncm91bmQgaG92ZXI6dGV4dC1mb3JlZ3JvdW5kIGhvdmVyOmJnLWFjY2VudC82MCc7XG5cbiAgLy8gU2hlbGwgOiBjb21wYWN0IHByZW1pdW0gcG91ciBiYXJyZSB1dGlsaXRhaXJlIChmb25kIGNsYWlyKVxuICBpZiAoZGlzcGxheSA9PT0gJ3NoZWxsJyAmJiAhaXNNb2JpbGUpIHtcbiAgICByZXR1cm4gKFxuICAgICAgPERyb3Bkb3duTWVudSBvcGVuPXtvcGVufSBvbk9wZW5DaGFuZ2U9e2hhbmRsZU9wZW5DaGFuZ2V9PlxuICAgICAgICA8RHJvcGRvd25NZW51VHJpZ2dlciBhc0NoaWxkPlxuICAgICAgICAgIDxCdXR0b25cbiAgICAgICAgICAgIHR5cGU9XCJidXR0b25cIlxuICAgICAgICAgICAgdmFyaWFudD1cImdob3N0XCJcbiAgICAgICAgICAgIHNpemU9XCJzbVwiXG4gICAgICAgICAgICBjbGFzc05hbWU9e2NuKHNoZWxsQnRuQ2xhc3MsIGJ1dHRvbkNsYXNzTmFtZSl9XG4gICAgICAgICAgICBhcmlhLWxhYmVsPXtgQ2hhbmdlciBsYSBsYW5ndWUgKGFjdHVlbGxlIDogJHtjdXJyZW50TGFuZ3VhZ2UubmFtZX0pYH1cbiAgICAgICAgICAgIGFyaWEtZXhwYW5kZWQ9e29wZW59XG4gICAgICAgICAgICBhcmlhLWhhc3BvcHVwPVwibWVudVwiXG4gICAgICAgICAgICBkaXNhYmxlZD17aXNDaGFuZ2luZ31cbiAgICAgICAgICA+XG4gICAgICAgICAgICB7aXNDaGFuZ2luZyA/IChcbiAgICAgICAgICAgICAgPExvYWRlcjIgY2xhc3NOYW1lPVwiaC00IHctNCBhbmltYXRlLXNwaW5cIiBhcmlhLWhpZGRlbj1cInRydWVcIiAvPlxuICAgICAgICAgICAgKSA6IChcbiAgICAgICAgICAgICAgPEdsb2JlIGNsYXNzTmFtZT1cImgtNCB3LTQgc2hyaW5rLTBcIiBhcmlhLWhpZGRlbj1cInRydWVcIiAvPlxuICAgICAgICAgICAgKX1cbiAgICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cInRleHQtYmFzZSBsZWFkaW5nLW5vbmVcIiBhcmlhLWhpZGRlbj1cInRydWVcIj5cbiAgICAgICAgICAgICAge2N1cnJlbnRMYW5ndWFnZS5mbGFnfVxuICAgICAgICAgICAgPC9zcGFuPlxuICAgICAgICAgICAgPHNwYW4gY2xhc3NOYW1lPVwiaGlkZGVuIHNtOmlubGluZSB0ZXh0LXNtIGZvbnQtbWVkaXVtIHVwcGVyY2FzZVwiPlxuICAgICAgICAgICAgICB7Y3VycmVudExhbmd1YWdlLmNvZGV9XG4gICAgICAgICAgICA8L3NwYW4+XG4gICAgICAgICAgPC9CdXR0b24+XG4gICAgICAgIDwvRHJvcGRvd25NZW51VHJpZ2dlcj5cbiAgICAgICAgPERyb3Bkb3duTWVudUNvbnRlbnQgYWxpZ249XCJlbmRcIiBjbGFzc05hbWU9XCJtaW4tdy1bMTByZW1dXCI+XG4gICAgICAgICAge0FWQUlMQUJMRV9MQU5HVUFHRVMubWFwKGxhbmcgPT4gKFxuICAgICAgICAgICAgPERyb3Bkb3duTWVudUl0ZW1cbiAgICAgICAgICAgICAga2V5PXtsYW5nLmNvZGV9XG4gICAgICAgICAgICAgIG9uQ2xpY2s9eygpID0+IGNoYW5nZUxhbmd1YWdlKGxhbmcuY29kZSl9XG4gICAgICAgICAgICAgIGNsYXNzTmFtZT17Y24oXG4gICAgICAgICAgICAgICAgJ2dhcC0yIGN1cnNvci1wb2ludGVyIG1pbi1oLVs0NHB4XScsXG4gICAgICAgICAgICAgICAgY3VycmVudExhbmd1YWdlLmNvZGUgPT09IGxhbmcuY29kZSAmJiAnYmctYWNjZW50J1xuICAgICAgICAgICAgICApfVxuICAgICAgICAgICAgPlxuICAgICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJ0ZXh0LWxnXCI+e2xhbmcuZmxhZ308L3NwYW4+XG4gICAgICAgICAgICAgIDxzcGFuPntsYW5nLm5hbWV9PC9zcGFuPlxuICAgICAgICAgICAgICB7Y3VycmVudExhbmd1YWdlLmNvZGUgPT09IGxhbmcuY29kZSAmJiAoXG4gICAgICAgICAgICAgICAgPHNwYW4gY2xhc3NOYW1lPVwibWwtYXV0byB0ZXh0LXhzIHRleHQtbXV0ZWQtZm9yZWdyb3VuZFwiPuKckzwvc3Bhbj5cbiAgICAgICAgICAgICAgKX1cbiAgICAgICAgICAgIDwvRHJvcGRvd25NZW51SXRlbT5cbiAgICAgICAgICApKX1cbiAgICAgICAgPC9Ecm9wZG93bk1lbnVDb250ZW50PlxuICAgICAgPC9Ecm9wZG93bk1lbnU+XG4gICAgKTtcbiAgfVxuXG4gIC8vIFRvcG5hdiA6IG1lbnUgZMOpcm91bGFudCBzYW5zIFNlbGVjdFRyaWdnZXIgKMOpdml0ZSBsZSBmb25kIGJsYW5jKVxuICBpZiAoZGlzcGxheSA9PT0gJ25hdicgJiYgIWlzTW9iaWxlKSB7XG4gICAgcmV0dXJuIChcbiAgICAgIDxEcm9wZG93bk1lbnUgb3Blbj17b3Blbn0gb25PcGVuQ2hhbmdlPXtoYW5kbGVPcGVuQ2hhbmdlfT5cbiAgICAgICAgPERyb3Bkb3duTWVudVRyaWdnZXIgYXNDaGlsZD5cbiAgICAgICAgICA8QnV0dG9uXG4gICAgICAgICAgICB0eXBlPVwiYnV0dG9uXCJcbiAgICAgICAgICAgIHZhcmlhbnQ9XCJnaG9zdFwiXG4gICAgICAgICAgICBzaXplPVwic21cIlxuICAgICAgICAgICAgY2xhc3NOYW1lPXtjbihcbiAgICAgICAgICAgICAgdG9wTmF2SWNvbkJ0bkNsYXNzLFxuICAgICAgICAgICAgICAnZ2FwLTEuNSB4bDpnYXAtMS41IHctOSB4bDp3LWF1dG8gcHgtMCB4bDpweC0yJyxcbiAgICAgICAgICAgICAgYnV0dG9uQ2xhc3NOYW1lXG4gICAgICAgICAgICApfVxuICAgICAgICAgICAgYXJpYS1sYWJlbD17YENoYW5nZXIgbGEgbGFuZ3VlIChhY3R1ZWxsZSA6ICR7Y3VycmVudExhbmd1YWdlLm5hbWV9KWB9XG4gICAgICAgICAgICBhcmlhLWV4cGFuZGVkPXtvcGVufVxuICAgICAgICAgICAgYXJpYS1oYXNwb3B1cD1cIm1lbnVcIlxuICAgICAgICAgICAgZGlzYWJsZWQ9e2lzQ2hhbmdpbmd9XG4gICAgICAgICAgPlxuICAgICAgICAgICAge2lzQ2hhbmdpbmcgPyAoXG4gICAgICAgICAgICAgIDxMb2FkZXIyIGNsYXNzTmFtZT1cImgtNCB3LTQgYW5pbWF0ZS1zcGluXCIgYXJpYS1oaWRkZW49XCJ0cnVlXCIgLz5cbiAgICAgICAgICAgICkgOiAoXG4gICAgICAgICAgICAgIDxHbG9iZSBjbGFzc05hbWU9XCJoLTQgdy00IHNocmluay0wXCIgYXJpYS1oaWRkZW49XCJ0cnVlXCIgLz5cbiAgICAgICAgICAgICl9XG4gICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJoaWRkZW4geGw6aW5saW5lIHRleHQtc20gZm9udC1tZWRpdW0gdXBwZXJjYXNlXCIgYXJpYS1oaWRkZW49XCJ0cnVlXCI+XG4gICAgICAgICAgICAgIHtjdXJyZW50TGFuZ3VhZ2UuY29kZX1cbiAgICAgICAgICAgIDwvc3Bhbj5cbiAgICAgICAgICA8L0J1dHRvbj5cbiAgICAgICAgPC9Ecm9wZG93bk1lbnVUcmlnZ2VyPlxuICAgICAgICA8RHJvcGRvd25NZW51Q29udGVudCBhbGlnbj1cImVuZFwiIGNsYXNzTmFtZT1cIm1pbi13LVsxMHJlbV1cIj5cbiAgICAgICAgICB7QVZBSUxBQkxFX0xBTkdVQUdFUy5tYXAobGFuZyA9PiAoXG4gICAgICAgICAgICA8RHJvcGRvd25NZW51SXRlbVxuICAgICAgICAgICAgICBrZXk9e2xhbmcuY29kZX1cbiAgICAgICAgICAgICAgb25DbGljaz17KCkgPT4gY2hhbmdlTGFuZ3VhZ2UobGFuZy5jb2RlKX1cbiAgICAgICAgICAgICAgY2xhc3NOYW1lPXtjbihcbiAgICAgICAgICAgICAgICAnZ2FwLTIgY3Vyc29yLXBvaW50ZXIgbWluLWgtWzQ0cHhdJyxcbiAgICAgICAgICAgICAgICBjdXJyZW50TGFuZ3VhZ2UuY29kZSA9PT0gbGFuZy5jb2RlICYmICdiZy1hY2NlbnQnXG4gICAgICAgICAgICAgICl9XG4gICAgICAgICAgICA+XG4gICAgICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cInRleHQtbGdcIj57bGFuZy5mbGFnfTwvc3Bhbj5cbiAgICAgICAgICAgICAgPHNwYW4+e2xhbmcubmFtZX08L3NwYW4+XG4gICAgICAgICAgICAgIHtjdXJyZW50TGFuZ3VhZ2UuY29kZSA9PT0gbGFuZy5jb2RlICYmIChcbiAgICAgICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJtbC1hdXRvIHRleHQteHMgdGV4dC1tdXRlZC1mb3JlZ3JvdW5kXCI+4pyTPC9zcGFuPlxuICAgICAgICAgICAgICApfVxuICAgICAgICAgICAgPC9Ecm9wZG93bk1lbnVJdGVtPlxuICAgICAgICAgICkpfVxuICAgICAgICA8L0Ryb3Bkb3duTWVudUNvbnRlbnQ+XG4gICAgICA8L0Ryb3Bkb3duTWVudT5cbiAgICApO1xuICB9XG5cbiAgLy8gU3VyIG1vYmlsZSwgdXRpbGlzZXIgdW4gdnJhaSBib3R0b20gc2hlZXQgYmFzw6kgc3VyIERpYWxvZyAoY29tbWUgcG91ciBkJ2F1dHJlcyBvdmVybGF5cyBjcml0aXF1ZXMpXG4gIGlmIChpc01vYmlsZSkge1xuICAgIHJldHVybiAoXG4gICAgICA8PlxuICAgICAgICB7bW9iaWxlVHJpZ2dlckJ1dHRvbn1cbiAgICAgICAgPERpYWxvZyBvcGVuPXtvcGVufSBvbk9wZW5DaGFuZ2U9e2hhbmRsZU9wZW5DaGFuZ2V9PlxuICAgICAgICAgIDxEaWFsb2dDb250ZW50IGNsYXNzTmFtZT1cInAtMCBwdC0zIHBiLTQgYmctYmFja2dyb3VuZFwiPlxuICAgICAgICAgICAgPERpYWxvZ0hlYWRlciBjbGFzc05hbWU9XCJweC00XCI+XG4gICAgICAgICAgICAgIDxEaWFsb2dUaXRsZSBjbGFzc05hbWU9XCJ0ZXh0LWJhc2UgZm9udC1zZW1pYm9sZFwiPkNob2lzaXIgbGEgbGFuZ3VlPC9EaWFsb2dUaXRsZT5cbiAgICAgICAgICAgIDwvRGlhbG9nSGVhZGVyPlxuICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJtdC0yIGRpdmlkZS15XCI+XG4gICAgICAgICAgICAgIHtBVkFJTEFCTEVfTEFOR1VBR0VTLm1hcChsYW5nID0+IChcbiAgICAgICAgICAgICAgICA8YnV0dG9uXG4gICAgICAgICAgICAgICAgICBrZXk9e2xhbmcuY29kZX1cbiAgICAgICAgICAgICAgICAgIHR5cGU9XCJidXR0b25cIlxuICAgICAgICAgICAgICAgICAgb25DbGljaz17KCkgPT4gY2hhbmdlTGFuZ3VhZ2UobGFuZy5jb2RlKX1cbiAgICAgICAgICAgICAgICAgIGNsYXNzTmFtZT17Y24oXG4gICAgICAgICAgICAgICAgICAgICd3LWZ1bGwgZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTMgcHgtNCBweS0zIHRleHQtYmFzZSBtaW4taC1bNDhweF0nLFxuICAgICAgICAgICAgICAgICAgICAndG91Y2gtbWFuaXB1bGF0aW9uIHRleHQtbGVmdCcsXG4gICAgICAgICAgICAgICAgICAgIGN1cnJlbnRMYW5ndWFnZS5jb2RlID09PSBsYW5nLmNvZGUgJiYgJ2JnLWFjY2VudC83MCdcbiAgICAgICAgICAgICAgICAgICl9XG4gICAgICAgICAgICAgICAgPlxuICAgICAgICAgICAgICAgICAgPHNwYW4gY2xhc3NOYW1lPVwidGV4dC14bFwiPntsYW5nLmZsYWd9PC9zcGFuPlxuICAgICAgICAgICAgICAgICAgPHNwYW4gY2xhc3NOYW1lPVwiZmxleC0xXCI+e2xhbmcubmFtZX08L3NwYW4+XG4gICAgICAgICAgICAgICAgICB7Y3VycmVudExhbmd1YWdlLmNvZGUgPT09IGxhbmcuY29kZSAmJiAoXG4gICAgICAgICAgICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cIm1sLWF1dG8gdGV4dC14cyB0ZXh0LW11dGVkLWZvcmVncm91bmRcIj7inJM8L3NwYW4+XG4gICAgICAgICAgICAgICAgICApfVxuICAgICAgICAgICAgICAgIDwvYnV0dG9uPlxuICAgICAgICAgICAgICApKX1cbiAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgIDwvRGlhbG9nQ29udGVudD5cbiAgICAgICAgPC9EaWFsb2c+XG4gICAgICA8Lz5cbiAgICApO1xuICB9XG5cbiAgLy8gRGVza3RvcCAvIHRhYmxldHRlIDogRHJvcGRvd25NZW51ICjDqXZpdGUgY29tYm9ib3ggU2VsZWN0IHNhbnMgYXJpYS1leHBhbmRlZCBzdXIgcGFnZXMgYXV0aClcbiAgcmV0dXJuIChcbiAgICA8RHJvcGRvd25NZW51IG9wZW49e29wZW59IG9uT3BlbkNoYW5nZT17aGFuZGxlT3BlbkNoYW5nZX0+XG4gICAgICA8RHJvcGRvd25NZW51VHJpZ2dlciBhc0NoaWxkPlxuICAgICAgICA8QnV0dG9uXG4gICAgICAgICAgdHlwZT1cImJ1dHRvblwiXG4gICAgICAgICAgdmFyaWFudD17dmFyaWFudH1cbiAgICAgICAgICBzaXplPVwic21cIlxuICAgICAgICAgIGNsYXNzTmFtZT17Y24oJ2dhcC0yIHRvdWNoLW1hbmlwdWxhdGlvbicsIGJ1dHRvbkNsYXNzTmFtZSwgY2xhc3NOYW1lKX1cbiAgICAgICAgICBhcmlhLWxhYmVsPXtgQ2hhbmdlciBsYSBsYW5ndWUgKGFjdHVlbGxlIDogJHtjdXJyZW50TGFuZ3VhZ2UubmFtZX0pYH1cbiAgICAgICAgICBhcmlhLWV4cGFuZGVkPXtvcGVufVxuICAgICAgICAgIGFyaWEtaGFzcG9wdXA9XCJtZW51XCJcbiAgICAgICAgICBkaXNhYmxlZD17aXNDaGFuZ2luZ31cbiAgICAgICAgPlxuICAgICAgICAgIHtpc0NoYW5naW5nID8gKFxuICAgICAgICAgICAgPExvYWRlcjIgY2xhc3NOYW1lPVwiaC00IHctNCBhbmltYXRlLXNwaW5cIiBhcmlhLWhpZGRlbj1cInRydWVcIiAvPlxuICAgICAgICAgICkgOiAoXG4gICAgICAgICAgICA8R2xvYmUgY2xhc3NOYW1lPVwiaC00IHctNFwiIGFyaWEtaGlkZGVuPVwidHJ1ZVwiIC8+XG4gICAgICAgICAgKX1cbiAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJ0ZXh0LWxnXCIgYXJpYS1oaWRkZW49XCJ0cnVlXCI+XG4gICAgICAgICAgICB7Y3VycmVudExhbmd1YWdlLmZsYWd9XG4gICAgICAgICAgPC9zcGFuPlxuICAgICAgICAgIHtzaG93TGFiZWwgJiYgPHNwYW4gY2xhc3NOYW1lPVwiaGlkZGVuIHNtOmlubGluZVwiPntjdXJyZW50TGFuZ3VhZ2UubmFtZX08L3NwYW4+fVxuICAgICAgICA8L0J1dHRvbj5cbiAgICAgIDwvRHJvcGRvd25NZW51VHJpZ2dlcj5cbiAgICAgIDxEcm9wZG93bk1lbnVDb250ZW50IGFsaWduPVwiZW5kXCIgY2xhc3NOYW1lPVwibWluLXctWzE4MHB4XVwiPlxuICAgICAgICB7QVZBSUxBQkxFX0xBTkdVQUdFUy5tYXAobGFuZyA9PiAoXG4gICAgICAgICAgPERyb3Bkb3duTWVudUl0ZW1cbiAgICAgICAgICAgIGtleT17bGFuZy5jb2RlfVxuICAgICAgICAgICAgb25DbGljaz17KCkgPT4gY2hhbmdlTGFuZ3VhZ2UobGFuZy5jb2RlKX1cbiAgICAgICAgICAgIGNsYXNzTmFtZT17Y24oXG4gICAgICAgICAgICAgICdnYXAtMiBjdXJzb3ItcG9pbnRlciBtaW4taC1bNDRweF0nLFxuICAgICAgICAgICAgICBjdXJyZW50TGFuZ3VhZ2UuY29kZSA9PT0gbGFuZy5jb2RlICYmICdiZy1hY2NlbnQnXG4gICAgICAgICAgICApfVxuICAgICAgICAgID5cbiAgICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cInRleHQtbGdcIj57bGFuZy5mbGFnfTwvc3Bhbj5cbiAgICAgICAgICAgIDxzcGFuPntsYW5nLm5hbWV9PC9zcGFuPlxuICAgICAgICAgICAge2N1cnJlbnRMYW5ndWFnZS5jb2RlID09PSBsYW5nLmNvZGUgJiYgKFxuICAgICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJtbC1hdXRvIHRleHQteHMgdGV4dC1tdXRlZC1mb3JlZ3JvdW5kXCI+4pyTPC9zcGFuPlxuICAgICAgICAgICAgKX1cbiAgICAgICAgICA8L0Ryb3Bkb3duTWVudUl0ZW0+XG4gICAgICAgICkpfVxuICAgICAgPC9Ecm9wZG93bk1lbnVDb250ZW50PlxuICAgIDwvRHJvcGRvd25NZW51PlxuICApO1xufTtcblxuLyoqXG4gKiBWZXJzaW9uIGNvbXBhY3RlIGF2ZWMganVzdGUgbGUgZmxhZ1xuICovXG5leHBvcnQgY29uc3QgTGFuZ3VhZ2VTd2l0Y2hlckNvbXBhY3Q6IFJlYWN0LkZDPHsgY2xhc3NOYW1lPzogc3RyaW5nIH0+ID0gKHsgY2xhc3NOYW1lIH0pID0+IHtcbiAgY29uc3QgeyBpMThuIH0gPSB1c2VUcmFuc2xhdGlvbigpO1xuXG4gIGNvbnN0IGN1cnJlbnRMYW5ndWFnZSA9XG4gICAgQVZBSUxBQkxFX0xBTkdVQUdFUy5maW5kKGxhbmcgPT4gbGFuZy5jb2RlID09PSBpMThuLmxhbmd1YWdlKSB8fCBBVkFJTEFCTEVfTEFOR1VBR0VTWzBdO1xuXG4gIGNvbnN0IGNoYW5nZUxhbmd1YWdlID0gKCkgPT4ge1xuICAgIC8vIFRvZ2dsZSBlbnRyZSBsZXMgbGFuZ3VlcyBkaXNwb25pYmxlc1xuICAgIGNvbnN0IGN1cnJlbnRJbmRleCA9IEFWQUlMQUJMRV9MQU5HVUFHRVMuZmluZEluZGV4KGxhbmcgPT4gbGFuZy5jb2RlID09PSBjdXJyZW50TGFuZ3VhZ2UuY29kZSk7XG4gICAgY29uc3QgbmV4dEluZGV4ID0gKGN1cnJlbnRJbmRleCArIDEpICUgQVZBSUxBQkxFX0xBTkdVQUdFUy5sZW5ndGg7XG4gICAgY29uc3QgbmV4dExhbmcgPSBBVkFJTEFCTEVfTEFOR1VBR0VTW25leHRJbmRleF07XG5cbiAgICBpMThuLmNoYW5nZUxhbmd1YWdlKG5leHRMYW5nLmNvZGUpO1xuICAgIGxvY2FsU3RvcmFnZS5zZXRJdGVtKCdlbWFyem9uYV9sYW5ndWFnZScsIG5leHRMYW5nLmNvZGUpO1xuICAgIGRvY3VtZW50LmRvY3VtZW50RWxlbWVudC5sYW5nID0gbmV4dExhbmcuY29kZTtcbiAgfTtcblxuICByZXR1cm4gKFxuICAgIDxCdXR0b25cbiAgICAgIHZhcmlhbnQ9XCJnaG9zdFwiXG4gICAgICBzaXplPVwic21cIlxuICAgICAgb25DbGljaz17Y2hhbmdlTGFuZ3VhZ2V9XG4gICAgICBjbGFzc05hbWU9e2NuKCdnYXAtMiB0b3VjaC1tYW5pcHVsYXRpb24nLCBjbGFzc05hbWUpfVxuICAgICAgYXJpYS1sYWJlbD17YENoYW5nZSBsYW5ndWFnZSAoY3VycmVudDogJHtjdXJyZW50TGFuZ3VhZ2UubmFtZX0pYH1cbiAgICA+XG4gICAgICA8c3BhbiBjbGFzc05hbWU9XCJ0ZXh0LWxnXCI+e2N1cnJlbnRMYW5ndWFnZS5mbGFnfTwvc3Bhbj5cbiAgICAgIDxzcGFuIGNsYXNzTmFtZT1cInRleHQteHMgaGlkZGVuIHNtOmlubGluZVwiPntjdXJyZW50TGFuZ3VhZ2UuY29kZS50b1VwcGVyQ2FzZSgpfTwvc3Bhbj5cbiAgICA8L0J1dHRvbj5cbiAgKTtcbn07XG4iXSwibmFtZXMiOlsiUmVhY3QiLCJ1c2VDYWxsYmFjayIsInVzZVN0YXRlIiwidXNlVHJhbnNsYXRpb24iLCJHbG9iZSIsIkxvYWRlcjIiLCJCdXR0b24iLCJBVkFJTEFCTEVfTEFOR1VBR0VTIiwiY24iLCJ1c2VJc01vYmlsZSIsIkRpYWxvZyIsIkRpYWxvZ0NvbnRlbnQiLCJEaWFsb2dIZWFkZXIiLCJEaWFsb2dUaXRsZSIsInVzZUJvZHlTY3JvbGxMb2NrIiwiRHJvcGRvd25NZW51IiwiRHJvcGRvd25NZW51Q29udGVudCIsIkRyb3Bkb3duTWVudUl0ZW0iLCJEcm9wZG93bk1lbnVUcmlnZ2VyIiwidG9wTmF2SWNvbkJ0bkNsYXNzIiwiTGFuZ3VhZ2VTd2l0Y2hlciIsImNsYXNzTmFtZSIsImJ1dHRvbkNsYXNzTmFtZSIsInZhcmlhbnQiLCJkaXNwbGF5Iiwic2hvd0xhYmVsIiwib3BlbiIsImNvbnRyb2xsZWRPcGVuIiwib25PcGVuQ2hhbmdlIiwiaTE4biIsImlzTW9iaWxlIiwiaW50ZXJuYWxPcGVuIiwic2V0SW50ZXJuYWxPcGVuIiwiaXNDaGFuZ2luZyIsInNldElzQ2hhbmdpbmciLCJ1bmRlZmluZWQiLCJoYW5kbGVPcGVuQ2hhbmdlIiwibmV3T3BlbiIsImN1cnJlbnRMYW5ndWFnZSIsImZpbmQiLCJsYW5nIiwiY29kZSIsImxhbmd1YWdlIiwiY2hhbmdlTGFuZ3VhZ2UiLCJsYW5nQ29kZSIsImxvY2FsU3RvcmFnZSIsInNldEl0ZW0iLCJkb2N1bWVudCIsImRvY3VtZW50RWxlbWVudCIsInNldFRpbWVvdXQiLCJtb2JpbGVUcmlnZ2VyQnV0dG9uIiwic2l6ZSIsImFyaWEtbGFiZWwiLCJuYW1lIiwiYXJpYS1oYXNwb3B1cCIsImFyaWEtZXhwYW5kZWQiLCJkaXNhYmxlZCIsIm9uQ2xpY2siLCJhcmlhLWhpZGRlbiIsInNwYW4iLCJmbGFnIiwic2hlbGxCdG5DbGFzcyIsImFzQ2hpbGQiLCJ0eXBlIiwiYWxpZ24iLCJtYXAiLCJkaXYiLCJidXR0b24iLCJMYW5ndWFnZVN3aXRjaGVyQ29tcGFjdCIsImN1cnJlbnRJbmRleCIsImZpbmRJbmRleCIsIm5leHRJbmRleCIs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

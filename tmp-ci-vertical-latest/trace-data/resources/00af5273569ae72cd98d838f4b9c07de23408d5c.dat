@@ -1,0 +1,7 @@
+/**
+ * Shared Components Exports
+ * Date: 28 octobre 2025
+ */ export { ProductImages, ProductImagesGrid } from "/src/components/shared/ProductImages.tsx";
+export { StaffCard, StaffList } from "/src/components/shared/StaffCard.tsx";
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImluZGV4LnRzIl0sInNvdXJjZXNDb250ZW50IjpbIi8qKlxuICogU2hhcmVkIENvbXBvbmVudHMgRXhwb3J0c1xuICogRGF0ZTogMjggb2N0b2JyZSAyMDI1XG4gKi9cblxuZXhwb3J0IHsgUHJvZHVjdEltYWdlcywgUHJvZHVjdEltYWdlc0dyaWQgfSBmcm9tICcuL1Byb2R1Y3RJbWFnZXMnO1xuZXhwb3J0IHsgU3RhZmZDYXJkLCBTdGFmZkxpc3QgfSBmcm9tICcuL1N0YWZmQ2FyZCc7XG5cblxuXG5cblxuXG5cbiJdLCJuYW1lcyI6WyJQcm9kdWN0SW1hZ2VzIiwiUHJvZHVjdEltYWdlc0dyaWQiLCJTdGFmZkNhcmQiLCJTdGFmZkxpc3QiXSwibWFwcGluZ3MiOiJBQUFBOzs7Q0FHQyxHQUVELFNBQVNBLGFBQWEsRUFBRUMsaUJBQWlCLFFBQVEsa0JBQWtCO0FBQ25FLFNBQVNDLFNBQVMsRUFBRUMsU0FBUyxRQUFRLGNBQWMifQ==

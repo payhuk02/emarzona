@@ -1,0 +1,61 @@
+import { observe } from "/node_modules/@sentry-internal/browser-utils/build/esm/metrics/web-vitals/lib/observe.js?v=d758aa40";
+
+/*
+ * Copyright 2022 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+let interactionCountEstimate = 0;
+let minKnownInteractionId = Infinity;
+let maxKnownInteractionId = 0;
+
+const updateEstimate = (entries) => {
+  entries.forEach(e => {
+    if (e.interactionId) {
+      minKnownInteractionId = Math.min(minKnownInteractionId, e.interactionId);
+      maxKnownInteractionId = Math.max(maxKnownInteractionId, e.interactionId);
+
+      interactionCountEstimate = maxKnownInteractionId ? (maxKnownInteractionId - minKnownInteractionId) / 7 + 1 : 0;
+    }
+  });
+};
+
+let po;
+
+/**
+ * Returns the `interactionCount` value using the native API (if available)
+ * or the polyfill estimate in this module.
+ */
+const getInteractionCount = () => {
+  return po ? interactionCountEstimate : performance.interactionCount || 0;
+};
+
+/**
+ * Feature detects native support or initializes the polyfill if needed.
+ */
+const initInteractionCountPolyfill = () => {
+  if ('interactionCount' in performance || po) return;
+
+  po = observe('event', updateEstimate, {
+    type: 'event',
+    buffered: true,
+    durationThreshold: 0,
+  } );
+};
+
+export { getInteractionCount, initInteractionCountPolyfill };
+                                                    
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW50ZXJhY3Rpb25Db3VudFBvbHlmaWxsLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi8uLi8uLi9zcmMvbWV0cmljcy93ZWItdml0YWxzL2xpYi9wb2x5ZmlsbHMvaW50ZXJhY3Rpb25Db3VudFBvbHlmaWxsLnRzIl0sInNvdXJjZXNDb250ZW50IjpbIi8qXG4gKiBDb3B5cmlnaHQgMjAyMiBHb29nbGUgTExDXG4gKlxuICogTGljZW5zZWQgdW5kZXIgdGhlIEFwYWNoZSBMaWNlbnNlLCBWZXJzaW9uIDIuMCAodGhlIFwiTGljZW5zZVwiKTtcbiAqIHlvdSBtYXkgbm90IHVzZSB0aGlzIGZpbGUgZXhjZXB0IGluIGNvbXBsaWFuY2Ugd2l0aCB0aGUgTGljZW5zZS5cbiAqIFlvdSBtYXkgb2J0YWluIGEgY29weSBvZiB0aGUgTGljZW5zZSBhdFxuICpcbiAqICAgICBodHRwczovL3d3dy5hcGFjaGUub3JnL2xpY2Vuc2VzL0xJQ0VOU0UtMi4wXG4gKlxuICogVW5sZXNzIHJlcXVpcmVkIGJ5IGFwcGxpY2FibGUgbGF3IG9yIGFncmVlZCB0byBpbiB3cml0aW5nLCBzb2Z0d2FyZVxuICogZGlzdHJpYnV0ZWQgdW5kZXIgdGhlIExpY2Vuc2UgaXMgZGlzdHJpYnV0ZWQgb24gYW4gXCJBUyBJU1wiIEJBU0lTLFxuICogV0lUSE9VVCBXQVJSQU5USUVTIE9SIENPTkRJVElPTlMgT0YgQU5ZIEtJTkQsIGVpdGhlciBleHByZXNzIG9yIGltcGxpZWQuXG4gKiBTZWUgdGhlIExpY2Vuc2UgZm9yIHRoZSBzcGVjaWZpYyBsYW5ndWFnZSBnb3Zlcm5pbmcgcGVybWlzc2lvbnMgYW5kXG4gKiBsaW1pdGF0aW9ucyB1bmRlciB0aGUgTGljZW5zZS5cbiAqL1xuXG5pbXBvcnQgeyBvYnNlcnZlIH0gZnJvbSAnLi4vb2JzZXJ2ZSc7XG5cbmRlY2xhcmUgZ2xvYmFsIHtcbiAgaW50ZXJmYWNlIFBlcmZvcm1hbmNlIHtcbiAgICBpbnRlcmFjdGlvbkNvdW50OiBudW1iZXI7XG4gIH1cbn1cblxubGV0IGludGVyYWN0aW9uQ291bnRFc3RpbWF0ZSA9IDA7XG5sZXQgbWluS25vd25JbnRlcmFjdGlvbklkID0gSW5maW5pdHk7XG5sZXQgbWF4S25vd25JbnRlcmFjdGlvbklkID0gMDtcblxuY29uc3QgdXBkYXRlRXN0aW1hdGUgPSAoZW50cmllczogUGVyZm9ybWFuY2VFdmVudFRpbWluZ1tdKSA9PiB7XG4gIGVudHJpZXMuZm9yRWFjaChlID0+IHtcbiAgICBpZiAoZS5pbnRlcmFjdGlvbklkKSB7XG4gICAgICBtaW5Lbm93bkludGVyYWN0aW9uSWQgPSBNYXRoLm1pbihtaW5Lbm93bkludGVyYWN0aW9uSWQsIGUuaW50ZXJhY3Rpb25JZCk7XG4gICAgICBtYXhLbm93bkludGVyYWN0aW9uSWQgPSBNYXRoLm1heChtYXhLbm93bkludGVyYWN0aW9uSWQsIGUuaW50ZXJhY3Rpb25JZCk7XG5cbiAgICAgIGludGVyYWN0aW9uQ291bnRFc3RpbWF0ZSA9IG1heEtub3duSW50ZXJhY3Rpb25JZCA/IChtYXhLbm93bkludGVyYWN0aW9uSWQgLSBtaW5Lbm93bkludGVyYWN0aW9uSWQpIC8gNyArIDEgOiAwO1xuICAgIH1cbiAgfSk7XG59O1xuXG5sZXQgcG86IFBlcmZvcm1hbmNlT2JzZXJ2ZXIgfCB1bmRlZmluZWQ7XG5cbi8qKlxuICogUmV0dXJucyB0aGUgYGludGVyYWN0aW9uQ291bnRgIHZhbHVlIHVzaW5nIHRoZSBuYXRpdmUgQVBJIChpZiBhdmFpbGFibGUpXG4gKiBvciB0aGUgcG9seWZpbGwgZXN0aW1hdGUgaW4gdGhpcyBtb2R1bGUuXG4gKi9cbmV4cG9ydCBjb25zdCBnZXRJbnRlcmFjdGlvbkNvdW50ID0gKCk6IG51bWJlciA9PiB7XG4gIHJldHVybiBwbyA/IGludGVyYWN0aW9uQ291bnRFc3RpbWF0ZSA6IHBlcmZvcm1hbmNlLmludGVyYWN0aW9uQ291bnQgfHwgMDtcbn07XG5cbi8qKlxuICogRmVhdHVyZSBkZXRlY3RzIG5hdGl2ZSBzdXBwb3J0IG9yIGluaXRpYWxpemVzIHRoZSBwb2x5ZmlsbCBpZiBuZWVkZWQuXG4gKi9cbmV4cG9ydCBjb25zdCBpbml0SW50ZXJhY3Rpb25Db3VudFBvbHlmaWxsID0gKCk6IHZvaWQgPT4ge1xuICBpZiAoJ2ludGVyYWN0aW9uQ291bnQnIGluIHBlcmZvcm1hbmNlIHx8IHBvKSByZXR1cm47XG5cbiAgcG8gPSBvYnNlcnZlKCdldmVudCcsIHVwZGF0ZUVzdGltYXRlLCB7XG4gICAgdHlwZTogJ2V2ZW50JyxcbiAgICBidWZmZXJlZDogdHJ1ZSxcbiAgICBkdXJhdGlvblRocmVzaG9sZDogMCxcbiAgfSBhcyBQZXJmb3JtYW5jZU9ic2VydmVySW5pdCk7XG59O1xuIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7O0FBQUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBOzs7QUFVQSxJQUFJLHdCQUFBLEdBQTJCLENBQUM7QUFDaEMsSUFBSSxxQkFBQSxHQUF3QixRQUFRO0FBQ3BDLElBQUkscUJBQUEsR0FBd0IsQ0FBQzs7QUFFN0IsTUFBTSxjQUFBLEdBQWlCLENBQUMsT0FBTyxLQUErQjtBQUM5RCxFQUFFLE9BQU8sQ0FBQyxPQUFPLENBQUMsS0FBSztBQUN2QixJQUFJLElBQUksQ0FBQyxDQUFDLGFBQWEsRUFBRTtBQUN6QixNQUFNLHFCQUFBLEdBQXdCLElBQUksQ0FBQyxHQUFHLENBQUMscUJBQXFCLEVBQUUsQ0FBQyxDQUFDLGFBQWEsQ0FBQztBQUM5RSxNQUFNLHFCQUFBLEdBQXdCLElBQUksQ0FBQyxHQUFHLENBQUMscUJBQXFCLEVBQUUsQ0FBQyxDQUFDLGFBQWEsQ0FBQzs7QUFFOUUsTUFBTSx3QkFBQSxHQUEyQixxQkFBQSxHQUF3QixDQUFDLHFCQUFBLEdBQXdCLHFCQUFxQixJQUFJLENBQUEsR0FBSSxDQUFBLEdBQUksQ0FBQztBQUNwSCxJQUFJO0FBQ0osRUFBRSxDQUFDLENBQUM7QUFDSixDQUFDOztBQUVELElBQUksRUFBRTs7QUFFTjtBQUNBO0FBQ0E7QUFDQTtBQUNPLE1BQU0sbUJBQUEsR0FBc0IsTUFBYztBQUNqRCxFQUFFLE9BQU8sS0FBSyx3QkFBQSxHQUEyQixXQUFXLENBQUMsZ0JBQUEsSUFBb0IsQ0FBQztBQUMxRTs7QUFFQTtBQUNBO0FBQ0E7QUFDTyxNQUFNLDRCQUFBLEdBQStCLE1BQVk7QUFDeEQsRUFBRSxJQUFJLGtCQUFBLElBQXNCLGVBQWUsRUFBRSxFQUFFOztBQUUvQyxFQUFFLEtBQUssT0FBTyxDQUFDLE9BQU8sRUFBRSxjQUFjLEVBQUU7QUFDeEMsSUFBSSxJQUFJLEVBQUUsT0FBTztBQUNqQixJQUFJLFFBQVEsRUFBRSxJQUFJO0FBQ2xCLElBQUksaUJBQWlCLEVBQUUsQ0FBQztBQUN4QixLQUErQjtBQUMvQjs7OzsiLCJ4X2dvb2dsZV9pZ25vcmVMaXN0IjpbMF19

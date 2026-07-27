@@ -1,0 +1,15 @@
+import { buildFeedbackIntegration } from "/node_modules/@sentry-internal/feedback/build/npm/esm/index.js?v=89021f86";
+import { lazyLoadIntegration } from "/node_modules/@sentry/browser/build/npm/esm/dev/utils/lazyLoadIntegration.js?v=89021f86";
+
+/**
+ * An integration to add user feedback to your application,
+ * while loading most of the code lazily only when it's needed.
+ */
+const feedbackAsyncIntegration = buildFeedbackIntegration({
+  lazyLoadIntegration,
+});
+
+export { feedbackAsyncIntegration };
+                                         
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZmVlZGJhY2tBc3luYy5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4vLi4vc3JjL2ZlZWRiYWNrQXN5bmMudHMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgYnVpbGRGZWVkYmFja0ludGVncmF0aW9uIH0gZnJvbSAnQHNlbnRyeS1pbnRlcm5hbC9mZWVkYmFjayc7XG5pbXBvcnQgeyBsYXp5TG9hZEludGVncmF0aW9uIH0gZnJvbSAnLi91dGlscy9sYXp5TG9hZEludGVncmF0aW9uJztcblxuLyoqXG4gKiBBbiBpbnRlZ3JhdGlvbiB0byBhZGQgdXNlciBmZWVkYmFjayB0byB5b3VyIGFwcGxpY2F0aW9uLFxuICogd2hpbGUgbG9hZGluZyBtb3N0IG9mIHRoZSBjb2RlIGxhemlseSBvbmx5IHdoZW4gaXQncyBuZWVkZWQuXG4gKi9cbmV4cG9ydCBjb25zdCBmZWVkYmFja0FzeW5jSW50ZWdyYXRpb24gPSBidWlsZEZlZWRiYWNrSW50ZWdyYXRpb24oe1xuICBsYXp5TG9hZEludGVncmF0aW9uLFxufSk7XG4iXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7O0FBR0E7QUFDQTtBQUNBO0FBQ0E7QUFDTyxNQUFNLHdCQUFBLEdBQTJCLHdCQUF3QixDQUFDO0FBQ2pFLEVBQUUsbUJBQW1CO0FBQ3JCLENBQUM7Ozs7IiwieF9nb29nbGVfaWdub3JlTGlzdCI6WzBdfQ==

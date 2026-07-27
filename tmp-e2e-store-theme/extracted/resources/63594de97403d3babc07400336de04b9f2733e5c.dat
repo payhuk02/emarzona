@@ -1,0 +1,169 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/layout/UtilityBarHeader.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/layout/UtilityBarHeader.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=6014a254"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+var _s = $RefreshSig$();
+/**
+ * Barre utilitaire sticky (langue + déconnexion) — zone contenu, sous TopNav si présente.
+ */ import { UserUtilityActions } from "/src/components/layout/UserUtilityActions.tsx";
+import { NotificationBell } from "/src/components/notifications/NotificationBell.tsx";
+import { cn } from "/src/lib/utils.ts";
+import { Button } from "/src/components/ui/button.tsx";
+import { Search } from "/node_modules/.vite/deps/lucide-react.js?v=6014a254";
+import { dispatchOpenCommandPalette } from "/src/lib/vendor-command-palette.ts";
+import { useTranslation } from "/node_modules/.vite/deps/react-i18next.js?v=02b07ad4";
+import { formatSearchShortcutKey, formatSidebarToggleShortcutKey } from "/src/lib/navigation/keyboard-shortcuts.ts";
+export function UtilityBarHeader({ className }) {
+    _s();
+    const { t } = useTranslation();
+    const searchShortcut = formatSearchShortcutKey();
+    const sidebarShortcut = formatSidebarToggleShortcutKey();
+    return /*#__PURE__*/ _jsxDEV("header", {
+        className: cn('sticky top-0 z-30 flex min-h-11 sm:min-h-12 shrink-0 items-center justify-between gap-1.5 sm:gap-2', 'border-b border-border/40 bg-background/90 backdrop-blur-xl', 'px-3 sm:px-4 lg:px-6 shadow-[0_1px_0_0_hsl(var(--border)/0.35)]', className),
+        role: "toolbar",
+        "aria-label": t('sidebar.chrome.utilityBarAriaLabel'),
+        children: [
+            /*#__PURE__*/ _jsxDEV("div", {
+                className: "hidden sm:flex items-center gap-2 min-w-0",
+                children: [
+                    /*#__PURE__*/ _jsxDEV(Button, {
+                        type: "button",
+                        variant: "outline",
+                        size: "sm",
+                        className: "h-8 gap-2 text-muted-foreground",
+                        onClick: dispatchOpenCommandPalette,
+                        "aria-label": t('sidebar.chrome.shortcutCommandPalette'),
+                        children: [
+                            /*#__PURE__*/ _jsxDEV(Search, {
+                                className: "h-3.5 w-3.5",
+                                "aria-hidden": true
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/layout/UtilityBarHeader.tsx",
+                                lineNumber: 46,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("span", {
+                                className: "text-xs",
+                                children: t('sidebar.chrome.searchPlaceholder')
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/layout/UtilityBarHeader.tsx",
+                                lineNumber: 47,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("kbd", {
+                                className: "pointer-events-none hidden md:inline-flex h-5 select-none items-center rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground",
+                                children: searchShortcut
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/layout/UtilityBarHeader.tsx",
+                                lineNumber: 48,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/layout/UtilityBarHeader.tsx",
+                        lineNumber: 38,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV("span", {
+                        className: "hidden lg:inline-flex items-center gap-1.5 text-[10px] text-muted-foreground",
+                        "aria-hidden": true,
+                        children: [
+                            /*#__PURE__*/ _jsxDEV("kbd", {
+                                className: "pointer-events-none inline-flex h-5 select-none items-center rounded border bg-muted px-1.5 font-mono font-medium",
+                                children: sidebarShortcut
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/layout/UtilityBarHeader.tsx",
+                                lineNumber: 56,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("span", {
+                                children: t('sidebar.chrome.shortcutToggleSidebar')
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/layout/UtilityBarHeader.tsx",
+                                lineNumber: 59,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/layout/UtilityBarHeader.tsx",
+                        lineNumber: 52,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/layout/UtilityBarHeader.tsx",
+                lineNumber: 37,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV("div", {
+                className: "flex items-center gap-1 sm:gap-2 ml-auto shrink-0",
+                children: [
+                    /*#__PURE__*/ _jsxDEV(NotificationBell, {}, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/layout/UtilityBarHeader.tsx",
+                        lineNumber: 63,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV(UserUtilityActions, {
+                        variant: "shell"
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/layout/UtilityBarHeader.tsx",
+                        lineNumber: 64,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/layout/UtilityBarHeader.tsx",
+                lineNumber: 62,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/layout/UtilityBarHeader.tsx",
+        lineNumber: 27,
+        columnNumber: 5
+    }, this);
+}
+_s(UtilityBarHeader, "zlIdU9EjM2llFt74AbE2KsUJXyM=", false, function() {
+    return [
+        useTranslation
+    ];
+});
+_c = UtilityBarHeader;
+var _c;
+$RefreshReg$(_c, "UtilityBarHeader");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/layout/UtilityBarHeader.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/layout/UtilityBarHeader.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIlV0aWxpdHlCYXJIZWFkZXIudHN4Il0sInNvdXJjZXNDb250ZW50IjpbIi8qKlxuICogQmFycmUgdXRpbGl0YWlyZSBzdGlja3kgKGxhbmd1ZSArIGTDqWNvbm5leGlvbikg4oCUIHpvbmUgY29udGVudSwgc291cyBUb3BOYXYgc2kgcHLDqXNlbnRlLlxuICovXG5cbmltcG9ydCB7IFVzZXJVdGlsaXR5QWN0aW9ucyB9IGZyb20gJ0AvY29tcG9uZW50cy9sYXlvdXQvVXNlclV0aWxpdHlBY3Rpb25zJztcbmltcG9ydCB7IE5vdGlmaWNhdGlvbkJlbGwgfSBmcm9tICdAL2NvbXBvbmVudHMvbm90aWZpY2F0aW9ucy9Ob3RpZmljYXRpb25CZWxsJztcbmltcG9ydCB7IGNuIH0gZnJvbSAnQC9saWIvdXRpbHMnO1xuaW1wb3J0IHsgQnV0dG9uIH0gZnJvbSAnQC9jb21wb25lbnRzL3VpL2J1dHRvbic7XG5pbXBvcnQgeyBTZWFyY2ggfSBmcm9tICdsdWNpZGUtcmVhY3QnO1xuaW1wb3J0IHsgZGlzcGF0Y2hPcGVuQ29tbWFuZFBhbGV0dGUgfSBmcm9tICdAL2xpYi92ZW5kb3ItY29tbWFuZC1wYWxldHRlJztcbmltcG9ydCB7IHVzZVRyYW5zbGF0aW9uIH0gZnJvbSAncmVhY3QtaTE4bmV4dCc7XG5pbXBvcnQge1xuICBmb3JtYXRTZWFyY2hTaG9ydGN1dEtleSxcbiAgZm9ybWF0U2lkZWJhclRvZ2dsZVNob3J0Y3V0S2V5LFxufSBmcm9tICdAL2xpYi9uYXZpZ2F0aW9uL2tleWJvYXJkLXNob3J0Y3V0cyc7XG5cbnR5cGUgVXRpbGl0eUJhckhlYWRlclByb3BzID0ge1xuICBjbGFzc05hbWU/OiBzdHJpbmc7XG59O1xuXG5leHBvcnQgZnVuY3Rpb24gVXRpbGl0eUJhckhlYWRlcih7IGNsYXNzTmFtZSB9OiBVdGlsaXR5QmFySGVhZGVyUHJvcHMpIHtcbiAgY29uc3QgeyB0IH0gPSB1c2VUcmFuc2xhdGlvbigpO1xuICBjb25zdCBzZWFyY2hTaG9ydGN1dCA9IGZvcm1hdFNlYXJjaFNob3J0Y3V0S2V5KCk7XG4gIGNvbnN0IHNpZGViYXJTaG9ydGN1dCA9IGZvcm1hdFNpZGViYXJUb2dnbGVTaG9ydGN1dEtleSgpO1xuXG4gIHJldHVybiAoXG4gICAgPGhlYWRlclxuICAgICAgY2xhc3NOYW1lPXtjbihcbiAgICAgICAgJ3N0aWNreSB0b3AtMCB6LTMwIGZsZXggbWluLWgtMTEgc206bWluLWgtMTIgc2hyaW5rLTAgaXRlbXMtY2VudGVyIGp1c3RpZnktYmV0d2VlbiBnYXAtMS41IHNtOmdhcC0yJyxcbiAgICAgICAgJ2JvcmRlci1iIGJvcmRlci1ib3JkZXIvNDAgYmctYmFja2dyb3VuZC85MCBiYWNrZHJvcC1ibHVyLXhsJyxcbiAgICAgICAgJ3B4LTMgc206cHgtNCBsZzpweC02IHNoYWRvdy1bMF8xcHhfMF8wX2hzbCh2YXIoLS1ib3JkZXIpLzAuMzUpXScsXG4gICAgICAgIGNsYXNzTmFtZVxuICAgICAgKX1cbiAgICAgIHJvbGU9XCJ0b29sYmFyXCJcbiAgICAgIGFyaWEtbGFiZWw9e3QoJ3NpZGViYXIuY2hyb21lLnV0aWxpdHlCYXJBcmlhTGFiZWwnKX1cbiAgICA+XG4gICAgICA8ZGl2IGNsYXNzTmFtZT1cImhpZGRlbiBzbTpmbGV4IGl0ZW1zLWNlbnRlciBnYXAtMiBtaW4tdy0wXCI+XG4gICAgICAgIDxCdXR0b25cbiAgICAgICAgICB0eXBlPVwiYnV0dG9uXCJcbiAgICAgICAgICB2YXJpYW50PVwib3V0bGluZVwiXG4gICAgICAgICAgc2l6ZT1cInNtXCJcbiAgICAgICAgICBjbGFzc05hbWU9XCJoLTggZ2FwLTIgdGV4dC1tdXRlZC1mb3JlZ3JvdW5kXCJcbiAgICAgICAgICBvbkNsaWNrPXtkaXNwYXRjaE9wZW5Db21tYW5kUGFsZXR0ZX1cbiAgICAgICAgICBhcmlhLWxhYmVsPXt0KCdzaWRlYmFyLmNocm9tZS5zaG9ydGN1dENvbW1hbmRQYWxldHRlJyl9XG4gICAgICAgID5cbiAgICAgICAgICA8U2VhcmNoIGNsYXNzTmFtZT1cImgtMy41IHctMy41XCIgYXJpYS1oaWRkZW4gLz5cbiAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJ0ZXh0LXhzXCI+e3QoJ3NpZGViYXIuY2hyb21lLnNlYXJjaFBsYWNlaG9sZGVyJyl9PC9zcGFuPlxuICAgICAgICAgIDxrYmQgY2xhc3NOYW1lPVwicG9pbnRlci1ldmVudHMtbm9uZSBoaWRkZW4gbWQ6aW5saW5lLWZsZXggaC01IHNlbGVjdC1ub25lIGl0ZW1zLWNlbnRlciByb3VuZGVkIGJvcmRlciBiZy1tdXRlZCBweC0xLjUgZm9udC1tb25vIHRleHQtWzEwcHhdIGZvbnQtbWVkaXVtIHRleHQtbXV0ZWQtZm9yZWdyb3VuZFwiPlxuICAgICAgICAgICAge3NlYXJjaFNob3J0Y3V0fVxuICAgICAgICAgIDwva2JkPlxuICAgICAgICA8L0J1dHRvbj5cbiAgICAgICAgPHNwYW5cbiAgICAgICAgICBjbGFzc05hbWU9XCJoaWRkZW4gbGc6aW5saW5lLWZsZXggaXRlbXMtY2VudGVyIGdhcC0xLjUgdGV4dC1bMTBweF0gdGV4dC1tdXRlZC1mb3JlZ3JvdW5kXCJcbiAgICAgICAgICBhcmlhLWhpZGRlblxuICAgICAgICA+XG4gICAgICAgICAgPGtiZCBjbGFzc05hbWU9XCJwb2ludGVyLWV2ZW50cy1ub25lIGlubGluZS1mbGV4IGgtNSBzZWxlY3Qtbm9uZSBpdGVtcy1jZW50ZXIgcm91bmRlZCBib3JkZXIgYmctbXV0ZWQgcHgtMS41IGZvbnQtbW9ubyBmb250LW1lZGl1bVwiPlxuICAgICAgICAgICAge3NpZGViYXJTaG9ydGN1dH1cbiAgICAgICAgICA8L2tiZD5cbiAgICAgICAgICA8c3Bhbj57dCgnc2lkZWJhci5jaHJvbWUuc2hvcnRjdXRUb2dnbGVTaWRlYmFyJyl9PC9zcGFuPlxuICAgICAgICA8L3NwYW4+XG4gICAgICA8L2Rpdj5cbiAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTEgc206Z2FwLTIgbWwtYXV0byBzaHJpbmstMFwiPlxuICAgICAgICA8Tm90aWZpY2F0aW9uQmVsbCAvPlxuICAgICAgICA8VXNlclV0aWxpdHlBY3Rpb25zIHZhcmlhbnQ9XCJzaGVsbFwiIC8+XG4gICAgICA8L2Rpdj5cbiAgICA8L2hlYWRlcj5cbiAgKTtcbn1cbiJdLCJuYW1lcyI6WyJVc2VyVXRpbGl0eUFjdGlvbnMiLCJOb3RpZmljYXRpb25CZWxsIiwiY24iLCJCdXR0b24iLCJTZWFyY2giLCJkaXNwYXRjaE9wZW5Db21tYW5kUGFsZXR0ZSIsInVzZVRyYW5zbGF0aW9uIiwiZm9ybWF0U2VhcmNoU2hvcnRjdXRLZXkiLCJmb3JtYXRTaWRlYmFyVG9nZ2xlU2hvcnRjdXRLZXkiLCJVdGlsaXR5QmFySGVhZGVyIiwiY2xhc3NOYW1lIiwidCIsInNlYXJjaFNob3J0Y3V0Iiwic2lkZWJhclNob3J0Y3V0IiwiaGVhZGVyIiwicm9sZSIsImFyaWEtbGFiZWwiLCJkaXYiLCJ0eXBlIiwidmFyaWFudCIsInNpemUiLCJvbkNsaWNrIiwiYXJpYS1oaWRkZW4iLCJzcGFuIiwia2JkIl0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7QUFBQTs7Q0FFQyxHQUVELFNBQVNBLGtCQUFrQixRQUFRLHlDQUF5QztBQUM1RSxTQUFTQyxnQkFBZ0IsUUFBUSw4Q0FBOEM7QUFDL0UsU0FBU0MsRUFBRSxRQUFRLGNBQWM7QUFDakMsU0FBU0MsTUFBTSxRQUFRLHlCQUF5QjtBQUNoRCxTQUFTQyxNQUFNLFFBQVEsZUFBZTtBQUN0QyxTQUFTQywwQkFBMEIsUUFBUSwrQkFBK0I7QUFDMUUsU0FBU0MsY0FBYyxRQUFRLGdCQUFnQjtBQUMvQyxTQUNFQyx1QkFBdUIsRUFDdkJDLDhCQUE4QixRQUN6QixzQ0FBc0M7QUFNN0MsT0FBTyxTQUFTQyxpQkFBaUIsRUFBRUMsU0FBUyxFQUF5Qjs7SUFDbkUsTUFBTSxFQUFFQyxDQUFDLEVBQUUsR0FBR0w7SUFDZCxNQUFNTSxpQkFBaUJMO0lBQ3ZCLE1BQU1NLGtCQUFrQkw7SUFFeEIscUJBQ0UsUUFBQ007UUFDQ0osV0FBV1IsR0FDVCxzR0FDQSwrREFDQSxtRUFDQVE7UUFFRkssTUFBSztRQUNMQyxjQUFZTCxFQUFFOzswQkFFZCxRQUFDTTtnQkFBSVAsV0FBVTs7a0NBQ2IsUUFBQ1A7d0JBQ0NlLE1BQUs7d0JBQ0xDLFNBQVE7d0JBQ1JDLE1BQUs7d0JBQ0xWLFdBQVU7d0JBQ1ZXLFNBQVNoQjt3QkFDVFcsY0FBWUwsRUFBRTs7MENBRWQsUUFBQ1A7Z0NBQU9NLFdBQVU7Z0NBQWNZLGFBQVc7Ozs7OzswQ0FDM0MsUUFBQ0M7Z0NBQUtiLFdBQVU7MENBQVdDLEVBQUU7Ozs7OzswQ0FDN0IsUUFBQ2E7Z0NBQUlkLFdBQVU7MENBQ1pFOzs7Ozs7Ozs7Ozs7a0NBR0wsUUFBQ1c7d0JBQ0NiLFdBQVU7d0JBQ1ZZLGFBQVc7OzBDQUVYLFFBQUNFO2dDQUFJZCxXQUFVOzBDQUNaRzs7Ozs7OzBDQUVILFFBQUNVOzBDQUFNWixFQUFFOzs7Ozs7Ozs7Ozs7Ozs7Ozs7MEJBR2IsUUFBQ007Z0JBQUlQLFdBQVU7O2tDQUNiLFFBQUNUOzs7OztrQ0FDRCxRQUFDRDt3QkFBbUJtQixTQUFROzs7Ozs7Ozs7Ozs7Ozs7Ozs7QUFJcEM7R0EvQ2dCVjs7UUFDQUg7OztLQURBRyJ9

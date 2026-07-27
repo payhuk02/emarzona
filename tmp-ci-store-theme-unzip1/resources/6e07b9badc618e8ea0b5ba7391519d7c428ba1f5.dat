@@ -1,0 +1,41 @@
+import { get, set, del } from "/node_modules/.vite/deps/idb-keyval.js?v=34ae4ad3";
+import { logger } from "/src/lib/logger.ts";
+/**
+ * Creates an IndexedDB persister for React Query using idb-keyval.
+ * This enables offline-first capabilities and instant load times.
+ *
+ * @param idbValidKey The key to use in IndexedDB
+ */ export function createIDBPersister(idbValidKey = 'reactQuery') {
+    return {
+        persistClient: async (client)=>{
+            try {
+                await set(idbValidKey, client);
+            } catch (error) {
+                logger.error('Failed to persist React Query cache to IndexedDB', {
+                    error
+                });
+            }
+        },
+        restoreClient: async ()=>{
+            try {
+                return await get(idbValidKey);
+            } catch (error) {
+                logger.error('Failed to restore React Query cache from IndexedDB', {
+                    error
+                });
+                return undefined;
+            }
+        },
+        removeClient: async ()=>{
+            try {
+                await del(idbValidKey);
+            } catch (error) {
+                logger.error('Failed to remove React Query cache from IndexedDB', {
+                    error
+                });
+            }
+        }
+    };
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInBlcnNpc3Rlci50cyJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgeyBnZXQsIHNldCwgZGVsIH0gZnJvbSAnaWRiLWtleXZhbCc7XG5pbXBvcnQgdHlwZSB7IFBlcnNpc3RlciwgUGVyc2lzdGVkQ2xpZW50IH0gZnJvbSAnQHRhbnN0YWNrL3JlYWN0LXF1ZXJ5LXBlcnNpc3QtY2xpZW50JztcbmltcG9ydCB7IGxvZ2dlciB9IGZyb20gJ0AvbGliL2xvZ2dlcic7XG5cbi8qKlxuICogQ3JlYXRlcyBhbiBJbmRleGVkREIgcGVyc2lzdGVyIGZvciBSZWFjdCBRdWVyeSB1c2luZyBpZGIta2V5dmFsLlxuICogVGhpcyBlbmFibGVzIG9mZmxpbmUtZmlyc3QgY2FwYWJpbGl0aWVzIGFuZCBpbnN0YW50IGxvYWQgdGltZXMuXG4gKlxuICogQHBhcmFtIGlkYlZhbGlkS2V5IFRoZSBrZXkgdG8gdXNlIGluIEluZGV4ZWREQlxuICovXG5leHBvcnQgZnVuY3Rpb24gY3JlYXRlSURCUGVyc2lzdGVyKGlkYlZhbGlkS2V5OiBzdHJpbmcgPSAncmVhY3RRdWVyeScpOiBQZXJzaXN0ZXIge1xuICByZXR1cm4ge1xuICAgIHBlcnNpc3RDbGllbnQ6IGFzeW5jIChjbGllbnQ6IFBlcnNpc3RlZENsaWVudCkgPT4ge1xuICAgICAgdHJ5IHtcbiAgICAgICAgYXdhaXQgc2V0KGlkYlZhbGlkS2V5LCBjbGllbnQpO1xuICAgICAgfSBjYXRjaCAoZXJyb3IpIHtcbiAgICAgICAgbG9nZ2VyLmVycm9yKCdGYWlsZWQgdG8gcGVyc2lzdCBSZWFjdCBRdWVyeSBjYWNoZSB0byBJbmRleGVkREInLCB7IGVycm9yIH0pO1xuICAgICAgfVxuICAgIH0sXG4gICAgcmVzdG9yZUNsaWVudDogYXN5bmMgKCkgPT4ge1xuICAgICAgdHJ5IHtcbiAgICAgICAgcmV0dXJuIGF3YWl0IGdldChpZGJWYWxpZEtleSk7XG4gICAgICB9IGNhdGNoIChlcnJvcikge1xuICAgICAgICBsb2dnZXIuZXJyb3IoJ0ZhaWxlZCB0byByZXN0b3JlIFJlYWN0IFF1ZXJ5IGNhY2hlIGZyb20gSW5kZXhlZERCJywgeyBlcnJvciB9KTtcbiAgICAgICAgcmV0dXJuIHVuZGVmaW5lZDtcbiAgICAgIH1cbiAgICB9LFxuICAgIHJlbW92ZUNsaWVudDogYXN5bmMgKCkgPT4ge1xuICAgICAgdHJ5IHtcbiAgICAgICAgYXdhaXQgZGVsKGlkYlZhbGlkS2V5KTtcbiAgICAgIH0gY2F0Y2ggKGVycm9yKSB7XG4gICAgICAgIGxvZ2dlci5lcnJvcignRmFpbGVkIHRvIHJlbW92ZSBSZWFjdCBRdWVyeSBjYWNoZSBmcm9tIEluZGV4ZWREQicsIHsgZXJyb3IgfSk7XG4gICAgICB9XG4gICAgfSxcbiAgfTtcbn1cbiJdLCJuYW1lcyI6WyJnZXQiLCJzZXQiLCJkZWwiLCJsb2dnZXIiLCJjcmVhdGVJREJQZXJzaXN0ZXIiLCJpZGJWYWxpZEtleSIsInBlcnNpc3RDbGllbnQiLCJjbGllbnQiLCJlcnJvciIsInJlc3RvcmVDbGllbnQiLCJ1bmRlZmluZWQiLCJyZW1vdmVDbGllbnQiXSwibWFwcGluZ3MiOiJBQUFBLFNBQVNBLEdBQUcsRUFBRUMsR0FBRyxFQUFFQyxHQUFHLFFBQVEsYUFBYTtBQUUzQyxTQUFTQyxNQUFNLFFBQVEsZUFBZTtBQUV0Qzs7Ozs7Q0FLQyxHQUNELE9BQU8sU0FBU0MsbUJBQW1CQyxjQUFzQixZQUFZO0lBQ25FLE9BQU87UUFDTEMsZUFBZSxPQUFPQztZQUNwQixJQUFJO2dCQUNGLE1BQU1OLElBQUlJLGFBQWFFO1lBQ3pCLEVBQUUsT0FBT0MsT0FBTztnQkFDZEwsT0FBT0ssS0FBSyxDQUFDLG9EQUFvRDtvQkFBRUE7Z0JBQU07WUFDM0U7UUFDRjtRQUNBQyxlQUFlO1lBQ2IsSUFBSTtnQkFDRixPQUFPLE1BQU1ULElBQUlLO1lBQ25CLEVBQUUsT0FBT0csT0FBTztnQkFDZEwsT0FBT0ssS0FBSyxDQUFDLHNEQUFzRDtvQkFBRUE7Z0JBQU07Z0JBQzNFLE9BQU9FO1lBQ1Q7UUFDRjtRQUNBQyxjQUFjO1lBQ1osSUFBSTtnQkFDRixNQUFNVCxJQUFJRztZQUNaLEVBQUUsT0FBT0csT0FBTztnQkFDZEwsT0FBT0ssS0FBSyxDQUFDLHFEQUFxRDtvQkFBRUE7Z0JBQU07WUFDNUU7UUFDRjtJQUNGO0FBQ0YifQ==

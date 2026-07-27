@@ -1,0 +1,34 @@
+const OPENAI_INTEGRATION_NAME = 'OpenAI';
+
+// https://platform.openai.com/docs/quickstart?api-mode=responses
+// https://platform.openai.com/docs/quickstart?api-mode=chat
+// https://platform.openai.com/docs/api-reference/conversations
+const INSTRUMENTED_METHODS = [
+  'responses.create',
+  'chat.completions.create',
+  'embeddings.create',
+  // Conversations API - for conversation state management
+  // https://platform.openai.com/docs/guides/conversation-state
+  'conversations.create',
+] ;
+const RESPONSES_TOOL_CALL_EVENT_TYPES = [
+  'response.output_item.added',
+  'response.function_call_arguments.delta',
+  'response.function_call_arguments.done',
+  'response.output_item.done',
+] ;
+const RESPONSE_EVENT_TYPES = [
+  'response.created',
+  'response.in_progress',
+  'response.failed',
+  'response.completed',
+  'response.incomplete',
+  'response.queued',
+  'response.output_text.delta',
+  ...RESPONSES_TOOL_CALL_EVENT_TYPES,
+] ;
+
+export { INSTRUMENTED_METHODS, OPENAI_INTEGRATION_NAME, RESPONSES_TOOL_CALL_EVENT_TYPES, RESPONSE_EVENT_TYPES };
+                                     
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiY29uc3RhbnRzLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi9zcmMvdHJhY2luZy9vcGVuYWkvY29uc3RhbnRzLnRzIl0sInNvdXJjZXNDb250ZW50IjpbImV4cG9ydCBjb25zdCBPUEVOQUlfSU5URUdSQVRJT05fTkFNRSA9ICdPcGVuQUknO1xuXG4vLyBodHRwczovL3BsYXRmb3JtLm9wZW5haS5jb20vZG9jcy9xdWlja3N0YXJ0P2FwaS1tb2RlPXJlc3BvbnNlc1xuLy8gaHR0cHM6Ly9wbGF0Zm9ybS5vcGVuYWkuY29tL2RvY3MvcXVpY2tzdGFydD9hcGktbW9kZT1jaGF0XG4vLyBodHRwczovL3BsYXRmb3JtLm9wZW5haS5jb20vZG9jcy9hcGktcmVmZXJlbmNlL2NvbnZlcnNhdGlvbnNcbmV4cG9ydCBjb25zdCBJTlNUUlVNRU5URURfTUVUSE9EUyA9IFtcbiAgJ3Jlc3BvbnNlcy5jcmVhdGUnLFxuICAnY2hhdC5jb21wbGV0aW9ucy5jcmVhdGUnLFxuICAnZW1iZWRkaW5ncy5jcmVhdGUnLFxuICAvLyBDb252ZXJzYXRpb25zIEFQSSAtIGZvciBjb252ZXJzYXRpb24gc3RhdGUgbWFuYWdlbWVudFxuICAvLyBodHRwczovL3BsYXRmb3JtLm9wZW5haS5jb20vZG9jcy9ndWlkZXMvY29udmVyc2F0aW9uLXN0YXRlXG4gICdjb252ZXJzYXRpb25zLmNyZWF0ZScsXG5dIGFzIGNvbnN0O1xuZXhwb3J0IGNvbnN0IFJFU1BPTlNFU19UT09MX0NBTExfRVZFTlRfVFlQRVMgPSBbXG4gICdyZXNwb25zZS5vdXRwdXRfaXRlbS5hZGRlZCcsXG4gICdyZXNwb25zZS5mdW5jdGlvbl9jYWxsX2FyZ3VtZW50cy5kZWx0YScsXG4gICdyZXNwb25zZS5mdW5jdGlvbl9jYWxsX2FyZ3VtZW50cy5kb25lJyxcbiAgJ3Jlc3BvbnNlLm91dHB1dF9pdGVtLmRvbmUnLFxuXSBhcyBjb25zdDtcbmV4cG9ydCBjb25zdCBSRVNQT05TRV9FVkVOVF9UWVBFUyA9IFtcbiAgJ3Jlc3BvbnNlLmNyZWF0ZWQnLFxuICAncmVzcG9uc2UuaW5fcHJvZ3Jlc3MnLFxuICAncmVzcG9uc2UuZmFpbGVkJyxcbiAgJ3Jlc3BvbnNlLmNvbXBsZXRlZCcsXG4gICdyZXNwb25zZS5pbmNvbXBsZXRlJyxcbiAgJ3Jlc3BvbnNlLnF1ZXVlZCcsXG4gICdyZXNwb25zZS5vdXRwdXRfdGV4dC5kZWx0YScsXG4gIC4uLlJFU1BPTlNFU19UT09MX0NBTExfRVZFTlRfVFlQRVMsXG5dIGFzIGNvbnN0O1xuIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFPLE1BQU0sdUJBQUEsR0FBMEI7O0FBRXZDO0FBQ0E7QUFDQTtBQUNPLE1BQU0sdUJBQXVCO0FBQ3BDLEVBQUUsa0JBQWtCO0FBQ3BCLEVBQUUseUJBQXlCO0FBQzNCLEVBQUUsbUJBQW1CO0FBQ3JCO0FBQ0E7QUFDQSxFQUFFLHNCQUFzQjtBQUN4QixDQUFBO0FBQ08sTUFBTSxrQ0FBa0M7QUFDL0MsRUFBRSw0QkFBNEI7QUFDOUIsRUFBRSx3Q0FBd0M7QUFDMUMsRUFBRSx1Q0FBdUM7QUFDekMsRUFBRSwyQkFBMkI7QUFDN0IsQ0FBQTtBQUNPLE1BQU0sdUJBQXVCO0FBQ3BDLEVBQUUsa0JBQWtCO0FBQ3BCLEVBQUUsc0JBQXNCO0FBQ3hCLEVBQUUsaUJBQWlCO0FBQ25CLEVBQUUsb0JBQW9CO0FBQ3RCLEVBQUUscUJBQXFCO0FBQ3ZCLEVBQUUsaUJBQWlCO0FBQ25CLEVBQUUsNEJBQTRCO0FBQzlCLEVBQUUsR0FBRywrQkFBK0I7QUFDcEMsQ0FBQTs7OzsiLCJ4X2dvb2dsZV9pZ25vcmVMaXN0IjpbMF19

@@ -1,0 +1,70 @@
+import { isPrimitive } from "/node_modules/@sentry/core/build/esm/utils/is.js?v=d758aa40";
+import { normalize } from "/node_modules/@sentry/core/build/esm/utils/normalize.js?v=d758aa40";
+import { GLOBAL_OBJ } from "/node_modules/@sentry/core/build/esm/utils/worldwide.js?v=d758aa40";
+
+/**
+ * Formats the given values into a string.
+ *
+ * @param values - The values to format.
+ * @param normalizeDepth - The depth to normalize the values.
+ * @param normalizeMaxBreadth - The max breadth to normalize the values.
+ * @returns The formatted string.
+ */
+function formatConsoleArgs(values, normalizeDepth, normalizeMaxBreadth) {
+  return 'util' in GLOBAL_OBJ && typeof (GLOBAL_OBJ ).util.format === 'function'
+    ? (GLOBAL_OBJ ).util.format(...values)
+    : safeJoinConsoleArgs(values, normalizeDepth, normalizeMaxBreadth);
+}
+
+/**
+ * Joins the given values into a string.
+ *
+ * @param values - The values to join.
+ * @param normalizeDepth - The depth to normalize the values.
+ * @param normalizeMaxBreadth - The max breadth to normalize the values.
+ * @returns The joined string.
+ */
+function safeJoinConsoleArgs(values, normalizeDepth, normalizeMaxBreadth) {
+  return values
+    .map(value =>
+      isPrimitive(value) ? String(value) : JSON.stringify(normalize(value, normalizeDepth, normalizeMaxBreadth)),
+    )
+    .join(' ');
+}
+
+/**
+ * Checks if a string contains console substitution patterns like %s, %d, %i, %f, %o, %O, %c.
+ *
+ * @param str - The string to check
+ * @returns true if the string contains console substitution patterns
+ */
+function hasConsoleSubstitutions(str) {
+  // Match console substitution patterns: %s, %d, %i, %f, %o, %O, %c
+  return /%[sdifocO]/.test(str);
+}
+
+/**
+ * Creates template attributes for multiple console arguments.
+ *
+ * @param args - The console arguments
+ * @returns An object with template and parameter attributes
+ */
+function createConsoleTemplateAttributes(firstArg, followingArgs) {
+  const attributes = {};
+
+  // Create template with placeholders for each argument
+  const template = new Array(followingArgs.length).fill('{}').join(' ');
+  attributes['sentry.message.template'] = `${firstArg} ${template}`;
+
+  // Add each argument as a parameter
+  followingArgs.forEach((arg, index) => {
+    attributes[`sentry.message.parameter.${index}`] = arg;
+  });
+
+  return attributes;
+}
+
+export { createConsoleTemplateAttributes, formatConsoleArgs, hasConsoleSubstitutions, safeJoinConsoleArgs };
+                                 
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidXRpbHMuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy9sb2dzL3V0aWxzLnRzIl0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7IGlzUHJpbWl0aXZlIH0gZnJvbSAnLi4vdXRpbHMvaXMnO1xuaW1wb3J0IHsgbm9ybWFsaXplIH0gZnJvbSAnLi4vdXRpbHMvbm9ybWFsaXplJztcbmltcG9ydCB7IEdMT0JBTF9PQkogfSBmcm9tICcuLi91dGlscy93b3JsZHdpZGUnO1xuXG50eXBlIEdsb2JhbE9iamVjdFdpdGhVdGlsID0gdHlwZW9mIEdMT0JBTF9PQkogJiB7XG4gIHV0aWw6IHtcbiAgICBmb3JtYXQ6ICguLi5hcmdzOiB1bmtub3duW10pID0+IHN0cmluZztcbiAgfTtcbn07XG5cbi8qKlxuICogRm9ybWF0cyB0aGUgZ2l2ZW4gdmFsdWVzIGludG8gYSBzdHJpbmcuXG4gKlxuICogQHBhcmFtIHZhbHVlcyAtIFRoZSB2YWx1ZXMgdG8gZm9ybWF0LlxuICogQHBhcmFtIG5vcm1hbGl6ZURlcHRoIC0gVGhlIGRlcHRoIHRvIG5vcm1hbGl6ZSB0aGUgdmFsdWVzLlxuICogQHBhcmFtIG5vcm1hbGl6ZU1heEJyZWFkdGggLSBUaGUgbWF4IGJyZWFkdGggdG8gbm9ybWFsaXplIHRoZSB2YWx1ZXMuXG4gKiBAcmV0dXJucyBUaGUgZm9ybWF0dGVkIHN0cmluZy5cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIGZvcm1hdENvbnNvbGVBcmdzKHZhbHVlczogdW5rbm93bltdLCBub3JtYWxpemVEZXB0aDogbnVtYmVyLCBub3JtYWxpemVNYXhCcmVhZHRoOiBudW1iZXIpOiBzdHJpbmcge1xuICByZXR1cm4gJ3V0aWwnIGluIEdMT0JBTF9PQkogJiYgdHlwZW9mIChHTE9CQUxfT0JKIGFzIEdsb2JhbE9iamVjdFdpdGhVdGlsKS51dGlsLmZvcm1hdCA9PT0gJ2Z1bmN0aW9uJ1xuICAgID8gKEdMT0JBTF9PQkogYXMgR2xvYmFsT2JqZWN0V2l0aFV0aWwpLnV0aWwuZm9ybWF0KC4uLnZhbHVlcylcbiAgICA6IHNhZmVKb2luQ29uc29sZUFyZ3ModmFsdWVzLCBub3JtYWxpemVEZXB0aCwgbm9ybWFsaXplTWF4QnJlYWR0aCk7XG59XG5cbi8qKlxuICogSm9pbnMgdGhlIGdpdmVuIHZhbHVlcyBpbnRvIGEgc3RyaW5nLlxuICpcbiAqIEBwYXJhbSB2YWx1ZXMgLSBUaGUgdmFsdWVzIHRvIGpvaW4uXG4gKiBAcGFyYW0gbm9ybWFsaXplRGVwdGggLSBUaGUgZGVwdGggdG8gbm9ybWFsaXplIHRoZSB2YWx1ZXMuXG4gKiBAcGFyYW0gbm9ybWFsaXplTWF4QnJlYWR0aCAtIFRoZSBtYXggYnJlYWR0aCB0byBub3JtYWxpemUgdGhlIHZhbHVlcy5cbiAqIEByZXR1cm5zIFRoZSBqb2luZWQgc3RyaW5nLlxuICovXG5leHBvcnQgZnVuY3Rpb24gc2FmZUpvaW5Db25zb2xlQXJncyh2YWx1ZXM6IHVua25vd25bXSwgbm9ybWFsaXplRGVwdGg6IG51bWJlciwgbm9ybWFsaXplTWF4QnJlYWR0aDogbnVtYmVyKTogc3RyaW5nIHtcbiAgcmV0dXJuIHZhbHVlc1xuICAgIC5tYXAodmFsdWUgPT5cbiAgICAgIGlzUHJpbWl0aXZlKHZhbHVlKSA/IFN0cmluZyh2YWx1ZSkgOiBKU09OLnN0cmluZ2lmeShub3JtYWxpemUodmFsdWUsIG5vcm1hbGl6ZURlcHRoLCBub3JtYWxpemVNYXhCcmVhZHRoKSksXG4gICAgKVxuICAgIC5qb2luKCcgJyk7XG59XG5cbi8qKlxuICogQ2hlY2tzIGlmIGEgc3RyaW5nIGNvbnRhaW5zIGNvbnNvbGUgc3Vic3RpdHV0aW9uIHBhdHRlcm5zIGxpa2UgJXMsICVkLCAlaSwgJWYsICVvLCAlTywgJWMuXG4gKlxuICogQHBhcmFtIHN0ciAtIFRoZSBzdHJpbmcgdG8gY2hlY2tcbiAqIEByZXR1cm5zIHRydWUgaWYgdGhlIHN0cmluZyBjb250YWlucyBjb25zb2xlIHN1YnN0aXR1dGlvbiBwYXR0ZXJuc1xuICovXG5leHBvcnQgZnVuY3Rpb24gaGFzQ29uc29sZVN1YnN0aXR1dGlvbnMoc3RyOiBzdHJpbmcpOiBib29sZWFuIHtcbiAgLy8gTWF0Y2ggY29uc29sZSBzdWJzdGl0dXRpb24gcGF0dGVybnM6ICVzLCAlZCwgJWksICVmLCAlbywgJU8sICVjXG4gIHJldHVybiAvJVtzZGlmb2NPXS8udGVzdChzdHIpO1xufVxuXG4vKipcbiAqIENyZWF0ZXMgdGVtcGxhdGUgYXR0cmlidXRlcyBmb3IgbXVsdGlwbGUgY29uc29sZSBhcmd1bWVudHMuXG4gKlxuICogQHBhcmFtIGFyZ3MgLSBUaGUgY29uc29sZSBhcmd1bWVudHNcbiAqIEByZXR1cm5zIEFuIG9iamVjdCB3aXRoIHRlbXBsYXRlIGFuZCBwYXJhbWV0ZXIgYXR0cmlidXRlc1xuICovXG5leHBvcnQgZnVuY3Rpb24gY3JlYXRlQ29uc29sZVRlbXBsYXRlQXR0cmlidXRlcyhmaXJzdEFyZzogdW5rbm93biwgZm9sbG93aW5nQXJnczogdW5rbm93bltdKTogUmVjb3JkPHN0cmluZywgdW5rbm93bj4ge1xuICBjb25zdCBhdHRyaWJ1dGVzOiBSZWNvcmQ8c3RyaW5nLCB1bmtub3duPiA9IHt9O1xuXG4gIC8vIENyZWF0ZSB0ZW1wbGF0ZSB3aXRoIHBsYWNlaG9sZGVycyBmb3IgZWFjaCBhcmd1bWVudFxuICBjb25zdCB0ZW1wbGF0ZSA9IG5ldyBBcnJheShmb2xsb3dpbmdBcmdzLmxlbmd0aCkuZmlsbCgne30nKS5qb2luKCcgJyk7XG4gIGF0dHJpYnV0ZXNbJ3NlbnRyeS5tZXNzYWdlLnRlbXBsYXRlJ10gPSBgJHtmaXJzdEFyZ30gJHt0ZW1wbGF0ZX1gO1xuXG4gIC8vIEFkZCBlYWNoIGFyZ3VtZW50IGFzIGEgcGFyYW1ldGVyXG4gIGZvbGxvd2luZ0FyZ3MuZm9yRWFjaCgoYXJnLCBpbmRleCkgPT4ge1xuICAgIGF0dHJpYnV0ZXNbYHNlbnRyeS5tZXNzYWdlLnBhcmFtZXRlci4ke2luZGV4fWBdID0gYXJnO1xuICB9KTtcblxuICByZXR1cm4gYXR0cmlidXRlcztcbn1cbiJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7O0FBVUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNPLFNBQVMsaUJBQWlCLENBQUMsTUFBTSxFQUFhLGNBQWMsRUFBVSxtQkFBbUIsRUFBa0I7QUFDbEgsRUFBRSxPQUFPLE1BQUEsSUFBVSxVQUFBLElBQWMsT0FBTyxDQUFDLFVBQUEsR0FBb0MsSUFBSSxDQUFDLFdBQVc7QUFDN0YsTUFBTSxDQUFDLFVBQUEsR0FBb0MsSUFBSSxDQUFDLE1BQU0sQ0FBQyxHQUFHLE1BQU07QUFDaEUsTUFBTSxtQkFBbUIsQ0FBQyxNQUFNLEVBQUUsY0FBYyxFQUFFLG1CQUFtQixDQUFDO0FBQ3RFOztBQUVBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDTyxTQUFTLG1CQUFtQixDQUFDLE1BQU0sRUFBYSxjQUFjLEVBQVUsbUJBQW1CLEVBQWtCO0FBQ3BILEVBQUUsT0FBTztBQUNULEtBQUssR0FBRyxDQUFDLEtBQUE7QUFDVCxNQUFNLFdBQVcsQ0FBQyxLQUFLLENBQUEsR0FBSSxNQUFNLENBQUMsS0FBSyxDQUFBLEdBQUksSUFBSSxDQUFDLFNBQVMsQ0FBQyxTQUFTLENBQUMsS0FBSyxFQUFFLGNBQWMsRUFBRSxtQkFBbUIsQ0FBQyxDQUFDO0FBQ2hIO0FBQ0EsS0FBSyxJQUFJLENBQUMsR0FBRyxDQUFDO0FBQ2Q7O0FBRUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ08sU0FBUyx1QkFBdUIsQ0FBQyxHQUFHLEVBQW1CO0FBQzlEO0FBQ0EsRUFBRSxPQUFPLFlBQVksQ0FBQyxJQUFJLENBQUMsR0FBRyxDQUFDO0FBQy9COztBQUVBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNPLFNBQVMsK0JBQStCLENBQUMsUUFBUSxFQUFXLGFBQWEsRUFBc0M7QUFDdEgsRUFBRSxNQUFNLFVBQVUsR0FBNEIsRUFBRTs7QUFFaEQ7QUFDQSxFQUFFLE1BQU0sUUFBQSxHQUFXLElBQUksS0FBSyxDQUFDLGFBQWEsQ0FBQyxNQUFNLENBQUMsQ0FBQyxJQUFJLENBQUMsSUFBSSxDQUFDLENBQUMsSUFBSSxDQUFDLEdBQUcsQ0FBQztBQUN2RSxFQUFFLFVBQVUsQ0FBQyx5QkFBeUIsQ0FBQSxHQUFJLENBQUMsRUFBQSxRQUFBLENBQUEsQ0FBQSxFQUFBLFFBQUEsQ0FBQSxDQUFBOztBQUVBO0FBQ0EsRUFBQSxhQUFBLENBQUEsT0FBQSxDQUFBLENBQUEsR0FBQSxFQUFBLEtBQUEsS0FBQTtBQUNBLElBQUEsVUFBQSxDQUFBLENBQUEseUJBQUEsRUFBQSxLQUFBLENBQUEsQ0FBQSxDQUFBLEdBQUEsR0FBQTtBQUNBLEVBQUEsQ0FBQSxDQUFBOztBQUVBLEVBQUEsT0FBQSxVQUFBO0FBQ0E7Ozs7IiwieF9nb29nbGVfaWdub3JlTGlzdCI6WzBdfQ==

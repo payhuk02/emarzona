@@ -1,0 +1,31 @@
+import { WINDOW } from "/node_modules/@sentry-internal/browser-utils/build/esm/types.js?v=a52cce50";
+
+/*
+ * Copyright 2022 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+const whenActivated = (callback) => {
+  if (WINDOW.document?.prerendering) {
+    addEventListener('prerenderingchange', () => callback(), true);
+  } else {
+    callback();
+  }
+};
+
+export { whenActivated };
+                                         
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoid2hlbkFjdGl2YXRlZC5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4vLi4vLi4vc3JjL21ldHJpY3Mvd2ViLXZpdGFscy9saWIvd2hlbkFjdGl2YXRlZC50cyJdLCJzb3VyY2VzQ29udGVudCI6WyIvKlxuICogQ29weXJpZ2h0IDIwMjIgR29vZ2xlIExMQ1xuICpcbiAqIExpY2Vuc2VkIHVuZGVyIHRoZSBBcGFjaGUgTGljZW5zZSwgVmVyc2lvbiAyLjAgKHRoZSBcIkxpY2Vuc2VcIik7XG4gKiB5b3UgbWF5IG5vdCB1c2UgdGhpcyBmaWxlIGV4Y2VwdCBpbiBjb21wbGlhbmNlIHdpdGggdGhlIExpY2Vuc2UuXG4gKiBZb3UgbWF5IG9idGFpbiBhIGNvcHkgb2YgdGhlIExpY2Vuc2UgYXRcbiAqXG4gKiAgICAgaHR0cHM6Ly93d3cuYXBhY2hlLm9yZy9saWNlbnNlcy9MSUNFTlNFLTIuMFxuICpcbiAqIFVubGVzcyByZXF1aXJlZCBieSBhcHBsaWNhYmxlIGxhdyBvciBhZ3JlZWQgdG8gaW4gd3JpdGluZywgc29mdHdhcmVcbiAqIGRpc3RyaWJ1dGVkIHVuZGVyIHRoZSBMaWNlbnNlIGlzIGRpc3RyaWJ1dGVkIG9uIGFuIFwiQVMgSVNcIiBCQVNJUyxcbiAqIFdJVEhPVVQgV0FSUkFOVElFUyBPUiBDT05ESVRJT05TIE9GIEFOWSBLSU5ELCBlaXRoZXIgZXhwcmVzcyBvciBpbXBsaWVkLlxuICogU2VlIHRoZSBMaWNlbnNlIGZvciB0aGUgc3BlY2lmaWMgbGFuZ3VhZ2UgZ292ZXJuaW5nIHBlcm1pc3Npb25zIGFuZFxuICogbGltaXRhdGlvbnMgdW5kZXIgdGhlIExpY2Vuc2UuXG4gKi9cblxuaW1wb3J0IHsgV0lORE9XIH0gZnJvbSAnLi4vLi4vLi4vdHlwZXMnO1xuXG5leHBvcnQgY29uc3Qgd2hlbkFjdGl2YXRlZCA9IChjYWxsYmFjazogKCkgPT4gdm9pZCkgPT4ge1xuICBpZiAoV0lORE9XLmRvY3VtZW50Py5wcmVyZW5kZXJpbmcpIHtcbiAgICBhZGRFdmVudExpc3RlbmVyKCdwcmVyZW5kZXJpbmdjaGFuZ2UnLCAoKSA9PiBjYWxsYmFjaygpLCB0cnVlKTtcbiAgfSBlbHNlIHtcbiAgICBjYWxsYmFjaygpO1xuICB9XG59O1xuIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7O0FBQUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBOzs7TUFJYSxhQUFBLEdBQWdCLENBQUMsUUFBUSxLQUFpQjtBQUN2RCxFQUFFLElBQUksTUFBTSxDQUFDLFFBQVEsRUFBRSxZQUFZLEVBQUU7QUFDckMsSUFBSSxnQkFBZ0IsQ0FBQyxvQkFBb0IsRUFBRSxNQUFNLFFBQVEsRUFBRSxFQUFFLElBQUksQ0FBQztBQUNsRSxFQUFFLE9BQU87QUFDVCxJQUFJLFFBQVEsRUFBRTtBQUNkLEVBQUU7QUFDRjs7OzsiLCJ4X2dvb2dsZV9pZ25vcmVMaXN0IjpbMF19

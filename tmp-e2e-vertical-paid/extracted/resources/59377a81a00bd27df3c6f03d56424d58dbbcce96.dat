@@ -1,0 +1,56 @@
+import { getClient, suppressTracing } from "/node_modules/@sentry/core/build/esm/index.js?v=a52cce50";
+
+/**
+ * A function to diagnose why the SDK might not be successfully sending data.
+ *
+ * Possible return values wrapped in a Promise:
+ * - `"no-client-active"` - There was no active client when the function was called. This possibly means that the SDK was not initialized yet.
+ * - `"sentry-unreachable"` - The Sentry SaaS servers were not reachable. This likely means that there is an ad blocker active on the page or that there are other connection issues.
+ *
+ * If the function doesn't detect an issue it resolves to `undefined`.
+ */
+async function diagnoseSdkConnectivity()
+
+ {
+  const client = getClient();
+
+  if (!client) {
+    return 'no-client-active';
+  }
+
+  if (!client.getDsn()) {
+    return 'no-dsn-configured';
+  }
+
+  // Check if a tunnel is configured and use it if available
+  const tunnel = client.getOptions().tunnel;
+
+  // We are using the
+  // - "sentry-sdks" org with id 447951 not to pollute any actual organizations.
+  // - "diagnose-sdk-connectivity" project with id 4509632503087104
+  // - the public key of said org/project, which is disabled in the project settings
+  // => this DSN: https://c1dfb07d783ad5325c245c1fd3725390@o447951.ingest.us.sentry.io/4509632503087104 (i.e. disabled)
+  const defaultUrl =
+    'https://o447951.ingest.sentry.io/api/4509632503087104/envelope/?sentry_version=7&sentry_key=c1dfb07d783ad5325c245c1fd3725390&sentry_client=sentry.javascript.browser%2F1.33.7';
+
+  const url = tunnel || defaultUrl;
+
+  try {
+    await suppressTracing(() =>
+      // If fetch throws, there is likely an ad blocker active or there are other connective issues.
+      fetch(url, {
+        body: '{}',
+        method: 'POST',
+        mode: 'cors',
+        credentials: 'omit',
+      }),
+    );
+  } catch {
+    return 'sentry-unreachable';
+  }
+}
+
+export { diagnoseSdkConnectivity };
+                                        
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZGlhZ25vc2Utc2RrLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi9zcmMvZGlhZ25vc2Utc2RrLnRzIl0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7IGdldENsaWVudCwgc3VwcHJlc3NUcmFjaW5nIH0gZnJvbSAnQHNlbnRyeS9jb3JlJztcblxuLyoqXG4gKiBBIGZ1bmN0aW9uIHRvIGRpYWdub3NlIHdoeSB0aGUgU0RLIG1pZ2h0IG5vdCBiZSBzdWNjZXNzZnVsbHkgc2VuZGluZyBkYXRhLlxuICpcbiAqIFBvc3NpYmxlIHJldHVybiB2YWx1ZXMgd3JhcHBlZCBpbiBhIFByb21pc2U6XG4gKiAtIGBcIm5vLWNsaWVudC1hY3RpdmVcImAgLSBUaGVyZSB3YXMgbm8gYWN0aXZlIGNsaWVudCB3aGVuIHRoZSBmdW5jdGlvbiB3YXMgY2FsbGVkLiBUaGlzIHBvc3NpYmx5IG1lYW5zIHRoYXQgdGhlIFNESyB3YXMgbm90IGluaXRpYWxpemVkIHlldC5cbiAqIC0gYFwic2VudHJ5LXVucmVhY2hhYmxlXCJgIC0gVGhlIFNlbnRyeSBTYWFTIHNlcnZlcnMgd2VyZSBub3QgcmVhY2hhYmxlLiBUaGlzIGxpa2VseSBtZWFucyB0aGF0IHRoZXJlIGlzIGFuIGFkIGJsb2NrZXIgYWN0aXZlIG9uIHRoZSBwYWdlIG9yIHRoYXQgdGhlcmUgYXJlIG90aGVyIGNvbm5lY3Rpb24gaXNzdWVzLlxuICpcbiAqIElmIHRoZSBmdW5jdGlvbiBkb2Vzbid0IGRldGVjdCBhbiBpc3N1ZSBpdCByZXNvbHZlcyB0byBgdW5kZWZpbmVkYC5cbiAqL1xuZXhwb3J0IGFzeW5jIGZ1bmN0aW9uIGRpYWdub3NlU2RrQ29ubmVjdGl2aXR5KCk6IFByb21pc2U8XG4gICduby1jbGllbnQtYWN0aXZlJyB8ICdzZW50cnktdW5yZWFjaGFibGUnIHwgJ25vLWRzbi1jb25maWd1cmVkJyB8IHZvaWRcbj4ge1xuICBjb25zdCBjbGllbnQgPSBnZXRDbGllbnQoKTtcblxuICBpZiAoIWNsaWVudCkge1xuICAgIHJldHVybiAnbm8tY2xpZW50LWFjdGl2ZSc7XG4gIH1cblxuICBpZiAoIWNsaWVudC5nZXREc24oKSkge1xuICAgIHJldHVybiAnbm8tZHNuLWNvbmZpZ3VyZWQnO1xuICB9XG5cbiAgLy8gQ2hlY2sgaWYgYSB0dW5uZWwgaXMgY29uZmlndXJlZCBhbmQgdXNlIGl0IGlmIGF2YWlsYWJsZVxuICBjb25zdCB0dW5uZWwgPSBjbGllbnQuZ2V0T3B0aW9ucygpLnR1bm5lbDtcblxuICAvLyBXZSBhcmUgdXNpbmcgdGhlXG4gIC8vIC0gXCJzZW50cnktc2Rrc1wiIG9yZyB3aXRoIGlkIDQ0Nzk1MSBub3QgdG8gcG9sbHV0ZSBhbnkgYWN0dWFsIG9yZ2FuaXphdGlvbnMuXG4gIC8vIC0gXCJkaWFnbm9zZS1zZGstY29ubmVjdGl2aXR5XCIgcHJvamVjdCB3aXRoIGlkIDQ1MDk2MzI1MDMwODcxMDRcbiAgLy8gLSB0aGUgcHVibGljIGtleSBvZiBzYWlkIG9yZy9wcm9qZWN0LCB3aGljaCBpcyBkaXNhYmxlZCBpbiB0aGUgcHJvamVjdCBzZXR0aW5nc1xuICAvLyA9PiB0aGlzIERTTjogaHR0cHM6Ly9jMWRmYjA3ZDc4M2FkNTMyNWMyNDVjMWZkMzcyNTM5MEBvNDQ3OTUxLmluZ2VzdC51cy5zZW50cnkuaW8vNDUwOTYzMjUwMzA4NzEwNCAoaS5lLiBkaXNhYmxlZClcbiAgY29uc3QgZGVmYXVsdFVybCA9XG4gICAgJ2h0dHBzOi8vbzQ0Nzk1MS5pbmdlc3Quc2VudHJ5LmlvL2FwaS80NTA5NjMyNTAzMDg3MTA0L2VudmVsb3BlLz9zZW50cnlfdmVyc2lvbj03JnNlbnRyeV9rZXk9YzFkZmIwN2Q3ODNhZDUzMjVjMjQ1YzFmZDM3MjUzOTAmc2VudHJ5X2NsaWVudD1zZW50cnkuamF2YXNjcmlwdC5icm93c2VyJTJGMS4zMy43JztcblxuICBjb25zdCB1cmwgPSB0dW5uZWwgfHwgZGVmYXVsdFVybDtcblxuICB0cnkge1xuICAgIGF3YWl0IHN1cHByZXNzVHJhY2luZygoKSA9PlxuICAgICAgLy8gSWYgZmV0Y2ggdGhyb3dzLCB0aGVyZSBpcyBsaWtlbHkgYW4gYWQgYmxvY2tlciBhY3RpdmUgb3IgdGhlcmUgYXJlIG90aGVyIGNvbm5lY3RpdmUgaXNzdWVzLlxuICAgICAgZmV0Y2godXJsLCB7XG4gICAgICAgIGJvZHk6ICd7fScsXG4gICAgICAgIG1ldGhvZDogJ1BPU1QnLFxuICAgICAgICBtb2RlOiAnY29ycycsXG4gICAgICAgIGNyZWRlbnRpYWxzOiAnb21pdCcsXG4gICAgICB9KSxcbiAgICApO1xuICB9IGNhdGNoIHtcbiAgICByZXR1cm4gJ3NlbnRyeS11bnJlYWNoYWJsZSc7XG4gIH1cbn1cbiJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOztBQUVBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNPLGVBQWUsdUJBQXVCOztBQUU3QyxDQUFFO0FBQ0YsRUFBRSxNQUFNLE1BQUEsR0FBUyxTQUFTLEVBQUU7O0FBRTVCLEVBQUUsSUFBSSxDQUFDLE1BQU0sRUFBRTtBQUNmLElBQUksT0FBTyxrQkFBa0I7QUFDN0IsRUFBRTs7QUFFRixFQUFFLElBQUksQ0FBQyxNQUFNLENBQUMsTUFBTSxFQUFFLEVBQUU7QUFDeEIsSUFBSSxPQUFPLG1CQUFtQjtBQUM5QixFQUFFOztBQUVGO0FBQ0EsRUFBRSxNQUFNLFNBQVMsTUFBTSxDQUFDLFVBQVUsRUFBRSxDQUFDLE1BQU07O0FBRTNDO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQSxFQUFFLE1BQU0sVUFBQTtBQUNSLElBQUksK0tBQStLOztBQUVuTCxFQUFFLE1BQU0sR0FBQSxHQUFNLE1BQUEsSUFBVSxVQUFVOztBQUVsQyxFQUFFLElBQUk7QUFDTixJQUFJLE1BQU0sZUFBZSxDQUFDO0FBQzFCO0FBQ0EsTUFBTSxLQUFLLENBQUMsR0FBRyxFQUFFO0FBQ2pCLFFBQVEsSUFBSSxFQUFFLElBQUk7QUFDbEIsUUFBUSxNQUFNLEVBQUUsTUFBTTtBQUN0QixRQUFRLElBQUksRUFBRSxNQUFNO0FBQ3BCLFFBQVEsV0FBVyxFQUFFLE1BQU07QUFDM0IsT0FBTyxDQUFDO0FBQ1IsS0FBSztBQUNMLEVBQUUsRUFBRSxNQUFNO0FBQ1YsSUFBSSxPQUFPLG9CQUFvQjtBQUMvQixFQUFFO0FBQ0Y7Ozs7IiwieF9nb29nbGVfaWdub3JlTGlzdCI6WzBdfQ==

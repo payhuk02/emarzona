@@ -1,0 +1,218 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/products/PaymentOptionsBadge.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/products/PaymentOptionsBadge.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=2441233a"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+/**
+ * Payment Options Badge - Composant réutilisable pour afficher les options de paiement
+ * Date: 2 Février 2025
+ *
+ * Affiche les badges pour les différentes options de paiement:
+ * - Paiement complet
+ * - Paiement partiel (avec pourcentage)
+ * - Paiement sécurisé (escrow)
+ */ import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=2441233a"; const React = __vite__cjsImport3_react.__esModule ? __vite__cjsImport3_react.default : __vite__cjsImport3_react;
+import { Badge } from "/src/components/ui/badge.tsx";
+import { CheckCircle, CreditCard, Shield } from "/node_modules/.vite/deps/lucide-react.js?v=2441233a";
+import { cn } from "/src/lib/utils.ts";
+/**
+ * Composant pour afficher un badge d'option de paiement
+ */ export function PaymentOptionsBadge({ paymentOptions, className, size = 'sm' }) {
+    // Valeurs par défaut : toujours afficher "Paiement complet" si pas de données
+    const paymentType = paymentOptions?.payment_type || 'full';
+    const percentageRate = paymentOptions?.percentage_rate || 30;
+    const sizeClasses = {
+        sm: 'text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5',
+        md: 'text-xs sm:text-sm px-2 sm:px-3 py-1',
+        lg: 'text-sm sm:text-base px-3 sm:px-4 py-1.5'
+    };
+    const iconSizes = {
+        sm: 'h-2.5 w-2.5 sm:h-3 sm:w-3',
+        md: 'h-3 w-3 sm:h-4 sm:w-4',
+        lg: 'h-4 w-4 sm:h-5 sm:w-5'
+    };
+    // Badge Paiement complet
+    if (paymentType === 'full') {
+        return /*#__PURE__*/ _jsxDEV(Badge, {
+            className: cn('bg-green-500 text-white border-0 shadow-sm', sizeClasses[size], className),
+            title: "Paiement complet requis à la commande",
+            children: [
+                /*#__PURE__*/ _jsxDEV(CheckCircle, {
+                    className: cn(iconSizes[size], 'mr-0.5 sm:mr-1')
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/products/PaymentOptionsBadge.tsx",
+                    lineNumber: 60,
+                    columnNumber: 9
+                }, this),
+                /*#__PURE__*/ _jsxDEV("span", {
+                    className: "hidden sm:inline",
+                    children: "Paiement complet"
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/products/PaymentOptionsBadge.tsx",
+                    lineNumber: 61,
+                    columnNumber: 9
+                }, this),
+                /*#__PURE__*/ _jsxDEV("span", {
+                    className: "sm:hidden",
+                    children: "Complet"
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/products/PaymentOptionsBadge.tsx",
+                    lineNumber: 62,
+                    columnNumber: 9
+                }, this)
+            ]
+        }, void 0, true, {
+            fileName: "/home/runner/work/emarzona/emarzona/src/components/products/PaymentOptionsBadge.tsx",
+            lineNumber: 56,
+            columnNumber: 7
+        }, this);
+    }
+    // Badge Paiement partiel
+    if (paymentType === 'percentage') {
+        return /*#__PURE__*/ _jsxDEV(Badge, {
+            className: cn('bg-orange-500 text-white border-0 shadow-sm', sizeClasses[size], className),
+            title: `Paiement partiel de ${percentageRate}% à la commande`,
+            children: [
+                /*#__PURE__*/ _jsxDEV(CreditCard, {
+                    className: cn(iconSizes[size], 'mr-0.5 sm:mr-1')
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/products/PaymentOptionsBadge.tsx",
+                    lineNumber: 74,
+                    columnNumber: 9
+                }, this),
+                /*#__PURE__*/ _jsxDEV("span", {
+                    className: "hidden sm:inline",
+                    children: [
+                        "Paiement partiel ",
+                        percentageRate,
+                        "%"
+                    ]
+                }, void 0, true, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/products/PaymentOptionsBadge.tsx",
+                    lineNumber: 75,
+                    columnNumber: 9
+                }, this),
+                /*#__PURE__*/ _jsxDEV("span", {
+                    className: "sm:hidden",
+                    children: [
+                        percentageRate,
+                        "%"
+                    ]
+                }, void 0, true, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/products/PaymentOptionsBadge.tsx",
+                    lineNumber: 76,
+                    columnNumber: 9
+                }, this)
+            ]
+        }, void 0, true, {
+            fileName: "/home/runner/work/emarzona/emarzona/src/components/products/PaymentOptionsBadge.tsx",
+            lineNumber: 70,
+            columnNumber: 7
+        }, this);
+    }
+    // Badge Paiement sécurisé (escrow)
+    if (paymentType === 'delivery_secured') {
+        return /*#__PURE__*/ _jsxDEV(Badge, {
+            className: cn('bg-blue-500 text-white border-0 shadow-sm', sizeClasses[size], className),
+            title: "Paiement sécurisé : fonds bloqués jusqu'à confirmation de livraison",
+            children: [
+                /*#__PURE__*/ _jsxDEV(Shield, {
+                    className: cn(iconSizes[size], 'mr-0.5 sm:mr-1')
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/products/PaymentOptionsBadge.tsx",
+                    lineNumber: 88,
+                    columnNumber: 9
+                }, this),
+                /*#__PURE__*/ _jsxDEV("span", {
+                    className: "hidden sm:inline",
+                    children: "Paiement sécurisé"
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/products/PaymentOptionsBadge.tsx",
+                    lineNumber: 89,
+                    columnNumber: 9
+                }, this),
+                /*#__PURE__*/ _jsxDEV("span", {
+                    className: "sm:hidden",
+                    children: "Sécurisé"
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/products/PaymentOptionsBadge.tsx",
+                    lineNumber: 90,
+                    columnNumber: 9
+                }, this)
+            ]
+        }, void 0, true, {
+            fileName: "/home/runner/work/emarzona/emarzona/src/components/products/PaymentOptionsBadge.tsx",
+            lineNumber: 84,
+            columnNumber: 7
+        }, this);
+    }
+    return null;
+}
+_c = PaymentOptionsBadge;
+/**
+ * Helper pour extraire paymentOptions depuis un produit
+ */ export function getPaymentOptions(product) {
+    if (!product) return null;
+    // Cas 1: payment_options est un objet direct
+    if (product.payment_options && typeof product.payment_options === 'object') {
+        return product.payment_options;
+    }
+    // Cas 2: payment_options est une string JSON
+    if (product.payment_options && typeof product.payment_options === 'string') {
+        try {
+            return JSON.parse(product.payment_options);
+        } catch  {
+            return null;
+        }
+    }
+    // Cas 3: payment est un objet
+    if (product.payment && typeof product.payment === 'object') {
+        return {
+            payment_type: product.payment.payment_type || 'full',
+            percentage_rate: product.payment.percentage_rate || 30
+        };
+    }
+    // Cas 4: Aucune donnée trouvée, retourner les valeurs par défaut (Paiement complet)
+    // Cela permet d'afficher toujours le badge même si les données ne sont pas présentes
+    return {
+        payment_type: 'full',
+        percentage_rate: 30
+    };
+}
+var _c;
+$RefreshReg$(_c, "PaymentOptionsBadge");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/products/PaymentOptionsBadge.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/products/PaymentOptionsBadge.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIlBheW1lbnRPcHRpb25zQmFkZ2UudHN4Il0sInNvdXJjZXNDb250ZW50IjpbIi8qKlxuICogUGF5bWVudCBPcHRpb25zIEJhZGdlIC0gQ29tcG9zYW50IHLDqXV0aWxpc2FibGUgcG91ciBhZmZpY2hlciBsZXMgb3B0aW9ucyBkZSBwYWllbWVudFxuICogRGF0ZTogMiBGw6l2cmllciAyMDI1XG4gKlxuICogQWZmaWNoZSBsZXMgYmFkZ2VzIHBvdXIgbGVzIGRpZmbDqXJlbnRlcyBvcHRpb25zIGRlIHBhaWVtZW50OlxuICogLSBQYWllbWVudCBjb21wbGV0XG4gKiAtIFBhaWVtZW50IHBhcnRpZWwgKGF2ZWMgcG91cmNlbnRhZ2UpXG4gKiAtIFBhaWVtZW50IHPDqWN1cmlzw6kgKGVzY3JvdylcbiAqL1xuXG5pbXBvcnQgUmVhY3QgZnJvbSAncmVhY3QnO1xuaW1wb3J0IHsgQmFkZ2UgfSBmcm9tICdAL2NvbXBvbmVudHMvdWkvYmFkZ2UnO1xuaW1wb3J0IHsgQ2hlY2tDaXJjbGUsIENyZWRpdENhcmQsIFNoaWVsZCB9IGZyb20gJ2x1Y2lkZS1yZWFjdCc7XG5pbXBvcnQgeyBjbiB9IGZyb20gJ0AvbGliL3V0aWxzJztcblxuZXhwb3J0IHR5cGUgUGF5bWVudFR5cGUgPSAnZnVsbCcgfCAncGVyY2VudGFnZScgfCAnZGVsaXZlcnlfc2VjdXJlZCc7XG5cbmludGVyZmFjZSBQYXltZW50T3B0aW9uc0RhdGEge1xuICBwYXltZW50X3R5cGU/OiBQYXltZW50VHlwZTtcbiAgcGVyY2VudGFnZV9yYXRlPzogbnVtYmVyO1xufVxuXG5pbnRlcmZhY2UgUGF5bWVudE9wdGlvbnNCYWRnZVByb3BzIHtcbiAgcGF5bWVudE9wdGlvbnM/OiBQYXltZW50T3B0aW9uc0RhdGEgfCBudWxsO1xuICBjbGFzc05hbWU/OiBzdHJpbmc7XG4gIHNpemU/OiAnc20nIHwgJ21kJyB8ICdsZyc7XG59XG5cbi8qKlxuICogQ29tcG9zYW50IHBvdXIgYWZmaWNoZXIgdW4gYmFkZ2UgZCdvcHRpb24gZGUgcGFpZW1lbnRcbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIFBheW1lbnRPcHRpb25zQmFkZ2Uoe1xuICBwYXltZW50T3B0aW9ucyxcbiAgY2xhc3NOYW1lLFxuICBzaXplID0gJ3NtJyxcbn06IFBheW1lbnRPcHRpb25zQmFkZ2VQcm9wcykge1xuICAvLyBWYWxldXJzIHBhciBkw6lmYXV0IDogdG91am91cnMgYWZmaWNoZXIgXCJQYWllbWVudCBjb21wbGV0XCIgc2kgcGFzIGRlIGRvbm7DqWVzXG4gIGNvbnN0IHBheW1lbnRUeXBlID0gcGF5bWVudE9wdGlvbnM/LnBheW1lbnRfdHlwZSB8fCAnZnVsbCc7XG4gIGNvbnN0IHBlcmNlbnRhZ2VSYXRlID0gcGF5bWVudE9wdGlvbnM/LnBlcmNlbnRhZ2VfcmF0ZSB8fCAzMDtcblxuICBjb25zdCBzaXplQ2xhc3NlcyA9IHtcbiAgICBzbTogJ3RleHQtWzEwcHhdIHNtOnRleHQteHMgcHgtMS41IHNtOnB4LTIgcHktMC41JyxcbiAgICBtZDogJ3RleHQteHMgc206dGV4dC1zbSBweC0yIHNtOnB4LTMgcHktMScsXG4gICAgbGc6ICd0ZXh0LXNtIHNtOnRleHQtYmFzZSBweC0zIHNtOnB4LTQgcHktMS41JyxcbiAgfTtcblxuICBjb25zdCBpY29uU2l6ZXMgPSB7XG4gICAgc206ICdoLTIuNSB3LTIuNSBzbTpoLTMgc206dy0zJyxcbiAgICBtZDogJ2gtMyB3LTMgc206aC00IHNtOnctNCcsXG4gICAgbGc6ICdoLTQgdy00IHNtOmgtNSBzbTp3LTUnLFxuICB9O1xuXG4gIC8vIEJhZGdlIFBhaWVtZW50IGNvbXBsZXRcbiAgaWYgKHBheW1lbnRUeXBlID09PSAnZnVsbCcpIHtcbiAgICByZXR1cm4gKFxuICAgICAgPEJhZGdlXG4gICAgICAgIGNsYXNzTmFtZT17Y24oJ2JnLWdyZWVuLTUwMCB0ZXh0LXdoaXRlIGJvcmRlci0wIHNoYWRvdy1zbScsIHNpemVDbGFzc2VzW3NpemVdLCBjbGFzc05hbWUpfVxuICAgICAgICB0aXRsZT1cIlBhaWVtZW50IGNvbXBsZXQgcmVxdWlzIMOgIGxhIGNvbW1hbmRlXCJcbiAgICAgID5cbiAgICAgICAgPENoZWNrQ2lyY2xlIGNsYXNzTmFtZT17Y24oaWNvblNpemVzW3NpemVdLCAnbXItMC41IHNtOm1yLTEnKX0gLz5cbiAgICAgICAgPHNwYW4gY2xhc3NOYW1lPVwiaGlkZGVuIHNtOmlubGluZVwiPlBhaWVtZW50IGNvbXBsZXQ8L3NwYW4+XG4gICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cInNtOmhpZGRlblwiPkNvbXBsZXQ8L3NwYW4+XG4gICAgICA8L0JhZGdlPlxuICAgICk7XG4gIH1cblxuICAvLyBCYWRnZSBQYWllbWVudCBwYXJ0aWVsXG4gIGlmIChwYXltZW50VHlwZSA9PT0gJ3BlcmNlbnRhZ2UnKSB7XG4gICAgcmV0dXJuIChcbiAgICAgIDxCYWRnZVxuICAgICAgICBjbGFzc05hbWU9e2NuKCdiZy1vcmFuZ2UtNTAwIHRleHQtd2hpdGUgYm9yZGVyLTAgc2hhZG93LXNtJywgc2l6ZUNsYXNzZXNbc2l6ZV0sIGNsYXNzTmFtZSl9XG4gICAgICAgIHRpdGxlPXtgUGFpZW1lbnQgcGFydGllbCBkZSAke3BlcmNlbnRhZ2VSYXRlfSUgw6AgbGEgY29tbWFuZGVgfVxuICAgICAgPlxuICAgICAgICA8Q3JlZGl0Q2FyZCBjbGFzc05hbWU9e2NuKGljb25TaXplc1tzaXplXSwgJ21yLTAuNSBzbTptci0xJyl9IC8+XG4gICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cImhpZGRlbiBzbTppbmxpbmVcIj5QYWllbWVudCBwYXJ0aWVsIHtwZXJjZW50YWdlUmF0ZX0lPC9zcGFuPlxuICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJzbTpoaWRkZW5cIj57cGVyY2VudGFnZVJhdGV9JTwvc3Bhbj5cbiAgICAgIDwvQmFkZ2U+XG4gICAgKTtcbiAgfVxuXG4gIC8vIEJhZGdlIFBhaWVtZW50IHPDqWN1cmlzw6kgKGVzY3JvdylcbiAgaWYgKHBheW1lbnRUeXBlID09PSAnZGVsaXZlcnlfc2VjdXJlZCcpIHtcbiAgICByZXR1cm4gKFxuICAgICAgPEJhZGdlXG4gICAgICAgIGNsYXNzTmFtZT17Y24oJ2JnLWJsdWUtNTAwIHRleHQtd2hpdGUgYm9yZGVyLTAgc2hhZG93LXNtJywgc2l6ZUNsYXNzZXNbc2l6ZV0sIGNsYXNzTmFtZSl9XG4gICAgICAgIHRpdGxlPVwiUGFpZW1lbnQgc8OpY3VyaXPDqSA6IGZvbmRzIGJsb3F1w6lzIGp1c3F1J8OgIGNvbmZpcm1hdGlvbiBkZSBsaXZyYWlzb25cIlxuICAgICAgPlxuICAgICAgICA8U2hpZWxkIGNsYXNzTmFtZT17Y24oaWNvblNpemVzW3NpemVdLCAnbXItMC41IHNtOm1yLTEnKX0gLz5cbiAgICAgICAgPHNwYW4gY2xhc3NOYW1lPVwiaGlkZGVuIHNtOmlubGluZVwiPlBhaWVtZW50IHPDqWN1cmlzw6k8L3NwYW4+XG4gICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cInNtOmhpZGRlblwiPlPDqWN1cmlzw6k8L3NwYW4+XG4gICAgICA8L0JhZGdlPlxuICAgICk7XG4gIH1cblxuICByZXR1cm4gbnVsbDtcbn1cblxuLyoqXG4gKiBIZWxwZXIgcG91ciBleHRyYWlyZSBwYXltZW50T3B0aW9ucyBkZXB1aXMgdW4gcHJvZHVpdFxuICovXG5leHBvcnQgZnVuY3Rpb24gZ2V0UGF5bWVudE9wdGlvbnMoXG4gIHByb2R1Y3Q6XG4gICAgfCB7XG4gICAgICAgIHBheW1lbnRfb3B0aW9ucz86IFBheW1lbnRPcHRpb25zRGF0YSB8IHN0cmluZyB8IG51bGw7XG4gICAgICAgIHBheW1lbnQ/OiB7XG4gICAgICAgICAgcGF5bWVudF90eXBlPzogUGF5bWVudFR5cGU7XG4gICAgICAgICAgcGVyY2VudGFnZV9yYXRlPzogbnVtYmVyO1xuICAgICAgICB9IHwgbnVsbDtcbiAgICAgIH1cbiAgICB8IG51bGxcbiAgICB8IHVuZGVmaW5lZFxuKTogUGF5bWVudE9wdGlvbnNEYXRhIHwgbnVsbCB7XG4gIGlmICghcHJvZHVjdCkgcmV0dXJuIG51bGw7XG5cbiAgLy8gQ2FzIDE6IHBheW1lbnRfb3B0aW9ucyBlc3QgdW4gb2JqZXQgZGlyZWN0XG4gIGlmIChwcm9kdWN0LnBheW1lbnRfb3B0aW9ucyAmJiB0eXBlb2YgcHJvZHVjdC5wYXltZW50X29wdGlvbnMgPT09ICdvYmplY3QnKSB7XG4gICAgcmV0dXJuIHByb2R1Y3QucGF5bWVudF9vcHRpb25zIGFzIFBheW1lbnRPcHRpb25zRGF0YTtcbiAgfVxuXG4gIC8vIENhcyAyOiBwYXltZW50X29wdGlvbnMgZXN0IHVuZSBzdHJpbmcgSlNPTlxuICBpZiAocHJvZHVjdC5wYXltZW50X29wdGlvbnMgJiYgdHlwZW9mIHByb2R1Y3QucGF5bWVudF9vcHRpb25zID09PSAnc3RyaW5nJykge1xuICAgIHRyeSB7XG4gICAgICByZXR1cm4gSlNPTi5wYXJzZShwcm9kdWN0LnBheW1lbnRfb3B0aW9ucykgYXMgUGF5bWVudE9wdGlvbnNEYXRhO1xuICAgIH0gY2F0Y2gge1xuICAgICAgcmV0dXJuIG51bGw7XG4gICAgfVxuICB9XG5cbiAgLy8gQ2FzIDM6IHBheW1lbnQgZXN0IHVuIG9iamV0XG4gIGlmIChwcm9kdWN0LnBheW1lbnQgJiYgdHlwZW9mIHByb2R1Y3QucGF5bWVudCA9PT0gJ29iamVjdCcpIHtcbiAgICByZXR1cm4ge1xuICAgICAgcGF5bWVudF90eXBlOiBwcm9kdWN0LnBheW1lbnQucGF5bWVudF90eXBlIHx8ICdmdWxsJyxcbiAgICAgIHBlcmNlbnRhZ2VfcmF0ZTogcHJvZHVjdC5wYXltZW50LnBlcmNlbnRhZ2VfcmF0ZSB8fCAzMCxcbiAgICB9O1xuICB9XG5cbiAgLy8gQ2FzIDQ6IEF1Y3VuZSBkb25uw6llIHRyb3V2w6llLCByZXRvdXJuZXIgbGVzIHZhbGV1cnMgcGFyIGTDqWZhdXQgKFBhaWVtZW50IGNvbXBsZXQpXG4gIC8vIENlbGEgcGVybWV0IGQnYWZmaWNoZXIgdG91am91cnMgbGUgYmFkZ2UgbcOqbWUgc2kgbGVzIGRvbm7DqWVzIG5lIHNvbnQgcGFzIHByw6lzZW50ZXNcbiAgcmV0dXJuIHtcbiAgICBwYXltZW50X3R5cGU6ICdmdWxsJyxcbiAgICBwZXJjZW50YWdlX3JhdGU6IDMwLFxuICB9O1xufVxuXG5cblxuXG5cblxuIl0sIm5hbWVzIjpbIlJlYWN0IiwiQmFkZ2UiLCJDaGVja0NpcmNsZSIsIkNyZWRpdENhcmQiLCJTaGllbGQiLCJjbiIsIlBheW1lbnRPcHRpb25zQmFkZ2UiLCJwYXltZW50T3B0aW9ucyIsImNsYXNzTmFtZSIsInNpemUiLCJwYXltZW50VHlwZSIsInBheW1lbnRfdHlwZSIsInBlcmNlbnRhZ2VSYXRlIiwicGVyY2VudGFnZV9yYXRlIiwic2l6ZUNsYXNzZXMiLCJzbSIsIm1kIiwibGciLCJpY29uU2l6ZXMiLCJ0aXRsZSIsInNwYW4iLCJnZXRQYXltZW50T3B0aW9ucyIsInByb2R1Y3QiLCJwYXltZW50X29wdGlvbnMiLCJKU09OIiwicGFyc2UiLCJwYXltZW50Il0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7Ozs7OztBQUFBOzs7Ozs7OztDQVFDLEdBRUQsT0FBT0EsV0FBVyxRQUFRO0FBQzFCLFNBQVNDLEtBQUssUUFBUSx3QkFBd0I7QUFDOUMsU0FBU0MsV0FBVyxFQUFFQyxVQUFVLEVBQUVDLE1BQU0sUUFBUSxlQUFlO0FBQy9ELFNBQVNDLEVBQUUsUUFBUSxjQUFjO0FBZWpDOztDQUVDLEdBQ0QsT0FBTyxTQUFTQyxvQkFBb0IsRUFDbENDLGNBQWMsRUFDZEMsU0FBUyxFQUNUQyxPQUFPLElBQUksRUFDYztJQUN6Qiw4RUFBOEU7SUFDOUUsTUFBTUMsY0FBY0gsZ0JBQWdCSSxnQkFBZ0I7SUFDcEQsTUFBTUMsaUJBQWlCTCxnQkFBZ0JNLG1CQUFtQjtJQUUxRCxNQUFNQyxjQUFjO1FBQ2xCQyxJQUFJO1FBQ0pDLElBQUk7UUFDSkMsSUFBSTtJQUNOO0lBRUEsTUFBTUMsWUFBWTtRQUNoQkgsSUFBSTtRQUNKQyxJQUFJO1FBQ0pDLElBQUk7SUFDTjtJQUVBLHlCQUF5QjtJQUN6QixJQUFJUCxnQkFBZ0IsUUFBUTtRQUMxQixxQkFDRSxRQUFDVDtZQUNDTyxXQUFXSCxHQUFHLDhDQUE4Q1MsV0FBVyxDQUFDTCxLQUFLLEVBQUVEO1lBQy9FVyxPQUFNOzs4QkFFTixRQUFDakI7b0JBQVlNLFdBQVdILEdBQUdhLFNBQVMsQ0FBQ1QsS0FBSyxFQUFFOzs7Ozs7OEJBQzVDLFFBQUNXO29CQUFLWixXQUFVOzhCQUFtQjs7Ozs7OzhCQUNuQyxRQUFDWTtvQkFBS1osV0FBVTs4QkFBWTs7Ozs7Ozs7Ozs7O0lBR2xDO0lBRUEseUJBQXlCO0lBQ3pCLElBQUlFLGdCQUFnQixjQUFjO1FBQ2hDLHFCQUNFLFFBQUNUO1lBQ0NPLFdBQVdILEdBQUcsK0NBQStDUyxXQUFXLENBQUNMLEtBQUssRUFBRUQ7WUFDaEZXLE9BQU8sQ0FBQyxvQkFBb0IsRUFBRVAsZUFBZSxlQUFlLENBQUM7OzhCQUU3RCxRQUFDVDtvQkFBV0ssV0FBV0gsR0FBR2EsU0FBUyxDQUFDVCxLQUFLLEVBQUU7Ozs7Ozs4QkFDM0MsUUFBQ1c7b0JBQUtaLFdBQVU7O3dCQUFtQjt3QkFBa0JJO3dCQUFlOzs7Ozs7OzhCQUNwRSxRQUFDUTtvQkFBS1osV0FBVTs7d0JBQWFJO3dCQUFlOzs7Ozs7Ozs7Ozs7O0lBR2xEO0lBRUEsbUNBQW1DO0lBQ25DLElBQUlGLGdCQUFnQixvQkFBb0I7UUFDdEMscUJBQ0UsUUFBQ1Q7WUFDQ08sV0FBV0gsR0FBRyw2Q0FBNkNTLFdBQVcsQ0FBQ0wsS0FBSyxFQUFFRDtZQUM5RVcsT0FBTTs7OEJBRU4sUUFBQ2Y7b0JBQU9JLFdBQVdILEdBQUdhLFNBQVMsQ0FBQ1QsS0FBSyxFQUFFOzs7Ozs7OEJBQ3ZDLFFBQUNXO29CQUFLWixXQUFVOzhCQUFtQjs7Ozs7OzhCQUNuQyxRQUFDWTtvQkFBS1osV0FBVTs4QkFBWTs7Ozs7Ozs7Ozs7O0lBR2xDO0lBRUEsT0FBTztBQUNUO0tBaEVnQkY7QUFrRWhCOztDQUVDLEdBQ0QsT0FBTyxTQUFTZSxrQkFDZEMsT0FTYTtJQUViLElBQUksQ0FBQ0EsU0FBUyxPQUFPO0lBRXJCLDZDQUE2QztJQUM3QyxJQUFJQSxRQUFRQyxlQUFlLElBQUksT0FBT0QsUUFBUUMsZUFBZSxLQUFLLFVBQVU7UUFDMUUsT0FBT0QsUUFBUUMsZUFBZTtJQUNoQztJQUVBLDZDQUE2QztJQUM3QyxJQUFJRCxRQUFRQyxlQUFlLElBQUksT0FBT0QsUUFBUUMsZUFBZSxLQUFLLFVBQVU7UUFDMUUsSUFBSTtZQUNGLE9BQU9DLEtBQUtDLEtBQUssQ0FBQ0gsUUFBUUMsZUFBZTtRQUMzQyxFQUFFLE9BQU07WUFDTixPQUFPO1FBQ1Q7SUFDRjtJQUVBLDhCQUE4QjtJQUM5QixJQUFJRCxRQUFRSSxPQUFPLElBQUksT0FBT0osUUFBUUksT0FBTyxLQUFLLFVBQVU7UUFDMUQsT0FBTztZQUNMZixjQUFjVyxRQUFRSSxPQUFPLENBQUNmLFlBQVksSUFBSTtZQUM5Q0UsaUJBQWlCUyxRQUFRSSxPQUFPLENBQUNiLGVBQWUsSUFBSTtRQUN0RDtJQUNGO0lBRUEsb0ZBQW9GO0lBQ3BGLHFGQUFxRjtJQUNyRixPQUFPO1FBQ0xGLGNBQWM7UUFDZEUsaUJBQWlCO0lBQ25CO0FBQ0YifQ==

@@ -1,0 +1,18 @@
+const ANTHROPIC_AI_INTEGRATION_NAME = 'Anthropic_AI';
+
+// https://docs.anthropic.com/en/api/messages
+// https://docs.anthropic.com/en/api/models-list
+const ANTHROPIC_AI_INSTRUMENTED_METHODS = [
+  'messages.create',
+  'messages.stream',
+  'messages.countTokens',
+  'models.get',
+  'completions.create',
+  'models.retrieve',
+  'beta.messages.create',
+] ;
+
+export { ANTHROPIC_AI_INSTRUMENTED_METHODS, ANTHROPIC_AI_INTEGRATION_NAME };
+                                     
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiY29uc3RhbnRzLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi9zcmMvdHJhY2luZy9hbnRocm9waWMtYWkvY29uc3RhbnRzLnRzIl0sInNvdXJjZXNDb250ZW50IjpbImV4cG9ydCBjb25zdCBBTlRIUk9QSUNfQUlfSU5URUdSQVRJT05fTkFNRSA9ICdBbnRocm9waWNfQUknO1xuXG4vLyBodHRwczovL2RvY3MuYW50aHJvcGljLmNvbS9lbi9hcGkvbWVzc2FnZXNcbi8vIGh0dHBzOi8vZG9jcy5hbnRocm9waWMuY29tL2VuL2FwaS9tb2RlbHMtbGlzdFxuZXhwb3J0IGNvbnN0IEFOVEhST1BJQ19BSV9JTlNUUlVNRU5URURfTUVUSE9EUyA9IFtcbiAgJ21lc3NhZ2VzLmNyZWF0ZScsXG4gICdtZXNzYWdlcy5zdHJlYW0nLFxuICAnbWVzc2FnZXMuY291bnRUb2tlbnMnLFxuICAnbW9kZWxzLmdldCcsXG4gICdjb21wbGV0aW9ucy5jcmVhdGUnLFxuICAnbW9kZWxzLnJldHJpZXZlJyxcbiAgJ2JldGEubWVzc2FnZXMuY3JlYXRlJyxcbl0gYXMgY29uc3Q7XG4iXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQU8sTUFBTSw2QkFBQSxHQUFnQzs7QUFFN0M7QUFDQTtBQUNPLE1BQU0sb0NBQW9DO0FBQ2pELEVBQUUsaUJBQWlCO0FBQ25CLEVBQUUsaUJBQWlCO0FBQ25CLEVBQUUsc0JBQXNCO0FBQ3hCLEVBQUUsWUFBWTtBQUNkLEVBQUUsb0JBQW9CO0FBQ3RCLEVBQUUsaUJBQWlCO0FBQ25CLEVBQUUsc0JBQXNCO0FBQ3hCLENBQUE7Ozs7IiwieF9nb29nbGVfaWdub3JlTGlzdCI6WzBdfQ==

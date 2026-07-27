@@ -1,0 +1,71 @@
+import { createTransport, makePromiseBuffer } from "/node_modules/@sentry/core/build/esm/index.js?v=a52cce50";
+import { getNativeImplementation, clearCachedImplementation } from "/node_modules/@sentry-internal/browser-utils/build/esm/index.js?v=a52cce50";
+
+const DEFAULT_BROWSER_TRANSPORT_BUFFER_SIZE = 40;
+
+/**
+ * Creates a Transport that uses the Fetch API to send events to Sentry.
+ */
+function makeFetchTransport(
+  options,
+  nativeFetch = getNativeImplementation('fetch'),
+) {
+  let pendingBodySize = 0;
+  let pendingCount = 0;
+
+  async function makeRequest(request) {
+    const requestSize = request.body.length;
+    pendingBodySize += requestSize;
+    pendingCount++;
+
+    const requestOptions = {
+      body: request.body,
+      method: 'POST',
+      referrerPolicy: 'strict-origin',
+      headers: options.headers,
+      // Outgoing requests are usually cancelled when navigating to a different page, causing a "TypeError: Failed to
+      // fetch" error and sending a "network_error" client-outcome - in Chrome, the request status shows "(cancelled)".
+      // The `keepalive` flag keeps outgoing requests alive, even when switching pages. We want this since we're
+      // frequently sending events right before the user is switching pages (eg. when finishing navigation transactions).
+      // Gotchas:
+      // - `keepalive` isn't supported by Firefox
+      // - As per spec (https://fetch.spec.whatwg.org/#http-network-or-cache-fetch):
+      //   If the sum of contentLength and inflightKeepaliveBytes is greater than 64 kibibytes, then return a network error.
+      //   We will therefore only activate the flag when we're below that limit.
+      // There is also a limit of requests that can be open at the same time, so we also limit this to 15
+      // See https://github.com/getsentry/sentry-javascript/pull/7553 for details
+      keepalive: pendingBodySize <= 60000 && pendingCount < 15,
+      ...options.fetchOptions,
+    };
+
+    try {
+      // Note: We do not need to suppress tracing here, because we are using the native fetch, instead of our wrapped one.
+      const response = await nativeFetch(options.url, requestOptions);
+
+      return {
+        statusCode: response.status,
+        headers: {
+          'x-sentry-rate-limits': response.headers.get('X-Sentry-Rate-Limits'),
+          'retry-after': response.headers.get('Retry-After'),
+        },
+      };
+    } catch (e) {
+      clearCachedImplementation('fetch');
+      throw e;
+    } finally {
+      pendingBodySize -= requestSize;
+      pendingCount--;
+    }
+  }
+
+  return createTransport(
+    options,
+    makeRequest,
+    makePromiseBuffer(options.bufferSize || DEFAULT_BROWSER_TRANSPORT_BUFFER_SIZE),
+  );
+}
+
+export { makeFetchTransport };
+                                 
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZmV0Y2guanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uLy4uL3NyYy90cmFuc3BvcnRzL2ZldGNoLnRzIl0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB0eXBlIHsgVHJhbnNwb3J0LCBUcmFuc3BvcnRNYWtlUmVxdWVzdFJlc3BvbnNlLCBUcmFuc3BvcnRSZXF1ZXN0IH0gZnJvbSAnQHNlbnRyeS9jb3JlJztcbmltcG9ydCB7IGNyZWF0ZVRyYW5zcG9ydCwgbWFrZVByb21pc2VCdWZmZXIgfSBmcm9tICdAc2VudHJ5L2NvcmUnO1xuaW1wb3J0IHsgY2xlYXJDYWNoZWRJbXBsZW1lbnRhdGlvbiwgZ2V0TmF0aXZlSW1wbGVtZW50YXRpb24gfSBmcm9tICdAc2VudHJ5LWludGVybmFsL2Jyb3dzZXItdXRpbHMnO1xuaW1wb3J0IHR5cGUgeyBXSU5ET1cgfSBmcm9tICcuLi9oZWxwZXJzJztcbmltcG9ydCB0eXBlIHsgQnJvd3NlclRyYW5zcG9ydE9wdGlvbnMgfSBmcm9tICcuL3R5cGVzJztcblxuY29uc3QgREVGQVVMVF9CUk9XU0VSX1RSQU5TUE9SVF9CVUZGRVJfU0laRSA9IDQwO1xuXG4vKipcbiAqIENyZWF0ZXMgYSBUcmFuc3BvcnQgdGhhdCB1c2VzIHRoZSBGZXRjaCBBUEkgdG8gc2VuZCBldmVudHMgdG8gU2VudHJ5LlxuICovXG5leHBvcnQgZnVuY3Rpb24gbWFrZUZldGNoVHJhbnNwb3J0KFxuICBvcHRpb25zOiBCcm93c2VyVHJhbnNwb3J0T3B0aW9ucyxcbiAgbmF0aXZlRmV0Y2g6IHR5cGVvZiBXSU5ET1cuZmV0Y2ggPSBnZXROYXRpdmVJbXBsZW1lbnRhdGlvbignZmV0Y2gnKSxcbik6IFRyYW5zcG9ydCB7XG4gIGxldCBwZW5kaW5nQm9keVNpemUgPSAwO1xuICBsZXQgcGVuZGluZ0NvdW50ID0gMDtcblxuICBhc3luYyBmdW5jdGlvbiBtYWtlUmVxdWVzdChyZXF1ZXN0OiBUcmFuc3BvcnRSZXF1ZXN0KTogUHJvbWlzZTxUcmFuc3BvcnRNYWtlUmVxdWVzdFJlc3BvbnNlPiB7XG4gICAgY29uc3QgcmVxdWVzdFNpemUgPSByZXF1ZXN0LmJvZHkubGVuZ3RoO1xuICAgIHBlbmRpbmdCb2R5U2l6ZSArPSByZXF1ZXN0U2l6ZTtcbiAgICBwZW5kaW5nQ291bnQrKztcblxuICAgIGNvbnN0IHJlcXVlc3RPcHRpb25zOiBSZXF1ZXN0SW5pdCA9IHtcbiAgICAgIGJvZHk6IHJlcXVlc3QuYm9keSxcbiAgICAgIG1ldGhvZDogJ1BPU1QnLFxuICAgICAgcmVmZXJyZXJQb2xpY3k6ICdzdHJpY3Qtb3JpZ2luJyxcbiAgICAgIGhlYWRlcnM6IG9wdGlvbnMuaGVhZGVycyxcbiAgICAgIC8vIE91dGdvaW5nIHJlcXVlc3RzIGFyZSB1c3VhbGx5IGNhbmNlbGxlZCB3aGVuIG5hdmlnYXRpbmcgdG8gYSBkaWZmZXJlbnQgcGFnZSwgY2F1c2luZyBhIFwiVHlwZUVycm9yOiBGYWlsZWQgdG9cbiAgICAgIC8vIGZldGNoXCIgZXJyb3IgYW5kIHNlbmRpbmcgYSBcIm5ldHdvcmtfZXJyb3JcIiBjbGllbnQtb3V0Y29tZSAtIGluIENocm9tZSwgdGhlIHJlcXVlc3Qgc3RhdHVzIHNob3dzIFwiKGNhbmNlbGxlZClcIi5cbiAgICAgIC8vIFRoZSBga2VlcGFsaXZlYCBmbGFnIGtlZXBzIG91dGdvaW5nIHJlcXVlc3RzIGFsaXZlLCBldmVuIHdoZW4gc3dpdGNoaW5nIHBhZ2VzLiBXZSB3YW50IHRoaXMgc2luY2Ugd2UncmVcbiAgICAgIC8vIGZyZXF1ZW50bHkgc2VuZGluZyBldmVudHMgcmlnaHQgYmVmb3JlIHRoZSB1c2VyIGlzIHN3aXRjaGluZyBwYWdlcyAoZWcuIHdoZW4gZmluaXNoaW5nIG5hdmlnYXRpb24gdHJhbnNhY3Rpb25zKS5cbiAgICAgIC8vIEdvdGNoYXM6XG4gICAgICAvLyAtIGBrZWVwYWxpdmVgIGlzbid0IHN1cHBvcnRlZCBieSBGaXJlZm94XG4gICAgICAvLyAtIEFzIHBlciBzcGVjIChodHRwczovL2ZldGNoLnNwZWMud2hhdHdnLm9yZy8jaHR0cC1uZXR3b3JrLW9yLWNhY2hlLWZldGNoKTpcbiAgICAgIC8vICAgSWYgdGhlIHN1bSBvZiBjb250ZW50TGVuZ3RoIGFuZCBpbmZsaWdodEtlZXBhbGl2ZUJ5dGVzIGlzIGdyZWF0ZXIgdGhhbiA2NCBraWJpYnl0ZXMsIHRoZW4gcmV0dXJuIGEgbmV0d29yayBlcnJvci5cbiAgICAgIC8vICAgV2Ugd2lsbCB0aGVyZWZvcmUgb25seSBhY3RpdmF0ZSB0aGUgZmxhZyB3aGVuIHdlJ3JlIGJlbG93IHRoYXQgbGltaXQuXG4gICAgICAvLyBUaGVyZSBpcyBhbHNvIGEgbGltaXQgb2YgcmVxdWVzdHMgdGhhdCBjYW4gYmUgb3BlbiBhdCB0aGUgc2FtZSB0aW1lLCBzbyB3ZSBhbHNvIGxpbWl0IHRoaXMgdG8gMTVcbiAgICAgIC8vIFNlZSBodHRwczovL2dpdGh1Yi5jb20vZ2V0c2VudHJ5L3NlbnRyeS1qYXZhc2NyaXB0L3B1bGwvNzU1MyBmb3IgZGV0YWlsc1xuICAgICAga2VlcGFsaXZlOiBwZW5kaW5nQm9keVNpemUgPD0gNjBfMDAwICYmIHBlbmRpbmdDb3VudCA8IDE1LFxuICAgICAgLi4ub3B0aW9ucy5mZXRjaE9wdGlvbnMsXG4gICAgfTtcblxuICAgIHRyeSB7XG4gICAgICAvLyBOb3RlOiBXZSBkbyBub3QgbmVlZCB0byBzdXBwcmVzcyB0cmFjaW5nIGhlcmUsIGJlY2F1c2Ugd2UgYXJlIHVzaW5nIHRoZSBuYXRpdmUgZmV0Y2gsIGluc3RlYWQgb2Ygb3VyIHdyYXBwZWQgb25lLlxuICAgICAgY29uc3QgcmVzcG9uc2UgPSBhd2FpdCBuYXRpdmVGZXRjaChvcHRpb25zLnVybCwgcmVxdWVzdE9wdGlvbnMpO1xuXG4gICAgICByZXR1cm4ge1xuICAgICAgICBzdGF0dXNDb2RlOiByZXNwb25zZS5zdGF0dXMsXG4gICAgICAgIGhlYWRlcnM6IHtcbiAgICAgICAgICAneC1zZW50cnktcmF0ZS1saW1pdHMnOiByZXNwb25zZS5oZWFkZXJzLmdldCgnWC1TZW50cnktUmF0ZS1MaW1pdHMnKSxcbiAgICAgICAgICAncmV0cnktYWZ0ZXInOiByZXNwb25zZS5oZWFkZXJzLmdldCgnUmV0cnktQWZ0ZXInKSxcbiAgICAgICAgfSxcbiAgICAgIH07XG4gICAgfSBjYXRjaCAoZSkge1xuICAgICAgY2xlYXJDYWNoZWRJbXBsZW1lbnRhdGlvbignZmV0Y2gnKTtcbiAgICAgIHRocm93IGU7XG4gICAgfSBmaW5hbGx5IHtcbiAgICAgIHBlbmRpbmdCb2R5U2l6ZSAtPSByZXF1ZXN0U2l6ZTtcbiAgICAgIHBlbmRpbmdDb3VudC0tO1xuICAgIH1cbiAgfVxuXG4gIHJldHVybiBjcmVhdGVUcmFuc3BvcnQoXG4gICAgb3B0aW9ucyxcbiAgICBtYWtlUmVxdWVzdCxcbiAgICBtYWtlUHJvbWlzZUJ1ZmZlcihvcHRpb25zLmJ1ZmZlclNpemUgfHwgREVGQVVMVF9CUk9XU0VSX1RSQU5TUE9SVF9CVUZGRVJfU0laRSksXG4gICk7XG59XG4iXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7O0FBTUEsTUFBTSxxQ0FBQSxHQUF3QyxFQUFFOztBQUVoRDtBQUNBO0FBQ0E7QUFDTyxTQUFTLGtCQUFrQjtBQUNsQyxFQUFFLE9BQU87QUFDVCxFQUFFLFdBQVcsR0FBd0IsdUJBQXVCLENBQUMsT0FBTyxDQUFDO0FBQ3JFLEVBQWE7QUFDYixFQUFFLElBQUksZUFBQSxHQUFrQixDQUFDO0FBQ3pCLEVBQUUsSUFBSSxZQUFBLEdBQWUsQ0FBQzs7QUFFdEIsRUFBRSxlQUFlLFdBQVcsQ0FBQyxPQUFPLEVBQTJEO0FBQy9GLElBQUksTUFBTSxXQUFBLEdBQWMsT0FBTyxDQUFDLElBQUksQ0FBQyxNQUFNO0FBQzNDLElBQUksZUFBQSxJQUFtQixXQUFXO0FBQ2xDLElBQUksWUFBWSxFQUFFOztBQUVsQixJQUFJLE1BQU0sY0FBYyxHQUFnQjtBQUN4QyxNQUFNLElBQUksRUFBRSxPQUFPLENBQUMsSUFBSTtBQUN4QixNQUFNLE1BQU0sRUFBRSxNQUFNO0FBQ3BCLE1BQU0sY0FBYyxFQUFFLGVBQWU7QUFDckMsTUFBTSxPQUFPLEVBQUUsT0FBTyxDQUFDLE9BQU87QUFDOUI7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLE1BQU0sU0FBUyxFQUFFLGVBQUEsSUFBbUIsU0FBVSxZQUFBLEdBQWUsRUFBRTtBQUMvRCxNQUFNLEdBQUcsT0FBTyxDQUFDLFlBQVk7QUFDN0IsS0FBSzs7QUFFTCxJQUFJLElBQUk7QUFDUjtBQUNBLE1BQU0sTUFBTSxRQUFBLEdBQVcsTUFBTSxXQUFXLENBQUMsT0FBTyxDQUFDLEdBQUcsRUFBRSxjQUFjLENBQUM7O0FBRXJFLE1BQU0sT0FBTztBQUNiLFFBQVEsVUFBVSxFQUFFLFFBQVEsQ0FBQyxNQUFNO0FBQ25DLFFBQVEsT0FBTyxFQUFFO0FBQ2pCLFVBQVUsc0JBQXNCLEVBQUUsUUFBUSxDQUFDLE9BQU8sQ0FBQyxHQUFHLENBQUMsc0JBQXNCLENBQUM7QUFDOUUsVUFBVSxhQUFhLEVBQUUsUUFBUSxDQUFDLE9BQU8sQ0FBQyxHQUFHLENBQUMsYUFBYSxDQUFDO0FBQzVELFNBQVM7QUFDVCxPQUFPO0FBQ1AsSUFBSSxDQUFBLENBQUUsT0FBTyxDQUFDLEVBQUU7QUFDaEIsTUFBTSx5QkFBeUIsQ0FBQyxPQUFPLENBQUM7QUFDeEMsTUFBTSxNQUFNLENBQUM7QUFDYixJQUFJLFVBQVU7QUFDZCxNQUFNLGVBQUEsSUFBbUIsV0FBVztBQUNwQyxNQUFNLFlBQVksRUFBRTtBQUNwQixJQUFJO0FBQ0osRUFBRTs7QUFFRixFQUFFLE9BQU8sZUFBZTtBQUN4QixJQUFJLE9BQU87QUFDWCxJQUFJLFdBQVc7QUFDZixJQUFJLGlCQUFpQixDQUFDLE9BQU8sQ0FBQyxVQUFBLElBQWMscUNBQXFDLENBQUM7QUFDbEYsR0FBRztBQUNIOzs7OyIsInhfZ29vZ2xlX2lnbm9yZUxpc3QiOlswXX0=

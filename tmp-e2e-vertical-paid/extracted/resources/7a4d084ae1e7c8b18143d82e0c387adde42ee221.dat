@@ -1,0 +1,42 @@
+/*
+ * Copyright 2024 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+const instanceMap = new WeakMap();
+
+/**
+ * A function that accepts and identity object and a class object and returns
+ * either a new instance of that class or an existing instance, if the
+ * identity object was previously used.
+ */
+function initUnique(identityObj, ClassObj) {
+  try {
+    if (!instanceMap.get(identityObj)) {
+      instanceMap.set(identityObj, new ClassObj());
+    }
+    return instanceMap.get(identityObj) ;
+  } catch (_e) {
+    // --- START Sentry-custom code (try/catch wrapping) ---
+    // Fix for cases where identityObj is not a valid key for WeakMap (sometimes a problem in Safari)
+    // Just return a new instance without caching it in instanceMap
+    return new ClassObj();
+  }
+  // --- END Sentry-custom code ---
+}
+
+export { initUnique };
+                                      
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5pdFVuaXF1ZS5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4vLi4vLi4vc3JjL21ldHJpY3Mvd2ViLXZpdGFscy9saWIvaW5pdFVuaXF1ZS50cyJdLCJzb3VyY2VzQ29udGVudCI6WyIvKlxuICogQ29weXJpZ2h0IDIwMjQgR29vZ2xlIExMQ1xuICpcbiAqIExpY2Vuc2VkIHVuZGVyIHRoZSBBcGFjaGUgTGljZW5zZSwgVmVyc2lvbiAyLjAgKHRoZSBcIkxpY2Vuc2VcIik7XG4gKiB5b3UgbWF5IG5vdCB1c2UgdGhpcyBmaWxlIGV4Y2VwdCBpbiBjb21wbGlhbmNlIHdpdGggdGhlIExpY2Vuc2UuXG4gKiBZb3UgbWF5IG9idGFpbiBhIGNvcHkgb2YgdGhlIExpY2Vuc2UgYXRcbiAqXG4gKiAgICAgaHR0cHM6Ly93d3cuYXBhY2hlLm9yZy9saWNlbnNlcy9MSUNFTlNFLTIuMFxuICpcbiAqIFVubGVzcyByZXF1aXJlZCBieSBhcHBsaWNhYmxlIGxhdyBvciBhZ3JlZWQgdG8gaW4gd3JpdGluZywgc29mdHdhcmVcbiAqIGRpc3RyaWJ1dGVkIHVuZGVyIHRoZSBMaWNlbnNlIGlzIGRpc3RyaWJ1dGVkIG9uIGFuIFwiQVMgSVNcIiBCQVNJUyxcbiAqIFdJVEhPVVQgV0FSUkFOVElFUyBPUiBDT05ESVRJT05TIE9GIEFOWSBLSU5ELCBlaXRoZXIgZXhwcmVzcyBvciBpbXBsaWVkLlxuICogU2VlIHRoZSBMaWNlbnNlIGZvciB0aGUgc3BlY2lmaWMgbGFuZ3VhZ2UgZ292ZXJuaW5nIHBlcm1pc3Npb25zIGFuZFxuICogbGltaXRhdGlvbnMgdW5kZXIgdGhlIExpY2Vuc2UuXG4gKi9cblxuY29uc3QgaW5zdGFuY2VNYXA6IFdlYWtNYXA8b2JqZWN0LCB1bmtub3duPiA9IG5ldyBXZWFrTWFwKCk7XG5cbi8qKlxuICogQSBmdW5jdGlvbiB0aGF0IGFjY2VwdHMgYW5kIGlkZW50aXR5IG9iamVjdCBhbmQgYSBjbGFzcyBvYmplY3QgYW5kIHJldHVybnNcbiAqIGVpdGhlciBhIG5ldyBpbnN0YW5jZSBvZiB0aGF0IGNsYXNzIG9yIGFuIGV4aXN0aW5nIGluc3RhbmNlLCBpZiB0aGVcbiAqIGlkZW50aXR5IG9iamVjdCB3YXMgcHJldmlvdXNseSB1c2VkLlxuICovXG5leHBvcnQgZnVuY3Rpb24gaW5pdFVuaXF1ZTxUPihpZGVudGl0eU9iajogb2JqZWN0LCBDbGFzc09iajogbmV3ICgpID0+IFQpOiBUIHtcbiAgdHJ5IHtcbiAgICBpZiAoIWluc3RhbmNlTWFwLmdldChpZGVudGl0eU9iaikpIHtcbiAgICAgIGluc3RhbmNlTWFwLnNldChpZGVudGl0eU9iaiwgbmV3IENsYXNzT2JqKCkpO1xuICAgIH1cbiAgICByZXR1cm4gaW5zdGFuY2VNYXAuZ2V0KGlkZW50aXR5T2JqKSEgYXMgVDtcbiAgfSBjYXRjaCAoX2UpIHtcbiAgICAvLyAtLS0gU1RBUlQgU2VudHJ5LWN1c3RvbSBjb2RlICh0cnkvY2F0Y2ggd3JhcHBpbmcpIC0tLVxuICAgIC8vIEZpeCBmb3IgY2FzZXMgd2hlcmUgaWRlbnRpdHlPYmogaXMgbm90IGEgdmFsaWQga2V5IGZvciBXZWFrTWFwIChzb21ldGltZXMgYSBwcm9ibGVtIGluIFNhZmFyaSlcbiAgICAvLyBKdXN0IHJldHVybiBhIG5ldyBpbnN0YW5jZSB3aXRob3V0IGNhY2hpbmcgaXQgaW4gaW5zdGFuY2VNYXBcbiAgICByZXR1cm4gbmV3IENsYXNzT2JqKCk7XG4gIH1cbiAgLy8gLS0tIEVORCBTZW50cnktY3VzdG9tIGNvZGUgLS0tXG59XG4iXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBOztBQUVBLE1BQU0sV0FBVyxHQUE2QixJQUFJLE9BQU8sRUFBRTs7QUFFM0Q7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNPLFNBQVMsVUFBVSxDQUFJLFdBQVcsRUFBVSxRQUFRLEVBQWtCO0FBQzdFLEVBQUUsSUFBSTtBQUNOLElBQUksSUFBSSxDQUFDLFdBQVcsQ0FBQyxHQUFHLENBQUMsV0FBVyxDQUFDLEVBQUU7QUFDdkMsTUFBTSxXQUFXLENBQUMsR0FBRyxDQUFDLFdBQVcsRUFBRSxJQUFJLFFBQVEsRUFBRSxDQUFDO0FBQ2xELElBQUk7QUFDSixJQUFJLE9BQU8sV0FBVyxDQUFDLEdBQUcsQ0FBQyxXQUFXLENBQUM7QUFDdkMsRUFBRSxDQUFBLENBQUUsT0FBTyxFQUFFLEVBQUU7QUFDZjtBQUNBO0FBQ0E7QUFDQSxJQUFJLE9BQU8sSUFBSSxRQUFRLEVBQUU7QUFDekIsRUFBRTtBQUNGO0FBQ0E7Ozs7IiwieF9nb29nbGVfaWdub3JlTGlzdCI6WzBdfQ==

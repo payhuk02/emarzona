@@ -1,0 +1,41 @@
+import {
+  Primitive
+} from "/node_modules/.vite/deps/chunk-H2NZ7KW5.js?v=a52cce50";
+import {
+  useLayoutEffect2
+} from "/node_modules/.vite/deps/chunk-CTCUIBW7.js?v=a52cce50";
+import {
+  require_react_dom
+} from "/node_modules/.vite/deps/chunk-KBI55PDZ.js?v=a52cce50";
+import {
+  require_jsx_runtime
+} from "/node_modules/.vite/deps/chunk-2ZO6ZW3X.js?v=a52cce50";
+import {
+  require_react
+} from "/node_modules/.vite/deps/chunk-7OHAGO6F.js?v=a52cce50";
+import {
+  __objRest,
+  __spreadProps,
+  __spreadValues,
+  __toESM
+} from "/node_modules/.vite/deps/chunk-WIEG4DIP.js?v=a52cce50";
+
+// node_modules/@radix-ui/react-portal/dist/index.mjs
+var React = __toESM(require_react(), 1);
+var import_react_dom = __toESM(require_react_dom(), 1);
+var import_jsx_runtime = __toESM(require_jsx_runtime(), 1);
+var PORTAL_NAME = "Portal";
+var Portal = React.forwardRef((props, forwardedRef) => {
+  var _b;
+  const _a = props, { container: containerProp } = _a, portalProps = __objRest(_a, ["container"]);
+  const [mounted, setMounted] = React.useState(false);
+  useLayoutEffect2(() => setMounted(true), []);
+  const container = containerProp || mounted && ((_b = globalThis == null ? void 0 : globalThis.document) == null ? void 0 : _b.body);
+  return container ? import_react_dom.default.createPortal((0, import_jsx_runtime.jsx)(Primitive.div, __spreadProps(__spreadValues({}, portalProps), { ref: forwardedRef })), container) : null;
+});
+Portal.displayName = PORTAL_NAME;
+
+export {
+  Portal
+};
+//# sourceMappingURL=chunk-PRX4IDJH.js.map

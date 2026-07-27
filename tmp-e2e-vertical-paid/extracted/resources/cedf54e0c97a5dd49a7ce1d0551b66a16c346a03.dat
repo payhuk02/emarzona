@@ -1,0 +1,52 @@
+/**
+ * Replaces constructor functions in module exports, handling read-only properties,
+ * and both default and named exports by wrapping them with the constructor.
+ *
+ * @param exports The module exports object to modify
+ * @param exportName The name of the export to replace (e.g., 'GoogleGenAI', 'Anthropic', 'OpenAI')
+ * @param wrappedConstructor The wrapped constructor function to replace the original with
+ * @returns void
+ */
+function replaceExports(
+  exports$1,
+  exportName,
+  wrappedConstructor,
+) {
+  const original = exports$1[exportName];
+
+  if (typeof original !== 'function') {
+    return;
+  }
+
+  // Replace the named export - handle read-only properties
+  try {
+    exports$1[exportName] = wrappedConstructor;
+  } catch {
+    // If direct assignment fails, override the property descriptor
+    Object.defineProperty(exports$1, exportName, {
+      value: wrappedConstructor,
+      writable: true,
+      configurable: true,
+      enumerable: true,
+    });
+  }
+
+  // Replace the default export if it points to the original constructor
+  if (exports$1.default === original) {
+    try {
+      exports$1.default = wrappedConstructor;
+    } catch {
+      Object.defineProperty(exports$1, 'default', {
+        value: wrappedConstructor,
+        writable: true,
+        configurable: true,
+        enumerable: true,
+      });
+    }
+  }
+}
+
+export { replaceExports };
+                                   
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZXhwb3J0cy5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4vc3JjL3V0aWxzL2V4cG9ydHMudHMiXSwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBSZXBsYWNlcyBjb25zdHJ1Y3RvciBmdW5jdGlvbnMgaW4gbW9kdWxlIGV4cG9ydHMsIGhhbmRsaW5nIHJlYWQtb25seSBwcm9wZXJ0aWVzLFxuICogYW5kIGJvdGggZGVmYXVsdCBhbmQgbmFtZWQgZXhwb3J0cyBieSB3cmFwcGluZyB0aGVtIHdpdGggdGhlIGNvbnN0cnVjdG9yLlxuICpcbiAqIEBwYXJhbSBleHBvcnRzIFRoZSBtb2R1bGUgZXhwb3J0cyBvYmplY3QgdG8gbW9kaWZ5XG4gKiBAcGFyYW0gZXhwb3J0TmFtZSBUaGUgbmFtZSBvZiB0aGUgZXhwb3J0IHRvIHJlcGxhY2UgKGUuZy4sICdHb29nbGVHZW5BSScsICdBbnRocm9waWMnLCAnT3BlbkFJJylcbiAqIEBwYXJhbSB3cmFwcGVkQ29uc3RydWN0b3IgVGhlIHdyYXBwZWQgY29uc3RydWN0b3IgZnVuY3Rpb24gdG8gcmVwbGFjZSB0aGUgb3JpZ2luYWwgd2l0aFxuICogQHJldHVybnMgdm9pZFxuICovXG5leHBvcnQgZnVuY3Rpb24gcmVwbGFjZUV4cG9ydHMoXG4gIGV4cG9ydHM6IHsgW2tleTogc3RyaW5nXTogdW5rbm93biB9LFxuICBleHBvcnROYW1lOiBzdHJpbmcsXG4gIHdyYXBwZWRDb25zdHJ1Y3RvcjogdW5rbm93bixcbik6IHZvaWQge1xuICBjb25zdCBvcmlnaW5hbCA9IGV4cG9ydHNbZXhwb3J0TmFtZV07XG5cbiAgaWYgKHR5cGVvZiBvcmlnaW5hbCAhPT0gJ2Z1bmN0aW9uJykge1xuICAgIHJldHVybjtcbiAgfVxuXG4gIC8vIFJlcGxhY2UgdGhlIG5hbWVkIGV4cG9ydCAtIGhhbmRsZSByZWFkLW9ubHkgcHJvcGVydGllc1xuICB0cnkge1xuICAgIGV4cG9ydHNbZXhwb3J0TmFtZV0gPSB3cmFwcGVkQ29uc3RydWN0b3I7XG4gIH0gY2F0Y2gge1xuICAgIC8vIElmIGRpcmVjdCBhc3NpZ25tZW50IGZhaWxzLCBvdmVycmlkZSB0aGUgcHJvcGVydHkgZGVzY3JpcHRvclxuICAgIE9iamVjdC5kZWZpbmVQcm9wZXJ0eShleHBvcnRzLCBleHBvcnROYW1lLCB7XG4gICAgICB2YWx1ZTogd3JhcHBlZENvbnN0cnVjdG9yLFxuICAgICAgd3JpdGFibGU6IHRydWUsXG4gICAgICBjb25maWd1cmFibGU6IHRydWUsXG4gICAgICBlbnVtZXJhYmxlOiB0cnVlLFxuICAgIH0pO1xuICB9XG5cbiAgLy8gUmVwbGFjZSB0aGUgZGVmYXVsdCBleHBvcnQgaWYgaXQgcG9pbnRzIHRvIHRoZSBvcmlnaW5hbCBjb25zdHJ1Y3RvclxuICBpZiAoZXhwb3J0cy5kZWZhdWx0ID09PSBvcmlnaW5hbCkge1xuICAgIHRyeSB7XG4gICAgICBleHBvcnRzLmRlZmF1bHQgPSB3cmFwcGVkQ29uc3RydWN0b3I7XG4gICAgfSBjYXRjaCB7XG4gICAgICBPYmplY3QuZGVmaW5lUHJvcGVydHkoZXhwb3J0cywgJ2RlZmF1bHQnLCB7XG4gICAgICAgIHZhbHVlOiB3cmFwcGVkQ29uc3RydWN0b3IsXG4gICAgICAgIHdyaXRhYmxlOiB0cnVlLFxuICAgICAgICBjb25maWd1cmFibGU6IHRydWUsXG4gICAgICAgIGVudW1lcmFibGU6IHRydWUsXG4gICAgICB9KTtcbiAgICB9XG4gIH1cbn1cbiJdLCJuYW1lcyI6WyJleHBvcnRzIl0sIm1hcHBpbmdzIjoiQUFBQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDTyxTQUFTLGNBQWM7QUFDOUIsRUFBRUEsU0FBTztBQUNULEVBQUUsVUFBVTtBQUNaLEVBQUUsa0JBQWtCO0FBQ3BCLEVBQVE7QUFDUixFQUFFLE1BQU0sUUFBQSxHQUFXQSxTQUFPLENBQUMsVUFBVSxDQUFDOztBQUV0QyxFQUFFLElBQUksT0FBTyxRQUFBLEtBQWEsVUFBVSxFQUFFO0FBQ3RDLElBQUk7QUFDSixFQUFFOztBQUVGO0FBQ0EsRUFBRSxJQUFJO0FBQ04sSUFBSUEsU0FBTyxDQUFDLFVBQVUsQ0FBQSxHQUFJLGtCQUFrQjtBQUM1QyxFQUFFLEVBQUUsTUFBTTtBQUNWO0FBQ0EsSUFBSSxNQUFNLENBQUMsY0FBYyxDQUFDQSxTQUFPLEVBQUUsVUFBVSxFQUFFO0FBQy9DLE1BQU0sS0FBSyxFQUFFLGtCQUFrQjtBQUMvQixNQUFNLFFBQVEsRUFBRSxJQUFJO0FBQ3BCLE1BQU0sWUFBWSxFQUFFLElBQUk7QUFDeEIsTUFBTSxVQUFVLEVBQUUsSUFBSTtBQUN0QixLQUFLLENBQUM7QUFDTixFQUFFOztBQUVGO0FBQ0EsRUFBRSxJQUFJQSxTQUFPLENBQUMsT0FBQSxLQUFZLFFBQVEsRUFBRTtBQUNwQyxJQUFJLElBQUk7QUFDUixNQUFNQSxTQUFPLENBQUMsT0FBQSxHQUFVLGtCQUFrQjtBQUMxQyxJQUFJLEVBQUUsTUFBTTtBQUNaLE1BQU0sTUFBTSxDQUFDLGNBQWMsQ0FBQ0EsU0FBTyxFQUFFLFNBQVMsRUFBRTtBQUNoRCxRQUFRLEtBQUssRUFBRSxrQkFBa0I7QUFDakMsUUFBUSxRQUFRLEVBQUUsSUFBSTtBQUN0QixRQUFRLFlBQVksRUFBRSxJQUFJO0FBQzFCLFFBQVEsVUFBVSxFQUFFLElBQUk7QUFDeEIsT0FBTyxDQUFDO0FBQ1IsSUFBSTtBQUNKLEVBQUU7QUFDRjs7OzsiLCJ4X2dvb2dsZV9pZ25vcmVMaXN0IjpbMF19

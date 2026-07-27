@@ -1,0 +1,18 @@
+import { getClient } from "/node_modules/@sentry/core/build/esm/index.js?v=89021f86";
+
+/**
+ * Manually report the end of the page load, resulting in the SDK ending the pageload span.
+ * This only works if {@link BrowserTracingOptions.enableReportPageLoaded} is set to `true`.
+ * Otherwise, the pageload span will end itself based on the {@link BrowserTracingOptions.finalTimeout},
+ * {@link BrowserTracingOptions.idleTimeout} and {@link BrowserTracingOptions.childSpanTimeout}.
+ *
+ * @param client - The client to use. If not provided, the global client will be used.
+ */
+function reportPageLoaded(client = getClient()) {
+  client?.emit('endPageloadSpan');
+}
+
+export { reportPageLoaded };
+                                            
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicmVwb3J0UGFnZUxvYWRlZC5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4vLi4vLi4vc3JjL3RyYWNpbmcvcmVwb3J0UGFnZUxvYWRlZC50cyJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgdHlwZSB7IENsaWVudCB9IGZyb20gJ0BzZW50cnkvY29yZSc7XG5pbXBvcnQgeyBnZXRDbGllbnQgfSBmcm9tICdAc2VudHJ5L2NvcmUnO1xuXG4vKipcbiAqIE1hbnVhbGx5IHJlcG9ydCB0aGUgZW5kIG9mIHRoZSBwYWdlIGxvYWQsIHJlc3VsdGluZyBpbiB0aGUgU0RLIGVuZGluZyB0aGUgcGFnZWxvYWQgc3Bhbi5cbiAqIFRoaXMgb25seSB3b3JrcyBpZiB7QGxpbmsgQnJvd3NlclRyYWNpbmdPcHRpb25zLmVuYWJsZVJlcG9ydFBhZ2VMb2FkZWR9IGlzIHNldCB0byBgdHJ1ZWAuXG4gKiBPdGhlcndpc2UsIHRoZSBwYWdlbG9hZCBzcGFuIHdpbGwgZW5kIGl0c2VsZiBiYXNlZCBvbiB0aGUge0BsaW5rIEJyb3dzZXJUcmFjaW5nT3B0aW9ucy5maW5hbFRpbWVvdXR9LFxuICoge0BsaW5rIEJyb3dzZXJUcmFjaW5nT3B0aW9ucy5pZGxlVGltZW91dH0gYW5kIHtAbGluayBCcm93c2VyVHJhY2luZ09wdGlvbnMuY2hpbGRTcGFuVGltZW91dH0uXG4gKlxuICogQHBhcmFtIGNsaWVudCAtIFRoZSBjbGllbnQgdG8gdXNlLiBJZiBub3QgcHJvdmlkZWQsIHRoZSBnbG9iYWwgY2xpZW50IHdpbGwgYmUgdXNlZC5cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIHJlcG9ydFBhZ2VMb2FkZWQoY2xpZW50OiBDbGllbnQgfCB1bmRlZmluZWQgPSBnZXRDbGllbnQoKSk6IHZvaWQge1xuICBjbGllbnQ/LmVtaXQoJ2VuZFBhZ2Vsb2FkU3BhbicpO1xufVxuIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7O0FBR0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNPLFNBQVMsZ0JBQWdCLENBQUMsTUFBTSxHQUF1QixTQUFTLEVBQUUsRUFBUTtBQUNqRixFQUFFLE1BQU0sRUFBRSxJQUFJLENBQUMsaUJBQWlCLENBQUM7QUFDakM7Ozs7IiwieF9nb29nbGVfaWdub3JlTGlzdCI6WzBdfQ==

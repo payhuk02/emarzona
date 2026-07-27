@@ -1,0 +1,20 @@
+import { uuid4 } from "/node_modules/@sentry/core/build/esm/utils/misc.js?v=d758aa40";
+
+/**
+ * Generate a random, valid trace ID.
+ */
+function generateTraceId() {
+  return uuid4();
+}
+
+/**
+ * Generate a random, valid span ID.
+ */
+function generateSpanId() {
+  return uuid4().substring(16);
+}
+
+export { generateSpanId, generateTraceId };
+                                              
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicHJvcGFnYXRpb25Db250ZXh0LmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi9zcmMvdXRpbHMvcHJvcGFnYXRpb25Db250ZXh0LnRzIl0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7IHV1aWQ0IH0gZnJvbSAnLi9taXNjJztcblxuLyoqXG4gKiBHZW5lcmF0ZSBhIHJhbmRvbSwgdmFsaWQgdHJhY2UgSUQuXG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBnZW5lcmF0ZVRyYWNlSWQoKTogc3RyaW5nIHtcbiAgcmV0dXJuIHV1aWQ0KCk7XG59XG5cbi8qKlxuICogR2VuZXJhdGUgYSByYW5kb20sIHZhbGlkIHNwYW4gSUQuXG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBnZW5lcmF0ZVNwYW5JZCgpOiBzdHJpbmcge1xuICByZXR1cm4gdXVpZDQoKS5zdWJzdHJpbmcoMTYpO1xufVxuIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7O0FBRUE7QUFDQTtBQUNBO0FBQ08sU0FBUyxlQUFlLEdBQVc7QUFDMUMsRUFBRSxPQUFPLEtBQUssRUFBRTtBQUNoQjs7QUFFQTtBQUNBO0FBQ0E7QUFDTyxTQUFTLGNBQWMsR0FBVztBQUN6QyxFQUFFLE9BQU8sS0FBSyxFQUFFLENBQUMsU0FBUyxDQUFDLEVBQUUsQ0FBQztBQUM5Qjs7OzsiLCJ4X2dvb2dsZV9pZ25vcmVMaXN0IjpbMF19

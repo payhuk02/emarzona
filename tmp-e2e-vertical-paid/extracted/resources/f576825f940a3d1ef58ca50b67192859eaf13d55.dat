@@ -1,0 +1,60 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/ui/label.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/ui/label.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=8792f17d"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=8792f17d"; const React = ((m) => m?.__esModule ? m : {	...typeof m === "object" && !Array.isArray(m) || typeof m === "function" ? m : {},	default: m})(__vite__cjsImport3_react);
+import * as LabelPrimitive from "/node_modules/.vite/deps/@radix-ui_react-label.js?v=8792f17d";
+import { cva } from "/node_modules/.vite/deps/class-variance-authority.js?v=ba254022";
+import { cn } from "/src/lib/utils.ts";
+const labelVariants = cva("text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70");
+const Label = /*#__PURE__*/ React.forwardRef(_c = ({ className, ...props }, ref)=>/*#__PURE__*/ _jsxDEV(LabelPrimitive.Root, {
+        ref: ref,
+        className: cn(labelVariants(), className),
+        ...props
+    }, void 0, false, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/label.tsx",
+        lineNumber: 13,
+        columnNumber: 3
+    }, this));
+_c1 = Label;
+Label.displayName = LabelPrimitive.Root.displayName;
+export { Label };
+var _c, _c1;
+$RefreshReg$(_c, "Label$React.forwardRef");
+$RefreshReg$(_c1, "Label");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/ui/label.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/ui/label.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImxhYmVsLnRzeCJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgKiBhcyBSZWFjdCBmcm9tIFwicmVhY3RcIjtcbmltcG9ydCAqIGFzIExhYmVsUHJpbWl0aXZlIGZyb20gXCJAcmFkaXgtdWkvcmVhY3QtbGFiZWxcIjtcbmltcG9ydCB7IGN2YSwgdHlwZSBWYXJpYW50UHJvcHMgfSBmcm9tIFwiY2xhc3MtdmFyaWFuY2UtYXV0aG9yaXR5XCI7XG5cbmltcG9ydCB7IGNuIH0gZnJvbSBcIkAvbGliL3V0aWxzXCI7XG5cbmNvbnN0IGxhYmVsVmFyaWFudHMgPSBjdmEoXCJ0ZXh0LXNtIGZvbnQtbWVkaXVtIGxlYWRpbmctbm9uZSBwZWVyLWRpc2FibGVkOmN1cnNvci1ub3QtYWxsb3dlZCBwZWVyLWRpc2FibGVkOm9wYWNpdHktNzBcIik7XG5cbmNvbnN0IExhYmVsID0gUmVhY3QuZm9yd2FyZFJlZjxcbiAgUmVhY3QuRWxlbWVudFJlZjx0eXBlb2YgTGFiZWxQcmltaXRpdmUuUm9vdD4sXG4gIFJlYWN0LkNvbXBvbmVudFByb3BzV2l0aG91dFJlZjx0eXBlb2YgTGFiZWxQcmltaXRpdmUuUm9vdD4gJiBWYXJpYW50UHJvcHM8dHlwZW9mIGxhYmVsVmFyaWFudHM+XG4+KCh7IGNsYXNzTmFtZSwgLi4ucHJvcHMgfSwgcmVmKSA9PiAoXG4gIDxMYWJlbFByaW1pdGl2ZS5Sb290IHJlZj17cmVmfSBjbGFzc05hbWU9e2NuKGxhYmVsVmFyaWFudHMoKSwgY2xhc3NOYW1lKX0gey4uLnByb3BzfSAvPlxuKSk7XG5MYWJlbC5kaXNwbGF5TmFtZSA9IExhYmVsUHJpbWl0aXZlLlJvb3QuZGlzcGxheU5hbWU7XG5cbmV4cG9ydCB7IExhYmVsIH07XG5cblxuXG5cblxuXG4iXSwibmFtZXMiOlsiUmVhY3QiLCJMYWJlbFByaW1pdGl2ZSIsImN2YSIsImNuIiwibGFiZWxWYXJpYW50cyIsIkxhYmVsIiwiZm9yd2FyZFJlZiIsImNsYXNzTmFtZSIsInByb3BzIiwicmVmIiwiUm9vdCIsImRpc3BsYXlOYW1lIl0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7Ozs7OztBQUFBLFlBQVlBLFdBQVcsUUFBUTtBQUMvQixZQUFZQyxvQkFBb0Isd0JBQXdCO0FBQ3hELFNBQVNDLEdBQUcsUUFBMkIsMkJBQTJCO0FBRWxFLFNBQVNDLEVBQUUsUUFBUSxjQUFjO0FBRWpDLE1BQU1DLGdCQUFnQkYsSUFBSTtBQUUxQixNQUFNRyxzQkFBUUwsTUFBTU0sVUFBVSxNQUc1QixDQUFDLEVBQUVDLFNBQVMsRUFBRSxHQUFHQyxPQUFPLEVBQUVDLG9CQUMxQixRQUFDUixlQUFlUyxJQUFJO1FBQUNELEtBQUtBO1FBQUtGLFdBQVdKLEdBQUdDLGlCQUFpQkc7UUFBYSxHQUFHQyxLQUFLOzs7Ozs7O0FBRXJGSCxNQUFNTSxXQUFXLEdBQUdWLGVBQWVTLElBQUksQ0FBQ0MsV0FBVztBQUVuRCxTQUFTTixLQUFLLEdBQUcifQ==

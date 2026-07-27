@@ -1,0 +1,17 @@
+import { getGlobalSingleton } from "/node_modules/@sentry/core/build/esm/carrier.js?v=89021f86";
+import { Scope } from "/node_modules/@sentry/core/build/esm/scope.js?v=89021f86";
+
+/** Get the default current scope. */
+function getDefaultCurrentScope() {
+  return getGlobalSingleton('defaultCurrentScope', () => new Scope());
+}
+
+/** Get the default isolation scope. */
+function getDefaultIsolationScope() {
+  return getGlobalSingleton('defaultIsolationScope', () => new Scope());
+}
+
+export { getDefaultCurrentScope, getDefaultIsolationScope };
+                                         
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZGVmYXVsdFNjb3Blcy5qcyIsInNvdXJjZXMiOlsiLi4vLi4vc3JjL2RlZmF1bHRTY29wZXMudHMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgZ2V0R2xvYmFsU2luZ2xldG9uIH0gZnJvbSAnLi9jYXJyaWVyJztcbmltcG9ydCB7IFNjb3BlIH0gZnJvbSAnLi9zY29wZSc7XG5cbi8qKiBHZXQgdGhlIGRlZmF1bHQgY3VycmVudCBzY29wZS4gKi9cbmV4cG9ydCBmdW5jdGlvbiBnZXREZWZhdWx0Q3VycmVudFNjb3BlKCk6IFNjb3BlIHtcbiAgcmV0dXJuIGdldEdsb2JhbFNpbmdsZXRvbignZGVmYXVsdEN1cnJlbnRTY29wZScsICgpID0+IG5ldyBTY29wZSgpKTtcbn1cblxuLyoqIEdldCB0aGUgZGVmYXVsdCBpc29sYXRpb24gc2NvcGUuICovXG5leHBvcnQgZnVuY3Rpb24gZ2V0RGVmYXVsdElzb2xhdGlvblNjb3BlKCk6IFNjb3BlIHtcbiAgcmV0dXJuIGdldEdsb2JhbFNpbmdsZXRvbignZGVmYXVsdElzb2xhdGlvblNjb3BlJywgKCkgPT4gbmV3IFNjb3BlKCkpO1xufVxuIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7OztBQUdBO0FBQ08sU0FBUyxzQkFBc0IsR0FBVTtBQUNoRCxFQUFFLE9BQU8sa0JBQWtCLENBQUMscUJBQXFCLEVBQUUsTUFBTSxJQUFJLEtBQUssRUFBRSxDQUFDO0FBQ3JFOztBQUVBO0FBQ08sU0FBUyx3QkFBd0IsR0FBVTtBQUNsRCxFQUFFLE9BQU8sa0JBQWtCLENBQUMsdUJBQXVCLEVBQUUsTUFBTSxJQUFJLEtBQUssRUFBRSxDQUFDO0FBQ3ZFOzs7OyIsInhfZ29vZ2xlX2lnbm9yZUxpc3QiOlswXX0=

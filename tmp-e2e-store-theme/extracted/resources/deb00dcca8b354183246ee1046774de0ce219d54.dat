@@ -1,0 +1,269 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/billing/PhysicalSubscriptionAlert.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/billing/PhysicalSubscriptionAlert.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=6014a254"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+var _s = $RefreshSig$();
+import { Link } from "/node_modules/.vite/deps/react-router-dom.js?v=6014a254";
+import { AlertTriangle, CreditCard } from "/node_modules/.vite/deps/lucide-react.js?v=6014a254";
+import { Alert, AlertDescription, AlertTitle } from "/src/components/ui/alert.tsx";
+import { Button } from "/src/components/ui/button.tsx";
+import { useStorePhysicalAccess } from "/src/hooks/billing/useStorePhysicalAccess.ts";
+import { format } from "/node_modules/.vite/deps/date-fns.js?v=6014a254";
+import { fr } from "/node_modules/.vite/deps/date-fns_locale.js?v=af6a8809";
+import { physicalPlanLabel } from "/src/lib/billing/physical-plan-display.ts";
+export function PhysicalSubscriptionAlert({ storeId }) {
+    _s();
+    const access = useStorePhysicalAccess(storeId);
+    if (access.loading || access.status === 'none' || access.status === 'cancelled') {
+        return null;
+    }
+    if (access.allowed && access.status !== 'trialing') {
+        return null;
+    }
+    const billingUrl = '/dashboard/billing/physical';
+    const periodEndLabel = access.currentPeriodEnd ? format(new Date(access.currentPeriodEnd), 'dd MMM yyyy', {
+        locale: fr
+    }) : null;
+    if (access.status === 'expired') {
+        return /*#__PURE__*/ _jsxDEV(Alert, {
+            variant: "destructive",
+            className: "mb-6",
+            children: [
+                /*#__PURE__*/ _jsxDEV(AlertTriangle, {
+                    className: "h-4 w-4"
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/billing/PhysicalSubscriptionAlert.tsx",
+                    lineNumber: 33,
+                    columnNumber: 9
+                }, this),
+                /*#__PURE__*/ _jsxDEV(AlertTitle, {
+                    children: "Abonnement produits physiques expiré"
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/billing/PhysicalSubscriptionAlert.tsx",
+                    lineNumber: 34,
+                    columnNumber: 9
+                }, this),
+                /*#__PURE__*/ _jsxDEV(AlertDescription, {
+                    className: "flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between",
+                    children: [
+                        /*#__PURE__*/ _jsxDEV("span", {
+                            children: [
+                                "Vos produits physiques sont suspendus. Réactivez votre abonnement",
+                                ' ',
+                                access.planName ? `(${physicalPlanLabel(access.planSlug)})` : '',
+                                " pour reprendre les ventes."
+                            ]
+                        }, void 0, true, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/billing/PhysicalSubscriptionAlert.tsx",
+                            lineNumber: 36,
+                            columnNumber: 11
+                        }, this),
+                        /*#__PURE__*/ _jsxDEV(Button, {
+                            asChild: true,
+                            size: "sm",
+                            variant: "outline",
+                            className: "shrink-0 border-destructive/40",
+                            children: /*#__PURE__*/ _jsxDEV(Link, {
+                                to: billingUrl,
+                                children: "Réactiver"
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/billing/PhysicalSubscriptionAlert.tsx",
+                                lineNumber: 42,
+                                columnNumber: 13
+                            }, this)
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/billing/PhysicalSubscriptionAlert.tsx",
+                            lineNumber: 41,
+                            columnNumber: 11
+                        }, this)
+                    ]
+                }, void 0, true, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/billing/PhysicalSubscriptionAlert.tsx",
+                    lineNumber: 35,
+                    columnNumber: 9
+                }, this)
+            ]
+        }, void 0, true, {
+            fileName: "/home/runner/work/emarzona/emarzona/src/components/billing/PhysicalSubscriptionAlert.tsx",
+            lineNumber: 32,
+            columnNumber: 7
+        }, this);
+    }
+    if (access.status === 'past_due') {
+        return /*#__PURE__*/ _jsxDEV(Alert, {
+            variant: "destructive",
+            className: "mb-6",
+            children: [
+                /*#__PURE__*/ _jsxDEV(CreditCard, {
+                    className: "h-4 w-4"
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/billing/PhysicalSubscriptionAlert.tsx",
+                    lineNumber: 52,
+                    columnNumber: 9
+                }, this),
+                /*#__PURE__*/ _jsxDEV(AlertTitle, {
+                    children: "Paiement en retard"
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/billing/PhysicalSubscriptionAlert.tsx",
+                    lineNumber: 53,
+                    columnNumber: 9
+                }, this),
+                /*#__PURE__*/ _jsxDEV(AlertDescription, {
+                    className: "flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between",
+                    children: [
+                        /*#__PURE__*/ _jsxDEV("span", {
+                            children: [
+                                "Votre abonnement produits physiques est en retard",
+                                periodEndLabel ? ` (échéance ${periodEndLabel})` : '',
+                                ". Sans régularisation, vos produits seront suspendus à la fin de la période de grâce (7 jours)."
+                            ]
+                        }, void 0, true, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/billing/PhysicalSubscriptionAlert.tsx",
+                            lineNumber: 55,
+                            columnNumber: 11
+                        }, this),
+                        /*#__PURE__*/ _jsxDEV(Button, {
+                            asChild: true,
+                            size: "sm",
+                            variant: "outline",
+                            className: "shrink-0 border-destructive/40",
+                            children: /*#__PURE__*/ _jsxDEV(Link, {
+                                to: billingUrl,
+                                children: "Régulariser"
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/billing/PhysicalSubscriptionAlert.tsx",
+                                lineNumber: 61,
+                                columnNumber: 13
+                            }, this)
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/billing/PhysicalSubscriptionAlert.tsx",
+                            lineNumber: 60,
+                            columnNumber: 11
+                        }, this)
+                    ]
+                }, void 0, true, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/billing/PhysicalSubscriptionAlert.tsx",
+                    lineNumber: 54,
+                    columnNumber: 9
+                }, this)
+            ]
+        }, void 0, true, {
+            fileName: "/home/runner/work/emarzona/emarzona/src/components/billing/PhysicalSubscriptionAlert.tsx",
+            lineNumber: 51,
+            columnNumber: 7
+        }, this);
+    }
+    if (access.status === 'trialing' && access.trialDaysRemaining !== null && access.trialDaysRemaining <= 7) {
+        return /*#__PURE__*/ _jsxDEV(Alert, {
+            className: "mb-6 border-amber-500/50 bg-amber-50/50 dark:bg-amber-950/20",
+            children: [
+                /*#__PURE__*/ _jsxDEV(AlertTriangle, {
+                    className: "h-4 w-4 text-amber-600"
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/billing/PhysicalSubscriptionAlert.tsx",
+                    lineNumber: 75,
+                    columnNumber: 9
+                }, this),
+                /*#__PURE__*/ _jsxDEV(AlertTitle, {
+                    className: "text-amber-900 dark:text-amber-100",
+                    children: [
+                        "Essai gratuit — ",
+                        access.trialDaysRemaining,
+                        " jour",
+                        access.trialDaysRemaining > 1 ? 's' : '',
+                        ' ',
+                        "restant",
+                        access.trialDaysRemaining > 1 ? 's' : ''
+                    ]
+                }, void 0, true, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/billing/PhysicalSubscriptionAlert.tsx",
+                    lineNumber: 76,
+                    columnNumber: 9
+                }, this),
+                /*#__PURE__*/ _jsxDEV(AlertDescription, {
+                    className: "flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between text-amber-900/90 dark:text-amber-100/90",
+                    children: [
+                        /*#__PURE__*/ _jsxDEV("span", {
+                            children: "Choisissez un plan avant la fin de l'essai pour conserver l'accès aux produits physiques."
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/billing/PhysicalSubscriptionAlert.tsx",
+                            lineNumber: 81,
+                            columnNumber: 11
+                        }, this),
+                        /*#__PURE__*/ _jsxDEV(Button, {
+                            asChild: true,
+                            size: "sm",
+                            variant: "outline",
+                            className: "shrink-0",
+                            children: /*#__PURE__*/ _jsxDEV(Link, {
+                                to: billingUrl,
+                                children: "Choisir un plan"
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/billing/PhysicalSubscriptionAlert.tsx",
+                                lineNumber: 86,
+                                columnNumber: 13
+                            }, this)
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/billing/PhysicalSubscriptionAlert.tsx",
+                            lineNumber: 85,
+                            columnNumber: 11
+                        }, this)
+                    ]
+                }, void 0, true, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/billing/PhysicalSubscriptionAlert.tsx",
+                    lineNumber: 80,
+                    columnNumber: 9
+                }, this)
+            ]
+        }, void 0, true, {
+            fileName: "/home/runner/work/emarzona/emarzona/src/components/billing/PhysicalSubscriptionAlert.tsx",
+            lineNumber: 74,
+            columnNumber: 7
+        }, this);
+    }
+    return null;
+}
+_s(PhysicalSubscriptionAlert, "LltBALyMMhvVJxubTZ5GVtO01tg=", false, function() {
+    return [
+        useStorePhysicalAccess
+    ];
+});
+_c = PhysicalSubscriptionAlert;
+var _c;
+$RefreshReg$(_c, "PhysicalSubscriptionAlert");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/billing/PhysicalSubscriptionAlert.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/billing/PhysicalSubscriptionAlert.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIlBoeXNpY2FsU3Vic2NyaXB0aW9uQWxlcnQudHN4Il0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7IExpbmsgfSBmcm9tICdyZWFjdC1yb3V0ZXItZG9tJztcbmltcG9ydCB7IEFsZXJ0VHJpYW5nbGUsIENyZWRpdENhcmQgfSBmcm9tICdsdWNpZGUtcmVhY3QnO1xuaW1wb3J0IHsgQWxlcnQsIEFsZXJ0RGVzY3JpcHRpb24sIEFsZXJ0VGl0bGUgfSBmcm9tICdAL2NvbXBvbmVudHMvdWkvYWxlcnQnO1xuaW1wb3J0IHsgQnV0dG9uIH0gZnJvbSAnQC9jb21wb25lbnRzL3VpL2J1dHRvbic7XG5pbXBvcnQgeyB1c2VTdG9yZVBoeXNpY2FsQWNjZXNzIH0gZnJvbSAnQC9ob29rcy9iaWxsaW5nL3VzZVN0b3JlUGh5c2ljYWxBY2Nlc3MnO1xuaW1wb3J0IHsgZm9ybWF0IH0gZnJvbSAnZGF0ZS1mbnMnO1xuaW1wb3J0IHsgZnIgfSBmcm9tICdkYXRlLWZucy9sb2NhbGUnO1xuaW1wb3J0IHsgcGh5c2ljYWxQbGFuTGFiZWwgfSBmcm9tICdAL2xpYi9iaWxsaW5nL3BoeXNpY2FsLXBsYW4tZGlzcGxheSc7XG5cbmludGVyZmFjZSBQaHlzaWNhbFN1YnNjcmlwdGlvbkFsZXJ0UHJvcHMge1xuICBzdG9yZUlkPzogc3RyaW5nIHwgbnVsbDtcbn1cblxuZXhwb3J0IGZ1bmN0aW9uIFBoeXNpY2FsU3Vic2NyaXB0aW9uQWxlcnQoeyBzdG9yZUlkIH06IFBoeXNpY2FsU3Vic2NyaXB0aW9uQWxlcnRQcm9wcykge1xuICBjb25zdCBhY2Nlc3MgPSB1c2VTdG9yZVBoeXNpY2FsQWNjZXNzKHN0b3JlSWQpO1xuXG4gIGlmIChhY2Nlc3MubG9hZGluZyB8fCBhY2Nlc3Muc3RhdHVzID09PSAnbm9uZScgfHwgYWNjZXNzLnN0YXR1cyA9PT0gJ2NhbmNlbGxlZCcpIHtcbiAgICByZXR1cm4gbnVsbDtcbiAgfVxuXG4gIGlmIChhY2Nlc3MuYWxsb3dlZCAmJiBhY2Nlc3Muc3RhdHVzICE9PSAndHJpYWxpbmcnKSB7XG4gICAgcmV0dXJuIG51bGw7XG4gIH1cblxuICBjb25zdCBiaWxsaW5nVXJsID0gJy9kYXNoYm9hcmQvYmlsbGluZy9waHlzaWNhbCc7XG4gIGNvbnN0IHBlcmlvZEVuZExhYmVsID0gYWNjZXNzLmN1cnJlbnRQZXJpb2RFbmRcbiAgICA/IGZvcm1hdChuZXcgRGF0ZShhY2Nlc3MuY3VycmVudFBlcmlvZEVuZCksICdkZCBNTU0geXl5eScsIHsgbG9jYWxlOiBmciB9KVxuICAgIDogbnVsbDtcblxuICBpZiAoYWNjZXNzLnN0YXR1cyA9PT0gJ2V4cGlyZWQnKSB7XG4gICAgcmV0dXJuIChcbiAgICAgIDxBbGVydCB2YXJpYW50PVwiZGVzdHJ1Y3RpdmVcIiBjbGFzc05hbWU9XCJtYi02XCI+XG4gICAgICAgIDxBbGVydFRyaWFuZ2xlIGNsYXNzTmFtZT1cImgtNCB3LTRcIiAvPlxuICAgICAgICA8QWxlcnRUaXRsZT5BYm9ubmVtZW50IHByb2R1aXRzIHBoeXNpcXVlcyBleHBpcsOpPC9BbGVydFRpdGxlPlxuICAgICAgICA8QWxlcnREZXNjcmlwdGlvbiBjbGFzc05hbWU9XCJmbGV4IGZsZXgtY29sIGdhcC0zIHNtOmZsZXgtcm93IHNtOml0ZW1zLWNlbnRlciBzbTpqdXN0aWZ5LWJldHdlZW5cIj5cbiAgICAgICAgICA8c3Bhbj5cbiAgICAgICAgICAgIFZvcyBwcm9kdWl0cyBwaHlzaXF1ZXMgc29udCBzdXNwZW5kdXMuIFLDqWFjdGl2ZXogdm90cmUgYWJvbm5lbWVudHsnICd9XG4gICAgICAgICAgICB7YWNjZXNzLnBsYW5OYW1lID8gYCgke3BoeXNpY2FsUGxhbkxhYmVsKGFjY2Vzcy5wbGFuU2x1Zyl9KWAgOiAnJ30gcG91ciByZXByZW5kcmUgbGVzXG4gICAgICAgICAgICB2ZW50ZXMuXG4gICAgICAgICAgPC9zcGFuPlxuICAgICAgICAgIDxCdXR0b24gYXNDaGlsZCBzaXplPVwic21cIiB2YXJpYW50PVwib3V0bGluZVwiIGNsYXNzTmFtZT1cInNocmluay0wIGJvcmRlci1kZXN0cnVjdGl2ZS80MFwiPlxuICAgICAgICAgICAgPExpbmsgdG89e2JpbGxpbmdVcmx9PlLDqWFjdGl2ZXI8L0xpbms+XG4gICAgICAgICAgPC9CdXR0b24+XG4gICAgICAgIDwvQWxlcnREZXNjcmlwdGlvbj5cbiAgICAgIDwvQWxlcnQ+XG4gICAgKTtcbiAgfVxuXG4gIGlmIChhY2Nlc3Muc3RhdHVzID09PSAncGFzdF9kdWUnKSB7XG4gICAgcmV0dXJuIChcbiAgICAgIDxBbGVydCB2YXJpYW50PVwiZGVzdHJ1Y3RpdmVcIiBjbGFzc05hbWU9XCJtYi02XCI+XG4gICAgICAgIDxDcmVkaXRDYXJkIGNsYXNzTmFtZT1cImgtNCB3LTRcIiAvPlxuICAgICAgICA8QWxlcnRUaXRsZT5QYWllbWVudCBlbiByZXRhcmQ8L0FsZXJ0VGl0bGU+XG4gICAgICAgIDxBbGVydERlc2NyaXB0aW9uIGNsYXNzTmFtZT1cImZsZXggZmxleC1jb2wgZ2FwLTMgc206ZmxleC1yb3cgc206aXRlbXMtY2VudGVyIHNtOmp1c3RpZnktYmV0d2VlblwiPlxuICAgICAgICAgIDxzcGFuPlxuICAgICAgICAgICAgVm90cmUgYWJvbm5lbWVudCBwcm9kdWl0cyBwaHlzaXF1ZXMgZXN0IGVuIHJldGFyZFxuICAgICAgICAgICAge3BlcmlvZEVuZExhYmVsID8gYCAow6ljaMOpYW5jZSAke3BlcmlvZEVuZExhYmVsfSlgIDogJyd9LiBTYW5zIHLDqWd1bGFyaXNhdGlvbiwgdm9zXG4gICAgICAgICAgICBwcm9kdWl0cyBzZXJvbnQgc3VzcGVuZHVzIMOgIGxhIGZpbiBkZSBsYSBww6lyaW9kZSBkZSBncsOiY2UgKDcgam91cnMpLlxuICAgICAgICAgIDwvc3Bhbj5cbiAgICAgICAgICA8QnV0dG9uIGFzQ2hpbGQgc2l6ZT1cInNtXCIgdmFyaWFudD1cIm91dGxpbmVcIiBjbGFzc05hbWU9XCJzaHJpbmstMCBib3JkZXItZGVzdHJ1Y3RpdmUvNDBcIj5cbiAgICAgICAgICAgIDxMaW5rIHRvPXtiaWxsaW5nVXJsfT5Sw6lndWxhcmlzZXI8L0xpbms+XG4gICAgICAgICAgPC9CdXR0b24+XG4gICAgICAgIDwvQWxlcnREZXNjcmlwdGlvbj5cbiAgICAgIDwvQWxlcnQ+XG4gICAgKTtcbiAgfVxuXG4gIGlmIChcbiAgICBhY2Nlc3Muc3RhdHVzID09PSAndHJpYWxpbmcnICYmXG4gICAgYWNjZXNzLnRyaWFsRGF5c1JlbWFpbmluZyAhPT0gbnVsbCAmJlxuICAgIGFjY2Vzcy50cmlhbERheXNSZW1haW5pbmcgPD0gN1xuICApIHtcbiAgICByZXR1cm4gKFxuICAgICAgPEFsZXJ0IGNsYXNzTmFtZT1cIm1iLTYgYm9yZGVyLWFtYmVyLTUwMC81MCBiZy1hbWJlci01MC81MCBkYXJrOmJnLWFtYmVyLTk1MC8yMFwiPlxuICAgICAgICA8QWxlcnRUcmlhbmdsZSBjbGFzc05hbWU9XCJoLTQgdy00IHRleHQtYW1iZXItNjAwXCIgLz5cbiAgICAgICAgPEFsZXJ0VGl0bGUgY2xhc3NOYW1lPVwidGV4dC1hbWJlci05MDAgZGFyazp0ZXh0LWFtYmVyLTEwMFwiPlxuICAgICAgICAgIEVzc2FpIGdyYXR1aXQg4oCUIHthY2Nlc3MudHJpYWxEYXlzUmVtYWluaW5nfSBqb3Vye2FjY2Vzcy50cmlhbERheXNSZW1haW5pbmcgPiAxID8gJ3MnIDogJyd9eycgJ31cbiAgICAgICAgICByZXN0YW50e2FjY2Vzcy50cmlhbERheXNSZW1haW5pbmcgPiAxID8gJ3MnIDogJyd9XG4gICAgICAgIDwvQWxlcnRUaXRsZT5cbiAgICAgICAgPEFsZXJ0RGVzY3JpcHRpb24gY2xhc3NOYW1lPVwiZmxleCBmbGV4LWNvbCBnYXAtMyBzbTpmbGV4LXJvdyBzbTppdGVtcy1jZW50ZXIgc206anVzdGlmeS1iZXR3ZWVuIHRleHQtYW1iZXItOTAwLzkwIGRhcms6dGV4dC1hbWJlci0xMDAvOTBcIj5cbiAgICAgICAgICA8c3Bhbj5cbiAgICAgICAgICAgIENob2lzaXNzZXogdW4gcGxhbiBhdmFudCBsYSBmaW4gZGUgbCZhcG9zO2Vzc2FpIHBvdXIgY29uc2VydmVyIGwmYXBvczthY2PDqHMgYXV4IHByb2R1aXRzXG4gICAgICAgICAgICBwaHlzaXF1ZXMuXG4gICAgICAgICAgPC9zcGFuPlxuICAgICAgICAgIDxCdXR0b24gYXNDaGlsZCBzaXplPVwic21cIiB2YXJpYW50PVwib3V0bGluZVwiIGNsYXNzTmFtZT1cInNocmluay0wXCI+XG4gICAgICAgICAgICA8TGluayB0bz17YmlsbGluZ1VybH0+Q2hvaXNpciB1biBwbGFuPC9MaW5rPlxuICAgICAgICAgIDwvQnV0dG9uPlxuICAgICAgICA8L0FsZXJ0RGVzY3JpcHRpb24+XG4gICAgICA8L0FsZXJ0PlxuICAgICk7XG4gIH1cblxuICByZXR1cm4gbnVsbDtcbn1cbiJdLCJuYW1lcyI6WyJMaW5rIiwiQWxlcnRUcmlhbmdsZSIsIkNyZWRpdENhcmQiLCJBbGVydCIsIkFsZXJ0RGVzY3JpcHRpb24iLCJBbGVydFRpdGxlIiwiQnV0dG9uIiwidXNlU3RvcmVQaHlzaWNhbEFjY2VzcyIsImZvcm1hdCIsImZyIiwicGh5c2ljYWxQbGFuTGFiZWwiLCJQaHlzaWNhbFN1YnNjcmlwdGlvbkFsZXJ0Iiwic3RvcmVJZCIsImFjY2VzcyIsImxvYWRpbmciLCJzdGF0dXMiLCJhbGxvd2VkIiwiYmlsbGluZ1VybCIsInBlcmlvZEVuZExhYmVsIiwiY3VycmVudFBlcmlvZEVuZCIsIkRhdGUiLCJsb2NhbGUiLCJ2YXJpYW50IiwiY2xhc3NOYW1lIiwic3BhbiIsInBsYW5OYW1lIiwicGxhblNsdWciLCJhc0NoaWxkIiwic2l6ZSIsInRvIiwidHJpYWxEYXlzUmVtYWluaW5nIl0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7QUFBQSxTQUFTQSxJQUFJLFFBQVEsbUJBQW1CO0FBQ3hDLFNBQVNDLGFBQWEsRUFBRUMsVUFBVSxRQUFRLGVBQWU7QUFDekQsU0FBU0MsS0FBSyxFQUFFQyxnQkFBZ0IsRUFBRUMsVUFBVSxRQUFRLHdCQUF3QjtBQUM1RSxTQUFTQyxNQUFNLFFBQVEseUJB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

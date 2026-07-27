@@ -74,7 +74,7 @@ import type { Store as ThemedStore } from '@/hooks/useStores';
 
 /** Colonnes réelles sur `public.products` (alignées types Supabase). Pas de video_url / variants JSON sur cette table en prod. */
 const PRODUCT_DETAIL_COLUMNS =
-  'id, store_id, slug, name, description, short_description, category, product_type, is_active, is_draft, price, promotional_price, currency, image_url, images, tags, stock, rating, reviews_count, created_at, updated_at, payment_options, pricing_model, sale_start_date, sale_end_date, free_product_id, paid_product_id, is_free_preview, preview_content_description, licensing_type, license_terms, password_protected, purchase_limit, downloadable_files, custom_fields, faqs';
+  'id, store_id, slug, name, description, short_description, category, product_type, is_active, is_draft, price, compare_at_price, promotional_price, currency, image_url, images, tags, stock, rating, reviews_count, created_at, updated_at, payment_options, pricing_model, sale_start_date, sale_end_date, free_product_id, paid_product_id, is_free_preview, preview_content_description, licensing_type, license_terms, password_protected, purchase_limit, downloadable_files, custom_fields, faqs';
 
 const PRODUCT_DETAIL_SELECT_WITH_AFFILIATE = `${PRODUCT_DETAIL_COLUMNS}, product_affiliate_settings!left(affiliate_enabled, commission_rate)`;
 
@@ -130,6 +130,7 @@ type ExtendedProduct = Product & {
   sale_start_date?: string | null;
   sale_end_date?: string | null;
   pricing_model?: string | null;
+  compare_at_price?: number | null;
   product_affiliate_settings?: Array<{
     commission_rate: number;
     affiliate_enabled: boolean;
@@ -313,30 +314,46 @@ const ProductDetails = () => {
   // Prix affiché cohérent avec Marketplace
   const displayPriceInfo = useMemo(() => {
     if (!product) return null;
-    const promoPrice = product.promotional_price ?? undefined;
-    const hasPromo = promoPrice !== undefined && promoPrice < product.price;
-    if (hasPromo && promoPrice !== undefined) {
+
+    let currentPrice = product.price || 0;
+    let crossedOutPrice: number | null = null;
+    
+    // Check for different promo price schemas based on product type
+    const backendPromotionalPrice = (product as any).promotional_price;
+    const backendCompareAtPrice = (product as any).compare_at_price;
+    
+    if (backendPromotionalPrice && backendPromotionalPrice < product.price) {
+      // Service/Digital schema: price is regular, promotional_price is discounted
+      currentPrice = backendPromotionalPrice;
+      crossedOutPrice = product.price;
+    } else if (backendCompareAtPrice && backendCompareAtPrice > product.price) {
+      // Physical/Artist/Course schema: price is discounted, compare_at_price is regular
+      currentPrice = product.price;
+      crossedOutPrice = backendCompareAtPrice;
+    }
+
+    if (crossedOutPrice !== null && crossedOutPrice > currentPrice) {
       return {
-        price: promoPrice,
-        originalPrice: product.price,
-        discount: calculateDiscount(product.price, promoPrice),
+        price: currentPrice,
+        originalPrice: crossedOutPrice,
+        discount: calculateDiscount(crossedOutPrice, currentPrice),
       };
     }
+
     return {
-      price: product.price,
+      price: currentPrice,
+      originalPrice: null,
+      discount: 0,
     };
   }, [product]);
 
   const hasPromo = useMemo(() => {
-    if (!product) return false;
-    const promoPrice = product.promotional_price ?? undefined;
-    return promoPrice !== undefined && promoPrice < product.price;
-  }, [product]);
+    return displayPriceInfo?.originalPrice !== null;
+  }, [displayPriceInfo]);
 
   const discountPercent = useMemo(() => {
-    if (!hasPromo || !product || !product.promotional_price) return 0;
-    return calculateDiscount(product.price, product.promotional_price);
-  }, [hasPromo, product]);
+    return displayPriceInfo?.discount || 0;
+  }, [displayPriceInfo]);
 
   const physicalCheckout = useMemo(
     () =>

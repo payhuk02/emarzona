@@ -1,0 +1,54 @@
+import { defineIntegration, _INTERNAL_copyFlagsFromScopeToEvent, _INTERNAL_insertFlagToScope, _INTERNAL_addFeatureFlagToActiveSpan } from "/node_modules/@sentry/core/build/esm/index.js?v=3ea6c1b9";
+
+/**
+ * Sentry integration for capturing feature flag evaluations from LaunchDarkly.
+ *
+ * See the [feature flag documentation](https://develop.sentry.dev/sdk/expected-features/#feature-flags) for more information.
+ *
+ * @example
+ * ```
+ * import * as Sentry from '@sentry/browser';
+ * import {launchDarklyIntegration, buildLaunchDarklyFlagUsedInspector} from '@sentry/browser';
+ * import * as LaunchDarkly from 'launchdarkly-js-client-sdk';
+ *
+ * Sentry.init(..., integrations: [launchDarklyIntegration()])
+ * const ldClient = LaunchDarkly.initialize(..., {inspectors: [buildLaunchDarklyFlagUsedHandler()]});
+ * ```
+ */
+const launchDarklyIntegration = defineIntegration(() => {
+  return {
+    name: 'LaunchDarkly',
+
+    processEvent(event, _hint, _client) {
+      return _INTERNAL_copyFlagsFromScopeToEvent(event);
+    },
+  };
+}) ;
+
+/**
+ * LaunchDarkly hook to listen for and buffer flag evaluations. This needs to
+ * be registered as an 'inspector' in LaunchDarkly initialize() options,
+ * separately from `launchDarklyIntegration`. Both the hook and the integration
+ * are needed to capture LaunchDarkly flags.
+ */
+function buildLaunchDarklyFlagUsedHandler() {
+  return {
+    name: 'sentry-flag-auditor',
+    type: 'flag-used',
+
+    synchronous: true,
+
+    /**
+     * Handle a flag evaluation by storing its name and value on the current scope.
+     */
+    method: (flagKey, flagDetail, _context) => {
+      _INTERNAL_insertFlagToScope(flagKey, flagDetail.value);
+      _INTERNAL_addFeatureFlagToActiveSpan(flagKey, flagDetail.value);
+    },
+  };
+}
+
+export { buildLaunchDarklyFlagUsedHandler, launchDarklyIntegration };
+                                       
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW50ZWdyYXRpb24uanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uLy4uLy4uLy4uL3NyYy9pbnRlZ3JhdGlvbnMvZmVhdHVyZUZsYWdzL2xhdW5jaGRhcmtseS9pbnRlZ3JhdGlvbi50cyJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgdHlwZSB7IENsaWVudCwgRXZlbnQsIEV2ZW50SGludCwgSW50ZWdyYXRpb25GbiB9IGZyb20gJ0BzZW50cnkvY29yZSc7XG5pbXBvcnQge1xuICBfSU5URVJOQUxfYWRkRmVhdHVyZUZsYWdUb0FjdGl2ZVNwYW4sXG4gIF9JTlRFUk5BTF9jb3B5RmxhZ3NGcm9tU2NvcGVUb0V2ZW50LFxuICBfSU5URVJOQUxfaW5zZXJ0RmxhZ1RvU2NvcGUsXG4gIGRlZmluZUludGVncmF0aW9uLFxufSBmcm9tICdAc2VudHJ5L2NvcmUnO1xuaW1wb3J0IHR5cGUgeyBMRENvbnRleHQsIExERXZhbHVhdGlvbkRldGFpbCwgTERJbnNwZWN0aW9uRmxhZ1VzZWRIYW5kbGVyIH0gZnJvbSAnLi90eXBlcyc7XG5cbi8qKlxuICogU2VudHJ5IGludGVncmF0aW9uIGZvciBjYXB0dXJpbmcgZmVhdHVyZSBmbGFnIGV2YWx1YXRpb25zIGZyb20gTGF1bmNoRGFya2x5LlxuICpcbiAqIFNlZSB0aGUgW2ZlYXR1cmUgZmxhZyBkb2N1bWVudGF0aW9uXShodHRwczovL2RldmVsb3Auc2VudHJ5LmRldi9zZGsvZXhwZWN0ZWQtZmVhdHVyZXMvI2ZlYXR1cmUtZmxhZ3MpIGZvciBtb3JlIGluZm9ybWF0aW9uLlxuICpcbiAqIEBleGFtcGxlXG4gKiBgYGBcbiAqIGltcG9ydCAqIGFzIFNlbnRyeSBmcm9tICdAc2VudHJ5L2Jyb3dzZXInO1xuICogaW1wb3J0IHtsYXVuY2hEYXJrbHlJbnRlZ3JhdGlvbiwgYnVpbGRMYXVuY2hEYXJrbHlGbGFnVXNlZEluc3BlY3Rvcn0gZnJvbSAnQHNlbnRyeS9icm93c2VyJztcbiAqIGltcG9ydCAqIGFzIExhdW5jaERhcmtseSBmcm9tICdsYXVuY2hkYXJrbHktanMtY2xpZW50LXNkayc7XG4gKlxuICogU2VudHJ5LmluaXQoLi4uLCBpbnRlZ3JhdGlvbnM6IFtsYXVuY2hEYXJrbHlJbnRlZ3JhdGlvbigpXSlcbiAqIGNvbnN0IGxkQ2xpZW50ID0gTGF1bmNoRGFya2x5LmluaXRpYWxpemUoLi4uLCB7aW5zcGVjdG9yczogW2J1aWxkTGF1bmNoRGFya2x5RmxhZ1VzZWRIYW5kbGVyKCldfSk7XG4gKiBgYGBcbiAqL1xuZXhwb3J0IGNvbnN0IGxhdW5jaERhcmtseUludGVncmF0aW9uID0gZGVmaW5lSW50ZWdyYXRpb24oKCkgPT4ge1xuICByZXR1cm4ge1xuICAgIG5hbWU6ICdMYXVuY2hEYXJrbHknLFxuXG4gICAgcHJvY2Vzc0V2ZW50KGV2ZW50OiBFdmVudCwgX2hpbnQ6IEV2ZW50SGludCwgX2NsaWVudDogQ2xpZW50KTogRXZlbnQge1xuICAgICAgcmV0dXJuIF9JTlRFUk5BTF9jb3B5RmxhZ3NGcm9tU2NvcGVUb0V2ZW50KGV2ZW50KTtcbiAgICB9LFxuICB9O1xufSkgc2F0aXNmaWVzIEludGVncmF0aW9uRm47XG5cbi8qKlxuICogTGF1bmNoRGFya2x5IGhvb2sgdG8gbGlzdGVuIGZvciBhbmQgYnVmZmVyIGZsYWcgZXZhbHVhdGlvbnMuIFRoaXMgbmVlZHMgdG9cbiAqIGJlIHJlZ2lzdGVyZWQgYXMgYW4gJ2luc3BlY3RvcicgaW4gTGF1bmNoRGFya2x5IGluaXRpYWxpemUoKSBvcHRpb25zLFxuICogc2VwYXJhdGVseSBmcm9tIGBsYXVuY2hEYXJrbHlJbnRlZ3JhdGlvbmAuIEJvdGggdGhlIGhvb2sgYW5kIHRoZSBpbnRlZ3JhdGlvblxuICogYXJlIG5lZWRlZCB0byBjYXB0dXJlIExhdW5jaERhcmtseSBmbGFncy5cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIGJ1aWxkTGF1bmNoRGFya2x5RmxhZ1VzZWRIYW5kbGVyKCk6IExESW5zcGVjdGlvbkZsYWdVc2VkSGFuZGxlciB7XG4gIHJldHVybiB7XG4gICAgbmFtZTogJ3NlbnRyeS1mbGFnLWF1ZGl0b3InLFxuICAgIHR5cGU6ICdmbGFnLXVzZWQnLFxuXG4gICAgc3luY2hyb25vdXM6IHRydWUsXG5cbiAgICAvKipcbiAgICAgKiBIYW5kbGUgYSBmbGFnIGV2YWx1YXRpb24gYnkgc3RvcmluZyBpdHMgbmFtZSBhbmQgdmFsdWUgb24gdGhlIGN1cnJlbnQgc2NvcGUuXG4gICAgICovXG4gICAgbWV0aG9kOiAoZmxhZ0tleTogc3RyaW5nLCBmbGFnRGV0YWlsOiBMREV2YWx1YXRpb25EZXRhaWwsIF9jb250ZXh0OiBMRENvbnRleHQpID0+IHtcbiAgICAgIF9JTlRFUk5BTF9pbnNlcnRGbGFnVG9TY29wZShmbGFnS2V5LCBmbGFnRGV0YWlsLnZhbHVlKTtcbiAgICAgIF9JTlRFUk5BTF9hZGRGZWF0dXJlRmxhZ1RvQWN0aXZlU3BhbihmbGFnS2V5LCBmbGFnRGV0YWlsLnZhbHVlKTtcbiAgICB9LFxuICB9O1xufVxuIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7O0FBU0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO01BQ2EsdUJBQUEsR0FBMEIsaUJBQWlCLENBQUMsTUFBTTtBQUMvRCxFQUFFLE9BQU87QUFDVCxJQUFJLElBQUksRUFBRSxjQUFjOztBQUV4QixJQUFJLFlBQVksQ0FBQyxLQUFLLEVBQVMsS0FBSyxFQUFhLE9BQU8sRUFBaUI7QUFDekUsTUFBTSxPQUFPLG1DQUFtQyxDQUFDLEtBQUssQ0FBQztBQUN2RCxJQUFJLENBQUM7QUFDTCxHQUFHO0FBQ0gsQ0FBQyxDQUFBOztBQUVEO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNPLFNBQVMsZ0NBQWdDLEdBQWdDO0FBQ2hGLEVBQUUsT0FBTztBQUNULElBQUksSUFBSSxFQUFFLHFCQUFxQjtBQUMvQixJQUFJLElBQUksRUFBRSxXQUFXOztBQUVyQixJQUFJLFdBQVcsRUFBRSxJQUFJOztBQUVyQjtBQUNBO0FBQ0E7QUFDQSxJQUFJLE1BQU0sRUFBRSxDQUFDLE9BQU8sRUFBVSxVQUFVLEVBQXNCLFFBQVEsS0FBZ0I7QUFDdEYsTUFBTSwyQkFBMkIsQ0FBQyxPQUFPLEVBQUUsVUFBVSxDQUFDLEtBQUssQ0FBQztBQUM1RCxNQUFNLG9DQUFvQyxDQUFDLE9BQU8sRUFBRSxVQUFVLENBQUMsS0FBSyxDQUFDO0FBQ3JFLElBQUksQ0FBQztBQUNMLEdBQUc7QUFDSDs7OzsiLCJ4X2dvb2dsZV9pZ25vcmVMaXN0IjpbMF19

@@ -1,0 +1,29 @@
+import { growthbookIntegration as growthbookIntegration$1 } from "/node_modules/@sentry/core/build/esm/index.js?v=a52cce50";
+
+/**
+ * Sentry integration for capturing feature flag evaluations from GrowthBook.
+ *
+ * See the feature flag documentation: https://develop.sentry.dev/sdk/expected-features/#feature-flags
+ *
+ * @example
+ * ```
+ * import { GrowthBook } from '@growthbook/growthbook';
+ * import * as Sentry from '@sentry/browser';
+ *
+ * Sentry.init({
+ *   dsn: '___PUBLIC_DSN___',
+ *   integrations: [Sentry.growthbookIntegration({ growthbookClass: GrowthBook })],
+ * });
+ *
+ * const gb = new GrowthBook();
+ * gb.isOn('my-feature');
+ * Sentry.captureException(new Error('something went wrong'));
+ * ```
+ */
+const growthbookIntegration = (({ growthbookClass }) =>
+  growthbookIntegration$1({ growthbookClass })) ;
+
+export { growthbookIntegration };
+                                       
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW50ZWdyYXRpb24uanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uLy4uLy4uLy4uL3NyYy9pbnRlZ3JhdGlvbnMvZmVhdHVyZUZsYWdzL2dyb3d0aGJvb2svaW50ZWdyYXRpb24udHMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHR5cGUgeyBJbnRlZ3JhdGlvbkZuIH0gZnJvbSAnQHNlbnRyeS9jb3JlJztcbmltcG9ydCB7IGdyb3d0aGJvb2tJbnRlZ3JhdGlvbiBhcyBjb3JlR3Jvd3RoYm9va0ludGVncmF0aW9uIH0gZnJvbSAnQHNlbnRyeS9jb3JlJztcbmltcG9ydCB0eXBlIHsgR3Jvd3RoQm9va0NsYXNzIH0gZnJvbSAnLi90eXBlcyc7XG5cbi8qKlxuICogU2VudHJ5IGludGVncmF0aW9uIGZvciBjYXB0dXJpbmcgZmVhdHVyZSBmbGFnIGV2YWx1YXRpb25zIGZyb20gR3Jvd3RoQm9vay5cbiAqXG4gKiBTZWUgdGhlIGZlYXR1cmUgZmxhZyBkb2N1bWVudGF0aW9uOiBodHRwczovL2RldmVsb3Auc2VudHJ5LmRldi9zZGsvZXhwZWN0ZWQtZmVhdHVyZXMvI2ZlYXR1cmUtZmxhZ3NcbiAqXG4gKiBAZXhhbXBsZVxuICogYGBgXG4gKiBpbXBvcnQgeyBHcm93dGhCb29rIH0gZnJvbSAnQGdyb3d0aGJvb2svZ3Jvd3RoYm9vayc7XG4gKiBpbXBvcnQgKiBhcyBTZW50cnkgZnJvbSAnQHNlbnRyeS9icm93c2VyJztcbiAqXG4gKiBTZW50cnkuaW5pdCh7XG4gKiAgIGRzbjogJ19fX1BVQkxJQ19EU05fX18nLFxuICogICBpbnRlZ3JhdGlvbnM6IFtTZW50cnkuZ3Jvd3RoYm9va0ludGVncmF0aW9uKHsgZ3Jvd3RoYm9va0NsYXNzOiBHcm93dGhCb29rIH0pXSxcbiAqIH0pO1xuICpcbiAqIGNvbnN0IGdiID0gbmV3IEdyb3d0aEJvb2soKTtcbiAqIGdiLmlzT24oJ215LWZlYXR1cmUnKTtcbiAqIFNlbnRyeS5jYXB0dXJlRXhjZXB0aW9uKG5ldyBFcnJvcignc29tZXRoaW5nIHdlbnQgd3JvbmcnKSk7XG4gKiBgYGBcbiAqL1xuZXhwb3J0IGNvbnN0IGdyb3d0aGJvb2tJbnRlZ3JhdGlvbiA9ICgoeyBncm93dGhib29rQ2xhc3MgfTogeyBncm93dGhib29rQ2xhc3M6IEdyb3d0aEJvb2tDbGFzcyB9KSA9PlxuICBjb3JlR3Jvd3RoYm9va0ludGVncmF0aW9uKHsgZ3Jvd3RoYm9va0NsYXNzIH0pKSBzYXRpc2ZpZXMgSW50ZWdyYXRpb25GbjtcbiJdLCJuYW1lcyI6WyJjb3JlR3Jvd3RoYm9va0ludGVncmF0aW9uIl0sIm1hcHBpbmdzIjoiOztBQUlBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDTyxNQUFNLHlCQUF5QixDQUFDLEVBQUUsZUFBQSxFQUFpQjtBQUMxRCxFQUFFQSx1QkFBeUIsQ0FBQyxFQUFFLGVBQUEsRUFBaUIsQ0FBQyxDQUFBOzs7OyIsInhfZ29vZ2xlX2lnbm9yZUxpc3QiOlswXX0=

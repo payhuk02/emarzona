@@ -1,0 +1,33 @@
+import { getTraceData } from "/node_modules/@sentry/core/build/esm/utils/traceData.js?v=3ea6c1b9";
+
+/**
+ * Returns a string of meta tags that represent the current trace data.
+ *
+ * You can use this to propagate a trace from your server-side rendered Html to the browser.
+ * This function returns up to two meta tags, `sentry-trace` and `baggage`, depending on the
+ * current trace data state.
+ *
+ * @example
+ * Usage example:
+ *
+ * ```js
+ * function renderHtml() {
+ *   return `
+ *     <head>
+ *       ${getTraceMetaTags()}
+ *     </head>
+ *   `;
+ * }
+ * ```
+ *
+ */
+function getTraceMetaTags(traceData) {
+  return Object.entries(traceData || getTraceData())
+    .map(([key, value]) => `<meta name="${key}" content="${value}"/>`)
+    .join('\n');
+}
+
+export { getTraceMetaTags };
+                                
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibWV0YS5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4vc3JjL3V0aWxzL21ldGEudHMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHR5cGUgeyBTZXJpYWxpemVkVHJhY2VEYXRhIH0gZnJvbSAnLi4vdHlwZXMtaG9pc3QvdHJhY2luZyc7XG5pbXBvcnQgeyBnZXRUcmFjZURhdGEgfSBmcm9tICcuL3RyYWNlRGF0YSc7XG5cbi8qKlxuICogUmV0dXJucyBhIHN0cmluZyBvZiBtZXRhIHRhZ3MgdGhhdCByZXByZXNlbnQgdGhlIGN1cnJlbnQgdHJhY2UgZGF0YS5cbiAqXG4gKiBZb3UgY2FuIHVzZSB0aGlzIHRvIHByb3BhZ2F0ZSBhIHRyYWNlIGZyb20geW91ciBzZXJ2ZXItc2lkZSByZW5kZXJlZCBIdG1sIHRvIHRoZSBicm93c2VyLlxuICogVGhpcyBmdW5jdGlvbiByZXR1cm5zIHVwIHRvIHR3byBtZXRhIHRhZ3MsIGBzZW50cnktdHJhY2VgIGFuZCBgYmFnZ2FnZWAsIGRlcGVuZGluZyBvbiB0aGVcbiAqIGN1cnJlbnQgdHJhY2UgZGF0YSBzdGF0ZS5cbiAqXG4gKiBAZXhhbXBsZVxuICogVXNhZ2UgZXhhbXBsZTpcbiAqXG4gKiBgYGBqc1xuICogZnVuY3Rpb24gcmVuZGVySHRtbCgpIHtcbiAqICAgcmV0dXJuIGBcbiAqICAgICA8aGVhZD5cbiAqICAgICAgICR7Z2V0VHJhY2VNZXRhVGFncygpfVxuICogICAgIDwvaGVhZD5cbiAqICAgYDtcbiAqIH1cbiAqIGBgYFxuICpcbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIGdldFRyYWNlTWV0YVRhZ3ModHJhY2VEYXRhPzogU2VyaWFsaXplZFRyYWNlRGF0YSk6IHN0cmluZyB7XG4gIHJldHVybiBPYmplY3QuZW50cmllcyh0cmFjZURhdGEgfHwgZ2V0VHJhY2VEYXRhKCkpXG4gICAgLm1hcCgoW2tleSwgdmFsdWVdKSA9PiBgPG1ldGEgbmFtZT1cIiR7a2V5fVwiIGNvbnRlbnQ9XCIke3ZhbHVlfVwiLz5gKVxuICAgIC5qb2luKCdcXG4nKTtcbn1cbiJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOztBQUdBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNPLFNBQVMsZ0JBQWdCLENBQUMsU0FBUyxFQUFnQztBQUMxRSxFQUFFLE9BQU8sTUFBTSxDQUFDLE9BQU8sQ0FBQyxTQUFBLElBQWEsWUFBWSxFQUFFO0FBQ25ELEtBQUssR0FBRyxDQUFDLENBQUMsQ0FBQyxHQUFHLEVBQUUsS0FBSyxDQUFDLEtBQUssQ0FBQyxZQUFZLEVBQUUsR0FBRyxDQUFDLFdBQVcsRUFBRSxLQUFLLENBQUMsR0FBRyxDQUFDO0FBQ3JFLEtBQUssSUFBSSxDQUFDLElBQUksQ0FBQztBQUNmOzs7OyIsInhfZ29vZ2xlX2lnbm9yZUxpc3QiOlswXX0=

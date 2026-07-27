@@ -1,0 +1,16 @@
+/**
+ * Converts a string-based level into a `SeverityLevel`, normalizing it along the way.
+ *
+ * @param level String representation of desired `SeverityLevel`.
+ * @returns The `SeverityLevel` corresponding to the given string, or 'log' if the string isn't a valid level.
+ */
+function severityLevelFromString(level) {
+  return (
+    level === 'warn' ? 'warning' : ['fatal', 'error', 'warning', 'log', 'info', 'debug'].includes(level) ? level : 'log'
+  ) ;
+}
+
+export { severityLevelFromString };
+                                    
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic2V2ZXJpdHkuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy91dGlscy9zZXZlcml0eS50cyJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgdHlwZSB7IFNldmVyaXR5TGV2ZWwgfSBmcm9tICcuLi90eXBlcy1ob2lzdC9zZXZlcml0eSc7XG5cbi8qKlxuICogQ29udmVydHMgYSBzdHJpbmctYmFzZWQgbGV2ZWwgaW50byBhIGBTZXZlcml0eUxldmVsYCwgbm9ybWFsaXppbmcgaXQgYWxvbmcgdGhlIHdheS5cbiAqXG4gKiBAcGFyYW0gbGV2ZWwgU3RyaW5nIHJlcHJlc2VudGF0aW9uIG9mIGRlc2lyZWQgYFNldmVyaXR5TGV2ZWxgLlxuICogQHJldHVybnMgVGhlIGBTZXZlcml0eUxldmVsYCBjb3JyZXNwb25kaW5nIHRvIHRoZSBnaXZlbiBzdHJpbmcsIG9yICdsb2cnIGlmIHRoZSBzdHJpbmcgaXNuJ3QgYSB2YWxpZCBsZXZlbC5cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIHNldmVyaXR5TGV2ZWxGcm9tU3RyaW5nKGxldmVsOiBTZXZlcml0eUxldmVsIHwgc3RyaW5nKTogU2V2ZXJpdHlMZXZlbCB7XG4gIHJldHVybiAoXG4gICAgbGV2ZWwgPT09ICd3YXJuJyA/ICd3YXJuaW5nJyA6IFsnZmF0YWwnLCAnZXJyb3InLCAnd2FybmluZycsICdsb2cnLCAnaW5mbycsICdkZWJ1ZyddLmluY2x1ZGVzKGxldmVsKSA/IGxldmVsIDogJ2xvZydcbiAgKSBhcyBTZXZlcml0eUxldmVsO1xufVxuIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUVBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNPLFNBQVMsdUJBQXVCLENBQUMsS0FBSyxFQUF5QztBQUN0RixFQUFFO0FBQ0YsSUFBSSxLQUFBLEtBQVUsTUFBQSxHQUFTLFNBQUEsR0FBWSxDQUFDLE9BQU8sRUFBRSxPQUFPLEVBQUUsU0FBUyxFQUFFLEtBQUssRUFBRSxNQUFNLEVBQUUsT0FBTyxDQUFDLENBQUMsUUFBUSxDQUFDLEtBQUssQ0FBQSxHQUFJLEtBQUEsR0FBUTtBQUNuSDtBQUNBOzs7OyIsInhfZ29vZ2xlX2lnbm9yZUxpc3QiOlswXX0=

@@ -1,0 +1,37 @@
+import { getCurrentScope, getIsolationScope } from "/node_modules/@sentry/core/build/esm/currentScopes.js?v=a52cce50";
+import { defineIntegration } from "/node_modules/@sentry/core/build/esm/integration.js?v=a52cce50";
+import { GEN_AI_CONVERSATION_ID_ATTRIBUTE } from "/node_modules/@sentry/core/build/esm/semanticAttributes.js?v=a52cce50";
+
+const INTEGRATION_NAME = 'ConversationId';
+
+const _conversationIdIntegration = (() => {
+  return {
+    name: INTEGRATION_NAME,
+    setup(client) {
+      client.on('spanStart', (span) => {
+        const scopeData = getCurrentScope().getScopeData();
+        const isolationScopeData = getIsolationScope().getScopeData();
+
+        const conversationId = scopeData.conversationId || isolationScopeData.conversationId;
+
+        if (conversationId) {
+          span.setAttribute(GEN_AI_CONVERSATION_ID_ATTRIBUTE, conversationId);
+        }
+      });
+    },
+  };
+}) ;
+
+/**
+ * Automatically applies conversation ID from scope to spans.
+ *
+ * This integration reads the conversation ID from the current or isolation scope
+ * and applies it to spans when they start. This ensures the conversation ID is
+ * available for all AI-related operations.
+ */
+const conversationIdIntegration = defineIntegration(_conversationIdIntegration);
+
+export { conversationIdIntegration };
+                                          
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiY29udmVyc2F0aW9uSWQuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy9pbnRlZ3JhdGlvbnMvY29udmVyc2F0aW9uSWQudHMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHR5cGUgeyBDbGllbnQgfSBmcm9tICcuLi9jbGllbnQnO1xuaW1wb3J0IHsgZ2V0Q3VycmVudFNjb3BlLCBnZXRJc29sYXRpb25TY29wZSB9IGZyb20gJy4uL2N1cnJlbnRTY29wZXMnO1xuaW1wb3J0IHsgZGVmaW5lSW50ZWdyYXRpb24gfSBmcm9tICcuLi9pbnRlZ3JhdGlvbic7XG5pbXBvcnQgeyBHRU5fQUlfQ09OVkVSU0FUSU9OX0lEX0FUVFJJQlVURSB9IGZyb20gJy4uL3NlbWFudGljQXR0cmlidXRlcyc7XG5pbXBvcnQgdHlwZSB7IEludGVncmF0aW9uRm4gfSBmcm9tICcuLi90eXBlcy1ob2lzdC9pbnRlZ3JhdGlvbic7XG5pbXBvcnQgdHlwZSB7IFNwYW4gfSBmcm9tICcuLi90eXBlcy1ob2lzdC9zcGFuJztcblxuY29uc3QgSU5URUdSQVRJT05fTkFNRSA9ICdDb252ZXJzYXRpb25JZCc7XG5cbmNvbnN0IF9jb252ZXJzYXRpb25JZEludGVncmF0aW9uID0gKCgpID0+IHtcbiAgcmV0dXJuIHtcbiAgICBuYW1lOiBJTlRFR1JBVElPTl9OQU1FLFxuICAgIHNldHVwKGNsaWVudDogQ2xpZW50KSB7XG4gICAgICBjbGllbnQub24oJ3NwYW5TdGFydCcsIChzcGFuOiBTcGFuKSA9PiB7XG4gICAgICAgIGNvbnN0IHNjb3BlRGF0YSA9IGdldEN1cnJlbnRTY29wZSgpLmdldFNjb3BlRGF0YSgpO1xuICAgICAgICBjb25zdCBpc29sYXRpb25TY29wZURhdGEgPSBnZXRJc29sYXRpb25TY29wZSgpLmdldFNjb3BlRGF0YSgpO1xuXG4gICAgICAgIGNvbnN0IGNvbnZlcnNhdGlvbklkID0gc2NvcGVEYXRhLmNvbnZlcnNhdGlvbklkIHx8IGlzb2xhdGlvblNjb3BlRGF0YS5jb252ZXJzYXRpb25JZDtcblxuICAgICAgICBpZiAoY29udmVyc2F0aW9uSWQpIHtcbiAgICAgICAgICBzcGFuLnNldEF0dHJpYnV0ZShHRU5fQUlfQ09OVkVSU0FUSU9OX0lEX0FUVFJJQlVURSwgY29udmVyc2F0aW9uSWQpO1xuICAgICAgICB9XG4gICAgICB9KTtcbiAgICB9LFxuICB9O1xufSkgc2F0aXNmaWVzIEludGVncmF0aW9uRm47XG5cbi8qKlxuICogQXV0b21hdGljYWxseSBhcHBsaWVzIGNvbnZlcnNhdGlvbiBJRCBmcm9tIHNjb3BlIHRvIHNwYW5zLlxuICpcbiAqIFRoaXMgaW50ZWdyYXRpb24gcmVhZHMgdGhlIGNvbnZlcnNhdGlvbiBJRCBmcm9tIHRoZSBjdXJyZW50IG9yIGlzb2xhdGlvbiBzY29wZVxuICogYW5kIGFwcGxpZXMgaXQgdG8gc3BhbnMgd2hlbiB0aGV5IHN0YXJ0LiBUaGlzIGVuc3VyZXMgdGhlIGNvbnZlcnNhdGlvbiBJRCBpc1xuICogYXZhaWxhYmxlIGZvciBhbGwgQUktcmVsYXRlZCBvcGVyYXRpb25zLlxuICovXG5leHBvcnQgY29uc3QgY29udmVyc2F0aW9uSWRJbnRlZ3JhdGlvbiA9IGRlZmluZUludGVncmF0aW9uKF9jb252ZXJzYXRpb25JZEludGVncmF0aW9uKTtcbiJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7O0FBT0EsTUFBTSxnQkFBQSxHQUFtQixnQkFBZ0I7O0FBRXpDLE1BQU0sMEJBQUEsSUFBOEIsTUFBTTtBQUMxQyxFQUFFLE9BQU87QUFDVCxJQUFJLElBQUksRUFBRSxnQkFBZ0I7QUFDMUIsSUFBSSxLQUFLLENBQUMsTUFBTSxFQUFVO0FBQzFCLE1BQU0sTUFBTSxDQUFDLEVBQUUsQ0FBQyxXQUFXLEVBQUUsQ0FBQyxJQUFJLEtBQVc7QUFDN0MsUUFBUSxNQUFNLFlBQVksZUFBZSxFQUFFLENBQUMsWUFBWSxFQUFFO0FBQzFELFFBQVEsTUFBTSxxQkFBcUIsaUJBQWlCLEVBQUUsQ0FBQyxZQUFZLEVBQUU7O0FBRXJFLFFBQVEsTUFBTSxpQkFBaUIsU0FBUyxDQUFDLGNBQUEsSUFBa0Isa0JBQWtCLENBQUMsY0FBYzs7QUFFNUYsUUFBUSxJQUFJLGNBQWMsRUFBRTtBQUM1QixVQUFVLElBQUksQ0FBQyxZQUFZLENBQUMsZ0NBQWdDLEVBQUUsY0FBYyxDQUFDO0FBQzdFLFFBQVE7QUFDUixNQUFNLENBQUMsQ0FBQztBQUNSLElBQUksQ0FBQztBQUNMLEdBQUc7QUFDSCxDQUFDLENBQUE7O0FBRUQ7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7TUFDYSx5QkFBQSxHQUE0QixpQkFBaUIsQ0FBQywwQkFBMEI7Ozs7IiwieF9nb29nbGVfaWdub3JlTGlzdCI6WzBdfQ==

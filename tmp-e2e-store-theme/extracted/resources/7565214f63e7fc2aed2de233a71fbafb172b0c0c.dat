@@ -1,0 +1,45 @@
+import __vite__cjsImport0_react from "/node_modules/.vite/deps/react.js?v=6014a254"; const useMemo = __vite__cjsImport0_react["useMemo"];
+import { useLocation } from "/node_modules/.vite/deps/react-router-dom.js?v=6014a254";
+import { useTranslation } from "/node_modules/.vite/deps/react-i18next.js?v=02b07ad4";
+import { resolveHorizontalNavDomains } from "/src/lib/navigation/resolveHorizontalNav.ts";
+import { resolveHorizontalNavPersona } from "/src/config/navigation.horizontal.ts";
+import { useAdmin } from "/src/hooks/useAdmin.ts";
+import { useStoreContext } from "/src/contexts/StoreContext.tsx";
+import { useStorePhysicalAccess } from "/src/hooks/billing/useStorePhysicalAccess.ts";
+import { useSidebarPersona } from "/src/hooks/useSidebarPersona.ts";
+import { useProgressiveUX } from "/src/hooks/useProgressiveUX.ts";
+export function useHorizontalContextNav() {
+    const { t } = useTranslation();
+    const location = useLocation();
+    const { isAdmin } = useAdmin();
+    const { persona: sidebarPersona } = useSidebarPersona(isAdmin);
+    const { selectedStoreId, selectedStore } = useStoreContext();
+    const { planSlug } = useStorePhysicalAccess(selectedStoreId);
+    const commerceType = selectedStore?.commerce_type;
+    const storeMetadata = selectedStore?.metadata ?? null;
+    const persona = resolveHorizontalNavPersona(location.pathname, sidebarPersona);
+    const { isExpertMode } = useProgressiveUX();
+    return useMemo(()=>resolveHorizontalNavDomains({
+            persona,
+            isPlatformAdmin: isAdmin,
+            physicalPlanSlug: planSlug,
+            commerceType,
+            storeMetadata,
+            isExpertMode,
+            pathname: location.pathname,
+            search: location.search,
+            t
+        }), [
+        persona,
+        isAdmin,
+        planSlug,
+        commerceType,
+        storeMetadata,
+        isExpertMode,
+        location.pathname,
+        location.search,
+        t
+    ]);
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInVzZUhvcml6b250YWxDb250ZXh0TmF2LnRzIl0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7IHVzZU1lbW8gfSBmcm9tICdyZWFjdCc7XG5pbXBvcnQgeyB1c2VMb2NhdGlvbiB9IGZyb20gJ3JlYWN0LXJvdXRlci1kb20nO1xuaW1wb3J0IHsgdXNlVHJhbnNsYXRpb24gfSBmcm9tICdyZWFjdC1pMThuZXh0JztcbmltcG9ydCB7IHJlc29sdmVIb3Jpem9udGFsTmF2RG9tYWlucyB9IGZyb20gJ0AvbGliL25hdmlnYXRpb24vcmVzb2x2ZUhvcml6b250YWxOYXYnO1xuaW1wb3J0IHsgcmVzb2x2ZUhvcml6b250YWxOYXZQZXJzb25hIH0gZnJvbSAnQC9jb25maWcvbmF2aWdhdGlvbi5ob3Jpem9udGFsJztcbmltcG9ydCB7IHVzZUFkbWluIH0gZnJvbSAnQC9ob29rcy91c2VBZG1pbic7XG5pbXBvcnQgeyB1c2VTdG9yZUNvbnRleHQgfSBmcm9tICdAL2NvbnRleHRzL1N0b3JlQ29udGV4dCc7XG5pbXBvcnQgeyB1c2VTdG9yZVBoeXNpY2FsQWNjZXNzIH0gZnJvbSAnQC9ob29rcy9iaWxsaW5nL3VzZVN0b3JlUGh5c2ljYWxBY2Nlc3MnO1xuaW1wb3J0IHsgdXNlU2lkZWJhclBlcnNvbmEgfSBmcm9tICdAL2hvb2tzL3VzZVNpZGViYXJQZXJzb25hJztcbmltcG9ydCB7IHVzZVByb2dyZXNzaXZlVVggfSBmcm9tICdAL2hvb2tzL3VzZVByb2dyZXNzaXZlVVgnO1xuXG5leHBvcnQgZnVuY3Rpb24gdXNlSG9yaXpvbnRhbENvbnRleHROYXYoKSB7XG4gIGNvbnN0IHsgdCB9ID0gdXNlVHJhbnNsYXRpb24oKTtcbiAgY29uc3QgbG9jYXRpb24gPSB1c2VMb2NhdGlvbigpO1xuICBjb25zdCB7IGlzQWRtaW4gfSA9IHVzZUFkbWluKCk7XG4gIGNvbnN0IHsgcGVyc29uYTogc2lkZWJhclBlcnNvbmEgfSA9IHVzZVNpZGViYXJQZXJzb25hKGlzQWRtaW4pO1xuICBjb25zdCB7IHNlbGVjdGVkU3RvcmVJZCwgc2VsZWN0ZWRTdG9yZSB9ID0gdXNlU3RvcmVDb250ZXh0KCk7XG4gIGNvbnN0IHsgcGxhblNsdWcgfSA9IHVzZVN0b3JlUGh5c2ljYWxBY2Nlc3Moc2VsZWN0ZWRTdG9yZUlkKTtcbiAgY29uc3QgY29tbWVyY2VUeXBlID0gc2VsZWN0ZWRTdG9yZT8uY29tbWVyY2VfdHlwZTtcbiAgY29uc3Qgc3RvcmVNZXRhZGF0YSA9IHNlbGVjdGVkU3RvcmU/Lm1ldGFkYXRhID8/IG51bGw7XG4gIGNvbnN0IHBlcnNvbmEgPSByZXNvbHZlSG9yaXpvbnRhbE5hdlBlcnNvbmEobG9jYXRpb24ucGF0aG5hbWUsIHNpZGViYXJQZXJzb25hKTtcbiAgY29uc3QgeyBpc0V4cGVydE1vZGUgfSA9IHVzZVByb2dyZXNzaXZlVVgoKTtcblxuICByZXR1cm4gdXNlTWVtbyhcbiAgICAoKSA9PlxuICAgICAgcmVzb2x2ZUhvcml6b250YWxOYXZEb21haW5zKHtcbiAgICAgICAgcGVyc29uYSxcbiAgICAgICAgaXNQbGF0Zm9ybUFkbWluOiBpc0FkbWluLFxuICAgICAgICBwaHlzaWNhbFBsYW5TbHVnOiBwbGFuU2x1ZyxcbiAgICAgICAgY29tbWVyY2VUeXBlLFxuICAgICAgICBzdG9yZU1ldGFkYXRhLFxuICAgICAgICBpc0V4cGVydE1vZGUsXG4gICAgICAgIHBhdGhuYW1lOiBsb2NhdGlvbi5wYXRobmFtZSxcbiAgICAgICAgc2VhcmNoOiBsb2NhdGlvbi5zZWFyY2gsXG4gICAgICAgIHQsXG4gICAgICB9KSxcbiAgICBbXG4gICAgICBwZXJzb25hLFxuICAgICAgaXNBZG1pbixcbiAgICAgIHBsYW5TbHVnLFxuICAgICAgY29tbWVyY2VUeXBlLFxuICAgICAgc3RvcmVNZXRhZGF0YSxcbiAgICAgIGlzRXhwZXJ0TW9kZSxcbiAgICAgIGxvY2F0aW9uLnBhdGhuYW1lLFxuICAgICAgbG9jYXRpb24uc2VhcmNoLFxuICAgICAgdCxcbiAgICBdXG4gICk7XG59XG4iXSwibmFtZXMiOlsidXNlTWVtbyIsInVzZUxvY2F0aW9uIiwidXNlVHJhbnNsYXRpb24iLCJyZXNvbHZlSG9yaXpvbnRhbE5hdkRvbWFpbnMiLCJyZXNvbHZlSG9yaXpvbnRhbE5hdlBlcnNvbmEiLCJ1c2VBZG1pbiIsInVzZVN0b3JlQ29udGV4dCIsInVzZVN0b3JlUGh5c2ljYWxBY2Nlc3MiLCJ1c2VTaWRlYmFyUGVyc29uYSIsInVzZVByb2dyZXNzaXZlVVgiLCJ1c2VIb3Jpem9udGFsQ29udGV4dE5hdiIsInQiLCJsb2NhdGlvbiIsImlzQWRtaW4iLCJwZXJzb25hIiwic2lkZWJhclBlcnNvbmEiLCJzZWxlY3RlZFN0b3JlSWQiLCJzZWxlY3RlZFN0b3JlIiwicGxhblNsdWciLCJjb21tZXJjZVR5cGUiLCJjb21tZXJjZV90eXBlIiwic3RvcmVNZXRhZGF0YSIsIm1ldGFkYXRhIiwicGF0aG5hbWUiLCJpc0V4cGVydE1vZGUiLCJpc1BsYXRmb3JtQWRtaW4iLCJwaHlzaWNhbFBsYW5TbHVnIiwic2VhcmNoIl0sIm1hcHBpbmdzIjoiQUFBQSxTQUFTQSxPQUFPLFFBQVEsUUFBUTtBQUNoQyxTQUFTQyxXQUFXLFFBQVEsbUJBQW1CO0FBQy9DLFNBQVNDLGNBQWMsUUFBUSxnQkFBZ0I7QUFDL0MsU0FBU0MsMkJBQTJCLFFBQVEsd0NBQXdDO0FBQ3BGLFNBQVNDLDJCQUEyQixRQUFRLGlDQUFpQztBQUM3RSxTQUFTQyxRQUFRLFFBQVEsbUJBQW1CO0FBQzVDLFNBQVNDLGVBQWUsUUFBUSwwQkFBMEI7QUFDMUQsU0FBU0Msc0JBQXNCLFFBQVEseUNBQXlDO0FBQ2hGLFNBQVNDLGlCQUFpQixRQUFRLDRCQUE0QjtBQUM5RCxTQUFTQyxnQkFBZ0IsUUFBUSwyQkFBMkI7QUFFNUQsT0FBTyxTQUFTQztJQUNkLE1BQU0sRUFBRUMsQ0FBQyxFQUFFLEdBQUdUO0lBQ2QsTUFBTVUsV0FBV1g7SUFDakIsTUFBTSxFQUFFWSxPQUFPLEVBQUUsR0FBR1I7SUFDcEIsTUFBTSxFQUFFUyxTQUFTQyxjQUFjLEVBQUUsR0FBR1Asa0JBQWtCSztJQUN0RCxNQUFNLEVBQUVHLGVBQWUsRUFBRUMsYUFBYSxFQUFFLEdBQUdYO0lBQzNDLE1BQU0sRUFBRVksUUFBUSxFQUFFLEdBQUdYLHVCQUF1QlM7SUFDNUMsTUFBTUcsZUFBZUYsZUFBZUc7SUFDcEMsTUFBTUMsZ0JBQWdCSixlQUFlSyxZQUFZO0lBQ2pELE1BQU1SLFVBQVVWLDRCQUE0QlEsU0FBU1csUUFBUSxFQUFFUjtJQUMvRCxNQUFNLEVBQUVTLFlBQVksRUFBRSxHQUFHZjtJQUV6QixPQUFPVCxRQUNMLElBQ0VHLDRCQUE0QjtZQUMxQlc7WUFDQVcsaUJBQWlCWjtZQUNqQmEsa0JBQWtCUjtZQUNsQkM7WUFDQUU7WUFDQUc7WUFDQUQsVUFBVVgsU0FBU1csUUFBUTtZQUMzQkksUUFBUWYsU0FBU2UsTUFBTTtZQUN2QmhCO1FBQ0YsSUFDRjtRQUNFRztRQUNBRDtRQUNBSztRQUNBQztRQUNBRTtRQUNBRztRQUNBWixTQUFTVyxRQUFRO1FBQ2pCWCxTQUFTZSxNQUFNO1FBQ2ZoQjtLQUNEO0FBRUwifQ==

@@ -1,0 +1,43 @@
+import { parseStringToURLObject, isURLObjectRelative } from "/node_modules/@sentry/core/build/esm/utils/url.js?v=a52cce50";
+
+/**
+ * Checks whether given url points to Sentry server
+ *
+ * @param url url to verify
+ */
+function isSentryRequestUrl(url, client) {
+  const dsn = client?.getDsn();
+  const tunnel = client?.getOptions().tunnel;
+  return checkDsn(url, dsn) || checkTunnel(url, tunnel);
+}
+
+function checkTunnel(url, tunnel) {
+  if (!tunnel) {
+    return false;
+  }
+
+  return removeTrailingSlash(url) === removeTrailingSlash(tunnel);
+}
+
+function checkDsn(url, dsn) {
+  // Requests to Sentry's ingest endpoint must have a `sentry_key` in the query string
+  // This is equivalent to the public_key which is required in the DSN
+  // see https://develop.sentry.dev/sdk/overview/#parsing-the-dsn
+  // Therefore, a request to the same host and with a `sentry_key` in the query string
+  // can be considered a request to the ingest endpoint.
+  const urlParts = parseStringToURLObject(url);
+  if (!urlParts || isURLObjectRelative(urlParts)) {
+    return false;
+  }
+
+  return dsn ? urlParts.host.includes(dsn.host) && /(^|&|\?)sentry_key=/.test(urlParts.search) : false;
+}
+
+function removeTrailingSlash(str) {
+  return str[str.length - 1] === '/' ? str.slice(0, -1) : str;
+}
+
+export { isSentryRequestUrl };
+                                              
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaXNTZW50cnlSZXF1ZXN0VXJsLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi9zcmMvdXRpbHMvaXNTZW50cnlSZXF1ZXN0VXJsLnRzIl0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB0eXBlIHsgQ2xpZW50IH0gZnJvbSAnLi4vY2xpZW50JztcbmltcG9ydCB0eXBlIHsgRHNuQ29tcG9uZW50cyB9IGZyb20gJy4uL3R5cGVzLWhvaXN0L2Rzbic7XG5pbXBvcnQgeyBpc1VSTE9iamVjdFJlbGF0aXZlLCBwYXJzZVN0cmluZ1RvVVJMT2JqZWN0IH0gZnJvbSAnLi91cmwnO1xuXG4vKipcbiAqIENoZWNrcyB3aGV0aGVyIGdpdmVuIHVybCBwb2ludHMgdG8gU2VudHJ5IHNlcnZlclxuICpcbiAqIEBwYXJhbSB1cmwgdXJsIHRvIHZlcmlmeVxuICovXG5leHBvcnQgZnVuY3Rpb24gaXNTZW50cnlSZXF1ZXN0VXJsKHVybDogc3RyaW5nLCBjbGllbnQ6IENsaWVudCB8IHVuZGVmaW5lZCk6IGJvb2xlYW4ge1xuICBjb25zdCBkc24gPSBjbGllbnQ/LmdldERzbigpO1xuICBjb25zdCB0dW5uZWwgPSBjbGllbnQ/LmdldE9wdGlvbnMoKS50dW5uZWw7XG4gIHJldHVybiBjaGVja0Rzbih1cmwsIGRzbikgfHwgY2hlY2tUdW5uZWwodXJsLCB0dW5uZWwpO1xufVxuXG5mdW5jdGlvbiBjaGVja1R1bm5lbCh1cmw6IHN0cmluZywgdHVubmVsOiBzdHJpbmcgfCB1bmRlZmluZWQpOiBib29sZWFuIHtcbiAgaWYgKCF0dW5uZWwpIHtcbiAgICByZXR1cm4gZmFsc2U7XG4gIH1cblxuICByZXR1cm4gcmVtb3ZlVHJhaWxpbmdTbGFzaCh1cmwpID09PSByZW1vdmVUcmFpbGluZ1NsYXNoKHR1bm5lbCk7XG59XG5cbmZ1bmN0aW9uIGNoZWNrRHNuKHVybDogc3RyaW5nLCBkc246IERzbkNvbXBvbmVudHMgfCB1bmRlZmluZWQpOiBib29sZWFuIHtcbiAgLy8gUmVxdWVzdHMgdG8gU2VudHJ5J3MgaW5nZXN0IGVuZHBvaW50IG11c3QgaGF2ZSBhIGBzZW50cnlfa2V5YCBpbiB0aGUgcXVlcnkgc3RyaW5nXG4gIC8vIFRoaXMgaXMgZXF1aXZhbGVudCB0byB0aGUgcHVibGljX2tleSB3aGljaCBpcyByZXF1aXJlZCBpbiB0aGUgRFNOXG4gIC8vIHNlZSBodHRwczovL2RldmVsb3Auc2VudHJ5LmRldi9zZGsvb3ZlcnZpZXcvI3BhcnNpbmctdGhlLWRzblxuICAvLyBUaGVyZWZvcmUsIGEgcmVxdWVzdCB0byB0aGUgc2FtZSBob3N0IGFuZCB3aXRoIGEgYHNlbnRyeV9rZXlgIGluIHRoZSBxdWVyeSBzdHJpbmdcbiAgLy8gY2FuIGJlIGNvbnNpZGVyZWQgYSByZXF1ZXN0IHRvIHRoZSBpbmdlc3QgZW5kcG9pbnQuXG4gIGNvbnN0IHVybFBhcnRzID0gcGFyc2VTdHJpbmdUb1VSTE9iamVjdCh1cmwpO1xuICBpZiAoIXVybFBhcnRzIHx8IGlzVVJMT2JqZWN0UmVsYXRpdmUodXJsUGFydHMpKSB7XG4gICAgcmV0dXJuIGZhbHNlO1xuICB9XG5cbiAgcmV0dXJuIGRzbiA/IHVybFBhcnRzLmhvc3QuaW5jbHVkZXMoZHNuLmhvc3QpICYmIC8oXnwmfFxcPylzZW50cnlfa2V5PS8udGVzdCh1cmxQYXJ0cy5zZWFyY2gpIDogZmFsc2U7XG59XG5cbmZ1bmN0aW9uIHJlbW92ZVRyYWlsaW5nU2xhc2goc3RyOiBzdHJpbmcpOiBzdHJpbmcge1xuICByZXR1cm4gc3RyW3N0ci5sZW5ndGggLSAxXSA9PT0gJy8nID8gc3RyLnNsaWNlKDAsIC0xKSA6IHN0cjtcbn1cbiJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOztBQUlBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDTyxTQUFTLGtCQUFrQixDQUFDLEdBQUcsRUFBVSxNQUFNLEVBQStCO0FBQ3JGLEVBQUUsTUFBTSxHQUFBLEdBQU0sTUFBTSxFQUFFLE1BQU0sRUFBRTtBQUM5QixFQUFFLE1BQU0sU0FBUyxNQUFNLEVBQUUsVUFBVSxFQUFFLENBQUMsTUFBTTtBQUM1QyxFQUFFLE9BQU8sUUFBUSxDQUFDLEdBQUcsRUFBRSxHQUFHLENBQUEsSUFBSyxXQUFXLENBQUMsR0FBRyxFQUFFLE1BQU0sQ0FBQztBQUN2RDs7QUFFQSxTQUFTLFdBQVcsQ0FBQyxHQUFHLEVBQVUsTUFBTSxFQUErQjtBQUN2RSxFQUFFLElBQUksQ0FBQyxNQUFNLEVBQUU7QUFDZixJQUFJLE9BQU8sS0FBSztBQUNoQixFQUFFOztBQUVGLEVBQUUsT0FBTyxtQkFBbUIsQ0FBQyxHQUFHLE1BQU0sbUJBQW1CLENBQUMsTUFBTSxDQUFDO0FBQ2pFOztBQUVBLFNBQVMsUUFBUSxDQUFDLEdBQUcsRUFBVSxHQUFHLEVBQXNDO0FBQ3hFO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQSxFQUFFLE1BQU0sUUFBQSxHQUFXLHNCQUFzQixDQUFDLEdBQUcsQ0FBQztBQUM5QyxFQUFFLElBQUksQ0FBQyxRQUFBLElBQVksbUJBQW1CLENBQUMsUUFBUSxDQUFDLEVBQUU7QUFDbEQsSUFBSSxPQUFPLEtBQUs7QUFDaEIsRUFBRTs7QUFFRixFQUFFLE9BQU8sTUFBTSxRQUFRLENBQUMsSUFBSSxDQUFDLFFBQVEsQ0FBQyxHQUFHLENBQUMsSUFBSSxDQUFBLElBQUsscUJBQXFCLENBQUMsSUFBSSxDQUFDLFFBQVEsQ0FBQyxNQUFNLENBQUEsR0FBSSxLQUFLO0FBQ3RHOztBQUVBLFNBQVMsbUJBQW1CLENBQUMsR0FBRyxFQUFrQjtBQUNsRCxFQUFFLE9BQU8sR0FBRyxDQUFDLEdBQUcsQ0FBQyxNQUFBLEdBQVMsQ0FBQyxDQUFBLEtBQU0sR0FBQSxHQUFNLEdBQUcsQ0FBQyxLQUFLLENBQUMsQ0FBQyxFQUFFLEVBQUUsQ0FBQSxHQUFJLEdBQUc7QUFDN0Q7Ozs7IiwieF9nb29nbGVfaWdub3JlTGlzdCI6WzBdfQ==

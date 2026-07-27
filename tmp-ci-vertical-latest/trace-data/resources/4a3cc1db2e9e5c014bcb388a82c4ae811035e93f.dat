@@ -1,0 +1,194 @@
+/**
+ * Configuration SEO centralisée pour toutes les pages publiques
+ * Évite la duplication et facilite la maintenance
+ */ import { LANDING_SEO_DEFAULTS } from "/src/lib/landing-seo.ts";
+/**
+ * Map des routes publiques vers leur configuration SEO
+ * Les pages dynamiques (/digital/:id, /physical/:id, etc.) sont gérées dans leurs composants
+ */ export const PAGE_SEO_CONFIG = {
+    // === Pages publiques indexables ===
+    '/': {
+        title: LANDING_SEO_DEFAULTS.title,
+        description: LANDING_SEO_DEFAULTS.description,
+        keywords: LANDING_SEO_DEFAULTS.keywords
+    },
+    '/marketplace': {
+        title: 'Marketplace - Explorer les produits | Emarzona',
+        description: "Découvrez des milliers de produits digitaux, physiques, services, cours en ligne et œuvres d'artistes sur Emarzona. Marketplace sécurisée.",
+        keywords: "marketplace, produits, produits digitaux, produits physiques, services, cours en ligne, œuvres d'artistes, acheter en ligne, ecommerce"
+    },
+    '/recommendations': {
+        title: 'Recommandations personnalisées | Emarzona',
+        description: 'Découvrez des produits sélectionnés spécialement pour vous grâce à notre système de recommandation IA.',
+        keywords: 'recommandations, personnalisé, IA, produits suggérés'
+    },
+    '/discover': {
+        title: 'Découvertes - Explorez de nouveaux produits | Emarzona',
+        description: 'Explorez des produits et services que vous ne connaissiez pas encore. Découvertes personnalisées par IA.',
+        keywords: 'découvertes, explorer, nouveaux produits'
+    },
+    '/trending': {
+        title: 'Tendances - Produits populaires | Emarzona',
+        description: 'Les produits et services les plus populaires du moment sur Emarzona. Tendances en temps réel.',
+        keywords: 'tendances, populaire, trending, best-sellers'
+    },
+    '/collections': {
+        title: 'Collections artistiques | Emarzona',
+        description: "Parcourez les collections d'œuvres d'artistes sur Emarzona. Art digital, illustrations, photographies et plus.",
+        keywords: 'collections, art, artistes, œuvres'
+    },
+    '/courses': {
+        title: 'Cours en ligne | Emarzona',
+        description: 'Formations et cours en ligne : développement, business, design, marketing. Apprenez à votre rythme avec certificats.',
+        keywords: 'cours en ligne, formation, e-learning, certificat'
+    },
+    '/art': {
+        title: "Œuvres d'artistes | Emarzona",
+        description: "Achetez des œuvres originales d'artistes : éditions limitées, certificats d'authenticité, collections et enchères.",
+        keywords: 'art, artistes, œuvres, marketplace art, enchères'
+    },
+    '/auctions': {
+        title: 'Enchères en ligne | Emarzona',
+        description: 'Participez aux enchères en ligne sur Emarzona. Trouvez des pièces uniques et faites vos offres.',
+        keywords: 'enchères, auctions, pièces uniques, offres'
+    },
+    '/community': {
+        title: 'Communauté | Emarzona',
+        description: 'Rejoignez la communauté Emarzona. Échangez avec des vendeurs et acheteurs passionnés.',
+        keywords: 'communauté, forum, échanges, réseau'
+    },
+    '/digital/search': {
+        title: 'Recherche de produits digitaux | Emarzona',
+        description: 'Recherchez parmi des milliers de produits digitaux : ebooks, templates, logiciels, formations et plus.',
+        keywords: 'recherche, produits digitaux, ebooks, templates'
+    },
+    '/digital/compare': {
+        title: 'Comparer des produits digitaux | Emarzona',
+        description: 'Comparez les caractéristiques et prix de produits digitaux côte à côte pour faire le meilleur choix.',
+        keywords: 'comparer, produits digitaux, comparaison'
+    },
+    '/products/compare': {
+        title: 'Comparer des produits | Emarzona',
+        description: 'Comparez les produits côte à côte pour trouver celui qui vous convient le mieux.',
+        keywords: 'comparer, produits, comparaison'
+    },
+    '/about': {
+        title: 'À propos | Emarzona',
+        description: "Découvrez Emarzona, plateforme e-commerce tout-en-un pensée pour l'Afrique de l'Ouest."
+    },
+    '/contact': {
+        title: 'Contact | Emarzona',
+        description: "Contactez l'équipe Emarzona : support, partenariats et presse."
+    },
+    '/pricing': {
+        title: 'Tarifs | Emarzona',
+        description: 'Découvrez les plans et tarifs Emarzona. Commencez gratuitement et évoluez selon vos besoins.',
+        keywords: 'tarifs, prix, abonnement, plans'
+    },
+    '/personalization/quiz': {
+        title: 'Quiz de style personnalisé | Emarzona',
+        description: 'Répondez à notre quiz pour recevoir des recommandations de produits adaptées à vos goûts.'
+    },
+    '/personalization/recommendations': {
+        title: 'Vos recommandations personnalisées | Emarzona',
+        description: 'Des produits sélectionnés pour vous en fonction de vos préférences et de votre historique.'
+    },
+    '/careers': {
+        title: 'Carrières | Emarzona',
+        description: 'Rejoignez Emarzona et participez à la construction du commerce en ligne.'
+    },
+    '/press': {
+        title: 'Presse | Emarzona',
+        description: 'Espace presse Emarzona : communiqués et contacts médias.'
+    },
+    '/blog': {
+        title: 'Blog e-commerce | Emarzona',
+        description: 'Articles Emarzona : lancer une boutique, SEO, panier multi-types, paiements GeniusPay et croissance en Afrique.'
+    },
+    '/docs': {
+        title: 'Documentation | Emarzona',
+        description: 'Guides et documentation pour démarrer sur Emarzona.'
+    },
+    '/help': {
+        title: "Centre d'aide | Emarzona",
+        description: 'FAQ et assistance pour vendeurs et acheteurs Emarzona.'
+    },
+    '/faq': {
+        title: 'FAQ — Questions fréquentes | Emarzona',
+        description: 'Réponses sur Emarzona : boutique en ligne, paiements GeniusPay, livraison FedEx, cours, produits digitaux et compte acheteur.'
+    },
+    '/integrations': {
+        title: 'Intégrations | Emarzona',
+        description: 'Paiements, logistique et outils connectés à votre boutique Emarzona.'
+    },
+    // === Pages légales (déjà SEOMeta mais listées pour cohérence) ===
+    '/legal/terms': {
+        title: "Conditions générales d'utilisation | Emarzona",
+        description: "Consultez les conditions générales d'utilisation de la plateforme Emarzona."
+    },
+    '/legal/cgv': {
+        title: 'Conditions générales de vente | Emarzona',
+        description: 'Consultez les conditions générales de vente applicables aux achats sur Emarzona.'
+    },
+    '/legal/privacy': {
+        title: 'Politique de confidentialité | Emarzona',
+        description: 'Découvrez comment Emarzona protège vos données personnelles.'
+    },
+    '/legal/cookies': {
+        title: 'Politique de cookies | Emarzona',
+        description: "Informations sur l'utilisation des cookies sur Emarzona."
+    },
+    '/legal/refund': {
+        title: 'Politique de remboursement | Emarzona',
+        description: 'Conditions de remboursement sur la plateforme Emarzona.'
+    },
+    '/legal/dpa': {
+        title: 'Accord de traitement des données (DPA) | Emarzona',
+        description: 'Accord de traitement des données personnelles pour les vendeurs Emarzona.'
+    },
+    // === Pages qui doivent être en noindex ===
+    '/login': {
+        title: 'Connexion | Emarzona',
+        description: 'Connectez-vous à votre compte Emarzona.',
+        noindex: false
+    },
+    '/register': {
+        title: 'Inscription | Emarzona',
+        description: 'Créez votre compte Emarzona gratuitement.',
+        noindex: false
+    },
+    '/auth': {
+        title: 'Connexion | Emarzona',
+        description: 'Connectez-vous à votre compte Emarzona.',
+        noindex: false
+    },
+    '/cart': {
+        title: 'Panier | Emarzona',
+        description: "Votre panier d'achats sur Emarzona.",
+        noindex: true,
+        nofollow: true
+    },
+    '/checkout': {
+        title: 'Paiement | Emarzona',
+        description: 'Finalisez votre commande sur Emarzona.',
+        noindex: true,
+        nofollow: true
+    },
+    '/payment/success': {
+        title: 'Paiement réussi | Emarzona',
+        description: 'Votre paiement a été confirmé.',
+        noindex: true
+    },
+    '/payment/cancel': {
+        title: 'Paiement annulé | Emarzona',
+        description: 'Votre paiement a été annulé.',
+        noindex: true
+    },
+    '/unsubscribe': {
+        title: 'Désabonnement | Emarzona',
+        description: 'Gérez vos préférences email Emarzona.',
+        noindex: true
+    }
+};
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIlBhZ2VTRU9Db25maWcudHMiXSwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBDb25maWd1cmF0aW9uIFNFTyBjZW50cmFsaXPDqWUgcG91ciB0b3V0ZXMgbGVzIHBhZ2VzIHB1YmxpcXVlc1xuICogw4l2aXRlIGxhIGR1cGxpY2F0aW9uIGV0IGZhY2lsaXRlIGxhIG1haW50ZW5hbmNlXG4gKi9cblxuaW1wb3J0IHsgTEFORElOR19TRU9fREVGQVVMVFMgfSBmcm9tICdAL2xpYi9sYW5kaW5nLXNlbyc7XG5cbmV4cG9ydCBpbnRlcmZhY2UgUGFnZVNFT0VudHJ5IHtcbiAgdGl0bGU6IHN0cmluZztcbiAgZGVzY3JpcHRpb246IHN0cmluZztcbiAgbm9pbmRleD86IGJvb2xlYW47XG4gIG5vZm9sbG93PzogYm9vbGVhbjtcbiAgdHlwZT86ICd3ZWJzaXRlJyB8ICdhcnRpY2xlJyB8ICdwcm9kdWN0JyB8ICdwcm9maWxlJztcbiAga2V5d29yZHM/OiBzdHJpbmc7XG59XG5cbi8qKlxuICogTWFwIGRlcyByb3V0ZXMgcHVibGlxdWVzIHZlcnMgbGV1ciBjb25maWd1cmF0aW9uIFNFT1xuICogTGVzIHBhZ2VzIGR5bmFtaXF1ZXMgKC9kaWdpdGFsLzppZCwgL3BoeXNpY2FsLzppZCwgZXRjLikgc29udCBnw6lyw6llcyBkYW5zIGxldXJzIGNvbXBvc2FudHNcbiAqL1xuZXhwb3J0IGNvbnN0IFBBR0VfU0VPX0NPTkZJRzogUmVjb3JkPHN0cmluZywgUGFnZVNFT0VudHJ5PiA9IHtcbiAgLy8gPT09IFBhZ2VzIHB1YmxpcXVlcyBpbmRleGFibGVzID09PVxuICAnLyc6IHtcbiAgICB0aXRsZTogTEFORElOR19TRU9fREVGQVVMVFMudGl0bGUsXG4gICAgZGVzY3JpcHRpb246IExBTkRJTkdfU0VPX0RFRkFVTFRTLmRlc2NyaXB0aW9uLFxuICAgIGtleXdvcmRzOiBMQU5ESU5HX1NFT19ERUZBVUxUUy5rZXl3b3JkcyxcbiAgfSxcbiAgJy9tYXJrZXRwbGFjZSc6IHtcbiAgICB0aXRsZTogJ01hcmtldHBsYWNlIC0gRXhwbG9yZXIgbGVzIHByb2R1aXRzIHwgRW1hcnpvbmEnLFxuICAgIGRlc2NyaXB0aW9uOlxuICAgICAgXCJEw6ljb3V2cmV6IGRlcyBtaWxsaWVycyBkZSBwcm9kdWl0cyBkaWdpdGF1eCwgcGh5c2lxdWVzLCBzZXJ2aWNlcywgY291cnMgZW4gbGlnbmUgZXQgxZN1dnJlcyBkJ2FydGlzdGVzIHN1ciBFbWFyem9uYS4gTWFya2V0cGxhY2Ugc8OpY3VyaXPDqWUuXCIsXG4gICAga2V5d29yZHM6XG4gICAgICBcIm1hcmtldHBsYWNlLCBwcm9kdWl0cywgcHJvZHVpdHMgZGlnaXRhdXgsIHByb2R1aXRzIHBoeXNpcXVlcywgc2VydmljZXMsIGNvdXJzIGVuIGxpZ25lLCDFk3V2cmVzIGQnYXJ0aXN0ZXMsIGFjaGV0ZXIgZW4gbGlnbmUsIGVjb21tZXJjZVwiLFxuICB9LFxuICAnL3JlY29tbWVuZGF0aW9ucyc6IHtcbiAgICB0aXRsZTogJ1JlY29tbWFuZGF0aW9ucyBwZXJzb25uYWxpc8OpZXMgfCBFbWFyem9uYScsXG4gICAgZGVzY3JpcHRpb246XG4gICAgICAnRMOpY291dnJleiBkZXMgcHJvZHVpdHMgc8OpbGVjdGlvbm7DqXMgc3DDqWNpYWxlbWVudCBwb3VyIHZvdXMgZ3LDomNlIMOgIG5vdHJlIHN5c3TDqG1lIGRlIHJlY29tbWFuZGF0aW9uIElBLicsXG4gICAga2V5d29yZHM6ICdyZWNvbW1hbmRhdGlvbnMsIHBlcnNvbm5hbGlzw6ksIElBLCBwcm9kdWl0cyBzdWdnw6lyw6lzJyxcbiAgfSxcbiAgJy9kaXNjb3Zlcic6IHtcbiAgICB0aXRsZTogJ0TDqWNvdXZlcnRlcyAtIEV4cGxvcmV6IGRlIG5vdXZlYXV4IHByb2R1aXRzIHwgRW1hcnpvbmEnLFxuICAgIGRlc2NyaXB0aW9uOlxuICAgICAgJ0V4cGxvcmV6IGRlcyBwcm9kdWl0cyBldCBzZXJ2aWNlcyBxdWUgdm91cyBuZSBjb25uYWlzc2lleiBwYXMgZW5jb3JlLiBEw6ljb3V2ZXJ0ZXMgcGVyc29ubmFsaXPDqWVzIHBhciBJQS4nLFxuICAgIGtleXdvcmRzOiAnZMOpY291dmVydGVzLCBleHBsb3Jlciwgbm91dmVhdXggcHJvZHVpdHMnLFxuICB9LFxuICAnL3RyZW5kaW5nJzoge1xuICAgIHRpdGxlOiAnVGVuZGFuY2VzIC0gUHJvZHVpdHMgcG9wdWxhaXJlcyB8IEVtYXJ6b25hJyxcbiAgICBkZXNjcmlwdGlvbjpcbiAgICAgICdMZXMgcHJvZHVpdHMgZXQgc2VydmljZXMgbGVzIHBsdXMgcG9wdWxhaXJlcyBkdSBtb21lbnQgc3VyIEVtYXJ6b25hLiBUZW5kYW5jZXMgZW4gdGVtcHMgcsOpZWwuJyxcbiAgICBrZXl3b3JkczogJ3RlbmRhbmNlcywgcG9wdWxhaXJlLCB0cmVuZGluZywgYmVzdC1zZWxsZXJzJyxcbiAgfSxcbiAgJy9jb2xsZWN0aW9ucyc6IHtcbiAgICB0aXRsZTogJ0NvbGxlY3Rpb25zIGFydGlzdGlxdWVzIHwgRW1hcnpvbmEnLFxuICAgIGRlc2NyaXB0aW9uOlxuICAgICAgXCJQYXJjb3VyZXogbGVzIGNvbGxlY3Rpb25zIGQnxZN1dnJlcyBkJ2FydGlzdGVzIHN1ciBFbWFyem9uYS4gQXJ0IGRpZ2l0YWwsIGlsbHVzdHJhdGlvbnMsIHBob3RvZ3JhcGhpZXMgZXQgcGx1cy5cIixcbiAgICBrZXl3b3JkczogJ2NvbGxlY3Rpb25zLCBhcnQsIGFydGlzdGVzLCDFk3V2cmVzJyxcbiAgfSxcbiAgJy9jb3Vyc2VzJzoge1xuICAgIHRpdGxlOiAnQ291cnMgZW4gbGlnbmUgfCBFbWFyem9uYScsXG4gICAgZGVzY3JpcHRpb246XG4gICAgICAnRm9ybWF0aW9ucyBldCBjb3VycyBlbiBsaWduZSA6IGTDqXZlbG9wcGVtZW50LCBidXNpbmVzcywgZGVzaWduLCBtYXJrZXRpbmcuIEFwcHJlbmV6IMOgIHZvdHJlIHJ5dGhtZSBhdmVjIGNlcnRpZmljYXRzLicsXG4gICAga2V5d29yZHM6ICdjb3VycyBlbiBsaWduZSwgZm9ybWF0aW9uLCBlLWxlYXJuaW5nLCBjZXJ0aWZpY2F0JyxcbiAgfSxcbiAgJy9hcnQnOiB7XG4gICAgdGl0bGU6IFwixZJ1dnJlcyBkJ2FydGlzdGVzIHwgRW1hcnpvbmFcIixcbiAgICBkZXNjcmlwdGlvbjpcbiAgICAgIFwiQWNoZXRleiBkZXMgxZN1dnJlcyBvcmlnaW5hbGVzIGQnYXJ0aXN0ZXMgOiDDqWRpdGlvbnMgbGltaXTDqWVzLCBjZXJ0aWZpY2F0cyBkJ2F1dGhlbnRpY2l0w6ksIGNvbGxlY3Rpb25zIGV0IGVuY2jDqHJlcy5cIixcbiAgICBrZXl3b3JkczogJ2FydCwgYXJ0aXN0ZXMsIMWTdXZyZXMsIG1hcmtldHBsYWNlIGFydCwgZW5jaMOocmVzJyxcbiAgfSxcbiAgJy9hdWN0aW9ucyc6IHtcbiAgICB0aXRsZTogJ0VuY2jDqHJlcyBlbiBsaWduZSB8IEVtYXJ6b25hJyxcbiAgICBkZXNjcmlwdGlvbjpcbiAgICAgICdQYXJ0aWNpcGV6IGF1eCBlbmNow6hyZXMgZW4gbGlnbmUgc3VyIEVtYXJ6b25hLiBUcm91dmV6IGRlcyBwacOoY2VzIHVuaXF1ZXMgZXQgZmFpdGVzIHZvcyBvZmZyZXMuJyxcbiAgICBrZXl3b3JkczogJ2VuY2jDqHJlcywgYXVjdGlvbnMsIHBpw6hjZXMgdW5pcXVlcywgb2ZmcmVzJyxcbiAgfSxcbiAgJy9jb21tdW5pdHknOiB7XG4gICAgdGl0bGU6ICdDb21tdW5hdXTDqSB8IEVtYXJ6b25hJyxcbiAgICBkZXNjcmlwdGlvbjpcbiAgICAgICdSZWpvaWduZXogbGEgY29tbXVuYXV0w6kgRW1hcnpvbmEuIMOJY2hhbmdleiBhdmVjIGRlcyB2ZW5kZXVycyBldCBhY2hldGV1cnMgcGFzc2lvbm7DqXMuJyxcbiAgICBrZXl3b3JkczogJ2NvbW11bmF1dMOpLCBmb3J1bSwgw6ljaGFuZ2VzLCByw6lzZWF1JyxcbiAgfSxcbiAgJy9kaWdpdGFsL3NlYXJjaCc6IHtcbiAgICB0aXRsZTogJ1JlY2hlcmNoZSBkZSBwcm9kdWl0cyBkaWdpdGF1eCB8IEVtYXJ6b25hJyxcbiAgICBkZXNjcmlwdGlvbjpcbiAgICAgICdSZWNoZXJjaGV6IHBhcm1pIGRlcyBtaWxsaWVycyBkZSBwcm9kdWl0cyBkaWdpdGF1eCA6IGVib29rcywgdGVtcGxhdGVzLCBsb2dpY2llbHMsIGZvcm1hdGlvbnMgZXQgcGx1cy4nLFxuICAgIGtleXdvcmRzOiAncmVjaGVyY2hlLCBwcm9kdWl0cyBkaWdpdGF1eCwgZWJvb2tzLCB0ZW1wbGF0ZXMnLFxuICB9LFxuICAnL2RpZ2l0YWwvY29tcGFyZSc6IHtcbiAgICB0aXRsZTogJ0NvbXBhcmVyIGRlcyBwcm9kdWl0cyBkaWdpdGF1eCB8IEVtYXJ6b25hJyxcbiAgICBkZXNjcmlwdGlvbjpcbiAgICAgICdDb21wYXJleiBsZXMgY2FyYWN0w6lyaXN0aXF1ZXMgZXQgcHJpeCBkZSBwcm9kdWl0cyBkaWdpdGF1eCBjw7R0ZSDDoCBjw7R0ZSBwb3VyIGZhaXJlIGxlIG1laWxsZXVyIGNob2l4LicsXG4gICAga2V5d29yZHM6ICdjb21wYXJlciwgcHJvZHVpdHMgZGlnaXRhdXgsIGNvbXBhcmFpc29uJyxcbiAgfSxcbiAgJy9wcm9kdWN0cy9jb21wYXJlJzoge1xuICAgIHRpdGxlOiAnQ29tcGFyZXIgZGVzIHByb2R1aXRzIHwgRW1hcnpvbmEnLFxuICAgIGRlc2NyaXB0aW9uOiAnQ29tcGFyZXogbGVzIHByb2R1aXRzIGPDtHRlIMOgIGPDtHRlIHBvdXIgdHJvdXZlciBjZWx1aSBxdWkgdm91cyBjb252aWVudCBsZSBtaWV1eC4nLFxuICAgIGtleXdvcmRzOiAnY29tcGFyZXIsIHByb2R1aXRzLCBjb21wYXJhaXNvbicsXG4gIH0sXG4gICcvYWJvdXQnOiB7XG4gICAgdGl0bGU6ICfDgCBwcm9wb3MgfCBFbWFyem9uYScsXG4gICAgZGVzY3JpcHRpb246XG4gICAgICBcIkTDqWNvdXZyZXogRW1hcnpvbmEsIHBsYXRlZm9ybWUgZS1jb21tZXJjZSB0b3V0LWVuLXVuIHBlbnPDqWUgcG91ciBsJ0FmcmlxdWUgZGUgbCdPdWVzdC5cIixcbiAgfSxcbiAgJy9jb250YWN0Jzoge1xuICAgIHRpdGxlOiAnQ29udGFjdCB8IEVtYXJ6b25hJyxcbiAgICBkZXNjcmlwdGlvbjogXCJDb250YWN0ZXogbCfDqXF1aXBlIEVtYXJ6b25hIDogc3VwcG9ydCwgcGFydGVuYXJpYXRzIGV0IHByZXNzZS5cIixcbiAgfSxcbiAgJy9wcmljaW5nJzoge1xuICAgIHRpdGxlOiAnVGFyaWZzIHwgRW1hcnpvbmEnLFxuICAgIGRlc2NyaXB0aW9uOlxuICAgICAgJ0TDqWNvdXZyZXogbGVzIHBsYW5zIGV0IHRhcmlmcyBFbWFyem9uYS4gQ29tbWVuY2V6IGdyYXR1aXRlbWVudCBldCDDqXZvbHVleiBzZWxvbiB2b3MgYmVzb2lucy4nLFxuICAgIGtleXdvcmRzOiAndGFyaWZzLCBwcml4LCBhYm9ubmVtZW50LCBwbGFucycsXG4gIH0sXG4gICcvcGVyc29uYWxpemF0aW9uL3F1aXonOiB7XG4gICAgdGl0bGU6ICdRdWl6IGRlIHN0eWxlIHBlcnNvbm5hbGlzw6kgfCBFbWFyem9uYScsXG4gICAgZGVzY3JpcHRpb246XG4gICAgICAnUsOpcG9uZGV6IMOgIG5vdHJlIHF1aXogcG91ciByZWNldm9pciBkZXMgcmVjb21tYW5kYXRpb25zIGRlIHByb2R1aXRzIGFkYXB0w6llcyDDoCB2b3MgZ2/Du3RzLicsXG4gIH0sXG4gICcvcGVyc29uYWxpemF0aW9uL3JlY29tbWVuZGF0aW9ucyc6IHtcbiAgICB0aXRsZTogJ1ZvcyByZWNvbW1hbmRhdGlvbnMgcGVyc29ubmFsaXPDqWVzIHwgRW1hcnpvbmEnLFxuICAgIGRlc2NyaXB0aW9uOlxuICAgICAgJ0RlcyBwcm9kdWl0cyBzw6lsZWN0aW9ubsOpcyBwb3VyIHZvdXMgZW4gZm9uY3Rpb24gZGUgdm9zIHByw6lmw6lyZW5jZXMgZXQgZGUgdm90cmUgaGlzdG9yaXF1ZS4nLFxuICB9LFxuXG4gICcvY2FyZWVycyc6IHtcbiAgICB0aXRsZTogJ0NhcnJpw6hyZXMgfCBFbWFyem9uYScsXG4gICAgZGVzY3JpcHRpb246ICdSZWpvaWduZXogRW1hcnpvbmEgZXQgcGFydGljaXBleiDDoCBsYSBjb25zdHJ1Y3Rpb24gZHUgY29tbWVyY2UgZW4gbGlnbmUuJyxcbiAgfSxcbiAgJy9wcmVzcyc6IHtcbiAgICB0aXRsZTogJ1ByZXNzZSB8IEVtYXJ6b25hJyxcbiAgICBkZXNjcmlwdGlvbjogJ0VzcGFjZSBwcmVzc2UgRW1hcnpvbmEgOiBjb21tdW5pcXXDqXMgZXQgY29udGFjdHMgbcOpZGlhcy4nLFxuICB9LFxuICAnL2Jsb2cnOiB7XG4gICAgdGl0bGU6ICdCbG9nIGUtY29tbWVyY2UgfCBFbWFyem9uYScsXG4gICAgZGVzY3JpcHRpb246XG4gICAgICAnQXJ0aWNsZXMgRW1hcnpvbmEgOiBsYW5jZXIgdW5lIGJvdXRpcXVlLCBTRU8sIHBhbmllciBtdWx0aS10eXBlcywgcGFpZW1lbnRzIEdlbml1c1BheSBldCBjcm9pc3NhbmNlIGVuIEFmcmlxdWUuJyxcbiAgfSxcbiAgJy9kb2NzJzoge1xuICAgIHRpdGxlOiAnRG9jdW1lbnRhdGlvbiB8IEVtYXJ6b25hJyxcbiAgICBkZXNjcmlwdGlvbjogJ0d1aWRlcyBldCBkb2N1bWVudGF0aW9uIHBvdXIgZMOpbWFycmVyIHN1ciBFbWFyem9uYS4nLFxuICB9LFxuICAnL2hlbHAnOiB7XG4gICAgdGl0bGU6IFwiQ2VudHJlIGQnYWlkZSB8IEVtYXJ6b25hXCIsXG4gICAgZGVzY3JpcHRpb246ICdGQVEgZXQgYXNzaXN0YW5jZSBwb3VyIHZlbmRldXJzIGV0IGFjaGV0ZXVycyBFbWFyem9uYS4nLFxuICB9LFxuICAnL2ZhcSc6IHtcbiAgICB0aXRsZTogJ0ZBUSDigJQgUXVlc3Rpb25zIGZyw6lxdWVudGVzIHwgRW1hcnpvbmEnLFxuICAgIGRlc2NyaXB0aW9uOlxuICAgICAgJ1LDqXBvbnNlcyBzdXIgRW1hcnpvbmEgOiBib3V0aXF1ZSBlbiBsaWduZSwgcGFpZW1lbnRzIEdlbml1c1BheSwgbGl2cmFpc29uIEZlZEV4LCBjb3VycywgcHJvZHVpdHMgZGlnaXRhdXggZXQgY29tcHRlIGFjaGV0ZXVyLicsXG4gIH0sXG4gICcvaW50ZWdyYXRpb25zJzoge1xuICAgIHRpdGxlOiAnSW50w6lncmF0aW9ucyB8IEVtYXJ6b25hJyxcbiAgICBkZXNjcmlwdGlvbjogJ1BhaWVtZW50cywgbG9naXN0aXF1ZSBldCBvdXRpbHMgY29ubmVjdMOpcyDDoCB2b3RyZSBib3V0aXF1ZSBFbWFyem9uYS4nLFxuICB9LFxuXG4gIC8vID09PSBQYWdlcyBsw6lnYWxlcyAoZMOpasOgIFNFT01ldGEgbWFpcyBsaXN0w6llcyBwb3VyIGNvaMOpcmVuY2UpID09PVxuICAnL2xlZ2FsL3Rlcm1zJzoge1xuICAgIHRpdGxlOiBcIkNvbmRpdGlvbnMgZ8OpbsOpcmFsZXMgZCd1dGlsaXNhdGlvbiB8IEVtYXJ6b25hXCIsXG4gICAgZGVzY3JpcHRpb246IFwiQ29uc3VsdGV6IGxlcyBjb25kaXRpb25zIGfDqW7DqXJhbGVzIGQndXRpbGlzYXRpb24gZGUgbGEgcGxhdGVmb3JtZSBFbWFyem9uYS5cIixcbiAgfSxcbiAgJy9sZWdhbC9jZ3YnOiB7XG4gICAgdGl0bGU6ICdDb25kaXRpb25zIGfDqW7DqXJhbGVzIGRlIHZlbnRlIHwgRW1hcnpvbmEnLFxuICAgIGRlc2NyaXB0aW9uOiAnQ29uc3VsdGV6IGxlcyBjb25kaXRpb25zIGfDqW7DqXJhbGVzIGRlIHZlbnRlIGFwcGxpY2FibGVzIGF1eCBhY2hhdHMgc3VyIEVtYXJ6b25hLicsXG4gIH0sXG4gICcvbGVnYWwvcHJpdmFjeSc6IHtcbiAgICB0aXRsZTogJ1BvbGl0aXF1ZSBkZSBjb25maWRlbnRpYWxpdMOpIHwgRW1hcnpvbmEnLFxuICAgIGRlc2NyaXB0aW9uOiAnRMOpY291dnJleiBjb21tZW50IEVtYXJ6b25hIHByb3TDqGdlIHZvcyBkb25uw6llcyBwZXJzb25uZWxsZXMuJyxcbiAgfSxcbiAgJy9sZWdhbC9jb29raWVzJzoge1xuICAgIHRpdGxlOiAnUG9saXRpcXVlIGRlIGNvb2tpZXMgfCBFbWFyem9uYScsXG4gICAgZGVzY3JpcHRpb246IFwiSW5mb3JtYXRpb25zIHN1ciBsJ3V0aWxpc2F0aW9uIGRlcyBjb29raWVzIHN1ciBFbWFyem9uYS5cIixcbiAgfSxcbiAgJy9sZWdhbC9yZWZ1bmQnOiB7XG4gICAgdGl0bGU6ICdQb2xpdGlxdWUgZGUgcmVtYm91cnNlbWVudCB8IEVtYXJ6b25hJyxcbiAgICBkZXNjcmlwdGlvbjogJ0NvbmRpdGlvbnMgZGUgcmVtYm91cnNlbWVudCBzdXIgbGEgcGxhdGVmb3JtZSBFbWFyem9uYS4nLFxuICB9LFxuICAnL2xlZ2FsL2RwYSc6IHtcbiAgICB0aXRsZTogJ0FjY29yZCBkZSB0cmFpdGVtZW50IGRlcyBkb25uw6llcyAoRFBBKSB8IEVtYXJ6b25hJyxcbiAgICBkZXNjcmlwdGlvbjogJ0FjY29yZCBkZSB0cmFpdGVtZW50IGRlcyBkb25uw6llcyBwZXJzb25uZWxsZXMgcG91ciBsZXMgdmVuZGV1cnMgRW1hcnpvbmEuJyxcbiAgfSxcblxuICAvLyA9PT0gUGFnZXMgcXVpIGRvaXZlbnQgw6p0cmUgZW4gbm9pbmRleCA9PT1cbiAgJy9sb2dpbic6IHtcbiAgICB0aXRsZTogJ0Nvbm5leGlvbiB8IEVtYXJ6b25hJyxcbiAgICBkZXNjcmlwdGlvbjogJ0Nvbm5lY3Rlei12b3VzIMOgIHZvdHJlIGNvbXB0ZSBFbWFyem9uYS4nLFxuICAgIG5vaW5kZXg6IGZhbHNlLFxuICB9LFxuICAnL3JlZ2lzdGVyJzoge1xuICAgIHRpdGxlOiAnSW5zY3JpcHRpb24gfCBFbWFyem9uYScsXG4gICAgZGVzY3JpcHRpb246ICdDcsOpZXogdm90cmUgY29tcHRlIEVtYXJ6b25hIGdyYXR1aXRlbWVudC4nLFxuICAgIG5vaW5kZXg6IGZhbHNlLFxuICB9LFxuICAnL2F1dGgnOiB7XG4gICAgdGl0bGU6ICdDb25uZXhpb24gfCBFbWFyem9uYScsXG4gICAgZGVzY3JpcHRpb246ICdDb25uZWN0ZXotdm91cyDDoCB2b3RyZSBjb21wdGUgRW1hcnpvbmEuJyxcbiAgICBub2luZGV4OiBmYWxzZSxcbiAgfSxcbiAgJy9jYXJ0Jzoge1xuICAgIHRpdGxlOiAnUGFuaWVyIHwgRW1hcnpvbmEnLFxuICAgIGRlc2NyaXB0aW9uOiBcIlZvdHJlIHBhbmllciBkJ2FjaGF0cyBzdXIgRW1hcnpvbmEuXCIsXG4gICAgbm9pbmRleDogdHJ1ZSxcbiAgICBub2ZvbGxvdzogdHJ1ZSxcbiAgfSxcbiAgJy9jaGVja291dCc6IHtcbiAgICB0aXRsZTogJ1BhaWVtZW50IHwgRW1hcnpvbmEnLFxuICAgIGRlc2NyaXB0aW9uOiAnRmluYWxpc2V6IHZvdHJlIGNvbW1hbmRlIHN1ciBFbWFyem9uYS4nLFxuICAgIG5vaW5kZXg6IHRydWUsXG4gICAgbm9mb2xsb3c6IHRydWUsXG4gIH0sXG4gICcvcGF5bWVudC9zdWNjZXNzJzoge1xuICAgIHRpdGxlOiAnUGFpZW1lbnQgcsOpdXNzaSB8IEVtYXJ6b25hJyxcbiAgICBkZXNjcmlwdGlvbjogJ1ZvdHJlIHBhaWVtZW50IGEgw6l0w6kgY29uZmlybcOpLicsXG4gICAgbm9pbmRleDogdHJ1ZSxcbiAgfSxcbiAgJy9wYXltZW50L2NhbmNlbCc6IHtcbiAgICB0aXRsZTogJ1BhaWVtZW50IGFubnVsw6kgfCBFbWFyem9uYScsXG4gICAgZGVzY3JpcHRpb246ICdWb3RyZSBwYWllbWVudCBhIMOpdMOpIGFubnVsw6kuJyxcbiAgICBub2luZGV4OiB0cnVlLFxuICB9LFxuICAnL3Vuc3Vic2NyaWJlJzoge1xuICAgIHRpdGxlOiAnRMOpc2Fib25uZW1lbnQgfCBFbWFyem9uYScsXG4gICAgZGVzY3JpcHRpb246ICdHw6lyZXogdm9zIHByw6lmw6lyZW5jZXMgZW1haWwgRW1hcnpvbmEuJyxcbiAgICBub2luZGV4OiB0cnVlLFxuICB9LFxufTtcbiJdLCJuYW1lcyI6WyJMQU5ESU5HX1NFT19ERUZBVUxUUyIsIlBBR0VfU0VPX0NPTkZJRyIsInRpdGxlIiwiZGVzY3JpcHRpb24iLCJrZXl3b3JkcyIsIm5vaW5kZXgiLCJub2ZvbGxvdyJdLCJtYXBwaW5ncyI6IkFBQUE7OztDQUdDLEdBRUQsU0FBU0Esb0JBQW9CLFFBQVEsb0JBQW9CO0FBV3pEOzs7Q0FHQyxHQUNELE9BQU8s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

@@ -1,0 +1,32 @@
+/**
+ * Définition des modules et routes considérés comme "Avancés" / "Experts".
+ * En mode "Essentiel", tous ces liens de navigation seront masqués pour
+ * réduire la charge cognitive d'un nouveau marchand.
+ */ // Liste des préfixes d'URLs qui ne doivent pas s'afficher en mode essentiel.
+export const EXPERT_ONLY_PATHS = [
+    // Marketing & Gamification
+    '/dashboard/gamification',
+    '/dashboard/affiliates',
+    '/dashboard/store-affiliates',
+    '/dashboard/referrals',
+    '/dashboard/emails/workflows',
+    '/dashboard/emails/segments',
+    '/dashboard/emails/tags',
+    // Analytics Complexes
+    '/dashboard/core-web-vitals',
+    '/dashboard/auctions',
+    '/dashboard/abandoned-carts',
+    // Paramétrages pointus
+    '/dashboard/integrations',
+    '/dashboard/digital/updates',
+    '/dashboard/taxes',
+    '/dashboard/payment-connections'
+];
+/**
+ * Vérifie si une route donnée nécessite le Mode Expert pour être affichée dans la navigation.
+ */ export function requiresExpertMode(url) {
+    const cleanUrl = url.split('?')[0];
+    return EXPERT_ONLY_PATHS.some((expertPath)=>cleanUrl === expertPath || cleanUrl.startsWith(`${expertPath}/`));
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIm5hdmlnYXRpb24ucHJvZ3Jlc3NpdmUudHMiXSwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBEw6lmaW5pdGlvbiBkZXMgbW9kdWxlcyBldCByb3V0ZXMgY29uc2lkw6lyw6lzIGNvbW1lIFwiQXZhbmPDqXNcIiAvIFwiRXhwZXJ0c1wiLlxuICogRW4gbW9kZSBcIkVzc2VudGllbFwiLCB0b3VzIGNlcyBsaWVucyBkZSBuYXZpZ2F0aW9uIHNlcm9udCBtYXNxdcOpcyBwb3VyXG4gKiByw6lkdWlyZSBsYSBjaGFyZ2UgY29nbml0aXZlIGQndW4gbm91dmVhdSBtYXJjaGFuZC5cbiAqL1xuXG4vLyBMaXN0ZSBkZXMgcHLDqWZpeGVzIGQnVVJMcyBxdWkgbmUgZG9pdmVudCBwYXMgcydhZmZpY2hlciBlbiBtb2RlIGVzc2VudGllbC5cbmV4cG9ydCBjb25zdCBFWFBFUlRfT05MWV9QQVRIUyA9IFtcbiAgLy8gTWFya2V0aW5nICYgR2FtaWZpY2F0aW9uXG4gICcvZGFzaGJvYXJkL2dhbWlmaWNhdGlvbicsXG4gICcvZGFzaGJvYXJkL2FmZmlsaWF0ZXMnLFxuICAnL2Rhc2hib2FyZC9zdG9yZS1hZmZpbGlhdGVzJyxcbiAgJy9kYXNoYm9hcmQvcmVmZXJyYWxzJyxcbiAgJy9kYXNoYm9hcmQvZW1haWxzL3dvcmtmbG93cycsXG4gICcvZGFzaGJvYXJkL2VtYWlscy9zZWdtZW50cycsXG4gICcvZGFzaGJvYXJkL2VtYWlscy90YWdzJyxcblxuICAvLyBBbmFseXRpY3MgQ29tcGxleGVzXG4gICcvZGFzaGJvYXJkL2NvcmUtd2ViLXZpdGFscycsXG4gICcvZGFzaGJvYXJkL2F1Y3Rpb25zJywgLy8gRW5jaMOocmVzIGQnYXJ0ID0gYXZhbmPDqVxuICAnL2Rhc2hib2FyZC9hYmFuZG9uZWQtY2FydHMnLFxuXG4gIC8vIFBhcmFtw6l0cmFnZXMgcG9pbnR1c1xuICAnL2Rhc2hib2FyZC9pbnRlZ3JhdGlvbnMnLCAvLyBTeXN0w6htZXMgZXh0ZXJuZXNcbiAgJy9kYXNoYm9hcmQvZGlnaXRhbC91cGRhdGVzJywgLy8gTWlzZXMgw6Agam91ciBPVEEgZGUgZmljaGllcnMgKE9UQSA9IGF2YW5jw6kpXG4gICcvZGFzaGJvYXJkL3RheGVzJywgLy8gQ29tcHRhYmlsaXTDqSBsb3VyZGUgPSBleHBlcnRcbiAgJy9kYXNoYm9hcmQvcGF5bWVudC1jb25uZWN0aW9ucycsIC8vIFBhc3NlcmVsbGVzIG1hbnVlbGxlc1xuXTtcblxuLyoqXG4gKiBWw6lyaWZpZSBzaSB1bmUgcm91dGUgZG9ubsOpZSBuw6ljZXNzaXRlIGxlIE1vZGUgRXhwZXJ0IHBvdXIgw6p0cmUgYWZmaWNow6llIGRhbnMgbGEgbmF2aWdhdGlvbi5cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIHJlcXVpcmVzRXhwZXJ0TW9kZSh1cmw6IHN0cmluZyk6IGJvb2xlYW4ge1xuICBjb25zdCBjbGVhblVybCA9IHVybC5zcGxpdCgnPycpWzBdO1xuICByZXR1cm4gRVhQRVJUX09OTFlfUEFUSFMuc29tZShcbiAgICBleHBlcnRQYXRoID0+IGNsZWFuVXJsID09PSBleHBlcnRQYXRoIHx8IGNsZWFuVXJsLnN0YXJ0c1dpdGgoYCR7ZXhwZXJ0UGF0aH0vYClcbiAgKTtcbn1cbiJdLCJuYW1lcyI6WyJFWFBFUlRfT05MWV9QQVRIUyIsInJlcXVpcmVzRXhwZXJ0TW9kZSIsInVybCIsImNsZWFuVXJsIiwic3BsaXQiLCJzb21lIiwiZXhwZXJ0UGF0aCIsInN0YXJ0c1dpdGgiXSwibWFwcGluZ3MiOiJBQUFBOzs7O0NBSUMsR0FFRCw2RUFBNkU7QUFDN0UsT0FBTyxNQUFNQSxvQkFBb0I7SUFDL0IsMkJBQTJCO0lBQzNCO0lBQ0E7SUFDQTtJQUNBO0lBQ0E7SUFDQTtJQUNBO0lBRUEsc0JBQXNCO0lBQ3RCO0lBQ0E7SUFDQTtJQUVBLHVCQUF1QjtJQUN2QjtJQUNBO0lBQ0E7SUFDQTtDQUNELENBQUM7QUFFRjs7Q0FFQyxHQUNELE9BQU8sU0FBU0MsbUJBQW1CQyxHQUFXO0lBQzVDLE1BQU1DLFdBQVdELElBQUlFLEtBQUssQ0FBQyxJQUFJLENBQUMsRUFBRTtJQUNsQyxPQUFPSixrQkFBa0JLLElBQUksQ0FDM0JDLENBQUFBLGFBQWNILGFBQWFHLGNBQWNILFNBQVNJLFVBQVUsQ0FBQyxHQUFHRCxXQUFXLENBQUMsQ0FBQztBQUVqRiJ9

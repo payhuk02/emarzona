@@ -1,0 +1,137 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/dashboard/DashboardMetricCard.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardMetricCard.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=6014a254"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+import { TrendingDown, TrendingUp } from "/node_modules/.vite/deps/lucide-react.js?v=6014a254";
+import { cn } from "/src/lib/utils.ts";
+export function DashboardMetricCard({ label, value, sublabel = 'vs le mois dernier', trendPercent, icon: Icon, theme, className }) {
+    const isUp = trendPercent >= 0;
+    const trendLabel = `${isUp ? '+' : ''}${trendPercent}%`;
+    return /*#__PURE__*/ _jsxDEV("article", {
+        className: cn('dashboard-metric-card', `dashboard-metric-card--${theme}`, className),
+        children: [
+            /*#__PURE__*/ _jsxDEV("div", {
+                className: "flex items-start justify-between gap-3 relative z-[1]",
+                children: [
+                    /*#__PURE__*/ _jsxDEV("div", {
+                        className: "dashboard-metric-icon-wrap",
+                        "aria-hidden": true,
+                        children: /*#__PURE__*/ _jsxDEV(Icon, {}, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardMetricCard.tsx",
+                            lineNumber: 32,
+                            columnNumber: 11
+                        }, this)
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardMetricCard.tsx",
+                        lineNumber: 31,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV("span", {
+                        className: cn('dashboard-metric-trend', isUp ? 'dashboard-metric-trend--up' : 'dashboard-metric-trend--down'),
+                        children: [
+                            isUp ? /*#__PURE__*/ _jsxDEV(TrendingUp, {
+                                className: "h-3.5 w-3.5",
+                                "aria-hidden": true
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardMetricCard.tsx",
+                                lineNumber: 41,
+                                columnNumber: 13
+                            }, this) : /*#__PURE__*/ _jsxDEV(TrendingDown, {
+                                className: "h-3.5 w-3.5",
+                                "aria-hidden": true
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardMetricCard.tsx",
+                                lineNumber: 43,
+                                columnNumber: 13
+                            }, this),
+                            trendLabel
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardMetricCard.tsx",
+                        lineNumber: 34,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardMetricCard.tsx",
+                lineNumber: 30,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV("p", {
+                className: "dashboard-metric-label relative z-[1]",
+                children: label
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardMetricCard.tsx",
+                lineNumber: 48,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV("p", {
+                className: "dashboard-metric-value relative z-[1] break-words",
+                children: value
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardMetricCard.tsx",
+                lineNumber: 49,
+                columnNumber: 7
+            }, this),
+            sublabel && /*#__PURE__*/ _jsxDEV("p", {
+                className: "dashboard-metric-sub relative z-[1]",
+                children: sublabel
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardMetricCard.tsx",
+                lineNumber: 50,
+                columnNumber: 20
+            }, this),
+            /*#__PURE__*/ _jsxDEV("div", {
+                className: "dashboard-metric-wave",
+                "aria-hidden": true
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardMetricCard.tsx",
+                lineNumber: 51,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardMetricCard.tsx",
+        lineNumber: 29,
+        columnNumber: 5
+    }, this);
+}
+_c = DashboardMetricCard;
+var _c;
+$RefreshReg$(_c, "DashboardMetricCard");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardMetricCard.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardMetricCard.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIkRhc2hib2FyZE1ldHJpY0NhcmQudHN4Il0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7IEx1Y2lkZUljb24sIFRyZW5kaW5nRG93biwgVHJlbmRpbmdVcCB9IGZyb20gJ2x1Y2lkZS1yZWFjdCc7XG5pbXBvcnQgeyBjbiB9IGZyb20gJ0AvbGliL3V0aWxzJztcblxuZXhwb3J0IHR5cGUgTWV0cmljVGhlbWUgPSAncHVycGxlJyB8ICdibHVlJyB8ICdncmVlbicgfCAnb3JhbmdlJztcblxuaW50ZXJmYWNlIERhc2hib2FyZE1ldHJpY0NhcmRQcm9wcyB7XG4gIGxhYmVsOiBzdHJpbmc7XG4gIHZhbHVlOiBzdHJpbmc7XG4gIHN1YmxhYmVsPzogc3RyaW5nO1xuICB0cmVuZFBlcmNlbnQ6IG51bWJlcjtcbiAgaWNvbjogTHVjaWRlSWNvbjtcbiAgdGhlbWU6IE1ldHJpY1RoZW1lO1xuICBjbGFzc05hbWU/OiBzdHJpbmc7XG59XG5cbmV4cG9ydCBmdW5jdGlvbiBEYXNoYm9hcmRNZXRyaWNDYXJkKHtcbiAgbGFiZWwsXG4gIHZhbHVlLFxuICBzdWJsYWJlbCA9ICd2cyBsZSBtb2lzIGRlcm5pZXInLFxuICB0cmVuZFBlcmNlbnQsXG4gIGljb246IEljb24sXG4gIHRoZW1lLFxuICBjbGFzc05hbWUsXG59OiBEYXNoYm9hcmRNZXRyaWNDYXJkUHJvcHMpIHtcbiAgY29uc3QgaXNVcCA9IHRyZW5kUGVyY2VudCA+PSAwO1xuICBjb25zdCB0cmVuZExhYmVsID0gYCR7aXNVcCA/ICcrJyA6ICcnfSR7dHJlbmRQZXJjZW50fSVgO1xuXG4gIHJldHVybiAoXG4gICAgPGFydGljbGUgY2xhc3NOYW1lPXtjbignZGFzaGJvYXJkLW1ldHJpYy1jYXJkJywgYGRhc2hib2FyZC1tZXRyaWMtY2FyZC0tJHt0aGVtZX1gLCBjbGFzc05hbWUpfT5cbiAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1zdGFydCBqdXN0aWZ5LWJldHdlZW4gZ2FwLTMgcmVsYXRpdmUgei1bMV1cIj5cbiAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJkYXNoYm9hcmQtbWV0cmljLWljb24td3JhcFwiIGFyaWEtaGlkZGVuPlxuICAgICAgICAgIDxJY29uIC8+XG4gICAgICAgIDwvZGl2PlxuICAgICAgICA8c3BhblxuICAgICAgICAgIGNsYXNzTmFtZT17Y24oXG4gICAgICAgICAgICAnZGFzaGJvYXJkLW1ldHJpYy10cmVuZCcsXG4gICAgICAgICAgICBpc1VwID8gJ2Rhc2hib2FyZC1tZXRyaWMtdHJlbmQtLXVwJyA6ICdkYXNoYm9hcmQtbWV0cmljLXRyZW5kLS1kb3duJ1xuICAgICAgICAgICl9XG4gICAgICAgID5cbiAgICAgICAgICB7aXNVcCA/IChcbiAgICAgICAgICAgIDxUcmVuZGluZ1VwIGNsYXNzTmFtZT1cImgtMy41IHctMy41XCIgYXJpYS1oaWRkZW4gLz5cbiAgICAgICAgICApIDogKFxuICAgICAgICAgICAgPFRyZW5kaW5nRG93biBjbGFzc05hbWU9XCJoLTMuNSB3LTMuNVwiIGFyaWEtaGlkZGVuIC8+XG4gICAgICAgICAgKX1cbiAgICAgICAgICB7dHJlbmRMYWJlbH1cbiAgICAgICAgPC9zcGFuPlxuICAgICAgPC9kaXY+XG4gICAgICA8cCBjbGFzc05hbWU9XCJkYXNoYm9hcmQtbWV0cmljLWxhYmVsIHJlbGF0aXZlIHotWzFdXCI+e2xhYmVsfTwvcD5cbiAgICAgIDxwIGNsYXNzTmFtZT1cImRhc2hib2FyZC1tZXRyaWMtdmFsdWUgcmVsYXRpdmUgei1bMV0gYnJlYWstd29yZHNcIj57dmFsdWV9PC9wPlxuICAgICAge3N1YmxhYmVsICYmIDxwIGNsYXNzTmFtZT1cImRhc2hib2FyZC1tZXRyaWMtc3ViIHJlbGF0aXZlIHotWzFdXCI+e3N1YmxhYmVsfTwvcD59XG4gICAgICA8ZGl2IGNsYXNzTmFtZT1cImRhc2hib2FyZC1tZXRyaWMtd2F2ZVwiIGFyaWEtaGlkZGVuIC8+XG4gICAgPC9hcnRpY2xlPlxuICApO1xufVxuIl0sIm5hbWVzIjpbIlRyZW5kaW5nRG93biIsIlRyZW5kaW5nVXAiLCJjbiIsIkRhc2hib2FyZE1ldHJpY0NhcmQiLCJsYWJlbCIsInZhbHVlIiwic3VibGFiZWwiLCJ0cmVuZFBlcmNlbnQiLCJpY29uIiwiSWNvbiIsInRoZW1lIiwiY2xhc3NOYW1lIiwiaXNVcCIsInRyZW5kTGFiZWwiLCJhcnRpY2xlIiwiZGl2IiwiYXJpYS1oaWRkZW4iLCJzcGFuIiwicCJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7QUFBQSxTQUFxQkEsWUFBWSxFQUFFQyxVQUFVLFFBQVEsZUFBZTtBQUNwRSxTQUFTQyxFQUFFLFFBQVEsY0FBYztBQWNqQyxPQUFPLFNBQVNDLG9CQUFvQixFQUNsQ0MsS0FBSyxFQUNMQyxLQUFLLEVBQ0xDLFdBQVcsb0JBQW9CLEVBQy9CQyxZQUFZLEVBQ1pDLE1BQU1DLElBQUksRUFDVkMsS0FBSyxFQUNMQyxTQUFTLEVBQ2dCO0lBQ3pCLE1BQU1DLE9BQU9MLGdCQUFnQjtJQUM3QixNQUFNTSxhQUFhLEdBQUdELE9BQU8sTUFBTSxLQUFLTCxhQUFhLENBQUMsQ0FBQztJQUV2RCxxQkFDRSxRQUFDTztRQUFRSCxXQUFXVCxHQUFHLHlCQUF5QixDQUFDLHVCQUF1QixFQUFFUSxPQUFPLEVBQUVDOzswQkFDakYsUUFBQ0k7Z0JBQUlKLFdBQVU7O2tDQUNiLFFBQUNJO3dCQUFJSixXQUFVO3dCQUE2QkssYUFBVztrQ0FDckQsY0FBQSxRQUFDUDs7Ozs7Ozs7OztrQ0FFSCxRQUFDUTt3QkFDQ04sV0FBV1QsR0FDVCwwQkFDQVUsT0FBTywrQkFBK0I7OzRCQUd2Q0EscUJBQ0MsUUFBQ1g7Z0NBQVdVLFdBQVU7Z0NBQWNLLGFBQVc7Ozs7O3FEQUUvQyxRQUFDaEI7Z0NBQWFXLFdBQVU7Z0NBQWNLLGFBQVc7Ozs7Ozs0QkFFbERIOzs7Ozs7Ozs7Ozs7OzBCQUdMLFFBQUNLO2dCQUFFUCxXQUFVOzBCQUF5Q1A7Ozs7OzswQkFDdEQsUUFBQ2M7Z0JBQUVQLFdBQVU7MEJBQXFETjs7Ozs7O1lBQ2pFQywwQkFBWSxRQUFDWTtnQkFBRVAsV0FBVTswQkFBdUNMOzs7Ozs7MEJBQ2pFLFFBQUNTO2dCQUFJSixXQUFVO2dCQUF3QkssYUFBVzs7Ozs7Ozs7Ozs7O0FBR3hEO0tBdENnQmIifQ==

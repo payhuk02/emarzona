@@ -1048,32 +1048,7 @@ export const DigitalProductsList = () => {
                                       <h3 className="text-base sm:text-lg font-semibold mb-1 sm:mb-2 line-clamp-1">
                                         {product.name}
                                       </h3>
-                                      <div className="flex flex-wrap items-center gap-2">
-                                        <Badge variant="secondary">{dp.digital_type}</Badge>
-                                        <Badge variant="outline">
-                                          {dp.total_downloads || dp.totalDownloads || 0}{' '}
-                                          {t('digitalProducts.downloads', 'téléchargements')}
-                                        </Badge>
-                                        <Badge variant="outline" className="font-semibold">
-                                          {(product.promotional_price || product.promo_price) &&
-                                          (product.promotional_price || product.promo_price) <
-                                            product.price ? (
-                                            <div className="flex items-center gap-1.5">
-                                              <span className="line-through text-muted-foreground/70 text-xs font-normal">
-                                                {product.price?.toLocaleString()}
-                                              </span>
-                                              <span className="text-blue-500 dark:text-blue-400">
-                                                {(
-                                                  product.promotional_price || product.promo_price
-                                                ).toLocaleString()}{' '}
-                                                XOF
-                                              </span>
-                                            </div>
-                                          ) : (
-                                            `${product.price?.toLocaleString() || 0} XOF`
-                                          )}
-                                        </Badge>
-                                      </div>
+
                                     </div>
 
                                     <div className="flex items-center gap-2 flex-shrink-0">

@@ -1,0 +1,792 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/auth/TwoFactorAuth.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=6014a254"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+var _s = $RefreshSig$();
+/**
+ * Composant Two-Factor Authentication (2FA)
+ * 
+ * Authentification à deux facteurs pour sécuriser les comptes admins
+ * Utilise Supabase MFA (Multi-Factor Authentication)
+ * 
+ * @module TwoFactorAuth
+ */ import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=6014a254"; const useState = __vite__cjsImport3_react["useState"]; const useEffect = __vite__cjsImport3_react["useEffect"];
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "/src/components/ui/card.tsx";
+import { Button } from "/src/components/ui/button.tsx";
+import { Input } from "/src/components/ui/input.tsx";
+import { Badge } from "/src/components/ui/badge.tsx";
+import { Alert, AlertDescription } from "/src/components/ui/alert.tsx";
+import { supabase } from "/src/integrations/supabase/client.ts";
+import { Shield, Smartphone, Key, CheckCircle2, AlertCircle, Copy, RefreshCw } from "/node_modules/.vite/deps/lucide-react.js?v=6014a254";
+import { useToast } from "/src/hooks/use-toast.ts";
+import { logger } from "/src/lib/logger.ts";
+import __vite__cjsImport13_qrcode from "/node_modules/.vite/deps/qrcode.js?v=6014a254"; const QRCode = __vite__cjsImport13_qrcode.__esModule ? __vite__cjsImport13_qrcode.default : __vite__cjsImport13_qrcode;
+export const TwoFactorAuth = ()=>{
+    _s();
+    const [factors, setFactors] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isEnabling, setIsEnabling] = useState(false);
+    const [qrCodeUrl, setQrCodeUrl] = useState(null);
+    const [secret, setSecret] = useState(null);
+    const [verificationCode, setVerificationCode] = useState('');
+    const [isVerifying, setIsVerifying] = useState(false);
+    const [factorId, setFactorId] = useState(null);
+    const { toast } = useToast();
+    // Charger les facteurs d'authentification existants
+    useEffect(()=>{
+        loadFactors();
+    }, []);
+    const loadFactors = async ()=>{
+        setIsLoading(true);
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) {
+                throw new Error('Utilisateur non connecté');
+            }
+            // Note: Supabase MFA API
+            // const { data, error } = await supabase.auth.mfa.listFactors();
+            // Pour l'instant, simuler (Supabase MFA nécessite configuration serveur)
+            setFactors([]);
+        } catch (error1) {
+            logger.error('Erreur chargement 2FA', {
+                error: error1
+            });
+            toast({
+                title: 'Erreur',
+                description: 'Impossible de charger les paramètres 2FA',
+                variant: 'destructive'
+            });
+        } finally{
+            setIsLoading(false);
+        }
+    };
+    const enable2FA = async ()=>{
+        setIsEnabling(true);
+        try {
+            // Étape 1 : Enroll un nouveau facteur TOTP
+            const { data, error: error1 } = await supabase.auth.mfa.enroll({
+                factorType: 'totp',
+                friendlyName: 'Authenticator App'
+            });
+            if (error1) throw error1;
+            if (data) {
+                // data contient : id, type, totp { qr_code, secret, uri }
+                setFactorId(data.id);
+                setSecret(data.totp.secret);
+                // Générer QR Code pour l'app authenticator
+                const qrUrl = await QRCode.toDataURL(data.totp.uri);
+                setQrCodeUrl(qrUrl);
+                toast({
+                    title: '2FA initialisé',
+                    description: 'Scannez le QR code avec votre app authentificator'
+                });
+            }
+        } catch (_error) {
+            logger.error('Erreur activation 2FA', {
+                error
+            });
+            toast({
+                title: 'Erreur',
+                description: error.message || 'Impossible d\'activer le 2FA',
+                variant: 'destructive'
+            });
+        } finally{
+            setIsEnabling(false);
+        }
+    };
+    const verify2FA = async ()=>{
+        if (!factorId || !verificationCode || verificationCode.length !== 6) {
+            toast({
+                title: 'Code invalide',
+                description: 'Le code doit contenir 6 chiffres',
+                variant: 'destructive'
+            });
+            return;
+        }
+        setIsVerifying(true);
+        try {
+            // Étape 2 : Vérifier le code TOTP
+            const { data, error: error1 } = await supabase.auth.mfa.challenge({
+                factorId: factorId
+            });
+            if (error1) throw error1;
+            if (data) {
+                // Vérifier le code
+                const { error: verifyError } = await supabase.auth.mfa.verify({
+                    factorId: factorId,
+                    challengeId: data.id,
+                    code: verificationCode
+                });
+                if (verifyError) throw verifyError;
+                toast({
+                    title: '2FA activé !',
+                    description: 'Votre compte est maintenant protégé par l\'authentification à deux facteurs'
+                });
+                // Reset et recharger
+                setQrCodeUrl(null);
+                setSecret(null);
+                setVerificationCode('');
+                setFactorId(null);
+                await loadFactors();
+            }
+        } catch (_error) {
+            logger.error('Erreur vérification 2FA', {
+                error,
+                factorId
+            });
+            toast({
+                title: 'Code incorrect',
+                description: error.message || 'Le code saisi est invalide',
+                variant: 'destructive'
+            });
+        } finally{
+            setIsVerifying(false);
+        }
+    };
+    const disable2FA = async (factorId)=>{
+        try {
+            const { error: error1 } = await supabase.auth.mfa.unenroll({
+                factorId
+            });
+            if (error1) throw error1;
+            toast({
+                title: '2FA désactivé',
+                description: 'L\'authentification à deux facteurs a été désactivée'
+            });
+            await loadFactors();
+        } catch (_error) {
+            toast({
+                title: 'Erreur',
+                description: error.message || 'Impossible de désactiver le 2FA',
+                variant: 'destructive'
+            });
+        }
+    };
+    const copySecret = ()=>{
+        if (secret) {
+            navigator.clipboard.writeText(secret);
+            toast({
+                title: 'Copié !',
+                description: 'Clé secrète copiée dans le presse-papiers'
+            });
+        }
+    };
+    if (isLoading) {
+        return /*#__PURE__*/ _jsxDEV(Card, {
+            children: /*#__PURE__*/ _jsxDEV(CardContent, {
+                className: "py-10",
+                children: /*#__PURE__*/ _jsxDEV("div", {
+                    className: "flex items-center justify-center",
+                    children: [
+                        /*#__PURE__*/ _jsxDEV(RefreshCw, {
+                            className: "h-6 w-6 animate-spin text-primary"
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                            lineNumber: 199,
+                            columnNumber: 13
+                        }, this),
+                        /*#__PURE__*/ _jsxDEV("span", {
+                            className: "ml-2",
+                            children: "Chargement..."
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                            lineNumber: 200,
+                            columnNumber: 13
+                        }, this)
+                    ]
+                }, void 0, true, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                    lineNumber: 198,
+                    columnNumber: 11
+                }, this)
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                lineNumber: 197,
+                columnNumber: 9
+            }, this)
+        }, void 0, false, {
+            fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+            lineNumber: 196,
+            columnNumber: 7
+        }, this);
+    }
+    return /*#__PURE__*/ _jsxDEV("div", {
+        className: "space-y-6",
+        children: [
+            /*#__PURE__*/ _jsxDEV(Card, {
+                children: /*#__PURE__*/ _jsxDEV(CardHeader, {
+                    children: [
+                        /*#__PURE__*/ _jsxDEV("div", {
+                            className: "flex items-center gap-2",
+                            children: [
+                                /*#__PURE__*/ _jsxDEV(Shield, {
+                                    className: "h-5 w-5 text-primary"
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                                    lineNumber: 213,
+                                    columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV(CardTitle, {
+                                    children: "Authentification à Deux Facteurs (2FA)"
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                                    lineNumber: 214,
+                                    columnNumber: 13
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                            lineNumber: 212,
+                            columnNumber: 11
+                        }, this),
+                        /*#__PURE__*/ _jsxDEV(CardDescription, {
+                            children: "Ajoutez une couche de sécurité supplémentaire à votre compte admin"
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                            lineNumber: 216,
+                            columnNumber: 11
+                        }, this)
+                    ]
+                }, void 0, true, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                    lineNumber: 211,
+                    columnNumber: 9
+                }, this)
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                lineNumber: 210,
+                columnNumber: 7
+            }, this),
+            factors.length === 0 ? /*#__PURE__*/ _jsxDEV(Alert, {
+                children: [
+                    /*#__PURE__*/ _jsxDEV(AlertCircle, {
+                        className: "h-4 w-4"
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                        lineNumber: 225,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV(AlertDescription, {
+                        children: "L'authentification à deux facteurs n'est pas activée. Votre compte admin est vulnérable."
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                        lineNumber: 226,
+                        columnNumber: 11
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                lineNumber: 224,
+                columnNumber: 9
+            }, this) : /*#__PURE__*/ _jsxDEV(Alert, {
+                className: "border-green-500 bg-green-50",
+                children: [
+                    /*#__PURE__*/ _jsxDEV(CheckCircle2, {
+                        className: "h-4 w-4 text-green-600"
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                        lineNumber: 232,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV(AlertDescription, {
+                        className: "text-green-800",
+                        children: "2FA activé - Votre compte est protégé"
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                        lineNumber: 233,
+                        columnNumber: 11
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                lineNumber: 231,
+                columnNumber: 9
+            }, this),
+            !qrCodeUrl ? /*#__PURE__*/ _jsxDEV(Card, {
+                children: [
+                    /*#__PURE__*/ _jsxDEV(CardHeader, {
+                        children: [
+                            /*#__PURE__*/ _jsxDEV(CardTitle, {
+                                children: "Configuration"
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                                lineNumber: 243,
+                                columnNumber: 13
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV(CardDescription, {
+                                children: "Utilisez une app authenticator (Google Authenticator, Authy, Microsoft Authenticator)"
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                                lineNumber: 244,
+                                columnNumber: 13
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                        lineNumber: 242,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV(CardContent, {
+                        children: factors.length === 0 ? /*#__PURE__*/ _jsxDEV(Button, {
+                            onClick: enable2FA,
+                            disabled: isEnabling,
+                            className: "w-full",
+                            children: [
+                                /*#__PURE__*/ _jsxDEV(Smartphone, {
+                                    className: "h-4 w-4 mr-2"
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                                    lineNumber: 255,
+                                    columnNumber: 17
+                                }, this),
+                                isEnabling ? 'Initialisation...' : 'Activer le 2FA'
+                            ]
+                        }, void 0, true, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                            lineNumber: 250,
+                            columnNumber: 15
+                        }, this) : /*#__PURE__*/ _jsxDEV("div", {
+                            className: "space-y-4",
+                            children: factors.map((factor)=>/*#__PURE__*/ _jsxDEV("div", {
+                                    className: "flex items-center justify-between p-4 border rounded-lg",
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV("div", {
+                                            className: "flex items-center gap-3",
+                                            children: [
+                                                /*#__PURE__*/ _jsxDEV(Key, {
+                                                    className: "h-5 w-5 text-primary"
+                                                }, void 0, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                                                    lineNumber: 266,
+                                                    columnNumber: 23
+                                                }, this),
+                                                /*#__PURE__*/ _jsxDEV("div", {
+                                                    children: [
+                                                        /*#__PURE__*/ _jsxDEV("p", {
+                                                            className: "font-medium",
+                                                            children: factor.friendly_name
+                                                        }, void 0, false, {
+                                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                                                            lineNumber: 268,
+                                                            columnNumber: 25
+                                                        }, this),
+                                                        /*#__PURE__*/ _jsxDEV("p", {
+                                                            className: "text-sm text-muted-foreground",
+                                                            children: [
+                                                                "Créé le ",
+                                                                new Date(factor.created_at).toLocaleDateString()
+                                                            ]
+                                                        }, void 0, true, {
+                                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                                                            lineNumber: 269,
+                                                            columnNumber: 25
+                                                        }, this)
+                                                    ]
+                                                }, void 0, true, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                                                    lineNumber: 267,
+                                                    columnNumber: 23
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                                            lineNumber: 265,
+                                            columnNumber: 21
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV("div", {
+                                            className: "flex items-center gap-2",
+                                            children: [
+                                                /*#__PURE__*/ _jsxDEV(Badge, {
+                                                    variant: factor.status === 'verified' ? 'default' : 'secondary',
+                                                    children: factor.status === 'verified' ? 'Vérifié' : 'En attente'
+                                                }, void 0, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                                                    lineNumber: 275,
+                                                    columnNumber: 23
+                                                }, this),
+                                                /*#__PURE__*/ _jsxDEV(Button, {
+                                                    variant: "destructive",
+                                                    size: "sm",
+                                                    onClick: ()=>disable2FA(factor.id),
+                                                    children: "Désactiver"
+                                                }, void 0, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                                                    lineNumber: 278,
+                                                    columnNumber: 23
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                                            lineNumber: 274,
+                                            columnNumber: 21
+                                        }, this)
+                                    ]
+                                }, factor.id, true, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                                    lineNumber: 261,
+                                    columnNumber: 19
+                                }, this))
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                            lineNumber: 259,
+                            columnNumber: 15
+                        }, this)
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                        lineNumber: 248,
+                        columnNumber: 11
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                lineNumber: 241,
+                columnNumber: 9
+            }, this) : /*#__PURE__*/ _jsxDEV(Card, {
+                children: [
+                    /*#__PURE__*/ _jsxDEV(CardHeader, {
+                        children: [
+                            /*#__PURE__*/ _jsxDEV(CardTitle, {
+                                children: "Scanner le QR Code"
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                                lineNumber: 295,
+                                columnNumber: 13
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV(CardDescription, {
+                                children: "Utilisez votre app authenticator pour scanner ce code"
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                                lineNumber: 296,
+                                columnNumber: 13
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                        lineNumber: 294,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV(CardContent, {
+                        className: "space-y-6",
+                        children: [
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                className: "flex justify-center",
+                                children: /*#__PURE__*/ _jsxDEV("div", {
+                                    className: "p-4 bg-white rounded-lg border",
+                                    children: /*#__PURE__*/ _jsxDEV("img", {
+                                        src: qrCodeUrl,
+                                        alt: "QR Code 2FA",
+                                        className: "w-48 h-48"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                                        lineNumber: 304,
+                                        columnNumber: 17
+                                    }, this)
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                                    lineNumber: 303,
+                                    columnNumber: 15
+                                }, this)
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                                lineNumber: 302,
+                                columnNumber: 13
+                            }, this),
+                            secret && /*#__PURE__*/ _jsxDEV("div", {
+                                className: "space-y-2",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV("p", {
+                                        className: "text-sm text-muted-foreground",
+                                        children: "Ou entrez manuellement cette clé :"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                                        lineNumber: 311,
+                                        columnNumber: 17
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "flex gap-2",
+                                        children: [
+                                            /*#__PURE__*/ _jsxDEV(Input, {
+                                                value: secret,
+                                                readOnly: true,
+                                                className: "font-mono text-sm"
+                                            }, void 0, false, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                                                lineNumber: 315,
+                                                columnNumber: 19
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV(Button, {
+                                                variant: "outline",
+                                                size: "icon",
+                                                onClick: copySecret,
+                                                "aria-label": "Copier le secret 2FA",
+                                                children: /*#__PURE__*/ _jsxDEV(Copy, {
+                                                    className: "h-4 w-4"
+                                                }, void 0, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                                                    lineNumber: 321,
+                                                    columnNumber: 21
+                                                }, this)
+                                            }, void 0, false, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                                                lineNumber: 320,
+                                                columnNumber: 19
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                                        lineNumber: 314,
+                                        columnNumber: 17
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                                lineNumber: 310,
+                                columnNumber: 15
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                className: "space-y-4",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV("div", {
+                                        children: [
+                                            /*#__PURE__*/ _jsxDEV("label", {
+                                                className: "text-sm font-medium",
+                                                children: "Code de vérification"
+                                            }, void 0, false, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                                                lineNumber: 330,
+                                                columnNumber: 17
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV(Input, {
+                                                type: "text",
+                                                placeholder: "000000",
+                                                value: verificationCode,
+                                                onChange: (e)=>setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6)),
+                                                maxLength: 6,
+                                                className: "mt-2 text-center text-2xl tracking-widest font-mono"
+                                            }, void 0, false, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                                                lineNumber: 331,
+                                                columnNumber: 17
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV("p", {
+                                                className: "text-sm text-muted-foreground mt-2",
+                                                children: "Entrez le code à 6 chiffres affiché dans votre app"
+                                            }, void 0, false, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                                                lineNumber: 339,
+                                                columnNumber: 17
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                                        lineNumber: 329,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "flex gap-2",
+                                        children: [
+                                            /*#__PURE__*/ _jsxDEV(Button, {
+                                                onClick: verify2FA,
+                                                disabled: isVerifying || verificationCode.length !== 6,
+                                                className: "flex-1",
+                                                children: isVerifying ? 'Vérification...' : 'Vérifier et activer'
+                                            }, void 0, false, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                                                lineNumber: 345,
+                                                columnNumber: 17
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV(Button, {
+                                                variant: "outline",
+                                                onClick: ()=>{
+                                                    setQrCodeUrl(null);
+                                                    setSecret(null);
+                                                    setVerificationCode('');
+                                                    setFactorId(null);
+                                                },
+                                                children: "Annuler"
+                                            }, void 0, false, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                                                lineNumber: 352,
+                                                columnNumber: 17
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                                        lineNumber: 344,
+                                        columnNumber: 15
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                                lineNumber: 328,
+                                columnNumber: 13
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                        lineNumber: 300,
+                        columnNumber: 11
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                lineNumber: 293,
+                columnNumber: 9
+            }, this),
+            /*#__PURE__*/ _jsxDEV(Card, {
+                children: [
+                    /*#__PURE__*/ _jsxDEV(CardHeader, {
+                        children: /*#__PURE__*/ _jsxDEV(CardTitle, {
+                            className: "text-base",
+                            children: "Apps Authenticator recommandées"
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                            lineNumber: 372,
+                            columnNumber: 11
+                        }, this)
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                        lineNumber: 371,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV(CardContent, {
+                        children: /*#__PURE__*/ _jsxDEV("ul", {
+                            className: "space-y-2 text-sm",
+                            children: [
+                                /*#__PURE__*/ _jsxDEV("li", {
+                                    className: "flex items-center gap-2",
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV(CheckCircle2, {
+                                            className: "h-4 w-4 text-green-600"
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                                            lineNumber: 377,
+                                            columnNumber: 15
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV("span", {
+                                            children: "Google Authenticator (iOS & Android)"
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                                            lineNumber: 378,
+                                            columnNumber: 15
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                                    lineNumber: 376,
+                                    columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV("li", {
+                                    className: "flex items-center gap-2",
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV(CheckCircle2, {
+                                            className: "h-4 w-4 text-green-600"
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                                            lineNumber: 381,
+                                            columnNumber: 15
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV("span", {
+                                            children: "Microsoft Authenticator (iOS & Android)"
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                                            lineNumber: 382,
+                                            columnNumber: 15
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                                    lineNumber: 380,
+                                    columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV("li", {
+                                    className: "flex items-center gap-2",
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV(CheckCircle2, {
+                                            className: "h-4 w-4 text-green-600"
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                                            lineNumber: 385,
+                                            columnNumber: 15
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV("span", {
+                                            children: "Authy (Multi-plateforme avec backup)"
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                                            lineNumber: 386,
+                                            columnNumber: 15
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                                    lineNumber: 384,
+                                    columnNumber: 13
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                            lineNumber: 375,
+                            columnNumber: 11
+                        }, this)
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                        lineNumber: 374,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+                lineNumber: 370,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx",
+        lineNumber: 208,
+        columnNumber: 5
+    }, this);
+};
+_s(TwoFactorAuth, "b44oUuAwbe0lg52G5U4ory4B8Dc=", false, function() {
+    return [
+        useToast
+    ];
+});
+_c = TwoFactorAuth;
+var _c;
+$RefreshReg$(_c, "TwoFactorAuth");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/auth/TwoFactorAuth.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIlR3b0ZhY3RvckF1dGgudHN4Il0sInNvdXJjZXNDb250ZW50IjpbIi8qKlxuICogQ29tcG9zYW50IFR3by1GYWN0b3IgQXV0aGVudGljYXRpb24gKDJGQSlcbiAqIFxuICogQXV0aGVudGlmaWNhdGlvbiDDoCBkZXV4IGZhY3RldXJzIHBvdXIgc8OpY3VyaXNlciBsZXMgY29tcHRlcyBhZG1pbnNcbiAqIFV0aWxpc2UgU3VwYWJhc2UgTUZBIChNdWx0aS1GYWN0b3IgQXV0aGVudGljYXRpb24pXG4gKiBcbiAqIEBtb2R1bGUgVHdvRmFjdG9yQXV0aFxuICovXG5cbmltcG9ydCB7IHVzZVN0YXRlLCB1c2VFZmZlY3QgfSBmcm9tICdyZWFjdCc7XG5pbXBvcnQgeyBDYXJkLCBDYXJkQ29udGVudCwgQ2FyZERlc2NyaXB0aW9uLCBDYXJkSGVhZGVyLCBDYXJkVGl0bGUgfSBmcm9tICdAL2NvbXBvbmVudHMvdWkvY2FyZCc7XG5pbXBvcnQgeyBCdXR0b24gfSBmcm9tICdAL2NvbXBvbmVudHMvdWkvYnV0dG9uJztcbmltcG9ydCB7IElucHV0IH0gZnJvbSAnQC9jb21wb25lbnRzL3VpL2lucHV0JztcbmltcG9ydCB7IEJhZGdlIH0gZnJvbSAnQC9jb21wb25lbnRzL3VpL2JhZGdlJztcbmltcG9ydCB7IEFsZXJ0LCBBbGVydERlc2NyaXB0aW9uIH0gZnJvbSAnQC9jb21wb25lbnRzL3VpL2FsZXJ0JztcbmltcG9ydCB7IHN1cGFiYXNlIH0gZnJvbSAnQC9pbnRlZ3JhdGlvbnMvc3VwYWJhc2UvY2xpZW50JztcbmltcG9ydCB7IFNoaWVsZCwgU21hcnRwaG9uZSwgS2V5LCBDaGVja0NpcmNsZTIsIEFsZXJ0Q2lyY2xlLCBDb3B5LCBSZWZyZXNoQ3cgfSBmcm9tICdsdWNpZGUtcmVhY3QnO1xuaW1wb3J0IHsgdXNlVG9hc3QgfSBmcm9tICdAL2hvb2tzL3VzZS10b2FzdCc7XG5pbXBvcnQgeyBsb2dnZXIgfSBmcm9tICdAL2xpYi9sb2dnZXInO1xuaW1wb3J0IFFSQ29kZSBmcm9tICdxcmNvZGUnO1xuXG5pbnRlcmZhY2UgRmFjdG9yIHtcbiAgaWQ6IHN0cmluZztcbiAgZnJpZW5kbHlfbmFtZTogc3RyaW5nO1xuICBmYWN0b3JfdHlwZTogJ3RvdHAnO1xuICBzdGF0dXM6ICd2ZXJpZmllZCcgfCAndW52ZXJpZmllZCc7XG4gIGNyZWF0ZWRfYXQ6IHN0cmluZztcbn1cblxuZXhwb3J0IGNvbnN0IFR3b0ZhY3RvckF1dGggPSAoKSA9PiB7XG4gIGNvbnN0IFtmYWN0b3JzLCBzZXRGYWN0b3JzXSA9IHVzZVN0YXRlPEZhY3RvcltdPihbXSk7XG4gIGNvbnN0IFtpc0xvYWRpbmcsIHNldElzTG9hZGluZ10gPSB1c2VTdGF0ZSh0cnVlKTtcbiAgY29uc3QgW2lzRW5hYmxpbmcsIHNldElzRW5hYmxpbmddID0gdXNlU3RhdGUoZmFsc2UpO1xuICBjb25zdCBbcXJDb2RlVXJsLCBzZXRRckNvZGVVcmxdID0gdXNlU3RhdGU8c3RyaW5nIHwgbnVsbD4obnVsbCk7XG4gIGNvbnN0IFtzZWNyZXQsIHNldFNlY3JldF0gPSB1c2VTdGF0ZTxzdHJpbmcgfCBudWxsPihudWxsKTtcbiAgY29uc3QgW3ZlcmlmaWNhdGlvbkNvZGUsIHNldFZlcmlmaWNhdGlvbkNvZGVdID0gdXNlU3RhdGUoJycpO1xuICBjb25zdCBbaXNWZXJpZnlpbmcsIHNldElzVmVyaWZ5aW5nXSA9IHVzZVN0YXRlKGZhbHNlKTtcbiAgY29uc3QgW2ZhY3RvcklkLCBzZXRGYWN0b3JJZF0gPSB1c2VTdGF0ZTxzdHJpbmcgfCBudWxsPihudWxsKTtcbiAgY29uc3QgeyB0b2FzdCB9ID0gdXNlVG9hc3QoKTtcblxuICAvLyBDaGFyZ2VyIGxlcyBmYWN0ZXVycyBkJ2F1dGhlbnRpZmljYXRpb24gZXhpc3RhbnRzXG4gIHVzZUVmZmVjdCgoKSA9PiB7XG4gICAgbG9hZEZhY3RvcnMoKTtcbiAgfSwgW10pO1xuXG4gIGNvbnN0IGxvYWRGYWN0b3JzID0gYXN5bmMgKCkgPT4ge1xuICAgIHNldElzTG9hZGluZyh0cnVlKTtcbiAgICB0cnkge1xuICAgICAgY29uc3QgeyBkYXRhOiB7IHVzZXIgfSB9ID0gYXdhaXQgc3VwYWJhc2UuYXV0aC5nZXRVc2VyKCk7XG4gICAgICBcbiAgICAgIGlmICghdXNlcikge1xuICAgICAgICB0aHJvdyBuZXcgRXJyb3IoJ1V0aWxpc2F0ZXVyIG5vbiBjb25uZWN0w6knKTtcbiAgICAgIH1cblxuICAgICAgLy8gTm90ZTogU3VwYWJhc2UgTUZBIEFQSVxuICAgICAgLy8gY29uc3QgeyBkYXRhLCBlcnJvciB9ID0gYXdhaXQgc3VwYWJhc2UuYXV0aC5tZmEubGlzdEZhY3RvcnMoKTtcbiAgICAgIFxuICAgICAgLy8gUG91ciBsJ2luc3RhbnQsIHNpbXVsZXIgKFN1cGFiYXNlIE1GQSBuw6ljZXNzaXRlIGNvbmZpZ3VyYXRpb24gc2VydmV1cilcbiAgICAgIHNldEZhY3RvcnMoW10pO1xuICAgICAgXG4gICAgfSBjYXRjaCAoZXJyb3IpIHtcbiAgICAgIGxvZ2dlci5lcnJvcignRXJyZXVyIGNoYXJnZW1lbnQgMkZBJywgeyBlcnJvciB9KTtcbiAgICAgIHRvYXN0KHtcbiAgICAgICAgdGl0bGU6ICdFcnJldXInLFxuICAgICAgICBkZXNjcmlwdGlvbjogJ0ltcG9zc2libGUgZGUgY2hhcmdlciBsZXMgcGFyYW3DqHRyZXMgMkZBJyxcbiAgICAgICAgdmFyaWFudDogJ2Rlc3RydWN0aXZlJyxcbiAgICAgIH0pO1xuICAgIH0gZmluYWxseSB7XG4gICAgICBzZXRJc0xvYWRpbmcoZmFsc2UpO1xuICAgIH1cbiAgfTtcblxuICBjb25zdCBlbmFibGUyRkEgPSBhc3luYyAoKSA9PiB7XG4gICAgc2V0SXNFbmFibGluZyh0cnVlKTtcbiAgICB0cnkge1xuICAgICAgLy8gw4l0YXBlIDEgOiBFbnJvbGwgdW4gbm91dmVhdSBmYWN0ZXVyIFRPVFBcbiAgICAgIGNvbnN0IHsgZGF0YSwgZXJyb3IgfSA9IGF3YWl0IHN1cGFiYXNlLmF1dGgubWZhLmVucm9sbCh7XG4gICAgICAgIGZhY3RvclR5cGU6ICd0b3RwJyxcbiAgICAgICAgZnJpZW5kbHlOYW1lOiAnQXV0aGVudGljYXRvciBBcHAnLFxuICAgICAgfSk7XG5cbiAgICAgIGlmIChlcnJvcikgdGhyb3cgZXJyb3I7XG5cbiAgICAgIGlmIChkYXRhKSB7XG4gICAgICAgIC8vIGRhdGEgY29udGllbnQgOiBpZCwgdHlwZSwgdG90cCB7IHFyX2NvZGUsIHNlY3JldCwgdXJpIH1cbiAgICAgICAgc2V0RmFjdG9ySWQoZGF0YS5pZCk7XG4gICAgICAgIHNldFNlY3JldChkYXRhLnRvdHAuc2VjcmV0KTtcbiAgICAgICAgXG4gICAgICAgIC8vIEfDqW7DqXJlciBRUiBDb2RlIHBvdXIgbCdhcHAgYXV0aGVudGljYXRvclxuICAgICAgICBjb25zdCBxclVybCA9IGF3YWl0IFFSQ29kZS50b0RhdGFVUkwoZGF0YS50b3RwLnVyaSk7XG4gICAgICAgIHNldFFyQ29kZVVybChxclVybCk7XG5cbiAgICAgICAgdG9hc3Qoe1xuICAgICAgICAgIHRpdGxlOiAnMkZBIGluaXRpYWxpc8OpJyxcbiAgICAgICAgICBkZXNjcmlwdGlvbjogJ1NjYW5uZXogbGUgUVIgY29kZSBhdmVjIHZvdHJlIGFwcCBhdXRoZW50aWZpY2F0b3InLFxuICAgICAgICB9KTtcbiAgICAgIH1cbiAgICB9IGNhdGNoICggX2Vycm9yOiBhbnkpIHtcbiAgICAgIGxvZ2dlci5lcnJvcignRXJyZXVyIGFjdGl2YXRpb24gMkZBJywgeyBlcnJvciB9KTtcbiAgICAgIHRvYXN0KHtcbiAgICAgICAgdGl0bGU6ICdFcnJldXInLFxuICAgICAgICBkZXNjcmlwdGlvbjogZXJyb3IubWVzc2FnZSB8fCAnSW1wb3NzaWJsZSBkXFwnYWN0aXZlciBsZSAyRkEnLFxuICAgICAgICB2YXJpYW50OiAnZGVzdHJ1Y3RpdmUnLFxuICAgICAgfSk7XG4gICAgfSBmaW5hbGx5IHtcbiAgICAgIHNldElzRW5hYmxpbmcoZmFsc2UpO1xuICAgIH1cbiAgfTtcblxuICBjb25zdCB2ZXJpZnkyRkEgPSBhc3luYyAoKSA9PiB7XG4gICAgaWYgKCFmYWN0b3JJZCB8fCAhdmVyaWZpY2F0aW9uQ29kZSB8fCB2ZXJpZmljYXRpb25Db2RlLmxlbmd0aCAhPT0gNikge1xuICAgICAgdG9hc3Qoe1xuICAgICAgICB0aXRsZTogJ0NvZGUgaW52YWxpZGUnLFxuICAgICAgICBkZXNjcmlwdGlvbjogJ0xlIGNvZGUgZG9pdCBjb250ZW5pciA2IGNoaWZmcmVzJyxcbiAgICAgICAgdmFyaWFudDogJ2Rlc3RydWN0aXZlJyxcbiAgICAgIH0pO1xuICAgICAgcmV0dXJuO1xuICAgIH1cblxuICAgIHNldElzVmVyaWZ5aW5nKHRydWUpO1xuICAgIHRyeSB7XG4gICAgICAvLyDDiXRhcGUgMiA6IFbDqXJpZmllciBsZSBjb2RlIFRPVFBcbiAgICAgIGNvbnN0IHsgZGF0YSwgZXJyb3IgfSA9IGF3YWl0IHN1cGFiYXNlLmF1dGgubWZhLmNoYWxsZW5nZSh7XG4gICAgICAgIGZhY3RvcklkOiBmYWN0b3JJZCxcbiAgICAgIH0pO1xuXG4gICAgICBpZiAoZXJyb3IpIHRocm93IGVycm9yO1xuXG4gICAgICBpZiAoZGF0YSkge1xuICAgICAgICAvLyBWw6lyaWZpZXIgbGUgY29kZVxuICAgICAgICBjb25zdCB7IGVycm9yOiB2ZXJpZnlFcnJvciB9ID0gYXdhaXQgc3VwYWJhc2UuYXV0aC5tZmEudmVyaWZ5KHtcbiAgICAgICAgICBmYWN0b3JJZDogZmFjdG9ySWQsXG4gICAgICAgICAgY2hhbGxlbmdlSWQ6IGRhdGEuaWQsXG4gICAgICAgICAgY29kZTogdmVyaWZpY2F0aW9uQ29kZSxcbiAgICAgICAgfSk7XG5cbiAgICAgICAgaWYgKHZlcmlmeUVycm9yKSB0aHJvdyB2ZXJpZnlFcnJvcjtcblxuICAgICAgICB0b2FzdCh7XG4gICAgICAgICAgdGl0bGU6ICcyRkEgYWN0aXbDqSAhJyxcbiAgICAgICAgICBkZXNjcmlwdGlvbjogJ1ZvdHJlIGNvbXB0ZSBlc3QgbWFpbnRlbmFudCBwcm90w6lnw6kgcGFyIGxcXCdhdXRoZW50aWZpY2F0aW9uIMOgIGRldXggZmFjdGV1cnMnLFxuICAgICAgICB9KTtcblxuICAgICAgICAvLyBSZXNldCBldCByZWNoYXJnZXJcbiAgICAgICAgc2V0UXJDb2RlVXJsKG51bGwpO1xuICAgICAgICBzZXRTZWNyZXQobnVsbCk7XG4gICAgICAgIHNldFZlcmlmaWNhdGlvbkNvZGUoJycpO1xuICAgICAgICBzZXRGYWN0b3JJZChudWxsKTtcbiAgICAgICAgYXdhaXQgbG9hZEZhY3RvcnMoKTtcbiAgICAgIH1cbiAgICB9IGNhdGNoICggX2Vycm9yOiBhbnkpIHtcbiAgICAgIGxvZ2dlci5lcnJvcignRXJyZXVyIHbDqXJpZmljYXRpb24gMkZBJywgeyBlcnJvciwgZmFjdG9ySWQgfSk7XG4gICAgICB0b2FzdCh7XG4gICAgICAgIHRpdGxlOiAnQ29kZSBpbmNvcnJlY3QnLFxuICAgICAgICBkZXNjcmlwdGlvbjogZXJyb3IubWVzc2FnZSB8fCAnTGUgY29kZSBzYWlzaSBlc3QgaW52YWxpZGUnLFxuICAgICAgICB2YXJpYW50OiAnZGVzdHJ1Y3RpdmUnLFxuICAgICAgfSk7XG4gICAgfSBmaW5hbGx5IHtcbiAgICAgIHNldElzVmVyaWZ5aW5nKGZhbHNlKTtcbiAgICB9XG4gIH07XG5cbiAgY29uc3QgZGlzYWJsZTJGQSA9IGFzeW5jIChmYWN0b3JJZDogc3RyaW5nKSA9PiB7XG4gICAgdHJ5IHtcbiAgICAgIGNvbnN0IHsgZXJyb3IgfSA9IGF3YWl0IHN1cGFiYXNlLmF1dGgubWZhLnVuZW5yb2xsKHsgZmFjdG9ySWQgfSk7XG4gICAgICBcbiAgICAgIGlmIChlcnJvcikgdGhyb3cgZXJyb3I7XG5cbiAgICAgIHRvYXN0KHtcbiAgICAgICAgdGl0bGU6ICcyRkEgZMOpc2FjdGl2w6knLFxuICAgICAgICBkZXNjcmlwdGlvbjogJ0xcXCdhdXRoZW50aWZpY2F0aW9uIMOgIGRldXggZmFjdGV1cnMgYSDDqXTDqSBkw6lzYWN0aXbDqWUnLFxuICAgICAgfSk7XG5cbiAgICAgIGF3YWl0IGxvYWRGYWN0b3JzKCk7XG4gICAgfSBjYXRjaCAoIF9lcnJvcjogYW55KSB7XG4gICAgICB0b2FzdCh7XG4gICAgICAgIHRpdGxlOiAnRXJyZXVyJyxcbiAgICAgICAgZGVzY3JpcHRpb246IGVycm9yLm1lc3NhZ2UgfHwgJ0ltcG9zc2libGUgZGUgZMOpc2FjdGl2ZXIgbGUgMkZBJyxcbiAgICAgICAgdmFyaWFudDogJ2Rlc3RydWN0aXZlJyxcbiAgICAgIH0pO1xuICAgIH1cbiAgfTtcblxuICBjb25zdCBjb3B5U2VjcmV0ID0gKCkgPT4ge1xuICAgIGlmIChzZWNyZXQpIHtcbiAgICAgIG5hdmlnYXRvci5jbGlwYm9hcmQud3JpdGVUZXh0KHNlY3JldCk7XG4gICAgICB0b2FzdCh7XG4gICAgICAgIHRpdGxlOiAnQ29wacOpICEnLFxuICAgICAgICBkZXNjcmlwdGlvbjogJ0Nsw6kgc2VjcsOodGUgY29wacOpZSBkYW5zIGxlIHByZXNzZS1wYXBpZXJzJyxcbiAgICAgIH0pO1xuICAgIH1cbiAgfTtcblxuICBpZiAoaXNMb2FkaW5nKSB7XG4gICAgcmV0dXJuIChcbiAgICAgIDxDYXJkPlxuICAgICAgICA8Q2FyZENvbnRlbnQgY2xhc3NOYW1lPVwicHktMTBcIj5cbiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGp1c3RpZnktY2VudGVyXCI+XG4gICAgICAgICAgICA8UmVmcmVzaEN3IGNsYXNzTmFtZT1cImgtNiB3LTYgYW5pbWF0ZS1zcGluIHRleHQtcHJpbWFyeVwiIC8+XG4gICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJtbC0yXCI+Q2hhcmdlbWVudC4uLjwvc3Bhbj5cbiAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgPC9DYXJkQ29udGVudD5cbiAgICAgIDwvQ2FyZD5cbiAgICApO1xuICB9XG5cbiAgcmV0dXJuIChcbiAgICA8ZGl2IGNsYXNzTmFtZT1cInNwYWNlLXktNlwiPlxuICAgICAgey8qIEVuLXTDqnRlICovfVxuICAgICAgPENhcmQ+XG4gICAgICAgIDxDYXJkSGVhZGVyPlxuICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTJcIj5cbiAgICAgICAgICAgIDxTaGllbGQgY2xhc3NOYW1lPVwiaC01IHctNSB0ZXh0LXByaW1hcnlcIiAvPlxuICAgICAgICAgICAgPENhcmRUaXRsZT5BdXRoZW50aWZpY2F0aW9uIMOgIERldXggRmFjdGV1cnMgKDJGQSk8L0NhcmRUaXRsZT5cbiAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICA8Q2FyZERlc2NyaXB0aW9uPlxuICAgICAgICAgICAgQWpvdXRleiB1bmUgY291Y2hlIGRlIHPDqWN1cml0w6kgc3VwcGzDqW1lbnRhaXJlIMOgIHZvdHJlIGNvbXB0ZSBhZG1pblxuICAgICAgICAgIDwvQ2FyZERlc2NyaXB0aW9uPlxuICAgICAgICA8L0NhcmRIZWFkZXI+XG4gICAgICA8L0NhcmQ+XG5cbiAgICAgIHsvKiDDiXRhdCBhY3R1ZWwgKi99XG4gICAgICB7ZmFjdG9ycy5sZW5ndGggPT09IDAgPyAoXG4gICAgICAgIDxBbGVydD5cbiAgICAgICAgICA8QWxlcnRDaXJjbGUgY2xhc3NOYW1lPVwiaC00IHctNFwiIC8+XG4gICAgICAgICAgPEFsZXJ0RGVzY3JpcHRpb24+XG4gICAgICAgICAgICBMJ2F1dGhlbnRpZmljYXRpb24gw6AgZGV1eCBmYWN0ZXVycyBuJ2VzdCBwYXMgYWN0aXbDqWUuIFZvdHJlIGNvbXB0ZSBhZG1pbiBlc3QgdnVsbsOpcmFibGUuXG4gICAgICAgICAgPC9BbGVydERlc2NyaXB0aW9uPlxuICAgICAgICA8L0FsZXJ0PlxuICAgICAgKSA6IChcbiAgICAgICAgPEFsZXJ0IGNsYXNzTmFtZT1cImJvcmRlci1ncmVlbi01MDAgYmctZ3JlZW4tNTBcIj5cbiAgICAgICAgICA8Q2hlY2tDaXJjbGUyIGNsYXNzTmFtZT1cImgtNCB3LTQgdGV4dC1ncmVlbi02MDBcIiAvPlxuICAgICAgICAgIDxBbGVydERlc2NyaXB0aW9uIGNsYXNzTmFtZT1cInRleHQtZ3JlZW4tODAwXCI+XG4gICAgICAgICAgICAyRkEgYWN0aXbDqSAtIFZvdHJlIGNvbXB0ZSBlc3QgcHJvdMOpZ8OpXG4gICAgICAgICAgPC9BbGVydERlc2NyaXB0aW9uPlxuICAgICAgICA8L0FsZXJ0PlxuICAgICAgKX1cblxuICAgICAgey8qIENvbmZpZ3VyYXRpb24gMkZBICovfVxuICAgICAgeyFxckNvZGVVcmwgPyAoXG4gICAgICAgIDxDYXJkPlxuICAgICAgICAgIDxDYXJkSGVhZGVyPlxuICAgICAgICAgICAgPENhcmRUaXRsZT5Db25maWd1cmF0aW9uPC9DYXJkVGl0bGU+XG4gICAgICAgICAgICA8Q2FyZERlc2NyaXB0aW9uPlxuICAgICAgICAgICAgICBVdGlsaXNleiB1bmUgYXBwIGF1dGhlbnRpY2F0b3IgKEdvb2dsZSBBdXRoZW50aWNhdG9yLCBBdXRoeSwgTWljcm9zb2Z0IEF1dGhlbnRpY2F0b3IpXG4gICAgICAgICAgICA8L0NhcmREZXNjcmlwdGlvbj5cbiAgICAgICAgICA8L0NhcmRIZWFkZXI+XG4gICAgICAgICAgPENhcmRDb250ZW50PlxuICAgICAgICAgICAge2ZhY3RvcnMubGVuZ3RoID09PSAwID8gKFxuICAgICAgICAgICAgICA8QnV0dG9uIFxuICAgICAgICAgICAgICAgIG9uQ2xpY2s9e2VuYWJsZTJGQX0gXG4gICAgICAgICAgICAgICAgZGlzYWJsZWQ9e2lzRW5hYmxpbmd9XG4gICAgICAgICAgICAgICAgY2xhc3NOYW1lPVwidy1mdWxsXCJcbiAgICAgICAgICAgICAgPlxuICAgICAgICAgICAgICAgIDxTbWFydHBob25lIGNsYXNzTmFtZT1cImgtNCB3LTQgbXItMlwiIC8+XG4gICAgICAgICAgICAgICAge2lzRW5hYmxpbmcgPyAnSW5pdGlhbGlzYXRpb24uLi4nIDogJ0FjdGl2ZXIgbGUgMkZBJ31cbiAgICAgICAgICAgICAgPC9CdXR0b24+XG4gICAgICAgICAgICApIDogKFxuICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInNwYWNlLXktNFwiPlxuICAgICAgICAgICAgICAgIHtmYWN0b3JzLm1hcCgoZmFjdG9yKSA9PiAoXG4gICAgICAgICAgICAgICAgICA8ZGl2IFxuICAgICAgICAgICAgICAgICAgICBrZXk9e2ZhY3Rvci5pZH1cbiAgICAgICAgICAgICAgICAgICAgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIganVzdGlmeS1iZXR3ZWVuIHAtNCBib3JkZXIgcm91bmRlZC1sZ1wiXG4gICAgICAgICAgICAgICAgICA+XG4gICAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTNcIj5cbiAgICAgICAgICAgICAgICAgICAgICA8S2V5IGNsYXNzTmFtZT1cImgtNSB3LTUgdGV4dC1wcmltYXJ5XCIgLz5cbiAgICAgICAgICAgICAgICAgICAgICA8ZGl2PlxuICAgICAgICAgICAgICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwiZm9udC1tZWRpdW1cIj57ZmFjdG9yLmZyaWVuZGx5X25hbWV9PC9wPlxuICAgICAgICAgICAgICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwidGV4dC1zbSB0ZXh0LW11dGVkLWZvcmVncm91bmRcIj5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgQ3LDqcOpIGxlIHtuZXcgRGF0ZShmYWN0b3IuY3JlYXRlZF9hdCkudG9Mb2NhbGVEYXRlU3RyaW5nKCl9XG4gICAgICAgICAgICAgICAgICAgICAgICA8L3A+XG4gICAgICAgICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGdhcC0yXCI+XG4gICAgICAgICAgICAgICAgICAgICAgPEJhZGdlIHZhcmlhbnQ9e2ZhY3Rvci5zdGF0dXMgPT09ICd2ZXJpZmllZCcgPyAnZGVmYXVsdCcgOiAnc2Vjb25kYXJ5J30+XG4gICAgICAgICAgICAgICAgICAgICAgICB7ZmFjdG9yLnN0YXR1cyA9PT0gJ3ZlcmlmaWVkJyA/ICdWw6lyaWZpw6knIDogJ0VuIGF0dGVudGUnfVxuICAgICAgICAgICAgICAgICAgICAgIDwvQmFkZ2U+XG4gICAgICAgICAgICAgICAgICAgICAgPEJ1dHRvblxuICAgICAgICAgICAgICAgICAgICAgICAgdmFyaWFudD1cImRlc3RydWN0aXZlXCJcbiAgICAgICAgICAgICAgICAgICAgICAgIHNpemU9XCJzbVwiXG4gICAgICAgICAgICAgICAgICAgICAgICBvbkNsaWNrPXsoKSA9PiBkaXNhYmxlMkZBKGZhY3Rvci5pZCl9XG4gICAgICAgICAgICAgICAgICAgICAgPlxuICAgICAgICAgICAgICAgICAgICAgICAgRMOpc2FjdGl2ZXJcbiAgICAgICAgICAgICAgICAgICAgICA8L0J1dHRvbj5cbiAgICAgICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICApKX1cbiAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICApfVxuICAgICAgICAgIDwvQ2FyZENvbnRlbnQ+XG4gICAgICAgIDwvQ2FyZD5cbiAgICAgICkgOiAoXG4gICAgICAgIDxDYXJkPlxuICAgICAgICAgIDxDYXJkSGVhZGVyPlxuICAgICAgICAgICAgPENhcmRUaXRsZT5TY2FubmVyIGxlIFFSIENvZGU8L0NhcmRUaXRsZT5cbiAgICAgICAgICAgIDxDYXJkRGVzY3JpcHRpb24+XG4gICAgICAgICAgICAgIFV0aWxpc2V6IHZvdHJlIGFwcCBhdXRoZW50aWNhdG9yIHBvdXIgc2Nhbm5lciBjZSBjb2RlXG4gICAgICAgICAgICA8L0NhcmREZXNjcmlwdGlvbj5cbiAgICAgICAgICA8L0NhcmRIZWFkZXI+XG4gICAgICAgICAgPENhcmRDb250ZW50IGNsYXNzTmFtZT1cInNwYWNlLXktNlwiPlxuICAgICAgICAgICAgey8qIFFSIENvZGUgKi99XG4gICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXgganVzdGlmeS1jZW50ZXJcIj5cbiAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJwLTQgYmctd2hpdGUgcm91bmRlZC1sZyBib3JkZXJcIj5cbiAgICAgICAgICAgICAgICA8aW1nIHNyYz17cXJDb2RlVXJsfSBhbHQ9XCJRUiBDb2RlIDJGQVwiIGNsYXNzTmFtZT1cInctNDggaC00OFwiIC8+XG4gICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgPC9kaXY+XG5cbiAgICAgICAgICAgIHsvKiBDbMOpIG1hbnVlbGxlICovfVxuICAgICAgICAgICAge3NlY3JldCAmJiAoXG4gICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwic3BhY2UteS0yXCI+XG4gICAgICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwidGV4dC1zbSB0ZXh0LW11dGVkLWZvcmVncm91bmRcIj5cbiAgICAgICAgICAgICAgICAgIE91IGVudHJleiBtYW51ZWxsZW1lbnQgY2V0dGUgY2zDqSA6XG4gICAgICAgICAgICAgICAgPC9wPlxuICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBnYXAtMlwiPlxuICAgICAgICAgICAgICAgICAgPElucHV0IFxuICAgICAgICAgICAgICAgICAgICB2YWx1ZT17c2VjcmV0fSBcbiAgICAgICAgICAgICAgICAgICAgcmVhZE9ubHkgXG4gICAgICAgICAgICAgICAgICAgIGNsYXNzTmFtZT1cImZvbnQtbW9ubyB0ZXh0LXNtXCJcbiAgICAgICAgICAgICAgICAgIC8+XG4gICAgICAgICAgICAgICAgICA8QnV0dG9uIHZhcmlhbnQ9XCJvdXRsaW5lXCIgc2l6ZT1cImljb25cIiBvbkNsaWNrPXtjb3B5U2VjcmV0fSBhcmlhLWxhYmVsPVwiQ29waWVyIGxlIHNlY3JldCAyRkFcIj5cbiAgICAgICAgICAgICAgICAgICAgPENvcHkgY2xhc3NOYW1lPVwiaC00IHctNFwiIC8+XG4gICAgICAgICAgICAgICAgICA8L0J1dHRvbj5cbiAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICApfVxuXG4gICAgICAgICAgICB7LyogVsOpcmlmaWNhdGlvbiAqL31cbiAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwic3BhY2UteS00XCI+XG4gICAgICAgICAgICAgIDxkaXY+XG4gICAgICAgICAgICAgICAgPGxhYmVsIGNsYXNzTmFtZT1cInRleHQtc20gZm9udC1tZWRpdW1cIj5Db2RlIGRlIHbDqXJpZmljYXRpb248L2xhYmVsPlxuICAgICAgICAgICAgICAgIDxJbnB1dFxuICAgICAgICAgICAgICAgICAgdHlwZT1cInRleHRcIlxuICAgICAgICAgICAgICAgICAgcGxhY2Vob2xkZXI9XCIwMDAwMDBcIlxuICAgICAgICAgICAgICAgICAgdmFsdWU9e3ZlcmlmaWNhdGlvbkNvZGV9XG4gICAgICAgICAgICAgICAgICBvbkNoYW5nZT17KGUpID0+IHNldFZlcmlmaWNhdGlvbkNvZGUoZS50YXJnZXQudmFsdWUucmVwbGFjZSgvXFxEL2csICcnKS5zbGljZSgwLCA2KSl9XG4gICAgICAgICAgICAgICAgICBtYXhMZW5ndGg9ezZ9XG4gICAgICAgICAgICAgICAgICBjbGFzc05hbWU9XCJtdC0yIHRleHQtY2VudGVyIHRleHQtMnhsIHRyYWNraW5nLXdpZGVzdCBmb250LW1vbm9cIlxuICAgICAgICAgICAgICAgIC8+XG4gICAgICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwidGV4dC1zbSB0ZXh0LW11dGVkLWZvcmVncm91bmQgbXQtMlwiPlxuICAgICAgICAgICAgICAgICAgRW50cmV6IGxlIGNvZGUgw6AgNiBjaGlmZnJlcyBhZmZpY2jDqSBkYW5zIHZvdHJlIGFwcFxuICAgICAgICAgICAgICAgIDwvcD5cbiAgICAgICAgICAgICAgPC9kaXY+XG5cbiAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGdhcC0yXCI+XG4gICAgICAgICAgICAgICAgPEJ1dHRvblxuICAgICAgICAgICAgICAgICAgb25DbGljaz17dmVyaWZ5MkZBfVxuICAgICAgICAgICAgICAgICAgZGlzYWJsZWQ9e2lzVmVyaWZ5aW5nIHx8IHZlcmlmaWNhdGlvbkNvZGUubGVuZ3RoICE9PSA2fVxuICAgICAgICAgICAgICAgICAgY2xhc3NOYW1lPVwiZmxleC0xXCJcbiAgICAgICAgICAgICAgICA+XG4gICAgICAgICAgICAgICAgICB7aXNWZXJpZnlpbmcgPyAnVsOpcmlmaWNhdGlvbi4uLicgOiAnVsOpcmlmaWVyIGV0IGFjdGl2ZXInfVxuICAgICAgICAgICAgICAgIDwvQnV0dG9uPlxuICAgICAgICAgICAgICAgIDxCdXR0b25cbiAgICAgICAgICAgICAgICAgIHZhcmlhbnQ9XCJvdXRsaW5lXCJcbiAgICAgICAgICAgICAgICAgIG9uQ2xpY2s9eygpID0+IHtcbiAgICAgICAgICAgICAgICAgICAgc2V0UXJDb2RlVXJsKG51bGwpO1xuICAgICAgICAgICAgICAgICAgICBzZXRTZWNyZXQobnVsbCk7XG4gICAgICAgICAgICAgICAgICAgIHNldFZlcmlmaWNhdGlvbkNvZGUoJycpO1xuICAgICAgICAgICAgICAgICAgICBzZXRGYWN0b3JJZChudWxsKTtcbiAgICAgICAgICAgICAgICAgIH19XG4gICAgICAgICAgICAgICAgPlxuICAgICAgICAgICAgICAgICAgQW5udWxlclxuICAgICAgICAgICAgICAgIDwvQnV0dG9uPlxuICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgIDwvQ2FyZENvbnRlbnQ+XG4gICAgICAgIDwvQ2FyZD5cbiAgICAgICl9XG5cbiAgICAgIHsvKiBJbmZvcm1hdGlvbnMgKi99XG4gICAgICA8Q2FyZD5cbiAgICAgICAgPENhcmRIZWFkZXI+XG4gICAgICAgICAgPENhcmRUaXRsZSBjbGFzc05hbWU9XCJ0ZXh0LWJhc2VcIj5BcHBzIEF1dGhlbnRpY2F0b3IgcmVjb21tYW5kw6llczwvQ2FyZFRpdGxlPlxuICAgICAgICA8L0NhcmRIZWFkZXI+XG4gICAgICAgIDxDYXJkQ29udGVudD5cbiAgICAgICAgICA8dWwgY2xhc3NOYW1lPVwic3BhY2UteS0yIHRleHQtc21cIj5cbiAgICAgICAgICAgIDxsaSBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLWNlbnRlciBnYXAtMlwiPlxuICAgICAgICAgICAgICA8Q2hlY2tDaXJjbGUyIGNsYXNzTmFtZT1cImgtNCB3LTQgdGV4dC1ncmVlbi02MDBcIiAvPlxuICAgICAgICAgICAgICA8c3Bhbj5Hb29nbGUgQXV0aGVudGljYXRvciAoaU9TICYgQW5kcm9pZCk8L3NwYW4+XG4gICAgICAgICAgICA8L2xpPlxuICAgICAgICAgICAgPGxpIGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGdhcC0yXCI+XG4gICAgICAgICAgICAgIDxDaGVja0NpcmNsZTIgY2xhc3NOYW1lPVwiaC00IHctNCB0ZXh0LWdyZWVuLTYwMFwiIC8+XG4gICAgICAgICAgICAgIDxzcGFuPk1pY3Jvc29mdCBBdXRoZW50aWNhdG9yIChpT1MgJiBBbmRyb2lkKTwvc3Bhbj5cbiAgICAgICAgICAgIDwvbGk+XG4gICAgICAgICAgICA8bGkgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTJcIj5cbiAgICAgICAgICAgICAgPENoZWNrQ2lyY2xlMiBjbGFzc05hbWU9XCJoLTQgdy00IHRleHQtZ3JlZW4tNjAwXCIgLz5cbiAgICAgICAgICAgICAgPHNwYW4+QXV0aHkgKE11bHRpLXBsYXRlZm9ybWUgYXZlYyBiYWNrdXApPC9zcGFuPlxuICAgICAgICAgICAgPC9saT5cbiAgICAgICAgICA8L3VsPlxuICAgICAgICA8L0NhcmRDb250ZW50PlxuICAgICAgPC9DYXJkPlxuICAgIDwvZGl2PlxuICApO1xufTtcblxuXG5cblxuXG5cblxuIl0sIm5hbWVzIjpbInVzZVN0YXRlIiwidXNlRWZmZWN0IiwiQ2FyZCIsIkNhcmRDb250ZW50IiwiQ2FyZERlc2NyaXB0aW9uIiwiQ2FyZEhlYWRlciIsIkNhcmRUaXRsZSIsIkJ1dHRvbiIsIklucHV0IiwiQmFkZ2UiLCJBbGVydCIsIkFsZXJ0RGVzY3JpcHRpb24iLCJzdXBhYmFzZSIsIlNoaWVsZCIsIlNtYXJ0cGhvbmUiLCJLZXkiLCJDaGVja0NpcmNsZTIiLCJBbGVydENpcmNsZSIsIkNvcHkiLCJSZWZyZXNoQ3ciLCJ1c2VUb2FzdCIsImxvZ2dlciIsIlFSQ29kZSIsIlR3b0ZhY3RvckF1dGgiLCJmYWN0b3JzIiwic2V0RmFjdG9ycyIsImlzTG9hZGluZyIsInNldElzTG9hZGluZyIsImlzRW5hYmxpbmciLCJzZXRJc0VuYWJsaW5nIiwicXJDb2RlVXJsIiwic2V0UXJDb2RlVXJsIiwic2VjcmV0Iiwic2V0U2VjcmV0IiwidmVyaWZpY2F0aW9uQ29kZSIsInNldFZlcmlmaWNhdGlvbkNvZGUiLCJpc1ZlcmlmeWluZyIsInNldElzVmVyaWZ5aW5nIiwiZmFjdG9ySWQiLCJzZXRGYWN0b3JJZCIsInRvYXN0IiwibG9hZEZhY3RvcnMiLCJkYXRhIiwidXNlciIsImF1dGgiLCJnZXRVc2VyIiwiRXJyb3IiLCJlcnJvciIsInRpdGxlIiwiZGVzY3JpcHRpb24iLCJ2YXJpYW50IiwiZW5hYmxlMkZBIiwibWZhIiwiZW5yb2xsIiwiZmFjdG9yVHlwZSIsImZyaWVuZGx5TmFtZSIsImlkIiwidG90cCIsInFyVXJsIiwidG9EYXRhVVJMIiwidXJpIiwiX2Vycm9yIiwibWVzc2FnZSIsInZlcmlmeTJGQSIsImxlbmd0aCIsImNoYWxsZW5nZSIsInZlcmlmeUVycm9yIiwidmVyaWZ5IiwiY2hhbGxlbmdlSWQiLCJjb2RlIiwiZGlzYWJsZTJGQSIsInVuZW5yb2xsIiwiY29weVNlY3JldCIsIm5hdmlnYXRvciIsImNsaXBib2FyZCIsIndyaXRlVGV4dCIsImNsYXNzTmFtZSIsImRpdiIsInNwYW4iLCJvbkNsaWNrIiwiZGlzYWJsZWQiLCJtYXAiLCJmYWN0b3IiLCJwIiwiZnJpZW5kbHlfbmFtZSIsIkRhdGUiLCJjcmVhdGVkX2F0IiwidG9Mb2NhbGVEYXRlU3RyaW5nIiwic3RhdHVzIiwic2l6ZSIsImltZyIsInNyYyIsImFsdCIsInZhbHVlIiwicmVhZE9ubHkiLCJhcmlhLWxhYmVsIiwibGFiZWwiLCJ0eXBlIiwicGxhY2Vob2xkZXIiLCJvbkNoYW5nZSIsImUiLCJ0YXJnZXQiLCJyZXBsYWNlIiwic2xpY2UiLCJtYXhMZW5ndGgiLCJ1bCIsImxpIl0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7QUFBQTs7Ozs7OztDQU9DLEdBRUQsU0FBU0EsUUFBUSxFQUFFQyxTQUFTLFFBQVEsUUFBUTtBQUM1QyxTQUFTQyxJQUFJLEVBQUVDLFdBQVcsRUFBRUMsZUFBZSxFQUFFQyxVQUFVLEVBQUVDLFNBQVMsUUFBUSx1QkFBdUI7QUFDakcsU0FBU0MsTUFBTSxRQUFRLHlCQUF5QjtBQUNoRCxTQUFTQyxLQUFLLFFBQVEsd0JBQXdCO0FBQzlDLFNBQVNDLEtBQUssUUFBUSx3QkFBd0I7QUFDOUMsU0FBU0MsS0FBSyxFQUFFQyxnQkFBZ0IsUUFBUSx3QkFBd0I7QUFDaEUsU0FBU0MsUUFBUSxRQUFRLGlDQUFpQztBQUMxRCxTQUFTQyxNQUFNLEVBQUVDLFVBQVUsRUFBRUMsR0FBRyxFQUFFQyxZQUFZLEVBQUVDLFdBQVcsRUFBRUMsSUFBSSxFQUFFQyxTQUFTLFFBQVEsZUFBZTtBQUNuRyxTQUFTQyxRQUFRLFFBQVEsb0JBQW9CO0FBQzdDLFNBQVNDLE1BQU0sUUFBUSxlQUFlO0FBQ3RDLE9BQU9DLFlBQVksU0FBUztBQVU1QixPQUFPLE1BQU1DLGdCQUFnQjs7SUFDM0IsTUFBTSxDQUFDQyxTQUFTQyxXQUFXLEdBQUd6QixTQUFtQixFQUFFO0lBQ25ELE1BQU0sQ0FBQzBCLFdBQVdDLGFBQWEsR0FBRzNCLFNBQVM7SUFDM0MsTUFBTSxDQUFDNEIsWUFBWUMsY0FBYyxHQUFHN0IsU0FBUztJQUM3QyxNQUFNLENBQUM4QixXQUFXQyxhQUFhLEdBQUcvQixTQUF3QjtJQUMxRCxNQUFNLENBQUNnQyxRQUFRQyxVQUFVLEdBQUdqQyxTQUF3QjtJQUNwRCxNQUFNLENBQUNrQyxrQkFBa0JDLG9CQUFvQixHQUFHbkMsU0FBUztJQUN6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

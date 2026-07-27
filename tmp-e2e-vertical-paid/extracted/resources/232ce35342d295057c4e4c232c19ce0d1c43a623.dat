@@ -1,0 +1,10 @@
+const REACT_RENDER_OP = 'ui.react.render';
+
+const REACT_UPDATE_OP = 'ui.react.update';
+
+const REACT_MOUNT_OP = 'ui.react.mount';
+
+export { REACT_MOUNT_OP, REACT_RENDER_OP, REACT_UPDATE_OP };
+                                     
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiY29uc3RhbnRzLmpzIiwic291cmNlcyI6WyIuLi8uLi9zcmMvY29uc3RhbnRzLnRzIl0sInNvdXJjZXNDb250ZW50IjpbImV4cG9ydCBjb25zdCBSRUFDVF9SRU5ERVJfT1AgPSAndWkucmVhY3QucmVuZGVyJztcblxuZXhwb3J0IGNvbnN0IFJFQUNUX1VQREFURV9PUCA9ICd1aS5yZWFjdC51cGRhdGUnO1xuXG5leHBvcnQgY29uc3QgUkVBQ1RfTU9VTlRfT1AgPSAndWkucmVhY3QubW91bnQnO1xuIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFPLE1BQU0sZUFBQSxHQUFrQjs7QUFFeEIsTUFBTSxlQUFBLEdBQWtCOztBQUV4QixNQUFNLGNBQUEsR0FBaUI7Ozs7IiwieF9nb29nbGVfaWdub3JlTGlzdCI6WzBdfQ==

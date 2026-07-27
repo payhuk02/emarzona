@@ -1,0 +1,98 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/ui/scroll-area.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/ui/scroll-area.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=6014a254"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=6014a254"; const React = ((m) => m?.__esModule ? m : {	...typeof m === "object" && !Array.isArray(m) || typeof m === "function" ? m : {},	default: m})(__vite__cjsImport3_react);
+import * as ScrollAreaPrimitive from "/node_modules/.vite/deps/@radix-ui_react-scroll-area.js?v=6014a254";
+import { cn } from "/src/lib/utils.ts";
+const ScrollArea = /*#__PURE__*/ React.forwardRef(_c = ({ className, children, ...props }, ref)=>/*#__PURE__*/ _jsxDEV(ScrollAreaPrimitive.Root, {
+        ref: ref,
+        className: cn("relative overflow-hidden", className),
+        ...props,
+        children: [
+            /*#__PURE__*/ _jsxDEV(ScrollAreaPrimitive.Viewport, {
+                className: "h-full w-full rounded-[inherit] -webkit-overflow-scrolling-touch overscroll-contain",
+                children: children
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/scroll-area.tsx",
+                lineNumber: 11,
+                columnNumber: 5
+            }, this),
+            /*#__PURE__*/ _jsxDEV(ScrollBar, {}, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/scroll-area.tsx",
+                lineNumber: 12,
+                columnNumber: 5
+            }, this),
+            /*#__PURE__*/ _jsxDEV(ScrollAreaPrimitive.Corner, {}, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/scroll-area.tsx",
+                lineNumber: 13,
+                columnNumber: 5
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/scroll-area.tsx",
+        lineNumber: 10,
+        columnNumber: 3
+    }, this));
+_c1 = ScrollArea;
+ScrollArea.displayName = ScrollAreaPrimitive.Root.displayName;
+const ScrollBar = /*#__PURE__*/ React.forwardRef(({ className, orientation = "vertical", ...props }, ref)=>/*#__PURE__*/ _jsxDEV(ScrollAreaPrimitive.ScrollAreaScrollbar, {
+        ref: ref,
+        orientation: orientation,
+        className: cn("flex touch-none select-none transition-colors", orientation === "vertical" && "h-full w-2.5 border-l border-l-transparent p-[1px]", orientation === "horizontal" && "h-2.5 flex-col border-t border-t-transparent p-[1px]", className),
+        ...props,
+        children: /*#__PURE__*/ _jsxDEV(ScrollAreaPrimitive.ScrollAreaThumb, {
+            className: "relative flex-1 rounded-full bg-border"
+        }, void 0, false, {
+            fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/scroll-area.tsx",
+            lineNumber: 33,
+            columnNumber: 5
+        }, this)
+    }, void 0, false, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/scroll-area.tsx",
+        lineNumber: 22,
+        columnNumber: 3
+    }, this));
+_c2 = ScrollBar;
+ScrollBar.displayName = ScrollAreaPrimitive.ScrollAreaScrollbar.displayName;
+export { ScrollArea, ScrollBar };
+var _c, _c1, _c2;
+$RefreshReg$(_c, "ScrollArea$React.forwardRef");
+$RefreshReg$(_c1, "ScrollArea");
+$RefreshReg$(_c2, "ScrollBar");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/ui/scroll-area.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/ui/scroll-area.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInNjcm9sbC1hcmVhLnRzeCJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgKiBhcyBSZWFjdCBmcm9tIFwicmVhY3RcIjtcbmltcG9ydCAqIGFzIFNjcm9sbEFyZWFQcmltaXRpdmUgZnJvbSBcIkByYWRpeC11aS9yZWFjdC1zY3JvbGwtYXJlYVwiO1xuXG5pbXBvcnQgeyBjbiB9IGZyb20gXCJAL2xpYi91dGlsc1wiO1xuXG5jb25zdCBTY3JvbGxBcmVhID0gUmVhY3QuZm9yd2FyZFJlZjxcbiAgUmVhY3QuRWxlbWVudFJlZjx0eXBlb2YgU2Nyb2xsQXJlYVByaW1pdGl2ZS5Sb290PixcbiAgUmVhY3QuQ29tcG9uZW50UHJvcHNXaXRob3V0UmVmPHR5cGVvZiBTY3JvbGxBcmVhUHJpbWl0aXZlLlJvb3Q+XG4+KCh7IGNsYXNzTmFtZSwgY2hpbGRyZW4sIC4uLnByb3BzIH0sIHJlZikgPT4gKFxuICA8U2Nyb2xsQXJlYVByaW1pdGl2ZS5Sb290IHJlZj17cmVmfSBjbGFzc05hbWU9e2NuKFwicmVsYXRpdmUgb3ZlcmZsb3ctaGlkZGVuXCIsIGNsYXNzTmFtZSl9IHsuLi5wcm9wc30+XG4gICAgPFNjcm9sbEFyZWFQcmltaXRpdmUuVmlld3BvcnQgY2xhc3NOYW1lPVwiaC1mdWxsIHctZnVsbCByb3VuZGVkLVtpbmhlcml0XSAtd2Via2l0LW92ZXJmbG93LXNjcm9sbGluZy10b3VjaCBvdmVyc2Nyb2xsLWNvbnRhaW5cIj57Y2hpbGRyZW59PC9TY3JvbGxBcmVhUHJpbWl0aXZlLlZpZXdwb3J0PlxuICAgIDxTY3JvbGxCYXIgLz5cbiAgICA8U2Nyb2xsQXJlYVByaW1pdGl2ZS5Db3JuZXIgLz5cbiAgPC9TY3JvbGxBcmVhUHJpbWl0aXZlLlJvb3Q+XG4pKTtcblNjcm9sbEFyZWEuZGlzcGxheU5hbWUgPSBTY3JvbGxBcmVhUHJpbWl0aXZlLlJvb3QuZGlzcGxheU5hbWU7XG5cbmNvbnN0IFNjcm9sbEJhciA9IFJlYWN0LmZvcndhcmRSZWY8XG4gIFJlYWN0LkVsZW1lbnRSZWY8dHlwZW9mIFNjcm9sbEFyZWFQcmltaXRpdmUuU2Nyb2xsQXJlYVNjcm9sbGJhcj4sXG4gIFJlYWN0LkNvbXBvbmVudFByb3BzV2l0aG91dFJlZjx0eXBlb2YgU2Nyb2xsQXJlYVByaW1pdGl2ZS5TY3JvbGxBcmVhU2Nyb2xsYmFyPlxuPigoeyBjbGFzc05hbWUsIG9yaWVudGF0aW9uID0gXCJ2ZXJ0aWNhbFwiLCAuLi5wcm9wcyB9LCByZWYpID0+IChcbiAgPFNjcm9sbEFyZWFQcmltaXRpdmUuU2Nyb2xsQXJlYVNjcm9sbGJhclxuICAgIHJlZj17cmVmfVxuICAgIG9yaWVudGF0aW9uPXtvcmllbnRhdGlvbn1cbiAgICBjbGFzc05hbWU9e2NuKFxuICAgICAgXCJmbGV4IHRvdWNoLW5vbmUgc2VsZWN0LW5vbmUgdHJhbnNpdGlvbi1jb2xvcnNcIixcbiAgICAgIG9yaWVudGF0aW9uID09PSBcInZlcnRpY2FsXCIgJiYgXCJoLWZ1bGwgdy0yLjUgYm9yZGVyLWwgYm9yZGVyLWwtdHJhbnNwYXJlbnQgcC1bMXB4XVwiLFxuICAgICAgb3JpZW50YXRpb24gPT09IFwiaG9yaXpvbnRhbFwiICYmIFwiaC0yLjUgZmxleC1jb2wgYm9yZGVyLXQgYm9yZGVyLXQtdHJhbnNwYXJlbnQgcC1bMXB4XVwiLFxuICAgICAgY2xhc3NOYW1lLFxuICAgICl9XG4gICAgey4uLnByb3BzfVxuICA+XG4gICAgPFNjcm9sbEFyZWFQcmltaXRpdmUuU2Nyb2xsQXJlYVRodW1iIGNsYXNzTmFtZT1cInJlbGF0aXZlIGZsZXgtMSByb3VuZGVkLWZ1bGwgYmctYm9yZGVyXCIgLz5cbiAgPC9TY3JvbGxBcmVhUHJpbWl0aXZlLlNjcm9sbEFyZWFTY3JvbGxiYXI+XG4pKTtcblNjcm9sbEJhci5kaXNwbGF5TmFtZSA9IFNjcm9sbEFyZWFQcmltaXRpdmUuU2Nyb2xsQXJlYVNjcm9sbGJhci5kaXNwbGF5TmFtZTtcblxuZXhwb3J0IHsgU2Nyb2xsQXJlYSwgU2Nyb2xsQmFyIH07XG5cblxuXG5cblxuXG4iXSwibmFtZXMiOlsiUmVhY3QiLCJTY3JvbGxBcmVhUHJpbWl0aXZlIiwiY24iLCJTY3JvbGxBcmVhIiwiZm9yd2FyZFJlZiIsImNsYXNzTmFtZSIsImNoaWxkcmVuIiwicHJvcHMiLCJyZWYiLCJSb290IiwiVmlld3BvcnQiLCJTY3JvbGxCYXIiLCJDb3JuZXIiLCJkaXNwbGF5TmFtZSIsIm9yaWVudGF0aW9uIiwiU2Nyb2xsQXJlYVNjcm9sbGJhciIsIlNjcm9sbEFyZWFUaHVtYiJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7QUFBQSxZQUFZQSxXQUFXLFFBQVE7QUFDL0IsWUFBWUMseUJBQXlCLDhCQUE4QjtBQUVuRSxTQUFTQyxFQUFFLFFBQVEsY0FBYztBQUVqQyxNQUFNQywyQkFBYUgsTUFBTUksVUFBVSxNQUdqQyxDQUFDLEVBQUVDLFNBQVMsRUFBRUMsUUFBUSxFQUFFLEdBQUdDLE9BQU8sRUFBRUMsb0JBQ3BDLFFBQUNQLG9CQUFvQlEsSUFBSTtRQUFDRCxLQUFLQTtRQUFLSCxXQUFXSCxHQUFHLDRCQUE0Qkc7UUFBYSxHQUFHRSxLQUFLOzswQkFDakcsUUFBQ04sb0JBQW9CUyxRQUFRO2dCQUFDTCxXQUFVOzBCQUF1RkM7Ozs7OzswQkFDL0gsUUFBQ0s7Ozs7OzBCQUNELFFBQUNWLG9CQUFvQlcsTUFBTTs7Ozs7Ozs7Ozs7O0FBRy9CVCxXQUFXVSxXQUFXLEdBQUdaLG9CQUFvQlEsSUFBSSxDQUFDSSxXQUFXO0FBRTdELE1BQU1GLDBCQUFZWCxNQUFNSSxVQUFVLENBR2hDLENBQUMsRUFBRUMsU0FBUyxFQUFFUyxjQUFjLFVBQVUsRUFBRSxHQUFHUCxPQUFPLEVBQUVDLG9CQUNwRCxRQUFDUCxvQkFBb0JjLG1CQUFtQjtRQUN0Q1AsS0FBS0E7UUFDTE0sYUFBYUE7UUFDYlQsV0FBV0gsR0FDVCxpREFDQVksZ0JBQWdCLGNBQWMsc0RBQzlCQSxnQkFBZ0IsZ0JBQWdCLHdEQUNoQ1Q7UUFFRCxHQUFHRSxLQUFLO2tCQUVULGNBQUEsUUFBQ04sb0JBQW9CZSxlQUFlO1lBQUNYLFdBQVU7Ozs7Ozs7Ozs7O01BZjdDTTtBQWtCTkEsVUFBVUUsV0FBVyxHQUFHWixvQkFBb0JjLG1CQUFtQixDQUFDRixXQUFXO0FBRTNFLFNBQVNWLFVBQVUsRUFBRVEsU0FBUyxHQUFHIn0=

@@ -1,0 +1,196 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/account/AccountDeletionPanel.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/account/AccountDeletionPanel.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=6014a254"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"]; const _Fragment = __vite__cjsImport2_react_jsxDevRuntime["Fragment"];
+var _s = $RefreshSig$();
+/**
+ * Epic 6.2 — Demande suppression compte (RGPD)
+ */ import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=6014a254"; const useState = __vite__cjsImport3_react["useState"];
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "/src/components/ui/card.tsx";
+import { Button } from "/src/components/ui/button.tsx";
+import { Textarea } from "/src/components/ui/textarea.tsx";
+import { Alert, AlertDescription } from "/src/components/ui/alert.tsx";
+import { Trash2, Loader2 } from "/node_modules/.vite/deps/lucide-react.js?v=6014a254";
+import { supabase } from "/src/integrations/supabase/client.ts";
+import { useToast } from "/src/hooks/use-toast.ts";
+import { Link } from "/node_modules/.vite/deps/react-router-dom.js?v=6014a254";
+export function AccountDeletionPanel() {
+    _s();
+    const { toast } = useToast();
+    const [reason, setReason] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [submitted, setSubmitted] = useState(false);
+    const handleSubmit = async ()=>{
+        setLoading(true);
+        try {
+            const { error } = await supabase.rpc('request_account_deletion', {
+                p_reason: reason.trim() || null
+            });
+            if (error) throw error;
+            setSubmitted(true);
+            toast({
+                title: 'Demande enregistrée',
+                description: 'Notre équipe traitera votre demande sous 30 jours (RGPD).'
+            });
+        } catch (err) {
+            toast({
+                title: 'Erreur',
+                description: err instanceof Error ? err.message : 'Impossible d’enregistrer la demande',
+                variant: 'destructive'
+            });
+        } finally{
+            setLoading(false);
+        }
+    };
+    return /*#__PURE__*/ _jsxDEV(Card, {
+        className: "border-destructive/20",
+        children: [
+            /*#__PURE__*/ _jsxDEV(CardHeader, {
+                children: [
+                    /*#__PURE__*/ _jsxDEV(CardTitle, {
+                        className: "flex items-center gap-2 text-destructive",
+                        children: [
+                            /*#__PURE__*/ _jsxDEV(Trash2, {
+                                className: "h-5 w-5",
+                                "aria-hidden": true
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/account/AccountDeletionPanel.tsx",
+                                lineNumber: 47,
+                                columnNumber: 11
+                            }, this),
+                            "Suppression du compte"
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/account/AccountDeletionPanel.tsx",
+                        lineNumber: 46,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV(CardDescription, {
+                        children: [
+                            "Demande de suppression de vos données personnelles conformément au RGPD. Voir aussi notre",
+                            ' ',
+                            /*#__PURE__*/ _jsxDEV(Link, {
+                                to: "/legal/dpa",
+                                className: "underline",
+                                children: "accord de traitement des données (DPA)"
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/account/AccountDeletionPanel.tsx",
+                                lineNumber: 52,
+                                columnNumber: 11
+                            }, this),
+                            "."
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/account/AccountDeletionPanel.tsx",
+                        lineNumber: 50,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/account/AccountDeletionPanel.tsx",
+                lineNumber: 45,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV(CardContent, {
+                className: "space-y-4",
+                children: submitted ? /*#__PURE__*/ _jsxDEV(Alert, {
+                    children: /*#__PURE__*/ _jsxDEV(AlertDescription, {
+                        children: "Votre demande est en cours de traitement. Vous recevrez une confirmation par email."
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/account/AccountDeletionPanel.tsx",
+                        lineNumber: 61,
+                        columnNumber: 13
+                    }, this)
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/account/AccountDeletionPanel.tsx",
+                    lineNumber: 60,
+                    columnNumber: 11
+                }, this) : /*#__PURE__*/ _jsxDEV(_Fragment, {
+                    children: [
+                        /*#__PURE__*/ _jsxDEV(Textarea, {
+                            placeholder: "Motif optionnel (facultatif)",
+                            value: reason,
+                            onChange: (e)=>setReason(e.target.value),
+                            rows: 3
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/account/AccountDeletionPanel.tsx",
+                            lineNumber: 67,
+                            columnNumber: 13
+                        }, this),
+                        /*#__PURE__*/ _jsxDEV(Button, {
+                            variant: "destructive",
+                            onClick: handleSubmit,
+                            disabled: loading,
+                            children: [
+                                loading ? /*#__PURE__*/ _jsxDEV(Loader2, {
+                                    className: "h-4 w-4 animate-spin mr-2"
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/account/AccountDeletionPanel.tsx",
+                                    lineNumber: 74,
+                                    columnNumber: 26
+                                }, this) : null,
+                                "Demander la suppression"
+                            ]
+                        }, void 0, true, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/account/AccountDeletionPanel.tsx",
+                            lineNumber: 73,
+                            columnNumber: 13
+                        }, this)
+                    ]
+                }, void 0, true)
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/account/AccountDeletionPanel.tsx",
+                lineNumber: 58,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/account/AccountDeletionPanel.tsx",
+        lineNumber: 44,
+        columnNumber: 5
+    }, this);
+}
+_s(AccountDeletionPanel, "yVWCObMCrgc0YcVKYhNlst0U6CM=", false, function() {
+    return [
+        useToast
+    ];
+});
+_c = AccountDeletionPanel;
+var _c;
+$RefreshReg$(_c, "AccountDeletionPanel");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/account/AccountDeletionPanel.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/account/AccountDeletionPanel.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIkFjY291bnREZWxldGlvblBhbmVsLnRzeCJdLCJzb3VyY2VzQ29udGVudCI6WyIvKipcbiAqIEVwaWMgNi4yIOKAlCBEZW1hbmRlIHN1cHByZXNzaW9uIGNvbXB0ZSAoUkdQRClcbiAqL1xuaW1wb3J0IHsgdXNlU3RhdGUgfSBmcm9tICdyZWFjdCc7XG5pbXBvcnQgeyBDYXJkLCBDYXJkQ29udGVudCwgQ2FyZERlc2NyaXB0aW9uLCBDYXJkSGVhZGVyLCBDYXJkVGl0bGUgfSBmcm9tICdAL2NvbXBvbmVudHMvdWkvY2FyZCc7XG5pbXBvcnQgeyBCdXR0b24gfSBmcm9tICdAL2NvbXBvbmVudHMvdWkvYnV0dG9uJztcbmltcG9ydCB7IFRleHRhcmVhIH0gZnJvbSAnQC9jb21wb25lbnRzL3VpL3RleHRhcmVhJztcbmltcG9ydCB7IEFsZXJ0LCBBbGVydERlc2NyaXB0aW9uIH0gZnJvbSAnQC9jb21wb25lbnRzL3VpL2FsZXJ0JztcbmltcG9ydCB7IFRyYXNoMiwgTG9hZGVyMiB9IGZyb20gJ2x1Y2lkZS1yZWFjdCc7XG5pbXBvcnQgeyBzdXBhYmFzZSB9IGZyb20gJ0AvaW50ZWdyYXRpb25zL3N1cGFiYXNlL2NsaWVudCc7XG5pbXBvcnQgeyB1c2VUb2FzdCB9IGZyb20gJ0AvaG9va3MvdXNlLXRvYXN0JztcbmltcG9ydCB7IExpbmsgfSBmcm9tICdyZWFjdC1yb3V0ZXItZG9tJztcblxuZXhwb3J0IGZ1bmN0aW9uIEFjY291bnREZWxldGlvblBhbmVsKCkge1xuICBjb25zdCB7IHRvYXN0IH0gPSB1c2VUb2FzdCgpO1xuICBjb25zdCBbcmVhc29uLCBzZXRSZWFzb25dID0gdXNlU3RhdGUoJycpO1xuICBjb25zdCBbbG9hZGluZywgc2V0TG9hZGluZ10gPSB1c2VTdGF0ZShmYWxzZSk7XG4gIGNvbnN0IFtzdWJtaXR0ZWQsIHNldFN1Ym1pdHRlZF0gPSB1c2VTdGF0ZShmYWxzZSk7XG5cbiAgY29uc3QgaGFuZGxlU3VibWl0ID0gYXN5bmMgKCkgPT4ge1xuICAgIHNldExvYWRpbmcodHJ1ZSk7XG4gICAgdHJ5IHtcbiAgICAgIGNvbnN0IHsgZXJyb3IgfSA9IGF3YWl0IHN1cGFiYXNlLnJwYygncmVxdWVzdF9hY2NvdW50X2RlbGV0aW9uJywge1xuICAgICAgICBwX3JlYXNvbjogcmVhc29uLnRyaW0oKSB8fCBudWxsLFxuICAgICAgfSk7XG4gICAgICBpZiAoZXJyb3IpIHRocm93IGVycm9yO1xuICAgICAgc2V0U3VibWl0dGVkKHRydWUpO1xuICAgICAgdG9hc3Qoe1xuICAgICAgICB0aXRsZTogJ0RlbWFuZGUgZW5yZWdpc3Ryw6llJyxcbiAgICAgICAgZGVzY3JpcHRpb246ICdOb3RyZSDDqXF1aXBlIHRyYWl0ZXJhIHZvdHJlIGRlbWFuZGUgc291cyAzMCBqb3VycyAoUkdQRCkuJyxcbiAgICAgIH0pO1xuICAgIH0gY2F0Y2ggKGVycikge1xuICAgICAgdG9hc3Qoe1xuICAgICAgICB0aXRsZTogJ0VycmV1cicsXG4gICAgICAgIGRlc2NyaXB0aW9uOiBlcnIgaW5zdGFuY2VvZiBFcnJvciA/IGVyci5tZXNzYWdlIDogJ0ltcG9zc2libGUgZOKAmWVucmVnaXN0cmVyIGxhIGRlbWFuZGUnLFxuICAgICAgICB2YXJpYW50OiAnZGVzdHJ1Y3RpdmUnLFxuICAgICAgfSk7XG4gICAgfSBmaW5hbGx5IHtcbiAgICAgIHNldExvYWRpbmcoZmFsc2UpO1xuICAgIH1cbiAgfTtcblxuICByZXR1cm4gKFxuICAgIDxDYXJkIGNsYXNzTmFtZT1cImJvcmRlci1kZXN0cnVjdGl2ZS8yMFwiPlxuICAgICAgPENhcmRIZWFkZXI+XG4gICAgICAgIDxDYXJkVGl0bGUgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTIgdGV4dC1kZXN0cnVjdGl2ZVwiPlxuICAgICAgICAgIDxUcmFzaDIgY2xhc3NOYW1lPVwiaC01IHctNVwiIGFyaWEtaGlkZGVuIC8+XG4gICAgICAgICAgU3VwcHJlc3Npb24gZHUgY29tcHRlXG4gICAgICAgIDwvQ2FyZFRpdGxlPlxuICAgICAgICA8Q2FyZERlc2NyaXB0aW9uPlxuICAgICAgICAgIERlbWFuZGUgZGUgc3VwcHJlc3Npb24gZGUgdm9zIGRvbm7DqWVzIHBlcnNvbm5lbGxlcyBjb25mb3Jtw6ltZW50IGF1IFJHUEQuIFZvaXIgYXVzc2kgbm90cmV7JyAnfVxuICAgICAgICAgIDxMaW5rIHRvPVwiL2xlZ2FsL2RwYVwiIGNsYXNzTmFtZT1cInVuZGVybGluZVwiPlxuICAgICAgICAgICAgYWNjb3JkIGRlIHRyYWl0ZW1lbnQgZGVzIGRvbm7DqWVzIChEUEEpXG4gICAgICAgICAgPC9MaW5rPlxuICAgICAgICAgIC5cbiAgICAgICAgPC9DYXJkRGVzY3JpcHRpb24+XG4gICAgICA8L0NhcmRIZWFkZXI+XG4gICAgICA8Q2FyZENvbnRlbnQgY2xhc3NOYW1lPVwic3BhY2UteS00XCI+XG4gICAgICAgIHtzdWJtaXR0ZWQgPyAoXG4gICAgICAgICAgPEFsZXJ0PlxuICAgICAgICAgICAgPEFsZXJ0RGVzY3JpcHRpb24+XG4gICAgICAgICAgICAgIFZvdHJlIGRlbWFuZGUgZXN0IGVuIGNvdXJzIGRlIHRyYWl0ZW1lbnQuIFZvdXMgcmVjZXZyZXogdW5lIGNvbmZpcm1hdGlvbiBwYXIgZW1haWwuXG4gICAgICAgICAgICA8L0FsZXJ0RGVzY3JpcHRpb24+XG4gICAgICAgICAgPC9BbGVydD5cbiAgICAgICAgKSA6IChcbiAgICAgICAgICA8PlxuICAgICAgICAgICAgPFRleHRhcmVhXG4gICAgICAgICAgICAgIHBsYWNlaG9sZGVyPVwiTW90aWYgb3B0aW9ubmVsIChmYWN1bHRhdGlmKVwiXG4gICAgICAgICAgICAgIHZhbHVlPXtyZWFzb259XG4gICAgICAgICAgICAgIG9uQ2hhbmdlPXtlID0+IHNldFJlYXNvbihlLnRhcmdldC52YWx1ZSl9XG4gICAgICAgICAgICAgIHJvd3M9ezN9XG4gICAgICAgICAgICAvPlxuICAgICAgICAgICAgPEJ1dHRvbiB2YXJpYW50PVwiZGVzdHJ1Y3RpdmVcIiBvbkNsaWNrPXtoYW5kbGVTdWJtaXR9IGRpc2FibGVkPXtsb2FkaW5nfT5cbiAgICAgICAgICAgICAge2xvYWRpbmcgPyA8TG9hZGVyMiBjbGFzc05hbWU9XCJoLTQgdy00IGFuaW1hdGUtc3BpbiBtci0yXCIgLz4gOiBudWxsfVxuICAgICAgICAgICAgICBEZW1hbmRlciBsYSBzdXBwcmVzc2lvblxuICAgICAgICAgICAgPC9CdXR0b24+XG4gICAgICAgICAgPC8+XG4gICAgICAgICl9XG4gICAgICA8L0NhcmRDb250ZW50PlxuICAgIDwvQ2FyZD5cbiAgKTtcbn1cbiJdLCJuYW1lcyI6WyJ1c2VTdGF0ZSIsIkNhcmQiLCJDYXJkQ29udGVudCIsIkNhcmREZXNjcmlwdGlvbiIsIkNhcmRIZWFkZXIiLCJDYXJkVGl0bGUiLCJCdXR0b24iLCJUZXh0YXJlYSIsIkFsZXJ0IiwiQWxlcnREZXNjcmlwdGlvbiIsIlRyYXNoMiIsIkxvYWRlcjIiLCJzdXBhYmFzZSIsInVzZVRvYXN0IiwiTGluayIsIkFjY291bnREZWxldGlvblBhbmVsIiwidG9hc3QiLCJyZWFzb24iLCJzZXRSZWFzb24iLCJsb2FkaW5nIiwic2V0TG9hZGluZyIsInN1Ym1pdHRlZCIsInNldFN1Ym1pdHRlZCIsImhhbmRsZVN1Ym1pdCIsImVycm9yIiwicnBjIiwicF9yZWFzb24iLCJ0cmltIiwidGl0bGUiLCJkZXNjcmlwdGlvbiIsImVyciIsIkVycm9yIiwibWVzc2FnZSIsInZhcmlhbnQiLCJjbGFzc05hbWUiLCJhcmlhLWhpZGRlbiIsInRvIiwicGxhY2Vob2xkZXIiLCJ2YWx1ZSIsIm9uQ2hhbmdlIiwiZSIsInRhcmdldCIsInJvd3MiLCJvbkNsaWNrIiwiZGlzYWJsZWQiXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OztBQUFBOztDQUVDLEdBQ0QsU0FBU0EsUUFBUSxRQUFRLFFBQVE7QUFDakMsU0FBU0MsSUFBSSxFQUFFQyxXQUFXLEVBQUVDLGVBQWUsRUFBRUMsVUFBVSxFQUFFQyxTQUFTLFFBQVEsdUJBQXVCO0FBQ2pHLFNBQVNDLE1BQU0sUUFBUSx5QkFBeUI7QUFDaEQsU0FBU0MsUUFBUSxRQUFRLDJCQUEyQjtBQUNwRCxTQUFTQyxLQUFLLEVBQUVDLGdCQUFnQixRQUFRLHdCQUF3QjtBQUNoRSxTQUFTQyxNQUFNLEVBQUVDLE9BQU8sUUFBUSxlQUFlO0FBQy9DLFNBQVNDLFFBQVEsUUFBUSxpQ0FBaUM7QUFDMUQsU0FBU0MsUUFBUSxRQUFRLG9CQUFvQjtBQUM3QyxTQUFTQyxJQUFJLFFBQVEsbUJBQW1CO0FBRXhDLE9BQU8sU0FBU0M7O0lBQ2QsTUFBTSxFQUFFQyxLQUFLLEVBQUUsR0FBR0g7SUFDbEIsTUFBTSxDQUFDSSxRQUFRQyxVQUFVLEdBQUdsQixTQUFTO0lBQ3JDLE1BQU0sQ0FBQ21CLFNBQVNDLFdBQVcsR0FBR3BCLFNBQVM7SUFDdkMsTUFBTSxDQUFDcUIsV0FBV0MsYUFBYSxHQUFHdEIsU0FBUztJQUUzQyxNQUFNdUIsZUFBZTtRQUNuQkgsV0FBVztRQUNYLElBQUk7WUFDRixNQUFNLEVBQUVJLEtBQUssRUFBRSxHQUFHLE1BQU1aLFNBQVNhLEdBQUcsQ0FBQyw0QkFBNEI7Z0JBQy9EQyxVQUFVVCxPQUFPVSxJQUFJLE1BQU07WUFDN0I7WUFDQSxJQUFJSCxPQUFPLE1BQU1BO1lBQ2pCRixhQUFhO1lBQ2JOLE1BQU07Z0JBQ0pZLE9BQU87Z0JBQ1BDLGFBQWE7WUFDZjtRQUNGLEVBQUUsT0FBT0MsS0FBSztZQUNaZCxNQUFNO2dCQUNKWSxPQUFPO2dCQUNQQyxhQUFhQyxlQUFlQyxRQUFRRCxJQUFJRSxPQUFPLEdBQUc7Z0JBQ2xEQyxTQUFTO1lBQ1g7UUFDRixTQUFVO1lBQ1JiLFdBQVc7UUFDYjtJQUNGO0lBRUEscUJBQ0UsUUFBQ25CO1FBQUtpQyxXQUFVOzswQkFDZCxRQUFDOUI7O2tDQUNDLFFBQUNDO3dCQUFVNkIsV0FBVTs7MENBQ25CLFFBQUN4QjtnQ0FBT3dCLFdBQVU7Z0NBQVVDLGFBQVc7Ozs7Ozs0QkFBRzs7Ozs7OztrQ0FHNUMsUUFBQ2hDOzs0QkFBZ0I7NEJBQzJFOzBDQUMxRixRQUFDVztnQ0FBS3NCLElBQUc7Z0NBQWFGLFdBQVU7MENBQVk7Ozs7Ozs0QkFFckM7Ozs7Ozs7Ozs7Ozs7MEJBSVgsUUFBQ2hDO2dCQUFZZ0MsV0FBVTswQkFDcEJiLDBCQUNDLFFBQUNiOzhCQUNDLGNBQUEsUUFBQ0M7a0NBQWlCOzs7Ozs7Ozs7O3lDQUtwQjs7c0NBQ0UsUUFBQ0Y7NEJBQ0M4QixhQUFZOzRCQUNaQyxPQUFPckI7NEJBQ1BzQixVQUFVQyxDQUFBQSxJQUFLdEIsVUFBVXNCLEVBQUVDLE1BQU0sQ0FBQ0gsS0FBSzs0QkFDdkNJLE1BQU07Ozs7OztzQ0FFUixRQUFDcEM7NEJBQU8yQixTQUFROzRCQUFjVSxTQUFTcEI7NEJBQWNxQixVQUFVekI7O2dDQUM1REEsd0JBQVUsUUFBQ1I7b0NBQVF1QixXQUFVOzs7OzsyQ0FBaUM7Z0NBQUs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O0FBUWxGO0dBcEVnQm5COztRQUNJRjs7O0tBREpFIn0=

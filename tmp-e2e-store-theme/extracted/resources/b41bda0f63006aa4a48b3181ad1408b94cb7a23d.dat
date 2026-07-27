@@ -1,0 +1,349 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/settings/AppearanceSettings.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/settings/AppearanceSettings.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=6014a254"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+var _s = $RefreshSig$();
+/**
+ * Composant de paramètres d'apparence
+ * Gère le thème et les préférences visuelles
+ */ import { ThemeSelector } from "/src/components/navigation/ThemeSelector.tsx";
+import { useTheme } from "/src/hooks/useTheme.ts";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "/src/components/ui/card.tsx";
+import { Palette, Monitor, Moon, Sun } from "/node_modules/.vite/deps/lucide-react.js?v=6014a254";
+export const AppearanceSettings = ()=>{
+    _s();
+    const { theme, themeConfig } = useTheme();
+    return /*#__PURE__*/ _jsxDEV("div", {
+        className: "space-y-6",
+        children: [
+            /*#__PURE__*/ _jsxDEV(Card, {
+                children: [
+                    /*#__PURE__*/ _jsxDEV(CardHeader, {
+                        children: [
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                className: "flex items-center gap-2",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV(Palette, {
+                                        className: "h-5 w-5 text-primary"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/AppearanceSettings.tsx",
+                                        lineNumber: 20,
+                                        columnNumber: 13
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV(CardTitle, {
+                                        children: "Thème de l'application"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/AppearanceSettings.tsx",
+                                        lineNumber: 21,
+                                        columnNumber: 13
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/AppearanceSettings.tsx",
+                                lineNumber: 19,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV(CardDescription, {
+                                children: "Choisissez un thème qui correspond à votre style. Votre préférence sera sauvegardée automatiquement."
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/AppearanceSettings.tsx",
+                                lineNumber: 23,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/AppearanceSettings.tsx",
+                        lineNumber: 18,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV(CardContent, {
+                        className: "space-y-4",
+                        children: [
+                            /*#__PURE__*/ _jsxDEV(ThemeSelector, {}, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/AppearanceSettings.tsx",
+                                lineNumber: 28,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                className: "mt-6 space-y-3",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "flex items-center gap-2 text-sm font-medium",
+                                        children: [
+                                            themeConfig.name === 'dark' || themeConfig.name === 'default' ? /*#__PURE__*/ _jsxDEV(Moon, {
+                                                className: "h-4 w-4"
+                                            }, void 0, false, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/AppearanceSettings.tsx",
+                                                lineNumber: 34,
+                                                columnNumber: 17
+                                            }, this) : /*#__PURE__*/ _jsxDEV(Sun, {
+                                                className: "h-4 w-4"
+                                            }, void 0, false, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/AppearanceSettings.tsx",
+                                                lineNumber: 36,
+                                                columnNumber: 17
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV("span", {
+                                                children: [
+                                                    "Thème actuel: ",
+                                                    themeConfig.displayName
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/AppearanceSettings.tsx",
+                                                lineNumber: 38,
+                                                columnNumber: 15
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/AppearanceSettings.tsx",
+                                        lineNumber: 32,
+                                        columnNumber: 13
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "text-xs text-muted-foreground",
+                                        children: themeConfig.description
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/AppearanceSettings.tsx",
+                                        lineNumber: 40,
+                                        columnNumber: 13
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/AppearanceSettings.tsx",
+                                lineNumber: 31,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/AppearanceSettings.tsx",
+                        lineNumber: 27,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/AppearanceSettings.tsx",
+                lineNumber: 17,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV(Card, {
+                children: [
+                    /*#__PURE__*/ _jsxDEV(CardHeader, {
+                        children: [
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                className: "flex items-center gap-2",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV(Monitor, {
+                                        className: "h-5 w-5 text-primary"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/AppearanceSettings.tsx",
+                                        lineNumber: 51,
+                                        columnNumber: 13
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV(CardTitle, {
+                                        children: "Thèmes disponibles"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/AppearanceSettings.tsx",
+                                        lineNumber: 52,
+                                        columnNumber: 13
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/AppearanceSettings.tsx",
+                                lineNumber: 50,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV(CardDescription, {
+                                children: "Découvrez les différents thèmes inspirés de grandes plateformes"
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/AppearanceSettings.tsx",
+                                lineNumber: 54,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/AppearanceSettings.tsx",
+                        lineNumber: 49,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV(CardContent, {
+                        children: /*#__PURE__*/ _jsxDEV("div", {
+                            className: "grid gap-4 sm:grid-cols-2 lg:grid-cols-3",
+                            children: [
+                                {
+                                    name: 'Professionnel',
+                                    description: 'Clair et professionnel',
+                                    colors: [
+                                        '#FFFFFF',
+                                        '#0A2540',
+                                        '#635BFF'
+                                    ]
+                                },
+                                {
+                                    name: 'Minimaliste',
+                                    description: 'Épuré et moderne',
+                                    colors: [
+                                        '#FFFFFF',
+                                        '#1D1D1F',
+                                        '#0066FF'
+                                    ]
+                                },
+                                {
+                                    name: 'Sombre',
+                                    description: 'Élégant et premium',
+                                    colors: [
+                                        '#000000',
+                                        '#FAFAFA',
+                                        '#FFFFFF'
+                                    ]
+                                },
+                                {
+                                    name: 'Spacieux',
+                                    description: 'Clair et confortable',
+                                    colors: [
+                                        '#FFFFFF',
+                                        '#37352F',
+                                        '#37352F'
+                                    ]
+                                },
+                                {
+                                    name: 'Classique',
+                                    description: 'Fonctionnel et pratique',
+                                    colors: [
+                                        '#FFFFFF',
+                                        '#24292F',
+                                        '#0969DA'
+                                    ]
+                                },
+                                {
+                                    name: 'Défaut',
+                                    description: 'Thème sombre actuel',
+                                    colors: [
+                                        '#1E293B',
+                                        '#F8FAFC',
+                                        '#3B82F6'
+                                    ]
+                                }
+                            ].map((themeInfo)=>/*#__PURE__*/ _jsxDEV("div", {
+                                    className: "p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors",
+                                    children: /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "flex items-center gap-3 mb-2",
+                                        children: [
+                                            /*#__PURE__*/ _jsxDEV("div", {
+                                                className: "flex gap-1",
+                                                children: themeInfo.colors.map((color, i)=>/*#__PURE__*/ _jsxDEV("div", {
+                                                        className: "w-4 h-4 rounded-full border-2 border-border",
+                                                        style: {
+                                                            backgroundColor: color
+                                                        }
+                                                    }, i, false, {
+                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/AppearanceSettings.tsx",
+                                                        lineNumber: 99,
+                                                        columnNumber: 23
+                                                    }, this))
+                                            }, void 0, false, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/AppearanceSettings.tsx",
+                                                lineNumber: 97,
+                                                columnNumber: 19
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV("div", {
+                                                children: [
+                                                    /*#__PURE__*/ _jsxDEV("div", {
+                                                        className: "font-medium text-sm",
+                                                        children: themeInfo.name
+                                                    }, void 0, false, {
+                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/AppearanceSettings.tsx",
+                                                        lineNumber: 107,
+                                                        columnNumber: 21
+                                                    }, this),
+                                                    /*#__PURE__*/ _jsxDEV("div", {
+                                                        className: "text-xs text-muted-foreground",
+                                                        children: themeInfo.description
+                                                    }, void 0, false, {
+                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/AppearanceSettings.tsx",
+                                                        lineNumber: 108,
+                                                        columnNumber: 21
+                                                    }, this)
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/AppearanceSettings.tsx",
+                                                lineNumber: 106,
+                                                columnNumber: 19
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/AppearanceSettings.tsx",
+                                        lineNumber: 96,
+                                        columnNumber: 17
+                                    }, this)
+                                }, themeInfo.name, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/AppearanceSettings.tsx",
+                                    lineNumber: 92,
+                                    columnNumber: 15
+                                }, this))
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/AppearanceSettings.tsx",
+                            lineNumber: 59,
+                            columnNumber: 11
+                        }, this)
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/AppearanceSettings.tsx",
+                        lineNumber: 58,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/AppearanceSettings.tsx",
+                lineNumber: 48,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/AppearanceSettings.tsx",
+        lineNumber: 15,
+        columnNumber: 5
+    }, this);
+};
+_s(AppearanceSettings, "M8qonZhZkFW53t67acl0NVNlj7E=", false, function() {
+    return [
+        useTheme
+    ];
+});
+_c = AppearanceSettings;
+var _c;
+$RefreshReg$(_c, "AppearanceSettings");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/settings/AppearanceSettings.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/settings/AppearanceSettings.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIkFwcGVhcmFuY2VTZXR0aW5ncy50c3giXSwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBDb21wb3NhbnQgZGUgcGFyYW3DqHRyZXMgZCdhcHBhcmVuY2VcbiAqIEfDqHJlIGxlIHRow6htZSBldCBsZXMgcHLDqWbDqXJlbmNlcyB2aXN1ZWxsZXNcbiAqL1xuXG5pbXBvcnQgeyBUaGVtZVNlbGVjdG9yIH0gZnJvbSAnQC9jb21wb25lbnRzL25hdmlnYXRpb24vVGhlbWVTZWxlY3Rvcic7XG5pbXBvcnQgeyB1c2VUaGVtZSB9IGZyb20gJ0AvaG9va3MvdXNlVGhlbWUnO1xuaW1wb3J0IHsgQ2FyZCwgQ2FyZENvbnRlbnQsIENhcmREZXNjcmlwdGlvbiwgQ2FyZEhlYWRlciwgQ2FyZFRpdGxlIH0gZnJvbSAnQC9jb21wb25lbnRzL3VpL2NhcmQnO1xuaW1wb3J0IHsgUGFsZXR0ZSwgTW9uaXRvciwgTW9vbiwgU3VuIH0gZnJvbSAnbHVjaWRlLXJlYWN0JztcblxuZXhwb3J0IGNvbnN0IEFwcGVhcmFuY2VTZXR0aW5ncyA9ICgpID0+IHtcbiAgY29uc3QgeyB0aGVtZSwgdGhlbWVDb25maWcgfSA9IHVzZVRoZW1lKCk7XG5cbiAgcmV0dXJuIChcbiAgICA8ZGl2IGNsYXNzTmFtZT1cInNwYWNlLXktNlwiPlxuICAgICAgey8qIFPDqWxlY3Rpb24gZGUgdGjDqG1lICovfVxuICAgICAgPENhcmQ+XG4gICAgICAgIDxDYXJkSGVhZGVyPlxuICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTJcIj5cbiAgICAgICAgICAgIDxQYWxldHRlIGNsYXNzTmFtZT1cImgtNSB3LTUgdGV4dC1wcmltYXJ5XCIgLz5cbiAgICAgICAgICAgIDxDYXJkVGl0bGU+VGjDqG1lIGRlIGwnYXBwbGljYXRpb248L0NhcmRUaXRsZT5cbiAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICA8Q2FyZERlc2NyaXB0aW9uPlxuICAgICAgICAgICAgQ2hvaXNpc3NleiB1biB0aMOobWUgcXVpIGNvcnJlc3BvbmQgw6Agdm90cmUgc3R5bGUuIFZvdHJlIHByw6lmw6lyZW5jZSBzZXJhIHNhdXZlZ2FyZMOpZSBhdXRvbWF0aXF1ZW1lbnQuXG4gICAgICAgICAgPC9DYXJkRGVzY3JpcHRpb24+XG4gICAgICAgIDwvQ2FyZEhlYWRlcj5cbiAgICAgICAgPENhcmRDb250ZW50IGNsYXNzTmFtZT1cInNwYWNlLXktNFwiPlxuICAgICAgICAgIDxUaGVtZVNlbGVjdG9yIC8+XG4gICAgICAgICAgXG4gICAgICAgICAgey8qIEFwZXLDp3UgZHUgdGjDqG1lIGFjdHVlbCAqL31cbiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cIm10LTYgc3BhY2UteS0zXCI+XG4gICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGdhcC0yIHRleHQtc20gZm9udC1tZWRpdW1cIj5cbiAgICAgICAgICAgICAge3RoZW1lQ29uZmlnLm5hbWUgPT09ICdkYXJrJyB8fCB0aGVtZUNvbmZpZy5uYW1lID09PSAnZGVmYXVsdCcgPyAoXG4gICAgICAgICAgICAgICAgPE1vb24gY2xhc3NOYW1lPVwiaC00IHctNFwiIC8+XG4gICAgICAgICAgICAgICkgOiAoXG4gICAgICAgICAgICAgICAgPFN1biBjbGFzc05hbWU9XCJoLTQgdy00XCIgLz5cbiAgICAgICAgICAgICAgKX1cbiAgICAgICAgICAgICAgPHNwYW4+VGjDqG1lIGFjdHVlbDoge3RoZW1lQ29uZmlnLmRpc3BsYXlOYW1lfTwvc3Bhbj5cbiAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJ0ZXh0LXhzIHRleHQtbXV0ZWQtZm9yZWdyb3VuZFwiPlxuICAgICAgICAgICAgICB7dGhlbWVDb25maWcuZGVzY3JpcHRpb259XG4gICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgPC9DYXJkQ29udGVudD5cbiAgICAgIDwvQ2FyZD5cblxuICAgICAgey8qIEluZm9ybWF0aW9ucyBzdXIgbGVzIHRow6htZXMgKi99XG4gICAgICA8Q2FyZD5cbiAgICAgICAgPENhcmRIZWFkZXI+XG4gICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLWNlbnRlciBnYXAtMlwiPlxuICAgICAgICAgICAgPE1vbml0b3IgY2xhc3NOYW1lPVwiaC01IHctNSB0ZXh0LXByaW1hcnlcIiAvPlxuICAgICAgICAgICAgPENhcmRUaXRsZT5UaMOobWVzIGRpc3BvbmlibGVzPC9DYXJkVGl0bGU+XG4gICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgPENhcmREZXNjcmlwdGlvbj5cbiAgICAgICAgICAgIETDqWNvdXZyZXogbGVzIGRpZmbDqXJlbnRzIHRow6htZXMgaW5zcGlyw6lzIGRlIGdyYW5kZXMgcGxhdGVmb3JtZXNcbiAgICAgICAgICA8L0NhcmREZXNjcmlwdGlvbj5cbiAgICAgICAgPC9DYXJkSGVhZGVyPlxuICAgICAgICA8Q2FyZENvbnRlbnQ+XG4gICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJncmlkIGdhcC00IHNtOmdyaWQtY29scy0yIGxnOmdyaWQtY29scy0zXCI+XG4gICAgICAgICAgICB7W1xuICAgICAgICAgICAgICB7XG4gICAgICAgICAgICAgICAgbmFtZTogJ1Byb2Zlc3Npb25uZWwnLFxuICAgICAgICAgICAgICAgIGRlc2NyaXB0aW9uOiAnQ2xhaXIgZXQgcHJvZmVzc2lvbm5lbCcsXG4gICAgICAgICAgICAgICAgY29sb3JzOiBbJyNGRkZGRkYnLCAnIzBBMjU0MCcsICcjNjM1QkZGJ10sXG4gICAgICAgICAgICAgIH0sXG4gICAgICAgICAgICAgIHtcbiAgICAgICAgICAgICAgICBuYW1lOiAnTWluaW1hbGlzdGUnLFxuICAgICAgICAgICAgICAgIGRlc2NyaXB0aW9uOiAnw4lwdXLDqSBldCBtb2Rlcm5lJyxcbiAgICAgICAgICAgICAgICBjb2xvcnM6IFsnI0ZGRkZGRicsICcjMUQxRDFGJywgJyMwMDY2RkYnXSxcbiAgICAgICAgICAgICAgfSxcbiAgICAgICAgICAgICAge1xuICAgICAgICAgICAgICAgIG5hbWU6ICdTb21icmUnLFxuICAgICAgICAgICAgICAgIGRlc2NyaXB0aW9uOiAnw4lsw6lnYW50IGV0IHByZW1pdW0nLFxuICAgICAgICAgICAgICAgIGNvbG9yczogWycjMDAwMDAwJywgJyNGQUZBRkEnLCAnI0ZGRkZGRiddLFxuICAgICAgICAgICAgICB9LFxuICAgICAgICAgICAgICB7XG4gICAgICAgICAgICAgICAgbmFtZTogJ1NwYWNpZXV4JyxcbiAgICAgICAgICAgICAgICBkZXNjcmlwdGlvbjogJ0NsYWlyIGV0IGNvbmZvcnRhYmxlJyxcbiAgICAgICAgICAgICAgICBjb2xvcnM6IFsnI0ZGRkZGRicsICcjMzczNTJGJywgJyMzNzM1MkYnXSxcbiAgICAgICAgICAgICAgfSxcbiAgICAgICAgICAgICAge1xuICAgICAgICAgICAgICAgIG5hbWU6ICdDbGFzc2lxdWUnLFxuICAgICAgICAgICAgICAgIGRlc2NyaXB0aW9uOiAnRm9uY3Rpb25uZWwgZXQgcHJhdGlxdWUnLFxuICAgICAgICAgICAgICAgIGNvbG9yczogWycjRkZGRkZGJywgJyMyNDI5MkYnLCAnIzA5NjlEQSddLFxuICAgICAgICAgICAgICB9LFxuICAgICAgICAgICAgICB7XG4gICAgICAgICAgICAgICAgbmFtZTogJ0TDqWZhdXQnLFxuICAgICAgICAgICAgICAgIGRlc2NyaXB0aW9uOiAnVGjDqG1lIHNvbWJyZSBhY3R1ZWwnLFxuICAgICAgICAgICAgICAgIGNvbG9yczogWycjMUUyOTNCJywgJyNGOEZBRkMnLCAnIzNCODJGNiddLFxuICAgICAgICAgICAgICB9LFxuICAgICAgICAgICAgXS5tYXAoKHRoZW1lSW5mbykgPT4gKFxuICAgICAgICAgICAgICA8ZGl2XG4gICAgICAgICAgICAgICAga2V5PXt0aGVtZUluZm8ubmFtZX1cbiAgICAgICAgICAgICAgICBjbGFzc05hbWU9XCJwLTQgcm91bmRlZC1sZyBib3JkZXIgYmctY2FyZCBob3ZlcjpiZy1hY2NlbnQvNTAgdHJhbnNpdGlvbi1jb2xvcnNcIlxuICAgICAgICAgICAgICA+XG4gICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLWNlbnRlciBnYXAtMyBtYi0yXCI+XG4gICAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggZ2FwLTFcIj5cbiAgICAgICAgICAgICAgICAgICAge3RoZW1lSW5mby5jb2xvcnMubWFwKChjb2xvciwgaSkgPT4gKFxuICAgICAgICAgICAgICAgICAgICAgIDxkaXZcbiAgICAgICAgICAgICAgICAgICAgICAgIGtleT17aX1cbiAgICAgICAgICAgICAgICAgICAgICAgIGNsYXNzTmFtZT1cInctNCBoLTQgcm91bmRlZC1mdWxsIGJvcmRlci0yIGJvcmRlci1ib3JkZXJcIlxuICAgICAgICAgICAgICAgICAgICAgICAgc3R5bGU9e3sgYmFja2dyb3VuZENvbG9yOiBjb2xvciB9fVxuICAgICAgICAgICAgICAgICAgICAgIC8+XG4gICAgICAgICAgICAgICAgICAgICkpfVxuICAgICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgICAgICA8ZGl2PlxuICAgICAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZvbnQtbWVkaXVtIHRleHQtc21cIj57dGhlbWVJbmZvLm5hbWV9PC9kaXY+XG4gICAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwidGV4dC14cyB0ZXh0LW11dGVkLWZvcmVncm91bmRcIj5cbiAgICAgICAgICAgICAgICAgICAgICB7dGhlbWVJbmZvLmRlc2NyaXB0aW9ufVxuICAgICAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICkpfVxuICAgICAgICAgIDwvZGl2PlxuICAgICAgICA8L0NhcmRDb250ZW50PlxuICAgICAgPC9DYXJkPlxuICAgIDwvZGl2PlxuICApO1xufTtcblxuXG5cblxuXG5cblxuIl0sIm5hbWVzIjpbIlRoZW1lU2VsZWN0b3IiLCJ1c2VUaGVtZSIsIkNhcmQiLCJDYXJkQ29udGVudCIsIkNhcmREZXNjcmlwdGlvbiIsIkNhcmRIZWFkZXIiLCJDYXJkVGl0bGUiLCJQYWxldHRlIiwiTW9uaXRvciIsIk1vb24iLCJTdW4iLCJBcHBlYXJhbmNlU2V0dGluZ3MiLCJ0aGVtZSIsInRoZW1lQ29uZmlnIiwiZGl2IiwiY2xhc3NOYW1lIiwibmFtZSIsInNwYW4iLCJkaXNwbGF5TmFtZSIsImRlc2NyaXB0aW9uIiwiY29sb3JzIiwibWFwIiwidGhlbWVJbmZvIiwiY29sb3IiLCJpIiwic3R5bGUiLCJiYWNrZ3JvdW5kQ29sb3IiXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OztBQUFBOzs7Q0FHQyxHQUVELFNBQVNBLGFBQWEsUUFBUSx3Q0FBd0M7QUFDdEUsU0FBU0MsUUFBUSxRQUFRLG1CQUFtQjtBQUM1QyxTQUFTQyxJQUFJLEVBQUVDLFdBQVcsRUFBRUMsZUFBZSxFQUFFQyxVQUFVLEVBQUVDLFNBQVMsUUFBUSx1QkFBdUI7QUFDakcsU0FBU0MsT0FBTyxFQUFFQyxPQUFPLEVBQUVDLElBQUksRUFBRUMsR0FBRyxRQUFRLGVBQWU7QUFFM0QsT0FBTyxNQUFNQyxxQkFBcUI7O0lBQ2hDLE1BQU0sRUFBRUMsS0FBSyxFQUFFQyxXQUFXLEVBQUUsR0FBR1o7SUFFL0IscUJBQ0UsUUFBQ2E7UUFBSUMsV0FBVTs7MEJBRWIsUUFBQ2I7O2tDQUNDLFFBQUNHOzswQ0FDQyxRQUFDUztnQ0FBSUMsV0FBVTs7a0RBQ2IsUUFBQ1I7d0NBQVFRLFdBQVU7Ozs7OztrREFDbkIsUUFBQ1Q7a0RBQVU7Ozs7Ozs7Ozs7OzswQ0FFYixRQUFDRjswQ0FBZ0I7Ozs7Ozs7Ozs7OztrQ0FJbkIsUUFBQ0Q7d0JBQVlZLFdBQVU7OzBDQUNyQixRQUFDZjs7Ozs7MENBR0QsUUFBQ2M7Z0NBQUlDLFdBQVU7O2tEQUNiLFFBQUNEO3dDQUFJQyxXQUFVOzs0Q0FDWkYsWUFBWUcsSUFBSSxLQUFLLFVBQVVILFlBQVlHLElBQUksS0FBSywwQkFDbkQsUUFBQ1A7Z0RBQUtNLFdBQVU7Ozs7O3FFQUVoQixRQUFDTDtnREFBSUssV0FBVTs7Ozs7OzBEQUVqQixRQUFDRTs7b0RBQUs7b0RBQWVKLFlBQVlLLFdBQVc7Ozs7Ozs7Ozs7Ozs7a0RBRTlDLFFBQUNKO3dDQUFJQyxXQUFVO2tEQUNaRixZQUFZTSxXQUFXOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7MEJBT2hDLFFBQUNqQjs7a0NBQ0MsUUFBQ0c7OzBDQUNDLFFBQUNTO2dDQUFJQyxXQUFVOztrREFDYixRQUFDUDt3Q0FBUU8sV0FBVTs7Ozs7O2tEQUNuQixRQUFDVDtrREFBVTs7Ozs7Ozs7Ozs7OzBDQUViLFFBQUNGOzBDQUFnQjs7Ozs7Ozs7Ozs7O2tDQUluQixRQUFDRDtrQ0FDQyxjQUFBLFFBQUNXOzRCQUFJQyxXQUFVO3NDQUNaO2dDQUNDO29DQUNFQyxNQUFNO29DQUNORyxhQUFhO29DQUNiQyxRQUFRO3dDQUFDO3dDQUFXO3dDQUFXO3FDQUFVO2dDQUMzQztnQ0FDQTtvQ0FDRUosTUFBTTtvQ0FDTkcsYUFBYTtvQ0FDYkMsUUFBUTt3Q0FBQzt3Q0FBVzt3Q0FBVztxQ0FBVTtnQ0FDM0M7Z0NBQ0E7b0NBQ0VKLE1BQU07b0NBQ05HLGFBQWE7b0NBQ2JDLFFBQVE7d0NBQUM7d0NBQVc7d0NBQVc7cUNBQVU7Z0NBQzNDO2dDQUNBO29DQUNFSixNQUFNO29DQUNORyxhQUFhO29DQUNiQyxRQUFRO3dDQUFDO3dDQUFXO3dDQUFXO3FDQUFVO2dDQUMzQztnQ0FDQTtvQ0FDRUosTUFBTTtvQ0FDTkcsYUFBYTtvQ0FDYkMsUUFBUTt3Q0FBQzt3Q0FBVzt3Q0FBVztxQ0FBVTtnQ0FDM0M7Z0NBQ0E7b0NBQ0VKLE1BQU07b0NBQ05HLGFBQWE7b0NBQ2JDLFFBQVE7d0NBQUM7d0NBQVc7d0NBQVc7cUNBQVU7Z0NBQzNDOzZCQUNELENBQUNDLEdBQUcsQ0FBQyxDQUFDQywwQkFDTCxRQUFDUjtvQ0FFQ0MsV0FBVTs4Q0FFVixjQUFBLFFBQUNEO3dDQUFJQyxXQUFVOzswREFDYixRQUFDRDtnREFBSUMsV0FBVTswREFDWk8sVUFBVUYsTUFBTSxDQUFDQyxHQUFHLENBQUMsQ0FBQ0UsT0FBT0Msa0JBQzVCLFFBQUNWO3dEQUVDQyxXQUFVO3dEQUNWVSxPQUFPOzREQUFFQyxpQkFBaUJIO3dEQUFNO3VEQUYzQkM7Ozs7Ozs7Ozs7MERBTVgsUUFBQ1Y7O2tFQUNDLFFBQUNBO3dEQUFJQyxXQUFVO2tFQUF1Qk8sVUFBVU4sSUFBSTs7Ozs7O2tFQUNwRCxRQUFDRjt3REFBSUMsV0FBVTtrRUFDWk8sVUFBVUgsV0FBVzs7Ozs7Ozs7Ozs7Ozs7Ozs7O21DQWhCdkJHLFVBQVVOLElBQUk7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OztBQTJCbkMsRUFBRTtHQTdHV0w7O1FBQ29CVjs7O0tBRHBCVSJ9

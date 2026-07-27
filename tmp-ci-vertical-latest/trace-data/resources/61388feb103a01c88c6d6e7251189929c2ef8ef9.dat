@@ -1,0 +1,37 @@
+/**
+ * Hook pour verrouiller le scroll du body pendant l'ouverture d'un menu
+ *
+ * Objectifs mobile :
+ * - Empêcher le scroll de fond pendant l'ouverture d'un Select / Dropdown
+ * - Laisser uniquement le scroll interne du menu
+ * - Éviter les conflits avec d'autres overlays (restaure toujours les styles initiaux)
+ */ import __vite__cjsImport0_react from "/node_modules/.vite/deps/react.js?v=2441233a"; const useEffect = __vite__cjsImport0_react["useEffect"];
+/**
+ * Verrouille le scroll du body tant que `enabled` est true.
+ *
+ * Important :
+ * - Ne pas utiliser côté serveur (check `typeof document`)
+ * - Toujours restaurer les styles à la désactivation/unmount
+ */ export function useBodyScrollLock(enabled) {
+    useEffect(()=>{
+        if (!enabled || typeof document === 'undefined') {
+            return;
+        }
+        const body = document.body;
+        const previousOverflow = body.style.overflow;
+        const previousTouchAction = body.style.touchAction;
+        // Bloquer le scroll de fond tout en permettant les interactions tactiles
+        body.style.overflow = 'hidden';
+        // Permettre les gestes tactiles pan-y pour les interactions normales
+        // mais empêcher le zoom et le scroll involontaire
+        body.style.touchAction = 'pan-x pinch-zoom';
+        return ()=>{
+            body.style.overflow = previousOverflow;
+            body.style.touchAction = previousTouchAction ?? '';
+        };
+    }, [
+        enabled
+    ]);
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInVzZS1ib2R5LXNjcm9sbC1sb2NrLnRzIl0sInNvdXJjZXNDb250ZW50IjpbIi8qKlxuICogSG9vayBwb3VyIHZlcnJvdWlsbGVyIGxlIHNjcm9sbCBkdSBib2R5IHBlbmRhbnQgbCdvdXZlcnR1cmUgZCd1biBtZW51XG4gKlxuICogT2JqZWN0aWZzIG1vYmlsZSA6XG4gKiAtIEVtcMOqY2hlciBsZSBzY3JvbGwgZGUgZm9uZCBwZW5kYW50IGwnb3V2ZXJ0dXJlIGQndW4gU2VsZWN0IC8gRHJvcGRvd25cbiAqIC0gTGFpc3NlciB1bmlxdWVtZW50IGxlIHNjcm9sbCBpbnRlcm5lIGR1IG1lbnVcbiAqIC0gw4l2aXRlciBsZXMgY29uZmxpdHMgYXZlYyBkJ2F1dHJlcyBvdmVybGF5cyAocmVzdGF1cmUgdG91am91cnMgbGVzIHN0eWxlcyBpbml0aWF1eClcbiAqL1xuXG5pbXBvcnQgeyB1c2VFZmZlY3QgfSBmcm9tICdyZWFjdCc7XG5cbi8qKlxuICogVmVycm91aWxsZSBsZSBzY3JvbGwgZHUgYm9keSB0YW50IHF1ZSBgZW5hYmxlZGAgZXN0IHRydWUuXG4gKlxuICogSW1wb3J0YW50IDpcbiAqIC0gTmUgcGFzIHV0aWxpc2VyIGPDtHTDqSBzZXJ2ZXVyIChjaGVjayBgdHlwZW9mIGRvY3VtZW50YClcbiAqIC0gVG91am91cnMgcmVzdGF1cmVyIGxlcyBzdHlsZXMgw6AgbGEgZMOpc2FjdGl2YXRpb24vdW5tb3VudFxuICovXG5leHBvcnQgZnVuY3Rpb24gdXNlQm9keVNjcm9sbExvY2soZW5hYmxlZDogYm9vbGVhbikge1xuICB1c2VFZmZlY3QoKCkgPT4ge1xuICAgIGlmICghZW5hYmxlZCB8fCB0eXBlb2YgZG9jdW1lbnQgPT09ICd1bmRlZmluZWQnKSB7XG4gICAgICByZXR1cm47XG4gICAgfVxuXG4gICAgY29uc3QgYm9keSA9IGRvY3VtZW50LmJvZHk7XG4gICAgY29uc3QgcHJldmlvdXNPdmVyZmxvdyA9IGJvZHkuc3R5bGUub3ZlcmZsb3c7XG4gICAgY29uc3QgcHJldmlvdXNUb3VjaEFjdGlvbiA9IChib2R5LnN0eWxlIGFzIENTU1N0eWxlRGVjbGFyYXRpb24gJiB7IHRvdWNoQWN0aW9uPzogc3RyaW5nIH0pXG4gICAgICAudG91Y2hBY3Rpb247XG5cbiAgICAvLyBCbG9xdWVyIGxlIHNjcm9sbCBkZSBmb25kIHRvdXQgZW4gcGVybWV0dGFudCBsZXMgaW50ZXJhY3Rpb25zIHRhY3RpbGVzXG4gICAgYm9keS5zdHlsZS5vdmVyZmxvdyA9ICdoaWRkZW4nO1xuICAgIC8vIFBlcm1ldHRyZSBsZXMgZ2VzdGVzIHRhY3RpbGVzIHBhbi15IHBvdXIgbGVzIGludGVyYWN0aW9ucyBub3JtYWxlc1xuICAgIC8vIG1haXMgZW1ww6pjaGVyIGxlIHpvb20gZXQgbGUgc2Nyb2xsIGludm9sb250YWlyZVxuICAgIChib2R5LnN0eWxlIGFzIENTU1N0eWxlRGVjbGFyYXRpb24gJiB7IHRvdWNoQWN0aW9uPzogc3RyaW5nIH0pLnRvdWNoQWN0aW9uID0gJ3Bhbi14IHBpbmNoLXpvb20nO1xuXG4gICAgcmV0dXJuICgpID0+IHtcbiAgICAgIGJvZHkuc3R5bGUub3ZlcmZsb3cgPSBwcmV2aW91c092ZXJmbG93O1xuICAgICAgKGJvZHkuc3R5bGUgYXMgQ1NTU3R5bGVEZWNsYXJhdGlvbiAmIHsgdG91Y2hBY3Rpb24/OiBzdHJpbmcgfSkudG91Y2hBY3Rpb24gPVxuICAgICAgICBwcmV2aW91c1RvdWNoQWN0aW9uID8/ICcnO1xuICAgIH07XG4gIH0sIFtlbmFibGVkXSk7XG59XG5cblxuXG5cblxuXG4iXSwibmFtZXMiOlsidXNlRWZmZWN0IiwidXNlQm9keVNjcm9sbExvY2siLCJlbmFibGVkIiwiZG9jdW1lbnQiLCJib2R5IiwicHJldmlvdXNPdmVyZmxvdyIsInN0eWxlIiwib3ZlcmZsb3ciLCJwcmV2aW91c1RvdWNoQWN0aW9uIiwidG91Y2hBY3Rpb24iXSwibWFwcGluZ3MiOiJBQUFBOzs7Ozs7O0NBT0MsR0FFRCxTQUFTQSxTQUFTLFFBQVEsUUFBUTtBQUVsQzs7Ozs7O0NBTUMsR0FDRCxPQUFPLFNBQVNDLGtCQUFrQkMsT0FBZ0I7SUFDaERGLFVBQVU7UUFDUixJQUFJLENBQUNFLFdBQVcsT0FBT0MsYUFBYSxhQUFhO1lBQy9DO1FBQ0Y7UUFFQSxNQUFNQyxPQUFPRCxTQUFTQyxJQUFJO1FBQzFCLE1BQU1DLG1CQUFtQkQsS0FBS0UsS0FBSyxDQUFDQyxRQUFRO1FBQzVDLE1BQU1DLHNCQUFzQixBQUFDSixLQUFLRSxLQUFLLENBQ3BDRyxXQUFXO1FBRWQseUVBQXlFO1FBQ3pFTCxLQUFLRSxLQUFLLENBQUNDLFFBQVEsR0FBRztRQUN0QixxRUFBcUU7UUFDckUsa0RBQWtEO1FBQ2pESCxLQUFLRSxLQUFLLENBQW9ERyxXQUFXLEdBQUc7UUFFN0UsT0FBTztZQUNMTCxLQUFLRSxLQUFLLENBQUNDLFFBQVEsR0FBR0Y7WUFDckJELEtBQUtFLEtBQUssQ0FBb0RHLFdBQVcsR0FDeEVELHVCQUF1QjtRQUMzQjtJQUNGLEdBQUc7UUFBQ047S0FBUTtBQUNkIn0=

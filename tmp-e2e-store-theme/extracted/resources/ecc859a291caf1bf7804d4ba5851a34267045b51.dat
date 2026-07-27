@@ -1,0 +1,403 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/settings/EmailPreferencesSettings.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/settings/EmailPreferencesSettings.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=6014a254"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+var _s = $RefreshSig$();
+/**
+ * Préférences email marketing (compte connecté) — aligné email_preferences + lien désabonnement
+ */ import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=6014a254"; const useEffect = __vite__cjsImport3_react["useEffect"]; const useState = __vite__cjsImport3_react["useState"];
+import { Link } from "/node_modules/.vite/deps/react-router-dom.js?v=6014a254";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "/src/components/ui/card.tsx";
+import { Label } from "/src/components/ui/label.tsx";
+import { Switch } from "/src/components/ui/switch.tsx";
+import { Button } from "/src/components/ui/button.tsx";
+import { Skeleton } from "/src/components/ui/skeleton.tsx";
+import { Mail, Save, ExternalLink } from "/node_modules/.vite/deps/lucide-react.js?v=6014a254";
+import { useEmailPreferences, useUpdateEmailPreferences } from "/src/hooks/useEmail.ts";
+export const EmailPreferencesSettings = ()=>{
+    _s();
+    const { data: preferences, isLoading } = useEmailPreferences();
+    const updatePreferences = useUpdateEmailPreferences();
+    const [localPrefs, setLocalPrefs] = useState(null);
+    useEffect(()=>{
+        if (preferences) setLocalPrefs(preferences);
+    }, [
+        preferences
+    ]);
+    if (isLoading || !localPrefs) {
+        return /*#__PURE__*/ _jsxDEV(Skeleton, {
+            className: "h-48 w-full"
+        }, void 0, false, {
+            fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/EmailPreferencesSettings.tsx",
+            lineNumber: 25,
+            columnNumber: 12
+        }, this);
+    }
+    const handleToggle = (field, value)=>{
+        setLocalPrefs((prev)=>prev ? {
+                ...prev,
+                [field]: value
+            } : prev);
+    };
+    const handleSave = async ()=>{
+        const { user_id: _uid, created_at: _c, updated_at: _u, unsubscribed_at: _unsub, ...patch } = localPrefs;
+        await updatePreferences.mutateAsync(patch);
+    };
+    return /*#__PURE__*/ _jsxDEV(Card, {
+        className: "mb-6 border-emerald-200/60 dark:border-emerald-900/40",
+        children: [
+            /*#__PURE__*/ _jsxDEV(CardHeader, {
+                children: [
+                    /*#__PURE__*/ _jsxDEV(CardTitle, {
+                        className: "flex items-center gap-2",
+                        children: [
+                            /*#__PURE__*/ _jsxDEV(Mail, {
+                                className: "w-5 h-5"
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/EmailPreferencesSettings.tsx",
+                                lineNumber: 47,
+                                columnNumber: 11
+                            }, this),
+                            "Préférences email Emarzona"
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/EmailPreferencesSettings.tsx",
+                        lineNumber: 46,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV(CardDescription, {
+                        children: "Contrôle des campagnes marketing et notifications par email (Resend). Les emails transactionnels essentiels (commandes, sécurité) restent actifs si requis par la loi."
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/EmailPreferencesSettings.tsx",
+                        lineNumber: 50,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/EmailPreferencesSettings.tsx",
+                lineNumber: 45,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV(CardContent, {
+                className: "space-y-4",
+                children: [
+                    /*#__PURE__*/ _jsxDEV("div", {
+                        className: "flex items-center justify-between gap-4",
+                        children: [
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV(Label, {
+                                        children: "Emails marketing"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/EmailPreferencesSettings.tsx",
+                                        lineNumber: 58,
+                                        columnNumber: 13
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("p", {
+                                        className: "text-sm text-muted-foreground",
+                                        children: "Promotions, newsletters boutiques"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/EmailPreferencesSettings.tsx",
+                                        lineNumber: 59,
+                                        columnNumber: 13
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/EmailPreferencesSettings.tsx",
+                                lineNumber: 57,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV(Switch, {
+                                checked: localPrefs.marketing_emails ?? true,
+                                onCheckedChange: (v)=>handleToggle('marketing_emails', v)
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/EmailPreferencesSettings.tsx",
+                                lineNumber: 61,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/EmailPreferencesSettings.tsx",
+                        lineNumber: 56,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV("div", {
+                        className: "flex items-center justify-between gap-4",
+                        children: [
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV(Label, {
+                                        children: "Notifications produit"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/EmailPreferencesSettings.tsx",
+                                        lineNumber: 68,
+                                        columnNumber: 13
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("p", {
+                                        className: "text-sm text-muted-foreground",
+                                        children: "Mises à jour cours, produits, affiliés"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/EmailPreferencesSettings.tsx",
+                                        lineNumber: 69,
+                                        columnNumber: 13
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/EmailPreferencesSettings.tsx",
+                                lineNumber: 67,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV(Switch, {
+                                checked: localPrefs.notification_emails ?? true,
+                                onCheckedChange: (v)=>handleToggle('notification_emails', v)
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/EmailPreferencesSettings.tsx",
+                                lineNumber: 71,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/EmailPreferencesSettings.tsx",
+                        lineNumber: 66,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV("div", {
+                        className: "flex items-center justify-between gap-4",
+                        children: [
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV(Label, {
+                                        children: "Suivi des commandes"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/EmailPreferencesSettings.tsx",
+                                        lineNumber: 78,
+                                        columnNumber: 13
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("p", {
+                                        className: "text-sm text-muted-foreground",
+                                        children: "Confirmations et statuts de livraison"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/EmailPreferencesSettings.tsx",
+                                        lineNumber: 79,
+                                        columnNumber: 13
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/EmailPreferencesSettings.tsx",
+                                lineNumber: 77,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV(Switch, {
+                                checked: localPrefs.order_updates ?? true,
+                                onCheckedChange: (v)=>handleToggle('order_updates', v)
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/EmailPreferencesSettings.tsx",
+                                lineNumber: 81,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/EmailPreferencesSettings.tsx",
+                        lineNumber: 76,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV("div", {
+                        className: "flex items-center justify-between gap-4",
+                        children: [
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                children: /*#__PURE__*/ _jsxDEV(Label, {
+                                    children: "Nouveautés produits"
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/EmailPreferencesSettings.tsx",
+                                    lineNumber: 88,
+                                    columnNumber: 13
+                                }, this)
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/EmailPreferencesSettings.tsx",
+                                lineNumber: 87,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV(Switch, {
+                                checked: localPrefs.product_updates ?? true,
+                                onCheckedChange: (v)=>handleToggle('product_updates', v)
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/EmailPreferencesSettings.tsx",
+                                lineNumber: 90,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/EmailPreferencesSettings.tsx",
+                        lineNumber: 86,
+                        columnNumber: 9
+                    }, this),
+                    localPrefs.affiliate_updates !== undefined && localPrefs.affiliate_updates !== null && /*#__PURE__*/ _jsxDEV("div", {
+                        className: "flex items-center justify-between gap-4",
+                        children: [
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                children: /*#__PURE__*/ _jsxDEV(Label, {
+                                    children: "Programme affilié"
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/EmailPreferencesSettings.tsx",
+                                    lineNumber: 98,
+                                    columnNumber: 15
+                                }, this)
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/EmailPreferencesSettings.tsx",
+                                lineNumber: 97,
+                                columnNumber: 13
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV(Switch, {
+                                checked: !!localPrefs.affiliate_updates,
+                                onCheckedChange: (v)=>handleToggle('affiliate_updates', v)
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/EmailPreferencesSettings.tsx",
+                                lineNumber: 100,
+                                columnNumber: 13
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/EmailPreferencesSettings.tsx",
+                        lineNumber: 96,
+                        columnNumber: 11
+                    }, this),
+                    localPrefs.course_updates !== undefined && localPrefs.course_updates !== null && /*#__PURE__*/ _jsxDEV("div", {
+                        className: "flex items-center justify-between gap-4",
+                        children: [
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                children: /*#__PURE__*/ _jsxDEV(Label, {
+                                    children: "Mises à jour de cours"
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/EmailPreferencesSettings.tsx",
+                                    lineNumber: 109,
+                                    columnNumber: 15
+                                }, this)
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/EmailPreferencesSettings.tsx",
+                                lineNumber: 108,
+                                columnNumber: 13
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV(Switch, {
+                                checked: !!localPrefs.course_updates,
+                                onCheckedChange: (v)=>handleToggle('course_updates', v)
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/EmailPreferencesSettings.tsx",
+                                lineNumber: 111,
+                                columnNumber: 13
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/EmailPreferencesSettings.tsx",
+                        lineNumber: 107,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV("div", {
+                        className: "flex flex-col sm:flex-row gap-2 pt-2",
+                        children: [
+                            /*#__PURE__*/ _jsxDEV(Button, {
+                                onClick: handleSave,
+                                disabled: updatePreferences.isPending,
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV(Save, {
+                                        className: "h-4 w-4 mr-2"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/EmailPreferencesSettings.tsx",
+                                        lineNumber: 119,
+                                        columnNumber: 13
+                                    }, this),
+                                    "Enregistrer les préférences email"
+                                ]
+                            }, void 0, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/EmailPreferencesSettings.tsx",
+                                lineNumber: 118,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV(Button, {
+                                variant: "outline",
+                                asChild: true,
+                                children: /*#__PURE__*/ _jsxDEV(Link, {
+                                    to: "/unsubscribe",
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV(ExternalLink, {
+                                            className: "h-4 w-4 mr-2"
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/EmailPreferencesSettings.tsx",
+                                            lineNumber: 124,
+                                            columnNumber: 15
+                                        }, this),
+                                        "Page de désabonnement public"
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/EmailPreferencesSettings.tsx",
+                                    lineNumber: 123,
+                                    columnNumber: 13
+                                }, this)
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/EmailPreferencesSettings.tsx",
+                                lineNumber: 122,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/EmailPreferencesSettings.tsx",
+                        lineNumber: 117,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/EmailPreferencesSettings.tsx",
+                lineNumber: 55,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/EmailPreferencesSettings.tsx",
+        lineNumber: 44,
+        columnNumber: 5
+    }, this);
+};
+_s(EmailPreferencesSettings, "LvEX0WAYAHCOVQBQEGFetw/psT8=", false, function() {
+    return [
+        useEmailPreferences,
+        useUpdateEmailPreferences
+    ];
+});
+_c = EmailPreferencesSettings;
+var _c;
+$RefreshReg$(_c, "EmailPreferencesSettings");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/settings/EmailPreferencesSettings.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/settings/EmailPreferencesSettings.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIkVtYWlsUHJlZmVyZW5jZXNTZXR0aW5ncy50c3giXSwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBQcsOpZsOpcmVuY2VzIGVtYWlsIG1hcmtldGluZyAoY29tcHRlIGNvbm5lY3TDqSkg4oCUIGFsaWduw6kgZW1haWxfcHJlZmVyZW5jZXMgKyBsaWVuIGTDqXNhYm9ubmVtZW50XG4gKi9cbmltcG9ydCB7IHVzZUVmZmVjdCwgdXNlU3RhdGUgfSBmcm9tICdyZWFjdCc7XG5pbXBvcnQgeyBMaW5rIH0gZnJvbSAncmVhY3Qtcm91dGVyLWRvbSc7XG5pbXBvcnQgeyBDYXJkLCBDYXJkQ29udGVudCwgQ2FyZERlc2NyaXB0aW9uLCBDYXJkSGVhZGVyLCBDYXJkVGl0bGUgfSBmcm9tICdAL2NvbXBvbmVudHMvdWkvY2FyZCc7XG5pbXBvcnQgeyBMYWJlbCB9IGZyb20gJ0AvY29tcG9uZW50cy91aS9sYWJlbCc7XG5pbXBvcnQgeyBTd2l0Y2ggfSBmcm9tICdAL2NvbXBvbmVudHMvdWkvc3dpdGNoJztcbmltcG9ydCB7IEJ1dHRvbiB9IGZyb20gJ0AvY29tcG9uZW50cy91aS9idXR0b24nO1xuaW1wb3J0IHsgU2tlbGV0b24gfSBmcm9tICdAL2NvbXBvbmVudHMvdWkvc2tlbGV0b24nO1xuaW1wb3J0IHsgTWFpbCwgU2F2ZSwgRXh0ZXJuYWxMaW5rIH0gZnJvbSAnbHVjaWRlLXJlYWN0JztcbmltcG9ydCB7IHVzZUVtYWlsUHJlZmVyZW5jZXMsIHVzZVVwZGF0ZUVtYWlsUHJlZmVyZW5jZXMgfSBmcm9tICdAL2hvb2tzL3VzZUVtYWlsJztcbmltcG9ydCB0eXBlIHsgRW1haWxQcmVmZXJlbmNlcyB9IGZyb20gJ0AvdHlwZXMvZW1haWwnO1xuXG5leHBvcnQgY29uc3QgRW1haWxQcmVmZXJlbmNlc1NldHRpbmdzID0gKCkgPT4ge1xuICBjb25zdCB7IGRhdGE6IHByZWZlcmVuY2VzLCBpc0xvYWRpbmcgfSA9IHVzZUVtYWlsUHJlZmVyZW5jZXMoKTtcbiAgY29uc3QgdXBkYXRlUHJlZmVyZW5jZXMgPSB1c2VVcGRhdGVFbWFpbFByZWZlcmVuY2VzKCk7XG4gIGNvbnN0IFtsb2NhbFByZWZzLCBzZXRMb2NhbFByZWZzXSA9IHVzZVN0YXRlPEVtYWlsUHJlZmVyZW5jZXMgfCBudWxsPihudWxsKTtcblxuICB1c2VFZmZlY3QoKCkgPT4ge1xuICAgIGlmIChwcmVmZXJlbmNlcykgc2V0TG9jYWxQcmVmcyhwcmVmZXJlbmNlcyk7XG4gIH0sIFtwcmVmZXJlbmNlc10pO1xuXG4gIGlmIChpc0xvYWRpbmcgfHwgIWxvY2FsUHJlZnMpIHtcbiAgICByZXR1cm4gPFNrZWxldG9uIGNsYXNzTmFtZT1cImgtNDggdy1mdWxsXCIgLz47XG4gIH1cblxuICBjb25zdCBoYW5kbGVUb2dnbGUgPSAoZmllbGQ6IGtleW9mIEVtYWlsUHJlZmVyZW5jZXMsIHZhbHVlOiBib29sZWFuKSA9PiB7XG4gICAgc2V0TG9jYWxQcmVmcyhwcmV2ID0+IChwcmV2ID8geyAuLi5wcmV2LCBbZmllbGRdOiB2YWx1ZSB9IDogcHJldikpO1xuICB9O1xuXG4gIGNvbnN0IGhhbmRsZVNhdmUgPSBhc3luYyAoKSA9PiB7XG4gICAgY29uc3Qge1xuICAgICAgdXNlcl9pZDogX3VpZCxcbiAgICAgIGNyZWF0ZWRfYXQ6IF9jLFxuICAgICAgdXBkYXRlZF9hdDogX3UsXG4gICAgICB1bnN1YnNjcmliZWRfYXQ6IF91bnN1YixcbiAgICAgIC4uLnBhdGNoXG4gICAgfSA9IGxvY2FsUHJlZnM7XG4gICAgYXdhaXQgdXBkYXRlUHJlZmVyZW5jZXMubXV0YXRlQXN5bmMocGF0Y2gpO1xuICB9O1xuXG4gIHJldHVybiAoXG4gICAgPENhcmQgY2xhc3NOYW1lPVwibWItNiBib3JkZXItZW1lcmFsZC0yMDAvNjAgZGFyazpib3JkZXItZW1lcmFsZC05MDAvNDBcIj5cbiAgICAgIDxDYXJkSGVhZGVyPlxuICAgICAgICA8Q2FyZFRpdGxlIGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGdhcC0yXCI+XG4gICAgICAgICAgPE1haWwgY2xhc3NOYW1lPVwidy01IGgtNVwiIC8+XG4gICAgICAgICAgUHLDqWbDqXJlbmNlcyBlbWFpbCBFbWFyem9uYVxuICAgICAgICA8L0NhcmRUaXRsZT5cbiAgICAgICAgPENhcmREZXNjcmlwdGlvbj5cbiAgICAgICAgICBDb250csO0bGUgZGVzIGNhbXBhZ25lcyBtYXJrZXRpbmcgZXQgbm90aWZpY2F0aW9ucyBwYXIgZW1haWwgKFJlc2VuZCkuIExlcyBlbWFpbHNcbiAgICAgICAgICB0cmFuc2FjdGlvbm5lbHMgZXNzZW50aWVscyAoY29tbWFuZGVzLCBzw6ljdXJpdMOpKSByZXN0ZW50IGFjdGlmcyBzaSByZXF1aXMgcGFyIGxhIGxvaS5cbiAgICAgICAgPC9DYXJkRGVzY3JpcHRpb24+XG4gICAgICA8L0NhcmRIZWFkZXI+XG4gICAgICA8Q2FyZENvbnRlbnQgY2xhc3NOYW1lPVwic3BhY2UteS00XCI+XG4gICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIganVzdGlmeS1iZXR3ZWVuIGdhcC00XCI+XG4gICAgICAgICAgPGRpdj5cbiAgICAgICAgICAgIDxMYWJlbD5FbWFpbHMgbWFya2V0aW5nPC9MYWJlbD5cbiAgICAgICAgICAgIDxwIGNsYXNzTmFtZT1cInRleHQtc20gdGV4dC1tdXRlZC1mb3JlZ3JvdW5kXCI+UHJvbW90aW9ucywgbmV3c2xldHRlcnMgYm91dGlxdWVzPC9wPlxuICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgIDxTd2l0Y2hcbiAgICAgICAgICAgIGNoZWNrZWQ9e2xvY2FsUHJlZnMubWFya2V0aW5nX2VtYWlscyA/PyB0cnVlfVxuICAgICAgICAgICAgb25DaGVja2VkQ2hhbmdlPXt2ID0+IGhhbmRsZVRvZ2dsZSgnbWFya2V0aW5nX2VtYWlscycsIHYpfVxuICAgICAgICAgIC8+XG4gICAgICAgIDwvZGl2PlxuICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGp1c3RpZnktYmV0d2VlbiBnYXAtNFwiPlxuICAgICAgICAgIDxkaXY+XG4gICAgICAgICAgICA8TGFiZWw+Tm90aWZpY2F0aW9ucyBwcm9kdWl0PC9MYWJlbD5cbiAgICAgICAgICAgIDxwIGNsYXNzTmFtZT1cInRleHQtc20gdGV4dC1tdXRlZC1mb3JlZ3JvdW5kXCI+TWlzZXMgw6Agam91ciBjb3VycywgcHJvZHVpdHMsIGFmZmlsacOpczwvcD5cbiAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICA8U3dpdGNoXG4gICAgICAgICAgICBjaGVja2VkPXtsb2NhbFByZWZzLm5vdGlmaWNhdGlvbl9lbWFpbHMgPz8gdHJ1ZX1cbiAgICAgICAgICAgIG9uQ2hlY2tlZENoYW5nZT17diA9PiBoYW5kbGVUb2dnbGUoJ25vdGlmaWNhdGlvbl9lbWFpbHMnLCB2KX1cbiAgICAgICAgICAvPlxuICAgICAgICA8L2Rpdj5cbiAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLWNlbnRlciBqdXN0aWZ5LWJldHdlZW4gZ2FwLTRcIj5cbiAgICAgICAgICA8ZGl2PlxuICAgICAgICAgICAgPExhYmVsPlN1aXZpIGRlcyBjb21tYW5kZXM8L0xhYmVsPlxuICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwidGV4dC1zbSB0ZXh0LW11dGVkLWZvcmVncm91bmRcIj5Db25maXJtYXRpb25zIGV0IHN0YXR1dHMgZGUgbGl2cmFpc29uPC9wPlxuICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgIDxTd2l0Y2hcbiAgICAgICAgICAgIGNoZWNrZWQ9e2xvY2FsUHJlZnMub3JkZXJfdXBkYXRlcyA/PyB0cnVlfVxuICAgICAgICAgICAgb25DaGVja2VkQ2hhbmdlPXt2ID0+IGhhbmRsZVRvZ2dsZSgnb3JkZXJfdXBkYXRlcycsIHYpfVxuICAgICAgICAgIC8+XG4gICAgICAgIDwvZGl2PlxuICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGp1c3RpZnktYmV0d2VlbiBnYXAtNFwiPlxuICAgICAgICAgIDxkaXY+XG4gICAgICAgICAgICA8TGFiZWw+Tm91dmVhdXTDqXMgcHJvZHVpdHM8L0xhYmVsPlxuICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgIDxTd2l0Y2hcbiAgICAgICAgICAgIGNoZWNrZWQ9e2xvY2FsUHJlZnMucHJvZHVjdF91cGRhdGVzID8/IHRydWV9XG4gICAgICAgICAgICBvbkNoZWNrZWRDaGFuZ2U9e3YgPT4gaGFuZGxlVG9nZ2xlKCdwcm9kdWN0X3VwZGF0ZXMnLCB2KX1cbiAgICAgICAgICAvPlxuICAgICAgICA8L2Rpdj5cbiAgICAgICAge2xvY2FsUHJlZnMuYWZmaWxpYXRlX3VwZGF0ZXMgIT09IHVuZGVmaW5lZCAmJiBsb2NhbFByZWZzLmFmZmlsaWF0ZV91cGRhdGVzICE9PSBudWxsICYmIChcbiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGp1c3RpZnktYmV0d2VlbiBnYXAtNFwiPlxuICAgICAgICAgICAgPGRpdj5cbiAgICAgICAgICAgICAgPExhYmVsPlByb2dyYW1tZSBhZmZpbGnDqTwvTGFiZWw+XG4gICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgIDxTd2l0Y2hcbiAgICAgICAgICAgICAgY2hlY2tlZD17ISFsb2NhbFByZWZzLmFmZmlsaWF0ZV91cGRhdGVzfVxuICAgICAgICAgICAgICBvbkNoZWNrZWRDaGFuZ2U9e3YgPT4gaGFuZGxlVG9nZ2xlKCdhZmZpbGlhdGVfdXBkYXRlcycsIHYpfVxuICAgICAgICAgICAgLz5cbiAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgKX1cbiAgICAgICAge2xvY2FsUHJlZnMuY291cnNlX3VwZGF0ZXMgIT09IHVuZGVmaW5lZCAmJiBsb2NhbFByZWZzLmNvdXJzZV91cGRhdGVzICE9PSBudWxsICYmIChcbiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGp1c3RpZnktYmV0d2VlbiBnYXAtNFwiPlxuICAgICAgICAgICAgPGRpdj5cbiAgICAgICAgICAgICAgPExhYmVsPk1pc2VzIMOgIGpvdXIgZGUgY291cnM8L0xhYmVsPlxuICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICA8U3dpdGNoXG4gICAgICAgICAgICAgIGNoZWNrZWQ9eyEhbG9jYWxQcmVmcy5jb3Vyc2VfdXBkYXRlc31cbiAgICAgICAgICAgICAgb25DaGVja2VkQ2hhbmdlPXt2ID0+IGhhbmRsZVRvZ2dsZSgnY291cnNlX3VwZGF0ZXMnLCB2KX1cbiAgICAgICAgICAgIC8+XG4gICAgICAgICAgPC9kaXY+XG4gICAgICAgICl9XG4gICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBmbGV4LWNvbCBzbTpmbGV4LXJvdyBnYXAtMiBwdC0yXCI+XG4gICAgICAgICAgPEJ1dHRvbiBvbkNsaWNrPXtoYW5kbGVTYXZlfSBkaXNhYmxlZD17dXBkYXRlUHJlZmVyZW5jZXMuaXNQZW5kaW5nfT5cbiAgICAgICAgICAgIDxTYXZlIGNsYXNzTmFtZT1cImgtNCB3LTQgbXItMlwiIC8+XG4gICAgICAgICAgICBFbnJlZ2lzdHJlciBsZXMgcHLDqWbDqXJlbmNlcyBlbWFpbFxuICAgICAgICAgIDwvQnV0dG9uPlxuICAgICAgICAgIDxCdXR0b24gdmFyaWFudD1cIm91dGxpbmVcIiBhc0NoaWxkPlxuICAgICAgICAgICAgPExpbmsgdG89XCIvdW5zdWJzY3JpYmVcIj5cbiAgICAgICAgICAgICAgPEV4dGVybmFsTGluayBjbGFzc05hbWU9XCJoLTQgdy00IG1yLTJcIiAvPlxuICAgICAgICAgICAgICBQYWdlIGRlIGTDqXNhYm9ubmVtZW50IHB1YmxpY1xuICAgICAgICAgICAgPC9MaW5rPlxuICAgICAgICAgIDwvQnV0dG9uPlxuICAgICAgICA8L2Rpdj5cbiAgICAgIDwvQ2FyZENvbnRlbnQ+XG4gICAgPC9DYXJkPlxuICApO1xufTtcbiJdLCJuYW1lcyI6WyJ1c2VFZmZlY3QiLCJ1c2VTdGF0ZSIsIkxpbmsiLCJDYXJkIiwiQ2FyZENvbnRlbnQiLCJDYXJkRGVzY3JpcHRpb24iLCJDYXJkSGVhZGVyIiwiQ2FyZFRpdGxlIiwiTGFiZWwiLCJTd2l0Y2giLCJCdXR0b24iLCJTa2VsZXRvbiIsIk1haWwiLCJTYXZlIiwiRXh0ZXJuYWxMaW5rIiwidXNlRW1haWxQcmVmZXJlbmNlcyIsInVzZVVwZGF0ZUVtYWlsUHJlZmVyZW5jZXMiLCJFbWFpbFByZWZlcmVuY2VzU2V0dGluZ3MiLCJkYXRhIiwicHJlZmVyZW5jZXMiLCJpc0xvYWRpbmciLCJ1cGRhdGVQcmVmZXJlbmNlcyIsImxvY2FsUHJlZnMiLCJzZXRMb2NhbFByZWZzIiwiY2xhc3NOYW1lIiwiaGFuZGxlVG9nZ2xlIiwiZmllbGQiLCJ2YWx1ZSIsInByZXYiLCJoYW5kbGVTYXZlIiwidXNlcl9pZCIsIl91aWQiLCJjcmVhdGVkX2F0IiwiX2MiLCJ1cGRhdGVkX2F0IiwiX3UiLCJ1bnN1YnNjcmliZWRfYXQiLCJfdW5zdWIiLCJwYXRjaCIsIm11dGF0ZUFzeW5jIiwiZGl2IiwicCIsImNoZWNrZWQiLCJtYXJrZXRpbmdfZW1haWxzIiwib25DaGVja2VkQ2hhbmdlIiwidiIsIm5vdGlmaWNhdGlvbl9lbWFpbHMiLCJvcmRlcl91cGRhdGVzIiwicHJvZHVjdF91cGRhdGVzIiwiYWZmaWxpYXRlX3VwZGF0ZXMiLCJ1bmRlZmluZWQiLCJjb3Vyc2VfdXBkYXRlcyIsIm9uQ2xpY2siLCJkaXNhYmxlZCIsImlzUGVuZGluZyIsInZhcmlhbnQiLCJhc0NoaWxkIiwidG8iXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OztBQUFBOztDQUVDLEdBQ0QsU0FBU0EsU0FBUyxFQUFFQyxRQUFRLFFBQVEsUUFBUTtBQUM1QyxTQUFTQyxJQUFJLFFBQVEsbUJBQW1CO0FBQ3hDLFNBQVNDLElBQUksRUFBRUMsV0FBVyxFQUFFQyxlQUFlLEVBQUVDLFVBQVUsRUFBRUMsU0FBUyxRQUFRLHVCQUF1QjtBQUNqRyxTQUFTQyxLQUFLLFFBQVEsd0JBQXdCO0FBQzlDLFNBQVNDLE1BQU0sUUFBUSx5QkFBeUI7QUFDaEQsU0FBU0MsTUFBTSxRQUFRLHlCQUF5QjtB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

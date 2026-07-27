@@ -1,0 +1,99 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/referral/ReferralTracker.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/referral/ReferralTracker.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+var _s = $RefreshSig$();
+import __vite__cjsImport2_react from "/node_modules/.vite/deps/react.js?v=2441233a"; const useEffect = __vite__cjsImport2_react["useEffect"];
+import { useSearchParams } from "/node_modules/.vite/deps/react-router-dom.js?v=2441233a";
+import { logger } from "/src/lib/logger.ts";
+/**
+ * Composant pour tracker les codes de parrainage dans l'URL
+ * Stocke le code dans localStorage pour l'utiliser lors de l'inscription
+ */ export const ReferralTracker = ()=>{
+    _s();
+    const [searchParams] = useSearchParams();
+    useEffect(()=>{
+        const referralCode = searchParams.get('ref');
+        // Ne traiter que si le code existe et n'est pas vide
+        if (referralCode && referralCode.trim() !== '') {
+            try {
+                // Stocker le code de parrainage dans localStorage
+                localStorage.setItem('referral_code', referralCode.trim());
+                // Optionnel : stocker aussi dans sessionStorage pour une session
+                sessionStorage.setItem('referral_code', referralCode.trim());
+                logger.info('Referral code tracked', {
+                    code: referralCode.trim()
+                });
+            // Nettoyer l'URL pour ne pas laisser le paramètre visible
+            // (On garde le paramètre pour que l'utilisateur puisse le voir s'il le souhaite)
+            } catch (err) {
+                logger.error('Error tracking referral code', {
+                    error: err.message
+                });
+            }
+        } else if (referralCode === '') {
+            // Si ref= existe mais est vide, ne rien faire
+            logger.debug('Empty referral code in URL, ignoring');
+        }
+    }, [
+        searchParams
+    ]);
+    return null; // Ce composant ne rend rien
+};
+_s(ReferralTracker, "Vr8ywHSj7XLtnLkrJxRpkjH85wI=", false, function() {
+    return [
+        useSearchParams
+    ];
+});
+_c = ReferralTracker;
+/**
+ * Fonction utilitaire pour obtenir le code de parrainage stocké
+ */ export const getStoredReferralCode = ()=>{
+    if (typeof window === 'undefined') return null;
+    // Essayer localStorage d'abord, puis sessionStorage
+    return localStorage.getItem('referral_code') || sessionStorage.getItem('referral_code');
+};
+/**
+ * Fonction pour nettoyer le code de parrainage après utilisation
+ */ export const clearStoredReferralCode = ()=>{
+    if (typeof window === 'undefined') return;
+    localStorage.removeItem('referral_code');
+    sessionStorage.removeItem('referral_code');
+};
+var _c;
+$RefreshReg$(_c, "ReferralTracker");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/referral/ReferralTracker.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/referral/ReferralTracker.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIlJlZmVycmFsVHJhY2tlci50c3giXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgdXNlRWZmZWN0IH0gZnJvbSAncmVhY3QnO1xuaW1wb3J0IHsgdXNlU2VhcmNoUGFyYW1zIH0gZnJvbSAncmVhY3Qtcm91dGVyLWRvbSc7XG5pbXBvcnQgeyBsb2dnZXIgfSBmcm9tICdAL2xpYi9sb2dnZXInO1xuXG4vKipcbiAqIENvbXBvc2FudCBwb3VyIHRyYWNrZXIgbGVzIGNvZGVzIGRlIHBhcnJhaW5hZ2UgZGFucyBsJ1VSTFxuICogU3RvY2tlIGxlIGNvZGUgZGFucyBsb2NhbFN0b3JhZ2UgcG91ciBsJ3V0aWxpc2VyIGxvcnMgZGUgbCdpbnNjcmlwdGlvblxuICovXG5leHBvcnQgY29uc3QgUmVmZXJyYWxUcmFja2VyID0gKCkgPT4ge1xuICBjb25zdCBbc2VhcmNoUGFyYW1zXSA9IHVzZVNlYXJjaFBhcmFtcygpO1xuXG4gIHVzZUVmZmVjdCgoKSA9PiB7XG4gICAgY29uc3QgcmVmZXJyYWxDb2RlID0gc2VhcmNoUGFyYW1zLmdldCgncmVmJyk7XG4gICAgXG4gICAgLy8gTmUgdHJhaXRlciBxdWUgc2kgbGUgY29kZSBleGlzdGUgZXQgbidlc3QgcGFzIHZpZGVcbiAgICBpZiAocmVmZXJyYWxDb2RlICYmIHJlZmVycmFsQ29kZS50cmltKCkgIT09ICcnKSB7XG4gICAgICB0cnkge1xuICAgICAgICAvLyBTdG9ja2VyIGxlIGNvZGUgZGUgcGFycmFpbmFnZSBkYW5zIGxvY2FsU3RvcmFnZVxuICAgICAgICBsb2NhbFN0b3JhZ2Uuc2V0SXRlbSgncmVmZXJyYWxfY29kZScsIHJlZmVycmFsQ29kZS50cmltKCkpO1xuICAgICAgICBcbiAgICAgICAgLy8gT3B0aW9ubmVsIDogc3RvY2tlciBhdXNzaSBkYW5zIHNlc3Npb25TdG9yYWdlIHBvdXIgdW5lIHNlc3Npb25cbiAgICAgICAgc2Vzc2lvblN0b3JhZ2Uuc2V0SXRlbSgncmVmZXJyYWxfY29kZScsIHJlZmVycmFsQ29kZS50cmltKCkpO1xuICAgICAgICBcbiAgICAgICAgbG9nZ2VyLmluZm8oJ1JlZmVycmFsIGNvZGUgdHJhY2tlZCcsIHsgY29kZTogcmVmZXJyYWxDb2RlLnRyaW0oKSB9KTtcbiAgICAgICAgXG4gICAgICAgIC8vIE5ldHRveWVyIGwnVVJMIHBvdXIgbmUgcGFzIGxhaXNzZXIgbGUgcGFyYW3DqHRyZSB2aXNpYmxlXG4gICAgICAgIC8vIChPbiBnYXJkZSBsZSBwYXJhbcOodHJlIHBvdXIgcXVlIGwndXRpbGlzYXRldXIgcHVpc3NlIGxlIHZvaXIgcydpbCBsZSBzb3VoYWl0ZSlcbiAgICAgIH0gY2F0Y2ggKGVycjogYW55KSB7XG4gICAgICAgIGxvZ2dlci5lcnJvcignRXJyb3IgdHJhY2tpbmcgcmVmZXJyYWwgY29kZScsIHsgZXJyb3I6IChlcnIgYXMgRXJyb3IpLm1lc3NhZ2UgfSk7XG4gICAgICB9XG4gICAgfSBlbHNlIGlmIChyZWZlcnJhbENvZGUgPT09ICcnKSB7XG4gICAgICAvLyBTaSByZWY9IGV4aXN0ZSBtYWlzIGVzdCB2aWRlLCBuZSByaWVuIGZhaXJlXG4gICAgICBsb2dnZXIuZGVidWcoJ0VtcHR5IHJlZmVycmFsIGNvZGUgaW4gVVJMLCBpZ25vcmluZycpO1xuICAgIH1cbiAgfSwgW3NlYXJjaFBhcmFtc10pO1xuXG4gIHJldHVybiBudWxsOyAvLyBDZSBjb21wb3NhbnQgbmUgcmVuZCByaWVuXG59O1xuXG4vKipcbiAqIEZvbmN0aW9uIHV0aWxpdGFpcmUgcG91ciBvYnRlbmlyIGxlIGNvZGUgZGUgcGFycmFpbmFnZSBzdG9ja8OpXG4gKi9cbmV4cG9ydCBjb25zdCBnZXRTdG9yZWRSZWZlcnJhbENvZGUgPSAoKTogc3RyaW5nIHwgbnVsbCA9PiB7XG4gIGlmICh0eXBlb2Ygd2luZG93ID09PSAndW5kZWZpbmVkJykgcmV0dXJuIG51bGw7XG4gIFxuICAvLyBFc3NheWVyIGxvY2FsU3RvcmFnZSBkJ2Fib3JkLCBwdWlzIHNlc3Npb25TdG9yYWdlXG4gIHJldHVybiBsb2NhbFN0b3JhZ2UuZ2V0SXRlbSgncmVmZXJyYWxfY29kZScpIHx8IHNlc3Npb25TdG9yYWdlLmdldEl0ZW0oJ3JlZmVycmFsX2NvZGUnKTtcbn07XG5cbi8qKlxuICogRm9uY3Rpb24gcG91ciBuZXR0b3llciBsZSBjb2RlIGRlIHBhcnJhaW5hZ2UgYXByw6hzIHV0aWxpc2F0aW9uXG4gKi9cbmV4cG9ydCBjb25zdCBjbGVhclN0b3JlZFJlZmVycmFsQ29kZSA9ICgpOiB2b2lkID0+IHtcbiAgaWYgKHR5cGVvZiB3aW5kb3cgPT09ICd1bmRlZmluZWQnKSByZXR1cm47XG4gIFxuICBsb2NhbFN0b3JhZ2UucmVtb3ZlSXRlbSgncmVmZXJyYWxfY29kZScpO1xuICBzZXNzaW9uU3RvcmFnZS5yZW1vdmVJdGVtKCdyZWZlcnJhbF9jb2RlJyk7XG59O1xuXG5cblxuXG5cblxuXG4iXSwibmFtZXMiOlsidXNlRWZmZWN0IiwidXNlU2VhcmNoUGFyYW1zIiwibG9nZ2VyIiwiUmVmZXJyYWxUcmFja2VyIiwic2VhcmNoUGFyYW1zIiwicmVmZXJyYWxDb2RlIiwiZ2V0IiwidHJpbSIsImxvY2FsU3RvcmFnZSIsInNldEl0ZW0iLCJzZXNzaW9uU3RvcmFnZSIsImluZm8iLCJjb2RlIiwiZXJyIiwiZXJyb3IiLCJtZXNzYWdlIiwiZGVidWciLCJnZXRTdG9yZWRSZWZlcnJhbENvZGUiLCJ3aW5kb3ciLCJnZXRJdGVtIiwiY2xlYXJTdG9yZWRSZWZlcnJhbENvZGUiLCJyZW1vdmVJdGVtIl0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7Ozs7OztBQUFBLFNBQVNBLFNBQVMsUUFBUSxRQUFRO0FBQ2xDLFNBQVNDLGVBQWUsUUFBUSxtQkFBbUI7QUFDbkQsU0FBU0MsTUFBTSxRQUFRLGVBQWU7QUFFdEM7OztDQUdDLEdBQ0QsT0FBTyxNQUFNQyxrQkFBa0I7O0lBQzdCLE1BQU0sQ0FBQ0MsYUFBYSxHQUFHSDtJQUV2QkQsVUFBVTtRQUNSLE1BQU1LLGVBQWVELGFBQWFFLEdBQUcsQ0FBQztRQUV0QyxxREFBcUQ7UUFDckQsSUFBSUQsZ0JBQWdCQSxhQUFhRSxJQUFJLE9BQU8sSUFBSTtZQUM5QyxJQUFJO2dCQUNGLGtEQUFrRDtnQkFDbERDLGFBQWFDLE9BQU8sQ0FBQyxpQkFBaUJKLGFBQWFFLElBQUk7Z0JBRXZELGlFQUFpRTtnQkFDakVHLGVBQWVELE9BQU8sQ0FBQyxpQkFBaUJKLGFBQWFFLElBQUk7Z0JBRXpETCxPQUFPUyxJQUFJLENBQUMseUJBQXlCO29CQUFFQyxNQUFNUCxhQUFhRSxJQUFJO2dCQUFHO1lBRWpFLDBEQUEwRDtZQUMxRCxpRkFBaUY7WUFDbkYsRUFBRSxPQUFPTSxLQUFVO2dCQUNqQlgsT0FBT1ksS0FBSyxDQUFDLGdDQUFnQztvQkFBRUEsT0FBTyxBQUFDRCxJQUFjRSxPQUFPO2dCQUFDO1lBQy9FO1FBQ0YsT0FBTyxJQUFJVixpQkFBaUIsSUFBSTtZQUM5Qiw4Q0FBOEM7WUFDOUNILE9BQU9jLEtBQUssQ0FBQztRQUNmO0lBQ0YsR0FBRztRQUFDWjtLQUFhO0lBRWpCLE9BQU8sTUFBTSw0QkFBNEI7QUFDM0MsRUFBRTtHQTdCV0Q7O1FBQ1lGOzs7S0FEWkU7QUErQmI7O0NBRUMsR0FDRCxPQUFPLE1BQU1jLHdCQUF3QjtJQUNuQyxJQUFJLE9BQU9DLFdBQVcsYUFBYSxPQUFPO0lBRTFDLG9EQUFvRDtJQUNwRCxPQUFPVixhQUFhVyxPQUFPLENBQUMsb0JBQW9CVCxlQUFlUyxPQUFPLENBQUM7QUFDekUsRUFBRTtBQUVGOztDQUVDLEdBQ0QsT0FBTyxNQUFNQywwQkFBMEI7SUFDckMsSUFBSSxPQUFPRixXQUFXLGFBQWE7SUFFbkNWLGFBQWFhLFVBQVUsQ0FBQztJQUN4QlgsZUFBZVcsVUFBVSxDQUFDO0FBQzVCLEVBQUUifQ==

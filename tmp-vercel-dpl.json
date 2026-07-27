@@ -1,0 +1,156 @@
+﻿{
+  "id": "dpl_AxLjiT1ywLms4fitGi56fxchDytx",
+  "name": "emarzona",
+  "url": "emarzona-b306upajw-rogers-projects-4062160a.vercel.app",
+  "target": "production",
+  "readyState": "ERROR",
+  "createdAt": 1784823446559,
+  "aliases": [
+    "emarzona-rogers-projects-4062160a.vercel.app",
+    "emarzona-git-main-rogers-projects-4062160a.vercel.app"
+  ],
+  "builds": [
+    {
+      "id": "bld_ocze58xgr",
+      "deploymentId": "dpl_AxLjiT1ywLms4fitGi56fxchDytx",
+      "entrypoint": ".",
+      "readyState": "READY",
+      "readyStateAt": 1784823446426,
+      "createdAt": 1784823446426,
+      "createdIn": "sfo1",
+      "use": "@vercel/vc-build",
+      "config": {},
+      "middleware": [],
+      "output": [],
+      "fingerprint": null
+    }
+  ],
+  "routes": [
+    {
+      "src": "^(?:/(.*))$",
+      "headers": {
+        "X-Frame-Options": "SAMEORIGIN",
+        "X-Content-Type-Options": "nosniff",
+        "X-XSS-Protection": "1; mode=block",
+        "Referrer-Policy": "strict-origin-when-cross-origin",
+        "Permissions-Policy": "camera=(), microphone=(), geolocation=(self), payment=(self)",
+        "Strict-Transport-Security": "max-age=63072000; includeSubDomains; preload"
+      },
+      "continue": true
+    },
+    {
+      "src": "^/index\\.html$",
+      "headers": {
+        "Cache-Control": "public, max-age=0, s-maxage=60, stale-while-revalidate=300"
+      },
+      "continue": true
+    },
+    {
+      "src": "^/assets(?:/(.*))$",
+      "headers": {
+        "Cache-Control": "public, max-age=31536000, immutable"
+      },
+      "continue": true
+    },
+    {
+      "src": "^/fonts(?:/(.*))$",
+      "headers": {
+        "Cache-Control": "public, max-age=31536000, immutable"
+      },
+      "continue": true
+    },
+    {
+      "src": "^(?:/(.*\\.(?:js|css|woff2?|avif|webp|png|jpg|jpeg|svg|ico)))$",
+      "headers": {
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "Vary": "Accept-Encoding"
+      },
+      "continue": true
+    },
+    {
+      "src": "^/manifest\\.json$",
+      "headers": {
+        "Cache-Control": "public, max-age=86400, stale-while-revalidate=604800"
+      },
+      "continue": true
+    },
+    {
+      "src": "^/api/cache/health$",
+      "headers": {
+        "Cache-Control": "no-store, max-age=0"
+      },
+      "continue": true
+    },
+    {
+      "src": "^/sitemap(.*)\\.xml$",
+      "headers": {
+        "Content-Type": "application/xml; charset=utf-8",
+        "Cache-Control": "public, max-age=3600"
+      },
+      "continue": true
+    },
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "^/sitemap\\.xml$",
+      "dest": "/api/sitemap",
+      "check": true
+    },
+    {
+      "src": "^/sitemap-stores\\.xml$",
+      "dest": "/api/sitemap-stores",
+      "check": true
+    },
+    {
+      "src": "^/sitemap\\.xml$",
+      "dest": "/api/sitemap-stores?slug=$sub&sub=$sub&host=$host",
+      "check": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "(?<sub>[^.]+)\\.myemarzona\\.shop"
+        }
+      ]
+    },
+    {
+      "src": "^/sitemap\\.xml$",
+      "dest": "/api/sitemap-stores?host=$host",
+      "check": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "myemarzona\\.shop"
+        }
+      ]
+    },
+    {
+      "src": "^/robots\\.txt$",
+      "dest": "/api/store-robots?slug=$sub&sub=$sub&host=$host",
+      "check": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "(?<sub>[^.]+)\\.myemarzona\\.shop"
+        }
+      ]
+    },
+    {
+      "src": "^/robots\\.txt$",
+      "dest": "/api/store-robots?slug=myemarzona.shop&host=$host",
+      "check": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "myemarzona\\.shop"
+        }
+      ]
+    },
+    {
+      "src": "^(?:/((?!api/|supabase/|assets/|fonts/).*))$",
+      "dest": "/index.html",
+      "check": true
+    }
+  ],
+  "contextName": "rogers-projects-4062160a"
+}

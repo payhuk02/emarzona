@@ -1,0 +1,20 @@
+/**
+ * Determine a breadcrumb's log level (only `warning` or `error`) based on an HTTP status code.
+ */
+function getBreadcrumbLogLevelFromHttpStatusCode(statusCode) {
+  // NOTE: undefined defaults to 'info' in Sentry
+  if (statusCode === undefined) {
+    return undefined;
+  } else if (statusCode >= 400 && statusCode < 500) {
+    return 'warning';
+  } else if (statusCode >= 500) {
+    return 'error';
+  } else {
+    return undefined;
+  }
+}
+
+export { getBreadcrumbLogLevelFromHttpStatusCode };
+                                                
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiYnJlYWRjcnVtYi1sb2ctbGV2ZWwuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy91dGlscy9icmVhZGNydW1iLWxvZy1sZXZlbC50cyJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgdHlwZSB7IFNldmVyaXR5TGV2ZWwgfSBmcm9tICcuLi90eXBlcy1ob2lzdC9zZXZlcml0eSc7XG5cbi8qKlxuICogRGV0ZXJtaW5lIGEgYnJlYWRjcnVtYidzIGxvZyBsZXZlbCAob25seSBgd2FybmluZ2Agb3IgYGVycm9yYCkgYmFzZWQgb24gYW4gSFRUUCBzdGF0dXMgY29kZS5cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIGdldEJyZWFkY3J1bWJMb2dMZXZlbEZyb21IdHRwU3RhdHVzQ29kZShzdGF0dXNDb2RlOiBudW1iZXIgfCB1bmRlZmluZWQpOiBTZXZlcml0eUxldmVsIHwgdW5kZWZpbmVkIHtcbiAgLy8gTk9URTogdW5kZWZpbmVkIGRlZmF1bHRzIHRvICdpbmZvJyBpbiBTZW50cnlcbiAgaWYgKHN0YXR1c0NvZGUgPT09IHVuZGVmaW5lZCkge1xuICAgIHJldHVybiB1bmRlZmluZWQ7XG4gIH0gZWxzZSBpZiAoc3RhdHVzQ29kZSA+PSA0MDAgJiYgc3RhdHVzQ29kZSA8IDUwMCkge1xuICAgIHJldHVybiAnd2FybmluZyc7XG4gIH0gZWxzZSBpZiAoc3RhdHVzQ29kZSA+PSA1MDApIHtcbiAgICByZXR1cm4gJ2Vycm9yJztcbiAgfSBlbHNlIHtcbiAgICByZXR1cm4gdW5kZWZpbmVkO1xuICB9XG59XG4iXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBRUE7QUFDQTtBQUNBO0FBQ08sU0FBUyx1Q0FBdUMsQ0FBQyxVQUFVLEVBQWlEO0FBQ25IO0FBQ0EsRUFBRSxJQUFJLFVBQUEsS0FBZSxTQUFTLEVBQUU7QUFDaEMsSUFBSSxPQUFPLFNBQVM7QUFDcEIsRUFBRSxDQUFBLE1BQU8sSUFBSSxVQUFBLElBQWMsR0FBQSxJQUFPLFVBQUEsR0FBYSxHQUFHLEVBQUU7QUFDcEQsSUFBSSxPQUFPLFNBQVM7QUFDcEIsRUFBRSxPQUFPLElBQUksVUFBQSxJQUFjLEdBQUcsRUFBRTtBQUNoQyxJQUFJLE9BQU8sT0FBTztBQUNsQixFQUFFLE9BQU87QUFDVCxJQUFJLE9BQU8sU0FBUztBQUNwQixFQUFFO0FBQ0Y7Ozs7IiwieF9nb29nbGVfaWdub3JlTGlzdCI6WzBdfQ==

@@ -1,0 +1,43 @@
+import { DEBUG_BUILD } from "/node_modules/@sentry/core/build/esm/debug-build.js?v=a52cce50";
+import { addGlobalErrorInstrumentationHandler } from "/node_modules/@sentry/core/build/esm/instrument/globalError.js?v=a52cce50";
+import { addGlobalUnhandledRejectionInstrumentationHandler } from "/node_modules/@sentry/core/build/esm/instrument/globalUnhandledRejection.js?v=a52cce50";
+import { debug } from "/node_modules/@sentry/core/build/esm/utils/debug-logger.js?v=a52cce50";
+import { getActiveSpan, getRootSpan } from "/node_modules/@sentry/core/build/esm/utils/spanUtils.js?v=a52cce50";
+import { SPAN_STATUS_ERROR } from "/node_modules/@sentry/core/build/esm/tracing/spanstatus.js?v=a52cce50";
+
+let errorsInstrumented = false;
+
+/**
+ * Ensure that global errors automatically set the active span status.
+ */
+function registerSpanErrorInstrumentation() {
+  if (errorsInstrumented) {
+    return;
+  }
+
+  /**
+   * If an error or unhandled promise occurs, we mark the active root span as failed
+   */
+  function errorCallback() {
+    const activeSpan = getActiveSpan();
+    const rootSpan = activeSpan && getRootSpan(activeSpan);
+    if (rootSpan) {
+      const message = 'internal_error';
+      DEBUG_BUILD && debug.log(`[Tracing] Root span: ${message} -> Global error occurred`);
+      rootSpan.setStatus({ code: SPAN_STATUS_ERROR, message });
+    }
+  }
+
+  // The function name will be lost when bundling but we need to be able to identify this listener later to maintain the
+  // node.js default exit behaviour
+  errorCallback.tag = 'sentry_tracingErrorCallback';
+
+  errorsInstrumented = true;
+  addGlobalErrorInstrumentationHandler(errorCallback);
+  addGlobalUnhandledRejectionInstrumentationHandler(errorCallback);
+}
+
+export { registerSpanErrorInstrumentation };
+                                  
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZXJyb3JzLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi9zcmMvdHJhY2luZy9lcnJvcnMudHMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgREVCVUdfQlVJTEQgfSBmcm9tICcuLi9kZWJ1Zy1idWlsZCc7XG5pbXBvcnQgeyBhZGRHbG9iYWxFcnJvckluc3RydW1lbnRhdGlvbkhhbmRsZXIgfSBmcm9tICcuLi9pbnN0cnVtZW50L2dsb2JhbEVycm9yJztcbmltcG9ydCB7IGFkZEdsb2JhbFVuaGFuZGxlZFJlamVjdGlvbkluc3RydW1lbnRhdGlvbkhhbmRsZXIgfSBmcm9tICcuLi9pbnN0cnVtZW50L2dsb2JhbFVuaGFuZGxlZFJlamVjdGlvbic7XG5pbXBvcnQgeyBkZWJ1ZyB9IGZyb20gJy4uL3V0aWxzL2RlYnVnLWxvZ2dlcic7XG5pbXBvcnQgeyBnZXRBY3RpdmVTcGFuLCBnZXRSb290U3BhbiB9IGZyb20gJy4uL3V0aWxzL3NwYW5VdGlscyc7XG5pbXBvcnQgeyBTUEFOX1NUQVRVU19FUlJPUiB9IGZyb20gJy4vc3BhbnN0YXR1cyc7XG5cbmxldCBlcnJvcnNJbnN0cnVtZW50ZWQgPSBmYWxzZTtcblxuLyoqICBPbmx5IGV4cG9zZWQgZm9yIHRlc3RpbmcgKi9cbmV4cG9ydCBmdW5jdGlvbiBfcmVzZXRFcnJvcnNJbnN0cnVtZW50ZWQoKTogdm9pZCB7XG4gIGVycm9yc0luc3RydW1lbnRlZCA9IGZhbHNlO1xufVxuXG4vKipcbiAqIEVuc3VyZSB0aGF0IGdsb2JhbCBlcnJvcnMgYXV0b21hdGljYWxseSBzZXQgdGhlIGFjdGl2ZSBzcGFuIHN0YXR1cy5cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIHJlZ2lzdGVyU3BhbkVycm9ySW5zdHJ1bWVudGF0aW9uKCk6IHZvaWQge1xuICBpZiAoZXJyb3JzSW5zdHJ1bWVudGVkKSB7XG4gICAgcmV0dXJuO1xuICB9XG5cbiAgLyoqXG4gICAqIElmIGFuIGVycm9yIG9yIHVuaGFuZGxlZCBwcm9taXNlIG9jY3Vycywgd2UgbWFyayB0aGUgYWN0aXZlIHJvb3Qgc3BhbiBhcyBmYWlsZWRcbiAgICovXG4gIGZ1bmN0aW9uIGVycm9yQ2FsbGJhY2soKTogdm9pZCB7XG4gICAgY29uc3QgYWN0aXZlU3BhbiA9IGdldEFjdGl2ZVNwYW4oKTtcbiAgICBjb25zdCByb290U3BhbiA9IGFjdGl2ZVNwYW4gJiYgZ2V0Um9vdFNwYW4oYWN0aXZlU3Bhbik7XG4gICAgaWYgKHJvb3RTcGFuKSB7XG4gICAgICBjb25zdCBtZXNzYWdlID0gJ2ludGVybmFsX2Vycm9yJztcbiAgICAgIERFQlVHX0JVSUxEICYmIGRlYnVnLmxvZyhgW1RyYWNpbmddIFJvb3Qgc3BhbjogJHttZXNzYWdlfSAtPiBHbG9iYWwgZXJyb3Igb2NjdXJyZWRgKTtcbiAgICAgIHJvb3RTcGFuLnNldFN0YXR1cyh7IGNvZGU6IFNQQU5fU1RBVFVTX0VSUk9SLCBtZXNzYWdlIH0pO1xuICAgIH1cbiAgfVxuXG4gIC8vIFRoZSBmdW5jdGlvbiBuYW1lIHdpbGwgYmUgbG9zdCB3aGVuIGJ1bmRsaW5nIGJ1dCB3ZSBuZWVkIHRvIGJlIGFibGUgdG8gaWRlbnRpZnkgdGhpcyBsaXN0ZW5lciBsYXRlciB0byBtYWludGFpbiB0aGVcbiAgLy8gbm9kZS5qcyBkZWZhdWx0IGV4aXQgYmVoYXZpb3VyXG4gIGVycm9yQ2FsbGJhY2sudGFnID0gJ3NlbnRyeV90cmFjaW5nRXJyb3JDYWxsYmFjayc7XG5cbiAgZXJyb3JzSW5zdHJ1bWVudGVkID0gdHJ1ZTtcbiAgYWRkR2xvYmFsRXJyb3JJbnN0cnVtZW50YXRpb25IYW5kbGVyKGVycm9yQ2FsbGJhY2spO1xuICBhZGRHbG9iYWxVbmhhbmRsZWRSZWplY3Rpb25JbnN0cnVtZW50YXRpb25IYW5kbGVyKGVycm9yQ2FsbGJhY2spO1xufVxuIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7Ozs7Ozs7QUFPQSxJQUFJLGtCQUFBLEdBQXFCLEtBQUs7O0FBTzlCO0FBQ0E7QUFDQTtBQUNPLFNBQVMsZ0NBQWdDLEdBQVM7QUFDekQsRUFBRSxJQUFJLGtCQUFrQixFQUFFO0FBQzFCLElBQUk7QUFDSixFQUFFOztBQUVGO0FBQ0E7QUFDQTtBQUNBLEVBQUUsU0FBUyxhQUFhLEdBQVM7QUFDakMsSUFBSSxNQUFNLFVBQUEsR0FBYSxhQUFhLEVBQUU7QUFDdEMsSUFBSSxNQUFNLFdBQVcsVUFBQSxJQUFjLFdBQVcsQ0FBQyxVQUFVLENBQUM7QUFDMUQsSUFBSSxJQUFJLFFBQVEsRUFBRTtBQUNsQixNQUFNLE1BQU0sT0FBQSxHQUFVLGdCQUFnQjtBQUN0QyxNQUFNLFdBQUEsSUFBZSxLQUFLLENBQUMsR0FBRyxDQUFDLENBQUMscUJBQXFCLEVBQUUsT0FBTyxDQUFDLHlCQUF5QixDQUFDLENBQUM7QUFDMUYsTUFBTSxRQUFRLENBQUMsU0FBUyxDQUFDLEVBQUUsSUFBSSxFQUFFLGlCQUFpQixFQUFFLE9BQUEsRUFBUyxDQUFDO0FBQzlELElBQUk7QUFDSixFQUFFOztBQUVGO0FBQ0E7QUFDQSxFQUFFLGFBQWEsQ0FBQyxHQUFBLEdBQU0sNkJBQTZCOztBQUVuRCxFQUFFLGtCQUFBLEdBQXFCLElBQUk7QUFDM0IsRUFBRSxvQ0FBb0MsQ0FBQyxhQUFhLENBQUM7QUFDckQsRUFBRSxpREFBaUQsQ0FBQyxhQUFhLENBQUM7QUFDbEU7Ozs7IiwieF9nb29nbGVfaWdub3JlTGlzdCI6WzBdfQ==

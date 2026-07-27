@@ -1,0 +1,14 @@
+export { addClsInstrumentationHandler, addInpInstrumentationHandler, addLcpInstrumentationHandler, addPerformanceInstrumentationHandler, addTtfbInstrumentationHandler } from "/node_modules/@sentry-internal/browser-utils/build/esm/metrics/instrument.js?v=d758aa40";
+export { addPerformanceEntries, startTrackingInteractions, startTrackingLongAnimationFrames, startTrackingLongTasks, startTrackingWebVitals } from "/node_modules/@sentry-internal/browser-utils/build/esm/metrics/browserMetrics.js?v=d758aa40";
+export { startTrackingElementTiming } from "/node_modules/@sentry-internal/browser-utils/build/esm/metrics/elementTiming.js?v=d758aa40";
+export { extractNetworkProtocol } from "/node_modules/@sentry-internal/browser-utils/build/esm/metrics/utils.js?v=d758aa40";
+export { addClickKeypressInstrumentationHandler } from "/node_modules/@sentry-internal/browser-utils/build/esm/instrument/dom.js?v=d758aa40";
+export { addHistoryInstrumentationHandler } from "/node_modules/@sentry-internal/browser-utils/build/esm/instrument/history.js?v=d758aa40";
+export { clearCachedImplementation, fetch, getNativeImplementation, setTimeout } from "/node_modules/@sentry-internal/browser-utils/build/esm/getNativeImplementation.js?v=d758aa40";
+export { SENTRY_XHR_DATA_KEY, addXhrInstrumentationHandler } from "/node_modules/@sentry-internal/browser-utils/build/esm/instrument/xhr.js?v=d758aa40";
+export { getBodyString, getFetchRequestArgBody, parseXhrResponseHeaders, serializeFormData } from "/node_modules/@sentry-internal/browser-utils/build/esm/networkUtils.js?v=d758aa40";
+export { resourceTimingToSpanAttributes } from "/node_modules/@sentry-internal/browser-utils/build/esm/metrics/resourceTiming.js?v=d758aa40";
+export { registerInpInteractionListener, startTrackingINP } from "/node_modules/@sentry-internal/browser-utils/build/esm/metrics/inp.js?v=d758aa40";
+                                 
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXguanMiLCJzb3VyY2VzIjpbXSwic291cmNlc0NvbnRlbnQiOltdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7OyJ9

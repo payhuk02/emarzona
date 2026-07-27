@@ -1,0 +1,23 @@
+import {
+  require_jsx_runtime
+} from "/node_modules/.vite/deps/chunk-2ZO6ZW3X.js?v=89021f86";
+import {
+  require_react
+} from "/node_modules/.vite/deps/chunk-7OHAGO6F.js?v=89021f86";
+import {
+  __toESM
+} from "/node_modules/.vite/deps/chunk-WIEG4DIP.js?v=89021f86";
+
+// node_modules/@radix-ui/react-direction/dist/index.mjs
+var React = __toESM(require_react(), 1);
+var import_jsx_runtime = __toESM(require_jsx_runtime(), 1);
+var DirectionContext = React.createContext(void 0);
+function useDirection(localDir) {
+  const globalDir = React.useContext(DirectionContext);
+  return localDir || globalDir || "ltr";
+}
+
+export {
+  useDirection
+};
+//# sourceMappingURL=chunk-ABWUKUUX.js.map

@@ -1,0 +1,255 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/ui/select-field.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/ui/select-field.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=2441233a"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+var _s = $RefreshSig$();
+/**
+ * Composant SelectField - Select avec gestion d'erreurs et validation intégrée
+ *
+ * Encapsule Select avec :
+ * - Gestion d'erreurs standardisée
+ * - Accessibilité complète (ARIA)
+ * - Feedback visuel pour les erreurs
+ * - Support des états loading et disabled
+ *
+ * @example
+ * ```tsx
+ * <SelectField
+ *   label="Catégorie"
+ *   value={value}
+ *   onValueChange={setValue}
+ *   error={errors.category}
+ *   required
+ * >
+ *   <SelectItem value="1">Option 1</SelectItem>
+ *   <SelectItem value="2">Option 2</SelectItem>
+ * </SelectField>
+ * ```
+ */ import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=2441233a"; const React = ((m) => m?.__esModule ? m : {	...typeof m === "object" && !Array.isArray(m) || typeof m === "function" ? m : {},	default: m})(__vite__cjsImport3_react);
+import { Select, SelectContent, SelectTrigger, SelectValue } from "/src/components/ui/select.tsx";
+import { Label } from "/src/components/ui/label.tsx";
+import { AlertCircle, Loader2 } from "/node_modules/.vite/deps/lucide-react.js?v=2441233a";
+import { cn } from "/src/lib/utils.ts";
+import { MobileSelect } from "/src/components/ui/mobile-select.tsx";
+export const SelectField = /*#__PURE__*/ _s(React.forwardRef(_c = _s(({ label, value, onValueChange, error, description, required = false, disabled = false, loading = false, placeholder = 'Sélectionner...', id, className, triggerClassName, contentVariant = 'sheet', useMobileSelectRoot = false, mobileHandleRef, children, 'aria-label': ariaLabel, ...props }, ref)=>{
+    _s();
+    const fieldId = React.useId();
+    const finalId = id || fieldId;
+    const errorId = `${finalId}-error`;
+    const descriptionId = `${finalId}-description`;
+    const hasError = !!error;
+    return /*#__PURE__*/ _jsxDEV("div", {
+        className: cn('space-y-2', className),
+        children: [
+            /*#__PURE__*/ _jsxDEV(Label, {
+                htmlFor: finalId,
+                className: "text-xs sm:text-sm",
+                children: [
+                    label,
+                    required && /*#__PURE__*/ _jsxDEV("span", {
+                        className: "text-destructive ml-1",
+                        children: "*"
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/select-field.tsx",
+                        lineNumber: 141,
+                        columnNumber: 24
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/select-field.tsx",
+                lineNumber: 139,
+                columnNumber: 9
+            }, this),
+            useMobileSelectRoot ? /*#__PURE__*/ _jsxDEV(MobileSelect, {
+                value: value,
+                onValueChange: onValueChange,
+                disabled: disabled || loading,
+                ref: mobileHandleRef,
+                children: [
+                    /*#__PURE__*/ _jsxDEV(SelectTrigger, {
+                        ref: ref,
+                        id: finalId,
+                        error: error,
+                        errorId: errorId,
+                        className: triggerClassName,
+                        "aria-label": ariaLabel || label,
+                        "aria-describedby": hasError ? errorId : description ? descriptionId : undefined,
+                        ...props,
+                        children: /*#__PURE__*/ _jsxDEV(SelectValue, {
+                            placeholder: placeholder
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/select-field.tsx",
+                            lineNumber: 162,
+                            columnNumber: 15
+                        }, this)
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/select-field.tsx",
+                        lineNumber: 152,
+                        columnNumber: 13
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV(SelectContent, {
+                        mobileVariant: contentVariant,
+                        children: loading ? /*#__PURE__*/ _jsxDEV("div", {
+                            className: "flex items-center justify-center py-4",
+                            children: /*#__PURE__*/ _jsxDEV(Loader2, {
+                                className: "h-4 w-4 animate-spin text-muted-foreground"
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/select-field.tsx",
+                                lineNumber: 167,
+                                columnNumber: 19
+                            }, this)
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/select-field.tsx",
+                            lineNumber: 166,
+                            columnNumber: 17
+                        }, this) : children
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/select-field.tsx",
+                        lineNumber: 164,
+                        columnNumber: 13
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/select-field.tsx",
+                lineNumber: 146,
+                columnNumber: 11
+            }, this) : /*#__PURE__*/ _jsxDEV(Select, {
+                value: value?.trim() ? value : undefined,
+                onValueChange: (next)=>{
+                    if (next?.trim()) onValueChange?.(next);
+                },
+                disabled: disabled || loading,
+                children: [
+                    /*#__PURE__*/ _jsxDEV(SelectTrigger, {
+                        ref: ref,
+                        id: finalId,
+                        error: error,
+                        errorId: errorId,
+                        className: triggerClassName,
+                        "aria-label": ariaLabel || label,
+                        "aria-describedby": hasError ? errorId : description ? descriptionId : undefined,
+                        ...props,
+                        children: /*#__PURE__*/ _jsxDEV(SelectValue, {
+                            placeholder: placeholder
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/select-field.tsx",
+                            lineNumber: 192,
+                            columnNumber: 15
+                        }, this)
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/select-field.tsx",
+                        lineNumber: 182,
+                        columnNumber: 13
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV(SelectContent, {
+                        mobileVariant: contentVariant,
+                        children: loading ? /*#__PURE__*/ _jsxDEV("div", {
+                            className: "flex items-center justify-center py-4",
+                            children: /*#__PURE__*/ _jsxDEV(Loader2, {
+                                className: "h-4 w-4 animate-spin text-muted-foreground"
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/select-field.tsx",
+                                lineNumber: 197,
+                                columnNumber: 19
+                            }, this)
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/select-field.tsx",
+                            lineNumber: 196,
+                            columnNumber: 17
+                        }, this) : children
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/select-field.tsx",
+                        lineNumber: 194,
+                        columnNumber: 13
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/select-field.tsx",
+                lineNumber: 175,
+                columnNumber: 11
+            }, this),
+            !hasError && description && /*#__PURE__*/ _jsxDEV("p", {
+                id: descriptionId,
+                className: "text-xs text-muted-foreground",
+                "aria-live": "polite",
+                children: description
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/select-field.tsx",
+                lineNumber: 208,
+                columnNumber: 11
+            }, this),
+            hasError && /*#__PURE__*/ _jsxDEV("div", {
+                id: errorId,
+                className: "flex items-start gap-2 text-xs text-destructive",
+                role: "alert",
+                "aria-live": "polite",
+                children: [
+                    /*#__PURE__*/ _jsxDEV(AlertCircle, {
+                        className: "h-3.5 w-3.5 shrink-0 mt-0.5",
+                        "aria-hidden": "true"
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/select-field.tsx",
+                        lineNumber: 221,
+                        columnNumber: 13
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV("span", {
+                        children: error
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/select-field.tsx",
+                        lineNumber: 222,
+                        columnNumber: 13
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/select-field.tsx",
+                lineNumber: 215,
+                columnNumber: 11
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/select-field.tsx",
+        lineNumber: 137,
+        columnNumber: 7
+    }, this);
+}, "5uI0dxuqh9kY8y3dcjkP7SKSP6M=")), "5uI0dxuqh9kY8y3dcjkP7SKSP6M=");
+_c1 = SelectField;
+SelectField.displayName = 'SelectField';
+var _c, _c1;
+$RefreshReg$(_c, "SelectField$React.forwardRef");
+$RefreshReg$(_c1, "SelectField");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/ui/select-field.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/ui/select-field.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInNlbGVjdC1maWVsZC50c3giXSwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBDb21wb3NhbnQgU2VsZWN0RmllbGQgLSBTZWxlY3QgYXZlYyBnZXN0aW9uIGQnZXJyZXVycyBldCB2YWxpZGF0aW9uIGludMOpZ3LDqWVcbiAqXG4gKiBFbmNhcHN1bGUgU2VsZWN0IGF2ZWMgOlxuICogLSBHZXN0aW9uIGQnZXJyZXVycyBzdGFuZGFyZGlzw6llXG4gKiAtIEFjY2Vzc2liaWxpdMOpIGNvbXBsw6h0ZSAoQVJJQSlcbiAqIC0gRmVlZGJhY2sgdmlzdWVsIHBvdXIgbGVzIGVycmV1cnNcbiAqIC0gU3VwcG9ydCBkZXMgw6l0YXRzIGxvYWRpbmcgZXQgZGlzYWJsZWRcbiAqXG4gKiBAZXhhbXBsZVxuICogYGBgdHN4XG4gKiA8U2VsZWN0RmllbGRcbiAqICAgbGFiZWw9XCJDYXTDqWdvcmllXCJcbiAqICAgdmFsdWU9e3ZhbHVlfVxuICogICBvblZhbHVlQ2hhbmdlPXtzZXRWYWx1ZX1cbiAqICAgZXJyb3I9e2Vycm9ycy5jYXRlZ29yeX1cbiAqICAgcmVxdWlyZWRcbiAqID5cbiAqICAgPFNlbGVjdEl0ZW0gdmFsdWU9XCIxXCI+T3B0aW9uIDE8L1NlbGVjdEl0ZW0+XG4gKiAgIDxTZWxlY3RJdGVtIHZhbHVlPVwiMlwiPk9wdGlvbiAyPC9TZWxlY3RJdGVtPlxuICogPC9TZWxlY3RGaWVsZD5cbiAqIGBgYFxuICovXG5cbmltcG9ydCAqIGFzIFJlYWN0IGZyb20gJ3JlYWN0JztcbmltcG9ydCB7IFNlbGVjdCwgU2VsZWN0Q29udGVudCwgU2VsZWN0SXRlbSwgU2VsZWN0VHJpZ2dlciwgU2VsZWN0VmFsdWUgfSBmcm9tICcuL3NlbGVjdCc7XG5pbXBvcnQgeyBMYWJlbCB9IGZyb20gJy4vbGFiZWwnO1xuaW1wb3J0IHsgQWxlcnRDaXJjbGUsIExvYWRlcjIgfSBmcm9tICdsdWNpZGUtcmVhY3QnO1xuaW1wb3J0IHsgY24gfSBmcm9tICdAL2xpYi91dGlscyc7XG5pbXBvcnQgeyBNb2JpbGVTZWxlY3QsIHR5cGUgTW9iaWxlU2VsZWN0SGFuZGxlIH0gZnJvbSAnLi9tb2JpbGUtc2VsZWN0JztcblxuZXhwb3J0IGludGVyZmFjZSBTZWxlY3RGaWVsZFByb3BzIHtcbiAgLyoqXG4gICAqIExhYmVsIGR1IGNoYW1wXG4gICAqL1xuICBsYWJlbDogc3RyaW5nO1xuICAvKipcbiAgICogVmFsZXVyIHPDqWxlY3Rpb25uw6llXG4gICAqL1xuICB2YWx1ZT86IHN0cmluZztcbiAgLyoqXG4gICAqIENhbGxiYWNrIHF1YW5kIGxhIHZhbGV1ciBjaGFuZ2VcbiAgICovXG4gIG9uVmFsdWVDaGFuZ2U/OiAodmFsdWU6IHN0cmluZykgPT4gdm9pZDtcbiAgLyoqXG4gICAqIE1lc3NhZ2UgZCdlcnJldXIgw6AgYWZmaWNoZXJcbiAgICovXG4gIGVycm9yPzogc3RyaW5nO1xuICAvKipcbiAgICogRGVzY3JpcHRpb24gb3UgaGludFxuICAgKi9cbiAgZGVzY3JpcHRpb24/OiBzdHJpbmc7XG4gIC8qKlxuICAgKiBDaGFtcCByZXF1aXNcbiAgICovXG4gIHJlcXVpcmVkPzogYm9vbGVhbjtcbiAgLyoqXG4gICAqIENoYW1wIGTDqXNhY3RpdsOpXG4gICAqL1xuICBkaXNhYmxlZD86IGJvb2xlYW47XG4gIC8qKlxuICAgKiDDiXRhdCBkZSBjaGFyZ2VtZW50XG4gICAqL1xuICBsb2FkaW5nPzogYm9vbGVhbjtcbiAgLyoqXG4gICAqIFBsYWNlaG9sZGVyXG4gICAqL1xuICBwbGFjZWhvbGRlcj86IHN0cmluZztcbiAgLyoqXG4gICAqIElEIGR1IGNoYW1wIChnw6luw6lyw6kgYXV0b21hdGlxdWVtZW50IHNpIG5vbiBmb3VybmkpXG4gICAqL1xuICBpZD86IHN0cmluZztcbiAgLyoqXG4gICAqIENsYXNzZXMgQ1NTIHN1cHBsw6ltZW50YWlyZXMgcG91ciBsZSBjb250ZW5ldXJcbiAgICovXG4gIGNsYXNzTmFtZT86IHN0cmluZztcbiAgLyoqXG4gICAqIENsYXNzZXMgQ1NTIHN1cHBsw6ltZW50YWlyZXMgcG91ciBsZSBTZWxlY3RUcmlnZ2VyXG4gICAqL1xuICB0cmlnZ2VyQ2xhc3NOYW1lPzogc3RyaW5nO1xuICAvKipcbiAgICogRW5mYW50cyAoU2VsZWN0SXRlbSlcbiAgICovXG4gIGNoaWxkcmVuOiBSZWFjdC5SZWFjdE5vZGU7XG4gIC8qKlxuICAgKiBWYXJpYW50ZSB2aXN1ZWxsZSBkdSBjb250ZW51IHN1ciBtb2JpbGUgKGRyb3Bkb3duIGNsYXNzaXF1ZSBvdSBib3R0b20gc2hlZXQpLlxuICAgKiBQYXIgZMOpZmF1dCBcInNoZWV0XCIgKGJvdHRvbSBzaGVldCBtb2JpbGUpLlxuICAgKi9cbiAgY29udGVudFZhcmlhbnQ/OiAnZGVmYXVsdCcgfCAnc2hlZXQnO1xuICAvKipcbiAgICogVXRpbGlzZXIgTW9iaWxlU2VsZWN0IGNvbW1lIFJvb3QgcG91ciBiw6luw6lmaWNpZXIgZGUgbCdBUEkgaW1ww6lyYXRpdmUgKG9wZW4vY2xvc2UvdG9nZ2xlKVxuICAgKiBldCBkJ3VuZSBnZXN0aW9uIG1vYmlsZSBlbmNvcmUgcGx1cyByb2J1c3RlLiBOZSBjaGFuZ2UgcGFzIGxlIHJlbmR1IHZpc3VlbC5cbiAgICovXG4gIHVzZU1vYmlsZVNlbGVjdFJvb3Q/OiBib29sZWFuO1xuICAvKipcbiAgICogUmVmIGltcMOpcmF0aXZlIG9wdGlvbm5lbGxlIHBvdXIgY29udHLDtGxlciBsJ291dmVydHVyZS9mZXJtZXR1cmUgdmlhIE1vYmlsZVNlbGVjdC5cbiAgICogTsOpY2Vzc2l0ZSB1c2VNb2JpbGVTZWxlY3RSb290ID0gdHJ1ZSBwb3VyIMOqdHJlIHV0aWxpc8OpZS5cbiAgICovXG4gIG1vYmlsZUhhbmRsZVJlZj86IFJlYWN0LlJlZjxNb2JpbGVTZWxlY3RIYW5kbGU+O1xuICAvKipcbiAgICogQXJpYS1sYWJlbCBwZXJzb25uYWxpc8OpXG4gICAqL1xuICAnYXJpYS1sYWJlbCc/OiBzdHJpbmc7XG59XG5cbmV4cG9ydCBjb25zdCBTZWxlY3RGaWVsZCA9IFJlYWN0LmZvcndhcmRSZWY8SFRNTEJ1dHRvbkVsZW1lbnQsIFNlbGVjdEZpZWxkUHJvcHM+KFxuICAoXG4gICAge1xuICAgICAgbGFiZWwsXG4gICAgICB2YWx1ZSxcbiAgICAgIG9uVmFsdWVDaGFuZ2UsXG4gICAgICBlcnJvcixcbiAgICAgIGRlc2NyaXB0aW9uLFxuICAgICAgcmVxdWlyZWQgPSBmYWxzZSxcbiAgICAgIGRpc2FibGVkID0gZmFsc2UsXG4gICAgICBsb2FkaW5nID0gZmFsc2UsXG4gICAgICBwbGFjZWhvbGRlciA9ICdTw6lsZWN0aW9ubmVyLi4uJyxcbiAgICAgIGlkLFxuICAgICAgY2xhc3NOYW1lLFxuICAgICAgdHJpZ2dlckNsYXNzTmFtZSxcbiAgICAgIGNvbnRlbnRWYXJpYW50ID0gJ3NoZWV0JyxcbiAgICAgIHVzZU1vYmlsZVNlbGVjdFJvb3QgPSBmYWxzZSxcbiAgICAgIG1vYmlsZUhhbmRsZVJlZixcbiAgICAgIGNoaWxkcmVuLFxuICAgICAgJ2FyaWEtbGFiZWwnOiBhcmlhTGFiZWwsXG4gICAgICAuLi5wcm9wc1xuICAgIH0sXG4gICAgcmVmXG4gICkgPT4ge1xuICAgIGNvbnN0IGZpZWxkSWQgPSBSZWFjdC51c2VJZCgpO1xuICAgIGNvbnN0IGZpbmFsSWQgPSBpZCB8fCBmaWVsZElkO1xuICAgIGNvbnN0IGVycm9ySWQgPSBgJHtmaW5hbElkfS1lcnJvcmA7XG4gICAgY29uc3QgZGVzY3JpcHRpb25JZCA9IGAke2ZpbmFsSWR9LWRlc2NyaXB0aW9uYDtcbiAgICBjb25zdCBoYXNFcnJvciA9ICEhZXJyb3I7XG5cbiAgICByZXR1cm4gKFxuICAgICAgPGRpdiBjbGFzc05hbWU9e2NuKCdzcGFjZS15LTInLCBjbGFzc05hbWUpfT5cbiAgICAgICAgey8qIExhYmVsICovfVxuICAgICAgICA8TGFiZWwgaHRtbEZvcj17ZmluYWxJZH0gY2xhc3NOYW1lPVwidGV4dC14cyBzbTp0ZXh0LXNtXCI+XG4gICAgICAgICAge2xhYmVsfVxuICAgICAgICAgIHtyZXF1aXJlZCAmJiA8c3BhbiBjbGFzc05hbWU9XCJ0ZXh0LWRlc3RydWN0aXZlIG1sLTFcIj4qPC9zcGFuPn1cbiAgICAgICAgPC9MYWJlbD5cblxuICAgICAgICB7LyogU2VsZWN0IFJvb3QgKHN0YW5kYXJkIG91IE1vYmlsZVNlbGVjdCkgKi99XG4gICAgICAgIHt1c2VNb2JpbGVTZWxlY3RSb290ID8gKFxuICAgICAgICAgIDxNb2JpbGVTZWxlY3RcbiAgICAgICAgICAgIHZhbHVlPXt2YWx1ZX1cbiAgICAgICAgICAgIG9uVmFsdWVDaGFuZ2U9e29uVmFsdWVDaGFuZ2V9XG4gICAgICAgICAgICBkaXNhYmxlZD17ZGlzYWJsZWQgfHwgbG9hZGluZ31cbiAgICAgICAgICAgIHJlZj17bW9iaWxlSGFuZGxlUmVmfVxuICAgICAgICAgID5cbiAgICAgICAgICAgIDxTZWxlY3RUcmlnZ2VyXG4gICAgICAgICAgICAgIHJlZj17cmVmfVxuICAgICAgICAgICAgICBpZD17ZmluYWxJZH1cbiAgICAgICAgICAgICAgZXJyb3I9e2Vycm9yfVxuICAgICAgICAgICAgICBlcnJvcklkPXtlcnJvcklkfVxuICAgICAgICAgICAgICBjbGFzc05hbWU9e3RyaWdnZXJDbGFzc05hbWV9XG4gICAgICAgICAgICAgIGFyaWEtbGFiZWw9e2FyaWFMYWJlbCB8fCBsYWJlbH1cbiAgICAgICAgICAgICAgYXJpYS1kZXNjcmliZWRieT17aGFzRXJyb3IgPyBlcnJvcklkIDogZGVzY3JpcHRpb24gPyBkZXNjcmlwdGlvbklkIDogdW5kZWZpbmVkfVxuICAgICAgICAgICAgICB7Li4ucHJvcHN9XG4gICAgICAgICAgICA+XG4gICAgICAgICAgICAgIDxTZWxlY3RWYWx1ZSBwbGFjZWhvbGRlcj17cGxhY2Vob2xkZXJ9IC8+XG4gICAgICAgICAgICA8L1NlbGVjdFRyaWdnZXI+XG4gICAgICAgICAgICA8U2VsZWN0Q29udGVudCBtb2JpbGVWYXJpYW50PXtjb250ZW50VmFyaWFudH0+XG4gICAgICAgICAgICAgIHtsb2FkaW5nID8gKFxuICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIganVzdGlmeS1jZW50ZXIgcHktNFwiPlxuICAgICAgICAgICAgICAgICAgPExvYWRlcjIgY2xhc3NOYW1lPVwiaC00IHctNCBhbmltYXRlLXNwaW4gdGV4dC1tdXRlZC1mb3JlZ3JvdW5kXCIgLz5cbiAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgKSA6IChcbiAgICAgICAgICAgICAgICBjaGlsZHJlblxuICAgICAgICAgICAgICApfVxuICAgICAgICAgICAgPC9TZWxlY3RDb250ZW50PlxuICAgICAgICAgIDwvTW9iaWxlU2VsZWN0PlxuICAgICAgICApIDogKFxuICAgICAgICAgIDxTZWxlY3RcbiAgICAgICAgICAgIHZhbHVlPXt2YWx1ZT8udHJpbSgpID8gdmFsdWUgOiB1bmRlZmluZWR9XG4gICAgICAgICAgICBvblZhbHVlQ2hhbmdlPXtuZXh0ID0+IHtcbiAgICAgICAgICAgICAgaWYgKG5leHQ/LnRyaW0oKSkgb25WYWx1ZUNoYW5nZT8uKG5leHQpO1xuICAgICAgICAgICAgfX1cbiAgICAgICAgICAgIGRpc2FibGVkPXtkaXNhYmxlZCB8fCBsb2FkaW5nfVxuICAgICAgICAgID5cbiAgICAgICAgICAgIDxTZWxlY3RUcmlnZ2VyXG4gICAgICAgICAgICAgIHJlZj17cmVmfVxuICAgICAgICAgICAgICBpZD17ZmluYWxJZH1cbiAgICAgICAgICAgICAgZXJyb3I9e2Vycm9yfVxuICAgICAgICAgICAgICBlcnJvcklkPXtlcnJvcklkfVxuICAgICAgICAgICAgICBjbGFzc05hbWU9e3RyaWdnZXJDbGFzc05hbWV9XG4gICAgICAgICAgICAgIGFyaWEtbGFiZWw9e2FyaWFMYWJlbCB8fCBsYWJlbH1cbiAgICAgICAgICAgICAgYXJpYS1kZXNjcmliZWRieT17aGFzRXJyb3IgPyBlcnJvcklkIDogZGVzY3JpcHRpb24gPyBkZXNjcmlwdGlvbklkIDogdW5kZWZpbmVkfVxuICAgICAgICAgICAgICB7Li4ucHJvcHN9XG4gICAgICAgICAgICA+XG4gICAgICAgICAgICAgIDxTZWxlY3RWYWx1ZSBwbGFjZWhvbGRlcj17cGxhY2Vob2xkZXJ9IC8+XG4gICAgICAgICAgICA8L1NlbGVjdFRyaWdnZXI+XG4gICAgICAgICAgICA8U2VsZWN0Q29udGVudCBtb2JpbGVWYXJpYW50PXtjb250ZW50VmFyaWFudH0+XG4gICAgICAgICAgICAgIHtsb2FkaW5nID8gKFxuICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIganVzdGlmeS1jZW50ZXIgcHktNFwiPlxuICAgICAgICAgICAgICAgICAgPExvYWRlcjIgY2xhc3NOYW1lPVwiaC00IHctNCBhbmltYXRlLXNwaW4gdGV4dC1tdXRlZC1mb3JlZ3JvdW5kXCIgLz5cbiAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgKSA6IChcbiAgICAgICAgICAgICAgICBjaGlsZHJlblxuICAgICAgICAgICAgICApfVxuICAgICAgICAgICAgPC9TZWxlY3RDb250ZW50PlxuICAgICAgICAgIDwvU2VsZWN0PlxuICAgICAgICApfVxuXG4gICAgICAgIHsvKiBEZXNjcmlwdGlvbiAqL31cbiAgICAgICAgeyFoYXNFcnJvciAmJiBkZXNjcmlwdGlvbiAmJiAoXG4gICAgICAgICAgPHAgaWQ9e2Rlc2NyaXB0aW9uSWR9IGNsYXNzTmFtZT1cInRleHQteHMgdGV4dC1tdXRlZC1mb3JlZ3JvdW5kXCIgYXJpYS1saXZlPVwicG9saXRlXCI+XG4gICAgICAgICAgICB7ZGVzY3JpcHRpb259XG4gICAgICAgICAgPC9wPlxuICAgICAgICApfVxuXG4gICAgICAgIHsvKiBNZXNzYWdlIGQnZXJyZXVyICovfVxuICAgICAgICB7aGFzRXJyb3IgJiYgKFxuICAgICAgICAgIDxkaXZcbiAgICAgICAgICAgIGlkPXtlcnJvcklkfVxuICAgICAgICAgICAgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1zdGFydCBnYXAtMiB0ZXh0LXhzIHRleHQtZGVzdHJ1Y3RpdmVcIlxuICAgICAgICAgICAgcm9sZT1cImFsZXJ0XCJcbiAgICAgICAgICAgIGFyaWEtbGl2ZT1cInBvbGl0ZVwiXG4gICAgICAgICAgPlxuICAgICAgICAgICAgPEFsZXJ0Q2lyY2xlIGNsYXNzTmFtZT1cImgtMy41IHctMy41IHNocmluay0wIG10LTAuNVwiIGFyaWEtaGlkZGVuPVwidHJ1ZVwiIC8+XG4gICAgICAgICAgICA8c3Bhbj57ZXJyb3J9PC9zcGFuPlxuICAgICAgICAgIDwvZGl2PlxuICAgICAgICApfVxuICAgICAgPC9kaXY+XG4gICAgKTtcbiAgfVxuKTtcblxuU2VsZWN0RmllbGQuZGlzcGxheU5hbWUgPSAnU2VsZWN0RmllbGQnO1xuIl0sIm5hbWVzIjpbIlJlYWN0IiwiU2VsZWN0IiwiU2VsZWN0Q29udGVudCIsIlNlbGVjdFRyaWdnZXIiLCJTZWxlY3RWYWx1ZSIsIkxhYmVsIiwiQWxlcnRDaXJjbGUiLCJMb2FkZXIyIiwiY24iLCJNb2JpbGVTZWxlY3QiLCJTZWxlY3RGaWVsZCIsImZvcndhcmRSZWYiLCJsYWJlbCIsInZhbHVlIiwib25WYWx1ZUNoYW5nZSIsImVycm9yIiwiZGVzY3JpcHRpb24iLCJyZXF1aXJlZCIsImRpc2FibGVkIiwibG9hZGluZyIsInBsYWNlaG9sZGVyIiwiaWQiLCJjbGFzc05hbWUiLCJ0cmlnZ2VyQ2xhc3NOYW1lIiwiY29udGVudFZhcmlhbnQiLCJ1c2VNb2JpbGVTZWxlY3RSb290IiwibW9iaWxlSGFuZGxlUmVmIiwiY2hpbGRyZW4iLCJhcmlhTGFiZWwiLCJwcm9wcyIsInJlZiIsImZpZWxkSWQiLCJ1c2VJZCIsImZpbmFsSWQiLCJlcnJvcklkIiwiZGVzY3JpcHRpb25JZCIsImhhc0Vycm9yIiwiZGl2IiwiaHRtbEZvciIsInNwYW4iLCJhcmlhLWxhYmVsIiwiYXJpYS1kZXNjcmliZWRieSIsInVuZGVmaW5lZCIsIm1vYmlsZVZhcmlhbnQiLCJ0cmltIiwibmV4dCIsInAiLCJhcmlhLWxpdmUiLCJyb2xlIiwiYXJpYS1oaWRk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

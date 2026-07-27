@@ -1,0 +1,314 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/seo/SEOOverview.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/seo/SEOOverview.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=2441233a"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"]; const _Fragment = __vite__cjsImport2_react_jsxDevRuntime["Fragment"];
+var _s = $RefreshSig$();
+import { Card, CardContent } from "/src/components/ui/card.tsx";
+import { Progress } from "/src/components/ui/progress.tsx";
+import { Skeleton } from "/src/components/ui/skeleton.tsx";
+import { CheckCircle2, AlertTriangle, TrendingUp } from "/src/components/icons/index.ts";
+import { useAverageSEOScore } from "/src/hooks/useSEOAnalysis.ts";
+import { useScrollAnimation } from "/src/hooks/useScrollAnimation.ts";
+export const SEOOverview = ({ data, isLoading })=>{
+    _s();
+    const statsRef = useScrollAnimation();
+    const averageScore = useAverageSEOScore(data);
+    // On calcule simplement le nombre de points à améliorer ici :
+    const improvements = data?.filter((p)=>p.score < 80) || [];
+    const optimizedCount = data?.filter((p)=>p.score > 80).length || 0;
+    return /*#__PURE__*/ _jsxDEV("div", {
+        ref: statsRef,
+        className: "grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-3 animate-in fade-in slide-in-from-bottom-4 duration-700",
+        children: [
+            /*#__PURE__*/ _jsxDEV(Card, {
+                className: "border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02]",
+                children: /*#__PURE__*/ _jsxDEV(CardContent, {
+                    className: "p-3 sm:p-4",
+                    children: /*#__PURE__*/ _jsxDEV("div", {
+                        className: "flex items-center justify-between",
+                        children: /*#__PURE__*/ _jsxDEV("div", {
+                            className: "flex-1",
+                            children: [
+                                /*#__PURE__*/ _jsxDEV("div", {
+                                    className: "flex items-center gap-2 mb-2",
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV("div", {
+                                            className: "p-1.5 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5",
+                                            children: /*#__PURE__*/ _jsxDEV(TrendingUp, {
+                                                className: "h-4 w-4 sm:h-5 sm:w-5 text-purple-500"
+                                            }, void 0, false, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOOverview.tsx",
+                                                lineNumber: 33,
+                                                columnNumber: 19
+                                            }, this)
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOOverview.tsx",
+                                            lineNumber: 32,
+                                            columnNumber: 17
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV("p", {
+                                            className: "text-xs sm:text-sm text-muted-foreground font-medium",
+                                            children: "Score SEO moyen"
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOOverview.tsx",
+                                            lineNumber: 35,
+                                            columnNumber: 17
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOOverview.tsx",
+                                    lineNumber: 31,
+                                    columnNumber: 15
+                                }, this),
+                                isLoading ? /*#__PURE__*/ _jsxDEV(Skeleton, {
+                                    className: "h-6 sm:h-8 w-20 mb-2"
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOOverview.tsx",
+                                    lineNumber: 38,
+                                    columnNumber: 17
+                                }, this) : /*#__PURE__*/ _jsxDEV(_Fragment, {
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV("p", {
+                                            className: "text-xl sm:text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2",
+                                            children: [
+                                                averageScore,
+                                                "%"
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOOverview.tsx",
+                                            lineNumber: 41,
+                                            columnNumber: 19
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV(Progress, {
+                                            value: averageScore,
+                                            className: "h-2"
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOOverview.tsx",
+                                            lineNumber: 44,
+                                            columnNumber: 19
+                                        }, this)
+                                    ]
+                                }, void 0, true)
+                            ]
+                        }, void 0, true, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOOverview.tsx",
+                            lineNumber: 30,
+                            columnNumber: 13
+                        }, this)
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOOverview.tsx",
+                        lineNumber: 29,
+                        columnNumber: 11
+                    }, this)
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOOverview.tsx",
+                    lineNumber: 28,
+                    columnNumber: 9
+                }, this)
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOOverview.tsx",
+                lineNumber: 27,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV(Card, {
+                className: "border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02]",
+                children: /*#__PURE__*/ _jsxDEV(CardContent, {
+                    className: "p-3 sm:p-4",
+                    children: /*#__PURE__*/ _jsxDEV("div", {
+                        className: "flex items-center justify-between",
+                        children: /*#__PURE__*/ _jsxDEV("div", {
+                            className: "flex-1",
+                            children: [
+                                /*#__PURE__*/ _jsxDEV("div", {
+                                    className: "flex items-center gap-2 mb-2",
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV("div", {
+                                            className: "p-1.5 rounded-lg bg-gradient-to-br from-yellow-500/10 to-orange-500/5",
+                                            children: /*#__PURE__*/ _jsxDEV(AlertTriangle, {
+                                                className: "h-4 w-4 sm:h-5 sm:w-5 text-yellow-500"
+                                            }, void 0, false, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOOverview.tsx",
+                                                lineNumber: 59,
+                                                columnNumber: 19
+                                            }, this)
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOOverview.tsx",
+                                            lineNumber: 58,
+                                            columnNumber: 17
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV("p", {
+                                            className: "text-xs sm:text-sm text-muted-foreground font-medium",
+                                            children: "Points à améliorer"
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOOverview.tsx",
+                                            lineNumber: 61,
+                                            columnNumber: 17
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOOverview.tsx",
+                                    lineNumber: 57,
+                                    columnNumber: 15
+                                }, this),
+                                isLoading ? /*#__PURE__*/ _jsxDEV(Skeleton, {
+                                    className: "h-6 sm:h-8 w-16"
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOOverview.tsx",
+                                    lineNumber: 64,
+                                    columnNumber: 17
+                                }, this) : /*#__PURE__*/ _jsxDEV("p", {
+                                    className: "text-xl sm:text-2xl font-bold bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent",
+                                    children: improvements.length
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOOverview.tsx",
+                                    lineNumber: 66,
+                                    columnNumber: 17
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOOverview.tsx",
+                            lineNumber: 56,
+                            columnNumber: 13
+                        }, this)
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOOverview.tsx",
+                        lineNumber: 55,
+                        columnNumber: 11
+                    }, this)
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOOverview.tsx",
+                    lineNumber: 54,
+                    columnNumber: 9
+                }, this)
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOOverview.tsx",
+                lineNumber: 53,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV(Card, {
+                className: "border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02]",
+                children: /*#__PURE__*/ _jsxDEV(CardContent, {
+                    className: "p-3 sm:p-4",
+                    children: /*#__PURE__*/ _jsxDEV("div", {
+                        className: "flex items-center justify-between",
+                        children: /*#__PURE__*/ _jsxDEV("div", {
+                            className: "flex-1",
+                            children: [
+                                /*#__PURE__*/ _jsxDEV("div", {
+                                    className: "flex items-center gap-2 mb-2",
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV("div", {
+                                            className: "p-1.5 rounded-lg bg-gradient-to-br from-green-500/10 to-emerald-500/5",
+                                            children: /*#__PURE__*/ _jsxDEV(CheckCircle2, {
+                                                className: "h-4 w-4 sm:h-5 sm:w-5 text-green-500"
+                                            }, void 0, false, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOOverview.tsx",
+                                                lineNumber: 82,
+                                                columnNumber: 19
+                                            }, this)
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOOverview.tsx",
+                                            lineNumber: 81,
+                                            columnNumber: 17
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV("p", {
+                                            className: "text-xs sm:text-sm text-muted-foreground font-medium",
+                                            children: "Pages optimisées"
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOOverview.tsx",
+                                            lineNumber: 84,
+                                            columnNumber: 17
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOOverview.tsx",
+                                    lineNumber: 80,
+                                    columnNumber: 15
+                                }, this),
+                                isLoading ? /*#__PURE__*/ _jsxDEV(Skeleton, {
+                                    className: "h-6 sm:h-8 w-16"
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOOverview.tsx",
+                                    lineNumber: 87,
+                                    columnNumber: 17
+                                }, this) : /*#__PURE__*/ _jsxDEV("p", {
+                                    className: "text-xl sm:text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent",
+                                    children: optimizedCount
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOOverview.tsx",
+                                    lineNumber: 89,
+                                    columnNumber: 17
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOOverview.tsx",
+                            lineNumber: 79,
+                            columnNumber: 13
+                        }, this)
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOOverview.tsx",
+                        lineNumber: 78,
+                        columnNumber: 11
+                    }, this)
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOOverview.tsx",
+                    lineNumber: 77,
+                    columnNumber: 9
+                }, this)
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOOverview.tsx",
+                lineNumber: 76,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOOverview.tsx",
+        lineNumber: 22,
+        columnNumber: 5
+    }, this);
+};
+_s(SEOOverview, "xJo2Xsa+ADS7S8GFdMIxB6EtLBc=", false, function() {
+    return [
+        useScrollAnimation,
+        useAverageSEOScore
+    ];
+});
+_c = SEOOverview;
+var _c;
+$RefreshReg$(_c, "SEOOverview");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/seo/SEOOverview.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/seo/SEOOverview.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIlNFT092ZXJ2aWV3LnRzeCJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgeyBDYXJkLCBDYXJkQ29udGVudCwgQ2FyZEhlYWRlciwgQ2FyZFRpdGxlIH0gZnJvbSBcIkAvY29tcG9uZW50cy91aS9jYXJkXCI7XG5pbXBvcnQgeyBQcm9ncmVzcyB9IGZyb20gXCJAL2NvbXBvbmVudHMvdWkvcHJvZ3Jlc3NcIjtcbmltcG9ydCB7IFNrZWxldG9uIH0gZnJvbSBcIkAvY29tcG9uZW50cy91aS9za2VsZXRvblwiO1xuaW1wb3J0IHsgQ2hlY2tDaXJjbGUyLCBBbGVydFRyaWFuZ2xlLCBUcmVuZGluZ1VwIH0gZnJvbSAnQC9jb21wb25lbnRzL2ljb25zJztcbmltcG9ydCB7IHVzZUF2ZXJhZ2VTRU9TY29yZSB9IGZyb20gXCJAL2hvb2tzL3VzZVNFT0FuYWx5c2lzXCI7XG5pbXBvcnQgeyB1c2VTY3JvbGxBbmltYXRpb24gfSBmcm9tIFwiQC9ob29rcy91c2VTY3JvbGxBbmltYXRpb25cIjtcblxuaW50ZXJmYWNlIFNFT092ZXJ2aWV3UHJvcHMge1xuICBkYXRhOiBhbnk7XG4gIGlzTG9hZGluZzogYm9vbGVhbjtcbn1cblxuZXhwb3J0IGNvbnN0IFNFT092ZXJ2aWV3ID0gKHsgZGF0YSwgaXNMb2FkaW5nIH06IFNFT092ZXJ2aWV3UHJvcHMpID0+IHtcbiAgY29uc3Qgc3RhdHNSZWYgPSB1c2VTY3JvbGxBbmltYXRpb248SFRNTERpdkVsZW1lbnQ+KCk7XG4gIGNvbnN0IGF2ZXJhZ2VTY29yZSA9IHVzZUF2ZXJhZ2VTRU9TY29yZShkYXRhKTtcblxuICAvLyBPbiBjYWxjdWxlIHNpbXBsZW1lbnQgbGUgbm9tYnJlIGRlIHBvaW50cyDDoCBhbcOpbGlvcmVyIGljaSA6XG4gIGNvbnN0IGltcHJvdmVtZW50cyA9IGRhdGE/LmZpbHRlcigocDogYW55KSA9PiBwLnNjb3JlIDwgODApIHx8IFtdO1xuICBjb25zdCBvcHRpbWl6ZWRDb3VudCA9IGRhdGE/LmZpbHRlcigocDogYW55KSA9PiBwLnNjb3JlID4gODApLmxlbmd0aCB8fCAwO1xuXG4gIHJldHVybiAoXG4gICAgPGRpdlxuICAgICAgcmVmPXtzdGF0c1JlZn1cbiAgICAgIGNsYXNzTmFtZT1cImdyaWQgZ2FwLTMgc206Z2FwLTQgZ3JpZC1jb2xzLTEgc206Z3JpZC1jb2xzLTMgYW5pbWF0ZS1pbiBmYWRlLWluIHNsaWRlLWluLWZyb20tYm90dG9tLTQgZHVyYXRpb24tNzAwXCJcbiAgICA+XG4gICAgICB7LyogU2NvcmUgbW95ZW4gKi99XG4gICAgICA8Q2FyZCBjbGFzc05hbWU9XCJib3JkZXItYm9yZGVyLzUwIGJnLWNhcmQvNTAgYmFja2Ryb3AtYmx1ci1zbSBob3ZlcjpzaGFkb3ctbGcgdHJhbnNpdGlvbi1hbGwgZHVyYXRpb24tMzAwIGhvdmVyOnNjYWxlLVsxLjAyXVwiPlxuICAgICAgICA8Q2FyZENvbnRlbnQgY2xhc3NOYW1lPVwicC0zIHNtOnAtNFwiPlxuICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIganVzdGlmeS1iZXR3ZWVuXCI+XG4gICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXgtMVwiPlxuICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGdhcC0yIG1iLTJcIj5cbiAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInAtMS41IHJvdW5kZWQtbGcgYmctZ3JhZGllbnQtdG8tYnIgZnJvbS1wdXJwbGUtNTAwLzEwIHRvLXBpbmstNTAwLzVcIj5cbiAgICAgICAgICAgICAgICAgIDxUcmVuZGluZ1VwIGNsYXNzTmFtZT1cImgtNCB3LTQgc206aC01IHNtOnctNSB0ZXh0LXB1cnBsZS01MDBcIiAvPlxuICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgIDxwIGNsYXNzTmFtZT1cInRleHQteHMgc206dGV4dC1zbSB0ZXh0LW11dGVkLWZvcmVncm91bmQgZm9udC1tZWRpdW1cIj5TY29yZSBTRU8gbW95ZW48L3A+XG4gICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgIHtpc0xvYWRpbmcgPyAoXG4gICAgICAgICAgICAgICAgPFNrZWxldG9uIGNsYXNzTmFtZT1cImgtNiBzbTpoLTggdy0yMCBtYi0yXCIgLz5cbiAgICAgICAgICApIDogKFxuICAgICAgICAgICAgPD5cbiAgICAgICAgICAgICAgICAgIDxwIGNsYXNzTmFtZT1cInRleHQteGwgc206dGV4dC0yeGwgZm9udC1ib2xkIGJnLWdyYWRpZW50LXRvLXIgZnJvbS1wdXJwbGUtNjAwIHRvLXBpbmstNjAwIGJnLWNsaXAtdGV4dCB0ZXh0LXRyYW5zcGFyZW50IG1iLTJcIj5cbiAgICAgICAgICAgICAgICAgICAge2F2ZXJhZ2VTY29yZX0lXG4gICAgICAgICAgICAgICAgICA8L3A+XG4gICAgICAgICAgICAgICAgICA8UHJvZ3Jlc3MgdmFsdWU9e2F2ZXJhZ2VTY29yZX0gY2xhc3NOYW1lPVwiaC0yXCIgLz5cbiAgICAgICAgICAgIDwvPlxuICAgICAgICAgICl9XG4gICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgPC9DYXJkQ29udGVudD5cbiAgICAgIDwvQ2FyZD5cblxuICAgICAgey8qIEFtw6lsaW9yYXRpb25zIHRyb3V2w6llcyAqL31cbiAgICAgIDxDYXJkIGNsYXNzTmFtZT1cImJvcmRlci1ib3JkZXIvNTAgYmctY2FyZC81MCBiYWNrZHJvcC1ibHVyLXNtIGhvdmVyOnNoYWRvdy1sZyB0cmFuc2l0aW9uLWFsbCBkdXJhdGlvbi0zMDAgaG92ZXI6c2NhbGUtWzEuMDJdXCI+XG4gICAgICAgIDxDYXJkQ29udGVudCBjbGFzc05hbWU9XCJwLTMgc206cC00XCI+XG4gICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLWNlbnRlciBqdXN0aWZ5LWJldHdlZW5cIj5cbiAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleC0xXCI+XG4gICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTIgbWItMlwiPlxuICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwicC0xLjUgcm91bmRlZC1sZyBiZy1ncmFkaWVudC10by1iciBmcm9tLXllbGxvdy01MDAvMTAgdG8tb3JhbmdlLTUwMC81XCI+XG4gICAgICAgICAgICAgICAgICA8QWxlcnRUcmlhbmdsZSBjbGFzc05hbWU9XCJoLTQgdy00IHNtOmgtNSBzbTp3LTUgdGV4dC15ZWxsb3ctNTAwXCIgLz5cbiAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJ0ZXh0LXhzIHNtOnRleHQtc20gdGV4dC1tdXRlZC1mb3JlZ3JvdW5kIGZvbnQtbWVkaXVtXCI+UG9pbnRzIMOgIGFtw6lsaW9yZXI8L3A+XG4gICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgIHtpc0xvYWRpbmcgPyAoXG4gICAgICAgICAgICAgICAgPFNrZWxldG9uIGNsYXNzTmFtZT1cImgtNiBzbTpoLTggdy0xNlwiIC8+XG4gICAgICAgICAgKSA6IChcbiAgICAgICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJ0ZXh0LXhsIHNtOnRleHQtMnhsIGZvbnQtYm9sZCBiZy1ncmFkaWVudC10by1yIGZyb20teWVsbG93LTYwMCB0by1vcmFuZ2UtNjAwIGJnLWNsaXAtdGV4dCB0ZXh0LXRyYW5zcGFyZW50XCI+XG4gICAgICAgICAgICAgICAgICB7aW1wcm92ZW1lbnRzLmxlbmd0aH1cbiAgICAgICAgICAgICAgICA8L3A+XG4gICAgICAgICAgKX1cbiAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgIDwvZGl2PlxuICAgICAgICA8L0NhcmRDb250ZW50PlxuICAgICAgPC9DYXJkPlxuXG4gICAgICB7LyogUGFnZXMgYmllbiBvcHRpbWlzw6llcyAqL31cbiAgICAgIDxDYXJkIGNsYXNzTmFtZT1cImJvcmRlci1ib3JkZXIvNTAgYmctY2FyZC81MCBiYWNrZHJvcC1ibHVyLXNtIGhvdmVyOnNoYWRvdy1sZyB0cmFuc2l0aW9uLWFsbCBkdXJhdGlvbi0zMDAgaG92ZXI6c2NhbGUtWzEuMDJdXCI+XG4gICAgICAgIDxDYXJkQ29udGVudCBjbGFzc05hbWU9XCJwLTMgc206cC00XCI+XG4gICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLWNlbnRlciBqdXN0aWZ5LWJldHdlZW5cIj5cbiAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleC0xXCI+XG4gICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTIgbWItMlwiPlxuICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwicC0xLjUgcm91bmRlZC1sZyBiZy1ncmFkaWVudC10by1iciBmcm9tLWdyZWVuLTUwMC8xMCB0by1lbWVyYWxkLTUwMC81XCI+XG4gICAgICAgICAgICAgICAgICA8Q2hlY2tDaXJjbGUyIGNsYXNzTmFtZT1cImgtNCB3LTQgc206aC01IHNtOnctNSB0ZXh0LWdyZWVuLTUwMFwiIC8+XG4gICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwidGV4dC14cyBzbTp0ZXh0LXNtIHRleHQtbXV0ZWQtZm9yZWdyb3VuZCBmb250LW1lZGl1bVwiPlBhZ2VzIG9wdGltaXPDqWVzPC9wPlxuICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICB7aXNMb2FkaW5nID8gKFxuICAgICAgICAgICAgICAgIDxTa2VsZXRvbiBjbGFzc05hbWU9XCJoLTYgc206aC04IHctMTZcIiAvPlxuICAgICAgICAgICkgOiAoXG4gICAgICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwidGV4dC14bCBzbTp0ZXh0LTJ4bCBmb250LWJvbGQgYmctZ3JhZGllbnQtdG8tciBmcm9tLWdyZWVuLTYwMCB0by1lbWVyYWxkLTYwMCBiZy1jbGlwLXRleHQgdGV4dC10cmFuc3BhcmVudFwiPlxuICAgICAgICAgICAgICAgICAge29wdGltaXplZENvdW50fVxuICAgICAgICAgICAgPC9wPlxuICAgICAgICAgICl9XG4gICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgPC9DYXJkQ29udGVudD5cbiAgICAgIDwvQ2FyZD5cbiAgICA8L2Rpdj5cbiAgKTtcbn07XG5cblxuXG5cblxuXG4iXSwibmFtZXMiOlsiQ2FyZCIsIkNhcmRDb250ZW50IiwiUHJvZ3Jlc3MiLCJTa2VsZXRvbiIsIkNoZWNrQ2lyY2xlMiIsIkFsZXJ0VHJpYW5nbGUiLCJUcmVuZGluZ1VwIiwidXNlQXZlcmFnZVNFT1Njb3JlIiwidXNlU2Nyb2xsQW5pbWF0aW9uIiwiU0VPT3ZlcnZpZXciLCJkYXRhIiwiaXNMb2FkaW5nIiwic3RhdHNSZWYiLCJhdmVyYWdlU2NvcmUiLCJpbXByb3ZlbWVudHMiLCJmaWx0ZXIiLCJwIiwic2NvcmUiLCJvcHRpbWl6ZWRDb3VudCIsImxlbmd0aCIsImRpdiIsInJlZiIsImNsYXNzTmFtZSIsInZhbHVlIl0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7QUFBQSxTQUFTQSxJQUFJLEVBQUVDLFdBQVcsUUFBK0IsdUJBQXVCO0FBQ2hGLFNBQVNDLFFBQVEsUUFBUSwyQkFBMkI7QUFDcEQsU0FBU0MsUUFBUSxRQUFRLDJCQUEyQjtBQUNwRCxTQUFTQyxZQUFZLEVBQUVDLGFBQWEsRUFBRUMsVUFBVSxRQUFRLHFCQUFxQjtBQUM3RSxTQUFTQyxrQkFBa0IsUUFBUSx5QkFBeUI7QUFDNUQsU0FBU0Msa0JBQWtCLFFBQVEsNkJBQTZCO0FBT2hFLE9BQU8sTUFBTUMsY0FBYyxDQUFDLEVBQUVDLElBQUksRUFBRUMsU0FBUyxFQUFvQjs7SUFDL0QsTUFBTUMsV0FBV0o7SUFDakIsTUFBTUssZUFBZU4sbUJBQW1CRztJQUV4Qyw4REFBOEQ7SUFDOUQsTUFBTUksZUFBZUosTUFBTUssT0FBTyxDQUFDQyxJQUFXQSxFQUFFQyxLQUFLLEdBQUcsT0FBTyxFQUFFO0lBQ2pFLE1BQU1DLGlCQUFpQlIsTUFBTUssT0FBTyxDQUFDQyxJQUFXQSxFQUFFQyxLQUFLLEdBQUcsSUFBSUUsVUFBVTtJQUV4RSxxQkFDRSxRQUFDQztRQUNDQyxLQUFLVDtRQUNMVSxXQUFVOzswQkFHVixRQUFDdEI7Z0JBQUtzQixXQUFVOzBCQUNkLGNBQUEsUUFBQ3JCO29CQUFZcUIsV0FBVTs4QkFDckIsY0FBQSxRQUFDRjt3QkFBSUUsV0FBVTtrQ0FDYixjQUFBLFFBQUNGOzRCQUFJRSxXQUFVOzs4Q0FDYixRQUFDRjtvQ0FBSUUsV0FBVTs7c0RBQ2IsUUFBQ0Y7NENBQUlFLFdBQVU7c0RBQ2IsY0FBQSxRQUFDaEI7Z0RBQVdnQixXQUFVOzs7Ozs7Ozs7OztzREFFeEIsUUFBQ047NENBQUVNLFdBQVU7c0RBQXVEOzs7Ozs7Ozs7Ozs7Z0NBRXpFWCwwQkFDSyxRQUFDUjtvQ0FBU21CLFdBQVU7Ozs7O3lEQUV4Qjs7c0RBQ00sUUFBQ047NENBQUVNLFdBQVU7O2dEQUNWVDtnREFBYTs7Ozs7OztzREFFaEIsUUFBQ1g7NENBQVNxQixPQUFPVjs0Q0FBY1MsV0FBVTs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7MEJBU3JELFFBQUN0QjtnQkFBS3NCLFdBQVU7MEJBQ2QsY0FBQSxRQUFDckI7b0JBQVlxQixXQUFVOzhCQUNyQixjQUFBLFFBQUNGO3dCQUFJRSxXQUFVO2tDQUNiLGNBQUEsUUFBQ0Y7NEJBQUlFLFdBQVU7OzhDQUNiLFFBQUNGO29DQUFJRSxXQUFVOztzREFDYixRQUFDRjs0Q0FBSUUsV0FBVTtzREFDYixjQUFBLFFBQUNqQjtnREFBY2lCLFdBQVU7Ozs7Ozs7Ozs7O3NEQUUzQixRQUFDTjs0Q0FBRU0sV0FBVTtzREFBdUQ7Ozs7Ozs7Ozs7OztnQ0FFekVYLDBCQUNLLFFBQUNSO29DQUFTbUIsV0FBVTs7Ozs7eURBRXBCLFFBQUNOO29DQUFFTSxXQUFVOzhDQUNWUixhQUFhSyxNQUFNOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7MEJBU2hDLFFBQUNuQjtnQkFBS3NCLFdBQVU7MEJBQ2QsY0FBQSxRQUFDckI7b0JBQVlxQixXQUFVOzhCQUNyQixjQUFBLFFBQUNGO3dCQUFJRSxXQUFVO2tDQUNiLGNBQUEsUUFBQ0Y7NEJBQUlFLFdBQVU7OzhDQUNiLFFBQUNGO29DQUFJRSxXQUFVOztzREFDYixRQUFDRjs0Q0FBSUUsV0FBVTtzREFDYixjQUFBLFFBQUNsQjtnREFBYWtCLFdBQVU7Ozs7Ozs7Ozs7O3NEQUUxQixRQUFDTjs0Q0FBRU0sV0FBVTtzREFBdUQ7Ozs7Ozs7Ozs7OztnQ0FFekVYLDBCQUNLLFFBQUNSO29DQUFTbUIsV0FBVTs7Ozs7eURBRXBCLFFBQUNOO29DQUFFTSxXQUFVOzhDQUNWSjs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O0FBU25CLEVBQUU7R0F0RldUOztRQUNNRDtRQUNJRDs7O0tBRlZFIn0=

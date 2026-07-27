@@ -1,0 +1,1124 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/settings/SecuritySettings.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=6014a254"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+var _s = $RefreshSig$();
+import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=6014a254"; const useState = __vite__cjsImport3_react["useState"]; const useEffect = __vite__cjsImport3_react["useEffect"];
+import { Button } from "/src/components/ui/button.tsx";
+import { Input } from "/src/components/ui/input.tsx";
+import { Label } from "/src/components/ui/label.tsx";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "/src/components/ui/card.tsx";
+import { Badge } from "/src/components/ui/badge.tsx";
+import { Progress } from "/src/components/ui/progress.tsx";
+import { useToast } from "/src/hooks/use-toast.ts";
+import { supabase } from "/src/integrations/supabase/client.ts";
+import { useAuth } from "/src/contexts/AuthContext.tsx";
+import { TwoFactorAuth } from "/src/components/auth/TwoFactorAuth.tsx";
+import { Loader2, Shield, Key, CheckCircle2, AlertCircle, Save, Eye, EyeOff, Clock, Trash2, Settings, Activity } from "/node_modules/.vite/deps/lucide-react.js?v=6014a254";
+import { logger } from "/src/lib/logger.ts";
+import { AccountDeletionPanel } from "/src/components/account/AccountDeletionPanel.tsx";
+import { GDPRExportPanel } from "/src/components/account/GDPRExportPanel.tsx";
+const USER_SESSION_FIELDS = 'id, user_id, start_time';
+const USER_LOGIN_HISTORY_FIELDS = 'id, user_id';
+const PROFILE_PRIVACY_FIELDS = 'id';
+export const SecuritySettings = ()=>{
+    _s();
+    const { toast } = useToast();
+    const { user } = useAuth();
+    const [loading, setLoading] = useState(false);
+    const [saving, setSaving] = useState(false);
+    const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [settings, setSettings] = useState({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: '',
+        activeSessions: [],
+        recentLogins: [],
+        showOnlineStatus: true,
+        allowDataCollection: false,
+        marketingEmails: false
+    });
+    useEffect(()=>{
+        loadSecuritySettings();
+    }, []);
+    const loadSecuritySettings = async ()=>{
+        if (!user) return;
+        setLoading(true);
+        try {
+            // Load active sessions (if table exists)
+            const { data: sessionsData } = await supabase.from('user_sessions').select(USER_SESSION_FIELDS).eq('user_id', user.id);
+            // Load recent logins (if table exists)
+            const { data: loginsData } = await supabase.from('user_login_history').select(USER_LOGIN_HISTORY_FIELDS).eq('user_id', user.id).limit(10);
+            // Load privacy settings from profile or user_security_settings
+            const { data: privacyData } = await supabase.from('profiles').select(PROFILE_PRIVACY_FIELDS).eq('id', user.id).single();
+            setSettings((prev)=>({
+                    ...prev,
+                    activeSessions: [],
+                    recentLogins: [],
+                    showOnlineStatus: true,
+                    allowDataCollection: false,
+                    marketingEmails: false
+                }));
+        } catch (err) {
+            logger.error('Error loading security settings', {
+                error: err
+            });
+        // Don't show error toast if tables don't exist yet (graceful degradation)
+        } finally{
+            setLoading(false);
+        }
+    };
+    const handlePasswordChange = async (e)=>{
+        e.preventDefault();
+        if (settings.newPassword !== settings.confirmPassword) {
+            toast({
+                title: 'Erreur',
+                description: 'Les mots de passe ne correspondent pas',
+                variant: 'destructive'
+            });
+            return;
+        }
+        if (settings.newPassword.length < 8) {
+            toast({
+                title: 'Erreur',
+                description: 'Le mot de passe doit contenir au moins 8 caractères',
+                variant: 'destructive'
+            });
+            return;
+        }
+        setSaving(true);
+        try {
+            const { error } = await supabase.auth.updateUser({
+                password: settings.newPassword
+            });
+            if (error) throw error;
+            toast({
+                title: 'Succès',
+                description: 'Mot de passe modifié avec succès'
+            });
+            setSettings((prev)=>({
+                    ...prev,
+                    currentPassword: '',
+                    newPassword: '',
+                    confirmPassword: ''
+                }));
+        } catch (err) {
+            const message = err instanceof Error ? err.message : 'Erreur inconnue';
+            toast({
+                title: 'Erreur',
+                description: message,
+                variant: 'destructive'
+            });
+        } finally{
+            setSaving(false);
+        }
+    };
+    const terminateSession = async (sessionId)=>{
+        try {
+            const { error } = await supabase.from('user_sessions').delete().eq('id', sessionId);
+            if (error) throw error;
+            setSettings((prev)=>({
+                    ...prev,
+                    activeSessions: prev.activeSessions.filter((s)=>s.id !== sessionId)
+                }));
+            toast({
+                title: 'Succès',
+                description: 'Session terminée'
+            });
+        } catch  {
+            toast({
+                title: 'Erreur',
+                description: 'Impossible de terminer la session',
+                variant: 'destructive'
+            });
+        }
+    };
+    const getPasswordStrength = (password)=>{
+        let strength = 0;
+        if (password.length >= 8) strength += 20;
+        if (password.match(/[a-z]/)) strength += 20;
+        if (password.match(/[A-Z]/)) strength += 20;
+        if (password.match(/[0-9]/)) strength += 20;
+        if (password.match(/[^a-zA-Z0-9]/)) strength += 20;
+        return strength;
+    };
+    const getPasswordStrengthColor = (strength)=>{
+        if (strength < 40) return 'bg-red-500';
+        if (strength < 60) return 'bg-orange-500';
+        if (strength < 80) return 'bg-yellow-500';
+        return 'bg-green-500';
+    };
+    const getPasswordStrengthText = (strength)=>{
+        if (strength < 40) return 'Faible';
+        if (strength < 60) return 'Moyen';
+        if (strength < 80) return 'Bon';
+        return 'Très fort';
+    };
+    if (loading) {
+        return /*#__PURE__*/ _jsxDEV("div", {
+            className: "flex items-center justify-center py-8",
+            children: [
+                /*#__PURE__*/ _jsxDEV(Loader2, {
+                    className: "h-8 w-8 animate-spin"
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                    lineNumber: 234,
+                    columnNumber: 9
+                }, this),
+                /*#__PURE__*/ _jsxDEV("span", {
+                    className: "ml-2",
+                    children: "Chargement des paramètres de sécurité..."
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                    lineNumber: 235,
+                    columnNumber: 9
+                }, this)
+            ]
+        }, void 0, true, {
+            fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+            lineNumber: 233,
+            columnNumber: 7
+        }, this);
+    }
+    return /*#__PURE__*/ _jsxDEV("div", {
+        className: "space-y-6",
+        children: [
+            /*#__PURE__*/ _jsxDEV(Card, {
+                children: [
+                    /*#__PURE__*/ _jsxDEV(CardHeader, {
+                        children: [
+                            /*#__PURE__*/ _jsxDEV(CardTitle, {
+                                className: "flex items-center gap-2",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV(Shield, {
+                                        className: "h-5 w-5"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                        lineNumber: 246,
+                                        columnNumber: 13
+                                    }, this),
+                                    "Vue d'ensemble de la sécurité"
+                                ]
+                            }, void 0, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                lineNumber: 245,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV(CardDescription, {
+                                children: "État actuel de la sécurité de votre compte"
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                lineNumber: 249,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                        lineNumber: 244,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV(CardContent, {
+                        children: /*#__PURE__*/ _jsxDEV("div", {
+                            className: "grid grid-cols-1 md:grid-cols-2 gap-4",
+                            children: [
+                                /*#__PURE__*/ _jsxDEV("div", {
+                                    className: "text-center p-4 rounded-lg bg-muted/50",
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV("div", {
+                                            className: "text-2xl font-bold text-blue-600",
+                                            children: settings.activeSessions.length
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                            lineNumber: 254,
+                                            columnNumber: 15
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV("div", {
+                                            className: "text-sm text-muted-foreground",
+                                            children: "Sessions actives"
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                            lineNumber: 257,
+                                            columnNumber: 15
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                    lineNumber: 253,
+                                    columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV("div", {
+                                    className: "text-center p-4 rounded-lg bg-muted/50",
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV("div", {
+                                            className: "text-2xl font-bold text-purple-600",
+                                            children: settings.recentLogins.filter((l)=>l.success).length
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                            lineNumber: 260,
+                                            columnNumber: 15
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV("div", {
+                                            className: "text-sm text-muted-foreground",
+                                            children: "Connexions réussies"
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                            lineNumber: 263,
+                                            columnNumber: 15
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                    lineNumber: 259,
+                                    columnNumber: 13
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                            lineNumber: 252,
+                            columnNumber: 11
+                        }, this)
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                        lineNumber: 251,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                lineNumber: 243,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV(Card, {
+                children: [
+                    /*#__PURE__*/ _jsxDEV(CardHeader, {
+                        children: [
+                            /*#__PURE__*/ _jsxDEV(CardTitle, {
+                                className: "flex items-center gap-2",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV(Key, {
+                                        className: "h-5 w-5"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                        lineNumber: 273,
+                                        columnNumber: 13
+                                    }, this),
+                                    "Mot de passe"
+                                ]
+                            }, void 0, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                lineNumber: 272,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV(CardDescription, {
+                                children: "Changez votre mot de passe pour sécuriser votre compte"
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                lineNumber: 276,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                        lineNumber: 271,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV(CardContent, {
+                        children: /*#__PURE__*/ _jsxDEV("form", {
+                            onSubmit: handlePasswordChange,
+                            className: "space-y-4",
+                            children: [
+                                /*#__PURE__*/ _jsxDEV("div", {
+                                    className: "space-y-2",
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV(Label, {
+                                            htmlFor: "currentPassword",
+                                            children: "Mot de passe actuel"
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                            lineNumber: 281,
+                                            columnNumber: 15
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV("div", {
+                                            className: "relative",
+                                            children: [
+                                                /*#__PURE__*/ _jsxDEV(Input, {
+                                                    id: "currentPassword",
+                                                    type: showCurrentPassword ? 'text' : 'password',
+                                                    value: settings.currentPassword,
+                                                    onChange: (e)=>setSettings((prev)=>({
+                                                                ...prev,
+                                                                currentPassword: e.target.value
+                                                            })),
+                                                    placeholder: "Votre mot de passe actuel"
+                                                }, void 0, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                                    lineNumber: 283,
+                                                    columnNumber: 17
+                                                }, this),
+                                                /*#__PURE__*/ _jsxDEV(Button, {
+                                                    type: "button",
+                                                    variant: "ghost",
+                                                    size: "sm",
+                                                    className: "absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent",
+                                                    onClick: ()=>setShowCurrentPassword(!showCurrentPassword),
+                                                    children: showCurrentPassword ? /*#__PURE__*/ _jsxDEV(EyeOff, {
+                                                        className: "h-4 w-4"
+                                                    }, void 0, false, {
+                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                                        lineNumber: 300,
+                                                        columnNumber: 21
+                                                    }, this) : /*#__PURE__*/ _jsxDEV(Eye, {
+                                                        className: "h-4 w-4"
+                                                    }, void 0, false, {
+                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                                        lineNumber: 302,
+                                                        columnNumber: 21
+                                                    }, this)
+                                                }, void 0, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                                    lineNumber: 292,
+                                                    columnNumber: 17
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                            lineNumber: 282,
+                                            columnNumber: 15
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                    lineNumber: 280,
+                                    columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV("div", {
+                                    className: "space-y-2",
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV(Label, {
+                                            htmlFor: "newPassword",
+                                            children: "Nouveau mot de passe"
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                            lineNumber: 309,
+                                            columnNumber: 15
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV("div", {
+                                            className: "relative",
+                                            children: [
+                                                /*#__PURE__*/ _jsxDEV(Input, {
+                                                    id: "newPassword",
+                                                    type: showNewPassword ? 'text' : 'password',
+                                                    value: settings.newPassword,
+                                                    onChange: (e)=>setSettings((prev)=>({
+                                                                ...prev,
+                                                                newPassword: e.target.value
+                                                            })),
+                                                    placeholder: "Votre nouveau mot de passe",
+                                                    minLength: 8
+                                                }, void 0, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                                    lineNumber: 311,
+                                                    columnNumber: 17
+                                                }, this),
+                                                /*#__PURE__*/ _jsxDEV(Button, {
+                                                    type: "button",
+                                                    variant: "ghost",
+                                                    size: "sm",
+                                                    className: "absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent",
+                                                    onClick: ()=>setShowNewPassword(!showNewPassword),
+                                                    children: showNewPassword ? /*#__PURE__*/ _jsxDEV(EyeOff, {
+                                                        className: "h-4 w-4"
+                                                    }, void 0, false, {
+                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                                        lineNumber: 326,
+                                                        columnNumber: 38
+                                                    }, this) : /*#__PURE__*/ _jsxDEV(Eye, {
+                                                        className: "h-4 w-4"
+                                                    }, void 0, false, {
+                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                                        lineNumber: 326,
+                                                        columnNumber: 71
+                                                    }, this)
+                                                }, void 0, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                                    lineNumber: 319,
+                                                    columnNumber: 17
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                            lineNumber: 310,
+                                            columnNumber: 15
+                                        }, this),
+                                        settings.newPassword && /*#__PURE__*/ _jsxDEV("div", {
+                                            className: "space-y-2",
+                                            children: [
+                                                /*#__PURE__*/ _jsxDEV("div", {
+                                                    className: "flex justify-between text-sm",
+                                                    children: [
+                                                        /*#__PURE__*/ _jsxDEV("span", {
+                                                            children: "Force du mot de passe"
+                                                        }, void 0, false, {
+                                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                                            lineNumber: 332,
+                                                            columnNumber: 21
+                                                        }, this),
+                                                        /*#__PURE__*/ _jsxDEV("span", {
+                                                            children: getPasswordStrengthText(getPasswordStrength(settings.newPassword))
+                                                        }, void 0, false, {
+                                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                                            lineNumber: 333,
+                                                            columnNumber: 21
+                                                        }, this)
+                                                    ]
+                                                }, void 0, true, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                                    lineNumber: 331,
+                                                    columnNumber: 19
+                                                }, this),
+                                                /*#__PURE__*/ _jsxDEV(Progress, {
+                                                    value: getPasswordStrength(settings.newPassword),
+                                                    className: "h-2"
+                                                }, void 0, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                                    lineNumber: 337,
+                                                    columnNumber: 19
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                            lineNumber: 330,
+                                            columnNumber: 17
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                    lineNumber: 308,
+                                    columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV("div", {
+                                    className: "space-y-2",
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV(Label, {
+                                            htmlFor: "confirmPassword",
+                                            children: "Confirmer le mot de passe"
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                            lineNumber: 343,
+                                            columnNumber: 15
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV("div", {
+                                            className: "relative",
+                                            children: [
+                                                /*#__PURE__*/ _jsxDEV(Input, {
+                                                    id: "confirmPassword",
+                                                    type: showConfirmPassword ? 'text' : 'password',
+                                                    value: settings.confirmPassword,
+                                                    onChange: (e)=>setSettings((prev)=>({
+                                                                ...prev,
+                                                                confirmPassword: e.target.value
+                                                            })),
+                                                    placeholder: "Confirmez votre nouveau mot de passe",
+                                                    minLength: 8
+                                                }, void 0, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                                    lineNumber: 345,
+                                                    columnNumber: 17
+                                                }, this),
+                                                /*#__PURE__*/ _jsxDEV(Button, {
+                                                    type: "button",
+                                                    variant: "ghost",
+                                                    size: "sm",
+                                                    className: "absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent",
+                                                    onClick: ()=>setShowConfirmPassword(!showConfirmPassword),
+                                                    children: showConfirmPassword ? /*#__PURE__*/ _jsxDEV(EyeOff, {
+                                                        className: "h-4 w-4"
+                                                    }, void 0, false, {
+                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                                        lineNumber: 363,
+                                                        columnNumber: 21
+                                                    }, this) : /*#__PURE__*/ _jsxDEV(Eye, {
+                                                        className: "h-4 w-4"
+                                                    }, void 0, false, {
+                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                                        lineNumber: 365,
+                                                        columnNumber: 21
+                                                    }, this)
+                                                }, void 0, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                                    lineNumber: 355,
+                                                    columnNumber: 17
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                            lineNumber: 344,
+                                            columnNumber: 15
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                    lineNumber: 342,
+                                    columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV(Button, {
+                                    type: "submit",
+                                    disabled: saving,
+                                    children: [
+                                        saving && /*#__PURE__*/ _jsxDEV(Loader2, {
+                                            className: "mr-2 h-4 w-4 animate-spin"
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                            lineNumber: 372,
+                                            columnNumber: 26
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV(Save, {
+                                            className: "mr-2 h-4 w-4"
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                            lineNumber: 373,
+                                            columnNumber: 15
+                                        }, this),
+                                        "Changer le mot de passe"
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                    lineNumber: 371,
+                                    columnNumber: 13
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                            lineNumber: 279,
+                            columnNumber: 11
+                        }, this)
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                        lineNumber: 278,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                lineNumber: 270,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV(TwoFactorAuth, {}, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                lineNumber: 381,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV(Card, {
+                children: [
+                    /*#__PURE__*/ _jsxDEV(CardHeader, {
+                        children: [
+                            /*#__PURE__*/ _jsxDEV(CardTitle, {
+                                className: "flex items-center gap-2",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV(Activity, {
+                                        className: "h-5 w-5"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                        lineNumber: 387,
+                                        columnNumber: 13
+                                    }, this),
+                                    "Sessions actives"
+                                ]
+                            }, void 0, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                lineNumber: 386,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV(CardDescription, {
+                                children: "Gérez les appareils connectés à votre compte"
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                lineNumber: 390,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                        lineNumber: 385,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV(CardContent, {
+                        children: /*#__PURE__*/ _jsxDEV("div", {
+                            className: "space-y-4",
+                            children: [
+                                settings.activeSessions.map((session)=>/*#__PURE__*/ _jsxDEV("div", {
+                                        className: "flex items-center justify-between p-4 rounded-lg border",
+                                        children: [
+                                            /*#__PURE__*/ _jsxDEV("div", {
+                                                className: "space-y-1",
+                                                children: [
+                                                    /*#__PURE__*/ _jsxDEV("div", {
+                                                        className: "flex items-center gap-2",
+                                                        children: [
+                                                            /*#__PURE__*/ _jsxDEV("span", {
+                                                                className: "font-medium",
+                                                                children: session.device
+                                                            }, void 0, false, {
+                                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                                                lineNumber: 401,
+                                                                columnNumber: 21
+                                                            }, this),
+                                                            session.current && /*#__PURE__*/ _jsxDEV(Badge, {
+                                                                variant: "secondary",
+                                                                children: "Actuel"
+                                                            }, void 0, false, {
+                                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                                                lineNumber: 402,
+                                                                columnNumber: 41
+                                                            }, this)
+                                                        ]
+                                                    }, void 0, true, {
+                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                                        lineNumber: 400,
+                                                        columnNumber: 19
+                                                    }, this),
+                                                    /*#__PURE__*/ _jsxDEV("div", {
+                                                        className: "text-sm text-muted-foreground",
+                                                        children: [
+                                                            session.location,
+                                                            " • Dernière activité:",
+                                                            ' ',
+                                                            new Date(session.lastActive).toLocaleString()
+                                                        ]
+                                                    }, void 0, true, {
+                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                                        lineNumber: 404,
+                                                        columnNumber: 19
+                                                    }, this)
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                                lineNumber: 399,
+                                                columnNumber: 17
+                                            }, this),
+                                            !session.current && /*#__PURE__*/ _jsxDEV(Button, {
+                                                variant: "outline",
+                                                size: "sm",
+                                                onClick: ()=>terminateSession(session.id),
+                                                children: /*#__PURE__*/ _jsxDEV(Trash2, {
+                                                    className: "h-4 w-4"
+                                                }, void 0, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                                    lineNumber: 411,
+                                                    columnNumber: 21
+                                                }, this)
+                                            }, void 0, false, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                                lineNumber: 410,
+                                                columnNumber: 19
+                                            }, this)
+                                        ]
+                                    }, session.id, true, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                        lineNumber: 395,
+                                        columnNumber: 15
+                                    }, this)),
+                                settings.activeSessions.length === 0 && /*#__PURE__*/ _jsxDEV("div", {
+                                    className: "text-center py-8 text-muted-foreground",
+                                    children: "Aucune session active"
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                    lineNumber: 417,
+                                    columnNumber: 15
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                            lineNumber: 393,
+                            columnNumber: 11
+                        }, this)
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                        lineNumber: 392,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                lineNumber: 384,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV(Card, {
+                children: [
+                    /*#__PURE__*/ _jsxDEV(CardHeader, {
+                        children: [
+                            /*#__PURE__*/ _jsxDEV(CardTitle, {
+                                className: "flex items-center gap-2",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV(Clock, {
+                                        className: "h-5 w-5"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                        lineNumber: 427,
+                                        columnNumber: 13
+                                    }, this),
+                                    "Connexions récentes"
+                                ]
+                            }, void 0, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                lineNumber: 426,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV(CardDescription, {
+                                children: "Historique des connexions à votre compte"
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                lineNumber: 430,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                        lineNumber: 425,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV(CardContent, {
+                        children: /*#__PURE__*/ _jsxDEV("div", {
+                            className: "space-y-3",
+                            children: [
+                                settings.recentLogins.map((login)=>/*#__PURE__*/ _jsxDEV("div", {
+                                        className: "flex items-center justify-between p-3 rounded-lg bg-muted/50",
+                                        children: [
+                                            /*#__PURE__*/ _jsxDEV("div", {
+                                                className: "space-y-1",
+                                                children: [
+                                                    /*#__PURE__*/ _jsxDEV("div", {
+                                                        className: "flex items-center gap-2",
+                                                        children: [
+                                                            /*#__PURE__*/ _jsxDEV("span", {
+                                                                className: "font-medium",
+                                                                children: login.device
+                                                            }, void 0, false, {
+                                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                                                lineNumber: 441,
+                                                                columnNumber: 21
+                                                            }, this),
+                                                            login.success ? /*#__PURE__*/ _jsxDEV(CheckCircle2, {
+                                                                className: "h-4 w-4 text-green-500"
+                                                            }, void 0, false, {
+                                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                                                lineNumber: 443,
+                                                                columnNumber: 23
+                                                            }, this) : /*#__PURE__*/ _jsxDEV(AlertCircle, {
+                                                                className: "h-4 w-4 text-red-500"
+                                                            }, void 0, false, {
+                                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                                                lineNumber: 445,
+                                                                columnNumber: 23
+                                                            }, this)
+                                                        ]
+                                                    }, void 0, true, {
+                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                                        lineNumber: 440,
+                                                        columnNumber: 19
+                                                    }, this),
+                                                    /*#__PURE__*/ _jsxDEV("div", {
+                                                        className: "text-sm text-muted-foreground",
+                                                        children: [
+                                                            login.location,
+                                                            " • ",
+                                                            new Date(login.timestamp).toLocaleString()
+                                                        ]
+                                                    }, void 0, true, {
+                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                                        lineNumber: 448,
+                                                        columnNumber: 19
+                                                    }, this)
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                                lineNumber: 439,
+                                                columnNumber: 17
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV(Badge, {
+                                                variant: login.success ? 'default' : 'destructive',
+                                                children: login.success ? 'Réussi' : 'Échec'
+                                            }, void 0, false, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                                lineNumber: 452,
+                                                columnNumber: 17
+                                            }, this)
+                                        ]
+                                    }, login.id, true, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                        lineNumber: 435,
+                                        columnNumber: 15
+                                    }, this)),
+                                settings.recentLogins.length === 0 && /*#__PURE__*/ _jsxDEV("div", {
+                                    className: "text-center py-8 text-muted-foreground",
+                                    children: "Aucune connexion récente"
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                    lineNumber: 458,
+                                    columnNumber: 15
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                            lineNumber: 433,
+                            columnNumber: 11
+                        }, this)
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                        lineNumber: 432,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                lineNumber: 424,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV(Card, {
+                children: [
+                    /*#__PURE__*/ _jsxDEV(CardHeader, {
+                        children: [
+                            /*#__PURE__*/ _jsxDEV(CardTitle, {
+                                className: "flex items-center gap-2",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV(Settings, {
+                                        className: "h-5 w-5"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                        lineNumber: 468,
+                                        columnNumber: 13
+                                    }, this),
+                                    "Paramètres de confidentialité"
+                                ]
+                            }, void 0, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                lineNumber: 467,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV(CardDescription, {
+                                children: "Contrôlez la visibilité de votre compte et l'utilisation des données"
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                lineNumber: 471,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                        lineNumber: 466,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV(CardContent, {
+                        className: "space-y-4",
+                        children: [
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                className: "flex items-center justify-between",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "space-y-0.5",
+                                        children: [
+                                            /*#__PURE__*/ _jsxDEV(Label, {
+                                                children: "Statut en ligne"
+                                            }, void 0, false, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                                lineNumber: 478,
+                                                columnNumber: 15
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV("p", {
+                                                className: "text-sm text-muted-foreground",
+                                                children: "Permettre aux autres utilisateurs de voir que vous êtes en ligne"
+                                            }, void 0, false, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                                lineNumber: 479,
+                                                columnNumber: 15
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                        lineNumber: 477,
+                                        columnNumber: 13
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV(Button, {
+                                        variant: settings.showOnlineStatus ? 'default' : 'outline',
+                                        onClick: ()=>setSettings((prev)=>({
+                                                    ...prev,
+                                                    showOnlineStatus: !prev.showOnlineStatus
+                                                })),
+                                        children: settings.showOnlineStatus ? 'Activé' : 'Désactivé'
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                        lineNumber: 483,
+                                        columnNumber: 13
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                lineNumber: 476,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                className: "flex items-center justify-between",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "space-y-0.5",
+                                        children: [
+                                            /*#__PURE__*/ _jsxDEV(Label, {
+                                                children: "Collecte de données"
+                                            }, void 0, false, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                                lineNumber: 495,
+                                                columnNumber: 15
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV("p", {
+                                                className: "text-sm text-muted-foreground",
+                                                children: "Permettre la collecte de données anonymes pour améliorer le service"
+                                            }, void 0, false, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                                lineNumber: 496,
+                                                columnNumber: 15
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                        lineNumber: 494,
+                                        columnNumber: 13
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV(Button, {
+                                        variant: settings.allowDataCollection ? 'default' : 'outline',
+                                        onClick: ()=>setSettings((prev)=>({
+                                                    ...prev,
+                                                    allowDataCollection: !prev.allowDataCollection
+                                                })),
+                                        children: settings.allowDataCollection ? 'Activé' : 'Désactivé'
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                        lineNumber: 500,
+                                        columnNumber: 13
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                lineNumber: 493,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                className: "flex items-center justify-between",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "space-y-0.5",
+                                        children: [
+                                            /*#__PURE__*/ _jsxDEV(Label, {
+                                                children: "Emails marketing"
+                                            }, void 0, false, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                                lineNumber: 512,
+                                                columnNumber: 15
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV("p", {
+                                                className: "text-sm text-muted-foreground",
+                                                children: "Recevoir des emails marketing et des offres spéciales"
+                                            }, void 0, false, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                                lineNumber: 513,
+                                                columnNumber: 15
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                        lineNumber: 511,
+                                        columnNumber: 13
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV(Button, {
+                                        variant: settings.marketingEmails ? 'default' : 'outline',
+                                        onClick: ()=>setSettings((prev)=>({
+                                                    ...prev,
+                                                    marketingEmails: !prev.marketingEmails
+                                                })),
+                                        children: settings.marketingEmails ? 'Activé' : 'Désactivé'
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                        lineNumber: 517,
+                                        columnNumber: 13
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                                lineNumber: 510,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                        lineNumber: 475,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                lineNumber: 465,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV(GDPRExportPanel, {}, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                lineNumber: 529,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV(AccountDeletionPanel, {}, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+                lineNumber: 530,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx",
+        lineNumber: 241,
+        columnNumber: 5
+    }, this);
+};
+_s(SecuritySettings, "7jfOcyrO7GcAvf8mNw2PoB9Lfl0=", false, function() {
+    return [
+        useToast,
+        useAuth
+    ];
+});
+_c = SecuritySettings;
+var _c;
+$RefreshReg$(_c, "SecuritySettings");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/settings/SecuritySettings.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIlNlY3VyaXR5U2V0dGluZ3MudHN4Il0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7IHVzZVN0YXRlLCB1c2VFZmZlY3QgfSBmcm9tICdyZWFjdCc7XG5pbXBvcnQgeyBCdXR0b24gfSBmcm9tICdAL2NvbXBvbmVudHMvdWkvYnV0dG9uJztcbmltcG9ydCB7IElucHV0IH0gZnJvbSAnQC9jb21wb25lbnRzL3VpL2lucHV0JztcbmltcG9ydCB7IExhYmVsIH0gZnJvbSAnQC9jb21wb25lbnRzL3VpL2xhYmVsJztcbmltcG9ydCB7IENhcmQsIENhcmRDb250ZW50LCBDYXJkRGVzY3JpcHRpb24sIENhcmRIZWFkZXIsIENhcmRUaXRsZSB9IGZyb20gJ0AvY29tcG9uZW50cy91aS9jYXJkJztcbmltcG9ydCB7IEJhZGdlIH0gZnJvbSAnQC9jb21wb25lbnRzL3VpL2JhZGdlJztcbmltcG9ydCB7IFNlcGFyYXRvciB9IGZyb20gJ0AvY29tcG9uZW50cy91aS9zZXBhcmF0b3InO1xuaW1wb3J0IHsgQWxlcnQsIEFsZXJ0RGVzY3JpcHRpb24gfSBmcm9tICdAL2NvbXBvbmVudHMvdWkvYWxlcnQnO1xuaW1wb3J0IHsgUHJvZ3Jlc3MgfSBmcm9tICdAL2NvbXBvbmVudHMvdWkvcHJvZ3Jlc3MnO1xuaW1wb3J0IHsgdXNlVG9hc3QgfSBmcm9tICdAL2hvb2tzL3VzZS10b2FzdCc7XG5pbXBvcnQgeyBzdXBhYmFzZSB9IGZyb20gJ0AvaW50ZWdyYXRpb25zL3N1cGFiYXNlL2NsaWVudCc7XG5pbXBvcnQgeyB1c2VBdXRoIH0gZnJvbSAnQC9jb250ZXh0cy9BdXRoQ29udGV4dCc7XG5pbXBvcnQgeyBUd29GYWN0b3JBdXRoIH0gZnJvbSAnQC9jb21wb25lbnRzL2F1dGgvVHdvRmFjdG9yQXV0aCc7XG5pbXBvcnQge1xuICBMb2FkZXIyLFxuICBTaGllbGQsXG4gIEtleSxcbiAgQ2hlY2tDaXJjbGUyLFxuICBBbGVydENpcmNsZSxcbiAgU2F2ZSxcbiAgRXllLFxuICBFeWVPZmYsXG4gIENsb2NrLFxuICBUcmFzaDIsXG4gIFNldHRpbmdzLFxuICBBY3Rpdml0eSxcbn0gZnJvbSAnbHVjaWRlLXJlYWN0JztcbmltcG9ydCB7IGxvZ2dlciB9IGZyb20gJ0AvbGliL2xvZ2dlcic7XG5pbXBvcnQgeyBBY2NvdW50RGVsZXRpb25QYW5lbCB9IGZyb20gJ0AvY29tcG9uZW50cy9hY2NvdW50L0FjY291bnREZWxldGlvblBhbmVsJztcbmltcG9ydCB7IEdEUFJFeHBvcnRQYW5lbCB9IGZyb20gJ0AvY29tcG9uZW50cy9hY2NvdW50L0dEUFJFeHBvcnRQYW5lbCc7XG5cbmNvbnN0IFVTRVJfU0VTU0lPTl9GSUVMRFMgPSAnaWQsIHVzZXJfaWQsIHN0YXJ0X3RpbWUnO1xuY29uc3QgVVNFUl9MT0dJTl9ISVNUT1JZX0ZJRUxEUyA9ICdpZCwgdXNlcl9pZCc7XG5jb25zdCBQUk9GSUxFX1BSSVZBQ1lfRklFTERTID0gJ2lkJztcblxuaW50ZXJmYWNlIFNlY3VyaXR5U2V0dGluZ3Mge1xuICAvLyBQYXNzd29yZFxuICBjdXJyZW50UGFzc3dvcmQ6IHN0cmluZztcbiAgbmV3UGFzc3dvcmQ6IHN0cmluZztcbiAgY29uZmlybVBhc3N3b3JkOiBzdHJpbmc7XG5cbiAgLy8gU2Vzc2lvbiBtYW5hZ2VtZW50XG4gIGFjdGl2ZVNlc3Npb25zOiBBcnJheTx7XG4gICAgaWQ6IHN0cmluZztcbiAgICBkZXZpY2U6IHN0cmluZztcbiAgICBsb2NhdGlvbjogc3RyaW5nO1xuICAgIGxhc3RBY3RpdmU6IHN0cmluZztcbiAgICBjdXJyZW50OiBib29sZWFuO1xuICB9PjtcblxuICAvLyBTZWN1cml0eSBldmVudHNcbiAgcmVjZW50TG9naW5zOiBBcnJheTx7XG4gICAgaWQ6IHN0cmluZztcbiAgICB0aW1lc3RhbXA6IHN0cmluZztcbiAgICBkZXZpY2U6IHN0cmluZztcbiAgICBsb2NhdGlvbjogc3RyaW5nO1xuICAgIHN1Y2Nlc3M6IGJvb2xlYW47XG4gIH0+O1xuXG4gIC8vIFByaXZhY3kgc2V0dGluZ3NcbiAgc2hvd09ubGluZVN0YXR1czogYm9vbGVhbjtcbiAgYWxsb3dEYXRhQ29sbGVjdGlvbjogYm9vbGVhbjtcbiAgbWFya2V0aW5nRW1haWxzOiBib29sZWFuO1xufVxuXG5leHBvcnQgY29uc3QgU2VjdXJpdHlTZXR0aW5ncyA9ICgpID0+IHtcbiAgY29uc3QgeyB0b2FzdCB9ID0gdXNlVG9hc3QoKTtcbiAgY29uc3QgeyB1c2VyIH0gPSB1c2VBdXRoKCk7XG4gIGNvbnN0IFtsb2FkaW5nLCBzZXRMb2FkaW5nXSA9IHVzZVN0YXRlKGZhbHNlKTtcbiAgY29uc3QgW3NhdmluZywgc2V0U2F2aW5nXSA9IHVzZVN0YXRlKGZhbHNlKTtcbiAgY29uc3QgW3Nob3dDdXJyZW50UGFzc3dvcmQsIHNldFNob3dDdXJyZW50UGFzc3dvcmRdID0gdXNlU3RhdGUoZmFsc2UpO1xuICBjb25zdCBbc2hvd05ld1Bhc3N3b3JkLCBzZXRTaG93TmV3UGFzc3dvcmRdID0gdXNlU3RhdGUoZmFsc2UpO1xuICBjb25zdCBbc2hvd0NvbmZpcm1QYXNzd29yZCwgc2V0U2hvd0NvbmZpcm1QYXNzd29yZF0gPSB1c2VTdGF0ZShmYWxzZSk7XG4gIGNvbnN0IFtzZXR0aW5ncywgc2V0U2V0dGluZ3NdID0gdXNlU3RhdGU8U2VjdXJpdHlTZXR0aW5ncz4oe1xuICAgIGN1cnJlbnRQYXNzd29yZDogJycsXG4gICAgbmV3UGFzc3dvcmQ6ICcnLFxuICAgIGNvbmZpcm1QYXNzd29yZDogJycsXG4gICAgYWN0aXZlU2Vzc2lvbnM6IFtdLFxuICAgIHJlY2VudExvZ2luczogW10sXG4gICAgc2hvd09ubGluZVN0YXR1czogdHJ1ZSxcbiAgICBhbGxvd0RhdGFDb2xsZWN0aW9uOiBmYWxzZSxcbiAgICBtYXJrZXRpbmdFbWFpbHM6IGZhbHNlLFxuICB9KTtcblxuICB1c2VFZmZlY3QoKCkgPT4ge1xuICAgIGxvYWRTZWN1cml0eVNldHRpbmdzKCk7XG4gIH0sIFtdKTtcblxuICBjb25zdCBsb2FkU2VjdXJpdHlTZXR0aW5ncyA9IGFzeW5jICgpID0+IHtcbiAgICBpZiAoIXVzZXIpIHJldHVybjtcblxuICAgIHNldExvYWRpbmcodHJ1ZSk7XG4gICAgdHJ5IHtcbiAgICAgIC8vIExvYWQgYWN0aXZlIHNlc3Npb25zIChpZiB0YWJsZSBleGlzdHMpXG4gICAgICBjb25zdCB7IGRhdGE6IHNlc3Npb25zRGF0YSB9ID0gYXdhaXQgc3VwYWJhc2VcbiAgICAgICAgLmZyb20oJ3VzZXJfc2Vzc2lvbnMnKVxuICAgICAgICAuc2VsZWN0KFVTRVJfU0VTU0lPTl9GSUVMRFMpXG4gICAgICAgIC5lcSgndXNlcl9pZCcsIHVzZXIuaWQpO1xuXG4gICAgICAvLyBMb2FkIHJlY2VudCBsb2dpbnMgKGlmIHRhYmxlIGV4aXN0cylcbiAgICAgIGNvbnN0IHsgZGF0YTogbG9naW5zRGF0YSB9ID0gYXdhaXQgc3VwYWJhc2VcbiAgICAgICAgLmZyb20oJ3VzZXJfbG9naW5faGlzdG9yeScpXG4gICAgICAgIC5zZWxlY3QoVVNFUl9MT0dJTl9ISVNUT1JZX0ZJRUxEUylcbiAgICAgICAgLmVxKCd1c2VyX2lkJywgdXNlci5pZClcbiAgICAgICAgLmxpbWl0KDEwKTtcblxuICAgICAgLy8gTG9hZCBwcml2YWN5IHNldHRpbmdzIGZyb20gcHJvZmlsZSBvciB1c2VyX3NlY3VyaXR5X3NldHRpbmdzXG4gICAgICBjb25zdCB7IGRhdGE6IHByaXZhY3lEYXRhIH0gPSBhd2FpdCBzdXBhYmFzZVxuICAgICAgICAuZnJvbSgncHJvZmlsZXMnKVxuICAgICAgICAuc2VsZWN0KFBST0ZJTEVfUFJJVkFDWV9GSUVMRFMpXG4gICAgICAgIC5lcSgnaWQnLCB1c2VyLmlkKVxuICAgICAgICAuc2luZ2xlKCk7XG5cbiAgICAgIHNldFNldHRpbmdzKHByZXYgPT4gKHtcbiAgICAgICAgLi4ucHJldixcbiAgICAgICAgYWN0aXZlU2Vzc2lvbnM6IFtdLFxuICAgICAgICByZWNlbnRMb2dpbnM6IFtdLFxuICAgICAgICBzaG93T25saW5lU3RhdHVzOiB0cnVlLFxuICAgICAgICBhbGxvd0RhdGFDb2xsZWN0aW9uOiBmYWxzZSxcbiAgICAgICAgbWFya2V0aW5nRW1haWxzOiBmYWxzZSxcbiAgICAgIH0pKTtcbiAgICB9IGNhdGNoIChlcnI6IHVua25vd24pIHtcbiAgICAgIGxvZ2dlci5lcnJvcignRXJyb3IgbG9hZGluZyBzZWN1cml0eSBzZXR0aW5ncycsIHsgZXJyb3I6IGVyciB9KTtcbiAgICAgIC8vIERvbid0IHNob3cgZXJyb3IgdG9hc3QgaWYgdGFibGVzIGRvbid0IGV4aXN0IHlldCAoZ3JhY2VmdWwgZGVncmFkYXRpb24pXG4gICAgfSBmaW5hbGx5IHtcbiAgICAgIHNldExvYWRpbmcoZmFsc2UpO1xuICAgIH1cbiAgfTtcblxuICBjb25zdCBoYW5kbGVQYXNzd29yZENoYW5nZSA9IGFzeW5jIChlOiBSZWFjdC5Gb3JtRXZlbnQpID0+IHtcbiAgICBlLnByZXZlbnREZWZhdWx0KCk7XG5cbiAgICBpZiAoc2V0dGluZ3MubmV3UGFzc3dvcmQgIT09IHNldHRpbmdzLmNvbmZpcm1QYXNzd29yZCkge1xuICAgICAgdG9hc3Qoe1xuICAgICAgICB0aXRsZTogJ0VycmV1cicsXG4gICAgICAgIGRlc2NyaXB0aW9uOiAnTGVzIG1vdHMgZGUgcGFzc2UgbmUgY29ycmVzcG9uZGVudCBwYXMnLFxuICAgICAgICB2YXJpYW50OiAnZGVzdHJ1Y3RpdmUnLFxuICAgICAgfSk7XG4gICAgICByZXR1cm47XG4gICAgfVxuXG4gICAgaWYgKHNldHRpbmdzLm5ld1Bhc3N3b3JkLmxlbmd0aCA8IDgpIHtcbiAgICAgIHRvYXN0KHtcbiAgICAgICAgdGl0bGU6ICdFcnJldXInLFxuICAgICAgICBkZXNjcmlwdGlvbjogJ0xlIG1vdCBkZSBwYXNzZSBkb2l0IGNvbnRlbmlyIGF1IG1vaW5zIDggY2FyYWN0w6hyZXMnLFxuICAgICAgICB2YXJpYW50OiAnZGVzdHJ1Y3RpdmUnLFxuICAgICAgfSk7XG4gICAgICByZXR1cm47XG4gICAgfVxuXG4gICAgc2V0U2F2aW5nKHRydWUpO1xuXG4gICAgdHJ5IHtcbiAgICAgIGNvbnN0IHsgZXJyb3IgfSA9IGF3YWl0IHN1cGFiYXNlLmF1dGgudXBkYXRlVXNlcih7XG4gICAgICAgIHBhc3N3b3JkOiBzZXR0aW5ncy5uZXdQYXNzd29yZCxcbiAgICAgIH0pO1xuXG4gICAgICBpZiAoZXJyb3IpIHRocm93IGVycm9yO1xuXG4gICAgICB0b2FzdCh7XG4gICAgICAgIHRpdGxlOiAnU3VjY8OocycsXG4gICAgICAgIGRlc2NyaXB0aW9uOiAnTW90IGRlIHBhc3NlIG1vZGlmacOpIGF2ZWMgc3VjY8OocycsXG4gICAgICB9KTtcblxuICAgICAgc2V0U2V0dGluZ3MocHJldiA9PiAoe1xuICAgICAgICAuLi5wcmV2LFxuICAgICAgICBjdXJyZW50UGFzc3dvcmQ6ICcnLFxuICAgICAgICBuZXdQYXNzd29yZDogJycsXG4gICAgICAgIGNvbmZpcm1QYXNzd29yZDogJycsXG4gICAgICB9KSk7XG4gICAgfSBjYXRjaCAoZXJyOiB1bmtub3duKSB7XG4gICAgICBjb25zdCBtZXNzYWdlID0gZXJyIGluc3RhbmNlb2YgRXJyb3IgPyBlcnIubWVzc2FnZSA6ICdFcnJldXIgaW5jb25udWUnO1xuICAgICAgdG9hc3Qoe1xuICAgICAgICB0aXRsZTogJ0VycmV1cicsXG4gICAgICAgIGRlc2NyaXB0aW9uOiBtZXNzYWdlLFxuICAgICAgICB2YXJpYW50OiAnZGVzdHJ1Y3RpdmUnLFxuICAgICAgfSk7XG4gICAgfSBmaW5hbGx5IHtcbiAgICAgIHNldFNhdmluZyhmYWxzZSk7XG4gICAgfVxuICB9O1xuXG4gIGNvbnN0IHRlcm1pbmF0ZVNlc3Npb24gPSBhc3luYyAoc2Vzc2lvbklkOiBzdHJpbmcpID0+IHtcbiAgICB0cnkge1xuICAgICAgY29uc3QgeyBlcnJvciB9ID0gYXdhaXQgc3VwYWJhc2UuZnJvbSgndXNlcl9zZXNzaW9ucycpLmRlbGV0ZSgpLmVxKCdpZCcsIHNlc3Npb25JZCk7XG5cbiAgICAgIGlmIChlcnJvcikgdGhyb3cgZXJyb3I7XG5cbiAgICAgIHNldFNldHRpbmdzKHByZXYgPT4gKHtcbiAgICAgICAgLi4ucHJldixcbiAgICAgICAgYWN0aXZlU2Vzc2lvbnM6IHByZXYuYWN0aXZlU2Vzc2lvbnMuZmlsdGVyKHMgPT4gcy5pZCAhPT0gc2Vzc2lvbklkKSxcbiAgICAgIH0pKTtcblxuICAgICAgdG9hc3Qoe1xuICAgICAgICB0aXRsZTogJ1N1Y2PDqHMnLFxuICAgICAgICBkZXNjcmlwdGlvbjogJ1Nlc3Npb24gdGVybWluw6llJyxcbiAgICAgIH0pO1xuICAgIH0gY2F0Y2gge1xuICAgICAgdG9hc3Qoe1xuICAgICAgICB0aXRsZTogJ0VycmV1cicsXG4gICAgICAgIGRlc2NyaXB0aW9uOiAnSW1wb3NzaWJsZSBkZSB0ZXJtaW5lciBsYSBzZXNzaW9uJyxcbiAgICAgICAgdmFyaWFudDogJ2Rlc3RydWN0aXZlJyxcbiAgICAgIH0pO1xuICAgIH1cbiAgfTtcblxuICBjb25zdCBnZXRQYXNzd29yZFN0cmVuZ3RoID0gKHBhc3N3b3JkOiBzdHJpbmcpID0+IHtcbiAgICBsZXQgc3RyZW5ndGggPSAwO1xuICAgIGlmIChwYXNzd29yZC5sZW5ndGggPj0gOCkgc3RyZW5ndGggKz0gMjA7XG4gICAgaWYgKHBhc3N3b3JkLm1hdGNoKC9bYS16XS8pKSBzdHJlbmd0aCArPSAyMDtcbiAgICBpZiAocGFzc3dvcmQubWF0Y2goL1tBLVpdLykpIHN0cmVuZ3RoICs9IDIwO1xuICAgIGlmIChwYXNzd29yZC5tYXRjaCgvWzAtOV0vKSkgc3RyZW5ndGggKz0gMjA7XG4gICAgaWYgKHBhc3N3b3JkLm1hdGNoKC9bXmEtekEtWjAtOV0vKSkgc3RyZW5ndGggKz0gMjA7XG4gICAgcmV0dXJuIHN0cmVuZ3RoO1xuICB9O1xuXG4gIGNvbnN0IGdldFBhc3N3b3JkU3RyZW5ndGhDb2xvciA9IChzdHJlbmd0aDogbnVtYmVyKSA9PiB7XG4gICAgaWYgKHN0cmVuZ3RoIDwgNDApIHJldHVybiAnYmctcmVkLTUwMCc7XG4gICAgaWYgKHN0cmVuZ3RoIDwgNjApIHJldHVybiAnYmctb3JhbmdlLTUwMCc7XG4gICAgaWYgKHN0cmVuZ3RoIDwgODApIHJldHVybiAnYmcteWVsbG93LTUwMCc7XG4gICAgcmV0dXJuICdiZy1ncmVlbi01MDAnO1xuICB9O1xuXG4gIGNvbnN0IGdldFBhc3N3b3JkU3RyZW5ndGhUZXh0ID0gKHN0cmVuZ3RoOiBudW1iZXIpID0+IHtcbiAgICBpZiAoc3RyZW5ndGggPCA0MCkgcmV0dXJuICdGYWlibGUnO1xuICAgIGlmIChzdHJlbmd0aCA8IDYwKSByZXR1cm4gJ01veWVuJztcbiAgICBpZiAoc3RyZW5ndGggPCA4MCkgcmV0dXJuICdCb24nO1xuICAgIHJldHVybiAnVHLDqHMgZm9ydCc7XG4gIH07XG5cbiAgaWYgKGxvYWRpbmcpIHtcbiAgICByZXR1cm4gKFxuICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLWNlbnRlciBqdXN0aWZ5LWNlbnRlciBweS04XCI+XG4gICAgICAgIDxMb2FkZXIyIGNsYXNzTmFtZT1cImgtOCB3LTggYW5pbWF0ZS1zcGluXCIgLz5cbiAgICAgICAgPHNwYW4gY2xhc3NOYW1lPVwibWwtMlwiPkNoYXJnZW1lbnQgZGVzIHBhcmFtw6h0cmVzIGRlIHPDqWN1cml0w6kuLi48L3NwYW4+XG4gICAgICA8L2Rpdj5cbiAgICApO1xuICB9XG5cbiAgcmV0dXJuIChcbiAgICA8ZGl2IGNsYXNzTmFtZT1cInNwYWNlLXktNlwiPlxuICAgICAgey8qIFNlY3VyaXR5IE92ZXJ2aWV3ICovfVxuICAgICAgPENhcmQ+XG4gICAgICAgIDxDYXJkSGVhZGVyPlxuICAgICAgICAgIDxDYXJkVGl0bGUgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTJcIj5cbiAgICAgICAgICAgIDxTaGllbGQgY2xhc3NOYW1lPVwiaC01IHctNVwiIC8+XG4gICAgICAgICAgICBWdWUgZCdlbnNlbWJsZSBkZSBsYSBzw6ljdXJpdMOpXG4gICAgICAgICAgPC9DYXJkVGl0bGU+XG4gICAgICAgICAgPENhcmREZXNjcmlwdGlvbj7DiXRhdCBhY3R1ZWwgZGUgbGEgc8OpY3VyaXTDqSBkZSB2b3RyZSBjb21wdGU8L0NhcmREZXNjcmlwdGlvbj5cbiAgICAgICAgPC9DYXJkSGVhZGVyPlxuICAgICAgICA8Q2FyZENvbnRlbnQ+XG4gICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJncmlkIGdyaWQtY29scy0xIG1kOmdyaWQtY29scy0yIGdhcC00XCI+XG4gICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInRleHQtY2VudGVyIHAtNCByb3VuZGVkLWxnIGJnLW11dGVkLzUwXCI+XG4gICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwidGV4dC0yeGwgZm9udC1ib2xkIHRleHQtYmx1ZS02MDBcIj5cbiAgICAgICAgICAgICAgICB7c2V0dGluZ3MuYWN0aXZlU2Vzc2lvbnMubGVuZ3RofVxuICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJ0ZXh0LXNtIHRleHQtbXV0ZWQtZm9yZWdyb3VuZFwiPlNlc3Npb25zIGFjdGl2ZXM8L2Rpdj5cbiAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJ0ZXh0LWNlbnRlciBwLTQgcm91bmRlZC1sZyBiZy1tdXRlZC81MFwiPlxuICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInRleHQtMnhsIGZvbnQtYm9sZCB0ZXh0LXB1cnBsZS02MDBcIj5cbiAgICAgICAgICAgICAgICB7c2V0dGluZ3MucmVjZW50TG9naW5zLmZpbHRlcihsID0+IGwuc3VjY2VzcykubGVuZ3RofVxuICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJ0ZXh0LXNtIHRleHQtbXV0ZWQtZm9yZWdyb3VuZFwiPkNvbm5leGlvbnMgcsOpdXNzaWVzPC9kaXY+XG4gICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgPC9DYXJkQ29udGVudD5cbiAgICAgIDwvQ2FyZD5cblxuICAgICAgey8qIFBhc3N3b3JkIENoYW5nZSAqL31cbiAgICAgIDxDYXJkPlxuICAgICAgICA8Q2FyZEhlYWRlcj5cbiAgICAgICAgICA8Q2FyZFRpdGxlIGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGdhcC0yXCI+XG4gICAgICAgICAgICA8S2V5IGNsYXNzTmFtZT1cImgtNSB3LTVcIiAvPlxuICAgICAgICAgICAgTW90IGRlIHBhc3NlXG4gICAgICAgICAgPC9DYXJkVGl0bGU+XG4gICAgICAgICAgPENhcmREZXNjcmlwdGlvbj5DaGFuZ2V6IHZvdHJlIG1vdCBkZSBwYXNzZSBwb3VyIHPDqWN1cmlzZXIgdm90cmUgY29tcHRlPC9DYXJkRGVzY3JpcHRpb24+XG4gICAgICAgIDwvQ2FyZEhlYWRlcj5cbiAgICAgICAgPENhcmRDb250ZW50PlxuICAgICAgICAgIDxmb3JtIG9uU3VibWl0PXtoYW5kbGVQYXNzd29yZENoYW5nZX0gY2xhc3NOYW1lPVwic3BhY2UteS00XCI+XG4gICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInNwYWNlLXktMlwiPlxuICAgICAgICAgICAgICA8TGFiZWwgaHRtbEZvcj1cImN1cnJlbnRQYXNzd29yZFwiPk1vdCBkZSBwYXNzZSBhY3R1ZWw8L0xhYmVsPlxuICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInJlbGF0aXZlXCI+XG4gICAgICAgICAgICAgICAgPElucHV0XG4gICAgICAgICAgICAgICAgICBpZD1cImN1cnJlbnRQYXNzd29yZFwiXG4gICAgICAgICAgICAgICAgICB0eXBlPXtzaG93Q3VycmVudFBhc3N3b3JkID8gJ3RleHQnIDogJ3Bhc3N3b3JkJ31cbiAgICAgICAgICAgICAgICAgIHZhbHVlPXtzZXR0aW5ncy5jdXJyZW50UGFzc3dvcmR9XG4gICAgICAgICAgICAgICAgICBvbkNoYW5nZT17ZSA9PlxuICAgICAgICAgICAgICAgICAgICBzZXRTZXR0aW5ncyhwcmV2ID0+ICh7IC4uLnByZXYsIGN1cnJlbnRQYXNzd29yZDogZS50YXJnZXQudmFsdWUgfSkpXG4gICAgICAgICAgICAgICAgICB9XG4gICAgICAgICAgICAgICAgICBwbGFjZWhvbGRlcj1cIlZvdHJlIG1vdCBkZSBwYXNzZSBhY3R1ZWxcIlxuICAgICAgICAgICAgICAgIC8+XG4gICAgICAgICAgICAgICAgPEJ1dHRvblxuICAgICAgICAgICAgICAgICAgdHlwZT1cImJ1dHRvblwiXG4gICAgICAgICAgICAgICAgICB2YXJpYW50PVwiZ2hvc3RcIlxuICAgICAgICAgICAgICAgICAgc2l6ZT1cInNtXCJcbiAgICAgICAgICAgICAgICAgIGNsYXNzTmFtZT1cImFic29sdXRlIHJpZ2h0LTAgdG9wLTAgaC1mdWxsIHB4LTMgcHktMiBob3ZlcjpiZy10cmFuc3BhcmVudFwiXG4gICAgICAgICAgICAgICAgICBvbkNsaWNrPXsoKSA9PiBzZXRTaG93Q3VycmVudFBhc3N3b3JkKCFzaG93Q3VycmVudFBhc3N3b3JkKX1cbiAgICAgICAgICAgICAgICA+XG4gICAgICAgICAgICAgICAgICB7c2hvd0N1cnJlbnRQYXNzd29yZCA/IChcbiAgICAgICAgICAgICAgICAgICAgPEV5ZU9mZiBjbGFzc05hbWU9XCJoLTQgdy00XCIgLz5cbiAgICAgICAgICAgICAgICAgICkgOiAoXG4gICAgICAgICAgICAgICAgICAgIDxFeWUgY2xhc3NOYW1lPVwiaC00IHctNFwiIC8+XG4gICAgICAgICAgICAgICAgICApfVxuICAgICAgICAgICAgICAgIDwvQnV0dG9uPlxuICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgIDwvZGl2PlxuXG4gICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInNwYWNlLXktMlwiPlxuICAgICAgICAgICAgICA8TGFiZWwgaHRtbEZvcj1cIm5ld1Bhc3N3b3JkXCI+Tm91dmVhdSBtb3QgZGUgcGFzc2U8L0xhYmVsPlxuICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInJlbGF0aXZlXCI+XG4gICAgICAgICAgICAgICAgPElucHV0XG4gICAgICAgICAgICAgICAgICBpZD1cIm5ld1Bhc3N3b3JkXCJcbiAgICAgICAgICAgICAgICAgIHR5cGU9e3Nob3dOZXdQYXNzd29yZCA/ICd0ZXh0JyA6ICdwYXNzd29yZCd9XG4gICAgICAgICAgICAgICAgICB2YWx1ZT17c2V0dGluZ3MubmV3UGFzc3dvcmR9XG4gICAgICAgICAgICAgICAgICBvbkNoYW5nZT17ZSA9PiBzZXRTZXR0aW5ncyhwcmV2ID0+ICh7IC4uLnByZXYsIG5ld1Bhc3N3b3JkOiBlLnRhcmdldC52YWx1ZSB9KSl9XG4gICAgICAgICAgICAgICAgICBwbGFjZWhvbGRlcj1cIlZvdHJlIG5vdXZlYXUgbW90IGRlIHBhc3NlXCJcbiAgICAgICAgICAgICAgICAgIG1pbkxlbmd0aD17OH1cbiAgICAgICAgICAgICAgICAvPlxuICAgICAgICAgICAgICAgIDxCdXR0b25cbiAgICAgICAgICAgICAgICAgIHR5cGU9XCJidXR0b25cIlxuICAgICAgICAgICAgICAgICAgdmFyaWFudD1cImdob3N0XCJcbiAgICAgICAgICAgICAgICAgIHNpemU9XCJzbVwiXG4gICAgICAgICAgICAgICAgICBjbGFzc05hbWU9XCJhYnNvbHV0ZSByaWdodC0wIHRvcC0wIGgtZnVsbCBweC0zIHB5LTIgaG92ZXI6YmctdHJhbnNwYXJlbnRcIlxuICAgICAgICAgICAgICAgICAgb25DbGljaz17KCkgPT4gc2V0U2hvd05ld1Bhc3N3b3JkKCFzaG93TmV3UGFzc3dvcmQpfVxuICAgICAgICAgICAgICAgID5cbiAgICAgICAgICAgICAgICAgIHtzaG93TmV3UGFzc3dvcmQgPyA8RXllT2ZmIGNsYXNzTmFtZT1cImgtNCB3LTRcIiAvPiA6IDxFeWUgY2xhc3NOYW1lPVwiaC00IHctNFwiIC8+fVxuICAgICAgICAgICAgICAgIDwvQnV0dG9uPlxuICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAge3NldHRpbmdzLm5ld1Bhc3N3b3JkICYmIChcbiAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInNwYWNlLXktMlwiPlxuICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGp1c3RpZnktYmV0d2VlbiB0ZXh0LXNtXCI+XG4gICAgICAgICAgICAgICAgICAgIDxzcGFuPkZvcmNlIGR1IG1vdCBkZSBwYXNzZTwvc3Bhbj5cbiAgICAgICAgICAgICAgICAgICAgPHNwYW4+XG4gICAgICAgICAgICAgICAgICAgICAge2dldFBhc3N3b3JkU3RyZW5ndGhUZXh0KGdldFBhc3N3b3JkU3RyZW5ndGgoc2V0dGluZ3MubmV3UGFzc3dvcmQpKX1cbiAgICAgICAgICAgICAgICAgICAgPC9zcGFuPlxuICAgICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgICAgICA8UHJvZ3Jlc3MgdmFsdWU9e2dldFBhc3N3b3JkU3RyZW5ndGgoc2V0dGluZ3MubmV3UGFzc3dvcmQpfSBjbGFzc05hbWU9XCJoLTJcIiAvPlxuICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICApfVxuICAgICAgICAgICAgPC9kaXY+XG5cbiAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwic3BhY2UteS0yXCI+XG4gICAgICAgICAgICAgIDxMYWJlbCBodG1sRm9yPVwiY29uZmlybVBhc3N3b3JkXCI+Q29uZmlybWVyIGxlIG1vdCBkZSBwYXNzZTwvTGFiZWw+XG4gICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwicmVsYXRpdmVcIj5cbiAgICAgICAgICAgICAgICA8SW5wdXRcbiAgICAgICAgICAgICAgICAgIGlkPVwiY29uZmlybVBhc3N3b3JkXCJcbiAgICAgICAgICAgICAgICAgIHR5cGU9e3Nob3dDb25maXJtUGFzc3dvcmQgPyAndGV4dCcgOiAncGFzc3dvcmQnfVxuICAgICAgICAgICAgICAgICAgdmFsdWU9e3NldHRpbmdzLmNvbmZpcm1QYXNzd29yZH1cbiAgICAgICAgICAgICAgICAgIG9uQ2hhbmdlPXtlID0+XG4gICAgICAgICAgICAgICAgICAgIHNldFNldHRpbmdzKHByZXYgPT4gKHsgLi4ucHJldiwgY29uZmlybVBhc3N3b3JkOiBlLnRhcmdldC52YWx1ZSB9KSlcbiAgICAgICAgICAgICAgICAgIH1cbiAgICAgICAgICAgICAgICAgIHBsYWNlaG9sZGVyPVwiQ29uZmlybWV6IHZvdHJlIG5vdXZlYXUgbW90IGRlIHBhc3NlXCJcbiAgICAgICAgICAgICAgICAgIG1pbkxlbmd0aD17OH1cbiAgICAgICAgICAgICAgICAvPlxuICAgICAgICAgICAgICAgIDxCdXR0b25cbiAgICAgICAgICAgICAgICAgIHR5cGU9XCJidXR0b25cIlxuICAgICAgICAgICAgICAgICAgdmFyaWFudD1cImdob3N0XCJcbiAgICAgICAgICAgICAgICAgIHNpemU9XCJzbVwiXG4gICAgICAgICAgICAgICAgICBjbGFzc05hbWU9XCJhYnNvbHV0ZSByaWdodC0wIHRvcC0wIGgtZnVsbCBweC0zIHB5LTIgaG92ZXI6YmctdHJhbnNwYXJlbnRcIlxuICAgICAgICAgICAgICAgICAgb25DbGljaz17KCkgPT4gc2V0U2hvd0NvbmZpcm1QYXNzd29yZCghc2hvd0NvbmZpcm1QYXNzd29yZCl9XG4gICAgICAgICAgICAgICAgPlxuICAgICAgICAgICAgICAgICAge3Nob3dDb25maXJtUGFzc3dvcmQgPyAoXG4gICAgICAgICAgICAgICAgICAgIDxFeWVPZmYgY2xhc3NOYW1lPVwiaC00IHctNFwiIC8+XG4gICAgICAgICAgICAgICAgICApIDogKFxuICAgICAgICAgICAgICAgICAgICA8RXllIGNsYXNzTmFtZT1cImgtNCB3LTRcIiAvPlxuICAgICAgICAgICAgICAgICAgKX1cbiAgICAgICAgICAgICAgICA8L0J1dHRvbj5cbiAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICA8L2Rpdj5cblxuICAgICAgICAgICAgPEJ1dHRvbiB0eXBlPVwic3VibWl0XCIgZGlzYWJsZWQ9e3NhdmluZ30+XG4gICAgICAgICAgICAgIHtzYXZpbmcgJiYgPExvYWRlcjIgY2xhc3NOYW1lPVwibXItMiBoLTQgdy00IGFuaW1hdGUtc3BpblwiIC8+fVxuICAgICAgICAgICAgICA8U2F2ZSBjbGFzc05hbWU9XCJtci0yIGgtNCB3LTRcIiAvPlxuICAgICAgICAgICAgICBDaGFuZ2VyIGxlIG1vdCBkZSBwYXNzZVxuICAgICAgICAgICAgPC9CdXR0b24+XG4gICAgICAgICAgPC9mb3JtPlxuICAgICAgICA8L0NhcmRDb250ZW50PlxuICAgICAgPC9DYXJkPlxuXG4gICAgICB7LyogVHdvLUZhY3RvciBBdXRoZW50aWNhdGlvbiAtIFByb2Zlc3Npb25hbCBDb21wb25lbnQgKi99XG4gICAgICA8VHdvRmFjdG9yQXV0aCAvPlxuXG4gICAgICB7LyogQWN0aXZlIFNlc3Npb25zICovfVxuICAgICAgPENhcmQ+XG4gICAgICAgIDxDYXJkSGVhZGVyPlxuICAgICAgICAgIDxDYXJkVGl0bGUgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTJcIj5cbiAgICAgICAgICAgIDxBY3Rpdml0eSBjbGFzc05hbWU9XCJoLTUgdy01XCIgLz5cbiAgICAgICAgICAgIFNlc3Npb25zIGFjdGl2ZXNcbiAgICAgICAgICA8L0NhcmRUaXRsZT5cbiAgICAgICAgICA8Q2FyZERlc2NyaXB0aW9uPkfDqXJleiBsZXMgYXBwYXJlaWxzIGNvbm5lY3TDqXMgw6Agdm90cmUgY29tcHRlPC9DYXJkRGVzY3JpcHRpb24+XG4gICAgICAgIDwvQ2FyZEhlYWRlcj5cbiAgICAgICAgPENhcmRDb250ZW50PlxuICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwic3BhY2UteS00XCI+XG4gICAgICAgICAgICB7c2V0dGluZ3MuYWN0aXZlU2Vzc2lvbnMubWFwKHNlc3Npb24gPT4gKFxuICAgICAgICAgICAgICA8ZGl2XG4gICAgICAgICAgICAgICAga2V5PXtzZXNzaW9uLmlkfVxuICAgICAgICAgICAgICAgIGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGp1c3RpZnktYmV0d2VlbiBwLTQgcm91bmRlZC1sZyBib3JkZXJcIlxuICAgICAgICAgICAgICA+XG4gICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJzcGFjZS15LTFcIj5cbiAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTJcIj5cbiAgICAgICAgICAgICAgICAgICAgPHNwYW4gY2xhc3NOYW1lPVwiZm9udC1tZWRpdW1cIj57c2Vzc2lvbi5kZXZpY2V9PC9zcGFuPlxuICAgICAgICAgICAgICAgICAgICB7c2Vzc2lvbi5jdXJyZW50ICYmIDxCYWRnZSB2YXJpYW50PVwic2Vjb25kYXJ5XCI+QWN0dWVsPC9CYWRnZT59XG4gICAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwidGV4dC1zbSB0ZXh0LW11dGVkLWZvcmVncm91bmRcIj5cbiAgICAgICAgICAgICAgICAgICAge3Nlc3Npb24ubG9jYXRpb259IOKAoiBEZXJuacOocmUgYWN0aXZpdMOpOnsnICd9XG4gICAgICAgICAgICAgICAgICAgIHtuZXcgRGF0ZShzZXNzaW9uLmxhc3RBY3RpdmUpLnRvTG9jYWxlU3RyaW5nKCl9XG4gICAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICB7IXNlc3Npb24uY3VycmVudCAmJiAoXG4gICAgICAgICAgICAgICAgICA8QnV0dG9uIHZhcmlhbnQ9XCJvdXRsaW5lXCIgc2l6ZT1cInNtXCIgb25DbGljaz17KCkgPT4gdGVybWluYXRlU2Vzc2lvbihzZXNzaW9uLmlkKX0+XG4gICAgICAgICAgICAgICAgICAgIDxUcmFzaDIgY2xhc3NOYW1lPVwiaC00IHctNFwiIC8+XG4gICAgICAgICAgICAgICAgICA8L0J1dHRvbj5cbiAgICAgICAgICAgICAgICApfVxuICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICkpfVxuICAgICAgICAgICAge3NldHRpbmdzLmFjdGl2ZVNlc3Npb25zLmxlbmd0aCA9PT0gMCAmJiAoXG4gICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwidGV4dC1jZW50ZXIgcHktOCB0ZXh0LW11dGVkLWZvcmVncm91bmRcIj5BdWN1bmUgc2Vzc2lvbiBhY3RpdmU8L2Rpdj5cbiAgICAgICAgICAgICl9XG4gICAgICAgICAgPC9kaXY+XG4gICAgICAgIDwvQ2FyZENvbnRlbnQ+XG4gICAgICA8L0NhcmQ+XG5cbiAgICAgIHsvKiBSZWNlbnQgTG9naW5zICovfVxuICAgICAgPENhcmQ+XG4gICAgICAgIDxDYXJkSGVhZGVyPlxuICAgICAgICAgIDxDYXJkVGl0bGUgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTJcIj5cbiAgICAgICAgICAgIDxDbG9jayBjbGFzc05hbWU9XCJoLTUgdy01XCIgLz5cbiAgICAgICAgICAgIENvbm5leGlvbnMgcsOpY2VudGVzXG4gICAgICAgICAgPC9DYXJkVGl0bGU+XG4gICAgICAgICAgPENhcmREZXNjcmlwdGlvbj5IaXN0b3JpcXVlIGRlcyBjb25uZXhpb25zIMOgIHZvdHJlIGNvbXB0ZTwvQ2FyZERlc2NyaXB0aW9uPlxuICAgICAgICA8L0NhcmRIZWFkZXI+XG4gICAgICAgIDxDYXJkQ29udGVudD5cbiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInNwYWNlLXktM1wiPlxuICAgICAgICAgICAge3NldHRpbmdzLnJlY2VudExvZ2lucy5tYXAobG9naW4gPT4gKFxuICAgICAgICAgICAgICA8ZGl2XG4gICAgICAgICAgICAgICAga2V5PXtsb2dpbi5pZH1cbiAgICAgICAgICAgICAgICBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLWNlbnRlciBqdXN0aWZ5LWJldHdlZW4gcC0zIHJvdW5kZWQtbGcgYmctbXV0ZWQvNTBcIlxuICAgICAgICAgICAgICA+XG4gICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJzcGFjZS15LTFcIj5cbiAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTJcIj5cbiAgICAgICAgICAgICAgICAgICAgPHNwYW4gY2xhc3NOYW1lPVwiZm9udC1tZWRpdW1cIj57bG9naW4uZGV2aWNlfTwvc3Bhbj5cbiAgICAgICAgICAgICAgICAgICAge2xvZ2luLnN1Y2Nlc3MgPyAoXG4gICAgICAgICAgICAgICAgICAgICAgPENoZWNrQ2lyY2xlMiBjbGFzc05hbWU9XCJoLTQgdy00IHRleHQtZ3JlZW4tNTAwXCIgLz5cbiAgICAgICAgICAgICAgICAgICAgKSA6IChcbiAgICAgICAgICAgICAgICAgICAgICA8QWxlcnRDaXJjbGUgY2xhc3NOYW1lPVwiaC00IHctNCB0ZXh0LXJlZC01MDBcIiAvPlxuICAgICAgICAgICAgICAgICAgICApfVxuICAgICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInRleHQtc20gdGV4dC1tdXRlZC1mb3JlZ3JvdW5kXCI+XG4gICAgICAgICAgICAgICAgICAgIHtsb2dpbi5sb2NhdGlvbn0g4oCiIHtuZXcgRGF0ZShsb2dpbi50aW1lc3RhbXApLnRvTG9jYWxlU3RyaW5nKCl9XG4gICAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICA8QmFkZ2UgdmFyaWFudD17bG9naW4uc3VjY2VzcyA/ICdkZWZhdWx0JyA6ICdkZXN0cnVjdGl2ZSd9PlxuICAgICAgICAgICAgICAgICAge2xvZ2luLnN1Y2Nlc3MgPyAnUsOpdXNzaScgOiAnw4ljaGVjJ31cbiAgICAgICAgICAgICAgICA8L0JhZGdlPlxuICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICkpfVxuICAgICAgICAgICAge3NldHRpbmdzLnJlY2VudExvZ2lucy5sZW5ndGggPT09IDAgJiYgKFxuICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInRleHQtY2VudGVyIHB5LTggdGV4dC1tdXRlZC1mb3JlZ3JvdW5kXCI+QXVjdW5lIGNvbm5leGlvbiByw6ljZW50ZTwvZGl2PlxuICAgICAgICAgICAgKX1cbiAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgPC9DYXJkQ29udGVudD5cbiAgICAgIDwvQ2FyZD5cblxuICAgICAgey8qIFByaXZhY3kgU2V0dGluZ3MgKi99XG4gICAgICA8Q2FyZD5cbiAgICAgICAgPENhcmRIZWFkZXI+XG4gICAgICAgICAgPENhcmRUaXRsZSBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLWNlbnRlciBnYXAtMlwiPlxuICAgICAgICAgICAgPFNldHRpbmdzIGNsYXNzTmFtZT1cImgtNSB3LTVcIiAvPlxuICAgICAgICAgICAgUGFyYW3DqHRyZXMgZGUgY29uZmlkZW50aWFsaXTDqVxuICAgICAgICAgIDwvQ2FyZFRpdGxlPlxuICAgICAgICAgIDxDYXJkRGVzY3JpcHRpb24+XG4gICAgICAgICAgICBDb250csO0bGV6IGxhIHZpc2liaWxpdMOpIGRlIHZvdHJlIGNvbXB0ZSBldCBsJ3V0aWxpc2F0aW9uIGRlcyBkb25uw6llc1xuICAgICAgICAgIDwvQ2FyZERlc2NyaXB0aW9uPlxuICAgICAgICA8L0NhcmRIZWFkZXI+XG4gICAgICAgIDxDYXJkQ29udGVudCBjbGFzc05hbWU9XCJzcGFjZS15LTRcIj5cbiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGp1c3RpZnktYmV0d2VlblwiPlxuICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJzcGFjZS15LTAuNVwiPlxuICAgICAgICAgICAgICA8TGFiZWw+U3RhdHV0IGVuIGxpZ25lPC9MYWJlbD5cbiAgICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwidGV4dC1zbSB0ZXh0LW11dGVkLWZvcmVncm91bmRcIj5cbiAgICAgICAgICAgICAgICBQZXJtZXR0cmUgYXV4IGF1dHJlcyB1dGlsaXNhdGV1cnMgZGUgdm9pciBxdWUgdm91cyDDqnRlcyBlbiBsaWduZVxuICAgICAgICAgICAgICA8L3A+XG4gICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgIDxCdXR0b25cbiAgICAgICAgICAgICAgdmFyaWFudD17c2V0dGluZ3Muc2hvd09ubGluZVN0YXR1cyA/ICdkZWZhdWx0JyA6ICdvdXRsaW5lJ31cbiAgICAgICAgICAgICAgb25DbGljaz17KCkgPT5cbiAgICAgICAgICAgICAgICBzZXRTZXR0aW5ncyhwcmV2ID0+ICh7IC4uLnByZXYsIHNob3dPbmxpbmVTdGF0dXM6ICFwcmV2LnNob3dPbmxpbmVTdGF0dXMgfSkpXG4gICAgICAgICAgICAgIH1cbiAgICAgICAgICAgID5cbiAgICAgICAgICAgICAge3NldHRpbmdzLnNob3dPbmxpbmVTdGF0dXMgPyAnQWN0aXbDqScgOiAnRMOpc2FjdGl2w6knfVxuICAgICAgICAgICAgPC9CdXR0b24+XG4gICAgICAgICAgPC9kaXY+XG5cbiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGp1c3RpZnktYmV0d2VlblwiPlxuICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJzcGFjZS15LTAuNVwiPlxuICAgICAgICAgICAgICA8TGFiZWw+Q29sbGVjdGUgZGUgZG9ubsOpZXM8L0xhYmVsPlxuICAgICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJ0ZXh0LXNtIHRleHQtbXV0ZWQtZm9yZWdyb3VuZFwiPlxuICAgICAgICAgICAgICAgIFBlcm1ldHRyZSBsYSBjb2xsZWN0ZSBkZSBkb25uw6llcyBhbm9ueW1lcyBwb3VyIGFtw6lsaW9yZXIgbGUgc2VydmljZVxuICAgICAgICAgICAgICA8L3A+XG4gICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgIDxCdXR0b25cbiAgICAgICAgICAgICAgdmFyaWFudD17c2V0dGluZ3MuYWxsb3dEYXRhQ29sbGVjdGlvbiA/ICdkZWZhdWx0JyA6ICdvdXRsaW5lJ31cbiAgICAgICAgICAgICAgb25DbGljaz17KCkgPT5cbiAgICAgICAgICAgICAgICBzZXRTZXR0aW5ncyhwcmV2ID0+ICh7IC4uLnByZXYsIGFsbG93RGF0YUNvbGxlY3Rpb246ICFwcmV2LmFsbG93RGF0YUNvbGxlY3Rpb24gfSkpXG4gICAgICAgICAgICAgIH1cbiAgICAgICAgICAgID5cbiAgICAgICAgICAgICAge3NldHRpbmdzLmFsbG93RGF0YUNvbGxlY3Rpb24gPyAnQWN0aXbDqScgOiAnRMOpc2FjdGl2w6knfVxuICAgICAgICAgICAgPC9CdXR0b24+XG4gICAgICAgICAgPC9kaXY+XG5cbiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGp1c3RpZnktYmV0d2VlblwiPlxuICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJzcGFjZS15LTAuNVwiPlxuICAgICAgICAgICAgICA8TGFiZWw+RW1haWxzIG1hcmtldGluZzwvTGFiZWw+XG4gICAgICAgICAgICAgIDxwIGNsYXNzTmFtZT1cInRleHQtc20gdGV4dC1tdXRlZC1mb3JlZ3JvdW5kXCI+XG4gICAgICAgICAgICAgICAgUmVjZXZvaXIgZGVzIGVtYWlscyBtYXJrZXRpbmcgZXQgZGVzIG9mZnJlcyBzcMOpY2lhbGVzXG4gICAgICAgICAgICAgIDwvcD5cbiAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgPEJ1dHRvblxuICAgICAgICAgICAgICB2YXJpYW50PXtzZXR0aW5ncy5tYXJrZXRpbmdFbWFpbHMgPyAnZGVmYXVsdCcgOiAnb3V0bGluZSd9XG4gICAgICAgICAgICAgIG9uQ2xpY2s9eygpID0+XG4gICAgICAgICAgICAgICAgc2V0U2V0dGluZ3MocHJldiA9PiAoeyAuLi5wcmV2LCBtYXJrZXRpbmdFbWFpbHM6ICFwcmV2Lm1hcmtldGluZ0VtYWlscyB9KSlcbiAgICAgICAgICAgICAgfVxuICAgICAgICAgICAgPlxuICAgICAgICAgICAgICB7c2V0dGluZ3MubWFya2V0aW5nRW1haWxzID8gJ0FjdGl2w6knIDogJ0TDqXNhY3RpdsOpJ31cbiAgICAgICAgICAgIDwvQnV0dG9uPlxuICAgICAgICAgIDwvZGl2PlxuICAgICAgICA8L0NhcmRDb250ZW50PlxuICAgICAgPC9DYXJkPlxuXG4gICAgICA8R0RQUkV4cG9ydFBhbmVsIC8+XG4gICAgICA8QWNjb3VudERlbGV0aW9uUGFuZWwgLz5cbiAgICA8L2Rpdj5cbiAgKTtcbn07XG4iXSwibmFtZXMiOlsidXNlU3RhdGUiLCJ1c2VFZmZlY3QiLCJCdXR0b24iLCJJbnB1dCIsIkxhYmVsIiwiQ2FyZCIsIkNhcmRDb250ZW50IiwiQ2FyZERlc2NyaXB0aW9uIiwiQ2FyZEhlYWRlciIsIkNhcmRUaXRsZSIsIkJhZGdlIiwiUHJvZ3Jlc3MiLCJ1c2VUb2FzdCIsInN1cGFiYXNlIiwidXNlQXV0aCIsIlR3b0ZhY3RvckF1dGgiLCJMb2FkZXIyIiwiU2hpZWxkIiwiS2V5IiwiQ2hlY2tDaXJjbGUyIiwiQWxlcnRDaXJjbGUiLCJTYXZlIiwiRXllIiwiRXllT2ZmIiwiQ2xvY2siLCJUcmFzaDIiLCJTZXR0aW5ncyIsIkFjdGl2aXR5IiwibG9nZ2VyIiwiQWNjb3VudERlbGV0aW9uUGFuZWwiLCJHRFBSRXhwb3J0UGFuZWwiLCJVU0VSX1NFU1NJT05fRklFTERTIiwiVVNFUl9MT0dJTl9ISVNUT1JZX0ZJRUxEUyIsIlBST0ZJTEVfUFJJVkFDWV9GSUVMRFMiLCJTZWN1cml0eVNldHRpbmdzIiwidG9hc3QiLCJ1c2VyIiwibG9hZGluZyIsInNldExvYWRpbmciLCJzYXZpbmciLCJzZXRTYXZpbmciLCJzaG93Q3VycmVudFBhc3N3b3JkIiwic2V0U2hvd0N1cnJlbnRQYXNzd29yZCIsInNob3dOZXdQYXNzd29yZCIsInNldFNob3dOZXdQYXNzd29yZCIsInNob3dDb25maXJtUGFzc3dvcmQiLCJzZXRTaG93Q29uZmlybVBhc3N3b3JkIiwic2V0dGluZ3MiLCJzZXRTZXR0aW5ncyIsImN1cnJlbnRQYXNzd29yZCIsIm5ld1Bhc3N3b3JkIiwiY29uZmlybVBhc3N3b3JkIiwiYWN0aXZlU2Vzc2lvbnMiLCJyZWNlbnRMb2dpbnMiLCJzaG93T25saW5lU3RhdHVzIiwiYWxsb3dEYXRhQ29sbGVjdGlvbiIsIm1hcmtldGluZ0VtYWlscyIsImxvYWRTZWN1cml0eVNldHRpbmdzIiwiZGF0YSIsInNlc3Npb25zRGF0YSIsImZyb20iLCJzZWxlY3QiLCJlcSIsImlkIiwibG9naW5zRGF0YSIsImxpbWl0IiwicHJpdmFjeURhdGEiLCJzaW5nbGUiLCJwcmV2IiwiZXJyIiwiZXJyb3IiLCJoYW5kbGVQYXNzd29yZENoYW5nZSIsImUiLCJwcmV2ZW50RGVmYXVsdCIsInRpdGxlIiwiZGVzY3JpcHRpb24iLCJ2YXJpYW50IiwibGVuZ3RoIiwiYXV0aCIsInVwZGF0ZVVzZXIiLCJwYXNzd29yZCIsIm1lc3NhZ2UiLCJFcnJvciIsInRlcm1pbmF0ZVNlc3Npb24iLCJzZXNzaW9uSWQiLCJkZWxldGUiLCJmaWx0ZXIiLCJzIiwiZ2V0UGFzc3dvcmRTdHJlbmd0aCIsInN0cmVuZ3RoIiwibWF0Y2giLCJnZXRQYXNzd29yZFN0cmVuZ3RoQ29sb3IiLCJnZXRQYXNzd29yZFN0cmVuZ3RoVGV4dCIsImRpdiIsImNsYXNzTmFtZSIsInNwYW4iLCJsIiwic3VjY2VzcyIsImZvcm0iLCJvblN1Ym1pdCIsImh0bWxGb3IiLCJ0eXBlIiwidmFsdWUiLCJvbkNoYW5nZSIsInRhcmdldCIsInBsYWNlaG9sZGVyIiwic2l6ZSIsIm9uQ2xpY2siLCJtaW5MZW5ndGgiLCJkaXNhYmxlZCIsIm1hcCIsInNlc3Npb24iLCJkZXZpY2UiLCJjdXJyZW50IiwibG9jYXRpb24iLCJEYXRlIiwibGFzdEFjdGl2ZSIsInRvTG9jYWxlU3RyaW5nIiwibG9naW4iLCJ0aW1lc3RhbXAiLCJwIl0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7QUFBQSxTQUFTQSxRQUFRLEVBQUVDLFNBQVMsUUFBUSxRQUFRO0FBQzVDLFNBQVNDLE1BQU0sUUFBUSx5QkFBeUI7QUFDaEQsU0FBU0MsS0FBSyxRQUFRLHdCQUF3QjtBQUM5QyxTQUFTQyxLQUFLLFFBQVEsd0JBQXdCO0FBQzlDLFNBQVNDLElBQUksRUFBRUMsV0FBVyxFQUFFQyxl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

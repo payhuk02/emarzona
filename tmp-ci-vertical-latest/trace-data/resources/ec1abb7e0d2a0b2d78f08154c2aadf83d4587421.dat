@@ -1,0 +1,59 @@
+import { getClient, debug } from "/node_modules/@sentry/core/build/esm/index.js?v=89021f86";
+import { DEBUG_BUILD } from "/node_modules/@sentry/browser/build/npm/esm/dev/debug-build.js?v=89021f86";
+
+/**
+ * Starts the Sentry UI profiler.
+ * This mode is exclusive with the transaction profiler and will only work if the profilesSampleRate is set to a falsy value.
+ * In UI profiling mode, the profiler will keep reporting profile chunks to Sentry until it is stopped, which allows for continuous profiling of the application.
+ */
+function startProfiler() {
+  const client = getClient();
+  if (!client) {
+    DEBUG_BUILD && debug.warn('No Sentry client available, profiling is not started');
+    return;
+  }
+
+  const integration = client.getIntegrationByName('BrowserProfiling');
+
+  if (!integration) {
+    DEBUG_BUILD && debug.warn('BrowserProfiling integration is not available');
+    return;
+  }
+
+  client.emit('startUIProfiler');
+}
+
+/**
+ * Stops the Sentry UI profiler.
+ * Calls to stop will stop the profiler and flush the currently collected profile data to Sentry.
+ */
+function stopProfiler() {
+  const client = getClient();
+  if (!client) {
+    DEBUG_BUILD && debug.warn('No Sentry client available, profiling is not started');
+    return;
+  }
+
+  const integration = client.getIntegrationByName('BrowserProfiling');
+  if (!integration) {
+    DEBUG_BUILD && debug.warn('ProfilingIntegration is not available');
+    return;
+  }
+
+  client.emit('stopUIProfiler');
+}
+
+/**
+ * Profiler namespace for controlling the JS profiler in 'manual' mode.
+ *
+ * Requires the `browserProfilingIntegration` from the `@sentry/browser` package.
+ */
+const uiProfiler = {
+  startProfiler,
+  stopProfiler,
+};
+
+export { uiProfiler };
+                                 
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXguanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uLy4uL3NyYy9wcm9maWxpbmcvaW5kZXgudHMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHR5cGUgeyBQcm9maWxlciB9IGZyb20gJ0BzZW50cnkvY29yZSc7XG5pbXBvcnQgeyBkZWJ1ZywgZ2V0Q2xpZW50IH0gZnJvbSAnQHNlbnRyeS9jb3JlJztcbmltcG9ydCB7IERFQlVHX0JVSUxEIH0gZnJvbSAnLi4vZGVidWctYnVpbGQnO1xuXG4vKipcbiAqIFN0YXJ0cyB0aGUgU2VudHJ5IFVJIHByb2ZpbGVyLlxuICogVGhpcyBtb2RlIGlzIGV4Y2x1c2l2ZSB3aXRoIHRoZSB0cmFuc2FjdGlvbiBwcm9maWxlciBhbmQgd2lsbCBvbmx5IHdvcmsgaWYgdGhlIHByb2ZpbGVzU2FtcGxlUmF0ZSBpcyBzZXQgdG8gYSBmYWxzeSB2YWx1ZS5cbiAqIEluIFVJIHByb2ZpbGluZyBtb2RlLCB0aGUgcHJvZmlsZXIgd2lsbCBrZWVwIHJlcG9ydGluZyBwcm9maWxlIGNodW5rcyB0byBTZW50cnkgdW50aWwgaXQgaXMgc3RvcHBlZCwgd2hpY2ggYWxsb3dzIGZvciBjb250aW51b3VzIHByb2ZpbGluZyBvZiB0aGUgYXBwbGljYXRpb24uXG4gKi9cbmZ1bmN0aW9uIHN0YXJ0UHJvZmlsZXIoKTogdm9pZCB7XG4gIGNvbnN0IGNsaWVudCA9IGdldENsaWVudCgpO1xuICBpZiAoIWNsaWVudCkge1xuICAgIERFQlVHX0JVSUxEICYmIGRlYnVnLndhcm4oJ05vIFNlbnRyeSBjbGllbnQgYXZhaWxhYmxlLCBwcm9maWxpbmcgaXMgbm90IHN0YXJ0ZWQnKTtcbiAgICByZXR1cm47XG4gIH1cblxuICBjb25zdCBpbnRlZ3JhdGlvbiA9IGNsaWVudC5nZXRJbnRlZ3JhdGlvbkJ5TmFtZSgnQnJvd3NlclByb2ZpbGluZycpO1xuXG4gIGlmICghaW50ZWdyYXRpb24pIHtcbiAgICBERUJVR19CVUlMRCAmJiBkZWJ1Zy53YXJuKCdCcm93c2VyUHJvZmlsaW5nIGludGVncmF0aW9uIGlzIG5vdCBhdmFpbGFibGUnKTtcbiAgICByZXR1cm47XG4gIH1cblxuICBjbGllbnQuZW1pdCgnc3RhcnRVSVByb2ZpbGVyJyk7XG59XG5cbi8qKlxuICogU3RvcHMgdGhlIFNlbnRyeSBVSSBwcm9maWxlci5cbiAqIENhbGxzIHRvIHN0b3Agd2lsbCBzdG9wIHRoZSBwcm9maWxlciBhbmQgZmx1c2ggdGhlIGN1cnJlbnRseSBjb2xsZWN0ZWQgcHJvZmlsZSBkYXRhIHRvIFNlbnRyeS5cbiAqL1xuZnVuY3Rpb24gc3RvcFByb2ZpbGVyKCk6IHZvaWQge1xuICBjb25zdCBjbGllbnQgPSBnZXRDbGllbnQoKTtcbiAgaWYgKCFjbGllbnQpIHtcbiAgICBERUJVR19CVUlMRCAmJiBkZWJ1Zy53YXJuKCdObyBTZW50cnkgY2xpZW50IGF2YWlsYWJsZSwgcHJvZmlsaW5nIGlzIG5vdCBzdGFydGVkJyk7XG4gICAgcmV0dXJuO1xuICB9XG5cbiAgY29uc3QgaW50ZWdyYXRpb24gPSBjbGllbnQuZ2V0SW50ZWdyYXRpb25CeU5hbWUoJ0Jyb3dzZXJQcm9maWxpbmcnKTtcbiAgaWYgKCFpbnRlZ3JhdGlvbikge1xuICAgIERFQlVHX0JVSUxEICYmIGRlYnVnLndhcm4oJ1Byb2ZpbGluZ0ludGVncmF0aW9uIGlzIG5vdCBhdmFpbGFibGUnKTtcbiAgICByZXR1cm47XG4gIH1cblxuICBjbGllbnQuZW1pdCgnc3RvcFVJUHJvZmlsZXInKTtcbn1cblxuLyoqXG4gKiBQcm9maWxlciBuYW1lc3BhY2UgZm9yIGNvbnRyb2xsaW5nIHRoZSBKUyBwcm9maWxlciBpbiAnbWFudWFsJyBtb2RlLlxuICpcbiAqIFJlcXVpcmVzIHRoZSBgYnJvd3NlclByb2ZpbGluZ0ludGVncmF0aW9uYCBmcm9tIHRoZSBgQHNlbnRyeS9icm93c2VyYCBwYWNrYWdlLlxuICovXG5leHBvcnQgY29uc3QgdWlQcm9maWxlcjogUHJvZmlsZXIgPSB7XG4gIHN0YXJ0UHJvZmlsZXIsXG4gIHN0b3BQcm9maWxlcixcbn07XG4iXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7O0FBSUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLFNBQVMsYUFBYSxHQUFTO0FBQy9CLEVBQUUsTUFBTSxNQUFBLEdBQVMsU0FBUyxFQUFFO0FBQzVCLEVBQUUsSUFBSSxDQUFDLE1BQU0sRUFBRTtBQUNmLElBQUksZUFBZSxLQUFLLENBQUMsSUFBSSxDQUFDLHNEQUFzRCxDQUFDO0FBQ3JGLElBQUk7QUFDSixFQUFFOztBQUVGLEVBQUUsTUFBTSxjQUFjLE1BQU0sQ0FBQyxvQkFBb0IsQ0FBQyxrQkFBa0IsQ0FBQzs7QUFFckUsRUFBRSxJQUFJLENBQUMsV0FBVyxFQUFFO0FBQ3BCLElBQUksZUFBZSxLQUFLLENBQUMsSUFBSSxDQUFDLCtDQUErQyxDQUFDO0FBQzlFLElBQUk7QUFDSixFQUFFOztBQUVGLEVBQUUsTUFBTSxDQUFDLElBQUksQ0FBQyxpQkFBaUIsQ0FBQztBQUNoQzs7QUFFQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLFNBQVMsWUFBWSxHQUFTO0FBQzlCLEVBQUUsTUFBTSxNQUFBLEdBQVMsU0FBUyxFQUFFO0FBQzVCLEVBQUUsSUFBSSxDQUFDLE1BQU0sRUFBRTtBQUNmLElBQUksZUFBZSxLQUFLLENBQUMsSUFBSSxDQUFDLHNEQUFzRCxDQUFDO0FBQ3JGLElBQUk7QUFDSixFQUFFOztBQUVGLEVBQUUsTUFBTSxjQUFjLE1BQU0sQ0FBQyxvQkFBb0IsQ0FBQyxrQkFBa0IsQ0FBQztBQUNyRSxFQUFFLElBQUksQ0FBQyxXQUFXLEVBQUU7QUFDcEIsSUFBSSxlQUFlLEtBQUssQ0FBQyxJQUFJLENBQUMsdUNBQXVDLENBQUM7QUFDdEUsSUFBSTtBQUNKLEVBQUU7O0FBRUYsRUFBRSxNQUFNLENBQUMsSUFBSSxDQUFDLGdCQUFnQixDQUFDO0FBQy9COztBQUVBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDTyxNQUFNLFVBQVUsR0FBYTtBQUNwQyxFQUFFLGFBQWE7QUFDZixFQUFFLFlBQVk7QUFDZDs7OzsiLCJ4X2dvb2dsZV9pZ25vcmVMaXN0IjpbMF19

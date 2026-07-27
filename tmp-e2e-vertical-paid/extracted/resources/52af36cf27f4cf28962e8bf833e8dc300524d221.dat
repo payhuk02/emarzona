@@ -1,0 +1,220 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/admin/AdminRoutePermissionGuard.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/admin/AdminRoutePermissionGuard.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=8792f17d"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"]; const _Fragment = __vite__cjsImport2_react_jsxDevRuntime["Fragment"];
+var _s = $RefreshSig$();
+import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=8792f17d"; const useEffect = __vite__cjsImport3_react["useEffect"]; const useState = __vite__cjsImport3_react["useState"];
+import { useLocation, useNavigate } from "/node_modules/.vite/deps/react-router-dom.js?v=8792f17d";
+import { ShieldAlert } from "/node_modules/.vite/deps/lucide-react.js?v=8792f17d";
+import { useCurrentAdminPermissions } from "/src/hooks/useCurrentAdminPermissions.ts";
+import { canAccessAdminPath } from "/src/lib/admin/admin-route-permissions.ts";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "/src/components/ui/card.tsx";
+import { Button } from "/src/components/ui/button.tsx";
+const PERM_GUARD_TIMEOUT_MS = 15000;
+/**
+ * Bloque l'accès direct aux URLs admin sans permission RBAC (redirect → /admin).
+ */ export function AdminRoutePermissionGuard({ children }) {
+    _s();
+    const location = useLocation();
+    const navigate = useNavigate();
+    const { can, isSuperAdmin, loading, platformRole, error } = useCurrentAdminPermissions();
+    const [timedOut, setTimedOut] = useState(false);
+    const allowed = canAccessAdminPath(location.pathname, can, isSuperAdmin);
+    useEffect(()=>{
+        if (!loading) {
+            setTimedOut(false);
+            return;
+        }
+        const timer = window.setTimeout(()=>setTimedOut(true), PERM_GUARD_TIMEOUT_MS);
+        return ()=>window.clearTimeout(timer);
+    }, [
+        loading
+    ]);
+    useEffect(()=>{
+        if (loading) return;
+        if (!allowed) {
+            navigate('/admin', {
+                replace: true,
+                state: {
+                    forbiddenPath: location.pathname,
+                    role: platformRole
+                }
+            });
+        }
+    }, [
+        loading,
+        allowed,
+        navigate,
+        location.pathname,
+        platformRole
+    ]);
+    if (loading) {
+        return /*#__PURE__*/ _jsxDEV("div", {
+            className: "flex min-h-[40vh] flex-col items-center justify-center gap-3 p-4",
+            children: [
+                /*#__PURE__*/ _jsxDEV("div", {
+                    className: "inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/admin/AdminRoutePermissionGuard.tsx",
+                    lineNumber: 48,
+                    columnNumber: 9
+                }, this),
+                timedOut ? /*#__PURE__*/ _jsxDEV(_Fragment, {
+                    children: [
+                        /*#__PURE__*/ _jsxDEV("p", {
+                            className: "text-sm text-muted-foreground text-center max-w-md",
+                            children: [
+                                "Le chargement des permissions prend trop de temps",
+                                error ? ` (${error})` : '',
+                                "."
+                            ]
+                        }, void 0, true, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/admin/AdminRoutePermissionGuard.tsx",
+                            lineNumber: 51,
+                            columnNumber: 13
+                        }, this),
+                        /*#__PURE__*/ _jsxDEV(Button, {
+                            type: "button",
+                            variant: "outline",
+                            onClick: ()=>window.location.reload(),
+                            children: "Réessayer"
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/admin/AdminRoutePermissionGuard.tsx",
+                            lineNumber: 55,
+                            columnNumber: 13
+                        }, this)
+                    ]
+                }, void 0, true) : /*#__PURE__*/ _jsxDEV("p", {
+                    className: "text-sm text-muted-foreground",
+                    children: "Chargement des permissions…"
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/admin/AdminRoutePermissionGuard.tsx",
+                    lineNumber: 60,
+                    columnNumber: 11
+                }, this)
+            ]
+        }, void 0, true, {
+            fileName: "/home/runner/work/emarzona/emarzona/src/components/admin/AdminRoutePermissionGuard.tsx",
+            lineNumber: 47,
+            columnNumber: 7
+        }, this);
+    }
+    if (!allowed) {
+        return /*#__PURE__*/ _jsxDEV("div", {
+            className: "flex min-h-[40vh] items-center justify-center p-4",
+            children: /*#__PURE__*/ _jsxDEV(Card, {
+                className: "max-w-md border-destructive/40",
+                children: [
+                    /*#__PURE__*/ _jsxDEV(CardHeader, {
+                        className: "text-center",
+                        children: [
+                            /*#__PURE__*/ _jsxDEV(ShieldAlert, {
+                                className: "mx-auto h-10 w-10 text-destructive mb-2"
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/admin/AdminRoutePermissionGuard.tsx",
+                                lineNumber: 71,
+                                columnNumber: 13
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV(CardTitle, {
+                                children: "Accès refusé"
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/admin/AdminRoutePermissionGuard.tsx",
+                                lineNumber: 72,
+                                columnNumber: 13
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV(CardDescription, {
+                                children: [
+                                    "Votre rôle (",
+                                    platformRole ?? 'admin',
+                                    ") n'a pas accès à cette section."
+                                ]
+                            }, void 0, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/admin/AdminRoutePermissionGuard.tsx",
+                                lineNumber: 73,
+                                columnNumber: 13
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/admin/AdminRoutePermissionGuard.tsx",
+                        lineNumber: 70,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV(CardContent, {
+                        className: "flex justify-center",
+                        children: /*#__PURE__*/ _jsxDEV(Button, {
+                            onClick: ()=>navigate('/admin', {
+                                    replace: true
+                                }),
+                            children: "Retour au tableau de bord"
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/admin/AdminRoutePermissionGuard.tsx",
+                            lineNumber: 78,
+                            columnNumber: 13
+                        }, this)
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/admin/AdminRoutePermissionGuard.tsx",
+                        lineNumber: 77,
+                        columnNumber: 11
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/admin/AdminRoutePermissionGuard.tsx",
+                lineNumber: 69,
+                columnNumber: 9
+            }, this)
+        }, void 0, false, {
+            fileName: "/home/runner/work/emarzona/emarzona/src/components/admin/AdminRoutePermissionGuard.tsx",
+            lineNumber: 68,
+            columnNumber: 7
+        }, this);
+    }
+    return /*#__PURE__*/ _jsxDEV(_Fragment, {
+        children: children
+    }, void 0, false);
+}
+_s(AdminRoutePermissionGuard, "qrnXeCph4ioHw1wRg3S2S+EfLgM=", false, function() {
+    return [
+        useLocation,
+        useNavigate,
+        useCurrentAdminPermissions
+    ];
+});
+_c = AdminRoutePermissionGuard;
+var _c;
+$RefreshReg$(_c, "AdminRoutePermissionGuard");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/admin/AdminRoutePermissionGuard.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/admin/AdminRoutePermissionGuard.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIkFkbWluUm91dGVQZXJtaXNzaW9uR3VhcmQudHN4Il0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7IFJlYWN0Tm9kZSwgdXNlRWZmZWN0LCB1c2VTdGF0ZSB9IGZyb20gJ3JlYWN0JztcbmltcG9ydCB7IHVzZUxvY2F0aW9uLCB1c2VOYXZpZ2F0ZSB9IGZyb20gJ3JlYWN0LXJvdXRlci1kb20nO1xuaW1wb3J0IHsgU2hpZWxkQWxlcnQgfSBmcm9tICdsdWNpZGUtcmVhY3QnO1xuaW1wb3J0IHsgdXNlQ3VycmVudEFkbWluUGVybWlzc2lvbnMgfSBmcm9tICdAL2hvb2tzL3VzZUN1cnJlbnRBZG1pblBlcm1pc3Npb25zJztcbmltcG9ydCB7IGNhbkFjY2Vzc0FkbWluUGF0aCB9IGZyb20gJ0AvbGliL2FkbWluL2FkbWluLXJvdXRlLXBlcm1pc3Npb25zJztcbmltcG9ydCB7IENhcmQsIENhcmRDb250ZW50LCBDYXJkRGVzY3JpcHRpb24sIENhcmRIZWFkZXIsIENhcmRUaXRsZSB9IGZyb20gJ0AvY29tcG9uZW50cy91aS9jYXJkJztcbmltcG9ydCB7IEJ1dHRvbiB9IGZyb20gJ0AvY29tcG9uZW50cy91aS9idXR0b24nO1xuXG50eXBlIEFkbWluUm91dGVQZXJtaXNzaW9uR3VhcmRQcm9wcyA9IHtcbiAgY2hpbGRyZW46IFJlYWN0Tm9kZTtcbn07XG5cbmNvbnN0IFBFUk1fR1VBUkRfVElNRU9VVF9NUyA9IDE1XzAwMDtcblxuLyoqXG4gKiBCbG9xdWUgbCdhY2PDqHMgZGlyZWN0IGF1eCBVUkxzIGFkbWluIHNhbnMgcGVybWlzc2lvbiBSQkFDIChyZWRpcmVjdCDihpIgL2FkbWluKS5cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIEFkbWluUm91dGVQZXJtaXNzaW9uR3VhcmQoeyBjaGlsZHJlbiB9OiBBZG1pblJvdXRlUGVybWlzc2lvbkd1YXJkUHJvcHMpIHtcbiAgY29uc3QgbG9jYXRpb24gPSB1c2VMb2NhdGlvbigpO1xuICBjb25zdCBuYXZpZ2F0ZSA9IHVzZU5hdmlnYXRlKCk7XG4gIGNvbnN0IHsgY2FuLCBpc1N1cGVyQWRtaW4sIGxvYWRpbmcsIHBsYXRmb3JtUm9sZSwgZXJyb3IgfSA9IHVzZUN1cnJlbnRBZG1pblBlcm1pc3Npb25zKCk7XG4gIGNvbnN0IFt0aW1lZE91dCwgc2V0VGltZWRPdXRdID0gdXNlU3RhdGUoZmFsc2UpO1xuXG4gIGNvbnN0IGFsbG93ZWQgPSBjYW5BY2Nlc3NBZG1pblBhdGgobG9jYXRpb24ucGF0aG5hbWUsIGNhbiwgaXNTdXBlckFkbWluKTtcblxuICB1c2VFZmZlY3QoKCkgPT4ge1xuICAgIGlmICghbG9hZGluZykge1xuICAgICAgc2V0VGltZWRPdXQoZmFsc2UpO1xuICAgICAgcmV0dXJuO1xuICAgIH1cbiAgICBjb25zdCB0aW1lciA9IHdpbmRvdy5zZXRUaW1lb3V0KCgpID0+IHNldFRpbWVkT3V0KHRydWUpLCBQRVJNX0dVQVJEX1RJTUVPVVRfTVMpO1xuICAgIHJldHVybiAoKSA9PiB3aW5kb3cuY2xlYXJUaW1lb3V0KHRpbWVyKTtcbiAgfSwgW2xvYWRpbmddKTtcblxuICB1c2VFZmZlY3QoKCkgPT4ge1xuICAgIGlmIChsb2FkaW5nKSByZXR1cm47XG4gICAgaWYgKCFhbGxvd2VkKSB7XG4gICAgICBuYXZpZ2F0ZSgnL2FkbWluJywge1xuICAgICAgICByZXBsYWNlOiB0cnVlLFxuICAgICAgICBzdGF0ZTogeyBmb3JiaWRkZW5QYXRoOiBsb2NhdGlvbi5wYXRobmFtZSwgcm9sZTogcGxhdGZvcm1Sb2xlIH0sXG4gICAgICB9KTtcbiAgICB9XG4gIH0sIFtsb2FkaW5nLCBhbGxvd2VkLCBuYXZpZ2F0ZSwgbG9jYXRpb24ucGF0aG5hbWUsIHBsYXRmb3JtUm9sZV0pO1xuXG4gIGlmIChsb2FkaW5nKSB7XG4gICAgcmV0dXJuIChcbiAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBtaW4taC1bNDB2aF0gZmxleC1jb2wgaXRlbXMtY2VudGVyIGp1c3RpZnktY2VudGVyIGdhcC0zIHAtNFwiPlxuICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImlubGluZS1ibG9jayBoLTggdy04IGFuaW1hdGUtc3BpbiByb3VuZGVkLWZ1bGwgYm9yZGVyLTQgYm9yZGVyLXNvbGlkIGJvcmRlci1wcmltYXJ5IGJvcmRlci1yLXRyYW5zcGFyZW50XCIgLz5cbiAgICAgICAge3RpbWVkT3V0ID8gKFxuICAgICAgICAgIDw+XG4gICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJ0ZXh0LXNtIHRleHQtbXV0ZWQtZm9yZWdyb3VuZCB0ZXh0LWNlbnRlciBtYXgtdy1tZFwiPlxuICAgICAgICAgICAgICBMZSBjaGFyZ2VtZW50IGRlcyBwZXJtaXNzaW9ucyBwcmVuZCB0cm9wIGRlIHRlbXBzXG4gICAgICAgICAgICAgIHtlcnJvciA/IGAgKCR7ZXJyb3J9KWAgOiAnJ30uXG4gICAgICAgICAgICA8L3A+XG4gICAgICAgICAgICA8QnV0dG9uIHR5cGU9XCJidXR0b25cIiB2YXJpYW50PVwib3V0bGluZVwiIG9uQ2xpY2s9eygpID0+IHdpbmRvdy5sb2NhdGlvbi5yZWxvYWQoKX0+XG4gICAgICAgICAgICAgIFLDqWVzc2F5ZXJcbiAgICAgICAgICAgIDwvQnV0dG9uPlxuICAgICAgICAgIDwvPlxuICAgICAgICApIDogKFxuICAgICAgICAgIDxwIGNsYXNzTmFtZT1cInRleHQtc20gdGV4dC1tdXRlZC1mb3JlZ3JvdW5kXCI+Q2hhcmdlbWVudCBkZXMgcGVybWlzc2lvbnPigKY8L3A+XG4gICAgICAgICl9XG4gICAgICA8L2Rpdj5cbiAgICApO1xuICB9XG5cbiAgaWYgKCFhbGxvd2VkKSB7XG4gICAgcmV0dXJuIChcbiAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBtaW4taC1bNDB2aF0gaXRlbXMtY2VudGVyIGp1c3RpZnktY2VudGVyIHAtNFwiPlxuICAgICAgICA8Q2FyZCBjbGFzc05hbWU9XCJtYXgtdy1tZCBib3JkZXItZGVzdHJ1Y3RpdmUvNDBcIj5cbiAgICAgICAgICA8Q2FyZEhlYWRlciBjbGFzc05hbWU9XCJ0ZXh0LWNlbnRlclwiPlxuICAgICAgICAgICAgPFNoaWVsZEFsZXJ0IGNsYXNzTmFtZT1cIm14LWF1dG8gaC0xMCB3LTEwIHRleHQtZGVzdHJ1Y3RpdmUgbWItMlwiIC8+XG4gICAgICAgICAgICA8Q2FyZFRpdGxlPkFjY8OocyByZWZ1c8OpPC9DYXJkVGl0bGU+XG4gICAgICAgICAgICA8Q2FyZERlc2NyaXB0aW9uPlxuICAgICAgICAgICAgICBWb3RyZSByw7RsZSAoe3BsYXRmb3JtUm9sZSA/PyAnYWRtaW4nfSkgbiZhcG9zO2EgcGFzIGFjY8OocyDDoCBjZXR0ZSBzZWN0aW9uLlxuICAgICAgICAgICAgPC9DYXJkRGVzY3JpcHRpb24+XG4gICAgICAgICAgPC9DYXJkSGVhZGVyPlxuICAgICAgICAgIDxDYXJkQ29udGVudCBjbGFzc05hbWU9XCJmbGV4IGp1c3RpZnktY2VudGVyXCI+XG4gICAgICAgICAgICA8QnV0dG9uIG9uQ2xpY2s9eygpID0+IG5hdmlnYXRlKCcvYWRtaW4nLCB7IHJlcGxhY2U6IHRydWUgfSl9PlxuICAgICAgICAgICAgICBSZXRvdXIgYXUgdGFibGVhdSBkZSBib3JkXG4gICAgICAgICAgICA8L0J1dHRvbj5cbiAgICAgICAgICA8L0NhcmRDb250ZW50PlxuICAgICAgICA8L0NhcmQ+XG4gICAgICA8L2Rpdj5cbiAgICApO1xuICB9XG5cbiAgcmV0dXJuIDw+e2NoaWxkcmVufTwvPjtcbn1cbiJdLCJuYW1lcyI6WyJ1c2VFZmZlY3QiLCJ1c2VTdGF0ZSIsInVzZUxvY2F0aW9uIiwidXNlTmF2aWdhdGUiLCJTaGllbGRBbGVydCIsInVzZUN1cnJlbnRBZG1pblBlcm1pc3Npb25zIiwiY2FuQWNjZXNzQWRtaW5QYXRoIiwiQ2FyZCIsIkNhcmRDb250ZW50IiwiQ2FyZERlc2NyaXB0aW9uIiwiQ2FyZEhlYWRlciIsIkNhcmRUaXRsZSIsIkJ1dHRvbiIsIlBFUk1fR1VBUkRfVElNRU9VVF9NUyIsIkFkbWluUm91dGVQZXJtaXNzaW9uR3VhcmQiLCJjaGlsZHJlbiIsImxvY2F0aW9uIiwibmF2aWdhdGUiLCJjYW4iLCJpc1N1cGVyQWRtaW4iLCJsb2FkaW5nIiwicGxhdGZvcm1Sb2xlIiwiZXJyb3IiLCJ0aW1lZE91dCIsInNldFRpbWVkT3V0IiwiYWxsb3dlZCIsInBhdGhuYW1lIiwidGltZXIiLCJ3aW5kb3ciLCJzZXRUaW1lb3V0IiwiY2xlYXJUaW1lb3V0IiwicmVwbGFjZSIsInN0YXRlIiwiZm9yYmlkZGVuUGF0aCIsInJvbGUiLCJkaXYiLCJjbGFzc05hbWUiLCJwIiwidHlwZSIsInZhcmlhbnQiLCJvbkNsaWNrIiwicmVsb2FkIl0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7QUFBQSxTQUFvQkEsU0FBUyxFQUFFQyxRQUFRLFFBQVEsUUFBUTtBQUN2RCxTQUFTQyxXQUFXLEVBQUVDLFdBQVcsUUFBUSxtQkFBbUI7QUFDNUQsU0FBU0MsV0FBVyxRQUFRLGVBQWU7QUFDM0MsU0FBU0MsMEJBQTBCLFFBQVEscUNBQXFDO0FBQ2hGLFNBQVNDLGtCQUFrQixRQUFRLHNDQUFzQztBQUN6RSxTQUFTQyxJQUFJLEVBQUVDLFdBQVcsRUFBRUMsZUFBZSxFQUFFQyxVQUFVLEVBQUVDLFNBQVMsUUFBUSx1QkFBdUI7QUFDakcsU0FBU0MsTUFBTSxRQUFRLHlCQUF5QjtBQU1oRCxNQUFNQyx3QkFBd0I7QUFFOUI7O0NBRUMsR0FDRCxPQUFPLFNBQVNDLDBCQUEwQixFQUFFQyxRQUFRLEVBQWtDOztJQUNwRixNQUFNQyxXQUFXZDtJQUNqQixNQUFNZSxXQUFXZDtJQUNqQixNQUFNLEVBQUVlLEdBQUcsRUFBRUMsWUFBWSxFQUFFQyxPQUFPLEVBQUVDLFlBQVksRUFBRUMsS0FBSyxFQUFFLEdBQUdqQjtJQUM1RCxNQUFNLENBQUNrQixVQUFVQyxZQUFZLEdBQUd2QixTQUFTO0lBRXpDLE1BQU13QixVQUFVbkIsbUJBQW1CVSxTQUFTVSxRQUFRLEVBQUVSLEtBQUtDO0lBRTNEbkIsVUFBVTtRQUNSLElBQUksQ0FBQ29CLFNBQVM7WUFDWkksWUFBWTtZQUNaO1FBQ0Y7UUFDQSxNQUFNRyxRQUFRQyxPQUFPQyxVQUFVLENBQUMsSUFBTUwsWUFBWSxPQUFPWDtRQUN6RCxPQUFPLElBQU1lLE9BQU9FLFlBQVksQ0FBQ0g7SUFDbkMsR0FBRztRQUFDUDtLQUFRO0lBRVpwQixVQUFVO1FBQ1IsSUFBSW9CLFNBQVM7UUFDYixJQUFJLENBQUNLLFNBQVM7WUFDWlIsU0FBUyxVQUFVO2dCQUNqQmMsU0FBUztnQkFDVEMsT0FBTztvQkFBRUMsZUFBZWpCLFNBQVNVLFFBQVE7b0JBQUVRLE1BQU1iO2dCQUFhO1lBQ2hFO1FBQ0Y7SUFDRixHQUFHO1FBQUNEO1FBQVNLO1FBQVNSO1FBQVVELFNBQVNVLFFBQVE7UUFBRUw7S0FBYTtJQUVoRSxJQUFJRCxTQUFTO1FBQ1gscUJBQ0UsUUFBQ2U7WUFBSUMsV0FBVTs7OEJBQ2IsUUFBQ0Q7b0JBQUlDLFdBQVU7Ozs7OztnQkFDZGIseUJBQ0M7O3NDQUNFLFFBQUNjOzRCQUFFRCxXQUFVOztnQ0FBcUQ7Z0NBRS9EZCxRQUFRLENBQUMsRUFBRSxFQUFFQSxNQUFNLENBQUMsQ0FBQyxHQUFHO2dDQUFHOzs7Ozs7O3NDQUU5QixRQUFDVjs0QkFBTzBCLE1BQUs7NEJBQVNDLFNBQVE7NEJBQVVDLFNBQVMsSUFBTVosT0FBT1osUUFBUSxDQUFDeUIsTUFBTTtzQ0FBSTs7Ozs7OztpREFLbkYsUUFBQ0o7b0JBQUVELFdBQVU7OEJBQWdDOzs7Ozs7Ozs7Ozs7SUFJckQ7SUFFQSxJQUFJLENBQUNYLFNBQVM7UUFDWixxQkFDRSxRQUFDVTtZQUFJQyxXQUFVO3NCQUNiLGNBQUEsUUFBQzdCO2dCQUFLNkIsV0FBVTs7a0NBQ2QsUUFBQzFCO3dCQUFXMEIsV0FBVTs7MENBQ3BCLFFBQUNoQztnQ0FBWWdDLFdBQVU7Ozs7OzswQ0FDdkIsUUFBQ3pCOzBDQUFVOzs7Ozs7MENBQ1gsUUFBQ0Y7O29DQUFnQjtvQ0FDRlksZ0JBQWdCO29DQUFROzs7Ozs7Ozs7Ozs7O2tDQUd6QyxRQUFDYjt3QkFBWTRCLFdBQVU7a0NBQ3JCLGNBQUEsUUFBQ3hCOzRCQUFPNEIsU0FBUyxJQUFNdkIsU0FBUyxVQUFVO29DQUFFYyxTQUFTO2dDQUFLO3NDQUFJOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O0lBT3hFO0lBRUEscUJBQU87a0JBQUdoQjs7QUFDWjtHQXRFZ0JEOztRQUNHWjtRQUNBQztRQUMyQ0U7OztLQUg5Q1MifQ==

@@ -1,0 +1,83 @@
+/**
+ * Champs autorisés en écriture sur public.stores (aligné migrations déployées).
+ * Les colonnes apparence sont sur store_appearance (Sprint 3).
+ */ const STORE_WRITABLE_COLUMNS = new Set([
+    'name',
+    'slug',
+    'description',
+    'about',
+    'info_message',
+    'info_message_color',
+    'info_message_font',
+    'contact_email',
+    'contact_phone',
+    'facebook_url',
+    'instagram_url',
+    'twitter_url',
+    'linkedin_url',
+    'youtube_url',
+    'tiktok_url',
+    'pinterest_url',
+    'snapchat_url',
+    'discord_url',
+    'twitch_url',
+    'support_email',
+    'sales_email',
+    'press_email',
+    'partnership_email',
+    'support_phone',
+    'sales_phone',
+    'whatsapp_number',
+    'telegram_username',
+    'address_line1',
+    'address_line2',
+    'city',
+    'state_province',
+    'postal_code',
+    'country',
+    'latitude',
+    'longitude',
+    'timezone',
+    'opening_hours',
+    'legal_pages',
+    'marketing_content',
+    'meta_title',
+    'meta_description',
+    'meta_keywords',
+    'og_title',
+    'og_description',
+    'og_image',
+    'google_analytics_id',
+    'google_analytics_enabled',
+    'facebook_pixel_id',
+    'facebook_pixel_enabled',
+    'google_tag_manager_id',
+    'google_tag_manager_enabled',
+    'tiktok_pixel_id',
+    'tiktok_pixel_enabled',
+    'custom_tracking_scripts',
+    'custom_scripts_enabled',
+    'default_currency',
+    'commerce_type',
+    'metadata',
+    'is_active'
+]);
+const UNSUPPORTED_STORE_FIELDS = [
+    'seo_score',
+    'theme_color'
+];
+/**
+ * Nettoie un payload d'update/insert pour la table `stores`.
+ * Note: `user_id` est volontairement exclu — le réinjecter explicitement à la création.
+ */ export function sanitizeStorePayload(payload) {
+    const cleaned = {};
+    Object.entries(payload).forEach(([key, value])=>{
+        if (value === undefined) return;
+        if (UNSUPPORTED_STORE_FIELDS.includes(key)) return;
+        if (!STORE_WRITABLE_COLUMNS.has(key)) return;
+        cleaned[key] = value;
+    });
+    return cleaned;
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInN0b3JlLXBheWxvYWQtdXRpbHMudHMiXSwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBDaGFtcHMgYXV0b3Jpc8OpcyBlbiDDqWNyaXR1cmUgc3VyIHB1YmxpYy5zdG9yZXMgKGFsaWduw6kgbWlncmF0aW9ucyBkw6lwbG95w6llcykuXG4gKiBMZXMgY29sb25uZXMgYXBwYXJlbmNlIHNvbnQgc3VyIHN0b3JlX2FwcGVhcmFuY2UgKFNwcmludCAzKS5cbiAqL1xuY29uc3QgU1RPUkVfV1JJVEFCTEVfQ09MVU1OUyA9IG5ldyBTZXQoW1xuICAnbmFtZScsXG4gICdzbHVnJyxcbiAgJ2Rlc2NyaXB0aW9uJyxcbiAgJ2Fib3V0JyxcbiAgJ2luZm9fbWVzc2FnZScsXG4gICdpbmZvX21lc3NhZ2VfY29sb3InLFxuICAnaW5mb19tZXNzYWdlX2ZvbnQnLFxuICAnY29udGFjdF9lbWFpbCcsXG4gICdjb250YWN0X3Bob25lJyxcbiAgJ2ZhY2Vib29rX3VybCcsXG4gICdpbnN0YWdyYW1fdXJsJyxcbiAgJ3R3aXR0ZXJfdXJsJyxcbiAgJ2xpbmtlZGluX3VybCcsXG4gICd5b3V0dWJlX3VybCcsXG4gICd0aWt0b2tfdXJsJyxcbiAgJ3BpbnRlcmVzdF91cmwnLFxuICAnc25hcGNoYXRfdXJsJyxcbiAgJ2Rpc2NvcmRfdXJsJyxcbiAgJ3R3aXRjaF91cmwnLFxuICAnc3VwcG9ydF9lbWFpbCcsXG4gICdzYWxlc19lbWFpbCcsXG4gICdwcmVzc19lbWFpbCcsXG4gICdwYXJ0bmVyc2hpcF9lbWFpbCcsXG4gICdzdXBwb3J0X3Bob25lJyxcbiAgJ3NhbGVzX3Bob25lJyxcbiAgJ3doYXRzYXBwX251bWJlcicsXG4gICd0ZWxlZ3JhbV91c2VybmFtZScsXG4gICdhZGRyZXNzX2xpbmUxJyxcbiAgJ2FkZHJlc3NfbGluZTInLFxuICAnY2l0eScsXG4gICdzdGF0ZV9wcm92aW5jZScsXG4gICdwb3N0YWxfY29kZScsXG4gICdjb3VudHJ5JyxcbiAgJ2xhdGl0dWRlJyxcbiAgJ2xvbmdpdHVkZScsXG4gICd0aW1lem9uZScsXG4gICdvcGVuaW5nX2hvdXJzJyxcbiAgJ2xlZ2FsX3BhZ2VzJyxcbiAgJ21hcmtldGluZ19jb250ZW50JyxcbiAgJ21ldGFfdGl0bGUnLFxuICAnbWV0YV9kZXNjcmlwdGlvbicsXG4gICdtZXRhX2tleXdvcmRzJyxcbiAgJ29nX3RpdGxlJyxcbiAgJ29nX2Rlc2NyaXB0aW9uJyxcbiAgJ29nX2ltYWdlJyxcbiAgJ2dvb2dsZV9hbmFseXRpY3NfaWQnLFxuICAnZ29vZ2xlX2FuYWx5dGljc19lbmFibGVkJyxcbiAgJ2ZhY2Vib29rX3BpeGVsX2lkJyxcbiAgJ2ZhY2Vib29rX3BpeGVsX2VuYWJsZWQnLFxuICAnZ29vZ2xlX3RhZ19tYW5hZ2VyX2lkJyxcbiAgJ2dvb2dsZV90YWdfbWFuYWdlcl9lbmFibGVkJyxcbiAgJ3Rpa3Rva19waXhlbF9pZCcsXG4gICd0aWt0b2tfcGl4ZWxfZW5hYmxlZCcsXG4gICdjdXN0b21fdHJhY2tpbmdfc2NyaXB0cycsXG4gICdjdXN0b21fc2NyaXB0c19lbmFibGVkJyxcbiAgJ2RlZmF1bHRfY3VycmVuY3knLFxuICAnY29tbWVyY2VfdHlwZScsXG4gICdtZXRhZGF0YScsXG4gICdpc19hY3RpdmUnLFxuXSk7XG5cbmNvbnN0IFVOU1VQUE9SVEVEX1NUT1JFX0ZJRUxEUzogc3RyaW5nW10gPSBbJ3Nlb19zY29yZScsICd0aGVtZV9jb2xvciddO1xuXG50eXBlIEFueU9iamVjdCA9IFJlY29yZDxzdHJpbmcsIHVua25vd24+O1xuXG4vKipcbiAqIE5ldHRvaWUgdW4gcGF5bG9hZCBkJ3VwZGF0ZS9pbnNlcnQgcG91ciBsYSB0YWJsZSBgc3RvcmVzYC5cbiAqIE5vdGU6IGB1c2VyX2lkYCBlc3Qgdm9sb250YWlyZW1lbnQgZXhjbHUg4oCUIGxlIHLDqWluamVjdGVyIGV4cGxpY2l0ZW1lbnQgw6AgbGEgY3LDqWF0aW9uLlxuICovXG5leHBvcnQgZnVuY3Rpb24gc2FuaXRpemVTdG9yZVBheWxvYWQ8VCBleHRlbmRzIEFueU9iamVjdD4ocGF5bG9hZDogVCk6IFQge1xuICBjb25zdCBjbGVhbmVkOiBBbnlPYmplY3QgPSB7fTtcblxuICBPYmplY3QuZW50cmllcyhwYXlsb2FkIGFzIEFueU9iamVjdCkuZm9yRWFjaCgoW2tleSwgdmFsdWVdKSA9PiB7XG4gICAgaWYgKHZhbHVlID09PSB1bmRlZmluZWQpIHJldHVybjtcbiAgICBpZiAoVU5TVVBQT1JURURfU1RPUkVfRklFTERTLmluY2x1ZGVzKGtleSkpIHJldHVybjtcbiAgICBpZiAoIVNUT1JFX1dSSVRBQkxFX0NPTFVNTlMuaGFzKGtleSkpIHJldHVybjtcbiAgICBjbGVhbmVkW2tleV0gPSB2YWx1ZTtcbiAgfSk7XG5cbiAgcmV0dXJuIGNsZWFuZWQgYXMgVDtcbn1cbiJdLCJuYW1lcyI6WyJTVE9SRV9XUklUQUJMRV9DT0xVTU5TIiwiU2V0IiwiVU5TVVBQT1JURURfU1RPUkVfRklFTERTIiwic2FuaXRpemVTdG9yZVBheWxvYWQiLCJwYXlsb2FkIiwiY2xlYW5lZCIsIk9iamVjdCIsImVudHJpZXMiLCJmb3JFYWNoIiwia2V5IiwidmFsdWUiLCJ1bmRlZmluZWQiLCJpbmNsdWRlcyIsImhhcyJdLCJtYXBwaW5ncyI6IkFBQUE7OztDQUdDLEdBQ0QsTUFBTUEseUJBQXlCLElBQUlDLElBQUk7SUFDckM7SUFDQTtJQUNBO0lBQ0E7SUFDQTtJQUNBO0lBQ0E7SUFDQTtJQUNBO0lBQ0E7SUFDQTtJQUNBO0lBQ0E7SUFDQTtJQUNBO0lBQ0E7SUFDQTtJQUNBO0lBQ0E7SUFDQTtJQUNBO0lBQ0E7SUFDQTtJQUNBO0lBQ0E7SUFDQTtJQUNBO0lBQ0E7SUFDQTtJQUNBO0lBQ0E7SUFDQTtJQUNBO0lBQ0E7SUFDQTtJQUNBO0lBQ0E7SUFDQTtJQUNBO0lBQ0E7SUFDQTtJQUNBO0lBQ0E7SUFDQTtJQUNBO0lBQ0E7SUFDQTtJQUNBO0lBQ0E7SUFDQTtJQUNBO0lBQ0E7SUFDQTtJQUNBO0lBQ0E7SUFDQTtJQUNBO0lBQ0E7SUFDQTtDQUNEO0FBRUQsTUFBTUMsMkJBQXFDO0lBQUM7SUFBYTtDQUFjO0FBSXZFOzs7Q0FHQyxHQUNELE9BQU8sU0FBU0MscUJBQTBDQyxPQUFVO0lBQ2xFLE1BQU1DLFVBQXFCLENBQUM7SUFFNUJDLE9BQU9DLE9BQU8sQ0FBQ0gsU0FBc0JJLE9BQU8sQ0FBQyxDQUFDLENBQUNDLEtBQUtDLE1BQU07UUFDeEQsSUFBSUEsVUFBVUMsV0FBVztRQUN6QixJQUFJVCx5QkFBeUJVLFFBQVEsQ0FBQ0gsTUFBTTtRQUM1QyxJQUFJLENBQUNULHVCQUF1QmEsR0FBRyxDQUFDSixNQUFNO1FBQ3RDSixPQUFPLENBQUNJLElBQUksR0FBR0M7SUFDakI7SUFFQSxPQUFPTDtBQUNUIn0=

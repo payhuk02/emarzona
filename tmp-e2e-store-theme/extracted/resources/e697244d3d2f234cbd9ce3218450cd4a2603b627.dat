@@ -1,0 +1,91 @@
+import { DEBUG_BUILD } from "/node_modules/@sentry/core/build/esm/debug-build.js?v=3ea6c1b9";
+import { debug } from "/node_modules/@sentry/core/build/esm/utils/debug-logger.js?v=3ea6c1b9";
+
+/**
+ * Message validation functions for MCP server instrumentation
+ *
+ * Provides JSON-RPC 2.0 message type validation and MCP server instance validation.
+ */
+
+
+/**
+ * Validates if a message is a JSON-RPC request
+ * @param message - Message to validate
+ * @returns True if message is a JSON-RPC request
+ */
+function isJsonRpcRequest(message) {
+  return (
+    typeof message === 'object' &&
+    message !== null &&
+    'jsonrpc' in message &&
+    (message ).jsonrpc === '2.0' &&
+    'method' in message &&
+    'id' in message
+  );
+}
+
+/**
+ * Validates if a message is a JSON-RPC notification
+ * @param message - Message to validate
+ * @returns True if message is a JSON-RPC notification
+ */
+function isJsonRpcNotification(message) {
+  return (
+    typeof message === 'object' &&
+    message !== null &&
+    'jsonrpc' in message &&
+    (message ).jsonrpc === '2.0' &&
+    'method' in message &&
+    !('id' in message)
+  );
+}
+
+/**
+ * Validates if a message is a JSON-RPC response
+ * @param message - Message to validate
+ * @returns True if message is a JSON-RPC response
+ */
+function isJsonRpcResponse(message) {
+  return (
+    typeof message === 'object' &&
+    message !== null &&
+    'jsonrpc' in message &&
+    (message ).jsonrpc === '2.0' &&
+    'id' in message &&
+    ('result' in message || 'error' in message)
+  );
+}
+
+/**
+ * Validates MCP server instance with type checking
+ * @param instance - Object to validate as MCP server instance
+ * @returns True if instance has required MCP server methods
+ */
+function validateMcpServerInstance(instance) {
+  if (
+    typeof instance === 'object' &&
+    instance !== null &&
+    'resource' in instance &&
+    'tool' in instance &&
+    'prompt' in instance &&
+    'connect' in instance
+  ) {
+    return true;
+  }
+  DEBUG_BUILD && debug.warn('Did not patch MCP server. Interface is incompatible.');
+  return false;
+}
+
+/**
+ * Check if the item is a valid content item
+ * @param item - The item to check
+ * @returns True if the item is a valid content item, false otherwise
+ */
+function isValidContentItem(item) {
+  return item != null && typeof item === 'object';
+}
+
+export { isJsonRpcNotification, isJsonRpcRequest, isJsonRpcResponse, isValidContentItem, validateMcpServerInstance };
+                                      
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidmFsaWRhdGlvbi5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4vLi4vc3JjL2ludGVncmF0aW9ucy9tY3Atc2VydmVyL3ZhbGlkYXRpb24udHMiXSwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBNZXNzYWdlIHZhbGlkYXRpb24gZnVuY3Rpb25zIGZvciBNQ1Agc2VydmVyIGluc3RydW1lbnRhdGlvblxuICpcbiAqIFByb3ZpZGVzIEpTT04tUlBDIDIuMCBtZXNzYWdlIHR5cGUgdmFsaWRhdGlvbiBhbmQgTUNQIHNlcnZlciBpbnN0YW5jZSB2YWxpZGF0aW9uLlxuICovXG5cbmltcG9ydCB7IERFQlVHX0JVSUxEIH0gZnJvbSAnLi4vLi4vZGVidWctYnVpbGQnO1xuaW1wb3J0IHsgZGVidWcgfSBmcm9tICcuLi8uLi91dGlscy9kZWJ1Zy1sb2dnZXInO1xuaW1wb3J0IHR5cGUgeyBKc29uUnBjTm90aWZpY2F0aW9uLCBKc29uUnBjUmVxdWVzdCwgSnNvblJwY1Jlc3BvbnNlIH0gZnJvbSAnLi90eXBlcyc7XG5cbi8qKlxuICogVmFsaWRhdGVzIGlmIGEgbWVzc2FnZSBpcyBhIEpTT04tUlBDIHJlcXVlc3RcbiAqIEBwYXJhbSBtZXNzYWdlIC0gTWVzc2FnZSB0byB2YWxpZGF0ZVxuICogQHJldHVybnMgVHJ1ZSBpZiBtZXNzYWdlIGlzIGEgSlNPTi1SUEMgcmVxdWVzdFxuICovXG5leHBvcnQgZnVuY3Rpb24gaXNKc29uUnBjUmVxdWVzdChtZXNzYWdlOiB1bmtub3duKTogbWVzc2FnZSBpcyBKc29uUnBjUmVxdWVzdCB7XG4gIHJldHVybiAoXG4gICAgdHlwZW9mIG1lc3NhZ2UgPT09ICdvYmplY3QnICYmXG4gICAgbWVzc2FnZSAhPT0gbnVsbCAmJlxuICAgICdqc29ucnBjJyBpbiBtZXNzYWdlICYmXG4gICAgKG1lc3NhZ2UgYXMgSnNvblJwY1JlcXVlc3QpLmpzb25ycGMgPT09ICcyLjAnICYmXG4gICAgJ21ldGhvZCcgaW4gbWVzc2FnZSAmJlxuICAgICdpZCcgaW4gbWVzc2FnZVxuICApO1xufVxuXG4vKipcbiAqIFZhbGlkYXRlcyBpZiBhIG1lc3NhZ2UgaXMgYSBKU09OLVJQQyBub3RpZmljYXRpb25cbiAqIEBwYXJhbSBtZXNzYWdlIC0gTWVzc2FnZSB0byB2YWxpZGF0ZVxuICogQHJldHVybnMgVHJ1ZSBpZiBtZXNzYWdlIGlzIGEgSlNPTi1SUEMgbm90aWZpY2F0aW9uXG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBpc0pzb25ScGNOb3RpZmljYXRpb24obWVzc2FnZTogdW5rbm93bik6IG1lc3NhZ2UgaXMgSnNvblJwY05vdGlmaWNhdGlvbiB7XG4gIHJldHVybiAoXG4gICAgdHlwZW9mIG1lc3NhZ2UgPT09ICdvYmplY3QnICYmXG4gICAgbWVzc2FnZSAhPT0gbnVsbCAmJlxuICAgICdqc29ucnBjJyBpbiBtZXNzYWdlICYmXG4gICAgKG1lc3NhZ2UgYXMgSnNvblJwY05vdGlmaWNhdGlvbikuanNvbnJwYyA9PT0gJzIuMCcgJiZcbiAgICAnbWV0aG9kJyBpbiBtZXNzYWdlICYmXG4gICAgISgnaWQnIGluIG1lc3NhZ2UpXG4gICk7XG59XG5cbi8qKlxuICogVmFsaWRhdGVzIGlmIGEgbWVzc2FnZSBpcyBhIEpTT04tUlBDIHJlc3BvbnNlXG4gKiBAcGFyYW0gbWVzc2FnZSAtIE1lc3NhZ2UgdG8gdmFsaWRhdGVcbiAqIEByZXR1cm5zIFRydWUgaWYgbWVzc2FnZSBpcyBhIEpTT04tUlBDIHJlc3BvbnNlXG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBpc0pzb25ScGNSZXNwb25zZShtZXNzYWdlOiB1bmtub3duKTogbWVzc2FnZSBpcyBKc29uUnBjUmVzcG9uc2Uge1xuICByZXR1cm4gKFxuICAgIHR5cGVvZiBtZXNzYWdlID09PSAnb2JqZWN0JyAmJlxuICAgIG1lc3NhZ2UgIT09IG51bGwgJiZcbiAgICAnanNvbnJwYycgaW4gbWVzc2FnZSAmJlxuICAgIChtZXNzYWdlIGFzIHsganNvbnJwYzogc3RyaW5nIH0pLmpzb25ycGMgPT09ICcyLjAnICYmXG4gICAgJ2lkJyBpbiBtZXNzYWdlICYmXG4gICAgKCdyZXN1bHQnIGluIG1lc3NhZ2UgfHwgJ2Vycm9yJyBpbiBtZXNzYWdlKVxuICApO1xufVxuXG4vKipcbiAqIFZhbGlkYXRlcyBNQ1Agc2VydmVyIGluc3RhbmNlIHdpdGggdHlwZSBjaGVja2luZ1xuICogQHBhcmFtIGluc3RhbmNlIC0gT2JqZWN0IHRvIHZhbGlkYXRlIGFzIE1DUCBzZXJ2ZXIgaW5zdGFuY2VcbiAqIEByZXR1cm5zIFRydWUgaWYgaW5zdGFuY2UgaGFzIHJlcXVpcmVkIE1DUCBzZXJ2ZXIgbWV0aG9kc1xuICovXG5leHBvcnQgZnVuY3Rpb24gdmFsaWRhdGVNY3BTZXJ2ZXJJbnN0YW5jZShpbnN0YW5jZTogdW5rbm93bik6IGJvb2xlYW4ge1xuICBpZiAoXG4gICAgdHlwZW9mIGluc3RhbmNlID09PSAnb2JqZWN0JyAmJlxuICAgIGluc3RhbmNlICE9PSBudWxsICYmXG4gICAgJ3Jlc291cmNlJyBpbiBpbnN0YW5jZSAmJlxuICAgICd0b29sJyBpbiBpbnN0YW5jZSAmJlxuICAgICdwcm9tcHQnIGluIGluc3RhbmNlICYmXG4gICAgJ2Nvbm5lY3QnIGluIGluc3RhbmNlXG4gICkge1xuICAgIHJldHVybiB0cnVlO1xuICB9XG4gIERFQlVHX0JVSUxEICYmIGRlYnVnLndhcm4oJ0RpZCBub3QgcGF0Y2ggTUNQIHNlcnZlci4gSW50ZXJmYWNlIGlzIGluY29tcGF0aWJsZS4nKTtcbiAgcmV0dXJuIGZhbHNlO1xufVxuXG4vKipcbiAqIENoZWNrIGlmIHRoZSBpdGVtIGlzIGEgdmFsaWQgY29udGVudCBpdGVtXG4gKiBAcGFyYW0gaXRlbSAtIFRoZSBpdGVtIHRvIGNoZWNrXG4gKiBAcmV0dXJucyBUcnVlIGlmIHRoZSBpdGVtIGlzIGEgdmFsaWQgY29udGVudCBpdGVtLCBmYWxzZSBvdGhlcndpc2VcbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIGlzVmFsaWRDb250ZW50SXRlbShpdGVtOiB1bmtub3duKTogaXRlbSBpcyBSZWNvcmQ8c3RyaW5nLCB1bmtub3duPiB7XG4gIHJldHVybiBpdGVtICE9IG51bGwgJiYgdHlwZW9mIGl0ZW0gPT09ICdvYmplY3QnO1xufVxuIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7OztBQUFBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7OztBQU1BO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDTyxTQUFTLGdCQUFnQixDQUFDLE9BQU8sRUFBc0M7QUFDOUUsRUFBRTtBQUNGLElBQUksT0FBTyxPQUFBLEtBQVksUUFBQTtBQUN2QixJQUFJLE9BQUEsS0FBWSxJQUFBO0FBQ2hCLElBQUksU0FBQSxJQUFhLE9BQUE7QUFDakIsSUFBSSxDQUFDLE9BQUEsR0FBMkIsT0FBQSxLQUFZLEtBQUE7QUFDNUMsSUFBSSxRQUFBLElBQVksT0FBQTtBQUNoQixJQUFJLFFBQVE7QUFDWjtBQUNBOztBQUVBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDTyxTQUFTLHFCQUFxQixDQUFDLE9BQU8sRUFBMkM7QUFDeEYsRUFBRTtBQUNGLElBQUksT0FBTyxPQUFBLEtBQVksUUFBQTtBQUN2QixJQUFJLE9BQUEsS0FBWSxJQUFBO0FBQ2hCLElBQUksU0FBQSxJQUFhLE9BQUE7QUFDakIsSUFBSSxDQUFDLE9BQUEsR0FBZ0MsT0FBQSxLQUFZLEtBQUE7QUFDakQsSUFBSSxRQUFBLElBQVksT0FBQTtBQUNoQixJQUFJLEVBQUUsSUFBQSxJQUFRLE9BQU87QUFDckI7QUFDQTs7QUFFQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ08sU0FBUyxpQkFBaUIsQ0FBQyxPQUFPLEVBQXVDO0FBQ2hGLEVBQUU7QUFDRixJQUFJLE9BQU8sT0FBQSxLQUFZLFFBQUE7QUFDdkIsSUFBSSxPQUFBLEtBQVksSUFBQTtBQUNoQixJQUFJLFNBQUEsSUFBYSxPQUFBO0FBQ2pCLElBQUksQ0FBQyxPQUFBLEdBQWdDLE9BQUEsS0FBWSxLQUFBO0FBQ2pELElBQUksSUFBQSxJQUFRLE9BQUE7QUFDWixLQUFLLFFBQUEsSUFBWSxXQUFXLE9BQUEsSUFBVyxPQUFPO0FBQzlDO0FBQ0E7O0FBRUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNPLFNBQVMseUJBQXlCLENBQUMsUUFBUSxFQUFvQjtBQUN0RSxFQUFFO0FBQ0YsSUFBSSxPQUFPLFFBQUEsS0FBYSxRQUFBO0FBQ3hCLElBQUksUUFBQSxLQUFhLElBQUE7QUFDakIsSUFBSSxVQUFBLElBQWMsUUFBQTtBQUNsQixJQUFJLE1BQUEsSUFBVSxRQUFBO0FBQ2QsSUFBSSxRQUFBLElBQVksUUFBQTtBQUNoQixJQUFJLGFBQWE7QUFDakIsSUFBSTtBQUNKLElBQUksT0FBTyxJQUFJO0FBQ2YsRUFBRTtBQUNGLEVBQUUsZUFBZSxLQUFLLENBQUMsSUFBSSxDQUFDLHNEQUFzRCxDQUFDO0FBQ25GLEVBQUUsT0FBTyxLQUFLO0FBQ2Q7O0FBRUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNPLFNBQVMsa0JBQWtCLENBQUMsSUFBSSxFQUE0QztBQUNuRixFQUFFLE9BQU8sUUFBUSxJQUFBLElBQVEsT0FBTyxJQUFBLEtBQVMsUUFBUTtBQUNqRDs7OzsiLCJ4X2dvb2dsZV9pZ25vcmVMaXN0IjpbMF19

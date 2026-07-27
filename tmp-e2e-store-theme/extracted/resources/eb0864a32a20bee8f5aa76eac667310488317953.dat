@@ -1,0 +1,970 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/import-export/ImportExportManager.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=6014a254"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"]; const _Fragment = __vite__cjsImport2_react_jsxDevRuntime["Fragment"];
+var _s = $RefreshSig$();
+/**
+ * Import/Export Manager Component
+ * Date: 28 Janvier 2025
+ * 
+ * Composant UI pour gérer l'import/export de données
+ */ import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=6014a254"; const useState = __vite__cjsImport3_react["useState"];
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "/src/components/ui/card.tsx";
+import { Button } from "/src/components/ui/button.tsx";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "/src/components/ui/select.tsx";
+import { Label } from "/src/components/ui/label.tsx";
+import { Input } from "/src/components/ui/input.tsx";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "/src/components/ui/tabs.tsx";
+import { Alert, AlertDescription } from "/src/components/ui/alert.tsx";
+import { Badge } from "/src/components/ui/badge.tsx";
+import { Upload, Download, FileText, CheckCircle2, AlertCircle, Loader2, FileSpreadsheet } from "/node_modules/.vite/deps/lucide-react.js?v=6014a254";
+import { useToast } from "/src/hooks/use-toast.ts";
+import { useStore } from "/src/hooks/useStore.ts";
+import { exportToCSV, exportToJSON, importFromCSV, importFromJSON } from "/src/lib/import-export/import-export.ts";
+import { logger } from "/src/lib/logger.ts";
+export const ImportExportManager = ()=>{
+    _s();
+    const { toast } = useToast();
+    const { store } = useStore();
+    const [type, setType] = useState('products');
+    const [format, setFormat] = useState('csv');
+    const [importFile, setImportFile] = useState(null);
+    const [importing, setImporting] = useState(false);
+    const [exporting, setExporting] = useState(false);
+    const [importResult, setImportResult] = useState(null);
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
+    const handleExport = async ()=>{
+        if (!store) {
+            toast({
+                title: 'Erreur',
+                description: 'Aucune boutique sélectionnée',
+                variant: 'destructive'
+            });
+            return;
+        }
+        setExporting(true);
+        try {
+            let _result;
+            if (format === 'csv') {
+                result = await exportToCSV(store.id, type, startDate || undefined, endDate || undefined);
+            } else {
+                result = await exportToJSON(store.id, type, startDate || undefined, endDate || undefined);
+            }
+            if (result.success && result.data) {
+                // Télécharger le fichier
+                const blob = format === 'csv' ? new Blob([
+                    result.data
+                ], {
+                    type: 'text/csv'
+                }) : new Blob([
+                    JSON.stringify(result.data, null, 2)
+                ], {
+                    type: 'application/json'
+                });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${type}-${new Date().toISOString().split('T')[0]}.${format}`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                toast({
+                    title: '✅ Export réussi',
+                    description: `Les données ont été exportées avec succès`
+                });
+            } else {
+                throw new Error(result.error || 'Erreur lors de l\'export');
+            }
+        } catch (_error) {
+            logger.error('Error exporting data', {
+                error: error.message
+            });
+            toast({
+                title: '❌ Erreur',
+                description: error.message || 'Une erreur est survenue lors de l\'export',
+                variant: 'destructive'
+            });
+        } finally{
+            setExporting(false);
+        }
+    };
+    const handleImport = async ()=>{
+        if (!store) {
+            toast({
+                title: 'Erreur',
+                description: 'Aucune boutique sélectionnée',
+                variant: 'destructive'
+            });
+            return;
+        }
+        if (!importFile) {
+            toast({
+                title: 'Erreur',
+                description: 'Veuillez sélectionner un fichier',
+                variant: 'destructive'
+            });
+            return;
+        }
+        setImporting(true);
+        setImportResult(null);
+        try {
+            const fileContent = await importFile.text();
+            let _result;
+            if (format === 'csv') {
+                result = await importFromCSV(store.id, type, fileContent);
+            } else {
+                const jsonData = JSON.parse(fileContent);
+                result = await importFromJSON(store.id, type, jsonData);
+            }
+            setImportResult(result);
+            if (result.success) {
+                toast({
+                    title: '✅ Import réussi',
+                    description: `${result.imported} élément(s) importé(s) avec succès`
+                });
+            } else {
+                toast({
+                    title: '⚠️ Import partiel',
+                    description: `${result.imported} importé(s), ${result.failed} échec(s)`,
+                    variant: 'default'
+                });
+            }
+        } catch (_error) {
+            logger.error('Error importing data', {
+                error: error.message
+            });
+            toast({
+                title: '❌ Erreur',
+                description: error.message || 'Une erreur est survenue lors de l\'import',
+                variant: 'destructive'
+            });
+        } finally{
+            setImporting(false);
+        }
+    };
+    const handleFileChange = (e)=>{
+        const file = e.target.files?.[0];
+        if (file) {
+            setImportFile(file);
+            // Détecter le format
+            if (file.name.endsWith('.csv')) {
+                setFormat('csv');
+            } else if (file.name.endsWith('.json')) {
+                setFormat('json');
+            }
+        }
+    };
+    if (!store) {
+        return /*#__PURE__*/ _jsxDEV(Card, {
+            children: /*#__PURE__*/ _jsxDEV(CardContent, {
+                className: "py-12 text-center",
+                children: [
+                    /*#__PURE__*/ _jsxDEV(AlertCircle, {
+                        className: "h-12 w-12 mx-auto text-muted-foreground mb-4"
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                        lineNumber: 181,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV("p", {
+                        className: "text-muted-foreground",
+                        children: "Aucune boutique sélectionnée"
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                        lineNumber: 182,
+                        columnNumber: 11
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                lineNumber: 180,
+                columnNumber: 9
+            }, this)
+        }, void 0, false, {
+            fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+            lineNumber: 179,
+            columnNumber: 7
+        }, this);
+    }
+    return /*#__PURE__*/ _jsxDEV("div", {
+        className: "space-y-6",
+        children: [
+            /*#__PURE__*/ _jsxDEV("div", {
+                children: [
+                    /*#__PURE__*/ _jsxDEV("h2", {
+                        className: "text-2xl font-bold mb-2",
+                        children: "Import/Export de données"
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                        lineNumber: 191,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV("p", {
+                        className: "text-muted-foreground",
+                        children: "Importez ou exportez vos produits, commandes et clients"
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                        lineNumber: 192,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                lineNumber: 190,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV(Tabs, {
+                defaultValue: "export",
+                className: "space-y-4",
+                children: [
+                    /*#__PURE__*/ _jsxDEV(TabsList, {
+                        children: [
+                            /*#__PURE__*/ _jsxDEV(TabsTrigger, {
+                                value: "export",
+                                children: "Exporter"
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                lineNumber: 199,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV(TabsTrigger, {
+                                value: "import",
+                                children: "Importer"
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                lineNumber: 200,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                        lineNumber: 198,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV(TabsContent, {
+                        value: "export",
+                        className: "space-y-4",
+                        children: /*#__PURE__*/ _jsxDEV(Card, {
+                            children: [
+                                /*#__PURE__*/ _jsxDEV(CardHeader, {
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV(CardTitle, {
+                                            className: "flex items-center gap-2",
+                                            children: [
+                                                /*#__PURE__*/ _jsxDEV(Download, {
+                                                    className: "h-5 w-5"
+                                                }, void 0, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                    lineNumber: 208,
+                                                    columnNumber: 17
+                                                }, this),
+                                                "Exporter des données"
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                            lineNumber: 207,
+                                            columnNumber: 15
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV(CardDescription, {
+                                            children: "Téléchargez vos données au format CSV ou JSON"
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                            lineNumber: 211,
+                                            columnNumber: 15
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                    lineNumber: 206,
+                                    columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV(CardContent, {
+                                    className: "space-y-4",
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV("div", {
+                                            className: "grid grid-cols-1 md:grid-cols-2 gap-4",
+                                            children: [
+                                                /*#__PURE__*/ _jsxDEV("div", {
+                                                    className: "space-y-2",
+                                                    children: [
+                                                        /*#__PURE__*/ _jsxDEV(Label, {
+                                                            htmlFor: "export-type",
+                                                            children: "Type de données"
+                                                        }, void 0, false, {
+                                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                            lineNumber: 218,
+                                                            columnNumber: 19
+                                                        }, this),
+                                                        /*#__PURE__*/ _jsxDEV(Select, {
+                                                            value: type,
+                                                            onValueChange: (v)=>setType(v),
+                                                            children: [
+                                                                /*#__PURE__*/ _jsxDEV(SelectTrigger, {
+                                                                    id: "export-type",
+                                                                    children: /*#__PURE__*/ _jsxDEV(SelectValue, {}, void 0, false, {
+                                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                                        lineNumber: 221,
+                                                                        columnNumber: 23
+                                                                    }, this)
+                                                                }, void 0, false, {
+                                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                                    lineNumber: 220,
+                                                                    columnNumber: 21
+                                                                }, this),
+                                                                /*#__PURE__*/ _jsxDEV(SelectContent, {
+                                                                    children: [
+                                                                        /*#__PURE__*/ _jsxDEV(SelectItem, {
+                                                                            value: "products",
+                                                                            children: "Produits"
+                                                                        }, void 0, false, {
+                                                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                                            lineNumber: 224,
+                                                                            columnNumber: 23
+                                                                        }, this),
+                                                                        /*#__PURE__*/ _jsxDEV(SelectItem, {
+                                                                            value: "orders",
+                                                                            children: "Commandes"
+                                                                        }, void 0, false, {
+                                                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                                            lineNumber: 225,
+                                                                            columnNumber: 23
+                                                                        }, this),
+                                                                        /*#__PURE__*/ _jsxDEV(SelectItem, {
+                                                                            value: "customers",
+                                                                            children: "Clients"
+                                                                        }, void 0, false, {
+                                                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                                            lineNumber: 226,
+                                                                            columnNumber: 23
+                                                                        }, this)
+                                                                    ]
+                                                                }, void 0, true, {
+                                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                                    lineNumber: 223,
+                                                                    columnNumber: 21
+                                                                }, this)
+                                                            ]
+                                                        }, void 0, true, {
+                                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                            lineNumber: 219,
+                                                            columnNumber: 19
+                                                        }, this)
+                                                    ]
+                                                }, void 0, true, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                    lineNumber: 217,
+                                                    columnNumber: 17
+                                                }, this),
+                                                /*#__PURE__*/ _jsxDEV("div", {
+                                                    className: "space-y-2",
+                                                    children: [
+                                                        /*#__PURE__*/ _jsxDEV(Label, {
+                                                            htmlFor: "export-format",
+                                                            children: "Format"
+                                                        }, void 0, false, {
+                                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                            lineNumber: 232,
+                                                            columnNumber: 19
+                                                        }, this),
+                                                        /*#__PURE__*/ _jsxDEV(Select, {
+                                                            value: format,
+                                                            onValueChange: (v)=>setFormat(v),
+                                                            children: [
+                                                                /*#__PURE__*/ _jsxDEV(SelectTrigger, {
+                                                                    id: "export-format",
+                                                                    children: /*#__PURE__*/ _jsxDEV(SelectValue, {}, void 0, false, {
+                                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                                        lineNumber: 235,
+                                                                        columnNumber: 23
+                                                                    }, this)
+                                                                }, void 0, false, {
+                                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                                    lineNumber: 234,
+                                                                    columnNumber: 21
+                                                                }, this),
+                                                                /*#__PURE__*/ _jsxDEV(SelectContent, {
+                                                                    children: [
+                                                                        /*#__PURE__*/ _jsxDEV(SelectItem, {
+                                                                            value: "csv",
+                                                                            children: /*#__PURE__*/ _jsxDEV("div", {
+                                                                                className: "flex items-center gap-2",
+                                                                                children: [
+                                                                                    /*#__PURE__*/ _jsxDEV(FileSpreadsheet, {
+                                                                                        className: "h-4 w-4"
+                                                                                    }, void 0, false, {
+                                                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                                                        lineNumber: 240,
+                                                                                        columnNumber: 27
+                                                                                    }, this),
+                                                                                    "CSV"
+                                                                                ]
+                                                                            }, void 0, true, {
+                                                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                                                lineNumber: 239,
+                                                                                columnNumber: 25
+                                                                            }, this)
+                                                                        }, void 0, false, {
+                                                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                                            lineNumber: 238,
+                                                                            columnNumber: 23
+                                                                        }, this),
+                                                                        /*#__PURE__*/ _jsxDEV(SelectItem, {
+                                                                            value: "json",
+                                                                            children: /*#__PURE__*/ _jsxDEV("div", {
+                                                                                className: "flex items-center gap-2",
+                                                                                children: [
+                                                                                    /*#__PURE__*/ _jsxDEV(FileText, {
+                                                                                        className: "h-4 w-4"
+                                                                                    }, void 0, false, {
+                                                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                                                        lineNumber: 246,
+                                                                                        columnNumber: 27
+                                                                                    }, this),
+                                                                                    "JSON"
+                                                                                ]
+                                                                            }, void 0, true, {
+                                                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                                                lineNumber: 245,
+                                                                                columnNumber: 25
+                                                                            }, this)
+                                                                        }, void 0, false, {
+                                                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                                            lineNumber: 244,
+                                                                            columnNumber: 23
+                                                                        }, this)
+                                                                    ]
+                                                                }, void 0, true, {
+                                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                                    lineNumber: 237,
+                                                                    columnNumber: 21
+                                                                }, this)
+                                                            ]
+                                                        }, void 0, true, {
+                                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                            lineNumber: 233,
+                                                            columnNumber: 19
+                                                        }, this)
+                                                    ]
+                                                }, void 0, true, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                    lineNumber: 231,
+                                                    columnNumber: 17
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                            lineNumber: 216,
+                                            columnNumber: 15
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV("div", {
+                                            className: "grid grid-cols-1 md:grid-cols-2 gap-4",
+                                            children: [
+                                                /*#__PURE__*/ _jsxDEV("div", {
+                                                    className: "space-y-2",
+                                                    children: [
+                                                        /*#__PURE__*/ _jsxDEV(Label, {
+                                                            htmlFor: "start-date",
+                                                            children: "Date de début (optionnel)"
+                                                        }, void 0, false, {
+                                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                            lineNumber: 257,
+                                                            columnNumber: 19
+                                                        }, this),
+                                                        /*#__PURE__*/ _jsxDEV(Input, {
+                                                            id: "start-date",
+                                                            type: "date",
+                                                            value: startDate,
+                                                            onChange: (e)=>setStartDate(e.target.value)
+                                                        }, void 0, false, {
+                                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                            lineNumber: 258,
+                                                            columnNumber: 19
+                                                        }, this)
+                                                    ]
+                                                }, void 0, true, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                    lineNumber: 256,
+                                                    columnNumber: 17
+                                                }, this),
+                                                /*#__PURE__*/ _jsxDEV("div", {
+                                                    className: "space-y-2",
+                                                    children: [
+                                                        /*#__PURE__*/ _jsxDEV(Label, {
+                                                            htmlFor: "end-date",
+                                                            children: "Date de fin (optionnel)"
+                                                        }, void 0, false, {
+                                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                            lineNumber: 267,
+                                                            columnNumber: 19
+                                                        }, this),
+                                                        /*#__PURE__*/ _jsxDEV(Input, {
+                                                            id: "end-date",
+                                                            type: "date",
+                                                            value: endDate,
+                                                            onChange: (e)=>setEndDate(e.target.value)
+                                                        }, void 0, false, {
+                                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                            lineNumber: 268,
+                                                            columnNumber: 19
+                                                        }, this)
+                                                    ]
+                                                }, void 0, true, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                    lineNumber: 266,
+                                                    columnNumber: 17
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                            lineNumber: 255,
+                                            columnNumber: 15
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV(Button, {
+                                            onClick: handleExport,
+                                            disabled: exporting,
+                                            className: "w-full",
+                                            children: exporting ? /*#__PURE__*/ _jsxDEV(_Fragment, {
+                                                children: [
+                                                    /*#__PURE__*/ _jsxDEV(Loader2, {
+                                                        className: "h-4 w-4 mr-2 animate-spin"
+                                                    }, void 0, false, {
+                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                        lineNumber: 284,
+                                                        columnNumber: 21
+                                                    }, this),
+                                                    "Export en cours..."
+                                                ]
+                                            }, void 0, true) : /*#__PURE__*/ _jsxDEV(_Fragment, {
+                                                children: [
+                                                    /*#__PURE__*/ _jsxDEV(Download, {
+                                                        className: "h-4 w-4 mr-2"
+                                                    }, void 0, false, {
+                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                        lineNumber: 289,
+                                                        columnNumber: 21
+                                                    }, this),
+                                                    "Exporter"
+                                                ]
+                                            }, void 0, true)
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                            lineNumber: 277,
+                                            columnNumber: 15
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                    lineNumber: 215,
+                                    columnNumber: 13
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                            lineNumber: 205,
+                            columnNumber: 11
+                        }, this)
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                        lineNumber: 204,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV(TabsContent, {
+                        value: "import",
+                        className: "space-y-4",
+                        children: /*#__PURE__*/ _jsxDEV(Card, {
+                            children: [
+                                /*#__PURE__*/ _jsxDEV(CardHeader, {
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV(CardTitle, {
+                                            className: "flex items-center gap-2",
+                                            children: [
+                                                /*#__PURE__*/ _jsxDEV(Upload, {
+                                                    className: "h-5 w-5"
+                                                }, void 0, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                    lineNumber: 303,
+                                                    columnNumber: 17
+                                                }, this),
+                                                "Importer des données"
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                            lineNumber: 302,
+                                            columnNumber: 15
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV(CardDescription, {
+                                            children: "Importez vos données depuis un fichier CSV ou JSON"
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                            lineNumber: 306,
+                                            columnNumber: 15
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                    lineNumber: 301,
+                                    columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV(CardContent, {
+                                    className: "space-y-4",
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV("div", {
+                                            className: "space-y-2",
+                                            children: [
+                                                /*#__PURE__*/ _jsxDEV(Label, {
+                                                    htmlFor: "import-type",
+                                                    children: "Type de données"
+                                                }, void 0, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                    lineNumber: 312,
+                                                    columnNumber: 17
+                                                }, this),
+                                                /*#__PURE__*/ _jsxDEV(Select, {
+                                                    value: type,
+                                                    onValueChange: (v)=>setType(v),
+                                                    children: [
+                                                        /*#__PURE__*/ _jsxDEV(SelectTrigger, {
+                                                            id: "import-type",
+                                                            children: /*#__PURE__*/ _jsxDEV(SelectValue, {}, void 0, false, {
+                                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                                lineNumber: 315,
+                                                                columnNumber: 21
+                                                            }, this)
+                                                        }, void 0, false, {
+                                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                            lineNumber: 314,
+                                                            columnNumber: 19
+                                                        }, this),
+                                                        /*#__PURE__*/ _jsxDEV(SelectContent, {
+                                                            children: [
+                                                                /*#__PURE__*/ _jsxDEV(SelectItem, {
+                                                                    value: "products",
+                                                                    children: "Produits"
+                                                                }, void 0, false, {
+                                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                                    lineNumber: 318,
+                                                                    columnNumber: 21
+                                                                }, this),
+                                                                /*#__PURE__*/ _jsxDEV(SelectItem, {
+                                                                    value: "customers",
+                                                                    children: "Clients"
+                                                                }, void 0, false, {
+                                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                                    lineNumber: 319,
+                                                                    columnNumber: 21
+                                                                }, this)
+                                                            ]
+                                                        }, void 0, true, {
+                                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                            lineNumber: 317,
+                                                            columnNumber: 19
+                                                        }, this)
+                                                    ]
+                                                }, void 0, true, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                    lineNumber: 313,
+                                                    columnNumber: 17
+                                                }, this),
+                                                /*#__PURE__*/ _jsxDEV("p", {
+                                                    className: "text-xs text-muted-foreground",
+                                                    children: "Note: Les commandes ne peuvent pas être importées directement"
+                                                }, void 0, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                    lineNumber: 322,
+                                                    columnNumber: 17
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                            lineNumber: 311,
+                                            columnNumber: 15
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV("div", {
+                                            className: "space-y-2",
+                                            children: [
+                                                /*#__PURE__*/ _jsxDEV(Label, {
+                                                    htmlFor: "import-file",
+                                                    children: "Fichier"
+                                                }, void 0, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                    lineNumber: 328,
+                                                    columnNumber: 17
+                                                }, this),
+                                                /*#__PURE__*/ _jsxDEV("div", {
+                                                    className: "flex items-center gap-2",
+                                                    children: [
+                                                        /*#__PURE__*/ _jsxDEV(Input, {
+                                                            id: "import-file",
+                                                            type: "file",
+                                                            accept: ".csv,.json",
+                                                            onChange: handleFileChange,
+                                                            disabled: importing
+                                                        }, void 0, false, {
+                                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                            lineNumber: 330,
+                                                            columnNumber: 19
+                                                        }, this),
+                                                        importFile && /*#__PURE__*/ _jsxDEV(Badge, {
+                                                            variant: "secondary",
+                                                            children: [
+                                                                /*#__PURE__*/ _jsxDEV(FileText, {
+                                                                    className: "h-3 w-3 mr-1"
+                                                                }, void 0, false, {
+                                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                                    lineNumber: 339,
+                                                                    columnNumber: 23
+                                                                }, this),
+                                                                importFile.name
+                                                            ]
+                                                        }, void 0, true, {
+                                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                            lineNumber: 338,
+                                                            columnNumber: 21
+                                                        }, this)
+                                                    ]
+                                                }, void 0, true, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                    lineNumber: 329,
+                                                    columnNumber: 17
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                            lineNumber: 327,
+                                            columnNumber: 15
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV(Button, {
+                                            onClick: handleImport,
+                                            disabled: !importFile || importing,
+                                            className: "w-full",
+                                            children: importing ? /*#__PURE__*/ _jsxDEV(_Fragment, {
+                                                children: [
+                                                    /*#__PURE__*/ _jsxDEV(Loader2, {
+                                                        className: "h-4 w-4 mr-2 animate-spin"
+                                                    }, void 0, false, {
+                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                        lineNumber: 353,
+                                                        columnNumber: 21
+                                                    }, this),
+                                                    "Import en cours..."
+                                                ]
+                                            }, void 0, true) : /*#__PURE__*/ _jsxDEV(_Fragment, {
+                                                children: [
+                                                    /*#__PURE__*/ _jsxDEV(Upload, {
+                                                        className: "h-4 w-4 mr-2"
+                                                    }, void 0, false, {
+                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                        lineNumber: 358,
+                                                        columnNumber: 21
+                                                    }, this),
+                                                    "Importer"
+                                                ]
+                                            }, void 0, true)
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                            lineNumber: 346,
+                                            columnNumber: 15
+                                        }, this),
+                                        importResult && /*#__PURE__*/ _jsxDEV(Alert, {
+                                            children: [
+                                                /*#__PURE__*/ _jsxDEV("div", {
+                                                    className: "flex items-center gap-2 mb-2",
+                                                    children: [
+                                                        importResult.success ? /*#__PURE__*/ _jsxDEV(CheckCircle2, {
+                                                            className: "h-4 w-4 text-green-500"
+                                                        }, void 0, false, {
+                                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                            lineNumber: 368,
+                                                            columnNumber: 23
+                                                        }, this) : /*#__PURE__*/ _jsxDEV(AlertCircle, {
+                                                            className: "h-4 w-4 text-yellow-500"
+                                                        }, void 0, false, {
+                                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                            lineNumber: 370,
+                                                            columnNumber: 23
+                                                        }, this),
+                                                        /*#__PURE__*/ _jsxDEV("span", {
+                                                            className: "font-medium",
+                                                            children: importResult.success ? 'Import réussi' : 'Import partiel'
+                                                        }, void 0, false, {
+                                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                            lineNumber: 372,
+                                                            columnNumber: 21
+                                                        }, this)
+                                                    ]
+                                                }, void 0, true, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                    lineNumber: 366,
+                                                    columnNumber: 19
+                                                }, this),
+                                                /*#__PURE__*/ _jsxDEV(AlertDescription, {
+                                                    children: /*#__PURE__*/ _jsxDEV("div", {
+                                                        className: "space-y-1",
+                                                        children: [
+                                                            /*#__PURE__*/ _jsxDEV("p", {
+                                                                children: [
+                                                                    /*#__PURE__*/ _jsxDEV(Badge, {
+                                                                        variant: "outline",
+                                                                        className: "mr-2",
+                                                                        children: importResult.imported
+                                                                    }, void 0, false, {
+                                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                                        lineNumber: 379,
+                                                                        columnNumber: 25
+                                                                    }, this),
+                                                                    "élément(s) importé(s)"
+                                                                ]
+                                                            }, void 0, true, {
+                                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                                lineNumber: 378,
+                                                                columnNumber: 23
+                                                            }, this),
+                                                            importResult.failed > 0 && /*#__PURE__*/ _jsxDEV("p", {
+                                                                children: [
+                                                                    /*#__PURE__*/ _jsxDEV(Badge, {
+                                                                        variant: "destructive",
+                                                                        className: "mr-2",
+                                                                        children: importResult.failed
+                                                                    }, void 0, false, {
+                                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                                        lineNumber: 386,
+                                                                        columnNumber: 27
+                                                                    }, this),
+                                                                    "échec(s)"
+                                                                ]
+                                                            }, void 0, true, {
+                                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                                lineNumber: 385,
+                                                                columnNumber: 25
+                                                            }, this),
+                                                            importResult.errors && importResult.errors.length > 0 && /*#__PURE__*/ _jsxDEV("div", {
+                                                                className: "mt-2",
+                                                                children: [
+                                                                    /*#__PURE__*/ _jsxDEV("p", {
+                                                                        className: "text-sm font-medium mb-1",
+                                                                        children: "Erreurs :"
+                                                                    }, void 0, false, {
+                                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                                        lineNumber: 394,
+                                                                        columnNumber: 27
+                                                                    }, this),
+                                                                    /*#__PURE__*/ _jsxDEV("ul", {
+                                                                        className: "text-xs space-y-1 max-h-32 overflow-y-auto",
+                                                                        children: importResult.errors.slice(0, 10).map((error1, index)=>/*#__PURE__*/ _jsxDEV("li", {
+                                                                                className: "text-muted-foreground",
+                                                                                children: [
+                                                                                    "Ligne ",
+                                                                                    error1.row,
+                                                                                    ": ",
+                                                                                    error1.error
+                                                                                ]
+                                                                            }, index, true, {
+                                                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                                                lineNumber: 397,
+                                                                                columnNumber: 31
+                                                                            }, this))
+                                                                    }, void 0, false, {
+                                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                                        lineNumber: 395,
+                                                                        columnNumber: 27
+                                                                    }, this)
+                                                                ]
+                                                            }, void 0, true, {
+                                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                                lineNumber: 393,
+                                                                columnNumber: 25
+                                                            }, this)
+                                                        ]
+                                                    }, void 0, true, {
+                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                        lineNumber: 377,
+                                                        columnNumber: 21
+                                                    }, this)
+                                                }, void 0, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                                    lineNumber: 376,
+                                                    columnNumber: 19
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                            lineNumber: 365,
+                                            columnNumber: 17
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                                    lineNumber: 310,
+                                    columnNumber: 13
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                            lineNumber: 300,
+                            columnNumber: 11
+                        }, this)
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                        lineNumber: 299,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+                lineNumber: 197,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx",
+        lineNumber: 189,
+        columnNumber: 5
+    }, this);
+};
+_s(ImportExportManager, "92gJuYPy+zh/wOioYwdhm65qNmU=", false, function() {
+    return [
+        useToast,
+        useStore
+    ];
+});
+_c = ImportExportManager;
+var _c;
+$RefreshReg$(_c, "ImportExportManager");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/import-export/ImportExportManager.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIkltcG9ydEV4cG9ydE1hbmFnZXIudHN4Il0sInNvdXJjZXNDb250ZW50IjpbIi8qKlxuICogSW1wb3J0L0V4cG9ydCBNYW5hZ2VyIENvbXBvbmVudFxuICogRGF0ZTogMjggSmFudmllciAyMDI1XG4gKiBcbiAqIENvbXBvc2FudCBVSSBwb3VyIGfDqXJlciBsJ2ltcG9ydC9leHBvcnQgZGUgZG9ubsOpZXNcbiAqL1xuXG5pbXBvcnQgeyB1c2VTdGF0ZSB9IGZyb20gJ3JlYWN0JztcbmltcG9ydCB7IENhcmQsIENhcmRDb250ZW50LCBDYXJkRGVzY3JpcHRpb24sIENhcmRIZWFkZXIsIENhcmRUaXRsZSB9IGZyb20gJ0AvY29tcG9uZW50cy91aS9jYXJkJztcbmltcG9ydCB7IEJ1dHRvbiB9IGZyb20gJ0AvY29tcG9uZW50cy91aS9idXR0b24nO1xuaW1wb3J0IHsgU2VsZWN0LCBTZWxlY3RDb250ZW50LCBTZWxlY3RJdGVtLCBTZWxlY3RUcmlnZ2VyLCBTZWxlY3RWYWx1ZSB9IGZyb20gJ0AvY29tcG9uZW50cy91aS9zZWxlY3QnO1xuaW1wb3J0IHsgTGFiZWwgfSBmcm9tICdAL2NvbXBvbmVudHMvdWkvbGFiZWwnO1xuaW1wb3J0IHsgSW5wdXQgfSBmcm9tICdAL2NvbXBvbmVudHMvdWkvaW5wdXQnO1xuaW1wb3J0IHsgVGFicywgVGFic0NvbnRlbnQsIFRhYnNMaXN0LCBUYWJzVHJpZ2dlciB9IGZyb20gJ0AvY29tcG9uZW50cy91aS90YWJzJztcbmltcG9ydCB7IEFsZXJ0LCBBbGVydERlc2NyaXB0aW9uIH0gZnJvbSAnQC9jb21wb25lbnRzL3VpL2FsZXJ0JztcbmltcG9ydCB7IEJhZGdlIH0gZnJvbSAnQC9jb21wb25lbnRzL3VpL2JhZGdlJztcbmltcG9ydCB7IFByb2dyZXNzIH0gZnJvbSAnQC9jb21wb25lbnRzL3VpL3Byb2dyZXNzJztcbmltcG9ydCB7XG4gIFVwbG9hZCxcbiAgRG93bmxvYWQsXG4gIEZpbGVUZXh0LFxuICBDaGVja0NpcmNsZTIsXG4gIEFsZXJ0Q2lyY2xlLFxuICBMb2FkZXIyLFxuICBGaWxlU3ByZWFkc2hlZXQsXG4gIERhdGFiYXNlLFxufSBmcm9tICdsdWNpZGUtcmVhY3QnO1xuaW1wb3J0IHsgdXNlVG9hc3QgfSBmcm9tICdAL2hvb2tzL3VzZS10b2FzdCc7XG5pbXBvcnQgeyB1c2VTdG9yZSB9IGZyb20gJ0AvaG9va3MvdXNlU3RvcmUnO1xuaW1wb3J0IHtcbiAgZXhwb3J0VG9DU1YsXG4gIGV4cG9ydFRvSlNPTixcbiAgaW1wb3J0RnJvbUNTVixcbiAgaW1wb3J0RnJvbUpTT04sXG4gIHR5cGUgSW1wb3J0RXhwb3J0VHlwZSxcbiAgdHlwZSBJbXBvcnRFeHBvcnRGb3JtYXQsXG59IGZyb20gJ0AvbGliL2ltcG9ydC1leHBvcnQvaW1wb3J0LWV4cG9ydCc7XG5pbXBvcnQgeyBsb2dnZXIgfSBmcm9tICdAL2xpYi9sb2dnZXInO1xuXG5leHBvcnQgY29uc3QgSW1wb3J0RXhwb3J0TWFuYWdlciA9ICgpID0+IHtcbiAgY29uc3QgeyB0b2FzdCB9ID0gdXNlVG9hc3QoKTtcbiAgY29uc3QgeyBzdG9yZSB9ID0gdXNlU3RvcmUoKTtcbiAgY29uc3QgW3R5cGUsIHNldFR5cGVdID0gdXNlU3RhdGU8SW1wb3J0RXhwb3J0VHlwZT4oJ3Byb2R1Y3RzJyk7XG4gIGNvbnN0IFtmb3JtYXQsIHNldEZvcm1hdF0gPSB1c2VTdGF0ZTxJbXBvcnRFeHBvcnRGb3JtYXQ+KCdjc3YnKTtcbiAgY29uc3QgW2ltcG9ydEZpbGUsIHNldEltcG9ydEZpbGVdID0gdXNlU3RhdGU8RmlsZSB8IG51bGw+KG51bGwpO1xuICBjb25zdCBbaW1wb3J0aW5nLCBzZXRJbXBvcnRpbmddID0gdXNlU3RhdGUoZmFsc2UpO1xuICBjb25zdCBbZXhwb3J0aW5nLCBzZXRFeHBvcnRpbmddID0gdXNlU3RhdGUoZmFsc2UpO1xuICBjb25zdCBbaW1wb3J0UmVzdWx0LCBzZXRJbXBvcnRSZXN1bHRdID0gdXNlU3RhdGU8YW55PihudWxsKTtcbiAgY29uc3QgW3N0YXJ0RGF0ZSwgc2V0U3RhcnREYXRlXSA9IHVzZVN0YXRlKCcnKTtcbiAgY29uc3QgW2VuZERhdGUsIHNldEVuZERhdGVdID0gdXNlU3RhdGUoJycpO1xuXG4gIGNvbnN0IGhhbmRsZUV4cG9ydCA9IGFzeW5jICgpID0+IHtcbiAgICBpZiAoIXN0b3JlKSB7XG4gICAgICB0b2FzdCh7XG4gICAgICAgIHRpdGxlOiAnRXJyZXVyJyxcbiAgICAgICAgZGVzY3JpcHRpb246ICdBdWN1bmUgYm91dGlxdWUgc8OpbGVjdGlvbm7DqWUnLFxuICAgICAgICB2YXJpYW50OiAnZGVzdHJ1Y3RpdmUnLFxuICAgICAgfSk7XG4gICAgICByZXR1cm47XG4gICAgfVxuXG4gICAgc2V0RXhwb3J0aW5nKHRydWUpO1xuICAgIHRyeSB7XG4gICAgICBsZXQgIF9yZXN1bHQ7XG4gICAgICBpZiAoZm9ybWF0ID09PSAnY3N2Jykge1xuICAgICAgICByZXN1bHQgPSBhd2FpdCBleHBvcnRUb0NTVihzdG9yZS5pZCwgdHlwZSwgc3RhcnREYXRlIHx8IHVuZGVmaW5lZCwgZW5kRGF0ZSB8fCB1bmRlZmluZWQpO1xuICAgICAgfSBlbHNlIHtcbiAgICAgICAgcmVzdWx0ID0gYXdhaXQgZXhwb3J0VG9KU09OKHN0b3JlLmlkLCB0eXBlLCBzdGFydERhdGUgfHwgdW5kZWZpbmVkLCBlbmREYXRlIHx8IHVuZGVmaW5lZCk7XG4gICAgICB9XG5cbiAgICAgIGlmIChyZXN1bHQuc3VjY2VzcyAmJiByZXN1bHQuZGF0YSkge1xuICAgICAgICAvLyBUw6lsw6ljaGFyZ2VyIGxlIGZpY2hpZXJcbiAgICAgICAgY29uc3QgYmxvYiA9IGZvcm1hdCA9PT0gJ2NzdidcbiAgICAgICAgICA/IG5ldyBCbG9iKFtyZXN1bHQuZGF0YV0sIHsgdHlwZTogJ3RleHQvY3N2JyB9KVxuICAgICAgICAgIDogbmV3IEJsb2IoW0pTT04uc3RyaW5naWZ5KHJlc3VsdC5kYXRhLCBudWxsLCAyKV0sIHsgdHlwZTogJ2FwcGxpY2F0aW9uL2pzb24nIH0pO1xuICAgICAgICBcbiAgICAgICAgY29uc3QgdXJsID0gVVJMLmNyZWF0ZU9iamVjdFVSTChibG9iKTtcbiAgICAgICAgY29uc3QgYSA9IGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoJ2EnKTtcbiAgICAgICAgYS5ocmVmID0gdXJsO1xuICAgICAgICBhLmRvd25sb2FkID0gYCR7dHlwZX0tJHtuZXcgRGF0ZSgpLnRvSVNPU3RyaW5nKCkuc3BsaXQoJ1QnKVswXX0uJHtmb3JtYXR9YDtcbiAgICAgICAgZG9jdW1lbnQuYm9keS5hcHBlbmRDaGlsZChhKTtcbiAgICAgICAgYS5jbGljaygpO1xuICAgICAgICBkb2N1bWVudC5ib2R5LnJlbW92ZUNoaWxkKGEpO1xuICAgICAgICBVUkwucmV2b2tlT2JqZWN0VVJMKHVybCk7XG5cbiAgICAgICAgdG9hc3Qoe1xuICAgICAgICAgIHRpdGxlOiAn4pyFIEV4cG9ydCByw6l1c3NpJyxcbiAgICAgICAgICBkZXNjcmlwdGlvbjogYExlcyBkb25uw6llcyBvbnQgw6l0w6kgZXhwb3J0w6llcyBhdmVjIHN1Y2PDqHNgLFxuICAgICAgICB9KTtcbiAgICAgIH0gZWxzZSB7XG4gICAgICAgIHRocm93IG5ldyBFcnJvcihyZXN1bHQuZXJyb3IgfHwgJ0VycmV1ciBsb3JzIGRlIGxcXCdleHBvcnQnKTtcbiAgICAgIH1cbiAgICB9IGNhdGNoICggX2Vycm9yOiBhbnkpIHtcbiAgICAgIGxvZ2dlci5lcnJvcignRXJyb3IgZXhwb3J0aW5nIGRhdGEnLCB7IGVycm9yOiBlcnJvci5tZXNzYWdlIH0pO1xuICAgICAgdG9hc3Qoe1xuICAgICAgICB0aXRsZTogJ+KdjCBFcnJldXInLFxuICAgICAgICBkZXNjcmlwdGlvbjogZXJyb3IubWVzc2FnZSB8fCAnVW5lIGVycmV1ciBlc3Qgc3VydmVudWUgbG9ycyBkZSBsXFwnZXhwb3J0JyxcbiAgICAgICAgdmFyaWFudDogJ2Rlc3RydWN0aXZlJyxcbiAgICAgIH0pO1xuICAgIH0gZmluYWxseSB7XG4gICAgICBzZXRFeHBvcnRpbmcoZmFsc2UpO1xuICAgIH1cbiAgfTtcblxuICBjb25zdCBoYW5kbGVJbXBvcnQgPSBhc3luYyAoKSA9PiB7XG4gICAgaWYgKCFzdG9yZSkge1xuICAgICAgdG9hc3Qoe1xuICAgICAgICB0aXRsZTogJ0VycmV1cicsXG4gICAgICAgIGRlc2NyaXB0aW9uOiAnQXVjdW5lIGJvdXRpcXVlIHPDqWxlY3Rpb25uw6llJyxcbiAgICAgICAgdmFyaWFudDogJ2Rlc3RydWN0aXZlJyxcbiAgICAgIH0pO1xuICAgICAgcmV0dXJuO1xuICAgIH1cblxuICAgIGlmICghaW1wb3J0RmlsZSkge1xuICAgICAgdG9hc3Qoe1xuICAgICAgICB0aXRsZTogJ0VycmV1cicsXG4gICAgICAgIGRlc2NyaXB0aW9uOiAnVmV1aWxsZXogc8OpbGVjdGlvbm5lciB1biBmaWNoaWVyJyxcbiAgICAgICAgdmFyaWFudDogJ2Rlc3RydWN0aXZlJyxcbiAgICAgIH0pO1xuICAgICAgcmV0dXJuO1xuICAgIH1cblxuICAgIHNldEltcG9ydGluZyh0cnVlKTtcbiAgICBzZXRJbXBvcnRSZXN1bHQobnVsbCk7XG5cbiAgICB0cnkge1xuICAgICAgY29uc3QgZmlsZUNvbnRlbnQgPSBhd2FpdCBpbXBvcnRGaWxlLnRleHQoKTtcbiAgICAgIGxldCAgX3Jlc3VsdDtcblxuICAgICAgaWYgKGZvcm1hdCA9PT0gJ2NzdicpIHtcbiAgICAgICAgcmVzdWx0ID0gYXdhaXQgaW1wb3J0RnJvbUNTVihzdG9yZS5pZCwgdHlwZSwgZmlsZUNvbnRlbnQpO1xuICAgICAgfSBlbHNlIHtcbiAgICAgICAgY29uc3QganNvbkRhdGEgPSBKU09OLnBhcnNlKGZpbGVDb250ZW50KTtcbiAgICAgICAgcmVzdWx0ID0gYXdhaXQgaW1wb3J0RnJvbUpTT04oc3RvcmUuaWQsIHR5cGUsIGpzb25EYXRhKTtcbiAgICAgIH1cblxuICAgICAgc2V0SW1wb3J0UmVzdWx0KHJlc3VsdCk7XG5cbiAgICAgIGlmIChyZXN1bHQuc3VjY2Vzcykge1xuICAgICAgICB0b2FzdCh7XG4gICAgICAgICAgdGl0bGU6ICfinIUgSW1wb3J0IHLDqXVzc2knLFxuICAgICAgICAgIGRlc2NyaXB0aW9uOiBgJHtyZXN1bHQuaW1wb3J0ZWR9IMOpbMOpbWVudChzKSBpbXBvcnTDqShzKSBhdmVjIHN1Y2PDqHNgLFxuICAgICAgICB9KTtcbiAgICAgIH0gZWxzZSB7XG4gICAgICAgIHRvYXN0KHtcbiAgICAgICAgICB0aXRsZTogJ+KaoO+4jyBJbXBvcnQgcGFydGllbCcsXG4gICAgICAgICAgZGVzY3JpcHRpb246IGAke3Jlc3VsdC5pbXBvcnRlZH0gaW1wb3J0w6kocyksICR7cmVzdWx0LmZhaWxlZH0gw6ljaGVjKHMpYCxcbiAgICAgICAgICB2YXJpYW50OiAnZGVmYXVsdCcsXG4gICAgICAgIH0pO1xuICAgICAgfVxuICAgIH0gY2F0Y2ggKCBfZXJyb3I6IGFueSkge1xuICAgICAgbG9nZ2VyLmVycm9yKCdFcnJvciBpbXBvcnRpbmcgZGF0YScsIHsgZXJyb3I6IGVycm9yLm1lc3NhZ2UgfSk7XG4gICAgICB0b2FzdCh7XG4gICAgICAgIHRpdGxlOiAn4p2MIEVycmV1cicsXG4gICAgICAgIGRlc2NyaXB0aW9uOiBlcnJvci5tZXNzYWdlIHx8ICdVbmUgZXJyZXVyIGVzdCBzdXJ2ZW51ZSBsb3JzIGRlIGxcXCdpbXBvcnQnLFxuICAgICAgICB2YXJpYW50OiAnZGVzdHJ1Y3RpdmUnLFxuICAgICAgfSk7XG4gICAgfSBmaW5hbGx5IHtcbiAgICAgIHNldEltcG9ydGluZyhmYWxzZSk7XG4gICAgfVxuICB9O1xuXG4gIGNvbnN0IGhhbmRsZUZpbGVDaGFuZ2UgPSAoZTogUmVhY3QuQ2hhbmdlRXZlbnQ8SFRNTElucHV0RWxlbWVudD4pID0+IHtcbiAgICBjb25zdCBmaWxlID0gZS50YXJnZXQuZmlsZXM/LlswXTtcbiAgICBpZiAoZmlsZSkge1xuICAgICAgc2V0SW1wb3J0RmlsZShmaWxlKTtcbiAgICAgIC8vIETDqXRlY3RlciBsZSBmb3JtYXRcbiAgICAgIGlmIChmaWxlLm5hbWUuZW5kc1dpdGgoJy5jc3YnKSkge1xuICAgICAgICBzZXRGb3JtYXQoJ2NzdicpO1xuICAgICAgfSBlbHNlIGlmIChmaWxlLm5hbWUuZW5kc1dpdGgoJy5qc29uJykpIHtcbiAgICAgICAgc2V0Rm9ybWF0KCdqc29uJyk7XG4gICAgICB9XG4gICAgfVxuICB9O1xuXG4gIGlmICghc3RvcmUpIHtcbiAgICByZXR1cm4gKFxuICAgICAgPENhcmQ+XG4gICAgICAgIDxDYXJkQ29udGVudCBjbGFzc05hbWU9XCJweS0xMiB0ZXh0LWNlbnRlclwiPlxuICAgICAgICAgIDxBbGVydENpcmNsZSBjbGFzc05hbWU9XCJoLTEyIHctMTIgbXgtYXV0byB0ZXh0LW11dGVkLWZvcmVncm91bmQgbWItNFwiIC8+XG4gICAgICAgICAgPHAgY2xhc3NOYW1lPVwidGV4dC1tdXRlZC1mb3JlZ3JvdW5kXCI+QXVjdW5lIGJvdXRpcXVlIHPDqWxlY3Rpb25uw6llPC9wPlxuICAgICAgICA8L0NhcmRDb250ZW50PlxuICAgICAgPC9DYXJkPlxuICAgICk7XG4gIH1cblxuICByZXR1cm4gKFxuICAgIDxkaXYgY2xhc3NOYW1lPVwic3BhY2UteS02XCI+XG4gICAgICA8ZGl2PlxuICAgICAgICA8aDIgY2xhc3NOYW1lPVwidGV4dC0yeGwgZm9udC1ib2xkIG1iLTJcIj5JbXBvcnQvRXhwb3J0IGRlIGRvbm7DqWVzPC9oMj5cbiAgICAgICAgPHAgY2xhc3NOYW1lPVwidGV4dC1tdXRlZC1mb3JlZ3JvdW5kXCI+XG4gICAgICAgICAgSW1wb3J0ZXogb3UgZXhwb3J0ZXogdm9zIHByb2R1aXRzLCBjb21tYW5kZXMgZXQgY2xpZW50c1xuICAgICAgICA8L3A+XG4gICAgICA8L2Rpdj5cblxuICAgICAgPFRhYnMgZGVmYXVsdFZhbHVlPVwiZXhwb3J0XCIgY2xhc3NOYW1lPVwic3BhY2UteS00XCI+XG4gICAgICAgIDxUYWJzTGlzdD5cbiAgICAgICAgICA8VGFic1RyaWdnZXIgdmFsdWU9XCJleHBvcnRcIj5FeHBvcnRlcjwvVGFic1RyaWdnZXI+XG4gICAgICAgICAgPFRhYnNUcmlnZ2VyIHZhbHVlPVwiaW1wb3J0XCI+SW1wb3J0ZXI8L1RhYnNUcmlnZ2VyPlxuICAgICAgICA8L1RhYnNMaXN0PlxuXG4gICAgICAgIHsvKiBFeHBvcnQgVGFiICovfVxuICAgICAgICA8VGFic0NvbnRlbnQgdmFsdWU9XCJleHBvcnRcIiBjbGFzc05hbWU9XCJzcGFjZS15LTRcIj5cbiAgICAgICAgICA8Q2FyZD5cbiAgICAgICAgICAgIDxDYXJkSGVhZGVyPlxuICAgICAgICAgICAgICA8Q2FyZFRpdGxlIGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGdhcC0yXCI+XG4gICAgICAgICAgICAgICAgPERvd25sb2FkIGNsYXNzTmFtZT1cImgtNSB3LTVcIiAvPlxuICAgICAgICAgICAgICAgIEV4cG9ydGVyIGRlcyBkb25uw6llc1xuICAgICAgICAgICAgICA8L0NhcmRUaXRsZT5cbiAgICAgICAgICAgICAgPENhcmREZXNjcmlwdGlvbj5cbiAgICAgICAgICAgICAgICBUw6lsw6ljaGFyZ2V6IHZvcyBkb25uw6llcyBhdSBmb3JtYXQgQ1NWIG91IEpTT05cbiAgICAgICAgICAgICAgPC9DYXJkRGVzY3JpcHRpb24+XG4gICAgICAgICAgICA8L0NhcmRIZWFkZXI+XG4gICAgICAgICAgICA8Q2FyZENvbnRlbnQgY2xhc3NOYW1lPVwic3BhY2UteS00XCI+XG4gICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZ3JpZCBncmlkLWNvbHMtMSBtZDpncmlkLWNvbHMtMiBnYXAtNFwiPlxuICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwic3BhY2UteS0yXCI+XG4gICAgICAgICAgICAgICAgICA8TGFiZWwgaHRtbEZvcj1cImV4cG9ydC10eXBlXCI+VHlwZSBkZSBkb25uw6llczwvTGFiZWw+XG4gICAgICAgICAgICAgICAgICA8U2VsZWN0IHZhbHVlPXt0eXBlfSBvblZhbHVlQ2hhbmdlPXsodikgPT4gc2V0VHlwZSh2IGFzIEltcG9ydEV4cG9ydFR5cGUpfT5cbiAgICAgICAgICAgICAgICAgICAgPFNlbGVjdFRyaWdnZXIgaWQ9XCJleHBvcnQtdHlwZVwiPlxuICAgICAgICAgICAgICAgICAgICAgIDxTZWxlY3RWYWx1ZSAvPlxuICAgICAgICAgICAgICAgICAgICA8L1NlbGVjdFRyaWdnZXI+XG4gICAgICAgICAgICAgICAgICAgIDxTZWxlY3RDb250ZW50PlxuICAgICAgICAgICAgICAgICAgICAgIDxTZWxlY3RJdGVtIHZhbHVlPVwicHJvZHVjdHNcIj5Qcm9kdWl0czwvU2VsZWN0SXRlbT5cbiAgICAgICAgICAgICAgICAgICAgICA8U2VsZWN0SXRlbSB2YWx1ZT1cIm9yZGVyc1wiPkNvbW1hbmRlczwvU2VsZWN0SXRlbT5cbiAgICAgICAgICAgICAgICAgICAgICA8U2VsZWN0SXRlbSB2YWx1ZT1cImN1c3RvbWVyc1wiPkNsaWVudHM8L1NlbGVjdEl0ZW0+XG4gICAgICAgICAgICAgICAgICAgIDwvU2VsZWN0Q29udGVudD5cbiAgICAgICAgICAgICAgICAgIDwvU2VsZWN0PlxuICAgICAgICAgICAgICAgIDwvZGl2PlxuXG4gICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJzcGFjZS15LTJcIj5cbiAgICAgICAgICAgICAgICAgIDxMYWJlbCBodG1sRm9yPVwiZXhwb3J0LWZvcm1hdFwiPkZvcm1hdDwvTGFiZWw+XG4gICAgICAgICAgICAgICAgICA8U2VsZWN0IHZhbHVlPXtmb3JtYXR9IG9uVmFsdWVDaGFuZ2U9eyh2KSA9PiBzZXRGb3JtYXQodiBhcyBJbXBvcnRFeHBvcnRGb3JtYXQpfT5cbiAgICAgICAgICAgICAgICAgICAgPFNlbGVjdFRyaWdnZXIgaWQ9XCJleHBvcnQtZm9ybWF0XCI+XG4gICAgICAgICAgICAgICAgICAgICAgPFNlbGVjdFZhbHVlIC8+XG4gICAgICAgICAgICAgICAgICAgIDwvU2VsZWN0VHJpZ2dlcj5cbiAgICAgICAgICAgICAgICAgICAgPFNlbGVjdENvbnRlbnQ+XG4gICAgICAgICAgICAgICAgICAgICAgPFNlbGVjdEl0ZW0gdmFsdWU9XCJjc3ZcIj5cbiAgICAgICAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTJcIj5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgPEZpbGVTcHJlYWRzaGVldCBjbGFzc05hbWU9XCJoLTQgdy00XCIgLz5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgQ1NWXG4gICAgICAgICAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICAgICAgICA8L1NlbGVjdEl0ZW0+XG4gICAgICAgICAgICAgICAgICAgICAgPFNlbGVjdEl0ZW0gdmFsdWU9XCJqc29uXCI+XG4gICAgICAgICAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGdhcC0yXCI+XG4gICAgICAgICAgICAgICAgICAgICAgICAgIDxGaWxlVGV4dCBjbGFzc05hbWU9XCJoLTQgdy00XCIgLz5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgSlNPTlxuICAgICAgICAgICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgICAgICAgICAgPC9TZWxlY3RJdGVtPlxuICAgICAgICAgICAgICAgICAgICA8L1NlbGVjdENvbnRlbnQ+XG4gICAgICAgICAgICAgICAgICA8L1NlbGVjdD5cbiAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgPC9kaXY+XG5cbiAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJncmlkIGdyaWQtY29scy0xIG1kOmdyaWQtY29scy0yIGdhcC00XCI+XG4gICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJzcGFjZS15LTJcIj5cbiAgICAgICAgICAgICAgICAgIDxMYWJlbCBodG1sRm9yPVwic3RhcnQtZGF0ZVwiPkRhdGUgZGUgZMOpYnV0IChvcHRpb25uZWwpPC9MYWJlbD5cbiAgICAgICAgICAgICAgICAgIDxJbnB1dFxuICAgICAgICAgICAgICAgICAgICBpZD1cInN0YXJ0LWRhdGVcIlxuICAgICAgICAgICAgICAgICAgICB0eXBlPVwiZGF0ZVwiXG4gICAgICAgICAgICAgICAgICAgIHZhbHVlPXtzdGFydERhdGV9XG4gICAgICAgICAgICAgICAgICAgIG9uQ2hhbmdlPXsoZSkgPT4gc2V0U3RhcnREYXRlKGUudGFyZ2V0LnZhbHVlKX1cbiAgICAgICAgICAgICAgICAgIC8+XG4gICAgICAgICAgICAgICAgPC9kaXY+XG5cbiAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInNwYWNlLXktMlwiPlxuICAgICAgICAgICAgICAgICAgPExhYmVsIGh0bWxGb3I9XCJlbmQtZGF0ZVwiPkRhdGUgZGUgZmluIChvcHRpb25uZWwpPC9MYWJlbD5cbiAgICAgICAgICAgICAgICAgIDxJbnB1dFxuICAgICAgICAgICAgICAgICAgICBpZD1cImVuZC1kYXRlXCJcbiAgICAgICAgICAgICAgICAgICAgdHlwZT1cImRhdGVcIlxuICAgICAgICAgICAgICAgICAgICB2YWx1ZT17ZW5kRGF0ZX1cbiAgICAgICAgICAgICAgICAgICAgb25DaGFuZ2U9eyhlKSA9PiBzZXRFbmREYXRlKGUudGFyZ2V0LnZhbHVlKX1cbiAgICAgICAgICAgICAgICAgIC8+XG4gICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgIDwvZGl2PlxuXG4gICAgICAgICAgICAgIDxCdXR0b25cbiAgICAgICAgICAgICAgICBvbkNsaWNrPXtoYW5kbGVFeHBvcnR9XG4gICAgICAgICAgICAgICAgZGlzYWJsZWQ9e2V4cG9ydGluZ31cbiAgICAgICAgICAgICAgICBjbGFzc05hbWU9XCJ3LWZ1bGxcIlxuICAgICAgICAgICAgICA+XG4gICAgICAgICAgICAgICAge2V4cG9ydGluZyA/IChcbiAgICAgICAgICAgICAgICAgIDw+XG4gICAgICAgICAgICAgICAgICAgIDxMb2FkZXIyIGNsYXNzTmFtZT1cImgtNCB3LTQgbXItMiBhbmltYXRlLXNwaW5cIiAvPlxuICAgICAgICAgICAgICAgICAgICBFeHBvcnQgZW4gY291cnMuLi5cbiAgICAgICAgICAgICAgICAgIDwvPlxuICAgICAgICAgICAgICAgICkgOiAoXG4gICAgICAgICAgICAgICAgICA8PlxuICAgICAgICAgICAgICAgICAgICA8RG93bmxvYWQgY2xhc3NOYW1lPVwiaC00IHctNCBtci0yXCIgLz5cbiAgICAgICAgICAgICAgICAgICAgRXhwb3J0ZXJcbiAgICAgICAgICAgICAgICAgIDwvPlxuICAgICAgICAgICAgICAgICl9XG4gICAgICAgICAgICAgIDwvQnV0dG9uPlxuICAgICAgICAgICAgPC9DYXJkQ29udGVudD5cbiAgICAgICAgICA8L0NhcmQ+XG4gICAgICAgIDwvVGFic0NvbnRlbnQ+XG5cbiAgICAgICAgey8qIEltcG9ydCBUYWIgKi99XG4gICAgICAgIDxUYWJzQ29udGVudCB2YWx1ZT1cImltcG9ydFwiIGNsYXNzTmFtZT1cInNwYWNlLXktNFwiPlxuICAgICAgICAgIDxDYXJkPlxuICAgICAgICAgICAgPENhcmRIZWFkZXI+XG4gICAgICAgICAgICAgIDxDYXJkVGl0bGUgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTJcIj5cbiAgICAgICAgICAgICAgICA8VXBsb2FkIGNsYXNzTmFtZT1cImgtNSB3LTVcIiAvPlxuICAgICAgICAgICAgICAgIEltcG9ydGVyIGRlcyBkb25uw6llc1xuICAgICAgICAgICAgICA8L0NhcmRUaXRsZT5cbiAgICAgICAgICAgICAgPENhcmREZXNjcmlwdGlvbj5cbiAgICAgICAgICAgICAgICBJbXBvcnRleiB2b3MgZG9ubsOpZXMgZGVwdWlzIHVuIGZpY2hpZXIgQ1NWIG91IEpTT05cbiAgICAgICAgICAgICAgPC9DYXJkRGVzY3JpcHRpb24+XG4gICAgICAgICAgICA8L0NhcmRIZWFkZXI+XG4gICAgICAgICAgICA8Q2FyZENvbnRlbnQgY2xhc3NOYW1lPVwic3BhY2UteS00XCI+XG4gICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwic3BhY2UteS0yXCI+XG4gICAgICAgICAgICAgICAgPExhYmVsIGh0bWxGb3I9XCJpbXBvcnQtdHlwZVwiPlR5cGUgZGUgZG9ubsOpZXM8L0xhYmVsPlxuICAgICAgICAgICAgICAgIDxTZWxlY3QgdmFsdWU9e3R5cGV9IG9uVmFsdWVDaGFuZ2U9eyh2KSA9PiBzZXRUeXBlKHYgYXMgSW1wb3J0RXhwb3J0VHlwZSl9PlxuICAgICAgICAgICAgICAgICAgPFNlbGVjdFRyaWdnZXIgaWQ9XCJpbXBvcnQtdHlwZVwiPlxuICAgICAgICAgICAgICAgICAgICA8U2VsZWN0VmFsdWUgLz5cbiAgICAgICAgICAgICAgICAgIDwvU2VsZWN0VHJpZ2dlcj5cbiAgICAgICAgICAgICAgICAgIDxTZWxlY3RDb250ZW50PlxuICAgICAgICAgICAgICAgICAgICA8U2VsZWN0SXRlbSB2YWx1ZT1cInByb2R1Y3RzXCI+UHJvZHVpdHM8L1NlbGVjdEl0ZW0+XG4gICAgICAgICAgICAgICAgICAgIDxTZWxlY3RJdGVtIHZhbHVlPVwiY3VzdG9tZXJzXCI+Q2xpZW50czwvU2VsZWN0SXRlbT5cbiAgICAgICAgICAgICAgICAgIDwvU2VsZWN0Q29udGVudD5cbiAgICAgICAgICAgICAgICA8L1NlbGVjdD5cbiAgICAgICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJ0ZXh0LXhzIHRleHQtbXV0ZWQtZm9yZWdyb3VuZFwiPlxuICAgICAgICAgICAgICAgICAgTm90ZTogTGVzIGNvbW1hbmRlcyBuZSBwZXV2ZW50IHBhcyDDqnRyZSBpbXBvcnTDqWVzIGRpcmVjdGVtZW50XG4gICAgICAgICAgICAgICAgPC9wPlxuICAgICAgICAgICAgICA8L2Rpdj5cblxuICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInNwYWNlLXktMlwiPlxuICAgICAgICAgICAgICAgIDxMYWJlbCBodG1sRm9yPVwiaW1wb3J0LWZpbGVcIj5GaWNoaWVyPC9MYWJlbD5cbiAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGdhcC0yXCI+XG4gICAgICAgICAgICAgICAgICA8SW5wdXRcbiAgICAgICAgICAgICAgICAgICAgaWQ9XCJpbXBvcnQtZmlsZVwiXG4gICAgICAgICAgICAgICAgICAgIHR5cGU9XCJmaWxlXCJcbiAgICAgICAgICAgICAgICAgICAgYWNjZXB0PVwiLmNzdiwuanNvblwiXG4gICAgICAgICAgICAgICAgICAgIG9uQ2hhbmdlPXtoYW5kbGVGaWxlQ2hhbmdlfVxuICAgICAgICAgICAgICAgICAgICBkaXNhYmxlZD17aW1wb3J0aW5nfVxuICAgICAgICAgICAgICAgICAgLz5cbiAgICAgICAgICAgICAgICAgIHtpbXBvcnRGaWxlICYmIChcbiAgICAgICAgICAgICAgICAgICAgPEJhZGdlIHZhcmlhbnQ9XCJzZWNvbmRhcnlcIj5cbiAgICAgICAgICAgICAgICAgICAgICA8RmlsZVRleHQgY2xhc3NOYW1lPVwiaC0zIHctMyBtci0xXCIgLz5cbiAgICAgICAgICAgICAgICAgICAgICB7aW1wb3J0RmlsZS5uYW1lfVxuICAgICAgICAgICAgICAgICAgICA8L0JhZGdlPlxuICAgICAgICAgICAgICAgICAgKX1cbiAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgPC9kaXY+XG5cbiAgICAgICAgICAgICAgPEJ1dHRvblxuICAgICAgICAgICAgICAgIG9uQ2xpY2s9e2hhbmRsZUltcG9ydH1cbiAgICAgICAgICAgICAgICBkaXNhYmxlZD17IWltcG9ydEZpbGUgfHwgaW1wb3J0aW5nfVxuICAgICAgICAgICAgICAgIGNsYXNzTmFtZT1cInctZnVsbFwiXG4gICAgICAgICAgICAgID5cbiAgICAgICAgICAgICAgICB7aW1wb3J0aW5nID8gKFxuICAgICAgICAgICAgICAgICAgPD5cbiAgICAgICAgICAgICAgICAgICAgPExvYWRlcjIgY2xhc3NOYW1lPVwiaC00IHctNCBtci0yIGFuaW1hdGUtc3BpblwiIC8+XG4gICAgICAgICAgICAgICAgICAgIEltcG9ydCBlbiBjb3Vycy4uLlxuICAgICAgICAgICAgICAgICAgPC8+XG4gICAgICAgICAgICAgICAgKSA6IChcbiAgICAgICAgICAgICAgICAgIDw+XG4gICAgICAgICAgICAgICAgICAgIDxVcGxvYWQgY2xhc3NOYW1lPVwiaC00IHctNCBtci0yXCIgLz5cbiAgICAgICAgICAgICAgICAgICAgSW1wb3J0ZXJcbiAgICAgICAgICAgICAgICAgIDwvPlxuICAgICAgICAgICAgICAgICl9XG4gICAgICAgICAgICAgIDwvQnV0dG9uPlxuXG4gICAgICAgICAgICAgIHtpbXBvcnRSZXN1bHQgJiYgKFxuICAgICAgICAgICAgICAgIDxBbGVydD5cbiAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTIgbWItMlwiPlxuICAgICAgICAgICAgICAgICAgICB7aW1wb3J0UmVzdWx0LnN1Y2Nlc3MgPyAoXG4gICAgICAgICAgICAgICAgICAgICAgPENoZWNrQ2lyY2xlMiBjbGFzc05hbWU9XCJoLTQgdy00IHRleHQtZ3JlZW4tNTAwXCIgLz5cbiAgICAgICAgICAgICAgICAgICAgKSA6IChcbiAgICAgICAgICAgICAgICAgICAgICA8QWxlcnRDaXJjbGUgY2xhc3NOYW1lPVwiaC00IHctNCB0ZXh0LXllbGxvdy01MDBcIiAvPlxuICAgICAgICAgICAgICAgICAgICApfVxuICAgICAgICAgICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJmb250LW1lZGl1bVwiPlxuICAgICAgICAgICAgICAgICAgICAgIHtpbXBvcnRSZXN1bHQuc3VjY2VzcyA/ICdJbXBvcnQgcsOpdXNzaScgOiAnSW1wb3J0IHBhcnRpZWwnfVxuICAgICAgICAgICAgICAgICAgICA8L3NwYW4+XG4gICAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICAgIDxBbGVydERlc2NyaXB0aW9uPlxuICAgICAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInNwYWNlLXktMVwiPlxuICAgICAgICAgICAgICAgICAgICAgIDxwPlxuICAgICAgICAgICAgICAgICAgICAgICAgPEJhZGdlIHZhcmlhbnQ9XCJvdXRsaW5lXCIgY2xhc3NOYW1lPVwibXItMlwiPlxuICAgICAgICAgICAgICAgICAgICAgICAgICB7aW1wb3J0UmVzdWx0LmltcG9ydGVkfVxuICAgICAgICAgICAgICAgICAgICAgICAgPC9CYWRnZT5cbiAgICAgICAgICAgICAgICAgICAgICAgIMOpbMOpbWVudChzKSBpbXBvcnTDqShzKVxuICAgICAgICAgICAgICAgICAgICAgIDwvcD5cbiAgICAgICAgICAgICAgICAgICAgICB7aW1wb3J0UmVzdWx0LmZhaWxlZCA+IDAgJiYgKFxuICAgICAgICAgICAgICAgICAgICAgICAgPHA+XG4gICAgICAgICAgICAgICAgICAgICAgICAgIDxCYWRnZSB2YXJpYW50PVwiZGVzdHJ1Y3RpdmVcIiBjbGFzc05hbWU9XCJtci0yXCI+XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAge2ltcG9ydFJlc3VsdC5mYWlsZWR9XG4gICAgICAgICAgICAgICAgICAgICAgICAgIDwvQmFkZ2U+XG4gICAgICAgICAgICAgICAgICAgICAgICAgIMOpY2hlYyhzKVxuICAgICAgICAgICAgICAgICAgICAgICAgPC9wPlxuICAgICAgICAgICAgICAgICAgICAgICl9XG4gICAgICAgICAgICAgICAgICAgICAge2ltcG9ydFJlc3VsdC5lcnJvcnMgJiYgaW1wb3J0UmVzdWx0LmVycm9ycy5sZW5ndGggPiAwICYmIChcbiAgICAgICAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwibXQtMlwiPlxuICAgICAgICAgICAgICAgICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJ0ZXh0LXNtIGZvbnQtbWVkaXVtIG1iLTFcIj5FcnJldXJzIDo8L3A+XG4gICAgICAgICAgICAgICAgICAgICAgICAgIDx1bCBjbGFzc05hbWU9XCJ0ZXh0LXhzIHNwYWNlLXktMSBtYXgtaC0zMiBvdmVyZmxvdy15LWF1dG9cIj5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICB7aW1wb3J0UmVzdWx0LmVycm9ycy5zbGljZSgwLCAxMCkubWFwKChlcnJvcjogYW55LCBpbmRleDogbnVtYmVyKSA9PiAoXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICA8bGkga2V5PXtpbmRleH0gY2xhc3NOYW1lPVwidGV4dC1tdXRlZC1mb3JlZ3JvdW5kXCI+XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIExpZ25lIHtlcnJvci5yb3d9OiB7ZXJyb3IuZXJyb3J9XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICA8L2xpPlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICkpfVxuICAgICAgICAgICAgICAgICAgICAgICAgICA8L3VsPlxuICAgICAgICAgICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgICAgICAgICAgKX1cbiAgICAgICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgICAgICA8L0FsZXJ0RGVzY3JpcHRpb24+XG4gICAgICAgICAgICAgICAgPC9BbGVydD5cbiAgICAgICAgICAgICAgKX1cbiAgICAgICAgICAgIDwvQ2FyZENvbnRlbnQ+XG4gICAgICAgICAgPC9DYXJkPlxuICAgICAgICA8L1RhYnNDb250ZW50PlxuICAgICAgPC9UYWJzPlxuICAgIDwvZGl2PlxuICApO1xufTtcblxuXG5cblxuXG5cblxuIl0sIm5hbWVzIjpbInVzZVN0YXRlIiwiQ2FyZCIsIkNhcmRDb250ZW50IiwiQ2FyZERlc2NyaXB0aW9uIiwiQ2FyZEhlYWRlciIsIkNhcmRUaXRsZSIsIkJ1dHRvbiIsIlNlbGVjdCIsIlNlbGVjdENvbnRlbnQiLCJTZWxlY3RJdGVtIiwiU2VsZWN0VHJpZ2dlciIsIlNlbGVjdFZhbHVlIiwiTGFiZWwiLCJJbnB1dCIsIlRhYnMiLCJUYWJzQ29udGVudCIsIlRhYnNMaXN0IiwiVGFic1RyaWdnZXIiLCJBbGVydCIsIkFsZXJ0RGVzY3JpcHRpb24iLCJCYWRnZSIsIlVwbG9hZCIsIkRvd25sb2FkIiwiRmlsZVRleHQiLCJDaGVja0NpcmNsZTIiLCJBbGVydENpcmNsZSIsIkxvYWRlcjIiLCJGaWxlU3ByZWFkc2hlZXQiLCJ1c2VUb2FzdCIsInVzZVN0b3JlIiwiZXhwb3J0VG9DU1YiLCJleHBvcnRUb0pTT04iLCJpbXBvcnRGcm9tQ1NWIiwiaW1wb3J0RnJvbUpTT04iLCJsb2dnZXIiLCJJbXBvcnRFeHBvcnRNYW5hZ2VyIiwidG9hc3QiLCJzdG9yZSIsInR5cGUiLCJzZXRUeXBlIiwiZm9ybWF0Iiwic2V0Rm9ybWF0IiwiaW1wb3J0RmlsZSIsInNldEltcG9ydEZpbGUiLCJpbXBvcnRpbmciLCJzZXRJbXBvcnRpbmciLCJleHBvcnRpbmciLCJzZXRFeHBvcnRpbmciLCJpbXBvcnRSZXN1bHQiLCJzZXRJbXBvcnRSZXN1bHQiLCJzdGFydERhdGUiLCJzZXRTdGFydERhdGUiLCJlbmREYXRlIiwic2V0RW5kRGF0ZSIsImhhbmRsZUV4cG9ydCIsInRpdGxlIiwiZGVzY3JpcHRpb24iLCJ2YXJpYW50IiwiX3Jlc3VsdCIsInJlc3VsdCIsImlkIiwidW5kZWZpbmVkIiwic3VjY2VzcyIsImRhdGEiLCJibG9iIiwiQmxvYiIsIkpTT04iLCJzdHJpbmdpZnkiLCJ1cmwiLCJVUkwiLCJjcmVhdGVPYmplY3RVUkwiLCJhIiwiZG9jdW1lbnQiLCJjcmVhdGVFbGVtZW50IiwiaHJlZiIsImRvd25sb2FkIiwiRGF0ZSIsInRvSVNPU3RyaW5nIiwic3BsaXQiLCJib2R5IiwiYXBwZW5kQ2hpbGQiLCJjbGljayIsInJlbW92ZUNoaWxkIiwicmV2b2tlT2JqZWN0VVJMIiwiRXJyb3IiLCJlcnJvciIsIl9lcnJvciIsIm1lc3NhZ2UiLCJoYW5kbGVJbXBvcnQiLCJmaWxlQ29udGVudCIsInRleHQiLCJqc29uRGF0YSIsInBhcnNlIiwiaW1wb3J0ZWQiLCJmYWlsZWQiLCJoYW5kbGVGaWxlQ2hhbmdlIiwiZSIsImZpbGUiLCJ0YXJnZXQiLCJmaWxlcyIsIm5hbWUiLCJlbmRzV2l0aCIsImNsYXNzTmFtZSIsInAiLCJkaXYiLCJoMiIsImRlZmF1bHRWYWx1ZSIsInZhbHVlIiwiaHRtbEZvciIsIm9uVmFsdWVDaGFuZ2UiLCJ2Iiwib25DaGFuZ2UiLCJvbkNsaWNrIiwiZGlzYWJsZWQiLCJhY2NlcHQiLCJzcGFuIiwiZXJyb3JzIiwibGVuZ3RoIiwidWwiLCJzbGljZSIsIm1hcCIsImluZGV4IiwibGkiLCJyb3ciXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OztBQUFBOzs7OztDQUtDLEdBRUQsU0FBU0EsUUFBUSxRQUFRLFFBQVE7QUFDakMsU0FBU0MsSUFBSSxFQUFFQyxXQUFXLEVBQUVDLGVBQWUsRUFBRUMsVUFBVSxFQUFFQyxTQUFTLFFBQVEsdUJBQXVCO0FBQ2pHLFNBQVNDLE1BQU0sUUFBUSx5QkFBeUI7QUFDaEQsU0FBU0MsTUFBTSxFQUFFQyxhQUFhLEVBQUVDLFVBQVUsRUFBRUMsYUFBYSxFQUFFQyxXQUFXLFFBQVEseUJBQXlCO0FBQ3ZHLFNBQVNDLEtBQUssUUFBUSx3QkFBd0I7QUFDOUMsU0FBU0MsS0FBSyxRQUFRLHdCQUF3QjtBQUM5QyxTQUFTQyxJQUFJLEVBQUVDLFdBQVcsRUFBRUMsUUFBUSxFQUFFQyxXQUFXLFFBQVEsdUJBQXVCO0FBQ2hGLFNBQVNDLEtBQUssRUFBRUMsZ0JBQWdCLFFBQVEsd0JBQXdCO0FBQ2hFLFNBQVNDLEtBQUssUUFBUSx3QkFBd0I7QUFFOUMsU0FDRUMsTUFBTSxFQUNOQyxRQUFRLEVBQ1JDLFFBQVEsRUFDUkMsWUFBWSxFQUNaQyxXQUFXLEVBQ1hDLE9BQU8sRUFDUEMsZUFBZSxRQUVWLGVBQWU7QUFDdEIsU0FBU0MsUUFBUSxRQUFRLG9CQUFvQjtBQUM3QyxTQUFTQyxRQUFRLFFBQVEsbUJBQW1CO0FBQzVDLFNBQ0VDLFdBQVcsRUFDWEMsWUFBWSxFQUNaQyxhQUFhLEVBQ2JDLGNBQWMsUUFHVCxvQ0FBb0M7QUFDM0MsU0FBU0MsTUFBTSxRQUFRLGVBQWU7QUFFdEMsT0FBTyxNQUFNQyxz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

@@ -1,0 +1,39 @@
+// By default, we want to infer the IP address, unless this is explicitly set to `null`
+// We do this after all other processing is done
+// If `ip_address` is explicitly set to `null` or a value, we leave it as is
+
+/**
+ * @internal
+ * @deprecated -- set ip inferral via via SDK metadata options on client instead.
+ */
+function addAutoIpAddressToUser(objWithMaybeUser) {
+  if (objWithMaybeUser.user?.ip_address === undefined) {
+    objWithMaybeUser.user = {
+      ...objWithMaybeUser.user,
+      ip_address: '{{auto}}',
+    };
+  }
+}
+
+/**
+ * @internal
+ */
+function addAutoIpAddressToSession(session) {
+  if ('aggregates' in session) {
+    if (session.attrs?.['ip_address'] === undefined) {
+      session.attrs = {
+        ...session.attrs,
+        ip_address: '{{auto}}',
+      };
+    }
+  } else {
+    if (session.ipAddress === undefined) {
+      session.ipAddress = '{{auto}}';
+    }
+  }
+}
+
+export { addAutoIpAddressToSession, addAutoIpAddressToUser };
+                                     
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaXBBZGRyZXNzLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi9zcmMvdXRpbHMvaXBBZGRyZXNzLnRzIl0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB0eXBlIHsgU2Vzc2lvbiwgU2Vzc2lvbkFnZ3JlZ2F0ZXMgfSBmcm9tICcuLi90eXBlcy1ob2lzdC9zZXNzaW9uJztcbmltcG9ydCB0eXBlIHsgVXNlciB9IGZyb20gJy4uL3R5cGVzLWhvaXN0L3VzZXInO1xuXG4vLyBCeSBkZWZhdWx0LCB3ZSB3YW50IHRvIGluZmVyIHRoZSBJUCBhZGRyZXNzLCB1bmxlc3MgdGhpcyBpcyBleHBsaWNpdGx5IHNldCB0byBgbnVsbGBcbi8vIFdlIGRvIHRoaXMgYWZ0ZXIgYWxsIG90aGVyIHByb2Nlc3NpbmcgaXMgZG9uZVxuLy8gSWYgYGlwX2FkZHJlc3NgIGlzIGV4cGxpY2l0bHkgc2V0IHRvIGBudWxsYCBvciBhIHZhbHVlLCB3ZSBsZWF2ZSBpdCBhcyBpc1xuXG4vKipcbiAqIEBpbnRlcm5hbFxuICogQGRlcHJlY2F0ZWQgLS0gc2V0IGlwIGluZmVycmFsIHZpYSB2aWEgU0RLIG1ldGFkYXRhIG9wdGlvbnMgb24gY2xpZW50IGluc3RlYWQuXG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBhZGRBdXRvSXBBZGRyZXNzVG9Vc2VyKG9ialdpdGhNYXliZVVzZXI6IHsgdXNlcj86IFVzZXIgfCBudWxsIH0pOiB2b2lkIHtcbiAgaWYgKG9ialdpdGhNYXliZVVzZXIudXNlcj8uaXBfYWRkcmVzcyA9PT0gdW5kZWZpbmVkKSB7XG4gICAgb2JqV2l0aE1heWJlVXNlci51c2VyID0ge1xuICAgICAgLi4ub2JqV2l0aE1heWJlVXNlci51c2VyLFxuICAgICAgaXBfYWRkcmVzczogJ3t7YXV0b319JyxcbiAgICB9O1xuICB9XG59XG5cbi8qKlxuICogQGludGVybmFsXG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBhZGRBdXRvSXBBZGRyZXNzVG9TZXNzaW9uKHNlc3Npb246IFNlc3Npb24gfCBTZXNzaW9uQWdncmVnYXRlcyk6IHZvaWQge1xuICBpZiAoJ2FnZ3JlZ2F0ZXMnIGluIHNlc3Npb24pIHtcbiAgICBpZiAoc2Vzc2lvbi5hdHRycz8uWydpcF9hZGRyZXNzJ10gPT09IHVuZGVmaW5lZCkge1xuICAgICAgc2Vzc2lvbi5hdHRycyA9IHtcbiAgICAgICAgLi4uc2Vzc2lvbi5hdHRycyxcbiAgICAgICAgaXBfYWRkcmVzczogJ3t7YXV0b319JyxcbiAgICAgIH07XG4gICAgfVxuICB9IGVsc2Uge1xuICAgIGlmIChzZXNzaW9uLmlwQWRkcmVzcyA9PT0gdW5kZWZpbmVkKSB7XG4gICAgICBzZXNzaW9uLmlwQWRkcmVzcyA9ICd7e2F1dG99fSc7XG4gICAgfVxuICB9XG59XG4iXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBR0E7QUFDQTtBQUNBOztBQUVBO0FBQ0E7QUFDQTtBQUNBO0FBQ08sU0FBUyxzQkFBc0IsQ0FBQyxnQkFBZ0IsRUFBZ0M7QUFDdkYsRUFBRSxJQUFJLGdCQUFnQixDQUFDLElBQUksRUFBRSxVQUFBLEtBQWUsU0FBUyxFQUFFO0FBQ3ZELElBQUksZ0JBQWdCLENBQUMsSUFBQSxHQUFPO0FBQzVCLE1BQU0sR0FBRyxnQkFBZ0IsQ0FBQyxJQUFJO0FBQzlCLE1BQU0sVUFBVSxFQUFFLFVBQVU7QUFDNUIsS0FBSztBQUNMLEVBQUU7QUFDRjs7QUFFQTtBQUNBO0FBQ0E7QUFDTyxTQUFTLHlCQUF5QixDQUFDLE9BQU8sRUFBcUM7QUFDdEYsRUFBRSxJQUFJLFlBQUEsSUFBZ0IsT0FBTyxFQUFFO0FBQy9CLElBQUksSUFBSSxPQUFPLENBQUMsS0FBSyxHQUFHLFlBQVksQ0FBQSxLQUFNLFNBQVMsRUFBRTtBQUNyRCxNQUFNLE9BQU8sQ0FBQyxLQUFBLEdBQVE7QUFDdEIsUUFBUSxHQUFHLE9BQU8sQ0FBQyxLQUFLO0FBQ3hCLFFBQVEsVUFBVSxFQUFFLFVBQVU7QUFDOUIsT0FBTztBQUNQLElBQUk7QUFDSixFQUFFLE9BQU87QUFDVCxJQUFJLElBQUksT0FBTyxDQUFDLFNBQUEsS0FBYyxTQUFTLEVBQUU7QUFDekMsTUFBTSxPQUFPLENBQUMsU0FBQSxHQUFZLFVBQVU7QUFDcEMsSUFBSTtBQUNKLEVBQUU7QUFDRjs7OzsiLCJ4X2dvb2dsZV9pZ25vcmVMaXN0IjpbMF19

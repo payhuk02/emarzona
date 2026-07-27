@@ -1,0 +1,144 @@
+import { timestampInSeconds, debug, spanToJSON, uuid4, getCurrentScope } from "/node_modules/@sentry/core/build/esm/index.js?v=a52cce50";
+import { DEBUG_BUILD } from "/node_modules/@sentry/browser/build/npm/esm/dev/debug-build.js?v=a52cce50";
+import { WINDOW } from "/node_modules/@sentry/browser/build/npm/esm/dev/helpers.js?v=a52cce50";
+import { isAutomatedPageLoadSpan, startJSSelfProfile, MAX_PROFILE_DURATION_MS, addProfileToGlobalCache } from "/node_modules/@sentry/browser/build/npm/esm/dev/profiling/utils.js?v=a52cce50";
+
+/**
+ * Wraps startTransaction and stopTransaction with profiling related logic.
+ * startProfileForTransaction is called after the call to startTransaction in order to avoid our own code from
+ * being profiled. Because of that same reason, stopProfiling is called before the call to stopTransaction.
+ */
+function startProfileForSpan(span) {
+  // Start the profiler and get the profiler instance.
+  let startTimestamp;
+  if (isAutomatedPageLoadSpan(span)) {
+    startTimestamp = timestampInSeconds() * 1000;
+  }
+
+  const profiler = startJSSelfProfile();
+
+  // We failed to construct the profiler, so we skip.
+  // No need to log anything as this has already been logged in startProfile.
+  if (!profiler) {
+    return;
+  }
+
+  if (DEBUG_BUILD) {
+    debug.log(`[Profiling] started profiling span: ${spanToJSON(span).description}`);
+  }
+
+  // We create "unique" span names to avoid concurrent spans with same names
+  // from being ignored by the profiler. From here on, only this span name should be used when
+  // calling the profiler methods. Note: we log the original name to the user to avoid confusion.
+  const profileId = uuid4();
+
+  // A couple of important things to note here:
+  // `CpuProfilerBindings.stopProfiling` will be scheduled to run in 30seconds in order to exceed max profile duration.
+  // Whichever of the two (span.finish/timeout) is first to run, the profiling will be stopped and the gathered profile
+  // will be processed when the original span is finished. Since onProfileHandler can be invoked multiple times in the
+  // event of an error or user mistake (calling span.finish multiple times), it is important that the behavior of onProfileHandler
+  // is idempotent as we do not want any timings or profiles to be overridden by the last call to onProfileHandler.
+  // After the original finish method is called, the event will be reported through the integration and delegated to transport.
+  let processedProfile = null;
+
+  getCurrentScope().setContext('profile', {
+    profile_id: profileId,
+    start_timestamp: startTimestamp,
+  });
+
+  /**
+   * Idempotent handler for profile stop
+   */
+  async function onProfileHandler() {
+    // Check if the profile exists and return it the behavior has to be idempotent as users may call span.finish multiple times.
+    if (!span) {
+      return;
+    }
+    // Satisfy the type checker, but profiler will always be defined here.
+    if (!profiler) {
+      return;
+    }
+    if (processedProfile) {
+      if (DEBUG_BUILD) {
+        debug.log('[Profiling] profile for:', spanToJSON(span).description, 'already exists, returning early');
+      }
+      return;
+    }
+
+    return profiler
+      .stop()
+      .then((profile) => {
+        if (maxDurationTimeoutID) {
+          WINDOW.clearTimeout(maxDurationTimeoutID);
+          maxDurationTimeoutID = undefined;
+        }
+
+        if (DEBUG_BUILD) {
+          debug.log(`[Profiling] stopped profiling of span: ${spanToJSON(span).description}`);
+        }
+
+        // In case of an overlapping span, stopProfiling may return null and silently ignore the overlapping profile.
+        if (!profile) {
+          if (DEBUG_BUILD) {
+            debug.log(
+              `[Profiling] profiler returned null profile for: ${spanToJSON(span).description}`,
+              'this may indicate an overlapping span or a call to stopProfiling with a profile title that was never started',
+            );
+          }
+          return;
+        }
+
+        processedProfile = profile;
+        addProfileToGlobalCache(profileId, profile);
+      })
+      .catch(error => {
+        if (DEBUG_BUILD) {
+          debug.log('[Profiling] error while stopping profiler:', error);
+        }
+      });
+  }
+
+  // Enqueue a timeout to prevent profiles from running over max duration.
+  let maxDurationTimeoutID = WINDOW.setTimeout(() => {
+    if (DEBUG_BUILD) {
+      debug.log('[Profiling] max profile duration elapsed, stopping profiling for:', spanToJSON(span).description);
+    }
+    // If the timeout exceeds, we want to stop profiling, but not finish the span
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    onProfileHandler();
+  }, MAX_PROFILE_DURATION_MS);
+
+  // We need to reference the original end call to avoid creating an infinite loop
+  const originalEnd = span.end.bind(span);
+
+  /**
+   * Wraps span `end()` with profiling related logic.
+   * startProfiling is called after the call to spanStart in order to avoid our own code from
+   * being profiled. Because of that same reason, stopProfiling is called before the call to spanEnd.
+   */
+  function profilingWrappedSpanEnd() {
+    if (!span) {
+      return originalEnd();
+    }
+    // onProfileHandler should always return the same profile even if this is called multiple times.
+    // Always call onProfileHandler to ensure stopProfiling is called and the timeout is cleared.
+    void onProfileHandler().then(
+      () => {
+        originalEnd();
+      },
+      () => {
+        // If onProfileHandler fails, we still want to call the original finish method.
+        originalEnd();
+      },
+    );
+
+    return span;
+  }
+
+  span.end = profilingWrappedSpanEnd;
+}
+
+export { startProfileForSpan };
+                                               
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic3RhcnRQcm9maWxlRm9yU3Bhbi5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4vLi4vLi4vc3JjL3Byb2ZpbGluZy9zdGFydFByb2ZpbGVGb3JTcGFuLnRzIl0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB0eXBlIHsgU3BhbiB9IGZyb20gJ0BzZW50cnkvY29yZSc7XG5pbXBvcnQgeyBkZWJ1ZywgZ2V0Q3VycmVudFNjb3BlLCBzcGFuVG9KU09OLCB0aW1lc3RhbXBJblNlY29uZHMsIHV1aWQ0IH0gZnJvbSAnQHNlbnRyeS9jb3JlJztcbmltcG9ydCB7IERFQlVHX0JVSUxEIH0gZnJvbSAnLi4vZGVidWctYnVpbGQnO1xuaW1wb3J0IHsgV0lORE9XIH0gZnJvbSAnLi4vaGVscGVycyc7XG5pbXBvcnQgdHlwZSB7IEpTU2VsZlByb2ZpbGUgfSBmcm9tICcuL2pzU2VsZlByb2ZpbGluZyc7XG5pbXBvcnQgeyBhZGRQcm9maWxlVG9HbG9iYWxDYWNoZSwgaXNBdXRvbWF0ZWRQYWdlTG9hZFNwYW4sIE1BWF9QUk9GSUxFX0RVUkFUSU9OX01TLCBzdGFydEpTU2VsZlByb2ZpbGUgfSBmcm9tICcuL3V0aWxzJztcblxuLyoqXG4gKiBXcmFwcyBzdGFydFRyYW5zYWN0aW9uIGFuZCBzdG9wVHJhbnNhY3Rpb24gd2l0aCBwcm9maWxpbmcgcmVsYXRlZCBsb2dpYy5cbiAqIHN0YXJ0UHJvZmlsZUZvclRyYW5zYWN0aW9uIGlzIGNhbGxlZCBhZnRlciB0aGUgY2FsbCB0byBzdGFydFRyYW5zYWN0aW9uIGluIG9yZGVyIHRvIGF2b2lkIG91ciBvd24gY29kZSBmcm9tXG4gKiBiZWluZyBwcm9maWxlZC4gQmVjYXVzZSBvZiB0aGF0IHNhbWUgcmVhc29uLCBzdG9wUHJvZmlsaW5nIGlzIGNhbGxlZCBiZWZvcmUgdGhlIGNhbGwgdG8gc3RvcFRyYW5zYWN0aW9uLlxuICovXG5leHBvcnQgZnVuY3Rpb24gc3RhcnRQcm9maWxlRm9yU3BhbihzcGFuOiBTcGFuKTogdm9pZCB7XG4gIC8vIFN0YXJ0IHRoZSBwcm9maWxlciBhbmQgZ2V0IHRoZSBwcm9maWxlciBpbnN0YW5jZS5cbiAgbGV0IHN0YXJ0VGltZXN0YW1wOiBudW1iZXIgfCB1bmRlZmluZWQ7XG4gIGlmIChpc0F1dG9tYXRlZFBhZ2VMb2FkU3BhbihzcGFuKSkge1xuICAgIHN0YXJ0VGltZXN0YW1wID0gdGltZXN0YW1wSW5TZWNvbmRzKCkgKiAxMDAwO1xuICB9XG5cbiAgY29uc3QgcHJvZmlsZXIgPSBzdGFydEpTU2VsZlByb2ZpbGUoKTtcblxuICAvLyBXZSBmYWlsZWQgdG8gY29uc3RydWN0IHRoZSBwcm9maWxlciwgc28gd2Ugc2tpcC5cbiAgLy8gTm8gbmVlZCB0byBsb2cgYW55dGhpbmcgYXMgdGhpcyBoYXMgYWxyZWFkeSBiZWVuIGxvZ2dlZCBpbiBzdGFydFByb2ZpbGUuXG4gIGlmICghcHJvZmlsZXIpIHtcbiAgICByZXR1cm47XG4gIH1cblxuICBpZiAoREVCVUdfQlVJTEQpIHtcbiAgICBkZWJ1Zy5sb2coYFtQcm9maWxpbmddIHN0YXJ0ZWQgcHJvZmlsaW5nIHNwYW46ICR7c3BhblRvSlNPTihzcGFuKS5kZXNjcmlwdGlvbn1gKTtcbiAgfVxuXG4gIC8vIFdlIGNyZWF0ZSBcInVuaXF1ZVwiIHNwYW4gbmFtZXMgdG8gYXZvaWQgY29uY3VycmVudCBzcGFucyB3aXRoIHNhbWUgbmFtZXNcbiAgLy8gZnJvbSBiZWluZyBpZ25vcmVkIGJ5IHRoZSBwcm9maWxlci4gRnJvbSBoZXJlIG9uLCBvbmx5IHRoaXMgc3BhbiBuYW1lIHNob3VsZCBiZSB1c2VkIHdoZW5cbiAgLy8gY2FsbGluZyB0aGUgcHJvZmlsZXIgbWV0aG9kcy4gTm90ZTogd2UgbG9nIHRoZSBvcmlnaW5hbCBuYW1lIHRvIHRoZSB1c2VyIHRvIGF2b2lkIGNvbmZ1c2lvbi5cbiAgY29uc3QgcHJvZmlsZUlkID0gdXVpZDQoKTtcblxuICAvLyBBIGNvdXBsZSBvZiBpbXBvcnRhbnQgdGhpbmdzIHRvIG5vdGUgaGVyZTpcbiAgLy8gYENwdVByb2ZpbGVyQmluZGluZ3Muc3RvcFByb2ZpbGluZ2Agd2lsbCBiZSBzY2hlZHVsZWQgdG8gcnVuIGluIDMwc2Vjb25kcyBpbiBvcmRlciB0byBleGNlZWQgbWF4IHByb2ZpbGUgZHVyYXRpb24uXG4gIC8vIFdoaWNoZXZlciBvZiB0aGUgdHdvIChzcGFuLmZpbmlzaC90aW1lb3V0KSBpcyBmaXJzdCB0byBydW4sIHRoZSBwcm9maWxpbmcgd2lsbCBiZSBzdG9wcGVkIGFuZCB0aGUgZ2F0aGVyZWQgcHJvZmlsZVxuICAvLyB3aWxsIGJlIHByb2Nlc3NlZCB3aGVuIHRoZSBvcmlnaW5hbCBzcGFuIGlzIGZpbmlzaGVkLiBTaW5jZSBvblByb2ZpbGVIYW5kbGVyIGNhbiBiZSBpbnZva2VkIG11bHRpcGxlIHRpbWVzIGluIHRoZVxuICAvLyBldmVudCBvZiBhbiBlcnJvciBvciB1c2VyIG1pc3Rha2UgKGNhbGxpbmcgc3Bhbi5maW5pc2ggbXVsdGlwbGUgdGltZXMpLCBpdCBpcyBpbXBvcnRhbnQgdGhhdCB0aGUgYmVoYXZpb3Igb2Ygb25Qcm9maWxlSGFuZGxlclxuICAvLyBpcyBpZGVtcG90ZW50IGFzIHdlIGRvIG5vdCB3YW50IGFueSB0aW1pbmdzIG9yIHByb2ZpbGVzIHRvIGJlIG92ZXJyaWRkZW4gYnkgdGhlIGxhc3QgY2FsbCB0byBvblByb2ZpbGVIYW5kbGVyLlxuICAvLyBBZnRlciB0aGUgb3JpZ2luYWwgZmluaXNoIG1ldGhvZCBpcyBjYWxsZWQsIHRoZSBldmVudCB3aWxsIGJlIHJlcG9ydGVkIHRocm91Z2ggdGhlIGludGVncmF0aW9uIGFuZCBkZWxlZ2F0ZWQgdG8gdHJhbnNwb3J0LlxuICBsZXQgcHJvY2Vzc2VkUHJvZmlsZTogSlNTZWxmUHJvZmlsZSB8IG51bGwgPSBudWxsO1xuXG4gIGdldEN1cnJlbnRTY29wZSgpLnNldENvbnRleHQoJ3Byb2ZpbGUnLCB7XG4gICAgcHJvZmlsZV9pZDogcHJvZmlsZUlkLFxuICAgIHN0YXJ0X3RpbWVzdGFtcDogc3RhcnRUaW1lc3RhbXAsXG4gIH0pO1xuXG4gIC8qKlxuICAgKiBJZGVtcG90ZW50IGhhbmRsZXIgZm9yIHByb2ZpbGUgc3RvcFxuICAgKi9cbiAgYXN5bmMgZnVuY3Rpb24gb25Qcm9maWxlSGFuZGxlcigpOiBQcm9taXNlPHZvaWQ+IHtcbiAgICAvLyBDaGVjayBpZiB0aGUgcHJvZmlsZSBleGlzdHMgYW5kIHJldHVybiBpdCB0aGUgYmVoYXZpb3IgaGFzIHRvIGJlIGlkZW1wb3RlbnQgYXMgdXNlcnMgbWF5IGNhbGwgc3Bhbi5maW5pc2ggbXVsdGlwbGUgdGltZXMuXG4gICAgaWYgKCFzcGFuKSB7XG4gICAgICByZXR1cm47XG4gICAgfVxuICAgIC8vIFNhdGlzZnkgdGhlIHR5cGUgY2hlY2tlciwgYnV0IHByb2ZpbGVyIHdpbGwgYWx3YXlzIGJlIGRlZmluZWQgaGVyZS5cbiAgICBpZiAoIXByb2ZpbGVyKSB7XG4gICAgICByZXR1cm47XG4gICAgfVxuICAgIGlmIChwcm9jZXNzZWRQcm9maWxlKSB7XG4gICAgICBpZiAoREVCVUdfQlVJTEQpIHtcbiAgICAgICAgZGVidWcubG9nKCdbUHJvZmlsaW5nXSBwcm9maWxlIGZvcjonLCBzcGFuVG9KU09OKHNwYW4pLmRlc2NyaXB0aW9uLCAnYWxyZWFkeSBleGlzdHMsIHJldHVybmluZyBlYXJseScpO1xuICAgICAgfVxuICAgICAgcmV0dXJuO1xuICAgIH1cblxuICAgIHJldHVybiBwcm9maWxlclxuICAgICAgLnN0b3AoKVxuICAgICAgLnRoZW4oKHByb2ZpbGU6IEpTU2VsZlByb2ZpbGUpOiB2b2lkID0+IHtcbiAgICAgICAgaWYgKG1heER1cmF0aW9uVGltZW91dElEKSB7XG4gICAgICAgICAgV0lORE9XLmNsZWFyVGltZW91dChtYXhEdXJhdGlvblRpbWVvdXRJRCk7XG4gICAgICAgICAgbWF4RHVyYXRpb25UaW1lb3V0SUQgPSB1bmRlZmluZWQ7XG4gICAgICAgIH1cblxuICAgICAgICBpZiAoREVCVUdfQlVJTEQpIHtcbiAgICAgICAgICBkZWJ1Zy5sb2coYFtQcm9maWxpbmddIHN0b3BwZWQgcHJvZmlsaW5nIG9mIHNwYW46ICR7c3BhblRvSlNPTihzcGFuKS5kZXNjcmlwdGlvbn1gKTtcbiAgICAgICAgfVxuXG4gICAgICAgIC8vIEluIGNhc2Ugb2YgYW4gb3ZlcmxhcHBpbmcgc3Bhbiwgc3RvcFByb2ZpbGluZyBtYXkgcmV0dXJuIG51bGwgYW5kIHNpbGVudGx5IGlnbm9yZSB0aGUgb3ZlcmxhcHBpbmcgcHJvZmlsZS5cbiAgICAgICAgaWYgKCFwcm9maWxlKSB7XG4gICAgICAgICAgaWYgKERFQlVHX0JVSUxEKSB7XG4gICAgICAgICAgICBkZWJ1Zy5sb2coXG4gICAgICAgICAgICAgIGBbUHJvZmlsaW5nXSBwcm9maWxlciByZXR1cm5lZCBudWxsIHByb2ZpbGUgZm9yOiAke3NwYW5Ub0pTT04oc3BhbikuZGVzY3JpcHRpb259YCxcbiAgICAgICAgICAgICAgJ3RoaXMgbWF5IGluZGljYXRlIGFuIG92ZXJsYXBwaW5nIHNwYW4gb3IgYSBjYWxsIHRvIHN0b3BQcm9maWxpbmcgd2l0aCBhIHByb2ZpbGUgdGl0bGUgdGhhdCB3YXMgbmV2ZXIgc3RhcnRlZCcsXG4gICAgICAgICAgICApO1xuICAgICAgICAgIH1cbiAgICAgICAgICByZXR1cm47XG4gICAgICAgIH1cblxuICAgICAgICBwcm9jZXNzZWRQcm9maWxlID0gcHJvZmlsZTtcbiAgICAgICAgYWRkUHJvZmlsZVRvR2xvYmFsQ2FjaGUocHJvZmlsZUlkLCBwcm9maWxlKTtcbiAgICAgIH0pXG4gICAgICAuY2F0Y2goZXJyb3IgPT4ge1xuICAgICAgICBpZiAoREVCVUdfQlVJTEQpIHtcbiAgICAgICAgICBkZWJ1Zy5sb2coJ1tQcm9maWxpbmddIGVycm9yIHdoaWxlIHN0b3BwaW5nIHByb2ZpbGVyOicsIGVycm9yKTtcbiAgICAgICAgfVxuICAgICAgfSk7XG4gIH1cblxuICAvLyBFbnF1ZXVlIGEgdGltZW91dCB0byBwcmV2ZW50IHByb2ZpbGVzIGZyb20gcnVubmluZyBvdmVyIG1heCBkdXJhdGlvbi5cbiAgbGV0IG1heER1cmF0aW9uVGltZW91dElEOiBudW1iZXIgfCB1bmRlZmluZWQgPSBXSU5ET1cuc2V0VGltZW91dCgoKSA9PiB7XG4gICAgaWYgKERFQlVHX0JVSUxEKSB7XG4gICAgICBkZWJ1Zy5sb2coJ1tQcm9maWxpbmddIG1heCBwcm9maWxlIGR1cmF0aW9uIGVsYXBzZWQsIHN0b3BwaW5nIHByb2ZpbGluZyBmb3I6Jywgc3BhblRvSlNPTihzcGFuKS5kZXNjcmlwdGlvbik7XG4gICAgfVxuICAgIC8vIElmIHRoZSB0aW1lb3V0IGV4Y2VlZHMsIHdlIHdhbnQgdG8gc3RvcCBwcm9maWxpbmcsIGJ1dCBub3QgZmluaXNoIHRoZSBzcGFuXG4gICAgLy8gZXNsaW50LWRpc2FibGUtbmV4dC1saW5lIEB0eXBlc2NyaXB0LWVzbGludC9uby1mbG9hdGluZy1wcm9taXNlc1xuICAgIG9uUHJvZmlsZUhhbmRsZXIoKTtcbiAgfSwgTUFYX1BST0ZJTEVfRFVSQVRJT05fTVMpO1xuXG4gIC8vIFdlIG5lZWQgdG8gcmVmZXJlbmNlIHRoZSBvcmlnaW5hbCBlbmQgY2FsbCB0byBhdm9pZCBjcmVhdGluZyBhbiBpbmZpbml0ZSBsb29wXG4gIGNvbnN0IG9yaWdpbmFsRW5kID0gc3Bhbi5lbmQuYmluZChzcGFuKTtcblxuICAvKipcbiAgICogV3JhcHMgc3BhbiBgZW5kKClgIHdpdGggcHJvZmlsaW5nIHJlbGF0ZWQgbG9naWMuXG4gICAqIHN0YXJ0UHJvZmlsaW5nIGlzIGNhbGxlZCBhZnRlciB0aGUgY2FsbCB0byBzcGFuU3RhcnQgaW4gb3JkZXIgdG8gYXZvaWQgb3VyIG93biBjb2RlIGZyb21cbiAgICogYmVpbmcgcHJvZmlsZWQuIEJlY2F1c2Ugb2YgdGhhdCBzYW1lIHJlYXNvbiwgc3RvcFByb2ZpbGluZyBpcyBjYWxsZWQgYmVmb3JlIHRoZSBjYWxsIHRvIHNwYW5FbmQuXG4gICAqL1xuICBmdW5jdGlvbiBwcm9maWxpbmdXcmFwcGVkU3BhbkVuZCgpOiBTcGFuIHtcbiAgICBpZiAoIXNwYW4pIHtcbiAgICAgIHJldHVybiBvcmlnaW5hbEVuZCgpO1xuICAgIH1cbiAgICAvLyBvblByb2ZpbGVIYW5kbGVyIHNob3VsZCBhbHdheXMgcmV0dXJuIHRoZSBzYW1lIHByb2ZpbGUgZXZlbiBpZiB0aGlzIGlzIGNhbGxlZCBtdWx0aXBsZSB0aW1lcy5cbiAgICAvLyBBbHdheXMgY2FsbCBvblByb2ZpbGVIYW5kbGVyIHRvIGVuc3VyZSBzdG9wUHJvZmlsaW5nIGlzIGNhbGxlZCBhbmQgdGhlIHRpbWVvdXQgaXMgY2xlYXJlZC5cbiAgICB2b2lkIG9uUHJvZmlsZUhhbmRsZXIoKS50aGVuKFxuICAgICAgKCkgPT4ge1xuICAgICAgICBvcmlnaW5hbEVuZCgpO1xuICAgICAgfSxcbiAgICAgICgpID0+IHtcbiAgICAgICAgLy8gSWYgb25Qcm9maWxlSGFuZGxlciBmYWlscywgd2Ugc3RpbGwgd2FudCB0byBjYWxsIHRoZSBvcmlnaW5hbCBmaW5pc2ggbWV0aG9kLlxuICAgICAgICBvcmlnaW5hbEVuZCgpO1xuICAgICAgfSxcbiAgICApO1xuXG4gICAgcmV0dXJuIHNwYW47XG4gIH1cblxuICBzcGFuLmVuZCA9IHByb2ZpbGluZ1dyYXBwZWRTcGFuRW5kO1xufVxuIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7Ozs7O0FBT0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNPLFNBQVMsbUJBQW1CLENBQUMsSUFBSSxFQUFjO0FBQ3REO0FBQ0EsRUFBRSxJQUFJLGNBQWM7QUFDcEIsRUFBRSxJQUFJLHVCQUF1QixDQUFDLElBQUksQ0FBQyxFQUFFO0FBQ3JDLElBQUksaUJBQWlCLGtCQUFrQixFQUFDLEdBQUksSUFBSTtBQUNoRCxFQUFFOztBQUVGLEVBQUUsTUFBTSxRQUFBLEdBQVcsa0JBQWtCLEVBQUU7O0FBRXZDO0FBQ0E7QUFDQSxFQUFFLElBQUksQ0FBQyxRQUFRLEVBQUU7QUFDakIsSUFBSTtBQUNKLEVBQUU7O0FBRUYsRUFBRSxJQUFJLFdBQVcsRUFBRTtBQUNuQixJQUFJLEtBQUssQ0FBQyxHQUFHLENBQUMsQ0FBQyxvQ0FBb0MsRUFBRSxVQUFVLENBQUMsSUFBSSxDQUFDLENBQUMsV0FBVyxDQUFDLENBQUEsQ0FBQTtBQUNBLEVBQUE7O0FBRUE7QUFDQTtBQUNBO0FBQ0EsRUFBQSxNQUFBLFNBQUEsR0FBQSxLQUFBLEVBQUE7O0FBRUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQSxFQUFBLElBQUEsZ0JBQUEsR0FBQSxJQUFBOztBQUVBLEVBQUEsZUFBQSxFQUFBLENBQUEsVUFBQSxDQUFBLFNBQUEsRUFBQTtBQUNBLElBQUEsVUFBQSxFQUFBLFNBQUE7QUFDQSxJQUFBLGVBQUEsRUFBQSxjQUFBO0FBQ0EsR0FBQSxDQUFBOztBQUVBO0FBQ0E7QUFDQTtBQUNBLEVBQUEsZUFBQSxnQkFBQSxHQUFBO0FBQ0E7QUFDQSxJQUFBLElBQUEsQ0FBQSxJQUFBLEVBQUE7QUFDQSxNQUFBO0FBQ0EsSUFBQTtBQUNBO0FBQ0EsSUFBQSxJQUFBLENBQUEsUUFBQSxFQUFBO0FBQ0EsTUFBQTtBQUNBLElBQUE7QUFDQSxJQUFBLElBQUEsZ0JBQUEsRUFBQTtBQUNBLE1BQUEsSUFBQSxXQUFBLEVBQUE7QUFDQSxRQUFBLEtBQUEsQ0FBQSxHQUFBLENBQUEsMEJBQUEsRUFBQSxVQUFBLENBQUEsSUFBQSxDQUFBLENBQUEsV0FBQSxFQUFBLGlDQUFBLENBQUE7QUFDQSxNQUFBO0FBQ0EsTUFBQTtBQUNBLElBQUE7O0FBRUEsSUFBQSxPQUFBO0FBQ0EsT0FBQSxJQUFBO0FBQ0EsT0FBQSxJQUFBLENBQUEsQ0FBQSxPQUFBLEtBQUE7QUFDQSxRQUFBLElBQUEsb0JBQUEsRUFBQTtBQUNBLFVBQUEsTUFBQSxDQUFBLFlBQUEsQ0FBQSxvQkFBQSxDQUFBO0FBQ0EsVUFBQSxvQkFBQSxHQUFBLFNBQUE7QUFDQSxRQUFBOztBQUVBLFFBQUEsSUFBQSxXQUFBLEVBQUE7QUFDQSxVQUFBLEtBQUEsQ0FBQSxHQUFBLENBQUEsQ0FBQSx1Q0FBQSxFQUFBLFVBQUEsQ0FBQSxJQUFBLENBQUEsQ0FBQSxXQUFBLENBQUEsQ0FBQSxDQUFBO0FBQ0EsUUFBQTs7QUFFQTtBQUNBLFFBQUEsSUFBQSxDQUFBLE9BQUEsRUFBQTtBQUNBLFVBQUEsSUFBQSxXQUFBLEVBQUE7QUFDQSxZQUFBLEtBQUEsQ0FBQSxHQUFBO0FBQ0EsY0FBQSxDQUFBLGdEQUFBLEVBQUEsVUFBQSxDQUFBLElBQUEsQ0FBQSxDQUFBLFdBQUEsQ0FBQSxDQUFBO0FBQ0EsY0FBQSw4R0FBQTtBQUNBLGFBQUE7QUFDQSxVQUFBO0FBQ0EsVUFBQTtBQUNBLFFBQUE7O0FBRUEsUUFBQSxnQkFBQSxHQUFBLE9BQUE7QUFDQSxRQUFBLHVCQUFBLENBQUEsU0FBQSxFQUFBLE9BQUEsQ0FBQTtBQUNBLE1BQUEsQ0FBQTtBQUNBLE9BQUEsS0FBQSxDQUFBLEtBQUEsSUFBQTtBQUNBLFFBQUEsSUFBQSxXQUFBLEVBQUE7QUFDQSxVQUFBLEtBQUEsQ0FBQSxHQUFBLENBQUEsNENBQUEsRUFBQSxLQUFBLENBQUE7QUFDQSxRQUFBO0FBQ0EsTUFBQSxDQUFBLENBQUE7QUFDQSxFQUFBOztBQUVBO0FBQ0EsRUFBQSxJQUFBLG9CQUFBLEdBQUEsTUFBQSxDQUFBLFVBQUEsQ0FBQSxNQUFBO0FBQ0EsSUFBQSxJQUFBLFdBQUEsRUFBQTtBQUNBLE1BQUEsS0FBQSxDQUFBLEdBQUEsQ0FBQSxtRUFBQSxFQUFBLFVBQUEsQ0FBQSxJQUFBLENBQUEsQ0FBQSxXQUFBLENBQUE7QUFDQSxJQUFBO0FBQ0E7QUFDQTtBQUNBLElBQUEsZ0JBQUEsRUFBQTtBQUNBLEVBQUEsQ0FBQSxFQUFBLHVCQUFBLENBQUE7O0FBRUE7QUFDQSxFQUFBLE1BQUEsV0FBQSxHQUFBLElBQUEsQ0FBQSxHQUFBLENBQUEsSUFBQSxDQUFBLElBQUEsQ0FBQTs7QUFFQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0EsRUFBQSxTQUFBLHVCQUFBLEdBQUE7QUFDQSxJQUFBLElBQUEsQ0FBQSxJQUFBLEVBQUE7QUFDQSxNQUFBLE9BQUEsV0FBQSxFQUFBO0FBQ0EsSUFBQTtBQUNBO0FBQ0E7QUFDQSxJQUFBLEtBQUEsZ0JBQUEsRUFBQSxDQUFBLElBQUE7QUFDQSxNQUFBLE1BQUE7QUFDQSxRQUFBLFdBQUEsRUFBQTtBQUNBLE1BQUEsQ0FBQTtBQUNBLE1BQUEsTUFBQTtBQUNBO0FBQ0EsUUFBQSxXQUFBLEVBQUE7QUFDQSxNQUFBLENBQUE7QUFDQSxLQUFBOztBQUVBLElBQUEsT0FBQSxJQUFBO0FBQ0EsRUFBQTs7QUFFQSxFQUFBLElBQUEsQ0FBQSxHQUFBLEdBQUEsdUJBQUE7QUFDQTs7OzsiLCJ4X2dvb2dsZV9pZ25vcmVMaXN0IjpbMF19

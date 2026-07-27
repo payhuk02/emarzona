@@ -1,0 +1,81 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/currency/CurrencyRatesInitializer.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/currency/CurrencyRatesInitializer.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+var _s = $RefreshSig$();
+/**
+ * Composant pour initialiser les taux de change au démarrage de l'application
+ * Charge les taux depuis l'API en arrière-plan
+ */ import __vite__cjsImport2_react from "/node_modules/.vite/deps/react.js?v=8792f17d"; const useEffect = __vite__cjsImport2_react["useEffect"];
+import { updateExchangeRates } from "/src/lib/currency-converter.ts";
+import { logger } from "/src/lib/logger.ts";
+export function CurrencyRatesInitializer() {
+    _s();
+    useEffect(()=>{
+        // Initialiser les taux de change au démarrage
+        const initializeRates = async ()=>{
+            try {
+                logger.info('Initializing exchange rates on app startup...');
+                await updateExchangeRates();
+                logger.info('Exchange rates initialized successfully');
+            } catch (error) {
+                const errorMessage = error instanceof Error ? error.message : String(error);
+                logger.error('Failed to initialize exchange rates on startup', {
+                    error: errorMessage,
+                    fallback: 'using static rates'
+                });
+            // Ne pas bloquer l'application si l'API échoue
+            // Les taux de fallback seront utilisés
+            }
+        };
+        initializeRates();
+        // Mettre à jour les taux toutes les heures
+        const intervalId = setInterval(()=>{
+            initializeRates();
+        }, 60 * 60 * 1000); // 1 heure
+        return ()=>{
+            clearInterval(intervalId);
+        };
+    }, []);
+    // Ce composant ne rend rien
+    return null;
+}
+_s(CurrencyRatesInitializer, "OD7bBpZva5O2jO+Puf00hKivP7c=");
+_c = CurrencyRatesInitializer;
+var _c;
+$RefreshReg$(_c, "CurrencyRatesInitializer");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/currency/CurrencyRatesInitializer.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/currency/CurrencyRatesInitializer.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIkN1cnJlbmN5UmF0ZXNJbml0aWFsaXplci50c3giXSwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBDb21wb3NhbnQgcG91ciBpbml0aWFsaXNlciBsZXMgdGF1eCBkZSBjaGFuZ2UgYXUgZMOpbWFycmFnZSBkZSBsJ2FwcGxpY2F0aW9uXG4gKiBDaGFyZ2UgbGVzIHRhdXggZGVwdWlzIGwnQVBJIGVuIGFycmnDqHJlLXBsYW5cbiAqL1xuXG5pbXBvcnQgeyB1c2VFZmZlY3QgfSBmcm9tICdyZWFjdCc7XG5pbXBvcnQgeyB1cGRhdGVFeGNoYW5nZVJhdGVzIH0gZnJvbSAnQC9saWIvY3VycmVuY3ktY29udmVydGVyJztcbmltcG9ydCB7IGxvZ2dlciB9IGZyb20gJ0AvbGliL2xvZ2dlcic7XG5cbmV4cG9ydCBmdW5jdGlvbiBDdXJyZW5jeVJhdGVzSW5pdGlhbGl6ZXIoKSB7XG4gIHVzZUVmZmVjdCgoKSA9PiB7XG4gICAgLy8gSW5pdGlhbGlzZXIgbGVzIHRhdXggZGUgY2hhbmdlIGF1IGTDqW1hcnJhZ2VcbiAgICBjb25zdCBpbml0aWFsaXplUmF0ZXMgPSBhc3luYyAoKSA9PiB7XG4gICAgICB0cnkge1xuICAgICAgICBsb2dnZXIuaW5mbygnSW5pdGlhbGl6aW5nIGV4Y2hhbmdlIHJhdGVzIG9uIGFwcCBzdGFydHVwLi4uJyk7XG4gICAgICAgIGF3YWl0IHVwZGF0ZUV4Y2hhbmdlUmF0ZXMoKTtcbiAgICAgICAgbG9nZ2VyLmluZm8oJ0V4Y2hhbmdlIHJhdGVzIGluaXRpYWxpemVkIHN1Y2Nlc3NmdWxseScpO1xuICAgICAgfSBjYXRjaCAoZXJyb3IpIHtcbiAgICAgICAgY29uc3QgZXJyb3JNZXNzYWdlID0gZXJyb3IgaW5zdGFuY2VvZiBFcnJvciA/IGVycm9yLm1lc3NhZ2UgOiBTdHJpbmcoZXJyb3IpO1xuICAgICAgICBsb2dnZXIuZXJyb3IoJ0ZhaWxlZCB0byBpbml0aWFsaXplIGV4Y2hhbmdlIHJhdGVzIG9uIHN0YXJ0dXAnLCB7XG4gICAgICAgICAgZXJyb3I6IGVycm9yTWVzc2FnZSxcbiAgICAgICAgICBmYWxsYmFjazogJ3VzaW5nIHN0YXRpYyByYXRlcycsXG4gICAgICAgIH0pO1xuICAgICAgICAvLyBOZSBwYXMgYmxvcXVlciBsJ2FwcGxpY2F0aW9uIHNpIGwnQVBJIMOpY2hvdWVcbiAgICAgICAgLy8gTGVzIHRhdXggZGUgZmFsbGJhY2sgc2Vyb250IHV0aWxpc8Opc1xuICAgICAgfVxuICAgIH07XG5cbiAgICBpbml0aWFsaXplUmF0ZXMoKTtcblxuICAgIC8vIE1ldHRyZSDDoCBqb3VyIGxlcyB0YXV4IHRvdXRlcyBsZXMgaGV1cmVzXG4gICAgY29uc3QgaW50ZXJ2YWxJZCA9IHNldEludGVydmFsKCgpID0+IHtcbiAgICAgIGluaXRpYWxpemVSYXRlcygpO1xuICAgIH0sIDYwICogNjAgKiAxMDAwKTsgLy8gMSBoZXVyZVxuXG4gICAgcmV0dXJuICgpID0+IHtcbiAgICAgIGNsZWFySW50ZXJ2YWwoaW50ZXJ2YWxJZCk7XG4gICAgfTtcbiAgfSwgW10pO1xuXG4gIC8vIENlIGNvbXBvc2FudCBuZSByZW5kIHJpZW5cbiAgcmV0dXJuIG51bGw7XG59XG5cblxuXG5cblxuXG5cblxuXG5cblxuXG5cbiJdLCJuYW1lcyI6WyJ1c2VFZmZlY3QiLCJ1cGRhdGVFeGNoYW5nZVJhdGVzIiwibG9nZ2VyIiwiQ3VycmVuY3lSYXRlc0luaXRpYWxpemVyIiwiaW5pdGlhbGl6ZVJhdGVzIiwiaW5mbyIsImVycm9yIiwiZXJyb3JNZXNzYWdlIiwiRXJyb3IiLCJtZXNzYWdlIiwiU3RyaW5nIiwiZmFsbGJhY2siLCJpbnRlcnZhbElkIiwic2V0SW50ZXJ2YWwiLCJjbGVhckludGVydmFsIl0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7Ozs7OztBQUFBOzs7Q0FHQyxHQUVELFNBQVNBLFNBQVMsUUFBUSxRQUFRO0FBQ2xDLFNBQVNDLG1CQUFtQixRQUFRLDJCQUEyQjtBQUMvRCxTQUFTQyxNQUFNLFFBQVEsZUFBZTtBQUV0QyxPQUFPLFNBQVNDOztJQUNkSCxVQUFVO1FBQ1IsOENBQThDO1FBQzlDLE1BQU1JLGtCQUFrQjtZQUN0QixJQUFJO2dCQUNGRixPQUFPRyxJQUFJLENBQUM7Z0JBQ1osTUFBTUo7Z0JBQ05DLE9BQU9HLElBQUksQ0FBQztZQUNkLEVBQUUsT0FBT0MsT0FBTztnQkFDZCxNQUFNQyxlQUFlRCxpQkFBaUJFLFFBQVFGLE1BQU1HLE9BQU8sR0FBR0MsT0FBT0o7Z0JBQ3JFSixPQUFPSSxLQUFLLENBQUMsa0RBQWtEO29CQUM3REEsT0FBT0M7b0JBQ1BJLFVBQVU7Z0JBQ1o7WUFDQSwrQ0FBK0M7WUFDL0MsdUNBQXVDO1lBQ3pDO1FBQ0Y7UUFFQVA7UUFFQSwyQ0FBMkM7UUFDM0MsTUFBTVEsYUFBYUMsWUFBWTtZQUM3QlQ7UUFDRixHQUFHLEtBQUssS0FBSyxPQUFPLFVBQVU7UUFFOUIsT0FBTztZQUNMVSxjQUFjRjtRQUNoQjtJQUNGLEdBQUcsRUFBRTtJQUVMLDRCQUE0QjtJQUM1QixPQUFPO0FBQ1Q7R0FqQ2dCVDtLQUFBQSJ9

@@ -1,0 +1,244 @@
+import { _INTERNAL_captureLog } from "/node_modules/@sentry/core/build/esm/logs/internal.js?v=d758aa40";
+export { fmt } from "/node_modules/@sentry/core/build/esm/utils/parameterize.js?v=d758aa40";
+
+/**
+ * Capture a log with the given level.
+ *
+ * @param level - The level of the log.
+ * @param message - The message to log.
+ * @param attributes - Arbitrary structured data that stores information about the log - e.g., userId: 100.
+ * @param scope - The scope to capture the log with.
+ * @param severityNumber - The severity number of the log.
+ */
+function captureLog(
+  level,
+  message,
+  attributes,
+  scope,
+  severityNumber,
+) {
+  _INTERNAL_captureLog({ level, message, attributes, severityNumber }, scope);
+}
+
+/**
+ * Additional metadata to capture the log with.
+ */
+
+/**
+ * @summary Capture a log with the `trace` level. Requires the `enableLogs` option to be enabled.
+ *
+ * @param message - The message to log.
+ * @param attributes - Arbitrary structured data that stores information about the log - e.g., { userId: 100, route: '/dashboard' }.
+ * @param metadata - additional metadata to capture the log with.
+ *
+ * @example
+ *
+ * ```
+ * Sentry.logger.trace('User clicked submit button', {
+ *   buttonId: 'submit-form',
+ *   formId: 'user-profile',
+ *   timestamp: Date.now()
+ * });
+ * ```
+ *
+ * @example With template strings
+ *
+ * ```
+ * Sentry.logger.trace(Sentry.logger.fmt`User ${user} navigated to ${page}`, {
+ *   userId: '123',
+ *   sessionId: 'abc-xyz'
+ * });
+ * ```
+ */
+function trace(
+  message,
+  attributes,
+  { scope } = {},
+) {
+  captureLog('trace', message, attributes, scope);
+}
+
+/**
+ * @summary Capture a log with the `debug` level. Requires the `enableLogs` option to be enabled.
+ *
+ * @param message - The message to log.
+ * @param attributes - Arbitrary structured data that stores information about the log - e.g., { component: 'Header', state: 'loading' }.
+ * @param metadata - additional metadata to capture the log with.
+ *
+ * @example
+ *
+ * ```
+ * Sentry.logger.debug('Component mounted', {
+ *   component: 'UserProfile',
+ *   props: { userId: 123 },
+ *   renderTime: 150
+ * });
+ * ```
+ *
+ * @example With template strings
+ *
+ * ```
+ * Sentry.logger.debug(Sentry.logger.fmt`API request to ${endpoint} failed`, {
+ *   statusCode: 404,
+ *   requestId: 'req-123',
+ *   duration: 250
+ * });
+ * ```
+ */
+function debug(
+  message,
+  attributes,
+  { scope } = {},
+) {
+  captureLog('debug', message, attributes, scope);
+}
+
+/**
+ * @summary Capture a log with the `info` level. Requires the `enableLogs` option to be enabled.
+ *
+ * @param message - The message to log.
+ * @param attributes - Arbitrary structured data that stores information about the log - e.g., { feature: 'checkout', status: 'completed' }.
+ * @param metadata - additional metadata to capture the log with.
+ *
+ * @example
+ *
+ * ```
+ * Sentry.logger.info('User completed checkout', {
+ *   orderId: 'order-123',
+ *   amount: 99.99,
+ *   paymentMethod: 'credit_card'
+ * });
+ * ```
+ *
+ * @example With template strings
+ *
+ * ```
+ * Sentry.logger.info(Sentry.logger.fmt`User ${user} updated profile picture`, {
+ *   userId: 'user-123',
+ *   imageSize: '2.5MB',
+ *   timestamp: Date.now()
+ * });
+ * ```
+ */
+function info(
+  message,
+  attributes,
+  { scope } = {},
+) {
+  captureLog('info', message, attributes, scope);
+}
+
+/**
+ * @summary Capture a log with the `warn` level. Requires the `enableLogs` option to be enabled.
+ *
+ * @param message - The message to log.
+ * @param attributes - Arbitrary structured data that stores information about the log - e.g., { browser: 'Chrome', version: '91.0' }.
+ * @param metadata - additional metadata to capture the log with.
+ *
+ * @example
+ *
+ * ```
+ * Sentry.logger.warn('Browser compatibility issue detected', {
+ *   browser: 'Safari',
+ *   version: '14.0',
+ *   feature: 'WebRTC',
+ *   fallback: 'enabled'
+ * });
+ * ```
+ *
+ * @example With template strings
+ *
+ * ```
+ * Sentry.logger.warn(Sentry.logger.fmt`API endpoint ${endpoint} is deprecated`, {
+ *   recommendedEndpoint: '/api/v2/users',
+ *   sunsetDate: '2024-12-31',
+ *   clientVersion: '1.2.3'
+ * });
+ * ```
+ */
+function warn(
+  message,
+  attributes,
+  { scope } = {},
+) {
+  captureLog('warn', message, attributes, scope);
+}
+
+/**
+ * @summary Capture a log with the `error` level. Requires the `enableLogs` option to be enabled.
+ *
+ * @param message - The message to log.
+ * @param attributes - Arbitrary structured data that stores information about the log - e.g., { error: 'NetworkError', url: '/api/data' }.
+ * @param metadata - additional metadata to capture the log with.
+ *
+ * @example
+ *
+ * ```
+ * Sentry.logger.error('Failed to load user data', {
+ *   error: 'NetworkError',
+ *   url: '/api/users/123',
+ *   statusCode: 500,
+ *   retryCount: 3
+ * });
+ * ```
+ *
+ * @example With template strings
+ *
+ * ```
+ * Sentry.logger.error(Sentry.logger.fmt`Payment processing failed for order ${orderId}`, {
+ *   error: 'InsufficientFunds',
+ *   amount: 100.00,
+ *   currency: 'USD',
+ *   userId: 'user-456'
+ * });
+ * ```
+ */
+function error(
+  message,
+  attributes,
+  { scope } = {},
+) {
+  captureLog('error', message, attributes, scope);
+}
+
+/**
+ * @summary Capture a log with the `fatal` level. Requires the `enableLogs` option to be enabled.
+ *
+ * @param message - The message to log.
+ * @param attributes - Arbitrary structured data that stores information about the log - e.g., { appState: 'corrupted', sessionId: 'abc-123' }.
+ * @param metadata - additional metadata to capture the log with.
+ *
+ * @example
+ *
+ * ```
+ * Sentry.logger.fatal('Application state corrupted', {
+ *   lastKnownState: 'authenticated',
+ *   sessionId: 'session-123',
+ *   timestamp: Date.now(),
+ *   recoveryAttempted: true
+ * });
+ * ```
+ *
+ * @example With template strings
+ *
+ * ```
+ * Sentry.logger.fatal(Sentry.logger.fmt`Critical system failure in ${service}`, {
+ *   service: 'payment-processor',
+ *   errorCode: 'CRITICAL_FAILURE',
+ *   affectedUsers: 150,
+ *   timestamp: Date.now()
+ * });
+ * ```
+ */
+function fatal(
+  message,
+  attributes,
+  { scope } = {},
+) {
+  captureLog('fatal', message, attributes, scope);
+}
+
+export { debug, error, fatal, info, trace, warn };
+                                      
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicHVibGljLWFwaS5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4vc3JjL2xvZ3MvcHVibGljLWFwaS50cyJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgdHlwZSB7IFNjb3BlIH0gZnJvbSAnLi4vc2NvcGUnO1xuaW1wb3J0IHR5cGUgeyBMb2csIExvZ1NldmVyaXR5TGV2ZWwgfSBmcm9tICcuLi90eXBlcy1ob2lzdC9sb2cnO1xuaW1wb3J0IHR5cGUgeyBQYXJhbWV0ZXJpemVkU3RyaW5nIH0gZnJvbSAnLi4vdHlwZXMtaG9pc3QvcGFyYW1ldGVyaXplJztcbmltcG9ydCB7IF9JTlRFUk5BTF9jYXB0dXJlTG9nIH0gZnJvbSAnLi9pbnRlcm5hbCc7XG5cbi8qKlxuICogQ2FwdHVyZSBhIGxvZyB3aXRoIHRoZSBnaXZlbiBsZXZlbC5cbiAqXG4gKiBAcGFyYW0gbGV2ZWwgLSBUaGUgbGV2ZWwgb2YgdGhlIGxvZy5cbiAqIEBwYXJhbSBtZXNzYWdlIC0gVGhlIG1lc3NhZ2UgdG8gbG9nLlxuICogQHBhcmFtIGF0dHJpYnV0ZXMgLSBBcmJpdHJhcnkgc3RydWN0dXJlZCBkYXRhIHRoYXQgc3RvcmVzIGluZm9ybWF0aW9uIGFib3V0IHRoZSBsb2cgLSBlLmcuLCB1c2VySWQ6IDEwMC5cbiAqIEBwYXJhbSBzY29wZSAtIFRoZSBzY29wZSB0byBjYXB0dXJlIHRoZSBsb2cgd2l0aC5cbiAqIEBwYXJhbSBzZXZlcml0eU51bWJlciAtIFRoZSBzZXZlcml0eSBudW1iZXIgb2YgdGhlIGxvZy5cbiAqL1xuZnVuY3Rpb24gY2FwdHVyZUxvZyhcbiAgbGV2ZWw6IExvZ1NldmVyaXR5TGV2ZWwsXG4gIG1lc3NhZ2U6IFBhcmFtZXRlcml6ZWRTdHJpbmcsXG4gIGF0dHJpYnV0ZXM/OiBMb2dbJ2F0dHJpYnV0ZXMnXSxcbiAgc2NvcGU/OiBTY29wZSxcbiAgc2V2ZXJpdHlOdW1iZXI/OiBMb2dbJ3NldmVyaXR5TnVtYmVyJ10sXG4pOiB2b2lkIHtcbiAgX0lOVEVSTkFMX2NhcHR1cmVMb2coeyBsZXZlbCwgbWVzc2FnZSwgYXR0cmlidXRlcywgc2V2ZXJpdHlOdW1iZXIgfSwgc2NvcGUpO1xufVxuXG4vKipcbiAqIEFkZGl0aW9uYWwgbWV0YWRhdGEgdG8gY2FwdHVyZSB0aGUgbG9nIHdpdGguXG4gKi9cbmludGVyZmFjZSBDYXB0dXJlTG9nTWV0YWRhdGEge1xuICBzY29wZT86IFNjb3BlO1xufVxuXG4vKipcbiAqIEBzdW1tYXJ5IENhcHR1cmUgYSBsb2cgd2l0aCB0aGUgYHRyYWNlYCBsZXZlbC4gUmVxdWlyZXMgdGhlIGBlbmFibGVMb2dzYCBvcHRpb24gdG8gYmUgZW5hYmxlZC5cbiAqXG4gKiBAcGFyYW0gbWVzc2FnZSAtIFRoZSBtZXNzYWdlIHRvIGxvZy5cbiAqIEBwYXJhbSBhdHRyaWJ1dGVzIC0gQXJiaXRyYXJ5IHN0cnVjdHVyZWQgZGF0YSB0aGF0IHN0b3JlcyBpbmZvcm1hdGlvbiBhYm91dCB0aGUgbG9nIC0gZS5nLiwgeyB1c2VySWQ6IDEwMCwgcm91dGU6ICcvZGFzaGJvYXJkJyB9LlxuICogQHBhcmFtIG1ldGFkYXRhIC0gYWRkaXRpb25hbCBtZXRhZGF0YSB0byBjYXB0dXJlIHRoZSBsb2cgd2l0aC5cbiAqXG4gKiBAZXhhbXBsZVxuICpcbiAqIGBgYFxuICogU2VudHJ5LmxvZ2dlci50cmFjZSgnVXNlciBjbGlja2VkIHN1Ym1pdCBidXR0b24nLCB7XG4gKiAgIGJ1dHRvbklkOiAnc3VibWl0LWZvcm0nLFxuICogICBmb3JtSWQ6ICd1c2VyLXByb2ZpbGUnLFxuICogICB0aW1lc3RhbXA6IERhdGUubm93KClcbiAqIH0pO1xuICogYGBgXG4gKlxuICogQGV4YW1wbGUgV2l0aCB0ZW1wbGF0ZSBzdHJpbmdzXG4gKlxuICogYGBgXG4gKiBTZW50cnkubG9nZ2VyLnRyYWNlKFNlbnRyeS5sb2dnZXIuZm10YFVzZXIgJHt1c2VyfSBuYXZpZ2F0ZWQgdG8gJHtwYWdlfWAsIHtcbiAqICAgdXNlcklkOiAnMTIzJyxcbiAqICAgc2Vzc2lvbklkOiAnYWJjLXh5eidcbiAqIH0pO1xuICogYGBgXG4gKi9cbmV4cG9ydCBmdW5jdGlvbiB0cmFjZShcbiAgbWVzc2FnZTogUGFyYW1ldGVyaXplZFN0cmluZyxcbiAgYXR0cmlidXRlcz86IExvZ1snYXR0cmlidXRlcyddLFxuICB7IHNjb3BlIH06IENhcHR1cmVMb2dNZXRhZGF0YSA9IHt9LFxuKTogdm9pZCB7XG4gIGNhcHR1cmVMb2coJ3RyYWNlJywgbWVzc2FnZSwgYXR0cmlidXRlcywgc2NvcGUpO1xufVxuXG4vKipcbiAqIEBzdW1tYXJ5IENhcHR1cmUgYSBsb2cgd2l0aCB0aGUgYGRlYnVnYCBsZXZlbC4gUmVxdWlyZXMgdGhlIGBlbmFibGVMb2dzYCBvcHRpb24gdG8gYmUgZW5hYmxlZC5cbiAqXG4gKiBAcGFyYW0gbWVzc2FnZSAtIFRoZSBtZXNzYWdlIHRvIGxvZy5cbiAqIEBwYXJhbSBhdHRyaWJ1dGVzIC0gQXJiaXRyYXJ5IHN0cnVjdHVyZWQgZGF0YSB0aGF0IHN0b3JlcyBpbmZvcm1hdGlvbiBhYm91dCB0aGUgbG9nIC0gZS5nLiwgeyBjb21wb25lbnQ6ICdIZWFkZXInLCBzdGF0ZTogJ2xvYWRpbmcnIH0uXG4gKiBAcGFyYW0gbWV0YWRhdGEgLSBhZGRpdGlvbmFsIG1ldGFkYXRhIHRvIGNhcHR1cmUgdGhlIGxvZyB3aXRoLlxuICpcbiAqIEBleGFtcGxlXG4gKlxuICogYGBgXG4gKiBTZW50cnkubG9nZ2VyLmRlYnVnKCdDb21wb25lbnQgbW91bnRlZCcsIHtcbiAqICAgY29tcG9uZW50OiAnVXNlclByb2ZpbGUnLFxuICogICBwcm9wczogeyB1c2VySWQ6IDEyMyB9LFxuICogICByZW5kZXJUaW1lOiAxNTBcbiAqIH0pO1xuICogYGBgXG4gKlxuICogQGV4YW1wbGUgV2l0aCB0ZW1wbGF0ZSBzdHJpbmdzXG4gKlxuICogYGBgXG4gKiBTZW50cnkubG9nZ2VyLmRlYnVnKFNlbnRyeS5sb2dnZXIuZm10YEFQSSByZXF1ZXN0IHRvICR7ZW5kcG9pbnR9IGZhaWxlZGAsIHtcbiAqICAgc3RhdHVzQ29kZTogNDA0LFxuICogICByZXF1ZXN0SWQ6ICdyZXEtMTIzJyxcbiAqICAgZHVyYXRpb246IDI1MFxuICogfSk7XG4gKiBgYGBcbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIGRlYnVnKFxuICBtZXNzYWdlOiBQYXJhbWV0ZXJpemVkU3RyaW5nLFxuICBhdHRyaWJ1dGVzPzogTG9nWydhdHRyaWJ1dGVzJ10sXG4gIHsgc2NvcGUgfTogQ2FwdHVyZUxvZ01ldGFkYXRhID0ge30sXG4pOiB2b2lkIHtcbiAgY2FwdHVyZUxvZygnZGVidWcnLCBtZXNzYWdlLCBhdHRyaWJ1dGVzLCBzY29wZSk7XG59XG5cbi8qKlxuICogQHN1bW1hcnkgQ2FwdHVyZSBhIGxvZyB3aXRoIHRoZSBgaW5mb2AgbGV2ZWwuIFJlcXVpcmVzIHRoZSBgZW5hYmxlTG9nc2Agb3B0aW9uIHRvIGJlIGVuYWJsZWQuXG4gKlxuICogQHBhcmFtIG1lc3NhZ2UgLSBUaGUgbWVzc2FnZSB0byBsb2cuXG4gKiBAcGFyYW0gYXR0cmlidXRlcyAtIEFyYml0cmFyeSBzdHJ1Y3R1cmVkIGRhdGEgdGhhdCBzdG9yZXMgaW5mb3JtYXRpb24gYWJvdXQgdGhlIGxvZyAtIGUuZy4sIHsgZmVhdHVyZTogJ2NoZWNrb3V0Jywgc3RhdHVzOiAnY29tcGxldGVkJyB9LlxuICogQHBhcmFtIG1ldGFkYXRhIC0gYWRkaXRpb25hbCBtZXRhZGF0YSB0byBjYXB0dXJlIHRoZSBsb2cgd2l0aC5cbiAqXG4gKiBAZXhhbXBsZVxuICpcbiAqIGBgYFxuICogU2VudHJ5LmxvZ2dlci5pbmZvKCdVc2VyIGNvbXBsZXRlZCBjaGVja291dCcsIHtcbiAqICAgb3JkZXJJZDogJ29yZGVyLTEyMycsXG4gKiAgIGFtb3VudDogOTkuOTksXG4gKiAgIHBheW1lbnRNZXRob2Q6ICdjcmVkaXRfY2FyZCdcbiAqIH0pO1xuICogYGBgXG4gKlxuICogQGV4YW1wbGUgV2l0aCB0ZW1wbGF0ZSBzdHJpbmdzXG4gKlxuICogYGBgXG4gKiBTZW50cnkubG9nZ2VyLmluZm8oU2VudHJ5LmxvZ2dlci5mbXRgVXNlciAke3VzZXJ9IHVwZGF0ZWQgcHJvZmlsZSBwaWN0dXJlYCwge1xuICogICB1c2VySWQ6ICd1c2VyLTEyMycsXG4gKiAgIGltYWdlU2l6ZTogJzIuNU1CJyxcbiAqICAgdGltZXN0YW1wOiBEYXRlLm5vdygpXG4gKiB9KTtcbiAqIGBgYFxuICovXG5leHBvcnQgZnVuY3Rpb24gaW5mbyhcbiAgbWVzc2FnZTogUGFyYW1ldGVyaXplZFN0cmluZyxcbiAgYXR0cmlidXRlcz86IExvZ1snYXR0cmlidXRlcyddLFxuICB7IHNjb3BlIH06IENhcHR1cmVMb2dNZXRhZGF0YSA9IHt9LFxuKTogdm9pZCB7XG4gIGNhcHR1cmVMb2coJ2luZm8nLCBtZXNzYWdlLCBhdHRyaWJ1dGVzLCBzY29wZSk7XG59XG5cbi8qKlxuICogQHN1bW1hcnkgQ2FwdHVyZSBhIGxvZyB3aXRoIHRoZSBgd2FybmAgbGV2ZWwuIFJlcXVpcmVzIHRoZSBgZW5hYmxlTG9nc2Agb3B0aW9uIHRvIGJlIGVuYWJsZWQuXG4gKlxuICogQHBhcmFtIG1lc3NhZ2UgLSBUaGUgbWVzc2FnZSB0byBsb2cuXG4gKiBAcGFyYW0gYXR0cmlidXRlcyAtIEFyYml0cmFyeSBzdHJ1Y3R1cmVkIGRhdGEgdGhhdCBzdG9yZXMgaW5mb3JtYXRpb24gYWJvdXQgdGhlIGxvZyAtIGUuZy4sIHsgYnJvd3NlcjogJ0Nocm9tZScsIHZlcnNpb246ICc5MS4wJyB9LlxuICogQHBhcmFtIG1ldGFkYXRhIC0gYWRkaXRpb25hbCBtZXRhZGF0YSB0byBjYXB0dXJlIHRoZSBsb2cgd2l0aC5cbiAqXG4gKiBAZXhhbXBsZVxuICpcbiAqIGBgYFxuICogU2VudHJ5LmxvZ2dlci53YXJuKCdCcm93c2VyIGNvbXBhdGliaWxpdHkgaXNzdWUgZGV0ZWN0ZWQnLCB7XG4gKiAgIGJyb3dzZXI6ICdTYWZhcmknLFxuICogICB2ZXJzaW9uOiAnMTQuMCcsXG4gKiAgIGZlYXR1cmU6ICdXZWJSVEMnLFxuICogICBmYWxsYmFjazogJ2VuYWJsZWQnXG4gKiB9KTtcbiAqIGBgYFxuICpcbiAqIEBleGFtcGxlIFdpdGggdGVtcGxhdGUgc3RyaW5nc1xuICpcbiAqIGBgYFxuICogU2VudHJ5LmxvZ2dlci53YXJuKFNlbnRyeS5sb2dnZXIuZm10YEFQSSBlbmRwb2ludCAke2VuZHBvaW50fSBpcyBkZXByZWNhdGVkYCwge1xuICogICByZWNvbW1lbmRlZEVuZHBvaW50OiAnL2FwaS92Mi91c2VycycsXG4gKiAgIHN1bnNldERhdGU6ICcyMDI0LTEyLTMxJyxcbiAqICAgY2xpZW50VmVyc2lvbjogJzEuMi4zJ1xuICogfSk7XG4gKiBgYGBcbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIHdhcm4oXG4gIG1lc3NhZ2U6IFBhcmFtZXRlcml6ZWRTdHJpbmcsXG4gIGF0dHJpYnV0ZXM/OiBMb2dbJ2F0dHJpYnV0ZXMnXSxcbiAgeyBzY29wZSB9OiBDYXB0dXJlTG9nTWV0YWRhdGEgPSB7fSxcbik6IHZvaWQge1xuICBjYXB0dXJlTG9nKCd3YXJuJywgbWVzc2FnZSwgYXR0cmlidXRlcywgc2NvcGUpO1xufVxuXG4vKipcbiAqIEBzdW1tYXJ5IENhcHR1cmUgYSBsb2cgd2l0aCB0aGUgYGVycm9yYCBsZXZlbC4gUmVxdWlyZXMgdGhlIGBlbmFibGVMb2dzYCBvcHRpb24gdG8gYmUgZW5hYmxlZC5cbiAqXG4gKiBAcGFyYW0gbWVzc2FnZSAtIFRoZSBtZXNzYWdlIHRvIGxvZy5cbiAqIEBwYXJhbSBhdHRyaWJ1dGVzIC0gQXJiaXRyYXJ5IHN0cnVjdHVyZWQgZGF0YSB0aGF0IHN0b3JlcyBpbmZvcm1hdGlvbiBhYm91dCB0aGUgbG9nIC0gZS5nLiwgeyBlcnJvcjogJ05ldHdvcmtFcnJvcicsIHVybDogJy9hcGkvZGF0YScgfS5cbiAqIEBwYXJhbSBtZXRhZGF0YSAtIGFkZGl0aW9uYWwgbWV0YWRhdGEgdG8gY2FwdHVyZSB0aGUgbG9nIHdpdGguXG4gKlxuICogQGV4YW1wbGVcbiAqXG4gKiBgYGBcbiAqIFNlbnRyeS5sb2dnZXIuZXJyb3IoJ0ZhaWxlZCB0byBsb2FkIHVzZXIgZGF0YScsIHtcbiAqICAgZXJyb3I6ICdOZXR3b3JrRXJyb3InLFxuICogICB1cmw6ICcvYXBpL3VzZXJzLzEyMycsXG4gKiAgIHN0YXR1c0NvZGU6IDUwMCxcbiAqICAgcmV0cnlDb3VudDogM1xuICogfSk7XG4gKiBgYGBcbiAqXG4gKiBAZXhhbXBsZSBXaXRoIHRlbXBsYXRlIHN0cmluZ3NcbiAqXG4gKiBgYGBcbiAqIFNlbnRyeS5sb2dnZXIuZXJyb3IoU2VudHJ5LmxvZ2dlci5mbXRgUGF5bWVudCBwcm9jZXNzaW5nIGZhaWxlZCBmb3Igb3JkZXIgJHtvcmRlcklkfWAsIHtcbiAqICAgZXJyb3I6ICdJbnN1ZmZpY2llbnRGdW5kcycsXG4gKiAgIGFtb3VudDogMTAwLjAwLFxuICogICBjdXJyZW5jeTogJ1VTRCcsXG4gKiAgIHVzZXJJZDogJ3VzZXItNDU2J1xuICogfSk7XG4gKiBgYGBcbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIGVycm9yKFxuICBtZXNzYWdlOiBQYXJhbWV0ZXJpemVkU3RyaW5nLFxuICBhdHRyaWJ1dGVzPzogTG9nWydhdHRyaWJ1dGVzJ10sXG4gIHsgc2NvcGUgfTogQ2FwdHVyZUxvZ01ldGFkYXRhID0ge30sXG4pOiB2b2lkIHtcbiAgY2FwdHVyZUxvZygnZXJyb3InLCBtZXNzYWdlLCBhdHRyaWJ1dGVzLCBzY29wZSk7XG59XG5cbi8qKlxuICogQHN1bW1hcnkgQ2FwdHVyZSBhIGxvZyB3aXRoIHRoZSBgZmF0YWxgIGxldmVsLiBSZXF1aXJlcyB0aGUgYGVuYWJsZUxvZ3NgIG9wdGlvbiB0byBiZSBlbmFibGVkLlxuICpcbiAqIEBwYXJhbSBtZXNzYWdlIC0gVGhlIG1lc3NhZ2UgdG8gbG9nLlxuICogQHBhcmFtIGF0dHJpYnV0ZXMgLSBBcmJpdHJhcnkgc3RydWN0dXJlZCBkYXRhIHRoYXQgc3RvcmVzIGluZm9ybWF0aW9uIGFib3V0IHRoZSBsb2cgLSBlLmcuLCB7IGFwcFN0YXRlOiAnY29ycnVwdGVkJywgc2Vzc2lvbklkOiAnYWJjLTEyMycgfS5cbiAqIEBwYXJhbSBtZXRhZGF0YSAtIGFkZGl0aW9uYWwgbWV0YWRhdGEgdG8gY2FwdHVyZSB0aGUgbG9nIHdpdGguXG4gKlxuICogQGV4YW1wbGVcbiAqXG4gKiBgYGBcbiAqIFNlbnRyeS5sb2dnZXIuZmF0YWwoJ0FwcGxpY2F0aW9uIHN0YXRlIGNvcnJ1cHRlZCcsIHtcbiAqICAgbGFzdEtub3duU3RhdGU6ICdhdXRoZW50aWNhdGVkJyxcbiAqICAgc2Vzc2lvbklkOiAnc2Vzc2lvbi0xMjMnLFxuICogICB0aW1lc3RhbXA6IERhdGUubm93KCksXG4gKiAgIHJlY292ZXJ5QXR0ZW1wdGVkOiB0cnVlXG4gKiB9KTtcbiAqIGBgYFxuICpcbiAqIEBleGFtcGxlIFdpdGggdGVtcGxhdGUgc3RyaW5nc1xuICpcbiAqIGBgYFxuICogU2VudHJ5LmxvZ2dlci5mYXRhbChTZW50cnkubG9nZ2VyLmZtdGBDcml0aWNhbCBzeXN0ZW0gZmFpbHVyZSBpbiAke3NlcnZpY2V9YCwge1xuICogICBzZXJ2aWNlOiAncGF5bWVudC1wcm9jZXNzb3InLFxuICogICBlcnJvckNvZGU6ICdDUklUSUNBTF9GQUlMVVJFJyxcbiAqICAgYWZmZWN0ZWRVc2VyczogMTUwLFxuICogICB0aW1lc3RhbXA6IERhdGUubm93KClcbiAqIH0pO1xuICogYGBgXG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBmYXRhbChcbiAgbWVzc2FnZTogUGFyYW1ldGVyaXplZFN0cmluZyxcbiAgYXR0cmlidXRlcz86IExvZ1snYXR0cmlidXRlcyddLFxuICB7IHNjb3BlIH06IENhcHR1cmVMb2dNZXRhZGF0YSA9IHt9LFxuKTogdm9pZCB7XG4gIGNhcHR1cmVMb2coJ2ZhdGFsJywgbWVzc2FnZSwgYXR0cmlidXRlcywgc2NvcGUpO1xufVxuXG5leHBvcnQgeyBmbXQgfSBmcm9tICcuLi91dGlscy9wYXJhbWV0ZXJpemUnO1xuIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7OztBQUtBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLFNBQVMsVUFBVTtBQUNuQixFQUFFLEtBQUs7QUFDUCxFQUFFLE9BQU87QUFDVCxFQUFFLFVBQVU7QUFDWixFQUFFLEtBQUs7QUFDUCxFQUFFLGNBQWM7QUFDaEIsRUFBUTtBQUNSLEVBQUUsb0JBQW9CLENBQUMsRUFBRSxLQUFLLEVBQUUsT0FBTyxFQUFFLFVBQVUsRUFBRSxjQUFBLEVBQWdCLEVBQUUsS0FBSyxDQUFDO0FBQzdFOztBQUVBO0FBQ0E7QUFDQTs7QUFLQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ08sU0FBUyxLQUFLO0FBQ3JCLEVBQUUsT0FBTztBQUNULEVBQUUsVUFBVTtBQUNaLEVBQUUsRUFBRSxLQUFBLEVBQU8sR0FBdUIsRUFBRTtBQUNwQyxFQUFRO0FBQ1IsRUFBRSxVQUFVLENBQUMsT0FBTyxFQUFFLE9BQU8sRUFBRSxVQUFVLEVBQUUsS0FBSyxDQUFDO0FBQ2pEOztBQUVBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNPLFNBQVMsS0FBSztBQUNyQixFQUFFLE9BQU87QUFDVCxFQUFFLFVBQVU7QUFDWixFQUFFLEVBQUUsS0FBQSxFQUFPLEdBQXVCLEVBQUU7QUFDcEMsRUFBUTtBQUNSLEVBQUUsVUFBVSxDQUFDLE9BQU8sRUFBRSxPQUFPLEVBQUUsVUFBVSxFQUFFLEtBQUssQ0FBQztBQUNqRDs7QUFFQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDTyxTQUFTLElBQUk7QUFDcEIsRUFBRSxPQUFPO0FBQ1QsRUFBRSxVQUFVO0FBQ1osRUFBRSxFQUFFLEtBQUEsRUFBTyxHQUF1QixFQUFFO0FBQ3BDLEVBQVE7QUFDUixFQUFFLFVBQVUsQ0FBQyxNQUFNLEVBQUUsT0FBTyxFQUFFLFVBQVUsRUFBRSxLQUFLLENBQUM7QUFDaEQ7O0FBRUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDTyxTQUFTLElBQUk7QUFDcEIsRUFBRSxPQUFPO0FBQ1QsRUFBRSxVQUFVO0FBQ1osRUFBRSxFQUFFLEtBQUEsRUFBTyxHQUF1QixFQUFFO0FBQ3BDLEVBQVE7QUFDUixFQUFFLFVBQVUsQ0FBQyxNQUFNLEVBQUUsT0FBTyxFQUFFLFVBQVUsRUFBRSxLQUFLLENBQUM7QUFDaEQ7O0FBRUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNPLFNBQVMsS0FBSztBQUNyQixFQUFFLE9BQU87QUFDVCxFQUFFLFVBQVU7QUFDWixFQUFFLEVBQUUsS0FBQSxFQUFPLEdBQXVCLEVBQUU7QUFDcEMsRUFBUTtBQUNSLEVBQUUsVUFBVSxDQUFDLE9BQU8sRUFBRSxPQUFPLEVBQUUsVUFBVSxFQUFFLEtBQUssQ0FBQztBQUNqRDs7QUFFQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ08sU0FBUyxLQUFLO0FBQ3JCLEVBQUUsT0FBTztBQUNULEVBQUUsVUFBVTtBQUNaLEVBQUUsRUFBRSxLQUFBLEVBQU8sR0FBdUIsRUFBRTtBQUNwQyxFQUFRO0FBQ1IsRUFBRSxVQUFVLENBQUMsT0FBTyxFQUFFLE9BQU8sRUFBRSxVQUFVLEVBQUUsS0FBSyxDQUFDO0FBQ2pEOzs7OyIsInhfZ29vZ2xlX2lnbm9yZUxpc3QiOlswXX0=

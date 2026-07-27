@@ -1,0 +1,96 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/navigation/LoadingBar.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/navigation/LoadingBar.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=02e1e75e"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+var _s = $RefreshSig$();
+import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=02e1e75e"; const useEffect = __vite__cjsImport3_react["useEffect"]; const useState = __vite__cjsImport3_react["useState"];
+import { useLocation } from "/node_modules/.vite/deps/react-router-dom.js?v=02e1e75e";
+export const LoadingBar = ()=>{
+    _s();
+    const location = useLocation();
+    const [progress, setProgress] = useState(0);
+    const [visible, setVisible] = useState(false);
+    useEffect(()=>{
+        // Start loading animation on route change
+        setVisible(true);
+        setProgress(20);
+        const timer1 = setTimeout(()=>setProgress(50), 100);
+        const timer2 = setTimeout(()=>setProgress(80), 200);
+        const timer3 = setTimeout(()=>setProgress(100), 300);
+        const hideTimer = setTimeout(()=>{
+            setVisible(false);
+            setProgress(0);
+        }, 500);
+        return ()=>{
+            clearTimeout(timer1);
+            clearTimeout(timer2);
+            clearTimeout(timer3);
+            clearTimeout(hideTimer);
+        };
+    }, [
+        location.pathname
+    ]);
+    if (!visible) return null;
+    return /*#__PURE__*/ _jsxDEV("div", {
+        className: "fixed top-0 left-0 right-0 z-[9999] h-1 bg-transparent pointer-events-none",
+        children: /*#__PURE__*/ _jsxDEV("div", {
+            className: "h-full bg-gradient-to-r from-primary via-accent to-primary transition-all duration-300 ease-out shadow-glow",
+            style: {
+                width: `${progress}%`,
+                transition: progress === 100 ? "width 0.2s ease-out" : "width 0.3s ease-out"
+            }
+        }, void 0, false, {
+            fileName: "/home/runner/work/emarzona/emarzona/src/components/navigation/LoadingBar.tsx",
+            lineNumber: 34,
+            columnNumber: 7
+        }, this)
+    }, void 0, false, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/navigation/LoadingBar.tsx",
+        lineNumber: 33,
+        columnNumber: 5
+    }, this);
+};
+_s(LoadingBar, "073HuxgvSXCOwavwZQvbs6e1cWA=", false, function() {
+    return [
+        useLocation
+    ];
+});
+_c = LoadingBar;
+var _c;
+$RefreshReg$(_c, "LoadingBar");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/navigation/LoadingBar.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/navigation/LoadingBar.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIkxvYWRpbmdCYXIudHN4Il0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7IHVzZUVmZmVjdCwgdXNlU3RhdGUgfSBmcm9tIFwicmVhY3RcIjtcbmltcG9ydCB7IHVzZUxvY2F0aW9uIH0gZnJvbSBcInJlYWN0LXJvdXRlci1kb21cIjtcblxuZXhwb3J0IGNvbnN0IExvYWRpbmdCYXIgPSAoKSA9PiB7XG4gIGNvbnN0IGxvY2F0aW9uID0gdXNlTG9jYXRpb24oKTtcbiAgY29uc3QgW3Byb2dyZXNzLCBzZXRQcm9ncmVzc10gPSB1c2VTdGF0ZSgwKTtcbiAgY29uc3QgW3Zpc2libGUsIHNldFZpc2libGVdID0gdXNlU3RhdGUoZmFsc2UpO1xuXG4gIHVzZUVmZmVjdCgoKSA9PiB7XG4gICAgLy8gU3RhcnQgbG9hZGluZyBhbmltYXRpb24gb24gcm91dGUgY2hhbmdlXG4gICAgc2V0VmlzaWJsZSh0cnVlKTtcbiAgICBzZXRQcm9ncmVzcygyMCk7XG4gICAgXG4gICAgY29uc3QgdGltZXIxID0gc2V0VGltZW91dCgoKSA9PiBzZXRQcm9ncmVzcyg1MCksIDEwMCk7XG4gICAgY29uc3QgdGltZXIyID0gc2V0VGltZW91dCgoKSA9PiBzZXRQcm9ncmVzcyg4MCksIDIwMCk7XG4gICAgY29uc3QgdGltZXIzID0gc2V0VGltZW91dCgoKSA9PiBzZXRQcm9ncmVzcygxMDApLCAzMDApO1xuICAgIGNvbnN0IGhpZGVUaW1lciA9IHNldFRpbWVvdXQoKCkgPT4ge1xuICAgICAgc2V0VmlzaWJsZShmYWxzZSk7XG4gICAgICBzZXRQcm9ncmVzcygwKTtcbiAgICB9LCA1MDApO1xuICAgIFxuICAgIHJldHVybiAoKSA9PiB7XG4gICAgICBjbGVhclRpbWVvdXQodGltZXIxKTtcbiAgICAgIGNsZWFyVGltZW91dCh0aW1lcjIpO1xuICAgICAgY2xlYXJUaW1lb3V0KHRpbWVyMyk7XG4gICAgICBjbGVhclRpbWVvdXQoaGlkZVRpbWVyKTtcbiAgICB9O1xuICB9LCBbbG9jYXRpb24ucGF0aG5hbWVdKTtcblxuICBpZiAoIXZpc2libGUpIHJldHVybiBudWxsO1xuXG4gIHJldHVybiAoXG4gICAgPGRpdiBjbGFzc05hbWU9XCJmaXhlZCB0b3AtMCBsZWZ0LTAgcmlnaHQtMCB6LVs5OTk5XSBoLTEgYmctdHJhbnNwYXJlbnQgcG9pbnRlci1ldmVudHMtbm9uZVwiPlxuICAgICAgPGRpdlxuICAgICAgICBjbGFzc05hbWU9XCJoLWZ1bGwgYmctZ3JhZGllbnQtdG8tciBmcm9tLXByaW1hcnkgdmlhLWFjY2VudCB0by1wcmltYXJ5IHRyYW5zaXRpb24tYWxsIGR1cmF0aW9uLTMwMCBlYXNlLW91dCBzaGFkb3ctZ2xvd1wiXG4gICAgICAgIHN0eWxlPXt7XG4gICAgICAgICAgd2lkdGg6IGAke3Byb2dyZXNzfSVgLFxuICAgICAgICAgIHRyYW5zaXRpb246IHByb2dyZXNzID09PSAxMDAgPyBcIndpZHRoIDAuMnMgZWFzZS1vdXRcIiA6IFwid2lkdGggMC4zcyBlYXNlLW91dFwiLFxuICAgICAgICB9fVxuICAgICAgLz5cbiAgICA8L2Rpdj5cbiAgKTtcbn07XG5cblxuXG5cblxuXG4iXSwibmFtZXMiOlsidXNlRWZmZWN0IiwidXNlU3RhdGUiLCJ1c2VMb2NhdGlvbiIsIkxvYWRpbmdCYXIiLCJsb2NhdGlvbiIsInByb2dyZXNzIiwic2V0UHJvZ3Jlc3MiLCJ2aXNpYmxlIiwic2V0VmlzaWJsZSIsInRpbWVyMSIsInNldFRpbWVvdXQiLCJ0aW1lcjIiLCJ0aW1lcjMiLCJoaWRlVGltZXIiLCJjbGVhclRpbWVvdXQiLCJwYXRobmFtZSIsImRpdiIsImNsYXNzTmFtZSIsInN0eWxlIiwid2lkdGgiLCJ0cmFuc2l0aW9uIl0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7QUFBQSxTQUFTQSxTQUFTLEVBQUVDLFFBQVEsUUFBUSxRQUFRO0FBQzVDLFNBQVNDLFdBQVcsUUFBUSxtQkFBbUI7QUFFL0MsT0FBTyxNQUFNQyxhQUFhOztJQUN4QixNQUFNQyxXQUFXRjtJQUNqQixNQUFNLENBQUNHLFVBQVVDLFlBQVksR0FBR0wsU0FBUztJQUN6QyxNQUFNLENBQUNNLFNBQVNDLFdBQVcsR0FBR1AsU0FBUztJQUV2Q0QsVUFBVTtRQUNSLDBDQUEwQztRQUMxQ1EsV0FBVztRQUNYRixZQUFZO1FBRVosTUFBTUcsU0FBU0MsV0FBVyxJQUFNSixZQUFZLEtBQUs7UUFDakQsTUFBTUssU0FBU0QsV0FBVyxJQUFNSixZQUFZLEtBQUs7UUFDakQsTUFBTU0sU0FBU0YsV0FBVyxJQUFNSixZQUFZLE1BQU07UUFDbEQsTUFBTU8sWUFBWUgsV0FBVztZQUMzQkYsV0FBVztZQUNYRixZQUFZO1FBQ2QsR0FBRztRQUVILE9BQU87WUFDTFEsYUFBYUw7WUFDYkssYUFBYUg7WUFDYkcsYUFBYUY7WUFDYkUsYUFBYUQ7UUFDZjtJQUNGLEdBQUc7UUFBQ1QsU0FBU1csUUFBUTtLQUFDO0lBRXRCLElBQUksQ0FBQ1IsU0FBUyxPQUFPO0lBRXJCLHFCQUNFLFFBQUNTO1FBQUlDLFdBQVU7a0JBQ2IsY0FBQSxRQUFDRDtZQUNDQyxXQUFVO1lBQ1ZDLE9BQU87Z0JBQ0xDLE9BQU8sR0FBR2QsU0FBUyxDQUFDLENBQUM7Z0JBQ3JCZSxZQUFZZixhQUFhLE1BQU0sd0JBQXdCO1lBQ3pEOzs7Ozs7Ozs7OztBQUlSLEVBQUU7R0F2Q1dGOztRQUNNRDs7O0tBRE5DIn0=

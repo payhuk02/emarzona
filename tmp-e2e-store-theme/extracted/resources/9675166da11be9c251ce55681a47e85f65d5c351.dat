@@ -1,0 +1,562 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/legal/CookieConsentBanner.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/legal/CookieConsentBanner.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=6014a254"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"]; const _Fragment = __vite__cjsImport2_react_jsxDevRuntime["Fragment"];
+var _s = $RefreshSig$();
+/**
+ * Cookie Consent Banner - Conformité RGPD
+ */ import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=6014a254"; const useState = __vite__cjsImport3_react["useState"]; const useEffect = __vite__cjsImport3_react["useEffect"];
+import { Settings, Check } from "/src/components/icons/index.ts";
+import { Link } from "/node_modules/.vite/deps/react-router-dom.js?v=6014a254";
+import { Button } from "/src/components/ui/button.tsx";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "/src/components/ui/dialog.tsx";
+import { Switch } from "/src/components/ui/switch.tsx";
+import { Label } from "/src/components/ui/label.tsx";
+import { useAuth } from "/src/contexts/AuthContext.tsx";
+import { useUpdateCookiePreferences, useCookiePreferences } from "/src/hooks/useLegal.ts";
+import { getStoredCookiePreferences, hasCookieConsentGiven, OPEN_COOKIE_SETTINGS_EVENT } from "/src/lib/cookie-consent.ts";
+const DEFAULT_PREFERENCES = {
+    necessary: true,
+    functional: false,
+    analytics: false,
+    marketing: false
+};
+export const CookieConsentBanner = ()=>{
+    _s();
+    const { user } = useAuth();
+    const { data: currentPreferences } = useCookiePreferences(user?.id);
+    const updatePreferences = useUpdateCookiePreferences();
+    const [showBanner, setShowBanner] = useState(false);
+    const [showSettings, setShowSettings] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+    const [preferences, setPreferences] = useState(DEFAULT_PREFERENCES);
+    useEffect(()=>{
+        if (hasCookieConsentGiven() || currentPreferences) return;
+        const timer = setTimeout(()=>{
+            setShowBanner(true);
+        }, 2000);
+        return ()=>clearTimeout(timer);
+    }, [
+        currentPreferences
+    ]);
+    useEffect(()=>{
+        const stored = currentPreferences ?? getStoredCookiePreferences();
+        if (stored) {
+            setPreferences({
+                necessary: true,
+                functional: stored.functional ?? false,
+                analytics: stored.analytics ?? false,
+                marketing: stored.marketing ?? false
+            });
+        }
+    }, [
+        currentPreferences
+    ]);
+    useEffect(()=>{
+        const openSettings = ()=>{
+            const stored = currentPreferences ?? getStoredCookiePreferences();
+            if (stored) {
+                setPreferences({
+                    necessary: true,
+                    functional: stored.functional ?? false,
+                    analytics: stored.analytics ?? false,
+                    marketing: stored.marketing ?? false
+                });
+            }
+            setShowSettings(true);
+            setShowBanner(false);
+        };
+        window.addEventListener(OPEN_COOKIE_SETTINGS_EVENT, openSettings);
+        return ()=>window.removeEventListener(OPEN_COOKIE_SETTINGS_EVENT, openSettings);
+    }, [
+        currentPreferences
+    ]);
+    const persistPreferences = async (next)=>{
+        setIsSaving(true);
+        try {
+            await updatePreferences.mutateAsync({
+                userId: user?.id,
+                preferences: next
+            });
+            localStorage.setItem('cookieConsentGiven', 'true');
+            setShowSettings(false);
+            setShowBanner(false);
+        } finally{
+            setIsSaving(false);
+        }
+    };
+    const handleAcceptAll = ()=>persistPreferences({
+            necessary: true,
+            functional: true,
+            analytics: true,
+            marketing: true
+        });
+    const handleRejectAll = ()=>persistPreferences(DEFAULT_PREFERENCES);
+    const handleSavePreferences = ()=>persistPreferences({
+            ...preferences,
+            necessary: true
+        });
+    const handleSettingsOpenChange = (open)=>{
+        setShowSettings(open);
+        if (!open && !hasCookieConsentGiven()) {
+            setShowBanner(true);
+        }
+    };
+    return /*#__PURE__*/ _jsxDEV(_Fragment, {
+        children: [
+            showBanner ? /*#__PURE__*/ _jsxDEV("div", {
+                className: "fixed bottom-0 left-0 right-0 z-50 border-t bg-white shadow-lg",
+                children: /*#__PURE__*/ _jsxDEV("div", {
+                    className: "container mx-auto max-w-7xl px-4 py-4",
+                    children: /*#__PURE__*/ _jsxDEV("div", {
+                        className: "flex flex-col items-start justify-between gap-4 md:flex-row md:items-center",
+                        children: [
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                className: "flex-1",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV("h3", {
+                                        className: "mb-1 font-semibold text-gray-900",
+                                        children: "🍪 Nous utilisons des cookies"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/legal/CookieConsentBanner.tsx",
+                                        lineNumber: 126,
+                                        columnNumber: 17
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("p", {
+                                        className: "text-sm text-gray-600",
+                                        children: [
+                                            "Nous utilisons des cookies pour améliorer votre expérience, analyser notre trafic et personnaliser le contenu. Vous pouvez accepter tous les cookies ou les personnaliser.",
+                                            ' ',
+                                            /*#__PURE__*/ _jsxDEV(Link, {
+                                                to: "/legal/cookies",
+                                                className: "font-medium text-blue-800 underline decoration-blue-800/80 hover:text-blue-900",
+                                                children: "En savoir plus"
+                                            }, void 0, false, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/legal/CookieConsentBanner.tsx",
+                                                lineNumber: 131,
+                                                columnNumber: 19
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/legal/CookieConsentBanner.tsx",
+                                        lineNumber: 127,
+                                        columnNumber: 17
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/legal/CookieConsentBanner.tsx",
+                                lineNumber: 125,
+                                columnNumber: 15
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                className: "flex flex-wrap items-center gap-3",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV(Button, {
+                                        variant: "outline",
+                                        size: "sm",
+                                        disabled: isSaving,
+                                        onClick: ()=>{
+                                            setShowSettings(true);
+                                            setShowBanner(false);
+                                        },
+                                        className: "whitespace-nowrap",
+                                        children: [
+                                            /*#__PURE__*/ _jsxDEV(Settings, {
+                                                className: "mr-2 h-4 w-4"
+                                            }, void 0, false, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/legal/CookieConsentBanner.tsx",
+                                                lineNumber: 151,
+                                                columnNumber: 19
+                                            }, this),
+                                            "Personnaliser"
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/legal/CookieConsentBanner.tsx",
+                                        lineNumber: 141,
+                                        columnNumber: 17
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV(Button, {
+                                        variant: "outline",
+                                        size: "sm",
+                                        disabled: isSaving,
+                                        onClick: handleRejectAll,
+                                        className: "whitespace-nowrap",
+                                        children: "Tout refuser"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/legal/CookieConsentBanner.tsx",
+                                        lineNumber: 155,
+                                        columnNumber: 17
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV(Button, {
+                                        size: "sm",
+                                        disabled: isSaving,
+                                        onClick: handleAcceptAll,
+                                        className: "whitespace-nowrap bg-blue-700 text-white hover:bg-blue-800",
+                                        children: [
+                                            /*#__PURE__*/ _jsxDEV(Check, {
+                                                className: "mr-2 h-4 w-4"
+                                            }, void 0, false, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/legal/CookieConsentBanner.tsx",
+                                                lineNumber: 171,
+                                                columnNumber: 19
+                                            }, this),
+                                            "Tout accepter"
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/legal/CookieConsentBanner.tsx",
+                                        lineNumber: 165,
+                                        columnNumber: 17
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/legal/CookieConsentBanner.tsx",
+                                lineNumber: 140,
+                                columnNumber: 15
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/legal/CookieConsentBanner.tsx",
+                        lineNumber: 124,
+                        columnNumber: 13
+                    }, this)
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/legal/CookieConsentBanner.tsx",
+                    lineNumber: 123,
+                    columnNumber: 11
+                }, this)
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/legal/CookieConsentBanner.tsx",
+                lineNumber: 122,
+                columnNumber: 9
+            }, this) : null,
+            /*#__PURE__*/ _jsxDEV(Dialog, {
+                open: showSettings,
+                onOpenChange: handleSettingsOpenChange,
+                children: /*#__PURE__*/ _jsxDEV(DialogContent, {
+                    className: "max-h-[80vh] max-w-[95vw] overflow-y-auto sm:max-w-2xl",
+                    children: [
+                        /*#__PURE__*/ _jsxDEV(DialogHeader, {
+                            children: [
+                                /*#__PURE__*/ _jsxDEV(DialogTitle, {
+                                    children: "Paramètres des cookies"
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/legal/CookieConsentBanner.tsx",
+                                    lineNumber: 183,
+                                    columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV(DialogDescription, {
+                                    children: [
+                                        "Choisissez les catégories de cookies que vous souhaitez autoriser.",
+                                        ' ',
+                                        /*#__PURE__*/ _jsxDEV(Link, {
+                                            to: "/legal/cookies",
+                                            className: "text-blue-800 underline hover:text-blue-900",
+                                            children: "Politique des cookies"
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/legal/CookieConsentBanner.tsx",
+                                            lineNumber: 186,
+                                            columnNumber: 15
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/legal/CookieConsentBanner.tsx",
+                                    lineNumber: 184,
+                                    columnNumber: 13
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/legal/CookieConsentBanner.tsx",
+                            lineNumber: 182,
+                            columnNumber: 11
+                        }, this),
+                        /*#__PURE__*/ _jsxDEV("div", {
+                            className: "space-y-6 py-4",
+                            children: [
+                                /*#__PURE__*/ _jsxDEV("div", {
+                                    className: "flex items-start justify-between gap-4 border-b pb-4",
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV("div", {
+                                            className: "flex-1",
+                                            children: [
+                                                /*#__PURE__*/ _jsxDEV("div", {
+                                                    className: "mb-1 flex items-center gap-2",
+                                                    children: [
+                                                        /*#__PURE__*/ _jsxDEV(Label, {
+                                                            className: "font-semibold",
+                                                            children: "Cookies nécessaires"
+                                                        }, void 0, false, {
+                                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/legal/CookieConsentBanner.tsx",
+                                                            lineNumber: 196,
+                                                            columnNumber: 19
+                                                        }, this),
+                                                        /*#__PURE__*/ _jsxDEV("span", {
+                                                            className: "rounded bg-gray-100 px-2 py-0.5 text-xs",
+                                                            children: "Toujours actifs"
+                                                        }, void 0, false, {
+                                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/legal/CookieConsentBanner.tsx",
+                                                            lineNumber: 197,
+                                                            columnNumber: 19
+                                                        }, this)
+                                                    ]
+                                                }, void 0, true, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/legal/CookieConsentBanner.tsx",
+                                                    lineNumber: 195,
+                                                    columnNumber: 17
+                                                }, this),
+                                                /*#__PURE__*/ _jsxDEV("p", {
+                                                    className: "text-sm text-gray-600",
+                                                    children: "Ces cookies sont essentiels au fonctionnement du site et ne peuvent pas être désactivés."
+                                                }, void 0, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/legal/CookieConsentBanner.tsx",
+                                                    lineNumber: 199,
+                                                    columnNumber: 17
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/legal/CookieConsentBanner.tsx",
+                                            lineNumber: 194,
+                                            columnNumber: 15
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV(Switch, {
+                                            checked: true,
+                                            disabled: true
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/legal/CookieConsentBanner.tsx",
+                                            lineNumber: 204,
+                                            columnNumber: 15
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/legal/CookieConsentBanner.tsx",
+                                    lineNumber: 193,
+                                    columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV("div", {
+                                    className: "flex items-start justify-between gap-4 border-b pb-4",
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV("div", {
+                                            className: "flex-1",
+                                            children: [
+                                                /*#__PURE__*/ _jsxDEV(Label, {
+                                                    className: "mb-1 block font-semibold",
+                                                    children: "Cookies fonctionnels"
+                                                }, void 0, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/legal/CookieConsentBanner.tsx",
+                                                    lineNumber: 209,
+                                                    columnNumber: 17
+                                                }, this),
+                                                /*#__PURE__*/ _jsxDEV("p", {
+                                                    className: "text-sm text-gray-600",
+                                                    children: "Mémorisent vos préférences (langue, thème) et activent le chat support."
+                                                }, void 0, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/legal/CookieConsentBanner.tsx",
+                                                    lineNumber: 210,
+                                                    columnNumber: 17
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/legal/CookieConsentBanner.tsx",
+                                            lineNumber: 208,
+                                            columnNumber: 15
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV(Switch, {
+                                            checked: preferences.functional,
+                                            onCheckedChange: (checked)=>setPreferences({
+                                                    ...preferences,
+                                                    functional: checked
+                                                })
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/legal/CookieConsentBanner.tsx",
+                                            lineNumber: 214,
+                                            columnNumber: 15
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/legal/CookieConsentBanner.tsx",
+                                    lineNumber: 207,
+                                    columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV("div", {
+                                    className: "flex items-start justify-between gap-4 border-b pb-4",
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV("div", {
+                                            className: "flex-1",
+                                            children: [
+                                                /*#__PURE__*/ _jsxDEV(Label, {
+                                                    className: "mb-1 block font-semibold",
+                                                    children: "Cookies analytics"
+                                                }, void 0, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/legal/CookieConsentBanner.tsx",
+                                                    lineNumber: 222,
+                                                    columnNumber: 17
+                                                }, this),
+                                                /*#__PURE__*/ _jsxDEV("p", {
+                                                    className: "text-sm text-gray-600",
+                                                    children: "Mesurent l'audience et améliorent le site en analysant son utilisation."
+                                                }, void 0, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/legal/CookieConsentBanner.tsx",
+                                                    lineNumber: 223,
+                                                    columnNumber: 17
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/legal/CookieConsentBanner.tsx",
+                                            lineNumber: 221,
+                                            columnNumber: 15
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV(Switch, {
+                                            checked: preferences.analytics,
+                                            onCheckedChange: (checked)=>setPreferences({
+                                                    ...preferences,
+                                                    analytics: checked
+                                                })
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/legal/CookieConsentBanner.tsx",
+                                            lineNumber: 227,
+                                            columnNumber: 15
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/legal/CookieConsentBanner.tsx",
+                                    lineNumber: 220,
+                                    columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV("div", {
+                                    className: "flex items-start justify-between gap-4",
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV("div", {
+                                            className: "flex-1",
+                                            children: [
+                                                /*#__PURE__*/ _jsxDEV(Label, {
+                                                    className: "mb-1 block font-semibold",
+                                                    children: "Cookies marketing"
+                                                }, void 0, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/legal/CookieConsentBanner.tsx",
+                                                    lineNumber: 235,
+                                                    columnNumber: 17
+                                                }, this),
+                                                /*#__PURE__*/ _jsxDEV("p", {
+                                                    className: "text-sm text-gray-600",
+                                                    children: "Publicités pertinentes et mesure de l'efficacité des campagnes."
+                                                }, void 0, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/legal/CookieConsentBanner.tsx",
+                                                    lineNumber: 236,
+                                                    columnNumber: 17
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/legal/CookieConsentBanner.tsx",
+                                            lineNumber: 234,
+                                            columnNumber: 15
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV(Switch, {
+                                            checked: preferences.marketing,
+                                            onCheckedChange: (checked)=>setPreferences({
+                                                    ...preferences,
+                                                    marketing: checked
+                                                })
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/legal/CookieConsentBanner.tsx",
+                                            lineNumber: 240,
+                                            columnNumber: 15
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/legal/CookieConsentBanner.tsx",
+                                    lineNumber: 233,
+                                    columnNumber: 13
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/legal/CookieConsentBanner.tsx",
+                            lineNumber: 192,
+                            columnNumber: 11
+                        }, this),
+                        /*#__PURE__*/ _jsxDEV("div", {
+                            className: "flex justify-end gap-3 border-t pt-4",
+                            children: [
+                                /*#__PURE__*/ _jsxDEV(Button, {
+                                    variant: "outline",
+                                    disabled: isSaving,
+                                    onClick: ()=>handleSettingsOpenChange(false),
+                                    children: "Annuler"
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/legal/CookieConsentBanner.tsx",
+                                    lineNumber: 248,
+                                    columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV(Button, {
+                                    disabled: isSaving,
+                                    onClick: handleSavePreferences,
+                                    children: isSaving ? 'Enregistrement…' : 'Sauvegarder mes préférences'
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/legal/CookieConsentBanner.tsx",
+                                    lineNumber: 255,
+                                    columnNumber: 13
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/legal/CookieConsentBanner.tsx",
+                            lineNumber: 247,
+                            columnNumber: 11
+                        }, this)
+                    ]
+                }, void 0, true, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/legal/CookieConsentBanner.tsx",
+                    lineNumber: 181,
+                    columnNumber: 9
+                }, this)
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/legal/CookieConsentBanner.tsx",
+                lineNumber: 180,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true);
+};
+_s(CookieConsentBanner, "S1I1d4KgRAhR0IGs39LWHAqH5f0=", false, function() {
+    return [
+        useAuth,
+        useCookiePreferences,
+        useUpdateCookiePreferences
+    ];
+});
+_c = CookieConsentBanner;
+var _c;
+$RefreshReg$(_c, "CookieConsentBanner");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/legal/CookieConsentBanner.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/legal/CookieConsentBanner.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIkNvb2tpZUNvbnNlbnRCYW5uZXIudHN4Il0sInNvdXJjZXNDb250ZW50IjpbIi8qKlxuICogQ29va2llIENvbnNlbnQgQmFubmVyIC0gQ29uZm9ybWl0w6kgUkdQRFxuICovXG5cbmltcG9ydCB7IHVzZVN0YXRlLCB1c2VFZmZlY3QgfSBmcm9tICdyZWFjdCc7XG5pbXBvcnQgeyBTZXR0aW5ncywgQ2hlY2sgfSBmcm9tICdAL2NvbXBvbmVudHMvaWNvbnMnO1xuaW1wb3J0IHsgTGluayB9IGZyb20gJ3JlYWN0LXJvdXRlci1kb20nO1xuaW1wb3J0IHsgQnV0dG9uIH0gZnJvbSAnQC9jb21wb25lbnRzL3VpL2J1dHRvbic7XG5pbXBvcnQge1xuICBEaWFsb2csXG4gIERpYWxvZ0NvbnRlbnQsXG4gIERpYWxvZ0Rlc2NyaXB0aW9uLFxuICBEaWFsb2dIZWFkZXIsXG4gIERpYWxvZ1RpdGxlLFxufSBmcm9tICdAL2NvbXBvbmVudHMvdWkvZGlhbG9nJztcbmltcG9ydCB7IFN3aXRjaCB9IGZyb20gJ0AvY29tcG9uZW50cy91aS9zd2l0Y2gnO1xuaW1wb3J0IHsgTGFiZWwgfSBmcm9tICdAL2NvbXBvbmVudHMvdWkvbGFiZWwnO1xuaW1wb3J0IHsgdXNlQXV0aCB9IGZyb20gJ0AvY29udGV4dHMvQXV0aENvbnRleHQnO1xuaW1wb3J0IHsgdXNlVXBkYXRlQ29va2llUHJlZmVyZW5jZXMsIHVzZUNvb2tpZVByZWZlcmVuY2VzIH0gZnJvbSAnQC9ob29rcy91c2VMZWdhbCc7XG5pbXBvcnQge1xuICBnZXRTdG9yZWRDb29raWVQcmVmZXJlbmNlcyxcbiAgaGFzQ29va2llQ29uc2VudEdpdmVuLFxuICBPUEVOX0NPT0tJRV9TRVRUSU5HU19FVkVOVCxcbn0gZnJvbSAnQC9saWIvY29va2llLWNvbnNlbnQnO1xuaW1wb3J0IHR5cGUgeyBDb29raWVQcmVmZXJlbmNlcyB9IGZyb20gJ0AvdHlwZXMvbGVnYWwnO1xuXG5jb25zdCBERUZBVUxUX1BSRUZFUkVOQ0VTOiBQYXJ0aWFsPENvb2tpZVByZWZlcmVuY2VzPiA9IHtcbiAgbmVjZXNzYXJ5OiB0cnVlLFxuICBmdW5jdGlvbmFsOiBmYWxzZSxcbiAgYW5hbHl0aWNzOiBmYWxzZSxcbiAgbWFya2V0aW5nOiBmYWxzZSxcbn07XG5cbmV4cG9ydCBjb25zdCBDb29raWVDb25zZW50QmFubmVyID0gKCkgPT4ge1xuICBjb25zdCB7IHVzZXIgfSA9IHVzZUF1dGgoKTtcbiAgY29uc3QgeyBkYXRhOiBjdXJyZW50UHJlZmVyZW5jZXMgfSA9IHVzZUNvb2tpZVByZWZlcmVuY2VzKHVzZXI/LmlkKTtcbiAgY29uc3QgdXBkYXRlUHJlZmVyZW5jZXMgPSB1c2VVcGRhdGVDb29raWVQcmVmZXJlbmNlcygpO1xuXG4gIGNvbnN0IFtzaG93QmFubmVyLCBzZXRTaG93QmFubmVyXSA9IHVzZVN0YXRlKGZhbHNlKTtcbiAgY29uc3QgW3Nob3dTZXR0aW5ncywgc2V0U2hvd1NldHRpbmdzXSA9IHVzZVN0YXRlKGZhbHNlKTtcbiAgY29uc3QgW2lzU2F2aW5nLCBzZXRJc1NhdmluZ10gPSB1c2VTdGF0ZShmYWxzZSk7XG5cbiAgY29uc3QgW3ByZWZlcmVuY2VzLCBzZXRQcmVmZXJlbmNlc10gPSB1c2VTdGF0ZTxQYXJ0aWFsPENvb2tpZVByZWZlcmVuY2VzPj4oREVGQVVMVF9QUkVGRVJFTkNFUyk7XG5cbiAgdXNlRWZmZWN0KCgpID0+IHtcbiAgICBpZiAoaGFzQ29va2llQ29uc2VudEdpdmVuKCkgfHwgY3VycmVudFByZWZlcmVuY2VzKSByZXR1cm47XG5cbiAgICBjb25zdCB0aW1lciA9IHNldFRpbWVvdXQoKCkgPT4ge1xuICAgICAgc2V0U2hvd0Jhbm5lcih0cnVlKTtcbiAgICB9LCAyMDAwKTtcbiAgICByZXR1cm4gKCkgPT4gY2xlYXJUaW1lb3V0KHRpbWVyKTtcbiAgfSwgW2N1cnJlbnRQcmVmZXJlbmNlc10pO1xuXG4gIHVzZUVmZmVjdCgoKSA9PiB7XG4gICAgY29uc3Qgc3RvcmVkID0gY3VycmVudFByZWZlcmVuY2VzID8/IGdldFN0b3JlZENvb2tpZVByZWZlcmVuY2VzKCk7XG4gICAgaWYgKHN0b3JlZCkge1xuICAgICAgc2V0UHJlZmVyZW5jZXMoe1xuICAgICAgICBuZWNlc3Nhcnk6IHRydWUsXG4gICAgICAgIGZ1bmN0aW9uYWw6IHN0b3JlZC5mdW5jdGlvbmFsID8/IGZhbHNlLFxuICAgICAgICBhbmFseXRpY3M6IHN0b3JlZC5hbmFseXRpY3MgPz8gZmFsc2UsXG4gICAgICAgIG1hcmtldGluZzogc3RvcmVkLm1hcmtldGluZyA/PyBmYWxzZSxcbiAgICAgIH0pO1xuICAgIH1cbiAgfSwgW2N1cnJlbnRQcmVmZXJlbmNlc10pO1xuXG4gIHVzZUVmZmVjdCgoKSA9PiB7XG4gICAgY29uc3Qgb3BlblNldHRpbmdzID0gKCkgPT4ge1xuICAgICAgY29uc3Qgc3RvcmVkID0gY3VycmVudFByZWZlcmVuY2VzID8/IGdldFN0b3JlZENvb2tpZVByZWZlcmVuY2VzKCk7XG4gICAgICBpZiAoc3RvcmVkKSB7XG4gICAgICAgIHNldFByZWZlcmVuY2VzKHtcbiAgICAgICAgICBuZWNlc3Nhcnk6IHRydWUsXG4gICAgICAgICAgZnVuY3Rpb25hbDogc3RvcmVkLmZ1bmN0aW9uYWwgPz8gZmFsc2UsXG4gICAgICAgICAgYW5hbHl0aWNzOiBzdG9yZWQuYW5hbHl0aWNzID8/IGZhbHNlLFxuICAgICAgICAgIG1hcmtldGluZzogc3RvcmVkLm1hcmtldGluZyA/PyBmYWxzZSxcbiAgICAgICAgfSk7XG4gICAgICB9XG4gICAgICBzZXRTaG93U2V0dGluZ3ModHJ1ZSk7XG4gICAgICBzZXRTaG93QmFubmVyKGZhbHNlKTtcbiAgICB9O1xuXG4gICAgd2luZG93LmFkZEV2ZW50TGlzdGVuZXIoT1BFTl9DT09LSUVfU0VUVElOR1NfRVZFTlQsIG9wZW5TZXR0aW5ncyk7XG4gICAgcmV0dXJuICgpID0+IHdpbmRvdy5yZW1vdmVFdmVudExpc3RlbmVyKE9QRU5fQ09PS0lFX1NFVFRJTkdTX0VWRU5ULCBvcGVuU2V0dGluZ3MpO1xuICB9LCBbY3VycmVudFByZWZlcmVuY2VzXSk7XG5cbiAgY29uc3QgcGVyc2lzdFByZWZlcmVuY2VzID0gYXN5bmMgKG5leHQ6IFBhcnRpYWw8Q29va2llUHJlZmVyZW5jZXM+KSA9PiB7XG4gICAgc2V0SXNTYXZpbmcodHJ1ZSk7XG4gICAgdHJ5IHtcbiAgICAgIGF3YWl0IHVwZGF0ZVByZWZlcmVuY2VzLm11dGF0ZUFzeW5jKHtcbiAgICAgICAgdXNlcklkOiB1c2VyPy5pZCxcbiAgICAgICAgcHJlZmVyZW5jZXM6IG5leHQsXG4gICAgICB9KTtcbiAgICAgIGxvY2FsU3RvcmFnZS5zZXRJdGVtKCdjb29raWVDb25zZW50R2l2ZW4nLCAndHJ1ZScpO1xuICAgICAgc2V0U2hvd1NldHRpbmdzKGZhbHNlKTtcbiAgICAgIHNldFNob3dCYW5uZXIoZmFsc2UpO1xuICAgIH0gZmluYWxseSB7XG4gICAgICBzZXRJc1NhdmluZyhmYWxzZSk7XG4gICAgfVxuICB9O1xuXG4gIGNvbnN0IGhhbmRsZUFjY2VwdEFsbCA9ICgpID0+XG4gICAgcGVyc2lzdFByZWZlcmVuY2VzKHtcbiAgICAgIG5lY2Vzc2FyeTogdHJ1ZSxcbiAgICAgIGZ1bmN0aW9uYWw6IHRydWUsXG4gICAgICBhbmFseXRpY3M6IHRydWUsXG4gICAgICBtYXJrZXRpbmc6IHRydWUsXG4gICAgfSk7XG5cbiAgY29uc3QgaGFuZGxlUmVqZWN0QWxsID0gKCkgPT4gcGVyc2lzdFByZWZlcmVuY2VzKERFRkFVTFRfUFJFRkVSRU5DRVMpO1xuXG4gIGNvbnN0IGhhbmRsZVNhdmVQcmVmZXJlbmNlcyA9ICgpID0+IHBlcnNpc3RQcmVmZXJlbmNlcyh7IC4uLnByZWZlcmVuY2VzLCBuZWNlc3Nhcnk6IHRydWUgfSk7XG5cbiAgY29uc3QgaGFuZGxlU2V0dGluZ3NPcGVuQ2hhbmdlID0gKG9wZW46IGJvb2xlYW4pID0+IHtcbiAgICBzZXRTaG93U2V0dGluZ3Mob3Blbik7XG4gICAgaWYgKCFvcGVuICYmICFoYXNDb29raWVDb25zZW50R2l2ZW4oKSkge1xuICAgICAgc2V0U2hvd0Jhbm5lcih0cnVlKTtcbiAgICB9XG4gIH07XG5cbiAgcmV0dXJuIChcbiAgICA8PlxuICAgICAge3Nob3dCYW5uZXIgPyAoXG4gICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZml4ZWQgYm90dG9tLTAgbGVmdC0wIHJpZ2h0LTAgei01MCBib3JkZXItdCBiZy13aGl0ZSBzaGFkb3ctbGdcIj5cbiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImNvbnRhaW5lciBteC1hdXRvIG1heC13LTd4bCBweC00IHB5LTRcIj5cbiAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBmbGV4LWNvbCBpdGVtcy1zdGFydCBqdXN0aWZ5LWJldHdlZW4gZ2FwLTQgbWQ6ZmxleC1yb3cgbWQ6aXRlbXMtY2VudGVyXCI+XG4gICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleC0xXCI+XG4gICAgICAgICAgICAgICAgPGgzIGNsYXNzTmFtZT1cIm1iLTEgZm9udC1zZW1pYm9sZCB0ZXh0LWdyYXktOTAwXCI+8J+NqiBOb3VzIHV0aWxpc29ucyBkZXMgY29va2llczwvaDM+XG4gICAgICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwidGV4dC1zbSB0ZXh0LWdyYXktNjAwXCI+XG4gICAgICAgICAgICAgICAgICBOb3VzIHV0aWxpc29ucyBkZXMgY29va2llcyBwb3VyIGFtw6lsaW9yZXIgdm90cmUgZXhww6lyaWVuY2UsIGFuYWx5c2VyIG5vdHJlIHRyYWZpY1xuICAgICAgICAgICAgICAgICAgZXQgcGVyc29ubmFsaXNlciBsZSBjb250ZW51LiBWb3VzIHBvdXZleiBhY2NlcHRlciB0b3VzIGxlcyBjb29raWVzIG91IGxlc1xuICAgICAgICAgICAgICAgICAgcGVyc29ubmFsaXNlci57JyAnfVxuICAgICAgICAgICAgICAgICAgPExpbmtcbiAgICAgICAgICAgICAgICAgICAgdG89XCIvbGVnYWwvY29va2llc1wiXG4gICAgICAgICAgICAgICAgICAgIGNsYXNzTmFtZT1cImZvbnQtbWVkaXVtIHRleHQtYmx1ZS04MDAgdW5kZXJsaW5lIGRlY29yYXRpb24tYmx1ZS04MDAvODAgaG92ZXI6dGV4dC1ibHVlLTkwMFwiXG4gICAgICAgICAgICAgICAgICA+XG4gICAgICAgICAgICAgICAgICAgIEVuIHNhdm9pciBwbHVzXG4gICAgICAgICAgICAgICAgICA8L0xpbms+XG4gICAgICAgICAgICAgICAgPC9wPlxuICAgICAgICAgICAgICA8L2Rpdj5cblxuICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggZmxleC13cmFwIGl0ZW1zLWNlbnRlciBnYXAtM1wiPlxuICAgICAgICAgICAgICAgIDxCdXR0b25cbiAgICAgICAgICAgICAgICAgIHZhcmlhbnQ9XCJvdXRsaW5lXCJcbiAgICAgICAgICAgICAgICAgIHNpemU9XCJzbVwiXG4gICAgICAgICAgICAgICAgICBkaXNhYmxlZD17aXNTYXZpbmd9XG4gICAgICAgICAgICAgICAgICBvbkNsaWNrPXsoKSA9PiB7XG4gICAgICAgICAgICAgICAgICAgIHNldFNob3dTZXR0aW5ncyh0cnVlKTtcbiAgICAgICAgICAgICAgICAgICAgc2V0U2hvd0Jhbm5lcihmYWxzZSk7XG4gICAgICAgICAgICAgICAgICB9fVxuICAgICAgICAgICAgICAgICAgY2xhc3NOYW1lPVwid2hpdGVzcGFjZS1ub3dyYXBcIlxuICAgICAgICAgICAgICAgID5cbiAgICAgICAgICAgICAgICAgIDxTZXR0aW5ncyBjbGFzc05hbWU9XCJtci0yIGgtNCB3LTRcIiAvPlxuICAgICAgICAgICAgICAgICAgUGVyc29ubmFsaXNlclxuICAgICAgICAgICAgICAgIDwvQnV0dG9uPlxuXG4gICAgICAgICAgICAgICAgPEJ1dHRvblxuICAgICAgICAgICAgICAgICAgdmFyaWFudD1cIm91dGxpbmVcIlxuICAgICAgICAgICAgICAgICAgc2l6ZT1cInNtXCJcbiAgICAgICAgICAgICAgICAgIGRpc2FibGVkPXtpc1NhdmluZ31cbiAgICAgICAgICAgICAgICAgIG9uQ2xpY2s9e2hhbmRsZVJlamVjdEFsbH1cbiAgICAgICAgICAgICAgICAgIGNsYXNzTmFtZT1cIndoaXRlc3BhY2Utbm93cmFwXCJcbiAgICAgICAgICAgICAgICA+XG4gICAgICAgICAgICAgICAgICBUb3V0IHJlZnVzZXJcbiAgICAgICAgICAgICAgICA8L0J1dHRvbj5cblxuICAgICAgICAgICAgICAgIDxCdXR0b25cbiAgICAgICAgICAgICAgICAgIHNpemU9XCJzbVwiXG4gICAgICAgICAgICAgICAgICBkaXNhYmxlZD17aXNTYXZpbmd9XG4gICAgICAgICAgICAgICAgICBvbkNsaWNrPXtoYW5kbGVBY2NlcHRBbGx9XG4gICAgICAgICAgICAgICAgICBjbGFzc05hbWU9XCJ3aGl0ZXNwYWNlLW5vd3JhcCBiZy1ibHVlLTcwMCB0ZXh0LXdoaXRlIGhvdmVyOmJnLWJsdWUtODAwXCJcbiAgICAgICAgICAgICAgICA+XG4gICAgICAgICAgICAgICAgICA8Q2hlY2sgY2xhc3NOYW1lPVwibXItMiBoLTQgdy00XCIgLz5cbiAgICAgICAgICAgICAgICAgIFRvdXQgYWNjZXB0ZXJcbiAgICAgICAgICAgICAgICA8L0J1dHRvbj5cbiAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgPC9kaXY+XG4gICAgICApIDogbnVsbH1cblxuICAgICAgPERpYWxvZyBvcGVuPXtzaG93U2V0dGluZ3N9IG9uT3BlbkNoYW5nZT17aGFuZGxlU2V0dGluZ3NPcGVuQ2hhbmdlfT5cbiAgICAgICAgPERpYWxvZ0NvbnRlbnQgY2xhc3NOYW1lPVwibWF4LWgtWzgwdmhdIG1heC13LVs5NXZ3XSBvdmVyZmxvdy15LWF1dG8gc206bWF4LXctMnhsXCI+XG4gICAgICAgICAgPERpYWxvZ0hlYWRlcj5cbiAgICAgICAgICAgIDxEaWFsb2dUaXRsZT5QYXJhbcOodHJlcyBkZXMgY29va2llczwvRGlhbG9nVGl0bGU+XG4gICAgICAgICAgICA8RGlhbG9nRGVzY3JpcHRpb24+XG4gICAgICAgICAgICAgIENob2lzaXNzZXogbGVzIGNhdMOpZ29yaWVzIGRlIGNvb2tpZXMgcXVlIHZvdXMgc291aGFpdGV6IGF1dG9yaXNlci57JyAnfVxuICAgICAgICAgICAgICA8TGluayB0bz1cIi9sZWdhbC9jb29raWVzXCIgY2xhc3NOYW1lPVwidGV4dC1ibHVlLTgwMCB1bmRlcmxpbmUgaG92ZXI6dGV4dC1ibHVlLTkwMFwiPlxuICAgICAgICAgICAgICAgIFBvbGl0aXF1ZSBkZXMgY29va2llc1xuICAgICAgICAgICAgICA8L0xpbms+XG4gICAgICAgICAgICA8L0RpYWxvZ0Rlc2NyaXB0aW9uPlxuICAgICAgICAgIDwvRGlhbG9nSGVhZGVyPlxuXG4gICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJzcGFjZS15LTYgcHktNFwiPlxuICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLXN0YXJ0IGp1c3RpZnktYmV0d2VlbiBnYXAtNCBib3JkZXItYiBwYi00XCI+XG4gICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleC0xXCI+XG4gICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJtYi0xIGZsZXggaXRlbXMtY2VudGVyIGdhcC0yXCI+XG4gICAgICAgICAgICAgICAgICA8TGFiZWwgY2xhc3NOYW1lPVwiZm9udC1zZW1pYm9sZFwiPkNvb2tpZXMgbsOpY2Vzc2FpcmVzPC9MYWJlbD5cbiAgICAgICAgICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cInJvdW5kZWQgYmctZ3JheS0xMDAgcHgtMiBweS0wLjUgdGV4dC14c1wiPlRvdWpvdXJzIGFjdGlmczwvc3Bhbj5cbiAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJ0ZXh0LXNtIHRleHQtZ3JheS02MDBcIj5cbiAgICAgICAgICAgICAgICAgIENlcyBjb29raWVzIHNvbnQgZXNzZW50aWVscyBhdSBmb25jdGlvbm5lbWVudCBkdSBzaXRlIGV0IG5lIHBldXZlbnQgcGFzIMOqdHJlXG4gICAgICAgICAgICAgICAgICBkw6lzYWN0aXbDqXMuXG4gICAgICAgICAgICAgICAgPC9wPlxuICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgPFN3aXRjaCBjaGVja2VkIGRpc2FibGVkIC8+XG4gICAgICAgICAgICA8L2Rpdj5cblxuICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLXN0YXJ0IGp1c3RpZnktYmV0d2VlbiBnYXAtNCBib3JkZXItYiBwYi00XCI+XG4gICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleC0xXCI+XG4gICAgICAgICAgICAgICAgPExhYmVsIGNsYXNzTmFtZT1cIm1iLTEgYmxvY2sgZm9udC1zZW1pYm9sZFwiPkNvb2tpZXMgZm9uY3Rpb25uZWxzPC9MYWJlbD5cbiAgICAgICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJ0ZXh0LXNtIHRleHQtZ3JheS02MDBcIj5cbiAgICAgICAgICAgICAgICAgIE3DqW1vcmlzZW50IHZvcyBwcsOpZsOpcmVuY2VzIChsYW5ndWUsIHRow6htZSkgZXQgYWN0aXZlbnQgbGUgY2hhdCBzdXBwb3J0LlxuICAgICAgICAgICAgICAgIDwvcD5cbiAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgIDxTd2l0Y2hcbiAgICAgICAgICAgICAgICBjaGVja2VkPXtwcmVmZXJlbmNlcy5mdW5jdGlvbmFsfVxuICAgICAgICAgICAgICAgIG9uQ2hlY2tlZENoYW5nZT17Y2hlY2tlZCA9PiBzZXRQcmVmZXJlbmNlcyh7IC4uLnByZWZlcmVuY2VzLCBmdW5jdGlvbmFsOiBjaGVja2VkIH0pfVxuICAgICAgICAgICAgICAvPlxuICAgICAgICAgICAgPC9kaXY+XG5cbiAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1zdGFydCBqdXN0aWZ5LWJldHdlZW4gZ2FwLTQgYm9yZGVyLWIgcGItNFwiPlxuICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXgtMVwiPlxuICAgICAgICAgICAgICAgIDxMYWJlbCBjbGFzc05hbWU9XCJtYi0xIGJsb2NrIGZvbnQtc2VtaWJvbGRcIj5Db29raWVzIGFuYWx5dGljczwvTGFiZWw+XG4gICAgICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwidGV4dC1zbSB0ZXh0LWdyYXktNjAwXCI+XG4gICAgICAgICAgICAgICAgICBNZXN1cmVudCBsJmFwb3M7YXVkaWVuY2UgZXQgYW3DqWxpb3JlbnQgbGUgc2l0ZSBlbiBhbmFseXNhbnQgc29uIHV0aWxpc2F0aW9uLlxuICAgICAgICAgICAgICAgIDwvcD5cbiAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgIDxTd2l0Y2hcbiAgICAgICAgICAgICAgICBjaGVja2VkPXtwcmVmZXJlbmNlcy5hbmFseXRpY3N9XG4gICAgICAgICAgICAgICAgb25DaGVja2VkQ2hhbmdlPXtjaGVja2VkID0+IHNldFByZWZlcmVuY2VzKHsgLi4ucHJlZmVyZW5jZXMsIGFuYWx5dGljczogY2hlY2tlZCB9KX1cbiAgICAgICAgICAgICAgLz5cbiAgICAgICAgICAgIDwvZGl2PlxuXG4gICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtc3RhcnQganVzdGlmeS1iZXR3ZWVuIGdhcC00XCI+XG4gICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleC0xXCI+XG4gICAgICAgICAgICAgICAgPExhYmVsIGNsYXNzTmFtZT1cIm1iLTEgYmxvY2sgZm9udC1zZW1pYm9sZFwiPkNvb2tpZXMgbWFya2V0aW5nPC9MYWJlbD5cbiAgICAgICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJ0ZXh0LXNtIHRleHQtZ3JheS02MDBcIj5cbiAgICAgICAgICAgICAgICAgIFB1YmxpY2l0w6lzIHBlcnRpbmVudGVzIGV0IG1lc3VyZSBkZSBsJmFwb3M7ZWZmaWNhY2l0w6kgZGVzIGNhbXBhZ25lcy5cbiAgICAgICAgICAgICAgICA8L3A+XG4gICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICA8U3dpdGNoXG4gICAgICAgICAgICAgICAgY2hlY2tlZD17cHJlZmVyZW5jZXMubWFya2V0aW5nfVxuICAgICAgICAgICAgICAgIG9uQ2hlY2tlZENoYW5nZT17Y2hlY2tlZCA9PiBzZXRQcmVmZXJlbmNlcyh7IC4uLnByZWZlcmVuY2VzLCBtYXJrZXRpbmc6IGNoZWNrZWQgfSl9XG4gICAgICAgICAgICAgIC8+XG4gICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICA8L2Rpdj5cblxuICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBqdXN0aWZ5LWVuZCBnYXAtMyBib3JkZXItdCBwdC00XCI+XG4gICAgICAgICAgICA8QnV0dG9uXG4gICAgICAgICAgICAgIHZhcmlhbnQ9XCJvdXRsaW5lXCJcbiAgICAgICAgICAgICAgZGlzYWJsZWQ9e2lzU2F2aW5nfVxuICAgICAgICAgICAgICBvbkNsaWNrPXsoKSA9PiBoYW5kbGVTZXR0aW5nc09wZW5DaGFuZ2UoZmFsc2UpfVxuICAgICAgICAgICAgPlxuICAgICAgICAgICAgICBBbm51bGVyXG4gICAgICAgICAgICA8L0J1dHRvbj5cbiAgICAgICAgICAgIDxCdXR0b24gZGlzYWJsZWQ9e2lzU2F2aW5nfSBvbkNsaWNrPXtoYW5kbGVTYXZlUHJlZmVyZW5jZXN9PlxuICAgICAgICAgICAgICB7aXNTYXZpbmcgPyAnRW5yZWdpc3RyZW1lbnTigKYnIDogJ1NhdXZlZ2FyZGVyIG1lcyBwcsOpZsOpcmVuY2VzJ31cbiAgICAgICAgICAgIDwvQnV0dG9uPlxuICAgICAgICAgIDwvZGl2PlxuICAgICAgICA8L0RpYWxvZ0NvbnRlbnQ+XG4gICAgICA8L0RpYWxvZz5cbiAgICA8Lz5cbiAgKTtcbn07XG4iXSwibmFtZXMiOlsidXNlU3RhdGUiLCJ1c2VFZmZlY3QiLCJTZXR0aW5ncyIsIkNoZWNrIiwiTGluayIsIkJ1dHRvbiIsIkRpYWxvZyIsIkRpYWxvZ0NvbnRlbnQiLCJEaWFsb2dEZXNjcmlwdGlvbiIsIkRpYWxvZ0hlYWRlciIsIkRpYWxvZ1RpdGxlIiwiU3dpdGNoIiwiTGFiZWwiLCJ1c2VBdXRoIiwidXNlVXBkYXRlQ29va2llUHJlZmVyZW5jZXMiLCJ1c2VDb29raWVQcmVmZXJlbmNlcyIsImdldFN0b3JlZENvb2tpZVByZWZlcmVuY2VzIiwiaGFzQ29va2llQ29uc2VudEdpdmVuIiwiT1BFTl9DT09LSUVfU0VUVElOR1NfRVZFTlQiLCJERUZBVUxUX1BSRUZFUkVOQ0VTIiwibmVjZXNzYXJ5IiwiZnVuY3Rpb25hbCIsImFuYWx5dGljcyIsIm1hcmtldGluZyIsIkNvb2tpZUNvbnNlbnRCYW5uZXIiLCJ1c2VyIiwiZGF0YSIsImN1cnJlbnRQcmVmZXJlbmNlcyIsImlkIiwidXBkYXRlUHJlZmVyZW5jZXMiLCJzaG93QmFubmVyIiwic2V0U2hvd0Jhbm5lciIsInNob3dTZXR0aW5ncyIsInNldFNob3dTZXR0aW5ncyIsImlzU2F2aW5nIiwic2V0SXNTYXZpbmciLCJwcmVmZXJlbmNlcyIsInNldFByZWZlcmVuY2VzIiwidGltZXIiLCJzZXRUaW1lb3V0IiwiY2xlYXJUaW1lb3V0Iiwic3RvcmVkIiwib3BlblNldHRpbmdzIiwid2luZG93IiwiYWRkRXZlbnRMaXN0ZW5lciIsInJlbW92ZUV2ZW50TGlzdGVuZXIiLCJwZXJzaXN0UHJlZmVyZW5jZXMiLCJuZXh0IiwibXV0YXRlQXN5bmMiLCJ1c2VySWQiLCJsb2NhbFN0b3JhZ2UiLCJzZXRJdGVtIiwiaGFuZGxlQWNjZXB0QWxsIiwiaGFuZGxlUmVqZWN0QWxsIiwiaGFuZGxlU2F2ZVByZWZlcmVuY2VzIiwiaGFuZGxlU2V0dGluZ3NPcGVuQ2hhbmdlIiwib3BlbiIsImRpdiIsImNsYXNzTmFtZSIsImgzIiwicCIsInRvIiwidmFyaWFudCIsInNpemUiLCJkaXNhYmxlZCIsIm9uQ2xpY2siLCJvbk9wZW5DaGFuZ2UiLCJzcGFuIiwiY2hlY2tlZCIsIm9uQ2hlY2tlZENoYW5nZSJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7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

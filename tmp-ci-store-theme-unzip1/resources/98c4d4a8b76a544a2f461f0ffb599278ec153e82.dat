@@ -1,0 +1,59 @@
+import { WINDOW } from "/node_modules/@sentry-internal/browser-utils/build/esm/types.js?v=d758aa40";
+import { addPageListener } from "/node_modules/@sentry-internal/browser-utils/build/esm/metrics/web-vitals/lib/globalListeners.js?v=d758aa40";
+
+/*
+ * Copyright 2020 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+/**
+ * Sentry-specific change:
+ *
+ * This function's logic was NOT updated to web-vitals 4.2.4 or 5.x but we continue
+ * to use the web-vitals 3.5.2 version due to having stricter browser support.
+ *
+ * PR with context that made the changes:
+ * https://github.com/GoogleChrome/web-vitals/pull/442/files#r1530492402
+ *
+ * The PR removed listening to the `pagehide` event, in favour of only listening to
+ * the `visibilitychange` event. This is "more correct" but some browsers we still
+ * support (Safari <14.4) don't fully support `visibilitychange` or have known bugs
+ * with respect to the `visibilitychange` event.
+ *
+ * TODO (v11): If we decide to drop support for Safari 14.4, we can use the logic
+ * from web-vitals 4.2.4. In this case, we also need to update the integration tests
+ * that currently trigger the `pagehide` event to simulate the page being hidden.
+ *
+ * @param {OnHiddenCallback} cb - Callback to be executed when the page is hidden or unloaded.
+ *
+ * @deprecated use `whenIdleOrHidden` or `addPageListener('visibilitychange')` instead
+ */
+const onHidden = (cb) => {
+  const onHiddenOrPageHide = (event) => {
+    if (event.type === 'pagehide' || WINDOW.document?.visibilityState === 'hidden') {
+      cb(event);
+    }
+  };
+
+  addPageListener('visibilitychange', onHiddenOrPageHide, { capture: true, once: true });
+  // Some browsers have buggy implementations of visibilitychange,
+  // so we use pagehide in addition, just to be safe.
+  addPageListener('pagehide', onHiddenOrPageHide, { capture: true, once: true });
+};
+
+export { onHidden };
+                                    
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoib25IaWRkZW4uanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uLy4uL3NyYy9tZXRyaWNzL3dlYi12aXRhbHMvbGliL29uSGlkZGVuLnRzIl0sInNvdXJjZXNDb250ZW50IjpbIi8qXG4gKiBDb3B5cmlnaHQgMjAyMCBHb29nbGUgTExDXG4gKlxuICogTGljZW5zZWQgdW5kZXIgdGhlIEFwYWNoZSBMaWNlbnNlLCBWZXJzaW9uIDIuMCAodGhlIFwiTGljZW5zZVwiKTtcbiAqIHlvdSBtYXkgbm90IHVzZSB0aGlzIGZpbGUgZXhjZXB0IGluIGNvbXBsaWFuY2Ugd2l0aCB0aGUgTGljZW5zZS5cbiAqIFlvdSBtYXkgb2J0YWluIGEgY29weSBvZiB0aGUgTGljZW5zZSBhdFxuICpcbiAqICAgICBodHRwczovL3d3dy5hcGFjaGUub3JnL2xpY2Vuc2VzL0xJQ0VOU0UtMi4wXG4gKlxuICogVW5sZXNzIHJlcXVpcmVkIGJ5IGFwcGxpY2FibGUgbGF3IG9yIGFncmVlZCB0byBpbiB3cml0aW5nLCBzb2Z0d2FyZVxuICogZGlzdHJpYnV0ZWQgdW5kZXIgdGhlIExpY2Vuc2UgaXMgZGlzdHJpYnV0ZWQgb24gYW4gXCJBUyBJU1wiIEJBU0lTLFxuICogV0lUSE9VVCBXQVJSQU5USUVTIE9SIENPTkRJVElPTlMgT0YgQU5ZIEtJTkQsIGVpdGhlciBleHByZXNzIG9yIGltcGxpZWQuXG4gKiBTZWUgdGhlIExpY2Vuc2UgZm9yIHRoZSBzcGVjaWZpYyBsYW5ndWFnZSBnb3Zlcm5pbmcgcGVybWlzc2lvbnMgYW5kXG4gKiBsaW1pdGF0aW9ucyB1bmRlciB0aGUgTGljZW5zZS5cbiAqL1xuXG5pbXBvcnQgeyBXSU5ET1cgfSBmcm9tICcuLi8uLi8uLi90eXBlcyc7XG5pbXBvcnQgeyBhZGRQYWdlTGlzdGVuZXIgfSBmcm9tICcuL2dsb2JhbExpc3RlbmVycyc7XG5cbmV4cG9ydCBpbnRlcmZhY2UgT25IaWRkZW5DYWxsYmFjayB7XG4gIChldmVudDogRXZlbnQpOiB2b2lkO1xufVxuXG4vKipcbiAqIFNlbnRyeS1zcGVjaWZpYyBjaGFuZ2U6XG4gKlxuICogVGhpcyBmdW5jdGlvbidzIGxvZ2ljIHdhcyBOT1QgdXBkYXRlZCB0byB3ZWItdml0YWxzIDQuMi40IG9yIDUueCBidXQgd2UgY29udGludWVcbiAqIHRvIHVzZSB0aGUgd2ViLXZpdGFscyAzLjUuMiB2ZXJzaW9uIGR1ZSB0byBoYXZpbmcgc3RyaWN0ZXIgYnJvd3NlciBzdXBwb3J0LlxuICpcbiAqIFBSIHdpdGggY29udGV4dCB0aGF0IG1hZGUgdGhlIGNoYW5nZXM6XG4gKiBodHRwczovL2dpdGh1Yi5jb20vR29vZ2xlQ2hyb21lL3dlYi12aXRhbHMvcHVsbC80NDIvZmlsZXMjcjE1MzA0OTI0MDJcbiAqXG4gKiBUaGUgUFIgcmVtb3ZlZCBsaXN0ZW5pbmcgdG8gdGhlIGBwYWdlaGlkZWAgZXZlbnQsIGluIGZhdm91ciBvZiBvbmx5IGxpc3RlbmluZyB0b1xuICogdGhlIGB2aXNpYmlsaXR5Y2hhbmdlYCBldmVudC4gVGhpcyBpcyBcIm1vcmUgY29ycmVjdFwiIGJ1dCBzb21lIGJyb3dzZXJzIHdlIHN0aWxsXG4gKiBzdXBwb3J0IChTYWZhcmkgPDE0LjQpIGRvbid0IGZ1bGx5IHN1cHBvcnQgYHZpc2liaWxpdHljaGFuZ2VgIG9yIGhhdmUga25vd24gYnVnc1xuICogd2l0aCByZXNwZWN0IHRvIHRoZSBgdmlzaWJpbGl0eWNoYW5nZWAgZXZlbnQuXG4gKlxuICogVE9ETyAodjExKTogSWYgd2UgZGVjaWRlIHRvIGRyb3Agc3VwcG9ydCBmb3IgU2FmYXJpIDE0LjQsIHdlIGNhbiB1c2UgdGhlIGxvZ2ljXG4gKiBmcm9tIHdlYi12aXRhbHMgNC4yLjQuIEluIHRoaXMgY2FzZSwgd2UgYWxzbyBuZWVkIHRvIHVwZGF0ZSB0aGUgaW50ZWdyYXRpb24gdGVzdHNcbiAqIHRoYXQgY3VycmVudGx5IHRyaWdnZXIgdGhlIGBwYWdlaGlkZWAgZXZlbnQgdG8gc2ltdWxhdGUgdGhlIHBhZ2UgYmVpbmcgaGlkZGVuLlxuICpcbiAqIEBwYXJhbSB7T25IaWRkZW5DYWxsYmFja30gY2IgLSBDYWxsYmFjayB0byBiZSBleGVjdXRlZCB3aGVuIHRoZSBwYWdlIGlzIGhpZGRlbiBvciB1bmxvYWRlZC5cbiAqXG4gKiBAZGVwcmVjYXRlZCB1c2UgYHdoZW5JZGxlT3JIaWRkZW5gIG9yIGBhZGRQYWdlTGlzdGVuZXIoJ3Zpc2liaWxpdHljaGFuZ2UnKWAgaW5zdGVhZFxuICovXG5leHBvcnQgY29uc3Qgb25IaWRkZW4gPSAoY2I6IE9uSGlkZGVuQ2FsbGJhY2spID0+IHtcbiAgY29uc3Qgb25IaWRkZW5PclBhZ2VIaWRlID0gKGV2ZW50OiBFdmVudCkgPT4ge1xuICAgIGlmIChldmVudC50eXBlID09PSAncGFnZWhpZGUnIHx8IFdJTkRPVy5kb2N1bWVudD8udmlzaWJpbGl0eVN0YXRlID09PSAnaGlkZGVuJykge1xuICAgICAgY2IoZXZlbnQpO1xuICAgIH1cbiAgfTtcblxuICBhZGRQYWdlTGlzdGVuZXIoJ3Zpc2liaWxpdHljaGFuZ2UnLCBvbkhpZGRlbk9yUGFnZUhpZGUsIHsgY2FwdHVyZTogdHJ1ZSwgb25jZTogdHJ1ZSB9KTtcbiAgLy8gU29tZSBicm93c2VycyBoYXZlIGJ1Z2d5IGltcGxlbWVudGF0aW9ucyBvZiB2aXNpYmlsaXR5Y2hhbmdlLFxuICAvLyBzbyB3ZSB1c2UgcGFnZWhpZGUgaW4gYWRkaXRpb24sIGp1c3QgdG8gYmUgc2FmZS5cbiAgYWRkUGFnZUxpc3RlbmVyKCdwYWdlaGlkZScsIG9uSGlkZGVuT3JQYWdlSGlkZSwgeyBjYXB0dXJlOiB0cnVlLCBvbmNlOiB0cnVlIH0pO1xufTtcbiJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7QUFBQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7OztBQVNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO01BQ2EsUUFBQSxHQUFXLENBQUMsRUFBRSxLQUF1QjtBQUNsRCxFQUFFLE1BQU0sa0JBQUEsR0FBcUIsQ0FBQyxLQUFLLEtBQVk7QUFDL0MsSUFBSSxJQUFJLEtBQUssQ0FBQyxTQUFTLFVBQUEsSUFBYyxNQUFNLENBQUMsUUFBUSxFQUFFLGVBQUEsS0FBb0IsUUFBUSxFQUFFO0FBQ3BGLE1BQU0sRUFBRSxDQUFDLEtBQUssQ0FBQztBQUNmLElBQUk7QUFDSixFQUFFLENBQUM7O0FBRUgsRUFBRSxlQUFlLENBQUMsa0JBQWtCLEVBQUUsa0JBQWtCLEVBQUUsRUFBRSxPQUFPLEVBQUUsSUFBSSxFQUFFLElBQUksRUFBRSxJQUFBLEVBQU0sQ0FBQztBQUN4RjtBQUNBO0FBQ0EsRUFBRSxlQUFlLENBQUMsVUFBVSxFQUFFLGtCQUFrQixFQUFFLEVBQUUsT0FBTyxFQUFFLElBQUksRUFBRSxJQUFJLEVBQUUsSUFBQSxFQUFNLENBQUM7QUFDaEY7Ozs7IiwieF9nb29nbGVfaWdub3JlTGlzdCI6WzBdfQ==

@@ -1,0 +1,27 @@
+/**
+ * Readable message when catching unknown values (logs, toasts, UI).
+ * Supabase PostgrestError-like values are plain objects with .message, not always instanceof Error.
+ */ export function toUserErrorMessage(err) {
+    if (err == null) return '';
+    if (typeof err === 'string') return err.trim();
+    if (typeof err === 'number' || typeof err === 'boolean') return String(err);
+    if (err instanceof Error) return err.message.trim();
+    if (typeof err === 'object') {
+        const o = err;
+        if (typeof o.message === 'string' && o.message.trim()) return o.message.trim();
+        const od = o.error_description;
+        if (typeof od === 'string' && od.trim()) return od.trim();
+        if (typeof o.details === 'string' && o.details.trim()) return o.details.trim();
+        if (typeof o.hint === 'string' && o.hint.trim()) return o.hint.trim();
+        const code = o.code;
+        if (typeof code === 'string' && code.trim()) return code.trim();
+        try {
+            const s = JSON.stringify(err);
+            if (s && s !== '{}' && s !== '[object Object]') return s;
+        } catch  {
+        /* ignore */ }
+    }
+    return '';
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInVzZXItZXJyb3ItbWVzc2FnZS50cyJdLCJzb3VyY2VzQ29udGVudCI6WyIvKipcbiAqIFJlYWRhYmxlIG1lc3NhZ2Ugd2hlbiBjYXRjaGluZyB1bmtub3duIHZhbHVlcyAobG9ncywgdG9hc3RzLCBVSSkuXG4gKiBTdXBhYmFzZSBQb3N0Z3Jlc3RFcnJvci1saWtlIHZhbHVlcyBhcmUgcGxhaW4gb2JqZWN0cyB3aXRoIC5tZXNzYWdlLCBub3QgYWx3YXlzIGluc3RhbmNlb2YgRXJyb3IuXG4gKi9cbmV4cG9ydCBmdW5jdGlvbiB0b1VzZXJFcnJvck1lc3NhZ2UoZXJyOiB1bmtub3duKTogc3RyaW5nIHtcbiAgaWYgKGVyciA9PSBudWxsKSByZXR1cm4gJyc7XG4gIGlmICh0eXBlb2YgZXJyID09PSAnc3RyaW5nJykgcmV0dXJuIGVyci50cmltKCk7XG4gIGlmICh0eXBlb2YgZXJyID09PSAnbnVtYmVyJyB8fCB0eXBlb2YgZXJyID09PSAnYm9vbGVhbicpIHJldHVybiBTdHJpbmcoZXJyKTtcbiAgaWYgKGVyciBpbnN0YW5jZW9mIEVycm9yKSByZXR1cm4gZXJyLm1lc3NhZ2UudHJpbSgpO1xuICBpZiAodHlwZW9mIGVyciA9PT0gJ29iamVjdCcpIHtcbiAgICBjb25zdCBvID0gZXJyIGFzIFJlY29yZDxzdHJpbmcsIHVua25vd24+O1xuICAgIGlmICh0eXBlb2Ygby5tZXNzYWdlID09PSAnc3RyaW5nJyAmJiBvLm1lc3NhZ2UudHJpbSgpKSByZXR1cm4gby5tZXNzYWdlLnRyaW0oKTtcbiAgICBjb25zdCBvZCA9IG8uZXJyb3JfZGVzY3JpcHRpb247XG4gICAgaWYgKHR5cGVvZiBvZCA9PT0gJ3N0cmluZycgJiYgb2QudHJpbSgpKSByZXR1cm4gb2QudHJpbSgpO1xuICAgIGlmICh0eXBlb2Ygby5kZXRhaWxzID09PSAnc3RyaW5nJyAmJiBvLmRldGFpbHMudHJpbSgpKSByZXR1cm4gby5kZXRhaWxzLnRyaW0oKTtcbiAgICBpZiAodHlwZW9mIG8uaGludCA9PT0gJ3N0cmluZycgJiYgby5oaW50LnRyaW0oKSkgcmV0dXJuIG8uaGludC50cmltKCk7XG4gICAgY29uc3QgY29kZSA9IG8uY29kZTtcbiAgICBpZiAodHlwZW9mIGNvZGUgPT09ICdzdHJpbmcnICYmIGNvZGUudHJpbSgpKSByZXR1cm4gY29kZS50cmltKCk7XG4gICAgdHJ5IHtcbiAgICAgIGNvbnN0IHMgPSBKU09OLnN0cmluZ2lmeShlcnIpO1xuICAgICAgaWYgKHMgJiYgcyAhPT0gJ3t9JyAmJiBzICE9PSAnW29iamVjdCBPYmplY3RdJykgcmV0dXJuIHM7XG4gICAgfSBjYXRjaCB7XG4gICAgICAvKiBpZ25vcmUgKi9cbiAgICB9XG4gIH1cbiAgcmV0dXJuICcnO1xufVxuIl0sIm5hbWVzIjpbInRvVXNlckVycm9yTWVzc2FnZSIsImVyciIsInRyaW0iLCJTdHJpbmciLCJFcnJvciIsIm1lc3NhZ2UiLCJvIiwib2QiLCJlcnJvcl9kZXNjcmlwdGlvbiIsImRldGFpbHMiLCJoaW50IiwiY29kZSIsInMiLCJKU09OIiwic3RyaW5naWZ5Il0sIm1hcHBpbmdzIjoiQUFBQTs7O0NBR0MsR0FDRCxPQUFPLFNBQVNBLG1CQUFtQkMsR0FBWTtJQUM3QyxJQUFJQSxPQUFPLE1BQU0sT0FBTztJQUN4QixJQUFJLE9BQU9BLFFBQVEsVUFBVSxPQUFPQSxJQUFJQyxJQUFJO0lBQzVDLElBQUksT0FBT0QsUUFBUSxZQUFZLE9BQU9BLFFBQVEsV0FBVyxPQUFPRSxPQUFPRjtJQUN2RSxJQUFJQSxlQUFlRyxPQUFPLE9BQU9ILElBQUlJLE9BQU8sQ0FBQ0gsSUFBSTtJQUNqRCxJQUFJLE9BQU9ELFFBQVEsVUFBVTtRQUMzQixNQUFNSyxJQUFJTDtRQUNWLElBQUksT0FBT0ssRUFBRUQsT0FBTyxLQUFLLFlBQVlDLEVBQUVELE9BQU8sQ0FBQ0gsSUFBSSxJQUFJLE9BQU9JLEVBQUVELE9BQU8sQ0FBQ0gsSUFBSTtRQUM1RSxNQUFNSyxLQUFLRCxFQUFFRSxpQkFBaUI7UUFDOUIsSUFBSSxPQUFPRCxPQUFPLFlBQVlBLEdBQUdMLElBQUksSUFBSSxPQUFPSyxHQUFHTCxJQUFJO1FBQ3ZELElBQUksT0FBT0ksRUFBRUcsT0FBTyxLQUFLLFlBQVlILEVBQUVHLE9BQU8sQ0FBQ1AsSUFBSSxJQUFJLE9BQU9JLEVBQUVHLE9BQU8sQ0FBQ1AsSUFBSTtRQUM1RSxJQUFJLE9BQU9JLEVBQUVJLElBQUksS0FBSyxZQUFZSixFQUFFSSxJQUFJLENBQUNSLElBQUksSUFBSSxPQUFPSSxFQUFFSSxJQUFJLENBQUNSLElBQUk7UUFDbkUsTUFBTVMsT0FBT0wsRUFBRUssSUFBSTtRQUNuQixJQUFJLE9BQU9BLFNBQVMsWUFBWUEsS0FBS1QsSUFBSSxJQUFJLE9BQU9TLEtBQUtULElBQUk7UUFDN0QsSUFBSTtZQUNGLE1BQU1VLElBQUlDLEtBQUtDLFNBQVMsQ0FBQ2I7WUFDekIsSUFBSVcsS0FBS0EsTUFBTSxRQUFRQSxNQUFNLG1CQUFtQixPQUFPQTtRQUN6RCxFQUFFLE9BQU07UUFDTixVQUFVLEdBQ1o7SUFDRjtJQUNBLE9BQU87QUFDVCJ9

@@ -1,0 +1,73 @@
+import { isBrowserBundle } from "/node_modules/@sentry/core/build/esm/utils/env.js?v=89021f86";
+
+/**
+ * NOTE: In order to avoid circular dependencies, if you add a function to this module and it needs to print something,
+ * you must either a) use `console.log` rather than the `debug` singleton, or b) put your function elsewhere.
+ */
+
+
+/**
+ * Checks whether we're in the Node.js or Browser environment
+ *
+ * @returns Answer to given question
+ */
+function isNodeEnv() {
+  // explicitly check for browser bundles as those can be optimized statically
+  // by terser/rollup.
+  return (
+    !isBrowserBundle() &&
+    Object.prototype.toString.call(typeof process !== 'undefined' ? process : 0) === '[object process]'
+  );
+}
+
+/**
+ * Requires a module which is protected against bundler minification.
+ *
+ * @param request The module path to resolve
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function dynamicRequire(mod, request) {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+  return mod.require(request);
+}
+
+/**
+ * Helper for dynamically loading module that should work with linked dependencies.
+ * The problem is that we _should_ be using `require(require.resolve(moduleName, { paths: [cwd()] }))`
+ * However it's _not possible_ to do that with Webpack, as it has to know all the dependencies during
+ * build time. `require.resolve` is also not available in any other way, so we cannot create,
+ * a fake helper like we do with `dynamicRequire`.
+ *
+ * We always prefer to use local package, thus the value is not returned early from each `try/catch` block.
+ * That is to mimic the behavior of `require.resolve` exactly.
+ *
+ * @param moduleName module name to require
+ * @param existingModule module to use for requiring
+ * @returns possibly required module
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function loadModule(moduleName, existingModule = module) {
+  let mod;
+
+  try {
+    mod = dynamicRequire(existingModule, moduleName);
+  } catch {
+    // no-empty
+  }
+
+  if (!mod) {
+    try {
+      const { cwd } = dynamicRequire(existingModule, 'process');
+      mod = dynamicRequire(existingModule, `${cwd()}/node_modules/${moduleName}`) ;
+    } catch {
+      // no-empty
+    }
+  }
+
+  return mod;
+}
+
+export { isNodeEnv, loadModule };
+                                
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibm9kZS5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4vc3JjL3V0aWxzL25vZGUudHMiXSwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBOT1RFOiBJbiBvcmRlciB0byBhdm9pZCBjaXJjdWxhciBkZXBlbmRlbmNpZXMsIGlmIHlvdSBhZGQgYSBmdW5jdGlvbiB0byB0aGlzIG1vZHVsZSBhbmQgaXQgbmVlZHMgdG8gcHJpbnQgc29tZXRoaW5nLFxuICogeW91IG11c3QgZWl0aGVyIGEpIHVzZSBgY29uc29sZS5sb2dgIHJhdGhlciB0aGFuIHRoZSBgZGVidWdgIHNpbmdsZXRvbiwgb3IgYikgcHV0IHlvdXIgZnVuY3Rpb24gZWxzZXdoZXJlLlxuICovXG5cbmltcG9ydCB7IGlzQnJvd3NlckJ1bmRsZSB9IGZyb20gJy4vZW52JztcblxuLyoqXG4gKiBDaGVja3Mgd2hldGhlciB3ZSdyZSBpbiB0aGUgTm9kZS5qcyBvciBCcm93c2VyIGVudmlyb25tZW50XG4gKlxuICogQHJldHVybnMgQW5zd2VyIHRvIGdpdmVuIHF1ZXN0aW9uXG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBpc05vZGVFbnYoKTogYm9vbGVhbiB7XG4gIC8vIGV4cGxpY2l0bHkgY2hlY2sgZm9yIGJyb3dzZXIgYnVuZGxlcyBhcyB0aG9zZSBjYW4gYmUgb3B0aW1pemVkIHN0YXRpY2FsbHlcbiAgLy8gYnkgdGVyc2VyL3JvbGx1cC5cbiAgcmV0dXJuIChcbiAgICAhaXNCcm93c2VyQnVuZGxlKCkgJiZcbiAgICBPYmplY3QucHJvdG90eXBlLnRvU3RyaW5nLmNhbGwodHlwZW9mIHByb2Nlc3MgIT09ICd1bmRlZmluZWQnID8gcHJvY2VzcyA6IDApID09PSAnW29iamVjdCBwcm9jZXNzXSdcbiAgKTtcbn1cblxuLyoqXG4gKiBSZXF1aXJlcyBhIG1vZHVsZSB3aGljaCBpcyBwcm90ZWN0ZWQgYWdhaW5zdCBidW5kbGVyIG1pbmlmaWNhdGlvbi5cbiAqXG4gKiBAcGFyYW0gcmVxdWVzdCBUaGUgbW9kdWxlIHBhdGggdG8gcmVzb2x2ZVxuICovXG4vLyBlc2xpbnQtZGlzYWJsZS1uZXh0LWxpbmUgQHR5cGVzY3JpcHQtZXNsaW50L25vLWV4cGxpY2l0LWFueVxuZnVuY3Rpb24gZHluYW1pY1JlcXVpcmUobW9kOiBhbnksIHJlcXVlc3Q6IHN0cmluZyk6IGFueSB7XG4gIC8vIGVzbGludC1kaXNhYmxlLW5leHQtbGluZSBAdHlwZXNjcmlwdC1lc2xpbnQvbm8tdW5zYWZlLW1lbWJlci1hY2Nlc3NcbiAgcmV0dXJuIG1vZC5yZXF1aXJlKHJlcXVlc3QpO1xufVxuXG4vKipcbiAqIEhlbHBlciBmb3IgZHluYW1pY2FsbHkgbG9hZGluZyBtb2R1bGUgdGhhdCBzaG91bGQgd29yayB3aXRoIGxpbmtlZCBkZXBlbmRlbmNpZXMuXG4gKiBUaGUgcHJvYmxlbSBpcyB0aGF0IHdlIF9zaG91bGRfIGJlIHVzaW5nIGByZXF1aXJlKHJlcXVpcmUucmVzb2x2ZShtb2R1bGVOYW1lLCB7IHBhdGhzOiBbY3dkKCldIH0pKWBcbiAqIEhvd2V2ZXIgaXQncyBfbm90IHBvc3NpYmxlXyB0byBkbyB0aGF0IHdpdGggV2VicGFjaywgYXMgaXQgaGFzIHRvIGtub3cgYWxsIHRoZSBkZXBlbmRlbmNpZXMgZHVyaW5nXG4gKiBidWlsZCB0aW1lLiBgcmVxdWlyZS5yZXNvbHZlYCBpcyBhbHNvIG5vdCBhdmFpbGFibGUgaW4gYW55IG90aGVyIHdheSwgc28gd2UgY2Fubm90IGNyZWF0ZSxcbiAqIGEgZmFrZSBoZWxwZXIgbGlrZSB3ZSBkbyB3aXRoIGBkeW5hbWljUmVxdWlyZWAuXG4gKlxuICogV2UgYWx3YXlzIHByZWZlciB0byB1c2UgbG9jYWwgcGFja2FnZSwgdGh1cyB0aGUgdmFsdWUgaXMgbm90IHJldHVybmVkIGVhcmx5IGZyb20gZWFjaCBgdHJ5L2NhdGNoYCBibG9jay5cbiAqIFRoYXQgaXMgdG8gbWltaWMgdGhlIGJlaGF2aW9yIG9mIGByZXF1aXJlLnJlc29sdmVgIGV4YWN0bHkuXG4gKlxuICogQHBhcmFtIG1vZHVsZU5hbWUgbW9kdWxlIG5hbWUgdG8gcmVxdWlyZVxuICogQHBhcmFtIGV4aXN0aW5nTW9kdWxlIG1vZHVsZSB0byB1c2UgZm9yIHJlcXVpcmluZ1xuICogQHJldHVybnMgcG9zc2libHkgcmVxdWlyZWQgbW9kdWxlXG4gKi9cbi8vIGVzbGludC1kaXNhYmxlLW5leHQtbGluZSBAdHlwZXNjcmlwdC1lc2xpbnQvbm8tZXhwbGljaXQtYW55XG5leHBvcnQgZnVuY3Rpb24gbG9hZE1vZHVsZTxUPihtb2R1bGVOYW1lOiBzdHJpbmcsIGV4aXN0aW5nTW9kdWxlOiBhbnkgPSBtb2R1bGUpOiBUIHwgdW5kZWZpbmVkIHtcbiAgbGV0IG1vZDogVCB8IHVuZGVmaW5lZDtcblxuICB0cnkge1xuICAgIG1vZCA9IGR5bmFtaWNSZXF1aXJlKGV4aXN0aW5nTW9kdWxlLCBtb2R1bGVOYW1lKTtcbiAgfSBjYXRjaCB7XG4gICAgLy8gbm8tZW1wdHlcbiAgfVxuXG4gIGlmICghbW9kKSB7XG4gICAgdHJ5IHtcbiAgICAgIGNvbnN0IHsgY3dkIH0gPSBkeW5hbWljUmVxdWlyZShleGlzdGluZ01vZHVsZSwgJ3Byb2Nlc3MnKTtcbiAgICAgIG1vZCA9IGR5bmFtaWNSZXF1aXJlKGV4aXN0aW5nTW9kdWxlLCBgJHtjd2QoKX0vbm9kZV9tb2R1bGVzLyR7bW9kdWxlTmFtZX1gKSBhcyBUO1xuICAgIH0gY2F0Y2gge1xuICAgICAgLy8gbm8tZW1wdHlcbiAgICB9XG4gIH1cblxuICByZXR1cm4gbW9kO1xufVxuIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7O0FBQUE7QUFDQTtBQUNBO0FBQ0E7OztBQUlBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDTyxTQUFTLFNBQVMsR0FBWTtBQUNyQztBQUNBO0FBQ0EsRUFBRTtBQUNGLElBQUksQ0FBQyxlQUFlLEVBQUM7QUFDckIsSUFBSSxNQUFNLENBQUMsU0FBUyxDQUFDLFFBQVEsQ0FBQyxJQUFJLENBQUMsT0FBTyxPQUFBLEtBQVksV0FBQSxHQUFjLFVBQVUsQ0FBQyxNQUFNO0FBQ3JGO0FBQ0E7O0FBRUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0EsU0FBUyxjQUFjLENBQUMsR0FBRyxFQUFPLE9BQU8sRUFBZTtBQUN4RDtBQUNBLEVBQUUsT0FBTyxHQUFHLENBQUMsT0FBTyxDQUFDLE9BQU8sQ0FBQztBQUM3Qjs7QUFFQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDTyxTQUFTLFVBQVUsQ0FBSSxVQUFVLEVBQVUsY0FBYyxHQUFRLE1BQU0sRUFBaUI7QUFDL0YsRUFBRSxJQUFJLEdBQUc7O0FBRVQsRUFBRSxJQUFJO0FBQ04sSUFBSSxNQUFNLGNBQWMsQ0FBQyxjQUFjLEVBQUUsVUFBVSxDQUFDO0FBQ3BELEVBQUUsRUFBRSxNQUFNO0FBQ1Y7QUFDQSxFQUFFOztBQUVGLEVBQUUsSUFBSSxDQUFDLEdBQUcsRUFBRTtBQUNaLElBQUksSUFBSTtBQUNSLE1BQU0sTUFBTSxFQUFFLEdBQUEsRUFBSSxHQUFJLGNBQWMsQ0FBQyxjQUFjLEVBQUUsU0FBUyxDQUFDO0FBQy9ELE1BQU0sTUFBTSxjQUFjLENBQUMsY0FBYyxFQUFFLENBQUMsRUFBQSxHQUFBLEVBQUEsQ0FBQSxjQUFBLEVBQUEsVUFBQSxDQUFBLENBQUEsQ0FBQTtBQUNBLElBQUEsQ0FBQSxDQUFBLE1BQUE7QUFDQTtBQUNBLElBQUE7QUFDQSxFQUFBOztBQUVBLEVBQUEsT0FBQSxHQUFBO0FBQ0E7Ozs7IiwieF9nb29nbGVfaWdub3JlTGlzdCI6WzBdfQ==

@@ -1,0 +1,114 @@
+import.meta.env = {"BASE_URL": "/", "DEV": true, "MODE": "development", "PROD": false, "SSR": false, "VITE_BUILD_ID": "build-mrszuipf", "VITE_E2E_BYPASS_TERMS": "true", "VITE_E2E_PAYMENT_STUB": "true", "VITE_SUPABASE_ANON_KEY": "sb_publishable_PaC6RE0frJU97Exnp30IKA_R9pieK7C", "VITE_SUPABASE_PROJECT_ID": "mock-project", "VITE_SUPABASE_PUBLISHABLE_KEY": "sb_publishable_PaC6RE0frJU97Exnp30IKA_R9pieK7C", "VITE_SUPABASE_TEST_URL": "https://ufbztturuwwazfcvhvuu.supabase.co", "VITE_SUPABASE_URL": "https://ufbztturuwwazfcvhvuu.supabase.co"};/**
+ * Utilitaires pour le géocodage d'adresses
+ * Utilise Google Maps Geocoding API
+ */ import { logger } from "/src/lib/logger.ts";
+/**
+ * Géocode une adresse complète en coordonnées GPS
+ * @param address - Adresse complète à géocoder
+ * @returns Résultat du géocodage ou erreur
+ */ export async function geocodeAddress(address) {
+    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+    if (!apiKey) {
+        logger.warn('Google Maps API key not configured');
+        return {
+            success: false,
+            error: {
+                error: 'API_KEY_MISSING',
+                message: 'Clé API Google Maps non configurée. Configurez VITE_GOOGLE_MAPS_API_KEY dans votre fichier .env'
+            }
+        };
+    }
+    if (!address || address.trim().length === 0) {
+        return {
+            success: false,
+            error: {
+                error: 'INVALID_ADDRESS',
+                message: 'Adresse vide ou invalide'
+            }
+        };
+    }
+    try {
+        // Construire l'URL de l'API Google Geocoding
+        const encodedAddress = encodeURIComponent(address.trim());
+        const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodedAddress}&key=${apiKey}`;
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        if (data.status === 'ZERO_RESULTS') {
+            return {
+                success: false,
+                error: {
+                    error: 'ZERO_RESULTS',
+                    message: 'Aucun résultat trouvé pour cette adresse'
+                }
+            };
+        }
+        if (data.status === 'REQUEST_DENIED') {
+            return {
+                success: false,
+                error: {
+                    error: 'REQUEST_DENIED',
+                    message: 'Requête refusée. Vérifiez votre clé API Google Maps.'
+                }
+            };
+        }
+        if (data.status === 'OVER_QUERY_LIMIT') {
+            return {
+                success: false,
+                error: {
+                    error: 'OVER_QUERY_LIMIT',
+                    message: 'Limite de requêtes Google Maps dépassée'
+                }
+            };
+        }
+        if (data.status !== 'OK' || !data.results || data.results.length === 0) {
+            return {
+                success: false,
+                error: {
+                    error: 'UNKNOWN_ERROR',
+                    message: `Erreur inconnue: ${data.status}`
+                }
+            };
+        }
+        const result = data.results[0];
+        const location = result.geometry.location;
+        return {
+            success: true,
+            data: {
+                latitude: location.lat,
+                longitude: location.lng,
+                formatted_address: result.formatted_address,
+                address_components: result.address_components || [],
+                place_id: result.place_id
+            }
+        };
+    } catch (_error) {
+        logger.error('Geocoding error', {
+            error,
+            address
+        });
+        return {
+            success: false,
+            error: {
+                error: 'NETWORK_ERROR',
+                message: error.message || 'Erreur réseau lors du géocodage'
+            }
+        };
+    }
+}
+/**
+ * Construit une adresse complète à partir des champs individuels
+ */ export function buildFullAddress(addressLine1, addressLine2, city, stateProvince, postalCode, country) {
+    const parts = [];
+    if (addressLine1) parts.push(addressLine1);
+    if (addressLine2) parts.push(addressLine2);
+    if (city) parts.push(city);
+    if (stateProvince) parts.push(stateProvince);
+    if (postalCode) parts.push(postalCode);
+    if (country) parts.push(country);
+    return parts.join(', ');
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImdlb2NvZGluZy50cyJdLCJzb3VyY2VzQ29udGVudCI6WyIvKipcbiAqIFV0aWxpdGFpcmVzIHBvdXIgbGUgZ8Opb2NvZGFnZSBkJ2FkcmVzc2VzXG4gKiBVdGlsaXNlIEdvb2dsZSBNYXBzIEdlb2NvZGluZyBBUElcbiAqL1xuXG5pbXBvcnQgeyBsb2dnZXIgfSBmcm9tICcuL2xvZ2dlcic7XG5cbmV4cG9ydCBpbnRlcmZhY2UgR2VvY29kaW5nUmVzdWx0IHtcbiAgbGF0aXR1ZGU6IG51bWJlcjtcbiAgbG9uZ2l0dWRlOiBudW1iZXI7XG4gIGZvcm1hdHRlZF9hZGRyZXNzOiBzdHJpbmc7XG4gIGFkZHJlc3NfY29tcG9uZW50czoge1xuICAgIGxvbmdfbmFtZTogc3RyaW5nO1xuICAgIHNob3J0X25hbWU6IHN0cmluZztcbiAgICB0eXBlczogc3RyaW5nW107XG4gIH1bXTtcbiAgcGxhY2VfaWQ6IHN0cmluZztcbn1cblxuZXhwb3J0IGludGVyZmFjZSBHZW9jb2RpbmdFcnJvciB7XG4gIGVycm9yOiBzdHJpbmc7XG4gIG1lc3NhZ2U6IHN0cmluZztcbn1cblxuLyoqXG4gKiBHw6lvY29kZSB1bmUgYWRyZXNzZSBjb21wbMOodGUgZW4gY29vcmRvbm7DqWVzIEdQU1xuICogQHBhcmFtIGFkZHJlc3MgLSBBZHJlc3NlIGNvbXBsw6h0ZSDDoCBnw6lvY29kZXJcbiAqIEByZXR1cm5zIFLDqXN1bHRhdCBkdSBnw6lvY29kYWdlIG91IGVycmV1clxuICovXG5leHBvcnQgYXN5bmMgZnVuY3Rpb24gZ2VvY29kZUFkZHJlc3MoXG4gIGFkZHJlc3M6IHN0cmluZ1xuKTogUHJvbWlzZTx7IHN1Y2Nlc3M6IHRydWU7IGRhdGE6IEdlb2NvZGluZ1Jlc3VsdCB9IHwgeyBzdWNjZXNzOiBmYWxzZTsgZXJyb3I6IEdlb2NvZGluZ0Vycm9yIH0+IHtcbiAgY29uc3QgYXBpS2V5ID0gaW1wb3J0Lm1ldGEuZW52LlZJVEVfR09PR0xFX01BUFNfQVBJX0tFWTtcblxuICBpZiAoIWFwaUtleSkge1xuICAgIGxvZ2dlci53YXJuKCdHb29nbGUgTWFwcyBBUEkga2V5IG5vdCBjb25maWd1cmVkJyk7XG4gICAgcmV0dXJuIHtcbiAgICAgIHN1Y2Nlc3M6IGZhbHNlLFxuICAgICAgZXJyb3I6IHtcbiAgICAgICAgZXJyb3I6ICdBUElfS0VZX01JU1NJTkcnLFxuICAgICAgICBtZXNzYWdlOiAnQ2zDqSBBUEkgR29vZ2xlIE1hcHMgbm9uIGNvbmZpZ3Vyw6llLiBDb25maWd1cmV6IFZJVEVfR09PR0xFX01BUFNfQVBJX0tFWSBkYW5zIHZvdHJlIGZpY2hpZXIgLmVudicsXG4gICAgICB9LFxuICAgIH07XG4gIH1cblxuICBpZiAoIWFkZHJlc3MgfHwgYWRkcmVzcy50cmltKCkubGVuZ3RoID09PSAwKSB7XG4gICAgcmV0dXJuIHtcbiAgICAgIHN1Y2Nlc3M6IGZhbHNlLFxuICAgICAgZXJyb3I6IHtcbiAgICAgICAgZXJyb3I6ICdJTlZBTElEX0FERFJFU1MnLFxuICAgICAgICBtZXNzYWdlOiAnQWRyZXNzZSB2aWRlIG91IGludmFsaWRlJyxcbiAgICAgIH0sXG4gICAgfTtcbiAgfVxuXG4gIHRyeSB7XG4gICAgLy8gQ29uc3RydWlyZSBsJ1VSTCBkZSBsJ0FQSSBHb29nbGUgR2VvY29kaW5nXG4gICAgY29uc3QgZW5jb2RlZEFkZHJlc3MgPSBlbmNvZGVVUklDb21wb25lbnQoYWRkcmVzcy50cmltKCkpO1xuICAgIGNvbnN0IHVybCA9IGBodHRwczovL21hcHMuZ29vZ2xlYXBpcy5jb20vbWFwcy9hcGkvZ2VvY29kZS9qc29uP2FkZHJlc3M9JHtlbmNvZGVkQWRkcmVzc30ma2V5PSR7YXBpS2V5fWA7XG5cbiAgICBjb25zdCByZXNwb25zZSA9IGF3YWl0IGZldGNoKHVybCk7XG5cbiAgICBpZiAoIXJlc3BvbnNlLm9rKSB7XG4gICAgICB0aHJvdyBuZXcgRXJyb3IoYEhUVFAgZXJyb3IhIHN0YXR1czogJHtyZXNwb25zZS5zdGF0dXN9YCk7XG4gICAgfVxuXG4gICAgY29uc3QgZGF0YSA9IGF3YWl0IHJlc3BvbnNlLmpzb24oKTtcblxuICAgIGlmIChkYXRhLnN0YXR1cyA9PT0gJ1pFUk9fUkVTVUxUUycpIHtcbiAgICAgIHJldHVybiB7XG4gICAgICAgIHN1Y2Nlc3M6IGZhbHNlLFxuICAgICAgICBlcnJvcjoge1xuICAgICAgICAgIGVycm9yOiAnWkVST19SRVNVTFRTJyxcbiAgICAgICAgICBtZXNzYWdlOiAnQXVjdW4gcsOpc3VsdGF0IHRyb3V2w6kgcG91ciBjZXR0ZSBhZHJlc3NlJyxcbiAgICAgICAgfSxcbiAgICAgIH07XG4gICAgfVxuXG4gICAgaWYgKGRhdGEuc3RhdHVzID09PSAnUkVRVUVTVF9ERU5JRUQnKSB7XG4gICAgICByZXR1cm4ge1xuICAgICAgICBzdWNjZXNzOiBmYWxzZSxcbiAgICAgICAgZXJyb3I6IHtcbiAgICAgICAgICBlcnJvcjogJ1JFUVVFU1RfREVOSUVEJyxcbiAgICAgICAgICBtZXNzYWdlOiAnUmVxdcOqdGUgcmVmdXPDqWUuIFbDqXJpZmlleiB2b3RyZSBjbMOpIEFQSSBHb29nbGUgTWFwcy4nLFxuICAgICAgICB9LFxuICAgICAgfTtcbiAgICB9XG5cbiAgICBpZiAoZGF0YS5zdGF0dXMgPT09ICdPVkVSX1FVRVJZX0xJTUlUJykge1xuICAgICAgcmV0dXJuIHtcbiAgICAgICAgc3VjY2VzczogZmFsc2UsXG4gICAgICAgIGVycm9yOiB7XG4gICAgICAgICAgZXJyb3I6ICdPVkVSX1FVRVJZX0xJTUlUJyxcbiAgICAgICAgICBtZXNzYWdlOiAnTGltaXRlIGRlIHJlcXXDqnRlcyBHb29nbGUgTWFwcyBkw6lwYXNzw6llJyxcbiAgICAgICAgfSxcbiAgICAgIH07XG4gICAgfVxuXG4gICAgaWYgKGRhdGEuc3RhdHVzICE9PSAnT0snIHx8ICFkYXRhLnJlc3VsdHMgfHwgZGF0YS5yZXN1bHRzLmxlbmd0aCA9PT0gMCkge1xuICAgICAgcmV0dXJuIHtcbiAgICAgICAgc3VjY2VzczogZmFsc2UsXG4gICAgICAgIGVycm9yOiB7XG4gICAgICAgICAgZXJyb3I6ICdVTktOT1dOX0VSUk9SJyxcbiAgICAgICAgICBtZXNzYWdlOiBgRXJyZXVyIGluY29ubnVlOiAke2RhdGEuc3RhdHVzfWAsXG4gICAgICAgIH0sXG4gICAgICB9O1xuICAgIH1cblxuICAgIGNvbnN0IHJlc3VsdCA9IGRhdGEucmVzdWx0c1swXTtcbiAgICBjb25zdCBsb2NhdGlvbiA9IHJlc3VsdC5nZW9tZXRyeS5sb2NhdGlvbjtcblxuICAgIHJldHVybiB7XG4gICAgICBzdWNjZXNzOiB0cnVlLFxuICAgICAgZGF0YToge1xuICAgICAgICBsYXRpdHVkZTogbG9jYXRpb24ubGF0LFxuICAgICAgICBsb25naXR1ZGU6IGxvY2F0aW9uLmxuZyxcbiAgICAgICAgZm9ybWF0dGVkX2FkZHJlc3M6IHJlc3VsdC5mb3JtYXR0ZWRfYWRkcmVzcyxcbiAgICAgICAgYWRkcmVzc19jb21wb25lbnRzOiByZXN1bHQuYWRkcmVzc19jb21wb25lbnRzIHx8IFtdLFxuICAgICAgICBwbGFjZV9pZDogcmVzdWx0LnBsYWNlX2lkLFxuICAgICAgfSxcbiAgICB9O1xuICB9IGNhdGNoICggX2Vycm9yOiB1bmtub3duKSB7XG4gICAgbG9nZ2VyLmVycm9yKCdHZW9jb2RpbmcgZXJyb3InLCB7IGVycm9yLCBhZGRyZXNzIH0pO1xuICAgIHJldHVybiB7XG4gICAgICBzdWNjZXNzOiBmYWxzZSxcbiAgICAgIGVycm9yOiB7XG4gICAgICAgIGVycm9yOiAnTkVUV09SS19FUlJPUicsXG4gICAgICAgIG1lc3NhZ2U6IGVycm9yLm1lc3NhZ2UgfHwgJ0VycmV1ciByw6lzZWF1IGxvcnMgZHUgZ8Opb2NvZGFnZScsXG4gICAgICB9LFxuICAgIH07XG4gIH1cbn1cblxuLyoqXG4gKiBDb25zdHJ1aXQgdW5lIGFkcmVzc2UgY29tcGzDqHRlIMOgIHBhcnRpciBkZXMgY2hhbXBzIGluZGl2aWR1ZWxzXG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBidWlsZEZ1bGxBZGRyZXNzKFxuICBhZGRyZXNzTGluZTE6IHN0cmluZyxcbiAgYWRkcmVzc0xpbmUyOiBzdHJpbmcsXG4gIGNpdHk6IHN0cmluZyxcbiAgc3RhdGVQcm92aW5jZTogc3RyaW5nLFxuICBwb3N0YWxDb2RlOiBzdHJpbmcsXG4gIGNvdW50cnk6IHN0cmluZ1xuKTogc3RyaW5nIHtcbiAgY29uc3QgIHBhcnRzOiBzdHJpbmdbXSA9IFtdO1xuXG4gIGlmIChhZGRyZXNzTGluZTEpIHBhcnRzLnB1c2goYWRkcmVzc0xpbmUxKTtcbiAgaWYgKGFkZHJlc3NMaW5lMikgcGFydHMucHVzaChhZGRyZXNzTGluZTIpO1xuICBpZiAoY2l0eSkgcGFydHMucHVzaChjaXR5KTtcbiAgaWYgKHN0YXRlUHJvdmluY2UpIHBhcnRzLnB1c2goc3RhdGVQcm92aW5jZSk7XG4gIGlmIChwb3N0YWxDb2RlKSBwYXJ0cy5wdXNoKHBvc3RhbENvZGUpO1xuICBpZiAoY291bnRyeSkgcGFydHMucHVzaChjb3VudHJ5KTtcblxuICByZXR1cm4gcGFydHMuam9pbignLCAnKTtcbn1cblxuXG5cblxuXG5cblxuIl0sIm5hbWVzIjpbImxvZ2dlciIsImdlb2NvZGVBZGRyZXNzIiwiYWRkcmVzcyIsImFwaUtleSIsImVudiIsIlZJVEVfR09PR0xFX01BUFNfQVBJX0tFWSIsIndhcm4iLCJzdWNjZXNzIiwiZXJyb3IiLCJtZXNzYWdlIiwidHJpbSIsImxlbmd0aCIsImVuY29kZWRBZGRyZXNzIiwiZW5jb2RlVVJJQ29tcG9uZW50IiwidXJsIiwicmVzcG9uc2UiLCJmZXRjaCIsIm9rIiwiRXJyb3IiLCJzdGF0dXMiLCJkYXRhIiwianNvbiIsInJlc3VsdHMiLCJyZXN1bHQiLCJsb2NhdGlvbiIsImdlb21ldHJ5IiwibGF0aXR1ZGUiLCJsYXQiLCJsb25naXR1ZGUiLCJsbmciLCJmb3JtYXR0ZWRfYWRkcmVzcyIsImFkZHJlc3NfY29tcG9uZW50cyIsInBsYWNlX2lkIiwiX2Vycm9yIiwiYnVpbGRGdWxsQWRkcmVzcyIsImFkZHJlc3NMaW5lMSIsImFkZHJlc3NMaW5lMiIsImNpdHkiLCJzdGF0ZVByb3ZpbmNlIiwicG9zdGFsQ29kZSIsImNvdW50cnkiLCJwYXJ0cyIsInB1c2giLCJqb2luIl0sIm1hcHBpbmdzIjoiQUFBQTs7O0NBR0MsR0FFRCxTQUFTQSxNQUFNLFFBQVEsV0FBVztBQW1CbEM7Ozs7Q0FJQyxHQUNELE9BQU8sZUFBZUMsZUFDcEJDLE9BQWU7SUFFZixNQUFNQyxTQUFTLFlBQVlDLEdBQUcsQ0FBQ0Msd0JBQXdCO0lBRXZELElBQUksQ0FBQ0YsUUFBUTtRQUNYSCxPQUFPTSxJQUFJLENBQUM7UUFDWixPQUFPO1lBQ0xDLFNBQVM7WUFDVEMsT0FBTztnQkFDTEEsT0FBTztnQkFDUEMsU0FBUztZQUNYO1FBQ0Y7SUFDRjtJQUVBLElBQUksQ0FBQ1AsV0FBV0EsUUFBUVEsSUFBSSxHQUFHQyxNQUFNLEtBQUssR0FBRztRQUMzQyxPQUFPO1lBQ0xKLFNBQVM7WUFDVEMsT0FBTztnQkFDTEEsT0FBTztnQkFDUEMsU0FBUztZQUNYO1FBQ0Y7SUFDRjtJQUVBLElBQUk7UUFDRiw2Q0FBNkM7UUFDN0MsTUFBTUcsaUJBQWlCQyxtQkFBbUJYLFFBQVFRLElBQUk7UUFDdEQsTUFBTUksTUFBTSxDQUFDLDBEQUEwRCxFQUFFRixlQUFlLEtBQUssRUFBRVQsUUFBUTtRQUV2RyxNQUFNWSxXQUFXLE1BQU1DLE1BQU1GO1FBRTdCLElBQUksQ0FBQ0MsU0FBU0UsRUFBRSxFQUFFO1lBQ2hCLE1BQU0sSUFBSUMsTUFBTSxDQUFDLG9CQUFvQixFQUFFSCxTQUFTSSxNQUFNLEVBQUU7UUFDMUQ7UUFFQSxNQUFNQyxPQUFPLE1BQU1MLFNBQVNNLElBQUk7UUFFaEMsSUFBSUQsS0FBS0QsTUFBTSxLQUFLLGdCQUFnQjtZQUNsQyxPQUFPO2dCQUNMWixTQUFTO2dCQUNUQyxPQUFPO29CQUNMQSxPQUFPO29CQUNQQyxTQUFTO2dCQUNYO1lBQ0Y7UUFDRjtRQUVBLElBQUlXLEtBQUtELE1BQU0sS0FBSyxrQkFBa0I7WUFDcEMsT0FBTztnQkFDTFosU0FBUztnQkFDVEMsT0FBTztvQkFDTEEsT0FBTztvQkFDUEMsU0FBUztnQkFDWDtZQUNGO1FBQ0Y7UUFFQSxJQUFJVyxLQUFLRCxNQUFNLEtBQUssb0JBQW9CO1lBQ3RDLE9BQU87Z0JBQ0xaLFNBQVM7Z0JBQ1RDLE9BQU87b0JBQ0xBLE9BQU87b0JBQ1BDLFNBQVM7Z0JBQ1g7WUFDRjtRQUNGO1FBRUEsSUFBSVcsS0FBS0QsTUFBTSxLQUFLLFFBQVEsQ0FBQ0MsS0FBS0UsT0FBTyxJQUFJRixLQUFLRSxPQUFPLENBQUNYLE1BQU0sS0FBSyxHQUFHO1lBQ3RFLE9BQU87Z0JBQ0xKLFNBQVM7Z0JBQ1RDLE9BQU87b0JBQ0xBLE9BQU87b0JBQ1BDLFNBQVMsQ0FBQyxpQkFBaUIsRUFBRVcsS0FBS0QsTUFBTSxFQUFFO2dCQUM1QztZQUNGO1FBQ0Y7UUFFQSxNQUFNSSxTQUFTSCxLQUFLRSxPQUFPLENBQUMsRUFBRTtRQUM5QixNQUFNRSxXQUFXRCxPQUFPRSxRQUFRLENBQUNELFFBQVE7UUFFekMsT0FBTztZQUNMakIsU0FBUztZQUNUYSxNQUFNO2dCQUNKTSxVQUFVRixTQUFTRyxHQUFHO2dCQUN0QkMsV0FBV0osU0FBU0ssR0FBRztnQkFDdkJDLG1CQUFtQlAsT0FBT08saUJBQWlCO2dCQUMzQ0Msb0JBQW9CUixPQUFPUSxrQkFBa0IsSUFBSSxFQUFFO2dCQUNuREMsVUFBVVQsT0FBT1MsUUFBUTtZQUMzQjtRQUNGO0lBQ0YsRUFBRSxPQUFRQyxRQUFpQjtRQUN6QmpDLE9BQU9RLEtBQUssQ0FBQyxtQkFBbUI7WUFBRUE7WUFBT047UUFBUTtRQUNqRCxPQUFPO1lBQ0xLLFNBQVM7WUFDVEMsT0FBTztnQkFDTEEsT0FBTztnQkFDUEMsU0FBU0QsTUFBTUMsT0FBTyxJQUFJO1lBQzVCO1FBQ0Y7SUFDRjtBQUNGO0FBRUE7O0NBRUMsR0FDRCxPQUFPLFNBQVN5QixpQkFDZEMsWUFBb0IsRUFDcEJDLFlBQW9CLEVBQ3BCQyxJQUFZLEVBQ1pDLGFBQXFCLEVBQ3JCQyxVQUFrQixFQUNsQkMsT0FBZTtJQUVmLE1BQU9DLFFBQWtCLEVBQUU7SUFFM0IsSUFBSU4sY0FBY00sTUFBTUMsSUFBSSxDQUFDUDtJQUM3QixJQUFJQyxjQUFjSyxNQUFNQyxJQUFJLENBQUNOO0lBQzdCLElBQUlDLE1BQU1JLE1BQU1DLElBQUksQ0FBQ0w7SUFDckIsSUFBSUMsZUFBZUcsTUFBTUMsSUFBSSxDQUFDSjtJQUM5QixJQUFJQyxZQUFZRSxNQUFNQyxJQUFJLENBQUNIO0lBQzNCLElBQUlDLFNBQVNDLE1BQU1DLElBQUksQ0FBQ0Y7SUFFeEIsT0FBT0MsTUFBTUUsSUFBSSxDQUFDO0FBQ3BCIn0=

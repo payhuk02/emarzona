@@ -1,0 +1,28 @@
+import { GLOBAL_OBJ } from "/node_modules/@sentry/core/build/esm/utils/worldwide.js?v=d758aa40";
+
+/**
+ * Function that delays closing of a Vercel lambda until the provided promise is resolved.
+ *
+ * Vendored from https://www.npmjs.com/package/@vercel/functions
+ */
+function vercelWaitUntil(task) {
+  // We only flush manually in Vercel Edge runtime
+  // In Node runtime, we use process.on('SIGTERM') instead
+  if (typeof EdgeRuntime !== 'string') {
+    return;
+  }
+  const vercelRequestContextGlobal =
+    // @ts-expect-error This is not typed
+    GLOBAL_OBJ[Symbol.for('@vercel/request-context')];
+
+  const ctx = vercelRequestContextGlobal?.get?.();
+
+  if (ctx?.waitUntil) {
+    ctx.waitUntil(task);
+  }
+}
+
+export { vercelWaitUntil };
+                                           
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidmVyY2VsV2FpdFVudGlsLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi9zcmMvdXRpbHMvdmVyY2VsV2FpdFVudGlsLnRzIl0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7IEdMT0JBTF9PQkogfSBmcm9tICcuL3dvcmxkd2lkZSc7XG5cbmRlY2xhcmUgY29uc3QgRWRnZVJ1bnRpbWU6IHN0cmluZyB8IHVuZGVmaW5lZDtcblxuaW50ZXJmYWNlIFZlcmNlbFJlcXVlc3RDb250ZXh0R2xvYmFsIHtcbiAgZ2V0PygpOlxuICAgIHwge1xuICAgICAgICB3YWl0VW50aWw/OiAodGFzazogUHJvbWlzZTx1bmtub3duPikgPT4gdm9pZDtcbiAgICAgIH1cbiAgICB8IHVuZGVmaW5lZDtcbn1cblxuLyoqXG4gKiBGdW5jdGlvbiB0aGF0IGRlbGF5cyBjbG9zaW5nIG9mIGEgVmVyY2VsIGxhbWJkYSB1bnRpbCB0aGUgcHJvdmlkZWQgcHJvbWlzZSBpcyByZXNvbHZlZC5cbiAqXG4gKiBWZW5kb3JlZCBmcm9tIGh0dHBzOi8vd3d3Lm5wbWpzLmNvbS9wYWNrYWdlL0B2ZXJjZWwvZnVuY3Rpb25zXG4gKi9cbmV4cG9ydCBmdW5jdGlvbiB2ZXJjZWxXYWl0VW50aWwodGFzazogUHJvbWlzZTx1bmtub3duPik6IHZvaWQge1xuICAvLyBXZSBvbmx5IGZsdXNoIG1hbnVhbGx5IGluIFZlcmNlbCBFZGdlIHJ1bnRpbWVcbiAgLy8gSW4gTm9kZSBydW50aW1lLCB3ZSB1c2UgcHJvY2Vzcy5vbignU0lHVEVSTScpIGluc3RlYWRcbiAgaWYgKHR5cGVvZiBFZGdlUnVudGltZSAhPT0gJ3N0cmluZycpIHtcbiAgICByZXR1cm47XG4gIH1cbiAgY29uc3QgdmVyY2VsUmVxdWVzdENvbnRleHRHbG9iYWw6IFZlcmNlbFJlcXVlc3RDb250ZXh0R2xvYmFsIHwgdW5kZWZpbmVkID1cbiAgICAvLyBAdHMtZXhwZWN0LWVycm9yIFRoaXMgaXMgbm90IHR5cGVkXG4gICAgR0xPQkFMX09CSltTeW1ib2wuZm9yKCdAdmVyY2VsL3JlcXVlc3QtY29udGV4dCcpXTtcblxuICBjb25zdCBjdHggPSB2ZXJjZWxSZXF1ZXN0Q29udGV4dEdsb2JhbD8uZ2V0Py4oKTtcblxuICBpZiAoY3R4Py53YWl0VW50aWwpIHtcbiAgICBjdHgud2FpdFVudGlsKHRhc2spO1xuICB9XG59XG4iXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7QUFZQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ08sU0FBUyxlQUFlLENBQUMsSUFBSSxFQUEwQjtBQUM5RDtBQUNBO0FBQ0EsRUFBRSxJQUFJLE9BQU8sV0FBQSxLQUFnQixRQUFRLEVBQUU7QUFDdkMsSUFBSTtBQUNKLEVBQUU7QUFDRixFQUFFLE1BQU0sMEJBQTBCO0FBQ2xDO0FBQ0EsSUFBSSxVQUFVLENBQUMsTUFBTSxDQUFDLEdBQUcsQ0FBQyx5QkFBeUIsQ0FBQyxDQUFDOztBQUVyRCxFQUFFLE1BQU0sTUFBTSwwQkFBMEIsRUFBRSxHQUFHLElBQUk7O0FBRWpELEVBQUUsSUFBSSxHQUFHLEVBQUUsU0FBUyxFQUFFO0FBQ3RCLElBQUksR0FBRyxDQUFDLFNBQVMsQ0FBQyxJQUFJLENBQUM7QUFDdkIsRUFBRTtBQUNGOzs7OyIsInhfZ29vZ2xlX2lnbm9yZUxpc3QiOlswXX0=

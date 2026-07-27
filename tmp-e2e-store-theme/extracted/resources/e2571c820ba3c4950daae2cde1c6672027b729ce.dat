@@ -1,0 +1,349 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/auth/Require2FABanner.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/auth/Require2FABanner.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=6014a254"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+var _s = $RefreshSig$(), _s1 = $RefreshSig$();
+/**
+ * Banner d'avertissement pour forcer l'activation du 2FA
+ *
+ * Affiche un bandeau persistant en haut de l'application
+ * pour les admins qui n'ont pas encore activé le 2FA
+ *
+ * @module Require2FABanner
+ */ import { useRequire2FA } from "/src/hooks/useRequire2FA.ts";
+import { useAuth } from "/src/contexts/AuthContext.tsx";
+import { isPrincipalAdminEmail } from "/src/lib/principal-admin.ts";
+import { Alert, AlertDescription } from "/src/components/ui/alert.tsx";
+import { Button } from "/src/components/ui/button.tsx";
+import { Shield, Clock, AlertTriangle, ArrowRight } from "/node_modules/.vite/deps/lucide-react.js?v=6014a254";
+import { useNavigate } from "/node_modules/.vite/deps/react-router-dom.js?v=6014a254";
+import { cn } from "/src/lib/utils.ts";
+/**
+ * Composant Banner pour encourager/forcer l'activation du 2FA
+ *
+ * @example
+ * ```tsx
+ * // Dans App.tsx ou Layout principal
+ * function AppLayout() {
+ *   return (
+ *     <>
+ *       <Require2FABanner position="top" />
+ *       <Dashboard />
+ *     </>
+ *   );
+ * }
+ * ```
+ */ export const Require2FABanner = ({ className, position = 'top', variant })=>{
+    _s();
+    const { user } = useAuth();
+    const { requires2FA, daysRemaining, isLoading, is2FAEnabled } = useRequire2FA({
+        disableRedirect: position === 'inline'
+    });
+    const navigate = useNavigate();
+    if (isPrincipalAdminEmail(user?.email)) {
+        return null;
+    }
+    // Ne rien afficher si :
+    // - Loading en cours
+    // - 2FA déjà activé
+    // - Pas de requirement
+    if (isLoading || is2FAEnabled || !requires2FA && daysRemaining === null) {
+        return null;
+    }
+    // Déterminer la variante
+    const autoVariant = variant || (daysRemaining && daysRemaining > 0 ? 'warning' : 'danger');
+    // Couleurs selon variante
+    const colors = {
+        warning: {
+            bg: 'bg-orange-50 dark:bg-orange-950',
+            border: 'border-orange-200 dark:border-orange-800',
+            text: 'text-orange-900 dark:text-orange-100',
+            icon: 'text-orange-600 dark:text-orange-400',
+            button: 'bg-orange-600 hover:bg-orange-700 text-white'
+        },
+        danger: {
+            bg: 'bg-red-50 dark:bg-red-950',
+            border: 'border-red-200 dark:border-red-800',
+            text: 'text-red-900 dark:text-red-100',
+            icon: 'text-red-600 dark:text-red-400',
+            button: 'bg-red-600 hover:bg-red-700 text-white'
+        }
+    };
+    const style = colors[autoVariant];
+    // Message selon situation
+    const getMessage = ()=>{
+        if (requires2FA) {
+            return {
+                icon: /*#__PURE__*/ _jsxDEV(AlertTriangle, {
+                    className: "h-5 w-5"
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/Require2FABanner.tsx",
+                    lineNumber: 94,
+                    columnNumber: 15
+                }, this),
+                title: '🔒 Activation 2FA Obligatoire',
+                description: "Pour des raisons de sécurité, l'authentification à deux facteurs est désormais requise pour votre compte admin. Vous devez l'activer maintenant pour continuer.",
+                cta: 'Activer maintenant',
+                urgent: true
+            };
+        }
+        if (daysRemaining !== null) {
+            return {
+                icon: /*#__PURE__*/ _jsxDEV(Clock, {
+                    className: "h-5 w-5"
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/Require2FABanner.tsx",
+                    lineNumber: 105,
+                    columnNumber: 15
+                }, this),
+                title: '⚠️ Action Requise : Activation 2FA',
+                description: `L'authentification à deux facteurs sera obligatoire dans ${daysRemaining} jour${daysRemaining > 1 ? 's' : ''}. Activez-la dès maintenant pour sécuriser votre compte admin.`,
+                cta: 'Activer le 2FA',
+                urgent: daysRemaining <= 1
+            };
+        }
+        return null;
+    };
+    const message = getMessage();
+    if (!message) return null;
+    const handleActivate = ()=>{
+        navigate('/dashboard/settings?tab=security&action=enable2fa');
+    };
+    // Style selon position
+    const positionClass = position === 'top' ? 'fixed top-0 left-0 right-0 z-50 shadow-lg' : 'relative';
+    return /*#__PURE__*/ _jsxDEV("div", {
+        className: cn(positionClass, style.bg, style.border, 'border-b', className),
+        children: /*#__PURE__*/ _jsxDEV(Alert, {
+            className: cn('border-0 rounded-none', style.bg),
+            children: /*#__PURE__*/ _jsxDEV("div", {
+                className: "flex items-center justify-between gap-4 w-full",
+                children: [
+                    /*#__PURE__*/ _jsxDEV("div", {
+                        className: "flex items-start gap-3 flex-1",
+                        children: [
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                className: cn('mt-0.5', style.icon),
+                                children: message.icon
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/Require2FABanner.tsx",
+                                lineNumber: 134,
+                                columnNumber: 13
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                className: "flex-1",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV("div", {
+                                        className: cn('font-semibold text-sm mb-1', style.text),
+                                        children: message.title
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/Require2FABanner.tsx",
+                                        lineNumber: 136,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV(AlertDescription, {
+                                        className: cn('text-sm', style.text),
+                                        children: message.description
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/Require2FABanner.tsx",
+                                        lineNumber: 137,
+                                        columnNumber: 15
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/Require2FABanner.tsx",
+                                lineNumber: 135,
+                                columnNumber: 13
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/Require2FABanner.tsx",
+                        lineNumber: 133,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV("div", {
+                        className: "flex items-center gap-2",
+                        children: [
+                            message.urgent && /*#__PURE__*/ _jsxDEV("div", {
+                                className: cn('text-xs font-medium px-2 py-1 rounded-full', autoVariant === 'danger' ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'),
+                                children: "URGENT"
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/Require2FABanner.tsx",
+                                lineNumber: 146,
+                                columnNumber: 15
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV(Button, {
+                                onClick: handleActivate,
+                                className: style.button,
+                                size: "sm",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV(Shield, {
+                                        className: "h-4 w-4 mr-2"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/Require2FABanner.tsx",
+                                        lineNumber: 158,
+                                        columnNumber: 15
+                                    }, this),
+                                    message.cta,
+                                    /*#__PURE__*/ _jsxDEV(ArrowRight, {
+                                        className: "h-4 w-4 ml-2"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/Require2FABanner.tsx",
+                                        lineNumber: 160,
+                                        columnNumber: 15
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/Require2FABanner.tsx",
+                                lineNumber: 157,
+                                columnNumber: 13
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/Require2FABanner.tsx",
+                        lineNumber: 144,
+                        columnNumber: 11
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/Require2FABanner.tsx",
+                lineNumber: 131,
+                columnNumber: 9
+            }, this)
+        }, void 0, false, {
+            fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/Require2FABanner.tsx",
+            lineNumber: 130,
+            columnNumber: 7
+        }, this)
+    }, void 0, false, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/Require2FABanner.tsx",
+        lineNumber: 129,
+        columnNumber: 5
+    }, this);
+};
+_s(Require2FABanner, "oIAvBjuPiPuoyVhKuNKtJsgOvnk=", false, function() {
+    return [
+        useAuth,
+        useRequire2FA,
+        useNavigate
+    ];
+});
+_c = Require2FABanner;
+/**
+ * Version compacte du banner pour dashboard cards
+ */ export const Require2FACard = ()=>{
+    _s1();
+    const { user } = useAuth();
+    const { requires2FA, daysRemaining, is2FAEnabled } = useRequire2FA({
+        disableRedirect: true
+    });
+    const navigate = useNavigate();
+    if (isPrincipalAdminEmail(user?.email)) {
+        return null;
+    }
+    if (is2FAEnabled || !requires2FA && daysRemaining === null) {
+        return null;
+    }
+    return /*#__PURE__*/ _jsxDEV("div", {
+        className: "p-4 rounded-lg border-2 border-orange-200 bg-orange-50 cursor-pointer hover:bg-orange-100 transition-colors",
+        onClick: ()=>navigate('/dashboard/settings?tab=security&action=enable2fa'),
+        children: /*#__PURE__*/ _jsxDEV("div", {
+            className: "flex items-center gap-3",
+            children: [
+                /*#__PURE__*/ _jsxDEV(Shield, {
+                    className: "h-8 w-8 text-orange-600"
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/Require2FABanner.tsx",
+                    lineNumber: 193,
+                    columnNumber: 9
+                }, this),
+                /*#__PURE__*/ _jsxDEV("div", {
+                    className: "flex-1",
+                    children: [
+                        /*#__PURE__*/ _jsxDEV("div", {
+                            className: "font-semibold text-orange-900",
+                            children: "Sécurisez votre compte"
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/Require2FABanner.tsx",
+                            lineNumber: 195,
+                            columnNumber: 11
+                        }, this),
+                        /*#__PURE__*/ _jsxDEV("div", {
+                            className: "text-sm text-orange-700",
+                            children: daysRemaining !== null && daysRemaining > 0 ? `Activez le 2FA (${daysRemaining} jour${daysRemaining > 1 ? 's' : ''} restant${daysRemaining > 1 ? 's' : ''})` : 'Activation 2FA requise maintenant'
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/Require2FABanner.tsx",
+                            lineNumber: 196,
+                            columnNumber: 11
+                        }, this)
+                    ]
+                }, void 0, true, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/Require2FABanner.tsx",
+                    lineNumber: 194,
+                    columnNumber: 9
+                }, this),
+                /*#__PURE__*/ _jsxDEV(ArrowRight, {
+                    className: "h-5 w-5 text-orange-600"
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/Require2FABanner.tsx",
+                    lineNumber: 202,
+                    columnNumber: 9
+                }, this)
+            ]
+        }, void 0, true, {
+            fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/Require2FABanner.tsx",
+            lineNumber: 192,
+            columnNumber: 7
+        }, this)
+    }, void 0, false, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/Require2FABanner.tsx",
+        lineNumber: 188,
+        columnNumber: 5
+    }, this);
+};
+_s1(Require2FACard, "0sUtCxippeNIRtwKxjuoHNToqyA=", false, function() {
+    return [
+        useAuth,
+        useRequire2FA,
+        useNavigate
+    ];
+});
+_c1 = Require2FACard;
+var _c, _c1;
+$RefreshReg$(_c, "Require2FABanner");
+$RefreshReg$(_c1, "Require2FACard");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/auth/Require2FABanner.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/auth/Require2FABanner.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIlJlcXVpcmUyRkFCYW5uZXIudHN4Il0sInNvdXJjZXNDb250ZW50IjpbIi8qKlxuICogQmFubmVyIGQnYXZlcnRpc3NlbWVudCBwb3VyIGZvcmNlciBsJ2FjdGl2YXRpb24gZHUgMkZBXG4gKlxuICogQWZmaWNoZSB1biBiYW5kZWF1IHBlcnNpc3RhbnQgZW4gaGF1dCBkZSBsJ2FwcGxpY2F0aW9uXG4gKiBwb3VyIGxlcyBhZG1pbnMgcXVpIG4nb250IHBhcyBlbmNvcmUgYWN0aXbDqSBsZSAyRkFcbiAqXG4gKiBAbW9kdWxlIFJlcXVpcmUyRkFCYW5uZXJcbiAqL1xuXG5pbXBvcnQgeyB1c2VSZXF1aXJlMkZBIH0gZnJvbSAnQC9ob29rcy91c2VSZXF1aXJlMkZBJztcbmltcG9ydCB7IHVzZUF1dGggfSBmcm9tICdAL2NvbnRleHRzL0F1dGhDb250ZXh0JztcbmltcG9ydCB7IGlzUHJpbmNpcGFsQWRtaW5FbWFpbCB9IGZyb20gJ0AvbGliL3ByaW5jaXBhbC1hZG1pbic7XG5pbXBvcnQgeyBBbGVydCwgQWxlcnREZXNjcmlwdGlvbiB9IGZyb20gJ0AvY29tcG9uZW50cy91aS9hbGVydCc7XG5pbXBvcnQgeyBCdXR0b24gfSBmcm9tICdAL2NvbXBvbmVudHMvdWkvYnV0dG9uJztcbmltcG9ydCB7IFNoaWVsZCwgQ2xvY2ssIEFsZXJ0VHJpYW5nbGUsIEFycm93UmlnaHQgfSBmcm9tICdsdWNpZGUtcmVhY3QnO1xuaW1wb3J0IHsgdXNlTmF2aWdhdGUgfSBmcm9tICdyZWFjdC1yb3V0ZXItZG9tJztcbmltcG9ydCB7IGNuIH0gZnJvbSAnQC9saWIvdXRpbHMnO1xuXG5pbnRlcmZhY2UgUmVxdWlyZTJGQUJhbm5lclByb3BzIHtcbiAgLyoqIENsYXNzZSBDU1MgcGVyc29ubmFsaXPDqWUgKi9cbiAgY2xhc3NOYW1lPzogc3RyaW5nO1xuICAvKiogUG9zaXRpb24gZHUgYmFubmVyICovXG4gIHBvc2l0aW9uPzogJ3RvcCcgfCAnaW5saW5lJztcbiAgLyoqIFZhcmlhbnRlIHZpc3VlbGxlICovXG4gIHZhcmlhbnQ/OiAnd2FybmluZycgfCAnZGFuZ2VyJztcbn1cblxuLyoqXG4gKiBDb21wb3NhbnQgQmFubmVyIHBvdXIgZW5jb3VyYWdlci9mb3JjZXIgbCdhY3RpdmF0aW9uIGR1IDJGQVxuICpcbiAqIEBleGFtcGxlXG4gKiBgYGB0c3hcbiAqIC8vIERhbnMgQXBwLnRzeCBvdSBMYXlvdXQgcHJpbmNpcGFsXG4gKiBmdW5jdGlvbiBBcHBMYXlvdXQoKSB7XG4gKiAgIHJldHVybiAoXG4gKiAgICAgPD5cbiAqICAgICAgIDxSZXF1aXJlMkZBQmFubmVyIHBvc2l0aW9uPVwidG9wXCIgLz5cbiAqICAgICAgIDxEYXNoYm9hcmQgLz5cbiAqICAgICA8Lz5cbiAqICAgKTtcbiAqIH1cbiAqIGBgYFxuICovXG5leHBvcnQgY29uc3QgUmVxdWlyZTJGQUJhbm5lciA9ICh7XG4gIGNsYXNzTmFtZSxcbiAgcG9zaXRpb24gPSAndG9wJyxcbiAgdmFyaWFudCxcbn06IFJlcXVpcmUyRkFCYW5uZXJQcm9wcykgPT4ge1xuICBjb25zdCB7IHVzZXIgfSA9IHVzZUF1dGgoKTtcbiAgY29uc3QgeyByZXF1aXJlczJGQSwgZGF5c1JlbWFpbmluZywgaXNMb2FkaW5nLCBpczJGQUVuYWJsZWQgfSA9IHVzZVJlcXVpcmUyRkEoe1xuICAgIGRpc2FibGVSZWRpcmVjdDogcG9zaXRpb24gPT09ICdpbmxpbmUnLCAvLyBOZSBwYXMgcmVkaXJpZ2VyIHNpIGJhbm5lciBpbmxpbmVcbiAgfSk7XG4gIGNvbnN0IG5hdmlnYXRlID0gdXNlTmF2aWdhdGUoKTtcblxuICBpZiAoaXNQcmluY2lwYWxBZG1pbkVtYWlsKHVzZXI/LmVtYWlsKSkge1xuICAgIHJldHVybiBudWxsO1xuICB9XG5cbiAgLy8gTmUgcmllbiBhZmZpY2hlciBzaSA6XG4gIC8vIC0gTG9hZGluZyBlbiBjb3Vyc1xuICAvLyAtIDJGQSBkw6lqw6AgYWN0aXbDqVxuICAvLyAtIFBhcyBkZSByZXF1aXJlbWVudFxuICBpZiAoaXNMb2FkaW5nIHx8IGlzMkZBRW5hYmxlZCB8fCAoIXJlcXVpcmVzMkZBICYmIGRheXNSZW1haW5pbmcgPT09IG51bGwpKSB7XG4gICAgcmV0dXJuIG51bGw7XG4gIH1cblxuICAvLyBEw6l0ZXJtaW5lciBsYSB2YXJpYW50ZVxuICBjb25zdCBhdXRvVmFyaWFudCA9IHZhcmlhbnQgfHwgKGRheXNSZW1haW5pbmcgJiYgZGF5c1JlbWFpbmluZyA+IDAgPyAnd2FybmluZycgOiAnZGFuZ2VyJyk7XG5cbiAgLy8gQ291bGV1cnMgc2Vsb24gdmFyaWFudGVcbiAgY29uc3QgY29sb3JzID0ge1xuICAgIHdhcm5pbmc6IHtcbiAgICAgIGJnOiAnYmctb3JhbmdlLTUwIGRhcms6Ymctb3JhbmdlLTk1MCcsXG4gICAgICBib3JkZXI6ICdib3JkZXItb3JhbmdlLTIwMCBkYXJrOmJvcmRlci1vcmFuZ2UtODAwJyxcbiAgICAgIHRleHQ6ICd0ZXh0LW9yYW5nZS05MDAgZGFyazp0ZXh0LW9yYW5nZS0xMDAnLFxuICAgICAgaWNvbjogJ3RleHQtb3JhbmdlLTYwMCBkYXJrOnRleHQtb3JhbmdlLTQwMCcsXG4gICAgICBidXR0b246ICdiZy1vcmFuZ2UtNjAwIGhvdmVyOmJnLW9yYW5nZS03MDAgdGV4dC13aGl0ZScsXG4gICAgfSxcbiAgICBkYW5nZXI6IHtcbiAgICAgIGJnOiAnYmctcmVkLTUwIGRhcms6YmctcmVkLTk1MCcsXG4gICAgICBib3JkZXI6ICdib3JkZXItcmVkLTIwMCBkYXJrOmJvcmRlci1yZWQtODAwJyxcbiAgICAgIHRleHQ6ICd0ZXh0LXJlZC05MDAgZGFyazp0ZXh0LXJlZC0xMDAnLFxuICAgICAgaWNvbjogJ3RleHQtcmVkLTYwMCBkYXJrOnRleHQtcmVkLTQwMCcsXG4gICAgICBidXR0b246ICdiZy1yZWQtNjAwIGhvdmVyOmJnLXJlZC03MDAgdGV4dC13aGl0ZScsXG4gICAgfSxcbiAgfTtcblxuICBjb25zdCBzdHlsZSA9IGNvbG9yc1thdXRvVmFyaWFudF07XG5cbiAgLy8gTWVzc2FnZSBzZWxvbiBzaXR1YXRpb25cbiAgY29uc3QgZ2V0TWVzc2FnZSA9ICgpID0+IHtcbiAgICBpZiAocmVxdWlyZXMyRkEpIHtcbiAgICAgIHJldHVybiB7XG4gICAgICAgIGljb246IDxBbGVydFRyaWFuZ2xlIGNsYXNzTmFtZT1cImgtNSB3LTVcIiAvPixcbiAgICAgICAgdGl0bGU6ICfwn5SSIEFjdGl2YXRpb24gMkZBIE9ibGlnYXRvaXJlJyxcbiAgICAgICAgZGVzY3JpcHRpb246XG4gICAgICAgICAgXCJQb3VyIGRlcyByYWlzb25zIGRlIHPDqWN1cml0w6ksIGwnYXV0aGVudGlmaWNhdGlvbiDDoCBkZXV4IGZhY3RldXJzIGVzdCBkw6lzb3JtYWlzIHJlcXVpc2UgcG91ciB2b3RyZSBjb21wdGUgYWRtaW4uIFZvdXMgZGV2ZXogbCdhY3RpdmVyIG1haW50ZW5hbnQgcG91ciBjb250aW51ZXIuXCIsXG4gICAgICAgIGN0YTogJ0FjdGl2ZXIgbWFpbnRlbmFudCcsXG4gICAgICAgIHVyZ2VudDogdHJ1ZSxcbiAgICAgIH07XG4gICAgfVxuXG4gICAgaWYgKGRheXNSZW1haW5pbmcgIT09IG51bGwpIHtcbiAgICAgIHJldHVybiB7XG4gICAgICAgIGljb246IDxDbG9jayBjbGFzc05hbWU9XCJoLTUgdy01XCIgLz4sXG4gICAgICAgIHRpdGxlOiAn4pqg77iPIEFjdGlvbiBSZXF1aXNlIDogQWN0aXZhdGlvbiAyRkEnLFxuICAgICAgICBkZXNjcmlwdGlvbjogYEwnYXV0aGVudGlmaWNhdGlvbiDDoCBkZXV4IGZhY3RldXJzIHNlcmEgb2JsaWdhdG9pcmUgZGFucyAke2RheXNSZW1haW5pbmd9IGpvdXIke2RheXNSZW1haW5pbmcgPiAxID8gJ3MnIDogJyd9LiBBY3RpdmV6LWxhIGTDqHMgbWFpbnRlbmFudCBwb3VyIHPDqWN1cmlzZXIgdm90cmUgY29tcHRlIGFkbWluLmAsXG4gICAgICAgIGN0YTogJ0FjdGl2ZXIgbGUgMkZBJyxcbiAgICAgICAgdXJnZW50OiBkYXlzUmVtYWluaW5nIDw9IDEsXG4gICAgICB9O1xuICAgIH1cblxuICAgIHJldHVybiBudWxsO1xuICB9O1xuXG4gIGNvbnN0IG1lc3NhZ2UgPSBnZXRNZXNzYWdlKCk7XG5cbiAgaWYgKCFtZXNzYWdlKSByZXR1cm4gbnVsbDtcblxuICBjb25zdCBoYW5kbGVBY3RpdmF0ZSA9ICgpID0+IHtcbiAgICBuYXZpZ2F0ZSgnL2Rhc2hib2FyZC9zZXR0aW5ncz90YWI9c2VjdXJpdHkmYWN0aW9uPWVuYWJsZTJmYScpO1xuICB9O1xuXG4gIC8vIFN0eWxlIHNlbG9uIHBvc2l0aW9uXG4gIGNvbnN0IHBvc2l0aW9uQ2xhc3MgPVxuICAgIHBvc2l0aW9uID09PSAndG9wJyA/ICdmaXhlZCB0b3AtMCBsZWZ0LTAgcmlnaHQtMCB6LTUwIHNoYWRvdy1sZycgOiAncmVsYXRpdmUnO1xuXG4gIHJldHVybiAoXG4gICAgPGRpdiBjbGFzc05hbWU9e2NuKHBvc2l0aW9uQ2xhc3MsIHN0eWxlLmJnLCBzdHlsZS5ib3JkZXIsICdib3JkZXItYicsIGNsYXNzTmFtZSl9PlxuICAgICAgPEFsZXJ0IGNsYXNzTmFtZT17Y24oJ2JvcmRlci0wIHJvdW5kZWQtbm9uZScsIHN0eWxlLmJnKX0+XG4gICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIganVzdGlmeS1iZXR3ZWVuIGdhcC00IHctZnVsbFwiPlxuICAgICAgICAgIHsvKiBJY8O0bmUgKyBNZXNzYWdlICovfVxuICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1zdGFydCBnYXAtMyBmbGV4LTFcIj5cbiAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPXtjbignbXQtMC41Jywgc3R5bGUuaWNvbil9PnttZXNzYWdlLmljb259PC9kaXY+XG4gICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXgtMVwiPlxuICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT17Y24oJ2ZvbnQtc2VtaWJvbGQgdGV4dC1zbSBtYi0xJywgc3R5bGUudGV4dCl9PnttZXNzYWdlLnRpdGxlfTwvZGl2PlxuICAgICAgICAgICAgICA8QWxlcnREZXNjcmlwdGlvbiBjbGFzc05hbWU9e2NuKCd0ZXh0LXNtJywgc3R5bGUudGV4dCl9PlxuICAgICAgICAgICAgICAgIHttZXNzYWdlLmRlc2NyaXB0aW9ufVxuICAgICAgICAgICAgICA8L0FsZXJ0RGVzY3JpcHRpb24+XG4gICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICA8L2Rpdj5cblxuICAgICAgICAgIHsvKiBDVEEgKi99XG4gICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLWNlbnRlciBnYXAtMlwiPlxuICAgICAgICAgICAge21lc3NhZ2UudXJnZW50ICYmIChcbiAgICAgICAgICAgICAgPGRpdlxuICAgICAgICAgICAgICAgIGNsYXNzTmFtZT17Y24oXG4gICAgICAgICAgICAgICAgICAndGV4dC14cyBmb250LW1lZGl1bSBweC0yIHB5LTEgcm91bmRlZC1mdWxsJyxcbiAgICAgICAgICAgICAgICAgIGF1dG9WYXJpYW50ID09PSAnZGFuZ2VyJ1xuICAgICAgICAgICAgICAgICAgICA/ICdiZy1yZWQtMTAwIHRleHQtcmVkLTcwMCdcbiAgICAgICAgICAgICAgICAgICAgOiAnYmctb3JhbmdlLTEwMCB0ZXh0LW9yYW5nZS03MDAnXG4gICAgICAgICAgICAgICAgKX1cbiAgICAgICAgICAgICAgPlxuICAgICAgICAgICAgICAgIFVSR0VOVFxuICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICl9XG4gICAgICAgICAgICA8QnV0dG9uIG9uQ2xpY2s9e2hhbmRsZUFjdGl2YXRlfSBjbGFzc05hbWU9e3N0eWxlLmJ1dHRvbn0gc2l6ZT1cInNtXCI+XG4gICAgICAgICAgICAgIDxTaGllbGQgY2xhc3NOYW1lPVwiaC00IHctNCBtci0yXCIgLz5cbiAgICAgICAgICAgICAge21lc3NhZ2UuY3RhfVxuICAgICAgICAgICAgICA8QXJyb3dSaWdodCBjbGFzc05hbWU9XCJoLTQgdy00IG1sLTJcIiAvPlxuICAgICAgICAgICAgPC9CdXR0b24+XG4gICAgICAgICAgPC9kaXY+XG4gICAgICAgIDwvZGl2PlxuICAgICAgPC9BbGVydD5cbiAgICA8L2Rpdj5cbiAgKTtcbn07XG5cbi8qKlxuICogVmVyc2lvbiBjb21wYWN0ZSBkdSBiYW5uZXIgcG91ciBkYXNoYm9hcmQgY2FyZHNcbiAqL1xuZXhwb3J0IGNvbnN0IFJlcXVpcmUyRkFDYXJkID0gKCkgPT4ge1xuICBjb25zdCB7IHVzZXIgfSA9IHVzZUF1dGgoKTtcbiAgY29uc3QgeyByZXF1aXJlczJGQSwgZGF5c1JlbWFpbmluZywgaXMyRkFFbmFibGVkIH0gPSB1c2VSZXF1aXJlMkZBKHtcbiAgICBkaXNhYmxlUmVkaXJlY3Q6IHRydWUsXG4gIH0pO1xuICBjb25zdCBuYXZpZ2F0ZSA9IHVzZU5hdmlnYXRlKCk7XG5cbiAgaWYgKGlzUHJpbmNpcGFsQWRtaW5FbWFpbCh1c2VyPy5lbWFpbCkpIHtcbiAgICByZXR1cm4gbnVsbDtcbiAgfVxuXG4gIGlmIChpczJGQUVuYWJsZWQgfHwgKCFyZXF1aXJlczJGQSAmJiBkYXlzUmVtYWluaW5nID09PSBudWxsKSkge1xuICAgIHJldHVybiBudWxsO1xuICB9XG5cbiAgcmV0dXJuIChcbiAgICA8ZGl2XG4gICAgICBjbGFzc05hbWU9XCJwLTQgcm91bmRlZC1sZyBib3JkZXItMiBib3JkZXItb3JhbmdlLTIwMCBiZy1vcmFuZ2UtNTAgY3Vyc29yLXBvaW50ZXIgaG92ZXI6Ymctb3JhbmdlLTEwMCB0cmFuc2l0aW9uLWNvbG9yc1wiXG4gICAgICBvbkNsaWNrPXsoKSA9PiBuYXZpZ2F0ZSgnL2Rhc2hib2FyZC9zZXR0aW5ncz90YWI9c2VjdXJpdHkmYWN0aW9uPWVuYWJsZTJmYScpfVxuICAgID5cbiAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTNcIj5cbiAgICAgICAgPFNoaWVsZCBjbGFzc05hbWU9XCJoLTggdy04IHRleHQtb3JhbmdlLTYwMFwiIC8+XG4gICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleC0xXCI+XG4gICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmb250LXNlbWlib2xkIHRleHQtb3JhbmdlLTkwMFwiPlPDqWN1cmlzZXogdm90cmUgY29tcHRlPC9kaXY+XG4gICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJ0ZXh0LXNtIHRleHQtb3JhbmdlLTcwMFwiPlxuICAgICAgICAgICAge2RheXNSZW1haW5pbmcgIT09IG51bGwgJiYgZGF5c1JlbWFpbmluZyA+IDBcbiAgICAgICAgICAgICAgPyBgQWN0aXZleiBsZSAyRkEgKCR7ZGF5c1JlbWFpbmluZ30gam91ciR7ZGF5c1JlbWFpbmluZyA+IDEgPyAncycgOiAnJ30gcmVzdGFudCR7ZGF5c1JlbWFpbmluZyA+IDEgPyAncycgOiAnJ30pYFxuICAgICAgICAgICAgICA6ICdBY3RpdmF0aW9uIDJGQSByZXF1aXNlIG1haW50ZW5hbnQnfVxuICAgICAgICAgIDwvZGl2PlxuICAgICAgICA8L2Rpdj5cbiAgICAgICAgPEFycm93UmlnaHQgY2xhc3NOYW1lPVwiaC01IHctNSB0ZXh0LW9yYW5nZS02MDBcIiAvPlxuICAgICAgPC9kaXY+XG4gICAgPC9kaXY+XG4gICk7XG59O1xuIl0sIm5hbWVzIjpbInVzZVJlcXVpcmUyRkEiLCJ1c2VBdXRoIiwiaXNQcmluY2lwYWxBZG1pbkVtYWlsIiwiQWxlcnQiLCJBbGVydERlc2NyaXB0aW9uIiwiQnV0dG9uIiwiU2hpZWxkIiwiQ2xvY2siLCJBbGVydFRyaWFuZ2xlIiwiQXJyb3dSaWdodCIsInVzZU5hdmlnYXRlIiwiY24iLCJSZXF1aXJlMkZBQmFubmVyIiwiY2xhc3NOYW1lIiwicG9zaXRpb24iLCJ2YXJpYW50IiwidXNlciIsInJlcXVpcmVzMkZBIiwiZGF5c1JlbWFpbmluZyIsImlzTG9hZGluZyIsImlzMkZBRW5hYmxlZCIsImRpc2FibGVSZWRpcmVjdCIsIm5hdmlnYXRlIiwiZW1haWwiLCJhdXRvVmFyaWFudCIsImNvbG9ycyIsIndhcm5pbmciLCJiZyIsImJvcmRlciIsInRleHQiLCJpY29uIiwiYnV0dG9uIiwiZGFuZ2VyIiwic3R5bGUiLCJnZXRNZXNzYWdlIiwidGl0bGUiLCJkZXNjcmlwdGlvbiIsImN0YSIsInVyZ2VudCIsIm1lc3NhZ2UiLCJoYW5kbGVBY3RpdmF0ZSIsInBvc2l0aW9uQ2xhc3MiLCJkaXYiLCJvbkNsaWNrIiwic2l6ZSIsIlJlcXVpcmUyRkFDYXJkIl0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7QUFBQTs7Ozs7OztDQU9DLEdBRUQsU0FBU0EsYUFBYSxRQUFRLHdCQUF3QjtBQUN0RCxTQUFTQyxPQUFPLFFBQVEseUJBQXlCO0FBQ2pELFNBQVNDLHFCQUFxQixRQUFRLHdCQUF3QjtBQUM5RCxTQUFTQyxLQUFLLEVBQUVDLGdCQUFnQixRQUFRLHdCQUF3QjtBQUNoRSxTQUFTQyxNQUFNLFFBQVEseUJBQXlCO0FBQ2hELFNBQVNDLE1BQU0sRUFBRUMsS0FBSyxFQUFFQyxhQUFhLEVBQUVDLFVBQVUsUUFBUSxlQUFlO0FBQ3hFLFNBQVNDLFdBQVcsUUFBUSxtQkFBbUI7QUFDL0MsU0FBU0MsRUFBRSxRQUFRLGNBQWM7QUFXakM7Ozs7Ozs7Ozs7Ozs7OztDQWVDLEdBQ0QsT0FBTyxNQUFNQyxtQkFBbUIsQ0FBQyxFQUMvQkMsU0FBUyxFQUNUQyxXQUFXLEtBQUssRUFDaEJDLE9BQU8sRUFDZTs7SUFDdEIsTUFBTSxFQUFFQyxJQUFJLEVBQUUsR0FBR2Y7SUFDakIsTUFBTSxFQUFFZ0IsV0FBVyxFQUFFQyxhQUFhLEVBQUVDLFNBQVMsRUFBRUMsWUFBWSxFQUFFLEdBQUdwQixjQUFjO1FBQzVFcUIsaUJBQWlCUCxhQUFhO0lBQ2hDO0lBQ0EsTUFBTVEsV0FBV1o7SUFFakIsSUFBSVIsc0JBQXNCYyxNQUFNTyxRQUFRO1FBQ3RDLE9BQU87SUFDVDtJQUVBLHdCQUF3QjtJQUN4QixxQkFBcUI7SUFDckIsb0JBQW9CO0lBQ3BCLHVCQUF1QjtJQUN2QixJQUFJSixhQUFhQyxnQkFBaUIsQ0FBQ0gsZUFBZUMsa0JBQWtCLE1BQU87UUFD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

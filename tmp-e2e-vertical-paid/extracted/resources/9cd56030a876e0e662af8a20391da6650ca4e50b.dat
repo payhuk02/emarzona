@@ -1,0 +1,229 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/notifications/SellerPushOptInBanner.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/notifications/SellerPushOptInBanner.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=8792f17d"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+var _s = $RefreshSig$();
+/**
+ * Bannière opt-in push pour vendeurs — alertes commande même app fermée.
+ */ import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=8792f17d"; const useCallback = __vite__cjsImport3_react["useCallback"]; const useState = __vite__cjsImport3_react["useState"];
+import { Link } from "/node_modules/.vite/deps/react-router-dom.js?v=8792f17d";
+import { useTranslation } from "/node_modules/.vite/deps/react-i18next.js?v=dd5b9242";
+import { Bell, BellRing, Loader2, X } from "/node_modules/.vite/deps/lucide-react.js?v=8792f17d";
+import { Alert, AlertDescription, AlertTitle } from "/src/components/ui/alert.tsx";
+import { Button } from "/src/components/ui/button.tsx";
+import { useAuth } from "/src/contexts/AuthContext.tsx";
+import { usePushNotifications } from "/src/hooks/usePushNotifications.ts";
+import { dismissSellerPushOptIn, isSellerPushOptInDismissed } from "/src/lib/notifications/seller-push-opt-in-prefs.ts";
+import { cn } from "/src/lib/utils.ts";
+export function SellerPushOptInBanner({ className, variant = 'dashboard' }) {
+    _s();
+    const { t } = useTranslation();
+    const { user } = useAuth();
+    const { isSupported, isVapidReady, isSubscribed, isLoading, permission, subscribe } = usePushNotifications();
+    const [dismissed, setDismissed] = useState(()=>user?.id ? isSellerPushOptInDismissed(user.id) : false);
+    const handleDismiss = useCallback(()=>{
+        if (user?.id) {
+            dismissSellerPushOptIn(user.id);
+        }
+        setDismissed(true);
+    }, [
+        user?.id
+    ]);
+    const handleSubscribe = useCallback(async ()=>{
+        const ok = await subscribe();
+        if (ok) {
+            setDismissed(true);
+        }
+    }, [
+        subscribe
+    ]);
+    if (!user?.id || dismissed || isSubscribed) {
+        return null;
+    }
+    if (!isSupported || !isVapidReady) {
+        return null;
+    }
+    if (permission.permission === 'denied') {
+        return null;
+    }
+    const title = variant === 'orders' ? t('notifications.sellerPushOptIn.ordersTitle', 'Ne manquez aucune commande') : t('notifications.sellerPushOptIn.dashboardTitle', 'Activez les alertes commande en temps réel');
+    const description = variant === 'orders' ? t('notifications.sellerPushOptIn.ordersDescription', 'Recevez une notification sonore sur cet appareil dès qu’un client confirme une commande, même si Emarzona est fermé.') : t('notifications.sellerPushOptIn.dashboardDescription', 'Les vendeurs qui activent les notifications push sont alertés immédiatement à chaque nouvelle commande confirmée.');
+    return /*#__PURE__*/ _jsxDEV(Alert, {
+        className: cn('relative border-violet-300/60 bg-gradient-to-r from-violet-50/90 to-blue-50/80 dark:from-violet-950/40 dark:to-blue-950/30 dark:border-violet-700/50', className),
+        role: "region",
+        "aria-label": t('notifications.sellerPushOptIn.ariaLabel', 'Activer les alertes commande'),
+        children: [
+            /*#__PURE__*/ _jsxDEV(BellRing, {
+                className: "h-4 w-4 text-violet-700 dark:text-violet-300",
+                "aria-hidden": true
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/notifications/SellerPushOptInBanner.tsx",
+                lineNumber: 92,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV(AlertTitle, {
+                className: "text-violet-900 dark:text-violet-100 pr-8",
+                children: title
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/notifications/SellerPushOptInBanner.tsx",
+                lineNumber: 93,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV(AlertDescription, {
+                className: "text-violet-950/80 dark:text-violet-100/80",
+                children: [
+                    /*#__PURE__*/ _jsxDEV("p", {
+                        className: "mb-3",
+                        children: description
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/notifications/SellerPushOptInBanner.tsx",
+                        lineNumber: 95,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV("div", {
+                        className: "flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center",
+                        children: [
+                            /*#__PURE__*/ _jsxDEV(Button, {
+                                type: "button",
+                                size: "sm",
+                                className: "min-h-[40px] bg-violet-600 hover:bg-violet-700 text-white gap-2",
+                                disabled: isLoading,
+                                onClick: ()=>void handleSubscribe(),
+                                children: [
+                                    isLoading ? /*#__PURE__*/ _jsxDEV(Loader2, {
+                                        className: "h-4 w-4 animate-spin",
+                                        "aria-hidden": true
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/notifications/SellerPushOptInBanner.tsx",
+                                        lineNumber: 105,
+                                        columnNumber: 15
+                                    }, this) : /*#__PURE__*/ _jsxDEV(Bell, {
+                                        className: "h-4 w-4",
+                                        "aria-hidden": true
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/notifications/SellerPushOptInBanner.tsx",
+                                        lineNumber: 107,
+                                        columnNumber: 15
+                                    }, this),
+                                    t('notifications.sellerPushOptIn.activate', 'Activer les alertes')
+                                ]
+                            }, void 0, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/notifications/SellerPushOptInBanner.tsx",
+                                lineNumber: 97,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV(Button, {
+                                type: "button",
+                                size: "sm",
+                                variant: "outline",
+                                className: "min-h-[40px] border-violet-300/70",
+                                disabled: isLoading,
+                                onClick: handleDismiss,
+                                children: t('notifications.sellerPushOptIn.later', 'Plus tard')
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/notifications/SellerPushOptInBanner.tsx",
+                                lineNumber: 111,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV(Button, {
+                                asChild: true,
+                                type: "button",
+                                size: "sm",
+                                variant: "ghost",
+                                className: "min-h-[40px] text-violet-800 dark:text-violet-200",
+                                children: /*#__PURE__*/ _jsxDEV(Link, {
+                                    to: "/dashboard/settings?tab=notifications",
+                                    children: t('notifications.sellerPushOptIn.settings', 'Paramètres notifications')
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/notifications/SellerPushOptInBanner.tsx",
+                                    lineNumber: 128,
+                                    columnNumber: 13
+                                }, this)
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/notifications/SellerPushOptInBanner.tsx",
+                                lineNumber: 121,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/notifications/SellerPushOptInBanner.tsx",
+                        lineNumber: 96,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/notifications/SellerPushOptInBanner.tsx",
+                lineNumber: 94,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV("button", {
+                type: "button",
+                onClick: handleDismiss,
+                className: "absolute right-3 top-3 rounded-md p-1 text-violet-700/70 hover:text-violet-900 hover:bg-violet-100/80 dark:hover:bg-violet-900/50",
+                "aria-label": t('common.close', 'Fermer'),
+                children: /*#__PURE__*/ _jsxDEV(X, {
+                    className: "h-4 w-4",
+                    "aria-hidden": true
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/notifications/SellerPushOptInBanner.tsx",
+                    lineNumber: 140,
+                    columnNumber: 9
+                }, this)
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/notifications/SellerPushOptInBanner.tsx",
+                lineNumber: 134,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/notifications/SellerPushOptInBanner.tsx",
+        lineNumber: 84,
+        columnNumber: 5
+    }, this);
+}
+_s(SellerPushOptInBanner, "mxT2Bz5xFVCPZWeKvp8s+/tmbjA=", false, function() {
+    return [
+        useTranslation,
+        useAuth,
+        usePushNotifications
+    ];
+});
+_c = SellerPushOptInBanner;
+var _c;
+$RefreshReg$(_c, "SellerPushOptInBanner");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/notifications/SellerPushOptInBanner.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/notifications/SellerPushOptInBanner.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIlNlbGxlclB1c2hPcHRJbkJhbm5lci50c3giXSwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBCYW5uacOocmUgb3B0LWluIHB1c2ggcG91ciB2ZW5kZXVycyDigJQgYWxlcnRlcyBjb21tYW5kZSBtw6ptZSBhcHAgZmVybcOpZS5cbiAqL1xuXG5pbXBvcnQgeyB1c2VDYWxsYmFjaywgdXNlU3RhdGUgfSBmcm9tICdyZWFjdCc7XG5pbXBvcnQgeyBMaW5rIH0gZnJvbSAncmVhY3Qtcm91dGVyLWRvbSc7XG5pbXBvcnQgeyB1c2VUcmFuc2xhdGlvbiB9IGZyb20gJ3JlYWN0LWkxOG5leHQnO1xuaW1wb3J0IHsgQmVsbCwgQmVsbFJpbmcsIExvYWRlcjIsIFggfSBmcm9tICdsdWNpZGUtcmVhY3QnO1xuaW1wb3J0IHsgQWxlcnQsIEFsZXJ0RGVzY3JpcHRpb24sIEFsZXJ0VGl0bGUgfSBmcm9tICdAL2NvbXBvbmVudHMvdWkvYWxlcnQnO1xuaW1wb3J0IHsgQnV0dG9uIH0gZnJvbSAnQC9jb21wb25lbnRzL3VpL2J1dHRvbic7XG5pbXBvcnQgeyB1c2VBdXRoIH0gZnJvbSAnQC9jb250ZXh0cy9BdXRoQ29udGV4dCc7XG5pbXBvcnQgeyB1c2VQdXNoTm90aWZpY2F0aW9ucyB9IGZyb20gJ0AvaG9va3MvdXNlUHVzaE5vdGlmaWNhdGlvbnMnO1xuaW1wb3J0IHtcbiAgZGlzbWlzc1NlbGxlclB1c2hPcHRJbixcbiAgaXNTZWxsZXJQdXNoT3B0SW5EaXNtaXNzZWQsXG59IGZyb20gJ0AvbGliL25vdGlmaWNhdGlvbnMvc2VsbGVyLXB1c2gtb3B0LWluLXByZWZzJztcbmltcG9ydCB7IGNuIH0gZnJvbSAnQC9saWIvdXRpbHMnO1xuXG5leHBvcnQgdHlwZSBTZWxsZXJQdXNoT3B0SW5CYW5uZXJQcm9wcyA9IHtcbiAgY2xhc3NOYW1lPzogc3RyaW5nO1xuICAvKiogQ29udGV4dGUgZCdhZmZpY2hhZ2UgcG91ciBhbmFseXRpY3MgLyBjb3B5IG9wdGlvbm5lbGxlICovXG4gIHZhcmlhbnQ/OiAnZGFzaGJvYXJkJyB8ICdvcmRlcnMnO1xufTtcblxuZXhwb3J0IGZ1bmN0aW9uIFNlbGxlclB1c2hPcHRJbkJhbm5lcih7XG4gIGNsYXNzTmFtZSxcbiAgdmFyaWFudCA9ICdkYXNoYm9hcmQnLFxufTogU2VsbGVyUHVzaE9wdEluQmFubmVyUHJvcHMpIHtcbiAgY29uc3QgeyB0IH0gPSB1c2VUcmFuc2xhdGlvbigpO1xuICBjb25zdCB7IHVzZXIgfSA9IHVzZUF1dGgoKTtcbiAgY29uc3QgeyBpc1N1cHBvcnRlZCwgaXNWYXBpZFJlYWR5LCBpc1N1YnNjcmliZWQsIGlzTG9hZGluZywgcGVybWlzc2lvbiwgc3Vic2NyaWJlIH0gPVxuICAgIHVzZVB1c2hOb3RpZmljYXRpb25zKCk7XG5cbiAgY29uc3QgW2Rpc21pc3NlZCwgc2V0RGlzbWlzc2VkXSA9IHVzZVN0YXRlKCgpID0+XG4gICAgdXNlcj8uaWQgPyBpc1NlbGxlclB1c2hPcHRJbkRpc21pc3NlZCh1c2VyLmlkKSA6IGZhbHNlXG4gICk7XG5cbiAgY29uc3QgaGFuZGxlRGlzbWlzcyA9IHVzZUNhbGxiYWNrKCgpID0+IHtcbiAgICBpZiAodXNlcj8uaWQpIHtcbiAgICAgIGRpc21pc3NTZWxsZXJQdXNoT3B0SW4odXNlci5pZCk7XG4gICAgfVxuICAgIHNldERpc21pc3NlZCh0cnVlKTtcbiAgfSwgW3VzZXI/LmlkXSk7XG5cbiAgY29uc3QgaGFuZGxlU3Vic2NyaWJlID0gdXNlQ2FsbGJhY2soYXN5bmMgKCkgPT4ge1xuICAgIGNvbnN0IG9rID0gYXdhaXQgc3Vic2NyaWJlKCk7XG4gICAgaWYgKG9rKSB7XG4gICAgICBzZXREaXNtaXNzZWQodHJ1ZSk7XG4gICAgfVxuICB9LCBbc3Vic2NyaWJlXSk7XG5cbiAgaWYgKCF1c2VyPy5pZCB8fCBkaXNtaXNzZWQgfHwgaXNTdWJzY3JpYmVkKSB7XG4gICAgcmV0dXJuIG51bGw7XG4gIH1cblxuICBpZiAoIWlzU3VwcG9ydGVkIHx8ICFpc1ZhcGlkUmVhZHkpIHtcbiAgICByZXR1cm4gbnVsbDtcbiAgfVxuXG4gIGlmIChwZXJtaXNzaW9uLnBlcm1pc3Npb24gPT09ICdkZW5pZWQnKSB7XG4gICAgcmV0dXJuIG51bGw7XG4gIH1cblxuICBjb25zdCB0aXRsZSA9XG4gICAgdmFyaWFudCA9PT0gJ29yZGVycydcbiAgICAgID8gdCgnbm90aWZpY2F0aW9ucy5zZWxsZXJQdXNoT3B0SW4ub3JkZXJzVGl0bGUnLCAnTmUgbWFucXVleiBhdWN1bmUgY29tbWFuZGUnKVxuICAgICAgOiB0KFxuICAgICAgICAgICdub3RpZmljYXRpb25zLnNlbGxlclB1c2hPcHRJbi5kYXNoYm9hcmRUaXRsZScsXG4gICAgICAgICAgJ0FjdGl2ZXogbGVzIGFsZXJ0ZXMgY29tbWFuZGUgZW4gdGVtcHMgcsOpZWwnXG4gICAgICAgICk7XG5cbiAgY29uc3QgZGVzY3JpcHRpb24gPVxuICAgIHZhcmlhbnQgPT09ICdvcmRlcnMnXG4gICAgICA/IHQoXG4gICAgICAgICAgJ25vdGlmaWNhdGlvbnMuc2VsbGVyUHVzaE9wdEluLm9yZGVyc0Rlc2NyaXB0aW9uJyxcbiAgICAgICAgICAnUmVjZXZleiB1bmUgbm90aWZpY2F0aW9uIHNvbm9yZSBzdXIgY2V0IGFwcGFyZWlsIGTDqHMgcXXigJl1biBjbGllbnQgY29uZmlybWUgdW5lIGNvbW1hbmRlLCBtw6ptZSBzaSBFbWFyem9uYSBlc3QgZmVybcOpLidcbiAgICAgICAgKVxuICAgICAgOiB0KFxuICAgICAgICAgICdub3RpZmljYXRpb25zLnNlbGxlclB1c2hPcHRJbi5kYXNoYm9hcmREZXNjcmlwdGlvbicsXG4gICAgICAgICAgJ0xlcyB2ZW5kZXVycyBxdWkgYWN0aXZlbnQgbGVzIG5vdGlmaWNhdGlvbnMgcHVzaCBzb250IGFsZXJ0w6lzIGltbcOpZGlhdGVtZW50IMOgIGNoYXF1ZSBub3V2ZWxsZSBjb21tYW5kZSBjb25maXJtw6llLidcbiAgICAgICAgKTtcblxuICByZXR1cm4gKFxuICAgIDxBbGVydFxuICAgICAgY2xhc3NOYW1lPXtjbihcbiAgICAgICAgJ3JlbGF0aXZlIGJvcmRlci12aW9sZXQtMzAwLzYwIGJnLWdyYWRpZW50LXRvLXIgZnJvbS12aW9sZXQtNTAvOTAgdG8tYmx1ZS01MC84MCBkYXJrOmZyb20tdmlvbGV0LTk1MC80MCBkYXJrOnRvLWJsdWUtOTUwLzMwIGRhcms6Ym9yZGVyLXZpb2xldC03MDAvNTAnLFxuICAgICAgICBjbGFzc05hbWVcbiAgICAgICl9XG4gICAgICByb2xlPVwicmVnaW9uXCJcbiAgICAgIGFyaWEtbGFiZWw9e3QoJ25vdGlmaWNhdGlvbnMuc2VsbGVyUHVzaE9wdEluLmFyaWFMYWJlbCcsICdBY3RpdmVyIGxlcyBhbGVydGVzIGNvbW1hbmRlJyl9XG4gICAgPlxuICAgICAgPEJlbGxSaW5nIGNsYXNzTmFtZT1cImgtNCB3LTQgdGV4dC12aW9sZXQtNzAwIGRhcms6dGV4dC12aW9sZXQtMzAwXCIgYXJpYS1oaWRkZW4gLz5cbiAgICAgIDxBbGVydFRpdGxlIGNsYXNzTmFtZT1cInRleHQtdmlvbGV0LTkwMCBkYXJrOnRleHQtdmlvbGV0LTEwMCBwci04XCI+e3RpdGxlfTwvQWxlcnRUaXRsZT5cbiAgICAgIDxBbGVydERlc2NyaXB0aW9uIGNsYXNzTmFtZT1cInRleHQtdmlvbGV0LTk1MC84MCBkYXJrOnRleHQtdmlvbGV0LTEwMC84MFwiPlxuICAgICAgICA8cCBjbGFzc05hbWU9XCJtYi0zXCI+e2Rlc2NyaXB0aW9ufTwvcD5cbiAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGZsZXgtY29sIGdhcC0yIHNtOmZsZXgtcm93IHNtOmZsZXgtd3JhcCBzbTppdGVtcy1jZW50ZXJcIj5cbiAgICAgICAgICA8QnV0dG9uXG4gICAgICAgICAgICB0eXBlPVwiYnV0dG9uXCJcbiAgICAgICAgICAgIHNpemU9XCJzbVwiXG4gICAgICAgICAgICBjbGFzc05hbWU9XCJtaW4taC1bNDBweF0gYmctdmlvbGV0LTYwMCBob3ZlcjpiZy12aW9sZXQtNzAwIHRleHQtd2hpdGUgZ2FwLTJcIlxuICAgICAgICAgICAgZGlzYWJsZWQ9e2lzTG9hZGluZ31cbiAgICAgICAgICAgIG9uQ2xpY2s9eygpID0+IHZvaWQgaGFuZGxlU3Vic2NyaWJlKCl9XG4gICAgICAgICAgPlxuICAgICAgICAgICAge2lzTG9hZGluZyA/IChcbiAgICAgICAgICAgICAgPExvYWRlcjIgY2xhc3NOYW1lPVwiaC00IHctNCBhbmltYXRlLXNwaW5cIiBhcmlhLWhpZGRlbiAvPlxuICAgICAgICAgICAgKSA6IChcbiAgICAgICAgICAgICAgPEJlbGwgY2xhc3NOYW1lPVwiaC00IHctNFwiIGFyaWEtaGlkZGVuIC8+XG4gICAgICAgICAgICApfVxuICAgICAgICAgICAge3QoJ25vdGlmaWNhdGlvbnMuc2VsbGVyUHVzaE9wdEluLmFjdGl2YXRlJywgJ0FjdGl2ZXIgbGVzIGFsZXJ0ZXMnKX1cbiAgICAgICAgICA8L0J1dHRvbj5cbiAgICAgICAgICA8QnV0dG9uXG4gICAgICAgICAgICB0eXBlPVwiYnV0dG9uXCJcbiAgICAgICAgICAgIHNpemU9XCJzbVwiXG4gICAgICAgICAgICB2YXJpYW50PVwib3V0bGluZVwiXG4gICAgICAgICAgICBjbGFzc05hbWU9XCJtaW4taC1bNDBweF0gYm9yZGVyLXZpb2xldC0zMDAvNzBcIlxuICAgICAgICAgICAgZGlzYWJsZWQ9e2lzTG9hZGluZ31cbiAgICAgICAgICAgIG9uQ2xpY2s9e2hhbmRsZURpc21pc3N9XG4gICAgICAgICAgPlxuICAgICAgICAgICAge3QoJ25vdGlmaWNhdGlvbnMuc2VsbGVyUHVzaE9wdEluLmxhdGVyJywgJ1BsdXMgdGFyZCcpfVxuICAgICAgICAgIDwvQnV0dG9uPlxuICAgICAgICAgIDxCdXR0b25cbiAgICAgICAgICAgIGFzQ2hpbGRcbiAgICAgICAgICAgIHR5cGU9XCJidXR0b25cIlxuICAgICAgICAgICAgc2l6ZT1cInNtXCJcbiAgICAgICAgICAgIHZhcmlhbnQ9XCJnaG9zdFwiXG4gICAgICAgICAgICBjbGFzc05hbWU9XCJtaW4taC1bNDBweF0gdGV4dC12aW9sZXQtODAwIGRhcms6dGV4dC12aW9sZXQtMjAwXCJcbiAgICAgICAgICA+XG4gICAgICAgICAgICA8TGluayB0bz1cIi9kYXNoYm9hcmQvc2V0dGluZ3M/dGFiPW5vdGlmaWNhdGlvbnNcIj5cbiAgICAgICAgICAgICAge3QoJ25vdGlmaWNhdGlvbnMuc2VsbGVyUHVzaE9wdEluLnNldHRpbmdzJywgJ1BhcmFtw6h0cmVzIG5vdGlmaWNhdGlvbnMnKX1cbiAgICAgICAgICAgIDwvTGluaz5cbiAgICAgICAgICA8L0J1dHRvbj5cbiAgICAgICAgPC9kaXY+XG4gICAgICA8L0FsZXJ0RGVzY3JpcHRpb24+XG4gICAgICA8YnV0dG9uXG4gICAgICAgIHR5cGU9XCJidXR0b25cIlxuICAgICAgICBvbkNsaWNrPXtoYW5kbGVEaXNtaXNzfVxuICAgICAgICBjbGFzc05hbWU9XCJhYnNvbHV0ZSByaWdodC0zIHRvcC0zIHJvdW5kZWQtbWQgcC0xIHRleHQtdmlvbGV0LTcwMC83MCBob3Zlcjp0ZXh0LXZpb2xldC05MDAgaG92ZXI6YmctdmlvbGV0LTEwMC84MCBkYXJrOmhvdmVyOmJnLXZpb2xldC05MDAvNTBcIlxuICAgICAgICBhcmlhLWxhYmVsPXt0KCdjb21tb24uY2xvc2UnLCAnRmVybWVyJyl9XG4gICAgICA+XG4gICAgICAgIDxYIGNsYXNzTmFtZT1cImgtNCB3LTRcIiBhcmlhLWhpZGRlbiAvPlxuICAgICAgPC9idXR0b24+XG4gICAgPC9BbGVydD5cbiAgKTtcbn1cbiJdLCJuYW1lcyI6WyJ1c2VDYWxsYmFjayIsInVzZVN0YXRlIiwiTGluayIsInVzZVRyYW5zbGF0aW9uIiwiQmVsbCIsIkJlbGxSaW5nIiwiTG9hZGVyMiIsIlgiLCJBbGVydCIsIkFsZXJ0RGVzY3JpcHRpb24iLCJBbGVydFRpdGxlIiwiQnV0dG9uIiwidXNlQXV0aCIsInVzZVB1c2hOb3RpZmljYXRpb25zIiwiZGlzbWlzc1NlbGxlclB1c2hPcHRJbiIsImlzU2VsbGVyUHVzaE9wdEluRGlzbWlzc2VkIiwiY24iLCJTZWxsZXJQdXNoT3B0SW5CYW5uZXIiLCJjbGFzc05hbWUiLCJ2YXJpYW50IiwidCIsInVzZXIiLCJpc1N1cHBvcnRlZCIsImlzVmFwaWRSZWFkeSIsImlzU3Vic2NyaWJlZCIsImlzTG9hZGluZyIsInBlcm1pc3Npb24iLCJzdWJzY3JpYmUiLCJkaXNtaXNzZWQiLCJzZXREaXNtaXNzZWQiLCJpZCIsImhhbmRsZURpc21pc3MiLCJoYW5kbGVTdWJzY3JpYmUiLCJvayIsInRpdGxlIiwiZGVzY3JpcHRpb24iLCJyb2xlIiwiYXJpYS1sYWJlbCIsImFyaWEtaGlkZGVuIiwicCIsImRpdiIsInR5cGUiLCJzaXplIiwiZGlzYWJsZWQiLCJvbkNsaWNrIiwiYXNDaGlsZCIsInRvIiwiYnV0dG9uIl0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7QUFBQTs7Q0FFQyxHQUVELFNBQVNBLFdBQVcsRUFBRUMsUUFBUSxRQUFRLFFBQVE7QUFDOUMsU0FBU0MsSUFBSSxRQUFRLG1CQUFtQjtBQUN4QyxTQUFTQyxjQUFjLFFBQVEsZ0JBQWdCO0FBQy9DLFNBQVNDLElBQUksRUFBRUMsUUFBUSxFQUFFQyxPQUFPLEVBQUVDLENBQUMsUUFBUSxlQUFlO0FBQzFELFNBQVNDLEtBQUssRUFBRUMsZ0JBQWdCLEVBQUVDLFVBQVUsUUFBUSx3QkFBd0I7QUFDNUUsU0FBU0MsTUFBTSxRQUFRLHlCQUF5QjtBQUNoRCxTQUFTQyxPQUFPLFFBQVEseUJBQXlCO0FBQ2pELFNBQVNDLG9CQUFvQixRQUFRLCtCQUErQjtBQUNwRSxTQUNFQyxzQkFBc0IsRUFDdEJDLDBCQUEwQixRQUNyQiwrQ0FBK0M7QUFDdEQsU0FBU0MsRUFBRSxRQUFRLGNBQWM7QUFRakMsT0FBTyxTQUFTQyxzQkFBc0IsRUFDcENDLFNBQVMsRUFDVEMsVUFBVSxXQUFXLEVBQ007O0lBQzNCLE1BQU0sRUFBRUMsQ0FBQyxFQUFFLEdBQUdqQjtJQUNkLE1BQU0sRUFBRWtCLElBQUksRUFBRSxHQUFHVDtJQUNqQixNQUFNLEVBQUVVLFdBQVcsRUFBRUMsWUFBWSxFQUFFQyxZQUFZLEVBQUVDLFNBQVMsRUFBRUMsVUFBVSxFQUFFQyxTQUFTLEVBQUUsR0FDakZkO0lBRUYsTUFBTSxDQUFDZSxXQUFXQyxhQUFhLEdBQUc1QixTQUFTLElBQ3pDb0IsTUFBTVMsS0FBS2YsMkJBQTJCTSxLQUFLUyxFQUFFLElBQUk7SUFHbkQsTUFBTUMsZ0JBQWdCL0IsWUFBWTtRQUNoQyxJQUFJcUIsTUFBTVMsSUFBSTtZQUNaaEIsdUJBQXVCTyxLQUFLUyxFQUFFO1FBQ2hDO1FBQ0FELGFBQWE7SUFDZixHQUFHO1FBQUNSLE1BQU1TO0tBQUc7SUFFYixNQUFNRSxrQkFBa0JoQyxZQUFZO1FBQ2xDLE1BQU1pQyxLQUFLLE1BQU1OO1FBQ2pCLElBQUlNLElBQUk7WUFDTkosYUFBYTtRQUNmO0lBQ0YsR0FBRztRQUFDRjtLQUFVO0lBRWQsSUFBSSxDQUFDTixNQUFNUyxNQUFNRixhQUFhSixjQUFjO1FBQzFDLE9BQU87SUFDVDtJQUVBLElBQUksQ0FBQ0YsZUFBZSxDQUFDQyxjQUFjO1FBQ2pDLE9BQU87SUFDVDtJQUVBLElBQUlHLFdBQVdBLFVBQVUsS0FBSyxVQUFVO1FBQ3RDLE9BQU87SUFDVDtJQUVBLE1BQU1RLFFBQ0pmLFlBQVksV0FDUkMsRUFBRSw2Q0FBNkMsZ0NBQy9DQSxFQUNFLGdEQUNBO0lBR1IsTUFBTWUsY0FDSmhCLFlBQVksV0FDUkMsRUFDRSxtREFDQSwwSEFFRkEsRUFDRSxzREFDQTtJQUdSLHFCQUNFLFFBQUNaO1FBQ0NVLFdBQVdGLEdBQ1Qsd0pBQ0FFO1FBRUZrQixNQUFLO1FBQ0xDLGNBQVlqQixFQUFFLDJDQUEyQzs7MEJBRXpELFFBQUNmO2dCQUFTYSxXQUFVO2dCQUErQ29CLGFBQVc7Ozs7OzswQkFDOUUsUUFBQzVCO2dCQUFXUSxXQUFVOzBCQUE2Q2dCOzs7Ozs7MEJBQ25FLFFBQUN6QjtnQkFBaUJTLFdBQVU7O2tDQUMxQixRQUFDcUI7d0JBQUVyQixXQUFVO2tDQUFRaUI7Ozs7OztrQ0FDckIsUUFBQ0s7d0JBQUl0QixXQUFVOzswQ0FDYixRQUFDUDtnQ0FDQzhCLE1BQUs7Z0NBQ0xDLE1BQUs7Z0NBQ0x4QixXQUFVO2dDQUNWeUIsVUFBVWxCO2dDQUNWbUIsU0FBUyxJQUFNLEtBQUtaOztvQ0FFbkJQLDBCQUNDLFFBQUNuQjt3Q0FBUVksV0FBVTt3Q0FBdUJvQixhQUFXOzs7Ozs2REFFckQsUUFBQ2xDO3dDQUFLYyxXQUFVO3dDQUFVb0IsYUFBVzs7Ozs7O29DQUV0Q2xCLEVBQUUsMENBQTBDOzs7Ozs7OzBDQUUvQyxRQUFDVDtnQ0FDQzhCLE1BQUs7Z0NBQ0xDLE1BQUs7Z0NBQ0x2QixTQUFRO2dDQUNSRCxXQUFVO2dDQUNWeUIsVUFBVWxCO2dDQUNWbUIsU0FBU2I7MENBRVJYLEVBQUUsdUNBQXVDOzs7Ozs7MENBRTVDLFFBQUNUO2dDQUNDa0MsT0FBTztnQ0FDUEosTUFBSztnQ0FDTEMsTUFBSztnQ0FDTHZCLFNBQVE7Z0NBQ1JELFdBQVU7MENBRVYsY0FBQSxRQUFDaEI7b0NBQUs0QyxJQUFHOzhDQUNOMUIsRUFBRSwwQ0FBMEM7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OzBCQUtyRCxRQUFDMkI7Z0JBQ0NOLE1BQUs7Z0JBQ0xHLFNBQVNiO2dCQUNUYixXQUFVO2dCQUNWbUIsY0FBWWpCLEVBQUUsZ0JBQWdCOzBCQUU5QixjQUFBLFFBQUNiO29CQUFFVyxXQUFVO29CQUFVb0IsYUFBVzs7Ozs7Ozs7Ozs7Ozs7Ozs7QUFJMUM7R0F2SGdCckI7O1FBSUFkO1FBQ0dTO1FBRWZDOzs7S0FQWUkifQ==

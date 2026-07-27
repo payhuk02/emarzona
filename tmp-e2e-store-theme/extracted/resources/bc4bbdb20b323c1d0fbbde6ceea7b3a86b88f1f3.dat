@@ -1,0 +1,185 @@
+import {
+  useId
+} from "/node_modules/.vite/deps/chunk-GCBGYMHB.js?v=3ea6c1b9";
+import {
+  Presence
+} from "/node_modules/.vite/deps/chunk-3O4ESYTN.js?v=3ea6c1b9";
+import {
+  useControllableState
+} from "/node_modules/.vite/deps/chunk-LRFKGCG4.js?v=3ea6c1b9";
+import {
+  createContextScope
+} from "/node_modules/.vite/deps/chunk-D4XE7STJ.js?v=3ea6c1b9";
+import {
+  Primitive,
+  composeEventHandlers
+} from "/node_modules/.vite/deps/chunk-H2NZ7KW5.js?v=3ea6c1b9";
+import {
+  useLayoutEffect2
+} from "/node_modules/.vite/deps/chunk-CTCUIBW7.js?v=3ea6c1b9";
+import {
+  useComposedRefs
+} from "/node_modules/.vite/deps/chunk-2PLMWXMJ.js?v=3ea6c1b9";
+import {
+  require_jsx_runtime
+} from "/node_modules/.vite/deps/chunk-2ZO6ZW3X.js?v=3ea6c1b9";
+import {
+  require_react
+} from "/node_modules/.vite/deps/chunk-7OHAGO6F.js?v=3ea6c1b9";
+import {
+  __objRest,
+  __spreadProps,
+  __spreadValues,
+  __toESM
+} from "/node_modules/.vite/deps/chunk-WIEG4DIP.js?v=3ea6c1b9";
+
+// node_modules/@radix-ui/react-collapsible/dist/index.mjs
+var React = __toESM(require_react(), 1);
+var import_jsx_runtime = __toESM(require_jsx_runtime(), 1);
+var COLLAPSIBLE_NAME = "Collapsible";
+var [createCollapsibleContext, createCollapsibleScope] = createContextScope(COLLAPSIBLE_NAME);
+var [CollapsibleProvider, useCollapsibleContext] = createCollapsibleContext(COLLAPSIBLE_NAME);
+var Collapsible = React.forwardRef(
+  (props, forwardedRef) => {
+    const _a = props, {
+      __scopeCollapsible,
+      open: openProp,
+      defaultOpen,
+      disabled,
+      onOpenChange
+    } = _a, collapsibleProps = __objRest(_a, [
+      "__scopeCollapsible",
+      "open",
+      "defaultOpen",
+      "disabled",
+      "onOpenChange"
+    ]);
+    const [open, setOpen] = useControllableState({
+      prop: openProp,
+      defaultProp: defaultOpen != null ? defaultOpen : false,
+      onChange: onOpenChange,
+      caller: COLLAPSIBLE_NAME
+    });
+    return (0, import_jsx_runtime.jsx)(
+      CollapsibleProvider,
+      {
+        scope: __scopeCollapsible,
+        disabled,
+        contentId: useId(),
+        open,
+        onOpenToggle: React.useCallback(() => setOpen((prevOpen) => !prevOpen), [setOpen]),
+        children: (0, import_jsx_runtime.jsx)(
+          Primitive.div,
+          __spreadProps(__spreadValues({
+            "data-state": getState(open),
+            "data-disabled": disabled ? "" : void 0
+          }, collapsibleProps), {
+            ref: forwardedRef
+          })
+        )
+      }
+    );
+  }
+);
+Collapsible.displayName = COLLAPSIBLE_NAME;
+var TRIGGER_NAME = "CollapsibleTrigger";
+var CollapsibleTrigger = React.forwardRef(
+  (props, forwardedRef) => {
+    const _a = props, { __scopeCollapsible } = _a, triggerProps = __objRest(_a, ["__scopeCollapsible"]);
+    const context = useCollapsibleContext(TRIGGER_NAME, __scopeCollapsible);
+    return (0, import_jsx_runtime.jsx)(
+      Primitive.button,
+      __spreadProps(__spreadValues({
+        type: "button",
+        "aria-controls": context.contentId,
+        "aria-expanded": context.open || false,
+        "data-state": getState(context.open),
+        "data-disabled": context.disabled ? "" : void 0,
+        disabled: context.disabled
+      }, triggerProps), {
+        ref: forwardedRef,
+        onClick: composeEventHandlers(props.onClick, context.onOpenToggle)
+      })
+    );
+  }
+);
+CollapsibleTrigger.displayName = TRIGGER_NAME;
+var CONTENT_NAME = "CollapsibleContent";
+var CollapsibleContent = React.forwardRef(
+  (props, forwardedRef) => {
+    const _a = props, { forceMount } = _a, contentProps = __objRest(_a, ["forceMount"]);
+    const context = useCollapsibleContext(CONTENT_NAME, props.__scopeCollapsible);
+    return (0, import_jsx_runtime.jsx)(Presence, { present: forceMount || context.open, children: ({ present }) => (0, import_jsx_runtime.jsx)(CollapsibleContentImpl, __spreadProps(__spreadValues({}, contentProps), { ref: forwardedRef, present })) });
+  }
+);
+CollapsibleContent.displayName = CONTENT_NAME;
+var CollapsibleContentImpl = React.forwardRef((props, forwardedRef) => {
+  const _a = props, { __scopeCollapsible, present, children } = _a, contentProps = __objRest(_a, ["__scopeCollapsible", "present", "children"]);
+  const context = useCollapsibleContext(CONTENT_NAME, __scopeCollapsible);
+  const [isPresent, setIsPresent] = React.useState(present);
+  const ref = React.useRef(null);
+  const composedRefs = useComposedRefs(forwardedRef, ref);
+  const heightRef = React.useRef(0);
+  const height = heightRef.current;
+  const widthRef = React.useRef(0);
+  const width = widthRef.current;
+  const isOpen = context.open || isPresent;
+  const isMountAnimationPreventedRef = React.useRef(isOpen);
+  const originalStylesRef = React.useRef(void 0);
+  React.useEffect(() => {
+    const rAF = requestAnimationFrame(() => isMountAnimationPreventedRef.current = false);
+    return () => cancelAnimationFrame(rAF);
+  }, []);
+  useLayoutEffect2(() => {
+    const node = ref.current;
+    if (node) {
+      originalStylesRef.current = originalStylesRef.current || {
+        transitionDuration: node.style.transitionDuration,
+        animationName: node.style.animationName
+      };
+      node.style.transitionDuration = "0s";
+      node.style.animationName = "none";
+      const rect = node.getBoundingClientRect();
+      heightRef.current = rect.height;
+      widthRef.current = rect.width;
+      if (!isMountAnimationPreventedRef.current) {
+        node.style.transitionDuration = originalStylesRef.current.transitionDuration;
+        node.style.animationName = originalStylesRef.current.animationName;
+      }
+      setIsPresent(present);
+    }
+  }, [context.open, present]);
+  return (0, import_jsx_runtime.jsx)(
+    Primitive.div,
+    __spreadProps(__spreadValues({
+      "data-state": getState(context.open),
+      "data-disabled": context.disabled ? "" : void 0,
+      id: context.contentId,
+      hidden: !isOpen
+    }, contentProps), {
+      ref: composedRefs,
+      style: __spreadValues({
+        [`--radix-collapsible-content-height`]: height ? `${height}px` : void 0,
+        [`--radix-collapsible-content-width`]: width ? `${width}px` : void 0
+      }, props.style),
+      children: isOpen && children
+    })
+  );
+});
+function getState(open) {
+  return open ? "open" : "closed";
+}
+var Root = Collapsible;
+var Trigger = CollapsibleTrigger;
+var Content = CollapsibleContent;
+
+export {
+  createCollapsibleScope,
+  Collapsible,
+  CollapsibleTrigger,
+  CollapsibleContent,
+  Root,
+  Trigger,
+  Content
+};
+//# sourceMappingURL=chunk-74KAMHIY.js.map

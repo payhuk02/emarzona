@@ -1,0 +1,76 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/currency/DeferredCurrencyRatesInitializer.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/currency/DeferredCurrencyRatesInitializer.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=2441233a"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+var _s = $RefreshSig$();
+/**
+ * Charge les taux de change après idle — hors chemin critique LCP/FCP.
+ */ import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=2441233a"; const lazy = __vite__cjsImport3_react["lazy"]; const Suspense = __vite__cjsImport3_react["Suspense"];
+import { useDeferredMount } from "/src/hooks/useDeferredMount.ts";
+const CurrencyRatesInitializer = /*#__PURE__*/ lazy(()=>import("/src/components/currency/CurrencyRatesInitializer.tsx").then((m)=>({
+            default: m.CurrencyRatesInitializer
+        })));
+_c = CurrencyRatesInitializer;
+const DEFER_MS = 2000;
+export function DeferredCurrencyRatesInitializer() {
+    _s();
+    const ready = useDeferredMount(true, DEFER_MS);
+    if (!ready) return null;
+    return /*#__PURE__*/ _jsxDEV(Suspense, {
+        fallback: null,
+        children: /*#__PURE__*/ _jsxDEV(CurrencyRatesInitializer, {}, void 0, false, {
+            fileName: "/home/runner/work/emarzona/emarzona/src/components/currency/DeferredCurrencyRatesInitializer.tsx",
+            lineNumber: 21,
+            columnNumber: 7
+        }, this)
+    }, void 0, false, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/currency/DeferredCurrencyRatesInitializer.tsx",
+        lineNumber: 20,
+        columnNumber: 5
+    }, this);
+}
+_s(DeferredCurrencyRatesInitializer, "RFOnYM2Ms/vt3aBsHxMcgwqxrp0=", false, function() {
+    return [
+        useDeferredMount
+    ];
+});
+_c1 = DeferredCurrencyRatesInitializer;
+var _c, _c1;
+$RefreshReg$(_c, "CurrencyRatesInitializer");
+$RefreshReg$(_c1, "DeferredCurrencyRatesInitializer");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/currency/DeferredCurrencyRatesInitializer.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/currency/DeferredCurrencyRatesInitializer.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIkRlZmVycmVkQ3VycmVuY3lSYXRlc0luaXRpYWxpemVyLnRzeCJdLCJzb3VyY2VzQ29udGVudCI6WyIvKipcbiAqIENoYXJnZSBsZXMgdGF1eCBkZSBjaGFuZ2UgYXByw6hzIGlkbGUg4oCUIGhvcnMgY2hlbWluIGNyaXRpcXVlIExDUC9GQ1AuXG4gKi9cbmltcG9ydCB7IGxhenksIFN1c3BlbnNlIH0gZnJvbSAncmVhY3QnO1xuaW1wb3J0IHsgdXNlRGVmZXJyZWRNb3VudCB9IGZyb20gJ0AvaG9va3MvdXNlRGVmZXJyZWRNb3VudCc7XG5cbmNvbnN0IEN1cnJlbmN5UmF0ZXNJbml0aWFsaXplciA9IGxhenkoKCkgPT5cbiAgaW1wb3J0KCdAL2NvbXBvbmVudHMvY3VycmVuY3kvQ3VycmVuY3lSYXRlc0luaXRpYWxpemVyJykudGhlbihtID0+ICh7XG4gICAgZGVmYXVsdDogbS5DdXJyZW5jeVJhdGVzSW5pdGlhbGl6ZXIsXG4gIH0pKVxuKTtcblxuY29uc3QgREVGRVJfTVMgPSAyMDAwO1xuXG5leHBvcnQgZnVuY3Rpb24gRGVmZXJyZWRDdXJyZW5jeVJhdGVzSW5pdGlhbGl6ZXIoKSB7XG4gIGNvbnN0IHJlYWR5ID0gdXNlRGVmZXJyZWRNb3VudCh0cnVlLCBERUZFUl9NUyk7XG4gIGlmICghcmVhZHkpIHJldHVybiBudWxsO1xuXG4gIHJldHVybiAoXG4gICAgPFN1c3BlbnNlIGZhbGxiYWNrPXtudWxsfT5cbiAgICAgIDxDdXJyZW5jeVJhdGVzSW5pdGlhbGl6ZXIgLz5cbiAgICA8L1N1c3BlbnNlPlxuICApO1xufVxuIl0sIm5hbWVzIjpbImxhenkiLCJTdXNwZW5zZSIsInVzZURlZmVycmVkTW91bnQiLCJDdXJyZW5jeVJhdGVzSW5pdGlhbGl6ZXIiLCJ0aGVuIiwibSIsImRlZmF1bHQiLCJERUZFUl9NUyIsIkRlZmVycmVkQ3VycmVuY3lSYXRlc0luaXRpYWxpemVyIiwicmVhZHkiLCJmYWxsYmFjayJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O0FBQUE7O0NBRUMsR0FDRCxTQUFTQSxJQUFJLEVBQUVDLFFBQVEsUUFBUSxRQUFRO0FBQ3ZDLFNBQVNDLGdCQUFnQixRQUFRLDJCQUEyQjtBQUU1RCxNQUFNQyx5Q0FBMkJILEtBQUssSUFDcEMsTUFBTSxDQUFDLGtEQUFrREksSUFBSSxDQUFDQyxDQUFBQSxJQUFNLENBQUE7WUFDbEVDLFNBQVNELEVBQUVGLHdCQUF3QjtRQUNyQyxDQUFBO0tBSElBO0FBTU4sTUFBTUksV0FBVztBQUVqQixPQUFPLFNBQVNDOztJQUNkLE1BQU1DLFFBQVFQLGlCQUFpQixNQUFNSztJQUNyQyxJQUFJLENBQUNFLE9BQU8sT0FBTztJQUVuQixxQkFDRSxRQUFDUjtRQUFTUyxVQUFVO2tCQUNsQixjQUFBLFFBQUNQOzs7Ozs7Ozs7O0FBR1A7R0FUZ0JLOztRQUNBTjs7O01BREFNIn0=

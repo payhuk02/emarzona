@@ -1,0 +1,34 @@
+import { getMainCarrier, getSentryCarrier } from "/node_modules/@sentry/core/build/esm/carrier.js?v=89021f86";
+import { getStackAsyncContextStrategy } from "/node_modules/@sentry/core/build/esm/asyncContext/stackStrategy.js?v=89021f86";
+
+/**
+ * @private Private API with no semver guarantees!
+ *
+ * Sets the global async context strategy
+ */
+function setAsyncContextStrategy(strategy) {
+  // Get main carrier (global for every environment)
+  const registry = getMainCarrier();
+  const sentry = getSentryCarrier(registry);
+  sentry.acs = strategy;
+}
+
+/**
+ * Get the current async context strategy.
+ * If none has been setup, the default will be used.
+ */
+function getAsyncContextStrategy(carrier) {
+  const sentry = getSentryCarrier(carrier);
+
+  if (sentry.acs) {
+    return sentry.acs;
+  }
+
+  // Otherwise, use the default one (stack)
+  return getStackAsyncContextStrategy();
+}
+
+export { getAsyncContextStrategy, setAsyncContextStrategy };
+                                 
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXguanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy9hc3luY0NvbnRleHQvaW5kZXgudHMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHR5cGUgeyBDYXJyaWVyIH0gZnJvbSAnLi8uLi9jYXJyaWVyJztcbmltcG9ydCB7IGdldE1haW5DYXJyaWVyLCBnZXRTZW50cnlDYXJyaWVyIH0gZnJvbSAnLi8uLi9jYXJyaWVyJztcbmltcG9ydCB7IGdldFN0YWNrQXN5bmNDb250ZXh0U3RyYXRlZ3kgfSBmcm9tICcuL3N0YWNrU3RyYXRlZ3knO1xuaW1wb3J0IHR5cGUgeyBBc3luY0NvbnRleHRTdHJhdGVneSB9IGZyb20gJy4vdHlwZXMnO1xuXG4vKipcbiAqIEBwcml2YXRlIFByaXZhdGUgQVBJIHdpdGggbm8gc2VtdmVyIGd1YXJhbnRlZXMhXG4gKlxuICogU2V0cyB0aGUgZ2xvYmFsIGFzeW5jIGNvbnRleHQgc3RyYXRlZ3lcbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIHNldEFzeW5jQ29udGV4dFN0cmF0ZWd5KHN0cmF0ZWd5OiBBc3luY0NvbnRleHRTdHJhdGVneSB8IHVuZGVmaW5lZCk6IHZvaWQge1xuICAvLyBHZXQgbWFpbiBjYXJyaWVyIChnbG9iYWwgZm9yIGV2ZXJ5IGVudmlyb25tZW50KVxuICBjb25zdCByZWdpc3RyeSA9IGdldE1haW5DYXJyaWVyKCk7XG4gIGNvbnN0IHNlbnRyeSA9IGdldFNlbnRyeUNhcnJpZXIocmVnaXN0cnkpO1xuICBzZW50cnkuYWNzID0gc3RyYXRlZ3k7XG59XG5cbi8qKlxuICogR2V0IHRoZSBjdXJyZW50IGFzeW5jIGNvbnRleHQgc3RyYXRlZ3kuXG4gKiBJZiBub25lIGhhcyBiZWVuIHNldHVwLCB0aGUgZGVmYXVsdCB3aWxsIGJlIHVzZWQuXG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBnZXRBc3luY0NvbnRleHRTdHJhdGVneShjYXJyaWVyOiBDYXJyaWVyKTogQXN5bmNDb250ZXh0U3RyYXRlZ3kge1xuICBjb25zdCBzZW50cnkgPSBnZXRTZW50cnlDYXJyaWVyKGNhcnJpZXIpO1xuXG4gIGlmIChzZW50cnkuYWNzKSB7XG4gICAgcmV0dXJuIHNlbnRyeS5hY3M7XG4gIH1cblxuICAvLyBPdGhlcndpc2UsIHVzZSB0aGUgZGVmYXVsdCBvbmUgKHN0YWNrKVxuICByZXR1cm4gZ2V0U3RhY2tBc3luY0NvbnRleHRTdHJhdGVneSgpO1xufVxuIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7OztBQUtBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDTyxTQUFTLHVCQUF1QixDQUFDLFFBQVEsRUFBMEM7QUFDMUY7QUFDQSxFQUFFLE1BQU0sUUFBQSxHQUFXLGNBQWMsRUFBRTtBQUNuQyxFQUFFLE1BQU0sTUFBQSxHQUFTLGdCQUFnQixDQUFDLFFBQVEsQ0FBQztBQUMzQyxFQUFFLE1BQU0sQ0FBQyxHQUFBLEdBQU0sUUFBUTtBQUN2Qjs7QUFFQTtBQUNBO0FBQ0E7QUFDQTtBQUNPLFNBQVMsdUJBQXVCLENBQUMsT0FBTyxFQUFpQztBQUNoRixFQUFFLE1BQU0sTUFBQSxHQUFTLGdCQUFnQixDQUFDLE9BQU8sQ0FBQzs7QUFFMUMsRUFBRSxJQUFJLE1BQU0sQ0FBQyxHQUFHLEVBQUU7QUFDbEIsSUFBSSxPQUFPLE1BQU0sQ0FBQyxHQUFHO0FBQ3JCLEVBQUU7O0FBRUY7QUFDQSxFQUFFLE9BQU8sNEJBQTRCLEVBQUU7QUFDdkM7Ozs7IiwieF9nb29nbGVfaWdub3JlTGlzdCI6WzBdfQ==

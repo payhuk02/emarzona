@@ -31,8 +31,12 @@ export interface ServiceBookingOptions {
 export interface ServiceProductFormData {
   // Basic Info (Step 1)
   name: string;
+  slug?: string;
   description: string;
+  short_description?: string;
   price: number;
+  compare_at_price: number | null;
+  category: string;
   category_id: string | null;
   tags: string[];
   images: string[];

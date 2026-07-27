@@ -1,0 +1,32 @@
+import { useQuery } from "/node_modules/.vite/deps/@tanstack_react-query.js?v=6014a254";
+import { supabase } from "/src/integrations/supabase/client.ts";
+import { parseStoreCommerceType } from "/src/lib/billing/store-commerce-access.ts";
+async function fetchStoreCommerceTypeChangeStatus(storeId) {
+    const { data, error } = await supabase.rpc('store_commerce_type_change_status', {
+        p_store_id: storeId
+    });
+    if (error) {
+        throw error;
+    }
+    const row = data;
+    return {
+        can_change: row?.can_change === true,
+        product_count: typeof row?.product_count === 'number' ? row.product_count : Number(row?.product_count ?? 0),
+        current_type: parseStoreCommerceType(row?.current_type)
+    };
+}
+/**
+ * Indicates whether a store's commerce_type can be changed (blocked when catalog has products).
+ */ export function useStoreCommerceTypeGuard(storeId) {
+    return useQuery({
+        queryKey: [
+            'store-commerce-type-guard',
+            storeId ?? 'none'
+        ],
+        queryFn: ()=>fetchStoreCommerceTypeChangeStatus(storeId),
+        enabled: Boolean(storeId),
+        staleTime: 30000
+    });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInVzZVN0b3JlQ29tbWVyY2VUeXBlR3VhcmQudHMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgdXNlUXVlcnkgfSBmcm9tICdAdGFuc3RhY2svcmVhY3QtcXVlcnknO1xuaW1wb3J0IHsgc3VwYWJhc2UgfSBmcm9tICdAL2ludGVncmF0aW9ucy9zdXBhYmFzZS9jbGllbnQnO1xuaW1wb3J0IHR5cGUgeyBTdG9yZUNvbW1lcmNlVHlwZSB9IGZyb20gJ0AvY29uc3RhbnRzL3N0b3JlLWNvbW1lcmNlLXR5cGVzJztcbmltcG9ydCB7IHBhcnNlU3RvcmVDb21tZXJjZVR5cGUgfSBmcm9tICdAL2xpYi9iaWxsaW5nL3N0b3JlLWNvbW1lcmNlLWFjY2Vzcyc7XG5cbmV4cG9ydCBpbnRlcmZhY2UgU3RvcmVDb21tZXJjZVR5cGVDaGFuZ2VTdGF0dXMge1xuICBjYW5fY2hhbmdlOiBib29sZWFuO1xuICBwcm9kdWN0X2NvdW50OiBudW1iZXI7XG4gIGN1cnJlbnRfdHlwZTogU3RvcmVDb21tZXJjZVR5cGU7XG59XG5cbmFzeW5jIGZ1bmN0aW9uIGZldGNoU3RvcmVDb21tZXJjZVR5cGVDaGFuZ2VTdGF0dXMoXG4gIHN0b3JlSWQ6IHN0cmluZ1xuKTogUHJvbWlzZTxTdG9yZUNvbW1lcmNlVHlwZUNoYW5nZVN0YXR1cz4ge1xuICBjb25zdCB7IGRhdGEsIGVycm9yIH0gPSBhd2FpdCBzdXBhYmFzZS5ycGMoJ3N0b3JlX2NvbW1lcmNlX3R5cGVfY2hhbmdlX3N0YXR1cycsIHtcbiAgICBwX3N0b3JlX2lkOiBzdG9yZUlkLFxuICB9KTtcblxuICBpZiAoZXJyb3IpIHtcbiAgICB0aHJvdyBlcnJvcjtcbiAgfVxuXG4gIGNvbnN0IHJvdyA9IGRhdGEgYXMgUmVjb3JkPHN0cmluZywgdW5rbm93bj4gfCBudWxsO1xuICByZXR1cm4ge1xuICAgIGNhbl9jaGFuZ2U6IHJvdz8uY2FuX2NoYW5nZSA9PT0gdHJ1ZSxcbiAgICBwcm9kdWN0X2NvdW50OlxuICAgICAgdHlwZW9mIHJvdz8ucHJvZHVjdF9jb3VudCA9PT0gJ251bWJlcicgPyByb3cucHJvZHVjdF9jb3VudCA6IE51bWJlcihyb3c/LnByb2R1Y3RfY291bnQgPz8gMCksXG4gICAgY3VycmVudF90eXBlOiBwYXJzZVN0b3JlQ29tbWVyY2VUeXBlKHJvdz8uY3VycmVudF90eXBlKSxcbiAgfTtcbn1cblxuLyoqXG4gKiBJbmRpY2F0ZXMgd2hldGhlciBhIHN0b3JlJ3MgY29tbWVyY2VfdHlwZSBjYW4gYmUgY2hhbmdlZCAoYmxvY2tlZCB3aGVuIGNhdGFsb2cgaGFzIHByb2R1Y3RzKS5cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIHVzZVN0b3JlQ29tbWVyY2VUeXBlR3VhcmQoc3RvcmVJZDogc3RyaW5nIHwgbnVsbCB8IHVuZGVmaW5lZCkge1xuICByZXR1cm4gdXNlUXVlcnkoe1xuICAgIHF1ZXJ5S2V5OiBbJ3N0b3JlLWNvbW1lcmNlLXR5cGUtZ3VhcmQnLCBzdG9yZUlkID8/ICdub25lJ10sXG4gICAgcXVlcnlGbjogKCkgPT4gZmV0Y2hTdG9yZUNvbW1lcmNlVHlwZUNoYW5nZVN0YXR1cyhzdG9yZUlkISksXG4gICAgZW5hYmxlZDogQm9vbGVhbihzdG9yZUlkKSxcbiAgICBzdGFsZVRpbWU6IDMwXzAwMCxcbiAgfSk7XG59XG4iXSwibmFtZXMiOlsidXNlUXVlcnkiLCJzdXBhYmFzZSIsInBhcnNlU3RvcmVDb21tZXJjZVR5cGUiLCJmZXRjaFN0b3JlQ29tbWVyY2VUeXBlQ2hhbmdlU3RhdHVzIiwic3RvcmVJZCIsImRhdGEiLCJlcnJvciIsInJwYyIsInBfc3RvcmVfaWQiLCJyb3ciLCJjYW5fY2hhbmdlIiwicHJvZHVjdF9jb3VudCIsIk51bWJlciIsImN1cnJlbnRfdHlwZSIsInVzZVN0b3JlQ29tbWVyY2VUeXBlR3VhcmQiLCJxdWVyeUtleSIsInF1ZXJ5Rm4iLCJlbmFibGVkIiwiQm9vbGVhbiIsInN0YWxlVGltZSJdLCJtYXBwaW5ncyI6IkFBQUEsU0FBU0EsUUFBUSxRQUFRLHdCQUF3QjtBQUNqRCxTQUFTQyxRQUFRLFFBQVEsaUNBQWlDO0FBRTFELFNBQVNDLHNCQUFzQixRQUFRLHNDQUFzQztBQVE3RSxlQUFlQyxtQ0FDYkMsT0FBZTtJQUVmLE1BQU0sRUFBRUMsSUFBSSxFQUFFQyxLQUFLLEVBQUUsR0FBRyxNQUFNTCxTQUFTTSxHQUFHLENBQUMscUNBQXFDO1FBQzlFQyxZQUFZSjtJQUNkO0lBRUEsSUFBSUUsT0FBTztRQUNULE1BQU1BO0lBQ1I7SUFFQSxNQUFNRyxNQUFNSjtJQUNaLE9BQU87UUFDTEssWUFBWUQsS0FBS0MsZUFBZTtRQUNoQ0MsZUFDRSxPQUFPRixLQUFLRSxrQkFBa0IsV0FBV0YsSUFBSUUsYUFBYSxHQUFHQyxPQUFPSCxLQUFLRSxpQkFBaUI7UUFDNUZFLGNBQWNYLHVCQUF1Qk8sS0FBS0k7SUFDNUM7QUFDRjtBQUVBOztDQUVDLEdBQ0QsT0FBTyxTQUFTQywwQkFBMEJWLE9BQWtDO0lBQzFFLE9BQU9KLFNBQVM7UUFDZGUsVUFBVTtZQUFDO1lBQTZCWCxXQUFXO1NBQU87UUFDMURZLFNBQVMsSUFBTWIsbUNBQW1DQztRQUNsRGEsU0FBU0MsUUFBUWQ7UUFDakJlLFdBQVc7SUFDYjtBQUNGIn0=

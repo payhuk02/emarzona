@@ -61,6 +61,8 @@ interface ArtistBasicInfoFormProps {
   storeSlug?: string;
 }
 
+const ARTIST_CATEGORIES = getCategoriesForProductType('artist');
+
 const ArtistBasicInfoFormComponent = ({ data, onUpdate, storeSlug }: ArtistBasicInfoFormProps) => {
   const { toast } = useToast();
   const {
@@ -266,6 +268,27 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate, storeSlug }: ArtistBasic
           </Badge>
         </div>
       )}
+
+      {/* Category */}
+      <div className="space-y-2">
+        <SelectField
+          label="Catégorie *"
+          contentVariant="sheet"
+          useMobileSelectRoot
+          value={data.category || 'peinture'}
+          onValueChange={value => {
+            onUpdate({ category: value });
+          }}
+          required
+          placeholder="Sélectionnez une catégorie"
+        >
+          {ARTIST_CATEGORIES.map(cat => (
+            <SelectItem key={cat.value} value={cat.value}>
+              {cat.label}
+            </SelectItem>
+          ))}
+        </SelectField>
+      </div>
 
       {/* Artist Photo */}
       <div className="space-y-2">

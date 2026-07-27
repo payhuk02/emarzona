@@ -1,0 +1,77 @@
+import { DEBUG_BUILD } from "/node_modules/@sentry/core/build/esm/debug-build.js?v=d758aa40";
+import { debug } from "/node_modules/@sentry/core/build/esm/utils/debug-logger.js?v=d758aa40";
+import { isMatchingPattern } from "/node_modules/@sentry/core/build/esm/utils/string.js?v=d758aa40";
+
+function logIgnoredSpan(droppedSpan) {
+  debug.log(`Ignoring span ${droppedSpan.op} - ${droppedSpan.description} because it matches \`ignoreSpans\`.`);
+}
+
+/**
+ * Check if a span should be ignored based on the ignoreSpans configuration.
+ */
+function shouldIgnoreSpan(
+  span,
+  ignoreSpans,
+) {
+  if (!ignoreSpans?.length || !span.description) {
+    return false;
+  }
+
+  for (const pattern of ignoreSpans) {
+    if (isStringOrRegExp(pattern)) {
+      if (isMatchingPattern(span.description, pattern)) {
+        DEBUG_BUILD && logIgnoredSpan(span);
+        return true;
+      }
+      continue;
+    }
+
+    if (!pattern.name && !pattern.op) {
+      continue;
+    }
+
+    const nameMatches = pattern.name ? isMatchingPattern(span.description, pattern.name) : true;
+    const opMatches = pattern.op ? span.op && isMatchingPattern(span.op, pattern.op) : true;
+
+    // This check here is only correct because we can guarantee that we ran `isMatchingPattern`
+    // for at least one of `nameMatches` and `opMatches`. So in contrary to how this looks,
+    // not both op and name actually have to match. This is the most efficient way to check
+    // for all combinations of name and op patterns.
+    if (nameMatches && opMatches) {
+      DEBUG_BUILD && logIgnoredSpan(span);
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/**
+ * Takes a list of spans, and a span that was dropped, and re-parents the child spans of the dropped span to the parent of the dropped span, if possible.
+ * This mutates the spans array in place!
+ */
+function reparentChildSpans(spans, dropSpan) {
+  const droppedSpanParentId = dropSpan.parent_span_id;
+  const droppedSpanId = dropSpan.span_id;
+
+  // This should generally not happen, as we do not apply this on root spans
+  // but to be safe, we just bail in this case
+  if (!droppedSpanParentId) {
+    return;
+  }
+
+  for (const span of spans) {
+    if (span.parent_span_id === droppedSpanId) {
+      span.parent_span_id = droppedSpanParentId;
+    }
+  }
+}
+
+function isStringOrRegExp(value) {
+  return typeof value === 'string' || value instanceof RegExp;
+}
+
+export { reparentChildSpans, shouldIgnoreSpan };
+                                              
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic2hvdWxkLWlnbm9yZS1zcGFuLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi9zcmMvdXRpbHMvc2hvdWxkLWlnbm9yZS1zcGFuLnRzIl0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7IERFQlVHX0JVSUxEIH0gZnJvbSAnLi4vZGVidWctYnVpbGQnO1xuaW1wb3J0IHR5cGUgeyBDbGllbnRPcHRpb25zIH0gZnJvbSAnLi4vdHlwZXMtaG9pc3Qvb3B0aW9ucyc7XG5pbXBvcnQgdHlwZSB7IFNwYW5KU09OIH0gZnJvbSAnLi4vdHlwZXMtaG9pc3Qvc3Bhbic7XG5pbXBvcnQgeyBkZWJ1ZyB9IGZyb20gJy4vZGVidWctbG9nZ2VyJztcbmltcG9ydCB7IGlzTWF0Y2hpbmdQYXR0ZXJuIH0gZnJvbSAnLi9zdHJpbmcnO1xuXG5mdW5jdGlvbiBsb2dJZ25vcmVkU3Bhbihkcm9wcGVkU3BhbjogUGljazxTcGFuSlNPTiwgJ2Rlc2NyaXB0aW9uJyB8ICdvcCc+KTogdm9pZCB7XG4gIGRlYnVnLmxvZyhgSWdub3Jpbmcgc3BhbiAke2Ryb3BwZWRTcGFuLm9wfSAtICR7ZHJvcHBlZFNwYW4uZGVzY3JpcHRpb259IGJlY2F1c2UgaXQgbWF0Y2hlcyBcXGBpZ25vcmVTcGFuc1xcYC5gKTtcbn1cblxuLyoqXG4gKiBDaGVjayBpZiBhIHNwYW4gc2hvdWxkIGJlIGlnbm9yZWQgYmFzZWQgb24gdGhlIGlnbm9yZVNwYW5zIGNvbmZpZ3VyYXRpb24uXG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBzaG91bGRJZ25vcmVTcGFuKFxuICBzcGFuOiBQaWNrPFNwYW5KU09OLCAnZGVzY3JpcHRpb24nIHwgJ29wJz4sXG4gIGlnbm9yZVNwYW5zOiBSZXF1aXJlZDxDbGllbnRPcHRpb25zPlsnaWdub3JlU3BhbnMnXSxcbik6IGJvb2xlYW4ge1xuICBpZiAoIWlnbm9yZVNwYW5zPy5sZW5ndGggfHwgIXNwYW4uZGVzY3JpcHRpb24pIHtcbiAgICByZXR1cm4gZmFsc2U7XG4gIH1cblxuICBmb3IgKGNvbnN0IHBhdHRlcm4gb2YgaWdub3JlU3BhbnMpIHtcbiAgICBpZiAoaXNTdHJpbmdPclJlZ0V4cChwYXR0ZXJuKSkge1xuICAgICAgaWYgKGlzTWF0Y2hpbmdQYXR0ZXJuKHNwYW4uZGVzY3JpcHRpb24sIHBhdHRlcm4pKSB7XG4gICAgICAgIERFQlVHX0JVSUxEICYmIGxvZ0lnbm9yZWRTcGFuKHNwYW4pO1xuICAgICAgICByZXR1cm4gdHJ1ZTtcbiAgICAgIH1cbiAgICAgIGNvbnRpbnVlO1xuICAgIH1cblxuICAgIGlmICghcGF0dGVybi5uYW1lICYmICFwYXR0ZXJuLm9wKSB7XG4gICAgICBjb250aW51ZTtcbiAgICB9XG5cbiAgICBjb25zdCBuYW1lTWF0Y2hlcyA9IHBhdHRlcm4ubmFtZSA/IGlzTWF0Y2hpbmdQYXR0ZXJuKHNwYW4uZGVzY3JpcHRpb24sIHBhdHRlcm4ubmFtZSkgOiB0cnVlO1xuICAgIGNvbnN0IG9wTWF0Y2hlcyA9IHBhdHRlcm4ub3AgPyBzcGFuLm9wICYmIGlzTWF0Y2hpbmdQYXR0ZXJuKHNwYW4ub3AsIHBhdHRlcm4ub3ApIDogdHJ1ZTtcblxuICAgIC8vIFRoaXMgY2hlY2sgaGVyZSBpcyBvbmx5IGNvcnJlY3QgYmVjYXVzZSB3ZSBjYW4gZ3VhcmFudGVlIHRoYXQgd2UgcmFuIGBpc01hdGNoaW5nUGF0dGVybmBcbiAgICAvLyBmb3IgYXQgbGVhc3Qgb25lIG9mIGBuYW1lTWF0Y2hlc2AgYW5kIGBvcE1hdGNoZXNgLiBTbyBpbiBjb250cmFyeSB0byBob3cgdGhpcyBsb29rcyxcbiAgICAvLyBub3QgYm90aCBvcCBhbmQgbmFtZSBhY3R1YWxseSBoYXZlIHRvIG1hdGNoLiBUaGlzIGlzIHRoZSBtb3N0IGVmZmljaWVudCB3YXkgdG8gY2hlY2tcbiAgICAvLyBmb3IgYWxsIGNvbWJpbmF0aW9ucyBvZiBuYW1lIGFuZCBvcCBwYXR0ZXJucy5cbiAgICBpZiAobmFtZU1hdGNoZXMgJiYgb3BNYXRjaGVzKSB7XG4gICAgICBERUJVR19CVUlMRCAmJiBsb2dJZ25vcmVkU3BhbihzcGFuKTtcbiAgICAgIHJldHVybiB0cnVlO1xuICAgIH1cbiAgfVxuXG4gIHJldHVybiBmYWxzZTtcbn1cblxuLyoqXG4gKiBUYWtlcyBhIGxpc3Qgb2Ygc3BhbnMsIGFuZCBhIHNwYW4gdGhhdCB3YXMgZHJvcHBlZCwgYW5kIHJlLXBhcmVudHMgdGhlIGNoaWxkIHNwYW5zIG9mIHRoZSBkcm9wcGVkIHNwYW4gdG8gdGhlIHBhcmVudCBvZiB0aGUgZHJvcHBlZCBzcGFuLCBpZiBwb3NzaWJsZS5cbiAqIFRoaXMgbXV0YXRlcyB0aGUgc3BhbnMgYXJyYXkgaW4gcGxhY2UhXG4gKi9cbmV4cG9ydCBmdW5jdGlvbiByZXBhcmVudENoaWxkU3BhbnMoc3BhbnM6IFNwYW5KU09OW10sIGRyb3BTcGFuOiBTcGFuSlNPTik6IHZvaWQge1xuICBjb25zdCBkcm9wcGVkU3BhblBhcmVudElkID0gZHJvcFNwYW4ucGFyZW50X3NwYW5faWQ7XG4gIGNvbnN0IGRyb3BwZWRTcGFuSWQgPSBkcm9wU3Bhbi5zcGFuX2lkO1xuXG4gIC8vIFRoaXMgc2hvdWxkIGdlbmVyYWxseSBub3QgaGFwcGVuLCBhcyB3ZSBkbyBub3QgYXBwbHkgdGhpcyBvbiByb290IHNwYW5zXG4gIC8vIGJ1dCB0byBiZSBzYWZlLCB3ZSBqdXN0IGJhaWwgaW4gdGhpcyBjYXNlXG4gIGlmICghZHJvcHBlZFNwYW5QYXJlbnRJZCkge1xuICAgIHJldHVybjtcbiAgfVxuXG4gIGZvciAoY29uc3Qgc3BhbiBvZiBzcGFucykge1xuICAgIGlmIChzcGFuLnBhcmVudF9zcGFuX2lkID09PSBkcm9wcGVkU3BhbklkKSB7XG4gICAgICBzcGFuLnBhcmVudF9zcGFuX2lkID0gZHJvcHBlZFNwYW5QYXJlbnRJZDtcbiAgICB9XG4gIH1cbn1cblxuZnVuY3Rpb24gaXNTdHJpbmdPclJlZ0V4cCh2YWx1ZTogdW5rbm93bik6IHZhbHVlIGlzIHN0cmluZyB8IFJlZ0V4cCB7XG4gIHJldHVybiB0eXBlb2YgdmFsdWUgPT09ICdzdHJpbmcnIHx8IHZhbHVl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

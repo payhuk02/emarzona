@@ -1,0 +1,94 @@
+import { getClient, withScope } from "/node_modules/@sentry/core/build/esm/currentScopes.js?v=d758aa40";
+import { captureException } from "/node_modules/@sentry/core/build/esm/exports.js?v=d758aa40";
+import { addConsoleInstrumentationHandler } from "/node_modules/@sentry/core/build/esm/instrument/console.js?v=d758aa40";
+import { defineIntegration } from "/node_modules/@sentry/core/build/esm/integration.js?v=d758aa40";
+import { CONSOLE_LEVELS } from "/node_modules/@sentry/core/build/esm/utils/debug-logger.js?v=d758aa40";
+import { addExceptionMechanism } from "/node_modules/@sentry/core/build/esm/utils/misc.js?v=d758aa40";
+import { severityLevelFromString } from "/node_modules/@sentry/core/build/esm/utils/severity.js?v=d758aa40";
+import { safeJoin } from "/node_modules/@sentry/core/build/esm/utils/string.js?v=d758aa40";
+import { GLOBAL_OBJ } from "/node_modules/@sentry/core/build/esm/utils/worldwide.js?v=d758aa40";
+
+const INTEGRATION_NAME = 'CaptureConsole';
+
+const _captureConsoleIntegration = ((options = {}) => {
+  const levels = options.levels || CONSOLE_LEVELS;
+  const handled = options.handled ?? true;
+
+  return {
+    name: INTEGRATION_NAME,
+    setup(client) {
+      if (!('console' in GLOBAL_OBJ)) {
+        return;
+      }
+
+      addConsoleInstrumentationHandler(({ args, level }) => {
+        if (getClient() !== client || !levels.includes(level)) {
+          return;
+        }
+
+        consoleHandler(args, level, handled);
+      });
+    },
+  };
+}) ;
+
+/**
+ * Send Console API calls as Sentry Events.
+ */
+const captureConsoleIntegration = defineIntegration(_captureConsoleIntegration);
+
+function consoleHandler(args, level, handled) {
+  const severityLevel = severityLevelFromString(level);
+
+  /*
+    We create this error here already to attach a stack trace to captured messages,
+    if users set `attachStackTrace` to `true` in Sentry.init.
+    We do this here already because we want to minimize the number of Sentry SDK stack frames
+    within the error. Technically, Client.captureMessage will also do it but this happens several
+    stack frames deeper.
+  */
+  const syntheticException = new Error();
+
+  const captureContext = {
+    level: severityLevelFromString(level),
+    extra: {
+      arguments: args,
+    },
+  };
+
+  withScope(scope => {
+    scope.addEventProcessor(event => {
+      event.logger = 'console';
+
+      addExceptionMechanism(event, {
+        handled,
+        type: 'auto.core.capture_console',
+      });
+
+      return event;
+    });
+
+    if (level === 'assert') {
+      if (!args[0]) {
+        const message = `Assertion failed: ${safeJoin(args.slice(1), ' ') || 'console.assert'}`;
+        scope.setExtra('arguments', args.slice(1));
+        scope.captureMessage(message, severityLevel, { captureContext, syntheticException });
+      }
+      return;
+    }
+
+    const error = args.find(arg => arg instanceof Error);
+    if (error) {
+      captureException(error, captureContext);
+      return;
+    }
+
+    const message = safeJoin(args, ' ');
+    scope.captureMessage(message, severityLevel, { captureContext, syntheticException });
+  });
+}
+
+export { captureConsoleIntegration };
+                                          
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiY2FwdHVyZWNvbnNvbGUuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy9pbnRlZ3JhdGlvbnMvY2FwdHVyZWNvbnNvbGUudHMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgZ2V0Q2xpZW50LCB3aXRoU2NvcGUgfSBmcm9tICcuLi9jdXJyZW50U2NvcGVzJztcbmltcG9ydCB7IGNhcHR1cmVFeGNlcHRpb24gfSBmcm9tICcuLi9leHBvcnRzJztcbmltcG9ydCB7IGFkZENvbnNvbGVJbnN0cnVtZW50YXRpb25IYW5kbGVyIH0gZnJvbSAnLi4vaW5zdHJ1bWVudC9jb25zb2xlJztcbmltcG9ydCB7IGRlZmluZUludGVncmF0aW9uIH0gZnJvbSAnLi4vaW50ZWdyYXRpb24nO1xuaW1wb3J0IHR5cGUgeyBDYXB0dXJlQ29udGV4dCB9IGZyb20gJy4uL3Njb3BlJztcbmltcG9ydCB0eXBlIHsgSW50ZWdyYXRpb25GbiB9IGZyb20gJy4uL3R5cGVzLWhvaXN0L2ludGVncmF0aW9uJztcbmltcG9ydCB7IENPTlNPTEVfTEVWRUxTIH0gZnJvbSAnLi4vdXRpbHMvZGVidWctbG9nZ2VyJztcbmltcG9ydCB7IGFkZEV4Y2VwdGlvbk1lY2hhbmlzbSB9IGZyb20gJy4uL3V0aWxzL21pc2MnO1xuaW1wb3J0IHsgc2V2ZXJpdHlMZXZlbEZyb21TdHJpbmcgfSBmcm9tICcuLi91dGlscy9zZXZlcml0eSc7XG5pbXBvcnQgeyBzYWZlSm9pbiB9IGZyb20gJy4uL3V0aWxzL3N0cmluZyc7XG5pbXBvcnQgeyBHTE9CQUxfT0JKIH0gZnJvbSAnLi4vdXRpbHMvd29ybGR3aWRlJztcblxuaW50ZXJmYWNlIENhcHR1cmVDb25zb2xlT3B0aW9ucyB7XG4gIGxldmVscz86IHN0cmluZ1tdO1xuXG4gIC8qKlxuICAgKiBCeSBkZWZhdWx0LCBTZW50cnkgd2lsbCBtYXJrIGNhcHR1cmVkIGNvbnNvbGUgbWVzc2FnZXMgYXMgaGFuZGxlZC5cbiAgICogU2V0IHRoaXMgdG8gYGZhbHNlYCBpZiB5b3Ugd2FudCB0byBtYXJrIHRoZW0gYXMgdW5oYW5kbGVkIGluc3RlYWQuXG4gICAqXG4gICAqIEBkZWZhdWx0IHRydWVcbiAgICovXG4gIGhhbmRsZWQ/OiBib29sZWFuO1xufVxuXG5jb25zdCBJTlRFR1JBVElPTl9OQU1FID0gJ0NhcHR1cmVDb25zb2xlJztcblxuY29uc3QgX2NhcHR1cmVDb25zb2xlSW50ZWdyYXRpb24gPSAoKG9wdGlvbnM6IENhcHR1cmVDb25zb2xlT3B0aW9ucyA9IHt9KSA9PiB7XG4gIGNvbnN0IGxldmVscyA9IG9wdGlvbnMubGV2ZWxzIHx8IENPTlNPTEVfTEVWRUxTO1xuICBjb25zdCBoYW5kbGVkID0gb3B0aW9ucy5oYW5kbGVkID8/IHRydWU7XG5cbiAgcmV0dXJuIHtcbiAgICBuYW1lOiBJTlRFR1JBVElPTl9OQU1FLFxuICAgIHNldHVwKGNsaWVudCkge1xuICAgICAgaWYgKCEoJ2NvbnNvbGUnIGluIEdMT0JBTF9PQkopKSB7XG4gICAgICAgIHJldHVybjtcbiAgICAgIH1cblxuICAgICAgYWRkQ29uc29sZUluc3RydW1lbnRhdGlvbkhhbmRsZXIoKHsgYXJncywgbGV2ZWwgfSkgPT4ge1xuICAgICAgICBpZiAoZ2V0Q2xpZW50KCkgIT09IGNsaWVudCB8fCAhbGV2ZWxzLmluY2x1ZGVzKGxldmVsKSkge1xuICAgICAgICAgIHJldHVybjtcbiAgICAgICAgfVxuXG4gICAgICAgIGNvbnNvbGVIYW5kbGVyKGFyZ3MsIGxldmVsLCBoYW5kbGVkKTtcbiAgICAgIH0pO1xuICAgIH0sXG4gIH07XG59KSBzYXRpc2ZpZXMgSW50ZWdyYXRpb25GbjtcblxuLyoqXG4gKiBTZW5kIENvbnNvbGUgQVBJIGNhbGxzIGFzIFNlbnRyeSBFdmVudHMuXG4gKi9cbmV4cG9ydCBjb25zdCBjYXB0dXJlQ29uc29sZUludGVncmF0aW9uID0gZGVmaW5lSW50ZWdyYXRpb24oX2NhcHR1cmVDb25zb2xlSW50ZWdyYXRpb24pO1xuXG5mdW5jdGlvbiBjb25zb2xlSGFuZGxlcihhcmdzOiB1bmtub3duW10sIGxldmVsOiBzdHJpbmcsIGhhbmRsZWQ6IGJvb2xlYW4pOiB2b2lkIHtcbiAgY29uc3Qgc2V2ZXJpdHlMZXZlbCA9IHNldmVyaXR5TGV2ZWxGcm9tU3RyaW5nKGxldmVsKTtcblxuICAvKlxuICAgIFdlIGNyZWF0ZSB0aGlzIGVycm9yIGhlcmUgYWxyZWFkeSB0byBhdHRhY2ggYSBzdGFjayB0cmFjZSB0byBjYXB0dXJlZCBtZXNzYWdlcyxcbiAgICBpZiB1c2VycyBzZXQgYGF0dGFjaFN0YWNrVHJhY2VgIHRvIGB0cnVlYCBpbiBTZW50cnkuaW5pdC5cbiAgICBXZSBkbyB0aGlzIGhlcmUgYWxyZWFkeSBiZWNhdXNlIHdlIHdhbnQgdG8gbWluaW1pemUgdGhlIG51bWJlciBvZiBTZW50cnkgU0RLIHN0YWNrIGZyYW1lc1xuICAgIHdpdGhpbiB0aGUgZXJyb3IuIFRlY2huaWNhbGx5LCBDbGllbnQuY2FwdHVyZU1lc3NhZ2Ugd2lsbCBhbHNvIGRvIGl0IGJ1dCB0aGlzIGhhcHBlbnMgc2V2ZXJhbFxuICAgIHN0YWNrIGZyYW1lcyBkZWVwZXIuXG4gICovXG4gIGNvbnN0IHN5bnRoZXRpY0V4Y2VwdGlvbiA9IG5ldyBFcnJvcigpO1xuXG4gIGNvbnN0IGNhcHR1cmVDb250ZXh0OiBDYXB0dXJlQ29udGV4dCA9IHtcbiAgICBsZXZlbDogc2V2ZXJpdHlMZXZlbEZyb21TdHJpbmcobGV2ZWwpLFxuICAgIGV4dHJhOiB7XG4gICAgICBhcmd1bWVudHM6IGFyZ3MsXG4gICAgfSxcbiAgfTtcblxuICB3aXRoU2NvcGUoc2NvcGUgPT4ge1xuICAgIHNjb3BlLmFkZEV2ZW50UHJvY2Vzc29yKGV2ZW50ID0+IHtcbiAgICAgIGV2ZW50LmxvZ2dlciA9ICdjb25zb2xlJztcblxuICAgICAgYWRkRXhjZXB0aW9uTWVjaGFuaXNtKGV2ZW50LCB7XG4gICAgICAgIGhhbmRsZWQsXG4gICAgICAgIHR5cGU6ICdhdXRvLmNvcmUuY2FwdHVyZV9jb25zb2xlJyxcbiAgICAgIH0pO1xuXG4gICAgICByZXR1cm4gZXZlbnQ7XG4gICAgfSk7XG5cbiAgICBpZiAobGV2ZWwgPT09ICdhc3NlcnQnKSB7XG4gICAgICBpZiAoIWFyZ3NbMF0pIHtcbiAgICAgICAgY29uc3QgbWVzc2FnZSA9IGBBc3NlcnRpb24gZmFpbGVkOiAke3NhZmVKb2luKGFyZ3Muc2xpY2UoMSksICcgJykgfHwgJ2NvbnNvbGUuYXNzZXJ0J31gO1xuICAgICAgICBzY29wZS5zZXRFeHRyYSgnYXJndW1lbnRzJywgYXJncy5zbGljZSgxKSk7XG4gICAgICAgIHNjb3BlLmNhcHR1cmVNZXNzYWdlKG1lc3NhZ2UsIHNldmVyaXR5TGV2ZWwsIHsgY2FwdHVyZUNvbnRleHQsIHN5bnRoZXRpY0V4Y2VwdGlvbiB9KTtcbiAgICAgIH1cbiAgICAgIHJldHVybjtcbiAgICB9XG5cbiAgICBjb25zdCBlcnJvciA9IGFyZ3MuZmluZChhcmcgPT4gYXJnIGluc3RhbmNlb2YgRXJyb3IpO1xuICAgIGlmIChlcnJvcikge1xuICAgICAgY2FwdHVyZUV4Y2VwdGlvbihlcnJvciwgY2FwdHVyZUNvbnRleHQpO1xuICAgICAgcmV0dXJuO1xuICAgIH1cblxuICAgIGNvbnN0IG1lc3NhZ2UgPSBzYWZlSm9pbihhcmdzLCAnICcpO1xuICAgIHNjb3BlLmNhcHR1cmVNZXNzYWdlKG1lc3NhZ2UsIHNldmVyaXR5TGV2ZWwsIHsgY2FwdHVyZUNvbnRleHQsIHN5bnRoZXRpY0V4Y2VwdGlvbiB9KTtcbiAgfSk7XG59XG4iXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7OztBQXdCQSxNQUFNLGdCQUFBLEdBQW1CLGdCQUFnQjs7QUFFekMsTUFBTSwwQkFBQSxJQUE4QixDQUFDLE9BQU8sR0FBMEIsRUFBRSxLQUFLO0FBQzdFLEVBQUUsTUFBTSxNQUFBLEdBQVMsT0FBTyxDQUFDLE1BQUEsSUFBVSxjQUFjO0FBQ2pELEVBQUUsTUFBTSxPQUFBLEdBQVUsT0FBTyxDQUFDLE9BQUEsSUFBVyxJQUFJOztBQUV6QyxFQUFFLE9BQU87QUFDVCxJQUFJLElB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

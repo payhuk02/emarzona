@@ -1,0 +1,110 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/sidebar/SidebarCollapsibleSection.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/sidebar/SidebarCollapsibleSection.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=6014a254"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+import { ChevronDown } from "/node_modules/.vite/deps/lucide-react.js?v=6014a254";
+import { SidebarGroup, SidebarGroupLabel } from "/src/components/ui/sidebar.tsx";
+import { cn } from "/src/lib/utils.ts";
+export function SidebarCollapsibleSection({ sectionId, label, isOpen, onToggle, hideHeader = false, children, className }) {
+    const panelId = `sidebar-section-${sectionId}`;
+    return /*#__PURE__*/ _jsxDEV(SidebarGroup, {
+        className: cn('app-sidebar-section py-0', className),
+        children: [
+            !hideHeader && /*#__PURE__*/ _jsxDEV(SidebarGroupLabel, {
+                className: "h-auto p-0",
+                children: /*#__PURE__*/ _jsxDEV("button", {
+                    type: "button",
+                    onClick: onToggle,
+                    className: "app-sidebar-section-header w-full flex items-center justify-between gap-2 rounded-md px-2 py-2 text-left transition-colors duration-200",
+                    "aria-expanded": isOpen,
+                    "aria-controls": panelId,
+                    children: [
+                        /*#__PURE__*/ _jsxDEV("span", {
+                            className: "text-[10px] uppercase tracking-[0.14em] font-bold text-muted-foreground",
+                            children: label
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/sidebar/SidebarCollapsibleSection.tsx",
+                            lineNumber: 39,
+                            columnNumber: 13
+                        }, this),
+                        /*#__PURE__*/ _jsxDEV(ChevronDown, {
+                            className: cn('h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform duration-300 ease-out', !isOpen && '-rotate-90'),
+                            "aria-hidden": true
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/sidebar/SidebarCollapsibleSection.tsx",
+                            lineNumber: 42,
+                            columnNumber: 13
+                        }, this)
+                    ]
+                }, void 0, true, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/sidebar/SidebarCollapsibleSection.tsx",
+                    lineNumber: 32,
+                    columnNumber: 11
+                }, this)
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/sidebar/SidebarCollapsibleSection.tsx",
+                lineNumber: 31,
+                columnNumber: 9
+            }, this),
+            /*#__PURE__*/ _jsxDEV("div", {
+                id: panelId,
+                className: cn('app-sidebar-accordion grid transition-[grid-template-rows] duration-300 ease-out', isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'),
+                children: /*#__PURE__*/ _jsxDEV("div", {
+                    className: "overflow-hidden min-h-0",
+                    children: children
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/sidebar/SidebarCollapsibleSection.tsx",
+                    lineNumber: 59,
+                    columnNumber: 9
+                }, this)
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/sidebar/SidebarCollapsibleSection.tsx",
+                lineNumber: 52,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/sidebar/SidebarCollapsibleSection.tsx",
+        lineNumber: 29,
+        columnNumber: 5
+    }, this);
+}
+_c = SidebarCollapsibleSection;
+var _c;
+$RefreshReg$(_c, "SidebarCollapsibleSection");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/sidebar/SidebarCollapsibleSection.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/sidebar/SidebarCollapsibleSection.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIlNpZGViYXJDb2xsYXBzaWJsZVNlY3Rpb24udHN4Il0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7IFJlYWN0Tm9kZSB9IGZyb20gJ3JlYWN0JztcbmltcG9ydCB7IENoZXZyb25Eb3duIH0gZnJvbSAnbHVjaWRlLXJlYWN0JztcbmltcG9ydCB7IFNpZGViYXJHcm91cCwgU2lkZWJhckdyb3VwTGFiZWwgfSBmcm9tICdAL2NvbXBvbmVudHMvdWkvc2lkZWJhcic7XG5pbXBvcnQgeyBjbiB9IGZyb20gJ0AvbGliL3V0aWxzJztcblxuaW50ZXJmYWNlIFNpZGViYXJDb2xsYXBzaWJsZVNlY3Rpb25Qcm9wcyB7XG4gIC8qKiBTdGFibGUgaWQgYmFzZSBmb3IgYXJpYS1jb250cm9scyAvIHBhbmVsIGlkIChhdm9pZCBsYWJlbC1iYXNlZCBpZHMpLiAqL1xuICBzZWN0aW9uSWQ6IHN0cmluZztcbiAgbGFiZWw6IHN0cmluZztcbiAgaXNPcGVuOiBib29sZWFuO1xuICBvblRvZ2dsZTogKCkgPT4gdm9pZDtcbiAgLyoqIE1vZGUgcmFpbCBpY8O0bmUgOiBtYXNxdWVyIGwnZW4tdMOqdGUgYWNjb3Jkw6lvbiAqL1xuICBoaWRlSGVhZGVyPzogYm9vbGVhbjtcbiAgY2hpbGRyZW46IFJlYWN0Tm9kZTtcbiAgY2xhc3NOYW1lPzogc3RyaW5nO1xufVxuXG5leHBvcnQgZnVuY3Rpb24gU2lkZWJhckNvbGxhcHNpYmxlU2VjdGlvbih7XG4gIHNlY3Rpb25JZCxcbiAgbGFiZWwsXG4gIGlzT3BlbixcbiAgb25Ub2dnbGUsXG4gIGhpZGVIZWFkZXIgPSBmYWxzZSxcbiAgY2hpbGRyZW4sXG4gIGNsYXNzTmFtZSxcbn06IFNpZGViYXJDb2xsYXBzaWJsZVNlY3Rpb25Qcm9wcykge1xuICBjb25zdCBwYW5lbElkID0gYHNpZGViYXItc2VjdGlvbi0ke3NlY3Rpb25JZH1gO1xuICByZXR1cm4gKFxuICAgIDxTaWRlYmFyR3JvdXAgY2xhc3NOYW1lPXtjbignYXBwLXNpZGViYXItc2VjdGlvbiBweS0wJywgY2xhc3NOYW1lKX0+XG4gICAgICB7IWhpZGVIZWFkZXIgJiYgKFxuICAgICAgICA8U2lkZWJhckdyb3VwTGFiZWwgY2xhc3NOYW1lPVwiaC1hdXRvIHAtMFwiPlxuICAgICAgICAgIDxidXR0b25cbiAgICAgICAgICAgIHR5cGU9XCJidXR0b25cIlxuICAgICAgICAgICAgb25DbGljaz17b25Ub2dnbGV9XG4gICAgICAgICAgICBjbGFzc05hbWU9XCJhcHAtc2lkZWJhci1zZWN0aW9uLWhlYWRlciB3LWZ1bGwgZmxleCBpdGVtcy1jZW50ZXIganVzdGlmeS1iZXR3ZWVuIGdhcC0yIHJvdW5kZWQtbWQgcHgtMiBweS0yIHRleHQtbGVmdCB0cmFuc2l0aW9uLWNvbG9ycyBkdXJhdGlvbi0yMDBcIlxuICAgICAgICAgICAgYXJpYS1leHBhbmRlZD17aXNPcGVufVxuICAgICAgICAgICAgYXJpYS1jb250cm9scz17cGFuZWxJZH1cbiAgICAgICAgICA+XG4gICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJ0ZXh0LVsxMHB4XSB1cHBlcmNhc2UgdHJhY2tpbmctWzAuMTRlbV0gZm9udC1ib2xkIHRleHQtbXV0ZWQtZm9yZWdyb3VuZFwiPlxuICAgICAgICAgICAgICB7bGFiZWx9XG4gICAgICAgICAgICA8L3NwYW4+XG4gICAgICAgICAgICA8Q2hldnJvbkRvd25cbiAgICAgICAgICAgICAgY2xhc3NOYW1lPXtjbihcbiAgICAgICAgICAgICAgICAnaC0zLjUgdy0zLjUgc2hyaW5rLTAgdGV4dC1tdXRlZC1mb3JlZ3JvdW5kIHRyYW5zaXRpb24tdHJhbnNmb3JtIGR1cmF0aW9uLTMwMCBlYXNlLW91dCcsXG4gICAgICAgICAgICAgICAgIWlzT3BlbiAmJiAnLXJvdGF0ZS05MCdcbiAgICAgICAgICAgICAgKX1cbiAgICAgICAgICAgICAgYXJpYS1oaWRkZW5cbiAgICAgICAgICAgIC8+XG4gICAgICAgICAgPC9idXR0b24+XG4gICAgICAgIDwvU2lkZWJhckdyb3VwTGFiZWw+XG4gICAgICApfVxuICAgICAgPGRpdlxuICAgICAgICBpZD17cGFuZWxJZH1cbiAgICAgICAgY2xhc3NOYW1lPXtjbihcbiAgICAgICAgICAnYXBwLXNpZGViYXItYWNjb3JkaW9uIGdyaWQgdHJhbnNpdGlvbi1bZ3JpZC10ZW1wbGF0ZS1yb3dzXSBkdXJhdGlvbi0zMDAgZWFzZS1vdXQnLFxuICAgICAgICAgIGlzT3BlbiA/ICdncmlkLXJvd3MtWzFmcl0nIDogJ2dyaWQtcm93cy1bMGZyXSdcbiAgICAgICAgKX1cbiAgICAgID5cbiAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJvdmVyZmxvdy1oaWRkZW4gbWluLWgtMFwiPntjaGlsZHJlbn08L2Rpdj5cbiAgICAgIDwvZGl2PlxuICAgIDwvU2lkZWJhckdyb3VwPlxuICApO1xufVxuIl0sIm5hbWVzIjpbIkNoZXZyb25Eb3duIiwiU2lkZWJhckdyb3VwIiwiU2lkZWJhckdyb3VwTGFiZWwiLCJjbiIsIlNpZGViYXJDb2xsYXBzaWJsZVNlY3Rpb24iLCJzZWN0aW9uSWQiLCJsYWJlbCIsImlzT3BlbiIsIm9uVG9nZ2xlIiwiaGlkZUhlYWRlciIsImNoaWxkcmVuIiwiY2xhc3NOYW1lIiwicGFuZWxJZCIsImJ1dHRvbiIsInR5cGUiLCJvbkNsaWNrIiwiYXJpYS1leHBhbmRlZCIsImFyaWEtY29udHJvbHMiLCJzcGFuIiwiYXJpYS1oaWRkZW4iLCJkaXYiLCJpZCJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7QUFDQSxTQUFTQSxXQUFXLFFBQVEsZUFBZTtBQUMzQyxTQUFTQyxZQUFZLEVBQUVDLGlCQUFpQixRQUFRLDBCQUEwQjtBQUMxRSxTQUFTQyxFQUFFLFFBQVEsY0FBYztBQWNqQyxPQUFPLFNBQVNDLDBCQUEwQixFQUN4Q0MsU0FBUyxFQUNUQyxLQUFLLEVBQ0xDLE1BQU0sRUFDTkMsUUFBUSxFQUNSQyxhQUFhLEtBQUssRUFDbEJDLFFBQVEsRUFDUkMsU0FBUyxFQUNzQjtJQUMvQixNQUFNQyxVQUFVLENBQUMsZ0JBQWdCLEVBQUVQLFdBQVc7SUFDOUMscUJBQ0UsUUFBQ0o7UUFBYVUsV0FBV1IsR0FBRyw0QkFBNEJROztZQUNyRCxDQUFDRiw0QkFDQSxRQUFDUDtnQkFBa0JTLFdBQVU7MEJBQzNCLGNBQUEsUUFBQ0U7b0JBQ0NDLE1BQUs7b0JBQ0xDLFNBQVNQO29CQUNURyxXQUFVO29CQUNWSyxpQkFBZVQ7b0JBQ2ZVLGlCQUFlTDs7c0NBRWYsUUFBQ007NEJBQUtQLFdBQVU7c0NBQ2JMOzs7Ozs7c0NBRUgsUUFBQ047NEJBQ0NXLFdBQVdSLEdBQ1QseUZBQ0EsQ0FBQ0ksVUFBVTs0QkFFYlksYUFBVzs7Ozs7Ozs7Ozs7Ozs7Ozs7MEJBS25CLFFBQUNDO2dCQUNDQyxJQUFJVDtnQkFDSkQsV0FBV1IsR0FDVCxvRkFDQUksU0FBUyxvQkFBb0I7MEJBRy9CLGNBQUEsUUFBQ2E7b0JBQUlULFdBQVU7OEJBQTJCRDs7Ozs7Ozs7Ozs7Ozs7Ozs7QUFJbEQ7S0E3Q2dCTiJ9

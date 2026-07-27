@@ -1,0 +1,32 @@
+import.meta.env = {"BASE_URL": "/", "DEV": true, "MODE": "development", "PROD": false, "SSR": false, "VITE_BUILD_ID": "build-mrszuyh2", "VITE_E2E_BYPASS_TERMS": "true", "VITE_E2E_PAYMENT_STUB": "true", "VITE_SUPABASE_ANON_KEY": "sb_publishable_PaC6RE0frJU97Exnp30IKA_R9pieK7C", "VITE_SUPABASE_PROJECT_ID": "mock-project", "VITE_SUPABASE_PUBLISHABLE_KEY": "sb_publishable_PaC6RE0frJU97Exnp30IKA_R9pieK7C", "VITE_SUPABASE_TEST_URL": "https://ufbztturuwwazfcvhvuu.supabase.co", "VITE_SUPABASE_URL": "https://ufbztturuwwazfcvhvuu.supabase.co"};/**
+ * Console guard: route console methods through the project logger.
+ * In production, logger is a no-op, effectively silencing console.* calls.
+ */ import { logger } from "/src/lib/logger.ts";
+const bind = (fn)=>fn.bind(null);
+// Replace global console methods to ensure consistent behavior across the app
+// and avoid accidental logs leaking in production.
+// This runs very early from main.tsx.
+export function installConsoleGuard() {
+    // Only override console in production to avoid breaking dev tools and Vite overlays
+    if (!import.meta.env.PROD) return;
+    // Preserve original methods just in case debugging is needed in dev tools
+    const original = {
+        info: console.info,
+        warn: console.warn,
+        error: console.error,
+        debug: console.debug
+    };
+    // Map all to logger which is environment-aware
+    console.info = bind(logger.info);
+    console.warn = bind(logger.warn);
+    console.error = bind(logger.error);
+    console.debug = bind(logger.log);
+    window._restoreConsole = ()=>{
+        console.info = original.info;
+        console.warn = original.warn;
+        console.error = original.error;
+        console.debug = original.debug;
+    };
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImNvbnNvbGUtZ3VhcmQudHMiXSwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBDb25zb2xlIGd1YXJkOiByb3V0ZSBjb25zb2xlIG1ldGhvZHMgdGhyb3VnaCB0aGUgcHJvamVjdCBsb2dnZXIuXG4gKiBJbiBwcm9kdWN0aW9uLCBsb2dnZXIgaXMgYSBuby1vcCwgZWZmZWN0aXZlbHkgc2lsZW5jaW5nIGNvbnNvbGUuKiBjYWxscy5cbiAqL1xuaW1wb3J0IHsgbG9nZ2VyIH0gZnJvbSAnLi9sb2dnZXInO1xuXG50eXBlIENvbnNvbGVNZXRob2QgPSAoLi4uYXJnczogdW5rbm93bltdKSA9PiB2b2lkO1xuXG5jb25zdCBiaW5kID0gKGZuOiBDb25zb2xlTWV0aG9kKTogQ29uc29sZU1ldGhvZCA9PiBmbi5iaW5kKG51bGwpO1xuXG4vLyBSZXBsYWNlIGdsb2JhbCBjb25zb2xlIG1ldGhvZHMgdG8gZW5zdXJlIGNvbnNpc3RlbnQgYmVoYXZpb3IgYWNyb3NzIHRoZSBhcHBcbi8vIGFuZCBhdm9pZCBhY2NpZGVudGFsIGxvZ3MgbGVha2luZyBpbiBwcm9kdWN0aW9uLlxuLy8gVGhpcyBydW5zIHZlcnkgZWFybHkgZnJvbSBtYWluLnRzeC5cbmV4cG9ydCBmdW5jdGlvbiBpbnN0YWxsQ29uc29sZUd1YXJkKCk6IHZvaWQge1xuICAvLyBPbmx5IG92ZXJyaWRlIGNvbnNvbGUgaW4gcHJvZHVjdGlvbiB0byBhdm9pZCBicmVha2luZyBkZXYgdG9vbHMgYW5kIFZpdGUgb3ZlcmxheXNcbiAgaWYgKCFpbXBvcnQubWV0YS5lbnYuUFJPRCkgcmV0dXJuO1xuICAvLyBQcmVzZXJ2ZSBvcmlnaW5hbCBtZXRob2RzIGp1c3QgaW4gY2FzZSBkZWJ1Z2dpbmcgaXMgbmVlZGVkIGluIGRldiB0b29sc1xuICBjb25zdCBvcmlnaW5hbCA9IHtcbiAgICBpbmZvOiBjb25zb2xlLmluZm8sXG4gICAgd2FybjogY29uc29sZS53YXJuLFxuICAgIGVycm9yOiBjb25zb2xlLmVycm9yLFxuICAgIGRlYnVnOiBjb25zb2xlLmRlYnVnLFxuICB9O1xuXG4gIC8vIE1hcCBhbGwgdG8gbG9nZ2VyIHdoaWNoIGlzIGVudmlyb25tZW50LWF3YXJlXG4gIGNvbnNvbGUuaW5mbyA9IGJpbmQobG9nZ2VyLmluZm8gYXMgQ29uc29sZU1ldGhvZCk7XG4gIGNvbnNvbGUud2FybiA9IGJpbmQobG9nZ2VyLndhcm4gYXMgQ29uc29sZU1ldGhvZCk7XG4gIGNvbnNvbGUuZXJyb3IgPSBiaW5kKGxvZ2dlci5lcnJvciBhcyBDb25zb2xlTWV0aG9kKTtcbiAgY29uc29sZS5kZWJ1ZyA9IGJpbmQobG9nZ2VyLmxvZyBhcyBDb25zb2xlTWV0aG9kKTtcblxuICAvLyBQcm92aWRlIGEgd2F5IHRvIHJlc3RvcmUgaWYgZXZlciBuZWVkZWQgZHVyaW5nIGRlYnVnZ2luZ1xuICAvLyBVdGlsaXNlciB1bmUgaW50ZXJmYWNlIHBvdXIgw6l2aXRlciBhbnlcbiAgaW50ZXJmYWNlIFdpbmRvd1dpdGhSZXN0b3JlQ29uc29sZSBleHRlbmRzIFdpbmRvdyB7XG4gICAgX19yZXN0b3JlQ29uc29sZT86ICgpID0+IHZvaWQ7XG4gIH1cbiAgKHdpbmRvdyBhcyBXaW5kb3dXaXRoUmVzdG9yZUNvbnNvbGUpLl9yZXN0b3JlQ29uc29sZSA9ICgpID0+IHtcbiAgICBjb25zb2xlLmluZm8gPSBvcmlnaW5hbC5pbmZvO1xuICAgIGNvbnNvbGUud2FybiA9IG9yaWdpbmFsLndhcm47XG4gICAgY29uc29sZS5lcnJvciA9IG9yaWdpbmFsLmVycm9yO1xuICAgIGNvbnNvbGUuZGVidWcgPSBvcmlnaW5hbC5kZWJ1ZztcbiAgfTtcbn1cblxuXG5cblxuXG5cblxuXG4iXSwibmFtZXMiOlsibG9nZ2VyIiwiYmluZCIsImZuIiwiaW5zdGFsbENvbnNvbGVHdWFyZCIsImVudiIsIlBST0QiLCJvcmlnaW5hbCIsImluZm8iLCJjb25zb2xlIiwid2FybiIsImVycm9yIiwiZGVidWciLCJsb2ciLCJ3aW5kb3ciLCJfcmVzdG9yZUNvbnNvbGUiXSwibWFwcGluZ3MiOiJBQUFBOzs7Q0FHQyxHQUNELFNBQVNBLE1BQU0sUUFBUSxXQUFXO0FBSWxDLE1BQU1DLE9BQU8sQ0FBQ0MsS0FBcUNBLEdBQUdELElBQUksQ0FBQztBQUUzRCw4RUFBOEU7QUFDOUUsbURBQW1EO0FBQ25ELHNDQUFzQztBQUN0QyxPQUFPLFNBQVNFO0lBQ2Qsb0ZBQW9GO0lBQ3BGLElBQUksQ0FBQyxZQUFZQyxHQUFHLENBQUNDLElBQUksRUFBRTtJQUMzQiwwRUFBMEU7SUFDMUUsTUFBTUMsV0FBVztRQUNmQyxNQUFNQyxRQUFRRCxJQUFJO1FBQ2xCRSxNQUFNRCxRQUFRQyxJQUFJO1FBQ2xCQyxPQUFPRixRQUFRRSxLQUFLO1FBQ3BCQyxPQUFPSCxRQUFRRyxLQUFLO0lBQ3RCO0lBRUEsK0NBQStDO0lBQy9DSCxRQUFRRCxJQUFJLEdBQUdOLEtBQUtELE9BQU9PLElBQUk7SUFDL0JDLFFBQVFDLElBQUksR0FBR1IsS0FBS0QsT0FBT1MsSUFBSTtJQUMvQkQsUUFBUUUsS0FBSyxHQUFHVCxLQUFLRCxPQUFPVSxLQUFLO0lBQ2pDRixRQUFRRyxLQUFLLEdBQUdWLEtBQUtELE9BQU9ZLEdBQUc7SUFPOUJDLE9BQW9DQyxlQUFlLEdBQUc7UUFDckROLFFBQVFELElBQUksR0FBR0QsU0FBU0MsSUFBSTtRQUM1QkMsUUFBUUMsSUFBSSxHQUFHSCxTQUFTRyxJQUFJO1FBQzVCRCxRQUFRRSxLQUFLLEdBQUdKLFNBQVNJLEtBQUs7UUFDOUJGLFFBQVFHLEtBQUssR0FBR0wsU0FBU0ssS0FBSztJQUNoQztBQUNGIn0=

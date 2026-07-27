@@ -1,0 +1,46 @@
+import { getActiveSpan, getRootSpan, spanToJSON, debug, SPAN_STATUS_ERROR } from "/node_modules/@sentry/core/build/esm/index.js?v=a52cce50";
+import { DEBUG_BUILD } from "/node_modules/@sentry/browser/build/npm/esm/dev/debug-build.js?v=a52cce50";
+import { WINDOW } from "/node_modules/@sentry/browser/build/npm/esm/dev/helpers.js?v=a52cce50";
+
+/**
+ * Add a listener that cancels and finishes a transaction when the global
+ * document is hidden.
+ */
+function registerBackgroundTabDetection() {
+  if (WINDOW.document) {
+    WINDOW.document.addEventListener('visibilitychange', () => {
+      const activeSpan = getActiveSpan();
+      if (!activeSpan) {
+        return;
+      }
+
+      const rootSpan = getRootSpan(activeSpan);
+
+      if (WINDOW.document.hidden && rootSpan) {
+        const cancelledStatus = 'cancelled';
+
+        const { op, status } = spanToJSON(rootSpan);
+
+        if (DEBUG_BUILD) {
+          debug.log(`[Tracing] Transaction: ${cancelledStatus} -> since tab moved to the background, op: ${op}`);
+        }
+
+        // We should not set status if it is already set, this prevent important statuses like
+        // error or data loss from being overwritten on transaction.
+        if (!status) {
+          rootSpan.setStatus({ code: SPAN_STATUS_ERROR, message: cancelledStatus });
+        }
+
+        rootSpan.setAttribute('sentry.cancellation_reason', 'document.hidden');
+        rootSpan.end();
+      }
+    });
+  } else {
+    DEBUG_BUILD && debug.warn('[Tracing] Could not set up background tab detection due to lack of global document');
+  }
+}
+
+export { registerBackgroundTabDetection };
+                                         
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiYmFja2dyb3VuZHRhYi5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4vLi4vLi4vc3JjL3RyYWNpbmcvYmFja2dyb3VuZHRhYi50cyJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgeyBkZWJ1ZywgZ2V0QWN0aXZlU3BhbiwgZ2V0Um9vdFNwYW4sIFNQQU5fU1RBVFVTX0VSUk9SLCBzcGFuVG9KU09OIH0gZnJvbSAnQHNlbnRyeS9jb3JlJztcbmltcG9ydCB7IERFQlVHX0JVSUxEIH0gZnJvbSAnLi4vZGVidWctYnVpbGQnO1xuaW1wb3J0IHsgV0lORE9XIH0gZnJvbSAnLi4vaGVscGVycyc7XG5cbi8qKlxuICogQWRkIGEgbGlzdGVuZXIgdGhhdCBjYW5jZWxzIGFuZCBmaW5pc2hlcyBhIHRyYW5zYWN0aW9uIHdoZW4gdGhlIGdsb2JhbFxuICogZG9jdW1lbnQgaXMgaGlkZGVuLlxuICovXG5leHBvcnQgZnVuY3Rpb24gcmVnaXN0ZXJCYWNrZ3JvdW5kVGFiRGV0ZWN0aW9uKCk6IHZvaWQge1xuICBpZiAoV0lORE9XLmRvY3VtZW50KSB7XG4gICAgV0lORE9XLmRvY3VtZW50LmFkZEV2ZW50TGlzdGVuZXIoJ3Zpc2liaWxpdHljaGFuZ2UnLCAoKSA9PiB7XG4gICAgICBjb25zdCBhY3RpdmVTcGFuID0gZ2V0QWN0aXZlU3BhbigpO1xuICAgICAgaWYgKCFhY3RpdmVTcGFuKSB7XG4gICAgICAgIHJldHVybjtcbiAgICAgIH1cblxuICAgICAgY29uc3Qgcm9vdFNwYW4gPSBnZXRSb290U3BhbihhY3RpdmVTcGFuKTtcblxuICAgICAgaWYgKFdJTkRPVy5kb2N1bWVudC5oaWRkZW4gJiYgcm9vdFNwYW4pIHtcbiAgICAgICAgY29uc3QgY2FuY2VsbGVkU3RhdHVzID0gJ2NhbmNlbGxlZCc7XG5cbiAgICAgICAgY29uc3QgeyBvcCwgc3RhdHVzIH0gPSBzcGFuVG9KU09OKHJvb3RTcGFuKTtcblxuICAgICAgICBpZiAoREVCVUdfQlVJTEQpIHtcbiAgICAgICAgICBkZWJ1Zy5sb2coYFtUcmFjaW5nXSBUcmFuc2FjdGlvbjogJHtjYW5jZWxsZWRTdGF0dXN9IC0+IHNpbmNlIHRhYiBtb3ZlZCB0byB0aGUgYmFja2dyb3VuZCwgb3A6ICR7b3B9YCk7XG4gICAgICAgIH1cblxuICAgICAgICAvLyBXZSBzaG91bGQgbm90IHNldCBzdGF0dXMgaWYgaXQgaXMgYWxyZWFkeSBzZXQsIHRoaXMgcHJldmVudCBpbXBvcnRhbnQgc3RhdHVzZXMgbGlrZVxuICAgICAgICAvLyBlcnJvciBvciBkYXRhIGxvc3MgZnJvbSBiZWluZyBvdmVyd3JpdHRlbiBvbiB0cmFuc2FjdGlvbi5cbiAgICAgICAgaWYgKCFzdGF0dXMpIHtcbiAgICAgICAgICByb290U3Bhbi5zZXRTdGF0dXMoeyBjb2RlOiBTUEFOX1NUQVRVU19FUlJPUiwgbWVzc2FnZTogY2FuY2VsbGVkU3RhdHVzIH0pO1xuICAgICAgICB9XG5cbiAgICAgICAgcm9vdFNwYW4uc2V0QXR0cmlidXRlKCdzZW50cnkuY2FuY2VsbGF0aW9uX3JlYXNvbicsICdkb2N1bWVudC5oaWRkZW4nKTtcbiAgICAgICAgcm9vdFNwYW4uZW5kKCk7XG4gICAgICB9XG4gICAgfSk7XG4gIH0gZWxzZSB7XG4gICAgREVCVUdfQlVJTEQgJiYgZGVidWcud2FybignW1RyYWNpbmddIENvdWxkIG5vdCBzZXQgdXAgYmFja2dyb3VuZCB0YWIgZGV0ZWN0aW9uIGR1ZSB0byBsYWNrIG9mIGdsb2JhbCBkb2N1bWVudCcpO1xuICB9XG59XG4iXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7OztBQUlBO0FBQ0E7QUFDQTtBQUNBO0FBQ08sU0FBUyw4QkFBOEIsR0FBUztBQUN2RCxFQUFFLElBQUksTUFBTSxDQUFDLFFBQVEsRUFBRTtBQUN2QixJQUFJLE1BQU0sQ0FBQyxRQUFRLENBQUMsZ0JBQWdCLENBQUMsa0JBQWtCLEVBQUUsTUFBTTtBQUMvRCxNQUFNLE1BQU0sVUFBQSxHQUFhLGFBQWEsRUFBRTtBQUN4QyxNQUFNLElBQUksQ0FBQyxVQUFVLEVBQUU7QUFDdkIsUUFBUTtBQUNSLE1BQU07O0FBRU4sTUFBTSxNQUFNLFFBQUEsR0FBVyxXQUFXLENBQUMsVUFBVSxDQUFDOztBQUU5QyxNQUFNLElBQUksTUFBTSxDQUFDLFFBQVEsQ0FBQyxNQUFBLElBQVUsUUFBUSxFQUFFO0FBQzlDLFFBQVEsTUFBTSxlQUFBLEdBQWtCLFdBQVc7O0FBRTNDLFFBQVEsTUFBTSxFQUFFLEVBQUUsRUFBRSxNQUFBLEtBQVcsVUFBVSxDQUFDLFFBQVEsQ0FBQzs7QUFFbkQsUUFBUSxJQUFJLFdBQVcsRUFBRTtBQUN6QixVQUFVLEtBQUssQ0FBQyxHQUFHLENBQUMsQ0FBQyx1QkFBdUIsRUFBRSxlQUFlLENBQUMsMkNBQTJDLEVBQUUsRUFBRSxDQUFDLENBQUEsQ0FBQTtBQUNBLFFBQUE7O0FBRUE7QUFDQTtBQUNBLFFBQUEsSUFBQSxDQUFBLE1BQUEsRUFBQTtBQUNBLFVBQUEsUUFBQSxDQUFBLFNBQUEsQ0FBQSxFQUFBLElBQUEsRUFBQSxpQkFBQSxFQUFBLE9BQUEsRUFBQSxlQUFBLEVBQUEsQ0FBQTtBQUNBLFFBQUE7O0FBRUEsUUFBQSxRQUFBLENBQUEsWUFBQSxDQUFBLDRCQUFBLEVBQUEsaUJBQUEsQ0FBQTtBQUNBLFFBQUEsUUFBQSxDQUFBLEdBQUEsRUFBQTtBQUNBLE1BQUE7QUFDQSxJQUFBLENBQUEsQ0FBQTtBQUNBLEVBQUEsQ0FBQSxNQUFBO0FBQ0EsSUFBQSxXQUFBLElBQUEsS0FBQSxDQUFBLElBQUEsQ0FBQSxvRkFBQSxDQUFBO0FBQ0EsRUFBQTtBQUNBOzs7OyIsInhfZ29vZ2xlX2lnbm9yZUxpc3QiOlswXX0=

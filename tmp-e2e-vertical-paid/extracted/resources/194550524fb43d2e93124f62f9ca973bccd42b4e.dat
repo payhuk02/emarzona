@@ -1,0 +1,25 @@
+/**
+ * Takes the SDK metadata and adds the user-agent header to the transport options.
+ * This ensures that the SDK sends the user-agent header with SDK name and version to
+ * all requests made by the transport.
+ *
+ * @see https://develop.sentry.dev/sdk/overview/#user-agent
+ */
+function addUserAgentToTransportHeaders(options) {
+  const sdkMetadata = options._metadata?.sdk;
+  const sdkUserAgent =
+    sdkMetadata?.name && sdkMetadata?.version ? `${sdkMetadata?.name}/${sdkMetadata?.version}` : undefined;
+
+  options.transportOptions = {
+    ...options.transportOptions,
+    headers: {
+      ...(sdkUserAgent && { 'user-agent': sdkUserAgent }),
+      ...options.transportOptions?.headers,
+    },
+  };
+}
+
+export { addUserAgentToTransportHeaders };
+                                     
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidXNlckFnZW50LmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi9zcmMvdHJhbnNwb3J0cy91c2VyQWdlbnQudHMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHR5cGUgeyBDbGllbnRPcHRpb25zIH0gZnJvbSAnLi4vdHlwZXMtaG9pc3Qvb3B0aW9ucyc7XG5cbi8qKlxuICogVGFrZXMgdGhlIFNESyBtZXRhZGF0YSBhbmQgYWRkcyB0aGUgdXNlci1hZ2VudCBoZWFkZXIgdG8gdGhlIHRyYW5zcG9ydCBvcHRpb25zLlxuICogVGhpcyBlbnN1cmVzIHRoYXQgdGhlIFNESyBzZW5kcyB0aGUgdXNlci1hZ2VudCBoZWFkZXIgd2l0aCBTREsgbmFtZSBhbmQgdmVyc2lvbiB0b1xuICogYWxsIHJlcXVlc3RzIG1hZGUgYnkgdGhlIHRyYW5zcG9ydC5cbiAqXG4gKiBAc2VlIGh0dHBzOi8vZGV2ZWxvcC5zZW50cnkuZGV2L3Nkay9vdmVydmlldy8jdXNlci1hZ2VudFxuICovXG5leHBvcnQgZnVuY3Rpb24gYWRkVXNlckFnZW50VG9UcmFuc3BvcnRIZWFkZXJzKG9wdGlvbnM6IENsaWVudE9wdGlvbnMpOiB2b2lkIHtcbiAgY29uc3Qgc2RrTWV0YWRhdGEgPSBvcHRpb25zLl9tZXRhZGF0YT8uc2RrO1xuICBjb25zdCBzZGtVc2VyQWdlbnQgPVxuICAgIHNka01ldGFkYXRhPy5uYW1lICYmIHNka01ldGFkYXRhPy52ZXJzaW9uID8gYCR7c2RrTWV0YWRhdGE/Lm5hbWV9LyR7c2RrTWV0YWRhdGE/LnZlcnNpb259YCA6IHVuZGVmaW5lZDtcblxuICBvcHRpb25zLnRyYW5zcG9ydE9wdGlvbnMgPSB7XG4gICAgLi4ub3B0aW9ucy50cmFuc3BvcnRPcHRpb25zLFxuICAgIGhlYWRlcnM6IHtcbiAgICAgIC4uLihzZGtVc2VyQWdlbnQgJiYgeyAndXNlci1hZ2VudCc6IHNka1VzZXJBZ2VudCB9KSxcbiAgICAgIC4uLm9wdGlvbnMudHJhbnNwb3J0T3B0aW9ucz8uaGVhZGVycyxcbiAgICB9LFxuICB9O1xufVxuIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUVBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ08sU0FBUyw4QkFBOEIsQ0FBQyxPQUFPLEVBQXVCO0FBQzdFLEVBQUUsTUFBTSxXQUFBLEdBQWMsT0FBTyxDQUFDLFNBQVMsRUFBRSxHQUFHO0FBQzVDLEVBQUUsTUFBTSxZQUFBO0FBQ1IsSUFBSSxXQUFXLEVBQUUsSUFBQSxJQUFRLFdBQVcsRUFBRSxPQUFBLEdBQVUsQ0FBQyxFQUFBLFdBQUEsRUFBQSxJQUFBLENBQUEsQ0FBQSxFQUFBLFdBQUEsRUFBQSxPQUFBLENBQUEsQ0FBQSxHQUFBLFNBQUE7O0FBRUEsRUFBQSxPQUFBLENBQUEsZ0JBQUEsR0FBQTtBQUNBLElBQUEsR0FBQSxPQUFBLENBQUEsZ0JBQUE7QUFDQSxJQUFBLE9BQUEsRUFBQTtBQUNBLE1BQUEsSUFBQSxZQUFBLElBQUEsRUFBQSxZQUFBLEVBQUEsWUFBQSxFQUFBLENBQUE7QUFDQSxNQUFBLEdBQUEsT0FBQSxDQUFBLGdCQUFBLEVBQUEsT0FBQTtBQUNBLEtBQUE7QUFDQSxHQUFBO0FBQ0E7Ozs7IiwieF9nb29nbGVfaWdub3JlTGlzdCI6WzBdfQ==

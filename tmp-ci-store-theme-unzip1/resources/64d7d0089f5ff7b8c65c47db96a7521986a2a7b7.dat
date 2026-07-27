@@ -1,0 +1,39 @@
+import { defineIntegration, applyAggregateErrorsToEvent } from "/node_modules/@sentry/core/build/esm/index.js?v=d758aa40";
+import { exceptionFromError } from "/node_modules/@sentry/browser/build/npm/esm/dev/eventbuilder.js?v=d758aa40";
+
+const DEFAULT_KEY = 'cause';
+const DEFAULT_LIMIT = 5;
+
+const INTEGRATION_NAME = 'LinkedErrors';
+
+const _linkedErrorsIntegration = ((options = {}) => {
+  const limit = options.limit || DEFAULT_LIMIT;
+  const key = options.key || DEFAULT_KEY;
+
+  return {
+    name: INTEGRATION_NAME,
+    preprocessEvent(event, hint, client) {
+      const options = client.getOptions();
+
+      applyAggregateErrorsToEvent(
+        // This differs from the LinkedErrors integration in core by using a different exceptionFromError function
+        exceptionFromError,
+        options.stackParser,
+        key,
+        limit,
+        event,
+        hint,
+      );
+    },
+  };
+}) ;
+
+/**
+ * Aggregrate linked errors in an event.
+ */
+const linkedErrorsIntegration = defineIntegration(_linkedErrorsIntegration);
+
+export { linkedErrorsIntegration };
+                                        
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibGlua2VkZXJyb3JzLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi8uLi9zcmMvaW50ZWdyYXRpb25zL2xpbmtlZGVycm9ycy50cyJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgdHlwZSB7IEludGVncmF0aW9uRm4gfSBmcm9tICdAc2VudHJ5L2NvcmUnO1xuaW1wb3J0IHsgYXBwbHlBZ2dyZWdhdGVFcnJvcnNUb0V2ZW50LCBkZWZpbmVJbnRlZ3JhdGlvbiB9IGZyb20gJ0BzZW50cnkvY29yZSc7XG5pbXBvcnQgeyBleGNlcHRpb25Gcm9tRXJyb3IgfSBmcm9tICcuLi9ldmVudGJ1aWxkZXInO1xuXG5pbnRlcmZhY2UgTGlua2VkRXJyb3JzT3B0aW9ucyB7XG4gIGtleT86IHN0cmluZztcbiAgbGltaXQ/OiBudW1iZXI7XG59XG5cbmNvbnN0IERFRkFVTFRfS0VZID0gJ2NhdXNlJztcbmNvbnN0IERFRkFVTFRfTElNSVQgPSA1O1xuXG5jb25zdCBJTlRFR1JBVElPTl9OQU1FID0gJ0xpbmtlZEVycm9ycyc7XG5cbmNvbnN0IF9saW5rZWRFcnJvcnNJbnRlZ3JhdGlvbiA9ICgob3B0aW9uczogTGlua2VkRXJyb3JzT3B0aW9ucyA9IHt9KSA9PiB7XG4gIGNvbnN0IGxpbWl0ID0gb3B0aW9ucy5saW1pdCB8fCBERUZBVUxUX0xJTUlUO1xuICBjb25zdCBrZXkgPSBvcHRpb25zLmtleSB8fCBERUZBVUxUX0tFWTtcblxuICByZXR1cm4ge1xuICAgIG5hbWU6IElOVEVHUkFUSU9OX05BTUUsXG4gICAgcHJlcHJvY2Vzc0V2ZW50KGV2ZW50LCBoaW50LCBjbGllbnQpIHtcbiAgICAgIGNvbnN0IG9wdGlvbnMgPSBjbGllbnQuZ2V0T3B0aW9ucygpO1xuXG4gICAgICBhcHBseUFnZ3JlZ2F0ZUVycm9yc1RvRXZlbnQoXG4gICAgICAgIC8vIFRoaXMgZGlmZmVycyBmcm9tIHRoZSBMaW5rZWRFcnJvcnMgaW50ZWdyYXRpb24gaW4gY29yZSBieSB1c2luZyBhIGRpZmZlcmVudCBleGNlcHRpb25Gcm9tRXJyb3IgZnVuY3Rpb25cbiAgICAgICAgZXhjZXB0aW9uRnJvbUVycm9yLFxuICAgICAgICBvcHRpb25zLnN0YWNrUGFyc2VyLFxuICAgICAgICBrZXksXG4gICAgICAgIGxpbWl0LFxuICAgICAgICBldmVudCxcbiAgICAgICAgaGludCxcbiAgICAgICk7XG4gICAgfSxcbiAgfTtcbn0pIHNhdGlzZmllcyBJbnRlZ3JhdGlvbkZuO1xuXG4vKipcbiAqIEFnZ3JlZ3JhdGUgbGlua2VkIGVycm9ycyBpbiBhbiBldmVudC5cbiAqL1xuZXhwb3J0IGNvbnN0IGxpbmtlZEVycm9yc0ludGVncmF0aW9uID0gZGVmaW5lSW50ZWdyYXRpb24oX2xpbmtlZEVycm9yc0ludGVncmF0aW9uKTtcbiJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7QUFTQSxNQUFNLFdBQUEsR0FBYyxPQUFPO0FBQzNCLE1BQU0sYUFBQSxHQUFnQixDQUFDOztBQUV2QixNQUFNLGdCQUFBLEdBQW1CLGNBQWM7O0FBRXZDLE1BQU0sd0JBQUEsSUFBNEIsQ0FBQyxPQUFPLEdBQXdCLEVBQUUsS0FBSztBQUN6RSxFQUFFLE1BQU0sS0FBQSxHQUFRLE9BQU8sQ0FBQyxLQUFBLElBQVMsYUFBYTtBQUM5QyxFQUFFLE1BQU0sR0FBQSxHQUFNLE9BQU8sQ0FBQyxHQUFBLElBQU8sV0FBVzs7QUFFeEMsRUFBRSxPQUFPO0FBQ1QsSUFBSSxJQUFJLEVBQUUsZ0JBQWdCO0FBQzFCLElBQUksZUFBZSxDQUFDLEtBQUssRUFBRSxJQUFJLEVBQUUsTUFBTSxFQUFFO0FBQ3pDLE1BQU0sTUFBTSxPQUFBLEdBQVUsTUFBTSxDQUFDLFVBQVUsRUFBRTs7QUFFekMsTUFBTSwyQkFBMkI7QUFDakM7QUFDQSxRQUFRLGtCQUFrQjtBQUMxQixRQUFRLE9BQU8sQ0FBQyxXQUFXO0FBQzNCLFFBQVEsR0FBRztBQUNYLFFBQVEsS0FBSztBQUNiLFFBQVEsS0FBSztBQUNiLFFBQVEsSUFBSTtBQUNaLE9BQU87QUFDUCxJQUFJLENBQUM7QUFDTCxHQUFHO0FBQ0gsQ0FBQyxDQUFBOztBQUVEO0FBQ0E7QUFDQTtNQUNhLHVCQUFBLEdBQTBCLGlCQUFpQixDQUFDLHdCQUF3Qjs7OzsiLCJ4X2dvb2dsZV9pZ25vcmVMaXN0IjpbMF19

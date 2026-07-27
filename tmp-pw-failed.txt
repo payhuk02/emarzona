@@ -1,0 +1,7 @@
+﻿gh : run 29756573496 is still in progress; logs will be available when it is complete
+Au caractère C:\Users\pc\AppData\Local\Temp\ps-script-087420bb-7b5e-4ff3-9bae-8a5df8a08e6f.ps1:110 : 1
++ gh run view 29756573496 --log-failed 2>&1 | Out-File -FilePath c:\ema ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (run 29756573496... it is complete:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 

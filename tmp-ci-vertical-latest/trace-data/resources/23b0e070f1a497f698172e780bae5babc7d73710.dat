@@ -1,0 +1,69 @@
+import { DEBUG_BUILD } from "/node_modules/@sentry/core/build/esm/debug-build.js?v=89021f86";
+import { debug } from "/node_modules/@sentry/core/build/esm/utils/debug-logger.js?v=89021f86";
+
+/**
+ * Registry tracking which AI provider modules should skip instrumentation wrapping.
+ *
+ * This prevents duplicate spans when a higher-level integration (like LangChain)
+ * already instruments AI providers at a higher abstraction level.
+ */
+const SKIPPED_AI_PROVIDERS = new Set();
+
+/**
+ * Mark AI provider modules to skip instrumentation wrapping.
+ *
+ * This prevents duplicate spans when a higher-level integration (like LangChain)
+ * already instruments AI providers at a higher abstraction level.
+ *
+ * @internal
+ * @param modules - Array of npm module names to skip (e.g., '@anthropic-ai/sdk', 'openai')
+ *
+ * @example
+ * ```typescript
+ * // In LangChain integration
+ * _INTERNAL_skipAiProviderWrapping(['@anthropic-ai/sdk', 'openai', '@google/generative-ai']);
+ * ```
+ */
+function _INTERNAL_skipAiProviderWrapping(modules) {
+  modules.forEach(module => {
+    SKIPPED_AI_PROVIDERS.add(module);
+    DEBUG_BUILD && debug.log(`AI provider "${module}" wrapping will be skipped`);
+  });
+}
+
+/**
+ * Check if an AI provider module should skip instrumentation wrapping.
+ *
+ * @internal
+ * @param module - The npm module name (e.g., '@anthropic-ai/sdk', 'openai')
+ * @returns true if wrapping should be skipped
+ *
+ * @example
+ * ```typescript
+ * // In AI provider instrumentation
+ * if (_INTERNAL_shouldSkipAiProviderWrapping('@anthropic-ai/sdk')) {
+ *   return Reflect.construct(Original, args); // Don't instrument
+ * }
+ * ```
+ */
+function _INTERNAL_shouldSkipAiProviderWrapping(module) {
+  return SKIPPED_AI_PROVIDERS.has(module);
+}
+
+/**
+ * Clear all AI provider skip registrations.
+ *
+ * This is automatically called at the start of Sentry.init() to ensure a clean state
+ * between different client initializations.
+ *
+ * @internal
+ */
+function _INTERNAL_clearAiProviderSkips() {
+  SKIPPED_AI_PROVIDERS.clear();
+  DEBUG_BUILD && debug.log('Cleared AI provider skip registrations');
+}
+
+export { _INTERNAL_clearAiProviderSkips, _INTERNAL_shouldSkipAiProviderWrapping, _INTERNAL_skipAiProviderWrapping };
+                                        
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicHJvdmlkZXJTa2lwLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi9zcmMvdXRpbHMvYWkvcHJvdmlkZXJTa2lwLnRzIl0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7IERFQlVHX0JVSUxEIH0gZnJvbSAnLi4vLi4vZGVidWctYnVpbGQnO1xuaW1wb3J0IHsgZGVidWcgfSBmcm9tICcuLi9kZWJ1Zy1sb2dnZXInO1xuXG4vKipcbiAqIFJlZ2lzdHJ5IHRyYWNraW5nIHdoaWNoIEFJIHByb3ZpZGVyIG1vZHVsZXMgc2hvdWxkIHNraXAgaW5zdHJ1bWVudGF0aW9uIHdyYXBwaW5nLlxuICpcbiAqIFRoaXMgcHJldmVudHMgZHVwbGljYXRlIHNwYW5zIHdoZW4gYSBoaWdoZXItbGV2ZWwgaW50ZWdyYXRpb24gKGxpa2UgTGFuZ0NoYWluKVxuICogYWxyZWFkeSBpbnN0cnVtZW50cyBBSSBwcm92aWRlcnMgYXQgYSBoaWdoZXIgYWJzdHJhY3Rpb24gbGV2ZWwuXG4gKi9cbmNvbnN0IFNLSVBQRURfQUlfUFJPVklERVJTID0gbmV3IFNldDxzdHJpbmc+KCk7XG5cbi8qKlxuICogTWFyayBBSSBwcm92aWRlciBtb2R1bGVzIHRvIHNraXAgaW5zdHJ1bWVudGF0aW9uIHdyYXBwaW5nLlxuICpcbiAqIFRoaXMgcHJldmVudHMgZHVwbGljYXRlIHNwYW5zIHdoZW4gYSBoaWdoZXItbGV2ZWwgaW50ZWdyYXRpb24gKGxpa2UgTGFuZ0NoYWluKVxuICogYWxyZWFkeSBpbnN0cnVtZW50cyBBSSBwcm92aWRlcnMgYXQgYSBoaWdoZXIgYWJzdHJhY3Rpb24gbGV2ZWwuXG4gKlxuICogQGludGVybmFsXG4gKiBAcGFyYW0gbW9kdWxlcyAtIEFycmF5IG9mIG5wbSBtb2R1bGUgbmFtZXMgdG8gc2tpcCAoZS5nLiwgJ0BhbnRocm9waWMtYWkvc2RrJywgJ29wZW5haScpXG4gKlxuICogQGV4YW1wbGVcbiAqIGBgYHR5cGVzY3JpcHRcbiAqIC8vIEluIExhbmdDaGFpbiBpbnRlZ3JhdGlvblxuICogX0lOVEVSTkFMX3NraXBBaVByb3ZpZGVyV3JhcHBpbmcoWydAYW50aHJvcGljLWFpL3NkaycsICdvcGVuYWknLCAnQGdvb2dsZS9nZW5lcmF0aXZlLWFpJ10pO1xuICogYGBgXG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBfSU5URVJOQUxfc2tpcEFpUHJvdmlkZXJXcmFwcGluZyhtb2R1bGVzOiBzdHJpbmdbXSk6IHZvaWQge1xuICBtb2R1bGVzLmZvckVhY2gobW9kdWxlID0+IHtcbiAgICBTS0lQUEVEX0FJX1BST1ZJREVSUy5hZGQobW9kdWxlKTtcbiAgICBERUJVR19CVUlMRCAmJiBkZWJ1Zy5sb2coYEFJIHByb3ZpZGVyIFwiJHttb2R1bGV9XCIgd3JhcHBpbmcgd2lsbCBiZSBza2lwcGVkYCk7XG4gIH0pO1xufVxuXG4vKipcbiAqIENoZWNrIGlmIGFuIEFJIHByb3ZpZGVyIG1vZHVsZSBzaG91bGQgc2tpcCBpbnN0cnVtZW50YXRpb24gd3JhcHBpbmcuXG4gKlxuICogQGludGVybmFsXG4gKiBAcGFyYW0gbW9kdWxlIC0gVGhlIG5wbSBtb2R1bGUgbmFtZSAoZS5nLiwgJ0BhbnRocm9waWMtYWkvc2RrJywgJ29wZW5haScpXG4gKiBAcmV0dXJucyB0cnVlIGlmIHdyYXBwaW5nIHNob3VsZCBiZSBza2lwcGVkXG4gKlxuICogQGV4YW1wbGVcbiAqIGBgYHR5cGVzY3JpcHRcbiAqIC8vIEluIEFJIHByb3ZpZGVyIGluc3RydW1lbnRhdGlvblxuICogaWYgKF9JTlRFUk5BTF9zaG91bGRTa2lwQWlQcm92aWRlcldyYXBwaW5nKCdAYW50aHJvcGljLWFpL3NkaycpKSB7XG4gKiAgIHJldHVybiBSZWZsZWN0LmNvbnN0cnVjdChPcmlnaW5hbCwgYXJncyk7IC8vIERvbid0IGluc3RydW1lbnRcbiAqIH1cbiAqIGBgYFxuICovXG5leHBvcnQgZnVuY3Rpb24gX0lOVEVSTkFMX3Nob3VsZFNraXBBaVByb3ZpZGVyV3JhcHBpbmcobW9kdWxlOiBzdHJpbmcpOiBib29sZWFuIHtcbiAgcmV0dXJuIFNLSVBQRURfQUlfUFJPVklERVJTLmhhcyhtb2R1bGUpO1xufVxuXG4vKipcbiAqIENsZWFyIGFsbCBBSSBwcm92aWRlciBza2lwIHJlZ2lzdHJhdGlvbnMuXG4gKlxuICogVGhpcyBpcyBhdXRvbWF0aWNhbGx5IGNhbGxlZCBhdCB0aGUgc3RhcnQgb2YgU2VudHJ5LmluaXQoKSB0byBlbnN1cmUgYSBjbGVhbiBzdGF0ZVxuICogYmV0d2VlbiBkaWZmZXJlbnQgY2xpZW50IGluaXRpYWxpemF0aW9ucy5cbiAqXG4gKiBAaW50ZXJuYWxcbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIF9JTlRFUk5BTF9jbGVhckFpUHJvdmlkZXJTa2lwcygpOiB2b2lkIHtcbiAgU0tJUFBFRF9BSV9QUk9WSURFUlMuY2xlYXIoKTtcbiAgREVCVUdfQlVJTEQgJiYgZGVidWcubG9nKCdDbGVhcmVkIEFJIHByb3ZpZGVyIHNraXAgcmVnaXN0cmF0aW9ucycpO1xufVxuIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7OztBQUdBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLE1BQU0sb0JBQUEsR0FBdUIsSUFBSSxHQUFHLEVBQVU7O0FBRTlDO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNPLFNBQVMsZ0NBQWdDLENBQUMsT0FBTyxFQUFrQjtBQUMxRSxFQUFFLE9BQU8sQ0FBQyxPQUFPLENBQUMsVUFBVTtBQUM1QixJQUFJLG9CQUFvQixDQUFDLEdBQUcsQ0FBQyxNQUFNLENBQUM7QUFDcEMsSUFBSSxXQUFBLElBQWUsS0FBSyxDQUFDLEdBQUcsQ0FBQyxDQUFDLGFBQWEsRUFBRSxNQUFNLENBQUMsMEJBQTBCLENBQUMsQ0FBQztBQUNoRixFQUFFLENBQUMsQ0FBQztBQUNKOztBQUVBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNPLFNBQVMsc0NBQXNDLENBQUMsTUFBTSxFQUFtQjtBQUNoRixFQUFFLE9BQU8sb0JBQW9CLENBQUMsR0FBRyxDQUFDLE1BQU0sQ0FBQztBQUN6Qzs7QUFFQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ08sU0FBUyw4QkFBOEIsR0FBUztBQUN2RCxFQUFFLG9CQUFvQixDQUFDLEtBQUssRUFBRTtBQUM5QixFQUFFLGVBQWUsS0FBSyxDQUFDLEdBQUcsQ0FBQyx3Q0FBd0MsQ0FBQztBQUNwRTs7OzsiLCJ4X2dvb2dsZV9pZ25vcmVMaXN0IjpbMF19

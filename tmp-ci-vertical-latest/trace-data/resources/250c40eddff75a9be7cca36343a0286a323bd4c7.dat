@@ -1,0 +1,56 @@
+import { WINDOW } from "/node_modules/@sentry-internal/browser-utils/build/esm/types.js?v=89021f86";
+import { addPageListener, removePageListener } from "/node_modules/@sentry-internal/browser-utils/build/esm/metrics/web-vitals/lib/globalListeners.js?v=89021f86";
+import { runOnce } from "/node_modules/@sentry-internal/browser-utils/build/esm/metrics/web-vitals/lib/runOnce.js?v=89021f86";
+
+/*
+ * Copyright 2024 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+/**
+ * Runs the passed callback during the next idle period, or immediately
+ * if the browser's visibility state is (or becomes) hidden.
+ */
+const whenIdleOrHidden = (cb) => {
+  const rIC = WINDOW.requestIdleCallback || WINDOW.setTimeout;
+
+  // If the document is hidden, run the callback immediately, otherwise
+  // race an idle callback with the next `visibilitychange` event.
+  if (WINDOW.document?.visibilityState === 'hidden') {
+    cb();
+  } else {
+    // eslint-disable-next-line no-param-reassign
+    cb = runOnce(cb);
+    addPageListener('visibilitychange', cb, { once: true, capture: true });
+    // sentry: we use pagehide instead of directly listening to visibilitychange
+    // because some browsers we still support (Safari <14.4) don't fully support
+    // `visibilitychange` or have known bugs w.r.t the `visibilitychange` event.
+    // TODO(v11): remove this once we drop support for Safari <14.4
+    addPageListener('pagehide', cb, { once: true, capture: true });
+    rIC(() => {
+      cb();
+      // Remove the above event listener since no longer required.
+      // See: https://github.com/GoogleChrome/web-vitals/issues/622
+      removePageListener('visibilitychange', cb, { capture: true });
+      // TODO(v11): remove this once we drop support for Safari <14.4
+      removePageListener('pagehide', cb, { capture: true });
+    });
+  }
+};
+
+export { whenIdleOrHidden };
+                                            
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoid2hlbklkbGVPckhpZGRlbi5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4vLi4vLi4vc3JjL21ldHJpY3Mvd2ViLXZpdGFscy9saWIvd2hlbklkbGVPckhpZGRlbi50cyJdLCJzb3VyY2VzQ29udGVudCI6WyIvKlxuICogQ29weXJpZ2h0IDIwMjQgR29vZ2xlIExMQ1xuICpcbiAqIExpY2Vuc2VkIHVuZGVyIHRoZSBBcGFjaGUgTGljZW5zZSwgVmVyc2lvbiAyLjAgKHRoZSBcIkxpY2Vuc2VcIik7XG4gKiB5b3UgbWF5IG5vdCB1c2UgdGhpcyBmaWxlIGV4Y2VwdCBpbiBjb21wbGlhbmNlIHdpdGggdGhlIExpY2Vuc2UuXG4gKiBZb3UgbWF5IG9idGFpbiBhIGNvcHkgb2YgdGhlIExpY2Vuc2UgYXRcbiAqXG4gKiAgICAgaHR0cHM6Ly93d3cuYXBhY2hlLm9yZy9saWNlbnNlcy9MSUNFTlNFLTIuMFxuICpcbiAqIFVubGVzcyByZXF1aXJlZCBieSBhcHBsaWNhYmxlIGxhdyBvciBhZ3JlZWQgdG8gaW4gd3JpdGluZywgc29mdHdhcmVcbiAqIGRpc3RyaWJ1dGVkIHVuZGVyIHRoZSBMaWNlbnNlIGlzIGRpc3RyaWJ1dGVkIG9uIGFuIFwiQVMgSVNcIiBCQVNJUyxcbiAqIFdJVEhPVVQgV0FSUkFOVElFUyBPUiBDT05ESVRJT05TIE9GIEFOWSBLSU5ELCBlaXRoZXIgZXhwcmVzcyBvciBpbXBsaWVkLlxuICogU2VlIHRoZSBMaWNlbnNlIGZvciB0aGUgc3BlY2lmaWMgbGFuZ3VhZ2UgZ292ZXJuaW5nIHBlcm1pc3Npb25zIGFuZFxuICogbGltaXRhdGlvbnMgdW5kZXIgdGhlIExpY2Vuc2UuXG4gKi9cblxuaW1wb3J0IHsgV0lORE9XIH0gZnJvbSAnLi4vLi4vLi4vdHlwZXMuanMnO1xuaW1wb3J0IHsgYWRkUGFnZUxpc3RlbmVyLCByZW1vdmVQYWdlTGlzdGVuZXIgfSBmcm9tICcuL2dsb2JhbExpc3RlbmVycy5qcyc7XG5pbXBvcnQgeyBydW5PbmNlIH0gZnJvbSAnLi9ydW5PbmNlLmpzJztcblxuLyoqXG4gKiBSdW5zIHRoZSBwYXNzZWQgY2FsbGJhY2sgZHVyaW5nIHRoZSBuZXh0IGlkbGUgcGVyaW9kLCBvciBpbW1lZGlhdGVseVxuICogaWYgdGhlIGJyb3dzZXIncyB2aXNpYmlsaXR5IHN0YXRlIGlzIChvciBiZWNvbWVzKSBoaWRkZW4uXG4gKi9cbmV4cG9ydCBjb25zdCB3aGVuSWRsZU9ySGlkZGVuID0gKGNiOiAoKSA9PiB2b2lkKSA9PiB7XG4gIGNvbnN0IHJJQyA9IFdJTkRPVy5yZXF1ZXN0SWRsZUNhbGxiYWNrIHx8IFdJTkRPVy5zZXRUaW1lb3V0O1xuXG4gIC8vIElmIHRoZSBkb2N1bWVudCBpcyBoaWRkZW4sIHJ1biB0aGUgY2FsbGJhY2sgaW1tZWRpYXRlbHksIG90aGVyd2lzZVxuICAvLyByYWNlIGFuIGlkbGUgY2FsbGJhY2sgd2l0aCB0aGUgbmV4dCBgdmlzaWJpbGl0eWNoYW5nZWAgZXZlbnQuXG4gIGlmIChXSU5ET1cuZG9jdW1lbnQ/LnZpc2liaWxpdHlTdGF0ZSA9PT0gJ2hpZGRlbicpIHtcbiAgICBjYigpO1xuICB9IGVsc2Uge1xuICAgIC8vIGVzbGludC1kaXNhYmxlLW5leHQtbGluZSBuby1wYXJhbS1yZWFzc2lnblxuICAgIGNiID0gcnVuT25jZShjYik7XG4gICAgYWRkUGFnZUxpc3RlbmVyKCd2aXNpYmlsaXR5Y2hhbmdlJywgY2IsIHsgb25jZTogdHJ1ZSwgY2FwdHVyZTogdHJ1ZSB9KTtcbiAgICAvLyBzZW50cnk6IHdlIHVzZSBwYWdlaGlkZSBpbnN0ZWFkIG9mIGRpcmVjdGx5IGxpc3RlbmluZyB0byB2aXNpYmlsaXR5Y2hhbmdlXG4gICAgLy8gYmVjYXVzZSBzb21lIGJyb3dzZXJzIHdlIHN0aWxsIHN1cHBvcnQgKFNhZmFyaSA8MTQuNCkgZG9uJ3QgZnVsbHkgc3VwcG9ydFxuICAgIC8vIGB2aXNpYmlsaXR5Y2hhbmdlYCBvciBoYXZlIGtub3duIGJ1Z3Mgdy5yLnQgdGhlIGB2aXNpYmlsaXR5Y2hhbmdlYCBldmVudC5cbiAgICAvLyBUT0RPKHYxMSk6IHJlbW92ZSB0aGlzIG9uY2Ugd2UgZHJvcCBzdXBwb3J0IGZvciBTYWZhcmkgPDE0LjRcbiAgICBhZGRQYWdlTGlzdGVuZXIoJ3BhZ2VoaWRlJywgY2IsIHsgb25jZTogdHJ1ZSwgY2FwdHVyZTogdHJ1ZSB9KTtcbiAgICBySUMoKCkgPT4ge1xuICAgICAgY2IoKTtcbiAgICAgIC8vIFJlbW92ZSB0aGUgYWJvdmUgZXZlbnQgbGlzdGVuZXIgc2luY2Ugbm8gbG9uZ2VyIHJlcXVpcmVkLlxuICAgICAgLy8gU2VlOiBodHRwczovL2dpdGh1Yi5jb20vR29vZ2xlQ2hyb21lL3dlYi12aXRhbHMvaXNzdWVzLzYyMlxuICAgICAgcmVtb3ZlUGFnZUxpc3RlbmVyKCd2aXNpYmlsaXR5Y2hhbmdlJywgY2IsIHsgY2FwdHVyZTogdHJ1ZSB9KTtcbiAgICAgIC8vIFRPRE8odjExKTogcmVtb3ZlIHRoaXMgb25jZSB3ZSBkcm9wIHN1cHBvcnQgZm9yIFNhZmFyaSA8MTQuNFxuICAgICAgcmVtb3ZlUGFnZUxpc3RlbmVyKCdwYWdlaGlkZScsIGNiLCB7IGNhcHR1cmU6IHRydWUgfSk7XG4gICAgfSk7XG4gIH1cbn07XG4iXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7OztBQUFBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTs7O0FBTUE7QUFDQTtBQUNBO0FBQ0E7TUFDYSxnQkFBQSxHQUFtQixDQUFDLEVBQUUsS0FBaUI7QUFDcEQsRUFBRSxNQUFNLE1BQU0sTUFBTSxDQUFDLG1CQUFBLElBQXVCLE1BQU0sQ0FBQyxVQUFVOztBQUU3RDtBQUNBO0FBQ0EsRUFBRSxJQUFJLE1BQU0sQ0FBQyxRQUFRLEVBQUUsZUFBQSxLQUFvQixRQUFRLEVBQUU7QUFDckQsSUFBSSxFQUFFLEVBQUU7QUFDUixFQUFFLE9BQU87QUFDVDtBQUNBLElBQUksRUFBQSxHQUFLLE9BQU8sQ0FBQyxFQUFFLENBQUM7QUFDcEIsSUFBSSxlQUFlLENBQUMsa0JBQWtCLEVBQUUsRUFBRSxFQUFFLEVBQUUsSUFBSSxFQUFFLElBQUksRUFBRSxPQUFPLEVBQUUsSUFBQSxFQUFNLENBQUM7QUFDMUU7QUFDQTtBQUNBO0FBQ0E7QUFDQSxJQUFJLGVBQWUsQ0FBQyxVQUFVLEVBQUUsRUFBRSxFQUFFLEVBQUUsSUFBSSxFQUFFLElBQUksRUFBRSxPQUFPLEVBQUUsSUFBQSxFQUFNLENBQUM7QUFDbEUsSUFBSSxHQUFHLENBQUMsTUFBTTtBQUNkLE1BQU0sRUFBRSxFQUFFO0FBQ1Y7QUFDQTtBQUNBLE1BQU0sa0JBQWtCLENBQUMsa0JBQWtCLEVBQUUsRUFBRSxFQUFFLEVBQUUsT0FBTyxFQUFFLElBQUEsRUFBTSxDQUFDO0FBQ25FO0FBQ0EsTUFBTSxrQkFBa0IsQ0FBQyxVQUFVLEVBQUUsRUFBRSxFQUFFLEVBQUUsT0FBTyxFQUFFLElBQUEsRUFBTSxDQUFDO0FBQzNELElBQUksQ0FBQyxDQUFDO0FBQ04sRUFBRTtBQUNGOzs7OyIsInhfZ29vZ2xlX2lnbm9yZUxpc3QiOlswXX0=

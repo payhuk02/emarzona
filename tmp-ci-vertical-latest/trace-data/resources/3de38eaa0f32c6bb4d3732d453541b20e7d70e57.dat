@@ -1,0 +1,74 @@
+import { getEnvelopeEndpointWithUrlEncodedAuth } from "/node_modules/@sentry/core/build/esm/api.js?v=89021f86";
+import { debug } from "/node_modules/@sentry/core/build/esm/utils/debug-logger.js?v=89021f86";
+import { makeDsn } from "/node_modules/@sentry/core/build/esm/utils/dsn.js?v=89021f86";
+import { parseEnvelope } from "/node_modules/@sentry/core/build/esm/utils/envelope.js?v=89021f86";
+
+/**
+ * Core Sentry tunnel handler - framework agnostic.
+ *
+ * Validates the envelope DSN against allowed DSNs, then forwards the
+ * envelope to the Sentry ingest endpoint.
+ *
+ * @returns A `Response` — either the upstream Sentry response on success, or an error response.
+ */
+async function handleTunnelRequest(options) {
+  const { request, allowedDsns } = options;
+
+  if (allowedDsns.length === 0) {
+    return new Response('Tunnel not configured', { status: 500 });
+  }
+
+  const body = new Uint8Array(await request.arrayBuffer());
+
+  let envelopeHeader;
+  try {
+    [envelopeHeader] = parseEnvelope(body);
+  } catch {
+    return new Response('Invalid envelope', { status: 400 });
+  }
+
+  if (!envelopeHeader) {
+    return new Response('Invalid envelope: missing header', { status: 400 });
+  }
+
+  const dsn = envelopeHeader.dsn;
+  if (!dsn) {
+    return new Response('Invalid envelope: missing DSN', { status: 400 });
+  }
+
+  // SECURITY: Validate that the envelope DSN matches one of the allowed DSNs
+  // This prevents SSRF attacks where attackers send crafted envelopes
+  // with malicious DSNs pointing to arbitrary hosts
+  const isAllowed = allowedDsns.some(allowed => allowed === dsn);
+
+  if (!isAllowed) {
+    debug.warn(`Sentry tunnel: rejected request with unauthorized DSN (${dsn})`);
+    return new Response('DSN not allowed', { status: 403 });
+  }
+
+  const dsnComponents = makeDsn(dsn);
+  if (!dsnComponents) {
+    debug.warn(`Could not extract DSN Components from: ${dsn}`);
+    return new Response('Invalid DSN', { status: 403 });
+  }
+
+  const sentryIngestUrl = getEnvelopeEndpointWithUrlEncodedAuth(dsnComponents);
+
+  try {
+    return await fetch(sentryIngestUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-sentry-envelope',
+      },
+      body,
+    });
+  } catch (error) {
+    debug.error('Sentry tunnel: failed to forward envelope', error);
+    return new Response('Failed to forward envelope to Sentry', { status: 500 });
+  }
+}
+
+export { handleTunnelRequest };
+                                  
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidHVubmVsLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi9zcmMvdXRpbHMvdHVubmVsLnRzIl0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7IGdldEVudmVsb3BlRW5kcG9pbnRXaXRoVXJsRW5jb2RlZEF1dGggfSBmcm9tICcuLi9hcGknO1xuaW1wb3J0IHsgZGVidWcgfSBmcm9tICcuL2RlYnVnLWxvZ2dlcic7XG5pbXBvcnQgeyBtYWtlRHNuIH0gZnJvbSAnLi9kc24nO1xuaW1wb3J0IHsgcGFyc2VFbnZlbG9wZSB9IGZyb20gJy4vZW52ZWxvcGUnO1xuXG5leHBvcnQgaW50ZXJmYWNlIEhhbmRsZVR1bm5lbFJlcXVlc3RPcHRpb25zIHtcbiAgLyoqIEluY29taW5nIHJlcXVlc3QgY29udGFpbmluZyB0aGUgU2VudHJ5IGVudmVsb3BlIGFzIGl0cyBib2R5ICovXG4gIHJlcXVlc3Q6IFJlcXVlc3Q7XG4gIC8qKiBQcmUtcGFyc2VkIGFycmF5IG9mIGFsbG93ZWQgRFNOIHN0cmluZ3MgKi9cbiAgYWxsb3dlZERzbnM6IEFycmF5PHN0cmluZz47XG59XG5cbi8qKlxuICogQ29yZSBTZW50cnkgdHVubmVsIGhhbmRsZXIgLSBmcmFtZXdvcmsgYWdub3N0aWMuXG4gKlxuICogVmFsaWRhdGVzIHRoZSBlbnZlbG9wZSBEU04gYWdhaW5zdCBhbGxvd2VkIERTTnMsIHRoZW4gZm9yd2FyZHMgdGhlXG4gKiBlbnZlbG9wZSB0byB0aGUgU2VudHJ5IGluZ2VzdCBlbmRwb2ludC5cbiAqXG4gKiBAcmV0dXJucyBBIGBSZXNwb25zZWAg4oCUIGVpdGhlciB0aGUgdXBzdHJlYW0gU2VudHJ5IHJlc3BvbnNlIG9uIHN1Y2Nlc3MsIG9yIGFuIGVycm9yIHJlc3BvbnNlLlxuICovXG5leHBvcnQgYXN5bmMgZnVuY3Rpb24gaGFuZGxlVHVubmVsUmVxdWVzdChvcHRpb25zOiBIYW5kbGVUdW5uZWxSZXF1ZXN0T3B0aW9ucyk6IFByb21pc2U8UmVzcG9uc2U+IHtcbiAgY29uc3QgeyByZXF1ZXN0LCBhbGxvd2VkRHNucyB9ID0gb3B0aW9ucztcblxuICBpZiAoYWxsb3dlZERzbnMubGVuZ3RoID09PSAwKSB7XG4gICAgcmV0dXJuIG5ldyBSZXNwb25zZSgnVHVubmVsIG5vdCBjb25maWd1cmVkJywgeyBzdGF0dXM6IDUwMCB9KTtcbiAgfVxuXG4gIGNvbnN0IGJvZHkgPSBuZXcgVWludDhBcnJheShhd2FpdCByZXF1ZXN0LmFycmF5QnVmZmVyKCkpO1xuXG4gIGxldCBlbnZlbG9wZUhlYWRlcjtcbiAgdHJ5IHtcbiAgICBbZW52ZWxvcGVIZWFkZXJdID0gcGFyc2VFbnZlbG9wZShib2R5KTtcbiAgfSBjYXRjaCB7XG4gICAgcmV0dXJuIG5ldyBSZXNwb25zZSgnSW52YWxpZCBlbnZlbG9wZScsIHsgc3RhdHVzOiA0MDAgfSk7XG4gIH1cblxuICBpZiAoIWVudmVsb3BlSGVhZGVyKSB7XG4gICAgcmV0dXJuIG5ldyBSZXNwb25zZSgnSW52YWxpZCBlbnZlbG9wZTogbWlzc2luZyBoZWFkZXInLCB7IHN0YXR1czogNDAwIH0pO1xuICB9XG5cbiAgY29uc3QgZHNuID0gZW52ZWxvcGVIZWFkZXIuZHNuO1xuICBpZiAoIWRzbikge1xuICAgIHJldHVybiBuZXcgUmVzcG9uc2UoJ0ludmFsaWQgZW52ZWxvcGU6IG1pc3NpbmcgRFNOJywgeyBzdGF0dXM6IDQwMCB9KTtcbiAgfVxuXG4gIC8vIFNFQ1VSSVRZOiBWYWxpZGF0ZSB0aGF0IHRoZSBlbnZlbG9wZSBEU04gbWF0Y2hlcyBvbmUgb2YgdGhlIGFsbG93ZWQgRFNOc1xuICAvLyBUaGlzIHByZXZlbnRzIFNTUkYgYXR0YWNrcyB3aGVyZSBhdHRhY2tlcnMgc2VuZCBjcmFmdGVkIGVudmVsb3Blc1xuICAvLyB3aXRoIG1hbGljaW91cyBEU05zIHBvaW50aW5nIHRvIGFyYml0cmFyeSBob3N0c1xuICBjb25zdCBpc0FsbG93ZWQgPSBhbGxvd2VkRHNucy5zb21lKGFsbG93ZWQgPT4gYWxsb3dlZCA9PT0gZHNuKTtcblxuICBpZiAoIWlzQWxsb3dlZCkge1xuICAgIGRlYnVnLndhcm4oYFNlbnRyeSB0dW5uZWw6IHJlamVjdGVkIHJlcXVlc3Qgd2l0aCB1bmF1dGhvcml6ZWQgRFNOICgke2Rzbn0pYCk7XG4gICAgcmV0dXJuIG5ldyBSZXNwb25zZSgnRFNOIG5vdCBhbGxvd2VkJywgeyBzdGF0dXM6IDQwMyB9KTtcbiAgfVxuXG4gIGNvbnN0IGRzbkNvbXBvbmVudHMgPSBtYWtlRHNuKGRzbik7XG4gIGlmICghZHNuQ29tcG9uZW50cykge1xuICAgIGRlYnVnLndhcm4oYENvdWxkIG5vdCBleHRyYWN0IERTTiBDb21wb25lbnRzIGZyb206ICR7ZHNufWApO1xuICAgIHJldHVybiBuZXcgUmVzcG9uc2UoJ0ludmFsaWQgRFNOJywgeyBzdGF0dXM6IDQwMyB9KTtcbiAgfVxuXG4gIGNvbnN0IHNlbnRyeUluZ2VzdFVybCA9IGdldEVudmVsb3BlRW5kcG9pbnRXaXRoVXJsRW5jb2RlZEF1dGgoZHNuQ29tcG9uZW50cyk7XG5cbiAgdHJ5IHtcbiAgICByZXR1cm4gYXdhaXQgZmV0Y2goc2VudHJ5SW5nZXN0VXJsLCB7XG4gICAgICBtZXRob2Q6ICdQT1NUJyxcbiAgICAgIGhlYWRlcnM6IHtcbiAgICAgICAgJ0NvbnRlbnQtVHlwZSc6ICdhcHBsaWNhdGlvbi94LXNlbnRyeS1lbnZlbG9wZScsXG4gICAgICB9LFxuICAgICAgYm9keSxcbiAgICB9KTtcbiAgfSBjYXRjaCAoZXJyb3IpIHtcbiAgICBkZWJ1Zy5lcnJvcignU2VudHJ5IHR1bm5lbDogZmFpbGVkIHRvIGZvcndhcmQgZW52ZWxvcGUnLCBlcnJvcik7XG4gICAgcmV0dXJuIG5ldyBSZXNwb25zZSgnRmFpbGVkIHRvIGZvcndhcmQgZW52ZWxvcGUgdG8gU2VudHJ5JywgeyBzdGF0dXM6IDUwMCB9KTtcbiAgfVxufVxuIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7Ozs7O0FBWUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNPLGVBQWUsbUJBQW1CLENBQUMs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

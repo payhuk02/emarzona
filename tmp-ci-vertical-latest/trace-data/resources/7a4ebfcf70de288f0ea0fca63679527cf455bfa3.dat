@@ -1,0 +1,93 @@
+import { resolvedSyncPromise, rejectedSyncPromise } from "/node_modules/@sentry/core/build/esm/utils/syncpromise.js?v=89021f86";
+import { safeUnref } from "/node_modules/@sentry/core/build/esm/utils/timer.js?v=89021f86";
+
+const SENTRY_BUFFER_FULL_ERROR = Symbol.for('SentryBufferFullError');
+
+/**
+ * Creates an new PromiseBuffer object with the specified limit
+ * @param limit max number of promises that can be stored in the buffer
+ */
+function makePromiseBuffer(limit = 100) {
+  const buffer = new Set();
+
+  function isReady() {
+    return buffer.size < limit;
+  }
+
+  /**
+   * Remove a promise from the queue.
+   *
+   * @param task Can be any PromiseLike<T>
+   * @returns Removed promise.
+   */
+  function remove(task) {
+    buffer.delete(task);
+  }
+
+  /**
+   * Add a promise (representing an in-flight action) to the queue, and set it to remove itself on fulfillment.
+   *
+   * @param taskProducer A function producing any PromiseLike<T>; In previous versions this used to be `task:
+   *        PromiseLike<T>`, but under that model, Promises were instantly created on the call-site and their executor
+   *        functions therefore ran immediately. Thus, even if the buffer was full, the action still happened. By
+   *        requiring the promise to be wrapped in a function, we can defer promise creation until after the buffer
+   *        limit check.
+   * @returns The original promise.
+   */
+  function add(taskProducer) {
+    if (!isReady()) {
+      return rejectedSyncPromise(SENTRY_BUFFER_FULL_ERROR);
+    }
+
+    // start the task and add its promise to the queue
+    const task = taskProducer();
+    buffer.add(task);
+    void task.then(
+      () => remove(task),
+      () => remove(task),
+    );
+    return task;
+  }
+
+  /**
+   * Wait for all promises in the queue to resolve or for timeout to expire, whichever comes first.
+   *
+   * @param timeout The time, in ms, after which to resolve to `false` if the queue is still non-empty. Passing `0` (or
+   * not passing anything) will make the promise wait as long as it takes for the queue to drain before resolving to
+   * `true`.
+   * @returns A promise which will resolve to `true` if the queue is already empty or drains before the timeout, and
+   * `false` otherwise
+   */
+  function drain(timeout) {
+    if (!buffer.size) {
+      return resolvedSyncPromise(true);
+    }
+
+    // We want to resolve even if one of the promises rejects
+    const drainPromise = Promise.allSettled(Array.from(buffer)).then(() => true);
+
+    if (!timeout) {
+      return drainPromise;
+    }
+
+    const promises = [
+      drainPromise,
+      new Promise(resolve => safeUnref(setTimeout(() => resolve(false), timeout))),
+    ];
+
+    return Promise.race(promises);
+  }
+
+  return {
+    get $() {
+      return Array.from(buffer);
+    },
+    add,
+    drain,
+  };
+}
+
+export { SENTRY_BUFFER_FULL_ERROR, makePromiseBuffer };
+                                         
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicHJvbWlzZWJ1ZmZlci5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4vc3JjL3V0aWxzL3Byb21pc2VidWZmZXIudHMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgcmVqZWN0ZWRTeW5jUHJvbWlzZSwgcmVzb2x2ZWRTeW5jUHJvbWlzZSB9IGZyb20gJy4vc3luY3Byb21pc2UnO1xuaW1wb3J0IHsgc2FmZVVucmVmIH0gZnJvbSAnLi90aW1lcic7XG5cbmV4cG9ydCBpbnRlcmZhY2UgUHJvbWlzZUJ1ZmZlcjxUPiB7XG4gIC8vIGV4cG9zZXMgdGhlIGludGVybmFsIGFycmF5IHNvIHRlc3RzIGNhbiBhc3NlcnQgb24gdGhlIHN0YXRlIG9mIGl0LlxuICAvLyBYWFg6IHRoaXMgcmVhbGx5IHNob3VsZCBub3QgYmUgcHVibGljIGFwaS5cbiAgJDogUHJvbWlzZUxpa2U8VD5bXTtcbiAgYWRkKHRhc2tQcm9kdWNlcjogKCkgPT4gUHJvbWlzZUxpa2U8VD4pOiBQcm9taXNlTGlrZTxUPjtcbiAgZHJhaW4odGltZW91dD86IG51bWJlcik6IFByb21pc2VMaWtlPGJvb2xlYW4+O1xufVxuXG5leHBvcnQgY29uc3QgU0VOVFJZX0JVRkZFUl9GVUxMX0VSUk9SID0gU3ltYm9sLmZvcignU2VudHJ5QnVmZmVyRnVsbEVycm9yJyk7XG5cbi8qKlxuICogQ3JlYXRlcyBhbiBuZXcgUHJvbWlzZUJ1ZmZlciBvYmplY3Qgd2l0aCB0aGUgc3BlY2lmaWVkIGxpbWl0XG4gKiBAcGFyYW0gbGltaXQgbWF4IG51bWJlciBvZiBwcm9taXNlcyB0aGF0IGNhbiBiZSBzdG9yZWQgaW4gdGhlIGJ1ZmZlclxuICovXG5leHBvcnQgZnVuY3Rpb24gbWFrZVByb21pc2VCdWZmZXI8VD4obGltaXQ6IG51bWJlciA9IDEwMCk6IFByb21pc2VCdWZmZXI8VD4ge1xuICBjb25zdCBidWZmZXI6IFNldDxQcm9taXNlTGlrZTxUPj4gPSBuZXcgU2V0KCk7XG5cbiAgZnVuY3Rpb24gaXNSZWFkeSgpOiBib29sZWFuIHtcbiAgICByZXR1cm4gYnVmZmVyLnNpemUgPCBsaW1pdDtcbiAgfVxuXG4gIC8qKlxuICAgKiBSZW1vdmUgYSBwcm9taXNlIGZyb20gdGhlIHF1ZXVlLlxuICAgKlxuICAgKiBAcGFyYW0gdGFzayBDYW4gYmUgYW55IFByb21pc2VMaWtlPFQ+XG4gICAqIEByZXR1cm5zIFJlbW92ZWQgcHJvbWlzZS5cbiAgICovXG4gIGZ1bmN0aW9uIHJlbW92ZSh0YXNrOiBQcm9taXNlTGlrZTxUPik6IHZvaWQge1xuICAgIGJ1ZmZlci5kZWxldGUodGFzayk7XG4gIH1cblxuICAvKipcbiAgICogQWRkIGEgcHJvbWlzZSAocmVwcmVzZW50aW5nIGFuIGluLWZsaWdodCBhY3Rpb24pIHRvIHRoZSBxdWV1ZSwgYW5kIHNldCBpdCB0byByZW1vdmUgaXRzZWxmIG9uIGZ1bGZpbGxtZW50LlxuICAgKlxuICAgKiBAcGFyYW0gdGFza1Byb2R1Y2VyIEEgZnVuY3Rpb24gcHJvZHVjaW5nIGFueSBQcm9taXNlTGlrZTxUPjsgSW4gcHJldmlvdXMgdmVyc2lvbnMgdGhpcyB1c2VkIHRvIGJlIGB0YXNrOlxuICAgKiAgICAgICAgUHJvbWlzZUxpa2U8VD5gLCBidXQgdW5kZXIgdGhhdCBtb2RlbCwgUHJvbWlzZXMgd2VyZSBpbnN0YW50bHkgY3JlYXRlZCBvbiB0aGUgY2FsbC1zaXRlIGFuZCB0aGVpciBleGVjdXRvclxuICAgKiAgICAgICAgZnVuY3Rpb25zIHRoZXJlZm9yZSByYW4gaW1tZWRpYXRlbHkuIFRodXMsIGV2ZW4gaWYgdGhlIGJ1ZmZlciB3YXMgZnVsbCwgdGhlIGFjdGlvbiBzdGlsbCBoYXBwZW5lZC4gQnlcbiAgICogICAgICAgIHJlcXVpcmluZyB0aGUgcHJvbWlzZSB0byBiZSB3cmFwcGVkIGluIGEgZnVuY3Rpb24sIHdlIGNhbiBkZWZlciBwcm9taXNlIGNyZWF0aW9uIHVudGlsIGFmdGVyIHRoZSBidWZmZXJcbiAgICogICAgICAgIGxpbWl0IGNoZWNrLlxuICAgKiBAcmV0dXJucyBUaGUgb3JpZ2luYWwgcHJvbWlzZS5cbiAgICovXG4gIGZ1bmN0aW9uIGFkZCh0YXNrUHJvZHVjZXI6ICgpID0+IFByb21pc2VMaWtlPFQ+KTogUHJvbWlzZUxpa2U8VD4ge1xuICAgIGlmICghaXNSZWFkeSgpKSB7XG4gICAgICByZXR1cm4gcmVqZWN0ZWRTeW5jUHJvbWlzZShTRU5UUllfQlVGRkVSX0ZVTExfRVJST1IpO1xuICAgIH1cblxuICAgIC8vIHN0YXJ0IHRoZSB0YXNrIGFuZCBhZGQgaXRzIHByb21pc2UgdG8gdGhlIHF1ZXVlXG4gICAgY29uc3QgdGFzayA9IHRhc2tQcm9kdWNlcigpO1xuICAgIGJ1ZmZlci5hZGQodGFzayk7XG4gICAgdm9pZCB0YXNrLnRoZW4oXG4gICAgICAoKSA9PiByZW1vdmUodGFzayksXG4gICAgICAoKSA9PiByZW1vdmUodGFzayksXG4gICAgKTtcbiAgICByZXR1cm4gdGFzaztcbiAgfVxuXG4gIC8qKlxuICAgKiBXYWl0IGZvciBhbGwgcHJvbWlzZXMgaW4gdGhlIHF1ZXVlIHRvIHJlc29sdmUgb3IgZm9yIHRpbWVvdXQgdG8gZXhwaXJlLCB3aGljaGV2ZXIgY29tZXMgZmlyc3QuXG4gICAqXG4gICAqIEBwYXJhbSB0aW1lb3V0IFRoZSB0aW1lLCBpbiBtcywgYWZ0ZXIgd2hpY2ggdG8gcmVzb2x2ZSB0byBgZmFsc2VgIGlmIHRoZSBxdWV1ZSBpcyBzdGlsbCBub24tZW1wdHkuIFBhc3NpbmcgYDBgIChvclxuICAgKiBub3QgcGFzc2luZyBhbnl0aGluZykgd2lsbCBtYWtlIHRoZSBwcm9taXNlIHdhaXQgYXMgbG9uZyBhcyBpdCB0YWtlcyBmb3IgdGhlIHF1ZXVlIHRvIGRyYWluIGJlZm9yZSByZXNvbHZpbmcgdG9cbiAgICogYHRydWVgLlxuICAgKiBAcmV0dXJucyBBIHByb21pc2Ugd2hpY2ggd2lsbCByZXNvbHZlIHRvIGB0cnVlYCBpZiB0aGUgcXVldWUgaXMgYWxyZWFkeSBlbXB0eSBvciBkcmFpbnMgYmVmb3JlIHRoZSB0aW1lb3V0LCBhbmRcbiAgICogYGZhbHNlYCBvdGhlcndpc2VcbiAgICovXG4gIGZ1bmN0aW9uIGRyYWluKHRpbWVvdXQ/OiBudW1iZXIpOiBQcm9taXNlTGlrZTxib29sZWFuPiB7XG4gICAgaWYgKCFidWZmZXIuc2l6ZSkge1xuICAgICAgcmV0dXJuIHJlc29sdmVkU3luY1Byb21pc2UodHJ1ZSk7XG4gICAgfVxuXG4gICAgLy8gV2Ugd2FudCB0byByZXNvbHZlIGV2ZW4gaWYgb25lIG9mIHRoZSBwcm9taXNlcyByZWplY3RzXG4gICAgY29uc3QgZHJhaW5Qcm9taXNlID0gUHJvbWlzZS5hbGxTZXR0bGVkKEFycmF5LmZyb20oYnVmZmVyKSkudGhlbigoKSA9PiB0cnVlKTtcblxuICAgIGlmICghdGltZW91dCkge1xuICAgICAgcmV0dXJuIGRyYWluUHJvbWlzZTtcbiAgICB9XG5cbiAgICBjb25zdCBwcm9taXNlcyA9IFtcbiAgICAgIGRyYWluUHJvbWlzZSxcbiAgICAgIG5ldyBQcm9taXNlPGJvb2xlYW4+KHJlc29sdmUgPT4gc2FmZVVucmVmKHNldFRpbWVvdXQoKCkgPT4gcmVzb2x2ZShmYWxzZSksIHRpbWVvdXQpKSksXG4gICAgXTtcblxuICAgIHJldHVybiBQcm9taXNlLnJhY2UocHJvbWlzZXMpO1xuICB9XG5cbiAgcmV0dXJuIHtcbiAgICBnZXQgJCgpOiBQcm9taXNlTGlrZTxUPltdIHtcbiAgICAgIHJldHVybiBBcnJheS5mcm9tKGJ1ZmZlcik7XG4gICAgfSxcbiAgICBhZGQsXG4gICAgZHJhaW4sXG4gIH07XG59XG4iXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7O0FBV08sTUFBTSwyQkFBMkIsTUFBTSxDQUFDLEdBQUcsQ0FBQyx1QkFBdUI7O0FBRTFFO0FBQ0E7QUFDQTtBQUNBO0FBQ08sU0FBUyxpQkFBaUIsQ0FBSSxLQUFLLEdBQVcsR0FBRyxFQUFvQjtBQUM1RSxFQUFFLE1BQU0sTUFBTSxHQUF3QixJQUFJLEdBQUcsRUFBRTs7QUFFL0MsRUFBRSxTQUFTLE9BQU8sR0FBWTtBQUM5QixJQUFJLE9BQU8sTUFBTSxDQUFDLElBQUEsR0FBTyxLQUFLO0FBQzlCLEVBQUU7O0FBRUY7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0EsRUFBRSxTQUFTLE1BQU0sQ0FBQyxJQUFJLEVBQXdCO0FBQzlDLElBQUksTUFBTSxDQUFDLE1BQU0sQ0FBQyxJQUFJLENBQUM7QUFDdkIsRUFBRTs7QUFFRjtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLEVBQUUsU0FBUyxHQUFHLENBQUMsWUFBWSxFQUF3QztBQUNuRSxJQUFJLElBQUksQ0FBQyxPQUFPLEVBQUUsRUFBRTtBQUNwQixNQUFNLE9BQU8sbUJBQW1CLENBQUMsd0JBQXdCLENBQUM7QUFDMUQsSUFBSTs7QUFFSjtBQUNBLElBQUksTUFBTSxJQUFBLEdBQU8sWUFBWSxFQUFFO0FBQy9CLElBQUksTUFBTSxDQUFDLEdBQUcsQ0FBQyxJQUFJLENBQUM7QUFDcEIsSUFBSSxLQUFLLElBQUksQ0FBQyxJQUFJO0FBQ2xCLE1BQU0sTUFBTSxNQUFNLENBQUMsSUFBSSxDQUFDO0FBQ3hCLE1BQU0sTUFBTSxNQUFNLENBQUMsSUFBSSxDQUFDO0FBQ3hCLEtBQUs7QUFDTCxJQUFJLE9BQU8sSUFBSTtBQUNmLEVBQUU7O0FBRUY7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0EsRUFBRSxTQUFTLEtBQUssQ0FBQyxPQUFPLEVBQWlDO0FBQ3pELElBQUksSUFBSSxDQUFDLE1BQU0sQ0FBQyxJQUFJLEVBQUU7QUFDdEIsTUFBTSxPQUFPLG1CQUFtQixDQUFDLElBQUksQ0FBQztBQUN0QyxJQUFJOztBQUVKO0FBQ0EsSUFBSSxNQUFNLGVBQWUsT0FBTyxDQUFDLFVBQVUsQ0FBQyxLQUFLLENBQUMsSUFBSSxDQUFDLE1BQU0sQ0FBQyxDQUFDLENBQUMsSUFBSSxDQUFDLE1BQU0sSUFBSSxDQUFDOztBQUVoRixJQUFJLElBQUksQ0FBQyxPQUFPLEVBQUU7QUFDbEIsTUFBTSxPQUFPLFlBQVk7QUFDekIsSUFBSTs7QUFFSixJQUFJLE1BQU0sV0FBVztBQUNyQixNQUFNLFlBQVk7QUFDbEIsTUFBTSxJQUFJLE9BQU8sQ0FBVSxPQUFBLElBQVcsU0FBUyxDQUFDLFVBQVUsQ0FBQyxNQUFNLE9BQU8sQ0FBQyxLQUFLLENBQUMsRUFBRSxPQUFPLENBQUMsQ0FBQyxDQUFDO0FBQzNGLEtBQUs7O0FBRUwsSUFBSSxPQUFPLE9BQU8sQ0FBQyxJQUFJLENBQUMsUUFBUSxDQUFDO0FBQ2pDLEVBQUU7O0FBRUYsRUFBRSxPQUFPO0FBQ1QsSUFBSSxJQUFJLENBQUMsR0FBcUI7QUFDOUIsTUFBTSxPQUFPLEtBQUssQ0FBQyxJQUFJLENBQUMsTUFBTSxDQUFDO0FBQy9CLElBQUksQ0FBQztBQUNMLElBQUksR0FBRztBQUNQLElBQUksS0FBSztBQUNULEdBQUc7QUFDSDs7OzsiLCJ4X2dvb2dsZV9pZ25vcmVMaXN0IjpbMF19

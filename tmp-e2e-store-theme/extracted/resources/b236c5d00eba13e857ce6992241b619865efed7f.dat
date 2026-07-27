@@ -1,0 +1,35 @@
+import { defineIntegration } from "/node_modules/@sentry/core/build/esm/index.js?v=3ea6c1b9";
+import { WINDOW, getHttpRequestData } from "/node_modules/@sentry/browser/build/npm/esm/dev/helpers.js?v=3ea6c1b9";
+
+/**
+ * Collects information about HTTP request headers and
+ * attaches them to the event.
+ */
+const httpContextIntegration = defineIntegration(() => {
+  return {
+    name: 'HttpContext',
+    preprocessEvent(event) {
+      // if none of the information we want exists, don't bother
+      if (!WINDOW.navigator && !WINDOW.location && !WINDOW.document) {
+        return;
+      }
+
+      const reqData = getHttpRequestData();
+      const headers = {
+        ...reqData.headers,
+        ...event.request?.headers,
+      };
+
+      event.request = {
+        ...reqData,
+        ...event.request,
+        headers,
+      };
+    },
+  };
+});
+
+export { httpContextIntegration };
+                                       
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaHR0cGNvbnRleHQuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uLy4uL3NyYy9pbnRlZ3JhdGlvbnMvaHR0cGNvbnRleHQudHMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgZGVmaW5lSW50ZWdyYXRpb24gfSBmcm9tICdAc2VudHJ5L2NvcmUnO1xuaW1wb3J0IHsgZ2V0SHR0cFJlcXVlc3REYXRhLCBXSU5ET1cgfSBmcm9tICcuLi9oZWxwZXJzJztcblxuLyoqXG4gKiBDb2xsZWN0cyBpbmZvcm1hdGlvbiBhYm91dCBIVFRQIHJlcXVlc3QgaGVhZGVycyBhbmRcbiAqIGF0dGFjaGVzIHRoZW0gdG8gdGhlIGV2ZW50LlxuICovXG5leHBvcnQgY29uc3QgaHR0cENvbnRleHRJbnRlZ3JhdGlvbiA9IGRlZmluZUludGVncmF0aW9uKCgpID0+IHtcbiAgcmV0dXJuIHtcbiAgICBuYW1lOiAnSHR0cENvbnRleHQnLFxuICAgIHByZXByb2Nlc3NFdmVudChldmVudCkge1xuICAgICAgLy8gaWYgbm9uZSBvZiB0aGUgaW5mb3JtYXRpb24gd2Ugd2FudCBleGlzdHMsIGRvbid0IGJvdGhlclxuICAgICAgaWYgKCFXSU5ET1cubmF2aWdhdG9yICYmICFXSU5ET1cubG9jYXRpb24gJiYgIVdJTkRPVy5kb2N1bWVudCkge1xuICAgICAgICByZXR1cm47XG4gICAgICB9XG5cbiAgICAgIGNvbnN0IHJlcURhdGEgPSBnZXRIdHRwUmVxdWVzdERhdGEoKTtcbiAgICAgIGNvbnN0IGhlYWRlcnMgPSB7XG4gICAgICAgIC4uLnJlcURhdGEuaGVhZGVycyxcbiAgICAgICAgLi4uZXZlbnQucmVxdWVzdD8uaGVhZGVycyxcbiAgICAgIH07XG5cbiAgICAgIGV2ZW50LnJlcXVlc3QgPSB7XG4gICAgICAgIC4uLnJlcURhdGEsXG4gICAgICAgIC4uLmV2ZW50LnJlcXVlc3QsXG4gICAgICAgIGhlYWRlcnMsXG4gICAgICB9O1xuICAgIH0sXG4gIH07XG59KTtcbiJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7QUFHQTtBQUNBO0FBQ0E7QUFDQTtNQUNhLHNCQUFBLEdBQXlCLGlCQUFpQixDQUFDLE1BQU07QUFDOUQsRUFBRSxPQUFPO0FBQ1QsSUFBSSxJQUFJLEVBQUUsYUFBYTtBQUN2QixJQUFJLGVBQWUsQ0FBQyxLQUFLLEVBQUU7QUFDM0I7QUFDQSxNQUFNLElBQUksQ0FBQyxNQUFNLENBQUMsYUFBYSxDQUFDLE1BQU0sQ0FBQyxZQUFZLENBQUMsTUFBTSxDQUFDLFFBQVEsRUFBRTtBQUNyRSxRQUFRO0FBQ1IsTUFBTTs7QUFFTixNQUFNLE1BQU0sT0FBQSxHQUFVLGtCQUFrQixFQUFFO0FBQzFDLE1BQU0sTUFBTSxVQUFVO0FBQ3RCLFFBQVEsR0FBRyxPQUFPLENBQUMsT0FBTztBQUMxQixRQUFRLEdBQUcsS0FBSyxDQUFDLE9BQU8sRUFBRSxPQUFPO0FBQ2pDLE9BQU87O0FBRVAsTUFBTSxLQUFLLENBQUMsT0FBQSxHQUFVO0FBQ3RCLFFBQVEsR0FBRyxPQUFPO0FBQ2xCLFFBQVEsR0FBRyxLQUFLLENBQUMsT0FBTztBQUN4QixRQUFRLE9BQU87QUFDZixPQUFPO0FBQ1AsSUFBSSxDQUFDO0FBQ0wsR0FBRztBQUNILENBQUM7Ozs7IiwieF9nb29nbGVfaWdub3JlTGlzdCI6WzBdfQ==

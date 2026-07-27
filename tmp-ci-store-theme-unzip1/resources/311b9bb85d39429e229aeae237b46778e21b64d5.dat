@@ -1,0 +1,38 @@
+import { DEBUG_BUILD } from "/node_modules/@sentry/core/build/esm/debug-build.js?v=d758aa40";
+import { debug } from "/node_modules/@sentry/core/build/esm/utils/debug-logger.js?v=d758aa40";
+import { stringMatchesSomePattern } from "/node_modules/@sentry/core/build/esm/utils/string.js?v=d758aa40";
+
+const NOT_PROPAGATED_MESSAGE =
+  '[Tracing] Not injecting trace data for url because it does not match tracePropagationTargets:';
+
+/**
+ * Check if a given URL should be propagated to or not.
+ * If no url is defined, or no trace propagation targets are defined, this will always return `true`.
+ * You can also optionally provide a decision map, to cache decisions and avoid repeated regex lookups.
+ */
+function shouldPropagateTraceForUrl(
+  url,
+  tracePropagationTargets,
+  decisionMap,
+) {
+  if (typeof url !== 'string' || !tracePropagationTargets) {
+    return true;
+  }
+
+  const cachedDecision = decisionMap?.get(url);
+  if (cachedDecision !== undefined) {
+    DEBUG_BUILD && !cachedDecision && debug.log(NOT_PROPAGATED_MESSAGE, url);
+    return cachedDecision;
+  }
+
+  const decision = stringMatchesSomePattern(url, tracePropagationTargets);
+  decisionMap?.set(url, decision);
+
+  DEBUG_BUILD && !decision && debug.log(NOT_PROPAGATED_MESSAGE, url);
+  return decision;
+}
+
+export { shouldPropagateTraceForUrl };
+                                                   
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidHJhY2VQcm9wYWdhdGlvblRhcmdldHMuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy91dGlscy90cmFjZVByb3BhZ2F0aW9uVGFyZ2V0cy50cyJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgeyBERUJVR19CVUlMRCB9IGZyb20gJy4uL2RlYnVnLWJ1aWxkJztcbmltcG9ydCB0eXBlIHsgQ29yZU9wdGlvbnMgYXMgT3B0aW9ucyB9IGZyb20gJy4uL3R5cGVzLWhvaXN0L29wdGlvbnMnO1xuaW1wb3J0IHsgZGVidWcgfSBmcm9tICcuL2RlYnVnLWxvZ2dlcic7XG5pbXBvcnQgdHlwZSB7IExSVU1hcCB9IGZyb20gJy4vbHJ1JztcbmltcG9ydCB7IHN0cmluZ01hdGNoZXNTb21lUGF0dGVybiB9IGZyb20gJy4vc3RyaW5nJztcblxuY29uc3QgTk9UX1BST1BBR0FURURfTUVTU0FHRSA9XG4gICdbVHJhY2luZ10gTm90IGluamVjdGluZyB0cmFjZSBkYXRhIGZvciB1cmwgYmVjYXVzZSBpdCBkb2VzIG5vdCBtYXRjaCB0cmFjZVByb3BhZ2F0aW9uVGFyZ2V0czonO1xuXG4vKipcbiAqIENoZWNrIGlmIGEgZ2l2ZW4gVVJMIHNob3VsZCBiZSBwcm9wYWdhdGVkIHRvIG9yIG5vdC5cbiAqIElmIG5vIHVybCBpcyBkZWZpbmVkLCBvciBubyB0cmFjZSBwcm9wYWdhdGlvbiB0YXJnZXRzIGFyZSBkZWZpbmVkLCB0aGlzIHdpbGwgYWx3YXlzIHJldHVybiBgdHJ1ZWAuXG4gKiBZb3UgY2FuIGFsc28gb3B0aW9uYWxseSBwcm92aWRlIGEgZGVjaXNpb24gbWFwLCB0byBjYWNoZSBkZWNpc2lvbnMgYW5kIGF2b2lkIHJlcGVhdGVkIHJlZ2V4IGxvb2t1cHMuXG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBzaG91bGRQcm9wYWdhdGVUcmFjZUZvclVybChcbiAgdXJsOiBzdHJpbmcgfCB1bmRlZmluZWQsXG4gIHRyYWNlUHJvcGFnYXRpb25UYXJnZXRzOiBPcHRpb25zWyd0cmFjZVByb3BhZ2F0aW9uVGFyZ2V0cyddLFxuICBkZWNpc2lvbk1hcD86IExSVU1hcDxzdHJpbmcsIGJvb2xlYW4+LFxuKTogYm9vbGVhbiB7XG4gIGlmICh0eXBlb2YgdXJsICE9PSAnc3RyaW5nJyB8fCAhdHJhY2VQcm9wYWdhdGlvblRhcmdldHMpIHtcbiAgICByZXR1cm4gdHJ1ZTtcbiAgfVxuXG4gIGNvbnN0IGNhY2hlZERlY2lzaW9uID0gZGVjaXNpb25NYXA/LmdldCh1cmwpO1xuICBpZiAoY2FjaGVkRGVjaXNpb24gIT09IHVuZGVmaW5lZCkge1xuICAgIERFQlVHX0JVSUxEICYmICFjYWNoZWREZWNpc2lvbiAmJiBkZWJ1Zy5sb2coTk9UX1BST1BBR0FURURfTUVTU0FHRSwgdXJsKTtcbiAgICByZXR1cm4gY2FjaGVkRGVjaXNpb247XG4gIH1cblxuICBjb25zdCBkZWNpc2lvbiA9IHN0cmluZ01hdGNoZXNTb21lUGF0dGVybih1cmwsIHRyYWNlUHJvcGFnYXRpb25UYXJnZXRzKTtcbiAgZGVjaXNpb25NYXA/LnNldCh1cmwsIGRlY2lzaW9uKTtcblxuICBERUJVR19CVUlMRCAmJiAhZGVjaXNpb24gJiYgZGVidWcubG9nKE5PVF9QUk9QQUdBVEVEX01FU1NBR0UsIHVybCk7XG4gIHJldHVybiBkZWNpc2lvbjtcbn1cbiJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7O0FBTUEsTUFBTSxzQkFBQTtBQUNOLEVBQUUsK0ZBQStGOztBQUVqRztBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ08sU0FBUywwQkFBMEI7QUFDMUMsRUFBRSxHQUFHO0FBQ0wsRUFBRSx1QkFBdUI7QUFDekIsRUFBRSxXQUFXO0FBQ2IsRUFBVztBQUNYLEVBQUUsSUFBSSxPQUFPLEdBQUEsS0FBUSxRQUFBLElBQVksQ0FBQyx1QkFBdUIsRUFBRTtBQUMzRCxJQUFJLE9BQU8sSUFBSTtBQUNmLEVBQUU7O0FBRUYsRUFBRSxNQUFNLGlCQUFpQixXQUFXLEVBQUUsR0FBRyxDQUFDLEdBQUcsQ0FBQztBQUM5QyxFQUFFLElBQUksY0FBQSxLQUFtQixTQUFTLEVBQUU7QUFDcEMsSUFBSSxXQUFBLElBQWUsQ0FBQyxjQUFBLElBQWtCLEtBQUssQ0FBQyxHQUFHLENBQUMsc0JBQXNCLEVBQUUsR0FBRyxDQUFDO0FBQzVFLElBQUksT0FBTyxjQUFjO0FBQ3pCLEVBQUU7O0FBRUYsRUFBRSxNQUFNLFdBQVcsd0JBQXdCLENBQUMsR0FBRyxFQUFFLHVCQUF1QixDQUFDO0FBQ3pFLEVBQUUsV0FBVyxFQUFFLEdBQUcsQ0FBQyxHQUFHLEVBQUUsUUFBUSxDQUFDOztBQUVqQyxFQUFFLFdBQUEsSUFBZSxDQUFDLFFBQUEsSUFBWSxLQUFLLENBQUMsR0FBRyxDQUFDLHNCQUFzQixFQUFFLEdBQUcsQ0FBQztBQUNwRSxFQUFFLE9BQU8sUUFBUTtBQUNqQjs7OzsiLCJ4X2dvb2dsZV9pZ25vcmVMaXN0IjpbMF19

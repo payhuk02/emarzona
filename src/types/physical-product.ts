@@ -64,6 +64,7 @@ export interface PhysicalProductFormData {
   compare_at_price: number | null;
   cost_per_item: number | null;
   images: string[];
+  category: string;
   category_id: string | null;
   tags: string[];
 

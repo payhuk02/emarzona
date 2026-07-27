@@ -1,0 +1,48 @@
+import { getCurrentScope } from "/node_modules/@sentry/core/build/esm/currentScopes.js?v=89021f86";
+import { DEBUG_BUILD } from "/node_modules/@sentry/core/build/esm/debug-build.js?v=89021f86";
+import { debug, consoleSandbox } from "/node_modules/@sentry/core/build/esm/utils/debug-logger.js?v=89021f86";
+
+/** A class object that can instantiate Client objects. */
+
+/**
+ * Internal function to create a new SDK client instance. The client is
+ * installed and then bound to the current scope.
+ *
+ * @param clientClass The client class to instantiate.
+ * @param options Options to pass to the client.
+ */
+function initAndBind(
+  clientClass,
+  options,
+) {
+  if (options.debug === true) {
+    if (DEBUG_BUILD) {
+      debug.enable();
+    } else {
+      // use `console.warn` rather than `debug.warn` since by non-debug bundles have all `debug.x` statements stripped
+      consoleSandbox(() => {
+        // eslint-disable-next-line no-console
+        console.warn('[Sentry] Cannot initialize SDK with `debug` option using a non-debug bundle.');
+      });
+    }
+  }
+  const scope = getCurrentScope();
+  scope.update(options.initialScope);
+
+  const client = new clientClass(options);
+  setCurrentClient(client);
+  client.init();
+  return client;
+}
+
+/**
+ * Make the given client the current client.
+ */
+function setCurrentClient(client) {
+  getCurrentScope().setClient(client);
+}
+
+export { initAndBind, setCurrentClient };
+                               
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic2RrLmpzIiwic291cmNlcyI6WyIuLi8uLi9zcmMvc2RrLnRzIl0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB0eXBlIHsgQ2xpZW50IH0gZnJvbSAnLi9jbGllbnQnO1xuaW1wb3J0IHsgZ2V0Q3VycmVudFNjb3BlIH0gZnJvbSAnLi9jdXJyZW50U2NvcGVzJztcbmltcG9ydCB7IERFQlVHX0JVSUxEIH0gZnJvbSAnLi9kZWJ1Zy1idWlsZCc7XG5pbXBvcnQgdHlwZSB7IENsaWVudE9wdGlvbnMgfSBmcm9tICcuL3R5cGVzLWhvaXN0L29wdGlvbnMnO1xuaW1wb3J0IHsgY29uc29sZVNhbmRib3gsIGRlYnVnIH0gZnJvbSAnLi91dGlscy9kZWJ1Zy1sb2dnZXInO1xuXG4vKiogQSBjbGFzcyBvYmplY3QgdGhhdCBjYW4gaW5zdGFudGlhdGUgQ2xpZW50IG9iamVjdHMuICovXG5leHBvcnQgdHlwZSBDbGllbnRDbGFzczxGIGV4dGVuZHMgQ2xpZW50LCBPIGV4dGVuZHMgQ2xpZW50T3B0aW9ucz4gPSBuZXcgKG9wdGlvbnM6IE8pID0+IEY7XG5cbi8qKlxuICogSW50ZXJuYWwgZnVuY3Rpb24gdG8gY3JlYXRlIGEgbmV3IFNESyBjbGllbnQgaW5zdGFuY2UuIFRoZSBjbGllbnQgaXNcbiAqIGluc3RhbGxlZCBhbmQgdGhlbiBib3VuZCB0byB0aGUgY3VycmVudCBzY29wZS5cbiAqXG4gKiBAcGFyYW0gY2xpZW50Q2xhc3MgVGhlIGNsaWVudCBjbGFzcyB0byBpbnN0YW50aWF0ZS5cbiAqIEBwYXJhbSBvcHRpb25zIE9wdGlvbnMgdG8gcGFzcyB0byB0aGUgY2xpZW50LlxuICovXG5leHBvcnQgZnVuY3Rpb24gaW5pdEFuZEJpbmQ8RiBleHRlbmRzIENsaWVudCwgTyBleHRlbmRzIENsaWVudE9wdGlvbnM+KFxuICBjbGllbnRDbGFzczogQ2xpZW50Q2xhc3M8RiwgTz4sXG4gIG9wdGlvbnM6IE8sXG4pOiBDbGllbnQge1xuICBpZiAob3B0aW9ucy5kZWJ1ZyA9PT0gdHJ1ZSkge1xuICAgIGlmIChERUJVR19CVUlMRCkge1xuICAgICAgZGVidWcuZW5hYmxlKCk7XG4gICAgfSBlbHNlIHtcbiAgICAgIC8vIHVzZSBgY29uc29sZS53YXJuYCByYXRoZXIgdGhhbiBgZGVidWcud2FybmAgc2luY2UgYnkgbm9uLWRlYnVnIGJ1bmRsZXMgaGF2ZSBhbGwgYGRlYnVnLnhgIHN0YXRlbWVudHMgc3RyaXBwZWRcbiAgICAgIGNvbnNvbGVTYW5kYm94KCgpID0+IHtcbiAgICAgICAgLy8gZXNsaW50LWRpc2FibGUtbmV4dC1saW5lIG5vLWNvbnNvbGVcbiAgICAgICAgY29uc29sZS53YXJuKCdbU2VudHJ5XSBDYW5ub3QgaW5pdGlhbGl6ZSBTREsgd2l0aCBgZGVidWdgIG9wdGlvbiB1c2luZyBhIG5vbi1kZWJ1ZyBidW5kbGUuJyk7XG4gICAgICB9KTtcbiAgICB9XG4gIH1cbiAgY29uc3Qgc2NvcGUgPSBnZXRDdXJyZW50U2NvcGUoKTtcbiAgc2NvcGUudXBkYXRlKG9wdGlvbnMuaW5pdGlhbFNjb3BlKTtcblxuICBjb25zdCBjbGllbnQgPSBuZXcgY2xpZW50Q2xhc3Mob3B0aW9ucyk7XG4gIHNldEN1cnJlbnRDbGllbnQoY2xpZW50KTtcbiAgY2xpZW50LmluaXQoKTtcbiAgcmV0dXJuIGNsaWVudDtcbn1cblxuLyoqXG4gKiBNYWtlIHRoZSBnaXZlbiBjbGllbnQgdGhlIGN1cnJlbnQgY2xpZW50LlxuICovXG5leHBvcnQgZnVuY3Rpb24gc2V0Q3VycmVudENsaWVudChjbGllbnQ6IENsaWVudCk6IHZvaWQge1xuICBnZXRDdXJyZW50U2NvcGUoKS5zZXRDbGllbnQoY2xpZW50KTtcbn1cbiJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7O0FBTUE7O0FBR0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDTyxTQUFTLFdBQVc7QUFDM0IsRUFBRSxXQUFXO0FBQ2IsRUFBRSxPQUFPO0FBQ1QsRUFBVTtBQUNWLEVBQUUsSUFBSSxPQUFPLENBQUMsS0FBQSxLQUFVLElBQUksRUFBRTtBQUM5QixJQUFJLElBQUksV0FBVyxFQUFFO0FBQ3JCLE1BQU0sS0FBSyxDQUFDLE1BQU0sRUFBRTtBQUNwQixJQUFJLE9BQU87QUFDWDtBQUNBLE1BQU0sY0FBYyxDQUFDLE1BQU07QUFDM0I7QUFDQSxRQUFRLE9BQU8sQ0FBQyxJQUFJLENBQUMsOEVBQThFLENBQUM7QUFDcEcsTUFBTSxDQUFDLENBQUM7QUFDUixJQUFJO0FBQ0osRUFBRTtBQUNGLEVBQUUsTUFBTSxLQUFBLEdBQVEsZUFBZSxFQUFFO0FBQ2pDLEVBQUUsS0FBSyxDQUFDLE1BQU0sQ0FBQyxPQUFPLENBQUMsWUFBWSxDQUFDOztBQUVwQyxFQUFFLE1BQU0sTUFBQSxHQUFTLElBQUksV0FBVyxDQUFDLE9BQU8sQ0FBQztBQUN6QyxFQUFFLGdCQUFnQixDQUFDLE1BQU0sQ0FBQztBQUMxQixFQUFFLE1BQU0sQ0FBQyxJQUFJLEVBQUU7QUFDZixFQUFFLE9BQU8sTUFBTTtBQUNmOztBQUVBO0FBQ0E7QUFDQTtBQUNPLFNBQVMsZ0JBQWdCLENBQUMsTUFBTSxFQUFnQjtBQUN2RCxFQUFFLGVBQWUsRUFBRSxDQUFDLFNBQVMsQ0FBQyxNQUFNLENBQUM7QUFDckM7Ozs7IiwieF9nb29nbGVfaWdub3JlTGlzdCI6WzBdfQ==

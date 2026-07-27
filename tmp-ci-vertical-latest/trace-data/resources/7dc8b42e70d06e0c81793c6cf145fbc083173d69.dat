@@ -1,0 +1,68 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/routes/SellerLegacyPathRedirect.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/routes/SellerLegacyPathRedirect.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=2441233a"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+var _s = $RefreshSig$();
+import { Navigate, useParams } from "/node_modules/.vite/deps/react-router-dom.js?v=2441233a";
+/** Redirige une route legacy vendeur vers son équivalent canonique sous `/dashboard`. */ export function SellerLegacyPathRedirect({ to }) {
+    _s();
+    const params = useParams();
+    let target = to;
+    for (const [key, value] of Object.entries(params)){
+        if (value != null) {
+            target = target.replace(`:${key}`, value);
+        }
+    }
+    return /*#__PURE__*/ _jsxDEV(Navigate, {
+        to: target,
+        replace: true
+    }, void 0, false, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/routes/SellerLegacyPathRedirect.tsx",
+        lineNumber: 17,
+        columnNumber: 10
+    }, this);
+}
+_s(SellerLegacyPathRedirect, "+jVsTcECDRo3yq2d7EQxlN9Ixog=", false, function() {
+    return [
+        useParams
+    ];
+});
+_c = SellerLegacyPathRedirect;
+var _c;
+$RefreshReg$(_c, "SellerLegacyPathRedirect");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/routes/SellerLegacyPathRedirect.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/routes/SellerLegacyPathRedirect.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIlNlbGxlckxlZ2FjeVBhdGhSZWRpcmVjdC50c3giXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgTmF2aWdhdGUsIHVzZVBhcmFtcyB9IGZyb20gJ3JlYWN0LXJvdXRlci1kb20nO1xuXG5pbnRlcmZhY2UgUHJvcHMge1xuICAvKiogQ2hlbWluIGNpYmxlIGF2ZWMgcGFyYW3DqHRyZXMgZHluYW1pcXVlcywgZXguIGAvZGFzaGJvYXJkL2NvdXJzZXMvOmNvdXJzZUlkL2dhbWlmaWNhdGlvbmAgKi9cbiAgdG86IHN0cmluZztcbn1cblxuLyoqIFJlZGlyaWdlIHVuZSByb3V0ZSBsZWdhY3kgdmVuZGV1ciB2ZXJzIHNvbiDDqXF1aXZhbGVudCBjYW5vbmlxdWUgc291cyBgL2Rhc2hib2FyZGAuICovXG5leHBvcnQgZnVuY3Rpb24gU2VsbGVyTGVnYWN5UGF0aFJlZGlyZWN0KHsgdG8gfTogUHJvcHMpIHtcbiAgY29uc3QgcGFyYW1zID0gdXNlUGFyYW1zKCk7XG4gIGxldCB0YXJnZXQgPSB0bztcbiAgZm9yIChjb25zdCBba2V5LCB2YWx1ZV0gb2YgT2JqZWN0LmVudHJpZXMocGFyYW1zKSkge1xuICAgIGlmICh2YWx1ZSAhPSBudWxsKSB7XG4gICAgICB0YXJnZXQgPSB0YXJnZXQucmVwbGFjZShgOiR7a2V5fWAsIHZhbHVlKTtcbiAgICB9XG4gIH1cbiAgcmV0dXJuIDxOYXZpZ2F0ZSB0bz17dGFyZ2V0fSByZXBsYWNlIC8+O1xufVxuIl0sIm5hbWVzIjpbIk5hdmlnYXRlIiwidXNlUGFyYW1zIiwiU2VsbGVyTGVnYWN5UGF0aFJlZGlyZWN0IiwidG8iLCJwYXJhbXMiLCJ0YXJnZXQiLCJrZXkiLCJ2YWx1ZSIsIk9iamVjdCIsImVudHJpZXMiLCJyZXBsYWNlIl0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7QUFBQSxTQUFTQSxRQUFRLEVBQUVDLFNBQVMsUUFBUSxtQkFBbUI7QUFPdkQsdUZBQXVGLEdBQ3ZGLE9BQU8sU0FBU0MseUJBQXlCLEVBQUVDLEVBQUUsRUFBUzs7SUFDcEQsTUFBTUMsU0FBU0g7SUFDZixJQUFJSSxTQUFTRjtJQUNiLEtBQUssTUFBTSxDQUFDRyxLQUFLQyxNQUFNLElBQUlDLE9BQU9DLE9BQU8sQ0FBQ0wsUUFBUztRQUNqRCxJQUFJRyxTQUFTLE1BQU07WUFDakJGLFNBQVNBLE9BQU9LLE9BQU8sQ0FBQyxDQUFDLENBQUMsRUFBRUosS0FBSyxFQUFFQztRQUNyQztJQUNGO0lBQ0EscUJBQU8sUUFBQ1A7UUFBU0csSUFBSUU7UUFBUUssT0FBTzs7Ozs7O0FBQ3RDO0dBVGdCUjs7UUFDQ0Q7OztLQUREQyJ9

@@ -1,0 +1,39 @@
+import { getClient } from "/node_modules/@sentry/core/build/esm/currentScopes.js?v=3ea6c1b9";
+
+// Treeshakable guard to remove all code related to tracing
+
+/**
+ * Determines if span recording is currently enabled.
+ *
+ * Spans are recorded when at least one of `tracesSampleRate` and `tracesSampler`
+ * is defined in the SDK config. This function does not make any assumption about
+ * sampling decisions, it only checks if the SDK is configured to record spans.
+ *
+ * Important: This function only determines if span recording is enabled. Trace
+ * continuation and propagation is separately controlled and not covered by this function.
+ * If this function returns `false`, traces can still be propagated (which is what
+ * we refer to by "Tracing without Performance")
+ * @see https://develop.sentry.dev/sdk/telemetry/traces/tracing-without-performance/
+ *
+ * @param maybeOptions An SDK options object to be passed to this function.
+ * If this option is not provided, the function will use the current client's options.
+ */
+function hasSpansEnabled(
+  maybeOptions,
+) {
+  if (typeof __SENTRY_TRACING__ === 'boolean' && !__SENTRY_TRACING__) {
+    return false;
+  }
+
+  const options = maybeOptions || getClient()?.getOptions();
+  return (
+    !!options &&
+    // Note: This check is `!= null`, meaning "nullish". `0` is not "nullish", `undefined` and `null` are. (This comment was brought to you by 15 minutes of questioning life)
+    (options.tracesSampleRate != null || !!options.tracesSampler)
+  );
+}
+
+export { hasSpansEnabled };
+                                           
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaGFzU3BhbnNFbmFibGVkLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi9zcmMvdXRpbHMvaGFzU3BhbnNFbmFibGVkLnRzIl0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7IGdldENsaWVudCB9IGZyb20gJy4uL2N1cnJlbnRTY29wZXMnO1xuaW1wb3J0IHR5cGUgeyBDb3JlT3B0aW9ucyB9IGZyb20gJy4uL3R5cGVzLWhvaXN0L29wdGlvbnMnO1xuXG4vLyBUcmVlc2hha2FibGUgZ3VhcmQgdG8gcmVtb3ZlIGFsbCBjb2RlIHJlbGF0ZWQgdG8gdHJhY2luZ1xuZGVjbGFyZSBjb25zdCBfX1NFTlRSWV9UUkFDSU5HX186IGJvb2xlYW4gfCB1bmRlZmluZWQ7XG5cbi8qKlxuICogRGV0ZXJtaW5lcyBpZiBzcGFuIHJlY29yZGluZyBpcyBjdXJyZW50bHkgZW5hYmxlZC5cbiAqXG4gKiBTcGFucyBhcmUgcmVjb3JkZWQgd2hlbiBhdCBsZWFzdCBvbmUgb2YgYHRyYWNlc1NhbXBsZVJhdGVgIGFuZCBgdHJhY2VzU2FtcGxlcmBcbiAqIGlzIGRlZmluZWQgaW4gdGhlIFNESyBjb25maWcuIFRoaXMgZnVuY3Rpb24gZG9lcyBub3QgbWFrZSBhbnkgYXNzdW1wdGlvbiBhYm91dFxuICogc2FtcGxpbmcgZGVjaXNpb25zLCBpdCBvbmx5IGNoZWNrcyBpZiB0aGUgU0RLIGlzIGNvbmZpZ3VyZWQgdG8gcmVjb3JkIHNwYW5zLlxuICpcbiAqIEltcG9ydGFudDogVGhpcyBmdW5jdGlvbiBvbmx5IGRldGVybWluZXMgaWYgc3BhbiByZWNvcmRpbmcgaXMgZW5hYmxlZC4gVHJhY2VcbiAqIGNvbnRpbnVhdGlvbiBhbmQgcHJvcGFnYXRpb24gaXMgc2VwYXJhdGVseSBjb250cm9sbGVkIGFuZCBub3QgY292ZXJlZCBieSB0aGlzIGZ1bmN0aW9uLlxuICogSWYgdGhpcyBmdW5jdGlvbiByZXR1cm5zIGBmYWxzZWAsIHRyYWNlcyBjYW4gc3RpbGwgYmUgcHJvcGFnYXRlZCAod2hpY2ggaXMgd2hhdFxuICogd2UgcmVmZXIgdG8gYnkgXCJUcmFjaW5nIHdpdGhvdXQgUGVyZm9ybWFuY2VcIilcbiAqIEBzZWUgaHR0cHM6Ly9kZXZlbG9wLnNlbnRyeS5kZXYvc2RrL3RlbGVtZXRyeS90cmFjZXMvdHJhY2luZy13aXRob3V0LXBlcmZvcm1hbmNlL1xuICpcbiAqIEBwYXJhbSBtYXliZU9wdGlvbnMgQW4gU0RLIG9wdGlvbnMgb2JqZWN0IHRvIGJlIHBhc3NlZCB0byB0aGlzIGZ1bmN0aW9uLlxuICogSWYgdGhpcyBvcHRpb24gaXMgbm90IHByb3ZpZGVkLCB0aGUgZnVuY3Rpb24gd2lsbCB1c2UgdGhlIGN1cnJlbnQgY2xpZW50J3Mgb3B0aW9ucy5cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIGhhc1NwYW5zRW5hYmxlZChcbiAgbWF5YmVPcHRpb25zPzogUGljazxDb3JlT3B0aW9ucywgJ3RyYWNlc1NhbXBsZVJhdGUnIHwgJ3RyYWNlc1NhbXBsZXInPiB8IHVuZGVmaW5lZCxcbik6IGJvb2xlYW4ge1xuICBpZiAodHlwZW9mIF9fU0VOVFJZX1RSQUNJTkdfXyA9PT0gJ2Jvb2xlYW4nICYmICFfX1NFTlRSWV9UUkFDSU5HX18pIHtcbiAgICByZXR1cm4gZmFsc2U7XG4gIH1cblxuICBjb25zdCBvcHRpb25zID0gbWF5YmVPcHRpb25zIHx8IGdldENsaWVudCgpPy5nZXRPcHRpb25zKCk7XG4gIHJldHVybiAoXG4gICAgISFvcHRpb25zICYmXG4gICAgLy8gTm90ZTogVGhpcyBjaGVjayBpcyBgIT0gbnVsbGAsIG1lYW5pbmcgXCJudWxsaXNoXCIuIGAwYCBpcyBub3QgXCJudWxsaXNoXCIsIGB1bmRlZmluZWRgIGFuZCBgbnVsbGAgYXJlLiAoVGhpcyBjb21tZW50IHdhcyBicm91Z2h0IHRvIHlvdSBieSAxNSBtaW51dGVzIG9mIHF1ZXN0aW9uaW5nIGxpZmUpXG4gICAgKG9wdGlvbnMudHJhY2VzU2FtcGxlUmF0ZSAhPSBudWxsIHx8ICEhb3B0aW9ucy50cmFjZXNTYW1wbGVyKVxuICApO1xufVxuIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7O0FBR0E7O0FBR0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDTyxTQUFTLGVBQWU7QUFDL0IsRUFBRSxZQUFZO0FBQ2QsRUFBVztBQUNYLEVBQUUsSUFBSSxPQUFPLGtCQUFBLEtBQXVCLFNBQUEsSUFBYSxDQUFDLGtCQUFrQixFQUFFO0FBQ3RFLElBQUksT0FBTyxLQUFLO0FBQ2hCLEVBQUU7O0FBRUYsRUFBRSxNQUFNLE9BQUEsR0FBVSxZQUFBLElBQWdCLFNBQVMsRUFBRSxFQUFFLFVBQVUsRUFBRTtBQUMzRCxFQUFFO0FBQ0YsSUFBSSxDQUFDLENBQUMsT0FBQTtBQUNOO0FBQ0EsS0FBSyxPQUFPLENBQUMsZ0JBQUEsSUFBb0IsSUFBQSxJQUFRLENBQUMsQ0FBQyxPQUFPLENBQUMsYUFBYTtBQUNoRTtBQUNBOzs7OyIsInhfZ29vZ2xlX2lnbm9yZUxpc3QiOlswXX0=

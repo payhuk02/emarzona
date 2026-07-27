@@ -1,0 +1,58 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/layout/AppPremiumShell.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/layout/AppPremiumShell.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=2441233a"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+import "/src/styles/landing-premium.css";
+import "/src/styles/app-premium.css";
+import "/src/styles/app-ui-overrides.css";
+import "/src/styles/app-typography.css";
+import "/src/styles/dashboard-responsive.css";
+/** Enveloppe thème premium (tokens landing) pour dashboard, admin, auth, etc. */ export function AppPremiumShell({ children }) {
+    return /*#__PURE__*/ _jsxDEV("div", {
+        className: "landing-premium app-premium min-h-screen w-full",
+        children: children
+    }, void 0, false, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/layout/AppPremiumShell.tsx",
+        lineNumber: 14,
+        columnNumber: 10
+    }, this);
+}
+_c = AppPremiumShell;
+var _c;
+$RefreshReg$(_c, "AppPremiumShell");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/layout/AppPremiumShell.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/layout/AppPremiumShell.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIkFwcFByZW1pdW1TaGVsbC50c3giXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgUmVhY3ROb2RlIH0gZnJvbSAncmVhY3QnO1xuaW1wb3J0ICdAL3N0eWxlcy9sYW5kaW5nLXByZW1pdW0uY3NzJztcbmltcG9ydCAnQC9zdHlsZXMvYXBwLXByZW1pdW0uY3NzJztcbmltcG9ydCAnQC9zdHlsZXMvYXBwLXVpLW92ZXJyaWRlcy5jc3MnO1xuaW1wb3J0ICdAL3N0eWxlcy9hcHAtdHlwb2dyYXBoeS5jc3MnO1xuaW1wb3J0ICdAL3N0eWxlcy9kYXNoYm9hcmQtcmVzcG9uc2l2ZS5jc3MnO1xuXG5pbnRlcmZhY2UgQXBwUHJlbWl1bVNoZWxsUHJvcHMge1xuICBjaGlsZHJlbjogUmVhY3ROb2RlO1xufVxuXG4vKiogRW52ZWxvcHBlIHRow6htZSBwcmVtaXVtICh0b2tlbnMgbGFuZGluZykgcG91ciBkYXNoYm9hcmQsIGFkbWluLCBhdXRoLCBldGMuICovXG5leHBvcnQgZnVuY3Rpb24gQXBwUHJlbWl1bVNoZWxsKHsgY2hpbGRyZW4gfTogQXBwUHJlbWl1bVNoZWxsUHJvcHMpIHtcbiAgcmV0dXJuIDxkaXYgY2xhc3NOYW1lPVwibGFuZGluZy1wcmVtaXVtIGFwcC1wcmVtaXVtIG1pbi1oLXNjcmVlbiB3LWZ1bGxcIj57Y2hpbGRyZW59PC9kaXY+O1xufVxuIl0sIm5hbWVzIjpbIkFwcFByZW1pdW1TaGVsbCIsImNoaWxkcmVuIiwiZGl2IiwiY2xhc3NOYW1lIl0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7Ozs7OztBQUNBLE9BQU8sK0JBQStCO0FBQ3RDLE9BQU8sMkJBQTJCO0FBQ2xDLE9BQU8sZ0NBQWdDO0FBQ3ZDLE9BQU8sOEJBQThCO0FBQ3JDLE9BQU8sb0NBQW9DO0FBTTNDLCtFQUErRSxHQUMvRSxPQUFPLFNBQVNBLGdCQUFnQixFQUFFQyxRQUFRLEVBQXdCO0lBQ2hFLHFCQUFPLFFBQUNDO1FBQUlDLFdBQVU7a0JBQW1ERjs7Ozs7O0FBQzNFO0tBRmdCRCJ9

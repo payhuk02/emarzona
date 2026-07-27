@@ -1,0 +1,75 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/brand/EmarzonaBrandName.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/brand/EmarzonaBrandName.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=02e1e75e"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+import { cn } from "/src/lib/utils.ts";
+/** Mot-symbole « Emarzona » aux couleurs du logo (Emar orange, zona bleu). */ export function EmarzonaBrandName({ className }) {
+    return /*#__PURE__*/ _jsxDEV("span", {
+        "data-testid": "emarzona-brand-name",
+        "aria-label": "Emarzona",
+        className: cn('emarzona-brand-name inline', className),
+        children: [
+            /*#__PURE__*/ _jsxDEV("span", {
+                className: "emarzona-brand-emar",
+                "aria-hidden": true,
+                children: "Emar"
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/brand/EmarzonaBrandName.tsx",
+                lineNumber: 15,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV("span", {
+                className: "emarzona-brand-zona",
+                "aria-hidden": true,
+                children: "zona"
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/brand/EmarzonaBrandName.tsx",
+                lineNumber: 18,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/brand/EmarzonaBrandName.tsx",
+        lineNumber: 10,
+        columnNumber: 5
+    }, this);
+}
+_c = EmarzonaBrandName;
+var _c;
+$RefreshReg$(_c, "EmarzonaBrandName");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/brand/EmarzonaBrandName.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/brand/EmarzonaBrandName.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIkVtYXJ6b25hQnJhbmROYW1lLnRzeCJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgeyBjbiB9IGZyb20gJ0AvbGliL3V0aWxzJztcblxudHlwZSBFbWFyem9uYUJyYW5kTmFtZVByb3BzID0ge1xuICBjbGFzc05hbWU/OiBzdHJpbmc7XG59O1xuXG4vKiogTW90LXN5bWJvbGUgwqsgRW1hcnpvbmEgwrsgYXV4IGNvdWxldXJzIGR1IGxvZ28gKEVtYXIgb3JhbmdlLCB6b25hIGJsZXUpLiAqL1xuZXhwb3J0IGZ1bmN0aW9uIEVtYXJ6b25hQnJhbmROYW1lKHsgY2xhc3NOYW1lIH06IEVtYXJ6b25hQnJhbmROYW1lUHJvcHMpIHtcbiAgcmV0dXJuIChcbiAgICA8c3BhblxuICAgICAgZGF0YS10ZXN0aWQ9XCJlbWFyem9uYS1icmFuZC1uYW1lXCJcbiAgICAgIGFyaWEtbGFiZWw9XCJFbWFyem9uYVwiXG4gICAgICBjbGFzc05hbWU9e2NuKCdlbWFyem9uYS1icmFuZC1uYW1lIGlubGluZScsIGNsYXNzTmFtZSl9XG4gICAgPlxuICAgICAgPHNwYW4gY2xhc3NOYW1lPVwiZW1hcnpvbmEtYnJhbmQtZW1hclwiIGFyaWEtaGlkZGVuPlxuICAgICAgICBFbWFyXG4gICAgICA8L3NwYW4+XG4gICAgICA8c3BhbiBjbGFzc05hbWU9XCJlbWFyem9uYS1icmFuZC16b25hXCIgYXJpYS1oaWRkZW4+XG4gICAgICAgIHpvbmFcbiAgICAgIDwvc3Bhbj5cbiAgICA8L3NwYW4+XG4gICk7XG59XG4iXSwibmFtZXMiOlsiY24iLCJFbWFyem9uYUJyYW5kTmFtZSIsImNsYXNzTmFtZSIsInNwYW4iLCJkYXRhLXRlc3RpZCIsImFyaWEtbGFiZWwiLCJhcmlhLWhpZGRlbiJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7QUFBQSxTQUFTQSxFQUFFLFFBQVEsY0FBYztBQU1qQyw0RUFBNEUsR0FDNUUsT0FBTyxTQUFTQyxrQkFBa0IsRUFBRUMsU0FBUyxFQUEwQjtJQUNyRSxxQkFDRSxRQUFDQztRQUNDQyxlQUFZO1FBQ1pDLGNBQVc7UUFDWEgsV0FBV0YsR0FBRyw4QkFBOEJFOzswQkFFNUMsUUFBQ0M7Z0JBQUtELFdBQVU7Z0JBQXNCSSxhQUFXOzBCQUFDOzs7Ozs7MEJBR2xELFFBQUNIO2dCQUFLRCxXQUFVO2dCQUFzQkksYUFBVzswQkFBQzs7Ozs7Ozs7Ozs7O0FBS3hEO0tBZmdCTCJ9

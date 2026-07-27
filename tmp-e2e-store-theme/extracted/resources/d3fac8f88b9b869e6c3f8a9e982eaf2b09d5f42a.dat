@@ -1,0 +1,45 @@
+/**
+ * Hook pour corriger le problème d'espacement dans les champs de texte
+ * Force l'insertion manuelle de l'espace quand la barre d'espace est pressée
+ */ export const useSpaceInputFix = ()=>{
+    const handleKeyDown = (e)=>{
+        // Allow paste events (Ctrl+V or Cmd+V) to work normally
+        if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
+            return;
+        }
+        // Allow other common shortcuts
+        if ((e.ctrlKey || e.metaKey) && [
+            'c',
+            'x',
+            'a',
+            'z',
+            'y'
+        ].includes(e.key)) {
+            return;
+        }
+        if (e.key === ' ') {
+            const target = e.target;
+            const currentValue = target.value;
+            const selectionStart = target.selectionStart || 0;
+            const selectionEnd = target.selectionEnd || 0;
+            // Forcer l'insertion de l'espace manuellement
+            const newValue = currentValue.substring(0, selectionStart) + ' ' + currentValue.substring(selectionEnd);
+            // Mettre à jour la valeur directement
+            target.value = newValue;
+            // Déplacer le curseur après l'espace inséré
+            target.setSelectionRange(selectionStart + 1, selectionStart + 1);
+            // Déclencher onChange manuellement pour React
+            const changeEvent = new Event('input', {
+                bubbles: true
+            });
+            target.dispatchEvent(changeEvent);
+            // Empêcher le comportement par défaut pour éviter le double espace
+            e.preventDefault();
+        }
+    };
+    return {
+        handleKeyDown
+    };
+};
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInVzZVNwYWNlSW5wdXRGaXgudHMiXSwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBIb29rIHBvdXIgY29ycmlnZXIgbGUgcHJvYmzDqG1lIGQnZXNwYWNlbWVudCBkYW5zIGxlcyBjaGFtcHMgZGUgdGV4dGVcbiAqIEZvcmNlIGwnaW5zZXJ0aW9uIG1hbnVlbGxlIGRlIGwnZXNwYWNlIHF1YW5kIGxhIGJhcnJlIGQnZXNwYWNlIGVzdCBwcmVzc8OpZVxuICovXG5pbXBvcnQgeyB1c2VSZWYgfSBmcm9tICdyZWFjdCc7XG5cbmV4cG9ydCBjb25zdCB1c2VTcGFjZUlucHV0Rml4ID0gKCkgPT4ge1xuICBjb25zdCBoYW5kbGVLZXlEb3duID0gKGU6IFJlYWN0LktleWJvYXJkRXZlbnQ8SFRNTElucHV0RWxlbWVudCB8IEhUTUxUZXh0QXJlYUVsZW1lbnQ+KSA9PiB7XG4gICAgLy8gQWxsb3cgcGFzdGUgZXZlbnRzIChDdHJsK1Ygb3IgQ21kK1YpIHRvIHdvcmsgbm9ybWFsbHlcbiAgICBpZiAoKGUuY3RybEtleSB8fCBlLm1ldGFLZXkpICYmIGUua2V5ID09PSAndicpIHtcbiAgICAgIHJldHVybjtcbiAgICB9XG4gICAgXG4gICAgLy8gQWxsb3cgb3RoZXIgY29tbW9uIHNob3J0Y3V0c1xuICAgIGlmICgoZS5jdHJsS2V5IHx8IGUubWV0YUtleSkgJiYgWydjJywgJ3gnLCAnYScsICd6JywgJ3knXS5pbmNsdWRlcyhlLmtleSkpIHtcbiAgICAgIHJldHVybjtcbiAgICB9XG4gICAgXG4gICAgaWYgKGUua2V5ID09PSAnICcpIHtcbiAgICAgIGNvbnN0IHRhcmdldCA9IGUudGFyZ2V0IGFzIEhUTUxJbnB1dEVsZW1lbnQgfCBIVE1MVGV4dEFyZWFFbGVtZW50O1xuICAgICAgY29uc3QgY3VycmVudFZhbHVlID0gdGFyZ2V0LnZhbHVlO1xuICAgICAgY29uc3Qgc2VsZWN0aW9uU3RhcnQgPSB0YXJnZXQuc2VsZWN0aW9uU3RhcnQgfHwgMDtcbiAgICAgIGNvbnN0IHNlbGVjdGlvbkVuZCA9IHRhcmdldC5zZWxlY3Rpb25FbmQgfHwgMDtcbiAgICAgIFxuICAgICAgLy8gRm9yY2VyIGwnaW5zZXJ0aW9uIGRlIGwnZXNwYWNlIG1hbnVlbGxlbWVudFxuICAgICAgY29uc3QgbmV3VmFsdWUgPSBcbiAgICAgICAgY3VycmVudFZhbHVlLnN1YnN0cmluZygwLCBzZWxlY3Rpb25TdGFydCkgKyBcbiAgICAgICAgJyAnICsgXG4gICAgICAgIGN1cnJlbnRWYWx1ZS5zdWJzdHJpbmcoc2VsZWN0aW9uRW5kKTtcbiAgICAgIFxuICAgICAgLy8gTWV0dHJlIMOgIGpvdXIgbGEgdmFsZXVyIGRpcmVjdGVtZW50XG4gICAgICB0YXJnZXQudmFsdWUgPSBuZXdWYWx1ZTtcbiAgICAgIFxuICAgICAgLy8gRMOpcGxhY2VyIGxlIGN1cnNldXIgYXByw6hzIGwnZXNwYWNlIGluc8OpcsOpXG4gICAgICB0YXJnZXQuc2V0U2VsZWN0aW9uUmFuZ2Uoc2VsZWN0aW9uU3RhcnQgKyAxLCBzZWxlY3Rpb25TdGFydCArIDEpO1xuICAgICAgXG4gICAgICAvLyBEw6ljbGVuY2hlciBvbkNoYW5nZSBtYW51ZWxsZW1lbnQgcG91ciBSZWFjdFxuICAgICAgY29uc3QgY2hhbmdlRXZlbnQgPSBuZXcgRXZlbnQoJ2lucHV0JywgeyBidWJibGVzOiB0cnVlIH0pO1xuICAgICAgdGFyZ2V0LmRpc3BhdGNoRXZlbnQoY2hhbmdlRXZlbnQpO1xuICAgICAgXG4gICAgICAvLyBFbXDDqmNoZXIgbGUgY29tcG9ydGVtZW50IHBhciBkw6lmYXV0IHBvdXIgw6l2aXRlciBsZSBkb3VibGUgZXNwYWNlXG4gICAgICBlLnByZXZlbnREZWZhdWx0KCk7XG4gICAgfVxuICB9O1xuXG4gIHJldHVybiB7IGhhbmRsZUtleURvd24gfTtcbn07XG5cblxuXG5cblxuXG5cblxuIl0sIm5hbWVzIjpbInVzZVNwYWNlSW5wdXRGaXgiLCJoYW5kbGVLZXlEb3duIiwiZSIsImN0cmxLZXkiLCJtZXRhS2V5Iiwia2V5IiwiaW5jbHVkZXMiLCJ0YXJnZXQiLCJjdXJyZW50VmFsdWUiLCJ2YWx1ZSIsInNlbGVjdGlvblN0YXJ0Iiwic2VsZWN0aW9uRW5kIiwibmV3VmFsdWUiLCJzdWJzdHJpbmciLCJzZXRTZWxlY3Rpb25SYW5nZSIsImNoYW5nZUV2ZW50IiwiRXZlbnQiLCJidWJibGVzIiwiZGlzcGF0Y2hFdmVudCIsInByZXZlbnREZWZhdWx0Il0sIm1hcHBpbmdzIjoiQUFBQTs7O0NBR0MsR0FHRCxPQUFPLE1BQU1BLG1CQUFtQjtJQUM5QixNQUFNQyxnQkFBZ0IsQ0FBQ0M7UUFDckIsd0RBQXdEO1FBQ3hELElBQUksQUFBQ0EsQ0FBQUEsRUFBRUMsT0FBTyxJQUFJRCxFQUFFRSxPQUFPLEFBQUQsS0FBTUYsRUFBRUcsR0FBRyxLQUFLLEtBQUs7WUFDN0M7UUFDRjtRQUVBLCtCQUErQjtRQUMvQixJQUFJLEFBQUNILENBQUFBLEVBQUVDLE9BQU8sSUFBSUQsRUFBRUUsT0FBTyxBQUFELEtBQU07WUFBQztZQUFLO1lBQUs7WUFBSztZQUFLO1NBQUksQ0FBQ0UsUUFBUSxDQUFDSixFQUFFRyxHQUFHLEdBQUc7WUFDekU7UUFDRjtRQUVBLElBQUlILEVBQUVHLEdBQUcsS0FBSyxLQUFLO1lBQ2pCLE1BQU1FLFNBQVNMLEVBQUVLLE1BQU07WUFDdkIsTUFBTUMsZUFBZUQsT0FBT0UsS0FBSztZQUNqQyxNQUFNQyxpQkFBaUJILE9BQU9HLGNBQWMsSUFBSTtZQUNoRCxNQUFNQyxlQUFlSixPQUFPSSxZQUFZLElBQUk7WUFFNUMsOENBQThDO1lBQzlDLE1BQU1DLFdBQ0pKLGFBQWFLLFNBQVMsQ0FBQyxHQUFHSCxrQkFDMUIsTUFDQUYsYUFBYUssU0FBUyxDQUFDRjtZQUV6QixzQ0FBc0M7WUFDdENKLE9BQU9FLEtBQUssR0FBR0c7WUFFZiw0Q0FBNEM7WUFDNUNMLE9BQU9PLGlCQUFpQixDQUFDSixpQkFBaUIsR0FBR0EsaUJBQWlCO1lBRTlELDhDQUE4QztZQUM5QyxNQUFNSyxjQUFjLElBQUlDLE1BQU0sU0FBUztnQkFBRUMsU0FBUztZQUFLO1lBQ3ZEVixPQUFPVyxhQUFhLENBQUNIO1lBRXJCLG1FQUFtRTtZQUNuRWIsRUFBRWlCLGNBQWM7UUFDbEI7SUFDRjtJQUVBLE9BQU87UUFBRWxCO0lBQWM7QUFDekIsRUFBRSJ9

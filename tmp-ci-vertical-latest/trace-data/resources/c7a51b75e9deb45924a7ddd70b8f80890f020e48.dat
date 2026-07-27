@@ -1,0 +1,57 @@
+function _define_property(obj, key, value) {
+    if (key in obj) {
+        Object.defineProperty(obj, key, {
+            value: value,
+            enumerable: true,
+            configurable: true,
+            writable: true
+        });
+    } else {
+        obj[key] = value;
+    }
+    return obj;
+}
+/**
+ * Validation stock produits physiques avant ajout / mise à jour panier.
+ */ import { supabase } from "/src/integrations/supabase/client.ts";
+function parseStockCheckResult(data) {
+    const row = data ?? {};
+    const availableQuantity = typeof row.available_quantity === 'number' ? row.available_quantity : typeof row.availableQuantity === 'number' ? row.availableQuantity : undefined;
+    return {
+        available: row.available === true,
+        availableQuantity,
+        reason: typeof row.reason === 'string' ? row.reason : undefined
+    };
+}
+export class PhysicalStockError extends Error {
+    constructor(message, availableQuantity){
+        super(message), _define_property(this, "availableQuantity", void 0), this.availableQuantity = availableQuantity;
+        this.name = 'PhysicalStockError';
+    }
+}
+export async function checkPhysicalStockAvailability(productId, quantity, variantId) {
+    const { data, error } = await supabase.rpc('check_physical_stock_availability', {
+        p_product_id: productId,
+        p_variant_id: variantId ?? null,
+        p_quantity: quantity
+    });
+    if (error) {
+        throw new Error(error.message || 'Impossible de vérifier le stock');
+    }
+    const result = parseStockCheckResult(data);
+    if (data == null) {
+        throw new Error('Impossible de vérifier le stock');
+    }
+    return result;
+}
+export async function assertPhysicalStockAvailable(productId, quantity, variantId) {
+    const result = await checkPhysicalStockAvailability(productId, quantity, variantId);
+    if (result.available) {
+        return;
+    }
+    const availableQty = result.availableQuantity ?? 0;
+    const message = availableQty > 0 ? `Stock insuffisant : seulement ${availableQty} disponible(s)` : 'Produit en rupture de stock';
+    throw new PhysicalStockError(message, availableQty);
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInBoeXNpY2FsLXN0b2NrLXZhbGlkYXRpb24udHMiXSwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBWYWxpZGF0aW9uIHN0b2NrIHByb2R1aXRzIHBoeXNpcXVlcyBhdmFudCBham91dCAvIG1pc2Ugw6Agam91ciBwYW5pZXIuXG4gKi9cblxuaW1wb3J0IHsgc3VwYWJhc2UgfSBmcm9tICdAL2ludGVncmF0aW9ucy9zdXBhYmFzZS9jbGllbnQnO1xuXG5leHBvcnQgdHlwZSBQaHlzaWNhbFN0b2NrQ2hlY2tSZXN1bHQgPSB7XG4gIGF2YWlsYWJsZTogYm9vbGVhbjtcbiAgYXZhaWxhYmxlUXVhbnRpdHk/OiBudW1iZXI7XG4gIHJlYXNvbj86IHN0cmluZztcbn07XG5cbmZ1bmN0aW9uIHBhcnNlU3RvY2tDaGVja1Jlc3VsdChkYXRhOiB1bmtub3duKTogUGh5c2ljYWxTdG9ja0NoZWNrUmVzdWx0IHtcbiAgY29uc3Qgcm93ID0gKGRhdGEgPz8ge30pIGFzIFJlY29yZDxzdHJpbmcsIHVua25vd24+O1xuICBjb25zdCBhdmFpbGFibGVRdWFudGl0eSA9XG4gICAgdHlwZW9mIHJvdy5hdmFpbGFibGVfcXVhbnRpdHkgPT09ICdudW1iZXInXG4gICAgICA/IHJvdy5hdmFpbGFibGVfcXVhbnRpdHlcbiAgICAgIDogdHlwZW9mIHJvdy5hdmFpbGFibGVRdWFudGl0eSA9PT0gJ251bWJlcidcbiAgICAgICAgPyByb3cuYXZhaWxhYmxlUXVhbnRpdHlcbiAgICAgICAgOiB1bmRlZmluZWQ7XG5cbiAgcmV0dXJuIHtcbiAgICBhdmFpbGFibGU6IHJvdy5hdmFpbGFibGUgPT09IHRydWUsXG4gICAgYXZhaWxhYmxlUXVhbnRpdHksXG4gICAgcmVhc29uOiB0eXBlb2Ygcm93LnJlYXNvbiA9PT0gJ3N0cmluZycgPyByb3cucmVhc29uIDogdW5kZWZpbmVkLFxuICB9O1xufVxuXG5leHBvcnQgY2xhc3MgUGh5c2ljYWxTdG9ja0Vycm9yIGV4dGVuZHMgRXJyb3Ige1xuICBjb25zdHJ1Y3RvcihcbiAgICBtZXNzYWdlOiBzdHJpbmcsXG4gICAgcmVhZG9ubHkgYXZhaWxhYmxlUXVhbnRpdHk/OiBudW1iZXJcbiAgKSB7XG4gICAgc3VwZXIobWVzc2FnZSk7XG4gICAgdGhpcy5uYW1lID0gJ1BoeXNpY2FsU3RvY2tFcnJvcic7XG4gIH1cbn1cblxuZXhwb3J0IGFzeW5jIGZ1bmN0aW9uIGNoZWNrUGh5c2ljYWxTdG9ja0F2YWlsYWJpbGl0eShcbiAgcHJvZHVjdElkOiBzdHJpbmcsXG4gIHF1YW50aXR5OiBudW1iZXIsXG4gIHZhcmlhbnRJZD86IHN0cmluZyB8IG51bGxcbik6IFByb21pc2U8UGh5c2ljYWxTdG9ja0NoZWNrUmVzdWx0PiB7XG4gIGNvbnN0IHsgZGF0YSwgZXJyb3IgfSA9IGF3YWl0IHN1cGFiYXNlLnJwYygnY2hlY2tfcGh5c2ljYWxfc3RvY2tfYXZhaWxhYmlsaXR5Jywge1xuICAgIHBfcHJvZHVjdF9pZDogcHJvZHVjdElkLFxuICAgIHBfdmFyaWFudF9pZDogdmFyaWFudElkID8/IG51bGwsXG4gICAgcF9xdWFudGl0eTogcXVhbnRpdHksXG4gIH0pO1xuXG4gIGlmIChlcnJvcikge1xuICAgIHRocm93IG5ldyBFcnJvcihlcnJvci5tZXNzYWdlIHx8ICdJbXBvc3NpYmxlIGRlIHbDqXJpZmllciBsZSBzdG9jaycpO1xuICB9XG5cbiAgY29uc3QgcmVzdWx0ID0gcGFyc2VTdG9ja0NoZWNrUmVzdWx0KGRhdGEpO1xuICBpZiAoZGF0YSA9PSBudWxsKSB7XG4gICAgdGhyb3cgbmV3IEVycm9yKCdJbXBvc3NpYmxlIGRlIHbDqXJpZmllciBsZSBzdG9jaycpO1xuICB9XG5cbiAgcmV0dXJuIHJlc3VsdDtcbn1cblxuZXhwb3J0IGFzeW5jIGZ1bmN0aW9uIGFzc2VydFBoeXNpY2FsU3RvY2tBdmFpbGFibGUoXG4gIHByb2R1Y3RJZDogc3RyaW5nLFxuICBxdWFudGl0eTogbnVtYmVyLFxuICB2YXJpYW50SWQ/OiBzdHJpbmcgfCBudWxsXG4pOiBQcm9taXNlPHZvaWQ+IHtcbiAgY29uc3QgcmVzdWx0ID0gYXdhaXQgY2hlY2tQaHlzaWNhbFN0b2NrQXZhaWxhYmlsaXR5KHByb2R1Y3RJZCwgcXVhbnRpdHksIHZhcmlhbnRJZCk7XG5cbiAgaWYgKHJlc3VsdC5hdmFpbGFibGUpIHtcbiAgICByZXR1cm47XG4gIH1cblxuICBjb25zdCBhdmFpbGFibGVRdHkgPSByZXN1bHQuYXZhaWxhYmxlUXVhbnRpdHkgPz8gMDtcbiAgY29uc3QgbWVzc2FnZSA9XG4gICAgYXZhaWxhYmxlUXR5ID4gMFxuICAgICAgPyBgU3RvY2sgaW5zdWZmaXNhbnQgOiBzZXVsZW1lbnQgJHthdmFpbGFibGVRdHl9IGRpc3BvbmlibGUocylgXG4gICAgICA6ICdQcm9kdWl0IGVuIHJ1cHR1cmUgZGUgc3RvY2snO1xuXG4gIHRocm93IG5ldyBQaHlzaWNhbFN0b2NrRXJyb3IobWVzc2FnZSwgYXZhaWxhYmxlUXR5KTtcbn1cbiJdLCJuYW1lcyI6WyJzdXBhYmFzZSIsInBhcnNlU3RvY2tDaGVja1Jlc3VsdCIsImRhdGEiLCJyb3ciLCJhdmFpbGFibGVRdWFudGl0eSIsImF2YWlsYWJsZV9xdWFudGl0eSIsInVuZGVmaW5lZCIsImF2YWlsYWJsZSIsInJlYXNvbiIsIlBoeXNpY2FsU3RvY2tFcnJvciIsIkVycm9yIiwibWVzc2FnZSIsIm5hbWUiLCJjaGVja1BoeXNpY2FsU3RvY2tBdmFpbGFiaWxpdHkiLCJwcm9kdWN0SWQiLCJxdWFudGl0eSIsInZhcmlhbnRJZCIsImVycm9yIiwicnBjIiwicF9wcm9kdWN0X2lkIiwicF92YXJpYW50X2lkIiwicF9xdWFudGl0eSIsInJlc3VsdCIsImFzc2VydFBoeXNpY2FsU3RvY2tBdmFpbGFibGUiLCJhdmFpbGFibGVRdHkiXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7QUFBQTs7Q0FFQyxHQUVELFNBQVNBLFFBQVEsUUFBUSxpQ0FBaUM7QUFRMUQsU0FBU0Msc0JBQXNCQyxJQUFhO0lBQzFDLE1BQU1DLE1BQU9ELFFBQVEsQ0FBQztJQUN0QixNQUFNRSxvQkFDSixPQUFPRCxJQUFJRSxrQkFBa0IsS0FBSyxXQUM5QkYsSUFBSUUsa0JBQWtCLEdBQ3RCLE9BQU9GLElBQUlDLGlCQUFpQixLQUFLLFdBQy9CRCxJQUFJQyxpQkFBaUIsR0FDckJFO0lBRVIsT0FBTztRQUNMQyxXQUFXSixJQUFJSSxTQUFTLEtBQUs7UUFDN0JIO1FBQ0FJLFFBQVEsT0FBT0wsSUFBSUssTUFBTSxLQUFLLFdBQVdMLElBQUlLLE1BQU0sR0FBR0Y7SUFDeEQ7QUFDRjtBQUVBLE9BQU8sTUFBTUcsMkJBQTJCQztJQUN0QyxZQUNFQyxPQUFlLEVBQ2YsQUFBU1AsaUJBQTBCLENBQ25DO1FBQ0EsS0FBSyxDQUFDTyxvRUFGR1Asb0JBQUFBO1FBR1QsSUFBSSxDQUFDUSxJQUFJLEdBQUc7SUFDZDtBQUNGO0FBRUEsT0FBTyxlQUFlQywrQkFDcEJDLFNBQWlCLEVBQ2pCQyxRQUFnQixFQUNoQkMsU0FBeUI7SUFFekIsTUFBTSxFQUFFZCxJQUFJLEVBQUVlLEtBQUssRUFBRSxHQUFHLE1BQU1qQixTQUFTa0IsR0FBRyxDQUFDLHFDQUFxQztRQUM5RUMsY0FBY0w7UUFDZE0sY0FBY0osYUFBYTtRQUMzQkssWUFBWU47SUFDZDtJQUVBLElBQUlFLE9BQU87UUFDVCxNQUFNLElBQUlQLE1BQU1PLE1BQU1OLE9BQU8sSUFBSTtJQUNuQztJQUVBLE1BQU1XLFNBQVNyQixzQkFBc0JDO0lBQ3JDLElBQUlBLFFBQVEsTUFBTTtRQUNoQixNQUFNLElBQUlRLE1BQU07SUFDbEI7SUFFQSxPQUFPWTtBQUNUO0FBRUEsT0FBTyxlQUFlQyw2QkFDcEJULFNBQWlCLEVBQ2pCQyxRQUFnQixFQUNoQkMsU0FBeUI7SUFFekIsTUFBTU0sU0FBUyxNQUFNVCwrQkFBK0JDLFdBQVdDLFVBQVVDO0lBRXpFLElBQUlNLE9BQU9mLFNBQVMsRUFBRTtRQUNwQjtJQUNGO0lBRUEsTUFBTWlCLGVBQWVGLE9BQU9sQixpQkFBaUIsSUFBSTtJQUNqRCxNQUFNTyxVQUNKYSxlQUFlLElBQ1gsQ0FBQyw4QkFBOEIsRUFBRUEsYUFBYSxjQUFjLENBQUMsR0FDN0Q7SUFFTixNQUFNLElBQUlmLG1CQUFtQkUsU0FBU2E7QUFDeEMifQ==

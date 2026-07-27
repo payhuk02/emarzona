@@ -1,0 +1,80 @@
+import { getClient } from "/node_modules/@sentry/core/build/esm/currentScopes.js?v=3ea6c1b9";
+import { DEBUG_BUILD } from "/node_modules/@sentry/core/build/esm/debug-build.js?v=3ea6c1b9";
+import { debug } from "/node_modules/@sentry/core/build/esm/utils/debug-logger.js?v=3ea6c1b9";
+
+function isProfilingIntegrationWithProfiler(
+  integration,
+) {
+  return (
+    !!integration &&
+    typeof integration['_profiler'] !== 'undefined' &&
+    typeof integration['_profiler']['start'] === 'function' &&
+    typeof integration['_profiler']['stop'] === 'function'
+  );
+}
+/**
+ * Starts the Sentry continuous profiler.
+ * This mode is exclusive with the transaction profiler and will only work if the profilesSampleRate is set to a falsy value.
+ * In continuous profiling mode, the profiler will keep reporting profile chunks to Sentry until it is stopped, which allows for continuous profiling of the application.
+ */
+function startProfiler() {
+  const client = getClient();
+  if (!client) {
+    DEBUG_BUILD && debug.warn('No Sentry client available, profiling is not started');
+    return;
+  }
+
+  const integration = client.getIntegrationByName('ProfilingIntegration');
+
+  if (!integration) {
+    DEBUG_BUILD && debug.warn('ProfilingIntegration is not available');
+    return;
+  }
+
+  if (!isProfilingIntegrationWithProfiler(integration)) {
+    DEBUG_BUILD && debug.warn('Profiler is not available on profiling integration.');
+    return;
+  }
+
+  integration._profiler.start();
+}
+
+/**
+ * Stops the Sentry continuous profiler.
+ * Calls to stop will stop the profiler and flush the currently collected profile data to Sentry.
+ */
+function stopProfiler() {
+  const client = getClient();
+  if (!client) {
+    DEBUG_BUILD && debug.warn('No Sentry client available, profiling is not started');
+    return;
+  }
+
+  const integration = client.getIntegrationByName('ProfilingIntegration');
+  if (!integration) {
+    DEBUG_BUILD && debug.warn('ProfilingIntegration is not available');
+    return;
+  }
+
+  if (!isProfilingIntegrationWithProfiler(integration)) {
+    DEBUG_BUILD && debug.warn('Profiler is not available on profiling integration.');
+    return;
+  }
+
+  integration._profiler.stop();
+}
+
+/**
+ * Profiler namespace for controlling the profiler in 'manual' mode.
+ *
+ * Requires the `nodeProfilingIntegration` from the `@sentry/profiling-node` package.
+ */
+const profiler = {
+  startProfiler,
+  stopProfiler,
+};
+
+export { profiler };
+                                     
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicHJvZmlsaW5nLmpzIiwic291cmNlcyI6WyIuLi8uLi9zcmMvcHJvZmlsaW5nLnRzIl0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7IGdldENsaWVudCB9IGZyb20gJy4vY3VycmVudFNjb3Blcyc7XG5pbXBvcnQgeyBERUJVR19CVUlMRCB9IGZyb20gJy4vZGVidWctYnVpbGQnO1xuaW1wb3J0IHR5cGUgeyBQcm9maWxlciwgUHJvZmlsaW5nSW50ZWdyYXRpb24gfSBmcm9tICcuL3R5cGVzLWhvaXN0L3Byb2ZpbGluZyc7XG5pbXBvcnQgeyBkZWJ1ZyB9IGZyb20gJy4vdXRpbHMvZGVidWctbG9nZ2VyJztcblxuZnVuY3Rpb24gaXNQcm9maWxpbmdJbnRlZ3JhdGlvbldpdGhQcm9maWxlcihcbiAgaW50ZWdyYXRpb246IFByb2ZpbGluZ0ludGVncmF0aW9uIHwgdW5kZWZpbmVkLFxuKTogaW50ZWdyYXRpb24gaXMgUHJvZmlsaW5nSW50ZWdyYXRpb24ge1xuICByZXR1cm4gKFxuICAgICEhaW50ZWdyYXRpb24gJiZcbiAgICB0eXBlb2YgaW50ZWdyYXRpb25bJ19wcm9maWxlciddICE9PSAndW5kZWZpbmVkJyAmJlxuICAgIHR5cGVvZiBpbnRlZ3JhdGlvblsnX3Byb2ZpbGVyJ11bJ3N0YXJ0J10gPT09ICdmdW5jdGlvbicgJiZcbiAgICB0eXBlb2YgaW50ZWdyYXRpb25bJ19wcm9maWxlciddWydzdG9wJ10gPT09ICdmdW5jdGlvbidcbiAgKTtcbn1cbi8qKlxuICogU3RhcnRzIHRoZSBTZW50cnkgY29udGludW91cyBwcm9maWxlci5cbiAqIFRoaXMgbW9kZSBpcyBleGNsdXNpdmUgd2l0aCB0aGUgdHJhbnNhY3Rpb24gcHJvZmlsZXIgYW5kIHdpbGwgb25seSB3b3JrIGlmIHRoZSBwcm9maWxlc1NhbXBsZVJhdGUgaXMgc2V0IHRvIGEgZmFsc3kgdmFsdWUuXG4gKiBJbiBjb250aW51b3VzIHByb2ZpbGluZyBtb2RlLCB0aGUgcHJvZmlsZXIgd2lsbCBrZWVwIHJlcG9ydGluZyBwcm9maWxlIGNodW5rcyB0byBTZW50cnkgdW50aWwgaXQgaXMgc3RvcHBlZCwgd2hpY2ggYWxsb3dzIGZvciBjb250aW51b3VzIHByb2ZpbGluZyBvZiB0aGUgYXBwbGljYXRpb24uXG4gKi9cbmZ1bmN0aW9uIHN0YXJ0UHJvZmlsZXIoKTogdm9pZCB7XG4gIGNvbnN0IGNsaWVudCA9IGdldENsaWVudCgpO1xuICBpZiAoIWNsaWVudCkge1xuICAgIERFQlVHX0JVSUxEICYmIGRlYnVnLndhcm4oJ05vIFNlbnRyeSBjbGllbnQgYXZhaWxhYmxlLCBwcm9maWxpbmcgaXMgbm90IHN0YXJ0ZWQnKTtcbiAgICByZXR1cm47XG4gIH1cblxuICBjb25zdCBpbnRlZ3JhdGlvbiA9IGNsaWVudC5nZXRJbnRlZ3JhdGlvbkJ5TmFtZTxQcm9maWxpbmdJbnRlZ3JhdGlvbj4oJ1Byb2ZpbGluZ0ludGVncmF0aW9uJyk7XG5cbiAgaWYgKCFpbnRlZ3JhdGlvbikge1xuICAgIERFQlVHX0JVSUxEICYmIGRlYnVnLndhcm4oJ1Byb2ZpbGluZ0ludGVncmF0aW9uIGlzIG5vdCBhdmFpbGFibGUnKTtcbiAgICByZXR1cm47XG4gIH1cblxuICBpZiAoIWlzUHJvZmlsaW5nSW50ZWdyYXRpb25XaXRoUHJvZmlsZXIoaW50ZWdyYXRpb24pKSB7XG4gICAgREVCVUdfQlVJTEQgJiYgZGVidWcud2FybignUHJvZmlsZXIgaXMgbm90IGF2YWlsYWJsZSBvbiBwcm9maWxpbmcgaW50ZWdyYXRpb24uJyk7XG4gICAgcmV0dXJuO1xuICB9XG5cbiAgaW50ZWdyYXRpb24uX3Byb2ZpbGVyLnN0YXJ0KCk7XG59XG5cbi8qKlxuICogU3RvcHMgdGhlIFNlbnRyeSBjb250aW51b3VzIHByb2ZpbGVyLlxuICogQ2FsbHMgdG8gc3RvcCB3aWxsIHN0b3AgdGhlIHByb2ZpbGVyIGFuZCBmbHVzaCB0aGUgY3VycmVudGx5IGNvbGxlY3RlZCBwcm9maWxlIGRhdGEgdG8gU2VudHJ5LlxuICovXG5mdW5jdGlvbiBzdG9wUHJvZmlsZXIoKTogdm9pZCB7XG4gIGNvbnN0IGNsaWVudCA9IGdldENsaWVudCgpO1xuICBpZiAoIWNsaWVudCkge1xuICAgIERFQlVHX0JVSUxEICYmIGRlYnVnLndhcm4oJ05vIFNlbnRyeSBjbGllbnQgYXZhaWxhYmxlLCBwcm9maWxpbmcgaXMgbm90IHN0YXJ0ZWQnKTtcbiAgICByZXR1cm47XG4gIH1cblxuICBjb25zdCBpbnRlZ3JhdGlvbiA9IGNsaWVudC5nZXRJbnRlZ3JhdGlvbkJ5TmFtZTxQcm9maWxpbmdJbnRlZ3JhdGlvbj4oJ1Byb2ZpbGluZ0ludGVncmF0aW9uJyk7XG4gIGlmICghaW50ZWdyYXRpb24pIHtcbiAgICBERUJVR19CVUlMRCAmJiBkZWJ1Zy53YXJuKCdQcm9maWxpbmdJbnRlZ3JhdGlvbiBpcyBub3QgYXZhaWxhYmxlJyk7XG4gICAgcmV0dXJuO1xuICB9XG5cbiAgaWYgKCFpc1Byb2ZpbGluZ0ludGVncmF0aW9uV2l0aFByb2ZpbGVyKGludGVncmF0aW9uKSkge1xuICAgIERFQlVHX0JVSUxEICYmIGRlYnVnLndhcm4oJ1Byb2ZpbGVyIGlzIG5vdCBhdmFpbGFibGUgb24gcHJvZmlsaW5nIGludGVncmF0aW9uLicpO1xuICAgIHJldHVybjtcbiAgfVxuXG4gIGludGVncmF0aW9uLl9wcm9maWxlci5zdG9wKCk7XG59XG5cbi8qKlxuICogUHJvZmlsZXIgbmFtZXNwYWNlIGZvciBjb250cm9sbGluZyB0aGUgcHJvZmlsZXIgaW4gJ21hbnVhbCcgbW9kZS5cbiAqXG4gKiBSZXF1aXJlcyB0aGUgYG5vZGVQcm9maWxpbmdJbnRlZ3JhdGlvbmAgZnJvbSB0aGUgYEBzZW50cnkvcHJvZmlsaW5nLW5vZGVgIHBhY2thZ2UuXG4gKi9cbmV4cG9ydCBjb25zdCBwcm9maWxlcjogUHJvZmlsZXIgPSB7XG4gIHN0YXJ0UHJvZmlsZXIsXG4gIHN0b3BQcm9maWxlcixcbn07XG4iXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7OztBQUtBLFNBQVMsa0NBQWtDO0FBQzNDLEVBQUUsV0FBVztBQUNiLEVBQXVDO0FBQ3ZDLEVBQUU7QUFDRixJQUFJLENBQUMsQ0FBQyxXQUFBO0FBQ04sSUFBSSxPQUFPLFdBQVcsQ0FBQyxXQUFXLENBQUEsS0FBTSxXQUFBO0FBQ3hDLElBQUksT0FBTyxXQUFXLENBQUMsV0FBVyxDQUFDLENBQUMsT0FBTyxDQUFBLEtBQU0sVUFBQTtBQUNqRCxJQUFJLE9BQU8sV0FBVyxDQUFDLFdBQVcsQ0FBQyxDQUFDLE1BQU0sTUFBTTtBQUNoRDtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLFNBQVMsYUFBYSxHQUFTO0FBQy9CLEVBQUUsTUFBTSxNQUFBLEdBQVMsU0FBUyxFQUFFO0FBQzVCLEVBQUUsSUFBSSxDQUFDLE1BQU0sRUFBRTtBQUNmLElBQUksZUFBZSxLQUFLLENBQUMsSUFBSSxDQUFDLHNEQUFzRCxDQUFDO0FBQ3JGLElBQUk7QUFDSixFQUFFOztBQUVGLEVBQUUsTUFBTSxjQUFjLE1BQU0sQ0FBQyxvQkFBb0IsQ0FBdUIsc0JBQXNCLENBQUM7O0FBRS9GLEVBQUUsSUFBSSxDQUFDLFdBQVcsRUFBRTtBQUNwQixJQUFJLGVBQWUsS0FBSyxDQUFDLElBQUksQ0FBQyx1Q0FBdUMsQ0FBQztBQUN0RSxJQUFJO0FBQ0osRUFBRTs7QUFFRixFQUFFLElBQUksQ0FBQyxrQ0FBa0MsQ0FBQyxXQUFXLENBQUMsRUFBRTtBQUN4RCxJQUFJLGVBQWUsS0FBSyxDQUFDLElBQUksQ0FBQyxxREFBcUQsQ0FBQztBQUNwRixJQUFJO0FBQ0osRUFBRTs7QUFFRixFQUFFLFdBQVcsQ0FBQyxTQUFTLENBQUMsS0FBSyxFQUFFO0FBQy9COztBQUVBO0FBQ0E7QUFDQTtBQUNBO0FBQ0EsU0FBUyxZQUFZLEdBQVM7QUFDOUIsRUFBRSxNQUFNLE1BQUEsR0FBUyxTQUFTLEVBQUU7QUFDNUIsRUFBRSxJQUFJLENBQUMsTUFBTSxFQUFFO0FBQ2YsSUFBSSxlQUFlLEtBQUssQ0FBQyxJQUFJLENBQUMsc0RBQXNELENBQUM7QUFDckYsSUFBSTtBQUNKLEVBQUU7O0FBRUYsRUFBRSxNQUFNLGNBQWMsTUFBTSxDQUFDLG9CQUFvQixDQUF1QixzQkFBc0IsQ0FBQztBQUMvRixFQUFFLElBQUksQ0FBQyxXQUFXLEVBQUU7QUFDcEIsSUFBSSxlQUFlLEtBQUssQ0FBQyxJQUFJLENBQUMsdUNBQXVDLENBQUM7QUFDdEUsSUFBSTtBQUNKLEVBQUU7O0FBRUYsRUFBRSxJQUFJLENBQUMsa0NBQWtDLENBQUMsV0FBVyxDQUFDLEVBQUU7QUFDeEQsSUFBSSxlQUFlLEtBQUssQ0FBQyxJQUFJLENBQUMscURBQXFELENBQUM7QUFDcEYsSUFBSTtBQUNKLEVBQUU7O0FBRUYsRUFBRSxXQUFXLENBQUMsU0FBUyxDQUFDLElBQUksRUFBRTtBQUM5Qjs7QUFFQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ08sTUFBTSxRQUFRLEdBQWE7QUFDbEMsRUFBRSxhQUFhO0FBQ2YsRUFBRSxZQUFZO0FBQ2Q7Ozs7IiwieF9nb29nbGVfaWdub3JlTGlzdCI6WzBdfQ==

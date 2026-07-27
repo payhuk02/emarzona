@@ -1,0 +1,769 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/store/DeleteStoreDialog.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=6014a254"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"]; const _Fragment = __vite__cjsImport2_react_jsxDevRuntime["Fragment"];
+var _s = $RefreshSig$();
+import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=6014a254"; const React = __vite__cjsImport3_react.__esModule ? __vite__cjsImport3_react.default : __vite__cjsImport3_react; const useState = __vite__cjsImport3_react["useState"]; const useEffect = __vite__cjsImport3_react["useEffect"]; const useCallback = __vite__cjsImport3_react["useCallback"];
+import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "/src/components/ui/alert-dialog.tsx";
+import { Alert, AlertDescription } from "/src/components/ui/alert.tsx";
+import { Checkbox } from "/src/components/ui/checkbox.tsx";
+import { Label } from "/src/components/ui/label.tsx";
+import { AlertTriangle, Package, ShoppingCart, Users, DollarSign, Loader2, XCircle, Archive } from "/node_modules/.vite/deps/lucide-react.js?v=6014a254";
+import { checkStoreDeleteProtection } from "/src/lib/store-delete-protection.ts";
+import { Button } from "/src/components/ui/button.tsx";
+import { logger } from "/src/lib/logger.ts";
+const DeleteStoreDialogComponent = ({ open, onOpenChange, storeId, storeName, onConfirmDelete, onConfirmArchive })=>{
+    _s();
+    const [checking, setChecking] = useState(true);
+    const [canDelete, setCanDelete] = useState(false);
+    const [dependencies, setDependencies] = useState(null);
+    const [warnings, setWarnings] = useState([]);
+    const [errors, setErrors] = useState([]);
+    const [confirmChecked, setConfirmChecked] = useState(false);
+    const [deleting, setDeleting] = useState(false);
+    const [archiving, setArchiving] = useState(false);
+    useEffect(()=>{
+        if (open) {
+            checkProtection();
+        } else {
+            // Reset state when dialog closes
+            setConfirmChecked(false);
+            setDeleting(false);
+            setArchiving(false);
+        }
+    }, [
+        open,
+        storeId
+    ]);
+    const checkProtection = useCallback(async ()=>{
+        setChecking(true);
+        try {
+            const result = await checkStoreDeleteProtection(storeId);
+            setCanDelete(result.canDelete);
+            setDependencies(result.dependencies);
+            setWarnings(result.warnings);
+            setErrors(result.errors || []);
+        } catch (error) {
+            logger.error('Error checking protection', {
+                error,
+                storeId
+            });
+            setCanDelete(false);
+            setErrors([
+                'Impossible de vérifier les dépendances. Veuillez réessayer.'
+            ]);
+        } finally{
+            setChecking(false);
+        }
+    }, [
+        storeId
+    ]);
+    const handleDelete = useCallback(async ()=>{
+        setDeleting(true);
+        try {
+            await onConfirmDelete();
+            onOpenChange(false);
+        } catch (error) {
+            logger.error('Error deleting store', {
+                error,
+                storeId
+            });
+        } finally{
+            setDeleting(false);
+        }
+    }, [
+        onConfirmDelete,
+        onOpenChange,
+        storeId
+    ]);
+    const handleArchive = useCallback(async ()=>{
+        if (!onConfirmArchive) return;
+        setArchiving(true);
+        try {
+            await onConfirmArchive();
+            onOpenChange(false);
+        } catch (error) {
+            logger.error('Error archiving store', {
+                error,
+                storeId
+            });
+        } finally{
+            setArchiving(false);
+        }
+    }, [
+        onConfirmArchive,
+        onOpenChange,
+        storeId
+    ]);
+    return /*#__PURE__*/ _jsxDEV(AlertDialog, {
+        open: open,
+        onOpenChange: onOpenChange,
+        children: /*#__PURE__*/ _jsxDEV(AlertDialogContent, {
+            className: "max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto",
+            children: [
+                /*#__PURE__*/ _jsxDEV(AlertDialogHeader, {
+                    children: [
+                        /*#__PURE__*/ _jsxDEV(AlertDialogTitle, {
+                            className: "flex items-center gap-2 text-xl",
+                            children: [
+                                /*#__PURE__*/ _jsxDEV(AlertTriangle, {
+                                    className: "h-6 w-6 text-destructive"
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                    lineNumber: 115,
+                                    columnNumber: 13
+                                }, this),
+                                'Supprimer la boutique "',
+                                storeName,
+                                '" ?'
+                            ]
+                        }, void 0, true, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                            lineNumber: 114,
+                            columnNumber: 11
+                        }, this),
+                        /*#__PURE__*/ _jsxDEV(AlertDialogDescription, {
+                            className: "text-base",
+                            children: checking ? /*#__PURE__*/ _jsxDEV("div", {
+                                className: "flex items-center gap-2 py-4",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV(Loader2, {
+                                        className: "h-4 w-4 animate-spin"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                        lineNumber: 121,
+                                        columnNumber: 17
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("span", {
+                                        children: "Vérification des dépendances..."
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                        lineNumber: 122,
+                                        columnNumber: 17
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                lineNumber: 120,
+                                columnNumber: 15
+                            }, this) : /*#__PURE__*/ _jsxDEV("div", {
+                                className: "space-y-4",
+                                children: [
+                                    errors.length > 0 && /*#__PURE__*/ _jsxDEV(Alert, {
+                                        variant: "destructive",
+                                        children: [
+                                            /*#__PURE__*/ _jsxDEV(XCircle, {
+                                                className: "h-4 w-4"
+                                            }, void 0, false, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                                lineNumber: 129,
+                                                columnNumber: 21
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV(AlertDescription, {
+                                                children: /*#__PURE__*/ _jsxDEV("div", {
+                                                    className: "space-y-2",
+                                                    children: [
+                                                        /*#__PURE__*/ _jsxDEV("p", {
+                                                            className: "font-semibold",
+                                                            children: "Suppression impossible :"
+                                                        }, void 0, false, {
+                                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                                            lineNumber: 132,
+                                                            columnNumber: 25
+                                                        }, this),
+                                                        errors.map((error, index)=>/*#__PURE__*/ _jsxDEV("p", {
+                                                                className: "text-sm",
+                                                                children: [
+                                                                    "• ",
+                                                                    error
+                                                                ]
+                                                            }, index, true, {
+                                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                                                lineNumber: 134,
+                                                                columnNumber: 27
+                                                            }, this))
+                                                    ]
+                                                }, void 0, true, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                                    lineNumber: 131,
+                                                    columnNumber: 23
+                                                }, this)
+                                            }, void 0, false, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                                lineNumber: 130,
+                                                columnNumber: 21
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                        lineNumber: 128,
+                                        columnNumber: 19
+                                    }, this),
+                                    dependencies && /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "grid grid-cols-2 gap-3 py-4",
+                                        children: [
+                                            /*#__PURE__*/ _jsxDEV("div", {
+                                                className: "flex items-center gap-3 p-3 border rounded-lg bg-muted/30",
+                                                children: [
+                                                    /*#__PURE__*/ _jsxDEV(Package, {
+                                                        className: "h-5 w-5 text-blue-500"
+                                                    }, void 0, false, {
+                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                                        lineNumber: 145,
+                                                        columnNumber: 23
+                                                    }, this),
+                                                    /*#__PURE__*/ _jsxDEV("div", {
+                                                        children: [
+                                                            /*#__PURE__*/ _jsxDEV("p", {
+                                                                className: "text-sm font-medium",
+                                                                children: [
+                                                                    dependencies.productsCount,
+                                                                    " Produits"
+                                                                ]
+                                                            }, void 0, true, {
+                                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                                                lineNumber: 147,
+                                                                columnNumber: 25
+                                                            }, this),
+                                                            /*#__PURE__*/ _jsxDEV("p", {
+                                                                className: "text-xs text-muted-foreground",
+                                                                children: [
+                                                                    dependencies.activeProductsCount,
+                                                                    " actifs"
+                                                                ]
+                                                            }, void 0, true, {
+                                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                                                lineNumber: 148,
+                                                                columnNumber: 25
+                                                            }, this)
+                                                        ]
+                                                    }, void 0, true, {
+                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                                        lineNumber: 146,
+                                                        columnNumber: 23
+                                                    }, this)
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                                lineNumber: 144,
+                                                columnNumber: 21
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV("div", {
+                                                className: "flex items-center gap-3 p-3 border rounded-lg bg-muted/30",
+                                                children: [
+                                                    /*#__PURE__*/ _jsxDEV(ShoppingCart, {
+                                                        className: "h-5 w-5 text-green-500"
+                                                    }, void 0, false, {
+                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                                        lineNumber: 155,
+                                                        columnNumber: 23
+                                                    }, this),
+                                                    /*#__PURE__*/ _jsxDEV("div", {
+                                                        children: [
+                                                            /*#__PURE__*/ _jsxDEV("p", {
+                                                                className: "text-sm font-medium",
+                                                                children: [
+                                                                    dependencies.ordersCount,
+                                                                    " Commandes"
+                                                                ]
+                                                            }, void 0, true, {
+                                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                                                lineNumber: 157,
+                                                                columnNumber: 25
+                                                            }, this),
+                                                            /*#__PURE__*/ _jsxDEV("p", {
+                                                                className: "text-xs text-muted-foreground",
+                                                                children: [
+                                                                    dependencies.pendingOrdersCount,
+                                                                    " en cours"
+                                                                ]
+                                                            }, void 0, true, {
+                                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                                                lineNumber: 158,
+                                                                columnNumber: 25
+                                                            }, this)
+                                                        ]
+                                                    }, void 0, true, {
+                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                                        lineNumber: 156,
+                                                        columnNumber: 23
+                                                    }, this)
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                                lineNumber: 154,
+                                                columnNumber: 21
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV("div", {
+                                                className: "flex items-center gap-3 p-3 border rounded-lg bg-muted/30",
+                                                children: [
+                                                    /*#__PURE__*/ _jsxDEV(Users, {
+                                                        className: "h-5 w-5 text-purple-500"
+                                                    }, void 0, false, {
+                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                                        lineNumber: 165,
+                                                        columnNumber: 23
+                                                    }, this),
+                                                    /*#__PURE__*/ _jsxDEV("div", {
+                                                        children: [
+                                                            /*#__PURE__*/ _jsxDEV("p", {
+                                                                className: "text-sm font-medium",
+                                                                children: [
+                                                                    dependencies.customersCount,
+                                                                    " Clients"
+                                                                ]
+                                                            }, void 0, true, {
+                                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                                                lineNumber: 167,
+                                                                columnNumber: 25
+                                                            }, this),
+                                                            /*#__PURE__*/ _jsxDEV("p", {
+                                                                className: "text-xs text-muted-foreground",
+                                                                children: "enregistrés"
+                                                            }, void 0, false, {
+                                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                                                lineNumber: 168,
+                                                                columnNumber: 25
+                                                            }, this)
+                                                        ]
+                                                    }, void 0, true, {
+                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                                        lineNumber: 166,
+                                                        columnNumber: 23
+                                                    }, this)
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                                lineNumber: 164,
+                                                columnNumber: 21
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV("div", {
+                                                className: "flex items-center gap-3 p-3 border rounded-lg bg-muted/30",
+                                                children: [
+                                                    /*#__PURE__*/ _jsxDEV(DollarSign, {
+                                                        className: "h-5 w-5 text-yellow-500"
+                                                    }, void 0, false, {
+                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                                        lineNumber: 173,
+                                                        columnNumber: 23
+                                                    }, this),
+                                                    /*#__PURE__*/ _jsxDEV("div", {
+                                                        children: [
+                                                            /*#__PURE__*/ _jsxDEV("p", {
+                                                                className: "text-sm font-medium",
+                                                                children: [
+                                                                    dependencies.totalRevenue.toLocaleString('fr-FR'),
+                                                                    " FCFA"
+                                                                ]
+                                                            }, void 0, true, {
+                                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                                                lineNumber: 175,
+                                                                columnNumber: 25
+                                                            }, this),
+                                                            /*#__PURE__*/ _jsxDEV("p", {
+                                                                className: "text-xs text-muted-foreground",
+                                                                children: "revenus totaux"
+                                                            }, void 0, false, {
+                                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                                                lineNumber: 178,
+                                                                columnNumber: 25
+                                                            }, this)
+                                                        ]
+                                                    }, void 0, true, {
+                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                                        lineNumber: 174,
+                                                        columnNumber: 23
+                                                    }, this)
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                                lineNumber: 172,
+                                                columnNumber: 21
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                        lineNumber: 143,
+                                        columnNumber: 19
+                                    }, this),
+                                    warnings.length > 0 && /*#__PURE__*/ _jsxDEV(Alert, {
+                                        children: [
+                                            /*#__PURE__*/ _jsxDEV(AlertTriangle, {
+                                                className: "h-4 w-4"
+                                            }, void 0, false, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                                lineNumber: 187,
+                                                columnNumber: 21
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV(AlertDescription, {
+                                                children: /*#__PURE__*/ _jsxDEV("div", {
+                                                    className: "space-y-2",
+                                                    children: [
+                                                        /*#__PURE__*/ _jsxDEV("p", {
+                                                            className: "font-semibold",
+                                                            children: "Attention :"
+                                                        }, void 0, false, {
+                                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                                            lineNumber: 190,
+                                                            columnNumber: 25
+                                                        }, this),
+                                                        warnings.map((warning, index)=>/*#__PURE__*/ _jsxDEV("p", {
+                                                                className: "text-sm",
+                                                                children: [
+                                                                    "• ",
+                                                                    warning
+                                                                ]
+                                                            }, index, true, {
+                                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                                                lineNumber: 192,
+                                                                columnNumber: 27
+                                                            }, this))
+                                                    ]
+                                                }, void 0, true, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                                    lineNumber: 189,
+                                                    columnNumber: 23
+                                                }, this)
+                                            }, void 0, false, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                                lineNumber: 188,
+                                                columnNumber: 21
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                        lineNumber: 186,
+                                        columnNumber: 19
+                                    }, this),
+                                    canDelete && /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "space-y-4 pt-4",
+                                        children: [
+                                            /*#__PURE__*/ _jsxDEV(Alert, {
+                                                variant: "destructive",
+                                                children: [
+                                                    /*#__PURE__*/ _jsxDEV(AlertTriangle, {
+                                                        className: "h-4 w-4"
+                                                    }, void 0, false, {
+                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                                        lineNumber: 203,
+                                                        columnNumber: 23
+                                                    }, this),
+                                                    /*#__PURE__*/ _jsxDEV(AlertDescription, {
+                                                        children: [
+                                                            /*#__PURE__*/ _jsxDEV("p", {
+                                                                className: "font-semibold mb-2",
+                                                                children: "⚠️ Cette action est IRRÉVERSIBLE"
+                                                            }, void 0, false, {
+                                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                                                lineNumber: 205,
+                                                                columnNumber: 25
+                                                            }, this),
+                                                            /*#__PURE__*/ _jsxDEV("p", {
+                                                                className: "text-sm",
+                                                                children: "Toutes les données de cette boutique seront définitivement supprimées :"
+                                                            }, void 0, false, {
+                                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                                                lineNumber: 206,
+                                                                columnNumber: 25
+                                                            }, this),
+                                                            /*#__PURE__*/ _jsxDEV("ul", {
+                                                                className: "text-sm mt-2 space-y-1 list-disc list-inside",
+                                                                children: [
+                                                                    /*#__PURE__*/ _jsxDEV("li", {
+                                                                        children: "Tous les produits et leurs images"
+                                                                    }, void 0, false, {
+                                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                                                        lineNumber: 210,
+                                                                        columnNumber: 27
+                                                                    }, this),
+                                                                    /*#__PURE__*/ _jsxDEV("li", {
+                                                                        children: "L'historique des commandes"
+                                                                    }, void 0, false, {
+                                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                                                        lineNumber: 211,
+                                                                        columnNumber: 27
+                                                                    }, this),
+                                                                    /*#__PURE__*/ _jsxDEV("li", {
+                                                                        children: "Les informations clients"
+                                                                    }, void 0, false, {
+                                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                                                        lineNumber: 212,
+                                                                        columnNumber: 27
+                                                                    }, this),
+                                                                    /*#__PURE__*/ _jsxDEV("li", {
+                                                                        children: "Les statistiques et analytics"
+                                                                    }, void 0, false, {
+                                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                                                        lineNumber: 213,
+                                                                        columnNumber: 27
+                                                                    }, this)
+                                                                ]
+                                                            }, void 0, true, {
+                                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                                                lineNumber: 209,
+                                                                columnNumber: 25
+                                                            }, this)
+                                                        ]
+                                                    }, void 0, true, {
+                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                                        lineNumber: 204,
+                                                        columnNumber: 23
+                                                    }, this)
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                                lineNumber: 202,
+                                                columnNumber: 21
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV("div", {
+                                                className: "flex items-start gap-2 p-4 border-2 border-destructive/50 rounded-lg bg-destructive/5",
+                                                children: [
+                                                    /*#__PURE__*/ _jsxDEV(Checkbox, {
+                                                        id: "confirm-delete",
+                                                        checked: confirmChecked,
+                                                        onCheckedChange: (checked)=>setConfirmChecked(checked)
+                                                    }, void 0, false, {
+                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                                        lineNumber: 219,
+                                                        columnNumber: 23
+                                                    }, this),
+                                                    /*#__PURE__*/ _jsxDEV(Label, {
+                                                        htmlFor: "confirm-delete",
+                                                        className: "text-sm font-medium cursor-pointer",
+                                                        children: [
+                                                            'Je comprends que cette action est irréversible et je souhaite supprimer définitivement la boutique "',
+                                                            storeName,
+                                                            '"'
+                                                        ]
+                                                    }, void 0, true, {
+                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                                        lineNumber: 224,
+                                                        columnNumber: 23
+                                                    }, this)
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                                lineNumber: 218,
+                                                columnNumber: 21
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                        lineNumber: 201,
+                                        columnNumber: 19
+                                    }, this),
+                                    !canDelete && onConfirmArchive && /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "space-y-3 pt-4",
+                                        children: [
+                                            /*#__PURE__*/ _jsxDEV("p", {
+                                                className: "text-sm font-medium",
+                                                children: "Alternative recommandée :"
+                                            }, void 0, false, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                                lineNumber: 237,
+                                                columnNumber: 21
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV(Alert, {
+                                                children: [
+                                                    /*#__PURE__*/ _jsxDEV(Archive, {
+                                                        className: "h-4 w-4"
+                                                    }, void 0, false, {
+                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                                        lineNumber: 239,
+                                                        columnNumber: 23
+                                                    }, this),
+                                                    /*#__PURE__*/ _jsxDEV(AlertDescription, {
+                                                        children: [
+                                                            /*#__PURE__*/ _jsxDEV("p", {
+                                                                className: "font-semibold mb-1",
+                                                                children: "Archiver la boutique"
+                                                            }, void 0, false, {
+                                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                                                lineNumber: 241,
+                                                                columnNumber: 25
+                                                            }, this),
+                                                            /*#__PURE__*/ _jsxDEV("p", {
+                                                                className: "text-sm",
+                                                                children: "Au lieu de supprimer, vous pouvez archiver cette boutique. Elle sera désactivée mais toutes les données seront conservées."
+                                                            }, void 0, false, {
+                                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                                                lineNumber: 242,
+                                                                columnNumber: 25
+                                                            }, this)
+                                                        ]
+                                                    }, void 0, true, {
+                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                                        lineNumber: 240,
+                                                        columnNumber: 23
+                                                    }, this)
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                                lineNumber: 238,
+                                                columnNumber: 21
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                        lineNumber: 236,
+                                        columnNumber: 19
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                lineNumber: 125,
+                                columnNumber: 15
+                            }, this)
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                            lineNumber: 118,
+                            columnNumber: 11
+                        }, this)
+                    ]
+                }, void 0, true, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                    lineNumber: 113,
+                    columnNumber: 9
+                }, this),
+                /*#__PURE__*/ _jsxDEV(AlertDialogFooter, {
+                    children: !checking && /*#__PURE__*/ _jsxDEV(_Fragment, {
+                        children: [
+                            /*#__PURE__*/ _jsxDEV(AlertDialogCancel, {
+                                disabled: deleting || archiving,
+                                children: "Annuler"
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                lineNumber: 258,
+                                columnNumber: 15
+                            }, this),
+                            !canDelete && onConfirmArchive && /*#__PURE__*/ _jsxDEV(Button, {
+                                onClick: handleArchive,
+                                disabled: archiving || deleting,
+                                variant: "secondary",
+                                children: archiving ? /*#__PURE__*/ _jsxDEV(_Fragment, {
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV(Loader2, {
+                                            className: "h-4 w-4 mr-2 animate-spin"
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                            lineNumber: 270,
+                                            columnNumber: 23
+                                        }, this),
+                                        "Archivage..."
+                                    ]
+                                }, void 0, true) : /*#__PURE__*/ _jsxDEV(_Fragment, {
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV(Archive, {
+                                            className: "h-4 w-4 mr-2"
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                            lineNumber: 275,
+                                            columnNumber: 23
+                                        }, this),
+                                        "Archiver"
+                                    ]
+                                }, void 0, true)
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                lineNumber: 263,
+                                columnNumber: 17
+                            }, this),
+                            canDelete && /*#__PURE__*/ _jsxDEV(Button, {
+                                onClick: handleDelete,
+                                disabled: !confirmChecked || deleting || archiving,
+                                variant: "destructive",
+                                children: deleting ? /*#__PURE__*/ _jsxDEV(_Fragment, {
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV(Loader2, {
+                                            className: "h-4 w-4 mr-2 animate-spin"
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                            lineNumber: 290,
+                                            columnNumber: 23
+                                        }, this),
+                                        "Suppression..."
+                                    ]
+                                }, void 0, true) : /*#__PURE__*/ _jsxDEV(_Fragment, {
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV(XCircle, {
+                                            className: "h-4 w-4 mr-2"
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                            lineNumber: 295,
+                                            columnNumber: 23
+                                        }, this),
+                                        "Supprimer définitivement"
+                                    ]
+                                }, void 0, true)
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                                lineNumber: 283,
+                                columnNumber: 17
+                            }, this)
+                        ]
+                    }, void 0, true)
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+                    lineNumber: 255,
+                    columnNumber: 9
+                }, this)
+            ]
+        }, void 0, true, {
+            fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+            lineNumber: 112,
+            columnNumber: 7
+        }, this)
+    }, void 0, false, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx",
+        lineNumber: 111,
+        columnNumber: 5
+    }, this);
+};
+_s(DeleteStoreDialogComponent, "zEGrjzBk+tTcYZGuMGSRenVG7z8=");
+_c = DeleteStoreDialogComponent;
+DeleteStoreDialogComponent.displayName = 'DeleteStoreDialogComponent';
+// Optimisation avec React.memo pour éviter les re-renders inutiles
+export const DeleteStoreDialog = /*#__PURE__*/ React.memo(DeleteStoreDialogComponent, (prevProps, nextProps)=>{
+    return prevProps.open === nextProps.open && prevProps.onOpenChange === nextProps.onOpenChange && prevProps.storeId === nextProps.storeId && prevProps.storeName === nextProps.storeName && prevProps.onConfirmDelete === nextProps.onConfirmDelete && prevProps.onConfirmArchive === nextProps.onConfirmArchive;
+});
+_c1 = DeleteStoreDialog;
+DeleteStoreDialog.displayName = 'DeleteStoreDialog';
+var _c, _c1;
+$RefreshReg$(_c, "DeleteStoreDialogComponent");
+$RefreshReg$(_c1, "DeleteStoreDialog");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/store/DeleteStoreDialog.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIkRlbGV0ZVN0b3JlRGlhbG9nLnRzeCJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgUmVhY3QsIHsgdXNlU3RhdGUsIHVzZUVmZmVjdCwgdXNlQ2FsbGJhY2sgfSBmcm9tIFwicmVhY3RcIjtcbmltcG9ydCB7XG4gIEFsZXJ0RGlhbG9nLFxuICBBbGVydERpYWxvZ0FjdGlvbixcbiAgQWxlcnREaWFsb2dDYW5jZWwsXG4gIEFsZXJ0RGlhbG9nQ29udGVudCxcbiAgQWxlcnREaWFsb2dEZXNjcmlwdGlvbixcbiAgQWxlcnREaWFsb2dGb290ZXIsXG4gIEFsZXJ0RGlhbG9nSGVhZGVyLFxuICBBbGVydERpYWxvZ1RpdGxlLFxufSBmcm9tIFwiQC9jb21wb25lbnRzL3VpL2FsZXJ0LWRpYWxvZ1wiO1xuaW1wb3J0IHsgQWxlcnQsIEFsZXJ0RGVzY3JpcHRpb24gfSBmcm9tIFwiQC9jb21wb25lbnRzL3VpL2FsZXJ0XCI7XG5pbXBvcnQgeyBCYWRnZSB9IGZyb20gXCJAL2NvbXBvbmVudHMvdWkvYmFkZ2VcIjtcbmltcG9ydCB7IENoZWNrYm94IH0gZnJvbSBcIkAvY29tcG9uZW50cy91aS9jaGVja2JveFwiO1xuaW1wb3J0IHsgTGFiZWwgfSBmcm9tIFwiQC9jb21wb25lbnRzL3VpL2xhYmVsXCI7XG5pbXBvcnQgeyBcbiAgQWxlcnRUcmlhbmdsZSwgXG4gIFBhY2thZ2UsIFxuICBTaG9wcGluZ0NhcnQsIFxuICBVc2VycywgXG4gIERvbGxhclNpZ24sXG4gIExvYWRlcjIsXG4gIFhDaXJjbGUsXG4gIEFyY2hpdmVcbn0gZnJvbSBcImx1Y2lkZS1yZWFjdFwiO1xuaW1wb3J0IHsgY2hlY2tTdG9yZURlbGV0ZVByb3RlY3Rpb24sIFN0b3JlRGVwZW5kZW5jaWVzIH0gZnJvbSBcIkAvbGliL3N0b3JlLWRlbGV0ZS1wcm90ZWN0aW9uXCI7XG5pbXBvcnQgeyBCdXR0b24gfSBmcm9tIFwiQC9jb21wb25lbnRzL3VpL2J1dHRvblwiO1xuaW1wb3J0IHsgbG9nZ2VyIH0gZnJvbSBcIkAvbGliL2xvZ2dlclwiO1xuXG5pbnRlcmZhY2UgRGVsZXRlU3RvcmVEaWFsb2dQcm9wcyB7XG4gIG9wZW46IGJvb2xlYW47XG4gIG9uT3BlbkNoYW5nZTogKG9wZW46IGJvb2xlYW4pID0+IHZvaWQ7XG4gIHN0b3JlSWQ6IHN0cmluZztcbiAgc3RvcmVOYW1lOiBzdHJpbmc7XG4gIG9uQ29uZmlybURlbGV0ZTogKCkgPT4gUHJvbWlzZTx2b2lkPjtcbiAgb25Db25maXJtQXJjaGl2ZT86ICgpID0+IFByb21pc2U8dm9pZD47XG59XG5cbmNvbnN0IERlbGV0ZVN0b3JlRGlhbG9nQ29tcG9uZW50ID0gKHtcbiAgb3BlbixcbiAgb25PcGVuQ2hhbmdlLFxuICBzdG9yZUlkLFxuICBzdG9yZU5hbWUsXG4gIG9uQ29uZmlybURlbGV0ZSxcbiAgb25Db25maXJtQXJjaGl2ZVxufTogRGVsZXRlU3RvcmVEaWFsb2dQcm9wcykgPT4ge1xuICBjb25zdCBbY2hlY2tpbmcsIHNldENoZWNraW5nXSA9IHVzZVN0YXRlKHRydWUpO1xuICBjb25zdCBbY2FuRGVsZXRlLCBzZXRDYW5EZWxldGVdID0gdXNlU3RhdGUoZmFsc2UpO1xuICBjb25zdCBbZGVwZW5kZW5jaWVzLCBzZXREZXBlbmRlbmNpZXNdID0gdXNlU3RhdGU8U3RvcmVEZXBlbmRlbmNpZXMgfCBudWxsPihudWxsKTtcbiAgY29uc3QgW3dhcm5pbmdzLCBzZXRXYXJuaW5nc10gPSB1c2VTdGF0ZTxzdHJpbmdbXT4oW10pO1xuICBjb25zdCBbZXJyb3JzLCBzZXRFcnJvcnNdID0gdXNlU3RhdGU8c3RyaW5nW10+KFtdKTtcbiAgY29uc3QgW2NvbmZpcm1DaGVja2VkLCBzZXRDb25maXJtQ2hlY2tlZF0gPSB1c2VTdGF0ZShmYWxzZSk7XG4gIGNvbnN0IFtkZWxldGluZywgc2V0RGVsZXRpbmddID0gdXNlU3RhdGUoZmFsc2UpO1xuICBjb25zdCBbYXJjaGl2aW5nLCBzZXRBcmNoaXZpbmddID0gdXNlU3RhdGUoZmFsc2UpO1xuXG4gIHVzZUVmZmVjdCgoKSA9PiB7XG4gICAgaWYgKG9wZW4pIHtcbiAgICAgIGNoZWNrUHJvdGVjdGlvbigpO1xuICAgIH0gZWxzZSB7XG4gICAgICAvLyBSZXNldCBzdGF0ZSB3aGVuIGRpYWxvZyBjbG9zZXNcbiAgICAgIHNldENvbmZpcm1DaGVja2VkKGZhbHNlKTtcbiAgICAgIHNldERlbGV0aW5nKGZhbHNlKTtcbiAgICAgIHNldEFyY2hpdmluZyhmYWxzZSk7XG4gICAgfVxuICB9LCBbb3Blbiwgc3RvcmVJZF0pO1xuXG4gIGNvbnN0IGNoZWNrUHJvdGVjdGlvbiA9IHVzZUNhbGxiYWNrKGFzeW5jICgpID0+IHtcbiAgICBzZXRDaGVja2luZyh0cnVlKTtcbiAgICB0cnkge1xuICAgICAgY29uc3QgcmVzdWx0ID0gYXdhaXQgY2hlY2tTdG9yZURlbGV0ZVByb3RlY3Rpb24oc3RvcmVJZCk7XG4gICAgICBzZXRDYW5EZWxldGUocmVzdWx0LmNhbkRlbGV0ZSk7XG4gICAgICBzZXREZXBlbmRlbmNpZXMocmVzdWx0LmRlcGVuZGVuY2llcyk7XG4gICAgICBzZXRXYXJuaW5ncyhyZXN1bHQud2FybmluZ3MpO1xuICAgICAgc2V0RXJyb3JzKHJlc3VsdC5lcnJvcnMgfHwgW10pO1xuICAgIH0gY2F0Y2ggKGVycm9yKSB7XG4gICAgICBsb2dnZXIuZXJyb3IoJ0Vycm9yIGNoZWNraW5nIHByb3RlY3Rpb24nLCB7IGVycm9yLCBzdG9yZUlkIH0pO1xuICAgICAgc2V0Q2FuRGVsZXRlKGZhbHNlKTtcbiAgICAgIHNldEVycm9ycyhbJ0ltcG9zc2libGUgZGUgdsOpcmlmaWVyIGxlcyBkw6lwZW5kYW5jZXMuIFZldWlsbGV6IHLDqWVzc2F5ZXIuJ10pO1xuICAgIH0gZmluYWxseSB7XG4gICAgICBzZXRDaGVja2luZyhmYWxzZSk7XG4gICAgfVxuICB9LCBbc3RvcmVJZF0pO1xuXG4gIGNvbnN0IGhhbmRsZURlbGV0ZSA9IHVzZUNhbGxiYWNrKGFzeW5jICgpID0+IHtcbiAgICBzZXREZWxldGluZyh0cnVlKTtcbiAgICB0cnkge1xuICAgICAgYXdhaXQgb25Db25maXJtRGVsZXRlKCk7XG4gICAgICBvbk9wZW5DaGFuZ2UoZmFsc2UpO1xuICAgIH0gY2F0Y2ggKGVycm9yKSB7XG4gICAgICBsb2dnZXIuZXJyb3IoJ0Vycm9yIGRlbGV0aW5nIHN0b3JlJywgeyBlcnJvciwgc3RvcmVJZCB9KTtcbiAgICB9IGZpbmFsbHkge1xuICAgICAgc2V0RGVsZXRpbmcoZmFsc2UpO1xuICAgIH1cbiAgfSwgW29uQ29uZmlybURlbGV0ZSwgb25PcGVuQ2hhbmdlLCBzdG9yZUlkXSk7XG5cbiAgY29uc3QgaGFuZGxlQXJjaGl2ZSA9IHVzZUNhbGxiYWNrKGFzeW5jICgpID0+IHtcbiAgICBpZiAoIW9uQ29uZmlybUFyY2hpdmUpIHJldHVybjtcbiAgICBcbiAgICBzZXRBcmNoaXZpbmcodHJ1ZSk7XG4gICAgdHJ5IHtcbiAgICAgIGF3YWl0IG9uQ29uZmlybUFyY2hpdmUoKTtcbiAgICAgIG9uT3BlbkNoYW5nZShmYWxzZSk7XG4gICAgfSBjYXRjaCAoZXJyb3IpIHtcbiAgICAgIGxvZ2dlci5lcnJvcignRXJyb3IgYXJjaGl2aW5nIHN0b3JlJywgeyBlcnJvciwgc3RvcmVJZCB9KTtcbiAgICB9IGZpbmFsbHkge1xuICAgICAgc2V0QXJjaGl2aW5nKGZhbHNlKTtcbiAgICB9XG4gIH0sIFtvbkNvbmZpcm1BcmNoaXZlLCBvbk9wZW5DaGFuZ2UsIHN0b3JlSWRdKTtcblxuICByZXR1cm4gKFxuICAgIDxBbGVydERpYWxvZyBvcGVuPXtvcGVufSBvbk9wZW5DaGFuZ2U9e29uT3BlbkNoYW5nZX0+XG4gICAgICA8QWxlcnREaWFsb2dDb250ZW50IGNsYXNzTmFtZT1cIm1heC13LVs5NXZ3XSBzbTptYXgtdy0yeGwgbWF4LWgtWzkwdmhdIG92ZXJmbG93LXktYXV0b1wiPlxuICAgICAgICA8QWxlcnREaWFsb2dIZWFkZXI+XG4gICAgICAgICAgPEFsZXJ0RGlhbG9nVGl0bGUgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTIgdGV4dC14bFwiPlxuICAgICAgICAgICAgPEFsZXJ0VHJpYW5nbGUgY2xhc3NOYW1lPVwiaC02IHctNiB0ZXh0LWRlc3RydWN0aXZlXCIgLz5cbiAgICAgICAgICAgIFN1cHByaW1lciBsYSBib3V0aXF1ZSBcIntzdG9yZU5hbWV9XCIgP1xuICAgICAgICAgIDwvQWxlcnREaWFsb2dUaXRsZT5cbiAgICAgICAgICA8QWxlcnREaWFsb2dEZXNjcmlwdGlvbiBjbGFzc05hbWU9XCJ0ZXh0LWJhc2VcIj5cbiAgICAgICAgICAgIHtjaGVja2luZyA/IChcbiAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLWNlbnRlciBnYXAtMiBweS00XCI+XG4gICAgICAgICAgICAgICAgPExvYWRlcjIgY2xhc3NOYW1lPVwiaC00IHctNCBhbmltYXRlLXNwaW5cIiAvPlxuICAgICAgICAgICAgICAgIDxzcGFuPlbDqXJpZmljYXRpb24gZGVzIGTDqXBlbmRhbmNlcy4uLjwvc3Bhbj5cbiAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICApIDogKFxuICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInNwYWNlLXktNFwiPlxuICAgICAgICAgICAgICAgIHsvKiBFcnJldXJzIGJsb3F1YW50ZXMgKi99XG4gICAgICAgICAgICAgICAge2Vycm9ycy5sZW5ndGggPiAwICYmIChcbiAgICAgICAgICAgICAgICAgIDxBbGVydCB2YXJpYW50PVwiZGVzdHJ1Y3RpdmVcIj5cbiAgICAgICAgICAgICAgICAgICAgPFhDaXJjbGUgY2xhc3NOYW1lPVwiaC00IHctNFwiIC8+XG4gICAgICAgICAgICAgICAgICAgIDxBbGVydERlc2NyaXB0aW9uPlxuICAgICAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwic3BhY2UteS0yXCI+XG4gICAgICAgICAgICAgICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJmb250LXNlbWlib2xkXCI+U3VwcHJlc3Npb24gaW1wb3NzaWJsZSA6PC9wPlxuICAgICAgICAgICAgICAgICAgICAgICAge2Vycm9ycy5tYXAoKGVycm9yLCBpbmRleCkgPT4gKFxuICAgICAgICAgICAgICAgICAgICAgICAgICA8cCBrZXk9e2luZGV4fSBjbGFzc05hbWU9XCJ0ZXh0LXNtXCI+4oCiIHtlcnJvcn08L3A+XG4gICAgICAgICAgICAgICAgICAgICAgICApKX1cbiAgICAgICAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICAgICAgPC9BbGVydERlc2NyaXB0aW9uPlxuICAgICAgICAgICAgICAgICAgPC9BbGVydD5cbiAgICAgICAgICAgICAgICApfVxuXG4gICAgICAgICAgICAgICAgey8qIFN0YXRpc3RpcXVlcyBkZSBsYSBib3V0aXF1ZSAqL31cbiAgICAgICAgICAgICAgICB7ZGVwZW5kZW5jaWVzICYmIChcbiAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZ3JpZCBncmlkLWNvbHMtMiBnYXAtMyBweS00XCI+XG4gICAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTMgcC0zIGJvcmRlciByb3VuZGVkLWxnIGJnLW11dGVkLzMwXCI+XG4gICAgICAgICAgICAgICAgICAgICAgPFBhY2thZ2UgY2xhc3NOYW1lPVwiaC01IHctNSB0ZXh0LWJsdWUtNTAwXCIgLz5cbiAgICAgICAgICAgICAgICAgICAgICA8ZGl2PlxuICAgICAgICAgICAgICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwidGV4dC1zbSBmb250LW1lZGl1bVwiPntkZXBlbmRlbmNpZXMucHJvZHVjdHNDb3VudH0gUHJvZHVpdHM8L3A+XG4gICAgICAgICAgICAgICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJ0ZXh0LXhzIHRleHQtbXV0ZWQtZm9yZWdyb3VuZFwiPlxuICAgICAgICAgICAgICAgICAgICAgICAgICB7ZGVwZW5kZW5jaWVzLmFjdGl2ZVByb2R1Y3RzQ291bnR9IGFjdGlmc1xuICAgICAgICAgICAgICAgICAgICAgICAgPC9wPlxuICAgICAgICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgICAgICA8L2Rpdj5cblxuICAgICAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGdhcC0zIHAtMyBib3JkZXIgcm91bmRlZC1sZyBiZy1tdXRlZC8zMFwiPlxuICAgICAgICAgICAgICAgICAgICAgIDxTaG9wcGluZ0NhcnQgY2xhc3NOYW1lPVwiaC01IHctNSB0ZXh0LWdyZWVuLTUwMFwiIC8+XG4gICAgICAgICAgICAgICAgICAgICAgPGRpdj5cbiAgICAgICAgICAgICAgICAgICAgICAgIDxwIGNsYXNzTmFtZT1cInRleHQtc20gZm9udC1tZWRpdW1cIj57ZGVwZW5kZW5jaWVzLm9yZGVyc0NvdW50fSBDb21tYW5kZXM8L3A+XG4gICAgICAgICAgICAgICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJ0ZXh0LXhzIHRleHQtbXV0ZWQtZm9yZWdyb3VuZFwiPlxuICAgICAgICAgICAgICAgICAgICAgICAgICB7ZGVwZW5kZW5jaWVzLnBlbmRpbmdPcmRlcnNDb3VudH0gZW4gY291cnNcbiAgICAgICAgICAgICAgICAgICAgICAgIDwvcD5cbiAgICAgICAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICAgICAgPC9kaXY+XG5cbiAgICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLWNlbnRlciBnYXAtMyBwLTMgYm9yZGVyIHJvdW5kZWQtbGcgYmctbXV0ZWQvMzBcIj5cbiAgICAgICAgICAgICAgICAgICAgICA8VXNlcnMgY2xhc3NOYW1lPVwiaC01IHctNSB0ZXh0LXB1cnBsZS01MDBcIiAvPlxuICAgICAgICAgICAgICAgICAgICAgIDxkaXY+XG4gICAgICAgICAgICAgICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJ0ZXh0LXNtIGZvbnQtbWVkaXVtXCI+e2RlcGVuZGVuY2llcy5jdXN0b21lcnNDb3VudH0gQ2xpZW50czwvcD5cbiAgICAgICAgICAgICAgICAgICAgICAgIDxwIGNsYXNzTmFtZT1cInRleHQteHMgdGV4dC1tdXRlZC1mb3JlZ3JvdW5kXCI+ZW5yZWdpc3Ryw6lzPC9wPlxuICAgICAgICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgICAgICA8L2Rpdj5cblxuICAgICAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGdhcC0zIHAtMyBib3JkZXIgcm91bmRlZC1sZyBiZy1tdXRlZC8zMFwiPlxuICAgICAgICAgICAgICAgICAgICAgIDxEb2xsYXJTaWduIGNsYXNzTmFtZT1cImgtNSB3LTUgdGV4dC15ZWxsb3ctNTAwXCIgLz5cbiAgICAgICAgICAgICAgICAgICAgICA8ZGl2PlxuICAgICAgICAgICAgICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwidGV4dC1zbSBmb250LW1lZGl1bVwiPlxuICAgICAgICAgICAgICAgICAgICAgICAgICB7ZGVwZW5kZW5jaWVzLnRvdGFsUmV2ZW51ZS50b0xvY2FsZVN0cmluZygnZnItRlInKX0gRkNGQVxuICAgICAgICAgICAgICAgICAgICAgICAgPC9wPlxuICAgICAgICAgICAgICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwidGV4dC14cyB0ZXh0LW11dGVkLWZvcmVncm91bmRcIj5yZXZlbnVzIHRvdGF1eDwvcD5cbiAgICAgICAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICApfVxuXG4gICAgICAgICAgICAgICAgey8qIEF2ZXJ0aXNzZW1lbnRzICovfVxuICAgICAgICAgICAgICAgIHt3YXJuaW5ncy5sZW5ndGggPiAwICYmIChcbiAgICAgICAgICAgICAgICAgIDxBbGVydD5cbiAgICAgICAgICAgICAgICAgICAgPEFsZXJ0VHJpYW5nbGUgY2xhc3NOYW1lPVwiaC00IHctNFwiIC8+XG4gICAgICAgICAgICAgICAgICAgIDxBbGVydERlc2NyaXB0aW9uPlxuICAgICAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwic3BhY2UteS0yXCI+XG4gICAgICAgICAgICAgICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJmb250LXNlbWlib2xkXCI+QXR0ZW50aW9uIDo8L3A+XG4gICAgICAgICAgICAgICAgICAgICAgICB7d2FybmluZ3MubWFwKCh3YXJuaW5nLCBpbmRleCkgPT4gKFxuICAgICAgICAgICAgICAgICAgICAgICAgICA8cCBrZXk9e2luZGV4fSBjbGFzc05hbWU9XCJ0ZXh0LXNtXCI+4oCiIHt3YXJuaW5nfTwvcD5cbiAgICAgICAgICAgICAgICAgICAgICAgICkpfVxuICAgICAgICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgICAgICA8L0FsZXJ0RGVzY3JpcHRpb24+XG4gICAgICAgICAgICAgICAgICA8L0FsZXJ0PlxuICAgICAgICAgICAgICAgICl9XG5cbiAgICAgICAgICAgICAgICB7LyogQ29uZmlybWF0aW9uIHNpIHN1cHByZXNzaW9uIHBvc3NpYmxlICovfVxuICAgICAgICAgICAgICAgIHtjYW5EZWxldGUgJiYgKFxuICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJzcGFjZS15LTQgcHQtNFwiPlxuICAgICAgICAgICAgICAgICAgICA8QWxlcnQgdmFyaWFudD1cImRlc3RydWN0aXZlXCI+XG4gICAgICAgICAgICAgICAgICAgICAgPEFsZXJ0VHJpYW5nbGUgY2xhc3NOYW1lPVwiaC00IHctNFwiIC8+XG4gICAgICAgICAgICAgICAgICAgICAgPEFsZXJ0RGVzY3JpcHRpb24+XG4gICAgICAgICAgICAgICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJmb250LXNlbWlib2xkIG1iLTJcIj7imqDvuI8gQ2V0dGUgYWN0aW9uIGVzdCBJUlLDiVZFUlNJQkxFPC9wPlxuICAgICAgICAgICAgICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwidGV4dC1zbVwiPlxuICAgICAgICAgICAgICAgICAgICAgICAgICBUb3V0ZXMgbGVzIGRvbm7DqWVzIGRlIGNldHRlIGJvdXRpcXVlIHNlcm9udCBkw6lmaW5pdGl2ZW1lbnQgc3VwcHJpbcOpZXMgOlxuICAgICAgICAgICAgICAgICAgICAgICAgPC9wPlxuICAgICAgICAgICAgICAgICAgICAgICAgPHVsIGNsYXNzTmFtZT1cInRleHQtc20gbXQtMiBzcGFjZS15LTEgbGlzdC1kaXNjIGxpc3QtaW5zaWRlXCI+XG4gICAgICAgICAgICAgICAgICAgICAgICAgIDxsaT5Ub3VzIGxlcyBwcm9kdWl0cyBldCBsZXVycyBpbWFnZXM8L2xpPlxuICAgICAgICAgICAgICAgICAgICAgICAgICA8bGk+TCdoaXN0b3JpcXVlIGRlcyBjb21tYW5kZXM8L2xpPlxuICAgICAgICAgICAgICAgICAgICAgICAgICA8bGk+TGVzIGluZm9ybWF0aW9ucyBjbGllbnRzPC9saT5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgPGxpPkxlcyBzdGF0aXN0aXF1ZXMgZXQgYW5hbHl0aWNzPC9saT5cbiAgICAgICAgICAgICAgICAgICAgICAgIDwvdWw+XG4gICAgICAgICAgICAgICAgICAgICAgPC9BbGVydERlc2NyaXB0aW9uPlxuICAgICAgICAgICAgICAgICAgICA8L0FsZXJ0PlxuXG4gICAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1zdGFydCBnYXAtMiBwLTQgYm9yZGVyLTIgYm9yZGVyLWRlc3RydWN0aXZlLzUwIHJvdW5kZWQtbGcgYmctZGVzdHJ1Y3RpdmUvNVwiPlxuICAgICAgICAgICAgICAgICAgICAgIDxDaGVja2JveFxuICAgICAgICAgICAgICAgICAgICAgICAgaWQ9XCJjb25maXJtLWRlbGV0ZVwiXG4gICAgICAgICAgICAgICAgICAgICAgICBjaGVja2VkPXtjb25maXJtQ2hlY2tlZH1cbiAgICAgICAgICAgICAgICAgICAgICAgIG9uQ2hlY2tlZENoYW5nZT17KGNoZWNrZWQpID0+IHNldENvbmZpcm1DaGVja2VkKGNoZWNrZWQgYXMgYm9vbGVhbil9XG4gICAgICAgICAgICAgICAgICAgICAgLz5cbiAgICAgICAgICAgICAgICAgICAgICA8TGFiZWxcbiAgICAgICAgICAgICAgICAgICAgICAgIGh0bWxGb3I9XCJjb25maXJtLWRlbGV0ZVwiXG4gICAgICAgICAgICAgICAgICAgICAgICBjbGFzc05hbWU9XCJ0ZXh0LXNtIGZvbnQtbWVkaXVtIGN1cnNvci1wb2ludGVyXCJcbiAgICAgICAgICAgICAgICAgICAgICA+XG4gICAgICAgICAgICAgICAgICAgICAgICBKZSBjb21wcmVuZHMgcXVlIGNldHRlIGFjdGlvbiBlc3QgaXJyw6l2ZXJzaWJsZSBldCBqZSBzb3VoYWl0ZSBzdXBwcmltZXIgZMOpZmluaXRpdmVtZW50IGxhIGJvdXRpcXVlIFwie3N0b3JlTmFtZX1cIlxuICAgICAgICAgICAgICAgICAgICAgIDwvTGFiZWw+XG4gICAgICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgICAgKX1cblxuICAgICAgICAgICAgICAgIHsvKiBBbHRlcm5hdGl2ZSA6IEFyY2hpdmFnZSAqL31cbiAgICAgICAgICAgICAgICB7IWNhbkRlbGV0ZSAmJiBvbkNvbmZpcm1BcmNoaXZlICYmIChcbiAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwic3BhY2UteS0zIHB0LTRcIj5cbiAgICAgICAgICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwidGV4dC1zbSBmb250LW1lZGl1bVwiPkFsdGVybmF0aXZlIHJlY29tbWFuZMOpZSA6PC9wPlxuICAgICAgICAgICAgICAgICAgICA8QWxlcnQ+XG4gICAgICAgICAgICAgICAgICAgICAgPEFyY2hpdmUgY2xhc3NOYW1lPVwiaC00IHctNFwiIC8+XG4gICAgICAgICAgICAgICAgICAgICAgPEFsZXJ0RGVzY3JpcHRpb24+XG4gICAgICAgICAgICAgICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJmb250LXNlbWlib2xkIG1iLTFcIj5BcmNoaXZlciBsYSBib3V0aXF1ZTwvcD5cbiAgICAgICAgICAgICAgICAgICAgICAgIDxwIGNsYXNzTmFtZT1cInRleHQtc21cIj5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgQXUgbGlldSBkZSBzdXBwcmltZXIsIHZvdXMgcG91dmV6IGFyY2hpdmVyIGNldHRlIGJvdXRpcXVlLiBFbGxlIHNlcmEgZMOpc2FjdGl2w6llIFxuICAgICAgICAgICAgICAgICAgICAgICAgICBtYWlzIHRvdXRlcyBsZXMgZG9ubsOpZXMgc2Vyb250IGNvbnNlcnbDqWVzLlxuICAgICAgICAgICAgICAgICAgICAgICAgPC9wPlxuICAgICAgICAgICAgICAgICAgICAgIDwvQWxlcnREZXNjcmlwdGlvbj5cbiAgICAgICAgICAgICAgICAgICAgPC9BbGVydD5cbiAgICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgICl9XG4gICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgKX1cbiAgICAgICAgICA8L0FsZXJ0RGlhbG9nRGVzY3JpcHRpb24+XG4gICAgICAgIDwvQWxlcnREaWFsb2dIZWFkZXI+XG5cbiAgICAgICAgPEFsZXJ0RGlhbG9nRm9vdGVyPlxuICAgICAgICAgIHshY2hlY2tpbmcgJiYgKFxuICAgICAgICAgICAgPD5cbiAgICAgICAgICAgICAgPEFsZXJ0RGlhbG9nQ2FuY2VsIGRpc2FibGVkPXtkZWxldGluZyB8fCBhcmNoaXZpbmd9PlxuICAgICAgICAgICAgICAgIEFubnVsZXJcbiAgICAgICAgICAgICAgPC9BbGVydERpYWxvZ0NhbmNlbD5cblxuICAgICAgICAgICAgICB7IWNhbkRlbGV0ZSAmJiBvbkNvbmZpcm1BcmNoaXZlICYmIChcbiAgICAgICAgICAgICAgICA8QnV0dG9uXG4gICAgICAgICAgICAgICAgICBvbkNsaWNrPXtoYW5kbGVBcmNoaXZlfVxuICAgICAgICAgICAgICAgICAgZGlzYWJsZWQ9e2FyY2hpdmluZyB8fCBkZWxldGluZ31cbiAgICAgICAgICAgICAgICAgIHZhcmlhbnQ9XCJzZWNvbmRhcnlcIlxuICAgICAgICAgICAgICAgID5cbiAgICAgICAgICAgICAgICAgIHthcmNoaXZpbmcgPyAoXG4gICAgICAgICAgICAgICAgICAgIDw+XG4gICAgICAgICAgICAgICAgICAgICAgPExvYWRlcjIgY2xhc3NOYW1lPVwiaC00IHctNCBtci0yIGFuaW1hdGUtc3BpblwiIC8+XG4gICAgICAgICAgICAgICAgICAgICAgQXJjaGl2YWdlLi4uXG4gICAgICAgICAgICAgICAgICAgIDwvPlxuICAgICAgICAgICAgICAgICAgKSA6IChcbiAgICAgICAgICAgICAgICAgICAgPD5cbiAgICAgICAgICAgICAgICAgICAgICA8QXJjaGl2ZSBjbGFzc05hbWU9XCJoLTQgdy00IG1yLTJcIiAvPlxuICAgICAgICAgICAgICAgICAgICAgIEFyY2hpdmVyXG4gICAgICAgICAgICAgICAgICAgIDwvPlxuICAgICAgICAgICAgICAgICAgKX1cbiAgICAgICAgICAgICAgICA8L0J1dHRvbj5cbiAgICAgICAgICAgICAgKX1cblxuICAgICAgICAgICAgICB7Y2FuRGVsZXRlICYmIChcbiAgICAgICAgICAgICAgICA8QnV0dG9uXG4gICAgICAgICAgICAgICAgICBvbkNsaWNrPXtoYW5kbGVEZWxldGV9XG4gICAgICAgICAgICAgICAgICBkaXNhYmxlZD17IWNvbmZpcm1DaGVja2VkIHx8IGRlbGV0aW5nIHx8IGFyY2hpdmluZ31cbiAgICAgICAgICAgICAgICAgIHZhcmlhbnQ9XCJkZXN0cnVjdGl2ZVwiXG4gICAgICAgICAgICAgICAgPlxuICAgICAgICAgICAgICAgICAge2RlbGV0aW5nID8gKFxuICAgICAgICAgICAgICAgICAgICA8PlxuICAgICAgICAgICAgICAgICAgICAgIDxMb2FkZXIyIGNsYXNzTmFtZT1cImgtNCB3LTQgbXItMiBhbmltYXRlLXNwaW5cIiAvPlxuICAgICAgICAgICAgICAgICAgICAgIFN1cHByZXNzaW9uLi4uXG4gICAgICAgICAgICAgICAgICAgIDwvPlxuICAgICAgICAgICAgICAgICAgKSA6IChcbiAgICAgICAgICAgICAgICAgICAgPD5cbiAgICAgICAgICAgICAgICAgICAgICA8WENpcmNsZSBjbGFzc05hbWU9XCJoLTQgdy00IG1yLTJcIiAvPlxuICAgICAgICAgICAgICAgICAgICAgIFN1cHByaW1lciBkw6lmaW5pdGl2ZW1lbnRcbiAgICAgICAgICAgICAgICAgICAgPC8+XG4gICAgICAgICAgICAgICAgICApfVxuICAgICAgICAgICAgICAgIDwvQnV0dG9uPlxuICAgICAgICAgICAgICApfVxuICAgICAgICAgICAgPC8+XG4gICAgICAgICAgKX1cbiAgICAgICAgPC9BbGVydERpYWxvZ0Zvb3Rlcj5cbiAgICAgIDwvQWxlcnREaWFsb2dDb250ZW50PlxuICAgIDwvQWxlcnREaWFsb2c+XG4gICk7XG59O1xuXG5EZWxldGVTdG9yZURpYWxvZ0NvbXBvbmVudC5kaXNwbGF5TmFtZSA9ICdEZWxldGVTdG9yZURpYWxvZ0NvbXBvbmVudCc7XG5cbi8vIE9wdGltaXNhdGlvbiBhdmVjIFJlYWN0Lm1lbW8gcG91ciDDqXZpdGVyIGxlcyByZS1yZW5kZXJzIGludXRpbGVzXG5leHBvcnQgY29uc3QgRGVsZXRlU3RvcmVEaWFsb2cgPSBSZWFjdC5tZW1vKERlbGV0ZVN0b3JlRGlhbG9nQ29tcG9uZW50LCAocHJldlByb3BzLCBuZXh0UHJvcHMpID0+IHtcbiAgcmV0dXJuIChcbiAgICBwcmV2UHJvcHMub3BlbiA9PT0gbmV4dFByb3BzLm9wZW4gJiZcbiAgICBwcmV2UHJvcHMub25PcGVuQ2hhbmdlID09PSBuZXh0UHJvcHMub25PcGVuQ2hhbmdlICYmXG4gICAgcHJldlByb3BzLnN0b3JlSWQgPT09IG5leHRQcm9wcy5zdG9yZUlkICYmXG4gICAgcHJldlByb3BzLnN0b3JlTmFtZSA9PT0gbmV4dFByb3BzLnN0b3JlTmFtZSAmJlxuICAgIHByZXZQcm9wcy5vbkNvbmZpcm1EZWxldGUgPT09IG5leHRQcm9wcy5vbkNvbmZpcm1EZWxldGUgJiZcbiAgICBwcmV2UHJvcHMub25Db25maXJtQXJjaGl2ZSA9PT0gbmV4dFByb3BzLm9uQ29uZmlybUFyY2hpdmVcbiAgKTtcbn0pO1xuXG5EZWxldGVTdG9yZURpYWxvZy5kaXNwbGF5TmFtZSA9ICdEZWxldGVTdG9yZURpYWxvZyc7XG5cblxuXG5cblxuXG5cbiJdLCJuYW1lcyI6WyJSZWFjdCIsInVzZVN0YXRlIiwidXNlRWZmZWN0IiwidXNlQ2FsbGJhY2siLCJBbGVydERpYWxvZyIsIkFsZXJ0RGlhbG9nQ2FuY2VsIiwiQWxlcnREaWFsb2dDb250ZW50IiwiQWxlcnREaWFsb2dEZXNjcmlwdGlvbiIsIkFsZXJ0RGlhbG9nRm9vdGVyIiwiQWxlcnREaWFsb2dIZWFkZXIiLCJBbGVydERpYWxvZ1RpdGxlIiwiQWxlcnQiLCJBbGVydERlc2NyaXB0aW9uIiwiQ2hlY2tib3giLCJMYWJlbCIsIkFsZXJ0VHJpYW5nbGUiLCJQYWNrYWdlIiwiU2hvcHBpbmdDYXJ0IiwiVXNlcnMiLCJEb2xsYXJTaWduIiwiTG9hZGVyMiIsIlhDaXJjbGUiLCJBcmNoaXZlIiwiY2hlY2tTdG9yZURlbGV0ZVByb3RlY3Rpb24iLCJCdXR0b24iLCJsb2dnZXIiLCJEZWxldGVTdG9yZURpYWxvZ0NvbXBvbmVudCIsIm9wZW4iLCJvbk9wZW5DaGFuZ2UiLCJzdG9yZUlkIiwic3RvcmVOYW1lIiwib25Db25maXJtRGVsZXRlIiwib25Db25maXJtQXJjaGl2ZSIsImNoZWNraW5nIiwic2V0Q2hlY2tpbmciLCJjYW5EZWxldGUiLCJzZXRDYW5EZWxldGUiLCJkZXBlbmRlbmNpZXMiLCJzZXREZXBlbmRlbmNpZXMiLCJ3YXJuaW5ncyIsInNldFdhcm5pbmdzIiwiZXJyb3JzIiwic2V0RXJyb3JzIiwiY29uZmlybUNoZWNrZWQiLCJzZXRDb25maXJtQ2hlY2tlZCIsImRlbGV0aW5nIiwic2V0RGVsZXRpbmciLCJhcmNoaXZpbmciLCJzZXRBcmNoaXZpbmciLCJjaGVja1Byb3RlY3Rpb24iLCJyZXN1bHQiLCJlcnJvciIsImhhbmRsZURlbGV0ZSIsImhhbmRsZUFyY2hpdmUiLCJjbGFzc05hbWUiLCJkaXYiLCJzcGFuIiwibGVuZ3RoIiwidmFyaWFudCIsInAiLCJtYXAiLCJpbmRleCIsInByb2R1Y3RzQ291bnQiLCJhY3RpdmVQcm9kdWN0c0NvdW50Iiwib3JkZXJzQ291bnQiLCJwZW5kaW5nT3JkZXJzQ291bnQiLCJjdXN0b21lcnNDb3VudCIsInRvdGFsUmV2ZW51ZSIsInRvTG9jYWxlU3RyaW5nIiwid2FybmluZyIsInVsIiwibGkiLCJpZCIsImNoZWNrZWQiLCJvbkNoZWNrZWRDaGFuZ2UiLCJodG1sRm9yIiwiZGlzYWJsZWQiLCJvbkNsaWNrIiwiZGlzcGxheU5hbWUiLCJEZWxldGVTdG9yZURpYWxvZyIsIm1lbW8iLCJwcmV2UHJvcHMiLCJuZXh0UHJvcHMiXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OztBQUFBLE9BQU9BLFNBQVNDLFFBQVEsRUFBRUMsU0FBUyxFQUFFQyxXQUFXLFFBQVEsUUFBUTtBQUNoRSxTQUNFQyxXQUFXLEVBRVhDLGlCQUFpQixFQUNqQkMsa0JBQWtCLEVBQ2xCQyxzQkFBc0IsRUFDdEJDLGlCQUFpQixFQUNqQkMsaUJBQWlCLEVBQ2pCQyxnQkFBZ0IsUUFDWCwrQkFBK0I7QUFDdEMsU0FBU0MsS0FBSyxFQUFFQyxnQkFBZ0IsUUFBUSx3QkFBd0I7QUFFaEUsU0FBU0MsUUFBUSxRQUFRLDJCQUEyQjtBQUNwRCxTQUFTQyxLQUFLLFFBQVEsd0JBQXdCO0FBQzlDLFNBQ0VDLGFBQWEsRUFDYkMsT0FBTyxFQUNQQyxZQUFZLEVBQ1pDLEtBQUssRUFDTEMsVUFBVSxFQUNWQyxPQUFPLEVBQ1BDLE9BQU8sRUFDUEMsT0FBTyxRQUNGLGVBQWU7QUFDdEIsU0FBU0MsMEJBQTBCLFFBQTJCLGdDQUFnQztBQUM5RixTQUFTQyxNQUFNLFFBQVEseUJBQXlCO0FBQ2hE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

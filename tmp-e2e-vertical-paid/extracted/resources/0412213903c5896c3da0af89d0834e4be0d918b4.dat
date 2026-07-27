@@ -1,0 +1,26 @@
+/**
+ * Trouve la transaction complétée à rembourser pour une commande
+ */ import { supabase } from "/src/integrations/supabase/client.ts";
+import { logger } from "/src/lib/logger.ts";
+export async function findCompletedTransactionForOrder(orderId) {
+    const { data, error } = await supabase.from('transactions').select('id, amount, currency, status, payment_provider').eq('order_id', orderId).eq('status', 'completed').order('created_at', {
+        ascending: false
+    }).limit(1).maybeSingle();
+    if (error) {
+        logger.error('findCompletedTransactionForOrder failed', {
+            error,
+            orderId
+        });
+        return null;
+    }
+    if (!data) return null;
+    return {
+        id: data.id,
+        amount: Number(data.amount ?? 0),
+        currency: data.currency ?? 'XOF',
+        status: data.status ?? 'completed',
+        payment_provider: data.payment_provider
+    };
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImZpbmQtb3JkZXItdHJhbnNhY3Rpb24udHMiXSwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBUcm91dmUgbGEgdHJhbnNhY3Rpb24gY29tcGzDqXTDqWUgw6AgcmVtYm91cnNlciBwb3VyIHVuZSBjb21tYW5kZVxuICovXG5cbmltcG9ydCB7IHN1cGFiYXNlIH0gZnJvbSAnQC9pbnRlZ3JhdGlvbnMvc3VwYWJhc2UvY2xpZW50JztcbmltcG9ydCB7IGxvZ2dlciB9IGZyb20gJ0AvbGliL2xvZ2dlcic7XG5cbmV4cG9ydCBpbnRlcmZhY2UgT3JkZXJUcmFuc2FjdGlvbkZvclJlZnVuZCB7XG4gIGlkOiBzdHJpbmc7XG4gIGFtb3VudDogbnVtYmVyO1xuICBjdXJyZW5jeTogc3RyaW5nO1xuICBzdGF0dXM6IHN0cmluZztcbiAgcGF5bWVudF9wcm92aWRlcjogc3RyaW5nIHwgbnVsbDtcbn1cblxuZXhwb3J0IGFzeW5jIGZ1bmN0aW9uIGZpbmRDb21wbGV0ZWRUcmFuc2FjdGlvbkZvck9yZGVyKFxuICBvcmRlcklkOiBzdHJpbmdcbik6IFByb21pc2U8T3JkZXJUcmFuc2FjdGlvbkZvclJlZnVuZCB8IG51bGw+IHtcbiAgY29uc3QgeyBkYXRhLCBlcnJvciB9ID0gYXdhaXQgc3VwYWJhc2VcbiAgICAuZnJvbSgndHJhbnNhY3Rpb25zJylcbiAgICAuc2VsZWN0KCdpZCwgYW1vdW50LCBjdXJyZW5jeSwgc3RhdHVzLCBwYXltZW50X3Byb3ZpZGVyJylcbiAgICAuZXEoJ29yZGVyX2lkJywgb3JkZXJJZClcbiAgICAuZXEoJ3N0YXR1cycsICdjb21wbGV0ZWQnKVxuICAgIC5vcmRlcignY3JlYXRlZF9hdCcsIHsgYXNjZW5kaW5nOiBmYWxzZSB9KVxuICAgIC5saW1pdCgxKVxuICAgIC5tYXliZVNpbmdsZSgpO1xuXG4gIGlmIChlcnJvcikge1xuICAgIGxvZ2dlci5lcnJvcignZmluZENvbXBsZXRlZFRyYW5zYWN0aW9uRm9yT3JkZXIgZmFpbGVkJywgeyBlcnJvciwgb3JkZXJJZCB9KTtcbiAgICByZXR1cm4gbnVsbDtcbiAgfVxuXG4gIGlmICghZGF0YSkgcmV0dXJuIG51bGw7XG5cbiAgcmV0dXJuIHtcbiAgICBpZDogZGF0YS5pZCxcbiAgICBhbW91bnQ6IE51bWJlcihkYXRhLmFtb3VudCA/PyAwKSxcbiAgICBjdXJyZW5jeTogZGF0YS5jdXJyZW5jeSA/PyAnWE9GJyxcbiAgICBzdGF0dXM6IGRhdGEuc3RhdHVzID8/ICdjb21wbGV0ZWQnLFxuICAgIHBheW1lbnRfcHJvdmlkZXI6IGRhdGEucGF5bWVudF9wcm92aWRlcixcbiAgfTtcbn1cbiJdLCJuYW1lcyI6WyJzdXBhYmFzZSIsImxvZ2dlciIsImZpbmRDb21wbGV0ZWRUcmFuc2FjdGlvbkZvck9yZGVyIiwib3JkZXJJZCIsImRhdGEiLCJlcnJvciIsImZyb20iLCJzZWxlY3QiLCJlcSIsIm9yZGVyIiwiYXNjZW5kaW5nIiwibGltaXQiLCJtYXliZVNpbmdsZSIsImlkIiwiYW1vdW50IiwiTnVtYmVyIiwiY3VycmVuY3kiLCJzdGF0dXMiLCJwYXltZW50X3Byb3ZpZGVyIl0sIm1hcHBpbmdzIjoiQUFBQTs7Q0FFQyxHQUVELFNBQVNBLFFBQVEsUUFBUSxpQ0FBaUM7QUFDMUQsU0FBU0MsTUFBTSxRQUFRLGVBQWU7QUFVdEMsT0FBTyxlQUFlQyxpQ0FDcEJDLE9BQWU7SUFFZixNQUFNLEVBQUVDLElBQUksRUFBRUMsS0FBSyxFQUFFLEdBQUcsTUFBTUwsU0FDM0JNLElBQUksQ0FBQyxnQkFDTEMsTUFBTSxDQUFDLGtEQUNQQyxFQUFFLENBQUMsWUFBWUwsU0FDZkssRUFBRSxDQUFDLFVBQVUsYUFDYkMsS0FBSyxDQUFDLGNBQWM7UUFBRUMsV0FBVztJQUFNLEdBQ3ZDQyxLQUFLLENBQUMsR0FDTkMsV0FBVztJQUVkLElBQUlQLE9BQU87UUFDVEosT0FBT0ksS0FBSyxDQUFDLDJDQUEyQztZQUFFQTtZQUFPRjtRQUFRO1FBQ3pFLE9BQU87SUFDVDtJQUVBLElBQUksQ0FBQ0MsTUFBTSxPQUFPO0lBRWxCLE9BQU87UUFDTFMsSUFBSVQsS0FBS1MsRUFBRTtRQUNYQyxRQUFRQyxPQUFPWCxLQUFLVSxNQUFNLElBQUk7UUFDOUJFLFVBQVVaLEtBQUtZLFFBQVEsSUFBSTtRQUMzQkMsUUFBUWIsS0FBS2EsTUFBTSxJQUFJO1FBQ3ZCQyxrQkFBa0JkLEtBQUtjLGdCQUFnQjtJQUN6QztBQUNGIn0=

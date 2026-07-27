@@ -1,0 +1,178 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/reviews/ReviewVoteButtons.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewVoteButtons.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=2441233a"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+/**
+ * Composant : ReviewVoteButtons
+ * Boutons améliorés pour voter sur les reviews avec feedback visuel
+ * Date : 31 Janvier 2025
+ */ import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=2441233a"; const React = __vite__cjsImport3_react.__esModule ? __vite__cjsImport3_react.default : __vite__cjsImport3_react;
+import { Button } from "/src/components/ui/button.tsx";
+import { ThumbsUp, ThumbsDown, Loader2 } from "/node_modules/.vite/deps/lucide-react.js?v=2441233a";
+import { cn } from "/src/lib/utils.ts";
+export const ReviewVoteButtons = ({ helpfulCount, notHelpfulCount, currentUserVote, onVote, isLoading = false, className = '' })=>{
+    const hasVoted = currentUserVote !== null && currentUserVote !== undefined;
+    const votedHelpful = currentUserVote?.is_helpful === true;
+    const votedNotHelpful = currentUserVote?.is_helpful === false;
+    const handleVote = (isHelpful)=>{
+        // Si l'utilisateur clique sur le même vote, on le retire
+        if (hasVoted && currentUserVote?.is_helpful === isHelpful) {
+            // Optionnel : permettre de retirer le vote
+            // Pour l'instant, on change juste de vote
+            onVote(!isHelpful);
+        } else {
+            onVote(isHelpful);
+        }
+    };
+    return /*#__PURE__*/ _jsxDEV("div", {
+        className: cn('flex items-center gap-2', className),
+        children: [
+            /*#__PURE__*/ _jsxDEV(Button, {
+                variant: "ghost",
+                size: "sm",
+                onClick: ()=>handleVote(true),
+                disabled: isLoading,
+                className: cn('transition-all', votedHelpful ? 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 border border-green-200 dark:border-green-800' : 'hover:bg-green-50 dark:hover:bg-green-900/10', isLoading && 'opacity-50 cursor-not-allowed'),
+                children: [
+                    isLoading && votedHelpful ? /*#__PURE__*/ _jsxDEV(Loader2, {
+                        className: "w-4 h-4 mr-1.5 animate-spin"
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewVoteButtons.tsx",
+                        lineNumber: 60,
+                        columnNumber: 11
+                    }, this) : /*#__PURE__*/ _jsxDEV(ThumbsUp, {
+                        className: cn('w-4 h-4 mr-1.5', votedHelpful && 'fill-current')
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewVoteButtons.tsx",
+                        lineNumber: 62,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV("span", {
+                        className: "font-medium",
+                        children: "Utile"
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewVoteButtons.tsx",
+                        lineNumber: 69,
+                        columnNumber: 9
+                    }, this),
+                    helpfulCount > 0 && /*#__PURE__*/ _jsxDEV("span", {
+                        className: "ml-1.5 text-xs opacity-75",
+                        children: [
+                            "(",
+                            helpfulCount,
+                            ")"
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewVoteButtons.tsx",
+                        lineNumber: 73,
+                        columnNumber: 11
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewVoteButtons.tsx",
+                lineNumber: 46,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV(Button, {
+                variant: "ghost",
+                size: "sm",
+                onClick: ()=>handleVote(false),
+                disabled: isLoading,
+                className: cn('transition-all', votedNotHelpful ? 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800' : 'hover:bg-red-50 dark:hover:bg-red-900/10', isLoading && 'opacity-50 cursor-not-allowed'),
+                children: [
+                    isLoading && votedNotHelpful ? /*#__PURE__*/ _jsxDEV(Loader2, {
+                        className: "w-4 h-4 mr-1.5 animate-spin"
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewVoteButtons.tsx",
+                        lineNumber: 93,
+                        columnNumber: 11
+                    }, this) : /*#__PURE__*/ _jsxDEV(ThumbsDown, {
+                        className: cn('w-4 h-4 mr-1.5', votedNotHelpful && 'fill-current')
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewVoteButtons.tsx",
+                        lineNumber: 95,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV("span", {
+                        className: "font-medium",
+                        children: "Pas utile"
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewVoteButtons.tsx",
+                        lineNumber: 102,
+                        columnNumber: 9
+                    }, this),
+                    notHelpfulCount > 0 && /*#__PURE__*/ _jsxDEV("span", {
+                        className: "ml-1.5 text-xs opacity-75",
+                        children: [
+                            "(",
+                            notHelpfulCount,
+                            ")"
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewVoteButtons.tsx",
+                        lineNumber: 106,
+                        columnNumber: 11
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewVoteButtons.tsx",
+                lineNumber: 79,
+                columnNumber: 7
+            }, this),
+            hasVoted && helpfulCount + notHelpfulCount > 0 && /*#__PURE__*/ _jsxDEV("div", {
+                className: "ml-2 text-xs text-muted-foreground",
+                children: [
+                    Math.round(helpfulCount / (helpfulCount + notHelpfulCount) * 100),
+                    "% utile"
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewVoteButtons.tsx",
+                lineNumber: 114,
+                columnNumber: 9
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewVoteButtons.tsx",
+        lineNumber: 45,
+        columnNumber: 5
+    }, this);
+};
+_c = ReviewVoteButtons;
+var _c;
+$RefreshReg$(_c, "ReviewVoteButtons");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewVoteButtons.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewVoteButtons.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIlJldmlld1ZvdGVCdXR0b25zLnRzeCJdLCJzb3VyY2VzQ29udGVudCI6WyIvKipcbiAqIENvbXBvc2FudCA6IFJldmlld1ZvdGVCdXR0b25zXG4gKiBCb3V0b25zIGFtw6lsaW9yw6lzIHBvdXIgdm90ZXIgc3VyIGxlcyByZXZpZXdzIGF2ZWMgZmVlZGJhY2sgdmlzdWVsXG4gKiBEYXRlIDogMzEgSmFudmllciAyMDI1XG4gKi9cblxuaW1wb3J0IFJlYWN0IGZyb20gJ3JlYWN0JztcbmltcG9ydCB7IEJ1dHRvbiB9IGZyb20gJ0AvY29tcG9uZW50cy91aS9idXR0b24nO1xuaW1wb3J0IHsgVGh1bWJzVXAsIFRodW1ic0Rvd24sIExvYWRlcjIgfSBmcm9tICdsdWNpZGUtcmVhY3QnO1xuaW1wb3J0IHsgY24gfSBmcm9tICdAL2xpYi91dGlscyc7XG5cbmludGVyZmFjZSBSZXZpZXdWb3RlQnV0dG9uc1Byb3BzIHtcbiAgaGVscGZ1bENvdW50OiBudW1iZXI7XG4gIG5vdEhlbHBmdWxDb3VudDogbnVtYmVyO1xuICBjdXJyZW50VXNlclZvdGU/OiB7IGlzX2hlbHBmdWw6IGJvb2xlYW4gfSB8IG51bGw7XG4gIG9uVm90ZTogKGlzSGVscGZ1bDogYm9vbGVhbikgPT4gdm9pZDtcbiAgaXNMb2FkaW5nPzogYm9vbGVhbjtcbiAgY2xhc3NOYW1lPzogc3RyaW5nO1xufVxuXG5leHBvcnQgY29uc3QgUmV2aWV3Vm90ZUJ1dHRvbnMgOiBSZWFjdC5GQzxSZXZpZXdWb3RlQnV0dG9uc1Byb3BzPiA9ICh7XG4gIGhlbHBmdWxDb3VudCxcbiAgbm90SGVscGZ1bENvdW50LFxuICBjdXJyZW50VXNlclZvdGUsXG4gIG9uVm90ZSxcbiAgaXNMb2FkaW5nID0gZmFsc2UsXG4gIGNsYXNzTmFtZSA9ICcnLFxufSkgPT4ge1xuICBjb25zdCBoYXNWb3RlZCA9IGN1cnJlbnRVc2VyVm90ZSAhPT0gbnVsbCAmJiBjdXJyZW50VXNlclZvdGUgIT09IHVuZGVmaW5lZDtcbiAgY29uc3Qgdm90ZWRIZWxwZnVsID0gY3VycmVudFVzZXJWb3RlPy5pc19oZWxwZnVsID09PSB0cnVlO1xuICBjb25zdCB2b3RlZE5vdEhlbHBmdWwgPSBjdXJyZW50VXNlclZvdGU/LmlzX2hlbHBmdWwgPT09IGZhbHNlO1xuXG4gIGNvbnN0IGhhbmRsZVZvdGUgPSAoaXNIZWxwZnVsOiBib29sZWFuKSA9PiB7XG4gICAgLy8gU2kgbCd1dGlsaXNhdGV1ciBjbGlxdWUgc3VyIGxlIG3Dqm1lIHZvdGUsIG9uIGxlIHJldGlyZVxuICAgIGlmIChoYXNWb3RlZCAmJiBjdXJyZW50VXNlclZvdGU/LmlzX2hlbHBmdWwgPT09IGlzSGVscGZ1bCkge1xuICAgICAgLy8gT3B0aW9ubmVsIDogcGVybWV0dHJlIGRlIHJldGlyZXIgbGUgdm90ZVxuICAgICAgLy8gUG91ciBsJ2luc3RhbnQsIG9uIGNoYW5nZSBqdXN0ZSBkZSB2b3RlXG4gICAgICBvblZvdGUoIWlzSGVscGZ1bCk7XG4gICAgfSBlbHNlIHtcbiAgICAgIG9uVm90ZShpc0hlbHBmdWwpO1xuICAgIH1cbiAgfTtcblxuICByZXR1cm4gKFxuICAgIDxkaXYgY2xhc3NOYW1lPXtjbignZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTInLCBjbGFzc05hbWUpfT5cbiAgICAgIDxCdXR0b25cbiAgICAgICAgdmFyaWFudD1cImdob3N0XCJcbiAgICAgICAgc2l6ZT1cInNtXCJcbiAgICAgICAgb25DbGljaz17KCkgPT4gaGFuZGxlVm90ZSh0cnVlKX1cbiAgICAgICAgZGlzYWJsZWQ9e2lzTG9hZGluZ31cbiAgICAgICAgY2xhc3NOYW1lPXtjbihcbiAgICAgICAgICAndHJhbnNpdGlvbi1hbGwnLFxuICAgICAgICAgIHZvdGVkSGVscGZ1bFxuICAgICAgICAgICAgPyAnYmctZ3JlZW4tNTAgZGFyazpiZy1ncmVlbi05MDAvMjAgdGV4dC1ncmVlbi02MDAgZGFyazp0ZXh0LWdyZWVuLTQwMCBib3JkZXIgYm9yZGVyLWdyZWVuLTIwMCBkYXJrOmJvcmRlci1ncmVlbi04MDAnXG4gICAgICAgICAgICA6ICdob3ZlcjpiZy1ncmVlbi01MCBkYXJrOmhvdmVyOmJnLWdyZWVuLTkwMC8xMCcsXG4gICAgICAgICAgaXNMb2FkaW5nICYmICdvcGFjaXR5LTUwIGN1cnNvci1ub3QtYWxsb3dlZCdcbiAgICAgICAgKX1cbiAgICAgID5cbiAgICAgICAge2lzTG9hZGluZyAmJiB2b3RlZEhlbHBmdWwgPyAoXG4gICAgICAgICAgPExvYWRlcjIgY2xhc3NOYW1lPVwidy00IGgtNCBtci0xLjUgYW5pbWF0ZS1zcGluXCIgLz5cbiAgICAgICAgKSA6IChcbiAgICAgICAgICA8VGh1bWJzVXBcbiAgICAgICAgICAgIGNsYXNzTmFtZT17Y24oXG4gICAgICAgICAgICAgICd3LTQgaC00IG1yLTEuNScsXG4gICAgICAgICAgICAgIHZvdGVkSGVscGZ1bCAmJiAnZmlsbC1jdXJyZW50J1xuICAgICAgICAgICAgKX1cbiAgICAgICAgICAvPlxuICAgICAgICApfVxuICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJmb250LW1lZGl1bVwiPlxuICAgICAgICAgIFV0aWxlXG4gICAgICAgIDwvc3Bhbj5cbiAgICAgICAge2hlbHBmdWxDb3VudCA+IDAgJiYgKFxuICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cIm1sLTEuNSB0ZXh0LXhzIG9wYWNpdHktNzVcIj5cbiAgICAgICAgICAgICh7aGVscGZ1bENvdW50fSlcbiAgICAgICAgICA8L3NwYW4+XG4gICAgICAgICl9XG4gICAgICA8L0J1dHRvbj5cblxuICAgICAgPEJ1dHRvblxuICAgICAgICB2YXJpYW50PVwiZ2hvc3RcIlxuICAgICAgICBzaXplPVwic21cIlxuICAgICAgICBvbkNsaWNrPXsoKSA9PiBoYW5kbGVWb3RlKGZhbHNlKX1cbiAgICAgICAgZGlzYWJsZWQ9e2lzTG9hZGluZ31cbiAgICAgICAgY2xhc3NOYW1lPXtjbihcbiAgICAgICAgICAndHJhbnNpdGlvbi1hbGwnLFxuICAgICAgICAgIHZvdGVkTm90SGVscGZ1bFxuICAgICAgICAgICAgPyAnYmctcmVkLTUwIGRhcms6YmctcmVkLTkwMC8yMCB0ZXh0LXJlZC02MDAgZGFyazp0ZXh0LXJlZC00MDAgYm9yZGVyIGJvcmRlci1yZWQtMjAwIGRhcms6Ym9yZGVyLXJlZC04MDAnXG4gICAgICAgICAgICA6ICdob3ZlcjpiZy1yZWQtNTAgZGFyazpob3ZlcjpiZy1yZWQtOTAwLzEwJyxcbiAgICAgICAgICBpc0xvYWRpbmcgJiYgJ29wYWNpdHktNTAgY3Vyc29yLW5vdC1hbGxvd2VkJ1xuICAgICAgICApfVxuICAgICAgPlxuICAgICAgICB7aXNMb2FkaW5nICYmIHZvdGVkTm90SGVscGZ1bCA/IChcbiAgICAgICAgICA8TG9hZGVyMiBjbGFzc05hbWU9XCJ3LTQgaC00IG1yLTEuNSBhbmltYXRlLXNwaW5cIiAvPlxuICAgICAgICApIDogKFxuICAgICAgICAgIDxUaHVtYnNEb3duXG4gICAgICAgICAgICBjbGFzc05hbWU9e2NuKFxuICAgICAgICAgICAgICAndy00IGgtNCBtci0xLjUnLFxuICAgICAgICAgICAgICB2b3RlZE5vdEhlbHBmdWwgJiYgJ2ZpbGwtY3VycmVudCdcbiAgICAgICAgICAgICl9XG4gICAgICAgICAgLz5cbiAgICAgICAgKX1cbiAgICAgICAgPHNwYW4gY2xhc3NOYW1lPVwiZm9udC1tZWRpdW1cIj5cbiAgICAgICAgICBQYXMgdXRpbGVcbiAgICAgICAgPC9zcGFuPlxuICAgICAgICB7bm90SGVscGZ1bENvdW50ID4gMCAmJiAoXG4gICAgICAgICAgPHNwYW4gY2xhc3NOYW1lPVwibWwtMS41IHRleHQteHMgb3BhY2l0eS03NVwiPlxuICAgICAgICAgICAgKHtub3RIZWxwZnVsQ291bnR9KVxuICAgICAgICAgIDwvc3Bhbj5cbiAgICAgICAgKX1cbiAgICAgIDwvQnV0dG9uPlxuXG4gICAgICB7LyogSW5kaWNhdGV1ciBkZSBwb3VyY2VudGFnZSAqL31cbiAgICAgIHtoYXNWb3RlZCAmJiBoZWxwZnVsQ291bnQgKyBub3RIZWxwZnVsQ291bnQgPiAwICYmIChcbiAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJtbC0yIHRleHQteHMgdGV4dC1tdXRlZC1mb3JlZ3JvdW5kXCI+XG4gICAgICAgICAge01hdGgucm91bmQoKGhlbHBmdWxDb3VudCAvIChoZWxwZnVsQ291bnQgKyBub3RIZWxwZnVsQ291bnQpKSAqIDEwMCl9JSB1dGlsZVxuICAgICAgICA8L2Rpdj5cbiAgICAgICl9XG4gICAgPC9kaXY+XG4gICk7XG59O1xuXG5cblxuXG5cblxuXG5cblxuXG5cblxuXG5cbiJdLCJuYW1lcyI6WyJSZWFjdCIsIkJ1dHRvbiIsIlRodW1ic1VwIiwiVGh1bWJzRG93biIsIkxvYWRlcjIiLCJjbiIsIlJldmlld1ZvdGVCdXR0b25zIiwiaGVscGZ1bENvdW50Iiwibm90SGVscGZ1bENvdW50IiwiY3VycmVudFVzZXJWb3RlIiwib25Wb3RlIiwiaXNMb2FkaW5nIiwiY2xhc3NOYW1lIiwiaGFzVm90ZWQiLCJ1bmRlZmluZWQiLCJ2b3RlZEhlbHBmdWwiLCJpc19oZWxwZnVsIiwidm90ZWROb3RIZWxwZnVsIiwiaGFuZGxlVm90ZSIsImlzSGVscGZ1bCIsImRpdiIsInZhcmlhbnQiLCJzaXplIiwib25DbGljayIsImRpc2FibGVkIiwic3BhbiIsIk1hdGgiLCJyb3VuZCJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7QUFBQTs7OztDQUlDLEdBRUQsT0FBT0EsV0FBVyxRQUFRO0FBQzFCLFNBQVNDLE1BQU0sUUFBUSx5QkFBeUI7QUFDaEQsU0FBU0MsUUFBUSxFQUFFQyxVQUFVLEVBQUVDLE9BQU8sUUFBUSxlQUFlO0FBQzdELFNBQVNDLEVBQUUsUUFBUSxjQUFjO0FBV2pDLE9BQU8sTUFBTUMsb0JBQXVELENBQUMsRUFDbkVDLFlBQVksRUFDWkMsZUFBZSxFQUNmQyxlQUFlLEVBQ2ZDLE1BQU0sRUFDTkMsWUFBWSxLQUFLLEVBQ2pCQyxZQUFZLEVBQUUsRUFDZjtJQUNDLE1BQU1DLFdBQVdKLG9CQUFvQixRQUFRQSxvQkFBb0JLO0lBQ2pFLE1BQU1DLGVBQWVOLGlCQUFpQk8sZUFBZTtJQUNyRCxNQUFNQyxrQkFBa0JSLGlCQUFpQk8sZUFBZTtJQUV4RCxNQUFNRSxhQUFhLENBQUNDO1FBQ2xCLHlEQUF5RDtRQUN6RCxJQUFJTixZQUFZSixpQkFBaUJPLGVBQWVHLFdBQVc7WUFDekQsMkNBQTJDO1lBQzNDLDBDQUEwQztZQUMxQ1QsT0FBTyxDQUFDUztRQUNWLE9BQU87WUFDTFQsT0FBT1M7UUFDVDtJQUNGO0lBRUEscUJBQ0UsUUFBQ0M7UUFBSVIsV0FBV1AsR0FBRywyQkFBMkJPOzswQkFDNUMsUUFBQ1g7Z0JBQ0NvQixTQUFRO2dCQUNSQyxNQUFLO2dCQUNMQyxTQUFTLElBQU1MLFdBQVc7Z0JBQzFCTSxVQUFVYjtnQkFDVkMsV0FBV1AsR0FDVCxrQkFDQVUsZUFDSSxzSEFDQSxnREFDSkosYUFBYTs7b0JBR2RBLGFBQWFJLDZCQUNaLFFBQUNYO3dCQUFRUSxXQUFVOzs7Ozs2Q0FFbkIsUUFBQ1Y7d0JBQ0NVLFdBQVdQLEdBQ1Qsa0JBQ0FVLGdCQUFnQjs7Ozs7O2tDQUl0QixRQUFDVTt3QkFBS2IsV0FBVTtrQ0FBYzs7Ozs7O29CQUc3QkwsZUFBZSxtQkFDZCxRQUFDa0I7d0JBQUtiLFdBQVU7OzRCQUE0Qjs0QkFDeENMOzRCQUFhOzs7Ozs7Ozs7Ozs7OzBCQUtyQixRQUFDTjtnQkFDQ29CLFNBQVE7Z0JBQ1JDLE1BQUs7Z0JBQ0xDLFNBQVMsSUFBTUwsV0FBVztnQkFDMUJNLFVBQVViO2dCQUNWQyxXQUFXUCxHQUNULGtCQUNBWSxrQkFDSSwwR0FDQSw0Q0FDSk4sYUFBYTs7b0JBR2RBLGFBQWFNLGdDQUNaLFFBQUNiO3dCQUFRUSxXQUFVOzs7Ozs2Q0FFbkIsUUFBQ1Q7d0JBQ0NTLFdBQVdQLEdBQ1Qsa0JBQ0FZLG1CQUFtQjs7Ozs7O2tDQUl6QixRQUFDUTt3QkFBS2IsV0FBVTtrQ0FBYzs7Ozs7O29CQUc3Qkosa0JBQWtCLG1CQUNqQixRQUFDaUI7d0JBQUtiLFdBQVU7OzRCQUE0Qjs0QkFDeENKOzRCQUFnQjs7Ozs7Ozs7Ozs7OztZQU12QkssWUFBWU4sZUFBZUMsa0JBQWtCLG1CQUM1QyxRQUFDWTtnQkFBSVIsV0FBVTs7b0JBQ1pjLEtBQUtDLEtBQUssQ0FBQyxBQUFDcEIsZUFBZ0JBLENBQUFBLGVBQWVDLGVBQWMsSUFBTTtvQkFBSzs7Ozs7Ozs7Ozs7OztBQUsvRSxFQUFFO0tBbkdXRiJ9

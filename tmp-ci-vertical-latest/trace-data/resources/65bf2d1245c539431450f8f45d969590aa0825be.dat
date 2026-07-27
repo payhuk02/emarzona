@@ -1,0 +1,426 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/service/JoinWaitlistButton.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/service/JoinWaitlistButton.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=2441233a"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"]; const _Fragment = __vite__cjsImport2_react_jsxDevRuntime["Fragment"];
+var _s = $RefreshSig$();
+/**
+ * Composant pour rejoindre la waitlist d'un service
+ * Date: 1 Février 2025
+ */ import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=2441233a"; const useState = __vite__cjsImport3_react["useState"];
+import { Button } from "/src/components/ui/button.tsx";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "/src/components/ui/dialog.tsx";
+import { Input } from "/src/components/ui/input.tsx";
+import { Label } from "/src/components/ui/label.tsx";
+import { Textarea } from "/src/components/ui/textarea.tsx";
+import { Bell, Loader2 } from "/node_modules/.vite/deps/lucide-react.js?v=2441233a";
+import { useAddToWaitlist } from "/src/hooks/services/useServiceWaitlist.ts";
+import { useAuth } from "/src/contexts/AuthContext.tsx";
+import { useStore } from "/src/hooks/useStore.ts";
+import { format } from "/node_modules/.vite/deps/date-fns.js?v=2441233a";
+export function JoinWaitlistButton({ serviceId, serviceName, storeId: storeIdProp, disabled }) {
+    _s();
+    const { user } = useAuth();
+    const { store } = useStore();
+    const storeId = storeIdProp ?? store?.id ?? null;
+    const [isOpen, setIsOpen] = useState(false);
+    const [formData, setFormData] = useState({
+        customer_name: user?.user_metadata?.full_name || '',
+        customer_email: user?.email || '',
+        customer_phone: '',
+        preferred_date: '',
+        preferred_time: '',
+        customer_notes: '',
+        priority: 'normal'
+    });
+    const addToWaitlist = useAddToWaitlist();
+    const handleSubmit = async (e)=>{
+        e.preventDefault();
+        if (!storeId) return;
+        try {
+            await addToWaitlist.mutateAsync({
+                service_id: serviceId,
+                store_id: storeId,
+                ...formData
+            });
+            setIsOpen(false);
+            setFormData({
+                customer_name: user?.user_metadata?.full_name || '',
+                customer_email: user?.email || '',
+                customer_phone: '',
+                preferred_date: '',
+                preferred_time: '',
+                customer_notes: '',
+                priority: 'normal'
+            });
+        } catch (error) {
+        // Error handled by mutation
+        }
+    };
+    return /*#__PURE__*/ _jsxDEV(Dialog, {
+        open: isOpen,
+        onOpenChange: setIsOpen,
+        children: [
+            /*#__PURE__*/ _jsxDEV(DialogTrigger, {
+                asChild: true,
+                children: /*#__PURE__*/ _jsxDEV(Button, {
+                    variant: "outline",
+                    disabled: disabled,
+                    className: "w-full",
+                    children: [
+                        /*#__PURE__*/ _jsxDEV(Bell, {
+                            className: "h-4 w-4 mr-2"
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/service/JoinWaitlistButton.tsx",
+                            lineNumber: 83,
+                            columnNumber: 11
+                        }, this),
+                        "Rejoindre la liste d'attente"
+                    ]
+                }, void 0, true, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/service/JoinWaitlistButton.tsx",
+                    lineNumber: 82,
+                    columnNumber: 9
+                }, this)
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/service/JoinWaitlistButton.tsx",
+                lineNumber: 81,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV(DialogContent, {
+                children: [
+                    /*#__PURE__*/ _jsxDEV(DialogHeader, {
+                        children: [
+                            /*#__PURE__*/ _jsxDEV(DialogTitle, {
+                                children: "Rejoindre la liste d'attente"
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/service/JoinWaitlistButton.tsx",
+                                lineNumber: 89,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV(DialogDescription, {
+                                children: [
+                                    "Vous serez notifié dès qu'un créneau sera disponible pour ",
+                                    serviceName
+                                ]
+                            }, void 0, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/service/JoinWaitlistButton.tsx",
+                                lineNumber: 90,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/service/JoinWaitlistButton.tsx",
+                        lineNumber: 88,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV("form", {
+                        onSubmit: handleSubmit,
+                        className: "space-y-4",
+                        children: [
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                className: "space-y-2",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV(Label, {
+                                        htmlFor: "customer_name",
+                                        children: "Nom complet *"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/service/JoinWaitlistButton.tsx",
+                                        lineNumber: 96,
+                                        columnNumber: 13
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV(Input, {
+                                        id: "customer_name",
+                                        value: formData.customer_name,
+                                        onChange: (e)=>setFormData({
+                                                ...formData,
+                                                customer_name: e.target.value
+                                            }),
+                                        required: true
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/service/JoinWaitlistButton.tsx",
+                                        lineNumber: 97,
+                                        columnNumber: 13
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/service/JoinWaitlistButton.tsx",
+                                lineNumber: 95,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                className: "space-y-2",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV(Label, {
+                                        htmlFor: "customer_email",
+                                        children: "Email *"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/service/JoinWaitlistButton.tsx",
+                                        lineNumber: 106,
+                                        columnNumber: 13
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV(Input, {
+                                        id: "customer_email",
+                                        type: "email",
+                                        value: formData.customer_email,
+                                        onChange: (e)=>setFormData({
+                                                ...formData,
+                                                customer_email: e.target.value
+                                            }),
+                                        required: true
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/service/JoinWaitlistButton.tsx",
+                                        lineNumber: 107,
+                                        columnNumber: 13
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/service/JoinWaitlistButton.tsx",
+                                lineNumber: 105,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                className: "space-y-2",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV(Label, {
+                                        htmlFor: "customer_phone",
+                                        children: "Téléphone"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/service/JoinWaitlistButton.tsx",
+                                        lineNumber: 117,
+                                        columnNumber: 13
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV(Input, {
+                                        id: "customer_phone",
+                                        type: "tel",
+                                        value: formData.customer_phone,
+                                        onChange: (e)=>setFormData({
+                                                ...formData,
+                                                customer_phone: e.target.value
+                                            })
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/service/JoinWaitlistButton.tsx",
+                                        lineNumber: 118,
+                                        columnNumber: 13
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/service/JoinWaitlistButton.tsx",
+                                lineNumber: 116,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                className: "grid grid-cols-2 gap-4",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "space-y-2",
+                                        children: [
+                                            /*#__PURE__*/ _jsxDEV(Label, {
+                                                htmlFor: "preferred_date",
+                                                children: "Date préférée"
+                                            }, void 0, false, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/service/JoinWaitlistButton.tsx",
+                                                lineNumber: 128,
+                                                columnNumber: 15
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV(Input, {
+                                                id: "preferred_date",
+                                                type: "date",
+                                                value: formData.preferred_date,
+                                                onChange: (e)=>setFormData({
+                                                        ...formData,
+                                                        preferred_date: e.target.value
+                                                    }),
+                                                min: format(new Date(), 'yyyy-MM-dd')
+                                            }, void 0, false, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/service/JoinWaitlistButton.tsx",
+                                                lineNumber: 129,
+                                                columnNumber: 15
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/service/JoinWaitlistButton.tsx",
+                                        lineNumber: 127,
+                                        columnNumber: 13
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "space-y-2",
+                                        children: [
+                                            /*#__PURE__*/ _jsxDEV(Label, {
+                                                htmlFor: "preferred_time",
+                                                children: "Heure préférée"
+                                            }, void 0, false, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/service/JoinWaitlistButton.tsx",
+                                                lineNumber: 139,
+                                                columnNumber: 15
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV(Input, {
+                                                id: "preferred_time",
+                                                type: "time",
+                                                value: formData.preferred_time,
+                                                onChange: (e)=>setFormData({
+                                                        ...formData,
+                                                        preferred_time: e.target.value
+                                                    })
+                                            }, void 0, false, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/service/JoinWaitlistButton.tsx",
+                                                lineNumber: 140,
+                                                columnNumber: 15
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/service/JoinWaitlistButton.tsx",
+                                        lineNumber: 138,
+                                        columnNumber: 13
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/service/JoinWaitlistButton.tsx",
+                                lineNumber: 126,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                className: "space-y-2",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV(Label, {
+                                        htmlFor: "customer_notes",
+                                        children: "Notes (optionnel)"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/service/JoinWaitlistButton.tsx",
+                                        lineNumber: 150,
+                                        columnNumber: 13
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV(Textarea, {
+                                        id: "customer_notes",
+                                        value: formData.customer_notes,
+                                        onChange: (e)=>setFormData({
+                                                ...formData,
+                                                customer_notes: e.target.value
+                                            }),
+                                        rows: 3,
+                                        placeholder: "Informations supplémentaires..."
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/service/JoinWaitlistButton.tsx",
+                                        lineNumber: 151,
+                                        columnNumber: 13
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/service/JoinWaitlistButton.tsx",
+                                lineNumber: 149,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                className: "flex justify-end gap-2",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV(Button, {
+                                        type: "button",
+                                        variant: "outline",
+                                        onClick: ()=>setIsOpen(false),
+                                        children: "Annuler"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/service/JoinWaitlistButton.tsx",
+                                        lineNumber: 161,
+                                        columnNumber: 13
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV(Button, {
+                                        type: "submit",
+                                        disabled: addToWaitlist.isPending,
+                                        children: addToWaitlist.isPending ? /*#__PURE__*/ _jsxDEV(_Fragment, {
+                                            children: [
+                                                /*#__PURE__*/ _jsxDEV(Loader2, {
+                                                    className: "h-4 w-4 mr-2 animate-spin"
+                                                }, void 0, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/service/JoinWaitlistButton.tsx",
+                                                    lineNumber: 167,
+                                                    columnNumber: 19
+                                                }, this),
+                                                "Ajout en cours..."
+                                            ]
+                                        }, void 0, true) : /*#__PURE__*/ _jsxDEV(_Fragment, {
+                                            children: [
+                                                /*#__PURE__*/ _jsxDEV(Bell, {
+                                                    className: "h-4 w-4 mr-2"
+                                                }, void 0, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/service/JoinWaitlistButton.tsx",
+                                                    lineNumber: 172,
+                                                    columnNumber: 19
+                                                }, this),
+                                                "Rejoindre la liste"
+                                            ]
+                                        }, void 0, true)
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/service/JoinWaitlistButton.tsx",
+                                        lineNumber: 164,
+                                        columnNumber: 13
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/service/JoinWaitlistButton.tsx",
+                                lineNumber: 160,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/service/JoinWaitlistButton.tsx",
+                        lineNumber: 94,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/service/JoinWaitlistButton.tsx",
+                lineNumber: 87,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/service/JoinWaitlistButton.tsx",
+        lineNumber: 80,
+        columnNumber: 5
+    }, this);
+}
+_s(JoinWaitlistButton, "QN3styopfz3u53IFgonmwNqYaJg=", false, function() {
+    return [
+        useAuth,
+        useStore,
+        useAddToWaitlist
+    ];
+});
+_c = JoinWaitlistButton;
+var _c;
+$RefreshReg$(_c, "JoinWaitlistButton");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/service/JoinWaitlistButton.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/service/JoinWaitlistButton.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIkpvaW5XYWl0bGlzdEJ1dHRvbi50c3giXSwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBDb21wb3NhbnQgcG91ciByZWpvaW5kcmUgbGEgd2FpdGxpc3QgZCd1biBzZXJ2aWNlXG4gKiBEYXRlOiAxIEbDqXZyaWVyIDIwMjVcbiAqL1xuXG5pbXBvcnQgeyB1c2VTdGF0ZSB9IGZyb20gJ3JlYWN0JztcbmltcG9ydCB7IEJ1dHRvbiB9IGZyb20gJ0AvY29tcG9uZW50cy91aS9idXR0b24nO1xuaW1wb3J0IHtcbiAgRGlhbG9nLFxuICBEaWFsb2dDb250ZW50LFxuICBEaWFsb2dEZXNjcmlwdGlvbixcbiAgRGlhbG9nSGVhZGVyLFxuICBEaWFsb2dUaXRsZSxcbiAgRGlhbG9nVHJpZ2dlcixcbn0gZnJvbSAnQC9jb21wb25lbnRzL3VpL2RpYWxvZyc7XG5pbXBvcnQgeyBJbnB1dCB9IGZyb20gJ0AvY29tcG9uZW50cy91aS9pbnB1dCc7XG5pbXBvcnQgeyBMYWJlbCB9IGZyb20gJ0AvY29tcG9uZW50cy91aS9sYWJlbCc7XG5pbXBvcnQgeyBUZXh0YXJlYSB9IGZyb20gJ0AvY29tcG9uZW50cy91aS90ZXh0YXJlYSc7XG5pbXBvcnQgeyBDYWxlbmRhciwgQ2xvY2ssIEJlbGwsIExvYWRlcjIgfSBmcm9tICdsdWNpZGUtcmVhY3QnO1xuaW1wb3J0IHsgdXNlQWRkVG9XYWl0bGlzdCB9IGZyb20gJ0AvaG9va3Mvc2VydmljZXMvdXNlU2VydmljZVdhaXRsaXN0JztcbmltcG9ydCB7IHVzZUF1dGggfSBmcm9tICdAL2NvbnRleHRzL0F1dGhDb250ZXh0JztcbmltcG9ydCB7IHVzZVN0b3JlIH0gZnJvbSAnQC9ob29rcy91c2VTdG9yZSc7XG5pbXBvcnQgeyBmb3JtYXQgfSBmcm9tICdkYXRlLWZucyc7XG5cbmludGVyZmFjZSBKb2luV2FpdGxpc3RCdXR0b25Qcm9wcyB7XG4gIHNlcnZpY2VJZDogc3RyaW5nO1xuICBzZXJ2aWNlTmFtZTogc3RyaW5nO1xuICBzdG9yZUlkPzogc3RyaW5nIHwgbnVsbDtcbiAgZGlzYWJsZWQ/OiBib29sZWFuO1xufVxuXG5leHBvcnQgZnVuY3Rpb24gSm9pbldhaXRsaXN0QnV0dG9uKHtcbiAgc2VydmljZUlkLFxuICBzZXJ2aWNlTmFtZSxcbiAgc3RvcmVJZDogc3RvcmVJZFByb3AsXG4gIGRpc2FibGVkLFxufTogSm9pbldhaXRsaXN0QnV0dG9uUHJvcHMpIHtcbiAgY29uc3QgeyB1c2VyIH0gPSB1c2VBdXRoKCk7XG4gIGNvbnN0IHsgc3RvcmUgfSA9IHVzZVN0b3JlKCk7XG4gIGNvbnN0IHN0b3JlSWQgPSBzdG9yZUlkUHJvcCA/PyBzdG9yZT8uaWQgPz8gbnVsbDtcbiAgY29uc3QgW2lzT3Blbiwgc2V0SXNPcGVuXSA9IHVzZVN0YXRlKGZhbHNlKTtcbiAgY29uc3QgW2Zvcm1EYXRhLCBzZXRGb3JtRGF0YV0gPSB1c2VTdGF0ZSh7XG4gICAgY3VzdG9tZXJfbmFtZTogdXNlcj8udXNlcl9tZXRhZGF0YT8uZnVsbF9uYW1lIHx8ICcnLFxuICAgIGN1c3RvbWVyX2VtYWlsOiB1c2VyPy5lbWFpbCB8fCAnJyxcbiAgICBjdXN0b21lcl9waG9uZTogJycsXG4gICAgcHJlZmVycmVkX2RhdGU6ICcnLFxuICAgIHByZWZlcnJlZF90aW1lOiAnJyxcbiAgICBjdXN0b21lcl9ub3RlczogJycsXG4gICAgcHJpb3JpdHk6ICdub3JtYWwnIGFzICdub3JtYWwnIHwgJ2hpZ2gnIHwgJ3VyZ2VudCcsXG4gIH0pO1xuXG4gIGNvbnN0IGFkZFRvV2FpdGxpc3QgPSB1c2VBZGRUb1dhaXRsaXN0KCk7XG5cbiAgY29uc3QgaGFuZGxlU3VibWl0ID0gYXN5bmMgKGU6IFJlYWN0LkZvcm1FdmVudCkgPT4ge1xuICAgIGUucHJldmVudERlZmF1bHQoKTtcbiAgICBpZiAoIXN0b3JlSWQpIHJldHVybjtcblxuICAgIHRyeSB7XG4gICAgICBhd2FpdCBhZGRUb1dhaXRsaXN0Lm11dGF0ZUFzeW5jKHtcbiAgICAgICAgc2VydmljZV9pZDogc2VydmljZUlkLFxuICAgICAgICBzdG9yZV9pZDogc3RvcmVJZCxcbiAgICAgICAgLi4uZm9ybURhdGEsXG4gICAgICB9KTtcbiAgICAgIHNldElzT3BlbihmYWxzZSk7XG4gICAgICBzZXRGb3JtRGF0YSh7XG4gICAgICAgIGN1c3RvbWVyX25hbWU6IHVzZXI/LnVzZXJfbWV0YWRhdGE/LmZ1bGxfbmFtZSB8fCAnJyxcbiAgICAgICAgY3VzdG9tZXJfZW1haWw6IHVzZXI/LmVtYWlsIHx8ICcnLFxuICAgICAgICBjdXN0b21lcl9waG9uZTogJycsXG4gICAgICAgIHByZWZlcnJlZF9kYXRlOiAnJyxcbiAgICAgICAgcHJlZmVycmVkX3RpbWU6ICcnLFxuICAgICAgICBjdXN0b21lcl9ub3RlczogJycsXG4gICAgICAgIHByaW9yaXR5OiAnbm9ybWFsJyxcbiAgICAgIH0pO1xuICAgIH0gY2F0Y2ggKGVycm9yKSB7XG4gICAgICAvLyBFcnJvciBoYW5kbGVkIGJ5IG11dGF0aW9uXG4gICAgfVxuICB9O1xuXG4gIHJldHVybiAoXG4gICAgPERpYWxvZyBvcGVuPXtpc09wZW59IG9uT3BlbkNoYW5nZT17c2V0SXNPcGVufT5cbiAgICAgIDxEaWFsb2dUcmlnZ2VyIGFzQ2hpbGQ+XG4gICAgICAgIDxCdXR0b24gdmFyaWFudD1cIm91dGxpbmVcIiBkaXNhYmxlZD17ZGlzYWJsZWR9IGNsYXNzTmFtZT1cInctZnVsbFwiPlxuICAgICAgICAgIDxCZWxsIGNsYXNzTmFtZT1cImgtNCB3LTQgbXItMlwiIC8+XG4gICAgICAgICAgUmVqb2luZHJlIGxhIGxpc3RlIGQnYXR0ZW50ZVxuICAgICAgICA8L0J1dHRvbj5cbiAgICAgIDwvRGlhbG9nVHJpZ2dlcj5cbiAgICAgIDxEaWFsb2dDb250ZW50PlxuICAgICAgICA8RGlhbG9nSGVhZGVyPlxuICAgICAgICAgIDxEaWFsb2dUaXRsZT5SZWpvaW5kcmUgbGEgbGlzdGUgZCdhdHRlbnRlPC9EaWFsb2dUaXRsZT5cbiAgICAgICAgICA8RGlhbG9nRGVzY3JpcHRpb24+XG4gICAgICAgICAgICBWb3VzIHNlcmV6IG5vdGlmacOpIGTDqHMgcXUndW4gY3LDqW5lYXUgc2VyYSBkaXNwb25pYmxlIHBvdXIge3NlcnZpY2VOYW1lfVxuICAgICAgICAgIDwvRGlhbG9nRGVzY3JpcHRpb24+XG4gICAgICAgIDwvRGlhbG9nSGVhZGVyPlxuICAgICAgICA8Zm9ybSBvblN1Ym1pdD17aGFuZGxlU3VibWl0fSBjbGFzc05hbWU9XCJzcGFjZS15LTRcIj5cbiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInNwYWNlLXktMlwiPlxuICAgICAgICAgICAgPExhYmVsIGh0bWxGb3I9XCJjdXN0b21lcl9uYW1lXCI+Tm9tIGNvbXBsZXQgKjwvTGFiZWw+XG4gICAgICAgICAgICA8SW5wdXRcbiAgICAgICAgICAgICAgaWQ9XCJjdXN0b21lcl9uYW1lXCJcbiAgICAgICAgICAgICAgdmFsdWU9e2Zvcm1EYXRhLmN1c3RvbWVyX25hbWV9XG4gICAgICAgICAgICAgIG9uQ2hhbmdlPXtlID0+IHNldEZvcm1EYXRhKHsgLi4uZm9ybURhdGEsIGN1c3RvbWVyX25hbWU6IGUudGFyZ2V0LnZhbHVlIH0pfVxuICAgICAgICAgICAgICByZXF1aXJlZFxuICAgICAgICAgICAgLz5cbiAgICAgICAgICA8L2Rpdj5cblxuICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwic3BhY2UteS0yXCI+XG4gICAgICAgICAgICA8TGFiZWwgaHRtbEZvcj1cImN1c3RvbWVyX2VtYWlsXCI+RW1haWwgKjwvTGFiZWw+XG4gICAgICAgICAgICA8SW5wdXRcbiAgICAgICAgICAgICAgaWQ9XCJjdXN0b21lcl9lbWFpbFwiXG4gICAgICAgICAgICAgIHR5cGU9XCJlbWFpbFwiXG4gICAgICAgICAgICAgIHZhbHVlPXtmb3JtRGF0YS5jdXN0b21lcl9lbWFpbH1cbiAgICAgICAgICAgICAgb25DaGFuZ2U9e2UgPT4gc2V0Rm9ybURhdGEoeyAuLi5mb3JtRGF0YSwgY3VzdG9tZXJfZW1haWw6IGUudGFyZ2V0LnZhbHVlIH0pfVxuICAgICAgICAgICAgICByZXF1aXJlZFxuICAgICAgICAgICAgLz5cbiAgICAgICAgICA8L2Rpdj5cblxuICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwic3BhY2UteS0yXCI+XG4gICAgICAgICAgICA8TGFiZWwgaHRtbEZvcj1cImN1c3RvbWVyX3Bob25lXCI+VMOpbMOpcGhvbmU8L0xhYmVsPlxuICAgICAgICAgICAgPElucHV0XG4gICAgICAgICAgICAgIGlkPVwiY3VzdG9tZXJfcGhvbmVcIlxuICAgICAgICAgICAgICB0eXBlPVwidGVsXCJcbiAgICAgICAgICAgICAgdmFsdWU9e2Zvcm1EYXRhLmN1c3RvbWVyX3Bob25lfVxuICAgICAgICAgICAgICBvbkNoYW5nZT17ZSA9PiBzZXRGb3JtRGF0YSh7IC4uLmZvcm1EYXRhLCBjdXN0b21lcl9waG9uZTogZS50YXJnZXQudmFsdWUgfSl9XG4gICAgICAgICAgICAvPlxuICAgICAgICAgIDwvZGl2PlxuXG4gICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJncmlkIGdyaWQtY29scy0yIGdhcC00XCI+XG4gICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInNwYWNlLXktMlwiPlxuICAgICAgICAgICAgICA8TGFiZWwgaHRtbEZvcj1cInByZWZlcnJlZF9kYXRlXCI+RGF0ZSBwcsOpZsOpcsOpZTwvTGFiZWw+XG4gICAgICAgICAgICAgIDxJbnB1dFxuICAgICAgICAgICAgICAgIGlkPVwicHJlZmVycmVkX2RhdGVcIlxuICAgICAgICAgICAgICAgIHR5cGU9XCJkYXRlXCJcbiAgICAgICAgICAgICAgICB2YWx1ZT17Zm9ybURhdGEucHJlZmVycmVkX2RhdGV9XG4gICAgICAgICAgICAgICAgb25DaGFuZ2U9e2UgPT4gc2V0Rm9ybURhdGEoeyAuLi5mb3JtRGF0YSwgcHJlZmVycmVkX2RhdGU6IGUudGFyZ2V0LnZhbHVlIH0pfVxuICAgICAgICAgICAgICAgIG1pbj17Zm9ybWF0KG5ldyBEYXRlKCksICd5eXl5LU1NLWRkJyl9XG4gICAgICAgICAgICAgIC8+XG4gICAgICAgICAgICA8L2Rpdj5cblxuICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJzcGFjZS15LTJcIj5cbiAgICAgICAgICAgICAgPExhYmVsIGh0bWxGb3I9XCJwcmVmZXJyZWRfdGltZVwiPkhldXJlIHByw6lmw6lyw6llPC9MYWJlbD5cbiAgICAgICAgICAgICAgPElucHV0XG4gICAgICAgICAgICAgICAgaWQ9XCJwcmVmZXJyZWRfdGltZVwiXG4gICAgICAgICAgICAgICAgdHlwZT1cInRpbWVcIlxuICAgICAgICAgICAgICAgIHZhbHVlPXtmb3JtRGF0YS5wcmVmZXJyZWRfdGltZX1cbiAgICAgICAgICAgICAgICBvbkNoYW5nZT17ZSA9PiBzZXRGb3JtRGF0YSh7IC4uLmZvcm1EYXRhLCBwcmVmZXJyZWRfdGltZTogZS50YXJnZXQudmFsdWUgfSl9XG4gICAgICAgICAgICAgIC8+XG4gICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICA8L2Rpdj5cblxuICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwic3BhY2UteS0yXCI+XG4gICAgICAgICAgICA8TGFiZWwgaHRtbEZvcj1cImN1c3RvbWVyX25vdGVzXCI+Tm90ZXMgKG9wdGlvbm5lbCk8L0xhYmVsPlxuICAgICAgICAgICAgPFRleHRhcmVhXG4gICAgICAgICAgICAgIGlkPVwiY3VzdG9tZXJfbm90ZXNcIlxuICAgICAgICAgICAgICB2YWx1ZT17Zm9ybURhdGEuY3VzdG9tZXJfbm90ZXN9XG4gICAgICAgICAgICAgIG9uQ2hhbmdlPXtlID0+IHNldEZvcm1EYXRhKHsgLi4uZm9ybURhdGEsIGN1c3RvbWVyX25vdGVzOiBlLnRhcmdldC52YWx1ZSB9KX1cbiAgICAgICAgICAgICAgcm93cz17M31cbiAgICAgICAgICAgICAgcGxhY2Vob2xkZXI9XCJJbmZvcm1hdGlvbnMgc3VwcGzDqW1lbnRhaXJlcy4uLlwiXG4gICAgICAgICAgICAvPlxuICAgICAgICAgIDwvZGl2PlxuXG4gICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGp1c3RpZnktZW5kIGdhcC0yXCI+XG4gICAgICAgICAgICA8QnV0dG9uIHR5cGU9XCJidXR0b25cIiB2YXJpYW50PVwib3V0bGluZVwiIG9uQ2xpY2s9eygpID0+IHNldElzT3BlbihmYWxzZSl9PlxuICAgICAgICAgICAgICBBbm51bGVyXG4gICAgICAgICAgICA8L0J1dHRvbj5cbiAgICAgICAgICAgIDxCdXR0b24gdHlwZT1cInN1Ym1pdFwiIGRpc2FibGVkPXthZGRUb1dhaXRsaXN0LmlzUGVuZGluZ30+XG4gICAgICAgICAgICAgIHthZGRUb1dhaXRsaXN0LmlzUGVuZGluZyA/IChcbiAgICAgICAgICAgICAgICA8PlxuICAgICAgICAgICAgICAgICAgPExvYWRlcjIgY2xhc3NOYW1lPVwiaC00IHctNCBtci0yIGFuaW1hdGUtc3BpblwiIC8+XG4gICAgICAgICAgICAgICAgICBBam91dCBlbiBjb3Vycy4uLlxuICAgICAgICAgICAgICAgIDwvPlxuICAgICAgICAgICAgICApIDogKFxuICAgICAgICAgICAgICAgIDw+XG4gICAgICAgICAgICAgICAgICA8QmVsbCBjbGFzc05hbWU9XCJoLTQgdy00IG1yLTJcIiAvPlxuICAgICAgICAgICAgICAgICAgUmVqb2luZHJlIGxhIGxpc3RlXG4gICAgICAgICAgICAgICAgPC8+XG4gICAgICAgICAgICAgICl9XG4gICAgICAgICAgICA8L0J1dHRvbj5cbiAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgPC9mb3JtPlxuICAgICAgPC9EaWFsb2dDb250ZW50PlxuICAgIDwvRGlhbG9nPlxuICApO1xufVxuIl0sIm5hbWVzIjpbInVzZVN0YXRlIiwiQnV0dG9uIiwiRGlhbG9nIiwiRGlhbG9nQ29udGVudCIsIkRpYWxvZ0Rlc2NyaXB0aW9uIiwiRGlhbG9nSGVhZGVyIiwiRGlhbG9nVGl0bGUiLCJEaWFsb2dUcmlnZ2VyIiwiSW5wdXQiLCJMYWJlbCIsIlRleHRhcmVhIiwiQmVsbCIsIkxvYWRlcjIiLCJ1c2VBZGRUb1dhaXRsaXN0IiwidXNlQXV0aCIsInVzZVN0b3JlIiwiZm9ybWF0IiwiSm9pbldhaXRsaXN0QnV0dG9uIiwic2VydmljZUlkIiwic2VydmljZU5hbWUiLCJzdG9yZUlkIiwic3RvcmVJZFByb3AiLCJkaXNhYmxlZCIsInVzZXIiLCJzdG9yZSIsImlkIiwiaXNPcGVuIiwic2V0SXNPcGVuIiwiZm9ybURhdGEiLCJzZXRGb3JtRGF0YSIsImN1c3RvbWVyX25hbWUiLCJ1c2VyX21ldGFkYXRhIiwiZnVsbF9uYW1lIiwiY3VzdG9tZXJfZW1haWwiLCJlbWFpbCIsImN1c3RvbWVyX3Bob25lIiwicHJlZmVycmVkX2RhdGUiLCJwcmVmZXJyZWRfdGltZSIsImN1c3RvbWVyX25vdGVzIiwicHJpb3JpdHkiLCJhZGRUb1dhaXRsaXN0IiwiaGFuZGxlU3VibWl0IiwiZSIsInByZXZlbnREZWZhdWx0IiwibXV0YXRlQXN5bmMiLCJzZXJ2aWNlX2lkIiwic3RvcmVfaWQiLCJlcnJvciIsIm9wZW4iLCJvbk9wZW5DaGFuZ2UiLCJhc0NoaWxkIiwidmFyaWFudCIsImNsYXNzTmFtZSIsImZvcm0iLCJvblN1Ym1pdCIsImRpdiIsImh0bWxGb3IiLCJ2YWx1ZSIsIm9uQ2hhbmdlIiwidGFyZ2V0IiwicmVxdWlyZWQiLCJ0eXBlIiwibWluIiwiRGF0ZSIsInJvd3MiLCJwbGFjZWhvbGRlciIsIm9uQ2xpY2siLCJpc1BlbmRpbmciXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OztBQUFBOzs7Q0FHQyxHQUVELFNBQVNBLFFBQVEsUUFBUSxRQUFRO0FBQ2pDLFNBQVNDLE1BQU0sUUFBUSx5QkFBeUI7QUFDaEQsU0FDRUMsTUFBTSxFQUNOQyxhQUFhLEVBQ2JDLGlCQUFpQixFQUNqQkMsWUFBWSxFQUNaQyxXQUFXLEVBQ1hDLGFBQWEsUUFDUix5QkFBeUI7QUFDaEMsU0FBU0MsS0FBSyxRQUFRLHdCQUF3QjtBQUM5QyxTQUFTQyxLQUFLLFFBQVEsd0JBQXdCO0FBQzlDLFNBQVNDLFFBQVEsUUFBUSwyQkFBMkI7QUFDcEQsU0FBMEJD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

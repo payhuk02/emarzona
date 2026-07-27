@@ -1,0 +1,97 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/icons/AlertCircleIcon.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/icons/AlertCircleIcon.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=8792f17d"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+/**
+ * Composant AlertCircle Icon - SVG inline pour éviter les problèmes de bundling
+ * Utilise un SVG inline au lieu de lucide-react pour garantir la disponibilité en production
+ */ import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=8792f17d"; const React = __vite__cjsImport3_react.__esModule ? __vite__cjsImport3_react.default : __vite__cjsImport3_react;
+export const AlertCircleIcon = ({ className = '', size = 24, strokeWidth = 2 })=>{
+    return /*#__PURE__*/ _jsxDEV("svg", {
+        xmlns: "http://www.w3.org/2000/svg",
+        width: size,
+        height: size,
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: strokeWidth,
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        className: className,
+        "aria-hidden": "true",
+        children: [
+            /*#__PURE__*/ _jsxDEV("circle", {
+                cx: "12",
+                cy: "12",
+                r: "10"
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/icons/AlertCircleIcon.tsx",
+                lineNumber: 33,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV("line", {
+                x1: "12",
+                y1: "8",
+                x2: "12",
+                y2: "12"
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/icons/AlertCircleIcon.tsx",
+                lineNumber: 34,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV("line", {
+                x1: "12",
+                y1: "16",
+                x2: "12.01",
+                y2: "16"
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/icons/AlertCircleIcon.tsx",
+                lineNumber: 35,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/icons/AlertCircleIcon.tsx",
+        lineNumber: 20,
+        columnNumber: 5
+    }, this);
+};
+_c = AlertCircleIcon;
+var _c;
+$RefreshReg$(_c, "AlertCircleIcon");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/icons/AlertCircleIcon.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/icons/AlertCircleIcon.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIkFsZXJ0Q2lyY2xlSWNvbi50c3giXSwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBDb21wb3NhbnQgQWxlcnRDaXJjbGUgSWNvbiAtIFNWRyBpbmxpbmUgcG91ciDDqXZpdGVyIGxlcyBwcm9ibMOobWVzIGRlIGJ1bmRsaW5nXG4gKiBVdGlsaXNlIHVuIFNWRyBpbmxpbmUgYXUgbGlldSBkZSBsdWNpZGUtcmVhY3QgcG91ciBnYXJhbnRpciBsYSBkaXNwb25pYmlsaXTDqSBlbiBwcm9kdWN0aW9uXG4gKi9cblxuaW1wb3J0IFJlYWN0IGZyb20gJ3JlYWN0JztcblxuaW50ZXJmYWNlIEFsZXJ0Q2lyY2xlSWNvblByb3BzIHtcbiAgY2xhc3NOYW1lPzogc3RyaW5nO1xuICBzaXplPzogbnVtYmVyO1xuICBzdHJva2VXaWR0aD86IG51bWJlcjtcbn1cblxuZXhwb3J0IGNvbnN0IEFsZXJ0Q2lyY2xlSWNvbiA6IFJlYWN0LkZDPEFsZXJ0Q2lyY2xlSWNvblByb3BzPiA9ICh7IFxuICBjbGFzc05hbWUgPSAnJywgXG4gIHNpemUgPSAyNCxcbiAgc3Ryb2tlV2lkdGggPSAyIFxufSkgPT4ge1xuICByZXR1cm4gKFxuICAgIDxzdmdcbiAgICAgIHhtbG5zPVwiaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmdcIlxuICAgICAgd2lkdGg9e3NpemV9XG4gICAgICBoZWlnaHQ9e3NpemV9XG4gICAgICB2aWV3Qm94PVwiMCAwIDI0IDI0XCJcbiAgICAgIGZpbGw9XCJub25lXCJcbiAgICAgIHN0cm9rZT1cImN1cnJlbnRDb2xvclwiXG4gICAgICBzdHJva2VXaWR0aD17c3Ryb2tlV2lkdGh9XG4gICAgICBzdHJva2VMaW5lY2FwPVwicm91bmRcIlxuICAgICAgc3Ryb2tlTGluZWpvaW49XCJyb3VuZFwiXG4gICAgICBjbGFzc05hbWU9e2NsYXNzTmFtZX1cbiAgICAgIGFyaWEtaGlkZGVuPVwidHJ1ZVwiXG4gICAgPlxuICAgICAgPGNpcmNsZSBjeD1cIjEyXCIgY3k9XCIxMlwiIHI9XCIxMFwiIC8+XG4gICAgICA8bGluZSB4MT1cIjEyXCIgeTE9XCI4XCIgeDI9XCIxMlwiIHkyPVwiMTJcIiAvPlxuICAgICAgPGxpbmUgeDE9XCIxMlwiIHkxPVwiMTZcIiB4Mj1cIjEyLjAxXCIgeTI9XCIxNlwiIC8+XG4gICAgPC9zdmc+XG4gICk7XG59O1xuXG5cblxuXG5cblxuXG5cbiJdLCJuYW1lcyI6WyJSZWFjdCIsIkFsZXJ0Q2lyY2xlSWNvbiIsImNsYXNzTmFtZSIsInNpemUiLCJzdHJva2VXaWR0aCIsInN2ZyIsInhtbG5zIiwid2lkdGgiLCJoZWlnaHQiLCJ2aWV3Qm94IiwiZmlsbCIsInN0cm9rZSIsInN0cm9rZUxpbmVjYXAiLCJzdHJva2VMaW5lam9pbiIsImFyaWEtaGlkZGVuIiwiY2lyY2xlIiwiY3giLCJjeSIsInIiLCJsaW5lIiwieDEiLCJ5MSIsIngyIiwieTIiXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O0FBQUE7OztDQUdDLEdBRUQsT0FBT0EsV0FBVyxRQUFRO0FBUTFCLE9BQU8sTUFBTUMsa0JBQW1ELENBQUMsRUFDL0RDLFlBQVksRUFBRSxFQUNkQyxPQUFPLEVBQUUsRUFDVEMsY0FBYyxDQUFDLEVBQ2hCO0lBQ0MscUJBQ0UsUUFBQ0M7UUFDQ0MsT0FBTTtRQUNOQyxPQUFPSjtRQUNQSyxRQUFRTDtRQUNSTSxTQUFRO1FBQ1JDLE1BQUs7UUFDTEMsUUFBTztRQUNQUCxhQUFhQTtRQUNiUSxlQUFjO1FBQ2RDLGdCQUFlO1FBQ2ZYLFdBQVdBO1FBQ1hZLGVBQVk7OzBCQUVaLFFBQUNDO2dCQUFPQyxJQUFHO2dCQUFLQyxJQUFHO2dCQUFLQyxHQUFFOzs7Ozs7MEJBQzFCLFFBQUNDO2dCQUFLQyxJQUFHO2dCQUFLQyxJQUFHO2dCQUFJQyxJQUFHO2dCQUFLQyxJQUFHOzs7Ozs7MEJBQ2hDLFFBQUNKO2dCQUFLQyxJQUFHO2dCQUFLQyxJQUFHO2dCQUFLQyxJQUFHO2dCQUFRQyxJQUFHOzs7Ozs7Ozs7Ozs7QUFHMUMsRUFBRTtLQXhCV3RCIn0=

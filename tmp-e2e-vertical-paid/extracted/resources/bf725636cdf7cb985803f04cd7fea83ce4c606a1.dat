@@ -1,0 +1,295 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/reviews/ReviewsStats.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewsStats.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=8792f17d"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+/**
+ * Composant : ReviewsStats
+ * Affichage des statistiques et distribution des notes
+ * Date : 27 octobre 2025
+ */ import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=8792f17d"; const React = __vite__cjsImport3_react.__esModule ? __vite__cjsImport3_react.default : __vite__cjsImport3_react;
+import { Card, CardContent, CardHeader, CardTitle } from "/src/components/ui/card.tsx";
+import { Progress } from "/src/components/ui/progress.tsx";
+import { ReviewStars } from "/src/components/reviews/ReviewStars.tsx";
+export const ReviewsStats = ({ stats, onFilterByRating })=>{
+    if (!stats || stats.total_reviews === 0) {
+        return /*#__PURE__*/ _jsxDEV(Card, {
+            children: /*#__PURE__*/ _jsxDEV(CardContent, {
+                className: "pt-6",
+                children: /*#__PURE__*/ _jsxDEV("p", {
+                    className: "text-center text-muted-foreground",
+                    children: "Aucun avis pour le moment"
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewsStats.tsx",
+                    lineNumber: 26,
+                    columnNumber: 11
+                }, this)
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewsStats.tsx",
+                lineNumber: 25,
+                columnNumber: 9
+            }, this)
+        }, void 0, false, {
+            fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewsStats.tsx",
+            lineNumber: 24,
+            columnNumber: 7
+        }, this);
+    }
+    const ratingDistribution = [
+        {
+            rating: 5,
+            count: stats.rating_5_count
+        },
+        {
+            rating: 4,
+            count: stats.rating_4_count
+        },
+        {
+            rating: 3,
+            count: stats.rating_3_count
+        },
+        {
+            rating: 2,
+            count: stats.rating_2_count
+        },
+        {
+            rating: 1,
+            count: stats.rating_1_count
+        }
+    ];
+    const getPercentage = (count)=>{
+        return stats.total_reviews > 0 ? count / stats.total_reviews * 100 : 0;
+    };
+    return /*#__PURE__*/ _jsxDEV(Card, {
+        children: [
+            /*#__PURE__*/ _jsxDEV(CardHeader, {
+                children: /*#__PURE__*/ _jsxDEV(CardTitle, {
+                    children: "Notes et avis"
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewsStats.tsx",
+                    lineNumber: 49,
+                    columnNumber: 9
+                }, this)
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewsStats.tsx",
+                lineNumber: 48,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV(CardContent, {
+                children: [
+                    /*#__PURE__*/ _jsxDEV("div", {
+                        className: "flex items-center gap-6 mb-6 pb-6 border-b",
+                        children: [
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                className: "text-center",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "text-4xl font-bold mb-1",
+                                        children: stats.average_rating.toFixed(1)
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewsStats.tsx",
+                                        lineNumber: 55,
+                                        columnNumber: 13
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV(ReviewStars, {
+                                        rating: stats.average_rating,
+                                        size: "md"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewsStats.tsx",
+                                        lineNumber: 58,
+                                        columnNumber: 13
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("p", {
+                                        className: "text-sm text-muted-foreground mt-1",
+                                        children: [
+                                            stats.total_reviews,
+                                            " avis"
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewsStats.tsx",
+                                        lineNumber: 59,
+                                        columnNumber: 13
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewsStats.tsx",
+                                lineNumber: 54,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                className: "flex-1",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV("p", {
+                                        className: "text-sm font-medium mb-2",
+                                        children: "Recommandation"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewsStats.tsx",
+                                        lineNumber: 65,
+                                        columnNumber: 13
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "text-2xl font-bold text-primary",
+                                        children: [
+                                            Math.round((stats.rating_5_count + stats.rating_4_count) / stats.total_reviews * 100),
+                                            "%"
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewsStats.tsx",
+                                        lineNumber: 66,
+                                        columnNumber: 13
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("p", {
+                                        className: "text-xs text-muted-foreground",
+                                        children: "des clients recommandent ce produit"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewsStats.tsx",
+                                        lineNumber: 71,
+                                        columnNumber: 13
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewsStats.tsx",
+                                lineNumber: 64,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewsStats.tsx",
+                        lineNumber: 53,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV("div", {
+                        className: "space-y-2",
+                        children: ratingDistribution.map(({ rating, count })=>/*#__PURE__*/ _jsxDEV("button", {
+                                onClick: ()=>onFilterByRating?.(rating),
+                                className: "w-full flex items-center gap-3 hover:bg-muted/50 p-2 rounded-md transition-colors",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "flex items-center gap-1 w-20",
+                                        children: [
+                                            /*#__PURE__*/ _jsxDEV("span", {
+                                                className: "text-sm font-medium",
+                                                children: rating
+                                            }, void 0, false, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewsStats.tsx",
+                                                lineNumber: 86,
+                                                columnNumber: 17
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV(ReviewStars, {
+                                                rating: rating,
+                                                size: "sm"
+                                            }, void 0, false, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewsStats.tsx",
+                                                lineNumber: 87,
+                                                columnNumber: 17
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewsStats.tsx",
+                                        lineNumber: 85,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV(Progress, {
+                                        value: getPercentage(count),
+                                        className: "flex-1 h-2"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewsStats.tsx",
+                                        lineNumber: 89,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("span", {
+                                        className: "text-sm text-muted-foreground w-12 text-right",
+                                        children: count
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewsStats.tsx",
+                                        lineNumber: 90,
+                                        columnNumber: 15
+                                    }, this)
+                                ]
+                            }, rating, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewsStats.tsx",
+                                lineNumber: 80,
+                                columnNumber: 13
+                            }, this))
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewsStats.tsx",
+                        lineNumber: 78,
+                        columnNumber: 9
+                    }, this),
+                    stats.verified_purchases_count > 0 && /*#__PURE__*/ _jsxDEV("div", {
+                        className: "mt-6 pt-6 border-t",
+                        children: /*#__PURE__*/ _jsxDEV("p", {
+                            className: "text-sm text-muted-foreground",
+                            children: [
+                                /*#__PURE__*/ _jsxDEV("span", {
+                                    className: "font-semibold text-foreground",
+                                    children: stats.verified_purchases_count
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewsStats.tsx",
+                                    lineNumber: 101,
+                                    columnNumber: 15
+                                }, this),
+                                ' ',
+                                "avis avec achat vérifié"
+                            ]
+                        }, void 0, true, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewsStats.tsx",
+                            lineNumber: 100,
+                            columnNumber: 13
+                        }, this)
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewsStats.tsx",
+                        lineNumber: 99,
+                        columnNumber: 11
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewsStats.tsx",
+                lineNumber: 51,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewsStats.tsx",
+        lineNumber: 47,
+        columnNumber: 5
+    }, this);
+};
+_c = ReviewsStats;
+var _c;
+$RefreshReg$(_c, "ReviewsStats");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewsStats.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewsStats.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIlJldmlld3NTdGF0cy50c3giXSwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBDb21wb3NhbnQgOiBSZXZpZXdzU3RhdHNcbiAqIEFmZmljaGFnZSBkZXMgc3RhdGlzdGlxdWVzIGV0IGRpc3RyaWJ1dGlvbiBkZXMgbm90ZXNcbiAqIERhdGUgOiAyNyBvY3RvYnJlIDIwMjVcbiAqL1xuXG5pbXBvcnQgUmVhY3QgZnJvbSAncmVhY3QnO1xuaW1wb3J0IHsgQ2FyZCwgQ2FyZENvbnRlbnQsIENhcmRIZWFkZXIsIENhcmRUaXRsZSB9IGZyb20gJ0AvY29tcG9uZW50cy91aS9jYXJkJztcbmltcG9ydCB7IFByb2dyZXNzIH0gZnJvbSAnQC9jb21wb25lbnRzL3VpL3Byb2dyZXNzJztcbmltcG9ydCB7IFJldmlld1N0YXJzIH0gZnJvbSAnLi9SZXZpZXdTdGFycyc7XG5pbXBvcnQgdHlwZSB7IFByb2R1Y3RSZXZpZXdTdGF0cyB9IGZyb20gJ0AvdHlwZXMvcmV2aWV3JztcblxuaW50ZXJmYWNlIFJldmlld3NTdGF0c1Byb3BzIHtcbiAgc3RhdHM6IFByb2R1Y3RSZXZpZXdTdGF0cyB8IG51bGw7XG4gIG9uRmlsdGVyQnlSYXRpbmc/OiAocmF0aW5nOiBudW1iZXIpID0+IHZvaWQ7XG59XG5cbmV4cG9ydCBjb25zdCBSZXZpZXdzU3RhdHMgOiBSZWFjdC5GQzxSZXZpZXdzU3RhdHNQcm9wcz4gPSAoe1xuICBzdGF0cyxcbiAgb25GaWx0ZXJCeVJhdGluZyxcbn0pID0+IHtcbiAgaWYgKCFzdGF0cyB8fCBzdGF0cy50b3RhbF9yZXZpZXdzID09PSAwKSB7XG4gICAgcmV0dXJuIChcbiAgICAgIDxDYXJkPlxuICAgICAgICA8Q2FyZENvbnRlbnQgY2xhc3NOYW1lPVwicHQtNlwiPlxuICAgICAgICAgIDxwIGNsYXNzTmFtZT1cInRleHQtY2VudGVyIHRleHQtbXV0ZWQtZm9yZWdyb3VuZFwiPlxuICAgICAgICAgICAgQXVjdW4gYXZpcyBwb3VyIGxlIG1vbWVudFxuICAgICAgICAgIDwvcD5cbiAgICAgICAgPC9DYXJkQ29udGVudD5cbiAgICAgIDwvQ2FyZD5cbiAgICApO1xuICB9XG5cbiAgY29uc3QgcmF0aW5nRGlzdHJpYnV0aW9uID0gW1xuICAgIHsgcmF0aW5nOiA1LCBjb3VudDogc3RhdHMucmF0aW5nXzVfY291bnQgfSxcbiAgICB7IHJhdGluZzogNCwgY291bnQ6IHN0YXRzLnJhdGluZ180X2NvdW50IH0sXG4gICAgeyByYXRpbmc6IDMsIGNvdW50OiBzdGF0cy5yYXRpbmdfM19jb3VudCB9LFxuICAgIHsgcmF0aW5nOiAyLCBjb3VudDogc3RhdHMucmF0aW5nXzJfY291bnQgfSxcbiAgICB7IHJhdGluZzogMSwgY291bnQ6IHN0YXRzLnJhdGluZ18xX2NvdW50IH0sXG4gIF07XG5cbiAgY29uc3QgZ2V0UGVyY2VudGFnZSA9IChjb3VudDogbnVtYmVyKSA9PiB7XG4gICAgcmV0dXJuIHN0YXRzLnRvdGFsX3Jldmlld3MgPiAwID8gKGNvdW50IC8gc3RhdHMudG90YWxfcmV2aWV3cykgKiAxMDAgOiAwO1xuICB9O1xuXG4gIHJldHVybiAoXG4gICAgPENhcmQ+XG4gICAgICA8Q2FyZEhlYWRlcj5cbiAgICAgICAgPENhcmRUaXRsZT5Ob3RlcyBldCBhdmlzPC9DYXJkVGl0bGU+XG4gICAgICA8L0NhcmRIZWFkZXI+XG4gICAgICA8Q2FyZENvbnRlbnQ+XG4gICAgICAgIHsvKiBOb3RlIG1veWVubmUgKi99XG4gICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTYgbWItNiBwYi02IGJvcmRlci1iXCI+XG4gICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJ0ZXh0LWNlbnRlclwiPlxuICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJ0ZXh0LTR4bCBmb250LWJvbGQgbWItMVwiPlxuICAgICAgICAgICAgICB7c3RhdHMuYXZlcmFnZV9yYXRpbmcudG9GaXhlZCgxKX1cbiAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgPFJldmlld1N0YXJzIHJhdGluZz17c3RhdHMuYXZlcmFnZV9yYXRpbmd9IHNpemU9XCJtZFwiIC8+XG4gICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJ0ZXh0LXNtIHRleHQtbXV0ZWQtZm9yZWdyb3VuZCBtdC0xXCI+XG4gICAgICAgICAgICAgIHtzdGF0cy50b3RhbF9yZXZpZXdzfSBhdmlzXG4gICAgICAgICAgICA8L3A+XG4gICAgICAgICAgPC9kaXY+XG5cbiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXgtMVwiPlxuICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwidGV4dC1zbSBmb250LW1lZGl1bSBtYi0yXCI+UmVjb21tYW5kYXRpb248L3A+XG4gICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInRleHQtMnhsIGZvbnQtYm9sZCB0ZXh0LXByaW1hcnlcIj5cbiAgICAgICAgICAgICAge01hdGgucm91bmQoXG4gICAgICAgICAgICAgICAgKChzdGF0cy5yYXRpbmdfNV9jb3VudCArIHN0YXRzLnJhdGluZ180X2NvdW50KSAvIHN0YXRzLnRvdGFsX3Jldmlld3MpICogMTAwXG4gICAgICAgICAgICAgICl9JVxuICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJ0ZXh0LXhzIHRleHQtbXV0ZWQtZm9yZWdyb3VuZFwiPlxuICAgICAgICAgICAgICBkZXMgY2xpZW50cyByZWNvbW1hbmRlbnQgY2UgcHJvZHVpdFxuICAgICAgICAgICAgPC9wPlxuICAgICAgICAgIDwvZGl2PlxuICAgICAgICA8L2Rpdj5cblxuICAgICAgICB7LyogRGlzdHJpYnV0aW9uICovfVxuICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInNwYWNlLXktMlwiPlxuICAgICAgICAgIHtyYXRpbmdEaXN0cmlidXRpb24ubWFwKCh7IHJhdGluZywgY291bnQgfSkgPT4gKFxuICAgICAgICAgICAgPGJ1dHRvblxuICAgICAgICAgICAgICBrZXk9e3JhdGluZ31cbiAgICAgICAgICAgICAgb25DbGljaz17KCkgPT4gb25GaWx0ZXJCeVJhdGluZz8uKHJhdGluZyl9XG4gICAgICAgICAgICAgIGNsYXNzTmFtZT1cInctZnVsbCBmbGV4IGl0ZW1zLWNlbnRlciBnYXAtMyBob3ZlcjpiZy1tdXRlZC81MCBwLTIgcm91bmRlZC1tZCB0cmFuc2l0aW9uLWNvbG9yc1wiXG4gICAgICAgICAgICA+XG4gICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTEgdy0yMFwiPlxuICAgICAgICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cInRleHQtc20gZm9udC1tZWRpdW1cIj57cmF0aW5nfTwvc3Bhbj5cbiAgICAgICAgICAgICAgICA8UmV2aWV3U3RhcnMgcmF0aW5nPXtyYXRpbmd9IHNpemU9XCJzbVwiIC8+XG4gICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICA8UHJvZ3Jlc3MgdmFsdWU9e2dldFBlcmNlbnRhZ2UoY291bnQpfSBjbGFzc05hbWU9XCJmbGV4LTEgaC0yXCIgLz5cbiAgICAgICAgICAgICAgPHNwYW4gY2xhc3NOYW1lPVwidGV4dC1zbSB0ZXh0LW11dGVkLWZvcmVncm91bmQgdy0xMiB0ZXh0LXJpZ2h0XCI+XG4gICAgICAgICAgICAgICAge2NvdW50fVxuICAgICAgICAgICAgICA8L3NwYW4+XG4gICAgICAgICAgICA8L2J1dHRvbj5cbiAgICAgICAgICApKX1cbiAgICAgICAgPC9kaXY+XG5cbiAgICAgICAgey8qIFN0YXRzIHN1cHBsw6ltZW50YWlyZXMgKi99XG4gICAgICAgIHtzdGF0cy52ZXJpZmllZF9wdXJjaGFzZXNfY291bnQgPiAwICYmIChcbiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cIm10LTYgcHQtNiBib3JkZXItdFwiPlxuICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwidGV4dC1zbSB0ZXh0LW11dGVkLWZvcmVncm91bmRcIj5cbiAgICAgICAgICAgICAgPHNwYW4gY2xhc3NOYW1lPVwiZm9udC1zZW1pYm9sZCB0ZXh0LWZvcmVncm91bmRcIj5cbiAgICAgICAgICAgICAgICB7c3RhdHMudmVyaWZpZWRfcHVyY2hhc2VzX2NvdW50fVxuICAgICAgICAgICAgICA8L3NwYW4+eycgJ31cbiAgICAgICAgICAgICAgYXZpcyBhdmVjIGFjaGF0IHbDqXJpZmnDqVxuICAgICAgICAgICAgPC9wPlxuICAgICAgICAgIDwvZGl2PlxuICAgICAgICApfVxuICAgICAgPC9DYXJkQ29udGVudD5cbiAgICA8L0NhcmQ+XG4gICk7XG59O1xuXG5cblxuXG5cblxuXG5cbiJdLCJuYW1lcyI6WyJSZWFjdCIsIkNhcmQiLCJDYXJkQ29udGVudCIsIkNhcmRIZWFkZXIiLCJDYXJkVGl0bGUiLCJQcm9ncmVzcyIsIlJldmlld1N0YXJzIiwiUmV2aWV3c1N0YXRzIiwic3RhdHMiLCJvbkZpbHRlckJ5UmF0aW5nIiwidG90YWxfcmV2aWV3cyIsImNsYXNzTmFtZSIsInAiLCJyYXRpbmdEaXN0cmlidXRpb24iLCJyYXRpbmciLCJjb3VudCIsInJhdGluZ181X2NvdW50IiwicmF0aW5nXzRfY291bnQiLCJyYXRpbmdfM19jb3VudCIsInJhdGluZ18yX2NvdW50IiwicmF0aW5nXzFfY291bnQiLCJnZXRQZXJjZW50YWdlIiwiZGl2IiwiYXZlcmFnZV9yYXRpbmciLCJ0b0ZpeGVkIiwic2l6ZSIsIk1hdGgiLCJyb3VuZCIsIm1hcCIsImJ1dHRvbiIsIm9uQ2xpY2siLCJzcGFuIiwidmFsdWUiLCJ2ZXJpZmllZF9wdXJjaGFzZXNfY291bnQiXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O0FBQUE7Ozs7Q0FJQyxHQUVELE9BQU9BLFdBQVcsUUFBUTtBQUMxQixTQUFTQyxJQUFJLEVBQUVDLFdBQVcsRUFBRUMsVUFBVSxFQUFFQyxTQUFTLFFBQVEsdUJBQXVCO0FBQ2hGLFNBQVNDLFFBQVEsUUFBUSwyQkFBMkI7QUFDcEQsU0FBU0MsV0FBVyxRQUFRLGdCQUFnQjtBQVE1QyxPQUFPLE1BQU1DLGVBQTZDLENBQUMsRUFD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

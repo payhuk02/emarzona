@@ -1,0 +1,348 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/store/RequireTermsConsent.tsx");import.meta.env = {"BASE_URL": "/", "DEV": true, "MODE": "development", "PROD": false, "SSR": false, "VITE_BUILD_ID": "build-mrszuipf", "VITE_E2E_BYPASS_TERMS": "true", "VITE_E2E_PAYMENT_STUB": "true", "VITE_SUPABASE_ANON_KEY": "sb_publishable_PaC6RE0frJU97Exnp30IKA_R9pieK7C", "VITE_SUPABASE_PROJECT_ID": "mock-project", "VITE_SUPABASE_PUBLISHABLE_KEY": "sb_publishable_PaC6RE0frJU97Exnp30IKA_R9pieK7C", "VITE_SUPABASE_TEST_URL": "https://ufbztturuwwazfcvhvuu.supabase.co", "VITE_SUPABASE_URL": "https://ufbztturuwwazfcvhvuu.supabase.co"};import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/store/RequireTermsConsent.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=6014a254"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"]; const _Fragment = __vite__cjsImport2_react_jsxDevRuntime["Fragment"];
+var _s = $RefreshSig$();
+/**
+ * Composant qui exige l'acceptation des CGV avant de permettre certaines actions
+ */ import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=6014a254"; const useState = __vite__cjsImport3_react["useState"]; const isValidElement = __vite__cjsImport3_react["isValidElement"]; const cloneElement = __vite__cjsImport3_react["cloneElement"];
+import { SafeHTML } from "/src/components/security/SafeHTML.tsx";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "/src/components/ui/alert-dialog.tsx";
+import { Checkbox } from "/src/components/ui/checkbox.tsx";
+import { useRequireTermsConsent } from "/src/hooks/useRequireTermsConsent.ts";
+import { useNavigate } from "/node_modules/.vite/deps/react-router-dom.js?v=6014a254";
+import { FileText, AlertCircle } from "/node_modules/.vite/deps/lucide-react.js?v=6014a254";
+import { useToast } from "/src/hooks/use-toast.ts";
+import { logger } from "/src/lib/logger.ts";
+function isE2eTermsBypassEnabled() {
+    if (import.meta.env.VITE_E2E_BYPASS_TERMS === 'true') return true;
+    if (typeof document === 'undefined') return false;
+    return document.documentElement.dataset.e2eBypassTerms === '1';
+}
+function isTermsGateOpen(hasConsented, needsUpdate) {
+    return isE2eTermsBypassEnabled() || hasConsented && !needsUpdate;
+}
+export const RequireTermsConsent = ({ children, onAction, actionLabel = 'continuer', showDialog = true })=>{
+    _s();
+    const { hasConsented, needsUpdate, isLoading, recordConsent, currentTermsDoc } = useRequireTermsConsent();
+    const [showTermsDialog, setShowTermsDialog] = useState(false);
+    const [accepted, setAccepted] = useState(false);
+    const [saving, setSaving] = useState(false);
+    const navigate = useNavigate();
+    const { toast } = useToast();
+    const bypassTerms = isE2eTermsBypassEnabled();
+    const gatePassed = isTermsGateOpen(hasConsented, needsUpdate);
+    const handleAction = async (e)=>{
+        if (!isTermsGateOpen(hasConsented, needsUpdate)) {
+            e?.preventDefault();
+            e?.stopPropagation();
+            if (showDialog) {
+                setShowTermsDialog(true);
+            } else {
+                toast({
+                    title: 'CGV requises',
+                    description: 'Vous devez accepter les Conditions Générales de Vente pour continuer.',
+                    variant: 'destructive'
+                });
+                navigate('/legal/terms');
+            }
+            return;
+        }
+        if (onAction) {
+            await onAction();
+        }
+    };
+    const handleAcceptTerms = async (e)=>{
+        e?.preventDefault();
+        if (!accepted) {
+            toast({
+                title: 'Acceptation requise',
+                description: 'Veuillez accepter les Conditions Générales de Vente pour continuer.',
+                variant: 'destructive'
+            });
+            return;
+        }
+        setSaving(true);
+        try {
+            await recordConsent();
+            setShowTermsDialog(false);
+            setAccepted(false);
+            toast({
+                title: 'CGV acceptées',
+                description: 'Les Conditions Générales de Vente ont été acceptées avec succès.'
+            });
+            if (onAction) {
+                await onAction();
+            }
+        } catch (error) {
+            logger.error('Error accepting terms', {
+                error
+            });
+            toast({
+                title: 'Erreur',
+                description: "Impossible d'enregistrer votre acceptation. Veuillez réessayer.",
+                variant: 'destructive'
+            });
+        } finally{
+            setSaving(false);
+        }
+    };
+    if (isLoading && !bypassTerms) {
+        return /*#__PURE__*/ _jsxDEV("div", {
+            className: "opacity-50",
+            children: children
+        }, void 0, false, {
+            fileName: "/home/runner/work/emarzona/emarzona/src/components/store/RequireTermsConsent.tsx",
+            lineNumber: 127,
+            columnNumber: 12
+        }, this);
+    }
+    if (gatePassed) {
+        return /*#__PURE__*/ _jsxDEV(_Fragment, {
+            children: children
+        }, void 0, false);
+    }
+    const gatedChild = /*#__PURE__*/ isValidElement(children) ? /*#__PURE__*/ cloneElement(children, {
+        onClick: (e)=>{
+            e.preventDefault();
+            e.stopPropagation();
+            void handleAction(e);
+        }
+    }) : children;
+    return /*#__PURE__*/ _jsxDEV(_Fragment, {
+        children: [
+            /*#__PURE__*/ _jsxDEV("div", {
+                className: "cursor-pointer",
+                children: gatedChild
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/store/RequireTermsConsent.tsx",
+                lineNumber: 146,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV(AlertDialog, {
+                open: showTermsDialog,
+                onOpenChange: setShowTermsDialog,
+                children: /*#__PURE__*/ _jsxDEV(AlertDialogContent, {
+                    className: "max-w-2xl max-h-[90vh] overflow-y-auto",
+                    children: [
+                        /*#__PURE__*/ _jsxDEV(AlertDialogHeader, {
+                            children: [
+                                /*#__PURE__*/ _jsxDEV(AlertDialogTitle, {
+                                    className: "flex items-center gap-2",
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV(AlertCircle, {
+                                            className: "h-5 w-5 text-amber-500"
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/store/RequireTermsConsent.tsx",
+                                            lineNumber: 152,
+                                            columnNumber: 15
+                                        }, this),
+                                        "Acceptation des Conditions Générales de Vente requise"
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/store/RequireTermsConsent.tsx",
+                                    lineNumber: 151,
+                                    columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV(AlertDialogDescription, {
+                                    children: needsUpdate ? 'Les Conditions Générales de Vente ont été mises à jour. Veuillez accepter la nouvelle version pour continuer.' : 'Vous devez accepter les Conditions Générales de Vente pour utiliser cette fonctionnalité.'
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/store/RequireTermsConsent.tsx",
+                                    lineNumber: 155,
+                                    columnNumber: 13
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/store/RequireTermsConsent.tsx",
+                            lineNumber: 150,
+                            columnNumber: 11
+                        }, this),
+                        /*#__PURE__*/ _jsxDEV("div", {
+                            className: "space-y-4 py-4",
+                            children: [
+                                /*#__PURE__*/ _jsxDEV("div", {
+                                    className: "border rounded-lg p-4 bg-muted/50 max-h-[400px] overflow-y-auto",
+                                    children: currentTermsDoc?.content ? /*#__PURE__*/ _jsxDEV(SafeHTML, {
+                                        html: currentTermsDoc.content,
+                                        className: "prose prose-sm max-w-none"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/store/RequireTermsConsent.tsx",
+                                        lineNumber: 165,
+                                        columnNumber: 17
+                                    }, this) : /*#__PURE__*/ _jsxDEV("p", {
+                                        className: "text-sm text-muted-foreground",
+                                        children: "Chargement des Conditions Générales de Vente..."
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/store/RequireTermsConsent.tsx",
+                                        lineNumber: 167,
+                                        columnNumber: 17
+                                    }, this)
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/store/RequireTermsConsent.tsx",
+                                    lineNumber: 163,
+                                    columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV("div", {
+                                    className: "flex items-start gap-3 p-4 border rounded-lg bg-background",
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV(Checkbox, {
+                                            id: "accept-terms",
+                                            checked: accepted,
+                                            onCheckedChange: (checked)=>setAccepted(checked === true),
+                                            className: "mt-1"
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/store/RequireTermsConsent.tsx",
+                                            lineNumber: 174,
+                                            columnNumber: 15
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV("label", {
+                                            htmlFor: "accept-terms",
+                                            className: "text-sm leading-relaxed cursor-pointer flex-1",
+                                            children: [
+                                                "J'ai lu et j'accepte les",
+                                                ' ',
+                                                /*#__PURE__*/ _jsxDEV("a", {
+                                                    href: "/legal/terms",
+                                                    target: "_blank",
+                                                    rel: "noopener noreferrer",
+                                                    className: "text-primary hover:underline font-medium",
+                                                    onClick: (e)=>e.stopPropagation(),
+                                                    children: "Conditions Générales de Vente"
+                                                }, void 0, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/store/RequireTermsConsent.tsx",
+                                                    lineNumber: 185,
+                                                    columnNumber: 17
+                                                }, this),
+                                                ' ',
+                                                "et j'accepte d'être lié par ces conditions."
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/store/RequireTermsConsent.tsx",
+                                            lineNumber: 180,
+                                            columnNumber: 15
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/store/RequireTermsConsent.tsx",
+                                    lineNumber: 173,
+                                    columnNumber: 13
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/store/RequireTermsConsent.tsx",
+                            lineNumber: 162,
+                            columnNumber: 11
+                        }, this),
+                        /*#__PURE__*/ _jsxDEV(AlertDialogFooter, {
+                            children: [
+                                /*#__PURE__*/ _jsxDEV(AlertDialogCancel, {
+                                    onClick: ()=>{
+                                        setShowTermsDialog(false);
+                                        setAccepted(false);
+                                    },
+                                    children: "Annuler"
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/store/RequireTermsConsent.tsx",
+                                    lineNumber: 200,
+                                    columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV(AlertDialogAction, {
+                                    onClick: (e)=>void handleAcceptTerms(e),
+                                    disabled: !accepted || saving,
+                                    className: "gap-2",
+                                    children: saving ? /*#__PURE__*/ _jsxDEV(_Fragment, {
+                                        children: [
+                                            /*#__PURE__*/ _jsxDEV("span", {
+                                                className: "animate-spin",
+                                                children: "⏳"
+                                            }, void 0, false, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/store/RequireTermsConsent.tsx",
+                                                lineNumber: 215,
+                                                columnNumber: 19
+                                            }, this),
+                                            "Enregistrement..."
+                                        ]
+                                    }, void 0, true) : /*#__PURE__*/ _jsxDEV(_Fragment, {
+                                        children: [
+                                            /*#__PURE__*/ _jsxDEV(FileText, {
+                                                className: "h-4 w-4"
+                                            }, void 0, false, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/store/RequireTermsConsent.tsx",
+                                                lineNumber: 220,
+                                                columnNumber: 19
+                                            }, this),
+                                            "Accepter et ",
+                                            actionLabel
+                                        ]
+                                    }, void 0, true)
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/store/RequireTermsConsent.tsx",
+                                    lineNumber: 208,
+                                    columnNumber: 13
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/store/RequireTermsConsent.tsx",
+                            lineNumber: 199,
+                            columnNumber: 11
+                        }, this)
+                    ]
+                }, void 0, true, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/store/RequireTermsConsent.tsx",
+                    lineNumber: 149,
+                    columnNumber: 9
+                }, this)
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/store/RequireTermsConsent.tsx",
+                lineNumber: 148,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true);
+};
+_s(RequireTermsConsent, "oUY9r+yhgSeaf/lltXmQy3H+RmE=", false, function() {
+    return [
+        useRequireTermsConsent,
+        useNavigate,
+        useToast
+    ];
+});
+_c = RequireTermsConsent;
+var _c;
+$RefreshReg$(_c, "RequireTermsConsent");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/store/RequireTermsConsent.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/store/RequireTermsConsent.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIlJlcXVpcmVUZXJtc0NvbnNlbnQudHN4Il0sInNvdXJjZXNDb250ZW50IjpbIi8qKlxuICogQ29tcG9zYW50IHF1aSBleGlnZSBsJ2FjY2VwdGF0aW9uIGRlcyBDR1YgYXZhbnQgZGUgcGVybWV0dHJlIGNlcnRhaW5lcyBhY3Rpb25zXG4gKi9cblxuaW1wb3J0IHtcbiAgUmVhY3ROb2RlLFxuICB1c2VTdGF0ZSxcbiAgaXNWYWxpZEVsZW1lbnQsXG4gIGNsb25lRWxlbWVudCxcbiAgdHlwZSBNb3VzZUV2ZW50IGFzIFJlYWN0TW91c2VFdmVudCxcbn0gZnJvbSAncmVhY3QnO1xuaW1wb3J0IHsgU2FmZUhUTUwgfSBmcm9tICdAL2NvbXBvbmVudHMvc2VjdXJpdHkvU2FmZUhUTUwnO1xuaW1wb3J0IHtcbiAgQWxlcnREaWFsb2csXG4gIEFsZXJ0RGlhbG9nQWN0aW9uLFxuICBBbGVydERpYWxvZ0NhbmNlbCxcbiAgQWxlcnREaWFsb2dDb250ZW50LFxuICBBbGVydERpYWxvZ0Rlc2NyaXB0aW9uLFxuICBBbGVydERpYWxvZ0Zvb3RlcixcbiAgQWxlcnREaWFsb2dIZWFkZXIsXG4gIEFsZXJ0RGlhbG9nVGl0bGUsXG59IGZyb20gJ0AvY29tcG9uZW50cy91aS9hbGVydC1kaWFsb2cnO1xuaW1wb3J0IHsgQ2hlY2tib3ggfSBmcm9tICdAL2NvbXBvbmVudHMvdWkvY2hlY2tib3gnO1xuaW1wb3J0IHsgdXNlUmVxdWlyZVRlcm1zQ29uc2VudCB9IGZyb20gJ0AvaG9va3MvdXNlUmVxdWlyZVRlcm1zQ29uc2VudCc7XG5pbXBvcnQgeyB1c2VOYXZpZ2F0ZSB9IGZyb20gJ3JlYWN0LXJvdXRlci1kb20nO1xuaW1wb3J0IHsgRmlsZVRleHQsIEFsZXJ0Q2lyY2xlIH0gZnJvbSAnbHVjaWRlLXJlYWN0JztcbmltcG9ydCB7IHVzZVRvYXN0IH0gZnJvbSAnQC9ob29rcy91c2UtdG9hc3QnO1xuaW1wb3J0IHsgbG9nZ2VyIH0gZnJvbSAnQC9saWIvbG9nZ2VyJztcblxuaW50ZXJmYWNlIFJlcXVpcmVUZXJtc0NvbnNlbnRQcm9wcyB7XG4gIGNoaWxkcmVuOiBSZWFjdE5vZGU7XG4gIG9uQWN0aW9uPzogKCkgPT4gdm9pZCB8IFByb21pc2U8dm9pZD47XG4gIGFjdGlvbkxhYmVsPzogc3RyaW5nO1xuICBzaG93RGlhbG9nPzogYm9vbGVhbjtcbn1cblxuZnVuY3Rpb24gaXNFMmVUZXJtc0J5cGFzc0VuYWJsZWQoKTogYm9vbGVhbiB7XG4gIGlmIChpbXBvcnQubWV0YS5lbnYuVklURV9FMkVfQllQQVNTX1RFUk1TID09PSAndHJ1ZScpIHJldHVybiB0cnVlO1xuICBpZiAodHlwZW9mIGRvY3VtZW50ID09PSAndW5kZWZpbmVkJykgcmV0dXJuIGZhbHNlO1xuICByZXR1cm4gZG9jdW1lbnQuZG9jdW1lbnRFbGVtZW50LmRhdGFzZXQuZTJlQnlwYXNzVGVybXMgPT09ICcxJztcbn1cblxuZnVuY3Rpb24gaXNUZXJtc0dhdGVPcGVuKFxuICBoYXNDb25zZW50ZWQ6IGJvb2xlYW4sXG4gIG5lZWRzVXBkYXRlOiBib29sZWFuIHwgJycgfCBudWxsIHwgdW5kZWZpbmVkXG4pOiBib29sZWFuIHtcbiAgcmV0dXJuIGlzRTJlVGVybXNCeXBhc3NFbmFibGVkKCkgfHwgKGhhc0NvbnNlbnRlZCAmJiAhbmVlZHNVcGRhdGUpO1xufVxuXG5leHBvcnQgY29uc3QgUmVxdWlyZVRlcm1zQ29uc2VudCA9ICh7XG4gIGNoaWxkcmVuLFxuICBvbkFjdGlvbixcbiAgYWN0aW9uTGFiZWwgPSAnY29udGludWVyJyxcbiAgc2hvd0RpYWxvZyA9IHRydWUsXG59OiBSZXF1aXJlVGVybXNDb25zZW50UHJvcHMpID0+IHtcbiAgY29uc3QgeyBoYXNDb25zZW50ZWQsIG5lZWRzVXBkYXRlLCBpc0xvYWRpbmcsIHJlY29yZENvbnNlbnQsIGN1cnJlbnRUZXJtc0RvYyB9ID1cbiAgICB1c2VSZXF1aXJlVGVybXNDb25zZW50KCk7XG4gIGNvbnN0IFtzaG93VGVybXNEaWFsb2csIHNldFNob3dUZXJtc0RpYWxvZ10gPSB1c2VTdGF0ZShmYWxzZSk7XG4gIGNvbnN0IFthY2NlcHRlZCwgc2V0QWNjZXB0ZWRdID0gdXNlU3RhdGUoZmFsc2UpO1xuICBjb25zdCBbc2F2aW5nLCBzZXRTYXZpbmddID0gdXNlU3RhdGUoZmFsc2UpO1xuICBjb25zdCBuYXZpZ2F0ZSA9IHVzZU5hdmlnYXRlKCk7XG4gIGNvbnN0IHsgdG9hc3QgfSA9IHVzZVRvYXN0KCk7XG5cbiAgY29uc3QgYnlwYXNzVGVybXMgPSBpc0UyZVRlcm1zQnlwYXNzRW5hYmxlZCgpO1xuICBjb25zdCBnYXRlUGFzc2VkID0gaXNUZXJtc0dhdGVPcGVuKGhhc0NvbnNlbnRlZCwgbmVlZHNVcGRhdGUpO1xuXG4gIGNvbnN0IGhhbmRsZUFjdGlvbiA9IGFzeW5jIChlPzogUmVhY3RNb3VzZUV2ZW50KSA9PiB7XG4gICAgaWYgKCFpc1Rlcm1zR2F0ZU9wZW4oaGFzQ29uc2VudGVkLCBuZWVkc1VwZGF0ZSkpIHtcbiAgICAgIGU/LnByZXZlbnREZWZhdWx0KCk7XG4gICAgICBlPy5zdG9wUHJvcGFnYXRpb24oKTtcbiAgICAgIGlmIChzaG93RGlhbG9nKSB7XG4gICAgICAgIHNldFNob3dUZXJtc0RpYWxvZyh0cnVlKTtcbiAgICAgIH0gZWxzZSB7XG4gICAgICAgIHRvYXN0KHtcbiAgICAgICAgICB0aXRsZTogJ0NHViByZXF1aXNlcycsXG4gICAgICAgICAgZGVzY3JpcHRpb246ICdWb3VzIGRldmV6IGFjY2VwdGVyIGxlcyBDb25kaXRpb25zIEfDqW7DqXJhbGVzIGRlIFZlbnRlIHBvdXIgY29udGludWVyLicsXG4gICAgICAgICAgdmFyaWFudDogJ2Rlc3RydWN0aXZlJyxcbiAgICAgICAgfSk7XG4gICAgICAgIG5hdmlnYXRlKCcvbGVnYWwvdGVybXMnKTtcbiAgICAgIH1cbiAgICAgIHJldHVybjtcbiAgICB9XG5cbiAgICBpZiAob25BY3Rpb24pIHtcbiAgICAgIGF3YWl0IG9uQWN0aW9uKCk7XG4gICAgfVxuICB9O1xuXG4gIGNvbnN0IGhhbmRsZUFjY2VwdFRlcm1zID0gYXN5bmMgKGU/OiBSZWFjdE1vdXNlRXZlbnQpID0+IHtcbiAgICBlPy5wcmV2ZW50RGVmYXVsdCgpO1xuICAgIGlmICghYWNjZXB0ZWQpIHtcbiAgICAgIHRvYXN0KHtcbiAgICAgICAgdGl0bGU6ICdBY2NlcHRhdGlvbiByZXF1aXNlJyxcbiAgICAgICAgZGVzY3JpcHRpb246ICdWZXVpbGxleiBhY2NlcHRlciBsZXMgQ29uZGl0aW9ucyBHw6luw6lyYWxlcyBkZSBWZW50ZSBwb3VyIGNvbnRpbnVlci4nLFxuICAgICAgICB2YXJpYW50OiAnZGVzdHJ1Y3RpdmUnLFxuICAgICAgfSk7XG4gICAgICByZXR1cm47XG4gICAgfVxuXG4gICAgc2V0U2F2aW5nKHRydWUpO1xuICAgIHRyeSB7XG4gICAgICBhd2FpdCByZWNvcmRDb25zZW50KCk7XG4gICAgICBzZXRTaG93VGVybXNEaWFsb2coZmFsc2UpO1xuICAgICAgc2V0QWNjZXB0ZWQoZmFsc2UpO1xuXG4gICAgICB0b2FzdCh7XG4gICAgICAgIHRpdGxlOiAnQ0dWIGFjY2VwdMOpZXMnLFxuICAgICAgICBkZXNjcmlwdGlvbjogJ0xlcyBDb25kaXRpb25zIEfDqW7DqXJhbGVzIGRlIFZlbnRlIG9udCDDqXTDqSBhY2NlcHTDqWVzIGF2ZWMgc3VjY8Oocy4nLFxuICAgICAgfSk7XG5cbiAgICAgIGlmIChvbkFjdGlvbikge1xuICAgICAgICBhd2FpdCBvbkFjdGlvbigpO1xuICAgICAgfVxuICAgIH0gY2F0Y2ggKGVycm9yOiB1bmtub3duKSB7XG4gICAgICBsb2dnZXIuZXJyb3IoJ0Vycm9yIGFjY2VwdGluZyB0ZXJtcycsIHsgZXJyb3IgfSk7XG4gICAgICB0b2FzdCh7XG4gICAgICAgIHRpdGxlOiAnRXJyZXVyJyxcbiAgICAgICAgZGVzY3JpcHRpb246IFwiSW1wb3NzaWJsZSBkJ2VucmVnaXN0cmVyIHZvdHJlIGFjY2VwdGF0aW9uLiBWZXVpbGxleiByw6llc3NheWVyLlwiLFxuICAgICAgICB2YXJpYW50OiAnZGVzdHJ1Y3RpdmUnLFxuICAgICAgfSk7XG4gICAgfSBmaW5hbGx5IHtcbiAgICAgIHNldFNhdmluZyhmYWxzZSk7XG4gICAgfVxuICB9O1xuXG4gIGlmIChpc0xvYWRpbmcgJiYgIWJ5cGFzc1Rlcm1zKSB7XG4gICAgcmV0dXJuIDxkaXYgY2xhc3NOYW1lPVwib3BhY2l0eS01MFwiPntjaGlsZHJlbn08L2Rpdj47XG4gIH1cblxuICBpZiAoZ2F0ZVBhc3NlZCkge1xuICAgIHJldHVybiA8PntjaGlsZHJlbn08Lz47XG4gIH1cblxuICBjb25zdCBnYXRlZENoaWxkID0gaXNWYWxpZEVsZW1lbnQ8eyBvbkNsaWNrPzogdW5rbm93bjsgdHlwZT86IHN0cmluZyB9PihjaGlsZHJlbilcbiAgICA/IGNsb25lRWxlbWVudChjaGlsZHJlbiwge1xuICAgICAgICBvbkNsaWNrOiAoZTogUmVhY3RNb3VzZUV2ZW50KSA9PiB7XG4gICAgICAgICAgZS5wcmV2ZW50RGVmYXVsdCgpO1xuICAgICAgICAgIGUuc3RvcFByb3BhZ2F0aW9uKCk7XG4gICAgICAgICAgdm9pZCBoYW5kbGVBY3Rpb24oZSk7XG4gICAgICAgIH0sXG4gICAgICB9KVxuICAgIDogY2hpbGRyZW47XG5cbiAgcmV0dXJuIChcbiAgICA8PlxuICAgICAgPGRpdiBjbGFzc05hbWU9XCJjdXJzb3ItcG9pbnRlclwiPntnYXRlZENoaWxkfTwvZGl2PlxuXG4gICAgICA8QWxlcnREaWFsb2cgb3Blbj17c2hvd1Rlcm1zRGlhbG9nfSBvbk9wZW5DaGFuZ2U9e3NldFNob3dUZXJtc0RpYWxvZ30+XG4gICAgICAgIDxBbGVydERpYWxvZ0NvbnRlbnQgY2xhc3NOYW1lPVwibWF4LXctMnhsIG1heC1oLVs5MHZoXSBvdmVyZmxvdy15LWF1dG9cIj5cbiAgICAgICAgICA8QWxlcnREaWFsb2dIZWFkZXI+XG4gICAgICAgICAgICA8QWxlcnREaWFsb2dUaXRsZSBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLWNlbnRlciBnYXAtMlwiPlxuICAgICAgICAgICAgICA8QWxlcnRDaXJjbGUgY2xhc3NOYW1lPVwiaC01IHctNSB0ZXh0LWFtYmVyLTUwMFwiIC8+XG4gICAgICAgICAgICAgIEFjY2VwdGF0aW9uIGRlcyBDb25kaXRpb25zIEfDqW7DqXJhbGVzIGRlIFZlbnRlIHJlcXVpc2VcbiAgICAgICAgICAgIDwvQWxlcnREaWFsb2dUaXRsZT5cbiAgICAgICAgICAgIDxBbGVydERpYWxvZ0Rlc2NyaXB0aW9uPlxuICAgICAgICAgICAgICB7bmVlZHNVcGRhdGVcbiAgICAgICAgICAgICAgICA/ICdMZXMgQ29uZGl0aW9ucyBHw6luw6lyYWxlcyBkZSBWZW50ZSBvbnQgw6l0w6kgbWlzZXMgw6Agam91ci4gVmV1aWxsZXogYWNjZXB0ZXIgbGEgbm91dmVsbGUgdmVyc2lvbiBwb3VyIGNvbnRpbnVlci4nXG4gICAgICAgICAgICAgICAgOiAnVm91cyBkZXZleiBhY2NlcHRlciBsZXMgQ29uZGl0aW9ucyBHw6luw6lyYWxlcyBkZSBWZW50ZSBwb3VyIHV0aWxpc2VyIGNldHRlIGZvbmN0aW9ubmFsaXTDqS4nfVxuICAgICAgICAgICAgPC9BbGVydERpYWxvZ0Rlc2NyaXB0aW9uPlxuICAgICAgICAgIDwvQWxlcnREaWFsb2dIZWFkZXI+XG5cbiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInNwYWNlLXktNCBweS00XCI+XG4gICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImJvcmRlciByb3VuZGVkLWxnIHAtNCBiZy1tdXRlZC81MCBtYXgtaC1bNDAwcHhdIG92ZXJmbG93LXktYXV0b1wiPlxuICAgICAgICAgICAgICB7Y3VycmVudFRlcm1zRG9jPy5jb250ZW50ID8gKFxuICAgICAgICAgICAgICAgIDxTYWZlSFRNTCBodG1sPXtjdXJyZW50VGVybXNEb2MuY29udGVudH0gY2xhc3NOYW1lPVwicHJvc2UgcHJvc2Utc20gbWF4LXctbm9uZVwiIC8+XG4gICAgICAgICAgICAgICkgOiAoXG4gICAgICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwidGV4dC1zbSB0ZXh0LW11dGVkLWZvcmVncm91bmRcIj5cbiAgICAgICAgICAgICAgICAgIENoYXJnZW1lbnQgZGVzIENvbmRpdGlvbnMgR8OpbsOpcmFsZXMgZGUgVmVudGUuLi5cbiAgICAgICAgICAgICAgICA8L3A+XG4gICAgICAgICAgICAgICl9XG4gICAgICAgICAgICA8L2Rpdj5cblxuICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLXN0YXJ0IGdhcC0zIHAtNCBib3JkZXIgcm91bmRlZC1sZyBiZy1iYWNrZ3JvdW5kXCI+XG4gICAgICAgICAgICAgIDxDaGVja2JveFxuICAgICAgICAgICAgICAgIGlkPVwiYWNjZXB0LXRlcm1zXCJcbiAgICAgICAgICAgICAgICBjaGVja2VkPXthY2NlcHRlZH1cbiAgICAgICAgICAgICAgICBvbkNoZWNrZWRDaGFuZ2U9e2NoZWNrZWQgPT4gc2V0QWNjZXB0ZWQoY2hlY2tlZCA9PT0gdHJ1ZSl9XG4gICAgICAgICAgICAgICAgY2xhc3NOYW1lPVwibXQtMVwiXG4gICAgICAgICAgICAgIC8+XG4gICAgICAgICAgICAgIDxsYWJlbFxuICAgICAgICAgICAgICAgIGh0bWxGb3I9XCJhY2NlcHQtdGVybXNcIlxuICAgICAgICAgICAgICAgIGNsYXNzTmFtZT1cInRleHQtc20gbGVhZGluZy1yZWxheGVkIGN1cnNvci1wb2ludGVyIGZsZXgtMVwiXG4gICAgICAgICAgICAgID5cbiAgICAgICAgICAgICAgICBKJ2FpIGx1IGV0IGonYWNjZXB0ZSBsZXN7JyAnfVxuICAgICAgICAgICAgICAgIDxhXG4gICAgICAgICAgICAgICAgICBocmVmPVwiL2xlZ2FsL3Rlcm1zXCJcbiAgICAgICAgICAgICAgICAgIHRhcmdldD1cIl9ibGFua1wiXG4gICAgICAgICAgICAgICAgICByZWw9XCJub29wZW5lciBub3JlZmVycmVyXCJcbiAgICAgICAgICAgICAgICAgIGNsYXNzTmFtZT1cInRleHQtcHJpbWFyeSBob3Zlcjp1bmRlcmxpbmUgZm9udC1tZWRpdW1cIlxuICAgICAgICAgICAgICAgICAgb25DbGljaz17ZSA9PiBlLnN0b3BQcm9wYWdhdGlvbigpfVxuICAgICAgICAgICAgICAgID5cbiAgICAgICAgICAgICAgICAgIENvbmRpdGlvbnMgR8OpbsOpcmFsZXMgZGUgVmVudGVcbiAgICAgICAgICAgICAgICA8L2E+eycgJ31cbiAgICAgICAgICAgICAgICBldCBqJ2FjY2VwdGUgZCfDqnRyZSBsacOpIHBhciBjZXMgY29uZGl0aW9ucy5cbiAgICAgICAgICAgICAgPC9sYWJlbD5cbiAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgIDwvZGl2PlxuXG4gICAgICAgICAgPEFsZXJ0RGlhbG9nRm9vdGVyPlxuICAgICAgICAgICAgPEFsZXJ0RGlhbG9nQ2FuY2VsXG4gICAgICAgICAgICAgIG9uQ2xpY2s9eygpID0+IHtcbiAgICAgICAgICAgICAgICBzZXRTaG93VGVybXNEaWFsb2coZmFsc2UpO1xuICAgICAgICAgICAgICAgIHNldEFjY2VwdGVkKGZhbHNlKTtcbiAgICAgICAgICAgICAgfX1cbiAgICAgICAgICAgID5cbiAgICAgICAgICAgICAgQW5udWxlclxuICAgICAgICAgICAgPC9BbGVydERpYWxvZ0NhbmNlbD5cbiAgICAgICAgICAgIDxBbGVydERpYWxvZ0FjdGlvblxuICAgICAgICAgICAgICBvbkNsaWNrPXtlID0+IHZvaWQgaGFuZGxlQWNjZXB0VGVybXMoZSl9XG4gICAgICAgICAgICAgIGRpc2FibGVkPXshYWNjZXB0ZWQgfHwgc2F2aW5nfVxuICAgICAgICAgICAgICBjbGFzc05hbWU9XCJnYXAtMlwiXG4gICAgICAgICAgICA+XG4gICAgICAgICAgICAgIHtzYXZpbmcgPyAoXG4gICAgICAgICAgICAgICAgPD5cbiAgICAgICAgICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cImFuaW1hdGUtc3BpblwiPuKPszwvc3Bhbj5cbiAgICAgICAgICAgICAgICAgIEVucmVnaXN0cmVtZW50Li4uXG4gICAgICAgICAgICAgICAgPC8+XG4gICAgICAgICAgICAgICkgOiAoXG4gICAgICAgICAgICAgICAgPD5cbiAgICAgICAgICAgICAgICAgIDxGaWxlVGV4dCBjbGFzc05hbWU9XCJoLTQgdy00XCIgLz5cbiAgICAgICAgICAgICAgICAgIEFjY2VwdGVyIGV0IHthY3Rpb25MYWJlbH1cbiAgICAgICAgICAgICAgICA8Lz5cbiAgICAgICAgICAgICAgKX1cbiAgICAgICAgICAgIDwvQWxlcnREaWFsb2dBY3Rpb24+XG4gICAgICAgICAgPC9BbGVydERpYWxvZ0Zvb3Rlcj5cbiAgICAgICAgPC9BbGVydERpYWxvZ0NvbnRlbnQ+XG4gICAgICA8L0FsZXJ0RGlhbG9nPlxuICAgIDwvPlxuICApO1xufTtcbiJdLCJuYW1lcyI6WyJ1c2VTdGF0ZSIsImlzVmFsaWRFbGVtZW50IiwiY2xvbmVFbGVtZW50IiwiU2FmZUhUTUwiLCJBbGVydERpYWxvZyIsIkFsZXJ0RGlhbG9nQWN0aW9uIiwiQWxlcnREaWFsb2dDYW5jZWwiLCJBbGVydERpYWxvZ0NvbnRlbnQiLCJBbGVydERpYWxvZ0Rlc2NyaXB0aW9uIiwiQWxlcnREaWFsb2dGb290ZXIiLCJBbGVydERpYWxvZ0hlYWRlciIsIkFsZXJ0RGlhbG9nVGl0bGUiLCJDaGVja2JveCIsInVzZVJlcXVpcmVUZXJtc0NvbnNlbnQiLCJ1c2VOYXZpZ2F0ZSIsIkZpbGVUZXh0IiwiQWxlcnRDaXJjbGUiLCJ1c2VUb2FzdCIsImxvZ2dlciIsImlzRTJlVGVybXNCeXBhc3NFbmFibGVkIiwiZW52IiwiVklURV9FMkVfQllQQVNTX1RFUk1TIiwiZG9jdW1lbnQiLCJkb2N1bWVudEVsZW1lbnQiLCJkYXRhc2V0IiwiZTJlQnlwYXNzVGVybXMiLCJpc1Rlcm1zR2F0ZU9wZW4iLCJoYXNDb25zZW50ZWQiLCJuZWVkc1VwZGF0ZSIsIlJlcXVpcmVUZXJtc0NvbnNlbnQiLCJjaGlsZHJlbiIsIm9uQWN0aW9uIiwiYWN0aW9uTGFiZWwiLCJzaG93RGlhbG9nIiwiaXNMb2FkaW5nIiwicmVjb3JkQ29uc2VudCIsImN1cnJlbnRUZXJtc0RvYyIsInNob3dUZXJtc0RpYWxvZyIsInNldFNob3dUZXJtc0RpYWxvZyIsImFjY2VwdGVkIiwic2V0QWNjZXB0ZWQiLCJzYXZpbmciLCJzZXRTYXZpbmciLCJuYXZpZ2F0ZSIsInRvYXN0IiwiYnlwYXNzVGVybXMiLCJnYXRlUGFzc2VkIiwiaGFuZGxlQWN0aW9uIiwiZSIsInByZXZlbnREZWZhdWx0Iiwic3RvcFByb3BhZ2F0aW9uIiwidGl0bGUiLCJkZXNjcmlwdGlvbiIsInZhcmlhbnQiLCJoYW5kbGVBY2NlcHRUZXJtcyIsImVycm9yIiwiZGl2IiwiY2xhc3NOYW1lIiwiZ2F0ZWRDaGlsZCIsIm9uQ2xpY2siLCJvcGVuIiwib25PcGVuQ2hhbmdlIiwiY29udGVudCIsImh0bWwiLCJwIiwiaWQiLCJjaGVja2VkIiwib25DaGVja2VkQ2hhbmdlIiwibGFiZWwiLCJodG1sRm9yIiwiYSIsImhyZWYiLCJ0YXJnZXQiLCJyZWwiLCJkaXNhYmxlZCIsInNwYW4iXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OztBQUFBOztDQUVDLEdBRUQsU0FFRUEsUUFBUSxFQUNSQyxjQUFjLEVBQ2RDLFlBQVksUUFFUCxRQUFRO0FBQ2YsU0FBU0MsUUFBUSxRQUFRLGlDQUFpQztBQUMxRCxTQUNFQyxXQUFXLEVBQ1hDLGlCQUFpQixFQUNqQkMsaUJBQWlCLEVBQ2pCQyxrQkFBa0IsRUFDbEJDLHNCQUFzQixFQUN0QkMsaUJBQWlCLEVBQ2pCQyxpQkFBaUIsRUFDakJDLGdCQUFnQixRQUNYLCtCQUErQjtBQUN0QyxTQUFTQyxRQUFRLFFBQVEsMkJBQTJCO0FBQ3BELFNBQVNDLHNCQUFzQixRQUFRLGlDQUFpQztBQUN4RSxTQUFTQyxXQUFXLFFBQVEsbUJBQW1CO0FBQy9DLFNBQVNDLFFBQVEsRUFBRUMsV0FBVyxRQUFRLGVBQWU7QUFDckQsU0FBU0MsUUFBUSxRQUFRLG9CQUFvQjtBQUM3QyxTQUFTQyxNQUFNLFFBQVEsZUFBZTtBQVN0QyxTQUFTQztJQUNQLElBQUksWUFBWUMsR0FBRyxDQUFDQyxxQkFB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

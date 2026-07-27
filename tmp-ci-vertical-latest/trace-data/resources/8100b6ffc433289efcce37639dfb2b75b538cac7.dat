@@ -1,0 +1,73 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/contexts/StoreSlugContext.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/contexts/StoreSlugContext.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=2441233a"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+var _s = $RefreshSig$();
+/**
+ * Context pour fournir le slug de boutique dans les routes subdomain
+ * Permet aux pages (Storefront, ProductDetail, StoreLegalPage) de fonctionner
+ * sans avoir le slug dans l'URL (sous-domaine = slug)
+ */ import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=2441233a"; const createContext = __vite__cjsImport3_react["createContext"]; const useContext = __vite__cjsImport3_react["useContext"];
+const StoreSlugContext = /*#__PURE__*/ createContext({
+    storeSlug: null
+});
+export function StoreSlugProvider({ slug, children }) {
+    return /*#__PURE__*/ _jsxDEV(StoreSlugContext.Provider, {
+        value: {
+            storeSlug: slug
+        },
+        children: children
+    }, void 0, false, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/contexts/StoreSlugContext.tsx",
+        lineNumber: 17,
+        columnNumber: 5
+    }, this);
+}
+_c = StoreSlugProvider;
+/**
+ * Hook pour récupérer le slug de boutique.
+ * Priorité : useParams().slug > StoreSlugContext (subdomain)
+ */ export function useStoreSlug() {
+    _s();
+    const ctx = useContext(StoreSlugContext);
+    return ctx.storeSlug || undefined;
+}
+_s(useStoreSlug, "/dMy7t63NXD4eYACoT93CePwGrg=");
+var _c;
+$RefreshReg$(_c, "StoreSlugProvider");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/contexts/StoreSlugContext.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/contexts/StoreSlugContext.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIlN0b3JlU2x1Z0NvbnRleHQudHN4Il0sInNvdXJjZXNDb250ZW50IjpbIi8qKlxuICogQ29udGV4dCBwb3VyIGZvdXJuaXIgbGUgc2x1ZyBkZSBib3V0aXF1ZSBkYW5zIGxlcyByb3V0ZXMgc3ViZG9tYWluXG4gKiBQZXJtZXQgYXV4IHBhZ2VzIChTdG9yZWZyb250LCBQcm9kdWN0RGV0YWlsLCBTdG9yZUxlZ2FsUGFnZSkgZGUgZm9uY3Rpb25uZXJcbiAqIHNhbnMgYXZvaXIgbGUgc2x1ZyBkYW5zIGwnVVJMIChzb3VzLWRvbWFpbmUgPSBzbHVnKVxuICovXG5cbmltcG9ydCB7IGNyZWF0ZUNvbnRleHQsIHVzZUNvbnRleHQsIFJlYWN0Tm9kZSB9IGZyb20gJ3JlYWN0JztcblxuaW50ZXJmYWNlIFN0b3JlU2x1Z0NvbnRleHRUeXBlIHtcbiAgc3RvcmVTbHVnOiBzdHJpbmcgfCBudWxsO1xufVxuXG5jb25zdCBTdG9yZVNsdWdDb250ZXh0ID0gY3JlYXRlQ29udGV4dDxTdG9yZVNsdWdDb250ZXh0VHlwZT4oeyBzdG9yZVNsdWc6IG51bGwgfSk7XG5cbmV4cG9ydCBmdW5jdGlvbiBTdG9yZVNsdWdQcm92aWRlcih7IHNsdWcsIGNoaWxkcmVuIH06IHsgc2x1Zzogc3RyaW5nOyBjaGlsZHJlbjogUmVhY3ROb2RlIH0pIHtcbiAgcmV0dXJuIChcbiAgICA8U3RvcmVTbHVnQ29udGV4dC5Qcm92aWRlciB2YWx1ZT17eyBzdG9yZVNsdWc6IHNsdWcgfX0+XG4gICAgICB7Y2hpbGRyZW59XG4gICAgPC9TdG9yZVNsdWdDb250ZXh0LlByb3ZpZGVyPlxuICApO1xufVxuXG4vKipcbiAqIEhvb2sgcG91ciByw6ljdXDDqXJlciBsZSBzbHVnIGRlIGJvdXRpcXVlLlxuICogUHJpb3JpdMOpIDogdXNlUGFyYW1zKCkuc2x1ZyA+IFN0b3JlU2x1Z0NvbnRleHQgKHN1YmRvbWFpbilcbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIHVzZVN0b3JlU2x1ZygpOiBzdHJpbmcgfCB1bmRlZmluZWQge1xuICBjb25zdCBjdHggPSB1c2VDb250ZXh0KFN0b3JlU2x1Z0NvbnRleHQpO1xuICByZXR1cm4gY3R4LnN0b3JlU2x1ZyB8fCB1bmRlZmluZWQ7XG59XG4iXSwibmFtZXMiOlsiY3JlYXRlQ29udGV4dCIsInVzZUNvbnRleHQiLCJTdG9yZVNsdWdDb250ZXh0Iiwic3RvcmVTbHVnIiwiU3RvcmVTbHVnUHJvdmlkZXIiLCJzbHVnIiwiY2hpbGRyZW4iLCJQcm92aWRlciIsInZhbHVlIiwidXNlU3RvcmVTbHVnIiwiY3R4IiwidW5kZWZpbmVkIl0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7QUFBQTs7OztDQUlDLEdBRUQsU0FBU0EsYUFBYSxFQUFFQyxVQUFVLFFBQW1CLFFBQVE7QUFNN0QsTUFBTUMsaUNBQW1CRixjQUFvQztJQUFFRyxXQUFXO0FBQUs7QUFFL0UsT0FBTyxTQUFTQyxrQkFBa0IsRUFBRUMsSUFBSSxFQUFFQyxRQUFRLEVBQXlDO0lBQ3pGLHFCQUNFLFFBQUNKLGlCQUFpQkssUUFBUTtRQUFDQyxPQUFPO1lBQUVMLFdBQVdFO1FBQUs7a0JBQ2pEQzs7Ozs7O0FBR1A7S0FOZ0JGO0FBUWhCOzs7Q0FHQyxHQUNELE9BQU8sU0FBU0s7O0lBQ2QsTUFBTUMsTUFBTVQsV0FBV0M7SUFDdkIsT0FBT1EsSUFBSVAsU0FBUyxJQUFJUTtBQUMxQjtHQUhnQkYifQ==

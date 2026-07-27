@@ -1,0 +1,379 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/dashboard/PeriodFilter.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/dashboard/PeriodFilter.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=6014a254"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+var _s = $RefreshSig$();
+import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=6014a254"; const React = __vite__cjsImport3_react.__esModule ? __vite__cjsImport3_react.default : __vite__cjsImport3_react;
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "/src/components/ui/select.tsx";
+import { Calendar as CalendarIcon, X } from "/node_modules/.vite/deps/lucide-react.js?v=6014a254";
+import { Button } from "/src/components/ui/button.tsx";
+import { Popover, PopoverContent, PopoverTrigger } from "/src/components/ui/popover.tsx";
+import { Calendar } from "/src/components/ui/calendar.tsx";
+import { format } from "/node_modules/.vite/deps/date-fns.js?v=6014a254";
+import { fr } from "/node_modules/.vite/deps/date-fns_locale.js?v=af6a8809";
+import { cn } from "/src/lib/utils.ts";
+import { useIsMobile } from "/src/hooks/use-mobile.tsx";
+export const PeriodFilter = ({ period, onPeriodChange, customStartDate, customEndDate, onCustomDateChange, className })=>{
+    _s();
+    const [isCustomOpen, setIsCustomOpen] = React.useState(false);
+    const isMobile = useIsMobile();
+    const handlePeriodChange = (value)=>{
+        const newPeriod = value;
+        onPeriodChange(newPeriod);
+        if (newPeriod !== 'custom') {
+            setIsCustomOpen(false);
+            // Réinitialiser les dates personnalisées si on change de période
+            if (newPeriod !== 'custom') {
+                onCustomDateChange?.(undefined, undefined);
+            }
+        } else {
+            setIsCustomOpen(true);
+        }
+    };
+    const handleDateRangeSelect = (range)=>{
+        if (range?.from && range?.to) {
+            onCustomDateChange?.(range.from, range.to);
+            // Fermer automatiquement après sélection complète
+            setTimeout(()=>setIsCustomOpen(false), 100);
+        } else if (range?.from) {
+            onCustomDateChange?.(range.from, undefined);
+        }
+    };
+    const handleClearDates = (e)=>{
+        e.stopPropagation();
+        onCustomDateChange?.(undefined, undefined);
+    };
+    const dateRange = customStartDate && customEndDate ? {
+        from: customStartDate,
+        to: customEndDate
+    } : customStartDate ? {
+        from: customStartDate,
+        to: undefined
+    } : undefined;
+    return /*#__PURE__*/ _jsxDEV("div", {
+        className: cn('flex items-center gap-2', className),
+        children: [
+            /*#__PURE__*/ _jsxDEV(Select, {
+                value: period,
+                onValueChange: handlePeriodChange,
+                children: [
+                    /*#__PURE__*/ _jsxDEV(SelectTrigger, {
+                        className: cn('h-9 sm:h-10 text-[10px] sm:text-xs md:text-sm', className?.includes('w-full') ? 'w-full' : 'w-[180px]'),
+                        children: [
+                            /*#__PURE__*/ _jsxDEV(CalendarIcon, {
+                                className: "h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 mr-1.5 sm:mr-2"
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/PeriodFilter.tsx",
+                                lineNumber: 86,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV(SelectValue, {}, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/PeriodFilter.tsx",
+                                lineNumber: 87,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/PeriodFilter.tsx",
+                        lineNumber: 80,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV(SelectContent, {
+                        children: [
+                            /*#__PURE__*/ _jsxDEV(SelectItem, {
+                                value: "7d",
+                                className: "text-[10px] sm:text-xs md:text-sm",
+                                children: "7 derniers jours"
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/PeriodFilter.tsx",
+                                lineNumber: 90,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV(SelectItem, {
+                                value: "30d",
+                                className: "text-[10px] sm:text-xs md:text-sm",
+                                children: "30 derniers jours"
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/PeriodFilter.tsx",
+                                lineNumber: 93,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV(SelectItem, {
+                                value: "90d",
+                                className: "text-[10px] sm:text-xs md:text-sm",
+                                children: "90 derniers jours"
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/PeriodFilter.tsx",
+                                lineNumber: 96,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV(SelectItem, {
+                                value: "custom",
+                                className: "text-[10px] sm:text-xs md:text-sm",
+                                children: "Personnalisé"
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/PeriodFilter.tsx",
+                                lineNumber: 99,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/PeriodFilter.tsx",
+                        lineNumber: 89,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/PeriodFilter.tsx",
+                lineNumber: 79,
+                columnNumber: 7
+            }, this),
+            period === 'custom' && /*#__PURE__*/ _jsxDEV(Popover, {
+                open: isCustomOpen,
+                onOpenChange: setIsCustomOpen,
+                children: [
+                    /*#__PURE__*/ _jsxDEV(PopoverTrigger, {
+                        asChild: true,
+                        children: /*#__PURE__*/ _jsxDEV(Button, {
+                            variant: "outline",
+                            className: cn('justify-start text-left font-normal h-9 sm:h-10 text-[10px] sm:text-xs md:text-sm', className?.includes('w-full') ? 'w-full' : 'w-full sm:w-[280px] md:w-[320px]', !customStartDate && !customEndDate && 'text-muted-foreground'),
+                            children: [
+                                /*#__PURE__*/ _jsxDEV(CalendarIcon, {
+                                    className: "mr-1.5 sm:mr-2 h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4"
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/PeriodFilter.tsx",
+                                    lineNumber: 116,
+                                    columnNumber: 15
+                                }, this),
+                                customStartDate && customEndDate ? /*#__PURE__*/ _jsxDEV("span", {
+                                    className: "flex-1 truncate",
+                                    children: [
+                                        format(customStartDate, 'dd MMM yyyy', {
+                                            locale: fr
+                                        }),
+                                        " -",
+                                        ' ',
+                                        format(customEndDate, 'dd MMM yyyy', {
+                                            locale: fr
+                                        })
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/PeriodFilter.tsx",
+                                    lineNumber: 118,
+                                    columnNumber: 17
+                                }, this) : customStartDate ? /*#__PURE__*/ _jsxDEV("span", {
+                                    className: "flex-1 truncate",
+                                    children: [
+                                        format(customStartDate, 'dd MMM yyyy', {
+                                            locale: fr
+                                        }),
+                                        " - ..."
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/PeriodFilter.tsx",
+                                    lineNumber: 123,
+                                    columnNumber: 17
+                                }, this) : /*#__PURE__*/ _jsxDEV("span", {
+                                    className: "flex-1",
+                                    children: "Sélectionner une période"
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/PeriodFilter.tsx",
+                                    lineNumber: 127,
+                                    columnNumber: 17
+                                }, this),
+                                customStartDate && /*#__PURE__*/ _jsxDEV("span", {
+                                    onClick: handleClearDates,
+                                    className: "ml-1.5 sm:ml-2 h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 opacity-50 hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer",
+                                    role: "button",
+                                    tabIndex: 0,
+                                    "aria-label": "Effacer les dates",
+                                    onKeyDown: (e)=>{
+                                        if (e.key === 'Enter' || e.key === ' ') {
+                                            e.preventDefault();
+                                            handleClearDates(e);
+                                        }
+                                    },
+                                    children: /*#__PURE__*/ _jsxDEV(X, {
+                                        className: "h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/PeriodFilter.tsx",
+                                        lineNumber: 143,
+                                        columnNumber: 19
+                                    }, this)
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/PeriodFilter.tsx",
+                                    lineNumber: 130,
+                                    columnNumber: 17
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/PeriodFilter.tsx",
+                            lineNumber: 108,
+                            columnNumber: 13
+                        }, this)
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/PeriodFilter.tsx",
+                        lineNumber: 107,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV(PopoverContent, {
+                        className: "w-auto p-0 shadow-lg border-border/50",
+                        align: "start",
+                        sideOffset: 5,
+                        children: /*#__PURE__*/ _jsxDEV("div", {
+                            className: "p-4",
+                            children: [
+                                /*#__PURE__*/ _jsxDEV(Calendar, {
+                                    initialFocus: true,
+                                    mode: "range",
+                                    defaultMonth: customStartDate || new Date(),
+                                    selected: dateRange,
+                                    onSelect: handleDateRangeSelect,
+                                    numberOfMonths: isMobile ? 1 : 2,
+                                    locale: fr,
+                                    className: "rounded-lg",
+                                    classNames: {
+                                        months: 'flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0',
+                                        month: 'space-y-4',
+                                        caption: 'flex justify-center pt-1 relative items-center',
+                                        caption_label: 'text-sm font-semibold',
+                                        nav: 'space-x-1 flex items-center',
+                                        nav_button: cn('h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 border border-input hover:bg-accent hover:text-accent-foreground rounded-md'),
+                                        nav_button_previous: 'absolute left-1',
+                                        nav_button_next: 'absolute right-1',
+                                        table: 'w-full border-collapse space-y-1',
+                                        head_row: 'flex',
+                                        head_cell: 'text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]',
+                                        row: 'flex w-full mt-2',
+                                        cell: 'h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20',
+                                        day: cn('h-9 w-9 p-0 font-normal aria-selected:opacity-100 hover:bg-accent hover:text-accent-foreground rounded-md transition-colors'),
+                                        day_range_end: 'day-range-end',
+                                        day_selected: 'bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground',
+                                        day_today: 'bg-accent text-accent-foreground font-semibold',
+                                        day_outside: 'day-outside text-muted-foreground opacity-50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground aria-selected:opacity-30',
+                                        day_disabled: 'text-muted-foreground opacity-50',
+                                        day_range_middle: 'aria-selected:bg-accent aria-selected:text-accent-foreground',
+                                        day_hidden: 'invisible'
+                                    }
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/PeriodFilter.tsx",
+                                    lineNumber: 154,
+                                    columnNumber: 15
+                                }, this),
+                                customStartDate && customEndDate && /*#__PURE__*/ _jsxDEV("div", {
+                                    className: "p-2 sm:p-3 border-t border-border flex items-center justify-between gap-2 bg-muted/30",
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV("div", {
+                                            className: "text-[10px] sm:text-[11px] md:text-xs text-muted-foreground",
+                                            children: [
+                                                /*#__PURE__*/ _jsxDEV("span", {
+                                                    className: "font-medium text-foreground",
+                                                    children: format(customStartDate, 'dd MMM yyyy', {
+                                                        locale: fr
+                                                    })
+                                                }, void 0, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/PeriodFilter.tsx",
+                                                    lineNumber: 196,
+                                                    columnNumber: 21
+                                                }, this),
+                                                ' - ',
+                                                /*#__PURE__*/ _jsxDEV("span", {
+                                                    className: "font-medium text-foreground",
+                                                    children: format(customEndDate, 'dd MMM yyyy', {
+                                                        locale: fr
+                                                    })
+                                                }, void 0, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/PeriodFilter.tsx",
+                                                    lineNumber: 200,
+                                                    columnNumber: 21
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/PeriodFilter.tsx",
+                                            lineNumber: 195,
+                                            columnNumber: 19
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV(Button, {
+                                            size: "sm",
+                                            onClick: ()=>setIsCustomOpen(false),
+                                            className: "h-8 text-[10px] sm:text-xs",
+                                            children: "Appliquer"
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/PeriodFilter.tsx",
+                                            lineNumber: 204,
+                                            columnNumber: 19
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/PeriodFilter.tsx",
+                                    lineNumber: 194,
+                                    columnNumber: 17
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/PeriodFilter.tsx",
+                            lineNumber: 153,
+                            columnNumber: 13
+                        }, this)
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/PeriodFilter.tsx",
+                        lineNumber: 148,
+                        columnNumber: 11
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/PeriodFilter.tsx",
+                lineNumber: 106,
+                columnNumber: 9
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/PeriodFilter.tsx",
+        lineNumber: 78,
+        columnNumber: 5
+    }, this);
+};
+_s(PeriodFilter, "wJzOP0P70VDvvJQJklKIaOJDRZA=", false, function() {
+    return [
+        useIsMobile
+    ];
+});
+_c = PeriodFilter;
+var _c;
+$RefreshReg$(_c, "PeriodFilter");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/dashboard/PeriodFilter.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/dashboard/PeriodFilter.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIlBlcmlvZEZpbHRlci50c3giXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IFJlYWN0IGZyb20gJ3JlYWN0JztcbmltcG9ydCB7XG4gIFNlbGVjdCxcbiAgU2VsZWN0Q29udGVudCxcbiAgU2VsZWN0SXRlbSxcbiAgU2VsZWN0VHJpZ2dlcixcbiAgU2VsZWN0VmFsdWUsXG59IGZyb20gJ0AvY29tcG9uZW50cy91aS9zZWxlY3QnO1xuaW1wb3J0IHsgQ2FsZW5kYXIgYXMgQ2FsZW5kYXJJY29uLCBYIH0gZnJvbSAnbHVjaWRlLXJlYWN0JztcbmltcG9ydCB7IEJ1dHRvbiB9IGZyb20gJ0AvY29tcG9uZW50cy91aS9idXR0b24nO1xuaW1wb3J0IHsgUG9wb3ZlciwgUG9wb3ZlckNvbnRlbnQsIFBvcG92ZXJUcmlnZ2VyIH0gZnJvbSAnQC9jb21wb25lbnRzL3VpL3BvcG92ZXInO1xuaW1wb3J0IHsgQ2FsZW5kYXIgfSBmcm9tICdAL2NvbXBvbmVudHMvdWkvY2FsZW5kYXInO1xuaW1wb3J0IHsgZm9ybWF0IH0gZnJvbSAnZGF0ZS1mbnMnO1xuaW1wb3J0IHsgZnIgfSBmcm9tICdkYXRlLWZucy9sb2NhbGUnO1xuaW1wb3J0IHsgY24gfSBmcm9tICdAL2xpYi91dGlscyc7XG5pbXBvcnQgeyB1c2VJc01vYmlsZSB9IGZyb20gJ0AvaG9va3MvdXNlLW1vYmlsZSc7XG5cbmV4cG9ydCB0eXBlIFBlcmlvZFR5cGUgPSAnN2QnIHwgJzMwZCcgfCAnOTBkJyB8ICdjdXN0b20nO1xuXG5pbnRlcmZhY2UgUGVyaW9kRmlsdGVyUHJvcHMge1xuICBwZXJpb2Q6IFBlcmlvZFR5cGU7XG4gIG9uUGVyaW9kQ2hhbmdlOiAocGVyaW9kOiBQZXJpb2RUeXBlKSA9PiB2b2lkO1xuICBjdXN0b21TdGFydERhdGU/OiBEYXRlO1xuICBjdXN0b21FbmREYXRlPzogRGF0ZTtcbiAgb25DdXN0b21EYXRlQ2hhbmdlPzogKHN0YXJ0RGF0ZTogRGF0ZSB8IHVuZGVmaW5lZCwgZW5kRGF0ZTogRGF0ZSB8IHVuZGVmaW5lZCkgPT4gdm9pZDtcbiAgY2xhc3NOYW1lPzogc3RyaW5nO1xufVxuXG5leHBvcnQgY29uc3QgUGVyaW9kRmlsdGVyIDogUmVhY3QuRkM8UGVyaW9kRmlsdGVyUHJvcHM+ID0gKHtcbiAgcGVyaW9kLFxuICBvblBlcmlvZENoYW5nZSxcbiAgY3VzdG9tU3RhcnREYXRlLFxuICBjdXN0b21FbmREYXRlLFxuICBvbkN1c3RvbURhdGVDaGFuZ2UsXG4gIGNsYXNzTmFtZSxcbn0pID0+IHtcbiAgY29uc3QgW2lzQ3VzdG9tT3Blbiwgc2V0SXNDdXN0b21PcGVuXSA9IFJlYWN0LnVzZVN0YXRlKGZhbHNlKTtcbiAgY29uc3QgaXNNb2JpbGUgPSB1c2VJc01vYmlsZSgpO1xuXG4gIGNvbnN0IGhhbmRsZVBlcmlvZENoYW5nZSA9ICh2YWx1ZTogc3RyaW5nKSA9PiB7XG4gICAgY29uc3QgbmV3UGVyaW9kID0gdmFsdWUgYXMgUGVyaW9kVHlwZTtcbiAgICBvblBlcmlvZENoYW5nZShuZXdQZXJpb2QpO1xuXG4gICAgaWYgKG5ld1BlcmlvZCAhPT0gJ2N1c3RvbScpIHtcbiAgICAgIHNldElzQ3VzdG9tT3BlbihmYWxzZSk7XG4gICAgICAvLyBSw6lpbml0aWFsaXNlciBsZXMgZGF0ZXMgcGVyc29ubmFsaXPDqWVzIHNpIG9uIGNoYW5nZSBkZSBww6lyaW9kZVxuICAgICAgaWYgKG5ld1BlcmlvZCAhPT0gJ2N1c3RvbScpIHtcbiAgICAgICAgb25DdXN0b21EYXRlQ2hhbmdlPy4odW5kZWZpbmVkLCB1bmRlZmluZWQpO1xuICAgICAgfVxuICAgIH0gZWxzZSB7XG4gICAgICBzZXRJc0N1c3RvbU9wZW4odHJ1ZSk7XG4gICAgfVxuICB9O1xuXG4gIGNvbnN0IGhhbmRsZURhdGVSYW5nZVNlbGVjdCA9IChyYW5nZTogeyBmcm9tPzogRGF0ZTsgdG8/OiBEYXRlIH0gfCB1bmRlZmluZWQpID0+IHtcbiAgICBpZiAocmFuZ2U/LmZyb20gJiYgcmFuZ2U/LnRvKSB7XG4gICAgICBvbkN1c3RvbURhdGVDaGFuZ2U/LihyYW5nZS5mcm9tLCByYW5nZS50byk7XG4gICAgICAvLyBGZXJtZXIgYXV0b21hdGlxdWVtZW50IGFwcsOocyBzw6lsZWN0aW9uIGNvbXBsw6h0ZVxuICAgICAgc2V0VGltZW91dCgoKSA9PiBzZXRJc0N1c3RvbU9wZW4oZmFsc2UpLCAxMDApO1xuICAgIH0gZWxzZSBpZiAocmFuZ2U/LmZyb20pIHtcbiAgICAgIG9uQ3VzdG9tRGF0ZUNoYW5nZT8uKHJhbmdlLmZyb20sIHVuZGVmaW5lZCk7XG4gICAgfVxuICB9O1xuXG4gIGNvbnN0IGhhbmRsZUNsZWFyRGF0ZXMgPSAoZTogUmVhY3QuTW91c2VFdmVudCkgPT4ge1xuICAgIGUuc3RvcFByb3BhZ2F0aW9uKCk7XG4gICAgb25DdXN0b21EYXRlQ2hhbmdlPy4odW5kZWZpbmVkLCB1bmRlZmluZWQpO1xuICB9O1xuXG4gIGNvbnN0IGRhdGVSYW5nZSA9XG4gICAgY3VzdG9tU3RhcnREYXRlICYmIGN1c3RvbUVuZERhdGVcbiAgICAgID8geyBmcm9tOiBjdXN0b21TdGFydERhdGUsIHRvOiBjdXN0b21FbmREYXRlIH1cbiAgICAgIDogY3VzdG9tU3RhcnREYXRlXG4gICAgICAgID8geyBmcm9tOiBjdXN0b21TdGFydERhdGUsIHRvOiB1bmRlZmluZWQgfVxuICAgICAgICA6IHVuZGVmaW5lZDtcblxuICByZXR1cm4gKFxuICAgIDxkaXYgY2xhc3NOYW1lPXtjbignZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTInLCBjbGFzc05hbWUpfT5cbiAgICAgIDxTZWxlY3QgdmFsdWU9e3BlcmlvZH0gb25WYWx1ZUNoYW5nZT17aGFuZGxlUGVyaW9kQ2hhbmdlfT5cbiAgICAgICAgPFNlbGVjdFRyaWdnZXJcbiAgICAgICAgICBjbGFzc05hbWU9e2NuKFxuICAgICAgICAgICAgJ2gtOSBzbTpoLTEwIHRleHQtWzEwcHhdIHNtOnRleHQteHMgbWQ6dGV4dC1zbScsXG4gICAgICAgICAgICBjbGFzc05hbWU/LmluY2x1ZGVzKCd3LWZ1bGwnKSA/ICd3LWZ1bGwnIDogJ3ctWzE4MHB4XSdcbiAgICAgICAgICApfVxuICAgICAgICA+XG4gICAgICAgICAgPENhbGVuZGFySWNvbiBjbGFzc05hbWU9XCJoLTMgdy0zIHNtOmgtMy41IHNtOnctMy41IG1kOmgtNCBtZDp3LTQgbXItMS41IHNtOm1yLTJcIiAvPlxuICAgICAgICAgIDxTZWxlY3RWYWx1ZSAvPlxuICAgICAgICA8L1NlbGVjdFRyaWdnZXI+XG4gICAgICAgIDxTZWxlY3RDb250ZW50PlxuICAgICAgICAgIDxTZWxlY3RJdGVtIHZhbHVlPVwiN2RcIiBjbGFzc05hbWU9XCJ0ZXh0LVsxMHB4XSBzbTp0ZXh0LXhzIG1kOnRleHQtc21cIj5cbiAgICAgICAgICAgIDcgZGVybmllcnMgam91cnNcbiAgICAgICAgICA8L1NlbGVjdEl0ZW0+XG4gICAgICAgICAgPFNlbGVjdEl0ZW0gdmFsdWU9XCIzMGRcIiBjbGFzc05hbWU9XCJ0ZXh0LVsxMHB4XSBzbTp0ZXh0LXhzIG1kOnRleHQtc21cIj5cbiAgICAgICAgICAgIDMwIGRlcm5pZXJzIGpvdXJzXG4gICAgICAgICAgPC9TZWxlY3RJdGVtPlxuICAgICAgICAgIDxTZWxlY3RJdGVtIHZhbHVlPVwiOTBkXCIgY2xhc3NOYW1lPVwidGV4dC1bMTBweF0gc206dGV4dC14cyBtZDp0ZXh0LXNtXCI+XG4gICAgICAgICAgICA5MCBkZXJuaWVycyBqb3Vyc1xuICAgICAgICAgIDwvU2VsZWN0SXRlbT5cbiAgICAgICAgICA8U2VsZWN0SXRlbSB2YWx1ZT1cImN1c3RvbVwiIGNsYXNzTmFtZT1cInRleHQtWzEwcHhdIHNtOnRleHQteHMgbWQ6dGV4dC1zbVwiPlxuICAgICAgICAgICAgUGVyc29ubmFsaXPDqVxuICAgICAgICAgIDwvU2VsZWN0SXRlbT5cbiAgICAgICAgPC9TZWxlY3RDb250ZW50PlxuICAgICAgPC9TZWxlY3Q+XG5cbiAgICAgIHtwZXJpb2QgPT09ICdjdXN0b20nICYmIChcbiAgICAgICAgPFBvcG92ZXIgb3Blbj17aXNDdXN0b21PcGVufSBvbk9wZW5DaGFuZ2U9e3NldElzQ3VzdG9tT3Blbn0+XG4gICAgICAgICAgPFBvcG92ZXJUcmlnZ2VyIGFzQ2hpbGQ+XG4gICAgICAgICAgICA8QnV0dG9uXG4gICAgICAgICAgICAgIHZhcmlhbnQ9XCJvdXRsaW5lXCJcbiAgICAgICAgICAgICAgY2xhc3NOYW1lPXtjbihcbiAgICAgICAgICAgICAgICAnanVzdGlmeS1zdGFydCB0ZXh0LWxlZnQgZm9udC1ub3JtYWwgaC05IHNtOmgtMTAgdGV4dC1bMTBweF0gc206dGV4dC14cyBtZDp0ZXh0LXNtJyxcbiAgICAgICAgICAgICAgICBjbGFzc05hbWU/LmluY2x1ZGVzKCd3LWZ1bGwnKSA/ICd3LWZ1bGwnIDogJ3ctZnVsbCBzbTp3LVsyODBweF0gbWQ6dy1bMzIwcHhdJyxcbiAgICAgICAgICAgICAgICAhY3VzdG9tU3RhcnREYXRlICYmICFjdXN0b21FbmREYXRlICYmICd0ZXh0LW11dGVkLWZvcmVncm91bmQnXG4gICAgICAgICAgICAgICl9XG4gICAgICAgICAgICA+XG4gICAgICAgICAgICAgIDxDYWxlbmRhckljb24gY2xhc3NOYW1lPVwibXItMS41IHNtOm1yLTIgaC0zIHctMyBzbTpoLTMuNSBzbTp3LTMuNSBtZDpoLTQgbWQ6dy00XCIgLz5cbiAgICAgICAgICAgICAge2N1c3RvbVN0YXJ0RGF0ZSAmJiBjdXN0b21FbmREYXRlID8gKFxuICAgICAgICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cImZsZXgtMSB0cnVuY2F0ZVwiPlxuICAgICAgICAgICAgICAgICAge2Zvcm1hdChjdXN0b21TdGFydERhdGUsICdkZCBNTU0geXl5eScsIHsgbG9jYWxlOiBmciB9KX0gLXsnICd9XG4gICAgICAgICAgICAgICAgICB7Zm9ybWF0KGN1c3RvbUVuZERhdGUsICdkZCBNTU0geXl5eScsIHsgbG9jYWxlOiBmciB9KX1cbiAgICAgICAgICAgICAgICA8L3NwYW4+XG4gICAgICAgICAgICAgICkgOiBjdXN0b21TdGFydERhdGUgPyAoXG4gICAgICAgICAgICAgICAgPHNwYW4gY2xhc3NOYW1lPVwiZmxleC0xIHRydW5jYXRlXCI+XG4gICAgICAgICAgICAgICAgICB7Zm9ybWF0KGN1c3RvbVN0YXJ0RGF0ZSwgJ2RkIE1NTSB5eXl5JywgeyBsb2NhbGU6IGZyIH0pfSAtIC4uLlxuICAgICAgICAgICAgICAgIDwvc3Bhbj5cbiAgICAgICAgICAgICAgKSA6IChcbiAgICAgICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJmbGV4LTFcIj5Tw6lsZWN0aW9ubmVyIHVuZSBww6lyaW9kZTwvc3Bhbj5cbiAgICAgICAgICAgICAgKX1cbiAgICAgICAgICAgICAge2N1c3RvbVN0YXJ0RGF0ZSAmJiAoXG4gICAgICAgICAgICAgICAgPHNwYW5cbiAgICAgICAgICAgICAgICAgIG9uQ2xpY2s9e2hhbmRsZUNsZWFyRGF0ZXN9XG4gICAgICAgICAgICAgICAgICBjbGFzc05hbWU9XCJtbC0xLjUgc206bWwtMiBoLTMgdy0zIHNtOmgtMy41IHNtOnctMy41IG1kOmgtNCBtZDp3LTQgb3BhY2l0eS01MCBob3ZlcjpvcGFjaXR5LTEwMCB0cmFuc2l0aW9uLW9wYWNpdHkgZmxleCBpdGVtcy1jZW50ZXIganVzdGlmeS1jZW50ZXIgY3Vyc29yLXBvaW50ZXJcIlxuICAgICAgICAgICAgICAgICAgcm9sZT1cImJ1dHRvblwiXG4gICAgICAgICAgICAgICAgICB0YWJJbmRleD17MH1cbiAgICAgICAgICAgICAgICAgIGFyaWEtbGFiZWw9XCJFZmZhY2VyIGxlcyBkYXRlc1wiXG4gICAgICAgICAgICAgICAgICBvbktleURvd249eyhlOiBSZWFjdC5LZXlib2FyZEV2ZW50PEhUTUxTcGFuRWxlbWVudD4pID0+IHtcbiAgICAgICAgICAgICAgICAgICAgaWYgKGUua2V5ID09PSAnRW50ZXInIHx8IGUua2V5ID09PSAnICcpIHtcbiAgICAgICAgICAgICAgICAgICAgICBlLnByZXZlbnREZWZhdWx0KCk7XG4gICAgICAgICAgICAgICAgICAgICAgaGFuZGxlQ2xlYXJEYXRlcyhlKTtcbiAgICAgICAgICAgICAgICAgICAgfVxuICAgICAgICAgICAgICAgICAgfX1cbiAgICAgICAgICAgICAgICA+XG4gICAgICAgICAgICAgICAgICA8WCBjbGFzc05hbWU9XCJoLTMgdy0zIHNtOmgtMy41IHNtOnctMy41IG1kOmgtNCBtZDp3LTRcIiAvPlxuICAgICAgICAgICAgICAgIDwvc3Bhbj5cbiAgICAgICAgICAgICAgKX1cbiAgICAgICAgICAgIDwvQnV0dG9uPlxuICAgICAgICAgIDwvUG9wb3ZlclRyaWdnZXI+XG4gICAgICAgICAgPFBvcG92ZXJDb250ZW50XG4gICAgICAgICAgICBjbGFzc05hbWU9XCJ3LWF1dG8gcC0wIHNoYWRvdy1sZyBib3JkZXItYm9yZGVyLzUwXCJcbiAgICAgICAgICAgIGFsaWduPVwic3RhcnRcIlxuICAgICAgICAgICAgc2lkZU9mZnNldD17NX1cbiAgICAgICAgICA+XG4gICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInAtNFwiPlxuICAgICAgICAgICAgICA8Q2FsZW5kYXJcbiAgICAgICAgICAgICAgICBpbml0aWFsRm9jdXNcbiAgICAgICAgICAgICAgICBtb2RlPVwicmFuZ2VcIlxuICAgICAgICAgICAgICAgIGRlZmF1bHRNb250aD17Y3VzdG9tU3RhcnREYXRlIHx8IG5ldyBEYXRlKCl9XG4gICAgICAgICAgICAgICAgc2VsZWN0ZWQ9e2RhdGVSYW5nZX1cbiAgICAgICAgICAgICAgICBvblNlbGVjdD17aGFuZGxlRGF0ZVJhbmdlU2VsZWN0fVxuICAgICAgICAgICAgICAgIG51bWJlck9mTW9udGhzPXtpc01vYmlsZSA/IDEgOiAyfVxuICAgICAgICAgICAgICAgIGxvY2FsZT17ZnJ9XG4gICAgICAgICAgICAgICAgY2xhc3NOYW1lPVwicm91bmRlZC1sZ1wiXG4gICAgICAgICAgICAgICAgY2xhc3NOYW1lcz17e1xuICAgICAgICAgICAgICAgICAgbW9udGhzOiAnZmxleCBmbGV4LWNvbCBzbTpmbGV4LXJvdyBzcGFjZS15LTQgc206c3BhY2UteC00IHNtOnNwYWNlLXktMCcsXG4gICAgICAgICAgICAgICAgICBtb250aDogJ3NwYWNlLXktNCcsXG4gICAgICAgICAgICAgICAgICBjYXB0aW9uOiAnZmxleCBqdXN0aWZ5LWNlbnRlciBwdC0xIHJlbGF0aXZlIGl0ZW1zLWNlbnRlcicsXG4gICAgICAgICAgICAgICAgICBjYXB0aW9uX2xhYmVsOiAndGV4dC1zbSBmb250LXNlbWlib2xkJyxcbiAgICAgICAgICAgICAgICAgIG5hdjogJ3NwYWNlLXgtMSBmbGV4IGl0ZW1zLWNlbnRlcicsXG4gICAgICAgICAgICAgICAgICBuYXZfYnV0dG9uOiBjbihcbiAgICAgICAgICAgICAgICAgICAgJ2gtNyB3LTcgYmctdHJhbnNwYXJlbnQgcC0wIG9wYWNpdHktNTAgaG92ZXI6b3BhY2l0eS0xMDAgYm9yZGVyIGJvcmRlci1pbnB1dCBob3ZlcjpiZy1hY2NlbnQgaG92ZXI6dGV4dC1hY2NlbnQtZm9yZWdyb3VuZCByb3VuZGVkLW1kJ1xuICAgICAgICAgICAgICAgICAgKSxcbiAgICAgICAgICAgICAgICAgIG5hdl9idXR0b25fcHJldmlvdXM6ICdhYnNvbHV0ZSBsZWZ0LTEnLFxuICAgICAgICAgICAgICAgICAgbmF2X2J1dHRvbl9uZXh0OiAnYWJzb2x1dGUgcmlnaHQtMScsXG4gICAgICAgICAgICAgICAgICB0YWJsZTogJ3ctZnVsbCBib3JkZXItY29sbGFwc2Ugc3BhY2UteS0xJyxcbiAgICAgICAgICAgICAgICAgIGhlYWRfcm93OiAnZmxleCcsXG4gICAgICAgICAgICAgICAgICBoZWFkX2NlbGw6ICd0ZXh0LW11dGVkLWZvcmVncm91bmQgcm91bmRlZC1tZCB3LTkgZm9udC1ub3JtYWwgdGV4dC1bMC44cmVtXScsXG4gICAgICAgICAgICAgICAgICByb3c6ICdmbGV4IHctZnVsbCBtdC0yJyxcbiAgICAgICAgICAgICAgICAgIGNlbGw6ICdoLTkgdy05IHRleHQtY2VudGVyIHRleHQtc20gcC0wIHJlbGF0aXZlIFsmOmhhcyhbYXJpYS1zZWxlY3RlZF0uZGF5LXJhbmdlLWVuZCldOnJvdW5kZWQtci1tZCBbJjpoYXMoW2FyaWEtc2VsZWN0ZWRdLmRheS1vdXRzaWRlKV06YmctYWNjZW50LzUwIFsmOmhhcyhbYXJpYS1zZWxlY3RlZF0pXTpiZy1hY2NlbnQgZmlyc3Q6WyY6aGFzKFthcmlhLXNlbGVjdGVkXSldOnJvdW5kZWQtbC1tZCBsYXN0OlsmOmhhcyhbYXJpYS1zZWxlY3RlZF0pXTpyb3VuZGVkLXItbWQgZm9jdXMtd2l0aGluOnJlbGF0aXZlIGZvY3VzLXdpdGhpbjp6LTIwJyxcbiAgICAgICAgICAgICAgICAgIGRheTogY24oXG4gICAgICAgICAgICAgICAgICAgICdoLTkgdy05IHAtMCBmb250LW5vcm1hbCBhcmlhLXNlbGVjdGVkOm9wYWNpdHktMTAwIGhvdmVyOmJnLWFjY2VudCBob3Zlcjp0ZXh0LWFjY2VudC1mb3JlZ3JvdW5kIHJvdW5kZWQtbWQgdHJhbnNpdGlvbi1jb2xvcnMnXG4gICAgICAgICAgICAgICAgICApLFxuICAgICAgICAgICAgICAgICAgZGF5X3JhbmdlX2VuZDogJ2RheS1yYW5nZS1lbmQnLFxuICAgICAgICAgICAgICAgICAgZGF5X3NlbGVjdGVkOlxuICAgICAgICAgICAgICAgICAgICAnYmctcHJpbWFyeSB0ZXh0LXByaW1hcnktZm9yZWdyb3VuZCBob3ZlcjpiZy1wcmltYXJ5IGhvdmVyOnRleHQtcHJpbWFyeS1mb3JlZ3JvdW5kIGZvY3VzOmJnLXByaW1hcnkgZm9jdXM6dGV4dC1wcmltYXJ5LWZvcmVncm91bmQnLFxuICAgICAgICAgICAgICAgICAgZGF5X3RvZGF5OiAnYmctYWNjZW50IHRleHQtYWNjZW50LWZvcmVncm91bmQgZm9udC1zZW1pYm9sZCcsXG4gICAgICAgICAgICAgICAgICBkYXlfb3V0c2lkZTpcbiAgICAgICAgICAgICAgICAgICAgJ2RheS1vdXRzaWRlIHRleHQtbXV0ZWQtZm9yZWdyb3VuZCBvcGFjaXR5LTUwIGFyaWEtc2VsZWN0ZWQ6YmctYWNjZW50LzUwIGFyaWEtc2VsZWN0ZWQ6dGV4dC1tdXRlZC1mb3JlZ3JvdW5kIGFyaWEtc2VsZWN0ZWQ6b3BhY2l0eS0zMCcsXG4gICAgICAgICAgICAgICAgICBkYXlfZGlzYWJsZWQ6ICd0ZXh0LW11dGVkLWZvcmVncm91bmQgb3BhY2l0eS01MCcsXG4gICAgICAgICAgICAgICAgICBkYXlfcmFuZ2VfbWlkZGxlOiAnYXJpYS1zZWxlY3RlZDpiZy1hY2NlbnQgYXJpYS1zZWxlY3RlZDp0ZXh0LWFjY2VudC1mb3JlZ3JvdW5kJyxcbiAgICAgICAgICAgICAgICAgIGRheV9oaWRkZW46ICdpbnZpc2libGUnLFxuICAgICAgICAgICAgICAgIH19XG4gICAgICAgICAgICAgIC8+XG4gICAgICAgICAgICAgIHtjdXN0b21TdGFydERhdGUgJiYgY3VzdG9tRW5kRGF0ZSAmJiAoXG4gICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJwLTIgc206cC0zIGJvcmRlci10IGJvcmRlci1ib3JkZXIgZmxleCBpdGVtcy1jZW50ZXIganVzdGlmeS1iZXR3ZWVuIGdhcC0yIGJnLW11dGVkLzMwXCI+XG4gICAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInRleHQtWzEwcHhdIHNtOnRleHQtWzExcHhdIG1kOnRleHQteHMgdGV4dC1tdXRlZC1mb3JlZ3JvdW5kXCI+XG4gICAgICAgICAgICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cImZvbnQtbWVkaXVtIHRleHQtZm9yZWdyb3VuZFwiPlxuICAgICAgICAgICAgICAgICAgICAgIHtmb3JtYXQoY3VzdG9tU3RhcnREYXRlLCAnZGQgTU1NIHl5eXknLCB7IGxvY2FsZTogZnIgfSl9XG4gICAgICAgICAgICAgICAgICAgIDwvc3Bhbj5cbiAgICAgICAgICAgICAgICAgICAgeycgLSAnfVxuICAgICAgICAgICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJmb250LW1lZGl1bSB0ZXh0LWZvcmVncm91bmRcIj5cbiAgICAgICAgICAgICAgICAgICAgICB7Zm9ybWF0KGN1c3RvbUVuZERhdGUsICdkZCBNTU0geXl5eScsIHsgbG9jYWxlOiBmciB9KX1cbiAgICAgICAgICAgICAgICAgICAgPC9zcGFuPlxuICAgICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgICAgICA8QnV0dG9uXG4gICAgICAgICAgICAgICAgICAgIHNpemU9XCJzbVwiXG4gICAgICAgICAgICAgICAgICAgIG9uQ2xpY2s9eygpID0+IHNldElzQ3VzdG9tT3BlbihmYWxzZSl9XG4gICAgICAgICAgICAgICAgICAgIGNsYXNzTmFtZT1cImgtOCB0ZXh0LVsxMHB4XSBzbTp0ZXh0LXhzXCJcbiAgICAgICAgICAgICAgICAgID5cbiAgICAgICAgICAgICAgICAgICAgQXBwbGlxdWVyXG4gICAgICAgICAgICAgICAgICA8L0J1dHRvbj5cbiAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgKX1cbiAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgIDwvUG9wb3ZlckNvbnRlbnQ+XG4gICAgICAgIDwvUG9wb3Zlcj5cbiAgICAgICl9XG4gICAgPC9kaXY+XG4gICk7XG59O1xuXG5cblxuXG5cblxuXG4iXSwibmFtZXMiOlsiUmVhY3QiLCJTZWxlY3QiLCJTZWxlY3RDb250ZW50IiwiU2VsZWN0SXRlbSIsIlNlbGVjdFRyaWdnZXIiLCJTZWxlY3RWYWx1ZSIsIkNhbGVuZGFyIiwiQ2FsZW5kYXJJY29uIiwiWCIsIkJ1dHRvbiIsIlBvcG92ZXIiLCJQb3BvdmVyQ29udGVudCIsIlBvcG92ZXJUcmlnZ2VyIiwiZm9ybWF0IiwiZnIiLCJjbiIsInVzZUlzTW9iaWxlIiwiUGVyaW9kRmlsdGVyIiwicGVyaW9kIiwib25QZXJpb2RDaGFuZ2UiLCJjdXN0b21TdGFydERhdGUiLCJjdXN0b21FbmREYXRlIiwib25DdXN0b21EYXRlQ2hhbmdlIiwiY2xhc3NOYW1lIiwiaXNDdXN0b21PcGVuIiwic2V0SXNDdXN0b21PcGVuIiwidXNlU3RhdGUiLCJpc01vYmlsZSIsImhhbmRsZVBlcmlvZENoYW5nZSIsInZhbHVlIiwibmV3UGVyaW9kIiwidW5kZWZpbmVkIiwiaGFuZGxlRGF0ZVJhbmdlU2VsZWN0IiwicmFuZ2UiLCJmcm9tIiwidG8iLCJzZXRUaW1lb3V0IiwiaGFuZGxlQ2xlYXJEYXRlcyIsImUiLCJzdG9wUHJvcGFnYXRpb24iLCJkYXRlUmFuZ2UiLCJkaXYiLCJvblZhbHVlQ2hhbmdlIiwiaW5jbHVkZXMiLCJvcGVuIiwib25PcGVuQ2hhbmdlIiwiYXNDaGlsZCIsInZhcmlhbnQiLCJzcGFuIiwibG9jYWxlIiwib25DbGljayIsInJvbGUiLCJ0YWJJbmRleCIsImFyaWEtbGFiZWwiLCJvbktleURvd24iLCJrZXkiLCJwcmV2ZW50RGVmYXVsdCIsImFsaWduIiwic2lkZU9mZnNldCIsImluaXRpYWxGb2N1cyIsIm1vZGUiLCJkZWZhdWx0TW9udGgiLCJEYXRlIiwic2VsZWN0ZWQiLCJvblNlbGVjdCIsIm51bWJlck9mTW9udGhzIiwiY2xhc3NOYW1lcyIsIm1vbnRocyIsIm1vbnRoIiwiY2FwdGlvbiIsImNhcHRpb25fbGFiZWwiLCJuYXYiLCJuYXZfYnV0dG9uIiwibmF2X2J1dHRvbl9wcmV2aW91cyIsIm5hdl9idXR0b25fbmV4dCIsInRhYmxlIiwiaGVhZF9yb3ciLCJoZWFkX2NlbGwiLCJyb3ciLCJjZWxsIiwiZGF5IiwiZGF5X3JhbmdlX2VuZCIsImRheV9zZWxlY3RlZCIsImRheV90b2RheSIsImRheV9vdXRzaWRlIiwiZGF5X2Rpc2FibGVkIiwiZGF5X3JhbmdlX21pZGRsZSIsImRheV9oaWRkZW4iLCJzaXplIl0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7QUFBQSxPQUFPQSxXQUFXLFFBQVE7QUFDMUIsU0FDRUMsTUFBTSxFQUNOQyxhQUFhLEVBQ2JDLFVBQVUsRUFDVkMsYUFBYSxFQUNiQyxXQUFXLFFBQ04seUJBQXlCO0FBQ2hDLFNBQVNDLFlBQVlDLFlBQVksRUFBRUMsQ0FBQyxRQUFRLGVBQWU7QUFDM0QsU0FBU0MsTUFBTSxRQUFRLHlC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

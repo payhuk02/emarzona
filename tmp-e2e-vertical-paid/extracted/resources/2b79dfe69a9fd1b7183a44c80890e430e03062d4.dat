@@ -1,0 +1,108 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/notifications/AutoEnablePushNotifications.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/notifications/AutoEnablePushNotifications.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+var _s = $RefreshSig$();
+import __vite__cjsImport2_react from "/node_modules/.vite/deps/react.js?v=8792f17d"; const useEffect = __vite__cjsImport2_react["useEffect"];
+import { useAuth } from "/src/contexts/AuthContext.tsx";
+import { useDeferredMount } from "/src/hooks/useDeferredMount.ts";
+import { useNotificationPreferences } from "/src/hooks/useNotifications.ts";
+import { usePushNotifications } from "/src/hooks/usePushNotifications.ts";
+import { hasAutoEnablePushBeenAttempted, markAutoEnablePushAttempted, shouldAutoEnablePush } from "/src/lib/notifications/auto-enable-push.ts";
+import { pushNotificationService } from "/src/lib/notifications/push.ts";
+import { logger } from "/src/lib/logger.ts";
+/**
+ * Opt-in push automatique à la connexion lorsque les préférences l'autorisent.
+ * Permet les alertes sonores / écran même app fermée (via Service Worker + VAPID).
+ */ export function AutoEnablePushNotifications() {
+    _s();
+    const { user, loading } = useAuth();
+    const enabled = useDeferredMount(!loading && !!user, 1500);
+    const { data: preferences } = useNotificationPreferences();
+    const { isSupported, isVapidReady, isSubscribed, permission } = usePushNotifications();
+    useEffect(()=>{
+        if (!enabled || !user?.id || !preferences) return;
+        const input = {
+            userId: user.id,
+            pushNotificationsEnabled: preferences.push_notifications,
+            isSupported,
+            isVapidReady,
+            permission: permission.permission,
+            isSubscribed,
+            alreadyAttemptedThisSession: hasAutoEnablePushBeenAttempted(user.id)
+        };
+        if (!shouldAutoEnablePush(input)) return;
+        markAutoEnablePushAttempted(user.id);
+        void (async ()=>{
+            try {
+                const ok = await pushNotificationService.initialize();
+                if (!ok) {
+                    logger.debug('Auto-enable push skipped or declined', {
+                        userId: user.id
+                    });
+                }
+            } catch (error) {
+                logger.warn('Auto-enable push failed', {
+                    error,
+                    userId: user.id
+                });
+            }
+        })();
+    }, [
+        enabled,
+        user?.id,
+        preferences,
+        preferences?.push_notifications,
+        isSupported,
+        isVapidReady,
+        isSubscribed,
+        permission.permission
+    ]);
+    return null;
+}
+_s(AutoEnablePushNotifications, "yIKGml5d7G8RvfeSaLNydpByh2g=", false, function() {
+    return [
+        useAuth,
+        useDeferredMount,
+        useNotificationPreferences,
+        usePushNotifications
+    ];
+});
+_c = AutoEnablePushNotifications;
+var _c;
+$RefreshReg$(_c, "AutoEnablePushNotifications");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/notifications/AutoEnablePushNotifications.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/notifications/AutoEnablePushNotifications.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIkF1dG9FbmFibGVQdXNoTm90aWZpY2F0aW9ucy50c3giXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgdXNlRWZmZWN0IH0gZnJvbSAncmVhY3QnO1xuaW1wb3J0IHsgdXNlQXV0aCB9IGZyb20gJ0AvY29udGV4dHMvQXV0aENvbnRleHQnO1xuaW1wb3J0IHsgdXNlRGVmZXJyZWRNb3VudCB9IGZyb20gJ0AvaG9va3MvdXNlRGVmZXJyZWRNb3VudCc7XG5pbXBvcnQgeyB1c2VOb3RpZmljYXRpb25QcmVmZXJlbmNlcyB9IGZyb20gJ0AvaG9va3MvdXNlTm90aWZpY2F0aW9ucyc7XG5pbXBvcnQgeyB1c2VQdXNoTm90aWZpY2F0aW9ucyB9IGZyb20gJ0AvaG9va3MvdXNlUHVzaE5vdGlmaWNhdGlvbnMnO1xuaW1wb3J0IHtcbiAgaGFzQXV0b0VuYWJsZVB1c2hCZWVuQXR0ZW1wdGVkLFxuICBtYXJrQXV0b0VuYWJsZVB1c2hBdHRlbXB0ZWQsXG4gIHNob3VsZEF1dG9FbmFibGVQdXNoLFxufSBmcm9tICdAL2xpYi9ub3RpZmljYXRpb25zL2F1dG8tZW5hYmxlLXB1c2gnO1xuaW1wb3J0IHsgcHVzaE5vdGlmaWNhdGlvblNlcnZpY2UgfSBmcm9tICdAL2xpYi9ub3RpZmljYXRpb25zL3B1c2gnO1xuaW1wb3J0IHsgbG9nZ2VyIH0gZnJvbSAnQC9saWIvbG9nZ2VyJztcblxuLyoqXG4gKiBPcHQtaW4gcHVzaCBhdXRvbWF0aXF1ZSDDoCBsYSBjb25uZXhpb24gbG9yc3F1ZSBsZXMgcHLDqWbDqXJlbmNlcyBsJ2F1dG9yaXNlbnQuXG4gKiBQZXJtZXQgbGVzIGFsZXJ0ZXMgc29ub3JlcyAvIMOpY3JhbiBtw6ptZSBhcHAgZmVybcOpZSAodmlhIFNlcnZpY2UgV29ya2VyICsgVkFQSUQpLlxuICovXG5leHBvcnQgZnVuY3Rpb24gQXV0b0VuYWJsZVB1c2hOb3RpZmljYXRpb25zKCkge1xuICBjb25zdCB7IHVzZXIsIGxvYWRpbmcgfSA9IHVzZUF1dGgoKTtcbiAgY29uc3QgZW5hYmxlZCA9IHVzZURlZmVycmVkTW91bnQoIWxvYWRpbmcgJiYgISF1c2VyLCAxNTAwKTtcbiAgY29uc3QgeyBkYXRhOiBwcmVmZXJlbmNlcyB9ID0gdXNlTm90aWZpY2F0aW9uUHJlZmVyZW5jZXMoKTtcbiAgY29uc3QgeyBpc1N1cHBvcnRlZCwgaXNWYXBpZFJlYWR5LCBpc1N1YnNjcmliZWQsIHBlcm1pc3Npb24gfSA9IHVzZVB1c2hOb3RpZmljYXRpb25zKCk7XG5cbiAgdXNlRWZmZWN0KCgpID0+IHtcbiAgICBpZiAoIWVuYWJsZWQgfHwgIXVzZXI/LmlkIHx8ICFwcmVmZXJlbmNlcykgcmV0dXJuO1xuXG4gICAgY29uc3QgaW5wdXQgPSB7XG4gICAgICB1c2VySWQ6IHVzZXIuaWQsXG4gICAgICBwdXNoTm90aWZpY2F0aW9uc0VuYWJsZWQ6IHByZWZlcmVuY2VzLnB1c2hfbm90aWZpY2F0aW9ucyxcbiAgICAgIGlzU3VwcG9ydGVkLFxuICAgICAgaXNWYXBpZFJlYWR5LFxuICAgICAgcGVybWlzc2lvbjogcGVybWlzc2lvbi5wZXJtaXNzaW9uLFxuICAgICAgaXNTdWJzY3JpYmVkLFxuICAgICAgYWxyZWFkeUF0dGVtcHRlZFRoaXNTZXNzaW9uOiBoYXNBdXRvRW5hYmxlUHVzaEJlZW5BdHRlbXB0ZWQodXNlci5pZCksXG4gICAgfTtcblxuICAgIGlmICghc2hvdWxkQXV0b0VuYWJsZVB1c2goaW5wdXQpKSByZXR1cm47XG5cbiAgICBtYXJrQXV0b0VuYWJsZVB1c2hBdHRlbXB0ZWQodXNlci5pZCk7XG5cbiAgICB2b2lkIChhc3luYyAoKSA9PiB7XG4gICAgICB0cnkge1xuICAgICAgICBjb25zdCBvayA9IGF3YWl0IHB1c2hOb3RpZmljYXRpb25TZXJ2aWNlLmluaXRpYWxpemUoKTtcbiAgICAgICAgaWYgKCFvaykge1xuICAgICAgICAgIGxvZ2dlci5kZWJ1ZygnQXV0by1lbmFibGUgcHVzaCBza2lwcGVkIG9yIGRlY2xpbmVkJywgeyB1c2VySWQ6IHVzZXIuaWQgfSk7XG4gICAgICAgIH1cbiAgICAgIH0gY2F0Y2ggKGVycm9yKSB7XG4gICAgICAgIGxvZ2dlci53YXJuKCdBdXRvLWVuYWJsZSBwdXNoIGZhaWxlZCcsIHsgZXJyb3IsIHVzZXJJZDogdXNlci5pZCB9KTtcbiAgICAgIH1cbiAgICB9KSgpO1xuICB9LCBbXG4gICAgZW5hYmxlZCxcbiAgICB1c2VyPy5pZCxcbiAgICBwcmVmZXJlbmNlcyxcbiAgICBwcmVmZXJlbmNlcz8ucHVzaF9ub3RpZmljYXRpb25zLFxuICAgIGlzU3VwcG9ydGVkLFxuICAgIGlzVmFwaWRSZWFkeSxcbiAgICBpc1N1YnNjcmliZWQsXG4gICAgcGVybWlzc2lvbi5wZXJtaXNzaW9uLFxuICBdKTtcblxuICByZXR1cm4gbnVsbDtcbn1cbiJdLCJuYW1lcyI6WyJ1c2VFZmZlY3QiLCJ1c2VBdXRoIiwidXNlRGVmZXJyZWRNb3VudCIsInVzZU5vdGlmaWNhdGlvblByZWZlcmVuY2VzIiwidXNlUHVzaE5vdGlmaWNhdGlvbnMiLCJoYXNBdXRvRW5hYmxlUHVzaEJlZW5BdHRlbXB0ZWQiLCJtYXJrQXV0b0VuYWJsZVB1c2hBdHRlbXB0ZWQiLCJzaG91bGRBdXRvRW5hYmxlUHVzaCIsInB1c2hOb3RpZmljYXRpb25TZXJ2aWNlIiwibG9nZ2VyIiwiQXV0b0VuYWJsZVB1c2hOb3RpZmljYXRpb25zIiwidXNlciIsImxvYWRpbmciLCJlbmFibGVkIiwiZGF0YSIsInByZWZlcmVuY2VzIiwiaXNTdXBwb3J0ZWQiLCJpc1ZhcGlkUmVhZHkiLCJpc1N1YnNjcmliZWQiLCJwZXJtaXNzaW9uIiwiaWQiLCJpbnB1dCIsInVzZXJJZCIsInB1c2hOb3RpZmljYXRpb25zRW5hYmxlZCIsInB1c2hfbm90aWZpY2F0aW9ucyIsImFscmVhZHlBdHRlbXB0ZWRUaGlzU2Vzc2lvbiIsIm9rIiwiaW5pdGlhbGl6ZSIsImRlYnVnIiwiZXJyb3IiLCJ3YXJuIl0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7Ozs7OztBQUFBLFNBQVNBLFNBQVMsUUFBUSxRQUFRO0FBQ2xDLFNBQVNDLE9BQU8sUUFBUSx5QkFBeUI7QUFDakQsU0FBU0MsZ0JBQWdCLFFBQVEsMkJBQTJCO0FBQzVELFNBQVNDLDBCQUEwQixRQUFRLDJCQUEyQjtBQUN0RSxTQUFTQyxvQkFBb0IsUUFBUSwrQkFBK0I7QUFDcEUsU0FDRUMsOEJBQThCLEVBQzlCQywyQkFBMkIsRUFDM0JDLG9CQUFvQixRQUNmLHVDQUF1QztBQUM5QyxTQUFTQyx1QkFBdUIsUUFBUSwyQkFBMkI7QUFDbkUsU0FBU0MsTUFBTSxRQUFRLGVBQWU7QUFFdEM7OztDQUdDLEdBQ0QsT0FBTyxTQUFTQzs7SUFDZCxNQUFNLEVBQUVDLElBQUksRUFBRUMsT0FBTyxFQUFFLEdBQUdYO0lBQzFCLE1BQU1ZLFVBQVVYLGlCQUFpQixDQUFDVSxXQUFXLENBQUMsQ0FBQ0QsTUFBTTtJQUNyRCxNQUFNLEVBQUVHLE1BQU1DLFdBQVcsRUFBRSxHQUFHWjtJQUM5QixNQUFNLEVBQUVhLFdBQVcsRUFBRUMsWUFBWSxFQUFFQyxZQUFZLEVBQUVDLFVBQVUsRUFBRSxHQUFHZjtJQUVoRUosVUFBVTtRQUNSLElBQUksQ0FBQ2EsV0FBVyxDQUFDRixNQUFNUyxNQUFNLENBQUNMLGFBQWE7UUFFM0MsTUFBTU0sUUFBUTtZQUNaQyxRQUFRWCxLQUFLUyxFQUFFO1lBQ2ZHLDBCQUEwQlIsWUFBWVMsa0JBQWtCO1lBQ3hEUjtZQUNBQztZQUNBRSxZQUFZQSxXQUFXQSxVQUFVO1lBQ2pDRDtZQUNBTyw2QkFBNkJwQiwrQkFBK0JNLEtBQUtTLEVBQUU7UUFDckU7UUFFQSxJQUFJLENBQUNiLHFCQUFxQmMsUUFBUTtRQUVsQ2YsNEJBQTRCSyxLQUFLUyxFQUFFO1FBRW5DLEtBQUssQUFBQyxDQUFBO1lBQ0osSUFBSTtnQkFDRixNQUFNTSxLQUFLLE1BQU1sQix3QkFBd0JtQixVQUFVO2dCQUNuRCxJQUFJLENBQUNELElBQUk7b0JBQ1BqQixPQUFPbUIsS0FBSyxDQUFDLHdDQUF3Qzt3QkFBRU4sUUFBUVgsS0FBS1MsRUFBRTtvQkFBQztnQkFDekU7WUFDRixFQUFFLE9BQU9TLE9BQU87Z0JBQ2RwQixPQUFPcUIsSUFBSSxDQUFDLDJCQUEyQjtvQkFBRUQ7b0JBQU9QLFFBQVFYLEtBQUtTLEVBQUU7Z0JBQUM7WUFDbEU7UUFDRixDQUFBO0lBQ0YsR0FBRztRQUNEUDtRQUNBRixNQUFNUztRQUNOTDtRQUNBQSxhQUFhUztRQUNiUjtRQUNBQztRQUNBQztRQUNBQyxXQUFXQSxVQUFVO0tBQ3RCO0lBRUQsT0FBTztBQUNUO0dBN0NnQlQ7O1FBQ1lUO1FBQ1ZDO1FBQ2NDO1FBQ2tDQzs7O0tBSmxETSJ9

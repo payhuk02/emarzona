@@ -1,0 +1,20 @@
+/**
+ * Calls `unref` on a timer, if the method is available on @param timer.
+ *
+ * `unref()` is used to allow processes to exit immediately, even if the timer
+ * is still running and hasn't resolved yet.
+ *
+ * Use this in places where code can run on browser or server, since browsers
+ * do not support `unref`.
+ */
+function safeUnref(timer) {
+  if (typeof timer === 'object' && typeof timer.unref === 'function') {
+    timer.unref();
+  }
+  return timer;
+}
+
+export { safeUnref };
+                                 
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidGltZXIuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy91dGlscy90aW1lci50cyJdLCJzb3VyY2VzQ29udGVudCI6WyIvKipcbiAqIENhbGxzIGB1bnJlZmAgb24gYSB0aW1lciwgaWYgdGhlIG1ldGhvZCBpcyBhdmFpbGFibGUgb24gQHBhcmFtIHRpbWVyLlxuICpcbiAqIGB1bnJlZigpYCBpcyB1c2VkIHRvIGFsbG93IHByb2Nlc3NlcyB0byBleGl0IGltbWVkaWF0ZWx5LCBldmVuIGlmIHRoZSB0aW1lclxuICogaXMgc3RpbGwgcnVubmluZyBhbmQgaGFzbid0IHJlc29sdmVkIHlldC5cbiAqXG4gKiBVc2UgdGhpcyBpbiBwbGFjZXMgd2hlcmUgY29kZSBjYW4gcnVuIG9uIGJyb3dzZXIgb3Igc2VydmVyLCBzaW5jZSBicm93c2Vyc1xuICogZG8gbm90IHN1cHBvcnQgYHVucmVmYC5cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIHNhZmVVbnJlZih0aW1lcjogUmV0dXJuVHlwZTx0eXBlb2Ygc2V0VGltZW91dD4pOiBSZXR1cm5UeXBlPHR5cGVvZiBzZXRUaW1lb3V0PiB7XG4gIGlmICh0eXBlb2YgdGltZXIgPT09ICdvYmplY3QnICYmIHR5cGVvZiB0aW1lci51bnJlZiA9PT0gJ2Z1bmN0aW9uJykge1xuICAgIHRpbWVyLnVucmVmKCk7XG4gIH1cbiAgcmV0dXJuIHRpbWVyO1xufVxuIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNPLFNBQVMsU0FBUyxDQUFDLEtBQUssRUFBZ0U7QUFDL0YsRUFBRSxJQUFJLE9BQU8sS0FBQSxLQUFVLFFBQUEsSUFBWSxPQUFPLEtBQUssQ0FBQyxLQUFBLEtBQVUsVUFBVSxFQUFFO0FBQ3RFLElBQUksS0FBSyxDQUFDLEtBQUssRUFBRTtBQUNqQixFQUFFO0FBQ0YsRUFBRSxPQUFPLEtBQUs7QUFDZDs7OzsiLCJ4X2dvb2dsZV9pZ25vcmVMaXN0IjpbMF19

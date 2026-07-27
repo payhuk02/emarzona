@@ -1,0 +1,81 @@
+import { WINDOW } from "/node_modules/@sentry-internal/browser-utils/build/esm/types.js?v=a52cce50";
+import { bindReporter } from "/node_modules/@sentry-internal/browser-utils/build/esm/metrics/web-vitals/lib/bindReporter.js?v=a52cce50";
+import { getActivationStart } from "/node_modules/@sentry-internal/browser-utils/build/esm/metrics/web-vitals/lib/getActivationStart.js?v=a52cce50";
+import { getNavigationEntry } from "/node_modules/@sentry-internal/browser-utils/build/esm/metrics/web-vitals/lib/getNavigationEntry.js?v=a52cce50";
+import { initMetric } from "/node_modules/@sentry-internal/browser-utils/build/esm/metrics/web-vitals/lib/initMetric.js?v=a52cce50";
+import { whenActivated } from "/node_modules/@sentry-internal/browser-utils/build/esm/metrics/web-vitals/lib/whenActivated.js?v=a52cce50";
+
+/*
+ * Copyright 2020 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+/** Thresholds for TTFB. See https://web.dev/articles/ttfb#what_is_a_good_ttfb_score */
+const TTFBThresholds = [800, 1800];
+
+/**
+ * Runs in the next task after the page is done loading and/or prerendering.
+ * @param callback
+ */
+const whenReady = (callback) => {
+  if (WINDOW.document?.prerendering) {
+    whenActivated(() => whenReady(callback));
+  } else if (WINDOW.document?.readyState !== 'complete') {
+    addEventListener('load', () => whenReady(callback), true);
+  } else {
+    // Queue a task so the callback runs after `loadEventEnd`.
+    setTimeout(callback);
+  }
+};
+
+/**
+ * Calculates the [TTFB](https://web.dev/articles/ttfb) value for the
+ * current page and calls the `callback` function once the page has loaded,
+ * along with the relevant `navigation` performance entry used to determine the
+ * value. The reported value is a `DOMHighResTimeStamp`.
+ *
+ * Note, this function waits until after the page is loaded to call `callback`
+ * in order to ensure all properties of the `navigation` entry are populated.
+ * This is useful if you want to report on other metrics exposed by the
+ * [Navigation Timing API](https://w3c.github.io/navigation-timing/). For
+ * example, the TTFB metric starts from the page's [time
+ * origin](https://www.w3.org/TR/hr-time-2/#sec-time-origin), which means it
+ * includes time spent on DNS lookup, connection negotiation, network latency,
+ * and server processing time.
+ */
+const onTTFB = (onReport, opts = {}) => {
+  const metric = initMetric('TTFB');
+  const report = bindReporter(onReport, metric, TTFBThresholds, opts.reportAllChanges);
+
+  whenReady(() => {
+    const navigationEntry = getNavigationEntry();
+
+    if (navigationEntry) {
+      // The activationStart reference is used because TTFB should be
+      // relative to page activation rather than navigation start if the
+      // page was prerendered. But in cases where `activationStart` occurs
+      // after the first byte is received, this time should be clamped at 0.
+      metric.value = Math.max(navigationEntry.responseStart - getActivationStart(), 0);
+
+      metric.entries = [navigationEntry];
+      report(true);
+    }
+  });
+};
+
+export { TTFBThresholds, onTTFB };
+                                  
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoib25UVEZCLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi9zcmMvbWV0cmljcy93ZWItdml0YWxzL29uVFRGQi50cyJdLCJzb3VyY2VzQ29udGVudCI6WyIvKlxuICogQ29weXJpZ2h0IDIwMjAgR29vZ2xlIExMQ1xuICpcbiAqIExpY2Vuc2VkIHVuZGVyIHRoZSBBcGFjaGUgTGljZW5zZSwgVmVyc2lvbiAyLjAgKHRoZSBcIkxpY2Vuc2VcIik7XG4gKiB5b3UgbWF5IG5vdCB1c2UgdGhpcyBmaWxlIGV4Y2VwdCBpbiBjb21wbGlhbmNlIHdpdGggdGhlIExpY2Vuc2UuXG4gKiBZb3UgbWF5IG9idGFpbiBhIGNvcHkgb2YgdGhlIExpY2Vuc2UgYXRcbiAqXG4gKiAgICAgaHR0cHM6Ly93d3cuYXBhY2hlLm9yZy9saWNlbnNlcy9MSUNFTlNFLTIuMFxuICpcbiAqIFVubGVzcyByZXF1aXJlZCBieSBhcHBsaWNhYmxlIGxhdyBvciBhZ3JlZWQgdG8gaW4gd3JpdGluZywgc29mdHdhcmVcbiAqIGRpc3RyaWJ1dGVkIHVuZGVyIHRoZSBMaWNlbnNlIGlzIGRpc3RyaWJ1dGVkIG9uIGFuIFwiQVMgSVNcIiBCQVNJUyxcbiAqIFdJVEhPVVQgV0FSUkFOVElFUyBPUiBDT05ESVRJT05TIE9GIEFOWSBLSU5ELCBlaXRoZXIgZXhwcmVzcyBvciBpbXBsaWVkLlxuICogU2VlIHRoZSBMaWNlbnNlIGZvciB0aGUgc3BlY2lmaWMgbGFuZ3VhZ2UgZ292ZXJuaW5nIHBlcm1pc3Npb25zIGFuZFxuICogbGltaXRhdGlvbnMgdW5kZXIgdGhlIExpY2Vuc2UuXG4gKi9cblxuaW1wb3J0IHsgV0lORE9XIH0gZnJvbSAnLi4vLi4vdHlwZXMnO1xuaW1wb3J0IHsgYmluZFJlcG9ydGVyIH0gZnJvbSAnLi9saWIvYmluZFJlcG9ydGVyJztcbmltcG9ydCB7IGdldEFjdGl2YXRpb25TdGFydCB9IGZyb20gJy4vbGliL2dldEFjdGl2YXRpb25TdGFydCc7XG5pbXBvcnQgeyBnZXROYXZpZ2F0aW9uRW50cnkgfSBmcm9tICcuL2xpYi9nZXROYXZpZ2F0aW9uRW50cnknO1xuaW1wb3J0IHsgaW5pdE1ldHJpYyB9IGZyb20gJy4vbGliL2luaXRNZXRyaWMnO1xuaW1wb3J0IHsgd2hlbkFjdGl2YXRlZCB9IGZyb20gJy4vbGliL3doZW5BY3RpdmF0ZWQnO1xuaW1wb3J0IHR5cGUgeyBNZXRyaWNSYXRpbmdUaHJlc2hvbGRzLCBSZXBvcnRPcHRzLCBUVEZCTWV0cmljIH0gZnJvbSAnLi90eXBlcyc7XG5cbi8qKiBUaHJlc2hvbGRzIGZvciBUVEZCLiBTZWUgaHR0cHM6Ly93ZWIuZGV2L2FydGljbGVzL3R0ZmIjd2hhdF9pc19hX2dvb2RfdHRmYl9zY29yZSAqL1xuZXhwb3J0IGNvbnN0IFRURkJUaHJlc2hvbGRzOiBNZXRyaWNSYXRpbmdUaHJlc2hvbGRzID0gWzgwMCwgMTgwMF07XG5cbi8qKlxuICogUnVucyBpbiB0aGUgbmV4dCB0YXNrIGFmdGVyIHRoZSBwYWdlIGlzIGRvbmUgbG9hZGluZyBhbmQvb3IgcHJlcmVuZGVyaW5nLlxuICogQHBhcmFtIGNhbGxiYWNrXG4gKi9cbmNvbnN0IHdoZW5SZWFkeSA9IChjYWxsYmFjazogKCkgPT4gdm9pZCkgPT4ge1xuICBpZiAoV0lORE9XLmRvY3VtZW50Py5wcmVyZW5kZXJpbmcpIHtcbiAgICB3aGVuQWN0aXZhdGVkKCgpID0+IHdoZW5SZWFkeShjYWxsYmFjaykpO1xuICB9IGVsc2UgaWYgKFdJTkRPVy5kb2N1bWVudD8ucmVhZHlTdGF0ZSAhPT0gJ2NvbXBsZXRlJykge1xuICAgIGFkZEV2ZW50TGlzdGVuZXIoJ2xvYWQnLCAoKSA9PiB3aGVuUmVhZHkoY2FsbGJhY2spLCB0cnVlKTtcbiAgfSBlbHNlIHtcbiAgICAvLyBRdWV1ZSBhIHRhc2sgc28gdGhlIGNhbGxiYWNrIHJ1bnMgYWZ0ZXIgYGxvYWRFdmVudEVuZGAuXG4gICAgc2V0VGltZW91dChjYWxsYmFjayk7XG4gIH1cbn07XG5cbi8qKlxuICogQ2FsY3VsYXRlcyB0aGUgW1RURkJdKGh0dHBzOi8vd2ViLmRldi9hcnRpY2xlcy90dGZiKSB2YWx1ZSBmb3IgdGhlXG4gKiBjdXJyZW50IHBhZ2UgYW5kIGNhbGxzIHRoZSBgY2FsbGJhY2tgIGZ1bmN0aW9uIG9uY2UgdGhlIHBhZ2UgaGFzIGxvYWRlZCxcbiAqIGFsb25nIHdpdGggdGhlIHJlbGV2YW50IGBuYXZpZ2F0aW9uYCBwZXJmb3JtYW5jZSBlbnRyeSB1c2VkIHRvIGRldGVybWluZSB0aGVcbiAqIHZhbHVlLiBUaGUgcmVwb3J0ZWQgdmFsdWUgaXMgYSBgRE9NSGlnaFJlc1RpbWVTdGFtcGAuXG4gKlxuICogTm90ZSwgdGhpcyBmdW5jdGlvbiB3YWl0cyB1bnRpbCBhZnRlciB0aGUgcGFnZSBpcyBsb2FkZWQgdG8gY2FsbCBgY2FsbGJhY2tgXG4gKiBpbiBvcmRlciB0byBlbnN1cmUgYWxsIHByb3BlcnRpZXMgb2YgdGhlIGBuYXZpZ2F0aW9uYCBlbnRyeSBhcmUgcG9wdWxhdGVkLlxuICogVGhpcyBpcyB1c2VmdWwgaWYgeW91IHdhbnQgdG8gcmVwb3J0IG9uIG90aGVyIG1ldHJpY3MgZXhwb3NlZCBieSB0aGVcbiAqIFtOYXZpZ2F0aW9uIFRpbWluZyBBUEldKGh0dHBzOi8vdzNjLmdpdGh1Yi5pby9uYXZpZ2F0aW9uLXRpbWluZy8pLiBGb3JcbiAqIGV4YW1wbGUsIHRoZSBUVEZCIG1ldHJpYyBzdGFydHMgZnJvbSB0aGUgcGFnZSdzIFt0aW1lXG4gKiBvcmlnaW5dKGh0dHBzOi8vd3d3LnczLm9yZy9UUi9oci10aW1lLTIvI3NlYy10aW1lLW9yaWdpbiksIHdoaWNoIG1lYW5zIGl0XG4gKiBpbmNsdWRlcyB0aW1lIHNwZW50IG9uIEROUyBsb29rdXAsIGNvbm5lY3Rpb24gbmVnb3RpYXRpb24sIG5ldHdvcmsgbGF0ZW5jeSxcbiAqIGFuZCBzZXJ2ZXIgcHJvY2Vzc2luZyB0aW1lLlxuICovXG5leHBvcnQgY29uc3Qgb25UVEZCID0gKG9uUmVwb3J0OiAobWV0cmljOiBUVEZCTWV0cmljKSA9PiB2b2lkLCBvcHRzOiBSZXBvcnRPcHRzID0ge30pID0+IHtcbiAgY29uc3QgbWV0cmljID0gaW5pdE1ldHJpYygnVFRGQicpO1xuICBjb25zdCByZXBvcnQgPSBiaW5kUmVwb3J0ZXIob25SZXBvcnQsIG1ldHJpYywgVFRGQlRocmVzaG9sZHMsIG9wdHMucmVwb3J0QWxsQ2hhbmdlcyk7XG5cbiAgd2hlblJlYWR5KCgpID0+IHtcbiAgICBjb25zdCBuYXZpZ2F0aW9uRW50cnkgPSBnZXROYXZpZ2F0aW9uRW50cnkoKTtcblxuICAgIGlmIChuYXZpZ2F0aW9uRW50cnkpIHtcbiAgICAgIC8vIFRoZSBhY3RpdmF0aW9uU3RhcnQgcmVmZXJlbmNlIGlzIHVzZWQgYmVjYXVzZSBUVEZCIHNob3VsZCBiZVxuICAgICAgLy8gcmVsYXRpdmUgdG8gcGFnZSBhY3RpdmF0aW9uIHJhdGhlciB0aGFuIG5hdmlnYXRpb24gc3RhcnQgaWYgdGhlXG4gICAgICAvLyBwYWdlIHdhcyBwcmVyZW5kZXJlZC4gQnV0IGluIGNhc2VzIHdoZXJlIGBhY3RpdmF0aW9uU3RhcnRgIG9jY3Vyc1xuICAgICAgLy8gYWZ0ZXIgdGhlIGZpcnN0IGJ5dGUgaXMgcmVjZWl2ZWQsIHRoaXMgdGltZSBzaG91bGQgYmUgY2xhbXBlZCBhdCAwLlxuICAgICAgbWV0cmljLnZhbHVlID0gTWF0aC5tYXgobmF2aWdhdGlvbkVudHJ5LnJlc3BvbnNlU3RhcnQgLSBnZXRBY3RpdmF0aW9uU3RhcnQoKSwgMCk7XG5cbiAgICAgIG1ldHJpYy5lbnRyaWVzID0gW25hdmlnYXRpb25FbnRyeV07XG4gICAgICByZXBvcnQodHJ1ZSk7XG4gICAgfVxuICB9KTtcbn07XG4iXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7OztBQUFBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTs7O0FBVUE7QUFDTyxNQUFNLGNBQWMsR0FBMkIsQ0FBQyxHQUFHLEVBQUUsSUFBSTs7QUFFaEU7QUFDQTtBQUNBO0FBQ0E7QUFDQSxNQUFNLFNBQUEsR0FBWSxDQUFDLFFBQVEsS0FBaUI7QUFDNUMsRUFBRSxJQUFJLE1BQU0sQ0FBQyxRQUFRLEVBQUUsWUFBWSxFQUFFO0FBQ3JDLElBQUksYUFBYSxDQUFDLE1BQU0sU0FBUyxDQUFDLFFBQVEsQ0FBQyxDQUFDO0FBQzVDLEVBQUUsQ0FBQSxNQUFPLElBQUksTUFBTSxDQUFDLFFBQVEsRUFBRSxVQUFBLEtBQWUsVUFBVSxFQUFFO0FBQ3pELElBQUksZ0JBQWdCLENBQUMsTUFBTSxFQUFFLE1BQU0sU0FBUyxDQUFDLFFBQVEsQ0FBQyxFQUFFLElBQUksQ0FBQztBQUM3RCxFQUFFLE9BQU87QUFDVDtBQUNBLElBQUksVUFBVSxDQUFDLFFBQVEsQ0FBQztBQUN4QixFQUFFO0FBQ0YsQ0FBQzs7QUFFRDtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDTyxNQUFNLE1BQUEsR0FBUyxDQUFDLFFBQVEsRUFBZ0MsSUFBSSxHQUFlLEVBQUUsS0FBSztBQUN6RixFQUFFLE1BQU0sTUFBQSxHQUFTLFVBQVUsQ0FBQyxNQUFNLENBQUM7QUFDbkMsRUFBRSxNQUFNLE1BQUEsR0FBUyxZQUFZLENBQUMsUUFBUSxFQUFFLE1BQU0sRUFBRSxjQUFjLEVBQUUsSUFBSSxDQUFDLGdCQUFnQixDQUFDOztBQUV0RixFQUFFLFNBQVMsQ0FBQyxNQUFNO0FBQ2xCLElBQUksTUFBTSxlQUFBLEdBQWtCLGtCQUFrQixFQUFFOztBQUVoRCxJQUFJLElBQUksZUFBZSxFQUFFO0FBQ3pCO0FBQ0E7QUFDQTtBQUNBO0FBQ0EsTUFBTSxNQUFNLENBQUMsS0FBQSxHQUFRLElBQUksQ0FBQyxHQUFHLENBQUMsZUFBZSxDQUFDLGdCQUFnQixrQkFBa0IsRUFBRSxFQUFFLENBQUMsQ0FBQzs7QUFFdEYsTUFBTSxNQUFNLENBQUMsT0FBQSxHQUFVLENBQUMsZUFBZSxDQUFDO0FBQ3hDLE1BQU0sTUFBTSxDQUFDLElBQUksQ0FBQztBQUNsQixJQUFJO0FBQ0osRUFBRSxDQUFDLENBQUM7QUFDSjs7OzsiLCJ4X2dvb2dsZV9pZ25vcmVMaXN0IjpbMF19

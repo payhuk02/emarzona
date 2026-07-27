@@ -1,0 +1,1008 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/AppSidebar.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=6014a254"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"]; const _Fragment = __vite__cjsImport2_react_jsxDevRuntime["Fragment"];
+var _s = $RefreshSig$();
+import { LayoutDashboard, Search, Check, Plus } from "/src/components/icons/index.ts";
+import { Circle, ChevronDown, ChevronRight, Lock, ShoppingBag, Key, Activity, Package } from "/node_modules/.vite/deps/lucide-react.js?v=6014a254";
+import { usePlatformLogo } from "/src/hooks/usePlatformLogo.ts";
+import { NavLink, Link, useNavigate, useLocation } from "/node_modules/.vite/deps/react-router-dom.js?v=6014a254";
+import { SidebarCollapsibleSection } from "/src/components/sidebar/SidebarCollapsibleSection.tsx";
+import { SidebarNavCommandPalette } from "/src/components/sidebar/SidebarNavCommandPalette.tsx";
+import { SidebarPersonaSwitch } from "/src/components/sidebar/SidebarPersonaSwitch.tsx";
+import { PersonaOnboardingCoach } from "/src/components/sidebar/PersonaOnboardingCoach.tsx";
+import { NAV_LINK_ACTIVE, NAV_LINK_INACTIVE } from "/src/components/sidebar/sidebar-nav-shared.ts";
+import { DEFAULT_OPEN_SECTION_KEYS, flattenNavSections, sectionContainsPath } from "/src/config/navigation.enrich.ts";
+import { getNavItemPath, isNavItemActive, parseNavTo, resolveSidebarLogoAriaKey, resolveSidebarLogoHome } from "/src/config/navigation.helpers.ts";
+import { resolveNavItemIcon } from "/src/config/navigation.icons.ts";
+import { useSidebarPersona } from "/src/hooks/useSidebarPersona.ts";
+import { useSidebarNavigation } from "/src/hooks/useSidebarNavigation.ts";
+import { recordNavClick, sortEntriesByNavFrequency } from "/src/hooks/useNavigationAnalytics.ts";
+import __vite__cjsImport18_react from "/node_modules/.vite/deps/react.js?v=6014a254"; const useState = __vite__cjsImport18_react["useState"]; const useEffect = __vite__cjsImport18_react["useEffect"]; const useMemo = __vite__cjsImport18_react["useMemo"]; const useCallback = __vite__cjsImport18_react["useCallback"];
+import __vite__cjsImport19_react from "/node_modules/.vite/deps/react.js?v=6014a254"; const React = __vite__cjsImport19_react.__esModule ? __vite__cjsImport19_react.default : __vite__cjsImport19_react;
+import { useTranslation } from "/node_modules/.vite/deps/react-i18next.js?v=02b07ad4";
+import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "/src/components/ui/sidebar.tsx";
+import { Button } from "/src/components/ui/button.tsx";
+import { EmarzonaBrandName } from "/src/components/brand/EmarzonaBrandName.tsx";
+import { cn } from "/src/lib/utils.ts";
+import { STORE_CREATE_PATH } from "/src/lib/store/store-create-path.ts";
+import { useToast } from "/src/hooks/use-toast.ts";
+import { useAdmin } from "/src/hooks/useAdmin.ts";
+import { useStoreContext } from "/src/contexts/StoreContext.tsx";
+import { useAuth } from "/src/contexts/AuthContext.tsx";
+import { useStorePhysicalAccess } from "/src/hooks/billing/useStorePhysicalAccess.ts";
+import { isNavPathPlanLocked } from "/src/lib/navigation/plan-lock-nav.ts";
+import { usePlanLockNavAction } from "/src/hooks/usePlanLockNavAction.ts";
+import { hasSidebarJsonPref, readSidebarJsonPref, setSidebarPrefsUserId, SIDEBAR_PREF_KEYS, writeSidebarJsonPref } from "/src/lib/navigation/sidebar-prefs-storage.ts";
+import { parseStoreCommerceType } from "/src/lib/billing/store-commerce-access.ts";
+import { canAccessCommercePath, getPrimaryProductCreatePath } from "/src/lib/commerce/store-capability-map.ts";
+import { isSellerNavItemActive, resolveSellerNavUrl } from "/src/lib/navigation/vendor-products-nav.ts";
+import { logger } from "/src/lib/logger.ts";
+import { LogoImageWithFallback } from "/src/components/sidebar/LogoImageWithFallback.tsx";
+import { ContextSidebar, useContextSidebar } from "/src/components/navigation/ContextSidebar.tsx";
+import { MegaMenuDropdown } from "/src/components/navigation/MegaMenuDropdown.tsx";
+import { CONTEXT_SIDEBAR_MAPPING } from "/src/config/navigation.context.extended.ts";
+const isNavItemPlanLocked = (url, planSlug, commerceType)=>isNavPathPlanLocked(url, planSlug, commerceType);
+// Exact hub path only — startsWith would wrap create wizards (/products/new/*)
+// in MegaMenuDropdown (button, no href) and break commerce-gating E2E + deep links.
+const getContextSectionsForItem = (itemUrl)=>{
+    const path = itemUrl.split('?')[0].replace(/\/+$/, '') || '/';
+    return CONTEXT_SIDEBAR_MAPPING[path] ?? [];
+};
+const buildDefaultCollapsedSections = (sections, pathname, search, commerceType)=>{
+    const openKeys = new Set(DEFAULT_OPEN_SECTION_KEYS);
+    sections.forEach((s)=>{
+        if (s.defaultOpen) openKeys.add(s.sectionKey);
+    });
+    const activeKey = sections.find((s)=>sectionContainsPath(s, pathname, search, commerceType))?.sectionKey;
+    if (activeKey) openKeys.add(activeKey);
+    return sections.map((s)=>s.sectionKey).filter((key)=>!openKeys.has(key));
+};
+export function AppSidebar() {
+    _s();
+    const { t } = useTranslation();
+    const { user } = useAuth();
+    const userId = user?.id ?? null;
+    const { state, isMobile } = useSidebar();
+    const navigate = useNavigate();
+    const location = useLocation();
+    const { toast } = useToast();
+    const { isAdmin } = useAdmin();
+    const { stores, selectedStoreId, selectedStore, switchStore, canCreateStore, loading: storesLoading } = useStoreContext();
+    const { planSlug } = useStorePhysicalAccess(selectedStoreId);
+    const commerceType = selectedStore?.commerce_type;
+    const storeMetadata = selectedStore?.metadata ?? null;
+    const platformLogo = usePlatformLogo();
+    const handlePlanLockedNav = usePlanLockNavAction();
+    /** Desktop rail only — mobile drawer always shows labels + icons */ const isCollapsed = state === 'collapsed' && !isMobile;
+    const { persona, setPersona, needsPersonaOnboarding } = useSidebarPersona(isAdmin);
+    const [commandOpen, setCommandOpen] = useState(false);
+    const { isOpen: contextSidebarOpen, open: openContextSidebar, close: closeContextSidebar } = useContextSidebar();
+    const [megaMenuOpen, setMegaMenuOpen] = useState(false);
+    const [collapsedSections, setCollapsedSections] = useState([]);
+    const [prefsHydrated, setPrefsHydrated] = useState(false);
+    const [storesMenuOpen, setStoresMenuOpen] = useState(false);
+    const showAdminMenu = isAdmin && persona === 'admin';
+    const showUserMenu = !showAdminMenu;
+    const resolveNavHref = (url)=>persona === 'seller' ? resolveSellerNavUrl(url, commerceType) : url;
+    const isNavLinkActive = useCallback((url, mode = 'exact')=>persona === 'seller' ? isSellerNavItemActive(url, location.pathname, location.search, mode, commerceType) : isNavItemActive(url, location.pathname, location.search, mode), [
+        persona,
+        location.pathname,
+        location.search,
+        commerceType
+    ]);
+    const logoHome = resolveSidebarLogoHome(persona);
+    const logoAriaKey = resolveSidebarLogoAriaKey(persona);
+    const { activeSections, commandPaletteSections } = useSidebarNavigation({
+        persona,
+        isPlatformAdmin: isAdmin,
+        showAdminMenu,
+        commerceType,
+        storeMetadata
+    });
+    const allCurrentEntries = useMemo(()=>flattenNavSections(activeSections), [
+        activeSections
+    ]);
+    const navCommandEntries = useMemo(()=>sortEntriesByNavFrequency(flattenNavSections(commandPaletteSections)).map((entry)=>({
+                title: entry.title,
+                url: entry.url,
+                icon: entry.icon,
+                sectionLabel: entry.sectionLabel
+            })), [
+        commandPaletteSections
+    ]);
+    const vendorQuickActions = useMemo(()=>{
+        const type = parseStoreCommerceType(commerceType);
+        const createLabels = {
+            physical: t('command.newPhysicalProduct', 'Nouveau produit physique'),
+            digital: t('command.newDigitalProduct', 'Nouveau produit digital'),
+            service: t('command.newService', 'Nouveau service'),
+            course: t('command.newCourse', 'Nouveau cours'),
+            artist: t('command.newArtistWork', "Nouvelle œuvre d'artiste")
+        };
+        const actions = [
+            {
+                title: createLabels[type],
+                url: getPrimaryProductCreatePath(type),
+                icon: Plus,
+                sectionLabel: t('command.quickActions', 'Actions rapides')
+            },
+            {
+                title: t('command.orders', 'Commandes'),
+                url: '/dashboard/orders',
+                icon: ShoppingBag,
+                sectionLabel: t('command.quickActions', 'Actions rapides')
+            },
+            {
+                title: t('command.integrations', 'Clés API & intégrations'),
+                url: '/dashboard/integrations',
+                icon: Key,
+                sectionLabel: t('command.quickActions', 'Actions rapides')
+            },
+            {
+                title: t('command.inventory', 'Inventaire'),
+                url: '/dashboard/physical/inventory',
+                icon: Package,
+                sectionLabel: t('command.quickActions', 'Actions rapides')
+            },
+            {
+                title: t('command.platformStatus', 'Statut plateforme'),
+                url: '/status',
+                icon: Activity,
+                sectionLabel: t('command.quickActions', 'Actions rapides')
+            }
+        ];
+        return actions.filter((action)=>canAccessCommercePath(action.url, type, {
+                storeMetadata
+            }));
+    }, [
+        t,
+        commerceType,
+        storeMetadata
+    ]);
+    const handlePersonaChange = (next)=>{
+        setPersona(next);
+        writeSidebarJsonPref(SIDEBAR_PREF_KEYS.personaOnboarded, true);
+        if (next === 'admin' && isAdmin) navigate('/admin');
+        else if (next === 'buyer') navigate('/account/hub');
+        else navigate('/dashboard');
+    };
+    const currentNavItem = useMemo(()=>allCurrentEntries.find((item)=>isNavLinkActive(item.url, 'exact')), [
+        allCurrentEntries,
+        isNavLinkActive
+    ]);
+    useEffect(()=>{
+        setSidebarPrefsUserId(userId);
+    }, [
+        userId
+    ]);
+    useEffect(()=>{
+        setPrefsHydrated(false);
+        try {
+            const storedCollapsed = readSidebarJsonPref(SIDEBAR_PREF_KEYS.collapsedSections, userId);
+            const storedStores = readSidebarJsonPref(SIDEBAR_PREF_KEYS.storesExpanded, userId);
+            if (storedCollapsed) setCollapsedSections(storedCollapsed);
+            if (storedStores !== null) setStoresMenuOpen(storedStores);
+            setPrefsHydrated(true);
+        } catch (error) {
+            logger.warn('Failed to restore sidebar preferences', error);
+            setPrefsHydrated(true);
+        }
+    }, [
+        userId
+    ]);
+    useEffect(()=>{
+        if (!prefsHydrated) return;
+        if (hasSidebarJsonPref(SIDEBAR_PREF_KEYS.collapsedSections, userId)) return;
+        setCollapsedSections(buildDefaultCollapsedSections(activeSections, location.pathname, location.search, commerceType));
+    }, [
+        prefsHydrated,
+        activeSections,
+        location.pathname,
+        location.search,
+        userId
+    ]);
+    useEffect(()=>{
+        if (!prefsHydrated) return;
+        if (hasSidebarJsonPref(SIDEBAR_PREF_KEYS.storesExpanded, userId)) return;
+        setStoresMenuOpen(stores.length <= 1);
+    }, [
+        prefsHydrated,
+        stores.length,
+        userId
+    ]);
+    useEffect(()=>{
+        const activeKey = activeSections.find((s)=>sectionContainsPath(s, location.pathname, location.search))?.sectionKey;
+        if (!activeKey) return;
+        setCollapsedSections((prev)=>prev.includes(activeKey) ? prev.filter((k)=>k !== activeKey) : prev);
+    }, [
+        location.pathname,
+        location.search,
+        activeSections
+    ]);
+    useEffect(()=>{
+        if (!prefsHydrated) return;
+        writeSidebarJsonPref(SIDEBAR_PREF_KEYS.storesExpanded, storesMenuOpen, userId);
+    }, [
+        storesMenuOpen,
+        prefsHydrated,
+        userId
+    ]);
+    useEffect(()=>{
+        if (!prefsHydrated) return;
+        writeSidebarJsonPref(SIDEBAR_PREF_KEYS.collapsedSections, collapsedSections, userId);
+    }, [
+        collapsedSections,
+        prefsHydrated,
+        userId
+    ]);
+    const toggleSectionCollapse = (sectionKey)=>{
+        setCollapsedSections((prev)=>prev.includes(sectionKey) ? prev.filter((key)=>key !== sectionKey) : [
+                ...prev,
+                sectionKey
+            ]);
+    };
+    const handleLockedNavClick = (itemTitle, itemUrl)=>{
+        handlePlanLockedNav(itemTitle, itemUrl);
+    };
+    const navigateToNavItem = (item)=>{
+        recordNavClick(item.url);
+        if (showUserMenu && isNavItemPlanLocked(item.url, planSlug, commerceType)) {
+            handleLockedNavClick(item.title, item.url);
+            return;
+        }
+        navigate(resolveNavHref(item.url));
+    };
+    return /*#__PURE__*/ _jsxDEV(Sidebar, {
+        collapsible: "icon",
+        className: "app-sidebar border-r border-border transition-all duration-300",
+        children: [
+            /*#__PURE__*/ _jsxDEV(SidebarNavCommandPalette, {
+                entries: navCommandEntries,
+                quickActions: vendorQuickActions,
+                open: commandOpen,
+                onOpenChange: setCommandOpen
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                lineNumber: 331,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV("div", {
+                className: cn('shrink-0 border-b border-border', isCollapsed ? 'p-2' : 'px-3 py-2.5'),
+                children: [
+                    /*#__PURE__*/ _jsxDEV("div", {
+                        className: "flex items-center gap-2 min-h-[2.75rem]",
+                        children: [
+                            /*#__PURE__*/ _jsxDEV(Link, {
+                                to: logoHome,
+                                className: "flex items-center gap-1.5 group transition-opacity duration-200 hover:opacity-90 shrink-0",
+                                "aria-label": t(logoAriaKey),
+                                children: [
+                                    platformLogo ? /*#__PURE__*/ _jsxDEV(LogoImageWithFallback, {
+                                        src: platformLogo,
+                                        className: cn('flex-shrink-0', isCollapsed ? 'h-8 w-8' : 'h-9 w-9 sm:h-10 sm:w-10')
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                        lineNumber: 347,
+                                        columnNumber: 15
+                                    }, this) : /*#__PURE__*/ _jsxDEV("div", {
+                                        className: cn('flex-shrink-0 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center shadow-md', isCollapsed ? 'h-8 w-8' : 'h-9 w-9 sm:h-10 sm:w-10'),
+                                        "aria-hidden": "true",
+                                        children: /*#__PURE__*/ _jsxDEV("span", {
+                                            className: "text-sm font-bold text-white",
+                                            children: "E"
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                            lineNumber: 359,
+                                            columnNumber: 17
+                                        }, this)
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                        lineNumber: 352,
+                                        columnNumber: 15
+                                    }, this),
+                                    !isCollapsed && /*#__PURE__*/ _jsxDEV(EmarzonaBrandName, {
+                                        className: "hidden text-lg tracking-tight sm:inline"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                        lineNumber: 363,
+                                        columnNumber: 15
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                lineNumber: 341,
+                                columnNumber: 11
+                            }, this),
+                            isCollapsed ? /*#__PURE__*/ _jsxDEV(Button, {
+                                variant: "ghost",
+                                size: "icon",
+                                className: "h-8 w-8 text-muted-foreground hover:bg-accent hover:text-foreground shrink-0",
+                                onClick: ()=>setCommandOpen(true),
+                                "aria-label": t('sidebar.chrome.searchAriaLabelCollapsed'),
+                                children: /*#__PURE__*/ _jsxDEV(Search, {
+                                    className: "h-4 w-4"
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                    lineNumber: 374,
+                                    columnNumber: 15
+                                }, this)
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                lineNumber: 367,
+                                columnNumber: 13
+                            }, this) : /*#__PURE__*/ _jsxDEV("button", {
+                                type: "button",
+                                onClick: ()=>setCommandOpen(true),
+                                className: "app-sidebar-command-trigger flex flex-1 items-center gap-2 h-9 rounded-lg border border-border bg-muted/40 px-2.5 text-left text-sm text-muted-foreground hover:border-primary/40 hover:bg-accent hover:text-foreground transition-all duration-200 min-w-0",
+                                "aria-label": t('sidebar.chrome.searchAriaLabel'),
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV(Search, {
+                                        className: "h-4 w-4 shrink-0 text-muted-foreground",
+                                        "aria-hidden": true
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                        lineNumber: 383,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("span", {
+                                        className: "flex-1 truncate text-xs",
+                                        children: t('sidebar.chrome.searchPlaceholder')
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                        lineNumber: 384,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("kbd", {
+                                        className: "hidden lg:inline-flex h-5 items-center rounded border border-border bg-muted px-1.5 text-[10px] font-medium text-muted-foreground",
+                                        children: "Ctrl+K"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                        lineNumber: 387,
+                                        columnNumber: 15
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                lineNumber: 377,
+                                columnNumber: 13
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                        lineNumber: 340,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV(PersonaOnboardingCoach, {
+                        isAdmin: isAdmin,
+                        enabled: !!userId && needsPersonaOnboarding,
+                        children: /*#__PURE__*/ _jsxDEV(SidebarPersonaSwitch, {
+                            persona: persona === 'admin' && !isAdmin ? 'seller' : persona,
+                            isAdmin: isAdmin,
+                            isCollapsed: isCollapsed,
+                            onPersonaChange: handlePersonaChange
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                            lineNumber: 394,
+                            columnNumber: 11
+                        }, this)
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                        lineNumber: 393,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                lineNumber: 339,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV(SidebarContent, {
+                className: "app-sidebar-scroll flex-1 min-h-0 overflow-y-auto scrollbar-thin",
+                children: [
+                    showUserMenu && activeSections.map((section, sectionIndex)=>/*#__PURE__*/ _jsxDEV(React.Fragment, {
+                            children: [
+                                isCollapsed && sectionIndex > 0 && /*#__PURE__*/ _jsxDEV("div", {
+                                    className: "app-sidebar-rail-separator mx-auto my-1 h-px w-6 bg-border",
+                                    role: "separator"
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                    lineNumber: 409,
+                                    columnNumber: 17
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV(SidebarCollapsibleSection, {
+                                    sectionId: section.sectionKey,
+                                    label: section.label,
+                                    isOpen: isCollapsed || !collapsedSections.includes(section.sectionKey),
+                                    onToggle: ()=>toggleSectionCollapse(section.sectionKey),
+                                    hideHeader: isCollapsed,
+                                    children: /*#__PURE__*/ _jsxDEV(SidebarGroupContent, {
+                                        children: /*#__PURE__*/ _jsxDEV(SidebarMenu, {
+                                            children: section.items.map((item)=>{
+                                                const IconComponent = resolveNavItemIcon(item.url, item.icon) ?? Circle;
+                                                if (!item.icon) {
+                                                    logger.warn(`Menu item missing icon: ${item.title}`);
+                                                }
+                                                // Menu spécial pour "Tableau de bord" avec sous-menu des boutiques - STATIQUE (toujours ouvert)
+                                                if (getNavItemPath(item.url) === '/dashboard' && !storesLoading && stores.length > 0) {
+                                                    const isDashboardActive = location.pathname === '/dashboard';
+                                                    return /*#__PURE__*/ _jsxDEV(SidebarMenuItem, {
+                                                        children: [
+                                                            /*#__PURE__*/ _jsxDEV(SidebarMenuButton, {
+                                                                asChild: true,
+                                                                tooltip: item.title,
+                                                                className: `transition-all duration-200 group relative flex items-center ${isDashboardActive ? NAV_LINK_ACTIVE : NAV_LINK_INACTIVE}`,
+                                                                children: /*#__PURE__*/ _jsxDEV(NavLink, {
+                                                                    to: item.url,
+                                                                    end: true,
+                                                                    className: "flex items-center gap-2 w-full",
+                                                                    children: [
+                                                                        /*#__PURE__*/ _jsxDEV(IconComponent, {
+                                                                            className: "h-4 w-4 shrink-0 stroke-[2]",
+                                                                            "aria-hidden": "true"
+                                                                        }, void 0, false, {
+                                                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                                                            lineNumber: 448,
+                                                                            columnNumber: 33
+                                                                        }, this),
+                                                                        !isCollapsed && /*#__PURE__*/ _jsxDEV("span", {
+                                                                            className: "flex-1 font-medium",
+                                                                            children: item.title
+                                                                        }, void 0, false, {
+                                                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                                                            lineNumber: 453,
+                                                                            columnNumber: 35
+                                                                        }, this)
+                                                                    ]
+                                                                }, void 0, true, {
+                                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                                                    lineNumber: 447,
+                                                                    columnNumber: 31
+                                                                }, this)
+                                                            }, void 0, false, {
+                                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                                                lineNumber: 440,
+                                                                columnNumber: 29
+                                                            }, this),
+                                                            !isCollapsed && stores.length > 0 && /*#__PURE__*/ _jsxDEV("button", {
+                                                                type: "button",
+                                                                onClick: ()=>setStoresMenuOpen((open)=>!open),
+                                                                className: "ml-6 mt-1 flex w-[calc(100%-1.5rem)] items-center justify-between rounded-md px-2 py-1.5 text-xs font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors",
+                                                                "aria-expanded": storesMenuOpen,
+                                                                children: [
+                                                                    /*#__PURE__*/ _jsxDEV("span", {
+                                                                        children: t('sidebar.chrome.myStores', {
+                                                                            count: stores.length
+                                                                        })
+                                                                    }, void 0, false, {
+                                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                                                        lineNumber: 464,
+                                                                        columnNumber: 33
+                                                                    }, this),
+                                                                    storesMenuOpen ? /*#__PURE__*/ _jsxDEV(ChevronDown, {
+                                                                        className: "h-3.5 w-3.5 shrink-0"
+                                                                    }, void 0, false, {
+                                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                                                        lineNumber: 468,
+                                                                        columnNumber: 35
+                                                                    }, this) : /*#__PURE__*/ _jsxDEV(ChevronRight, {
+                                                                        className: "h-3.5 w-3.5 shrink-0"
+                                                                    }, void 0, false, {
+                                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                                                        lineNumber: 470,
+                                                                        columnNumber: 35
+                                                                    }, this)
+                                                                ]
+                                                            }, void 0, true, {
+                                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                                                lineNumber: 458,
+                                                                columnNumber: 31
+                                                            }, this),
+                                                            !isCollapsed && stores.length > 0 && /*#__PURE__*/ _jsxDEV("div", {
+                                                                className: cn('ml-4 grid transition-[grid-template-rows] duration-300 ease-out', storesMenuOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'),
+                                                                children: /*#__PURE__*/ _jsxDEV("div", {
+                                                                    className: "overflow-hidden min-h-0 space-y-1 border-l border-border pl-2 mt-1",
+                                                                    children: [
+                                                                        stores.map((store)=>/*#__PURE__*/ _jsxDEV(Button, {
+                                                                                variant: "ghost",
+                                                                                size: "sm",
+                                                                                onClick: ()=>{
+                                                                                    switchStore(store.id);
+                                                                                    navigate('/dashboard');
+                                                                                    toast({
+                                                                                        title: t('sidebar.chrome.storeChangedTitle'),
+                                                                                        description: t('sidebar.chrome.storeChangedDescription', {
+                                                                                            name: store.name
+                                                                                        })
+                                                                                    });
+                                                                                },
+                                                                                className: `w-full justify-start transition-all duration-200 opacity-90 ${selectedStoreId === store.id ? NAV_LINK_ACTIVE : NAV_LINK_INACTIVE}`,
+                                                                                children: [
+                                                                                    selectedStoreId === store.id && /*#__PURE__*/ _jsxDEV(Check, {
+                                                                                        className: "h-3 w-3 mr-2"
+                                                                                    }, void 0, false, {
+                                                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                                                                        lineNumber: 504,
+                                                                                        columnNumber: 41
+                                                                                    }, this),
+                                                                                    /*#__PURE__*/ _jsxDEV("span", {
+                                                                                        className: "truncate",
+                                                                                        children: store.name
+                                                                                    }, void 0, false, {
+                                                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                                                                        lineNumber: 506,
+                                                                                        columnNumber: 39
+                                                                                    }, this)
+                                                                                ]
+                                                                            }, store.id, true, {
+                                                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                                                                lineNumber: 483,
+                                                                                columnNumber: 37
+                                                                            }, this)),
+                                                                        canCreateStore() && /*#__PURE__*/ _jsxDEV(Button, {
+                                                                            variant: "ghost",
+                                                                            size: "sm",
+                                                                            onClick: ()=>navigate(STORE_CREATE_PATH),
+                                                                            className: `w-full justify-start ${NAV_LINK_INACTIVE} transition-all duration-200`,
+                                                                            children: [
+                                                                                /*#__PURE__*/ _jsxDEV(Plus, {
+                                                                                    className: "h-3 w-3 mr-2"
+                                                                                }, void 0, false, {
+                                                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                                                                    lineNumber: 516,
+                                                                                    columnNumber: 39
+                                                                                }, this),
+                                                                                /*#__PURE__*/ _jsxDEV("span", {
+                                                                                    children: t('sidebar.chrome.createStore')
+                                                                                }, void 0, false, {
+                                                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                                                                    lineNumber: 517,
+                                                                                    columnNumber: 39
+                                                                                }, this)
+                                                                            ]
+                                                                        }, void 0, true, {
+                                                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                                                            lineNumber: 510,
+                                                                            columnNumber: 37
+                                                                        }, this)
+                                                                    ]
+                                                                }, void 0, true, {
+                                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                                                    lineNumber: 481,
+                                                                    columnNumber: 33
+                                                                }, this)
+                                                            }, void 0, false, {
+                                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                                                lineNumber: 475,
+                                                                columnNumber: 31
+                                                            }, this)
+                                                        ]
+                                                    }, `${section.label}-${item.title}-${item.url}-dashboard`, true, {
+                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                                        lineNumber: 437,
+                                                        columnNumber: 27
+                                                    }, this);
+                                                }
+                                                // Menu items normaux
+                                                const isPlanLocked = showUserMenu && isNavItemPlanLocked(item.url, planSlug, commerceType);
+                                                if (isPlanLocked) {
+                                                    return /*#__PURE__*/ _jsxDEV(SidebarMenuItem, {
+                                                        children: /*#__PURE__*/ _jsxDEV(SidebarMenuButton, {
+                                                            tooltip: t('sidebar.chrome.planLockTooltip', {
+                                                                item: item.title
+                                                            }),
+                                                            onClick: ()=>handleLockedNavClick(item.title, item.url),
+                                                            className: `${NAV_LINK_INACTIVE} opacity-75 transition-all duration-200 group relative flex items-center`,
+                                                            children: [
+                                                                /*#__PURE__*/ _jsxDEV(IconComponent, {
+                                                                    className: "h-4 w-4 shrink-0 stroke-[2]",
+                                                                    "aria-hidden": "true"
+                                                                }, void 0, false, {
+                                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                                                    lineNumber: 539,
+                                                                    columnNumber: 31
+                                                                }, this),
+                                                                !isCollapsed ? /*#__PURE__*/ _jsxDEV(_Fragment, {
+                                                                    children: [
+                                                                        /*#__PURE__*/ _jsxDEV("span", {
+                                                                            className: "flex-1 font-medium",
+                                                                            children: item.title
+                                                                        }, void 0, false, {
+                                                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                                                            lineNumber: 545,
+                                                                            columnNumber: 35
+                                                                        }, this),
+                                                                        /*#__PURE__*/ _jsxDEV(Lock, {
+                                                                            className: "h-3 w-3 flex-shrink-0 opacity-80",
+                                                                            "aria-hidden": "true"
+                                                                        }, void 0, false, {
+                                                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                                                            lineNumber: 546,
+                                                                            columnNumber: 35
+                                                                        }, this)
+                                                                    ]
+                                                                }, void 0, true) : /*#__PURE__*/ _jsxDEV("span", {
+                                                                    className: "sr-only",
+                                                                    children: t('sidebar.chrome.planLockTooltip', {
+                                                                        item: item.title
+                                                                    })
+                                                                }, void 0, false, {
+                                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                                                    lineNumber: 552,
+                                                                    columnNumber: 33
+                                                                }, this)
+                                                            ]
+                                                        }, void 0, true, {
+                                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                                            lineNumber: 534,
+                                                            columnNumber: 29
+                                                        }, this)
+                                                    }, `${section.label}-${item.title}-${item.url}`, false, {
+                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                                        lineNumber: 533,
+                                                        columnNumber: 27
+                                                    }, this);
+                                                }
+                                                return /*#__PURE__*/ _jsxDEV(SidebarMenuItem, {
+                                                    children: getContextSectionsForItem(item.url).length > 0 ? /*#__PURE__*/ _jsxDEV(MegaMenuDropdown, {
+                                                        trigger: /*#__PURE__*/ _jsxDEV(SidebarMenuButton, {
+                                                            asChild: true,
+                                                            tooltip: item.title,
+                                                            children: /*#__PURE__*/ _jsxDEV(NavLink, {
+                                                                to: parseNavTo(resolveNavHref(item.url)),
+                                                                end: true,
+                                                                "data-sidebar-path": item.url.split('?')[0],
+                                                                onClick: (e)=>{
+                                                                    // Keep href for E2E/deep-link discovery; open mega menu instead of navigating.
+                                                                    e.preventDefault();
+                                                                    recordNavClick(item.url);
+                                                                },
+                                                                className: isNavLinkActive(item.url) ? `transition-all duration-200 group relative flex items-center ${NAV_LINK_ACTIVE}` : `transition-all duration-200 group relative flex items-center ${NAV_LINK_INACTIVE}`,
+                                                                children: [
+                                                                    /*#__PURE__*/ _jsxDEV(IconComponent, {
+                                                                        className: "h-4 w-4 shrink-0 stroke-[2]",
+                                                                        "aria-hidden": "true"
+                                                                    }, void 0, false, {
+                                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                                                        lineNumber: 582,
+                                                                        columnNumber: 37
+                                                                    }, this),
+                                                                    !isCollapsed ? /*#__PURE__*/ _jsxDEV("span", {
+                                                                        className: "flex-1 font-medium",
+                                                                        children: item.title
+                                                                    }, void 0, false, {
+                                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                                                        lineNumber: 587,
+                                                                        columnNumber: 39
+                                                                    }, this) : /*#__PURE__*/ _jsxDEV("span", {
+                                                                        className: "sr-only",
+                                                                        children: item.title
+                                                                    }, void 0, false, {
+                                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                                                        lineNumber: 589,
+                                                                        columnNumber: 39
+                                                                    }, this)
+                                                                ]
+                                                            }, void 0, true, {
+                                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                                                lineNumber: 567,
+                                                                columnNumber: 35
+                                                            }, this)
+                                                        }, void 0, false, {
+                                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                                            lineNumber: 566,
+                                                            columnNumber: 33
+                                                        }, this),
+                                                        sections: getContextSectionsForItem(item.url),
+                                                        isOpen: megaMenuOpen,
+                                                        onOpenChange: setMegaMenuOpen
+                                                    }, void 0, false, {
+                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                                        lineNumber: 564,
+                                                        columnNumber: 29
+                                                    }, this) : /*#__PURE__*/ _jsxDEV(SidebarMenuButton, {
+                                                        asChild: true,
+                                                        tooltip: item.title,
+                                                        children: /*#__PURE__*/ _jsxDEV(NavLink, {
+                                                            to: parseNavTo(resolveNavHref(item.url)),
+                                                            end: true,
+                                                            onClick: ()=>recordNavClick(item.url),
+                                                            className: isNavLinkActive(item.url) ? `transition-all duration-200 group relative flex items-center ${NAV_LINK_ACTIVE}` : `transition-all duration-200 group relative flex items-center ${NAV_LINK_INACTIVE}`,
+                                                            children: [
+                                                                /*#__PURE__*/ _jsxDEV(IconComponent, {
+                                                                    className: "h-4 w-4 shrink-0 stroke-[2]",
+                                                                    "aria-hidden": "true"
+                                                                }, void 0, false, {
+                                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                                                    lineNumber: 610,
+                                                                    columnNumber: 33
+                                                                }, this),
+                                                                !isCollapsed ? /*#__PURE__*/ _jsxDEV("span", {
+                                                                    className: "flex-1 font-medium",
+                                                                    children: item.title
+                                                                }, void 0, false, {
+                                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                                                    lineNumber: 615,
+                                                                    columnNumber: 35
+                                                                }, this) : /*#__PURE__*/ _jsxDEV("span", {
+                                                                    className: "sr-only",
+                                                                    children: item.title
+                                                                }, void 0, false, {
+                                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                                                    lineNumber: 617,
+                                                                    columnNumber: 35
+                                                                }, this)
+                                                            ]
+                                                        }, void 0, true, {
+                                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                                            lineNumber: 600,
+                                                            columnNumber: 31
+                                                        }, this)
+                                                    }, void 0, false, {
+                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                                        lineNumber: 599,
+                                                        columnNumber: 29
+                                                    }, this)
+                                                }, `${section.label}-${item.title}-${item.url}`, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                                    lineNumber: 562,
+                                                    columnNumber: 25
+                                                }, this);
+                                            })
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                            lineNumber: 422,
+                                            columnNumber: 19
+                                        }, this)
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                        lineNumber: 421,
+                                        columnNumber: 17
+                                    }, this)
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                    lineNumber: 414,
+                                    columnNumber: 15
+                                }, this)
+                            ]
+                        }, section.sectionKey, true, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                            lineNumber: 407,
+                            columnNumber: 13
+                        }, this)),
+                    showAdminMenu && /*#__PURE__*/ _jsxDEV(SidebarGroup, {
+                        children: /*#__PURE__*/ _jsxDEV(SidebarGroupContent, {
+                            children: /*#__PURE__*/ _jsxDEV(SidebarMenu, {
+                                children: /*#__PURE__*/ _jsxDEV(SidebarMenuItem, {
+                                    children: /*#__PURE__*/ _jsxDEV(SidebarMenuButton, {
+                                        asChild: true,
+                                        tooltip: t('sidebar.chrome.adminBackToDashboard'),
+                                        children: /*#__PURE__*/ _jsxDEV(NavLink, {
+                                            to: "/dashboard",
+                                            className: `${NAV_LINK_INACTIVE} transition-all duration-200`,
+                                            children: [
+                                                /*#__PURE__*/ _jsxDEV(LayoutDashboard, {
+                                                    className: "h-4 w-4",
+                                                    "aria-hidden": "true"
+                                                }, void 0, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                                    lineNumber: 642,
+                                                    columnNumber: 23
+                                                }, this),
+                                                !isCollapsed && /*#__PURE__*/ _jsxDEV("span", {
+                                                    children: t('sidebar.chrome.adminBackToDashboard')
+                                                }, void 0, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                                    lineNumber: 643,
+                                                    columnNumber: 40
+                                                }, this),
+                                                isCollapsed && /*#__PURE__*/ _jsxDEV("span", {
+                                                    className: "sr-only",
+                                                    children: t('sidebar.chrome.adminBackToDashboard')
+                                                }, void 0, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                                    lineNumber: 645,
+                                                    columnNumber: 25
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                            lineNumber: 638,
+                                            columnNumber: 21
+                                        }, this)
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                        lineNumber: 637,
+                                        columnNumber: 19
+                                    }, this)
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                    lineNumber: 636,
+                                    columnNumber: 17
+                                }, this)
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                lineNumber: 635,
+                                columnNumber: 15
+                            }, this)
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                            lineNumber: 634,
+                            columnNumber: 13
+                        }, this)
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                        lineNumber: 633,
+                        columnNumber: 11
+                    }, this),
+                    showAdminMenu && activeSections.map((section, sectionIndex)=>/*#__PURE__*/ _jsxDEV(React.Fragment, {
+                            children: [
+                                isCollapsed && sectionIndex > 0 && /*#__PURE__*/ _jsxDEV("div", {
+                                    className: "app-sidebar-rail-separator mx-auto my-1 h-px w-6 bg-border",
+                                    role: "separator"
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                    lineNumber: 660,
+                                    columnNumber: 17
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV(SidebarCollapsibleSection, {
+                                    sectionId: section.sectionKey,
+                                    label: section.label,
+                                    isOpen: isCollapsed || !collapsedSections.includes(section.sectionKey),
+                                    onToggle: ()=>toggleSectionCollapse(section.sectionKey),
+                                    hideHeader: isCollapsed,
+                                    children: /*#__PURE__*/ _jsxDEV(SidebarGroupContent, {
+                                        children: /*#__PURE__*/ _jsxDEV(SidebarMenu, {
+                                            children: section.items.map((item)=>{
+                                                const IconComponent = resolveNavItemIcon(item.url, item.icon) ?? Circle;
+                                                if (!item.icon) {
+                                                    logger.warn(`Menu item missing icon: ${item.title}`);
+                                                }
+                                                return /*#__PURE__*/ _jsxDEV(SidebarMenuItem, {
+                                                    children: /*#__PURE__*/ _jsxDEV(SidebarMenuButton, {
+                                                        asChild: true,
+                                                        tooltip: item.title,
+                                                        children: /*#__PURE__*/ _jsxDEV(NavLink, {
+                                                            to: parseNavTo(item.url),
+                                                            end: true,
+                                                            onClick: ()=>recordNavClick(item.url),
+                                                            className: isNavItemActive(item.url, location.pathname, location.search) ? `transition-all duration-200 ${NAV_LINK_ACTIVE}` : `transition-all duration-200 ${NAV_LINK_INACTIVE}`,
+                                                            children: [
+                                                                /*#__PURE__*/ _jsxDEV(IconComponent, {
+                                                                    className: "h-4 w-4 shrink-0 stroke-[2]",
+                                                                    "aria-hidden": "true"
+                                                                }, void 0, false, {
+                                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                                                    lineNumber: 692,
+                                                                    columnNumber: 31
+                                                                }, this),
+                                                                !isCollapsed ? /*#__PURE__*/ _jsxDEV("span", {
+                                                                    children: item.title
+                                                                }, void 0, false, {
+                                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                                                    lineNumber: 697,
+                                                                    columnNumber: 33
+                                                                }, this) : /*#__PURE__*/ _jsxDEV("span", {
+                                                                    className: "sr-only",
+                                                                    children: item.title
+                                                                }, void 0, false, {
+                                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                                                    lineNumber: 699,
+                                                                    columnNumber: 33
+                                                                }, this)
+                                                            ]
+                                                        }, void 0, true, {
+                                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                                            lineNumber: 682,
+                                                            columnNumber: 29
+                                                        }, this)
+                                                    }, void 0, false, {
+                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                                        lineNumber: 681,
+                                                        columnNumber: 27
+                                                    }, this)
+                                                }, `${section.label}-${item.title}-${item.url}`, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                                    lineNumber: 680,
+                                                    columnNumber: 25
+                                                }, this);
+                                            })
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                            lineNumber: 673,
+                                            columnNumber: 19
+                                        }, this)
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                        lineNumber: 672,
+                                        columnNumber: 17
+                                    }, this)
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                                    lineNumber: 665,
+                                    columnNumber: 15
+                                }, this)
+                            ]
+                        }, section.sectionKey, true, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                            lineNumber: 658,
+                            columnNumber: 13
+                        }, this))
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                lineNumber: 403,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV(ContextSidebar, {
+                isOpen: contextSidebarOpen,
+                onClose: closeContextSidebar
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+                lineNumber: 714,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx",
+        lineNumber: 327,
+        columnNumber: 5
+    }, this);
+}
+_s(AppSidebar, "MAtRRmp63M63MEb7J6Xyk+AoXsc=", false, function() {
+    return [
+        useTranslation,
+        useAuth,
+        useSidebar,
+        useNavigate,
+        useLocation,
+        useToast,
+        useAdmin,
+        useStoreContext,
+        useStorePhysicalAccess,
+        usePlatformLogo,
+        usePlanLockNavAction,
+        useSidebarPersona,
+        useContextSidebar,
+        useSidebarNavigation
+    ];
+});
+_c = AppSidebar;
+var _c;
+$RefreshReg$(_c, "AppSidebar");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/AppSidebar.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIkFwcFNpZGViYXIudHN4Il0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7IExheW91dERhc2hib2FyZCwgU2VhcmNoLCBDaGVjaywgUGx1cyB9IGZyb20gJ0AvY29tcG9uZW50cy9pY29ucyc7XG5pbXBvcnQge1xuICBDaXJjbGUsXG4gIENsb2NrMyxcbiAgQ2hldnJvbkRvd24sXG4gIENoZXZyb25SaWdodCxcbiAgTG9jayxcbiAgU2hvcHBpbmdCYWcsXG4gIEtleSxcbiAgQWN0aXZpdHksXG4gIFBhY2thZ2UsXG59IGZyb20gJ2x1Y2lkZS1yZWFjdCc7XG5pbXBvcnQgeyB1c2VQbGF0Zm9ybUxvZ28gfSBmcm9tICdAL2hvb2tzL3VzZVBsYXRmb3JtTG9nbyc7XG5pbXBvcnQgeyBOYXZMaW5rLCBMaW5rLCB1c2VOYXZpZ2F0ZSwgdXNlTG9jYXRpb24gfSBmcm9tICdyZWFjdC1yb3V0ZXItZG9tJztcbmltcG9ydCB7IFNpZGViYXJDb2xsYXBzaWJsZVNlY3Rpb24gfSBmcm9tICdAL2NvbXBvbmVudHMvc2lkZWJhci9TaWRlYmFyQ29sbGFwc2libGVTZWN0aW9uJztcbmltcG9ydCB7IFNpZGViYXJOYXZDb21tYW5kUGFsZXR0ZSB9IGZyb20gJ0AvY29tcG9uZW50cy9zaWRlYmFyL1NpZGViYXJOYXZDb21tYW5kUGFsZXR0ZSc7XG5pbXBvcnQgeyBTaWRlYmFyUGVyc29uYVN3aXRjaCB9IGZyb20gJ0AvY29tcG9uZW50cy9zaWRlYmFyL1NpZGViYXJQZXJzb25hU3dpdGNoJztcbmltcG9ydCB7IFBlcnNvbmFPbmJvYXJkaW5nQ29hY2ggfSBmcm9tICdAL2NvbXBvbmVudHMvc2lkZWJhci9QZXJzb25hT25ib2FyZGluZ0NvYWNoJztcbmltcG9ydCB7IE5BVl9MSU5LX0FDVElWRSwgTkFWX0xJTktfSU5BQ1RJVkUgfSBmcm9tICdAL2NvbXBvbmVudHMvc2lkZWJhci9zaWRlYmFyLW5hdi1zaGFyZWQnO1xuaW1wb3J0IHtcbiAgREVGQVVMVF9PUEVOX1NFQ1RJT05fS0VZUyxcbiAgZmxhdHRlbk5hdlNlY3Rpb25zLFxuICBzZWN0aW9uQ29udGFpbnNQYXRoLFxufSBmcm9tICdAL2NvbmZpZy9uYXZpZ2F0aW9uLmVucmljaCc7XG5pbXBvcnQge1xuICBnZXROYXZJdGVtUGF0aCxcbiAgaXNOYXZJdGVtQWN0aXZlLFxuICBwYXJzZU5hdlRvLFxuICByZXNvbHZlU2lkZWJhckxvZ29BcmlhS2V5LFxuICByZXNvbHZlU2lkZWJhckxvZ29Ib21lLFxufSBmcm9tICdAL2NvbmZpZy9uYXZpZ2F0aW9uLmhlbHBlcnMnO1xuaW1wb3J0IHsgcmVzb2x2ZU5hdkl0ZW1JY29uIH0gZnJvbSAnQC9jb25maWcvbmF2aWdhdGlvbi5pY29ucyc7XG5pbXBvcnQgdHlwZSB7IE5hdlNlY3Rpb24sIFNpZGViYXJQZXJzb25hIH0gZnJvbSAnQC9jb25maWcvbmF2aWdhdGlvbi50eXBlcyc7XG5pbXBvcnQgeyB1c2VTaWRlYmFyUGVyc29uYSB9IGZyb20gJ0AvaG9va3MvdXNlU2lkZWJhclBlcnNvbmEnO1xuaW1wb3J0IHsgdXNlU2lkZWJhck5hdmlnYXRpb24gfSBmcm9tICdAL2hvb2tzL3VzZVNpZGViYXJOYXZpZ2F0aW9uJztcbmltcG9ydCB7IHJlY29yZE5hdkNsaWNrLCBzb3J0RW50cmllc0J5TmF2RnJlcXVlbmN5IH0gZnJvbSAnQC9ob29rcy91c2VOYXZpZ2F0aW9uQW5hbHl0aWNzJztcbmltcG9ydCB7IHVzZVN0YXRlLCB1c2VFZmZlY3QsIHVzZU1lbW8sIHVzZUNhbGxiYWNrIH0gZnJvbSAncmVhY3QnO1xuaW1wb3J0IFJlYWN0IGZyb20gJ3JlYWN0JztcbmltcG9ydCB7IHVzZVRyYW5zbGF0aW9uIH0gZnJvbSAncmVhY3QtaTE4bmV4dCc7XG5pbXBvcnQge1xuICBTaWRlYmFyLFxuICBTaWRlYmFyQ29udGVudCxcbiAgU2lkZWJhckdyb3VwLFxuICBTaWRlYmFyR3JvdXBDb250ZW50LFxuICBTaWRlYmFyTWVudSxcbiAgU2lkZWJhck1lbnVCdXR0b24sXG4gIFNpZGViYXJNZW51SXRlbSxcbiAgdXNlU2lkZWJhcixcbn0gZnJvbSAnQC9jb21wb25lbnRzL3VpL3NpZGViYXInO1xuaW1wb3J0IHsgQnV0dG9uIH0gZnJvbSAnQC9jb21wb25lbnRzL3VpL2J1dHRvbic7XG5pbXBvcnQgeyBFbWFyem9uYUJyYW5kTmFtZSB9IGZyb20gJ0AvY29tcG9uZW50cy9icmFuZC9FbWFyem9uYUJyYW5kTmFtZSc7XG5pbXBvcnQgeyBjbiB9IGZyb20gJ0AvbGliL3V0aWxzJztcbmltcG9ydCB7IFNUT1JFX0NSRUFURV9QQVRIIH0gZnJvbSAnQC9saWIvc3RvcmUvc3RvcmUtY3JlYXRlLXBhdGgnO1xuaW1wb3J0IHsgdXNlVG9hc3QgfSBmcm9tICdAL2hvb2tzL3VzZS10b2FzdCc7XG5pbXBvcnQgeyB1c2VBZG1pbiB9IGZyb20gJ0AvaG9va3MvdXNlQWRtaW4nO1xuaW1wb3J0IHsgdXNlU3RvcmVDb250ZXh0IH0gZnJvbSAnQC9jb250ZXh0cy9TdG9yZUNvbnRleHQnO1xuaW1wb3J0IHsgdXNlQXV0aCB9IGZyb20gJ0AvY29udGV4dHMvQXV0aENvbnRleHQnO1xuaW1wb3J0IHsgdXNlU3RvcmVQaHlzaWNhbEFjY2VzcyB9IGZyb20gJ0AvaG9va3MvYmlsbGluZy91c2VTdG9yZVBoeXNpY2FsQWNjZXNzJztcbmltcG9ydCB7IGlzTmF2UGF0aFBsYW5Mb2NrZWQgfSBmcm9tICdAL2xpYi9uYXZpZ2F0aW9uL3BsYW4tbG9jay1uYXYnO1xuaW1wb3J0IHsgdXNlUGxhbkxvY2tOYXZBY3Rpb24gfSBmcm9tICdAL2hvb2tzL3VzZVBsYW5Mb2NrTmF2QWN0aW9uJztcbmltcG9ydCB7XG4gIGhhc1NpZGViYXJKc29uUHJlZixcbiAgcmVhZFNpZGViYXJKc29uUHJlZixcbiAgc2V0U2lkZWJhclByZWZzVXNlcklkLFxuICBTSURFQkFSX1BSRUZfS0VZUyxcbiAgd3JpdGVTaWRlYmFySnNvblByZWYsXG59IGZyb20gJ0AvbGliL25hdmlnYXRpb24vc2lkZWJhci1wcmVmcy1zdG9yYWdlJztcbmltcG9ydCB0eXBlIHsgU3RvcmVDb21tZXJjZVR5cGUgfSBmcm9tICdAL2NvbnN0YW50cy9zdG9yZS1jb21tZXJjZS10eXBlcyc7XG5pbXBvcnQgeyBwYXJzZVN0b3JlQ29tbWVyY2VUeXBlIH0gZnJvbSAnQC9saWIvYmlsbGluZy9zdG9yZS1jb21tZXJjZS1hY2Nlc3MnO1xuaW1wb3J0IHtcbiAgY2FuQWNjZXNzQ29tbWVyY2VQYXRoLFxuICBnZXRQcmltYXJ5UHJvZHVjdENyZWF0ZVBhdGgsXG59IGZyb20gJ0AvbGliL2NvbW1lcmNlL3N0b3JlLWNhcGFiaWxpdHktbWFwJztcbmltcG9ydCB7IGlzU2VsbGVyTmF2SXRlbUFjdGl2ZSwgcmVzb2x2ZVNlbGxlck5hdlVybCB9IGZyb20gJ0AvbGliL25hdmlnYXRpb24vdmVuZG9yLXByb2R1Y3RzLW5hdic7XG5pbXBvcnQgeyBsb2dnZXIgfSBmcm9tICdAL2xpYi9sb2dnZXInO1xuaW1wb3J0IHsgTG9nb0ltYWdlV2l0aEZhbGxiYWNrIH0gZnJvbSAnQC9jb21wb25lbnRzL3NpZGViYXIvTG9nb0ltYWdlV2l0aEZhbGxiYWNrJztcbmltcG9ydCB7XG4gIENvbnRleHRTaWRlYmFyLFxuICB1c2VDb250ZXh0U2lkZWJhcixcbiAgQ29udGV4dFNpZGViYXJUcmlnZ2VyLFxufSBmcm9tICdAL2NvbXBvbmVudHMvbmF2aWdhdGlvbi9Db250ZXh0U2lkZWJhcic7XG5pbXBvcnQgeyBNZWdhTWVudURyb3Bkb3duLCBNZWdhTWVudVRyaWdnZXIgfSBmcm9tICdAL2NvbXBvbmVudHMvbmF2aWdhdGlvbi9NZWdhTWVudURyb3Bkb3duJztcbmltcG9ydCB7IENPTlRFWFRfU0lERUJBUl9NQVBQSU5HIH0gZnJvbSAnQC9jb25maWcvbmF2aWdhdGlvbi5jb250ZXh0LmV4dGVuZGVkJztcblxuY29uc3QgaXNOYXZJdGVtUGxhbkxvY2tlZCA9IChcbiAgdXJsOiBzdHJpbmcsXG4gIHBsYW5TbHVnOiBzdHJpbmcgfCBudWxsLFxuICBjb21tZXJjZVR5cGU/OiBTdG9yZUNvbW1lcmNlVHlwZSB8IG51bGxcbikgPT4gaXNOYXZQYXRoUGxhbkxvY2tlZCh1cmwsIHBsYW5TbHVnLCBjb21tZXJjZVR5cGUpO1xuXG4vLyBFeGFjdCBodWIgcGF0aCBvbmx5IOKAlCBzdGFydHNXaXRoIHdvdWxkIHdyYXAgY3JlYXRlIHdpemFyZHMgKC9wcm9kdWN0cy9uZXcvKilcbi8vIGluIE1lZ2FNZW51RHJvcGRvd24gKGJ1dHRvbiwgbm8gaHJlZikgYW5kIGJyZWFrIGNvbW1lcmNlLWdhdGluZyBFMkUgKyBkZWVwIGxpbmtzLlxuY29uc3QgZ2V0Q29udGV4dFNlY3Rpb25zRm9ySXRlbSA9IChpdGVtVXJsOiBzdHJpbmcpID0+IHtcbiAgY29uc3QgcGF0aCA9IGl0ZW1Vcmwuc3BsaXQoJz8nKVswXS5yZXBsYWNlKC9cXC8rJC8sICcnKSB8fCAnLyc7XG4gIHJldHVybiBDT05URVhUX1NJREVCQVJfTUFQUElOR1twYXRoXSA/PyBbXTtcbn07XG5cbmNvbnN0IGJ1aWxkRGVmYXVsdENvbGxhcHNlZFNlY3Rpb25zID0gKFxuICBzZWN0aW9uczogTmF2U2VjdGlvbltdLFxuICBwYXRobmFtZTogc3RyaW5nLFxuICBzZWFyY2g6IHN0cmluZyxcbiAgY29tbWVyY2VUeXBlPzogU3RvcmVDb21tZXJjZVR5cGUgfCBudWxsXG4pOiBzdHJpbmdbXSA9PiB7XG4gIGNvbnN0IG9wZW5LZXlzID0gbmV3IFNldChERUZBVUxUX09QRU5fU0VDVElPTl9LRVlTKTtcbiAgc2VjdGlvbnMuZm9yRWFjaChzID0+IHtcbiAgICBpZiAocy5kZWZhdWx0T3Blbikgb3BlbktleXMuYWRkKHMuc2VjdGlvbktleSk7XG4gIH0pO1xuICBjb25zdCBhY3RpdmVLZXkgPSBzZWN0aW9ucy5maW5kKHMgPT5cbiAgICBzZWN0aW9uQ29udGFpbnNQYXRoKHMsIHBhdGhuYW1lLCBzZWFyY2gsIGNvbW1lcmNlVHlwZSlcbiAgKT8uc2VjdGlvbktleTtcbiAgaWYgKGFjdGl2ZUtleSkgb3BlbktleXMuYWRkKGFjdGl2ZUtleSk7XG4gIHJldHVybiBzZWN0aW9ucy5tYXAocyA9PiBzLnNlY3Rpb25LZXkpLmZpbHRlcihrZXkgPT4gIW9wZW5LZXlzLmhhcyhrZXkpKTtcbn07XG5cbmV4cG9ydCBmdW5jdGlvbiBBcHBTaWRlYmFyKCkge1xuICBjb25zdCB7IHQgfSA9IHVzZVRyYW5zbGF0aW9uKCk7XG4gIGNvbnN0IHsgdXNlciB9ID0gdXNlQXV0aCgpO1xuICBjb25zdCB1c2VySWQgPSB1c2VyPy5pZCA/PyBudWxsO1xuICBjb25zdCB7IHN0YXRlLCBpc01vYmlsZSB9ID0gdXNlU2lkZWJhcigpO1xuICBjb25zdCBuYXZpZ2F0ZSA9IHVzZU5hdmlnYXRlKCk7XG4gIGNvbnN0IGxvY2F0aW9uID0gdXNlTG9jYXRpb24oKTtcbiAgY29uc3QgeyB0b2FzdCB9ID0gdXNlVG9hc3QoKTtcbiAgY29uc3QgeyBpc0FkbWluIH0gPSB1c2VBZG1pbigpO1xuICBjb25zdCB7XG4gICAgc3RvcmVzLFxuICAgIHNlbGVjdGVkU3RvcmVJZCxcbiAgICBzZWxlY3RlZFN0b3JlLFxuICAgIHN3aXRjaFN0b3JlLFxuICAgIGNhbkNyZWF0ZVN0b3JlLFxuICAgIGxvYWRpbmc6IHN0b3Jlc0xvYWRpbmcsXG4gIH0gPSB1c2VTdG9yZUNvbnRleHQoKTtcbiAgY29uc3QgeyBwbGFuU2x1ZyB9ID0gdXNlU3RvcmVQaHlzaWNhbEFjY2VzcyhzZWxlY3RlZFN0b3JlSWQpO1xuICBjb25zdCBjb21tZXJjZVR5cGUgPSBzZWxlY3RlZFN0b3JlPy5jb21tZXJjZV90eXBlO1xuICBjb25zdCBzdG9yZU1ldGFkYXRhID0gc2VsZWN0ZWRTdG9yZT8ubWV0YWRhdGEgPz8gbnVsbDtcbiAgY29uc3QgcGxhdGZvcm1Mb2dvID0gdXNlUGxhdGZvcm1Mb2dvKCk7XG4gIGNvbnN0IGhhbmRsZVBsYW5Mb2NrZWROYXYgPSB1c2VQbGFuTG9ja05hdkFjdGlvbigpO1xuICAvKiogRGVza3RvcCByYWlsIG9ubHkg4oCUIG1vYmlsZSBkcmF3ZXIgYWx3YXlzIHNob3dzIGxhYmVscyArIGljb25zICovXG4gIGNvbnN0IGlzQ29sbGFwc2VkID0gc3RhdGUgPT09ICdjb2xsYXBzZWQnICYmICFpc01vYmlsZTtcbiAgY29uc3QgeyBwZXJzb25hLCBzZXRQZXJzb25hLCBuZWVkc1BlcnNvbmFPbmJvYXJkaW5nIH0gPSB1c2VTaWRlYmFyUGVyc29uYShpc0FkbWluKTtcbiAgY29uc3QgW2NvbW1hbmRPcGVuLCBzZXRDb21tYW5kT3Blbl0gPSB1c2VTdGF0ZShmYWxzZSk7XG4gIGNvbnN0IHtcbiAgICBpc09wZW46IGNvbnRleHRTaWRlYmFyT3BlbixcbiAgICBvcGVuOiBvcGVuQ29udGV4dFNpZGViYXIsXG4gICAgY2xvc2U6IGNsb3NlQ29udGV4dFNpZGViYXIsXG4gIH0gPSB1c2VDb250ZXh0U2lkZWJhcigpO1xuICBjb25zdCBbbWVnYU1lbnVPcGVuLCBzZXRNZWdhTWVudU9wZW5dID0gdXNlU3RhdGUoZmFsc2UpO1xuXG4gIGNvbnN0IFtjb2xsYXBzZWRTZWN0aW9ucywgc2V0Q29sbGFwc2VkU2VjdGlvbnNdID0gdXNlU3RhdGU8c3RyaW5nW10+KFtdKTtcbiAgY29uc3QgW3ByZWZzSHlkcmF0ZWQsIHNldFByZWZzSHlkcmF0ZWRdID0gdXNlU3RhdGUoZmFsc2UpO1xuICBjb25zdCBbc3RvcmVzTWVudU9wZW4sIHNldFN0b3Jlc01lbnVPcGVuXSA9IHVzZVN0YXRlKGZhbHNlKTtcblxuICBjb25zdCBzaG93QWRtaW5NZW51ID0gaXNBZG1pbiAmJiBwZXJzb25hID09PSAnYWRtaW4nO1xuICBjb25zdCBzaG93VXNlck1lbnUgPSAhc2hvd0FkbWluTWVudTtcbiAgY29uc3QgcmVzb2x2ZU5hdkhyZWYgPSAodXJsOiBzdHJpbmcpID0+XG4gICAgcGVyc29uYSA9PT0gJ3NlbGxlcicgPyByZXNvbHZlU2VsbGVyTmF2VXJsKHVybCwgY29tbWVyY2VUeXBlKSA6IHVybDtcbiAgY29uc3QgaXNOYXZMaW5rQWN0aXZlID0gdXNlQ2FsbGJhY2soXG4gICAgKHVybDogc3RyaW5nLCBtb2RlOiAnZXhhY3QnIHwgJ3ByZWZpeCcgPSAnZXhhY3QnKSA9PlxuICAgICAgcGVyc29uYSA9PT0gJ3NlbGxlcidcbiAgICAgICAgPyBpc1NlbGxlck5hdkl0ZW1BY3RpdmUodXJsLCBsb2NhdGlvbi5wYXRobmFtZSwgbG9jYXRpb24uc2VhcmNoLCBtb2RlLCBjb21tZXJjZVR5cGUpXG4gICAgICAgIDogaXNOYXZJdGVtQWN0aXZlKHVybCwgbG9jYXRpb24ucGF0aG5hbWUsIGxvY2F0aW9uLnNlYXJjaCwgbW9kZSksXG4gICAgW3BlcnNvbmEsIGxvY2F0aW9uLnBhdGhuYW1lLCBsb2NhdGlvbi5zZWFyY2gsIGNvbW1lcmNlVHlwZV1cbiAgKTtcbiAgY29uc3QgbG9nb0hvbWUgPSByZXNvbHZlU2lkZWJhckxvZ29Ib21lKHBlcnNvbmEpO1xuICBjb25zdCBsb2dvQXJpYUtleSA9IHJlc29sdmVTaWRlYmFyTG9nb0FyaWFLZXkocGVyc29uYSk7XG5cbiAgY29uc3QgeyBhY3RpdmVTZWN0aW9ucywgY29tbWFuZFBhbGV0dGVTZWN0aW9ucyB9ID0gdXNlU2lkZWJhck5hdmlnYXRpb24oe1xuICAgIHBlcnNvbmEsXG4gICAgaXNQbGF0Zm9ybUFkbWluOiBpc0FkbWluLFxuICAgIHNob3dBZG1pbk1lbnUsXG4gICAgY29tbWVyY2VUeXBlLFxuICAgIHN0b3JlTWV0YWRhdGEsXG4gIH0pO1xuXG4gIGNvbnN0IGFsbEN1cnJlbnRFbnRyaWVzID0gdXNlTWVtbygoKSA9PiBmbGF0dGVuTmF2U2VjdGlvbnMoYWN0aXZlU2VjdGlvbnMpLCBbYWN0aXZlU2VjdGlvbnNdKTtcblxuICBjb25zdCBuYXZDb21tYW5kRW50cmllcyA9IHVzZU1lbW8oXG4gICAgKCkgPT5cbiAgICAgIHNvcnRFbnRyaWVzQnlOYXZGcmVxdWVuY3koZmxhdHRlbk5hdlNlY3Rpb25zKGNvbW1hbmRQYWxldHRlU2VjdGlvbnMpKS5tYXAoZW50cnkgPT4gKHtcbiAgICAgICAgdGl0bGU6IGVudHJ5LnRpdGxlLFxuICAgICAgICB1cmw6IGVudHJ5LnVybCxcbiAgICAgICAgaWNvbjogZW50cnkuaWNvbixcbiAgICAgICAgc2VjdGlvbkxhYmVsOiBlbnRyeS5zZWN0aW9uTGFiZWwsXG4gICAgICB9KSksXG4gICAgW2NvbW1hbmRQYWxldHRlU2VjdGlvbnNdXG4gICk7XG5cbiAgY29uc3QgdmVuZG9yUXVpY2tBY3Rpb25zID0gdXNlTWVtbygoKSA9PiB7XG4gICAgY29uc3QgdHlwZSA9IHBhcnNlU3RvcmVDb21tZXJjZVR5cGUoY29tbWVyY2VUeXBlKTtcbiAgICBjb25zdCBjcmVhdGVMYWJlbHM6IFJlY29yZDxTdG9yZUNvbW1lcmNlVHlwZSwgc3RyaW5nPiA9IHtcbiAgICAgIHBoeXNpY2FsOiB0KCdjb21tYW5kLm5ld1BoeXNpY2FsUHJvZHVjdCcsICdOb3V2ZWF1IHByb2R1aXQgcGh5c2lxdWUnKSxcbiAgICAgIGRpZ2l0YWw6IHQoJ2NvbW1hbmQubmV3RGlnaXRhbFByb2R1Y3QnLCAnTm91dmVhdSBwcm9kdWl0IGRpZ2l0YWwnKSxcbiAgICAgIHNlcnZpY2U6IHQoJ2NvbW1hbmQubmV3U2VydmljZScsICdOb3V2ZWF1IHNlcnZpY2UnKSxcbiAgICAgIGNvdXJzZTogdCgnY29tbWFuZC5uZXdDb3Vyc2UnLCAnTm91dmVhdSBjb3VycycpLFxuICAgICAgYXJ0aXN0OiB0KCdjb21tYW5kLm5ld0FydGlzdFdvcmsnLCBcIk5vdXZlbGxlIMWTdXZyZSBkJ2FydGlzdGVcIiksXG4gICAgfTtcblxuICAgIGNvbnN0IGFjdGlvbnMgPSBbXG4gICAgICB7XG4gICAgICAgIHRpdGxlOiBjcmVhdGVMYWJlbHNbdHlwZV0sXG4gICAgICAgIHVybDogZ2V0UHJpbWFyeVByb2R1Y3RDcmVhdGVQYXRoKHR5cGUpLFxuICAgICAgICBpY29uOiBQbHVzLFxuICAgICAgICBzZWN0aW9uTGFiZWw6IHQoJ2NvbW1hbmQucXVpY2tBY3Rpb25zJywgJ0FjdGlvbnMgcmFwaWRlcycpLFxuICAgICAgfSxcbiAgICAgIHtcbiAgICAgICAgdGl0bGU6IHQoJ2NvbW1hbmQub3JkZXJzJywgJ0NvbW1hbmRlcycpLFxuICAgICAgICB1cmw6ICcvZGFzaGJvYXJkL29yZGVycycsXG4gICAgICAgIGljb246IFNob3BwaW5nQmFnLFxuICAgICAgICBzZWN0aW9uTGFiZWw6IHQoJ2NvbW1hbmQucXVpY2tBY3Rpb25zJywgJ0FjdGlvbnMgcmFwaWRlcycpLFxuICAgICAgfSxcbiAgICAgIHtcbiAgICAgICAgdGl0bGU6IHQoJ2NvbW1hbmQuaW50ZWdyYXRpb25zJywgJ0Nsw6lzIEFQSSAmIGludMOpZ3JhdGlvbnMnKSxcbiAgICAgICAgdXJsOiAnL2Rhc2hib2FyZC9pbnRlZ3JhdGlvbnMnLFxuICAgICAgICBpY29uOiBLZXksXG4gICAgICAgIHNlY3Rpb25MYWJlbDogdCgnY29tbWFuZC5xdWlja0FjdGlvbnMnLCAnQWN0aW9ucyByYXBpZGVzJyksXG4gICAgICB9LFxuICAgICAge1xuICAgICAgICB0aXRsZTogdCgnY29tbWFuZC5pbnZlbnRvcnknLCAnSW52ZW50YWlyZScpLFxuICAgICAgICB1cmw6ICcvZGFzaGJvYXJkL3BoeXNpY2FsL2ludmVudG9yeScsXG4gICAgICAgIGljb246IFBhY2thZ2UsXG4gICAgICAgIHNlY3Rpb25MYWJlbDogdCgnY29tbWFuZC5xdWlja0FjdGlvbnMnLCAnQWN0aW9ucyByYXBpZGVzJyksXG4gICAgICB9LFxuICAgICAge1xuICAgICAgICB0aXRsZTogdCgnY29tbWFuZC5wbGF0Zm9ybVN0YXR1cycsICdTdGF0dXQgcGxhdGVmb3JtZScpLFxuICAgICAgICB1cmw6ICcvc3RhdHVzJyxcbiAgICAgICAgaWNvbjogQWN0aXZpdHksXG4gICAgICAgIHNlY3Rpb25MYWJlbDogdCgnY29tbWFuZC5xdWlja0FjdGlvbnMnLCAnQWN0aW9ucyByYXBpZGVzJyksXG4gICAgICB9LFxuICAgIF07XG5cbiAgICByZXR1cm4gYWN0aW9ucy5maWx0ZXIoYWN0aW9uID0+IGNhbkFjY2Vzc0NvbW1lcmNlUGF0aChhY3Rpb24udXJsLCB0eXBlLCB7IHN0b3JlTWV0YWRhdGEgfSkpO1xuICB9LCBbdCwgY29tbWVyY2VUeXBlLCBzdG9yZU1ldGFkYXRhXSk7XG5cbiAgY29uc3QgaGFuZGxlUGVyc29uYUNoYW5nZSA9IChuZXh0OiBTaWRlYmFyUGVyc29uYSkgPT4ge1xuICAgIHNldFBlcnNvbmEobmV4dCk7XG4gICAgd3JpdGVTaWRlYmFySnNvblByZWYoU0lERUJBUl9QUkVGX0tFWVMucGVyc29uYU9uYm9hcmRlZCwgdHJ1ZSk7XG4gICAgaWYgKG5leHQgPT09ICdhZG1pbicgJiYgaXNBZG1pbikgbmF2aWdhdGUoJy9hZG1pbicpO1xuICAgIGVsc2UgaWYgKG5leHQgPT09ICdidXllcicpIG5hdmlnYXRlKCcvYWNjb3VudC9odWInKTtcbiAgICBlbHNlIG5hdmlnYXRlKCcvZGFzaGJvYXJkJyk7XG4gIH07XG5cbiAgY29uc3QgY3VycmVudE5hdkl0ZW0gPSB1c2VNZW1vKFxuICAgICgpID0+IGFsbEN1cnJlbnRFbnRyaWVzLmZpbmQoaXRlbSA9PiBpc05hdkxpbmtBY3RpdmUoaXRlbS51cmwsICdleGFjdCcpKSxcbiAgICBbYWxsQ3VycmVudEVudHJpZXMsIGlzTmF2TGlua0FjdGl2ZV1cbiAgKTtcblxuICB1c2VFZmZlY3QoKCkgPT4ge1xuICAgIHNldFNpZGViYXJQcmVmc1VzZXJJZCh1c2VySWQpO1xuICB9LCBbdXNlcklkXSk7XG5cbiAgdXNlRWZmZWN0KCgpID0+IHtcbiAgICBzZXRQcmVmc0h5ZHJhdGVkKGZhbHNlKTtcbiAgICB0cnkge1xuICAgICAgY29uc3Qgc3RvcmVkQ29sbGFwc2VkID0gcmVhZFNpZGViYXJKc29uUHJlZjxzdHJpbmdbXT4oXG4gICAgICAgIFNJREVCQVJfUFJFRl9LRVlTLmNvbGxhcHNlZFNlY3Rpb25zLFxuICAgICAgICB1c2VySWRcbiAgICAgICk7XG4gICAgICBjb25zdCBzdG9yZWRTdG9yZXMgPSByZWFkU2lkZWJhckpzb25QcmVmPGJvb2xlYW4+KFNJREVCQVJfUFJFRl9LRVlTLnN0b3Jlc0V4cGFuZGVkLCB1c2VySWQpO1xuXG4gICAgICBpZiAoc3RvcmVkQ29sbGFwc2VkKSBzZXRDb2xsYXBzZWRTZWN0aW9ucyhzdG9yZWRDb2xsYXBzZWQpO1xuICAgICAgaWYgKHN0b3JlZFN0b3JlcyAhPT0gbnVsbCkgc2V0U3RvcmVzTWVudU9wZW4oc3RvcmVkU3RvcmVzKTtcbiAgICAgIHNldFByZWZzSHlkcmF0ZWQodHJ1ZSk7XG4gICAgfSBjYXRjaCAoZXJyb3IpIHtcbiAgICAgIGxvZ2dlci53YXJuKCdGYWlsZWQgdG8gcmVzdG9yZSBzaWRlYmFyIHByZWZlcmVuY2VzJywgZXJyb3IpO1xuICAgICAgc2V0UHJlZnNIeWRyYXRlZCh0cnVlKTtcbiAgICB9XG4gIH0sIFt1c2VySWRdKTtcblxuICB1c2VFZmZlY3QoKCkgPT4ge1xuICAgIGlmICghcHJlZnNIeWRyYXRlZCkgcmV0dXJuO1xuICAgIGlmIChoYXNTaWRlYmFySnNvblByZWYoU0lERUJBUl9QUkVGX0tFWVMuY29sbGFwc2VkU2VjdGlvbnMsIHVzZXJJZCkpIHJldHVybjtcbiAgICBzZXRDb2xsYXBzZWRTZWN0aW9ucyhcbiAgICAgIGJ1aWxkRGVmYXVsdENvbGxhcHNlZFNlY3Rpb25zKFxuICAgICAgICBhY3RpdmVTZWN0aW9ucyxcbiAgICAgICAgbG9jYXRpb24ucGF0aG5hbWUsXG4gICAgICAgIGxvY2F0aW9uLnNlYXJjaCxcbiAgICAgICAgY29tbWVyY2VUeXBlXG4gICAgICApXG4gICAgKTtcbiAgfSwgW3ByZWZzSHlkcmF0ZWQsIGFjdGl2ZVNlY3Rpb25zLCBsb2NhdGlvbi5wYXRobmFtZSwgbG9jYXRpb24uc2VhcmNoLCB1c2VySWRdKTtcblxuICB1c2VFZmZlY3QoKCkgPT4ge1xuICAgIGlmICghcHJlZnNIeWRyYXRlZCkgcmV0dXJuO1xuICAgIGlmIChoYXNTaWRlYmFySnNvblByZWYoU0lERUJBUl9QUkVGX0tFWVMuc3RvcmVzRXhwYW5kZWQsIHVzZXJJZCkpIHJldHVybjtcbiAgICBzZXRTdG9yZXNNZW51T3BlbihzdG9yZXMubGVuZ3RoIDw9IDEpO1xuICB9LCBbcHJlZnNIeWRyYXRlZCwgc3RvcmVzLmxlbmd0aCwgdXNlcklkXSk7XG5cbiAgdXNlRWZmZWN0KCgpID0+IHtcbiAgICBjb25zdCBhY3RpdmVLZXkgPSBhY3RpdmVTZWN0aW9ucy5maW5kKHMgPT5cbiAgICAgIHNlY3Rpb25Db250YWluc1BhdGgocywgbG9jYXRpb24ucGF0aG5hbWUsIGxvY2F0aW9uLnNlYXJjaClcbiAgICApPy5zZWN0aW9uS2V5O1xuICAgIGlmICghYWN0aXZlS2V5KSByZXR1cm47XG4gICAgc2V0Q29sbGFwc2VkU2VjdGlvbnMocHJldiA9PlxuICAgICAgcHJldi5pbmNsdWRlcyhhY3RpdmVLZXkpID8gcHJldi5maWx0ZXIoayA9PiBrICE9PSBhY3RpdmVLZXkpIDogcHJldlxuICAgICk7XG4gIH0sIFtsb2NhdGlvbi5wYXRobmFtZSwgbG9jYXRpb24uc2VhcmNoLCBhY3RpdmVTZWN0aW9uc10pO1xuXG4gIHVzZUVmZmVjdCgoKSA9PiB7XG4gICAgaWYgKCFwcmVmc0h5ZHJhdGVkKSByZXR1cm47XG4gICAgd3JpdGVTaWRlYmFySnNvblByZWYoU0lERUJBUl9QUkVGX0tFWVMuc3RvcmVzRXhwYW5kZWQsIHN0b3Jlc01lbnVPcGVuLCB1c2VySWQpO1xuICB9LCBbc3RvcmVzTWVudU9wZW4sIHByZWZzSHlkcmF0ZWQsIHVzZXJJZF0pO1xuXG4gIHVzZUVmZmVjdCgoKSA9PiB7XG4gICAgaWYgKCFwcmVmc0h5ZHJhdGVkKSByZXR1cm47XG4gICAgd3JpdGVTaWRlYmFySnNvblByZWYoU0lERUJBUl9QUkVGX0tFWVMuY29sbGFwc2VkU2VjdGlvbnMsIGNvbGxhcHNlZFNlY3Rpb25zLCB1c2VySWQpO1xuICB9LCBbY29sbGFwc2VkU2VjdGlvbnMsIHByZWZzSHlkcmF0ZWQsIHVzZXJJZF0pO1xuXG4gIGNvbnN0IHRvZ2dsZVNlY3Rpb25Db2xsYXBzZSA9IChzZWN0aW9uS2V5OiBzdHJpbmcpID0+IHtcbiAgICBzZXRDb2xsYXBzZWRTZWN0aW9ucyhwcmV2ID0+XG4gICAgICBwcmV2LmluY2x1ZGVzKHNlY3Rpb25LZXkpID8gcHJldi5maWx0ZXIoa2V5ID0+IGtleSAhPT0gc2VjdGlvbktleSkgOiBbLi4ucHJldiwgc2VjdGlvbktleV1cbiAgICApO1xuICB9O1xuXG4gIGNvbnN0IGhhbmRsZUxvY2tlZE5hdkNsaWNrID0gKGl0ZW1UaXRsZTogc3RyaW5nLCBpdGVtVXJsOiBzdHJpbmcpID0+IHtcbiAgICBoYW5kbGVQbGFuTG9ja2VkTmF2KGl0ZW1UaXRsZSwgaXRlbVVybCk7XG4gIH07XG5cbiAgY29uc3QgbmF2aWdhdGVUb05hdkl0ZW0gPSAoaXRlbTogeyB0aXRsZTogc3RyaW5nOyB1cmw6IHN0cmluZyB9KSA9PiB7XG4gICAgcmVjb3JkTmF2Q2xpY2soaXRlbS51cmwpO1xuICAgIGlmIChzaG93VXNlck1lbnUgJiYgaXNOYXZJdGVtUGxhbkxvY2tlZChpdGVtLnVybCwgcGxhblNsdWcsIGNvbW1lcmNlVHlwZSkpIHtcbiAgICAgIGhhbmRsZUxvY2tlZE5hdkNsaWNrKGl0ZW0udGl0bGUsIGl0ZW0udXJsKTtcbiAgICAgIHJldHVybjtcbiAgICB9XG4gICAgbmF2aWdhdGUocmVzb2x2ZU5hdkhyZWYoaXRlbS51cmwpKTtcbiAgfTtcblxuICByZXR1cm4gKFxuICAgIDxTaWRlYmFyXG4gICAgICBjb2xsYXBzaWJsZT1cImljb25cIlxuICAgICAgY2xhc3NOYW1lPVwiYXBwLXNpZGViYXIgYm9yZGVyLXIgYm9yZGVyLWJvcmRlciB0cmFuc2l0aW9uLWFsbCBkdXJhdGlvbi0zMDBcIlxuICAgID5cbiAgICAgIDxTaWRlYmFyTmF2Q29tbWFuZFBhbGV0dGVcbiAgICAgICAgZW50cmllcz17bmF2Q29tbWFuZEVudHJpZXN9XG4gICAgICAgIHF1aWNrQWN0aW9ucz17dmVuZG9yUXVpY2tBY3Rpb25zfVxuICAgICAgICBvcGVuPXtjb21tYW5kT3Blbn1cbiAgICAgICAgb25PcGVuQ2hhbmdlPXtzZXRDb21tYW5kT3Blbn1cbiAgICAgIC8+XG5cbiAgICAgIHsvKiBFbi10w6p0ZSBjb21wYWN0IDogbG9nbyArIHBhbGV0dGUgKi99XG4gICAgICA8ZGl2IGNsYXNzTmFtZT17Y24oJ3Nocmluay0wIGJvcmRlci1iIGJvcmRlci1ib3JkZXInLCBpc0NvbGxhcHNlZCA/ICdwLTInIDogJ3B4LTMgcHktMi41Jyl9PlxuICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGdhcC0yIG1pbi1oLVsyLjc1cmVtXVwiPlxuICAgICAgICAgIDxMaW5rXG4gICAgICAgICAgICB0bz17bG9nb0hvbWV9XG4gICAgICAgICAgICBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLWNlbnRlciBnYXAtMS41IGdyb3VwIHRyYW5zaXRpb24tb3BhY2l0eSBkdXJhdGlvbi0yMDAgaG92ZXI6b3BhY2l0eS05MCBzaHJpbmstMFwiXG4gICAgICAgICAgICBhcmlhLWxhYmVsPXt0KGxvZ29BcmlhS2V5KX1cbiAgICAgICAgICA+XG4gICAgICAgICAgICB7cGxhdGZvcm1Mb2dvID8gKFxuICAgICAgICAgICAgICA8TG9nb0ltYWdlV2l0aEZhbGxiYWNrXG4gICAgICAgICAgICAgICAgc3JjPXtwbGF0Zm9ybUxvZ299XG4gICAgICAgICAgICAgICAgY2xhc3NOYW1lPXtjbignZmxleC1zaHJpbmstMCcsIGlzQ29sbGFwc2VkID8gJ2gtOCB3LTgnIDogJ2gtOSB3LTkgc206aC0xMCBzbTp3LTEwJyl9XG4gICAgICAgICAgICAgIC8+XG4gICAgICAgICAgICApIDogKFxuICAgICAgICAgICAgICA8ZGl2XG4gICAgICAgICAgICAgICAgY2xhc3NOYW1lPXtjbihcbiAgICAgICAgICAgICAgICAgICdmbGV4LXNocmluay0wIGJnLWdyYWRpZW50LXRvLWJyIGZyb20tYmx1ZS02MDAgdG8taW5kaWdvLTYwMCByb3VuZGVkLWxnIGZsZXggaXRlbXMtY2VudGVyIGp1c3RpZnktY2VudGVyIHNoYWRvdy1tZCcsXG4gICAgICAgICAgICAgICAgICBpc0NvbGxhcHNlZCA/ICdoLTggdy04JyA6ICdoLTkgdy05IHNtOmgtMTAgc206dy0xMCdcbiAgICAgICAgICAgICAgICApfVxuICAgICAgICAgICAgICAgIGFyaWEtaGlkZGVuPVwidHJ1ZVwiXG4gICAgICAgICAgICAgID5cbiAgICAgICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJ0ZXh0LXNtIGZvbnQtYm9sZCB0ZXh0LXdoaXRlXCI+RTwvc3Bhbj5cbiAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICApfVxuICAgICAgICAgICAgeyFpc0NvbGxhcHNlZCAmJiAoXG4gICAgICAgICAgICAgIDxFbWFyem9uYUJyYW5kTmFtZSBjbGFzc05hbWU9XCJoaWRkZW4gdGV4dC1sZyB0cmFja2luZy10aWdodCBzbTppbmxpbmVcIiAvPlxuICAgICAgICAgICAgKX1cbiAgICAgICAgICA8L0xpbms+XG4gICAgICAgICAge2lzQ29sbGFwc2VkID8gKFxuICAgICAgICAgICAgPEJ1dHRvblxuICAgICAgICAgICAgICB2YXJpYW50PVwiZ2hvc3RcIlxuICAgICAgICAgICAgICBzaXplPVwiaWNvblwiXG4gICAgICAgICAgICAgIGNsYXNzTmFtZT1cImgtOCB3LTggdGV4dC1tdXRlZC1mb3JlZ3JvdW5kIGhvdmVyOmJnLWFjY2VudCBob3Zlcjp0ZXh0LWZvcmVncm91bmQgc2hyaW5rLTBcIlxuICAgICAgICAgICAgICBvbkNsaWNrPXsoKSA9PiBzZXRDb21tYW5kT3Blbih0cnVlKX1cbiAgICAgICAgICAgICAgYXJpYS1sYWJlbD17dCgnc2lkZWJhci5jaHJvbWUuc2VhcmNoQXJpYUxhYmVsQ29sbGFwc2VkJyl9XG4gICAgICAgICAgICA+XG4gICAgICAgICAgICAgIDxTZWFyY2ggY2xhc3NOYW1lPVwiaC00IHctNFwiIC8+XG4gICAgICAgICAgICA8L0J1dHRvbj5cbiAgICAgICAgICApIDogKFxuICAgICAgICAgICAgPGJ1dHRvblxuICAgICAgICAgICAgICB0eXBlPVwiYnV0dG9uXCJcbiAgICAgICAgICAgICAgb25DbGljaz17KCkgPT4gc2V0Q29tbWFuZE9wZW4odHJ1ZSl9XG4gICAgICAgICAgICAgIGNsYXNzTmFtZT1cImFwcC1zaWRlYmFyLWNvbW1hbmQtdHJpZ2dlciBmbGV4IGZsZXgtMSBpdGVtcy1jZW50ZXIgZ2FwLTIgaC05IHJvdW5kZWQtbGcgYm9yZGVyIGJvcmRlci1ib3JkZXIgYmctbXV0ZWQvNDAgcHgtMi41IHRleHQtbGVmdCB0ZXh0LXNtIHRleHQtbXV0ZWQtZm9yZWdyb3VuZCBob3Zlcjpib3JkZXItcHJpbWFyeS80MCBob3ZlcjpiZy1hY2NlbnQgaG92ZXI6dGV4dC1mb3JlZ3JvdW5kIHRyYW5zaXRpb24tYWxsIGR1cmF0aW9uLTIwMCBtaW4tdy0wXCJcbiAgICAgICAgICAgICAgYXJpYS1sYWJlbD17dCgnc2lkZWJhci5jaHJvbWUuc2VhcmNoQXJpYUxhYmVsJyl9XG4gICAgICAgICAgICA+XG4gICAgICAgICAgICAgIDxTZWFyY2ggY2xhc3NOYW1lPVwiaC00IHctNCBzaHJpbmstMCB0ZXh0LW11dGVkLWZvcmVncm91bmRcIiBhcmlhLWhpZGRlbiAvPlxuICAgICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJmbGV4LTEgdHJ1bmNhdGUgdGV4dC14c1wiPlxuICAgICAgICAgICAgICAgIHt0KCdzaWRlYmFyLmNocm9tZS5zZWFyY2hQbGFjZWhvbGRlcicpfVxuICAgICAgICAgICAgICA8L3NwYW4+XG4gICAgICAgICAgICAgIDxrYmQgY2xhc3NOYW1lPVwiaGlkZGVuIGxnOmlubGluZS1mbGV4IGgtNSBpdGVtcy1jZW50ZXIgcm91bmRlZCBib3JkZXIgYm9yZGVyLWJvcmRlciBiZy1tdXRlZCBweC0xLjUgdGV4dC1bMTBweF0gZm9udC1tZWRpdW0gdGV4dC1tdXRlZC1mb3JlZ3JvdW5kXCI+XG4gICAgICAgICAgICAgICAgQ3RybCtLXG4gICAgICAgICAgICAgIDwva2JkPlxuICAgICAgICAgICAgPC9idXR0b24+XG4gICAgICAgICAgKX1cbiAgICAgICAgPC9kaXY+XG4gICAgICAgIDxQZXJzb25hT25ib2FyZGluZ0NvYWNoIGlzQWRtaW49e2lzQWRtaW59IGVuYWJsZWQ9eyEhdXNlcklkICYmIG5lZWRzUGVyc29uYU9uYm9hcmRpbmd9PlxuICAgICAgICAgIDxTaWRlYmFyUGVyc29uYVN3aXRjaFxuICAgICAgICAgICAgcGVyc29uYT17cGVyc29uYSA9PT0gJ2FkbWluJyAmJiAhaXNBZG1pbiA/ICdzZWxsZXInIDogcGVyc29uYX1cbiAgICAgICAgICAgIGlzQWRtaW49e2lzQWRtaW59XG4gICAgICAgICAgICBpc0NvbGxhcHNlZD17aXNDb2xsYXBzZWR9XG4gICAgICAgICAgICBvblBlcnNvbmFDaGFuZ2U9e2hhbmRsZVBlcnNvbmFDaGFuZ2V9XG4gICAgICAgICAgLz5cbiAgICAgICAgPC9QZXJzb25hT25ib2FyZGluZ0NvYWNoPlxuICAgICAgPC9kaXY+XG5cbiAgICAgIDxTaWRlYmFyQ29udGVudCBjbGFzc05hbWU9XCJhcHAtc2lkZWJhci1zY3JvbGwgZmxleC0xIG1pbi1oLTAgb3ZlcmZsb3cteS1hdXRvIHNjcm9sbGJhci10aGluXCI+XG4gICAgICAgIHsvKiBNZW51IEl0ZW1zIC0gT3JnYW5pc8OpIHBhciBzZWN0aW9ucyAqL31cbiAgICAgICAge3Nob3dVc2VyTWVudSAmJlxuICAgICAgICAgIGFjdGl2ZVNlY3Rpb25zLm1hcCgoc2VjdGlvbiwgc2VjdGlvbkluZGV4KSA9PiAoXG4gICAgICAgICAgICA8UmVhY3QuRnJhZ21lbnQga2V5PXtzZWN0aW9uLnNlY3Rpb25LZXl9PlxuICAgICAgICAgICAgICB7aXNDb2xsYXBzZWQgJiYgc2VjdGlvbkluZGV4ID4gMCAmJiAoXG4gICAgICAgICAgICAgICAgPGRpdlxuICAgICAgICAgICAgICAgICAgY2xhc3NOYW1lPVwiYXBwLXNpZGViYXItcmFpbC1zZXBhcmF0b3IgbXgtYXV0byBteS0xIGgtcHggdy02IGJnLWJvcmRlclwiXG4gICAgICAgICAgICAgICAgICByb2xlPVwic2VwYXJhdG9yXCJcbiAgICAgICAgICAgICAgICAvPlxuICAgICAgICAgICAgICApfVxuICAgICAgICAgICAgICA8U2lkZWJhckNvbGxhcHNpYmxlU2VjdGlvblxuICAgICAgICAgICAgICAgIHNlY3Rpb25JZD17c2VjdGlvbi5zZWN0aW9uS2V5fVxuICAgICAgICAgICAgICAgIGxhYmVsPXtzZWN0aW9uLmxhYmVsfVxuICAgICAgICAgICAgICAgIGlzT3Blbj17aXNDb2xsYXBzZWQgfHwgIWNvbGxhcHNlZFNlY3Rpb25zLmluY2x1ZGVzKHNlY3Rpb24uc2VjdGlvbktleSl9XG4gICAgICAgICAgICAgICAgb25Ub2dnbGU9eygpID0+IHRvZ2dsZVNlY3Rpb25Db2xsYXBzZShzZWN0aW9uLnNlY3Rpb25LZXkpfVxuICAgICAgICAgICAgICAgIGhpZGVIZWFkZXI9e2lzQ29sbGFwc2VkfVxuICAgICAgICAgICAgICA+XG4gICAgICAgICAgICAgICAgPFNpZGViYXJHcm91cENvbnRlbnQ+XG4gICAgICAgICAgICAgICAgICA8U2lkZWJhck1lbnU+XG4gICAgICAgICAgICAgICAgICAgIHtzZWN0aW9uLml0ZW1zLm1hcChpdGVtID0+IHtcbiAgICAgICAgICAgICAgICAgICAgICBjb25zdCBJY29uQ29tcG9uZW50ID0gcmVzb2x2ZU5hdkl0ZW1JY29uKGl0ZW0udXJsLCBpdGVtLmljb24pID8/IENpcmNsZTtcbiAgICAgICAgICAgICAgICAgICAgICBpZiAoIWl0ZW0uaWNvbikge1xuICAgICAgICAgICAgICAgICAgICAgICAgbG9nZ2VyLndhcm4oYE1lbnUgaXRlbSBtaXNzaW5nIGljb246ICR7aXRlbS50aXRsZX1gKTtcbiAgICAgICAgICAgICAgICAgICAgICB9XG5cbiAgICAgICAgICAgICAgICAgICAgICAvLyBNZW51IHNww6ljaWFsIHBvdXIgXCJUYWJsZWF1IGRlIGJvcmRcIiBhdmVjIHNvdXMtbWVudSBkZXMgYm91dGlxdWVzIC0gU1RBVElRVUUgKHRvdWpvdXJzIG91dmVydClcbiAgICAgICAgICAgICAgICAgICAgICBpZiAoXG4gICAgICAgICAgICAgICAgICAgICAgICBnZXROYXZJdGVtUGF0aChpdGVtLnVybCkgPT09ICcvZGFzaGJvYXJkJyAmJlxuICAgICAgICAgICAgICAgICAgICAgICAgIXN0b3Jlc0xvYWRpbmcgJiZcbiAgICAgICAgICAgICAgICAgICAgICAgIHN0b3Jlcy5sZW5ndGggPiAwXG4gICAgICAgICAgICAgICAgICAgICAgKSB7XG4gICAgICAgICAgICAgICAgICAgICAgICBjb25zdCBpc0Rhc2hib2FyZEFjdGl2ZSA9IGxvY2F0aW9uLnBhdGhuYW1lID09PSAnL2Rhc2hib2FyZCc7XG4gICAgICAgICAgICAgICAgICAgICAgICByZXR1cm4gKFxuICAgICAgICAgICAgICAgICAgICAgICAgICA8U2lkZWJhck1lbnVJdGVtXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAga2V5PXtgJHtzZWN0aW9uLmxhYmVsfS0ke2l0ZW0udGl0bGV9LSR7aXRlbS51cmx9LWRhc2hib2FyZGB9XG4gICAgICAgICAgICAgICAgICAgICAgICAgID5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICA8U2lkZWJhck1lbnVCdXR0b25cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGFzQ2hpbGRcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHRvb2x0aXA9e2l0ZW0udGl0bGV9XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICBjbGFzc05hbWU9e2B0cmFuc2l0aW9uLWFsbCBkdXJhdGlvbi0yMDAgZ3JvdXAgcmVsYXRpdmUgZmxleCBpdGVtcy1jZW50ZXIgJHtcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaXNEYXNoYm9hcmRBY3RpdmUgPyBOQVZfTElOS19BQ1RJVkUgOiBOQVZfTElOS19JTkFDVElWRVxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgfWB9XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgPlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPE5hdkxpbmsgdG89e2l0ZW0udXJsfSBlbmQgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTIgdy1mdWxsXCI+XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDxJY29uQ29tcG9uZW50XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgY2xhc3NOYW1lPVwiaC00IHctNCBzaHJpbmstMCBzdHJva2UtWzJdXCJcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBhcmlhLWhpZGRlbj1cInRydWVcIlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAvPlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICB7IWlzQ29sbGFwc2VkICYmIChcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJmbGV4LTEgZm9udC1tZWRpdW1cIj57aXRlbS50aXRsZX08L3NwYW4+XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICl9XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICA8L05hdkxpbms+XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgPC9TaWRlYmFyTWVudUJ1dHRvbj5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICB7IWlzQ29sbGFwc2VkICYmIHN0b3Jlcy5sZW5ndGggPiAwICYmIChcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDxidXR0b25cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgdHlwZT1cImJ1dHRvblwiXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIG9uQ2xpY2s9eygpID0+IHNldFN0b3Jlc01lbnVPcGVuKG9wZW4gPT4gIW9wZW4pfVxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBjbGFzc05hbWU9XCJtbC02IG10LTEgZmxleCB3LVtjYWxjKDEwMCUtMS41cmVtKV0gaXRlbXMtY2VudGVyIGp1c3RpZnktYmV0d2VlbiByb3VuZGVkLW1kIHB4LTIgcHktMS41IHRleHQteHMgZm9udC1tZWRpdW0gdGV4dC1tdXRlZC1mb3JlZ3JvdW5kIGhvdmVyOmJnLWFjY2VudCBob3Zlcjp0ZXh0LWZvcmVncm91bmQgdHJhbnNpdGlvbi1jb2xvcnNcIlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBhcmlhLWV4cGFuZGVkPXtzdG9yZXNNZW51T3Blbn1cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgID5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPHNwYW4+XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAge3QoJ3NpZGViYXIuY2hyb21lLm15U3RvcmVzJywgeyBjb3VudDogc3RvcmVzLmxlbmd0aCB9KX1cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPC9zcGFuPlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICB7c3RvcmVzTWVudU9wZW4gPyAoXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPENoZXZyb25Eb3duIGNsYXNzTmFtZT1cImgtMy41IHctMy41IHNocmluay0wXCIgLz5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgKSA6IChcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA8Q2hldnJvblJpZ2h0IGNsYXNzTmFtZT1cImgtMy41IHctMy41IHNocmluay0wXCIgLz5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgKX1cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDwvYnV0dG9uPlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICl9XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgeyFpc0NvbGxhcHNlZCAmJiBzdG9yZXMubGVuZ3RoID4gMCAmJiAoXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICA8ZGl2XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGNsYXNzTmFtZT17Y24oXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgJ21sLTQgZ3JpZCB0cmFuc2l0aW9uLVtncmlkLXRlbXBsYXRlLXJvd3NdIGR1cmF0aW9uLTMwMCBlYXNlLW91dCcsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgc3RvcmVzTWVudU9wZW4gPyAnZ3JpZC1yb3dzLVsxZnJdJyA6ICdncmlkLXJvd3MtWzBmcl0nXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICl9XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICA+XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwib3ZlcmZsb3ctaGlkZGVuIG1pbi1oLTAgc3BhY2UteS0xIGJvcmRlci1sIGJvcmRlci1ib3JkZXIgcGwtMiBtdC0xXCI+XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAge3N0b3Jlcy5tYXAoc3RvcmUgPT4gKFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPEJ1dHRvblxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBrZXk9e3N0b3JlLmlkfVxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICB2YXJpYW50PVwiZ2hvc3RcIlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBzaXplPVwic21cIlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBvbkNsaWNrPXsoKSA9PiB7XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgc3dpdGNoU3RvcmUoc3RvcmUuaWQpO1xuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIG5hdmlnYXRlKCcvZGFzaGJvYXJkJyk7XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgdG9hc3Qoe1xuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgdGl0bGU6IHQoJ3NpZGViYXIuY2hyb21lLnN0b3JlQ2hhbmdlZFRpdGxlJyksXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBkZXNjcmlwdGlvbjogdCgnc2lkZWJhci5jaHJvbWUuc3RvcmVDaGFuZ2VkRGVzY3JpcHRpb24nLCB7XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIG5hbWU6IHN0b3JlLm5hbWUsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICB9KSxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICB9KTtcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgfX1cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgY2xhc3NOYW1lPXtgdy1mdWxsIGp1c3RpZnktc3RhcnQgdHJhbnNpdGlvbi1hbGwgZHVyYXRpb24tMjAwIG9wYWNpdHktOTAgJHtcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBzZWxlY3RlZFN0b3JlSWQgPT09IHN0b3JlLmlkXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA/IE5BVl9MSU5LX0FDVElWRVxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgOiBOQVZfTElOS19JTkFDVElWRVxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICB9YH1cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgID5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAge3NlbGVjdGVkU3RvcmVJZCA9PT0gc3RvcmUuaWQgJiYgKFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDxDaGVjayBjbGFzc05hbWU9XCJoLTMgdy0zIG1yLTJcIiAvPlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICApfVxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJ0cnVuY2F0ZVwiPntzdG9yZS5uYW1lfTwvc3Bhbj5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDwvQnV0dG9uPlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICkpfVxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHtjYW5DcmVhdGVTdG9yZSgpICYmIChcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDxCdXR0b25cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgdmFyaWFudD1cImdob3N0XCJcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgc2l6ZT1cInNtXCJcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgb25DbGljaz17KCkgPT4gbmF2aWdhdGUoU1RPUkVfQ1JFQVRFX1BBVEgpfVxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBjbGFzc05hbWU9e2B3LWZ1bGwganVzdGlmeS1zdGFydCAke05BVl9MSU5LX0lOQUNUSVZFfSB0cmFuc2l0aW9uLWFsbCBkdXJhdGlvbi0yMDBgfVxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA8UGx1cyBjbGFzc05hbWU9XCJoLTMgdy0zIG1yLTJcIiAvPlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA8c3Bhbj57dCgnc2lkZWJhci5jaHJvbWUuY3JlYXRlU3RvcmUnKX08L3NwYW4+XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA8L0J1dHRvbj5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICApfVxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICl9XG4gICAgICAgICAgICAgICAgICAgICAgICAgIDwvU2lkZWJhck1lbnVJdGVtPlxuICAgICAgICAgICAgICAgICAgICAgICAgKTtcbiAgICAgICAgICAgICAgICAgICAgICB9XG5cbiAgICAgICAgICAgICAgICAgICAgICAvLyBNZW51IGl0ZW1zIG5vcm1hdXhcbiAgICAgICAgICAgICAgICAgICAgICBjb25zdCBpc1BsYW5Mb2NrZWQgPVxuICAgICAgICAgICAgICAgICAgICAgICAgc2hvd1VzZXJNZW51ICYmIGlzTmF2SXRlbVBsYW5Mb2NrZWQoaXRlbS51cmwsIHBsYW5TbHVnLCBjb21tZXJjZVR5cGUpO1xuXG4gICAgICAgICAgICAgICAgICAgICAgaWYgKGlzUGxhbkxvY2tlZCkge1xuICAgICAgICAgICAgICAgICAgICAgICAgcmV0dXJuIChcbiAgICAgICAgICAgICAgICAgICAgICAgICAgPFNpZGViYXJNZW51SXRlbSBrZXk9e2Ake3NlY3Rpb24ubGFiZWx9LSR7aXRlbS50aXRsZX0tJHtpdGVtLnVybH1gfT5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICA8U2lkZWJhck1lbnVCdXR0b25cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHRvb2x0aXA9e3QoJ3NpZGViYXIuY2hyb21lLnBsYW5Mb2NrVG9vbHRpcCcsIHsgaXRlbTogaXRlbS50aXRsZSB9KX1cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIG9uQ2xpY2s9eygpID0+IGhhbmRsZUxvY2tlZE5hdkNsaWNrKGl0ZW0udGl0bGUsIGl0ZW0udXJsKX1cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGNsYXNzTmFtZT17YCR7TkFWX0xJTktfSU5BQ1RJVkV9IG9wYWNpdHktNzUgdHJhbnNpdGlvbi1hbGwgZHVyYXRpb24tMjAwIGdyb3VwIHJlbGF0aXZlIGZsZXggaXRlbXMtY2VudGVyYH1cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICA+XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICA8SWNvbkNvbXBvbmVudFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBjbGFzc05hbWU9XCJoLTQgdy00IHNocmluay0wIHN0cm9rZS1bMl1cIlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBhcmlhLWhpZGRlbj1cInRydWVcIlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgLz5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHshaXNDb2xsYXBzZWQgPyAoXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDw+XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPHNwYW4gY2xhc3NOYW1lPVwiZmxleC0xIGZvbnQtbWVkaXVtXCI+e2l0ZW0udGl0bGV9PC9zcGFuPlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDxMb2NrXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBjbGFzc05hbWU9XCJoLTMgdy0zIGZsZXgtc2hyaW5rLTAgb3BhY2l0eS04MFwiXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBhcmlhLWhpZGRlbj1cInRydWVcIlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIC8+XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDwvPlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgKSA6IChcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPHNwYW4gY2xhc3NOYW1lPVwic3Itb25seVwiPlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHt0KCdzaWRlYmFyLmNocm9tZS5wbGFuTG9ja1Rvb2x0aXAnLCB7IGl0ZW06IGl0ZW0udGl0bGUgfSl9XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDwvc3Bhbj5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICl9XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgPC9TaWRlYmFyTWVudUJ1dHRvbj5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgPC9TaWRlYmFyTWVudUl0ZW0+XG4gICAgICAgICAgICAgICAgICAgICAgICApO1xuICAgICAgICAgICAgICAgICAgICAgIH1cblxuICAgICAgICAgICAgICAgICAgICAgIHJldHVybiAoXG4gICAgICAgICAgICAgICAgICAgICAgICA8U2lkZWJhck1lbnVJdGVtIGtleT17YCR7c2VjdGlvbi5sYWJlbH0tJHtpdGVtLnRpdGxlfS0ke2l0ZW0udXJsfWB9PlxuICAgICAgICAgICAgICAgICAgICAgICAgICB7Z2V0Q29udGV4dFNlY3Rpb25zRm9ySXRlbShpdGVtLnVybCkubGVuZ3RoID4gMCA/IChcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICA8TWVnYU1lbnVEcm9wZG93blxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgdHJpZ2dlcj17XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDxTaWRlYmFyTWVudUJ1dHRvbiBhc0NoaWxkIHRvb2x0aXA9e2l0ZW0udGl0bGV9PlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDxOYXZMaW5rXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICB0bz17cGFyc2VOYXZUbyhyZXNvbHZlTmF2SHJlZihpdGVtLnVybCkpfVxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgZW5kXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBkYXRhLXNpZGViYXItcGF0aD17aXRlbS51cmwuc3BsaXQoJz8nKVswXX1cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIG9uQ2xpY2s9e2UgPT4ge1xuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAvLyBLZWVwIGhyZWYgZm9yIEUyRS9kZWVwLWxpbmsgZGlzY292ZXJ5OyBvcGVuIG1lZ2EgbWVudSBpbnN0ZWFkIG9mIG5hdmlnYXRpbmcuXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGUucHJldmVudERlZmF1bHQoKTtcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgcmVjb3JkTmF2Q2xpY2soaXRlbS51cmwpO1xuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgfX1cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGNsYXNzTmFtZT17XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGlzTmF2TGlua0FjdGl2ZShpdGVtLnVybClcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA/IGB0cmFuc2l0aW9uLWFsbCBkdXJhdGlvbi0yMDAgZ3JvdXAgcmVsYXRpdmUgZmxleCBpdGVtcy1jZW50ZXIgJHtOQVZfTElOS19BQ1RJVkV9YFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDogYHRyYW5zaXRpb24tYWxsIGR1cmF0aW9uLTIwMCBncm91cCByZWxhdGl2ZSBmbGV4IGl0ZW1zLWNlbnRlciAke05BVl9MSU5LX0lOQUNUSVZFfWBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIH1cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA+XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA8SWNvbkNvbXBvbmVudFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBjbGFzc05hbWU9XCJoLTQgdy00IHNocmluay0wIHN0cm9rZS1bMl1cIlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBhcmlhLWhpZGRlbj1cInRydWVcIlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgLz5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHshaXNDb2xsYXBzZWQgPyAoXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cImZsZXgtMSBmb250LW1lZGl1bVwiPntpdGVtLnRpdGxlfTwvc3Bhbj5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICkgOiAoXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cInNyLW9ubHlcIj57aXRlbS50aXRsZX08L3NwYW4+XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICApfVxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDwvTmF2TGluaz5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPC9TaWRlYmFyTWVudUJ1dHRvbj5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIH1cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHNlY3Rpb25zPXtnZXRDb250ZXh0U2VjdGlvbnNGb3JJdGVtKGl0ZW0udXJsKX1cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGlzT3Blbj17bWVnYU1lbnVPcGVufVxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgb25PcGVuQ2hhbmdlPXtzZXRNZWdhTWVudU9wZW59XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgLz5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgKSA6IChcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICA8U2lkZWJhck1lbnVCdXR0b24gYXNDaGlsZCB0b29sdGlwPXtpdGVtLnRpdGxlfT5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDxOYXZMaW5rXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHRvPXtwYXJzZU5hdlRvKHJlc29sdmVOYXZIcmVmKGl0ZW0udXJsKSl9XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGVuZFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBvbkNsaWNrPXsoKSA9PiByZWNvcmROYXZDbGljayhpdGVtLnVybCl9XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGNsYXNzTmFtZT17XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaXNOYXZMaW5rQWN0aXZlKGl0ZW0udXJsKVxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPyBgdHJhbnNpdGlvbi1hbGwgZHVyYXRpb24tMjAwIGdyb3VwIHJlbGF0aXZlIGZsZXggaXRlbXMtY2VudGVyICR7TkFWX0xJTktfQUNUSVZFfWBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDogYHRyYW5zaXRpb24tYWxsIGR1cmF0aW9uLTIwMCBncm91cCByZWxhdGl2ZSBmbGV4IGl0ZW1zLWNlbnRlciAke05BVl9MSU5LX0lOQUNUSVZFfWBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgfVxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA8SWNvbkNvbXBvbmVudFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGNsYXNzTmFtZT1cImgtNCB3LTQgc2hyaW5rLTAgc3Ryb2tlLVsyXVwiXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgYXJpYS1oaWRkZW49XCJ0cnVlXCJcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgLz5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgeyFpc0NvbGxhcHNlZCA/IChcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJmbGV4LTEgZm9udC1tZWRpdW1cIj57aXRlbS50aXRsZX08L3NwYW4+XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICkgOiAoXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPHNwYW4gY2xhc3NOYW1lPVwic3Itb25seVwiPntpdGVtLnRpdGxlfTwvc3Bhbj5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgKX1cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDwvTmF2TGluaz5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICA8L1NpZGViYXJNZW51QnV0dG9uPlxuICAgICAgICAgICAgICAgICAgICAgICAgICApfVxuICAgICAgICAgICAgICAgICAgICAgICAgPC9TaWRlYmFyTWVudUl0ZW0+XG4gICAgICAgICAgICAgICAgICAgICAgKTtcbiAgICAgICAgICAgICAgICAgICAgfSl9XG4gICAgICAgICAgICAgICAgICA8L1NpZGViYXJNZW51PlxuICAgICAgICAgICAgICAgIDwvU2lkZWJhckdyb3VwQ29udGVudD5cbiAgICAgICAgICAgICAgPC9TaWRlYmFyQ29sbGFwc2libGVTZWN0aW9uPlxuICAgICAgICAgICAgPC9SZWFjdC5GcmFnbWVudD5cbiAgICAgICAgICApKX1cblxuICAgICAgICB7LyogQm91dG9uIFJldG91ciBEYXNoYm9hcmQgKHZpc2libGUgdW5pcXVlbWVudCBzdXIgcGFnZXMgYWRtaW4pICovfVxuICAgICAgICB7c2hvd0FkbWluTWVudSAmJiAoXG4gICAgICAgICAgPFNpZGViYXJHcm91cD5cbiAgICAgICAgICAgIDxTaWRlYmFyR3JvdXBDb250ZW50PlxuICAgICAgICAgICAgICA8U2lkZWJhck1lbnU+XG4gICAgICAgICAgICAgICAgPFNpZGViYXJNZW51SXRlbT5cbiAgICAgICAgICAgICAgICAgIDxTaWRlYmFyTWVudUJ1dHRvbiBhc0NoaWxkIHRvb2x0aXA9e3QoJ3NpZGViYXIuY2hyb21lLmFkbWluQmFja1RvRGFzaGJvYXJkJyl9PlxuICAgICAgICAgICAgICAgICAgICA8TmF2TGlua1xuICAgICAgICAgICAgICAgICAgICAgIHRvPVwiL2Rhc2hib2FyZFwiXG4gICAgICAgICAgICAgICAgICAgICAgY2xhc3NOYW1lPXtgJHtOQVZfTElOS19JTkFDVElWRX0gdHJhbnNpdGlvbi1hbGwgZHVyYXRpb24tMjAwYH1cbiAgICAgICAgICAgICAgICAgICAgPlxuICAgICAgICAgICAgICAgICAgICAgIDxMYXlvdXREYXNoYm9hcmQgY2xhc3NOYW1lPVwiaC00IHctNFwiIGFyaWEtaGlkZGVuPVwidHJ1ZVwiIC8+XG4gICAgICAgICAgICAgICAgICAgICAgeyFpc0NvbGxhcHNlZCAmJiA8c3Bhbj57dCgnc2lkZWJhci5jaHJvbWUuYWRtaW5CYWNrVG9EYXNoYm9hcmQnKX08L3NwYW4+fVxuICAgICAgICAgICAgICAgICAgICAgIHtpc0NvbGxhcHNlZCAmJiAoXG4gICAgICAgICAgICAgICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJzci1vbmx5XCI+e3QoJ3NpZGViYXIuY2hyb21lLmFkbWluQmFja1RvRGFzaGJvYXJkJyl9PC9zcGFuPlxuICAgICAgICAgICAgICAgICAgICAgICl9XG4gICAgICAgICAgICAgICAgICAgIDwvTmF2TGluaz5cbiAgICAgICAgICAgICAgICAgIDwvU2lkZWJhck1lbnVCdXR0b24+XG4gICAgICAgICAgICAgICAgPC9TaWRlYmFyTWVudUl0ZW0+XG4gICAgICAgICAgICAgIDwvU2lkZWJhck1lbnU+XG4gICAgICAgICAgICA8L1NpZGViYXJHcm91cENvbnRlbnQ+XG4gICAgICAgICAgPC9TaWRlYmFyR3JvdXA+XG4gICAgICAgICl9XG5cbiAgICAgICAgey8qIEFkbWluIE1lbnUgSXRlbXMgLSBPcmdhbmlzw6kgcGFyIHNlY3Rpb25zICovfVxuICAgICAgICB7c2hvd0FkbWluTWVudSAmJlxuICAgICAgICAgIGFjdGl2ZVNlY3Rpb25zLm1hcCgoc2VjdGlvbiwgc2VjdGlvbkluZGV4KSA9PiAoXG4gICAgICAgICAgICA8UmVhY3QuRnJhZ21lbnQga2V5PXtzZWN0aW9uLnNlY3Rpb25LZXl9PlxuICAgICAgICAgICAgICB7aXNDb2xsYXBzZWQgJiYgc2VjdGlvbkluZGV4ID4gMCAmJiAoXG4gICAgICAgICAgICAgICAgPGRpdlxuICAgICAgICAgICAgICAgICAgY2xhc3NOYW1lPVwiYXBwLXNpZGViYXItcmFpbC1zZXBhcmF0b3IgbXgtYXV0byBteS0xIGgtcHggdy02IGJnLWJvcmRlclwiXG4gICAgICAgICAgICAgICAgICByb2xlPVwic2VwYXJhdG9yXCJcbiAgICAgICAgICAgICAgICAvPlxuICAgICAgICAgICAgICApfVxuICAgICAgICAgICAgICA8U2lkZWJhckNvbGxhcHNpYmxlU2VjdGlvblxuICAgICAgICAgICAgICAgIHNlY3Rpb25JZD17c2VjdGlvbi5zZWN0aW9uS2V5fVxuICAgICAgICAgICAgICAgIGxhYmVsPXtzZWN0aW9uLmxhYmVsfVxuICAgICAgICAgICAgICAgIGlzT3Blbj17aXNDb2xsYXBzZWQgfHwgIWNvbGxhcHNlZFNlY3Rpb25zLmluY2x1ZGVzKHNlY3Rpb24uc2VjdGlvbktleSl9XG4gICAgICAgICAgICAgICAgb25Ub2dnbGU9eygpID0+IHRvZ2dsZVNlY3Rpb25Db2xsYXBzZShzZWN0aW9uLnNlY3Rpb25LZXkpfVxuICAgICAgICAgICAgICAgIGhpZGVIZWFkZXI9e2lzQ29sbGFwc2VkfVxuICAgICAgICAgICAgICA+XG4gICAgICAgICAgICAgICAgPFNpZGViYXJHcm91cENvbnRlbnQ+XG4gICAgICAgICAgICAgICAgICA8U2lkZWJhck1lbnU+XG4gICAgICAgICAgICAgICAgICAgIHtzZWN0aW9uLml0ZW1zLm1hcChpdGVtID0+IHtcbiAgICAgICAgICAgICAgICAgICAgICBjb25zdCBJY29uQ29tcG9uZW50ID0gcmVzb2x2ZU5hdkl0ZW1JY29uKGl0ZW0udXJsLCBpdGVtLmljb24pID8/IENpcmNsZTtcbiAgICAgICAgICAgICAgICAgICAgICBpZiAoIWl0ZW0uaWNvbikge1xuICAgICAgICAgICAgICAgICAgICAgICAgbG9nZ2VyLndhcm4oYE1lbnUgaXRlbSBtaXNzaW5nIGljb246ICR7aXRlbS50aXRsZX1gKTtcbiAgICAgICAgICAgICAgICAgICAgICB9XG4gICAgICAgICAgICAgICAgICAgICAgcmV0dXJuIChcbiAgICAgICAgICAgICAgICAgICAgICAgIDxTaWRlYmFyTWVudUl0ZW0ga2V5PXtgJHtzZWN0aW9uLmxhYmVsfS0ke2l0ZW0udGl0bGV9LSR7aXRlbS51cmx9YH0+XG4gICAgICAgICAgICAgICAgICAgICAgICAgIDxTaWRlYmFyTWVudUJ1dHRvbiBhc0NoaWxkIHRvb2x0aXA9e2l0ZW0udGl0bGV9PlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgIDxOYXZMaW5rXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICB0bz17cGFyc2VOYXZUbyhpdGVtLnVybCl9XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICBlbmRcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIG9uQ2xpY2s9eygpID0+IHJlY29yZE5hdkNsaWNrKGl0ZW0udXJsKX1cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGNsYXNzTmFtZT17XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGlzTmF2SXRlbUFjdGl2ZShpdGVtLnVybCwgbG9jYXRpb24ucGF0aG5hbWUsIGxvY2F0aW9uLnNlYXJjaClcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA/IGB0cmFuc2l0aW9uLWFsbCBkdXJhdGlvbi0yMDAgJHtOQVZfTElOS19BQ1RJVkV9YFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDogYHRyYW5zaXRpb24tYWxsIGR1cmF0aW9uLTIwMCAke05BVl9MSU5LX0lOQUNUSVZFfWBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIH1cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICA+XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICA8SWNvbkNvbXBvbmVudFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBjbGFzc05hbWU9XCJoLTQgdy00IHNocmluay0wIHN0cm9rZS1bMl1cIlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBhcmlhLWhpZGRlbj1cInRydWVcIlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgLz5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHshaXNDb2xsYXBzZWQgPyAoXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDxzcGFuPntpdGVtLnRpdGxlfTwvc3Bhbj5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICkgOiAoXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cInNyLW9ubHlcIj57aXRlbS50aXRsZX08L3NwYW4+XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICApfVxuICAgICAgICAgICAgICAgICAgICAgICAgICAgIDwvTmF2TGluaz5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgPC9TaWRlYmFyTWVudUJ1dHRvbj5cbiAgICAgICAgICAgICAgICAgICAgICAgIDwvU2lkZWJhck1lbnVJdGVtPlxuICAgICAgICAgICAgICAgICAgICAgICk7XG4gICAgICAgICAgICAgICAgICAgIH0pfVxuICAgICAgICAgICAgICAgICAgPC9TaWRlYmFyTWVudT5cbiAgICAgICAgICAgICAgICA8L1NpZGViYXJHcm91cENvbnRlbnQ+XG4gICAgICAgICAgICAgIDwvU2lkZWJhckNvbGxhcHNpYmxlU2VjdGlvbj5cbiAgICAgICAgICAgIDwvUmVhY3QuRnJhZ21lbnQ+XG4gICAgICAgICAgKSl9XG4gICAgICA8L1NpZGViYXJDb250ZW50PlxuXG4gICAgICB7LyogQ29udGV4dCBTaWRlYmFyIC0gRW50ZXJwcmlzZS1ncmFkZSBkb21haW4tc3BlY2lmaWMgbmF2aWdhdGlvbiAqL31cbiAgICAgIDxDb250ZXh0U2lkZWJhciBpc09wZW49e2NvbnRleHRTaWRlYmFyT3Blbn0gb25DbG9zZT17Y2xvc2VDb250ZXh0U2lkZWJhcn0gLz5cbiAgICA8L1NpZGViYXI+XG4gICk7XG59XG4iXSwibmFtZXMiOlsiTGF5b3V0RGFzaGJvYXJkIiwiU2VhcmNoIiwiQ2hlY2siLCJQbHVzIiwiQ2lyY2xlIiwiQ2hldnJvbkRvd24iLCJDaGV2cm9uUmlnaHQiLCJMb2NrIiwiU2hvcHBpbmdCYWciLCJLZXkiLCJBY3Rpdml0eSIsIlBhY2thZ2UiLCJ1c2VQbGF0Zm9ybUxvZ28iLCJOYXZMaW5rIiwiTGluayIsInVzZU5hdmlnYXRlIiwidXNlTG9jYXRpb24iLCJTaWRlYmFyQ29sbGFwc2libGVTZWN0aW9uIiwiU2lkZWJhck5hdkNvbW1hbmRQYWxldHRlIiwiU2lkZWJhclBlcnNvbmFTd2l0Y2giLCJQZXJzb25hT25ib2FyZGluZ0NvYWNoIiwiTkFWX0xJTktfQUNUSVZFIiwiTkFWX0xJTktfSU5BQ1RJVkUiLCJERUZBVUxUX09QRU5fU0VDVElPTl9LRVlTIiwiZmxhdHRlbk5hdlNlY3Rpb25zIiwic2VjdGlvbkNvbnRhaW5zUGF0aCIsImdldE5hdkl0ZW1QYXRoIiwiaXNOYXZJdGVtQWN0aXZlIiwicGFyc2VOYXZUbyIsInJlc29sdmVTaWRlYmFyTG9nb0FyaWFLZXkiLCJyZXNvbHZlU2lkZWJhckxvZ29Ib21lIiwicmVzb2x2ZU5hdkl0ZW1JY29uIiwidXNlU2lkZWJhclBlcnNvbmEiLCJ1c2VTaWRlYmFyTmF2aWdhdGlvbiIsInJlY29yZE5hdkNsaWNrIiwic29ydEVudHJpZXNCeU5hdkZyZXF1ZW5jeSIsInVzZVN0YXRlIiwidXNlRWZmZWN0IiwidXNlTWVtbyIsInVzZUNhbGxiYWNrIiwiUmVhY3QiLCJ1c2VUcmFuc2xhdGlvbiIsIlNpZGViYXIiLCJTaWRlYmFyQ29udGVudCIsIlNpZGViYXJHcm91cCIsIlNpZGViYXJHcm91cENvbnRlbnQiLCJTaWRlYmFyTWVudSIsIlNpZGViYXJNZW51QnV0dG9uIiwiU2lkZWJhck1lbnVJdGVtIiwidXNlU2lkZWJhciIsIkJ1dHRvbiIsIkVtYXJ6b25hQnJhbmROYW1lIiwiY24iLCJTVE9SRV9DUkVBVEVfUEFUSCIsInVzZVRvYXN0IiwidXNlQWRtaW4iLCJ1c2VTdG9yZUNvbnRleHQiLCJ1c2VBdXRoIiwidXNlU3RvcmVQaHlzaWNhbEFjY2VzcyIsImlzTmF2UGF0aFBsYW5Mb2NrZWQiLCJ1c2VQbGFuTG9ja05hdkFjdGlvbiIsImhhc1NpZGViYXJKc29uUHJlZiIsInJlYWRTaWRlYmFySnNvblByZWYiLCJzZXRTaWRlYmFyUHJlZnNVc2VySWQiLCJTSURFQkFSX1BSRUZfS0VZUyIsIndyaXRlU2lkZWJhckpzb25QcmVmIiwicGFyc2VTdG9yZUNvbW1lcmNlVHlwZSIsImNhbkFjY2Vzc0NvbW1lcmNlUGF0aCIsImdldFByaW1hcnlQcm9kdWN0Q3JlYXRlUGF0aCIsImlzU2VsbGVyTmF2SXRlbUFjdGl2ZSIsInJlc29sdmVTZWxsZXJOYXZVcmwiLCJsb2dnZXIiLCJMb2dvSW1hZ2VXaXRoRmFsbGJhY2siLCJDb250ZXh0U2lkZWJhciIsInVzZUNvbnRleHRTaWRlYmFyIiwiTWVnYU1lbnVEcm9wZG93biIsIkNPTlRFWFRfU0lERUJBUl9NQVBQSU5HIiwiaXNOYXZJdGVtUGxhbkxvY2tlZCIsInVybCIsInBsYW5TbHVnIiwiY29tbWVyY2VUeXBlIiwiZ2V0Q29udGV4dFNlY3Rpb25zRm9ySXRlbSIsIml0ZW1VcmwiLCJwYXRoIiwic3BsaXQiLCJyZXBsYWNlIiwiYnVpbGREZWZhdWx0Q29sbGFwc2VkU2VjdGlvbnMiLCJzZWN0aW9ucyIsInBhdGhuYW1lIiwic2VhcmNoIiwib3BlbktleXMiLCJTZXQiLCJmb3JFYWNoIiwicyIsImRlZmF1bHRPcGVuIiwiYWRkIiwic2VjdGlvbktleSIsImFjdGl2ZUtleSIsImZpbmQiLCJtYXAiLCJmaWx0ZXIiLCJrZXkiLCJoYXMiLCJBcHBTaWRlYmFyIiwidCIsInVzZXIiLCJ1c2VySWQiLCJpZCIsInN0YXRlIiwiaXNNb2JpbGUiLCJuYXZpZ2F0ZSIsImxvY2F0aW9uIiwidG9hc3QiLCJpc0FkbWluIiwic3RvcmVzIiwic2VsZWN0ZWRTdG9yZUlkIiwic2VsZWN0ZWRTdG9yZSIsInN3aXRjaFN0b3JlIiwiY2FuQ3JlYXRlU3RvcmUiLCJsb2FkaW5nIiwic3RvcmVzTG9hZGluZyIsImNvbW1lcmNlX3R5cGUiLCJzdG9yZU1ldGFkYXRhIiwibWV0YWRhdGEiLCJwbGF0Zm9ybUxvZ28iLCJoYW5kbGVQbGFuTG9ja2VkTmF2IiwiaXNDb2xsYXBzZWQiLCJwZXJzb25hIiwic2V0UGVyc29uYSIsIm5lZWRzUGVyc29uYU9uYm9hcmRpbmciLCJjb21tYW5kT3BlbiIsInNldENvbW1hbmRPcGVuIiwiaXNPcGVuIiwiY29udGV4dFNpZGViYXJPcGVuIiwib3BlbiIsIm9wZW5Db250ZXh0U2lkZWJhciIsImNsb3NlIiwiY2xvc2VDb250ZXh0U2lkZWJhciIsIm1lZ2FNZW51T3BlbiIsInNldE1lZ2FNZW51T3BlbiIsImNvbGxhcHNlZFNlY3Rpb25zIiwic2V0Q29sbGFwc2VkU2VjdGlvbnMiLCJwcmVmc0h5ZHJhdGVkIiwic2V0UHJlZnNIeWRyYXRlZCIsInN0b3Jlc01lbnVPcGVuIiwic2V0U3RvcmVzTWVudU9wZW4iLCJzaG93QWRtaW5NZW51Iiwic2hvd1VzZXJNZW51IiwicmVzb2x2ZU5hdkhyZWYiLCJpc05hdkxpbmtBY3RpdmUiLCJtb2RlIiwibG9nb0hvbWUiLCJsb2dvQXJpYUtleSIsImFjdGl2ZVNlY3Rpb25zIiwiY29tbWFuZFBhbGV0dGVTZWN0aW9ucyIsImlzUGxhdGZvcm1BZG1pbiIsImFsbEN1cnJlbnRFbnRyaWVzIiwibmF2Q29tbWFuZEVudHJpZXMiLCJlbnRyeSIsInRpdGxlIiwiaWNvbiIsInNlY3Rpb25MYWJlbCIsInZlbmRvclF1aWNrQWN0aW9ucyIsInR5cGUiLCJjcmVhdGVMYWJlbHMiLCJwaHlzaWNhbCIsImRpZ2l0YWwiLCJzZXJ2aWNlIiwiY291cnNlIiwiYXJ0aXN0IiwiYWN0aW9ucyIsImFjdGlvbiIsImhhbmRsZVBlcnNvbmFDaGFuZ2UiLCJuZXh0IiwicGVyc29uYU9uYm9hcmRlZCIsImN1cnJlbnROYXZJdGVtIiwiaXRlbSIsInN0b3JlZENvbGxhcHNlZCIsInN0b3JlZFN0b3JlcyIsInN0b3Jlc0V4cGFuZGVkIiwiZXJyb3IiLCJ3YXJuIiwibGVuZ3RoIiwicHJldiIsImluY2x1ZGVzIiwiayIsInRvZ2dsZVNlY3Rpb25Db2xsYXBzZSIsImhhbmRsZUxvY2tlZE5hdkNsaWNrIiwiaXRlbVRpdGxlIiwibmF2aWdhdGVUb05hdkl0ZW0iLCJjb2xsYXBzaWJsZSIsImNsYXNzTmFtZSIsImVudHJpZXMiLCJxdWlja0FjdGlvbnMiLCJvbk9wZW5DaGFuZ2UiLCJkaXYiLCJ0byIsImFyaWEtbGFiZWwiLCJzcmMiLCJhcmlhLWhpZGRlbiIsInNwYW4iLCJ2YXJpYW50Iiwic2l6ZSIsIm9uQ2xpY2siLCJidXR0b24iLCJrYmQiLCJlbmFibGVkIiwib25QZXJzb25hQ2hhbmdlIiwic2VjdGlvbiIsInNlY3Rpb25JbmRleCIsIkZyYWdtZW50Iiwicm9sZSIsInNlY3Rpb25JZCIsImxhYmVsIiwib25Ub2dnbGUiLCJoaWRlSGVhZGVyIiwiaXRlbXMiLCJJY29uQ29tcG9uZW50IiwiaXNEYXNoYm9hcmRBY3RpdmUiLCJhc0NoaWxkIiwidG9vbHRpcCIsImVuZCIsImFyaWEtZXhwYW5kZWQiLCJjb3VudCIsInN0b3JlIiwiZGVzY3JpcHRpb24iLCJuYW1lIiwiaXNQbGFuTG9ja2VkIiwidHJpZ2dlciIsImRhdGEtc2lkZWJhci1wYXRoIiwiZSIsInByZXZlbnREZWZhdWx0Iiwib25DbG9zZSJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O0FBQUEsU0FBU0EsZUFBZSxFQUFFQyxNQUFNLEVBQUVDLEtBQUssRUFBRUMsSUFBSSxRQUFRLHFCQUFxQjtBQUMxRSxTQUNFQyxNQUFNLEVBRU5DLFdBQVcsRUFDWEMs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

@@ -1,0 +1,262 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/seo/SEOSerpPreview.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/seo/SEOSerpPreview.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=6014a254"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+/**
+ * Composant de prévisualisation SERP (Search Engine Results Page)
+ * Affiche un aperçu visuel de la façon dont la boutique apparaîtra dans les résultats Google
+ */ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "/src/components/ui/card.tsx";
+import { Search, ExternalLink } from "/node_modules/.vite/deps/lucide-react.js?v=6014a254";
+export const SEOSerpPreview = ({ metaTitle, metaDescription, url = 'https://www.emarzona.com', faviconUrl })=>{
+    // Limiter la longueur pour un affichage réaliste
+    const displayTitle = metaTitle || 'Titre de votre boutique';
+    const displayDescription = metaDescription || 'Description de votre boutique';
+    // Limiter à 60 caractères pour le titre (réaliste Google)
+    const truncatedTitle = displayTitle.length > 60 ? displayTitle.substring(0, 57) + '...' : displayTitle;
+    // Limiter à 160 caractères pour la description (réaliste Google)
+    const truncatedDescription = displayDescription.length > 160 ? displayDescription.substring(0, 157) + '...' : displayDescription;
+    return /*#__PURE__*/ _jsxDEV(Card, {
+        children: [
+            /*#__PURE__*/ _jsxDEV(CardHeader, {
+                children: [
+                    /*#__PURE__*/ _jsxDEV("div", {
+                        className: "flex items-center gap-2",
+                        children: [
+                            /*#__PURE__*/ _jsxDEV(Search, {
+                                className: "h-5 w-5"
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOSerpPreview.tsx",
+                                lineNumber: 40,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV(CardTitle, {
+                                className: "text-lg",
+                                children: "Aperçu Google"
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOSerpPreview.tsx",
+                                lineNumber: 41,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOSerpPreview.tsx",
+                        lineNumber: 39,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV(CardDescription, {
+                        children: "Prévisualisation de l'apparence dans les résultats de recherche Google"
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOSerpPreview.tsx",
+                        lineNumber: 43,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOSerpPreview.tsx",
+                lineNumber: 38,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV(CardContent, {
+                children: [
+                    /*#__PURE__*/ _jsxDEV("div", {
+                        className: "border rounded-lg p-4 bg-white dark:bg-gray-950 shadow-sm",
+                        children: [
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                className: "flex items-center gap-2 mb-1",
+                                children: [
+                                    faviconUrl && /*#__PURE__*/ _jsxDEV("img", {
+                                        src: faviconUrl,
+                                        alt: "Favicon",
+                                        className: "w-4 h-4 rounded-sm",
+                                        onError: (e)=>{
+                                            e.target.style.display = 'none';
+                                        }
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOSerpPreview.tsx",
+                                        lineNumber: 52,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("span", {
+                                        className: "text-xs text-gray-600 dark:text-gray-400 truncate",
+                                        children: url
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOSerpPreview.tsx",
+                                        lineNumber: 61,
+                                        columnNumber: 13
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV(ExternalLink, {
+                                        className: "w-3 h-3 text-gray-400 ml-1 flex-shrink-0"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOSerpPreview.tsx",
+                                        lineNumber: 64,
+                                        columnNumber: 13
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOSerpPreview.tsx",
+                                lineNumber: 50,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("a", {
+                                href: "#",
+                                onClick: (e)=>e.preventDefault(),
+                                className: "block text-xl text-blue-600 dark:text-blue-400 hover:underline mb-1 leading-tight cursor-default",
+                                children: truncatedTitle
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOSerpPreview.tsx",
+                                lineNumber: 68,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("p", {
+                                className: "text-sm text-gray-700 dark:text-gray-300 leading-relaxed line-clamp-2",
+                                children: truncatedDescription
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOSerpPreview.tsx",
+                                lineNumber: 77,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                className: "flex items-center gap-4 mt-3 pt-3 border-t border-gray-200 dark:border-gray-800",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "flex items-center gap-1",
+                                        children: /*#__PURE__*/ _jsxDEV("span", {
+                                            className: `text-xs ${metaTitle.length >= 50 && metaTitle.length <= 60 ? 'text-green-600' : 'text-amber-600'}`,
+                                            children: [
+                                                metaTitle.length,
+                                                "/60 caractères"
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOSerpPreview.tsx",
+                                            lineNumber: 84,
+                                            columnNumber: 15
+                                        }, this)
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOSerpPreview.tsx",
+                                        lineNumber: 83,
+                                        columnNumber: 13
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "flex items-center gap-1",
+                                        children: /*#__PURE__*/ _jsxDEV("span", {
+                                            className: `text-xs ${metaDescription.length >= 120 && metaDescription.length <= 160 ? 'text-green-600' : 'text-amber-600'}`,
+                                            children: [
+                                                metaDescription.length,
+                                                "/160 caractères"
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOSerpPreview.tsx",
+                                            lineNumber: 89,
+                                            columnNumber: 15
+                                        }, this)
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOSerpPreview.tsx",
+                                        lineNumber: 88,
+                                        columnNumber: 13
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOSerpPreview.tsx",
+                                lineNumber: 82,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOSerpPreview.tsx",
+                        lineNumber: 48,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV("div", {
+                        className: "mt-4 space-y-2 text-xs text-muted-foreground",
+                        children: [
+                            /*#__PURE__*/ _jsxDEV("p", {
+                                children: [
+                                    "💡 ",
+                                    /*#__PURE__*/ _jsxDEV("strong", {
+                                        children: "Conseil :"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOSerpPreview.tsx",
+                                        lineNumber: 99,
+                                        columnNumber: 16
+                                    }, this),
+                                    " Un titre entre 50-60 caractères et une description entre 120-160 caractères offrent les meilleurs résultats."
+                                ]
+                            }, void 0, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOSerpPreview.tsx",
+                                lineNumber: 98,
+                                columnNumber: 11
+                            }, this),
+                            metaTitle.length > 60 && /*#__PURE__*/ _jsxDEV("p", {
+                                className: "text-amber-600",
+                                children: "⚠️ Le titre sera tronqué dans les résultats Google (max 60 caractères)."
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOSerpPreview.tsx",
+                                lineNumber: 102,
+                                columnNumber: 13
+                            }, this),
+                            metaDescription.length > 160 && /*#__PURE__*/ _jsxDEV("p", {
+                                className: "text-amber-600",
+                                children: "⚠️ La description sera tronquée dans les résultats Google (max 160 caractères)."
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOSerpPreview.tsx",
+                                lineNumber: 107,
+                                columnNumber: 13
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOSerpPreview.tsx",
+                        lineNumber: 97,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOSerpPreview.tsx",
+                lineNumber: 47,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOSerpPreview.tsx",
+        lineNumber: 37,
+        columnNumber: 5
+    }, this);
+};
+_c = SEOSerpPreview;
+var _c;
+$RefreshReg$(_c, "SEOSerpPreview");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/seo/SEOSerpPreview.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/seo/SEOSerpPreview.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIlNFT1NlcnBQcmV2aWV3LnRzeCJdLCJzb3VyY2VzQ29udGVudCI6WyIvKipcbiAqIENvbXBvc2FudCBkZSBwcsOpdmlzdWFsaXNhdGlvbiBTRVJQIChTZWFyY2ggRW5naW5lIFJlc3VsdHMgUGFnZSlcbiAqIEFmZmljaGUgdW4gYXBlcsOndSB2aXN1ZWwgZGUgbGEgZmHDp29uIGRvbnQgbGEgYm91dGlxdWUgYXBwYXJhw650cmEgZGFucyBsZXMgcsOpc3VsdGF0cyBHb29nbGVcbiAqL1xuXG5pbXBvcnQgeyBDYXJkLCBDYXJkQ29udGVudCwgQ2FyZERlc2NyaXB0aW9uLCBDYXJkSGVhZGVyLCBDYXJkVGl0bGUgfSBmcm9tICdAL2NvbXBvbmVudHMvdWkvY2FyZCc7XG5pbXBvcnQgeyBTZWFyY2gsIEV4dGVybmFsTGluayB9IGZyb20gJ2x1Y2lkZS1yZWFjdCc7XG5cbmludGVyZmFjZSBTRU9TZXJwUHJldmlld1Byb3BzIHtcbiAgbWV0YVRpdGxlOiBzdHJpbmc7XG4gIG1ldGFEZXNjcmlwdGlvbjogc3RyaW5nO1xuICB1cmw/OiBzdHJpbmc7XG4gIGZhdmljb25Vcmw/OiBzdHJpbmc7XG59XG5cbmV4cG9ydCBjb25zdCBTRU9TZXJwUHJldmlldyA9ICh7XG4gIG1ldGFUaXRsZSxcbiAgbWV0YURlc2NyaXB0aW9uLFxuICB1cmwgPSAnaHR0cHM6Ly93d3cuZW1hcnpvbmEuY29tJyxcbiAgZmF2aWNvblVybCxcbn06IFNFT1NlcnBQcmV2aWV3UHJvcHMpID0+IHtcbiAgLy8gTGltaXRlciBsYSBsb25ndWV1ciBwb3VyIHVuIGFmZmljaGFnZSByw6lhbGlzdGVcbiAgY29uc3QgZGlzcGxheVRpdGxlID0gbWV0YVRpdGxlIHx8ICdUaXRyZSBkZSB2b3RyZSBib3V0aXF1ZSc7XG4gIGNvbnN0IGRpc3BsYXlEZXNjcmlwdGlvbiA9IG1ldGFEZXNjcmlwdGlvbiB8fCAnRGVzY3JpcHRpb24gZGUgdm90cmUgYm91dGlxdWUnO1xuICBcbiAgLy8gTGltaXRlciDDoCA2MCBjYXJhY3TDqHJlcyBwb3VyIGxlIHRpdHJlIChyw6lhbGlzdGUgR29vZ2xlKVxuICBjb25zdCB0cnVuY2F0ZWRUaXRsZSA9IGRpc3BsYXlUaXRsZS5sZW5ndGggPiA2MCBcbiAgICA/IGRpc3BsYXlUaXRsZS5zdWJzdHJpbmcoMCwgNTcpICsgJy4uLicgXG4gICAgOiBkaXNwbGF5VGl0bGU7XG4gIFxuICAvLyBMaW1pdGVyIMOgIDE2MCBjYXJhY3TDqHJlcyBwb3VyIGxhIGRlc2NyaXB0aW9uIChyw6lhbGlzdGUgR29vZ2xlKVxuICBjb25zdCB0cnVuY2F0ZWREZXNjcmlwdGlvbiA9IGRpc3BsYXlEZXNjcmlwdGlvbi5sZW5ndGggPiAxNjBcbiAgICA/IGRpc3BsYXlEZXNjcmlwdGlvbi5zdWJzdHJpbmcoMCwgMTU3KSArICcuLi4nXG4gICAgOiBkaXNwbGF5RGVzY3JpcHRpb247XG5cbiAgcmV0dXJuIChcbiAgICA8Q2FyZD5cbiAgICAgIDxDYXJkSGVhZGVyPlxuICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGdhcC0yXCI+XG4gICAgICAgICAgPFNlYXJjaCBjbGFzc05hbWU9XCJoLTUgdy01XCIgLz5cbiAgICAgICAgICA8Q2FyZFRpdGxlIGNsYXNzTmFtZT1cInRleHQtbGdcIj5BcGVyw6d1IEdvb2dsZTwvQ2FyZFRpdGxlPlxuICAgICAgICA8L2Rpdj5cbiAgICAgICAgPENhcmREZXNjcmlwdGlvbj5cbiAgICAgICAgICBQcsOpdmlzdWFsaXNhdGlvbiBkZSBsJ2FwcGFyZW5jZSBkYW5zIGxlcyByw6lzdWx0YXRzIGRlIHJlY2hlcmNoZSBHb29nbGVcbiAgICAgICAgPC9DYXJkRGVzY3JpcHRpb24+XG4gICAgICA8L0NhcmRIZWFkZXI+XG4gICAgICA8Q2FyZENvbnRlbnQ+XG4gICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiYm9yZGVyIHJvdW5kZWQtbGcgcC00IGJnLXdoaXRlIGRhcms6YmctZ3JheS05NTAgc2hhZG93LXNtXCI+XG4gICAgICAgICAgey8qIExpZ25lIFVSTCBldCBmYXZpY29uICovfVxuICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTIgbWItMVwiPlxuICAgICAgICAgICAge2Zhdmljb25VcmwgJiYgKFxuICAgICAgICAgICAgICA8aW1nXG4gICAgICAgICAgICAgICAgc3JjPXtmYXZpY29uVXJsfVxuICAgICAgICAgICAgICAgIGFsdD1cIkZhdmljb25cIlxuICAgICAgICAgICAgICAgIGNsYXNzTmFtZT1cInctNCBoLTQgcm91bmRlZC1zbVwiXG4gICAgICAgICAgICAgICAgb25FcnJvcj17KGUpID0+IHtcbiAgICAgICAgICAgICAgICAgIChlLnRhcmdldCBhcyBIVE1MSW1hZ2VFbGVtZW50KS5zdHlsZS5kaXNwbGF5ID0gJ25vbmUnO1xuICAgICAgICAgICAgICAgIH19XG4gICAgICAgICAgICAgIC8+XG4gICAgICAgICAgICApfVxuICAgICAgICAgICAgPHNwYW4gY2xhc3NOYW1lPVwidGV4dC14cyB0ZXh0LWdyYXktNjAwIGRhcms6dGV4dC1ncmF5LTQwMCB0cnVuY2F0ZVwiPlxuICAgICAgICAgICAgICB7dXJsfVxuICAgICAgICAgICAgPC9zcGFuPlxuICAgICAgICAgICAgPEV4dGVybmFsTGluayBjbGFzc05hbWU9XCJ3LTMgaC0zIHRleHQtZ3JheS00MDAgbWwtMSBmbGV4LXNocmluay0wXCIgLz5cbiAgICAgICAgICA8L2Rpdj5cblxuICAgICAgICAgIHsvKiBUaXRyZSAobGllbiBibGV1KSAqL31cbiAgICAgICAgICA8YVxuICAgICAgICAgICAgaHJlZj1cIiNcIlxuICAgICAgICAgICAgb25DbGljaz17KGUpID0+IGUucHJldmVudERlZmF1bHQoKX1cbiAgICAgICAgICAgIGNsYXNzTmFtZT1cImJsb2NrIHRleHQteGwgdGV4dC1ibHVlLTYwMCBkYXJrOnRleHQtYmx1ZS00MDAgaG92ZXI6dW5kZXJsaW5lIG1iLTEgbGVhZGluZy10aWdodCBjdXJzb3ItZGVmYXVsdFwiXG4gICAgICAgICAgPlxuICAgICAgICAgICAge3RydW5jYXRlZFRpdGxlfVxuICAgICAgICAgIDwvYT5cblxuICAgICAgICAgIHsvKiBEZXNjcmlwdGlvbiAqL31cbiAgICAgICAgICA8cCBjbGFzc05hbWU9XCJ0ZXh0LXNtIHRleHQtZ3JheS03MDAgZGFyazp0ZXh0LWdyYXktMzAwIGxlYWRpbmctcmVsYXhlZCBsaW5lLWNsYW1wLTJcIj5cbiAgICAgICAgICAgIHt0cnVuY2F0ZWREZXNjcmlwdGlvbn1cbiAgICAgICAgICA8L3A+XG5cbiAgICAgICAgICB7LyogSW5kaWNhdGV1cnMgZGUgcXVhbGl0w6kgKi99XG4gICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLWNlbnRlciBnYXAtNCBtdC0zIHB0LTMgYm9yZGVyLXQgYm9yZGVyLWdyYXktMjAwIGRhcms6Ym9yZGVyLWdyYXktODAwXCI+XG4gICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGdhcC0xXCI+XG4gICAgICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT17YHRleHQteHMgJHttZXRhVGl0bGUubGVuZ3RoID49IDUwICYmIG1ldGFUaXRsZS5sZW5ndGggPD0gNjAgPyAndGV4dC1ncmVlbi02MDAnIDogJ3RleHQtYW1iZXItNjAwJ31gfT5cbiAgICAgICAgICAgICAgICB7bWV0YVRpdGxlLmxlbmd0aH0vNjAgY2FyYWN0w6hyZXNcbiAgICAgICAgICAgICAgPC9zcGFuPlxuICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGdhcC0xXCI+XG4gICAgICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT17YHRleHQteHMgJHttZXRhRGVzY3JpcHRpb24ubGVuZ3RoID49IDEyMCAmJiBtZXRhRGVzY3JpcHRpb24ubGVuZ3RoIDw9IDE2MCA/ICd0ZXh0LWdyZWVuLTYwMCcgOiAndGV4dC1hbWJlci02MDAnfWB9PlxuICAgICAgICAgICAgICAgIHttZXRhRGVzY3JpcHRpb24ubGVuZ3RofS8xNjAgY2FyYWN0w6hyZXNcbiAgICAgICAgICAgICAgPC9zcGFuPlxuICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgPC9kaXY+XG4gICAgICAgIDwvZGl2PlxuXG4gICAgICAgIHsvKiBOb3RlcyAqL31cbiAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJtdC00IHNwYWNlLXktMiB0ZXh0LXhzIHRleHQtbXV0ZWQtZm9yZWdyb3VuZFwiPlxuICAgICAgICAgIDxwPlxuICAgICAgICAgICAg8J+SoSA8c3Ryb25nPkNvbnNlaWwgOjwvc3Ryb25nPiBVbiB0aXRyZSBlbnRyZSA1MC02MCBjYXJhY3TDqHJlcyBldCB1bmUgZGVzY3JpcHRpb24gZW50cmUgMTIwLTE2MCBjYXJhY3TDqHJlcyBvZmZyZW50IGxlcyBtZWlsbGV1cnMgcsOpc3VsdGF0cy5cbiAgICAgICAgICA8L3A+XG4gICAgICAgICAge21ldGFUaXRsZS5sZW5ndGggPiA2MCAmJiAoXG4gICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJ0ZXh0LWFtYmVyLTYwMFwiPlxuICAgICAgICAgICAgICDimqDvuI8gTGUgdGl0cmUgc2VyYSB0cm9ucXXDqSBkYW5zIGxlcyByw6lzdWx0YXRzIEdvb2dsZSAobWF4IDYwIGNhcmFjdMOocmVzKS5cbiAgICAgICAgICAgIDwvcD5cbiAgICAgICAgICApfVxuICAgICAgICAgIHttZXRhRGVzY3JpcHRpb24ubGVuZ3RoID4gMTYwICYmIChcbiAgICAgICAgICAgIDxwIGNsYXNzTmFtZT1cInRleHQtYW1iZXItNjAwXCI+XG4gICAgICAgICAgICAgIOKaoO+4jyBMYSBkZXNjcmlwdGlvbiBzZXJhIHRyb25xdcOpZSBkYW5zIGxlcyByw6lzdWx0YXRzIEdvb2dsZSAobWF4IDE2MCBjYXJhY3TDqHJlcykuXG4gICAgICAgICAgICA8L3A+XG4gICAgICAgICAgKX1cbiAgICAgICAgPC9kaXY+XG4gICAgICA8L0NhcmRDb250ZW50PlxuICAgIDwvQ2FyZD5cbiAgKTtcbn07XG5cblxuXG5cblxuXG5cbiJdLCJuYW1lcyI6WyJDYXJkIiwiQ2FyZENvbnRlbnQiLCJDYXJkRGVzY3JpcHRpb24iLCJDYXJkSGVhZGVyIiwiQ2FyZFRpdGxlIiwiU2VhcmNoIiwiRXh0ZXJuYWxMaW5rIiwiU0VPU2VycFByZXZpZXciLCJtZXRhVGl0bGUiLCJtZXRhRGVzY3JpcHRpb24iLCJ1cmwiLCJmYXZpY29uVXJsIiwiZGlzcGxheVRpdGxlIiwiZGlzcGxheURlc2NyaXB0aW9uIiwidHJ1bmNhdGVkVGl0bGUiLCJsZW5ndGgiLCJzdWJzdHJpbmciLCJ0cnVuY2F0ZWREZXNjcmlwdGlvbiIsImRpdiIsImNsYXNzTmFtZSIsImltZyIsInNyYyIsImFsdCIsIm9uRXJyb3IiLCJlIiwidGFyZ2V0Iiwic3R5bGUiLCJkaXNwbGF5Iiwic3BhbiIsImEiLCJocmVmIiwib25DbGljayIsInByZXZlbnREZWZhdWx0IiwicCIsInN0cm9uZyJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7QUFBQTs7O0NBR0MsR0FFRCxTQUFTQSxJQUFJLEVBQUVDLFdBQVcsRUFBRUMsZUFBZSxFQUFFQyxVQUFVLEVBQUVDLFNBQVMsUUFBUSx1QkFBdUI7QUFDakcsU0FBU0MsTUFBTSxFQUFFQyxZQUFZLFFBQVEsZUFBZTtBQVNwRCxPQUFPLE1BQU1DLGlCQUFpQixDQUFDLEVBQzdCQyxTQUFTLEVBQ1RDLGVBQWUsRUFDZkMsTUFBTSwwQkFBMEIsRUFDaENDLFVBQVUsRUFDVTtJQUNwQixpREFBaUQ7SUFDakQsTUFBTUMsZUFBZUosYUFBYTtJQUNsQyxNQUFNSyxxQkFBcUJKLG1CQUFtQjtJQUU5QywwREFBMEQ7SUFDMUQsTUFBTUssaUJBQWlCRixhQUFhRyxNQUFNLEdBQUcsS0FDekNILGFBQWFJLFNBQVMsQ0FBQyxHQUFHLE1BQU0sUUFDaENKO0lBRUosaUVBQWlFO0lBQ2pFLE1BQU1LLHVCQUF1QkosbUJBQW1CRSxNQUFNLEdBQUcsTUFDckRGLG1CQUFtQkcsU0FBUyxDQUFDLEdBQUcsT0FBTyxRQUN2Q0g7SUFFSixxQkFDRSxRQUFDYjs7MEJBQ0MsUUFBQ0c7O2tDQUNDLFFBQUNlO3dCQUFJQyxXQUFVOzswQ0FDYixRQUFDZDtnQ0FBT2MsV0FBVTs7Ozs7OzBDQUNsQixRQUFDZjtnQ0FBVWUsV0FBVTswQ0FBVTs7Ozs7Ozs7Ozs7O2tDQUVqQyxRQUFDakI7a0NBQWdCOzs7Ozs7Ozs7Ozs7MEJBSW5CLFFBQUNEOztrQ0FDQyxRQUFDaUI7d0JBQUlDLFdBQVU7OzBDQUViLFFBQUNEO2dDQUFJQyxXQUFVOztvQ0FDWlIsNEJBQ0MsUUFBQ1M7d0NBQ0NDLEtBQUtWO3dDQUNMVyxLQUFJO3dDQUNKSCxXQUFVO3dDQUNWSSxTQUFTLENBQUNDOzRDQUNQQSxFQUFFQyxNQUFNLENBQXNCQyxLQUFLLENBQUNDLE9BQU8sR0FBRzt3Q0FDakQ7Ozs7OztrREFHSixRQUFDQzt3Q0FBS1QsV0FBVTtrREFDYlQ7Ozs7OztrREFFSCxRQUFDSjt3Q0FBYWEsV0FBVTs7Ozs7Ozs7Ozs7OzBDQUkxQixRQUFDVTtnQ0FDQ0MsTUFBSztnQ0FDTEMsU0FBUyxDQUFDUCxJQUFNQSxFQUFFUSxjQUFjO2dDQUNoQ2IsV0FBVTswQ0FFVEw7Ozs7OzswQ0FJSCxRQUFDbUI7Z0NBQUVkLFdBQVU7MENBQ1ZGOzs7Ozs7MENBSUgsUUFBQ0M7Z0NBQUlDLFdBQVU7O2tEQUNiLFFBQUNEO3dDQUFJQyxXQUFVO2tEQUNiLGNBQUEsUUFBQ1M7NENBQUtULFdBQVcsQ0FBQyxRQUFRLEVBQUVYLFVBQVVPLE1BQU0sSUFBSSxNQUFNUCxVQUFVTyxNQUFNLElBQUksS0FBSyxtQkFBbUIsa0JBQWtCOztnREFDakhQLFVBQVVPLE1BQU07Z0RBQUM7Ozs7Ozs7Ozs7OztrREFHdEIsUUFBQ0c7d0NBQUlDLFdBQVU7a0RBQ2IsY0FBQSxRQUFDUzs0Q0FBS1QsV0FBVyxDQUFDLFFBQVEsRUFBRVYsZ0JBQWdCTSxNQUFNLElBQUksT0FBT04sZ0JBQWdCTSxNQUFNLElBQUksTUFBTSxtQkFBbUIsa0JBQWtCOztnREFDL0hOLGdCQUFnQk0sTUFBTTtnREFBQzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O2tDQU9oQyxRQUFDRzt3QkFBSUMsV0FBVTs7MENBQ2IsUUFBQ2M7O29DQUFFO2tEQUNFLFFBQUNDO2tEQUFPOzs7Ozs7b0NBQWtCOzs7Ozs7OzRCQUU5QjFCLFVBQVVPLE1BQU0sR0FBRyxvQkFDbEIsUUFBQ2tCO2dDQUFFZCxXQUFVOzBDQUFpQjs7Ozs7OzRCQUkvQlYsZ0JBQWdCTSxNQUFNLEdBQUcscUJBQ3hCLFFBQUNrQjtnQ0FBRWQsV0FBVTswQ0FBaUI7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OztBQVExQyxFQUFFO0tBbkdXWiJ9

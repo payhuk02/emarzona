@@ -1,0 +1,19 @@
+/**
+ * An error emitted by Sentry SDKs and related utilities.
+ * @deprecated This class is no longer used and will be removed in a future version. Use `Error` instead.
+ */
+class SentryError extends Error {
+
+   constructor(
+     message,
+    logLevel = 'warn',
+  ) {
+    super(message);this.message = message;
+    this.logLevel = logLevel;
+  }
+}
+
+export { SentryError };
+                                 
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZXJyb3IuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy91dGlscy9lcnJvci50cyJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgdHlwZSB7IENvbnNvbGVMZXZlbCB9IGZyb20gJy4uL3R5cGVzLWhvaXN0L2luc3RydW1lbnQnO1xuXG4vKipcbiAqIEFuIGVycm9yIGVtaXR0ZWQgYnkgU2VudHJ5IFNES3MgYW5kIHJlbGF0ZWQgdXRpbGl0aWVzLlxuICogQGRlcHJlY2F0ZWQgVGhpcyBjbGFzcyBpcyBubyBsb25nZXIgdXNlZCBhbmQgd2lsbCBiZSByZW1vdmVkIGluIGEgZnV0dXJlIHZlcnNpb24uIFVzZSBgRXJyb3JgIGluc3RlYWQuXG4gKi9cbmV4cG9ydCBjbGFzcyBTZW50cnlFcnJvciBleHRlbmRzIEVycm9yIHtcbiAgcHVibGljIGxvZ0xldmVsOiBDb25zb2xlTGV2ZWw7XG5cbiAgcHVibGljIGNvbnN0cnVjdG9yKFxuICAgIHB1YmxpYyBtZXNzYWdlOiBzdHJpbmcsXG4gICAgbG9nTGV2ZWw6IENvbnNvbGVMZXZlbCA9ICd3YXJuJyxcbiAgKSB7XG4gICAgc3VwZXIobWVzc2FnZSk7XG5cbiAgICB0aGlzLmxvZ0xldmVsID0gbG9nTGV2ZWw7XG4gIH1cbn1cbiJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFFQTtBQUNBO0FBQ0E7QUFDQTtBQUNPLE1BQU0sV0FBQSxTQUFvQixLQUFBLENBQU07O0FBR3ZDLEdBQVMsV0FBVztBQUNwQixLQUFXLE9BQU87QUFDbEIsSUFBSSxRQUFRLEdBQWlCLE1BQU07QUFDbkMsSUFBSTtBQUNKLElBQUksS0FBSyxDQUFDLE9BQU8sQ0FBQSxDQUFBLElBQUEsQ0FBQSxPQUFBLEdBQUEsT0FBQTtBQUVqQixJQUFJLElBQUksQ0FBQyxRQUFBLEdBQVcsUUFBUTtBQUM1QixFQUFFO0FBQ0Y7Ozs7IiwieF9nb29nbGVfaWdub3JlTGlzdCI6WzBdfQ==

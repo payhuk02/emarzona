@@ -1,0 +1,29 @@
+import { addNonEnumerableProperty } from "/node_modules/@sentry/core/build/esm/utils/object.js?v=89021f86";
+
+const SCOPE_SPAN_FIELD = '_sentrySpan';
+
+/**
+ * Set the active span for a given scope.
+ * NOTE: This should NOT be used directly, but is only used internally by the trace methods.
+ */
+function _setSpanForScope(scope, span) {
+  if (span) {
+    addNonEnumerableProperty(scope , SCOPE_SPAN_FIELD, span);
+  } else {
+    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+    delete (scope )[SCOPE_SPAN_FIELD];
+  }
+}
+
+/**
+ * Get the active span for a given scope.
+ * NOTE: This should NOT be used directly, but is only used internally by the trace methods.
+ */
+function _getSpanForScope(scope) {
+  return scope[SCOPE_SPAN_FIELD];
+}
+
+export { _getSpanForScope, _setSpanForScope };
+                                       
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic3Bhbk9uU2NvcGUuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy91dGlscy9zcGFuT25TY29wZS50cyJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgdHlwZSB7IFNjb3BlIH0gZnJvbSAnLi4vc2NvcGUnO1xuaW1wb3J0IHR5cGUgeyBTcGFuIH0gZnJvbSAnLi4vdHlwZXMtaG9pc3Qvc3Bhbic7XG5pbXBvcnQgeyBhZGROb25FbnVtZXJhYmxlUHJvcGVydHkgfSBmcm9tICcuLi91dGlscy9vYmplY3QnO1xuXG5jb25zdCBTQ09QRV9TUEFOX0ZJRUxEID0gJ19zZW50cnlTcGFuJztcblxudHlwZSBTY29wZVdpdGhNYXliZVNwYW4gPSBTY29wZSAmIHtcbiAgW1NDT1BFX1NQQU5fRklFTERdPzogU3Bhbjtcbn07XG5cbi8qKlxuICogU2V0IHRoZSBhY3RpdmUgc3BhbiBmb3IgYSBnaXZlbiBzY29wZS5cbiAqIE5PVEU6IFRoaXMgc2hvdWxkIE5PVCBiZSB1c2VkIGRpcmVjdGx5LCBidXQgaXMgb25seSB1c2VkIGludGVybmFsbHkgYnkgdGhlIHRyYWNlIG1ldGhvZHMuXG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBfc2V0U3BhbkZvclNjb3BlKHNjb3BlOiBTY29wZSwgc3BhbjogU3BhbiB8IHVuZGVmaW5lZCk6IHZvaWQge1xuICBpZiAoc3Bhbikge1xuICAgIGFkZE5vbkVudW1lcmFibGVQcm9wZXJ0eShzY29wZSBhcyBTY29wZVdpdGhNYXliZVNwYW4sIFNDT1BFX1NQQU5fRklFTEQsIHNwYW4pO1xuICB9IGVsc2Uge1xuICAgIC8vIGVzbGludC1kaXNhYmxlLW5leHQtbGluZSBAdHlwZXNjcmlwdC1lc2xpbnQvbm8tZHluYW1pYy1kZWxldGVcbiAgICBkZWxldGUgKHNjb3BlIGFzIFNjb3BlV2l0aE1heWJlU3BhbilbU0NPUEVfU1BBTl9GSUVMRF07XG4gIH1cbn1cblxuLyoqXG4gKiBHZXQgdGhlIGFjdGl2ZSBzcGFuIGZvciBhIGdpdmVuIHNjb3BlLlxuICogTk9URTogVGhpcyBzaG91bGQgTk9UIGJlIHVzZWQgZGlyZWN0bHksIGJ1dCBpcyBvbmx5IHVzZWQgaW50ZXJuYWxseSBieSB0aGUgdHJhY2UgbWV0aG9kcy5cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIF9nZXRTcGFuRm9yU2NvcGUoc2NvcGU6IFNjb3BlV2l0aE1heWJlU3Bhbik6IFNwYW4gfCB1bmRlZmluZWQge1xuICByZXR1cm4gc2NvcGVbU0NPUEVfU1BBTl9GSUVMRF07XG59XG4iXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7QUFJQSxNQUFNLGdCQUFBLEdBQW1CLGFBQWE7O0FBTXRDO0FBQ0E7QUFDQTtBQUNBO0FBQ08sU0FBUyxnQkFBZ0IsQ0FBQyxLQUFLLEVBQVMsSUFBSSxFQUEwQjtBQUM3RSxFQUFFLElBQUksSUFBSSxFQUFFO0FBQ1osSUFBSSx3QkFBd0IsQ0FBQyxLQUFBLEdBQTZCLGdCQUFnQixFQUFFLElBQUksQ0FBQztBQUNqRixFQUFFLE9BQU87QUFDVDtBQUNBLElBQUksT0FBTyxDQUFDLEtBQUEsR0FBNkIsZ0JBQWdCLENBQUM7QUFDMUQsRUFBRTtBQUNGOztBQUVBO0FBQ0E7QUFDQTtBQUNBO0FBQ08sU0FBUyxnQkFBZ0IsQ0FBQyxLQUFLLEVBQXdDO0FBQzlFLEVBQUUsT0FBTyxLQUFLLENBQUMsZ0JBQWdCLENBQUM7QUFDaEM7Ozs7IiwieF9nb29nbGVfaWdub3JlTGlzdCI6WzBdfQ==

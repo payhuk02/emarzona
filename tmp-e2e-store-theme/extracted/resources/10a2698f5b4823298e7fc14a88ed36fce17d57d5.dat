@@ -1,0 +1,101 @@
+import { DEBUG_BUILD } from "/node_modules/@sentry/core/build/esm/debug-build.js?v=3ea6c1b9";
+import { debug } from "/node_modules/@sentry/core/build/esm/utils/debug-logger.js?v=3ea6c1b9";
+import { hasSpansEnabled } from "/node_modules/@sentry/core/build/esm/utils/hasSpansEnabled.js?v=3ea6c1b9";
+import { parseSampleRate } from "/node_modules/@sentry/core/build/esm/utils/parseSampleRate.js?v=3ea6c1b9";
+
+/**
+ * Makes a sampling decision for the given options.
+ *
+ * Called every time a root span is created. Only root spans which emerge with a `sampled` value of `true` will be
+ * sent to Sentry.
+ */
+function sampleSpan(
+  options,
+  samplingContext,
+  sampleRand,
+) {
+  // nothing to do if span recording is not enabled
+  if (!hasSpansEnabled(options)) {
+    return [false];
+  }
+
+  let localSampleRateWasApplied = undefined;
+
+  // we would have bailed already if neither `tracesSampler` nor `tracesSampleRate` were defined, so one of these should
+  // work; prefer the hook if so
+  let sampleRate;
+  if (typeof options.tracesSampler === 'function') {
+    sampleRate = options.tracesSampler({
+      ...samplingContext,
+      inheritOrSampleWith: fallbackSampleRate => {
+        // If we have an incoming parent sample rate, we'll just use that one.
+        // The sampling decision will be inherited because of the sample_rand that was generated when the trace reached the incoming boundaries of the SDK.
+        if (typeof samplingContext.parentSampleRate === 'number') {
+          return samplingContext.parentSampleRate;
+        }
+
+        // Fallback if parent sample rate is not on the incoming trace (e.g. if there is no baggage)
+        // This is to provide backwards compatibility if there are incoming traces from older SDKs that don't send a parent sample rate or a sample rand. In these cases we just want to force either a sampling decision on the downstream traces via the sample rate.
+        if (typeof samplingContext.parentSampled === 'boolean') {
+          return Number(samplingContext.parentSampled);
+        }
+
+        return fallbackSampleRate;
+      },
+    });
+    localSampleRateWasApplied = true;
+  } else if (samplingContext.parentSampled !== undefined) {
+    sampleRate = samplingContext.parentSampled;
+  } else if (typeof options.tracesSampleRate !== 'undefined') {
+    sampleRate = options.tracesSampleRate;
+    localSampleRateWasApplied = true;
+  }
+
+  // Since this is coming from the user (or from a function provided by the user), who knows what we might get.
+  // (The only valid values are booleans or numbers between 0 and 1.)
+  const parsedSampleRate = parseSampleRate(sampleRate);
+
+  if (parsedSampleRate === undefined) {
+    DEBUG_BUILD &&
+      debug.warn(
+        `[Tracing] Discarding root span because of invalid sample rate. Sample rate must be a boolean or a number between 0 and 1. Got ${JSON.stringify(
+          sampleRate,
+        )} of type ${JSON.stringify(typeof sampleRate)}.`,
+      );
+    return [false];
+  }
+
+  // if the function returned 0 (or false), or if `tracesSampleRate` is 0, it's a sign the transaction should be dropped
+  if (!parsedSampleRate) {
+    DEBUG_BUILD &&
+      debug.log(
+        `[Tracing] Discarding transaction because ${
+          typeof options.tracesSampler === 'function'
+            ? 'tracesSampler returned 0 or false'
+            : 'a negative sampling decision was inherited or tracesSampleRate is set to 0'
+        }`,
+      );
+    return [false, parsedSampleRate, localSampleRateWasApplied];
+  }
+
+  // We always compare the sample rand for the current execution context against the chosen sample rate.
+  // Read more: https://develop.sentry.dev/sdk/telemetry/traces/#propagated-random-value
+  const shouldSample = sampleRand < parsedSampleRate;
+
+  // if we're not going to keep it, we're done
+  if (!shouldSample) {
+    DEBUG_BUILD &&
+      debug.log(
+        `[Tracing] Discarding transaction because it's not included in the random sample (sampling rate = ${Number(
+          sampleRate,
+        )})`,
+      );
+  }
+
+  return [shouldSample, parsedSampleRate, localSampleRateWasApplied];
+}
+
+export { sampleSpan };
+                                    
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic2FtcGxpbmcuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy90cmFjaW5nL3NhbXBsaW5nLnRzIl0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7IERFQlVHX0JVSUxEIH0gZnJvbSAnLi4vZGVidWctYnVpbGQnO1xuaW1wb3J0IHR5cGUgeyBDb3JlT3B0aW9ucyB9IGZyb20gJy4uL3R5cGVzLWhvaXN0L29wdGlvbnMnO1xuaW1wb3J0IHR5cGUgeyBTYW1wbGluZ0NvbnRleHQgfSBmcm9tICcuLi90eXBlcy1ob2lzdC9zYW1wbGluZ2NvbnRleHQnO1xuaW1wb3J0IHsgZGVidWcgfSBmcm9tICcuLi91dGlscy9kZWJ1Zy1sb2dnZXInO1xuaW1wb3J0IHsgaGFzU3BhbnNFbmFibGVkIH0gZnJvbSAnLi4vdXRpbHMvaGFzU3BhbnNFbmFibGVkJztcbmltcG9ydCB7IHBhcnNlU2FtcGxlUmF0ZSB9IGZyb20gJy4uL3V0aWxzL3BhcnNlU2FtcGxlUmF0ZSc7XG5cbi8qKlxuICogTWFrZXMgYSBzYW1wbGluZyBkZWNpc2lvbiBmb3IgdGhlIGdpdmVuIG9wdGlvbnMuXG4gKlxuICogQ2FsbGVkIGV2ZXJ5IHRpbWUgYSByb290IHNwYW4gaXMgY3JlYXRlZC4gT25seSByb290IHNwYW5zIHdoaWNoIGVtZXJnZSB3aXRoIGEgYHNhbXBsZWRgIHZhbHVlIG9mIGB0cnVlYCB3aWxsIGJlXG4gKiBzZW50IHRvIFNlbnRyeS5cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIHNhbXBsZVNwYW4oXG4gIG9wdGlvbnM6IFBpY2s8Q29yZU9wdGlvbnMsICd0cmFjZXNTYW1wbGVSYXRlJyB8ICd0cmFjZXNTYW1wbGVyJz4sXG4gIHNhbXBsaW5nQ29udGV4dDogU2FtcGxpbmdDb250ZXh0LFxuICBzYW1wbGVSYW5kOiBudW1iZXIsXG4pOiBbc2FtcGxlZDogYm9vbGVhbiwgc2FtcGxlUmF0ZT86IG51bWJlciwgbG9jYWxTYW1wbGVSYXRlV2FzQXBwbGllZD86IGJvb2xlYW5dIHtcbiAgLy8gbm90aGluZyB0byBkbyBpZiBzcGFuIHJlY29yZGluZyBpcyBub3QgZW5hYmxlZFxuICBpZiAoIWhhc1NwYW5zRW5hYmxlZChvcHRpb25zKSkge1xuICAgIHJldHVybiBbZmFsc2VdO1xuICB9XG5cbiAgbGV0IGxvY2FsU2FtcGxlUmF0ZVdhc0FwcGxpZWQgPSB1bmRlZmluZWQ7XG5cbiAgLy8gd2Ugd291bGQgaGF2ZSBiYWlsZWQgYWxyZWFkeSBpZiBuZWl0aGVyIGB0cmFjZXNTYW1wbGVyYCBub3IgYHRyYWNlc1NhbXBsZVJhdGVgIHdlcmUgZGVmaW5lZCwgc28gb25lIG9mIHRoZXNlIHNob3VsZFxuICAvLyB3b3JrOyBwcmVmZXIgdGhlIGhvb2sgaWYgc29cbiAgbGV0IHNhbXBsZVJhdGU7XG4gIGlmICh0eXBlb2Ygb3B0aW9ucy50cmFjZXNTYW1wbGVyID09PSAnZnVuY3Rpb24nKSB7XG4gICAgc2FtcGxlUmF0ZSA9IG9wdGlvbnMudHJhY2VzU2FtcGxlcih7XG4gICAgICAuLi5zYW1wbGluZ0NvbnRleHQsXG4gICAgICBpbmhlcml0T3JTYW1wbGVXaXRoOiBmYWxsYmFja1NhbXBsZVJhdGUgPT4ge1xuICAgICAgICAvLyBJZiB3ZSBoYXZlIGFuIGluY29taW5nIHBhcmVudCBzYW1wbGUgcmF0ZSwgd2UnbGwganVzdCB1c2UgdGhhdCBvbmUuXG4gICAgICAgIC8vIFRoZSBzYW1wbGluZyBkZWNpc2lvbiB3aWxsIGJlIGluaGVyaXRlZCBiZWNhdXNlIG9mIHRoZSBzYW1wbGVfcmFuZCB0aGF0IHdhcyBnZW5lcmF0ZWQgd2hlbiB0aGUgdHJhY2UgcmVhY2hlZCB0aGUgaW5jb21pbmcgYm91bmRhcmllcyBvZiB0aGUgU0RLLlxuICAgICAgICBpZiAodHlwZW9mIHNhbXBsaW5nQ29udGV4dC5wYXJlbnRTYW1wbGVSYXRlID09PSAnbnVtYmVyJykge1xuICAgICAgICAgIHJldHVybiBzYW1wbGluZ0NvbnRleHQucGFyZW50U2FtcGxlUmF0ZTtcbiAgICAgICAgfVxuXG4gICAgICAgIC8vIEZhbGxiYWNrIGlmIHBhcmVudCBzYW1wbGUgcmF0ZSBpcyBub3Qgb24gdGhlIGluY29taW5nIHRyYWNlIChlLmcuIGlmIHRoZXJlIGlzIG5vIGJhZ2dhZ2UpXG4gICAgICAgIC8vIFRoaXMgaXMgdG8gcHJvdmlkZSBiYWNrd2FyZHMgY29tcGF0aWJpbGl0eSBpZiB0aGVyZSBhcmUgaW5jb21pbmcgdHJhY2VzIGZyb20gb2xkZXIgU0RLcyB0aGF0IGRvbid0IHNlbmQgYSBwYXJlbnQgc2FtcGxlIHJhdGUgb3IgYSBzYW1wbGUgcmFuZC4gSW4gdGhlc2UgY2FzZXMgd2UganVzdCB3YW50IHRvIGZvcmNlIGVpdGhlciBhIHNhbXBsaW5nIGRlY2lzaW9uIG9uIHRoZSBkb3duc3RyZWFtIHRyYWNlcyB2aWEgdGhlIHNhbXBsZSByYXRlLlxuICAgICAgICBpZiAodHlwZW9mIHNhbXBsaW5nQ29udGV4dC5wYXJlbnRTYW1wbGVkID09PSAnYm9vbGVhbicpIHtcbiAgICAgICAgICByZXR1cm4gTnVtYmVyKHNhbXBsaW5nQ29udGV4dC5wYXJlbnRTYW1wbGVkKTtcbiAgICAgICAgfVxuXG4gICAgICAgIHJldHVybiBmYWxsYmFja1NhbXBsZVJhdGU7XG4gICAgICB9LFxuICAgIH0pO1xuICAgIGxvY2FsU2FtcGxlUmF0ZVdhc0FwcGxpZWQgPSB0cnVlO1xuICB9IGVsc2UgaWYgKHNhbXBsaW5nQ29udGV4dC5wYXJlbnRTYW1wbGVkICE9PSB1bmRlZmluZWQpIHtcbiAgICBzYW1wbGVSYXRlID0gc2FtcGxpbmdDb250ZXh0LnBhcmVudFNhbXBsZWQ7XG4gIH0gZWxzZSBpZiAodHlwZW9mIG9wdGlvbnMudHJhY2VzU2FtcGxlUmF0ZSAhPT0gJ3VuZGVmaW5lZCcpIHtcbiAgICBzYW1wbGVSYXRlID0gb3B0aW9ucy50cmFjZXNTYW1wbGVSYXRlO1xuICAgIGxvY2FsU2FtcGxlUmF0ZVdhc0FwcGxpZWQgPSB0cnVlO1xuICB9XG5cbiAgLy8gU2luY2UgdGhpcyBpcyBjb21pbmcgZnJvbSB0aGUgdXNlciAob3IgZnJvbSBhIGZ1bmN0aW9uIHByb3ZpZGVkIGJ5IHRoZSB1c2VyKSwgd2hvIGtub3dzIHdoYXQgd2UgbWlnaHQgZ2V0LlxuICAvLyAoVGhlIG9ubHkgdmFsaWQgdmFsdWVzIGFyZSBib29sZWFucyBvciBudW1iZXJzIGJldHdlZW4gMCBhbmQgMS4pXG4gIGNvbnN0IHBhcnNlZFNhbXBsZVJhdGUgPSBwYXJzZVNhbXBsZVJhdGUoc2FtcGxlUmF0ZSk7XG5cbiAgaWYgKHBhcnNlZFNhbXBsZVJhdGUgPT09IHVuZGVmaW5lZCkge1xuICAgIERFQlVHX0JVSUxEICYmXG4gICAgICBkZWJ1Zy53YXJuKFxuICAgICAgICBgW1RyYWNpbmddIERpc2NhcmRpbmcgcm9vdCBzcGFuIGJlY2F1c2Ugb2YgaW52YWxpZCBzYW1wbGUgcmF0ZS4gU2FtcGxlIHJhdGUgbXVzdCBiZSBhIGJvb2xlYW4gb3IgYSBudW1iZXIgYmV0d2VlbiAwIGFuZCAxLiBHb3QgJHtKU09OLnN0cmluZ2lmeShcbiAgICAgICAgICBzYW1wbGVSYXRlLFxuICAgICAgICApfSBvZiB0eXBlICR7SlNPTi5zdHJpbmdpZnkodHlwZW9mIHNhbXBsZVJhdGUpfS5gLFxuICAgICAgKTtcbiAgICByZXR1cm4gW2ZhbHNlXTtcbiAgfVxuXG4gIC8vIGlmIHRoZSBmdW5jdGlvbiByZXR1cm5lZCAwIChvciBmYWxzZSksIG9yIGlmIGB0cmFjZXNTYW1wbGVSYXRlYCBpcyAwLCBpdCdzIGEgc2lnbiB0aGUgdHJhbnNhY3Rpb24gc2hvdWxkIGJlIGRyb3BwZWRcbiAgaWYgKCFwYXJzZWRTYW1wbGVSYXRlKSB7XG4gICAgREVCVUdfQlVJTEQgJiZcbiAgICAgIGRlYnVnLmxvZyhcbiAgICAgICAgYFtUcmFjaW5nXSBEaXNjYXJkaW5nIHRyYW5zYWN0aW9uIGJlY2F1c2UgJHtcbiAgICAgICAgICB0eXBlb2Ygb3B0aW9ucy50cmFjZXNTYW1wbGVyID09PSAnZnVuY3Rpb24nXG4gICAgICAgICAgICA/ICd0cmFjZXNTYW1wbGVyIHJldHVybmVkIDAgb3IgZmFsc2UnXG4gICAgICAgICAgICA6ICdhIG5lZ2F0aXZlIHNhbXBsaW5nIGRlY2lzaW9uIHdhcyBpbmhlcml0ZWQgb3IgdHJhY2VzU2FtcGxlUmF0ZSBpcyBzZXQgdG8gMCdcbiAgICAgICAgfWAsXG4gICAgICApO1xuICAgIHJldHVybiBbZmFsc2UsIHBhcnNlZFNhbXBsZVJhdGUsIGxvY2FsU2FtcGxlUmF0ZVdhc0FwcGxpZWRdO1xuICB9XG5cbiAgLy8gV2UgYWx3YXlzIGNvbXBhcmUgdGhlIHNhbXBsZSByYW5kIGZvciB0aGUgY3VycmVudCBleGVjdXRpb24gY29udGV4dCBhZ2FpbnN0IHRoZSBjaG9zZW4gc2FtcGxlIHJhdGUuXG4gIC8vIFJlYWQgbW9yZTogaHR0cHM6Ly9kZXZlbG9wLnNlbnRyeS5kZXYvc2RrL3RlbGVtZXRyeS90cmFjZXMvI3Byb3BhZ2F0ZWQtcmFuZG9tLXZhbHVlXG4gIGNvbnN0IHNob3VsZFNhbXBsZSA9IHNhbXBsZVJhbmQgPCBwYXJzZWRTYW1wbGVSYXRlO1xuXG4gIC8vIGlmIHdlJ3JlIG5vdCBnb2luZyB0byBrZWVwIGl0LCB3ZSdyZSBkb25lXG4gIGlmICghc2hvdWxkU2FtcGxlKSB7XG4gICAgREVCVUdfQlVJTEQgJiZcbiAgICAgIGRlYnVnLmxvZyhcbiAgICAgICAgYFtUcmFjaW5nXSBEaXNjYXJkaW5nIHRyYW5zYWN0aW9uIGJlY2F1c2UgaXQncyBub3QgaW5jbHVkZWQgaW4gdGhlIHJhbmRvbSBzYW1wbGUgKHNhbXBsaW5nIHJhdGUgPSAke051bWJlcihcbiAgICAgICAgICBzYW1wbGVSYXRlLFxuICAgICAgICApfSlgLFxuICAgICAgKTtcbiAgfVxuXG4gIHJldHVybiBbc2hvdWxkU2FtcGxlLCBwYXJzZWRTYW1wbGVSYXRlLCBsb2NhbFNhbXBsZVJhdGVXYXNBcHBsaWVkXTtcbn1cbiJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7OztBQU9BO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNPLFNBQVMsVUFBVTtBQUMxQixFQUFFLE9BQU87QUFDVCxFQUFFLGVBQWU7QUFDakIs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

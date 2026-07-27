@@ -1,0 +1,21 @@
+import { setContext, init as init$1 } from "/node_modules/@sentry/browser/build/npm/esm/dev/index.js?v=3ea6c1b9";
+import { applySdkMetadata } from "/node_modules/@sentry/core/build/esm/index.js?v=3ea6c1b9";
+import __vite__cjsImport2_react from "/node_modules/.vite/deps/react.js?v=6014a254"; const version = __vite__cjsImport2_react["version"];
+
+/**
+ * Inits the React SDK
+ */
+function init(options) {
+  const opts = {
+    ...options,
+  };
+
+  applySdkMetadata(opts, 'react');
+  setContext('react', { version });
+  return init$1(opts);
+}
+
+export { init };
+                               
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic2RrLmpzIiwic291cmNlcyI6WyIuLi8uLi9zcmMvc2RrLnRzIl0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB0eXBlIHsgQnJvd3Nlck9wdGlvbnMgfSBmcm9tICdAc2VudHJ5L2Jyb3dzZXInO1xuaW1wb3J0IHsgaW5pdCBhcyBicm93c2VySW5pdCwgc2V0Q29udGV4dCB9IGZyb20gJ0BzZW50cnkvYnJvd3Nlcic7XG5pbXBvcnQgdHlwZSB7IENsaWVudCB9IGZyb20gJ0BzZW50cnkvY29yZSc7XG5pbXBvcnQgeyBhcHBseVNka01ldGFkYXRhIH0gZnJvbSAnQHNlbnRyeS9jb3JlJztcbmltcG9ydCB7IHZlcnNpb24gfSBmcm9tICdyZWFjdCc7XG5cbi8qKlxuICogSW5pdHMgdGhlIFJlYWN0IFNES1xuICovXG5leHBvcnQgZnVuY3Rpb24gaW5pdChvcHRpb25zOiBCcm93c2VyT3B0aW9ucyk6IENsaWVudCB8IHVuZGVmaW5lZCB7XG4gIGNvbnN0IG9wdHMgPSB7XG4gICAgLi4ub3B0aW9ucyxcbiAgfTtcblxuICBhcHBseVNka01ldGFkYXRhKG9wdHMsICdyZWFjdCcpO1xuICBzZXRDb250ZXh0KCdyZWFjdCcsIHsgdmVyc2lvbiB9KTtcbiAgcmV0dXJuIGJyb3dzZXJJbml0KG9wdHMpO1xufVxuIl0sIm5hbWVzIjpbImJyb3dzZXJJbml0Il0sIm1hcHBpbmdzIjoiOzs7O0FBTUE7QUFDQTtBQUNBO0FBQ08sU0FBUyxJQUFJLENBQUMsT0FBTyxFQUFzQztBQUNsRSxFQUFFLE1BQU0sT0FBTztBQUNmLElBQUksR0FBRyxPQUFPO0FBQ2QsR0FBRzs7QUFFSCxFQUFFLGdCQUFnQixDQUFDLElBQUksRUFBRSxPQUFPLENBQUM7QUFDakMsRUFBRSxVQUFVLENBQUMsT0FBTyxFQUFFLEVBQUUsT0FBQSxFQUFTLENBQUM7QUFDbEMsRUFBRSxPQUFPQSxNQUFXLENBQUMsSUFBSSxDQUFDO0FBQzFCOzs7OyIsInhfZ29vZ2xlX2lnbm9yZUxpc3QiOlswXX0=

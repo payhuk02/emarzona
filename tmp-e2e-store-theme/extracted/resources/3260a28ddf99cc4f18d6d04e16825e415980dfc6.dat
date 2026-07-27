@@ -1,0 +1,36 @@
+/**
+ * Shallow merge two objects.
+ * Does not mutate the passed in objects.
+ * Undefined/empty values in the merge object will overwrite existing values.
+ *
+ * By default, this merges 2 levels deep.
+ */
+function merge(initialObj, mergeObj, levels = 2) {
+  // If the merge value is not an object, or we have no merge levels left,
+  // we just set the value to the merge value
+  if (!mergeObj || typeof mergeObj !== 'object' || levels <= 0) {
+    return mergeObj;
+  }
+
+  // If the merge object is an empty object, and the initial object is not undefined, we return the initial object
+  if (initialObj && Object.keys(mergeObj).length === 0) {
+    return initialObj;
+  }
+
+  // Clone object
+  const output = { ...initialObj };
+
+  // Merge values into output, resursively
+  for (const key in mergeObj) {
+    if (Object.prototype.hasOwnProperty.call(mergeObj, key)) {
+      output[key] = merge(output[key], mergeObj[key], levels - 1);
+    }
+  }
+
+  return output;
+}
+
+export { merge };
+                                 
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibWVyZ2UuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy91dGlscy9tZXJnZS50cyJdLCJzb3VyY2VzQ29udGVudCI6WyIvKipcbiAqIFNoYWxsb3cgbWVyZ2UgdHdvIG9iamVjdHMuXG4gKiBEb2VzIG5vdCBtdXRhdGUgdGhlIHBhc3NlZCBpbiBvYmplY3RzLlxuICogVW5kZWZpbmVkL2VtcHR5IHZhbHVlcyBpbiB0aGUgbWVyZ2Ugb2JqZWN0IHdpbGwgb3ZlcndyaXRlIGV4aXN0aW5nIHZhbHVlcy5cbiAqXG4gKiBCeSBkZWZhdWx0LCB0aGlzIG1lcmdlcyAyIGxldmVscyBkZWVwLlxuICovXG5leHBvcnQgZnVuY3Rpb24gbWVyZ2U8VD4oaW5pdGlhbE9iajogVCwgbWVyZ2VPYmo6IFQsIGxldmVscyA9IDIpOiBUIHtcbiAgLy8gSWYgdGhlIG1lcmdlIHZhbHVlIGlzIG5vdCBhbiBvYmplY3QsIG9yIHdlIGhhdmUgbm8gbWVyZ2UgbGV2ZWxzIGxlZnQsXG4gIC8vIHdlIGp1c3Qgc2V0IHRoZSB2YWx1ZSB0byB0aGUgbWVyZ2UgdmFsdWVcbiAgaWYgKCFtZXJnZU9iaiB8fCB0eXBlb2YgbWVyZ2VPYmogIT09ICdvYmplY3QnIHx8IGxldmVscyA8PSAwKSB7XG4gICAgcmV0dXJuIG1lcmdlT2JqO1xuICB9XG5cbiAgLy8gSWYgdGhlIG1lcmdlIG9iamVjdCBpcyBhbiBlbXB0eSBvYmplY3QsIGFuZCB0aGUgaW5pdGlhbCBvYmplY3QgaXMgbm90IHVuZGVmaW5lZCwgd2UgcmV0dXJuIHRoZSBpbml0aWFsIG9iamVjdFxuICBpZiAoaW5pdGlhbE9iaiAmJiBPYmplY3Qua2V5cyhtZXJnZU9iaikubGVuZ3RoID09PSAwKSB7XG4gICAgcmV0dXJuIGluaXRpYWxPYmo7XG4gIH1cblxuICAvLyBDbG9uZSBvYmplY3RcbiAgY29uc3Qgb3V0cHV0ID0geyAuLi5pbml0aWFsT2JqIH07XG5cbiAgLy8gTWVyZ2UgdmFsdWVzIGludG8gb3V0cHV0LCByZXN1cnNpdmVseVxuICBmb3IgKGNvbnN0IGtleSBpbiBtZXJnZU9iaikge1xuICAgIGlmIChPYmplY3QucHJvdG90eXBlLmhhc093blByb3BlcnR5LmNhbGwobWVyZ2VPYmosIGtleSkpIHtcbiAgICAgIG91dHB1dFtrZXldID0gbWVyZ2Uob3V0cHV0W2tleV0sIG1lcmdlT2JqW2tleV0sIGxldmVscyAtIDEpO1xuICAgIH1cbiAgfVxuXG4gIHJldHVybiBvdXRwdXQ7XG59XG4iXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDTyxTQUFTLEtBQUssQ0FBSSxVQUFVLEVBQUssUUFBUSxFQUFLLE1BQUEsR0FBUyxDQUFDLEVBQUs7QUFDcEU7QUFDQTtBQUNBLEVBQUUsSUFBSSxDQUFDLFFBQUEsSUFBWSxPQUFPLFFBQUEsS0FBYSxRQUFBLElBQVksTUFBQSxJQUFVLENBQUMsRUFBRTtBQUNoRSxJQUFJLE9BQU8sUUFBUTtBQUNuQixFQUFFOztBQUVGO0FBQ0EsRUFBRSxJQUFJLFVBQUEsSUFBYyxNQUFNLENBQUMsSUFBSSxDQUFDLFFBQVEsQ0FBQyxDQUFDLE1BQUEsS0FBVyxDQUFDLEVBQUU7QUFDeEQsSUFBSSxPQUFPLFVBQVU7QUFDckIsRUFBRTs7QUFFRjtBQUNBLEVBQUUsTUFBTSxNQUFBLEdBQVMsRUFBRSxHQUFHLFlBQVk7O0FBRWxDO0FBQ0EsRUFBRSxLQUFLLE1BQU0sR0FBQSxJQUFPLFFBQVEsRUFBRTtBQUM5QixJQUFJLElBQUksTUFBTSxDQUFDLFNBQVMsQ0FBQyxjQUFjLENBQUMsSUFBSSxDQUFDLFFBQVEsRUFBRSxHQUFHLENBQUMsRUFBRTtBQUM3RCxNQUFNLE1BQU0sQ0FBQyxHQUFHLENBQUEsR0FBSSxLQUFLLENBQUMsTUFBTSxDQUFDLEdBQUcsQ0FBQyxFQUFFLFFBQVEsQ0FBQyxHQUFHLENBQUMsRUFBRSxNQUFBLEdBQVMsQ0FBQyxDQUFDO0FBQ2pFLElBQUk7QUFDSixFQUFFOztBQUVGLEVBQUUsT0FBTyxNQUFNO0FBQ2Y7Ozs7IiwieF9nb29nbGVfaWdub3JlTGlzdCI6WzBdfQ==

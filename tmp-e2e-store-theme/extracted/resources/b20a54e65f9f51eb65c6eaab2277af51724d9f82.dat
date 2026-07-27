@@ -1,0 +1,263 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/ui/dropdown-menu.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/ui/dropdown-menu.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=6014a254"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=6014a254"; const React = ((m) => m?.__esModule ? m : {	...typeof m === "object" && !Array.isArray(m) || typeof m === "function" ? m : {},	default: m})(__vite__cjsImport3_react);
+import * as DropdownMenuPrimitive from "/node_modules/.vite/deps/@radix-ui_react-dropdown-menu.js?v=6014a254";
+import { Check, Circle } from "/node_modules/.vite/deps/lucide-react.js?v=6014a254";
+import { cn } from "/src/lib/utils.ts";
+import { Button } from "/src/components/ui/button.tsx";
+const DropdownMenu = DropdownMenuPrimitive.Root;
+const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger;
+const DropdownMenuGroup = DropdownMenuPrimitive.Group;
+const DropdownMenuPortal = DropdownMenuPrimitive.Portal;
+const DropdownMenuSub = DropdownMenuPrimitive.Sub;
+const DropdownMenuRadioGroup = DropdownMenuPrimitive.RadioGroup;
+const DropdownMenuSubTrigger = /*#__PURE__*/ React.forwardRef(_c = ({ className, inset, children, ...props }, ref)=>/*#__PURE__*/ _jsxDEV(DropdownMenuPrimitive.SubTrigger, {
+        ref: ref,
+        className: cn('flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none focus:bg-accent data-[state=open]:bg-accent min-h-[44px] touch-manipulation', inset && 'pl-8', className),
+        ...props,
+        children: children
+    }, void 0, false, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/dropdown-menu.tsx",
+        lineNumber: 25,
+        columnNumber: 3
+    }, this));
+_c1 = DropdownMenuSubTrigger;
+DropdownMenuSubTrigger.displayName = DropdownMenuPrimitive.SubTrigger.displayName;
+const DropdownMenuSubContent = /*#__PURE__*/ React.forwardRef(_c2 = ({ className, ...props }, ref)=>/*#__PURE__*/ _jsxDEV(DropdownMenuPrimitive.SubContent, {
+        ref: ref,
+        className: cn('z-50 min-w-[8rem] overflow-hidden rounded-xl border border-border/40 bg-popover/95 backdrop-blur-xl p-1 text-popover-foreground shadow-glass data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2', className),
+        ...props
+    }, void 0, false, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/dropdown-menu.tsx",
+        lineNumber: 43,
+        columnNumber: 3
+    }, this));
+_c3 = DropdownMenuSubContent;
+DropdownMenuSubContent.displayName = DropdownMenuPrimitive.SubContent.displayName;
+const DropdownMenuContent = /*#__PURE__*/ React.forwardRef(({ className, sideOffset = 4, ...props }, ref)=>/*#__PURE__*/ _jsxDEV(DropdownMenuPrimitive.Portal, {
+        children: /*#__PURE__*/ _jsxDEV(DropdownMenuPrimitive.Content, {
+            ref: ref,
+            sideOffset: sideOffset,
+            className: cn('z-50 min-w-[8rem] overflow-hidden rounded-xl border border-border/40 bg-popover/95 backdrop-blur-xl p-1 text-popover-foreground shadow-glass data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2', className),
+            ...props
+        }, void 0, false, {
+            fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/dropdown-menu.tsx",
+            lineNumber: 59,
+            columnNumber: 5
+        }, this)
+    }, void 0, false, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/dropdown-menu.tsx",
+        lineNumber: 58,
+        columnNumber: 3
+    }, this));
+_c4 = DropdownMenuContent;
+DropdownMenuContent.displayName = DropdownMenuPrimitive.Content.displayName;
+const DropdownMenuItem = /*#__PURE__*/ React.forwardRef(_c5 = ({ className, inset, ...props }, ref)=>/*#__PURE__*/ _jsxDEV(DropdownMenuPrimitive.Item, {
+        ref: ref,
+        className: cn('relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 min-h-[44px] touch-manipulation', inset && 'pl-8', className),
+        ...props
+    }, void 0, false, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/dropdown-menu.tsx",
+        lineNumber: 78,
+        columnNumber: 3
+    }, this));
+_c6 = DropdownMenuItem;
+DropdownMenuItem.displayName = DropdownMenuPrimitive.Item.displayName;
+const DropdownMenuCheckboxItem = /*#__PURE__*/ React.forwardRef(_c7 = ({ className, children, checked, ...props }, ref)=>/*#__PURE__*/ _jsxDEV(DropdownMenuPrimitive.CheckboxItem, {
+        ref: ref,
+        className: cn('relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 min-h-[44px] touch-manipulation', className),
+        checked: checked,
+        ...props,
+        children: [
+            /*#__PURE__*/ _jsxDEV("span", {
+                className: "absolute left-2 flex h-3.5 w-3.5 items-center justify-center",
+                children: /*#__PURE__*/ _jsxDEV(DropdownMenuPrimitive.ItemIndicator, {
+                    children: /*#__PURE__*/ _jsxDEV(Check, {
+                        className: "h-4 w-4"
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/dropdown-menu.tsx",
+                        lineNumber: 105,
+                        columnNumber: 9
+                    }, this)
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/dropdown-menu.tsx",
+                    lineNumber: 104,
+                    columnNumber: 7
+                }, this)
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/dropdown-menu.tsx",
+                lineNumber: 103,
+                columnNumber: 5
+            }, this),
+            children
+        ]
+    }, void 0, true, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/dropdown-menu.tsx",
+        lineNumber: 94,
+        columnNumber: 3
+    }, this));
+_c8 = DropdownMenuCheckboxItem;
+DropdownMenuCheckboxItem.displayName = DropdownMenuPrimitive.CheckboxItem.displayName;
+const DropdownMenuRadioItem = /*#__PURE__*/ React.forwardRef(_c9 = ({ className, children, ...props }, ref)=>/*#__PURE__*/ _jsxDEV(DropdownMenuPrimitive.RadioItem, {
+        ref: ref,
+        className: cn('relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 min-h-[44px] touch-manipulation', className),
+        ...props,
+        children: [
+            /*#__PURE__*/ _jsxDEV("span", {
+                className: "absolute left-2 flex h-3.5 w-3.5 items-center justify-center",
+                children: /*#__PURE__*/ _jsxDEV(DropdownMenuPrimitive.ItemIndicator, {
+                    children: /*#__PURE__*/ _jsxDEV(Circle, {
+                        className: "h-2 w-2 fill-current"
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/dropdown-menu.tsx",
+                        lineNumber: 127,
+                        columnNumber: 9
+                    }, this)
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/dropdown-menu.tsx",
+                    lineNumber: 126,
+                    columnNumber: 7
+                }, this)
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/dropdown-menu.tsx",
+                lineNumber: 125,
+                columnNumber: 5
+            }, this),
+            children
+        ]
+    }, void 0, true, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/dropdown-menu.tsx",
+        lineNumber: 117,
+        columnNumber: 3
+    }, this));
+_c10 = DropdownMenuRadioItem;
+DropdownMenuRadioItem.displayName = DropdownMenuPrimitive.RadioItem.displayName;
+const DropdownMenuLabel = /*#__PURE__*/ React.forwardRef(_c11 = ({ className, inset, ...props }, ref)=>/*#__PURE__*/ _jsxDEV(DropdownMenuPrimitive.Label, {
+        ref: ref,
+        className: cn('px-2 py-1.5 text-sm font-semibold', inset && 'pl-8', className),
+        ...props
+    }, void 0, false, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/dropdown-menu.tsx",
+        lineNumber: 141,
+        columnNumber: 3
+    }, this));
+_c12 = DropdownMenuLabel;
+DropdownMenuLabel.displayName = DropdownMenuPrimitive.Label.displayName;
+const DropdownMenuSeparator = /*#__PURE__*/ React.forwardRef(_c13 = ({ className, ...props }, ref)=>/*#__PURE__*/ _jsxDEV(DropdownMenuPrimitive.Separator, {
+        ref: ref,
+        className: cn('-mx-1 my-1 h-px bg-muted', className),
+        ...props
+    }, void 0, false, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/dropdown-menu.tsx",
+        lineNumber: 153,
+        columnNumber: 3
+    }, this));
+_c14 = DropdownMenuSeparator;
+DropdownMenuSeparator.displayName = DropdownMenuPrimitive.Separator.displayName;
+const DropdownMenuShortcut = ({ className, ...props })=>{
+    return /*#__PURE__*/ _jsxDEV("span", {
+        className: cn('ml-auto text-xs tracking-widest opacity-60', className),
+        ...props
+    }, void 0, false, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/dropdown-menu.tsx",
+        lineNumber: 163,
+        columnNumber: 5
+    }, this);
+};
+_c15 = DropdownMenuShortcut;
+DropdownMenuShortcut.displayName = 'DropdownMenuShortcut';
+const StableDropdownMenu = /*#__PURE__*/ React.forwardRef(_c16 = ({ children, triggerContent, triggerProps }, ref)=>{
+    return /*#__PURE__*/ _jsxDEV(DropdownMenu, {
+        children: [
+            /*#__PURE__*/ _jsxDEV(DropdownMenuTrigger, {
+                asChild: true,
+                children: /*#__PURE__*/ _jsxDEV(Button, {
+                    ref: ref,
+                    ...triggerProps,
+                    children: triggerContent
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/dropdown-menu.tsx",
+                    lineNumber: 181,
+                    columnNumber: 9
+                }, this)
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/dropdown-menu.tsx",
+                lineNumber: 180,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV(DropdownMenuContent, {
+                align: "end",
+                className: "min-w-[200px]",
+                children: children
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/dropdown-menu.tsx",
+                lineNumber: 185,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/dropdown-menu.tsx",
+        lineNumber: 179,
+        columnNumber: 5
+    }, this);
+});
+_c17 = StableDropdownMenu;
+StableDropdownMenu.displayName = 'StableDropdownMenu';
+export { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuCheckboxItem, DropdownMenuRadioItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuGroup, DropdownMenuPortal, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuRadioGroup, StableDropdownMenu };
+var _c, _c1, _c2, _c3, _c4, _c5, _c6, _c7, _c8, _c9, _c10, _c11, _c12, _c13, _c14, _c15, _c16, _c17;
+$RefreshReg$(_c, "DropdownMenuSubTrigger$React.forwardRef");
+$RefreshReg$(_c1, "DropdownMenuSubTrigger");
+$RefreshReg$(_c2, "DropdownMenuSubContent$React.forwardRef");
+$RefreshReg$(_c3, "DropdownMenuSubContent");
+$RefreshReg$(_c4, "DropdownMenuContent");
+$RefreshReg$(_c5, "DropdownMenuItem$React.forwardRef");
+$RefreshReg$(_c6, "DropdownMenuItem");
+$RefreshReg$(_c7, "DropdownMenuCheckboxItem$React.forwardRef");
+$RefreshReg$(_c8, "DropdownMenuCheckboxItem");
+$RefreshReg$(_c9, "DropdownMenuRadioItem$React.forwardRef");
+$RefreshReg$(_c10, "DropdownMenuRadioItem");
+$RefreshReg$(_c11, "DropdownMenuLabel$React.forwardRef");
+$RefreshReg$(_c12, "DropdownMenuLabel");
+$RefreshReg$(_c13, "DropdownMenuSeparator$React.forwardRef");
+$RefreshReg$(_c14, "DropdownMenuSeparator");
+$RefreshReg$(_c15, "DropdownMenuShortcut");
+$RefreshReg$(_c16, "StableDropdownMenu$React.forwardRef");
+$RefreshReg$(_c17, "StableDropdownMenu");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/ui/dropdown-menu.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/ui/dropdown-menu.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImRyb3Bkb3duLW1lbnUudHN4Il0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCAqIGFzIFJlYWN0IGZyb20gJ3JlYWN0JztcbmltcG9ydCAqIGFzIERyb3Bkb3duTWVudVByaW1pdGl2ZSBmcm9tICdAcmFkaXgtdWkvcmVhY3QtZHJvcGRvd24tbWVudSc7XG5pbXBvcnQgeyBDaGVjaywgQ2lyY2xlIH0gZnJvbSAnbHVjaWRlLXJlYWN0JztcbmltcG9ydCB7IGNuIH0gZnJvbSAnQC9saWIvdXRpbHMnO1xuaW1wb3J0IHsgQnV0dG9uIH0gZnJvbSAnLi9idXR0b24nO1xuXG5jb25zdCBEcm9wZG93bk1lbnUgPSBEcm9wZG93bk1lbnVQcmltaXRpdmUuUm9vdDtcblxuY29uc3QgRHJvcGRvd25NZW51VHJpZ2dlciA9IERyb3Bkb3duTWVudVByaW1pdGl2ZS5UcmlnZ2VyO1xuXG5jb25zdCBEcm9wZG93bk1lbnVHcm91cCA9IERyb3Bkb3duTWVudVByaW1pdGl2ZS5Hcm91cDtcblxuY29uc3QgRHJvcGRvd25NZW51UG9ydGFsID0gRHJvcGRvd25NZW51UHJpbWl0aXZlLlBvcnRhbDtcblxuY29uc3QgRHJvcGRvd25NZW51U3ViID0gRHJvcGRvd25NZW51UHJpbWl0aXZlLlN1YjtcblxuY29uc3QgRHJvcGRvd25NZW51UmFkaW9Hcm91cCA9IERyb3Bkb3duTWVudVByaW1pdGl2ZS5SYWRpb0dyb3VwO1xuXG5jb25zdCBEcm9wZG93bk1lbnVTdWJUcmlnZ2VyID0gUmVhY3QuZm9yd2FyZFJlZjxcbiAgUmVhY3QuRWxlbWVudFJlZjx0eXBlb2YgRHJvcGRvd25NZW51UHJpbWl0aXZlLlN1YlRyaWdnZXI+LFxuICBSZWFjdC5Db21wb25lbnRQcm9wc1dpdGhvdXRSZWY8dHlwZW9mIERyb3Bkb3duTWVudVByaW1pdGl2ZS5TdWJUcmlnZ2VyPiAmIHtcbiAgICBpbnNldD86IGJvb2xlYW47XG4gIH1cbj4oKHsgY2xhc3NOYW1lLCBpbnNldCwgY2hpbGRyZW4sIC4uLnByb3BzIH0sIHJlZikgPT4gKFxuICA8RHJvcGRvd25NZW51UHJpbWl0aXZlLlN1YlRyaWdnZXJcbiAgICByZWY9e3JlZn1cbiAgICBjbGFzc05hbWU9e2NuKFxuICAgICAgJ2ZsZXggY3Vyc29yLWRlZmF1bHQgc2VsZWN0LW5vbmUgaXRlbXMtY2VudGVyIHJvdW5kZWQtc20gcHgtMiBweS0xLjUgdGV4dC1zbSBvdXRsaW5lLW5vbmUgZm9jdXM6YmctYWNjZW50IGRhdGEtW3N0YXRlPW9wZW5dOmJnLWFjY2VudCBtaW4taC1bNDRweF0gdG91Y2gtbWFuaXB1bGF0aW9uJyxcbiAgICAgIGluc2V0ICYmICdwbC04JyxcbiAgICAgIGNsYXNzTmFtZVxuICAgICl9XG4gICAgey4uLnByb3BzfVxuICA+XG4gICAge2NoaWxkcmVufVxuICA8L0Ryb3Bkb3duTWVudVByaW1pdGl2ZS5TdWJUcmlnZ2VyPlxuKSk7XG5Ecm9wZG93bk1lbnVTdWJUcmlnZ2VyLmRpc3BsYXlOYW1lID0gRHJvcGRvd25NZW51UHJpbWl0aXZlLlN1YlRyaWdnZXIuZGlzcGxheU5hbWU7XG5cbmNvbnN0IERyb3Bkb3duTWVudVN1YkNvbnRlbnQgPSBSZWFjdC5mb3J3YXJkUmVmPFxuICBSZWFjdC5FbGVtZW50UmVmPHR5cGVvZiBEcm9wZG93bk1lbnVQcmltaXRpdmUuU3ViQ29udGVudD4sXG4gIFJlYWN0LkNvbXBvbmVudFByb3BzV2l0aG91dFJlZjx0eXBlb2YgRHJvcGRvd25NZW51UHJpbWl0aXZlLlN1YkNvbnRlbnQ+XG4+KCh7IGNsYXNzTmFtZSwgLi4ucHJvcHMgfSwgcmVmKSA9PiAoXG4gIDxEcm9wZG93bk1lbnVQcmltaXRpdmUuU3ViQ29udGVudFxuICAgIHJlZj17cmVmfVxuICAgIGNsYXNzTmFtZT17Y24oXG4gICAgICAnei01MCBtaW4tdy1bOHJlbV0gb3ZlcmZsb3ctaGlkZGVuIHJvdW5kZWQteGwgYm9yZGVyIGJvcmRlci1ib3JkZXIvNDAgYmctcG9wb3Zlci85NSBiYWNrZHJvcC1ibHVyLXhsIHAtMSB0ZXh0LXBvcG92ZXItZm9yZWdyb3VuZCBzaGFkb3ctZ2xhc3MgZGF0YS1bc3RhdGU9b3Blbl06YW5pbWF0ZS1pbiBkYXRhLVtzdGF0ZT1jbG9zZWRdOmFuaW1hdGUtb3V0IGRhdGEtW3N0YXRlPWNsb3NlZF06ZmFkZS1vdXQtMCBkYXRhLVtzdGF0ZT1vcGVuXTpmYWRlLWluLTAgZGF0YS1bc3RhdGU9Y2xvc2VkXTp6b29tLW91dC05NSBkYXRhLVtzdGF0ZT1vcGVuXTp6b29tLWluLTk1IGRhdGEtW3NpZGU9Ym90dG9tXTpzbGlkZS1pbi1mcm9tLXRvcC0yIGRhdGEtW3NpZGU9bGVmdF06c2xpZGUtaW4tZnJvbS1yaWdodC0yIGRhdGEtW3NpZGU9cmlnaHRdOnNsaWRlLWluLWZyb20tbGVmdC0yIGRhdGEtW3NpZGU9dG9wXTpzbGlkZS1pbi1mcm9tLWJvdHRvbS0yJyxcbiAgICAgIGNsYXNzTmFtZVxuICAgICl9XG4gICAgey4uLnByb3BzfVxuICAvPlxuKSk7XG5Ecm9wZG93bk1lbnVTdWJDb250ZW50LmRpc3BsYXlOYW1lID0gRHJvcGRvd25NZW51UHJpbWl0aXZlLlN1YkNvbnRlbnQuZGlzcGxheU5hbWU7XG5cbmNvbnN0IERyb3Bkb3duTWVudUNvbnRlbnQgPSBSZWFjdC5mb3J3YXJkUmVmPFxuICBSZWFjdC5FbGVtZW50UmVmPHR5cGVvZiBEcm9wZG93bk1lbnVQcmltaXRpdmUuQ29udGVudD4sXG4gIFJlYWN0LkNvbXBvbmVudFByb3BzV2l0aG91dFJlZjx0eXBlb2YgRHJvcGRvd25NZW51UHJpbWl0aXZlLkNvbnRlbnQ+XG4+KCh7IGNsYXNzTmFtZSwgc2lkZU9mZnNldCA9IDQsIC4uLnByb3BzIH0sIHJlZikgPT4gKFxuICA8RHJvcGRvd25NZW51UHJpbWl0aXZlLlBvcnRhbD5cbiAgICA8RHJvcGRvd25NZW51UHJpbWl0aXZlLkNvbnRlbnRcbiAgICAgIHJlZj17cmVmfVxuICAgICAgc2lkZU9mZnNldD17c2lkZU9mZnNldH1cbiAgICAgIGNsYXNzTmFtZT17Y24oXG4gICAgICAgICd6LTUwIG1pbi13LVs4cmVtXSBvdmVyZmxvdy1oaWRkZW4gcm91bmRlZC14bCBib3JkZXIgYm9yZGVyLWJvcmRlci80MCBiZy1wb3BvdmVyLzk1IGJhY2tkcm9wLWJsdXIteGwgcC0xIHRleHQtcG9wb3Zlci1mb3JlZ3JvdW5kIHNoYWRvdy1nbGFzcyBkYXRhLVtzdGF0ZT1vcGVuXTphbmltYXRlLWluIGRhdGEtW3N0YXRlPWNsb3NlZF06YW5pbWF0ZS1vdXQgZGF0YS1bc3RhdGU9Y2xvc2VkXTpmYWRlLW91dC0wIGRhdGEtW3N0YXRlPW9wZW5dOmZhZGUtaW4tMCBkYXRhLVtzdGF0ZT1jbG9zZWRdOnpvb20tb3V0LTk1IGRhdGEtW3N0YXRlPW9wZW5dOnpvb20taW4tOTUgZGF0YS1bc2lkZT1ib3R0b21dOnNsaWRlLWluLWZyb20tdG9wLTIgZGF0YS1bc2lkZT1sZWZ0XTpzbGlkZS1pbi1mcm9tLXJpZ2h0LTIgZGF0YS1bc2lkZT1yaWdodF06c2xpZGUtaW4tZnJvbS1sZWZ0LTIgZGF0YS1bc2lkZT10b3BdOnNsaWRlLWluLWZyb20tYm90dG9tLTInLFxuICAgICAgICBjbGFzc05hbWVcbiAgICAgICl9XG4gICAgICB7Li4ucHJvcHN9XG4gICAgLz5cbiAgPC9Ecm9wZG93bk1lbnVQcmltaXRpdmUuUG9ydGFsPlxuKSk7XG5Ecm9wZG93bk1lbnVDb250ZW50LmRpc3BsYXlOYW1lID0gRHJvcGRvd25NZW51UHJpbWl0aXZlLkNvbnRlbnQuZGlzcGxheU5hbWU7XG5cbmNvbnN0IERyb3Bkb3duTWVudUl0ZW0gPSBSZWFjdC5mb3J3YXJkUmVmPFxuICBSZWFjdC5FbGVtZW50UmVmPHR5cGVvZiBEcm9wZG93bk1lbnVQcmltaXRpdmUuSXRlbT4sXG4gIFJlYWN0LkNvbXBvbmVudFByb3BzV2l0aG91dFJlZjx0eXBlb2YgRHJvcGRvd25NZW51UHJpbWl0aXZlLkl0ZW0+ICYge1xuICAgIGluc2V0PzogYm9vbGVhbjtcbiAgfVxuPigoeyBjbGFzc05hbWUsIGluc2V0LCAuLi5wcm9wcyB9LCByZWYpID0+IChcbiAgPERyb3Bkb3duTWVudVByaW1pdGl2ZS5JdGVtXG4gICAgcmVmPXtyZWZ9XG4gICAgY2xhc3NOYW1lPXtjbihcbiAgICAgICdyZWxhdGl2ZSBmbGV4IGN1cnNvci1kZWZhdWx0IHNlbGVjdC1ub25lIGl0ZW1zLWNlbnRlciByb3VuZGVkLXNtIHB4LTIgcHktMS41IHRleHQtc20gb3V0bGluZS1ub25lIHRyYW5zaXRpb24tY29sb3JzIGZvY3VzOmJnLWFjY2VudCBmb2N1czp0ZXh0LWFjY2VudC1mb3JlZ3JvdW5kIGRhdGEtW2Rpc2FibGVkXTpwb2ludGVyLWV2ZW50cy1ub25lIGRhdGEtW2Rpc2FibGVkXTpvcGFjaXR5LTUwIG1pbi1oLVs0NHB4XSB0b3VjaC1tYW5pcHVsYXRpb24nLFxuICAgICAgaW5zZXQgJiYgJ3BsLTgnLFxuICAgICAgY2xhc3NOYW1lXG4gICAgKX1cbiAgICB7Li4ucHJvcHN9XG4gIC8+XG4pKTtcbkRyb3Bkb3duTWVudUl0ZW0uZGlzcGxheU5hbWUgPSBEcm9wZG93bk1lbnVQcmltaXRpdmUuSXRlbS5kaXNwbGF5TmFtZTtcblxuY29uc3QgRHJvcGRvd25NZW51Q2hlY2tib3hJdGVtID0gUmVhY3QuZm9yd2FyZFJlZjxcbiAgUmVhY3QuRWxlbWVudFJlZjx0eXBlb2YgRHJvcGRvd25NZW51UHJpbWl0aXZlLkNoZWNrYm94SXRlbT4sXG4gIFJlYWN0LkNvbXBvbmVudFByb3BzV2l0aG91dFJlZjx0eXBlb2YgRHJvcGRvd25NZW51UHJpbWl0aXZlLkNoZWNrYm94SXRlbT5cbj4oKHsgY2xhc3NOYW1lLCBjaGlsZHJlbiwgY2hlY2tlZCwgLi4ucHJvcHMgfSwgcmVmKSA9PiAoXG4gIDxEcm9wZG93bk1lbnVQcmltaXRpdmUuQ2hlY2tib3hJdGVtXG4gICAgcmVmPXtyZWZ9XG4gICAgY2xhc3NOYW1lPXtjbihcbiAgICAgICdyZWxhdGl2ZSBmbGV4IGN1cnNvci1kZWZhdWx0IHNlbGVjdC1ub25lIGl0ZW1zLWNlbnRlciByb3VuZGVkLXNtIHB5LTEuNSBwbC04IHByLTIgdGV4dC1zbSBvdXRsaW5lLW5vbmUgdHJhbnNpdGlvbi1jb2xvcnMgZm9jdXM6YmctYWNjZW50IGZvY3VzOnRleHQtYWNjZW50LWZvcmVncm91bmQgZGF0YS1bZGlzYWJsZWRdOnBvaW50ZXItZXZlbnRzLW5vbmUgZGF0YS1bZGlzYWJsZWRdOm9wYWNpdHktNTAgbWluLWgtWzQ0cHhdIHRvdWNoLW1hbmlwdWxhdGlvbicsXG4gICAgICBjbGFzc05hbWVcbiAgICApfVxuICAgIGNoZWNrZWQ9e2NoZWNrZWR9XG4gICAgey4uLnByb3BzfVxuICA+XG4gICAgPHNwYW4gY2xhc3NOYW1lPVwiYWJzb2x1dGUgbGVmdC0yIGZsZXggaC0zLjUgdy0zLjUgaXRlbXMtY2VudGVyIGp1c3RpZnktY2VudGVyXCI+XG4gICAgICA8RHJvcGRvd25NZW51UHJpbWl0aXZlLkl0ZW1JbmRpY2F0b3I+XG4gICAgICAgIDxDaGVjayBjbGFzc05hbWU9XCJoLTQgdy00XCIgLz5cbiAgICAgIDwvRHJvcGRvd25NZW51UHJpbWl0aXZlLkl0ZW1JbmRpY2F0b3I+XG4gICAgPC9zcGFuPlxuICAgIHtjaGlsZHJlbn1cbiAgPC9Ecm9wZG93bk1lbnVQcmltaXRpdmUuQ2hlY2tib3hJdGVtPlxuKSk7XG5Ecm9wZG93bk1lbnVDaGVja2JveEl0ZW0uZGlzcGxheU5hbWUgPSBEcm9wZG93bk1lbnVQcmltaXRpdmUuQ2hlY2tib3hJdGVtLmRpc3BsYXlOYW1lO1xuXG5jb25zdCBEcm9wZG93bk1lbnVSYWRpb0l0ZW0gPSBSZWFjdC5mb3J3YXJkUmVmPFxuICBSZWFjdC5FbGVtZW50UmVmPHR5cGVvZiBEcm9wZG93bk1lbnVQcmltaXRpdmUuUmFkaW9JdGVtPixcbiAgUmVhY3QuQ29tcG9uZW50UHJvcHNXaXRob3V0UmVmPHR5cGVvZiBEcm9wZG93bk1lbnVQcmltaXRpdmUuUmFkaW9JdGVtPlxuPigoeyBjbGFzc05hbWUsIGNoaWxkcmVuLCAuLi5wcm9wcyB9LCByZWYpID0+IChcbiAgPERyb3Bkb3duTWVudVByaW1pdGl2ZS5SYWRpb0l0ZW1cbiAgICByZWY9e3JlZn1cbiAgICBjbGFzc05hbWU9e2NuKFxuICAgICAgJ3JlbGF0aXZlIGZsZXggY3Vyc29yLWRlZmF1bHQgc2VsZWN0LW5vbmUgaXRlbXMtY2VudGVyIHJvdW5kZWQtc20gcHktMS41IHBsLTggcHItMiB0ZXh0LXNtIG91dGxpbmUtbm9uZSB0cmFuc2l0aW9uLWNvbG9ycyBmb2N1czpiZy1hY2NlbnQgZm9jdXM6dGV4dC1hY2NlbnQtZm9yZWdyb3VuZCBkYXRhLVtkaXNhYmxlZF06cG9pbnRlci1ldmVudHMtbm9uZSBkYXRhLVtkaXNhYmxlZF06b3BhY2l0eS01MCBtaW4taC1bNDRweF0gdG91Y2gtbWFuaXB1bGF0aW9uJyxcbiAgICAgIGNsYXNzTmFtZVxuICAgICl9XG4gICAgey4uLnByb3BzfVxuICA+XG4gICAgPHNwYW4gY2xhc3NOYW1lPVwiYWJzb2x1dGUgbGVmdC0yIGZsZXggaC0zLjUgdy0zLjUgaXRlbXMtY2VudGVyIGp1c3RpZnktY2VudGVyXCI+XG4gICAgICA8RHJvcGRvd25NZW51UHJpbWl0aXZlLkl0ZW1JbmRpY2F0b3I+XG4gICAgICAgIDxDaXJjbGUgY2xhc3NOYW1lPVwiaC0yIHctMiBmaWxsLWN1cnJlbnRcIiAvPlxuICAgICAgPC9Ecm9wZG93bk1lbnVQcmltaXRpdmUuSXRlbUluZGljYXRvcj5cbiAgICA8L3NwYW4+XG4gICAge2NoaWxkcmVufVxuICA8L0Ryb3Bkb3duTWVudVByaW1pdGl2ZS5SYWRpb0l0ZW0+XG4pKTtcbkRyb3Bkb3duTWVudVJhZGlvSXRlbS5kaXNwbGF5TmFtZSA9IERyb3Bkb3duTWVudVByaW1pdGl2ZS5SYWRpb0l0ZW0uZGlzcGxheU5hbWU7XG5cbmNvbnN0IERyb3Bkb3duTWVudUxhYmVsID0gUmVhY3QuZm9yd2FyZFJlZjxcbiAgUmVhY3QuRWxlbWVudFJlZjx0eXBlb2YgRHJvcGRvd25NZW51UHJpbWl0aXZlLkxhYmVsPixcbiAgUmVhY3QuQ29tcG9uZW50UHJvcHNXaXRob3V0UmVmPHR5cGVvZiBEcm9wZG93bk1lbnVQcmltaXRpdmUuTGFiZWw+ICYge1xuICAgIGluc2V0PzogYm9vbGVhbjtcbiAgfVxuPigoeyBjbGFzc05hbWUsIGluc2V0LCAuLi5wcm9wcyB9LCByZWYpID0+IChcbiAgPERyb3Bkb3duTWVudVByaW1pdGl2ZS5MYWJlbFxuICAgIHJlZj17cmVmfVxuICAgIGNsYXNzTmFtZT17Y24oJ3B4LTIgcHktMS41IHRleHQtc20gZm9udC1zZW1pYm9sZCcsIGluc2V0ICYmICdwbC04JywgY2xhc3NOYW1lKX1cbiAgICB7Li4ucHJvcHN9XG4gIC8+XG4pKTtcbkRyb3Bkb3duTWVudUxhYmVsLmRpc3BsYXlOYW1lID0gRHJvcGRvd25NZW51UHJpbWl0aXZlLkxhYmVsLmRpc3BsYXlOYW1lO1xuXG5jb25zdCBEcm9wZG93bk1lbnVTZXBhcmF0b3IgPSBSZWFjdC5mb3J3YXJkUmVmPFxuICBSZWFjdC5FbGVtZW50UmVmPHR5cGVvZiBEcm9wZG93bk1lbnVQcmltaXRpdmUuU2VwYXJhdG9yPixcbiAgUmVhY3QuQ29tcG9uZW50UHJvcHNXaXRob3V0UmVmPHR5cGVvZiBEcm9wZG93bk1lbnVQcmltaXRpdmUuU2VwYXJhdG9yPlxuPigoeyBjbGFzc05hbWUsIC4uLnByb3BzIH0sIHJlZikgPT4gKFxuICA8RHJvcGRvd25NZW51UHJpbWl0aXZlLlNlcGFyYXRvclxuICAgIHJlZj17cmVmfVxuICAgIGNsYXNzTmFtZT17Y24oJy1teC0xIG15LTEgaC1weCBiZy1tdXRlZCcsIGNsYXNzTmFtZSl9XG4gICAgey4uLnByb3BzfVxuICAvPlxuKSk7XG5Ecm9wZG93bk1lbnVTZXBhcmF0b3IuZGlzcGxheU5hbWUgPSBEcm9wZG93bk1lbnVQcmltaXRpdmUuU2VwYXJhdG9yLmRpc3BsYXlOYW1lO1xuXG5jb25zdCBEcm9wZG93bk1lbnVTaG9ydGN1dCA9ICh7IGNsYXNzTmFtZSwgLi4ucHJvcHMgfTogUmVhY3QuSFRNTEF0dHJpYnV0ZXM8SFRNTFNwYW5FbGVtZW50PikgPT4ge1xuICByZXR1cm4gKFxuICAgIDxzcGFuIGNsYXNzTmFtZT17Y24oJ21sLWF1dG8gdGV4dC14cyB0cmFja2luZy13aWRlc3Qgb3BhY2l0eS02MCcsIGNsYXNzTmFtZSl9IHsuLi5wcm9wc30gLz5cbiAgKTtcbn07XG5Ecm9wZG93bk1lbnVTaG9ydGN1dC5kaXNwbGF5TmFtZSA9ICdEcm9wZG93bk1lbnVTaG9ydGN1dCc7XG5cbmludGVyZmFjZSBTdGFibGVEcm9wZG93bk1lbnVQcm9wcyB7XG4gIGNoaWxkcmVuOiBSZWFjdC5SZWFjdE5vZGU7XG4gIHRyaWdnZXJDb250ZW50OiBSZWFjdC5SZWFjdE5vZGU7XG4gIHRyaWdnZXJQcm9wcz86IFJlYWN0LkNvbXBvbmVudFByb3BzPHR5cGVvZiBCdXR0b24+O1xufVxuXG5jb25zdCBTdGFibGVEcm9wZG93bk1lbnUgPSBSZWFjdC5mb3J3YXJkUmVmPFxuICBSZWFjdC5FbGVtZW50UmVmPHR5cGVvZiBEcm9wZG93bk1lbnVQcmltaXRpdmUuVHJpZ2dlcj4sXG4gIFN0YWJsZURyb3Bkb3duTWVudVByb3BzXG4+KCh7IGNoaWxkcmVuLCB0cmlnZ2VyQ29udGVudCwgdHJpZ2dlclByb3BzIH0sIHJlZikgPT4ge1xuICByZXR1cm4gKFxuICAgIDxEcm9wZG93bk1lbnU+XG4gICAgICA8RHJvcGRvd25NZW51VHJpZ2dlciBhc0NoaWxkPlxuICAgICAgICA8QnV0dG9uIHJlZj17cmVmfSB7Li4udHJpZ2dlclByb3BzfT5cbiAgICAgICAgICB7dHJpZ2dlckNvbnRlbnR9XG4gICAgICAgIDwvQnV0dG9uPlxuICAgICAgPC9Ecm9wZG93bk1lbnVUcmlnZ2VyPlxuICAgICAgPERyb3Bkb3duTWVudUNvbnRlbnQgYWxpZ249XCJlbmRcIiBjbGFzc05hbWU9XCJtaW4tdy1bMjAwcHhdXCI+XG4gICAgICAgIHtjaGlsZHJlbn1cbiAgICAgIDwvRHJvcGRvd25NZW51Q29udGVudD5cbiAgICA8L0Ryb3Bkb3duTWVudT5cbiAgKTtcbn0pO1xuU3RhYmxlRHJvcGRvd25NZW51LmRpc3BsYXlOYW1lID0gJ1N0YWJsZURyb3Bkb3duTWVudSc7XG5cbmV4cG9ydCB7XG4gIERyb3Bkb3duTWVudSxcbiAgRHJvcGRvd25NZW51VHJpZ2dlcixcbiAgRHJvcGRvd25NZW51Q29udGVudCxcbiAgRHJvcGRvd25NZW51SXRlbSxcbiAgRHJvcGRvd25NZW51Q2hlY2tib3hJdGVtLFxuICBEcm9wZG93bk1lbnVSYWRpb0l0ZW0sXG4gIERyb3Bkb3duTWVudUxhYmVsLFxuICBEcm9wZG93bk1lbnVTZXBhcmF0b3IsXG4gIERyb3Bkb3duTWVudVNob3J0Y3V0LFxuICBEcm9wZG93bk1lbnVHcm91cCxcbiAgRHJvcGRvd25NZW51UG9ydGFsLFxuICBEcm9wZG93bk1lbnVTdWIsXG4gIERyb3Bkb3duTWVudVN1YkNvbnRlbnQsXG4gIERyb3Bkb3duTWVudVN1YlRyaWdnZXIsXG4gIERyb3Bkb3duTWVudVJhZGlvR3JvdXAsXG4gIFN0YWJsZURyb3Bkb3duTWVudSxcbn07XG4iXSwibmFtZXMiOlsiUmVhY3QiLCJEcm9wZG93bk1lbnVQcmltaXRpdmUiLCJDaGVjayIsIkNpcmNsZSIsImNuIiwiQnV0dG9uIiwiRHJvcGRvd25NZW51IiwiUm9vdCIsIkRyb3Bkb3duTWVudVRyaWdnZXIiLCJUcmlnZ2VyIiwiRHJvcGRvd25NZW51R3JvdXAiLCJHcm91cCIsIkRyb3Bkb3duTWVudVBvcnRhbCIsIlBvcnRhbCIsIkRyb3Bkb3duTWVudVN1YiIsIlN1YiIsIkRyb3Bkb3duTWVudVJhZGlvR3JvdXAiLCJSYWRpb0dyb3VwIiwiRHJvcGRvd25NZW51U3ViVHJpZ2dlciIsImZvcndhcmRSZWYiLCJjbGFzc05hbWUiLCJpbnNldCIsImNoaWxkcmVuIiwicHJvcHMiLCJyZWYiLCJTdWJUcmlnZ2VyIiwiZGlzcGxheU5hbWUiLCJEcm9wZG93bk1lbnVTdWJDb250ZW50IiwiU3ViQ29udGVudCIsIkRyb3Bkb3duTWVudUNvbnRlbnQiLCJzaWRlT2Zmc2V0IiwiQ29udGVudCIsIkRyb3Bkb3duTWVudUl0ZW0iLCJJdGVtIiwiRHJvcGRvd25NZW51Q2hlY2tib3hJdGVtIiwiY2hlY2tlZCIsIkNoZWNrYm94SXRlbSIsInNwYW4iLCJJdGVtSW5kaWNhdG9yIiwiRHJvcGRvd25NZW51UmFkaW9JdGVtIiwiUmFkaW9JdGVtIiwiRHJvcGRvd25NZW51TGFiZWwiLCJMYWJlbCIsIkRyb3Bkb3duTWVudVNlcGFyYXRvciIsIlNlcGFyYXRvciIsIkRyb3Bkb3duTWVudVNob3J0Y3V0IiwiU3RhYmxlRHJvcGRvd25NZW51IiwidHJpZ2dlckNvbnRlbnQiLCJ0cmlnZ2VyUHJvcHMiLCJhc0NoaWxkIiwiYWxpZ24iXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O0FBQUEsWUFBWUEsV0FBVyxRQUFRO0FBQy9CLFlBQVlDLDJCQUEyQixnQ0FBZ0M7QUFDdkUsU0FBU0MsS0FBSyxFQUFFQyxNQUFNLFFBQVEsZUFBZTtBQUM3QyxTQUFTQyxFQUFFLFFBQVEsY0FBYztBQUNqQyxTQUFTQyxNQUFNLFFBQVEsV0FBVztBQUVsQyxNQUFNQyxlQUFlTCxzQkFBc0JNLElBQUk7QUFFL0MsTUFBTUMsc0JBQXNCUCxzQkFBc0JRLE9BQU87QUFFekQsTUFBTUMsb0JBQW9CVCxzQkFBc0JVLEtBQUs7QUFFckQsTUFBTUMscUJBQXFCWCxzQkFBc0JZLE1BQU07QUFFdkQsTUFBTUMsa0JBQWtCYixzQkFBc0JjLEdBQUc7QUFFakQsTUFBTUMseUJBQXlCZixzQkFBc0JnQixVQUFVO0FBRS9ELE1BQU1DLHVDQUF5QmxCLE1BQU1tQixVQUFVLE1BSzdDLENBQUMsRUFBRUMsU0FBUyxFQUFFQyxLQUFLLEVBQUVDLFFBQVEsRUFBRSxHQUFHQyxPQUFPLEVBQUVDLG9CQUMzQyxRQUFDdkIsc0JBQXNCd0IsVUFBVTtRQUMvQkQsS0FBS0E7UUFDTEosV0FBV2hCLEdBQ1Qsd0tBQ0FpQixTQUFTLFFBQ1REO1FBRUQsR0FBR0csS0FBSztrQkFFUkQ7Ozs7Ozs7QUFHTEosdUJBQXVCUSxXQUFXLEdBQUd6QixzQkFBc0J3QixVQUFVLENBQUNDLFdBQVc7QUFFakYsTUFBTUMsdUNBQXlCM0IsTUFBTW1CLFVBQVUsT0FHN0MsQ0FBQyxF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

@@ -1,0 +1,195 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/account/GDPRExportPanel.tsx");import.meta.env = {"BASE_URL": "/", "DEV": true, "MODE": "development", "PROD": false, "SSR": false, "VITE_BUILD_ID": "build-mrszuipf", "VITE_E2E_BYPASS_TERMS": "true", "VITE_E2E_PAYMENT_STUB": "true", "VITE_SUPABASE_ANON_KEY": "sb_publishable_PaC6RE0frJU97Exnp30IKA_R9pieK7C", "VITE_SUPABASE_PROJECT_ID": "mock-project", "VITE_SUPABASE_PUBLISHABLE_KEY": "sb_publishable_PaC6RE0frJU97Exnp30IKA_R9pieK7C", "VITE_SUPABASE_TEST_URL": "https://ufbztturuwwazfcvhvuu.supabase.co", "VITE_SUPABASE_URL": "https://ufbztturuwwazfcvhvuu.supabase.co"};import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/account/GDPRExportPanel.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=6014a254"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+var _s = $RefreshSig$();
+import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=6014a254"; const useState = __vite__cjsImport3_react["useState"];
+import { Button } from "/src/components/ui/button.tsx";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "/src/components/ui/card.tsx";
+import { useToast } from "/src/hooks/use-toast.ts";
+import { supabase } from "/src/integrations/supabase/client.ts";
+import { Loader2, Download } from "/node_modules/.vite/deps/lucide-react.js?v=6014a254";
+export const GDPRExportPanel = ()=>{
+    _s();
+    const { toast } = useToast();
+    const [loading, setLoading] = useState(false);
+    const handleExport = async (format)=>{
+        setLoading(true);
+        try {
+            const { data: session } = await supabase.auth.getSession();
+            if (!session.session) throw new Error('Non autorisé');
+            const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/gdpr-export`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${session.session.access_token}`
+                },
+                body: JSON.stringify({
+                    format
+                })
+            });
+            if (!response.ok) {
+                throw new Error("Erreur lors de la génération de l'export");
+            }
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `gdpr_export_${new Date().toISOString().split('T')[0]}.${format}`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            toast({
+                title: 'Export réussi',
+                description: 'Vos données ont été téléchargées.'
+            });
+        } catch (err) {
+            toast({
+                title: 'Erreur',
+                description: err instanceof Error ? err.message : "Impossible d'exporter vos données",
+                variant: 'destructive'
+            });
+        } finally{
+            setLoading(false);
+        }
+    };
+    return /*#__PURE__*/ _jsxDEV(Card, {
+        className: "border-border/50 bg-card/50 backdrop-blur-sm",
+        children: [
+            /*#__PURE__*/ _jsxDEV(CardHeader, {
+                children: [
+                    /*#__PURE__*/ _jsxDEV(CardTitle, {
+                        className: "flex items-center gap-2",
+                        children: [
+                            /*#__PURE__*/ _jsxDEV(Download, {
+                                className: "h-5 w-5"
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/account/GDPRExportPanel.tsx",
+                                lineNumber: 63,
+                                columnNumber: 11
+                            }, this),
+                            "Télécharger mes données (GDPR)"
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/account/GDPRExportPanel.tsx",
+                        lineNumber: 62,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV(CardDescription, {
+                        children: "Conformément à l'article 20 du RGPD, vous pouvez télécharger une copie de vos données personnelles (profil, boutiques, commandes) au format structuré."
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/account/GDPRExportPanel.tsx",
+                        lineNumber: 66,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/account/GDPRExportPanel.tsx",
+                lineNumber: 61,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV(CardContent, {
+                children: /*#__PURE__*/ _jsxDEV("div", {
+                    className: "flex gap-4",
+                    children: [
+                        /*#__PURE__*/ _jsxDEV(Button, {
+                            variant: "outline",
+                            onClick: ()=>handleExport('json'),
+                            disabled: loading,
+                            children: [
+                                loading && /*#__PURE__*/ _jsxDEV(Loader2, {
+                                    className: "mr-2 h-4 w-4 animate-spin"
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/account/GDPRExportPanel.tsx",
+                                    lineNumber: 74,
+                                    columnNumber: 25
+                                }, this),
+                                "Télécharger en JSON"
+                            ]
+                        }, void 0, true, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/account/GDPRExportPanel.tsx",
+                            lineNumber: 73,
+                            columnNumber: 11
+                        }, this),
+                        /*#__PURE__*/ _jsxDEV(Button, {
+                            variant: "outline",
+                            onClick: ()=>handleExport('csv'),
+                            disabled: loading,
+                            children: [
+                                loading && /*#__PURE__*/ _jsxDEV(Loader2, {
+                                    className: "mr-2 h-4 w-4 animate-spin"
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/account/GDPRExportPanel.tsx",
+                                    lineNumber: 78,
+                                    columnNumber: 25
+                                }, this),
+                                "Télécharger en CSV"
+                            ]
+                        }, void 0, true, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/account/GDPRExportPanel.tsx",
+                            lineNumber: 77,
+                            columnNumber: 11
+                        }, this)
+                    ]
+                }, void 0, true, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/account/GDPRExportPanel.tsx",
+                    lineNumber: 72,
+                    columnNumber: 9
+                }, this)
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/account/GDPRExportPanel.tsx",
+                lineNumber: 71,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/account/GDPRExportPanel.tsx",
+        lineNumber: 60,
+        columnNumber: 5
+    }, this);
+};
+_s(GDPRExportPanel, "P70xPUW7EbRNpU8Hw0BJTWz1tuU=", false, function() {
+    return [
+        useToast
+    ];
+});
+_c = GDPRExportPanel;
+var _c;
+$RefreshReg$(_c, "GDPRExportPanel");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/account/GDPRExportPanel.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/account/GDPRExportPanel.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIkdEUFJFeHBvcnRQYW5lbC50c3giXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgdXNlU3RhdGUgfSBmcm9tICdyZWFjdCc7XG5pbXBvcnQgeyBCdXR0b24gfSBmcm9tICdAL2NvbXBvbmVudHMvdWkvYnV0dG9uJztcbmltcG9ydCB7IENhcmQsIENhcmRDb250ZW50LCBDYXJkRGVzY3JpcHRpb24sIENhcmRIZWFkZXIsIENhcmRUaXRsZSB9IGZyb20gJ0AvY29tcG9uZW50cy91aS9jYXJkJztcbmltcG9ydCB7IHVzZVRvYXN0IH0gZnJvbSAnQC9ob29rcy91c2UtdG9hc3QnO1xuaW1wb3J0IHsgc3VwYWJhc2UgfSBmcm9tICdAL2ludGVncmF0aW9ucy9zdXBhYmFzZS9jbGllbnQnO1xuaW1wb3J0IHsgTG9hZGVyMiwgRG93bmxvYWQgfSBmcm9tICdsdWNpZGUtcmVhY3QnO1xuXG5leHBvcnQgY29uc3QgR0RQUkV4cG9ydFBhbmVsID0gKCkgPT4ge1xuICBjb25zdCB7IHRvYXN0IH0gPSB1c2VUb2FzdCgpO1xuICBjb25zdCBbbG9hZGluZywgc2V0TG9hZGluZ10gPSB1c2VTdGF0ZShmYWxzZSk7XG5cbiAgY29uc3QgaGFuZGxlRXhwb3J0ID0gYXN5bmMgKGZvcm1hdDogJ2pzb24nIHwgJ2NzdicpID0+IHtcbiAgICBzZXRMb2FkaW5nKHRydWUpO1xuICAgIHRyeSB7XG4gICAgICBjb25zdCB7IGRhdGE6IHNlc3Npb24gfSA9IGF3YWl0IHN1cGFiYXNlLmF1dGguZ2V0U2Vzc2lvbigpO1xuICAgICAgaWYgKCFzZXNzaW9uLnNlc3Npb24pIHRocm93IG5ldyBFcnJvcignTm9uIGF1dG9yaXPDqScpO1xuXG4gICAgICBjb25zdCByZXNwb25zZSA9IGF3YWl0IGZldGNoKFxuICAgICAgICBgJHtpbXBvcnQubWV0YS5lbnYuVklURV9TVVBBQkFTRV9VUkx9L2Z1bmN0aW9ucy92MS9nZHByLWV4cG9ydGAsXG4gICAgICAgIHtcbiAgICAgICAgICBtZXRob2Q6ICdQT1NUJyxcbiAgICAgICAgICBoZWFkZXJzOiB7XG4gICAgICAgICAgICAnQ29udGVudC1UeXBlJzogJ2FwcGxpY2F0aW9uL2pzb24nLFxuICAgICAgICAgICAgQXV0aG9yaXphdGlvbjogYEJlYXJlciAke3Nlc3Npb24uc2Vzc2lvbi5hY2Nlc3NfdG9rZW59YCxcbiAgICAgICAgICB9LFxuICAgICAgICAgIGJvZHk6IEpTT04uc3RyaW5naWZ5KHsgZm9ybWF0IH0pLFxuICAgICAgICB9XG4gICAgICApO1xuXG4gICAgICBpZiAoIXJlc3BvbnNlLm9rKSB7XG4gICAgICAgIHRocm93IG5ldyBFcnJvcihcIkVycmV1ciBsb3JzIGRlIGxhIGfDqW7DqXJhdGlvbiBkZSBsJ2V4cG9ydFwiKTtcbiAgICAgIH1cblxuICAgICAgY29uc3QgYmxvYiA9IGF3YWl0IHJlc3BvbnNlLmJsb2IoKTtcbiAgICAgIGNvbnN0IHVybCA9IHdpbmRvdy5VUkwuY3JlYXRlT2JqZWN0VVJMKGJsb2IpO1xuICAgICAgY29uc3QgYSA9IGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoJ2EnKTtcbiAgICAgIGEuaHJlZiA9IHVybDtcbiAgICAgIGEuZG93bmxvYWQgPSBgZ2Rwcl9leHBvcnRfJHtuZXcgRGF0ZSgpLnRvSVNPU3RyaW5nKCkuc3BsaXQoJ1QnKVswXX0uJHtmb3JtYXR9YDtcbiAgICAgIGRvY3VtZW50LmJvZHkuYXBwZW5kQ2hpbGQoYSk7XG4gICAgICBhLmNsaWNrKCk7XG4gICAgICB3aW5kb3cuVVJMLnJldm9rZU9iamVjdFVSTCh1cmwpO1xuICAgICAgZG9jdW1lbnQuYm9keS5yZW1vdmVDaGlsZChhKTtcblxuICAgICAgdG9hc3Qoe1xuICAgICAgICB0aXRsZTogJ0V4cG9ydCByw6l1c3NpJyxcbiAgICAgICAgZGVzY3JpcHRpb246ICdWb3MgZG9ubsOpZXMgb250IMOpdMOpIHTDqWzDqWNoYXJnw6llcy4nLFxuICAgICAgfSk7XG4gICAgfSBjYXRjaCAoZXJyOiB1bmtub3duKSB7XG4gICAgICB0b2FzdCh7XG4gICAgICAgIHRpdGxlOiAnRXJyZXVyJyxcbiAgICAgICAgZGVzY3JpcHRpb246IGVyciBpbnN0YW5jZW9mIEVycm9yID8gZXJyLm1lc3NhZ2UgOiBcIkltcG9zc2libGUgZCdleHBvcnRlciB2b3MgZG9ubsOpZXNcIixcbiAgICAgICAgdmFyaWFudDogJ2Rlc3RydWN0aXZlJyxcbiAgICAgIH0pO1xuICAgIH0gZmluYWxseSB7XG4gICAgICBzZXRMb2FkaW5nKGZhbHNlKTtcbiAgICB9XG4gIH07XG5cbiAgcmV0dXJuIChcbiAgICA8Q2FyZCBjbGFzc05hbWU9XCJib3JkZXItYm9yZGVyLzUwIGJnLWNhcmQvNTAgYmFja2Ryb3AtYmx1ci1zbVwiPlxuICAgICAgPENhcmRIZWFkZXI+XG4gICAgICAgIDxDYXJkVGl0bGUgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTJcIj5cbiAgICAgICAgICA8RG93bmxvYWQgY2xhc3NOYW1lPVwiaC01IHctNVwiIC8+XG4gICAgICAgICAgVMOpbMOpY2hhcmdlciBtZXMgZG9ubsOpZXMgKEdEUFIpXG4gICAgICAgIDwvQ2FyZFRpdGxlPlxuICAgICAgICA8Q2FyZERlc2NyaXB0aW9uPlxuICAgICAgICAgIENvbmZvcm3DqW1lbnQgw6AgbCdhcnRpY2xlIDIwIGR1IFJHUEQsIHZvdXMgcG91dmV6IHTDqWzDqWNoYXJnZXIgdW5lIGNvcGllIGRlIHZvcyBkb25uw6llc1xuICAgICAgICAgIHBlcnNvbm5lbGxlcyAocHJvZmlsLCBib3V0aXF1ZXMsIGNvbW1hbmRlcykgYXUgZm9ybWF0IHN0cnVjdHVyw6kuXG4gICAgICAgIDwvQ2FyZERlc2NyaXB0aW9uPlxuICAgICAgPC9DYXJkSGVhZGVyPlxuICAgICAgPENhcmRDb250ZW50PlxuICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggZ2FwLTRcIj5cbiAgICAgICAgICA8QnV0dG9uIHZhcmlhbnQ9XCJvdXRsaW5lXCIgb25DbGljaz17KCkgPT4gaGFuZGxlRXhwb3J0KCdqc29uJyl9IGRpc2FibGVkPXtsb2FkaW5nfT5cbiAgICAgICAgICAgIHtsb2FkaW5nICYmIDxMb2FkZXIyIGNsYXNzTmFtZT1cIm1yLTIgaC00IHctNCBhbmltYXRlLXNwaW5cIiAvPn1cbiAgICAgICAgICAgIFTDqWzDqWNoYXJnZXIgZW4gSlNPTlxuICAgICAgICAgIDwvQnV0dG9uPlxuICAgICAgICAgIDxCdXR0b24gdmFyaWFudD1cIm91dGxpbmVcIiBvbkNsaWNrPXsoKSA9PiBoYW5kbGVFeHBvcnQoJ2NzdicpfSBkaXNhYmxlZD17bG9hZGluZ30+XG4gICAgICAgICAgICB7bG9hZGluZyAmJiA8TG9hZGVyMiBjbGFzc05hbWU9XCJtci0yIGgtNCB3LTQgYW5pbWF0ZS1zcGluXCIgLz59XG4gICAgICAgICAgICBUw6lsw6ljaGFyZ2VyIGVuIENTVlxuICAgICAgICAgIDwvQnV0dG9uPlxuICAgICAgICA8L2Rpdj5cbiAgICAgIDwvQ2FyZENvbnRlbnQ+XG4gICAgPC9DYXJkPlxuICApO1xufTtcbiJdLCJuYW1lcyI6WyJ1c2VTdGF0ZSIsIkJ1dHRvbiIsIkNhcmQiLCJDYXJkQ29udGVudCIsIkNhcmREZXNjcmlwdGlvbiIsIkNhcmRIZWFkZXIiLCJDYXJkVGl0bGUiLCJ1c2VUb2FzdCIsInN1cGFiYXNlIiwiTG9hZGVyMiIsIkRvd25sb2FkIiwiR0RQUkV4cG9ydFBhbmVsIiwidG9hc3QiLCJsb2FkaW5nIiwic2V0TG9hZGluZyIsImhhbmRsZUV4cG9ydCIsImZvcm1hdCIsImRhdGEiLCJzZXNzaW9uIiwiYXV0aCIsImdldFNlc3Npb24iLCJFcnJvciIsInJlc3BvbnNlIiwiZmV0Y2giLCJlbnYiLCJWSVRFX1NVUEFCQVNFX1VSTCIsIm1ldGhvZCIsImhlYWRlcnMiLCJBdXRob3JpemF0aW9uIiwiYWNjZXNzX3Rva2VuIiwiYm9keSIsIkpTT04iLCJzdHJpbmdpZnkiLCJvayIsImJsb2IiLCJ1cmwiLCJ3aW5kb3ciLCJVUkwiLCJjcmVhdGVPYmplY3RVUkwiLCJhIiwiZG9jdW1lbnQiLCJjcmVhdGVFbGVtZW50IiwiaHJlZiIsImRvd25sb2FkIiwiRGF0ZSIsInRvSVNPU3RyaW5nIiwic3BsaXQiLCJhcHBlbmRDaGlsZCIsImNsaWNrIiwicmV2b2tlT2JqZWN0VVJMIiwicmVtb3ZlQ2hpbGQiLCJ0aXRsZSIsImRlc2NyaXB0aW9uIiwiZXJyIiwibWVzc2FnZSIsInZhcmlhbnQiLCJjbGFzc05hbWUiLCJkaXYiLCJvbkNsaWNrIiwiZGlzYWJsZWQiXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OztBQUFBLFNBQVNBLFFBQVEsUUFBUSxRQUFRO0FBQ2pDLFNBQVNDLE1BQU0sUUFBUSx5QkFBeUI7QUFDaEQsU0FBU0MsSUFBSSxFQUFFQyxXQUFXLEVBQUVDLGVBQWUsRUFBRUMsVUFBVSxFQUFFQyxTQUFTLFFBQVEsdUJBQXVCO0FBQ2pHLFNBQVNDLFFBQVEsUUFBUSxvQkFBb0I7QUFDN0MsU0FBU0MsUUFBUSxRQUFRLGlDQUFpQztBQUMxRCxTQUFTQyxPQUFPLEVBQUVDLFFBQVEsUUFBUSxlQUFlO0FBRWpELE9BQU8sTUFBTUMsa0JBQWtCOztJQUM3QixNQUFNLEVBQUVDLEtBQUssRUFBRSxHQUFHTDtJQUNsQixNQUFNLENBQUNNLFNBQVNDLFdBQVcsR0FBR2QsU0FBUztJQUV2QyxNQUFNZSxlQUFlLE9BQU9DO1FBQzFCRixXQUFXO1FBQ1gsSUFBSTtZQUNGLE1BQU0sRUFBRUcsTUFBTUMsT0FBTyxFQUFFLEdBQUcsTUFBTVYsU0FBU1csSUFBSSxDQUFDQyxVQUFVO1lBQ3hELElBQUksQ0FBQ0YsUUFBUUEsT0FBTyxFQUFFLE1BQU0sSUFBSUcsTUFBTTtZQUV0QyxNQUFNQyxXQUFXLE1BQU1DLE1BQ3JCLEdBQUcsWUFBWUMsR0FBRyxDQUFDQyxpQkFBaUIsQ0FBQyx5QkFBeUIsQ0FBQyxFQUMvRDtnQkFDRUMsUUFBUTtnQkFDUkMsU0FBUztvQkFDUCxnQkFBZ0I7b0JBQ2hCQyxlQUFlLENBQUMsT0FBTyxFQUFFVixRQUFRQSxPQUFPLENBQUNXLFlBQVksRUFBRTtnQkFDekQ7Z0JBQ0FDLE1BQU1DLEtBQUtDLFNBQVMsQ0FBQztvQkFBRWhCO2dCQUFPO1lBQ2hDO1lBR0YsSUFBSSxDQUFDTSxTQUFTVyxFQUFFLEVBQUU7Z0JBQ2hCLE1BQU0sSUFBSVosTUFBTTtZQUNsQjtZQUVBLE1BQU1hLE9BQU8sTUFBTVosU0FBU1ksSUFBSTtZQUNoQyxNQUFNQyxNQUFNQyxPQUFPQyxHQUFHLENBQUNDLGVBQWUsQ0FBQ0o7WUFDdkMsTUFBTUssSUFBSUMsU0FBU0MsYUFBYSxDQUFDO1lBQ2pDRixFQUFFRyxJQUFJLEdBQUdQO1lBQ1RJLEVBQUVJLFFBQVEsR0FBRyxDQUFDLFlBQVksRUFBRSxJQUFJQyxPQUFPQyxXQUFXLEdBQUdDLEtBQUssQ0FBQyxJQUFJLENBQUMsRUFBRSxDQUFDLENBQUMsRUFBRTlCLFFBQVE7WUFDOUV3QixTQUFTVixJQUFJLENBQUNpQixXQUFXLENBQUNSO1lBQzFCQSxFQUFFUyxLQUFLO1lBQ1BaLE9BQU9DLEdBQUcsQ0FBQ1ksZUFBZSxDQUFDZDtZQUMzQkssU0FBU1YsSUFBSSxDQUFDb0IsV0FBVyxDQUFDWDtZQUUxQjNCLE1BQU07Z0JBQ0p1QyxPQUFPO2dCQUNQQyxhQUFhO1lBQ2Y7UUFDRixFQUFFLE9BQU9DLEtBQWM7WUFDckJ6QyxNQUFNO2dCQUNKdUMsT0FBTztnQkFDUEMsYUFBYUMsZUFBZWhDLFFBQVFnQyxJQUFJQyxPQUFPLEdBQUc7Z0JBQ2xEQyxTQUFTO1lBQ1g7UUFDRixTQUFVO1lBQ1J6QyxXQUFXO1FBQ2I7SUFDRjtJQUVBLHFCQUNFLFFBQUNaO1FBQUtzRCxXQUFVOzswQkFDZCxRQUFDbkQ7O2tDQUNDLFFBQUNDO3dCQUFVa0QsV0FBVTs7MENBQ25CLFFBQUM5QztnQ0FBUzhDLFdBQVU7Ozs7Ozs0QkFBWTs7Ozs7OztrQ0FHbEMsUUFBQ3BEO2tDQUFnQjs7Ozs7Ozs7Ozs7OzBCQUtuQixRQUFDRDswQkFDQyxjQUFBLFFBQUNzRDtvQkFBSUQsV0FBVTs7c0NBQ2IsUUFBQ3ZEOzRCQUFPc0QsU0FBUTs0QkFBVUcsU0FBUyxJQUFNM0MsYUFBYTs0QkFBUzRDLFVBQVU5Qzs7Z0NBQ3RFQSx5QkFBVyxRQUFDSjtvQ0FBUStDLFdBQVU7Ozs7OztnQ0FBK0I7Ozs7Ozs7c0NBR2hFLFFBQUN2RDs0QkFBT3NELFNBQVE7NEJBQVVHLFNBQVMsSUFBTTNDLGFBQWE7NEJBQVE0QyxVQUFVOUM7O2dDQUNyRUEseUJBQVcsUUFBQ0o7b0NBQVErQyxXQUFVOzs7Ozs7Z0NBQStCOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7QUFPMUUsRUFBRTtHQTdFVzdDOztRQUNPSjs7O0tBRFBJIn0=

@@ -1,0 +1,260 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/products/PricingModelBadge.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/products/PricingModelBadge.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=8792f17d"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+/**
+ * Pricing Model Badge - Composant réutilisable pour afficher le modèle de tarification
+ * Date: 2 Février 2025
+ *
+ * Affiche les badges pour les différents modèles de tarification:
+ * - Achat unique (one-time)
+ * - Abonnement (subscription)
+ * - Accès à vie (lifetime)
+ * - Gratuit (free)
+ * - Prix libre (pay-what-you-want)
+ */ import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=8792f17d"; const React = __vite__cjsImport3_react.__esModule ? __vite__cjsImport3_react.default : __vite__cjsImport3_react;
+import { Badge } from "/src/components/ui/badge.tsx";
+import { DollarSign, RefreshCw, InfinityIcon, Gift, Percent } from "/node_modules/.vite/deps/lucide-react.js?v=8792f17d";
+import { cn } from "/src/lib/utils.ts";
+/**
+ * Composant pour afficher un badge de modèle de tarification
+ */ export function PricingModelBadge({ pricingModel, className, size = 'sm' }) {
+    if (!pricingModel) {
+        return null;
+    }
+    const sizeClasses = {
+        sm: 'text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5',
+        md: 'text-xs sm:text-sm px-2 sm:px-3 py-1',
+        lg: 'text-sm sm:text-base px-3 sm:px-4 py-1.5'
+    };
+    const iconSizes = {
+        sm: 'h-2.5 w-2.5 sm:h-3 sm:w-3',
+        md: 'h-3 w-3 sm:h-4 sm:w-4',
+        lg: 'h-4 w-4 sm:h-5 sm:w-5'
+    };
+    // Achat unique
+    if (pricingModel === 'one-time') {
+        return /*#__PURE__*/ _jsxDEV(Badge, {
+            variant: "outline",
+            className: cn('border-green-500 text-green-600 dark:text-green-400', sizeClasses[size], className),
+            title: "Achat unique, pas d'abonnement",
+            children: [
+                /*#__PURE__*/ _jsxDEV(DollarSign, {
+                    className: cn(iconSizes[size], 'mr-0.5 sm:mr-1')
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/products/PricingModelBadge.tsx",
+                    lineNumber: 62,
+                    columnNumber: 9
+                }, this),
+                /*#__PURE__*/ _jsxDEV("span", {
+                    className: "hidden sm:inline",
+                    children: "Achat unique"
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/products/PricingModelBadge.tsx",
+                    lineNumber: 63,
+                    columnNumber: 9
+                }, this),
+                /*#__PURE__*/ _jsxDEV("span", {
+                    className: "sm:hidden",
+                    children: "Unique"
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/products/PricingModelBadge.tsx",
+                    lineNumber: 64,
+                    columnNumber: 9
+                }, this)
+            ]
+        }, void 0, true, {
+            fileName: "/home/runner/work/emarzona/emarzona/src/components/products/PricingModelBadge.tsx",
+            lineNumber: 53,
+            columnNumber: 7
+        }, this);
+    }
+    // Abonnement
+    if (pricingModel === 'subscription') {
+        return /*#__PURE__*/ _jsxDEV(Badge, {
+            variant: "outline",
+            className: cn('border-orange-500 text-orange-600 dark:text-orange-400', sizeClasses[size], className),
+            title: "Abonnement récurrent",
+            children: [
+                /*#__PURE__*/ _jsxDEV(RefreshCw, {
+                    className: cn(iconSizes[size], 'mr-0.5 sm:mr-1')
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/products/PricingModelBadge.tsx",
+                    lineNumber: 81,
+                    columnNumber: 9
+                }, this),
+                /*#__PURE__*/ _jsxDEV("span", {
+                    className: "hidden sm:inline",
+                    children: "Abonnement"
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/products/PricingModelBadge.tsx",
+                    lineNumber: 82,
+                    columnNumber: 9
+                }, this),
+                /*#__PURE__*/ _jsxDEV("span", {
+                    className: "sm:hidden",
+                    children: "Abonnement"
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/products/PricingModelBadge.tsx",
+                    lineNumber: 83,
+                    columnNumber: 9
+                }, this)
+            ]
+        }, void 0, true, {
+            fileName: "/home/runner/work/emarzona/emarzona/src/components/products/PricingModelBadge.tsx",
+            lineNumber: 72,
+            columnNumber: 7
+        }, this);
+    }
+    // Accès à vie
+    if (pricingModel === 'lifetime') {
+        return /*#__PURE__*/ _jsxDEV(Badge, {
+            variant: "outline",
+            className: cn('border-purple-500 text-purple-600 dark:text-purple-400', sizeClasses[size], className),
+            title: "Accès à vie après achat",
+            children: [
+                /*#__PURE__*/ _jsxDEV(InfinityIcon, {
+                    className: cn(iconSizes[size], 'mr-0.5 sm:mr-1')
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/products/PricingModelBadge.tsx",
+                    lineNumber: 100,
+                    columnNumber: 9
+                }, this),
+                /*#__PURE__*/ _jsxDEV("span", {
+                    className: "hidden sm:inline",
+                    children: "Accès à vie"
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/products/PricingModelBadge.tsx",
+                    lineNumber: 101,
+                    columnNumber: 9
+                }, this),
+                /*#__PURE__*/ _jsxDEV("span", {
+                    className: "sm:hidden",
+                    children: "À vie"
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/products/PricingModelBadge.tsx",
+                    lineNumber: 102,
+                    columnNumber: 9
+                }, this)
+            ]
+        }, void 0, true, {
+            fileName: "/home/runner/work/emarzona/emarzona/src/components/products/PricingModelBadge.tsx",
+            lineNumber: 91,
+            columnNumber: 7
+        }, this);
+    }
+    // Gratuit
+    if (pricingModel === 'free') {
+        return /*#__PURE__*/ _jsxDEV(Badge, {
+            variant: "outline",
+            className: cn('border-blue-500 text-blue-600 dark:text-blue-400', sizeClasses[size], className),
+            title: "Produit gratuit",
+            children: [
+                /*#__PURE__*/ _jsxDEV(Gift, {
+                    className: cn(iconSizes[size], 'mr-0.5 sm:mr-1')
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/products/PricingModelBadge.tsx",
+                    lineNumber: 119,
+                    columnNumber: 9
+                }, this),
+                /*#__PURE__*/ _jsxDEV("span", {
+                    className: "hidden sm:inline",
+                    children: "Gratuit"
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/products/PricingModelBadge.tsx",
+                    lineNumber: 120,
+                    columnNumber: 9
+                }, this),
+                /*#__PURE__*/ _jsxDEV("span", {
+                    className: "sm:hidden",
+                    children: "Gratuit"
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/products/PricingModelBadge.tsx",
+                    lineNumber: 121,
+                    columnNumber: 9
+                }, this)
+            ]
+        }, void 0, true, {
+            fileName: "/home/runner/work/emarzona/emarzona/src/components/products/PricingModelBadge.tsx",
+            lineNumber: 110,
+            columnNumber: 7
+        }, this);
+    }
+    // Prix libre
+    if (pricingModel === 'pay-what-you-want') {
+        return /*#__PURE__*/ _jsxDEV(Badge, {
+            variant: "outline",
+            className: cn('border-yellow-500 text-yellow-600 dark:text-yellow-400', sizeClasses[size], className),
+            title: "Vous choisissez le prix",
+            children: [
+                /*#__PURE__*/ _jsxDEV(Percent, {
+                    className: cn(iconSizes[size], 'mr-0.5 sm:mr-1')
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/products/PricingModelBadge.tsx",
+                    lineNumber: 138,
+                    columnNumber: 9
+                }, this),
+                /*#__PURE__*/ _jsxDEV("span", {
+                    className: "hidden sm:inline",
+                    children: "Prix libre"
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/products/PricingModelBadge.tsx",
+                    lineNumber: 139,
+                    columnNumber: 9
+                }, this),
+                /*#__PURE__*/ _jsxDEV("span", {
+                    className: "sm:hidden",
+                    children: "Libre"
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/products/PricingModelBadge.tsx",
+                    lineNumber: 140,
+                    columnNumber: 9
+                }, this)
+            ]
+        }, void 0, true, {
+            fileName: "/home/runner/work/emarzona/emarzona/src/components/products/PricingModelBadge.tsx",
+            lineNumber: 129,
+            columnNumber: 7
+        }, this);
+    }
+    return null;
+}
+_c = PricingModelBadge;
+var _c;
+$RefreshReg$(_c, "PricingModelBadge");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/products/PricingModelBadge.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/products/PricingModelBadge.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIlByaWNpbmdNb2RlbEJhZGdlLnRzeCJdLCJzb3VyY2VzQ29udGVudCI6WyIvKipcbiAqIFByaWNpbmcgTW9kZWwgQmFkZ2UgLSBDb21wb3NhbnQgcsOpdXRpbGlzYWJsZSBwb3VyIGFmZmljaGVyIGxlIG1vZMOobGUgZGUgdGFyaWZpY2F0aW9uXG4gKiBEYXRlOiAyIEbDqXZyaWVyIDIwMjVcbiAqXG4gKiBBZmZpY2hlIGxlcyBiYWRnZXMgcG91ciBsZXMgZGlmZsOpcmVudHMgbW9kw6hsZXMgZGUgdGFyaWZpY2F0aW9uOlxuICogLSBBY2hhdCB1bmlxdWUgKG9uZS10aW1lKVxuICogLSBBYm9ubmVtZW50IChzdWJzY3JpcHRpb24pXG4gKiAtIEFjY8OocyDDoCB2aWUgKGxpZmV0aW1lKVxuICogLSBHcmF0dWl0IChmcmVlKVxuICogLSBQcml4IGxpYnJlIChwYXktd2hhdC15b3Utd2FudClcbiAqL1xuXG5pbXBvcnQgUmVhY3QgZnJvbSAncmVhY3QnO1xuaW1wb3J0IHsgQmFkZ2UgfSBmcm9tICdAL2NvbXBvbmVudHMvdWkvYmFkZ2UnO1xuaW1wb3J0IHsgRG9sbGFyU2lnbiwgUmVmcmVzaEN3LCBJbmZpbml0eUljb24sIEdpZnQsIFBlcmNlbnQgfSBmcm9tICdsdWNpZGUtcmVhY3QnO1xuaW1wb3J0IHsgY24gfSBmcm9tICdAL2xpYi91dGlscyc7XG5cbmV4cG9ydCB0eXBlIFByaWNpbmdNb2RlbCA9ICdvbmUtdGltZScgfCAnc3Vic2NyaXB0aW9uJyB8ICdsaWZldGltZScgfCAnZnJlZScgfCAncGF5LXdoYXQteW91LXdhbnQnO1xuXG5pbnRlcmZhY2UgUHJpY2luZ01vZGVsQmFkZ2VQcm9wcyB7XG4gIHByaWNpbmdNb2RlbD86IFByaWNpbmdNb2RlbCB8IHN0cmluZyB8IG51bGw7XG4gIGNsYXNzTmFtZT86IHN0cmluZztcbiAgc2l6ZT86ICdzbScgfCAnbWQnIHwgJ2xnJztcbn1cblxuLyoqXG4gKiBDb21wb3NhbnQgcG91ciBhZmZpY2hlciB1biBiYWRnZSBkZSBtb2TDqGxlIGRlIHRhcmlmaWNhdGlvblxuICovXG5leHBvcnQgZnVuY3Rpb24gUHJpY2luZ01vZGVsQmFkZ2Uoe1xuICBwcmljaW5nTW9kZWwsXG4gIGNsYXNzTmFtZSxcbiAgc2l6ZSA9ICdzbScsXG59OiBQcmljaW5nTW9kZWxCYWRnZVByb3BzKSB7XG4gIGlmICghcHJpY2luZ01vZGVsKSB7XG4gICAgcmV0dXJuIG51bGw7XG4gIH1cblxuICBjb25zdCBzaXplQ2xhc3NlcyA9IHtcbiAgICBzbTogJ3RleHQtWzEwcHhdIHNtOnRleHQteHMgcHgtMS41IHNtOnB4LTIgcHktMC41JyxcbiAgICBtZDogJ3RleHQteHMgc206dGV4dC1zbSBweC0yIHNtOnB4LTMgcHktMScsXG4gICAgbGc6ICd0ZXh0LXNtIHNtOnRleHQtYmFzZSBweC0zIHNtOnB4LTQgcHktMS41JyxcbiAgfTtcblxuICBjb25zdCBpY29uU2l6ZXMgPSB7XG4gICAgc206ICdoLTIuNSB3LTIuNSBzbTpoLTMgc206dy0zJyxcbiAgICBtZDogJ2gtMyB3LTMgc206aC00IHNtOnctNCcsXG4gICAgbGc6ICdoLTQgdy00IHNtOmgtNSBzbTp3LTUnLFxuICB9O1xuXG4gIC8vIEFjaGF0IHVuaXF1ZVxuICBpZiAocHJpY2luZ01vZGVsID09PSAnb25lLXRpbWUnKSB7XG4gICAgcmV0dXJuIChcbiAgICAgIDxCYWRnZVxuICAgICAgICB2YXJpYW50PVwib3V0bGluZVwiXG4gICAgICAgIGNsYXNzTmFtZT17Y24oXG4gICAgICAgICAgJ2JvcmRlci1ncmVlbi01MDAgdGV4dC1ncmVlbi02MDAgZGFyazp0ZXh0LWdyZWVuLTQwMCcsXG4gICAgICAgICAgc2l6ZUNsYXNzZXNbc2l6ZV0sXG4gICAgICAgICAgY2xhc3NOYW1lXG4gICAgICAgICl9XG4gICAgICAgIHRpdGxlPVwiQWNoYXQgdW5pcXVlLCBwYXMgZCdhYm9ubmVtZW50XCJcbiAgICAgID5cbiAgICAgICAgPERvbGxhclNpZ24gY2xhc3NOYW1lPXtjbihpY29uU2l6ZXNbc2l6ZV0sICdtci0wLjUgc206bXItMScpfSAvPlxuICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJoaWRkZW4gc206aW5saW5lXCI+QWNoYXQgdW5pcXVlPC9zcGFuPlxuICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJzbTpoaWRkZW5cIj5VbmlxdWU8L3NwYW4+XG4gICAgICA8L0JhZGdlPlxuICAgICk7XG4gIH1cblxuICAvLyBBYm9ubmVtZW50XG4gIGlmIChwcmljaW5nTW9kZWwgPT09ICdzdWJzY3JpcHRpb24nKSB7XG4gICAgcmV0dXJuIChcbiAgICAgIDxCYWRnZVxuICAgICAgICB2YXJpYW50PVwib3V0bGluZVwiXG4gICAgICAgIGNsYXNzTmFtZT17Y24oXG4gICAgICAgICAgJ2JvcmRlci1vcmFuZ2UtNTAwIHRleHQtb3JhbmdlLTYwMCBkYXJrOnRleHQtb3JhbmdlLTQwMCcsXG4gICAgICAgICAgc2l6ZUNsYXNzZXNbc2l6ZV0sXG4gICAgICAgICAgY2xhc3NOYW1lXG4gICAgICAgICl9XG4gICAgICAgIHRpdGxlPVwiQWJvbm5lbWVudCByw6ljdXJyZW50XCJcbiAgICAgID5cbiAgICAgICAgPFJlZnJlc2hDdyBjbGFzc05hbWU9e2NuKGljb25TaXplc1tzaXplXSwgJ21yLTAuNSBzbTptci0xJyl9IC8+XG4gICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cImhpZGRlbiBzbTppbmxpbmVcIj5BYm9ubmVtZW50PC9zcGFuPlxuICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJzbTpoaWRkZW5cIj5BYm9ubmVtZW50PC9zcGFuPlxuICAgICAgPC9CYWRnZT5cbiAgICApO1xuICB9XG5cbiAgLy8gQWNjw6hzIMOgIHZpZVxuICBpZiAocHJpY2luZ01vZGVsID09PSAnbGlmZXRpbWUnKSB7XG4gICAgcmV0dXJuIChcbiAgICAgIDxCYWRnZVxuICAgICAgICB2YXJpYW50PVwib3V0bGluZVwiXG4gICAgICAgIGNsYXNzTmFtZT17Y24oXG4gICAgICAgICAgJ2JvcmRlci1wdXJwbGUtNTAwIHRleHQtcHVycGxlLTYwMCBkYXJrOnRleHQtcHVycGxlLTQwMCcsXG4gICAgICAgICAgc2l6ZUNsYXNzZXNbc2l6ZV0sXG4gICAgICAgICAgY2xhc3NOYW1lXG4gICAgICAgICl9XG4gICAgICAgIHRpdGxlPVwiQWNjw6hzIMOgIHZpZSBhcHLDqHMgYWNoYXRcIlxuICAgICAgPlxuICAgICAgICA8SW5maW5pdHlJY29uIGNsYXNzTmFtZT17Y24oaWNvblNpemVzW3NpemVdLCAnbXItMC41IHNtOm1yLTEnKX0gLz5cbiAgICAgICAgPHNwYW4gY2xhc3NOYW1lPVwiaGlkZGVuIHNtOmlubGluZVwiPkFjY8OocyDDoCB2aWU8L3NwYW4+XG4gICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cInNtOmhpZGRlblwiPsOAIHZpZTwvc3Bhbj5cbiAgICAgIDwvQmFkZ2U+XG4gICAgKTtcbiAgfVxuXG4gIC8vIEdyYXR1aXRcbiAgaWYgKHByaWNpbmdNb2RlbCA9PT0gJ2ZyZWUnKSB7XG4gICAgcmV0dXJuIChcbiAgICAgIDxCYWRnZVxuICAgICAgICB2YXJpYW50PVwib3V0bGluZVwiXG4gICAgICAgIGNsYXNzTmFtZT17Y24oXG4gICAgICAgICAgJ2JvcmRlci1ibHVlLTUwMCB0ZXh0LWJsdWUtNjAwIGRhcms6dGV4dC1ibHVlLTQwMCcsXG4gICAgICAgICAgc2l6ZUNsYXNzZXNbc2l6ZV0sXG4gICAgICAgICAgY2xhc3NOYW1lXG4gICAgICAgICl9XG4gICAgICAgIHRpdGxlPVwiUHJvZHVpdCBncmF0dWl0XCJcbiAgICAgID5cbiAgICAgICAgPEdpZnQgY2xhc3NOYW1lPXtjbihpY29uU2l6ZXNbc2l6ZV0sICdtci0wLjUgc206bXItMScpfSAvPlxuICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJoaWRkZW4gc206aW5saW5lXCI+R3JhdHVpdDwvc3Bhbj5cbiAgICAgICAgPHNwYW4gY2xhc3NOYW1lPVwic206aGlkZGVuXCI+R3JhdHVpdDwvc3Bhbj5cbiAgICAgIDwvQmFkZ2U+XG4gICAgKTtcbiAgfVxuXG4gIC8vIFByaXggbGlicmVcbiAgaWYgKHByaWNpbmdNb2RlbCA9PT0gJ3BheS13aGF0LXlvdS13YW50Jykge1xuICAgIHJldHVybiAoXG4gICAgICA8QmFkZ2VcbiAgICAgICAgdmFyaWFudD1cIm91dGxpbmVcIlxuICAgICAgICBjbGFzc05hbWU9e2NuKFxuICAgICAgICAgICdib3JkZXIteWVsbG93LTUwMCB0ZXh0LXllbGxvdy02MDAgZGFyazp0ZXh0LXllbGxvdy00MDAnLFxuICAgICAgICAgIHNpemVDbGFzc2VzW3NpemVdLFxuICAgICAgICAgIGNsYXNzTmFtZVxuICAgICAgICApfVxuICAgICAgICB0aXRsZT1cIlZvdXMgY2hvaXNpc3NleiBsZSBwcml4XCJcbiAgICAgID5cbiAgICAgICAgPFBlcmNlbnQgY2xhc3NOYW1lPXtjbihpY29uU2l6ZXNbc2l6ZV0sICdtci0wLjUgc206bXItMScpfSAvPlxuICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJoaWRkZW4gc206aW5saW5lXCI+UHJpeCBsaWJyZTwvc3Bhbj5cbiAgICAgICAgPHNwYW4gY2xhc3NOYW1lPVwic206aGlkZGVuXCI+TGlicmU8L3NwYW4+XG4gICAgICA8L0JhZGdlPlxuICAgICk7XG4gIH1cblxuICByZXR1cm4gbnVsbDtcbn1cblxuXG5cblxuXG5cbiJdLCJuYW1lcyI6WyJSZWFjdCIsIkJhZGdlIiwiRG9sbGFyU2lnbiIsIlJlZnJlc2hDdyIsIkluZmluaXR5SWNvbiIsIkdpZnQiLCJQZXJjZW50IiwiY24iLCJQcmljaW5nTW9kZWxCYWRnZSIsInByaWNpbmdNb2RlbCIsImNsYXNzTmFtZSIsInNpemUiLCJzaXplQ2xhc3NlcyIsInNtIiwibWQiLCJsZyIsImljb25TaXplcyIsInZhcmlhbnQiLCJ0aXRsZSIsInNwYW4iXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O0FBQUE7Ozs7Ozs7Ozs7Q0FVQyxHQUVELE9BQU9BLFdBQVcsUUFBUTtBQUMxQixTQUFTQyxLQUFLLFFBQVEsd0JBQXdCO0FBQzlDLFNBQVNDLFVBQVUs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

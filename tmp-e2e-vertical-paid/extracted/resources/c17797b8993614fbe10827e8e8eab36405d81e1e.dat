@@ -1,0 +1,490 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/seo/SEODetailDialog.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/seo/SEODetailDialog.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=8792f17d"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+var _s = $RefreshSig$();
+import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=8792f17d"; const React = __vite__cjsImport3_react.__esModule ? __vite__cjsImport3_react.default : __vite__cjsImport3_react; const useCallback = __vite__cjsImport3_react["useCallback"];
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "/src/components/ui/dialog.tsx";
+import { Badge } from "/src/components/ui/badge.tsx";
+import { Progress } from "/src/components/ui/progress.tsx";
+import { Alert, AlertDescription } from "/src/components/ui/alert.tsx";
+import { getScoreColor } from "/src/lib/seo-analyzer.ts";
+import { CheckCircle2, AlertTriangle, XCircle, ArrowRight } from "/node_modules/.vite/deps/lucide-react.js?v=8792f17d";
+import { Button } from "/src/components/ui/button.tsx";
+import { useNavigate } from "/node_modules/.vite/deps/react-router-dom.js?v=8792f17d";
+const SEODetailDialogComponent = ({ page, open, onOpenChange })=>{
+    _s();
+    const navigate = useNavigate();
+    const handleEdit = useCallback(()=>{
+        if (!page) return;
+        onOpenChange(false);
+        if (page.type === 'product') {
+            navigate(`/dashboard/products/${page.id}/edit`);
+        } else {
+            navigate('/dashboard/store');
+        }
+    }, [
+        page,
+        onOpenChange,
+        navigate
+    ]);
+    if (!page) return null;
+    const getPriorityIcon = (priority)=>{
+        switch(priority){
+            case 'high':
+                return /*#__PURE__*/ _jsxDEV(XCircle, {
+                    className: "h-4 w-4 text-red-600"
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEODetailDialog.tsx",
+                    lineNumber: 42,
+                    columnNumber: 16
+                }, this);
+            case 'medium':
+                return /*#__PURE__*/ _jsxDEV(AlertTriangle, {
+                    className: "h-4 w-4 text-orange-600"
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEODetailDialog.tsx",
+                    lineNumber: 44,
+                    columnNumber: 16
+                }, this);
+            default:
+                return /*#__PURE__*/ _jsxDEV(CheckCircle2, {
+                    className: "h-4 w-4 text-blue-600"
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEODetailDialog.tsx",
+                    lineNumber: 46,
+                    columnNumber: 16
+                }, this);
+        }
+    };
+    return /*#__PURE__*/ _jsxDEV(Dialog, {
+        open: open,
+        onOpenChange: onOpenChange,
+        children: /*#__PURE__*/ _jsxDEV(DialogContent, {
+            className: "max-w-[90vw] sm:max-w-3xl max-h-[90vh] overflow-y-auto",
+            children: [
+                /*#__PURE__*/ _jsxDEV(DialogHeader, {
+                    children: [
+                        /*#__PURE__*/ _jsxDEV(DialogTitle, {
+                            className: "flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-base sm:text-lg",
+                            children: [
+                                /*#__PURE__*/ _jsxDEV("span", {
+                                    className: "truncate",
+                                    children: [
+                                        "Analyse SEO : ",
+                                        page.name
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEODetailDialog.tsx",
+                                    lineNumber: 55,
+                                    columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV("span", {
+                                    className: `text-xl sm:text-2xl font-bold ${getScoreColor(page.analysis.score.overall)}`,
+                                    children: [
+                                        page.analysis.score.overall,
+                                        "/100"
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEODetailDialog.tsx",
+                                    lineNumber: 56,
+                                    columnNumber: 13
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEODetailDialog.tsx",
+                            lineNumber: 54,
+                            columnNumber: 11
+                        }, this),
+                        /*#__PURE__*/ _jsxDEV(DialogDescription, {
+                            className: "text-xs sm:text-sm",
+                            children: [
+                                page.type === 'product' ? 'Produit' : 'Boutique',
+                                " • Analysé le",
+                                ' ',
+                                page.lastAnalyzed.toLocaleDateString('fr-FR')
+                            ]
+                        }, void 0, true, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEODetailDialog.tsx",
+                            lineNumber: 62,
+                            columnNumber: 11
+                        }, this)
+                    ]
+                }, void 0, true, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEODetailDialog.tsx",
+                    lineNumber: 53,
+                    columnNumber: 9
+                }, this),
+                /*#__PURE__*/ _jsxDEV("div", {
+                    className: "space-y-4 sm:space-y-6",
+                    children: [
+                        /*#__PURE__*/ _jsxDEV("div", {
+                            className: "space-y-2 sm:space-y-3",
+                            children: [
+                                /*#__PURE__*/ _jsxDEV("h3", {
+                                    className: "font-semibold text-sm sm:text-base",
+                                    children: "Scores détaillés"
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEODetailDialog.tsx",
+                                    lineNumber: 71,
+                                    columnNumber: 13
+                                }, this),
+                                Object.entries(page.analysis.score).map(([key, value])=>{
+                                    if (key === 'overall') return null;
+                                    const labels = {
+                                        structure: 'Structure',
+                                        content: 'Contenu',
+                                        images: 'Images',
+                                        performance: 'Performance',
+                                        readability: 'Lisibilité'
+                                    };
+                                    return /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "space-y-1",
+                                        children: [
+                                            /*#__PURE__*/ _jsxDEV("div", {
+                                                className: "flex justify-between text-xs sm:text-sm",
+                                                children: [
+                                                    /*#__PURE__*/ _jsxDEV("span", {
+                                                        children: labels[key]
+                                                    }, void 0, false, {
+                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEODetailDialog.tsx",
+                                                        lineNumber: 86,
+                                                        columnNumber: 21
+                                                    }, this),
+                                                    /*#__PURE__*/ _jsxDEV("span", {
+                                                        className: `font-semibold ${getScoreColor(value)}`,
+                                                        children: [
+                                                            value,
+                                                            "/100"
+                                                        ]
+                                                    }, void 0, true, {
+                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEODetailDialog.tsx",
+                                                        lineNumber: 87,
+                                                        columnNumber: 21
+                                                    }, this)
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEODetailDialog.tsx",
+                                                lineNumber: 85,
+                                                columnNumber: 19
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV(Progress, {
+                                                value: value,
+                                                className: "h-2"
+                                            }, void 0, false, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEODetailDialog.tsx",
+                                                lineNumber: 89,
+                                                columnNumber: 19
+                                            }, this)
+                                        ]
+                                    }, key, true, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEODetailDialog.tsx",
+                                        lineNumber: 84,
+                                        columnNumber: 17
+                                    }, this);
+                                })
+                            ]
+                        }, void 0, true, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEODetailDialog.tsx",
+                            lineNumber: 70,
+                            columnNumber: 11
+                        }, this),
+                        page.analysis.strengths.length > 0 && /*#__PURE__*/ _jsxDEV("div", {
+                            className: "space-y-2",
+                            children: [
+                                /*#__PURE__*/ _jsxDEV("h3", {
+                                    className: "font-semibold flex items-center gap-2 text-sm sm:text-base",
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV(CheckCircle2, {
+                                            className: "h-4 w-4 sm:h-5 sm:w-5 text-green-600"
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEODetailDialog.tsx",
+                                            lineNumber: 99,
+                                            columnNumber: 17
+                                        }, this),
+                                        "Points forts"
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEODetailDialog.tsx",
+                                    lineNumber: 98,
+                                    columnNumber: 15
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV("div", {
+                                    className: "grid gap-2",
+                                    children: page.analysis.strengths.map((strength, index)=>/*#__PURE__*/ _jsxDEV(Alert, {
+                                            className: "bg-green-50 border-green-200",
+                                            children: [
+                                                /*#__PURE__*/ _jsxDEV(CheckCircle2, {
+                                                    className: "h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-600"
+                                                }, void 0, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEODetailDialog.tsx",
+                                                    lineNumber: 105,
+                                                    columnNumber: 21
+                                                }, this),
+                                                /*#__PURE__*/ _jsxDEV(AlertDescription, {
+                                                    className: "text-xs sm:text-sm text-green-900",
+                                                    children: strength
+                                                }, void 0, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEODetailDialog.tsx",
+                                                    lineNumber: 106,
+                                                    columnNumber: 21
+                                                }, this)
+                                            ]
+                                        }, index, true, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEODetailDialog.tsx",
+                                            lineNumber: 104,
+                                            columnNumber: 19
+                                        }, this))
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEODetailDialog.tsx",
+                                    lineNumber: 102,
+                                    columnNumber: 15
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEODetailDialog.tsx",
+                            lineNumber: 97,
+                            columnNumber: 13
+                        }, this),
+                        page.analysis.issues.length > 0 && /*#__PURE__*/ _jsxDEV("div", {
+                            className: "space-y-2",
+                            children: [
+                                /*#__PURE__*/ _jsxDEV("h3", {
+                                    className: "font-semibold flex items-center gap-2 text-sm sm:text-base",
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV(AlertTriangle, {
+                                            className: "h-4 w-4 sm:h-5 sm:w-5 text-orange-600"
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEODetailDialog.tsx",
+                                            lineNumber: 119,
+                                            columnNumber: 17
+                                        }, this),
+                                        "Recommandations"
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEODetailDialog.tsx",
+                                    lineNumber: 118,
+                                    columnNumber: 15
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV("div", {
+                                    className: "grid gap-2 sm:gap-3",
+                                    children: page.analysis.issues.map((issue, index)=>/*#__PURE__*/ _jsxDEV(Alert, {
+                                            className: issue.type === 'error' ? 'bg-red-50 border-red-200' : issue.type === 'warning' ? 'bg-orange-50 border-orange-200' : 'bg-blue-50 border-blue-200',
+                                            children: /*#__PURE__*/ _jsxDEV("div", {
+                                                className: "flex items-start gap-2",
+                                                children: [
+                                                    getPriorityIcon(issue.priority),
+                                                    /*#__PURE__*/ _jsxDEV("div", {
+                                                        className: "flex-1 space-y-1",
+                                                        children: [
+                                                            /*#__PURE__*/ _jsxDEV("div", {
+                                                                className: "flex flex-wrap items-center gap-2",
+                                                                children: [
+                                                                    /*#__PURE__*/ _jsxDEV(Badge, {
+                                                                        variant: "outline",
+                                                                        className: "text-xs",
+                                                                        children: issue.category
+                                                                    }, void 0, false, {
+                                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEODetailDialog.tsx",
+                                                                        lineNumber: 138,
+                                                                        columnNumber: 27
+                                                                    }, this),
+                                                                    /*#__PURE__*/ _jsxDEV(Badge, {
+                                                                        variant: issue.priority === 'high' ? 'destructive' : issue.priority === 'medium' ? 'secondary' : 'default',
+                                                                        className: "text-xs",
+                                                                        children: issue.priority === 'high' ? 'Priorité haute' : issue.priority === 'medium' ? 'Priorité moyenne' : 'Priorité faible'
+                                                                    }, void 0, false, {
+                                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEODetailDialog.tsx",
+                                                                        lineNumber: 141,
+                                                                        columnNumber: 27
+                                                                    }, this)
+                                                                ]
+                                                            }, void 0, true, {
+                                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEODetailDialog.tsx",
+                                                                lineNumber: 137,
+                                                                columnNumber: 25
+                                                            }, this),
+                                                            /*#__PURE__*/ _jsxDEV(AlertDescription, {
+                                                                className: issue.type === 'error' ? 'text-red-900' : issue.type === 'warning' ? 'text-orange-900' : 'text-blue-900',
+                                                                children: [
+                                                                    /*#__PURE__*/ _jsxDEV("p", {
+                                                                        className: "font-medium text-xs sm:text-sm",
+                                                                        children: issue.message
+                                                                    }, void 0, false, {
+                                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEODetailDialog.tsx",
+                                                                        lineNumber: 167,
+                                                                        columnNumber: 27
+                                                                    }, this),
+                                                                    issue.recommendation && /*#__PURE__*/ _jsxDEV("p", {
+                                                                        className: "text-xs sm:text-sm mt-1 opacity-80",
+                                                                        children: [
+                                                                            "💡 ",
+                                                                            issue.recommendation
+                                                                        ]
+                                                                    }, void 0, true, {
+                                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEODetailDialog.tsx",
+                                                                        lineNumber: 169,
+                                                                        columnNumber: 29
+                                                                    }, this)
+                                                                ]
+                                                            }, void 0, true, {
+                                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEODetailDialog.tsx",
+                                                                lineNumber: 158,
+                                                                columnNumber: 25
+                                                            }, this)
+                                                        ]
+                                                    }, void 0, true, {
+                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEODetailDialog.tsx",
+                                                        lineNumber: 136,
+                                                        columnNumber: 23
+                                                    }, this)
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEODetailDialog.tsx",
+                                                lineNumber: 134,
+                                                columnNumber: 21
+                                            }, this)
+                                        }, index, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEODetailDialog.tsx",
+                                            lineNumber: 124,
+                                            columnNumber: 19
+                                        }, this))
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEODetailDialog.tsx",
+                                    lineNumber: 122,
+                                    columnNumber: 15
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEODetailDialog.tsx",
+                            lineNumber: 117,
+                            columnNumber: 13
+                        }, this),
+                        page.analysis.keywords.length > 0 && /*#__PURE__*/ _jsxDEV("div", {
+                            className: "space-y-2",
+                            children: [
+                                /*#__PURE__*/ _jsxDEV("h3", {
+                                    className: "font-semibold text-sm sm:text-base",
+                                    children: "Mots-clés détectés"
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEODetailDialog.tsx",
+                                    lineNumber: 185,
+                                    columnNumber: 15
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV("div", {
+                                    className: "flex flex-wrap gap-2",
+                                    children: page.analysis.keywords.map((keyword, index)=>/*#__PURE__*/ _jsxDEV(Badge, {
+                                            variant: "secondary",
+                                            className: "text-xs",
+                                            children: keyword
+                                        }, index, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEODetailDialog.tsx",
+                                            lineNumber: 188,
+                                            columnNumber: 19
+                                        }, this))
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEODetailDialog.tsx",
+                                    lineNumber: 186,
+                                    columnNumber: 15
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEODetailDialog.tsx",
+                            lineNumber: 184,
+                            columnNumber: 13
+                        }, this),
+                        /*#__PURE__*/ _jsxDEV("div", {
+                            className: "pt-3 sm:pt-4 border-t",
+                            children: /*#__PURE__*/ _jsxDEV(Button, {
+                                onClick: handleEdit,
+                                className: "w-full h-9 sm:h-10 text-xs sm:text-sm bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700",
+                                children: [
+                                    "Corriger maintenant",
+                                    /*#__PURE__*/ _jsxDEV(ArrowRight, {
+                                        className: "ml-2 h-3.5 w-3.5 sm:h-4 sm:w-4"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEODetailDialog.tsx",
+                                        lineNumber: 203,
+                                        columnNumber: 15
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEODetailDialog.tsx",
+                                lineNumber: 198,
+                                columnNumber: 13
+                            }, this)
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEODetailDialog.tsx",
+                            lineNumber: 197,
+                            columnNumber: 11
+                        }, this)
+                    ]
+                }, void 0, true, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEODetailDialog.tsx",
+                    lineNumber: 68,
+                    columnNumber: 9
+                }, this)
+            ]
+        }, void 0, true, {
+            fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEODetailDialog.tsx",
+            lineNumber: 52,
+            columnNumber: 7
+        }, this)
+    }, void 0, false, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEODetailDialog.tsx",
+        lineNumber: 51,
+        columnNumber: 5
+    }, this);
+};
+_s(SEODetailDialogComponent, "DrdRg/kgQxXt2jlbE6wVV3wLKqM=", false, function() {
+    return [
+        useNavigate
+    ];
+});
+_c = SEODetailDialogComponent;
+SEODetailDialogComponent.displayName = 'SEODetailDialogComponent';
+// Optimisation avec React.memo pour éviter les re-renders inutiles
+export const SEODetailDialog = /*#__PURE__*/ React.memo(SEODetailDialogComponent, (prevProps, nextProps)=>{
+    return prevProps.open === nextProps.open && prevProps.onOpenChange === nextProps.onOpenChange && prevProps.page?.id === nextProps.page?.id && prevProps.page?.analysis.score.overall === nextProps.page?.analysis.score.overall;
+});
+_c1 = SEODetailDialog;
+SEODetailDialog.displayName = 'SEODetailDialog';
+var _c, _c1;
+$RefreshReg$(_c, "SEODetailDialogComponent");
+$RefreshReg$(_c1, "SEODetailDialog");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/seo/SEODetailDialog.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/seo/SEODetailDialog.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIlNFT0RldGFpbERpYWxvZy50c3giXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IFJlYWN0LCB7IHVzZUNhbGxiYWNrIH0gZnJvbSAncmVhY3QnO1xuaW1wb3J0IHtcbiAgRGlhbG9nLFxuICBEaWFsb2dDb250ZW50LFxuICBEaWFsb2dEZXNjcmlwdGlvbixcbiAgRGlhbG9nSGVhZGVyLFxuICBEaWFsb2dUaXRsZSxcbn0gZnJvbSAnQC9jb21wb25lbnRzL3VpL2RpYWxvZyc7XG5pbXBvcnQgeyBCYWRnZSB9IGZyb20gJ0AvY29tcG9uZW50cy91aS9iYWRnZSc7XG5pbXBvcnQgeyBQcm9ncmVzcyB9IGZyb20gJ0AvY29tcG9uZW50cy91aS9wcm9ncmVzcyc7XG5pbXBvcnQgeyBBbGVydCwgQWxlcnREZXNjcmlwdGlvbiB9IGZyb20gJ0AvY29tcG9uZW50cy91aS9hbGVydCc7XG5pbXBvcnQgeyBTRU9QYWdlRGF0YSB9IGZyb20gJ0AvaG9va3MvdXNlU0VPQW5hbHlzaXMnO1xuaW1wb3J0IHsgZ2V0U2NvcmVDb2xvciB9IGZyb20gJ0AvbGliL3Nlby1hbmFseXplcic7XG5pbXBvcnQgeyBDaGVja0NpcmNsZTIsIEFsZXJ0VHJpYW5nbGUsIFhDaXJjbGUsIEFycm93UmlnaHQgfSBmcm9tICdsdWNpZGUtcmVhY3QnO1xuaW1wb3J0IHsgQnV0dG9uIH0gZnJvbSAnQC9jb21wb25lbnRzL3VpL2J1dHRvbic7XG5pbXBvcnQgeyB1c2VOYXZpZ2F0ZSB9IGZyb20gJ3JlYWN0LXJvdXRlci1kb20nO1xuXG5pbnRlcmZhY2UgU0VPRGV0YWlsRGlhbG9nUHJvcHMge1xuICBwYWdlOiBTRU9QYWdlRGF0YSB8IG51bGw7XG4gIG9wZW46IGJvb2xlYW47XG4gIG9uT3BlbkNoYW5nZTogKG9wZW46IGJvb2xlYW4pID0+IHZvaWQ7XG59XG5cbmNvbnN0IFNFT0RldGFpbERpYWxvZ0NvbXBvbmVudCA9ICh7IHBhZ2UsIG9wZW4sIG9uT3BlbkNoYW5nZSB9OiBTRU9EZXRhaWxEaWFsb2dQcm9wcykgPT4ge1xuICBjb25zdCBuYXZpZ2F0ZSA9IHVzZU5hdmlnYXRlKCk7XG5cbiAgY29uc3QgaGFuZGxlRWRpdCA9IHVzZUNhbGxiYWNrKCgpID0+IHtcbiAgICBpZiAoIXBhZ2UpIHJldHVybjtcbiAgICBvbk9wZW5DaGFuZ2UoZmFsc2UpO1xuICAgIGlmIChwYWdlLnR5cGUgPT09ICdwcm9kdWN0Jykge1xuICAgICAgbmF2aWdhdGUoYC9kYXNoYm9hcmQvcHJvZHVjdHMvJHtwYWdlLmlkfS9lZGl0YCk7XG4gICAgfSBlbHNlIHtcbiAgICAgIG5hdmlnYXRlKCcvZGFzaGJvYXJkL3N0b3JlJyk7XG4gICAgfVxuICB9LCBbcGFnZSwgb25PcGVuQ2hhbmdlLCBuYXZpZ2F0ZV0pO1xuXG4gIGlmICghcGFnZSkgcmV0dXJuIG51bGw7XG5cbiAgY29uc3QgZ2V0UHJpb3JpdHlJY29uID0gKHByaW9yaXR5OiBzdHJpbmcpID0+IHtcbiAgICBzd2l0Y2ggKHByaW9yaXR5KSB7XG4gICAgICBjYXNlICdoaWdoJzpcbiAgICAgICAgcmV0dXJuIDxYQ2lyY2xlIGNsYXNzTmFtZT1cImgtNCB3LTQgdGV4dC1yZWQtNjAwXCIgLz47XG4gICAgICBjYXNlICdtZWRpdW0nOlxuICAgICAgICByZXR1cm4gPEFsZXJ0VHJpYW5nbGUgY2xhc3NOYW1lPVwiaC00IHctNCB0ZXh0LW9yYW5nZS02MDBcIiAvPjtcbiAgICAgIGRlZmF1bHQ6XG4gICAgICAgIHJldHVybiA8Q2hlY2tDaXJjbGUyIGNsYXNzTmFtZT1cImgtNCB3LTQgdGV4dC1ibHVlLTYwMFwiIC8+O1xuICAgIH1cbiAgfTtcblxuICByZXR1cm4gKFxuICAgIDxEaWFsb2cgb3Blbj17b3Blbn0gb25PcGVuQ2hhbmdlPXtvbk9wZW5DaGFuZ2V9PlxuICAgICAgPERpYWxvZ0NvbnRlbnQgY2xhc3NOYW1lPVwibWF4LXctWzkwdnddIHNtOm1heC13LTN4bCBtYXgtaC1bOTB2aF0gb3ZlcmZsb3cteS1hdXRvXCI+XG4gICAgICAgIDxEaWFsb2dIZWFkZXI+XG4gICAgICAgICAgPERpYWxvZ1RpdGxlIGNsYXNzTmFtZT1cImZsZXggZmxleC1jb2wgc206ZmxleC1yb3cgc206aXRlbXMtY2VudGVyIHNtOmp1c3RpZnktYmV0d2VlbiBnYXAtMiB0ZXh0LWJhc2Ugc206dGV4dC1sZ1wiPlxuICAgICAgICAgICAgPHNwYW4gY2xhc3NOYW1lPVwidHJ1bmNhdGVcIj5BbmFseXNlIFNFTyA6IHtwYWdlLm5hbWV9PC9zcGFuPlxuICAgICAgICAgICAgPHNwYW5cbiAgICAgICAgICAgICAgY2xhc3NOYW1lPXtgdGV4dC14bCBzbTp0ZXh0LTJ4bCBmb250LWJvbGQgJHtnZXRTY29yZUNvbG9yKHBhZ2UuYW5hbHlzaXMuc2NvcmUub3ZlcmFsbCl9YH1cbiAgICAgICAgICAgID5cbiAgICAgICAgICAgICAge3BhZ2UuYW5hbHlzaXMuc2NvcmUub3ZlcmFsbH0vMTAwXG4gICAgICAgICAgICA8L3NwYW4+XG4gICAgICAgICAgPC9EaWFsb2dUaXRsZT5cbiAgICAgICAgICA8RGlhbG9nRGVzY3JpcHRpb24gY2xhc3NOYW1lPVwidGV4dC14cyBzbTp0ZXh0LXNtXCI+XG4gICAgICAgICAgICB7cGFnZS50eXBlID09PSAncHJvZHVjdCcgPyAnUHJvZHVpdCcgOiAnQm91dGlxdWUnfSDigKIgQW5hbHlzw6kgbGV7JyAnfVxuICAgICAgICAgICAge3BhZ2UubGFzdEFuYWx5emVkLnRvTG9jYWxlRGF0ZVN0cmluZygnZnItRlInKX1cbiAgICAgICAgICA8L0RpYWxvZ0Rlc2NyaXB0aW9uPlxuICAgICAgICA8L0RpYWxvZ0hlYWRlcj5cblxuICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInNwYWNlLXktNCBzbTpzcGFjZS15LTZcIj5cbiAgICAgICAgICB7LyogU2NvcmVzIHBhciBjYXTDqWdvcmllICovfVxuICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwic3BhY2UteS0yIHNtOnNwYWNlLXktM1wiPlxuICAgICAgICAgICAgPGgzIGNsYXNzTmFtZT1cImZvbnQtc2VtaWJvbGQgdGV4dC1zbSBzbTp0ZXh0LWJhc2VcIj5TY29yZXMgZMOpdGFpbGzDqXM8L2gzPlxuICAgICAgICAgICAge09iamVjdC5lbnRyaWVzKHBhZ2UuYW5hbHlzaXMuc2NvcmUpLm1hcCgoW2tleSwgdmFsdWVdKSA9PiB7XG4gICAgICAgICAgICAgIGlmIChrZXkgPT09ICdvdmVyYWxsJykgcmV0dXJuIG51bGw7XG5cbiAgICAgICAgICAgICAgY29uc3QgIGxhYmVsczogUmVjb3JkPHN0cmluZywgc3RyaW5nPiA9IHtcbiAgICAgICAgICAgICAgICBzdHJ1Y3R1cmU6ICdTdHJ1Y3R1cmUnLFxuICAgICAgICAgICAgICAgIGNvbnRlbnQ6ICdDb250ZW51JyxcbiAgICAgICAgICAgICAgICBpbWFnZXM6ICdJbWFnZXMnLFxuICAgICAgICAgICAgICAgIHBlcmZvcm1hbmNlOiAnUGVyZm9ybWFuY2UnLFxuICAgICAgICAgICAgICAgIHJlYWRhYmlsaXR5OiAnTGlzaWJpbGl0w6knLFxuICAgICAgICAgICAgICB9O1xuXG4gICAgICAgICAgICAgIHJldHVybiAoXG4gICAgICAgICAgICAgICAgPGRpdiBrZXk9e2tleX0gY2xhc3NOYW1lPVwic3BhY2UteS0xXCI+XG4gICAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXgganVzdGlmeS1iZXR3ZWVuIHRleHQteHMgc206dGV4dC1zbVwiPlxuICAgICAgICAgICAgICAgICAgICA8c3Bhbj57bGFiZWxzW2tleV19PC9zcGFuPlxuICAgICAgICAgICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9e2Bmb250LXNlbWlib2xkICR7Z2V0U2NvcmVDb2xvcih2YWx1ZSl9YH0+e3ZhbHVlfS8xMDA8L3NwYW4+XG4gICAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICAgIDxQcm9ncmVzcyB2YWx1ZT17dmFsdWV9IGNsYXNzTmFtZT1cImgtMlwiIC8+XG4gICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgICk7XG4gICAgICAgICAgICB9KX1cbiAgICAgICAgICA8L2Rpdj5cblxuICAgICAgICAgIHsvKiBQb2ludHMgZm9ydHMgKi99XG4gICAgICAgICAge3BhZ2UuYW5hbHlzaXMuc3RyZW5ndGhzLmxlbmd0aCA+IDAgJiYgKFxuICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJzcGFjZS15LTJcIj5cbiAgICAgICAgICAgICAgPGgzIGNsYXNzTmFtZT1cImZvbnQtc2VtaWJvbGQgZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTIgdGV4dC1zbSBzbTp0ZXh0LWJhc2VcIj5cbiAgICAgICAgICAgICAgICA8Q2hlY2tDaXJjbGUyIGNsYXNzTmFtZT1cImgtNCB3LTQgc206aC01IHNtOnctNSB0ZXh0LWdyZWVuLTYwMFwiIC8+XG4gICAgICAgICAgICAgICAgUG9pbnRzIGZvcnRzXG4gICAgICAgICAgICAgIDwvaDM+XG4gICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZ3JpZCBnYXAtMlwiPlxuICAgICAgICAgICAgICAgIHtwYWdlLmFuYWx5c2lzLnN0cmVuZ3Rocy5tYXAoKHN0cmVuZ3RoLCBpbmRleCkgPT4gKFxuICAgICAgICAgICAgICAgICAgPEFsZXJ0IGtleT17aW5kZXh9IGNsYXNzTmFtZT1cImJnLWdyZWVuLTUwIGJvcmRlci1ncmVlbi0yMDBcIj5cbiAgICAgICAgICAgICAgICAgICAgPENoZWNrQ2lyY2xlMiBjbGFzc05hbWU9XCJoLTMuNSB3LTMuNSBzbTpoLTQgc206dy00IHRleHQtZ3JlZW4tNjAwXCIgLz5cbiAgICAgICAgICAgICAgICAgICAgPEFsZXJ0RGVzY3JpcHRpb24gY2xhc3NOYW1lPVwidGV4dC14cyBzbTp0ZXh0LXNtIHRleHQtZ3JlZW4tOTAwXCI+XG4gICAgICAgICAgICAgICAgICAgICAge3N0cmVuZ3RofVxuICAgICAgICAgICAgICAgICAgICA8L0FsZXJ0RGVzY3JpcHRpb24+XG4gICAgICAgICAgICAgICAgICA8L0FsZXJ0PlxuICAgICAgICAgICAgICAgICkpfVxuICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICl9XG5cbiAgICAgICAgICB7LyogUHJvYmzDqG1lcyBldCByZWNvbW1hbmRhdGlvbnMgKi99XG4gICAgICAgICAge3BhZ2UuYW5hbHlzaXMuaXNzdWVzLmxlbmd0aCA+IDAgJiYgKFxuICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJzcGFjZS15LTJcIj5cbiAgICAgICAgICAgICAgPGgzIGNsYXNzTmFtZT1cImZvbnQtc2VtaWJvbGQgZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTIgdGV4dC1zbSBzbTp0ZXh0LWJhc2VcIj5cbiAgICAgICAgICAgICAgICA8QWxlcnRUcmlhbmdsZSBjbGFzc05hbWU9XCJoLTQgdy00IHNtOmgtNSBzbTp3LTUgdGV4dC1vcmFuZ2UtNjAwXCIgLz5cbiAgICAgICAgICAgICAgICBSZWNvbW1hbmRhdGlvbnNcbiAgICAgICAgICAgICAgPC9oMz5cbiAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJncmlkIGdhcC0yIHNtOmdhcC0zXCI+XG4gICAgICAgICAgICAgICAge3BhZ2UuYW5hbHlzaXMuaXNzdWVzLm1hcCgoaXNzdWUsIGluZGV4KSA9PiAoXG4gICAgICAgICAgICAgICAgICA8QWxlcnRcbiAgICAgICAgICAgICAgICAgICAga2V5PXtpbmRleH1cbiAgICAgICAgICAgICAgICAgICAgY2xhc3NOYW1lPXtcbiAgICAgICAgICAgICAgICAgICAgICBpc3N1ZS50eXBlID09PSAnZXJyb3InXG4gICAgICAgICAgICAgICAgICAgICAgICA/ICdiZy1yZWQtNTAgYm9yZGVyLXJlZC0yMDAnXG4gICAgICAgICAgICAgICAgICAgICAgICA6IGlzc3VlLnR5cGUgPT09ICd3YXJuaW5nJ1xuICAgICAgICAgICAgICAgICAgICAgICAgICA/ICdiZy1vcmFuZ2UtNTAgYm9yZGVyLW9yYW5nZS0yMDAnXG4gICAgICAgICAgICAgICAgICAgICAgICAgIDogJ2JnLWJsdWUtNTAgYm9yZGVyLWJsdWUtMjAwJ1xuICAgICAgICAgICAgICAgICAgICB9XG4gICAgICAgICAgICAgICAgICA+XG4gICAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1zdGFydCBnYXAtMlwiPlxuICAgICAgICAgICAgICAgICAgICAgIHtnZXRQcmlvcml0eUljb24oaXNzdWUucHJpb3JpdHkpfVxuICAgICAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleC0xIHNwYWNlLXktMVwiPlxuICAgICAgICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGZsZXgtd3JhcCBpdGVtcy1jZW50ZXIgZ2FwLTJcIj5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgPEJhZGdlIHZhcmlhbnQ9XCJvdXRsaW5lXCIgY2xhc3NOYW1lPVwidGV4dC14c1wiPlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgIHtpc3N1ZS5jYXRlZ29yeX1cbiAgICAgICAgICAgICAgICAgICAgICAgICAgPC9CYWRnZT5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgPEJhZGdlXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgdmFyaWFudD17XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpc3N1ZS5wcmlvcml0eSA9PT0gJ2hpZ2gnXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgID8gJ2Rlc3RydWN0aXZlJ1xuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA6IGlzc3VlLnByaW9yaXR5ID09PSAnbWVkaXVtJ1xuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgID8gJ3NlY29uZGFyeSdcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA6ICdkZWZhdWx0J1xuICAgICAgICAgICAgICAgICAgICAgICAgICAgIH1cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICBjbGFzc05hbWU9XCJ0ZXh0LXhzXCJcbiAgICAgICAgICAgICAgICAgICAgICAgICAgPlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgIHtpc3N1ZS5wcmlvcml0eSA9PT0gJ2hpZ2gnXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICA/ICdQcmlvcml0w6kgaGF1dGUnXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICA6IGlzc3VlLnByaW9yaXR5ID09PSAnbWVkaXVtJ1xuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA/ICdQcmlvcml0w6kgbW95ZW5uZSdcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgOiAnUHJpb3JpdMOpIGZhaWJsZSd9XG4gICAgICAgICAgICAgICAgICAgICAgICAgIDwvQmFkZ2U+XG4gICAgICAgICAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICAgICAgICAgIDxBbGVydERlc2NyaXB0aW9uXG4gICAgICAgICAgICAgICAgICAgICAgICAgIGNsYXNzTmFtZT17XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgaXNzdWUudHlwZSA9PT0gJ2Vycm9yJ1xuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPyAndGV4dC1yZWQtOTAwJ1xuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgOiBpc3N1ZS50eXBlID09PSAnd2FybmluZydcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPyAndGV4dC1vcmFuZ2UtOTAwJ1xuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA6ICd0ZXh0LWJsdWUtOTAwJ1xuICAgICAgICAgICAgICAgICAgICAgICAgICB9XG4gICAgICAgICAgICAgICAgICAgICAgICA+XG4gICAgICAgICAgICAgICAgICAgICAgICAgIDxwIGNsYXNzTmFtZT1cImZvbnQtbWVkaXVtIHRleHQteHMgc206dGV4dC1zbVwiPntpc3N1ZS5tZXNzYWdlfTwvcD5cbiAgICAgICAgICAgICAgICAgICAgICAgICAge2lzc3VlLnJlY29tbWVuZGF0aW9uICYmIChcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJ0ZXh0LXhzIHNtOnRleHQtc20gbXQtMSBvcGFjaXR5LTgwXCI+XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICDwn5KhIHtpc3N1ZS5yZWNvbW1lbmRhdGlvbn1cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICA8L3A+XG4gICAgICAgICAgICAgICAgICAgICAgICAgICl9XG4gICAgICAgICAgICAgICAgICAgICAgICA8L0FsZXJ0RGVzY3JpcHRpb24+XG4gICAgICAgICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgICAgPC9BbGVydD5cbiAgICAgICAgICAgICAgICApKX1cbiAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICApfVxuXG4gICAgICAgICAgey8qIE1vdHMtY2zDqXMgc3VnZ8OpcsOpcyAqL31cbiAgICAgICAgICB7cGFnZS5hbmFseXNpcy5rZXl3b3Jkcy5sZW5ndGggPiAwICYmIChcbiAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwic3BhY2UteS0yXCI+XG4gICAgICAgICAgICAgIDxoMyBjbGFzc05hbWU9XCJmb250LXNlbWlib2xkIHRleHQtc20gc206dGV4dC1iYXNlXCI+TW90cy1jbMOpcyBkw6l0ZWN0w6lzPC9oMz5cbiAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGZsZXgtd3JhcCBnYXAtMlwiPlxuICAgICAgICAgICAgICAgIHtwYWdlLmFuYWx5c2lzLmtleXdvcmRzLm1hcCgoa2V5d29yZCwgaW5kZXgpID0+IChcbiAgICAgICAgICAgICAgICAgIDxCYWRnZSBrZXk9e2luZGV4fSB2YXJpYW50PVwic2Vjb25kYXJ5XCIgY2xhc3NOYW1lPVwidGV4dC14c1wiPlxuICAgICAgICAgICAgICAgICAgICB7a2V5d29yZH1cbiAgICAgICAgICAgICAgICAgIDwvQmFkZ2U+XG4gICAgICAgICAgICAgICAgKSl9XG4gICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgKX1cblxuICAgICAgICAgIHsvKiBBY3Rpb24gYnV0dG9uICovfVxuICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwicHQtMyBzbTpwdC00IGJvcmRlci10XCI+XG4gICAgICAgICAgICA8QnV0dG9uXG4gICAgICAgICAgICAgIG9uQ2xpY2s9e2hhbmRsZUVkaXR9XG4gICAgICAgICAgICAgIGNsYXNzTmFtZT1cInctZnVsbCBoLTkgc206aC0xMCB0ZXh0LXhzIHNtOnRleHQtc20gYmctZ3JhZGllbnQtdG8tciBmcm9tLXB1cnBsZS02MDAgdG8tcGluay02MDAgaG92ZXI6ZnJvbS1wdXJwbGUtNzAwIGhvdmVyOnRvLXBpbmstNzAwXCJcbiAgICAgICAgICAgID5cbiAgICAgICAgICAgICAgQ29ycmlnZXIgbWFpbnRlbmFudFxuICAgICAgICAgICAgICA8QXJyb3dSaWdodCBjbGFzc05hbWU9XCJtbC0yIGgtMy41IHctMy41IHNtOmgtNCBzbTp3LTRcIiAvPlxuICAgICAgICAgICAgPC9CdXR0b24+XG4gICAgICAgICAgPC9kaXY+XG4gICAgICAgIDwvZGl2PlxuICAgICAgPC9EaWFsb2dDb250ZW50PlxuICAgIDwvRGlhbG9nPlxuICApO1xufTtcblxuU0VPRGV0YWlsRGlhbG9nQ29tcG9uZW50LmRpc3BsYXlOYW1lID0gJ1NFT0RldGFpbERpYWxvZ0NvbXBvbmVudCc7XG5cbi8vIE9wdGltaXNhdGlvbiBhdmVjIFJlYWN0Lm1lbW8gcG91ciDDqXZpdGVyIGxlcyByZS1yZW5kZXJzIGludXRpbGVzXG5leHBvcnQgY29uc3QgU0VPRGV0YWlsRGlhbG9nID0gUmVhY3QubWVtbyhTRU9EZXRhaWxEaWFsb2dDb21wb25lbnQsIChwcmV2UHJvcHMsIG5leHRQcm9wcykgPT4ge1xuICByZXR1cm4gKFxuICAgIHByZXZQcm9wcy5vcGVuID09PSBuZXh0UHJvcHMub3BlbiAmJlxuICAgIHByZXZQcm9wcy5vbk9wZW5DaGFuZ2UgPT09IG5leHRQcm9wcy5vbk9wZW5DaGFuZ2UgJiZcbiAgICBwcmV2UHJvcHMucGFnZT8uaWQgPT09IG5leHRQcm9wcy5wYWdlPy5pZCAmJlxuICAgIHByZXZQcm9wcy5wYWdlPy5hbmFseXNpcy5zY29yZS5vdmVyYWxsID09PSBuZXh0UHJvcHMucGFnZT8uYW5hbHlzaXMuc2NvcmUub3ZlcmFsbFxuICApO1xufSk7XG5cblNFT0RldGFpbERpYWxvZy5kaXNwbGF5TmFtZSA9ICdTRU9EZXRhaWxEaWFsb2cnO1xuXG5cblxuXG5cblxuIl0sIm5hbWVzIjpbIlJlYWN0IiwidXNlQ2FsbGJhY2siLCJEaWFsb2ciLCJEaWFsb2dDb250ZW50IiwiRGlhbG9nRGVzY3JpcHRpb24iLCJEaWFsb2dIZWFkZXIiLCJEaWFsb2dUaXRsZSIsIkJhZGdlIiwiUHJvZ3Jlc3MiLCJBbGVydCIsIkFsZXJ0RGVzY3JpcHRpb24iLCJnZXRTY29yZUNvbG9yIiwiQ2hlY2tDaXJjbGUyIiwiQWxlcnRUcmlhbmdsZSIsIlhDaXJjbGUiLCJBcnJvd1JpZ2h0IiwiQnV0dG9uIiwidXNlTmF2aWdhdGUiLCJTRU9EZXRhaWxEaWFsb2dDb21wb25lbnQiLCJwYWdlIiwib3BlbiIsIm9uT3BlbkNoYW5nZSIsIm5hdmlnYXRlIiwiaGFuZGxlRWRpdCIsInR5cGUiLCJpZCIsImdldFByaW9yaXR5SWNvbiIsInByaW9yaXR5IiwiY2xhc3NOYW1lIiwic3BhbiIsIm5hbWUiLCJhbmFseXNpcyIsInNjb3JlIiwib3ZlcmFsbCIsImxhc3RBbmFseXplZCIsInRvTG9jYWxlRGF0ZVN0cmluZyIsImRpdiIsImgzIiwiT2JqZWN0IiwiZW50cmllcyIsIm1hcCIsImtleSIsInZhbHVlIiwibGFiZWxzIiwic3RydWN0dXJlIiwiY29udGVudCIsImltYWdlcyIsInBlcmZvcm1hbmNlIiwicmVhZGFiaWxpdHkiLCJzdHJlbmd0aHMiLCJsZW5ndGgiLCJzdHJlbmd0aCIsImluZGV4IiwiaXNzdWVzIiwiaXNzdWUiLCJ2YXJpYW50IiwiY2F0ZWdvcnkiLCJwIiwibWVzc2FnZSIsInJlY29tbWVuZGF0aW9uIiwia2V5d29yZHMiLCJrZXl3b3JkIiwib25DbGljayIsImRpc3BsYXlOYW1lIiwiU0VPRGV0YWlsRGlhbG9nIiwibWVtbyIsInByZXZQcm9wcyIsIm5leHRQcm9wcyJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O0FBQUEsT0FBT0EsU0FBU0MsV0FBVyxRQUFRLFFBQVE7QUFDM0MsU0FDRUMsTUFBTSxFQUNOQyxhQUFhLEVBQ2JDLGlCQUFpQixFQUNqQkMsWUFBWSxFQUNaQyxXQUFXLFFBQ04seUJBQXlCO0FBQ2hDLFNBQVNDLEtBQUssUUFBUSx3QkFBd0I7QUFDOUMsU0FBU0MsUUFBUSxRQUFRLDJCQUEyQjtBQUNwRCxTQUFTQyxLQUFLLEVBQUVDLGdCQUFnQixRQUFRLHdCQUF3QjtBQUVoRSxTQUFTQyxhQUFhLFFBQVEscUJBQXFCO0FBQ25ELFNBQVNDLFlBQVksRUFBRUMsYUFBYSxFQUFFQyxPQUFPLEVBQUVDLFVBQVUsUUFBUSxlQUFlO0FBQ2hGLFNBQVNDLE1BQU0sUUFBUSx5QkFBeUI7QUFDaEQsU0FBU0MsV0FBVyxRQUFRLG1CQUFtQjtBQVEvQyxNQUFNQywyQkFBMkIsQ0FBQyxFQUFFQyxJQUFJLEVBQUVDLElBQUksRUFBRUMsWUFBWSxFQUF3Qjs7SUFDbEYsTUFBTUMsV0FBV0w7SUFFakIsTUFBTU0sYUFBYXRCLFlBQVk7UUFDN0IsSUFBSSxDQUFDa0IsTUFBTTtRQUNYRSxhQUFhO1FBQ2IsSUFBSUYsS0FBS0ssSUFBSSxLQUFLLFdBQVc7WUFDM0JGLFNBQVMsQ0FBQyxvQkFBb0IsRUFBRUgsS0FBS00sRUFBRSxDQUFDLEtBQUssQ0FBQztRQUNoRCxPQUFPO1lBQ0xILFNBQVM7UUFDWDtJQUNGLEdBQUc7UUFBQ0g7UUFBTUU7UUFBY0M7S0FBUztJQUVqQyxJQUFJLENBQUNILE1BQU0sT0FBTztJQUVsQixNQUFNTyxrQkFBa0IsQ0FBQ0M7UUFD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

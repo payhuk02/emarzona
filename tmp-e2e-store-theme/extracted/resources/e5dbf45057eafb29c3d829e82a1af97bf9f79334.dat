@@ -1,0 +1,36 @@
+/*
+ * This module exists for optimizations in the build process through rollup and terser.  We define some global
+ * constants, which can be overridden during build. By guarding certain pieces of code with functions that return these
+ * constants, we can control whether or not they appear in the final bundle. (Any code guarded by a false condition will
+ * never run, and will hence be dropped during treeshaking.) The two primary uses for this are stripping out calls to
+ * `debug` and preventing node-related code from appearing in browser bundles.
+ *
+ * Attention:
+ * This file should not be used to define constants/flags that are intended to be used for tree-shaking conducted by
+ * users. These flags should live in their respective packages, as we identified user tooling (specifically webpack)
+ * having issues tree-shaking these constants across package boundaries.
+ * An example for this is the __SENTRY_DEBUG__ constant. It is declared in each package individually because we want
+ * users to be able to shake away expressions that it guards.
+ */
+
+/**
+ * Figures out if we're building a browser bundle.
+ *
+ * @returns true if this is a browser bundle build.
+ */
+function isBrowserBundle() {
+  return typeof __SENTRY_BROWSER_BUNDLE__ !== 'undefined' && !!__SENTRY_BROWSER_BUNDLE__;
+}
+
+/**
+ * Get source of SDK.
+ */
+function getSDKSource() {
+  // This comment is used to identify this line in the CDN bundle build step and replace this with "return 'cdn';"
+  /* __SENTRY_SDK_SOURCE__ */ return 'npm';
+}
+
+export { getSDKSource, isBrowserBundle };
+                               
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZW52LmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi9zcmMvdXRpbHMvZW52LnRzIl0sInNvdXJjZXNDb250ZW50IjpbIi8qXG4gKiBUaGlzIG1vZHVsZSBleGlzdHMgZm9yIG9wdGltaXphdGlvbnMgaW4gdGhlIGJ1aWxkIHByb2Nlc3MgdGhyb3VnaCByb2xsdXAgYW5kIHRlcnNlci4gIFdlIGRlZmluZSBzb21lIGdsb2JhbFxuICogY29uc3RhbnRzLCB3aGljaCBjYW4gYmUgb3ZlcnJpZGRlbiBkdXJpbmcgYnVpbGQuIEJ5IGd1YXJkaW5nIGNlcnRhaW4gcGllY2VzIG9mIGNvZGUgd2l0aCBmdW5jdGlvbnMgdGhhdCByZXR1cm4gdGhlc2VcbiAqIGNvbnN0YW50cywgd2UgY2FuIGNvbnRyb2wgd2hldGhlciBvciBub3QgdGhleSBhcHBlYXIgaW4gdGhlIGZpbmFsIGJ1bmRsZS4gKEFueSBjb2RlIGd1YXJkZWQgYnkgYSBmYWxzZSBjb25kaXRpb24gd2lsbFxuICogbmV2ZXIgcnVuLCBhbmQgd2lsbCBoZW5jZSBiZSBkcm9wcGVkIGR1cmluZyB0cmVlc2hha2luZy4pIFRoZSB0d28gcHJpbWFyeSB1c2VzIGZvciB0aGlzIGFyZSBzdHJpcHBpbmcgb3V0IGNhbGxzIHRvXG4gKiBgZGVidWdgIGFuZCBwcmV2ZW50aW5nIG5vZGUtcmVsYXRlZCBjb2RlIGZyb20gYXBwZWFyaW5nIGluIGJyb3dzZXIgYnVuZGxlcy5cbiAqXG4gKiBBdHRlbnRpb246XG4gKiBUaGlzIGZpbGUgc2hvdWxkIG5vdCBiZSB1c2VkIHRvIGRlZmluZSBjb25zdGFudHMvZmxhZ3MgdGhhdCBhcmUgaW50ZW5kZWQgdG8gYmUgdXNlZCBmb3IgdHJlZS1zaGFraW5nIGNvbmR1Y3RlZCBieVxuICogdXNlcnMuIFRoZXNlIGZsYWdzIHNob3VsZCBsaXZlIGluIHRoZWlyIHJlc3BlY3RpdmUgcGFja2FnZXMsIGFzIHdlIGlkZW50aWZpZWQgdXNlciB0b29saW5nIChzcGVjaWZpY2FsbHkgd2VicGFjaylcbiAqIGhhdmluZyBpc3N1ZXMgdHJlZS1zaGFraW5nIHRoZXNlIGNvbnN0YW50cyBhY3Jvc3MgcGFja2FnZSBib3VuZGFyaWVzLlxuICogQW4gZXhhbXBsZSBmb3IgdGhpcyBpcyB0aGUgX19TRU5UUllfREVCVUdfXyBjb25zdGFudC4gSXQgaXMgZGVjbGFyZWQgaW4gZWFjaCBwYWNrYWdlIGluZGl2aWR1YWxseSBiZWNhdXNlIHdlIHdhbnRcbiAqIHVzZXJzIHRvIGJlIGFibGUgdG8gc2hha2UgYXdheSBleHByZXNzaW9ucyB0aGF0IGl0IGd1YXJkcy5cbiAqL1xuXG5kZWNsYXJlIGNvbnN0IF9fU0VOVFJZX0JST1dTRVJfQlVORExFX186IGJvb2xlYW4gfCB1bmRlZmluZWQ7XG5cbmV4cG9ydCB0eXBlIFNka1NvdXJjZSA9ICducG0nIHwgJ2NkbicgfCAnbG9hZGVyJyB8ICdhd3MtbGFtYmRhLWxheWVyJztcblxuLyoqXG4gKiBGaWd1cmVzIG91dCBpZiB3ZSdyZSBidWlsZGluZyBhIGJyb3dzZXIgYnVuZGxlLlxuICpcbiAqIEByZXR1cm5zIHRydWUgaWYgdGhpcyBpcyBhIGJyb3dzZXIgYnVuZGxlIGJ1aWxkLlxuICovXG5leHBvcnQgZnVuY3Rpb24gaXNCcm93c2VyQnVuZGxlKCk6IGJvb2xlYW4ge1xuICByZXR1cm4gdHlwZW9mIF9fU0VOVFJZX0JST1dTRVJfQlVORExFX18gIT09ICd1bmRlZmluZWQnICYmICEhX19TRU5UUllfQlJPV1NFUl9CVU5ETEVfXztcbn1cblxuLyoqXG4gKiBHZXQgc291cmNlIG9mIFNESy5cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIGdldFNES1NvdXJjZSgpOiBTZGtTb3VyY2Uge1xuICAvLyBUaGlzIGNvbW1lbnQgaXMgdXNlZCB0byBpZGVudGlmeSB0aGlzIGxpbmUgaW4gdGhlIENETiBidW5kbGUgYnVpbGQgc3RlcCBhbmQgcmVwbGFjZSB0aGlzIHdpdGggXCJyZXR1cm4gJ2Nkbic7XCJcbiAgLyogX19TRU5UUllfU0RLX1NPVVJDRV9fICovIHJldHVybiAnbnBtJztcbn1cbiJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFBQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBOztBQU1BO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDTyxTQUFTLGVBQWUsR0FBWTtBQUMzQyxFQUFFLE9BQU8sT0FBTyx5QkFBQSxLQUE4QixlQUFlLENBQUMsQ0FBQyx5QkFBeUI7QUFDeEY7O0FBRUE7QUFDQTtBQUNBO0FBQ08sU0FBUyxZQUFZLEdBQWM7QUFDMUM7QUFDQSw4QkFBOEIsT0FBTyxLQUFLO0FBQzFDOzs7OyIsInhfZ29vZ2xlX2lnbm9yZUxpc3QiOlswXX0=

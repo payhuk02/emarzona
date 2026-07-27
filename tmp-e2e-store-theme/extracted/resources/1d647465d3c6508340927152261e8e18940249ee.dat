@@ -1,0 +1,79 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/auth/RedirectToPlatformVendorMessaging.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/auth/RedirectToPlatformVendorMessaging.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=6014a254"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+var _s = $RefreshSig$();
+import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=6014a254"; const useEffect = __vite__cjsImport3_react["useEffect"];
+import { useLocation } from "/node_modules/.vite/deps/react-router-dom.js?v=6014a254";
+import { getPlatformUrl } from "/src/lib/auth-routes.ts";
+/**
+ * Sur *.myemarzona.shop, /vendor/messaging n'existe pas côté boutique :
+ * redirection vers www.emarzona.com avec le même chemin et query string.
+ */ export function RedirectToPlatformVendorMessaging() {
+    _s();
+    const { pathname, search } = useLocation();
+    useEffect(()=>{
+        window.location.replace(getPlatformUrl(`${pathname}${search}`));
+    }, [
+        pathname,
+        search
+    ]);
+    return /*#__PURE__*/ _jsxDEV("div", {
+        className: "flex min-h-[40vh] items-center justify-center",
+        children: /*#__PURE__*/ _jsxDEV("div", {
+            className: "h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"
+        }, void 0, false, {
+            fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/RedirectToPlatformVendorMessaging.tsx",
+            lineNumber: 18,
+            columnNumber: 7
+        }, this)
+    }, void 0, false, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/auth/RedirectToPlatformVendorMessaging.tsx",
+        lineNumber: 17,
+        columnNumber: 5
+    }, this);
+}
+_s(RedirectToPlatformVendorMessaging, "KdY6qrkltkY3VxxtcPywmRXF9Eg=", false, function() {
+    return [
+        useLocation
+    ];
+});
+_c = RedirectToPlatformVendorMessaging;
+var _c;
+$RefreshReg$(_c, "RedirectToPlatformVendorMessaging");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/auth/RedirectToPlatformVendorMessaging.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/auth/RedirectToPlatformVendorMessaging.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIlJlZGlyZWN0VG9QbGF0Zm9ybVZlbmRvck1lc3NhZ2luZy50c3giXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgdXNlRWZmZWN0IH0gZnJvbSAncmVhY3QnO1xuaW1wb3J0IHsgdXNlTG9jYXRpb24gfSBmcm9tICdyZWFjdC1yb3V0ZXItZG9tJztcbmltcG9ydCB7IGdldFBsYXRmb3JtVXJsIH0gZnJvbSAnQC9saWIvYXV0aC1yb3V0ZXMnO1xuXG4vKipcbiAqIFN1ciAqLm15ZW1hcnpvbmEuc2hvcCwgL3ZlbmRvci9tZXNzYWdpbmcgbidleGlzdGUgcGFzIGPDtHTDqSBib3V0aXF1ZSA6XG4gKiByZWRpcmVjdGlvbiB2ZXJzIHd3dy5lbWFyem9uYS5jb20gYXZlYyBsZSBtw6ptZSBjaGVtaW4gZXQgcXVlcnkgc3RyaW5nLlxuICovXG5leHBvcnQgZnVuY3Rpb24gUmVkaXJlY3RUb1BsYXRmb3JtVmVuZG9yTWVzc2FnaW5nKCkge1xuICBjb25zdCB7IHBhdGhuYW1lLCBzZWFyY2ggfSA9IHVzZUxvY2F0aW9uKCk7XG5cbiAgdXNlRWZmZWN0KCgpID0+IHtcbiAgICB3aW5kb3cubG9jYXRpb24ucmVwbGFjZShnZXRQbGF0Zm9ybVVybChgJHtwYXRobmFtZX0ke3NlYXJjaH1gKSk7XG4gIH0sIFtwYXRobmFtZSwgc2VhcmNoXSk7XG5cbiAgcmV0dXJuIChcbiAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggbWluLWgtWzQwdmhdIGl0ZW1zLWNlbnRlciBqdXN0aWZ5LWNlbnRlclwiPlxuICAgICAgPGRpdiBjbGFzc05hbWU9XCJoLTggdy04IGFuaW1hdGUtc3BpbiByb3VuZGVkLWZ1bGwgYm9yZGVyLTQgYm9yZGVyLXByaW1hcnkgYm9yZGVyLXQtdHJhbnNwYXJlbnRcIiAvPlxuICAgIDwvZGl2PlxuICApO1xufVxuIl0sIm5hbWVzIjpbInVzZUVmZmVjdCIsInVzZUxvY2F0aW9uIiwiZ2V0UGxhdGZvcm1VcmwiLCJSZWRpcmVjdFRvUGxhdGZvcm1WZW5kb3JNZXNzYWdpbmciLCJwYXRobmFtZSIsInNlYXJjaCIsIndpbmRvdyIsImxvY2F0aW9uIiwicmVwbGFjZSIsImRpdiIsImNsYXNzTmFtZSJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O0FBQUEsU0FBU0EsU0FBUyxRQUFRLFFBQVE7QUFDbEMsU0FBU0MsV0FBVyxRQUFRLG1CQUFtQjtBQUMvQyxTQUFTQyxjQUFjLFFBQVEsb0JBQW9CO0FBRW5EOzs7Q0FHQyxHQUNELE9BQU8sU0FBU0M7O0lBQ2QsTUFBTSxFQUFFQyxRQUFRLEVBQUVDLE1BQU0sRUFBRSxHQUFHSjtJQUU3QkQsVUFBVTtRQUNSTSxPQUFPQyxRQUFRLENBQUNDLE9BQU8sQ0FBQ04sZUFBZSxHQUFHRSxXQUFXQyxRQUFRO0lBQy9ELEdBQUc7UUFBQ0Q7UUFBVUM7S0FBTztJQUVyQixxQkFDRSxRQUFDSTtRQUFJQyxXQUFVO2tCQUNiLGNBQUEsUUFBQ0Q7WUFBSUMsV0FBVTs7Ozs7Ozs7Ozs7QUFHckI7R0FaZ0JQOztRQUNlRjs7O0tBRGZFIn0=

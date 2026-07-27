@@ -1,0 +1,7 @@
+const DEFAULT_ENVIRONMENT = 'production';
+const DEV_ENVIRONMENT = 'development';
+
+export { DEFAULT_ENVIRONMENT, DEV_ENVIRONMENT };
+                                     
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiY29uc3RhbnRzLmpzIiwic291cmNlcyI6WyIuLi8uLi9zcmMvY29uc3RhbnRzLnRzIl0sInNvdXJjZXNDb250ZW50IjpbImV4cG9ydCBjb25zdCBERUZBVUxUX0VOVklST05NRU5UID0gJ3Byb2R1Y3Rpb24nO1xuZXhwb3J0IGNvbnN0IERFVl9FTlZJUk9OTUVOVCA9ICdkZXZlbG9wbWVudCc7XG4iXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQU8sTUFBTSxtQkFBQSxHQUFzQjtBQUM1QixNQUFNLGVBQUEsR0FBa0I7Ozs7IiwieF9nb29nbGVfaWdub3JlTGlzdCI6WzBdfQ==

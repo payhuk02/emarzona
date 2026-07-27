@@ -1,0 +1,270 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/navigation/ThemeSelector.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/navigation/ThemeSelector.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=6014a254"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+var _s = $RefreshSig$(), _s1 = $RefreshSig$();
+/**
+ * Composant de sélection de thème
+ */ import { useTheme } from "/src/hooks/useTheme.ts";
+import { themes } from "/src/lib/themes.ts";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "/src/components/ui/select.tsx";
+import { Label } from "/src/components/ui/label.tsx";
+import { Button } from "/src/components/ui/button.tsx";
+import { Palette } from "/src/components/icons/index.ts";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "/src/components/ui/dropdown-menu.tsx";
+import { cn } from "/src/lib/utils.ts";
+const topNavIconBtnClass = 'topnav-icon-btn h-9 w-9 min-h-9 min-w-9 shrink-0 border-0 bg-transparent p-0 shadow-none hover:bg-accent/50';
+export const ThemeSelector = ()=>{
+    _s();
+    const { theme, changeTheme } = useTheme();
+    return /*#__PURE__*/ _jsxDEV("div", {
+        className: "space-y-2",
+        children: [
+            /*#__PURE__*/ _jsxDEV(Label, {
+                htmlFor: "theme-select",
+                children: "Thème"
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/navigation/ThemeSelector.tsx",
+                lineNumber: 34,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV(Select, {
+                value: theme,
+                onValueChange: (value)=>changeTheme(value),
+                children: [
+                    /*#__PURE__*/ _jsxDEV(SelectTrigger, {
+                        id: "theme-select",
+                        className: "w-full",
+                        children: /*#__PURE__*/ _jsxDEV(SelectValue, {
+                            placeholder: "Sélectionner un thème"
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/navigation/ThemeSelector.tsx",
+                            lineNumber: 37,
+                            columnNumber: 11
+                        }, this)
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/navigation/ThemeSelector.tsx",
+                        lineNumber: 36,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV(SelectContent, {
+                        children: Object.values(themes).map((themeConfig)=>/*#__PURE__*/ _jsxDEV(SelectItem, {
+                                value: themeConfig.name,
+                                children: /*#__PURE__*/ _jsxDEV("div", {
+                                    className: "flex items-center gap-2",
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV("div", {
+                                            className: "w-4 h-4 rounded-full border-2 border-border",
+                                            style: {
+                                                backgroundColor: `hsl(${themeConfig.colors.background})`
+                                            }
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/navigation/ThemeSelector.tsx",
+                                            lineNumber: 43,
+                                            columnNumber: 17
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV("div", {
+                                            children: [
+                                                /*#__PURE__*/ _jsxDEV("div", {
+                                                    className: "font-medium",
+                                                    children: themeConfig.displayName
+                                                }, void 0, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/navigation/ThemeSelector.tsx",
+                                                    lineNumber: 50,
+                                                    columnNumber: 19
+                                                }, this),
+                                                /*#__PURE__*/ _jsxDEV("div", {
+                                                    className: "text-xs text-muted-foreground",
+                                                    children: themeConfig.description
+                                                }, void 0, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/navigation/ThemeSelector.tsx",
+                                                    lineNumber: 51,
+                                                    columnNumber: 19
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/navigation/ThemeSelector.tsx",
+                                            lineNumber: 49,
+                                            columnNumber: 17
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/navigation/ThemeSelector.tsx",
+                                    lineNumber: 42,
+                                    columnNumber: 15
+                                }, this)
+                            }, themeConfig.name, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/navigation/ThemeSelector.tsx",
+                                lineNumber: 41,
+                                columnNumber: 13
+                            }, this))
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/navigation/ThemeSelector.tsx",
+                        lineNumber: 39,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/navigation/ThemeSelector.tsx",
+                lineNumber: 35,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/navigation/ThemeSelector.tsx",
+        lineNumber: 33,
+        columnNumber: 5
+    }, this);
+};
+_s(ThemeSelector, "sFY4wcPF1v+2pDc/RJRXTYXP09E=", false, function() {
+    return [
+        useTheme
+    ];
+});
+_c = ThemeSelector;
+/**
+ * Sélection de thème — select pleine largeur (sidebar) ou icône (topnav)
+ */ export const ThemeSelectorCompact = ({ variant = 'select', className })=>{
+    _s1();
+    const { theme, changeTheme } = useTheme();
+    if (variant === 'nav') {
+        return /*#__PURE__*/ _jsxDEV(DropdownMenu, {
+            children: [
+                /*#__PURE__*/ _jsxDEV(DropdownMenuTrigger, {
+                    asChild: true,
+                    children: /*#__PURE__*/ _jsxDEV(Button, {
+                        type: "button",
+                        variant: "ghost",
+                        size: "icon",
+                        className: cn(topNavIconBtnClass, className),
+                        "aria-label": "Changer le thème",
+                        children: /*#__PURE__*/ _jsxDEV(Palette, {
+                            className: "h-5 w-5"
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/navigation/ThemeSelector.tsx",
+                            lineNumber: 88,
+                            columnNumber: 13
+                        }, this)
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/navigation/ThemeSelector.tsx",
+                        lineNumber: 81,
+                        columnNumber: 11
+                    }, this)
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/navigation/ThemeSelector.tsx",
+                    lineNumber: 80,
+                    columnNumber: 9
+                }, this),
+                /*#__PURE__*/ _jsxDEV(DropdownMenuContent, {
+                    align: "end",
+                    className: "min-w-[10rem]",
+                    children: /*#__PURE__*/ _jsxDEV(DropdownMenuRadioGroup, {
+                        value: theme,
+                        onValueChange: (value)=>changeTheme(value),
+                        children: Object.values(themes).map((themeConfig)=>/*#__PURE__*/ _jsxDEV(DropdownMenuRadioItem, {
+                                value: themeConfig.name,
+                                children: themeConfig.displayName
+                            }, themeConfig.name, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/navigation/ThemeSelector.tsx",
+                                lineNumber: 97,
+                                columnNumber: 15
+                            }, this))
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/navigation/ThemeSelector.tsx",
+                        lineNumber: 92,
+                        columnNumber: 11
+                    }, this)
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/navigation/ThemeSelector.tsx",
+                    lineNumber: 91,
+                    columnNumber: 9
+                }, this)
+            ]
+        }, void 0, true, {
+            fileName: "/home/runner/work/emarzona/emarzona/src/components/navigation/ThemeSelector.tsx",
+            lineNumber: 79,
+            columnNumber: 7
+        }, this);
+    }
+    return /*#__PURE__*/ _jsxDEV(Select, {
+        value: theme,
+        onValueChange: (value)=>changeTheme(value),
+        children: [
+            /*#__PURE__*/ _jsxDEV(SelectTrigger, {
+                className: cn('w-full', className),
+                children: /*#__PURE__*/ _jsxDEV(SelectValue, {}, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/navigation/ThemeSelector.tsx",
+                    lineNumber: 110,
+                    columnNumber: 9
+                }, this)
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/navigation/ThemeSelector.tsx",
+                lineNumber: 109,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV(SelectContent, {
+                children: Object.values(themes).map((themeConfig)=>/*#__PURE__*/ _jsxDEV(SelectItem, {
+                        value: themeConfig.name,
+                        children: themeConfig.displayName
+                    }, themeConfig.name, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/navigation/ThemeSelector.tsx",
+                        lineNumber: 114,
+                        columnNumber: 11
+                    }, this))
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/navigation/ThemeSelector.tsx",
+                lineNumber: 112,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/navigation/ThemeSelector.tsx",
+        lineNumber: 108,
+        columnNumber: 5
+    }, this);
+};
+_s1(ThemeSelectorCompact, "sFY4wcPF1v+2pDc/RJRXTYXP09E=", false, function() {
+    return [
+        useTheme
+    ];
+});
+_c1 = ThemeSelectorCompact;
+var _c, _c1;
+$RefreshReg$(_c, "ThemeSelector");
+$RefreshReg$(_c1, "ThemeSelectorCompact");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/navigation/ThemeSelector.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/navigation/ThemeSelector.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIlRoZW1lU2VsZWN0b3IudHN4Il0sInNvdXJjZXNDb250ZW50IjpbIi8qKlxuICogQ29tcG9zYW50IGRlIHPDqWxlY3Rpb24gZGUgdGjDqG1lXG4gKi9cblxuaW1wb3J0IHsgdXNlVGhlbWUgfSBmcm9tICdAL2hvb2tzL3VzZVRoZW1lJztcbmltcG9ydCB7IHRoZW1lcywgVGhlbWVOYW1lIH0gZnJvbSAnQC9saWIvdGhlbWVzJztcbmltcG9ydCB7XG4gIFNlbGVjdCxcbiAgU2VsZWN0Q29udGVudCxcbiAgU2VsZWN0SXRlbSxcbiAgU2VsZWN0VHJpZ2dlcixcbiAgU2VsZWN0VmFsdWUsXG59IGZyb20gJ0AvY29tcG9uZW50cy91aS9zZWxlY3QnO1xuaW1wb3J0IHsgTGFiZWwgfSBmcm9tICdAL2NvbXBvbmVudHMvdWkvbGFiZWwnO1xuaW1wb3J0IHsgQnV0dG9uIH0gZnJvbSAnQC9jb21wb25lbnRzL3VpL2J1dHRvbic7XG5pbXBvcnQgeyBQYWxldHRlIH0gZnJvbSAnQC9jb21wb25lbnRzL2ljb25zJztcbmltcG9ydCB7XG4gIERyb3Bkb3duTWVudSxcbiAgRHJvcGRvd25NZW51Q29udGVudCxcbiAgRHJvcGRvd25NZW51UmFkaW9Hcm91cCxcbiAgRHJvcGRvd25NZW51UmFkaW9JdGVtLFxuICBEcm9wZG93bk1lbnVUcmlnZ2VyLFxufSBmcm9tICdAL2NvbXBvbmVudHMvdWkvZHJvcGRvd24tbWVudSc7XG5pbXBvcnQgeyBjbiB9IGZyb20gJ0AvbGliL3V0aWxzJztcblxuY29uc3QgdG9wTmF2SWNvbkJ0bkNsYXNzID1cbiAgJ3RvcG5hdi1pY29uLWJ0biBoLTkgdy05IG1pbi1oLTkgbWluLXctOSBzaHJpbmstMCBib3JkZXItMCBiZy10cmFuc3BhcmVudCBwLTAgc2hhZG93LW5vbmUgaG92ZXI6YmctYWNjZW50LzUwJztcblxuZXhwb3J0IGNvbnN0IFRoZW1lU2VsZWN0b3IgPSAoKSA9PiB7XG4gIGNvbnN0IHsgdGhlbWUsIGNoYW5nZVRoZW1lIH0gPSB1c2VUaGVtZSgpO1xuXG4gIHJldHVybiAoXG4gICAgPGRpdiBjbGFzc05hbWU9XCJzcGFjZS15LTJcIj5cbiAgICAgIDxMYWJlbCBodG1sRm9yPVwidGhlbWUtc2VsZWN0XCI+VGjDqG1lPC9MYWJlbD5cbiAgICAgIDxTZWxlY3QgdmFsdWU9e3RoZW1lfSBvblZhbHVlQ2hhbmdlPXt2YWx1ZSA9PiBjaGFuZ2VUaGVtZSh2YWx1ZSBhcyBUaGVtZU5hbWUpfT5cbiAgICAgICAgPFNlbGVjdFRyaWdnZXIgaWQ9XCJ0aGVtZS1zZWxlY3RcIiBjbGFzc05hbWU9XCJ3LWZ1bGxcIj5cbiAgICAgICAgICA8U2VsZWN0VmFsdWUgcGxhY2Vob2xkZXI9XCJTw6lsZWN0aW9ubmVyIHVuIHRow6htZVwiIC8+XG4gICAgICAgIDwvU2VsZWN0VHJpZ2dlcj5cbiAgICAgICAgPFNlbGVjdENvbnRlbnQ+XG4gICAgICAgICAge09iamVjdC52YWx1ZXModGhlbWVzKS5tYXAodGhlbWVDb25maWcgPT4gKFxuICAgICAgICAgICAgPFNlbGVjdEl0ZW0ga2V5PXt0aGVtZUNvbmZpZy5uYW1lfSB2YWx1ZT17dGhlbWVDb25maWcubmFtZX0+XG4gICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTJcIj5cbiAgICAgICAgICAgICAgICA8ZGl2XG4gICAgICAgICAgICAgICAgICBjbGFzc05hbWU9XCJ3LTQgaC00IHJvdW5kZWQtZnVsbCBib3JkZXItMiBib3JkZXItYm9yZGVyXCJcbiAgICAgICAgICAgICAgICAgIHN0eWxlPXt7XG4gICAgICAgICAgICAgICAgICAgIGJhY2tncm91bmRDb2xvcjogYGhzbCgke3RoZW1lQ29uZmlnLmNvbG9ycy5iYWNrZ3JvdW5kfSlgLFxuICAgICAgICAgICAgICAgICAgfX1cbiAgICAgICAgICAgICAgICAvPlxuICAgICAgICAgICAgICAgIDxkaXY+XG4gICAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZvbnQtbWVkaXVtXCI+e3RoZW1lQ29uZmlnLmRpc3BsYXlOYW1lfTwvZGl2PlxuICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJ0ZXh0LXhzIHRleHQtbXV0ZWQtZm9yZWdyb3VuZFwiPnt0aGVtZUNvbmZpZy5kZXNjcmlwdGlvbn08L2Rpdj5cbiAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICA8L1NlbGVjdEl0ZW0+XG4gICAgICAgICAgKSl9XG4gICAgICAgIDwvU2VsZWN0Q29udGVudD5cbiAgICAgIDwvU2VsZWN0PlxuICAgIDwvZGl2PlxuICApO1xufTtcblxudHlwZSBUaGVtZVNlbGVjdG9yQ29tcGFjdFByb3BzID0ge1xuICAvKiogYG5hdmAgOiBpY8O0bmUgc2V1bGUgcG91ciBsYSBiYXJyZSBzdXDDqXJpZXVyZSA7IGBzZWxlY3RgIDogbGlzdGUgZMOpcm91bGFudGUgcGxlaW5lIGxhcmdldXIgKi9cbiAgdmFyaWFudD86ICdzZWxlY3QnIHwgJ25hdic7XG4gIGNsYXNzTmFtZT86IHN0cmluZztcbn07XG5cbi8qKlxuICogU8OpbGVjdGlvbiBkZSB0aMOobWUg4oCUIHNlbGVjdCBwbGVpbmUgbGFyZ2V1ciAoc2lkZWJhcikgb3UgaWPDtG5lICh0b3BuYXYpXG4gKi9cbmV4cG9ydCBjb25zdCBUaGVtZVNlbGVjdG9yQ29tcGFjdCA9ICh7XG4gIHZhcmlhbnQgPSAnc2VsZWN0JyxcbiAgY2xhc3NOYW1lLFxufTogVGhlbWVTZWxlY3RvckNvbXBhY3RQcm9wcykgPT4ge1xuICBjb25zdCB7IHRoZW1lLCBjaGFuZ2VUaGVtZSB9ID0gdXNlVGhlbWUoKTtcblxuICBpZiAodmFyaWFudCA9PT0gJ25hdicpIHtcbiAgICByZXR1cm4gKFxuICAgICAgPERyb3Bkb3duTWVudT5cbiAgICAgICAgPERyb3Bkb3duTWVudVRyaWdnZXIgYXNDaGlsZD5cbiAgICAgICAgICA8QnV0dG9uXG4gICAgICAgICAgICB0eXBlPVwiYnV0dG9uXCJcbiAgICAgICAgICAgIHZhcmlhbnQ9XCJnaG9zdFwiXG4gICAgICAgICAgICBzaXplPVwiaWNvblwiXG4gICAgICAgICAgICBjbGFzc05hbWU9e2NuKHRvcE5hdkljb25CdG5DbGFzcywgY2xhc3NOYW1lKX1cbiAgICAgICAgICAgIGFyaWEtbGFiZWw9XCJDaGFuZ2VyIGxlIHRow6htZVwiXG4gICAgICAgICAgPlxuICAgICAgICAgICAgPFBhbGV0dGUgY2xhc3NOYW1lPVwiaC01IHctNVwiIC8+XG4gICAgICAgICAgPC9CdXR0b24+XG4gICAgICAgIDwvRHJvcGRvd25NZW51VHJpZ2dlcj5cbiAgICAgICAgPERyb3Bkb3duTWVudUNvbnRlbnQgYWxpZ249XCJlbmRcIiBjbGFzc05hbWU9XCJtaW4tdy1bMTByZW1dXCI+XG4gICAgICAgICAgPERyb3Bkb3duTWVudVJhZGlvR3JvdXBcbiAgICAgICAgICAgIHZhbHVlPXt0aGVtZX1cbiAgICAgICAgICAgIG9uVmFsdWVDaGFuZ2U9e3ZhbHVlID0+IGNoYW5nZVRoZW1lKHZhbHVlIGFzIFRoZW1lTmFtZSl9XG4gICAgICAgICAgPlxuICAgICAgICAgICAge09iamVjdC52YWx1ZXModGhlbWVzKS5tYXAodGhlbWVDb25maWcgPT4gKFxuICAgICAgICAgICAgICA8RHJvcGRvd25NZW51UmFkaW9JdGVtIGtleT17dGhlbWVDb25maWcubmFtZX0gdmFsdWU9e3RoZW1lQ29uZmlnLm5hbWV9PlxuICAgICAgICAgICAgICAgIHt0aGVtZUNvbmZpZy5kaXNwbGF5TmFtZX1cbiAgICAgICAgICAgICAgPC9Ecm9wZG93bk1lbnVSYWRpb0l0ZW0+XG4gICAgICAgICAgICApKX1cbiAgICAgICAgICA8L0Ryb3Bkb3duTWVudVJhZGlvR3JvdXA+XG4gICAgICAgIDwvRHJvcGRvd25NZW51Q29udGVudD5cbiAgICAgIDwvRHJvcGRvd25NZW51PlxuICAgICk7XG4gIH1cblxuICByZXR1cm4gKFxuICAgIDxTZWxlY3QgdmFsdWU9e3RoZW1lfSBvblZhbHVlQ2hhbmdlPXt2YWx1ZSA9PiBjaGFuZ2VUaGVtZSh2YWx1ZSBhcyBUaGVtZU5hbWUpfT5cbiAgICAgIDxTZWxlY3RUcmlnZ2VyIGNsYXNzTmFtZT17Y24oJ3ctZnVsbCcsIGNsYXNzTmFtZSl9PlxuICAgICAgICA8U2VsZWN0VmFsdWUgLz5cbiAgICAgIDwvU2VsZWN0VHJpZ2dlcj5cbiAgICAgIDxTZWxlY3RDb250ZW50PlxuICAgICAgICB7T2JqZWN0LnZhbHVlcyh0aGVtZXMpLm1hcCh0aGVtZUNvbmZpZyA9PiAoXG4gICAgICAgICAgPFNlbGVjdEl0ZW0ga2V5PXt0aGVtZUNvbmZpZy5uYW1lfSB2YWx1ZT17dGhlbWVDb25maWcubmFtZX0+XG4gICAgICAgICAgICB7dGhlbWVDb25maWcuZGlzcGxheU5hbWV9XG4gICAgICAgICAgPC9TZWxlY3RJdGVtPlxuICAgICAgICApKX1cbiAgICAgIDwvU2VsZWN0Q29udGVudD5cbiAgICA8L1NlbGVjdD5cbiAgKTtcbn07XG4iXSwibmFtZXMiOlsidXNlVGhlbWUiLCJ0aGVtZXMiLCJTZWxlY3QiLCJTZWxlY3RDb250ZW50IiwiU2VsZWN0SXRlbSIsIlNlbGVjdFRyaWdnZXIiLCJTZWxlY3RWYWx1ZSIsIkxhYmVsIiwiQnV0dG9uIiwiUGFsZXR0ZSIsIkRyb3Bkb3duTWVudSIsIkRyb3Bkb3duTWVudUNvbnRlbnQiLCJEcm9wZG93bk1lbnVSYWRpb0dyb3VwIiwiRHJvcGRvd25NZW51UmFkaW9JdGVtIiwiRHJvcGRvd25NZW51VHJpZ2dlciIsImNuIiwidG9wTmF2SWNvbkJ0bkNsYXNzIiwiVGhlbWVTZWxlY3RvciIsInRoZW1lIiwiY2hhbmdlVGhlbWUiLCJkaXYiLCJjbGFzc05hbWUiLCJodG1sRm9yIiwidmFsdWUiLCJvblZhbHVlQ2hhbmdlIiwiaWQiLCJwbGFjZWhvbGRlciIsIk9iamVjdCIsInZhbHVlcyIsIm1hcCIsInRoZW1lQ29uZmlnIiwibmFtZSIsInN0eWxlIiwiYmFja2dyb3VuZENvbG9yIiwiY29sb3JzIiwiYmFja2dyb3VuZCIsImRpc3BsYXlOYW1lIiwiZGVzY3JpcHRpb24iLCJUaGVtZVNlbGVjdG9yQ29tcGFjdCIsInZhcmlhbnQiLCJhc0NoaWxkIiwidHlwZSIsInNpemUiLCJhcmlhLWxhYmVsIiwiYWxpZ24iXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OztBQUFBOztDQUVDLEdBRUQsU0FBU0EsUUFBUSxRQUFRLG1CQUFtQjtBQUM1QyxTQUFTQyxNQUFNLFFBQW1CLGVBQWU7QUFDakQsU0FDRUMsTUFBTSxFQUNOQyxhQUFhLEVBQ2JDLFVBQVUsRUFDVkMsYUFBYSxFQUNiQyxXQUFXLFFBQ04seUJBQXlCO0FBQ2hDLFNBQVNDLEtBQUssUUFBUSx3QkFBd0I7QUFDOUMsU0FBU0MsTUFBTSxRQUFRLHlCQUF5QjtBQUNoRCxTQUFTQyxPQUFPLFFBQVEscUJBQXFCO0FBQzdDLFNBQ0VDLFlBQVksRUFDWkMsbUJBQW1CLEVBQ25CQyxzQkFBc0IsRUFDdEJDLHFCQUFxQixFQUNyQkMsbUJBQW1CLFFBQ2QsZ0NBQWdDO0FBQ3ZDLFNBQVNDLEVBQUUsUUFBUSxjQUFjO0FBRWpDLE1BQU1DLHFCQUNKO0FBRUYsT0FBTyxNQUFNQyxnQkFBZ0I7O0lBQzNCLE1BQU0sRUFBRUMsS0FBSyxFQUFFQyxXQUFXLEVBQUUsR0FBR25CO0lBRS9CLHFCQUNFLFFBQUNvQjtRQUFJQyxXQUFVOzswQkFDYixRQUFDZDtnQkFBTWUsU0FBUTswQkFBZTs7Ozs7OzBCQUM5QixRQUFDcEI7Z0JBQU9xQixPQUFPTDtnQkFBT00sZUFBZUQsQ0FBQUEsUUFBU0osWUFBWUk7O2tDQUN4RCxRQUFDbEI7d0JBQWNvQixJQUFHO3dCQUFlSixXQUFVO2tDQUN6QyxjQUFBLFFBQUNmOzRCQUFZb0IsYUFBWTs7Ozs7Ozs7Ozs7a0NBRTNCLFFBQUN2QjtrQ0FDRXdCLE9BQU9DLE1BQU0sQ0FBQzNCLFFBQVE0QixHQUFHLENBQUNDLENBQUFBLDRCQUN6QixRQUFDMUI7Z0NBQWtDbUIsT0FBT08sWUFBWUMsSUFBSTswQ0FDeEQsY0FBQSxRQUFDWDtvQ0FBSUMsV0FBVTs7c0RBQ2IsUUFBQ0Q7NENBQ0NDLFdBQVU7NENBQ1ZXLE9BQU87Z0RBQ0xDLGlCQUFpQixDQUFDLElBQUksRUFBRUgsWUFBWUksTUFBTSxDQUFDQyxVQUFVLENBQUMsQ0FBQyxDQUFDOzRDQUMxRDs7Ozs7O3NEQUVGLFFBQUNmOzs4REFDQyxRQUFDQTtvREFBSUMsV0FBVTs4REFBZVMsWUFBWU0sV0FBVzs7Ozs7OzhEQUNyRCxRQUFDaEI7b0RBQUlDLFdBQVU7OERBQWlDUyxZQUFZTyxXQUFXOzs7Ozs7Ozs7Ozs7Ozs7Ozs7K0JBVjVEUCxZQUFZQyxJQUFJOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O0FBbUI3QyxFQUFFO0dBL0JXZDs7UUFDb0JqQjs7O0tBRHBCaUI7QUF1Q2I7O0NBRUMsR0FDRCxPQUFPLE1BQU1xQix1QkFBdUIsQ0FBQyxFQUNuQ0MsVUFBVSxRQUFRLEVBQ2xCbEIsU0FBUyxFQUNpQjs7SUFDMUIsTUFBTSxFQUFFSCxLQUFLLEVBQUVDLFdBQVcsRUFBRSxHQUFHbkI7SUFFL0IsSUFBSXVDLFlBQVksT0FBTztRQUNyQixxQkFDRSxRQUFDN0I7OzhCQUNDLFFBQUNJO29CQUFvQjBCLE9BQU87OEJBQzFCLGNBQUEsUUFBQ2hDO3dCQUNDaUMsTUFBSzt3QkFDTEYsU0FBUTt3QkFDUkcsTUFBSzt3QkFDTHJCLFdBQVdOLEdBQUdDLG9CQUFvQks7d0JBQ2xDc0IsY0FBVztrQ0FFWCxjQUFBLFFBQUNsQzs0QkFBUVksV0FBVTs7Ozs7Ozs7Ozs7Ozs7Ozs4QkFHdkIsUUFBQ1Y7b0JBQW9CaUMsT0FBTTtvQkFBTXZCLFdBQVU7OEJBQ3pDLGNBQUEsUUFBQ1Q7d0JBQ0NXLE9BQU9MO3dCQUNQTSxlQUFlRCxDQUFBQSxRQUFTSixZQUFZSTtrQ0FFbkNJLE9BQU9DLE1BQU0sQ0FBQzNCLFFBQVE0QixHQUFHLENBQUNDLENBQUFBLDRCQUN6QixRQUFDakI7Z0NBQTZDVSxPQUFPTyxZQUFZQyxJQUFJOzBDQUNsRUQsWUFBWU0sV0FBVzsrQkFERU4sWUFBWUMsSUFBSTs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O0lBUXhEO0lBRUEscUJBQ0UsUUFBQzdCO1FBQU9xQixPQUFPTDtRQUFPTSxlQUFlRCxDQUFBQSxRQUFTSixZQUFZSTs7MEJBQ3hELFFBQUNsQjtnQkFBY2dCLFdBQVdOLEdBQUcsVUFBVU07MEJBQ3JDLGNBQUEsUUFBQ2Y7Ozs7Ozs7Ozs7MEJBRUgsUUFBQ0g7MEJBQ0V3QixPQUFPQyxNQUFNLENBQUMzQixRQUFRNEIsR0FBRyxDQUFDQyxDQUFBQSw0QkFDekIsUUFBQzFCO3dCQUFrQ21CLE9BQU9PLFlBQVlDLElBQUk7a0NBQ3ZERCxZQUFZTSxXQUFXO3VCQURUTixZQUFZQyxJQUFJOzs7Ozs7Ozs7Ozs7Ozs7O0FBTzNDLEVBQUU7SUFsRFdPOztRQUlvQnRDOzs7TUFKcEJzQyJ9

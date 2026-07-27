@@ -1347,9 +1347,34 @@ const Products = () => {
 
               <div>
                 <h4 className="font-semibold mb-2">{t('products.price', 'Prix')}</h4>
-                <p className="text-lg sm:text-xl md:text-2xl font-bold text-primary">
-                  {quickViewProduct.price.toLocaleString()} {quickViewProduct.currency || 'FCFA'}
-                </p>
+                {(() => {
+                  let currentPrice = quickViewProduct.price || 0;
+                  let crossedOutPrice: number | null = null;
+                  
+                  const backendPromotionalPrice = (quickViewProduct as any).promotional_price;
+                  const backendCompareAtPrice = (quickViewProduct as any).compare_at_price;
+                  
+                  if (backendPromotionalPrice && backendPromotionalPrice < quickViewProduct.price) {
+                    currentPrice = backendPromotionalPrice;
+                    crossedOutPrice = quickViewProduct.price;
+                  } else if (backendCompareAtPrice && backendCompareAtPrice > quickViewProduct.price) {
+                    currentPrice = quickViewProduct.price;
+                    crossedOutPrice = backendCompareAtPrice;
+                  }
+                  
+                  return (
+                    <div className="flex items-center gap-2">
+                      {crossedOutPrice !== null && (
+                        <span className="text-sm md:text-base text-muted-foreground line-through">
+                          {crossedOutPrice.toLocaleString()} {quickViewProduct.currency || 'FCFA'}
+                        </span>
+                      )}
+                      <p className="text-lg sm:text-xl md:text-2xl font-bold text-primary">
+                        {currentPrice.toLocaleString()} {quickViewProduct.currency || 'FCFA'}
+                      </p>
+                    </div>
+                  );
+                })()}
               </div>
 
               {quickViewProduct.description && (

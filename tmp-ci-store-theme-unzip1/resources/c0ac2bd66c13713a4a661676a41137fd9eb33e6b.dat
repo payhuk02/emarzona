@@ -1,0 +1,180 @@
+import { debug } from "/node_modules/@sentry/core/build/esm/utils/debug-logger.js?v=d758aa40";
+import { baggageHeaderToDynamicSamplingContext } from "/node_modules/@sentry/core/build/esm/utils/baggage.js?v=d758aa40";
+import { extractOrgIdFromClient } from "/node_modules/@sentry/core/build/esm/utils/dsn.js?v=d758aa40";
+import { parseSampleRate } from "/node_modules/@sentry/core/build/esm/utils/parseSampleRate.js?v=d758aa40";
+import { generateTraceId, generateSpanId } from "/node_modules/@sentry/core/build/esm/utils/propagationContext.js?v=d758aa40";
+import { safeMathRandom } from "/node_modules/@sentry/core/build/esm/utils/randomSafeContext.js?v=d758aa40";
+
+// oxlint-disable-next-line sdk/no-regexp-constructor -- RegExp is used for readability here
+const TRACEPARENT_REGEXP = new RegExp(
+  '^[ \\t]*' + // whitespace
+    '([0-9a-f]{32})?' + // trace_id
+    '-?([0-9a-f]{16})?' + // span_id
+    '-?([01])?' + // sampled
+    '[ \\t]*$', // whitespace
+);
+
+/**
+ * Extract transaction context data from a `sentry-trace` header.
+ *
+ * This is terrible naming but the function has nothing to do with the W3C traceparent header.
+ * It can only parse the `sentry-trace` header and extract the "trace parent" data.
+ *
+ * @param traceparent Traceparent string
+ *
+ * @returns Object containing data from the header, or undefined if traceparent string is malformed
+ */
+function extractTraceparentData(traceparent) {
+  if (!traceparent) {
+    return undefined;
+  }
+
+  const matches = traceparent.match(TRACEPARENT_REGEXP);
+  if (!matches) {
+    return undefined;
+  }
+
+  let parentSampled;
+  if (matches[3] === '1') {
+    parentSampled = true;
+  } else if (matches[3] === '0') {
+    parentSampled = false;
+  }
+
+  return {
+    traceId: matches[1],
+    parentSampled,
+    parentSpanId: matches[2],
+  };
+}
+
+/**
+ * Create a propagation context from incoming headers or
+ * creates a minimal new one if the headers are undefined.
+ */
+function propagationContextFromHeaders(
+  sentryTrace,
+  baggage,
+) {
+  const traceparentData = extractTraceparentData(sentryTrace);
+  const dynamicSamplingContext = baggageHeaderToDynamicSamplingContext(baggage);
+
+  if (!traceparentData?.traceId) {
+    return {
+      traceId: generateTraceId(),
+      sampleRand: safeMathRandom(),
+    };
+  }
+
+  const sampleRand = getSampleRandFromTraceparentAndDsc(traceparentData, dynamicSamplingContext);
+
+  // The sample_rand on the DSC needs to be generated based on traceparent + baggage.
+  if (dynamicSamplingContext) {
+    dynamicSamplingContext.sample_rand = sampleRand.toString();
+  }
+
+  const { traceId, parentSpanId, parentSampled } = traceparentData;
+
+  return {
+    traceId,
+    parentSpanId,
+    sampled: parentSampled,
+    dsc: dynamicSamplingContext || {}, // If we have traceparent data but no DSC it means we are not head of trace and we must freeze it
+    sampleRand,
+  };
+}
+
+/**
+ * Create sentry-trace header from span context values.
+ */
+function generateSentryTraceHeader(
+  traceId = generateTraceId(),
+  spanId = generateSpanId(),
+  sampled,
+) {
+  let sampledString = '';
+  if (sampled !== undefined) {
+    sampledString = sampled ? '-1' : '-0';
+  }
+  return `${traceId}-${spanId}${sampledString}`;
+}
+
+/**
+ * Creates a W3C traceparent header from the given trace and span ids.
+ */
+function generateTraceparentHeader(
+  traceId = generateTraceId(),
+  spanId = generateSpanId(),
+  sampled,
+) {
+  return `00-${traceId}-${spanId}-${sampled ? '01' : '00'}`;
+}
+
+/**
+ * Given any combination of an incoming trace, generate a sample rand based on its defined semantics.
+ *
+ * Read more: https://develop.sentry.dev/sdk/telemetry/traces/#propagated-random-value
+ */
+function getSampleRandFromTraceparentAndDsc(
+  traceparentData,
+  dsc,
+) {
+  // When there is an incoming sample rand use it.
+  const parsedSampleRand = parseSampleRate(dsc?.sample_rand);
+  if (parsedSampleRand !== undefined) {
+    return parsedSampleRand;
+  }
+
+  // Otherwise, if there is an incoming sampling decision + sample rate, generate a sample rand that would lead to the same sampling decision.
+  const parsedSampleRate = parseSampleRate(dsc?.sample_rate);
+  if (parsedSampleRate && traceparentData?.parentSampled !== undefined) {
+    return traceparentData.parentSampled
+      ? // Returns a sample rand with positive sampling decision [0, sampleRate)
+        safeMathRandom() * parsedSampleRate
+      : // Returns a sample rand with negative sampling decision [sampleRate, 1)
+        parsedSampleRate + safeMathRandom() * (1 - parsedSampleRate);
+  } else {
+    // If nothing applies, return a random sample rand.
+    return safeMathRandom();
+  }
+}
+
+/**
+ * Determines whether a new trace should be continued based on the provided baggage org ID and the client's `strictTraceContinuation` option.
+ * If the trace should not be continued, a new trace will be started.
+ *
+ * The result is dependent on the `strictTraceContinuation` option in the client.
+ * See https://develop.sentry.dev/sdk/telemetry/traces/#stricttracecontinuation
+ */
+function shouldContinueTrace(client, baggageOrgId) {
+  const clientOrgId = extractOrgIdFromClient(client);
+
+  // Case: baggage orgID and Client orgID don't match - always start new trace
+  if (baggageOrgId && clientOrgId && baggageOrgId !== clientOrgId) {
+    debug.log(
+      `Won't continue trace because org IDs don't match (incoming baggage: ${baggageOrgId}, SDK options: ${clientOrgId})`,
+    );
+    return false;
+  }
+
+  const strictTraceContinuation = client.getOptions().strictTraceContinuation || false; // default for `strictTraceContinuation` is `false`
+
+  if (strictTraceContinuation) {
+    // With strict continuation enabled, don't continue trace if:
+    // - Baggage has orgID, but Client doesn't have one
+    // - Client has orgID, but baggage doesn't have one
+    if ((baggageOrgId && !clientOrgId) || (!baggageOrgId && clientOrgId)) {
+      debug.log(
+        `Starting a new trace because strict trace continuation is enabled but one org ID is missing (incoming baggage: ${baggageOrgId}, Sentry client: ${clientOrgId})`,
+      );
+      return false;
+    }
+  }
+
+  return true;
+}
+
+export { TRACEPARENT_REGEXP, extractTraceparentData, generateSentryTraceHeader, generateTraceparentHeader, propagationContextFromHeaders, shouldContinueTrace };
+                                   
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidHJhY2luZy5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4vc3JjL3V0aWxzL3RyYWNpbmcudHMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHR5cGUgeyBDbGllbnQgfSBmcm9tICcuLi9jbGllbnQnO1xuaW1wb3J0IHR5cGUgeyBEeW5hbWljU2FtcGxpbmdDb250ZXh0IH0gZnJvbSAnLi4vdHlwZXMtaG9pc3QvZW52ZWxvcGUnO1xuaW1wb3J0IHR5cGUgeyBQcm9wYWdhdGlvbkNvbnRleHQgfSBmcm9tICcuLi90eXBlcy1ob2lzdC90cmFjaW5nJztcbmltcG9ydCB0eXBlIHsgVHJhY2VwYXJlbnREYXRhIH0gZnJvbSAnLi4vdHlwZXMtaG9pc3QvdHJhbnNhY3Rpb24nO1xuaW1wb3J0IHsgZGVidWcgfSBmcm9tICcuLi91dGlscy9kZWJ1Zy1sb2dnZXInO1xuaW1wb3J0IHsgYmFnZ2FnZUhlYWRlclRvRHluYW1pY1NhbXBsaW5nQ29udGV4dCB9IGZyb20gJy4vYmFnZ2FnZSc7XG5pbXBvcnQgeyBleHRyYWN0T3JnSWRGcm9tQ2xpZW50IH0gZnJvbSAnLi9kc24nO1xuaW1wb3J0IHsgcGFyc2VTYW1wbGVSYXRlIH0gZnJvbSAnLi9wYXJzZVNhbXBsZVJhdGUnO1xuaW1wb3J0IHsgZ2VuZXJhdGVTcGFuSWQsIGdlbmVyYXRlVHJhY2VJZCB9IGZyb20gJy4vcHJvcGFnYXRpb25Db250ZXh0JztcbmltcG9ydCB7IHNhZmVNYXRoUmFuZG9tIH0gZnJvbSAnLi9yYW5kb21TYWZlQ29udGV4dCc7XG5cbi8vIG94bGludC1kaXNhYmxlLW5leHQtbGluZSBzZGsvbm8tcmVnZXhwLWNvbnN0cnVjdG9yIC0tIFJlZ0V4cCBpcyB1c2VkIGZvciByZWFkYWJpbGl0eSBoZXJlXG5leHBvcnQgY29uc3QgVFJBQ0VQQVJFTlRfUkVHRVhQID0gbmV3IFJlZ0V4cChcbiAgJ15bIFxcXFx0XSonICsgLy8gd2hpdGVzcGFjZVxuICAgICcoWzAtOWEtZl17MzJ9KT8nICsgLy8gdHJhY2VfaWRcbiAgICAnLT8oWzAtOWEtZl17MTZ9KT8nICsgLy8gc3Bhbl9pZFxuICAgICctPyhbMDFdKT8nICsgLy8gc2FtcGxlZFxuICAgICdbIFxcXFx0XSokJywgLy8gd2hpdGVzcGFjZVxuKTtcblxuLyoqXG4gKiBFeHRyYWN0IHRyYW5zYWN0aW9uIGNvbnRleHQgZGF0YSBmcm9tIGEgYHNlbnRyeS10cmFjZWAgaGVhZGVyLlxuICpcbiAqIFRoaXMgaXMgdGVycmlibGUgbmFtaW5nIGJ1dCB0aGUgZnVuY3Rpb24gaGFzIG5vdGhpbmcgdG8gZG8gd2l0aCB0aGUgVzNDIHRyYWNlcGFyZW50IGhlYWRlci5cbiAqIEl0IGNhbiBvbmx5IHBhcnNlIHRoZSBgc2VudHJ5LXRyYWNlYCBoZWFkZXIgYW5kIGV4dHJhY3QgdGhlIFwidHJhY2UgcGFyZW50XCIgZGF0YS5cbiAqXG4gKiBAcGFyYW0gdHJhY2VwYXJlbnQgVHJhY2VwYXJlbnQgc3RyaW5nXG4gKlxuICogQHJldHVybnMgT2JqZWN0IGNvbnRhaW5pbmcgZGF0YSBmcm9tIHRoZSBoZWFkZXIsIG9yIHVuZGVmaW5lZCBpZiB0cmFjZXBhcmVudCBzdHJpbmcgaXMgbWFsZm9ybWVkXG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBleHRyYWN0VHJhY2VwYXJlbnREYXRhKHRyYWNlcGFyZW50Pzogc3RyaW5nKTogVHJhY2VwYXJlbnREYXRhIHwgdW5kZWZpbmVkIHtcbiAgaWYgKCF0cmFjZXBhcmVudCkge1xuICAgIHJldHVybiB1bmRlZmluZWQ7XG4gIH1cblxuICBjb25zdCBtYXRjaGVzID0gdHJhY2VwYXJlbnQubWF0Y2goVFJBQ0VQQVJFTlRfUkVHRVhQKTtcbiAgaWYgKCFtYXRjaGVzKSB7XG4gICAgcmV0dXJuIHVuZGVmaW5lZDtcbiAgfVxuXG4gIGxldCBwYXJlbnRTYW1wbGVkOiBib29sZWFuIHwgdW5kZWZpbmVkO1xuICBpZiAobWF0Y2hlc1szXSA9PT0gJzEnKSB7XG4gICAgcGFyZW50U2FtcGxlZCA9IHRydWU7XG4gIH0gZWxzZSBpZiAobWF0Y2hlc1szXSA9PT0gJzAnKSB7XG4gICAgcGFyZW50U2FtcGxlZCA9IGZhbHNlO1xuICB9XG5cbiAgcmV0dXJuIHtcbiAgICB0cmFjZUlkOiBtYXRjaGVzWzFdLFxuICAgIHBhcmVudFNhbXBsZWQsXG4gICAgcGFyZW50U3BhbklkOiBtYXRjaGVzWzJdLFxuICB9O1xufVxuXG4vKipcbiAqIENyZWF0ZSBhIHByb3BhZ2F0aW9uIGNvbnRleHQgZnJvbSBpbmNvbWluZyBoZWFkZXJzIG9yXG4gKiBjcmVhdGVzIGEgbWluaW1hbCBuZXcgb25lIGlmIHRoZSBoZWFkZXJzIGFyZSB1bmRlZmluZWQuXG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBwcm9wYWdhdGlvbkNvbnRleHRGcm9tSGVhZGVycyhcbiAgc2VudHJ5VHJhY2U6IHN0cmluZyB8IHVuZGVmaW5lZCxcbiAgYmFnZ2FnZTogc3RyaW5nIHwgbnVtYmVyIHwgYm9vbGVhbiB8IHN0cmluZ1tdIHwgbnVsbCB8IHVuZGVmaW5lZCxcbik6IFByb3BhZ2F0aW9uQ29udGV4dCB7XG4gIGNvbnN0IHRyYWNlcGFyZW50RGF0YSA9IGV4dHJhY3RUcmFjZXBhcmVudERhdGEoc2VudHJ5VHJhY2UpO1xuICBjb25zdCBkeW5hbWljU2FtcGxpbmdDb250ZXh0ID0gYmFnZ2FnZUhlYWRlclRvRHluYW1pY1NhbXBsaW5nQ29udGV4dChiYWdnYWdlKTtcblxuICBpZiAoIXRyYWNlcGFyZW50RGF0YT8udHJhY2VJZCkge1xuICAgIHJldHVybiB7XG4gICAgICB0cmFjZUlkOiBnZW5lcmF0ZVRyYWNlSWQoKSxcbiAgICAgIHNhbXBsZVJhbmQ6IHNhZmVNYXRoUmFuZG9tKCksXG4gICAgfTtcbiAgfVxuXG4gIGNvbnN0IHNhbXBsZVJhbmQgPSBnZXRTYW1wbGVSYW5kRnJvbVRyYWNlcGFyZW50QW5kRHNjKHRyYWNlcGFyZW50RGF0YSwgZHluYW1pY1NhbXBsaW5nQ29udGV4dCk7XG5cbiAgLy8gVGhlIHNhbXBsZV9yYW5kIG9uIHRoZSBEU0MgbmVlZHMgdG8gYmUgZ2VuZXJhdGVkIGJhc2VkIG9uIHRyYWNlcGFyZW50ICsgYmFnZ2FnZS5cbiAgaWYgKGR5bmFtaWNTYW1wbGluZ0NvbnRleHQpIHtcbiAgICBkeW5hbWljU2FtcGxpbmdDb250ZXh0LnNhbXBsZV9yYW5kID0gc2FtcGxlUmFuZC50b1N0cmluZygpO1xuICB9XG5cbiAgY29uc3QgeyB0cmFjZUlkLCBwYXJlbnRTcGFuSWQsIHBhcmVudFNhbXBsZWQgfSA9IHRyYWNlcGFyZW50RGF0YTtcblxuICByZXR1cm4ge1xuICAgIHRyYWNlSWQsXG4gICAgcGFyZW50U3BhbklkLFxuICAgIHNhbXBsZWQ6IHBhcmVudFNhbXBsZWQsXG4gICAgZHNjOiBkeW5hbWljU2FtcGxpbmdDb250ZXh0IHx8IHt9LCAvLyBJZiB3ZSBoYXZlIHRyYWNlcGFyZW50IGRhdGEgYnV0IG5vIERTQyBpdCBtZWFucyB3ZSBhcmUgbm90IGhlYWQgb2YgdHJhY2UgYW5kIHdlIG11c3QgZnJlZXplIGl0XG4gICAgc2FtcGxlUmFuZCxcbiAgfTtcbn1cblxuLyoqXG4gKiBDcmVhdGUgc2VudHJ5LXRyYWNlIGhlYWRlciBmcm9tIHNwYW4gY29udGV4dCB2YWx1ZXMuXG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBnZW5lcmF0ZVNlbnRyeVRyYWNlSGVhZGVyKFxuICB0cmFjZUlkOiBzdHJpbmcgfCB1bmRlZmluZWQgPSBnZW5lcmF0ZVRyYWNlSWQoKSxcbiAgc3BhbklkOiBzdHJpbmcgfCB1bmRlZmluZWQgPSBnZW5lcmF0ZVNwYW5JZCgpLFxuICBzYW1wbGVkPzogYm9vbGVhbixcbik6IHN0cmluZyB7XG4gIGxldCBzYW1wbGVkU3RyaW5nID0gJyc7XG4gIGlmIChzYW1wbGVkICE9PSB1bmRlZmluZWQpIHtcbiAgICBzYW1wbGVkU3RyaW5nID0gc2FtcGxlZCA/ICctMScgOiAnLTAnO1xuICB9XG4gIHJldHVybiBgJHt0cmFjZUlkfS0ke3NwYW5JZH0ke3NhbXBsZWRTdHJpbmd9YDtcbn1cblxuLyoqXG4gKiBDcmVhdGVzIGEgVzNDIHRyYWNlcGFyZW50IGhlYWRlciBmcm9tIHRoZSBnaXZlbiB0cmFjZSBhbmQgc3BhbiBpZHMuXG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBnZW5lcmF0ZVRyYWNlcGFyZW50SGVhZGVyKFxuICB0cmFjZUlkOiBzdHJpbmcgfCB1bmRlZmluZWQgPSBnZW5lcmF0ZVRyYWNlSWQoKSxcbiAgc3BhbklkOiBzdHJpbmcgfCB1bmRlZmluZWQgPSBnZW5lcmF0ZVNwYW5JZCgpLFxuICBzYW1wbGVkPzogYm9vbGVhbixcbik6IHN0cmluZyB7XG4gIHJldHVybiBgMDAtJHt0cmFjZUlkfS0ke3NwYW5JZH0tJHtzYW1wbGVkID8gJzAxJyA6ICcwMCd9YDtcbn1cblxuLyoqXG4gKiBHaXZlbiBhbnkgY29tYmluYXRpb24gb2YgYW4gaW5jb21pbmcgdHJhY2UsIGdlbmVyYXRlIGEgc2FtcGxlIHJhbmQgYmFzZWQgb24gaXRzIGRlZmluZWQgc2VtYW50aWNzLlxuICpcbiAqIFJlYWQgbW9yZTogaHR0cHM6Ly9kZXZlbG9wLnNlbnRyeS5kZXYvc2RrL3RlbGVtZXRyeS90cmFjZXMvI3Byb3BhZ2F0ZWQtcmFuZG9tLXZhbHVlXG4gKi9cbmZ1bmN0aW9uIGdldFNhbXBsZVJhbmRGcm9tVHJhY2VwYXJlbnRBbmREc2MoXG4gIHRyYWNlcGFyZW50RGF0YTogVHJhY2VwYXJlbnREYXRhIHwgdW5kZWZpbmVkLFxuICBkc2M6IFBhcnRpYWw8RHluYW1pY1NhbXBsaW5nQ29udGV4dD4gfCB1bmRlZmluZWQsXG4pOiBudW1iZXIge1xuICAvLyBXaGVuIHRoZXJlIGlzIGFuIGluY29taW5nIHNhbXBsZSByYW5kIHVzZSBpdC5cbiAgY29uc3QgcGFyc2VkU2FtcGxlUmFuZCA9IHBhcnNlU2FtcGxlUmF0ZShkc2M/LnNhbXBsZV9yYW5kKTtcbiAgaWYgKHBhcnNlZFNhbXBsZVJhbmQgIT09IHVuZGVmaW5lZCkge1xuICAgIHJldHVybiBwYXJzZWRTYW1wbGVSYW5kO1xuICB9XG5cbiAgLy8gT3RoZXJ3aXNlLCBpZiB0aGVyZSBpcyBhbiBpbmNvbWluZyBzYW1wbGluZyBkZWNpc2lvbiArIHNhbXBsZSByYXRlLCBnZW5lcmF0ZSBhIHNhbXBsZSByYW5kIHRoYXQgd291bGQgbGVhZCB0byB0aGUgc2FtZSBzYW1wbGluZyBkZWNpc2lvbi5cbiAgY29uc3QgcGFyc2VkU2FtcGxlUmF0ZSA9IHBhcnNlU2FtcGxlUmF0ZShkc2M/LnNhbXBsZV9yYXRlKTtcbiAgaWYgKHBhcnNlZFNhbXBsZVJhdGUgJiYgdHJhY2VwYXJlbnREYXRhPy5wYXJlbnRTYW1wbGVkICE9PSB1bmRlZmluZWQpIHtcbiAgICByZXR1cm4gdHJhY2VwYXJlbnREYXRhLnBhcmVudFNhbXBsZWRcbiAgICAgID8gLy8gUmV0dXJucyBhIHNhbXBsZSByYW5kIHdpdGggcG9zaXRpdmUgc2FtcGxpbmcgZGVjaXNpb24gWzAsIHNhbXBsZVJhdGUpXG4gICAgICAgIHNhZmVNYXRoUmFuZG9tKCkgKiBwYXJzZWRTYW1wbGVSYXRlXG4gICAgICA6IC8vIFJldHVybnMgYSBzYW1wbGUgcmFuZCB3aXRoIG5lZ2F0aXZlIHNhbXBsaW5nIGRlY2lzaW9uIFtzYW1wbGVSYXRlLCAxKVxuICAgICAgICBwYXJzZWRTYW1wbGVSYXRlICsgc2FmZU1hdGhSYW5kb20oKSAqICgxIC0gcGFyc2VkU2FtcGxlUmF0ZSk7XG4gIH0gZWxzZSB7XG4gICAgLy8gSWYgbm90aGluZyBhcHBsaWVzLCByZXR1cm4gYSByYW5kb20gc2FtcGxlIHJhbmQuXG4gICAgcmV0dXJuIHNhZmVNYXRoUmFuZG9tKCk7XG4gIH1cbn1cblxuLyoqXG4gKiBEZXRlcm1pbmVzIHdoZXRoZXIgYSBuZXcgdHJhY2Ugc2hvdWxkIGJlIGNvbnRpbnVlZCBiYXNlZCBvbiB0aGUgcHJvdmlkZWQgYmFnZ2FnZSBvcmcgSUQgYW5kIHRoZSBjbGllbnQncyBgc3RyaWN0VHJhY2VDb250aW51YXRpb25gIG9wdGlvbi5cbiAqIElmIHRoZSB0cmFjZSBzaG91bGQgbm90IGJlIGNvbnRpbnVlZCwgYSBuZXcgdHJhY2Ugd2lsbCBiZSBzdGFydGVkLlxuICpcbiAqIFRoZSByZXN1bHQgaXMgZGVwZW5kZW50IG9uIHRoZSBgc3RyaWN0VHJhY2VDb250aW51YXRpb25gIG9wdGlvbiBpbiB0aGUgY2xpZW50LlxuICogU2VlIGh0dHBzOi8vZGV2ZWxvcC5zZW50cnkuZGV2L3Nkay90ZWxlbWV0cnkvdHJhY2VzLyNzdHJpY3R0cmFjZWNvbnRpbnVhdGlvblxuICovXG5leHBvcnQgZnVuY3Rpb24gc2hvdWxkQ29udGludWVUcmFjZShjbGllbnQ6IENsaWVudCwgYmFnZ2FnZU9yZ0lkPzogc3RyaW5nKTogYm9vbGVhbiB7XG4gIGNvbnN0IGNsaWVudE9yZ0lkID0gZXh0cmFjdE9yZ0lkRnJvbUNsaWVudChjbGllbnQpO1xuXG4gIC8vIENhc2U6IGJhZ2dhZ2Ugb3JnSUQgYW5kIENsaWVudCBvcmdJRCBkb24ndCBtYXRjaCAtIGFsd2F5cyBzdGFydCBuZXcgdHJhY2VcbiAgaWYgKGJhZ2dhZ2VPcmdJZCAmJiBjbGllbnRPcmdJZCAmJiBiYWdnYWdlT3JnSWQgIT09IGNsaWVudE9yZ0lkKSB7XG4gICAgZGVidWcubG9nKFxuICAgICAgYFdvbid0IGNvbnRpbnVlIHRyYWNlIGJlY2F1c2Ugb3JnIElEcyBkb24ndCBtYXRjaCAoaW5jb21pbmcgYmFnZ2FnZTogJHtiYWdnYWdlT3JnSWR9LCBTREsgb3B0aW9uczogJHtjbGllbnRPcmdJZH0pYCxcbiAgICApO1xuICAgIHJldHVybiBmYWxzZTtcbiAgfVxuXG4gIGNvbnN0IHN0cmljdFRyYWNlQ29udGludWF0aW9uID0gY2xpZW50LmdldE9wdGlvbnMoKS5zdHJpY3RUcmFjZUNvbnRpbnVhdGlvbiB8fCBmYWxzZTsgLy8gZGVmYXVsdCBmb3IgYHN0cmljdFRyYWNlQ29udGludWF0aW9uYCBpcyBgZmFsc2VgXG5cbiAgaWYgKHN0cmljdFRyYWNlQ29udGludWF0aW9uKSB7XG4gICAgLy8gV2l0aCBzdHJpY3QgY29udGludWF0aW9uIGVuYWJsZWQsIGRvbid0IGNvbnRpbnVlIHRyYWNlIGlmOlxuICAgIC8vIC0gQmFnZ2FnZSBoYXMgb3JnSUQsIGJ1dCBDbGllbnQgZG9lc24ndCBoYXZlIG9uZVxuICAgIC8vIC0gQ2xpZW50IGhhcyBvcmdJRCwgYnV0IGJhZ2dhZ2UgZG9lc24ndCBoYXZlIG9uZVxuICAgIGlmICgoYmFnZ2FnZU9yZ0lkICYmICFjbGllbnRPcmdJZCkgfHwgKCFiYWdnYWdlT3JnSWQgJiYgY2xpZW50T3JnSWQpKSB7XG4gICAgICBkZWJ1Zy5sb2coXG4gICAgICAgIGBTdGFydGluZyBhIG5ldyB0cmFjZSBiZWNhdXNlIHN0cmljdCB0cmFjZSBjb250aW51YXRpb24gaXMgZW5hYmxlZCBidXQgb25lIG9yZyBJRCBpcyBtaXNzaW5nIChpbmNvbWluZyBiYWdnYWdlOiAke2JhZ2dhZ2VPcmdJZH0sIFNlbnRyeSBjbGllbnQ6ICR7Y2xpZW50T3JnSWR9KWAsXG4gICAgICApO1xuICAgICAgcmV0dXJuIGZhbHNlO1xuICAgIH1cbiAgfVxuXG4gIHJldHVybiB0cnVlO1xufVxuIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7Ozs7Ozs7QUFXQTtBQUNPLE1BQU0sa0JBQUEsR0FBcUIsSUFBSSxNQUFNO0FBQzVDLEVBQUUsVUFBQTtBQUNGLElBQUksaUJBQUE7QUFDSixJQUFJLG1CQUFBO0FBQ0osSUFBSSxXQUFBO0FBQ0osSUFBSSxVQUFVO0FBQ2Q7O0FBRUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDTyxTQUFTLHNCQUFzQixDQUFDLFdBQVcsRUFBd0M7QUFDMUYsRUFBRSxJQUFJLENBQUMsV0FBVyxFQUFFO0FBQ3BCLElBQUksT0FBTyxTQUFTO0FBQ3BCLEVBQUU7O0FBRUYsRUFBRSxNQUFNLFVBQVUsV0FBVyxDQUFDLEtBQUssQ0FBQyxrQkFBa0IsQ0FBQztBQUN2RCxFQUFFLElBQUksQ0FBQyxPQUFPLEVBQUU7QUFDaEIsSUFBSSxPQUFPLFNBQVM7QUFDcEIsRUFBRTs7QUFFRixFQUFFLElBQUksYUFBYTtBQUNuQixFQUFFLElBQUksT0FBTyxDQUFDLENBQUMsQ0FBQSxLQUFNLEdBQUcsRUFBRTtBQUMxQixJ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

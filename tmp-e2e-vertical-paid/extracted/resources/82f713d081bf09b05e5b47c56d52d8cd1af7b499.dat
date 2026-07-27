@@ -1,0 +1,89 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/errors/PageLoadError.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/errors/PageLoadError.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=8792f17d"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+/**
+ * Fallback affiché quand un chunk de page ne peut pas être chargé (réseau, cache SW, deploy).
+ */ import { Button } from "/src/components/ui/button.tsx";
+export function PageLoadError({ pageName }) {
+    return /*#__PURE__*/ _jsxDEV("div", {
+        className: "flex min-h-[50vh] items-center justify-center p-4",
+        children: /*#__PURE__*/ _jsxDEV("div", {
+            className: "max-w-md w-full text-center space-y-4",
+            children: [
+                /*#__PURE__*/ _jsxDEV("h2", {
+                    className: "text-xl font-semibold",
+                    children: "Erreur de chargement"
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/errors/PageLoadError.tsx",
+                    lineNumber: 14,
+                    columnNumber: 9
+                }, this),
+                /*#__PURE__*/ _jsxDEV("p", {
+                    className: "text-muted-foreground text-sm",
+                    children: pageName ? `Impossible de charger « ${pageName} ». Une mise à jour peut être en cours.` : 'Impossible de charger cette page. Une mise à jour peut être en cours.'
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/errors/PageLoadError.tsx",
+                    lineNumber: 15,
+                    columnNumber: 9
+                }, this),
+                /*#__PURE__*/ _jsxDEV(Button, {
+                    type: "button",
+                    onClick: ()=>window.location.reload(),
+                    children: "Recharger la page"
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/errors/PageLoadError.tsx",
+                    lineNumber: 20,
+                    columnNumber: 9
+                }, this)
+            ]
+        }, void 0, true, {
+            fileName: "/home/runner/work/emarzona/emarzona/src/components/errors/PageLoadError.tsx",
+            lineNumber: 13,
+            columnNumber: 7
+        }, this)
+    }, void 0, false, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/errors/PageLoadError.tsx",
+        lineNumber: 12,
+        columnNumber: 5
+    }, this);
+}
+_c = PageLoadError;
+var _c;
+$RefreshReg$(_c, "PageLoadError");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/errors/PageLoadError.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/errors/PageLoadError.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIlBhZ2VMb2FkRXJyb3IudHN4Il0sInNvdXJjZXNDb250ZW50IjpbIi8qKlxuICogRmFsbGJhY2sgYWZmaWNow6kgcXVhbmQgdW4gY2h1bmsgZGUgcGFnZSBuZSBwZXV0IHBhcyDDqnRyZSBjaGFyZ8OpIChyw6lzZWF1LCBjYWNoZSBTVywgZGVwbG95KS5cbiAqL1xuaW1wb3J0IHsgQnV0dG9uIH0gZnJvbSAnQC9jb21wb25lbnRzL3VpL2J1dHRvbic7XG5cbmludGVyZmFjZSBQYWdlTG9hZEVycm9yUHJvcHMge1xuICBwYWdlTmFtZT86IHN0cmluZztcbn1cblxuZXhwb3J0IGZ1bmN0aW9uIFBhZ2VMb2FkRXJyb3IoeyBwYWdlTmFtZSB9OiBQYWdlTG9hZEVycm9yUHJvcHMpIHtcbiAgcmV0dXJuIChcbiAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggbWluLWgtWzUwdmhdIGl0ZW1zLWNlbnRlciBqdXN0aWZ5LWNlbnRlciBwLTRcIj5cbiAgICAgIDxkaXYgY2xhc3NOYW1lPVwibWF4LXctbWQgdy1mdWxsIHRleHQtY2VudGVyIHNwYWNlLXktNFwiPlxuICAgICAgICA8aDIgY2xhc3NOYW1lPVwidGV4dC14bCBmb250LXNlbWlib2xkXCI+RXJyZXVyIGRlIGNoYXJnZW1lbnQ8L2gyPlxuICAgICAgICA8cCBjbGFzc05hbWU9XCJ0ZXh0LW11dGVkLWZvcmVncm91bmQgdGV4dC1zbVwiPlxuICAgICAgICAgIHtwYWdlTmFtZVxuICAgICAgICAgICAgPyBgSW1wb3NzaWJsZSBkZSBjaGFyZ2VyIMKrICR7cGFnZU5hbWV9IMK7LiBVbmUgbWlzZSDDoCBqb3VyIHBldXQgw6p0cmUgZW4gY291cnMuYFxuICAgICAgICAgICAgOiAnSW1wb3NzaWJsZSBkZSBjaGFyZ2VyIGNldHRlIHBhZ2UuIFVuZSBtaXNlIMOgIGpvdXIgcGV1dCDDqnRyZSBlbiBjb3Vycy4nfVxuICAgICAgICA8L3A+XG4gICAgICAgIDxCdXR0b24gdHlwZT1cImJ1dHRvblwiIG9uQ2xpY2s9eygpID0+IHdpbmRvdy5sb2NhdGlvbi5yZWxvYWQoKX0+XG4gICAgICAgICAgUmVjaGFyZ2VyIGxhIHBhZ2VcbiAgICAgICAgPC9CdXR0b24+XG4gICAgICA8L2Rpdj5cbiAgICA8L2Rpdj5cbiAgKTtcbn1cbiJdLCJuYW1lcyI6WyJCdXR0b24iLCJQYWdlTG9hZEVycm9yIiwicGFnZU5hbWUiLCJkaXYiLCJjbGFzc05hbWUiLCJoMiIsInAiLCJ0eXBlIiwib25DbGljayIsIndpbmRvdyIsImxvY2F0aW9uIiwicmVsb2FkIl0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7Ozs7OztBQUFBOztDQUVDLEdBQ0QsU0FBU0EsTUFBTSxRQUFRLHlCQUF5QjtBQU1oRCxPQUFPLFNBQVNDLGNBQWMsRUFBRUMsUUFBUSxFQUFzQjtJQUM1RCxxQkFDRSxRQUFDQztRQUFJQyxXQUFVO2tCQUNiLGNBQUEsUUFBQ0Q7WUFBSUMsV0FBVTs7OEJBQ2IsUUFBQ0M7b0JBQUdELFdBQVU7OEJBQXdCOzs7Ozs7OEJBQ3RDLFFBQUNFO29CQUFFRixXQUFVOzhCQUNWRixXQUNHLENBQUMsd0JBQXdCLEVBQUVBLFNBQVMsdUNBQXVDLENBQUMsR0FDNUU7Ozs7Ozs4QkFFTixRQUFDRjtvQkFBT08sTUFBSztvQkFBU0MsU0FBUyxJQUFNQyxPQUFPQyxRQUFRLENBQUNDLE1BQU07OEJBQUk7Ozs7Ozs7Ozs7Ozs7Ozs7O0FBTXZFO0tBaEJnQlYifQ==

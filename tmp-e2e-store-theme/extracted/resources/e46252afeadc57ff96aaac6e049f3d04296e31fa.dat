@@ -1,0 +1,381 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/store/StoreSuggestions.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/store/StoreSuggestions.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=6014a254"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"]; const _Fragment = __vite__cjsImport2_react_jsxDevRuntime["Fragment"];
+var _s = $RefreshSig$();
+/**
+ * Composant affichant des suggestions automatiques pour améliorer le formulaire
+ */ import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=6014a254"; const useState = __vite__cjsImport3_react["useState"];
+import { Sparkles, X, Check, ArrowRight } from "/node_modules/.vite/deps/lucide-react.js?v=6014a254";
+import { Button } from "/src/components/ui/button.tsx";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "/src/components/ui/card.tsx";
+import { Badge } from "/src/components/ui/badge.tsx";
+import { Alert, AlertDescription } from "/src/components/ui/alert.tsx";
+import { suggestSlugAlternatives, suggestMetaTitle, suggestMetaDescription, suggestColorPalette, suggestCustomDomain, suggestKeywords } from "/src/lib/store-suggestions.ts";
+export const StoreSuggestions = ({ name = '', slug = '', description = '', slugAvailable, onSlugSuggestion, onMetaTitleSuggestion, onMetaDescriptionSuggestion, onColorSuggestion, onKeywordSuggestion, className = '' })=>{
+    _s();
+    const [dismissedSuggestions, setDismissedSuggestions] = useState(new Set());
+    const [showSuggestions, setShowSuggestions] = useState(true);
+    if (!showSuggestions || !name) return null;
+    const suggestions = [];
+    // Suggestion de slug alternatif si indisponible
+    if (slugAvailable === false && slug) {
+        const alternatives = suggestSlugAlternatives(slug);
+        if (alternatives.length > 0) {
+            suggestions.push({
+                id: 'slug-alternatives',
+                type: 'slug',
+                title: 'Slug non disponible',
+                description: 'Voici des alternatives disponibles :',
+                actions: alternatives.slice(0, 3).map((alt)=>({
+                        label: alt,
+                        value: alt,
+                        onClick: ()=>{
+                            onSlugSuggestion?.(alt);
+                            setDismissedSuggestions((prev)=>new Set([
+                                    ...prev,
+                                    'slug-alternatives'
+                                ]));
+                        }
+                    }))
+            });
+        }
+    }
+    // Suggestions SEO
+    if (name) {
+        const suggestedTitle = suggestMetaTitle(name, description);
+        const suggestedDescription = suggestMetaDescription(name, description);
+        if (suggestedTitle !== name || suggestedDescription !== description) {
+            suggestions.push({
+                id: 'meta-suggestions',
+                type: 'meta',
+                title: 'Optimisation SEO',
+                description: 'Suggéré pour améliorer votre référencement :',
+                actions: [
+                    {
+                        label: 'Appliquer le titre SEO',
+                        value: suggestedTitle,
+                        onClick: ()=>{
+                            onMetaTitleSuggestion?.(suggestedTitle);
+                        }
+                    },
+                    {
+                        label: 'Appliquer la description SEO',
+                        value: suggestedDescription,
+                        onClick: ()=>{
+                            onMetaDescriptionSuggestion?.(suggestedDescription);
+                        }
+                    }
+                ]
+            });
+        }
+    }
+    // Suggestions de couleurs (si logo détecté)
+    if (name && !description) {
+        const colors = suggestColorPalette('#3b82f6');
+        suggestions.push({
+            id: 'color-palette',
+            type: 'colors',
+            title: 'Palette de couleurs suggérée',
+            description: 'Couleurs harmonieuses pour votre boutique :',
+            actions: [
+                {
+                    label: 'Appliquer la palette',
+                    value: colors,
+                    onClick: ()=>{
+                        onColorSuggestion?.(colors);
+                    }
+                }
+            ]
+        });
+    }
+    // Suggestions de domaines personnalisés
+    if (slug && slugAvailable === true) {
+        const domains = suggestCustomDomain(slug);
+        suggestions.push({
+            id: 'custom-domains',
+            type: 'domain',
+            title: 'Domaines personnalisés suggérés',
+            description: 'Vous pourrez configurer ces domaines plus tard :',
+            actions: domains.slice(0, 3).map((domain)=>({
+                    label: domain,
+                    value: domain,
+                    onClick: ()=>{
+                    // Logique pour suggérer le domaine
+                    }
+                }))
+        });
+    }
+    // Suggestions de mots-clés
+    if (name && description) {
+        const keywords = suggestKeywords(name, description);
+        if (keywords.length > 0) {
+            suggestions.push({
+                id: 'keywords',
+                type: 'keywords',
+                title: 'Mots-clés SEO suggérés',
+                description: 'Mots-clés pertinents pour votre boutique :',
+                actions: [
+                    {
+                        label: `Utiliser : ${keywords.slice(0, 5).join(', ')}`,
+                        value: keywords,
+                        onClick: ()=>{
+                            onKeywordSuggestion?.(keywords);
+                        }
+                    }
+                ]
+            });
+        }
+    }
+    // Filtrer les suggestions déjà rejetées
+    const visibleSuggestions = suggestions.filter((s)=>!dismissedSuggestions.has(s.id));
+    if (visibleSuggestions.length === 0) return null;
+    const handleDismiss = (id)=>{
+        setDismissedSuggestions((prev)=>new Set([
+                ...prev,
+                id
+            ]));
+    };
+    const handleDismissAll = ()=>{
+        setShowSuggestions(false);
+    };
+    return /*#__PURE__*/ _jsxDEV(Card, {
+        className: className,
+        children: [
+            /*#__PURE__*/ _jsxDEV(CardHeader, {
+                className: "pb-3",
+                children: [
+                    /*#__PURE__*/ _jsxDEV("div", {
+                        className: "flex items-center justify-between",
+                        children: [
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                className: "flex items-center gap-2",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV(Sparkles, {
+                                        className: "h-5 w-5 text-primary"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/store/StoreSuggestions.tsx",
+                                        lineNumber: 188,
+                                        columnNumber: 13
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV(CardTitle, {
+                                        className: "text-base",
+                                        children: "Suggestions intelligentes"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/store/StoreSuggestions.tsx",
+                                        lineNumber: 189,
+                                        columnNumber: 13
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/store/StoreSuggestions.tsx",
+                                lineNumber: 187,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV(Button, {
+                                variant: "ghost",
+                                size: "sm",
+                                onClick: handleDismissAll,
+                                className: "h-6 w-6 p-0",
+                                children: /*#__PURE__*/ _jsxDEV(X, {
+                                    className: "h-4 w-4"
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/store/StoreSuggestions.tsx",
+                                    lineNumber: 197,
+                                    columnNumber: 13
+                                }, this)
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/store/StoreSuggestions.tsx",
+                                lineNumber: 191,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/store/StoreSuggestions.tsx",
+                        lineNumber: 186,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV(CardDescription, {
+                        className: "text-xs",
+                        children: "Des suggestions pour améliorer votre boutique"
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/store/StoreSuggestions.tsx",
+                        lineNumber: 200,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/store/StoreSuggestions.tsx",
+                lineNumber: 185,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV(CardContent, {
+                className: "space-y-3",
+                children: visibleSuggestions.map((suggestion)=>/*#__PURE__*/ _jsxDEV(Alert, {
+                        className: "relative",
+                        children: /*#__PURE__*/ _jsxDEV("div", {
+                            className: "flex items-start justify-between gap-2",
+                            children: [
+                                /*#__PURE__*/ _jsxDEV("div", {
+                                    className: "flex-1",
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV("div", {
+                                            className: "flex items-center gap-2 mb-1",
+                                            children: [
+                                                /*#__PURE__*/ _jsxDEV("span", {
+                                                    className: "text-sm font-medium",
+                                                    children: suggestion.title
+                                                }, void 0, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/store/StoreSuggestions.tsx",
+                                                    lineNumber: 210,
+                                                    columnNumber: 19
+                                                }, this),
+                                                /*#__PURE__*/ _jsxDEV(Badge, {
+                                                    variant: "outline",
+                                                    className: "text-xs",
+                                                    children: suggestion.type
+                                                }, void 0, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/store/StoreSuggestions.tsx",
+                                                    lineNumber: 211,
+                                                    columnNumber: 19
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/store/StoreSuggestions.tsx",
+                                            lineNumber: 209,
+                                            columnNumber: 17
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV(AlertDescription, {
+                                            className: "text-xs mb-2",
+                                            children: suggestion.description
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/store/StoreSuggestions.tsx",
+                                            lineNumber: 215,
+                                            columnNumber: 17
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV("div", {
+                                            className: "flex flex-wrap gap-2",
+                                            children: suggestion.actions.map((action, idx)=>/*#__PURE__*/ _jsxDEV(Button, {
+                                                    variant: "outline",
+                                                    size: "sm",
+                                                    onClick: action.onClick,
+                                                    className: "text-xs h-7",
+                                                    children: action.type === 'slug' ? /*#__PURE__*/ _jsxDEV(_Fragment, {
+                                                        children: [
+                                                            action.label,
+                                                            /*#__PURE__*/ _jsxDEV(Check, {
+                                                                className: "h-3 w-3 ml-1"
+                                                            }, void 0, false, {
+                                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/store/StoreSuggestions.tsx",
+                                                                lineNumber: 230,
+                                                                columnNumber: 27
+                                                            }, this)
+                                                        ]
+                                                    }, void 0, true) : /*#__PURE__*/ _jsxDEV(_Fragment, {
+                                                        children: [
+                                                            action.label,
+                                                            /*#__PURE__*/ _jsxDEV(ArrowRight, {
+                                                                className: "h-3 w-3 ml-1"
+                                                            }, void 0, false, {
+                                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/store/StoreSuggestions.tsx",
+                                                                lineNumber: 235,
+                                                                columnNumber: 27
+                                                            }, this)
+                                                        ]
+                                                    }, void 0, true)
+                                                }, idx, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/store/StoreSuggestions.tsx",
+                                                    lineNumber: 220,
+                                                    columnNumber: 21
+                                                }, this))
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/store/StoreSuggestions.tsx",
+                                            lineNumber: 218,
+                                            columnNumber: 17
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/store/StoreSuggestions.tsx",
+                                    lineNumber: 208,
+                                    columnNumber: 15
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV(Button, {
+                                    variant: "ghost",
+                                    size: "sm",
+                                    onClick: ()=>handleDismiss(suggestion.id),
+                                    className: "h-6 w-6 p-0 opacity-50 hover:opacity-100",
+                                    children: /*#__PURE__*/ _jsxDEV(X, {
+                                        className: "h-3 w-3"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/store/StoreSuggestions.tsx",
+                                        lineNumber: 248,
+                                        columnNumber: 17
+                                    }, this)
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/store/StoreSuggestions.tsx",
+                                    lineNumber: 242,
+                                    columnNumber: 15
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/store/StoreSuggestions.tsx",
+                            lineNumber: 207,
+                            columnNumber: 13
+                        }, this)
+                    }, suggestion.id, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/store/StoreSuggestions.tsx",
+                        lineNumber: 206,
+                        columnNumber: 11
+                    }, this))
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/store/StoreSuggestions.tsx",
+                lineNumber: 204,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/store/StoreSuggestions.tsx",
+        lineNumber: 184,
+        columnNumber: 5
+    }, this);
+};
+_s(StoreSuggestions, "ndzSx4TnA+7KxMu5Px3e4/0ptlQ=");
+_c = StoreSuggestions;
+var _c;
+$RefreshReg$(_c, "StoreSuggestions");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/store/StoreSuggestions.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/store/StoreSuggestions.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIlN0b3JlU3VnZ2VzdGlvbnMudHN4Il0sInNvdXJjZXNDb250ZW50IjpbIi8qKlxuICogQ29tcG9zYW50IGFmZmljaGFudCBkZXMgc3VnZ2VzdGlvbnMgYXV0b21hdGlxdWVzIHBvdXIgYW3DqWxpb3JlciBsZSBmb3JtdWxhaXJlXG4gKi9cblxuaW1wb3J0IHsgdXNlU3RhdGUgfSBmcm9tICdyZWFjdCc7XG5pbXBvcnQgeyBTcGFya2xlcywgWCwgQ2hlY2ssIEFycm93UmlnaHQgfSBmcm9tICdsdWNpZGUtcmVhY3QnO1xuaW1wb3J0IHsgQnV0dG9uIH0gZnJvbSAnQC9jb21wb25lbnRzL3VpL2J1dHRvbic7XG5pbXBvcnQgeyBDYXJkLCBDYXJkQ29udGVudCwgQ2FyZERlc2NyaXB0aW9uLCBDYXJkSGVhZGVyLCBDYXJkVGl0bGUgfSBmcm9tICdAL2NvbXBvbmVudHMvdWkvY2FyZCc7XG5pbXBvcnQgeyBCYWRnZSB9IGZyb20gJ0AvY29tcG9uZW50cy91aS9iYWRnZSc7XG5pbXBvcnQgeyBBbGVydCwgQWxlcnREZXNjcmlwdGlvbiB9IGZyb20gJ0AvY29tcG9uZW50cy91aS9hbGVydCc7XG5pbXBvcnQgeyBcbiAgc3VnZ2VzdFNsdWdBbHRlcm5hdGl2ZXMsIFxuICBzdWdnZXN0TWV0YVRpdGxlLCBcbiAgc3VnZ2VzdE1ldGFEZXNjcmlwdGlvbixcbiAgc3VnZ2VzdENvbG9yUGFsZXR0ZSxcbiAgc3VnZ2VzdEN1c3RvbURvbWFpbixcbiAgc3VnZ2VzdEtleXdvcmRzLFxufSBmcm9tICdAL2xpYi9zdG9yZS1zdWdnZXN0aW9ucyc7XG5cbmludGVyZmFjZSBTdG9yZVN1Z2dlc3Rpb25zUHJvcHMge1xuICBuYW1lPzogc3RyaW5nO1xuICBzbHVnPzogc3RyaW5nO1xuICBkZXNjcmlwdGlvbj86IHN0cmluZztcbiAgc2x1Z0F2YWlsYWJsZT86IGJvb2xlYW4gfCBudWxsO1xuICBvblNsdWdTdWdnZXN0aW9uPzogKHN1Z2dlc3Rpb246IHN0cmluZykgPT4gdm9pZDtcbiAgb25NZXRhVGl0bGVTdWdnZXN0aW9uPzogKHN1Z2dlc3Rpb246IHN0cmluZykgPT4gdm9pZDtcbiAgb25NZXRhRGVzY3JpcHRpb25TdWdnZXN0aW9uPzogKHN1Z2dlc3Rpb246IHN0cmluZykgPT4gdm9pZDtcbiAgb25Db2xvclN1Z2dlc3Rpb24/OiAoY29sb3JzOiB7IHByaW1hcnk6IHN0cmluZzsgc2Vjb25kYXJ5OiBzdHJpbmc7IGFjY2VudDogc3RyaW5nOyBiYWNrZ3JvdW5kOiBzdHJpbmc7IHRleHQ6IHN0cmluZyB9KSA9PiB2b2lkO1xuICBvbktleXdvcmRTdWdnZXN0aW9uPzogKGtleXdvcmRzOiBzdHJpbmdbXSkgPT4gdm9pZDtcbiAgY2xhc3NOYW1lPzogc3RyaW5nO1xufVxuXG5leHBvcnQgY29uc3QgU3RvcmVTdWdnZXN0aW9ucyA9ICh7XG4gIG5hbWUgPSAnJyxcbiAgc2x1ZyA9ICcnLFxuICBkZXNjcmlwdGlvbiA9ICcnLFxuICBzbHVnQXZhaWxhYmxlLFxuICBvblNsdWdTdWdnZXN0aW9uLFxuICBvbk1ldGFUaXRsZVN1Z2dlc3Rpb24sXG4gIG9uTWV0YURlc2NyaXB0aW9uU3VnZ2VzdGlvbixcbiAgb25Db2xvclN1Z2dlc3Rpb24sXG4gIG9uS2V5d29yZFN1Z2dlc3Rpb24sXG4gIGNsYXNzTmFtZSA9ICcnLFxufTogU3RvcmVTdWdnZXN0aW9uc1Byb3BzKSA9PiB7XG4gIGNvbnN0IFtkaXNtaXNzZWRTdWdnZXN0aW9ucywgc2V0RGlzbWlzc2VkU3VnZ2VzdGlvbnNdID0gdXNlU3RhdGU8U2V0PHN0cmluZz4+KG5ldyBTZXQoKSk7XG4gIGNvbnN0IFtzaG93U3VnZ2VzdGlvbnMsIHNldFNob3dTdWdnZXN0aW9uc10gPSB1c2VTdGF0ZSh0cnVlKTtcblxuICBpZiAoIXNob3dTdWdnZXN0aW9ucyB8fCAhbmFtZSkgcmV0dXJuIG51bGw7XG5cbiAgY29uc3QgIHN1Z2dlc3Rpb25zOiBBcnJheTx7XG4gICAgaWQ6IHN0cmluZztcbiAgICB0eXBlOiAnc2x1ZycgfCAnbWV0YScgfCAnY29sb3JzJyB8ICdkb21haW4nIHwgJ2tleXdvcmRzJztcbiAgICB0aXRsZTogc3RyaW5nO1xuICAgIGRlc2NyaXB0aW9uOiBzdHJpbmc7XG4gICAgYWN0aW9uczogQXJyYXk8eyBsYWJlbDogc3RyaW5nOyB2YWx1ZTogc3RyaW5nIHwgeyBwcmltYXJ5OiBzdHJpbmc7IHNlY29uZGFyeTogc3RyaW5nOyBhY2NlbnQ6IHN0cmluZzsgYmFja2dyb3VuZDogc3RyaW5nOyB0ZXh0OiBzdHJpbmcgfTsgb25DbGljazogKCkgPT4gdm9pZCB9PjtcbiAgfT4gPSBbXTtcblxuICAvLyBTdWdnZXN0aW9uIGRlIHNsdWcgYWx0ZXJuYXRpZiBzaSBpbmRpc3BvbmlibGVcbiAgaWYgKHNsdWdBdmFpbGFibGUgPT09IGZhbHNlICYmIHNsdWcpIHtcbiAgICBjb25zdCBhbHRlcm5hdGl2ZXMgPSBzdWdnZXN0U2x1Z0FsdGVybmF0aXZlcyhzbHVnKTtcbiAgICBpZiAoYWx0ZXJuYXRpdmVzLmxlbmd0aCA+IDApIHtcbiAgICAgIHN1Z2dlc3Rpb25zLnB1c2goe1xuICAgICAgICBpZDogJ3NsdWctYWx0ZXJuYXRpdmVzJyxcbiAgICAgICAgdHlwZTogJ3NsdWcnLFxuICAgICAgICB0aXRsZTogJ1NsdWcgbm9uIGRpc3BvbmlibGUnLFxuICAgICAgICBkZXNjcmlwdGlvbjogJ1ZvaWNpIGRlcyBhbHRlcm5hdGl2ZXMgZGlzcG9uaWJsZXMgOicsXG4gICAgICAgIGFjdGlvbnM6IGFsdGVybmF0aXZlcy5zbGljZSgwLCAzKS5tYXAoYWx0ID0+ICh7XG4gICAgICAgICAgbGFiZWw6IGFsdCxcbiAgICAgICAgICB2YWx1ZTogYWx0LFxuICAgICAgICAgIG9uQ2xpY2s6ICgpID0+IHtcbiAgICAgICAgICAgIG9uU2x1Z1N1Z2dlc3Rpb24/LihhbHQpO1xuICAgICAgICAgICAgc2V0RGlzbWlzc2VkU3VnZ2VzdGlvbnMocHJldiA9PiBuZXcgU2V0KFsuLi5wcmV2LCAnc2x1Zy1hbHRlcm5hdGl2ZXMnXSkpO1xuICAgICAgICAgIH0sXG4gICAgICAgIH0pKSxcbiAgICAgIH0pO1xuICAgIH1cbiAgfVxuXG4gIC8vIFN1Z2dlc3Rpb25zIFNFT1xuICBpZiAobmFtZSkge1xuICAgIGNvbnN0IHN1Z2dlc3RlZFRpdGxlID0gc3VnZ2VzdE1ldGFUaXRsZShuYW1lLCBkZXNjcmlwdGlvbik7XG4gICAgY29uc3Qgc3VnZ2VzdGVkRGVzY3JpcHRpb24gPSBzdWdnZXN0TWV0YURlc2NyaXB0aW9uKG5hbWUsIGRlc2NyaXB0aW9uKTtcbiAgICBcbiAgICBpZiAoc3VnZ2VzdGVkVGl0bGUgIT09IG5hbWUgfHwgc3VnZ2VzdGVkRGVzY3JpcHRpb24gIT09IGRlc2NyaXB0aW9uKSB7XG4gICAgICBzdWdnZXN0aW9ucy5wdXNoKHtcbiAgICAgICAgaWQ6ICdtZXRhLXN1Z2dlc3Rpb25zJyxcbiAgICAgICAgdHlwZTogJ21ldGEnLFxuICAgICAgICB0aXRsZTogJ09wdGltaXNhdGlvbiBTRU8nLFxuICAgICAgICBkZXNjcmlwdGlvbjogJ1N1Z2fDqXLDqSBwb3VyIGFtw6lsaW9yZXIgdm90cmUgcsOpZsOpcmVuY2VtZW50IDonLFxuICAgICAgICBhY3Rpb25zOiBbXG4gICAgICAgICAge1xuICAgICAgICAgICAgbGFiZWw6ICdBcHBsaXF1ZXIgbGUgdGl0cmUgU0VPJyxcbiAgICAgICAgICAgIHZhbHVlOiBzdWdnZXN0ZWRUaXRsZSxcbiAgICAgICAgICAgIG9uQ2xpY2s6ICgpID0+IHtcbiAgICAgICAgICAgICAgb25NZXRhVGl0bGVTdWdnZXN0aW9uPy4oc3VnZ2VzdGVkVGl0bGUpO1xuICAgICAgICAgICAgfSxcbiAgICAgICAgICB9LFxuICAgICAgICAgIHtcbiAgICAgICAgICAgIGxhYmVsOiAnQXBwbGlxdWVyIGxhIGRlc2NyaXB0aW9uIFNFTycsXG4gICAgICAgICAgICB2YWx1ZTogc3VnZ2VzdGVkRGVzY3JpcHRpb24sXG4gICAgICAgICAgICBvbkNsaWNrOiAoKSA9PiB7XG4gICAgICAgICAgICAgIG9uTWV0YURlc2NyaXB0aW9uU3VnZ2VzdGlvbj8uKHN1Z2dlc3RlZERlc2NyaXB0aW9uKTtcbiAgICAgICAgICAgIH0sXG4gICAgICAgICAgfSxcbiAgICAgICAgXSxcbiAgICAgIH0pO1xuICAgIH1cbiAgfVxuXG4gIC8vIFN1Z2dlc3Rpb25zIGRlIGNvdWxldXJzIChzaSBsb2dvIGTDqXRlY3TDqSlcbiAgaWYgKG5hbWUgJiYgIWRlc2NyaXB0aW9uKSB7XG4gICAgY29uc3QgY29sb3JzID0gc3VnZ2VzdENvbG9yUGFsZXR0ZSgnIzNiODJmNicpO1xuICAgIHN1Z2dlc3Rpb25zLnB1c2goe1xuICAgICAgaWQ6ICdjb2xvci1wYWxldHRlJyxcbiAgICAgIHR5cGU6ICdjb2xvcnMnLFxuICAgICAgdGl0bGU6ICdQYWxldHRlIGRlIGNvdWxldXJzIHN1Z2fDqXLDqWUnLFxuICAgICAgZGVzY3JpcHRpb246ICdDb3VsZXVycyBoYXJtb25pZXVzZXMgcG91ciB2b3RyZSBib3V0aXF1ZSA6JyxcbiAgICAgIGFjdGlvbnM6IFtcbiAgICAgICAge1xuICAgICAgICAgIGxhYmVsOiAnQXBwbGlxdWVyIGxhIHBhbGV0dGUnLFxuICAgICAgICAgIHZhbHVlOiBjb2xvcnMsXG4gICAgICAgICAgb25DbGljazogKCkgPT4ge1xuICAgICAgICAgICAgb25Db2xvclN1Z2dlc3Rpb24/Lihjb2xvcnMpO1xuICAgICAgICAgIH0sXG4gICAgICAgIH0sXG4gICAgICBdLFxuICAgIH0pO1xuICB9XG5cbiAgLy8gU3VnZ2VzdGlvbnMgZGUgZG9tYWluZXMgcGVyc29ubmFsaXPDqXNcbiAgaWYgKHNsdWcgJiYgc2x1Z0F2YWlsYWJsZSA9PT0gdHJ1ZSkge1xuICAgIGNvbnN0IGRvbWFpbnMgPSBzdWdnZXN0Q3VzdG9tRG9tYWluKHNsdWcpO1xuICAgIHN1Z2dlc3Rpb25zLnB1c2goe1xuICAgICAgaWQ6ICdjdXN0b20tZG9tYWlucycsXG4gICAgICB0eXBlOiAnZG9tYWluJyxcbiAgICAgIHRpdGxlOiAnRG9tYWluZXMgcGVyc29ubmFsaXPDqXMgc3VnZ8OpcsOpcycsXG4gICAgICBkZXNjcmlwdGlvbjogJ1ZvdXMgcG91cnJleiBjb25maWd1cmVyIGNlcyBkb21haW5lcyBwbHVzIHRhcmQgOicsXG4gICAgICBhY3Rpb25zOiBkb21haW5zLnNsaWNlKDAsIDMpLm1hcChkb21haW4gPT4gKHtcbiAgICAgICAgbGFiZWw6IGRvbWFpbixcbiAgICAgICAgdmFsdWU6IGRvbWFpbixcbiAgICAgICAgb25DbGljazogKCkgPT4ge1xuICAgICAgICAgIC8vIExvZ2lxdWUgcG91ciBzdWdnw6lyZXIgbGUgZG9tYWluZVxuICAgICAgICB9LFxuICAgICAgfSkpLFxuICAgIH0pO1xuICB9XG5cbiAgLy8gU3VnZ2VzdGlvbnMgZGUgbW90cy1jbMOpc1xuICBpZiAobmFtZSAmJiBkZXNjcmlwdGlvbikge1xuICAgIGNvbnN0IGtleXdvcmRzID0gc3VnZ2VzdEtleXdvcmRzKG5hbWUsIGRlc2NyaXB0aW9uKTtcbiAgICBpZiAoa2V5d29yZHMubGVuZ3RoID4gMCkge1xuICAgICAgc3VnZ2VzdGlvbnMucHVzaCh7XG4gICAgICAgIGlkOiAna2V5d29yZHMnLFxuICAgICAgICB0eXBlOiAna2V5d29yZHMnLFxuICAgICAgICB0aXRsZTogJ01vdHMtY2zDqXMgU0VPIHN1Z2fDqXLDqXMnLFxuICAgICAgICBkZXNjcmlwdGlvbjogJ01vdHMtY2zDqXMgcGVydGluZW50cyBwb3VyIHZvdHJlIGJvdXRpcXVlIDonLFxuICAgICAgICBhY3Rpb25zOiBbXG4gICAgICAgICAge1xuICAgICAgICAgICAgbGFiZWw6IGBVdGlsaXNlciA6ICR7a2V5d29yZHMuc2xpY2UoMCwgNSkuam9pbignLCAnKX1gLFxuICAgICAgICAgICAgdmFsdWU6IGtleXdvcmRzLFxuICAgICAgICAgICAgb25DbGljazogKCkgPT4ge1xuICAgICAgICAgICAgICBvbktleXdvcmRTdWdnZXN0aW9uPy4oa2V5d29yZHMpO1xuICAgICAgICAgICAgfSxcbiAgICAgICAgICB9LFxuICAgICAgICBdLFxuICAgICAgfSk7XG4gICAgfVxuICB9XG5cbiAgLy8gRmlsdHJlciBsZXMgc3VnZ2VzdGlvbnMgZMOpasOgIHJlamV0w6llc1xuICBjb25zdCB2aXNpYmxlU3VnZ2VzdGlvbnMgPSBzdWdnZXN0aW9ucy5maWx0ZXIocyA9PiAhZGlzbWlzc2VkU3VnZ2VzdGlvbnMuaGFzKHMuaWQpKTtcblxuICBpZiAodmlzaWJsZVN1Z2dlc3Rpb25zLmxlbmd0aCA9PT0gMCkgcmV0dXJuIG51bGw7XG5cbiAgY29uc3QgaGFuZGxlRGlzbWlzcyA9IChpZDogc3RyaW5nKSA9PiB7XG4gICAgc2V0RGlzbWlzc2VkU3VnZ2VzdGlvbnMocHJldiA9PiBuZXcgU2V0KFsuLi5wcmV2LCBpZF0pKTtcbiAgfTtcblxuICBjb25zdCBoYW5kbGVEaXNtaXNzQWxsID0gKCkgPT4ge1xuICAgIHNldFNob3dTdWdnZXN0aW9ucyhmYWxzZSk7XG4gIH07XG5cbiAgcmV0dXJuIChcbiAgICA8Q2FyZCBjbGFzc05hbWU9e2NsYXNzTmFtZX0+XG4gICAgICA8Q2FyZEhlYWRlciBjbGFzc05hbWU9XCJwYi0zXCI+XG4gICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIganVzdGlmeS1iZXR3ZWVuXCI+XG4gICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLWNlbnRlciBnYXAtMlwiPlxuICAgICAgICAgICAgPFNwYXJrbGVzIGNsYXNzTmFtZT1cImgtNSB3LTUgdGV4dC1wcmltYXJ5XCIgLz5cbiAgICAgICAgICAgIDxDYXJkVGl0bGUgY2xhc3NOYW1lPVwidGV4dC1iYXNlXCI+U3VnZ2VzdGlvbnMgaW50ZWxsaWdlbnRlczwvQ2FyZFRpdGxlPlxuICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgIDxCdXR0b25cbiAgICAgICAgICAgIHZhcmlhbnQ9XCJnaG9zdFwiXG4gICAgICAgICAgICBzaXplPVwic21cIlxuICAgICAgICAgICAgb25DbGljaz17aGFuZGxlRGlzbWlzc0FsbH1cbiAgICAgICAgICAgIGNsYXNzTmFtZT1cImgtNiB3LTYgcC0wXCJcbiAgICAgICAgICA+XG4gICAgICAgICAgICA8WCBjbGFzc05hbWU9XCJoLTQgdy00XCIgLz5cbiAgICAgICAgICA8L0J1dHRvbj5cbiAgICAgICAgPC9kaXY+XG4gICAgICAgIDxDYXJkRGVzY3JpcHRpb24gY2xhc3NOYW1lPVwidGV4dC14c1wiPlxuICAgICAgICAgIERlcyBzdWdnZXN0aW9ucyBwb3VyIGFtw6lsaW9yZXIgdm90cmUgYm91dGlxdWVcbiAgICAgICAgPC9DYXJkRGVzY3JpcHRpb24+XG4gICAgICA8L0NhcmRIZWFkZXI+XG4gICAgICA8Q2FyZENvbnRlbnQgY2xhc3NOYW1lPVwic3BhY2UteS0zXCI+XG4gICAgICAgIHt2aXNpYmxlU3VnZ2VzdGlvbnMubWFwKChzdWdnZXN0aW9uKSA9PiAoXG4gICAgICAgICAgPEFsZXJ0IGtleT17c3VnZ2VzdGlvbi5pZH0gY2xhc3NOYW1lPVwicmVsYXRpdmVcIj5cbiAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1zdGFydCBqdXN0aWZ5LWJldHdlZW4gZ2FwLTJcIj5cbiAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4LTFcIj5cbiAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGdhcC0yIG1iLTFcIj5cbiAgICAgICAgICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cInRleHQtc20gZm9udC1tZWRpdW1cIj57c3VnZ2VzdGlvbi50aXRsZX08L3NwYW4+XG4gICAgICAgICAgICAgICAgICA8QmFkZ2UgdmFyaWFudD1cIm91dGxpbmVcIiBjbGFzc05hbWU9XCJ0ZXh0LXhzXCI+XG4gICAgICAgICAgICAgICAgICAgIHtzdWdnZXN0aW9uLnR5cGV9XG4gICAgICAgICAgICAgICAgICA8L0JhZGdlPlxuICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgIDxBbGVydERlc2NyaXB0aW9uIGNsYXNzTmFtZT1cInRleHQteHMgbWItMlwiPlxuICAgICAgICAgICAgICAgICAge3N1Z2dlc3Rpb24uZGVzY3JpcHRpb259XG4gICAgICAgICAgICAgICAgPC9BbGVydERlc2NyaXB0aW9uPlxuICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBmbGV4LXdyYXAgZ2FwLTJcIj5cbiAgICAgICAgICAgICAgICAgIHtzdWdnZXN0aW9uLmFjdGlvbnMubWFwKChhY3Rpb24sIGlkeCkgPT4gKFxuICAgICAgICAgICAgICAgICAgICA8QnV0dG9uXG4gICAgICAgICAgICAgICAgICAgICAga2V5PXtpZHh9XG4gICAgICAgICAgICAgICAgICAgICAgdmFyaWFudD1cIm91dGxpbmVcIlxuICAgICAgICAgICAgICAgICAgICAgIHNpemU9XCJzbVwiXG4gICAgICAgICAgICAgICAgICAgICAgb25DbGljaz17YWN0aW9uLm9uQ2xpY2t9XG4gICAgICAgICAgICAgICAgICAgICAgY2xhc3NOYW1lPVwidGV4dC14cyBoLTdcIlxuICAgICAgICAgICAgICAgICAgICA+XG4gICAgICAgICAgICAgICAgICAgICAge2FjdGlvbi50eXBlID09PSAnc2x1ZycgPyAoXG4gICAgICAgICAgICAgICAgICAgICAgICA8PlxuICAgICAgICAgICAgICAgICAgICAgICAgICB7YWN0aW9uLmxhYmVsfVxuICAgICAgICAgICAgICAgICAgICAgICAgICA8Q2hlY2sgY2xhc3NOYW1lPVwiaC0zIHctMyBtbC0xXCIgLz5cbiAgICAgICAgICAgICAgICAgICAgICAgIDwvPlxuICAgICAgICAgICAgICAgICAgICAgICkgOiAoXG4gICAgICAgICAgICAgICAgICAgICAgICA8PlxuICAgICAgICAgICAgICAgICAgICAgICAgICB7YWN0aW9uLmxhYmVsfVxuICAgICAgICAgICAgICAgICAgICAgICAgICA8QXJyb3dSaWdodCBjbGFzc05hbWU9XCJoLTMgdy0zIG1sLTFcIiAvPlxuICAgICAgICAgICAgICAgICAgICAgICAgPC8+XG4gICAgICAgICAgICAgICAgICAgICAgKX1cbiAgICAgICAgICAgICAgICAgICAgPC9CdXR0b24+XG4gICAgICAgICAgICAgICAgICApKX1cbiAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgIDxCdXR0b25cbiAgICAgICAgICAgICAgICB2YXJpYW50PVwiZ2hvc3RcIlxuICAgICAgICAgICAgICAgIHNpemU9XCJzbVwiXG4gICAgICAgICAgICAgICAgb25DbGljaz17KCkgPT4gaGFuZGxlRGlzbWlzcyhzdWdnZXN0aW9uLmlkKX1cbiAgICAgICAgICAgICAgICBjbGFzc05hbWU9XCJoLTYgdy02IHAtMCBvcGFjaXR5LTUwIGhvdmVyOm9wYWNpdHktMTAwXCJcbiAgICAgICAgICAgICAgPlxuICAgICAgICAgICAgICAgIDxYIGNsYXNzTmFtZT1cImgtMyB3LTNcIiAvPlxuICAgICAgICAgICAgICA8L0J1dHRvbj5cbiAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgIDwvQWxlcnQ+XG4gICAgICAgICkpfVxuICAgICAgPC9DYXJkQ29udGVudD5cbiAgICA8L0NhcmQ+XG4gICk7XG59O1xuXG5cblxuXG5cblxuXG4iXSwibmFtZXMiOlsidXNlU3RhdGUiLCJTcGFya2xlcyIsIlgiLCJDaGVjayIsIkFycm93UmlnaHQiLCJCdXR0b24iLCJDYXJkIiwiQ2FyZENvbnRlbnQiLCJDYXJkRGVzY3JpcHRpb24iLCJDYXJkSGVhZGVyIiwiQ2FyZFRpdGxlIiwiQmFkZ2UiLCJBbGVydCIsIkFsZXJ0RGVzY3JpcHRpb24iLCJzdWdnZXN0U2x1Z0FsdGVybmF0aXZlcyIsInN1Z2dlc3RNZXRhVGl0bGUiLCJzdWdnZXN0TWV0YURlc2NyaXB0aW9uIiwic3VnZ2VzdENvbG9yUGFsZXR0ZSIsInN1Z2dlc3RDdXN0b21Eb21haW4iLCJzdWdnZXN0S2V5d29yZHMiLCJTdG9yZVN1Z2dlc3Rpb25zIiwibmFtZSIsInNsdWciLCJkZXNjcmlwdGlvbiIsInNsdWdBdmFpbGFibGUiLCJvblNsdWdTdWdnZXN0aW9uIiwib25NZXRhVGl0bGVTdWdnZXN0aW9uIiwib25NZXRhRGVzY3JpcHRpb25TdWdnZXN0aW9uIiwib25Db2xvclN1Z2dlc3Rpb24iLCJvbktleXdvcmRTdWdnZXN0aW9uIiwiY2xhc3NOYW1lIiwiZGlzbWlzc2VkU3VnZ2VzdGlvbnMiLCJzZXREaXNtaXNzZWRTdWdnZXN0aW9ucyIsIlNldCIsInNob3dTdWdnZXN0aW9ucyIsInNldFNob3dTdWdnZXN0aW9ucyIsInN1Z2dlc3Rpb25zIiwiYWx0ZXJuYXRpdmVzIiwibGVuZ3RoIiwicHVzaCIsImlkIiwidHlwZSIsInRpdGxlIiwiYWN0aW9ucyIsInNsaWNlIiwibWFwIiwiYWx0IiwibGFiZWwiLCJ2YWx1ZSIsIm9uQ2xpY2siLCJwcmV2Iiwic3VnZ2VzdGVkVGl0bGUiLCJzdWdnZXN0ZWREZXNjcmlwdGlvbiIsImNvbG9ycyIsImRvbWFpbnMiLCJkb21haW4iLCJrZXl3b3JkcyIsImpvaW4iLCJ2aXNpYmxlU3VnZ2VzdGlvbnMiLCJmaWx0ZXIiLCJzIiwiaGFzIiwiaGFuZGxlRGlzbWlzcyIsImhhbmRsZURpc21pc3NBbGwiLCJkaXYiLCJ2YXJpYW50Iiwic2l6ZSIsInN1Z2dlc3Rpb24iLCJzcGFuIiwiYWN0aW9uIiwiaWR4Il0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7QUFBQTs7Q0FFQyxHQUVELFNBQVNBLFFBQVEsUUFBUSxRQUFRO0FBQ2pDLFNBQVNDLFFBQVEsRUFBRUMsQ0FBQyxFQUFFQyxLQUFLLEVBQUVDLFVBQVUsUUFBUSxlQUFlO0FBQzlELFNBQVNDLE1BQU0sUUFBUSx5QkFBeUI7QUFDaEQsU0FBU0MsSUFBSSxFQUFFQyxXQUFXLEVBQUVDLGVBQWUsRUFBRUMsVUFBVSxFQUFFQyxTQUFTLFFBQVEsdUJBQXVCO0FBQ2pHLFNBQVNDLEtBQUssUUFBUSx3QkFBd0I7QUFDOUMsU0FBU0MsS0FBSyxFQUFFQyxnQkFBZ0IsUUFBUSx3QkFBd0I7QUFDaEUsU0FDRUMsdUJBQXVCLEVBQ3ZCQyxnQkFBZ0IsRUFDaEJDLHNC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

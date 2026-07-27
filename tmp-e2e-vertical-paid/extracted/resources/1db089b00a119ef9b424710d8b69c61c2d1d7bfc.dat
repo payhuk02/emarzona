@@ -1,0 +1,28 @@
+/**
+ * État Cmd+K — léger, sans importer la config navigation (chunk CommandPalette différé).
+ */ import __vite__cjsImport0_react from "/node_modules/.vite/deps/react.js?v=8792f17d"; const useEffect = __vite__cjsImport0_react["useEffect"]; const useState = __vite__cjsImport0_react["useState"];
+import { OPEN_COMMAND_PALETTE_EVENT } from "/src/lib/vendor-command-palette.ts";
+export function useCommandPalette() {
+    const [open, setOpen] = useState(false);
+    useEffect(()=>{
+        const handleKeyDown = (e)=>{
+            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+                e.preventDefault();
+                setOpen((prev)=>!prev);
+            }
+        };
+        const handleOpenEvent = ()=>setOpen(true);
+        document.addEventListener('keydown', handleKeyDown);
+        window.addEventListener(OPEN_COMMAND_PALETTE_EVENT, handleOpenEvent);
+        return ()=>{
+            document.removeEventListener('keydown', handleKeyDown);
+            window.removeEventListener(OPEN_COMMAND_PALETTE_EVENT, handleOpenEvent);
+        };
+    }, []);
+    return {
+        open,
+        setOpen
+    };
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInVzZUNvbW1hbmRQYWxldHRlLnRzIl0sInNvdXJjZXNDb250ZW50IjpbIi8qKlxuICogw4l0YXQgQ21kK0sg4oCUIGzDqWdlciwgc2FucyBpbXBvcnRlciBsYSBjb25maWcgbmF2aWdhdGlvbiAoY2h1bmsgQ29tbWFuZFBhbGV0dGUgZGlmZsOpcsOpKS5cbiAqL1xuXG5pbXBvcnQgeyB1c2VFZmZlY3QsIHVzZVN0YXRlIH0gZnJvbSAncmVhY3QnO1xuaW1wb3J0IHsgT1BFTl9DT01NQU5EX1BBTEVUVEVfRVZFTlQgfSBmcm9tICdAL2xpYi92ZW5kb3ItY29tbWFuZC1wYWxldHRlJztcblxuZXhwb3J0IGZ1bmN0aW9uIHVzZUNvbW1hbmRQYWxldHRlKCkge1xuICBjb25zdCBbb3Blbiwgc2V0T3Blbl0gPSB1c2VTdGF0ZShmYWxzZSk7XG5cbiAgdXNlRWZmZWN0KCgpID0+IHtcbiAgICBjb25zdCBoYW5kbGVLZXlEb3duID0gKGU6IEtleWJvYXJkRXZlbnQpID0+IHtcbiAgICAgIGlmICgoZS5tZXRhS2V5IHx8IGUuY3RybEtleSkgJiYgZS5rZXkgPT09ICdrJykge1xuICAgICAgICBlLnByZXZlbnREZWZhdWx0KCk7XG4gICAgICAgIHNldE9wZW4ocHJldiA9PiAhcHJldik7XG4gICAgICB9XG4gICAgfTtcblxuICAgIGNvbnN0IGhhbmRsZU9wZW5FdmVudCA9ICgpID0+IHNldE9wZW4odHJ1ZSk7XG5cbiAgICBkb2N1bWVudC5hZGRFdmVudExpc3RlbmVyKCdrZXlkb3duJywgaGFuZGxlS2V5RG93bik7XG4gICAgd2luZG93LmFkZEV2ZW50TGlzdGVuZXIoT1BFTl9DT01NQU5EX1BBTEVUVEVfRVZFTlQsIGhhbmRsZU9wZW5FdmVudCk7XG5cbiAgICByZXR1cm4gKCkgPT4ge1xuICAgICAgZG9jdW1lbnQucmVtb3ZlRXZlbnRMaXN0ZW5lcigna2V5ZG93bicsIGhhbmRsZUtleURvd24pO1xuICAgICAgd2luZG93LnJlbW92ZUV2ZW50TGlzdGVuZXIoT1BFTl9DT01NQU5EX1BBTEVUVEVfRVZFTlQsIGhhbmRsZU9wZW5FdmVudCk7XG4gICAgfTtcbiAgfSwgW10pO1xuXG4gIHJldHVybiB7IG9wZW4sIHNldE9wZW4gfTtcbn1cbiJdLCJuYW1lcyI6WyJ1c2VFZmZlY3QiLCJ1c2VTdGF0ZSIsIk9QRU5fQ09NTUFORF9QQUxFVFRFX0VWRU5UIiwidXNlQ29tbWFuZFBhbGV0dGUiLCJvcGVuIiwic2V0T3BlbiIsImhhbmRsZUtleURvd24iLCJlIiwibWV0YUtleSIsImN0cmxLZXkiLCJrZXkiLCJwcmV2ZW50RGVmYXVsdCIsInByZXYiLCJoYW5kbGVPcGVuRXZlbnQiLCJkb2N1bWVudCIsImFkZEV2ZW50TGlzdGVuZXIiLCJ3aW5kb3ciLCJyZW1vdmVFdmVudExpc3RlbmVyIl0sIm1hcHBpbmdzIjoiQUFBQTs7Q0FFQyxHQUVELFNBQVNBLFNBQVMsRUFBRUMsUUFBUSxRQUFRLFFBQVE7QUFDNUMsU0FBU0MsMEJBQTBCLFFBQVEsK0JBQStCO0FBRTFFLE9BQU8sU0FBU0M7SUFDZCxNQUFNLENBQUNDLE1BQU1DLFFBQVEsR0FBR0osU0FBUztJQUVqQ0QsVUFBVTtRQUNSLE1BQU1NLGdCQUFnQixDQUFDQztZQUNyQixJQUFJLEFBQUNBLENBQUFBLEVBQUVDLE9BQU8sSUFBSUQsRUFBRUUsT0FBTyxBQUFELEtBQU1GLEVBQUVHLEdBQUcsS0FBSyxLQUFLO2dCQUM3Q0gsRUFBRUksY0FBYztnQkFDaEJOLFFBQVFPLENBQUFBLE9BQVEsQ0FBQ0E7WUFDbkI7UUFDRjtRQUVBLE1BQU1DLGtCQUFrQixJQUFNUixRQUFRO1FBRXRDUyxTQUFTQyxnQkFBZ0IsQ0FBQyxXQUFXVDtRQUNyQ1UsT0FBT0QsZ0JBQWdCLENBQUNiLDRCQUE0Qlc7UUFFcEQsT0FBTztZQUNMQyxTQUFTRyxtQkFBbUIsQ0FBQyxXQUFXWDtZQUN4Q1UsT0FBT0MsbUJBQW1CLENBQUNmLDRCQUE0Qlc7UUFDekQ7SUFDRixHQUFHLEVBQUU7SUFFTCxPQUFPO1FBQUVUO1FBQU1DO0lBQVE7QUFDekIifQ==

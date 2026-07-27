@@ -1,0 +1,69 @@
+import { defineIntegration, debug, startSession, captureSession, getIsolationScope } from "/node_modules/@sentry/core/build/esm/index.js?v=3ea6c1b9";
+import { addHistoryInstrumentationHandler } from "/node_modules/@sentry-internal/browser-utils/build/esm/index.js?v=3ea6c1b9";
+import { DEBUG_BUILD } from "/node_modules/@sentry/browser/build/npm/esm/dev/debug-build.js?v=3ea6c1b9";
+import { WINDOW } from "/node_modules/@sentry/browser/build/npm/esm/dev/helpers.js?v=3ea6c1b9";
+
+/**
+ * When added, automatically creates sessions which allow you to track adoption and crashes (crash free rate) in your Releases in Sentry.
+ * More information: https://docs.sentry.io/product/releases/health/
+ *
+ * Note: In order for session tracking to work, you need to set up Releases: https://docs.sentry.io/product/releases/
+ */
+const browserSessionIntegration = defineIntegration((options = {}) => {
+  const lifecycle = options.lifecycle ?? 'route';
+
+  return {
+    name: 'BrowserSession',
+    setupOnce() {
+      if (typeof WINDOW.document === 'undefined') {
+        DEBUG_BUILD &&
+          debug.warn('Using the `browserSessionIntegration` in non-browser environments is not supported.');
+        return;
+      }
+
+      // The session duration for browser sessions does not track a meaningful
+      // concept that can be used as a metric.
+      // Automatically captured sessions are akin to page views, and thus we
+      // discard their duration.
+      startSession({ ignoreDuration: true });
+      captureSession();
+
+      // User data can be set at any time, for example async after Sentry.init has run and the initial session
+      // envelope was already sent, but still on the initial page.
+      // Therefore, we have to update the ongoing session with the new user data if it exists, to send the `did`.
+      // In theory, sessions, as well as user data is always put onto the isolation scope. So we listen to the
+      // isolation scope for changes and update the session with the new user data if it exists.
+      // This will not catch users set onto other scopes, like the current scope. For now, we'll accept this limitation.
+      // The alternative is to update and capture the session from within the scope. This could be too costly or would not
+      // play well with session aggregates on the server side. Since this happens in the scope class, we'd need change
+      // scope behaviour in the browser.
+      const isolationScope = getIsolationScope();
+      let previousUser = isolationScope.getUser();
+      isolationScope.addScopeListener(scope => {
+        const maybeNewUser = scope.getUser();
+        // sessions only care about user id and ip address, so we only need to capture the session if the user has changed
+        if (previousUser?.id !== maybeNewUser?.id || previousUser?.ip_address !== maybeNewUser?.ip_address) {
+          // the scope class already writes the user to its session, so we only need to capture the session here
+          captureSession();
+          previousUser = maybeNewUser;
+        }
+      });
+
+      if (lifecycle === 'route') {
+        // We want to create a session for every navigation as well
+        addHistoryInstrumentationHandler(({ from, to }) => {
+          // Don't create an additional session for the initial route or if the location did not change
+          if (from !== to) {
+            startSession({ ignoreDuration: true });
+            captureSession();
+          }
+        });
+      }
+    },
+  };
+});
+
+export { browserSessionIntegration };
+                                          
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiYnJvd3NlcnNlc3Npb24uanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uLy4uL3NyYy9pbnRlZ3JhdGlvbnMvYnJvd3NlcnNlc3Npb24udHMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgY2FwdHVyZVNlc3Npb24sIGRlYnVnLCBkZWZpbmVJbnRlZ3JhdGlvbiwgZ2V0SXNvbGF0aW9uU2NvcGUsIHN0YXJ0U2Vzc2lvbiB9IGZyb20gJ0BzZW50cnkvY29yZSc7XG5pbXBvcnQgeyBhZGRIaXN0b3J5SW5zdHJ1bWVudGF0aW9uSGFuZGxlciB9IGZyb20gJ0BzZW50cnktaW50ZXJuYWwvYnJvd3Nlci11dGlscyc7XG5pbXBvcnQgeyBERUJVR19CVUlMRCB9IGZyb20gJy4uL2RlYnVnLWJ1aWxkJztcbmltcG9ydCB7IFdJTkRPVyB9IGZyb20gJy4uL2hlbHBlcnMnO1xuXG5pbnRlcmZhY2UgQnJvd3NlclNlc3Npb25PcHRpb25zIHtcbiAgLyoqXG4gICAqIENvbnRyb2xzIHRoZSBzZXNzaW9uIGxpZmVjeWNsZSAtIHdoZW4gbmV3IHNlc3Npb25zIGFyZSBjcmVhdGVkLlxuICAgKlxuICAgKiAtIGAncm91dGUnYDogQSBzZXNzaW9uIGlzIGNyZWF0ZWQgb24gcGFnZSBsb2FkIGFuZCBvbiBldmVyeSBuYXZpZ2F0aW9uLlxuICAgKiAgIFRoaXMgaXMgdGhlIGRlZmF1bHQgYmVoYXZpb3IuXG4gICAqIC0gYCdwYWdlJ2A6IEEgc2Vzc2lvbiBpcyBjcmVhdGVkIG9uY2Ugd2hlbiB0aGUgcGFnZSBpcyBsb2FkZWQuIFNlc3Npb24gaXMgbm90XG4gICAqICAgdXBkYXRlZCBvbiBuYXZpZ2F0aW9uLiBUaGlzIGlzIHVzZWZ1bCBmb3Igd2Vidmlld3Mgb3Igc2luZ2xlLXBhZ2UgYXBwcyB3aGVyZVxuICAgKiAgIFVSTCBjaGFuZ2VzIHNob3VsZCBub3QgdHJpZ2dlciBuZXcgc2Vzc2lvbnMuXG4gICAqXG4gICAqIEBkZWZhdWx0ICdyb3V0ZSdcbiAgICovXG4gIGxpZmVjeWNsZT86ICdyb3V0ZScgfCAncGFnZSc7XG59XG5cbi8qKlxuICogV2hlbiBhZGRlZCwgYXV0b21hdGljYWxseSBjcmVhdGVzIHNlc3Npb25zIHdoaWNoIGFsbG93IHlvdSB0byB0cmFjayBhZG9wdGlvbiBhbmQgY3Jhc2hlcyAoY3Jhc2ggZnJlZSByYXRlKSBpbiB5b3VyIFJlbGVhc2VzIGluIFNlbnRyeS5cbiAqIE1vcmUgaW5mb3JtYXRpb246IGh0dHBzOi8vZG9jcy5zZW50cnkuaW8vcHJvZHVjdC9yZWxlYXNlcy9oZWFsdGgvXG4gKlxuICogTm90ZTogSW4gb3JkZXIgZm9yIHNlc3Npb24gdHJhY2tpbmcgdG8gd29yaywgeW91IG5lZWQgdG8gc2V0IHVwIFJlbGVhc2VzOiBodHRwczovL2RvY3Muc2VudHJ5LmlvL3Byb2R1Y3QvcmVsZWFzZXMvXG4gKi9cbmV4cG9ydCBjb25zdCBicm93c2VyU2Vzc2lvbkludGVncmF0aW9uID0gZGVmaW5lSW50ZWdyYXRpb24oKG9wdGlvbnM6IEJyb3dzZXJTZXNzaW9uT3B0aW9ucyA9IHt9KSA9PiB7XG4gIGNvbnN0IGxpZmVjeWNsZSA9IG9wdGlvbnMubGlmZWN5Y2xlID8/ICdyb3V0ZSc7XG5cbiAgcmV0dXJuIHtcbiAgICBuYW1lOiAnQnJvd3NlclNlc3Npb24nLFxuICAgIHNldHVwT25jZSgpIHtcbiAgICAgIGlmICh0eXBlb2YgV0lORE9XLmRvY3VtZW50ID09PSAndW5kZWZpbmVkJykge1xuICAgICAgICBERUJVR19CVUlMRCAmJlxuICAgICAgICAgIGRlYnVnLndhcm4oJ1VzaW5nIHRoZSBgYnJvd3NlclNlc3Npb25JbnRlZ3JhdGlvbmAgaW4gbm9uLWJyb3dzZXIgZW52aXJvbm1lbnRzIGlzIG5vdCBzdXBwb3J0ZWQuJyk7XG4gICAgICAgIHJldHVybjtcbiAgICAgIH1cblxuICAgICAgLy8gVGhlIHNlc3Npb24gZHVyYXRpb24gZm9yIGJyb3dzZXIgc2Vzc2lvbnMgZG9lcyBub3QgdHJhY2sgYSBtZWFuaW5nZnVsXG4gICAgICAvLyBjb25jZXB0IHRoYXQgY2FuIGJlIHVzZWQgYXMgYSBtZXRyaWMuXG4gICAgICAvLyBBdXRvbWF0aWNhbGx5IGNhcHR1cmVkIHNlc3Npb25zIGFyZSBha2luIHRvIHBhZ2Ugdmlld3MsIGFuZCB0aHVzIHdlXG4gICAgICAvLyBkaXNjYXJkIHRoZWlyIGR1cmF0aW9uLlxuICAgICAgc3RhcnRTZXNzaW9uKHsgaWdub3JlRHVyYXRpb246IHRydWUgfSk7XG4gICAgICBjYXB0dXJlU2Vzc2lvbigpO1xuXG4gICAgICAvLyBVc2VyIGRhdGEgY2FuIGJlIHNldCBhdCBhbnkgdGltZSwgZm9yIGV4YW1wbGUgYXN5bmMgYWZ0ZXIgU2VudHJ5LmluaXQgaGFzIHJ1biBhbmQgdGhlIGluaXRpYWwgc2Vzc2lvblxuICAgICAgLy8gZW52ZWxvcGUgd2FzIGFscmVhZHkgc2VudCwgYnV0IHN0aWxsIG9uIHRoZSBpbml0aWFsIHBhZ2UuXG4gICAgICAvLyBUaGVyZWZvcmUsIHdlIGhhdmUgdG8gdXBkYXRlIHRoZSBvbmdvaW5nIHNlc3Npb24gd2l0aCB0aGUgbmV3IHVzZXIgZGF0YSBpZiBpdCBleGlzdHMsIHRvIHNlbmQgdGhlIGBkaWRgLlxuICAgICAgLy8gSW4gdGhlb3J5LCBzZXNzaW9ucywgYXMgd2VsbCBhcyB1c2VyIGRhdGEgaXMgYWx3YXlzIHB1dCBvbnRvIHRoZSBpc29sYXRpb24gc2NvcGUuIFNvIHdlIGxpc3RlbiB0byB0aGVcbiAgICAgIC8vIGlzb2xhdGlvbiBzY29wZSBmb3IgY2hhbmdlcyBhbmQgdXBkYXRlIHRoZSBzZXNzaW9uIHdpdGggdGhlIG5ldyB1c2VyIGRhdGEgaWYgaXQgZXhpc3RzLlxuICAgICAgLy8gVGhpcyB3aWxsIG5vdCBjYXRjaCB1c2VycyBzZXQgb250byBvdGhlciBzY29wZXMsIGxpa2UgdGhlIGN1cnJlbnQgc2NvcGUuIEZvciBub3csIHdlJ2xsIGFjY2VwdCB0aGlzIGxpbWl0YXRpb24uXG4gICAgICAvLyBUaGUgYWx0ZXJuYXRpdmUgaXMgdG8gdXBkYXRlIGFuZCBjYXB0dXJlIHRoZSBzZXNzaW9uIGZyb20gd2l0aGluIHRoZSBzY29wZS4gVGhpcyBjb3VsZCBiZSB0b28gY29zdGx5IG9yIHdvdWxkIG5vdFxuICAgICAgLy8gcGxheSB3ZWxsIHdpdGggc2Vzc2lvbiBhZ2dyZWdhdGVzIG9uIHRoZSBzZXJ2ZXIgc2lkZS4gU2luY2UgdGhpcyBoYXBwZW5zIGluIHRoZSBzY29wZSBjbGFzcywgd2UnZCBuZWVkIGNoYW5nZVxuICAgICAgLy8gc2NvcGUgYmVoYXZpb3VyIGluIHRoZSBicm93c2VyLlxuICAgICAgY29uc3QgaXNvbGF0aW9uU2NvcGUgPSBnZXRJc29sYXRpb25TY29wZSgpO1xuICAgICAgbGV0IHByZXZpb3VzVXNlciA9IGlzb2xhdGlvblNjb3BlLmdldFVzZXIoKTtcbiAgICAgIGlzb2xhdGlvblNjb3BlLmFkZFNjb3BlTGlzdGVuZXIoc2NvcGUgPT4ge1xuICAgICAgICBjb25zdCBtYXliZU5ld1VzZXIgPSBzY29wZS5nZXRVc2VyKCk7XG4gICAgICAgIC8vIHNlc3Npb25zIG9ubHkgY2FyZSBhYm91dCB1c2VyIGlkIGFuZCBpcCBhZGRyZXNzLCBzbyB3ZSBvbmx5IG5lZWQgdG8gY2FwdHVyZSB0aGUgc2Vzc2lvbiBpZiB0aGUgdXNlciBoYXMgY2hhbmdlZFxuICAgICAgICBpZiAocHJldmlvdXNVc2VyPy5pZCAhPT0gbWF5YmVOZXdVc2VyPy5pZCB8fCBwcmV2aW91c1VzZXI/LmlwX2FkZHJlc3MgIT09IG1heWJlTmV3VXNlcj8uaXBfYWRkcmVzcykge1xuICAgICAgICAgIC8vIHRoZSBzY29wZSBjbGFzcyBhbHJlYWR5IHdyaXRlcyB0aGUgdXNlciB0byBpdHMgc2Vzc2lvbiwgc28gd2Ugb25seSBuZWVkIHRvIGNhcHR1cmUgdGhlIHNlc3Npb24gaGVyZVxuICAgICAgICAgIGNhcHR1cmVTZXNzaW9uKCk7XG4gICAgICAgICAgcHJldmlvdXNVc2VyID0gbWF5YmVOZXdVc2VyO1xuICAgICAgICB9XG4gICAgICB9KTtcblxuICAgICAgaWYgKGxpZmVjeWNsZSA9PT0gJ3JvdXRlJykge1xuICAgICAgICAvLyBXZSB3YW50IHRvIGNyZWF0ZSBhIHNlc3Npb24gZm9yIGV2ZXJ5IG5hdmlnYXRpb24gYXMgd2VsbFxuICAgICAgICBhZGRIaXN0b3J5SW5zdHJ1bWVudGF0aW9uSGFuZGxlcigoeyBmcm9tLCB0byB9KSA9PiB7XG4gICAgICAgICAgLy8gRG9uJ3QgY3JlYXRlIGFuIGFkZGl0aW9uYWwgc2Vzc2lvbiBmb3IgdGhlIGluaXRpYWwgcm91dGUgb3IgaWYgdGhlIGxvY2F0aW9uIGRpZCBub3QgY2hhbmdlXG4gICAgICAgICAgaWYgKGZyb20gIT09IHRvKSB7XG4gICAgICAgICAgICBzdGFydFNlc3Npb24oeyBpZ25vcmVEdXJhdGlvbjogdHJ1ZSB9KTtcbiAgICAgICAgICAgIGNhcHR1cmVTZXNzaW9uKCk7XG4gICAgICAgICAgfVxuICAgICAgICB9KTtcbiAgICAgIH1cbiAgICB9LFxuICB9O1xufSk7XG4iXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7QUFvQkE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ08sTUFBTSx5QkFBQSxHQUE0QixpQkFBaUIsQ0FBQyxDQUFDLE9BQU8sR0FBMEIsRUFBRSxLQUFLO0FBQ3BHLEVBQUUsTUFBTSxTQUFBLEdBQVksT0FBTyxDQUFDLFNBQUEsSUFBYSxPQUFPOztBQUVoRCxFQUFFLE9BQU87QUFDVCxJQUFJLElBQUksRUFBRSxnQkFBZ0I7QUFDMUIsSUFBSSxTQUFTLEdBQUc7QUFDaEIsTUFBTSxJQUFJLE9BQU8sTUFBTSxDQUFDLFFBQUEsS0FBYSxXQUFXLEVBQUU7QUFDbEQsUUFBUSxXQUFBO0FBQ1IsVUFBVSxLQUFLLENBQUMsSUFBSSxDQUFDLHFGQUFxRixDQUFDO0FBQzNHLFFBQVE7QUFDUixNQUFNOztBQUVOO0FBQ0E7QUFDQTtBQUNBO0FBQ0EsTUFBTSxZQUFZLENBQUMsRUFBRSxjQUFjLEVBQUUsSUFBQSxFQUFNLENBQUM7QUFDNUMsTUFBTSxjQUFjLEVBQUU7O0FBRXRCO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLE1BQU0sTUFBTSxjQUFBLEdBQWlCLGlCQUFpQixFQUFFO0FBQ2hELE1BQU0sSUFBSSxZQUFBLEdBQWUsY0FBYyxDQUFDLE9BQU8sRUFBRTtBQUNqRCxNQUFNLGNBQWMsQ0FBQyxnQkFBZ0IsQ0FBQyxTQUFTO0FBQy9DLFFBQVEsTUFBTSxZQUFBLEdBQWUsS0FBSyxDQUFDLE9BQU8sRUFBRTtBQUM1QztBQUNBLFFBQVEsSUFBSSxZQUFZLEVBQUUsRUFBQSxLQUFPLFlBQVksRUFBRSxFQUFBLElBQU0sWUFBWSxFQUFFLFVBQUEsS0FBZSxZQUFZLEVBQUUsVUFBVSxFQUFFO0FBQzVHO0FBQ0EsVUFBVSxjQUFjLEVBQUU7QUFDMUIsVUFBVSxZQUFBLEdBQWUsWUFBWTtBQUNyQyxRQUFRO0FBQ1IsTUFBTSxDQUFDLENBQUM7O0FBRVIsTUFBTSxJQUFJLFNBQUEsS0FBYyxPQUFPLEVBQUU7QUFDakM7QUFDQSxRQUFRLGdDQUFnQyxDQUFDLENBQUMsRUFBRSxJQUFJLEVBQUUsRUFBQSxFQUFJLEtBQUs7QUFDM0Q7QUFDQSxVQUFVLElBQUksSUFBQSxLQUFTLEVBQUUsRUFBRTtBQUMzQixZQUFZLFlBQVksQ0FBQyxFQUFFLGNBQWMsRUFBRSxJQUFBLEVBQU0sQ0FBQztBQUNsRCxZQUFZLGNBQWMsRUFBRTtBQUM1QixVQUFVO0FBQ1YsUUFBUSxDQUFDLENBQUM7QUFDVixNQUFNO0FBQ04sSUFBSSxDQUFDO0FBQ0wsR0FBRztBQUNILENBQUM7Ozs7IiwieF9nb29nbGVfaWdub3JlTGlzdCI6WzBdfQ==

@@ -1,0 +1,557 @@
+import { Settings } from "/node_modules/.vite/deps/lucide-react.js?v=6014a254";
+/** Remaining context sidebars migrated in Phase 6 */ export const PHASE6_CONTEXT_CONFIGS = {
+    sales: {
+        id: 'sales',
+        sectionKey: 'ventes_logistique',
+        additionalSectionKeys: [
+            'finance_paiements'
+        ],
+        rootPath: '/dashboard/orders',
+        breadcrumbSectionKey: 'ventes_logistique',
+        ariaLabel: 'Navigation ventes',
+        enablePlanLock: true,
+        collapsibleGroups: true,
+        includePaths: [
+            '/dashboard/orders',
+            '/dashboard/store/team',
+            '/dashboard/tasks',
+            '/dashboard/withdrawals',
+            '/dashboard/taxes',
+            '/dashboard/payments',
+            '/dashboard/payments-customers',
+            '/dashboard/pay-balance',
+            '/dashboard/payment-management',
+            '/dashboard/payment-methods',
+            '/dashboard/payment-connections',
+            '/dashboard/advanced-orders',
+            '/vendor/messaging',
+            '/dashboard/bookings',
+            '/dashboard/services/calendar',
+            '/dashboard/services/recurring-bookings',
+            '/dashboard/advanced-calendar',
+            '/dashboard/service-management',
+            '/dashboard/recurring-bookings',
+            '/dashboard/services/staff-availability',
+            '/dashboard/services/resource-conflicts',
+            '/dashboard/services/calendar-integrations',
+            '/dashboard/services/waitlist',
+            '/dashboard/services/reminders',
+            '/dashboard/inventory',
+            '/dashboard/shipping',
+            '/dashboard/shipping-services',
+            '/dashboard/contact-shipping-service',
+            '/dashboard/batch-shipping',
+            '/dashboard/product-kits',
+            '/dashboard/demand-forecasting',
+            '/dashboard/inventory-analytics',
+            '/dashboard/cost-optimization',
+            '/dashboard/suppliers',
+            '/dashboard/warehouses',
+            '/dashboard/physical-inventory',
+            '/dashboard/physical-analytics',
+            '/dashboard/physical-lots',
+            '/dashboard/physical-serial-tracking',
+            '/dashboard/physical-barcode-scanner',
+            '/dashboard/physical-preorders',
+            '/dashboard/physical-backorders',
+            '/dashboard/physical-bundles',
+            '/dashboard/physical-promotions',
+            '/dashboard/multi-currency'
+        ],
+        groups: [
+            {
+                groupKey: 'commandes_clients',
+                defaultLabel: 'Commandes & Clients',
+                paths: [
+                    '/dashboard/orders',
+                    '/dashboard/store/team',
+                    '/dashboard/tasks',
+                    '/dashboard/advanced-orders',
+                    '/vendor/messaging'
+                ]
+            },
+            {
+                groupKey: 'finance_paiements',
+                defaultLabel: 'Finance & Paiements',
+                paths: [
+                    '/dashboard/payments',
+                    '/dashboard/taxes',
+                    '/dashboard/payments-customers',
+                    '/dashboard/pay-balance',
+                    '/dashboard/payment-management',
+                    '/dashboard/payment-methods',
+                    '/dashboard/payment-connections',
+                    '/dashboard/withdrawals'
+                ]
+            },
+            {
+                groupKey: 'services_reservations',
+                defaultLabel: 'Services & Réservations',
+                paths: [
+                    '/dashboard/bookings',
+                    '/dashboard/services/calendar',
+                    '/dashboard/services/recurring-bookings',
+                    '/dashboard/advanced-calendar',
+                    '/dashboard/service-management',
+                    '/dashboard/recurring-bookings',
+                    '/dashboard/services/staff-availability',
+                    '/dashboard/services/resource-conflicts',
+                    '/dashboard/services/calendar-integrations',
+                    '/dashboard/services/waitlist',
+                    '/dashboard/services/reminders'
+                ]
+            },
+            {
+                groupKey: 'logistique_inventaire',
+                defaultLabel: 'Logistique & Inventaire',
+                paths: [
+                    '/dashboard/inventory',
+                    '/dashboard/shipping',
+                    '/dashboard/shipping-services',
+                    '/dashboard/contact-shipping-service',
+                    '/dashboard/batch-shipping',
+                    '/dashboard/product-kits',
+                    '/dashboard/inventory-analytics'
+                ]
+            },
+            {
+                groupKey: 'optimisation',
+                defaultLabel: 'Optimisation',
+                paths: [
+                    '/dashboard/demand-forecasting',
+                    '/dashboard/cost-optimization',
+                    '/dashboard/suppliers',
+                    '/dashboard/warehouses'
+                ]
+            },
+            {
+                groupKey: 'produits_physiques',
+                defaultLabel: 'Produits Physiques',
+                paths: [
+                    '/dashboard/physical-products',
+                    '/dashboard/physical-inventory',
+                    '/dashboard/physical-analytics',
+                    '/dashboard/physical-lots',
+                    '/dashboard/physical-serial-tracking',
+                    '/dashboard/physical-barcode-scanner',
+                    '/dashboard/physical-preorders',
+                    '/dashboard/physical-backorders',
+                    '/dashboard/physical-bundles',
+                    '/dashboard/physical-promotions',
+                    '/dashboard/multi-currency'
+                ]
+            }
+        ]
+    },
+    bookings: {
+        id: 'bookings',
+        sectionKey: 'ventes_logistique',
+        rootPath: '/dashboard/bookings',
+        breadcrumbSectionKey: 'reservations',
+        ariaLabel: 'Navigation réservations',
+        collapsibleGroups: true,
+        includePaths: [
+            '/dashboard/bookings',
+            '/dashboard/advanced-calendar',
+            '/dashboard/service-management',
+            '/dashboard/recurring-bookings',
+            '/dashboard/services/staff-availability',
+            '/dashboard/services/resource-conflicts',
+            '/dashboard/services/calendar',
+            '/dashboard/services/recurring-bookings',
+            '/dashboard/services/calendar-integrations',
+            '/dashboard/services/waitlist',
+            '/dashboard/services/reminders'
+        ],
+        groups: [
+            {
+                groupKey: 'reservations',
+                defaultLabel: 'Réservations',
+                paths: [
+                    '/dashboard/bookings',
+                    '/dashboard/recurring-bookings',
+                    '/dashboard/service-management'
+                ]
+            },
+            {
+                groupKey: 'calendriers',
+                defaultLabel: 'Calendriers',
+                paths: [
+                    '/dashboard/advanced-calendar',
+                    '/dashboard/services/calendar',
+                    '/dashboard/services/recurring-bookings',
+                    '/dashboard/services/staff-availability'
+                ]
+            },
+            {
+                groupKey: 'automatisation',
+                defaultLabel: 'Automatisation',
+                paths: [
+                    '/dashboard/services/calendar-integrations',
+                    '/dashboard/services/waitlist',
+                    '/dashboard/services/reminders',
+                    '/dashboard/services/resource-conflicts'
+                ]
+            }
+        ]
+    },
+    inventory: {
+        id: 'inventory',
+        sectionKey: 'ventes_logistique',
+        rootPath: '/dashboard/inventory',
+        breadcrumbSectionKey: 'inventaire',
+        ariaLabel: 'Navigation inventaire',
+        enablePlanLock: true,
+        collapsibleGroups: true,
+        includePaths: [
+            '/dashboard/inventory',
+            '/dashboard/product-kits',
+            '/dashboard/demand-forecasting',
+            '/dashboard/cost-optimization',
+            '/dashboard/suppliers',
+            '/dashboard/warehouses',
+            '/dashboard/physical-inventory',
+            '/dashboard/physical-lots',
+            '/dashboard/physical-serial-tracking',
+            '/dashboard/physical-barcode-scanner',
+            '/dashboard/physical-preorders',
+            '/dashboard/physical-backorders',
+            '/dashboard/inventory-analytics'
+        ],
+        groups: [
+            {
+                groupKey: 'stocks',
+                defaultLabel: 'Stocks',
+                paths: [
+                    '/dashboard/inventory',
+                    '/dashboard/physical-inventory',
+                    '/dashboard/physical-lots',
+                    '/dashboard/inventory-analytics'
+                ]
+            },
+            {
+                groupKey: 'suivi_qualite',
+                defaultLabel: 'Suivi & traçabilité',
+                paths: [
+                    '/dashboard/physical-serial-tracking',
+                    '/dashboard/physical-barcode-scanner',
+                    '/dashboard/physical-preorders',
+                    '/dashboard/physical-backorders'
+                ]
+            },
+            {
+                groupKey: 'optimisation_stock',
+                defaultLabel: 'Optimisation',
+                paths: [
+                    '/dashboard/product-kits',
+                    '/dashboard/demand-forecasting',
+                    '/dashboard/cost-optimization',
+                    '/dashboard/suppliers',
+                    '/dashboard/warehouses'
+                ]
+            }
+        ]
+    },
+    shipping: {
+        id: 'shipping',
+        sectionKey: 'ventes_logistique',
+        rootPath: '/dashboard/shipping',
+        breadcrumbSectionKey: 'expeditions',
+        ariaLabel: 'Navigation expéditions',
+        enablePlanLock: true,
+        includePaths: [
+            '/dashboard/shipping',
+            '/dashboard/shipping-services',
+            '/dashboard/contact-shipping-service',
+            '/dashboard/batch-shipping'
+        ]
+    },
+    store: {
+        id: 'store',
+        sectionKey: 'principal',
+        additionalSectionKeys: [
+            'ventes_logistique'
+        ],
+        rootPath: '/dashboard/store',
+        breadcrumbSectionKey: 'boutique',
+        ariaLabel: 'Navigation boutique',
+        includePaths: [
+            '/dashboard/store',
+            '/dashboard/store/team'
+        ],
+        supplementStaticItems: [
+            {
+                title: 'Paramètres Boutique',
+                url: '/dashboard/settings?tab=store',
+                icon: Settings
+            }
+        ]
+    },
+    promotions: {
+        id: 'promotions',
+        sectionKey: 'marketing_croissance',
+        rootPath: '/dashboard/promotions',
+        breadcrumbSectionKey: 'promotions',
+        ariaLabel: 'Navigation promotions',
+        includePaths: [
+            '/dashboard/promotions',
+            '/dashboard/coupons',
+            '/dashboard/promotions/stats',
+            '/dashboard/abandoned-carts'
+        ]
+    },
+    courses: {
+        id: 'courses',
+        sectionKey: 'produits_cours',
+        additionalSectionKeys: [
+            'mon_compte'
+        ],
+        rootPath: '/account/courses',
+        breadcrumbSectionKey: 'cours',
+        ariaLabel: 'Navigation cours',
+        collapsibleGroups: true,
+        includePaths: [
+            '/account/courses',
+            '/dashboard/courses/new',
+            '/dashboard/courses',
+            '/dashboard/courses/live-sessions',
+            '/dashboard/courses/assignments',
+            '/dashboard/cohorts',
+            '/dashboard/reviews'
+        ],
+        groups: [
+            {
+                groupKey: 'mes_cours',
+                defaultLabel: 'Mes cours',
+                paths: [
+                    '/account/courses'
+                ]
+            },
+            {
+                groupKey: 'gestion_cours',
+                defaultLabel: 'Gestion (vendeur)',
+                paths: [
+                    '/dashboard/courses/new',
+                    '/dashboard/courses',
+                    '/dashboard/courses/live-sessions',
+                    '/dashboard/courses/assignments',
+                    '/dashboard/cohorts',
+                    '/dashboard/reviews'
+                ]
+            }
+        ]
+    },
+    affiliate: {
+        id: 'affiliate',
+        sectionKey: 'marketing_croissance',
+        rootPath: '/affiliate/dashboard',
+        breadcrumbSectionKey: 'affiliation',
+        ariaLabel: 'Navigation affiliation',
+        collapsibleGroups: true,
+        includePaths: [
+            '/affiliate/dashboard',
+            '/affiliate/courses',
+            '/dashboard/affiliates',
+            '/dashboard/referrals',
+            '/dashboard/store-affiliates'
+        ],
+        groups: [
+            {
+                groupKey: 'tableau_bord',
+                defaultLabel: 'Tableau de bord',
+                paths: [
+                    '/affiliate/dashboard',
+                    '/affiliate/courses'
+                ]
+            },
+            {
+                groupKey: 'programmes',
+                defaultLabel: 'Programmes',
+                paths: [
+                    '/dashboard/affiliates',
+                    '/dashboard/referrals',
+                    '/dashboard/store-affiliates'
+                ]
+            }
+        ]
+    },
+    account: {
+        id: 'account',
+        sectionKey: 'mon_compte',
+        rootPath: '/account',
+        breadcrumbSectionKey: 'mon_compte',
+        ariaLabel: 'Navigation compte',
+        persona: 'buyer',
+        collapsibleGroups: true,
+        includePaths: [
+            '/account',
+            '/account/profile',
+            '/account/orders',
+            '/account/downloads',
+            '/account/digital',
+            '/account/physical',
+            '/account/courses',
+            '/account/wishlist',
+            '/account/alerts',
+            '/account/invoices',
+            '/account/returns',
+            '/account/gift-cards',
+            '/account/warranties',
+            '/account/bookings',
+            '/account/artist',
+            '/account/loyalty',
+            '/checkout/multi-store-tracking'
+        ],
+        groups: [
+            {
+                groupKey: 'profil_compte',
+                defaultLabel: 'Mon compte',
+                paths: [
+                    '/account',
+                    '/account/profile',
+                    '/account/wishlist',
+                    '/account/alerts'
+                ]
+            },
+            {
+                groupKey: 'achats',
+                defaultLabel: 'Achats & facturation',
+                paths: [
+                    '/account/orders',
+                    '/account/invoices',
+                    '/account/returns',
+                    '/account/gift-cards',
+                    '/account/warranties'
+                ]
+            },
+            {
+                groupKey: 'portails',
+                defaultLabel: 'Mes portails',
+                paths: [
+                    '/account/downloads',
+                    '/account/digital',
+                    '/account/physical',
+                    '/account/courses'
+                ]
+            },
+            {
+                groupKey: 'services_fidelite',
+                defaultLabel: 'Services & fidélité',
+                paths: [
+                    '/account/bookings',
+                    '/account/artist',
+                    '/account/loyalty',
+                    '/checkout/multi-store-tracking'
+                ]
+            }
+        ]
+    },
+    digitalPortal: {
+        id: 'digitalPortal',
+        sectionKey: 'mon_compte',
+        additionalSectionKeys: [
+            'produits_cours'
+        ],
+        rootPath: '/account/digital',
+        breadcrumbSectionKey: 'portail_digital',
+        ariaLabel: 'Navigation portail digital',
+        persona: 'buyer',
+        collapsibleGroups: true,
+        includePaths: [
+            '/account/digital',
+            '/account/downloads',
+            '/dashboard/my-licenses',
+            '/dashboard/digital-products',
+            '/dashboard/digital-products/bundles',
+            '/dashboard/digital-products/bundles/create',
+            '/dashboard/digital/updates',
+            '/dashboard/my-downloads',
+            '/dashboard/license-management'
+        ],
+        groups: [
+            {
+                groupKey: 'mon_portail_digital',
+                defaultLabel: 'Mon portail',
+                paths: [
+                    '/account/digital',
+                    '/account/downloads',
+                    '/dashboard/my-licenses'
+                ]
+            },
+            {
+                groupKey: 'gestion_digitale',
+                defaultLabel: 'Gestion (vendeur)',
+                paths: [
+                    '/dashboard/digital-products',
+                    '/dashboard/digital-products/bundles',
+                    '/dashboard/digital-products/bundles/create',
+                    '/dashboard/digital/updates',
+                    '/dashboard/my-downloads',
+                    '/dashboard/license-management'
+                ]
+            }
+        ]
+    },
+    physicalPortal: {
+        id: 'physicalPortal',
+        sectionKey: 'mon_compte',
+        additionalSectionKeys: [
+            'ventes_logistique'
+        ],
+        rootPath: '/account/physical',
+        breadcrumbSectionKey: 'portail_physique',
+        ariaLabel: 'Navigation portail physique',
+        persona: 'buyer',
+        collapsibleGroups: true,
+        includePaths: [
+            '/account/physical',
+            '/account/orders',
+            '/account/returns',
+            '/dashboard/physical-inventory',
+            '/dashboard/physical-analytics',
+            '/dashboard/physical-lots',
+            '/dashboard/physical-serial-tracking',
+            '/dashboard/physical-barcode-scanner',
+            '/dashboard/physical-preorders',
+            '/dashboard/physical-backorders',
+            '/dashboard/physical-bundles',
+            '/dashboard/physical-promotions',
+            '/dashboard/multi-currency'
+        ],
+        groups: [
+            {
+                groupKey: 'mon_portail_physique',
+                defaultLabel: 'Mon portail',
+                paths: [
+                    '/account/physical',
+                    '/account/orders',
+                    '/account/returns'
+                ]
+            },
+            {
+                groupKey: 'stocks_suivi',
+                defaultLabel: 'Stocks & suivi',
+                paths: [
+                    '/dashboard/physical-inventory',
+                    '/dashboard/physical-analytics',
+                    '/dashboard/physical-lots',
+                    '/dashboard/physical-serial-tracking',
+                    '/dashboard/physical-barcode-scanner'
+                ]
+            },
+            {
+                groupKey: 'operations_physiques',
+                defaultLabel: 'Opérations',
+                paths: [
+                    '/dashboard/physical-preorders',
+                    '/dashboard/physical-backorders',
+                    '/dashboard/physical-bundles',
+                    '/dashboard/physical-promotions',
+                    '/dashboard/multi-currency'
+                ]
+            }
+        ]
+    }
+};
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIm5hdmlnYXRpb24uY29udGV4dC5waGFzZTYudHMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgU2V0dGluZ3MgfSBmcm9tICdsdWNpZGUtcmVhY3QnO1xuaW1wb3J0IHR5cGUgeyBDb250ZXh0U2lkZWJhckNvbmZpZyB9IGZyb20gJ0AvY29uZmlnL25hdmlnYXRpb24uY29udGV4dC50eXBlcyc7XG5cbi8qKiBSZW1haW5pbmcgY29udGV4dCBzaWRlYmFycyBtaWdyYXRlZCBpbiBQaGFzZSA2ICovXG5leHBvcnQgY29uc3QgUEhBU0U2X0NPTlRFWFRfQ09ORklHUyA9IHtcbiAgc2FsZXM6IHtcbiAgICBpZDogJ3NhbGVzJyxcbiAgICBzZWN0aW9uS2V5OiAndmVudGVzX2xvZ2lzdGlxdWUnLFxuICAgIGFkZGl0aW9uYWxTZWN0aW9uS2V5czogWydmaW5hbmNlX3BhaWVtZW50cyddLFxuICAgIHJvb3RQYXRoOiAnL2Rhc2hib2FyZC9vcmRlcnMnLFxuICAgIGJyZWFkY3J1bWJTZWN0aW9uS2V5OiAndmVudGVzX2xvZ2lzdGlxdWUnLFxuICAgIGFyaWFMYWJlbDogJ05hdmlnYXRpb24gdmVudGVzJyxcbiAgICBlbmFibGVQbGFuTG9jazogdHJ1ZSxcbiAgICBjb2xsYXBzaWJsZUdyb3VwczogdHJ1ZSxcbiAgICBpbmNsdWRlUGF0aHM6IFtcbiAgICAgICcvZGFzaGJvYXJkL29yZGVycycsXG4gICAgICAnL2Rhc2hib2FyZC9zdG9yZS90ZWFtJyxcbiAgICAgICcvZGFzaGJvYXJkL3Rhc2tzJyxcbiAgICAgICcvZGFzaGJvYXJkL3dpdGhkcmF3YWxzJyxcbiAgICAgICcvZGFzaGJvYXJkL3RheGVzJyxcbiAgICAgICcvZGFzaGJvYXJkL3BheW1lbnRzJyxcbiAgICAgICcvZGFzaGJvYXJkL3BheW1lbnRzLWN1c3RvbWVycycsXG4gICAgICAnL2Rhc2hib2FyZC9wYXktYmFsYW5jZScsXG4gICAgICAnL2Rhc2hib2FyZC9wYXltZW50LW1hbmFnZW1lbnQnLFxuICAgICAgJy9kYXNoYm9hcmQvcGF5bWVudC1tZXRob2RzJyxcbiAgICAgICcvZGFzaGJvYXJkL3BheW1lbnQtY29ubmVjdGlvbnMnLFxuICAgICAgJy9kYXNoYm9hcmQvYWR2YW5jZWQtb3JkZXJzJyxcbiAgICAgICcvdmVuZG9yL21lc3NhZ2luZycsXG4gICAgICAnL2Rhc2hib2FyZC9ib29raW5ncycsXG4gICAgICAnL2Rhc2hib2FyZC9zZXJ2aWNlcy9jYWxlbmRhcicsXG4gICAgICAnL2Rhc2hib2FyZC9zZXJ2aWNlcy9yZWN1cnJpbmctYm9va2luZ3MnLFxuICAgICAgJy9kYXNoYm9hcmQvYWR2YW5jZWQtY2FsZW5kYXInLFxuICAgICAgJy9kYXNoYm9hcmQvc2VydmljZS1tYW5hZ2VtZW50JyxcbiAgICAgICcvZGFzaGJvYXJkL3JlY3VycmluZy1ib29raW5ncycsXG4gICAgICAnL2Rhc2hib2FyZC9zZXJ2aWNlcy9zdGFmZi1hdmFpbGFiaWxpdHknLFxuICAgICAgJy9kYXNoYm9hcmQvc2VydmljZXMvcmVzb3VyY2UtY29uZmxpY3RzJyxcbiAgICAgICcvZGFzaGJvYXJkL3NlcnZpY2VzL2NhbGVuZGFyLWludGVncmF0aW9ucycsXG4gICAgICAnL2Rhc2hib2FyZC9zZXJ2aWNlcy93YWl0bGlzdCcsXG4gICAgICAnL2Rhc2hib2FyZC9zZXJ2aWNlcy9yZW1pbmRlcnMnLFxuICAgICAgJy9kYXNoYm9hcmQvaW52ZW50b3J5JyxcbiAgICAgICcvZGFzaGJvYXJkL3NoaXBwaW5nJyxcbiAgICAgICcvZGFzaGJvYXJkL3NoaXBwaW5nLXNlcnZpY2VzJyxcbiAgICAgICcvZGFzaGJvYXJkL2NvbnRhY3Qtc2hpcHBpbmctc2VydmljZScsXG4gICAgICAnL2Rhc2hib2FyZC9iYXRjaC1zaGlwcGluZycsXG4gICAgICAnL2Rhc2hib2FyZC9wcm9kdWN0LWtpdHMnLFxuICAgICAgJy9kYXNoYm9hcmQvZGVtYW5kLWZvcmVjYXN0aW5nJyxcbiAgICAgICcvZGFzaGJvYXJkL2ludmVudG9yeS1hbmFseXRpY3MnLFxuICAgICAgJy9kYXNoYm9hcmQvY29zdC1vcHRpbWl6YXRpb24nLFxuICAgICAgJy9kYXNoYm9hcmQvc3VwcGxpZXJzJyxcbiAgICAgICcvZGFzaGJvYXJkL3dhcmVob3VzZXMnLFxuICAgICAgJy9kYXNoYm9hcmQvcGh5c2ljYWwtaW52ZW50b3J5JyxcbiAgICAgICcvZGFzaGJvYXJkL3BoeXNpY2FsLWFuYWx5dGljcycsXG4gICAgICAnL2Rhc2hib2FyZC9waHlzaWNhbC1sb3RzJyxcbiAgICAgICcvZGFzaGJvYXJkL3BoeXNpY2FsLXNlcmlhbC10cmFja2luZycsXG4gICAgICAnL2Rhc2hib2FyZC9waHlzaWNhbC1iYXJjb2RlLXNjYW5uZXInLFxuICAgICAgJy9kYXNoYm9hcmQvcGh5c2ljYWwtcHJlb3JkZXJzJyxcbiAgICAgICcvZGFzaGJvYXJkL3BoeXNpY2FsLWJhY2tvcmRlcnMnLFxuICAgICAgJy9kYXNoYm9hcmQvcGh5c2ljYWwtYnVuZGxlcycsXG4gICAgICAnL2Rhc2hib2FyZC9waHlzaWNhbC1wcm9tb3Rpb25zJyxcbiAgICAgICcvZGFzaGJvYXJkL211bHRpLWN1cnJlbmN5JyxcbiAgICBdLFxuICAgIGdyb3VwczogW1xuICAgICAge1xuICAgICAgICBncm91cEtleTogJ2NvbW1hbmRlc19jbGllbnRzJyxcbiAgICAgICAgZGVmYXVsdExhYmVsOiAnQ29tbWFuZGVzICYgQ2xpZW50cycsXG4gICAgICAgIHBhdGhzOiBbXG4gICAgICAgICAgJy9kYXNoYm9hcmQvb3JkZXJzJyxcbiAgICAgICAgICAnL2Rhc2hib2FyZC9zdG9yZS90ZWFtJyxcbiAgICAgICAgICAnL2Rhc2hib2FyZC90YXNrcycsXG4gICAgICAgICAgJy9kYXNoYm9hcmQvYWR2YW5jZWQtb3JkZXJzJyxcbiAgICAgICAgICAnL3ZlbmRvci9tZXNzYWdpbmcnLFxuICAgICAgICBdLFxuICAgICAgfSxcbiAgICAgIHtcbiAgICAgICAgZ3JvdXBLZXk6ICdmaW5hbmNlX3BhaWVtZW50cycsXG4gICAgICAgIGRlZmF1bHRMYWJlbDogJ0ZpbmFuY2UgJiBQYWllbWVudHMnLFxuICAgICAgICBwYXRoczogW1xuICAgICAgICAgICcvZGFzaGJvYXJkL3BheW1lbnRzJyxcbiAgICAgICAgICAnL2Rhc2hib2FyZC90YXhlcycsXG4gICAgICAgICAgJy9kYXNoYm9hcmQvcGF5bWVudHMtY3VzdG9tZXJzJyxcbiAgICAgICAgICAnL2Rhc2hib2FyZC9wYXktYmFsYW5jZScsXG4gICAgICAgICAgJy9kYXNoYm9hcmQvcGF5bWVudC1tYW5hZ2VtZW50JyxcbiAgICAgICAgICAnL2Rhc2hib2FyZC9wYXltZW50LW1ldGhvZHMnLFxuICAgICAgICAgICcvZGFzaGJvYXJkL3BheW1lbnQtY29ubmVjdGlvbnMnLFxuICAgICAgICAgICcvZGFzaGJvYXJkL3dpdGhkcmF3YWxzJyxcbiAgICAgICAgXSxcbiAgICAgIH0sXG4gICAgICB7XG4gICAgICAgIGdyb3VwS2V5OiAnc2VydmljZXNfcmVzZXJ2YXRpb25zJyxcbiAgICAgICAgZGVmYXVsdExhYmVsOiAnU2VydmljZXMgJiBSw6lzZXJ2YXRpb25zJyxcbiAgICAgICAgcGF0aHM6IFtcbiAgICAgICAgICAnL2Rhc2hib2FyZC9ib29raW5ncycsXG4gICAgICAgICAgJy9kYXNoYm9hcmQvc2VydmljZXMvY2FsZW5kYXInLFxuICAgICAgICAgICcvZGFzaGJvYXJkL3NlcnZpY2VzL3JlY3VycmluZy1ib29raW5ncycsXG4gICAgICAgICAgJy9kYXNoYm9hcmQvYWR2YW5jZWQtY2FsZW5kYXInLFxuICAgICAgICAgICcvZGFzaGJvYXJkL3NlcnZpY2UtbWFuYWdlbWVudCcsXG4gICAgICAgICAgJy9kYXNoYm9hcmQvcmVjdXJyaW5nLWJvb2tpbmdzJyxcbiAgICAgICAgICAnL2Rhc2hib2FyZC9zZXJ2aWNlcy9zdGFmZi1hdmFpbGFiaWxpdHknLFxuICAgICAgICAgICcvZGFzaGJvYXJkL3NlcnZpY2VzL3Jlc291cmNlLWNvbmZsaWN0cycsXG4gICAgICAgICAgJy9kYXNoYm9hcmQvc2VydmljZXMvY2FsZW5kYXItaW50ZWdyYXRpb25zJyxcbiAgICAgICAgICAnL2Rhc2hib2FyZC9zZXJ2aWNlcy93YWl0bGlzdCcsXG4gICAgICAgICAgJy9kYXNoYm9hcmQvc2VydmljZXMvcmVtaW5kZXJzJyxcbiAgICAgICAgXSxcbiAgICAgIH0sXG4gICAgICB7XG4gICAgICAgIGdyb3VwS2V5OiAnbG9naXN0aXF1ZV9pbnZlbnRhaXJlJyxcbiAgICAgICAgZGVmYXVsdExhYmVsOiAnTG9naXN0aXF1ZSAmIEludmVudGFpcmUnLFxuICAgICAgICBwYXRoczogW1xuICAgICAgICAgICcvZGFzaGJvYXJkL2ludmVudG9yeScsXG4gICAgICAgICAgJy9kYXNoYm9hcmQvc2hpcHBpbmcnLFxuICAgICAgICAgICcvZGFzaGJvYXJkL3NoaXBwaW5nLXNlcnZpY2VzJyxcbiAgICAgICAgICAnL2Rhc2hib2FyZC9jb250YWN0LXNoaXBwaW5nLXNlcnZpY2UnLFxuICAgICAgICAgICcvZGFzaGJvYXJkL2JhdGNoLXNoaXBwaW5nJyxcbiAgICAgICAgICAnL2Rhc2hib2FyZC9wcm9kdWN0LWtpdHMnLFxuICAgICAgICAgICcvZGFzaGJvYXJkL2ludmVudG9yeS1hbmFseXRpY3MnLFxuICAgICAgICBdLFxuICAgICAgfSxcbiAgICAgIHtcbiAgICAgICAgZ3JvdXBLZXk6ICdvcHRpbWlzYXRpb24nLFxuICAgICAgICBkZWZhdWx0TGFiZWw6ICdPcHRpbWlzYXRpb24nLFxuICAgICAgICBwYXRoczogW1xuICAgICAgICAgICcvZGFzaGJvYXJkL2RlbWFuZC1mb3JlY2FzdGluZycsXG4gICAgICAgICAgJy9kYXNoYm9hcmQvY29zdC1vcHRpbWl6YXRpb24nLFxuICAgICAgICAgICcvZGFzaGJvYXJkL3N1cHBsaWVycycsXG4gICAgICAgICAgJy9kYXNoYm9hcmQvd2FyZWhvdXNlcycsXG4gICAgICAgIF0sXG4gICAgICB9LFxuICAgICAge1xuICAgICAgICBncm91cEtleTogJ3Byb2R1aXRzX3BoeXNpcXVlcycsXG4gICAgICAgIGRlZmF1bHRMYWJlbDogJ1Byb2R1aXRzIFBoeXNpcXVlcycsXG4gICAgICAgIHBhdGhzOiBbXG4gICAgICAgICAgJy9kYXNoYm9hcmQvcGh5c2ljYWwtcHJvZHVjdHMnLFxuICAgICAgICAgICcvZGFzaGJvYXJkL3BoeXNpY2FsLWludmVudG9yeScsXG4gICAgICAgICAgJy9kYXNoYm9hcmQvcGh5c2ljYWwtYW5hbHl0aWNzJyxcbiAgICAgICAgICAnL2Rhc2hib2FyZC9waHlzaWNhbC1sb3RzJyxcbiAgICAgICAgICAnL2Rhc2hib2FyZC9waHlzaWNhbC1zZXJpYWwtdHJhY2tpbmcnLFxuICAgICAgICAgICcvZGFzaGJvYXJkL3BoeXNpY2FsLWJhcmNvZGUtc2Nhbm5lcicsXG4gICAgICAgICAgJy9kYXNoYm9hcmQvcGh5c2ljYWwtcHJlb3JkZXJzJyxcbiAgICAgICAgICAnL2Rhc2hib2FyZC9waHlzaWNhbC1iYWNrb3JkZXJzJyxcbiAgICAgICAgICAnL2Rhc2hib2FyZC9waHlzaWNhbC1idW5kbGVzJyxcbiAgICAgICAgICAnL2Rhc2hib2FyZC9waHlzaWNhbC1wcm9tb3Rpb25zJyxcbiAgICAgICAgICAnL2Rhc2hib2FyZC9tdWx0aS1jdXJyZW5jeScsXG4gICAgICAgIF0sXG4gICAgICB9LFxuICAgIF0sXG4gIH0sXG4gIGJvb2tpbmdzOiB7XG4gICAgaWQ6ICdib29raW5ncycsXG4gICAgc2VjdGlvbktleTogJ3ZlbnRlc19sb2dpc3RpcXVlJyxcbiAgICByb290UGF0aDogJy9kYXNoYm9hcmQvYm9va2luZ3MnLFxuICAgIGJyZWFkY3J1bWJTZWN0aW9uS2V5OiAncmVzZXJ2YXRpb25zJyxcbiAgICBhcmlhTGFiZWw6ICdOYXZpZ2F0aW9uIHLDqXNlcnZhdGlvbnMnLFxuICAgIGNvbGxhcHNpYmxlR3JvdXBzOiB0cnVlLFxuICAgIGluY2x1ZGVQYXRoczogW1xuICAgICAgJy9kYXNoYm9hcmQvYm9va2luZ3MnLFxuICAgICAgJy9kYXNoYm9hcmQvYWR2YW5jZWQtY2FsZW5kYXInLFxuICAgICAgJy9kYXNoYm9hcmQvc2VydmljZS1tYW5hZ2VtZW50JyxcbiAgICAgICcvZGFzaGJvYXJkL3JlY3VycmluZy1ib29raW5ncycsXG4gICAgICAnL2Rhc2hib2FyZC9zZXJ2aWNlcy9zdGFmZi1hdmFpbGFiaWxpdHknLFxuICAgICAgJy9kYXNoYm9hcmQvc2VydmljZXMvcmVzb3VyY2UtY29uZmxpY3RzJyxcbiAgICAgICcvZGFzaGJvYXJkL3NlcnZpY2VzL2NhbGVuZGFyJyxcbiAgICAgICcvZGFzaGJvYXJkL3NlcnZpY2VzL3JlY3VycmluZy1ib29raW5ncycsXG4gICAgICAnL2Rhc2hib2FyZC9zZXJ2aWNlcy9jYWxlbmRhci1pbnRlZ3JhdGlvbnMnLFxuICAgICAgJy9kYXNoYm9hcmQvc2VydmljZXMvd2FpdGxpc3QnLFxuICAgICAgJy9kYXNoYm9hcmQvc2VydmljZXMvcmVtaW5kZXJzJyxcbiAgICBdLFxuICAgIGdyb3VwczogW1xuICAgICAge1xuICAgICAgICBncm91cEtleTogJ3Jlc2VydmF0aW9ucycsXG4gICAgICAgIGRlZmF1bHRMYWJlbDogJ1LDqXNlcnZhdGlvbnMnLFxuICAgICAgICBwYXRoczogW1xuICAgICAgICAgICcvZGFzaGJvYXJkL2Jvb2tpbmdzJyxcbiAgICAgICAgICAnL2Rhc2hib2FyZC9yZWN1cnJpbmctYm9va2luZ3MnLFxuICAgICAgICAgICcvZGFzaGJvYXJkL3NlcnZpY2UtbWFuYWdlbWVudCcsXG4gICAgICAgIF0sXG4gICAgICB9LFxuICAgICAge1xuICAgICAgICBncm91cEtleTogJ2NhbGVuZHJpZXJzJyxcbiAgICAgICAgZGVmYXVsdExhYmVsOiAnQ2FsZW5kcmllcnMnLFxuICAgICAgICBwYXRoczogW1xuICAgICAgICAgICcvZGFzaGJvYXJkL2FkdmFuY2VkLWNhbGVuZGFyJyxcbiAgICAgICAgICAnL2Rhc2hib2FyZC9zZXJ2aWNlcy9jYWxlbmRhcicsXG4gICAgICAgICAgJy9kYXNoYm9hcmQvc2VydmljZXMvcmVjdXJyaW5nLWJvb2tpbmdzJyxcbiAgICAgICAgICAnL2Rhc2hib2FyZC9zZXJ2aWNlcy9zdGFmZi1hdmFpbGFiaWxpdHknLFxuICAgICAgICBdLFxuICAgICAgfSxcbiAgICAgIHtcbiAgICAgICAgZ3JvdXBLZXk6ICdhdXRvbWF0aXNhdGlvbicsXG4gICAgICAgIGRlZmF1bHRMYWJlbDogJ0F1dG9tYXRpc2F0aW9uJyxcbiAgICAgICAgcGF0aHM6IFtcbiAgICAgICAgICAnL2Rhc2hib2FyZC9zZXJ2aWNlcy9jYWxlbmRhci1pbnRlZ3JhdGlvbnMnLFxuICAgICAgICAgICcvZGFzaGJvYXJkL3NlcnZpY2VzL3dhaXRsaXN0JyxcbiAgICAgICAgICAnL2Rhc2hib2FyZC9zZXJ2aWNlcy9yZW1pbmRlcnMnLFxuICAgICAgICAgICcvZGFzaGJvYXJkL3NlcnZpY2VzL3Jlc291cmNlLWNvbmZsaWN0cycsXG4gICAgICAgIF0sXG4gICAgICB9LFxuICAgIF0sXG4gIH0sXG4gIGludmVudG9yeToge1xuICAgIGlkOiAnaW52ZW50b3J5JyxcbiAgICBzZWN0aW9uS2V5OiAndmVudGVzX2xvZ2lzdGlxdWUnLFxuICAgIHJvb3RQYXRoOiAnL2Rhc2hib2FyZC9pbnZlbnRvcnknLFxuICAgIGJyZWFkY3J1bWJTZWN0aW9uS2V5OiAnaW52ZW50YWlyZScsXG4gICAgYXJpYUxhYmVsOiAnTmF2aWdhdGlvbiBpbnZlbnRhaXJlJyxcbiAgICBlbmFibGVQbGFuTG9jazogdHJ1ZSxcbiAgICBjb2xsYXBzaWJsZUdyb3VwczogdHJ1ZSxcbiAgICBpbmNsdWRlUGF0aHM6IFtcbiAgICAgICcvZGFzaGJvYXJkL2ludmVudG9yeScsXG4gICAgICAnL2Rhc2hib2FyZC9wcm9kdWN0LWtpdHMnLFxuICAgICAgJy9kYXNoYm9hcmQvZGVtYW5kLWZvcmVjYXN0aW5nJyxcbiAgICAgICcvZGFzaGJvYXJkL2Nvc3Qtb3B0aW1pemF0aW9uJyxcbiAgICAgICcvZGFzaGJvYXJkL3N1cHBsaWVycycsXG4gICAgICAnL2Rhc2hib2FyZC93YXJlaG91c2VzJyxcbiAgICAgICcvZGFzaGJvYXJkL3BoeXNpY2FsLWludmVudG9yeScsXG4gICAgICAnL2Rhc2hib2FyZC9waHlzaWNhbC1sb3RzJyxcbiAgICAgICcvZGFzaGJvYXJkL3BoeXNpY2FsLXNlcmlhbC10cmFja2luZycsXG4gICAgICAnL2Rhc2hib2FyZC9waHlzaWNhbC1iYXJjb2RlLXNjYW5uZXInLFxuICAgICAgJy9kYXNoYm9hcmQvcGh5c2ljYWwtcHJlb3JkZXJzJyxcbiAgICAgICcvZGFzaGJvYXJkL3BoeXNpY2FsLWJhY2tvcmRlcnMnLFxuICAgICAgJy9kYXNoYm9hcmQvaW52ZW50b3J5LWFuYWx5dGljcycsXG4gICAgXSxcbiAgICBncm91cHM6IFtcbiAgICAgIHtcbiAgICAgICAgZ3JvdXBLZXk6ICdzdG9ja3MnLFxuICAgICAgICBkZWZhdWx0TGFiZWw6ICdTdG9ja3MnLFxuICAgICAgICBwYXRoczogW1xuICAgICAgICAgICcvZGFzaGJvYXJkL2ludmVudG9yeScsXG4gICAgICAgICAgJy9kYXNoYm9hcmQvcGh5c2ljYWwtaW52ZW50b3J5JyxcbiAgICAgICAgICAnL2Rhc2hib2FyZC9waHlzaWNhbC1sb3RzJyxcbiAgICAgICAgICAnL2Rhc2hib2FyZC9pbnZlbnRvcnktYW5hbHl0aWNzJyxcbiAgICAgICAgXSxcbiAgICAgIH0sXG4gICAgICB7XG4gICAgICAgIGdyb3VwS2V5OiAnc3VpdmlfcXVhbGl0ZScsXG4gICAgICAgIGRlZmF1bHRMYWJlbDogJ1N1aXZpICYgdHJhw6dhYmlsaXTDqScsXG4gICAgICAgIHBhdGhzOiBbXG4gICAgICAgICAgJy9kYXNoYm9hcmQvcGh5c2ljYWwtc2VyaWFsLXRyYWNraW5nJyxcbiAgICAgICAgICAnL2Rhc2hib2FyZC9waHlzaWNhbC1iYXJjb2RlLXNjYW5uZXInLFxuICAgICAgICAgICcvZGFzaGJvYXJkL3BoeXNpY2FsLXByZW9yZGVycycsXG4gICAgICAgICAgJy9kYXNoYm9hcmQvcGh5c2ljYWwtYmFja29yZGVycycsXG4gICAgICAgIF0sXG4gICAgICB9LFxuICAgICAge1xuICAgICAgICBncm91cEtleTogJ29wdGltaXNhdGlvbl9zdG9jaycsXG4gICAgICAgIGRlZmF1bHRMYWJlbDogJ09wdGltaXNhdGlvbicsXG4gICAgICAgIHBhdGhzOiBbXG4gICAgICAgICAgJy9kYXNoYm9hcmQvcHJvZHVjdC1raXRzJyxcbiAgICAgICAgICAnL2Rhc2hib2FyZC9kZW1hbmQtZm9yZWNhc3RpbmcnLFxuICAgICAgICAgICcvZGFzaGJvYXJkL2Nvc3Qtb3B0aW1pemF0aW9uJyxcbiAgICAgICAgICAnL2Rhc2hib2FyZC9zdXBwbGllcnMnLFxuICAgICAgICAgICcvZGFzaGJvYXJkL3dhcmVob3VzZXMnLFxuICAgICAgICBdLFxuICAgICAgfSxcbiAgICBdLFxuICB9LFxuICBzaGlwcGluZzoge1xuICAgIGlkOiAnc2hpcHBpbmcnLFxuICAgIHNlY3Rpb25LZXk6ICd2ZW50ZXNfbG9naXN0aXF1ZScsXG4gICAgcm9vdFBhdGg6ICcvZGFzaGJvYXJkL3NoaXBwaW5nJyxcbiAgICBicmVhZGNydW1iU2VjdGlvbktleTogJ2V4cGVkaXRpb25zJyxcbiAgICBhcmlhTGFiZWw6ICdOYXZpZ2F0aW9uIGV4cMOpZGl0aW9ucycsXG4gICAgZW5hYmxlUGxhbkxvY2s6IHRydWUsXG4gICAgaW5jbHVkZVBhdGhzOiBbXG4gICAgICAnL2Rhc2hib2FyZC9zaGlwcGluZycsXG4gICAgICAnL2Rhc2hib2FyZC9zaGlwcGluZy1zZXJ2aWNlcycsXG4gICAgICAnL2Rhc2hib2FyZC9jb250YWN0LXNoaXBwaW5nLXNlcnZpY2UnLFxuICAgICAgJy9kYXNoYm9hcmQvYmF0Y2gtc2hpcHBpbmcnLFxuICAgIF0sXG4gIH0sXG4gIHN0b3JlOiB7XG4gICAgaWQ6ICdzdG9yZScsXG4gICAgc2VjdGlvbktleTogJ3ByaW5jaXBhbCcsXG4gICAgYWRkaXRpb25hbFNlY3Rpb25LZXlzOiBbJ3ZlbnRlc19sb2dpc3RpcXVlJ10sXG4gICAgcm9vdFBhdGg6ICcvZGFzaGJvYXJkL3N0b3JlJyxcbiAgICBicmVhZGNydW1iU2VjdGlvbktleTogJ2JvdXRpcXVlJyxcbiAgICBhcmlhTGFiZWw6ICdOYXZpZ2F0aW9uIGJvdXRpcXVlJyxcbiAgICBpbmNsdWRlUGF0aHM6IFsnL2Rhc2hib2FyZC9zdG9yZScsICcvZGFzaGJvYXJkL3N0b3JlL3RlYW0nXSxcbiAgICBzdXBwbGVtZW50U3RhdGljSXRlbXM6IFtcbiAgICAgIHtcbiAgICAgICAgdGl0bGU6ICdQYXJhbcOodHJlcyBCb3V0aXF1ZScsXG4gICAgICAgIHVybDogJy9kYXNoYm9hcmQvc2V0dGluZ3M/dGFiPXN0b3JlJyxcbiAgICAgICAgaWNvbjogU2V0dGluZ3MsXG4gICAgICB9LFxuICAgIF0sXG4gIH0sXG4gIHByb21vdGlvbnM6IHtcbiAgICBpZDogJ3Byb21vdGlvbnMnLFxuICAgIHNlY3Rpb25LZXk6ICdtYXJrZXRpbmdfY3JvaXNzYW5jZScsXG4gICAgcm9vdFBhdGg6ICcvZGFzaGJvYXJkL3Byb21vdGlvbnMnLFxuICAgIGJyZWFkY3J1bWJTZWN0aW9uS2V5OiAncHJvbW90aW9ucycsXG4gICAgYXJpYUxhYmVsOiAnTmF2aWdhdGlvbiBwcm9tb3Rpb25zJyxcbiAgICBpbmNsdWRlUGF0aHM6IFtcbiAgICAgICcvZGFzaGJvYXJkL3Byb21vdGlvbnMnLFxuICAgICAgJy9kYXNoYm9hcmQvY291cG9ucycsXG4gICAgICAnL2Rhc2hib2FyZC9wcm9tb3Rpb25zL3N0YXRzJyxcbiAgICAgICcvZGFzaGJvYXJkL2FiYW5kb25lZC1jYXJ0cycsXG4gICAgXSxcbiAgfSxcbiAgY291cnNlczoge1xuICAgIGlkOiAnY291cnNlcycsXG4gICAgc2VjdGlvbktleTogJ3Byb2R1aXRzX2NvdXJzJyxcbiAgICBhZGRpdGlvbmFsU2VjdGlvbktleXM6IFsnbW9uX2NvbXB0ZSddLFxuICAgIHJvb3RQYXRoOiAnL2FjY291bnQvY291cnNlcycsXG4gICAgYnJlYWRjcnVtYlNlY3Rpb25LZXk6ICdjb3VycycsXG4gICAgYXJpYUxhYmVsOiAnTmF2aWdhdGlvbiBjb3VycycsXG4gICAgY29sbGFwc2libGVHcm91cHM6IHRydWUsXG4gICAgaW5jbHVkZVBhdGhzOiBbXG4gICAgICAnL2FjY291bnQvY291cnNlcycsXG4gICAgICAnL2Rhc2hib2FyZC9jb3Vyc2VzL25ldycsXG4gICAgICAnL2Rhc2hib2FyZC9jb3Vyc2VzJyxcbiAgICAgICcvZGFzaGJvYXJkL2NvdXJzZXMvbGl2ZS1zZXNzaW9ucycsXG4gICAgICAnL2Rhc2hib2FyZC9jb3Vyc2VzL2Fzc2lnbm1lbnRzJyxcbiAgICAgICcvZGFzaGJvYXJkL2NvaG9ydHMnLFxuICAgICAgJy9kYXNoYm9hcmQvcmV2aWV3cycsXG4gICAgXSxcbiAgICBncm91cHM6IFtcbiAgICAgIHtcbiAgICAgICAgZ3JvdXBLZXk6ICdtZXNfY291cnMnLFxuICAgICAgICBkZWZhdWx0TGFiZWw6ICdNZXMgY291cnMnLFxuICAgICAgICBwYXRoczogWycvYWNjb3VudC9jb3Vyc2VzJ10sXG4gICAgICB9LFxuICAgICAge1xuICAgICAgICBncm91cEtleTogJ2dlc3Rpb25fY291cnMnLFxuICAgICAgICBkZWZhdWx0TGFiZWw6ICdHZXN0aW9uICh2ZW5kZXVyKScsXG4gICAgICAgIHBhdGhzOiBbXG4gICAgICAgICAgJy9kYXNoYm9hcmQvY291cnNlcy9uZXcnLFxuICAgICAgICAgICcvZGFzaGJvYXJkL2NvdXJzZXMnLFxuICAgICAgICAgICcvZGFzaGJvYXJkL2NvdXJzZXMvbGl2ZS1zZXNzaW9ucycsXG4gICAgICAgICAgJy9kYXNoYm9hcmQvY291cnNlcy9hc3NpZ25tZW50cycsXG4gICAgICAgICAgJy9kYXNoYm9hcmQvY29ob3J0cycsXG4gICAgICAgICAgJy9kYXNoYm9hcmQvcmV2aWV3cycsXG4gICAgICAgIF0sXG4gICAgICB9LFxuICAgIF0sXG4gIH0sXG4gIGFmZmlsaWF0ZToge1xuICAgIGlkOiAnYWZmaWxpYXRlJyxcbiAgICBzZWN0aW9uS2V5OiAnbWFya2V0aW5nX2Nyb2lzc2FuY2UnLFxuICAgIHJvb3RQYXRoOiAnL2FmZmlsaWF0ZS9kYXNoYm9hcmQnLFxuICAgIGJyZWFkY3J1bWJTZWN0aW9uS2V5OiAnYWZmaWxpYXRpb24nLFxuICAgIGFyaWFMYWJlbDogJ05hdmlnYXRpb24gYWZmaWxpYXRpb24nLFxuICAgIGNvbGxhcHNpYmxlR3JvdXBzOiB0cnVlLFxuICAgIGluY2x1ZGVQYXRoczogW1xuICAgICAgJy9hZmZpbGlhdGUvZGFzaGJvYXJkJyxcbiAgICAgICcvYWZmaWxpYXRlL2NvdXJzZXMnLFxuICAgICAgJy9kYXNoYm9hcmQvYWZmaWxpYXRlcycsXG4gICAgICAnL2Rhc2hib2FyZC9yZWZlcnJhbHMnLFxuICAgICAgJy9kYXNoYm9hcmQvc3RvcmUtYWZmaWxpYXRlcycsXG4gICAgXSxcbiAgICBncm91cHM6IFtcbiAgICAgIHtcbiAgICAgICAgZ3JvdXBLZXk6ICd0YWJsZWF1X2JvcmQnLFxuICAgICAgICBkZWZhdWx0TGFiZWw6ICdUYWJsZWF1IGRlIGJvcmQnLFxuICAgICAgICBwYXRoczogWycvYWZmaWxpYXRlL2Rhc2hib2FyZCcsICcvYWZmaWxpYXRlL2NvdXJzZXMnXSxcbiAgICAgIH0sXG4gICAgICB7XG4gICAgICAgIGdyb3VwS2V5OiAncHJvZ3JhbW1lcycsXG4gICAgICAgIGRlZmF1bHRMYWJlbDogJ1Byb2dyYW1tZXMnLFxuICAgICAgICBwYXRoczogWycvZGFzaGJvYXJkL2FmZmlsaWF0ZXMnLCAnL2Rhc2hib2FyZC9yZWZlcnJhbHMnLCAnL2Rhc2hib2FyZC9zdG9yZS1hZmZpbGlhdGVzJ10sXG4gICAgICB9LFxuICAgIF0sXG4gIH0sXG4gIGFjY291bnQ6IHtcbiAgICBpZDogJ2FjY291bnQnLFxuICAgIHNlY3Rpb25LZXk6ICdtb25fY29tcHRlJyxcbiAgICByb290UGF0aDogJy9hY2NvdW50JyxcbiAgICBicmVhZGNydW1iU2VjdGlvbktleTogJ21vbl9jb21wdGUnLFxuICAgIGFyaWFMYWJlbDogJ05hdmlnYXRpb24gY29tcHRlJyxcbiAgICBwZXJzb25hOiAnYnV5ZXInLFxuICAgIGNvbGxhcHNpYmxlR3JvdXBzOiB0cnVlLFxuICAgIGluY2x1ZGVQYXRoczogW1xuICAgICAgJy9hY2NvdW50JyxcbiAgICAgICcvYWNjb3VudC9wcm9maWxlJyxcbiAgICAgICcvYWNjb3VudC9vcmRlcnMnLFxuICAgICAgJy9hY2NvdW50L2Rvd25sb2FkcycsXG4gICAgICAnL2FjY291bnQvZGlnaXRhbCcsXG4gICAgICAnL2FjY291bnQvcGh5c2ljYWwnLFxuICAgICAgJy9hY2NvdW50L2NvdXJzZXMnLFxuICAgICAgJy9hY2NvdW50L3dpc2hsaXN0JyxcbiAgICAgICcvYWNjb3VudC9hbGVydHMnLFxuICAgICAgJy9hY2NvdW50L2ludm9pY2VzJyxcbiAgICAgICcvYWNjb3VudC9yZXR1cm5zJyxcbiAgICAgICcvYWNjb3VudC9naWZ0LWNhcmRzJyxcbiAgICAgICcvYWNjb3VudC93YXJyYW50aWVzJyxcbiAgICAgICcvYWNjb3VudC9ib29raW5ncycsXG4gICAgICAnL2FjY291bnQvYXJ0aXN0JyxcbiAgICAgICcvYWNjb3VudC9sb3lhbHR5JyxcbiAgICAgICcvY2hlY2tvdXQvbXVsdGktc3RvcmUtdHJhY2tpbmcnLFxuICAgIF0sXG4gICAgZ3JvdXBzOiBbXG4gICAgICB7XG4gICAgICAgIGdyb3VwS2V5OiAncHJvZmlsX2NvbXB0ZScsXG4gICAgICAgIGRlZmF1bHRMYWJlbDogJ01vbiBjb21wdGUnLFxuICAgICAgICBwYXRoczogWycvYWNjb3VudCcsICcvYWNjb3VudC9wcm9maWxlJywgJy9hY2NvdW50L3dpc2hsaXN0JywgJy9hY2NvdW50L2FsZXJ0cyddLFxuICAgICAgfSxcbiAgICAgIHtcbiAgICAgICAgZ3JvdXBLZXk6ICdhY2hhdHMnLFxuICAgICAgICBkZWZhdWx0TGFiZWw6ICdBY2hhdHMgJiBmYWN0dXJhdGlvbicsXG4gICAgICAgIHBhdGhzOiBbXG4gICAgICAgICAgJy9hY2NvdW50L29yZGVycycsXG4gICAgICAgICAgJy9hY2NvdW50L2ludm9pY2VzJyxcbiAgICAgICAgICAnL2FjY291bnQvcmV0dXJucycsXG4gICAgICAgICAgJy9hY2NvdW50L2dpZnQtY2FyZHMnLFxuICAgICAgICAgICcvYWNjb3VudC93YXJyYW50aWVzJyxcbiAgICAgICAgXSxcbiAgICAgIH0sXG4gICAgICB7XG4gICAgICAgIGdyb3VwS2V5OiAncG9ydGFpbHMnLFxuICAgICAgICBkZWZhdWx0TGFiZWw6ICdNZXMgcG9ydGFpbHMnLFxuICAgICAgICBwYXRoczogWycvYWNjb3VudC9kb3dubG9hZHMnLCAnL2FjY291bnQvZGlnaXRhbCcsICcvYWNjb3VudC9waHlzaWNhbCcsICcvYWNjb3VudC9jb3Vyc2VzJ10sXG4gICAgICB9LFxuICAgICAge1xuICAgICAgICBncm91cEtleTogJ3NlcnZpY2VzX2ZpZGVsaXRlJyxcbiAgICAgICAgZGVmYXVsdExhYmVsOiAnU2VydmljZXMgJiBmaWTDqWxpdMOpJyxcbiAgICAgICAgcGF0aHM6IFtcbiAgICAgICAgICAnL2FjY291bnQvYm9va2luZ3MnLFxuICAgICAgICAgICcvYWNjb3VudC9hcnRpc3QnLFxuICAgICAgICAgICcvYWNjb3VudC9sb3lhbHR5JyxcbiAgICAgICAgICAnL2NoZWNrb3V0L211bHRpLXN0b3JlLXRyYWNraW5nJyxcbiAgICAgICAgXSxcbiAgICAgIH0sXG4gICAgXSxcbiAgfSxcbiAgZGlnaXRhbFBvcnRhbDoge1xuICAgIGlkOiAnZGlnaXRhbFBvcnRhbCcsXG4gICAgc2VjdGlvbktleTogJ21vbl9jb21wdGUnLFxuICAgIGFkZGl0aW9uYWxTZWN0aW9uS2V5czogWydwcm9kdWl0c19jb3VycyddLFxuICAgIHJvb3RQYXRoOiAnL2FjY291bnQvZGlnaXRhbCcsXG4gICAgYnJlYWRjcnVtYlNlY3Rpb25LZXk6ICdwb3J0YWlsX2RpZ2l0YWwnLFxuICAgIGFyaWFMYWJlbDogJ05hdmlnYXRpb24gcG9ydGFpbCBkaWdpdGFsJyxcbiAgICBwZXJzb25hOiAnYnV5ZXInLFxuICAgIGNvbGxhcHNpYmxlR3JvdXBzOiB0cnVlLFxuICAgIGluY2x1ZGVQYXRoczogW1xuICAgICAgJy9hY2NvdW50L2RpZ2l0YWwnLFxuICAgICAgJy9hY2NvdW50L2Rvd25sb2FkcycsXG4gICAgICAnL2Rhc2hib2FyZC9teS1saWNlbnNlcycsXG4gICAgICAnL2Rhc2hib2FyZC9kaWdpdGFsLXByb2R1Y3RzJyxcbiAgICAgICcvZGFzaGJvYXJkL2RpZ2l0YWwtcHJvZHVjdHMvYnVuZGxlcycsXG4gICAgICAnL2Rhc2hib2FyZC9kaWdpdGFsLXByb2R1Y3RzL2J1bmRsZXMvY3JlYXRlJyxcbiAgICAgICcvZGFzaGJvYXJkL2RpZ2l0YWwvdXBkYXRlcycsXG4gICAgICAnL2Rhc2hib2FyZC9teS1kb3dubG9hZHMnLFxuICAgICAgJy9kYXNoYm9hcmQvbGljZW5zZS1tYW5hZ2VtZW50JyxcbiAgICBdLFxuICAgIGdyb3VwczogW1xuICAgICAge1xuICAgICAgICBncm91cEtleTogJ21vbl9wb3J0YWlsX2RpZ2l0YWwnLFxuICAgICAgICBkZWZhdWx0TGFiZWw6ICdNb24gcG9ydGFpbCcsXG4gICAgICAgIHBhdGhzOiBbJy9hY2NvdW50L2RpZ2l0YWwnLCAnL2FjY291bnQvZG93bmxvYWRzJywgJy9kYXNoYm9hcmQvbXktbGljZW5zZXMnXSxcbiAgICAgIH0sXG4gICAgICB7XG4gICAgICAgIGdyb3VwS2V5OiAnZ2VzdGlvbl9kaWdpdGFsZScsXG4gICAgICAgIGRlZmF1bHRMYWJlbDogJ0dlc3Rpb24gKHZlbmRldXIpJyxcbiAgICAgICAgcGF0aHM6IFtcbiAgICAgICAgICAnL2Rhc2hib2FyZC9kaWdpdGFsLXByb2R1Y3RzJyxcbiAgICAgICAgICAnL2Rhc2hib2FyZC9kaWdpdGFsLXByb2R1Y3RzL2J1bmRsZXMnLFxuICAgICAgICAgICcvZGFzaGJvYXJkL2RpZ2l0YWwtcHJvZHVjdHMvYnVuZGxlcy9jcmVhdGUnLFxuICAgICAgICAgICcvZGFzaGJvYXJkL2RpZ2l0YWwvdXBkYXRlcycsXG4gICAgICAgICAgJy9kYXNoYm9hcmQvbXktZG93bmxvYWRzJyxcbiAgICAgICAgICAnL2Rhc2hib2FyZC9saWNlbnNlLW1hbmFnZW1lbnQnLFxuICAgICAgICBdLFxuICAgICAgfSxcbiAgICBdLFxuICB9LFxuICBwaHlzaWNhbFBvcnRhbDoge1xuICAgIGlkOiAncGh5c2ljYWxQb3J0YWwnLFxuICAgIHNlY3Rpb25LZXk6ICdtb25fY29tcHRlJyxcbiAgICBhZGRpdGlvbmFsU2VjdGlvbktleXM6IFsndmVudGVzX2xvZ2lzdGlxdWUnXSxcbiAgICByb290UGF0aDogJy9hY2NvdW50L3BoeXNpY2FsJyxcbiAgICBicmVhZGNydW1iU2VjdGlvbktleTogJ3BvcnRhaWxfcGh5c2lxdWUnLFxuICAgIGFyaWFMYWJlbDogJ05hdmlnYXRpb24gcG9ydGFpbCBwaHlzaXF1ZScsXG4gICAgcGVyc29uYTogJ2J1eWVyJyxcbiAgICBjb2xsYXBzaWJsZUdyb3VwczogdHJ1ZSxcbiAgICBpbmNsdWRlUGF0aHM6IFtcbiAgICAgICcvYWNjb3VudC9waHlzaWNhbCcsXG4gICAgICAnL2FjY291bnQvb3JkZXJzJyxcbiAgICAgICcvYWNjb3VudC9yZXR1cm5zJyxcbiAgICAgICcvZGFzaGJvYXJkL3BoeXNpY2FsLWludmVudG9yeScsXG4gICAgICAnL2Rhc2hib2FyZC9waHlzaWNhbC1hbmFseXRpY3MnLFxuICAgICAgJy9kYXNoYm9hcmQvcGh5c2ljYWwtbG90cycsXG4gICAgICAnL2Rhc2hib2FyZC9waHlzaWNhbC1zZXJpYWwtdHJhY2tpbmcnLFxuICAgICAgJy9kYXNoYm9hcmQvcGh5c2ljYWwtYmFyY29kZS1zY2FubmVyJyxcbiAgICAgICcvZGFzaGJvYXJkL3BoeXNpY2FsLXByZW9yZGVycycsXG4gICAgICAnL2Rhc2hib2FyZC9waHlzaWNhbC1iYWNrb3JkZXJzJyxcbiAgICAgICcvZGFzaGJvYXJkL3BoeXNpY2FsLWJ1bmRsZXMnLFxuICAgICAgJy9kYXNoYm9hcmQvcGh5c2ljYWwtcHJvbW90aW9ucycsXG4gICAgICAnL2Rhc2hib2FyZC9tdWx0aS1jdXJyZW5jeScsXG4gICAgXSxcbiAgICBncm91cHM6IFtcbiAgICAgIHtcbiAgICAgICAgZ3JvdXBLZXk6ICdtb25fcG9ydGFpbF9waHlzaXF1ZScsXG4gICAgICAgIGRlZmF1bHRMYWJlbDogJ01vbiBwb3J0YWlsJyxcbiAgICAgICAgcGF0aHM6IFsnL2FjY291bnQvcGh5c2ljYWwnLCAnL2FjY291bnQvb3JkZXJzJywgJy9hY2NvdW50L3JldHVybnMnXSxcbiAgICAgIH0sXG4gICAgICB7XG4gICAgICAgIGdyb3VwS2V5OiAnc3RvY2tzX3N1aXZpJyxcbiAgICAgICAgZGVmYXVsdExhYmVsOiAnU3RvY2tzICYgc3VpdmknLFxuICAgICAgICBwYXRoczogW1xuICAgICAgICAgICcvZGFzaGJvYXJkL3BoeXNpY2FsLWludmVudG9yeScsXG4gICAgICAgICAgJy9kYXNoYm9hcmQvcGh5c2ljYWwtYW5hbHl0aWNzJyxcbiAgICAgICAgICAnL2Rhc2hib2FyZC9waHlzaWNhbC1sb3RzJyxcbiAgICAgICAgICAnL2Rhc2hib2FyZC9waHlzaWNhbC1zZXJpYWwtdHJhY2tpbmcnLFxuICAgICAgICAgICcvZGFzaGJvYXJkL3BoeXNpY2FsLWJhcmNvZGUtc2Nhbm5lcicsXG4gICAgICAgIF0sXG4gICAgICB9LFxuICAgICAge1xuICAgICAgICBncm91cEtleTogJ29wZXJhdGlvbnNfcGh5c2lxdWVzJyxcbiAgICAgICAgZGVmYXVsdExhYmVsOiAnT3DDqXJhdGlvbnMnLFxuICAgICAgICBwYXRoczogW1xuICAgICAgICAgICcvZGFzaGJvYXJkL3BoeXNpY2FsLXByZW9yZGVycycsXG4gICAgICAgICAgJy9kYXNoYm9hcmQvcGh5c2ljYWwtYmFja29yZGVycycsXG4gICAgICAgICAgJy9kYXNoYm9hcmQvcGh5c2ljYWwtYnVuZGxlcycsXG4gICAgICAgICAgJy9kYXNoYm9hcmQvcGh5c2ljYWwtcHJvbW90aW9ucycsXG4gICAgICAgICAgJy9kYXNoYm9hcmQvbXVsdGktY3VycmVuY3knLFxuICAgICAgICBdLFxuICAgICAgfSxcbiAgICBdLFxuICB9LFxufSBhcyBjb25zdCBzYXRpc2ZpZXMgUmVjb3JkPHN0cmluZywgQ29udGV4dFNpZGViYXJDb25maWc+O1xuXG5leHBvcnQgdHlwZSBQaGFzZTZDb250ZXh0Q29uZmlnSWQgPSBrZXlvZiB0eXBlb2YgUEhBU0U2X0NPTlRFWFRfQ09ORklHUztcbiJdLCJuYW1lcyI6WyJTZXR0aW5ncyIsIlBIQVNFNl9DT05URVhUX0NPTkZJR1MiLCJzYWxlcyIsImlkIiwic2VjdGlvbktleSIsImFkZGl0aW9uYWxTZWN0aW9uS2V5cyIsInJvb3RQYXRoIiwiYnJlYWRjcnVtYlNlY3Rpb25LZXkiLCJhcmlhTGFiZWwiLCJlbmFibGVQbGFuTG9jayIsImNvbGxhcHNpYmxlR3JvdXBzIiwiaW5jbHVkZVBhdGhzIiwiZ3JvdXBzIiwiZ3JvdXBLZXkiLCJkZWZhdWx0TGFiZWwiLCJwYXRocyIsImJvb2tpbmdzIiwiaW52ZW50b3J5Iiwic2hpcHBpbmciLCJzdG9yZSIsInN1cHBsZW1lbnRTdGF0aWNJdGVtcyIsInRpdGxlIiwidXJsIiwiaWNvbiIsInByb21vdGlvbnMiLCJjb3Vyc2VzIiwiYWZmaWxpYXRlIiwiYWNjb3VudCIsInBlcnNvbmEiLCJkaWdpdGFsUG9ydGFsIiwicGh5c2ljYWxQb3J0YWwiXSwibWFwcGluZ3MiOiJBQUFBLFNBQVNBLFFBQVEsUUFBUSxlQUFlO0FBR3hDLG1EQUFtRCxHQUNuRCxPQUFPLE1BQU1DLHlCQUF5QjtJQUNwQ0MsT0FBTztRQUNMQyxJQUFJO1FBQ0pDLFlBQVk7UUFDWkMsdUJBQXVCO1lBQUM7U0FBb0I7UUFDNUNDLFVBQVU7UUFDVkMsc0JBQXNCO1FBQ3RCQyxXQUFXO1FBQ1hDLGdCQUFnQjtRQUNoQkMsbUJBQW1CO1FBQ25CQyxjQUFjO1lBQ1o7WUFDQTtZQUNBO1lBQ0E7WUFDQTtZQUNBO1lBQ0E7WUFDQTtZQUNBO1lBQ0E7WUFDQTtZQUNBO1lBQ0E7WUFDQTtZQUNBO1lBQ0E7WUFDQTtZQUNBO1lBQ0E7WUFDQTtZQUNBO1lBQ0E7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

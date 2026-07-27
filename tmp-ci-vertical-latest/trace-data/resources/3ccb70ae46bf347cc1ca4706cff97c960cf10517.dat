@@ -1,0 +1,133 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/reviews/ReviewReplyForm.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewReplyForm.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=2441233a"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+var _s = $RefreshSig$();
+/**
+ * Composant : ReviewReplyForm
+ * Formulaire de réponse à un avis
+ * Date : 27 octobre 2025
+ */ import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=2441233a"; const React = __vite__cjsImport3_react.__esModule ? __vite__cjsImport3_react.default : __vite__cjsImport3_react;
+import { useForm } from "/node_modules/.vite/deps/react-hook-form.js?v=2441233a";
+import { Button } from "/src/components/ui/button.tsx";
+import { Textarea } from "/src/components/ui/textarea.tsx";
+import { useReplyToReview } from "/src/hooks/useReviews.ts";
+export const ReviewReplyForm = ({ reviewId, onSuccess, onCancel })=>{
+    _s();
+    const { register, handleSubmit, reset, formState: { errors } } = useForm();
+    const replyMutation = useReplyToReview();
+    const onSubmit = (data)=>{
+        replyMutation.mutate({
+            reviewId,
+            content: data.content
+        }, {
+            onSuccess: ()=>{
+                reset();
+                onSuccess?.();
+            }
+        });
+    };
+    return /*#__PURE__*/ _jsxDEV("form", {
+        onSubmit: handleSubmit(onSubmit),
+        className: "space-y-3",
+        children: [
+            /*#__PURE__*/ _jsxDEV(Textarea, {
+                placeholder: "Répondre à cet avis...",
+                rows: 3,
+                ...register('content', {
+                    required: true,
+                    minLength: 10
+                })
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewReplyForm.tsx",
+                lineNumber: 41,
+                columnNumber: 7
+            }, this),
+            errors.content && /*#__PURE__*/ _jsxDEV("p", {
+                className: "text-sm text-destructive",
+                children: "La réponse doit contenir au moins 10 caractères"
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewReplyForm.tsx",
+                lineNumber: 47,
+                columnNumber: 9
+            }, this),
+            /*#__PURE__*/ _jsxDEV("div", {
+                className: "flex justify-end gap-2",
+                children: [
+                    onCancel && /*#__PURE__*/ _jsxDEV(Button, {
+                        type: "button",
+                        variant: "outline",
+                        onClick: onCancel,
+                        children: "Annuler"
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewReplyForm.tsx",
+                        lineNumber: 53,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV(Button, {
+                        type: "submit",
+                        disabled: replyMutation.isPending,
+                        children: replyMutation.isPending ? 'Publication...' : 'Publier'
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewReplyForm.tsx",
+                        lineNumber: 57,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewReplyForm.tsx",
+                lineNumber: 51,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewReplyForm.tsx",
+        lineNumber: 40,
+        columnNumber: 5
+    }, this);
+};
+_s(ReviewReplyForm, "cPqAzYfL6cK1IZAZ3N1u8i4RTeM=", false, function() {
+    return [
+        useForm,
+        useReplyToReview
+    ];
+});
+_c = ReviewReplyForm;
+var _c;
+$RefreshReg$(_c, "ReviewReplyForm");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewReplyForm.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/reviews/ReviewReplyForm.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIlJldmlld1JlcGx5Rm9ybS50c3giXSwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBDb21wb3NhbnQgOiBSZXZpZXdSZXBseUZvcm1cbiAqIEZvcm11bGFpcmUgZGUgcsOpcG9uc2Ugw6AgdW4gYXZpc1xuICogRGF0ZSA6IDI3IG9jdG9icmUgMjAyNVxuICovXG5cbmltcG9ydCBSZWFjdCBmcm9tICdyZWFjdCc7XG5pbXBvcnQgeyB1c2VGb3JtIH0gZnJvbSAncmVhY3QtaG9vay1mb3JtJztcbmltcG9ydCB7IEJ1dHRvbiB9IGZyb20gJ0AvY29tcG9uZW50cy91aS9idXR0b24nO1xuaW1wb3J0IHsgVGV4dGFyZWEgfSBmcm9tICdAL2NvbXBvbmVudHMvdWkvdGV4dGFyZWEnO1xuaW1wb3J0IHsgdXNlUmVwbHlUb1JldmlldyB9IGZyb20gJ0AvaG9va3MvdXNlUmV2aWV3cyc7XG5cbmludGVyZmFjZSBSZXZpZXdSZXBseUZvcm1Qcm9wcyB7XG4gIHJldmlld0lkOiBzdHJpbmc7XG4gIG9uU3VjY2Vzcz86ICgpID0+IHZvaWQ7XG4gIG9uQ2FuY2VsPzogKCkgPT4gdm9pZDtcbn1cblxuZXhwb3J0IGNvbnN0IFJldmlld1JlcGx5Rm9ybSA6IFJlYWN0LkZDPFJldmlld1JlcGx5Rm9ybVByb3BzPiA9ICh7XG4gIHJldmlld0lkLFxuICBvblN1Y2Nlc3MsXG4gIG9uQ2FuY2VsLFxufSkgPT4ge1xuICBjb25zdCB7IHJlZ2lzdGVyLCBoYW5kbGVTdWJtaXQsIHJlc2V0LCBmb3JtU3RhdGU6IHsgZXJyb3JzIH0gfSA9IHVzZUZvcm08eyBjb250ZW50OiBzdHJpbmcgfT4oKTtcbiAgY29uc3QgcmVwbHlNdXRhdGlvbiA9IHVzZVJlcGx5VG9SZXZpZXcoKTtcblxuICBjb25zdCBvblN1Ym1pdCA9IChkYXRhOiB7IGNvbnRlbnQ6IHN0cmluZyB9KSA9PiB7XG4gICAgcmVwbHlNdXRhdGlvbi5tdXRhdGUoXG4gICAgICB7IHJldmlld0lkLCBjb250ZW50OiBkYXRhLmNvbnRlbnQgfSxcbiAgICAgIHtcbiAgICAgICAgb25TdWNjZXNzOiAoKSA9PiB7XG4gICAgICAgICAgcmVzZXQoKTtcbiAgICAgICAgICBvblN1Y2Nlc3M/LigpO1xuICAgICAgICB9LFxuICAgICAgfVxuICAgICk7XG4gIH07XG5cbiAgcmV0dXJuIChcbiAgICA8Zm9ybSBvblN1Ym1pdD17aGFuZGxlU3VibWl0KG9uU3VibWl0KX0gY2xhc3NOYW1lPVwic3BhY2UteS0zXCI+XG4gICAgICA8VGV4dGFyZWFcbiAgICAgICAgcGxhY2Vob2xkZXI9XCJSw6lwb25kcmUgw6AgY2V0IGF2aXMuLi5cIlxuICAgICAgICByb3dzPXszfVxuICAgICAgICB7Li4ucmVnaXN0ZXIoJ2NvbnRlbnQnLCB7IHJlcXVpcmVkOiB0cnVlLCBtaW5MZW5ndGg6IDEwIH0pfVxuICAgICAgLz5cbiAgICAgIHtlcnJvcnMuY29udGVudCAmJiAoXG4gICAgICAgIDxwIGNsYXNzTmFtZT1cInRleHQtc20gdGV4dC1kZXN0cnVjdGl2ZVwiPlxuICAgICAgICAgIExhIHLDqXBvbnNlIGRvaXQgY29udGVuaXIgYXUgbW9pbnMgMTAgY2FyYWN0w6hyZXNcbiAgICAgICAgPC9wPlxuICAgICAgKX1cbiAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBqdXN0aWZ5LWVuZCBnYXAtMlwiPlxuICAgICAgICB7b25DYW5jZWwgJiYgKFxuICAgICAgICAgIDxCdXR0b24gdHlwZT1cImJ1dHRvblwiIHZhcmlhbnQ9XCJvdXRsaW5lXCIgb25DbGljaz17b25DYW5jZWx9PlxuICAgICAgICAgICAgQW5udWxlclxuICAgICAgICAgIDwvQnV0dG9uPlxuICAgICAgICApfVxuICAgICAgICA8QnV0dG9uIHR5cGU9XCJzdWJtaXRcIiBkaXNhYmxlZD17cmVwbHlNdXRhdGlvbi5pc1BlbmRpbmd9PlxuICAgICAgICAgIHtyZXBseU11dGF0aW9uLmlzUGVuZGluZyA/ICdQdWJsaWNhdGlvbi4uLicgOiAnUHVibGllcid9XG4gICAgICAgIDwvQnV0dG9uPlxuICAgICAgPC9kaXY+XG4gICAgPC9mb3JtPlxuICApO1xufTtcblxuXG5cblxuXG5cblxuXG4iXSwibmFtZXMiOlsiUmVhY3QiLCJ1c2VGb3JtIiwiQnV0dG9uIiwiVGV4dGFyZWEiLCJ1c2VSZXBseVRvUmV2aWV3IiwiUmV2aWV3UmVwbHlGb3JtIiwicmV2aWV3SWQiLCJvblN1Y2Nlc3MiLCJvbkNhbmNlbCIsInJlZ2lzdGVyIiwiaGFuZGxlU3VibWl0IiwicmVzZXQiLCJmb3JtU3RhdGUiLCJlcnJvcnMiLCJyZXBseU11dGF0aW9uIiwib25TdWJtaXQiLCJkYXRhIiwibXV0YXRlIiwiY29udGVudCIsImZvcm0iLCJjbGFzc05hbWUiLCJwbGFjZWhvbGRlciIsInJvd3MiLCJyZXF1aXJlZCIsIm1pbkxlbmd0aCIsInAiLCJkaXYiLCJ0eXBlIiwidmFyaWFudCIsIm9uQ2xpY2siLCJkaXNhYmxlZCIsImlzUGVuZGluZyJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O0FBQUE7Ozs7Q0FJQyxHQUVELE9BQU9BLFdBQVcsUUFBUTtBQUMxQixTQUFTQyxPQUFPLFFBQVEsa0JBQWtCO0FBQzFDLFNBQVNDLE1BQU0sUUFBUSx5QkFBeUI7QUFDaEQsU0FBU0MsUUFBUSxRQUFRLDJCQUEyQjtBQUNwRCxTQUFTQyxnQkFBZ0IsUUFBUSxxQkFBcUI7QUFRdEQsT0FBTyxNQUFNQyxrQkFBbUQsQ0FBQyxFQUMvREMsUUFBUSxFQUNSQyxTQUFTLEVBQ1RDLFFBQVEsRUFDVDs7SUFDQyxNQUFNLEVBQUVDLFFBQVEsRUFBRUMsWUFBWSxFQUFFQyxLQUFLLEVBQUVDLFdBQVcsRUFBRUMsTUFBTSxFQUFFLEVBQUUsR0FBR1o7SUFDakUsTUFBTWEsZ0JBQWdCVjtJQUV0QixNQUFNVyxXQUFXLENBQUNDO1FBQ2hCRixjQUFjRyxNQUFNLENBQ2xCO1lBQUVYO1lBQVVZLFNBQVNGLEtBQUtFLE9BQU87UUFBQyxHQUNsQztZQUNFWCxXQUFXO2dCQUNUSTtnQkFDQUo7WUFDRjtRQUNGO0lBRUo7SUFFQSxxQkFDRSxRQUFDWTtRQUFLSixVQUFVTCxhQUFhSztRQUFXSyxXQUFVOzswQkFDaEQsUUFBQ2pCO2dCQUNDa0IsYUFBWTtnQkFDWkMsTUFBTTtnQkFDTCxHQUFHYixTQUFTLFdBQVc7b0JBQUVjLFVBQVU7b0JBQU1DLFdBQVc7Z0JBQUcsRUFBRTs7Ozs7O1lBRTNEWCxPQUFPSyxPQUFPLGtCQUNiLFFBQUNPO2dCQUFFTCxXQUFVOzBCQUEyQjs7Ozs7OzBCQUkxQyxRQUFDTTtnQkFBSU4sV0FBVTs7b0JBQ1paLDBCQUNDLFFBQUNOO3dCQUFPeUIsTUFBSzt3QkFBU0MsU0FBUTt3QkFBVUMsU0FBU3JCO2tDQUFVOzs7Ozs7a0NBSTdELFFBQUNOO3dCQUFPeUIsTUFBSzt3QkFBU0csVUFBVWhCLGNBQWNpQixTQUFTO2tDQUNwRGpCLGNBQWNpQixTQUFTLEdBQUcsbUJBQW1COzs7Ozs7Ozs7Ozs7Ozs7Ozs7QUFLeEQsRUFBRTtHQTVDVzFCOztRQUtzREo7UUFDM0NHOzs7S0FOWEMifQ==

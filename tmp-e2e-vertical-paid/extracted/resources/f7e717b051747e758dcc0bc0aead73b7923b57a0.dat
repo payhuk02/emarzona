@@ -1,0 +1,75 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/seo/BreadcrumbSchema.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/seo/BreadcrumbSchema.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=8792f17d"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+/**
+ * Composant: BreadcrumbSchema
+ * Description: Génère les données structurées Schema.org pour fil d'Ariane
+ * Usage: <BreadcrumbSchema items={[...]} />
+ */ import { Helmet } from "/node_modules/.vite/deps/react-helmet-async.js?v=0d92e436";
+export const BreadcrumbSchema = ({ items })=>{
+    const schema = {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": items.map((item, index)=>({
+                "@type": "ListItem",
+                "position": index + 1,
+                "name": item.name,
+                "item": item.url
+            }))
+    };
+    return /*#__PURE__*/ _jsxDEV(Helmet, {
+        children: /*#__PURE__*/ _jsxDEV("script", {
+            type: "application/ld+json",
+            children: JSON.stringify(schema)
+        }, void 0, false, {
+            fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/BreadcrumbSchema.tsx",
+            lineNumber: 32,
+            columnNumber: 7
+        }, this)
+    }, void 0, false, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/BreadcrumbSchema.tsx",
+        lineNumber: 31,
+        columnNumber: 5
+    }, this);
+};
+_c = BreadcrumbSchema;
+export default BreadcrumbSchema;
+var _c;
+$RefreshReg$(_c, "BreadcrumbSchema");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/seo/BreadcrumbSchema.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/seo/BreadcrumbSchema.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIkJyZWFkY3J1bWJTY2hlbWEudHN4Il0sInNvdXJjZXNDb250ZW50IjpbIi8qKlxuICogQ29tcG9zYW50OiBCcmVhZGNydW1iU2NoZW1hXG4gKiBEZXNjcmlwdGlvbjogR8OpbsOocmUgbGVzIGRvbm7DqWVzIHN0cnVjdHVyw6llcyBTY2hlbWEub3JnIHBvdXIgZmlsIGQnQXJpYW5lXG4gKiBVc2FnZTogPEJyZWFkY3J1bWJTY2hlbWEgaXRlbXM9e1suLi5dfSAvPlxuICovXG5cbmltcG9ydCB7IEhlbG1ldCB9IGZyb20gJ3JlYWN0LWhlbG1ldC1hc3luYyc7XG5cbmV4cG9ydCBpbnRlcmZhY2UgQnJlYWRjcnVtYkl0ZW0ge1xuICBuYW1lOiBzdHJpbmc7XG4gIHVybDogc3RyaW5nO1xufVxuXG5pbnRlcmZhY2UgQnJlYWRjcnVtYlNjaGVtYVByb3BzIHtcbiAgaXRlbXM6IEJyZWFkY3J1bWJJdGVtW107XG59XG5cbmV4cG9ydCBjb25zdCBCcmVhZGNydW1iU2NoZW1hID0gKHsgaXRlbXMgfTogQnJlYWRjcnVtYlNjaGVtYVByb3BzKSA9PiB7XG4gIGNvbnN0IHNjaGVtYSA9IHtcbiAgICBcIkBjb250ZXh0XCI6IFwiaHR0cHM6Ly9zY2hlbWEub3JnXCIsXG4gICAgXCJAdHlwZVwiOiBcIkJyZWFkY3J1bWJMaXN0XCIsXG4gICAgXCJpdGVtTGlzdEVsZW1lbnRcIjogaXRlbXMubWFwKChpdGVtLCBpbmRleCkgPT4gKHtcbiAgICAgIFwiQHR5cGVcIjogXCJMaXN0SXRlbVwiLFxuICAgICAgXCJwb3NpdGlvblwiOiBpbmRleCArIDEsXG4gICAgICBcIm5hbWVcIjogaXRlbS5uYW1lLFxuICAgICAgXCJpdGVtXCI6IGl0ZW0udXJsXG4gICAgfSkpXG4gIH07XG4gIFxuICByZXR1cm4gKFxuICAgIDxIZWxtZXQ+XG4gICAgICA8c2NyaXB0IHR5cGU9XCJhcHBsaWNhdGlvbi9sZCtqc29uXCI+XG4gICAgICAgIHtKU09OLnN0cmluZ2lmeShzY2hlbWEpfVxuICAgICAgPC9zY3JpcHQ+XG4gICAgPC9IZWxtZXQ+XG4gICk7XG59O1xuXG5leHBvcnQgZGVmYXVsdCBCcmVhZGNydW1iU2NoZW1hO1xuXG5cblxuXG5cblxuXG4iXSwibmFtZXMiOlsiSGVsbWV0IiwiQnJlYWRjcnVtYlNjaGVtYSIsIml0ZW1zIiwic2NoZW1hIiwibWFwIiwiaXRlbSIsImluZGV4IiwibmFtZSIsInVybCIsInNjcmlwdCIsInR5cGUiLCJKU09OIiwic3RyaW5naWZ5Il0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7Ozs7OztBQUFBOzs7O0NBSUMsR0FFRCxTQUFTQSxNQUFNLFFBQVEscUJBQXFCO0FBVzVDLE9BQU8sTUFBTUMsbUJBQW1CLENBQUMsRUFBRUMsS0FBSyxFQUF5QjtJQUMvRCxNQUFNQyxTQUFTO1FBQ2IsWUFBWTtRQUNaLFNBQVM7UUFDVCxtQkFBbUJELE1BQU1FLEdBQUcsQ0FBQyxDQUFDQyxNQUFNQyxRQUFXLENBQUE7Z0JBQzdDLFNBQVM7Z0JBQ1QsWUFBWUEsUUFBUTtnQkFDcEIsUUFBUUQsS0FBS0UsSUFBSTtnQkFDakIsUUFBUUYsS0FBS0csR0FBRztZQUNsQixDQUFBO0lBQ0Y7SUFFQSxxQkFDRSxRQUFDUjtrQkFDQyxjQUFBLFFBQUNTO1lBQU9DLE1BQUs7c0JBQ1ZDLEtBQUtDLFNBQVMsQ0FBQ1Q7Ozs7Ozs7Ozs7O0FBSXhCLEVBQUU7S0FuQldGO0FBcUJiLGVBQWVBLGlCQUFpQiJ9

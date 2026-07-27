@@ -1,0 +1,33 @@
+import __vite__cjsImport0_react from "/node_modules/.vite/deps/react.js?v=8792f17d"; const useEffect = __vite__cjsImport0_react["useEffect"]; const useRef = __vite__cjsImport0_react["useRef"];
+/** Intervalle par défaut pour remplacer les abonnements Realtime « liste » (90s). */ export const POLLING_INTERVAL_MS = 90000;
+/**
+ * Rafraîchit les données par intervalle uniquement quand l’onglet est visible.
+ * Réduit les connexions Realtime Supabase sur les écrans dashboard/admin.
+ */ export function useVisibilityAwarePolling(callback, intervalMs = POLLING_INTERVAL_MS, enabled = true) {
+    const callbackRef = useRef(callback);
+    callbackRef.current = callback;
+    useEffect(()=>{
+        if (!enabled) return;
+        const tick = ()=>{
+            if (document.visibilityState === 'visible') {
+                callbackRef.current();
+            }
+        };
+        const intervalId = window.setInterval(tick, intervalMs);
+        const onVisibility = ()=>{
+            if (document.visibilityState === 'visible') {
+                callbackRef.current();
+            }
+        };
+        document.addEventListener('visibilitychange', onVisibility);
+        return ()=>{
+            clearInterval(intervalId);
+            document.removeEventListener('visibilitychange', onVisibility);
+        };
+    }, [
+        enabled,
+        intervalMs
+    ]);
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInVzZVZpc2liaWxpdHlBd2FyZVBvbGxpbmcudHMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgdXNlRWZmZWN0LCB1c2VSZWYgfSBmcm9tICdyZWFjdCc7XG5cbi8qKiBJbnRlcnZhbGxlIHBhciBkw6lmYXV0IHBvdXIgcmVtcGxhY2VyIGxlcyBhYm9ubmVtZW50cyBSZWFsdGltZSDCqyBsaXN0ZSDCuyAoOTBzKS4gKi9cbmV4cG9ydCBjb25zdCBQT0xMSU5HX0lOVEVSVkFMX01TID0gOTBfMDAwO1xuXG4vKipcbiAqIFJhZnJhw65jaGl0IGxlcyBkb25uw6llcyBwYXIgaW50ZXJ2YWxsZSB1bmlxdWVtZW50IHF1YW5kIGzigJlvbmdsZXQgZXN0IHZpc2libGUuXG4gKiBSw6lkdWl0IGxlcyBjb25uZXhpb25zIFJlYWx0aW1lIFN1cGFiYXNlIHN1ciBsZXMgw6ljcmFucyBkYXNoYm9hcmQvYWRtaW4uXG4gKi9cbmV4cG9ydCBmdW5jdGlvbiB1c2VWaXNpYmlsaXR5QXdhcmVQb2xsaW5nKFxuICBjYWxsYmFjazogKCkgPT4gdm9pZCxcbiAgaW50ZXJ2YWxNcyA9IFBPTExJTkdfSU5URVJWQUxfTVMsXG4gIGVuYWJsZWQgPSB0cnVlXG4pIHtcbiAgY29uc3QgY2FsbGJhY2tSZWYgPSB1c2VSZWYoY2FsbGJhY2spO1xuICBjYWxsYmFja1JlZi5jdXJyZW50ID0gY2FsbGJhY2s7XG5cbiAgdXNlRWZmZWN0KCgpID0+IHtcbiAgICBpZiAoIWVuYWJsZWQpIHJldHVybjtcblxuICAgIGNvbnN0IHRpY2sgPSAoKSA9PiB7XG4gICAgICBpZiAoZG9jdW1lbnQudmlzaWJpbGl0eVN0YXRlID09PSAndmlzaWJsZScpIHtcbiAgICAgICAgY2FsbGJhY2tSZWYuY3VycmVudCgpO1xuICAgICAgfVxuICAgIH07XG5cbiAgICBjb25zdCBpbnRlcnZhbElkID0gd2luZG93LnNldEludGVydmFsKHRpY2ssIGludGVydmFsTXMpO1xuICAgIGNvbnN0IG9uVmlzaWJpbGl0eSA9ICgpID0+IHtcbiAgICAgIGlmIChkb2N1bWVudC52aXNpYmlsaXR5U3RhdGUgPT09ICd2aXNpYmxlJykge1xuICAgICAgICBjYWxsYmFja1JlZi5jdXJyZW50KCk7XG4gICAgICB9XG4gICAgfTtcbiAgICBkb2N1bWVudC5hZGRFdmVudExpc3RlbmVyKCd2aXNpYmlsaXR5Y2hhbmdlJywgb25WaXNpYmlsaXR5KTtcblxuICAgIHJldHVybiAoKSA9PiB7XG4gICAgICBjbGVhckludGVydmFsKGludGVydmFsSWQpO1xuICAgICAgZG9jdW1lbnQucmVtb3ZlRXZlbnRMaXN0ZW5lcigndmlzaWJpbGl0eWNoYW5nZScsIG9uVmlzaWJpbGl0eSk7XG4gICAgfTtcbiAgfSwgW2VuYWJsZWQsIGludGVydmFsTXNdKTtcbn1cbiJdLCJuYW1lcyI6WyJ1c2VFZmZlY3QiLCJ1c2VSZWYiLCJQT0xMSU5HX0lOVEVSVkFMX01TIiwidXNlVmlzaWJpbGl0eUF3YXJlUG9sbGluZyIsImNhbGxiYWNrIiwiaW50ZXJ2YWxNcyIsImVuYWJsZWQiLCJjYWxsYmFja1JlZiIsImN1cnJlbnQiLCJ0aWNrIiwiZG9jdW1lbnQiLCJ2aXNpYmlsaXR5U3RhdGUiLCJpbnRlcnZhbElkIiwid2luZG93Iiwic2V0SW50ZXJ2YWwiLCJvblZpc2liaWxpdHkiLCJhZGRFdmVudExpc3RlbmVyIiwiY2xlYXJJbnRlcnZhbCIsInJlbW92ZUV2ZW50TGlzdGVuZXIiXSwibWFwcGluZ3MiOiJBQUFBLFNBQVNBLFNBQVMsRUFBRUMsTUFBTSxRQUFRLFFBQVE7QUFFMUMsbUZBQW1GLEdBQ25GLE9BQU8sTUFBTUMsc0JBQXNCLE1BQU87QUFFMUM7OztDQUdDLEdBQ0QsT0FBTyxTQUFTQywwQkFDZEMsUUFBb0IsRUFDcEJDLGFBQWFILG1CQUFtQixFQUNoQ0ksVUFBVSxJQUFJO0lBRWQsTUFBTUMsY0FBY04sT0FBT0c7SUFDM0JHLFlBQVlDLE9BQU8sR0FBR0o7SUFFdEJKLFVBQVU7UUFDUixJQUFJLENBQUNNLFNBQVM7UUFFZCxNQUFNRyxPQUFPO1lBQ1gsSUFBSUMsU0FBU0MsZUFBZSxLQUFLLFdBQVc7Z0JBQzFDSixZQUFZQyxPQUFPO1lBQ3JCO1FBQ0Y7UUFFQSxNQUFNSSxhQUFhQyxPQUFPQyxXQUFXLENBQUNMLE1BQU1KO1FBQzVDLE1BQU1VLGVBQWU7WUFDbkIsSUFBSUwsU0FBU0MsZUFBZSxLQUFLLFdBQVc7Z0JBQzFDSixZQUFZQyxPQUFPO1lBQ3JCO1FBQ0Y7UUFDQUUsU0FBU00sZ0JBQWdCLENBQUMsb0JBQW9CRDtRQUU5QyxPQUFPO1lBQ0xFLGNBQWNMO1lBQ2RGLFNBQVNRLG1CQUFtQixDQUFDLG9CQUFvQkg7UUFDbkQ7SUFDRixHQUFHO1FBQUNUO1FBQVNEO0tBQVc7QUFDMUIifQ==

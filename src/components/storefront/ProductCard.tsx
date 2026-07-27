@@ -92,18 +92,41 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
   }, []);
 
   // Mémoriser les calculs de prix pour éviter les recalculs
-  const { price, hasPromo, discountPercent } = useMemo(() => {
-    const calculatedPrice = product.promo_price ?? product.price;
-    const calculatedHasPromo = product.promo_price && product.promo_price < product.price;
+  const { price, oldPrice, hasPromo, discountPercent } = useMemo(() => {
+    let currentPrice = product.price || 0;
+    let crossedOutPrice: number | null = null;
+    
+    // Check for different promo price schemas based on product type
+    const backendPromotionalPrice = (product as any).promotional_price;
+    const backendCompareAtPrice = product.compare_at_price;
+    const legacyPromoPrice = product.promo_price;
+    
+    if (backendPromotionalPrice && backendPromotionalPrice < product.price) {
+      // Service/Digital schema: price is regular, promotional_price is discounted
+      currentPrice = backendPromotionalPrice;
+      crossedOutPrice = product.price;
+    } else if (backendCompareAtPrice && backendCompareAtPrice > product.price) {
+      // Physical/Artist/Course schema: price is discounted, compare_at_price is regular
+      currentPrice = product.price;
+      crossedOutPrice = backendCompareAtPrice;
+    } else if (legacyPromoPrice && legacyPromoPrice < product.price) {
+      // Legacy fallback
+      currentPrice = legacyPromoPrice;
+      crossedOutPrice = product.price;
+    }
+
+    const calculatedHasPromo = crossedOutPrice !== null && crossedOutPrice > currentPrice;
     const calculatedDiscountPercent = calculatedHasPromo
-      ? Math.round(((product.price - product.promo_price!) / product.price) * 100)
+      ? Math.round(((crossedOutPrice! - currentPrice) / crossedOutPrice!) * 100)
       : 0;
+
     return {
-      price: calculatedPrice,
+      price: currentPrice,
+      oldPrice: crossedOutPrice,
       hasPromo: calculatedHasPromo,
       discountPercent: calculatedDiscountPercent,
     };
-  }, [product.promo_price, product.price]);
+  }, [product.price, product.promo_price, product.compare_at_price, (product as any).promotional_price]);
 
   // Vérifier si le produit est nouveau (< 7 jours) - mémorisé
   const isNew = useMemo(() => {
@@ -647,9 +670,9 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
         <div className="flex items-center justify-between mb-4">
           <div className="flex flex-col flex-1">
             <div className="flex items-center gap-2 mb-1">
-              {hasPromo && (
+              {hasPromo && oldPrice !== null && (
                 <span className="text-sm text-gray-500 line-through">
-                  {formatPrice(product.price)} {product.currency || 'XOF'}
+                  {formatPrice(oldPrice)} {product.currency || 'XOF'}
                 </span>
               )}
               <span className="text-lg font-bold text-blue-600">

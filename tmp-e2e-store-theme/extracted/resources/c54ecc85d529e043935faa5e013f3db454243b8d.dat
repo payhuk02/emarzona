@@ -1,0 +1,212 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/ui/currency-select.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/ui/currency-select.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=6014a254"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+var _s = $RefreshSig$();
+/**
+ * Composant de sélection de devise
+ * Optimisé avec React.memo pour éviter les re-renders inutiles
+ */ import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=6014a254"; const memo = __vite__cjsImport3_react["memo"]; const useMemo = __vite__cjsImport3_react["useMemo"];
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "/src/components/ui/select.tsx";
+import { CURRENCIES } from "/src/lib/currencies.ts";
+const AFRICAN_CURRENCIES = [
+    'XOF',
+    'XAF',
+    'NGN',
+    'GHS',
+    'KES',
+    'ZAR',
+    'MAD',
+    'TND',
+    'EGP',
+    'UGX',
+    'TZS',
+    'RWF'
+];
+const INTERNATIONAL_CURRENCIES = [
+    'EUR',
+    'USD',
+    'GBP',
+    'CAD',
+    'CHF',
+    'JPY',
+    'CNY'
+];
+export const CurrencySelect = /*#__PURE__*/ _s(memo(_c = _s(({ value, onValueChange, disabled })=>{
+    _s();
+    const africanCurrencies = useMemo(()=>CURRENCIES.filter((c)=>AFRICAN_CURRENCIES.includes(c.code)), []);
+    const internationalCurrencies = useMemo(()=>CURRENCIES.filter((c)=>INTERNATIONAL_CURRENCIES.includes(c.code)), []);
+    return /*#__PURE__*/ _jsxDEV(Select, {
+        value: value,
+        onValueChange: onValueChange,
+        disabled: disabled,
+        children: [
+            /*#__PURE__*/ _jsxDEV(SelectTrigger, {
+                children: /*#__PURE__*/ _jsxDEV(SelectValue, {
+                    placeholder: "Sélectionner une devise"
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/currency-select.tsx",
+                    lineNumber: 39,
+                    columnNumber: 9
+                }, this)
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/currency-select.tsx",
+                lineNumber: 38,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV(SelectContent, {
+                children: [
+                    /*#__PURE__*/ _jsxDEV("div", {
+                        className: "px-2 py-1.5 text-xs font-semibold text-muted-foreground",
+                        children: "Devises africaines"
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/currency-select.tsx",
+                        lineNumber: 42,
+                        columnNumber: 9
+                    }, this),
+                    africanCurrencies.map((currency)=>/*#__PURE__*/ _jsxDEV(SelectItem, {
+                            value: currency.code,
+                            children: /*#__PURE__*/ _jsxDEV("span", {
+                                className: "flex items-center gap-2",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV("span", {
+                                        children: currency.flag
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/currency-select.tsx",
+                                        lineNumber: 48,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("span", {
+                                        children: currency.name
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/currency-select.tsx",
+                                        lineNumber: 49,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("span", {
+                                        className: "text-muted-foreground",
+                                        children: [
+                                            "(",
+                                            currency.symbol,
+                                            ")"
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/currency-select.tsx",
+                                        lineNumber: 50,
+                                        columnNumber: 15
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/currency-select.tsx",
+                                lineNumber: 47,
+                                columnNumber: 13
+                            }, this)
+                        }, currency.code, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/currency-select.tsx",
+                            lineNumber: 46,
+                            columnNumber: 11
+                        }, this)),
+                    /*#__PURE__*/ _jsxDEV("div", {
+                        className: "px-2 py-1.5 text-xs font-semibold text-muted-foreground border-t mt-1",
+                        children: "Devises internationales"
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/currency-select.tsx",
+                        lineNumber: 54,
+                        columnNumber: 9
+                    }, this),
+                    internationalCurrencies.map((currency)=>/*#__PURE__*/ _jsxDEV(SelectItem, {
+                            value: currency.code,
+                            children: /*#__PURE__*/ _jsxDEV("span", {
+                                className: "flex items-center gap-2",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV("span", {
+                                        children: currency.flag
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/currency-select.tsx",
+                                        lineNumber: 60,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("span", {
+                                        children: currency.name
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/currency-select.tsx",
+                                        lineNumber: 61,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("span", {
+                                        className: "text-muted-foreground",
+                                        children: [
+                                            "(",
+                                            currency.symbol,
+                                            ")"
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/currency-select.tsx",
+                                        lineNumber: 62,
+                                        columnNumber: 15
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/currency-select.tsx",
+                                lineNumber: 59,
+                                columnNumber: 13
+                            }, this)
+                        }, currency.code, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/currency-select.tsx",
+                            lineNumber: 58,
+                            columnNumber: 11
+                        }, this))
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/currency-select.tsx",
+                lineNumber: 41,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/currency-select.tsx",
+        lineNumber: 37,
+        columnNumber: 5
+    }, this);
+}, "UgrmBfprTdrMiX+j18Uu4S7Ege8=")), "UgrmBfprTdrMiX+j18Uu4S7Ege8=");
+_c1 = CurrencySelect;
+CurrencySelect.displayName = 'CurrencySelect';
+var _c, _c1;
+$RefreshReg$(_c, "CurrencySelect$memo");
+$RefreshReg$(_c1, "CurrencySelect");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/ui/currency-select.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/ui/currency-select.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImN1cnJlbmN5LXNlbGVjdC50c3giXSwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBDb21wb3NhbnQgZGUgc8OpbGVjdGlvbiBkZSBkZXZpc2VcbiAqIE9wdGltaXPDqSBhdmVjIFJlYWN0Lm1lbW8gcG91ciDDqXZpdGVyIGxlcyByZS1yZW5kZXJzIGludXRpbGVzXG4gKi9cblxuaW1wb3J0IHsgbWVtbywgdXNlTWVtbyB9IGZyb20gJ3JlYWN0JztcbmltcG9ydCB7XG4gIFNlbGVjdCxcbiAgU2VsZWN0Q29udGVudCxcbiAgU2VsZWN0SXRlbSxcbiAgU2VsZWN0VHJpZ2dlcixcbiAgU2VsZWN0VmFsdWUsXG59IGZyb20gJ0AvY29tcG9uZW50cy91aS9zZWxlY3QnO1xuaW1wb3J0IHsgQ1VSUkVOQ0lFUyB9IGZyb20gJ0AvbGliL2N1cnJlbmNpZXMnO1xuXG5pbnRlcmZhY2UgQ3VycmVuY3lTZWxlY3RQcm9wcyB7XG4gIHZhbHVlOiBzdHJpbmc7XG4gIG9uVmFsdWVDaGFuZ2U6ICh2YWx1ZTogc3RyaW5nKSA9PiB2b2lkO1xuICBkaXNhYmxlZD86IGJvb2xlYW47XG59XG5cbmNvbnN0IEFGUklDQU5fQ1VSUkVOQ0lFUyA9IFsnWE9GJywgJ1hBRicsICdOR04nLCAnR0hTJywgJ0tFUycsICdaQVInLCAnTUFEJywgJ1RORCcsICdFR1AnLCAnVUdYJywgJ1RaUycsICdSV0YnXTtcbmNvbnN0IElOVEVSTkFUSU9OQUxfQ1VSUkVOQ0lFUyA9IFsnRVVSJywgJ1VTRCcsICdHQlAnLCAnQ0FEJywgJ0NIRicsICdKUFknLCAnQ05ZJ107XG5cbmV4cG9ydCBjb25zdCBDdXJyZW5jeVNlbGVjdCA9IG1lbW8oKHsgdmFsdWUsIG9uVmFsdWVDaGFuZ2UsIGRpc2FibGVkIH06IEN1cnJlbmN5U2VsZWN0UHJvcHMpID0+IHtcbiAgY29uc3QgYWZyaWNhbkN1cnJlbmNpZXMgPSB1c2VNZW1vKFxuICAgICgpID0+IENVUlJFTkNJRVMuZmlsdGVyKGMgPT4gQUZSSUNBTl9DVVJSRU5DSUVTLmluY2x1ZGVzKGMuY29kZSkpLFxuICAgIFtdXG4gICk7XG5cbiAgY29uc3QgaW50ZXJuYXRpb25hbEN1cnJlbmNpZXMgPSB1c2VNZW1vKFxuICAgICgpID0+IENVUlJFTkNJRVMuZmlsdGVyKGMgPT4gSU5URVJOQVRJT05BTF9DVVJSRU5DSUVTLmluY2x1ZGVzKGMuY29kZSkpLFxuICAgIFtdXG4gICk7XG5cbiAgcmV0dXJuIChcbiAgICA8U2VsZWN0IHZhbHVlPXt2YWx1ZX0gb25WYWx1ZUNoYW5nZT17b25WYWx1ZUNoYW5nZX0gZGlzYWJsZWQ9e2Rpc2FibGVkfT5cbiAgICAgIDxTZWxlY3RUcmlnZ2VyPlxuICAgICAgICA8U2VsZWN0VmFsdWUgcGxhY2Vob2xkZXI9XCJTw6lsZWN0aW9ubmVyIHVuZSBkZXZpc2VcIiAvPlxuICAgICAgPC9TZWxlY3RUcmlnZ2VyPlxuICAgICAgPFNlbGVjdENvbnRlbnQ+XG4gICAgICAgIDxkaXYgY2xhc3NOYW1lPVwicHgtMiBweS0xLjUgdGV4dC14cyBmb250LXNlbWlib2xkIHRleHQtbXV0ZWQtZm9yZWdyb3VuZFwiPlxuICAgICAgICAgIERldmlzZXMgYWZyaWNhaW5lc1xuICAgICAgICA8L2Rpdj5cbiAgICAgICAge2FmcmljYW5DdXJyZW5jaWVzLm1hcChjdXJyZW5jeSA9PiAoXG4gICAgICAgICAgPFNlbGVjdEl0ZW0ga2V5PXtjdXJyZW5jeS5jb2RlfSB2YWx1ZT17Y3VycmVuY3kuY29kZX0+XG4gICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLWNlbnRlciBnYXAtMlwiPlxuICAgICAgICAgICAgICA8c3Bhbj57Y3VycmVuY3kuZmxhZ308L3NwYW4+XG4gICAgICAgICAgICAgIDxzcGFuPntjdXJyZW5jeS5uYW1lfTwvc3Bhbj5cbiAgICAgICAgICAgICAgPHNwYW4gY2xhc3NOYW1lPVwidGV4dC1tdXRlZC1mb3JlZ3JvdW5kXCI+KHtjdXJyZW5jeS5zeW1ib2x9KTwvc3Bhbj5cbiAgICAgICAgICAgIDwvc3Bhbj5cbiAgICAgICAgICA8L1NlbGVjdEl0ZW0+XG4gICAgICAgICkpfVxuICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInB4LTIgcHktMS41IHRleHQteHMgZm9udC1zZW1pYm9sZCB0ZXh0LW11dGVkLWZvcmVncm91bmQgYm9yZGVyLXQgbXQtMVwiPlxuICAgICAgICAgIERldmlzZXMgaW50ZXJuYXRpb25hbGVzXG4gICAgICAgIDwvZGl2PlxuICAgICAgICB7aW50ZXJuYXRpb25hbEN1cnJlbmNpZXMubWFwKGN1cnJlbmN5ID0+IChcbiAgICAgICAgICA8U2VsZWN0SXRlbSBrZXk9e2N1cnJlbmN5LmNvZGV9IHZhbHVlPXtjdXJyZW5jeS5jb2RlfT5cbiAgICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGdhcC0yXCI+XG4gICAgICAgICAgICAgIDxzcGFuPntjdXJyZW5jeS5mbGFnfTwvc3Bhbj5cbiAgICAgICAgICAgICAgPHNwYW4+e2N1cnJlbmN5Lm5hbWV9PC9zcGFuPlxuICAgICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJ0ZXh0LW11dGVkLWZvcmVncm91bmRcIj4oe2N1cnJlbmN5LnN5bWJvbH0pPC9zcGFuPlxuICAgICAgICAgICAgPC9zcGFuPlxuICAgICAgICAgIDwvU2VsZWN0SXRlbT5cbiAgICAgICAgKSl9XG4gICAgICA8L1NlbGVjdENvbnRlbnQ+XG4gICAgPC9TZWxlY3Q+XG4gICk7XG59KTtcblxuQ3VycmVuY3lTZWxlY3QuZGlzcGxheU5hbWUgPSAnQ3VycmVuY3lTZWxlY3QnO1xuXG5cblxuXG5cblxuIl0sIm5hbWVzIjpbIm1lbW8iLCJ1c2VNZW1vIiwiU2VsZWN0IiwiU2VsZWN0Q29udGVudCIsIlNlbGVjdEl0ZW0iLCJTZWxlY3RUcmlnZ2VyIiwiU2VsZWN0VmFsdWUiLCJDVVJSRU5DSUVTIiwiQUZSSUNBTl9DVVJSRU5DSUVTIiwiSU5URVJOQVRJT05BTF9DVVJSRU5DSUVTIiwiQ3VycmVuY3lTZWxlY3QiLCJ2YWx1ZSIsIm9uVmFsdWVDaGFuZ2UiLCJkaXNhYmxlZCIsImFmcmljYW5DdXJyZW5jaWVzIiwiZmlsdGVyIiwiYyIsImluY2x1ZGVzIiwiY29kZSIsImludGVybmF0aW9uYWxDdXJyZW5jaWVzIiwicGxhY2Vob2xkZXIiLCJkaXYiLCJjbGFzc05hbWUiLCJtYXAiLCJjdXJyZW5jeSIsInNwYW4iLCJmbGFnIiwibmFtZSIsInN5bWJvbCIsImRpc3BsYXlOYW1lIl0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7QUFBQTs7O0NBR0MsR0FFRCxTQUFTQSxJQUFJLEVBQUVDLE9BQU8sUUFBUSxRQUFRO0FBQ3RDLFNBQ0VDLE1BQU0sRUFDTkMsYUFBYSxFQUNiQyxVQUFVLEVBQ1ZDLGFBQWEsRUFDYkMsV0FBVyxRQUNOLHlCQUF5QjtBQUNoQyxTQUFTQyxVQUFVLFFBQVEsbUJBQW1CO0FBUTlDLE1BQU1DLHFCQUFxQjtJQUFDO0lBQU87SUFBTztJQUFPO0lBQU87SUFBTztJQUFPO0lBQU87SUFBTztJQUFPO0lBQU87SUFBTztDQUFNO0FBQy9HLE1BQU1DLDJCQUEyQjtJQUFDO0lBQU87SUFBTztJQUFPO0lBQU87SUFBTztJQUFPO0NBQU07QUFFbEYsT0FBTyxNQUFNQywrQkFBaUJWLEdBQUFBLGFBQUssQ0FBQyxFQUFFVyxLQUFLLEVBQUVDLGFBQWEsRUFBRUMsUUFBUSxFQUF1Qjs7SUFDekYsTUFBTUMsb0JBQW9CYixRQUN4QixJQUFNTSxXQUFXUSxNQUFNLENBQUNDLENBQUFBLElBQUtSLG1CQUFtQlMsUUFBUSxDQUFDRCxFQUFFRSxJQUFJLElBQy9ELEVBQUU7SUFHSixNQUFNQywwQkFBMEJsQixRQUM5QixJQUFNTSxXQUFXUSxNQUFNLENBQUNDLENBQUFBLElBQUtQLHlCQUF5QlEsUUFBUSxDQUFDRCxFQUFFRSxJQUFJLElBQ3JFLEVBQUU7SUFHSixxQkFDRSxRQUFDaEI7UUFBT1MsT0FBT0E7UUFBT0MsZUFBZUE7UUFBZUMsVUFBVUE7OzBCQUM1RCxRQUFDUjswQkFDQyxjQUFBLFFBQUNDO29CQUFZYyxhQUFZOzs7Ozs7Ozs7OzswQkFFM0IsUUFBQ2pCOztrQ0FDQyxRQUFDa0I7d0JBQUlDLFdBQVU7a0NBQTBEOzs7Ozs7b0JBR3hFUixrQkFBa0JTLEdBQUcsQ0FBQ0MsQ0FBQUEseUJBQ3JCLFFBQUNwQjs0QkFBK0JPLE9BQU9hLFNBQVNOLElBQUk7c0NBQ2xELGNBQUEsUUFBQ087Z0NBQUtILFdBQVU7O2tEQUNkLFFBQUNHO2tEQUFNRCxTQUFTRSxJQUFJOzs7Ozs7a0RBQ3BCLFFBQUNEO2tEQUFNRCxTQUFTRyxJQUFJOzs7Ozs7a0RBQ3BCLFFBQUNGO3dDQUFLSCxXQUFVOzs0Q0FBd0I7NENBQUVFLFNBQVNJLE1BQU07NENBQUM7Ozs7Ozs7Ozs7Ozs7MkJBSjdDSixTQUFTTixJQUFJOzs7OztrQ0FRaEMsUUFBQ0c7d0JBQUlDLFdBQVU7a0NBQXdFOzs7Ozs7b0JBR3RGSCx3QkFBd0JJLEdBQUcsQ0FBQ0MsQ0FBQUEseUJBQzNCLFFBQUNwQjs0QkFBK0JPLE9BQU9hLFNBQVNOLElBQUk7c0NBQ2xELGNBQUEsUUFBQ087Z0NBQUtILFdBQVU7O2tEQUNkLFFBQUNHO2tEQUFNRCxTQUFTRSxJQUFJOzs7Ozs7a0RBQ3BCLFFBQUNEO2tEQUFNRCxTQUFTRyxJQUFJOzs7Ozs7a0RBQ3BCLFFBQUNGO3dDQUFLSCxXQUFVOzs0Q0FBd0I7NENBQUVFLFNBQVNJLE1BQU07NENBQUM7Ozs7Ozs7Ozs7Ozs7MkJBSjdDSixTQUFTTixJQUFJOzs7Ozs7Ozs7Ozs7Ozs7OztBQVd4QyxxRUFBRzs7QUFFSFIsZUFBZW1CLFdBQVcsR0FBRyJ9

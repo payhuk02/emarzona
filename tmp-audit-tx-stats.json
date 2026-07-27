@@ -1,0 +1,4 @@
+﻿npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+Initialising login role...
+unexpected status 400: {"message":"query: String must contain at least 1 character(s)"}
+Try rerunning the command with --debug to troubleshoot the error.

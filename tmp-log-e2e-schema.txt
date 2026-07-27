@@ -1,0 +1,186 @@
+﻿Prepare shared E2E schema	Apply E2E schema patches (idempotent)	´╗┐2026-07-22T03:41:31.9739344Z ##[group]Run sudo apt-get update
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:31.9740622Z ^[[36;1msudo apt-get update^[[0m
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:31.9741698Z ^[[36;1msudo apt-get install -y postgresql-client^[[0m
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:31.9743116Z ^[[36;1mbash scripts/apply-e2e-post-bootstrap-patches-ci.sh^[[0m
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:31.9813246Z shell: /usr/bin/bash -e {0}
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:31.9814182Z env:
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:31.9814936Z   E2E_REF: ufbztturuwwazfcvhvuu
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:31.9816024Z   POOLER_HOST: aws-1-eu-west-2.pooler.supabase.com
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:31.9817435Z   E2E_SUPABASE_DB_PASSWORD: ***
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:31.9818375Z ##[endgroup]
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:32.0509184Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:32.0934914Z Hit:6 https://packages.microsoft.com/repos/azure-cli noble InRelease
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:32.0946048Z Get:7 https://packages.microsoft.com/ubuntu/24.04/prod noble InRelease [3600 B]
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:32.1306760Z Get:8 https://dl.google.com/linux/chrome-stable/deb stable InRelease [2548 B]
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:32.2130220Z Get:9 https://packages.microsoft.com/ubuntu/24.04/prod noble/main amd64 Packages [234 kB]
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:32.2137079Z Hit:2 http://azure.archive.ubuntu.com/ubuntu noble InRelease
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:32.2224017Z Get:3 http://azure.archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:32.2234633Z Get:4 http://azure.archive.ubuntu.com/ubuntu noble-backports InRelease [126 kB]
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:32.2243467Z Get:5 http://azure.archive.ubuntu.com/ubuntu noble-security InRelease [126 kB]
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:32.2294719Z Get:10 https://packages.microsoft.com/ubuntu/24.04/prod noble/main armhf Packages [11.7 kB]
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:32.2319974Z Get:11 https://packages.microsoft.com/ubuntu/24.04/prod noble/main arm64 Packages [201 kB]
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:32.3334471Z Get:12 https://dl.google.com/linux/chrome-stable/deb stable/main amd64 Packages [1414 B]
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:32.3456145Z Get:13 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 Packages [1124 kB]
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:32.3512145Z Get:14 http://azure.archive.ubuntu.com/ubuntu noble-updates/main Translation-en [274 kB]
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:32.3541675Z Get:15 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 Components [180 kB]
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:32.3561375Z Get:16 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe amd64 Packages [1666 kB]
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:32.3611438Z Get:17 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe Translation-en [329 kB]
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:32.3668107Z Get:18 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe amd64 Components [388 kB]
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:32.3699458Z Get:19 http://azure.archive.ubuntu.com/ubuntu noble-updates/restricted amd64 Packages [1274 kB]
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:32.3767228Z Get:20 http://azure.archive.ubuntu.com/ubuntu noble-updates/restricted Translation-en [291 kB]
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:32.3776019Z Get:21 http://azure.archive.ubuntu.com/ubuntu noble-updates/multiverse amd64 Components [940 B]
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:32.3877220Z Get:22 http://azure.archive.ubuntu.com/ubuntu noble-backports/main amd64 Components [5752 B]
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:32.4305857Z Get:23 http://azure.archive.ubuntu.com/ubuntu noble-backports/universe amd64 Components [10.5 kB]
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:32.4315163Z Get:24 http://azure.archive.ubuntu.com/ubuntu noble-security/main amd64 Packages [862 kB]
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:32.4351865Z Get:25 http://azure.archive.ubuntu.com/ubuntu noble-security/main Translation-en [193 kB]
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:32.4364535Z Get:26 http://azure.archive.ubuntu.com/ubuntu noble-security/main amd64 Components [46.3 kB]
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:32.4372279Z Get:27 http://azure.archive.ubuntu.com/ubuntu noble-security/universe amd64 Packages [1180 kB]
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:32.4419230Z Get:28 http://azure.archive.ubuntu.com/ubuntu noble-security/universe Translation-en [233 kB]
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:32.4432800Z Get:29 http://azure.archive.ubuntu.com/ubuntu noble-security/universe amd64 Components [76.3 kB]
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:32.4441008Z Get:30 http://azure.archive.ubuntu.com/ubuntu noble-security/restricted amd64 Packages [1178 kB]
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:32.4487032Z Get:31 http://azure.archive.ubuntu.com/ubuntu noble-security/restricted Translation-en [272 kB]
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:36.6377627Z Fetched 10.4 MB in 1s (9324 kB/s)
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:37.1765315Z Reading package lists...
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:37.2022730Z Reading package lists...
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:37.3485419Z Building dependency tree...
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:37.3492239Z Reading state information...
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:37.4872580Z The following NEW packages will be installed:
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:37.4873151Z   postgresql-client
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:37.5014878Z 0 upgraded, 1 newly installed, 0 to remove and 66 not upgraded.
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:37.5015742Z Need to get 11.6 kB of archives.
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:37.5016106Z After this operation, 17.4 kB of additional disk space will be used.
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:37.5016521Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:37.5913897Z Get:2 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 postgresql-client all 16+257build1.1 [11.6 kB]
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:37.7949523Z Fetched 11.6 kB in 0s (117 kB/s)
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:37.8176686Z Selecting previously unselected package postgresql-client.
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:37.8358755Z (Reading database ... 
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:37.8359500Z (Reading database ... 5%
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:37.8360079Z (Reading database ... 10%
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:37.8360590Z (Reading database ... 15%
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:37.8360909Z (Reading database ... 20%
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:37.8361236Z (Reading database ... 25%
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:37.8361530Z (Reading database ... 30%
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:37.8361827Z (Reading database ... 35%
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:37.8362115Z (Reading database ... 40%
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:37.8362381Z (Reading database ... 45%
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:37.8362677Z (Reading database ... 50%
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:37.8587199Z (Reading database ... 55%
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:37.9557750Z (Reading database ... 60%
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:38.1626083Z (Reading database ... 65%
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:38.4933915Z (Reading database ... 70%
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:38.7618768Z (Reading database ... 75%
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:38.9568112Z (Reading database ... 80%
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:39.1310603Z (Reading database ... 85%
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:39.2589160Z (Reading database ... 90%
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:39.4284074Z (Reading database ... 95%
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:39.4284416Z (Reading database ... 100%
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:39.4284703Z (Reading database ... 202507 files and directories currently installed.)
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:39.4324190Z Preparing to unpack .../postgresql-client_16+257build1.1_all.deb ...
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:39.4412320Z Unpacking postgresql-client (16+257build1.1) ...
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:39.4984911Z Setting up postgresql-client (16+257build1.1) ...
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:40.1012622Z 
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:40.1013198Z Running kernel seems to be up-to-date.
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:40.1013490Z 
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:40.1013604Z No services need to be restarted.
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:40.1013811Z 
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:40.1014057Z No containers need to be restarted.
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:40.1014261Z 
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:40.1014491Z No user sessions are running outdated binaries.
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:40.1014932Z 
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:40.1015206Z No VM guests are running outdated hypervisor (qemu) binaries on this host.
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:40.8448407Z Applying E2E post-bootstrap patches on ufbztturuwwazfcvhvuu via pooler...
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5547575Z  pg_advisory_lock 
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5548037Z ------------------
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5548453Z  
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5548685Z (1 row)
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5548814Z 
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5548954Z CREATE FUNCTION
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5549125Z CREATE FUNCTION
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5549285Z DROP TRIGGER
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5549517Z CREATE TRIGGER
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5549841Z GRANT
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5550116Z GRANT
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5550899Z psql:scripts/e2e-post-bootstrap-patches.sql:54: NOTICE:  column "total_orders" of relation "stores" already exists, skipping
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5551824Z psql:scripts/e2e-post-bootstrap-patches.sql:54: NOTICE:  column "total_revenue" of relation "stores" already exists, skipping
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5552457Z ALTER TABLE
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5553333Z psql:scripts/e2e-post-bootstrap-patches.sql:58: NOTICE:  column "store_id" of relation "service_products" already exists, skipping
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5553967Z ALTER TABLE
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5554367Z UPDATE 0
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5554887Z psql:scripts/e2e-post-bootstrap-patches.sql:66: NOTICE:  relation "idx_service_products_store_id" already exists, skipping
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5555504Z CREATE INDEX
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5556194Z psql:scripts/e2e-post-bootstrap-patches.sql:70: NOTICE:  column "store_id" of relation "physical_products" already exists, skipping
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5556844Z ALTER TABLE
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5557056Z UPDATE 0
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5557616Z psql:scripts/e2e-post-bootstrap-patches.sql:78: NOTICE:  relation "idx_physical_products_store_id" already exists, skipping
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5558254Z CREATE INDEX
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5558471Z CREATE FUNCTION
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5558680Z GRANT
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5558862Z GRANT
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5559055Z GRANT
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5559267Z INSERT 0 3
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5559483Z INSERT 0 0
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5559691Z CREATE FUNCTION
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5559920Z CREATE FUNCTION
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5560139Z CREATE FUNCTION
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5560559Z GRANT
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5560765Z GRANT
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5560966Z GRANT
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5561177Z CREATE FUNCTION
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5561411Z CREATE FUNCTION
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5561637Z GRANT
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5561843Z ALTER VIEW
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5562063Z CREATE FUNCTION
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5562289Z COMMENT
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5562496Z CREATE FUNCTION
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5562715Z CREATE FUNCTION
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5562930Z GRANT
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5563141Z GRANT
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5563342Z NOTIFY
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5563543Z BEGIN
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5564079Z psql:supabase/scripts/apply-web-analytics-prod.sql:39: NOTICE:  relation "analytics_events" already exists, skipping
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5564703Z CREATE TABLE
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5565275Z psql:supabase/scripts/apply-web-analytics-prod.sql:68: NOTICE:  relation "store_analytics_sessions" already exists, skipping
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5565931Z CREATE TABLE
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5566559Z psql:supabase/scripts/apply-web-analytics-prod.sql:70: NOTICE:  relation "idx_analytics_events_product_id" already exists, skipping
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5567223Z CREATE INDEX
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5567655Z psql:supabase/scripts/apply-web-analytics-prod.sql:71: NOTICE:  relation "idx_analytics_events_event_type" already exists, skipping
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5568328Z CREATE INDEX
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5568713Z psql:supabase/scripts/apply-web-analytics-prod.sql:72: NOTICE:  relation "idx_analytics_events_created_at" already exists, skipping
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5569169Z CREATE INDEX
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5569609Z psql:supabase/scripts/apply-web-analytics-prod.sql:73: NOTICE:  relation "idx_analytics_events_session_id" already exists, skipping
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5570369Z CREATE INDEX
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5570963Z psql:supabase/scripts/apply-web-analytics-prod.sql:74: NOTICE:  relation "idx_analytics_events_store_id" already exists, skipping
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5571669Z CREATE INDEX
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5572278Z psql:supabase/scripts/apply-web-analytics-prod.sql:75: NOTICE:  relation "idx_store_analytics_sessions_product_id" already exists, skipping
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5572938Z CREATE INDEX
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5573455Z psql:supabase/scripts/apply-web-analytics-prod.sql:76: NOTICE:  relation "idx_store_analytics_sessions_session_id" already exists, skipping
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5573898Z CREATE INDEX
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5574295Z psql:supabase/scripts/apply-web-analytics-prod.sql:77: NOTICE:  relation "idx_store_analytics_sessions_start_time" already exists, skipping
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5574775Z CREATE INDEX
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5575168Z psql:supabase/scripts/apply-web-analytics-prod.sql:78: NOTICE:  relation "idx_store_analytics_sessions_store_id" already exists, skipping
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5575596Z CREATE INDEX
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5575749Z ALTER TABLE
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5576133Z ALTER TABLE
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5576276Z DROP POLICY
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5576426Z CREATE POLICY
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5576577Z DROP POLICY
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5576722Z CREATE POLICY
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5576963Z DROP POLICY
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5577103Z CREATE POLICY
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5577247Z DROP POLICY
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5577391Z CREATE POLICY
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5577538Z DO
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5577690Z CREATE FUNCTION
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5577844Z GRANT
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5577989Z CREATE FUNCTION
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5578137Z GRANT
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5578273Z COMMIT
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5578410Z NOTIFY
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5578545Z BEGIN
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5578685Z CREATE FUNCTION
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5578830Z GRANT
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5578975Z CREATE FUNCTION
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5579371Z psql:supabase/scripts/apply-public-order-rpcs-prod.sql:254: ERROR:  function name "public.create_public_digital_order" is not unique
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5579879Z HINT:  Specify the argument list to select the function unambiguously.
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5595519Z ##[error]E2E schema patches failed with exit 3
+Prepare shared E2E schema	Apply E2E schema patches (idempotent)	2026-07-22T03:41:52.5603949Z ##[error]Process completed with exit code 3.

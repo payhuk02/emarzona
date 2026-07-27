@@ -1,0 +1,31 @@
+/**
+ * Tagged template function which returns parameterized representation of the message
+ * For example: parameterize`This is a log statement with ${x} and ${y} params`, would return:
+ * "__sentry_template_string__": 'This is a log statement with %s and %s params',
+ * "__sentry_template_values__": ['first', 'second']
+ *
+ * @param strings An array of string values splitted between expressions
+ * @param values Expressions extracted from template string
+ *
+ * @returns A `ParameterizedString` object that can be passed into `captureMessage` or Sentry.logger.X methods.
+ */
+function parameterize(strings, ...values) {
+  const formatted = new String(String.raw(strings, ...values)) ;
+  formatted.__sentry_template_string__ = strings.join('\x00').replace(/%/g, '%%').replace(/\0/g, '%s');
+  formatted.__sentry_template_values__ = values;
+  return formatted;
+}
+
+/**
+ * Tagged template function which returns parameterized representation of the message.
+ *
+ * @param strings An array of string values splitted between expressions
+ * @param values Expressions extracted from template string
+ * @returns A `ParameterizedString` object that can be passed into `captureMessage` or Sentry.logger.X methods.
+ */
+const fmt = parameterize;
+
+export { fmt, parameterize };
+                                        
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicGFyYW1ldGVyaXplLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi9zcmMvdXRpbHMvcGFyYW1ldGVyaXplLnRzIl0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB0eXBlIHsgUGFyYW1ldGVyaXplZFN0cmluZyB9IGZyb20gJy4uL3R5cGVzLWhvaXN0L3BhcmFtZXRlcml6ZSc7XG5cbi8qKlxuICogVGFnZ2VkIHRlbXBsYXRlIGZ1bmN0aW9uIHdoaWNoIHJldHVybnMgcGFyYW1ldGVyaXplZCByZXByZXNlbnRhdGlvbiBvZiB0aGUgbWVzc2FnZVxuICogRm9yIGV4YW1wbGU6IHBhcmFtZXRlcml6ZWBUaGlzIGlzIGEgbG9nIHN0YXRlbWVudCB3aXRoICR7eH0gYW5kICR7eX0gcGFyYW1zYCwgd291bGQgcmV0dXJuOlxuICogXCJfX3NlbnRyeV90ZW1wbGF0ZV9zdHJpbmdfX1wiOiAnVGhpcyBpcyBhIGxvZyBzdGF0ZW1lbnQgd2l0aCAlcyBhbmQgJXMgcGFyYW1zJyxcbiAqIFwiX19zZW50cnlfdGVtcGxhdGVfdmFsdWVzX19cIjogWydmaXJzdCcsICdzZWNvbmQnXVxuICpcbiAqIEBwYXJhbSBzdHJpbmdzIEFuIGFycmF5IG9mIHN0cmluZyB2YWx1ZXMgc3BsaXR0ZWQgYmV0d2VlbiBleHByZXNzaW9uc1xuICogQHBhcmFtIHZhbHVlcyBFeHByZXNzaW9ucyBleHRyYWN0ZWQgZnJvbSB0ZW1wbGF0ZSBzdHJpbmdcbiAqXG4gKiBAcmV0dXJucyBBIGBQYXJhbWV0ZXJpemVkU3RyaW5nYCBvYmplY3QgdGhhdCBjYW4gYmUgcGFzc2VkIGludG8gYGNhcHR1cmVNZXNzYWdlYCBvciBTZW50cnkubG9nZ2VyLlggbWV0aG9kcy5cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIHBhcmFtZXRlcml6ZShzdHJpbmdzOiBUZW1wbGF0ZVN0cmluZ3NBcnJheSwgLi4udmFsdWVzOiB1bmtub3duW10pOiBQYXJhbWV0ZXJpemVkU3RyaW5nIHtcbiAgY29uc3QgZm9ybWF0dGVkID0gbmV3IFN0cmluZyhTdHJpbmcucmF3KHN0cmluZ3MsIC4uLnZhbHVlcykpIGFzIFBhcmFtZXRlcml6ZWRTdHJpbmc7XG4gIGZvcm1hdHRlZC5fX3NlbnRyeV90ZW1wbGF0ZV9zdHJpbmdfXyA9IHN0cmluZ3Muam9pbignXFx4MDAnKS5yZXBsYWNlKC8lL2csICclJScpLnJlcGxhY2UoL1xcMC9nLCAnJXMnKTtcbiAgZm9ybWF0dGVkLl9fc2VudHJ5X3RlbXBsYXRlX3ZhbHVlc19fID0gdmFsdWVzO1xuICByZXR1cm4gZm9ybWF0dGVkO1xufVxuXG4vKipcbiAqIFRhZ2dlZCB0ZW1wbGF0ZSBmdW5jdGlvbiB3aGljaCByZXR1cm5zIHBhcmFtZXRlcml6ZWQgcmVwcmVzZW50YXRpb24gb2YgdGhlIG1lc3NhZ2UuXG4gKlxuICogQHBhcmFtIHN0cmluZ3MgQW4gYXJyYXkgb2Ygc3RyaW5nIHZhbHVlcyBzcGxpdHRlZCBiZXR3ZWVuIGV4cHJlc3Npb25zXG4gKiBAcGFyYW0gdmFsdWVzIEV4cHJlc3Npb25zIGV4dHJhY3RlZCBmcm9tIHRlbXBsYXRlIHN0cmluZ1xuICogQHJldHVybnMgQSBgUGFyYW1ldGVyaXplZFN0cmluZ2Agb2JqZWN0IHRoYXQgY2FuIGJlIHBhc3NlZCBpbnRvIGBjYXB0dXJlTWVzc2FnZWAgb3IgU2VudHJ5LmxvZ2dlci5YIG1ldGhvZHMuXG4gKi9cbmV4cG9ydCBjb25zdCBmbXQgPSBwYXJhbWV0ZXJpemU7XG4iXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBRUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNPLFNBQVMsWUFBWSxDQUFDLE9BQU8sRUFBd0IsR0FBRyxNQUFNLEVBQWtDO0FBQ3ZHLEVBQUUsTUFBTSxTQUFBLEdBQVksSUFBSSxNQUFNLENBQUMsTUFBTSxDQUFDLEdBQUcsQ0FBQyxPQUFPLEVBQUUsR0FBRyxNQUFNLENBQUMsQ0FBQTtBQUM3RCxFQUFFLFNBQVMsQ0FBQywwQkFBQSxHQUE2QixPQUFPLENBQUMsSUFBSSxDQUFDLE1BQU0sQ0FBQyxDQUFDLE9BQU8sQ0FBQyxJQUFJLEVBQUUsSUFBSSxDQUFDLENBQUMsT0FBTyxDQUFDLEtBQUssRUFBRSxJQUFJLENBQUM7QUFDdEcsRUFBRSxTQUFTLENBQUMsMEJBQUEsR0FBNkIsTUFBTTtBQUMvQyxFQUFFLE9BQU8sU0FBUztBQUNsQjs7QUFFQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNPLE1BQU0sR0FBQSxHQUFNOzs7OyIsInhfZ29vZ2xlX2lnbm9yZUxpc3QiOlswXX0=

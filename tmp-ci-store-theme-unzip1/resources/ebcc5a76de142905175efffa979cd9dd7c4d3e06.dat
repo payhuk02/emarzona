@@ -1,0 +1,26 @@
+import {
+  useLayoutEffect2
+} from "/node_modules/.vite/deps/chunk-CTCUIBW7.js?v=d758aa40";
+import {
+  require_react
+} from "/node_modules/.vite/deps/chunk-7OHAGO6F.js?v=d758aa40";
+import {
+  __toESM
+} from "/node_modules/.vite/deps/chunk-WIEG4DIP.js?v=d758aa40";
+
+// node_modules/@radix-ui/react-id/dist/index.mjs
+var React = __toESM(require_react(), 1);
+var useReactId = React[" useId ".trim().toString()] || (() => void 0);
+var count = 0;
+function useId(deterministicId) {
+  const [id, setId] = React.useState(useReactId());
+  useLayoutEffect2(() => {
+    if (!deterministicId) setId((reactId) => reactId != null ? reactId : String(count++));
+  }, [deterministicId]);
+  return deterministicId || (id ? `radix-${id}` : "");
+}
+
+export {
+  useId
+};
+//# sourceMappingURL=chunk-GCBGYMHB.js.map

@@ -1,0 +1,19 @@
+export function getPaymentProviderLabel(provider) {
+    switch(provider){
+        case 'stripe_connect':
+            return 'Stripe';
+        case 'paypal_commerce':
+            return 'PayPal';
+        case 'geniuspay_platform':
+        case 'geniuspay':
+            return 'GeniusPay';
+        case 'moneyfusion':
+            return 'MoneyFusion';
+        case 'flutterwave_connect':
+            return 'Flutterwave';
+        default:
+            return provider ?? 'Inconnu';
+    }
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInBheW1lbnQtcHJvdmlkZXItbGFiZWxzLnRzIl0sInNvdXJjZXNDb250ZW50IjpbImV4cG9ydCBmdW5jdGlvbiBnZXRQYXltZW50UHJvdmlkZXJMYWJlbChwcm92aWRlcjogc3RyaW5nIHwgbnVsbCB8IHVuZGVmaW5lZCk6IHN0cmluZyB7XG4gIHN3aXRjaCAocHJvdmlkZXIpIHtcbiAgICBjYXNlICdzdHJpcGVfY29ubmVjdCc6XG4gICAgICByZXR1cm4gJ1N0cmlwZSc7XG4gICAgY2FzZSAncGF5cGFsX2NvbW1lcmNlJzpcbiAgICAgIHJldHVybiAnUGF5UGFsJztcbiAgICBjYXNlICdnZW5pdXNwYXlfcGxhdGZvcm0nOlxuICAgIGNhc2UgJ2dlbml1c3BheSc6XG4gICAgICByZXR1cm4gJ0dlbml1c1BheSc7XG4gICAgY2FzZSAnbW9uZXlmdXNpb24nOlxuICAgICAgcmV0dXJuICdNb25leUZ1c2lvbic7XG4gICAgY2FzZSAnZmx1dHRlcndhdmVfY29ubmVjdCc6XG4gICAgICByZXR1cm4gJ0ZsdXR0ZXJ3YXZlJztcbiAgICBkZWZhdWx0OlxuICAgICAgcmV0dXJuIHByb3ZpZGVyID8/ICdJbmNvbm51JztcbiAgfVxufVxuIl0sIm5hbWVzIjpbImdldFBheW1lbnRQcm92aWRlckxhYmVsIiwicHJvdmlkZXIiXSwibWFwcGluZ3MiOiJBQUFBLE9BQU8sU0FBU0Esd0JBQXdCQyxRQUFtQztJQUN6RSxPQUFRQTtRQUNOLEtBQUs7WUFDSCxPQUFPO1FBQ1QsS0FBSztZQUNILE9BQU87UUFDVCxLQUFLO1FBQ0wsS0FBSztZQUNILE9BQU87UUFDVCxLQUFLO1lBQ0gsT0FBTztRQUNULEtBQUs7WUFDSCxPQUFPO1FBQ1Q7WUFDRSxPQUFPQSxZQUFZO0lBQ3ZCO0FBQ0YifQ==

@@ -28,11 +28,15 @@ import type { ServiceProductFormData } from '@/types/service-product';
 import { logger } from '@/lib/logger';
 import { useSpaceInputFix } from '@/hooks/useSpaceInputFix';
 import { buildSeoFromGenerated, mergeImages } from '@/lib/ai-product-apply';
+import { getCategoriesForProductType } from '@/constants/product-categories';
 
 interface ServiceBasicInfoFormProps {
   data: Partial<ServiceProductFormData>;
   onUpdate: (data: Partial<ServiceProductFormData>) => void;
+  storeSlug?: string;
 }
+
+const SERVICE_CATEGORIES = getCategoriesForProductType('service');
 
 export const ServiceBasicInfoForm = ({ data, onUpdate }: ServiceBasicInfoFormProps) => {
   const { toast } = useToast();
@@ -115,6 +119,27 @@ export const ServiceBasicInfoForm = ({ data, onUpdate }: ServiceBasicInfoFormPro
         <SelectItem value="consultation">Consultation</SelectItem>
         <SelectItem value="other">Autre</SelectItem>
       </SelectField>
+
+      {/* Category */}
+      <div className="space-y-2">
+        <SelectField
+          label="Catégorie *"
+          contentVariant="sheet"
+          useMobileSelectRoot
+          value={data.category || 'consultation'}
+          onValueChange={value => {
+            onUpdate({ category: value });
+          }}
+          required
+          placeholder="Sélectionnez une catégorie"
+        >
+          {SERVICE_CATEGORIES.map(cat => (
+            <SelectItem key={cat.value} value={cat.value}>
+              {cat.label}
+            </SelectItem>
+          ))}
+        </SelectField>
+      </div>
 
       {/* Service Name */}
       <div className="space-y-2">

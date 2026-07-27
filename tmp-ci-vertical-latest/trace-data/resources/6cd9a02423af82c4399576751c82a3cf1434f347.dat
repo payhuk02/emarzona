@@ -1,0 +1,131 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/calendar/LazyCalendarWrapper.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/calendar/LazyCalendarWrapper.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=2441233a"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"]; const _Fragment = __vite__cjsImport2_react_jsxDevRuntime["Fragment"];
+var _s = $RefreshSig$();
+/**
+ * Lazy Calendar Wrapper Component
+ * Charge react-big-calendar de manière lazy et expose les composants nécessaires
+ */ import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=2441233a"; const useState = __vite__cjsImport3_react["useState"]; const useEffect = __vite__cjsImport3_react["useEffect"];
+import { Skeleton } from "/src/components/ui/skeleton.tsx";
+import { Card, CardContent } from "/src/components/ui/card.tsx";
+const CalendarLoadingFallback = ()=>/*#__PURE__*/ _jsxDEV(Card, {
+        children: /*#__PURE__*/ _jsxDEV(CardContent, {
+            className: "p-6",
+            children: /*#__PURE__*/ _jsxDEV("div", {
+                className: "space-y-4",
+                children: [
+                    /*#__PURE__*/ _jsxDEV(Skeleton, {
+                        className: "h-10 w-full"
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/calendar/LazyCalendarWrapper.tsx",
+                        lineNumber: 23,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV(Skeleton, {
+                        className: "h-[600px] w-full"
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/calendar/LazyCalendarWrapper.tsx",
+                        lineNumber: 24,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/calendar/LazyCalendarWrapper.tsx",
+                lineNumber: 22,
+                columnNumber: 7
+            }, this)
+        }, void 0, false, {
+            fileName: "/home/runner/work/emarzona/emarzona/src/components/calendar/LazyCalendarWrapper.tsx",
+            lineNumber: 21,
+            columnNumber: 5
+        }, this)
+    }, void 0, false, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/calendar/LazyCalendarWrapper.tsx",
+        lineNumber: 20,
+        columnNumber: 3
+    }, this);
+_c = CalendarLoadingFallback;
+/**
+ * Wrapper pour utiliser react-big-calendar de manière lazy
+ * Usage:
+ * <LazyCalendarWrapper>
+ *   {(calendar) => (
+ *     <calendar.Calendar
+ *       localizer={localizer}
+ *       events={events}
+ *       startAccessor="start"
+ *       endAccessor="end"
+ *     />
+ *   )}
+ * </LazyCalendarWrapper>
+ */ export const LazyCalendarWrapper = ({ children })=>{
+    _s();
+    const [calendarModule, setCalendarModule] = useState(null);
+    const [loading, setLoading] = useState(true);
+    useEffect(()=>{
+        Promise.all([
+            import("/node_modules/.vite/deps/react-big-calendar.js?v=51448abe"),
+            import("/node_modules/react-big-calendar/lib/css/react-big-calendar.css")
+        ]).then(([module])=>{
+            setCalendarModule(module);
+            setLoading(false);
+        });
+    }, []);
+    if (loading || !calendarModule) {
+        return /*#__PURE__*/ _jsxDEV(CalendarLoadingFallback, {}, void 0, false, {
+            fileName: "/home/runner/work/emarzona/emarzona/src/components/calendar/LazyCalendarWrapper.tsx",
+            lineNumber: 59,
+            columnNumber: 12
+        }, this);
+    }
+    return /*#__PURE__*/ _jsxDEV(_Fragment, {
+        children: children({
+            Calendar: calendarModule.Calendar,
+            dateFnsLocalizer: calendarModule.dateFnsLocalizer,
+            View: calendarModule.View,
+            Views: calendarModule.Views
+        })
+    }, void 0, false);
+};
+_s(LazyCalendarWrapper, "nYcmWN/YmyiGZY+htSg8RpdM3/k=");
+_c1 = LazyCalendarWrapper;
+var _c, _c1;
+$RefreshReg$(_c, "CalendarLoadingFallback");
+$RefreshReg$(_c1, "LazyCalendarWrapper");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/calendar/LazyCalendarWrapper.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/calendar/LazyCalendarWrapper.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIkxhenlDYWxlbmRhcldyYXBwZXIudHN4Il0sInNvdXJjZXNDb250ZW50IjpbIi8qKlxuICogTGF6eSBDYWxlbmRhciBXcmFwcGVyIENvbXBvbmVudFxuICogQ2hhcmdlIHJlYWN0LWJpZy1jYWxlbmRhciBkZSBtYW5pw6hyZSBsYXp5IGV0IGV4cG9zZSBsZXMgY29tcG9zYW50cyBuw6ljZXNzYWlyZXNcbiAqL1xuXG5pbXBvcnQgeyB1c2VTdGF0ZSwgdXNlRWZmZWN0LCBSZWFjdE5vZGUgfSBmcm9tICdyZWFjdCc7XG5pbXBvcnQgeyBTa2VsZXRvbiB9IGZyb20gJ0AvY29tcG9uZW50cy91aS9za2VsZXRvbic7XG5pbXBvcnQgeyBDYXJkLCBDYXJkQ29udGVudCB9IGZyb20gJ0AvY29tcG9uZW50cy91aS9jYXJkJztcblxuaW50ZXJmYWNlIExhenlDYWxlbmRhcldyYXBwZXJQcm9wcyB7XG4gIGNoaWxkcmVuOiAoY2FsZW5kYXI6IHtcbiAgICBDYWxlbmRhcjogdHlwZW9mIGltcG9ydCgncmVhY3QtYmlnLWNhbGVuZGFyJykuQ2FsZW5kYXI7XG4gICAgZGF0ZUZuc0xvY2FsaXplcjogdHlwZW9mIGltcG9ydCgncmVhY3QtYmlnLWNhbGVuZGFyJykuZGF0ZUZuc0xvY2FsaXplcjtcbiAgICBWaWV3OiB0eXBlb2YgaW1wb3J0KCdyZWFjdC1iaWctY2FsZW5kYXInKS5WaWV3O1xuICAgIFZpZXdzOiB0eXBlb2YgaW1wb3J0KCdyZWFjdC1iaWctY2FsZW5kYXInKS5WaWV3cztcbiAgfSkgPT4gUmVhY3ROb2RlO1xufVxuXG5jb25zdCBDYWxlbmRhckxvYWRpbmdGYWxsYmFjayA9ICgpID0+IChcbiAgPENhcmQ+XG4gICAgPENhcmRDb250ZW50IGNsYXNzTmFtZT1cInAtNlwiPlxuICAgICAgPGRpdiBjbGFzc05hbWU9XCJzcGFjZS15LTRcIj5cbiAgICAgICAgPFNrZWxldG9uIGNsYXNzTmFtZT1cImgtMTAgdy1mdWxsXCIgLz5cbiAgICAgICAgPFNrZWxldG9uIGNsYXNzTmFtZT1cImgtWzYwMHB4XSB3LWZ1bGxcIiAvPlxuICAgICAgPC9kaXY+XG4gICAgPC9DYXJkQ29udGVudD5cbiAgPC9DYXJkPlxuKTtcblxuLyoqXG4gKiBXcmFwcGVyIHBvdXIgdXRpbGlzZXIgcmVhY3QtYmlnLWNhbGVuZGFyIGRlIG1hbmnDqHJlIGxhenlcbiAqIFVzYWdlOlxuICogPExhenlDYWxlbmRhcldyYXBwZXI+XG4gKiAgIHsoY2FsZW5kYXIpID0+IChcbiAqICAgICA8Y2FsZW5kYXIuQ2FsZW5kYXJcbiAqICAgICAgIGxvY2FsaXplcj17bG9jYWxpemVyfVxuICogICAgICAgZXZlbnRzPXtldmVudHN9XG4gKiAgICAgICBzdGFydEFjY2Vzc29yPVwic3RhcnRcIlxuICogICAgICAgZW5kQWNjZXNzb3I9XCJlbmRcIlxuICogICAgIC8+XG4gKiAgICl9XG4gKiA8L0xhenlDYWxlbmRhcldyYXBwZXI+XG4gKi9cbmV4cG9ydCBjb25zdCBMYXp5Q2FsZW5kYXJXcmFwcGVyID0gKHsgY2hpbGRyZW4gfTogTGF6eUNhbGVuZGFyV3JhcHBlclByb3BzKSA9PiB7XG4gIGNvbnN0IFtjYWxlbmRhck1vZHVsZSwgc2V0Q2FsZW5kYXJNb2R1bGVdID0gdXNlU3RhdGU8dHlwZW9mIGltcG9ydCgncmVhY3QtYmlnLWNhbGVuZGFyJykgfCBudWxsPihudWxsKTtcbiAgY29uc3QgW2xvYWRpbmcsIHNldExvYWRpbmddID0gdXNlU3RhdGUodHJ1ZSk7XG5cbiAgdXNlRWZmZWN0KCgpID0+IHtcbiAgICBQcm9taXNlLmFsbChbXG4gICAgICBpbXBvcnQoJ3JlYWN0LWJpZy1jYWxlbmRhcicpLFxuICAgICAgaW1wb3J0KCdyZWFjdC1iaWctY2FsZW5kYXIvbGliL2Nzcy9yZWFjdC1iaWctY2FsZW5kYXIuY3NzJylcbiAgICBdKS50aGVuKChbbW9kdWxlXSkgPT4ge1xuICAgICAgc2V0Q2FsZW5kYXJNb2R1bGUobW9kdWxlKTtcbiAgICAgIHNldExvYWRpbmcoZmFsc2UpO1xuICAgIH0pO1xuICB9LCBbXSk7XG5cbiAgaWYgKGxvYWRpbmcgfHwgIWNhbGVuZGFyTW9kdWxlKSB7XG4gICAgcmV0dXJuIDxDYWxlbmRhckxvYWRpbmdGYWxsYmFjayAvPjtcbiAgfVxuXG4gIHJldHVybiAoXG4gICAgPD5cbiAgICAgIHtjaGlsZHJlbih7XG4gICAgICAgIENhbGVuZGFyOiBjYWxlbmRhck1vZHVsZS5DYWxlbmRhcixcbiAgICAgICAgZGF0ZUZuc0xvY2FsaXplcjogY2FsZW5kYXJNb2R1bGUuZGF0ZUZuc0xvY2FsaXplcixcbiAgICAgICAgVmlldzogY2FsZW5kYXJNb2R1bGUuVmlldyxcbiAgICAgICAgVmlld3M6IGNhbGVuZGFyTW9kdWxlLlZpZXdzLFxuICAgICAgfSl9XG4gICAgPC8+XG4gICk7XG59O1xuXG5cblxuXG5cblxuXG4iXSwibmFtZXMiOlsidXNlU3RhdGUiLCJ1c2VFZmZlY3QiLCJTa2VsZXRvbiIsIkNhcmQiLCJDYXJkQ29udGVudCIsIkNhbGVuZGFyTG9hZGluZ0ZhbGxiYWNrIiwiY2xhc3NOYW1lIiwiZGl2IiwiTGF6eUNhbGVuZGFyV3JhcHBlciIsImNoaWxkcmVuIiwiY2FsZW5kYXJNb2R1bGUiLCJzZXRDYWxlbmRhck1vZHVsZSIsImxvYWRpbmciLCJzZXRMb2FkaW5nIiwiUHJvbWlzZSIsImFsbCIsInRoZW4iLCJtb2R1bGUiLCJDYWxlbmRhciIsImRhdGVGbnNMb2NhbGl6ZXIiLCJWaWV3IiwiVmlld3MiXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OztBQUFBOzs7Q0FHQyxHQUVELFNBQVNBLFFBQVEsRUFBRUMsU0FBUyxRQUFtQixRQUFRO0FBQ3ZELFNBQVNDLFFBQVEsUUFBUSwyQkFBMkI7QUFDcEQsU0FBU0MsSUFBSSxFQUFFQyxXQUFXLFFBQVEsdUJBQXVCO0FBV3pELE1BQU1DLDBCQUEwQixrQkFDOUIsUUFBQ0Y7a0JBQ0MsY0FBQSxRQUFDQztZQUFZRSxXQUFVO3NCQUNyQixjQUFBLFFBQUNDO2dCQUFJRCxXQUFVOztrQ0FDYixRQUFDSjt3QkFBU0ksV0FBVTs7Ozs7O2tDQUNwQixRQUFDSjt3QkFBU0ksV0FBVTs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OztLQUx0QkQ7QUFXTjs7Ozs7Ozs7Ozs7OztDQWFDLEdBQ0QsT0FBTyxNQUFNRyxzQkFBc0IsQ0FBQyxFQUFFQyxRQUFRLEVBQTRCOztJQUN4RSxNQUFNLENBQUNDLGdCQUFnQkMsa0JBQWtCLEdBQUdYLFNBQXFEO0lBQ2pHLE1BQU0sQ0FBQ1ksU0FBU0MsV0FBVyxHQUFHYixTQUFTO0lBRXZDQyxVQUFVO1FBQ1JhLFFBQVFDLEdBQUcsQ0FBQztZQUNWLE1BQU0sQ0FBQztZQUNQLE1BQU0sQ0FBQztTQUNSLEVBQUVDLElBQUksQ0FBQyxDQUFDLENBQUNDLE9BQU87WUFDZk4sa0JBQWtCTTtZQUNsQkosV0FBVztRQUNiO0lBQ0YsR0FBRyxFQUFFO0lBRUwsSUFBSUQsV0FBVyxDQUFDRixnQkFBZ0I7UUFDOUIscUJBQU8sUUFBQ0w7Ozs7O0lBQ1Y7SUFFQSxxQkFDRTtrQkFDR0ksU0FBUztZQUNSUyxVQUFVUixlQUFlUSxRQUFRO1lBQ2pDQyxrQkFBa0JULGVBQWVTLGdCQUFnQjtZQUNqREMsTUFBTVYsZUFBZVUsSUFBSTtZQUN6QkMsT0FBT1gsZUFBZVcsS0FBSztRQUM3Qjs7QUFHTixFQUFFO0dBNUJXYjtNQUFBQSJ9

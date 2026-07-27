@@ -1,0 +1,70 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/brand/EmarzonaInText.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/brand/EmarzonaInText.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=02e1e75e"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"]; const _Fragment = __vite__cjsImport2_react_jsxDevRuntime["Fragment"];
+import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=02e1e75e"; const Fragment = __vite__cjsImport3_react["Fragment"];
+import { EmarzonaBrandName } from "/src/components/brand/EmarzonaBrandName.tsx";
+const EMARZONA_TOKEN = 'Emarzona';
+/** Remplace « Emarzona » dans un texte par le mot-symbole bicolore. */ export function EmarzonaInText({ children }) {
+    if (!children.includes(EMARZONA_TOKEN)) {
+        return /*#__PURE__*/ _jsxDEV(_Fragment, {
+            children: children
+        }, void 0, false);
+    }
+    const parts = children.split(EMARZONA_TOKEN);
+    return /*#__PURE__*/ _jsxDEV(_Fragment, {
+        children: parts.map((part, index)=>/*#__PURE__*/ _jsxDEV(Fragment, {
+                children: [
+                    part,
+                    index < parts.length - 1 ? /*#__PURE__*/ _jsxDEV(EmarzonaBrandName, {}, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/brand/EmarzonaInText.tsx",
+                        lineNumber: 19,
+                        columnNumber: 39
+                    }, this) : null
+                ]
+            }, index, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/brand/EmarzonaInText.tsx",
+                lineNumber: 17,
+                columnNumber: 9
+            }, this))
+    }, void 0, false);
+}
+_c = EmarzonaInText;
+var _c;
+$RefreshReg$(_c, "EmarzonaInText");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/brand/EmarzonaInText.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/brand/EmarzonaInText.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIkVtYXJ6b25hSW5UZXh0LnRzeCJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgeyBGcmFnbWVudCB9IGZyb20gJ3JlYWN0JztcbmltcG9ydCB7IEVtYXJ6b25hQnJhbmROYW1lIH0gZnJvbSAnQC9jb21wb25lbnRzL2JyYW5kL0VtYXJ6b25hQnJhbmROYW1lJztcblxuY29uc3QgRU1BUlpPTkFfVE9LRU4gPSAnRW1hcnpvbmEnO1xuXG4vKiogUmVtcGxhY2UgwqsgRW1hcnpvbmEgwrsgZGFucyB1biB0ZXh0ZSBwYXIgbGUgbW90LXN5bWJvbGUgYmljb2xvcmUuICovXG5leHBvcnQgZnVuY3Rpb24gRW1hcnpvbmFJblRleHQoeyBjaGlsZHJlbiB9OiB7IGNoaWxkcmVuOiBzdHJpbmcgfSkge1xuICBpZiAoIWNoaWxkcmVuLmluY2x1ZGVzKEVNQVJaT05BX1RPS0VOKSkge1xuICAgIHJldHVybiA8PntjaGlsZHJlbn08Lz47XG4gIH1cblxuICBjb25zdCBwYXJ0cyA9IGNoaWxkcmVuLnNwbGl0KEVNQVJaT05BX1RPS0VOKTtcblxuICByZXR1cm4gKFxuICAgIDw+XG4gICAgICB7cGFydHMubWFwKChwYXJ0LCBpbmRleCkgPT4gKFxuICAgICAgICA8RnJhZ21lbnQga2V5PXtpbmRleH0+XG4gICAgICAgICAge3BhcnR9XG4gICAgICAgICAge2luZGV4IDwgcGFydHMubGVuZ3RoIC0gMSA/IDxFbWFyem9uYUJyYW5kTmFtZSAvPiA6IG51bGx9XG4gICAgICAgIDwvRnJhZ21lbnQ+XG4gICAgICApKX1cbiAgICA8Lz5cbiAgKTtcbn1cbiJdLCJuYW1lcyI6WyJGcmFnbWVudCIsIkVtYXJ6b25hQnJhbmROYW1lIiwiRU1BUlpPTkFfVE9LRU4iLCJFbWFyem9uYUluVGV4dCIsImNoaWxkcmVuIiwiaW5jbHVkZXMiLCJwYXJ0cyIsInNwbGl0IiwibWFwIiwicGFydCIsImluZGV4IiwibGVuZ3RoIl0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7Ozs7OztBQUFBLFNBQVNBLFFBQVEsUUFBUSxRQUFRO0FBQ2pDLFNBQVNDLGlCQUFpQixRQUFRLHVDQUF1QztBQUV6RSxNQUFNQyxpQkFBaUI7QUFFdkIscUVBQXFFLEdBQ3JFLE9BQU8sU0FBU0MsZUFBZSxFQUFFQyxRQUFRLEVBQXdCO0lBQy9ELElBQUksQ0FBQ0EsU0FBU0MsUUFBUSxDQUFDSCxpQkFBaUI7UUFDdEMscUJBQU87c0JBQUdFOztJQUNaO0lBRUEsTUFBTUUsUUFBUUYsU0FBU0csS0FBSyxDQUFDTDtJQUU3QixxQkFDRTtrQkFDR0ksTUFBTUUsR0FBRyxDQUFDLENBQUNDLE1BQU1DLHNCQUNoQixRQUFDVjs7b0JBQ0VTO29CQUNBQyxRQUFRSixNQUFNSyxNQUFNLEdBQUcsa0JBQUksUUFBQ1Y7Ozs7K0JBQXVCOztlQUZ2Q1M7Ozs7OztBQU92QjtLQWpCZ0JQIn0=

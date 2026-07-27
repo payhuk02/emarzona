@@ -1,0 +1,39 @@
+// Based on https://github.com/sindresorhus/escape-string-regexp but with modifications to:
+//   a) reduce the size by skipping the runtime type - checking
+//   b) ensure it gets down - compiled for old versions of Node(the published package only supports Node 14+).
+//
+// MIT License
+//
+// Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (https://sindresorhus.com)
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+// documentation files(the "Software"), to deal in the Software without restriction, including without limitation
+// the rights to use, copy, modify, merge, publish, distribute, sublicense, and / or sell copies of the Software, and
+// to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all copies or substantial portions of
+// the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+// TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+// IN THE SOFTWARE.
+
+/**
+ * Given a string, escape characters which have meaning in the regex grammar, such that the result is safe to feed to
+ * `new RegExp()`.
+ *
+ * @param regexString The string to escape
+ * @returns An version of the string with all special regex characters escaped
+ */
+function escapeStringForRegex(regexString) {
+  // escape the hyphen separately so we can also replace it with a unicode literal hyphen, to avoid the problems
+  // discussed in https://github.com/sindresorhus/escape-string-regexp/issues/20.
+  return regexString.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&').replace(/-/g, '\\x2d');
+}
+
+export { escapeStringForRegex };
+                                                
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZXNjYXBlU3RyaW5nRm9yUmVnZXguanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy92ZW5kb3IvZXNjYXBlU3RyaW5nRm9yUmVnZXgudHMiXSwic291cmNlc0NvbnRlbnQiOlsiLy8gQmFzZWQgb24gaHR0cHM6Ly9naXRodWIuY29tL3NpbmRyZXNvcmh1cy9lc2NhcGUtc3RyaW5nLXJlZ2V4cCBidXQgd2l0aCBtb2RpZmljYXRpb25zIHRvOlxuLy8gICBhKSByZWR1Y2UgdGhlIHNpemUgYnkgc2tpcHBpbmcgdGhlIHJ1bnRpbWUgdHlwZSAtIGNoZWNraW5nXG4vLyAgIGIpIGVuc3VyZSBpdCBnZXRzIGRvd24gLSBjb21waWxlZCBmb3Igb2xkIHZlcnNpb25zIG9mIE5vZGUodGhlIHB1Ymxpc2hlZCBwYWNrYWdlIG9ubHkgc3VwcG9ydHMgTm9kZSAxNCspLlxuLy9cbi8vIE1JVCBMaWNlbnNlXG4vL1xuLy8gQ29weXJpZ2h0IChjKSBTaW5kcmUgU29yaHVzIDxzaW5kcmVzb3JodXNAZ21haWwuY29tPiAoaHR0cHM6Ly9zaW5kcmVzb3JodXMuY29tKVxuLy9cbi8vIFBlcm1pc3Npb24gaXMgaGVyZWJ5IGdyYW50ZWQsIGZyZWUgb2YgY2hhcmdlLCB0byBhbnkgcGVyc29uIG9idGFpbmluZyBhIGNvcHkgb2YgdGhpcyBzb2Z0d2FyZSBhbmQgYXNzb2NpYXRlZFxuLy8gZG9jdW1lbnRhdGlvbiBmaWxlcyh0aGUgXCJTb2Z0d2FyZVwiKSwgdG8gZGVhbCBpbiB0aGUgU29mdHdhcmUgd2l0aG91dCByZXN0cmljdGlvbiwgaW5jbHVkaW5nIHdpdGhvdXQgbGltaXRhdGlvblxuLy8gdGhlIHJpZ2h0cyB0byB1c2UsIGNvcHksIG1vZGlmeSwgbWVyZ2UsIHB1Ymxpc2gsIGRpc3RyaWJ1dGUsIHN1YmxpY2Vuc2UsIGFuZCAvIG9yIHNlbGwgY29waWVzIG9mIHRoZSBTb2Z0d2FyZSwgYW5kXG4vLyB0byBwZXJtaXQgcGVyc29ucyB0byB3aG9tIHRoZSBTb2Z0d2FyZSBpcyBmdXJuaXNoZWQgdG8gZG8gc28sIHN1YmplY3QgdG8gdGhlIGZvbGxvd2luZyBjb25kaXRpb25zOlxuLy9cbi8vIFRoZSBhYm92ZSBjb3B5cmlnaHQgbm90aWNlIGFuZCB0aGlzIHBlcm1pc3Npb24gbm90aWNlIHNoYWxsIGJlIGluY2x1ZGVkIGluIGFsbCBjb3BpZXMgb3Igc3Vic3RhbnRpYWwgcG9ydGlvbnMgb2Zcbi8vIHRoZSBTb2Z0d2FyZS5cbi8vXG4vLyBUSEUgU09GVFdBUkUgSVMgUFJPVklERUQgXCJBUyBJU1wiLCBXSVRIT1VUIFdBUlJBTlRZIE9GIEFOWSBLSU5ELCBFWFBSRVNTIE9SIElNUExJRUQsIElOQ0xVRElORyBCVVQgTk9UIExJTUlURUQgVE9cbi8vIFRIRSBXQVJSQU5USUVTIE9GIE1FUkNIQU5UQUJJTElUWSwgRklUTkVTUyBGT1IgQSBQQVJUSUNVTEFSIFBVUlBPU0UgQU5EIE5PTklORlJJTkdFTUVOVC5JTiBOTyBFVkVOVCBTSEFMTCBUSEVcbi8vIEFVVEhPUlMgT1IgQ09QWVJJR0hUIEhPTERFUlMgQkUgTElBQkxFIEZPUiBBTlkgQ0xBSU0sIERBTUFHRVMgT1IgT1RIRVIgTElBQklMSVRZLCBXSEVUSEVSIElOIEFOIEFDVElPTiBPRiBDT05UUkFDVCxcbi8vIFRPUlQgT1IgT1RIRVJXSVNFLCBBUklTSU5HIEZST00sIE9VVCBPRiBPUiBJTiBDT05ORUNUSU9OIFdJVEggVEhFIFNPRlRXQVJFIE9SIFRIRSBVU0UgT1IgT1RIRVIgREVBTElOR1Ncbi8vIElOIFRIRSBTT0ZUV0FSRS5cblxuLyoqXG4gKiBHaXZlbiBhIHN0cmluZywgZXNjYXBlIGNoYXJhY3RlcnMgd2hpY2ggaGF2ZSBtZWFuaW5nIGluIHRoZSByZWdleCBncmFtbWFyLCBzdWNoIHRoYXQgdGhlIHJlc3VsdCBpcyBzYWZlIHRvIGZlZWQgdG9cbiAqIGBuZXcgUmVnRXhwKClgLlxuICpcbiAqIEBwYXJhbSByZWdleFN0cmluZyBUaGUgc3RyaW5nIHRvIGVzY2FwZVxuICogQHJldHVybnMgQW4gdmVyc2lvbiBvZiB0aGUgc3RyaW5nIHdpdGggYWxsIHNwZWNpYWwgcmVnZXggY2hhcmFjdGVycyBlc2NhcGVkXG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBlc2NhcGVTdHJpbmdGb3JSZWdleChyZWdleFN0cmluZzogc3RyaW5nKTogc3RyaW5nIHtcbiAgLy8gZXNjYXBlIHRoZSBoeXBoZW4gc2VwYXJhdGVseSBzbyB3ZSBjYW4gYWxzbyByZXBsYWNlIGl0IHdpdGggYSB1bmljb2RlIGxpdGVyYWwgaHlwaGVuLCB0byBhdm9pZCB0aGUgcHJvYmxlbXNcbiAgLy8gZGlzY3Vzc2VkIGluIGh0dHBzOi8vZ2l0aHViLmNvbS9zaW5kcmVzb3JodXMvZXNjYXBlLXN0cmluZy1yZWdleHAvaXNzdWVzLzIwLlxuICByZXR1cm4gcmVnZXhTdHJpbmcucmVwbGFjZSgvW3xcXFxce30oKVtcXF1eJCsqPy5dL2csICdcXFxcJCYnKS5yZXBsYWNlKC8tL2csICdcXFxceDJkJyk7XG59XG4iXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBOztBQUVBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ08sU0FBUyxvQkFBb0IsQ0FBQyxXQUFXLEVBQWtCO0FBQ2xFO0FBQ0E7QUFDQSxFQUFFLE9BQU8sV0FBVyxDQUFDLE9BQU8sQ0FBQyxxQkFBcUIsRUFBRSxNQUFNLENBQUMsQ0FBQyxPQUFPLENBQUMsSUFBSSxFQUFFLE9BQU8sQ0FBQztBQUNsRjs7OzsiLCJ4X2dvb2dsZV9pZ25vcmVMaXN0IjpbMF19

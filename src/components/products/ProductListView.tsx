@@ -245,9 +245,34 @@ const ProductListView = ({
             <div className="flex flex-wrap items-center gap-2 sm:gap-3 md:gap-4 text-xs sm:text-sm text-muted-foreground">
               <div className="flex items-center gap-1.5">
                 <DollarSign className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-600 flex-shrink-0" />
-                <span className="font-semibold text-green-600 text-sm sm:text-base">
-                  {product.price.toLocaleString()} {product.currency}
-                </span>
+                {(() => {
+                  let currentPrice = product.price || 0;
+                  let crossedOutPrice: number | null = null;
+                  
+                  const backendPromotionalPrice = (product as any).promotional_price;
+                  const backendCompareAtPrice = (product as any).compare_at_price;
+                  
+                  if (backendPromotionalPrice && backendPromotionalPrice < product.price) {
+                    currentPrice = backendPromotionalPrice;
+                    crossedOutPrice = product.price;
+                  } else if (backendCompareAtPrice && backendCompareAtPrice > product.price) {
+                    currentPrice = product.price;
+                    crossedOutPrice = backendCompareAtPrice;
+                  }
+                  
+                  return (
+                    <div className="flex items-center gap-1.5">
+                      {crossedOutPrice !== null && (
+                        <span className="text-xs text-muted-foreground line-through">
+                          {crossedOutPrice.toLocaleString()} {product.currency || 'XOF'}
+                        </span>
+                      )}
+                      <span className="font-semibold text-green-600 text-sm sm:text-base">
+                        {currentPrice.toLocaleString()} {product.currency || 'XOF'}
+                      </span>
+                    </div>
+                  );
+                })()}
               </div>
               {product.rating > 0 && (
                 <div className="flex items-center gap-1">

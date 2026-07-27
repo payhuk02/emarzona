@@ -1,0 +1,7 @@
+[{"id":"65950b25-a5be-4adb-b39e-fb609c49a2ad","service_product_id":"bae03e55-e6a4-4f8b-baff-6cd33db8abde","day_of_week":0,"start_time":"09:00:00","end_time":"18:00:00","is_active":true}, 
+ {"id":"cee90c94-e5e8-4157-adcb-4cf4e947b1d0","service_product_id":"bae03e55-e6a4-4f8b-baff-6cd33db8abde","day_of_week":1,"start_time":"09:00:00","end_time":"18:00:00","is_active":true}, 
+ {"id":"b77ce2d2-9c5d-4a7b-96dc-5e5a6b2aad3d","service_product_id":"bae03e55-e6a4-4f8b-baff-6cd33db8abde","day_of_week":2,"start_time":"09:00:00","end_time":"18:00:00","is_active":true}, 
+ {"id":"3c78342b-d8fc-4e0b-b47a-0fd6a79e2e23","service_product_id":"bae03e55-e6a4-4f8b-baff-6cd33db8abde","day_of_week":3,"start_time":"09:00:00","end_time":"18:00:00","is_active":true}, 
+ {"id":"03de87f7-0edb-40d3-9480-9e75a2cb5c3f","service_product_id":"bae03e55-e6a4-4f8b-baff-6cd33db8abde","day_of_week":4,"start_time":"09:00:00","end_time":"18:00:00","is_active":true}, 
+ {"id":"f1d8a019-bea3-4303-a0b4-597087e05ea6","service_product_id":"bae03e55-e6a4-4f8b-baff-6cd33db8abde","day_of_week":5,"start_time":"09:00:00","end_time":"18:00:00","is_active":true}, 
+ {"id":"65e21754-b027-48f6-8bad-c1bb6ac25554","service_product_id":"bae03e55-e6a4-4f8b-baff-6cd33db8abde","day_of_week":6,"start_time":"09:00:00","end_time":"18:00:00","is_active":true}]

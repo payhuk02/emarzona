@@ -1,0 +1,183 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/dashboard/DashboardNotificationsStrip.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardNotificationsStrip.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=6014a254"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+var _s = $RefreshSig$();
+import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=6014a254"; const React = __vite__cjsImport3_react.__esModule ? __vite__cjsImport3_react.default : __vite__cjsImport3_react;
+import { useNavigate } from "/node_modules/.vite/deps/react-router-dom.js?v=6014a254";
+import { useTranslation } from "/node_modules/.vite/deps/react-i18next.js?v=02b07ad4";
+import { Bell, ChevronRight } from "/node_modules/.vite/deps/lucide-react.js?v=6014a254";
+export const DashboardNotificationsStrip = /*#__PURE__*/ _s(React.memo(_c = _s(({ notifications, unreadCount, enabled })=>{
+    _s();
+    const { t } = useTranslation();
+    const navigate = useNavigate();
+    if (!enabled || notifications.length === 0 && unreadCount === 0) {
+        return null;
+    }
+    const latest = notifications.slice(0, 2);
+    return /*#__PURE__*/ _jsxDEV("section", {
+        className: "dashboard-premium-panel border-violet-200/50 bg-violet-50/20",
+        role: "region",
+        "aria-label": t('dashboard.notificationsStrip.ariaLabel', 'Notifications récentes'),
+        children: [
+            /*#__PURE__*/ _jsxDEV("div", {
+                className: "flex items-center justify-between gap-3 mb-3",
+                children: [
+                    /*#__PURE__*/ _jsxDEV("div", {
+                        className: "flex items-center gap-2",
+                        children: [
+                            /*#__PURE__*/ _jsxDEV(Bell, {
+                                className: "h-5 w-5 text-violet-700",
+                                "aria-hidden": true
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardNotificationsStrip.tsx",
+                                lineNumber: 40,
+                                columnNumber: 13
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("h2", {
+                                className: "text-sm font-semibold",
+                                children: [
+                                    t('dashboard.notificationsStrip.title', 'Notifications'),
+                                    unreadCount > 0 && /*#__PURE__*/ _jsxDEV("span", {
+                                        className: "ml-2 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-violet-600 px-1.5 text-[10px] font-bold text-white",
+                                        children: unreadCount > 99 ? '99+' : unreadCount
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardNotificationsStrip.tsx",
+                                        lineNumber: 44,
+                                        columnNumber: 17
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardNotificationsStrip.tsx",
+                                lineNumber: 41,
+                                columnNumber: 13
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardNotificationsStrip.tsx",
+                        lineNumber: 39,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV("button", {
+                        type: "button",
+                        onClick: ()=>navigate('/notifications'),
+                        className: "inline-flex items-center gap-1 text-sm font-medium text-violet-700 hover:underline",
+                        children: [
+                            t('common.viewAll', 'Tout voir'),
+                            /*#__PURE__*/ _jsxDEV(ChevronRight, {
+                                className: "h-4 w-4",
+                                "aria-hidden": true
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardNotificationsStrip.tsx",
+                                lineNumber: 56,
+                                columnNumber: 13
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardNotificationsStrip.tsx",
+                        lineNumber: 50,
+                        columnNumber: 11
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardNotificationsStrip.tsx",
+                lineNumber: 38,
+                columnNumber: 9
+            }, this),
+            latest.length > 0 ? /*#__PURE__*/ _jsxDEV("ul", {
+                className: "space-y-2",
+                children: latest.map((n)=>/*#__PURE__*/ _jsxDEV("li", {
+                        className: "rounded-lg border border-border/40 bg-background/80 px-3 py-2 text-sm",
+                        children: [
+                            /*#__PURE__*/ _jsxDEV("p", {
+                                className: "font-medium truncate",
+                                children: n.title
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardNotificationsStrip.tsx",
+                                lineNumber: 66,
+                                columnNumber: 17
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("p", {
+                                className: "text-muted-foreground text-xs line-clamp-1",
+                                children: n.message
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardNotificationsStrip.tsx",
+                                lineNumber: 67,
+                                columnNumber: 17
+                            }, this)
+                        ]
+                    }, n.id, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardNotificationsStrip.tsx",
+                        lineNumber: 62,
+                        columnNumber: 15
+                    }, this))
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardNotificationsStrip.tsx",
+                lineNumber: 60,
+                columnNumber: 11
+            }, this) : /*#__PURE__*/ _jsxDEV("p", {
+                className: "text-sm text-muted-foreground",
+                children: t('dashboard.notificationsStrip.empty', 'Aucune notification récente.')
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardNotificationsStrip.tsx",
+                lineNumber: 72,
+                columnNumber: 11
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardNotificationsStrip.tsx",
+        lineNumber: 33,
+        columnNumber: 7
+    }, this);
+}, "1n6r5eWNKhP/dvqdbLCphpT4ddM=", false, function() {
+    return [
+        useTranslation,
+        useNavigate
+    ];
+})), "1n6r5eWNKhP/dvqdbLCphpT4ddM=", false, function() {
+    return [
+        useTranslation,
+        useNavigate
+    ];
+});
+_c1 = DashboardNotificationsStrip;
+DashboardNotificationsStrip.displayName = 'DashboardNotificationsStrip';
+var _c, _c1;
+$RefreshReg$(_c, "DashboardNotificationsStrip$React.memo");
+$RefreshReg$(_c1, "DashboardNotificationsStrip");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardNotificationsStrip.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardNotificationsStrip.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIkRhc2hib2FyZE5vdGlmaWNhdGlvbnNTdHJpcC50c3giXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IFJlYWN0IGZyb20gJ3JlYWN0JztcbmltcG9ydCB7IHVzZU5hdmlnYXRlIH0gZnJvbSAncmVhY3Qtcm91dGVyLWRvbSc7XG5pbXBvcnQgeyB1c2VUcmFuc2xhdGlvbiB9IGZyb20gJ3JlYWN0LWkxOG5leHQnO1xuaW1wb3J0IHsgQmVsbCwgQ2hldnJvblJpZ2h0IH0gZnJvbSAnbHVjaWRlLXJlYWN0JztcblxuaW50ZXJmYWNlIE5vdGlmaWNhdGlvblByZXZpZXcge1xuICBpZDogc3RyaW5nO1xuICB0aXRsZTogc3RyaW5nO1xuICBtZXNzYWdlOiBzdHJpbmc7XG4gIHR5cGU6ICd3YXJuaW5nJyB8ICdzdWNjZXNzJztcbiAgdGltZXN0YW1wOiBzdHJpbmc7XG4gIHJlYWQ6IGJvb2xlYW47XG59XG5cbmludGVyZmFjZSBEYXNoYm9hcmROb3RpZmljYXRpb25zU3RyaXBQcm9wcyB7XG4gIG5vdGlmaWNhdGlvbnM6IE5vdGlmaWNhdGlvblByZXZpZXdbXTtcbiAgdW5yZWFkQ291bnQ6IG51bWJlcjtcbiAgZW5hYmxlZDogYm9vbGVhbjtcbn1cblxuZXhwb3J0IGNvbnN0IERhc2hib2FyZE5vdGlmaWNhdGlvbnNTdHJpcCA9IFJlYWN0Lm1lbW88RGFzaGJvYXJkTm90aWZpY2F0aW9uc1N0cmlwUHJvcHM+KFxuICAoeyBub3RpZmljYXRpb25zLCB1bnJlYWRDb3VudCwgZW5hYmxlZCB9KSA9PiB7XG4gICAgY29uc3QgeyB0IH0gPSB1c2VUcmFuc2xhdGlvbigpO1xuICAgIGNvbnN0IG5hdmlnYXRlID0gdXNlTmF2aWdhdGUoKTtcblxuICAgIGlmICghZW5hYmxlZCB8fCAobm90aWZpY2F0aW9ucy5sZW5ndGggPT09IDAgJiYgdW5yZWFkQ291bnQgPT09IDApKSB7XG4gICAgICByZXR1cm4gbnVsbDtcbiAgICB9XG5cbiAgICBjb25zdCBsYXRlc3QgPSBub3RpZmljYXRpb25zLnNsaWNlKDAsIDIpO1xuXG4gICAgcmV0dXJuIChcbiAgICAgIDxzZWN0aW9uXG4gICAgICAgIGNsYXNzTmFtZT1cImRhc2hib2FyZC1wcmVtaXVtLXBhbmVsIGJvcmRlci12aW9sZXQtMjAwLzUwIGJnLXZpb2xldC01MC8yMFwiXG4gICAgICAgIHJvbGU9XCJyZWdpb25cIlxuICAgICAgICBhcmlhLWxhYmVsPXt0KCdkYXNoYm9hcmQubm90aWZpY2F0aW9uc1N0cmlwLmFyaWFMYWJlbCcsICdOb3RpZmljYXRpb25zIHLDqWNlbnRlcycpfVxuICAgICAgPlxuICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGp1c3RpZnktYmV0d2VlbiBnYXAtMyBtYi0zXCI+XG4gICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLWNlbnRlciBnYXAtMlwiPlxuICAgICAgICAgICAgPEJlbGwgY2xhc3NOYW1lPVwiaC01IHctNSB0ZXh0LXZpb2xldC03MDBcIiBhcmlhLWhpZGRlbiAvPlxuICAgICAgICAgICAgPGgyIGNsYXNzTmFtZT1cInRleHQtc20gZm9udC1zZW1pYm9sZFwiPlxuICAgICAgICAgICAgICB7dCgnZGFzaGJvYXJkLm5vdGlmaWNhdGlvbnNTdHJpcC50aXRsZScsICdOb3RpZmljYXRpb25zJyl9XG4gICAgICAgICAgICAgIHt1bnJlYWRDb3VudCA+IDAgJiYgKFxuICAgICAgICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cIm1sLTIgaW5saW5lLWZsZXggaC01IG1pbi13LTUgaXRlbXMtY2VudGVyIGp1c3RpZnktY2VudGVyIHJvdW5kZWQtZnVsbCBiZy12aW9sZXQtNjAwIHB4LTEuNSB0ZXh0LVsxMHB4XSBmb250LWJvbGQgdGV4dC13aGl0ZVwiPlxuICAgICAgICAgICAgICAgICAge3VucmVhZENvdW50ID4gOTkgPyAnOTkrJyA6IHVucmVhZENvdW50fVxuICAgICAgICAgICAgICAgIDwvc3Bhbj5cbiAgICAgICAgICAgICAgKX1cbiAgICAgICAgICAgIDwvaDI+XG4gICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgPGJ1dHRvblxuICAgICAgICAgICAgdHlwZT1cImJ1dHRvblwiXG4gICAgICAgICAgICBvbkNsaWNrPXsoKSA9PiBuYXZpZ2F0ZSgnL25vdGlmaWNhdGlvbnMnKX1cbiAgICAgICAgICAgIGNsYXNzTmFtZT1cImlubGluZS1mbGV4IGl0ZW1zLWNlbnRlciBnYXAtMSB0ZXh0LXNtIGZvbnQtbWVkaXVtIHRleHQtdmlvbGV0LTcwMCBob3Zlcjp1bmRlcmxpbmVcIlxuICAgICAgICAgID5cbiAgICAgICAgICAgIHt0KCdjb21tb24udmlld0FsbCcsICdUb3V0IHZvaXInKX1cbiAgICAgICAgICAgIDxDaGV2cm9uUmlnaHQgY2xhc3NOYW1lPVwiaC00IHctNFwiIGFyaWEtaGlkZGVuIC8+XG4gICAgICAgICAgPC9idXR0b24+XG4gICAgICAgIDwvZGl2PlxuICAgICAgICB7bGF0ZXN0Lmxlbmd0aCA+IDAgPyAoXG4gICAgICAgICAgPHVsIGNsYXNzTmFtZT1cInNwYWNlLXktMlwiPlxuICAgICAgICAgICAge2xhdGVzdC5tYXAobiA9PiAoXG4gICAgICAgICAgICAgIDxsaVxuICAgICAgICAgICAgICAgIGtleT17bi5pZH1cbiAgICAgICAgICAgICAgICBjbGFzc05hbWU9XCJyb3VuZGVkLWxnIGJvcmRlciBib3JkZXItYm9yZGVyLzQwIGJnLWJhY2tncm91bmQvODAgcHgtMyBweS0yIHRleHQtc21cIlxuICAgICAgICAgICAgICA+XG4gICAgICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwiZm9udC1tZWRpdW0gdHJ1bmNhdGVcIj57bi50aXRsZX08L3A+XG4gICAgICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwidGV4dC1tdXRlZC1mb3JlZ3JvdW5kIHRleHQteHMgbGluZS1jbGFtcC0xXCI+e24ubWVzc2FnZX08L3A+XG4gICAgICAgICAgICAgIDwvbGk+XG4gICAgICAgICAgICApKX1cbiAgICAgICAgICA8L3VsPlxuICAgICAgICApIDogKFxuICAgICAgICAgIDxwIGNsYXNzTmFtZT1cInRleHQtc20gdGV4dC1tdXRlZC1mb3JlZ3JvdW5kXCI+XG4gICAgICAgICAgICB7dCgnZGFzaGJvYXJkLm5vdGlmaWNhdGlvbnNTdHJpcC5lbXB0eScsICdBdWN1bmUgbm90aWZpY2F0aW9uIHLDqWNlbnRlLicpfVxuICAgICAgICAgIDwvcD5cbiAgICAgICAgKX1cbiAgICAgIDwvc2VjdGlvbj5cbiAgICApO1xuICB9XG4pO1xuXG5EYXNoYm9hcmROb3RpZmljYXRpb25zU3RyaXAuZGlzcGxheU5hbWUgPSAnRGFzaGJvYXJkTm90aWZpY2F0aW9uc1N0cmlwJztcbiJdLCJuYW1lcyI6WyJSZWFjdCIsInVzZU5hdmlnYXRlIiwidXNlVHJhbnNsYXRpb24iLCJCZWxsIiwiQ2hldnJvblJpZ2h0IiwiRGFzaGJvYXJkTm90aWZpY2F0aW9uc1N0cmlwIiwibWVtbyIsIm5vdGlmaWNhdGlvbnMiLCJ1bnJlYWRDb3VudCIsImVuYWJsZWQiLCJ0IiwibmF2aWdhdGUiLCJsZW5ndGgiLCJsYXRlc3QiLCJzbGljZSIsInNlY3Rpb24iLCJjbGFzc05hbWUiLCJyb2xlIiwiYXJpYS1sYWJlbCIsImRpdiIsImFyaWEtaGlkZGVuIiwiaDIiLCJzcGFuIiwiYnV0dG9uIiwidHlwZSIsIm9uQ2xpY2siLCJ1bCIsIm1hcCIsIm4iLCJsaSIsInAiLCJ0aXRsZSIsIm1lc3NhZ2UiLCJpZCIsImRpc3BsYXlOYW1lIl0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7QUFBQSxPQUFPQSxXQUFXLFFBQVE7QUFDMUIsU0FBU0MsV0FBVyxRQUFRLG1CQUFtQjtBQUMvQyxTQUFTQyxjQUFjLFFBQVEsZ0JBQWdCO0FBQy9DLFNBQVNDLElBQUksRUFBRUMsWUFBWSxRQUFRLGVBQWU7QUFpQmxELE9BQU8sTUFBTUMsNENBQThCTCxHQUFBQSxNQUFNTSxJQUFJLFNBQ25ELENBQUMsRUFBRUMsYUFBYSxFQUFFQyxXQUFXLEVBQUVDLE9BQU8sRUFBRTs7SUFDdEMsTUFBTSxFQUFFQyxDQUFDLEVBQUUsR0FBR1I7SUFDZCxNQUFNUyxXQUFXVjtJQUVqQixJQUFJLENBQUNRLFdBQVlGLGNBQWNLLE1BQU0sS0FBSyxLQUFLSixnQkFBZ0IsR0FBSTtRQUNqRSxPQUFPO0lBQ1Q7SUFFQSxNQUFNSyxTQUFTTixjQUFjTyxLQUFLLENBQUMsR0FBRztJQUV0QyxxQkFDRSxRQUFDQztRQUNDQyxXQUFVO1FBQ1ZDLE1BQUs7UUFDTEMsY0FBWVIsRUFBRSwwQ0FBMEM7OzBCQUV4RCxRQUFDUztnQkFBSUgsV0FBVTs7a0NBQ2IsUUFBQ0c7d0JBQUlILFdBQVU7OzBDQUNiLFFBQUNiO2dDQUFLYSxXQUFVO2dDQUEwQkksYUFBVzs7Ozs7OzBDQUNyRCxRQUFDQztnQ0FBR0wsV0FBVTs7b0NBQ1hOLEVBQUUsc0NBQXNDO29DQUN4Q0YsY0FBYyxtQkFDYixRQUFDYzt3Q0FBS04sV0FBVTtrREFDYlIsY0FBYyxLQUFLLFFBQVFBOzs7Ozs7Ozs7Ozs7Ozs7Ozs7a0NBS3BDLFFBQUNlO3dCQUNDQyxNQUFLO3dCQUNMQyxTQUFTLElBQU1kLFNBQVM7d0JBQ3hCSyxXQUFVOzs0QkFFVE4sRUFBRSxrQkFBa0I7MENBQ3JCLFFBQUNOO2dDQUFhWSxXQUFVO2dDQUFVSSxhQUFXOzs7Ozs7Ozs7Ozs7Ozs7Ozs7WUFHaERQLE9BQU9ELE1BQU0sR0FBRyxrQkFDZixRQUFDYztnQkFBR1YsV0FBVTswQkFDWEgsT0FBT2MsR0FBRyxDQUFDQyxDQUFBQSxrQkFDVixRQUFDQzt3QkFFQ2IsV0FBVTs7MENBRVYsUUFBQ2M7Z0NBQUVkLFdBQVU7MENBQXdCWSxFQUFFRyxLQUFLOzs7Ozs7MENBQzVDLFFBQUNEO2dDQUFFZCxXQUFVOzBDQUE4Q1ksRUFBRUksT0FBTzs7Ozs7Ozt1QkFKL0RKLEVBQUVLLEVBQUU7Ozs7Ozs7OztxQ0FTZixRQUFDSDtnQkFBRWQsV0FBVTswQkFDVk4sRUFBRSxzQ0FBc0M7Ozs7Ozs7Ozs7OztBQUtuRDs7UUF2RGdCUjtRQUNHRDs7OztRQURIQztRQUNHRDs7R0F1RG5COztBQUVGSSw0QkFBNEI2QixXQUFXLEdBQUcifQ==

@@ -1,0 +1,82 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/security/SafeHTML.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/security/SafeHTML.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=02e1e75e"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+var _s = $RefreshSig$();
+import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=02e1e75e"; const React = __vite__cjsImport3_react.__esModule ? __vite__cjsImport3_react.default : __vite__cjsImport3_react;
+import { sanitizeHTML } from "/src/lib/html-sanitizer.ts";
+/**
+ * Composant pour afficher du HTML sécurisé
+ * Utilise DOMPurify pour nettoyer le contenu HTML
+ */ export const SafeHTML = ({ html, content, className, tag, as, style })=>{
+    const Tag = as ?? tag ?? 'div';
+    const rawHtml = html ?? content ?? '';
+    const sanitizedContent = sanitizeHTML(rawHtml, 'richContent');
+    return /*#__PURE__*/ _jsxDEV(Tag, {
+        className: className,
+        style: style,
+        dangerouslySetInnerHTML: {
+            __html: sanitizedContent
+        }
+    }, void 0, false, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/security/SafeHTML.tsx",
+        lineNumber: 33,
+        columnNumber: 5
+    }, this);
+};
+_c = SafeHTML;
+/**
+ * Hook pour nettoyer les données utilisateur
+ */ export const useSanitizedInput = (initialValue = '')=>{
+    _s();
+    const [value, setValue] = React.useState(initialValue);
+    const sanitizedValue = React.useMemo(()=>{
+        return sanitizeHTML(value, 'plainText');
+    }, [
+        value
+    ]);
+    return {
+        value,
+        sanitizedValue,
+        setValue
+    };
+};
+_s(useSanitizedInput, "6jkEiWZYy7L8QDu3C5fN+LNfBqM=");
+var _c;
+$RefreshReg$(_c, "SafeHTML");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/security/SafeHTML.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/security/SafeHTML.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIlNhZmVIVE1MLnRzeCJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgUmVhY3QgZnJvbSAncmVhY3QnO1xuaW1wb3J0IHsgc2FuaXRpemVIVE1MIH0gZnJvbSAnQC9saWIvaHRtbC1zYW5pdGl6ZXInO1xuXG5pbnRlcmZhY2UgU2FmZUhUTUxQcm9wcyB7XG4gIC8qKiBUaGUgSFRNTCBzdHJpbmcgdG8gc2FuaXRpemUgYW5kIHJlbmRlciAocHJlZmVycmVkKSAqL1xuICBodG1sPzogc3RyaW5nO1xuICAvKiogQWxpYXMgZm9yIGh0bWwg4oCTIGtlcHQgZm9yIGJhY2t3YXJkcyBjb21wYXRpYmlsaXR5ICovXG4gIGNvbnRlbnQ/OiBzdHJpbmc7XG4gIGNsYXNzTmFtZT86IHN0cmluZztcbiAgLyoqIEhUTUwgZWxlbWVudCB0byByZW5kZXIgKGFsaWFzOiBgYXNgKSAqL1xuICB0YWc/OiBrZXlvZiBKU1guSW50cmluc2ljRWxlbWVudHM7XG4gIGFzPzoga2V5b2YgSlNYLkludHJpbnNpY0VsZW1lbnRzO1xuICBzdHlsZT86IFJlYWN0LkNTU1Byb3BlcnRpZXM7XG59XG5cbi8qKlxuICogQ29tcG9zYW50IHBvdXIgYWZmaWNoZXIgZHUgSFRNTCBzw6ljdXJpc8OpXG4gKiBVdGlsaXNlIERPTVB1cmlmeSBwb3VyIG5ldHRveWVyIGxlIGNvbnRlbnUgSFRNTFxuICovXG5leHBvcnQgY29uc3QgU2FmZUhUTUw6IFJlYWN0LkZDPFNhZmVIVE1MUHJvcHM+ID0gKHtcbiAgaHRtbCxcbiAgY29udGVudCxcbiAgY2xhc3NOYW1lLFxuICB0YWcsXG4gIGFzLFxuICBzdHlsZSxcbn0pID0+IHtcbiAgY29uc3QgVGFnID0gKGFzID8/IHRhZyA/PyAnZGl2JykgYXMgUmVhY3QuRWxlbWVudFR5cGU7XG4gIGNvbnN0IHJhd0h0bWwgPSBodG1sID8/IGNvbnRlbnQgPz8gJyc7XG4gIGNvbnN0IHNhbml0aXplZENvbnRlbnQgPSBzYW5pdGl6ZUhUTUwocmF3SHRtbCwgJ3JpY2hDb250ZW50Jyk7XG5cbiAgcmV0dXJuIChcbiAgICA8VGFnXG4gICAgICBjbGFzc05hbWU9e2NsYXNzTmFtZX1cbiAgICAgIHN0eWxlPXtzdHlsZX1cbiAgICAgIGRhbmdlcm91c2x5U2V0SW5uZXJIVE1MPXt7IF9faHRtbDogc2FuaXRpemVkQ29udGVudCB9fVxuICAgIC8+XG4gICk7XG59O1xuXG4vKipcbiAqIEhvb2sgcG91ciBuZXR0b3llciBsZXMgZG9ubsOpZXMgdXRpbGlzYXRldXJcbiAqL1xuZXhwb3J0IGNvbnN0IHVzZVNhbml0aXplZElucHV0ID0gKGluaXRpYWxWYWx1ZTogc3RyaW5nID0gJycpID0+IHtcbiAgY29uc3QgW3ZhbHVlLCBzZXRWYWx1ZV0gPSBSZWFjdC51c2VTdGF0ZShpbml0aWFsVmFsdWUpO1xuICBcbiAgY29uc3Qgc2FuaXRpemVkVmFsdWUgPSBSZWFjdC51c2VNZW1vKCgpID0+IHtcbiAgICByZXR1cm4gc2FuaXRpemVIVE1MKHZhbHVlLCAncGxhaW5UZXh0Jyk7XG4gIH0sIFt2YWx1ZV0pO1xuXG4gIHJldHVybiB7XG4gICAgdmFsdWUsXG4gICAgc2FuaXRpemVkVmFsdWUsXG4gICAgc2V0VmFsdWUsXG4gIH07XG59O1xuXG5cblxuXG5cblxuXG4iXSwibmFtZXMiOlsiUmVhY3QiLCJzYW5pdGl6ZUhUTUwiLCJTYWZlSFRNTCIsImh0bWwiLCJjb250ZW50IiwiY2xhc3NOYW1lIiwidGFnIiwiYXMiLCJzdHlsZSIsIlRhZyIsInJhd0h0bWwiLCJzYW5pdGl6ZWRDb250ZW50IiwiZGFuZ2Vyb3VzbHlTZXRJbm5lckhUTUwiLCJfX2h0bWwiLCJ1c2VTYW5pdGl6ZWRJbnB1dCIsImluaXRpYWxWYWx1ZSIsInZhbHVlIiwic2V0VmFsdWUiLCJ1c2VTdGF0ZSIsInNhbml0aXplZFZhbHVlIiwidXNlTWVtbyJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O0FBQUEsT0FBT0EsV0FBVyxRQUFRO0FBQzFCLFNBQVNDLFlBQVksUUFBUSx1QkFBdUI7QUFjcEQ7OztDQUdDLEdBQ0QsT0FBTyxNQUFNQyxXQUFvQyxDQUFDLEVBQ2hEQyxJQUFJLEVBQ0pDLE9BQU8sRUFDUEMsU0FBUyxFQUNUQyxHQUFHLEVBQ0hDLEVBQUUsRUFDRkMsS0FBSyxFQUNOO0lBQ0MsTUFBTUMsTUFBT0YsTUFBTUQsT0FBTztJQUMxQixNQUFNSSxVQUFVUCxRQUFRQyxXQUFXO0lBQ25DLE1BQU1PLG1CQUFtQlYsYUFBYVMsU0FBUztJQUUvQyxxQkFDRSxRQUFDRDtRQUNDSixXQUFXQTtRQUNYRyxPQUFPQTtRQUNQSSx5QkFBeUI7WUFBRUMsUUFBUUY7UUFBaUI7Ozs7OztBQUcxRCxFQUFFO0tBbkJXVDtBQXFCYjs7Q0FFQyxHQUNELE9BQU8sTUFBTVksb0JBQW9CLENBQUNDLGVBQXVCLEVBQUU7O0lBQ3pELE1BQU0sQ0FBQ0MsT0FBT0MsU0FBUyxHQUFHakIsTUFBTWtCLFFBQVEsQ0FBQ0g7SUFFekMsTUFBTUksaUJBQWlCbkIsTUFBTW9CLE9BQU8sQ0FBQztRQUNuQyxPQUFPbkIsYUFBYWUsT0FBTztJQUM3QixHQUFHO1FBQUNBO0tBQU07SUFFVixPQUFPO1FBQ0xBO1FBQ0FHO1FBQ0FGO0lBQ0Y7QUFDRixFQUFFO0dBWldIIn0=

@@ -1,0 +1,27 @@
+import __vite__cjsImport0_react from "/node_modules/.vite/deps/react.js?v=6014a254"; const useEffect = __vite__cjsImport0_react["useEffect"]; const useState = __vite__cjsImport0_react["useState"];
+/**
+ * Retarde le montage d'une section non critique (graphiques, listes…) après le premier paint.
+ */ /** @param idleTimeoutMs délai max idle avant montage (défaut 400 ms pour below-the-fold dashboard). */ export function useDeferredMount(enabled = true, idleTimeoutMs = 400) {
+    const [ready, setReady] = useState(false);
+    useEffect(()=>{
+        if (!enabled) {
+            setReady(false);
+            return;
+        }
+        const mount = ()=>setReady(true);
+        if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+            const id = requestIdleCallback(mount, {
+                timeout: idleTimeoutMs
+            });
+            return ()=>cancelIdleCallback(id);
+        }
+        const timer = setTimeout(mount, 80);
+        return ()=>clearTimeout(timer);
+    }, [
+        enabled,
+        idleTimeoutMs
+    ]);
+    return ready;
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInVzZURlZmVycmVkTW91bnQudHMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgdXNlRWZmZWN0LCB1c2VTdGF0ZSB9IGZyb20gJ3JlYWN0JztcblxuLyoqXG4gKiBSZXRhcmRlIGxlIG1vbnRhZ2UgZCd1bmUgc2VjdGlvbiBub24gY3JpdGlxdWUgKGdyYXBoaXF1ZXMsIGxpc3Rlc+KApikgYXByw6hzIGxlIHByZW1pZXIgcGFpbnQuXG4gKi9cbi8qKiBAcGFyYW0gaWRsZVRpbWVvdXRNcyBkw6lsYWkgbWF4IGlkbGUgYXZhbnQgbW9udGFnZSAoZMOpZmF1dCA0MDAgbXMgcG91ciBiZWxvdy10aGUtZm9sZCBkYXNoYm9hcmQpLiAqL1xuZXhwb3J0IGZ1bmN0aW9uIHVzZURlZmVycmVkTW91bnQoZW5hYmxlZCA9IHRydWUsIGlkbGVUaW1lb3V0TXMgPSA0MDApIHtcbiAgY29uc3QgW3JlYWR5LCBzZXRSZWFkeV0gPSB1c2VTdGF0ZShmYWxzZSk7XG5cbiAgdXNlRWZmZWN0KCgpID0+IHtcbiAgICBpZiAoIWVuYWJsZWQpIHtcbiAgICAgIHNldFJlYWR5KGZhbHNlKTtcbiAgICAgIHJldHVybjtcbiAgICB9XG5cbiAgICBjb25zdCBtb3VudCA9ICgpID0+IHNldFJlYWR5KHRydWUpO1xuXG4gICAgaWYgKHR5cGVvZiB3aW5kb3cgIT09ICd1bmRlZmluZWQnICYmICdyZXF1ZXN0SWRsZUNhbGxiYWNrJyBpbiB3aW5kb3cpIHtcbiAgICAgIGNvbnN0IGlkID0gcmVxdWVzdElkbGVDYWxsYmFjayhtb3VudCwgeyB0aW1lb3V0OiBpZGxlVGltZW91dE1zIH0pO1xuICAgICAgcmV0dXJuICgpID0+IGNhbmNlbElkbGVDYWxsYmFjayhpZCk7XG4gICAgfVxuXG4gICAgY29uc3QgdGltZXIgPSBzZXRUaW1lb3V0KG1vdW50LCA4MCk7XG4gICAgcmV0dXJuICgpID0+IGNsZWFyVGltZW91dCh0aW1lcik7XG4gIH0sIFtlbmFibGVkLCBpZGxlVGltZW91dE1zXSk7XG5cbiAgcmV0dXJuIHJlYWR5O1xufVxuIl0sIm5hbWVzIjpbInVzZUVmZmVjdCIsInVzZVN0YXRlIiwidXNlRGVmZXJyZWRNb3VudCIsImVuYWJsZWQiLCJpZGxlVGltZW91dE1zIiwicmVhZHkiLCJzZXRSZWFkeSIsIm1vdW50Iiwid2luZG93IiwiaWQiLCJyZXF1ZXN0SWRsZUNhbGxiYWNrIiwidGltZW91dCIsImNhbmNlbElkbGVDYWxsYmFjayIsInRpbWVyIiwic2V0VGltZW91dCIsImNsZWFyVGltZW91dCJdLCJtYXBwaW5ncyI6IkFBQUEsU0FBU0EsU0FBUyxFQUFFQyxRQUFRLFFBQVEsUUFBUTtBQUU1Qzs7Q0FFQyxHQUNELHFHQUFxRyxHQUNyRyxPQUFPLFNBQVNDLGlCQUFpQkMsVUFBVSxJQUFJLEVBQUVDLGdCQUFnQixHQUFHO0lBQ2xFLE1BQU0sQ0FBQ0MsT0FBT0MsU0FBUyxHQUFHTCxTQUFTO0lBRW5DRCxVQUFVO1FBQ1IsSUFBSSxDQUFDRyxTQUFTO1lBQ1pHLFNBQVM7WUFDVDtRQUNGO1FBRUEsTUFBTUMsUUFBUSxJQUFNRCxTQUFTO1FBRTdCLElBQUksT0FBT0UsV0FBVyxlQUFlLHlCQUF5QkEsUUFBUTtZQUNwRSxNQUFNQyxLQUFLQyxvQkFBb0JILE9BQU87Z0JBQUVJLFNBQVNQO1lBQWM7WUFDL0QsT0FBTyxJQUFNUSxtQkFBbUJIO1FBQ2xDO1FBRUEsTUFBTUksUUFBUUMsV0FBV1AsT0FBTztRQUNoQyxPQUFPLElBQU1RLGFBQWFGO0lBQzVCLEdBQUc7UUFBQ1Y7UUFBU0M7S0FBYztJQUUzQixPQUFPQztBQUNUIn0=

@@ -1,0 +1,120 @@
+import { WINDOW } from "/node_modules/@sentry-internal/browser-utils/build/esm/types.js?v=a52cce50";
+import { getActivationStart } from "/node_modules/@sentry-internal/browser-utils/build/esm/metrics/web-vitals/lib/getActivationStart.js?v=a52cce50";
+import { addPageListener, removePageListener } from "/node_modules/@sentry-internal/browser-utils/build/esm/metrics/web-vitals/lib/globalListeners.js?v=a52cce50";
+
+/*
+ * Copyright 2020 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+let firstHiddenTime = -1;
+const onHiddenFunctions = new Set();
+
+const initHiddenTime = () => {
+  // If the document is hidden when this code runs, assume it was always
+  // hidden and the page was loaded in the background, with the one exception
+  // that visibility state is always 'hidden' during prerendering, so we have
+  // to ignore that case until prerendering finishes (see: `prerenderingchange`
+  // event logic below).
+  return WINDOW.document?.visibilityState === 'hidden' && !WINDOW.document?.prerendering ? 0 : Infinity;
+};
+
+const onVisibilityUpdate = (event) => {
+  // Handle changes to hidden state
+  if (isPageHidden(event) && firstHiddenTime > -1) {
+    // Sentry-specific change: Also call onHidden callbacks for pagehide events
+    // to support older browsers (Safari <14.4) that don't properly fire visibilitychange
+    if (event.type === 'visibilitychange' || event.type === 'pagehide') {
+      for (const onHiddenFunction of onHiddenFunctions) {
+        onHiddenFunction();
+      }
+    }
+
+    // If the document is 'hidden' and no previous hidden timestamp has been
+    // set (so is infinity), update it based on the current event data.
+    if (!isFinite(firstHiddenTime)) {
+      // If the event is a 'visibilitychange' event, it means the page was
+      // visible prior to this change, so the event timestamp is the first
+      // hidden time.
+      // However, if the event is not a 'visibilitychange' event, then it must
+      // be a 'prerenderingchange' or 'pagehide' event, and the fact that the document is
+      // still 'hidden' from the above check means the tab was activated
+      // in a background state and so has always been hidden.
+      firstHiddenTime = event.type === 'visibilitychange' ? event.timeStamp : 0;
+
+      // We no longer need the `prerenderingchange` event listener now we've
+      // set an initial init time so remove that
+      // (we'll keep the visibilitychange and pagehide ones for onHiddenFunction above)
+      removePageListener('prerenderingchange', onVisibilityUpdate, true);
+    }
+  }
+};
+
+const getVisibilityWatcher = () => {
+  if (WINDOW.document && firstHiddenTime < 0) {
+    // Check if we have a previous hidden `visibility-state` performance entry.
+    const activationStart = getActivationStart();
+    const firstVisibilityStateHiddenTime = !WINDOW.document.prerendering
+      ? globalThis.performance
+          .getEntriesByType('visibility-state')
+          .filter(e => e.name === 'hidden' && e.startTime > activationStart)[0]?.startTime
+      : undefined;
+
+    // Prefer that, but if it's not available and the document is hidden when
+    // this code runs, assume it was hidden since navigation start. This isn't
+    // a perfect heuristic, but it's the best we can do until the
+    // `visibility-state` performance entry becomes available in all browsers.
+    firstHiddenTime = firstVisibilityStateHiddenTime ?? initHiddenTime();
+    // Listen for visibility changes so we can handle things like bfcache
+    // restores and/or prerender without having to examine individual
+    // timestamps in detail and also for onHidden function calls.
+    addPageListener('visibilitychange', onVisibilityUpdate, true);
+
+    // Sentry-specific change: Some browsers have buggy implementations of visibilitychange,
+    // so we use pagehide in addition, just to be safe. This is also required for older
+    // Safari versions (<14.4) that we still support.
+    addPageListener('pagehide', onVisibilityUpdate, true);
+
+    // IMPORTANT: when a page is prerendering, its `visibilityState` is
+    // 'hidden', so in order to account for cases where this module checks for
+    // visibility during prerendering, an additional check after prerendering
+    // completes is also required.
+    addPageListener('prerenderingchange', onVisibilityUpdate, true);
+  }
+
+  return {
+    get firstHiddenTime() {
+      return firstHiddenTime;
+    },
+    onHidden(cb) {
+      onHiddenFunctions.add(cb);
+    },
+  };
+};
+
+/**
+ * Check if the page is hidden, uses the `pagehide` event for older browsers support that we used to have in `onHidden` function.
+ * Some browsers we still support (Safari <14.4) don't fully support `visibilitychange`
+ * or have known bugs w.r.t the `visibilitychange` event.
+ * // TODO (v11): If we decide to drop support for Safari 14.4, we can use the logic from web-vitals 4.2.4
+ */
+function isPageHidden(event) {
+  return event.type === 'pagehide' || WINDOW.document?.visibilityState === 'hidden';
+}
+
+export { getVisibilityWatcher };
+                                                
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZ2V0VmlzaWJpbGl0eVdhdGNoZXIuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uLy4uL3NyYy9tZXRyaWNzL3dlYi12aXRhbHMvbGliL2dldFZpc2liaWxpdHlXYXRjaGVyLnRzIl0sInNvdXJjZXNDb250ZW50IjpbIi8qXG4gKiBDb3B5cmlnaHQgMjAyMCBHb29nbGUgTExDXG4gKlxuICogTGljZW5zZWQgdW5kZXIgdGhlIEFwYWNoZSBMaWNlbnNlLCBWZXJzaW9uIDIuMCAodGhlIFwiTGljZW5zZVwiKTtcbiAqIHlvdSBtYXkgbm90IHVzZSB0aGlzIGZpbGUgZXhjZXB0IGluIGNvbXBsaWFuY2Ugd2l0aCB0aGUgTGljZW5zZS5cbiAqIFlvdSBtYXkgb2J0YWluIGEgY29weSBvZiB0aGUgTGljZW5zZSBhdFxuICpcbiAqICAgICBodHRwczovL3d3dy5hcGFjaGUub3JnL2xpY2Vuc2VzL0xJQ0VOU0UtMi4wXG4gKlxuICogVW5sZXNzIHJlcXVpcmVkIGJ5IGFwcGxpY2FibGUgbGF3IG9yIGFncmVlZCB0byBpbiB3cml0aW5nLCBzb2Z0d2FyZVxuICogZGlzdHJpYnV0ZWQgdW5kZXIgdGhlIExpY2Vuc2UgaXMgZGlzdHJpYnV0ZWQgb24gYW4gXCJBUyBJU1wiIEJBU0lTLFxuICogV0lUSE9VVCBXQVJSQU5USUVTIE9SIENPTkRJVElPTlMgT0YgQU5ZIEtJTkQsIGVpdGhlciBleHByZXNzIG9yIGltcGxpZWQuXG4gKiBTZWUgdGhlIExpY2Vuc2UgZm9yIHRoZSBzcGVjaWZpYyBsYW5ndWFnZSBnb3Zlcm5pbmcgcGVybWlzc2lvbnMgYW5kXG4gKiBsaW1pdGF0aW9ucyB1bmRlciB0aGUgTGljZW5zZS5cbiAqL1xuXG5pbXBvcnQgeyBXSU5ET1cgfSBmcm9tICcuLi8uLi8uLi90eXBlcyc7XG5pbXBvcnQgeyBnZXRBY3RpdmF0aW9uU3RhcnQgfSBmcm9tICcuL2dldEFjdGl2YXRpb25TdGFydCc7XG5pbXBvcnQgeyBhZGRQYWdlTGlzdGVuZXIsIHJlbW92ZVBhZ2VMaXN0ZW5lciB9IGZyb20gJy4vZ2xvYmFsTGlzdGVuZXJzJztcblxubGV0IGZpcnN0SGlkZGVuVGltZSA9IC0xO1xuY29uc3Qgb25IaWRkZW5GdW5jdGlvbnM6IFNldDwoKSA9PiB2b2lkPiA9IG5ldyBTZXQoKTtcblxuY29uc3QgaW5pdEhpZGRlblRpbWUgPSAoKSA9PiB7XG4gIC8vIElmIHRoZSBkb2N1bWVudCBpcyBoaWRkZW4gd2hlbiB0aGlzIGNvZGUgcnVucywgYXNzdW1lIGl0IHdhcyBhbHdheXNcbiAgLy8gaGlkZGVuIGFuZCB0aGUgcGFnZSB3YXMgbG9hZGVkIGluIHRoZSBiYWNrZ3JvdW5kLCB3aXRoIHRoZSBvbmUgZXhjZXB0aW9uXG4gIC8vIHRoYXQgdmlzaWJpbGl0eSBzdGF0ZSBpcyBhbHdheXMgJ2hpZGRlbicgZHVyaW5nIHByZXJlbmRlcmluZywgc28gd2UgaGF2ZVxuICAvLyB0byBpZ25vcmUgdGhhdCBjYXNlIHVudGlsIHByZXJlbmRlcmluZyBmaW5pc2hlcyAoc2VlOiBgcHJlcmVuZGVyaW5nY2hhbmdlYFxuICAvLyBldmVudCBsb2dpYyBiZWxvdykuXG4gIHJldHVybiBXSU5ET1cuZG9jdW1lbnQ/LnZpc2liaWxpdHlTdGF0ZSA9PT0gJ2hpZGRlbicgJiYgIVdJTkRPVy5kb2N1bWVudD8ucHJlcmVuZGVyaW5nID8gMCA6IEluZmluaXR5O1xufTtcblxuY29uc3Qgb25WaXNpYmlsaXR5VXBkYXRlID0gKGV2ZW50OiBFdmVudCkgPT4ge1xuICAvLyBIYW5kbGUgY2hhbmdlcyB0byBoaWRkZW4gc3RhdGVcbiAgaWYgKGlzUGFnZUhpZGRlbihldmVudCkgJiYgZmlyc3RIaWRkZW5UaW1lID4gLTEpIHtcbiAgICAvLyBTZW50cnktc3BlY2lmaWMgY2hhbmdlOiBBbHNvIGNhbGwgb25IaWRkZW4gY2FsbGJhY2tzIGZvciBwYWdlaGlkZSBldmVudHNcbiAgICAvLyB0byBzdXBwb3J0IG9sZGVyIGJyb3dzZXJzIChTYWZhcmkgPDE0LjQpIHRoYXQgZG9uJ3QgcHJvcGVybHkgZmlyZSB2aXNpYmlsaXR5Y2hhbmdlXG4gICAgaWYgKGV2ZW50LnR5cGUgPT09ICd2aXNpYmlsaXR5Y2hhbmdlJyB8fCBldmVudC50eXBlID09PSAncGFnZWhpZGUnKSB7XG4gICAgICBmb3IgKGNvbnN0IG9uSGlkZGVuRnVuY3Rpb24gb2Ygb25IaWRkZW5GdW5jdGlvbnMpIHtcbiAgICAgICAgb25IaWRkZW5GdW5jdGlvbigpO1xuICAgICAgfVxuICAgIH1cblxuICAgIC8vIElmIHRoZSBkb2N1bWVudCBpcyAnaGlkZGVuJyBhbmQgbm8gcHJldmlvdXMgaGlkZGVuIHRpbWVzdGFtcCBoYXMgYmVlblxuICAgIC8vIHNldCAoc28gaXMgaW5maW5pdHkpLCB1cGRhdGUgaXQgYmFzZWQgb24gdGhlIGN1cnJlbnQgZXZlbnQgZGF0YS5cbiAgICBpZiAoIWlzRmluaXRlKGZpcnN0SGlkZGVuVGltZSkpIHtcbiAgICAgIC8vIElmIHRoZSBldmVudCBpcyBhICd2aXNpYmlsaXR5Y2hhbmdlJyBldmVudCwgaXQgbWVhbnMgdGhlIHBhZ2Ugd2FzXG4gICAgICAvLyB2aXNpYmxlIHByaW9yIHRvIHRoaXMgY2hhbmdlLCBzbyB0aGUgZXZlbnQgdGltZXN0YW1wIGlzIHRoZSBmaXJzdFxuICAgICAgLy8gaGlkZGVuIHRpbWUuXG4gICAgICAvLyBIb3dldmVyLCBpZiB0aGUgZXZlbnQgaXMgbm90IGEgJ3Zpc2liaWxpdHljaGFuZ2UnIGV2ZW50LCB0aGVuIGl0IG11c3RcbiAgICAgIC8vIGJlIGEgJ3ByZXJlbmRlcmluZ2NoYW5nZScgb3IgJ3BhZ2VoaWRlJyBldmVudCwgYW5kIHRoZSBmYWN0IHRoYXQgdGhlIGRvY3VtZW50IGlzXG4gICAgICAvLyBzdGlsbCAnaGlkZGVuJyBmcm9tIHRoZSBhYm92ZSBjaGVjayBtZWFucyB0aGUgdGFiIHdhcyBhY3RpdmF0ZWRcbiAgICAgIC8vIGluIGEgYmFja2dyb3VuZCBzdGF0ZSBhbmQgc28gaGFzIGFsd2F5cyBiZWVuIGhpZGRlbi5cbiAgICAgIGZpcnN0SGlkZGVuVGltZSA9IGV2ZW50LnR5cGUgPT09ICd2aXNpYmlsaXR5Y2hhbmdlJyA/IGV2ZW50LnRpbWVTdGFtcCA6IDA7XG5cbiAgICAgIC8vIFdlIG5vIGxvbmdlciBuZWVkIHRoZSBgcHJlcmVuZGVyaW5nY2hhbmdlYCBldmVudCBsaXN0ZW5lciBub3cgd2UndmVcbiAgICAgIC8vIHNldCBhbiBpbml0aWFsIGluaXQgdGltZSBzbyByZW1vdmUgdGhhdFxuICAgICAgLy8gKHdlJ2xsIGtlZXAgdGhlIHZpc2liaWxpdHljaGFuZ2UgYW5kIHBhZ2VoaWRlIG9uZXMgZm9yIG9uSGlkZGVuRnVuY3Rpb24gYWJvdmUpXG4gICAgICByZW1vdmVQYWdlTGlzdGVuZXIoJ3ByZXJlbmRlcmluZ2NoYW5nZScsIG9uVmlzaWJpbGl0eVVwZGF0ZSwgdHJ1ZSk7XG4gICAgfVxuICB9XG59O1xuXG5leHBvcnQgY29uc3QgZ2V0VmlzaWJpbGl0eVdhdGNoZXIgPSAoKSA9PiB7XG4gIGlmIChXSU5ET1cuZG9jdW1lbnQgJiYgZmlyc3RIaWRkZW5UaW1lIDwgMCkge1xuICAgIC8vIENoZWNrIGlmIHdlIGhhdmUgYSBwcmV2aW91cyBoaWRkZW4gYHZpc2liaWxpdHktc3RhdGVgIHBlcmZvcm1hbmNlIGVudHJ5LlxuICAgIGNvbnN0IGFjdGl2YXRpb25TdGFydCA9IGdldEFjdGl2YXRpb25TdGFydCgpO1xuICAgIGNvbnN0IGZpcnN0VmlzaWJpbGl0eVN0YXRlSGlkZGVuVGltZSA9ICFXSU5ET1cuZG9jdW1lbnQucHJlcmVuZGVyaW5nXG4gICAgICA/IGdsb2JhbFRoaXMucGVyZm9ybWFuY2VcbiAgICAgICAgICAuZ2V0RW50cmllc0J5VHlwZSgndmlzaWJpbGl0eS1zdGF0ZScpXG4gICAgICAgICAgLmZpbHRlcihlID0+IGUubmFtZSA9PT0gJ2hpZGRlbicgJiYgZS5zdGFydFRpbWUgPiBhY3RpdmF0aW9uU3RhcnQpWzBdPy5zdGFydFRpbWVcbiAgICAgIDogdW5kZWZpbmVkO1xuXG4gICAgLy8gUHJlZmVyIHRoYXQsIGJ1dCBpZiBpdCdzIG5vdCBhdmFpbGFibGUgYW5kIHRoZSBkb2N1bWVudCBpcyBoaWRkZW4gd2hlblxuICAgIC8vIHRoaXMgY29kZSBydW5zLCBhc3N1bWUgaXQgd2FzIGhpZGRlbiBzaW5jZSBuYXZpZ2F0aW9uIHN0YXJ0LiBUaGlzIGlzbid0XG4gICAgLy8gYSBwZXJmZWN0IGhldXJpc3RpYywgYnV0IGl0J3MgdGhlIGJlc3Qgd2UgY2FuIGRvIHVudGlsIHRoZVxuICAgIC8vIGB2aXNpYmlsaXR5LXN0YXRlYCBwZXJmb3JtYW5jZSBlbnRyeSBiZWNvbWVzIGF2YWlsYWJsZSBpbiBhbGwgYnJvd3NlcnMuXG4gICAgZmlyc3RIaWRkZW5UaW1lID0gZmlyc3RWaXNpYmlsaXR5U3RhdGVIaWRkZW5UaW1lID8/IGluaXRIaWRkZW5UaW1lKCk7XG4gICAgLy8gTGlzdGVuIGZvciB2aXNpYmlsaXR5IGNoYW5nZXMgc28gd2UgY2FuIGhhbmRsZSB0aGluZ3MgbGlrZSBiZmNhY2hlXG4gICAgLy8gcmVzdG9yZXMgYW5kL29yIHByZXJlbmRlciB3aXRob3V0IGhhdmluZyB0byBleGFtaW5lIGluZGl2aWR1YWxcbiAgICAvLyB0aW1lc3RhbXBzIGluIGRldGFpbCBhbmQgYWxzbyBmb3Igb25IaWRkZW4gZnVuY3Rpb24gY2FsbHMuXG4gICAgYWRkUGFnZUxpc3RlbmVyKCd2aXNpYmlsaXR5Y2hhbmdlJywgb25WaXNpYmlsaXR5VXBkYXRlLCB0cnVlKTtcblxuICAgIC8vIFNlbnRyeS1zcGVjaWZpYyBjaGFuZ2U6IFNvbWUgYnJvd3NlcnMgaGF2ZSBidWdneSBpbXBsZW1lbnRhdGlvbnMgb2YgdmlzaWJpbGl0eWNoYW5nZSxcbiAgICAvLyBzbyB3ZSB1c2UgcGFnZWhpZGUgaW4gYWRkaXRpb24sIGp1c3QgdG8gYmUgc2FmZS4gVGhpcyBpcyBhbHNvIHJlcXVpcmVkIGZvciBvbGRlclxuICAgIC8vIFNhZmFyaSB2ZXJzaW9ucyAoPDE0LjQpIHRoYXQgd2Ugc3RpbGwgc3VwcG9ydC5cbiAgICBhZGRQYWdlTGlzdGVuZXIoJ3BhZ2VoaWRlJywgb25WaXNpYmlsaXR5VXBkYXRlLCB0cnVlKTtcblxuICAgIC8vIElNUE9SVEFOVDogd2hlbiBhIHBhZ2UgaXMgcHJlcmVuZGVyaW5nLCBpdHMgYHZpc2liaWxpdHlTdGF0ZWAgaXNcbiAgICAvLyAnaGlkZGVuJywgc28gaW4gb3JkZXIgdG8gYWNjb3VudCBmb3IgY2FzZXMgd2hlcmUgdGhpcyBtb2R1bGUgY2hlY2tzIGZvclxuICAgIC8vIHZpc2liaWxpdHkgZHVyaW5nIHByZXJlbmRlcmluZywgYW4gYWRkaXRpb25hbCBjaGVjayBhZnRlciBwcmVyZW5kZXJpbmdcbiAgICAvLyBjb21wbGV0ZXMgaXMgYWxzbyByZXF1aXJlZC5cbiAgICBhZGRQYWdlTGlzdGVuZXIoJ3ByZXJlbmRlcmluZ2NoYW5nZScsIG9uVmlzaWJpbGl0eVVwZGF0ZSwgdHJ1ZSk7XG4gIH1cblxuICByZXR1cm4ge1xuICAgIGdldCBmaXJzdEhpZGRlblRpbWUoKSB7XG4gICAgICByZXR1cm4gZmlyc3RIaWRkZW5UaW1lO1xuICAgIH0sXG4gICAgb25IaWRkZW4oY2I6ICgpID0+IHZvaWQpIHtcbiAgICAgIG9uSGlkZGVuRnVuY3Rpb25zLmFkZChjYik7XG4gICAgfSxcbiAgfTtcbn07XG5cbi8qKlxuICogQ2hlY2sgaWYgdGhlIHBhZ2UgaXMgaGlkZGVuLCB1c2VzIHRoZSBgcGFnZWhpZGVgIGV2ZW50IGZvciBvbGRlciBicm93c2VycyBzdXBwb3J0IHRoYXQgd2UgdXNlZCB0byBoYXZlIGluIGBvbkhpZGRlbmAgZnVuY3Rpb24uXG4gKiBTb21lIGJyb3dzZXJzIHdlIHN0aWxsIHN1cHBvcnQgKFNhZmFyaSA8MTQuNCkgZG9uJ3QgZnVsbHkgc3VwcG9ydCBgdmlzaWJpbGl0eWNoYW5nZWBcbiAqIG9yIGhhdmUga25vd24gYnVncyB3LnIudCB0aGUgYHZpc2liaWxpdHljaGFuZ2VgIGV2ZW50LlxuICogLy8gVE9ETyAodjExKTogSWYgd2UgZGVjaWRlIHRvIGRyb3Agc3VwcG9ydCBmb3IgU2FmYXJpIDE0LjQsIHdlIGNhbiB1c2UgdGhlIGxvZ2ljIGZyb20gd2ViLXZpdGFscyA0LjIuNFxuICovXG5mdW5jdGlvbiBpc1BhZ2VIaWRkZW4oZXZlbnQ6IEV2ZW50KSB7XG4gIHJldHVybiBldmVudC50eXBlID09PSAncGFnZWhpZGUnIHx8IFdJTkRPVy5kb2N1bWVudD8udmlzaWJpbGl0eVN0YXRlID09PSAnaGlkZGVuJztcbn1cbiJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7O0FBQUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBOzs7QUFNQSxJQUFJLGVBQUEsR0FBa0IsRUFBRTtBQUN4QixNQUFNLGlCQUFpQixHQUFvQixJQUFJLEdBQUcsRUFBRTs7QUFFcEQsTUFBTSxjQUFBLEdBQWlCLE1BQU07QUFDN0I7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLEVBQUUsT0FBTyxNQUFNLENBQUMsUUFBUSxFQUFFLGVBQUEsS0FBb0IsUUFBQSxJQUFZLENBQUMsTUFBTSxDQUFDLFFBQVEsRUFBRSxlQUFlLENBQUEsR0FBSSxRQUFRO0FBQ3ZHLENBQUM7O0FBRUQsTUFBTSxrQkFBQSxHQUFxQixDQUFDLEtBQUssS0FBWTtBQUM3QztBQUNBLEVBQUUsSUFBSSxZQUFZLENBQUMsS0FBSyxDQUFBLElBQUssZUFBQSxHQUFrQixFQUFFLEVBQUU7QUFDbkQ7QUFDQTtBQUNBLElBQUksSUFBSSxLQUFLLENBQUMsSUFBQSxLQUFTLGtCQUFBLElBQXNCLEtBQUssQ0FBQyxJQUFBLEtBQVMsVUFBVSxFQUFFO0FBQ3hFLE1BQU0sS0FBSyxNQUFNLGdCQUFBLElBQW9CLGlCQUFpQixFQUFFO0FBQ3hELFFBQVEsZ0JBQWdCLEVBQUU7QUFDMUIsTUFBTTtBQUNOLElBQUk7O0FBRUo7QUFDQTtBQUNBLElBQUksSUFBSSxDQUFDLFFBQVEsQ0FBQyxlQUFlLENBQUMsRUFBRTtBQUNwQztBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLE1BQU0sZUFBQSxHQUFrQixLQUFLLENBQUMsSUFBQSxLQUFTLGtCQUFBLEdBQXFCLEtBQUssQ0FBQyxTQUFBLEdBQVksQ0FBQzs7QUFFL0U7QUFDQTtBQUNBO0FBQ0EsTUFBTSxrQkFBa0IsQ0FBQyxvQkFBb0IsRUFBRSxrQkFBa0IsRUFBRSxJQUFJLENBQUM7QUFDeEUsSUFBSTtBQUNKLEVBQUU7QUFDRixDQUFDOztBQUVNLE1BQU0sb0JBQUEsR0FBdUIsTUFBTTtBQUMxQyxFQUFFLElBQUksTUFBTSxDQUFDLFlBQVksZUFBQSxHQUFrQixDQUFDLEVBQUU7QUFDOUM7QUFDQSxJQUFJLE1BQU0sZUFBQSxHQUFrQixrQkFBa0IsRUFBRTtBQUNoRCxJQUFJLE1BQU0sOEJBQUEsR0FBaUMsQ0FBQyxNQUFNLENBQUMsUUFBUSxDQUFDO0FBQzVELFFBQVEsVUFBVSxDQUFDO0FBQ25CLFdBQVcsZ0JBQWdCLENBQUMsa0JBQWtCO0FBQzlDLFdBQVcsTUFBTSxDQUFDLENBQUEsSUFBSyxDQUFDLENBQUMsU0FBUyxRQUFBLElBQVksQ0FBQyxDQUFDLFlBQVksZUFBZSxDQUFDLENBQUMsQ0FBQyxDQUFDLEVBQUU7QUFDakYsUUFBUSxTQUFTOztBQUVqQjtBQUNBO0FBQ0E7QUFDQTtBQUNBLElBQUksa0JBQWtCLDhCQUFBLElBQWtDLGNBQWMsRUFBRTtBQUN4RTtBQUNBO0FBQ0E7QUFDQSxJQUFJLGVBQWUsQ0FBQyxrQkFBa0IsRUFBRSxrQkFBa0IsRUFBRSxJQUFJLENBQUM7O0FBRWpFO0FBQ0E7QUFDQTtBQUNBLElBQUksZUFBZSxDQUFDLFVBQVUsRUFBRSxrQkFBa0IsRUFBRSxJQUFJLENBQUM7O0FBRXpEO0FBQ0E7QUFDQTtBQUNBO0FBQ0EsSUFBSSxlQUFlLENBQUMsb0JBQW9CLEVBQUUsa0JBQWtCLEVBQUUsSUFBSSxDQUFDO0FBQ25FLEVBQUU7O0FBRUYsRUFBRSxPQUFPO0FBQ1QsSUFBSSxJQUFJLGVBQWUsR0FBRztBQUMxQixNQUFNLE9BQU8sZUFBZTtBQUM1QixJQUFJLENBQUM7QUFDTCxJQUFJLFFBQVEsQ0FBQyxFQUFFLEVBQWM7QUFDN0IsTUFBTSxpQkFBaUIsQ0FBQyxHQUFHLENBQUMsRUFBRSxDQUFDO0FBQy9CLElBQUksQ0FBQztBQUNMLEdBQUc7QUFDSDs7QUFFQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQSxTQUFTLFlBQVksQ0FBQyxLQUFLLEVBQVM7QUFDcEMsRUFBRSxPQUFPLEtBQUssQ0FBQyxJQUFBLEtBQVMsVUFBQSxJQUFjLE1BQU0sQ0FBQyxRQUFRLEVBQUUsZUFBQSxLQUFvQixRQUFRO0FBQ25GOzs7OyIsInhfZ29vZ2xlX2lnbm9yZUxpc3QiOlswXX0=

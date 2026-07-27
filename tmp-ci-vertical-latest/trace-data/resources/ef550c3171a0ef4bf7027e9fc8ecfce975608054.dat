@@ -1,0 +1,162 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/seo/DynamicFavicon.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/seo/DynamicFavicon.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=2441233a"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+var _s = $RefreshSig$();
+/**
+ * Composant pour gérer le favicon dynamiquement
+ * Met à jour le favicon selon la configuration de la plateforme
+ * Priorité : favicon personnalisé > logo light > favicon par défaut
+ */ import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=2441233a"; const useEffect = __vite__cjsImport3_react["useEffect"]; const useRef = __vite__cjsImport3_react["useRef"];
+import { Helmet } from "/node_modules/.vite/deps/react-helmet-async.js?v=e719cde7";
+import { usePlatformFavicon, usePlatformLogoLight } from "/src/hooks/usePlatformLogo.ts";
+export const DynamicFavicon = ()=>{
+    _s();
+    const favicon = usePlatformFavicon();
+    const logoLight = usePlatformLogoLight();
+    const previousUrlRef = useRef(null);
+    // Utiliser le favicon personnalisé s'il existe, sinon le logo light, sinon le favicon par défaut
+    // Si logoLight est null, utiliser uniquement le favicon par défaut pour éviter le clignotement
+    // Note: logoLight peut être null si aucun logo personnalisé n'est configuré
+    const faviconUrl = favicon || logoLight || '/icon-32x32.png';
+    useEffect(()=>{
+        // Éviter les mises à jour inutiles
+        if (previousUrlRef.current === faviconUrl) {
+            return;
+        }
+        previousUrlRef.current = faviconUrl;
+        // Mettre à jour tous les liens favicon dans le head
+        const updateFavicon = (href)=>{
+            // Supprimer les anciens liens favicon (sauf celui par défaut dans index.html)
+            const existingLinks = document.querySelectorAll('link[rel*="icon"]:not(#favicon-default)');
+            existingLinks.forEach((link)=>link.remove());
+            // Déterminer le type MIME selon l'extension
+            const getMimeType = (url)=>{
+                if (url.endsWith('.ico')) return 'image/x-icon';
+                if (url.endsWith('.png')) return 'image/png';
+                if (url.endsWith('.svg')) return 'image/svg+xml';
+                if (url.endsWith('.webp')) return 'image/webp';
+                return 'image/png'; // Par défaut
+            };
+            const mimeType = getMimeType(href);
+            const timestamp = Date.now();
+            // Favicon principal
+            const linkIcon = document.createElement('link');
+            linkIcon.rel = 'icon';
+            linkIcon.type = mimeType;
+            linkIcon.href = `${href}?v=${timestamp}`;
+            document.head.appendChild(linkIcon);
+            // Favicon PNG 32x32
+            const linkIcon32 = document.createElement('link');
+            linkIcon32.rel = 'icon';
+            linkIcon32.type = 'image/png';
+            linkIcon32.sizes = '32x32';
+            linkIcon32.href = `${href}?v=${timestamp}`;
+            document.head.appendChild(linkIcon32);
+            // Favicon PNG 16x16
+            const linkIcon16 = document.createElement('link');
+            linkIcon16.rel = 'icon';
+            linkIcon16.type = 'image/png';
+            linkIcon16.sizes = '16x16';
+            linkIcon16.href = `${href}?v=${timestamp}`;
+            document.head.appendChild(linkIcon16);
+            // Apple Touch Icon
+            const linkApple = document.createElement('link');
+            linkApple.rel = 'apple-touch-icon';
+            linkApple.sizes = '180x180';
+            linkApple.href = `${href}?v=${timestamp}`;
+            document.head.appendChild(linkApple);
+            // Mask Icon (Safari)
+            const linkMask = document.createElement('link');
+            linkMask.rel = 'mask-icon';
+            linkMask.href = `${href}?v=${timestamp}`;
+            linkMask.setAttribute('color', '#007bff');
+            document.head.appendChild(linkMask);
+        };
+        updateFavicon(faviconUrl);
+    }, [
+        faviconUrl
+    ]);
+    return /*#__PURE__*/ _jsxDEV(Helmet, {
+        children: [
+            /*#__PURE__*/ _jsxDEV("link", {
+                rel: "icon",
+                type: "image/png",
+                sizes: "32x32",
+                href: `${faviconUrl}?v=${Date.now()}`
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/DynamicFavicon.tsx",
+                lineNumber: 90,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV("link", {
+                rel: "icon",
+                type: "image/png",
+                sizes: "16x16",
+                href: `${faviconUrl}?v=${Date.now()}`
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/DynamicFavicon.tsx",
+                lineNumber: 91,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV("link", {
+                rel: "apple-touch-icon",
+                sizes: "180x180",
+                href: `${faviconUrl}?v=${Date.now()}`
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/DynamicFavicon.tsx",
+                lineNumber: 92,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/DynamicFavicon.tsx",
+        lineNumber: 89,
+        columnNumber: 5
+    }, this);
+};
+_s(DynamicFavicon, "XVkJHVcKCFrhy6aDWQWSxOpA9MA=", false, function() {
+    return [
+        usePlatformFavicon,
+        usePlatformLogoLight
+    ];
+});
+_c = DynamicFavicon;
+var _c;
+$RefreshReg$(_c, "DynamicFavicon");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/seo/DynamicFavicon.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/seo/DynamicFavicon.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIkR5bmFtaWNGYXZpY29uLnRzeCJdLCJzb3VyY2VzQ29udGVudCI6WyIvKipcbiAqIENvbXBvc2FudCBwb3VyIGfDqXJlciBsZSBmYXZpY29uIGR5bmFtaXF1ZW1lbnRcbiAqIE1ldCDDoCBqb3VyIGxlIGZhdmljb24gc2Vsb24gbGEgY29uZmlndXJhdGlvbiBkZSBsYSBwbGF0ZWZvcm1lXG4gKiBQcmlvcml0w6kgOiBmYXZpY29uIHBlcnNvbm5hbGlzw6kgPiBsb2dvIGxpZ2h0ID4gZmF2aWNvbiBwYXIgZMOpZmF1dFxuICovXG5cbmltcG9ydCB7IHVzZUVmZmVjdCwgdXNlUmVmIH0gZnJvbSAncmVhY3QnO1xuaW1wb3J0IHsgSGVsbWV0IH0gZnJvbSAncmVhY3QtaGVsbWV0LWFzeW5jJztcbmltcG9ydCB7IHVzZVBsYXRmb3JtRmF2aWNvbiwgdXNlUGxhdGZvcm1Mb2dvTGlnaHQgfSBmcm9tICdAL2hvb2tzL3VzZVBsYXRmb3JtTG9nbyc7XG5cbmV4cG9ydCBjb25zdCBEeW5hbWljRmF2aWNvbiA9ICgpID0+IHtcbiAgY29uc3QgZmF2aWNvbiA9IHVzZVBsYXRmb3JtRmF2aWNvbigpO1xuICBjb25zdCBsb2dvTGlnaHQgPSB1c2VQbGF0Zm9ybUxvZ29MaWdodCgpO1xuICBjb25zdCBwcmV2aW91c1VybFJlZiA9IHVzZVJlZjxzdHJpbmcgfCBudWxsPihudWxsKTtcblxuICAvLyBVdGlsaXNlciBsZSBmYXZpY29uIHBlcnNvbm5hbGlzw6kgcydpbCBleGlzdGUsIHNpbm9uIGxlIGxvZ28gbGlnaHQsIHNpbm9uIGxlIGZhdmljb24gcGFyIGTDqWZhdXRcbiAgLy8gU2kgbG9nb0xpZ2h0IGVzdCBudWxsLCB1dGlsaXNlciB1bmlxdWVtZW50IGxlIGZhdmljb24gcGFyIGTDqWZhdXQgcG91ciDDqXZpdGVyIGxlIGNsaWdub3RlbWVudFxuICAvLyBOb3RlOiBsb2dvTGlnaHQgcGV1dCDDqnRyZSBudWxsIHNpIGF1Y3VuIGxvZ28gcGVyc29ubmFsaXPDqSBuJ2VzdCBjb25maWd1csOpXG4gIGNvbnN0IGZhdmljb25VcmwgPSBmYXZpY29uIHx8IGxvZ29MaWdodCB8fCAnL2ljb24tMzJ4MzIucG5nJztcblxuICB1c2VFZmZlY3QoKCkgPT4ge1xuICAgIC8vIMOJdml0ZXIgbGVzIG1pc2VzIMOgIGpvdXIgaW51dGlsZXNcbiAgICBpZiAocHJldmlvdXNVcmxSZWYuY3VycmVudCA9PT0gZmF2aWNvblVybCkge1xuICAgICAgcmV0dXJuO1xuICAgIH1cblxuICAgIHByZXZpb3VzVXJsUmVmLmN1cnJlbnQgPSBmYXZpY29uVXJsO1xuXG4gICAgLy8gTWV0dHJlIMOgIGpvdXIgdG91cyBsZXMgbGllbnMgZmF2aWNvbiBkYW5zIGxlIGhlYWRcbiAgICBjb25zdCB1cGRhdGVGYXZpY29uID0gKGhyZWY6IHN0cmluZykgPT4ge1xuICAgICAgLy8gU3VwcHJpbWVyIGxlcyBhbmNpZW5zIGxpZW5zIGZhdmljb24gKHNhdWYgY2VsdWkgcGFyIGTDqWZhdXQgZGFucyBpbmRleC5odG1sKVxuICAgICAgY29uc3QgZXhpc3RpbmdMaW5rcyA9IGRvY3VtZW50LnF1ZXJ5U2VsZWN0b3JBbGwoJ2xpbmtbcmVsKj1cImljb25cIl06bm90KCNmYXZpY29uLWRlZmF1bHQpJyk7XG4gICAgICBleGlzdGluZ0xpbmtzLmZvckVhY2gobGluayA9PiBsaW5rLnJlbW92ZSgpKTtcblxuICAgICAgLy8gRMOpdGVybWluZXIgbGUgdHlwZSBNSU1FIHNlbG9uIGwnZXh0ZW5zaW9uXG4gICAgICBjb25zdCBnZXRNaW1lVHlwZSA9ICh1cmw6IHN0cmluZyk6IHN0cmluZyA9PiB7XG4gICAgICAgIGlmICh1cmwuZW5kc1dpdGgoJy5pY28nKSkgcmV0dXJuICdpbWFnZS94LWljb24nO1xuICAgICAgICBpZiAodXJsLmVuZHNXaXRoKCcucG5nJykpIHJldHVybiAnaW1hZ2UvcG5nJztcbiAgICAgICAgaWYgKHVybC5lbmRzV2l0aCgnLnN2ZycpKSByZXR1cm4gJ2ltYWdlL3N2Zyt4bWwnO1xuICAgICAgICBpZiAodXJsLmVuZHNXaXRoKCcud2VicCcpKSByZXR1cm4gJ2ltYWdlL3dlYnAnO1xuICAgICAgICByZXR1cm4gJ2ltYWdlL3BuZyc7IC8vIFBhciBkw6lmYXV0XG4gICAgICB9O1xuXG4gICAgICBjb25zdCBtaW1lVHlwZSA9IGdldE1pbWVUeXBlKGhyZWYpO1xuICAgICAgY29uc3QgdGltZXN0YW1wID0gRGF0ZS5ub3coKTtcblxuICAgICAgLy8gRmF2aWNvbiBwcmluY2lwYWxcbiAgICAgIGNvbnN0IGxpbmtJY29uID0gZG9jdW1lbnQuY3JlYXRlRWxlbWVudCgnbGluaycpO1xuICAgICAgbGlua0ljb24ucmVsID0gJ2ljb24nO1xuICAgICAgbGlua0ljb24udHlwZSA9IG1pbWVUeXBlO1xuICAgICAgbGlua0ljb24uaHJlZiA9IGAke2hyZWZ9P3Y9JHt0aW1lc3RhbXB9YDtcbiAgICAgIGRvY3VtZW50LmhlYWQuYXBwZW5kQ2hpbGQobGlua0ljb24pO1xuXG4gICAgICAvLyBGYXZpY29uIFBORyAzMngzMlxuICAgICAgY29uc3QgbGlua0ljb24zMiA9IGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoJ2xpbmsnKTtcbiAgICAgIGxpbmtJY29uMzIucmVsID0gJ2ljb24nO1xuICAgICAgbGlua0ljb24zMi50eXBlID0gJ2ltYWdlL3BuZyc7XG4gICAgICBsaW5rSWNvbjMyLnNpemVzID0gJzMyeDMyJztcbiAgICAgIGxpbmtJY29uMzIuaHJlZiA9IGAke2hyZWZ9P3Y9JHt0aW1lc3RhbXB9YDtcbiAgICAgIGRvY3VtZW50LmhlYWQuYXBwZW5kQ2hpbGQobGlua0ljb24zMik7XG5cbiAgICAgIC8vIEZhdmljb24gUE5HIDE2eDE2XG4gICAgICBjb25zdCBsaW5rSWNvbjE2ID0gZG9jdW1lbnQuY3JlYXRlRWxlbWVudCgnbGluaycpO1xuICAgICAgbGlua0ljb24xNi5yZWwgPSAnaWNvbic7XG4gICAgICBsaW5rSWNvbjE2LnR5cGUgPSAnaW1hZ2UvcG5nJztcbiAgICAgIGxpbmtJY29uMTYuc2l6ZXMgPSAnMTZ4MTYnO1xuICAgICAgbGlua0ljb24xNi5ocmVmID0gYCR7aHJlZn0/dj0ke3RpbWVzdGFtcH1gO1xuICAgICAgZG9jdW1lbnQuaGVhZC5hcHBlbmRDaGlsZChsaW5rSWNvbjE2KTtcblxuICAgICAgLy8gQXBwbGUgVG91Y2ggSWNvblxuICAgICAgY29uc3QgbGlua0FwcGxlID0gZG9jdW1lbnQuY3JlYXRlRWxlbWVudCgnbGluaycpO1xuICAgICAgbGlua0FwcGxlLnJlbCA9ICdhcHBsZS10b3VjaC1pY29uJztcbiAgICAgIGxpbmtBcHBsZS5zaXplcyA9ICcxODB4MTgwJztcbiAgICAgIGxpbmtBcHBsZS5ocmVmID0gYCR7aHJlZn0/dj0ke3RpbWVzdGFtcH1gO1xuICAgICAgZG9jdW1lbnQuaGVhZC5hcHBlbmRDaGlsZChsaW5rQXBwbGUpO1xuXG4gICAgICAvLyBNYXNrIEljb24gKFNhZmFyaSlcbiAgICAgIGNvbnN0IGxpbmtNYXNrID0gZG9jdW1lbnQuY3JlYXRlRWxlbWVudCgnbGluaycpO1xuICAgICAgbGlua01hc2sucmVsID0gJ21hc2staWNvbic7XG4gICAgICBsaW5rTWFzay5ocmVmID0gYCR7aHJlZn0/dj0ke3RpbWVzdGFtcH1gO1xuICAgICAgbGlua01hc2suc2V0QXR0cmlidXRlKCdjb2xvcicsICcjMDA3YmZmJyk7XG4gICAgICBkb2N1bWVudC5oZWFkLmFwcGVuZENoaWxkKGxpbmtNYXNrKTtcbiAgICB9O1xuXG4gICAgdXBkYXRlRmF2aWNvbihmYXZpY29uVXJsKTtcbiAgfSwgW2Zhdmljb25VcmxdKTtcblxuICByZXR1cm4gKFxuICAgIDxIZWxtZXQ+XG4gICAgICA8bGluayByZWw9XCJpY29uXCIgdHlwZT1cImltYWdlL3BuZ1wiIHNpemVzPVwiMzJ4MzJcIiBocmVmPXtgJHtmYXZpY29uVXJsfT92PSR7RGF0ZS5ub3coKX1gfSAvPlxuICAgICAgPGxpbmsgcmVsPVwiaWNvblwiIHR5cGU9XCJpbWFnZS9wbmdcIiBzaXplcz1cIjE2eDE2XCIgaHJlZj17YCR7ZmF2aWNvblVybH0/dj0ke0RhdGUubm93KCl9YH0gLz5cbiAgICAgIDxsaW5rIHJlbD1cImFwcGxlLXRvdWNoLWljb25cIiBzaXplcz1cIjE4MHgxODBcIiBocmVmPXtgJHtmYXZpY29uVXJsfT92PSR7RGF0ZS5ub3coKX1gfSAvPlxuICAgIDwvSGVsbWV0PlxuICApO1xufTtcbiJdLCJuYW1lcyI6WyJ1c2VFZmZlY3QiLCJ1c2VSZWYiLCJIZWxtZXQiLCJ1c2VQbGF0Zm9ybUZhdmljb24iLCJ1c2VQbGF0Zm9ybUxvZ29MaWdodCIsIkR5bmFtaWNGYXZpY29uIiwiZmF2aWNvbiIsImxvZ29MaWdodCIsInByZXZpb3VzVXJsUmVmIiwiZmF2aWNvblVybCIsImN1cnJlbnQiLCJ1cGRhdGVGYXZpY29uIiwiaHJlZiIsImV4aXN0aW5nTGlua3MiLCJkb2N1bWVudCIsInF1ZXJ5U2VsZWN0b3JBbGwiLCJmb3JFYWNoIiwibGluayIsInJlbW92ZSIsImdldE1pbWVUeXBlIiwidXJsIiwiZW5kc1dpdGgiLCJtaW1lVHlwZSIsInRpbWVzdGFtcCIsIkRhdGUiLCJub3ciLCJsaW5rSWNvbiIsImNyZWF0ZUVsZW1lbnQiLCJyZWwiLCJ0eXBlIiwiaGVhZCIsImFwcGVuZENoaWxkIiwibGlua0ljb24zMiIsInNpemVzIiwibGlua0ljb24xNiIsImxpbmtBcHBsZSIsImxpbmtNYXNrIiwic2V0QXR0cmlidXRlIl0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7QUFBQTs7OztDQUlDLEdBRUQsU0FBU0EsU0FBUyxFQUFFQyxNQUFNLFFBQVEsUUFBUTtBQUMxQyxTQUFTQyxNQUFNLFFBQVEscUJBQXFCO0FBQzVDLFNBQVNDLGtCQUFrQixFQUFFQyxvQkFBb0IsUUFBUSwwQkFBMEI7QUFFbkYsT0FBTyxNQUFNQyxpQkFBaUI7O0lBQzVCLE1BQU1DLFVBQVVIO0lBQ2hCLE1BQU1JLFlBQVlIO0lBQ2xCLE1BQU1JLGlCQUFpQlAsT0FBc0I7SUFFN0MsaUdBQWlHO0lBQ2pHLCtGQUErRjtJQUMvRiw0RUFBNEU7SUFDNUUs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

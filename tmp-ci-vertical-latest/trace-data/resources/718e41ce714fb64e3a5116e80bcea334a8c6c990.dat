@@ -1,0 +1,59 @@
+import { consoleSandbox, getLocationHref } from "/node_modules/@sentry/core/build/esm/index.js?v=89021f86";
+import { DEBUG_BUILD } from "/node_modules/@sentry/browser/build/npm/esm/dev/debug-build.js?v=89021f86";
+import { WINDOW } from "/node_modules/@sentry/browser/build/npm/esm/dev/helpers.js?v=89021f86";
+
+/**
+ * Returns true if the SDK is running in an embedded browser extension.
+ * Stand-alone browser extensions (which do not share the same data as the main browser page) are fine.
+ */
+function checkAndWarnIfIsEmbeddedBrowserExtension() {
+  if (_isEmbeddedBrowserExtension()) {
+    if (DEBUG_BUILD) {
+      consoleSandbox(() => {
+        // eslint-disable-next-line no-console
+        console.error(
+          '[Sentry] You cannot use Sentry.init() in a browser extension, see: https://docs.sentry.io/platforms/javascript/best-practices/browser-extensions/',
+        );
+      });
+    }
+
+    return true;
+  }
+
+  return false;
+}
+
+function _isEmbeddedBrowserExtension() {
+  if (typeof WINDOW.window === 'undefined') {
+    // No need to show the error if we're not in a browser window environment (e.g. service workers)
+    return false;
+  }
+
+  const _window = WINDOW ;
+
+  // Running the SDK in NW.js, which appears like a browser extension but isn't, is also fine
+  // see: https://github.com/getsentry/sentry-javascript/issues/12668
+  if (_window.nw) {
+    return false;
+  }
+
+  const extensionObject = _window['chrome'] || _window['browser'];
+
+  if (!extensionObject?.runtime?.id) {
+    return false;
+  }
+
+  const href = getLocationHref();
+  const extensionProtocols = ['chrome-extension', 'moz-extension', 'ms-browser-extension', 'safari-web-extension'];
+
+  // Running the SDK in a dedicated extension page and calling Sentry.init is fine; no risk of data leakage
+  const isDedicatedExtensionPage =
+    WINDOW === WINDOW.top && extensionProtocols.some(protocol => href.startsWith(`${protocol}://`));
+
+  return !isDedicatedExtensionPage;
+}
+
+export { checkAndWarnIfIsEmbeddedBrowserExtension };
+                                                  
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZGV0ZWN0QnJvd3NlckV4dGVuc2lvbi5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4vLi4vLi4vc3JjL3V0aWxzL2RldGVjdEJyb3dzZXJFeHRlbnNpb24udHMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgY29uc29sZVNhbmRib3gsIGdldExvY2F0aW9uSHJlZiB9IGZyb20gJ0BzZW50cnkvY29yZSc7XG5pbXBvcnQgeyBERUJVR19CVUlMRCB9IGZyb20gJy4uL2RlYnVnLWJ1aWxkJztcbmltcG9ydCB7IFdJTkRPVyB9IGZyb20gJy4uL2hlbHBlcnMnO1xuXG50eXBlIEV4dGVuc2lvblJ1bnRpbWUgPSB7XG4gIHJ1bnRpbWU/OiB7XG4gICAgaWQ/OiBzdHJpbmc7XG4gIH07XG59O1xudHlwZSBFeHRlbnNpb25Qcm9wZXJ0aWVzID0ge1xuICBjaHJvbWU/OiBFeHRlbnNpb25SdW50aW1lO1xuICBicm93c2VyPzogRXh0ZW5zaW9uUnVudGltZTtcbiAgbnc/OiB1bmtub3duO1xufTtcblxuLyoqXG4gKiBSZXR1cm5zIHRydWUgaWYgdGhlIFNESyBpcyBydW5uaW5nIGluIGFuIGVtYmVkZGVkIGJyb3dzZXIgZXh0ZW5zaW9uLlxuICogU3RhbmQtYWxvbmUgYnJvd3NlciBleHRlbnNpb25zICh3aGljaCBkbyBub3Qgc2hhcmUgdGhlIHNhbWUgZGF0YSBhcyB0aGUgbWFpbiBicm93c2VyIHBhZ2UpIGFyZSBmaW5lLlxuICovXG5leHBvcnQgZnVuY3Rpb24gY2hlY2tBbmRXYXJuSWZJc0VtYmVkZGVkQnJvd3NlckV4dGVuc2lvbigpOiBib29sZWFuIHtcbiAgaWYgKF9pc0VtYmVkZGVkQnJvd3NlckV4dGVuc2lvbigpKSB7XG4gICAgaWYgKERFQlVHX0JVSUxEKSB7XG4gICAgICBjb25zb2xlU2FuZGJveCgoKSA9PiB7XG4gICAgICAgIC8vIGVzbGludC1kaXNhYmxlLW5leHQtbGluZSBuby1jb25zb2xlXG4gICAgICAgIGNvbnNvbGUuZXJyb3IoXG4gICAgICAgICAgJ1tTZW50cnldIFlvdSBjYW5ub3QgdXNlIFNlbnRyeS5pbml0KCkgaW4gYSBicm93c2VyIGV4dGVuc2lvbiwgc2VlOiBodHRwczovL2RvY3Muc2VudHJ5LmlvL3BsYXRmb3Jtcy9qYXZhc2NyaXB0L2Jlc3QtcHJhY3RpY2VzL2Jyb3dzZXItZXh0ZW5zaW9ucy8nLFxuICAgICAgICApO1xuICAgICAgfSk7XG4gICAgfVxuXG4gICAgcmV0dXJuIHRydWU7XG4gIH1cblxuICByZXR1cm4gZmFsc2U7XG59XG5cbmZ1bmN0aW9uIF9pc0VtYmVkZGVkQnJvd3NlckV4dGVuc2lvbigpOiBib29sZWFuIHtcbiAgaWYgKHR5cGVvZiBXSU5ET1cud2luZG93ID09PSAndW5kZWZpbmVkJykge1xuICAgIC8vIE5vIG5lZWQgdG8gc2hvdyB0aGUgZXJyb3IgaWYgd2UncmUgbm90IGluIGEgYnJvd3NlciB3aW5kb3cgZW52aXJvbm1lbnQgKGUuZy4gc2VydmljZSB3b3JrZXJzKVxuICAgIHJldHVybiBmYWxzZTtcbiAgfVxuXG4gIGNvbnN0IF93aW5kb3cgPSBXSU5ET1cgYXMgdHlwZW9mIFdJTkRPVyAmIEV4dGVuc2lvblByb3BlcnRpZXM7XG5cbiAgLy8gUnVubmluZyB0aGUgU0RLIGluIE5XLmpzLCB3aGljaCBhcHBlYXJzIGxpa2UgYSBicm93c2VyIGV4dGVuc2lvbiBidXQgaXNuJ3QsIGlzIGFsc28gZmluZVxuICAvLyBzZWU6IGh0dHBzOi8vZ2l0aHViLmNvbS9nZXRzZW50cnkvc2VudHJ5LWphdmFzY3JpcHQvaXNzdWVzLzEyNjY4XG4gIGlmIChfd2luZG93Lm53KSB7XG4gICAgcmV0dXJuIGZhbHNlO1xuICB9XG5cbiAgY29uc3QgZXh0ZW5zaW9uT2JqZWN0ID0gX3dpbmRvd1snY2hyb21lJ10gfHwgX3dpbmRvd1snYnJvd3NlciddO1xuXG4gIGlmICghZXh0ZW5zaW9uT2JqZWN0Py5ydW50aW1lPy5pZCkge1xuICAgIHJldHVybiBmYWxzZTtcbiAgfVxuXG4gIGNvbnN0IGhyZWYgPSBnZXRMb2NhdGlvbkhyZWYoKTtcbiAgY29uc3QgZXh0ZW5zaW9uUHJvdG9jb2xzID0gWydjaHJvbWUtZXh0ZW5zaW9uJywgJ21vei1leHRlbnNpb24nLCAnbXMtYnJvd3Nlci1leHRlbnNpb24nLCAnc2FmYXJpLXdlYi1leHRlbnNpb24nXTtcblxuICAvLyBSdW5uaW5nIHRoZSBTREsgaW4gYSBkZWRpY2F0ZWQgZXh0ZW5zaW9uIHBhZ2UgYW5kIGNhbGxpbmcgU2VudHJ5LmluaXQgaXMgZmluZTsgbm8gcmlzayBvZiBkYXRhIGxlYWthZ2VcbiAgY29uc3QgaXNEZWRpY2F0ZWRFeHRlbnNpb25QYWdlID1cbiAgICBXSU5ET1cgPT09IFdJTkRPVy50b3AgJiYgZXh0ZW5zaW9uUHJvdG9jb2xzLnNvbWUocHJvdG9jb2wgPT4gaHJlZi5zdGFydHNXaXRoKGAke3Byb3RvY29sfTovL2ApKTtcblxuICByZXR1cm4gIWlzRGVkaWNhdGVkRXh0ZW5zaW9uUGFnZTtcbn1cbiJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7O0FBZUE7QUFDQTtBQUNBO0FBQ0E7QUFDTyxTQUFTLHdDQUF3QyxHQUFZO0FBQ3BFLEVBQUUsSUFBSSwyQkFBMkIsRUFBRSxFQUFFO0FBQ3JDLElBQUksSUFBSSxXQUFXLEVBQUU7QUFDckIsTUFBTSxjQUFjLENBQUMsTUFBTTtBQUMzQjtBQUNBLFFBQVEsT0FBTyxDQUFDLEtBQUs7QUFDckIsVUFBVSxtSkFBbUo7QUFDN0osU0FBUztBQUNULE1BQU0sQ0FBQyxDQUFDO0FBQ1IsSUFBSTs7QUFFSixJQUFJLE9BQU8sSUFBSTtBQUNmLEVBQUU7O0FBRUYsRUFBRSxPQUFPLEtBQUs7QUFDZDs7QUFFQSxTQUFTLDJCQUEyQixHQUFZO0FBQ2hELEVBQUUsSUFBSSxPQUFPLE1BQU0sQ0FBQyxNQUFBLEtBQVcsV0FBVyxFQUFFO0FBQzVDO0FBQ0EsSUFBSSxPQUFPLEtBQUs7QUFDaEIsRUFBRTs7QUFFRixFQUFFLE1BQU0sT0FBQSxHQUFVLE1BQUE7O0FBRWxCO0FBQ0E7QUFDQSxFQUFFLElBQUksT0FBTyxDQUFDLEVBQUUsRUFBRTtBQUNsQixJQUFJLE9BQU8sS0FBSztBQUNoQixFQUFFOztBQUVGLEVBQUUsTUFBTSxlQUFBLEdBQWtCLE9BQU8sQ0FBQyxRQUFRLENBQUEsSUFBSyxPQUFPLENBQUMsU0FBUyxDQUFDOztBQUVqRSxFQUFFLElBQUksQ0FBQyxlQUFlLEVBQUUsT0FBTyxFQUFFLEVBQUUsRUFBRTtBQUNyQyxJQUFJLE9BQU8sS0FBSztBQUNoQixFQUFFOztBQUVGLEVBQUUsTUFBTSxJQUFBLEdBQU8sZUFBZSxFQUFFO0FBQ2hDLEVBQUUsTUFBTSxrQkFBQSxHQUFxQixDQUFDLGtCQUFrQixFQUFFLGVBQWUsRUFBRSxzQkFBc0IsRUFBRSxzQkFBc0IsQ0FBQzs7QUFFbEg7QUFDQSxFQUFFLE1BQU0sd0JBQUE7QUFDUixJQUFJLFdBQVcsTUFBTSxDQUFDLEdBQUEsSUFBTyxrQkFBa0IsQ0FBQyxJQUFJLENBQUMsWUFBWSxJQUFJLENBQUMsVUFBVSxDQUFDLENBQUMsRUFBQSxRQUFBLENBQUEsR0FBQSxDQUFBLENBQUEsQ0FBQTs7QUFFQSxFQUFBLE9BQUEsQ0FBQSx3QkFBQTtBQUNBOzs7OyIsInhfZ29vZ2xlX2lnbm9yZUxpc3QiOlswXX0=

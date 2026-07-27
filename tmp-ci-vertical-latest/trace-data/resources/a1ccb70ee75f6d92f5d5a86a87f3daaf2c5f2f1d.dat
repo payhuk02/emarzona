@@ -1,0 +1,45 @@
+import { getClient, getIsolationScope } from "/node_modules/@sentry/core/build/esm/currentScopes.js?v=89021f86";
+import { consoleSandbox } from "/node_modules/@sentry/core/build/esm/utils/debug-logger.js?v=89021f86";
+import { dateTimestampInSeconds } from "/node_modules/@sentry/core/build/esm/utils/time.js?v=89021f86";
+
+/**
+ * Default maximum number of breadcrumbs added to an event. Can be overwritten
+ * with {@link Options.maxBreadcrumbs}.
+ */
+const DEFAULT_BREADCRUMBS = 100;
+
+/**
+ * Records a new breadcrumb which will be attached to future events.
+ *
+ * Breadcrumbs will be added to subsequent events to provide more context on
+ * user's actions prior to an error or crash.
+ */
+function addBreadcrumb(breadcrumb, hint) {
+  const client = getClient();
+  const isolationScope = getIsolationScope();
+
+  if (!client) return;
+
+  const { beforeBreadcrumb = null, maxBreadcrumbs = DEFAULT_BREADCRUMBS } = client.getOptions();
+
+  if (maxBreadcrumbs <= 0) return;
+
+  const timestamp = dateTimestampInSeconds();
+  const mergedBreadcrumb = { timestamp, ...breadcrumb };
+  const finalBreadcrumb = beforeBreadcrumb
+    ? consoleSandbox(() => beforeBreadcrumb(mergedBreadcrumb, hint))
+    : mergedBreadcrumb;
+
+  if (finalBreadcrumb === null) return;
+
+  if (client.emit) {
+    client.emit('beforeAddBreadcrumb', finalBreadcrumb, hint);
+  }
+
+  isolationScope.addBreadcrumb(finalBreadcrumb, maxBreadcrumbs);
+}
+
+export { addBreadcrumb };
+                                       
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiYnJlYWRjcnVtYnMuanMiLCJzb3VyY2VzIjpbIi4uLy4uL3NyYy9icmVhZGNydW1icy50cyJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgeyBnZXRDbGllbnQsIGdldElzb2xhdGlvblNjb3BlIH0gZnJvbSAnLi9jdXJyZW50U2NvcGVzJztcbmltcG9ydCB0eXBlIHsgQnJlYWRjcnVtYiwgQnJlYWRjcnVtYkhpbnQgfSBmcm9tICcuL3R5cGVzLWhvaXN0L2JyZWFkY3J1bWInO1xuaW1wb3J0IHsgY29uc29sZVNhbmRib3ggfSBmcm9tICcuL3V0aWxzL2RlYnVnLWxvZ2dlcic7XG5pbXBvcnQgeyBkYXRlVGltZXN0YW1wSW5TZWNvbmRzIH0gZnJvbSAnLi91dGlscy90aW1lJztcblxuLyoqXG4gKiBEZWZhdWx0IG1heGltdW0gbnVtYmVyIG9mIGJyZWFkY3J1bWJzIGFkZGVkIHRvIGFuIGV2ZW50LiBDYW4gYmUgb3ZlcndyaXR0ZW5cbiAqIHdpdGgge0BsaW5rIE9wdGlvbnMubWF4QnJlYWRjcnVtYnN9LlxuICovXG5jb25zdCBERUZBVUxUX0JSRUFEQ1JVTUJTID0gMTAwO1xuXG4vKipcbiAqIFJlY29yZHMgYSBuZXcgYnJlYWRjcnVtYiB3aGljaCB3aWxsIGJlIGF0dGFjaGVkIHRvIGZ1dHVyZSBldmVudHMuXG4gKlxuICogQnJlYWRjcnVtYnMgd2lsbCBiZSBhZGRlZCB0byBzdWJzZXF1ZW50IGV2ZW50cyB0byBwcm92aWRlIG1vcmUgY29udGV4dCBvblxuICogdXNlcidzIGFjdGlvbnMgcHJpb3IgdG8gYW4gZXJyb3Igb3IgY3Jhc2guXG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBhZGRCcmVhZGNydW1iKGJyZWFkY3J1bWI6IEJyZWFkY3J1bWIsIGhpbnQ/OiBCcmVhZGNydW1iSGludCk6IHZvaWQge1xuICBjb25zdCBjbGllbnQgPSBnZXRDbGllbnQoKTtcbiAgY29uc3QgaXNvbGF0aW9uU2NvcGUgPSBnZXRJc29sYXRpb25TY29wZSgpO1xuXG4gIGlmICghY2xpZW50KSByZXR1cm47XG5cbiAgY29uc3QgeyBiZWZvcmVCcmVhZGNydW1iID0gbnVsbCwgbWF4QnJlYWRjcnVtYnMgPSBERUZBVUxUX0JSRUFEQ1JVTUJTIH0gPSBjbGllbnQuZ2V0T3B0aW9ucygpO1xuXG4gIGlmIChtYXhCcmVhZGNydW1icyA8PSAwKSByZXR1cm47XG5cbiAgY29uc3QgdGltZXN0YW1wID0gZGF0ZVRpbWVzdGFtcEluU2Vjb25kcygpO1xuICBjb25zdCBtZXJnZWRCcmVhZGNydW1iID0geyB0aW1lc3RhbXAsIC4uLmJyZWFkY3J1bWIgfTtcbiAgY29uc3QgZmluYWxCcmVhZGNydW1iID0gYmVmb3JlQnJlYWRjcnVtYlxuICAgID8gY29uc29sZVNhbmRib3goKCkgPT4gYmVmb3JlQnJlYWRjcnVtYihtZXJnZWRCcmVhZGNydW1iLCBoaW50KSlcbiAgICA6IG1lcmdlZEJyZWFkY3J1bWI7XG5cbiAgaWYgKGZpbmFsQnJlYWRjcnVtYiA9PT0gbnVsbCkgcmV0dXJuO1xuXG4gIGlmIChjbGllbnQuZW1pdCkge1xuICAgIGNsaWVudC5lbWl0KCdiZWZvcmVBZGRCcmVhZGNydW1iJywgZmluYWxCcmVhZGNydW1iLCBoaW50KTtcbiAgfVxuXG4gIGlzb2xhdGlvblNjb3BlLmFkZEJyZWFkY3J1bWIoZmluYWxCcmVhZGNydW1iLCBtYXhCcmVhZGNydW1icyk7XG59XG4iXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7OztBQUtBO0FBQ0E7QUFDQTtBQUNBO0FBQ0EsTUFBTSxtQkFBQSxHQUFzQixHQUFHOztBQUUvQjtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDTyxTQUFTLGFBQWEsQ0FBQyxVQUFVLEVBQWMsSUFBSSxFQUF5QjtBQUNuRixFQUFFLE1BQU0sTUFBQSxHQUFTLFNBQVMsRUFBRTtBQUM1QixFQUFFLE1BQU0sY0FBQSxHQUFpQixpQkFBaUIsRUFBRTs7QUFFNUMsRUFBRSxJQUFJLENBQUMsTUFBTSxFQUFFOztBQUVmLEVBQUUsTUFBTSxFQUFFLGdCQUFBLEdBQW1CLElBQUksRUFBRSxjQUFBLEdBQWlCLG1CQUFBLEtBQXdCLE1BQU0sQ0FBQyxVQUFVLEVBQUU7O0FBRS9GLEVBQUUsSUFBSSxjQUFBLElBQWtCLENBQUMsRUFBRTs7QUFFM0IsRUFBRSxNQUFNLFNBQUEsR0FBWSxzQkFBc0IsRUFBRTtBQUM1QyxFQUFFLE1BQU0sbUJBQW1CLEVBQUUsU0FBUyxFQUFFLEdBQUcsWUFBWTtBQUN2RCxFQUFFLE1BQU0sa0JBQWtCO0FBQzFCLE1BQU0sY0FBYyxDQUFDLE1BQU0sZ0JBQWdCLENBQUMsZ0JBQWdCLEVBQUUsSUFBSSxDQUFDO0FBQ25FLE1BQU0sZ0JBQWdCOztBQUV0QixFQUFFLElBQUksZUFBQSxLQUFvQixJQUFJLEVBQUU7O0FBRWhDLEVBQUUsSUFBSSxNQUFNLENBQUMsSUFBSSxFQUFFO0FBQ25CLElBQUksTUFBTSxDQUFDLElBQUksQ0FBQyxxQkFBcUIsRUFBRSxlQUFlLEVBQUUsSUFBSSxDQUFDO0FBQzdELEVBQUU7O0FBRUYsRUFBRSxjQUFjLENBQUMsYUFBYSxDQUFDLGVBQWUsRUFBRSxjQUFjLENBQUM7QUFDL0Q7Ozs7IiwieF9nb29nbGVfaWdub3JlTGlzdCI6WzBdfQ==

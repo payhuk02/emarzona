@@ -1,0 +1,123 @@
+import { isNativeFunction, debug } from "/node_modules/@sentry/core/build/esm/index.js?v=89021f86";
+import { DEBUG_BUILD } from "/node_modules/@sentry-internal/browser-utils/build/esm/debug-build.js?v=89021f86";
+import { WINDOW } from "/node_modules/@sentry-internal/browser-utils/build/esm/types.js?v=89021f86";
+
+/**
+ * We generally want to use window.fetch / window.setTimeout.
+ * However, in some cases this may be wrapped (e.g. by Zone.js for Angular),
+ * so we try to get an unpatched version of this from a sandboxed iframe.
+ */
+
+const cachedImplementations = {};
+
+/**
+ * Get the native implementation of a browser function.
+ *
+ * This can be used to ensure we get an unwrapped version of a function, in cases where a wrapped function can lead to problems.
+ *
+ * The following methods can be retrieved:
+ * - `setTimeout`: This can be wrapped by e.g. Angular, causing change detection to be triggered.
+ * - `fetch`: This can be wrapped by e.g. ad-blockers, causing an infinite loop when a request is blocked.
+ */
+function getNativeImplementation(
+  name,
+) {
+  const cached = cachedImplementations[name];
+  if (cached) {
+    return cached;
+  }
+
+  let impl = WINDOW[name] ;
+
+  // Fast path to avoid DOM I/O
+  if (isNativeFunction(impl)) {
+    return (cachedImplementations[name] = impl.bind(WINDOW) );
+  }
+
+  const document = WINDOW.document;
+  // eslint-disable-next-line deprecation/deprecation
+  if (document && typeof document.createElement === 'function') {
+    try {
+      const sandbox = document.createElement('iframe');
+      sandbox.hidden = true;
+      document.head.appendChild(sandbox);
+      const contentWindow = sandbox.contentWindow;
+      if (contentWindow?.[name]) {
+        impl = contentWindow[name] ;
+      }
+      document.head.removeChild(sandbox);
+    } catch (e) {
+      // Could not create sandbox iframe, just use window.xxx
+      DEBUG_BUILD && debug.warn(`Could not create sandbox iframe for ${name} check, bailing to window.${name}: `, e);
+    }
+  }
+
+  // Sanity check: This _should_ not happen, but if it does, we just skip caching...
+  // This can happen e.g. in tests where fetch may not be available in the env, or similar.
+  if (!impl) {
+    return impl;
+  }
+
+  return (cachedImplementations[name] = impl.bind(WINDOW) );
+}
+
+/** Clear a cached implementation. */
+function clearCachedImplementation(name) {
+  cachedImplementations[name] = undefined;
+}
+
+/**
+ * A special usecase for incorrectly wrapped Fetch APIs in conjunction with ad-blockers.
+ * Whenever someone wraps the Fetch API and returns the wrong promise chain,
+ * this chain becomes orphaned and there is no possible way to capture it's rejections
+ * other than allowing it bubble up to this very handler. eg.
+ *
+ * const f = window.fetch;
+ * window.fetch = function () {
+ *   const p = f.apply(this, arguments);
+ *
+ *   p.then(function() {
+ *     console.log('hi.');
+ *   });
+ *
+ *   return p;
+ * }
+ *
+ * `p.then(function () { ... })` is producing a completely separate promise chain,
+ * however, what's returned is `p` - the result of original `fetch` call.
+ *
+ * This mean, that whenever we use the Fetch API to send our own requests, _and_
+ * some ad-blocker blocks it, this orphaned chain will _always_ reject,
+ * effectively causing another event to be captured.
+ * This makes a whole process become an infinite loop, which we need to somehow
+ * deal with, and break it in one way or another.
+ *
+ * To deal with this issue, we are making sure that we _always_ use the real
+ * browser Fetch API, instead of relying on what `window.fetch` exposes.
+ * The only downside to this would be missing our own requests as breadcrumbs,
+ * but because we are already not doing this, it should be just fine.
+ *
+ * Possible failed fetch error messages per-browser:
+ *
+ * Chrome:  Failed to fetch
+ * Edge:    Failed to Fetch
+ * Firefox: NetworkError when attempting to fetch resource
+ * Safari:  resource blocked by content blocker
+ */
+function fetch(...rest) {
+  return getNativeImplementation('fetch')(...rest);
+}
+
+/**
+ * Get an unwrapped `setTimeout` method.
+ * This ensures that even if e.g. Angular wraps `setTimeout`, we get the native implementation,
+ * avoiding triggering change detection.
+ */
+function setTimeout(...rest) {
+  return getNativeImplementation('setTimeout')(...rest);
+}
+
+export { clearCachedImplementation, fetch, getNativeImplementation, setTimeout };
+                                                   
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZ2V0TmF0aXZlSW1wbGVtZW50YXRpb24uanMiLCJzb3VyY2VzIjpbIi4uLy4uL3NyYy9nZXROYXRpdmVJbXBsZW1lbnRhdGlvbi50cyJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgeyBkZWJ1ZywgaXNOYXRpdmVGdW5jdGlvbiB9IGZyb20gJ0BzZW50cnkvY29yZSc7XG5pbXBvcnQgeyBERUJVR19CVUlMRCB9IGZyb20gJy4vZGVidWctYnVpbGQnO1xuaW1wb3J0IHsgV0lORE9XIH0gZnJvbSAnLi90eXBlcyc7XG5cbi8qKlxuICogV2UgZ2VuZXJhbGx5IHdhbnQgdG8gdXNlIHdpbmRvdy5mZXRjaCAvIHdpbmRvdy5zZXRUaW1lb3V0LlxuICogSG93ZXZlciwgaW4gc29tZSBjYXNlcyB0aGlzIG1heSBiZSB3cmFwcGVkIChlLmcuIGJ5IFpvbmUuanMgZm9yIEFuZ3VsYXIpLFxuICogc28gd2UgdHJ5IHRvIGdldCBhbiB1bnBhdGNoZWQgdmVyc2lvbiBvZiB0aGlzIGZyb20gYSBzYW5kYm94ZWQgaWZyYW1lLlxuICovXG5cbmludGVyZmFjZSBDYWNoZWFibGVJbXBsZW1lbnRhdGlvbnMge1xuICBzZXRUaW1lb3V0OiB0eXBlb2YgV0lORE9XLnNldFRpbWVvdXQ7XG4gIGZldGNoOiB0eXBlb2YgV0lORE9XLmZldGNoO1xufVxuXG5jb25zdCBjYWNoZWRJbXBsZW1lbnRhdGlvbnM6IFBhcnRpYWw8Q2FjaGVhYmxlSW1wbGVtZW50YXRpb25zPiA9IHt9O1xuXG4vKipcbiAqIEdldCB0aGUgbmF0aXZlIGltcGxlbWVudGF0aW9uIG9mIGEgYnJvd3NlciBmdW5jdGlvbi5cbiAqXG4gKiBUaGlzIGNhbiBiZSB1c2VkIHRvIGVuc3VyZSB3ZSBnZXQgYW4gdW53cmFwcGVkIHZlcnNpb24gb2YgYSBmdW5jdGlvbiwgaW4gY2FzZXMgd2hlcmUgYSB3cmFwcGVkIGZ1bmN0aW9uIGNhbiBsZWFkIHRvIHByb2JsZW1zLlxuICpcbiAqIFRoZSBmb2xsb3dpbmcgbWV0aG9kcyBjYW4gYmUgcmV0cmlldmVkOlxuICogLSBgc2V0VGltZW91dGA6IFRoaXMgY2FuIGJlIHdyYXBwZWQgYnkgZS5nLiBBbmd1bGFyLCBjYXVzaW5nIGNoYW5nZSBkZXRlY3Rpb24gdG8gYmUgdHJpZ2dlcmVkLlxuICogLSBgZmV0Y2hgOiBUaGlzIGNhbiBiZSB3cmFwcGVkIGJ5IGUuZy4gYWQtYmxvY2tlcnMsIGNhdXNpbmcgYW4gaW5maW5pdGUgbG9vcCB3aGVuIGEgcmVxdWVzdCBpcyBibG9ja2VkLlxuICovXG5leHBvcnQgZnVuY3Rpb24gZ2V0TmF0aXZlSW1wbGVtZW50YXRpb248VCBleHRlbmRzIGtleW9mIENhY2hlYWJsZUltcGxlbWVudGF0aW9ucz4oXG4gIG5hbWU6IFQsXG4pOiBDYWNoZWFibGVJbXBsZW1lbnRhdGlvbnNbVF0ge1xuICBjb25zdCBjYWNoZWQgPSBjYWNoZWRJbXBsZW1lbnRhdGlvbnNbbmFtZV07XG4gIGlmIChjYWNoZWQpIHtcbiAgICByZXR1cm4gY2FjaGVkO1xuICB9XG5cbiAgbGV0IGltcGwgPSBXSU5ET1dbbmFtZV0gYXMgQ2FjaGVhYmxlSW1wbGVtZW50YXRpb25zW1RdO1xuXG4gIC8vIEZhc3QgcGF0aCB0byBhdm9pZCBET00gSS9PXG4gIGlmIChpc05hdGl2ZUZ1bmN0aW9uKGltcGwpKSB7XG4gICAgcmV0dXJuIChjYWNoZWRJbXBsZW1lbnRhdGlvbnNbbmFtZV0gPSBpbXBsLmJpbmQoV0lORE9XKSBhcyBDYWNoZWFibGVJbXBsZW1lbnRhdGlvbnNbVF0pO1xuICB9XG5cbiAgY29uc3QgZG9jdW1lbnQgPSBXSU5ET1cuZG9jdW1lbnQ7XG4gIC8vIGVzbGludC1kaXNhYmxlLW5leHQtbGluZSBkZXByZWNhdGlvbi9kZXByZWNhdGlvblxuICBpZiAoZG9jdW1lbnQgJiYgdHlwZW9mIGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQgPT09ICdmdW5jdGlvbicpIHtcbiAgICB0cnkge1xuICAgICAgY29uc3Qgc2FuZGJveCA9IGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoJ2lmcmFtZScpO1xuICAgICAgc2FuZGJveC5oaWRkZW4gPSB0cnVlO1xuICAgICAgZG9jdW1lbnQuaGVhZC5hcHBlbmRDaGlsZChzYW5kYm94KTtcbiAgICAgIGNvbnN0IGNvbnRlbnRXaW5kb3cgPSBzYW5kYm94LmNvbnRlbnRXaW5kb3c7XG4gICAgICBpZiAoY29udGVudFdpbmRvdz8uW25hbWVdKSB7XG4gICAgICAgIGltcGwgPSBjb250ZW50V2luZG93W25hbWVdIGFzIENhY2hlYWJsZUltcGxlbWVudGF0aW9uc1tUXTtcbiAgICAgIH1cbiAgICAgIGRvY3VtZW50LmhlYWQucmVtb3ZlQ2hpbGQoc2FuZGJveCk7XG4gICAgfSBjYXRjaCAoZSkge1xuICAgICAgLy8gQ291bGQgbm90IGNyZWF0ZSBzYW5kYm94IGlmcmFtZSwganVzdCB1c2Ugd2luZG93Lnh4eFxuICAgICAgREVCVUdfQlVJTEQgJiYgZGVidWcud2FybihgQ291bGQgbm90IGNyZWF0ZSBzYW5kYm94IGlmcmFtZSBmb3IgJHtuYW1lfSBjaGVjaywgYmFpbGluZyB0byB3aW5kb3cuJHtuYW1lfTogYCwgZSk7XG4gICAgfVxuICB9XG5cbiAgLy8gU2FuaXR5IGNoZWNrOiBUaGlzIF9zaG91bGRfIG5vdCBoYXBwZW4sIGJ1dCBpZiBpdCBkb2VzLCB3ZSBqdXN0IHNraXAgY2FjaGluZy4uLlxuICAvLyBUaGlzIGNhbiBoYXBwZW4gZS5nLiBpbiB0ZXN0cyB3aGVyZSBmZXRjaCBtYXkgbm90IGJlIGF2YWlsYWJsZSBpbiB0aGUgZW52LCBvciBzaW1pbGFyLlxuICBpZiAoIWltcGwpIHtcbiAgICByZXR1cm4gaW1wbDtcbiAgfVxuXG4gIHJldHVybiAoY2FjaGVkSW1wbGVtZW50YXRpb25zW25hbWVdID0gaW1wbC5iaW5kKFdJTkRPVykgYXMgQ2FjaGVhYmxlSW1wbGVtZW50YXRpb25zW1RdKTtcbn1cblxuLyoqIENsZWFyIGEgY2FjaGVkIGltcGxlbWVudGF0aW9uLiAqL1xuZXhwb3J0IGZ1bmN0aW9uIGNsZWFyQ2FjaGVkSW1wbGVtZW50YXRpb24obmFtZToga2V5b2YgQ2FjaGVhYmxlSW1wbGVtZW50YXRpb25zKTogdm9pZCB7XG4gIGNhY2hlZEltcGxlbWVudGF0aW9uc1tuYW1lXSA9IHVuZGVmaW5lZDtcbn1cblxuLyoqXG4gKiBBIHNwZWNpYWwgdXNlY2FzZSBmb3IgaW5jb3JyZWN0bHkgd3JhcHBlZCBGZXRjaCBBUElzIGluIGNvbmp1bmN0aW9uIHdpdGggYWQtYmxvY2tlcnMuXG4gKiBXaGVuZXZlciBzb21lb25lIHdyYXBzIHRoZSBGZXRjaCBBUEkgYW5kIHJldHVybnMgdGhlIHdyb25nIHByb21pc2UgY2hhaW4sXG4gKiB0aGlzIGNoYWluIGJlY29tZXMgb3JwaGFuZWQgYW5kIHRoZXJlIGlzIG5vIHBvc3NpYmxlIHdheSB0byBjYXB0dXJlIGl0J3MgcmVqZWN0aW9uc1xuICogb3RoZXIgdGhhbiBhbGxvd2luZyBpdCBidWJibGUgdXAgdG8gdGhpcyB2ZXJ5IGhhbmRsZXIuIGVnLlxuICpcbiAqIGNvbnN0IGYgPSB3aW5kb3cuZmV0Y2g7XG4gKiB3aW5kb3cuZmV0Y2ggPSBmdW5jdGlvbiAoKSB7XG4gKiAgIGNvbnN0IHAgPSBmLmFwcGx5KHRoaXMsIGFyZ3VtZW50cyk7XG4gKlxuICogICBwLnRoZW4oZnVuY3Rpb24oKSB7XG4gKiAgICAgY29uc29sZS5sb2coJ2hpLicpO1xuICogICB9KTtcbiAqXG4gKiAgIHJldHVybiBwO1xuICogfVxuICpcbiAqIGBwLnRoZW4oZnVuY3Rpb24gKCkgeyAuLi4gfSlgIGlzIHByb2R1Y2luZyBhIGNvbXBsZXRlbHkgc2VwYXJhdGUgcHJvbWlzZSBjaGFpbixcbiAqIGhvd2V2ZXIsIHdoYXQncyByZXR1cm5lZCBpcyBgcGAgLSB0aGUgcmVzdWx0IG9mIG9yaWdpbmFsIGBmZXRjaGAgY2FsbC5cbiAqXG4gKiBUaGlzIG1lYW4sIHRoYXQgd2hlbmV2ZXIgd2UgdXNlIHRoZSBGZXRjaCBBUEkgdG8gc2VuZCBvdXIgb3duIHJlcXVlc3RzLCBfYW5kX1xuICogc29tZSBhZC1ibG9ja2VyIGJsb2NrcyBpdCwgdGhpcyBvcnBoYW5lZCBjaGFpbiB3aWxsIF9hbHdheXNfIHJlamVjdCxcbiAqIGVmZmVjdGl2ZWx5IGNhdXNpbmcgYW5vdGhlciBldmVudCB0byBiZSBjYXB0dXJlZC5cbiAqIFRoaXMgbWFrZXMgYSB3aG9sZSBwcm9jZXNzIGJlY29tZSBhbiBpbmZpbml0ZSBsb29wLCB3aGljaCB3ZSBuZWVkIHRvIHNvbWVob3dcbiAqIGRlYWwgd2l0aCwgYW5kIGJyZWFrIGl0IGluIG9uZSB3YXkgb3IgYW5vdGhlci5cbiAqXG4gKiBUbyBkZWFsIHdpdGggdGhpcyBpc3N1ZSwgd2UgYXJlIG1ha2luZyBzdXJlIHRoYXQgd2UgX2Fsd2F5c18gdXNlIHRoZSByZWFsXG4gKiBicm93c2VyIEZldGNoIEFQSSwgaW5zdGVhZCBvZiByZWx5aW5nIG9uIHdoYXQgYHdpbmRvdy5mZXRjaGAgZXhwb3Nlcy5cbiAqIFRoZSBvbmx5IGRvd25zaWRlIHRvIHRoaXMgd291bGQgYmUgbWlzc2luZyBvdXIgb3duIHJlcXVlc3RzIGFzIGJyZWFkY3J1bWJzLFxuICogYnV0IGJlY2F1c2Ugd2UgYXJlIGFscmVhZHkgbm90IGRvaW5nIHRoaXMsIGl0IHNob3VsZCBiZSBqdXN0IGZpbmUuXG4gKlxuICogUG9zc2libGUgZmFpbGVkIGZldGNoIGVycm9yIG1lc3NhZ2VzIHBlci1icm93c2VyOlxuICpcbiAqIENocm9tZTogIEZhaWxlZCB0byBmZXRjaFxuICogRWRnZTogICAgRmFpbGVkIHRvIEZldGNoXG4gKiBGaXJlZm94OiBOZXR3b3JrRXJyb3Igd2hlbiBhdHRlbXB0aW5nIHRvIGZldGNoIHJlc291cmNlXG4gKiBTYWZhcmk6ICByZXNvdXJjZSBibG9ja2VkIGJ5IGNvbnRlbnQgYmxvY2tlclxuICovXG5leHBvcnQgZnVuY3Rpb24gZmV0Y2goLi4ucmVzdDogUGFyYW1ldGVyczx0eXBlb2YgV0lORE9XLmZldGNoPik6IFJldHVyblR5cGU8dHlwZW9mIFdJTkRPVy5mZXRjaD4ge1xuICByZXR1cm4gZ2V0TmF0aXZlSW1wbGVtZW50YXRpb24oJ2ZldGNoJykoLi4ucmVzdCk7XG59XG5cbi8qKlxuICogR2V0IGFuIHVud3JhcHBlZCBgc2V0VGltZW91dGAgbWV0aG9kLlxuICogVGhpcyBlbnN1cmVzIHRoYXQgZXZlbiBpZiBlLmcuIEFuZ3VsYXIgd3JhcHMgYHNldFRpbWVvdXRgLCB3ZSBnZXQgdGhlIG5hdGl2ZSBpbXBsZW1lbnRhdGlvbixcbiAqIGF2b2lkaW5nIHRyaWdnZXJpbmcgY2hhbmdlIGRldGVjdGlvbi5cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIHNldFRpbWVvdXQoLi4ucmVzdDogUGFyYW1ldGVyczx0eXBlb2YgV0lORE9XLnNldFRpbWVvdXQ+KTogUmV0dXJuVHlwZTx0eXBlb2YgV0lORE9XLnNldFRpbWVvdXQ+IHtcbiAgcmV0dXJuIGdldE5hdGl2ZUltcGxlbWVudGF0aW9uKCdzZXRUaW1lb3V0JykoLi4ucmVzdCk7XG59XG4iXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7OztBQUlBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7O0FBT0EsTUFBTSxxQkFBcUIsR0FBc0MsRUFBRTs7QUFFbkU7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ08sU0FBUyx1QkFBdUI7QUFDdkMsRUFBRSxJQUFJO0FBQ04sRUFBK0I7QUFDL0IsRUFBRSxNQUFNLE1BQUEsR0FBUyxxQkFBcUIsQ0FBQyxJQUFJLENBQUM7QUFDNUMsRUFBRSxJQUFJLE1BQU0sRUFBRTtBQUNkLElBQUksT0FBTyxNQUFNO0FBQ2pCLEVBQUU7O0FBRUYsRUFBRSxJQUFJLElBQUEsR0FBTyxNQUFNLENBQUMsSUFBSSxDQUFBOztBQUV4QjtBQUNBLEVBQUUsSUFBSSxnQkFBZ0IsQ0FBQyxJQUFJLENBQUMsRUFBRTtBQUM5QixJQUFJLFFBQVEscUJBQXFCLENBQUMsSUFBSSxDQUFBLEdBQUksSUFBSSxDQUFDLElBQUksQ0FBQyxNQUFNO0FBQzFELEVBQUU7O0FBRUYsRUFBRSxNQUFNLFFBQUEsR0FBVyxNQUFNLENBQUMsUUFBUTtBQUNsQztBQUNBLEVBQUUsSUFBSSxRQUFBLElBQVksT0FBTyxRQUFRLENBQUMsYUFBQSxLQUFrQixVQUFVLEVBQUU7QUFDaEUsSUFBSSxJQUFJO0FBQ1IsTUFBTSxNQUFNLFVBQVUsUUFBUSxDQUFDLGFBQWEsQ0FBQyxRQUFRLENBQUM7QUFDdEQsTUFBTSxPQUFPLENBQUMsTUFBQSxHQUFTLElBQUk7QUFDM0IsTUFBTSxRQUFRLENBQUMsSUFBSSxDQUFDLFdBQVcsQ0FBQyxPQUFPLENBQUM7QUFDeEMsTUFBTSxNQUFNLGFBQUEsR0FBZ0IsT0FBTyxDQUFDLGFBQWE7QUFDakQsTUFBTSxJQUFJLGFBQWEsR0FBRyxJQUFJLENBQUMsRUFBRTtBQUNqQyxRQUFRLElBQUEsR0FBTyxhQUFhLENBQUMsSUFBSSxDQUFBO0FBQ2pDLE1BQU07QUFDTixNQUFNLFFBQVEsQ0FBQyxJQUFJLENBQUMsV0FBVyxDQUFDLE9BQU8sQ0FBQztBQUN4QyxJQUFJLENBQUEsQ0FBRSxPQUFPLENBQUMsRUFBRTtBQUNoQjtBQUNBLE1BQU0sZUFBZSxLQUFLLENBQUMsSUFBSSxDQUFDLENBQUMsb0NBQW9DLEVBQUUsSUFBSSxDQUFDLDBCQUEwQixFQUFFLElBQUksQ0FBQyxFQUFFLENBQUMsRUFBRSxDQUFDLENBQUM7QUFDcEgsSUFBSTtBQUNKLEVBQUU7O0FBRUY7QUFDQTtBQUNBLEVBQUUsSUFBSSxDQUFDLElBQUksRUFBRTtBQUNiLElBQUksT0FBTyxJQUFJO0FBQ2YsRUFBRTs7QUFFRixFQUFFLFFBQVEscUJBQXFCLENBQUMsSUFBSSxDQUFBLEdBQUksSUFBSSxDQUFDLElBQUksQ0FBQyxNQUFNO0FBQ3hEOztBQUVBO0FBQ08sU0FBUyx5QkFBeUIsQ0FBQyxJQUFJLEVBQXdDO0FBQ3RGLEVBQUUscUJBQXFCLENBQUMsSUFBSSxDQUFBLEdBQUksU0FBUztBQUN6Qzs7QUFFQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ08sU0FBUyxLQUFLLENBQUMsR0FBRyxJQUFJLEVBQW9FO0FBQ2pHLEVBQUUsT0FBTyx1QkFBdUIsQ0FBQyxPQUFPLENBQUMsQ0FBQyxHQUFHLElBQUksQ0FBQztBQUNsRDs7QUFFQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ08sU0FBUyxVQUFVLENBQUMsR0FBRyxJQUFJLEVBQThFO0FBQ2hILEVBQUUsT0FBTyx1QkFBdUIsQ0FBQyxZQUFZLENBQUMsQ0FBQyxHQUFHLElBQUksQ0FBQztBQUN2RDs7OzsiLCJ4X2dvb2dsZV9pZ25vcmVMaXN0IjpbMF19

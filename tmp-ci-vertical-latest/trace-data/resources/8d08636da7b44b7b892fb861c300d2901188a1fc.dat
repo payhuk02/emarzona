@@ -1,0 +1,55 @@
+import { getClient } from "/node_modules/@sentry/core/build/esm/currentScopes.js?v=89021f86";
+import { captureException } from "/node_modules/@sentry/core/build/esm/exports.js?v=89021f86";
+import { getActiveSpan } from "/node_modules/@sentry/core/build/esm/utils/spanUtils.js?v=89021f86";
+import { SPAN_STATUS_ERROR } from "/node_modules/@sentry/core/build/esm/tracing/spanstatus.js?v=89021f86";
+
+/**
+ * Safe error capture utilities for MCP server instrumentation
+ *
+ * Ensures error reporting never interferes with MCP server operation.
+ * All capture operations are wrapped in try-catch to prevent side effects.
+ */
+
+
+/**
+ * Captures an error without affecting MCP server operation.
+ *
+ * The active span already contains all MCP context (method, tool, arguments, etc.)
+ * @param error - Error to capture
+ * @param errorType - Classification of error type for filtering
+ * @param extraData - Additional context data to include
+ */
+function captureError(error, errorType, extraData) {
+  try {
+    const client = getClient();
+    if (!client) {
+      return;
+    }
+
+    const activeSpan = getActiveSpan();
+    if (activeSpan?.isRecording()) {
+      activeSpan.setStatus({
+        code: SPAN_STATUS_ERROR,
+        message: 'internal_error',
+      });
+    }
+
+    captureException(error, {
+      mechanism: {
+        type: 'auto.ai.mcp_server',
+        handled: false,
+        data: {
+          error_type: errorType || 'handler_execution',
+          ...extraData,
+        },
+      },
+    });
+  } catch {
+    // noop
+  }
+}
+
+export { captureError };
+                                        
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZXJyb3JDYXB0dXJlLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi9zcmMvaW50ZWdyYXRpb25zL21jcC1zZXJ2ZXIvZXJyb3JDYXB0dXJlLnRzIl0sInNvdXJjZXNDb250ZW50IjpbIi8qKlxuICogU2FmZSBlcnJvciBjYXB0dXJlIHV0aWxpdGllcyBmb3IgTUNQIHNlcnZlciBpbnN0cnVtZW50YXRpb25cbiAqXG4gKiBFbnN1cmVzIGVycm9yIHJlcG9ydGluZyBuZXZlciBpbnRlcmZlcmVzIHdpdGggTUNQIHNlcnZlciBvcGVyYXRpb24uXG4gKiBBbGwgY2FwdHVyZSBvcGVyYXRpb25zIGFyZSB3cmFwcGVkIGluIHRyeS1jYXRjaCB0byBwcmV2ZW50IHNpZGUgZWZmZWN0cy5cbiAqL1xuXG5pbXBvcnQgeyBnZXRDbGllbnQgfSBmcm9tICcuLi8uLi9jdXJyZW50U2NvcGVzJztcbmltcG9ydCB7IGNhcHR1cmVFeGNlcHRpb24gfSBmcm9tICcuLi8uLi9leHBvcnRzJztcbmltcG9ydCB7IFNQQU5fU1RBVFVTX0VSUk9SIH0gZnJvbSAnLi4vLi4vdHJhY2luZyc7XG5pbXBvcnQgeyBnZXRBY3RpdmVTcGFuIH0gZnJvbSAnLi4vLi4vdXRpbHMvc3BhblV0aWxzJztcbmltcG9ydCB0eXBlIHsgTWNwRXJyb3JUeXBlIH0gZnJvbSAnLi90eXBlcyc7XG5cbi8qKlxuICogQ2FwdHVyZXMgYW4gZXJyb3Igd2l0aG91dCBhZmZlY3RpbmcgTUNQIHNlcnZlciBvcGVyYXRpb24uXG4gKlxuICogVGhlIGFjdGl2ZSBzcGFuIGFscmVhZHkgY29udGFpbnMgYWxsIE1DUCBjb250ZXh0IChtZXRob2QsIHRvb2wsIGFyZ3VtZW50cywgZXRjLilcbiAqIEBwYXJhbSBlcnJvciAtIEVycm9yIHRvIGNhcHR1cmVcbiAqIEBwYXJhbSBlcnJvclR5cGUgLSBDbGFzc2lmaWNhdGlvbiBvZiBlcnJvciB0eXBlIGZvciBmaWx0ZXJpbmdcbiAqIEBwYXJhbSBleHRyYURhdGEgLSBBZGRpdGlvbmFsIGNvbnRleHQgZGF0YSB0byBpbmNsdWRlXG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBjYXB0dXJlRXJyb3IoZXJyb3I6IEVycm9yLCBlcnJvclR5cGU/OiBNY3BFcnJvclR5cGUsIGV4dHJhRGF0YT86IFJlY29yZDxzdHJpbmcsIHVua25vd24+KTogdm9pZCB7XG4gIHRyeSB7XG4gICAgY29uc3QgY2xpZW50ID0gZ2V0Q2xpZW50KCk7XG4gICAgaWYgKCFjbGllbnQpIHtcbiAgICAgIHJldHVybjtcbiAgICB9XG5cbiAgICBjb25zdCBhY3RpdmVTcGFuID0gZ2V0QWN0aXZlU3BhbigpO1xuICAgIGlmIChhY3RpdmVTcGFuPy5pc1JlY29yZGluZygpKSB7XG4gICAgICBhY3RpdmVTcGFuLnNldFN0YXR1cyh7XG4gICAgICAgIGNvZGU6IFNQQU5fU1RBVFVTX0VSUk9SLFxuICAgICAgICBtZXNzYWdlOiAnaW50ZXJuYWxfZXJyb3InLFxuICAgICAgfSk7XG4gICAgfVxuXG4gICAgY2FwdHVyZUV4Y2VwdGlvbihlcnJvciwge1xuICAgICAgbWVjaGFuaXNtOiB7XG4gICAgICAgIHR5cGU6ICdhdXRvLmFpLm1jcF9zZXJ2ZXInLFxuICAgICAgICBoYW5kbGVkOiBmYWxzZSxcbiAgICAgICAgZGF0YToge1xuICAgICAgICAgIGVycm9yX3R5cGU6IGVycm9yVHlwZSB8fCAnaGFuZGxlcl9leGVjdXRpb24nLFxuICAgICAgICAgIC4uLmV4dHJhRGF0YSxcbiAgICAgICAgfSxcbiAgICAgIH0sXG4gICAgfSk7XG4gIH0gY2F0Y2gge1xuICAgIC8vIG5vb3BcbiAgfVxufVxuIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7Ozs7O0FBQUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBOzs7QUFRQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ08sU0FBUyxZQUFZLENBQUMsS0FBSyxFQUFTLFNBQVMsRUFBaUIsU0FBUyxFQUFrQztBQUNoSCxFQUFFLElBQUk7QUFDTixJQUFJLE1BQU0sTUFBQSxHQUFTLFNBQVMsRUFBRTtBQUM5QixJQUFJLElBQUksQ0FBQyxNQUFNLEVBQUU7QUFDakIsTUFBTTtBQUNOLElBQUk7O0FBRUosSUFBSSxNQUFNLFVBQUEsR0FBYSxhQUFhLEVBQUU7QUFDdEMsSUFBSSxJQUFJLFVBQVUsRUFBRSxXQUFXLEVBQUUsRUFBRTtBQUNuQyxNQUFNLFVBQVUsQ0FBQyxTQUFTLENBQUM7QUFDM0IsUUFBUSxJQUFJLEVBQUUsaUJBQWlCO0FBQy9CLFFBQVEsT0FBTyxFQUFFLGdCQUFnQjtBQUNqQyxPQUFPLENBQUM7QUFDUixJQUFJOztBQUVKLElBQUksZ0JBQWdCLENBQUMsS0FBSyxFQUFFO0FBQzVCLE1BQU0sU0FBUyxFQUFFO0FBQ2pCLFFBQVEsSUFBSSxFQUFFLG9CQUFvQjtBQUNsQyxRQUFRLE9BQU8sRUFBRSxLQUFLO0FBQ3RCLFFBQVEsSUFBSSxFQUFFO0FBQ2QsVUFBVSxVQUFVLEVBQUUsU0FBQSxJQUFhLG1CQUFtQjtBQUN0RCxVQUFVLEdBQUcsU0FBUztBQUN0QixTQUFTO0FBQ1QsT0FBTztBQUNQLEtBQUssQ0FBQztBQUNOLEVBQUUsRUFBRSxNQUFNO0FBQ1Y7QUFDQSxFQUFFO0FBQ0Y7Ozs7IiwieF9nb29nbGVfaWdub3JlTGlzdCI6WzBdfQ==

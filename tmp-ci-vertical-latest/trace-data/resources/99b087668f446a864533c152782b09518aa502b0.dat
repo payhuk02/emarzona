@@ -1,0 +1,1152 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/seo/SEOPagesList.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=2441233a"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"]; const _Fragment = __vite__cjsImport2_react_jsxDevRuntime["Fragment"];
+var _s = $RefreshSig$();
+'use client';
+import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=2441233a"; const React = __vite__cjsImport3_react.__esModule ? __vite__cjsImport3_react.default : __vite__cjsImport3_react; const useMemo = __vite__cjsImport3_react["useMemo"]; const useState = __vite__cjsImport3_react["useState"];
+import { getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from "/node_modules/.vite/deps/@tanstack_react-table.js?v=733103b8";
+import { Card, CardContent, CardHeader, CardTitle } from "/src/components/ui/card.tsx";
+import { Button } from "/src/components/ui/button.tsx";
+import { Badge } from "/src/components/ui/badge.tsx";
+import { Input } from "/src/components/ui/input.tsx";
+import { Skeleton } from "/src/components/ui/skeleton.tsx";
+import { Select, SelectContent, SelectItem, SelectTrigger } from "/src/components/ui/select.tsx";
+import { getScoreBadgeVariant, getScoreColor } from "/src/lib/seo-analyzer.ts";
+import { Eye, ExternalLink, MoreVertical, TrendingUp, CheckCircle2, AlertTriangle, Search, X } from "/node_modules/.vite/deps/lucide-react.js?v=2441233a";
+import { SEODetailDialog } from "/src/components/seo/SEODetailDialog.tsx";
+import { Progress } from "/src/components/ui/progress.tsx";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "/src/components/ui/table.tsx";
+import { useScrollAnimation } from "/src/hooks/useScrollAnimation.ts";
+import { useDebounce } from "/src/hooks/useDebounce.ts";
+const SEOPagesListComponent = ({ data, isLoading })=>{
+    _s();
+    const listRef = useScrollAnimation();
+    const [selectedPage, setSelectedPage] = useState(null);
+    const [detailsOpen, setDetailsOpen] = useState(false);
+    const [typeFilter, setTypeFilter] = useState('all');
+    const [scoreFilter, setScoreFilter] = useState('all');
+    const [search, setSearch] = useState('');
+    const debouncedSearch = useDebounce(search, 300);
+    const filteredData = useMemo(()=>{
+        if (!data) return [];
+        return data.filter((page)=>{
+            const matchType = typeFilter === 'all' || page.type === typeFilter;
+            const matchSearch = page.name.toLowerCase().includes(debouncedSearch.toLowerCase()) || page.url.toLowerCase().includes(debouncedSearch.toLowerCase());
+            const score = page.analysis.score.overall;
+            const matchScore = scoreFilter === 'all' || scoreFilter === 'good' && score >= 80 || scoreFilter === 'medium' && score >= 60 && score < 80 || scoreFilter === 'bad' && score < 60;
+            return matchType && matchSearch && matchScore;
+        });
+    }, [
+        data,
+        typeFilter,
+        scoreFilter,
+        debouncedSearch
+    ]);
+    const averageScore = useMemo(()=>{
+        if (!filteredData.length) return 0;
+        const total = filteredData.reduce((acc, page)=>acc + page.analysis.score.overall, 0);
+        return Math.round(total / filteredData.length);
+    }, [
+        filteredData
+    ]);
+    const optimizedCount = useMemo(()=>filteredData.filter((p)=>p.analysis.score.overall >= 80).length, [
+        filteredData
+    ]);
+    const toFixCount = useMemo(()=>filteredData.filter((p)=>p.analysis.score.overall < 70).length, [
+        filteredData
+    ]);
+    const goodRate = useMemo(()=>{
+        if (!filteredData.length) return 0;
+        return Math.round(optimizedCount / filteredData.length * 100);
+    }, [
+        filteredData,
+        optimizedCount
+    ]);
+    const columns = useMemo(()=>[
+            {
+                accessorKey: 'name',
+                header: 'Nom de la Page',
+                cell: ({ row })=>/*#__PURE__*/ _jsxDEV("div", {
+                        className: "font-semibold text-sm break-words max-w-[200px]",
+                        children: row.original.name
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                        lineNumber: 110,
+                        columnNumber: 11
+                    }, this)
+            },
+            {
+                accessorKey: 'type',
+                header: 'Type',
+                cell: ({ row })=>/*#__PURE__*/ _jsxDEV(Badge, {
+                        variant: "outline",
+                        className: "capitalize",
+                        children: row.original.type === 'product' ? 'Produit' : 'Boutique'
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                        lineNumber: 117,
+                        columnNumber: 11
+                    }, this)
+            },
+            {
+                accessorKey: 'score',
+                header: 'Score SEO',
+                cell: ({ row })=>{
+                    const score = row.original.analysis.score.overall;
+                    return /*#__PURE__*/ _jsxDEV("div", {
+                        className: "flex items-center gap-3",
+                        children: [
+                            /*#__PURE__*/ _jsxDEV(Progress, {
+                                value: score,
+                                className: "h-2 w-[80px]"
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                lineNumber: 129,
+                                columnNumber: 15
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("span", {
+                                className: `font-bold text-sm ${getScoreColor(score)}`,
+                                children: [
+                                    score,
+                                    "/100"
+                                ]
+                            }, void 0, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                lineNumber: 130,
+                                columnNumber: 15
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                        lineNumber: 128,
+                        columnNumber: 13
+                    }, this);
+                }
+            },
+            {
+                accessorKey: 'niveau',
+                header: 'Niveau',
+                cell: ({ row })=>{
+                    const score = row.original.analysis.score.overall;
+                    return /*#__PURE__*/ _jsxDEV(Badge, {
+                        variant: getScoreBadgeVariant(score),
+                        children: score >= 80 ? '🟢 Bon' : score >= 60 ? '🟠 Moyen' : '🔴 Faible'
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                        lineNumber: 141,
+                        columnNumber: 13
+                    }, this);
+                }
+            },
+            {
+                id: 'actions',
+                header: 'Actions',
+                cell: ({ row })=>/*#__PURE__*/ _jsxDEV("div", {
+                        className: "flex gap-2 justify-end",
+                        children: [
+                            /*#__PURE__*/ _jsxDEV(Button, {
+                                variant: "outline",
+                                size: "sm",
+                                onClick: ()=>window.open(row.original.url, '_blank'),
+                                children: /*#__PURE__*/ _jsxDEV(ExternalLink, {
+                                    className: "h-4 w-4"
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                    lineNumber: 157,
+                                    columnNumber: 15
+                                }, this)
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                lineNumber: 152,
+                                columnNumber: 13
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV(Button, {
+                                variant: "default",
+                                size: "sm",
+                                onClick: ()=>{
+                                    setSelectedPage(row.original);
+                                    setDetailsOpen(true);
+                                },
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV(Eye, {
+                                        className: "h-4 w-4 mr-1"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                        lineNumber: 167,
+                                        columnNumber: 15
+                                    }, this),
+                                    "Détails"
+                                ]
+                            }, void 0, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                lineNumber: 159,
+                                columnNumber: 13
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                        lineNumber: 151,
+                        columnNumber: 11
+                    }, this)
+            }
+        ], []);
+    const table = useReactTable({
+        data: filteredData,
+        columns,
+        getCoreRowModel: getCoreRowModel(),
+        getSortedRowModel: getSortedRowModel(),
+        getFilteredRowModel: getFilteredRowModel(),
+        getPaginationRowModel: getPaginationRowModel()
+    });
+    return /*#__PURE__*/ _jsxDEV("div", {
+        ref: listRef,
+        className: "space-y-4 sm:space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700",
+        children: [
+            /*#__PURE__*/ _jsxDEV("div", {
+                className: "grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-4",
+                children: [
+                    /*#__PURE__*/ _jsxDEV(Card, {
+                        className: "border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02]",
+                        children: /*#__PURE__*/ _jsxDEV(CardContent, {
+                            className: "p-3 sm:p-4",
+                            children: /*#__PURE__*/ _jsxDEV("div", {
+                                className: "flex items-center justify-between",
+                                children: /*#__PURE__*/ _jsxDEV("div", {
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV("div", {
+                                            className: "flex items-center gap-2 mb-1",
+                                            children: [
+                                                /*#__PURE__*/ _jsxDEV("div", {
+                                                    className: "p-1.5 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5",
+                                                    children: /*#__PURE__*/ _jsxDEV(TrendingUp, {
+                                                        className: "h-3.5 w-3.5 sm:h-4 sm:w-4 text-purple-500"
+                                                    }, void 0, false, {
+                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                        lineNumber: 199,
+                                                        columnNumber: 21
+                                                    }, this)
+                                                }, void 0, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                    lineNumber: 198,
+                                                    columnNumber: 19
+                                                }, this),
+                                                /*#__PURE__*/ _jsxDEV("p", {
+                                                    className: "text-xs sm:text-sm text-muted-foreground",
+                                                    children: "Score Moyen"
+                                                }, void 0, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                    lineNumber: 201,
+                                                    columnNumber: 19
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                            lineNumber: 197,
+                                            columnNumber: 17
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV("p", {
+                                            className: `text-xl sm:text-2xl font-bold bg-gradient-to-r ${getScoreColor(averageScore).includes('text-red') ? 'from-red-600 to-orange-600' : getScoreColor(averageScore).includes('text-orange') ? 'from-orange-600 to-yellow-600' : 'from-green-600 to-emerald-600'} bg-clip-text text-transparent`,
+                                            children: [
+                                                averageScore,
+                                                "/100"
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                            lineNumber: 203,
+                                            columnNumber: 17
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                    lineNumber: 196,
+                                    columnNumber: 15
+                                }, this)
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                lineNumber: 195,
+                                columnNumber: 13
+                            }, this)
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                            lineNumber: 194,
+                            columnNumber: 11
+                        }, this)
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                        lineNumber: 193,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV(Card, {
+                        className: "border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02]",
+                        children: /*#__PURE__*/ _jsxDEV(CardContent, {
+                            className: "p-3 sm:p-4",
+                            children: /*#__PURE__*/ _jsxDEV("div", {
+                                className: "flex items-center justify-between",
+                                children: /*#__PURE__*/ _jsxDEV("div", {
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV("div", {
+                                            className: "flex items-center gap-2 mb-1",
+                                            children: [
+                                                /*#__PURE__*/ _jsxDEV("div", {
+                                                    className: "p-1.5 rounded-lg bg-gradient-to-br from-green-500/10 to-emerald-500/5",
+                                                    children: /*#__PURE__*/ _jsxDEV(CheckCircle2, {
+                                                        className: "h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-500"
+                                                    }, void 0, false, {
+                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                        lineNumber: 219,
+                                                        columnNumber: 21
+                                                    }, this)
+                                                }, void 0, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                    lineNumber: 218,
+                                                    columnNumber: 19
+                                                }, this),
+                                                /*#__PURE__*/ _jsxDEV("p", {
+                                                    className: "text-xs sm:text-sm text-muted-foreground",
+                                                    children: "Pages Optimisées"
+                                                }, void 0, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                    lineNumber: 221,
+                                                    columnNumber: 19
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                            lineNumber: 217,
+                                            columnNumber: 17
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV("p", {
+                                            className: "text-xl sm:text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent",
+                                            children: optimizedCount
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                            lineNumber: 223,
+                                            columnNumber: 17
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                    lineNumber: 216,
+                                    columnNumber: 15
+                                }, this)
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                lineNumber: 215,
+                                columnNumber: 13
+                            }, this)
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                            lineNumber: 214,
+                            columnNumber: 11
+                        }, this)
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                        lineNumber: 213,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV(Card, {
+                        className: "border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02]",
+                        children: /*#__PURE__*/ _jsxDEV(CardContent, {
+                            className: "p-3 sm:p-4",
+                            children: /*#__PURE__*/ _jsxDEV("div", {
+                                className: "flex items-center justify-between",
+                                children: /*#__PURE__*/ _jsxDEV("div", {
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV("div", {
+                                            className: "flex items-center gap-2 mb-1",
+                                            children: [
+                                                /*#__PURE__*/ _jsxDEV("div", {
+                                                    className: "p-1.5 rounded-lg bg-gradient-to-br from-yellow-500/10 to-orange-500/5",
+                                                    children: /*#__PURE__*/ _jsxDEV(AlertTriangle, {
+                                                        className: "h-3.5 w-3.5 sm:h-4 sm:w-4 text-orange-500"
+                                                    }, void 0, false, {
+                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                        lineNumber: 237,
+                                                        columnNumber: 21
+                                                    }, this)
+                                                }, void 0, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                    lineNumber: 236,
+                                                    columnNumber: 19
+                                                }, this),
+                                                /*#__PURE__*/ _jsxDEV("p", {
+                                                    className: "text-xs sm:text-sm text-muted-foreground",
+                                                    children: "À Corriger"
+                                                }, void 0, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                    lineNumber: 239,
+                                                    columnNumber: 19
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                            lineNumber: 235,
+                                            columnNumber: 17
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV("p", {
+                                            className: "text-xl sm:text-2xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent",
+                                            children: toFixCount
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                            lineNumber: 241,
+                                            columnNumber: 17
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                    lineNumber: 234,
+                                    columnNumber: 15
+                                }, this)
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                lineNumber: 233,
+                                columnNumber: 13
+                            }, this)
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                            lineNumber: 232,
+                            columnNumber: 11
+                        }, this)
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                        lineNumber: 231,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV(Card, {
+                        className: "border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02]",
+                        children: /*#__PURE__*/ _jsxDEV(CardContent, {
+                            className: "p-3 sm:p-4",
+                            children: /*#__PURE__*/ _jsxDEV("div", {
+                                className: "flex items-center justify-between",
+                                children: /*#__PURE__*/ _jsxDEV("div", {
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV("div", {
+                                            className: "flex items-center gap-2 mb-1",
+                                            children: [
+                                                /*#__PURE__*/ _jsxDEV("div", {
+                                                    className: "p-1.5 rounded-lg bg-gradient-to-br from-blue-500/10 to-cyan-500/5",
+                                                    children: /*#__PURE__*/ _jsxDEV(TrendingUp, {
+                                                        className: "h-3.5 w-3.5 sm:h-4 sm:w-4 text-blue-500"
+                                                    }, void 0, false, {
+                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                        lineNumber: 255,
+                                                        columnNumber: 21
+                                                    }, this)
+                                                }, void 0, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                    lineNumber: 254,
+                                                    columnNumber: 19
+                                                }, this),
+                                                /*#__PURE__*/ _jsxDEV("p", {
+                                                    className: "text-xs sm:text-sm text-muted-foreground",
+                                                    children: "Taux de Réussite"
+                                                }, void 0, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                    lineNumber: 257,
+                                                    columnNumber: 19
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                            lineNumber: 253,
+                                            columnNumber: 17
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV("p", {
+                                            className: "text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent",
+                                            children: [
+                                                goodRate,
+                                                "%"
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                            lineNumber: 259,
+                                            columnNumber: 17
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                    lineNumber: 252,
+                                    columnNumber: 15
+                                }, this)
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                lineNumber: 251,
+                                columnNumber: 13
+                            }, this)
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                            lineNumber: 250,
+                            columnNumber: 11
+                        }, this)
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                        lineNumber: 249,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                lineNumber: 192,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV(Card, {
+                className: "border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden",
+                children: [
+                    /*#__PURE__*/ _jsxDEV(CardHeader, {
+                        children: /*#__PURE__*/ _jsxDEV(CardTitle, {
+                            className: "text-base sm:text-lg font-semibold flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3",
+                            children: [
+                                /*#__PURE__*/ _jsxDEV("span", {
+                                    children: [
+                                        "Mes Pages (",
+                                        filteredData.length,
+                                        ")"
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                    lineNumber: 272,
+                                    columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV("div", {
+                                    className: "flex flex-wrap gap-2",
+                                    children: /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "relative flex-1 sm:flex-initial sm:w-[200px]",
+                                        children: [
+                                            /*#__PURE__*/ _jsxDEV(Search, {
+                                                className: "absolute left-2.5 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground"
+                                            }, void 0, false, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                lineNumber: 275,
+                                                columnNumber: 17
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV(Input, {
+                                                placeholder: "Rechercher...",
+                                                value: search,
+                                                onChange: (e)=>setSearch(e.target.value),
+                                                className: "pl-8 pr-8 h-9 sm:h-10 text-xs sm:text-sm w-full"
+                                            }, void 0, false, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                lineNumber: 276,
+                                                columnNumber: 17
+                                            }, this),
+                                            search && /*#__PURE__*/ _jsxDEV("button", {
+                                                onClick: ()=>setSearch(''),
+                                                className: "absolute right-2.5 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground",
+                                                children: /*#__PURE__*/ _jsxDEV(X, {
+                                                    className: "h-3.5 w-3.5 sm:h-4 sm:w-4"
+                                                }, void 0, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                    lineNumber: 287,
+                                                    columnNumber: 21
+                                                }, this)
+                                            }, void 0, false, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                lineNumber: 283,
+                                                columnNumber: 19
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                        lineNumber: 274,
+                                        columnNumber: 15
+                                    }, this)
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                    lineNumber: 273,
+                                    columnNumber: 13
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                            lineNumber: 271,
+                            columnNumber: 11
+                        }, this)
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                        lineNumber: 270,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV(CardContent, {
+                        children: isLoading ? /*#__PURE__*/ _jsxDEV("div", {
+                            className: "space-y-2",
+                            children: [
+                                /*#__PURE__*/ _jsxDEV(Skeleton, {
+                                    className: "h-12 w-full"
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                    lineNumber: 298,
+                                    columnNumber: 15
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV(Skeleton, {
+                                    className: "h-12 w-full"
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                    lineNumber: 299,
+                                    columnNumber: 15
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV(Skeleton, {
+                                    className: "h-12 w-full"
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                    lineNumber: 300,
+                                    columnNumber: 15
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                            lineNumber: 297,
+                            columnNumber: 13
+                        }, this) : filteredData.length === 0 ? /*#__PURE__*/ _jsxDEV("div", {
+                            className: "text-center py-12 sm:py-16",
+                            children: [
+                                /*#__PURE__*/ _jsxDEV("div", {
+                                    className: "p-4 rounded-full bg-gradient-to-br from-purple-500/10 to-pink-500/5 mb-4 animate-in zoom-in duration-500 inline-block",
+                                    children: /*#__PURE__*/ _jsxDEV(Search, {
+                                        className: "h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground opacity-20"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                        lineNumber: 305,
+                                        columnNumber: 17
+                                    }, this)
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                    lineNumber: 304,
+                                    columnNumber: 15
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV("p", {
+                                    className: "text-sm sm:text-base text-foreground font-medium",
+                                    children: "Aucune page ne correspond à votre recherche."
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                    lineNumber: 307,
+                                    columnNumber: 15
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                            lineNumber: 303,
+                            columnNumber: 13
+                        }, this) : /*#__PURE__*/ _jsxDEV(_Fragment, {
+                            children: [
+                                /*#__PURE__*/ _jsxDEV("div", {
+                                    className: "hidden lg:block",
+                                    children: /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "border border-border/50 rounded-lg overflow-hidden",
+                                        children: /*#__PURE__*/ _jsxDEV(Table, {
+                                            children: [
+                                                /*#__PURE__*/ _jsxDEV(TableHeader, {
+                                                    children: /*#__PURE__*/ _jsxDEV(TableRow, {
+                                                        className: "bg-muted/50",
+                                                        children: [
+                                                            /*#__PURE__*/ _jsxDEV(TableHead, {
+                                                                className: "text-xs sm:text-sm font-semibold",
+                                                                children: "Nom de la Page"
+                                                            }, void 0, false, {
+                                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                                lineNumber: 319,
+                                                                columnNumber: 25
+                                                            }, this),
+                                                            /*#__PURE__*/ _jsxDEV(TableHead, {
+                                                                className: "text-xs sm:text-sm font-semibold",
+                                                                children: "Type"
+                                                            }, void 0, false, {
+                                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                                lineNumber: 322,
+                                                                columnNumber: 25
+                                                            }, this),
+                                                            /*#__PURE__*/ _jsxDEV(TableHead, {
+                                                                className: "text-xs sm:text-sm font-semibold",
+                                                                children: "Score SEO"
+                                                            }, void 0, false, {
+                                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                                lineNumber: 323,
+                                                                columnNumber: 25
+                                                            }, this),
+                                                            /*#__PURE__*/ _jsxDEV(TableHead, {
+                                                                className: "text-xs sm:text-sm font-semibold",
+                                                                children: "Niveau"
+                                                            }, void 0, false, {
+                                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                                lineNumber: 326,
+                                                                columnNumber: 25
+                                                            }, this),
+                                                            /*#__PURE__*/ _jsxDEV(TableHead, {
+                                                                className: "text-right text-xs sm:text-sm font-semibold",
+                                                                children: "Actions"
+                                                            }, void 0, false, {
+                                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                                lineNumber: 327,
+                                                                columnNumber: 25
+                                                            }, this)
+                                                        ]
+                                                    }, void 0, true, {
+                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                        lineNumber: 318,
+                                                        columnNumber: 23
+                                                    }, this)
+                                                }, void 0, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                    lineNumber: 317,
+                                                    columnNumber: 21
+                                                }, this),
+                                                /*#__PURE__*/ _jsxDEV(TableBody, {
+                                                    children: filteredData.map((page)=>{
+                                                        const score = page.analysis.score.overall;
+                                                        return /*#__PURE__*/ _jsxDEV(TableRow, {
+                                                            className: "hover:bg-muted/50 transition-colors",
+                                                            children: [
+                                                                /*#__PURE__*/ _jsxDEV(TableCell, {
+                                                                    className: "text-xs sm:text-sm font-semibold",
+                                                                    children: page.name
+                                                                }, void 0, false, {
+                                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                                    lineNumber: 337,
+                                                                    columnNumber: 29
+                                                                }, this),
+                                                                /*#__PURE__*/ _jsxDEV(TableCell, {
+                                                                    children: /*#__PURE__*/ _jsxDEV(Badge, {
+                                                                        variant: "outline",
+                                                                        className: "capitalize text-xs",
+                                                                        children: page.type === 'product' ? 'Produit' : 'Boutique'
+                                                                    }, void 0, false, {
+                                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                                        lineNumber: 341,
+                                                                        columnNumber: 31
+                                                                    }, this)
+                                                                }, void 0, false, {
+                                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                                    lineNumber: 340,
+                                                                    columnNumber: 29
+                                                                }, this),
+                                                                /*#__PURE__*/ _jsxDEV(TableCell, {
+                                                                    children: /*#__PURE__*/ _jsxDEV("div", {
+                                                                        className: "flex items-center gap-3",
+                                                                        children: [
+                                                                            /*#__PURE__*/ _jsxDEV(Progress, {
+                                                                                value: score,
+                                                                                className: "h-2 w-[80px]"
+                                                                            }, void 0, false, {
+                                                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                                                lineNumber: 347,
+                                                                                columnNumber: 33
+                                                                            }, this),
+                                                                            /*#__PURE__*/ _jsxDEV("span", {
+                                                                                className: `font-bold text-xs sm:text-sm ${getScoreColor(score)}`,
+                                                                                children: [
+                                                                                    score,
+                                                                                    "/100"
+                                                                                ]
+                                                                            }, void 0, true, {
+                                                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                                                lineNumber: 348,
+                                                                                columnNumber: 33
+                                                                            }, this)
+                                                                        ]
+                                                                    }, void 0, true, {
+                                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                                        lineNumber: 346,
+                                                                        columnNumber: 31
+                                                                    }, this)
+                                                                }, void 0, false, {
+                                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                                    lineNumber: 345,
+                                                                    columnNumber: 29
+                                                                }, this),
+                                                                /*#__PURE__*/ _jsxDEV(TableCell, {
+                                                                    children: /*#__PURE__*/ _jsxDEV(Badge, {
+                                                                        variant: getScoreBadgeVariant(score),
+                                                                        className: "text-xs",
+                                                                        children: score >= 80 ? '🟢 Bon' : score >= 60 ? '🟠 Moyen' : '🔴 Faible'
+                                                                    }, void 0, false, {
+                                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                                        lineNumber: 356,
+                                                                        columnNumber: 31
+                                                                    }, this)
+                                                                }, void 0, false, {
+                                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                                    lineNumber: 355,
+                                                                    columnNumber: 29
+                                                                }, this),
+                                                                /*#__PURE__*/ _jsxDEV(TableCell, {
+                                                                    className: "text-right",
+                                                                    children: /*#__PURE__*/ _jsxDEV("div", {
+                                                                        className: "flex justify-end gap-2",
+                                                                        children: [
+                                                                            /*#__PURE__*/ _jsxDEV(Button, {
+                                                                                variant: "ghost",
+                                                                                size: "sm",
+                                                                                onClick: ()=>window.open(page.url, '_blank'),
+                                                                                className: "h-8 w-8 p-0",
+                                                                                children: /*#__PURE__*/ _jsxDEV(ExternalLink, {
+                                                                                    className: "h-3.5 w-3.5"
+                                                                                }, void 0, false, {
+                                                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                                                    lineNumber: 368,
+                                                                                    columnNumber: 35
+                                                                                }, this)
+                                                                            }, void 0, false, {
+                                                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                                                lineNumber: 362,
+                                                                                columnNumber: 33
+                                                                            }, this),
+                                                                            /*#__PURE__*/ _jsxDEV(Button, {
+                                                                                variant: "default",
+                                                                                size: "sm",
+                                                                                onClick: ()=>{
+                                                                                    setSelectedPage(page);
+                                                                                    setDetailsOpen(true);
+                                                                                },
+                                                                                className: "h-8 text-xs",
+                                                                                children: [
+                                                                                    /*#__PURE__*/ _jsxDEV(Eye, {
+                                                                                        className: "h-3.5 w-3.5 mr-1"
+                                                                                    }, void 0, false, {
+                                                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                                                        lineNumber: 379,
+                                                                                        columnNumber: 35
+                                                                                    }, this),
+                                                                                    "Détails"
+                                                                                ]
+                                                                            }, void 0, true, {
+                                                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                                                lineNumber: 370,
+                                                                                columnNumber: 33
+                                                                            }, this)
+                                                                        ]
+                                                                    }, void 0, true, {
+                                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                                        lineNumber: 361,
+                                                                        columnNumber: 31
+                                                                    }, this)
+                                                                }, void 0, false, {
+                                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                                    lineNumber: 360,
+                                                                    columnNumber: 29
+                                                                }, this)
+                                                            ]
+                                                        }, page.id, true, {
+                                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                            lineNumber: 336,
+                                                            columnNumber: 27
+                                                        }, this);
+                                                    })
+                                                }, void 0, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                    lineNumber: 332,
+                                                    columnNumber: 21
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                            lineNumber: 316,
+                                            columnNumber: 19
+                                        }, this)
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                        lineNumber: 315,
+                                        columnNumber: 17
+                                    }, this)
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                    lineNumber: 314,
+                                    columnNumber: 15
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV("div", {
+                                    className: "lg:hidden space-y-3 sm:space-y-4",
+                                    children: filteredData.map((page)=>{
+                                        const score = page.analysis.score.overall;
+                                        return /*#__PURE__*/ _jsxDEV(Card, {
+                                            className: "border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300",
+                                            children: /*#__PURE__*/ _jsxDEV(CardContent, {
+                                                className: "p-4 sm:p-5",
+                                                children: [
+                                                    /*#__PURE__*/ _jsxDEV("div", {
+                                                        className: "flex items-start justify-between mb-3",
+                                                        children: [
+                                                            /*#__PURE__*/ _jsxDEV("div", {
+                                                                className: "flex-1 min-w-0",
+                                                                children: [
+                                                                    /*#__PURE__*/ _jsxDEV("h3", {
+                                                                        className: "font-semibold text-sm sm:text-base truncate mb-1",
+                                                                        children: page.name
+                                                                    }, void 0, false, {
+                                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                                        lineNumber: 404,
+                                                                        columnNumber: 29
+                                                                    }, this),
+                                                                    /*#__PURE__*/ _jsxDEV(Badge, {
+                                                                        variant: "outline",
+                                                                        className: "capitalize text-xs mb-2",
+                                                                        children: page.type === 'product' ? 'Produit' : 'Boutique'
+                                                                    }, void 0, false, {
+                                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                                        lineNumber: 407,
+                                                                        columnNumber: 29
+                                                                    }, this)
+                                                                ]
+                                                            }, void 0, true, {
+                                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                                lineNumber: 403,
+                                                                columnNumber: 27
+                                                            }, this),
+                                                            /*#__PURE__*/ _jsxDEV(Select, {
+                                                                children: [
+                                                                    /*#__PURE__*/ _jsxDEV(SelectTrigger, {
+                                                                        className: "h-8 w-8",
+                                                                        children: /*#__PURE__*/ _jsxDEV(MoreVertical, {
+                                                                            className: "h-4 w-4"
+                                                                        }, void 0, false, {
+                                                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                                            lineNumber: 413,
+                                                                            columnNumber: 31
+                                                                        }, this)
+                                                                    }, void 0, false, {
+                                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                                        lineNumber: 412,
+                                                                        columnNumber: 29
+                                                                    }, this),
+                                                                    /*#__PURE__*/ _jsxDEV(SelectContent, {
+                                                                        mobileVariant: "sheet",
+                                                                        className: "min-w-[200px]",
+                                                                        children: [
+                                                                            /*#__PURE__*/ _jsxDEV(SelectItem, {
+                                                                                value: "view",
+                                                                                onSelect: true,
+                                                                                onClick: ()=>window.open(page.url, '_blank'),
+                                                                                children: [
+                                                                                    /*#__PURE__*/ _jsxDEV(ExternalLink, {
+                                                                                        className: "h-4 w-4 mr-2"
+                                                                                    }, void 0, false, {
+                                                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                                                        lineNumber: 421,
+                                                                                        columnNumber: 33
+                                                                                    }, this),
+                                                                                    "Ouvrir"
+                                                                                ]
+                                                                            }, void 0, true, {
+                                                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                                                lineNumber: 416,
+                                                                                columnNumber: 31
+                                                                            }, this),
+                                                                            /*#__PURE__*/ _jsxDEV(SelectItem, {
+                                                                                value: "export",
+                                                                                onSelect: true,
+                                                                                onClick: ()=>{
+                                                                                    setSelectedPage(page);
+                                                                                    setDetailsOpen(true);
+                                                                                },
+                                                                                children: [
+                                                                                    /*#__PURE__*/ _jsxDEV(Eye, {
+                                                                                        className: "h-4 w-4 mr-2"
+                                                                                    }, void 0, false, {
+                                                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                                                        lineNumber: 432,
+                                                                                        columnNumber: 33
+                                                                                    }, this),
+                                                                                    "Détails"
+                                                                                ]
+                                                                            }, void 0, true, {
+                                                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                                                lineNumber: 424,
+                                                                                columnNumber: 31
+                                                                            }, this)
+                                                                        ]
+                                                                    }, void 0, true, {
+                                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                                        lineNumber: 415,
+                                                                        columnNumber: 29
+                                                                    }, this)
+                                                                ]
+                                                            }, void 0, true, {
+                                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                                lineNumber: 411,
+                                                                columnNumber: 27
+                                                            }, this)
+                                                        ]
+                                                    }, void 0, true, {
+                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                        lineNumber: 402,
+                                                        columnNumber: 25
+                                                    }, this),
+                                                    /*#__PURE__*/ _jsxDEV("div", {
+                                                        className: "space-y-2 pt-3 border-t border-border/50",
+                                                        children: [
+                                                            /*#__PURE__*/ _jsxDEV("div", {
+                                                                className: "flex items-center justify-between",
+                                                                children: [
+                                                                    /*#__PURE__*/ _jsxDEV("p", {
+                                                                        className: "text-xs text-muted-foreground",
+                                                                        children: "Score SEO"
+                                                                    }, void 0, false, {
+                                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                                        lineNumber: 441,
+                                                                        columnNumber: 29
+                                                                    }, this),
+                                                                    /*#__PURE__*/ _jsxDEV("div", {
+                                                                        className: "flex items-center gap-2",
+                                                                        children: [
+                                                                            /*#__PURE__*/ _jsxDEV(Progress, {
+                                                                                value: score,
+                                                                                className: "h-2 w-20"
+                                                                            }, void 0, false, {
+                                                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                                                lineNumber: 443,
+                                                                                columnNumber: 31
+                                                                            }, this),
+                                                                            /*#__PURE__*/ _jsxDEV("span", {
+                                                                                className: `font-bold text-xs ${getScoreColor(score)}`,
+                                                                                children: [
+                                                                                    score,
+                                                                                    "/100"
+                                                                                ]
+                                                                            }, void 0, true, {
+                                                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                                                lineNumber: 444,
+                                                                                columnNumber: 31
+                                                                            }, this)
+                                                                        ]
+                                                                    }, void 0, true, {
+                                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                                        lineNumber: 442,
+                                                                        columnNumber: 29
+                                                                    }, this)
+                                                                ]
+                                                            }, void 0, true, {
+                                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                                lineNumber: 440,
+                                                                columnNumber: 27
+                                                            }, this),
+                                                            /*#__PURE__*/ _jsxDEV("div", {
+                                                                className: "flex items-center justify-between",
+                                                                children: [
+                                                                    /*#__PURE__*/ _jsxDEV("p", {
+                                                                        className: "text-xs text-muted-foreground",
+                                                                        children: "Niveau"
+                                                                    }, void 0, false, {
+                                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                                        lineNumber: 450,
+                                                                        columnNumber: 29
+                                                                    }, this),
+                                                                    /*#__PURE__*/ _jsxDEV(Badge, {
+                                                                        variant: getScoreBadgeVariant(score),
+                                                                        className: "text-xs",
+                                                                        children: score >= 80 ? '🟢 Bon' : score >= 60 ? '🟠 Moyen' : '🔴 Faible'
+                                                                    }, void 0, false, {
+                                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                                        lineNumber: 451,
+                                                                        columnNumber: 29
+                                                                    }, this)
+                                                                ]
+                                                            }, void 0, true, {
+                                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                                lineNumber: 449,
+                                                                columnNumber: 27
+                                                            }, this)
+                                                        ]
+                                                    }, void 0, true, {
+                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                        lineNumber: 439,
+                                                        columnNumber: 25
+                                                    }, this)
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                                lineNumber: 401,
+                                                columnNumber: 23
+                                            }, this)
+                                        }, page.id, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                            lineNumber: 397,
+                                            columnNumber: 21
+                                        }, this);
+                                    })
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                                    lineNumber: 393,
+                                    columnNumber: 15
+                                }, this)
+                            ]
+                        }, void 0, true)
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                        lineNumber: 295,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                lineNumber: 269,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV(SEODetailDialog, {
+                page: selectedPage,
+                open: detailsOpen,
+                onOpenChange: setDetailsOpen
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+                lineNumber: 466,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx",
+        lineNumber: 187,
+        columnNumber: 5
+    }, this);
+};
+_s(SEOPagesListComponent, "w3s0tEweCnyS5dng9LY1XU56Td0=", false, function() {
+    return [
+        useScrollAnimation,
+        useDebounce,
+        useReactTable
+    ];
+});
+_c = SEOPagesListComponent;
+SEOPagesListComponent.displayName = 'SEOPagesListComponent';
+// Optimisation avec React.memo pour éviter les re-renders inutiles
+export const SEOPagesList = /*#__PURE__*/ React.memo(SEOPagesListComponent, (prevProps, nextProps)=>{
+    return prevProps.isLoading === nextProps.isLoading && prevProps.data?.length === nextProps.data?.length && // Comparaison superficielle des données (comparer les IDs)
+    (!prevProps.data || !nextProps.data || prevProps.data.every((page, index)=>page.id === nextProps.data?.[index]?.id && page.analysis.score.overall === nextProps.data?.[index]?.analysis.score.overall));
+});
+_c1 = SEOPagesList;
+SEOPagesList.displayName = 'SEOPagesList';
+var _c, _c1;
+$RefreshReg$(_c, "SEOPagesListComponent");
+$RefreshReg$(_c1, "SEOPagesList");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/seo/SEOPagesList.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIlNFT1BhZ2VzTGlzdC50c3giXSwic291cmNlc0NvbnRlbnQiOlsiJ3VzZSBjbGllbnQnO1xuXG5pbXBvcnQgUmVhY3QsIHsgdXNlTWVtbywgdXNlU3RhdGUgfSBmcm9tICdyZWFjdCc7XG5pbXBvcnQge1xuICBDb2x1bW5EZWYsXG4gIGZsZXhSZW5kZXIsXG4gIGdldENvcmVSb3dNb2RlbCxcbiAgZ2V0RmlsdGVyZWRSb3dNb2RlbCxcbiAgZ2V0UGFnaW5hdGlvblJvd01vZGVsLFxuICBnZXRTb3J0ZWRSb3dNb2RlbCxcbiAgdXNlUmVhY3RUYWJsZSxcbn0gZnJvbSAnQHRhbnN0YWNrL3JlYWN0LXRhYmxlJztcbmltcG9ydCB7IENhcmQsIENhcmRDb250ZW50LCBDYXJkSGVhZGVyLCBDYXJkVGl0bGUgfSBmcm9tICdAL2NvbXBvbmVudHMvdWkvY2FyZCc7XG5pbXBvcnQgeyBCdXR0b24gfSBmcm9tICdAL2NvbXBvbmVudHMvdWkvYnV0dG9uJztcbmltcG9ydCB7IEJhZGdlIH0gZnJvbSAnQC9jb21wb25lbnRzL3VpL2JhZGdlJztcbmltcG9ydCB7IElucHV0IH0gZnJvbSAnQC9jb21wb25lbnRzL3VpL2lucHV0JztcbmltcG9ydCB7IFNrZWxldG9uIH0gZnJvbSAnQC9jb21wb25lbnRzL3VpL3NrZWxldG9uJztcbmltcG9ydCB7XG4gIFNlbGVjdCxcbiAgU2VsZWN0Q29udGVudCxcbiAgU2VsZWN0SXRlbSxcbiAgU2VsZWN0VHJpZ2dlcixcbiAgU2VsZWN0VmFsdWUsXG59IGZyb20gJ0AvY29tcG9uZW50cy91aS9zZWxlY3QnO1xuaW1wb3J0IHsgU0VPUGFnZURhdGEgfSBmcm9tICdAL2hvb2tzL3VzZVNFT0FuYWx5c2lzJztcbmltcG9ydCB7IGdldFNjb3JlQmFkZ2VWYXJpYW50LCBnZXRTY29yZUNvbG9yIH0gZnJvbSAnQC9saWIvc2VvLWFuYWx5emVyJztcbmltcG9ydCB7XG4gIEV5ZSxcbiAgRXh0ZXJuYWxMaW5rLFxuICBNb3JlVmVydGljYWwsXG4gIFRyZW5kaW5nVXAsXG4gIENoZWNrQ2lyY2xlMixcbiAgQWxlcnRUcmlhbmdsZSxcbiAgU2VhcmNoLFxuICBYLFxufSBmcm9tICdsdWNpZGUtcmVhY3QnO1xuaW1wb3J0IHsgU0VPRGV0YWlsRGlhbG9nIH0gZnJvbSAnLi9TRU9EZXRhaWxEaWFsb2cnO1xuaW1wb3J0IHsgUHJvZ3Jlc3MgfSBmcm9tICdAL2NvbXBvbmVudHMvdWkvcHJvZ3Jlc3MnO1xuaW1wb3J0IHtcbiAgVGFibGUsXG4gIFRhYmxlQm9keSxcbiAgVGFibGVDZWxsLFxuICBUYWJsZUhlYWQsXG4gIFRhYmxlSGVhZGVyLFxuICBUYWJsZVJvdyxcbn0gZnJvbSAnQC9jb21wb25lbnRzL3VpL3RhYmxlJztcbmltcG9ydCB7IHVzZVNjcm9sbEFuaW1hdGlvbiB9IGZyb20gJ0AvaG9va3MvdXNlU2Nyb2xsQW5pbWF0aW9uJztcbmltcG9ydCB7IHVzZURlYm91bmNlIH0gZnJvbSAnQC9ob29rcy91c2VEZWJvdW5jZSc7XG5cbmltcG9ydCB7IHNhdmVBcyB9IGZyb20gJ2ZpbGUtc2F2ZXInO1xuXG5pbnRlcmZhY2UgU0VPUGFnZXNMaXN0UHJvcHMge1xuICBkYXRhOiBTRU9QYWdlRGF0YVtdIHwgdW5kZWZpbmVkO1xuICBpc0xvYWRpbmc6IGJvb2xlYW47XG59XG5cbmNvbnN0IFNFT1BhZ2VzTGlzdENvbXBvbmVudCA9ICh7IGRhdGEsIGlzTG9hZGluZyB9OiBTRU9QYWdlc0xpc3RQcm9wcykgPT4ge1xuICBjb25zdCBsaXN0UmVmID0gdXNlU2Nyb2xsQW5pbWF0aW9uPEhUTUxEaXZFbGVtZW50PigpO1xuICBjb25zdCBbc2VsZWN0ZWRQYWdlLCBzZXRTZWxlY3RlZFBhZ2VdID0gdXNlU3RhdGU8U0VPUGFnZURhdGEgfCBudWxsPihudWxsKTtcbiAgY29uc3QgW2RldGFpbHNPcGVuLCBzZXREZXRhaWxzT3Blbl0gPSB1c2VTdGF0ZShmYWxzZSk7XG4gIGNvbnN0IFt0eXBlRmlsdGVyLCBzZXRUeXBlRmlsdGVyXSA9IHVzZVN0YXRlKCdhbGwnKTtcbiAgY29uc3QgW3Njb3JlRmlsdGVyLCBzZXRTY29yZUZpbHRlcl0gPSB1c2VTdGF0ZSgnYWxsJyk7XG4gIGNvbnN0IFtzZWFyY2gsIHNldFNlYXJjaF0gPSB1c2VTdGF0ZSgnJyk7XG4gIGNvbnN0IGRlYm91bmNlZFNlYXJjaCA9IHVzZURlYm91bmNlKHNlYXJjaCwgMzAwKTtcblxuICBjb25zdCBmaWx0ZXJlZERhdGEgPSB1c2VNZW1vKCgpID0+IHtcbiAgICBpZiAoIWRhdGEpIHJldHVybiBbXTtcbiAgICByZXR1cm4gZGF0YS5maWx0ZXIocGFnZSA9PiB7XG4gICAgICBjb25zdCBtYXRjaFR5cGUgPSB0eXBlRmlsdGVyID09PSAnYWxsJyB8fCBwYWdlLnR5cGUgPT09IHR5cGVGaWx0ZXI7XG4gICAgICBjb25zdCBtYXRjaFNlYXJjaCA9XG4gICAgICAgIHBhZ2UubmFtZS50b0xvd2VyQ2FzZSgpLmluY2x1ZGVzKGRlYm91bmNlZFNlYXJjaC50b0xvd2VyQ2FzZSgpKSB8fFxuICAgICAgICBwYWdlLnVybC50b0xvd2VyQ2FzZSgpLmluY2x1ZGVzKGRlYm91bmNlZFNlYXJjaC50b0xvd2VyQ2FzZSgpKTtcbiAgICAgIGNvbnN0IHNjb3JlID0gcGFnZS5hbmFseXNpcy5zY29yZS5vdmVyYWxsO1xuICAgICAgY29uc3QgbWF0Y2hTY29yZSA9XG4gICAgICAgIHNjb3JlRmlsdGVyID09PSAnYWxsJyB8fFxuICAgICAgICAoc2NvcmVGaWx0ZXIgPT09ICdnb29kJyAmJiBzY29yZSA+PSA4MCkgfHxcbiAgICAgICAgKHNjb3JlRmlsdGVyID09PSAnbWVkaXVtJyAmJiBzY29yZSA+PSA2MCAmJiBzY29yZSA8IDgwKSB8fFxuICAgICAgICAoc2NvcmVGaWx0ZXIgPT09ICdiYWQnICYmIHNjb3JlIDwgNjApO1xuICAgICAgcmV0dXJuIG1hdGNoVHlwZSAmJiBtYXRjaFNlYXJjaCAmJiBtYXRjaFNjb3JlO1xuICAgIH0pO1xuICB9LCBbZGF0YSwgdHlwZUZpbHRlciwgc2NvcmVGaWx0ZXIsIGRlYm91bmNlZFNlYXJjaF0pO1xuXG4gIGNvbnN0IGF2ZXJhZ2VTY29yZSA9IHVzZU1lbW8oKCkgPT4ge1xuICAgIGlmICghZmlsdGVyZWREYXRhLmxlbmd0aCkgcmV0dXJuIDA7XG4gICAgY29uc3QgdG90YWwgPSBmaWx0ZXJlZERhdGEucmVkdWNlKChhY2MsIHBhZ2UpID0+IGFjYyArIHBhZ2UuYW5hbHlzaXMuc2NvcmUub3ZlcmFsbCwgMCk7XG4gICAgcmV0dXJuIE1hdGgucm91bmQodG90YWwgLyBmaWx0ZXJlZERhdGEubGVuZ3RoKTtcbiAgfSwgW2ZpbHRlcmVkRGF0YV0pO1xuXG4gIGNvbnN0IG9wdGltaXplZENvdW50ID0gdXNlTWVtbyhcbiAgICAoKSA9PiBmaWx0ZXJlZERhdGEuZmlsdGVyKHAgPT4gcC5hbmFseXNpcy5zY29yZS5vdmVyYWxsID49IDgwKS5sZW5ndGgsXG4gICAgW2ZpbHRlcmVkRGF0YV1cbiAgKTtcblxuICBjb25zdCB0b0ZpeENvdW50ID0gdXNlTWVtbyhcbiAgICAoKSA9PiBmaWx0ZXJlZERhdGEuZmlsdGVyKHAgPT4gcC5hbmFseXNpcy5zY29yZS5vdmVyYWxsIDwgNzApLmxlbmd0aCxcbiAgICBbZmlsdGVyZWREYXRhXVxuICApO1xuXG4gIGNvbnN0IGdvb2RSYXRlID0gdXNlTWVtbygoKSA9PiB7XG4gICAgaWYgKCFmaWx0ZXJlZERhdGEubGVuZ3RoKSByZXR1cm4gMDtcbiAgICByZXR1cm4gTWF0aC5yb3VuZCgob3B0aW1pemVkQ291bnQgLyBmaWx0ZXJlZERhdGEubGVuZ3RoKSAqIDEwMCk7XG4gIH0sIFtmaWx0ZXJlZERhdGEsIG9wdGltaXplZENvdW50XSk7XG5cbiAgY29uc3QgY29sdW1ucyA9IHVzZU1lbW88Q29sdW1uRGVmPFNFT1BhZ2VEYXRhPltdPihcbiAgICAoKSA9PiBbXG4gICAgICB7XG4gICAgICAgIGFjY2Vzc29yS2V5OiAnbmFtZScsXG4gICAgICAgIGhlYWRlcjogJ05vbSBkZSBsYSBQYWdlJyxcbiAgICAgICAgY2VsbDogKHsgcm93IH0pID0+IChcbiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZvbnQtc2VtaWJvbGQgdGV4dC1zbSBicmVhay13b3JkcyBtYXgtdy1bMjAwcHhdXCI+e3Jvdy5vcmlnaW5hbC5uYW1lfTwvZGl2PlxuICAgICAgICApLFxuICAgICAgfSxcbiAgICAgIHtcbiAgICAgICAgYWNjZXNzb3JLZXk6ICd0eXBlJyxcbiAgICAgICAgaGVhZGVyOiAnVHlwZScsXG4gICAgICAgIGNlbGw6ICh7IHJvdyB9KSA9PiAoXG4gICAgICAgICAgPEJhZGdlIHZhcmlhbnQ9XCJvdXRsaW5lXCIgY2xhc3NOYW1lPVwiY2FwaXRhbGl6ZVwiPlxuICAgICAgICAgICAge3Jvdy5vcmlnaW5hbC50eXBlID09PSAncHJvZHVjdCcgPyAnUHJvZHVpdCcgOiAnQm91dGlxdWUnfVxuICAgICAgICAgIDwvQmFkZ2U+XG4gICAgICAgICksXG4gICAgICB9LFxuICAgICAge1xuICAgICAgICBhY2Nlc3NvcktleTogJ3Njb3JlJyxcbiAgICAgICAgaGVhZGVyOiAnU2NvcmUgU0VPJyxcbiAgICAgICAgY2VsbDogKHsgcm93IH0pID0+IHtcbiAgICAgICAgICBjb25zdCBzY29yZSA9IHJvdy5vcmlnaW5hbC5hbmFseXNpcy5zY29yZS5vdmVyYWxsO1xuICAgICAgICAgIHJldHVybiAoXG4gICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGdhcC0zXCI+XG4gICAgICAgICAgICAgIDxQcm9ncmVzcyB2YWx1ZT17c2NvcmV9IGNsYXNzTmFtZT1cImgtMiB3LVs4MHB4XVwiIC8+XG4gICAgICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT17YGZvbnQtYm9sZCB0ZXh0LXNtICR7Z2V0U2NvcmVDb2xvcihzY29yZSl9YH0+e3Njb3JlfS8xMDA8L3NwYW4+XG4gICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICApO1xuICAgICAgICB9LFxuICAgICAgfSxcbiAgICAgIHtcbiAgICAgICAgYWNjZXNzb3JLZXk6ICduaXZlYXUnLFxuICAgICAgICBoZWFkZXI6ICdOaXZlYXUnLFxuICAgICAgICBjZWxsOiAoeyByb3cgfSkgPT4ge1xuICAgICAgICAgIGNvbnN0IHNjb3JlID0gcm93Lm9yaWdpbmFsLmFuYWx5c2lzLnNjb3JlLm92ZXJhbGw7XG4gICAgICAgICAgcmV0dXJuIChcbiAgICAgICAgICAgIDxCYWRnZSB2YXJpYW50PXtnZXRTY29yZUJhZGdlVmFyaWFudChzY29yZSl9PlxuICAgICAgICAgICAgICB7c2NvcmUgPj0gODAgPyAn8J+foiBCb24nIDogc2NvcmUgPj0gNjAgPyAn8J+foCBNb3llbicgOiAn8J+UtCBGYWlibGUnfVxuICAgICAgICAgICAgPC9CYWRnZT5cbiAgICAgICAgICApO1xuICAgICAgICB9LFxuICAgICAgfSxcbiAgICAgIHtcbiAgICAgICAgaWQ6ICdhY3Rpb25zJyxcbiAgICAgICAgaGVhZGVyOiAnQWN0aW9ucycsXG4gICAgICAgIGNlbGw6ICh7IHJvdyB9KSA9PiAoXG4gICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGdhcC0yIGp1c3RpZnktZW5kXCI+XG4gICAgICAgICAgICA8QnV0dG9uXG4gICAgICAgICAgICAgIHZhcmlhbnQ9XCJvdXRsaW5lXCJcbiAgICAgICAgICAgICAgc2l6ZT1cInNtXCJcbiAgICAgICAgICAgICAgb25DbGljaz17KCkgPT4gd2luZG93Lm9wZW4ocm93Lm9yaWdpbmFsLnVybCwgJ19ibGFuaycpfVxuICAgICAgICAgICAgPlxuICAgICAgICAgICAgICA8RXh0ZXJuYWxMaW5rIGNsYXNzTmFtZT1cImgtNCB3LTRcIiAvPlxuICAgICAgICAgICAgPC9CdXR0b24+XG4gICAgICAgICAgICA8QnV0dG9uXG4gICAgICAgICAgICAgIHZhcmlhbnQ9XCJkZWZhdWx0XCJcbiAgICAgICAgICAgICAgc2l6ZT1cInNtXCJcbiAgICAgICAgICAgICAgb25DbGljaz17KCkgPT4ge1xuICAgICAgICAgICAgICAgIHNldFNlbGVjdGVkUGFnZShyb3cub3JpZ2luYWwpO1xuICAgICAgICAgICAgICAgIHNldERldGFpbHNPcGVuKHRydWUpO1xuICAgICAgICAgICAgICB9fVxuICAgICAgICAgICAgPlxuICAgICAgICAgICAgICA8RXllIGNsYXNzTmFtZT1cImgtNCB3LTQgbXItMVwiIC8+XG4gICAgICAgICAgICAgIETDqXRhaWxzXG4gICAgICAgICAgICA8L0J1dHRvbj5cbiAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgKSxcbiAgICAgIH0sXG4gICAgXSxcbiAgICBbXVxuICApO1xuXG4gIGNvbnN0IHRhYmxlID0gdXNlUmVhY3RUYWJsZSh7XG4gICAgZGF0YTogZmlsdGVyZWREYXRhLFxuICAgIGNvbHVtbnMsXG4gICAgZ2V0Q29yZVJvd01vZGVsOiBnZXRDb3JlUm93TW9kZWwoKSxcbiAgICBnZXRTb3J0ZWRSb3dNb2RlbDogZ2V0U29ydGVkUm93TW9kZWwoKSxcbiAgICBnZXRGaWx0ZXJlZFJvd01vZGVsOiBnZXRGaWx0ZXJlZFJvd01vZGVsKCksXG4gICAgZ2V0UGFnaW5hdGlvblJvd01vZGVsOiBnZXRQYWdpbmF0aW9uUm93TW9kZWwoKSxcbiAgfSk7XG5cbiAgcmV0dXJuIChcbiAgICA8ZGl2XG4gICAgICByZWY9e2xpc3RSZWZ9XG4gICAgICBjbGFzc05hbWU9XCJzcGFjZS15LTQgc206c3BhY2UteS02IGFuaW1hdGUtaW4gZmFkZS1pbiBzbGlkZS1pbi1mcm9tLWJvdHRvbS00IGR1cmF0aW9uLTcwMFwiXG4gICAgPlxuICAgICAgey8qIFN0YXRpc3RpcXVlcyAqL31cbiAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZ3JpZCBnYXAtMyBzbTpnYXAtNCBncmlkLWNvbHMtMiBzbTpncmlkLWNvbHMtNFwiPlxuICAgICAgICA8Q2FyZCBjbGFzc05hbWU9XCJib3JkZXItYm9yZGVyLzUwIGJnLWNhcmQvNTAgYmFja2Ryb3AtYmx1ci1zbSBob3ZlcjpzaGFkb3ctbGcgdHJhbnNpdGlvbi1hbGwgZHVyYXRpb24tMzAwIGhvdmVyOnNjYWxlLVsxLjAyXVwiPlxuICAgICAgICAgIDxDYXJkQ29udGVudCBjbGFzc05hbWU9XCJwLTMgc206cC00XCI+XG4gICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGp1c3RpZnktYmV0d2VlblwiPlxuICAgICAgICAgICAgICA8ZGl2PlxuICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTIgbWItMVwiPlxuICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJwLTEuNSByb3VuZGVkLWxnIGJnLWdyYWRpZW50LXRvLWJyIGZyb20tcHVycGxlLTUwMC8xMCB0by1waW5rLTUwMC81XCI+XG4gICAgICAgICAgICAgICAgICAgIDxUcmVuZGluZ1VwIGNsYXNzTmFtZT1cImgtMy41IHctMy41IHNtOmgtNCBzbTp3LTQgdGV4dC1wdXJwbGUtNTAwXCIgLz5cbiAgICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwidGV4dC14cyBzbTp0ZXh0LXNtIHRleHQtbXV0ZWQtZm9yZWdyb3VuZFwiPlNjb3JlIE1veWVuPC9wPlxuICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgIDxwXG4gICAgICAgICAgICAgICAgICBjbGFzc05hbWU9e2B0ZXh0LXhsIHNtOnRleHQtMnhsIGZvbnQtYm9sZCBiZy1ncmFkaWVudC10by1yICR7Z2V0U2NvcmVDb2xvcihhdmVyYWdlU2NvcmUpLmluY2x1ZGVzKCd0ZXh0LXJlZCcpID8gJ2Zyb20tcmVkLTYwMCB0by1vcmFuZ2UtNjAwJyA6IGdldFNjb3JlQ29sb3IoYXZlcmFnZVNjb3JlKS5pbmNsdWRlcygndGV4dC1vcmFuZ2UnKSA/ICdmcm9tLW9yYW5nZS02MDAgdG8teWVsbG93LTYwMCcgOiAnZnJvbS1ncmVlbi02MDAgdG8tZW1lcmFsZC02MDAnfSBiZy1jbGlwLXRleHQgdGV4dC10cmFuc3BhcmVudGB9XG4gICAgICAgICAgICAgICAgPlxuICAgICAgICAgICAgICAgICAge2F2ZXJhZ2VTY29yZX0vMTAwXG4gICAgICAgICAgICAgICAgPC9wPlxuICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgIDwvQ2FyZENvbnRlbnQ+XG4gICAgICAgIDwvQ2FyZD5cblxuICAgICAgICA8Q2FyZCBjbGFzc05hbWU9XCJib3JkZXItYm9yZGVyLzUwIGJnLWNhcmQvNTAgYmFja2Ryb3AtYmx1ci1zbSBob3ZlcjpzaGFkb3ctbGcgdHJhbnNpdGlvbi1hbGwgZHVyYXRpb24tMzAwIGhvdmVyOnNjYWxlLVsxLjAyXVwiPlxuICAgICAgICAgIDxDYXJkQ29udGVudCBjbGFzc05hbWU9XCJwLTMgc206cC00XCI+XG4gICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGp1c3RpZnktYmV0d2VlblwiPlxuICAgICAgICAgICAgICA8ZGl2PlxuICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTIgbWItMVwiPlxuICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJwLTEuNSByb3VuZGVkLWxnIGJnLWdyYWRpZW50LXRvLWJyIGZyb20tZ3JlZW4tNTAwLzEwIHRvLWVtZXJhbGQtNTAwLzVcIj5cbiAgICAgICAgICAgICAgICAgICAgPENoZWNrQ2lyY2xlMiBjbGFzc05hbWU9XCJoLTMuNSB3LTMuNSBzbTpoLTQgc206dy00IHRleHQtZ3JlZW4tNTAwXCIgLz5cbiAgICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwidGV4dC14cyBzbTp0ZXh0LXNtIHRleHQtbXV0ZWQtZm9yZWdyb3VuZFwiPlBhZ2VzIE9wdGltaXPDqWVzPC9wPlxuICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgIDxwIGNsYXNzTmFtZT1cInRleHQteGwgc206dGV4dC0yeGwgZm9udC1ib2xkIGJnLWdyYWRpZW50LXRvLXIgZnJvbS1ncmVlbi02MDAgdG8tZW1lcmFsZC02MDAgYmctY2xpcC10ZXh0IHRleHQtdHJhbnNwYXJlbnRcIj5cbiAgICAgICAgICAgICAgICAgIHtvcHRpbWl6ZWRDb3VudH1cbiAgICAgICAgICAgICAgICA8L3A+XG4gICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgPC9DYXJkQ29udGVudD5cbiAgICAgICAgPC9DYXJkPlxuXG4gICAgICAgIDxDYXJkIGNsYXNzTmFtZT1cImJvcmRlci1ib3JkZXIvNTAgYmctY2FyZC81MCBiYWNrZHJvcC1ibHVyLXNtIGhvdmVyOnNoYWRvdy1sZyB0cmFuc2l0aW9uLWFsbCBkdXJhdGlvbi0zMDAgaG92ZXI6c2NhbGUtWzEuMDJdXCI+XG4gICAgICAgICAgPENhcmRDb250ZW50IGNsYXNzTmFtZT1cInAtMyBzbTpwLTRcIj5cbiAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIganVzdGlmeS1iZXR3ZWVuXCI+XG4gICAgICAgICAgICAgIDxkaXY+XG4gICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLWNlbnRlciBnYXAtMiBtYi0xXCI+XG4gICAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInAtMS41IHJvdW5kZWQtbGcgYmctZ3JhZGllbnQtdG8tYnIgZnJvbS15ZWxsb3ctNTAwLzEwIHRvLW9yYW5nZS01MDAvNVwiPlxuICAgICAgICAgICAgICAgICAgICA8QWxlcnRUcmlhbmdsZSBjbGFzc05hbWU9XCJoLTMuNSB3LTMuNSBzbTpoLTQgc206dy00IHRleHQtb3JhbmdlLTUwMFwiIC8+XG4gICAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICAgIDxwIGNsYXNzTmFtZT1cInRleHQteHMgc206dGV4dC1zbSB0ZXh0LW11dGVkLWZvcmVncm91bmRcIj7DgCBDb3JyaWdlcjwvcD5cbiAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJ0ZXh0LXhsIHNtOnRleHQtMnhsIGZvbnQtYm9sZCBiZy1ncmFkaWVudC10by1yIGZyb20tb3JhbmdlLTYwMCB0by1yZWQtNjAwIGJnLWNsaXAtdGV4dCB0ZXh0LXRyYW5zcGFyZW50XCI+XG4gICAgICAgICAgICAgICAgICB7dG9GaXhDb3VudH1cbiAgICAgICAgICAgICAgICA8L3A+XG4gICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgPC9DYXJkQ29udGVudD5cbiAgICAgICAgPC9DYXJkPlxuXG4gICAgICAgIDxDYXJkIGNsYXNzTmFtZT1cImJvcmRlci1ib3JkZXIvNTAgYmctY2FyZC81MCBiYWNrZHJvcC1ibHVyLXNtIGhvdmVyOnNoYWRvdy1sZyB0cmFuc2l0aW9uLWFsbCBkdXJhdGlvbi0zMDAgaG92ZXI6c2NhbGUtWzEuMDJdXCI+XG4gICAgICAgICAgPENhcmRDb250ZW50IGNsYXNzTmFtZT1cInAtMyBzbTpwLTRcIj5cbiAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIganVzdGlmeS1iZXR3ZWVuXCI+XG4gICAgICAgICAgICAgIDxkaXY+XG4gICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLWNlbnRlciBnYXAtMiBtYi0xXCI+XG4gICAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInAtMS41IHJvdW5kZWQtbGcgYmctZ3JhZGllbnQtdG8tYnIgZnJvbS1ibHVlLTUwMC8xMCB0by1jeWFuLTUwMC81XCI+XG4gICAgICAgICAgICAgICAgICAgIDxUcmVuZGluZ1VwIGNsYXNzTmFtZT1cImgtMy41IHctMy41IHNtOmgtNCBzbTp3LTQgdGV4dC1ibHVlLTUwMFwiIC8+XG4gICAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICAgIDxwIGNsYXNzTmFtZT1cInRleHQteHMgc206dGV4dC1zbSB0ZXh0LW11dGVkLWZvcmVncm91bmRcIj5UYXV4IGRlIFLDqXVzc2l0ZTwvcD5cbiAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJ0ZXh0LXhsIHNtOnRleHQtMnhsIGZvbnQtYm9sZCBiZy1ncmFkaWVudC10by1yIGZyb20tYmx1ZS02MDAgdG8tY3lhbi02MDAgYmctY2xpcC10ZXh0IHRleHQtdHJhbnNwYXJlbnRcIj5cbiAgICAgICAgICAgICAgICAgIHtnb29kUmF0ZX0lXG4gICAgICAgICAgICAgICAgPC9wPlxuICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgIDwvQ2FyZENvbnRlbnQ+XG4gICAgICAgIDwvQ2FyZD5cbiAgICAgIDwvZGl2PlxuXG4gICAgICB7LyogVGFibGVhdSBwcmluY2lwYWwgKi99XG4gICAgICA8Q2FyZCBjbGFzc05hbWU9XCJib3JkZXItYm9yZGVyLzUwIGJnLWNhcmQvNTAgYmFja2Ryb3AtYmx1ci1zbSBvdmVyZmxvdy1oaWRkZW5cIj5cbiAgICAgICAgPENhcmRIZWFkZXI+XG4gICAgICAgICAgPENhcmRUaXRsZSBjbGFzc05hbWU9XCJ0ZXh0LWJhc2Ugc206dGV4dC1sZyBmb250LXNlbWlib2xkIGZsZXggZmxleC1jb2wgc206ZmxleC1yb3cgc206aXRlbXMtY2VudGVyIHNtOmp1c3RpZnktYmV0d2VlbiBnYXAtM1wiPlxuICAgICAgICAgICAgPHNwYW4+TWVzIFBhZ2VzICh7ZmlsdGVyZWREYXRhLmxlbmd0aH0pPC9zcGFuPlxuICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGZsZXgtd3JhcCBnYXAtMlwiPlxuICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInJlbGF0aXZlIGZsZXgtMSBzbTpmbGV4LWluaXRpYWwgc206dy1bMjAwcHhdXCI+XG4gICAgICAgICAgICAgICAgPFNlYXJjaCBjbGFzc05hbWU9XCJhYnNvbHV0ZSBsZWZ0LTIuNSB0b3AtMS8yIHRyYW5zZm9ybSAtdHJhbnNsYXRlLXktMS8yIGgtMy41IHctMy41IHNtOmgtNCBzbTp3LTQgdGV4dC1tdXRlZC1mb3JlZ3JvdW5kXCIgLz5cbiAgICAgICAgICAgICAgICA8SW5wdXRcbiAgICAgICAgICAgICAgICAgIHBsYWNlaG9sZGVyPVwiUmVjaGVyY2hlci4uLlwiXG4gICAgICAgICAgICAgICAgICB2YWx1ZT17c2VhcmNofVxuICAgICAgICAgICAgICAgICAgb25DaGFuZ2U9e2UgPT4gc2V0U2VhcmNoKGUudGFyZ2V0LnZhbHVlKX1cbiAgICAgICAgICAgICAgICAgIGNsYXNzTmFtZT1cInBsLTggcHItOCBoLTkgc206aC0xMCB0ZXh0LXhzIHNtOnRleHQtc20gdy1mdWxsXCJcbiAgICAgICAgICAgICAgICAvPlxuICAgICAgICAgICAgICAgIHtzZWFyY2ggJiYgKFxuICAgICAgICAgICAgICAgICAgPGJ1dHRvblxuICAgICAgICAgICAgICAgICAgICBvbkNsaWNrPXsoKSA9PiBzZXRTZWFyY2goJycpfVxuICAgICAgICAgICAgICAgICAgICBjbGFzc05hbWU9XCJhYnNvbHV0ZSByaWdodC0yLjUgdG9wLTEvMiB0cmFuc2Zvcm0gLXRyYW5zbGF0ZS15LTEvMiB0ZXh0LW11dGVkLWZvcmVncm91bmQgaG92ZXI6dGV4dC1mb3JlZ3JvdW5kXCJcbiAgICAgICAgICAgICAgICAgID5cbiAgICAgICAgICAgICAgICAgICAgPFggY2xhc3NOYW1lPVwiaC0zLjUgdy0zLjUgc206aC00IHNtOnctNFwiIC8+XG4gICAgICAgICAgICAgICAgICA8L2J1dHRvbj5cbiAgICAgICAgICAgICAgICApfVxuICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgIDwvQ2FyZFRpdGxlPlxuICAgICAgICA8L0NhcmRIZWFkZXI+XG5cbiAgICAgICAgPENhcmRDb250ZW50PlxuICAgICAgICAgIHtpc0xvYWRpbmcgPyAoXG4gICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInNwYWNlLXktMlwiPlxuICAgICAgICAgICAgICA8U2tlbGV0b24gY2xhc3NOYW1lPVwiaC0xMiB3LWZ1bGxcIiAvPlxuICAgICAgICAgICAgICA8U2tlbGV0b24gY2xhc3NOYW1lPVwiaC0xMiB3LWZ1bGxcIiAvPlxuICAgICAgICAgICAgICA8U2tlbGV0b24gY2xhc3NOYW1lPVwiaC0xMiB3LWZ1bGxcIiAvPlxuICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgKSA6IGZpbHRlcmVkRGF0YS5sZW5ndGggPT09IDAgPyAoXG4gICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInRleHQtY2VudGVyIHB5LTEyIHNtOnB5LTE2XCI+XG4gICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwicC00IHJvdW5kZWQtZnVsbCBiZy1ncmFkaWVudC10by1iciBmcm9tLXB1cnBsZS01MDAvMTAgdG8tcGluay01MDAvNSBtYi00IGFuaW1hdGUtaW4gem9vbS1pbiBkdXJhdGlvbi01MDAgaW5saW5lLWJsb2NrXCI+XG4gICAgICAgICAgICAgICAgPFNlYXJjaCBjbGFzc05hbWU9XCJoLTEyIHctMTIgc206aC0xNiBzbTp3LTE2IHRleHQtbXV0ZWQtZm9yZWdyb3VuZCBvcGFjaXR5LTIwXCIgLz5cbiAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgIDxwIGNsYXNzTmFtZT1cInRleHQtc20gc206dGV4dC1iYXNlIHRleHQtZm9yZWdyb3VuZCBmb250LW1lZGl1bVwiPlxuICAgICAgICAgICAgICAgIEF1Y3VuZSBwYWdlIG5lIGNvcnJlc3BvbmQgw6Agdm90cmUgcmVjaGVyY2hlLlxuICAgICAgICAgICAgICA8L3A+XG4gICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICApIDogKFxuICAgICAgICAgICAgPD5cbiAgICAgICAgICAgICAgey8qIERlc2t0b3AgVGFibGUgVmlldyAqL31cbiAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJoaWRkZW4gbGc6YmxvY2tcIj5cbiAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImJvcmRlciBib3JkZXItYm9yZGVyLzUwIHJvdW5kZWQtbGcgb3ZlcmZsb3ctaGlkZGVuXCI+XG4gICAgICAgICAgICAgICAgICA8VGFibGU+XG4gICAgICAgICAgICAgICAgICAgIDxUYWJsZUhlYWRlcj5cbiAgICAgICAgICAgICAgICAgICAgICA8VGFibGVSb3cgY2xhc3NOYW1lPVwiYmctbXV0ZWQvNTBcIj5cbiAgICAgICAgICAgICAgICAgICAgICAgIDxUYWJsZUhlYWQgY2xhc3NOYW1lPVwidGV4dC14cyBzbTp0ZXh0LXNtIGZvbnQtc2VtaWJvbGRcIj5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgTm9tIGRlIGxhIFBhZ2VcbiAgICAgICAgICAgICAgICAgICAgICAgIDwvVGFibGVIZWFkPlxuICAgICAgICAgICAgICAgICAgICAgICAgPFRhYmxlSGVhZCBjbGFzc05hbWU9XCJ0ZXh0LXhzIHNtOnRleHQtc20gZm9udC1zZW1pYm9sZFwiPlR5cGU8L1RhYmxlSGVhZD5cbiAgICAgICAgICAgICAgICAgICAgICAgIDxUYWJsZUhlYWQgY2xhc3NOYW1lPVwidGV4dC14cyBzbTp0ZXh0LXNtIGZvbnQtc2VtaWJvbGRcIj5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgU2NvcmUgU0VPXG4gICAgICAgICAgICAgICAgICAgICAgICA8L1RhYmxlSGVhZD5cbiAgICAgICAgICAgICAgICAgICAgICAgIDxUYWJsZUhlYWQgY2xhc3NOYW1lPVwidGV4dC14cyBzbTp0ZXh0LXNtIGZvbnQtc2VtaWJvbGRcIj5OaXZlYXU8L1RhYmxlSGVhZD5cbiAgICAgICAgICAgICAgICAgICAgICAgIDxUYWJsZUhlYWQgY2xhc3NOYW1lPVwidGV4dC1yaWdodCB0ZXh0LXhzIHNtOnRleHQtc20gZm9udC1zZW1pYm9sZFwiPlxuICAgICAgICAgICAgICAgICAgICAgICAgICBBY3Rpb25zXG4gICAgICAgICAgICAgICAgICAgICAgICA8L1RhYmxlSGVhZD5cbiAgICAgICAgICAgICAgICAgICAgICA8L1RhYmxlUm93PlxuICAgICAgICAgICAgICAgICAgICA8L1RhYmxlSGVhZGVyPlxuICAgICAgICAgICAgICAgICAgICA8VGFibGVCb2R5PlxuICAgICAgICAgICAgICAgICAgICAgIHtmaWx0ZXJlZERhdGEubWFwKHBhZ2UgPT4ge1xuICAgICAgICAgICAgICAgICAgICAgICAgY29uc3Qgc2NvcmUgPSBwYWdlLmFuYWx5c2lzLnNjb3JlLm92ZXJhbGw7XG4gICAgICAgICAgICAgICAgICAgICAgICByZXR1cm4gKFxuICAgICAgICAgICAgICAgICAgICAgICAgICA8VGFibGVSb3cga2V5PXtwYWdlLmlkfSBjbGFzc05hbWU9XCJob3ZlcjpiZy1tdXRlZC81MCB0cmFuc2l0aW9uLWNvbG9yc1wiPlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgIDxUYWJsZUNlbGwgY2xhc3NOYW1lPVwidGV4dC14cyBzbTp0ZXh0LXNtIGZvbnQtc2VtaWJvbGRcIj5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHtwYWdlLm5hbWV9XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgPC9UYWJsZUNlbGw+XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgPFRhYmxlQ2VsbD5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDxCYWRnZSB2YXJpYW50PVwib3V0bGluZVwiIGNsYXNzTmFtZT1cImNhcGl0YWxpemUgdGV4dC14c1wiPlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICB7cGFnZS50eXBlID09PSAncHJvZHVjdCcgPyAnUHJvZHVpdCcgOiAnQm91dGlxdWUnfVxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPC9CYWRnZT5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICA8L1RhYmxlQ2VsbD5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICA8VGFibGVDZWxsPlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLWNlbnRlciBnYXAtM1wiPlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA8UHJvZ3Jlc3MgdmFsdWU9e3Njb3JlfSBjbGFzc05hbWU9XCJoLTIgdy1bODBweF1cIiAvPlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA8c3BhblxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGNsYXNzTmFtZT17YGZvbnQtYm9sZCB0ZXh0LXhzIHNtOnRleHQtc20gJHtnZXRTY29yZUNvbG9yKHNjb3JlKX1gfVxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA+XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAge3Njb3JlfS8xMDBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPC9zcGFuPlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgPC9UYWJsZUNlbGw+XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgPFRhYmxlQ2VsbD5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDxCYWRnZSB2YXJpYW50PXtnZXRTY29yZUJhZGdlVmFyaWFudChzY29yZSl9IGNsYXNzTmFtZT1cInRleHQteHNcIj5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAge3Njb3JlID49IDgwID8gJ/Cfn6IgQm9uJyA6IHNjb3JlID49IDYwID8gJ/Cfn6AgTW95ZW4nIDogJ/CflLQgRmFpYmxlJ31cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDwvQmFkZ2U+XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgPC9UYWJsZUNlbGw+XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgPFRhYmxlQ2VsbCBjbGFzc05hbWU9XCJ0ZXh0LXJpZ2h0XCI+XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXgganVzdGlmeS1lbmQgZ2FwLTJcIj5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPEJ1dHRvblxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHZhcmlhbnQ9XCJnaG9zdFwiXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgc2l6ZT1cInNtXCJcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBvbkNsaWNrPXsoKSA9PiB3aW5kb3cub3BlbihwYWdlLnVybCwgJ19ibGFuaycpfVxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGNsYXNzTmFtZT1cImgtOCB3LTggcC0wXCJcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDxFeHRlcm5hbExpbmsgY2xhc3NOYW1lPVwiaC0zLjUgdy0zLjVcIiAvPlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA8L0J1dHRvbj5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPEJ1dHRvblxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHZhcmlhbnQ9XCJkZWZhdWx0XCJcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBzaXplPVwic21cIlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIG9uQ2xpY2s9eygpID0+IHtcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHNldFNlbGVjdGVkUGFnZShwYWdlKTtcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHNldERldGFpbHNPcGVuKHRydWUpO1xuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIH19XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgY2xhc3NOYW1lPVwiaC04IHRleHQteHNcIlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA+XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPEV5ZSBjbGFzc05hbWU9XCJoLTMuNSB3LTMuNSBtci0xXCIgLz5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBEw6l0YWlsc1xuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA8L0J1dHRvbj5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgIDwvVGFibGVDZWxsPlxuICAgICAgICAgICAgICAgICAgICAgICAgICA8L1RhYmxlUm93PlxuICAgICAgICAgICAgICAgICAgICAgICAgKTtcbiAgICAgICAgICAgICAgICAgICAgICB9KX1cbiAgICAgICAgICAgICAgICAgICAgPC9UYWJsZUJvZHk+XG4gICAgICAgICAgICAgICAgICA8L1RhYmxlPlxuICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICA8L2Rpdj5cblxuICAgICAgICAgICAgICB7LyogTW9iaWxlIENhcmQgVmlldyAqL31cbiAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJsZzpoaWRkZW4gc3BhY2UteS0zIHNtOnNwYWNlLXktNFwiPlxuICAgICAgICAgICAgICAgIHtmaWx0ZXJlZERhdGEubWFwKHBhZ2UgPT4ge1xuICAgICAgICAgICAgICAgICAgY29uc3Qgc2NvcmUgPSBwYWdlLmFuYWx5c2lzLnNjb3JlLm92ZXJhbGw7XG4gICAgICAgICAgICAgICAgICByZXR1cm4gKFxuICAgICAgICAgICAgICAgICAgICA8Q2FyZFxuICAgICAgICAgICAgICAgICAgICAgIGtleT17cGFnZS5pZH1cbiAgICAgICAgICAgICAgICAgICAgICBjbGFzc05hbWU9XCJib3JkZXItYm9yZGVyLzUwIGJnLWNhcmQvNTAgYmFja2Ryb3AtYmx1ci1zbSBob3ZlcjpzaGFkb3ctbGcgdHJhbnNpdGlvbi1hbGwgZHVyYXRpb24tMzAwXCJcbiAgICAgICAgICAgICAgICAgICAgPlxuICAgICAgICAgICAgICAgICAgICAgIDxDYXJkQ29udGVudCBjbGFzc05hbWU9XCJwLTQgc206cC01XCI+XG4gICAgICAgICAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtc3RhcnQganVzdGlmeS1iZXR3ZWVuIG1iLTNcIj5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4LTEgbWluLXctMFwiPlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgIDxoMyBjbGFzc05hbWU9XCJmb250LXNlbWlib2xkIHRleHQtc20gc206dGV4dC1iYXNlIHRydW5jYXRlIG1iLTFcIj5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHtwYWdlLm5hbWV9XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgPC9oMz5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICA8QmFkZ2UgdmFyaWFudD1cIm91dGxpbmVcIiBjbGFzc05hbWU9XCJjYXBpdGFsaXplIHRleHQteHMgbWItMlwiPlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAge3BhZ2UudHlwZSA9PT0gJ3Byb2R1Y3QnID8gJ1Byb2R1aXQnIDogJ0JvdXRpcXVlJ31cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICA8L0JhZGdlPlxuICAgICAgICAgICAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgPFNlbGVjdD5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICA8U2VsZWN0VHJpZ2dlciBjbGFzc05hbWU9XCJoLTggdy04XCI+XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICA8TW9yZVZlcnRpY2FsIGNsYXNzTmFtZT1cImgtNCB3LTRcIiAvPlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgIDwvU2VsZWN0VHJpZ2dlcj5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICA8U2VsZWN0Q29udGVudCBtb2JpbGVWYXJpYW50PVwic2hlZXRcIiBjbGFzc05hbWU9XCJtaW4tdy1bMjAwcHhdXCI+XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICA8U2VsZWN0SXRlbVxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICB2YWx1ZT1cInZpZXdcIlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBvblNlbGVjdFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBvbkNsaWNrPXsoKSA9PiB3aW5kb3cub3BlbihwYWdlLnVybCwgJ19ibGFuaycpfVxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA8RXh0ZXJuYWxMaW5rIGNsYXNzTmFtZT1cImgtNCB3LTQgbXItMlwiIC8+XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIE91dnJpclxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPC9TZWxlY3RJdGVtPlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPFNlbGVjdEl0ZW1cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgdmFsdWU9XCJleHBvcnRcIlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBvblNlbGVjdFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBvbkNsaWNrPXsoKSA9PiB7XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgc2V0U2VsZWN0ZWRQYWdlKHBhZ2UpO1xuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHNldERldGFpbHNPcGVuKHRydWUpO1xuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICB9fVxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA8RXllIGNsYXNzTmFtZT1cImgtNCB3LTQgbXItMlwiIC8+XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIETDqXRhaWxzXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICA8L1NlbGVjdEl0ZW0+XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgPC9TZWxlY3RDb250ZW50PlxuICAgICAgICAgICAgICAgICAgICAgICAgICA8L1NlbGVjdD5cbiAgICAgICAgICAgICAgICAgICAgICAgIDwvZGl2PlxuXG4gICAgICAgICAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInNwYWNlLXktMiBwdC0zIGJvcmRlci10IGJvcmRlci1ib3JkZXIvNTBcIj5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLWNlbnRlciBqdXN0aWZ5LWJldHdlZW5cIj5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJ0ZXh0LXhzIHRleHQtbXV0ZWQtZm9yZWdyb3VuZFwiPlNjb3JlIFNFTzwvcD5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGdhcC0yXCI+XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICA8UHJvZ3Jlc3MgdmFsdWU9e3Njb3JlfSBjbGFzc05hbWU9XCJoLTIgdy0yMFwiIC8+XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9e2Bmb250LWJvbGQgdGV4dC14cyAke2dldFNjb3JlQ29sb3Ioc2NvcmUpfWB9PlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICB7c2NvcmV9LzEwMFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPC9zcGFuPlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLWNlbnRlciBqdXN0aWZ5LWJldHdlZW5cIj5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJ0ZXh0LXhzIHRleHQtbXV0ZWQtZm9yZWdyb3VuZFwiPk5pdmVhdTwvcD5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICA8QmFkZ2UgdmFyaWFudD17Z2V0U2NvcmVCYWRnZVZhcmlhbnQoc2NvcmUpfSBjbGFzc05hbWU9XCJ0ZXh0LXhzXCI+XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICB7c2NvcmUgPj0gODAgPyAn8J+foiBCb24nIDogc2NvcmUgPj0gNjAgPyAn8J+foCBNb3llbicgOiAn8J+UtCBGYWlibGUnfVxuICAgICAgICAgICAgICAgICAgICAgICAgICAgIDwvQmFkZ2U+XG4gICAgICAgICAgICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgICAgICAgICAgPC9DYXJkQ29udGVudD5cbiAgICAgICAgICAgICAgICAgICAgPC9DYXJkPlxuICAgICAgICAgICAgICAgICAgKTtcbiAgICAgICAgICAgICAgICB9KX1cbiAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICA8Lz5cbiAgICAgICAgICApfVxuICAgICAgICA8L0NhcmRDb250ZW50PlxuICAgICAgPC9DYXJkPlxuXG4gICAgICA8U0VPRGV0YWlsRGlhbG9nIHBhZ2U9e3NlbGVjdGVkUGFnZX0gb3Blbj17ZGV0YWlsc09wZW59IG9uT3BlbkNoYW5nZT17c2V0RGV0YWlsc09wZW59IC8+XG4gICAgPC9kaXY+XG4gICk7XG59O1xuXG5TRU9QYWdlc0xpc3RDb21wb25lbnQuZGlzcGxheU5hbWUgPSAnU0VPUGFnZXNMaXN0Q29tcG9uZW50JztcblxuLy8gT3B0aW1pc2F0aW9uIGF2ZWMgUmVhY3QubWVtbyBwb3VyIMOpdml0ZXIgbGVzIHJlLXJlbmRlcnMgaW51dGlsZXNcbmV4cG9ydCBjb25zdCBTRU9QYWdlc0xpc3QgPSBSZWFjdC5tZW1vKFNFT1BhZ2VzTGlzdENvbXBvbmVudCwgKHByZXZQcm9wcywgbmV4dFByb3BzKSA9PiB7XG4gIHJldHVybiAoXG4gICAgcHJldlByb3BzLmlzTG9hZGluZyA9PT0gbmV4dFByb3BzLmlzTG9hZGluZyAmJlxuICAgIHByZXZQcm9wcy5kYXRhPy5sZW5ndGggPT09IG5leHRQcm9wcy5kYXRhPy5sZW5ndGggJiZcbiAgICAvLyBDb21wYXJhaXNvbiBzdXBlcmZpY2llbGxlIGRlcyBkb25uw6llcyAoY29tcGFyZXIgbGVzIElEcylcbiAgICAoIXByZXZQcm9wcy5kYXRhIHx8XG4gICAgICAhbmV4dFByb3BzLmRhdGEgfHxcbiAgICAgIHByZXZQcm9wcy5kYXRhLmV2ZXJ5KFxuICAgICAgICAocGFnZSwgaW5kZXgpID0+XG4gICAgICAgICAgcGFnZS5pZCA9PT0gbmV4dFByb3BzLmRhdGE/LltpbmRleF0/LmlkICYmXG4gICAgICAgICAgcGFnZS5hbmFseXNpcy5zY29yZS5vdmVyYWxsID09PSBuZXh0UHJvcHMuZGF0YT8uW2luZGV4XT8uYW5hbHlzaXMuc2NvcmUub3ZlcmFsbFxuICAgICAgKSlcbiAgKTtcbn0pO1xuXG5TRU9QYWdlc0xpc3QuZGlzcGxheU5hbWUgPSAnU0VPUGFnZXNMaXN0JztcbiJdLCJuYW1lcyI6WyJSZWFjdCIsInVzZU1lbW8iLCJ1c2VTdGF0ZSIsImdldENvcmVSb3dNb2RlbCIsImdldEZpbHRlcmVkUm93TW9kZWwiLCJnZXRQYWdpbmF0aW9uUm93TW9kZWwiLCJnZXRTb3J0ZWRSb3dNb2RlbCIsInVzZVJlYWN0VGFibGUiLCJDYXJkIiwiQ2FyZENvbnRlbnQiLCJDYXJkSGVhZGVyIiwiQ2FyZFRpdGxlIiwiQnV0dG9uIiwiQmFkZ2UiLCJJbnB1dCIsIlNrZWxldG9uIiwiU2VsZWN0IiwiU2VsZWN0Q29udGVudCIsIlNlbGVjdEl0ZW0iLCJTZWxlY3RUcmlnZ2VyIiwiZ2V0U2NvcmVCYWRnZVZhcmlhbnQiLCJnZXRTY29yZUNvbG9yIiwiRXllIiwiRXh0ZXJuYWxMaW5rIiwiTW9yZVZlcnRpY2FsIiwiVHJlbmRpbmdVcCIsIkNoZWNrQ2lyY2xlMiIsIkFsZXJ0VHJpYW5nbGUiLCJTZWFyY2giLCJYIiwiU0VPRGV0YWlsRGlhbG9nIiwiUHJvZ3Jlc3MiLCJUYWJsZSIsIlRhYmxlQm9keSIsIlRhYmxlQ2VsbCIsIlRhYmxlSGVhZCIsIlRhYmxlSGVhZGVyIiwiVGFibGVSb3ciLCJ1c2VTY3JvbGxBbmltYXRpb24iLCJ1c2VEZWJvdW5jZSIsIlNFT1BhZ2VzTGlzdENvbXBvbmVudCIsImRhdGEiLCJpc0xvYWRpbmciLCJsaXN0UmVmIiwic2VsZWN0ZWRQYWdlIiwic2V0U2VsZWN0ZWRQYWdlIiwiZGV0YWlsc09wZW4iLCJzZXREZXRhaWxzT3BlbiIsInR5cGVGaWx0ZXIiLCJzZXRUeXBlRmlsdGVyIiwic2NvcmVGaWx0ZXIiLCJzZXRTY29yZUZpbHRlciIsInNlYXJjaCIsInNldFNlYXJjaCIsImRlYm91bmNlZFNlYXJjaCIsImZpbHRlcmVkRGF0YSIsImZpbHRlciIsInBhZ2UiLCJtYXRjaFR5cGUiLCJ0eXBlIiwibWF0Y2hTZWFyY2giLCJuYW1lIiwidG9Mb3dlckNhc2UiLCJpbmNsdWRlcyIsInVybCIsInNjb3JlIiwiYW5hbHlzaXMiLCJvdmVyYWxsIiwibWF0Y2hTY29yZSIsImF2ZXJhZ2VTY29yZSIsImxlbmd0aCIsInRvdGFsIiwicmVkdWNlIiwiYWNjIiwiTWF0aCIsInJvdW5kIiwib3B0aW1pemVkQ291bnQiLCJwIiwidG9GaXhDb3VudCIsImdvb2RSYXRlIiwiY29sdW1ucyIsImFjY2Vzc29yS2V5IiwiaGVhZGVyIiwiY2VsbCIsInJvdyIsImRpdiIsImNsYXNzTmFtZSIsIm9yaWdpbmFsIiwidmFyaWFudCIsInZhbHVlIiwic3BhbiIsImlkIiwic2l6ZSIsIm9uQ2xpY2siLCJ3aW5kb3ciLCJvcGVuIiwidGFibGUiLCJyZWYiLCJwbGFjZWhvbGRlciIsIm9uQ2hhbmdlIiwiZSIsInRhcmdldCIsImJ1dHRvbiIsIm1hcCIsImgzIiwibW9iaWxlVmFyaWFudCIsIm9uU2VsZWN0Iiwib25PcGVuQ2hhbmdlIiwiZGlzcGxheU5hbWUiLCJTRU9QYWdlc0xpc3QiLCJtZW1vIiwicHJldlByb3BzIiwibmV4dFByb3BzIiwiZXZlcnkiLCJpbmRleCJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O0FBQUE7QUFFQSxPQUFPQSxTQUFTQyxPQUFPLEVBQUVDLFFBQVEsUUFBUSxRQUFRO0FBQ2pELFNBR0VDLGVBQWUsRUFDZkMsbUJBQW1CLEVBQ25CQyxxQkFBcUIsRUFDckJDLGlCQUFpQixFQUNqQkMsYUFBYSxRQUNSLHdCQUF3QjtBQUMvQixTQUFTQyxJQUFJLEVBQUVDLFdBQVcsRUFBRUMsVUFBVSxFQUFFQyxTQUFTLFFBQVEsdUJBQXVCO0FBQ2hGLFNBQVNDLE1BQU0sUUFBUSx5QkFBeUI7QUFDaEQsU0FBU0MsS0FBSyxRQUFRLHdCQUF3QjtBQUM5QyxTQUFTQyxLQUFLLFFBQVEsd0JBQXdCO0FBQzlDLFNBQVNDLFFBQVEsUUFBUSwyQkFBMkI7QUFDcEQsU0FDRUMsTUFBTSxFQUNOQyxhQUFhLEVBQ2JDLFVBQVUsRUFDVkMsYUFBYSxRQUVSLHlCQUF5QjtBQUVoQyxTQUFTQyxvQkFBb0IsRUFBRUMsYUFBYSxRQUFRLHFCQUFxQjtBQUN6RSxTQUNFQyxHQUFHLEVBQ0hDLFlBQVksRUFDWkMsWUFBWSxFQUNaQyxVQUFVLEVBQ1ZDLFlBQVksRUFDWkMsYUFBYSxFQUNiQyxNQUFNLEVBQ05DLENBQUMsUUFDSSxlQUFlO0FBQ3RCLFNBQVNDLGVBQWUsUUFBUSxvQkFBb0I7QUFDcEQsU0FBU0MsUUFBUSxRQUFRLDJCQUEyQjtBQUNwRCxTQUNFQyxLQUFLLEVBQ0xDLFNBQVMsRUFDVEMsU0FBUyxFQUNUQyxTQUFTLEVBQ1RDLFdBQVcsRUFDWEMsUUFBUSxRQUNILHdCQUF3QjtBQUMvQixTQUFTQyxrQkFBa0IsUUFBUSw2QkFBNkI7QUFDaEUsU0FBU0MsV0FBVyxRQUFRLHNCQUFzQjtBQVNsRCxN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

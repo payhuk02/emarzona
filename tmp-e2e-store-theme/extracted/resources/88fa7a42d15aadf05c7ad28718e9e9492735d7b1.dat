@@ -1,0 +1,108 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/ui/toaster.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/ui/toaster.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=6014a254"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+var _s = $RefreshSig$();
+import { useToast } from "/src/hooks/use-toast.ts";
+import { Toast, ToastClose, ToastDescription, ToastProvider, ToastTitle, ToastViewport } from "/src/components/ui/toast.tsx";
+export function Toaster() {
+    _s();
+    const { toasts } = useToast();
+    return /*#__PURE__*/ _jsxDEV(ToastProvider, {
+        children: [
+            toasts.map(function({ id, title, description, action, ...props }) {
+                return /*#__PURE__*/ _jsxDEV(Toast, {
+                    ...props,
+                    children: [
+                        /*#__PURE__*/ _jsxDEV("div", {
+                            className: "grid gap-1",
+                            children: [
+                                title && /*#__PURE__*/ _jsxDEV(ToastTitle, {
+                                    children: title
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/toaster.tsx",
+                                    lineNumber: 13,
+                                    columnNumber: 25
+                                }, this),
+                                description && /*#__PURE__*/ _jsxDEV(ToastDescription, {
+                                    children: description
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/toaster.tsx",
+                                    lineNumber: 14,
+                                    columnNumber: 31
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/toaster.tsx",
+                            lineNumber: 12,
+                            columnNumber: 13
+                        }, this),
+                        action,
+                        /*#__PURE__*/ _jsxDEV(ToastClose, {}, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/toaster.tsx",
+                            lineNumber: 17,
+                            columnNumber: 13
+                        }, this)
+                    ]
+                }, id, true, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/toaster.tsx",
+                    lineNumber: 11,
+                    columnNumber: 11
+                }, this);
+            }),
+            /*#__PURE__*/ _jsxDEV(ToastViewport, {}, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/toaster.tsx",
+                lineNumber: 21,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/toaster.tsx",
+        lineNumber: 8,
+        columnNumber: 5
+    }, this);
+}
+_s(Toaster, "1YTCnXrq2qRowe0H/LBWLjtXoYc=", false, function() {
+    return [
+        useToast
+    ];
+});
+_c = Toaster;
+var _c;
+$RefreshReg$(_c, "Toaster");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/ui/toaster.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/ui/toaster.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInRvYXN0ZXIudHN4Il0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7IHVzZVRvYXN0IH0gZnJvbSBcIkAvaG9va3MvdXNlLXRvYXN0XCI7XG5pbXBvcnQgeyBUb2FzdCwgVG9hc3RDbG9zZSwgVG9hc3REZXNjcmlwdGlvbiwgVG9hc3RQcm92aWRlciwgVG9hc3RUaXRsZSwgVG9hc3RWaWV3cG9ydCB9IGZyb20gXCJAL2NvbXBvbmVudHMvdWkvdG9hc3RcIjtcblxuZXhwb3J0IGZ1bmN0aW9uIFRvYXN0ZXIoKSB7XG4gIGNvbnN0IHsgdG9hc3RzIH0gPSB1c2VUb2FzdCgpO1xuXG4gIHJldHVybiAoXG4gICAgPFRvYXN0UHJvdmlkZXI+XG4gICAgICB7dG9hc3RzLm1hcChmdW5jdGlvbiAoeyBpZCwgdGl0bGUsIGRlc2NyaXB0aW9uLCBhY3Rpb24sIC4uLnByb3BzIH0pIHtcbiAgICAgICAgcmV0dXJuIChcbiAgICAgICAgICA8VG9hc3Qga2V5PXtpZH0gey4uLnByb3BzfT5cbiAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZ3JpZCBnYXAtMVwiPlxuICAgICAgICAgICAgICB7dGl0bGUgJiYgPFRvYXN0VGl0bGU+e3RpdGxlfTwvVG9hc3RUaXRsZT59XG4gICAgICAgICAgICAgIHtkZXNjcmlwdGlvbiAmJiA8VG9hc3REZXNjcmlwdGlvbj57ZGVzY3JpcHRpb259PC9Ub2FzdERlc2NyaXB0aW9uPn1cbiAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAge2FjdGlvbn1cbiAgICAgICAgICAgIDxUb2FzdENsb3NlIC8+XG4gICAgICAgICAgPC9Ub2FzdD5cbiAgICAgICAgKTtcbiAgICAgIH0pfVxuICAgICAgPFRvYXN0Vmlld3BvcnQgLz5cbiAgICA8L1RvYXN0UHJvdmlkZXI+XG4gICk7XG59XG5cblxuXG5cblxuXG4iXSwibmFtZXMiOlsidXNlVG9hc3QiLCJUb2FzdCIsIlRvYXN0Q2xvc2UiLCJUb2FzdERlc2NyaXB0aW9uIiwiVG9hc3RQcm92aWRlciIsIlRvYXN0VGl0bGUiLCJUb2FzdFZpZXdwb3J0IiwiVG9hc3RlciIsInRvYXN0cyIsIm1hcCIsImlkIiwidGl0bGUiLCJkZXNjcmlwdGlvbiIsImFjdGlvbiIsInByb3BzIiwiZGl2IiwiY2xhc3NOYW1lIl0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7QUFBQSxTQUFTQSxRQUFRLFFBQVEsb0JBQW9CO0FBQzdDLFNBQVNDLEtBQUssRUFBRUMsVUFBVSxFQUFFQyxnQkFBZ0IsRUFBRUMsYUFBYSxFQUFFQyxVQUFVLEVBQUVDLGFBQWEsUUFBUSx3QkFBd0I7QUFFdEgsT0FBTyxTQUFTQzs7SUFDZCxNQUFNLEVBQUVDLE1BQU0sRUFBRSxHQUFHUjtJQUVuQixxQkFDRSxRQUFDSTs7WUFDRUksT0FBT0MsR0FBRyxDQUFDLFNBQVUsRUFBRUMsRUFBRSxFQUFFQyxLQUFLLEVBQUVDLFdBQVcsRUFBRUMsTUFBTSxFQUFFLEdBQUdDLE9BQU87Z0JBQ2hFLHFCQUNFLFFBQUNiO29CQUFnQixHQUFHYSxLQUFLOztzQ0FDdkIsUUFBQ0M7NEJBQUlDLFdBQVU7O2dDQUNaTCx1QkFBUyxRQUFDTjs4Q0FBWU07Ozs7OztnQ0FDdEJDLDZCQUFlLFFBQUNUOzhDQUFrQlM7Ozs7Ozs7Ozs7Ozt3QkFFcENDO3NDQUNELFFBQUNYOzs7Ozs7bUJBTlNROzs7OztZQVNoQjswQkFDQSxRQUFDSjs7Ozs7Ozs7Ozs7QUFHUDtHQXBCZ0JDOztRQUNLUDs7O0tBRExPIn0=

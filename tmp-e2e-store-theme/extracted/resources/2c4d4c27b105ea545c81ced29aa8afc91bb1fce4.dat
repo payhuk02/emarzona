@@ -1,0 +1,335 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/storefront/StoreSubdomainNav.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/storefront/StoreSubdomainNav.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=6014a254"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+var _s = $RefreshSig$();
+/**
+ * Navigation spécifique aux sous-domaines de boutiques (*.myemarzona.shop)
+ * Affiche les liens vers les sections de la boutique : Boutique, Portfolio, Collections, Enchères
+ * Utilise les couleurs du thème de la boutique si disponibles
+ */ import { Link, useLocation } from "/node_modules/.vite/deps/react-router-dom.js?v=6014a254";
+import { Store, Palette, FolderOpen, Gavel, ShoppingCart, Menu, X } from "/node_modules/.vite/deps/lucide-react.js?v=6014a254";
+import __vite__cjsImport5_react from "/node_modules/.vite/deps/react.js?v=6014a254"; const useState = __vite__cjsImport5_react["useState"]; const useMemo = __vite__cjsImport5_react["useMemo"];
+import { Button } from "/src/components/ui/button.tsx";
+import { cn } from "/src/lib/utils.ts";
+import { isNavItemActive } from "/src/config/navigation.helpers.ts";
+import { parseStoreCommerceType } from "/src/lib/billing/store-commerce-access.ts";
+/**
+ * Convertit un hex en rgba avec opacité
+ */ function hexToRgba(hex, alpha) {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+export function StoreSubdomainNav({ storeName, logoUrl, themeColors, commerceType }) {
+    _s();
+    const location = useLocation();
+    const [mobileOpen, setMobileOpen] = useState(false);
+    const hasTheme = themeColors?.primaryColor;
+    const effectiveCommerceType = parseStoreCommerceType(commerceType);
+    const navItems = useMemo(()=>{
+        const items = [
+            {
+                label: 'Boutique',
+                path: '/',
+                icon: Store
+            }
+        ];
+        if (effectiveCommerceType === 'artist' || effectiveCommerceType === 'digital') {
+            items.push({
+                label: 'Portfolio',
+                path: '/portfolio',
+                icon: Palette
+            });
+        }
+        if (effectiveCommerceType !== 'service') {
+            items.push({
+                label: 'Collections',
+                path: '/collections',
+                icon: FolderOpen
+            });
+        }
+        if (effectiveCommerceType === 'artist') {
+            items.push({
+                label: 'Enchères',
+                path: '/auctions',
+                icon: Gavel
+            });
+        }
+        return items;
+    }, [
+        effectiveCommerceType
+    ]);
+    const navStyle = useMemo(()=>{
+        if (!hasTheme) return {};
+        return {
+            backgroundColor: themeColors.backgroundColor || undefined,
+            borderColor: themeColors.primaryColor ? hexToRgba(themeColors.primaryColor, 0.15) : undefined,
+            color: themeColors.textColor || undefined
+        };
+    }, [
+        themeColors,
+        hasTheme
+    ]);
+    const isActive = (path)=>isNavItemActive(path, location.pathname, location.search, 'prefix');
+    const getItemStyle = (active)=>{
+        if (!hasTheme) return {};
+        if (active) {
+            return {
+                backgroundColor: hexToRgba(themeColors.primaryColor, 0.12),
+                color: themeColors.primaryColor
+            };
+        }
+        return {
+            color: themeColors.textColor ? hexToRgba(themeColors.textColor, 0.65) : undefined
+        };
+    };
+    const logoStyle = useMemo(()=>{
+        if (!hasTheme) return {};
+        return {
+            color: themeColors.primaryColor
+        };
+    }, [
+        themeColors,
+        hasTheme
+    ]);
+    return /*#__PURE__*/ _jsxDEV("nav", {
+        className: "sticky top-0 z-50 w-full border-b backdrop-blur bg-background/95 supports-[backdrop-filter]:bg-background/60",
+        style: navStyle,
+        children: [
+            /*#__PURE__*/ _jsxDEV("div", {
+                className: "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8",
+                children: /*#__PURE__*/ _jsxDEV("div", {
+                    className: "flex h-14 items-center justify-between",
+                    children: [
+                        /*#__PURE__*/ _jsxDEV(Link, {
+                            to: "/",
+                            className: "flex items-center gap-2 flex-shrink-0",
+                            children: [
+                                logoUrl ? /*#__PURE__*/ _jsxDEV("img", {
+                                    src: logoUrl,
+                                    alt: storeName || 'Boutique',
+                                    className: "h-8 w-8 rounded-full object-cover"
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/storefront/StoreSubdomainNav.tsx",
+                                    lineNumber: 111,
+                                    columnNumber: 15
+                                }, this) : /*#__PURE__*/ _jsxDEV(Store, {
+                                    className: "h-5 w-5",
+                                    style: logoStyle
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/storefront/StoreSubdomainNav.tsx",
+                                    lineNumber: 117,
+                                    columnNumber: 15
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV("span", {
+                                    className: "font-semibold text-sm sm:text-base truncate max-w-[150px] sm:max-w-[200px]",
+                                    style: {
+                                        color: themeColors?.textColor || undefined
+                                    },
+                                    children: storeName || 'Boutique'
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/storefront/StoreSubdomainNav.tsx",
+                                    lineNumber: 119,
+                                    columnNumber: 13
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/storefront/StoreSubdomainNav.tsx",
+                            lineNumber: 109,
+                            columnNumber: 11
+                        }, this),
+                        /*#__PURE__*/ _jsxDEV("div", {
+                            className: "hidden md:flex items-center gap-1",
+                            children: navItems.map((item)=>{
+                                const active = isActive(item.path);
+                                return /*#__PURE__*/ _jsxDEV(Link, {
+                                    to: item.path,
+                                    className: cn('flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition-colors', !hasTheme && (active ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50')),
+                                    style: getItemStyle(active),
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV(item.icon, {
+                                            className: "h-4 w-4"
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/storefront/StoreSubdomainNav.tsx",
+                                            lineNumber: 144,
+                                            columnNumber: 19
+                                        }, this),
+                                        item.label
+                                    ]
+                                }, item.path, true, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/storefront/StoreSubdomainNav.tsx",
+                                    lineNumber: 132,
+                                    columnNumber: 17
+                                }, this);
+                            })
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/storefront/StoreSubdomainNav.tsx",
+                            lineNumber: 128,
+                            columnNumber: 11
+                        }, this),
+                        /*#__PURE__*/ _jsxDEV("div", {
+                            className: "flex items-center gap-2",
+                            children: [
+                                /*#__PURE__*/ _jsxDEV(Link, {
+                                    to: "/cart",
+                                    children: /*#__PURE__*/ _jsxDEV(Button, {
+                                        variant: "ghost",
+                                        size: "icon",
+                                        className: "relative",
+                                        style: {
+                                            color: themeColors?.textColor || undefined
+                                        },
+                                        children: /*#__PURE__*/ _jsxDEV(ShoppingCart, {
+                                            className: "h-5 w-5"
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/storefront/StoreSubdomainNav.tsx",
+                                            lineNumber: 160,
+                                            columnNumber: 17
+                                        }, this)
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/storefront/StoreSubdomainNav.tsx",
+                                        lineNumber: 154,
+                                        columnNumber: 15
+                                    }, this)
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/storefront/StoreSubdomainNav.tsx",
+                                    lineNumber: 153,
+                                    columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV(Button, {
+                                    variant: "ghost",
+                                    size: "icon",
+                                    className: "md:hidden",
+                                    onClick: ()=>setMobileOpen(!mobileOpen),
+                                    "aria-label": "Menu",
+                                    style: {
+                                        color: themeColors?.textColor || undefined
+                                    },
+                                    children: mobileOpen ? /*#__PURE__*/ _jsxDEV(X, {
+                                        className: "h-5 w-5"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/storefront/StoreSubdomainNav.tsx",
+                                        lineNumber: 171,
+                                        columnNumber: 29
+                                    }, this) : /*#__PURE__*/ _jsxDEV(Menu, {
+                                        className: "h-5 w-5"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/storefront/StoreSubdomainNav.tsx",
+                                        lineNumber: 171,
+                                        columnNumber: 57
+                                    }, this)
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/storefront/StoreSubdomainNav.tsx",
+                                    lineNumber: 163,
+                                    columnNumber: 13
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/storefront/StoreSubdomainNav.tsx",
+                            lineNumber: 152,
+                            columnNumber: 11
+                        }, this)
+                    ]
+                }, void 0, true, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/storefront/StoreSubdomainNav.tsx",
+                    lineNumber: 107,
+                    columnNumber: 9
+                }, this)
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/storefront/StoreSubdomainNav.tsx",
+                lineNumber: 106,
+                columnNumber: 7
+            }, this),
+            mobileOpen && /*#__PURE__*/ _jsxDEV("div", {
+                className: "md:hidden border-t",
+                style: {
+                    backgroundColor: themeColors?.backgroundColor || undefined
+                },
+                children: /*#__PURE__*/ _jsxDEV("div", {
+                    className: "px-4 py-2 space-y-1",
+                    children: navItems.map((item)=>{
+                        const active = isActive(item.path);
+                        return /*#__PURE__*/ _jsxDEV(Link, {
+                            to: item.path,
+                            onClick: ()=>setMobileOpen(false),
+                            className: cn('flex items-center gap-2 px-3 py-2.5 rounded-md text-sm font-medium transition-colors', !hasTheme && (active ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50')),
+                            style: getItemStyle(active),
+                            children: [
+                                /*#__PURE__*/ _jsxDEV(item.icon, {
+                                    className: "h-4 w-4"
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/storefront/StoreSubdomainNav.tsx",
+                                    lineNumber: 200,
+                                    columnNumber: 19
+                                }, this),
+                                item.label
+                            ]
+                        }, item.path, true, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/storefront/StoreSubdomainNav.tsx",
+                            lineNumber: 187,
+                            columnNumber: 17
+                        }, this);
+                    })
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/storefront/StoreSubdomainNav.tsx",
+                    lineNumber: 183,
+                    columnNumber: 11
+                }, this)
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/storefront/StoreSubdomainNav.tsx",
+                lineNumber: 179,
+                columnNumber: 9
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/storefront/StoreSubdomainNav.tsx",
+        lineNumber: 102,
+        columnNumber: 5
+    }, this);
+}
+_s(StoreSubdomainNav, "etBlVvOLZVtlE3LQlZSSVoFHuTc=", false, function() {
+    return [
+        useLocation
+    ];
+});
+_c = StoreSubdomainNav;
+var _c;
+$RefreshReg$(_c, "StoreSubdomainNav");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/storefront/StoreSubdomainNav.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/storefront/StoreSubdomainNav.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIlN0b3JlU3ViZG9tYWluTmF2LnRzeCJdLCJzb3VyY2VzQ29udGVudCI6WyIvKipcbiAqIE5hdmlnYXRpb24gc3DDqWNpZmlxdWUgYXV4IHNvdXMtZG9tYWluZXMgZGUgYm91dGlxdWVzICgqLm15ZW1hcnpvbmEuc2hvcClcbiAqIEFmZmljaGUgbGVzIGxpZW5zIHZlcnMgbGVzIHNlY3Rpb25zIGRlIGxhIGJvdXRpcXVlIDogQm91dGlxdWUsIFBvcnRmb2xpbywgQ29sbGVjdGlvbnMsIEVuY2jDqHJlc1xuICogVXRpbGlzZSBsZXMgY291bGV1cnMgZHUgdGjDqG1lIGRlIGxhIGJvdXRpcXVlIHNpIGRpc3BvbmlibGVzXG4gKi9cblxuaW1wb3J0IHsgTGluaywgdXNlTG9jYXRpb24gfSBmcm9tICdyZWFjdC1yb3V0ZXItZG9tJztcbmltcG9ydCB7IFN0b3JlLCBQYWxldHRlLCBGb2xkZXJPcGVuLCBHYXZlbCwgU2hvcHBpbmdDYXJ0LCBNZW51LCBYIH0gZnJvbSAnbHVjaWRlLXJlYWN0JztcbmltcG9ydCB7IHVzZVN0YXRlLCB1c2VNZW1vLCBDU1NQcm9wZXJ0aWVzIH0gZnJvbSAncmVhY3QnO1xuaW1wb3J0IHsgQnV0dG9uIH0gZnJvbSAnQC9jb21wb25lbnRzL3VpL2J1dHRvbic7XG5pbXBvcnQgeyBjbiB9IGZyb20gJ0AvbGliL3V0aWxzJztcbmltcG9ydCB7IGlzTmF2SXRlbUFjdGl2ZSB9IGZyb20gJ0AvY29uZmlnL25hdmlnYXRpb24uaGVscGVycyc7XG5pbXBvcnQgdHlwZSB7IFN0b3JlQ29tbWVyY2VUeXBlIH0gZnJvbSAnQC9jb25zdGFudHMvc3RvcmUtY29tbWVyY2UtdHlwZXMnO1xuaW1wb3J0IHsgcGFyc2VTdG9yZUNvbW1lcmNlVHlwZSB9IGZyb20gJ0AvbGliL2JpbGxpbmcvc3RvcmUtY29tbWVyY2UtYWNjZXNzJztcblxuaW50ZXJmYWNlIFN0b3JlVGhlbWVDb2xvcnMge1xuICBwcmltYXJ5Q29sb3I/OiBzdHJpbmc7XG4gIHNlY29uZGFyeUNvbG9yPzogc3RyaW5nO1xuICBhY2NlbnRDb2xvcj86IHN0cmluZztcbiAgYmFja2dyb3VuZENvbG9yPzogc3RyaW5nO1xuICB0ZXh0Q29sb3I/OiBzdHJpbmc7XG59XG5cbmludGVyZmFjZSBTdG9yZVN1YmRvbWFpbk5hdlByb3BzIHtcbiAgc3RvcmVOYW1lPzogc3RyaW5nO1xuICBsb2dvVXJsPzogc3RyaW5nO1xuICB0aGVtZUNvbG9ycz86IFN0b3JlVGhlbWVDb2xvcnM7XG4gIGNvbW1lcmNlVHlwZT86IFN0b3JlQ29tbWVyY2VUeXBlIHwgbnVsbDtcbn1cblxuLyoqXG4gKiBDb252ZXJ0aXQgdW4gaGV4IGVuIHJnYmEgYXZlYyBvcGFjaXTDqVxuICovXG5mdW5jdGlvbiBoZXhUb1JnYmEoaGV4OiBzdHJpbmcsIGFscGhhOiBudW1iZXIpOiBzdHJpbmcge1xuICBjb25zdCByID0gcGFyc2VJbnQoaGV4LnNsaWNlKDEsIDMpLCAxNik7XG4gIGNvbnN0IGcgPSBwYXJzZUludChoZXguc2xpY2UoMywgNSksIDE2KTtcbiAgY29uc3QgYiA9IHBhcnNlSW50KGhleC5zbGljZSg1LCA3KSwgMTYpO1xuICByZXR1cm4gYHJnYmEoJHtyfSwgJHtnfSwgJHtifSwgJHthbHBoYX0pYDtcbn1cblxuZXhwb3J0IGZ1bmN0aW9uIFN0b3JlU3ViZG9tYWluTmF2KHtcbiAgc3RvcmVOYW1lLFxuICBsb2dvVXJsLFxuICB0aGVtZUNvbG9ycyxcbiAgY29tbWVyY2VUeXBlLFxufTogU3RvcmVTdWJkb21haW5OYXZQcm9wcykge1xuICBjb25zdCBsb2NhdGlvbiA9IHVzZUxvY2F0aW9uKCk7XG4gIGNvbnN0IFttb2JpbGVPcGVuLCBzZXRNb2JpbGVPcGVuXSA9IHVzZVN0YXRlKGZhbHNlKTtcblxuICBjb25zdCBoYXNUaGVtZSA9IHRoZW1lQ29sb3JzPy5wcmltYXJ5Q29sb3I7XG4gIGNvbnN0IGVmZmVjdGl2ZUNvbW1lcmNlVHlwZSA9IHBhcnNlU3RvcmVDb21tZXJjZVR5cGUoY29tbWVyY2VUeXBlKTtcblxuICBjb25zdCBuYXZJdGVtcyA9IHVzZU1lbW8oKCkgPT4ge1xuICAgIGNvbnN0IGl0ZW1zID0gW3sgbGFiZWw6ICdCb3V0aXF1ZScsIHBhdGg6ICcvJywgaWNvbjogU3RvcmUgfV07XG5cbiAgICBpZiAoZWZmZWN0aXZlQ29tbWVyY2VUeXBlID09PSAnYXJ0aXN0JyB8fCBlZmZlY3RpdmVDb21tZXJjZVR5cGUgPT09ICdkaWdpdGFsJykge1xuICAgICAgaXRlbXMucHVzaCh7IGxhYmVsOiAnUG9ydGZvbGlvJywgcGF0aDogJy9wb3J0Zm9saW8nLCBpY29uOiBQYWxldHRlIH0pO1xuICAgIH1cblxuICAgIGlmIChlZmZlY3RpdmVDb21tZXJjZVR5cGUgIT09ICdzZXJ2aWNlJykge1xuICAgICAgaXRlbXMucHVzaCh7IGxhYmVsOiAnQ29sbGVjdGlvbnMnLCBwYXRoOiAnL2NvbGxlY3Rpb25zJywgaWNvbjogRm9sZGVyT3BlbiB9KTtcbiAgICB9XG5cbiAgICBpZiAoZWZmZWN0aXZlQ29tbWVyY2VUeXBlID09PSAnYXJ0aXN0Jykge1xuICAgICAgaXRlbXMucHVzaCh7IGxhYmVsOiAnRW5jaMOocmVzJywgcGF0aDogJy9hdWN0aW9ucycsIGljb246IEdhdmVsIH0pO1xuICAgIH1cblxuICAgIHJldHVybiBpdGVtcztcbiAgfSwgW2VmZmVjdGl2ZUNvbW1lcmNlVHlwZV0pO1xuXG4gIGNvbnN0IG5hdlN0eWxlID0gdXNlTWVtbzxDU1NQcm9wZXJ0aWVzPigoKSA9PiB7XG4gICAgaWYgKCFoYXNUaGVtZSkgcmV0dXJuIHt9O1xuICAgIHJldHVybiB7XG4gICAgICBiYWNrZ3JvdW5kQ29sb3I6IHRoZW1lQ29sb3JzLmJhY2tncm91bmRDb2xvciB8fCB1bmRlZmluZWQsXG4gICAgICBib3JkZXJDb2xvcjogdGhlbWVDb2xvcnMucHJpbWFyeUNvbG9yID8gaGV4VG9SZ2JhKHRoZW1lQ29sb3JzLnByaW1hcnlDb2xvciwgMC4xNSkgOiB1bmRlZmluZWQsXG4gICAgICBjb2xvcjogdGhlbWVDb2xvcnMudGV4dENvbG9yIHx8IHVuZGVmaW5lZCxcbiAgICB9O1xuICB9LCBbdGhlbWVDb2xvcnMsIGhhc1RoZW1lXSk7XG5cbiAgY29uc3QgaXNBY3RpdmUgPSAocGF0aDogc3RyaW5nKSA9PlxuICAgIGlzTmF2SXRlbUFjdGl2ZShwYXRoLCBsb2NhdGlvbi5wYXRobmFtZSwgbG9jYXRpb24uc2VhcmNoLCAncHJlZml4Jyk7XG5cbiAgY29uc3QgZ2V0SXRlbVN0eWxlID0gKGFjdGl2ZTogYm9vbGVhbik6IENTU1Byb3BlcnRpZXMgPT4ge1xuICAgIGlmICghaGFzVGhlbWUpIHJldHVybiB7fTtcbiAgICBpZiAoYWN0aXZlKSB7XG4gICAgICByZXR1cm4ge1xuICAgICAgICBiYWNrZ3JvdW5kQ29sb3I6IGhleFRvUmdiYSh0aGVtZUNvbG9ycy5wcmltYXJ5Q29sb3IhLCAwLjEyKSxcbiAgICAgICAgY29sb3I6IHRoZW1lQ29sb3JzLnByaW1hcnlDb2xvcixcbiAgICAgIH07XG4gICAgfVxuICAgIHJldHVybiB7XG4gICAgICBjb2xvcjogdGhlbWVDb2xvcnMudGV4dENvbG9yID8gaGV4VG9SZ2JhKHRoZW1lQ29sb3JzLnRleHRDb2xvciwgMC42NSkgOiB1bmRlZmluZWQsXG4gICAgfTtcbiAgfTtcblxuICBjb25zdCBsb2dvU3R5bGUgPSB1c2VNZW1vPENTU1Byb3BlcnRpZXM+KCgpID0+IHtcbiAgICBpZiAoIWhhc1RoZW1lKSByZXR1cm4ge307XG4gICAgcmV0dXJuIHsgY29sb3I6IHRoZW1lQ29sb3JzLnByaW1hcnlDb2xvciB9O1xuICB9LCBbdGhlbWVDb2xvcnMsIGhhc1RoZW1lXSk7XG5cbiAgcmV0dXJuIChcbiAgICA8bmF2XG4gICAgICBjbGFzc05hbWU9XCJzdGlja3kgdG9wLTAgei01MCB3LWZ1bGwgYm9yZGVyLWIgYmFja2Ryb3AtYmx1ciBiZy1iYWNrZ3JvdW5kLzk1IHN1cHBvcnRzLVtiYWNrZHJvcC1maWx0ZXJdOmJnLWJhY2tncm91bmQvNjBcIlxuICAgICAgc3R5bGU9e25hdlN0eWxlfVxuICAgID5cbiAgICAgIDxkaXYgY2xhc3NOYW1lPVwibWF4LXctN3hsIG14LWF1dG8gcHgtNCBzbTpweC02IGxnOnB4LThcIj5cbiAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGgtMTQgaXRlbXMtY2VudGVyIGp1c3RpZnktYmV0d2VlblwiPlxuICAgICAgICAgIHsvKiBMb2dvIC8gU3RvcmUgbmFtZSAqL31cbiAgICAgICAgICA8TGluayB0bz1cIi9cIiBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLWNlbnRlciBnYXAtMiBmbGV4LXNocmluay0wXCI+XG4gICAgICAgICAgICB7bG9nb1VybCA/IChcbiAgICAgICAgICAgICAgPGltZ1xuICAgICAgICAgICAgICAgIHNyYz17bG9nb1VybH1cbiAgICAgICAgICAgICAgICBhbHQ9e3N0b3JlTmFtZSB8fCAnQm91dGlxdWUnfVxuICAgICAgICAgICAgICAgIGNsYXNzTmFtZT1cImgtOCB3LTggcm91bmRlZC1mdWxsIG9iamVjdC1jb3ZlclwiXG4gICAgICAgICAgICAgIC8+XG4gICAgICAgICAgICApIDogKFxuICAgICAgICAgICAgICA8U3RvcmUgY2xhc3NOYW1lPVwiaC01IHctNVwiIHN0eWxlPXtsb2dvU3R5bGV9IC8+XG4gICAgICAgICAgICApfVxuICAgICAgICAgICAgPHNwYW5cbiAgICAgICAgICAgICAgY2xhc3NOYW1lPVwiZm9udC1zZW1pYm9sZCB0ZXh0LXNtIHNtOnRleHQtYmFzZSB0cnVuY2F0ZSBtYXgtdy1bMTUwcHhdIHNtOm1heC13LVsyMDBweF1cIlxuICAgICAgICAgICAgICBzdHlsZT17eyBjb2xvcjogdGhlbWVDb2xvcnM/LnRleHRDb2xvciB8fCB1bmRlZmluZWQgfX1cbiAgICAgICAgICAgID5cbiAgICAgICAgICAgICAge3N0b3JlTmFtZSB8fCAnQm91dGlxdWUnfVxuICAgICAgICAgICAgPC9zcGFuPlxuICAgICAgICAgIDwvTGluaz5cblxuICAgICAgICAgIHsvKiBEZXNrdG9wIG5hdiAqL31cbiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImhpZGRlbiBtZDpmbGV4IGl0ZW1zLWNlbnRlciBnYXAtMVwiPlxuICAgICAgICAgICAge25hdkl0ZW1zLm1hcChpdGVtID0+IHtcbiAgICAgICAgICAgICAgY29uc3QgYWN0aXZlID0gaXNBY3RpdmUoaXRlbS5wYXRoKTtcbiAgICAgICAgICAgICAgcmV0dXJuIChcbiAgICAgICAgICAgICAgICA8TGlua1xuICAgICAgICAgICAgICAgICAga2V5PXtpdGVtLnBhdGh9XG4gICAgICAgICAgICAgICAgICB0bz17aXRlbS5wYXRofVxuICAgICAgICAgICAgICAgICAgY2xhc3NOYW1lPXtjbihcbiAgICAgICAgICAgICAgICAgICAgJ2ZsZXggaXRlbXMtY2VudGVyIGdhcC0xLjUgcHgtMyBweS0yIHJvdW5kZWQtbWQgdGV4dC1zbSBmb250LW1lZGl1bSB0cmFuc2l0aW9uLWNvbG9ycycsXG4gICAgICAgICAgICAgICAgICAgICFoYXNUaGVtZSAmJlxuICAgICAgICAgICAgICAgICAgICAgIChhY3RpdmVcbiAgICAgICAgICAgICAgICAgICAgICAgID8gJ2JnLXByaW1hcnkvMTAgdGV4dC1wcmltYXJ5J1xuICAgICAgICAgICAgICAgICAgICAgICAgOiAndGV4dC1tdXRlZC1mb3JlZ3JvdW5kIGhvdmVyOnRleHQtZm9yZWdyb3VuZCBob3ZlcjpiZy1tdXRlZC81MCcpXG4gICAgICAgICAgICAgICAgICApfVxuICAgICAgICAgICAgICAgICAgc3R5bGU9e2dldEl0ZW1TdHlsZShhY3RpdmUpfVxuICAgICAgICAgICAgICAgID5cbiAgICAgICAgICAgICAgICAgIDxpdGVtLmljb24gY2xhc3NOYW1lPVwiaC00IHctNFwiIC8+XG4gICAgICAgICAgICAgICAgICB7aXRlbS5sYWJlbH1cbiAgICAgICAgICAgICAgICA8L0xpbms+XG4gICAgICAgICAgICAgICk7XG4gICAgICAgICAgICB9KX1cbiAgICAgICAgICA8L2Rpdj5cblxuICAgICAgICAgIHsvKiBDYXJ0ICsgbW9iaWxlIHRvZ2dsZSAqL31cbiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGdhcC0yXCI+XG4gICAgICAgICAgICA8TGluayB0bz1cIi9jYXJ0XCI+XG4gICAgICAgICAgICAgIDxCdXR0b25cbiAgICAgICAgICAgICAgICB2YXJpYW50PVwiZ2hvc3RcIlxuICAgICAgICAgICAgICAgIHNpemU9XCJpY29uXCJcbiAgICAgICAgICAgICAgICBjbGFzc05hbWU9XCJyZWxhdGl2ZVwiXG4gICAgICAgICAgICAgICAgc3R5bGU9e3sgY29sb3I6IHRoZW1lQ29sb3JzPy50ZXh0Q29sb3IgfHwgdW5kZWZpbmVkIH19XG4gICAgICAgICAgICAgID5cbiAgICAgICAgICAgICAgICA8U2hvcHBpbmdDYXJ0IGNsYXNzTmFtZT1cImgtNSB3LTVcIiAvPlxuICAgICAgICAgICAgICA8L0J1dHRvbj5cbiAgICAgICAgICAgIDwvTGluaz5cbiAgICAgICAgICAgIDxCdXR0b25cbiAgICAgICAgICAgICAgdmFyaWFudD1cImdob3N0XCJcbiAgICAgICAgICAgICAgc2l6ZT1cImljb25cIlxuICAgICAgICAgICAgICBjbGFzc05hbWU9XCJtZDpoaWRkZW5cIlxuICAgICAgICAgICAgICBvbkNsaWNrPXsoKSA9PiBzZXRNb2JpbGVPcGVuKCFtb2JpbGVPcGVuKX1cbiAgICAgICAgICAgICAgYXJpYS1sYWJlbD1cIk1lbnVcIlxuICAgICAgICAgICAgICBzdHlsZT17eyBjb2xvcjogdGhlbWVDb2xvcnM/LnRleHRDb2xvciB8fCB1bmRlZmluZWQgfX1cbiAgICAgICAgICAgID5cbiAgICAgICAgICAgICAge21vYmlsZU9wZW4gPyA8WCBjbGFzc05hbWU9XCJoLTUgdy01XCIgLz4gOiA8TWVudSBjbGFzc05hbWU9XCJoLTUgdy01XCIgLz59XG4gICAgICAgICAgICA8L0J1dHRvbj5cbiAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgPC9kaXY+XG4gICAgICA8L2Rpdj5cblxuICAgICAgey8qIE1vYmlsZSBtZW51ICovfVxuICAgICAge21vYmlsZU9wZW4gJiYgKFxuICAgICAgICA8ZGl2XG4gICAgICAgICAgY2xhc3NOYW1lPVwibWQ6aGlkZGVuIGJvcmRlci10XCJcbiAgICAgICAgICBzdHlsZT17eyBiYWNrZ3JvdW5kQ29sb3I6IHRoZW1lQ29sb3JzPy5iYWNrZ3JvdW5kQ29sb3IgfHwgdW5kZWZpbmVkIH19XG4gICAgICAgID5cbiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInB4LTQgcHktMiBzcGFjZS15LTFcIj5cbiAgICAgICAgICAgIHtuYXZJdGVtcy5tYXAoaXRlbSA9PiB7XG4gICAgICAgICAgICAgIGNvbnN0IGFjdGl2ZSA9IGlzQWN0aXZlKGl0ZW0ucGF0aCk7XG4gICAgICAgICAgICAgIHJldHVybiAoXG4gICAgICAgICAgICAgICAgPExpbmtcbiAgICAgICAgICAgICAgICAgIGtleT17aXRlbS5wYXRofVxuICAgICAgICAgICAgICAgICAgdG89e2l0ZW0ucGF0aH1cbiAgICAgICAgICAgICAgICAgIG9uQ2xpY2s9eygpID0+IHNldE1vYmlsZU9wZW4oZmFsc2UpfVxuICAgICAgICAgICAgICAgICAgY2xhc3NOYW1lPXtjbihcbiAgICAgICAgICAgICAgICAgICAgJ2ZsZXggaXRlbXMtY2VudGVyIGdhcC0yIHB4LTMgcHktMi41IHJvdW5kZWQtbWQgdGV4dC1zbSBmb250LW1lZGl1bSB0cmFuc2l0aW9uLWNvbG9ycycsXG4gICAgICAgICAgICAgICAgICAgICFoYXNUaGVtZSAmJlxuICAgICAgICAgICAgICAgICAgICAgIChhY3RpdmVcbiAgICAgICAgICAgICAgICAgICAgICAgID8gJ2JnLXByaW1hcnkvMTAgdGV4dC1wcmltYXJ5J1xuICAgICAgICAgICAgICAgICAgICAgICAgOiAndGV4dC1tdXRlZC1mb3JlZ3JvdW5kIGhvdmVyOnRleHQtZm9yZWdyb3VuZCBob3ZlcjpiZy1tdXRlZC81MCcpXG4gICAgICAgICAgICAgICAgICApfVxuICAgICAgICAgICAgICAgICAgc3R5bGU9e2dldEl0ZW1TdHlsZShhY3RpdmUpfVxuICAgICAgICAgICAgICAgID5cbiAgICAgICAgICAgICAgICAgIDxpdGVtLmljb24gY2xhc3NOYW1lPVwiaC00IHctNFwiIC8+XG4gICAgICAgICAgICAgICAgICB7aXRlbS5sYWJlbH1cbiAgICAgICAgICAgICAgICA8L0xpbms+XG4gICAgICAgICAgICAgICk7XG4gICAgICAgICAgICB9KX1cbiAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgPC9kaXY+XG4gICAgICApfVxuICAgIDwvbmF2PlxuICApO1xufVxuIl0sIm5hbWVzIjpbIkxpbmsiLCJ1c2VMb2NhdGlvbiIsIlN0b3JlIiwiUGFsZXR0ZSIsIkZvbGRlck9wZW4iLCJHYXZlbCIsIlNob3BwaW5nQ2FydCIsIk1lbnUiLCJYIiwidXNlU3RhdGUiLCJ1c2VNZW1vIiwiQnV0dG9uIiwiY24iLCJpc05hdkl0ZW1BY3RpdmUiLCJwYXJzZVN0b3JlQ29tbWVyY2VUeXBlIiwiaGV4VG9SZ2JhIiwiaGV4IiwiYWxwaGEiLCJyIiwicGFyc2VJbnQiLCJzbGljZSIsImciLCJiIiwiU3RvcmVTdWJkb21haW5OYXYiLCJzdG9yZU5hbWUiLCJsb2dvVXJsIiwidGhlbWVDb2xvcnMiLCJjb21tZXJjZVR5cGUiLCJsb2NhdGlvbiIsIm1vYmlsZU9wZW4iLCJzZXRNb2JpbGVPcGVuIiwiaGFzVGhlbWUiLCJwcmltYXJ5Q29sb3IiLCJlZmZlY3RpdmVDb21tZXJjZVR5cGUiLCJuYXZJdGVtcyIsIml0ZW1zIiwibGFiZWwiLCJwYXRoIiwiaWNvbiIsInB1c2giLCJuYXZTdHlsZSIsImJhY2tncm91bmRDb2xvciIsInVuZGVmaW5lZCIsImJvcmRlckNvbG9yIiwiY29sb3IiLCJ0ZXh0Q29sb3IiLCJpc0FjdGl2ZSIsInBhdGhuYW1lIiwic2VhcmNoIiwiZ2V0SXRlbVN0eWxlIiwiYWN0aXZlIiwibG9nb1N0eWxlIiwibmF2IiwiY2xhc3NOYW1lIiwic3R5bGUiLCJkaXYiLCJ0byIsImltZyIsInNyYyIsImFsdCIsInNwYW4iLCJtYXAiLCJpdGVtIiwi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

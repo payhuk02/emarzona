@@ -1,0 +1,53 @@
+/*
+ * Copyright 2020 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Takes a performance entry type and a callback function, and creates a
+ * `PerformanceObserver` instance that will observe the specified entry type
+ * with buffering enabled and call the callback _for each entry_.
+ *
+ * This function also feature-detects entry support and wraps the logic in a
+ * try/catch to avoid errors in unsupporting browsers.
+ */
+const observe = (
+  type,
+  callback,
+  opts = {},
+) => {
+  try {
+    if (PerformanceObserver.supportedEntryTypes.includes(type)) {
+      const po = new PerformanceObserver(list => {
+        // Delay by a microtask to workaround a bug in Safari where the
+        // callback is invoked immediately, rather than in a separate task.
+        // See: https://github.com/GoogleChrome/web-vitals/issues/277
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+        Promise.resolve().then(() => {
+          callback(list.getEntries() );
+        });
+      });
+      po.observe({ type, buffered: true, ...opts });
+      return po;
+    }
+  } catch {
+    // Do nothing.
+  }
+  return;
+};
+
+export { observe };
+                                   
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoib2JzZXJ2ZS5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4vLi4vLi4vc3JjL21ldHJpY3Mvd2ViLXZpdGFscy9saWIvb2JzZXJ2ZS50cyJdLCJzb3VyY2VzQ29udGVudCI6WyIvKlxuICogQ29weXJpZ2h0IDIwMjAgR29vZ2xlIExMQ1xuICpcbiAqIExpY2Vuc2VkIHVuZGVyIHRoZSBBcGFjaGUgTGljZW5zZSwgVmVyc2lvbiAyLjAgKHRoZSBcIkxpY2Vuc2VcIik7XG4gKiB5b3UgbWF5IG5vdCB1c2UgdGhpcyBmaWxlIGV4Y2VwdCBpbiBjb21wbGlhbmNlIHdpdGggdGhlIExpY2Vuc2UuXG4gKiBZb3UgbWF5IG9idGFpbiBhIGNvcHkgb2YgdGhlIExpY2Vuc2UgYXRcbiAqXG4gKiAgICAgaHR0cHM6Ly93d3cuYXBhY2hlLm9yZy9saWNlbnNlcy9MSUNFTlNFLTIuMFxuICpcbiAqIFVubGVzcyByZXF1aXJlZCBieSBhcHBsaWNhYmxlIGxhdyBvciBhZ3JlZWQgdG8gaW4gd3JpdGluZywgc29mdHdhcmVcbiAqIGRpc3RyaWJ1dGVkIHVuZGVyIHRoZSBMaWNlbnNlIGlzIGRpc3RyaWJ1dGVkIG9uIGFuIFwiQVMgSVNcIiBCQVNJUyxcbiAqIFdJVEhPVVQgV0FSUkFOVElFUyBPUiBDT05ESVRJT05TIE9GIEFOWSBLSU5ELCBlaXRoZXIgZXhwcmVzcyBvciBpbXBsaWVkLlxuICogU2VlIHRoZSBMaWNlbnNlIGZvciB0aGUgc3BlY2lmaWMgbGFuZ3VhZ2UgZ292ZXJuaW5nIHBlcm1pc3Npb25zIGFuZFxuICogbGltaXRhdGlvbnMgdW5kZXIgdGhlIExpY2Vuc2UuXG4gKi9cblxuaW50ZXJmYWNlIFBlcmZvcm1hbmNlRW50cnlNYXAge1xuICBldmVudDogUGVyZm9ybWFuY2VFdmVudFRpbWluZ1tdO1xuICAnZmlyc3QtaW5wdXQnOiBQZXJmb3JtYW5jZUV2ZW50VGltaW5nW107XG4gICdsYXlvdXQtc2hpZnQnOiBMYXlvdXRTaGlmdFtdO1xuICAnbGFyZ2VzdC1jb250ZW50ZnVsLXBhaW50JzogTGFyZ2VzdENvbnRlbnRmdWxQYWludFtdO1xuICAnbG9uZy1hbmltYXRpb24tZnJhbWUnOiBQZXJmb3JtYW5jZUxvbmdBbmltYXRpb25GcmFtZVRpbWluZ1tdO1xuICBwYWludDogUGVyZm9ybWFuY2VQYWludFRpbWluZ1tdO1xuICBuYXZpZ2F0aW9uOiBQZXJmb3JtYW5jZU5hdmlnYXRpb25UaW1pbmdbXTtcbiAgcmVzb3VyY2U6IFBlcmZvcm1hbmNlUmVzb3VyY2VUaW1pbmdbXTtcbiAgLy8gU2VudHJ5LXNwZWNpZmljIGNoYW5nZTpcbiAgLy8gV2UgYWRkIGxvbmd0YXNrIGFzIGEgc3VwcG9ydGVkIGVudHJ5IHR5cGUgYXMgd2UgdXNlIHRoaXMgaW5cbiAgLy8gb3VyIGBpbnN0cnVtZW50UGVyZm9ybWFuY2VPYnNlcnZlcmAgZnVuY3Rpb24gYWxzbyBvYnNlcnZlcyAnbG9uZ3Rhc2snXG4gIC8vIGVudHJpZXMuXG4gIGxvbmd0YXNrOiBQZXJmb3JtYW5jZUVudHJ5W107XG4gIC8vIFNlbnRyeS1zcGVjaWZpYyBjaGFuZ2U6XG4gIC8vIFdlIGFkZCBlbGVtZW50IGFzIGEgc3VwcG9ydGVkIGVudHJ5IHR5cGUgZm9yIEVsZW1lbnRUaW1pbmcgQVBJXG4gIGVsZW1lbnQ6IFBlcmZvcm1hbmNlRW50cnlbXTtcbn1cblxuLyoqXG4gKiBUYWtlcyBhIHBlcmZvcm1hbmNlIGVudHJ5IHR5cGUgYW5kIGEgY2FsbGJhY2sgZnVuY3Rpb24sIGFuZCBjcmVhdGVzIGFcbiAqIGBQZXJmb3JtYW5jZU9ic2VydmVyYCBpbnN0YW5jZSB0aGF0IHdpbGwgb2JzZXJ2ZSB0aGUgc3BlY2lmaWVkIGVudHJ5IHR5cGVcbiAqIHdpdGggYnVmZmVyaW5nIGVuYWJsZWQgYW5kIGNhbGwgdGhlIGNhbGxiYWNrIF9mb3IgZWFjaCBlbnRyeV8uXG4gKlxuICogVGhpcyBmdW5jdGlvbiBhbHNvIGZlYXR1cmUtZGV0ZWN0cyBlbnRyeSBzdXBwb3J0IGFuZCB3cmFwcyB0aGUgbG9naWMgaW4gYVxuICogdHJ5L2NhdGNoIHRvIGF2b2lkIGVycm9ycyBpbiB1bnN1cHBvcnRpbmcgYnJvd3NlcnMuXG4gKi9cbmV4cG9ydCBjb25zdCBvYnNlcnZlID0gPEsgZXh0ZW5kcyBrZXlvZiBQZXJmb3JtYW5jZUVudHJ5TWFwPihcbiAgdHlwZTogSyxcbiAgY2FsbGJhY2s6IChlbnRyaWVzOiBQZXJmb3JtYW5jZUVudHJ5TWFwW0tdKSA9PiB2b2lkLFxuICBvcHRzOiBQZXJmb3JtYW5jZU9ic2VydmVySW5pdCA9IHt9LFxuKTogUGVyZm9ybWFuY2VPYnNlcnZlciB8IHVuZGVmaW5lZCA9PiB7XG4gIHRyeSB7XG4gICAgaWYgKFBlcmZvcm1hbmNlT2JzZXJ2ZXIuc3VwcG9ydGVkRW50cnlUeXBlcy5pbmNsdWRlcyh0eXBlKSkge1xuICAgICAgY29uc3QgcG8gPSBuZXcgUGVyZm9ybWFuY2VPYnNlcnZlcihsaXN0ID0+IHtcbiAgICAgICAgLy8gRGVsYXkgYnkgYSBtaWNyb3Rhc2sgdG8gd29ya2Fyb3VuZCBhIGJ1ZyBpbiBTYWZhcmkgd2hlcmUgdGhlXG4gICAgICAgIC8vIGNhbGxiYWNrIGlzIGludm9rZWQgaW1tZWRpYXRlbHksIHJhdGhlciB0aGFuIGluIGEgc2VwYXJhdGUgdGFzay5cbiAgICAgICAgLy8gU2VlOiBodHRwczovL2dpdGh1Yi5jb20vR29vZ2xlQ2hyb21lL3dlYi12aXRhbHMvaXNzdWVzLzI3N1xuICAgICAgICAvLyBlc2xpbnQtZGlzYWJsZS1uZXh0LWxpbmUgQHR5cGVzY3JpcHQtZXNsaW50L25vLWZsb2F0aW5nLXByb21pc2VzXG4gICAgICAgIFByb21pc2UucmVzb2x2ZSgpLnRoZW4oKCkgPT4ge1xuICAgICAgICAgIGNhbGxiYWNrKGxpc3QuZ2V0RW50cmllcygpIGFzIFBlcmZvcm1hbmNlRW50cnlNYXBbS10pO1xuICAgICAgICB9KTtcbiAgICAgIH0pO1xuICAgICAgcG8ub2JzZXJ2ZSh7IHR5cGUsIGJ1ZmZlcmVkOiB0cnVlLCAuLi5vcHRzIH0pO1xuICAgICAgcmV0dXJuIHBvO1xuICAgIH1cbiAgfSBjYXRjaCB7XG4gICAgLy8gRG8gbm90aGluZy5cbiAgfVxuICByZXR1cm47XG59O1xuIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTs7QUFxQkE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNPLE1BQU0sVUFBVTtBQUN2QixFQUFFLElBQUk7QUFDTixFQUFFLFFBQVE7QUFDVixFQUFFLElBQUksR0FBNEIsRUFBRTtBQUNwQyxLQUFzQztBQUN0QyxFQUFFLElBQUk7QUFDTixJQUFJLElBQUksbUJBQW1CLENBQUMsbUJBQW1CLENBQUMsUUFBUSxDQUFDLElBQUksQ0FBQyxFQUFFO0FBQ2hFLE1BQU0sTUFBTSxFQUFBLEdBQUssSUFBSSxtQkFBbUIsQ0FBQyxRQUFRO0FBQ2pEO0FBQ0E7QUFDQTtBQUNBO0FBQ0EsUUFBUSxPQUFPLENBQUMsT0FBTyxFQUFFLENBQUMsSUFBSSxDQUFDLE1BQU07QUFDckMsVUFBVSxRQUFRLENBQUMsSUFBSSxDQUFDLFVBQVUsSUFBNkI7QUFDL0QsUUFBUSxDQUFDLENBQUM7QUFDVixNQUFNLENBQUMsQ0FBQztBQUNSLE1BQU0sRUFBRSxDQUFDLE9BQU8sQ0FBQyxFQUFFLElBQUksRUFBRSxRQUFRLEVBQUUsSUFBSSxFQUFFLEdBQUcsSUFBQSxFQUFNLENBQUM7QUFDbkQsTUFBTSxPQUFPLEVBQUU7QUFDZixJQUFJO0FBQ0osRUFBRSxFQUFFLE1BQU07QUFDVjtBQUNBLEVBQUU7QUFDRixFQUFFO0FBQ0Y7Ozs7IiwieF9nb29nbGVfaWdub3JlTGlzdCI6WzBdfQ==

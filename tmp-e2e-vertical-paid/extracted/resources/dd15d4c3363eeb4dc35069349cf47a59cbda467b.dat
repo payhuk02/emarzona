@@ -1,0 +1,89 @@
+import { addHandler, maybeInstrument, triggerHandlers, supportsHistory, fill } from "/node_modules/@sentry/core/build/esm/index.js?v=a52cce50";
+import { WINDOW } from "/node_modules/@sentry-internal/browser-utils/build/esm/types.js?v=a52cce50";
+
+let lastHref;
+
+/**
+ * Add an instrumentation handler for when a fetch request happens.
+ * The handler function is called once when the request starts and once when it ends,
+ * which can be identified by checking if it has an `endTimestamp`.
+ *
+ * Use at your own risk, this might break without changelog notice, only used internally.
+ * @hidden
+ */
+function addHistoryInstrumentationHandler(handler) {
+  const type = 'history';
+  addHandler(type, handler);
+  maybeInstrument(type, instrumentHistory);
+}
+
+/**
+ * Exported just for testing
+ */
+function instrumentHistory() {
+  // The `popstate` event may also be triggered on `pushState`, but it may not always reliably be emitted by the browser
+  // Which is why we also monkey-patch methods below, in addition to this
+  WINDOW.addEventListener('popstate', () => {
+    const to = WINDOW.location.href;
+    // keep track of the current URL state, as we always receive only the updated state
+    const from = lastHref;
+    lastHref = to;
+
+    if (from === to) {
+      return;
+    }
+
+    const handlerData = { from, to } ;
+    triggerHandlers('history', handlerData);
+  });
+
+  // Just guard against this not being available, in weird environments
+  if (!supportsHistory()) {
+    return;
+  }
+
+  function historyReplacementFunction(originalHistoryFunction) {
+    return function ( ...args) {
+      const url = args.length > 2 ? args[2] : undefined;
+      if (url) {
+        const from = lastHref;
+
+        // Ensure the URL is absolute
+        // this can be either a path, then it is relative to the current origin
+        // or a full URL of the current origin - other origins are not allowed
+        // See: https://developer.mozilla.org/en-US/docs/Web/API/History/pushState#url
+        // coerce to string (this is what pushState does)
+        const to = getAbsoluteUrl(String(url));
+
+        // keep track of the current URL state, as we always receive only the updated state
+        lastHref = to;
+
+        if (from === to) {
+          return originalHistoryFunction.apply(this, args);
+        }
+
+        const handlerData = { from, to } ;
+        triggerHandlers('history', handlerData);
+      }
+      return originalHistoryFunction.apply(this, args);
+    };
+  }
+
+  fill(WINDOW.history, 'pushState', historyReplacementFunction);
+  fill(WINDOW.history, 'replaceState', historyReplacementFunction);
+}
+
+function getAbsoluteUrl(urlOrPath) {
+  try {
+    const url = new URL(urlOrPath, WINDOW.location.origin);
+    return url.toString();
+  } catch {
+    // fallback, just do nothing
+    return urlOrPath;
+  }
+}
+
+export { addHistoryInstrumentationHandler, instrumentHistory };
+                                   
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaGlzdG9yeS5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4vc3JjL2luc3RydW1lbnQvaGlzdG9yeS50cyJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgdHlwZSB7IEhhbmRsZXJEYXRhSGlzdG9yeSB9IGZyb20gJ0BzZW50cnkvY29yZSc7XG5pbXBvcnQgeyBhZGRIYW5kbGVyLCBmaWxsLCBtYXliZUluc3RydW1lbnQsIHN1cHBvcnRzSGlzdG9yeSwgdHJpZ2dlckhhbmRsZXJzIH0gZnJvbSAnQHNlbnRyeS9jb3JlJztcbmltcG9ydCB7IFdJTkRPVyB9IGZyb20gJy4uL3R5cGVzJztcblxubGV0IGxhc3RIcmVmOiBzdHJpbmcgfCB1bmRlZmluZWQ7XG5cbi8qKlxuICogQWRkIGFuIGluc3RydW1lbnRhdGlvbiBoYW5kbGVyIGZvciB3aGVuIGEgZmV0Y2ggcmVxdWVzdCBoYXBwZW5zLlxuICogVGhlIGhhbmRsZXIgZnVuY3Rpb24gaXMgY2FsbGVkIG9uY2Ugd2hlbiB0aGUgcmVxdWVzdCBzdGFydHMgYW5kIG9uY2Ugd2hlbiBpdCBlbmRzLFxuICogd2hpY2ggY2FuIGJlIGlkZW50aWZpZWQgYnkgY2hlY2tpbmcgaWYgaXQgaGFzIGFuIGBlbmRUaW1lc3RhbXBgLlxuICpcbiAqIFVzZSBhdCB5b3VyIG93biByaXNrLCB0aGlzIG1pZ2h0IGJyZWFrIHdpdGhvdXQgY2hhbmdlbG9nIG5vdGljZSwgb25seSB1c2VkIGludGVybmFsbHkuXG4gKiBAaGlkZGVuXG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBhZGRIaXN0b3J5SW5zdHJ1bWVudGF0aW9uSGFuZGxlcihoYW5kbGVyOiAoZGF0YTogSGFuZGxlckRhdGFIaXN0b3J5KSA9PiB2b2lkKTogdm9pZCB7XG4gIGNvbnN0IHR5cGUgPSAnaGlzdG9yeSc7XG4gIGFkZEhhbmRsZXIodHlwZSwgaGFuZGxlcik7XG4gIG1heWJlSW5zdHJ1bWVudCh0eXBlLCBpbnN0cnVtZW50SGlzdG9yeSk7XG59XG5cbi8qKlxuICogRXhwb3J0ZWQganVzdCBmb3IgdGVzdGluZ1xuICovXG5leHBvcnQgZnVuY3Rpb24gaW5zdHJ1bWVudEhpc3RvcnkoKTogdm9pZCB7XG4gIC8vIFRoZSBgcG9wc3RhdGVgIGV2ZW50IG1heSBhbHNvIGJlIHRyaWdnZXJlZCBvbiBgcHVzaFN0YXRlYCwgYnV0IGl0IG1heSBub3QgYWx3YXlzIHJlbGlhYmx5IGJlIGVtaXR0ZWQgYnkgdGhlIGJyb3dzZXJcbiAgLy8gV2hpY2ggaXMgd2h5IHdlIGFsc28gbW9ua2V5LXBhdGNoIG1ldGhvZHMgYmVsb3csIGluIGFkZGl0aW9uIHRvIHRoaXNcbiAgV0lORE9XLmFkZEV2ZW50TGlzdGVuZXIoJ3BvcHN0YXRlJywgKCkgPT4ge1xuICAgIGNvbnN0IHRvID0gV0lORE9XLmxvY2F0aW9uLmhyZWY7XG4gICAgLy8ga2VlcCB0cmFjayBvZiB0aGUgY3VycmVudCBVUkwgc3RhdGUsIGFzIHdlIGFsd2F5cyByZWNlaXZlIG9ubHkgdGhlIHVwZGF0ZWQgc3RhdGVcbiAgICBjb25zdCBmcm9tID0gbGFzdEhyZWY7XG4gICAgbGFzdEhyZWYgPSB0bztcblxuICAgIGlmIChmcm9tID09PSB0bykge1xuICAgICAgcmV0dXJuO1xuICAgIH1cblxuICAgIGNvbnN0IGhhbmRsZXJEYXRhID0geyBmcm9tLCB0byB9IHNhdGlzZmllcyBIYW5kbGVyRGF0YUhpc3Rvcnk7XG4gICAgdHJpZ2dlckhhbmRsZXJzKCdoaXN0b3J5JywgaGFuZGxlckRhdGEpO1xuICB9KTtcblxuICAvLyBKdXN0IGd1YXJkIGFnYWluc3QgdGhpcyBub3QgYmVpbmcgYXZhaWxhYmxlLCBpbiB3ZWlyZCBlbnZpcm9ubWVudHNcbiAgaWYgKCFzdXBwb3J0c0hpc3RvcnkoKSkge1xuICAgIHJldHVybjtcbiAgfVxuXG4gIGZ1bmN0aW9uIGhpc3RvcnlSZXBsYWNlbWVudEZ1bmN0aW9uKG9yaWdpbmFsSGlzdG9yeUZ1bmN0aW9uOiAoKSA9PiB2b2lkKTogKCkgPT4gdm9pZCB7XG4gICAgcmV0dXJuIGZ1bmN0aW9uICh0aGlzOiBIaXN0b3J5LCAuLi5hcmdzOiB1bmtub3duW10pOiB2b2lkIHtcbiAgICAgIGNvbnN0IHVybCA9IGFyZ3MubGVuZ3RoID4gMiA/IGFyZ3NbMl0gOiB1bmRlZmluZWQ7XG4gICAgICBpZiAodXJsKSB7XG4gICAgICAgIGNvbnN0IGZyb20gPSBsYXN0SHJlZjtcblxuICAgICAgICAvLyBFbnN1cmUgdGhlIFVSTCBpcyBhYnNvbHV0ZVxuICAgICAgICAvLyB0aGlzIGNhbiBiZSBlaXRoZXIgYSBwYXRoLCB0aGVuIGl0IGlzIHJlbGF0aXZlIHRvIHRoZSBjdXJyZW50IG9yaWdpblxuICAgICAgICAvLyBvciBhIGZ1bGwgVVJMIG9mIHRoZSBjdXJyZW50IG9yaWdpbiAtIG90aGVyIG9yaWdpbnMgYXJlIG5vdCBhbGxvd2VkXG4gICAgICAgIC8vIFNlZTogaHR0cHM6Ly9kZXZlbG9wZXIubW96aWxsYS5vcmcvZW4tVVMvZG9jcy9XZWIvQVBJL0hpc3RvcnkvcHVzaFN0YXRlI3VybFxuICAgICAgICAvLyBjb2VyY2UgdG8gc3RyaW5nICh0aGlzIGlzIHdoYXQgcHVzaFN0YXRlIGRvZXMpXG4gICAgICAgIGNvbnN0IHRvID0gZ2V0QWJzb2x1dGVVcmwoU3RyaW5nKHVybCkpO1xuXG4gICAgICAgIC8vIGtlZXAgdHJhY2sgb2YgdGhlIGN1cnJlbnQgVVJMIHN0YXRlLCBhcyB3ZSBhbHdheXMgcmVjZWl2ZSBvbmx5IHRoZSB1cGRhdGVkIHN0YXRlXG4gICAgICAgIGxhc3RIcmVmID0gdG87XG5cbiAgICAgICAgaWYgKGZyb20gPT09IHRvKSB7XG4gICAgICAgICAgcmV0dXJuIG9yaWdpbmFsSGlzdG9yeUZ1bmN0aW9uLmFwcGx5KHRoaXMsIGFyZ3MpO1xuICAgICAgICB9XG5cbiAgICAgICAgY29uc3QgaGFuZGxlckRhdGEgPSB7IGZyb20sIHRvIH0gc2F0aXNmaWVzIEhhbmRsZXJEYXRhSGlzdG9yeTtcbiAgICAgICAgdHJpZ2dlckhhbmRsZXJzKCdoaXN0b3J5JywgaGFuZGxlckRhdGEpO1xuICAgICAgfVxuICAgICAgcmV0dXJuIG9yaWdpbmFsSGlzdG9yeUZ1bmN0aW9uLmFwcGx5KHRoaXMsIGFyZ3MpO1xuICAgIH07XG4gIH1cblxuICBmaWxsKFdJTkRPVy5oaXN0b3J5LCAncHVzaFN0YXRlJywgaGlzdG9yeVJlcGxhY2VtZW50RnVuY3Rpb24pO1xuICBmaWxsKFdJTkRPVy5oaXN0b3J5LCAncmVwbGFjZVN0YXRlJywgaGlzdG9yeVJlcGxhY2VtZW50RnVuY3Rpb24pO1xufVxuXG5mdW5jdGlvbiBnZXRBYnNvbHV0ZVVybCh1cmxPclBhdGg6IHN0cmluZyk6IHN0cmluZyB7XG4gIHRyeSB7XG4gICAgY29uc3QgdXJsID0gbmV3IFVSTCh1cmxPclBhdGgsIFdJTkRPVy5sb2NhdGlvbi5vcmlnaW4pO1xuICAgIHJldHVybiB1cmwudG9TdHJpbmcoKTtcbiAgfSBjYXRjaCB7XG4gICAgLy8gZmFsbGJhY2ssIGp1c3QgZG8gbm90aGluZ1xuICAgIHJldHVybiB1cmxPclBhdGg7XG4gIH1cbn1cbiJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7QUFJQSxJQUFJLFFBQVE7O0FBRVo7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNPLFNBQVMsZ0NBQWdDLENBQUMsT0FBTyxFQUE0QztBQUNwRyxFQUFFLE1BQU0sSUFBQSxHQUFPLFNBQVM7QUFDeEIsRUFBRSxVQUFVLENBQUMsSUFBSSxFQUFFLE9BQU8sQ0FBQztBQUMzQixFQUFFLGVBQWUsQ0FBQyxJQUFJLEVBQUUsaUJBQWlCLENBQUM7QUFDMUM7O0FBRUE7QUFDQTtBQUNBO0FBQ08sU0FBUyxpQkFBaUIsR0FBUztBQUMxQztBQUNBO0FBQ0EsRUFBRSxNQUFNLENBQUMsZ0JBQWdCLENBQUMsVUFBVSxFQUFFLE1BQU07QUFDNUMsSUFBSSxNQUFNLEVBQUEsR0FBSyxNQUFNLENBQUMsUUFBUSxDQUFDLElBQUk7QUFDbkM7QUFDQSxJQUFJLE1BQU0sSUFBQSxHQUFPLFFBQVE7QUFDekIsSUFBSSxRQUFBLEdBQVcsRUFBRTs7QUFFakIsSUFBSSxJQUFJLElBQUEsS0FBUyxFQUFFLEVBQUU7QUFDckIsTUFBTTtBQUNOLElBQUk7O0FBRUosSUFBSSxNQUFNLFdBQUEsR0FBYyxFQUFFLElBQUksRUFBRSxJQUFHO0FBQ25DLElBQUksZUFBZSxDQUFDLFNBQVMsRUFBRSxXQUFXLENBQUM7QUFDM0MsRUFBRSxDQUFDLENBQUM7O0FBRUo7QUFDQSxFQUFFLElBQUksQ0FBQyxlQUFlLEVBQUUsRUFBRTtBQUMxQixJQUFJO0FBQ0osRUFBRTs7QUFFRixFQUFFLFNBQVMsMEJBQTBCLENBQUMsdUJBQXVCLEVBQTBCO0FBQ3ZGLElBQUksT0FBTyxXQUF5QixHQUFHLElBQUksRUFBbUI7QUFDOUQsTUFBTSxNQUFNLEdBQUEsR0FBTSxJQUFJLENBQUMsTUFBQSxHQUFTLENBQUEsR0FBSSxJQUFJLENBQUMsQ0FBQyxDQUFBLEdBQUksU0FBUztBQUN2RCxNQUFNLElBQUksR0FBRyxFQUFFO0FBQ2YsUUFBUSxNQUFNLElBQUEsR0FBTyxRQUFROztBQUU3QjtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0EsUUFBUSxNQUFNLEtBQUssY0FBYyxDQUFDLE1BQU0sQ0FBQyxHQUFHLENBQUMsQ0FBQzs7QUFFOUM7QUFDQSxRQUFRLFFBQUEsR0FBVyxFQUFFOztBQUVyQixRQUFRLElBQUksSUFBQSxLQUFTLEVBQUUsRUFBRTtBQUN6QixVQUFVLE9BQU8sdUJBQXVCLENBQUMsS0FBSyxDQUFDLElBQUksRUFBRSxJQUFJLENBQUM7QUFDMUQsUUFBUTs7QUFFUixRQUFRLE1BQU0sV0FBQSxHQUFjLEVBQUUsSUFBSSxFQUFFLElBQUc7QUFDdkMsUUFBUSxlQUFlLENBQUMsU0FBUyxFQUFFLFdBQVcsQ0FBQztBQUMvQyxNQUFNO0FBQ04sTUFBTSxPQUFPLHVCQUF1QixDQUFDLEtBQUssQ0FBQyxJQUFJLEVBQUUsSUFBSSxDQUFDO0FBQ3RELElBQUksQ0FBQztBQUNMLEVBQUU7O0FBRUYsRUFBRSxJQUFJLENBQUMsTUFBTSxDQUFDLE9BQU8sRUFBRSxXQUFXLEVBQUUsMEJBQTBCLENBQUM7QUFDL0QsRUFBRSxJQUFJLENBQUMsTUFBTSxDQUFDLE9BQU8sRUFBRSxjQUFjLEVBQUUsMEJBQTBCLENBQUM7QUFDbEU7O0FBRUEsU0FBUyxjQUFjLENBQUMsU0FBUyxFQUFrQjtBQUNuRCxFQUFFLElBQUk7QUFDTixJQUFJLE1BQU0sR0FBQSxHQUFNLElBQUksR0FBRyxDQUFDLFNBQVMsRUFBRSxNQUFNLENBQUMsUUFBUSxDQUFDLE1BQU0sQ0FBQztBQUMxRCxJQUFJLE9BQU8sR0FBRyxDQUFDLFFBQVEsRUFBRTtBQUN6QixFQUFFLEVBQUUsTUFBTTtBQUNWO0FBQ0EsSUFBSSxPQUFPLFNBQVM7QUFDcEIsRUFBRTtBQUNGOzs7OyIsInhfZ29vZ2xlX2lnbm9yZUxpc3QiOlswXX0=

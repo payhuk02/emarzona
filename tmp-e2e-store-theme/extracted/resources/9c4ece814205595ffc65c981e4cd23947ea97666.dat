@@ -1,0 +1,477 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/mobile/PWAInstallPrompt.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/mobile/PWAInstallPrompt.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=6014a254"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+var _s = $RefreshSig$();
+import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=6014a254"; const React = __vite__cjsImport3_react.__esModule ? __vite__cjsImport3_react.default : __vite__cjsImport3_react; const useState = __vite__cjsImport3_react["useState"]; const useEffect = __vite__cjsImport3_react["useEffect"];
+import { usePWA } from "/src/hooks/usePWA.ts";
+import { Button } from "/src/components/ui/button.tsx";
+import { Card, CardContent, CardHeader, CardTitle } from "/src/components/ui/card.tsx";
+import { Badge } from "/src/components/ui/badge.tsx";
+import { Download, X, Smartphone, Zap, Bell, Share2 } from "/node_modules/.vite/deps/lucide-react.js?v=6014a254";
+import { EmarzonaInText } from "/src/components/brand/EmarzonaInText.tsx";
+import { cn } from "/src/lib/utils.ts";
+import { useToast } from "/src/hooks/use-toast.ts";
+import { logger } from "/src/lib/logger.ts";
+export const PWAInstallPrompt = ({ className, showAsBanner = false, autoShow = true, dismissible = true })=>{
+    _s();
+    const { canInstall, isInstallable, supportsNotifications, supportsWebShare, install, requestNotificationPermission, sendNotification } = usePWA();
+    const { toast } = useToast();
+    const [isVisible, setIsVisible] = useState(false);
+    const [isInstalling, setIsInstalling] = useState(false);
+    const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+    useEffect(()=>{
+        if (autoShow && canInstall && !localStorage.getItem('pwa-install-dismissed')) {
+            // Small delay to avoid showing immediately on page load
+            const timer = setTimeout(()=>setIsVisible(true), 3000);
+            return ()=>clearTimeout(timer);
+        }
+    }, [
+        canInstall,
+        autoShow
+    ]);
+    useEffect(()=>{
+        if (supportsNotifications && Notification.permission === 'granted') {
+            setNotificationsEnabled(true);
+        }
+    }, [
+        supportsNotifications
+    ]);
+    const handleInstall = async ()=>{
+        setIsInstalling(true);
+        try {
+            await install();
+            setIsVisible(false);
+            toast({
+                title: 'Application installée !',
+                description: 'Emarzona est maintenant disponible hors ligne.'
+            });
+        } catch (error) {
+            logger.error('Installation failed', {
+                error
+            });
+            toast({
+                title: "Erreur d'installation",
+                description: "Impossible d'installer l'application.",
+                variant: 'destructive'
+            });
+        } finally{
+            setIsInstalling(false);
+        }
+    };
+    const handleEnableNotifications = async ()=>{
+        try {
+            const permission = await requestNotificationPermission();
+            setNotificationsEnabled(permission === 'granted');
+            if (permission === 'granted') {
+                toast({
+                    title: 'Notifications activées',
+                    description: 'Vous recevrez maintenant des notifications importantes.'
+                });
+                // Send a test notification
+                sendNotification('Notifications activées !', {
+                    body: "Vous recevrez maintenant des mises à jour importantes d'Emarzona.",
+                    icon: '/icon-192x192.png'
+                });
+            } else {
+                toast({
+                    title: 'Notifications refusées',
+                    description: 'Vous pouvez les activer plus tard dans les paramètres.',
+                    variant: 'destructive'
+                });
+            }
+        } catch (error) {
+            logger.error('Error requesting notification permission', {
+                error
+            });
+        }
+    };
+    const handleDismiss = ()=>{
+        setIsVisible(false);
+        if (dismissible) {
+            localStorage.setItem('pwa-install-dismissed', 'true');
+        }
+    };
+    if (!isVisible || !canInstall) return null;
+    if (showAsBanner) {
+        return /*#__PURE__*/ _jsxDEV("div", {
+            "data-pwa-install": true,
+            className: cn('fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 shadow-lg', className),
+            children: /*#__PURE__*/ _jsxDEV("div", {
+                className: "flex items-center justify-between max-w-7xl mx-auto",
+                children: [
+                    /*#__PURE__*/ _jsxDEV("div", {
+                        className: "flex items-center gap-3",
+                        children: [
+                            /*#__PURE__*/ _jsxDEV(Smartphone, {
+                                className: "h-6 w-6"
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/mobile/PWAInstallPrompt.tsx",
+                                lineNumber: 123,
+                                columnNumber: 13
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV("p", {
+                                        className: "font-semibold",
+                                        children: /*#__PURE__*/ _jsxDEV(EmarzonaInText, {
+                                            children: "Installez Emarzona"
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/mobile/PWAInstallPrompt.tsx",
+                                            lineNumber: 126,
+                                            columnNumber: 17
+                                        }, this)
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/mobile/PWAInstallPrompt.tsx",
+                                        lineNumber: 125,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("p", {
+                                        className: "text-sm opacity-90",
+                                        children: "Accès rapide et hors ligne"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/mobile/PWAInstallPrompt.tsx",
+                                        lineNumber: 128,
+                                        columnNumber: 15
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/mobile/PWAInstallPrompt.tsx",
+                                lineNumber: 124,
+                                columnNumber: 13
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/mobile/PWAInstallPrompt.tsx",
+                        lineNumber: 122,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV("div", {
+                        className: "flex items-center gap-2",
+                        children: [
+                            /*#__PURE__*/ _jsxDEV(Button, {
+                                size: "sm",
+                                variant: "secondary",
+                                onClick: handleInstall,
+                                disabled: isInstalling,
+                                children: isInstalling ? 'Installation...' : 'Installer'
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/mobile/PWAInstallPrompt.tsx",
+                                lineNumber: 132,
+                                columnNumber: 13
+                            }, this),
+                            dismissible && /*#__PURE__*/ _jsxDEV(Button, {
+                                size: "sm",
+                                variant: "ghost",
+                                onClick: handleDismiss,
+                                className: "text-white hover:bg-white/20",
+                                children: /*#__PURE__*/ _jsxDEV(X, {
+                                    className: "h-4 w-4"
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/mobile/PWAInstallPrompt.tsx",
+                                    lineNumber: 142,
+                                    columnNumber: 17
+                                }, this)
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/mobile/PWAInstallPrompt.tsx",
+                                lineNumber: 136,
+                                columnNumber: 15
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/mobile/PWAInstallPrompt.tsx",
+                        lineNumber: 131,
+                        columnNumber: 11
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/mobile/PWAInstallPrompt.tsx",
+                lineNumber: 121,
+                columnNumber: 9
+            }, this)
+        }, void 0, false, {
+            fileName: "/home/runner/work/emarzona/emarzona/src/components/mobile/PWAInstallPrompt.tsx",
+            lineNumber: 114,
+            columnNumber: 7
+        }, this);
+    }
+    return /*#__PURE__*/ _jsxDEV(Card, {
+        "data-pwa-install": true,
+        className: cn('w-full max-w-md mx-auto', className),
+        children: [
+            /*#__PURE__*/ _jsxDEV(CardHeader, {
+                className: "text-center",
+                children: [
+                    /*#__PURE__*/ _jsxDEV("div", {
+                        className: "mx-auto mb-4 p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full w-fit",
+                        children: /*#__PURE__*/ _jsxDEV(Download, {
+                            className: "h-8 w-8 text-white"
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/mobile/PWAInstallPrompt.tsx",
+                            lineNumber: 155,
+                            columnNumber: 11
+                        }, this)
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/mobile/PWAInstallPrompt.tsx",
+                        lineNumber: 154,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV(CardTitle, {
+                        className: "text-xl",
+                        children: /*#__PURE__*/ _jsxDEV(EmarzonaInText, {
+                            children: "Installez Emarzona"
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/mobile/PWAInstallPrompt.tsx",
+                            lineNumber: 158,
+                            columnNumber: 11
+                        }, this)
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/mobile/PWAInstallPrompt.tsx",
+                        lineNumber: 157,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV("p", {
+                        className: "text-muted-foreground",
+                        children: "Profitez d'une expérience mobile optimale avec accès hors ligne"
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/mobile/PWAInstallPrompt.tsx",
+                        lineNumber: 160,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/mobile/PWAInstallPrompt.tsx",
+                lineNumber: 153,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV(CardContent, {
+                className: "space-y-4",
+                children: [
+                    /*#__PURE__*/ _jsxDEV("div", {
+                        className: "grid grid-cols-2 gap-3",
+                        children: [
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                className: "flex items-center gap-2 text-sm",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV(Zap, {
+                                        className: "h-4 w-4 text-green-500"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/mobile/PWAInstallPrompt.tsx",
+                                        lineNumber: 167,
+                                        columnNumber: 13
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("span", {
+                                        children: "Rapide"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/mobile/PWAInstallPrompt.tsx",
+                                        lineNumber: 168,
+                                        columnNumber: 13
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/mobile/PWAInstallPrompt.tsx",
+                                lineNumber: 166,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                className: "flex items-center gap-2 text-sm",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV(Smartphone, {
+                                        className: "h-4 w-4 text-blue-500"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/mobile/PWAInstallPrompt.tsx",
+                                        lineNumber: 171,
+                                        columnNumber: 13
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("span", {
+                                        children: "Hors ligne"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/mobile/PWAInstallPrompt.tsx",
+                                        lineNumber: 172,
+                                        columnNumber: 13
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/mobile/PWAInstallPrompt.tsx",
+                                lineNumber: 170,
+                                columnNumber: 11
+                            }, this),
+                            supportsNotifications && /*#__PURE__*/ _jsxDEV("div", {
+                                className: "flex items-center gap-2 text-sm",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV(Bell, {
+                                        className: "h-4 w-4 text-orange-500"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/mobile/PWAInstallPrompt.tsx",
+                                        lineNumber: 176,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("span", {
+                                        children: "Notifications"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/mobile/PWAInstallPrompt.tsx",
+                                        lineNumber: 177,
+                                        columnNumber: 15
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/mobile/PWAInstallPrompt.tsx",
+                                lineNumber: 175,
+                                columnNumber: 13
+                            }, this),
+                            supportsWebShare && /*#__PURE__*/ _jsxDEV("div", {
+                                className: "flex items-center gap-2 text-sm",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV(Share2, {
+                                        className: "h-4 w-4 text-purple-500"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/mobile/PWAInstallPrompt.tsx",
+                                        lineNumber: 182,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("span", {
+                                        children: "Partage"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/mobile/PWAInstallPrompt.tsx",
+                                        lineNumber: 183,
+                                        columnNumber: 15
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/mobile/PWAInstallPrompt.tsx",
+                                lineNumber: 181,
+                                columnNumber: 13
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/mobile/PWAInstallPrompt.tsx",
+                        lineNumber: 165,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV("div", {
+                        className: "space-y-3",
+                        children: [
+                            /*#__PURE__*/ _jsxDEV(Button, {
+                                onClick: handleInstall,
+                                disabled: isInstalling,
+                                className: "w-full",
+                                size: "lg",
+                                children: isInstalling ? 'Installation en cours...' : "Installer l'application"
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/mobile/PWAInstallPrompt.tsx",
+                                lineNumber: 189,
+                                columnNumber: 11
+                            }, this),
+                            supportsNotifications && !notificationsEnabled && /*#__PURE__*/ _jsxDEV(Button, {
+                                variant: "outline",
+                                onClick: handleEnableNotifications,
+                                className: "w-full",
+                                size: "sm",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV(Bell, {
+                                        className: "h-4 w-4 mr-2"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/mobile/PWAInstallPrompt.tsx",
+                                        lineNumber: 200,
+                                        columnNumber: 15
+                                    }, this),
+                                    "Activer les notifications"
+                                ]
+                            }, void 0, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/mobile/PWAInstallPrompt.tsx",
+                                lineNumber: 194,
+                                columnNumber: 13
+                            }, this),
+                            notificationsEnabled && /*#__PURE__*/ _jsxDEV(Badge, {
+                                variant: "secondary",
+                                className: "w-full justify-center py-2",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV(Bell, {
+                                        className: "h-4 w-4 mr-2"
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/mobile/PWAInstallPrompt.tsx",
+                                        lineNumber: 207,
+                                        columnNumber: 15
+                                    }, this),
+                                    "Notifications activées"
+                                ]
+                            }, void 0, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/mobile/PWAInstallPrompt.tsx",
+                                lineNumber: 206,
+                                columnNumber: 13
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/mobile/PWAInstallPrompt.tsx",
+                        lineNumber: 188,
+                        columnNumber: 9
+                    }, this),
+                    dismissible && /*#__PURE__*/ _jsxDEV(Button, {
+                        variant: "ghost",
+                        onClick: handleDismiss,
+                        className: "w-full text-muted-foreground",
+                        size: "sm",
+                        children: "Plus tard"
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/mobile/PWAInstallPrompt.tsx",
+                        lineNumber: 214,
+                        columnNumber: 11
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/mobile/PWAInstallPrompt.tsx",
+                lineNumber: 164,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/mobile/PWAInstallPrompt.tsx",
+        lineNumber: 152,
+        columnNumber: 5
+    }, this);
+};
+_s(PWAInstallPrompt, "7RG8DpPbdlBs6hgs0nfCc8vOYRI=", false, function() {
+    return [
+        usePWA,
+        useToast
+    ];
+});
+_c = PWAInstallPrompt;
+var _c;
+$RefreshReg$(_c, "PWAInstallPrompt");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/mobile/PWAInstallPrompt.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/mobile/PWAInstallPrompt.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIlBXQUluc3RhbGxQcm9tcHQudHN4Il0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCBSZWFjdCwgeyB1c2VTdGF0ZSwgdXNlRWZmZWN0IH0gZnJvbSAncmVhY3QnO1xuaW1wb3J0IHsgdXNlUFdBIH0gZnJvbSAnQC9ob29rcy91c2VQV0EnO1xuaW1wb3J0IHsgQnV0dG9uIH0gZnJvbSAnQC9jb21wb25lbnRzL3VpL2J1dHRvbic7XG5pbXBvcnQgeyBDYXJkLCBDYXJkQ29udGVudCwgQ2FyZEhlYWRlciwgQ2FyZFRpdGxlIH0gZnJvbSAnQC9jb21wb25lbnRzL3VpL2NhcmQnO1xuaW1wb3J0IHsgQmFkZ2UgfSBmcm9tICdAL2NvbXBvbmVudHMvdWkvYmFkZ2UnO1xuaW1wb3J0IHsgRG93bmxvYWQsIFgsIFNtYXJ0cGhvbmUsIFphcCwgQmVsbCwgU2hhcmUyIH0gZnJvbSAnbHVjaWRlLXJlYWN0JztcbmltcG9ydCB7IEVtYXJ6b25hSW5UZXh0IH0gZnJvbSAnQC9jb21wb25lbnRzL2JyYW5kL0VtYXJ6b25hSW5UZXh0JztcbmltcG9ydCB7IGNuIH0gZnJvbSAnQC9saWIvdXRpbHMnO1xuaW1wb3J0IHsgdXNlVG9hc3QgfSBmcm9tICdAL2hvb2tzL3VzZS10b2FzdCc7XG5pbXBvcnQgeyBsb2dnZXIgfSBmcm9tICdAL2xpYi9sb2dnZXInO1xuXG5pbnRlcmZhY2UgUFdBSW5zdGFsbFByb21wdFByb3BzIHtcbiAgY2xhc3NOYW1lPzogc3RyaW5nO1xuICBzaG93QXNCYW5uZXI/OiBib29sZWFuO1xuICBhdXRvU2hvdz86IGJvb2xlYW47XG4gIGRpc21pc3NpYmxlPzogYm9vbGVhbjtcbn1cblxuZXhwb3J0IGNvbnN0IFBXQUluc3RhbGxQcm9tcHQ6IFJlYWN0LkZDPFBXQUluc3RhbGxQcm9tcHRQcm9wcz4gPSAoe1xuICBjbGFzc05hbWUsXG4gIHNob3dBc0Jhbm5lciA9IGZhbHNlLFxuICBhdXRvU2hvdyA9IHRydWUsXG4gIGRpc21pc3NpYmxlID0gdHJ1ZSxcbn0pID0+IHtcbiAgY29uc3Qge1xuICAgIGNhbkluc3RhbGwsXG4gICAgaXNJbnN0YWxsYWJsZSxcbiAgICBzdXBwb3J0c05vdGlmaWNhdGlvbnMsXG4gICAgc3VwcG9ydHNXZWJTaGFyZSxcbiAgICBpbnN0YWxsLFxuICAgIHJlcXVlc3ROb3RpZmljYXRpb25QZXJtaXNzaW9uLFxuICAgIHNlbmROb3RpZmljYXRpb24sXG4gIH0gPSB1c2VQV0EoKTtcblxuICBjb25zdCB7IHRvYXN0IH0gPSB1c2VUb2FzdCgpO1xuICBjb25zdCBbaXNWaXNpYmxlLCBzZXRJc1Zpc2libGVdID0gdXNlU3RhdGUoZmFsc2UpO1xuICBjb25zdCBbaXNJbnN0YWxsaW5nLCBzZXRJc0luc3RhbGxpbmddID0gdXNlU3RhdGUoZmFsc2UpO1xuICBjb25zdCBbbm90aWZpY2F0aW9uc0VuYWJsZWQsIHNldE5vdGlmaWNhdGlvbnNFbmFibGVkXSA9IHVzZVN0YXRlKGZhbHNlKTtcblxuICB1c2VFZmZlY3QoKCkgPT4ge1xuICAgIGlmIChhdXRvU2hvdyAmJiBjYW5JbnN0YWxsICYmICFsb2NhbFN0b3JhZ2UuZ2V0SXRlbSgncHdhLWluc3RhbGwtZGlzbWlzc2VkJykpIHtcbiAgICAgIC8vIFNtYWxsIGRlbGF5IHRvIGF2b2lkIHNob3dpbmcgaW1tZWRpYXRlbHkgb24gcGFnZSBsb2FkXG4gICAgICBjb25zdCB0aW1lciA9IHNldFRpbWVvdXQoKCkgPT4gc2V0SXNWaXNpYmxlKHRydWUpLCAzMDAwKTtcbiAgICAgIHJldHVybiAoKSA9PiBjbGVhclRpbWVvdXQodGltZXIpO1xuICAgIH1cbiAgfSwgW2Nhbkluc3RhbGwsIGF1dG9TaG93XSk7XG5cbiAgdXNlRWZmZWN0KCgpID0+IHtcbiAgICBpZiAoc3VwcG9ydHNOb3RpZmljYXRpb25zICYmIE5vdGlmaWNhdGlvbi5wZXJtaXNzaW9uID09PSAnZ3JhbnRlZCcpIHtcbiAgICAgIHNldE5vdGlmaWNhdGlvbnNFbmFibGVkKHRydWUpO1xuICAgIH1cbiAgfSwgW3N1cHBvcnRzTm90aWZpY2F0aW9uc10pO1xuXG4gIGNvbnN0IGhhbmRsZUluc3RhbGwgPSBhc3luYyAoKSA9PiB7XG4gICAgc2V0SXNJbnN0YWxsaW5nKHRydWUpO1xuICAgIHRyeSB7XG4gICAgICBhd2FpdCBpbnN0YWxsKCk7XG4gICAgICBzZXRJc1Zpc2libGUoZmFsc2UpO1xuICAgICAgdG9hc3Qoe1xuICAgICAgICB0aXRsZTogJ0FwcGxpY2F0aW9uIGluc3RhbGzDqWUgIScsXG4gICAgICAgIGRlc2NyaXB0aW9uOiAnRW1hcnpvbmEgZXN0IG1haW50ZW5hbnQgZGlzcG9uaWJsZSBob3JzIGxpZ25lLicsXG4gICAgICB9KTtcbiAgICB9IGNhdGNoIChlcnJvcikge1xuICAgICAgbG9nZ2VyLmVycm9yKCdJbnN0YWxsYXRpb24gZmFpbGVkJywgeyBlcnJvciB9KTtcbiAgICAgIHRvYXN0KHtcbiAgICAgICAgdGl0bGU6IFwiRXJyZXVyIGQnaW5zdGFsbGF0aW9uXCIsXG4gICAgICAgIGRlc2NyaXB0aW9uOiBcIkltcG9zc2libGUgZCdpbnN0YWxsZXIgbCdhcHBsaWNhdGlvbi5cIixcbiAgICAgICAgdmFyaWFudDogJ2Rlc3RydWN0aXZlJyxcbiAgICAgIH0pO1xuICAgIH0gZmluYWxseSB7XG4gICAgICBzZXRJc0luc3RhbGxpbmcoZmFsc2UpO1xuICAgIH1cbiAgfTtcblxuICBjb25zdCBoYW5kbGVFbmFibGVOb3RpZmljYXRpb25zID0gYXN5bmMgKCkgPT4ge1xuICAgIHRyeSB7XG4gICAgICBjb25zdCBwZXJtaXNzaW9uID0gYXdhaXQgcmVxdWVzdE5vdGlmaWNhdGlvblBlcm1pc3Npb24oKTtcbiAgICAgIHNldE5vdGlmaWNhdGlvbnNFbmFibGVkKHBlcm1pc3Npb24gPT09ICdncmFudGVkJyk7XG5cbiAgICAgIGlmIChwZXJtaXNzaW9uID09PSAnZ3JhbnRlZCcpIHtcbiAgICAgICAgdG9hc3Qoe1xuICAgICAgICAgIHRpdGxlOiAnTm90aWZpY2F0aW9ucyBhY3RpdsOpZXMnLFxuICAgICAgICAgIGRlc2NyaXB0aW9uOiAnVm91cyByZWNldnJleiBtYWludGVuYW50IGRlcyBub3RpZmljYXRpb25zIGltcG9ydGFudGVzLicsXG4gICAgICAgIH0pO1xuXG4gICAgICAgIC8vIFNlbmQgYSB0ZXN0IG5vdGlmaWNhdGlvblxuICAgICAgICBzZW5kTm90aWZpY2F0aW9uKCdOb3RpZmljYXRpb25zIGFjdGl2w6llcyAhJywge1xuICAgICAgICAgIGJvZHk6IFwiVm91cyByZWNldnJleiBtYWludGVuYW50IGRlcyBtaXNlcyDDoCBqb3VyIGltcG9ydGFudGVzIGQnRW1hcnpvbmEuXCIsXG4gICAgICAgICAgaWNvbjogJy9pY29uLTE5MngxOTIucG5nJyxcbiAgICAgICAgfSk7XG4gICAgICB9IGVsc2Uge1xuICAgICAgICB0b2FzdCh7XG4gICAgICAgICAgdGl0bGU6ICdOb3RpZmljYXRpb25zIHJlZnVzw6llcycsXG4gICAgICAgICAgZGVzY3JpcHRpb246ICdWb3VzIHBvdXZleiBsZXMgYWN0aXZlciBwbHVzIHRhcmQgZGFucyBsZXMgcGFyYW3DqHRyZXMuJyxcbiAgICAgICAgICB2YXJpYW50OiAnZGVzdHJ1Y3RpdmUnLFxuICAgICAgICB9KTtcbiAgICAgIH1cbiAgICB9IGNhdGNoIChlcnJvcikge1xuICAgICAgbG9nZ2VyLmVycm9yKCdFcnJvciByZXF1ZXN0aW5nIG5vdGlmaWNhdGlvbiBwZXJtaXNzaW9uJywgeyBlcnJvciB9KTtcbiAgICB9XG4gIH07XG5cbiAgY29uc3QgaGFuZGxlRGlzbWlzcyA9ICgpID0+IHtcbiAgICBzZXRJc1Zpc2libGUoZmFsc2UpO1xuICAgIGlmIChkaXNtaXNzaWJsZSkge1xuICAgICAgbG9jYWxTdG9yYWdlLnNldEl0ZW0oJ3B3YS1pbnN0YWxsLWRpc21pc3NlZCcsICd0cnVlJyk7XG4gICAgfVxuICB9O1xuXG4gIGlmICghaXNWaXNpYmxlIHx8ICFjYW5JbnN0YWxsKSByZXR1cm4gbnVsbDtcblxuICBpZiAoc2hvd0FzQmFubmVyKSB7XG4gICAgcmV0dXJuIChcbiAgICAgIDxkaXZcbiAgICAgICAgZGF0YS1wd2EtaW5zdGFsbFxuICAgICAgICBjbGFzc05hbWU9e2NuKFxuICAgICAgICAgICdmaXhlZCBib3R0b20tMCBsZWZ0LTAgcmlnaHQtMCB6LTUwIGJnLWdyYWRpZW50LXRvLXIgZnJvbS1ibHVlLTYwMCB0by1wdXJwbGUtNjAwIHRleHQtd2hpdGUgcC00IHNoYWRvdy1sZycsXG4gICAgICAgICAgY2xhc3NOYW1lXG4gICAgICAgICl9XG4gICAgICA+XG4gICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIganVzdGlmeS1iZXR3ZWVuIG1heC13LTd4bCBteC1hdXRvXCI+XG4gICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLWNlbnRlciBnYXAtM1wiPlxuICAgICAgICAgICAgPFNtYXJ0cGhvbmUgY2xhc3NOYW1lPVwiaC02IHctNlwiIC8+XG4gICAgICAgICAgICA8ZGl2PlxuICAgICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJmb250LXNlbWlib2xkXCI+XG4gICAgICAgICAgICAgICAgPEVtYXJ6b25hSW5UZXh0Pkluc3RhbGxleiBFbWFyem9uYTwvRW1hcnpvbmFJblRleHQ+XG4gICAgICAgICAgICAgIDwvcD5cbiAgICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwidGV4dC1zbSBvcGFjaXR5LTkwXCI+QWNjw6hzIHJhcGlkZSBldCBob3JzIGxpZ25lPC9wPlxuICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLWNlbnRlciBnYXAtMlwiPlxuICAgICAgICAgICAgPEJ1dHRvbiBzaXplPVwic21cIiB2YXJpYW50PVwic2Vjb25kYXJ5XCIgb25DbGljaz17aGFuZGxlSW5zdGFsbH0gZGlzYWJsZWQ9e2lzSW5zdGFsbGluZ30+XG4gICAgICAgICAgICAgIHtpc0luc3RhbGxpbmcgPyAnSW5zdGFsbGF0aW9uLi4uJyA6ICdJbnN0YWxsZXInfVxuICAgICAgICAgICAgPC9CdXR0b24+XG4gICAgICAgICAgICB7ZGlzbWlzc2libGUgJiYgKFxuICAgICAgICAgICAgICA8QnV0dG9uXG4gICAgICAgICAgICAgICAgc2l6ZT1cInNtXCJcbiAgICAgICAgICAgICAgICB2YXJpYW50PVwiZ2hvc3RcIlxuICAgICAgICAgICAgICAgIG9uQ2xpY2s9e2hhbmRsZURpc21pc3N9XG4gICAgICAgICAgICAgICAgY2xhc3NOYW1lPVwidGV4dC13aGl0ZSBob3ZlcjpiZy13aGl0ZS8yMFwiXG4gICAgICAgICAgICAgID5cbiAgICAgICAgICAgICAgICA8WCBjbGFzc05hbWU9XCJoLTQgdy00XCIgLz5cbiAgICAgICAgICAgICAgPC9CdXR0b24+XG4gICAgICAgICAgICApfVxuICAgICAgICAgIDwvZGl2PlxuICAgICAgICA8L2Rpdj5cbiAgICAgIDwvZGl2PlxuICAgICk7XG4gIH1cblxuICByZXR1cm4gKFxuICAgIDxDYXJkIGRhdGEtcHdhLWluc3RhbGwgY2xhc3NOYW1lPXtjbigndy1mdWxsIG1heC13LW1kIG14LWF1dG8nLCBjbGFzc05hbWUpfT5cbiAgICAgIDxDYXJkSGVhZGVyIGNsYXNzTmFtZT1cInRleHQtY2VudGVyXCI+XG4gICAgICAgIDxkaXYgY2xhc3NOYW1lPVwibXgtYXV0byBtYi00IHAtMyBiZy1ncmFkaWVudC10by1iciBmcm9tLWJsdWUtNTAwIHRvLXB1cnBsZS02MDAgcm91bmRlZC1mdWxsIHctZml0XCI+XG4gICAgICAgICAgPERvd25sb2FkIGNsYXNzTmFtZT1cImgtOCB3LTggdGV4dC13aGl0ZVwiIC8+XG4gICAgICAgIDwvZGl2PlxuICAgICAgICA8Q2FyZFRpdGxlIGNsYXNzTmFtZT1cInRleHQteGxcIj5cbiAgICAgICAgICA8RW1hcnpvbmFJblRleHQ+SW5zdGFsbGV6IEVtYXJ6b25hPC9FbWFyem9uYUluVGV4dD5cbiAgICAgICAgPC9DYXJkVGl0bGU+XG4gICAgICAgIDxwIGNsYXNzTmFtZT1cInRleHQtbXV0ZWQtZm9yZWdyb3VuZFwiPlxuICAgICAgICAgIFByb2ZpdGV6IGQndW5lIGV4cMOpcmllbmNlIG1vYmlsZSBvcHRpbWFsZSBhdmVjIGFjY8OocyBob3JzIGxpZ25lXG4gICAgICAgIDwvcD5cbiAgICAgIDwvQ2FyZEhlYWRlcj5cbiAgICAgIDxDYXJkQ29udGVudCBjbGFzc05hbWU9XCJzcGFjZS15LTRcIj5cbiAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJncmlkIGdyaWQtY29scy0yIGdhcC0zXCI+XG4gICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLWNlbnRlciBnYXAtMiB0ZXh0LXNtXCI+XG4gICAgICAgICAgICA8WmFwIGNsYXNzTmFtZT1cImgtNCB3LTQgdGV4dC1ncmVlbi01MDBcIiAvPlxuICAgICAgICAgICAgPHNwYW4+UmFwaWRlPC9zcGFuPlxuICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTIgdGV4dC1zbVwiPlxuICAgICAgICAgICAgPFNtYXJ0cGhvbmUgY2xhc3NOYW1lPVwiaC00IHctNCB0ZXh0LWJsdWUtNTAwXCIgLz5cbiAgICAgICAgICAgIDxzcGFuPkhvcnMgbGlnbmU8L3NwYW4+XG4gICAgICAgICAgPC9kaXY+XG4gICAgICAgICAge3N1cHBvcnRzTm90aWZpY2F0aW9ucyAmJiAoXG4gICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGdhcC0yIHRleHQtc21cIj5cbiAgICAgICAgICAgICAgPEJlbGwgY2xhc3NOYW1lPVwiaC00IHctNCB0ZXh0LW9yYW5nZS01MDBcIiAvPlxuICAgICAgICAgICAgICA8c3Bhbj5Ob3RpZmljYXRpb25zPC9zcGFuPlxuICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgKX1cbiAgICAgICAgICB7c3VwcG9ydHNXZWJTaGFyZSAmJiAoXG4gICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGdhcC0yIHRleHQtc21cIj5cbiAgICAgICAgICAgICAgPFNoYXJlMiBjbGFzc05hbWU9XCJoLTQgdy00IHRleHQtcHVycGxlLTUwMFwiIC8+XG4gICAgICAgICAgICAgIDxzcGFuPlBhcnRhZ2U8L3NwYW4+XG4gICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICApfVxuICAgICAgICA8L2Rpdj5cblxuICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInNwYWNlLXktM1wiPlxuICAgICAgICAgIDxCdXR0b24gb25DbGljaz17aGFuZGxlSW5zdGFsbH0gZGlzYWJsZWQ9e2lzSW5zdGFsbGluZ30gY2xhc3NOYW1lPVwidy1mdWxsXCIgc2l6ZT1cImxnXCI+XG4gICAgICAgICAgICB7aXNJbnN0YWxsaW5nID8gJ0luc3RhbGxhdGlvbiBlbiBjb3Vycy4uLicgOiBcIkluc3RhbGxlciBsJ2FwcGxpY2F0aW9uXCJ9XG4gICAgICAgICAgPC9CdXR0b24+XG5cbiAgICAgICAgICB7c3VwcG9ydHNOb3RpZmljYXRpb25zICYmICFub3RpZmljYXRpb25zRW5hYmxlZCAmJiAoXG4gICAgICAgICAgICA8QnV0dG9uXG4gICAgICAgICAgICAgIHZhcmlhbnQ9XCJvdXRsaW5lXCJcbiAgICAgICAgICAgICAgb25DbGljaz17aGFuZGxlRW5hYmxlTm90aWZpY2F0aW9uc31cbiAgICAgICAgICAgICAgY2xhc3NOYW1lPVwidy1mdWxsXCJcbiAgICAgICAgICAgICAgc2l6ZT1cInNtXCJcbiAgICAgICAgICAgID5cbiAgICAgICAgICAgICAgPEJlbGwgY2xhc3NOYW1lPVwiaC00IHctNCBtci0yXCIgLz5cbiAgICAgICAgICAgICAgQWN0aXZlciBsZXMgbm90aWZpY2F0aW9uc1xuICAgICAgICAgICAgPC9CdXR0b24+XG4gICAgICAgICAgKX1cblxuICAgICAgICAgIHtub3RpZmljYXRpb25zRW5hYmxlZCAmJiAoXG4gICAgICAgICAgICA8QmFkZ2UgdmFyaWFudD1cInNlY29uZGFyeVwiIGNsYXNzTmFtZT1cInctZnVsbCBqdXN0aWZ5LWNlbnRlciBweS0yXCI+XG4gICAgICAgICAgICAgIDxCZWxsIGNsYXNzTmFtZT1cImgtNCB3LTQgbXItMlwiIC8+XG4gICAgICAgICAgICAgIE5vdGlmaWNhdGlvbnMgYWN0aXbDqWVzXG4gICAgICAgICAgICA8L0JhZGdlPlxuICAgICAgICAgICl9XG4gICAgICAgIDwvZGl2PlxuXG4gICAgICAgIHtkaXNtaXNzaWJsZSAmJiAoXG4gICAgICAgICAgPEJ1dHRvblxuICAgICAgICAgICAgdmFyaWFudD1cImdob3N0XCJcbiAgICAgICAgICAgIG9uQ2xpY2s9e2hhbmRsZURpc21pc3N9XG4gICAgICAgICAgICBjbGFzc05hbWU9XCJ3LWZ1bGwgdGV4dC1tdXRlZC1mb3JlZ3JvdW5kXCJcbiAgICAgICAgICAgIHNpemU9XCJzbVwiXG4gICAgICAgICAgPlxuICAgICAgICAgICAgUGx1cyB0YXJkXG4gICAgICAgICAgPC9CdXR0b24+XG4gICAgICAgICl9XG4gICAgICA8L0NhcmRDb250ZW50PlxuICAgIDwvQ2FyZD5cbiAgKTtcbn07XG4iXSwibmFtZXMiOlsiUmVhY3QiLCJ1c2VTdGF0ZSIsInVzZUVmZmVjdCIsInVzZVBXQSIsIkJ1dHRvbiIsIkNhcmQiLCJDYXJkQ29udGVudCIsIkNhcmRIZWFkZXIiLCJDYXJkVGl0bGUiLCJCYWRnZSIsIkRvd25sb2FkIiwiWCIsIlNtYXJ0cGhvbmUiLCJaYXAiLCJCZWxsIiwiU2hhcmUyIiwiRW1hcnpvbmFJblRleHQiLCJjbiIsInVzZVRvYXN0IiwibG9nZ2VyIiwiUFdBSW5zdGFsbFByb21wdCIsImNsYXNzTmFtZSIsInNob3dBc0Jhbm5lciIsImF1dG9TaG93IiwiZGlzbWlzc2libGUiLCJjYW5JbnN0YWxsIiwiaXNJbnN0YWxsYWJsZSIsInN1cHBvcnRzTm90aWZpY2F0aW9ucyIsInN1cHBvcnRzV2ViU2hhcmUiLCJpbnN0YWxsIiwicmVxdWVzdE5vdGlmaWNhdGlvblBlcm1pc3Npb24iLCJzZW5kTm90aWZpY2F0aW9uIiwidG9hc3QiLCJpc1Zpc2libGUiLCJzZXRJc1Zpc2libGUiLCJpc0luc3RhbGxpbmciLCJzZXRJc0luc3RhbGxpbmciLCJub3RpZmljYXRpb25zRW5hYmxlZCIsInNldE5vdGlmaWNhdGlvbnNFbmFibGVkIiwibG9jYWxTdG9yYWdlIiwiZ2V0SXRlbSIsInRpbWVyIiwic2V0VGltZW91dCIsImNsZWFyVGltZW91dCIsIk5vdGlmaWNhdGlvbiIsInBlcm1pc3Npb24iLCJoYW5kbGVJbnN0YWxsIiwidGl0bGUiLCJkZXNjcmlwdGlvbiIsImVycm9yIiwidmFyaWFudCIsImhhbmRsZUVuYWJsZU5vdGlmaWNhdGlvbnMiLCJib2R5IiwiaWNvbiIsImhhbmRsZURpc21pc3MiLCJzZXRJdGVtIiwiZGl2IiwiZGF0YS1wd2EtaW5zdGFsbCIsInAiLCJzaXplIiwib25DbGljayIsImRpc2FibGVkIiwic3BhbiJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O0FBQUEsT0FBT0EsU0FBU0MsUUFBUSxFQUFFQyxTQUFTLFFBQVEsUUFBUTtBQUNuRCxTQUFTQyxNQUFNLFFBQVEsaUJBQWlCO0FBQ3hDLFNBQVNDLE1BQU0sUUFBUSx5QkFBeUI7QUFDaEQsU0FBU0MsSUFBSSxFQUFFQyxXQUFXLEVBQUVDLFVBQVUsRUFBRUMsU0FBUyxRQUFRLHVCQUF1QjtBQUNoRixTQUFTQyxLQUFLLFFBQVEsd0JBQXdCO0FBQzlDLFNBQVNDLFFBQVEsRUFBRUMsQ0FBQyxFQUFFQyxVQUFVLEVBQUVDLEdBQUcsRUFBRUMsSUFBSSxFQUFFQyxNQUFNLFFBQVEsZUFBZTtBQUMxRSxTQUFTQyxjQUFjLFFBQVEsb0NBQW9DO0FBQ25FLFNBQVNDLEVBQUUsUUFBUSxjQUFjO0FBQ2pDLFNBQVNDLFFBQVEsUUFBUSxvQkFBb0I7QUFDN0MsU0FBU0MsTUFBTSxRQUFRLGVBQWU7QUFTdEMsT0FBTyxNQUFNQyxtQkFBb0QsQ0FBQyxFQUNoRUMsU0FBUyxFQUNUQyxlQUFlLEtBQUssRUFDcEJDLFdBQVcsSUFBSSxFQUNmQyxjQUFjLElBQUksRUFDbkI7O0lBQ0Ms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

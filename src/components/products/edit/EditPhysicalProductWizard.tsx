@@ -83,7 +83,7 @@ import { useCatalogCacheInvalidation } from '@/hooks/useCatalogCacheInvalidation
 import { useQuery } from '@tanstack/react-query';
 
 const PRODUCT_FIELDS =
-  'id, store_id, name, slug, description, short_description, price, compare_at_price, cost_per_item, images, image_url, category_id, tags, meta_title, meta_description, og_image, faqs, payment_options, hide_purchase_count, hide_likes_count, hide_recommendations_count, hide_downloads_count, hide_reviews_count, hide_rating, is_active';
+  'id, store_id, name, slug, description, short_description, price, compare_at_price, cost_per_item, images, image_url, category, category_id, tags, meta_title, meta_description, og_image, faqs, payment_options, hide_purchase_count, hide_likes_count, hide_recommendations_count, hide_downloads_count, hide_reviews_count, hide_rating, is_active';
 const PHYSICAL_PRODUCT_FIELDS =
   'id, product_id, track_inventory, continue_selling_when_out_of_stock, inventory_policy, sku, barcode, requires_shipping, weight, weight_unit, length, width, height, dimensions_unit, shipping_class, free_shipping, whatsapp_number, whatsapp_enabled, has_variants, option1_name, option2_name, option3_name, low_stock_threshold';
 const PRODUCT_VARIANT_FIELDS =
@@ -313,7 +313,8 @@ const convertToFormData = async (
     price: product.price || 0,
     compare_at_price: product.compare_at_price || null,
     cost_per_item: product.cost_per_item || null,
-    images: product.images || [],
+    images: product.images || (product.image_url ? [product.image_url] : []),
+    category: product.category || 'vetements',
     category_id: product.category_id || null,
     tags: product.tags || [],
 
@@ -694,7 +695,10 @@ export const EditPhysicalProductWizard = ({
         compare_at_price: formData.compare_at_price,
         cost_per_item: formData.cost_per_item,
         images: formData.images || [],
+        currency: 'XOF',
+        category: formData.category,
         category_id: formData.category_id,
+        image_url: formData.images?.[0] || null,
         tags: formData.tags || [],
         meta_title: formData.seo?.meta_title,
         meta_description: formData.seo?.meta_description,

@@ -1,0 +1,400 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/store/StoreLegalPages.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/store/StoreLegalPages.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=6014a254"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+var _s = $RefreshSig$();
+/**
+ * StoreLegalPages Component
+ * Composant pour la gestion des pages légales
+ * Phase 1 - Fonctionnalités avancées
+ */ import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=6014a254"; const React = __vite__cjsImport3_react.__esModule ? __vite__cjsImport3_react.default : __vite__cjsImport3_react; const useState = __vite__cjsImport3_react["useState"];
+import { useTranslation } from "/node_modules/.vite/deps/react-i18next.js?v=02b07ad4";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "/src/components/ui/card.tsx";
+import { Textarea } from "/src/components/ui/textarea.tsx";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "/src/components/ui/tabs.tsx";
+import { Button } from "/src/components/ui/button.tsx";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "/src/components/ui/collapsible.tsx";
+import { FileText, Scale, Shield, Truck, RefreshCw, Cookie, AlertTriangle, Save, ChevronRight, ChevronDown, ChevronUp } from "/node_modules/.vite/deps/lucide-react.js?v=6014a254";
+const LEGAL_PAGES = [
+    {
+        key: 'terms_of_service',
+        icon: Scale
+    },
+    {
+        key: 'privacy_policy',
+        icon: Shield
+    },
+    {
+        key: 'return_policy',
+        icon: RefreshCw
+    },
+    {
+        key: 'shipping_policy',
+        icon: Truck
+    },
+    {
+        key: 'refund_policy',
+        icon: RefreshCw
+    },
+    {
+        key: 'cookie_policy',
+        icon: Cookie
+    },
+    {
+        key: 'disclaimer',
+        icon: AlertTriangle
+    },
+    {
+        key: 'faq_content',
+        icon: FileText
+    }
+];
+export const DEFAULT_LEGAL_TAB = LEGAL_PAGES[0].key;
+export const StoreLegalPagesComponent = ({ legalPages, onChange, onSave, currentTab = DEFAULT_LEGAL_TAB, onTabChange, onCompleteSubSteps, isSubmitting = false })=>{
+    _s();
+    const { t } = useTranslation();
+    const [localPages, setLocalPages] = useState(legalPages || {
+        terms_of_service: '',
+        privacy_policy: '',
+        return_policy: '',
+        shipping_policy: '',
+        refund_policy: '',
+        cookie_policy: '',
+        disclaimer: '',
+        faq_content: ''
+    });
+    const [previewOpen, setPreviewOpen] = useState(false);
+    // Sync local state with prop changes
+    React.useEffect(()=>{
+        if (legalPages) {
+            setLocalPages(legalPages);
+        }
+    }, [
+        legalPages
+    ]);
+    const getPageContent = (key)=>{
+        const value = localPages[key];
+        return typeof value === 'string' ? value : '';
+    };
+    const handleChange = (key, value)=>{
+        setLocalPages((prev)=>({
+                ...prev,
+                [key]: value
+            }));
+        onChange(key, value);
+    };
+    const handleSaveAndContinue = async ()=>{
+        if (onSave) {
+            await onSave();
+        }
+        const currentIndex = LEGAL_PAGES.findIndex((page)=>page.key === currentTab);
+        if (currentIndex < LEGAL_PAGES.length - 1 && onTabChange) {
+            onTabChange(LEGAL_PAGES[currentIndex + 1].key);
+        } else if (onCompleteSubSteps) {
+            onCompleteSubSteps();
+        }
+    };
+    return /*#__PURE__*/ _jsxDEV(Card, {
+        children: [
+            /*#__PURE__*/ _jsxDEV(CardHeader, {
+                children: [
+                    /*#__PURE__*/ _jsxDEV(CardTitle, {
+                        className: "flex items-center gap-2",
+                        children: [
+                            /*#__PURE__*/ _jsxDEV(FileText, {
+                                className: "h-5 w-5"
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/store/StoreLegalPages.tsx",
+                                lineNumber: 109,
+                                columnNumber: 11
+                            }, this),
+                            t('store.form.legal.title')
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/store/StoreLegalPages.tsx",
+                        lineNumber: 108,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV(CardDescription, {
+                        children: t('store.form.legal.description')
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/store/StoreLegalPages.tsx",
+                        lineNumber: 112,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/store/StoreLegalPages.tsx",
+                lineNumber: 107,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV(CardContent, {
+                children: /*#__PURE__*/ _jsxDEV(Tabs, {
+                    value: currentTab,
+                    onValueChange: (value)=>onTabChange?.(value),
+                    className: "w-full",
+                    children: [
+                        /*#__PURE__*/ _jsxDEV(TabsList, {
+                            className: "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3",
+                            children: LEGAL_PAGES.map((page)=>{
+                                const Icon = page.icon;
+                                return /*#__PURE__*/ _jsxDEV(TabsTrigger, {
+                                    value: page.key,
+                                    className: "flex items-center gap-1 sm:gap-2 text-[10px] sm:text-xs h-auto py-2 sm:py-2.5 bg-muted hover:bg-muted/80 data-[state=active]:bg-orange-500 data-[state=active]:text-white data-[state=active]:hover:bg-orange-600",
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV(Icon, {
+                                            className: "h-2.5 w-2.5 sm:h-3 sm:w-3 flex-shrink-0"
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/store/StoreLegalPages.tsx",
+                                            lineNumber: 129,
+                                            columnNumber: 19
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV("span", {
+                                            className: "hidden sm:inline truncate",
+                                            children: t(`store.form.legal.pages.${page.key}.label`)
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/store/StoreLegalPages.tsx",
+                                            lineNumber: 130,
+                                            columnNumber: 19
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV("span", {
+                                            className: "sm:hidden truncate leading-tight",
+                                            children: t(`store.form.legal.pages.${page.key}.shortLabel`)
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/store/StoreLegalPages.tsx",
+                                            lineNumber: 133,
+                                            columnNumber: 19
+                                        }, this)
+                                    ]
+                                }, page.key, true, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/store/StoreLegalPages.tsx",
+                                    lineNumber: 124,
+                                    columnNumber: 17
+                                }, this);
+                            })
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/store/StoreLegalPages.tsx",
+                            lineNumber: 120,
+                            columnNumber: 11
+                        }, this),
+                        LEGAL_PAGES.map((page)=>{
+                            return /*#__PURE__*/ _jsxDEV(TabsContent, {
+                                value: page.key,
+                                className: "space-y-3 mt-20",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "space-y-1",
+                                        children: /*#__PURE__*/ _jsxDEV("p", {
+                                            className: "text-sm text-muted-foreground",
+                                            children: t(`store.form.legal.pages.${page.key}.description`)
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/store/StoreLegalPages.tsx",
+                                            lineNumber: 145,
+                                            columnNumber: 19
+                                        }, this)
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/store/StoreLegalPages.tsx",
+                                        lineNumber: 144,
+                                        columnNumber: 17
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "space-y-1",
+                                        children: [
+                                            /*#__PURE__*/ _jsxDEV(Textarea, {
+                                                id: page.key,
+                                                value: getPageContent(page.key),
+                                                onChange: (e)=>handleChange(page.key, e.target.value),
+                                                placeholder: t(`store.form.legal.pages.${page.key}.placeholder`),
+                                                rows: 8,
+                                                className: "resize-y"
+                                            }, void 0, false, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/store/StoreLegalPages.tsx",
+                                                lineNumber: 151,
+                                                columnNumber: 19
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV("p", {
+                                                className: "text-xs text-muted-foreground",
+                                                children: t('store.form.legal.markdownHint')
+                                            }, void 0, false, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/store/StoreLegalPages.tsx",
+                                                lineNumber: 159,
+                                                columnNumber: 19
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/store/StoreLegalPages.tsx",
+                                        lineNumber: 150,
+                                        columnNumber: 17
+                                    }, this),
+                                    getPageContent(page.key) && /*#__PURE__*/ _jsxDEV(Collapsible, {
+                                        open: previewOpen,
+                                        onOpenChange: setPreviewOpen,
+                                        children: [
+                                            /*#__PURE__*/ _jsxDEV(CollapsibleTrigger, {
+                                                asChild: true,
+                                                children: /*#__PURE__*/ _jsxDEV(Button, {
+                                                    variant: "ghost",
+                                                    size: "sm",
+                                                    className: "w-full justify-start gap-2 h-8 text-xs",
+                                                    children: [
+                                                        previewOpen ? /*#__PURE__*/ _jsxDEV(ChevronUp, {
+                                                            className: "h-3 w-3"
+                                                        }, void 0, false, {
+                                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/store/StoreLegalPages.tsx",
+                                                            lineNumber: 173,
+                                                            columnNumber: 27
+                                                        }, this) : /*#__PURE__*/ _jsxDEV(ChevronDown, {
+                                                            className: "h-3 w-3"
+                                                        }, void 0, false, {
+                                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/store/StoreLegalPages.tsx",
+                                                            lineNumber: 175,
+                                                            columnNumber: 27
+                                                        }, this),
+                                                        t('store.form.common.preview')
+                                                    ]
+                                                }, void 0, true, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/store/StoreLegalPages.tsx",
+                                                    lineNumber: 167,
+                                                    columnNumber: 23
+                                                }, this)
+                                            }, void 0, false, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/store/StoreLegalPages.tsx",
+                                                lineNumber: 166,
+                                                columnNumber: 21
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV(CollapsibleContent, {
+                                                children: /*#__PURE__*/ _jsxDEV("div", {
+                                                    className: "mt-2 p-3 border rounded-lg bg-muted/50",
+                                                    children: /*#__PURE__*/ _jsxDEV("div", {
+                                                        className: "prose prose-sm max-w-none",
+                                                        children: /*#__PURE__*/ _jsxDEV("pre", {
+                                                            className: "whitespace-pre-wrap text-xs",
+                                                            children: getPageContent(page.key)
+                                                        }, void 0, false, {
+                                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/store/StoreLegalPages.tsx",
+                                                            lineNumber: 183,
+                                                            columnNumber: 27
+                                                        }, this)
+                                                    }, void 0, false, {
+                                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/store/StoreLegalPages.tsx",
+                                                        lineNumber: 182,
+                                                        columnNumber: 25
+                                                    }, this)
+                                                }, void 0, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/store/StoreLegalPages.tsx",
+                                                    lineNumber: 181,
+                                                    columnNumber: 23
+                                                }, this)
+                                            }, void 0, false, {
+                                                fileName: "/home/runner/work/emarzona/emarzona/src/components/store/StoreLegalPages.tsx",
+                                                lineNumber: 180,
+                                                columnNumber: 21
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/store/StoreLegalPages.tsx",
+                                        lineNumber: 165,
+                                        columnNumber: 19
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "flex justify-end pt-2",
+                                        children: /*#__PURE__*/ _jsxDEV(Button, {
+                                            onClick: ()=>void handleSaveAndContinue(),
+                                            className: "gap-2 h-9 text-sm",
+                                            disabled: isSubmitting,
+                                            children: [
+                                                /*#__PURE__*/ _jsxDEV(Save, {
+                                                    className: "h-4 w-4"
+                                                }, void 0, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/store/StoreLegalPages.tsx",
+                                                    lineNumber: 198,
+                                                    columnNumber: 21
+                                                }, this),
+                                                isSubmitting ? t('store.form.common.saving') : t('store.form.common.saveAndContinue'),
+                                                !isSubmitting && /*#__PURE__*/ _jsxDEV(ChevronRight, {
+                                                    className: "h-4 w-4"
+                                                }, void 0, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/store/StoreLegalPages.tsx",
+                                                    lineNumber: 202,
+                                                    columnNumber: 39
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/store/StoreLegalPages.tsx",
+                                            lineNumber: 193,
+                                            columnNumber: 19
+                                        }, this)
+                                    }, void 0, false, {
+                                        fileName: "/home/runner/work/emarzona/emarzona/src/components/store/StoreLegalPages.tsx",
+                                        lineNumber: 192,
+                                        columnNumber: 17
+                                    }, this)
+                                ]
+                            }, page.key, true, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/store/StoreLegalPages.tsx",
+                                lineNumber: 143,
+                                columnNumber: 15
+                            }, this);
+                        })
+                    ]
+                }, void 0, true, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/store/StoreLegalPages.tsx",
+                    lineNumber: 115,
+                    columnNumber: 9
+                }, this)
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/store/StoreLegalPages.tsx",
+                lineNumber: 114,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/store/StoreLegalPages.tsx",
+        lineNumber: 106,
+        columnNumber: 5
+    }, this);
+};
+_s(StoreLegalPagesComponent, "L3qlxYVnMIShUn/9ClpzuYn6fRQ=", false, function() {
+    return [
+        useTranslation
+    ];
+});
+_c = StoreLegalPagesComponent;
+var _c;
+$RefreshReg$(_c, "StoreLegalPagesComponent");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/store/StoreLegalPages.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/store/StoreLegalPages.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIlN0b3JlTGVnYWxQYWdlcy50c3giXSwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBTdG9yZUxlZ2FsUGFnZXMgQ29tcG9uZW50XG4gKiBDb21wb3NhbnQgcG91ciBsYSBnZXN0aW9uIGRlcyBwYWdlcyBsw6lnYWxlc1xuICogUGhhc2UgMSAtIEZvbmN0aW9ubmFsaXTDqXMgYXZhbmPDqWVzXG4gKi9cblxuaW1wb3J0IFJlYWN0LCB7IHVzZVN0YXRlIH0gZnJvbSAncmVhY3QnO1xuaW1wb3J0IHsgdXNlVHJhbnNsYXRpb24gfSBmcm9tICdyZWFjdC1pMThuZXh0JztcbmltcG9ydCB7IENhcmQsIENhcmRDb250ZW50LCBDYXJkRGVzY3JpcHRpb24sIENhcmRIZWFkZXIsIENhcmRUaXRsZSB9IGZyb20gJ0AvY29tcG9uZW50cy91aS9jYXJkJztcbmltcG9ydCB7IFRleHRhcmVhIH0gZnJvbSAnQC9jb21wb25lbnRzL3VpL3RleHRhcmVhJztcbmltcG9ydCB7IFRhYnMsIFRhYnNDb250ZW50LCBUYWJzTGlzdCwgVGFic1RyaWdnZXIgfSBmcm9tICdAL2NvbXBvbmVudHMvdWkvdGFicyc7XG5pbXBvcnQgeyBCdXR0b24gfSBmcm9tICdAL2NvbXBvbmVudHMvdWkvYnV0dG9uJztcbmltcG9ydCB7IENvbGxhcHNpYmxlLCBDb2xsYXBzaWJsZUNvbnRlbnQsIENvbGxhcHNpYmxlVHJpZ2dlciB9IGZyb20gJ0AvY29tcG9uZW50cy91aS9jb2xsYXBzaWJsZSc7XG5pbXBvcnQge1xuICBGaWxlVGV4dCxcbiAgU2NhbGUsXG4gIFNoaWVsZCxcbiAgVHJ1Y2ssXG4gIFJlZnJlc2hDdyxcbiAgQ29va2llLFxuICBBbGVydFRyaWFuZ2xlLFxuICBTYXZlLFxuICBDaGV2cm9uUmlnaHQsXG4gIENoZXZyb25Eb3duLFxuICBDaGV2cm9uVXAsXG59IGZyb20gJ2x1Y2lkZS1yZWFjdCc7XG5pbXBvcnQgeyBTdG9yZUxlZ2FsUGFnZXMgfSBmcm9tICdAL2hvb2tzL3VzZVN0b3Jlcyc7XG5cbmludGVyZmFjZSBTdG9yZUxlZ2FsUGFnZXNQcm9wcyB7XG4gIGxlZ2FsUGFnZXM6IFN0b3JlTGVnYWxQYWdlcyB8IG51bGw7XG4gIG9uQ2hhbmdlOiAoZmllbGQ6IGtleW9mIFN0b3JlTGVnYWxQYWdlcywgdmFsdWU6IHN0cmluZykgPT4gdm9pZDtcbiAgb25TYXZlPzogKCkgPT4gdm9pZCB8IFByb21pc2U8dm9pZD47XG4gIGN1cnJlbnRUYWI/OiBrZXlvZiBTdG9yZUxlZ2FsUGFnZXM7XG4gIG9uVGFiQ2hhbmdlPzogKHRhYjoga2V5b2YgU3RvcmVMZWdhbFBhZ2VzKSA9PiB2b2lkO1xuICBvbkNvbXBsZXRlU3ViU3RlcHM/OiAoKSA9PiB2b2lkO1xuICBpc1N1Ym1pdHRpbmc/OiBib29sZWFuO1xufVxuXG5jb25zdCBMRUdBTF9QQUdFUyA9IFtcbiAgeyBrZXk6ICd0ZXJtc19vZl9zZXJ2aWNlJyBhcyBrZXlvZiBTdG9yZUxlZ2FsUGFnZXMsIGljb246IFNjYWxlIH0sXG4gIHsga2V5OiAncHJpdmFjeV9wb2xpY3knIGFzIGtleW9mIFN0b3JlTGVnYWxQYWdlcywgaWNvbjogU2hpZWxkIH0sXG4gIHsga2V5OiAncmV0dXJuX3BvbGljeScgYXMga2V5b2YgU3RvcmVMZWdhbFBhZ2VzLCBpY29uOiBSZWZyZXNoQ3cgfSxcbiAgeyBrZXk6ICdzaGlwcGluZ19wb2xpY3knIGFzIGtleW9mIFN0b3JlTGVnYWxQYWdlcywgaWNvbjogVHJ1Y2sgfSxcbiAgeyBrZXk6ICdyZWZ1bmRfcG9saWN5JyBhcyBrZXlvZiBTdG9yZUxlZ2FsUGFnZXMsIGljb246IFJlZnJlc2hDdyB9LFxuICB7IGtleTogJ2Nvb2tpZV9wb2xpY3knIGFzIGtleW9mIFN0b3JlTGVnYWxQYWdlcywgaWNvbjogQ29va2llIH0sXG4gIHsga2V5OiAnZGlzY2xhaW1lcicgYXMga2V5b2YgU3RvcmVMZWdhbFBhZ2VzLCBpY29uOiBBbGVydFRyaWFuZ2xlIH0sXG4gIHsga2V5OiAnZmFxX2NvbnRlbnQnIGFzIGtleW9mIFN0b3JlTGVnYWxQYWdlcywgaWNvbjogRmlsZVRleHQgfSxcbl07XG5cbmV4cG9ydCBjb25zdCBERUZBVUxUX0xFR0FMX1RBQiA9IExFR0FMX1BBR0VTWzBdLmtleTtcblxuZXhwb3J0IGNvbnN0IFN0b3JlTGVnYWxQYWdlc0NvbXBvbmVudDogUmVhY3QuRkM8U3RvcmVMZWdhbFBhZ2VzUHJvcHM+ID0gKHtcbiAgbGVnYWxQYWdlcyxcbiAgb25DaGFuZ2UsXG4gIG9uU2F2ZSxcbiAgY3VycmVudFRhYiA9IERFRkFVTFRfTEVHQUxfVEFCLFxuICBvblRhYkNoYW5nZSxcbiAgb25Db21wbGV0ZVN1YlN0ZXBzLFxuICBpc1N1Ym1pdHRpbmcgPSBmYWxzZSxcbn0pID0+IHtcbiAgY29uc3QgeyB0IH0gPSB1c2VUcmFuc2xhdGlvbigpO1xuICBjb25zdCBbbG9jYWxQYWdlcywgc2V0TG9jYWxQYWdlc10gPSB1c2VTdGF0ZTxTdG9yZUxlZ2FsUGFnZXM+KFxuICAgIGxlZ2FsUGFnZXMgfHwge1xuICAgICAgdGVybXNfb2Zfc2VydmljZTogJycsXG4gICAgICBwcml2YWN5X3BvbGljeTogJycsXG4gICAgICByZXR1cm5fcG9saWN5OiAnJyxcbiAgICAgIHNoaXBwaW5nX3BvbGljeTogJycsXG4gICAgICByZWZ1bmRfcG9saWN5OiAnJyxcbiAgICAgIGNvb2tpZV9wb2xpY3k6ICcnLFxuICAgICAgZGlzY2xhaW1lcjogJycsXG4gICAgICBmYXFfY29udGVudDogJycsXG4gICAgfVxuICApO1xuICBjb25zdCBbcHJldmlld09wZW4sIHNldFByZXZpZXdPcGVuXSA9IHVzZVN0YXRlKGZhbHNlKTtcblxuICAvLyBTeW5jIGxvY2FsIHN0YXRlIHdpdGggcHJvcCBjaGFuZ2VzXG4gIFJlYWN0LnVzZUVmZmVjdCgoKSA9PiB7XG4gICAgaWYgKGxlZ2FsUGFnZXMpIHtcbiAgICAgIHNldExvY2FsUGFnZXMobGVnYWxQYWdlcyk7XG4gICAgfVxuICB9LCBbbGVnYWxQYWdlc10pO1xuXG4gIGNvbnN0IGdldFBhZ2VDb250ZW50ID0gKGtleToga2V5b2YgU3RvcmVMZWdhbFBhZ2VzKTogc3RyaW5nID0+IHtcbiAgICBjb25zdCB2YWx1ZSA9IGxvY2FsUGFnZXNba2V5XTtcbiAgICByZXR1cm4gdHlwZW9mIHZhbHVlID09PSAnc3RyaW5nJyA/IHZhbHVlIDogJyc7XG4gIH07XG5cbiAgY29uc3QgaGFuZGxlQ2hhbmdlID0gKGtleToga2V5b2YgU3RvcmVMZWdhbFBhZ2VzLCB2YWx1ZTogc3RyaW5nKSA9PiB7XG4gICAgc2V0TG9jYWxQYWdlcyhwcmV2ID0+ICh7IC4uLnByZXYsIFtrZXldOiB2YWx1ZSB9KSk7XG4gICAgb25DaGFuZ2Uoa2V5LCB2YWx1ZSk7XG4gIH07XG5cbiAgY29uc3QgaGFuZGxlU2F2ZUFuZENvbnRpbnVlID0gYXN5bmMgKCkgPT4ge1xuICAgIGlmIChvblNhdmUpIHtcbiAgICAgIGF3YWl0IG9uU2F2ZSgpO1xuICAgIH1cbiAgICBjb25zdCBjdXJyZW50SW5kZXggPSBMRUdBTF9QQUdFUy5maW5kSW5kZXgocGFnZSA9PiBwYWdlLmtleSA9PT0gY3VycmVudFRhYik7XG4gICAgaWYgKGN1cnJlbnRJbmRleCA8IExFR0FMX1BBR0VTLmxlbmd0aCAtIDEgJiYgb25UYWJDaGFuZ2UpIHtcbiAgICAgIG9uVGFiQ2hhbmdlKExFR0FMX1BBR0VTW2N1cnJlbnRJbmRleCArIDFdLmtleSk7XG4gICAgfSBlbHNlIGlmIChvbkNvbXBsZXRlU3ViU3RlcHMpIHtcbiAgICAgIG9uQ29tcGxldGVTdWJTdGVwcygpO1xuICAgIH1cbiAgfTtcblxuICByZXR1cm4gKFxuICAgIDxDYXJkPlxuICAgICAgPENhcmRIZWFkZXI+XG4gICAgICAgIDxDYXJkVGl0bGUgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTJcIj5cbiAgICAgICAgICA8RmlsZVRleHQgY2xhc3NOYW1lPVwiaC01IHctNVwiIC8+XG4gICAgICAgICAge3QoJ3N0b3JlLmZvcm0ubGVnYWwudGl0bGUnKX1cbiAgICAgICAgPC9DYXJkVGl0bGU+XG4gICAgICAgIDxDYXJkRGVzY3JpcHRpb24+e3QoJ3N0b3JlLmZvcm0ubGVnYWwuZGVzY3JpcHRpb24nKX08L0NhcmREZXNjcmlwdGlvbj5cbiAgICAgIDwvQ2FyZEhlYWRlcj5cbiAgICAgIDxDYXJkQ29udGVudD5cbiAgICAgICAgPFRhYnNcbiAgICAgICAgICB2YWx1ZT17Y3VycmVudFRhYn1cbiAgICAgICAgICBvblZhbHVlQ2hhbmdlPXt2YWx1ZSA9PiBvblRhYkNoYW5nZT8uKHZhbHVlIGFzIGtleW9mIFN0b3JlTGVnYWxQYWdlcyl9XG4gICAgICAgICAgY2xhc3NOYW1lPVwidy1mdWxsXCJcbiAgICAgICAgPlxuICAgICAgICAgIDxUYWJzTGlzdCBjbGFzc05hbWU9XCJncmlkIGdyaWQtY29scy0yIHNtOmdyaWQtY29scy0zIGxnOmdyaWQtY29scy00IGdhcC0yIHNtOmdhcC0zXCI+XG4gICAgICAgICAgICB7TEVHQUxfUEFHRVMubWFwKHBhZ2UgPT4ge1xuICAgICAgICAgICAgICBjb25zdCBJY29uID0gcGFnZS5pY29uO1xuICAgICAgICAgICAgICByZXR1cm4gKFxuICAgICAgICAgICAgICAgIDxUYWJzVHJpZ2dlclxuICAgICAgICAgICAgICAgICAga2V5PXtwYWdlLmtleX1cbiAgICAgICAgICAgICAgICAgIHZhbHVlPXtwYWdlLmtleX1cbiAgICAgICAgICAgICAgICAgIGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGdhcC0xIHNtOmdhcC0yIHRleHQtWzEwcHhdIHNtOnRleHQteHMgaC1hdXRvIHB5LTIgc206cHktMi41IGJnLW11dGVkIGhvdmVyOmJnLW11dGVkLzgwIGRhdGEtW3N0YXRlPWFjdGl2ZV06Ymctb3JhbmdlLTUwMCBkYXRhLVtzdGF0ZT1hY3RpdmVdOnRleHQtd2hpdGUgZGF0YS1bc3RhdGU9YWN0aXZlXTpob3ZlcjpiZy1vcmFuZ2UtNjAwXCJcbiAgICAgICAgICAgICAgICA+XG4gICAgICAgICAgICAgICAgICA8SWNvbiBjbGFzc05hbWU9XCJoLTIuNSB3LTIuNSBzbTpoLTMgc206dy0zIGZsZXgtc2hyaW5rLTBcIiAvPlxuICAgICAgICAgICAgICAgICAgPHNwYW4gY2xhc3NOYW1lPVwiaGlkZGVuIHNtOmlubGluZSB0cnVuY2F0ZVwiPlxuICAgICAgICAgICAgICAgICAgICB7dChgc3RvcmUuZm9ybS5sZWdhbC5wYWdlcy4ke3BhZ2Uua2V5fS5sYWJlbGApfVxuICAgICAgICAgICAgICAgICAgPC9zcGFuPlxuICAgICAgICAgICAgICAgICAgPHNwYW4gY2xhc3NOYW1lPVwic206aGlkZGVuIHRydW5jYXRlIGxlYWRpbmctdGlnaHRcIj5cbiAgICAgICAgICAgICAgICAgICAge3QoYHN0b3JlLmZvcm0ubGVnYWwucGFnZXMuJHtwYWdlLmtleX0uc2hvcnRMYWJlbGApfVxuICAgICAgICAgICAgICAgICAgPC9zcGFuPlxuICAgICAgICAgICAgICAgIDwvVGFic1RyaWdnZXI+XG4gICAgICAgICAgICAgICk7XG4gICAgICAgICAgICB9KX1cbiAgICAgICAgICA8L1RhYnNMaXN0PlxuXG4gICAgICAgICAge0xFR0FMX1BBR0VTLm1hcChwYWdlID0+IHtcbiAgICAgICAgICAgIHJldHVybiAoXG4gICAgICAgICAgICAgIDxUYWJzQ29udGVudCBrZXk9e3BhZ2Uua2V5fSB2YWx1ZT17cGFnZS5rZXl9IGNsYXNzTmFtZT1cInNwYWNlLXktMyBtdC0yMFwiPlxuICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwic3BhY2UteS0xXCI+XG4gICAgICAgICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJ0ZXh0LXNtIHRleHQtbXV0ZWQtZm9yZWdyb3VuZFwiPlxuICAgICAgICAgICAgICAgICAgICB7dChgc3RvcmUuZm9ybS5sZWdhbC5wYWdlcy4ke3BhZ2Uua2V5fS5kZXNjcmlwdGlvbmApfVxuICAgICAgICAgICAgICAgICAgPC9wPlxuICAgICAgICAgICAgICAgIDwvZGl2PlxuXG4gICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJzcGFjZS15LTFcIj5cbiAgICAgICAgICAgICAgICAgIDxUZXh0YXJlYVxuICAgICAgICAgICAgICAgICAgICBpZD17cGFnZS5rZXl9XG4gICAgICAgICAgICAgICAgICAgIHZhbHVlPXtnZXRQYWdlQ29udGVudChwYWdlLmtleSl9XG4gICAgICAgICAgICAgICAgICAgIG9uQ2hhbmdlPXtlID0+IGhhbmRsZUNoYW5nZShwYWdlLmtleSwgZS50YXJnZXQudmFsdWUpfVxuICAgICAgICAgICAgICAgICAgICBwbGFjZWhvbGRlcj17dChgc3RvcmUuZm9ybS5sZWdhbC5wYWdlcy4ke3BhZ2Uua2V5fS5wbGFjZWhvbGRlcmApfVxuICAgICAgICAgICAgICAgICAgICByb3dzPXs4fVxuICAgICAgICAgICAgICAgICAgICBjbGFzc05hbWU9XCJyZXNpemUteVwiXG4gICAgICAgICAgICAgICAgICAvPlxuICAgICAgICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwidGV4dC14cyB0ZXh0LW11dGVkLWZvcmVncm91bmRcIj5cbiAgICAgICAgICAgICAgICAgICAge3QoJ3N0b3JlLmZvcm0ubGVnYWwubWFya2Rvd25IaW50Jyl9XG4gICAgICAgICAgICAgICAgICA8L3A+XG4gICAgICAgICAgICAgICAgPC9kaXY+XG5cbiAgICAgICAgICAgICAgICB7Z2V0UGFnZUNvbnRlbnQocGFnZS5rZXkpICYmIChcbiAgICAgICAgICAgICAgICAgIDxDb2xsYXBzaWJsZSBvcGVuPXtwcmV2aWV3T3Blbn0gb25PcGVuQ2hhbmdlPXtzZXRQcmV2aWV3T3Blbn0+XG4gICAgICAgICAgICAgICAgICAgIDxDb2xsYXBzaWJsZVRyaWdnZXIgYXNDaGlsZD5cbiAgICAgICAgICAgICAgICAgICAgICA8QnV0dG9uXG4gICAgICAgICAgICAgICAgICAgICAgICB2YXJpYW50PVwiZ2hvc3RcIlxuICAgICAgICAgICAgICAgICAgICAgICAgc2l6ZT1cInNtXCJcbiAgICAgICAgICAgICAgICAgICAgICAgIGNsYXNzTmFtZT1cInctZnVsbCBqdXN0aWZ5LXN0YXJ0IGdhcC0yIGgtOCB0ZXh0LXhzXCJcbiAgICAgICAgICAgICAgICAgICAgICA+XG4gICAgICAgICAgICAgICAgICAgICAgICB7cHJldmlld09wZW4gPyAoXG4gICAgICAgICAgICAgICAgICAgICAgICAgIDxDaGV2cm9uVXAgY2xhc3NOYW1lPVwiaC0zIHctM1wiIC8+XG4gICAgICAgICAgICAgICAgICAgICAgICApIDogKFxuICAgICAgICAgICAgICAgICAgICAgICAgICA8Q2hldnJvbkRvd24gY2xhc3NOYW1lPVwiaC0zIHctM1wiIC8+XG4gICAgICAgICAgICAgICAgICAgICAgICApfVxuICAgICAgICAgICAgICAgICAgICAgICAge3QoJ3N0b3JlLmZvcm0uY29tbW9uLnByZXZpZXcnKX1cbiAgICAgICAgICAgICAgICAgICAgICA8L0J1dHRvbj5cbiAgICAgICAgICAgICAgICAgICAgPC9Db2xsYXBzaWJsZVRyaWdnZXI+XG4gICAgICAgICAgICAgICAgICAgIDxDb2xsYXBzaWJsZUNvbnRlbnQ+XG4gICAgICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJtdC0yIHAtMyBib3JkZXIgcm91bmRlZC1sZyBiZy1tdXRlZC81MFwiPlxuICAgICAgICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJwcm9zZSBwcm9zZS1zbSBtYXgtdy1ub25lXCI+XG4gICAgICAgICAgICAgICAgICAgICAgICAgIDxwcmUgY2xhc3NOYW1lPVwid2hpdGVzcGFjZS1wcmUtd3JhcCB0ZXh0LXhzXCI+XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAge2dldFBhZ2VDb250ZW50KHBhZ2Uua2V5KX1cbiAgICAgICAgICAgICAgICAgICAgICAgICAgPC9wcmU+XG4gICAgICAgICAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICAgICAgPC9Db2xsYXBzaWJsZUNvbnRlbnQ+XG4gICAgICAgICAgICAgICAgICA8L0NvbGxhcHNpYmxlPlxuICAgICAgICAgICAgICAgICl9XG5cbiAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXgganVzdGlmeS1lbmQgcHQtMlwiPlxuICAgICAgICAgICAgICAgICAgPEJ1dHRvblxuICAgICAgICAgICAgICAgICAgICBvbkNsaWNrPXsoKSA9PiB2b2lkIGhhbmRsZVNhdmVBbmRDb250aW51ZSgpfVxuICAgICAgICAgICAgICAgICAgICBjbGFzc05hbWU9XCJnYXAtMiBoLTkgdGV4dC1zbVwiXG4gICAgICAgICAgICAgICAgICAgIGRpc2FibGVkPXtpc1N1Ym1pdHRpbmd9XG4gICAgICAgICAgICAgICAgICA+XG4gICAgICAgICAgICAgICAgICAgIDxTYXZlIGNsYXNzTmFtZT1cImgtNCB3LTRcIiAvPlxuICAgICAgICAgICAgICAgICAgICB7aXNTdWJtaXR0aW5nXG4gICAgICAgICAgICAgICAgICAgICAgPyB0KCdzdG9yZS5mb3JtLmNvbW1vbi5zYXZpbmcnKVxuICAgICAgICAgICAgICAgICAgICAgIDogdCgnc3RvcmUuZm9ybS5jb21tb24uc2F2ZUFuZENvbnRpbnVlJyl9XG4gICAgICAgICAgICAgICAgICAgIHshaXNTdWJtaXR0aW5nICYmIDxDaGV2cm9uUmlnaHQgY2xhc3NOYW1lPVwiaC00IHctNFwiIC8+fVxuICAgICAgICAgICAgICAgICAgPC9CdXR0b24+XG4gICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgIDwvVGFic0NvbnRlbnQ+XG4gICAgICAgICAgICApO1xuICAgICAgICAgIH0pfVxuICAgICAgICA8L1RhYnM+XG4gICAgICA8L0NhcmRDb250ZW50PlxuICAgIDwvQ2FyZD5cbiAgKTtcbn07XG4iXSwibmFtZXMiOlsiUmVhY3QiLCJ1c2VTdGF0ZSIsInVzZVRyYW5zbGF0aW9uIiwiQ2FyZCIsIkNhcmRDb250ZW50IiwiQ2FyZERlc2NyaXB0aW9uIiwiQ2FyZEhlYWRlciIsIkNhcmRUaXRsZSIsIlRleHRhcmVhIiwiVGFicyIsIlRhYnNDb250ZW50IiwiVGFic0xpc3QiLCJUYWJzVHJpZ2dlciIsIkJ1dHRvbiIsIkNvbGxhcHNpYmxlIiwiQ29sbGFwc2libGVDb250ZW50IiwiQ29sbGFwc2libGVUcmlnZ2VyIiwiRmlsZVRleHQiLCJTY2FsZSIsIlNoaWVsZCIsIlRydWNrIiwiUmVmcmVzaEN3IiwiQ29va2llIiwiQWxlcnRUcmlhbmdsZSIsIlNhdmUiLCJDaGV2cm9uUmlnaHQiLCJDaGV2cm9uRG93biIsIkNoZXZyb25VcCIsIkxFR0FMX1BBR0VTIiwia2V5IiwiaWNvbiIsIkRFRkFVTFRfTEVHQUxfVEFCIiwiU3RvcmVMZWdhbFBhZ2VzQ29tcG9uZW50IiwibGVnYWxQYWdlcyIsIm9uQ2hhbmdlIiwib25TYXZlIiwiY3VycmVudFRhYiIsIm9uVGFiQ2hhbmdlIiwib25Db21wbGV0ZVN1YlN0ZXBzIiwiaXNTdWJtaXR0aW5nIiwidCIsImxvY2FsUGFnZXMiLCJzZXRMb2NhbFBhZ2VzIiwidGVybXNfb2Zfc2VydmljZSIsInByaXZhY3lfcG9saWN5IiwicmV0dXJuX3BvbGljeSIsInNoaXBwaW5nX3BvbGljeSIsInJlZnVuZF9wb2xpY3kiLCJjb29raWVfcG9saWN5IiwiZGlzY2xhaW1lciIsImZhcV9jb250ZW50IiwicHJldmlld09wZW4iLCJzZXRQcmV2aWV3T3BlbiIsInVzZUVmZmVjdCIsImdldFBhZ2VDb250ZW50IiwidmFsdWUiLCJoYW5kbGVDaGFuZ2UiLCJwcmV2IiwiaGFuZGxlU2F2ZUFuZENvbnRpbnVlIiwiY3VycmVudEluZGV4IiwiZmluZEluZGV4IiwicGFnZSIsImxlbmd0aCIsImNsYXNzTmFtZSIsIm9uVmFsdWVDaGFuZ2UiLCJtYXAiLCJJY29uIiwic3BhbiIsImRpdiIsInAiLCJpZCIsImUiLCJ0YXJnZXQiLCJwbGFjZWhvbGRlciIsInJvd3MiLCJvcGVuIiwib25PcGVuQ2hhbmdlIiwiYXNDaGlsZCIsInZhcmlhbnQiLCJzaXplIiwicHJlIiwib25DbGljayIsImRpc2FibGVkIl0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7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

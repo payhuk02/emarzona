@@ -1,0 +1,18 @@
+import.meta.env = {"BASE_URL": "/", "DEV": true, "MODE": "development", "PROD": false, "SSR": false, "VITE_BUILD_ID": "build-mrujuzzh", "VITE_E2E_BYPASS_TERMS": "true", "VITE_E2E_PAYMENT_STUB": "true", "VITE_E2E_UPLOAD_STUB": "true", "VITE_SUPABASE_ANON_KEY": "sb_publishable_PaC6RE0frJU97Exnp30IKA_R9pieK7C", "VITE_SUPABASE_PROJECT_ID": "mock-project", "VITE_SUPABASE_PUBLISHABLE_KEY": "sb_publishable_PaC6RE0frJU97Exnp30IKA_R9pieK7C", "VITE_SUPABASE_TEST_URL": "https://ufbztturuwwazfcvhvuu.supabase.co", "VITE_SUPABASE_URL": "https://ufbztturuwwazfcvhvuu.supabase.co"};/**
+ * Contrôle l'affichage des détails d'erreur techniques dans l'UI.
+ *
+ * En production, les messages techniques ne sont jamais exposés via un simple
+ * query param public. Un token secret (VITE_ERROR_DEBUG_TOKEN) est requis.
+ */ export function canShowErrorDetails() {
+    if (import.meta.env.DEV) {
+        return true;
+    }
+    const debugToken = import.meta.env.VITE_ERROR_DEBUG_TOKEN;
+    if (!debugToken || typeof debugToken !== 'string' || debugToken.length < 16) {
+        return false;
+    }
+    const params = new URLSearchParams(window.location.search);
+    return params.get('debug_token') === debugToken;
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImVycm9yLWRlYnVnLnRzIl0sInNvdXJjZXNDb250ZW50IjpbIi8qKlxuICogQ29udHLDtGxlIGwnYWZmaWNoYWdlIGRlcyBkw6l0YWlscyBkJ2VycmV1ciB0ZWNobmlxdWVzIGRhbnMgbCdVSS5cbiAqXG4gKiBFbiBwcm9kdWN0aW9uLCBsZXMgbWVzc2FnZXMgdGVjaG5pcXVlcyBuZSBzb250IGphbWFpcyBleHBvc8OpcyB2aWEgdW4gc2ltcGxlXG4gKiBxdWVyeSBwYXJhbSBwdWJsaWMuIFVuIHRva2VuIHNlY3JldCAoVklURV9FUlJPUl9ERUJVR19UT0tFTikgZXN0IHJlcXVpcy5cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIGNhblNob3dFcnJvckRldGFpbHMoKTogYm9vbGVhbiB7XG4gIGlmIChpbXBvcnQubWV0YS5lbnYuREVWKSB7XG4gICAgcmV0dXJuIHRydWU7XG4gIH1cblxuICBjb25zdCBkZWJ1Z1Rva2VuID0gaW1wb3J0Lm1ldGEuZW52LlZJVEVfRVJST1JfREVCVUdfVE9LRU47XG4gIGlmICghZGVidWdUb2tlbiB8fCB0eXBlb2YgZGVidWdUb2tlbiAhPT0gJ3N0cmluZycgfHwgZGVidWdUb2tlbi5sZW5ndGggPCAxNikge1xuICAgIHJldHVybiBmYWxzZTtcbiAgfVxuXG4gIGNvbnN0IHBhcmFtcyA9IG5ldyBVUkxTZWFyY2hQYXJhbXMod2luZG93LmxvY2F0aW9uLnNlYXJjaCk7XG4gIHJldHVybiBwYXJhbXMuZ2V0KCdkZWJ1Z190b2tlbicpID09PSBkZWJ1Z1Rva2VuO1xufVxuIl0sIm5hbWVzIjpbImNhblNob3dFcnJvckRldGFpbHMiLCJlbnYiLCJERVYiLCJkZWJ1Z1Rva2VuIiwiVklURV9FUlJPUl9ERUJVR19UT0tFTiIsImxlbmd0aCIsInBhcmFtcyIsIlVSTFNlYXJjaFBhcmFtcyIsIndpbmRvdyIsImxvY2F0aW9uIiwic2VhcmNoIiwiZ2V0Il0sIm1hcHBpbmdzIjoiQUFBQTs7Ozs7Q0FLQyxHQUNELE9BQU8sU0FBU0E7SUFDZCxJQUFJLFlBQVlDLEdBQUcsQ0FBQ0MsR0FBRyxFQUFFO1FBQ3ZCLE9BQU87SUFDVDtJQUVBLE1BQU1DLGFBQWEsWUFBWUYsR0FBRyxDQUFDRyxzQkFBc0I7SUFDekQsSUFBSSxDQUFDRCxjQUFjLE9BQU9BLGVBQWUsWUFBWUEsV0FBV0UsTUFBTSxHQUFHLElBQUk7UUFDM0UsT0FBTztJQUNUO0lBRUEsTUFBTUMsU0FBUyxJQUFJQyxnQkFBZ0JDLE9BQU9DLFFBQVEsQ0FBQ0MsTUFBTTtJQUN6RCxPQUFPSixPQUFPSyxHQUFHLENBQUMsbUJBQW1CUjtBQUN2QyJ9

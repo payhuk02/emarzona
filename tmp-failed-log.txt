@@ -1,0 +1,594 @@
+﻿Store create & theme E2E	Run store theme E2E	´╗┐2026-07-21T15:27:36.7981972Z ##[group]Run npm run test:e2e:store-theme
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:27:36.7982344Z ^[[36;1mnpm run test:e2e:store-theme^[[0m
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:27:36.8046261Z shell: /usr/bin/bash -e {0}
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:27:36.8046561Z env:
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:27:36.8046775Z   CI: true
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:27:36.8047248Z   VITE_SUPABASE_TEST_URL: ***
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:27:36.8047621Z   VITE_SUPABASE_URL: ***
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:27:36.8047990Z   VITE_SUPABASE_ANON_KEY: ***
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:27:36.8048386Z   VITE_SUPABASE_PUBLISHABLE_KEY: ***
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:27:36.8048784Z   SUPABASE_SERVICE_ROLE_KEY: ***
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:27:36.8049058Z ##[endgroup]
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:27:36.9178546Z 
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:27:36.9178978Z > emarzona@1.0.0 test:e2e:store-theme
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:27:36.9179892Z > playwright test --config=playwright.store-theme.config.ts
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:27:36.9180198Z 
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:27:40.4001232Z 
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:27:40.4002492Z Running 4 tests using 1 worker
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0250745Z ├ùF├ùF
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0251471Z Testing stopped early after 2 maximum allowed failures.
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0281337Z ##[error]Testing stopped early after 2 maximum allowed failures.
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0740170Z 
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0755564Z 
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0757906Z   1) [chromium] ÔÇ║ tests/e2e/store-appearance-revisions.spec.ts:90:3 ÔÇ║ Store appearance revisions (E2E) ÔÇ║ rollback panel restores a previous published appearance revision 
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0758924Z 
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0759809Z     Error: ^[[2mexpect(^[[22m^[[31mlocator^[[39m^[[2m).^[[22mtoBeVisible^[[2m(^[[22m^[[2m)^[[22m failed
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0760344Z 
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0761369Z     Locator: getByTestId('store-express-create-form').or(getByTestId('store-create-limit-reached')).or(locator('input[name="email-login"], #password-login')).first()
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0762500Z     Expected: visible
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0762867Z     Timeout: 60000ms
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0763259Z     Error: element(s) not found
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0763581Z 
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0763724Z     Call log:
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0764298Z     ^[[2m  - Expect "toBeVisible" with timeout 60000ms^[[22m
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0765931Z     ^[[2m  - waiting for getByTestId('store-express-create-form').or(getByTestId('store-create-limit-reached')).or(locator('input[name="email-login"], #password-login')).first()^[[22m
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0766986Z 
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0766996Z 
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0767228Z        at helpers/store-theme-helpers.ts:504
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0767538Z 
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0768013Z       502 |   const loginGate = page.locator('input[name="email-login"], #password-login');
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0768666Z       503 |
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0769317Z     > 504 |   await expect(form.or(limit).or(loginGate).first()).toBeVisible({ timeout: 60_000 });
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0770376Z           |                                                      ^
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0770837Z       505 |
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0771142Z       506 |   if (
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0771998Z       507 |     await loginGate
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0772863Z         at waitForStoreExpressCreateForm (/home/runner/work/emarzona/emarzona/tests/e2e/helpers/store-theme-helpers.ts:504:54)
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0774452Z         at /home/runner/work/emarzona/emarzona/tests/e2e/store-appearance-revisions.spec.ts:122:5
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0774858Z 
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0775343Z     Error Context: test-results/store-appearance-revisions-0f275-blished-appearance-revision-chromium/error-context.md
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0776152Z 
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0776785Z     Retry #1 ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0777227Z 
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0777787Z     Error: ^[[2mexpect(^[[22m^[[31mlocator^[[39m^[[2m).^[[22mtoBeVisible^[[2m(^[[22m^[[2m)^[[22m failed
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0778280Z 
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0779827Z     Locator: getByTestId('store-express-create-form').or(getByTestId('store-create-limit-reached')).or(locator('input[name="email-login"], #password-login')).first()
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0780985Z     Expected: visible
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0781348Z     Timeout: 60000ms
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0782119Z     Error: element(s) not found
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0782378Z 
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0782517Z     Call log:
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0809906Z     ^[[2m  - Expect "toBeVisible" with timeout 60000ms^[[22m
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0811700Z     ^[[2m  - waiting for getByTestId('store-express-create-form').or(getByTestId('store-create-limit-reached')).or(locator('input[name="email-login"], #password-login')).first()^[[22m
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0812751Z 
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0812762Z 
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0813004Z        at helpers/store-theme-helpers.ts:504
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0813343Z 
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0813810Z       502 |   const loginGate = page.locator('input[name="email-login"], #password-login');
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0814472Z       503 |
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0815132Z     > 504 |   await expect(form.or(limit).or(loginGate).first()).toBeVisible({ timeout: 60_000 });
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0815933Z           |                                                      ^
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0816394Z       505 |
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0816723Z       506 |   if (
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0817093Z       507 |     await loginGate
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0818116Z         at waitForStoreExpressCreateForm (/home/runner/work/emarzona/emarzona/tests/e2e/helpers/store-theme-helpers.ts:504:54)
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0819608Z         at /home/runner/work/emarzona/emarzona/tests/e2e/store-appearance-revisions.spec.ts:122:5
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0820218Z 
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0821050Z     Error Context: test-results/store-appearance-revisions-0f275-blished-appearance-revision-chromium-retry1/error-context.md
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0821912Z 
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0822594Z     attachment #2: trace (application/zip) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0823838Z     test-results/store-appearance-revisions-0f275-blished-appearance-revision-chromium-retry1/trace.zip
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0824725Z     Usage:
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0824902Z 
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0825727Z         npx playwright show-trace test-results/store-appearance-revisions-0f275-blished-appearance-revision-chromium-retry1/trace.zip
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0826612Z 
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0827191Z     ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0827647Z 
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0828878Z   2) [chromium] ÔÇ║ tests/e2e/store-create-theme.spec.ts:55:3 ÔÇ║ Store create ÔåÆ customize ÔåÆ storefront theme (E2E) ÔÇ║ express create, dashboard customize, persisted theme colors 
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0880090Z 
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0880565Z     Error: ^[[2mexpect(^[[22m^[[31mlocator^[[39m^[[2m).^[[22mtoBeVisible^[[2m(^[[22m^[[2m)^[[22m failed
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0880933Z 
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0881554Z     Locator: getByTestId('store-express-create-form').or(getByTestId('store-create-limit-reached')).or(locator('input[name="email-login"], #password-login')).first()
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0882247Z     Expected: visible
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0882756Z     Timeout: 60000ms
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0883021Z     Error: element(s) not found
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0883198Z 
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0883310Z     Call log:
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0883681Z     ^[[2m  - Expect "toBeVisible" with timeout 60000ms^[[22m
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0884657Z     ^[[2m  - waiting for getByTestId('store-express-create-form').or(getByTestId('store-create-limit-reached')).or(locator('input[name="email-login"], #password-login')).first()^[[22m
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0885288Z 
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0885295Z 
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0885451Z        at helpers/store-theme-helpers.ts:504
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0885672Z 
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0885975Z       502 |   const loginGate = page.locator('input[name="email-login"], #password-login');
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0886395Z       503 |
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0886816Z     > 504 |   await expect(form.or(limit).or(loginGate).first()).toBeVisible({ timeout: 60_000 });
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0887313Z           |                                                      ^
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0887613Z       505 |
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0887822Z       506 |   if (
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0888068Z       507 |     await loginGate
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0888877Z         at waitForStoreExpressCreateForm (/home/runner/work/emarzona/emarzona/tests/e2e/helpers/store-theme-helpers.ts:504:54)
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0890172Z         at /home/runner/work/emarzona/emarzona/tests/e2e/store-create-theme.spec.ts:90:5
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0902034Z 
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0902889Z     Error Context: test-results/store-create-theme-Store-c-e47a3-mize-persisted-theme-colors-chromium/error-context.md
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0903675Z 
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0904307Z     Retry #1 ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0904728Z 
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0905191Z     Error: ^[[2mexpect(^[[22m^[[31mlocator^[[39m^[[2m).^[[22mtoBeVisible^[[2m(^[[22m^[[2m)^[[22m failed
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0905678Z 
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0906533Z     Locator: getByTestId('store-express-create-form').or(getByTestId('store-create-limit-reached')).or(locator('input[name="email-login"], #password-login')).first()
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0907463Z     Expected: visible
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0907789Z     Timeout: 60000ms
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0908130Z     Error: element(s) not found
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0908325Z 
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0908456Z     Call log:
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0908925Z     ^[[2m  - Expect "toBeVisible" with timeout 60000ms^[[22m
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0921644Z     ^[[2m  - waiting for getByTestId('store-express-create-form').or(getByTestId('store-create-limit-reached')).or(locator('input[name="email-login"], #password-login')).first()^[[22m
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0922722Z 
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0922733Z 
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0922971Z        at helpers/store-theme-helpers.ts:504
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0923304Z 
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0923778Z       502 |   const loginGate = page.locator('input[name="email-login"], #password-login');
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0924444Z       503 |
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0925105Z     > 504 |   await expect(form.or(limit).or(loginGate).first()).toBeVisible({ timeout: 60_000 });
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0926179Z           |                                                      ^
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0926641Z       505 |
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0926949Z       506 |   if (
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0927317Z       507 |     await loginGate
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0928327Z         at waitForStoreExpressCreateForm (/home/runner/work/emarzona/emarzona/tests/e2e/helpers/store-theme-helpers.ts:504:54)
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0939898Z         at /home/runner/work/emarzona/emarzona/tests/e2e/store-create-theme.spec.ts:90:5
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0940487Z 
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0941321Z     Error Context: test-results/store-create-theme-Store-c-e47a3-mize-persisted-theme-colors-chromium-retry1/error-context.md
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0942188Z 
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0942917Z     attachment #2: trace (application/zip) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0944180Z     test-results/store-create-theme-Store-c-e47a3-mize-persisted-theme-colors-chromium-retry1/trace.zip
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0945099Z     Usage:
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0945272Z 
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0946198Z         npx playwright show-trace test-results/store-create-theme-Store-c-e47a3-mize-persisted-theme-colors-chromium-retry1/trace.zip
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0947086Z 
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0947679Z     ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0948134Z 
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0948270Z   2 failed
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0953446Z     [chromium] ÔÇ║ tests/e2e/store-appearance-revisions.spec.ts:90:3 ÔÇ║ Store appearance revisions (E2E) ÔÇ║ rollback panel restores a previous published appearance revision 
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0955761Z     [chromium] ÔÇ║ tests/e2e/store-create-theme.spec.ts:55:3 ÔÇ║ Store create ÔåÆ customize ÔåÆ storefront theme (E2E) ÔÇ║ express create, dashboard customize, persisted theme colors 
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0956865Z   2 did not run
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.0957360Z   1 error was not a part of any test, see above for details
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.1898410Z ##[error]  1) [chromium] ÔÇ║ tests/e2e/store-appearance-revisions.spec.ts:90:3 ÔÇ║ Store appearance revisions (E2E) ÔÇ║ rollback panel restores a previous published appearance revision 
+Store create & theme E2E	Run store theme E2E	    Error: expect(locator).toBeVisible() failed
+Store create & theme E2E	Run store theme E2E	
+Store create & theme E2E	Run store theme E2E	    Locator: getByTestId('store-express-create-form').or(getByTestId('store-create-limit-reached')).or(locator('input[name="email-login"], #password-login')).first()
+Store create & theme E2E	Run store theme E2E	    Expected: visible
+Store create & theme E2E	Run store theme E2E	    Timeout: 60000ms
+Store create & theme E2E	Run store theme E2E	    Error: element(s) not found
+Store create & theme E2E	Run store theme E2E	
+Store create & theme E2E	Run store theme E2E	    Call log:
+Store create & theme E2E	Run store theme E2E	      - Expect "toBeVisible" with timeout 60000ms
+Store create & theme E2E	Run store theme E2E	      - waiting for getByTestId('store-express-create-form').or(getByTestId('store-create-limit-reached')).or(locator('input[name="email-login"], #password-login')).first()
+Store create & theme E2E	Run store theme E2E	
+Store create & theme E2E	Run store theme E2E	
+Store create & theme E2E	Run store theme E2E	       at helpers/store-theme-helpers.ts:504
+Store create & theme E2E	Run store theme E2E	
+Store create & theme E2E	Run store theme E2E	      502 |   const loginGate = page.locator('input[name="email-login"], #password-login');
+Store create & theme E2E	Run store theme E2E	      503 |
+Store create & theme E2E	Run store theme E2E	    > 504 |   await expect(form.or(limit).or(loginGate).first()).toBeVisible({ timeout: 60_000 });
+Store create & theme E2E	Run store theme E2E	          |                                                      ^
+Store create & theme E2E	Run store theme E2E	      505 |
+Store create & theme E2E	Run store theme E2E	      506 |   if (
+Store create & theme E2E	Run store theme E2E	      507 |     await loginGate
+Store create & theme E2E	Run store theme E2E	        at waitForStoreExpressCreateForm (/home/runner/work/emarzona/emarzona/tests/e2e/helpers/store-theme-helpers.ts:504:54)
+Store create & theme E2E	Run store theme E2E	        at /home/runner/work/emarzona/emarzona/tests/e2e/store-appearance-revisions.spec.ts:122:5
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.1920271Z ##[error]  1) [chromium] ÔÇ║ tests/e2e/store-appearance-revisions.spec.ts:90:3 ÔÇ║ Store appearance revisions (E2E) ÔÇ║ rollback panel restores a previous published appearance revision 
+Store create & theme E2E	Run store theme E2E	
+Store create & theme E2E	Run store theme E2E	    Retry #1 ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+Store create & theme E2E	Run store theme E2E	    Error: expect(locator).toBeVisible() failed
+Store create & theme E2E	Run store theme E2E	
+Store create & theme E2E	Run store theme E2E	    Locator: getByTestId('store-express-create-form').or(getByTestId('store-create-limit-reached')).or(locator('input[name="email-login"], #password-login')).first()
+Store create & theme E2E	Run store theme E2E	    Expected: visible
+Store create & theme E2E	Run store theme E2E	    Timeout: 60000ms
+Store create & theme E2E	Run store theme E2E	    Error: element(s) not found
+Store create & theme E2E	Run store theme E2E	
+Store create & theme E2E	Run store theme E2E	    Call log:
+Store create & theme E2E	Run store theme E2E	      - Expect "toBeVisible" with timeout 60000ms
+Store create & theme E2E	Run store theme E2E	      - waiting for getByTestId('store-express-create-form').or(getByTestId('store-create-limit-reached')).or(locator('input[name="email-login"], #password-login')).first()
+Store create & theme E2E	Run store theme E2E	
+Store create & theme E2E	Run store theme E2E	
+Store create & theme E2E	Run store theme E2E	       at helpers/store-theme-helpers.ts:504
+Store create & theme E2E	Run store theme E2E	
+Store create & theme E2E	Run store theme E2E	      502 |   const loginGate = page.locator('input[name="email-login"], #password-login');
+Store create & theme E2E	Run store theme E2E	      503 |
+Store create & theme E2E	Run store theme E2E	    > 504 |   await expect(form.or(limit).or(loginGate).first()).toBeVisible({ timeout: 60_000 });
+Store create & theme E2E	Run store theme E2E	          |                                                      ^
+Store create & theme E2E	Run store theme E2E	      505 |
+Store create & theme E2E	Run store theme E2E	      506 |   if (
+Store create & theme E2E	Run store theme E2E	      507 |     await loginGate
+Store create & theme E2E	Run store theme E2E	        at waitForStoreExpressCreateForm (/home/runner/work/emarzona/emarzona/tests/e2e/helpers/store-theme-helpers.ts:504:54)
+Store create & theme E2E	Run store theme E2E	        at /home/runner/work/emarzona/emarzona/tests/e2e/store-appearance-revisions.spec.ts:122:5
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.1944454Z ##[error]  2) [chromium] ÔÇ║ tests/e2e/store-create-theme.spec.ts:55:3 ÔÇ║ Store create ÔåÆ customize ÔåÆ storefront theme (E2E) ÔÇ║ express create, dashboard customize, persisted theme colors 
+Store create & theme E2E	Run store theme E2E	    Error: expect(locator).toBeVisible() failed
+Store create & theme E2E	Run store theme E2E	
+Store create & theme E2E	Run store theme E2E	    Locator: getByTestId('store-express-create-form').or(getByTestId('store-create-limit-reached')).or(locator('input[name="email-login"], #password-login')).first()
+Store create & theme E2E	Run store theme E2E	    Expected: visible
+Store create & theme E2E	Run store theme E2E	    Timeout: 60000ms
+Store create & theme E2E	Run store theme E2E	    Error: element(s) not found
+Store create & theme E2E	Run store theme E2E	
+Store create & theme E2E	Run store theme E2E	    Call log:
+Store create & theme E2E	Run store theme E2E	      - Expect "toBeVisible" with timeout 60000ms
+Store create & theme E2E	Run store theme E2E	      - waiting for getByTestId('store-express-create-form').or(getByTestId('store-create-limit-reached')).or(locator('input[name="email-login"], #password-login')).first()
+Store create & theme E2E	Run store theme E2E	
+Store create & theme E2E	Run store theme E2E	
+Store create & theme E2E	Run store theme E2E	       at helpers/store-theme-helpers.ts:504
+Store create & theme E2E	Run store theme E2E	
+Store create & theme E2E	Run store theme E2E	      502 |   const loginGate = page.locator('input[name="email-login"], #password-login');
+Store create & theme E2E	Run store theme E2E	      503 |
+Store create & theme E2E	Run store theme E2E	    > 504 |   await expect(form.or(limit).or(loginGate).first()).toBeVisible({ timeout: 60_000 });
+Store create & theme E2E	Run store theme E2E	          |                                                      ^
+Store create & theme E2E	Run store theme E2E	      505 |
+Store create & theme E2E	Run store theme E2E	      506 |   if (
+Store create & theme E2E	Run store theme E2E	      507 |     await loginGate
+Store create & theme E2E	Run store theme E2E	        at waitForStoreExpressCreateForm (/home/runner/work/emarzona/emarzona/tests/e2e/helpers/store-theme-helpers.ts:504:54)
+Store create & theme E2E	Run store theme E2E	        at /home/runner/work/emarzona/emarzona/tests/e2e/store-create-theme.spec.ts:90:5
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.1967988Z ##[error]  2) [chromium] ÔÇ║ tests/e2e/store-create-theme.spec.ts:55:3 ÔÇ║ Store create ÔåÆ customize ÔåÆ storefront theme (E2E) ÔÇ║ express create, dashboard customize, persisted theme colors 
+Store create & theme E2E	Run store theme E2E	
+Store create & theme E2E	Run store theme E2E	    Retry #1 ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+Store create & theme E2E	Run store theme E2E	    Error: expect(locator).toBeVisible() failed
+Store create & theme E2E	Run store theme E2E	
+Store create & theme E2E	Run store theme E2E	    Locator: getByTestId('store-express-create-form').or(getByTestId('store-create-limit-reached')).or(locator('input[name="email-login"], #password-login')).first()
+Store create & theme E2E	Run store theme E2E	    Expected: visible
+Store create & theme E2E	Run store theme E2E	    Timeout: 60000ms
+Store create & theme E2E	Run store theme E2E	    Error: element(s) not found
+Store create & theme E2E	Run store theme E2E	
+Store create & theme E2E	Run store theme E2E	    Call log:
+Store create & theme E2E	Run store theme E2E	      - Expect "toBeVisible" with timeout 60000ms
+Store create & theme E2E	Run store theme E2E	      - waiting for getByTestId('store-express-create-form').or(getByTestId('store-create-limit-reached')).or(locator('input[name="email-login"], #password-login')).first()
+Store create & theme E2E	Run store theme E2E	
+Store create & theme E2E	Run store theme E2E	
+Store create & theme E2E	Run store theme E2E	       at helpers/store-theme-helpers.ts:504
+Store create & theme E2E	Run store theme E2E	
+Store create & theme E2E	Run store theme E2E	      502 |   const loginGate = page.locator('input[name="email-login"], #password-login');
+Store create & theme E2E	Run store theme E2E	      503 |
+Store create & theme E2E	Run store theme E2E	    > 504 |   await expect(form.or(limit).or(loginGate).first()).toBeVisible({ timeout: 60_000 });
+Store create & theme E2E	Run store theme E2E	          |                                                      ^
+Store create & theme E2E	Run store theme E2E	      505 |
+Store create & theme E2E	Run store theme E2E	      506 |   if (
+Store create & theme E2E	Run store theme E2E	      507 |     await loginGate
+Store create & theme E2E	Run store theme E2E	        at waitForStoreExpressCreateForm (/home/runner/work/emarzona/emarzona/tests/e2e/helpers/store-theme-helpers.ts:504:54)
+Store create & theme E2E	Run store theme E2E	        at /home/runner/work/emarzona/emarzona/tests/e2e/store-create-theme.spec.ts:90:5
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.1981570Z ##[notice]  2 failed
+Store create & theme E2E	Run store theme E2E	    [chromium] ÔÇ║ tests/e2e/store-appearance-revisions.spec.ts:90:3 ÔÇ║ Store appearance revisions (E2E) ÔÇ║ rollback panel restores a previous published appearance revision 
+Store create & theme E2E	Run store theme E2E	    [chromium] ÔÇ║ tests/e2e/store-create-theme.spec.ts:55:3 ÔÇ║ Store create ÔåÆ customize ÔåÆ storefront theme (E2E) ÔÇ║ express create, dashboard customize, persisted theme colors 
+Store create & theme E2E	Run store theme E2E	  2 did not run
+Store create & theme E2E	Run store theme E2E	2026-07-21T15:32:59.2169938Z ##[error]Process completed with exit code 1.
+Product wizards publish E2E	Run product wizards E2E	´╗┐2026-07-21T15:27:53.1731545Z ##[group]Run npm run test:e2e:product-wizards
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:27:53.1731964Z ^[[36;1mnpm run test:e2e:product-wizards^[[0m
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:27:53.1791237Z shell: /usr/bin/bash -e {0}
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:27:53.1791511Z env:
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:27:53.1791707Z   CI: true
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:27:53.1792135Z   VITE_SUPABASE_TEST_URL: ***
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:27:53.1792504Z   VITE_SUPABASE_URL: ***
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:27:53.1792888Z   VITE_SUPABASE_ANON_KEY: ***
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:27:53.1793297Z   VITE_SUPABASE_PUBLISHABLE_KEY: ***
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:27:53.1793722Z   SUPABASE_SERVICE_ROLE_KEY: ***
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:27:53.1793989Z ##[endgroup]
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:27:53.3023078Z 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:27:53.3023825Z > emarzona@1.0.0 test:e2e:product-wizards
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:27:53.3025085Z > playwright test --config=playwright.artist-wizard.config.ts
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:27:53.3025924Z 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:27:57.1347829Z 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:27:57.1348675Z Running 26 tests using 1 worker
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:27:57.1349269Z 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:28:32.0810563Z   Ô£ô   1 [chromium] ÔÇ║ tests/e2e/artist-product-create-rpc.spec.ts:57:3 ÔÇ║ Artist vendor ÔÇö redirect & RPC create ÔÇ║ artist store: /dashboard/products redirects to /dashboard/artist-products (33.4s)
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:28:33.3243901Z   Ô£ô   2 [chromium] ÔÇ║ tests/e2e/artist-product-create-rpc.spec.ts:107:3 ÔÇ║ Artist vendor ÔÇö redirect & RPC create ÔÇ║ landing homepage exposes multilingual hreflang alternates (1.2s)
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:29:08.6528153Z   Ô£ÿ   3 [chromium] ÔÇ║ tests/e2e/artist-product-create-rpc.spec.ts:123:3 ÔÇ║ Artist vendor ÔÇö redirect & RPC create ÔÇ║ artist wizard draft save creates product + artist_products via RPC (35.3s)
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:29:45.0586683Z   Ô£ÿ   4 [chromium] ÔÇ║ tests/e2e/artist-product-create-rpc.spec.ts:123:3 ÔÇ║ Artist vendor ÔÇö redirect & RPC create ÔÇ║ artist wizard draft save creates product + artist_products via RPC (retry #1) (33.7s)
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:30:54.3094170Z   Ô£ÿ   5 [chromium] ÔÇ║ tests/e2e/artist-product-publish.spec.ts:53:3 ÔÇ║ Artist wizard ÔÇö publish (E2E) ÔÇ║ original edition: full wizard publish ÔåÆ active product + artist-products redirect (1.1m)
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:32:05.5486592Z   Ô£ÿ   6 [chromium] ÔÇ║ tests/e2e/artist-product-publish.spec.ts:53:3 ÔÇ║ Artist wizard ÔÇö publish (E2E) ÔÇ║ original edition: full wizard publish ÔåÆ active product + artist-products redirect (retry #1) (1.1m)
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:33:12.3339874Z   Ô£ÿ   7 [chromium] ÔÇ║ tests/e2e/artist-product-publish.spec.ts:134:3 ÔÇ║ Artist wizard ÔÇö publish (E2E) ÔÇ║ limited edition: num├®rotage ├®tape Authentification puis publish (1.1m)
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6336719Z   Ô£ÿ   8 [chromium] ÔÇ║ tests/e2e/artist-product-publish.spec.ts:134:3 ÔÇ║ Artist wizard ÔÇö publish (E2E) ÔÇ║ limited edition: num├®rotage ├®tape Authentification puis publish (retry #1) (1.1m)
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6347450Z Testing stopped early after 3 maximum allowed failures.
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6380885Z ##[error]Testing stopped early after 3 maximum allowed failures.
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6816897Z 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6835773Z 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6858361Z   1) [chromium] ÔÇ║ tests/e2e/artist-product-create-rpc.spec.ts:123:3 ÔÇ║ Artist vendor ÔÇö redirect & RPC create ÔÇ║ artist wizard draft save creates product + artist_products via RPC 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6859834Z 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6860785Z     Error: Artist draft save failed in UI: ÔØî Erreur
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6861243Z 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6861646Z       147 |     if (await errorToast.isVisible().catch(() => false)) {
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6862590Z       148 |       const copy = (await errorToast.innerText().catch(() => '')).slice(0, 400);
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6863553Z     > 149 |       throw new Error(`Artist draft save failed in UI: ${copy}`);
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6864178Z           |             ^
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6864590Z       150 |     }
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6864943Z       151 |
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6865651Z       152 |     // Primary contract: draft row exists even if toast is flaky/portal-hidden.
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6867041Z         at /home/runner/work/emarzona/emarzona/tests/e2e/artist-product-create-rpc.spec.ts:149:13
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6867773Z 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6868692Z     Error Context: test-results/artist-product-create-rpc--06f56-uct-artist-products-via-RPC-chromium/error-context.md
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6870052Z 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6870647Z     Retry #1 ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6871135Z 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6871547Z     Error: Artist draft save failed in UI: ÔØî Erreur
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6871948Z 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6872324Z       147 |     if (await errorToast.isVisible().catch(() => false)) {
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6873235Z       148 |       const copy = (await errorToast.innerText().catch(() => '')).slice(0, 400);
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6873920Z     > 149 |       throw new Error(`Artist draft save failed in UI: ${copy}`);
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6874381Z           |             ^
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6874629Z       150 |     }
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6874837Z       151 |
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6875255Z       152 |     // Primary contract: draft row exists even if toast is flaky/portal-hidden.
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6875940Z         at /home/runner/work/emarzona/emarzona/tests/e2e/artist-product-create-rpc.spec.ts:149:13
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6877043Z 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6877585Z     Error Context: test-results/artist-product-create-rpc--06f56-uct-artist-products-via-RPC-chromium-retry1/error-context.md
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6878146Z 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6878596Z     attachment #2: trace (application/zip) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6879383Z     test-results/artist-product-create-rpc--06f56-uct-artist-products-via-RPC-chromium-retry1/trace.zip
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6879943Z     Usage:
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6880063Z 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6880608Z         npx playwright show-trace test-results/artist-product-create-rpc--06f56-uct-artist-products-via-RPC-chromium-retry1/trace.zip
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6881188Z 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6881551Z     ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6881845Z 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6882637Z   2) [chromium] ÔÇ║ tests/e2e/artist-product-publish.spec.ts:53:3 ÔÇ║ Artist wizard ÔÇö publish (E2E) ÔÇ║ original edition: full wizard publish ÔåÆ active product + artist-products redirect 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6883305Z 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6883683Z     Error: ^[[2mexpect(^[[22m^[[31mlocator^[[39m^[[2m).^[[22mtoBeVisible^[[2m(^[[22m^[[2m)^[[22m failed
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6884035Z 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6884307Z     Locator: getByText(/cr├®├® avec succ├¿s|succ├¿s/i).first()
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6884691Z     Expected: visible
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6884935Z     Timeout: 45000ms
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6885196Z     Error: element(s) not found
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6885371Z 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6885464Z     Call log:
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6886058Z     ^[[2m  - Expect "toBeVisible" with timeout 45000ms^[[22m
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6887219Z     ^[[2m  - waiting for getByText(/cr├®├® avec succ├¿s|succ├¿s/i).first()^[[22m
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6887548Z 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6887555Z 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6887725Z        at helpers/artist-wizard-helpers.ts:246
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6887947Z 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6888150Z       244 |   await dismissCookieBannerIfVisible(page);
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6888786Z       245 |   await page.getByRole('button', { name: /^Publier(?: le produit)?$/i }).click({ timeout: 20_000 });
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6889588Z     > 246 |   await expect(page.getByText(/cr├®├® avec succ├¿s|succ├¿s/i).first()).toBeVisible({
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6890127Z           |                                                                    ^
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6890483Z       247 |     timeout: 45_000,
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6890755Z       248 |   });
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6890973Z       249 | }
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6891530Z         at publishArtistWizard (/home/runner/work/emarzona/emarzona/tests/e2e/helpers/artist-wizard-helpers.ts:246:68)
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6892317Z         at /home/runner/work/emarzona/emarzona/tests/e2e/artist-product-publish.spec.ts:70:5
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6892685Z 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6893162Z     Error Context: test-results/artist-product-publish-Art-7c8bf-ct-artist-products-redirect-chromium/error-context.md
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6893876Z 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6894251Z     Retry #1 ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6894553Z 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6894911Z     Error: ^[[2mexpect(^[[22m^[[31mlocator^[[39m^[[2m).^[[22mtoBeVisible^[[2m(^[[22m^[[2m)^[[22m failed
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6895250Z 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6895503Z     Locator: getByText(/cr├®├® avec succ├¿s|succ├¿s/i).first()
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6895845Z     Expected: visible
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6896088Z     Timeout: 45000ms
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6897452Z     Error: element(s) not found
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6897645Z 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6897754Z     Call log:
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6898139Z     ^[[2m  - Expect "toBeVisible" with timeout 45000ms^[[22m
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6898689Z     ^[[2m  - waiting for getByText(/cr├®├® avec succ├¿s|succ├¿s/i).first()^[[22m
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6898997Z 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6899003Z 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6899167Z        at helpers/artist-wizard-helpers.ts:246
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6899402Z 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6899590Z       244 |   await dismissCookieBannerIfVisible(page);
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6900196Z       245 |   await page.getByRole('button', { name: /^Publier(?: le produit)?$/i }).click({ timeout: 20_000 });
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6900969Z     > 246 |   await expect(page.getByText(/cr├®├® avec succ├¿s|succ├¿s/i).first()).toBeVisible({
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6901499Z           |                                                                    ^
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6901848Z       247 |     timeout: 45_000,
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6902128Z       248 |   });
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6902422Z       249 | }
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6903158Z         at publishArtistWizard (/home/runner/work/emarzona/emarzona/tests/e2e/helpers/artist-wizard-helpers.ts:246:68)
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6903947Z         at /home/runner/work/emarzona/emarzona/tests/e2e/artist-product-publish.spec.ts:70:5
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6904329Z 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6904850Z     Error Context: test-results/artist-product-publish-Art-7c8bf-ct-artist-products-redirect-chromium-retry1/error-context.md
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6905781Z 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6906832Z     attachment #2: trace (application/zip) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6908334Z     test-results/artist-product-publish-Art-7c8bf-ct-artist-products-redirect-chromium-retry1/trace.zip
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6909363Z     Usage:
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6909575Z 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6910619Z         npx playwright show-trace test-results/artist-product-publish-Art-7c8bf-ct-artist-products-redirect-chromium-retry1/trace.zip
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6911710Z 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6912415Z     ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6912977Z 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6914374Z   3) [chromium] ÔÇ║ tests/e2e/artist-product-publish.spec.ts:134:3 ÔÇ║ Artist wizard ÔÇö publish (E2E) ÔÇ║ limited edition: num├®rotage ├®tape Authentification puis publish 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6915552Z 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6916791Z     Error: ^[[2mexpect(^[[22m^[[31mlocator^[[39m^[[2m).^[[22mtoBeVisible^[[2m(^[[22m^[[2m)^[[22m failed
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6917450Z 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6917929Z     Locator: getByText(/cr├®├® avec succ├¿s|succ├¿s/i).first()
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6918546Z     Expected: visible
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6918965Z     Timeout: 45000ms
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6919439Z     Error: element(s) not found
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6919826Z 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6919985Z     Call log:
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6920635Z     ^[[2m  - Expect "toBeVisible" with timeout 45000ms^[[22m
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6921603Z     ^[[2m  - waiting for getByText(/cr├®├® avec succ├¿s|succ├¿s/i).first()^[[22m
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6922172Z 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6922182Z 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6922454Z        at helpers/artist-wizard-helpers.ts:246
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6922847Z 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6923164Z       244 |   await dismissCookieBannerIfVisible(page);
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6924291Z       245 |   await page.getByRole('button', { name: /^Publier(?: le produit)?$/i }).click({ timeout: 20_000 });
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6925764Z     > 246 |   await expect(page.getByText(/cr├®├® avec succ├¿s|succ├¿s/i).first()).toBeVisible({
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6926981Z           |                                                                    ^
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6927624Z       247 |     timeout: 45_000,
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6928067Z       248 |   });
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6928446Z       249 | }
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6929468Z         at publishArtistWizard (/home/runner/work/emarzona/emarzona/tests/e2e/helpers/artist-wizard-helpers.ts:246:68)
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6930930Z         at /home/runner/work/emarzona/emarzona/tests/e2e/artist-product-publish.spec.ts:160:5
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6931632Z 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6932513Z     Error Context: test-results/artist-product-publish-Art-43230-thentification-puis-publish-chromium/error-context.md
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6933493Z 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6934205Z     Retry #1 ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6934774Z 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6935441Z     Error: ^[[2mexpect(^[[22m^[[31mlocator^[[39m^[[2m).^[[22mtoBeVisible^[[2m(^[[22m^[[2m)^[[22m failed
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6936066Z 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6936771Z     Locator: getByText(/cr├®├® avec succ├¿s|succ├¿s/i).first()
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6937390Z     Expected: visible
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6937806Z     Timeout: 45000ms
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6938264Z     Error: element(s) not found
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6938558Z 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6938720Z     Call log:
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6939359Z     ^[[2m  - Expect "toBeVisible" with timeout 45000ms^[[22m
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6940302Z     ^[[2m  - waiting for getByText(/cr├®├® avec succ├¿s|succ├¿s/i).first()^[[22m
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6941103Z 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6941116Z 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6941403Z        at helpers/artist-wizard-helpers.ts:246
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6941800Z 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6942119Z       244 |   await dismissCookieBannerIfVisible(page);
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6943203Z       245 |   await page.getByRole('button', { name: /^Publier(?: le produit)?$/i }).click({ timeout: 20_000 });
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6944616Z     > 246 |   await expect(page.getByText(/cr├®├® avec succ├¿s|succ├¿s/i).first()).toBeVisible({
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6945577Z           |                                                                    ^
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6946480Z       247 |     timeout: 45_000,
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6946978Z       248 |   });
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6947363Z       249 | }
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6948381Z         at publishArtistWizard (/home/runner/work/emarzona/emarzona/tests/e2e/helpers/artist-wizard-helpers.ts:246:68)
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6949857Z         at /home/runner/work/emarzona/emarzona/tests/e2e/artist-product-publish.spec.ts:160:5
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6950581Z 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6951568Z     Error Context: test-results/artist-product-publish-Art-43230-thentification-puis-publish-chromium-retry1/error-context.md
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6952608Z 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6953413Z     attachment #2: trace (application/zip) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6955112Z     test-results/artist-product-publish-Art-43230-thentification-puis-publish-chromium-retry1/trace.zip
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6956142Z     Usage:
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6956623Z 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6957655Z         npx playwright show-trace test-results/artist-product-publish-Art-43230-thentification-puis-publish-chromium-retry1/trace.zip
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6958735Z 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6959437Z     ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6959992Z 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6960152Z   3 failed
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6961838Z     [chromium] ÔÇ║ tests/e2e/artist-product-create-rpc.spec.ts:123:3 ÔÇ║ Artist vendor ÔÇö redirect & RPC create ÔÇ║ artist wizard draft save creates product + artist_products via RPC 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6963366Z     [chromium] ÔÇ║ tests/e2e/artist-product-publish.spec.ts:53:3 ÔÇ║ Artist wizard ÔÇö publish (E2E) ÔÇ║ original edition: full wizard publish ÔåÆ active product + artist-products redirect 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6964762Z     [chromium] ÔÇ║ tests/e2e/artist-product-publish.spec.ts:134:3 ÔÇ║ Artist wizard ÔÇö publish (E2E) ÔÇ║ limited edition: num├®rotage ├®tape Authentification puis publish 
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6965467Z   21 did not run
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6965694Z   2 passed (6.5m)
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.6966022Z   1 error was not a part of any test, see above for details
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.8018887Z ##[error]  1) [chromium] ÔÇ║ tests/e2e/artist-product-create-rpc.spec.ts:123:3 ÔÇ║ Artist vendor ÔÇö redirect & RPC create ÔÇ║ artist wizard draft save creates product + artist_products via RPC 
+Product wizards publish E2E	Run product wizards E2E	    Error: Artist draft save failed in UI: ÔØî Erreur
+Product wizards publish E2E	Run product wizards E2E	
+Product wizards publish E2E	Run product wizards E2E	      147 |     if (await errorToast.isVisible().catch(() => false)) {
+Product wizards publish E2E	Run product wizards E2E	      148 |       const copy = (await errorToast.innerText().catch(() => '')).slice(0, 400);
+Product wizards publish E2E	Run product wizards E2E	    > 149 |       throw new Error(`Artist draft save failed in UI: ${copy}`);
+Product wizards publish E2E	Run product wizards E2E	          |             ^
+Product wizards publish E2E	Run product wizards E2E	      150 |     }
+Product wizards publish E2E	Run product wizards E2E	      151 |
+Product wizards publish E2E	Run product wizards E2E	      152 |     // Primary contract: draft row exists even if toast is flaky/portal-hidden.
+Product wizards publish E2E	Run product wizards E2E	        at /home/runner/work/emarzona/emarzona/tests/e2e/artist-product-create-rpc.spec.ts:149:13
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.8029398Z ##[error]  1) [chromium] ÔÇ║ tests/e2e/artist-product-create-rpc.spec.ts:123:3 ÔÇ║ Artist vendor ÔÇö redirect & RPC create ÔÇ║ artist wizard draft save creates product + artist_products via RPC 
+Product wizards publish E2E	Run product wizards E2E	
+Product wizards publish E2E	Run product wizards E2E	    Retry #1 ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+Product wizards publish E2E	Run product wizards E2E	    Error: Artist draft save failed in UI: ÔØî Erreur
+Product wizards publish E2E	Run product wizards E2E	
+Product wizards publish E2E	Run product wizards E2E	      147 |     if (await errorToast.isVisible().catch(() => false)) {
+Product wizards publish E2E	Run product wizards E2E	      148 |       const copy = (await errorToast.innerText().catch(() => '')).slice(0, 400);
+Product wizards publish E2E	Run product wizards E2E	    > 149 |       throw new Error(`Artist draft save failed in UI: ${copy}`);
+Product wizards publish E2E	Run product wizards E2E	          |             ^
+Product wizards publish E2E	Run product wizards E2E	      150 |     }
+Product wizards publish E2E	Run product wizards E2E	      151 |
+Product wizards publish E2E	Run product wizards E2E	      152 |     // Primary contract: draft row exists even if toast is flaky/portal-hidden.
+Product wizards publish E2E	Run product wizards E2E	        at /home/runner/work/emarzona/emarzona/tests/e2e/artist-product-create-rpc.spec.ts:149:13
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.8050040Z ##[error]  2) [chromium] ÔÇ║ tests/e2e/artist-product-publish.spec.ts:53:3 ÔÇ║ Artist wizard ÔÇö publish (E2E) ÔÇ║ original edition: full wizard publish ÔåÆ active product + artist-products redirect 
+Product wizards publish E2E	Run product wizards E2E	    Error: expect(locator).toBeVisible() failed
+Product wizards publish E2E	Run product wizards E2E	
+Product wizards publish E2E	Run product wizards E2E	    Locator: getByText(/cr├®├® avec succ├¿s|succ├¿s/i).first()
+Product wizards publish E2E	Run product wizards E2E	    Expected: visible
+Product wizards publish E2E	Run product wizards E2E	    Timeout: 45000ms
+Product wizards publish E2E	Run product wizards E2E	    Error: element(s) not found
+Product wizards publish E2E	Run product wizards E2E	
+Product wizards publish E2E	Run product wizards E2E	    Call log:
+Product wizards publish E2E	Run product wizards E2E	      - Expect "toBeVisible" with timeout 45000ms
+Product wizards publish E2E	Run product wizards E2E	      - waiting for getByText(/cr├®├® avec succ├¿s|succ├¿s/i).first()
+Product wizards publish E2E	Run product wizards E2E	
+Product wizards publish E2E	Run product wizards E2E	
+Product wizards publish E2E	Run product wizards E2E	       at helpers/artist-wizard-helpers.ts:246
+Product wizards publish E2E	Run product wizards E2E	
+Product wizards publish E2E	Run product wizards E2E	      244 |   await dismissCookieBannerIfVisible(page);
+Product wizards publish E2E	Run product wizards E2E	      245 |   await page.getByRole('button', { name: /^Publier(?: le produit)?$/i }).click({ timeout: 20_000 });
+Product wizards publish E2E	Run product wizards E2E	    > 246 |   await expect(page.getByText(/cr├®├® avec succ├¿s|succ├¿s/i).first()).toBeVisible({
+Product wizards publish E2E	Run product wizards E2E	          |                                                                    ^
+Product wizards publish E2E	Run product wizards E2E	      247 |     timeout: 45_000,
+Product wizards publish E2E	Run product wizards E2E	      248 |   });
+Product wizards publish E2E	Run product wizards E2E	      249 | }
+Product wizards publish E2E	Run product wizards E2E	        at publishArtistWizard (/home/runner/work/emarzona/emarzona/tests/e2e/helpers/artist-wizard-helpers.ts:246:68)
+Product wizards publish E2E	Run product wizards E2E	        at /home/runner/work/emarzona/emarzona/tests/e2e/artist-product-publish.spec.ts:70:5
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.8074694Z ##[error]  2) [chromium] ÔÇ║ tests/e2e/artist-product-publish.spec.ts:53:3 ÔÇ║ Artist wizard ÔÇö publish (E2E) ÔÇ║ original edition: full wizard publish ÔåÆ active product + artist-products redirect 
+Product wizards publish E2E	Run product wizards E2E	
+Product wizards publish E2E	Run product wizards E2E	    Retry #1 ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+Product wizards publish E2E	Run product wizards E2E	    Error: expect(locator).toBeVisible() failed
+Product wizards publish E2E	Run product wizards E2E	
+Product wizards publish E2E	Run product wizards E2E	    Locator: getByText(/cr├®├® avec succ├¿s|succ├¿s/i).first()
+Product wizards publish E2E	Run product wizards E2E	    Expected: visible
+Product wizards publish E2E	Run product wizards E2E	    Timeout: 45000ms
+Product wizards publish E2E	Run product wizards E2E	    Error: element(s) not found
+Product wizards publish E2E	Run product wizards E2E	
+Product wizards publish E2E	Run product wizards E2E	    Call log:
+Product wizards publish E2E	Run product wizards E2E	      - Expect "toBeVisible" with timeout 45000ms
+Product wizards publish E2E	Run product wizards E2E	      - waiting for getByText(/cr├®├® avec succ├¿s|succ├¿s/i).first()
+Product wizards publish E2E	Run product wizards E2E	
+Product wizards publish E2E	Run product wizards E2E	
+Product wizards publish E2E	Run product wizards E2E	       at helpers/artist-wizard-helpers.ts:246
+Product wizards publish E2E	Run product wizards E2E	
+Product wizards publish E2E	Run product wizards E2E	      244 |   await dismissCookieBannerIfVisible(page);
+Product wizards publish E2E	Run product wizards E2E	      245 |   await page.getByRole('button', { name: /^Publier(?: le produit)?$/i }).click({ timeout: 20_000 });
+Product wizards publish E2E	Run product wizards E2E	    > 246 |   await expect(page.getByText(/cr├®├® avec succ├¿s|succ├¿s/i).first()).toBeVisible({
+Product wizards publish E2E	Run product wizards E2E	          |                                                                    ^
+Product wizards publish E2E	Run product wizards E2E	      247 |     timeout: 45_000,
+Product wizards publish E2E	Run product wizards E2E	      248 |   });
+Product wizards publish E2E	Run product wizards E2E	      249 | }
+Product wizards publish E2E	Run product wizards E2E	        at publishArtistWizard (/home/runner/work/emarzona/emarzona/tests/e2e/helpers/artist-wizard-helpers.ts:246:68)
+Product wizards publish E2E	Run product wizards E2E	        at /home/runner/work/emarzona/emarzona/tests/e2e/artist-product-publish.spec.ts:70:5
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.8097351Z ##[error]  3) [chromium] ÔÇ║ tests/e2e/artist-product-publish.spec.ts:134:3 ÔÇ║ Artist wizard ÔÇö publish (E2E) ÔÇ║ limited edition: num├®rotage ├®tape Authentification puis publish 
+Product wizards publish E2E	Run product wizards E2E	    Error: expect(locator).toBeVisible() failed
+Product wizards publish E2E	Run product wizards E2E	
+Product wizards publish E2E	Run product wizards E2E	    Locator: getByText(/cr├®├® avec succ├¿s|succ├¿s/i).first()
+Product wizards publish E2E	Run product wizards E2E	    Expected: visible
+Product wizards publish E2E	Run product wizards E2E	    Timeout: 45000ms
+Product wizards publish E2E	Run product wizards E2E	    Error: element(s) not found
+Product wizards publish E2E	Run product wizards E2E	
+Product wizards publish E2E	Run product wizards E2E	    Call log:
+Product wizards publish E2E	Run product wizards E2E	      - Expect "toBeVisible" with timeout 45000ms
+Product wizards publish E2E	Run product wizards E2E	      - waiting for getByText(/cr├®├® avec succ├¿s|succ├¿s/i).first()
+Product wizards publish E2E	Run product wizards E2E	
+Product wizards publish E2E	Run product wizards E2E	
+Product wizards publish E2E	Run product wizards E2E	       at helpers/artist-wizard-helpers.ts:246
+Product wizards publish E2E	Run product wizards E2E	
+Product wizards publish E2E	Run product wizards E2E	      244 |   await dismissCookieBannerIfVisible(page);
+Product wizards publish E2E	Run product wizards E2E	      245 |   await page.getByRole('button', { name: /^Publier(?: le produit)?$/i }).click({ timeout: 20_000 });
+Product wizards publish E2E	Run product wizards E2E	    > 246 |   await expect(page.getByText(/cr├®├® avec succ├¿s|succ├¿s/i).first()).toBeVisible({
+Product wizards publish E2E	Run product wizards E2E	          |                                                                    ^
+Product wizards publish E2E	Run product wizards E2E	      247 |     timeout: 45_000,
+Product wizards publish E2E	Run product wizards E2E	      248 |   });
+Product wizards publish E2E	Run product wizards E2E	      249 | }
+Product wizards publish E2E	Run product wizards E2E	        at publishArtistWizard (/home/runner/work/emarzona/emarzona/tests/e2e/helpers/artist-wizard-helpers.ts:246:68)
+Product wizards publish E2E	Run product wizards E2E	        at /home/runner/work/emarzona/emarzona/tests/e2e/artist-product-publish.spec.ts:160:5
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.8115645Z ##[error]  3) [chromium] ÔÇ║ tests/e2e/artist-product-publish.spec.ts:134:3 ÔÇ║ Artist wizard ÔÇö publish (E2E) ÔÇ║ limited edition: num├®rotage ├®tape Authentification puis publish 
+Product wizards publish E2E	Run product wizards E2E	
+Product wizards publish E2E	Run product wizards E2E	    Retry #1 ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+Product wizards publish E2E	Run product wizards E2E	    Error: expect(locator).toBeVisible() failed
+Product wizards publish E2E	Run product wizards E2E	
+Product wizards publish E2E	Run product wizards E2E	    Locator: getByText(/cr├®├® avec succ├¿s|succ├¿s/i).first()
+Product wizards publish E2E	Run product wizards E2E	    Expected: visible
+Product wizards publish E2E	Run product wizards E2E	    Timeout: 45000ms
+Product wizards publish E2E	Run product wizards E2E	    Error: element(s) not found
+Product wizards publish E2E	Run product wizards E2E	
+Product wizards publish E2E	Run product wizards E2E	    Call log:
+Product wizards publish E2E	Run product wizards E2E	      - Expect "toBeVisible" with timeout 45000ms
+Product wizards publish E2E	Run product wizards E2E	      - waiting for getByText(/cr├®├® avec succ├¿s|succ├¿s/i).first()
+Product wizards publish E2E	Run product wizards E2E	
+Product wizards publish E2E	Run product wizards E2E	
+Product wizards publish E2E	Run product wizards E2E	       at helpers/artist-wizard-helpers.ts:246
+Product wizards publish E2E	Run product wizards E2E	
+Product wizards publish E2E	Run product wizards E2E	      244 |   await dismissCookieBannerIfVisible(page);
+Product wizards publish E2E	Run product wizards E2E	      245 |   await page.getByRole('button', { name: /^Publier(?: le produit)?$/i }).click({ timeout: 20_000 });
+Product wizards publish E2E	Run product wizards E2E	    > 246 |   await expect(page.getByText(/cr├®├® avec succ├¿s|succ├¿s/i).first()).toBeVisible({
+Product wizards publish E2E	Run product wizards E2E	          |                                                                    ^
+Product wizards publish E2E	Run product wizards E2E	      247 |     timeout: 45_000,
+Product wizards publish E2E	Run product wizards E2E	      248 |   });
+Product wizards publish E2E	Run product wizards E2E	      249 | }
+Product wizards publish E2E	Run product wizards E2E	        at publishArtistWizard (/home/runner/work/emarzona/emarzona/tests/e2e/helpers/artist-wizard-helpers.ts:246:68)
+Product wizards publish E2E	Run product wizards E2E	        at /home/runner/work/emarzona/emarzona/tests/e2e/artist-product-publish.spec.ts:160:5
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.8132795Z ##[notice]  3 failed
+Product wizards publish E2E	Run product wizards E2E	    [chromium] ÔÇ║ tests/e2e/artist-product-create-rpc.spec.ts:123:3 ÔÇ║ Artist vendor ÔÇö redirect & RPC create ÔÇ║ artist wizard draft save creates product + artist_products via RPC 
+Product wizards publish E2E	Run product wizards E2E	    [chromium] ÔÇ║ tests/e2e/artist-product-publish.spec.ts:53:3 ÔÇ║ Artist wizard ÔÇö publish (E2E) ÔÇ║ original edition: full wizard publish ÔåÆ active product + artist-products redirect 
+Product wizards publish E2E	Run product wizards E2E	    [chromium] ÔÇ║ tests/e2e/artist-product-publish.spec.ts:134:3 ÔÇ║ Artist wizard ÔÇö publish (E2E) ÔÇ║ limited edition: num├®rotage ├®tape Authentification puis publish 
+Product wizards publish E2E	Run product wizards E2E	  21 did not run
+Product wizards publish E2E	Run product wizards E2E	  2 passed (6.5m)
+Product wizards publish E2E	Run product wizards E2E	2026-07-21T15:34:22.8269908Z ##[error]Process completed with exit code 1.

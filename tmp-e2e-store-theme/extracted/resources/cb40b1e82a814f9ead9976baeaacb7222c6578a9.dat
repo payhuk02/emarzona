@@ -1,0 +1,45 @@
+import { CONSOLE_LEVELS, originalConsoleMethods } from "/node_modules/@sentry/core/build/esm/utils/debug-logger.js?v=3ea6c1b9";
+import { fill } from "/node_modules/@sentry/core/build/esm/utils/object.js?v=3ea6c1b9";
+import { GLOBAL_OBJ } from "/node_modules/@sentry/core/build/esm/utils/worldwide.js?v=3ea6c1b9";
+import { addHandler, maybeInstrument, triggerHandlers } from "/node_modules/@sentry/core/build/esm/instrument/handlers.js?v=3ea6c1b9";
+
+/**
+ * Add an instrumentation handler for when a console.xxx method is called.
+ *
+ * Use at your own risk, this might break without changelog notice, only used internally.
+ * @hidden
+ */
+function addConsoleInstrumentationHandler(handler) {
+  const type = 'console';
+  addHandler(type, handler);
+  maybeInstrument(type, instrumentConsole);
+}
+
+function instrumentConsole() {
+  if (!('console' in GLOBAL_OBJ)) {
+    return;
+  }
+
+  CONSOLE_LEVELS.forEach(function (level) {
+    if (!(level in GLOBAL_OBJ.console)) {
+      return;
+    }
+
+    fill(GLOBAL_OBJ.console, level, function (originalConsoleMethod) {
+      originalConsoleMethods[level] = originalConsoleMethod;
+
+      return function (...args) {
+        const handlerData = { args, level };
+        triggerHandlers('console', handlerData);
+
+        const log = originalConsoleMethods[level];
+        log?.apply(GLOBAL_OBJ.console, args);
+      };
+    });
+  });
+}
+
+export { addConsoleInstrumentationHandler };
+                                   
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiY29uc29sZS5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4vc3JjL2luc3RydW1lbnQvY29uc29sZS50cyJdLCJzb3VyY2VzQ29udGVudCI6WyIvKiBlc2xpbnQtZGlzYWJsZSBAdHlwZXNjcmlwdC1lc2xpbnQvbm8tZXhwbGljaXQtYW55ICovXG4vKiBlc2xpbnQtZGlzYWJsZSBAdHlwZXNjcmlwdC1lc2xpbnQvYmFuLXR5cGVzICovXG5pbXBvcnQgdHlwZSB7IENvbnNvbGVMZXZlbCwgSGFuZGxlckRhdGFDb25zb2xlIH0gZnJvbSAnLi4vdHlwZXMtaG9pc3QvaW5zdHJ1bWVudCc7XG5pbXBvcnQgeyBDT05TT0xFX0xFVkVMUywgb3JpZ2luYWxDb25zb2xlTWV0aG9kcyB9IGZyb20gJy4uL3V0aWxzL2RlYnVnLWxvZ2dlcic7XG5pbXBvcnQgeyBmaWxsIH0gZnJvbSAnLi4vdXRpbHMvb2JqZWN0JztcbmltcG9ydCB7IEdMT0JBTF9PQkogfSBmcm9tICcuLi91dGlscy93b3JsZHdpZGUnO1xuaW1wb3J0IHsgYWRkSGFuZGxlciwgbWF5YmVJbnN0cnVtZW50LCB0cmlnZ2VySGFuZGxlcnMgfSBmcm9tICcuL2hhbmRsZXJzJztcblxuLyoqXG4gKiBBZGQgYW4gaW5zdHJ1bWVudGF0aW9uIGhhbmRsZXIgZm9yIHdoZW4gYSBjb25zb2xlLnh4eCBtZXRob2QgaXMgY2FsbGVkLlxuICpcbiAqIFVzZSBhdCB5b3VyIG93biByaXNrLCB0aGlzIG1pZ2h0IGJyZWFrIHdpdGhvdXQgY2hhbmdlbG9nIG5vdGljZSwgb25seSB1c2VkIGludGVybmFsbHkuXG4gKiBAaGlkZGVuXG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBhZGRDb25zb2xlSW5zdHJ1bWVudGF0aW9uSGFuZGxlcihoYW5kbGVyOiAoZGF0YTogSGFuZGxlckRhdGFDb25zb2xlKSA9PiB2b2lkKTogdm9pZCB7XG4gIGNvbnN0IHR5cGUgPSAnY29uc29sZSc7XG4gIGFkZEhhbmRsZXIodHlwZSwgaGFuZGxlcik7XG4gIG1heWJlSW5zdHJ1bWVudCh0eXBlLCBpbnN0cnVtZW50Q29uc29sZSk7XG59XG5cbmZ1bmN0aW9uIGluc3RydW1lbnRDb25zb2xlKCk6IHZvaWQge1xuICBpZiAoISgnY29uc29sZScgaW4gR0xPQkFMX09CSikpIHtcbiAgICByZXR1cm47XG4gIH1cblxuICBDT05TT0xFX0xFVkVMUy5mb3JFYWNoKGZ1bmN0aW9uIChsZXZlbDogQ29uc29sZUxldmVsKTogdm9pZCB7XG4gICAgaWYgKCEobGV2ZWwgaW4gR0xPQkFMX09CSi5jb25zb2xlKSkge1xuICAgICAgcmV0dXJuO1xuICAgIH1cblxuICAgIGZpbGwoR0xPQkFMX09CSi5jb25zb2xlLCBsZXZlbCwgZnVuY3Rpb24gKG9yaWdpbmFsQ29uc29sZU1ldGhvZDogKCkgPT4gYW55KTogRnVuY3Rpb24ge1xuICAgICAgb3JpZ2luYWxDb25zb2xlTWV0aG9kc1tsZXZlbF0gPSBvcmlnaW5hbENvbnNvbGVNZXRob2Q7XG5cbiAgICAgIHJldHVybiBmdW5jdGlvbiAoLi4uYXJnczogYW55W10pOiB2b2lkIHtcbiAgICAgICAgY29uc3QgaGFuZGxlckRhdGE6IEhhbmRsZXJEYXRhQ29uc29sZSA9IHsgYXJncywgbGV2ZWwgfTtcbiAgICAgICAgdHJpZ2dlckhhbmRsZXJzKCdjb25zb2xlJywgaGFuZGxlckRhdGEpO1xuXG4gICAgICAgIGNvbnN0IGxvZyA9IG9yaWdpbmFsQ29uc29sZU1ldGhvZHNbbGV2ZWxdO1xuICAgICAgICBsb2c/LmFwcGx5KEdMT0JBTF9PQkouY29uc29sZSwgYXJncyk7XG4gICAgICB9O1xuICAgIH0pO1xuICB9KTtcbn1cbiJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7OztBQVFBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNPLFNBQVMsZ0NBQWdDLENBQUMsT0FBTyxFQUE0QztBQUNwRyxFQUFFLE1BQU0sSUFBQSxHQUFPLFNBQVM7QUFDeEIsRUFBRSxVQUFVLENBQUMsSUFBSSxFQUFFLE9BQU8sQ0FBQztBQUMzQixFQUFFLGVBQWUsQ0FBQyxJQUFJLEVBQUUsaUJBQWlCLENBQUM7QUFDMUM7O0FBRUEsU0FBUyxpQkFBaUIsR0FBUztBQUNuQyxFQUFFLElBQUksRUFBRSxhQUFhLFVBQVUsQ0FBQyxFQUFFO0FBQ2xDLElBQUk7QUFDSixFQUFFOztBQUVGLEVBQUUsY0FBYyxDQUFDLE9BQU8sQ0FBQyxVQUFVLEtBQUssRUFBc0I7QUFDOUQsSUFBSSxJQUFJLEVBQUUsS0FBQSxJQUFTLFVBQVUsQ0FBQyxPQUFPLENBQUMsRUFBRTtBQUN4QyxNQUFNO0FBQ04sSUFBSTs7QUFFSixJQUFJLElBQUksQ0FBQyxVQUFVLENBQUMsT0FBTyxFQUFFLEtBQUssRUFBRSxVQUFVLHFCQUFxQixFQUF1QjtBQUMxRixNQUFNLHNCQUFzQixDQUFDLEtBQUssQ0FBQSxHQUFJLHFCQUFxQjs7QUFFM0QsTUFBTSxPQUFPLFVBQVUsR0FBRyxJQUFJLEVBQWU7QUFDN0MsUUFBUSxNQUFNLFdBQVcsR0FBdUIsRUFBRSxJQUFJLEVBQUUsT0FBTztBQUMvRCxRQUFRLGVBQWUsQ0FBQyxTQUFTLEVBQUUsV0FBVyxDQUFDOztBQUUvQyxRQUFRLE1BQU0sR0FBQSxHQUFNLHNCQUFzQixDQUFDLEtBQUssQ0FBQztBQUNqRCxRQUFRLEdBQUcsRUFBRSxLQUFLLENBQUMsVUFBVSxDQUFDLE9BQU8sRUFBRSxJQUFJLENBQUM7QUFDNUMsTUFBTSxDQUFDO0FBQ1AsSUFBSSxDQUFDLENBQUM7QUFDTixFQUFFLENBQUMsQ0FBQztBQUNKOzs7OyIsInhfZ29vZ2xlX2lnbm9yZUxpc3QiOlswXX0=

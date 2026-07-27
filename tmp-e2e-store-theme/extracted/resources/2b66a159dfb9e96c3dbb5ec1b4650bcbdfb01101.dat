@@ -1,0 +1,91 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/contexts/ProgressiveUXContext.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/contexts/ProgressiveUXContext.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=6014a254"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+var _s = $RefreshSig$();
+import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=6014a254"; const React = __vite__cjsImport3_react.__esModule ? __vite__cjsImport3_react.default : __vite__cjsImport3_react; const createContext = __vite__cjsImport3_react["createContext"]; const useState = __vite__cjsImport3_react["useState"]; const useEffect = __vite__cjsImport3_react["useEffect"];
+const STORAGE_KEY = 'emarzona:ux_level';
+export const ProgressiveUXContext = /*#__PURE__*/ createContext({
+    uxLevel: 'expert',
+    isExpertMode: true,
+    setUxLevel: ()=>{},
+    toggleExpertMode: ()=>{}
+});
+export function ProgressiveUXProvider({ children }) {
+    _s();
+    const [uxLevel, setUxLevelState] = useState(()=>{
+        // Par défaut, un nouveau vendeur arrive en mode essentiel pour éviter l'overdose
+        const stored = localStorage.getItem(STORAGE_KEY);
+        return stored || 'essential';
+    });
+    const setUxLevel = (level)=>{
+        setUxLevelState(level);
+        localStorage.setItem(STORAGE_KEY, level);
+    };
+    const toggleExpertMode = ()=>{
+        setUxLevel(uxLevel === 'essential' ? 'expert' : 'essential');
+    };
+    // Pour supporter le SSR ou des bugs d'hydratation, on s'assure de synchro le state
+    useEffect(()=>{
+        const handleStorage = (e)=>{
+            if (e.key === STORAGE_KEY && e.newValue) {
+                setUxLevelState(e.newValue);
+            }
+        };
+        window.addEventListener('storage', handleStorage);
+        return ()=>window.removeEventListener('storage', handleStorage);
+    }, []);
+    return /*#__PURE__*/ _jsxDEV(ProgressiveUXContext.Provider, {
+        value: {
+            uxLevel,
+            isExpertMode: uxLevel === 'expert',
+            setUxLevel,
+            toggleExpertMode
+        },
+        children: children
+    }, void 0, false, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/contexts/ProgressiveUXContext.tsx",
+        lineNumber: 49,
+        columnNumber: 5
+    }, this);
+}
+_s(ProgressiveUXProvider, "IHDtmzmGMafgZQS/UvIgprW+8zk=");
+_c = ProgressiveUXProvider;
+var _c;
+$RefreshReg$(_c, "ProgressiveUXProvider");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/contexts/ProgressiveUXContext.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/contexts/ProgressiveUXContext.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIlByb2dyZXNzaXZlVVhDb250ZXh0LnRzeCJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgUmVhY3QsIHsgY3JlYXRlQ29udGV4dCwgdXNlQ29udGV4dCwgdXNlU3RhdGUsIHVzZUVmZmVjdCB9IGZyb20gJ3JlYWN0JztcblxudHlwZSBVWExldmVsID0gJ2Vzc2VudGlhbCcgfCAnZXhwZXJ0JztcblxuaW50ZXJmYWNlIFByb2dyZXNzaXZlVVhDb250ZXh0VHlwZSB7XG4gIHV4TGV2ZWw6IFVYTGV2ZWw7XG4gIGlzRXhwZXJ0TW9kZTogYm9vbGVhbjtcbiAgc2V0VXhMZXZlbDogKGxldmVsOiBVWExldmVsKSA9PiB2b2lkO1xuICB0b2dnbGVFeHBlcnRNb2RlOiAoKSA9PiB2b2lkO1xufVxuXG5jb25zdCBTVE9SQUdFX0tFWSA9ICdlbWFyem9uYTp1eF9sZXZlbCc7XG5cbmV4cG9ydCBjb25zdCBQcm9ncmVzc2l2ZVVYQ29udGV4dCA9IGNyZWF0ZUNvbnRleHQ8UHJvZ3Jlc3NpdmVVWENvbnRleHRUeXBlPih7XG4gIHV4TGV2ZWw6ICdleHBlcnQnLFxuICBpc0V4cGVydE1vZGU6IHRydWUsXG4gIHNldFV4TGV2ZWw6ICgpID0+IHt9LFxuICB0b2dnbGVFeHBlcnRNb2RlOiAoKSA9PiB7fSxcbn0pO1xuXG5leHBvcnQgZnVuY3Rpb24gUHJvZ3Jlc3NpdmVVWFByb3ZpZGVyKHsgY2hpbGRyZW4gfTogeyBjaGlsZHJlbjogUmVhY3QuUmVhY3ROb2RlIH0pIHtcbiAgY29uc3QgW3V4TGV2ZWwsIHNldFV4TGV2ZWxTdGF0ZV0gPSB1c2VTdGF0ZTxVWExldmVsPigoKSA9PiB7XG4gICAgLy8gUGFyIGTDqWZhdXQsIHVuIG5vdXZlYXUgdmVuZGV1ciBhcnJpdmUgZW4gbW9kZSBlc3NlbnRpZWwgcG91ciDDqXZpdGVyIGwnb3ZlcmRvc2VcbiAgICBjb25zdCBzdG9yZWQgPSBsb2NhbFN0b3JhZ2UuZ2V0SXRlbShTVE9SQUdFX0tFWSk7XG4gICAgcmV0dXJuIChzdG9yZWQgYXMgVVhMZXZlbCkgfHwgJ2Vzc2VudGlhbCc7XG4gIH0pO1xuXG4gIGNvbnN0IHNldFV4TGV2ZWwgPSAobGV2ZWw6IFVYTGV2ZWwpID0+IHtcbiAgICBzZXRVeExldmVsU3RhdGUobGV2ZWwpO1xuICAgIGxvY2FsU3RvcmFnZS5zZXRJdGVtKFNUT1JBR0VfS0VZLCBsZXZlbCk7XG4gIH07XG5cbiAgY29uc3QgdG9nZ2xlRXhwZXJ0TW9kZSA9ICgpID0+IHtcbiAgICBzZXRVeExldmVsKHV4TGV2ZWwgPT09ICdlc3NlbnRpYWwnID8gJ2V4cGVydCcgOiAnZXNzZW50aWFsJyk7XG4gIH07XG5cbiAgLy8gUG91ciBzdXBwb3J0ZXIgbGUgU1NSIG91IGRlcyBidWdzIGQnaHlkcmF0YXRpb24sIG9uIHMnYXNzdXJlIGRlIHN5bmNocm8gbGUgc3RhdGVcbiAgdXNlRWZmZWN0KCgpID0+IHtcbiAgICBjb25zdCBoYW5kbGVTdG9yYWdlID0gKGU6IFN0b3JhZ2VFdmVudCkgPT4ge1xuICAgICAgaWYgKGUua2V5ID09PSBTVE9SQUdFX0tFWSAmJiBlLm5ld1ZhbHVlKSB7XG4gICAgICAgIHNldFV4TGV2ZWxTdGF0ZShlLm5ld1ZhbHVlIGFzIFVYTGV2ZWwpO1xuICAgICAgfVxuICAgIH07XG4gICAgd2luZG93LmFkZEV2ZW50TGlzdGVuZXIoJ3N0b3JhZ2UnLCBoYW5kbGVTdG9yYWdlKTtcbiAgICByZXR1cm4gKCkgPT4gd2luZG93LnJlbW92ZUV2ZW50TGlzdGVuZXIoJ3N0b3JhZ2UnLCBoYW5kbGVTdG9yYWdlKTtcbiAgfSwgW10pO1xuXG4gIHJldHVybiAoXG4gICAgPFByb2dyZXNzaXZlVVhDb250ZXh0LlByb3ZpZGVyXG4gICAgICB2YWx1ZT17e1xuICAgICAgICB1eExldmVsLFxuICAgICAgICBpc0V4cGVydE1vZGU6IHV4TGV2ZWwgPT09ICdleHBlcnQnLFxuICAgICAgICBzZXRVeExldmVsLFxuICAgICAgICB0b2dnbGVFeHBlcnRNb2RlLFxuICAgICAgfX1cbiAgICA+XG4gICAgICB7Y2hpbGRyZW59XG4gICAgPC9Qcm9ncmVzc2l2ZVVYQ29udGV4dC5Qcm92aWRlcj5cbiAgKTtcbn1cbiJdLCJuYW1lcyI6WyJSZWFjdCIsImNyZWF0ZUNvbnRleHQiLCJ1c2VTdGF0ZSIsInVzZUVmZmVjdCIsIlNUT1JBR0VfS0VZIiwiUHJvZ3Jlc3NpdmVVWENvbnRleHQiLCJ1eExldmVsIiwiaXNFeHBlcnRNb2RlIiwic2V0VXhMZXZlbCIsInRvZ2dsZUV4cGVydE1vZGUiLCJQcm9ncmVzc2l2ZVVYUHJvdmlkZXIiLCJjaGlsZHJlbiIsInNldFV4TGV2ZWxTdGF0ZSIsInN0b3JlZCIsImxvY2FsU3RvcmFnZSIsImdldEl0ZW0iLCJsZXZlbCIsInNldEl0ZW0iLCJoYW5kbGVTdG9yYWdlIiwiZSIsImtleSIsIm5ld1ZhbHVlIiwid2luZG93IiwiYWRkRXZlbnRMaXN0ZW5lciIsInJlbW92ZUV2ZW50TGlzdGVuZXIiLCJQcm92aWRlciIsInZhbHVlIl0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7QUFBQSxPQUFPQSxTQUFTQyxhQUFhLEVBQWNDLFFBQVEsRUFBRUMsU0FBUyxRQUFRLFFBQVE7QUFXOUUsTUFBTUMsY0FBYztBQUVwQixPQUFPLE1BQU1DLHFDQUF1QkosY0FBd0M7SUFDMUVLLFNBQVM7SUFDVEMsY0FBYztJQUNkQyxZQUFZLEtBQU87SUFDbkJDLGtCQUFrQixLQUFPO0FBQzNCLEdBQUc7QUFFSCxPQUFPLFNBQVNDLHNCQUFzQixFQUFFQyxRQUFRLEVBQWlDOztJQUMvRSxNQUFNLENBQUNMLFNBQVNNLGdCQUFnQixHQUFHVixTQUFrQjtRQUNuRCxpRkFBaUY7UUFDakYsTUFBTVcsU0FBU0MsYUFBYUMsT0FBTyxDQUFDWDtRQUNwQyxPQUFPLEFBQUNTLFVBQXNCO0lBQ2hDO0lBRUEsTUFBTUwsYUFBYSxDQUFDUTtRQUNsQkosZ0JBQWdCSTtRQUNoQkYsYUFBYUcsT0FBTyxDQUFDYixhQUFhWTtJQUNwQztJQUVBLE1BQU1QLG1CQUFtQjtRQUN2QkQsV0FBV0YsWUFBWSxjQUFjLFdBQVc7SUFDbEQ7SUFFQSxtRkFBbUY7SUFDbkZILFVBQVU7UUFDUixNQUFNZSxnQkFBZ0IsQ0FBQ0M7WUFDckIsSUFBSUEsRUFBRUMsR0FBRyxLQUFLaEIsZUFBZWUsRUFBRUUsUUFBUSxFQUFFO2dCQUN2Q1QsZ0JBQWdCTyxFQUFFRSxRQUFRO1lBQzVCO1FBQ0Y7UUFDQUMsT0FBT0MsZ0JBQWdCLENBQUMsV0FBV0w7UUFDbkMsT0FBTyxJQUFNSSxPQUFPRSxtQkFBbUIsQ0FBQyxXQUFXTjtJQUNyRCxHQUFHLEVBQUU7SUFFTCxxQkFDRSxRQUFDYixxQkFBcUJvQixRQUFRO1FBQzVCQyxPQUFPO1lBQ0xwQjtZQUNBQyxjQUFjRCxZQUFZO1lBQzFCRTtZQUNBQztRQUNGO2tCQUVDRTs7Ozs7O0FBR1A7R0F2Q2dCRDtLQUFBQSJ9

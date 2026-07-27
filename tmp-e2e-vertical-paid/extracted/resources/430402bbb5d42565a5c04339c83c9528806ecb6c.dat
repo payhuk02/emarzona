@@ -1,0 +1,144 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/ui/lazy-image.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/ui/lazy-image.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=8792f17d"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+var _s = $RefreshSig$();
+/**
+ * Composant LazyImage optimisé pour le chargement des images
+ * Utilise IntersectionObserver pour charger les images uniquement quand elles sont visibles
+ */ import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=8792f17d"; const React = __vite__cjsImport3_react.__esModule ? __vite__cjsImport3_react.default : __vite__cjsImport3_react; const useState = __vite__cjsImport3_react["useState"]; const useRef = __vite__cjsImport3_react["useRef"]; const useEffect = __vite__cjsImport3_react["useEffect"];
+import { cn } from "/src/lib/utils.ts";
+export const LazyImage = /*#__PURE__*/ _s(React.forwardRef(_c = _s(({ src, alt, placeholder, fallbackSrc, className, onLoad, onError, ...props }, ref)=>{
+    _s();
+    const [isLoaded, setIsLoaded] = useState(false);
+    const [isInView, setIsInView] = useState(false);
+    const [hasError, setHasError] = useState(false);
+    const imgRef = useRef(null);
+    const observerRef = useRef(null);
+    // Observer pour détecter quand l'image entre dans la viewport
+    useEffect(()=>{
+        const element = imgRef.current;
+        if (!element) return;
+        observerRef.current = new IntersectionObserver(([entry])=>{
+            if (entry.isIntersecting) {
+                setIsInView(true);
+                observerRef.current?.disconnect();
+            }
+        }, {
+            rootMargin: '50px',
+            threshold: 0.1
+        });
+        observerRef.current.observe(element);
+        return ()=>{
+            observerRef.current?.disconnect();
+        };
+    }, []);
+    const handleLoad = ()=>{
+        setIsLoaded(true);
+        onLoad?.();
+    };
+    const handleError = ()=>{
+        setHasError(true);
+        onError?.();
+    };
+    const currentSrc = hasError && fallbackSrc ? fallbackSrc : src;
+    return /*#__PURE__*/ _jsxDEV("div", {
+        className: cn('relative overflow-hidden', className),
+        children: [
+            !isLoaded && /*#__PURE__*/ _jsxDEV("div", {
+                className: "absolute inset-0 bg-muted animate-pulse flex items-center justify-center",
+                children: placeholder ? /*#__PURE__*/ _jsxDEV("img", {
+                    src: placeholder,
+                    alt: "",
+                    className: "w-full h-full object-cover opacity-50",
+                    "aria-hidden": "true"
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/lazy-image.tsx",
+                    lineNumber: 79,
+                    columnNumber: 15
+                }, this) : /*#__PURE__*/ _jsxDEV("div", {
+                    className: "text-muted-foreground text-xs",
+                    children: "Chargement..."
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/lazy-image.tsx",
+                    lineNumber: 86,
+                    columnNumber: 15
+                }, this)
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/lazy-image.tsx",
+                lineNumber: 77,
+                columnNumber: 11
+            }, this),
+            isInView && /*#__PURE__*/ _jsxDEV("img", {
+                ref: ref || imgRef,
+                src: currentSrc,
+                alt: alt,
+                className: cn('transition-opacity duration-300', isLoaded ? 'opacity-100' : 'opacity-0', className),
+                onLoad: handleLoad,
+                onError: handleError,
+                ...props
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/lazy-image.tsx",
+                lineNumber: 93,
+                columnNumber: 11
+            }, this),
+            !isInView && /*#__PURE__*/ _jsxDEV("div", {
+                ref: imgRef,
+                className: "bg-muted animate-pulse",
+                style: {
+                    width: props.width || '100%',
+                    height: props.height || '100%'
+                }
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/lazy-image.tsx",
+                lineNumber: 110,
+                columnNumber: 11
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/ui/lazy-image.tsx",
+        lineNumber: 74,
+        columnNumber: 7
+    }, this);
+}, "++vBGiLrqWg79xoDRBllZil6qgw=")), "++vBGiLrqWg79xoDRBllZil6qgw=");
+_c1 = LazyImage;
+LazyImage.displayName = 'LazyImage';
+var _c, _c1;
+$RefreshReg$(_c, "LazyImage$React.forwardRef");
+$RefreshReg$(_c1, "LazyImage");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/ui/lazy-image.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/ui/lazy-image.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImxhenktaW1hZ2UudHN4Il0sInNvdXJjZXNDb250ZW50IjpbIi8qKlxuICogQ29tcG9zYW50IExhenlJbWFnZSBvcHRpbWlzw6kgcG91ciBsZSBjaGFyZ2VtZW50IGRlcyBpbWFnZXNcbiAqIFV0aWxpc2UgSW50ZXJzZWN0aW9uT2JzZXJ2ZXIgcG91ciBjaGFyZ2VyIGxlcyBpbWFnZXMgdW5pcXVlbWVudCBxdWFuZCBlbGxlcyBzb250IHZpc2libGVzXG4gKi9cblxuaW1wb3J0IFJlYWN0LCB7IHVzZVN0YXRlLCB1c2VSZWYsIHVzZUVmZmVjdCB9IGZyb20gJ3JlYWN0JztcbmltcG9ydCB7IGNuIH0gZnJvbSAnQC9saWIvdXRpbHMnO1xuXG5pbnRlcmZhY2UgTGF6eUltYWdlUHJvcHMgZXh0ZW5kcyBPbWl0PFJlYWN0LkltZ0hUTUxBdHRyaWJ1dGVzPEhUTUxJbWFnZUVsZW1lbnQ+LCAnc3JjJyB8ICdsb2FkaW5nJz4ge1xuICBzcmM6IHN0cmluZztcbiAgYWx0OiBzdHJpbmc7XG4gIHBsYWNlaG9sZGVyPzogc3RyaW5nO1xuICBmYWxsYmFja1NyYz86IHN0cmluZztcbiAgY2xhc3NOYW1lPzogc3RyaW5nO1xuICBvbkxvYWQ/OiAoKSA9PiB2b2lkO1xuICBvbkVycm9yPzogKCkgPT4gdm9pZDtcbn1cblxuZXhwb3J0IGNvbnN0IExhenlJbWFnZSA9IFJlYWN0LmZvcndhcmRSZWY8SFRNTEltYWdlRWxlbWVudCwgTGF6eUltYWdlUHJvcHM+KFxuICAoe1xuICAgIHNyYyxcbiAgICBhbHQsXG4gICAgcGxhY2Vob2xkZXIsXG4gICAgZmFsbGJhY2tTcmMsXG4gICAgY2xhc3NOYW1lLFxuICAgIG9uTG9hZCxcbiAgICBvbkVycm9yLFxuICAgIC4uLnByb3BzXG4gIH0sIHJlZikgPT4ge1xuICAgIGNvbnN0IFtpc0xvYWRlZCwgc2V0SXNMb2FkZWRdID0gdXNlU3RhdGUoZmFsc2UpO1xuICAgIGNvbnN0IFtpc0luVmlldywgc2V0SXNJblZpZXddID0gdXNlU3RhdGUoZmFsc2UpO1xuICAgIGNvbnN0IFtoYXNFcnJvciwgc2V0SGFzRXJyb3JdID0gdXNlU3RhdGUoZmFsc2UpO1xuICAgIGNvbnN0IGltZ1JlZiA9IHVzZVJlZjxIVE1MSW1hZ2VFbGVtZW50PihudWxsKTtcbiAgICBjb25zdCBvYnNlcnZlclJlZiA9IHVzZVJlZjxJbnRlcnNlY3Rpb25PYnNlcnZlciB8IG51bGw+KG51bGwpO1xuXG4gICAgLy8gT2JzZXJ2ZXIgcG91ciBkw6l0ZWN0ZXIgcXVhbmQgbCdpbWFnZSBlbnRyZSBkYW5zIGxhIHZpZXdwb3J0XG4gICAgdXNlRWZmZWN0KCgpID0+IHtcbiAgICAgIGNvbnN0IGVsZW1lbnQgPSBpbWdSZWYuY3VycmVudDtcbiAgICAgIGlmICghZWxlbWVudCkgcmV0dXJuO1xuXG4gICAgICBvYnNlcnZlclJlZi5jdXJyZW50ID0gbmV3IEludGVyc2VjdGlvbk9ic2VydmVyKFxuICAgICAgICAoW2VudHJ5XSkgPT4ge1xuICAgICAgICAgIGlmIChlbnRyeS5pc0ludGVyc2VjdGluZykge1xuICAgICAgICAgICAgc2V0SXNJblZpZXcodHJ1ZSk7XG4gICAgICAgICAgICBvYnNlcnZlclJlZi5jdXJyZW50Py5kaXNjb25uZWN0KCk7XG4gICAgICAgICAgfVxuICAgICAgICB9LFxuICAgICAgICB7XG4gICAgICAgICAgcm9vdE1hcmdpbjogJzUwcHgnLCAvLyBDb21tZW5jZXIgbGUgY2hhcmdlbWVudCA1MHB4IGF2YW50IHF1ZSBsJ2ltYWdlIHNvaXQgdmlzaWJsZVxuICAgICAgICAgIHRocmVzaG9sZDogMC4xLFxuICAgICAgICB9XG4gICAgICApO1xuXG4gICAgICBvYnNlcnZlclJlZi5jdXJyZW50Lm9ic2VydmUoZWxlbWVudCk7XG5cbiAgICAgIHJldHVybiAoKSA9PiB7XG4gICAgICAgIG9ic2VydmVyUmVmLmN1cnJlbnQ/LmRpc2Nvbm5lY3QoKTtcbiAgICAgIH07XG4gICAgfSwgW10pO1xuXG4gICAgY29uc3QgaGFuZGxlTG9hZCA9ICgpID0+IHtcbiAgICAgIHNldElzTG9hZGVkKHRydWUpO1xuICAgICAgb25Mb2FkPy4oKTtcbiAgICB9O1xuXG4gICAgY29uc3QgaGFuZGxlRXJyb3IgPSAoKSA9PiB7XG4gICAgICBzZXRIYXNFcnJvcih0cnVlKTtcbiAgICAgIG9uRXJyb3I/LigpO1xuICAgIH07XG5cbiAgICBjb25zdCBjdXJyZW50U3JjID0gaGFzRXJyb3IgJiYgZmFsbGJhY2tTcmMgPyBmYWxsYmFja1NyYyA6IHNyYztcblxuICAgIHJldHVybiAoXG4gICAgICA8ZGl2IGNsYXNzTmFtZT17Y24oJ3JlbGF0aXZlIG92ZXJmbG93LWhpZGRlbicsIGNsYXNzTmFtZSl9PlxuICAgICAgICB7LyogUGxhY2Vob2xkZXIgcGVuZGFudCBsZSBjaGFyZ2VtZW50ICovfVxuICAgICAgICB7IWlzTG9hZGVkICYmIChcbiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImFic29sdXRlIGluc2V0LTAgYmctbXV0ZWQgYW5pbWF0ZS1wdWxzZSBmbGV4IGl0ZW1zLWNlbnRlciBqdXN0aWZ5LWNlbnRlclwiPlxuICAgICAgICAgICAge3BsYWNlaG9sZGVyID8gKFxuICAgICAgICAgICAgICA8aW1nXG4gICAgICAgICAgICAgICAgc3JjPXtwbGFjZWhvbGRlcn1cbiAgICAgICAgICAgICAgICBhbHQ9XCJcIlxuICAgICAgICAgICAgICAgIGNsYXNzTmFtZT1cInctZnVsbCBoLWZ1bGwgb2JqZWN0LWNvdmVyIG9wYWNpdHktNTBcIlxuICAgICAgICAgICAgICAgIGFyaWEtaGlkZGVuPVwidHJ1ZVwiXG4gICAgICAgICAgICAgIC8+XG4gICAgICAgICAgICApIDogKFxuICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInRleHQtbXV0ZWQtZm9yZWdyb3VuZCB0ZXh0LXhzXCI+Q2hhcmdlbWVudC4uLjwvZGl2PlxuICAgICAgICAgICAgKX1cbiAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgKX1cblxuICAgICAgICB7LyogSW1hZ2UgcsOpZWxsZSAqL31cbiAgICAgICAge2lzSW5WaWV3ICYmIChcbiAgICAgICAgICA8aW1nXG4gICAgICAgICAgICByZWY9e3JlZiB8fCBpbWdSZWZ9XG4gICAgICAgICAgICBzcmM9e2N1cnJlbnRTcmN9XG4gICAgICAgICAgICBhbHQ9e2FsdH1cbiAgICAgICAgICAgIGNsYXNzTmFtZT17Y24oXG4gICAgICAgICAgICAgICd0cmFuc2l0aW9uLW9wYWNpdHkgZHVyYXRpb24tMzAwJyxcbiAgICAgICAgICAgICAgaXNMb2FkZWQgPyAnb3BhY2l0eS0xMDAnIDogJ29wYWNpdHktMCcsXG4gICAgICAgICAgICAgIGNsYXNzTmFtZVxuICAgICAgICAgICAgKX1cbiAgICAgICAgICAgIG9uTG9hZD17aGFuZGxlTG9hZH1cbiAgICAgICAgICAgIG9uRXJyb3I9e2hhbmRsZUVycm9yfVxuICAgICAgICAgICAgey4uLnByb3BzfVxuICAgICAgICAgIC8+XG4gICAgICAgICl9XG5cbiAgICAgICAgey8qIFNrZWxldG9uIGxvYWRlciAqL31cbiAgICAgICAgeyFpc0luVmlldyAmJiAoXG4gICAgICAgICAgPGRpdlxuICAgICAgICAgICAgcmVmPXtpbWdSZWZ9XG4gICAgICAgICAgICBjbGFzc05hbWU9XCJiZy1tdXRlZCBhbmltYXRlLXB1bHNlXCJcbiAgICAgICAgICAgIHN0eWxlPXt7XG4gICAgICAgICAgICAgIHdpZHRoOiBwcm9wcy53aWR0aCB8fCAnMTAwJScsXG4gICAgICAgICAgICAgIGhlaWdodDogcHJvcHMuaGVpZ2h0IHx8ICcxMDAlJyxcbiAgICAgICAgICAgIH19XG4gICAgICAgICAgLz5cbiAgICAgICAgKX1cbiAgICAgIDwvZGl2PlxuICAgICk7XG4gIH1cbik7XG5cbkxhenlJbWFnZS5kaXNwbGF5TmFtZSA9ICdMYXp5SW1hZ2UnO1xuIl0sIm5hbWVzIjpbIlJlYWN0IiwidXNlU3RhdGUiLCJ1c2VSZWYiLCJ1c2VFZmZlY3QiLCJjbiIsIkxhenlJbWFnZSIsImZvcndhcmRSZWYiLCJzcmMiLCJhbHQiLCJwbGFjZWhvbGRlciIsImZhbGxiYWNrU3JjIiwiY2xhc3NOYW1lIiwib25Mb2FkIiwib25FcnJvciIsInByb3BzIiwicmVmIiwiaXNMb2FkZWQiLCJzZXRJc0xvYWRlZCIsImlzSW5WaWV3Iiwic2V0SXNJblZpZXciLCJoYXNFcnJvciIsInNldEhhc0Vycm9yIiwiaW1nUmVmIiwib2JzZXJ2ZXJSZWYiLCJlbGVtZW50IiwiY3VycmVudCIsIkludGVyc2VjdGlvbk9ic2VydmVyIiwiZW50cnkiLCJpc0ludGVyc2VjdGluZyIsImRpc2Nvbm5lY3QiLCJyb290TWFyZ2luIiwidGhyZXNob2xkIiwib2JzZXJ2ZSIsImhhbmRsZUxvYWQiLCJoYW5kbGVFcnJvciIsImN1cnJlbnRTcmMiLCJkaXYiLCJpbWciLCJhcmlhLWhpZGRlbiIsInN0eWxlIiwid2lkdGgiLCJoZWlnaHQiLCJkaXNwbGF5TmFtZSJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O0FBQUE7OztDQUdDLEdBRUQsT0FBT0EsU0FBU0MsUUFBUSxFQUFFQyxNQUFNLEVBQUVDLFNBQVMsUUFBUSxRQUFRO0FBQzNELFNBQVNDLEVBQUUsUUFBUSxjQUFjO0FBWWpDLE9BQU8sTUFBTUMsMEJBQVlMLEdBQUFBLE1BQU1NLFVBQVUsU0FDdkMsQ0FBQyxFQUNDQyxHQUFHLEVBQ0hDLEdBQUcsRUFDSEMsV0FBVyxFQUNYQyxXQUFXLEVBQ1hDLFNBQVMsRUFDVEMsTUFBTSxFQUNOQyxPQUFPLEVBQ1AsR0FBR0MsT0FDSixFQUFFQzs7SUFDRCxNQUFNLENBQUNDLFVBQVVDLFlBQVksR0FBR2hCLFNBQVM7SUFDekMsTUFBTSxDQUFDaUIsVUFBVUMsWUFBWSxHQUFHbEIsU0FBUztJQUN6QyxNQUFNLENBQUNtQixVQUFVQyxZQUFZLEdBQUdwQixTQUFTO0lBQ3pDLE1BQU1xQixTQUFTcEIsT0FBeUI7SUFDeEMsTUFBTXFCLGNBQWNyQixPQUFvQztJQUV4RCw4REFBOEQ7SUFDOURDLFVBQVU7UUFDUixNQUFNcUIsVUFBVUYsT0FBT0csT0FBTztRQUM5QixJQUFJLENBQUNELFNBQVM7UUFFZEQsWUFBWUUsT0FBTyxHQUFHLElBQUlDLHFCQUN4QixDQUFDLENBQUNDLE1BQU07WUFDTixJQUFJQSxNQUFNQyxjQUFjLEVBQUU7Z0JBQ3hCVCxZQUFZO2dCQUNaSSxZQUFZRSxPQUFPLEVBQUVJO1lBQ3ZCO1FBQ0YsR0FDQTtZQUNFQyxZQUFZO1lBQ1pDLFdBQVc7UUFDYjtRQUdGUixZQUFZRSxPQUFPLENBQUNPLE9BQU8sQ0FBQ1I7UUFFNUIsT0FBTztZQUNMRCxZQUFZRSxPQUFPLEVBQUVJO1FBQ3ZCO0lBQ0YsR0FBRyxFQUFFO0lBRUwsTUFBTUksYUFBYTtRQUNqQmhCLFlBQVk7UUFDWkw7SUFDRjtJQUVBLE1BQU1zQixjQUFjO1FBQ2xCYixZQUFZO1FBQ1pSO0lBQ0Y7SUFFQSxNQUFNc0IsYUFBYWYsWUFBWVYsY0FBY0EsY0FBY0g7SUFFM0QscUJBQ0UsUUFBQzZCO1FBQUl6QixXQUFXUCxHQUFHLDRCQUE0Qk87O1lBRTVDLENBQUNLLDBCQUNBLFFBQUNvQjtnQkFBSXpCLFdBQVU7MEJBQ1pGLDRCQUNDLFFBQUM0QjtvQkFDQzlCLEtBQUtFO29CQUNMRCxLQUFJO29CQUNKRyxXQUFVO29CQUNWMkIsZUFBWTs7Ozs7eUNBR2QsUUFBQ0Y7b0JBQUl6QixXQUFVOzhCQUFnQzs7Ozs7Ozs7Ozs7WUFNcERPLDBCQUNDLFFBQUNtQjtnQkFDQ3RCLEtBQUtBLE9BQU9PO2dCQUNaZixLQUFLNEI7Z0JBQ0wzQixLQUFLQTtnQkFDTEcsV0FBV1AsR0FDVCxtQ0FDQVksV0FBVyxnQkFBZ0IsYUFDM0JMO2dCQUVGQyxRQUFRcUI7Z0JBQ1JwQixTQUFTcUI7Z0JBQ1IsR0FBR3BCLEtBQUs7Ozs7OztZQUtaLENBQUNJLDBCQUNBLFFBQUNrQjtnQkFDQ3JCLEtBQUtPO2dCQUNMWCxXQUFVO2dCQUNWNEIsT0FBTztvQkFDTEMsT0FBTzFCLE1BQU0wQixLQUFLLElBQUk7b0JBQ3RCQyxRQUFRM0IsTUFBTTJCLE1BQU0sSUFBSTtnQkFDMUI7Ozs7Ozs7Ozs7OztBQUtWLHFFQUNBOztBQUVGcEMsVUFBVXFDLFdBQVcsR0FBRyJ9

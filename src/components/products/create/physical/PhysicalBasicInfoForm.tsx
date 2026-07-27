@@ -24,11 +24,16 @@ import { useStore } from '@/hooks/useStore';
 import { buildSeoFromGenerated, mergeImages } from '@/lib/ai-product-apply';
 import { PRODUCT_DESCRIPTION_MAX_WORDS } from '@/constants/product-description';
 
+import { getCategoriesForProductType } from '@/constants/product-categories';
+import { SelectField, SelectItem } from '@/components/ui/select';
+
 interface PhysicalBasicInfoFormProps {
   data: Partial<PhysicalProductFormData>;
   onUpdate: (data: Partial<PhysicalProductFormData>) => void;
   storeSlug?: string;
 }
+
+const PHYSICAL_CATEGORIES = getCategoriesForProductType('physical');
 
 export const PhysicalBasicInfoForm = ({
   data,
@@ -194,6 +199,27 @@ export const PhysicalBasicInfoForm = ({
           )}
         </div>
       )}
+
+      {/* Category */}
+      <div className="space-y-2">
+        <SelectField
+          label="Catégorie *"
+          contentVariant="sheet"
+          useMobileSelectRoot
+          value={data.category || 'vetements'}
+          onValueChange={value => {
+            onUpdate({ category: value });
+          }}
+          required
+          placeholder="Sélectionnez une catégorie"
+        >
+          {PHYSICAL_CATEGORIES.map(cat => (
+            <SelectItem key={cat.value} value={cat.value}>
+              {cat.label}
+            </SelectItem>
+          ))}
+        </SelectField>
+      </div>
 
       {/* Short Description */}
       <div className="space-y-2">

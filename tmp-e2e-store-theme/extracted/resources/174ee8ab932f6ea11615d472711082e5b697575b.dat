@@ -1,0 +1,447 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/dashboard/DashboardSkeleton.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardSkeleton.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=6014a254"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+/**
+ * Skeleton de chargement pour le Dashboard
+ * Affiche une structure visuelle pendant le chargement des données
+ */ import { Card, CardContent, CardHeader } from "/src/components/ui/card.tsx";
+import { Skeleton } from "/src/components/ui/skeleton.tsx";
+/** Skeleton d'une carte KPI premium (révélation progressive). */ export function DashboardMetricCardSkeleton() {
+    return /*#__PURE__*/ _jsxDEV("article", {
+        className: "dashboard-metric-card dashboard-metric-card--purple min-h-[8.5rem] animate-pulse",
+        "aria-hidden": true,
+        children: [
+            /*#__PURE__*/ _jsxDEV("div", {
+                className: "flex justify-between gap-3 mb-4",
+                children: [
+                    /*#__PURE__*/ _jsxDEV(Skeleton, {
+                        className: "h-10 w-10 rounded-xl"
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardSkeleton.tsx",
+                        lineNumber: 17,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV(Skeleton, {
+                        className: "h-6 w-14 rounded-full"
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardSkeleton.tsx",
+                        lineNumber: 18,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardSkeleton.tsx",
+                lineNumber: 16,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV(Skeleton, {
+                className: "h-3 w-24 mb-3"
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardSkeleton.tsx",
+                lineNumber: 20,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV(Skeleton, {
+                className: "h-7 w-32 mb-2"
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardSkeleton.tsx",
+                lineNumber: 21,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV(Skeleton, {
+                className: "h-3 w-28"
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardSkeleton.tsx",
+                lineNumber: 22,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardSkeleton.tsx",
+        lineNumber: 12,
+        columnNumber: 5
+    }, this);
+}
+_c = DashboardMetricCardSkeleton;
+/** Skeleton pour les 4 cartes de statistiques */ export const StatsSkeleton = ()=>/*#__PURE__*/ _jsxDEV("div", {
+        className: "grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-2 lg:grid-cols-4",
+        children: Array.from({
+            length: 4
+        }).map((_, i)=>/*#__PURE__*/ _jsxDEV(Card, {
+                className: "border-border/50 bg-card/50 backdrop-blur-sm",
+                children: [
+                    /*#__PURE__*/ _jsxDEV(CardHeader, {
+                        className: "pb-1.5 sm:pb-2 md:pb-3 p-2.5 sm:p-3 md:p-4",
+                        children: /*#__PURE__*/ _jsxDEV("div", {
+                            className: "flex items-center gap-1.5",
+                            children: [
+                                /*#__PURE__*/ _jsxDEV(Skeleton, {
+                                    className: "h-3 w-3 sm:h-4 sm:w-4 rounded"
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardSkeleton.tsx",
+                                    lineNumber: 34,
+                                    columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV(Skeleton, {
+                                    className: "h-3 sm:h-4 w-16 sm:w-20"
+                                }, void 0, false, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardSkeleton.tsx",
+                                    lineNumber: 35,
+                                    columnNumber: 13
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardSkeleton.tsx",
+                            lineNumber: 33,
+                            columnNumber: 11
+                        }, this)
+                    }, void 0, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardSkeleton.tsx",
+                        lineNumber: 32,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV(CardContent, {
+                        className: "p-3 sm:p-4 md:p-6 pt-0",
+                        children: [
+                            /*#__PURE__*/ _jsxDEV(Skeleton, {
+                                className: "h-5 sm:h-7 w-20 sm:w-28 mb-2"
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardSkeleton.tsx",
+                                lineNumber: 39,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV(Skeleton, {
+                                className: "h-3 w-24 mb-2"
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardSkeleton.tsx",
+                                lineNumber: 40,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV(Skeleton, {
+                                className: "h-5 w-12 rounded-full"
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardSkeleton.tsx",
+                                lineNumber: 41,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardSkeleton.tsx",
+                        lineNumber: 38,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, i, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardSkeleton.tsx",
+                lineNumber: 31,
+                columnNumber: 7
+            }, this))
+    }, void 0, false, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardSkeleton.tsx",
+        lineNumber: 29,
+        columnNumber: 3
+    }, this);
+_c1 = StatsSkeleton;
+/** Skeleton pour les actions rapides */ export const QuickActionsSkeleton = ()=>/*#__PURE__*/ _jsxDEV(Card, {
+        className: "border-border/50 bg-card/50 backdrop-blur-sm",
+        children: [
+            /*#__PURE__*/ _jsxDEV(CardHeader, {
+                className: "pb-2 sm:pb-3 p-3 sm:p-4 md:p-6",
+                children: /*#__PURE__*/ _jsxDEV("div", {
+                    className: "flex items-center gap-2",
+                    children: [
+                        /*#__PURE__*/ _jsxDEV(Skeleton, {
+                            className: "h-8 w-8 rounded-lg"
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardSkeleton.tsx",
+                            lineNumber: 53,
+                            columnNumber: 9
+                        }, this),
+                        /*#__PURE__*/ _jsxDEV(Skeleton, {
+                            className: "h-5 w-32"
+                        }, void 0, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardSkeleton.tsx",
+                            lineNumber: 54,
+                            columnNumber: 9
+                        }, this)
+                    ]
+                }, void 0, true, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardSkeleton.tsx",
+                    lineNumber: 52,
+                    columnNumber: 7
+                }, this)
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardSkeleton.tsx",
+                lineNumber: 51,
+                columnNumber: 5
+            }, this),
+            /*#__PURE__*/ _jsxDEV(CardContent, {
+                className: "p-3 sm:p-4 md:p-6 pt-0",
+                children: /*#__PURE__*/ _jsxDEV("div", {
+                    className: "grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
+                    children: Array.from({
+                        length: 3
+                    }).map((_, i)=>/*#__PURE__*/ _jsxDEV(Card, {
+                            className: "border-border/50 bg-card/50",
+                            children: /*#__PURE__*/ _jsxDEV(CardContent, {
+                                className: "p-3 sm:p-4 md:p-6",
+                                children: /*#__PURE__*/ _jsxDEV("div", {
+                                    className: "flex items-start gap-2",
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV(Skeleton, {
+                                            className: "h-10 w-10 rounded-xl shrink-0"
+                                        }, void 0, false, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardSkeleton.tsx",
+                                            lineNumber: 63,
+                                            columnNumber: 17
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV("div", {
+                                            className: "flex-1",
+                                            children: [
+                                                /*#__PURE__*/ _jsxDEV(Skeleton, {
+                                                    className: "h-4 w-24 mb-2"
+                                                }, void 0, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardSkeleton.tsx",
+                                                    lineNumber: 65,
+                                                    columnNumber: 19
+                                                }, this),
+                                                /*#__PURE__*/ _jsxDEV(Skeleton, {
+                                                    className: "h-3 w-full"
+                                                }, void 0, false, {
+                                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardSkeleton.tsx",
+                                                    lineNumber: 66,
+                                                    columnNumber: 19
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardSkeleton.tsx",
+                                            lineNumber: 64,
+                                            columnNumber: 17
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardSkeleton.tsx",
+                                    lineNumber: 62,
+                                    columnNumber: 15
+                                }, this)
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardSkeleton.tsx",
+                                lineNumber: 61,
+                                columnNumber: 13
+                            }, this)
+                        }, i, false, {
+                            fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardSkeleton.tsx",
+                            lineNumber: 60,
+                            columnNumber: 11
+                        }, this))
+                }, void 0, false, {
+                    fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardSkeleton.tsx",
+                    lineNumber: 58,
+                    columnNumber: 7
+                }, this)
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardSkeleton.tsx",
+                lineNumber: 57,
+                columnNumber: 5
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardSkeleton.tsx",
+        lineNumber: 50,
+        columnNumber: 3
+    }, this);
+_c2 = QuickActionsSkeleton;
+/** Skeleton pour les graphiques */ export const ChartsSkeleton = ()=>/*#__PURE__*/ _jsxDEV("div", {
+        className: "grid gap-3 sm:gap-4 md:gap-6 grid-cols-1 lg:grid-cols-2",
+        children: [
+            /*#__PURE__*/ _jsxDEV(Skeleton, {
+                className: "h-[300px] w-full rounded-lg"
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardSkeleton.tsx",
+                lineNumber: 80,
+                columnNumber: 5
+            }, this),
+            /*#__PURE__*/ _jsxDEV(Skeleton, {
+                className: "h-[300px] w-full rounded-lg"
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardSkeleton.tsx",
+                lineNumber: 81,
+                columnNumber: 5
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardSkeleton.tsx",
+        lineNumber: 79,
+        columnNumber: 3
+    }, this);
+_c3 = ChartsSkeleton;
+/** Skeleton pour la zone graphiques + listes (below-the-fold) */ export const DashboardSecondarySkeleton = ()=>/*#__PURE__*/ _jsxDEV("div", {
+        className: "space-y-5 sm:space-y-6",
+        children: [
+            /*#__PURE__*/ _jsxDEV(ChartsSkeleton, {}, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardSkeleton.tsx",
+                lineNumber: 88,
+                columnNumber: 5
+            }, this),
+            /*#__PURE__*/ _jsxDEV("div", {
+                className: "grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6",
+                children: Array.from({
+                    length: 3
+                }).map((_, i)=>/*#__PURE__*/ _jsxDEV(Skeleton, {
+                        className: "h-[220px] w-full rounded-xl"
+                    }, i, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardSkeleton.tsx",
+                        lineNumber: 91,
+                        columnNumber: 9
+                    }, this))
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardSkeleton.tsx",
+                lineNumber: 89,
+                columnNumber: 5
+            }, this),
+            /*#__PURE__*/ _jsxDEV("div", {
+                className: "grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-3",
+                children: Array.from({
+                    length: 3
+                }).map((_, i)=>/*#__PURE__*/ _jsxDEV(Skeleton, {
+                        className: "h-14 w-full rounded-xl"
+                    }, i, false, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardSkeleton.tsx",
+                        lineNumber: 96,
+                        columnNumber: 9
+                    }, this))
+            }, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardSkeleton.tsx",
+                lineNumber: 94,
+                columnNumber: 5
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardSkeleton.tsx",
+        lineNumber: 87,
+        columnNumber: 3
+    }, this);
+_c4 = DashboardSecondarySkeleton;
+/** Skeleton complet du dashboard (store en cours de chargement) */ export const DashboardFullSkeleton = ()=>/*#__PURE__*/ _jsxDEV("div", {
+        className: "space-y-4 sm:space-y-6",
+        children: [
+            /*#__PURE__*/ _jsxDEV("div", {
+                className: "flex items-center justify-between",
+                children: [
+                    /*#__PURE__*/ _jsxDEV("div", {
+                        children: [
+                            /*#__PURE__*/ _jsxDEV(Skeleton, {
+                                className: "h-7 w-48 mb-2"
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardSkeleton.tsx",
+                                lineNumber: 108,
+                                columnNumber: 9
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV(Skeleton, {
+                                className: "h-4 w-64"
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardSkeleton.tsx",
+                                lineNumber: 109,
+                                columnNumber: 9
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardSkeleton.tsx",
+                        lineNumber: 107,
+                        columnNumber: 7
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV("div", {
+                        className: "flex gap-2",
+                        children: [
+                            /*#__PURE__*/ _jsxDEV(Skeleton, {
+                                className: "h-9 w-24 rounded-md"
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardSkeleton.tsx",
+                                lineNumber: 112,
+                                columnNumber: 9
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV(Skeleton, {
+                                className: "h-9 w-9 rounded-md"
+                            }, void 0, false, {
+                                fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardSkeleton.tsx",
+                                lineNumber: 113,
+                                columnNumber: 9
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardSkeleton.tsx",
+                        lineNumber: 111,
+                        columnNumber: 7
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardSkeleton.tsx",
+                lineNumber: 106,
+                columnNumber: 5
+            }, this),
+            /*#__PURE__*/ _jsxDEV(StatsSkeleton, {}, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardSkeleton.tsx",
+                lineNumber: 116,
+                columnNumber: 5
+            }, this),
+            /*#__PURE__*/ _jsxDEV(QuickActionsSkeleton, {}, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardSkeleton.tsx",
+                lineNumber: 117,
+                columnNumber: 5
+            }, this),
+            /*#__PURE__*/ _jsxDEV(ChartsSkeleton, {}, void 0, false, {
+                fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardSkeleton.tsx",
+                lineNumber: 118,
+                columnNumber: 5
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardSkeleton.tsx",
+        lineNumber: 104,
+        columnNumber: 3
+    }, this);
+_c5 = DashboardFullSkeleton;
+var _c, _c1, _c2, _c3, _c4, _c5;
+$RefreshReg$(_c, "DashboardMetricCardSkeleton");
+$RefreshReg$(_c1, "StatsSkeleton");
+$RefreshReg$(_c2, "QuickActionsSkeleton");
+$RefreshReg$(_c3, "ChartsSkeleton");
+$RefreshReg$(_c4, "DashboardSecondarySkeleton");
+$RefreshReg$(_c5, "DashboardFullSkeleton");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardSkeleton.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("/home/runner/work/emarzona/emarzona/src/components/dashboard/DashboardSkeleton.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIkRhc2hib2FyZFNrZWxldG9uLnRzeCJdLCJzb3VyY2VzQ29udGVudCI6WyIvKipcbiAqIFNrZWxldG9uIGRlIGNoYXJnZW1lbnQgcG91ciBsZSBEYXNoYm9hcmRcbiAqIEFmZmljaGUgdW5lIHN0cnVjdHVyZSB2aXN1ZWxsZSBwZW5kYW50IGxlIGNoYXJnZW1lbnQgZGVzIGRvbm7DqWVzXG4gKi9cblxuaW1wb3J0IHsgQ2FyZCwgQ2FyZENvbnRlbnQsIENhcmRIZWFkZXIgfSBmcm9tICdAL2NvbXBvbmVudHMvdWkvY2FyZCc7XG5pbXBvcnQgeyBTa2VsZXRvbiB9IGZyb20gJ0AvY29tcG9uZW50cy91aS9za2VsZXRvbic7XG5cbi8qKiBTa2VsZXRvbiBkJ3VuZSBjYXJ0ZSBLUEkgcHJlbWl1bSAocsOpdsOpbGF0aW9uIHByb2dyZXNzaXZlKS4gKi9cbmV4cG9ydCBmdW5jdGlvbiBEYXNoYm9hcmRNZXRyaWNDYXJkU2tlbGV0b24oKSB7XG4gIHJldHVybiAoXG4gICAgPGFydGljbGVcbiAgICAgIGNsYXNzTmFtZT1cImRhc2hib2FyZC1tZXRyaWMtY2FyZCBkYXNoYm9hcmQtbWV0cmljLWNhcmQtLXB1cnBsZSBtaW4taC1bOC41cmVtXSBhbmltYXRlLXB1bHNlXCJcbiAgICAgIGFyaWEtaGlkZGVuXG4gICAgPlxuICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGp1c3RpZnktYmV0d2VlbiBnYXAtMyBtYi00XCI+XG4gICAgICAgIDxTa2VsZXRvbiBjbGFzc05hbWU9XCJoLTEwIHctMTAgcm91bmRlZC14bFwiIC8+XG4gICAgICAgIDxTa2VsZXRvbiBjbGFzc05hbWU9XCJoLTYgdy0xNCByb3VuZGVkLWZ1bGxcIiAvPlxuICAgICAgPC9kaXY+XG4gICAgICA8U2tlbGV0b24gY2xhc3NOYW1lPVwiaC0zIHctMjQgbWItM1wiIC8+XG4gICAgICA8U2tlbGV0b24gY2xhc3NOYW1lPVwiaC03IHctMzIgbWItMlwiIC8+XG4gICAgICA8U2tlbGV0b24gY2xhc3NOYW1lPVwiaC0zIHctMjhcIiAvPlxuICAgIDwvYXJ0aWNsZT5cbiAgKTtcbn1cblxuLyoqIFNrZWxldG9uIHBvdXIgbGVzIDQgY2FydGVzIGRlIHN0YXRpc3RpcXVlcyAqL1xuZXhwb3J0IGNvbnN0IFN0YXRzU2tlbGV0b24gPSAoKSA9PiAoXG4gIDxkaXYgY2xhc3NOYW1lPVwiZ3JpZCBnYXAtMyBzbTpnYXAtNCBncmlkLWNvbHMtMiBzbTpncmlkLWNvbHMtMiBsZzpncmlkLWNvbHMtNFwiPlxuICAgIHtBcnJheS5mcm9tKHsgbGVuZ3RoOiA0IH0pLm1hcCgoXywgaSkgPT4gKFxuICAgICAgPENhcmQga2V5PXtpfSBjbGFzc05hbWU9XCJib3JkZXItYm9yZGVyLzUwIGJnLWNhcmQvNTAgYmFja2Ryb3AtYmx1ci1zbVwiPlxuICAgICAgICA8Q2FyZEhlYWRlciBjbGFzc05hbWU9XCJwYi0xLjUgc206cGItMiBtZDpwYi0zIHAtMi41IHNtOnAtMyBtZDpwLTRcIj5cbiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGdhcC0xLjVcIj5cbiAgICAgICAgICAgIDxTa2VsZXRvbiBjbGFzc05hbWU9XCJoLTMgdy0zIHNtOmgtNCBzbTp3LTQgcm91bmRlZFwiIC8+XG4gICAgICAgICAgICA8U2tlbGV0b24gY2xhc3NOYW1lPVwiaC0zIHNtOmgtNCB3LTE2IHNtOnctMjBcIiAvPlxuICAgICAgICAgIDwvZGl2PlxuICAgICAgICA8L0NhcmRIZWFkZXI+XG4gICAgICAgIDxDYXJkQ29udGVudCBjbGFzc05hbWU9XCJwLTMgc206cC00IG1kOnAtNiBwdC0wXCI+XG4gICAgICAgICAgPFNrZWxldG9uIGNsYXNzTmFtZT1cImgtNSBzbTpoLTcgdy0yMCBzbTp3LTI4IG1iLTJcIiAvPlxuICAgICAgICAgIDxTa2VsZXRvbiBjbGFzc05hbWU9XCJoLTMgdy0yNCBtYi0yXCIgLz5cbiAgICAgICAgICA8U2tlbGV0b24gY2xhc3NOYW1lPVwiaC01IHctMTIgcm91bmRlZC1mdWxsXCIgLz5cbiAgICAgICAgPC9DYXJkQ29udGVudD5cbiAgICAgIDwvQ2FyZD5cbiAgICApKX1cbiAgPC9kaXY+XG4pO1xuXG4vKiogU2tlbGV0b24gcG91ciBsZXMgYWN0aW9ucyByYXBpZGVzICovXG5leHBvcnQgY29uc3QgUXVpY2tBY3Rpb25zU2tlbGV0b24gPSAoKSA9PiAoXG4gIDxDYXJkIGNsYXNzTmFtZT1cImJvcmRlci1ib3JkZXIvNTAgYmctY2FyZC81MCBiYWNrZHJvcC1ibHVyLXNtXCI+XG4gICAgPENhcmRIZWFkZXIgY2xhc3NOYW1lPVwicGItMiBzbTpwYi0zIHAtMyBzbTpwLTQgbWQ6cC02XCI+XG4gICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGdhcC0yXCI+XG4gICAgICAgIDxTa2VsZXRvbiBjbGFzc05hbWU9XCJoLTggdy04IHJvdW5kZWQtbGdcIiAvPlxuICAgICAgICA8U2tlbGV0b24gY2xhc3NOYW1lPVwiaC01IHctMzJcIiAvPlxuICAgICAgPC9kaXY+XG4gICAgPC9DYXJkSGVhZGVyPlxuICAgIDxDYXJkQ29udGVudCBjbGFzc05hbWU9XCJwLTMgc206cC00IG1kOnAtNiBwdC0wXCI+XG4gICAgICA8ZGl2IGNsYXNzTmFtZT1cImdyaWQgZ2FwLTMgc206Z2FwLTQgZ3JpZC1jb2xzLTEgc206Z3JpZC1jb2xzLTIgbGc6Z3JpZC1jb2xzLTNcIj5cbiAgICAgICAge0FycmF5LmZyb20oeyBsZW5ndGg6IDMgfSkubWFwKChfLCBpKSA9PiAoXG4gICAgICAgICAgPENhcmQga2V5PXtpfSBjbGFzc05hbWU9XCJib3JkZXItYm9yZGVyLzUwIGJnLWNhcmQvNTBcIj5cbiAgICAgICAgICAgIDxDYXJkQ29udGVudCBjbGFzc05hbWU9XCJwLTMgc206cC00IG1kOnAtNlwiPlxuICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtc3RhcnQgZ2FwLTJcIj5cbiAgICAgICAgICAgICAgICA8U2tlbGV0b24gY2xhc3NOYW1lPVwiaC0xMCB3LTEwIHJvdW5kZWQteGwgc2hyaW5rLTBcIiAvPlxuICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleC0xXCI+XG4gICAgICAgICAgICAgICAgICA8U2tlbGV0b24gY2xhc3NOYW1lPVwiaC00IHctMjQgbWItMlwiIC8+XG4gICAgICAgICAgICAgICAgICA8U2tlbGV0b24gY2xhc3NOYW1lPVwiaC0zIHctZnVsbFwiIC8+XG4gICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgPC9DYXJkQ29udGVudD5cbiAgICAgICAgICA8L0NhcmQ+XG4gICAgICAgICkpfVxuICAgICAgPC9kaXY+XG4gICAgPC9DYXJkQ29udGVudD5cbiAgPC9DYXJkPlxuKTtcblxuLyoqIFNrZWxldG9uIHBvdXIgbGVzIGdyYXBoaXF1ZXMgKi9cbmV4cG9ydCBjb25zdCBDaGFydHNTa2VsZXRvbiA9ICgpID0+IChcbiAgPGRpdiBjbGFzc05hbWU9XCJncmlkIGdhcC0zIHNtOmdhcC00IG1kOmdhcC02IGdyaWQtY29scy0xIGxnOmdyaWQtY29scy0yXCI+XG4gICAgPFNrZWxldG9uIGNsYXNzTmFtZT1cImgtWzMwMHB4XSB3LWZ1bGwgcm91bmRlZC1sZ1wiIC8+XG4gICAgPFNrZWxldG9uIGNsYXNzTmFtZT1cImgtWzMwMHB4XSB3LWZ1bGwgcm91bmRlZC1sZ1wiIC8+XG4gIDwvZGl2PlxuKTtcblxuLyoqIFNrZWxldG9uIHBvdXIgbGEgem9uZSBncmFwaGlxdWVzICsgbGlzdGVzIChiZWxvdy10aGUtZm9sZCkgKi9cbmV4cG9ydCBjb25zdCBEYXNoYm9hcmRTZWNvbmRhcnlTa2VsZXRvbiA9ICgpID0+IChcbiAgPGRpdiBjbGFzc05hbWU9XCJzcGFjZS15LTUgc206c3BhY2UteS02XCI+XG4gICAgPENoYXJ0c1NrZWxldG9uIC8+XG4gICAgPGRpdiBjbGFzc05hbWU9XCJncmlkIGdyaWQtY29scy0xIGxnOmdyaWQtY29scy0zIGdhcC01IHNtOmdhcC02XCI+XG4gICAgICB7QXJyYXkuZnJvbSh7IGxlbmd0aDogMyB9KS5tYXAoKF8sIGkpID0+IChcbiAgICAgICAgPFNrZWxldG9uIGtleT17aX0gY2xhc3NOYW1lPVwiaC1bMjIwcHhdIHctZnVsbCByb3VuZGVkLXhsXCIgLz5cbiAgICAgICkpfVxuICAgIDwvZGl2PlxuICAgIDxkaXYgY2xhc3NOYW1lPVwiZ3JpZCBnYXAtMyBzbTpnYXAtNCBncmlkLWNvbHMtMSBzbTpncmlkLWNvbHMtM1wiPlxuICAgICAge0FycmF5LmZyb20oeyBsZW5ndGg6IDMgfSkubWFwKChfLCBpKSA9PiAoXG4gICAgICAgIDxTa2VsZXRvbiBrZXk9e2l9IGNsYXNzTmFtZT1cImgtMTQgdy1mdWxsIHJvdW5kZWQteGxcIiAvPlxuICAgICAgKSl9XG4gICAgPC9kaXY+XG4gIDwvZGl2PlxuKTtcblxuLyoqIFNrZWxldG9uIGNvbXBsZXQgZHUgZGFzaGJvYXJkIChzdG9yZSBlbiBjb3VycyBkZSBjaGFyZ2VtZW50KSAqL1xuZXhwb3J0IGNvbnN0IERhc2hib2FyZEZ1bGxTa2VsZXRvbiA9ICgpID0+IChcbiAgPGRpdiBjbGFzc05hbWU9XCJzcGFjZS15LTQgc206c3BhY2UteS02XCI+XG4gICAgey8qIEhlYWRlciBza2VsZXRvbiAqL31cbiAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGp1c3RpZnktYmV0d2VlblwiPlxuICAgICAgPGRpdj5cbiAgICAgICAgPFNrZWxldG9uIGNsYXNzTmFtZT1cImgtNyB3LTQ4IG1iLTJcIiAvPlxuICAgICAgICA8U2tlbGV0b24gY2xhc3NOYW1lPVwiaC00IHctNjRcIiAvPlxuICAgICAgPC9kaXY+XG4gICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggZ2FwLTJcIj5cbiAgICAgICAgPFNrZWxldG9uIGNsYXNzTmFtZT1cImgtOSB3LTI0IHJvdW5kZWQtbWRcIiAvPlxuICAgICAgICA8U2tlbGV0b24gY2xhc3NOYW1lPVwiaC05IHctOSByb3VuZGVkLW1kXCIgLz5cbiAgICAgIDwvZGl2PlxuICAgIDwvZGl2PlxuICAgIDxTdGF0c1NrZWxldG9uIC8+XG4gICAgPFF1aWNrQWN0aW9uc1NrZWxldG9uIC8+XG4gICAgPENoYXJ0c1NrZWxldG9uIC8+XG4gIDwvZGl2PlxuKTtcbiJdLCJuYW1lcyI6WyJDYXJkIiwiQ2FyZENvbnRlbnQiLCJDYXJkSGVhZGVyIiwiU2tlbGV0b24iLCJEYXNoYm9hcmRNZXRyaWNDYXJkU2tlbGV0b24iLCJhcnRpY2xlIiwiY2xhc3NOYW1lIiwiYXJpYS1oaWRkZW4iLCJkaXYiLCJTdGF0c1NrZWxldG9uIiwiQXJyYXkiLCJmcm9tIiwibGVuZ3RoIiwibWFwIiwiXyIsImkiLCJRdWlja0FjdGlvbnNTa2VsZXRvbiIsIkNoYXJ0c1NrZWxldG9uIiwiRGFzaGJvYXJkU2Vjb25kYXJ5U2tlbGV0b24iLCJEYXNoYm9hcmRGdWxsU2tlbGV0b24iXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O0FBQUE7OztDQUdDLEdBRUQsU0FBU0EsSUFBSSxFQUFFQyxXQUFXLEVBQUVDLFVBQVUsUUFBUSx1QkFBdUI7QUFDckUsU0FBU0MsUUFBUSxRQUFRLDJCQUEyQjtBQUVwRCwrREFBK0QsR0FDL0QsT0FBTyxTQUFTQztJQUNkLHFCQUNFLFFBQUNDO1FBQ0NDLFdBQVU7UUFDVkMsYUFBVzs7MEJBRVgsUUFBQ0M7Z0JBQUlGLFdBQVU7O2tDQUNiLFFBQUNIO3dCQUFTRyxXQUFVOzs7Ozs7a0NBQ3BCLFFBQUNIO3dCQUFTRyxXQUFVOzs7Ozs7Ozs7Ozs7MEJBRXRCLFFBQUNIO2dCQUFTRyxXQUFVOzs7Ozs7MEJBQ3BCLFFBQUNIO2dCQUFTRyxXQUFVOzs7Ozs7MEJBQ3BCLFFBQUNIO2dCQUFTRyxXQUFVOzs7Ozs7Ozs7Ozs7QUFHMUI7S0FmZ0JGO0FBaUJoQiwrQ0FBK0MsR0FDL0MsT0FBTyxNQUFNSyxnQkFBZ0Isa0JBQzNCLFFBQUNEO1FBQUlGLFdBQVU7a0JBQ1pJLE1BQU1DLElBQUksQ0FBQztZQUFFQyxRQUFRO1FBQUUsR0FBR0MsR0FBRyxDQUFDLENBQUNDLEdBQUdD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
