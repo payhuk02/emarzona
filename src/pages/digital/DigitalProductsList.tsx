@@ -52,6 +52,12 @@ import {
   ChevronsRight,
   AlertTriangle,
   FileDown,
+  MoreVertical,
+  Copy,
+  Link as LinkIcon,
+  Share2,
+  CopyPlus,
+  Trash2,
 } from 'lucide-react';
 import { useStore } from '@/hooks/useStore';
 import {
@@ -1016,8 +1022,8 @@ export const DigitalProductsList = () => {
                               key={dp.id}
                               className="group hover:shadow-md transition-all duration-300 border-border/50 hover:border-primary/30 bg-card/50 backdrop-blur-sm animate-in fade-in slide-in-from-left-2"
                             >
-                              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-                                <div className="relative w-full sm:w-32 lg:w-40 h-40 sm:h-full min-h-[160px] overflow-hidden rounded-t-lg sm:rounded-l-lg sm:rounded-tr-none bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700">
+                              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 sm:items-center p-3 sm:p-4">
+                                <div className="relative w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 flex-shrink-0 overflow-hidden rounded-lg bg-gradient-to-br from-blue-500/10 via-blue-600/10 to-blue-700/10 shadow-sm border border-border/50">
                                   {product.image_url ? (
                                     <img
                                       src={product.image_url}
@@ -1025,25 +1031,24 @@ export const DigitalProductsList = () => {
                                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                                       loading="lazy"
                                       onError={e => {
-                                        // Fallback si l'image échoue à charger
                                         const target = e.target as HTMLImageElement;
                                         target.style.display = 'none';
                                       }}
                                     />
                                   ) : (
                                     <div className="w-full h-full flex items-center justify-center">
-                                      <Package className="h-12 w-12 text-white/70" />
+                                      <Package className="h-8 w-8 text-blue-500/50" />
                                     </div>
                                   )}
                                 </div>
 
-                                <div className="flex-1 p-3 sm:p-4">
-                                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4">
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
                                     <div className="flex-1 min-w-0">
-                                      <h3 className="text-base sm:text-lg font-semibold mb-1 sm:mb-2 line-clamp-2">
+                                      <h3 className="text-base sm:text-lg font-semibold mb-1 sm:mb-2 line-clamp-1">
                                         {product.name}
                                       </h3>
-                                      <div className="flex flex-wrap items-center gap-2 mb-2 sm:mb-3">
+                                      <div className="flex flex-wrap items-center gap-2">
                                         <Badge variant="secondary">{dp.digital_type}</Badge>
                                         <Badge variant="outline">
                                           {dp.total_downloads || dp.totalDownloads || 0}{' '}
@@ -1053,41 +1058,9 @@ export const DigitalProductsList = () => {
                                           {product.price?.toLocaleString() || 0} XOF
                                         </Badge>
                                       </div>
-                                      {product.description && (
-                                        <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2 mb-2 sm:mb-3">
-                                          {htmlToPlainText(product.description)}
-                                        </p>
-                                      )}
                                     </div>
 
-                                    <div className="flex items-center gap-2">
-                                      <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => {
-                                          if (store?.slug && product?.slug) {
-                                            navigate(
-                                              generateProductUrl(
-                                                store.slug,
-                                                product.slug || product.id,
-                                                store.subdomain
-                                              )
-                                            );
-                                          } else {
-                                            toast({
-                                              title: 'Erreur',
-                                              description: 'Informations de produit incomplètes',
-                                              variant: 'destructive',
-                                            });
-                                          }
-                                        }}
-                                      >
-                                        <Eye className="h-4 w-4 mr-2" />
-                                        <span className="hidden sm:inline">
-                                          {t('digitalProducts.view', 'Détails')}
-                                        </span>
-                                        <span className="sm:hidden">Détails</span>
-                                      </Button>
+                                    <div className="flex items-center gap-2 flex-shrink-0">
                                       <Button
                                         variant="outline"
                                         size="sm"
@@ -1109,32 +1082,84 @@ export const DigitalProductsList = () => {
                                         </span>
                                         <span className="sm:hidden">Modifier</span>
                                       </Button>
-                                      <Button
-                                        size="sm"
-                                        className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-                                        onClick={() => {
-                                          if (store?.slug && product?.slug) {
-                                            navigate(
-                                              generateProductUrl(
-                                                store.slug,
-                                                product.slug || product.id,
-                                                store.subdomain
-                                              )
+
+                                      <Select
+                                        onValueChange={action => {
+                                          const url =
+                                            store?.slug && product?.slug
+                                              ? generateProductUrl(
+                                                  store.slug,
+                                                  product.slug || product.id,
+                                                  store.subdomain
+                                                )
+                                              : '';
+
+                                          if (action === 'copy-link' && url) {
+                                            navigator.clipboard.writeText(
+                                              window.location.origin + url
                                             );
-                                          } else {
                                             toast({
-                                              title: 'Erreur',
-                                              description: 'Informations de produit incomplètes',
-                                              variant: 'destructive',
+                                              title: 'Succès',
+                                              description: 'Le lien du produit a été copié',
                                             });
+                                          } else if (action === 'copy-payment' && url) {
+                                            navigator.clipboard.writeText(
+                                              window.location.origin + url + '?buy=true'
+                                            );
+                                            toast({
+                                              title: 'Succès',
+                                              description: 'Le lien de paiement a été copié',
+                                            });
+                                          } else if (action === 'share' && navigator.share && url) {
+                                            navigator.share({
+                                              title: product.name,
+                                              url: window.location.origin + url,
+                                            });
+                                          } else if (action === 'duplicate') {
+                                            toast({
+                                              title: 'Action requise',
+                                              description: 'La duplication sera bientôt disponible',
+                                            });
+                                          } else if (action === 'delete') {
+                                            handleBulkDelete([product.id]);
                                           }
                                         }}
                                       >
-                                        <span className="hidden sm:inline">
-                                          {t('digitalProducts.buy', 'Acheter')}
-                                        </span>
-                                        <span className="sm:hidden">Acheter</span>
-                                      </Button>
+                                        <SelectTrigger className="h-9 sm:h-10 w-9 sm:w-10 px-0 flex items-center justify-center">
+                                          <MoreVertical className="h-4 w-4" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          <SelectItem value="copy-link">
+                                            <span className="flex items-center">
+                                              <LinkIcon className="h-4 w-4 mr-2" /> Copier le lien
+                                            </span>
+                                          </SelectItem>
+                                          <SelectItem value="copy-payment">
+                                            <span className="flex items-center">
+                                              <DollarSign className="h-4 w-4 mr-2" /> Lien de
+                                              paiement
+                                            </span>
+                                          </SelectItem>
+                                          <SelectItem value="share">
+                                            <span className="flex items-center">
+                                              <Share2 className="h-4 w-4 mr-2" /> Partager
+                                            </span>
+                                          </SelectItem>
+                                          <SelectItem value="duplicate">
+                                            <span className="flex items-center">
+                                              <CopyPlus className="h-4 w-4 mr-2" /> Dupliquer
+                                            </span>
+                                          </SelectItem>
+                                          <SelectItem
+                                            value="delete"
+                                            className="text-destructive font-medium focus:text-destructive focus:bg-destructive/10"
+                                          >
+                                            <span className="flex items-center">
+                                              <Trash2 className="h-4 w-4 mr-2" /> Supprimer
+                                            </span>
+                                          </SelectItem>
+                                        </SelectContent>
+                                      </Select>
                                     </div>
                                   </div>
                                 </div>
