@@ -132,8 +132,70 @@ export const useProductsOptimized = (
         });
 
         if (rpcError) {
-          logger.error('Erreur RPC products:', rpcError);
-          throw rpcError;
+          logger.warn('Erreur RPC products, tentative de fallback:', rpcError);
+
+          // Fallback query si la RPC get_products_management n'est pas disponible (ex: prod non migrée)
+          let queryBuilder = supabase
+            .from('products')
+            .select('*', { count: 'exact' })
+            .eq('store_id', storeId);
+
+          if (status === 'active') queryBuilder = queryBuilder.eq('is_active', true);
+          if (status === 'inactive') queryBuilder = queryBuilder.eq('is_active', false);
+          if (category && category !== 'all') queryBuilder = queryBuilder.eq('category', category);
+          if (productType && productType !== 'all')
+            queryBuilder = queryBuilder.eq('product_type', productType);
+          if (searchQuery) queryBuilder = queryBuilder.ilike('name', `%${searchQuery}%`);
+
+          const from = (page - 1) * itemsPerPage;
+          const to = from + itemsPerPage - 1;
+
+          const {
+            data: fallbackData,
+            error: fallbackError,
+            count,
+          } = await queryBuilder.order('created_at', { ascending: false }).range(from, to);
+
+          if (fallbackError) {
+            logger.error('Erreur du fallback query products:', fallbackError);
+            throw fallbackError;
+          }
+
+          const totalCount = count || (fallbackData ? fallbackData.length : 0);
+          const products = (fallbackData || []).map((product: Record<string, unknown>) => ({
+            id: product.id,
+            name: product.name,
+            slug: product.slug,
+            description: product.description,
+            short_description: product.short_description,
+            image_url: product.image_url,
+            price: Number(product.price),
+            promotional_price: product.promotional_price ? Number(product.promotional_price) : null,
+            currency: product.currency,
+            category: product.category,
+            product_type: product.product_type,
+            licensing_type: product.licensing_type,
+            license_terms: product.license_terms,
+            is_active: product.is_active,
+            is_featured: product.is_featured,
+            rating: product.rating ? Number(product.rating) : null,
+            reviews_count: product.reviews_count ? Number(product.reviews_count) : 0,
+            purchases_count: product.purchases_count ? Number(product.purchases_count) : 0,
+            stock_quantity: product.stock_quantity ? Number(product.stock_quantity) : null,
+            created_at: product.created_at,
+            updated_at: product.updated_at,
+            tags: product.tags || [],
+            effective_price: Number(product.price), // Simplified fallback
+            sales_last_30_days: 0,
+            revenue_last_30_days: 0,
+            stock_status: product.stock_status || 'in_stock',
+            product_affiliate_settings: null,
+            store_id: product.store_id || '',
+            digital_file_url: product.digital_file_url || null,
+          })) as unknown as Product[];
+
+          const totalPages = Math.ceil(totalCount / itemsPerPage);
+          return { data: products, total: totalCount, page, itemsPerPage, totalPages };
         }
 
         if (rpcData && Array.isArray(rpcData) && rpcData.length > 0) {
