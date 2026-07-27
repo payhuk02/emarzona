@@ -15,6 +15,7 @@ export interface Product {
   slug: string;
   description: string | null;
   price: number;
+  promotional_price?: number | null;
   currency: string;
   image_url: string | null;
   category: string | null;
@@ -339,8 +340,8 @@ export const useStorefrontProducts = (storeId?: string | null) => {
           throw error;
         }
 
-        // `data` peut contenir plus de champs que `Product`, on caste simplement.
-        return (data ?? []) as Product[];
+        // `data` peut contenir plus de champs que `Product` ou en omettre, on caste simplement via unknown
+        return (data ?? []) as unknown as Product[];
       } catch (_error: unknown) {
         logger.error('Erreur dans useStorefrontProducts', {
           error: _error instanceof Error ? _error.message : String(_error),
