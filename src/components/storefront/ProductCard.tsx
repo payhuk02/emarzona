@@ -25,16 +25,20 @@ import {
   ShoppingCart,
   Star,
   Download,
-  Crown,
-  CheckCircle2,
-  Lock,
-  MessageCircle,
-  ExternalLink,
   Package,
-  Star,
+  Zap,
+  RefreshCw,
+  DollarSign,
+  Gift,
+  Heart,
+  Eye,
+  TrendingUp,
+  CheckCircle,
+  Loader2,
+  Shield,
+  MessageSquare,
   Play,
   ZoomIn,
-  Eye,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { VendorMessagingLink } from '@/components/vendor/VendorMessagingLink';
@@ -44,6 +48,16 @@ import { initiateMarketplaceDirectBuy } from '@/lib/marketplace/initiate-direct-
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { safeRedirect } from '@/lib/url-validator';
+import { PriceStockAlertButton } from '@/components/marketplace/PriceStockAlertButton';
+import { PaymentOptionsBadge, getPaymentOptions } from '@/components/products/PaymentOptionsBadge';
+import { PricingModelBadge } from '@/components/products/PricingModelBadge';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import {
   GuestPurchaseDialog,
   type GuestCustomerInfo,
@@ -59,16 +73,27 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [isZoomOpen, setIsZoomOpen] = useState(false);
   const [guestDialogOpen, setGuestDialogOpen] = useState(false);
+  const [_userId, setUserId] = useState<string | null>(null);
   const { toast } = useToast();
   const isDigital = product.product_type === 'digital';
   const extendedProduct = product as ExtendedProduct;
 
+  // Récupérer l'utilisateur pour les alertes
+  useEffect(() => {
+    const fetchUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setUserId(user?.id || null);
+    };
+    fetchUser();
+  }, []);
+
   // Mémoriser les calculs de prix pour éviter les recalculs
-  const { price, hasPromo, discountPercent } = useMemo(() => {
+  const { price, oldPrice, hasPromo, discountPercent } = useMemo(() => {
     let currentPrice = product.price || 0;
     let crossedOutPrice: number | null = null;
 
-    // Check for different promo price schemas based on product type
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const p = product as any;
     const backendPromotionalPrice = p.promotional_price;
@@ -76,12 +101,15 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
     const legacyPromoPrice = product.promo_price;
 
     if (backendPromotionalPrice && backendPromotionalPrice < product.price) {
+      // Service/Digital schema: price is regular, promotional_price is discounted
       currentPrice = backendPromotionalPrice;
       crossedOutPrice = product.price;
     } else if (backendCompareAtPrice && backendCompareAtPrice > product.price) {
+      // Physical/Artist/Course schema: price is discounted, compare_at_price is regular
       currentPrice = product.price;
       crossedOutPrice = backendCompareAtPrice;
     } else if (legacyPromoPrice && legacyPromoPrice < product.price) {
+      // Legacy fallback
       currentPrice = legacyPromoPrice;
       crossedOutPrice = product.price;
     }
@@ -93,6 +121,7 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
 
     return {
       price: currentPrice,
+      oldPrice: crossedOutPrice,
       hasPromo: calculatedHasPromo,
       discountPercent: calculatedDiscountPercent,
     };
@@ -106,6 +135,11 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
     const daysDiff = (now.getTime() - createdDate.getTime()) / (1000 * 3600 * 24);
     return daysDiff < 7;
   }, [product.created_at]);
+
+  // Formater le prix - mémorisé
+  const formatPrice = useCallback((amount: number) => {
+    return new Intl.NumberFormat('fr-FR').format(amount);
+  }, []);
 
   // Gérer les favoris - mémorisé
   const handleFavorite = useCallback(
@@ -205,7 +239,7 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
       email: user.email,
       fullName: (user.user_metadata?.full_name as string | undefined) || user.email.split('@')[0],
     });
-  }, [product.store_id, proceedToPayment, toast]);
+  }, [product, proceedToPayment, toast]);
 
   // Rendre les étoiles - mémorisé
   const renderStars = useCallback(
