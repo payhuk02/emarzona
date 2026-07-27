@@ -28,9 +28,9 @@ export async function openCourseCreateWizard(page: Page): Promise<void> {
     const body = (
       await page
         .locator('body')
-        .innerText()
+        .innerHTML()
         .catch(() => '')
-    ).slice(0, 400);
+    ).slice(0, 1500);
     throw new Error(`Course wizard #title not visible — url=${page.url()} body=${body}`, {
       cause: error,
     });
@@ -46,7 +46,7 @@ export async function fillCourseBasicInfoStep(
     slug,
     shortDescription = 'Résumé court du cours E2E pour les tests automatisés.',
     description = 'Description complète du cours E2E avec objectifs pédagogiques détaillés.',
-    price = '15000',
+    price = '150',
   } = options;
 
   await page.locator('#title').fill(title);

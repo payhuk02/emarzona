@@ -170,7 +170,7 @@ export async function fillArtistBasicInfoStep(
     artworkTitle,
     artistName = 'Artiste E2E',
     medium = 'Huile sur toile',
-    price = '75000',
+    price = '750',
     description = 'Description complète de l’œuvre pour le test E2E avec plus de dix caractères.',
     editionType,
   } = options;

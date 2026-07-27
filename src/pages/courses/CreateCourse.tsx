@@ -16,17 +16,13 @@ const CreateCourseWizard = lazy(() =>
 const CreateCourse = () => {
   const { t } = useTranslation();
   // Animations au scroll
-  const headerRef = useScrollAnimation<HTMLDivElement>();
   const [showTemplateSelector, setShowTemplateSelector] = useState(false);
 
   return (
     <AppPageShell>
       <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
-        {/* Header avec animation - Style Inventaire et Mes Cours */}
-        <div
-          ref={headerRef}
-          className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700"
-        >
+        {/* Header - Style Inventaire et Mes Cours */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
           <div className="flex-1">
             {/* Bouton retour - Style responsive */}
             <Button

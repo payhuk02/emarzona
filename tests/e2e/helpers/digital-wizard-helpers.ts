@@ -29,7 +29,7 @@ export async function fillDigitalBasicInfoStep(
 ): Promise<void> {
   const {
     name,
-    price = '5000',
+    price = '50',
     description = 'Description complète du produit digital E2E avec plus de dix caractères.',
   } = options;
 

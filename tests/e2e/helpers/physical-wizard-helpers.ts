@@ -39,7 +39,7 @@ export async function fillPhysicalBasicInfoStep(
 ): Promise<void> {
   const {
     name,
-    price = '12000',
+    price = '120',
     description = 'Description complète du produit physique E2E avec plus de dix caractères.',
   } = options;
 

@@ -49,7 +49,6 @@ import {
   validateCourseWizardPublishSteps,
   validateCourseWizardStep,
 } from '@/lib/course-wizard-step-validation';
-import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { cn } from '@/lib/utils';
 
 import type {
@@ -142,11 +141,6 @@ export const CreateCourseWizard = ({
   // Use props or fallback to hook store
   const storeId = propsStoreId || store?.id;
   const invalidateCatalog = useCatalogCacheInvalidation();
-
-  // Refs for animations
-  const headerRef = useScrollAnimation<HTMLDivElement>();
-  const stepsRef = useScrollAnimation<HTMLDivElement>();
-  const contentRef = useScrollAnimation<HTMLDivElement>();
 
   const [formData, setFormData] = useState({
     // Informations de base
@@ -912,7 +906,7 @@ export const CreateCourseWizard = ({
     <div className="w-full space-y-4 sm:space-y-6">
       {/* Header - Style Inventaire et Mes Cours (uniquement si hideHeader est false) */}
       {!hideHeader && (
-        <div ref={headerRef} className="animate-in fade-in slide-in-from-top-4 duration-700">
+        <div className="mb-4 sm:mb-6">
           {onBack && (
             <Button
               variant="ghost"
@@ -930,7 +924,7 @@ export const CreateCourseWizard = ({
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
             <div>
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold flex items-center gap-2 mb-1 sm:mb-2">
-                <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
+                <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20">
                   <GraduationCap
                     className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400"
                     aria-hidden="true"
@@ -949,7 +943,7 @@ export const CreateCourseWizard = ({
       )}
 
       {/* Progress Bar - Style Inventaire */}
-      <Card className="border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
         <CardContent className="p-3 sm:p-4">
           <div className="space-y-2">
             <div className="flex items-center justify-between text-xs sm:text-sm">
@@ -981,10 +975,7 @@ export const CreateCourseWizard = ({
       </Card>
 
       {/* Steps Navigator - Style Inventaire (Responsive) */}
-      <Card
-        ref={stepsRef}
-        className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 animate-in fade-in slide-in-from-bottom-4 duration-700"
-      >
+      <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300">
         <CardContent className="p-3 sm:p-4 lg:p-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-2 sm:gap-3 lg:gap-4">
             {STEPS.map((step, index) => {
@@ -1007,10 +998,8 @@ export const CreateCourseWizard = ({
                     isCompleted && 'border-green-500 bg-green-50 dark:bg-green-950/30',
                     !isActive &&
                       !isCompleted &&
-                      'border-border hover:border-purple-500/50 bg-card/50',
-                    'animate-in fade-in slide-in-from-bottom-4'
+                      'border-border hover:border-purple-500/50 bg-card/50'
                   )}
-                  style={{ animationDelay: `${index * 100}ms` }}
                 >
                   <div className="flex items-start gap-2 sm:gap-3">
                     <div
@@ -1058,10 +1047,7 @@ export const CreateCourseWizard = ({
       </Card>
 
       {/* Step Content - Style Inventaire */}
-      <Card
-        ref={contentRef}
-        className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 animate-in fade-in slide-in-from-bottom-4 duration-700"
-      >
+      <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
         <CardContent className="pt-4 sm:pt-6 px-3 sm:px-4 lg:px-6">
           <WizardStepSuspense>{renderStepContent()}</WizardStepSuspense>
         </CardContent>

@@ -27,7 +27,7 @@ export async function fillServiceBasicInfoStep(
 ): Promise<void> {
   const {
     name,
-    price = '25000',
+    price = '250',
     description = 'Description complète du service E2E avec plus de dix caractères.',
   } = options;
 
