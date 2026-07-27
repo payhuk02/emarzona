@@ -329,7 +329,7 @@ export const useStorefrontProducts = (storeId?: string | null) => {
         const { data, error } = await supabase
           .from('products')
           .select(
-            'id, store_id, name, slug, description, price, currency, image_url, category, product_type, rating, reviews_count, is_active, created_at, updated_at'
+            'id, store_id, name, slug, description, price, promotional_price, currency, image_url, category, product_type, rating, reviews_count, is_active, created_at, updated_at'
           )
           .eq('store_id', storeId)
           .eq('is_active', true);

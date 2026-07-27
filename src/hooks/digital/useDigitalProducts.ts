@@ -74,6 +74,7 @@ interface ProductFromJoin {
   slug: string;
   description?: string | null;
   price: number;
+  promotional_price?: number | null;
   currency?: string | null;
   is_active: boolean;
   image_url?: string | null;
@@ -223,6 +224,7 @@ export const useDigitalProducts = (
               slug,
               description,
               price,
+              promotional_price,
               currency,
               is_active,
               image_url,
@@ -273,6 +275,7 @@ export const useDigitalProducts = (
                 slug,
                 description,
                 price,
+                promotional_price,
                 currency,
                 is_active,
                 image_url,
