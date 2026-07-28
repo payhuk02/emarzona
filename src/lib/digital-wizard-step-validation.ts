@@ -8,7 +8,7 @@ export type DigitalWizardFormFields = {
   pricing_model?: string;
   version?: string;
   main_file_url?: string;
-  downloadable_files?: Array<{ url?: string }>;
+  downloadable_files?: Array<{ url?: string; is_main?: boolean }>;
   is_active?: boolean;
 };
 
@@ -78,10 +78,11 @@ export function validateDigitalWizardStep(
 
   if (step === 2) {
     const hasMainFile = Boolean(formData.main_file_url?.trim());
-    const hasDownloadableFiles = Boolean(
-      formData.downloadable_files?.some(file => file.url?.trim())
-    );
-    if (!hasMainFile && !hasDownloadableFiles) {
+    const hasMainFileInArray =
+      formData.downloadable_files?.some(file => file.url?.trim() && file.is_main !== false) ??
+      false;
+
+    if (!hasMainFile && !hasMainFileInArray) {
       errors.push('Au moins un fichier est requis');
     }
   }

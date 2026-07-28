@@ -3,17 +3,13 @@
  * Date: 27 octobre 2025
  */
 
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { X, CheckCircle2, AlertCircle, Link2, Plus, Upload, Loader2 } from '@/components/icons';
+import { X, AlertCircle, Link2, Plus } from '@/components/icons';
 import { useToast } from '@/hooks/use-toast';
-import { useStore } from '@/hooks/useStore';
-import { uploadToSupabaseStorage } from '@/utils/uploadToSupabase';
-import { toCanonicalStorageRef } from '@/lib/digital/storage-ref';
 import type {
   DigitalProductFormData,
   DigitalProductDownloadableFile,
@@ -25,44 +21,9 @@ interface DigitalFilesUploaderProps {
 }
 
 export const DigitalFilesUploader = ({ formData, updateFormData }: DigitalFilesUploaderProps) => {
-  const [mainFileUrl, setMainFileUrl] = useState(formData.main_file_url || '');
+  const [mainUrl, setMainUrl] = useState('');
   const [additionalUrl, setAdditionalUrl] = useState('');
-  const [isUploadingMain, setIsUploadingMain] = useState(false);
-  const mainFileInputRef = useRef<HTMLInputElement>(null);
-  const { store } = useStore();
   const { toast } = useToast();
-
-  const handleMainFileUpload = async (file: File) => {
-    setIsUploadingMain(true);
-    try {
-      const storeSegment = formData.store_id || store?.id || 'drafts';
-      const result = await uploadToSupabaseStorage(file, {
-        bucket: 'products',
-        path: `digital/${storeSegment}`,
-        maxSizeBytes: 500 * 1024 * 1024,
-      });
-
-      if (!result.success || !result.path) {
-        throw result.error ?? new Error("Échec de l'upload");
-      }
-
-      const storageRef = toCanonicalStorageRef('products', result.path);
-      setMainFileUrl(storageRef);
-      updateFormData({ main_file_url: storageRef });
-      toast({
-        title: 'Fichier uploadé',
-        description: 'Le fichier principal a été enregistré dans le stockage sécurisé.',
-      });
-    } catch (error) {
-      toast({
-        title: 'Erreur upload',
-        description: error instanceof Error ? error.message : "Impossible d'uploader le fichier",
-        variant: 'destructive',
-      });
-    } finally {
-      setIsUploadingMain(false);
-    }
-  };
 
   /**
    * Valider une URL
@@ -77,22 +38,10 @@ export const DigitalFilesUploader = ({ formData, updateFormData }: DigitalFilesU
   };
 
   /**
-   * Ajouter le fichier principal (URL)
+   * Ajouter un fichier (URL)
    */
-  const handleMainFileUrlChange = (url: string) => {
-    setMainFileUrl(url);
-    if (url && isValidUrl(url)) {
-      updateFormData({ main_file_url: url });
-    } else if (!url) {
-      updateFormData({ main_file_url: '' });
-    }
-  };
-
-  /**
-   * Ajouter un fichier additionnel (URL)
-   */
-  const handleAddAdditionalUrl = () => {
-    if (!additionalUrl.trim()) {
+  const handleAddUrl = (url: string, isMain: boolean) => {
+    if (!url.trim()) {
       toast({
         title: 'URL vide',
         description: 'Veuillez entrer une URL valide',
@@ -101,7 +50,7 @@ export const DigitalFilesUploader = ({ formData, updateFormData }: DigitalFilesU
       return;
     }
 
-    if (!isValidUrl(additionalUrl)) {
+    if (!isValidUrl(url)) {
       toast({
         title: 'URL invalide',
         description: 'Veuillez entrer une URL valide (commençant par http:// ou https://)',
@@ -112,20 +61,26 @@ export const DigitalFilesUploader = ({ formData, updateFormData }: DigitalFilesU
 
     // Extraire le nom du fichier depuis l'URL
     const fileName =
-      additionalUrl.split('/').pop() || `Fichier ${(formData.downloadable_files?.length || 0) + 1}`;
+      url.split('/').pop() || `Fichier ${(formData.downloadable_files?.length || 0) + 1}`;
 
     const newFile = {
       name: fileName,
-      url: additionalUrl,
+      url: url,
       size: 0, // Taille inconnue pour les URLs
       type: 'application/octet-stream', // Type générique
+      is_main: isMain,
     };
 
     updateFormData({
       downloadable_files: [...(formData.downloadable_files || []), newFile],
     });
 
-    setAdditionalUrl('');
+    if (isMain) {
+      setMainUrl('');
+    } else {
+      setAdditionalUrl('');
+    }
+
     toast({
       title: 'URL ajoutée',
       description: 'Le lien a été ajouté avec succès',
@@ -133,7 +88,7 @@ export const DigitalFilesUploader = ({ formData, updateFormData }: DigitalFilesU
   };
 
   /**
-   * Remove additional file
+   * Remove file
    */
   const removeFile = (index: number) => {
     const newFiles = [...(formData.downloadable_files || [])];
@@ -141,102 +96,121 @@ export const DigitalFilesUploader = ({ formData, updateFormData }: DigitalFilesU
     updateFormData({ downloadable_files: newFiles });
   };
 
-  /**
-   * Mettre à jour main_file_url quand formData change
-   */
-  useEffect(() => {
-    if (formData.main_file_url !== mainFileUrl) {
-      setMainFileUrl(formData.main_file_url || '');
-    }
-  }, [formData.main_file_url, mainFileUrl]);
+  const mainFiles = (formData.downloadable_files || []).filter(f => f.is_main);
+  const additionalFiles = (formData.downloadable_files || []).filter(f => !f.is_main);
+
+  const renderFileList = (files: DigitalProductDownloadableFile[], isMainList: boolean) => {
+    if (files.length === 0) return null;
+
+    return (
+      <div className="space-y-2 mt-4">
+        <Label>
+          {isMainList ? 'Liens principaux ajoutés' : 'Liens additionnels ajoutés'} ({files.length})
+        </Label>
+        {formData.downloadable_files?.map((file, index) => {
+          // Ne render que les fichiers du type demandé
+          if (isMainList && !file.is_main) return null;
+          if (!isMainList && file.is_main) return null;
+
+          return (
+            <div
+              key={index}
+              className="flex items-center justify-between p-3 border rounded-lg space-x-3"
+            >
+              <div className="flex items-center gap-3 flex-1">
+                <Link2 className="h-5 w-5 text-muted-foreground" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{file.name}</p>
+                  <p className="text-xs text-muted-foreground break-all">{file.url}</p>
+                </div>
+              </div>
+
+              {/* Toggle Preview (only if create_free_preview is enabled) */}
+              {formData.create_free_preview && (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id={`is_preview_${index}`}
+                    checked={file.is_preview || false}
+                    onChange={e => {
+                      const newFiles = [...(formData.downloadable_files || [])];
+                      newFiles[index] = {
+                        ...newFiles[index],
+                        is_preview: e.target.checked,
+                        requires_purchase: !e.target.checked,
+                      };
+                      updateFormData({ downloadable_files: newFiles });
+                    }}
+                    className="rounded border-gray-300"
+                  />
+                  <Label
+                    htmlFor={`is_preview_${index}`}
+                    className="text-xs cursor-pointer text-muted-foreground"
+                  >
+                    Preview gratuit
+                  </Label>
+                </div>
+              )}
+
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => removeFile(index)}
+                aria-label={`Supprimer le fichier ${file.name || index + 1}`}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
 
   return (
     <div className="space-y-6">
-      {/* Main File */}
+      {/* Main Files URLs */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Fichier principal</CardTitle>
+          <CardTitle className="text-lg">Liens principaux (requis)</CardTitle>
           <CardDescription>
-            Uploadez sur Emarzona (recommandé) ou fournissez une URL externe
+            Ajoutez un ou plusieurs liens vers votre produit principal (URLs externes)
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="upload">
-            <TabsList className="mb-4">
-              <TabsTrigger value="upload">Upload sécurisé</TabsTrigger>
-              <TabsTrigger value="url">URL externe</TabsTrigger>
-            </TabsList>
-            <TabsContent value="upload" className="space-y-3">
-              <input
-                ref={mainFileInputRef}
-                type="file"
-                className="hidden"
-                onChange={e => {
-                  const file = e.target.files?.[0];
-                  if (file) void handleMainFileUpload(file);
+        <CardContent className="space-y-4">
+          <div className="border-2 border-dashed rounded-lg p-6">
+            <div className="flex items-center gap-2 mb-3">
+              <Link2 className="h-5 w-5 text-muted-foreground" />
+              <Input
+                type="url"
+                placeholder="https://exemple.com/fichier-principal.pdf"
+                value={mainUrl}
+                onChange={e => setMainUrl(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleAddUrl(mainUrl, true);
+                  }
                 }}
+                className="flex-1"
               />
               <Button
-                type="button"
-                variant="outline"
-                onClick={() => mainFileInputRef.current?.click()}
-                disabled={isUploadingMain}
+                onClick={() => handleAddUrl(mainUrl, true)}
+                disabled={!mainUrl.trim()}
+                size="sm"
               >
-                {isUploadingMain ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <Upload className="h-4 w-4 mr-2" />
-                )}
-                Choisir un fichier
+                <Plus className="h-4 w-4 mr-2" />
+                Ajouter
               </Button>
-              {mainFileUrl && mainFileUrl.startsWith('products:') && (
-                <div className="flex items-center gap-2 text-sm text-green-700">
-                  <CheckCircle2 className="h-4 w-4" />
-                  Fichier stocké : {mainFileUrl}
-                </div>
-              )}
-            </TabsContent>
-            <TabsContent value="url" className="space-y-3">
-              <div className="flex items-center gap-2">
-                <Link2 className="h-5 w-5 text-muted-foreground" />
-                <Input
-                  type="url"
-                  placeholder="https://exemple.com/fichier.pdf"
-                  value={mainFileUrl}
-                  onChange={e => handleMainFileUrlChange(e.target.value)}
-                  className="flex-1"
-                />
-              </div>
-              {mainFileUrl && !isValidUrl(mainFileUrl) && (
-                <p className="text-sm text-destructive">
-                  ⚠️ URL invalide. Veuillez entrer une URL valide (commençant par http:// ou
-                  https://)
-                </p>
-              )}
-              {mainFileUrl && isValidUrl(mainFileUrl) && (
-                <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/50">
-                  <div className="flex items-center gap-3">
-                    <CheckCircle2 className="h-5 w-5 text-green-600" />
-                    <div>
-                      <p className="font-medium">Lien principal configuré</p>
-                      <p className="text-sm text-muted-foreground break-all">{mainFileUrl}</p>
-                    </div>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      setMainFileUrl('');
-                      updateFormData({ main_file_url: '' });
-                    }}
-                    aria-label="Supprimer le lien du produit principal"
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              )}
-            </TabsContent>
-          </Tabs>
+            </div>
+            {mainUrl && !isValidUrl(mainUrl) && (
+              <p className="text-sm text-destructive">
+                ⚠️ URL invalide. Veuillez entrer une URL valide (commençant par http:// ou https://)
+              </p>
+            )}
+          </div>
+
+          {renderFileList(mainFiles, true)}
         </CardContent>
       </Card>
 
@@ -260,12 +234,16 @@ export const DigitalFilesUploader = ({ formData, updateFormData }: DigitalFilesU
                 onKeyDown={e => {
                   if (e.key === 'Enter') {
                     e.preventDefault();
-                    handleAddAdditionalUrl();
+                    handleAddUrl(additionalUrl, false);
                   }
                 }}
                 className="flex-1"
               />
-              <Button onClick={handleAddAdditionalUrl} disabled={!additionalUrl.trim()} size="sm">
+              <Button
+                onClick={() => handleAddUrl(additionalUrl, false)}
+                disabled={!additionalUrl.trim()}
+                size="sm"
+              >
                 <Plus className="h-4 w-4 mr-2" />
                 Ajouter
               </Button>
@@ -277,70 +255,16 @@ export const DigitalFilesUploader = ({ formData, updateFormData }: DigitalFilesU
             )}
           </div>
 
-          {/* Files List */}
-          {formData.downloadable_files && formData.downloadable_files.length > 0 && (
-            <div className="space-y-2">
-              <Label>Liens additionnels ({formData.downloadable_files.length})</Label>
-              {formData.downloadable_files.map(
-                (file: DigitalProductDownloadableFile, index: number) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between p-3 border rounded-lg space-x-3"
-                  >
-                    <div className="flex items-center gap-3 flex-1">
-                      <Link2 className="h-5 w-5 text-muted-foreground" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">{file.name}</p>
-                        <p className="text-xs text-muted-foreground break-all">{file.url}</p>
-                      </div>
-                    </div>
+          {renderFileList(additionalFiles, false)}
 
-                    {/* Toggle Preview (only if create_free_preview is enabled) */}
-                    {formData.create_free_preview && (
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          id={`is_preview_${index}`}
-                          checked={file.is_preview || false}
-                          onChange={e => {
-                            const newFiles = [...formData.downloadable_files];
-                            newFiles[index] = {
-                              ...newFiles[index],
-                              is_preview: e.target.checked,
-                              requires_purchase: !e.target.checked,
-                            };
-                            updateFormData({ downloadable_files: newFiles });
-                          }}
-                          className="rounded border-gray-300"
-                        />
-                        <Label
-                          htmlFor={`is_preview_${index}`}
-                          className="text-xs cursor-pointer text-muted-foreground"
-                        >
-                          Preview gratuit
-                        </Label>
-                      </div>
-                    )}
-
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeFile(index)}
-                      aria-label={`Supprimer le fichier ${file.name || index + 1}`}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                )
-              )}
-              {formData.create_free_preview && (
-                <p className="text-xs text-muted-foreground mt-2">
-                  💡 Les fichiers cochés "Preview gratuit" seront inclus dans le produit preview
-                  gratuit
-                </p>
-              )}
-            </div>
-          )}
+          {formData.create_free_preview &&
+            formData.downloadable_files &&
+            formData.downloadable_files.length > 0 && (
+              <p className="text-xs text-muted-foreground mt-2">
+                💡 Les fichiers cochés "Preview gratuit" seront inclus dans le produit preview
+                gratuit
+              </p>
+            )}
         </CardContent>
       </Card>
 
@@ -353,11 +277,11 @@ export const DigitalFilesUploader = ({ formData, updateFormData }: DigitalFilesU
               Conseils pour les liens
             </p>
             <ul className="text-blue-800 dark:text-blue-200 space-y-1 list-disc list-inside">
+              <li>Les URLs externes sont supportées pour Google Drive, Dropbox, Notion, etc.</li>
               <li>
-                Préférez l&apos;upload sécurisé Emarzona (bucket privé + token de téléchargement)
+                Assurez-vous que les liens sont accessibles par vos clients (permissions de
+                partage).
               </li>
-              <li>Les URLs externes restent supportées pour Google Drive / Dropbox</li>
-              <li>Taille maximale upload : 500 Mo</li>
             </ul>
           </div>
         </CardContent>

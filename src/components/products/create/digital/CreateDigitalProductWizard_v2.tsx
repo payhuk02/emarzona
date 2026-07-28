@@ -654,10 +654,8 @@ export const CreateDigitalProductWizard = ({
             return true;
           }
           case 2: {
-            if (
-              !formData.main_file_url &&
-              (!formData.downloadable_files || formData.downloadable_files.length === 0)
-            ) {
+            const hasMainFileInArray = formData.downloadable_files?.some(f => f.is_main) ?? false;
+            if (!formData.main_file_url && !hasMainFileInArray) {
               toast({
                 title: t('wizard.errors.title', 'Erreur'),
                 description: t(
