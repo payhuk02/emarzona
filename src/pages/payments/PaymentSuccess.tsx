@@ -68,7 +68,7 @@ const PaymentSuccess = () => {
         .select('product_id, product_type, products(slug)')
         .eq('order_id', id)
         .limit(1)
-        .single();
+        .maybeSingle();
 
       if (orderItems) {
         setPurchasedProductId(orderItems.product_id);

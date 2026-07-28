@@ -25,6 +25,7 @@ const ALLOWED_PAYMENT_DOMAINS = [
   'emarzona.com',
   'myemarzona.shop', // Domaine dédié aux boutiques
   'emarzona.vercel.app',
+  'supabase.co', // Autoriser les redirections vers Supabase (Magic Links Auth)
   'localhost', // Dev only
   '127.0.0.1', // Dev only
 ];
