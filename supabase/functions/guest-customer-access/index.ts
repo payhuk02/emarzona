@@ -123,7 +123,7 @@ serve(async (req: Request) => {
   }
 
   try {
-    const { orderId, email } = await req.json();
+    const { orderId, email, password } = await req.json();
 
     if (!orderId || typeof orderId !== 'string' || !email || typeof email !== 'string') {
       return new Response(JSON.stringify({ success: false, error: 'orderId et email requis' }), {
@@ -231,9 +231,13 @@ serve(async (req: Request) => {
 
     let targetUserId: string | null = null;
 
+    const userPassword = (typeof password === 'string' && password.length >= 6) 
+      ? password 
+      : crypto.randomUUID();
+
     const { data: created, error: createError } = await supabaseAdmin.auth.admin.createUser({
       email: normalizedEmail,
-      password: crypto.randomUUID(),
+      password: userPassword,
       email_confirm: true,
       user_metadata: {
         guest_checkout: true,

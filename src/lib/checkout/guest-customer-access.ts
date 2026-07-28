@@ -15,7 +15,8 @@ export type GuestCustomerAccessResult = {
 
 export async function requestGuestCustomerAccess(
   orderId: string,
-  email: string
+  email: string,
+  password?: string
 ): Promise<GuestCustomerAccessResult> {
   const trimmedEmail = email.trim();
   if (!orderId || !trimmedEmail) {
@@ -24,7 +25,7 @@ export async function requestGuestCustomerAccess(
 
   try {
     const { data, error } = await supabase.functions.invoke('guest-customer-access', {
-      body: { orderId, email: trimmedEmail },
+      body: { orderId, email: trimmedEmail, password },
     });
 
     if (error) {

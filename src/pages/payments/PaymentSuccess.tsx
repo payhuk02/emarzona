@@ -1,7 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
-import { Card, CardContent } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardFooter,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { CheckCircle, Download, ShoppingBag, ArrowRight, Loader2, LogIn } from 'lucide-react';
 import { OneClickUpsell } from '@/components/upsell/OneClickUpsell';
 import { supabase } from '@/integrations/supabase/client';
@@ -39,6 +47,7 @@ const PaymentSuccess = () => {
   const [confirmationState, setConfirmationState] = useState<ConfirmationState>('loading');
   const [guestAccessState, setGuestAccessState] = useState<GuestAccessState>('idle');
   const [guestAccessError, setGuestAccessError] = useState<string | null>(null);
+  const [guestPassword, setGuestPassword] = useState('');
 
   const orderId = searchParams.get('order_id');
   const transactionId = searchParams.get('transaction_id');
@@ -215,44 +224,54 @@ const PaymentSuccess = () => {
     return () => clearTimeout(timer);
   }, [confirmationState, purchasedProductId]);
 
-  useEffect(() => {
-    if (user || !isGuestReturn || confirmationState !== 'confirmed' || !orderId || !guestEmail) {
+  const handleCreateGuestAccount = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!orderId || !guestEmail) return;
+
+    if (guestPassword.length < 6) {
+      setGuestAccessError('Le mot de passe doit contenir au moins 6 caractères.');
       return;
     }
 
-    let cancelled = false;
+    setGuestAccessState('loading');
+    setGuestAccessError(null);
 
-    const openGuestPortal = async () => {
-      setGuestAccessState('loading');
-      setGuestAccessError(null);
+    const result = await requestGuestCustomerAccess(orderId, guestEmail, guestPassword);
 
-      const result = await requestGuestCustomerAccess(orderId, guestEmail);
-      if (cancelled) return;
-
-      if (result.success && result.actionLink) {
+    if (result.success) {
+      if (result.existingUser && result.actionLink) {
+        // L'utilisateur existe déjà, on le connecte via magic link
         setGuestAccessState('redirecting');
         safeRedirect(result.actionLink, () => {
           setGuestAccessState('failed');
-          setGuestAccessError(
-            'Impossible d’ouvrir votre espace client. Utilisez le bouton ci-dessous.'
-          );
+          setGuestAccessError('Impossible d’ouvrir votre espace client.');
         });
-        return;
-      }
+      } else {
+        // On connecte avec le mot de passe fraîchement créé
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: guestEmail,
+          password: guestPassword,
+        });
 
+        if (signInError) {
+          logger.error('Error signing in after guest account creation', { signInError });
+          setGuestAccessState('failed');
+          setGuestAccessError(
+            'Compte créé, mais connexion échouée. Veuillez vous connecter manuellement.'
+          );
+        } else {
+          setGuestAccessState('redirecting');
+          navigate(portalPath);
+        }
+      }
+    } else {
       setGuestAccessState('failed');
       setGuestAccessError(
         result.error ||
-          'Connectez-vous avec le même email que lors de l’achat pour accéder à votre espace.'
+          'Impossible de configurer votre compte. Connectez-vous avec le même email que lors de l’achat.'
       );
-    };
-
-    void openGuestPortal();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [user, isGuestReturn, confirmationState, orderId, guestEmail]);
+    }
+  };
 
   const title =
     confirmationState === 'confirmed'
@@ -266,10 +285,8 @@ const PaymentSuccess = () => {
   const description =
     confirmationState === 'confirmed'
       ? isGuestReturn && !user && guestAccessState === 'redirecting'
-        ? 'Ouverture sécurisée de votre espace client…'
-        : isGuestReturn && !user && guestAccessState === 'loading'
-          ? 'Préparation de votre accès client…'
-          : 'Merci pour votre achat ! Votre paiement a été confirmé.'
+        ? 'Connexion à votre espace client en cours…'
+        : 'Merci pour votre achat ! Votre paiement a été confirmé.'
       : confirmationState === 'pending'
         ? 'Votre banque ou PSP finalise encore le paiement. Consultez vos commandes dans quelques instants.'
         : confirmationState === 'failed'
@@ -299,10 +316,48 @@ const PaymentSuccess = () => {
               {title}
             </h1>
             <p className="text-lg text-muted-foreground">{description}</p>
-            {guestAccessError && (
-              <p className="text-sm text-amber-700 dark:text-amber-400 mt-3">{guestAccessError}</p>
-            )}
           </div>
+
+          {confirmationState === 'confirmed' &&
+            isGuestReturn &&
+            !user &&
+            guestAccessState !== 'redirecting' && (
+              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border shadow-sm text-left max-w-md mx-auto w-full">
+                <h3 className="text-lg font-semibold mb-2">Créez votre mot de passe</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Pour accéder à vos achats plus tard, veuillez définir un mot de passe pour le
+                  compte associé à <strong>{guestEmail}</strong>.
+                </p>
+                <form onSubmit={handleCreateGuestAccount} className="space-y-4">
+                  <div>
+                    <Input
+                      type="password"
+                      placeholder="Mot de passe (min 6 caractères)"
+                      value={guestPassword}
+                      onChange={e => setGuestPassword(e.target.value)}
+                      required
+                      minLength={6}
+                      disabled={guestAccessState === 'loading'}
+                    />
+                  </div>
+                  {guestAccessError && (
+                    <p className="text-sm text-red-600 dark:text-red-400 font-medium">
+                      {guestAccessError}
+                    </p>
+                  )}
+                  <Button
+                    type="submit"
+                    className="w-full"
+                    disabled={guestAccessState === 'loading' || guestPassword.length < 6}
+                  >
+                    {guestAccessState === 'loading' && (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    )}
+                    Créer mon compte et accéder
+                  </Button>
+                </form>
+              </div>
+            )}
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center flex-wrap">
             {confirmationState === 'confirmed' && purchasedProductType === 'course' && user && (
@@ -341,23 +396,7 @@ const PaymentSuccess = () => {
                   Mon espace client
                 </Button>
               </>
-            ) : (
-              <>
-                {guestAccessState === 'failed' && guestEmail && (
-                  <Button asChild className="flex items-center gap-2">
-                    <Link
-                      to={`/login?email=${encodeURIComponent(guestEmail)}&redirect=${encodeURIComponent(portalPath)}`}
-                    >
-                      <LogIn className="h-4 w-4" />
-                      Se connecter ({guestEmail})
-                    </Link>
-                  </Button>
-                )}
-                <Button asChild variant="outline">
-                  <Link to="/register">Créer un compte</Link>
-                </Button>
-              </>
-            )}
+            ) : null}
             <Button
               variant="outline"
               onClick={() => navigate('/marketplace')}

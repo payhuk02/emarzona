@@ -893,15 +893,6 @@ const Auth = () => {
               </CardContent>
             </Card>
 
-            <div className="app-premium-auth-trust" aria-label="Garanties Emarzona">
-              {AUTH_TRUST_ITEMS.map(({ icon: Icon, label }) => (
-                <div key={label} className="app-premium-auth-trust-item">
-                  <Icon className="h-4 w-4" aria-hidden />
-                  <span>{label}</span>
-                </div>
-              ))}
-            </div>
-
             <p className="app-premium-auth-terms text-center text-xs sm:text-sm mt-5 px-2">
               <Trans
                 i18nKey="auth.termsNote"
