@@ -35,6 +35,7 @@ import { fr } from 'date-fns/locale';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { cn } from '@/lib/utils';
+import { fileNameFromRef } from '@/lib/digital/storage-ref';
 
 export const MyDigitalProducts = () => {
   const { data: products, isLoading, error } = useCustomerPurchasedProducts();
@@ -280,7 +281,7 @@ export const MyDigitalProducts = () => {
                       </div>
                       {product.product_description && (
                         <p className="text-sm text-muted-foreground line-clamp-2">
-                          {product.product_description}
+                          {product.product_description.replace(/<[^>]*>?/gm, '')}
                         </p>
                       )}
                     </div>
@@ -354,14 +355,20 @@ export const MyDigitalProducts = () => {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            {product.files.map((file, idx) => (
-                              <DropdownMenuItem
-                                key={file.id}
-                                onClick={() => handleDownload(product, file.id)}
-                              >
-                                {file.name || `Fichier ${idx + 1}`} {file.is_main && '(Principal)'}
-                              </DropdownMenuItem>
-                            ))}
+                            {product.files.map((file, idx) => {
+                              const displayName = file.file_url
+                                ? fileNameFromRef(file.file_url)
+                                : file.name || `Fichier ${idx + 1}`;
+
+                              return (
+                                <DropdownMenuItem
+                                  key={file.id}
+                                  onClick={() => handleDownload(product, file.id)}
+                                >
+                                  {displayName} {file.is_main && '(Principal)'}
+                                </DropdownMenuItem>
+                              );
+                            })}
                           </DropdownMenuContent>
                         </DropdownMenu>
                       ) : (
