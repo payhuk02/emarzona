@@ -248,32 +248,12 @@ const PaymentSuccess = () => {
 
     const result = await requestGuestCustomerAccess(orderId, guestEmail, guestPassword);
 
-    if (result.success) {
-      if (result.existingUser && result.actionLink) {
-        // L'utilisateur existe déjà, on le connecte via magic link
-        setGuestAccessState('redirecting');
-        safeRedirect(result.actionLink, () => {
-          setGuestAccessState('failed');
-          setGuestAccessError('Impossible d’ouvrir votre espace client.');
-        });
-      } else {
-        // On connecte avec le mot de passe fraîchement créé
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email: guestEmail,
-          password: guestPassword,
-        });
-
-        if (signInError) {
-          logger.error('Error signing in after guest account creation', { signInError });
-          setGuestAccessState('failed');
-          setGuestAccessError(
-            'Compte créé, mais connexion échouée. Veuillez vous connecter manuellement.'
-          );
-        } else {
-          setGuestAccessState('redirecting');
-          navigateToPlatform(portalPath);
-        }
-      }
+    if (result.success && result.actionLink) {
+      setGuestAccessState('redirecting');
+      safeRedirect(result.actionLink, () => {
+        setGuestAccessState('failed');
+        setGuestAccessError('Impossible d’ouvrir votre espace client.');
+      });
     } else {
       setGuestAccessState('failed');
       setGuestAccessError(
