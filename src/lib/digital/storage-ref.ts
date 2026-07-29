@@ -109,8 +109,17 @@ export function parseFileRef(fileUrl: string): ParsedFileRef {
 export function fileNameFromRef(fileUrl: string): string {
   const ref = parseFileRef(fileUrl);
   if (ref.kind === 'external') {
-    const segment = ref.url.split('/').pop()?.split('?')[0];
-    return segment ? decodeURIComponent(segment) : 'download';
+    try {
+      const urlObj = new URL(ref.url);
+      if (urlObj.hostname.includes('drive.google.com')) return 'Lien Google Drive';
+      if (urlObj.hostname.includes('dropbox.com')) return 'Lien Dropbox';
+      const segment = urlObj.pathname.split('/').pop();
+      if (segment && segment !== 'view' && segment !== 'download')
+        return decodeURIComponent(segment);
+    } catch {
+      // fallback
+    }
+    return 'Lien externe';
   }
   const segment = ref.path.split('/').pop()?.split('?')[0];
   return segment ? decodeURIComponent(segment) : 'download';

@@ -39,18 +39,21 @@ export default function SecureDownloadPage() {
         return;
       }
 
-      const { signedUrl, fileName: resolvedName } = result.data;
+      const { signedUrl, fileName: resolvedName, external } = result.data;
       setFileUrl(signedUrl);
       setFileName(resolvedName);
 
-      const link = document.createElement('a');
-      link.href = signedUrl;
-      link.download = resolvedName;
-      link.target = '_blank';
-      link.rel = 'noopener noreferrer';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      if (external) {
+        window.location.replace(signedUrl);
+      } else {
+        const link = document.createElement('a');
+        link.href = signedUrl;
+        link.download = resolvedName;
+        link.rel = 'noopener noreferrer';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
 
       setState('success');
     };

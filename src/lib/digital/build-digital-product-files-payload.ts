@@ -20,9 +20,12 @@ function inferFileType(url: string, explicit?: string): string {
 
 function inferFileName(url: string, fallback = 'Fichier principal'): string {
   try {
-    const path = new URL(url, 'https://placeholder.local').pathname;
+    const urlObj = new URL(url, 'https://placeholder.local');
+    if (urlObj.hostname.includes('drive.google.com')) return 'Lien Google Drive';
+    if (urlObj.hostname.includes('dropbox.com')) return 'Lien Dropbox';
+    const path = urlObj.pathname;
     const base = path.split('/').pop();
-    if (base) return decodeURIComponent(base);
+    if (base && base !== 'view' && base !== 'download') return decodeURIComponent(base);
   } catch {
     // ignore malformed URLs
   }

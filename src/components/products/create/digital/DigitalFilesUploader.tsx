@@ -60,8 +60,22 @@ export const DigitalFilesUploader = ({ formData, updateFormData }: DigitalFilesU
     }
 
     // Extraire le nom du fichier depuis l'URL
-    const fileName =
-      url.split('/').pop() || `Fichier ${(formData.downloadable_files?.length || 0) + 1}`;
+    let fileName = `Fichier ${(formData.downloadable_files?.length || 0) + 1}`;
+    try {
+      const urlObj = new URL(url);
+      if (urlObj.hostname.includes('drive.google.com')) {
+        fileName = 'Lien Google Drive';
+      } else if (urlObj.hostname.includes('dropbox.com')) {
+        fileName = 'Lien Dropbox';
+      } else {
+        const base = urlObj.pathname.split('/').pop();
+        if (base && base !== 'view' && base !== 'download') {
+          fileName = decodeURIComponent(base);
+        }
+      }
+    } catch {
+      // fallback
+    }
 
     const newFile = {
       name: fileName,
