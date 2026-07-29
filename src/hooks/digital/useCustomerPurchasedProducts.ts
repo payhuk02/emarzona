@@ -10,6 +10,7 @@ import { logger } from '@/lib/logger';
 export interface PurchasedDigitalProduct {
   id: string;
   product_id: string;
+  product_slug?: string;
   digital_product_id: string;
   order_id: string;
   order_number: string;
@@ -22,10 +23,14 @@ export interface PurchasedDigitalProduct {
   product_name: string;
   product_image_url: string | null;
   product_description: string | null;
+  store_name?: string;
+  store_subdomain?: string;
+  store_custom_domain?: string | null;
   digital_type: string;
   license_type: string;
   main_file_url: string;
   main_file_id: string | null;
+  files?: Array<{ id: string; name: string; is_main: boolean; file_url?: string }>;
   download_count: number;
   download_limit: number;
   last_download_date: string | null;
@@ -94,8 +99,15 @@ export const useCustomerPurchasedProducts = () => {
             product:products!inner (
               id,
               name,
+              slug,
               description,
               image_url,
+              store:stores (
+                id,
+                name,
+                subdomain,
+                custom_domain
+              ),
               digital_product:digital_products (
                 id,
                 digital_type,
@@ -144,11 +156,12 @@ export const useCustomerPurchasedProducts = () => {
         .eq('user_id', user.id)
         .order('download_date', { ascending: false });
 
-      const { data: mainFiles } = await supabase
+      const { data: productFiles } = await supabase
         .from('digital_product_files')
-        .select('id, digital_product_id')
+        .select('id, digital_product_id, name, is_main, file_url, order_index')
         .in('digital_product_id', productIds)
-        .eq('is_main', true);
+        .order('is_main', { ascending: false })
+        .order('order_index', { ascending: true });
 
       // Organiser les données
       const purchasedProducts: PurchasedDigitalProduct[] = [];
@@ -165,8 +178,15 @@ export const useCustomerPurchasedProducts = () => {
           total_price: number;
           product?: {
             name: string;
+            slug?: string;
             description: string | null;
             image_url: string | null;
+            store?: {
+              id: string;
+              name: string;
+              subdomain: string;
+              custom_domain?: string | null;
+            };
             digital_product?: {
               id: string;
               digital_type: string;
@@ -186,7 +206,9 @@ export const useCustomerPurchasedProducts = () => {
           const license = licenses?.find(l => l.order_id === order.id);
           const productDownloads =
             downloads?.filter(d => d.digital_product_id === digitalProduct.id) || [];
-          const mainFileRow = mainFiles?.find(f => f.digital_product_id === digitalProduct.id);
+          const filesRow =
+            productFiles?.filter(f => f.digital_product_id === digitalProduct.id) || [];
+          const mainFileRow = filesRow.find(f => f.is_main) || filesRow[0];
 
           // Calculer la date d'expiration
           let expiryDate: string | null = null;
@@ -219,12 +241,22 @@ export const useCustomerPurchasedProducts = () => {
             license_key: license?.license_key || null,
             license_status: license?.status || null,
             product_name: item.product.name,
+            product_slug: item.product.slug,
             product_image_url: item.product.image_url,
             product_description: item.product.description,
+            store_name: item.product.store?.name,
+            store_subdomain: item.product.store?.subdomain,
+            store_custom_domain: item.product.store?.custom_domain,
             digital_type: digitalProduct.digital_type,
             license_type: digitalProduct.license_type,
             main_file_url: digitalProduct.main_file_url,
             main_file_id: mainFileRow?.id ?? null,
+            files: filesRow.map(f => ({
+              id: f.id,
+              name: f.name,
+              is_main: f.is_main,
+              file_url: f.file_url,
+            })),
             download_count: productDownloads.length,
             download_limit: digitalProduct.download_limit || -1,
             last_download_date: productDownloads[0]?.download_date || null,

@@ -16,6 +16,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Download, ExternalLink, Search, Filter, Package, Clock, Key } from 'lucide-react';
 import { AlertCircleIcon } from '@/components/icons/AlertCircleIcon';
 import {
@@ -46,30 +52,41 @@ export const MyDigitalProducts = () => {
       return matchesSearch && matchesStatus && matchesType;
     }) || [];
 
-  const handleDownload = async (product: PurchasedDigitalProduct) => {
-    if (!product.main_file_id) {
+  const handleDownload = async (product: PurchasedDigitalProduct, fileId: string | null) => {
+    if (!fileId) {
       toast({
         title: 'Fichier indisponible',
         description:
-          'Le fichier principal de ce produit est introuvable. Contactez le vendeur ou réessayez plus tard.',
+          'Le fichier de ce produit est introuvable. Contactez le vendeur ou réessayez plus tard.',
         variant: 'destructive',
       });
       return;
     }
 
+    // Ouvrir un onglet tout de suite pour éviter le blocage des pop-ups par le navigateur
+    const newTab = window.open('about:blank', '_blank');
+
     try {
       const result = await generateLink.mutateAsync({
-        fileId: product.main_file_id,
+        fileId: fileId,
       });
 
       if (result.url) {
-        window.open(result.url, '_blank');
+        if (newTab) {
+          newTab.location.href = result.url;
+        } else {
+          window.location.href = result.url;
+        }
+
         toast({
           title: 'Téléchargement démarré',
           description: 'Le téléchargement a été lancé dans un nouvel onglet',
         });
       }
     } catch (err: unknown) {
+      if (newTab) {
+        newTab.close();
+      }
       const message =
         err instanceof Error ? err.message : 'Impossible de générer le lien de téléchargement';
       toast({
@@ -324,19 +341,56 @@ export const MyDigitalProducts = () => {
 
                     {/* Actions */}
                     <div className="flex flex-wrap gap-2 pt-2">
-                      <Button
-                        onClick={() => handleDownload(product)}
-                        disabled={generateLink.isPending || product.status !== 'active'}
-                        variant="default"
-                        size="sm"
-                      >
-                        <Download className="h-4 w-4 mr-2" />
-                        Télécharger
-                      </Button>
+                      {product.files && product.files.length > 1 ? (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              disabled={generateLink.isPending || product.status !== 'active'}
+                              variant="default"
+                              size="sm"
+                            >
+                              <Download className="h-4 w-4 mr-2" />
+                              Télécharger ({product.files.length})
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            {product.files.map((file, idx) => (
+                              <DropdownMenuItem
+                                key={file.id}
+                                onClick={() => handleDownload(product, file.id)}
+                              >
+                                {file.name || `Fichier ${idx + 1}`} {file.is_main && '(Principal)'}
+                              </DropdownMenuItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      ) : (
+                        <Button
+                          onClick={() => handleDownload(product, product.main_file_id)}
+                          disabled={generateLink.isPending || product.status !== 'active'}
+                          variant="default"
+                          size="sm"
+                        >
+                          <Download className="h-4 w-4 mr-2" />
+                          Télécharger
+                        </Button>
+                      )}
+
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => window.open(`/digital/${product.product_id}`, '_blank')}
+                        onClick={() => {
+                          const storeDomain =
+                            product.store_custom_domain ||
+                            (product.store_subdomain
+                              ? `${product.store_subdomain}.myemarzona.shop`
+                              : null);
+                          const productUrl =
+                            storeDomain && product.product_slug
+                              ? `https://${storeDomain}/products/${product.product_slug}`
+                              : `/marketplace`;
+                          window.open(productUrl, '_blank');
+                        }}
                       >
                         <ExternalLink className="h-4 w-4 mr-2" />
                         Voir le produit

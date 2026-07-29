@@ -435,6 +435,35 @@ async function sendDigitalEmail(
 
   const siteUrl = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
   const customerId = payload.customer_id || order.customer_id || order.customer?.id;
+  const orderNumber = order.order_number ?? order.id;
+
+  let storeName = 'Boutique';
+  if (order.store_id) {
+    const { data: storeRow } = await supabase
+      .from('stores')
+      .select('name')
+      .eq('id', order.store_id)
+      .maybeSingle();
+    if (storeRow?.name) storeName = storeRow.name;
+  }
+
+  let whatsappLink: string | null = null;
+  try {
+    whatsappLink = await resolvePhysicalWhatsAppLink(supabase, {
+      productId: item.product_id,
+      productName: item.product_name,
+      orderNumber,
+    });
+  } catch (error) {
+    console.warn('WhatsApp link resolution failed for digital product:', error);
+  }
+
+  const price = item.total_price || (item.unit_price * item.quantity);
+  const formattedPrice = new Intl.NumberFormat('fr-FR', {
+    style: 'currency',
+    currency: order.currency || 'XOF',
+    minimumFractionDigits: (order.currency || 'XOF') === 'XOF' ? 0 : 2,
+  }).format(price || 0);
 
   let downloadLink = `${siteUrl}/account/digital`;
   let downloadExpiresAt: string | undefined;
@@ -482,11 +511,15 @@ async function sendDigitalEmail(
     productId: item.product_id,
     productName: item.product_name,
     orderId: order.id,
+    storeId: order.store_id,
     variables: {
       user_name: payload.customer_name,
       order_id: order.id,
-      order_number: order.order_number ?? order.id,
+      order_number: orderNumber,
       product_name: item.product_name,
+      store_name: storeName,
+      price: formattedPrice,
+      whatsapp_link: whatsappLink,
       download_link: downloadLink,
       download_expires_at: downloadExpiresAt,
       file_format: digitalProduct.main_file_format || digitalProduct.digital_type || 'digital',
