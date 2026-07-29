@@ -20,6 +20,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { safeRedirect } from '@/lib/url-validator';
 import { requestGuestCustomerAccess } from '@/lib/checkout/guest-customer-access';
 import { resolveCustomerPortalPath } from '@/lib/checkout/guest-payment-return';
+import { detectSubdomain } from '@/lib/subdomain-detector';
 
 type ConfirmationState = 'loading' | 'confirmed' | 'pending' | 'failed';
 type GuestAccessState = 'idle' | 'loading' | 'redirecting' | 'failed';
@@ -60,6 +61,15 @@ const PaymentSuccess = () => {
   const portalPath = resolveCustomerPortalPath(
     purchasedProductType || productTypeParam || 'digital'
   );
+
+  const navigateToPlatform = (path: string) => {
+    const info = detectSubdomain();
+    if (info.isStoreDomain || info.isCustomDomain) {
+      window.location.href = `https://www.emarzona.com${path}`;
+    } else {
+      navigate(path);
+    }
+  };
 
   const loadOrderInfo = async (id: string) => {
     try {
@@ -205,7 +215,7 @@ const PaymentSuccess = () => {
     }
 
     const timer = setTimeout(() => {
-      navigate(learnUrl);
+      navigateToPlatform(learnUrl);
     }, 1200);
     return () => clearTimeout(timer);
   }, [
@@ -261,7 +271,7 @@ const PaymentSuccess = () => {
           );
         } else {
           setGuestAccessState('redirecting');
-          navigate(portalPath);
+          navigateToPlatform(portalPath);
         }
       }
     } else {
@@ -380,7 +390,7 @@ const PaymentSuccess = () => {
               <>
                 {purchasedProductType === 'digital' && (
                   <Button
-                    onClick={() => navigate('/account/digital')}
+                    onClick={() => navigateToPlatform('/account/digital')}
                     className="flex items-center gap-2"
                   >
                     <Download className="h-4 w-4" />
@@ -389,7 +399,7 @@ const PaymentSuccess = () => {
                 )}
                 <Button
                   variant="outline"
-                  onClick={() => navigate(portalPath)}
+                  onClick={() => navigateToPlatform(portalPath)}
                   className="flex items-center gap-2"
                 >
                   <ShoppingBag className="h-4 w-4" />
@@ -399,7 +409,14 @@ const PaymentSuccess = () => {
             ) : null}
             <Button
               variant="outline"
-              onClick={() => navigate('/marketplace')}
+              onClick={() => {
+                const info = detectSubdomain();
+                if (info.isStoreDomain || info.isCustomDomain) {
+                  navigate('/');
+                } else {
+                  navigate('/marketplace');
+                }
+              }}
               className="flex items-center gap-2"
             >
               Continuer les achats

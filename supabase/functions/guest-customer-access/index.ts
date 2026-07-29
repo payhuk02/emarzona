@@ -3,25 +3,7 @@ import { createClient } from 'npm:@supabase/supabase-js@2.58.0';
 import { isDuplicateAuthUserError } from '../_shared/auth-admin-utils.ts';
 import { resolveCustomerPortalPath } from '../_shared/guest-customer-magic-link.ts';
 
-const defaultAllowedOrigin = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
-const allowedOrigins = (Deno.env.get('ALLOWED_ORIGINS') || defaultAllowedOrigin)
-  .split(',')
-  .map((origin: string) => origin.trim())
-  .filter(Boolean);
-
-function resolveCorsOrigin(originHeader: string | null): string {
-  if (!originHeader) return defaultAllowedOrigin;
-  return allowedOrigins.includes(originHeader) ? originHeader : defaultAllowedOrigin;
-}
-
-function buildCorsHeaders(originHeader: string | null) {
-  return {
-    'Access-Control-Allow-Origin': resolveCorsOrigin(originHeader),
-    Vary: 'Origin',
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  };
-}
+import { buildCorsHeaders } from '../_shared/cors.ts';
 
 function normalizeEmail(email: string): string {
   return email.trim().toLowerCase();
