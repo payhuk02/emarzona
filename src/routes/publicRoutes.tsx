@@ -298,7 +298,7 @@ export const publicRoutes = (
     {import.meta.env.DEV && <Route path="/i18n-test" element={<I18nTest />} />}
 
     {/* Premium Link Access */}
-    <Route path="/:storeSlug/:licenseType" element={<PremiumUnlockPage />} />
+    <Route path="/:storeSlug/:productSlug/:licenseType" element={<PremiumUnlockPage />} />
 
     {/* Fallback */}
     <Route path="*" element={<NotFound />} />

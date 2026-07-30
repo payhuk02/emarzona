@@ -469,6 +469,13 @@ async function sendDigitalEmail(
 
   let downloadLink = `${siteUrl}/account/digital`;
   let downloadExpiresAt: string | undefined;
+  let productSlug = 'produit';
+  const { data: itemProduct } = await supabase
+    .from('products')
+    .select('slug')
+    .eq('id', item.product_id)
+    .maybeSingle();
+  if (itemProduct?.slug) productSlug = itemProduct.slug;
 
   if (customerId && digitalProduct.main_file_url) {
     const { data: license } = await supabase
@@ -479,9 +486,9 @@ async function sendDigitalEmail(
       .maybeSingle();
 
     if (license?.license_key) {
-      // New Premium Short Link flow
+      // New Premium Short Link flow with unique product slug
       const licenseTypeStr = digitalProduct.license_type || 'standard';
-      downloadLink = `${siteUrl}/${storeSlug}/${licenseTypeStr}`;
+      downloadLink = `${siteUrl}/${storeSlug}/${productSlug}/${licenseTypeStr}`;
       // Note: we no longer mint a token here; it will be minted on demand via the PremiumUnlockPage.
     } else {
       // Fallback if no license key exists yet

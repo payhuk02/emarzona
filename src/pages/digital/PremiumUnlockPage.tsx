@@ -1,20 +1,60 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { redeemDownloadToken } from '@/lib/digital/redeem-download';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Loader2, Lock, KeyRound, CheckCircle2, ShieldCheck } from 'lucide-react';
+import { Loader2, Lock, KeyRound, CheckCircle2, ShieldCheck, Image as ImageIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useToast } from '@/hooks/use-toast';
 import { AlertCircle } from 'lucide-react';
 
+interface ProductInfo {
+  name: string;
+  image_url: string | null;
+  storeName: string;
+}
+
 export default function PremiumUnlockPage() {
-  const { storeSlug, licenseType } = useParams<{ storeSlug: string; licenseType: string }>();
+  const { storeSlug, productSlug, licenseType } = useParams<{ storeSlug: string; productSlug: string; licenseType: string }>();
   const [licenseKey, setLicenseKey] = useState('');
   const [state, setState] = useState<'idle' | 'verifying' | 'unlocking' | 'success'>('idle');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [productInfo, setProductInfo] = useState<ProductInfo | null>(null);
+  const [loadingProduct, setLoadingProduct] = useState(true);
   const { toast } = useToast();
+
+  useEffect(() => {
+    async function fetchProductDetails() {
+      if (!storeSlug || !productSlug) {
+        setLoadingProduct(false);
+        return;
+      }
+      try {
+        const { data: store } = await supabase.from('stores').select('id, name').eq('slug', storeSlug).maybeSingle();
+        if (store) {
+          const { data: product } = await supabase
+            .from('products')
+            .select('name, main_image')
+            .eq('store_id', store.id)
+            .eq('slug', productSlug)
+            .maybeSingle();
+          if (product) {
+            setProductInfo({
+              name: product.name,
+              image_url: product.main_image,
+              storeName: store.name
+            });
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch product details', err);
+      } finally {
+        setLoadingProduct(false);
+      }
+    }
+    fetchProductDetails();
+  }, [storeSlug, productSlug]);
 
   const handleUnlock = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,7 +64,6 @@ export default function PremiumUnlockPage() {
     setErrorMsg(null);
 
     try {
-      // 1. Call RPC to validate key and mint token
       const { data, error } = await supabase.rpc('unlock_digital_product_direct_access', {
         p_store_slug: storeSlug,
         p_license_type: licenseType,
@@ -43,7 +82,6 @@ export default function PremiumUnlockPage() {
 
       setState('unlocking');
 
-      // 2. Redeem the token to get the signed URL or external URL
       const result = await redeemDownloadToken(token);
 
       if (!result.ok) {
@@ -52,55 +90,60 @@ export default function PremiumUnlockPage() {
 
       const { signedUrl, fileName, external } = result.data;
 
-      // 3. Trigger download / open file directly
       if (external) {
-        // For Google Drive / Dropbox, redirect the user directly in the same tab
         window.location.replace(signedUrl);
       } else {
-        // For internal storage, force download
-        const link = document.createElement('a');
-        link.href = signedUrl;
-        link.download = fileName;
-        link.rel = 'noopener noreferrer';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        setState('success');
+        const a = document.createElement('a');
+        a.href = signedUrl;
+        a.download = fileName || 'download';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
       }
-    } catch (err) {
-      setState('idle');
-      const message = err instanceof Error ? err.message : 'Une erreur inattendue est survenue.';
-      setErrorMsg(message);
+
+      setState('success');
       toast({
-        title: 'Erreur',
-        description: message,
-        variant: 'destructive',
+        title: 'Accès déverrouillé !',
+        description: 'Votre produit est en cours d\'ouverture.',
       });
+    } catch (err: unknown) {
+      console.error(err);
+      setErrorMsg(err instanceof Error ? err.message : 'La clé est invalide ou expirée.');
+      setState('idle');
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center relative overflow-hidden p-4">
-      {/* Decorative background elements */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-[128px] pointer-events-none animate-pulse" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-[128px] pointer-events-none animate-pulse delay-1000" />
+    <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4 overflow-hidden relative selection:bg-primary/30">
+      <div className="absolute inset-0 z-0">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full mix-blend-screen filter blur-[100px] animate-pulse" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-600/20 rounded-full mix-blend-screen filter blur-[100px] animate-pulse" style={{ animationDelay: '2s' }} />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />
+      </div>
 
-      <motion.div
+      <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: 'easeOut' }}
-        className="w-full max-w-md z-10"
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="w-full max-w-md relative z-10"
       >
-        <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-800 rounded-3xl p-8 shadow-2xl">
+        <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-800/50 rounded-3xl p-8 shadow-2xl">
           <div className="text-center mb-8">
-            <div className="mx-auto w-16 h-16 bg-gradient-to-br from-primary/20 to-primary/5 rounded-2xl flex items-center justify-center mb-6 shadow-inner border border-primary/20">
-              <ShieldCheck className="h-8 w-8 text-primary" />
-            </div>
-            <h1 className="text-2xl font-bold text-white mb-2 tracking-tight">Accès Sécurisé</h1>
-            <p className="text-slate-400 text-sm">
-              Veuillez saisir votre clé de licence pour déverrouiller votre produit{' '}
-              {licenseType?.toUpperCase()}.
+            <motion.div 
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+              className="mx-auto w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-6 shadow-inner border border-primary/20"
+            >
+              {state === 'success' ? (
+                <CheckCircle2 className="w-8 h-8 text-primary" />
+              ) : (
+                <ShieldCheck className="w-8 h-8 text-primary" />
+              )}
+            </motion.div>
+            <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">Accès Premium</h1>
+            <p className="text-slate-400">
+              Veuillez saisir votre clé de licence pour déverrouiller votre produit.
             </p>
           </div>
 
