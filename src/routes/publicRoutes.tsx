@@ -62,6 +62,7 @@ const DigitalProductsCompare = lazyPage(() =>
 const SharedWishlist = lazyPage(() => import('@/pages/customer/SharedWishlist'));
 const BundleDetail = lazyPage(() => import('@/pages/digital/BundleDetail'));
 const SecureDownloadPage = lazyPage(() => import('@/pages/digital/SecureDownloadPage'));
+const PremiumUnlockPage = lazyPage(() => import('@/pages/digital/PremiumUnlockPage'));
 const ProductsCompare = lazyPage(() => import('@/pages/ProductsCompare'));
 const PhysicalProductDetail = lazyPage(() => import('@/pages/physical/PhysicalProductDetail'));
 const ServiceDetail = lazyPage(() => import('@/pages/service/ServiceDetail'));
@@ -295,6 +296,9 @@ export const publicRoutes = (
 
     {/* Test i18n (dev only) */}
     {import.meta.env.DEV && <Route path="/i18n-test" element={<I18nTest />} />}
+
+    {/* Premium Link Access */}
+    <Route path="/:storeSlug/:licenseType" element={<PremiumUnlockPage />} />
 
     {/* Fallback */}
     <Route path="*" element={<NotFound />} />
