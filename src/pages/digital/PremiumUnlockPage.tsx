@@ -4,56 +4,23 @@ import { supabase } from '@/integrations/supabase/client';
 import { redeemDownloadToken } from '@/lib/digital/redeem-download';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Loader2, Lock, KeyRound, CheckCircle2, ShieldCheck, Image as ImageIcon } from 'lucide-react';
+import { Loader2, Lock, KeyRound, CheckCircle2, ShieldCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useToast } from '@/hooks/use-toast';
 import { AlertCircle } from 'lucide-react';
 
-interface ProductInfo {
-  name: string;
-  image_url: string | null;
-  storeName: string;
-}
+
 
 export default function PremiumUnlockPage() {
   const { storeSlug, productSlug, licenseType } = useParams<{ storeSlug: string; productSlug: string; licenseType: string }>();
   const [licenseKey, setLicenseKey] = useState('');
   const [state, setState] = useState<'idle' | 'verifying' | 'unlocking' | 'success'>('idle');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [productInfo, setProductInfo] = useState<ProductInfo | null>(null);
-  const [loadingProduct, setLoadingProduct] = useState(true);
+  const [filesToDownload, setFilesToDownload] = useState<Record<string, any>[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
-    async function fetchProductDetails() {
-      if (!storeSlug || !productSlug) {
-        setLoadingProduct(false);
-        return;
-      }
-      try {
-        const { data: store } = await supabase.from('stores').select('id, name').eq('slug', storeSlug).maybeSingle();
-        if (store) {
-          const { data: product } = await supabase
-            .from('products')
-            .select('name, main_image')
-            .eq('store_id', store.id)
-            .eq('slug', productSlug)
-            .maybeSingle();
-          if (product) {
-            setProductInfo({
-              name: product.name,
-              image_url: product.main_image,
-              storeName: store.name
-            });
-          }
-        }
-      } catch (err) {
-        console.error('Failed to fetch product details', err);
-      } finally {
-        setLoadingProduct(false);
-      }
-    }
-    fetchProductDetails();
+    // If needed, fetch product details to display on this page.
   }, [storeSlug, productSlug]);
 
   const handleUnlock = async (e: React.FormEvent) => {
