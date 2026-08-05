@@ -4,6 +4,7 @@
  */
 
 import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -22,8 +23,9 @@ import {
   useCustomerPurchasedProducts,
   PurchasedDigitalProduct,
 } from '@/hooks/digital/useCustomerPurchasedProducts';
-import { useGenerateDownloadLink } from '@/hooks/digital/useDownloads';
+import { useGenerateDownloadLink, useTrackDownload } from '@/hooks/digital/useDownloads';
 import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/lib/logger';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -41,6 +43,8 @@ export const MyDigitalProducts = () => {
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [downloadingFileId, setDownloadingFileId] = useState<string | null>(null);
   const generateLink = useGenerateDownloadLink();
+  const trackDownload = useTrackDownload();
+  const queryClient = useQueryClient();
   const { toast } = useToast();
 
   const filteredProducts =
@@ -50,6 +54,22 @@ export const MyDigitalProducts = () => {
       const matchesType = typeFilter === 'all' || product.digital_type === typeFilter;
       return matchesSearch && matchesStatus && matchesType;
     }) || [];
+
+  const recordSuccessfulDownload = async (
+    product: PurchasedDigitalProduct,
+    fileId: string
+  ): Promise<void> => {
+    try {
+      await trackDownload.mutateAsync({
+        digitalProductId: product.digital_product_id,
+        fileId,
+        licenseKey: product.license_key ?? undefined,
+      });
+      await queryClient.invalidateQueries({ queryKey: ['customerPurchasedDigitalProducts'] });
+    } catch (trackError: unknown) {
+      logger.warn('Download tracking failed', { error: trackError, fileId });
+    }
+  };
 
   const handleDownload = async (
     product: PurchasedDigitalProduct,
@@ -95,6 +115,7 @@ export const MyDigitalProducts = () => {
           title: 'Accès ouvert',
           description: "Le lien du produit s'ouvre dans un nouvel onglet.",
         });
+        await recordSuccessfulDownload(product, fileId);
         return;
       }
 
@@ -108,6 +129,7 @@ export const MyDigitalProducts = () => {
           title: 'Téléchargement démarré',
           description: 'Le téléchargement a été lancé dans un nouvel onglet',
         });
+        await recordSuccessfulDownload(product, fileId);
         return;
       }
 
@@ -381,9 +403,7 @@ export const MyDigitalProducts = () => {
                               key={file.id}
                               onClick={() => handleDownload(product, file.id, file.file_url)}
                               disabled={
-                                downloadingFileId === file.id ||
-                                generateLink.isPending ||
-                                product.status !== 'active'
+                                downloadingFileId === file.id || product.status !== 'active'
                               }
                               variant="default"
                               size="sm"
@@ -399,7 +419,6 @@ export const MyDigitalProducts = () => {
                             }
                             disabled={
                               downloadingFileId === product.main_file_id ||
-                              generateLink.isPending ||
                               product.status !== 'active'
                             }
                             variant="default"

@@ -5,7 +5,8 @@
  * Page principale du portail client avec navigation par onglets
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { AppPageShell } from '@/components/layout/AppPageShell';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -16,10 +17,37 @@ import { MyDownloads } from '@/components/digital/customer/MyDownloads';
 import { DigitalProductStats } from '@/components/digital/customer/DigitalProductStats';
 import { DigitalPreferences } from '@/components/digital/customer/DigitalPreferences';
 
+const DIGITAL_PORTAL_TABS = ['products', 'licenses', 'downloads', 'stats', 'preferences'] as const;
+type DigitalPortalTab = (typeof DIGITAL_PORTAL_TABS)[number];
+
+function isDigitalPortalTab(value: string | null): value is DigitalPortalTab {
+  return value !== null && (DIGITAL_PORTAL_TABS as readonly string[]).includes(value);
+}
+
 // Composant principal
 export default function CustomerDigitalPortal() {
-  const [activeTab, setActiveTab] = useState('products');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabFromUrl = searchParams.get('tab');
+  const [activeTab, setActiveTab] = useState<DigitalPortalTab>(() =>
+    isDigitalPortalTab(tabFromUrl) ? tabFromUrl : 'products'
+  );
   const headerRef = useScrollAnimation<HTMLDivElement>();
+
+  useEffect(() => {
+    if (isDigitalPortalTab(tabFromUrl) && tabFromUrl !== activeTab) {
+      setActiveTab(tabFromUrl);
+    }
+  }, [tabFromUrl, activeTab]);
+
+  const handleTabChange = (value: string) => {
+    if (!isDigitalPortalTab(value)) return;
+    setActiveTab(value);
+    if (value === 'products') {
+      setSearchParams({}, { replace: true });
+    } else {
+      setSearchParams({ tab: value }, { replace: true });
+    }
+  };
 
   return (
     <AppPageShell layoutType="digital-portal">
@@ -49,7 +77,7 @@ export default function CustomerDigitalPortal() {
           </div>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
           <TabsList className="bg-muted/50 backdrop-blur-sm h-auto p-1 w-full grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-1.5 sm:gap-2 sm:inline-flex sm:w-auto">
             <TabsTrigger
               value="products"

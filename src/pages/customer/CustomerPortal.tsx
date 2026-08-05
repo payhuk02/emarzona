@@ -129,7 +129,7 @@ export default function CustomerPortal() {
     (e?: React.MouseEvent) => {
       e?.preventDefault();
       e?.stopPropagation();
-      navigate('/dashboard/my-licenses', { replace: true });
+      navigate('/account/digital?tab=licenses', { replace: true });
     },
     [navigate]
   );
@@ -156,7 +156,7 @@ export default function CustomerPortal() {
     (e?: React.MouseEvent) => {
       e?.preventDefault();
       e?.stopPropagation();
-      navigate('/dashboard/loyalty', { replace: true });
+      navigate('/account/loyalty', { replace: true });
     },
     [navigate]
   );
