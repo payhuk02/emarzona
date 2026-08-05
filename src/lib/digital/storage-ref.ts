@@ -30,6 +30,8 @@ export function toCanonicalStorageRef(bucket: string, path: string): string {
 
 export function parseCanonicalStorageRef(value: string): ParsedStorageRef | null {
   const trimmed = value.trim();
+  if (/^https?:\/\//i.test(trimmed)) return null;
+
   const colonIndex = trimmed.indexOf(':');
   if (colonIndex <= 0) return null;
 
@@ -90,14 +92,25 @@ export function normalizeFileStorageRef(fileUrl: string): string {
 }
 
 export function parseFileRef(fileUrl: string): ParsedFileRef {
-  const normalized = normalizeFileStorageRef(fileUrl);
+  const trimmed = fileUrl.trim();
+  if (!trimmed) {
+    return { kind: 'storage', bucket: DEFAULT_DIGITAL_FILES_BUCKET, path: '' };
+  }
 
+  if (/^https?:\/\//i.test(trimmed)) {
+    try {
+      const url = new URL(trimmed);
+      const storageRef = extractStorageFromSupabaseUrl(url);
+      if (storageRef) return storageRef;
+      return { kind: 'external', url: trimmed };
+    } catch {
+      return { kind: 'external', url: trimmed };
+    }
+  }
+
+  const normalized = normalizeFileStorageRef(trimmed);
   const canonical = parseCanonicalStorageRef(normalized);
   if (canonical) return canonical;
-
-  if (/^https?:\/\//i.test(normalized)) {
-    return { kind: 'external', url: normalized };
-  }
 
   return {
     kind: 'storage',

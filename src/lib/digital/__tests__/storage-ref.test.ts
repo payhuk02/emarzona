@@ -33,4 +33,11 @@ describe('storage-ref', () => {
     expect(fileNameFromRef('products:digital/a/my-ebook.pdf')).toBe('my-ebook.pdf');
     expect(toCanonicalStorageRef('products', '/digital/a.pdf')).toBe('products:digital/a.pdf');
   });
+
+  it('parses external https URLs (not as bucket:path)', () => {
+    expect(parseFileRef('https://drive.google.com/file/d/abc123')).toEqual({
+      kind: 'external',
+      url: 'https://drive.google.com/file/d/abc123',
+    });
+  });
 });

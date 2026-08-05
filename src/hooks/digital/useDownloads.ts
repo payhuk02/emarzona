@@ -117,6 +117,11 @@ export const useUserDownloads = () => {
         .select(
           `
           *,
+          file:digital_product_files (
+            id,
+            name,
+            file_url
+          ),
           digital_product:digital_products (
             id,
             product:products (

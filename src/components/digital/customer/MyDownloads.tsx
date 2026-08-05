@@ -20,13 +20,21 @@ import {
   Key,
 } from 'lucide-react';
 import { useUserDownloads, DigitalDownload } from '@/hooks/digital/useDownloads';
+import { useCustomerDigitalDownload } from '@/hooks/digital/useCustomerDigitalDownload';
+import { getCustomerDigitalFileLabel } from '@/lib/digital/customer-file-label';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useState } from 'react';
+import { useToast } from '@/hooks/use-toast';
 
 interface DownloadWithRelations extends DigitalDownload {
+  file?: {
+    id: string;
+    name: string;
+    file_url: string;
+  } | null;
   digital_product?: {
     id: string;
     product?: {
@@ -39,12 +47,38 @@ interface DownloadWithRelations extends DigitalDownload {
 
 export const MyDownloads = () => {
   const { data: downloads, isLoading, error } = useUserDownloads();
+  const { downloadFile, downloadingFileId } = useCustomerDigitalDownload();
+  const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
 
-  const filteredDownloads = (downloads as DownloadWithRelations[] | undefined)?.filter((download: DownloadWithRelations) => {
-    const productName = download.digital_product?.product?.name || '';
-    return productName.toLowerCase().includes(searchQuery.toLowerCase());
-  }) || [];
+  const filteredDownloads =
+    (downloads as DownloadWithRelations[] | undefined)?.filter(
+      (download: DownloadWithRelations) => {
+        const productName = download.digital_product?.product?.name || '';
+        return productName.toLowerCase().includes(searchQuery.toLowerCase());
+      }
+    ) || [];
+
+  const handleRedownload = async (download: DownloadWithRelations) => {
+    if (!download.file_id || !download.digital_product_id) return;
+
+    try {
+      const openResult = await downloadFile({
+        fileId: download.file_id,
+        fileUrl: download.file?.file_url,
+        digitalProductId: download.digital_product_id,
+        licenseKey: download.license_key ?? undefined,
+      });
+
+      toast({
+        title: openResult.mode === 'external' ? 'Accès ouvert' : 'Téléchargement démarré',
+        description: "Votre fichier est en cours d'ouverture.",
+      });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Impossible de télécharger à nouveau';
+      toast({ title: 'Erreur', description: message, variant: 'destructive' });
+    }
+  };
 
   if (isLoading) {
     return (
@@ -91,9 +125,7 @@ export const MyDownloads = () => {
       <Card>
         <CardHeader>
           <CardTitle>Rechercher dans l'historique</CardTitle>
-          <CardDescription>
-            Trouvez rapidement un téléchargement
-          </CardDescription>
+          <CardDescription>Trouvez rapidement un téléchargement</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="relative">
@@ -101,7 +133,7 @@ export const MyDownloads = () => {
             <Input
               placeholder="Nom du produit..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={e => setSearchQuery(e.target.value)}
               className="pl-10"
             />
           </div>
@@ -119,7 +151,11 @@ export const MyDownloads = () => {
         <Card>
           <CardContent className="p-4">
             <div className="text-2xl font-bold text-green-600">
-              {(downloads as DownloadWithRelations[]).filter((d: DownloadWithRelations) => d.download_success).length}
+              {
+                (downloads as DownloadWithRelations[]).filter(
+                  (d: DownloadWithRelations) => d.download_success
+                ).length
+              }
             </div>
             <div className="text-sm text-muted-foreground">Réussis</div>
           </CardContent>
@@ -127,7 +163,11 @@ export const MyDownloads = () => {
         <Card>
           <CardContent className="p-4">
             <div className="text-2xl font-bold text-red-600">
-              {(downloads as DownloadWithRelations[]).filter((d: DownloadWithRelations) => !d.download_success).length}
+              {
+                (downloads as DownloadWithRelations[]).filter(
+                  (d: DownloadWithRelations) => !d.download_success
+                ).length
+              }
             </div>
             <div className="text-sm text-muted-foreground">Échoués</div>
           </CardContent>
@@ -135,7 +175,13 @@ export const MyDownloads = () => {
         <Card>
           <CardContent className="p-4">
             <div className="text-2xl font-bold">
-              {new Set((downloads as DownloadWithRelations[]).map((d: DownloadWithRelations) => d.digital_product?.product?.id).filter(Boolean)).size}
+              {
+                new Set(
+                  (downloads as DownloadWithRelations[])
+                    .map((d: DownloadWithRelations) => d.digital_product?.product?.id)
+                    .filter(Boolean)
+                ).size
+              }
             </div>
             <div className="text-sm text-muted-foreground">Produits uniques</div>
           </CardContent>
@@ -203,7 +249,9 @@ export const MyDownloads = () => {
                         <div>
                           <div className="text-muted-foreground">Date</div>
                           <div className="font-medium">
-                            {format(new Date(download.download_date), 'dd/MM/yyyy à HH:mm', { locale: fr })}
+                            {format(new Date(download.download_date), 'dd/MM/yyyy à HH:mm', {
+                              locale: fr,
+                            })}
                           </div>
                         </div>
                       </div>
@@ -227,9 +275,7 @@ export const MyDownloads = () => {
                       {download.download_duration_seconds && (
                         <div>
                           <div className="text-muted-foreground">Durée</div>
-                          <div className="font-medium">
-                            {download.download_duration_seconds}s
-                          </div>
+                          <div className="font-medium">{download.download_duration_seconds}s</div>
                         </div>
                       )}
                     </div>
@@ -238,6 +284,21 @@ export const MyDownloads = () => {
                       <div className="text-sm text-muted-foreground">
                         Version du fichier : {download.file_version}
                       </div>
+                    )}
+
+                    {download.file_id && download.digital_product_id && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="mt-2"
+                        disabled={downloadingFileId === download.file_id}
+                        onClick={() => handleRedownload(download)}
+                      >
+                        <Download className="h-4 w-4 mr-2" />
+                        {downloadingFileId === download.file_id
+                          ? 'Ouverture…'
+                          : `Télécharger à nouveau${download.file?.name ? ` — ${getCustomerDigitalFileLabel(download.file.name, 0)}` : ''}`}
+                      </Button>
                     )}
                   </div>
                 </div>
@@ -249,10 +310,3 @@ export const MyDownloads = () => {
     </div>
   );
 };
-
-
-
-
-
-
-

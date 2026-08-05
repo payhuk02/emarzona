@@ -18,6 +18,7 @@ import {
 import { Download, CheckCircle2, AlertCircle, Loader2, Clock, Lock, RefreshCw } from 'lucide-react';
 import { useGenerateDownloadLink, useTrackDownload } from '@/hooks/digital/useDownloads';
 import { useRemainingDownloads } from '@/hooks/digital/useDigitalProducts';
+import { openCustomerDigitalFile } from '@/lib/digital/open-customer-digital-file';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { logger } from '@/lib/logger';
@@ -28,6 +29,7 @@ interface DigitalDownloadButtonProps {
   fileId: string;
   fileName: string;
   fileSize: number;
+  fileUrl?: string | null;
   licenseKey?: string;
   variant?: 'default' | 'outline' | 'secondary';
   size?: 'default' | 'sm' | 'lg';
@@ -40,6 +42,7 @@ export const DigitalDownloadButton = ({
   fileId,
   fileName,
   fileSize,
+  fileUrl,
   licenseKey,
   variant = 'default',
   size = 'default',
@@ -101,43 +104,27 @@ export const DigitalDownloadButton = ({
         });
         setDownloadProgress(50);
       } catch (trackError: unknown) {
-        // Ne pas bloquer le téléchargement si le tracking échoue
         logger.warn('Download tracking failed', { error: trackError });
         setDownloadProgress(50);
       }
 
-      // Start actual download with error handling
-      try {
-        const link = document.createElement('a');
-        link.href = result.url;
-        link.download = fileName;
-        link.target = '_blank';
-        document.body.appendChild(link);
-        link.click();
+      setDownloadProgress(80);
+      const openResult = await openCustomerDigitalFile(result, fileUrl);
+      setDownloadProgress(100);
 
-        // Cleanup after a short delay
-        setTimeout(() => {
-          document.body.removeChild(link);
-        }, 100);
+      toast({
+        title: openResult.mode === 'external' ? 'Accès ouvert' : 'Téléchargement démarré',
+        description:
+          openResult.mode === 'external'
+            ? `${fileName} s'ouvre dans un nouvel onglet.`
+            : `${fileName} est en cours de téléchargement`,
+      });
 
-        setDownloadProgress(100);
-
-        // Success notification
-        toast({
-          title: 'Téléchargement démarré',
-          description: `${fileName} est en cours de téléchargement`,
-        });
-
-        // Success
-        setTimeout(() => {
-          setIsDownloading(false);
-          setTimeout(() => setShowDialog(false), 1500);
-        }, 500);
-      } catch (_downloadError: unknown) {
-        logger.error('Error starting download', { error: downloadError });
-        throw new Error('Erreur lors du démarrage du téléchargement. Veuillez réessayer.');
-      }
-    } catch (_err: unknown) {
+      setTimeout(() => {
+        setIsDownloading(false);
+        setTimeout(() => setShowDialog(false), 1500);
+      }, 500);
+    } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : String(err);
       logger.error('Download error', {
         error: errorMessage,

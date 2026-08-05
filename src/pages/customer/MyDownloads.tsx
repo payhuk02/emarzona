@@ -423,10 +423,17 @@ export default function MyDownloads() {
 
                         {/* Action Button */}
                         <div className="flex-shrink-0 w-full sm:w-auto">
-                          {download.digital_product_id && (
+                          {download.digital_product_id && download.file_id && (
                             <DigitalDownloadButton
                               digitalProductId={download.digital_product_id}
                               fileId={download.file_id}
+                              fileUrl={
+                                (
+                                  download as DigitalDownload & {
+                                    file?: { file_url?: string | null } | null;
+                                  }
+                                ).file?.file_url
+                              }
                               fileName={download.digital_product?.product?.name || 'Fichier'}
                               fileSize={0}
                               variant="default"

@@ -4,7 +4,6 @@
  */
 
 import { useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -23,28 +22,21 @@ import {
   useCustomerPurchasedProducts,
   PurchasedDigitalProduct,
 } from '@/hooks/digital/useCustomerPurchasedProducts';
-import { useGenerateDownloadLink, useTrackDownload } from '@/hooks/digital/useDownloads';
+import { useCustomerDigitalDownload } from '@/hooks/digital/useCustomerDigitalDownload';
 import { useToast } from '@/hooks/use-toast';
-import { logger } from '@/lib/logger';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { cn } from '@/lib/utils';
 import { getCustomerDigitalFileLabel } from '@/lib/digital/customer-file-label';
-import { redeemDownloadToken } from '@/lib/digital/redeem-download';
-import { buildDownloadRedeemPageUrl } from '@/lib/digital/drm-policy';
-import { parseFileRef } from '@/lib/digital/storage-ref';
 
 export const MyDigitalProducts = () => {
   const { data: products, isLoading, error } = useCustomerPurchasedProducts();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [typeFilter, setTypeFilter] = useState<string>('all');
-  const [downloadingFileId, setDownloadingFileId] = useState<string | null>(null);
-  const generateLink = useGenerateDownloadLink();
-  const trackDownload = useTrackDownload();
-  const queryClient = useQueryClient();
+  const { downloadFile, downloadingFileId } = useCustomerDigitalDownload();
   const { toast } = useToast();
 
   const filteredProducts =
@@ -54,22 +46,6 @@ export const MyDigitalProducts = () => {
       const matchesType = typeFilter === 'all' || product.digital_type === typeFilter;
       return matchesSearch && matchesStatus && matchesType;
     }) || [];
-
-  const recordSuccessfulDownload = async (
-    product: PurchasedDigitalProduct,
-    fileId: string
-  ): Promise<void> => {
-    try {
-      await trackDownload.mutateAsync({
-        digitalProductId: product.digital_product_id,
-        fileId,
-        licenseKey: product.license_key ?? undefined,
-      });
-      await queryClient.invalidateQueries({ queryKey: ['customerPurchasedDigitalProducts'] });
-    } catch (trackError: unknown) {
-      logger.warn('Download tracking failed', { error: trackError, fileId });
-    }
-  };
 
   const handleDownload = async (
     product: PurchasedDigitalProduct,
@@ -86,54 +62,21 @@ export const MyDigitalProducts = () => {
       return;
     }
 
-    setDownloadingFileId(fileId);
-
     try {
-      const result = await generateLink.mutateAsync({ fileId });
-      const token = result.token;
-      const redeemPageUrl =
-        result.url || (token ? buildDownloadRedeemPageUrl(token, window.location.origin) : null);
+      const openResult = await downloadFile({
+        fileId,
+        fileUrl,
+        digitalProductId: product.digital_product_id,
+        licenseKey: product.license_key ?? undefined,
+      });
 
-      if (!token && !redeemPageUrl) {
-        throw new Error('Impossible de générer le lien de téléchargement');
-      }
-
-      const isExternalLink = fileUrl ? parseFileRef(fileUrl).kind === 'external' : false;
-
-      if (token && isExternalLink) {
-        const redeemed = await redeemDownloadToken(token);
-        if (!redeemed.ok) {
-          throw new Error(redeemed.error.error);
-        }
-
-        const opened = window.open(redeemed.data.signedUrl, '_blank', 'noopener,noreferrer');
-        if (!opened) {
-          window.location.assign(redeemed.data.signedUrl);
-        }
-
-        toast({
-          title: 'Accès ouvert',
-          description: "Le lien du produit s'ouvre dans un nouvel onglet.",
-        });
-        await recordSuccessfulDownload(product, fileId);
-        return;
-      }
-
-      if (redeemPageUrl) {
-        const opened = window.open(redeemPageUrl, '_blank', 'noopener,noreferrer');
-        if (!opened) {
-          window.location.assign(redeemPageUrl);
-        }
-
-        toast({
-          title: 'Téléchargement démarré',
-          description: 'Le téléchargement a été lancé dans un nouvel onglet',
-        });
-        await recordSuccessfulDownload(product, fileId);
-        return;
-      }
-
-      throw new Error("Impossible d'ouvrir le fichier");
+      toast({
+        title: openResult.mode === 'external' ? 'Accès ouvert' : 'Téléchargement démarré',
+        description:
+          openResult.mode === 'external'
+            ? "Le lien du produit s'ouvre dans un nouvel onglet."
+            : 'Le téléchargement a été lancé dans un nouvel onglet',
+      });
     } catch (err: unknown) {
       const message =
         err instanceof Error ? err.message : 'Impossible de générer le lien de téléchargement';
@@ -142,8 +85,6 @@ export const MyDigitalProducts = () => {
         description: message,
         variant: 'destructive',
       });
-    } finally {
-      setDownloadingFileId(null);
     }
   };
 
