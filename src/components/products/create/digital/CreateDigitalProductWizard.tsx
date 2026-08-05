@@ -22,6 +22,7 @@ import { DigitalFilesUploader } from './DigitalFilesUploader';
 import { DigitalLicenseConfig } from './DigitalLicenseConfig';
 import { DigitalAffiliateSettings } from './DigitalAffiliateSettings';
 import { DigitalPreview } from './DigitalPreview';
+import { resolvePrimaryDigitalFile } from '@/lib/digital/resolve-primary-digital-file';
 
 interface CreateDigitalProductWizardProps {
   storeId: string;
@@ -223,7 +224,7 @@ export const CreateDigitalProductWizard = ({
         }, 0) || 0;
 
       // Get main file info
-      const mainFile = formData.downloadable_files?.[0];
+      const mainFile = resolvePrimaryDigitalFile(formData.downloadable_files);
       const mainFileFormat =
         mainFile?.type?.split('/')[1] || mainFile?.name?.split('.').pop() || 'unknown';
 

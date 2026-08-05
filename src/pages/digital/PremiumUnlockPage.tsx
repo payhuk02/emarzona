@@ -1,27 +1,79 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { redeemDownloadToken } from '@/lib/digital/redeem-download';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Loader2, Lock, KeyRound, CheckCircle2, ShieldCheck } from 'lucide-react';
+import {
+  Loader2,
+  Lock,
+  KeyRound,
+  CheckCircle2,
+  ShieldCheck,
+  Download,
+  AlertCircle,
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useToast } from '@/hooks/use-toast';
-import { AlertCircle } from 'lucide-react';
 
+type UnlockedFile = {
+  token: string;
+  fileName: string;
+};
 
+async function openDownload(token: string, fileName: string): Promise<void> {
+  const result = await redeemDownloadToken(token);
+
+  if (!result.ok) {
+    throw new Error(result.error.error);
+  }
+
+  const { signedUrl, fileName: resolvedName, external } = result.data;
+
+  if (external) {
+    window.open(signedUrl, '_blank', 'noopener,noreferrer');
+    return;
+  }
+
+  const anchor = document.createElement('a');
+  anchor.href = signedUrl;
+  anchor.download = resolvedName || fileName || 'download';
+  document.body.appendChild(anchor);
+  anchor.click();
+  document.body.removeChild(anchor);
+}
 
 export default function PremiumUnlockPage() {
-  const { storeSlug, productSlug, licenseType } = useParams<{ storeSlug: string; productSlug: string; licenseType: string }>();
+  const { storeSlug, licenseType } = useParams<{
+    storeSlug: string;
+    productSlug: string;
+    licenseType: string;
+  }>();
   const [licenseKey, setLicenseKey] = useState('');
   const [state, setState] = useState<'idle' | 'verifying' | 'unlocking' | 'success'>('idle');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [filesToDownload, setFilesToDownload] = useState<Record<string, any>[]>([]);
+  const [unlockedFiles, setUnlockedFiles] = useState<UnlockedFile[]>([]);
+  const [downloadingToken, setDownloadingToken] = useState<string | null>(null);
   const { toast } = useToast();
 
-  useEffect(() => {
-    // If needed, fetch product details to display on this page.
-  }, [storeSlug, productSlug]);
+  const handleDownloadFile = async (file: UnlockedFile) => {
+    setDownloadingToken(file.token);
+    try {
+      await openDownload(file.token, file.fileName);
+      toast({
+        title: 'Téléchargement démarré',
+        description: file.fileName,
+      });
+    } catch (err: unknown) {
+      toast({
+        title: 'Erreur',
+        description: err instanceof Error ? err.message : 'Impossible de télécharger ce fichier.',
+        variant: 'destructive',
+      });
+    } finally {
+      setDownloadingToken(null);
+    }
+  };
 
   const handleUnlock = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,6 +81,7 @@ export default function PremiumUnlockPage() {
 
     setState('verifying');
     setErrorMsg(null);
+    setUnlockedFiles([]);
 
     try {
       const { data, error } = await supabase.rpc('unlock_digital_product_direct_access', {
@@ -41,37 +94,35 @@ export default function PremiumUnlockPage() {
         throw new Error(error.message);
       }
 
-      if (!data || data.length === 0 || !data[0].download_token) {
-        throw new Error('Impossible de générer le jeton de téléchargement.');
+      const rows = (data ?? []).filter((row: { download_token?: string | null }) =>
+        Boolean(row.download_token)
+      );
+
+      if (rows.length === 0) {
+        throw new Error('Impossible de générer les jetons de téléchargement.');
       }
 
-      const { download_token: token } = data[0];
+      const files: UnlockedFile[] = rows.map(
+        (row: { download_token: string; file_name?: string | null }) => ({
+          token: row.download_token,
+          fileName: row.file_name?.trim() || 'Fichier',
+        })
+      );
 
       setState('unlocking');
 
-      const result = await redeemDownloadToken(token);
-
-      if (!result.ok) {
-        throw new Error(result.error.error);
+      if (files.length === 1) {
+        await openDownload(files[0].token, files[0].fileName);
       }
 
-      const { signedUrl, fileName, external } = result.data;
-
-      if (external) {
-        window.location.replace(signedUrl);
-      } else {
-        const a = document.createElement('a');
-        a.href = signedUrl;
-        a.download = fileName || 'download';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-      }
-
+      setUnlockedFiles(files);
       setState('success');
       toast({
         title: 'Accès déverrouillé !',
-        description: 'Votre produit est en cours d\'ouverture.',
+        description:
+          files.length === 1
+            ? "Votre produit est en cours d'ouverture."
+            : `${files.length} fichiers sont disponibles au téléchargement.`,
       });
     } catch (err: unknown) {
       console.error(err);
@@ -84,22 +135,25 @@ export default function PremiumUnlockPage() {
     <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4 overflow-hidden relative selection:bg-primary/30">
       <div className="absolute inset-0 z-0">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full mix-blend-screen filter blur-[100px] animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-600/20 rounded-full mix-blend-screen filter blur-[100px] animate-pulse" style={{ animationDelay: '2s' }} />
+        <div
+          className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-600/20 rounded-full mix-blend-screen filter blur-[100px] animate-pulse"
+          style={{ animationDelay: '2s' }}
+        />
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />
       </div>
 
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
+        transition={{ duration: 0.5, ease: 'easeOut' }}
         className="w-full max-w-md relative z-10"
       >
         <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-800/50 rounded-3xl p-8 shadow-2xl">
           <div className="text-center mb-8">
-            <motion.div 
+            <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+              transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
               className="mx-auto w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-6 shadow-inner border border-primary/20"
             >
               {state === 'success' ? (
@@ -120,16 +174,44 @@ export default function PremiumUnlockPage() {
                 key="success"
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="text-center py-6"
+                className="text-center py-6 space-y-4"
               >
                 <div className="mx-auto w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mb-4">
                   <CheckCircle2 className="h-8 w-8 text-green-500" />
                 </div>
                 <h2 className="text-xl font-bold text-white mb-2">Produit déverrouillé !</h2>
-                <p className="text-slate-400 text-sm">
-                  Le téléchargement a démarré automatiquement. Merci pour votre achat sur{' '}
-                  {storeSlug}.
-                </p>
+                {unlockedFiles.length === 1 ? (
+                  <p className="text-slate-400 text-sm">
+                    Le téléchargement a démarré automatiquement. Merci pour votre achat sur{' '}
+                    {storeSlug}.
+                  </p>
+                ) : (
+                  <>
+                    <p className="text-slate-400 text-sm">
+                      {unlockedFiles.length} fichiers sont prêts. Téléchargez chaque fichier
+                      ci-dessous.
+                    </p>
+                    <div className="space-y-2 text-left">
+                      {unlockedFiles.map(file => (
+                        <Button
+                          key={file.token}
+                          type="button"
+                          variant="secondary"
+                          className="w-full justify-start"
+                          disabled={downloadingToken === file.token}
+                          onClick={() => handleDownloadFile(file)}
+                        >
+                          {downloadingToken === file.token ? (
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          ) : (
+                            <Download className="h-4 w-4 mr-2" />
+                          )}
+                          {file.fileName}
+                        </Button>
+                      ))}
+                    </div>
+                  </>
+                )}
               </motion.div>
             ) : (
               <motion.form

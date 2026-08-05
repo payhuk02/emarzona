@@ -8,6 +8,9 @@ import {
   advanceDigitalWizardToPublishStep,
   fillDigitalBasicInfoStep,
   fillDigitalMainFileUrlStep,
+  E2E_DIGITAL_MAIN_FILE_URL,
+  E2E_DIGITAL_MAIN_FILE_URL_2,
+  E2E_DIGITAL_MAIN_FILE_URL_3,
   openDigitalCreateWizard,
   publishDigitalWizard,
 } from './helpers/digital-wizard-helpers';
@@ -123,6 +126,99 @@ test.describe('Digital wizard — publish (E2E)', () => {
     expect(files.some(f => f.is_main && Boolean(f.file_url))).toBe(true);
 
     testInfo.attach('published-digital-product-id', {
+      body: product.id,
+      contentType: 'text/plain',
+    });
+
+    await cleanupE2EVendor(admin, ctx, [product.id]);
+  });
+
+  test('multiple main links → all saved as is_main in digital_product_files', async ({
+    page,
+  }, testInfo) => {
+    const admin = createNodeSupabaseClient(supabaseUrl!, supabaseServiceKey!);
+    const ctx = await createE2EVendor(admin, 'digital', 'e2e-digital-multi');
+    const productName = `Digital multi-liens E2E ${ctx.runId}`;
+    const mainUrls = [
+      E2E_DIGITAL_MAIN_FILE_URL,
+      E2E_DIGITAL_MAIN_FILE_URL_2,
+      E2E_DIGITAL_MAIN_FILE_URL_3,
+    ];
+
+    await loginE2EVendor(page, ctx.email, ctx.password, ctx.storeId);
+    await openDigitalCreateWizard(page);
+    await waitForReactApp(page);
+
+    await fillDigitalBasicInfoStep(page, { name: productName });
+    await clickWizardNext(page, 1);
+
+    await fillDigitalMainFileUrlStep(page, mainUrls);
+    await clickWizardNext(page, 1);
+
+    await advanceDigitalWizardToPublishStep(page);
+    await publishDigitalWizard(page);
+
+    await expect(page).toHaveURL('/dashboard/digital-products', { timeout: 30_000 });
+
+    const { data: rows, error: queryError } = await admin
+      .from('products')
+      .select(
+        `
+        id,
+        name,
+        digital_products (
+          main_file_url,
+          digital_product_files (
+            is_main,
+            file_url,
+            order_index
+          )
+        )
+      `
+      )
+      .eq('store_id', ctx.storeId)
+      .eq('product_type', 'digital')
+      .order('created_at', { ascending: false })
+      .limit(1);
+
+    expect(queryError).toBeNull();
+    expect(rows?.length).toBe(1);
+
+    const product = rows![0] as {
+      id: string;
+      name: string;
+      digital_products:
+        | {
+            main_file_url: string | null;
+            digital_product_files: Array<{
+              is_main: boolean;
+              file_url: string | null;
+              order_index: number | null;
+            }>;
+          }
+        | Array<{
+            main_file_url: string | null;
+            digital_product_files: Array<{
+              is_main: boolean;
+              file_url: string | null;
+              order_index: number | null;
+            }>;
+          }>
+        | null;
+    };
+
+    const digital = Array.isArray(product.digital_products)
+      ? product.digital_products[0]
+      : product.digital_products;
+    const files = digital?.digital_product_files ?? [];
+    const mainFiles = files.filter(file => file.is_main);
+
+    expect(product.name).toBe(productName);
+    expect(mainFiles).toHaveLength(mainUrls.length);
+    expect(mainFiles.map(file => file.file_url)).toEqual(expect.arrayContaining(mainUrls));
+    expect(digital?.main_file_url).toBe(E2E_DIGITAL_MAIN_FILE_URL);
+
+    testInfo.attach('published-digital-multi-link-product-id', {
       body: product.id,
       contentType: 'text/plain',
     });

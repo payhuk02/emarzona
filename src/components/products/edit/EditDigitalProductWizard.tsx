@@ -47,6 +47,7 @@ import { useWizardServerValidation } from '@/hooks/useWizardServerValidation';
 import { supabase } from '@/integrations/supabase/client';
 import { updateDigitalProductTx } from '@/lib/products/product-update-rpc';
 import { buildDigitalProductFilesPayload } from '@/lib/digital/build-digital-product-files-payload';
+import { resolvePrimaryDigitalFile } from '@/lib/digital/resolve-primary-digital-file';
 import {
   validateDigitalWizardSaveSteps,
   validateDigitalWizardStep,
@@ -602,7 +603,7 @@ export const EditDigitalProductWizard = ({
         throw new Error('Impossible de générer un slug unique');
       }
 
-      const mainFile = formData.downloadable_files?.[0];
+      const mainFile = resolvePrimaryDigitalFile(formData.downloadable_files);
       const mainFileFormat = mainFile?.format || mainFile?.name?.split('.').pop() || 'unknown';
       const totalSizeMB = (formData.downloadable_files || []).reduce(
         (sum, file) => sum + (file.size || 0) / (1024 * 1024),

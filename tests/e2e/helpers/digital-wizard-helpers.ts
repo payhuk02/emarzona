@@ -8,6 +8,8 @@ import { goToWizardStep } from './vendor-e2e-helpers';
 import { waitForReactApp } from '../shared/e2e-test-config';
 
 export const E2E_DIGITAL_MAIN_FILE_URL = 'https://example.com/e2e-digital-product.pdf';
+export const E2E_DIGITAL_MAIN_FILE_URL_2 = 'https://example.com/e2e-digital-product-part2.pdf';
+export const E2E_DIGITAL_MAIN_FILE_URL_3 = 'https://example.com/e2e-digital-product-part3.pdf';
 
 export type FillDigitalBasicInfoOptions = {
   name: string;
@@ -43,13 +45,24 @@ export async function fillDigitalBasicInfoStep(
   }
 }
 
-export async function fillDigitalMainFileUrlStep(page: Page): Promise<void> {
-  await page.getByRole('tab', { name: /URL externe/i }).click();
-  await page
-    .locator('input[type="url"][placeholder*="exemple.com/fichier"]')
-    .first()
-    .fill(E2E_DIGITAL_MAIN_FILE_URL);
-  await expect(page.getByText(/Lien principal configuré/i)).toBeVisible({ timeout: 10_000 });
+export async function fillDigitalMainFileUrlStep(
+  page: Page,
+  urls: string[] = [E2E_DIGITAL_MAIN_FILE_URL]
+): Promise<void> {
+  const mainInput = page.locator('input[type="url"][placeholder*="fichier-principal"]').first();
+
+  for (const url of urls) {
+    await mainInput.fill(url);
+    await page
+      .getByRole('button', { name: /Ajouter/i })
+      .first()
+      .click();
+    await expect(page.getByText(url, { exact: false })).toBeVisible({ timeout: 10_000 });
+  }
+
+  if (urls.length > 1) {
+    await expect(page.getByText(/Liens principaux ajoutés/i)).toContainText(String(urls.length));
+  }
 }
 
 export async function advanceDigitalWizardToPublishStep(page: Page): Promise<void> {

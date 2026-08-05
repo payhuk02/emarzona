@@ -1,7 +1,7 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient, type SupabaseClient } from 'npm:@supabase/supabase-js@2.58.0';
 import { getProjectRefFromSupabaseUrl, isServiceRoleJwt } from '../_shared/edge-auth-utils.ts';
-import { mintOrderDownloadLink } from '../_shared/mint-download-token.ts';
+import { buildDigitalDownloadLinks } from '../_shared/digital-download-links.ts';
 import { CHECKOUT_GUEST_WINDOW_MS } from '../_shared/order-checkout-auth.ts';
 import {
   formatOrderDateTime,
@@ -438,15 +438,13 @@ async function sendDigitalEmail(
   const orderNumber = order.order_number ?? order.id;
 
   let storeName = 'Boutique';
-  let storeSlug = 'boutique';
   if (order.store_id) {
     const { data: storeRow } = await supabase
       .from('stores')
-      .select('name, slug')
+      .select('name')
       .eq('id', order.store_id)
       .maybeSingle();
     if (storeRow?.name) storeName = storeRow.name;
-    if (storeRow?.slug) storeSlug = storeRow.slug;
   }
 
   let whatsappLink: string | null = null;
@@ -467,50 +465,28 @@ async function sendDigitalEmail(
     minimumFractionDigits: (order.currency || 'XOF') === 'XOF' ? 0 : 2,
   }).format(price || 0);
 
-  let downloadLink = `${siteUrl}/account/digital`;
-  let downloadExpiresAt: string | undefined;
-  let productSlug = 'produit';
-  const { data: itemProduct } = await supabase
-    .from('products')
-    .select('slug')
-    .eq('id', item.product_id)
+  const { data: license } = await supabase
+    .from('digital_licenses')
+    .select('id, license_key')
+    .eq('order_id', order.id)
+    .eq('digital_product_id', digitalProduct.id)
     .maybeSingle();
-  if (itemProduct?.slug) productSlug = itemProduct.slug;
 
-  if (customerId && digitalProduct.main_file_url) {
-    const { data: license } = await supabase
-      .from('digital_licenses')
-      .select('id, license_key')
-      .eq('order_id', order.id)
-      .eq('digital_product_id', digitalProduct.id)
-      .maybeSingle();
+  const builtLinks = await buildDigitalDownloadLinks(supabase, {
+    siteUrl,
+    productId: item.product_id,
+    digitalProductId: digitalProduct.id,
+    customerId: customerId ?? null,
+    licenseId: license?.id ?? null,
+    fallbackMainFileUrl: digitalProduct.main_file_url,
+  });
 
-    if (license?.license_key) {
-      // New Premium Short Link flow with unique product slug
-      const licenseTypeStr = digitalProduct.license_type || 'standard';
-      downloadLink = `${siteUrl}/${storeSlug}/${productSlug}/${licenseTypeStr}`;
-      // Note: we no longer mint a token here; it will be minted on demand via the PremiumUnlockPage.
-    } else {
-      // Fallback if no license key exists yet
-      const secureLink = await mintOrderDownloadLink(supabase, {
-        siteUrl,
-        productId: item.product_id,
-        fileUrl: digitalProduct.main_file_url,
-        customerId,
-        licenseId: license?.id ?? null,
-        expiresHours: 48,
-      });
-
-      if (secureLink) {
-        downloadLink = secureLink;
-        downloadExpiresAt = new Date(Date.now() + 48 * 3600 * 1000).toISOString();
-      } else {
-        console.warn(
-          `Secure download link not minted for order ${order.id}, product ${item.product_id}`
-        );
-      }
-    }
-  }
+  const downloadLink = builtLinks.primaryDownloadLink;
+  const downloadLinksHtml = builtLinks.downloadLinksHtml;
+  const downloadExpiresAt =
+    builtLinks.links.length > 0
+      ? new Date(Date.now() + 48 * 3600 * 1000).toISOString()
+      : undefined;
 
   const fileSizeLabel =
     digitalProduct.total_size_mb != null
@@ -538,11 +514,12 @@ async function sendDigitalEmail(
       price: formattedPrice,
       whatsapp_link: whatsappLink,
       download_link: downloadLink,
+      download_links_html: downloadLinksHtml,
       download_expires_at: downloadExpiresAt,
       file_format: digitalProduct.main_file_format || digitalProduct.digital_type || 'digital',
       file_size: fileSizeLabel,
       licensing_type: digitalProduct.license_type,
-      license_key: (await supabase.from('digital_licenses').select('license_key').eq('order_id', order.id).eq('digital_product_id', digitalProduct.id).maybeSingle()).data?.license_key || undefined,
+      license_key: license?.license_key || undefined,
     },
   });
 

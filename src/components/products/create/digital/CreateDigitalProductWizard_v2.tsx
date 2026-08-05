@@ -41,6 +41,7 @@ import { cn } from '@/lib/utils';
 import { useWizardServerValidation } from '@/hooks/useWizardServerValidation';
 import { createDigitalProductTx } from '@/lib/products/product-create-rpc';
 import { buildDigitalProductFilesPayload } from '@/lib/digital/build-digital-product-files-payload';
+import { resolvePrimaryDigitalFile } from '@/lib/digital/resolve-primary-digital-file';
 import { validateDigitalWizardPublishSteps } from '@/lib/digital-wizard-step-validation';
 import type {
   DigitalProductFormData,
@@ -821,7 +822,7 @@ export const CreateDigitalProductWizard = ({
           );
         }
 
-        const mainFile = formData.downloadable_files?.[0];
+        const mainFile = resolvePrimaryDigitalFile(formData.downloadable_files);
         const mainFileFormat =
           mainFile?.type?.split('/')[1] || mainFile?.name?.split('.').pop() || 'unknown';
         const totalSizeMB =

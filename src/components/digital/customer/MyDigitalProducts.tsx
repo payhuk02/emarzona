@@ -16,12 +16,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { Download, ExternalLink, Search, Filter, Package, Clock, Key } from 'lucide-react';
 import { AlertCircleIcon } from '@/components/icons/AlertCircleIcon';
 import {
@@ -35,7 +29,10 @@ import { fr } from 'date-fns/locale';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { cn } from '@/lib/utils';
-import { fileNameFromRef } from '@/lib/digital/storage-ref';
+function getPurchasedFileLabel(file: { name?: string; is_main?: boolean }, index: number): string {
+  const baseName = file.name?.trim() || `Fichier ${index + 1}`;
+  return file.is_main ? `${baseName} (Principal)` : baseName;
+}
 
 export const MyDigitalProducts = () => {
   const { data: products, isLoading, error } = useCustomerPurchasedProducts();
@@ -341,83 +338,75 @@ export const MyDigitalProducts = () => {
                     )}
 
                     {/* Actions */}
-                    <div className="flex flex-wrap gap-2 pt-2">
-                      {product.files && product.files.length > 1 ? (
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
+                    <div className="space-y-2 pt-2">
+                      {product.files && product.files.length > 1 && (
+                        <p className="text-sm font-medium text-muted-foreground">
+                          Vos fichiers ({product.files.length})
+                        </p>
+                      )}
+                      <div className="flex flex-wrap gap-2">
+                        {product.files && product.files.length > 0 ? (
+                          product.files.map((file, idx) => (
                             <Button
+                              key={file.id}
+                              onClick={() => handleDownload(product, file.id)}
                               disabled={generateLink.isPending || product.status !== 'active'}
                               variant="default"
                               size="sm"
                             >
                               <Download className="h-4 w-4 mr-2" />
-                              Télécharger ({product.files.length})
+                              {getPurchasedFileLabel(file, idx)}
                             </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            {product.files.map((file, idx) => {
-                              const displayName = file.file_url
-                                ? fileNameFromRef(file.file_url)
-                                : file.name || `Fichier ${idx + 1}`;
+                          ))
+                        ) : (
+                          <Button
+                            onClick={() => handleDownload(product, product.main_file_id)}
+                            disabled={generateLink.isPending || product.status !== 'active'}
+                            variant="default"
+                            size="sm"
+                          >
+                            <Download className="h-4 w-4 mr-2" />
+                            Télécharger
+                          </Button>
+                        )}
 
-                              return (
-                                <DropdownMenuItem
-                                  key={file.id}
-                                  onClick={() => handleDownload(product, file.id)}
-                                >
-                                  {displayName} {file.is_main && '(Principal)'}
-                                </DropdownMenuItem>
-                              );
-                            })}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      ) : (
-                        <Button
-                          onClick={() => handleDownload(product, product.main_file_id)}
-                          disabled={generateLink.isPending || product.status !== 'active'}
-                          variant="default"
-                          size="sm"
-                        >
-                          <Download className="h-4 w-4 mr-2" />
-                          Télécharger
-                        </Button>
-                      )}
-
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          const storeDomain =
-                            product.store_custom_domain ||
-                            (product.store_subdomain
-                              ? `${product.store_subdomain}.myemarzona.shop`
-                              : null);
-                          const productUrl =
-                            storeDomain && product.product_slug
-                              ? `https://${storeDomain}/products/${product.product_slug}`
-                              : `/marketplace`;
-                          window.open(productUrl, '_blank');
-                        }}
-                      >
-                        <ExternalLink className="h-4 w-4 mr-2" />
-                        Voir le produit
-                      </Button>
-                      {product.license_key && (
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => {
-                            navigator.clipboard.writeText(product.license_key!);
-                            toast({
-                              title: 'Clé copiée',
-                              description: 'La clé de licence a été copiée dans le presse-papiers',
-                            });
+                            const storeDomain =
+                              product.store_custom_domain ||
+                              (product.store_subdomain
+                                ? `${product.store_subdomain}.myemarzona.shop`
+                                : null);
+                            const productUrl =
+                              storeDomain && product.product_slug
+                                ? `https://${storeDomain}/products/${product.product_slug}`
+                                : `/marketplace`;
+                            window.open(productUrl, '_blank');
                           }}
                         >
-                          <Key className="h-4 w-4 mr-2" />
-                          Copier la clé
+                          <ExternalLink className="h-4 w-4 mr-2" />
+                          Voir le produit
                         </Button>
-                      )}
+                        {product.license_key && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              navigator.clipboard.writeText(product.license_key!);
+                              toast({
+                                title: 'Clé copiée',
+                                description:
+                                  'La clé de licence a été copiée dans le presse-papiers',
+                              });
+                            }}
+                          >
+                            <Key className="h-4 w-4 mr-2" />
+                            Copier la clé
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
