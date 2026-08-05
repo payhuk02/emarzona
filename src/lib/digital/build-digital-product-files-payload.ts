@@ -47,7 +47,7 @@ export function buildDigitalProductFilesPayload(input: {
 
   if (downloadable.length > 0) {
     return downloadable.map((file, index) => ({
-      name: file.name,
+      name: file.name?.trim() || inferFileName(file.url, `Fichier ${index + 1}`),
       file_url: file.url,
       file_type: file.format || inferFileType(file.url, file.format),
       file_size_mb: (file.size ?? 0) / (1024 * 1024),

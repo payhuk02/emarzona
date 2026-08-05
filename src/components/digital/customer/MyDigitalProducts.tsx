@@ -29,16 +29,17 @@ import { fr } from 'date-fns/locale';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { cn } from '@/lib/utils';
-function getPurchasedFileLabel(file: { name?: string; is_main?: boolean }, index: number): string {
-  const baseName = file.name?.trim() || `Fichier ${index + 1}`;
-  return file.is_main ? `${baseName} (Principal)` : baseName;
-}
+import { getCustomerDigitalFileLabel } from '@/lib/digital/customer-file-label';
+import { redeemDownloadToken } from '@/lib/digital/redeem-download';
+import { buildDownloadRedeemPageUrl } from '@/lib/digital/drm-policy';
+import { parseFileRef } from '@/lib/digital/storage-ref';
 
 export const MyDigitalProducts = () => {
   const { data: products, isLoading, error } = useCustomerPurchasedProducts();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [typeFilter, setTypeFilter] = useState<string>('all');
+  const [downloadingFileId, setDownloadingFileId] = useState<string | null>(null);
   const generateLink = useGenerateDownloadLink();
   const { toast } = useToast();
 
@@ -50,7 +51,11 @@ export const MyDigitalProducts = () => {
       return matchesSearch && matchesStatus && matchesType;
     }) || [];
 
-  const handleDownload = async (product: PurchasedDigitalProduct, fileId: string | null) => {
+  const handleDownload = async (
+    product: PurchasedDigitalProduct,
+    fileId: string | null,
+    fileUrl?: string
+  ) => {
     if (!fileId) {
       toast({
         title: 'Fichier indisponible',
@@ -61,30 +66,53 @@ export const MyDigitalProducts = () => {
       return;
     }
 
-    // Ouvrir un onglet tout de suite pour éviter le blocage des pop-ups par le navigateur
-    const newTab = window.open('about:blank', '_blank');
+    setDownloadingFileId(fileId);
 
     try {
-      const result = await generateLink.mutateAsync({
-        fileId: fileId,
-      });
+      const result = await generateLink.mutateAsync({ fileId });
+      const token = result.token;
+      const redeemPageUrl =
+        result.url || (token ? buildDownloadRedeemPageUrl(token, window.location.origin) : null);
 
-      if (result.url) {
-        if (newTab) {
-          newTab.location.href = result.url;
-        } else {
-          window.location.href = result.url;
+      if (!token && !redeemPageUrl) {
+        throw new Error('Impossible de générer le lien de téléchargement');
+      }
+
+      const isExternalLink = fileUrl ? parseFileRef(fileUrl).kind === 'external' : false;
+
+      if (token && isExternalLink) {
+        const redeemed = await redeemDownloadToken(token);
+        if (!redeemed.ok) {
+          throw new Error(redeemed.error.error);
+        }
+
+        const opened = window.open(redeemed.data.signedUrl, '_blank', 'noopener,noreferrer');
+        if (!opened) {
+          window.location.assign(redeemed.data.signedUrl);
+        }
+
+        toast({
+          title: 'Accès ouvert',
+          description: "Le lien du produit s'ouvre dans un nouvel onglet.",
+        });
+        return;
+      }
+
+      if (redeemPageUrl) {
+        const opened = window.open(redeemPageUrl, '_blank', 'noopener,noreferrer');
+        if (!opened) {
+          window.location.assign(redeemPageUrl);
         }
 
         toast({
           title: 'Téléchargement démarré',
           description: 'Le téléchargement a été lancé dans un nouvel onglet',
         });
+        return;
       }
+
+      throw new Error("Impossible d'ouvrir le fichier");
     } catch (err: unknown) {
-      if (newTab) {
-        newTab.close();
-      }
       const message =
         err instanceof Error ? err.message : 'Impossible de générer le lien de téléchargement';
       toast({
@@ -92,6 +120,8 @@ export const MyDigitalProducts = () => {
         description: message,
         variant: 'destructive',
       });
+    } finally {
+      setDownloadingFileId(null);
     }
   };
 
@@ -349,24 +379,34 @@ export const MyDigitalProducts = () => {
                           product.files.map((file, idx) => (
                             <Button
                               key={file.id}
-                              onClick={() => handleDownload(product, file.id)}
-                              disabled={generateLink.isPending || product.status !== 'active'}
+                              onClick={() => handleDownload(product, file.id, file.file_url)}
+                              disabled={
+                                downloadingFileId === file.id ||
+                                generateLink.isPending ||
+                                product.status !== 'active'
+                              }
                               variant="default"
                               size="sm"
                             >
                               <Download className="h-4 w-4 mr-2" />
-                              {getPurchasedFileLabel(file, idx)}
+                              {getCustomerDigitalFileLabel(file.name, idx)}
                             </Button>
                           ))
                         ) : (
                           <Button
-                            onClick={() => handleDownload(product, product.main_file_id)}
-                            disabled={generateLink.isPending || product.status !== 'active'}
+                            onClick={() =>
+                              handleDownload(product, product.main_file_id, product.main_file_url)
+                            }
+                            disabled={
+                              downloadingFileId === product.main_file_id ||
+                              generateLink.isPending ||
+                              product.status !== 'active'
+                            }
                             variant="default"
                             size="sm"
                           >
                             <Download className="h-4 w-4 mr-2" />
-                            Télécharger
+                            {getCustomerDigitalFileLabel(product.files?.[0]?.name, 0)}
                           </Button>
                         )}
 

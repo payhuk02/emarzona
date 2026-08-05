@@ -47,17 +47,32 @@ export async function fillDigitalBasicInfoStep(
 
 export async function fillDigitalMainFileUrlStep(
   page: Page,
-  urls: string[] = [E2E_DIGITAL_MAIN_FILE_URL]
+  urls: string[] = [E2E_DIGITAL_MAIN_FILE_URL],
+  labels: string[] = []
 ): Promise<void> {
-  const mainInput = page.locator('input[type="url"][placeholder*="fichier-principal"]').first();
+  const mainUrlInput = page.locator('input[type="url"][placeholder*="fichier-principal"]').first();
+  const mainLabelInput = page.locator('#main-link-label');
 
-  for (const url of urls) {
-    await mainInput.fill(url);
+  for (let i = 0; i < urls.length; i += 1) {
+    const url = urls[i];
+    const label = labels[i]?.trim();
+
+    if (label) {
+      await mainLabelInput.fill(label);
+    } else {
+      await mainLabelInput.fill('');
+    }
+
+    await mainUrlInput.fill(url);
     await page
       .getByRole('button', { name: /Ajouter/i })
       .first()
       .click();
     await expect(page.getByText(url, { exact: false })).toBeVisible({ timeout: 10_000 });
+
+    if (label) {
+      await expect(page.getByDisplayValue(label)).toBeVisible({ timeout: 10_000 });
+    }
   }
 
   if (urls.length > 1) {

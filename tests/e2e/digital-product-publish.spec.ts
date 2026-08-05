@@ -144,6 +144,7 @@ test.describe('Digital wizard — publish (E2E)', () => {
       E2E_DIGITAL_MAIN_FILE_URL_2,
       E2E_DIGITAL_MAIN_FILE_URL_3,
     ];
+    const mainLabels = ['Partie 1 E2E', 'Partie 2 E2E', 'Partie 3 E2E'];
 
     await loginE2EVendor(page, ctx.email, ctx.password, ctx.storeId);
     await openDigitalCreateWizard(page);
@@ -152,7 +153,7 @@ test.describe('Digital wizard — publish (E2E)', () => {
     await fillDigitalBasicInfoStep(page, { name: productName });
     await clickWizardNext(page, 1);
 
-    await fillDigitalMainFileUrlStep(page, mainUrls);
+    await fillDigitalMainFileUrlStep(page, mainUrls, mainLabels);
     await clickWizardNext(page, 1);
 
     await advanceDigitalWizardToPublishStep(page);
@@ -171,6 +172,7 @@ test.describe('Digital wizard — publish (E2E)', () => {
           digital_product_files (
             is_main,
             file_url,
+            name,
             order_index
           )
         )
@@ -193,6 +195,7 @@ test.describe('Digital wizard — publish (E2E)', () => {
             digital_product_files: Array<{
               is_main: boolean;
               file_url: string | null;
+              name: string | null;
               order_index: number | null;
             }>;
           }
@@ -201,6 +204,7 @@ test.describe('Digital wizard — publish (E2E)', () => {
             digital_product_files: Array<{
               is_main: boolean;
               file_url: string | null;
+              name: string | null;
               order_index: number | null;
             }>;
           }>
@@ -216,6 +220,7 @@ test.describe('Digital wizard — publish (E2E)', () => {
     expect(product.name).toBe(productName);
     expect(mainFiles).toHaveLength(mainUrls.length);
     expect(mainFiles.map(file => file.file_url)).toEqual(expect.arrayContaining(mainUrls));
+    expect(mainFiles.map(file => file.name)).toEqual(expect.arrayContaining(mainLabels));
     expect(digital?.main_file_url).toBe(E2E_DIGITAL_MAIN_FILE_URL);
 
     testInfo.attach('published-digital-multi-link-product-id', {
