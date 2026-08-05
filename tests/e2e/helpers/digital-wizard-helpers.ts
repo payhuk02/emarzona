@@ -71,7 +71,9 @@ export async function fillDigitalMainFileUrlStep(
     await expect(page.getByText(url, { exact: false })).toBeVisible({ timeout: 10_000 });
 
     if (label) {
-      await expect(page.getByDisplayValue(label)).toBeVisible({ timeout: 10_000 });
+      await expect(page.getByPlaceholder(/Nom affiché/i).nth(i)).toHaveValue(label, {
+        timeout: 10_000,
+      });
     }
   }
 
