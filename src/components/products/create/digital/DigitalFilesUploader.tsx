@@ -95,6 +95,12 @@ export const DigitalFilesUploader = ({ formData, updateFormData }: DigitalFilesU
     updateFormData({ downloadable_files: newFiles });
   };
 
+  const updateFileUrl = (index: number, url: string) => {
+    const newFiles = [...(formData.downloadable_files || [])];
+    newFiles[index] = { ...newFiles[index], url: url.trim() };
+    updateFormData({ downloadable_files: newFiles });
+  };
+
   const mainFiles = (formData.downloadable_files || []).filter(f => f.is_main);
   const additionalFiles = (formData.downloadable_files || []).filter(f => !f.is_main);
 
@@ -164,9 +170,13 @@ export const DigitalFilesUploader = ({ formData, updateFormData }: DigitalFilesU
           if (isMainList && !file.is_main) return null;
           if (!isMainList && file.is_main) return null;
 
+          const displayIndex = isMainList
+            ? (formData.downloadable_files?.slice(0, index).filter(f => f.is_main).length ?? 0)
+            : (formData.downloadable_files?.slice(0, index).filter(f => !f.is_main).length ?? 0);
+
           return (
             <div
-              key={index}
+              key={file.id ?? `${file.url}-${index}`}
               className="flex flex-col gap-3 p-3 border rounded-lg sm:flex-row sm:items-center sm:space-x-3"
             >
               <div className="flex items-start gap-3 flex-1 min-w-0">
@@ -174,11 +184,19 @@ export const DigitalFilesUploader = ({ formData, updateFormData }: DigitalFilesU
                 <div className="flex-1 min-w-0 space-y-2">
                   <Input
                     type="text"
-                    placeholder={`Nom affiché (sinon: Accédez au produit ${index + 1})`}
+                    placeholder={`Nom affiché (sinon: Accédez au produit ${displayIndex + 1})`}
                     value={file.name || ''}
                     onChange={e => updateFileLabel(index, e.target.value)}
                   />
-                  <p className="text-xs text-muted-foreground break-all">{file.url}</p>
+                  <Input
+                    type="url"
+                    value={file.url || ''}
+                    onChange={e => updateFileUrl(index, e.target.value)}
+                    aria-label={`URL du lien ${displayIndex + 1}`}
+                  />
+                  {file.url && !isValidUrl(file.url) && (
+                    <p className="text-xs text-destructive">URL invalide (http:// ou https://)</p>
+                  )}
                 </div>
               </div>
 
