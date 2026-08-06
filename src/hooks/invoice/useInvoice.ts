@@ -1,7 +1,7 @@
 /**
  * Hook useInvoice - Gestion des factures
  * Date: 26 Janvier 2025
- * 
+ *
  * Fonctionnalités:
  * - Création facture depuis commande
  * - Génération PDF
@@ -13,30 +13,48 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
-import type { Invoice, InvoiceItem, CreateInvoiceOptions } from '@/types/invoice';
+import {
+  getBuyerOrderCustomerIds,
+  resolveBuyerCustomerIds,
+} from '@/lib/customer/resolve-buyer-customer-ids';
+import type { Invoice, CreateInvoiceOptions } from '@/types/invoice';
 
 const INVOICE_QUERY_KEY = ['invoices'];
 
+export type UseInvoicesParams = {
+  userId?: string;
+  email?: string | null;
+};
+
 /**
- * Récupérer toutes les factures d'un utilisateur
+ * Récupérer toutes les factures d'un acheteur (via customers.id, multi-boutique)
  */
-export function useInvoices(customerId?: string) {
+export function useInvoices(params?: UseInvoicesParams) {
   return useQuery({
-    queryKey: [...INVOICE_QUERY_KEY, customerId],
+    queryKey: [...INVOICE_QUERY_KEY, params?.userId, params?.email],
     queryFn: async (): Promise<Invoice[]> => {
-      let  query= supabase
+      if (!params?.userId) return [];
+
+      const customerIds = getBuyerOrderCustomerIds(
+        await resolveBuyerCustomerIds({
+          userId: params.userId,
+          email: params.email,
+        }),
+        params.userId
+      );
+
+      if (customerIds.length === 0) return [];
+
+      const { data, error } = await supabase
         .from('invoices')
-        .select(`
+        .select(
+          `
           *,
           invoice_items(*)
-        `)
+        `
+        )
+        .in('customer_id', customerIds)
         .order('invoice_date', { ascending: false });
-
-      if (customerId) {
-        query = query.eq('customer_id', customerId);
-      }
-
-      const { data, error } = await query;
 
       if (error) {
         logger.error('Error fetching invoices:', error);
@@ -45,7 +63,7 @@ export function useInvoices(customerId?: string) {
 
       return (data as Invoice[]) || [];
     },
-    enabled: true,
+    enabled: !!params?.userId,
   });
 }
 
@@ -58,10 +76,12 @@ export function useInvoice(invoiceId: string) {
     queryFn: async (): Promise<Invoice | null> => {
       const { data, error } = await supabase
         .from('invoices')
-        .select(`
+        .select(
+          `
           *,
           invoice_items(*)
-        `)
+        `
+        )
         .eq('id', invoiceId)
         .single();
 
@@ -85,10 +105,12 @@ export function useOrderInvoices(orderId: string) {
     queryFn: async (): Promise<Invoice[]> => {
       const { data, error } = await supabase
         .from('invoices')
-        .select(`
+        .select(
+          `
           *,
           invoice_items(*)
-        `)
+        `
+        )
         .eq('order_id', orderId)
         .order('created_at', { ascending: false });
 
@@ -125,10 +147,12 @@ export function useCreateInvoice() {
       // Récupérer la facture créée
       const { data: invoice, error: fetchError } = await supabase
         .from('invoices')
-        .select(`
+        .select(
+          `
           *,
           invoice_items(*)
-        `)
+        `
+        )
         .eq('id', invoiceId)
         .single();
 
@@ -139,18 +163,18 @@ export function useCreateInvoice() {
 
       return invoice as Invoice;
     },
-    onSuccess: (invoice) => {
+    onSuccess: invoice => {
       queryClient.invalidateQueries({ queryKey: INVOICE_QUERY_KEY });
       toast({
         title: '✅ Facture créée',
         description: `Facture ${invoice.invoice_number} créée avec succès`,
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       logger.error('Error creating invoice:', error);
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de créer la facture',
+        description: error instanceof Error ? error.message : 'Impossible de créer la facture',
         variant: 'destructive',
       });
     },
@@ -171,14 +195,14 @@ export function useGenerateInvoicePDF() {
       // Pour l'instant, retourner l'ID de la facture
       return invoiceId;
     },
-    onSuccess: (invoiceId) => {
+    onSuccess: invoiceId => {
       queryClient.invalidateQueries({ queryKey: [...INVOICE_QUERY_KEY, invoiceId] });
       toast({
         title: '✅ PDF généré',
         description: 'Le PDF de la facture a été généré',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       logger.error('Error generating PDF:', error);
       toast({
         title: '❌ Erreur',
@@ -225,11 +249,11 @@ export function useSendInvoiceEmail() {
         description: 'La facture a été envoyée par email',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       logger.error('Error sending invoice email:', error);
       toast({
         title: '❌ Erreur',
-        description: 'Impossible d\'envoyer l\'email',
+        description: "Impossible d'envoyer l'email",
         variant: 'destructive',
       });
     },
@@ -266,7 +290,7 @@ export function useMarkInvoicePaid() {
         description: 'La facture a été marquée comme payée',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       logger.error('Error marking invoice as paid:', error);
       toast({
         title: '❌ Erreur',
@@ -276,10 +300,3 @@ export function useMarkInvoicePaid() {
     },
   });
 }
-
-
-
-
-
-
-

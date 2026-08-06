@@ -42,6 +42,15 @@ export interface ProductReturn {
   return_tracking_number?: string;
   created_at: string;
   updated_at: string;
+  products?: {
+    id: string;
+    name: string;
+    image_url?: string | null;
+  } | null;
+  orders?: {
+    order_number?: string;
+    customer_id?: string;
+  } | null;
 }
 
 const RETURNS_QUERY_KEY = ['product-returns'];
@@ -60,7 +69,16 @@ export function useCustomerReturns(customerId?: string) {
       // La politique peut vérifier customer_id ou user_id selon la migration
       const { data, error } = await supabase
         .from('product_returns')
-        .select(PRODUCT_RETURN_FIELDS)
+        .select(
+          `
+          ${PRODUCT_RETURN_FIELDS},
+          products (
+            id,
+            name,
+            image_url
+          )
+        `
+        )
         .order('created_at', { ascending: false });
 
       if (error) {

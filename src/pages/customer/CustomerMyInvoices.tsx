@@ -93,7 +93,15 @@ export default function CustomerMyInvoices() {
     fetchUser();
   }, []);
 
-  const { data: invoices, isLoading, error: invoicesError, refetch } = useInvoices(user?.id);
+  const {
+    data: invoices,
+    isLoading,
+    error: invoicesError,
+    refetch,
+  } = useInvoices({
+    userId: user?.id,
+    email: user?.email,
+  });
 
   // Filtrer les factures
   const filteredInvoices = useMemo(() => {
@@ -145,8 +153,9 @@ export default function CustomerMyInvoices() {
           description: `Facture ${invoice.invoice_number} téléchargée avec succès`,
         });
         logger.info('Invoice PDF downloaded:', invoice.id);
-      } catch (_error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
+      } catch (downloadError: unknown) {
+        const errorMessage =
+          downloadError instanceof Error ? downloadError.message : 'Erreur inconnue';
         logger.error('Error downloading invoice PDF:', { error: errorMessage });
         toast({
           title: 'Erreur',

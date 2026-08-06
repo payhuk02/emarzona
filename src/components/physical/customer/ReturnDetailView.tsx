@@ -5,27 +5,30 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { useReturn } from '@/hooks/physical/useReturns';
+import { useReturn } from '@/hooks/returns/useReturns';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import {
-  RotateCcw,
-  Package,
-  Calendar,
-  DollarSign,
-  CheckCircle2,
-  XCircle,
-  Clock,
-  AlertCircle,
-} from 'lucide-react';
-import { useState } from 'react';
+import { RotateCcw, CheckCircle2, Clock } from 'lucide-react';
 
 interface ReturnDetailViewProps {
   returnId: string;
 }
+
+const STATUS_LABELS: Record<string, string> = {
+  requested: 'En attente',
+  approved: 'Approuvé',
+  rejected: 'Rejeté',
+  pending_pickup: 'Récupération',
+  in_transit: 'En transit',
+  received: 'Reçu',
+  inspecting: 'En inspection',
+  refunded: 'Remboursé',
+  exchanged: 'Échangé',
+  replaced: 'Remplacé',
+  cancelled: 'Annulé',
+};
 
 export const ReturnDetailView = ({ returnId }: ReturnDetailViewProps) => {
   const { data: returnData, isLoading, error } = useReturn(returnId);
@@ -50,49 +53,35 @@ export const ReturnDetailView = ({ returnId }: ReturnDetailViewProps) => {
   }
 
   const getStatusBadge = (status: string) => {
-    const  variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
-      pending: 'secondary',
+    const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
+      requested: 'secondary',
       approved: 'default',
       rejected: 'destructive',
-      return_received: 'default',
-      inspecting: 'default',
-      refund_processing: 'default',
+      pending_pickup: 'secondary',
+      in_transit: 'default',
+      received: 'default',
+      inspecting: 'secondary',
       refunded: 'outline',
-      completed: 'outline',
+      exchanged: 'default',
+      replaced: 'default',
       cancelled: 'destructive',
     };
 
-    const  labels: Record<string, string> = {
-      pending: 'En attente',
-      approved: 'Approuvé',
-      rejected: 'Rejeté',
-      return_received: 'Reçu',
-      inspecting: 'En inspection',
-      refund_processing: 'Remboursement en cours',
-      refunded: 'Remboursé',
-      completed: 'Terminé',
-      cancelled: 'Annulé',
-    };
-
-    return (
-      <Badge variant={variants[status] || 'default'}>
-        {labels[status] || status}
-      </Badge>
-    );
+    return <Badge variant={variants[status] || 'default'}>{STATUS_LABELS[status] || status}</Badge>;
   };
 
-  // Timeline des statuts
   const statusTimeline = [
     { key: 'requested', label: 'Demandé', date: returnData.requested_at },
     { key: 'approved', label: 'Approuvé', date: returnData.approved_at },
-    { key: 'return_received', label: 'Reçu', date: returnData.return_received_at },
-    { key: 'inspecting', label: 'En inspection', date: returnData.inspected_at },
-    { key: 'refunded', label: 'Remboursé', date: returnData.refund_processed_at },
-  ].filter((item) => item.date);
+    { key: 'received', label: 'Reçu', date: returnData.received_at },
+    { key: 'inspecting', label: 'En inspection', date: returnData.received_at },
+    { key: 'refunded', label: 'Remboursé', date: returnData.refunded_at },
+  ].filter(item => item.date);
+
+  const productName = returnData.products?.name ?? 'Produit';
 
   return (
     <div className="space-y-6">
-      {/* Informations générales */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -112,7 +101,7 @@ export const ReturnDetailView = ({ returnId }: ReturnDetailViewProps) => {
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Produit</p>
-              <p className="font-medium">{returnData.product?.name || 'Produit inconnu'}</p>
+              <p className="font-medium">{productName}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Quantité</p>
@@ -121,10 +110,10 @@ export const ReturnDetailView = ({ returnId }: ReturnDetailViewProps) => {
             <div>
               <p className="text-sm text-muted-foreground">Raison</p>
               <Badge variant="outline" className="mt-1">
-                {returnData.return_reason.replace('_', ' ')}
+                {returnData.return_reason.replace(/_/g, ' ')}
               </Badge>
             </div>
-            {returnData.refund_amount && (
+            {returnData.refund_amount != null && (
               <div>
                 <p className="text-sm text-muted-foreground">Montant remboursé</p>
                 <p className="font-medium">
@@ -153,64 +142,69 @@ export const ReturnDetailView = ({ returnId }: ReturnDetailViewProps) => {
         </CardContent>
       </Card>
 
-      {/* Timeline du retour */}
       <Card>
         <CardHeader>
           <CardTitle>Historique du retour</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="relative pl-8 border-l-2 border-muted">
-            {statusTimeline.map((step, index) => {
-              const isLast = index === statusTimeline.length - 1;
-              const isCurrent = step.key === returnData.status;
-              const isCompleted = statusTimeline.findIndex((s) => s.key === returnData.status) > index;
+          {statusTimeline.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              Aucun événement enregistré pour le moment.
+            </p>
+          ) : (
+            <div className="relative pl-8 border-l-2 border-muted">
+              {statusTimeline.map((step, index) => {
+                const isLast = index === statusTimeline.length - 1;
+                const isCurrent = step.key === returnData.status;
+                const currentIndex = statusTimeline.findIndex(s => s.key === returnData.status);
+                const isCompleted = currentIndex > index;
 
-              return (
-                <div key={step.key} className={`relative ${!isLast ? 'pb-8' : ''}`}>
-                  <div className="absolute -left-[13px] top-0">
-                    {isCompleted ? (
-                      <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center">
-                        <CheckCircle2 className="h-4 w-4 text-white" />
-                      </div>
-                    ) : isCurrent ? (
-                      <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center">
-                        <Clock className="h-4 w-4 text-white animate-pulse" />
-                      </div>
-                    ) : (
-                      <div className="w-6 h-6 rounded-full bg-muted border-2 border-muted-foreground" />
-                    )}
-                  </div>
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">{step.label}</span>
-                      {isCurrent && (
-                        <Badge variant="default" className="ml-2">
-                          En cours
-                        </Badge>
+                return (
+                  <div key={step.key} className={`relative ${!isLast ? 'pb-8' : ''}`}>
+                    <div className="absolute -left-[13px] top-0">
+                      {isCompleted ? (
+                        <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center">
+                          <CheckCircle2 className="h-4 w-4 text-white" />
+                        </div>
+                      ) : isCurrent ? (
+                        <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center">
+                          <Clock className="h-4 w-4 text-white animate-pulse" />
+                        </div>
+                      ) : (
+                        <div className="w-6 h-6 rounded-full bg-muted border-2 border-muted-foreground" />
                       )}
                     </div>
-                    {step.date && (
-                      <p className="text-sm text-muted-foreground pl-6">
-                        {format(new Date(step.date), 'dd MMMM yyyy à HH:mm', { locale: fr })}
-                      </p>
-                    )}
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">{step.label}</span>
+                        {isCurrent && (
+                          <Badge variant="default" className="ml-2">
+                            En cours
+                          </Badge>
+                        )}
+                      </div>
+                      {step.date && (
+                        <p className="text-sm text-muted-foreground pl-6">
+                          {format(new Date(step.date), 'dd MMMM yyyy à HH:mm', { locale: fr })}
+                        </p>
+                      )}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </CardContent>
       </Card>
 
-      {/* Photos */}
-      {returnData.photos && returnData.photos.length > 0 && (
+      {returnData.customer_photos && returnData.customer_photos.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle>Photos du retour</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {returnData.photos.map((photo: string, index: number) => (
+              {returnData.customer_photos.map((photo: string, index: number) => (
                 <img
                   key={index}
                   src={photo}
@@ -225,10 +219,3 @@ export const ReturnDetailView = ({ returnId }: ReturnDetailViewProps) => {
     </div>
   );
 };
-
-
-
-
-
-
-

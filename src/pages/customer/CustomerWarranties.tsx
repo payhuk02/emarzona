@@ -57,7 +57,10 @@ import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import type { WarrantyRegistration, WarrantyClaim } from '@/hooks/physical/useWarranties';
-import { resolveBuyerCustomerIds } from '@/lib/customer/resolve-buyer-customer-ids';
+import {
+  resolveBuyerCustomerIds,
+  getBuyerOrderCustomerIds,
+} from '@/lib/customer/resolve-buyer-customer-ids';
 
 export default function CustomerWarranties() {
   const { user } = useAuth();
@@ -122,47 +125,18 @@ export default function CustomerWarranties() {
     enabled: !!user?.id,
   });
 
-  // Fetch user warranty claims
+  // Fetch user warranty claims (directement par user_id — aligné RLS)
   const { data: claims = [], isLoading: claimsLoading } = useQuery({
-    queryKey: ['customer-warranty-claims', user?.id, user?.email],
+    queryKey: ['customer-warranty-claims', user?.id],
     queryFn: async () => {
       if (!user?.id) return [];
 
-      // Récupérer les commandes de l'utilisateur
-      const customerIds = await resolveBuyerCustomerIds({
-        userId: user.id,
-        email: user.email,
-      });
-      const { data: userOrders } = await supabase
-        .from('orders')
-        .select('id')
-        .in('customer_id', customerIds);
-
-      const orderIds = userOrders?.map(o => o.id) || [];
-
-      if (orderIds.length === 0) {
-        return [];
-      }
-
-      // Récupérer les garanties de l'utilisateur
-      const { data: userWarranties } = await supabase
-        .from('product_warranties')
-        .select('id')
-        .in('order_id', orderIds);
-
-      const warrantyIds = userWarranties?.map(w => w.id) || [];
-
-      if (warrantyIds.length === 0) {
-        return [];
-      }
-
-      // Récupérer les réclamations
       const { data, error } = await supabase
         .from('warranty_claims')
         .select(
           `
           *,
-          product_warranties!inner (
+          product_warranties (
             id,
             warranty_number,
             products (
@@ -173,7 +147,7 @@ export default function CustomerWarranties() {
           )
         `
         )
-        .in('warranty_id', warrantyIds)
+        .eq('user_id', user.id)
         .order('submitted_at', { ascending: false });
 
       if (error) {
@@ -191,6 +165,12 @@ export default function CustomerWarranties() {
     queryKey: ['customer-orders-for-warranty', user?.id, user?.email],
     queryFn: async () => {
       if (!user?.id) return [];
+
+      const customerIds = getBuyerOrderCustomerIds(
+        await resolveBuyerCustomerIds({ userId: user.id, email: user.email }),
+        user.id
+      );
+      if (customerIds.length === 0) return [];
 
       const { data, error } = await supabase
         .from('orders')
@@ -210,8 +190,8 @@ export default function CustomerWarranties() {
           )
         `
         )
-        .in('customer_id', await resolveBuyerCustomerIds({ userId: user.id, email: user.email }))
-        .eq('status', 'delivered')
+        .in('customer_id', customerIds)
+        .eq('payment_status', 'paid')
         .order('created_at', { ascending: false })
         .limit(50);
 
@@ -220,7 +200,11 @@ export default function CustomerWarranties() {
         return [];
       }
 
-      return data || [];
+      return (data ?? []).filter(order => {
+        type OrderItem = { product_type?: string | null };
+        const items = (order.order_items ?? []) as OrderItem[];
+        return items.some(item => item.product_type === 'physical');
+      });
     },
     enabled: !!user?.id && isRegisterDialogOpen,
   });
@@ -754,14 +738,17 @@ export default function CustomerWarranties() {
                       id: string;
                       order_number: string;
                       created_at: string;
-                      order_items?: Array<{ product_id: string }>;
+                      order_items?: Array<{ product_id: string; product_type?: string | null }>;
                     };
                     const order = orders.find((o: OrderWithItems) => o.id === value);
-                    if (order && order.order_items && order.order_items.length > 0) {
+                    const physicalItem =
+                      order?.order_items?.find(item => item.product_type === 'physical') ??
+                      order?.order_items?.[0];
+                    if (order && physicalItem) {
                       setRegisterForm({
                         ...registerForm,
                         order_id: value,
-                        product_id: order.order_items[0].product_id,
+                        product_id: physicalItem.product_id,
                         purchase_date: order.created_at
                           ? format(new Date(order.created_at), 'yyyy-MM-dd')
                           : '',

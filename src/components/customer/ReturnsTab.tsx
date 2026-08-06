@@ -100,7 +100,7 @@ export const ReturnsTab = () => {
   const filteredReturns = useMemo(() => {
     if (!returns) return [];
 
-    let  filtered= returns;
+    let filtered = returns;
 
     // Filtre par statut
     if (activeTab !== 'all') {
@@ -126,7 +126,8 @@ export const ReturnsTab = () => {
       filtered = filtered.filter(
         (r: ProductReturn) =>
           r.return_number.toLowerCase().includes(query) ||
-          r.product_id?.toLowerCase().includes(query)
+          r.product_id?.toLowerCase().includes(query) ||
+          r.products?.name?.toLowerCase().includes(query)
       );
     }
 
@@ -135,7 +136,7 @@ export const ReturnsTab = () => {
 
   const getStatusBadge = useCallback((status: string) => {
     type IconComponent = React.ComponentType<{ className?: string }>;
-    const  statusConfig: Record<
+    const statusConfig: Record<
       string,
       {
         label: string;
@@ -477,7 +478,8 @@ export const ReturnsTab = () => {
                           <div className="flex items-center gap-2">
                             <Package className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                             <span className="font-medium truncate">
-                              Produit {returnItem.product_id.slice(0, 8)}...
+                              {returnItem.products?.name ??
+                                `Produit ${returnItem.product_id.slice(0, 8)}...`}
                             </span>
                           </div>
                         </TableCell>
@@ -549,7 +551,8 @@ export const ReturnsTab = () => {
                             </h3>
                             <div className="flex items-center gap-1 text-xs sm:text-sm text-muted-foreground mb-2">
                               <Package className="h-3.5 w-3.5" />
-                              Produit {returnItem.product_id.slice(0, 8)}...
+                              {returnItem.products?.name ??
+                                `Produit ${returnItem.product_id.slice(0, 8)}...`}
                             </div>
                             <p className="text-xs sm:text-sm text-muted-foreground mb-2">
                               {returnItem.return_reason === 'defective' && 'Défectueux'}
@@ -613,9 +616,3 @@ export const ReturnsTab = () => {
     </div>
   );
 };
-
-
-
-
-
-
