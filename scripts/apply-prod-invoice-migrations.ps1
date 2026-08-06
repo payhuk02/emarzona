@@ -14,7 +14,7 @@ if (-not $env:SUPABASE_DB_PASSWORD) {
 $env:SUPABASE_TARGET = 'prod'
 
 $migrations = @(
-  'supabase/migrations/20260806120000__fix_invoices_customer_rls.sql',
+  'supabase/migrations/20260806140000__fix_invoices_customer_rls_email_only.sql',
   'supabase/migrations/20260806130000__invoice_no_default_vat.sql'
 )
 

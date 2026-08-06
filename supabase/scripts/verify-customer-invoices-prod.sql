@@ -1,7 +1,6 @@
 -- Verify customer invoices: visibility + zero default VAT
--- Run after 20260806120000 + 20260806130000 on prod
 
-\echo '=== Paid orders sample (last 10) ==='
+SELECT 'paid_orders_sample' AS section;
 SELECT
   o.id,
   o.order_number,
@@ -16,7 +15,7 @@ WHERE o.payment_status = 'paid'
 ORDER BY o.created_at DESC
 LIMIT 10;
 
-\echo '=== Invoices linked to paid orders ==='
+SELECT 'invoices_paid_orders' AS section;
 SELECT
   i.invoice_number,
   i.status,
@@ -33,13 +32,11 @@ WHERE o.payment_status = 'paid'
 ORDER BY i.created_at DESC
 LIMIT 15;
 
-\echo '=== Invoices with tax_amount > 0 (should only be explicit checkout tax) ==='
-SELECT COUNT(*) AS invoices_with_tax
+SELECT 'invoices_with_tax' AS section, COUNT(*) AS invoices_with_tax
 FROM public.invoices
 WHERE tax_amount > 0;
 
-\echo '=== RLS policies on invoices ==='
-SELECT policyname, cmd
+SELECT 'invoice_rls_policies' AS section, policyname, cmd
 FROM pg_policies
 WHERE schemaname = 'public' AND tablename = 'invoices'
 ORDER BY policyname;

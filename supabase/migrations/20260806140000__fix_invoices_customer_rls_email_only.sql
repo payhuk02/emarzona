@@ -1,5 +1,4 @@
--- Fix customer invoice visibility: customer_id references customers.id (not auth.users.id)
--- Prod: customers has no user_id — match by email + legacy uid
+-- Fix customer invoice RLS: customers table has no user_id on prod (email + legacy uid only)
 
 BEGIN;
 
