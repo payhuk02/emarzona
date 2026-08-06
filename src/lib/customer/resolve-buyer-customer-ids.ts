@@ -9,6 +9,7 @@
  */
 
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/lib/logger';
 
 export type ResolveBuyerCustomerIdsParams = {
   userId: string;
@@ -34,7 +35,8 @@ export async function resolveBuyerCustomerIds(
     .eq('user_id', userId);
 
   if (byUserError) {
-    throw byUserError;
+    // Ne pas bloquer le portail client si la recherche par user_id échoue (RLS, etc.)
+    logger.warn('resolveBuyerCustomerIds: customers by user_id failed', { error: byUserError });
   }
   for (const row of byUserId ?? []) {
     if (row.id) ids.add(row.id);
@@ -48,7 +50,7 @@ export async function resolveBuyerCustomerIds(
       .eq('email', email);
 
     if (byEmailError) {
-      throw byEmailError;
+      logger.warn('resolveBuyerCustomerIds: customers by email failed', { error: byEmailError });
     }
     for (const row of byEmail ?? []) {
       if (row.id) ids.add(row.id);
@@ -72,4 +74,10 @@ export async function resolveBuyerCustomerIds(
 /** True si seuls l'uid legacy est présent (aucun profil customers trouvé). */
 export function hasLinkedCustomerProfiles(customerIds: string[], userId: string): boolean {
   return customerIds.some(id => id !== userId);
+}
+
+/** IDs valides pour `orders.customer_id` (exclut l'uid legacy si des profils customers existent). */
+export function getBuyerOrderCustomerIds(customerIds: string[], userId: string): string[] {
+  const linked = customerIds.filter(id => id !== userId);
+  return linked.length > 0 ? linked : customerIds;
 }

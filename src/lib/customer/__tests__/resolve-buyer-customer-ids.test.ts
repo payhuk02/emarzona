@@ -1,5 +1,8 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { resolveBuyerCustomerIds } from '@/lib/customer/resolve-buyer-customer-ids';
+import {
+  getBuyerOrderCustomerIds,
+  resolveBuyerCustomerIds,
+} from '@/lib/customer/resolve-buyer-customer-ids';
 
 const fromMock = vi.fn();
 
@@ -41,5 +44,18 @@ describe('resolveBuyerCustomerIds', () => {
 
     const ids = await resolveBuyerCustomerIds({ userId: 'auth-uid' });
     expect(ids).toEqual(['auth-uid']);
+  });
+});
+
+describe('getBuyerOrderCustomerIds', () => {
+  it('excludes legacy uid when linked customer profiles exist', () => {
+    expect(getBuyerOrderCustomerIds(['auth-uid', 'cust-1', 'cust-2'], 'auth-uid')).toEqual([
+      'cust-1',
+      'cust-2',
+    ]);
+  });
+
+  it('keeps legacy uid when no linked profiles exist', () => {
+    expect(getBuyerOrderCustomerIds(['auth-uid'], 'auth-uid')).toEqual(['auth-uid']);
   });
 });
