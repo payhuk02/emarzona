@@ -13,7 +13,7 @@ if (-not $env:SUPABASE_DB_PASSWORD) {
 
 $env:SUPABASE_TARGET = 'prod'
 
-node scripts/apply-target-migrations.mjs supabase/migrations/20260807120000__fix_digital_licenses_customer_rls_email_only.sql
+node scripts/apply-prod-digital-licenses-rls.mjs
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 Write-Host 'Digital licenses RLS migration applied on prod.' -ForegroundColor Green

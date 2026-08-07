@@ -1,5 +1,6 @@
 /**
- * Licences digitales visibles pour l'acheteur (user_id, email, customers multi-boutiques).
+ * Licences digitales visibles pour l'acheteur (user_id + emails multi-boutiques).
+ * Prod : pas de colonne digital_licenses.customer_id.
  */
 
 import { supabase } from '@/integrations/supabase/client';
@@ -46,24 +47,40 @@ export type BuyerDigitalLicenseRow = {
   digital_product?: BuyerDigitalProductRef | null;
 };
 
+async function resolveBuyerEmails(userId: string, email?: string | null): Promise<string[]> {
+  const emails = new Set<string>();
+  const normalizedAuthEmail = email?.trim().toLowerCase();
+  if (normalizedAuthEmail) emails.add(normalizedAuthEmail);
+
+  const customerIds = await resolveBuyerCustomerIds({ userId, email });
+  const orderCustomerIds = getBuyerOrderCustomerIds(customerIds, userId).filter(
+    id => id && id !== userId
+  );
+
+  if (orderCustomerIds.length > 0) {
+    const { data: customerRows } = await supabase
+      .from('customers')
+      .select('email')
+      .in('id', orderCustomerIds);
+
+    for (const row of customerRows ?? []) {
+      const customerEmail = row.email?.trim().toLowerCase();
+      if (customerEmail) emails.add(customerEmail);
+    }
+  }
+
+  return Array.from(emails);
+}
+
 export async function fetchBuyerDigitalLicenses(
   userId: string,
   email?: string | null
 ): Promise<BuyerDigitalLicenseRow[]> {
-  const customerIds = await resolveBuyerCustomerIds({ userId, email });
-  const orderCustomerIds = getBuyerOrderCustomerIds(customerIds, userId);
-
+  const buyerEmails = await resolveBuyerEmails(userId, email);
   const orFilters: string[] = [`user_id.eq.${userId}`];
 
-  const normalizedEmail = email?.trim();
-  if (normalizedEmail) {
-    orFilters.push(`customer_email.ilike.${normalizedEmail}`);
-  }
-
-  for (const customerId of orderCustomerIds) {
-    if (customerId && customerId !== userId) {
-      orFilters.push(`customer_id.eq.${customerId}`);
-    }
+  for (const buyerEmail of buyerEmails) {
+    orFilters.push(`customer_email.ilike.${buyerEmail}`);
   }
 
   let query = supabase
