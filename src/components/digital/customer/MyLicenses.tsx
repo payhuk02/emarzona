@@ -18,12 +18,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Table,
   TableBody,
@@ -55,11 +50,12 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { logger } from '@/lib/logger';
-import { useLicenseManagement, type LicenseActivation, type LicenseEvent } from '@/hooks/digital/useLicenseManagement';
+import { fetchBuyerDigitalLicenses } from '@/lib/customer/fetch-buyer-digital-licenses';
 
-const DIGITAL_LICENSE_FIELDS = 'id, user_id, digital_product_id, license_key, license_type, status, max_activations, current_activations, issued_at, activated_at, expires_at, last_used_at, allow_license_transfer';
-const LICENSE_ACTIVATION_FIELDS = 'id, license_id, device_name, device_fingerprint, ip_address, status, activated_at, deactivated_at, last_seen_at';
+const DIGITAL_LICENSE_FIELDS =
+  'id, user_id, digital_product_id, license_key, license_type, status, max_activations, current_activations, issued_at, activated_at, expires_at, last_used_at, allow_license_transfer';
+const LICENSE_ACTIVATION_FIELDS =
+  'id, license_id, device_name, device_fingerprint, ip_address, status, activated_at, deactivated_at, last_seen_at';
 const LICENSE_EVENT_FIELDS = 'id, license_id, event_type, description, ip_address, created_at';
 
 interface CustomerLicense {
@@ -83,44 +79,21 @@ export const MyLicenses = () => {
   const [selectedLicense, setSelectedLicense] = useState<CustomerLicense | null>(null);
   const [showLicenseKey, setShowLicenseKey] = useState<Record<string, boolean>>({});
 
-  const { data: licenses, isLoading, error } = useQuery({
+  const {
+    data: licenses,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['customerLicenses'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
-      // Récupérer le customer_id
-      const { data: customer } = await supabase
-        .from('customers')
-        .select('id')
-        .eq('email', user.email)
-        .limit(1)
-        .single();
+      const data = await fetchBuyerDigitalLicenses(user.id, user.email);
 
-      if (!customer) return [];
-
-      // Récupérer les licences
-      const { data, error } = await supabase
-        .from('digital_licenses')
-        .select(`
-          ${DIGITAL_LICENSE_FIELDS},
-          digital_product:digital_products!inner (
-            product:products!inner (
-              id,
-              name,
-              image_url
-            )
-          )
-        `)
-        .eq('user_id', user.id)
-        .order('issued_at', { ascending: false });
-
-      if (error) {
-        logger.error('Error fetching licenses', { error });
-        throw error;
-      }
-
-      return (data || []).map((license: any) => ({
+      return (data || []).map(license => ({
         id: license.id,
         license_key: license.license_key,
         product_name: license.digital_product?.product?.name || 'Produit supprimé',
@@ -161,7 +134,11 @@ export const MyLicenses = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'active':
-        return <Badge variant="default" className="bg-green-500">Actif</Badge>;
+        return (
+          <Badge variant="default" className="bg-green-500">
+            Actif
+          </Badge>
+        );
       case 'expired':
         return <Badge variant="destructive">Expiré</Badge>;
       case 'suspended':
@@ -205,7 +182,8 @@ export const MyLicenses = () => {
           <Key className="h-16 w-16 text-muted-foreground mb-4" />
           <h3 className="text-lg font-semibold mb-2">Aucune licence</h3>
           <p className="text-muted-foreground text-center max-w-md">
-            Vous n'avez pas encore de licences. Les licences sont générées automatiquement lors de l'achat de produits nécessitant une activation.
+            Vous n'avez pas encore de licences. Les licences sont générées automatiquement lors de
+            l'achat de produits nécessitant une activation.
           </p>
         </CardContent>
       </Card>
@@ -250,7 +228,7 @@ export const MyLicenses = () => {
 
       {/* Liste des licences */}
       <div className="space-y-4">
-        {licenses.map((license) => (
+        {licenses.map(license => (
           <Card key={license.id} className="hover:shadow-md transition-shadow">
             <CardContent className="p-6">
               <div className="flex flex-col md:flex-row gap-6">
@@ -295,7 +273,11 @@ export const MyLicenses = () => {
                         variant="outline"
                         size="icon"
                         onClick={() => toggleLicenseKeyVisibility(license.id)}
-                        aria-label={showLicenseKey[license.id] ? "Masquer la clé de licence" : "Afficher la clé de licence"}
+                        aria-label={
+                          showLicenseKey[license.id]
+                            ? 'Masquer la clé de licence'
+                            : 'Afficher la clé de licence'
+                        }
                       >
                         {showLicenseKey[license.id] ? (
                           <EyeOff className="h-4 w-4" />
@@ -319,7 +301,8 @@ export const MyLicenses = () => {
                     <div>
                       <div className="text-muted-foreground">Activations</div>
                       <div className="font-medium">
-                        {license.current_activations} / {license.max_activations === -1 ? '∞' : license.max_activations}
+                        {license.current_activations} /{' '}
+                        {license.max_activations === -1 ? '∞' : license.max_activations}
                       </div>
                     </div>
                     <div>
@@ -339,7 +322,13 @@ export const MyLicenses = () => {
                     {license.expires_at && (
                       <div>
                         <div className="text-muted-foreground">Expire le</div>
-                        <div className={license.status === 'expired' ? 'text-red-600 font-medium' : 'font-medium'}>
+                        <div
+                          className={
+                            license.status === 'expired'
+                              ? 'text-red-600 font-medium'
+                              : 'font-medium'
+                          }
+                        >
                           {format(new Date(license.expires_at), 'dd/MM/yyyy', { locale: fr })}
                         </div>
                       </div>
@@ -351,7 +340,10 @@ export const MyLicenses = () => {
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Clock className="h-4 w-4" />
                       <span>
-                        Dernière utilisation : {format(new Date(license.last_used_at), 'dd/MM/yyyy à HH:mm', { locale: fr })}
+                        Dernière utilisation :{' '}
+                        {format(new Date(license.last_used_at), 'dd/MM/yyyy à HH:mm', {
+                          locale: fr,
+                        })}
                       </span>
                     </div>
                   )}
@@ -366,11 +358,7 @@ export const MyLicenses = () => {
 
                   {/* Actions */}
                   <div className="flex gap-2 pt-4 border-t">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setSelectedLicense(license)}
-                    >
+                    <Button variant="outline" size="sm" onClick={() => setSelectedLicense(license)}>
                       <History className="h-4 w-4 mr-2" />
                       Voir détails
                     </Button>
@@ -394,10 +382,7 @@ export const MyLicenses = () => {
 
       {/* Dialog de détails de licence */}
       {selectedLicense && (
-        <LicenseDetailsDialog
-          license={selectedLicense}
-          onClose={() => setSelectedLicense(null)}
-        />
+        <LicenseDetailsDialog license={selectedLicense} onClose={() => setSelectedLicense(null)} />
       )}
     </div>
   );
@@ -483,13 +468,14 @@ function LicenseDetailsDialog({
       queryClient.invalidateQueries({ queryKey: ['customerLicenses'] });
       toast({
         title: '✅ Activation désactivée',
-        description: 'L\'activation a été désactivée avec succès',
+        description: "L'activation a été désactivée avec succès",
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de désactiver l\'activation',
+        description:
+          error instanceof Error ? error.message : "Impossible de désactiver l'activation",
         variant: 'destructive',
       });
     },
@@ -542,25 +528,33 @@ function LicenseDetailsDialog({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {activations.map((activation) => (
+                  {activations.map(activation => (
                     <TableRow key={activation.id}>
                       <TableCell>
-                        {activation.device_name || activation.device_fingerprint?.substring(0, 8) || 'Inconnu'}
+                        {activation.device_name ||
+                          activation.device_fingerprint?.substring(0, 8) ||
+                          'Inconnu'}
                       </TableCell>
                       <TableCell>{activation.ip_address || '-'}</TableCell>
                       <TableCell>
                         {activation.status === 'active' ? (
-                          <Badge variant="default" className="bg-green-500">Actif</Badge>
+                          <Badge variant="default" className="bg-green-500">
+                            Actif
+                          </Badge>
                         ) : (
                           <Badge variant="secondary">Désactivé</Badge>
                         )}
                       </TableCell>
                       <TableCell>
-                        {format(new Date(activation.activated_at), 'dd/MM/yyyy HH:mm', { locale: fr })}
+                        {format(new Date(activation.activated_at), 'dd/MM/yyyy HH:mm', {
+                          locale: fr,
+                        })}
                       </TableCell>
                       <TableCell>
                         {activation.last_seen_at
-                          ? format(new Date(activation.last_seen_at), 'dd/MM/yyyy HH:mm', { locale: fr })
+                          ? format(new Date(activation.last_seen_at), 'dd/MM/yyyy HH:mm', {
+                              locale: fr,
+                            })
                           : '-'}
                       </TableCell>
                       <TableCell>
@@ -587,13 +581,11 @@ function LicenseDetailsDialog({
               <Skeleton className="h-32 w-full" />
             ) : events.length === 0 ? (
               <Alert>
-                <AlertDescription>
-                  Aucun événement enregistré pour cette licence.
-                </AlertDescription>
+                <AlertDescription>Aucun événement enregistré pour cette licence.</AlertDescription>
               </Alert>
             ) : (
               <div className="space-y-2">
-                {events.map((event) => (
+                {events.map(event => (
                   <Card key={event.id}>
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between">
@@ -603,7 +595,9 @@ function LicenseDetailsDialog({
                             <div className="text-sm text-muted-foreground">{event.description}</div>
                           )}
                           <div className="text-xs text-muted-foreground mt-1">
-                            {format(new Date(event.created_at), 'dd/MM/yyyy à HH:mm', { locale: fr })}
+                            {format(new Date(event.created_at), 'dd/MM/yyyy à HH:mm', {
+                              locale: fr,
+                            })}
                           </div>
                         </div>
                         {event.ip_address && (
@@ -634,10 +628,3 @@ function LicenseDetailsDialog({
 function handleTransferLicense(license: CustomerLicense) {
   // TODO: Implémenter le transfert de licence
 }
-
-
-
-
-
-
-

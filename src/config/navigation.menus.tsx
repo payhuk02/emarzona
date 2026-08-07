@@ -183,6 +183,11 @@ export const userMenuSections = [
         icon: Package,
       },
       {
+        title: 'Mes licences achetées',
+        url: '/account/digital?tab=licenses',
+        icon: Key,
+      },
+      {
         title: 'Mon Portail Produits Physiques',
         url: '/account/physical',
         icon: ShoppingBag,
@@ -271,11 +276,6 @@ export const userMenuSections = [
         title: 'Comparer Produits',
         url: '/products/compare',
         icon: Layers,
-      },
-      {
-        title: 'Mes licences achetées',
-        url: '/dashboard/my-licenses',
-        icon: Key,
       },
       {
         title: 'Gestion des Licences',

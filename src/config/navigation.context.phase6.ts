@@ -427,7 +427,6 @@ export const PHASE6_CONTEXT_CONFIGS = {
     includePaths: [
       '/account/digital',
       '/account/downloads',
-      '/dashboard/my-licenses',
       '/dashboard/digital-products',
       '/dashboard/digital-products/bundles',
       '/dashboard/digital-products/bundles/create',
@@ -439,7 +438,7 @@ export const PHASE6_CONTEXT_CONFIGS = {
       {
         groupKey: 'mon_portail_digital',
         defaultLabel: 'Mon portail',
-        paths: ['/account/digital', '/account/downloads', '/dashboard/my-licenses'],
+        paths: ['/account/digital', '/account/downloads'],
       },
       {
         groupKey: 'gestion_digitale',

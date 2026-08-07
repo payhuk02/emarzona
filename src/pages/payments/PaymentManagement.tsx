@@ -6,9 +6,11 @@
  * Features: Release payments, confirm delivery, partial payments tracking
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { AppPageShell } from '@/components/layout/AppPageShell';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -46,34 +48,96 @@ import {
 } from 'lucide-react';
 import { useAdvancedPayments } from '@/hooks/useAdvancedPayments';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/contexts/AuthContext';
+import { useStore } from '@/hooks/useStore';
+import { useStoreContext } from '@/contexts/StoreContext';
+import {
+  advancedPaymentFromOrder,
+  isSyntheticOrderPaymentId,
+  orderIdFromSyntheticPaymentId,
+  type PaymentManagementOrder,
+} from '@/lib/payments/payment-management-orders';
+import { releaseOrderSecuredPayment } from '@/lib/payments/release-order-secured-payment';
 import { format } from 'date-fns';
 import { logger } from '@/lib/logger';
 import { fr } from 'date-fns/locale';
-import { CountdownTimer } from '@/components/ui/countdown-timer';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import type { AdvancedPayment } from '@/types/advanced-features';
 
 export default function PaymentManagement() {
   const { orderId } = useParams<{ orderId: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user } = useAuth();
   const queryClient = useQueryClient();
+  const { store } = useStore();
+  const { selectedStoreId, selectedStore } = useStoreContext();
 
-  const { payments, loading, stats, releasePayment, openDispute } = useAdvancedPayments();
+  const storeId = store?.id ?? selectedStore?.id ?? selectedStoreId ?? undefined;
+
+  const { data: order, isLoading: orderLoading } = useQuery({
+    queryKey: ['payment-management-order', orderId, storeId],
+    enabled: !!orderId,
+    queryFn: async () => {
+      let query = supabase
+        .from('orders')
+        .select(
+          `
+          *,
+          customers ( id, name, email ),
+          order_items ( id, product_name, quantity, unit_price, total_price )
+        `
+        )
+        .eq('id', orderId!);
+
+      if (storeId) {
+        query = query.eq('store_id', storeId);
+      }
+
+      const { data, error } = await query.maybeSingle();
+
+      if (error) throw error;
+      return data as PaymentManagementOrder | null;
+    },
+  });
+
+  const effectiveStoreId = storeId ?? order?.store_id ?? undefined;
+
+  const { payments, loading, stats, releasePayment } = useAdvancedPayments(effectiveStoreId);
 
   const [selectedPayment, setSelectedPayment] = useState<AdvancedPayment | null>(null);
   const [showReleaseDialog, setShowReleaseDialog] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // Filter payments for this order if orderId is provided
-  const orderPayments = orderId ? payments.filter(p => p.order_id === orderId) : payments;
+  const orderPayments = useMemo(() => {
+    const fromPayments = orderId ? payments.filter(p => p.order_id === orderId) : payments;
+    if (orderId && fromPayments.length === 0 && order) {
+      return [advancedPaymentFromOrder(order)];
+    }
+    return fromPayments;
+  }, [payments, orderId, order]);
 
-  // Separate payments by type
   const partialPayments = orderPayments.filter(p => p.payment_type === 'percentage');
-  const securedPayments = orderPayments.filter(p => p.payment_type === 'delivery_secured');
+  const securedPayments = orderPayments.filter(
+    p => p.payment_type === 'delivery_secured' || p.is_held
+  );
+
+  const releaseSelectedPayment = async (releasedBy: string) => {
+    if (!selectedPayment) return;
+
+    if (isSyntheticOrderPaymentId(selectedPayment.id)) {
+      await releaseOrderSecuredPayment(orderIdFromSyntheticPaymentId(selectedPayment.id));
+      await queryClient.invalidateQueries({ queryKey: ['payment-management-orders'] });
+      await queryClient.invalidateQueries({ queryKey: ['payment-management-order', orderId] });
+      await queryClient.invalidateQueries({ queryKey: ['advanced-payments'] });
+      return;
+    }
+
+    const result = await releasePayment(selectedPayment.id, releasedBy);
+    if (!result.success) {
+      throw new Error(result.error || 'Impossible de libérer le paiement');
+    }
+  };
 
   /**
    * Handle release secured payment
@@ -83,7 +147,7 @@ export default function PaymentManagement() {
 
     try {
       setIsProcessing(true);
-      await releasePayment(selectedPayment.id, 'delivery_confirmed');
+      await releaseSelectedPayment('delivery_confirmed');
 
       toast({
         title: '✅ Paiement relâché',
@@ -93,8 +157,8 @@ export default function PaymentManagement() {
       setShowReleaseDialog(false);
       setSelectedPayment(null);
     } catch (_error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error('Release payment error', { error, paymentId: selectedPayment.id });
+      const errorMessage = _error instanceof Error ? _error.message : String(_error);
+      logger.error('Release payment error', { error: _error, paymentId: selectedPayment.id });
       toast({
         title: 'Erreur',
         description: errorMessage || 'Impossible de relâcher le paiement',
@@ -113,9 +177,7 @@ export default function PaymentManagement() {
 
     try {
       setIsProcessing(true);
-
-      // Call release payment with customer confirmation
-      await releasePayment(selectedPayment.id, 'customer_confirmed');
+      await releaseSelectedPayment('customer_confirmed');
 
       toast({
         title: '✅ Livraison confirmée',
@@ -125,8 +187,8 @@ export default function PaymentManagement() {
       setShowConfirmDialog(false);
       setSelectedPayment(null);
     } catch (_error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error('Confirm delivery error', { error, paymentId: selectedPayment.id });
+      const errorMessage = _error instanceof Error ? _error.message : String(_error);
+      logger.error('Confirm delivery error', { error: _error, paymentId: selectedPayment.id });
       toast({
         title: 'Erreur',
         description: errorMessage || 'Impossible de confirmer la livraison',
@@ -143,6 +205,12 @@ export default function PaymentManagement() {
   const formatCurrency = (amount: number, currency: string = 'XOF') => {
     return `${amount.toLocaleString()} ${currency}`;
   };
+
+  const canManageEscrow = (payment: AdvancedPayment) =>
+    payment.status === 'held' ||
+    (payment.payment_type === 'delivery_secured' &&
+      payment.status !== 'completed' &&
+      payment.status !== 'released');
 
   /**
    * Get payment status badge
@@ -175,7 +243,7 @@ export default function PaymentManagement() {
     );
   };
 
-  if (loading) {
+  if (loading || orderLoading) {
     return (
       <AppPageShell mainClassName="overflow-x-hidden">
         <div className="container mx-auto p-6">
@@ -190,12 +258,39 @@ export default function PaymentManagement() {
     );
   }
 
+  if (orderId && !order) {
+    return (
+      <AppPageShell mainClassName="overflow-x-hidden">
+        <div className="container mx-auto p-6 max-w-lg">
+          <Button
+            variant="ghost"
+            onClick={() => navigate('/dashboard/payment-management')}
+            className="mb-4"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Retour
+          </Button>
+          <Card>
+            <CardContent className="pt-6 text-center space-y-3">
+              <AlertCircle className="h-10 w-10 text-muted-foreground mx-auto" />
+              <p className="text-muted-foreground">Commande introuvable ou accès refusé.</p>
+            </CardContent>
+          </Card>
+        </div>
+      </AppPageShell>
+    );
+  }
+
   return (
     <AppPageShell mainClassName="overflow-x-hidden">
       <div className="container mx-auto p-6 max-w-7xl">
         {/* Header */}
         <div className="mb-6">
-          <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4">
+          <Button
+            variant="ghost"
+            onClick={() => navigate('/dashboard/payment-management')}
+            className="mb-4"
+          >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Retour
           </Button>
@@ -207,7 +302,9 @@ export default function PaymentManagement() {
                 Gestion Paiements
               </h1>
               <p className="text-muted-foreground mt-1">
-                Paiements avancés, escrow et paiements partiels
+                {order?.order_number
+                  ? `Commande ${order.order_number}`
+                  : 'Paiements avancés, escrow et paiements partiels'}
               </p>
             </div>
           </div>
@@ -369,7 +466,7 @@ export default function PaymentManagement() {
 
                       {/* Right: Actions */}
                       <div className="space-y-4">
-                        {payment.status === 'held' && (
+                        {canManageEscrow(payment) && (
                           <>
                             <Alert>
                               <Clock className="h-4 w-4" />

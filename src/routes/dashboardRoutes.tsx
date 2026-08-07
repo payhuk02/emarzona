@@ -224,7 +224,10 @@ const CrossTypeBundlesPage = lazyPage(
 );
 const ServiceAddonsPage = lazyPage(() => import('@/pages/service/ServiceAddonsPage'));
 const CreateBundle = lazyPage(() => import('@/pages/digital/CreateBundle'));
-const MyLicenses = lazyPage(() => import('@/pages/digital/MyLicenses'));
+const MyLicensesRedirect = lazyPage(() => import('@/pages/digital/MyLicensesRedirect'));
+const PaymentOrderManageRedirect = lazyPage(
+  () => import('@/pages/payments/PaymentOrderManageRedirect')
+);
 const LicenseManagement = lazyPage(() => import('@/pages/digital/LicenseManagement'));
 const DigitalProductAnalytics = lazyPage(() => import('@/pages/digital/DigitalProductAnalytics'));
 const DigitalProductUpdatesDashboard = lazyPage(
@@ -439,7 +442,7 @@ export const dashboardRoutes = (
     {pr('/dashboard/digital-products/bundles', DigitalBundlesManagement)}
     {pr('/dashboard/cross-type-bundles', CrossTypeBundlesPage)}
     {pr('/dashboard/digital-products/bundles/create', CreateBundle)}
-    {pr('/dashboard/my-licenses', MyLicenses)}
+    {pr('/dashboard/my-licenses', MyLicensesRedirect)}
     {pr('/dashboard/license-management', LicenseManagement)}
     {pr('/dashboard/licenses/manage/:id', LicenseManagement)}
     {pr('/dashboard/digital/analytics/:productId', DigitalProductAnalytics)}
@@ -462,7 +465,8 @@ export const dashboardRoutes = (
 
     {/* Advanced Systems */}
     {pr('/orders/:orderId/messaging', OrderMessaging)}
-    {pr('/payments/:orderId/manage', PaymentManagement)}
+    {pr('/dashboard/payment-management/:orderId', PaymentManagement)}
+    {pr('/payments/:orderId/manage', PaymentOrderManageRedirect)}
     {pr('/payments/:orderId/balance', PayBalance)}
     {pr('/disputes/:disputeId', DisputeDetail)}
     <Route

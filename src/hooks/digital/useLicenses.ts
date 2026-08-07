@@ -1,16 +1,22 @@
 /**
  * Digital Licenses Hooks - Professional
  * Date: 27 octobre 2025
- * 
+ *
  * Système de gestion des licenses professionnel
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import {
+  fetchBuyerDigitalLicenses,
+  type BuyerDigitalProductRef,
+} from '@/lib/customer/fetch-buyer-digital-licenses';
 
-const DIGITAL_LICENSE_FIELDS = 'id, digital_product_id, user_id, license_key, license_type, status, max_activations, current_activations, activation_history, issued_at, activated_at, expires_at, customer_email, created_at, updated_at';
-const DIGITAL_LICENSE_ACTIVATION_FIELDS = 'id, license_id, device_id, device_name, device_type, os_name, ip_address, activated_at, is_active';
+const DIGITAL_LICENSE_FIELDS =
+  'id, digital_product_id, user_id, license_key, license_type, status, max_activations, current_activations, activation_history, issued_at, activated_at, expires_at, customer_email, created_at, updated_at';
+const DIGITAL_LICENSE_ACTIVATION_FIELDS =
+  'id, license_id, device_id, device_name, device_type, os_name, ip_address, activated_at, is_active';
 
 // =====================================================
 // TYPES
@@ -25,7 +31,7 @@ export interface DigitalLicense {
   status: 'active' | 'suspended' | 'expired' | 'revoked' | 'pending';
   max_activations: number;
   current_activations: number;
-  activation_history: any[];
+  activation_history: unknown[];
   issued_at: string;
   activated_at: string | null;
   expires_at: string | null;
@@ -53,7 +59,7 @@ export interface LicenseActivation {
 export const licenseKeys = {
   all: ['licenses'] as const,
   lists: () => [...licenseKeys.all, 'list'] as const,
-  list: (filters: any) => [...licenseKeys.lists(), filters] as const,
+  list: (filters: unknown) => [...licenseKeys.lists(), filters] as const,
   detail: (id: string) => [...licenseKeys.all, 'detail', id] as const,
   userLicenses: (userId: string) => [...licenseKeys.all, 'user', userId] as const,
   productLicenses: (productId: string) => [...licenseKeys.all, 'product', productId] as const,
@@ -71,28 +77,13 @@ export const useUserLicenses = () => {
   return useQuery({
     queryKey: licenseKeys.userLicenses('current'),
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
-      const { data, error } = await supabase
-        .from('digital_licenses')
-        .select(`
-          *,
-          digital_product:digital_products (
-            id,
-            digital_type,
-            product:products (
-              id,
-              name,
-              image_url
-            )
-          )
-        `)
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      return data as (DigitalLicense & { digital_product: any })[];
+      const data = await fetchBuyerDigitalLicenses(user.id, user.email);
+      return data as (DigitalLicense & { digital_product: BuyerDigitalProductRef | null })[];
     },
   });
 };
@@ -106,13 +97,15 @@ export const useLicense = (licenseId: string) => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('digital_licenses')
-        .select(`
+        .select(
+          `
           ${DIGITAL_LICENSE_FIELDS},
           digital_product:digital_products (
             *,
             product:products (*)
           )
-        `)
+        `
+        )
         .eq('id', licenseId)
         .single();
 
@@ -234,7 +227,7 @@ export const useCreateLicense = () => {
       customerEmail?: string;
     }) => {
       const licenseKey = generateLicenseKey();
-      const expiresAt = data.expiresIn 
+      const expiresAt = data.expiresIn
         ? new Date(Date.now() + data.expiresIn * 24 * 60 * 60 * 1000).toISOString()
         : null;
 
@@ -256,22 +249,22 @@ export const useCreateLicense = () => {
       if (error) throw error;
       return result;
     },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ 
-        queryKey: licenseKeys.productLicenses(data.digital_product_id) 
+    onSuccess: data => {
+      queryClient.invalidateQueries({
+        queryKey: licenseKeys.productLicenses(data.digital_product_id),
       });
-      queryClient.invalidateQueries({ 
-        queryKey: licenseKeys.userLicenses(data.user_id) 
+      queryClient.invalidateQueries({
+        queryKey: licenseKeys.userLicenses(data.user_id),
       });
       toast({
         title: 'Succès',
         description: 'License créée avec succès',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast({
         title: 'Erreur',
-        description: error.message,
+        description: error instanceof Error ? error.message : 'Une erreur est survenue',
         variant: 'destructive',
       });
     },
@@ -308,8 +301,10 @@ export const useActivateLicense = () => {
         throw new Error(`License is ${license.status}`);
       }
 
-      if (license.max_activations !== -1 && 
-          license.current_activations >= license.max_activations) {
+      if (
+        license.max_activations !== -1 &&
+        license.current_activations >= license.max_activations
+      ) {
         throw new Error('Maximum activations reached');
       }
 
@@ -364,13 +359,13 @@ export const useActivateLicense = () => {
 
       return { activation, license };
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       if (!data.alreadyActivated) {
-        queryClient.invalidateQueries({ 
-          queryKey: licenseKeys.detail(data.license.id) 
+        queryClient.invalidateQueries({
+          queryKey: licenseKeys.detail(data.license.id),
         });
-        queryClient.invalidateQueries({ 
-          queryKey: licenseKeys.activations(data.license.id) 
+        queryClient.invalidateQueries({
+          queryKey: licenseKeys.activations(data.license.id),
         });
         toast({
           title: 'Succès',
@@ -378,10 +373,10 @@ export const useActivateLicense = () => {
         });
       }
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast({
-        title: 'Erreur d\'activation',
-        description: error.message,
+        title: "Erreur d'activation",
+        description: error instanceof Error ? error.message : 'Une erreur est survenue',
         variant: 'destructive',
       });
     },
@@ -396,10 +391,7 @@ export const useDeactivateLicense = () => {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async (params: {
-      licenseId: string;
-      activationId: string;
-    }) => {
+    mutationFn: async (params: { licenseId: string; activationId: string }) => {
       // Deactivate
       const { error: deactivateError } = await supabase
         .from('digital_license_activations')
@@ -428,21 +420,21 @@ export const useDeactivateLicense = () => {
       }
     },
     onSuccess: (_, params) => {
-      queryClient.invalidateQueries({ 
-        queryKey: licenseKeys.detail(params.licenseId) 
+      queryClient.invalidateQueries({
+        queryKey: licenseKeys.detail(params.licenseId),
       });
-      queryClient.invalidateQueries({ 
-        queryKey: licenseKeys.activations(params.licenseId) 
+      queryClient.invalidateQueries({
+        queryKey: licenseKeys.activations(params.licenseId),
       });
       toast({
         title: 'Succès',
         description: 'License désactivée sur cet appareil',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast({
         title: 'Erreur',
-        description: error.message,
+        description: error instanceof Error ? error.message : 'Une erreur est survenue',
         variant: 'destructive',
       });
     },
@@ -457,10 +449,7 @@ export const useRevokeLicense = () => {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async (params: {
-      licenseId: string;
-      reason?: string;
-    }) => {
+    mutationFn: async (params: { licenseId: string; reason?: string }) => {
       const { error } = await supabase
         .from('digital_licenses')
         .update({
@@ -482,28 +471,20 @@ export const useRevokeLicense = () => {
         .eq('is_active', true);
     },
     onSuccess: (_, params) => {
-      queryClient.invalidateQueries({ 
-        queryKey: licenseKeys.detail(params.licenseId) 
+      queryClient.invalidateQueries({
+        queryKey: licenseKeys.detail(params.licenseId),
       });
       toast({
         title: 'Succès',
         description: 'License révoquée',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast({
         title: 'Erreur',
-        description: error.message,
+        description: error instanceof Error ? error.message : 'Une erreur est survenue',
         variant: 'destructive',
       });
     },
   });
 };
-
-
-
-
-
-
-
-

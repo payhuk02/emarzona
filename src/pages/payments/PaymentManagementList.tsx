@@ -81,6 +81,11 @@ import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useToast } from '@/hooks/use-toast';
+import {
+  orderNeedsAdvancedManagement,
+  getManagementPaymentKind,
+  getManagementStatusKind,
+} from '@/lib/payments/payment-management-orders';
 
 export default function PaymentManagementList() {
   const navigate = useNavigate();
@@ -181,20 +186,9 @@ export default function PaymentManagementList() {
         data = Array.isArray(rpcData) ? (rpcData as OrderWithRelations[]) : [];
       }
 
-      // Filtrer les commandes avec paiements avancés
-      const filtered =
-        data?.filter(order => {
-          const orderTyped = order as OrderWithRelations;
-          const hasPercentagePayment =
-            (orderTyped.percentage_paid || 0) > 0 && (orderTyped.percentage_paid || 0) < 100;
-          const hasRemainingAmount = (orderTyped.remaining_amount || 0) > 0;
-          // Also include orders with payment_status pending that might have advanced payment
-          const hasAdvancedPaymentStatus =
-            orderTyped.payment_status === 'pending' || orderTyped.payment_status === 'partial';
-          return hasPercentagePayment || hasRemainingAmount || hasAdvancedPaymentStatus;
-        }) || [];
-
-      return filtered;
+      return (data ?? []).filter(order =>
+        orderNeedsAdvancedManagement(order as OrderWithRelations)
+      );
     },
     enabled: !!user?.id || !!store?.id,
   });
@@ -213,18 +207,14 @@ export default function PaymentManagementList() {
         orderTyped.customers?.name?.toLowerCase().includes(searchLower) ||
         orderTyped.customers?.email?.toLowerCase().includes(searchLower);
 
-      // Tab filter - simplified logic
-      const hasPercentagePayment =
-        (orderTyped.percentage_paid || 0) > 0 && (orderTyped.percentage_paid || 0) < 100;
-      const hasRemainingAmount = (orderTyped.remaining_amount || 0) > 0;
+      const kind = getManagementPaymentKind(orderTyped);
+      const statusKind = getManagementStatusKind(orderTyped);
 
       const matchesTab =
         activeTab === 'all' ||
-        (activeTab === 'percentage' && hasPercentagePayment) ||
-        (activeTab === 'escrow' &&
-          (orderTyped.payment_status === 'pending' || orderTyped.payment_status === 'partial')) ||
-        (activeTab === 'pending' &&
-          (orderTyped.payment_status === 'pending' || hasRemainingAmount));
+        (activeTab === 'percentage' && kind === 'percentage') ||
+        (activeTab === 'escrow' && kind === 'escrow') ||
+        (activeTab === 'pending' && statusKind !== 'completed');
 
       return matchesSearch && matchesTab;
     });
@@ -235,32 +225,23 @@ export default function PaymentManagementList() {
     if (!orders) return { total: 0, percentage: 0, escrow: 0, pending: 0 };
 
     const total = orders.length;
-    const percentage = orders.filter(o => {
-      const oTyped = o as OrderWithRelations;
-      const hasPercentage =
-        (oTyped.percentage_paid || 0) > 0 && (oTyped.percentage_paid || 0) < 100;
-      return hasPercentage;
-    }).length;
-    const escrow = orders.filter(o => {
-      const oTyped = o as OrderWithRelations;
-      // Check if order has escrow/delivery_secured payment type
-      return oTyped.payment_status === 'pending' || oTyped.payment_status === 'partial';
-    }).length;
-    const pending = orders.filter(o => {
-      const oTyped = o as OrderWithRelations;
-      return oTyped.payment_status === 'pending' || (oTyped.remaining_amount || 0) > 0;
-    }).length;
+    const percentage = orders.filter(
+      o => getManagementPaymentKind(o as OrderWithRelations) === 'percentage'
+    ).length;
+    const escrow = orders.filter(
+      o => getManagementPaymentKind(o as OrderWithRelations) === 'escrow'
+    ).length;
+    const pending = orders.filter(
+      o => getManagementStatusKind(o as OrderWithRelations) !== 'completed'
+    ).length;
 
     return { total, percentage, escrow, pending };
   }, [orders]);
 
   const getPaymentTypeBadge = (order: OrderWithRelations) => {
-    const hasPercentage =
-      ((order.percentage_paid as number | null | undefined) || 0) > 0 &&
-      ((order.percentage_paid as number | null | undefined) || 0) < 100;
-    const isEscrow = order.payment_status === 'pending' || order.payment_status === 'partial';
+    const kind = getManagementPaymentKind(order);
 
-    if (isEscrow) {
+    if (kind === 'escrow') {
       return (
         <Badge variant="default" className="bg-purple-600 hover:bg-purple-700">
           <Shield className="h-3 w-3 mr-1" />
@@ -268,7 +249,7 @@ export default function PaymentManagementList() {
         </Badge>
       );
     }
-    if (hasPercentage) {
+    if (kind === 'percentage') {
       return (
         <Badge variant="secondary">
           <Percent className="h-3 w-3 mr-1" />
@@ -285,10 +266,9 @@ export default function PaymentManagementList() {
   };
 
   const getStatusBadge = (order: OrderWithRelations) => {
-    const hasRemaining = ((order.remaining_amount as number | null | undefined) || 0) > 0;
-    const paymentStatus = order.payment_status;
+    const statusKind = getManagementStatusKind(order);
 
-    if (paymentStatus === 'completed' || !hasRemaining) {
+    if (statusKind === 'completed') {
       return (
         <Badge variant="default" className="bg-green-600 hover:bg-green-700">
           <CheckCircle className="h-3 w-3 mr-1" />
@@ -296,15 +276,20 @@ export default function PaymentManagementList() {
         </Badge>
       );
     }
-    if (paymentStatus === 'pending' || hasRemaining) {
+    if (statusKind === 'partial') {
       return (
-        <Badge variant="secondary" className="bg-yellow-600 hover:bg-yellow-700">
-          <Clock className="h-3 w-3 mr-1" />
-          En attente
+        <Badge variant="secondary" className="bg-orange-600 hover:bg-orange-700">
+          <Percent className="h-3 w-3 mr-1" />
+          Partiel
         </Badge>
       );
     }
-    return <Badge variant="outline">{paymentStatus || 'N/A'}</Badge>;
+    return (
+      <Badge variant="secondary" className="bg-yellow-600 hover:bg-yellow-700">
+        <Clock className="h-3 w-3 mr-1" />
+        En attente
+      </Badge>
+    );
   };
 
   // Export to CSV
@@ -337,9 +322,7 @@ export default function PaymentManagementList() {
           format(new Date(orderTyped.created_at), 'dd/MM/yyyy', { locale: fr }),
           orderTyped.customers?.name || '',
           orderTyped.order_items?.[0]?.product_name || 'N/A',
-          ((orderTyped.percentage_paid as number | null | undefined) || 0) > 0
-            ? 'Pourcentage'
-            : 'Escrow',
+          getManagementPaymentKind(orderTyped) === 'percentage' ? 'Pourcentage' : 'Escrow',
           orderTyped.total_amount || 0,
           orderTyped.payment_status || 'N/A',
           format(new Date(orderTyped.created_at), 'dd/MM/yyyy HH:mm', { locale: fr }),
@@ -729,7 +712,9 @@ export default function PaymentManagementList() {
                               <TableCell className="text-right">
                                 <Button
                                   size="sm"
-                                  onClick={() => navigate(`/payments/${orderTyped.id}/manage`)}
+                                  onClick={() =>
+                                    navigate(`/dashboard/payment-management/${orderTyped.id}`)
+                                  }
                                   className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-white"
                                 >
                                   <span className="hidden sm:inline">Gérer</span>
