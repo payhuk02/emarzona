@@ -98,12 +98,14 @@ export function MediaSection({ onChange }: MediaSectionProps) {
     description: string;
     keyPath: string[];
     currentUrl?: string;
-    defaultUrl: string;
+    defaultUrl?: string;
+    optional?: boolean;
   }) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const uploadKey = keyPath.join('.');
     const loading = isUploading === uploadKey;
     const isCustom = !!currentUrl;
+    const hasPreview = !!(currentUrl || defaultUrl);
     const displayUrl = currentUrl || defaultUrl;
 
     return (
@@ -113,7 +115,7 @@ export function MediaSection({ onChange }: MediaSectionProps) {
             <Label className="text-base font-semibold">{title}</Label>
             {!isCustom && (
               <span className="inline-flex items-center gap-1 text-[10px] uppercase font-bold tracking-wider bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
-                Par défaut
+                {defaultUrl ? 'Par défaut' : 'Blanc par défaut'}
               </span>
             )}
           </div>
@@ -121,11 +123,20 @@ export function MediaSection({ onChange }: MediaSectionProps) {
         </div>
 
         <div className="mt-2 relative group overflow-hidden rounded-md border-2 border-dashed border-muted-foreground/25 bg-muted/10 flex items-center justify-center min-h-[160px]">
-          <img
-            src={displayUrl}
-            alt={title}
-            className={`max-h-[200px] w-full object-contain p-2 transition-opacity ${!isCustom ? 'opacity-60 grayscale-[30%]' : ''}`}
-          />
+          {hasPreview ? (
+            <img
+              src={displayUrl}
+              alt={title}
+              className={`max-h-[200px] w-full object-contain p-2 transition-opacity ${!isCustom ? 'opacity-60 grayscale-[30%]' : ''}`}
+            />
+          ) : (
+            <div className="flex h-[160px] w-full flex-col items-center justify-center gap-2 border border-border bg-white px-6 text-center">
+              <p className="text-sm font-medium text-foreground/90">Fond blanc par défaut</p>
+              <p className="text-xs text-muted-foreground">
+                Couleurs réglables dans Textes → Hero plateforme
+              </p>
+            </div>
+          )}
 
           <div className="absolute inset-0 bg-background/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 backdrop-blur-sm">
             <Button
@@ -141,10 +152,13 @@ export function MediaSection({ onChange }: MediaSectionProps) {
               )}
               {isCustom ? 'Remplacer' : 'Uploader une image'}
             </Button>
-            {!isCustom && (
+            {!isCustom && defaultUrl && (
               <p className="text-xs font-medium text-foreground">
                 L'image par défaut est actuellement utilisée.
               </p>
+            )}
+            {!isCustom && !defaultUrl && (
+              <p className="text-xs font-medium text-foreground">Aucune image personnalisée.</p>
             )}
           </div>
 
@@ -186,6 +200,13 @@ export function MediaSection({ onChange }: MediaSectionProps) {
           <CardDescription>Modifiez les visuels clés de la page de présentation.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          <ImageUploader
+            title="Arrière-plan Hero plateforme (bandeau haut)"
+            description="Image optionnelle derrière le bandeau « Plateforme N°1 ». Les couleurs de fond et de texte se règlent dans Textes → Hero plateforme."
+            keyPath={['landingPlatformHero']}
+            currentUrl={media.landingPlatformHero as string | undefined}
+            optional
+          />
           <ImageUploader
             title="Image Adapt (Entrepreneur)"
             description="Image de la section 'S'adapte à vous'. Recommandé avec fond transparent."

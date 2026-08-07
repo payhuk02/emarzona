@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react';
 import '@/styles/landing-premium.css';
 import { PremiumNav } from './PremiumNav';
+import { PremiumPlatformHero } from './PremiumPlatformHero';
 import { PremiumHero } from './PremiumHero';
 import { LandingDeferredSection } from './LandingDeferredSection';
 
@@ -33,6 +34,7 @@ export function PremiumLandingPage() {
     <div className="landing-premium min-h-screen overflow-x-clip">
       <PremiumNav />
       <main>
+        <PremiumPlatformHero />
         <PremiumHero />
 
         <LandingDeferredSection minHeight="28rem">

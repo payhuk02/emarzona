@@ -221,7 +221,16 @@ function usePlatformCustomizationState() {
         const data = publicData as PlatformCustomizationData;
         setCustomizationData(prev => ({
           ...prev,
-          ...data,
+          pages: { ...(prev?.pages ?? {}), ...(data.pages ?? {}) },
+          media: data.media
+            ? {
+                ...(prev?.media ?? {}),
+                images: {
+                  ...(prev?.media?.images ?? {}),
+                  ...(data.media?.images ?? {}),
+                },
+              }
+            : prev?.media,
         }));
       } else if (
         publicError &&

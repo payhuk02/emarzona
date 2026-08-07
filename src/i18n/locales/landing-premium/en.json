@@ -14,6 +14,18 @@
     "menuOpen": "Open menu",
     "menuClose": "Close menu"
   },
+  "platformHero": {
+    "ariaLabel": "Emarzona platform introduction",
+    "title": "The #1 Modern E-commerce Platform",
+    "backgroundAlt": "Emarzona platform hero background",
+    "checks": {
+      "physical": "Physical products",
+      "digital": "Digital products",
+      "service": "Services",
+      "courses": "Online courses",
+      "artist": "Artist works"
+    }
+  },
   "hero": {
     "eyebrow": "All-in-one e-commerce platform",
     "typewriterBadge": "E-commerce Platform #1: Sell Physical Products, Digital Products, Services, Online Courses, and Artist Works.",

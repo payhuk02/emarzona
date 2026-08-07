@@ -197,6 +197,7 @@ export const mediaSchema = z
     images: z
       .object({
         authHero: urlSchema,
+        landingPlatformHero: urlSchema.optional(),
         landingCarousel: z.record(z.string(), urlSchema).optional(),
         landingAdapt: urlSchema,
         landingGlobe: urlSchema,

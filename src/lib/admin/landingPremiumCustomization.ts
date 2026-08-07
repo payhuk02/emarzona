@@ -68,6 +68,10 @@ function email(id: string, label: string, defaultValue: string): LandingPremiumE
   return { id, label, type: 'email', defaultValue };
 }
 
+function color(id: string, label: string, defaultValue: string): LandingPremiumElement {
+  return { id, label, type: 'color', defaultValue };
+}
+
 function itemFields(
   prefix: string,
   items: { title: string; desc: string }[],
@@ -118,6 +122,30 @@ export const LANDING_PREMIUM_SECTIONS: LandingPremiumSection[] = [
       text('nav.getStartedShort', 'Bouton Démarrer (mobile)', lp.nav.getStartedShort),
       text('nav.menuOpen', 'Menu — ouvrir', lp.nav.menuOpen),
       text('nav.menuClose', 'Menu — fermer', lp.nav.menuClose),
+    ],
+  },
+  {
+    id: 'platformHero',
+    name: 'Hero plateforme (bandeau haut)',
+    icon: Home,
+    elements: [
+      text('platformHero.title', 'Titre H1', lp.platformHero.title),
+      color('platformHero.backgroundColor', 'Couleur de fond', '#ffffff'),
+      color('platformHero.textColor', 'Couleur du texte', '#0f0f12'),
+      text('platformHero.backgroundAlt', 'Alt image arrière-plan', lp.platformHero.backgroundAlt),
+      text(
+        'platformHero.checks.physical',
+        'Check — Produits physiques',
+        lp.platformHero.checks.physical
+      ),
+      text(
+        'platformHero.checks.digital',
+        'Check — Produits digitaux',
+        lp.platformHero.checks.digital
+      ),
+      text('platformHero.checks.service', 'Check — Services', lp.platformHero.checks.service),
+      text('platformHero.checks.courses', 'Check — Cours en ligne', lp.platformHero.checks.courses),
+      text('platformHero.checks.artist', "Check — Œuvres d'artiste", lp.platformHero.checks.artist),
     ],
   },
   {

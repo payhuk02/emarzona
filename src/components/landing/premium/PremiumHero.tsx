@@ -19,7 +19,7 @@ export function PremiumHero() {
   const { t } = useLandingPremiumT();
 
   return (
-    <section className="lp-hero relative overflow-hidden bg-[#08080a] pt-16 text-[var(--lp-text-on-dark)] sm:pt-[72px]">
+    <section className="lp-hero relative overflow-hidden bg-[#08080a] text-[var(--lp-text-on-dark)]">
       <div className="pointer-events-none absolute inset-0 lp-hero-grain" aria-hidden />
       <div
         className="pointer-events-none absolute inset-0"

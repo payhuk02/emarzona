@@ -14,6 +14,18 @@
     "menuOpen": "Ouvrir le menu",
     "menuClose": "Fermer le menu"
   },
+  "platformHero": {
+    "ariaLabel": "Présentation de la plateforme Emarzona",
+    "title": "Plateforme N°1 de E-commerce moderne",
+    "backgroundAlt": "Arrière-plan du hero plateforme Emarzona",
+    "checks": {
+      "physical": "Produits physiques",
+      "digital": "Produits digitaux",
+      "service": "Services",
+      "courses": "Cours en ligne",
+      "artist": "Œuvres d'artiste"
+    }
+  },
   "hero": {
     "eyebrow": "Plateforme e-commerce tout-en-un",
     "typewriterBadge": "Plateforme E-commerce N°1 : Vente des Produits Physiques, Vente des Produits digitaux, Vente des Services, Vente des Cours en ligne, Vente des Œuvres d'artiste.",
