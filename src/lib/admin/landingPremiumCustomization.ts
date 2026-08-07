@@ -36,6 +36,8 @@ export interface LandingPremiumElement {
   type: LandingPremiumElementType;
   defaultValue?: string;
   description?: string;
+  /** Permet de retirer la valeur personnalisée (ex. fond transparent). */
+  clearable?: boolean;
 }
 
 export interface LandingPremiumSection {
@@ -68,8 +70,13 @@ function email(id: string, label: string, defaultValue: string): LandingPremiumE
   return { id, label, type: 'email', defaultValue };
 }
 
-function color(id: string, label: string, defaultValue: string): LandingPremiumElement {
-  return { id, label, type: 'color', defaultValue };
+function color(
+  id: string,
+  label: string,
+  defaultValue: string,
+  options?: Pick<LandingPremiumElement, 'clearable' | 'description'>
+): LandingPremiumElement {
+  return { id, label, type: 'color', defaultValue, ...options };
 }
 
 function itemFields(
@@ -130,7 +137,11 @@ export const LANDING_PREMIUM_SECTIONS: LandingPremiumSection[] = [
     icon: Home,
     elements: [
       text('platformHero.title', 'Titre H1', lp.platformHero.title),
-      color('platformHero.backgroundColor', 'Couleur de fond', '#ffffff'),
+      color('platformHero.backgroundColor', 'Couleur de fond', '#ffffff', {
+        clearable: true,
+        description:
+          'Optionnel. Supprimez la couleur pour un fond transparent (l’image arrière-plan reste visible).',
+      }),
       color('platformHero.textColor', 'Couleur du texte', '#0f0f12'),
       text('platformHero.backgroundAlt', 'Alt image arrière-plan', lp.platformHero.backgroundAlt),
       text(

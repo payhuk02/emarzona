@@ -19,14 +19,22 @@ export function PremiumPlatformHero() {
   const backgroundUrl = customizationData?.media?.images?.landingPlatformHero as string | undefined;
   const backgroundAlt = t('platformHero.backgroundAlt');
 
-  const backgroundColor =
-    getPageCustomizationValue(pageCustomization, 'platformHero.backgroundColor') ?? DEFAULT_BG;
+  const customBackgroundColor = getPageCustomizationValue(
+    pageCustomization,
+    'platformHero.backgroundColor'
+  );
+  const hasBackgroundColor = Boolean(customBackgroundColor);
+  const backgroundColor = hasBackgroundColor
+    ? customBackgroundColor!
+    : backgroundUrl
+      ? 'transparent'
+      : DEFAULT_BG;
   const textColor =
     getPageCustomizationValue(pageCustomization, 'platformHero.textColor') ?? DEFAULT_TEXT;
 
   return (
     <section
-      className="lp-platform-hero relative w-full overflow-hidden border-b border-black/8 pt-16 sm:pt-[72px]"
+      className={`lp-platform-hero relative w-full overflow-hidden border-b border-black/8 pt-16 sm:pt-[72px]${hasBackgroundColor ? '' : ' lp-platform-hero--no-bg-color'}`}
       aria-label={t('platformHero.ariaLabel')}
       style={
         {

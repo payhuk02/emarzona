@@ -201,7 +201,19 @@ export const LandingPageCustomizationSection = ({
 
   const renderElementEditor = useCallback(
     (element: PageElement) => {
-      const value = (pageValues[element.id] ?? element.defaultValue ?? '') as string;
+      const storedValue = pageValues[element.id];
+      const hasStoredColor =
+        element.type === 'color' &&
+        element.clearable &&
+        storedValue != null &&
+        String(storedValue).trim() !== '';
+      const value = (
+        element.type === 'color' && element.clearable
+          ? hasStoredColor
+            ? String(storedValue)
+            : ''
+          : (storedValue ?? element.defaultValue ?? '')
+      ) as string;
       const inputId = `landing-${element.id}`;
 
       switch (element.type) {
@@ -279,23 +291,43 @@ export const LandingPageCustomizationSection = ({
               </Button>
             </div>
           );
-        case 'color':
+        case 'color': {
+          const pickerValue = value.trim() || element.defaultValue || '#ffffff';
           return (
-            <div className="flex items-center gap-2">
-              <Input
-                type="color"
-                value={value}
-                onChange={e => handleElementChange(element.id, e.target.value)}
-                className="w-16 h-10 p-1 border rounded-md cursor-pointer"
-              />
-              <Input
-                value={value}
-                onChange={e => handleElementChange(element.id, e.target.value)}
-                placeholder={element.defaultValue}
-                className="flex-1"
-              />
+            <div className="space-y-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <Input
+                  type="color"
+                  value={pickerValue}
+                  onChange={e => handleElementChange(element.id, e.target.value)}
+                  className="h-10 w-16 cursor-pointer rounded-md border p-1"
+                />
+                <Input
+                  value={value}
+                  onChange={e => handleElementChange(element.id, e.target.value)}
+                  placeholder={element.defaultValue}
+                  className="min-w-[8rem] flex-1"
+                />
+                {element.clearable && hasStoredColor ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleElementChange(element.id, null)}
+                  >
+                    <X className="mr-1 h-4 w-4" />
+                    Supprimer
+                  </Button>
+                ) : null}
+              </div>
+              {element.clearable && !hasStoredColor ? (
+                <p className="text-xs text-muted-foreground">
+                  Aucune couleur — fond transparent sur la landing.
+                </p>
+              ) : null}
             </div>
           );
+        }
         case 'font':
           return (
             <Input
