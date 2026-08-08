@@ -140,7 +140,7 @@ export const LANDING_PREMIUM_SECTIONS: LandingPremiumSection[] = [
       color('platformHero.backgroundColor', 'Couleur de fond', '#ffffff', {
         clearable: true,
         description:
-          'Optionnel. Supprimez la couleur pour un fond transparent (l’image arrière-plan reste visible).',
+          'Optionnel. Cliquez sur Supprimer ou videz le champ pour un fond totalement transparent.',
       }),
       color('platformHero.textColor', 'Couleur du texte', '#0f0f12'),
       text('platformHero.backgroundAlt', 'Alt image arrière-plan', lp.platformHero.backgroundAlt),

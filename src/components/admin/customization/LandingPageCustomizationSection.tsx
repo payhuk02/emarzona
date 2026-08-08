@@ -94,10 +94,12 @@ export const LandingPageCustomizationSection = ({
   const handleElementChange = useCallback(
     (elementKey: string, value: string | number | boolean | null) => {
       setPageValues(prev => {
-        const updated = {
-          ...prev,
-          [elementKey]: value,
-        };
+        const updated = { ...prev };
+        if (value === null || value === '') {
+          delete updated[elementKey];
+        } else {
+          updated[elementKey] = value;
+        }
 
         // Debounce la sauvegarde (500ms)
         if (saveTimeoutRef.current) {
@@ -304,7 +306,10 @@ export const LandingPageCustomizationSection = ({
                 />
                 <Input
                   value={value}
-                  onChange={e => handleElementChange(element.id, e.target.value)}
+                  onChange={e => {
+                    const next = e.target.value.trim();
+                    handleElementChange(element.id, next === '' ? null : e.target.value);
+                  }}
                   placeholder={element.defaultValue}
                   className="min-w-[8rem] flex-1"
                 />

@@ -45,12 +45,12 @@
   background: var(--lp-platform-hero-bg, #ffffff);
   color: var(--lp-platform-hero-text, #0f0f12);
   width: 100%;
-  min-height: clamp(28rem, 54vh, 40rem);
+  min-height: clamp(32rem, 60vh, 46rem);
 }
 
 @media (min-width: 1024px) {
   .landing-premium .lp-platform-hero {
-    min-height: clamp(32rem, 48vw, 50rem);
+    min-height: clamp(36rem, 54vw, 58rem);
   }
 }
 
@@ -90,10 +90,9 @@
 .landing-premium .lp-platform-hero--no-bg-color .lp-platform-hero__photo-overlay {
   background: linear-gradient(
     90deg,
-    rgba(255, 255, 255, 0.9) 0%,
-    rgba(255, 255, 255, 0.55) 24%,
-    rgba(255, 255, 255, 0.2) 42%,
-    transparent 62%
+    rgba(255, 255, 255, 0.72) 0%,
+    rgba(255, 255, 255, 0.28) 16%,
+    transparent 38%
   );
 }
 
@@ -107,7 +106,7 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  min-height: clamp(18rem, 36vh, 28rem);
+  min-height: clamp(20rem, 40vh, 32rem);
   width: 100%;
   max-width: none;
 }
@@ -115,7 +114,7 @@
 @media (min-width: 1024px) {
   .landing-premium .lp-platform-hero__content {
     max-width: min(54rem, 58%);
-    min-height: clamp(20rem, 38vw, 32rem);
+    min-height: clamp(24rem, 42vw, 36rem);
   }
 }
 

@@ -8,7 +8,6 @@ import { getPageCustomizationValue } from '@/lib/admin/pageCustomizationKeys';
 
 const CHECK_KEYS = ['physical', 'digital', 'service', 'courses', 'artist'] as const;
 
-const DEFAULT_BG = '#ffffff';
 const DEFAULT_TEXT = '#0f0f12';
 
 export function PremiumPlatformHero() {
@@ -24,11 +23,7 @@ export function PremiumPlatformHero() {
     'platformHero.backgroundColor'
   );
   const hasBackgroundColor = Boolean(customBackgroundColor);
-  const backgroundColor = hasBackgroundColor
-    ? customBackgroundColor!
-    : backgroundUrl
-      ? 'transparent'
-      : DEFAULT_BG;
+  const backgroundColor = hasBackgroundColor ? customBackgroundColor! : 'transparent';
   const textColor =
     getPageCustomizationValue(pageCustomization, 'platformHero.textColor') ?? DEFAULT_TEXT;
 
@@ -61,7 +56,7 @@ export function PremiumPlatformHero() {
       ) : null}
       <div className="lp-platform-hero__grain pointer-events-none absolute inset-0" aria-hidden />
 
-      <div className="relative mx-auto flex w-full max-w-[100rem] items-stretch px-4 py-14 sm:px-6 sm:py-16 md:px-10 lg:px-14 lg:py-20 xl:px-16 xl:py-24 2xl:px-20">
+      <div className="relative mx-auto flex w-full max-w-[100rem] items-stretch px-4 py-16 sm:px-6 sm:py-20 md:px-10 lg:px-14 lg:py-24 xl:px-16 xl:py-28 2xl:px-20">
         <div className="lp-platform-hero__content text-center lg:text-left">
           <h1 className="lp-platform-hero__title lp-serif text-[2.25rem] leading-[1.1] sm:text-[2.85rem] md:text-[3.35rem] lg:text-[4.25rem] xl:text-[4.75rem]">
             {t('platformHero.title')}
