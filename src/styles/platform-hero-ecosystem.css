@@ -1,0 +1,941 @@
+/* Hero plateforme premium — écosystème animé (CSS GPU, boucle 12s) */
+
+.landing-premium .lp-platform-hero--premium {
+  --lp-ph-deep: #060d18;
+  --lp-ph-ink: #0a1628;
+  --lp-ph-royal: #1e3a8a;
+  --lp-ph-electric: rgba(59, 130, 246, 0.45);
+  --lp-ph-gold: #c9a227;
+  --lp-eco-cycle: 12s;
+  background: linear-gradient(145deg, var(--lp-ph-deep) 0%, var(--lp-ph-ink) 42%, #0f2847 100%);
+  color: var(--lp-platform-hero-text, #f4f3f0);
+}
+
+.landing-premium .lp-platform-hero--premium.lp-platform-hero--no-bg-color {
+  background: linear-gradient(145deg, var(--lp-ph-deep) 0%, var(--lp-ph-ink) 42%, #0f2847 100%);
+}
+
+.landing-premium .lp-platform-hero--premium[style*='--lp-platform-hero-bg'] {
+  background: var(--lp-platform-hero-bg);
+}
+
+/* Ambient */
+.landing-premium .lp-platform-hero__ambient-base {
+  background:
+    radial-gradient(ellipse 70% 55% at 15% 20%, rgba(37, 99, 235, 0.18) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 45% at 85% 75%, rgba(201, 162, 39, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse 90% 60% at 50% 100%, rgba(30, 58, 138, 0.25) 0%, transparent 60%);
+}
+
+.landing-premium .lp-platform-hero__ambient-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.5;
+  animation: lp-ph-orb-drift 28s ease-in-out infinite;
+}
+
+.landing-premium .lp-platform-hero__ambient-orb--1 {
+  width: min(42vw, 28rem);
+  height: min(42vw, 28rem);
+  top: -8%;
+  left: -5%;
+  background: rgba(37, 99, 235, 0.22);
+}
+
+.landing-premium .lp-platform-hero__ambient-orb--2 {
+  width: min(36vw, 22rem);
+  height: min(36vw, 22rem);
+  bottom: 5%;
+  right: 10%;
+  background: rgba(201, 162, 39, 0.12);
+  animation-delay: -9s;
+  animation-duration: 32s;
+}
+
+.landing-premium .lp-platform-hero__ambient-orb--3 {
+  width: min(28vw, 16rem);
+  height: min(28vw, 16rem);
+  top: 40%;
+  left: 35%;
+  background: rgba(59, 130, 246, 0.15);
+  animation-delay: -16s;
+  animation-duration: 24s;
+}
+
+@keyframes lp-ph-orb-drift {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(12px, -18px) scale(1.04);
+  }
+}
+
+.landing-premium .lp-platform-hero__ambient-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: linear-gradient(180deg, black 0%, transparent 85%);
+}
+
+.landing-premium .lp-platform-hero__particle {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: rgba(147, 197, 253, 0.55);
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.35);
+  animation: lp-ph-particle 18s ease-in-out infinite;
+}
+
+.landing-premium .lp-platform-hero__particle--1 {
+  top: 18%;
+  left: 12%;
+}
+.landing-premium .lp-platform-hero__particle--2 {
+  top: 35%;
+  left: 28%;
+  animation-delay: -3s;
+}
+.landing-premium .lp-platform-hero__particle--3 {
+  top: 55%;
+  left: 8%;
+  animation-delay: -6s;
+}
+.landing-premium .lp-platform-hero__particle--4 {
+  top: 72%;
+  left: 22%;
+  animation-delay: -9s;
+}
+.landing-premium .lp-platform-hero__particle--5 {
+  top: 25%;
+  right: 35%;
+  animation-delay: -2s;
+}
+.landing-premium .lp-platform-hero__particle--6 {
+  top: 48%;
+  right: 28%;
+  animation-delay: -5s;
+}
+.landing-premium .lp-platform-hero__particle--7 {
+  top: 65%;
+  right: 40%;
+  animation-delay: -8s;
+}
+.landing-premium .lp-platform-hero__particle--8 {
+  top: 82%;
+  right: 22%;
+  animation-delay: -11s;
+}
+
+@keyframes lp-ph-particle {
+  0%,
+  100% {
+    opacity: 0.2;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 0.75;
+    transform: translateY(-10px);
+  }
+}
+
+/* Layout visual */
+.landing-premium .lp-platform-hero__visual {
+  isolation: isolate;
+}
+
+.landing-premium .lp-platform-hero__visual .lp-platform-hero__photo,
+.landing-premium .lp-platform-hero__visual picture {
+  border-radius: 0;
+  mask-image: linear-gradient(90deg, transparent 0%, black 22%, black 100%);
+}
+
+.landing-premium .lp-platform-hero__visual .lp-platform-hero__photo {
+  object-position: 78% 22%;
+}
+
+.landing-premium .lp-platform-hero--premium .lp-platform-hero__photo-overlay {
+  background: linear-gradient(
+    90deg,
+    #0a1628 0%,
+    rgba(10, 22, 40, 0.92) 28%,
+    rgba(10, 22, 40, 0.45) 48%,
+    rgba(10, 22, 40, 0.08) 62%,
+    transparent 78%
+  );
+}
+
+.landing-premium .lp-platform-hero__visual-fallback {
+  background: radial-gradient(ellipse at 70% 40%, rgba(37, 99, 235, 0.15) 0%, transparent 60%);
+}
+
+.landing-premium .lp-platform-hero__subtitle {
+  color: color-mix(in srgb, var(--lp-platform-hero-text, #f4f3f0) 78%, transparent);
+}
+
+.landing-premium .lp-platform-hero--premium .lp-platform-hero__check-item {
+  color: color-mix(in srgb, var(--lp-platform-hero-text, #f4f3f0) 88%, transparent);
+}
+
+.landing-premium .lp-platform-hero--premium .lp-platform-hero__check-icon {
+  color: var(--lp-platform-hero-text, #f4f3f0);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+
+@media (min-width: 1024px) {
+  .landing-premium .lp-platform-hero__content {
+    max-width: min(54rem, 58%);
+  }
+
+  .landing-premium .lp-platform-hero__checks {
+    width: max-content;
+  }
+}
+
+/* Ecosystem container */
+.landing-premium .lp-platform-hero__ecosystem {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.landing-premium .lp-platform-hero__ecosystem--static {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 1rem;
+}
+
+/* Glass cards */
+.landing-premium .lp-eco-card,
+.landing-premium .lp-eco-scene {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate3d(0, 0, 0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+.landing-premium .lp-eco-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  max-width: min(11.5rem, 42vw);
+  padding: 0.55rem 0.65rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.09);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.landing-premium .lp-eco-card--gold {
+  border-color: rgba(201, 162, 39, 0.35);
+}
+
+.landing-premium .lp-eco-card__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 1.65rem;
+  height: 1.65rem;
+  border-radius: 0.45rem;
+  background: rgba(59, 130, 246, 0.2);
+  color: #93c5fd;
+}
+
+.landing-premium .lp-eco-card--gold .lp-eco-card__icon {
+  background: rgba(201, 162, 39, 0.2);
+  color: var(--lp-ph-gold);
+}
+
+.landing-premium .lp-eco-card__title {
+  font-size: 0.68rem;
+  font-weight: 600;
+  line-height: 1.25;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.landing-premium .lp-eco-card__detail {
+  margin-top: 0.15rem;
+  font-size: 0.6rem;
+  line-height: 1.3;
+  color: rgba(255, 255, 255, 0.58);
+}
+
+.landing-premium .lp-eco-scene {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  max-width: min(10.5rem, 40vw);
+  padding: 0.6rem 0.7rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.2);
+}
+
+.landing-premium .lp-eco-scene__title {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.landing-premium .lp-eco-scene__meta {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.62rem;
+  color: rgba(134, 239, 172, 0.95);
+}
+
+.landing-premium .lp-eco-scene__label {
+  font-size: 0.58rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.landing-premium .lp-eco-scene__value {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.landing-premium .lp-eco-scene__delta {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #86efac;
+}
+
+.landing-premium .lp-eco-scene__disclaimer {
+  font-size: 0.52rem;
+  color: rgba(255, 255, 255, 0.38);
+}
+
+.landing-premium .lp-eco-scene__brand {
+  font-family: var(--lp-serif);
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: 0.02em;
+}
+
+.landing-premium .lp-eco-scene__tagline {
+  font-size: 0.62rem;
+  color: rgba(201, 162, 39, 0.95);
+  letter-spacing: 0.04em;
+}
+
+.landing-premium .lp-eco-node {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.62rem;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.landing-premium .lp-eco-line {
+  width: 1px;
+  height: 1rem;
+  margin: 0.15rem 0 0.15rem 0.55rem;
+  background: linear-gradient(180deg, rgba(59, 130, 246, 0.8), rgba(201, 162, 39, 0.6));
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
+}
+
+.landing-premium .lp-eco-badge {
+  align-self: flex-start;
+  margin-top: 0.25rem;
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.58rem;
+  font-weight: 600;
+}
+
+.landing-premium .lp-eco-badge--gold {
+  background: rgba(201, 162, 39, 0.18);
+  color: var(--lp-ph-gold);
+  border: 1px solid rgba(201, 162, 39, 0.35);
+}
+
+.landing-premium .lp-eco-notice {
+  font-size: 0.58rem;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.landing-premium .lp-eco-flow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.2rem 0.15rem;
+  font-size: 0.58rem;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.landing-premium .lp-eco-flow__arrow {
+  display: inline-block;
+  width: 0.65rem;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(59, 130, 246, 0.3), rgba(59, 130, 246, 0.9));
+  vertical-align: middle;
+  margin: 0 0.1rem;
+  animation: lp-eco-flow-pulse 2s ease-in-out infinite;
+}
+
+.landing-premium .lp-eco-flow-glow {
+  height: 2px;
+  margin-top: 0.35rem;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.85), transparent);
+  animation: lp-eco-flow-pulse 2.4s ease-in-out infinite;
+}
+
+.landing-premium .lp-eco-sparkline {
+  height: 1.25rem;
+  margin: 0.25rem 0;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 24' fill='none'%3E%3Cpath d='M0 18 L12 14 L24 16 L36 8 L48 10 L60 4 L72 6 L80 2' stroke='%2386efac' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E")
+    no-repeat left center / 100% 100%;
+  opacity: 0.85;
+}
+
+@keyframes lp-eco-float {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -4px;
+  }
+}
+
+@keyframes lp-eco-flow-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Positions — gauche de la zone visuelle (évite le visage à droite) */
+.landing-premium .lp-eco-card--physical {
+  top: 6%;
+  left: 2%;
+  animation: lp-eco-phase-1 var(--lp-eco-cycle) ease-in-out infinite;
+}
+.landing-premium .lp-eco-card--digital {
+  top: 20%;
+  left: 10%;
+  animation: lp-eco-phase-2 var(--lp-eco-cycle) ease-in-out infinite;
+}
+.landing-premium .lp-eco-card--service {
+  top: 34%;
+  left: 1%;
+  animation: lp-eco-phase-3 var(--lp-eco-cycle) ease-in-out infinite;
+}
+.landing-premium .lp-eco-card--courses {
+  top: 48%;
+  left: 8%;
+  animation: lp-eco-phase-4 var(--lp-eco-cycle) ease-in-out infinite;
+}
+.landing-premium .lp-eco-card--artist {
+  top: 62%;
+  left: 3%;
+  animation: lp-eco-phase-5 var(--lp-eco-cycle) ease-in-out infinite;
+}
+
+.landing-premium .lp-eco-scene--referral {
+  top: 14%;
+  left: 6%;
+  animation: lp-eco-phase-referral var(--lp-eco-cycle) ease-in-out infinite;
+}
+.landing-premium .lp-eco-scene--affiliate {
+  top: 28%;
+  left: 4%;
+  animation: lp-eco-phase-affiliate var(--lp-eco-cycle) ease-in-out infinite;
+}
+.landing-premium .lp-eco-scene--payment {
+  top: 52%;
+  left: 5%;
+  animation: lp-eco-phase-payment var(--lp-eco-cycle) ease-in-out infinite;
+}
+.landing-premium .lp-eco-scene--order {
+  top: 64%;
+  left: 8%;
+  animation: lp-eco-phase-order var(--lp-eco-cycle) ease-in-out infinite;
+}
+.landing-premium .lp-eco-scene--dashboard {
+  top: 38%;
+  left: 2%;
+  animation: lp-eco-phase-dashboard var(--lp-eco-cycle) ease-in-out infinite;
+}
+.landing-premium .lp-eco-scene--convergence {
+  top: 42%;
+  left: 50%;
+  transform: translateX(-50%);
+  align-items: center;
+  text-align: center;
+  animation: lp-eco-phase-convergence var(--lp-eco-cycle) ease-in-out infinite;
+}
+
+.landing-premium .lp-eco-card--mkt-stats {
+  top: 8%;
+  left: 4%;
+  animation: lp-eco-phase-mkt1 var(--lp-eco-cycle) ease-in-out infinite;
+}
+.landing-premium .lp-eco-card--mkt-promo {
+  top: 22%;
+  left: 12%;
+  animation: lp-eco-phase-mkt2 var(--lp-eco-cycle) ease-in-out infinite;
+}
+.landing-premium .lp-eco-card--mkt-target {
+  top: 36%;
+  left: 2%;
+  animation: lp-eco-phase-mkt3 var(--lp-eco-cycle) ease-in-out infinite;
+}
+.landing-premium .lp-eco-card--mkt-links {
+  top: 50%;
+  left: 10%;
+  animation: lp-eco-phase-mkt4 var(--lp-eco-cycle) ease-in-out infinite;
+}
+.landing-premium .lp-eco-card--mkt-clients {
+  top: 18%;
+  left: 2%;
+  animation: lp-eco-phase-mkt5 var(--lp-eco-cycle) ease-in-out infinite;
+}
+.landing-premium .lp-eco-card--mkt-revenue {
+  top: 32%;
+  left: 8%;
+  animation: lp-eco-phase-mkt6 var(--lp-eco-cycle) ease-in-out infinite;
+}
+.landing-premium .lp-eco-card--mkt-orders {
+  top: 46%;
+  left: 3%;
+  animation: lp-eco-phase-mkt7 var(--lp-eco-cycle) ease-in-out infinite;
+}
+
+/* Cycle keyframes — boucle 12s sans coupure visible */
+@keyframes lp-eco-phase-1 {
+  0%,
+  100% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.95);
+  }
+  4%,
+  14% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  20%,
+  99.5% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.95);
+  }
+}
+@keyframes lp-eco-phase-2 {
+  0%,
+  100% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.95);
+  }
+  10%,
+  20% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  26%,
+  99.5% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.95);
+  }
+}
+@keyframes lp-eco-phase-3 {
+  0%,
+  100% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.95);
+  }
+  18%,
+  28% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  34%,
+  99.5% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.95);
+  }
+}
+@keyframes lp-eco-phase-4 {
+  0%,
+  100% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.95);
+  }
+  26%,
+  36% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  42%,
+  99.5% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.95);
+  }
+}
+@keyframes lp-eco-phase-5 {
+  0%,
+  100% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.95);
+  }
+  34%,
+  44% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  50%,
+  99.5% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.95);
+  }
+}
+@keyframes lp-eco-phase-referral {
+  0%,
+  100% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.96);
+  }
+  42%,
+  54% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  60%,
+  99.5% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.96);
+  }
+}
+@keyframes lp-eco-phase-affiliate {
+  0%,
+  100% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.96);
+  }
+  52%,
+  64% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  70%,
+  99.5% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.96);
+  }
+}
+@keyframes lp-eco-phase-mkt1 {
+  0%,
+  100% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+  }
+  62%,
+  68% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  74%,
+  99.5% {
+    opacity: 0;
+  }
+}
+@keyframes lp-eco-phase-mkt2 {
+  0%,
+  100% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+  }
+  66%,
+  72% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  78%,
+  99.5% {
+    opacity: 0;
+  }
+}
+@keyframes lp-eco-phase-mkt3 {
+  0%,
+  100% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+  }
+  70%,
+  76% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  82%,
+  99.5% {
+    opacity: 0;
+  }
+}
+@keyframes lp-eco-phase-mkt4 {
+  0%,
+  100% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+  }
+  74%,
+  80% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  86%,
+  99.5% {
+    opacity: 0;
+  }
+}
+@keyframes lp-eco-phase-mkt5 {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  64%,
+  70% {
+    opacity: 0.85;
+    transform: translateY(0) scale(1);
+  }
+  76%,
+  99.5% {
+    opacity: 0;
+  }
+}
+@keyframes lp-eco-phase-mkt6 {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  68%,
+  74% {
+    opacity: 0.85;
+    transform: translateY(0) scale(1);
+  }
+  80%,
+  99.5% {
+    opacity: 0;
+  }
+}
+@keyframes lp-eco-phase-mkt7 {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  72%,
+  78% {
+    opacity: 0.85;
+    transform: translateY(0) scale(1);
+  }
+  84%,
+  99.5% {
+    opacity: 0;
+  }
+}
+@keyframes lp-eco-phase-payment {
+  0%,
+  100% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.96);
+  }
+  78%,
+  86% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  92%,
+  99.5% {
+    opacity: 0;
+  }
+}
+@keyframes lp-eco-phase-order {
+  0%,
+  100% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.96);
+  }
+  82%,
+  90% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  96%,
+  99.5% {
+    opacity: 0;
+  }
+}
+@keyframes lp-eco-phase-dashboard {
+  0%,
+  100% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.96);
+  }
+  86%,
+  94% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  98%,
+  99.5% {
+    opacity: 0;
+  }
+}
+@keyframes lp-eco-phase-convergence {
+  0%,
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(8px) scale(0.94);
+  }
+  94%,
+  99% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
+/* Mobile — animations simplifiées + anti-clignotement (pas de backdrop-filter animé) */
+@media (max-width: 767px) {
+  .landing-premium .lp-platform-hero__ecosystem {
+    transform: translateZ(0);
+    isolation: isolate;
+  }
+
+  .landing-premium .lp-eco-card,
+  .landing-premium .lp-eco-scene {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(10, 18, 36, 0.94);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.28);
+  }
+
+  .landing-premium .lp-platform-hero__particle--5,
+  .landing-premium .lp-platform-hero__particle--6,
+  .landing-premium .lp-platform-hero__particle--7,
+  .landing-premium .lp-platform-hero__particle--8 {
+    display: none;
+  }
+
+  .landing-premium .lp-eco-card--physical,
+  .landing-premium .lp-eco-card--service,
+  .landing-premium .lp-eco-card--courses,
+  .landing-premium .lp-eco-card--artist,
+  .landing-premium .lp-eco-scene--referral,
+  .landing-premium .lp-eco-scene--affiliate,
+  .landing-premium .lp-eco-scene--order,
+  .landing-premium .lp-eco-scene--convergence,
+  .landing-premium .lp-eco-card--mkt-promo,
+  .landing-premium .lp-eco-card--mkt-target,
+  .landing-premium .lp-eco-card--mkt-links,
+  .landing-premium .lp-eco-card--mkt-clients,
+  .landing-premium .lp-eco-card--mkt-revenue,
+  .landing-premium .lp-eco-card--mkt-orders {
+    display: none;
+  }
+
+  .landing-premium .lp-eco-card--digital {
+    top: 10%;
+    left: 4%;
+  }
+  .landing-premium .lp-eco-card--mkt-stats {
+    top: 28%;
+    left: 6%;
+  }
+  .landing-premium .lp-eco-scene--payment {
+    top: 46%;
+    left: 4%;
+    animation: lp-eco-phase-payment-mobile var(--lp-eco-cycle) ease-in-out infinite;
+  }
+  .landing-premium .lp-eco-scene--dashboard {
+    top: 62%;
+    left: 6%;
+    animation: lp-eco-phase-dashboard-mobile var(--lp-eco-cycle) ease-in-out infinite;
+  }
+}
+
+@keyframes lp-eco-phase-payment-mobile {
+  0%,
+  100%,
+  78%,
+  99.5% {
+    opacity: 0;
+  }
+  82%,
+  90% {
+    opacity: 1;
+  }
+}
+
+@keyframes lp-eco-phase-dashboard-mobile {
+  0%,
+  100%,
+  86%,
+  99.5% {
+    opacity: 0;
+  }
+  90%,
+  98% {
+    opacity: 1;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .landing-premium .lp-eco-card {
+    max-width: 10rem;
+  }
+  .landing-premium .lp-eco-card--mkt-clients,
+  .landing-premium .lp-eco-card--mkt-revenue,
+  .landing-premium .lp-eco-card--mkt-orders {
+    display: none;
+  }
+}
+
+/* Accessibilité — reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .landing-premium .lp-platform-hero__ambient-orb,
+  .landing-premium .lp-platform-hero__particle,
+  .landing-premium .lp-eco-card,
+  .landing-premium .lp-eco-scene {
+    animation: none !important;
+  }
+}
+
+.landing-premium .lp-platform-hero__ecosystem--static .lp-eco-card,
+.landing-premium .lp-eco-static .lp-eco-card {
+  position: relative;
+  top: auto;
+  left: auto;
+  opacity: 1;
+  transform: none;
+  animation: none;
+  max-width: none;
+}
+
+.landing-premium .lp-platform-hero__ecosystem--static .lp-eco-scene {
+  display: none;
+}

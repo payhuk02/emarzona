@@ -136,13 +136,22 @@ export const LANDING_PREMIUM_SECTIONS: LandingPremiumSection[] = [
     name: 'Hero plateforme (bandeau haut)',
     icon: Home,
     elements: [
-      text('platformHero.title', 'Titre H1', lp.platformHero.title),
-      color('platformHero.backgroundColor', 'Couleur de fond', '#ffffff', {
+      text('platformHero.titleLine1', 'Titre H1 — ligne 1', lp.platformHero.titleLine1),
+      text('platformHero.titleLine2', 'Titre H1 — ligne 2', lp.platformHero.titleLine2),
+      area(
+        'platformHero.subtitle',
+        'Sous-titre (optionnel, laisser vide pour masquer)',
+        lp.platformHero.subtitle
+      ),
+      text('platformHero.ctaLabel', 'Texte bouton CTA', lp.platformHero.ctaLabel),
+      color('platformHero.backgroundColor', 'Couleur de fond', '#0a1628', {
         clearable: true,
         description:
-          'Optionnel. Cliquez sur Supprimer ou videz le champ pour un fond totalement transparent.',
+          'Optionnel. Cliquez sur Supprimer ou videz le champ pour le dégradé bleu nuit par défaut.',
       }),
-      color('platformHero.textColor', 'Couleur du texte', '#0f0f12'),
+      color('platformHero.textColor', 'Couleur du texte', '#f4f3f0'),
+      color('platformHero.ctaBackgroundColor', 'Couleur bouton CTA', '#f97316'),
+      color('platformHero.ctaTextColor', 'Couleur texte bouton CTA', '#ffffff'),
       text('platformHero.backgroundAlt', 'Alt image arrière-plan', lp.platformHero.backgroundAlt),
       text(
         'platformHero.checks.physical',
