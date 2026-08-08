@@ -819,19 +819,12 @@
   }
 }
 
-/* Mobile — animations simplifiées + anti-clignotement (pas de backdrop-filter animé) */
+/* Mobile — fond ambiant fixe, pas de cartes écosystème */
 @media (max-width: 767px) {
-  .landing-premium .lp-platform-hero__ecosystem {
-    transform: translateZ(0);
-    isolation: isolate;
-  }
-
-  .landing-premium .lp-eco-card,
-  .landing-premium .lp-eco-scene {
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-    background: rgba(10, 18, 36, 0.94);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.28);
+  .landing-premium .lp-platform-hero__ambient-orb,
+  .landing-premium .lp-platform-hero__particle {
+    animation: none !important;
+    opacity: 0.3;
   }
 
   .landing-premium .lp-platform-hero__particle--5,
@@ -839,68 +832,6 @@
   .landing-premium .lp-platform-hero__particle--7,
   .landing-premium .lp-platform-hero__particle--8 {
     display: none;
-  }
-
-  .landing-premium .lp-eco-card--physical,
-  .landing-premium .lp-eco-card--service,
-  .landing-premium .lp-eco-card--courses,
-  .landing-premium .lp-eco-card--artist,
-  .landing-premium .lp-eco-scene--referral,
-  .landing-premium .lp-eco-scene--affiliate,
-  .landing-premium .lp-eco-scene--order,
-  .landing-premium .lp-eco-scene--convergence,
-  .landing-premium .lp-eco-card--mkt-promo,
-  .landing-premium .lp-eco-card--mkt-target,
-  .landing-premium .lp-eco-card--mkt-links,
-  .landing-premium .lp-eco-card--mkt-clients,
-  .landing-premium .lp-eco-card--mkt-revenue,
-  .landing-premium .lp-eco-card--mkt-orders {
-    display: none;
-  }
-
-  .landing-premium .lp-eco-card--digital {
-    top: 10%;
-    left: 4%;
-  }
-  .landing-premium .lp-eco-card--mkt-stats {
-    top: 28%;
-    left: 6%;
-  }
-  .landing-premium .lp-eco-scene--payment {
-    top: 46%;
-    left: 4%;
-    animation: lp-eco-phase-payment-mobile var(--lp-eco-cycle) ease-in-out infinite;
-  }
-  .landing-premium .lp-eco-scene--dashboard {
-    top: 62%;
-    left: 6%;
-    animation: lp-eco-phase-dashboard-mobile var(--lp-eco-cycle) ease-in-out infinite;
-  }
-}
-
-@keyframes lp-eco-phase-payment-mobile {
-  0%,
-  100%,
-  78%,
-  99.5% {
-    opacity: 0;
-  }
-  82%,
-  90% {
-    opacity: 1;
-  }
-}
-
-@keyframes lp-eco-phase-dashboard-mobile {
-  0%,
-  100%,
-  86%,
-  99.5% {
-    opacity: 0;
-  }
-  90%,
-  98% {
-    opacity: 1;
   }
 }
 

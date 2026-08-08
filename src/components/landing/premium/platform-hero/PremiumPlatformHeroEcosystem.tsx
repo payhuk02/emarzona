@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import {
   Package,
   Laptop,
@@ -16,6 +17,7 @@ import {
   BarChart3,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { useLandingPremiumT } from '@/hooks/useLandingPremiumT';
 import { usePrefersReducedMotion } from './usePrefersReducedMotion';
 
@@ -72,8 +74,19 @@ function StaticEcosystem() {
 export function PremiumPlatformHeroEcosystem() {
   const { t } = useLandingPremiumT();
   const reducedMotion = usePrefersReducedMotion();
+  const isMobile = useIsMobile();
+  const [hydrated, setHydrated] = useState(false);
 
-  if (reducedMotion) {
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
+
+  // Mobile : pas de cartes (évite le clignotement iOS/Android).
+  if (isMobile) {
+    return null;
+  }
+
+  if (reducedMotion || !hydrated) {
     return (
       <div className="lp-platform-hero__ecosystem lp-platform-hero__ecosystem--static" aria-hidden>
         <StaticEcosystem />

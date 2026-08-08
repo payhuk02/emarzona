@@ -201,8 +201,15 @@ export function MediaSection({ onChange }: MediaSectionProps) {
         </CardHeader>
         <CardContent className="space-y-4">
           <ImageUploader
-            title="Arrière-plan Hero plateforme (bandeau haut)"
-            description="Image optionnelle derrière le bandeau « Plateforme N°1 ». Les couleurs de fond et de texte se règlent dans Textes → Hero plateforme."
+            title="Arrière-plan gauche Hero plateforme"
+            description="Image optionnelle derrière la colonne texte (partie gauche). Alt configurable dans Textes → Hero plateforme."
+            keyPath={['landingPlatformHeroLeft']}
+            currentUrl={media.landingPlatformHeroLeft as string | undefined}
+            optional
+          />
+          <ImageUploader
+            title="Arrière-plan droit Hero plateforme (visuel)"
+            description="Image optionnelle dans la colonne visuelle à droite (avec animation écosystème sur desktop). Les couleurs se règlent dans Textes → Hero plateforme."
             keyPath={['landingPlatformHero']}
             currentUrl={media.landingPlatformHero as string | undefined}
             optional

@@ -5,20 +5,33 @@ import { getPlatformHeroImageProps } from '@/lib/image-transform';
 interface PremiumPlatformHeroBackgroundProps {
   src: string;
   alt: string;
+  /** `visual` = colonne droite (LCP) ; `left` = arrière-plan colonne gauche */
+  variant?: 'visual' | 'left';
 }
 
-export function PremiumPlatformHeroBackground({ src, alt }: PremiumPlatformHeroBackgroundProps) {
+export function PremiumPlatformHeroBackground({
+  src,
+  alt,
+  variant = 'visual',
+}: PremiumPlatformHeroBackgroundProps) {
   const imageProps = useMemo(() => getPlatformHeroImageProps(src), [src]);
   const [loaded, setLoaded] = useState(false);
+  const isLcp = variant === 'visual';
 
   const preloadSrc = imageProps?.webpSrcSet?.split(',')[0]?.split(' ')[0] ?? imageProps?.src ?? src;
-  useLCPImagePreload(preloadSrc, imageProps?.webpSrcSet ?? imageProps?.srcSet, imageProps?.sizes);
+  useLCPImagePreload(
+    isLcp ? preloadSrc : '',
+    isLcp ? (imageProps?.webpSrcSet ?? imageProps?.srcSet) : undefined,
+    isLcp ? imageProps?.sizes : undefined
+  );
 
   const handleLoad = useCallback(() => setLoaded(true), []);
 
   if (!imageProps) return null;
 
-  const imgClassName = `lp-platform-hero__photo pointer-events-none absolute inset-0 h-full w-full object-cover${loaded ? ' is-loaded' : ''}`;
+  const photoClass =
+    variant === 'left' ? 'lp-platform-hero__left-photo' : 'lp-platform-hero__photo';
+  const imgClassName = `${photoClass} pointer-events-none absolute inset-0 h-full w-full object-cover${loaded ? ' is-loaded' : ''}`;
 
   if (imageProps.webpSrcSet || imageProps.avifSrcSet) {
     return (
@@ -35,8 +48,8 @@ export function PremiumPlatformHeroBackground({ src, alt }: PremiumPlatformHeroB
           sizes={imageProps.sizes}
           alt={alt}
           className={imgClassName}
-          loading="eager"
-          fetchPriority="high"
+          loading={isLcp ? 'eager' : 'lazy'}
+          fetchPriority={isLcp ? 'high' : 'auto'}
           decoding="async"
           onLoad={handleLoad}
         />
@@ -51,8 +64,8 @@ export function PremiumPlatformHeroBackground({ src, alt }: PremiumPlatformHeroB
       sizes={imageProps.sizes}
       alt={alt}
       className={imgClassName}
-      loading="eager"
-      fetchPriority="high"
+      loading={isLcp ? 'eager' : 'lazy'}
+      fetchPriority={isLcp ? 'high' : 'auto'}
       decoding="async"
       onLoad={handleLoad}
     />

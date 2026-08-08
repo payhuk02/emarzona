@@ -152,7 +152,16 @@ export const LANDING_PREMIUM_SECTIONS: LandingPremiumSection[] = [
       color('platformHero.textColor', 'Couleur du texte', '#f4f3f0'),
       color('platformHero.ctaBackgroundColor', 'Couleur bouton CTA', '#f97316'),
       color('platformHero.ctaTextColor', 'Couleur texte bouton CTA', '#ffffff'),
-      text('platformHero.backgroundAlt', 'Alt image arrière-plan', lp.platformHero.backgroundAlt),
+      text(
+        'platformHero.backgroundAlt',
+        'Alt image arrière-plan droit',
+        lp.platformHero.backgroundAlt
+      ),
+      text(
+        'platformHero.leftBackgroundAlt',
+        'Alt image arrière-plan gauche',
+        lp.platformHero.leftBackgroundAlt
+      ),
       text(
         'platformHero.checks.physical',
         'Check — Produits physiques',

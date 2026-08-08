@@ -6,6 +6,7 @@ import { usePageCustomization } from '@/hooks/usePageCustomization';
 import { usePlatformCustomizationContext } from '@/contexts/PlatformCustomizationContext';
 import { LANDING_PREMIUM_PAGE_ID } from '@/lib/admin/landingPremiumCustomization';
 import { getPageCustomizationValue } from '@/lib/admin/pageCustomizationKeys';
+import { PremiumPlatformHeroBackground } from './PremiumPlatformHeroBackground';
 import { PremiumPlatformHeroAmbient } from './platform-hero/PremiumPlatformHeroAmbient';
 import { PremiumPlatformHeroVisual } from './platform-hero/PremiumPlatformHeroVisual';
 
@@ -21,7 +22,13 @@ export function PremiumPlatformHero() {
   const { customizationData } = usePlatformCustomizationContext();
 
   const backgroundUrl = customizationData?.media?.images?.landingPlatformHero as string | undefined;
+  const leftBackgroundUrl = customizationData?.media?.images?.landingPlatformHeroLeft as
+    | string
+    | undefined;
   const backgroundAlt = t('platformHero.backgroundAlt');
+  const leftBackgroundAlt =
+    getPageCustomizationValue(pageCustomization, 'platformHero.leftBackgroundAlt') ??
+    t('platformHero.leftBackgroundAlt');
 
   const customBackgroundColor = getPageCustomizationValue(
     pageCustomization,
@@ -44,7 +51,7 @@ export function PremiumPlatformHero() {
 
   return (
     <section
-      className={`lp-platform-hero lp-platform-hero--premium relative w-full overflow-hidden border-b border-white/[0.06] pt-16 sm:pt-[72px]${hasBackgroundColor ? '' : ' lp-platform-hero--no-bg-color'}${backgroundUrl ? ' lp-platform-hero--has-photo' : ''}`}
+      className={`lp-platform-hero lp-platform-hero--premium relative w-full overflow-hidden border-b border-white/[0.06] pt-16 sm:pt-[72px]${hasBackgroundColor ? '' : ' lp-platform-hero--no-bg-color'}${backgroundUrl ? ' lp-platform-hero--has-photo' : ''}${leftBackgroundUrl ? ' lp-platform-hero--has-left-photo' : ''}`}
       aria-label={t('platformHero.ariaLabel')}
       style={
         {
@@ -58,7 +65,18 @@ export function PremiumPlatformHero() {
       <PremiumPlatformHeroAmbient />
       <div className="lp-platform-hero__grain pointer-events-none absolute inset-0" aria-hidden />
 
-      <div className="lp-platform-hero__frame relative mx-auto grid w-full max-w-[100rem] grid-cols-1 gap-8 px-4 sm:px-6 md:px-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-6 lg:px-14 xl:px-16 2xl:px-20">
+      {leftBackgroundUrl ? (
+        <div className="lp-platform-hero__left-bg pointer-events-none absolute inset-y-0 left-0 z-[1]">
+          <PremiumPlatformHeroBackground
+            src={leftBackgroundUrl}
+            alt={leftBackgroundAlt}
+            variant="left"
+          />
+          <div className="lp-platform-hero__left-bg-overlay absolute inset-0" aria-hidden />
+        </div>
+      ) : null}
+
+      <div className="lp-platform-hero__frame relative z-[2] mx-auto grid w-full max-w-[100rem] grid-cols-1 gap-8 px-4 sm:px-6 md:px-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-6 lg:px-14 xl:px-16 2xl:px-20">
         <div className="lp-platform-hero__col-content flex flex-col">
           <div className="lp-platform-hero__content text-center lg:text-left">
             <h1 className="lp-platform-hero__title lp-serif text-[2rem] leading-[1.08] sm:text-[2.65rem] md:text-[3rem] lg:text-[3.65rem] xl:text-[4.15rem]">
