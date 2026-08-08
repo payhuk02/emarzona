@@ -164,7 +164,7 @@ export const getResponsiveSrcSet = (
     return imageUrl || undefined;
   }
 
-  const  srcSetParts: string[] = [];
+  const srcSetParts: string[] = [];
 
   // Mobile
   if (sizes.mobile) {
@@ -239,6 +239,14 @@ export const IMAGE_PRESETS = {
   },
 
   /**
+   * Hero landing plateforme (bandeau pleine largeur, LCP)
+   */
+  platformHero: {
+    sizes: { mobile: 768, tablet: 1280, desktop: 1920, large: 2560 },
+    options: { quality: 80, format: 'webp' as const, resize: 'cover' as const },
+  },
+
+  /**
    * Galerie produit (haute qualité, grandes tailles)
    */
   productGallery: {
@@ -283,7 +291,7 @@ export const getImageAttributesForPreset = (
 
   // Générer l'attribut sizes basé sur les breakpoints
   // Optimisé pour mobile : utiliser 100vw sur mobile pour meilleure qualité
-  const  sizesArray: string[] = [];
+  const sizesArray: string[] = [];
   if (preset.sizes.mobile) {
     // Sur mobile, utiliser 100vw pour charger l'image pleine largeur
     sizesArray.push(`(max-width: 640px) 100vw`);
@@ -368,7 +376,7 @@ export const supportsWebP = (): boolean => {
 /**
  * Détecte le support WebP du navigateur (asynchrone avec cache)
  */
-let  webpSupportCache: boolean | null = null;
+let webpSupportCache: boolean | null = null;
 export const supportsWebPAsync = async (): Promise<boolean> => {
   if (webpSupportCache !== null) return webpSupportCache;
 
@@ -386,8 +394,40 @@ export const formatFileSize = (sizeInKB: number): string => {
   return `${(sizeInKB / 1024).toFixed(2)} MB`;
 };
 
+export interface PlatformHeroImageProps {
+  src: string;
+  sizes: string;
+  srcSet?: string;
+  webpSrcSet?: string;
+  avifSrcSet?: string;
+}
 
+/** Attributs responsive + formats modernes pour l'image LCP du hero plateforme. */
+export function getPlatformHeroImageProps(
+  imageUrl: string | undefined | null
+): PlatformHeroImageProps | null {
+  if (!imageUrl) return null;
 
+  const sizesAttr = '100vw';
+  const preset = IMAGE_PRESETS.platformHero;
 
+  if (!isSupabaseStorageUrl(imageUrl)) {
+    return { src: imageUrl, sizes: sizesAttr };
+  }
 
+  const baseOptions = preset.options;
+  const sizeConfig = preset.sizes;
 
+  return {
+    src:
+      getOptimizedImageUrl(imageUrl, {
+        ...baseOptions,
+        width: sizeConfig.tablet,
+        format: 'webp',
+      }) ?? imageUrl,
+    sizes: sizesAttr,
+    avifSrcSet: getResponsiveSrcSet(imageUrl, sizeConfig, { ...baseOptions, format: 'avif' }),
+    webpSrcSet: getResponsiveSrcSet(imageUrl, sizeConfig, { ...baseOptions, format: 'webp' }),
+    srcSet: getResponsiveSrcSet(imageUrl, sizeConfig, { ...baseOptions, format: 'origin' }),
+  };
+}

@@ -1,10 +1,12 @@
 import type { CSSProperties } from 'react';
 import { Check } from 'lucide-react';
+import { StoreCreateCtaLink } from '@/components/store/StoreCreateCtaLink';
 import { useLandingPremiumT } from '@/hooks/useLandingPremiumT';
 import { usePageCustomization } from '@/hooks/usePageCustomization';
 import { usePlatformCustomizationContext } from '@/contexts/PlatformCustomizationContext';
 import { LANDING_PREMIUM_PAGE_ID } from '@/lib/admin/landingPremiumCustomization';
 import { getPageCustomizationValue } from '@/lib/admin/pageCustomizationKeys';
+import { PremiumPlatformHeroBackground } from './PremiumPlatformHeroBackground';
 
 const CHECK_KEYS = ['physical', 'digital', 'service', 'courses', 'artist'] as const;
 
@@ -29,7 +31,7 @@ export function PremiumPlatformHero() {
 
   return (
     <section
-      className={`lp-platform-hero relative w-full overflow-hidden border-b border-black/8 pt-16 sm:pt-[72px]${hasBackgroundColor ? '' : ' lp-platform-hero--no-bg-color'}`}
+      className={`lp-platform-hero relative w-full overflow-hidden border-b border-black/8 pt-16 sm:pt-[72px]${hasBackgroundColor ? '' : ' lp-platform-hero--no-bg-color'}${backgroundUrl ? ' lp-platform-hero--has-photo' : ''}`}
       aria-label={t('platformHero.ariaLabel')}
       style={
         {
@@ -40,14 +42,7 @@ export function PremiumPlatformHero() {
     >
       {backgroundUrl ? (
         <>
-          <img
-            src={backgroundUrl}
-            alt={backgroundAlt}
-            className="lp-platform-hero__photo pointer-events-none absolute inset-0 h-full w-full object-cover"
-            loading="eager"
-            fetchPriority="high"
-            decoding="async"
-          />
+          <PremiumPlatformHeroBackground src={backgroundUrl} alt={backgroundAlt} />
           <div
             className="lp-platform-hero__photo-overlay pointer-events-none absolute inset-0"
             aria-hidden
@@ -56,13 +51,13 @@ export function PremiumPlatformHero() {
       ) : null}
       <div className="lp-platform-hero__grain pointer-events-none absolute inset-0" aria-hidden />
 
-      <div className="relative mx-auto flex w-full max-w-[100rem] items-stretch px-4 py-16 sm:px-6 sm:py-20 md:px-10 lg:px-14 lg:py-24 xl:px-16 xl:py-28 2xl:px-20">
+      <div className="lp-platform-hero__frame relative mx-auto flex w-full max-w-[100rem] flex-col px-4 sm:px-6 md:px-10 lg:px-14 xl:px-16 2xl:px-20">
         <div className="lp-platform-hero__content text-center lg:text-left">
           <h1 className="lp-platform-hero__title lp-serif text-[2.25rem] leading-[1.1] sm:text-[2.85rem] md:text-[3.35rem] lg:text-[4.25rem] xl:text-[4.75rem]">
             {t('platformHero.title')}
           </h1>
 
-          <ul className="lp-platform-hero__checks mt-10 sm:mt-12 lg:mt-14">
+          <ul className="lp-platform-hero__checks mt-8 sm:mt-10 lg:mt-12">
             {CHECK_KEYS.map(key => (
               <li
                 key={key}
@@ -75,6 +70,12 @@ export function PremiumPlatformHero() {
               </li>
             ))}
           </ul>
+        </div>
+
+        <div className="lp-platform-hero__cta mt-auto flex justify-center pb-6 pt-10 sm:pb-8 sm:pt-12 lg:justify-start lg:pb-10 lg:pt-14">
+          <StoreCreateCtaLink className="lp-btn-primary inline-flex rounded-full px-6 py-3 text-sm font-semibold sm:px-7 sm:py-3.5">
+            {t('nav.getStarted')}
+          </StoreCreateCtaLink>
         </div>
       </div>
     </section>
