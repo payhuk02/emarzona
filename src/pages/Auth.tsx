@@ -41,10 +41,8 @@ import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { usePlatformLogo } from '@/hooks/usePlatformLogo';
 import { SEOMeta } from '@/components/seo/SEOMeta';
 import { logger } from '@/lib/logger';
-import {
-  getStoredReferralCode,
-  clearStoredReferralCode,
-} from '@/components/referral/ReferralTracker';
+import { getStoredReferralCode } from '@/components/referral/ReferralTracker';
+import { applyPendingReferralForUser } from '@/lib/referral-helpers';
 import { usePageCustomization } from '@/hooks/usePageCustomization';
 import { useAdvancedLoyalty } from '@/hooks/useAdvancedLoyalty';
 import { resolvePostAuthRedirectPath } from '@/lib/auth-redirect';
@@ -376,63 +374,28 @@ const Auth = () => {
       }
 
       if (data.user) {
-        // Traiter le code de parrainage si présent
-        const referralCode = getStoredReferralCode();
-        if (referralCode && data.user.id) {
-          try {
-            // Trouver le parrain via son code de parrainage
-            const { data: referrerProfile } = await supabase
-              .from('profiles')
-              .select('user_id')
-              .eq('referral_code', referralCode)
-              .single();
-
-            if (referrerProfile && referrerProfile.user_id !== data.user.id) {
-              // Créer la relation de parrainage
-              const { createReferralRelation } = await import('@/lib/referral-helpers');
-              await createReferralRelation(referrerProfile.user_id, data.user.id, referralCode);
-
-              // Déclencher l'événement de fidélisation pour le parrainage réussi
-              try {
-                // Points pour le parrain (celui qui a invité)
-                const referrerReward = await triggerLoyaltyEvent('referral_success', {
-                  referrerId: referrerProfile.user_id,
-                  referredId: data.user.id,
-                  referralCode,
-                });
-
-                // Points pour le parrainé (celui qui s'inscrit)
-                const referredReward = await triggerLoyaltyEvent('signup_with_referral', {
-                  referrerId: referrerProfile.user_id,
-                  referredId: data.user.id,
-                  referralCode,
-                });
-
-                logger.info('Referral loyalty events triggered', {
-                  referrerId: referrerProfile.user_id,
-                  referredId: data.user.id,
-                  referrerReward,
-                  referredReward,
-                });
-              } catch (loyaltyError) {
-                logger.error('Failed to trigger referral loyalty events', { error: loyaltyError });
-              }
-
-              // Nettoyer le code stocké
-              clearStoredReferralCode();
-
-              logger.info('Referral relation created on signup', {
-                referrerId: referrerProfile.user_id,
+        if (data.session) {
+          const storedReferralCode = getStoredReferralCode();
+          const referralResult = await applyPendingReferralForUser(data.user.id);
+          if (
+            referralResult.success &&
+            referralResult.referrerId &&
+            !referralResult.alreadyLinked
+          ) {
+            try {
+              await triggerLoyaltyEvent('referral_success', {
+                referrerId: referralResult.referrerId,
                 referredId: data.user.id,
+                referralCode: storedReferralCode ?? undefined,
               });
+              await triggerLoyaltyEvent('signup_with_referral', {
+                referrerId: referralResult.referrerId,
+                referredId: data.user.id,
+                referralCode: storedReferralCode ?? undefined,
+              });
+            } catch (loyaltyError) {
+              logger.error('Failed to trigger referral loyalty events', { error: loyaltyError });
             }
-          } catch (referralCaught: unknown) {
-            // Ne pas bloquer l'inscription si l'erreur est sur le parrainage
-            const referralErrorMessage = getCaughtErrorMessage(referralCaught);
-            logger.error('Error processing referral on signup', {
-              error: referralErrorMessage,
-              referralCode,
-            });
           }
         }
 

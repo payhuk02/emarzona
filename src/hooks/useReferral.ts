@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { logger } from "@/lib/logger";
+import { useState, useEffect, useCallback } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/lib/logger';
 
 export interface ReferralData {
   referralCode: string;
@@ -53,8 +53,10 @@ export const useReferral = () => {
 
   const fetchReferralData = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
       if (!user) {
         setLoading(false);
         return;
@@ -79,10 +81,10 @@ export const useReferral = () => {
       // Si le code de parrainage est manquant, le générer via RPC
       if (!profileData.referral_code) {
         logger.warn('Referral code missing, generating one', { userId: user.id });
-        
+
         // Générer un code via la fonction Supabase
-        const { data: newCode, error: generateError } = await supabase
-          .rpc('generate_referral_code');
+        const { data: newCode, error: generateError } =
+          await supabase.rpc('generate_referral_code');
 
         if (!generateError && newCode) {
           // Mettre à jour le profil avec le nouveau code
@@ -95,7 +97,9 @@ export const useReferral = () => {
             profileData.referral_code = newCode;
             logger.info('Referral code generated and saved', { userId: user.id, code: newCode });
           } else {
-            logger.error('Error updating profile with referral code', { error: updateError.message });
+            logger.error('Error updating profile with referral code', {
+              error: updateError.message,
+            });
           }
         } else {
           // Fallback : générer un code côté client si la fonction RPC échoue
@@ -107,7 +111,10 @@ export const useReferral = () => {
 
           if (!updateError) {
             profileData.referral_code = fallbackCode;
-            logger.info('Fallback referral code generated', { userId: user.id, code: fallbackCode });
+            logger.info('Fallback referral code generated', {
+              userId: user.id,
+              code: fallbackCode,
+            });
           }
         }
       }
@@ -117,8 +124,8 @@ export const useReferral = () => {
         .from('platform_settings')
         .select('referral_commission_rate')
         .single();
-      
-      const commissionRate = platformSettings?.referral_commission_rate || 2.00;
+
+      const commissionRate = platformSettings?.referral_commission_rate || 2.0;
 
       // Récupérer le nombre total de filleuls
       const { data: allReferrals, error: referralsError } = await supabase
@@ -153,8 +160,14 @@ export const useReferral = () => {
       }
 
       // Calculer les gains par statut
-      const pendingEarnings = allCommissions?.filter(c => c.status === 'pending').reduce((sum, c) => sum + Number(c.commission_amount || 0), 0) || 0;
-      const paidEarnings = allCommissions?.filter(c => c.status === 'paid' || c.status === 'completed').reduce((sum, c) => sum + Number(c.commission_amount || 0), 0) || 0;
+      const pendingEarnings =
+        allCommissions
+          ?.filter(c => c.status === 'pending')
+          .reduce((sum, c) => sum + Number(c.commission_amount || 0), 0) || 0;
+      const paidEarnings =
+        allCommissions
+          ?.filter(c => c.status === 'paid' || c.status === 'completed')
+          .reduce((sum, c) => sum + Number(c.commission_amount || 0), 0) || 0;
 
       const baseUrl = window.location.origin;
       const referralLink = `${baseUrl}/?ref=${profileData.referral_code || ''}`;
@@ -169,13 +182,13 @@ export const useReferral = () => {
         paidEarnings,
         commissionRate,
       });
-    } catch ( _error: unknown) {
+    } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('Error in fetchReferralData', { error: errorMessage });
       toast({
-        title: "Erreur",
-        description: errorMessage || "Impossible de charger les données de parrainage",
-        variant: "destructive",
+        title: 'Erreur',
+        description: errorMessage || 'Impossible de charger les données de parrainage',
+        variant: 'destructive',
       });
     } finally {
       setLoading(false);
@@ -185,8 +198,10 @@ export const useReferral = () => {
   const fetchReferrals = useCallback(async () => {
     try {
       setReferralsLoading(true);
-      const { data: { user } } = await supabase.auth.getUser();
-      
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
       if (!user) {
         setReferrals([]);
         setReferralsLoading(false);
@@ -234,19 +249,21 @@ export const useReferral = () => {
 
       // Combiner les données : utiliser referredProfilesData comme source principale
       // car elle contient directement les profils parrainés
-      const  referralsList: ReferralUser[] = [];
+      const referralsList: ReferralUser[] = [];
 
       // Récupérer les emails via RPC si disponible
-      const referredIds = referredProfilesData && referredProfilesData.length > 0
-        ? referredProfilesData.map((p: { user_id: string }) => p.user_id)
-        : referralsData.map((r: { referred_id: string }) => r.referred_id);
+      const referredIds =
+        referredProfilesData && referredProfilesData.length > 0
+          ? referredProfilesData.map((p: { user_id: string }) => p.user_id)
+          : referralsData.map((r: { referred_id: string }) => r.referred_id);
 
       const emailsMap = new Map<string, string>();
-      
+
       if (referredIds.length > 0) {
         try {
-          const { data: emailsData, error: emailsError } = await supabase
-            .rpc('get_users_emails', { p_user_ids: referredIds });
+          const { data: emailsData, error: emailsError } = await supabase.rpc('get_users_emails', {
+            p_user_ids: referredIds,
+          });
 
           if (!emailsError && emailsData) {
             emailsData.forEach((item: { user_id: string; email: string }) => {
@@ -256,7 +273,7 @@ export const useReferral = () => {
             });
             logger.info('Emails fetched via RPC', { count: emailsMap.size });
           }
-        } catch ( _rpcError: unknown) {
+        } catch (rpcError: unknown) {
           const errorMessage = rpcError instanceof Error ? rpcError.message : 'Erreur inconnue';
           logger.debug('RPC get_users_emails not available or failed', { error: errorMessage });
         }
@@ -296,12 +313,18 @@ export const useReferral = () => {
                 if (allOrdersData && allOrdersData.length > 0) {
                   // Grouper les commandes par customer_id
                   const ordersByCustomer = new Map<string, typeof allOrdersData>();
-                  allOrdersData.forEach((order: { customer_id: string; total_amount?: number | null; status: string }) => {
-                    if (!ordersByCustomer.has(order.customer_id)) {
-                      ordersByCustomer.set(order.customer_id, []);
+                  allOrdersData.forEach(
+                    (order: {
+                      customer_id: string;
+                      total_amount?: number | null;
+                      status: string;
+                    }) => {
+                      if (!ordersByCustomer.has(order.customer_id)) {
+                        ordersByCustomer.set(order.customer_id, []);
+                      }
+                      ordersByCustomer.get(order.customer_id)!.push(order);
                     }
-                    ordersByCustomer.get(order.customer_id)!.push(order);
-                  });
+                  );
 
                   // Calculer les stats pour chaque userId
                   referredIds.forEach((userId: string) => {
@@ -310,11 +333,13 @@ export const useReferral = () => {
                       const customerId = emailToCustomerMap.get(email);
                       if (customerId) {
                         const customerOrders = ordersByCustomer.get(customerId) || [];
-                        const completedOrders = customerOrders.filter((o: { status: string }) => 
-                          o.status === 'completed' || o.status === 'delivered'
+                        const completedOrders = customerOrders.filter(
+                          (o: { status: string }) =>
+                            o.status === 'completed' || o.status === 'delivered'
                         );
                         const totalSpent = completedOrders.reduce(
-                          (sum: number, o: { total_amount?: number | null }) => sum + Number(o.total_amount || 0), 
+                          (sum: number, o: { total_amount?: number | null }) =>
+                            sum + Number(o.total_amount || 0),
                           0
                         );
                         ordersStatsMap.set(userId, {
@@ -328,8 +353,9 @@ export const useReferral = () => {
               }
             }
           }
-        } catch ( _ordersError: unknown) {
-          const errorMessage = ordersError instanceof Error ? ordersError.message : 'Erreur inconnue';
+        } catch (ordersError: unknown) {
+          const errorMessage =
+            ordersError instanceof Error ? ordersError.message : 'Erreur inconnue';
           logger.debug('Could not fetch orders stats', { error: errorMessage });
         }
       }
@@ -338,11 +364,14 @@ export const useReferral = () => {
       if (referredProfilesData && referredProfilesData.length > 0) {
         // Trouver la correspondance dans referrals pour chaque profil
         for (const profile of referredProfilesData) {
-          const referral = referralsData.find((r: { referred_id: string }) => r.referred_id === profile.user_id);
-          
-          const fullName = [profile.first_name, profile.last_name]
-            .filter(Boolean)
-            .join(' ') || profile.display_name || undefined;
+          const referral = referralsData.find(
+            (r: { referred_id: string }) => r.referred_id === profile.user_id
+          );
+
+          const fullName =
+            [profile.first_name, profile.last_name].filter(Boolean).join(' ') ||
+            profile.display_name ||
+            undefined;
 
           const stats = ordersStatsMap.get(profile.user_id) || { orders: 0, spent: 0 };
           const email = emailsMap.get(profile.user_id) || '';
@@ -369,15 +398,26 @@ export const useReferral = () => {
           .in('user_id', referredIds)
           .catch(() => ({ data: [] }));
 
-        const profilesMap = new Map<string, { user_id: string; display_name?: string; first_name?: string; last_name?: string }>();
-        (profilesData || []).forEach((profile: { user_id: string; display_name?: string; first_name?: string; last_name?: string }) => {
-          profilesMap.set(profile.user_id, profile);
-        });
+        const profilesMap = new Map<
+          string,
+          { user_id: string; display_name?: string; first_name?: string; last_name?: string }
+        >();
+        (profilesData || []).forEach(
+          (profile: {
+            user_id: string;
+            display_name?: string;
+            first_name?: string;
+            last_name?: string;
+          }) => {
+            profilesMap.set(profile.user_id, profile);
+          }
+        );
 
         for (const ref of referralsData) {
           const profile = profilesMap.get(ref.referred_id);
           const fullName = profile
-            ? [profile.first_name, profile.last_name].filter(Boolean).join(' ') || profile.display_name
+            ? [profile.first_name, profile.last_name].filter(Boolean).join(' ') ||
+              profile.display_name
             : undefined;
 
           const stats = ordersStatsMap.get(ref.referred_id) || { orders: 0, spent: 0 };
@@ -400,17 +440,17 @@ export const useReferral = () => {
 
       logger.info('Referrals list prepared', { count: referralsList.length });
       setReferrals(referralsList);
-    } catch ( _error: unknown) {
+    } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       const errorStack = error instanceof Error ? error.stack : undefined;
-      logger.error('Error fetching referrals', { 
+      logger.error('Error fetching referrals', {
         error: errorMessage,
-        stack: errorStack 
+        stack: errorStack,
       });
       toast({
-        title: "Erreur",
-        description: errorMessage || "Impossible de charger la liste des filleuls",
-        variant: "destructive",
+        title: 'Erreur',
+        description: errorMessage || 'Impossible de charger la liste des filleuls',
+        variant: 'destructive',
       });
       setReferrals([]); // Assurer que l'état est défini même en cas d'erreur
     } finally {
@@ -421,8 +461,10 @@ export const useReferral = () => {
   const fetchCommissions = useCallback(async () => {
     try {
       setCommissionsLoading(true);
-      const { data: { user } } = await supabase.auth.getUser();
-      
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
       if (!user) {
         setCommissions([]);
         setCommissionsLoading(false);
@@ -434,37 +476,39 @@ export const useReferral = () => {
       // Récupérer les commissions de base
       const { data: commissionsData, error } = await supabase
         .from('referral_commissions')
-        .select('id, commission_amount, total_amount, status, created_at, paid_at, order_id, referred_id, commission_rate')
+        .select(
+          'id, commission_amount, total_amount, status, created_at, paid_at, order_id, referred_id, commission_rate'
+        )
         .eq('referrer_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) {
-        logger.error('Error fetching commissions', { 
+        logger.error('Error fetching commissions', {
           error: error.message,
           code: error.code,
           details: error.details,
-          hint: error.hint
+          hint: error.hint,
         });
-        
+
         // Vérifier si c'est une erreur de permission (RLS)
-        const isPermissionError = 
+        const isPermissionError =
           error.message?.toLowerCase().includes('permission') ||
           error.message?.toLowerCase().includes('policy') ||
           error.message?.toLowerCase().includes('row-level security') ||
           error.code === '42501' || // insufficient_privilege
           error.code === 'PGRST301'; // PostgREST not found/access denied
-        
+
         if (isPermissionError) {
           // Erreur de permission - silencieuse, juste logger
-          logger.warn('Permission error fetching commissions (likely RLS)', { 
+          logger.warn('Permission error fetching commissions (likely RLS)', {
             error: error.message,
-            userId: user.id 
+            userId: user.id,
           });
           setCommissions([]);
           setCommissionsLoading(false);
           return;
         }
-        
+
         throw error;
       }
 
@@ -494,9 +538,10 @@ export const useReferral = () => {
               ordersMap.set(order.id, order);
             });
           }
-        } catch ( _ordersError: unknown) {
+        } catch (ordersError: unknown) {
           // Erreur silencieuse - on continue sans les numéros de commande
-          const errorMessage = ordersError instanceof Error ? ordersError.message : String(ordersError);
+          const errorMessage =
+            ordersError instanceof Error ? ordersError.message : String(ordersError);
           logger.debug('Could not fetch orders for commissions', { error: errorMessage });
         }
       }
@@ -509,12 +554,15 @@ export const useReferral = () => {
       const emailsMap = new Map<string, string>();
       if (referredIds.length > 0) {
         try {
-          const { data: emailsData, error: emailsError } = await supabase
-            .rpc('get_users_emails', { p_user_ids: referredIds });
+          const { data: emailsData, error: emailsError } = await supabase.rpc('get_users_emails', {
+            p_user_ids: referredIds,
+          });
 
           if (emailsError) {
             // Erreur silencieuse - on continue sans les emails
-            logger.debug('RPC get_users_emails error for commissions', { error: emailsError.message });
+            logger.debug('RPC get_users_emails error for commissions', {
+              error: emailsError.message,
+            });
           } else if (emailsData) {
             emailsData.forEach((item: { user_id: string; email: string }) => {
               if (item.user_id && item.email) {
@@ -522,7 +570,7 @@ export const useReferral = () => {
               }
             });
           }
-        } catch ( _rpcError: unknown) {
+        } catch (rpcError: unknown) {
           // Erreur silencieuse - on continue sans les emails
           const errorMessage = rpcError instanceof Error ? rpcError.message : String(rpcError);
           logger.debug('RPC get_users_emails exception for commissions', { error: errorMessage });
@@ -530,54 +578,57 @@ export const useReferral = () => {
       }
 
       // Construire les commissions enrichies
-      const enrichedCommissions = commissionsData.map((comm: { 
-        id: string; 
-        commission_amount?: number | string | null; 
-        total_amount?: number | string | null; 
-        status: string; 
-        created_at: string; 
-        paid_at?: string | null; 
-        order_id?: string | null; 
-        referred_id?: string | null;
-      }) => {
-        const order = ordersMap.get(comm.order_id);
-        const email = emailsMap.get(comm.referred_id) || '';
+      const enrichedCommissions = commissionsData.map(
+        (comm: {
+          id: string;
+          commission_amount?: number | string | null;
+          total_amount?: number | string | null;
+          status: string;
+          created_at: string;
+          paid_at?: string | null;
+          order_id?: string | null;
+          referred_id?: string | null;
+        }) => {
+          const order = ordersMap.get(comm.order_id);
+          const email = emailsMap.get(comm.referred_id) || '';
 
-        return {
-          id: comm.id,
-          commission_amount: Number(comm.commission_amount || 0),
-          total_amount: Number(comm.total_amount || 0),
-          status: comm.status,
-          created_at: comm.created_at,
-          paid_at: comm.paid_at,
-          order_id: comm.order_id,
-          referred_id: comm.referred_id,
-          order: {
-            order_number: order?.order_number || undefined,
-          },
-          referred: {
-            email: email,
-          },
-        };
-      });
+          return {
+            id: comm.id,
+            commission_amount: Number(comm.commission_amount || 0),
+            total_amount: Number(comm.total_amount || 0),
+            status: comm.status,
+            created_at: comm.created_at,
+            paid_at: comm.paid_at,
+            order_id: comm.order_id,
+            referred_id: comm.referred_id,
+            order: {
+              order_number: order?.order_number || undefined,
+            },
+            referred: {
+              email: email,
+            },
+          };
+        }
+      );
 
       logger.info('Commissions fetched and enriched', { count: enrichedCommissions.length });
       setCommissions(enrichedCommissions);
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      const errorCode = error && typeof error === 'object' && 'code' in error ? String(error.code) : undefined;
+      const errorCode =
+        error && typeof error === 'object' && 'code' in error ? String(error.code) : undefined;
       const errorStack = error instanceof Error ? error.stack : undefined;
-      logger.error('Error fetching commissions', { 
+      logger.error('Error fetching commissions', {
         error: errorMessage,
         code: errorCode,
-        stack: errorStack 
+        stack: errorStack,
       });
-      
+
       // Ne JAMAIS afficher le toast d'erreur pour les commissions
       // Car même si la requête échoue, on peut avoir des commissions vides
       // et l'utilisateur verra "Aucune commission" ce qui est acceptable
       // Le toast d'erreur n'apporte rien et crée de la confusion
-      
+
       // Toujours définir un tableau vide en cas d'erreur pour éviter les états indéterminés
       setCommissions([]);
     } finally {
@@ -601,9 +652,3 @@ export const useReferral = () => {
     refetchCommissions: fetchCommissions,
   };
 };
-
-
-
-
-
-

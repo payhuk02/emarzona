@@ -54,6 +54,11 @@ const AffiliateLinkTracker = lazy(() =>
 const ReferralTracker = lazy(() =>
   import('@/components/referral/ReferralTracker').then(m => ({ default: m.ReferralTracker }))
 );
+const ReferralClaimOnAuth = lazy(() =>
+  import('@/components/referral/ReferralClaimOnAuth').then(m => ({
+    default: m.ReferralClaimOnAuth,
+  }))
+);
 import { DeferredCurrencyRatesInitializer } from '@/components/currency/DeferredCurrencyRatesInitializer';
 import { AuthenticatedRealtimeNotifications } from '@/components/notifications/AuthenticatedRealtimeNotifications';
 const PWAInstallPrompt = lazy(() =>
@@ -290,6 +295,7 @@ const AppContent = () => {
           <Require2FABanner position="top" />
           <AffiliateLinkTracker />
           <ReferralTracker />
+          <ReferralClaimOnAuth />
         </Suspense>
         <PlatformVisitorTracker />
         <Suspense fallback={<LoadingFallback />}>
