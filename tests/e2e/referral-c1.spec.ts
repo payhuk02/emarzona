@@ -5,6 +5,8 @@
  * Niveau 2 : validation SQL staging (calculate_referral_commission + order_commissionable_amount)
  *
  * npx playwright test tests/e2e/referral-c1.spec.ts
+ *
+ * Parcours claim filleul (tracking ?ref= + RPC) : tests/e2e/referral-claim-flow.spec.ts
  */
 
 import { test, expect } from '@playwright/test';
