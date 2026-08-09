@@ -16,7 +16,7 @@ BEGIN
   RAISE NOTICE '✓ Test 1: order_commissionable_amount exists';
 END $$;
 
--- Test 2: calculate_referral_commission trigger function référence la base commissionnable
+-- Test 2: calculate_referral_commission_on_transaction utilise la base commissionnable
 DO $$
 DECLARE
   v_src text;
@@ -25,14 +25,24 @@ BEGIN
   INTO v_src
   FROM pg_proc p
   INNER JOIN pg_namespace n ON n.oid = p.pronamespace
-  WHERE n.nspname = 'public' AND p.proname = 'calculate_referral_commission';
+  WHERE n.nspname = 'public' AND p.proname = 'calculate_referral_commission_on_transaction';
 
   ASSERT v_src ILIKE '%order_commissionable_amount%',
-    'calculate_referral_commission must use order_commissionable_amount';
-  RAISE NOTICE '✓ Test 2: referral uses commissionable base';
+    'calculate_referral_commission_on_transaction must use order_commissionable_amount';
+  ASSERT v_src ILIKE '%user_id%',
+    'calculate_referral_commission_on_transaction must resolve profiles by user_id';
+  RAISE NOTICE '✓ Test 2: transaction referral trigger uses commissionable base';
 END $$;
 
--- Test 3: resolve_store_platform_fee_percent — boutique physique = 0 %
+-- Test 3: claim_referral RPC disponible
+DO $$
+BEGIN
+  ASSERT to_regprocedure('public.claim_referral(text)') IS NOT NULL,
+    'claim_referral(text) must exist';
+  RAISE NOTICE '✓ Test 3: claim_referral RPC exists';
+END $$;
+
+-- Test 4: resolve_store_platform_fee_percent — boutique physique = 0 %
 DO $$
 DECLARE
   v_store_id uuid;
@@ -44,11 +54,11 @@ BEGIN
   LIMIT 1;
 
   IF v_store_id IS NULL THEN
-    RAISE NOTICE '⊘ Test 3 skipped: no store with platform subscription';
+    RAISE NOTICE '⊘ Test 4 skipped: no store with platform subscription';
     RETURN;
   END IF;
 
   v_fee := public.resolve_store_platform_fee_percent(v_store_id);
   ASSERT v_fee IS NOT NULL;
-  RAISE NOTICE '✓ Test 3: resolve_store_platform_fee_percent = % for store %', v_fee, v_store_id;
+  RAISE NOTICE '✓ Test 4: resolve_store_platform_fee_percent = % for store %', v_fee, v_store_id;
 END $$;
