@@ -146,12 +146,46 @@
 /* Layout visual */
 .landing-premium .lp-platform-hero__visual {
   isolation: isolate;
+  background: #0a1628;
 }
 
 .landing-premium .lp-platform-hero__visual .lp-platform-hero__photo,
 .landing-premium .lp-platform-hero__visual picture {
   border-radius: 0;
-  mask-image: linear-gradient(90deg, transparent 0%, black 22%, black 100%);
+  mask-image: linear-gradient(90deg, transparent 0%, black 18%, black 100%);
+}
+
+@media (max-width: 1023px) {
+  .landing-premium .lp-platform-hero__visual .lp-platform-hero__photo,
+  .landing-premium .lp-platform-hero__visual picture {
+    mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.15) 0%, black 14%, black 100%);
+  }
+
+  .landing-premium .lp-platform-hero--premium .lp-platform-hero__photo-overlay {
+    background: linear-gradient(
+      180deg,
+      rgba(10, 22, 40, 0.55) 0%,
+      rgba(10, 22, 40, 0.15) 30%,
+      rgba(10, 22, 40, 0.04) 100%
+    );
+  }
+
+  .landing-premium .lp-platform-hero__frame {
+    gap: 0.75rem;
+    padding-bottom: 0;
+  }
+
+  .landing-premium .lp-platform-hero__col-content {
+    padding-bottom: 0;
+  }
+
+  .landing-premium .lp-platform-hero__visual {
+    min-height: clamp(14rem, 42vw, 18rem);
+  }
+
+  .landing-premium .lp-platform-hero__visual .lp-platform-hero__photo {
+    object-position: 72% 16%;
+  }
 }
 
 .landing-premium .lp-platform-hero__visual .lp-platform-hero__photo {
@@ -162,11 +196,17 @@
   background: linear-gradient(
     90deg,
     #0a1628 0%,
-    rgba(10, 22, 40, 0.92) 28%,
-    rgba(10, 22, 40, 0.45) 48%,
-    rgba(10, 22, 40, 0.08) 62%,
-    transparent 78%
+    rgba(10, 22, 40, 0.88) 30%,
+    rgba(10, 22, 40, 0.35) 52%,
+    rgba(10, 22, 40, 0.12) 68%,
+    rgba(10, 22, 40, 0.04) 100%
   );
+}
+
+/* Hero premium — aucune animation */
+.landing-premium .lp-platform-hero--premium,
+.landing-premium .lp-platform-hero--premium * {
+  animation: none !important;
 }
 
 .landing-premium .lp-platform-hero__visual-fallback {

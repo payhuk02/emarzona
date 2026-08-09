@@ -239,11 +239,25 @@ export const IMAGE_PRESETS = {
   },
 
   /**
-   * Hero landing plateforme (bandeau pleine largeur, LCP)
+   * Hero plateforme — colonne visuelle (LCP, droite desktop)
    */
+  platformHeroVisual: {
+    sizes: { mobile: 430, tablet: 640, desktop: 900, large: 1100 },
+    options: { quality: 70, format: 'webp' as const, resize: 'cover' as const },
+  },
+
+  /**
+   * Hero plateforme — arrière-plan gauche (lazy, secondaire)
+   */
+  platformHeroLeft: {
+    sizes: { mobile: 540, tablet: 768, desktop: 900, large: 1100 },
+    options: { quality: 68, format: 'webp' as const, resize: 'cover' as const },
+  },
+
+  /** @deprecated Utiliser platformHeroVisual ou platformHeroLeft */
   platformHero: {
-    sizes: { mobile: 768, tablet: 1280, desktop: 1920, large: 2560 },
-    options: { quality: 80, format: 'webp' as const, resize: 'cover' as const },
+    sizes: { mobile: 430, tablet: 640, desktop: 900, large: 1100 },
+    options: { quality: 70, format: 'webp' as const, resize: 'cover' as const },
   },
 
   /**
@@ -402,14 +416,23 @@ export interface PlatformHeroImageProps {
   avifSrcSet?: string;
 }
 
-/** Attributs responsive + formats modernes pour l'image LCP du hero plateforme. */
+export type PlatformHeroImageVariant = 'visual' | 'left';
+
+const PLATFORM_HERO_SIZES_ATTR: Record<PlatformHeroImageVariant, string> = {
+  visual: '(max-width: 767px) 100vw, (max-width: 1023px) 52vw, 42vw',
+  left: '(max-width: 1023px) 100vw, 58vw',
+};
+
+/** Attributs responsive + formats modernes pour le hero plateforme. */
 export function getPlatformHeroImageProps(
-  imageUrl: string | undefined | null
+  imageUrl: string | undefined | null,
+  variant: PlatformHeroImageVariant = 'visual'
 ): PlatformHeroImageProps | null {
   if (!imageUrl) return null;
 
-  const sizesAttr = '100vw';
-  const preset = IMAGE_PRESETS.platformHero;
+  const sizesAttr = PLATFORM_HERO_SIZES_ATTR[variant];
+  const preset =
+    variant === 'left' ? IMAGE_PRESETS.platformHeroLeft : IMAGE_PRESETS.platformHeroVisual;
 
   if (!isSupabaseStorageUrl(imageUrl)) {
     return { src: imageUrl, sizes: sizesAttr };
@@ -422,7 +445,7 @@ export function getPlatformHeroImageProps(
     src:
       getOptimizedImageUrl(imageUrl, {
         ...baseOptions,
-        width: sizeConfig.tablet,
+        width: sizeConfig.mobile,
         format: 'webp',
       }) ?? imageUrl,
     sizes: sizesAttr,

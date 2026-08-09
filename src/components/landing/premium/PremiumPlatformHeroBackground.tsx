@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback } from 'react';
+import { useMemo } from 'react';
 import { useLCPImagePreload } from '@/components/ui/OptimizedImage';
 import { getPlatformHeroImageProps } from '@/lib/image-transform';
 
@@ -14,8 +14,7 @@ export function PremiumPlatformHeroBackground({
   alt,
   variant = 'visual',
 }: PremiumPlatformHeroBackgroundProps) {
-  const imageProps = useMemo(() => getPlatformHeroImageProps(src), [src]);
-  const [loaded, setLoaded] = useState(false);
+  const imageProps = useMemo(() => getPlatformHeroImageProps(src, variant), [src, variant]);
   const isLcp = variant === 'visual';
 
   const preloadSrc = imageProps?.webpSrcSet?.split(',')[0]?.split(' ')[0] ?? imageProps?.src ?? src;
@@ -25,13 +24,11 @@ export function PremiumPlatformHeroBackground({
     isLcp ? imageProps?.sizes : undefined
   );
 
-  const handleLoad = useCallback(() => setLoaded(true), []);
-
   if (!imageProps) return null;
 
   const photoClass =
     variant === 'left' ? 'lp-platform-hero__left-photo' : 'lp-platform-hero__photo';
-  const imgClassName = `${photoClass} pointer-events-none absolute inset-0 h-full w-full object-cover${loaded ? ' is-loaded' : ''}`;
+  const imgClassName = `${photoClass} pointer-events-none absolute inset-0 h-full w-full object-cover`;
 
   if (imageProps.webpSrcSet || imageProps.avifSrcSet) {
     return (
@@ -51,7 +48,6 @@ export function PremiumPlatformHeroBackground({
           loading={isLcp ? 'eager' : 'lazy'}
           fetchPriority={isLcp ? 'high' : 'auto'}
           decoding="async"
-          onLoad={handleLoad}
         />
       </picture>
     );
@@ -67,7 +63,6 @@ export function PremiumPlatformHeroBackground({
       loading={isLcp ? 'eager' : 'lazy'}
       fetchPriority={isLcp ? 'high' : 'auto'}
       decoding="async"
-      onLoad={handleLoad}
     />
   );
 }

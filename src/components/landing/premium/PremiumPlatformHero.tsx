@@ -105,14 +105,18 @@ export function PremiumPlatformHero() {
             </ul>
           </div>
 
-          <div className="lp-platform-hero__cta relative z-10 mt-auto flex justify-center pb-6 pt-10 sm:pb-8 sm:pt-12 lg:justify-start lg:pb-10 lg:pt-14">
+          <div className="lp-platform-hero__cta relative z-10 mt-auto hidden justify-center pb-6 pt-10 sm:pb-8 sm:pt-12 lg:flex lg:justify-start lg:pb-10 lg:pt-14">
             <StoreCreateCtaLink className="lp-platform-hero__cta-btn inline-flex rounded-full px-6 py-3 text-sm font-semibold sm:px-7 sm:py-3.5">
               {ctaLabel}
             </StoreCreateCtaLink>
           </div>
         </div>
 
-        <PremiumPlatformHeroVisual backgroundUrl={backgroundUrl} backgroundAlt={backgroundAlt} />
+        <PremiumPlatformHeroVisual
+          backgroundUrl={backgroundUrl}
+          backgroundAlt={backgroundAlt}
+          ctaLabel={ctaLabel}
+        />
       </div>
     </section>
   );
