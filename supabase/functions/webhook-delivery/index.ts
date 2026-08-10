@@ -84,6 +84,7 @@ interface Webhook {
   custom_headers: Record<string, string>;
   verify_ssl: boolean;
   timeout_seconds: number;
+  include_payload: boolean;
 }
 
 function logEvent(
@@ -129,15 +130,23 @@ async function generateSignature(payload: string, secret: string): Promise<strin
 /**
  * Prépare le payload du webhook
  */
-function preparePayload(delivery: WebhookDelivery): any {
-  return {
+function preparePayload(delivery: WebhookDelivery, includePayload: boolean): Record<string, unknown> {
+  const base = {
     id: delivery.id,
     event: delivery.event_type,
     timestamp: new Date().toISOString(),
-    data: delivery.event_data,
     metadata: {
       version: '1.0',
     },
+  };
+
+  if (!includePayload) {
+    return base;
+  }
+
+  return {
+    ...base,
+    data: delivery.event_data,
   };
 }
 
@@ -157,7 +166,7 @@ async function deliverWebhook(
   const startTime = Date.now();
 
   try {
-    const payload = preparePayload(delivery);
+    const payload = preparePayload(delivery, webhook.include_payload !== false);
     const payloadString = JSON.stringify(payload);
 
     // Préparer les headers
@@ -256,7 +265,7 @@ async function processDelivery(supabase: any, delivery: WebhookDelivery): Promis
   // Récupérer le webhook
   const { data: webhook, error: webhookError } = await supabase
     .from('webhooks')
-    .select('id,status,url,secret,custom_headers,verify_ssl,timeout_seconds')
+    .select('id,status,url,secret,custom_headers,verify_ssl,timeout_seconds,include_payload')
     .eq('id', delivery.webhook_id)
     .single();
 
