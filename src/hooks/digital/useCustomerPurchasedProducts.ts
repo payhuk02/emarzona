@@ -127,26 +127,26 @@ export const useCustomerPurchasedProducts = () => {
           `
           id,
           order_id,
-          product_id,
-          total_price,
+            product_id,
+            total_price,
           product:products (
-            name,
-            slug,
-            description,
-            image_url,
-            store:stores (
-              id,
               name,
-              subdomain,
-              custom_domain
-            ),
-            digital_product:digital_products (
-              id,
-              digital_type,
-              license_type,
-              main_file_url,
-              download_limit,
-              download_expiry_days
+              slug,
+              description,
+              image_url,
+              store:stores (
+                id,
+                name,
+                subdomain,
+                custom_domain
+              ),
+              digital_product:digital_products (
+                id,
+                digital_type,
+                license_type,
+                main_file_url,
+                download_limit,
+                download_expiry_days
             )
           )
         `
