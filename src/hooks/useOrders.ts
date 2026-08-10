@@ -102,7 +102,6 @@ export const useOrders = (storeId?: string, options: UseOrdersOptions = {}) => {
             phone,
             address,
             city,
-            postal_code,
             country
           )
         `,

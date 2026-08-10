@@ -6,10 +6,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
-import {
-  notifyCommissionApproved,
-  notifyCommissionRejected,
-} from '@/lib/commission-notifications';
+import { notifyCommissionApproved, notifyCommissionRejected } from '@/lib/commission-notifications';
 
 export interface StoreAffiliate {
   id: string;
@@ -161,39 +158,40 @@ export const useStoreAffiliates = (
 ) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  
+
   const linksPage = pagination?.links?.page || 1;
   const linksPageSize = pagination?.links?.pageSize || 20;
   const commissionsPage = pagination?.commissions?.page || 1;
   const commissionsPageSize = pagination?.commissions?.pageSize || 20;
 
   // Récupérer les affiliés
-  const { data: affiliates = [], isLoading, error } = useQuery({
+  const {
+    data: affiliates = [],
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['store-affiliates', storeId],
     queryFn: async () => {
       const { data, error: fetchError } = await supabase
         .from('affiliates')
-        .select(`
-          *,
-          profiles!affiliates_user_id_fkey(
-            email,
-            full_name,
-            display_name
-          )
-        `)
+        .select('*')
         .eq('store_id', storeId)
         .order('created_at', { ascending: false });
 
       if (fetchError) throw fetchError;
 
-      return (data || []).map((affiliate) => ({
+      return (data || []).map(affiliate => ({
         id: affiliate.id,
         affiliate_id: affiliate.id,
         user_id: affiliate.user_id,
-        email: affiliate.profiles?.email || '',
-        display_name: affiliate.profiles?.display_name || affiliate.profiles?.full_name || '',
-        first_name: affiliate.profiles?.full_name?.split(' ')[0] || '',
-        last_name: affiliate.profiles?.full_name?.split(' ').slice(1).join(' ') || '',
+        email: affiliate.email || '',
+        display_name:
+          affiliate.display_name ||
+          [affiliate.first_name, affiliate.last_name].filter(Boolean).join(' ') ||
+          '',
+        first_name: affiliate.first_name || affiliate.display_name?.split(' ')[0] || '',
+        last_name:
+          affiliate.last_name || affiliate.display_name?.split(' ').slice(1).join(' ') || '',
         affiliate_code: affiliate.affiliate_code,
         status: affiliate.status,
         total_clicks: affiliate.total_clicks || 0,
@@ -214,20 +212,28 @@ export const useStoreAffiliates = (
     queryFn: async () => {
       const { data: affiliatesData } = await supabase
         .from('affiliates')
-        .select('status, total_clicks, total_sales, total_revenue, total_commission_earned, pending_commission')
+        .select(
+          'status, total_clicks, total_sales, total_revenue, total_commission_earned, pending_commission'
+        )
         .eq('store_id', storeId);
 
       if (!affiliatesData) return null;
 
-      const  stats: StoreAffiliateStats = {
+      const stats: StoreAffiliateStats = {
         total_affiliates: affiliatesData.length,
-        active_affiliates: affiliatesData.filter((a) => a.status === 'active').length,
-        pending_affiliates: affiliatesData.filter((a) => a.status === 'pending').length,
+        active_affiliates: affiliatesData.filter(a => a.status === 'active').length,
+        pending_affiliates: affiliatesData.filter(a => a.status === 'pending').length,
         total_clicks: affiliatesData.reduce((sum, a) => sum + (a.total_clicks || 0), 0),
         total_sales: affiliatesData.reduce((sum, a) => sum + (a.total_sales || 0), 0),
         total_revenue: affiliatesData.reduce((sum, a) => sum + (a.total_revenue || 0), 0),
-        total_commissions_paid: affiliatesData.reduce((sum, a) => sum + (a.total_commission_earned || 0), 0),
-        pending_commissions: affiliatesData.reduce((sum, a) => sum + (a.pending_commission || 0), 0),
+        total_commissions_paid: affiliatesData.reduce(
+          (sum, a) => sum + (a.total_commission_earned || 0),
+          0
+        ),
+        pending_commissions: affiliatesData.reduce(
+          (sum, a) => sum + (a.pending_commission || 0),
+          0
+        ),
       };
 
       return stats;
@@ -253,7 +259,8 @@ export const useStoreAffiliates = (
 
       const { data, error: fetchError } = await supabase
         .from('affiliate_links')
-        .select(`
+        .select(
+          `
           *,
           products(
             id,
@@ -266,14 +273,15 @@ export const useStoreAffiliates = (
             email,
             display_name
           )
-        `)
+        `
+        )
         .eq('store_id', storeId)
         .order('created_at', { ascending: false })
         .range(from, to);
 
       if (fetchError) throw fetchError;
 
-      const links = (data || []).map((link) => ({
+      const links = (data || []).map(link => ({
         id: link.id,
         affiliate_id: link.affiliate_id,
         product_id: link.product_id,
@@ -284,17 +292,21 @@ export const useStoreAffiliates = (
         total_revenue: link.total_revenue || 0,
         total_commission: link.total_commission || 0,
         status: link.status,
-        product: link.products ? {
-          id: link.products.id,
-          name: link.products.name,
-          slug: link.products.slug,
-          price: link.products.price,
-          image_url: link.products.image_url,
-        } : undefined,
-        affiliate: link.affiliates ? {
-          email: link.affiliates.email,
-          display_name: link.affiliates.display_name,
-        } : undefined,
+        product: link.products
+          ? {
+              id: link.products.id,
+              name: link.products.name,
+              slug: link.products.slug,
+              price: link.products.price,
+              image_url: link.products.image_url,
+            }
+          : undefined,
+        affiliate: link.affiliates
+          ? {
+              email: link.affiliates.email,
+              display_name: link.affiliates.display_name,
+            }
+          : undefined,
       })) as StoreAffiliateLink[];
 
       const total = count || 0;
@@ -336,7 +348,8 @@ export const useStoreAffiliates = (
 
       const { data, error: fetchError } = await supabase
         .from('affiliate_commissions')
-        .select(`
+        .select(
+          `
           *,
           affiliates(
             email,
@@ -349,14 +362,15 @@ export const useStoreAffiliates = (
           orders(
             order_number
           )
-        `)
+        `
+        )
         .eq('store_id', storeId)
         .order('created_at', { ascending: false })
         .range(from, to);
 
       if (fetchError) throw fetchError;
 
-      const commissions = (data || []).map((commission) => ({
+      const commissions = (data || []).map(commission => ({
         id: commission.id,
         affiliate_id: commission.affiliate_id,
         affiliate_link_id: commission.affiliate_link_id,
@@ -369,17 +383,23 @@ export const useStoreAffiliates = (
         status: commission.status,
         created_at: commission.created_at,
         updated_at: commission.updated_at,
-        affiliate: commission.affiliates ? {
-          email: commission.affiliates.email,
-          display_name: commission.affiliates.display_name,
-        } : undefined,
-        product: commission.products ? {
-          name: commission.products.name,
-          image_url: commission.products.image_url,
-        } : undefined,
-        order: commission.orders ? {
-          order_number: commission.orders.order_number,
-        } : undefined,
+        affiliate: commission.affiliates
+          ? {
+              email: commission.affiliates.email,
+              display_name: commission.affiliates.display_name,
+            }
+          : undefined,
+        product: commission.products
+          ? {
+              name: commission.products.name,
+              image_url: commission.products.image_url,
+            }
+          : undefined,
+        order: commission.orders
+          ? {
+              order_number: commission.orders.order_number,
+            }
+          : undefined,
       })) as StoreAffiliateCommission[];
 
       const total = count || 0;
@@ -424,10 +444,10 @@ export const useStoreAffiliates = (
       // Notifier l'affilié (via trigger SQL, mais on peut aussi le faire ici pour plus de contrôle)
       return { affiliate_id: affiliateId, user_id: affiliate?.user_id };
     },
-    onSuccess: async (data) => {
+    onSuccess: async data => {
       queryClient.invalidateQueries({ queryKey: ['store-affiliates', storeId] });
       queryClient.invalidateQueries({ queryKey: ['store-affiliate-stats', storeId] });
-      
+
       if (data?.user_id) {
         // La notification sera créée par le trigger SQL, mais on peut aussi l'envoyer ici
         // pour s'assurer qu'elle est bien envoyée
@@ -435,7 +455,7 @@ export const useStoreAffiliates = (
 
       toast({
         title: '✅ Affilié approuvé',
-        description: 'L\'affilié a été approuvé avec succès',
+        description: "L'affilié a été approuvé avec succès",
       });
     },
     onError: (error: Error) => {
@@ -464,7 +484,7 @@ export const useStoreAffiliates = (
       queryClient.invalidateQueries({ queryKey: ['store-affiliate-stats', storeId] });
       toast({
         title: '✅ Affilié rejeté',
-        description: 'L\'affilié a été rejeté',
+        description: "L'affilié a été rejeté",
       });
     },
     onError: (error: Error) => {
@@ -493,7 +513,7 @@ export const useStoreAffiliates = (
       queryClient.invalidateQueries({ queryKey: ['store-affiliate-stats', storeId] });
       toast({
         title: '✅ Affilié suspendu',
-        description: 'L\'affilié a été suspendu',
+        description: "L'affilié a été suspendu",
       });
     },
     onError: (error: Error) => {
@@ -512,7 +532,9 @@ export const useStoreAffiliates = (
       // Récupérer les infos de la commission avant la mise à jour
       const { data: commission } = await supabase
         .from('affiliate_commissions')
-        .select('affiliate_id, commission_amount, order_id, affiliates(user_id), orders(order_number)')
+        .select(
+          'affiliate_id, commission_amount, order_id, affiliates(user_id), orders(order_number)'
+        )
         .eq('id', commissionId)
         .single();
 
@@ -526,15 +548,16 @@ export const useStoreAffiliates = (
       // La notification sera créée par le trigger SQL, mais on peut aussi l'envoyer ici
       return {
         commission_id: commissionId,
-        affiliate_user_id: (commission as { affiliates?: { user_id?: string } })?.affiliates?.user_id,
+        affiliate_user_id: (commission as { affiliates?: { user_id?: string } })?.affiliates
+          ?.user_id,
         amount: commission?.commission_amount,
         order_number: (commission as { orders?: { order_number?: string } })?.orders?.order_number,
       };
     },
-    onSuccess: async (data) => {
+    onSuccess: async data => {
       queryClient.invalidateQueries({ queryKey: ['store-affiliate-commissions', storeId] });
       queryClient.invalidateQueries({ queryKey: ['store-affiliate-stats', storeId] });
-      
+
       // Notifier l'affilié (le trigger SQL le fait déjà, mais on peut aussi l'envoyer ici pour plus de contrôle)
       if (data?.affiliate_user_id && data?.amount) {
         await notifyCommissionApproved(data.affiliate_user_id, {
@@ -566,7 +589,9 @@ export const useStoreAffiliates = (
       // Récupérer les infos de la commission avant la mise à jour
       const { data: commission } = await supabase
         .from('affiliate_commissions')
-        .select('affiliate_id, commission_amount, order_id, affiliates(user_id), orders(order_number)')
+        .select(
+          'affiliate_id, commission_amount, order_id, affiliates(user_id), orders(order_number)'
+        )
         .eq('id', commissionId)
         .single();
 
@@ -580,15 +605,16 @@ export const useStoreAffiliates = (
       // La notification sera créée par le trigger SQL, mais on peut aussi l'envoyer ici
       return {
         commission_id: commissionId,
-        affiliate_user_id: (commission as { affiliates?: { user_id?: string } })?.affiliates?.user_id,
+        affiliate_user_id: (commission as { affiliates?: { user_id?: string } })?.affiliates
+          ?.user_id,
         amount: commission?.commission_amount,
         order_number: (commission as { orders?: { order_number?: string } })?.orders?.order_number,
       };
     },
-    onSuccess: async (data) => {
+    onSuccess: async data => {
       queryClient.invalidateQueries({ queryKey: ['store-affiliate-commissions', storeId] });
       queryClient.invalidateQueries({ queryKey: ['store-affiliate-stats', storeId] });
-      
+
       // Notifier l'affilié (le trigger SQL le fait déjà, mais on peut aussi l'envoyer ici pour plus de contrôle)
       if (data?.affiliate_user_id && data?.amount) {
         await notifyCommissionRejected(data.affiliate_user_id, {
@@ -632,10 +658,3 @@ export const useStoreAffiliates = (
     rejectCommission,
   };
 };
-
-
-
-
-
-
-

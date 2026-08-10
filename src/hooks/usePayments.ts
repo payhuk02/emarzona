@@ -3,8 +3,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 
-const TRANSACTION_FIELDS = 'id, store_id, order_id, customer_id, amount, currency, status, customer_email, customer_name, customer_phone, metadata, geniuspay_payment_method, geniuspay_transaction_id, error_message, created_at, updated_at';
-const PAYMENT_FIELDS = 'id, store_id, order_id, customer_id, payment_method, amount, currency, status, transaction_id, notes, created_at, updated_at';
+const TRANSACTION_FIELDS =
+  'id, store_id, order_id, customer_id, amount, currency, status, customer_email, customer_name, customer_phone, metadata, geniuspay_payment_method, geniuspay_transaction_id, error_message, created_at, updated_at';
+const PAYMENT_FIELDS =
+  'id, store_id, order_id, customer_id, payment_method, amount, currency, status, transaction_id, notes, created_at, updated_at';
 
 type ShippingAddress = {
   full_name?: string;
@@ -84,7 +86,7 @@ export const usePayments = (
       // Priorité aux transactions car elles contiennent plus d'informations
 
       // 1. Récupérer les transactions (GeniusPay)
-      let  transactionsQuery= supabase
+      let transactionsQuery = supabase
         .from('transactions')
         .select(TRANSACTION_FIELDS)
         .eq('store_id', storeId)
@@ -97,7 +99,7 @@ export const usePayments = (
       const { data: transactions, error: transactionsError } = await transactionsQuery;
 
       // 2. Récupérer les payments (système générique)
-      let  paymentsQuery= supabase
+      let paymentsQuery = supabase
         .from('payments')
         .select(PAYMENT_FIELDS)
         .eq('store_id', storeId)
@@ -135,7 +137,7 @@ export const usePayments = (
             return null;
           }
           // Extraire shipping_address depuis metadata
-          let  shippingAddress: ShippingAddress = null;
+          let shippingAddress: ShippingAddress = null;
           if (
             transaction.metadata &&
             typeof transaction.metadata === 'object' &&
@@ -145,20 +147,20 @@ export const usePayments = (
             shippingAddress = (metadata.shipping_address as ShippingAddress) || null;
           }
 
-          const  payment: Payment = {
+          const payment: Payment = {
             id: transaction.id,
             store_id: transaction.store_id,
             order_id: transaction.order_id,
             customer_id: transaction.customer_id,
             payment_method:
-              (transaction as { geniuspay_payment_method?: string | null }).geniuspay_payment_method ||
-              'geniuspay',
+              (transaction as { geniuspay_payment_method?: string | null })
+                .geniuspay_payment_method || 'geniuspay',
             amount: Number(transaction.amount || 0),
             currency: transaction.currency || 'XOF',
             status: transaction.status || 'pending',
             transaction_id:
-              (transaction as { geniuspay_transaction_id?: string | null }).geniuspay_transaction_id ||
-              transaction.id,
+              (transaction as { geniuspay_transaction_id?: string | null })
+                .geniuspay_transaction_id || transaction.id,
             notes: transaction.error_message || null,
             created_at: transaction.created_at || new Date().toISOString(),
             updated_at: transaction.updated_at || new Date().toISOString(),
@@ -176,7 +178,7 @@ export const usePayments = (
             try {
               const { data: customerData, error: customerError } = await supabase
                 .from('customers')
-                .select('name, email, full_name, phone, address, city, postal_code, country')
+                .select('name, email, full_name, phone, address, city, country')
                 .eq('id', transaction.customer_id)
                 .eq('store_id', storeId)
                 .single();
@@ -262,7 +264,7 @@ export const usePayments = (
                   country: shippingAddress?.country || null,
                 };
               }
-            } catch ( _customerError: unknown) {
+            } catch (_customerError: unknown) {
               // Utiliser les données de la transaction en fallback
               const errorMessage =
                 customerError instanceof Error ? customerError.message : String(customerError);
@@ -340,7 +342,7 @@ export const usePayments = (
                   order_number: orderData.order_number,
                 };
               }
-            } catch ( _orderError: unknown) {
+            } catch (_orderError: unknown) {
               // Catch pour les exceptions non-Supabase
               const errorMessage =
                 orderError instanceof Error ? orderError.message : String(orderError);
@@ -394,7 +396,7 @@ export const usePayments = (
               return null;
             }
 
-            const  enrichedPayment: Payment = {
+            const enrichedPayment: Payment = {
               ...payment,
               customers: null,
               orders: null,
@@ -406,7 +408,7 @@ export const usePayments = (
               try {
                 const { data: customerData, error: customerError } = await supabase
                   .from('customers')
-                  .select('name, email, full_name, phone, address, city, postal_code, country')
+                  .select('name, email, full_name, phone, address, city, country')
                   .eq('id', payment.customer_id)
                   .eq('store_id', storeId)
                   .single();
@@ -457,7 +459,7 @@ export const usePayments = (
                     country: (customerData as { country?: string | null }).country || null,
                   };
                 }
-              } catch ( _customerError: unknown) {
+              } catch (_customerError: unknown) {
                 const errorMessage =
                   customerError instanceof Error ? customerError.message : String(customerError);
                 logger.warn('Exception fetching customer for payment', {
@@ -514,7 +516,7 @@ export const usePayments = (
                     order_number: orderData.order_number,
                   };
                 }
-              } catch ( _orderError: unknown) {
+              } catch (_orderError: unknown) {
                 const errorMessage =
                   orderError instanceof Error ? orderError.message : String(orderError);
                 logger.warn('Exception fetching order for payment', {
@@ -531,7 +533,7 @@ export const usePayments = (
       );
 
       // 5. Combiner et filtrer par searchTerm si nécessaire
-      let  allPayments= [
+      let allPayments = [
         ...validTransactionsAsPayments,
         ...paymentsEnriched.filter((p): p is Payment => p !== null),
       ];
@@ -558,7 +560,7 @@ export const usePayments = (
       );
 
       setPayments(allPayments);
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: 'Erreur',
@@ -576,9 +578,3 @@ export const usePayments = (
 
   return { payments, loading, refetch: fetchPayments };
 };
-
-
-
-
-
-
