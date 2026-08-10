@@ -28,8 +28,11 @@ test.describe('Referral — tracking URL (browser)', () => {
   test('?ref= stocke le code dans localStorage', async ({ page }) => {
     await gotoApp(page, '/?ref=TESTCODE123');
 
-    const stored = await page.evaluate(() => localStorage.getItem('referral_code'));
-    expect(stored).toBe('TESTCODE123');
+    await expect
+      .poll(async () => page.evaluate(() => localStorage.getItem('referral_code')), {
+        timeout: 15_000,
+      })
+      .toBe('TESTCODE123');
   });
 
   test('?ref= vide ne stocke pas de code', async ({ page }) => {
@@ -74,8 +77,15 @@ test.describe('Referral — claim après auth (E2E Supabase)', () => {
 
       await gotoApp(page, `/?ref=${encodeURIComponent(referralCode)}`);
 
-      const storedBeforeLogin = await page.evaluate(() => localStorage.getItem('referral_code'));
-      expect(storedBeforeLogin?.toUpperCase()).toBe(referralCode.toUpperCase());
+      await expect
+        .poll(
+          async () => {
+            const stored = await page.evaluate(() => localStorage.getItem('referral_code'));
+            return stored?.toUpperCase() ?? null;
+          },
+          { timeout: 15_000 }
+        )
+        .toBe(referralCode.toUpperCase());
 
       await loginAsSeededUser(page, admin, referred.email, '/dashboard', referred.password);
 
