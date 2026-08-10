@@ -85,6 +85,7 @@ interface Webhook {
   verify_ssl: boolean;
   timeout_seconds: number;
   include_payload: boolean;
+  rate_limit_per_minute: number;
 }
 
 function logEvent(
@@ -259,13 +260,40 @@ function calculateNextRetry(attemptNumber: number): Date {
 }
 
 /**
+ * Vérifie si le webhook a atteint sa limite de livraisons par minute.
+ */
+async function isRateLimited(
+  supabase: any,
+  webhookId: string,
+  limit: number
+): Promise<boolean> {
+  if (!limit || limit <= 0) return false;
+
+  const oneMinuteAgo = new Date(Date.now() - 60_000).toISOString();
+  const { count, error } = await supabase
+    .from('webhook_deliveries')
+    .select('id', { count: 'exact', head: true })
+    .eq('webhook_id', webhookId)
+    .gte('triggered_at', oneMinuteAgo);
+
+  if (error) {
+    logEvent('warn', 'Rate limit check failed', { webhookId, error: error.message });
+    return false;
+  }
+
+  return (count ?? 0) >= limit;
+}
+
+/**
  * Traite une livraison webhook
  */
 async function processDelivery(supabase: any, delivery: WebhookDelivery): Promise<void> {
   // Récupérer le webhook
   const { data: webhook, error: webhookError } = await supabase
     .from('webhooks')
-    .select('id,status,url,secret,custom_headers,verify_ssl,timeout_seconds,include_payload')
+    .select(
+      'id,status,url,secret,custom_headers,verify_ssl,timeout_seconds,include_payload,rate_limit_per_minute'
+    )
     .eq('id', delivery.webhook_id)
     .single();
 
@@ -288,6 +316,29 @@ async function processDelivery(supabase: any, delivery: WebhookDelivery): Promis
       p_status: 'failed',
       p_error_message: 'Webhook is not active',
       p_error_type: 'configuration_error',
+    });
+    return;
+  }
+
+  const rateLimit = webhook.rate_limit_per_minute ?? 60;
+  if (await isRateLimited(supabase, webhook.id, rateLimit)) {
+    const nextRetry = new Date();
+    nextRetry.setSeconds(nextRetry.getSeconds() + 60);
+
+    await supabase
+      .from('webhook_deliveries')
+      .update({
+        status: 'retrying',
+        next_retry_at: nextRetry.toISOString(),
+        error_message: `Rate limit exceeded (${rateLimit}/min)`,
+        error_type: 'rate_limit',
+      })
+      .eq('id', delivery.id);
+
+    logEvent('info', 'Webhook delivery deferred (rate limit)', {
+      deliveryId: delivery.id,
+      webhookId: webhook.id,
+      rateLimit,
     });
     return;
   }

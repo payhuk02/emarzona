@@ -43,6 +43,7 @@
     "verify:fulfillment-monitor": "node scripts/verify-fulfillment-monitor.mjs",
     "backfill:cod-emails": "node scripts/backfill-cod-order-emails.mjs",
     "verify:webhook-idempotency": "node scripts/verify-webhook-idempotency-remote.mjs",
+    "verify:webhook-delivery-config": "node scripts/verify-webhook-delivery-config.mjs",
     "verify:webhook-idempotency:replay": "node scripts/webhook-idempotency-replay-staging.mjs",
     "verify:fedex-prod": "node scripts/verify-fedex-prod-remote.mjs",
     "verify:fedex-prod:strict": "node scripts/verify-fedex-prod-remote.mjs --strict",

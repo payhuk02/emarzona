@@ -59,3 +59,11 @@ BEGIN
   ), 'Platform admins webhook_deliveries policy must exist';
   RAISE NOTICE '✓ Test 4: platform admin RLS policies exist';
 END $$;
+
+-- Test 5: verify_webhook_delivery_config RPC
+DO $$
+BEGIN
+  ASSERT to_regprocedure('public.verify_webhook_delivery_config()') IS NOT NULL,
+    'verify_webhook_delivery_config() must exist';
+  RAISE NOTICE '✓ Test 5: verify_webhook_delivery_config exists';
+END $$;
