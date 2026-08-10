@@ -14,10 +14,13 @@ import type {
   WebhookDeliveryFilters,
 } from '@/types/webhooks';
 
-const WEBHOOK_FIELDS =
-  'id, store_id, name, description, url, secret, events, status, retry_count, timeout_seconds, rate_limit_per_minute, custom_headers, verify_ssl, include_payload, total_deliveries, successful_deliveries, failed_deliveries, last_triggered_at, created_at, updated_at';
+const WEBHOOK_PUBLIC_FIELDS =
+  'id, store_id, name, description, url, events, status, retry_count, timeout_seconds, rate_limit_per_minute, custom_headers, verify_ssl, include_payload, total_deliveries, successful_deliveries, failed_deliveries, last_triggered_at, created_at, updated_at';
+
+/** Secret renvoyé une seule fois à la création / rotation explicite. */
+const WEBHOOK_CREATE_RETURN_FIELDS = `${WEBHOOK_PUBLIC_FIELDS}, secret`;
 const WEBHOOK_DELIVERY_FIELDS =
-  'id, webhook_id, event_type, event_id, status, request_headers, request_body, response_status, response_headers, response_body, response_time_ms, error_message, retry_attempt, max_retries, next_retry_at, triggered_at, completed_at, created_at';
+  'id, webhook_id, event_type, event_id, status, request_headers, request_body, response_status_code, response_headers, response_body, duration_ms, error_message, attempt_number, max_attempts, next_retry_at, triggered_at, delivered_at, failed_at';
 
 // ============================================================================
 // useWebhooks: Liste tous les webhooks d'un store
@@ -31,7 +34,7 @@ export const useWebhooks = (storeId: string | undefined, filters?: WebhookFilter
 
       let query = supabase
         .from('webhooks')
-        .select(WEBHOOK_FIELDS)
+        .select(WEBHOOK_PUBLIC_FIELDS)
         .eq('store_id', storeId)
         .order('created_at', { ascending: false });
 
@@ -70,7 +73,7 @@ export const useWebhook = (webhookId: string | undefined) => {
 
       const { data, error } = await supabase
         .from('webhooks')
-        .select(WEBHOOK_FIELDS)
+        .select(WEBHOOK_PUBLIC_FIELDS)
         .eq('id', webhookId)
         .single();
 
@@ -117,7 +120,7 @@ export const useCreateWebhook = () => {
           verify_ssl: form.verify_ssl ?? true,
           include_payload: form.include_payload ?? true,
         })
-        .select()
+        .select(WEBHOOK_CREATE_RETURN_FIELDS)
         .single();
 
       if (error) throw error;
@@ -155,7 +158,9 @@ export const useUpdateWebhook = () => {
       if (form.name !== undefined) updates.name = form.name;
       if (form.description !== undefined) updates.description = form.description;
       if (form.url !== undefined) updates.url = form.url;
-      if (form.secret !== undefined) updates.secret = form.secret;
+      if (form.secret !== undefined && form.secret.trim() !== '') {
+        updates.secret = form.secret.trim();
+      }
       if (form.events !== undefined) updates.events = form.events;
       if (form.status !== undefined) updates.status = form.status;
       if (form.retry_count !== undefined) updates.retry_count = form.retry_count;
@@ -166,11 +171,14 @@ export const useUpdateWebhook = () => {
       if (form.verify_ssl !== undefined) updates.verify_ssl = form.verify_ssl;
       if (form.include_payload !== undefined) updates.include_payload = form.include_payload;
 
+      const secretRotated = form.secret !== undefined && form.secret.trim() !== '';
+      const selectFields = secretRotated ? WEBHOOK_CREATE_RETURN_FIELDS : WEBHOOK_PUBLIC_FIELDS;
+
       const { data, error } = await supabase
         .from('webhooks')
         .update(updates)
         .eq('id', form.id)
-        .select()
+        .select(selectFields)
         .single();
 
       if (error) throw error;

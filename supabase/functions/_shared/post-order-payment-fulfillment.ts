@@ -187,7 +187,7 @@ async function confirmServiceBookings(
       .rpc('trigger_webhook', {
         p_store_id: storeId,
         p_event_type: 'service.booking_confirmed',
-        p_payload: {
+        p_event_data: {
           booking_id: bookingId,
           order_id: orderId,
           order_number: orderNumber,
@@ -369,7 +369,7 @@ async function triggerStoreWebhooks(
     .rpc('trigger_webhook', {
       p_store_id: storeId,
       p_event_type: 'order.completed',
-      p_payload: {
+      p_event_data: {
         order_id: order.id,
         order_number: order.order_number,
         customer_id: order.customer_id,
@@ -386,7 +386,7 @@ async function triggerStoreWebhooks(
     .rpc('trigger_webhook', {
       p_store_id: storeId,
       p_event_type: 'payment.completed',
-      p_payload: {
+      p_event_data: {
         transaction_id: transaction.id,
         order_id: order.id,
         order_number: order.order_number,

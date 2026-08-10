@@ -70,7 +70,7 @@ export async function applyPaymentRefund(
       .rpc('trigger_webhook', {
         p_store_id: transaction.store_id,
         p_event_type: 'payment.refunded',
-        p_payload: {
+        p_event_data: {
           transaction_id: transactionId,
           order_id: payload?.order_id ?? transaction.order_id,
           refund_id: refund.refundId,
