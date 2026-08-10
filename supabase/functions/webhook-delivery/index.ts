@@ -68,9 +68,9 @@ interface WebhookDelivery {
   event_id: string;
   event_data: any;
   status: string;
-  url: string;
-  request_headers: Record<string, string>;
-  request_body: string | null;
+  url?: string;
+  request_headers?: Record<string, string>;
+  request_body?: string | null;
   attempt_number: number;
   max_attempts: number;
   next_retry_at: string | null;
