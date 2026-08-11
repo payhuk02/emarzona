@@ -239,8 +239,8 @@ test.describe('Edit product wizards — smoke (E2E)', () => {
     const originalTitle = `Œuvre edit E2E ${ctx.runId}`;
     const updatedTitle = `${originalTitle} (modifié)`;
 
-    await loginArtistVendor(page, ctx.email, ctx.password);
-    await openArtistCreateWizard(page);
+    await loginArtistVendor(page, ctx.email, ctx.password, ctx.storeId);
+    await openArtistCreateWizard(page, ctx.storeId);
     await selectArtistTypeVisual(page);
     await clickArtistWizardNext(page, 1);
     await fillArtistBasicInfoStep(page, { artworkTitle: originalTitle });

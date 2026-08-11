@@ -133,8 +133,8 @@ test.describe('Artist vendor — redirect & RPC create', () => {
     const ctx = await createArtistE2EVendor(admin, 'e2e-artist-rpc');
     const artworkTitle = `Œuvre E2E ${ctx.runId}`;
 
-    await loginArtistVendor(page, ctx.email, ctx.password);
-    await openArtistCreateWizard(page);
+    await loginArtistVendor(page, ctx.email, ctx.password, ctx.storeId);
+    await openArtistCreateWizard(page, ctx.storeId);
 
     await selectArtistTypeVisual(page);
     await clickArtistWizardNext(page, 1);

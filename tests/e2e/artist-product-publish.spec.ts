@@ -57,8 +57,8 @@ test.describe('Artist wizard — publish (E2E)', () => {
     const ctx = await createArtistE2EVendor(admin, 'e2e-artist-pub');
     const artworkTitle = `Œuvre publiée E2E ${ctx.runId}`;
 
-    await loginArtistVendor(page, ctx.email, ctx.password);
-    await openArtistCreateWizard(page);
+    await loginArtistVendor(page, ctx.email, ctx.password, ctx.storeId);
+    await openArtistCreateWizard(page, ctx.storeId);
 
     await selectArtistTypeVisual(page);
     await clickArtistWizardNext(page, 1);
@@ -138,8 +138,8 @@ test.describe('Artist wizard — publish (E2E)', () => {
     const ctx = await createArtistE2EVendor(admin, 'e2e-artist-ltd');
     const artworkTitle = `Édition limitée E2E ${ctx.runId}`;
 
-    await loginArtistVendor(page, ctx.email, ctx.password);
-    await openArtistCreateWizard(page);
+    await loginArtistVendor(page, ctx.email, ctx.password, ctx.storeId);
+    await openArtistCreateWizard(page, ctx.storeId);
 
     await selectArtistTypeVisual(page);
     await clickArtistWizardNext(page, 1);

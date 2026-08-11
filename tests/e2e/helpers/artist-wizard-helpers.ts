@@ -8,6 +8,7 @@ import {
 } from './store-theme-helpers';
 import { waitForReactApp, waitForVendorStoreReady } from '../shared/e2e-test-config';
 import { retryOnTransientPostgrest } from './supabase-schema-cache-retry';
+import { prepareSellerDashboardChrome, waitForStoresLoaded } from './seller-dashboard-setup';
 
 /** 1×1 PNG valide pour upload catalogue. */
 export const E2E_ARTWORK_PNG = Buffer.from(
@@ -110,8 +111,10 @@ export async function cleanupArtistE2EVendor(
 export async function loginArtistVendor(
   page: Page,
   email: string,
-  password: string
+  password: string,
+  storeId?: string
 ): Promise<void> {
+  await prepareSellerDashboardChrome(page, { selectedStoreId: storeId });
   await page.goto('/login', { waitUntil: 'domcontentloaded' });
   await page.locator('input[name="email-login"], input[type="email"]').first().fill(email);
   await page.locator('#password-login').fill(password);
@@ -123,19 +126,34 @@ export async function loginArtistVendor(
   await expect(page).toHaveURL('/dashboard', { timeout: 30_000 });
   await waitForReactApp(page);
   await waitForVendorStoreReady(page);
+  if (storeId) {
+    await waitForStoresLoaded(page, { storeId });
+  }
   await dismissCookieBannerIfVisible(page);
   await dismissPersonaOnboardingIfVisible(page);
   await acceptTermsDialogIfVisible(page);
 }
 
-export async function openArtistCreateWizard(page: Page): Promise<void> {
+export async function openArtistCreateWizard(page: Page, storeId?: string): Promise<void> {
+  if (storeId) {
+    await page.evaluate(id => {
+      localStorage.setItem('selectedStoreId', id);
+    }, storeId);
+  }
   await page.goto('/dashboard/products/new/artist', { waitUntil: 'domcontentloaded' });
   await waitForReactApp(page);
   await dismissCookieBannerIfVisible(page);
   await dismissPersonaOnboardingIfVisible(page);
   await expect(page).toHaveURL(/\/dashboard\/products\/new\/artist/, { timeout: 30_000 });
+  if (storeId) {
+    await waitForStoresLoaded(page, { storeId });
+  }
+  const wizardReady = page
+    .getByRole('heading', { name: /Type d'artiste|Créer une œuvre d'artiste/i })
+    .first();
+  await expect(wizardReady).toBeVisible({ timeout: 60_000 });
   await expect(page.getByRole('heading', { name: /Type d'artiste/i })).toBeVisible({
-    timeout: 60_000,
+    timeout: 15_000,
   });
 }
 

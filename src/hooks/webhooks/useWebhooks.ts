@@ -172,13 +172,24 @@ export const useUpdateWebhook = () => {
       if (form.include_payload !== undefined) updates.include_payload = form.include_payload;
 
       const secretRotated = form.secret !== undefined && form.secret.trim() !== '';
-      const selectFields = secretRotated ? WEBHOOK_CREATE_RETURN_FIELDS : WEBHOOK_PUBLIC_FIELDS;
+
+      if (secretRotated) {
+        const { data, error } = await supabase
+          .from('webhooks')
+          .update(updates)
+          .eq('id', form.id)
+          .select(WEBHOOK_CREATE_RETURN_FIELDS)
+          .single();
+
+        if (error) throw error;
+        return data as Webhook;
+      }
 
       const { data, error } = await supabase
         .from('webhooks')
         .update(updates)
         .eq('id', form.id)
-        .select(selectFields)
+        .select(WEBHOOK_PUBLIC_FIELDS)
         .single();
 
       if (error) throw error;
