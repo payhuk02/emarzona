@@ -4,6 +4,9 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
+import { withTimeoutFallback } from '@/lib/promise-timeout';
+
+const VISITOR_TRACK_TIMEOUT_MS = 5000;
 
 const SESSION_KEY = 'emarzona_platform_visitor_session';
 const SESSION_TTL_MS = 30 * 60 * 1000;
@@ -303,7 +306,12 @@ export async function trackPlatformVisitorEvent(payload: TrackPayload): Promise<
     event_data: payload.event_data ?? {},
   };
 
-  const { error } = await supabase.from('platform_visitor_events').insert(row);
+  const { error } = await withTimeoutFallback(
+    supabase.from('platform_visitor_events').insert(row),
+    VISITOR_TRACK_TIMEOUT_MS,
+    { error: { message: 'timeout' } },
+    'platform_visitor_events_insert'
+  );
   if (error) {
     logger.warn('platform visitor track failed', { error: error.message });
   }

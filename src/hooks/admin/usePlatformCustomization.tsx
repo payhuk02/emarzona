@@ -127,7 +127,10 @@ export interface PlatformCustomizationDataLegacy {
   pages?: Record<string, Record<string, string | number | boolean | null>>;
 }
 
-const PREVIEW_STORAGE_KEY = 'platform-customization-preview';
+import { withTimeoutFallback } from '@/lib/promise-timeout';
+
+const PUBLIC_CUSTOMIZATION_CACHE_KEY = 'platform-customization-public-cache';
+const PUBLIC_CUSTOMIZATION_TIMEOUT_MS = 8000;
 const LAST_SAVED_KEY = 'platform-customization-last-saved';
 
 export type PlatformCustomizationHookValue = ReturnType<typeof usePlatformCustomizationState>;
@@ -212,13 +215,20 @@ function usePlatformCustomizationState() {
     }
 
     try {
-      // Pages publiques (footer, landing, marketing) — visiteurs anonymes inclus
-      const { data: publicData, error: publicError } = await supabase.rpc(
+      const { data: publicData, error: publicError } = await withTimeoutFallback(
+        supabase.rpc('get_public_platform_customization'),
+        PUBLIC_CUSTOMIZATION_TIMEOUT_MS,
+        { data: null, error: { message: 'timeout' } as { message: string } },
         'get_public_platform_customization'
       );
 
       if (!publicError && publicData && typeof publicData === 'object') {
         const data = publicData as PlatformCustomizationData;
+        try {
+          localStorage.setItem(PUBLIC_CUSTOMIZATION_CACHE_KEY, JSON.stringify(data));
+        } catch {
+          // ignore quota errors
+        }
         setCustomizationData(prev => ({
           ...prev,
           pages: { ...(prev?.pages ?? {}), ...(data.pages ?? {}) },
@@ -232,8 +242,33 @@ function usePlatformCustomizationState() {
               }
             : prev?.media,
         }));
-      } else if (
+      } else {
+        try {
+          const cached = localStorage.getItem(PUBLIC_CUSTOMIZATION_CACHE_KEY);
+          if (cached) {
+            const data = JSON.parse(cached) as PlatformCustomizationData;
+            setCustomizationData(prev => ({
+              ...prev,
+              pages: { ...(prev?.pages ?? {}), ...(data.pages ?? {}) },
+              media: data.media
+                ? {
+                    ...(prev?.media ?? {}),
+                    images: {
+                      ...(prev?.media?.images ?? {}),
+                      ...(data.media?.images ?? {}),
+                    },
+                  }
+                : prev?.media,
+            }));
+          }
+        } catch {
+          // ignore corrupt cache
+        }
+      }
+
+      if (
         publicError &&
+        publicError.message !== 'timeout' &&
         !(
           publicError.code === 'PGRST116' ||
           publicError.message?.includes('function') ||

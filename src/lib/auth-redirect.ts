@@ -1,10 +1,12 @@
 import { supabase } from '@/integrations/supabase/client';
 import { isPrincipalAdminEmail } from '@/lib/principal-admin';
 import { logger } from '@/lib/logger';
+import { withTimeoutFallback } from '@/lib/promise-timeout';
 
 const ADMIN_PREFIX = '/admin';
 const VENDOR_HOME = '/dashboard';
 const LOGIN_PATH = '/login';
+const ADMIN_CHECK_TIMEOUT_MS = 6000;
 
 function isSafeInternalPath(path: string | undefined | null): path is string {
   return Boolean(path && path.startsWith('/') && !path.startsWith('//'));
@@ -20,31 +22,38 @@ export async function checkUserIsAdmin(userId: string, email?: string | null): P
     return true;
   }
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role, is_super_admin')
-    .eq('user_id', userId)
-    .maybeSingle();
+  return withTimeoutFallback(
+    (async () => {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role, is_super_admin')
+        .eq('user_id', userId)
+        .maybeSingle();
 
-  if (profile?.is_super_admin || profile?.role === 'admin') {
-    return true;
-  }
+      if (profile?.is_super_admin || profile?.role === 'admin') {
+        return true;
+      }
 
-  if (profile?.role && ADMIN_PANEL_PROFILE_ROLES.has(profile.role)) {
-    return true;
-  }
+      if (profile?.role && ADMIN_PANEL_PROFILE_ROLES.has(profile.role)) {
+        return true;
+      }
 
-  const { data, error } = await supabase.rpc('has_role', {
-    _user_id: userId,
-    _role: 'admin',
-  });
+      const { data, error } = await supabase.rpc('has_role', {
+        _user_id: userId,
+        _role: 'admin',
+      });
 
-  if (error) {
-    logger.error('Error checking admin status for redirect', { error, userId });
-    return false;
-  }
+      if (error) {
+        logger.error('Error checking admin status for redirect', { error, userId });
+        return false;
+      }
 
-  return Boolean(data);
+      return Boolean(data);
+    })(),
+    ADMIN_CHECK_TIMEOUT_MS,
+    false,
+    'checkUserIsAdmin'
+  );
 }
 
 /**
@@ -52,9 +61,12 @@ export async function checkUserIsAdmin(userId: string, email?: string | null): P
  * Respecte `returnTo` si fourni et sûr (chemin interne).
  */
 export async function resolvePostAuthRedirectPath(returnTo?: string | null): Promise<string> {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await withTimeoutFallback(
+    supabase.auth.getUser().then(({ data }) => data.user ?? null),
+    ADMIN_CHECK_TIMEOUT_MS,
+    null,
+    'resolvePostAuthRedirect_getUser'
+  );
 
   if (!user) {
     return LOGIN_PATH;

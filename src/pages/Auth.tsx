@@ -46,6 +46,7 @@ import { applyPendingReferralForUser } from '@/lib/referral-helpers';
 import { usePageCustomization } from '@/hooks/usePageCustomization';
 import { useAdvancedLoyalty } from '@/hooks/useAdvancedLoyalty';
 import { resolvePostAuthRedirectPath } from '@/lib/auth-redirect';
+import { withTimeoutFallback } from '@/lib/promise-timeout';
 import {
   coerceToErrorString,
   formatAuthErrorForUi,
@@ -109,7 +110,12 @@ const Auth = () => {
   const returnTo = (location.state as { from?: string } | null)?.from;
 
   const redirectAfterAuth = useCallback(async () => {
-    const path = await resolvePostAuthRedirectPath(returnTo);
+    const path = await withTimeoutFallback(
+      resolvePostAuthRedirectPath(returnTo),
+      8000,
+      '/dashboard',
+      'postAuthRedirect'
+    );
     navigate(path, { replace: true });
   }, [navigate, returnTo]);
 
@@ -476,10 +482,24 @@ const Auth = () => {
     }
 
     try {
-      const { data, error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      const signInResult = await withTimeoutFallback(
+        supabase.auth.signInWithPassword({ email, password }),
+        20000,
+        null,
+        'signInWithPassword'
+      );
+
+      if (!signInResult) {
+        setError(
+          t(
+            'auth.login.serverTimeout',
+            'Le serveur met trop de temps à répondre. Réessayez dans quelques instants.'
+          )
+        );
+        return;
+      }
+
+      const { data, error: signInError } = signInResult;
 
       if (signInError) throw signInError;
 

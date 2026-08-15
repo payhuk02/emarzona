@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
+import { withTimeoutFallback } from '@/lib/promise-timeout';
 
 export type BroadcastChannel = 'email' | 'in_app' | 'popup';
 export type BroadcastAudience = 'all' | 'vendors' | 'customers' | 'emails';
@@ -307,9 +308,14 @@ export async function dismissPlatformPopup(popupId: string): Promise<void> {
 }
 
 export async function fetchActivePlatformPopups(userId?: string): Promise<PlatformPopupMessage[]> {
-  const { data, error } = await supabase.rpc('get_active_platform_popups', {
-    p_user_id: userId ?? null,
-  });
+  const { data, error } = await withTimeoutFallback(
+    supabase.rpc('get_active_platform_popups', {
+      p_user_id: userId ?? null,
+    }),
+    8000,
+    { data: null, error: { message: 'timeout' } },
+    'get_active_platform_popups'
+  );
 
   if (error) {
     logger.warn('fetchActivePlatformPopups error', { error: error.message });
