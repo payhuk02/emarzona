@@ -56,7 +56,7 @@ import { cn } from '@/lib/utils';
 import { PriceStockAlertButton } from '@/components/marketplace/PriceStockAlertButton';
 import { PaymentOptionsBadge, getPaymentOptions } from '@/components/products/PaymentOptionsBadge';
 import { PricingModelBadge } from '@/components/products/PricingModelBadge';
-import { useMarketplaceFavorites } from '@/hooks/useMarketplaceFavorites';
+import { useMarketplaceFavoritesContext } from '@/contexts/MarketplaceFavoritesContext';
 import {
   Dialog,
   DialogContent,
@@ -112,9 +112,10 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
   productCardStyle,
   storePlaceholderImageUrl,
   storeWatermarkUrl,
+  imagePriority = false,
 }) => {
-  const { favorites, toggleFavorite } = useMarketplaceFavorites();
-  const isFavorite = favorites.has(product.id);
+  const favoritesCtx = useMarketplaceFavoritesContext();
+  const isFavorite = favoritesCtx?.isFavorite(product.id) ?? false;
   const [isZoomOpen, setIsZoomOpen] = useState(false);
 
   const isDigital = product.type === 'digital';
@@ -191,10 +192,11 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
     async (e: React.MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
-      await toggleFavorite(product.id);
+      if (!favoritesCtx) return;
+      await favoritesCtx.toggleFavorite(product.id);
       onAction?.('favorite', product);
     },
-    [product, toggleFavorite, onAction]
+    [product, favoritesCtx, onAction]
   );
 
   const handleZoomClick = useCallback((e: React.MouseEvent) => {
@@ -217,7 +219,7 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
   const imageSizes =
     variant === 'compact'
       ? '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw'
-      : '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1536px) 33vw, 25vw';
+      : '(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw';
 
   // --- Specific Helpers ---
   const physicalCheckoutDisplay = useMemo(
@@ -327,13 +329,12 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
                 alt={productName}
                 sizes={imageSizes}
                 context="grid"
-                fit={variant === 'marketplace' || variant === 'store' ? 'contain' : 'cover'}
-                fill={variant === 'marketplace' || variant === 'store' ? false : true}
+                priority={imagePriority}
+                fit={variant === 'store' ? 'contain' : 'cover'}
+                fill={variant !== 'store'}
                 className={cn(
-                  'w-full transition-transform duration-300',
-                  variant === 'marketplace' || variant === 'store'
-                    ? 'h-auto max-h-[320px] sm:max-h-[360px] group-hover:scale-110'
-                    : 'h-full group-hover:scale-110'
+                  'w-full h-full transition-transform duration-300 group-hover:scale-110',
+                  variant === 'store' && 'h-auto max-h-[320px] sm:max-h-[360px]'
                 )}
                 fallbackIcon={<ShoppingCart className="h-16 w-16 text-gray-400 opacity-20" />}
               />
@@ -462,14 +463,17 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
         )}
 
         {/* Favorite Button */}
-        <button
-          onClick={handleFavorite}
-          className="absolute bottom-2 right-2 p-2.5 sm:p-2 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-full hover:bg-white dark:hover:bg-gray-800 z-10 touch-manipulation active:scale-90 transition-transform min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 flex items-center justify-center"
-        >
-          <Heart
-            className={`h-5 w-5 sm:h-4 sm:w-4 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-600 dark:text-gray-300'}`}
-          />
-        </button>
+        {favoritesCtx && (
+          <button
+            onClick={handleFavorite}
+            className="absolute bottom-2 right-2 p-2.5 sm:p-2 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-full hover:bg-white dark:hover:bg-gray-800 z-10 touch-manipulation active:scale-90 transition-transform min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 flex items-center justify-center"
+            aria-label={isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+          >
+            <Heart
+              className={`h-5 w-5 sm:h-4 sm:w-4 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-600 dark:text-gray-300'}`}
+            />
+          </button>
+        )}
       </div>
 
       {isDigital && (

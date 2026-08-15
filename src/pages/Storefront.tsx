@@ -27,6 +27,7 @@ import { StoreThemeProvider } from '@/components/storefront/StoreThemeProvider';
 import '@/styles/landing-premium.css';
 import '@/styles/marketplace-premium.css';
 import { StoreAnalyticsScripts } from '@/components/storefront/StoreAnalyticsScripts';
+import { MarketplaceFavoritesProvider } from '@/contexts/MarketplaceFavoritesContext';
 import type { Store } from '@/hooks/useStores';
 import { useLCPPreload } from '@/hooks/useLCPPreload';
 import { useAdaptiveLoading } from '@/hooks/useAdaptiveLoading';
@@ -50,7 +51,7 @@ export type StorefrontProps = {
   storeOverride?: Store | null;
 };
 
-const Storefront = ({ previewMode = false, storeOverride = null }: StorefrontProps = {}) => {
+const StorefrontPage = ({ previewMode = false, storeOverride = null }: StorefrontProps = {}) => {
   const { slug: paramSlug } = useParams<{ slug: string }>();
   const contextSlug = useStoreSlug();
   const slug = paramSlug || contextSlug;
@@ -750,5 +751,11 @@ const Storefront = ({ previewMode = false, storeOverride = null }: StorefrontPro
     </>
   );
 };
+
+const Storefront = (props: StorefrontProps = {}) => (
+  <MarketplaceFavoritesProvider>
+    <StorefrontPage {...props} />
+  </MarketplaceFavoritesProvider>
+);
 
 export default Storefront;

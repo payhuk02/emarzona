@@ -202,6 +202,8 @@ export interface UnifiedProductCardProps {
   storePlaceholderImageUrl?: string | null;
   /** Filigrane boutique superposé sur l'image produit (variant store) */
   storeWatermarkUrl?: string | null;
+  /** Priorité LCP pour les premières cartes visibles */
+  imagePriority?: boolean;
 }
 
 /**

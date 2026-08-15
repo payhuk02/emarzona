@@ -35,7 +35,7 @@ import { ResponsiveProductImage } from '@/components/ui/ResponsiveProductImage';
 import { LazyImage } from '@/components/ui/lazy-image';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
-import { useMarketplaceFavorites } from '@/hooks/useMarketplaceFavorites';
+import { useMarketplaceFavoritesContext } from '@/contexts/MarketplaceFavoritesContext';
 import { PriceStockAlertButton } from './PriceStockAlertButton';
 import { PaymentOptionsBadge, getPaymentOptions } from '@/components/products/PaymentOptionsBadge';
 import { PricingModelBadge } from '@/components/products/PricingModelBadge';
@@ -107,9 +107,9 @@ const ProductCardModernComponent = ({
   const { toast } = useToast();
   const isDigital = product.product_type === 'digital';
 
-  // Hook centralisé pour favoris synchronisés
-  const { favorites, toggleFavorite } = useMarketplaceFavorites();
-  const isFavorite = favorites.has(product.id);
+  // Favoris via contexte partagé (évite N+1 requêtes)
+  const favoritesCtx = useMarketplaceFavoritesContext();
+  const isFavorite = favoritesCtx?.isFavorite(product.id) ?? false;
 
   // Récupérer l'utilisateur pour les alertes
   useEffect(() => {
@@ -198,9 +198,10 @@ const ProductCardModernComponent = ({
     async (e: React.MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
-      await toggleFavorite(product.id);
+      if (!favoritesCtx) return;
+      await favoritesCtx.toggleFavorite(product.id);
     },
-    [product.id, toggleFavorite]
+    [product.id, favoritesCtx]
   );
 
   // Gérer le zoom

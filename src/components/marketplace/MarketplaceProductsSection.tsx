@@ -49,10 +49,8 @@
 import React, { useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { AlertCircle, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { AlertCircle, ArrowRight, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { ProductGrid } from '@/components/ui/ProductGrid';
-import { VirtualizedProductGrid } from '@/components/ui/VirtualizedProductGrid';
 import { ProductListSkeleton } from '@/components/ui/skeleton-enhanced';
 import UnifiedProductCard from '@/components/products/UnifiedProductCard';
 import { transformToUnifiedProduct } from '@/lib/product-transform';
@@ -117,42 +115,17 @@ export const MarketplaceProductsSection = React.memo<MarketplaceProductsSectionP
       [products]
     );
 
-    // ✅ OPTIMISATION: Mémoriser le renderItem pour VirtualizedProductGrid
-    const renderProductItem = useCallback(
-      (index: number) => {
-        const unifiedProduct = transformedProducts[index];
-        if (!unifiedProduct) return null;
-
-        return (
-          <UnifiedProductCard
-            key={unifiedProduct.id}
-            product={unifiedProduct}
-            variant="marketplace"
-            showAffiliate={true}
-            showActions={true}
-            onAction={(action, prod) => {
-              if (action === 'view') {
-                // Navigation gérée par le Link dans UnifiedProductCard
-              } else if (action === 'buy') {
-                onBuyProduct(prod);
-              }
-            }}
-          />
-        );
-      },
-      [transformedProducts, onBuyProduct]
-    );
-
     // ✅ OPTIMISATION: Mémoriser le rendu des produits pour ProductGrid
     const renderedProducts = useMemo(
       () =>
-        transformedProducts.map(unifiedProduct => (
+        transformedProducts.map((unifiedProduct, index) => (
           <UnifiedProductCard
             key={unifiedProduct.id}
             product={unifiedProduct}
             variant="marketplace"
             showAffiliate={true}
             showActions={true}
+            imagePriority={index < 2}
             onAction={(action, prod) => {
               if (action === 'view') {
                 // Navigation gérée par le Link dans UnifiedProductCard
@@ -164,6 +137,10 @@ export const MarketplaceProductsSection = React.memo<MarketplaceProductsSectionP
         )),
       [transformedProducts, onBuyProduct]
     );
+
+    const showInitialSkeleton =
+      (loading && !hasLoadedOnce) || (isLoadingProducts && !hasLoadedOnce);
+    const showFilterOverlay = isLoadingProducts && hasLoadedOnce;
 
     // Gestion du scroll vers le haut lors du changement de page
     const handlePageChange = useCallback(
@@ -224,9 +201,7 @@ export const MarketplaceProductsSection = React.memo<MarketplaceProductsSectionP
                 <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
               </Button>
             </div>
-          ) : isLoadingProducts || (loading && !hasLoadedOnce) ? (
-            // ✅ OPTIMISATION: Afficher skeleton au premier chargement ET pendant les filtrages
-            // Cela maintient la structure de la grille et évite tout Cumulative Layout Shift (CLS)
+          ) : showInitialSkeleton ? (
             <div
               className="w-full animate-in fade-in duration-300"
               role="status"
@@ -239,19 +214,23 @@ export const MarketplaceProductsSection = React.memo<MarketplaceProductsSectionP
               <ProductListSkeleton count={pagination.itemsPerPage} />
             </div>
           ) : products.length > 0 ? (
-            <div className="w-full animate-in fade-in duration-300">
-              {/* ✅ OPTIMISATION: Utiliser VirtualizedProductGrid dès 12 produits (1 page) */}
-              {products.length >= 12 ? (
-                <VirtualizedProductGrid
-                  count={products.length}
-                  renderItem={renderProductItem}
-                  loading={false}
-                  loadingCount={pagination.itemsPerPage}
-                  emptyMessage={t('marketplace.noProducts')}
-                />
-              ) : (
-                <ProductGrid>{renderedProducts}</ProductGrid>
+            <div className="relative w-full animate-in fade-in duration-300">
+              {showFilterOverlay && (
+                <div
+                  className="absolute inset-0 z-20 flex items-start justify-center pt-16 bg-background/40 backdrop-blur-[1px] pointer-events-none"
+                  role="status"
+                  aria-live="polite"
+                  aria-label={t('marketplace.filtering', 'Mise à jour des produits...')}
+                >
+                  <div className="flex items-center gap-2 rounded-full bg-background/90 px-4 py-2 shadow-md border">
+                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                    <span className="text-sm text-muted-foreground">
+                      {t('marketplace.filtering', 'Mise à jour...')}
+                    </span>
+                  </div>
+                </div>
               )}
+              <ProductGrid>{renderedProducts}</ProductGrid>
 
               {/* Pagination */}
               {totalPages > 1 && (

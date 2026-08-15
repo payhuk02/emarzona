@@ -1,6 +1,71 @@
 import { useState, useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 
+/** Cache module-level pour éviter de recréer un canvas par image */
+let cachedPreferredFormat: 'avif' | 'webp' | null | undefined;
+
+function getPreferredImageFormat(): 'avif' | 'webp' | null {
+  if (cachedPreferredFormat !== undefined) return cachedPreferredFormat;
+  if (typeof document === 'undefined') {
+    cachedPreferredFormat = null;
+    return null;
+  }
+  try {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1;
+    canvas.height = 1;
+    if (canvas.toDataURL('image/avif').indexOf('data:image/avif') === 0) {
+      cachedPreferredFormat = 'avif';
+    } else if (canvas.toDataURL('image/webp').indexOf('data:image/webp') === 0) {
+      cachedPreferredFormat = 'webp';
+    } else {
+      cachedPreferredFormat = null;
+    }
+  } catch {
+    cachedPreferredFormat = null;
+  }
+  return cachedPreferredFormat;
+}
+
+function getContextDimensions(
+  context: 'grid' | 'detail' | 'thumbnail',
+  propWidth?: number,
+  propHeight?: number
+) {
+  if (propWidth && propHeight) {
+    return { width: propWidth, height: propHeight };
+  }
+  switch (context) {
+    case 'thumbnail':
+      return { width: 384, height: 256 };
+    case 'detail':
+      return { width: 1536, height: 1024 };
+    default:
+      // Grille marketplace : ~480px suffisant sur mobile (2 colonnes)
+      return { width: 480, height: 320 };
+  }
+}
+
+function buildOptimizedSupabaseUrl(
+  src: string,
+  context: 'grid' | 'detail' | 'thumbnail',
+  propWidth?: number,
+  propHeight?: number
+) {
+  if (!src.includes('supabase.co/storage')) return src;
+
+  const { width, height } = getContextDimensions(context, propWidth, propHeight);
+  const params = new URLSearchParams();
+  params.set('width', width.toString());
+  params.set('height', height.toString());
+  params.set('quality', '82');
+
+  const format = getPreferredImageFormat();
+  if (format) params.set('format', format);
+
+  return `${src}?${params.toString()}`;
+}
+
 interface ResponsiveProductImageProps {
   src?: string;
   alt: string;
@@ -41,7 +106,7 @@ export const ResponsiveProductImage = ({
   className,
   fallbackIcon,
   priority = false,
-  sizes = '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1920px) 33vw, 25vw',
+  sizes = '(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw',
   quality: quality = 85,
   placeholder: placeholder = 'empty',
   blurDataURL: _blurDataURL,
@@ -60,6 +125,7 @@ export const ResponsiveProductImage = ({
   useEffect(() => {
     if (priority || !elementRef.current) return;
 
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
     const observer = new IntersectionObserver(
       entries => {
         entries.forEach(entry => {
@@ -70,7 +136,7 @@ export const ResponsiveProductImage = ({
         });
       },
       {
-        rootMargin: '50px',
+        rootMargin: isMobile ? '200px' : '100px',
       }
     );
 
@@ -135,59 +201,10 @@ export const ResponsiveProductImage = ({
       {/* Image optimisée avec rendu professionnel - Stable et optimisée */}
       {isInView && (
         <img
-          src={
-            src
-              ? (() => {
-                  // ✅ OPTIMISATION: Utiliser WebP/AVIF pour Supabase Storage
-                  if (src.includes('supabase.co/storage')) {
-                    const params = new URLSearchParams();
-                    // Utiliser les props width/height si fournies, sinon utiliser les valeurs par défaut basées sur le contexte
-                    const width =
-                      propWidth ??
-                      (context === 'thumbnail' ? 768 : context === 'detail' ? 1536 : 1536);
-                    const height =
-                      propHeight ??
-                      (context === 'thumbnail' ? 512 : context === 'detail' ? 1024 : 1024);
-                    params.set('width', width.toString());
-                    params.set('height', height.toString());
-                    params.set('quality', '85');
-
-                    // Détecter le meilleur format supporté
-                    if (typeof document !== 'undefined') {
-                      try {
-                        const canvas = document.createElement('canvas');
-                        canvas.width = 1;
-                        canvas.height = 1;
-                        if (canvas.toDataURL('image/avif').indexOf('data:image/avif') === 0) {
-                          params.set('format', 'avif');
-                        } else if (
-                          canvas.toDataURL('image/webp').indexOf('data:image/webp') === 0
-                        ) {
-                          params.set('format', 'webp');
-                        }
-                      } catch {
-                        // Fallback vers format original
-                      }
-                    }
-
-                    return `${src}?${params.toString()}`;
-                  }
-                  return src;
-                })()
-              : undefined
-          }
+          src={src ? buildOptimizedSupabaseUrl(src, context, propWidth, propHeight) : undefined}
           alt={alt}
-          width={
-            propWidth ??
-            (context === 'thumbnail'
-              ? 768 // 3:2 thumbnail aligné avec IMAGE_FORMATS.thumbnail
-              : context === 'detail'
-                ? 1536 // format produit principal
-                : 1536) // Format 1536x1024 pour les grilles (cartes produits) - ratio 3:2
-          }
-          height={
-            propHeight ?? (context === 'thumbnail' ? 512 : context === 'detail' ? 1024 : 1024)
-          }
+          width={getContextDimensions(context, propWidth, propHeight).width}
+          height={getContextDimensions(context, propWidth, propHeight).height}
           className={cn('w-full h-full', 'product-image', isLoaded ? 'opacity-100' : 'opacity-100')}
           onLoad={handleLoad}
           onError={handleError}

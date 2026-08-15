@@ -25,7 +25,10 @@ import { logger } from '@/lib/logger';
 import { buildCheckoutUrl } from '@/lib/checkout/checkout-route';
 import { usePageCustomization } from '@/hooks/usePageCustomization';
 import { Product } from '@/types/marketplace';
-import { useMarketplaceFavorites } from '@/hooks/useMarketplaceFavorites';
+import {
+  MarketplaceFavoritesProvider,
+  useMarketplaceFavoritesContext,
+} from '@/contexts/MarketplaceFavoritesContext';
 import { useDebounce } from '@/hooks/useDebounce';
 import {
   useProductSearch,
@@ -58,7 +61,7 @@ import { useMarketplaceFacets } from '@/hooks/useMarketplaceFacets';
 import { buildMarketplaceBreadcrumbs, buildMarketplaceSEO } from '@/lib/marketplace-seo';
 import { BuyerDiscoveryPageLayout } from '@/components/layout/BuyerDiscoveryPageLayout';
 
-const Marketplace = () => {
+const MarketplacePage = () => {
   const { t } = useTranslation();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -78,9 +81,12 @@ const Marketplace = () => {
     priority: !!heroImage, // Seulement si image présente
   });
 
-  // Hook personnalisé pour favoris synchronisés
-  const { favorites, favoritesCount, toggleFavorite, clearAllFavorites } =
-    useMarketplaceFavorites();
+  // Favoris via contexte partagé (une seule requête Supabase)
+  const favoritesState = useMarketplaceFavoritesContext();
+  const favorites = favoritesState?.favorites ?? new Set<string>();
+  const favoritesCount = favoritesState?.favoritesCount ?? 0;
+  const toggleFavorite = favoritesState?.toggleFavorite ?? (async () => {});
+  const clearAllFavorites = favoritesState?.clearAllFavorites ?? (async () => {});
 
   // Récupérer l'utilisateur pour les recommandations personnalisées
   // ✅ FIX: Utiliser useAuth() qui est plus fiable et réactif que useCurrentUserId
@@ -318,6 +324,13 @@ const Marketplace = () => {
     }
     return filtered;
   }, [hasSearchQuery, searchResults, catalogProducts, filters.tags]);
+
+  const firstProductImage = displayProducts[0]?.image_url;
+  useLCPPreload({
+    src: firstProductImage || '',
+    sizes: '(max-width: 640px) 50vw, 33vw',
+    priority: !!firstProductImage && hasLoadedOnce,
+  });
 
   const isLoadingProducts = catalogLoading && hasLoadedOnce;
 
@@ -1011,5 +1024,11 @@ const Marketplace = () => {
     </>
   );
 };
+
+const Marketplace = () => (
+  <MarketplaceFavoritesProvider>
+    <MarketplacePage />
+  </MarketplaceFavoritesProvider>
+);
 
 export default Marketplace;

@@ -20,7 +20,7 @@ import { PhysicalCheckoutMethodBadge } from '@/components/products/PhysicalCheck
 import type { PhysicalProductPaymentOptions } from '@/types/physical-product';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { useMarketplaceFavorites } from '@/hooks/useMarketplaceFavorites';
+import { useMarketplaceFavoritesContext } from '@/contexts/MarketplaceFavoritesContext';
 import { PriceStockAlertButton } from './PriceStockAlertButton';
 import { ResponsiveProductImage } from '@/components/ui/ResponsiveProductImage';
 import { PaymentOptionsBadge, getPaymentOptions } from '@/components/products/PaymentOptionsBadge';
@@ -71,8 +71,8 @@ interface ProductCardProps {
 
 const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
   const [isZoomOpen, setIsZoomOpen] = useState(false);
-  const { favorites, toggleFavorite } = useMarketplaceFavorites();
-  const isFavorite = favorites.has(product.id);
+  const favoritesCtx = useMarketplaceFavoritesContext();
+  const isFavorite = favoritesCtx?.isFavorite(product.id) ?? false;
   const isDigital = product.product_type === 'digital';
 
   // Extraire les infos de boutique depuis product.stores (déjà joint dans la requête)
@@ -117,10 +117,10 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
     async (e: React.MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
-      await toggleFavorite(product.id);
-      // Le toast est géré par useMarketplaceFavorites
+      if (!favoritesCtx) return;
+      await favoritesCtx.toggleFavorite(product.id);
     },
-    [product.id, toggleFavorite]
+    [product.id, favoritesCtx]
   );
 
   // Gérer le zoom
