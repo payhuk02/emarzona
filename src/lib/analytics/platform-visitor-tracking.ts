@@ -10,8 +10,16 @@ const VISITOR_TRACK_TIMEOUT_MS = 5000;
 
 const SESSION_KEY = 'emarzona_platform_visitor_session';
 const SESSION_TTL_MS = 30 * 60 * 1000;
-const HEARTBEAT_INTERVAL_MS = 30_000;
+const HEARTBEAT_INTERVAL_MS = 120_000;
 const EXCLUDED_PATH_PREFIXES = ['/admin', '/api', '/auth/callback'];
+const EXCLUDED_EXACT_PATHS = new Set([
+  '/login',
+  '/register',
+  '/connexion',
+  '/auth',
+  '/auth/login',
+  '/auth/register',
+]);
 
 export type PlatformVisitorEventType = 'page_view' | 'session_heartbeat' | 'session_end';
 
@@ -142,6 +150,7 @@ function writeSession(state: SessionState) {
 }
 
 export function shouldTrackPath(pathname: string): boolean {
+  if (EXCLUDED_EXACT_PATHS.has(pathname)) return false;
   return !EXCLUDED_PATH_PREFIXES.some(
     prefix => pathname === prefix || pathname.startsWith(`${prefix}/`)
   );
