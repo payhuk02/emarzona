@@ -92,7 +92,7 @@ BEGIN
       FROM public.platform_visitor_events
       WHERE created_at < v_cutoff
       ORDER BY created_at ASC
-      LIMIT 10000
+      LIMIT 1000
     );
 
     GET DIAGNOSTICS v_batch = ROW_COUNT;
