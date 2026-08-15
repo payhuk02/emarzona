@@ -8,8 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { RefreshCw, UploadCloud, Info } from 'lucide-react';
 import { logger } from '@/lib/logger';
 
-// Default images imports
-import authHero from '@/assets/auth/auth-hero.webp';
+// Default images imports (auth hero: admin upload only, no bundled fallback)
 import adaptPremiumPng from '@/assets/landing/adapt-entrepreneur.png';
 import ctaGlobePng from '@/assets/landing/cta-globe.png';
 import heroEntrepreneur from '@/assets/landing/hero-carousel-entrepreneur.webp';
@@ -186,10 +185,10 @@ export function MediaSection({ onChange }: MediaSectionProps) {
         <CardContent>
           <ImageUploader
             title="Image Héro (Auth)"
-            description="Format recommandé: WebP ou PNG optimisé. Orienté portrait."
+            description="Format recommandé: WebP ou PNG optimisé. Orienté portrait. Affichée sur la page de connexion/inscription."
             keyPath={['authHero']}
             currentUrl={media.authHero as string}
-            defaultUrl={authHero}
+            optional
           />
         </CardContent>
       </Card>
