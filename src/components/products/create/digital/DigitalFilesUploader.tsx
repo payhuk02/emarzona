@@ -63,8 +63,10 @@ export const DigitalFilesUploader = ({ formData, updateFormData }: DigitalFilesU
       is_main: isMain,
     };
 
+    const nextFiles = [...(formData.downloadable_files || []), newFile];
     updateFormData({
-      downloadable_files: [...(formData.downloadable_files || []), newFile],
+      downloadable_files: nextFiles,
+      ...(isMain && !formData.main_file_url?.trim() ? { main_file_url: newFile.url } : {}),
     });
 
     if (isMain) {

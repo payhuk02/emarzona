@@ -40,13 +40,11 @@ import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { cn } from '@/lib/utils';
 import { useWizardServerValidation } from '@/hooks/useWizardServerValidation';
 import { createDigitalProductTx } from '@/lib/products/product-create-rpc';
-import { buildDigitalProductFilesPayload } from '@/lib/digital/build-digital-product-files-payload';
-import { resolvePrimaryDigitalFile } from '@/lib/digital/resolve-primary-digital-file';
+import { buildDigitalProductCreatePayloads } from '@/lib/digital/build-digital-product-create-payload';
 import { validateDigitalWizardPublishSteps } from '@/lib/digital-wizard-step-validation';
 import type {
   DigitalProductFormData,
   DigitalProductFormDataUpdate,
-  DigitalProductDownloadableFile,
 } from '@/types/digital-product-form';
 
 import { WizardStepSuspense } from '../shared/WizardStepSuspense';
@@ -822,81 +820,14 @@ export const CreateDigitalProductWizard = ({
           );
         }
 
-        const mainFile = resolvePrimaryDigitalFile(formData.downloadable_files);
-        const mainFileFormat =
-          mainFile?.type?.split('/')[1] || mainFile?.name?.split('.').pop() || 'unknown';
-        const totalSizeMB =
-          formData.downloadable_files?.reduce(
-            (sum: number, file: DigitalProductDownloadableFile) => sum + file.size / (1024 * 1024),
-            0
-          ) || 0;
-
-        const productPayload: Record<string, unknown> = {
-          name: formData.name,
+        const {
+          product: productPayload,
+          digital: digitalPayload,
+          files: filesPayload,
+        } = buildDigitalProductCreatePayloads({
+          formData,
           slug,
-          description: formData.description,
-          short_description: formData.short_description,
-          category: formData.category,
-          price: formData.pricing_model === 'free' ? 0 : formData.price,
-          promotional_price: formData.promotional_price,
-          currency: formData.currency,
-          pricing_model: formData.pricing_model || 'one-time',
-          image_url:
-            formData.image_url ||
-            (formData.images && formData.images.length > 0 ? formData.images[0] : ''),
-          images: formData.images || (formData.image_url ? [formData.image_url] : []),
-          licensing_type: formData.licensing_type || 'standard',
-          license_terms: formData.license_terms || null,
-          is_active: !isDraft,
-          is_draft: isDraft,
-          meta_title: formData.seo?.meta_title || formData.name,
-          meta_description: formData.seo?.meta_description || formData.short_description,
-          og_image: formData.seo?.og_image,
-          faqs: formData.faqs || [],
-          hide_purchase_count: formData.hide_purchase_count ?? false,
-          hide_likes_count: formData.hide_likes_count ?? false,
-          hide_recommendations_count: formData.hide_recommendations_count ?? false,
-          hide_downloads_count: formData.hide_downloads_count ?? false,
-          hide_reviews_count: formData.hide_reviews_count ?? false,
-          hide_rating: formData.hide_rating ?? false,
-        };
-
-        const digitalPayload: Record<string, unknown> = {
-          digital_type: formData.digital_type || 'other',
-          license_type: formData.license_type || 'single',
-          license_duration_days: formData.license_duration_days || null,
-          max_activations:
-            formData.max_activations ||
-            (formData.license_type === 'unlimited'
-              ? -1
-              : formData.license_type === 'multi'
-                ? 5
-                : 1),
-          allow_license_transfer: formData.allow_license_transfer || false,
-          auto_generate_keys: formData.auto_generate_keys !== false,
-          main_file_url: formData.main_file_url || mainFile?.url || '',
-          main_file_size_mb: mainFile ? mainFile.size / (1024 * 1024) : 0,
-          main_file_format: mainFileFormat,
-          main_file_version: formData.main_file_version || '1.0',
-          total_files: formData.downloadable_files?.length || 1,
-          total_size_mb: totalSizeMB,
-          download_limit: formData.download_limit || 5,
-          download_expiry_days: formData.download_expiry_days || 30,
-          require_registration: formData.require_registration !== false,
-          watermark_enabled: formData.watermark_enabled || false,
-          watermark_text: formData.watermark_text || '',
-          version: formData.version || '1.0',
-        };
-
-        const filesPayload = buildDigitalProductFilesPayload({
-          main_file_url: formData.main_file_url || mainFile?.url || '',
-          main_file_version: formData.main_file_version,
-          downloadable_files: formData.downloadable_files,
-          mainFileMeta: mainFile
-            ? { name: mainFile.name, size: mainFile.size, type: mainFile.format }
-            : formData.main_file_url
-              ? { name: formData.name ? `${formData.name}-main` : undefined }
-              : null,
+          isDraft,
         });
 
         const rpcResult = await createDigitalProductTx(

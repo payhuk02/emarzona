@@ -3,6 +3,7 @@
  */
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
+import { assertRpcJsonSerializable, sanitizeRpcJson } from '@/lib/products/rpc-json';
 
 export interface ProductCreateRpcResult {
   success: boolean;
@@ -53,12 +54,15 @@ export async function createDigitalProductTx(
   digital: Record<string, unknown>,
   files: Record<string, unknown>[] = []
 ): Promise<ProductCreateRpcResult> {
-  const { data, error } = await rpc('create_digital_product_tx', {
+  const args = {
     p_store_id: storeId,
-    p_product: product,
-    p_digital: digital,
-    p_files: files,
-  });
+    p_product: sanitizeRpcJson(product),
+    p_digital: sanitizeRpcJson(digital),
+    p_files: sanitizeRpcJson(files),
+  };
+  assertRpcJsonSerializable(args, 'create_digital_product_tx');
+
+  const { data, error } = await rpc('create_digital_product_tx', args);
   return parseRpcResult(data, error);
 }
 
