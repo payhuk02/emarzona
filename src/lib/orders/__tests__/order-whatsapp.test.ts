@@ -50,6 +50,11 @@ describe('order-whatsapp', () => {
   });
 
   it('buildOrderWhatsAppMessage includes order, products and payment status', () => {
+    const formattedAmount = (5200).toLocaleString('fr-FR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+
     const message = buildOrderWhatsAppMessage(
       baseOrder,
       [
@@ -66,7 +71,7 @@ describe('order-whatsapp', () => {
     expect(message).toContain('Bonjour Tud Emarzona,');
     expect(message).toContain('*ORD-202608100001*');
     expect(message).toContain('Cours Excel (x1)');
-    expect(message).toContain('*Montant total :* 5 200,00 XOF');
+    expect(message).toContain(`*Montant total :* ${formattedAmount} XOF`);
     expect(message).toContain('*Statut du paiement :* En attente');
     expect(message).toContain('finaliser votre paiement');
     expect(message).toContain('Ma Boutique');
