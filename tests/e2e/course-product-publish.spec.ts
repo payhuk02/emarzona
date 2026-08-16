@@ -13,7 +13,6 @@ import {
   clickWizardNext,
 } from './helpers/course-wizard-helpers';
 import { cleanupE2EVendor, createE2EVendor, loginE2EVendor } from './helpers/vendor-e2e-helpers';
-import { waitForReactApp } from './shared/e2e-test-config';
 
 function requiredEnv(name: string): string | null {
   const value = process.env[name];
@@ -50,7 +49,6 @@ test.describe('Course wizard — publish (E2E)', () => {
 
     await loginE2EVendor(page, ctx.email, ctx.password, ctx.storeId);
     await openCourseCreateWizard(page);
-    await waitForReactApp(page);
 
     await fillCourseBasicInfoStep(page, { title: courseTitle, slug: courseSlug });
     await clickWizardNext(page, 1);
@@ -70,6 +68,7 @@ test.describe('Course wizard — publish (E2E)', () => {
         id,
         name,
         slug,
+        category,
         product_type,
         is_draft,
         is_active,
@@ -92,6 +91,7 @@ test.describe('Course wizard — publish (E2E)', () => {
       id: string;
       name: string;
       slug: string;
+      category: string;
       product_type: string;
       is_draft: boolean;
       is_active: boolean;
@@ -102,6 +102,7 @@ test.describe('Course wizard — publish (E2E)', () => {
     expect(product.is_active).toBe(true);
     expect(product.name).toBe(courseTitle);
     expect(product.slug).toBe(courseSlug);
+    expect(product.category).toBe('Business');
     expect(product.courses?.[0]?.id).toBeTruthy();
 
     const courseId = product.courses[0].id;

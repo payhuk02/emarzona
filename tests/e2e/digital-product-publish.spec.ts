@@ -20,7 +20,6 @@ import {
   clickWizardNext,
   loginE2EVendor,
 } from './helpers/vendor-e2e-helpers';
-import { waitForReactApp } from './shared/e2e-test-config';
 
 function requiredEnv(name: string): string | null {
   const value = process.env[name];
@@ -56,7 +55,6 @@ test.describe('Digital wizard — publish (E2E)', () => {
 
     await loginE2EVendor(page, ctx.email, ctx.password, ctx.storeId);
     await openDigitalCreateWizard(page);
-    await waitForReactApp(page);
 
     await fillDigitalBasicInfoStep(page, { name: productName });
     await clickWizardNext(page, 1);
@@ -148,7 +146,6 @@ test.describe('Digital wizard — publish (E2E)', () => {
 
     await loginE2EVendor(page, ctx.email, ctx.password, ctx.storeId);
     await openDigitalCreateWizard(page);
-    await waitForReactApp(page);
 
     await fillDigitalBasicInfoStep(page, { name: productName });
     await clickWizardNext(page, 1);
@@ -229,5 +226,99 @@ test.describe('Digital wizard — publish (E2E)', () => {
     });
 
     await cleanupE2EVendor(admin, ctx, [product.id]);
+  });
+
+  test('selected category is persisted on publish', async ({ page }, testInfo) => {
+    const admin = createNodeSupabaseClient(supabaseUrl!, supabaseServiceKey!);
+    const ctx = await createE2EVendor(admin, 'digital', 'e2e-digital-cat');
+    const productName = `Digital catégorie E2E ${ctx.runId}`;
+
+    await loginE2EVendor(page, ctx.email, ctx.password, ctx.storeId);
+    await openDigitalCreateWizard(page);
+
+    await fillDigitalBasicInfoStep(page, {
+      name: productName,
+      categoryLabel: 'Logiciel',
+    });
+    await clickWizardNext(page, 1);
+
+    await fillDigitalMainFileUrlStep(page);
+    await clickWizardNext(page, 1);
+
+    await advanceDigitalWizardToPublishStep(page);
+    await publishDigitalWizard(page);
+
+    await expect(page).toHaveURL('/dashboard/digital-products', { timeout: 30_000 });
+
+    const { data: rows, error: queryError } = await admin
+      .from('products')
+      .select('id, name, category')
+      .eq('store_id', ctx.storeId)
+      .eq('product_type', 'digital')
+      .order('created_at', { ascending: false })
+      .limit(1);
+
+    expect(queryError).toBeNull();
+    expect(rows?.length).toBe(1);
+    expect(rows![0].name).toBe(productName);
+    expect(rows![0].category).toBe('logiciel');
+
+    testInfo.attach('published-digital-category-product-id', {
+      body: rows![0].id as string,
+      contentType: 'text/plain',
+    });
+
+    await cleanupE2EVendor(admin, ctx, [rows![0].id as string]);
+  });
+
+  test('store can publish multiple digital products without quota block', async ({
+    page,
+  }, testInfo) => {
+    const admin = createNodeSupabaseClient(supabaseUrl!, supabaseServiceKey!);
+    const ctx = await createE2EVendor(admin, 'digital', 'e2e-digital-multi-pub');
+    const productIds: string[] = [];
+
+    await loginE2EVendor(page, ctx.email, ctx.password, ctx.storeId);
+
+    for (let index = 1; index <= 2; index += 1) {
+      const productName = `Digital multi-pub ${index} E2E ${ctx.runId}`;
+
+      await openDigitalCreateWizard(page);
+      await fillDigitalBasicInfoStep(page, { name: productName });
+      await clickWizardNext(page, 1);
+      await fillDigitalMainFileUrlStep(page);
+      await clickWizardNext(page, 1);
+      await advanceDigitalWizardToPublishStep(page);
+      await publishDigitalWizard(page);
+      await expect(page).toHaveURL('/dashboard/digital-products', { timeout: 30_000 });
+
+      const { data: row, error } = await admin
+        .from('products')
+        .select('id, name, is_active, is_draft')
+        .eq('store_id', ctx.storeId)
+        .eq('name', productName)
+        .maybeSingle();
+
+      expect(error).toBeNull();
+      expect(row?.is_active).toBe(true);
+      expect(row?.is_draft).toBe(false);
+      productIds.push(row!.id as string);
+    }
+
+    const { count } = await admin
+      .from('products')
+      .select('id', { count: 'exact', head: true })
+      .eq('store_id', ctx.storeId)
+      .eq('product_type', 'digital')
+      .eq('is_active', true);
+
+    expect(count).toBeGreaterThanOrEqual(2);
+
+    testInfo.attach('multi-publish-product-ids', {
+      body: productIds.join(','),
+      contentType: 'text/plain',
+    });
+
+    await cleanupE2EVendor(admin, ctx, productIds);
   });
 });

@@ -1,10 +1,6 @@
 import { expect, type Page } from '@playwright/test';
-import {
-  dismissCookieBannerIfVisible,
-  dismissPersonaOnboardingIfVisible,
-} from './store-theme-helpers';
 import { clickWizardNext, goToWizardStep } from './vendor-e2e-helpers';
-import { waitForReactApp } from '../shared/e2e-test-config';
+import { openProductCreateWizard } from './product-wizard-helpers';
 
 export type FillCourseBasicInfoOptions = {
   title: string;
@@ -15,26 +11,12 @@ export type FillCourseBasicInfoOptions = {
 };
 
 export async function openCourseCreateWizard(page: Page): Promise<void> {
-  await page.goto('/dashboard/courses/new', { waitUntil: 'domcontentloaded' });
-  await waitForReactApp(page);
-  await dismissCookieBannerIfVisible(page);
-  await dismissPersonaOnboardingIfVisible(page);
-  await expect(page.getByText(/Aucune boutique trouvée/i)).toHaveCount(0, { timeout: 5_000 });
-
-  const title = page.locator('#title');
-  try {
-    await expect(title).toBeVisible({ timeout: 60_000 });
-  } catch (error) {
-    const body = (
-      await page
-        .locator('body')
-        .innerHTML()
-        .catch(() => '')
-    ).slice(0, 1500);
-    throw new Error(`Course wizard #title not visible — url=${page.url()} body=${body}`, {
-      cause: error,
-    });
-  }
+  await openProductCreateWizard(
+    page,
+    '/dashboard/courses/new',
+    page.locator('#title'),
+    'course #title'
+  );
 }
 
 export async function fillCourseBasicInfoStep(

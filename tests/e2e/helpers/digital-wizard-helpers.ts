@@ -1,11 +1,7 @@
 import { expect, type Page } from '@playwright/test';
 import { E2E_ARTWORK_PNG } from './artist-wizard-helpers';
-import {
-  dismissCookieBannerIfVisible,
-  dismissPersonaOnboardingIfVisible,
-} from './store-theme-helpers';
 import { goToWizardStep } from './vendor-e2e-helpers';
-import { waitForReactApp } from '../shared/e2e-test-config';
+import { openProductCreateWizard } from './product-wizard-helpers';
 
 export const E2E_DIGITAL_MAIN_FILE_URL = 'https://example.com/e2e-digital-product.pdf';
 export const E2E_DIGITAL_MAIN_FILE_URL_2 = 'https://example.com/e2e-digital-product-part2.pdf';
@@ -15,14 +11,16 @@ export type FillDigitalBasicInfoOptions = {
   name: string;
   price?: string;
   description?: string;
+  categoryLabel?: string;
 };
 
 export async function openDigitalCreateWizard(page: Page): Promise<void> {
-  await page.goto('/dashboard/products/new/digital', { waitUntil: 'domcontentloaded' });
-  await waitForReactApp(page);
-  await dismissCookieBannerIfVisible(page);
-  await dismissPersonaOnboardingIfVisible(page);
-  await expect(page.locator('#name')).toBeVisible({ timeout: 60_000 });
+  await openProductCreateWizard(
+    page,
+    '/dashboard/products/new/digital',
+    page.locator('#name'),
+    'digital #name'
+  );
 }
 
 export async function fillDigitalBasicInfoStep(
@@ -33,10 +31,19 @@ export async function fillDigitalBasicInfoStep(
     name,
     price = '50',
     description = 'Description complète du produit digital E2E avec plus de dix caractères.',
+    categoryLabel,
   } = options;
 
   await page.locator('#name').fill(name);
   await page.locator('#price').fill(price);
+
+  if (categoryLabel) {
+    await page.getByText('Catégorie', { exact: false }).first().click();
+    await page
+      .getByRole('option', { name: new RegExp(categoryLabel, 'i') })
+      .first()
+      .click();
+  }
 
   const editor = page.locator('[contenteditable="true"]').first();
   if (await editor.isVisible({ timeout: 5_000 }).catch(() => false)) {

@@ -58,9 +58,12 @@ export const useStore = () => {
   const { stores, selectedStoreId, loading: contextLoading } = useStoreContext();
   const { toast } = useToast();
 
-  const hasKnownStore = !!selectedStoreId && stores.some(entry => entry.id === selectedStoreId);
+  const selectedId = selectedStoreId?.trim() ?? '';
+  const contextStore = stores.find(entry => entry.id === selectedId) ?? null;
+  const hasSelectedStore = !!selectedId;
 
-  const queryEnabled = !!user?.id && !authLoading && !contextLoading && hasKnownStore;
+  // Fetch by selectedStoreId even before StoreContext list includes it (E2E / post-create race).
+  const queryEnabled = !!user?.id && !authLoading && !contextLoading && hasSelectedStore;
 
   const {
     data: store = null,
@@ -69,10 +72,10 @@ export const useStore = () => {
     isError: queryError,
     refetch,
   } = useQuery({
-    queryKey: storeQueryKeys.detail(user?.id ?? '', selectedStoreId ?? ''),
+    queryKey: storeQueryKeys.detail(user?.id ?? '', selectedId),
     queryFn: async () => {
-      if (!user?.id || !selectedStoreId?.trim()) return null;
-      return fetchStoreById(user.id, selectedStoreId);
+      if (!user?.id || !selectedId) return null;
+      return fetchStoreById(user.id, selectedId);
     },
     enabled: queryEnabled,
     staleTime: 2 * 60 * 1000,
@@ -82,12 +85,14 @@ export const useStore = () => {
     placeholderData: keepPreviousData,
   });
 
+  const resolvedStore = store ?? contextStore;
+
   // Empty stores after StoreContext settles is a terminal state (first-store create).
   // Do not keep loading=true forever when the user has zero boutiques.
   const loading =
     authLoading ||
     contextLoading ||
-    (hasKnownStore && !store && (queryLoading || queryFetching) && !queryError);
+    (hasSelectedStore && !resolvedStore && (queryLoading || queryFetching) && !queryError);
 
   const generateSlug = (name: string): string => {
     return name
@@ -118,24 +123,24 @@ export const useStore = () => {
   // Le domaine est maintenant toujours myemarzona.shop pour les boutiques
 
   const getStoreUrl = (): string => {
-    if (!store) return '';
+    if (!resolvedStore) return '';
 
     // Si un domaine personnalisé est configuré
-    if (store.custom_domain) {
-      return `https://${store.custom_domain}`;
+    if (resolvedStore.custom_domain) {
+      return `https://${resolvedStore.custom_domain}`;
     }
 
-    const storeSubdomain = store.subdomain || store.slug;
+    const storeSubdomain = resolvedStore.subdomain || resolvedStore.slug;
     return `https://${storeSubdomain}.myemarzona.shop`;
   };
 
   const getProductUrl = (productSlug: string): string => {
-    if (!store) return '';
+    if (!resolvedStore) return '';
 
-    if (store.custom_domain) {
-      return `https://${store.custom_domain}/products/${productSlug}`;
+    if (resolvedStore.custom_domain) {
+      return `https://${resolvedStore.custom_domain}/products/${productSlug}`;
     }
-    const storeSubdomain = store.subdomain || store.slug;
+    const storeSubdomain = resolvedStore.subdomain || resolvedStore.slug;
     return `https://${storeSubdomain}.myemarzona.shop/products/${productSlug}`;
   };
 
@@ -247,7 +252,7 @@ export const useStore = () => {
   };
 
   const updateStore = async (updates: Partial<Store> & Record<string, unknown>) => {
-    if (!store) return false;
+    if (!resolvedStore) return false;
 
     try {
       // Nettoyer le payload pour ne garder que les colonnes réellement supportées
@@ -261,18 +266,18 @@ export const useStore = () => {
       const { error } = await supabase
         .from('stores')
         .update(updateData as StoreUpdate)
-        .eq('id', store.id);
+        .eq('id', resolvedStore.id);
 
       if (error) throw error;
 
-      if (user?.id && store.id) {
+      if (user?.id && resolvedStore.id) {
         await queryClient.invalidateQueries({
-          queryKey: storeQueryKeys.detail(user.id, store.id),
+          queryKey: storeQueryKeys.detail(user.id, resolvedStore.id),
         });
       }
       await queryClient.invalidateQueries({ queryKey: ['stores'] });
       await queryClient.invalidateQueries({
-        queryKey: ['store-customization-detail', store.id],
+        queryKey: ['store-customization-detail', resolvedStore.id],
       });
       toast({
         title: 'Boutique mise à jour',
@@ -291,7 +296,7 @@ export const useStore = () => {
   };
 
   return {
-    store,
+    store: resolvedStore,
     loading,
     hasStores: stores.length > 0,
     createStore,

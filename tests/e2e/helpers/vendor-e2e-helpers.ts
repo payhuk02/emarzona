@@ -9,6 +9,7 @@ import {
 import { waitForReactApp, waitForVendorStoreReady } from '../shared/e2e-test-config';
 import { retryOnTransientPostgrest } from './supabase-schema-cache-retry';
 import { withAuthAdminRetry } from './auth-admin-retry';
+import { waitForStoresLoaded } from './seller-dashboard-setup';
 
 export type CommerceType = 'artist' | 'digital' | 'course' | 'physical' | 'service';
 
@@ -132,9 +133,20 @@ export async function loginE2EVendor(
   }
   await waitForReactApp(page);
   await waitForVendorStoreReady(page);
+  if (storeId) {
+    await waitForStoresLoaded(page, { storeId });
+  }
   await dismissCookieBannerIfVisible(page);
   await dismissPersonaOnboardingIfVisible(page);
   await acceptTermsDialogIfVisible(page);
+}
+
+/** Attend que la page création produit soit prête (boutique chargée + wizard monté). */
+export async function waitForProductCreatePageReady(page: Page): Promise<void> {
+  await expect(page.getByText(/Aucune boutique trouvée/i)).toHaveCount(0, { timeout: 30_000 });
+  await expect(page.locator('[data-testid="seller-route-guard-loading"]')).toHaveCount(0, {
+    timeout: 30_000,
+  });
 }
 
 export async function clickWizardNext(page: Page, times = 1): Promise<void> {

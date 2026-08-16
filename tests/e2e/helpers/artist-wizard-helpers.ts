@@ -8,6 +8,7 @@ import {
 } from './store-theme-helpers';
 import { waitForReactApp, waitForVendorStoreReady } from '../shared/e2e-test-config';
 import { retryOnTransientPostgrest } from './supabase-schema-cache-retry';
+import { openProductCreateWizard } from './product-wizard-helpers';
 import { prepareSellerDashboardChrome, waitForStoresLoaded } from './seller-dashboard-setup';
 
 /** 1×1 PNG valide pour upload catalogue. */
@@ -135,26 +136,19 @@ export async function loginArtistVendor(
 }
 
 export async function openArtistCreateWizard(page: Page, storeId?: string): Promise<void> {
-  if (storeId) {
-    await page.evaluate(id => {
-      localStorage.setItem('selectedStoreId', id);
-    }, storeId);
-  }
-  await page.goto('/dashboard/products/new/artist', { waitUntil: 'domcontentloaded' });
-  await waitForReactApp(page);
-  await dismissCookieBannerIfVisible(page);
-  await dismissPersonaOnboardingIfVisible(page);
-  await expect(page).toHaveURL(/\/dashboard\/products\/new\/artist/, { timeout: 30_000 });
-  if (storeId) {
-    await waitForStoresLoaded(page, { storeId });
-  }
-  const wizardReady = page
-    .getByRole('heading', { name: /Type d'artiste|Créer une œuvre d'artiste/i })
-    .first();
-  await expect(wizardReady).toBeVisible({ timeout: 60_000 });
-  await expect(page.getByRole('heading', { name: /Type d'artiste/i })).toBeVisible({
-    timeout: 15_000,
-  });
+  const wizardMarker = page
+    .locator('#artwork_title')
+    .or(page.getByRole('heading', { name: /Type d'artiste|Créer une œuvre d'artiste/i }));
+
+  await openProductCreateWizard(
+    page,
+    '/dashboard/products/new/artist',
+    wizardMarker,
+    "Type d'artiste / artwork_title",
+    storeId
+  );
+
+  await expect(page.getByText('Artiste Visuel', { exact: true })).toBeVisible({ timeout: 20_000 });
 }
 
 export async function selectArtistTypeVisual(page: Page): Promise<void> {

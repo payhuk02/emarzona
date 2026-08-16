@@ -12,7 +12,7 @@ const CreateProduct = () => {
   // Priorité à l'URL explicite /dashboard/products/new/:type, fallback sur ?type=
   const productType = routeType || searchParams.get('type') || undefined;
 
-  if (loading) {
+  if (loading && !store) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />

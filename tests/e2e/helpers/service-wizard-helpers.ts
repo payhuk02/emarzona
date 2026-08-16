@@ -1,10 +1,6 @@
 import { expect, type Page } from '@playwright/test';
-import {
-  dismissCookieBannerIfVisible,
-  dismissPersonaOnboardingIfVisible,
-} from './store-theme-helpers';
 import { clickWizardNext, goToWizardStep } from './vendor-e2e-helpers';
-import { waitForReactApp } from '../shared/e2e-test-config';
+import { openProductCreateWizard } from './product-wizard-helpers';
 
 export const SERVICE_WIZARD_TOTAL_STEPS = 8;
 
@@ -14,11 +10,14 @@ export type FillServiceBasicInfoOptions = {
   description?: string;
 };
 
-export async function openServiceCreateWizard(page: Page): Promise<void> {
-  await page.goto('/dashboard/products/new/service', { waitUntil: 'domcontentloaded' });
-  await waitForReactApp(page);
-  await dismissCookieBannerIfVisible(page);
-  await dismissPersonaOnboardingIfVisible(page);
+export async function openServiceCreateWizard(page: Page, storeId?: string): Promise<void> {
+  await openProductCreateWizard(
+    page,
+    '/dashboard/products/new/service',
+    page.locator('#name'),
+    'service #name',
+    storeId
+  );
 }
 
 export async function fillServiceBasicInfoStep(

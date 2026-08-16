@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  isWithinProductLimit,
   isWithinVariantLimit,
   variantLimitMessage,
   type PhysicalPlanLimitsSnapshot,
@@ -30,5 +31,15 @@ describe('physical-plan-limits', () => {
 
   it('formats variant limit message', () => {
     expect(variantLimitMessage(3)).toContain('3');
+  });
+
+  it('treats null max_products as unlimited (multiple products per store)', () => {
+    const unlimited: PhysicalPlanLimitsSnapshot = {
+      ...baseLimits,
+      max_products: null,
+      active_physical_products: 99,
+    };
+    expect(isWithinProductLimit(unlimited, 1)).toBe(true);
+    expect(isWithinProductLimit(unlimited, 100)).toBe(true);
   });
 });

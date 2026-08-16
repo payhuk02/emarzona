@@ -1,11 +1,7 @@
 import { expect, type Page } from '@playwright/test';
 import { E2E_ARTWORK_PNG } from './artist-wizard-helpers';
-import {
-  dismissCookieBannerIfVisible,
-  dismissPersonaOnboardingIfVisible,
-} from './store-theme-helpers';
 import { clickWizardNext, goToWizardStep } from './vendor-e2e-helpers';
-import { waitForReactApp } from '../shared/e2e-test-config';
+import { openProductCreateWizard } from './product-wizard-helpers';
 
 export const PHYSICAL_WIZARD_TOTAL_STEPS = 9;
 
@@ -15,11 +11,14 @@ export type FillPhysicalBasicInfoOptions = {
   description?: string;
 };
 
-export async function openPhysicalCreateWizard(page: Page): Promise<void> {
-  await page.goto('/dashboard/products/new/physical', { waitUntil: 'domcontentloaded' });
-  await waitForReactApp(page);
-  await dismissCookieBannerIfVisible(page);
-  await dismissPersonaOnboardingIfVisible(page);
+export async function openPhysicalCreateWizard(page: Page, storeId?: string): Promise<void> {
+  await openProductCreateWizard(
+    page,
+    '/dashboard/products/new/physical',
+    page.locator('#name'),
+    'physical #name',
+    storeId
+  );
 }
 
 export async function uploadPhysicalProductImage(page: Page): Promise<void> {

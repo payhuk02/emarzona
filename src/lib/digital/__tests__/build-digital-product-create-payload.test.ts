@@ -78,6 +78,19 @@ describe('buildDigitalProductCreatePayloads', () => {
     expect(JSON.stringify({ product, digital, files })).not.toContain('undefined');
   });
 
+  it('syncs wizard category selection into product payload', () => {
+    const formData = baseFormData();
+    formData.category = 'logiciel';
+
+    const { product } = buildDigitalProductCreatePayloads({
+      formData,
+      slug: 'mon-logiciel',
+      isDraft: false,
+    });
+
+    expect(product.category).toBe('logiciel');
+  });
+
   it('sanitizes invalid faqs and images from draft state', () => {
     const formData = baseFormData();
     formData.faqs = 'invalid' as unknown as DigitalProductFormData['faqs'];
