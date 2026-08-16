@@ -12,7 +12,7 @@ const IMAGE_CACHE_NAME = `emarzona-images-${CACHE_VERSION}`;
 /** Limite d'entrées images pour éviter de saturer le quota Cache Storage */
 const IMAGE_CACHE_MAX_ENTRIES = 150;
 
-const STATIC_ASSETS = ['/', '/index.html', '/manifest.json'];
+const STATIC_ASSETS = ['/', '/index.html', '/manifest.json', '/offline.html', '/placeholder.svg'];
 
 /** Fichiers émis par Vite avec hash de contenu (évite chunks obsolètes après deploy). */
 function isHashedBuildAsset(pathname) {
@@ -26,10 +26,24 @@ function isSpaNavigation(request) {
   );
 }
 
+/** Toujours une Response valide — sinon Chrome: Failed to convert value to 'Response'. */
+function offlineResponse(message = 'Offline', status = 503) {
+  return new Response(message, {
+    status,
+    statusText: 'Service Unavailable',
+    headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+  });
+}
+
+function ensureResponse(response, fallbackMessage) {
+  return response instanceof Response ? response : offlineResponse(fallbackMessage);
+}
+
 function serveSpaShell() {
-  return caches.match('/index.html').then(
-    cached => cached || caches.match('/offline.html')
-  );
+  return caches
+    .match('/index.html')
+    .then(cached => cached || caches.match('/offline.html'))
+    .then(cached => ensureResponse(cached, 'Offline'));
 }
 
 /** Navigation document : jamais de 503 — toujours index.html en fallback (SPA Vercel). */
@@ -55,7 +69,9 @@ function networkFirst(request, cacheName, { cacheOk = true } = {}) {
       }
       return response;
     })
-    .catch(() => caches.match(request));
+    .catch(() =>
+      caches.match(request).then(cached => ensureResponse(cached, 'Offline'))
+    );
 }
 
 async function trimImageCache(cacheName, maxEntries) {
@@ -87,13 +103,8 @@ function staleWhileRevalidate(request, cacheName) {
         void networkUpdate;
         return cached;
       }
-      return networkUpdate.then(
-        response =>
-          response ||
-          new Response('Offline', {
-            status: 503,
-            headers: { 'Content-Type': 'text/plain' },
-          })
+      return networkUpdate.then(response =>
+        ensureResponse(response, 'Offline')
       );
     })
   );
@@ -187,13 +198,8 @@ self.addEventListener('fetch', event => {
       (url.pathname.endsWith('.js') || url.pathname.endsWith('.css')))
   ) {
     event.respondWith(
-      networkOnlyHashedAsset(request).then(
-        response =>
-          response ||
-          new Response('Asset unavailable offline', {
-            status: 503,
-            headers: { 'Content-Type': 'text/plain' },
-          })
+      networkOnlyHashedAsset(request).then(response =>
+        ensureResponse(response, 'Asset unavailable offline')
       )
     );
     return;
@@ -213,7 +219,9 @@ self.addEventListener('fetch', event => {
   if (url.pathname.includes('/storage/v1/object/public/')) {
     event.respondWith(
       staleWhileRevalidate(request, IMAGE_CACHE_NAME).catch(() =>
-        caches.match('/placeholder.svg')
+        caches
+          .match('/placeholder.svg')
+          .then(cached => ensureResponse(cached, 'Image unavailable'))
       )
     );
     return;
@@ -244,7 +252,11 @@ self.addEventListener('fetch', event => {
             }
             return response;
           })
-          .catch(() => caches.match('/placeholder.svg'));
+          .catch(() =>
+            caches
+              .match('/placeholder.svg')
+              .then(ph => ensureResponse(ph, 'Image unavailable'))
+          );
       })
     );
     return;
@@ -258,13 +270,8 @@ self.addEventListener('fetch', event => {
 
   // Autres requêtes HTML / données : network-first avec cache
   event.respondWith(
-    networkFirst(request, DYNAMIC_CACHE_NAME).then(
-      cached =>
-        cached ||
-        new Response('Offline', {
-          status: 503,
-          headers: { 'Content-Type': 'text/plain' },
-        })
+    networkFirst(request, DYNAMIC_CACHE_NAME).then(cached =>
+      ensureResponse(cached, 'Offline')
     )
   );
 });
