@@ -33,6 +33,7 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { OrderDetailDialog } from './OrderDetailDialog';
 import { OrderEditDialog } from './OrderEditDialog';
+import { OrderWhatsAppButton } from './OrderWhatsAppButton';
 import { cn } from '@/lib/utils';
 
 interface OrdersTableProps {
@@ -250,41 +251,44 @@ const OrdersTableComponent = ({
                     {format(new Date(order.created_at), 'dd MMM yyyy', { locale: fr })}
                   </TableCell>
                   <TableCell className="text-right">
-                    <Select>
-                      <SelectTrigger className="min-h-[44px] min-w-[44px]">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </SelectTrigger>
-                      <SelectContent mobileVariant="sheet" className="min-w-[200px]">
-                        <SelectItem
-                          value="view"
-                          onSelect={() => {
-                            setSelectedOrder(order);
-                            setDetailDialogOpen(true);
-                          }}
-                        >
-                          <Eye className="h-4 w-4 mr-2" />
-                          Voir détails
-                        </SelectItem>
-                        <SelectItem
-                          value="edit"
-                          onSelect={() => {
-                            setSelectedOrder(order);
-                            setEditDialogOpen(true);
-                          }}
-                        >
-                          <Edit className="h-4 w-4 mr-2" />
-                          Modifier
-                        </SelectItem>
-                        <SelectItem
-                          value="delete"
-                          onSelect={() => setDeleteId(order.id)}
-                          className="text-destructive"
-                        >
-                          <Trash2 className="h-4 w-4 mr-2" />
-                          Supprimer
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <div className="flex items-center justify-end gap-1">
+                      <OrderWhatsAppButton order={order} />
+                      <Select>
+                        <SelectTrigger className="min-h-[44px] min-w-[44px]">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </SelectTrigger>
+                        <SelectContent mobileVariant="sheet" className="min-w-[200px]">
+                          <SelectItem
+                            value="view"
+                            onSelect={() => {
+                              setSelectedOrder(order);
+                              setDetailDialogOpen(true);
+                            }}
+                          >
+                            <Eye className="h-4 w-4 mr-2" />
+                            Voir détails
+                          </SelectItem>
+                          <SelectItem
+                            value="edit"
+                            onSelect={() => {
+                              setSelectedOrder(order);
+                              setEditDialogOpen(true);
+                            }}
+                          >
+                            <Edit className="h-4 w-4 mr-2" />
+                            Modifier
+                          </SelectItem>
+                          <SelectItem
+                            value="delete"
+                            onSelect={() => setDeleteId(order.id)}
+                            className="text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Supprimer
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

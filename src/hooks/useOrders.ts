@@ -51,12 +51,25 @@ export interface Order {
   // Metadata for additional information
   metadata?: Record<string, unknown> | null;
   customers?: {
-    full_name: string | null;
+    name: string | null;
     email: string | null;
     phone: string | null;
+    address?: string | null;
+    city?: string | null;
+    country?: string | null;
+    postal_code?: string | null;
   } | null;
+  order_items?: OrderItem[] | null;
   // Transactions linked to this order
   transactions?: OrderTransaction[] | null;
+}
+
+export interface OrderItem {
+  id?: string;
+  product_name: string;
+  quantity: number;
+  unit_price: number;
+  total_price: number;
 }
 
 export type SortColumn =
@@ -103,6 +116,13 @@ export const useOrders = (storeId?: string, options: UseOrdersOptions = {}) => {
             address,
             city,
             country
+          ),
+          order_items (
+            id,
+            product_name,
+            quantity,
+            unit_price,
+            total_price
           )
         `,
           { count: 'exact' }

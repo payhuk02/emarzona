@@ -27,6 +27,7 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { OrderDetailDialog } from './OrderDetailDialog';
 import { OrderEditDialog } from './OrderEditDialog';
+import { OrderWhatsAppButton } from './OrderWhatsAppButton';
 
 interface OrderCardProps {
   order: Order;
@@ -240,7 +241,8 @@ const OrderCardComponent = ({ order, onUpdate, storeId }: OrderCardProps) => {
           </div>
 
           {/* Actions */}
-          <div className="flex flex-col gap-2 pt-1 sm:grid sm:grid-cols-3 sm:gap-2">
+          <div className="flex flex-col gap-2 pt-1 sm:grid sm:grid-cols-2 sm:gap-2">
+            <OrderWhatsAppButton order={order} showLabel className="w-full justify-center" />
             <Button
               variant="outline"
               size="sm"
