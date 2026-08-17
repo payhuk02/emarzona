@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
+import { getScrollParent } from '@/hooks/useScrollAnimation';
 
 /** Cache module-level pour éviter de recréer un canvas par image */
 let cachedPreferredFormat: 'avif' | 'webp' | null | undefined;
@@ -121,32 +122,50 @@ export const ResponsiveProductImage = ({
   const [isInView, setIsInView] = useState(priority); // Si priority, charger immédiatement
   const elementRef = useRef<HTMLDivElement>(null);
 
-  // Intersection Observer pour le lazy loading
+  // Intersection Observer pour le lazy loading (mobile-safe : threshold 0 + scroll parent + fallback)
   useEffect(() => {
     if (priority || !elementRef.current) return;
 
+    const node = elementRef.current;
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+
+    const markInView = () => {
+      setIsInView(true);
+    };
+
+    const fallbackTimer = setTimeout(markInView, isMobile ? 1500 : 2500);
+
     const observer = new IntersectionObserver(
       entries => {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
-            setIsInView(true);
+            clearTimeout(fallbackTimer);
+            markInView();
             observer.disconnect();
           }
         });
       },
       {
-        rootMargin: isMobile ? '200px' : '100px',
+        root: getScrollParent(node),
+        rootMargin: isMobile ? '240px 0px' : '120px 0px',
+        threshold: 0,
       }
     );
 
-    observer.observe(elementRef.current);
+    observer.observe(node);
 
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      clearTimeout(fallbackTimer);
+    };
   }, [priority]);
 
   const handleLoad = () => {
     setIsLoaded(true);
+    if (elementRef.current) {
+      const img = elementRef.current.querySelector('img');
+      img?.classList.add('loaded');
+    }
   };
 
   const handleError = () => {
@@ -210,6 +229,7 @@ export const ResponsiveProductImage = ({
           onError={handleError}
           loading={priority ? 'eager' : 'lazy'}
           decoding={priority ? 'sync' : 'async'}
+          data-no-mobile-opt=""
           sizes={sizes}
           style={{
             // Prévenir le CLS (Cumulative Layout Shift)

@@ -46,7 +46,7 @@
  * - **Loading States** : Skeleton loaders et indicateurs de chargement
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, ArrowRight, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
@@ -55,7 +55,7 @@ import { ProductListSkeleton } from '@/components/ui/skeleton-enhanced';
 import UnifiedProductCard from '@/components/products/UnifiedProductCard';
 import { transformToUnifiedProduct } from '@/lib/product-transform';
 import { Product } from '@/types/marketplace';
-import { useScrollAnimation } from '@/hooks/useScrollAnimation';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface MarketplaceProductsSectionProps {
   products: Product[];
@@ -95,7 +95,10 @@ export const MarketplaceProductsSection = React.memo<MarketplaceProductsSectionP
     onRecommendationsRender,
   }) => {
     const { t } = useTranslation();
-    const productsRef = useScrollAnimation<HTMLDivElement>();
+    const isMobile = useIsMobile();
+    /** Ref ancre pagination — pas d'animation scroll (contenu critique toujours visible). */
+    const productsRef = useRef<HTMLDivElement>(null);
+    const eagerImageCount = isMobile ? 4 : 2;
 
     // Calculer le nombre total de pages
     const totalPages = Math.ceil(pagination.totalItems / pagination.itemsPerPage);
@@ -125,7 +128,7 @@ export const MarketplaceProductsSection = React.memo<MarketplaceProductsSectionP
             variant="marketplace"
             showAffiliate={true}
             showActions={true}
-            imagePriority={index < 2}
+            imagePriority={index < eagerImageCount}
             onAction={(action, prod) => {
               if (action === 'view') {
                 // Navigation gérée par le Link dans UnifiedProductCard
@@ -135,7 +138,7 @@ export const MarketplaceProductsSection = React.memo<MarketplaceProductsSectionP
             }}
           />
         )),
-      [transformedProducts, onBuyProduct]
+      [transformedProducts, onBuyProduct, eagerImageCount]
     );
 
     const showInitialSkeleton =

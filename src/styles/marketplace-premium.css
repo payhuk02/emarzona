@@ -309,6 +309,15 @@
   background: rgba(8, 18, 32, 0.65);
 }
 
+@media (max-width: 768px) {
+  .marketplace-premium .mp-product-card__image img.product-image,
+  .marketplace-premium .mp-product-card__image .product-image {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+  }
+}
+
 .marketplace-premium .mp-product-card .border-gray-200,
 .marketplace-premium .mp-product-card .dark\:border-gray-700,
 .mp-product-cards-band.landing-premium .mp-product-card .border-gray-200,

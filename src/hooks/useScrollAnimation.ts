@@ -1,36 +1,78 @@
 /**
- * Hook pour animer les éléments au scroll
+ * Hook pour animer les éléments au scroll (IntersectionObserver).
+ * Mobile-safe : threshold 0, scroll parent détecté, fallback si IO ne déclenche pas.
  */
 
 import { useEffect, useRef, useState } from 'react';
 
 interface UseScrollAnimationOptions {
-  threshold?: number;
+  /** Fraction visible pour déclencher (0 = dès qu'un pixel entre dans la zone). */
+  threshold?: number | number[];
   rootMargin?: string;
   triggerOnce?: boolean;
+  /** Désactive l'animation (contenu critique toujours visible). */
+  disabled?: boolean;
+  /** Force l'affichage si IO ne déclenche pas (ms). 0 = pas de fallback. */
+  fallbackMs?: number;
 }
 
-export function useScrollAnimation<T extends HTMLElement>(
-  options: UseScrollAnimationOptions = {}
-) {
+export function getScrollParent(element: HTMLElement): Element | null {
+  let parent = element.parentElement;
+  while (parent) {
+    const { overflowY, overflow } = getComputedStyle(parent);
+    if (/(auto|scroll|overlay)/.test(overflowY) || /(auto|scroll|overlay)/.test(overflow)) {
+      return parent;
+    }
+    parent = parent.parentElement;
+  }
+  return null;
+}
+
+function prefersReducedMotion(): boolean {
+  if (typeof window === 'undefined') return false;
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+function revealElement(element: HTMLElement) {
+  element.classList.add('animate-in');
+}
+
+export function useScrollAnimation<T extends HTMLElement>(options: UseScrollAnimationOptions = {}) {
   const {
-    threshold = 0.1,
-    rootMargin = '50px',
-    triggerOnce = true
+    threshold = 0,
+    rootMargin = '80px 0px',
+    triggerOnce = true,
+    disabled = false,
+    fallbackMs = 2000,
   } = options;
 
   const ref = useRef<T>(null);
 
   useEffect(() => {
     const element = ref.current;
-    if (!element) return;
+    if (!element || disabled) return;
 
+    if (prefersReducedMotion()) {
+      revealElement(element);
+      return;
+    }
+
+    let revealed = false;
+    let fallbackTimer: ReturnType<typeof setTimeout> | undefined;
+
+    const reveal = () => {
+      if (revealed) return;
+      revealed = true;
+      revealElement(element);
+      if (fallbackTimer) clearTimeout(fallbackTimer);
+    };
+
+    const scrollRoot = getScrollParent(element);
     const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
+      entries => {
+        entries.forEach(entry => {
           if (entry.isIntersecting) {
-            entry.target.classList.add('animate-in');
-            
+            reveal();
             if (triggerOnce) {
               observer.unobserve(entry.target);
             }
@@ -41,17 +83,23 @@ export function useScrollAnimation<T extends HTMLElement>(
       },
       {
         threshold,
-        rootMargin
+        rootMargin,
+        root: scrollRoot,
       }
     );
 
     element.classList.add('animate-on-scroll');
     observer.observe(element);
 
+    if (fallbackMs > 0) {
+      fallbackTimer = setTimeout(reveal, fallbackMs);
+    }
+
     return () => {
       observer.disconnect();
+      if (fallbackTimer) clearTimeout(fallbackTimer);
     };
-  }, [threshold, rootMargin, triggerOnce]);
+  }, [threshold, rootMargin, triggerOnce, disabled, fallbackMs]);
 
   return ref;
 }
@@ -66,8 +114,8 @@ export function useStaggerAnimation(itemCount: number, delayIncrement: number = 
     refs.current = refs.current.slice(0, itemCount);
 
     const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
+      entries => {
+        entries.forEach(entry => {
           if (entry.isIntersecting) {
             entry.target.classList.add('animate-in');
             observer.unobserve(entry.target);
@@ -75,8 +123,8 @@ export function useStaggerAnimation(itemCount: number, delayIncrement: number = 
         });
       },
       {
-        threshold: 0.1,
-        rootMargin: '50px'
+        threshold: 0,
+        rootMargin: '80px 0px',
       }
     );
 
@@ -104,9 +152,9 @@ export function useStaggerAnimation(itemCount: number, delayIncrement: number = 
  * Hook pour détecter si un élément est visible
  */
 export function useInView<T extends HTMLElement>(
-  options: UseScrollAnimationOptions = {}
+  options: Omit<UseScrollAnimationOptions, 'disabled'> = {}
 ) {
-  const { threshold = 0.1, rootMargin = '50px' } = options;
+  const { threshold = 0, rootMargin = '80px 0px', fallbackMs = 2000 } = options;
   const ref = useRef<T>(null);
   const [isInView, setIsInView] = useState(false);
 
@@ -114,31 +162,37 @@ export function useInView<T extends HTMLElement>(
     const element = ref.current;
     if (!element) return;
 
+    let fallbackTimer: ReturnType<typeof setTimeout> | undefined;
+    const scrollRoot = getScrollParent(element);
+
+    const markVisible = () => {
+      setIsInView(true);
+      if (fallbackTimer) clearTimeout(fallbackTimer);
+    };
+
     const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          setIsInView(entry.isIntersecting);
+      entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            markVisible();
+            observer.disconnect();
+          }
         });
       },
-      {
-        threshold,
-        rootMargin
-      }
+      { threshold, rootMargin, root: scrollRoot }
     );
 
     observer.observe(element);
 
+    if (fallbackMs > 0) {
+      fallbackTimer = setTimeout(markVisible, fallbackMs);
+    }
+
     return () => {
       observer.disconnect();
+      if (fallbackTimer) clearTimeout(fallbackTimer);
     };
-  }, [threshold, rootMargin]);
+  }, [threshold, rootMargin, fallbackMs]);
 
   return { ref, isInView };
 }
-
-
-
-
-
-
-
