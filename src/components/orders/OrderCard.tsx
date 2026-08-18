@@ -213,6 +213,9 @@ const OrderCardComponent = ({ order, onUpdate, storeId }: OrderCardProps) => {
                 <SelectContent>
                   <SelectItem value="pending">En attente</SelectItem>
                   <SelectItem value="cod_pending">Paiement à la livraison</SelectItem>
+                  <SelectItem value="deposit_paid">
+                    Garantie payée (solde à la livraison)
+                  </SelectItem>
                   <SelectItem value="paid">Payée</SelectItem>
                   <SelectItem value="partially_refunded">Partiellement remboursée</SelectItem>
                   <SelectItem value="failed">Échouée</SelectItem>

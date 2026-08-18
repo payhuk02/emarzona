@@ -151,12 +151,16 @@ const OrderDetailDialogComponent = ({ open, onOpenChange, order }: OrderDetailDi
       pending: 'secondary',
       paid: 'outline',
       failed: 'destructive',
+      cod_pending: 'secondary',
+      deposit_paid: 'outline',
     };
 
     const labels: Record<string, string> = {
       pending: 'En attente',
       paid: 'Payée',
       failed: 'Échouée',
+      cod_pending: 'À la livraison',
+      deposit_paid: 'Garantie payée',
     };
 
     return <Badge variant={variants[status] || 'default'}>{labels[status] || status}</Badge>;

@@ -53,6 +53,7 @@ export function PhysicalQuickOrderDialog({
     product.payment_options as Parameters<typeof parsePhysicalCheckoutOptions>[0]
   );
   const isCod = checkout.checkout_method === 'cash_on_delivery';
+  const isGuarantee = checkout.checkout_method === 'guarantee';
 
   const [fullName, setFullName] = useState(user?.user_metadata?.full_name ?? '');
   const [email, setEmail] = useState(user?.email ?? '');
@@ -109,7 +110,7 @@ export function PhysicalQuickOrderDialog({
 
       onOpenChange(false);
 
-      if (result.cashOnDelivery || !result.checkoutUrl) {
+      if (result.cashOnDelivery) {
         toast({
           title: 'Commande confirmée',
           description: `Votre commande « ${product.name} » est enregistrée. Paiement à la livraison.`,
@@ -132,9 +133,15 @@ export function PhysicalQuickOrderDialog({
         return;
       }
 
+      if (!result.checkoutUrl) {
+        throw new Error('URL de paiement MoneyFusion non reçue');
+      }
+
       toast({
-        title: 'Commande créée',
-        description: 'Redirection vers le paiement sécurisé…',
+        title: isGuarantee ? 'Garantie à régler' : 'Commande créée',
+        description: isGuarantee
+          ? 'Redirection vers le paiement de la garantie (MoneyFusion)…'
+          : 'Redirection vers le paiement sécurisé MoneyFusion…',
       });
       safeRedirect(result.checkoutUrl, () => {
         navigate('/account/orders');
@@ -157,7 +164,9 @@ export function PhysicalQuickOrderDialog({
             {product.name} —{' '}
             {isCod
               ? 'Paiement à la livraison. Aucun paiement en ligne requis.'
-              : 'Paiement en ligne après confirmation.'}
+              : isGuarantee
+                ? 'Vous payez la garantie en ligne via MoneyFusion. Le solde est dû à la livraison.'
+                : 'Paiement en ligne MoneyFusion après confirmation.'}
           </DialogDescription>
         </DialogHeader>
 
@@ -224,8 +233,12 @@ export function PhysicalQuickOrderDialog({
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                 Traitement…
               </>
-            ) : (
+            ) : isCod ? (
               'Confirmer la commande'
+            ) : isGuarantee ? (
+              'Payer la garantie'
+            ) : (
+              'Payer en ligne'
             )}
           </Button>
         </DialogFooter>

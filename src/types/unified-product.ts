@@ -85,7 +85,7 @@ export interface DigitalProduct extends BaseProduct {
 export interface PhysicalProduct extends BaseProduct {
   type: 'physical';
   payment_options?: {
-    checkout_method?: 'online' | 'cash_on_delivery';
+    checkout_method?: 'online' | 'cash_on_delivery' | 'guarantee';
     cta_button_label?: string;
     payment_type?: 'full' | 'percentage' | 'delivery_secured';
     percentage_rate?: number;

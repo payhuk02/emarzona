@@ -140,7 +140,7 @@ const STEPS = [
   {
     id: 8,
     title: 'Checkout & Bouton',
-    description: 'Paiement en ligne ou à la livraison, libellé du bouton',
+    description: 'Paiement en ligne, à la livraison ou garantie, libellé du bouton',
     icon: CreditCard,
     component: LazyPhysicalCheckoutOptionsForm,
   },
@@ -1042,6 +1042,8 @@ export const CreatePhysicalProductWizard = ({
       case 8: // Checkout options
         return {
           data: formData.payment || {},
+          productPrice: formData.price || 0,
+          currency: 'XOF',
           onUpdate: (paymentData: PhysicalProductFormDataUpdate['payment']) =>
             handleUpdateFormData({ payment: paymentData }),
         };

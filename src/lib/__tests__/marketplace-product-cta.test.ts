@@ -29,6 +29,21 @@ describe('getMarketplaceProductCTA', () => {
     expect(cta.showPhysicalCheckoutBadge).toBe(true);
   });
 
+  it('routes physical guarantee checkout to checkout with vendor CTA', () => {
+    const cta = getMarketplaceProductCTA('physical', {
+      checkout_method: 'guarantee',
+      cta_button_label: 'Payer la garantie',
+      payment_type: 'full',
+      percentage_rate: 30,
+      guarantee_amount: 4000,
+    });
+
+    expect(cta.action).toBe('checkout');
+    expect(cta.buyLabel).toBe('Payer la garantie');
+    expect(cta.showPhysicalCheckoutBadge).toBe(true);
+    expect(cta.showAddToCart).toBe(false);
+  });
+
   it('keeps service and course defaults', () => {
     expect(getMarketplaceProductCTA('service').buyLabel).toBe('Réserver');
     expect(getMarketplaceProductCTA('course').buyLabel).toBe("S'inscrire");

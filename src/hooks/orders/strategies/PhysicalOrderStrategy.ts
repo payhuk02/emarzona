@@ -6,6 +6,7 @@ import { getAffiliateTrackingCookie } from '@/hooks/useAffiliateTracking';
 import { logger } from '@/lib/logger';
 import { createPublicPhysicalOrder } from '@/lib/orders/create-public-physical-order';
 import { parsePhysicalCheckoutOptions } from '@/lib/physical/physical-checkout-display';
+import { computePhysicalGuaranteeBreakdown } from '@/lib/physical/physical-guarantee';
 import {
   asOrderProduct,
   parsePaymentOptions,
@@ -57,6 +58,7 @@ export class PhysicalOrderStrategy implements OrderStrategy {
     );
     const checkoutMethod = checkoutMethodOverride ?? parsedCheckout.checkout_method;
     const isCashOnDelivery = checkoutMethod === 'cash_on_delivery';
+    const isGuarantee = checkoutMethod === 'guarantee';
 
     const { data: physicalRow } = await supabase
       .from('physical_products')
@@ -72,7 +74,7 @@ export class PhysicalOrderStrategy implements OrderStrategy {
     const { payment_type: paymentTypeRaw, percentage_rate: percentageRate } = parsePaymentOptions(
       productData.payment_options
     );
-    const paymentType = isCashOnDelivery ? 'full' : paymentTypeRaw;
+    const paymentType = isCashOnDelivery || isGuarantee ? 'full' : paymentTypeRaw;
 
     const {
       data: { user },
@@ -101,10 +103,18 @@ export class PhysicalOrderStrategy implements OrderStrategy {
     const inventoryId = rpcResult.inventory_id ?? '';
     const currency = rpcResult.currency || productData.currency;
 
-    let amountToPay = totalPrice;
-    let remainingAmount = 0;
+    let amountToPay = rpcResult.amount_due_now ?? totalPrice;
+    let remainingAmount = rpcResult.remaining_amount ?? 0;
 
-    if (paymentType === 'percentage') {
+    if (isGuarantee || rpcResult.guarantee) {
+      const breakdown = computePhysicalGuaranteeBreakdown({
+        unitPrice: totalPrice / Math.max(1, quantity),
+        quantity,
+        guaranteeAmount: parsedCheckout.guarantee_amount,
+      });
+      amountToPay = rpcResult.amount_due_now ?? breakdown.guaranteeDueNow;
+      remainingAmount = rpcResult.remaining_amount ?? breakdown.remainderOnDelivery;
+    } else if (paymentType === 'percentage') {
       amountToPay = Math.round((totalPrice * percentageRate) / 100);
       remainingAmount = totalPrice - amountToPay;
     }
@@ -172,11 +182,13 @@ export class PhysicalOrderStrategy implements OrderStrategy {
     }
 
     const paymentDescription =
-      paymentType === 'percentage'
-        ? `Acompte ${percentageRate}%: ${productData.name} x${quantity}`
-        : paymentType === 'delivery_secured'
-          ? `Paiement sécurisé: ${productData.name} x${quantity}`
-          : `Achat: ${productData.name} x${quantity}`;
+      isGuarantee || rpcResult.guarantee
+        ? `Garantie: ${productData.name} x${quantity}`
+        : paymentType === 'percentage'
+          ? `Acompte ${percentageRate}%: ${productData.name} x${quantity}`
+          : paymentType === 'delivery_secured'
+            ? `Paiement sécurisé: ${productData.name} x${quantity}`
+            : `Achat: ${productData.name} x${quantity}`;
 
     const paymentResult = await initiatePayment({
       storeId,
@@ -199,11 +211,12 @@ export class PhysicalOrderStrategy implements OrderStrategy {
         quantity,
         order_item_id: orderItemId,
         shipping_address: shippingAddress,
-        payment_type: paymentType,
+        payment_type: isGuarantee || rpcResult.guarantee ? 'guarantee' : paymentType,
         percentage_rate: paymentType === 'percentage' ? percentageRate : null,
         total_price: totalPrice,
         amount_paid: amountToPay,
         remaining_amount: remainingAmount,
+        checkout_method: checkoutMethod,
         ...(isGuest ? { guest_checkout: true } : {}),
       },
     });
@@ -220,6 +233,9 @@ export class PhysicalOrderStrategy implements OrderStrategy {
       checkoutUrl: paymentResult.checkout_url,
       transactionId: paymentResult.transaction_id,
       orderNumber: rpcResult.order_number,
+      guarantee: isGuarantee || rpcResult.guarantee === true,
+      amountDueNow: amountToPay,
+      remainingAmount,
     };
   }
 }

@@ -14,6 +14,7 @@ const PAYMENT_STATUS_LABELS: Record<string, string> = {
   paid: 'Payée',
   failed: 'Échouée',
   cod_pending: 'Paiement à la livraison',
+  deposit_paid: 'Garantie payée, solde à la livraison',
   partially_refunded: 'Partiellement remboursée',
   completed: 'Terminé',
 };

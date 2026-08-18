@@ -73,6 +73,7 @@ const OrderFiltersComponent = ({
             <SelectItem value="all">Tous les paiements</SelectItem>
             <SelectItem value="pending">En attente</SelectItem>
             <SelectItem value="cod_pending">Paiement à la livraison</SelectItem>
+            <SelectItem value="deposit_paid">Garantie payée</SelectItem>
             <SelectItem value="paid">Payée</SelectItem>
             <SelectItem value="partially_refunded">Partiellement remboursée</SelectItem>
             <SelectItem value="failed">Échouée</SelectItem>

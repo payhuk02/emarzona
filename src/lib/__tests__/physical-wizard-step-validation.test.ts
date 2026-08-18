@@ -74,4 +74,32 @@ describe('validatePhysicalWizardStep', () => {
     const result = validatePhysicalWizardStep(8, baseForm);
     expect(result.valid).toBe(true);
   });
+
+  it('rejects step 8 guarantee without amount', () => {
+    const result = validatePhysicalWizardStep(8, {
+      ...baseForm,
+      payment: {
+        checkout_method: 'guarantee',
+        cta_button_label: 'Payer la garantie',
+        payment_type: 'full',
+        percentage_rate: 30,
+        guarantee_amount: 0,
+      },
+    });
+    expect(result.valid).toBe(false);
+  });
+
+  it('accepts step 8 guarantee with valid amount', () => {
+    const result = validatePhysicalWizardStep(8, {
+      ...baseForm,
+      payment: {
+        checkout_method: 'guarantee',
+        cta_button_label: 'Payer la garantie',
+        payment_type: 'full',
+        percentage_rate: 30,
+        guarantee_amount: 3000,
+      },
+    });
+    expect(result.valid).toBe(true);
+  });
 });

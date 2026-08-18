@@ -80,26 +80,7 @@ const GENERIC_PRODUCT_VARIANT_FIELDS = 'id, price, promotional_price, option1_va
  * - Remplissant ses informations de livraison
  * - Appliquant un code promo éventuel
  * - Vérifiant le résumé de commande
- * - Procédant au paiement via GeniusPay
- *
- * @component
- * @returns {JSX.Element} Le composant Checkout
- *
- * @remarks
- * - Preload des images produit pour améliorer LCP
- * - Validation complète du formulaire
- * - Gestion des codes promo
- * - Intégration GeniusPay avec lazy loading
- * - Gestion d'erreurs robuste
- * - Accessible avec ARIA labels complets
- *
- * @example
- * ```tsx
- * <Route path="/checkout" element={<Checkout />} />
- * ```
- *
- * @see {@link loadGeniusPayPayment} pour l'intégration GeniusPay
- * @see {@link CouponInput} pour la gestion des codes promo
+ * - Procédant au paiement via MoneyFusion (en ligne / garantie) ou à la livraison
  */
 const Checkout = () => {
   const [searchParams] = useSearchParams();
@@ -174,7 +155,12 @@ const Checkout = () => {
   );
 
   const isPhysicalCod = physicalCheckout?.checkout_method === 'cash_on_delivery';
-  const submitButtonLabel = isPhysicalCod ? 'Confirmer la commande' : 'Procéder au paiement';
+  const isPhysicalGuarantee = physicalCheckout?.checkout_method === 'guarantee';
+  const submitButtonLabel = isPhysicalCod
+    ? 'Confirmer la commande'
+    : isPhysicalGuarantee
+      ? 'Payer la garantie'
+      : 'Procéder au paiement';
 
   // Restaurer le code promo depuis localStorage au chargement
   useEffect(() => {
@@ -536,7 +522,7 @@ const Checkout = () => {
             orderNumber: result.orderNumber ?? result.orderId.slice(0, 8),
             orderId: result.orderId,
             quantity: checkoutQuantity,
-            totalAmount: finalPrice,
+            totalAmount: finalPrice * checkoutQuantity,
             currency: finalCurrency,
             checkoutMethod,
             customerName,
@@ -882,8 +868,10 @@ const Checkout = () => {
             </div>
             <p className="text-muted-foreground mt-1.5 sm:mt-2 text-sm sm:text-base max-w-2xl leading-relaxed">
               {isPhysicalCod
-                ? 'Complétez vos informations pour confirmer votre commande (paiement à la livraison)'
-                : 'Complétez vos informations pour procéder au paiement'}
+                ? 'Complétez vos informations pour confirmer votre commande (paiement à la livraison).'
+                : isPhysicalGuarantee
+                  ? 'Complétez vos informations. Vous payez la garantie via MoneyFusion ; le solde est dû à la livraison.'
+                  : 'Complétez vos informations pour procéder au paiement sécurisé MoneyFusion.'}
             </p>
           </header>
 
@@ -922,6 +910,9 @@ const Checkout = () => {
                   submitting={submitting}
                   submitButtonLabel={submitButtonLabel}
                   isCashOnDelivery={isPhysicalCod}
+                  isGuarantee={isPhysicalGuarantee}
+                  guaranteeAmount={physicalCheckout?.guarantee_amount}
+                  checkoutQuantity={checkoutQuantity}
                   onCouponApply={handleCouponApply}
                   onCouponRemove={handleCouponRemove}
                 />

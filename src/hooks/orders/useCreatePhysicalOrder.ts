@@ -7,7 +7,7 @@
  * 2. Vérifier disponibilité stock
  * 3. Réserver stock (quantity_reserved)
  * 4. Créer order + order_item
- * 5. Initier paiement GeniusPay
+ * 5. Initier le paiement MoneyFusion (sauf paiement à la livraison)
  * 6. Déduire stock si paiement réussi (via webhook)
  */
 
@@ -20,6 +20,7 @@ import { getAffiliateTrackingCookie } from '@/hooks/useAffiliateTracking';
 import { logger } from '@/lib/logger';
 import { createPublicPhysicalOrder } from '@/lib/orders/create-public-physical-order';
 import { parsePhysicalCheckoutOptions } from '@/lib/physical/physical-checkout-display';
+import { computePhysicalGuaranteeBreakdown } from '@/lib/physical/physical-guarantee';
 import type { PhysicalCheckoutMethod } from '@/constants/physical-checkout-options';
 
 const PRODUCT_FIELDS = 'id, name, price, promotional_price, currency, payment_options';
@@ -98,14 +99,23 @@ export interface CreatePhysicalOrderResult {
   /** ID de l'inventaire réservé */
   inventoryId: string;
 
-  /** URL de checkout GeniusPay (absent si paiement à la livraison) */
+  /** URL de checkout MoneyFusion (absent si paiement à la livraison) */
   checkoutUrl?: string;
 
-  /** ID de transaction GeniusPay */
+  /** ID de transaction MoneyFusion */
   transactionId?: string;
 
   /** True si commande en paiement à la livraison */
   cashOnDelivery?: boolean;
+
+  /** True si acompte/garantie en ligne, solde à la livraison */
+  guarantee?: boolean;
+
+  /** Montant encaissé maintenant (garantie) */
+  amountDueNow?: number;
+
+  /** Solde dû à la livraison */
+  remainingAmount?: number;
 
   /** Numéro de commande lisible */
   orderNumber?: string;
@@ -146,7 +156,7 @@ type OrderRow = {
  *     quantity: 2,
  *   });
  *
- *   // Rediriger vers GeniusPay
+ *   // Rediriger vers MoneyFusion
  *   window.location.href = result.checkoutUrl;
  * };
  * ```
@@ -193,6 +203,7 @@ export const useCreatePhysicalOrder = () => {
       );
       const checkoutMethod = checkoutMethodOverride ?? parsedCheckout.checkout_method;
       const isCashOnDelivery = checkoutMethod === 'cash_on_delivery';
+      const isGuarantee = checkoutMethod === 'guarantee';
 
       if (!resolvedPhysicalProductId) {
         const { data: physicalRow } = await supabase
@@ -212,7 +223,8 @@ export const useCreatePhysicalOrder = () => {
         payment_type?: string;
         percentage_rate?: number;
       } | null) || { payment_type: 'full', percentage_rate: 30 };
-      const paymentType = isCashOnDelivery ? 'full' : paymentOptions.payment_type || 'full';
+      const paymentType =
+        isCashOnDelivery || isGuarantee ? 'full' : paymentOptions.payment_type || 'full';
       const percentageRate = paymentOptions.percentage_rate || 30;
 
       // 2. Récupérer les détails physiques
@@ -285,11 +297,20 @@ export const useCreatePhysicalOrder = () => {
       const inventoryId = rpcResult.inventory_id ?? '';
 
       // Recalcul montant à payer selon type (RPC retourne le total catalogue)
-      let amountToPay = totalPrice;
+      let amountToPay = rpcResult.amount_due_now ?? totalPrice;
       let percentagePaid = 0;
-      let remainingAmount = 0;
+      let remainingAmount = rpcResult.remaining_amount ?? 0;
 
-      if (paymentType === 'percentage') {
+      if (isGuarantee || rpcResult.guarantee) {
+        const breakdown = computePhysicalGuaranteeBreakdown({
+          unitPrice: totalPrice / Math.max(1, quantity),
+          quantity,
+          guaranteeAmount: parsedCheckout.guarantee_amount,
+        });
+        amountToPay = rpcResult.amount_due_now ?? breakdown.guaranteeDueNow;
+        percentagePaid = amountToPay;
+        remainingAmount = rpcResult.remaining_amount ?? breakdown.remainderOnDelivery;
+      } else if (paymentType === 'percentage') {
         amountToPay = Math.round((totalPrice * percentageRate) / 100);
         percentagePaid = amountToPay;
         remainingAmount = totalPrice - amountToPay;
@@ -399,11 +420,13 @@ export const useCreatePhysicalOrder = () => {
       }
 
       const paymentDescription =
-        paymentType === 'percentage'
-          ? `Acompte ${percentageRate}%: ${product.name} x${quantity}`
-          : paymentType === 'delivery_secured'
-            ? `Paiement sécurisé: ${product.name} x${quantity}`
-            : `Achat: ${product.name} x${quantity}`;
+        isGuarantee || rpcResult.guarantee
+          ? `Garantie: ${product.name} x${quantity}`
+          : paymentType === 'percentage'
+            ? `Acompte ${percentageRate}%: ${product.name} x${quantity}`
+            : paymentType === 'delivery_secured'
+              ? `Paiement sécurisé: ${product.name} x${quantity}`
+              : `Achat: ${product.name} x${quantity}`;
 
       const paymentResult = await initiatePayment({
         storeId,
@@ -426,11 +449,12 @@ export const useCreatePhysicalOrder = () => {
           quantity,
           order_item_id: orderItem.id,
           shipping_address: shippingAddress,
-          payment_type: paymentType,
+          payment_type: isGuarantee || rpcResult.guarantee ? 'guarantee' : paymentType,
           percentage_rate: paymentType === 'percentage' ? percentageRate : null,
           total_price: totalPrice,
           amount_paid: amountToPay,
           remaining_amount: remainingAmount,
+          checkout_method: checkoutMethod,
           ...(isGuestCheckout ? { guest_checkout: true } : {}),
         },
       });
@@ -448,6 +472,9 @@ export const useCreatePhysicalOrder = () => {
         checkoutUrl: paymentResult.checkout_url,
         transactionId: paymentResult.transaction_id,
         orderNumber: typedOrder.order_number,
+        guarantee: isGuarantee || rpcResult.guarantee === true,
+        amountDueNow: amountToPay,
+        remainingAmount,
       };
     },
 
@@ -456,7 +483,9 @@ export const useCreatePhysicalOrder = () => {
         title: data.cashOnDelivery ? '✅ Commande confirmée' : '✅ Commande créée',
         description: data.cashOnDelivery
           ? 'Paiement à la livraison — votre commande est enregistrée.'
-          : 'Stock réservé. Redirection vers le paiement...',
+          : data.guarantee
+            ? 'Stock réservé. Redirection vers le paiement de la garantie...'
+            : 'Stock réservé. Redirection vers le paiement...',
       });
 
       // Déclencher webhook pour achat (en arrière-plan) - Système unifié

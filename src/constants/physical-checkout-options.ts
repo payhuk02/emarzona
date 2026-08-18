@@ -1,10 +1,11 @@
-export const PHYSICAL_CHECKOUT_METHODS = ['online', 'cash_on_delivery'] as const;
+export const PHYSICAL_CHECKOUT_METHODS = ['online', 'cash_on_delivery', 'guarantee'] as const;
 
 export type PhysicalCheckoutMethod = (typeof PHYSICAL_CHECKOUT_METHODS)[number];
 
 export const PHYSICAL_CHECKOUT_METHOD_LABELS: Record<PhysicalCheckoutMethod, string> = {
   online: 'Paiement en ligne',
   cash_on_delivery: 'Paiement à la livraison',
+  guarantee: 'Garantie + solde à la livraison',
 };
 
 /** Libellés de bouton proposés au vendeur pour la carte produit */
@@ -13,6 +14,7 @@ export const PHYSICAL_CTA_BUTTON_PRESETS = [
   'Acheter maintenant',
   'Acheter en ligne',
   'Payer à la livraison',
+  'Payer la garantie',
   'Je commande',
   'Passer commande',
   'Réserver',
@@ -23,3 +25,9 @@ export type PhysicalCtaButtonPreset = (typeof PHYSICAL_CTA_BUTTON_PRESETS)[numbe
 export const DEFAULT_PHYSICAL_CTA_LABEL: PhysicalCtaButtonPreset = 'Commander';
 
 export const DEFAULT_PHYSICAL_CHECKOUT_METHOD: PhysicalCheckoutMethod = 'online';
+
+export function isPhysicalCheckoutMethod(value: unknown): value is PhysicalCheckoutMethod {
+  return (
+    typeof value === 'string' && (PHYSICAL_CHECKOUT_METHODS as readonly string[]).includes(value)
+  );
+}

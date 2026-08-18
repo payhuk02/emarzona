@@ -178,10 +178,22 @@ export async function completeTransactionAndOrder(
   let orderId: string | null = transaction.order_id;
   if (orderId) {
     const paidOrderStatus = await resolvePaidOrderStatusForOrder(supabase, orderId);
+    const { data: orderRow } = await supabase
+      .from('orders')
+      .select('remaining_amount, metadata')
+      .eq('id', orderId)
+      .maybeSingle();
+    const checkoutMethod =
+      orderRow?.metadata && typeof orderRow.metadata === 'object' && !Array.isArray(orderRow.metadata)
+        ? String((orderRow.metadata as Record<string, unknown>).checkout_method ?? '')
+        : '';
+    const remaining = Number(orderRow?.remaining_amount) || 0;
+    const paymentStatus =
+      checkoutMethod === 'guarantee' && remaining > 0 ? 'deposit_paid' : 'paid';
     await supabase
       .from('orders')
       .update({
-        payment_status: 'paid',
+        payment_status: paymentStatus,
         status: paidOrderStatus,
         payment_provider_used:
           paymentProviderUsed !== 'unknown' ? paymentProviderUsed : transaction.payment_provider,
@@ -239,7 +251,7 @@ export async function resolveOrderExpectedPayableAmount(
 }> {
   const { data: orderData } = await supabase
     .from('orders')
-    .select('total_amount, currency, payment_type, percentage_paid')
+    .select('total_amount, currency, payment_type, percentage_paid, remaining_amount, metadata')
     .eq('id', orderId)
     .single();
 
@@ -253,7 +265,14 @@ export async function resolveOrderExpectedPayableAmount(
       : Number(orderData.total_amount);
 
   let baseAmount = Number.isFinite(orderAmount) ? orderAmount : 0;
-  if (orderData.payment_type === 'percentage') {
+  const metadata =
+    orderData.metadata && typeof orderData.metadata === 'object' && !Array.isArray(orderData.metadata)
+      ? (orderData.metadata as Record<string, unknown>)
+      : {};
+  const isGuarantee =
+    String(metadata.checkout_method ?? '') === 'guarantee' &&
+    Number(orderData.remaining_amount) > 0;
+  if (isGuarantee || orderData.payment_type === 'percentage') {
     const percentageAmount =
       typeof orderData.percentage_paid === 'string'
         ? parseFloat(orderData.percentage_paid)

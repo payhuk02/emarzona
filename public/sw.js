@@ -286,6 +286,24 @@ async function syncForms() {
   // Extension point pour la file offline
 }
 
+const ORDER_ALERT_TYPES = [
+  'order_payment_received',
+  'order_payment_failed',
+  'physical_product_order_placed',
+  'physical_order_paid',
+  'physical_order_failed',
+];
+
+function isOrderAlertType(value) {
+  return ORDER_ALERT_TYPES.includes(String(value || ''));
+}
+
+function isClientInForeground(client) {
+  if (!client || !client.focused) return false;
+  if (client.visibilityState && client.visibilityState !== 'visible') return false;
+  return true;
+}
+
 self.addEventListener('push', event => {
   let notificationData = {
     title: 'Nouvelle notification',
@@ -343,18 +361,27 @@ self.addEventListener('push', event => {
     }
   };
 
+  const alertType =
+    notificationData.data?.type ||
+    notificationData.data?.notificationType ||
+    notificationData.tag;
+  const isOrderAlert =
+    notificationData.requireInteraction === true ||
+    notificationData.data?.requireInteraction === true ||
+    isOrderAlertType(alertType);
+  const soundOn = notificationData.soundEnabled !== false;
+  // Commande : forcer le son OS (app fermée / arrière-plan). silent:true = aucun son système.
+  const silentNotification = soundOn && isOrderAlert ? false : notificationData.silent === true;
+
   const notificationOptions = {
     body: notificationData.body,
     icon: notificationData.icon,
     badge: notificationData.badge,
     tag: notificationData.tag,
-    data: { ...notificationData.data, url: notificationData.url },
-    requireInteraction: notificationData.requireInteraction,
-    silent:
-      notificationData.silent !== undefined
-        ? notificationData.silent
-        : !notificationData.soundEnabled,
-    vibrate: notificationData.vibrate ?? getVibrationPattern(),
+    data: { ...notificationData.data, url: notificationData.url, type: alertType },
+    requireInteraction: notificationData.requireInteraction || isOrderAlert,
+    silent: silentNotification,
+    vibrate: silentNotification ? [] : (notificationData.vibrate ?? getVibrationPattern()),
     timestamp: Date.now(),
     renotify: true,
     actions: notificationData.data.actions || [],
@@ -363,27 +390,14 @@ self.addEventListener('push', event => {
   event.waitUntil(
     (async () => {
       const clientList = await clients.matchAll({ type: 'window', includeUncontrolled: true });
-      const hasFocusedClient = clientList.some(client => client.focused);
+      const hasForegroundClient = clientList.some(isClientInForeground);
       const playPlatformSound =
-        notificationData.data?.playPlatformSound !== false && notificationData.soundEnabled !== false;
+        notificationData.data?.playPlatformSound !== false && soundOn;
 
-      // App au premier plan : laisser Realtime afficher ; jouer le son plateforme via postMessage.
-      // App fermée / onglet en arrière-plan : notification OS sticky (écran + son système).
-      if (!hasFocusedClient) {
-        const sticky =
-          notificationData.requireInteraction === true ||
-          notificationData.data?.requireInteraction === true ||
-          [
-            'order_payment_received',
-            'order_payment_failed',
-            'physical_product_order_placed',
-            'physical_order_paid',
-            'physical_order_failed',
-          ].includes(String(notificationData.data?.type || ''));
-        await self.registration.showNotification(notificationData.title, {
-          ...notificationOptions,
-          requireInteraction: sticky || notificationOptions.requireInteraction,
-        });
+      // App fermée, minimisée ou onglet caché : notification OS + son système.
+      // Premier plan uniquement : Realtime + postMessage (évite le double bandeau).
+      if (!hasForegroundClient) {
+        await self.registration.showNotification(notificationData.title, notificationOptions);
       }
 
       const unreadCount =

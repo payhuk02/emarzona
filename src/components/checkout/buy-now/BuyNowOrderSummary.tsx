@@ -14,8 +14,19 @@ import type {
   CheckoutUser,
   CheckoutVariant,
 } from '@/pages/checkout/buy-now/checkout-buy-now-types';
-import { ShoppingBag, Loader2, Lock, Tag, Truck, ArrowRight, AlertTriangle } from 'lucide-react';
+import {
+  ShoppingBag,
+  Loader2,
+  Lock,
+  Tag,
+  Truck,
+  ArrowRight,
+  AlertTriangle,
+  ShieldCheck,
+} from 'lucide-react';
 import { MONEYFUSION_MIN_AMOUNT_XOF } from '@/lib/moneyfusion-client';
+import { computePhysicalGuaranteeBreakdown } from '@/lib/physical/physical-guarantee';
+import { MoneyFusionCheckoutMethods } from '@/components/checkout/MoneyFusionCheckoutMethods';
 
 const PRODUCT_TYPE_LABELS: Record<string, string> = {
   digital: 'Produit digital',
@@ -38,6 +49,9 @@ export interface BuyNowOrderSummaryProps {
   submitting: boolean;
   submitButtonLabel?: string;
   isCashOnDelivery?: boolean;
+  isGuarantee?: boolean;
+  guaranteeAmount?: number;
+  checkoutQuantity?: number;
   onCouponApply: (couponId: string, discountAmount: number, code: string) => void;
   onCouponRemove: () => void;
 }
@@ -55,6 +69,9 @@ export default function BuyNowOrderSummary({
   submitting,
   submitButtonLabel = 'Procéder au paiement',
   isCashOnDelivery = false,
+  isGuarantee = false,
+  guaranteeAmount = 0,
+  checkoutQuantity = 1,
   onCouponApply,
   onCouponRemove,
 }: BuyNowOrderSummaryProps) {
@@ -63,11 +80,21 @@ export default function BuyNowOrderSummary({
   const originalPrice = Number(product?.price) || 0;
   const hasPromo = promoPrice && Number(promoPrice) < originalPrice && Number(promoPrice) > 0;
   const savings = hasPromo ? originalPrice - Number(promoPrice) : 0;
-  const totalAmount = Number(displayPrice) || 0;
+  const qty = Math.max(1, checkoutQuantity);
+  const unitAmount = Number(displayPrice) || 0;
+  const totalAmount = unitAmount * qty;
+  const guaranteeBreakdown = isGuarantee
+    ? computePhysicalGuaranteeBreakdown({
+        unitPrice: unitAmount,
+        quantity: qty,
+        guaranteeAmount,
+      })
+    : null;
+  const amountDueNow = guaranteeBreakdown?.guaranteeDueNow ?? totalAmount;
   const belowMoneyFusionMin =
     !isCashOnDelivery &&
     (currency || 'XOF').toUpperCase() === 'XOF' &&
-    totalAmount < MONEYFUSION_MIN_AMOUNT_XOF;
+    amountDueNow < MONEYFUSION_MIN_AMOUNT_XOF;
 
   return (
     <Card className="lg:sticky lg:top-4 rounded-2xl border-border/50 shadow-none sm:shadow-sm overflow-hidden bg-card">
@@ -146,16 +173,16 @@ export default function BuyNowOrderSummary({
         {/* Détail des montants */}
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Sous-total</span>
+            <span className="text-muted-foreground">Sous-total{qty > 1 ? ` × ${qty}` : ''}</span>
             <span className="font-medium tabular-nums text-foreground">
-              {formatPrice(basePrice, currency)}
+              {formatPrice(basePrice * qty, currency)}
             </span>
           </div>
           {appliedCouponCode && appliedCouponCode.discountAmount > 0 && (
             <div className="flex justify-between text-sm text-emerald-600 dark:text-emerald-400">
               <span>Code promo ({appliedCouponCode.code})</span>
               <span className="font-medium tabular-nums">
-                −{formatPrice(appliedCouponCode.discountAmount, currency)}
+                −{formatPrice(appliedCouponCode.discountAmount * qty, currency)}
               </span>
             </div>
           )}
@@ -171,12 +198,29 @@ export default function BuyNowOrderSummary({
           </span>
         </div>
 
+        {guaranteeBreakdown && (
+          <div className="space-y-2 rounded-xl border border-emerald-500/30 bg-emerald-500/5 px-3 py-2.5 text-sm">
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">À payer maintenant (garantie)</span>
+              <span className="font-semibold tabular-nums">
+                {formatPrice(guaranteeBreakdown.guaranteeDueNow, currency)}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Reste à la livraison</span>
+              <span className="font-semibold tabular-nums">
+                {formatPrice(guaranteeBreakdown.remainderOnDelivery, currency)}
+              </span>
+            </div>
+          </div>
+        )}
+
         {belowMoneyFusionMin && (
           <div className="flex items-start gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2.5 text-xs sm:text-sm text-amber-900 dark:text-amber-200">
             <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" aria-hidden="true" />
             <p className="leading-snug">
-              Montant minimum MoneyFusion : {MONEYFUSION_MIN_AMOUNT_XOF} XOF. Augmentez le prix du
-              produit pour pouvoir payer en ligne.
+              Montant minimum MoneyFusion : {MONEYFUSION_MIN_AMOUNT_XOF} XOF. Augmentez{' '}
+              {isGuarantee ? 'la garantie' : 'le prix du produit'} pour pouvoir payer en ligne.
             </p>
           </div>
         )}
@@ -199,6 +243,8 @@ export default function BuyNowOrderSummary({
               <>
                 {isCashOnDelivery ? (
                   <Truck className="mr-2 h-5 w-5" aria-hidden="true" />
+                ) : isGuarantee ? (
+                  <ShieldCheck className="mr-2 h-5 w-5" aria-hidden="true" />
                 ) : (
                   <Lock className="mr-2 h-[18px] w-[18px]" aria-hidden="true" />
                 )}
@@ -215,6 +261,22 @@ export default function BuyNowOrderSummary({
             <p className="text-center leading-snug">
               Paiement à la livraison — vous réglez à la réception.
             </p>
+          </div>
+        )}
+        {isGuarantee && (
+          <div className="flex items-start justify-center gap-2 text-[11px] sm:text-xs text-muted-foreground pt-0.5">
+            <ShieldCheck className="h-3.5 w-3.5 mt-0.5 flex-shrink-0" aria-hidden="true" />
+            <p className="text-center leading-snug">
+              Vous payez la garantie maintenant via MoneyFusion. Le solde est dû à la livraison.
+            </p>
+          </div>
+        )}
+        {!isCashOnDelivery && (
+          <div className="rounded-xl border border-border/50 bg-muted/20 px-3 py-2.5">
+            <p className="text-[11px] sm:text-xs font-medium text-foreground mb-1.5">
+              Paiement sécurisé MoneyFusion
+            </p>
+            <MoneyFusionCheckoutMethods compact />
           </div>
         )}
       </CardContent>

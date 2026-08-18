@@ -42,7 +42,7 @@ export interface PhysicalProductAffiliateSettings {
   terms_and_conditions: string;
 }
 
-export type PhysicalCheckoutMethod = 'online' | 'cash_on_delivery';
+export type PhysicalCheckoutMethod = 'online' | 'cash_on_delivery' | 'guarantee';
 
 export interface PhysicalProductPaymentOptions {
   /** Mode de paiement affiché sur la carte produit */
@@ -52,6 +52,8 @@ export interface PhysicalProductPaymentOptions {
   payment_type: 'full' | 'percentage' | 'delivery_secured';
   percentage_rate: number;
   min_percentage?: number;
+  /** Montant de garantie par article (mode `guarantee`), dans la devise du produit */
+  guarantee_amount?: number;
 }
 
 export interface PhysicalProductFormData {

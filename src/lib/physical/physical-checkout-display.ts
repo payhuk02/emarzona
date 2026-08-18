@@ -2,6 +2,7 @@ import {
   DEFAULT_PHYSICAL_CHECKOUT_METHOD,
   DEFAULT_PHYSICAL_CTA_LABEL,
   PHYSICAL_CHECKOUT_METHOD_LABELS,
+  isPhysicalCheckoutMethod,
   type PhysicalCheckoutMethod,
 } from '@/constants/physical-checkout-options';
 import type { PhysicalProductPaymentOptions } from '@/types/physical-product';
@@ -12,6 +13,7 @@ export type ParsedPhysicalCheckoutOptions = {
   cta_button_label: string;
   payment_type: PhysicalProductPaymentOptions['payment_type'];
   percentage_rate: number;
+  guarantee_amount: number;
 };
 
 function parsePaymentOptionsRaw(
@@ -33,8 +35,9 @@ export function parsePhysicalCheckoutOptions(
   payment?: Partial<PhysicalProductPaymentOptions> | null
 ): ParsedPhysicalCheckoutOptions {
   const parsed = parsePaymentOptionsRaw(paymentOptions) ?? payment ?? {};
-  const checkoutMethod =
-    parsed.checkout_method === 'cash_on_delivery' ? 'cash_on_delivery' : 'online';
+  const checkoutMethod = isPhysicalCheckoutMethod(parsed.checkout_method)
+    ? parsed.checkout_method
+    : DEFAULT_PHYSICAL_CHECKOUT_METHOD;
 
   return {
     checkout_method: checkoutMethod,
@@ -42,20 +45,24 @@ export function parsePhysicalCheckoutOptions(
     cta_button_label: parsed.cta_button_label?.trim() || DEFAULT_PHYSICAL_CTA_LABEL,
     payment_type: parsed.payment_type ?? 'full',
     percentage_rate: parsed.percentage_rate ?? 30,
+    guarantee_amount: Number(parsed.guarantee_amount) || 0,
   };
 }
 
 export function buildPhysicalPaymentOptions(
   input: Partial<PhysicalProductPaymentOptions>
 ): PhysicalProductPaymentOptions {
+  const checkoutMethod = isPhysicalCheckoutMethod(input.checkout_method)
+    ? input.checkout_method
+    : DEFAULT_PHYSICAL_CHECKOUT_METHOD;
+
   return {
-    checkout_method:
-      input.checkout_method === 'cash_on_delivery'
-        ? 'cash_on_delivery'
-        : DEFAULT_PHYSICAL_CHECKOUT_METHOD,
+    checkout_method: checkoutMethod,
     cta_button_label: input.cta_button_label?.trim() || DEFAULT_PHYSICAL_CTA_LABEL,
     payment_type: input.payment_type ?? 'full',
     percentage_rate: input.percentage_rate ?? 30,
     min_percentage: input.min_percentage,
+    guarantee_amount:
+      checkoutMethod === 'guarantee' ? Number(input.guarantee_amount) || 0 : undefined,
   };
 }

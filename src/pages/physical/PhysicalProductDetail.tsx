@@ -303,6 +303,7 @@ export default function PhysicalProductDetail() {
   const physicalCheckout = parsePhysicalCheckoutOptions(product?.payment_options);
   const buyLabel = physicalCheckout.cta_button_label;
   const isCod = physicalCheckout.checkout_method === 'cash_on_delivery';
+  const isGuarantee = physicalCheckout.checkout_method === 'guarantee';
   const physicalWeightLabel = formatPhysicalWeight(product?.physical);
   const physicalDimensionsLabel = formatPhysicalDimensions(product?.physical);
   const availability = stockQuantity > 0 ? 'instock' : 'outofstock';
@@ -523,7 +524,9 @@ export default function PhysicalProductDetail() {
             <p className="text-xs text-muted-foreground text-center">
               {isCod
                 ? 'Paiement à la livraison — aucun paiement en ligne requis'
-                : 'Paiement en ligne à la commande'}
+                : isGuarantee
+                  ? 'Payez une garantie en ligne, le solde à la livraison'
+                  : 'Paiement en ligne à la commande'}
             </p>
 
             <div className="grid grid-cols-2 gap-2">

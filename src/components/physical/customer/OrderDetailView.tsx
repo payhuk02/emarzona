@@ -12,25 +12,42 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import {
-  Package,
-  MapPin,
-  CreditCard,
-  Calendar,
-  Truck,
-} from 'lucide-react';
+import { Package } from 'lucide-react';
 
 interface OrderDetailViewProps {
   orderId: string;
 }
 
+type OrderProductSummary = {
+  name?: string | null;
+  image_url?: string | null;
+  product_type?: string | null;
+};
+
+type OrderItemRow = {
+  quantity?: number | null;
+  unit_price?: number | null;
+  products?: OrderProductSummary | null;
+};
+
+type OrderCustomerRow = {
+  name?: string | null;
+  email?: string | null;
+  phone?: string | null;
+};
+
 export const OrderDetailView = ({ orderId }: OrderDetailViewProps) => {
-  const { data: order, isLoading, error } = useQuery({
+  const {
+    data: order,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['order', orderId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('orders')
-        .select(`
+        .select(
+          `
           *,
           order_items(
             *,
@@ -45,7 +62,8 @@ export const OrderDetailView = ({ orderId }: OrderDetailViewProps) => {
             email,
             phone
           )
-        `)
+        `
+        )
         .eq('id', orderId)
         .single();
 
@@ -73,12 +91,12 @@ export const OrderDetailView = ({ orderId }: OrderDetailViewProps) => {
     );
   }
 
-  const physicalItems = (order.order_items || []).filter(
-    (item: any) => item.products?.product_type === 'physical'
+  const physicalItems = ((order.order_items || []) as OrderItemRow[]).filter(
+    item => item.products?.product_type === 'physical'
   );
 
   const getStatusBadge = (status: string) => {
-    const  variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
+    const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
       pending: 'secondary',
       processing: 'default',
       confirmed: 'default',
@@ -88,7 +106,7 @@ export const OrderDetailView = ({ orderId }: OrderDetailViewProps) => {
       cancelled: 'destructive',
     };
 
-    const  labels: Record<string, string> = {
+    const labels: Record<string, string> = {
       pending: 'En attente',
       processing: 'En traitement',
       confirmed: 'Confirmée',
@@ -98,11 +116,7 @@ export const OrderDetailView = ({ orderId }: OrderDetailViewProps) => {
       cancelled: 'Annulée',
     };
 
-    return (
-      <Badge variant={variants[status] || 'default'}>
-        {labels[status] || status}
-      </Badge>
-    );
+    return <Badge variant={variants[status] || 'default'}>{labels[status] || status}</Badge>;
   };
 
   return (
@@ -131,10 +145,24 @@ export const OrderDetailView = ({ orderId }: OrderDetailViewProps) => {
             <div>
               <p className="text-sm text-muted-foreground">Paiement</p>
               <Badge variant={order.payment_status === 'paid' ? 'default' : 'secondary'}>
-                {order.payment_status === 'paid' ? 'Payée' : 'En attente'}
+                {order.payment_status === 'paid'
+                  ? 'Payée'
+                  : order.payment_status === 'deposit_paid'
+                    ? 'Garantie payée'
+                    : order.payment_status === 'cod_pending'
+                      ? 'À la livraison'
+                      : 'En attente'}
               </Badge>
             </div>
           </div>
+          {Number(order.remaining_amount) > 0 && (
+            <p className="text-sm text-muted-foreground">
+              Reste à payer à la livraison :{' '}
+              <strong>
+                {Number(order.remaining_amount).toLocaleString('fr-FR')} {order.currency}
+              </strong>
+            </p>
+          )}
         </CardContent>
       </Card>
 
@@ -148,7 +176,7 @@ export const OrderDetailView = ({ orderId }: OrderDetailViewProps) => {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {physicalItems.map((item: any, index: number) => (
+            {physicalItems.map((item, index) => (
               <div key={index} className="flex items-start gap-4 p-4 border rounded-lg">
                 {item.products?.image_url && (
                   <img
@@ -202,16 +230,16 @@ export const OrderDetailView = ({ orderId }: OrderDetailViewProps) => {
           <CardContent className="space-y-2">
             <p>
               <span className="text-muted-foreground">Nom: </span>
-              {(order.customers as any).name || 'Non renseigné'}
+              {(order.customers as OrderCustomerRow).name || 'Non renseigné'}
             </p>
             <p>
               <span className="text-muted-foreground">Email: </span>
-              {(order.customers as any).email}
+              {(order.customers as OrderCustomerRow).email}
             </p>
-            {(order.customers as any).phone && (
+            {(order.customers as OrderCustomerRow).phone && (
               <p>
                 <span className="text-muted-foreground">Téléphone: </span>
-                {(order.customers as any).phone}
+                {(order.customers as OrderCustomerRow).phone}
               </p>
             )}
           </CardContent>
@@ -220,10 +248,3 @@ export const OrderDetailView = ({ orderId }: OrderDetailViewProps) => {
     </div>
   );
 };
-
-
-
-
-
-
-

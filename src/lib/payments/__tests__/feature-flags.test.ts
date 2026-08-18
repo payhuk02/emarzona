@@ -1,6 +1,7 @@
 import { describe, it, expect, afterEach, vi } from 'vitest';
 import {
   getPaymentOrchestrationV2RolloutPercent,
+  isGeniusPayEnabled,
   isMoneyFusionEnabled,
   isMoneyFusionOnlyEnabled,
   isPaymentOrchestrationV2Enabled,
@@ -128,6 +129,12 @@ describe('isMoneyFusionEnabled', () => {
   it('is always enabled (MoneyFusion rail plateforme)', () => {
     vi.stubEnv('VITE_MONEYFUSION_ENABLED', 'false');
     expect(isMoneyFusionEnabled()).toBe(true);
+  });
+});
+
+describe('isGeniusPayEnabled', () => {
+  it('is always disabled (GeniusPay retiré — MoneyFusion uniquement)', () => {
+    expect(isGeniusPayEnabled()).toBe(false);
   });
 });
 

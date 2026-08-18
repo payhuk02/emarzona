@@ -15,7 +15,7 @@ export type PhysicalOrderNotificationInput = {
   quantity: number;
   totalAmount: number;
   currency: string;
-  checkoutMethod: 'online' | 'cash_on_delivery';
+  checkoutMethod: 'online' | 'cash_on_delivery' | 'guarantee';
   customerName?: string;
   customerPhone?: string;
   shippingSummary?: string;
@@ -64,7 +64,9 @@ function buildOrderMessage(input: PhysicalOrderNotificationInput): string {
     `Paiement : ${
       input.checkoutMethod === 'cash_on_delivery'
         ? 'À la livraison'
-        : 'En ligne (en attente ou confirmé)'
+        : input.checkoutMethod === 'guarantee'
+          ? 'Garantie en ligne, solde à la livraison'
+          : 'En ligne (en attente ou confirmé)'
     }`,
   ];
 
@@ -86,7 +88,9 @@ export async function notifyPhysicalOrderPlaced(
   const title =
     input.checkoutMethod === 'cash_on_delivery'
       ? `Commande confirmée — ${input.productName}`
-      : `Commande enregistrée — ${input.productName}`;
+      : input.checkoutMethod === 'guarantee'
+        ? `Garantie à régler — ${input.productName}`
+        : `Commande enregistrée — ${input.productName}`;
 
   if (userId) {
     await createNotification({

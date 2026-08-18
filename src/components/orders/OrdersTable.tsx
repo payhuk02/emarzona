@@ -242,6 +242,8 @@ const OrdersTableComponent = ({
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="pending">En attente</SelectItem>
+                        <SelectItem value="cod_pending">À la livraison</SelectItem>
+                        <SelectItem value="deposit_paid">Garantie payée</SelectItem>
                         <SelectItem value="paid">Payée</SelectItem>
                         <SelectItem value="failed">Échouée</SelectItem>
                       </SelectContent>

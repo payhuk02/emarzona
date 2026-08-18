@@ -27,6 +27,9 @@ export type CreatePublicPhysicalOrderResult = {
   order_item_id: string;
   inventory_id: string | null;
   cash_on_delivery: boolean;
+  guarantee?: boolean;
+  amount_due_now?: number;
+  remaining_amount?: number;
   total_amount: number;
   currency: string;
   customer_id: string;

@@ -1,3 +1,5 @@
+import { isPhysicalCheckoutMethod } from '@/constants/physical-checkout-options';
+import { validateGuaranteeAmount } from '@/lib/physical/physical-guarantee';
 import {
   getFieldError,
   validateWithZod,
@@ -117,15 +119,22 @@ export function validatePhysicalWizardStep(
 
   if (step === 8) {
     const payment = formData.payment;
-    const checkoutMethod =
-      payment?.checkout_method === 'cash_on_delivery' ? 'cash_on_delivery' : 'online';
-    if (checkoutMethod !== 'online' && checkoutMethod !== 'cash_on_delivery') {
-      errors.push('Le mode de paiement sélectionné est invalide');
-    }
+    const checkoutMethod = isPhysicalCheckoutMethod(payment?.checkout_method)
+      ? payment.checkout_method
+      : 'online';
 
     const ctaLabel = (payment?.cta_button_label ?? 'Commander').trim();
     if (!ctaLabel) {
       errors.push('Le libellé du bouton de commande est requis');
+    }
+
+    if (checkoutMethod === 'guarantee') {
+      const guaranteeError = validateGuaranteeAmount(
+        Number(payment?.guarantee_amount) || 0,
+        Number(formData.price) || 0,
+        'XOF'
+      );
+      if (guaranteeError) errors.push(guaranteeError);
     }
   }
 

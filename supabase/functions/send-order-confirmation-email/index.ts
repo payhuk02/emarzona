@@ -9,6 +9,9 @@ import {
   resolveCustomerPortalLink,
   resolvePhysicalWhatsAppLink,
 } from '../_shared/physical-order-email-utils.ts';
+import {
+  buildPhysicalPaymentEmailVariables,
+} from '../_shared/seller-order-email-utils.ts';
 import { sendSellerOrderNotificationEmail, sendSellerPaymentFailedEmail } from '../_shared/seller-order-notification-email.ts';
 
 const ALLOWED_ORIGINS = (Deno.env.get('ALLOWED_ORIGINS') || '')
@@ -150,6 +153,7 @@ serve(async req => {
           !Number.isNaN(createdMs) && Date.now() - createdMs <= CHECKOUT_GUEST_WINDOW_MS;
         const isCodOrConfirmed =
           orderRow?.payment_status === 'cod_pending' ||
+          orderRow?.payment_status === 'deposit_paid' ||
           orderRow?.status === 'confirmed';
 
         if (orderToken && checkoutToken === orderToken && (withinGuestWindow || isCodOrConfirmed)) {
@@ -596,6 +600,7 @@ async function sendPhysicalEmail(
       tracking_link: order.tracking_link,
       whatsapp_link: whatsappLink,
       customer_portal_link: customerPortalLink,
+      ...buildPhysicalPaymentEmailVariables(order as Record<string, unknown>),
     },
   });
 
