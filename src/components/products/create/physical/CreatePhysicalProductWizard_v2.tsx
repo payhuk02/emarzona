@@ -58,6 +58,7 @@ import { useStore } from '@/hooks/useStore';
 import { useCatalogCacheInvalidation } from '@/hooks/useCatalogCacheInvalidation';
 import { useWizardServerValidation } from '@/hooks/useWizardServerValidation';
 import { createPhysicalProductTx } from '@/lib/products/product-create-rpc';
+import { persistProductWhatsApp } from '@/lib/products/persist-product-whatsapp';
 import { useStorePhysicalAccess } from '@/hooks/billing/useStorePhysicalAccess';
 import { useStorePhysicalPlanLimits } from '@/hooks/billing/useStorePhysicalPlanLimits';
 import { isWithinProductLimit, productLimitMessage } from '@/lib/billing/physical-plan-limits';
@@ -836,6 +837,12 @@ export const CreatePhysicalProductWizard = ({
         inventoryData,
         formData.size_chart_id || null,
         affiliateData
+      );
+
+      await persistProductWhatsApp(
+        rpcResult.product_id,
+        formData.whatsapp_number,
+        formData.whatsapp_enabled
       );
 
       const product = {

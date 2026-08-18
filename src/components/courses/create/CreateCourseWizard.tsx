@@ -44,7 +44,7 @@ import { useCreateFullCourse } from '@/hooks/courses/useCreateFullCourse';
 import { useAuth } from '@/contexts/AuthContext';
 import { useStore } from '@/hooks/useStore';
 import { useCatalogCacheInvalidation } from '@/hooks/useCatalogCacheInvalidation';
-import { logger } from '@/lib/logger';
+import { ProductWhatsAppContactConfig } from '@/components/products/create/shared/ProductWhatsAppContactConfig';
 import {
   validateCourseWizardPublishSteps,
   validateCourseWizardStep,
@@ -168,6 +168,8 @@ export const CreateCourseWizard = ({
     learning_objectives: [],
     prerequisites: [],
     target_audience: [],
+    whatsapp_number: '',
+    whatsapp_enabled: false,
   });
   const [sections, setSections] = useState<Section[]>([]);
   const [seoData, setSeoData] = useState<CourseSEOData>({
@@ -573,6 +575,8 @@ export const CreateCourseWizard = ({
       track_lesson_completion: pixelsData.track_lesson_completion,
       track_quiz_attempts: pixelsData.track_quiz_attempts,
       track_certificate_downloads: pixelsData.track_certificate_downloads,
+      whatsapp_number: formData.whatsapp_number,
+      whatsapp_enabled: formData.whatsapp_enabled,
     };
 
     logger.info('Publication du cours', { courseName: formData.title });
@@ -667,7 +671,23 @@ export const CreateCourseWizard = ({
       case 2:
         return <LazyCourseCurriculumBuilder sections={sections} onSectionsChange={setSections} />;
       case 3:
-        return <LazyCourseAdvancedConfig formData={formData} onChange={handleFieldChange} />;
+        return (
+          <div className="space-y-6">
+            <LazyCourseAdvancedConfig formData={formData} onChange={handleFieldChange} />
+            <ProductWhatsAppContactConfig
+              whatsappNumber={formData.whatsapp_number || ''}
+              whatsappEnabled={Boolean(formData.whatsapp_enabled)}
+              onChange={patch => {
+                if (patch.whatsapp_number !== undefined) {
+                  handleFieldChange('whatsapp_number', patch.whatsapp_number);
+                }
+                if (patch.whatsapp_enabled !== undefined) {
+                  handleFieldChange('whatsapp_enabled', patch.whatsapp_enabled);
+                }
+              }}
+            />
+          </div>
+        );
       case 4:
         return (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">

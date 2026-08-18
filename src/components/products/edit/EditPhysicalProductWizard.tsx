@@ -66,6 +66,7 @@ import { useStore } from '@/hooks/useStore';
 import { useAuth } from '@/contexts/AuthContext';
 import { useWizardServerValidation } from '@/hooks/useWizardServerValidation';
 import { updatePhysicalProductTx } from '@/lib/products/product-update-rpc';
+import { persistProductWhatsApp } from '@/lib/products/persist-product-whatsapp';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
@@ -803,6 +804,8 @@ export const EditPhysicalProductWizard = ({
         formData.size_chart_id || null,
         affiliatePayload
       );
+
+      await persistProductWhatsApp(productId, formData.whatsapp_number, formData.whatsapp_enabled);
 
       const physicalProductId = rpcResult.physical_product_id;
       if (!physicalProductId) {

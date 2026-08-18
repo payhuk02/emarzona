@@ -42,12 +42,14 @@ import { ServiceSEOAndFAQs } from '../create/service/ServiceSEOAndFAQs';
 import { ServicePreview } from '../create/service/ServicePreview';
 import { PaymentOptionsForm } from '../create/shared/PaymentOptionsForm';
 import { ProductStatisticsDisplaySettings } from '../create/shared/ProductStatisticsDisplaySettings';
+import { ProductWhatsAppContactConfig } from '../create/shared/ProductWhatsAppContactConfig';
 import { useToast } from '@/hooks/use-toast';
 import { useStore } from '@/hooks/useStore';
 import { useAuth } from '@/contexts/AuthContext';
 import { useWizardServerValidation } from '@/hooks/useWizardServerValidation';
 import { supabase } from '@/integrations/supabase/client';
 import { updateServiceProductTx } from '@/lib/products/product-update-rpc';
+import { persistProductWhatsApp } from '@/lib/products/persist-product-whatsapp';
 import {
   validateServiceWizardPublishSteps,
   validateServiceWizardStep,
@@ -63,7 +65,7 @@ import { useCatalogCacheInvalidation } from '@/hooks/useCatalogCacheInvalidation
 import { useQuery } from '@tanstack/react-query';
 
 const PRODUCT_FIELDS =
-  'id, store_id, name, slug, description, short_description, price, promotional_price, currency, category, category_id, tags, images, image_url, meta_title, meta_description, og_image, faqs, payment_options, hide_purchase_count, hide_likes_count, hide_recommendations_count, hide_downloads_count, hide_reviews_count, hide_rating, is_active';
+  'id, store_id, name, slug, description, short_description, price, promotional_price, currency, category, category_id, tags, images, image_url, meta_title, meta_description, og_image, faqs, payment_options, hide_purchase_count, hide_likes_count, hide_recommendations_count, hide_downloads_count, hide_reviews_count, hide_rating, is_active, whatsapp_number, whatsapp_enabled';
 const SERVICE_PRODUCT_FIELDS =
   'id, product_id, service_type, duration_minutes, location_type, location_address, meeting_url, timezone, requires_staff, max_participants, pricing_type, deposit_required, deposit_amount, deposit_type, allow_booking_cancellation, cancellation_deadline_hours, require_approval, buffer_time_before, buffer_time_after, advance_booking_days';
 const SERVICE_AVAILABILITY_SLOT_FIELDS =
@@ -333,6 +335,9 @@ const convertToFormData = async (
     hide_downloads_count: product.hide_downloads_count || false,
     hide_reviews_count: product.hide_reviews_count || false,
     hide_rating: product.hide_rating || false,
+
+    whatsapp_number: product.whatsapp_number || '',
+    whatsapp_enabled: Boolean(product.whatsapp_enabled),
 
     // Meta
     is_active: product.is_active ?? true,
@@ -698,6 +703,8 @@ export const EditServiceProductWizard = ({
         affiliatePayload
       );
 
+      await persistProductWhatsApp(productId, formData.whatsapp_number, formData.whatsapp_enabled);
+
       const serviceProductId = rpcResult.service_product_id;
       if (!serviceProductId) {
         throw new Error('Enregistrement produit service introuvable');
@@ -919,6 +926,12 @@ export const EditServiceProductWizard = ({
                   updateFormData={(field, value) => handleUpdateFormData({ [field]: value })}
                   productType="service"
                   variant="compact"
+                />
+                <ProductWhatsAppContactConfig
+                  whatsappNumber={formData.whatsapp_number || ''}
+                  whatsappEnabled={Boolean(formData.whatsapp_enabled)}
+                  onChange={patch => handleUpdateFormData(patch)}
+                  disabled={isSaving}
                 />
               </div>
             ) : CurrentStepComponent ? (

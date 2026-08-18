@@ -92,6 +92,8 @@ export function transformToUnifiedProduct(product: DatabaseProduct): UnifiedProd
     affiliate_enabled: product.product_affiliate_settings?.[0]?.affiliate_enabled || false,
     product_affiliate_settings: product.product_affiliate_settings || null,
     payment_options: product.payment_options,
+    whatsapp_number: (product.whatsapp_number as string | null | undefined) ?? null,
+    whatsapp_enabled: Boolean(product.whatsapp_enabled),
   };
 
   // Transformer selon le type

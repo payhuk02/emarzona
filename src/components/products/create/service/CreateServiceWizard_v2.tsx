@@ -47,12 +47,14 @@ import {
   LazyServicePreview,
   LazyPaymentOptionsForm,
   LazyProductStatisticsDisplaySettings,
+  LazyProductWhatsAppContactConfig,
 } from './service-wizard-steps';
 import { useToast } from '@/hooks/use-toast';
 import { useStore } from '@/hooks/useStore';
 import { useCatalogCacheInvalidation } from '@/hooks/useCatalogCacheInvalidation';
 import { useWizardServerValidation } from '@/hooks/useWizardServerValidation';
 import { createServiceProductTx } from '@/lib/products/product-create-rpc';
+import { persistProductWhatsApp } from '@/lib/products/persist-product-whatsapp';
 import { createDefaultServiceBookingOptions } from '@/lib/service/default-booking-options';
 import { validateServiceWizardPublishSteps } from '@/lib/service-wizard-step-validation';
 import { supabase } from '@/integrations/supabase/client';
@@ -281,6 +283,8 @@ export const CreateServiceWizard = ({
     hide_downloads_count: false,
     hide_reviews_count: false,
     hide_rating: false,
+    whatsapp_number: '',
+    whatsapp_enabled: false,
   });
 
   const [validationErrors, setValidationErrors] = useState<Record<number, string[]>>({});
@@ -804,6 +808,12 @@ export const CreateServiceWizard = ({
         staffData,
         slotsData,
         resourcesData
+      );
+
+      await persistProductWhatsApp(
+        rpcResult.product_id,
+        formData.whatsapp_number,
+        formData.whatsapp_enabled
       );
 
       const product = {
@@ -1382,6 +1392,12 @@ export const CreateServiceWizard = ({
                     updateFormData={(field, value) => handleUpdateFormData({ [field]: value })}
                     productType="service"
                     variant="compact"
+                  />
+                  <LazyProductWhatsAppContactConfig
+                    whatsappNumber={formData.whatsapp_number || ''}
+                    whatsappEnabled={Boolean(formData.whatsapp_enabled)}
+                    onChange={patch => handleUpdateFormData(patch)}
+                    disabled={isSaving}
                   />
                 </div>
               ) : (

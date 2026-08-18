@@ -1,12 +1,13 @@
 import { Button } from '@/components/ui/button';
 import { usePublicWhatsAppConfig } from '@/hooks/usePublicWhatsAppConfig';
-import { buildWhatsAppClickUrl } from '@/lib/whatsapp/whatsapp-url';
+import { buildProductWhatsAppMessage, buildWhatsAppClickUrl } from '@/lib/whatsapp/whatsapp-url';
 import { MessageCircle } from 'lucide-react';
 
 type PhysicalProductWhatsAppButtonProps = {
   productName: string;
   whatsappNumber?: string | null;
   whatsappEnabled?: boolean | null;
+  paymentUrl?: string | null;
   className?: string;
 };
 
@@ -14,6 +15,7 @@ export function PhysicalProductWhatsAppButton({
   productName,
   whatsappNumber,
   whatsappEnabled,
+  paymentUrl,
   className,
 }: PhysicalProductWhatsAppButtonProps) {
   const { data: config } = usePublicWhatsAppConfig();
@@ -25,7 +27,7 @@ export function PhysicalProductWhatsAppButton({
   const href = buildWhatsAppClickUrl(
     config?.click_url_base ?? 'https://wa.me',
     whatsappNumber,
-    `Bonjour, je suis intéressé(e) par « ${productName} ».`
+    buildProductWhatsAppMessage(productName, paymentUrl || '')
   );
 
   if (!href) return null;

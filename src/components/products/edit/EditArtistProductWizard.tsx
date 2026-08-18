@@ -46,6 +46,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 import { updateArtistProductTx } from '@/lib/products/product-update-rpc';
+import { persistProductWhatsApp } from '@/lib/products/persist-product-whatsapp';
+import { ProductWhatsAppContactConfig } from '../create/shared/ProductWhatsAppContactConfig';
 import { validateRequiredSteps } from '@/lib/wizard-validation/edit-save-validation';
 import { validateAndSanitizeArtistProduct } from '@/lib/artist-product-sanitizer';
 import { validateArtistProduct } from '@/lib/validation/centralized-validation';
@@ -132,6 +134,11 @@ const convertToFormData = (
     },
     faqs: product?.faqs || [],
     payment: product?.payment_options || { payment_type: 'full', percentage_rate: 30 },
+    whatsapp_number:
+      (product as { whatsapp_number?: string | null } | undefined)?.whatsapp_number || '',
+    whatsapp_enabled: Boolean(
+      (product as { whatsapp_enabled?: boolean } | undefined)?.whatsapp_enabled
+    ),
     is_active: product?.is_active ?? true,
   };
 };
@@ -200,6 +207,8 @@ export const EditArtistProductWizard = ({
     seo: {},
     faqs: [],
     payment: { payment_type: 'full', percentage_rate: 30 },
+    whatsapp_number: '',
+    whatsapp_enabled: false,
     is_active: true,
   });
 
@@ -477,6 +486,8 @@ export const EditArtistProductWizard = ({
 
       await updateArtistProductTx(store.id, productId, productPayload, artistPayload);
 
+      await persistProductWhatsApp(productId, formData.whatsapp_number, formData.whatsapp_enabled);
+
       localStorage.removeItem('artist-product-draft');
 
       toast({
@@ -630,12 +641,20 @@ export const EditArtistProductWizard = ({
             )}
 
             {currentStep === 7 && (
-              <PaymentOptionsForm
-                productPrice={formData.price || 0}
-                productType="artist"
-                data={formData.payment || { payment_type: 'full', percentage_rate: 30 }}
-                onUpdate={payment => handleUpdateFormData({ payment })}
-              />
+              <div className="space-y-6">
+                <PaymentOptionsForm
+                  productPrice={formData.price || 0}
+                  productType="artist"
+                  data={formData.payment || { payment_type: 'full', percentage_rate: 30 }}
+                  onUpdate={payment => handleUpdateFormData({ payment })}
+                />
+                <ProductWhatsAppContactConfig
+                  whatsappNumber={formData.whatsapp_number || ''}
+                  whatsappEnabled={Boolean(formData.whatsapp_enabled)}
+                  onChange={patch => handleUpdateFormData(patch)}
+                  disabled={isSaving}
+                />
+              </div>
             )}
 
             {currentStep === 8 && <ArtistPreview data={formData} />}

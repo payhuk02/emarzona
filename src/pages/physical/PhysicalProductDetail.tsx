@@ -63,6 +63,7 @@ import {
   BoughtTogetherPhysicalRecommendations,
 } from '@/components/physical/PhysicalProductRecommendations';
 import { PhysicalProductWhatsAppButton } from '@/components/physical/PhysicalProductWhatsAppButton';
+import { generatePaymentUrl } from '@/lib/store-utils';
 import type { PhysicalProductVariant } from '@/types/physical-product';
 import {
   formatPhysicalDimensions,
@@ -492,6 +493,11 @@ export default function PhysicalProductDetail() {
               productName={product?.name || 'Produit'}
               whatsappNumber={product?.physical?.whatsapp_number}
               whatsappEnabled={product?.physical?.whatsapp_enabled}
+              paymentUrl={
+                product?.store?.slug && product?.slug
+                  ? generatePaymentUrl(product.store.slug, product.slug)
+                  : undefined
+              }
               className="w-full"
             />
 

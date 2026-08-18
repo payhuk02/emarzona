@@ -68,6 +68,8 @@ import { validateAndSanitizeArtistProduct } from '@/lib/artist-product-sanitizer
 import { validateArtistPublishFormData } from '@/lib/artist-product-publish-validation';
 import { validateArtistProduct } from '@/lib/validation/centralized-validation';
 import { createArtistProductTx } from '@/lib/products/product-create-rpc';
+import { persistProductWhatsApp } from '@/lib/products/persist-product-whatsapp';
+import { ProductWhatsAppContactConfig } from '@/components/products/shared/ProductWhatsAppContactConfig';
 import {
   getRequiredFieldError,
   getPriceError,
@@ -177,6 +179,8 @@ const CreateArtistProductWizardComponent = ({
     seo: {},
     faqs: [],
     payment: { payment_type: 'full', percentage_rate: 30 },
+    whatsapp_number: '',
+    whatsapp_enabled: false,
     is_active: true,
   });
 
@@ -477,6 +481,12 @@ const CreateArtistProductWizardComponent = ({
 
       const rpcResult = await createArtistProductTx(store.id, productPayload, artistPayload);
       const product = { id: rpcResult.product_id };
+
+      await persistProductWhatsApp(
+        rpcResult.product_id,
+        formData.whatsapp_number,
+        formData.whatsapp_enabled
+      );
 
       // Déclencher webhook product.created (asynchrone)
       if (product && !isDraft) {
@@ -794,25 +804,33 @@ const CreateArtistProductWizardComponent = ({
 
             {currentStep === 7 && (
               <Suspense fallback={<StepSkeleton />}>
-                <PaymentOptionsForm
-                  productPrice={formData.price || 0}
-                  productType="artist"
-                  data={{
-                    payment_type: (formData.payment?.payment_type || 'full') as
-                      | 'full'
-                      | 'percentage'
-                      | 'delivery_secured',
-                    percentage_rate: formData.payment?.percentage_rate ?? 30,
-                  }}
-                  onUpdate={payment =>
-                    handleUpdateFormData({
-                      payment: {
-                        payment_type: payment.payment_type,
-                        percentage_rate: payment.percentage_rate ?? 30,
-                      },
-                    })
-                  }
-                />
+                <div className="space-y-6">
+                  <PaymentOptionsForm
+                    productPrice={formData.price || 0}
+                    productType="artist"
+                    data={{
+                      payment_type: (formData.payment?.payment_type || 'full') as
+                        | 'full'
+                        | 'percentage'
+                        | 'delivery_secured',
+                      percentage_rate: formData.payment?.percentage_rate ?? 30,
+                    }}
+                    onUpdate={payment =>
+                      handleUpdateFormData({
+                        payment: {
+                          payment_type: payment.payment_type,
+                          percentage_rate: payment.percentage_rate ?? 30,
+                        },
+                      })
+                    }
+                  />
+                  <ProductWhatsAppContactConfig
+                    whatsappNumber={formData.whatsapp_number || ''}
+                    whatsappEnabled={Boolean(formData.whatsapp_enabled)}
+                    onChange={patch => handleUpdateFormData(patch)}
+                    disabled={isSaving}
+                  />
+                </div>
               </Suspense>
             )}
 

@@ -14,7 +14,7 @@ import { logger } from '@/lib/logger';
 const ARTIST_PRODUCT_FIELDS =
   'id, product_id, store_id, artist_type, artist_name, artist_bio, artist_website, artist_social_links, artwork_title, artwork_year, artwork_medium, artwork_dimensions, artwork_weight, artwork_style, artwork_subject, artwork_dominant_colors, artwork_techniques, artwork_materials, artwork_framed, artwork_signature, artwork_condition, artwork_certificate_of_authenticity, artwork_provenance, artwork_location, artwork_shipping_info, artwork_returns_policy, artwork_tags, artwork_meta_title, artwork_meta_description, artwork_slug, created_at, updated_at';
 const PRODUCT_CORE_FIELDS =
-  'id, name, slug, description, short_description, price, compare_at_price, currency, category, category_id, image_url, images, is_active, is_draft, created_at, updated_at';
+  'id, name, slug, description, short_description, price, compare_at_price, currency, category, category_id, image_url, images, is_active, is_draft, created_at, updated_at, payment_options, whatsapp_number, whatsapp_enabled';
 
 // ✅ SÉCURITÉ: Fonction de validation de propriété du produit artiste
 const validateArtistProductOwnership = async (

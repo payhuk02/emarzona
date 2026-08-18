@@ -31,6 +31,11 @@ export const LazyProductStatisticsDisplaySettings = lazy(() =>
     default: m.ProductStatisticsDisplaySettings,
   }))
 );
+export const LazyProductWhatsAppContactConfig = lazy(() =>
+  import('../shared/ProductWhatsAppContactConfig').then(m => ({
+    default: m.ProductWhatsAppContactConfig,
+  }))
+);
 
 export function prefetchServiceWizardFirstStep(): void {
   void import('./ServiceBasicInfoForm');

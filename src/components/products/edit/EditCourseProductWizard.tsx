@@ -29,6 +29,7 @@ import {
 import { CourseBasicInfoForm } from '@/components/courses/create/CourseBasicInfoForm';
 import { CourseCurriculumBuilder } from '@/components/courses/create/CourseCurriculumBuilder';
 import { CourseAdvancedConfig } from '@/components/courses/create/CourseAdvancedConfig';
+import { ProductWhatsAppContactConfig } from '@/components/products/create/shared/ProductWhatsAppContactConfig';
 import { CourseSEOForm, CourseSEOData } from '@/components/courses/create/CourseSEOForm';
 import { CourseFAQForm, FAQ } from '@/components/courses/create/CourseFAQForm';
 import {
@@ -48,13 +49,14 @@ import {
   validateCourseWizardStep,
 } from '@/lib/course-wizard-step-validation';
 import { updateFullCourseTx } from '@/lib/products/product-update-rpc';
+import { persistProductWhatsApp } from '@/lib/products/persist-product-whatsapp';
 import { logger } from '@/lib/logger';
 import { useCatalogCacheInvalidation } from '@/hooks/useCatalogCacheInvalidation';
 import { useQuery } from '@tanstack/react-query';
 import type { CourseSection, CourseLesson, CourseFormData } from '@/types/course-form';
 
 const PRODUCT_FIELDS =
-  'id, store_id, name, slug, description, short_description, category, category_id, image_url, images, price, currency, promotional_price, pricing_model, free_product_id, licensing_type, license_terms, meta_title, meta_description, og_image, faqs';
+  'id, store_id, name, slug, description, short_description, category, category_id, image_url, images, price, currency, promotional_price, pricing_model, free_product_id, licensing_type, license_terms, meta_title, meta_description, og_image, faqs, whatsapp_number, whatsapp_enabled';
 const COURSE_FIELDS =
   'id, product_id, level, language, certificate_enabled, certificate_passing_score, learning_objectives, prerequisites, target_audience';
 const PRODUCT_AFFILIATE_FIELDS =
@@ -272,6 +274,8 @@ const convertToFormData = async (
       prerequisites: course?.prerequisites || [],
       target_audience: course?.target_audience || [],
       store_id: product.store_id,
+      whatsapp_number: product.whatsapp_number || '',
+      whatsapp_enabled: Boolean(product.whatsapp_enabled),
     },
     sections,
     seoData: {
@@ -591,6 +595,8 @@ export const EditCourseProductWizard = ({
         },
       });
 
+      await persistProductWhatsApp(productId, formData.whatsapp_number, formData.whatsapp_enabled);
+
       toast({
         title: '✅ Cours mis à jour',
         description: 'Le cours a été modifié avec succès',
@@ -678,7 +684,24 @@ export const EditCourseProductWizard = ({
       case 2:
         return <CourseCurriculumBuilder sections={sections} onSectionsChange={setSections} />;
       case 3:
-        return <CourseAdvancedConfig formData={formData} onChange={handleFieldChange} />;
+        return (
+          <div className="space-y-6">
+            <CourseAdvancedConfig formData={formData} onChange={handleFieldChange} />
+            <ProductWhatsAppContactConfig
+              whatsappNumber={formData.whatsapp_number || ''}
+              whatsappEnabled={Boolean(formData.whatsapp_enabled)}
+              onChange={patch => {
+                if (patch.whatsapp_number !== undefined) {
+                  handleFieldChange('whatsapp_number', patch.whatsapp_number);
+                }
+                if (patch.whatsapp_enabled !== undefined) {
+                  handleFieldChange('whatsapp_enabled', patch.whatsapp_enabled);
+                }
+              }}
+              disabled={isSaving}
+            />
+          </div>
+        );
       case 4:
         return (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
@@ -761,6 +784,7 @@ export const EditCourseProductWizard = ({
     pixelsData,
     errors,
     handleFieldChange,
+    isSaving,
   ]);
 
   const CurrentStep = STEPS[currentStep - 1];

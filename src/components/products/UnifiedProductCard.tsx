@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 import React, { useMemo, useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { generateProductUrl } from '@/lib/store-utils';
+import { generateProductUrl, generatePaymentUrl } from '@/lib/store-utils';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -185,6 +185,14 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
       product.store?.slug
         ? generateProductUrl(product.store.slug, product.slug, product.store?.subdomain)
         : `/products/${product.slug}`,
+    [product.store?.slug, product.store?.subdomain, product.slug]
+  );
+
+  const paymentUrl = useMemo(
+    () =>
+      product.store?.slug
+        ? generatePaymentUrl(product.store.slug, product.slug, product.store?.subdomain)
+        : '',
     [product.store?.slug, product.store?.subdomain, product.slug]
   );
 
@@ -1002,6 +1010,9 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
                 if (product.type === 'physical' && product.stock === 0) return;
                 void marketplaceBuy.handleBuyClick();
               }}
+              whatsappNumber={product.whatsapp_number}
+              whatsappEnabled={product.whatsapp_enabled}
+              paymentUrl={paymentUrl}
             />
           )}
         </div>

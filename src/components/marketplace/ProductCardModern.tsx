@@ -46,7 +46,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { generateProductUrl } from '@/lib/store-utils';
+import { generateProductUrl, generatePaymentUrl } from '@/lib/store-utils';
 
 interface ProductCardModernProps {
   product: {
@@ -69,6 +69,8 @@ interface ProductCardModernProps {
     product_type?: string | null;
     store_id?: string;
     payment_options?: PhysicalProductPaymentOptions | string | null;
+    whatsapp_number?: string | null;
+    whatsapp_enabled?: boolean | null;
     stock_quantity?: number | null;
     stores?: {
       id: string;
@@ -609,6 +611,11 @@ const ProductCardModernComponent = ({
           buyLoading={marketplaceBuy.loading}
           buyIcon={cta.action === 'service' ? 'calendar' : 'cart'}
           onBuy={handleBuyNow}
+          whatsappNumber={product.whatsapp_number}
+          whatsappEnabled={product.whatsapp_enabled}
+          paymentUrl={
+            currentStoreSlug ? generatePaymentUrl(currentStoreSlug, product.slug) : undefined
+          }
         />
       </div>
 
@@ -645,6 +652,8 @@ const ProductCardModern = React.memo(ProductCardModernComponent, (prevProps, nex
     prevProps.product.rating === nextProps.product.rating &&
     prevProps.product.reviews_count === nextProps.product.reviews_count &&
     prevProps.product.is_featured === nextProps.product.is_featured &&
+    prevProps.product.whatsapp_number === nextProps.product.whatsapp_number &&
+    prevProps.product.whatsapp_enabled === nextProps.product.whatsapp_enabled &&
     prevProps.storeSlug === nextProps.storeSlug &&
     prevProps.affiliateCommissionRate === nextProps.affiliateCommissionRate &&
     prevProps.freeShipping === nextProps.freeShipping &&

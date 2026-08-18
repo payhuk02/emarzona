@@ -2,7 +2,7 @@ import { useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
-import { validateCourseData } from '@/lib/validation/courseSchemas';
+import { persistProductWhatsApp } from '@/lib/products/persist-product-whatsapp';
 
 const PRODUCT_FIELDS =
   'id, store_id, name, slug, description, image_url, price, currency, product_type, is_active, created_at, updated_at';
@@ -109,6 +109,8 @@ interface CreateFullCourseData {
   track_lesson_completion?: boolean;
   track_quiz_attempts?: boolean;
   track_certificate_downloads?: boolean;
+  whatsapp_number?: string;
+  whatsapp_enabled?: boolean;
 }
 
 /**
@@ -260,6 +262,8 @@ export const useCreateFullCourse = () => {
           logger.error('Error fetching created product', { error: productError });
           throw new Error('Cours créé mais erreur lors de la récupération des données');
         }
+
+        await persistProductWhatsApp(product.id, data.whatsapp_number, data.whatsapp_enabled);
 
         const { data: course, error: courseError } = await supabase
           .from('courses')

@@ -26599,6 +26599,8 @@ export type Database = {
           updated_at: string;
           watermark_enabled: boolean | null;
           weight: number | null;
+          whatsapp_enabled: boolean;
+          whatsapp_number: string | null;
         };
         Insert: {
           automatic_discount_enabled?: boolean | null;
@@ -26667,6 +26669,8 @@ export type Database = {
           updated_at?: string;
           watermark_enabled?: boolean | null;
           weight?: number | null;
+          whatsapp_enabled?: boolean;
+          whatsapp_number?: string | null;
         };
         Update: {
           automatic_discount_enabled?: boolean | null;
@@ -26735,6 +26739,8 @@ export type Database = {
           updated_at?: string;
           watermark_enabled?: boolean | null;
           weight?: number | null;
+          whatsapp_enabled?: boolean;
+          whatsapp_number?: string | null;
         };
         Relationships: [
           {
@@ -43590,6 +43596,8 @@ export type Database = {
           store_slug: string | null;
           tags: string[] | null;
           updated_at: string | null;
+          whatsapp_enabled: boolean | null;
+          whatsapp_number: string | null;
         };
         Relationships: [];
       };
@@ -46607,6 +46615,8 @@ export type Database = {
           tags: string[];
           total_count: number;
           updated_at: string;
+          whatsapp_enabled: boolean;
+          whatsapp_number: string | null;
         }[];
       };
       get_next_course_in_path: {

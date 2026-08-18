@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { buildWhatsAppClickUrl, normalizeWhatsAppDigits } from '../whatsapp-url';
+import {
+  buildProductWhatsAppMessage,
+  buildWhatsAppClickUrl,
+  normalizeWhatsAppDigits,
+  splitWhatsAppNumber,
+} from '../whatsapp-url';
 
 describe('whatsapp-url', () => {
   it('normalizes Burkina Faso style numbers', () => {
@@ -19,5 +24,22 @@ describe('whatsapp-url', () => {
 
   it('rejects too-short numbers', () => {
     expect(buildWhatsAppClickUrl('https://wa.me', '123')).toBeNull();
+  });
+
+  it('splits country code without + from a Burkina number', () => {
+    expect(splitWhatsAppNumber('226 70 12 34 56')).toEqual({
+      countryCode: '226',
+      localNumber: '70123456',
+    });
+  });
+
+  it('builds a prefilled payment message', () => {
+    const message = buildProductWhatsAppMessage(
+      'Ebook Premium',
+      'https://digitallog.myemarzona.shop/pay/ebook-premium'
+    );
+    expect(message).toContain('Ebook Premium');
+    expect(message).toContain('Payer ici en sécurité');
+    expect(message).toContain('https://digitallog.myemarzona.shop/pay/ebook-premium');
   });
 });

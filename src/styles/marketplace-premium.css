@@ -394,7 +394,7 @@
   color: var(--lp-text-dim);
 }
 
-/* Actions carte produit — CTA pleine largeur + secondaires en grille */
+/* Actions carte produit — grille 2x2 (Acheter / Voir / Contacter / WhatsApp) */
 .marketplace-premium .mp-product-card__actions,
 .mp-product-cards-band.landing-premium .mp-product-card__actions {
   min-width: 0;

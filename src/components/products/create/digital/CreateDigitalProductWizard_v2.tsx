@@ -40,6 +40,7 @@ import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { cn } from '@/lib/utils';
 import { useWizardServerValidation } from '@/hooks/useWizardServerValidation';
 import { createDigitalProductTx } from '@/lib/products/product-create-rpc';
+import { persistProductWhatsApp } from '@/lib/products/persist-product-whatsapp';
 import { buildDigitalProductCreatePayloads } from '@/lib/digital/build-digital-product-create-payload';
 import { validateDigitalWizardPublishSteps } from '@/lib/digital-wizard-step-validation';
 import type {
@@ -57,6 +58,7 @@ import {
   LazyProductSEOForm,
   LazyProductFAQForm,
   LazyProductStatisticsDisplaySettings,
+  LazyProductWhatsAppContactConfig,
 } from './digital-wizard-steps';
 
 const createDefaultAffiliate = () => ({
@@ -140,6 +142,8 @@ const getDefaultFormData = () => ({
   hide_downloads_count: false,
   hide_reviews_count: false,
   hide_rating: false,
+  whatsapp_number: '',
+  whatsapp_enabled: false,
 });
 
 const mergeFormDataWithDefaults = (
@@ -837,6 +841,12 @@ export const CreateDigitalProductWizard = ({
           filesPayload
         );
 
+        await persistProductWhatsApp(
+          rpcResult.product_id,
+          formData.whatsapp_number,
+          formData.whatsapp_enabled
+        );
+
         const product = {
           id: rpcResult.product_id,
           name: formData.name,
@@ -1143,6 +1153,12 @@ export const CreateDigitalProductWizard = ({
               productType="digital"
               variant="compact"
             />
+            <LazyProductWhatsAppContactConfig
+              whatsappNumber={formData.whatsapp_number || ''}
+              whatsappEnabled={Boolean(formData.whatsapp_enabled)}
+              onChange={patch => updateFormData(patch)}
+              disabled={isSubmitting}
+            />
           </div>
         );
       case 4:
@@ -1186,7 +1202,7 @@ export const CreateDigitalProductWizard = ({
       default:
         return null;
     }
-  }, [currentStep, formData, updateFormData, storeSlug, t]);
+  }, [currentStep, formData, updateFormData, storeSlug, t, isSubmitting]);
 
   /**
    * Calculate progress

@@ -1,7 +1,7 @@
 /**
  * Types stricts pour le formulaire de création de cours en ligne
  * Date: 31 Janvier 2025
- * 
+ *
  * Remplace les types `any` dans CreateCourseWizard
  */
 
@@ -40,11 +40,11 @@ export interface CourseFormData {
   level: string;
   language: string;
   category: string;
-  
+
   // Images
   image_url: string;
   images: string[];
-  
+
   // Configuration
   price: number;
   currency: string;
@@ -59,9 +59,12 @@ export interface CourseFormData {
   learning_objectives: string[];
   prerequisites: string[];
   target_audience: string[];
-  
+
   // Store ID
   store_id?: string;
+
+  whatsapp_number?: string;
+  whatsapp_enabled?: boolean;
 }
 
 /**
@@ -70,10 +73,3 @@ export interface CourseFormData {
 export type CourseFormDataUpdate = Partial<CourseFormData> & {
   [key: string]: unknown; // Pour permettre les mises à jour dynamiques
 };
-
-
-
-
-
-
-

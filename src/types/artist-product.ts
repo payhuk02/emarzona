@@ -4,7 +4,13 @@
  * Types pour les produits artistes (écrivains, musiciens, artistes visuels, etc.)
  */
 
-export type ArtistType = 'writer' | 'musician' | 'visual_artist' | 'designer' | 'multimedia' | 'other';
+export type ArtistType =
+  | 'writer'
+  | 'musician'
+  | 'visual_artist'
+  | 'designer'
+  | 'multimedia'
+  | 'other';
 export type EditionType = 'original' | 'limited_edition' | 'print' | 'reproduction';
 export type BookFormat = 'paperback' | 'hardcover' | 'ebook';
 export type AlbumFormat = 'cd' | 'vinyl' | 'digital' | 'cassette';
@@ -85,17 +91,17 @@ export interface ArtistProductFormData {
   category_id: string | null;
   tags: string[];
   slug?: string;
-  
+
   // Type d'artiste
   artist_type: ArtistType;
-  
+
   // Informations artiste
   artist_name: string;
   artist_bio: string;
   artist_website: string;
   artist_photo_url?: string; // Photo de l'artiste
   artist_social_links: ArtistSocialLinks;
-  
+
   // Informations œuvre
   artwork_title: string;
   artwork_year: number | null;
@@ -105,27 +111,27 @@ export interface ArtistProductFormData {
   edition_type: EditionType;
   edition_number: number | null;
   total_editions: number | null;
-  
+
   // Spécificités par type
   writer_specific?: WriterProductData;
   musician_specific?: MusicianProductData;
   visual_artist_specific?: VisualArtistProductData;
   designer_specific?: DesignerProductData;
   multimedia_specific?: MultimediaProductData;
-  
+
   // Livraison
   requires_shipping: boolean;
   shipping_handling_time: number;
   shipping_fragile: boolean;
   shipping_insurance_required: boolean;
   shipping_insurance_amount: number | null;
-  
+
   // Authentification
   certificate_of_authenticity: boolean;
   certificate_file_url: string;
   signature_authenticated: boolean;
   signature_location: string;
-  
+
   // SEO & FAQs
   seo?: {
     meta_title?: string;
@@ -139,7 +145,7 @@ export interface ArtistProductFormData {
     question: string;
     answer: string;
   }>;
-  
+
   // Affiliation
   affiliate?: {
     enabled: boolean;
@@ -152,13 +158,16 @@ export interface ArtistProductFormData {
     require_approval: boolean;
     terms_and_conditions: string;
   };
-  
+
   // Payment Options
   payment?: {
     payment_type: 'full' | 'percentage' | 'delivery_secured';
     percentage_rate: number;
   };
-  
+
+  whatsapp_number?: string;
+  whatsapp_enabled?: boolean;
+
   // Meta
   is_active: boolean;
 }
@@ -170,9 +179,3 @@ export interface ArtistProduct extends ArtistProductFormData {
   created_at: string;
   updated_at: string;
 }
-
-
-
-
-
-

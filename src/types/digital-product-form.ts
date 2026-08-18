@@ -112,6 +112,9 @@ export interface DigitalProductFormData {
   hide_downloads_count?: boolean;
   hide_reviews_count?: boolean;
   hide_rating?: boolean;
+
+  whatsapp_number?: string;
+  whatsapp_enabled?: boolean;
 }
 
 /**
@@ -123,9 +126,3 @@ export type DigitalProductFormDataUpdate = Partial<DigitalProductFormData> & {
   faqs?: DigitalProductFAQ[];
   downloadable_files?: DigitalProductDownloadableFile[];
 };
-
-
-
-
-
-

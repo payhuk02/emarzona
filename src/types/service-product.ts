@@ -40,33 +40,33 @@ export interface ServiceProductFormData {
   category_id: string | null;
   tags: string[];
   images: string[];
-  
+
   // Duration & Availability (Step 2)
   service_type: 'appointment' | 'class' | 'event' | 'consultation' | 'other';
   duration_minutes: number;
   location_type: 'on_site' | 'online' | 'customer_location' | 'flexible';
   location_address?: string;
   meeting_url?: string;
-  
+
   // Availability
   availability_slots: ServiceAvailabilitySlot[];
   timezone: string;
-  
+
   // Staff & Resources (Step 3)
   requires_staff: boolean;
   staff_members: ServiceStaffMember[];
   max_participants: number; // 1 for individual, >1 for group
   resources_needed?: string[];
-  
+
   // Pricing & Options (Step 4)
   pricing_type: 'fixed' | 'hourly' | 'per_participant';
   deposit_required: boolean;
   deposit_amount?: number;
   deposit_type?: 'fixed' | 'percentage';
-  
+
   // Booking Options
   booking_options: ServiceBookingOptions;
-  
+
   // Statistics Display Settings
   hide_purchase_count?: boolean;
   hide_likes_count?: boolean;
@@ -74,14 +74,10 @@ export interface ServiceProductFormData {
   hide_downloads_count?: boolean;
   hide_reviews_count?: boolean;
   hide_rating?: boolean;
-  
+
+  whatsapp_number?: string;
+  whatsapp_enabled?: boolean;
+
   // Meta
   is_active: boolean;
 }
-
-
-
-
-
-
-

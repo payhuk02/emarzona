@@ -51,6 +51,9 @@ export interface BaseProduct {
   hide_downloads_count?: boolean | null;
   hide_reviews_count?: boolean | null;
   hide_rating?: boolean | null;
+
+  whatsapp_number?: string | null;
+  whatsapp_enabled?: boolean | null;
 }
 
 /**

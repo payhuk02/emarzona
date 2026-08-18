@@ -40,12 +40,14 @@ import { DigitalPreview } from '../create/digital/DigitalPreview';
 import { ProductSEOForm } from '../create/shared/ProductSEOForm';
 import { ProductFAQForm } from '../create/shared/ProductFAQForm';
 import { ProductStatisticsDisplaySettings } from '../create/shared/ProductStatisticsDisplaySettings';
+import { ProductWhatsAppContactConfig } from '../create/shared/ProductWhatsAppContactConfig';
 import { useToast } from '@/hooks/use-toast';
 import { useStore } from '@/hooks/useStore';
 import { useAuth } from '@/contexts/AuthContext';
 import { useWizardServerValidation } from '@/hooks/useWizardServerValidation';
 import { supabase } from '@/integrations/supabase/client';
 import { updateDigitalProductTx } from '@/lib/products/product-update-rpc';
+import { persistProductWhatsApp } from '@/lib/products/persist-product-whatsapp';
 import { buildDigitalProductFilesPayload } from '@/lib/digital/build-digital-product-files-payload';
 import { resolvePrimaryDigitalFile } from '@/lib/digital/resolve-primary-digital-file';
 import {
@@ -64,7 +66,7 @@ import { useCatalogCacheInvalidation } from '@/hooks/useCatalogCacheInvalidation
 import { useQuery } from '@tanstack/react-query';
 
 const PRODUCT_FIELDS =
-  'id, store_id, name, slug, description, short_description, category, price, promotional_price, currency, pricing_model, image_url, images, meta_title, meta_description, og_image, faqs, licensing_type, license_terms, free_product_id, hide_purchase_count, hide_likes_count, hide_recommendations_count, hide_downloads_count, hide_reviews_count, hide_rating, is_active';
+  'id, store_id, name, slug, description, short_description, category, price, promotional_price, currency, pricing_model, image_url, images, meta_title, meta_description, og_image, faqs, licensing_type, license_terms, free_product_id, hide_purchase_count, hide_likes_count, hide_recommendations_count, hide_downloads_count, hide_reviews_count, hide_rating, is_active, whatsapp_number, whatsapp_enabled';
 const DIGITAL_PRODUCT_FIELDS =
   'id, product_id, digital_type, license_type, license_duration_days, max_activations, allow_license_transfer, auto_generate_keys, main_file_url, main_file_version, download_limit, download_expiry_days, require_registration, watermark_enabled, watermark_text, version';
 const DIGITAL_PRODUCT_FILE_FIELDS =
@@ -305,6 +307,9 @@ const convertToFormData = async (
     hide_reviews_count:
       ((product as Record<string, unknown>).hide_reviews_count as boolean | undefined) || false,
     hide_rating: ((product as Record<string, unknown>).hide_rating as boolean | undefined) || false,
+
+    whatsapp_number: (product.whatsapp_number as string | null) || '',
+    whatsapp_enabled: Boolean(product.whatsapp_enabled),
 
     // Metadata
     product_type: 'digital' as const,
@@ -665,6 +670,8 @@ export const EditDigitalProductWizard = ({
         digitalPayload
       );
 
+      await persistProductWhatsApp(productId, formData.whatsapp_number, formData.whatsapp_enabled);
+
       const digitalProductId = rpcResult.digital_product_id;
       if (!digitalProductId) {
         throw new Error('Enregistrement produit digital introuvable');
@@ -856,6 +863,12 @@ export const EditDigitalProductWizard = ({
               updateFormData={(field, value) => handleUpdateFormData({ [field]: value })}
               productType="digital"
               variant="compact"
+            />
+            <ProductWhatsAppContactConfig
+              whatsappNumber={formData.whatsapp_number || ''}
+              whatsappEnabled={Boolean(formData.whatsapp_enabled)}
+              onChange={patch => handleUpdateFormData(patch)}
+              disabled={isSaving}
             />
           </div>
         );

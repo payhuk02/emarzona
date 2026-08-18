@@ -551,22 +551,32 @@ export const DigitalProductsList = () => {
           throw new Error(createProductError?.message || 'Impossible de créer la copie produit');
         }
 
-        const digitalClone: Record<string, unknown> = { ...fullDigital };
-        delete digitalClone.id;
-        delete digitalClone.created_at;
-        delete digitalClone.updated_at;
-        delete digitalClone.product_id;
-        delete digitalClone.total_downloads;
-        delete digitalClone.revenue;
-        delete digitalClone.average_rating;
-        delete digitalClone.total_reviews;
+        const digitalOmit = new Set([
+          'id',
+          'created_at',
+          'updated_at',
+          'product_id',
+          'total_downloads',
+          'total_revenue',
+          'revenue',
+          'average_rating',
+          'total_reviews',
+          'unique_downloaders',
+          'bounce_rate',
+          'status',
+        ]);
+        const digitalClone: Record<string, unknown> = {};
+        for (const [key, value] of Object.entries(fullDigital as Record<string, unknown>)) {
+          if (!digitalOmit.has(key)) {
+            digitalClone[key] = value;
+          }
+        }
 
         const { error: createDigitalError } = await supabase.from('digital_products').insert({
           ...digitalClone,
           product_id: createdProduct.id,
-          status: 'draft',
           total_downloads: 0,
-          revenue: 0,
+          total_revenue: 0,
           average_rating: 0,
           total_reviews: 0,
         });
@@ -1208,28 +1218,6 @@ export const DigitalProductsList = () => {
                                     </div>
 
                                     <div className="flex items-center gap-2 flex-shrink-0">
-                                      <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => {
-                                          if (product?.id) {
-                                            navigate(`/dashboard/products/${product.id}/edit`);
-                                          } else {
-                                            toast({
-                                              title: 'Erreur',
-                                              description: 'ID de produit manquant',
-                                              variant: 'destructive',
-                                            });
-                                          }
-                                        }}
-                                      >
-                                        <Edit className="h-4 w-4 mr-2" />
-                                        <span className="hidden sm:inline">
-                                          {t('digitalProducts.edit', 'Modifier')}
-                                        </span>
-                                        <span className="sm:hidden">Modifier</span>
-                                      </Button>
-
                                       <Select
                                         onValueChange={action => {
                                           const url =
@@ -1274,6 +1262,16 @@ export const DigitalProductsList = () => {
                                               title: product.name,
                                               url: url,
                                             });
+                                          } else if (action === 'edit') {
+                                            if (product?.id) {
+                                              navigate(`/dashboard/products/${product.id}/edit`);
+                                            } else {
+                                              toast({
+                                                title: 'Erreur',
+                                                description: 'ID de produit manquant',
+                                                variant: 'destructive',
+                                              });
+                                            }
                                           } else if (action === 'duplicate') {
                                             handleDuplicateProduct(product?.id);
                                           } else if (action === 'delete') {
@@ -1285,6 +1283,11 @@ export const DigitalProductsList = () => {
                                           <MoreVertical className="h-4 w-4" />
                                         </SelectTrigger>
                                         <SelectContent>
+                                          <SelectItem value="edit">
+                                            <span className="flex items-center">
+                                              <Edit className="h-4 w-4 mr-2" /> Modifier
+                                            </span>
+                                          </SelectItem>
                                           <SelectItem value="view-product">
                                             <span className="flex items-center">
                                               <Eye className="h-4 w-4 mr-2" /> Voir le produit
