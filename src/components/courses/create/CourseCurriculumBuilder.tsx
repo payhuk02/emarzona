@@ -1,25 +1,25 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
-import { 
-  Plus, 
-  GripVertical, 
-  Trash2, 
-  Edit, 
-  ChevronDown, 
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Plus,
+  GripVertical,
+  Trash2,
+  Edit,
+  ChevronDown,
   ChevronUp,
   PlayCircle,
   FileText,
   Clock,
-  Video
-} from "lucide-react";
-import { useState } from "react";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { VideoUploader } from "./VideoUploader";
+  Video,
+} from 'lucide-react';
+import { useState } from 'react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { VideoUploader } from './VideoUploader';
 
 interface Lesson {
   id: string;
@@ -46,14 +46,23 @@ interface CourseCurriculumBuilderProps {
   onSectionsChange: (sections: Section[]) => void;
 }
 
-export const CourseCurriculumBuilder = ({ sections, onSectionsChange }: CourseCurriculumBuilderProps) => {
+export const CourseCurriculumBuilder = ({
+  sections,
+  onSectionsChange,
+}: CourseCurriculumBuilderProps) => {
   const [editingSection, setEditingSection] = useState<string | null>(null);
-  const [editingLesson, setEditingLesson] = useState<{ sectionId: string; lessonId: string } | null>(null);
-  const [uploadingVideo, setUploadingVideo] = useState<{ sectionId: string; lessonId: string } | null>(null);
+  const [editingLesson, setEditingLesson] = useState<{
+    sectionId: string;
+    lessonId: string;
+  } | null>(null);
+  const [uploadingVideo, setUploadingVideo] = useState<{
+    sectionId: string;
+    lessonId: string;
+  } | null>(null);
 
   // Ajouter une nouvelle section
   const addSection = () => {
-    const  newSection: Section = {
+    const newSection: Section = {
       id: `section-${Date.now()}`,
       title: '',
       description: '',
@@ -72,15 +81,13 @@ export const CourseCurriculumBuilder = ({ sections, onSectionsChange }: CourseCu
 
   // Mettre à jour une section
   const updateSection = (sectionId: string, updates: Partial<Section>) => {
-    onSectionsChange(
-      sections.map(s => s.id === sectionId ? { ...s, ...updates } : s)
-    );
+    onSectionsChange(sections.map(s => (s.id === sectionId ? { ...s, ...updates } : s)));
   };
 
   // Toggle section
   const toggleSection = (sectionId: string) => {
     updateSection(sectionId, {
-      isOpen: !sections.find(s => s.id === sectionId)?.isOpen
+      isOpen: !sections.find(s => s.id === sectionId)?.isOpen,
     });
   };
 
@@ -89,7 +96,7 @@ export const CourseCurriculumBuilder = ({ sections, onSectionsChange }: CourseCu
     const section = sections.find(s => s.id === sectionId);
     if (!section) return;
 
-    const  newLesson: Lesson = {
+    const newLesson: Lesson = {
       id: `lesson-${Date.now()}`,
       title: '',
       description: '',
@@ -100,7 +107,7 @@ export const CourseCurriculumBuilder = ({ sections, onSectionsChange }: CourseCu
     };
 
     updateSection(sectionId, {
-      lessons: [...section.lessons, newLesson]
+      lessons: [...section.lessons, newLesson],
     });
     setEditingLesson({ sectionId, lessonId: newLesson.id });
   };
@@ -111,7 +118,7 @@ export const CourseCurriculumBuilder = ({ sections, onSectionsChange }: CourseCu
     if (!section) return;
 
     updateSection(sectionId, {
-      lessons: section.lessons.filter(l => l.id !== lessonId)
+      lessons: section.lessons.filter(l => l.id !== lessonId),
     });
   };
 
@@ -121,13 +128,13 @@ export const CourseCurriculumBuilder = ({ sections, onSectionsChange }: CourseCu
     if (!section) return;
 
     updateSection(sectionId, {
-      lessons: section.lessons.map(l => l.id === lessonId ? { ...l, ...updates } : l)
+      lessons: section.lessons.map(l => (l.id === lessonId ? { ...l, ...updates } : l)),
     });
   };
 
   // Calculer la durée totale
   const getTotalDuration = () => {
-    let  total= 0;
+    let total = 0;
     sections.forEach(section => {
       section.lessons.forEach(lesson => {
         total += lesson.video_duration_seconds || 0;
@@ -159,11 +166,9 @@ export const CourseCurriculumBuilder = ({ sections, onSectionsChange }: CourseCu
           <div className="flex items-center justify-between">
             <div>
               <CardTitle>Curriculum du cours</CardTitle>
-              <CardDescription>
-                Organisez votre contenu en sections et leçons
-              </CardDescription>
+              <CardDescription>Organisez votre contenu en sections et leçons</CardDescription>
             </div>
-            <Button onClick={addSection} size="sm">
+            <Button onClick={addSection} size="sm" data-testid="course-add-section">
               <Plus className="w-4 h-4 mr-2" />
               Ajouter une section
             </Button>
@@ -205,7 +210,7 @@ export const CourseCurriculumBuilder = ({ sections, onSectionsChange }: CourseCu
               <p className="text-muted-foreground mb-4">
                 Aucune section créée. Commencez par ajouter votre première section.
               </p>
-              <Button onClick={addSection} variant="outline">
+              <Button onClick={addSection} variant="outline" data-testid="course-add-first-section">
                 <Plus className="w-4 h-4 mr-2" />
                 Créer la première section
               </Button>
@@ -229,20 +234,19 @@ export const CourseCurriculumBuilder = ({ sections, onSectionsChange }: CourseCu
                           <Input
                             placeholder="Titre de la section"
                             value={section.title}
-                            onChange={(e) => updateSection(section.id, { title: e.target.value })}
+                            onChange={e => updateSection(section.id, { title: e.target.value })}
                             autoFocus
                           />
                           <Textarea
                             placeholder="Description (optionnelle)"
                             value={section.description}
-                            onChange={(e) => updateSection(section.id, { description: e.target.value })}
+                            onChange={e =>
+                              updateSection(section.id, { description: e.target.value })
+                            }
                             rows={2}
                           />
                           <div className="flex gap-2">
-                            <Button
-                              size="sm"
-                              onClick={() => setEditingSection(null)}
-                            >
+                            <Button size="sm" onClick={() => setEditingSection(null)}>
                               Enregistrer
                             </Button>
                             <Button
@@ -258,13 +262,16 @@ export const CourseCurriculumBuilder = ({ sections, onSectionsChange }: CourseCu
                         <div>
                           <div className="flex items-center justify-between mb-1">
                             <div className="flex items-center gap-2">
-                              <span className="text-sm font-medium">Section {sectionIndex + 1}:</span>
+                              <span className="text-sm font-medium">
+                                Section {sectionIndex + 1}:
+                              </span>
                               <h3 className="text-lg font-semibold">
                                 {section.title || 'Section sans titre'}
                               </h3>
                               {section.lessons.length > 0 && (
                                 <Badge variant="secondary">
-                                  {section.lessons.length} leçon{section.lessons.length > 1 ? 's' : ''}
+                                  {section.lessons.length} leçon
+                                  {section.lessons.length > 1 ? 's' : ''}
                                 </Badge>
                               )}
                             </div>
@@ -313,14 +320,15 @@ export const CourseCurriculumBuilder = ({ sections, onSectionsChange }: CourseCu
                       >
                         <GripVertical className="w-4 h-4 mt-1 text-muted-foreground cursor-move" />
                         <div className="flex-1">
-                          {editingLesson?.sectionId === section.id && editingLesson?.lessonId === lesson.id ? (
+                          {editingLesson?.sectionId === section.id &&
+                          editingLesson?.lessonId === lesson.id ? (
                             <div className="space-y-4 border rounded-lg p-4 bg-background">
                               <div className="space-y-2">
                                 <Label>Titre de la leçon *</Label>
                                 <Input
                                   placeholder="Ex: Introduction au React"
                                   value={lesson.title}
-                                  onChange={(e) =>
+                                  onChange={e =>
                                     updateLesson(section.id, lesson.id, { title: e.target.value })
                                   }
                                   autoFocus
@@ -332,8 +340,10 @@ export const CourseCurriculumBuilder = ({ sections, onSectionsChange }: CourseCu
                                 <Textarea
                                   placeholder="Décrivez ce que les étudiants vont apprendre..."
                                   value={lesson.description || ''}
-                                  onChange={(e) =>
-                                    updateLesson(section.id, lesson.id, { description: e.target.value })
+                                  onChange={e =>
+                                    updateLesson(section.id, lesson.id, {
+                                      description: e.target.value,
+                                    })
                                   }
                                   rows={2}
                                 />
@@ -346,7 +356,7 @@ export const CourseCurriculumBuilder = ({ sections, onSectionsChange }: CourseCu
                                 </Label>
                                 {uploadingVideo?.lessonId === lesson.id ? (
                                   <VideoUploader
-                                    onVideoUploaded={(videoData) => {
+                                    onVideoUploaded={videoData => {
                                       updateLesson(section.id, lesson.id, {
                                         video_type: videoData.type,
                                         video_url: videoData.url,
@@ -366,7 +376,12 @@ export const CourseCurriculumBuilder = ({ sections, onSectionsChange }: CourseCu
                                     type="button"
                                     variant="outline"
                                     className="w-full"
-                                    onClick={() => setUploadingVideo({ sectionId: section.id, lessonId: lesson.id })}
+                                    onClick={() =>
+                                      setUploadingVideo({
+                                        sectionId: section.id,
+                                        lessonId: lesson.id,
+                                      })
+                                    }
                                   >
                                     <Video className="w-4 h-4 mr-2" />
                                     {lesson.video_url ? 'Modifier la vidéo' : 'Ajouter une vidéo'}
@@ -381,9 +396,9 @@ export const CourseCurriculumBuilder = ({ sections, onSectionsChange }: CourseCu
                                     type="number"
                                     placeholder="600"
                                     value={lesson.video_duration_seconds || ''}
-                                    onChange={(e) =>
+                                    onChange={e =>
                                       updateLesson(section.id, lesson.id, {
-                                        video_duration_seconds: parseInt(e.target.value) || 0
+                                        video_duration_seconds: parseInt(e.target.value) || 0,
                                       })
                                     }
                                   />
@@ -394,7 +409,7 @@ export const CourseCurriculumBuilder = ({ sections, onSectionsChange }: CourseCu
                                 <Checkbox
                                   id={`preview-${lesson.id}`}
                                   checked={lesson.is_preview}
-                                  onCheckedChange={(checked) =>
+                                  onCheckedChange={checked =>
                                     updateLesson(section.id, lesson.id, { is_preview: !!checked })
                                   }
                                 />
@@ -440,7 +455,9 @@ export const CourseCurriculumBuilder = ({ sections, onSectionsChange }: CourseCu
                                 <Button
                                   size="sm"
                                   variant="ghost"
-                                  onClick={() => setEditingLesson({ sectionId: section.id, lessonId: lesson.id })}
+                                  onClick={() =>
+                                    setEditingLesson({ sectionId: section.id, lessonId: lesson.id })
+                                  }
                                 >
                                   <Edit className="w-3 h-3" />
                                 </Button>
@@ -478,10 +495,3 @@ export const CourseCurriculumBuilder = ({ sections, onSectionsChange }: CourseCu
     </div>
   );
 };
-
-
-
-
-
-
-

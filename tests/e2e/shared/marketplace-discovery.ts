@@ -34,27 +34,57 @@ export async function searchMarketplaceForProduct(page: Page, query: string): Pr
   await expect(searchInput).toBeVisible({ timeout: 20_000 });
   await searchInput.fill(query);
   await searchInput.press('Enter');
-  // Marketplace debounces search input (500ms) before calling search_products.
   await page.waitForTimeout(1_000);
 }
 
-async function waitForProductSearchable(admin: SupabaseClient, productName: string): Promise<void> {
+async function waitForProductInCatalog(
+  admin: SupabaseClient,
+  productId: string,
+  productName: string,
+  productType: MarketplaceProductType
+): Promise<void> {
   await expect
     .poll(
       async () => {
-        const { data, error } = await admin.rpc('search_products', {
-          p_search_query: productName,
-          p_limit: 20,
+        const { data: viewRow } = await admin
+          .from('marketplace_products_optimized')
+          .select('id')
+          .eq('id', productId)
+          .maybeSingle();
+        if (viewRow?.id === productId) return true;
+
+        const { data, error } = await admin.rpc('get_marketplace_products_filtered', {
+          p_limit: 24,
           p_offset: 0,
+          p_product_type: productType,
+          p_sort_by: 'newest',
+          p_sort_order: 'desc',
+          p_search_query: productName,
+          p_featured_only: false,
         });
-        if (error) return false;
-        return (
-          Array.isArray(data) && data.some((row: { name?: string }) => row.name === productName)
-        );
+        if (error || !Array.isArray(data)) return false;
+        return data.some((row: { id?: string }) => row.id === productId);
       },
       { timeout: 45_000 }
     )
     .toBe(true);
+}
+
+async function clearMarketplaceClientCache(page: Page): Promise<void> {
+  await page.addInitScript(() => {
+    try {
+      Object.keys(localStorage)
+        .filter(key => key.startsWith('marketplace_'))
+        .forEach(key => localStorage.removeItem(key));
+    } catch {
+      // ignore
+    }
+    try {
+      indexedDB.deleteDatabase('marketplace_cache');
+    } catch {
+      // ignore
+    }
+  });
 }
 
 export async function assertMarketplaceGuestBuyCta(
@@ -76,13 +106,20 @@ export async function assertGuestMarketplaceProductVisible(
   admin: SupabaseClient,
   productId: string,
   productName: string,
-  buyLabelPattern: RegExp
+  buyLabelPattern: RegExp,
+  productType: MarketplaceProductType
 ): Promise<void> {
   await assertProductListedInMarketplaceQuery(admin, productId, productName);
-  await waitForProductSearchable(admin, productName);
+  await waitForProductInCatalog(admin, productId, productName, productType);
   await page.context().clearCookies();
-  await gotoApp(page, '/marketplace');
-  await searchMarketplaceForProduct(page, productName);
+  await clearMarketplaceClientCache(page);
+
+  const params = new URLSearchParams({
+    type: productType,
+    sort: 'created_at',
+    order: 'desc',
+  });
+  await gotoApp(page, `/marketplace?${params.toString()}`);
   await assertMarketplaceGuestBuyCta(page, productName, buyLabelPattern);
 }
 

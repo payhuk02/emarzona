@@ -51,9 +51,14 @@ export async function fillCourseBasicInfoStep(
 }
 
 export async function fillCourseCurriculumStep(page: Page): Promise<void> {
-  await page
-    .getByRole('button', { name: /Ajouter une section|Créer la première section/i })
-    .click();
+  const emptyStateCta = page.getByTestId('course-add-first-section');
+  const headerCta = page.getByTestId('course-add-section');
+  await expect(headerCta).toBeVisible({ timeout: 20_000 });
+  if (await emptyStateCta.isVisible()) {
+    await emptyStateCta.click();
+  } else {
+    await headerCta.click();
+  }
   await page.getByPlaceholder('Titre de la section').fill('Section E2E');
   await page
     .getByRole('button', { name: /^Enregistrer$/i })

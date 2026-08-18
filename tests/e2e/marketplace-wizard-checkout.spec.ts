@@ -81,7 +81,14 @@ test.describe('Marketplace — wizard publish to guest checkout (E2E)', () => {
       .limit(1);
     const productId = (rows![0] as { id: string }).id;
 
-    await assertGuestMarketplaceProductVisible(page, admin, productId, productName, /Acheter/i);
+    await assertGuestMarketplaceProductVisible(
+      page,
+      admin,
+      productId,
+      productName,
+      /Acheter/i,
+      'digital'
+    );
     await completeMarketplaceGuestPurchaseFromCard(page, productName, {
       guestEmail,
       guestName: 'Acheteur E2E',
@@ -125,7 +132,8 @@ test.describe('Marketplace — wizard publish to guest checkout (E2E)', () => {
       admin,
       productId,
       courseTitle,
-      /S'inscrire|inscrire/i
+      /S'inscrire|inscrire/i,
+      'course'
     );
     await completeMarketplaceGuestPurchaseFromCard(page, courseTitle, {
       guestEmail,

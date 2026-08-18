@@ -133,7 +133,8 @@ test.describe('Marketplace — product visibility after wizard publish (E2E)', (
       admin,
       product.id,
       courseTitle,
-      /S'inscrire|inscrire/i
+      /S'inscrire|inscrire/i,
+      'course'
     );
 
     testInfo.attach('marketplace-visible-course-id', {
@@ -167,7 +168,14 @@ test.describe('Marketplace — product visibility after wizard publish (E2E)', (
     const product = await fetchLatestPublishedProduct(admin, ctx.storeId, 'digital');
     expect(product.name).toBe(productName);
 
-    await assertGuestMarketplaceProductVisible(page, admin, product.id, productName, /Acheter/i);
+    await assertGuestMarketplaceProductVisible(
+      page,
+      admin,
+      product.id,
+      productName,
+      /Acheter/i,
+      'digital'
+    );
 
     testInfo.attach('marketplace-visible-digital-id', {
       body: product.id,
@@ -204,7 +212,14 @@ test.describe('Marketplace — product visibility after wizard publish (E2E)', (
     const product = await fetchLatestPublishedProduct(admin, ctx.storeId, 'physical');
     expect(product.name).toBe(productName);
 
-    await assertGuestMarketplaceProductVisible(page, admin, product.id, productName, /Commander/i);
+    await assertGuestMarketplaceProductVisible(
+      page,
+      admin,
+      product.id,
+      productName,
+      /Commander/i,
+      'physical'
+    );
 
     testInfo.attach('marketplace-visible-physical-id', {
       body: product.id,
@@ -240,7 +255,14 @@ test.describe('Marketplace — product visibility after wizard publish (E2E)', (
     const product = await fetchLatestPublishedProduct(admin, ctx.storeId, 'service');
     expect(product.name).toBe(serviceName);
 
-    await assertGuestMarketplaceProductVisible(page, admin, product.id, serviceName, /Réserver/i);
+    await assertGuestMarketplaceProductVisible(
+      page,
+      admin,
+      product.id,
+      serviceName,
+      /Réserver/i,
+      'service'
+    );
 
     testInfo.attach('marketplace-visible-service-id', {
       body: product.id,
@@ -272,7 +294,14 @@ test.describe('Marketplace — product visibility after wizard publish (E2E)', (
     const product = await fetchLatestPublishedProduct(admin, ctx.storeId, 'artist');
     expect(product.name).toBe(artworkTitle);
 
-    await assertGuestMarketplaceProductVisible(page, admin, product.id, artworkTitle, /Acheter/i);
+    await assertGuestMarketplaceProductVisible(
+      page,
+      admin,
+      product.id,
+      artworkTitle,
+      /Acheter/i,
+      'artist'
+    );
 
     testInfo.attach('marketplace-visible-artist-id', {
       body: product.id,
