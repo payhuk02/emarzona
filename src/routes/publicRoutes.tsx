@@ -113,6 +113,9 @@ const UnsubscribePage = lazyPage(() => import('@/pages/UnsubscribePage'));
 const ShortLinkRedirect = lazyPage(() =>
   import('@/pages/affiliate/ShortLinkRedirect').then(m => ({ default: m.ShortLinkRedirect }))
 );
+const ReferralShortLinkLanding = lazyPage(
+  () => import('@/pages/referral/ReferralShortLinkLanding')
+);
 
 // Page test i18n
 const I18nTest = lazyPage(() => import('@/pages/I18nTest'));
@@ -285,6 +288,9 @@ export const publicRoutes = (
     <Route path="/auctions" element={<AuctionsListPage />} />
     <Route path="/auctions/:slug" element={<AuctionDetailPage />} />
     <Route path="/verify/:code" element={<VerifyCertificatePage />} />
+
+    {/* Parrainage — lien court /p/abcdef */}
+    <Route path="/p/:code" element={<ReferralShortLinkLanding />} />
 
     {/* Affiliation */}
     <Route path="/aff/:code" element={<ShortLinkRedirect />} />

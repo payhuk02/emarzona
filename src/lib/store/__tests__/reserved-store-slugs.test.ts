@@ -7,6 +7,8 @@ describe('reserved-store-slugs', () => {
     for (const slug of [
       'api',
       'app',
+      'p',
+      'aff',
       'web',
       'whatsapp',
       'police',

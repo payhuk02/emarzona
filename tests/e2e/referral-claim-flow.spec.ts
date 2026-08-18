@@ -46,6 +46,16 @@ test.describe('Referral — tracking URL (browser)', () => {
     const stored = await page.evaluate(() => localStorage.getItem('referral_code'));
     expect(stored).toBeNull();
   });
+
+  test('/p/abcdef stocke le code dans localStorage', async ({ page }) => {
+    await gotoApp(page, '/p/abcdef');
+
+    await expect
+      .poll(async () => page.evaluate(() => localStorage.getItem('referral_code')), {
+        timeout: 15_000,
+      })
+      .toBe('abcdef');
+  });
 });
 
 test.describe('Referral — claim après auth (E2E Supabase)', () => {

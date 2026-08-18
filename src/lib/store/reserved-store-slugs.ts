@@ -10,6 +10,8 @@ const RESERVED_STORE_SLUGS_LIST = [
   'admin',
   'api',
   'app',
+  'aff',
+  'p',
   'apps',
   'support',
   'help',

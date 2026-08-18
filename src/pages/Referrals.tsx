@@ -27,6 +27,7 @@ import {
   Loader2,
   Search,
   X,
+  Pencil,
 } from 'lucide-react';
 import { useReferral } from '@/hooks/useReferral';
 import { useToast } from '@/hooks/use-toast';
@@ -35,6 +36,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useDebounce } from '@/hooks/useDebounce';
 import { logger } from '@/lib/logger';
+import { getReferralLinkOrigin } from '@/lib/referral/referral-link';
+import { normalizeReferralSlug } from '@/lib/referral/referral-slug';
 import {
   Table,
   TableBody,
@@ -55,12 +58,16 @@ const Referrals = () => {
     refetch,
     refetchReferrals,
     refetchCommissions,
+    updateReferralSlug,
   } = useReferral();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
   const [searchQuery, setSearchQuery] = useState('');
+  const [isEditingSlug, setIsEditingSlug] = useState(false);
+  const [draftSlug, setDraftSlug] = useState('');
+  const [savingSlug, setSavingSlug] = useState(false);
   const debouncedSearch = useDebounce(searchQuery, 300);
   const headerRef = useScrollAnimation();
   const statsRef = useScrollAnimation();
@@ -79,6 +86,18 @@ const Referrals = () => {
       setHasLoadedCommissions(true);
     }
   }, [activeTab]); // Seulement dépendre de activeTab pour éviter les boucles
+
+  const handleStartEditSlug = () => {
+    setDraftSlug(normalizeReferralSlug(data?.referralCode || ''));
+    setIsEditingSlug(true);
+  };
+
+  const handleSaveSlug = async () => {
+    setSavingSlug(true);
+    const ok = await updateReferralSlug(draftSlug);
+    setSavingSlug(false);
+    if (ok) setIsEditingSlug(false);
+  };
 
   const copyToClipboard = async () => {
     if (!data?.referralLink) return;
@@ -402,44 +421,109 @@ const Referrals = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex flex-col sm:flex-row gap-3">
-                  <div className="flex-1 relative">
-                    <Input
-                      type="text"
-                      readOnly
-                      value={
-                        loading
-                          ? 'Chargement...'
-                          : data?.referralLink && data.referralLink.includes('?ref=')
-                            ? data.referralLink
-                            : data?.referralLink || 'Génération du code...'
-                      }
-                      placeholder="Génération du code de parrainage..."
-                      className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-muted rounded-lg font-mono text-xs sm:text-sm border border-border focus:outline-none focus:border-purple-500 transition-colors"
-                    />
-                    {data?.referralCode && (
-                      <p className="text-xs text-muted-foreground mt-1.5 sm:mt-2">
+                  <div className="flex-1 space-y-2">
+                    {isEditingSlug ? (
+                      <div className="flex items-stretch rounded-lg border border-border bg-muted overflow-hidden focus-within:border-purple-500">
+                        <span className="shrink-0 px-3 py-2 sm:py-3 text-xs sm:text-sm text-muted-foreground border-r border-border bg-muted/80 font-mono">
+                          {getReferralLinkOrigin()}/p/
+                        </span>
+                        <Input
+                          value={draftSlug}
+                          onChange={e =>
+                            setDraftSlug(normalizeReferralSlug(e.target.value).slice(0, 20))
+                          }
+                          autoFocus
+                          maxLength={20}
+                          aria-label="Code de parrainage personnalisé"
+                          className="border-0 bg-background rounded-none font-mono text-xs sm:text-sm focus-visible:ring-0"
+                          placeholder="abcdef"
+                        />
+                      </div>
+                    ) : (
+                      <Input
+                        type="text"
+                        readOnly
+                        value={
+                          loading ? 'Chargement...' : data?.referralLink || 'Génération du code...'
+                        }
+                        placeholder="Génération du code de parrainage..."
+                        className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-muted rounded-lg font-mono text-xs sm:text-sm border border-border focus:outline-none focus:border-purple-500 transition-colors"
+                      />
+                    )}
+                    {data?.referralCode && !isEditingSlug && (
+                      <p className="text-xs text-muted-foreground">
                         Votre code :{' '}
-                        <span className="font-mono font-semibold">{data.referralCode}</span>
+                        <span className="font-mono font-semibold">
+                          {normalizeReferralSlug(data.referralCode)}
+                        </span>
+                        <span className="text-muted-foreground/80"> — personnalisable</span>
+                      </p>
+                    )}
+                    {isEditingSlug && (
+                      <p className="text-xs text-muted-foreground">
+                        4 à 20 lettres ou chiffres, sans espace. Exemple : abcdef
                       </p>
                     )}
                   </div>
-                  <Button
-                    onClick={copyToClipboard}
-                    disabled={loading || !data?.referralLink}
-                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-white h-9 sm:h-10 lg:h-11"
-                  >
-                    {copied ? (
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    {isEditingSlug ? (
                       <>
-                        <Check className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
-                        <span className="text-xs sm:text-sm">Copié !</span>
+                        <Button
+                          onClick={() => void handleSaveSlug()}
+                          disabled={savingSlug || !draftSlug}
+                          className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white h-9 sm:h-10 lg:h-11"
+                        >
+                          {savingSlug ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <>
+                              <Check className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5" />
+                              Enregistrer
+                            </>
+                          )}
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          disabled={savingSlug}
+                          onClick={() => setIsEditingSlug(false)}
+                          className="h-9 sm:h-10 lg:h-11"
+                        >
+                          Annuler
+                        </Button>
                       </>
                     ) : (
                       <>
-                        <Copy className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
-                        <span className="text-xs sm:text-sm">Copier le lien</span>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={handleStartEditSlug}
+                          disabled={loading || !data?.referralCode}
+                          className="h-9 sm:h-10 lg:h-11"
+                        >
+                          <Pencil className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5" />
+                          Personnaliser
+                        </Button>
+                        <Button
+                          onClick={copyToClipboard}
+                          disabled={loading || !data?.referralLink}
+                          className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-white h-9 sm:h-10 lg:h-11"
+                        >
+                          {copied ? (
+                            <>
+                              <Check className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
+                              <span className="text-xs sm:text-sm">Copié !</span>
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
+                              <span className="text-xs sm:text-sm">Copier le lien</span>
+                            </>
+                          )}
+                        </Button>
                       </>
                     )}
-                  </Button>
+                  </div>
                 </div>
 
                 {/* Boutons de partage social */}
@@ -927,8 +1011,8 @@ const Referrals = () => {
                         Partagez votre lien
                       </h3>
                       <p className="text-sm sm:text-base text-muted-foreground">
-                        Envoyez votre lien de parrainage à vos amis, sur les réseaux sociaux ou par
-                        email. Plus vous partagez, plus vous avez de chances de gagner !
+                        Envoyez votre lien court (exemple : emarzona.com/p/abcdef) à vos amis, sur
+                        les réseaux ou par email. Vous pouvez personnaliser le code.
                       </p>
                     </div>
                   </div>

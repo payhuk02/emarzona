@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
+import { buildReferralShortUrl } from '@/lib/referral/referral-link';
+import { normalizeReferralSlug, validateReferralSlug } from '@/lib/referral/referral-slug';
 
 export interface ReferralData {
   referralCode: string;
@@ -169,8 +171,7 @@ export const useReferral = () => {
           ?.filter(c => c.status === 'paid' || c.status === 'completed')
           .reduce((sum, c) => sum + Number(c.commission_amount || 0), 0) || 0;
 
-      const baseUrl = window.location.origin;
-      const referralLink = `${baseUrl}/?ref=${profileData.referral_code || ''}`;
+      const referralLink = buildReferralShortUrl(profileData.referral_code || '');
 
       setData({
         referralCode: profileData.referral_code || '',
@@ -640,6 +641,71 @@ export const useReferral = () => {
     fetchReferralData();
   }, []);
 
+  const updateReferralSlug = async (rawSlug: string): Promise<boolean> => {
+    const slug = normalizeReferralSlug(rawSlug);
+    const validationError = validateReferralSlug(slug);
+    if (validationError) {
+      toast({
+        title: 'Code invalide',
+        description: validationError,
+        variant: 'destructive',
+      });
+      return false;
+    }
+
+    const { data: result, error } = await supabase.rpc('update_my_referral_slug', {
+      p_slug: slug,
+    });
+
+    if (error) {
+      logger.error('update_my_referral_slug failed', { error: error.message, slug });
+      const taken =
+        error.code === '23505' || /unique|duplicate|taken|referral_code/i.test(error.message);
+      toast({
+        title: taken ? 'Code déjà utilisé' : 'Impossible d’enregistrer',
+        description: taken
+          ? 'Ce lien de parrainage appartient déjà à un autre utilisateur.'
+          : error.message,
+        variant: 'destructive',
+      });
+      return false;
+    }
+
+    const payload = (result ?? {}) as { success?: boolean; error?: string; slug?: string };
+    if (!payload.success) {
+      const messages: Record<string, string> = {
+        taken: 'Ce lien de parrainage appartient déjà à un autre utilisateur.',
+        reserved: 'Ce code est réservé. Choisissez-en un autre.',
+        invalid_length: 'Le code doit contenir entre 4 et 20 caractères.',
+        invalid_format: 'Utilisez uniquement des lettres et des chiffres.',
+        not_authenticated: 'Reconnectez-vous pour modifier votre lien.',
+      };
+      toast({
+        title: 'Code indisponible',
+        description: messages[payload.error ?? ''] || 'Impossible de personnaliser ce code.',
+        variant: 'destructive',
+      });
+      return false;
+    }
+
+    const saved = payload.slug || slug;
+    setData(prev =>
+      prev
+        ? {
+            ...prev,
+            referralCode: saved,
+            referralLink: buildReferralShortUrl(saved),
+          }
+        : prev
+    );
+
+    toast({
+      title: 'Lien mis à jour',
+      description: 'Votre lien de parrainage personnalisé est prêt.',
+    });
+    return true;
+  };
+
   return {
     data,
     referrals,
@@ -650,5 +716,6 @@ export const useReferral = () => {
     refetch: fetchReferralData,
     refetchReferrals: fetchReferrals,
     refetchCommissions: fetchCommissions,
+    updateReferralSlug,
   };
 };

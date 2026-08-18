@@ -46083,6 +46083,8 @@ export type Database = {
         Returns: number;
       };
       generate_referral_code: { Args: never; Returns: string };
+      claim_referral: { Args: { p_referral_code: string }; Returns: Json };
+      update_my_referral_slug: { Args: { p_slug: string }; Returns: Json };
       generate_reorder_recommendations: {
         Args: { p_store_id: string };
         Returns: number;

@@ -1,34 +1,35 @@
-import { useState, useEffect, useRef } from "react";
-import { useTranslation } from "react-i18next";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Progress } from "@/components/ui/progress";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Switch } from "@/components/ui/switch";
-import { useAuth } from "@/contexts/AuthContext";
-import { useProfile } from "@/hooks/useProfile";
-import { logger } from "@/lib/logger";
-import { 
-  User, 
-  Mail, 
-  Phone, 
-  MapPin, 
-  Globe, 
-  Camera, 
-  Edit3, 
-  Save, 
-  X, 
-  CheckCircle2, 
-  AlertCircle, 
+import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Progress } from '@/components/ui/progress';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Switch } from '@/components/ui/switch';
+import { useAuth } from '@/contexts/AuthContext';
+import { useProfile } from '@/hooks/useProfile';
+import { logger } from '@/lib/logger';
+import { buildReferralShortUrl } from '@/lib/referral/referral-link';
+import {
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  Globe,
+  Camera,
+  Edit3,
+  Save,
+  X,
+  CheckCircle2,
+  AlertCircle,
   Loader2,
   Copy,
   Share2,
@@ -52,51 +53,65 @@ import {
   Target,
   BarChart3,
   PieChart,
-  Activity
-} from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { cn } from "@/lib/utils";
+  Activity,
+} from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { cn } from '@/lib/utils';
+
+type ReferralInfoState = {
+  referral_code: string | null;
+  total_referral_earnings?: number | null;
+  referred_by?: string | null;
+};
+
+type ReferredProfileRow = {
+  id: string;
+  display_name?: string | null;
+  first_name?: string | null;
+  last_name?: string | null;
+  created_at: string;
+};
 
 export const AdvancedProfileSettings = () => {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const { 
-    profile, 
-    loading: profileLoading, 
-    uploading, 
-    uploadAvatar, 
-    removeAvatar, 
-    updateProfile, 
+  const {
+    profile,
+    loading: profileLoading,
+    uploading,
+    uploadAvatar,
+    removeAvatar,
+    updateProfile,
     getProfileStats,
     getProfileCompletion,
     getReferralInfo,
     getReferredProfiles,
-    refetch 
+    refetch,
   } = useProfile();
   const { toast } = useToast();
-  
+
   // États pour l'édition
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState("overview");
-  
+  const [activeTab, setActiveTab] = useState('overview');
+
   // États des champs du formulaire
   const [formData, setFormData] = useState({
-    displayName: "",
-    firstName: "",
-    lastName: "",
-    bio: "",
-    phone: "",
-    location: "",
-    website: "",
+    displayName: '',
+    firstName: '',
+    lastName: '',
+    bio: '',
+    phone: '',
+    location: '',
+    website: '',
   });
-  
+
   // États pour les fonctionnalités avancées
-  const [profileStats, setProfileStats] = useState<any>(null);
-  const [referralInfo, setReferralInfo] = useState<any>(null);
-  const [referredProfiles, setReferredProfiles] = useState<any[]>([]);
+  const [profileStats, setProfileStats] = useState<unknown>(null);
+  const [referralInfo, setReferralInfo] = useState<ReferralInfoState | null>(null);
+  const [referredProfiles, setReferredProfiles] = useState<ReferredProfileRow[]>([]);
   const [showPrivateInfo, setShowPrivateInfo] = useState(false);
   const [notifications, setNotifications] = useState({
     emailUpdates: true,
@@ -104,20 +119,20 @@ export const AdvancedProfileSettings = () => {
     securityAlerts: true,
     referralNotifications: true,
   });
-  
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Charger les données du profil
   useEffect(() => {
     if (profile) {
       setFormData({
-        displayName: profile.display_name || "",
-        firstName: profile.first_name || "",
-        lastName: profile.last_name || "",
-        bio: profile.bio || "",
-        phone: profile.phone || "",
-        location: profile.location || "",
-        website: profile.website || "",
+        displayName: profile.display_name || '',
+        firstName: profile.first_name || '',
+        lastName: profile.last_name || '',
+        bio: profile.bio || '',
+        phone: profile.phone || '',
+        location: profile.location || '',
+        website: profile.website || '',
       });
     }
   }, [profile]);
@@ -134,9 +149,9 @@ export const AdvancedProfileSettings = () => {
       const [stats, referral, referred] = await Promise.all([
         getProfileStats(),
         getReferralInfo(),
-        getReferredProfiles()
+        getReferredProfiles(),
       ]);
-      
+
       setProfileStats(stats);
       setReferralInfo(referral);
       setReferredProfiles(referred);
@@ -178,30 +193,30 @@ export const AdvancedProfileSettings = () => {
     setIsEditing(false);
     if (profile) {
       setFormData({
-        displayName: profile.display_name || "",
-        firstName: profile.first_name || "",
-        lastName: profile.last_name || "",
-        bio: profile.bio || "",
-        phone: profile.phone || "",
-        location: profile.location || "",
-        website: profile.website || "",
+        displayName: profile.display_name || '',
+        firstName: profile.first_name || '',
+        lastName: profile.last_name || '',
+        bio: profile.bio || '',
+        phone: profile.phone || '',
+        location: profile.location || '',
+        website: profile.website || '',
       });
     }
   };
 
   const copyReferralCode = () => {
     if (referralInfo?.referral_code) {
-      navigator.clipboard.writeText(referralInfo.referral_code);
+      navigator.clipboard.writeText(buildReferralShortUrl(referralInfo.referral_code));
       toast({
-        title: "Code copié",
-        description: "Le code de parrainage a été copié dans le presse-papiers",
+        title: 'Lien copié',
+        description: 'Le lien de parrainage a été copié dans le presse-papiers',
       });
     }
   };
 
   const shareReferralCode = () => {
     if (referralInfo?.referral_code) {
-      const shareUrl = `${window.location.origin}/register?ref=${referralInfo.referral_code}`;
+      const shareUrl = buildReferralShortUrl(referralInfo.referral_code);
       navigator.clipboard.writeText(shareUrl);
       toast({
         title: t('settings.profileSettings.referral.linkShared'),
@@ -220,7 +235,7 @@ export const AdvancedProfileSettings = () => {
     if (user?.email) {
       return user.email[0].toUpperCase();
     }
-    return "U";
+    return 'U';
   };
 
   const profileCompletion = getProfileCompletion();
@@ -238,9 +253,7 @@ export const AdvancedProfileSettings = () => {
     return (
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
-        <AlertDescription>
-          {t('settings.profileSettings.error')}
-        </AlertDescription>
+        <AlertDescription>{t('settings.profileSettings.error')}</AlertDescription>
       </Alert>
     );
   }
@@ -255,7 +268,7 @@ export const AdvancedProfileSettings = () => {
               <div className="flex items-center gap-4">
                 <div className="relative">
                   <Avatar className="h-20 w-20 border-4 border-primary/20">
-                    <AvatarImage src={profile.avatar_url || ""} alt="Avatar" />
+                    <AvatarImage src={profile.avatar_url || ''} alt="Avatar" />
                     <AvatarFallback className="text-lg font-semibold bg-primary text-primary-foreground">
                       {getInitials()}
                     </AvatarFallback>
@@ -287,10 +300,11 @@ export const AdvancedProfileSettings = () => {
                     {formData.displayName || user?.email}
                   </h1>
                   <p className="text-muted-foreground">
-                    {formData.firstName && formData.lastName 
-                      ? `${formData.firstName} ${formData.lastName}` 
-                      : t('settings.profileSettings.memberSince') + " " + format(new Date(profile.created_at), "MMMM yyyy", { locale: fr })
-                    }
+                    {formData.firstName && formData.lastName
+                      ? `${formData.firstName} ${formData.lastName}`
+                      : t('settings.profileSettings.memberSince') +
+                        ' ' +
+                        format(new Date(profile.created_at), 'MMMM yyyy', { locale: fr })}
                   </p>
                   <div className="flex items-center gap-2 mt-2">
                     <Badge variant="outline" className="text-xs">
@@ -331,7 +345,9 @@ export const AdvancedProfileSettings = () => {
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-foreground">Complétion du profil</span>
-              <span className="text-sm text-muted-foreground font-semibold">{profileCompletion}%</span>
+              <span className="text-sm text-muted-foreground font-semibold">
+                {profileCompletion}%
+              </span>
             </div>
             <Progress value={profileCompletion} className="h-2" />
             <p className="text-xs text-muted-foreground mt-2">
@@ -343,11 +359,36 @@ export const AdvancedProfileSettings = () => {
         {/* Onglets */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-5 bg-muted border border-border">
-            <TabsTrigger value="overview" className="data-[state=active]:bg-background data-[state=active]:text-foreground">Vue d'ensemble</TabsTrigger>
-            <TabsTrigger value="personal" className="data-[state=active]:bg-background data-[state=active]:text-foreground">Informations</TabsTrigger>
-            <TabsTrigger value="referral" className="data-[state=active]:bg-background data-[state=active]:text-foreground">Parrainage</TabsTrigger>
-            <TabsTrigger value="stats" className="data-[state=active]:bg-background data-[state=active]:text-foreground">Statistiques</TabsTrigger>
-            <TabsTrigger value="settings" className="data-[state=active]:bg-background data-[state=active]:text-foreground">Paramètres</TabsTrigger>
+            <TabsTrigger
+              value="overview"
+              className="data-[state=active]:bg-background data-[state=active]:text-foreground"
+            >
+              Vue d'ensemble
+            </TabsTrigger>
+            <TabsTrigger
+              value="personal"
+              className="data-[state=active]:bg-background data-[state=active]:text-foreground"
+            >
+              Informations
+            </TabsTrigger>
+            <TabsTrigger
+              value="referral"
+              className="data-[state=active]:bg-background data-[state=active]:text-foreground"
+            >
+              Parrainage
+            </TabsTrigger>
+            <TabsTrigger
+              value="stats"
+              className="data-[state=active]:bg-background data-[state=active]:text-foreground"
+            >
+              Statistiques
+            </TabsTrigger>
+            <TabsTrigger
+              value="settings"
+              className="data-[state=active]:bg-background data-[state=active]:text-foreground"
+            >
+              Paramètres
+            </TabsTrigger>
           </TabsList>
 
           {/* Vue d'ensemble */}
@@ -370,7 +411,9 @@ export const AdvancedProfileSettings = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-muted-foreground">Parrainages</p>
-                      <p className="text-2xl font-bold text-foreground">{referredProfiles.length}</p>
+                      <p className="text-2xl font-bold text-foreground">
+                        {referredProfiles.length}
+                      </p>
                     </div>
                     <Users className="h-8 w-8 text-green-600" />
                   </div>
@@ -397,7 +440,7 @@ export const AdvancedProfileSettings = () => {
                     <div>
                       <p className="text-sm text-muted-foreground">Membre depuis</p>
                       <p className="text-sm font-semibold text-foreground">
-                        {format(new Date(profile.created_at), "MMM yyyy", { locale: fr })}
+                        {format(new Date(profile.created_at), 'MMM yyyy', { locale: fr })}
                       </p>
                     </div>
                     <Calendar className="h-8 w-8 text-purple-600" />
@@ -421,7 +464,9 @@ export const AdvancedProfileSettings = () => {
                     <div>
                       <p className="text-sm font-medium text-foreground">Profil mis à jour</p>
                       <p className="text-xs text-muted-foreground">
-                        {format(new Date(profile.updated_at), "dd MMM yyyy à HH:mm", { locale: fr })}
+                        {format(new Date(profile.updated_at), 'dd MMM yyyy à HH:mm', {
+                          locale: fr,
+                        })}
                       </p>
                     </div>
                   </div>
@@ -429,8 +474,12 @@ export const AdvancedProfileSettings = () => {
                     <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg border border-border">
                       <Share2 className="h-5 w-5 text-primary" />
                       <div>
-                        <p className="text-sm font-medium text-foreground">Code de parrainage généré</p>
-                        <p className="text-xs text-muted-foreground">Code: {referralInfo.referral_code}</p>
+                        <p className="text-sm font-medium text-foreground">
+                          Code de parrainage généré
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Code: {referralInfo.referral_code}
+                        </p>
                       </div>
                     </div>
                   )}
@@ -445,7 +494,9 @@ export const AdvancedProfileSettings = () => {
               <CardHeader className="pb-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle className="text-lg font-semibold text-foreground">Informations personnelles</CardTitle>
+                    <CardTitle className="text-lg font-semibold text-foreground">
+                      Informations personnelles
+                    </CardTitle>
                     <CardDescription className="text-muted-foreground">
                       Gérez vos informations personnelles et votre profil public
                     </CardDescription>
@@ -474,10 +525,14 @@ export const AdvancedProfileSettings = () => {
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <Label className="text-sm font-medium text-foreground">Nom d'affichage *</Label>
+                      <Label className="text-sm font-medium text-foreground">
+                        Nom d'affichage *
+                      </Label>
                       <Input
                         value={formData.displayName}
-                        onChange={(e) => setFormData(prev => ({ ...prev, displayName: e.target.value }))}
+                        onChange={e =>
+                          setFormData(prev => ({ ...prev, displayName: e.target.value }))
+                        }
                         placeholder="Votre nom d'affichage"
                         className="bg-background border-input text-foreground placeholder:text-muted-foreground"
                         disabled={!isEditing}
@@ -488,18 +543,22 @@ export const AdvancedProfileSettings = () => {
                     <div className="space-y-2">
                       <Label className="text-sm font-medium text-foreground">Email</Label>
                       <Input
-                        value={user?.email || ""}
+                        value={user?.email || ''}
                         disabled
                         className="bg-muted border-input text-muted-foreground"
                       />
-                      <p className="text-xs text-muted-foreground">L'email ne peut pas être modifié</p>
+                      <p className="text-xs text-muted-foreground">
+                        L'email ne peut pas être modifié
+                      </p>
                     </div>
 
                     <div className="space-y-2">
                       <Label className="text-sm font-medium text-foreground">Prénom</Label>
                       <Input
                         value={formData.firstName}
-                        onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
+                        onChange={e =>
+                          setFormData(prev => ({ ...prev, firstName: e.target.value }))
+                        }
                         placeholder="Votre prénom"
                         className="bg-background border-input text-foreground placeholder:text-muted-foreground"
                         disabled={!isEditing}
@@ -510,7 +569,7 @@ export const AdvancedProfileSettings = () => {
                       <Label className="text-sm font-medium text-foreground">Nom de famille</Label>
                       <Input
                         value={formData.lastName}
-                        onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
+                        onChange={e => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
                         placeholder="Votre nom de famille"
                         className="bg-background border-input text-foreground placeholder:text-muted-foreground"
                         disabled={!isEditing}
@@ -521,7 +580,7 @@ export const AdvancedProfileSettings = () => {
                       <Label className="text-sm font-medium text-foreground">Téléphone</Label>
                       <Input
                         value={formData.phone}
-                        onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+                        onChange={e => setFormData(prev => ({ ...prev, phone: e.target.value }))}
                         placeholder="+226 XX XX XX XX"
                         className="bg-background border-input text-foreground placeholder:text-muted-foreground"
                         disabled={!isEditing}
@@ -532,7 +591,7 @@ export const AdvancedProfileSettings = () => {
                       <Label className="text-sm font-medium text-foreground">Localisation</Label>
                       <Input
                         value={formData.location}
-                        onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
+                        onChange={e => setFormData(prev => ({ ...prev, location: e.target.value }))}
                         placeholder="Ville, Pays"
                         className="bg-background border-input text-foreground placeholder:text-muted-foreground"
                         disabled={!isEditing}
@@ -543,7 +602,7 @@ export const AdvancedProfileSettings = () => {
                       <Label className="text-sm font-medium text-foreground">Site web</Label>
                       <Input
                         value={formData.website}
-                        onChange={(e) => setFormData(prev => ({ ...prev, website: e.target.value }))}
+                        onChange={e => setFormData(prev => ({ ...prev, website: e.target.value }))}
                         placeholder="https://votre-site.com"
                         className="bg-background border-input text-foreground placeholder:text-muted-foreground"
                         disabled={!isEditing}
@@ -554,7 +613,7 @@ export const AdvancedProfileSettings = () => {
                       <Label className="text-sm font-medium text-foreground">Biographie</Label>
                       <Textarea
                         value={formData.bio}
-                        onChange={(e) => setFormData(prev => ({ ...prev, bio: e.target.value }))}
+                        onChange={e => setFormData(prev => ({ ...prev, bio: e.target.value }))}
                         placeholder="Parlez-nous de vous..."
                         rows={4}
                         className="bg-background border-input text-foreground placeholder:text-muted-foreground"
@@ -616,9 +675,11 @@ export const AdvancedProfileSettings = () => {
                     <div className="p-4 bg-muted/50 rounded-lg border border-border">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-medium text-foreground">Votre code de parrainage</p>
-                          <p className="text-2xl font-bold text-primary font-mono">
-                            {referralInfo.referral_code}
+                          <p className="text-sm font-medium text-foreground">
+                            Votre lien de parrainage
+                          </p>
+                          <p className="text-lg font-bold text-primary font-mono break-all">
+                            {buildReferralShortUrl(referralInfo.referral_code)}
                           </p>
                         </div>
                         <div className="flex items-center gap-2">
@@ -650,7 +711,9 @@ export const AdvancedProfileSettings = () => {
                           <div className="flex items-center justify-between">
                             <div>
                               <p className="text-sm text-muted-foreground">Parrainages</p>
-                              <p className="text-2xl font-bold text-foreground">{referredProfiles.length}</p>
+                              <p className="text-2xl font-bold text-foreground">
+                                {referredProfiles.length}
+                              </p>
                             </div>
                             <Users className="h-8 w-8 text-green-600" />
                           </div>
@@ -674,22 +737,32 @@ export const AdvancedProfileSettings = () => {
 
                     {referredProfiles.length > 0 && (
                       <div>
-                        <h3 className="text-lg font-semibold text-foreground mb-4">Parrainages récents</h3>
+                        <h3 className="text-lg font-semibold text-foreground mb-4">
+                          Parrainages récents
+                        </h3>
                         <div className="space-y-2">
-                          {referredProfiles.slice(0, 5).map((ref) => (
-                            <div key={ref.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg border border-border">
+                          {referredProfiles.slice(0, 5).map(ref => (
+                            <div
+                              key={ref.id}
+                              className="flex items-center justify-between p-3 bg-muted/50 rounded-lg border border-border"
+                            >
                               <div className="flex items-center gap-3">
                                 <Avatar className="h-8 w-8">
                                   <AvatarFallback className="text-xs bg-primary text-primary-foreground">
-                                    {ref.display_name?.[0] || "U"}
+                                    {ref.display_name?.[0] || 'U'}
                                   </AvatarFallback>
                                 </Avatar>
                                 <div>
                                   <p className="text-sm font-medium text-foreground">
-                                    {ref.display_name || `${ref.first_name || ""} ${ref.last_name || ""}`.trim() || "Utilisateur"}
+                                    {ref.display_name ||
+                                      `${ref.first_name || ''} ${ref.last_name || ''}`.trim() ||
+                                      'Utilisateur'}
                                   </p>
                                   <p className="text-xs text-muted-foreground">
-                                    Rejoint le {format(new Date(ref.created_at), "dd MMM yyyy", { locale: fr })}
+                                    Rejoint le{' '}
+                                    {format(new Date(ref.created_at), 'dd MMM yyyy', {
+                                      locale: fr,
+                                    })}
                                   </p>
                                 </div>
                               </div>
@@ -726,21 +799,23 @@ export const AdvancedProfileSettings = () => {
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-muted-foreground">Complétion du profil</span>
-                      <span className="text-sm font-semibold text-foreground">{profileCompletion}%</span>
+                      <span className="text-sm font-semibold text-foreground">
+                        {profileCompletion}%
+                      </span>
                     </div>
                     <Progress value={profileCompletion} className="h-2" />
-                    
+
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-muted-foreground">Membre depuis</span>
                       <span className="text-sm font-semibold text-foreground">
-                        {format(new Date(profile.created_at), "dd MMM yyyy", { locale: fr })}
+                        {format(new Date(profile.created_at), 'dd MMM yyyy', { locale: fr })}
                       </span>
                     </div>
-                    
+
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-muted-foreground">Dernière mise à jour</span>
                       <span className="text-sm font-semibold text-foreground">
-                        {format(new Date(profile.updated_at), "dd MMM yyyy", { locale: fr })}
+                        {format(new Date(profile.updated_at), 'dd MMM yyyy', { locale: fr })}
                       </span>
                     </div>
                   </div>
@@ -757,10 +832,25 @@ export const AdvancedProfileSettings = () => {
                 <CardContent>
                   <div className="space-y-3">
                     {[
-                      { label: "Informations de base", value: (formData.displayName ? 1 : 0) + (formData.firstName ? 1 : 0) + (formData.lastName ? 1 : 0), max: 3 },
-                      { label: "Contact", value: (formData.phone ? 1 : 0) + (formData.location ? 1 : 0), max: 2 },
-                      { label: "Présentation", value: (formData.bio ? 1 : 0) + (formData.website ? 1 : 0), max: 2 },
-                      { label: "Avatar", value: profile.avatar_url ? 1 : 0, max: 1 },
+                      {
+                        label: 'Informations de base',
+                        value:
+                          (formData.displayName ? 1 : 0) +
+                          (formData.firstName ? 1 : 0) +
+                          (formData.lastName ? 1 : 0),
+                        max: 3,
+                      },
+                      {
+                        label: 'Contact',
+                        value: (formData.phone ? 1 : 0) + (formData.location ? 1 : 0),
+                        max: 2,
+                      },
+                      {
+                        label: 'Présentation',
+                        value: (formData.bio ? 1 : 0) + (formData.website ? 1 : 0),
+                        max: 2,
+                      },
+                      { label: 'Avatar', value: profile.avatar_url ? 1 : 0, max: 1 },
                     ].map((item, index) => (
                       <div key={index} className="space-y-1">
                         <div className="flex items-center justify-between">
@@ -795,41 +885,54 @@ export const AdvancedProfileSettings = () => {
                   <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg border border-border">
                     <div className="space-y-1">
                       <Label className="text-sm font-medium text-foreground">Profil public</Label>
-                      <p className="text-xs text-muted-foreground">Rendre votre profil visible par d'autres utilisateurs</p>
+                      <p className="text-xs text-muted-foreground">
+                        Rendre votre profil visible par d'autres utilisateurs
+                      </p>
                     </div>
-                    <Switch
-                      checked={showPrivateInfo}
-                      onCheckedChange={setShowPrivateInfo}
-                    />
+                    <Switch checked={showPrivateInfo} onCheckedChange={setShowPrivateInfo} />
                   </div>
 
                   <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg border border-border">
                     <div className="space-y-1">
                       <Label className="text-sm font-medium text-foreground">Statut en ligne</Label>
-                      <p className="text-xs text-muted-foreground">Afficher quand vous êtes connecté</p>
+                      <p className="text-xs text-muted-foreground">
+                        Afficher quand vous êtes connecté
+                      </p>
                     </div>
                     <Switch defaultChecked />
                   </div>
 
                   <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg border border-border">
                     <div className="space-y-1">
-                      <Label className="text-sm font-medium text-foreground">Notifications par email</Label>
-                      <p className="text-xs text-muted-foreground">Recevoir des notifications importantes par email</p>
+                      <Label className="text-sm font-medium text-foreground">
+                        Notifications par email
+                      </Label>
+                      <p className="text-xs text-muted-foreground">
+                        Recevoir des notifications importantes par email
+                      </p>
                     </div>
                     <Switch
                       checked={notifications.emailUpdates}
-                      onCheckedChange={(checked) => setNotifications(prev => ({ ...prev, emailUpdates: checked }))}
+                      onCheckedChange={checked =>
+                        setNotifications(prev => ({ ...prev, emailUpdates: checked }))
+                      }
                     />
                   </div>
 
                   <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg border border-border">
                     <div className="space-y-1">
-                      <Label className="text-sm font-medium text-foreground">Emails marketing</Label>
-                      <p className="text-xs text-muted-foreground">Recevoir des offres et promotions</p>
+                      <Label className="text-sm font-medium text-foreground">
+                        Emails marketing
+                      </Label>
+                      <p className="text-xs text-muted-foreground">
+                        Recevoir des offres et promotions
+                      </p>
                     </div>
                     <Switch
                       checked={notifications.marketingEmails}
-                      onCheckedChange={(checked) => setNotifications(prev => ({ ...prev, marketingEmails: checked }))}
+                      onCheckedChange={checked =>
+                        setNotifications(prev => ({ ...prev, marketingEmails: checked }))
+                      }
                     />
                   </div>
                 </div>
@@ -852,7 +955,7 @@ export const AdvancedProfileSettings = () => {
                     <Download className="h-4 w-4 mr-2" />
                     Exporter les données
                   </Button>
-                  
+
                   <Button
                     variant="outline"
                     className="border-border text-foreground hover:bg-accent"
@@ -869,9 +972,3 @@ export const AdvancedProfileSettings = () => {
     </TooltipProvider>
   );
 };
-
-
-
-
-
-

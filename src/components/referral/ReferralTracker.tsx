@@ -1,40 +1,40 @@
 import { useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useLocation, useSearchParams } from 'react-router-dom';
 import { logger } from '@/lib/logger';
+import { extractReferralCodeFromPath } from '@/lib/referral/referral-link';
+
+export function persistReferralCode(code: string) {
+  const trimmed = code.trim();
+  if (!trimmed) return;
+  try {
+    localStorage.setItem('referral_code', trimmed);
+    sessionStorage.setItem('referral_code', trimmed);
+  } catch (error) {
+    logger.error('Error tracking referral code', {
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
+}
 
 /**
- * Composant pour tracker les codes de parrainage dans l'URL
- * Stocke le code dans localStorage pour l'utiliser lors de l'inscription
+ * Capture le code de parrainage : ?ref=CODE (ancien) ou /p/abcdef (lien court).
  */
 export const ReferralTracker = () => {
   const [searchParams] = useSearchParams();
+  const location = useLocation();
 
   useEffect(() => {
-    const referralCode = searchParams.get('ref');
-    
-    // Ne traiter que si le code existe et n'est pas vide
-    if (referralCode && referralCode.trim() !== '') {
-      try {
-        // Stocker le code de parrainage dans localStorage
-        localStorage.setItem('referral_code', referralCode.trim());
-        
-        // Optionnel : stocker aussi dans sessionStorage pour une session
-        sessionStorage.setItem('referral_code', referralCode.trim());
-        
-        logger.info('Referral code tracked', { code: referralCode.trim() });
-        
-        // Nettoyer l'URL pour ne pas laisser le paramètre visible
-        // (On garde le paramètre pour que l'utilisateur puisse le voir s'il le souhaite)
-      } catch (err: any) {
-        logger.error('Error tracking referral code', { error: (err as Error).message });
-      }
-    } else if (referralCode === '') {
-      // Si ref= existe mais est vide, ne rien faire
-      logger.debug('Empty referral code in URL, ignoring');
-    }
-  }, [searchParams]);
+    const fromQuery = searchParams.get('ref')?.trim() || '';
+    const fromPath = extractReferralCodeFromPath(location.pathname);
+    const referralCode = fromQuery || fromPath?.trim() || '';
 
-  return null; // Ce composant ne rend rien
+    if (referralCode) {
+      persistReferralCode(referralCode);
+      logger.info('Referral code tracked', { code: referralCode });
+    }
+  }, [searchParams, location.pathname]);
+
+  return null;
 };
 
 /**
@@ -42,7 +42,7 @@ export const ReferralTracker = () => {
  */
 export const getStoredReferralCode = (): string | null => {
   if (typeof window === 'undefined') return null;
-  
+
   // Essayer localStorage d'abord, puis sessionStorage
   return localStorage.getItem('referral_code') || sessionStorage.getItem('referral_code');
 };
@@ -52,14 +52,7 @@ export const getStoredReferralCode = (): string | null => {
  */
 export const clearStoredReferralCode = (): void => {
   if (typeof window === 'undefined') return;
-  
+
   localStorage.removeItem('referral_code');
   sessionStorage.removeItem('referral_code');
 };
-
-
-
-
-
-
-
