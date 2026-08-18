@@ -29,7 +29,7 @@ import {
 import { CourseBasicInfoForm } from '@/components/courses/create/CourseBasicInfoForm';
 import { CourseCurriculumBuilder } from '@/components/courses/create/CourseCurriculumBuilder';
 import { CourseAdvancedConfig } from '@/components/courses/create/CourseAdvancedConfig';
-import { ProductWhatsAppContactConfig } from '@/components/products/create/shared/ProductWhatsAppContactConfig';
+import { ProductWhatsAppContactConfig } from '@/components/products/shared/ProductWhatsAppContactConfig';
 import { CourseSEOForm, CourseSEOData } from '@/components/courses/create/CourseSEOForm';
 import { CourseFAQForm, FAQ } from '@/components/courses/create/CourseFAQForm';
 import {

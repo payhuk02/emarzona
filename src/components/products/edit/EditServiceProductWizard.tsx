@@ -42,7 +42,7 @@ import { ServiceSEOAndFAQs } from '../create/service/ServiceSEOAndFAQs';
 import { ServicePreview } from '../create/service/ServicePreview';
 import { PaymentOptionsForm } from '../create/shared/PaymentOptionsForm';
 import { ProductStatisticsDisplaySettings } from '../create/shared/ProductStatisticsDisplaySettings';
-import { ProductWhatsAppContactConfig } from '../create/shared/ProductWhatsAppContactConfig';
+import { ProductWhatsAppContactConfig } from '@/components/products/shared/ProductWhatsAppContactConfig';
 import { useToast } from '@/hooks/use-toast';
 import { useStore } from '@/hooks/useStore';
 import { useAuth } from '@/contexts/AuthContext';

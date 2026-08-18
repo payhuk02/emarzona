@@ -40,7 +40,7 @@ import { DigitalPreview } from '../create/digital/DigitalPreview';
 import { ProductSEOForm } from '../create/shared/ProductSEOForm';
 import { ProductFAQForm } from '../create/shared/ProductFAQForm';
 import { ProductStatisticsDisplaySettings } from '../create/shared/ProductStatisticsDisplaySettings';
-import { ProductWhatsAppContactConfig } from '../create/shared/ProductWhatsAppContactConfig';
+import { ProductWhatsAppContactConfig } from '@/components/products/shared/ProductWhatsAppContactConfig';
 import { useToast } from '@/hooks/use-toast';
 import { useStore } from '@/hooks/useStore';
 import { useAuth } from '@/contexts/AuthContext';

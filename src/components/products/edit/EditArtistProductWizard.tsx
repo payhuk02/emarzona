@@ -47,7 +47,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 import { updateArtistProductTx } from '@/lib/products/product-update-rpc';
 import { persistProductWhatsApp } from '@/lib/products/persist-product-whatsapp';
-import { ProductWhatsAppContactConfig } from '../create/shared/ProductWhatsAppContactConfig';
+import { ProductWhatsAppContactConfig } from '@/components/products/shared/ProductWhatsAppContactConfig';
 import { validateRequiredSteps } from '@/lib/wizard-validation/edit-save-validation';
 import { validateAndSanitizeArtistProduct } from '@/lib/artist-product-sanitizer';
 import { validateArtistProduct } from '@/lib/validation/centralized-validation';

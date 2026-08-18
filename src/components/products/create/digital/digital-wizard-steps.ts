@@ -27,7 +27,7 @@ export const LazyProductStatisticsDisplaySettings = lazy(() =>
   }))
 );
 export const LazyProductWhatsAppContactConfig = lazy(() =>
-  import('../shared/ProductWhatsAppContactConfig').then(m => ({
+  import('@/components/products/shared/ProductWhatsAppContactConfig').then(m => ({
     default: m.ProductWhatsAppContactConfig,
   }))
 );
