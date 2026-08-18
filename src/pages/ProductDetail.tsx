@@ -39,7 +39,7 @@ import { SafeHTML } from '@/components/security/SafeHTML';
 import { OptimizedImage } from '@/components/ui/OptimizedImage';
 import { ResponsiveProductImage } from '@/components/ui/ResponsiveProductImage';
 import { CountdownTimer } from '@/components/ui/countdown-timer';
-import { PhysicalProductShippingDetails } from '@/components/physical/PhysicalProductShippingDetails';
+import { PhysicalProductWhatsAppButton } from '@/components/physical/PhysicalProductWhatsAppButton';
 import { PhysicalProductDeliveryEstimate } from '@/components/physical/PhysicalProductDeliveryEstimate';
 import { CustomFieldsDisplay } from '@/components/products/CustomFieldsDisplay';
 import { ProductVariantSelector } from '@/components/products/ProductVariantSelector';
@@ -64,7 +64,7 @@ import { cn } from '@/lib/utils';
 import type { ProductFAQ } from '@/types/product-form';
 import type { Product } from '@/types/marketplace';
 import type { Store } from '@/hooks/useStore';
-import { generateStoreUrl, generateProductUrl } from '@/lib/store-utils';
+import { generateStoreUrl, generateProductUrl, generatePaymentUrl } from '@/lib/store-utils';
 import { buildCheckoutUrl } from '@/lib/checkout/checkout-route';
 import { toUserErrorMessage } from '@/lib/user-error-message';
 import { sanitizeProductDescription } from '@/lib/html-sanitizer';
@@ -75,7 +75,7 @@ import type { Store as ThemedStore } from '@/hooks/useStores';
 
 /** Colonnes réelles sur `public.products` (alignées types Supabase). Pas de video_url / variants JSON sur cette table en prod. */
 const PRODUCT_DETAIL_COLUMNS =
-  'id, store_id, slug, name, description, short_description, category, product_type, is_active, is_draft, price, compare_at_price, promotional_price, currency, image_url, images, tags, stock, rating, reviews_count, created_at, updated_at, payment_options, pricing_model, sale_start_date, sale_end_date, free_product_id, paid_product_id, is_free_preview, preview_content_description, licensing_type, license_terms, password_protected, purchase_limit, downloadable_files, custom_fields, faqs';
+  'id, store_id, slug, name, description, short_description, category, product_type, is_active, is_draft, price, compare_at_price, promotional_price, currency, image_url, images, tags, stock, rating, reviews_count, created_at, updated_at, payment_options, pricing_model, sale_start_date, sale_end_date, free_product_id, paid_product_id, is_free_preview, preview_content_description, licensing_type, license_terms, password_protected, purchase_limit, downloadable_files, custom_fields, faqs, whatsapp_number, whatsapp_enabled';
 
 const PRODUCT_DETAIL_SELECT_WITH_AFFILIATE = `${PRODUCT_DETAIL_COLUMNS}, product_affiliate_settings!left(affiliate_enabled, commission_rate)`;
 
@@ -1007,10 +1007,10 @@ const ProductDetails = () => {
                     )}
 
                   {/* Boutons d'action */}
-                  <div className="flex flex-col gap-2 sm:gap-3">
+                  <div className="flex flex-col gap-2 sm:gap-3 w-full">
                     <Button
                       size="lg"
-                      className="w-full sm:w-auto sm:max-w-[min(100%,16rem)] sm:self-start touch-manipulation min-h-[44px] px-6 sm:px-8 text-sm sm:text-base font-semibold rounded-full shadow-md hover:shadow-lg transition-shadow"
+                      className="w-full touch-manipulation min-h-[44px] px-6 text-sm sm:text-base font-semibold rounded-full shadow-md hover:shadow-lg transition-shadow"
                       onClick={handleBuyNow}
                       disabled={isPurchasing || !product || !product.is_active}
                     >
@@ -1023,15 +1023,10 @@ const ProductDetails = () => {
                       ) : (
                         <>
                           <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 mr-2 shrink-0" />
-                          <span className="hidden sm:inline">
+                          <span>
                             {product.product_type === 'physical'
                               ? physicalBuyLabel
                               : getValue('productDetail.cta.buyNow') || 'Acheter maintenant'}
-                          </span>
-                          <span className="sm:hidden">
-                            {product.product_type === 'physical'
-                              ? physicalBuyLabel
-                              : getValue('productDetail.cta.buyNow') || 'Acheter'}
                           </span>
                           {selectedVariantPrice &&
                             selectedVariantPrice !== (displayPriceInfo?.price ?? product.price) && (
@@ -1043,40 +1038,54 @@ const ProductDetails = () => {
                       )}
                     </Button>
 
-                    <div className="flex flex-col sm:flex-row gap-2 sm:max-w-xl">
-                      {/* Bouton Contacter le vendeur */}
+                    <div
+                      className={cn(
+                        'grid gap-2 w-full',
+                        product.store_id && product.whatsapp_enabled && product.whatsapp_number
+                          ? 'grid-cols-2'
+                          : 'grid-cols-1'
+                      )}
+                    >
                       {product.store_id && (
                         <Button
                           size="lg"
                           variant="outline"
-                          className="flex-1 sm:flex-1 touch-manipulation min-h-[44px] text-sm sm:text-base border-2"
+                          className="w-full touch-manipulation min-h-[44px] text-sm sm:text-base border-2 px-2 sm:px-3"
                           asChild
                         >
                           <VendorMessagingLink storeId={product.store_id} productId={product.id}>
-                            <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5 mr-2 flex-shrink-0" />
-                            <span className="hidden sm:inline">Contacter le vendeur</span>
-                            <span className="sm:hidden">Contacter</span>
+                            <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5 mr-1.5 flex-shrink-0" />
+                            <span>Contacter</span>
                           </VendorMessagingLink>
                         </Button>
                       )}
 
-                      {/* Bouton Alerte prix */}
-                      <div className="flex-1 sm:flex-1">
-                        <PriceStockAlertButton
-                          productId={product.id}
-                          productName={product.name}
-                          currentPrice={
-                            selectedVariantPrice || (displayPriceInfo?.price ?? product.price)
-                          }
-                          currency={product.currency || 'XOF'}
-                          productType={product.product_type}
-                          stockQuantity={product.stock ?? undefined}
-                          variant="outline"
-                          size="lg"
-                          className="w-full touch-manipulation min-h-[44px]"
-                        />
-                      </div>
+                      <PhysicalProductWhatsAppButton
+                        productName={product.name}
+                        whatsappNumber={product.whatsapp_number}
+                        whatsappEnabled={product.whatsapp_enabled}
+                        paymentUrl={
+                          store?.slug && product.slug
+                            ? generatePaymentUrl(store.slug, product.slug)
+                            : undefined
+                        }
+                        className="w-full min-h-[44px] touch-manipulation text-sm sm:text-base border-2 border-green-600/40 bg-green-500/10 text-green-700 hover:bg-green-500/15 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300"
+                      />
                     </div>
+
+                    <PriceStockAlertButton
+                      productId={product.id}
+                      productName={product.name}
+                      currentPrice={
+                        selectedVariantPrice || (displayPriceInfo?.price ?? product.price)
+                      }
+                      currency={product.currency || 'XOF'}
+                      productType={product.product_type}
+                      stockQuantity={product.stock ?? undefined}
+                      variant="outline"
+                      size="lg"
+                      className="w-full touch-manipulation min-h-[44px]"
+                    />
                   </div>
 
                   {/* 🔒 NOUVEAU: Badges informatifs (Phase 4) */}

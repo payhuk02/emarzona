@@ -4,25 +4,25 @@
  * 1rem = 16px (Tailwind par défaut).
  */
 export const STORE_HERO_BANNER_SPECS = {
-  /** < 640px — ratio 2.15:1, min 160px, max 224px */
-  base: { aspectRatio: 2.15, minPx: 160, maxPx: 224 },
-  /** ≥ 640px — ratio 2.45:1, min 176px, max 288px */
-  sm: { aspectRatio: 2.45, minPx: 176, maxPx: 288 },
-  /** ≥ 768px — ratio 2.85:1, min 192px, max 352px */
-  md: { aspectRatio: 2.85, minPx: 192, maxPx: 352 },
-  /** ≥ 1024px — ratio 3.1:1, max 416px */
-  lg: { aspectRatio: 3.1, maxPx: 416 },
-  /** ≥ 1280px — ratio 3.1:1, max 480px */
-  xl: { aspectRatio: 3.1, maxPx: 480 },
+  /** < 640px — 16:9, image entière visible (object-contain) */
+  base: { aspectRatio: 16 / 9, minPx: 176, maxPx: 240 },
+  /** ≥ 640px */
+  sm: { aspectRatio: 16 / 9, minPx: 200, maxPx: 320 },
+  /** ≥ 768px */
+  md: { aspectRatio: 2.4, minPx: 200, maxPx: 360 },
+  /** ≥ 1024px */
+  lg: { aspectRatio: 2.8, maxPx: 420 },
+  /** ≥ 1280px */
+  xl: { aspectRatio: 3, maxPx: 480 },
 } as const;
 
 /** Classes Tailwind appliquées au conteneur bannière. */
 export const STORE_HERO_BANNER_CLASS =
-  'aspect-[2.15/1] min-h-[10rem] max-h-[14rem] ' +
-  'sm:aspect-[2.45/1] sm:min-h-[11rem] sm:max-h-[18rem] ' +
-  'md:aspect-[2.85/1] md:min-h-[12rem] md:max-h-[22rem] ' +
-  'lg:aspect-[3.1/1] lg:max-h-[26rem] ' +
-  'xl:max-h-[30rem]';
+  'aspect-[16/9] min-h-[11rem] max-h-[15rem] ' +
+  'sm:aspect-[16/9] sm:min-h-[12.5rem] sm:max-h-[20rem] ' +
+  'md:aspect-[12/5] md:min-h-[12.5rem] md:max-h-[22.5rem] ' +
+  'lg:aspect-[14/5] lg:max-h-[26.25rem] ' +
+  'xl:aspect-[3/1] xl:max-h-[30rem]';
 
 /** Hauteur effective (px) pour une largeur viewport donnée. */
 export function resolveStoreHeroBannerHeightPx(viewportWidth: number): number {

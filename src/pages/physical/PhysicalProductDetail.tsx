@@ -499,6 +499,7 @@ export default function PhysicalProductDetail() {
                   : undefined
               }
               className="w-full"
+              label="Contacter sur WhatsApp"
             />
 
             <Button

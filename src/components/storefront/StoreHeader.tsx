@@ -47,7 +47,10 @@ const StoreHeader = ({ store }: StoreHeaderProps) => {
     >
       <div className="relative w-full">
         <div
-          className={cn('relative w-full overflow-hidden', STORE_HERO_BANNER_CLASS)}
+          className={cn(
+            'relative w-full overflow-hidden bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900',
+            STORE_HERO_BANNER_CLASS
+          )}
           style={{
             background: displayBannerUrl
               ? undefined
@@ -60,14 +63,20 @@ const StoreHeader = ({ store }: StoreHeaderProps) => {
                 src={displayBannerUrl}
                 alt=""
                 role="presentation"
-                className="absolute inset-0 h-full w-full object-cover object-center"
-                loading="eager"
-                decoding="async"
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 1280px"
+                className="pointer-events-none absolute inset-0 h-full w-full scale-110 object-cover blur-2xl opacity-50"
+                aria-hidden
               />
               <div
-                className="pointer-events-none absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-background/30 via-background/5 to-transparent"
+                className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-background/40"
                 aria-hidden
+              />
+              <img
+                src={displayBannerUrl}
+                alt={`Bannière ${store.name}`}
+                className="relative z-10 mx-auto h-full w-full object-contain object-center"
+                loading="eager"
+                decoding="async"
+                sizes="100vw"
               />
             </>
           ) : (

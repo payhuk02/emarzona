@@ -9,6 +9,7 @@ type PhysicalProductWhatsAppButtonProps = {
   whatsappEnabled?: boolean | null;
   paymentUrl?: string | null;
   className?: string;
+  label?: string;
 };
 
 export function PhysicalProductWhatsAppButton({
@@ -17,6 +18,7 @@ export function PhysicalProductWhatsAppButton({
   whatsappEnabled,
   paymentUrl,
   className,
+  label = 'WhatsApp',
 }: PhysicalProductWhatsAppButtonProps) {
   const { data: config } = usePublicWhatsAppConfig();
 
@@ -35,8 +37,8 @@ export function PhysicalProductWhatsAppButton({
   return (
     <Button variant="outline" className={className} asChild>
       <a href={href} target="_blank" rel="noopener noreferrer">
-        <MessageCircle className="h-5 w-5 mr-2 text-green-600" aria-hidden />
-        Contacter sur WhatsApp
+        <MessageCircle className="h-4 w-4 sm:h-5 sm:w-5 mr-2 shrink-0" aria-hidden />
+        {label}
       </a>
     </Button>
   );

@@ -6,11 +6,11 @@ import {
 
 describe('store-hero-banner', () => {
   it('respects min height on very narrow mobile', () => {
-    expect(resolveStoreHeroBannerHeightPx(320)).toBe(STORE_HERO_BANNER_SPECS.base.minPx);
+    expect(resolveStoreHeroBannerHeightPx(280)).toBe(STORE_HERO_BANNER_SPECS.base.minPx);
   });
 
   it('uses aspect ratio on typical mobile width', () => {
-    expect(resolveStoreHeroBannerHeightPx(390)).toBe(Math.round(390 / 2.15));
+    expect(resolveStoreHeroBannerHeightPx(390)).toBe(Math.round(390 / (16 / 9)));
   });
 
   it('caps height on large desktop', () => {
@@ -18,6 +18,6 @@ describe('store-hero-banner', () => {
   });
 
   it('scales at tablet breakpoint', () => {
-    expect(resolveStoreHeroBannerHeightPx(768)).toBe(Math.round(768 / 2.85));
+    expect(resolveStoreHeroBannerHeightPx(768)).toBe(Math.round(768 / 2.4));
   });
 });
