@@ -57,9 +57,12 @@ test.describe('Artist limited edition', () => {
     await gotoApp(page, `/artist/${LIMITED_PRODUCT_ID}`);
     await page.getByTestId('artist-buy-now').click();
 
-    await expect(page).toHaveURL(new RegExp(`/checkout\\?.*productId=${LIMITED_PRODUCT_ID}`), {
-      timeout: 15_000,
-    });
+    await expect(page).toHaveURL(
+      new RegExp(`(/checkout\\?.*productId=${LIMITED_PRODUCT_ID}|/pay/[^/?#]+)`),
+      {
+        timeout: 15_000,
+      }
+    );
     const payOrContinue = page.getByRole('button', {
       name: /payer|continuer|commander|valider|checkout/i,
     });

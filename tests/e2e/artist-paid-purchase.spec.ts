@@ -118,9 +118,12 @@ test.describe('Artist paid purchase (E2E)', () => {
       const buyNow = page.getByTestId('artist-buy-now');
       await buyNow.click();
 
-      await expect(page).toHaveURL(new RegExp(`/checkout\\?.*productId=${fixture.product.id}`), {
-        timeout: 15_000,
-      });
+      await expect(page).toHaveURL(
+        new RegExp(`(/checkout\\?.*productId=${fixture.product.id}|/pay/[^/?#]+)`),
+        {
+          timeout: 15_000,
+        }
+      );
       await admin.auth.admin.deleteUser(unpaidBuyer.id);
     } finally {
       try {

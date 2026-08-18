@@ -429,7 +429,7 @@ export default function ServiceDetail() {
           productId: serviceId!,
           storeId,
           productSlug: service?.slug,
-          storeSlug: store?.slug,
+          storeSlug: service.store?.slug,
           scheduledAt: bookingDateTime,
           participants,
           guestEmail: checkoutEmail,

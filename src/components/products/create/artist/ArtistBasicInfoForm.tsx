@@ -13,10 +13,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import {
   Select,
   SelectContent,
+  SelectField,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { getCategoriesForProductType } from '@/constants/product-categories';
 import {
   ImagePlus,
   X,

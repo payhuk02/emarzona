@@ -290,7 +290,7 @@ const ArtistProductDetail = () => {
           productId: productId!,
           storeId: product.store_id,
           productSlug: product.slug,
-          storeSlug: store?.slug,
+          storeSlug: product.store?.slug,
           quantity,
         })
       );

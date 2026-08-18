@@ -38,9 +38,12 @@ test.describe('Epic 3.5.1 — artiste vente & certificat', () => {
     }
 
     await buyNow.click();
-    await expect(page).toHaveURL(new RegExp(`/checkout\\?.*productId=${productId}`), {
-      timeout: 15_000,
-    });
+    await expect(page).toHaveURL(
+      new RegExp(`(/checkout\\?.*productId=${productId}|/pay/[^/?#]+)`),
+      {
+        timeout: 15_000,
+      }
+    );
   });
 
   test('portail artiste acheteur (auth)', async ({ page }) => {

@@ -245,7 +245,7 @@ export default function PhysicalProductDetail() {
           productId: productId!,
           storeId: product.store_id,
           productSlug: product.slug,
-          storeSlug: store?.slug,
+          storeSlug: product.store?.slug,
           variantId: selectedVariant?.id,
           quantity,
         })
