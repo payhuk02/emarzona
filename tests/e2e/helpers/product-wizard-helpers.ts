@@ -60,3 +60,21 @@ export async function openProductCreateWizard(
 
   await waitForWizardMarker(page, marker, label);
 }
+
+/** Ouvre un SelectField (combobox) par son label et choisit une option. */
+export async function selectWizardComboboxOption(
+  page: Page,
+  fieldLabel: string | RegExp,
+  optionName: string | RegExp
+): Promise<void> {
+  const combobox = page.getByRole('combobox', { name: fieldLabel });
+  await combobox.scrollIntoViewIfNeeded();
+  await expect(combobox).toBeVisible({ timeout: 15_000 });
+  await combobox.click();
+  const option = page.getByRole('option', { name: optionName }).first();
+  await expect(option).toBeVisible({ timeout: 15_000 });
+  await option.click();
+  await expect(option)
+    .toBeHidden({ timeout: 5_000 })
+    .catch(() => undefined);
+}

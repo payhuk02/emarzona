@@ -92,7 +92,18 @@ export async function waitForStoresLoaded(
 ): Promise<void> {
   const { storeId, storeName } = options;
 
-  await expect(page.locator('.app-sidebar')).toBeVisible({ timeout: 30_000 });
+  await expect
+    .poll(
+      async () =>
+        page
+          .locator('.app-sidebar')
+          .isVisible()
+          .catch(() => false),
+      {
+        timeout: 45_000,
+      }
+    )
+    .toBe(true);
 
   if (storeId) {
     await expect

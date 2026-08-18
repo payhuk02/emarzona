@@ -81,7 +81,7 @@ export function ProductWhatsAppContactConfig({
               autoComplete="tel-national"
               placeholder="70 12 34 56"
               value={parts.localNumber}
-              onChange={e => emitNumber(parts.countryCode, e.target.value)}
+              onChange={e => emitNumber(parts.countryCode, e.target.value.replace(/\D/g, ''))}
               disabled={disabled}
             />
             <p className="text-[11px] text-muted-foreground">

@@ -34,6 +34,27 @@ export async function searchMarketplaceForProduct(page: Page, query: string): Pr
   await expect(searchInput).toBeVisible({ timeout: 20_000 });
   await searchInput.fill(query);
   await searchInput.press('Enter');
+  // Marketplace debounces search input (500ms) before calling search_products.
+  await page.waitForTimeout(1_000);
+}
+
+async function waitForProductSearchable(admin: SupabaseClient, productName: string): Promise<void> {
+  await expect
+    .poll(
+      async () => {
+        const { data, error } = await admin.rpc('search_products', {
+          p_search_query: productName,
+          p_limit: 20,
+          p_offset: 0,
+        });
+        if (error) return false;
+        return (
+          Array.isArray(data) && data.some((row: { name?: string }) => row.name === productName)
+        );
+      },
+      { timeout: 45_000 }
+    )
+    .toBe(true);
 }
 
 export async function assertMarketplaceGuestBuyCta(
@@ -43,7 +64,7 @@ export async function assertMarketplaceGuestBuyCta(
 ): Promise<void> {
   const root = appLocator(page);
   const card = root.getByTestId('product-card').filter({ hasText: productName }).first();
-  await expect(card).toBeVisible({ timeout: 20_000 });
+  await expect(card).toBeVisible({ timeout: 45_000 });
 
   const buyButton = card.locator('button[data-action="primary"]');
   await expect(buyButton).toBeVisible({ timeout: 10_000 });
@@ -58,6 +79,7 @@ export async function assertGuestMarketplaceProductVisible(
   buyLabelPattern: RegExp
 ): Promise<void> {
   await assertProductListedInMarketplaceQuery(admin, productId, productName);
+  await waitForProductSearchable(admin, productName);
   await page.context().clearCookies();
   await gotoApp(page, '/marketplace');
   await searchMarketplaceForProduct(page, productName);

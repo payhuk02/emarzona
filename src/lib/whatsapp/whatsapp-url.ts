@@ -80,7 +80,7 @@ export function splitWhatsAppNumber(phoneNumber: string): {
 
   const codes = [...WHATSAPP_COUNTRY_CODES].sort((a, b) => b.length - a.length);
   for (const code of codes) {
-    if (digits.startsWith(code) && digits.length - code.length >= 6) {
+    if (digits.startsWith(code)) {
       return { countryCode: code, localNumber: digits.slice(code.length) };
     }
   }

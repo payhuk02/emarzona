@@ -1,7 +1,7 @@
 import { expect, type Page } from '@playwright/test';
 import { E2E_ARTWORK_PNG } from './artist-wizard-helpers';
 import { goToWizardStep } from './vendor-e2e-helpers';
-import { openProductCreateWizard } from './product-wizard-helpers';
+import { openProductCreateWizard, selectWizardComboboxOption } from './product-wizard-helpers';
 import { dismissCookieBannerIfVisible } from './store-theme-helpers';
 
 export const E2E_DIGITAL_MAIN_FILE_URL = 'https://example.com/e2e-digital-product.pdf';
@@ -39,11 +39,7 @@ export async function fillDigitalBasicInfoStep(
   await page.locator('#price').fill(price);
 
   if (categoryLabel) {
-    await page.getByText('Catégorie', { exact: false }).first().click();
-    await page
-      .getByRole('option', { name: new RegExp(categoryLabel, 'i') })
-      .first()
-      .click();
+    await selectWizardComboboxOption(page, 'Catégorie', new RegExp(categoryLabel, 'i'));
   }
 
   const editor = page.locator('[contenteditable="true"]').first();

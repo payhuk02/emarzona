@@ -1,6 +1,6 @@
 import { expect, type Page } from '@playwright/test';
 import { clickWizardNext, goToWizardStep } from './vendor-e2e-helpers';
-import { openProductCreateWizard } from './product-wizard-helpers';
+import { openProductCreateWizard, selectWizardComboboxOption } from './product-wizard-helpers';
 
 export type FillCourseBasicInfoOptions = {
   title: string;
@@ -36,7 +36,6 @@ export async function fillCourseBasicInfoStep(
     await page.locator('#slug').fill(slug);
   }
   await page.locator('#short_description').fill(shortDescription);
-  await page.locator('#price').fill(price);
 
   const editor = page.locator('[contenteditable="true"]').first();
   if (await editor.isVisible({ timeout: 5_000 }).catch(() => false)) {
@@ -44,23 +43,11 @@ export async function fillCourseBasicInfoStep(
     await editor.fill(description);
   }
 
-  await page.getByText('Niveau du cours', { exact: false }).click();
-  await page
-    .getByRole('option', { name: /Débutant/i })
-    .first()
-    .click();
+  await selectWizardComboboxOption(page, 'Niveau du cours', /Débutant/i);
+  await selectWizardComboboxOption(page, 'Langue du cours', /Français/i);
+  await selectWizardComboboxOption(page, 'Catégorie', /^Business$/i);
 
-  await page.getByText('Langue du cours', { exact: false }).click();
-  await page
-    .getByRole('option', { name: /Français/i })
-    .first()
-    .click();
-
-  await page.getByText('Catégorie', { exact: false }).first().click();
-  await page
-    .getByRole('option', { name: /Business/i })
-    .first()
-    .click();
+  await page.locator('#price').fill(price);
 }
 
 export async function fillCourseCurriculumStep(page: Page): Promise<void> {

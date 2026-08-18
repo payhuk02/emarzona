@@ -33,6 +33,17 @@ describe('whatsapp-url', () => {
     });
   });
 
+  it('keeps country and local separate while the number is still being typed', () => {
+    expect(splitWhatsAppNumber('2265')).toEqual({
+      countryCode: '226',
+      localNumber: '5',
+    });
+    expect(splitWhatsAppNumber('226')).toEqual({
+      countryCode: '226',
+      localNumber: '',
+    });
+  });
+
   it('builds a prefilled payment message', () => {
     const message = buildProductWhatsAppMessage(
       'Ebook Premium',
