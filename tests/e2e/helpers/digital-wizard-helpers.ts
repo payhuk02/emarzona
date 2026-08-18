@@ -2,6 +2,7 @@ import { expect, type Page } from '@playwright/test';
 import { E2E_ARTWORK_PNG } from './artist-wizard-helpers';
 import { goToWizardStep } from './vendor-e2e-helpers';
 import { openProductCreateWizard } from './product-wizard-helpers';
+import { dismissCookieBannerIfVisible } from './store-theme-helpers';
 
 export const E2E_DIGITAL_MAIN_FILE_URL = 'https://example.com/e2e-digital-product.pdf';
 export const E2E_DIGITAL_MAIN_FILE_URL_2 = 'https://example.com/e2e-digital-product-part2.pdf';
@@ -59,6 +60,7 @@ export async function fillDigitalMainFileUrlStep(
 ): Promise<void> {
   const mainUrlInput = page.locator('input[type="url"][placeholder*="fichier-principal"]').first();
   const mainLabelInput = page.locator('#main-link-label');
+  await expect(mainUrlInput).toBeVisible({ timeout: 15_000 });
 
   for (let i = 0; i < urls.length; i += 1) {
     const url = urls[i];
@@ -71,11 +73,11 @@ export async function fillDigitalMainFileUrlStep(
     }
 
     await mainUrlInput.fill(url);
-    await page
+    await mainUrlInput
+      .locator('xpath=ancestor::div[contains(@class,"border-dashed")]')
       .getByRole('button', { name: /Ajouter/i })
-      .first()
       .click();
-    await expect(page.getByText(url, { exact: false })).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByLabel(`URL du lien ${i + 1}`)).toHaveValue(url, { timeout: 10_000 });
 
     if (label) {
       await expect(page.getByPlaceholder(/Nom affiché/i).nth(i)).toHaveValue(label, {

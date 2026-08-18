@@ -240,15 +240,11 @@ export async function dismissPersonaOnboardingIfVisible(page: Page): Promise<voi
 
   const dismiss = page.getByRole('button', { name: /^Compris$/i });
   if (await dismiss.isVisible().catch(() => false)) {
-    // Radix popover can sit outside a narrow CI viewport — prefer DOM click.
-    await dismiss
-      .evaluate((el: HTMLElement) => el.click())
-      .catch(async () => {
-        await dismiss.scrollIntoViewIfNeeded().catch(() => undefined);
-        await dismiss.click({ force: true, timeout: 5_000 });
-      });
+    // Radix popover can sit outside a narrow CI viewport — never fail the suite on this coach.
+    await dismiss.evaluate((el: HTMLElement) => el.click()).catch(() => undefined);
+    await dismiss.click({ force: true, timeout: 2_000 }).catch(() => undefined);
     await expect(dismiss)
-      .toBeHidden({ timeout: 10_000 })
+      .toBeHidden({ timeout: 5_000 })
       .catch(() => undefined);
   }
 

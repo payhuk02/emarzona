@@ -44,6 +44,7 @@ import { useCreateFullCourse } from '@/hooks/courses/useCreateFullCourse';
 import { useAuth } from '@/contexts/AuthContext';
 import { useStore } from '@/hooks/useStore';
 import { useCatalogCacheInvalidation } from '@/hooks/useCatalogCacheInvalidation';
+import { logger } from '@/lib/logger';
 import { ProductWhatsAppContactConfig } from '@/components/products/shared/ProductWhatsAppContactConfig';
 import {
   validateCourseWizardPublishSteps,
