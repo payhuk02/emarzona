@@ -33,6 +33,7 @@ import { useLCPPreload } from '@/hooks/useLCPPreload';
 import { useAdaptiveLoading } from '@/hooks/useAdaptiveLoading';
 import { useStoreSlug } from '@/contexts/StoreSlugContext';
 import { generateStoreUrl, generateProductUrl } from '@/lib/store-utils';
+import { buildCheckoutUrl } from '@/lib/checkout/checkout-route';
 import { detectSubdomain } from '@/lib/subdomain-detector';
 import { redirectToPlatformLogin } from '@/lib/auth-routes';
 import {
@@ -353,14 +354,16 @@ const StorefrontPage = ({ previewMode = false, storeOverride = null }: Storefron
       }
 
       // Rediriger vers la page de checkout
-      const checkoutParams = new URLSearchParams({
-        productId: product.id,
-        storeId: product.store_id,
-      });
-
-      navigate(`/checkout?${checkoutParams.toString()}`);
+      navigate(
+        buildCheckoutUrl({
+          productId: product.id,
+          storeId: product.store_id,
+          productSlug: product.slug,
+          storeSlug: store.slug,
+        })
+      );
     },
-    [toast, navigate]
+    [toast, navigate, store?.slug]
   );
 
   // MAINTENANT les early returns APRÈS tous les hooks

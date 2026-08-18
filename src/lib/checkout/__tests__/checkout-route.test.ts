@@ -19,16 +19,29 @@ describe('checkout-route', () => {
     );
   });
 
+  it('builds premium short checkout url when slugs are available', () => {
+    expect(
+      buildCheckoutUrl({
+        productId: 'p1',
+        storeId: 's1',
+        productSlug: 'mon-produit',
+        storeSlug: 'ma-boutique',
+      })
+    ).toBe('/pay/ma-boutique/mon-produit');
+  });
+
   it('supports service scheduling params', () => {
     expect(
       buildCheckoutUrl({
         productId: 'p1',
         storeId: 's1',
+        productSlug: 'consultation-premium',
+        storeSlug: 'agence-pro',
         scheduledAt: '2026-07-21T10:00:00.000Z',
         participants: 2,
       })
     ).toBe(
-      '/checkout?productId=p1&storeId=s1&scheduledAt=2026-07-21T10%3A00%3A00.000Z&participants=2'
+      '/pay/agence-pro/consultation-premium?scheduledAt=2026-07-21T10%3A00%3A00.000Z&participants=2'
     );
   });
 

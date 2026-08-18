@@ -26,7 +26,7 @@ type UseMarketplaceGuestBuyOptions = {
 export function useMarketplaceGuestBuy({
   product,
   price: _price,
-  storeSlug: _storeSlug,
+  storeSlug,
 }: UseMarketplaceGuestBuyOptions) {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -67,6 +67,8 @@ export function useMarketplaceGuestBuy({
           buildCheckoutUrl({
             productId: product.id,
             storeId: product.store_id,
+            productSlug: product.slug,
+            storeSlug,
             guestEmail: customer.email,
             guestName: customer.fullName,
             guestPhone: customer.phone,
@@ -83,7 +85,7 @@ export function useMarketplaceGuestBuy({
         setGuestOpen(false);
       }
     },
-    [cta.action, navigate, product, toast]
+    [cta.action, navigate, product, storeSlug, toast]
   );
 
   const handleBuyClick = useCallback(async () => {

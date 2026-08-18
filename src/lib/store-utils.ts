@@ -89,6 +89,27 @@ export const generateProductUrl = (
   return `${protocol}://${subdomain}.myemarzona.shop/products/${productSlug}`;
 };
 
+/**
+ * Génère l'URL premium de paiement d'un produit.
+ * Exemple: `https://digitallog.myemarzona.shop/pay/mon-produit`
+ */
+export const generatePaymentUrl = (
+  storeSlug: string,
+  productSlug: string,
+  storeSubdomain?: string | null,
+  customDomain?: string
+): string => {
+  if (customDomain) {
+    const protocol = 'https';
+    const normalizedDomain = customDomain.replace(/^https?:\/\//, '').replace(/\/+$/, '');
+    return `${protocol}://${normalizedDomain}/pay/${productSlug}`;
+  }
+
+  const protocol = 'https';
+  const subdomain = storeSubdomain || storeSlug;
+  return `${protocol}://${subdomain}.myemarzona.shop/pay/${productSlug}`;
+};
+
 export const copyToClipboard = async (text: string): Promise<boolean> => {
   try {
     await navigator.clipboard.writeText(text);

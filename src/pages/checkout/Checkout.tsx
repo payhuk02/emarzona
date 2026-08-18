@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, lazy, Suspense } from 'react';
-import { useSearchParams, useNavigate, Link } from 'react-router-dom';
+import { useSearchParams, useNavigate, Link, useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -11,6 +11,7 @@ import { safeRedirect } from '@/lib/url-validator';
 import { logger } from '@/lib/logger';
 import { useLCPPreload } from '@/hooks/useLCPPreload';
 import { generateProductUrl } from '@/lib/store-utils';
+import { detectSubdomain } from '@/lib/subdomain-detector';
 import { normalizePhoneForPayment } from '@/lib/validation';
 
 /** Client Supabase assoupli pour tables absentes du schéma généré */
@@ -102,6 +103,10 @@ const GENERIC_PRODUCT_VARIANT_FIELDS = 'id, price, promotional_price, option1_va
  */
 const Checkout = () => {
   const [searchParams] = useSearchParams();
+  const { storeSlug: routeStoreSlug, productSlug: routeProductSlug } = useParams<{
+    storeSlug?: string;
+    productSlug?: string;
+  }>();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -204,7 +209,8 @@ const Checkout = () => {
   // Charger les données
   useEffect(() => {
     const loadData = async () => {
-      if (!productId || !storeId) {
+      const needsSlugResolution = !productId || !storeId;
+      if (needsSlugResolution && !routeProductSlug) {
         setError('Paramètres manquants. Veuillez sélectionner un produit.');
         setLoading(false);
         return;
@@ -219,13 +225,53 @@ const Checkout = () => {
           setUser(currentUser);
         }
 
+        let resolvedStoreId = storeId;
+        let storeData: CheckoutStore = null;
+
+        if (needsSlugResolution) {
+          const hostInfo = detectSubdomain();
+          let storeQuery = supabase.from('stores_public').select(STOREFRONT_STORE_PUBLIC_SELECT);
+
+          if (routeStoreSlug) {
+            storeQuery = storeQuery.eq('slug', routeStoreSlug);
+          } else if (hostInfo.isStoreDomain && hostInfo.isSubdomain && hostInfo.subdomain) {
+            storeQuery = storeQuery.eq('subdomain', hostInfo.subdomain);
+          } else if (hostInfo.isCustomDomain && hostInfo.customDomain) {
+            storeQuery = storeQuery
+              .eq('custom_domain', hostInfo.customDomain)
+              .eq('domain_status', 'verified');
+          } else {
+            setError('Boutique introuvable pour ce lien de paiement.');
+            setLoading(false);
+            return;
+          }
+
+          const { data: resolvedStore, error: resolvedStoreError } = await storeQuery.single();
+          if (resolvedStoreError || !resolvedStore) {
+            logger.error('Error resolving store from premium checkout URL:', resolvedStoreError);
+            setError('Boutique introuvable pour ce lien de paiement.');
+            setLoading(false);
+            return;
+          }
+
+          storeData = resolvedStore as unknown as CheckoutStore;
+          resolvedStoreId = storeData.id;
+        }
+
+        if (!resolvedStoreId) {
+          setError('Boutique introuvable pour ce lien de paiement.');
+          setLoading(false);
+          return;
+        }
+
         // Charger le produit
-        const { data: productData, error: productError } = await supabase
-          .from('products')
-          .select(CHECKOUT_PRODUCT_FIELDS)
-          .eq('id', productId)
-          .eq('store_id', storeId)
-          .single();
+        const productQuery = supabase.from('products').select(CHECKOUT_PRODUCT_FIELDS);
+        const productScopedQuery =
+          routeProductSlug && needsSlugResolution
+            ? productQuery.eq('slug', routeProductSlug).eq('store_id', resolvedStoreId)
+            : productQuery.eq('id', productId!).eq('store_id', resolvedStoreId);
+
+        const { data: productData, error: productError } = await productScopedQuery.single();
 
         if (productError) {
           logger.error('Error loading product:', productError);
@@ -242,18 +288,24 @@ const Checkout = () => {
 
         setProduct(productData as unknown as CheckoutProduct);
 
-        const { data: storeData, error: storeError } = await supabase
-          .from('stores_public')
-          .select(STOREFRONT_STORE_PUBLIC_SELECT)
-          .eq('id', storeId)
-          .single();
+        if (!storeData) {
+          const { data: fetchedStoreData, error: storeError } = await supabase
+            .from('stores_public')
+            .select(STOREFRONT_STORE_PUBLIC_SELECT)
+            .eq('id', resolvedStoreId)
+            .single();
 
-        if (storeError) {
-          logger.error('Error loading store:', storeError);
+          if (storeError) {
+            logger.error('Error loading store:', storeError);
+          }
+
+          if (fetchedStoreData) {
+            storeData = fetchedStoreData as unknown as CheckoutStore;
+          }
         }
 
         if (storeData) {
-          setStore(storeData as unknown as CheckoutStore);
+          setStore(storeData);
         }
 
         // Charger la variante si spécifiée
@@ -331,6 +383,8 @@ const Checkout = () => {
   }, [
     productId,
     storeId,
+    routeStoreSlug,
+    routeProductSlug,
     variantId,
     navigate,
     toast,

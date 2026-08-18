@@ -64,13 +64,14 @@ export function UtilityBarHeader({ className }: UtilityBarHeaderProps) {
       </div>
       <div className="flex items-center gap-1 sm:gap-2 ml-auto shrink-0">
         {/* 🔒 UX Progressive Toggle */}
-        <div className="hidden md:flex items-center gap-2 mr-2 px-2 border-r">
+        <div className="flex items-center gap-1 sm:gap-2 mr-1 sm:mr-2 pr-2 border-r">
           <label
             htmlFor="utility-expert-mode"
-            className="text-xs font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:text-foreground"
+            className="hidden sm:inline text-xs font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:text-foreground"
           >
             Mode Expert
           </label>
+          <span className="sm:hidden text-[11px] font-medium text-muted-foreground">Expert</span>
           <Switch
             id="utility-expert-mode"
             checked={isExpertMode}

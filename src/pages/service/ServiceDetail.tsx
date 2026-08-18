@@ -428,6 +428,8 @@ export default function ServiceDetail() {
         buildCheckoutUrl({
           productId: serviceId!,
           storeId,
+          productSlug: service?.slug,
+          storeSlug: store?.slug,
           scheduledAt: bookingDateTime,
           participants,
           guestEmail: checkoutEmail,

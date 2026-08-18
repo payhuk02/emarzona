@@ -446,6 +446,8 @@ const MarketplacePage = () => {
         buildCheckoutUrl({
           productId: product.id,
           storeId: product.store_id,
+          productSlug: product.slug,
+          storeSlug: product.stores?.slug,
         })
       );
     },

@@ -9,7 +9,7 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { AppPageShell } from '@/components/layout/AppPageShell';
 import { useNavigate } from 'react-router-dom';
-import { generateProductUrl, generateStoreUrl } from '@/lib/store-utils';
+import { generatePaymentUrl, generateProductUrl } from '@/lib/store-utils';
 import { useTranslation } from 'react-i18next';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
@@ -60,6 +60,7 @@ import {
   Trash2,
 } from 'lucide-react';
 import { useStore } from '@/hooks/useStore';
+import { supabase } from '@/integrations/supabase/client';
 import {
   useDigitalProducts,
   useDigitalProductsRevenue,
@@ -434,10 +435,166 @@ export const DigitalProductsList = () => {
         })
         .map(p => p.id);
 
+      if (digitalProductIds.length === 0) {
+        throw new Error('Aucun produit digital correspondant à supprimer');
+      }
+
       await bulkDeleteMutation.mutateAsync(digitalProductIds);
       await refetch();
     },
     [bulkDeleteMutation, refetch, products]
+  );
+
+  const handleSingleProductDelete = useCallback(
+    async (productId?: string) => {
+      if (!productId) {
+        toast({
+          title: 'Erreur',
+          description: 'ID de produit manquant',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      const confirmed = window.confirm(
+        'Confirmer la suppression de ce produit ? Cette action est irréversible.'
+      );
+      if (!confirmed) return;
+
+      try {
+        await handleBulkDelete([productId]);
+        toast({
+          title: 'Produit supprimé',
+          description: 'Le produit a été supprimé avec succès.',
+        });
+      } catch (error) {
+        logger.error('Erreur suppression produit digital', { error, productId });
+        toast({
+          title: 'Erreur',
+          description: 'La suppression a échoué. Veuillez réessayer.',
+          variant: 'destructive',
+        });
+      }
+    },
+    [handleBulkDelete, toast]
+  );
+
+  const handleDuplicateProduct = useCallback(
+    async (productId?: string) => {
+      if (!productId) {
+        toast({
+          title: 'Erreur',
+          description: 'ID de produit manquant',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      const sourceRow = products.find(p => {
+        const base = 'product' in p ? p.product : p;
+        return (base?.id || p.id) === productId;
+      });
+
+      if (!sourceRow) {
+        toast({
+          title: 'Erreur',
+          description: 'Produit introuvable pour duplication.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      try {
+        const sourceProduct = ('product' in sourceRow ? sourceRow.product : sourceRow) as Record<
+          string,
+          unknown
+        >;
+        const digitalId = String((sourceRow as Record<string, unknown>).id || '');
+
+        const { data: fullProduct, error: productError } = await supabase
+          .from('products')
+          .select(
+            'store_id, name, slug, description, short_description, category, product_type, price, promotional_price, currency, image_url, images, tags, payment_options, licensing_type, license_terms'
+          )
+          .eq('id', productId)
+          .single();
+
+        if (productError || !fullProduct) {
+          throw new Error(productError?.message || 'Produit source introuvable');
+        }
+
+        const { data: fullDigital, error: digitalError } = await supabase
+          .from('digital_products')
+          .select('*')
+          .eq('id', digitalId)
+          .single();
+
+        if (digitalError || !fullDigital) {
+          throw new Error(digitalError?.message || 'Produit digital source introuvable');
+        }
+
+        const newSlug = `${fullProduct.slug || sourceProduct.slug || productId}-copie-${Date.now().toString(36)}`;
+
+        const { data: createdProduct, error: createProductError } = await supabase
+          .from('products')
+          .insert({
+            ...fullProduct,
+            name: `${String(fullProduct.name || sourceProduct.name || 'Produit')} (copie)`,
+            slug: newSlug,
+            is_active: false,
+            is_draft: true,
+          } as Record<string, unknown>)
+          .select('id')
+          .single();
+
+        if (createProductError || !createdProduct) {
+          throw new Error(createProductError?.message || 'Impossible de créer la copie produit');
+        }
+
+        const digitalClone: Record<string, unknown> = { ...fullDigital };
+        delete digitalClone.id;
+        delete digitalClone.created_at;
+        delete digitalClone.updated_at;
+        delete digitalClone.product_id;
+        delete digitalClone.total_downloads;
+        delete digitalClone.revenue;
+        delete digitalClone.average_rating;
+        delete digitalClone.total_reviews;
+
+        const { error: createDigitalError } = await supabase.from('digital_products').insert({
+          ...digitalClone,
+          product_id: createdProduct.id,
+          status: 'draft',
+          total_downloads: 0,
+          revenue: 0,
+          average_rating: 0,
+          total_reviews: 0,
+        });
+
+        if (createDigitalError) {
+          // rollback produit si la couche digital échoue
+          await supabase.from('products').delete().eq('id', createdProduct.id);
+          throw new Error(createDigitalError.message || 'Impossible de créer la copie digitale');
+        }
+
+        await refetch();
+        toast({
+          title: 'Produit dupliqué',
+          description: 'La copie a été créée en brouillon.',
+        });
+      } catch (error) {
+        logger.error('Erreur duplication produit digital', { error, productId });
+        toast({
+          title: 'Erreur',
+          description:
+            error instanceof Error
+              ? `Duplication impossible: ${error.message}`
+              : 'Duplication impossible. Veuillez réessayer.',
+          variant: 'destructive',
+        });
+      }
+    },
+    [products, refetch, toast]
   );
 
   // Handler pour export
@@ -1048,7 +1205,6 @@ export const DigitalProductsList = () => {
                                       <h3 className="text-base sm:text-lg font-semibold mb-1 sm:mb-2 line-clamp-1">
                                         {product.name}
                                       </h3>
-
                                     </div>
 
                                     <div className="flex items-center gap-2 flex-shrink-0">
@@ -1084,15 +1240,24 @@ export const DigitalProductsList = () => {
                                                   store.subdomain
                                                 )
                                               : '';
-                                          const storeBaseUrl = store
-                                            ? generateStoreUrl(store.slug, store.subdomain)
-                                            : '';
                                           const paymentUrl =
-                                            storeBaseUrl && product?.id
-                                              ? `${storeBaseUrl}/checkout?productId=${product.id}&storeId=${store.id}`
+                                            store?.slug && product?.slug
+                                              ? generatePaymentUrl(
+                                                  store.slug,
+                                                  product.slug || product.id,
+                                                  store.subdomain
+                                                )
                                               : '';
 
-                                          if (action === 'copy-link' && url) {
+                                          if (action === 'view-product' && url) {
+                                            window.open(url, '_blank', 'noopener,noreferrer');
+                                          } else if (action === 'view-product') {
+                                            toast({
+                                              title: 'Erreur',
+                                              description: 'Lien produit indisponible',
+                                              variant: 'destructive',
+                                            });
+                                          } else if (action === 'copy-link' && url) {
                                             navigator.clipboard.writeText(url);
                                             toast({
                                               title: 'Succès',
@@ -1110,12 +1275,9 @@ export const DigitalProductsList = () => {
                                               url: url,
                                             });
                                           } else if (action === 'duplicate') {
-                                            toast({
-                                              title: 'Action requise',
-                                              description: 'La duplication sera bientôt disponible',
-                                            });
+                                            handleDuplicateProduct(product?.id);
                                           } else if (action === 'delete') {
-                                            handleBulkDelete([product.id]);
+                                            void handleSingleProductDelete(product?.id);
                                           }
                                         }}
                                       >
@@ -1123,6 +1285,11 @@ export const DigitalProductsList = () => {
                                           <MoreVertical className="h-4 w-4" />
                                         </SelectTrigger>
                                         <SelectContent>
+                                          <SelectItem value="view-product">
+                                            <span className="flex items-center">
+                                              <Eye className="h-4 w-4 mr-2" /> Voir le produit
+                                            </span>
+                                          </SelectItem>
                                           <SelectItem value="copy-link">
                                             <span className="flex items-center">
                                               <LinkIcon className="h-4 w-4 mr-2" /> Copier le lien

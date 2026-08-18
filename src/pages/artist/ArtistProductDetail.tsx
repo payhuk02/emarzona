@@ -289,6 +289,8 @@ const ArtistProductDetail = () => {
         buildCheckoutUrl({
           productId: productId!,
           storeId: product.store_id,
+          productSlug: product.slug,
+          storeSlug: store?.slug,
           quantity,
         })
       );

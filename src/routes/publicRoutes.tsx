@@ -214,6 +214,7 @@ export const publicRoutes = (
     <Route path="/cart" element={<Navigate to="/marketplace" replace />} />
     <Route path="/cart-old" element={<Navigate to="/marketplace" replace />} />
     <Route path="/checkout" element={<Checkout />} />
+    <Route path="/pay/:storeSlug/:productSlug" element={<Checkout />} />
     <Route path="/checkout/cart" element={<Navigate to="/marketplace" replace />} />
     <Route path="/cart/checkout" element={<Navigate to="/marketplace" replace />} />
     <Route

@@ -75,6 +75,7 @@ export function StoreSubdomainRoutes({ storeSlug }: StoreSubdomainRoutesProps) {
           {/* Panier et checkout */}
           <Route path="/cart" element={<Cart />} />
           <Route path="/checkout" element={<Checkout />} />
+          <Route path="/pay/:productSlug" element={<Checkout />} />
 
           {/* Paiements */}
           <Route path="/payment/success" element={<PaymentSuccess />} />

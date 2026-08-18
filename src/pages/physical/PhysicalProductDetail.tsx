@@ -243,6 +243,8 @@ export default function PhysicalProductDetail() {
         buildCheckoutUrl({
           productId: productId!,
           storeId: product.store_id,
+          productSlug: product.slug,
+          storeSlug: store?.slug,
           variantId: selectedVariant?.id,
           quantity,
         })

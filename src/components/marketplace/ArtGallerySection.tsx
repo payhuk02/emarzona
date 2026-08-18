@@ -9,6 +9,7 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
 import { generateProductUrl } from '@/lib/store-utils';
+import { buildCheckoutUrl } from '@/lib/checkout/checkout-route';
 import { Product } from '@/types/marketplace';
 import { UnifiedProductCard } from '@/components/products/UnifiedProductCard';
 import { transformToUnifiedProduct } from '@/lib/product-transform';
@@ -153,12 +154,12 @@ export function ArtGallerySection() {
                         artwork.stores?.subdomain
                       );
                     } else if (action === 'buy') {
-                      // Logique d'achat - rediriger vers checkout
-                      const checkoutParams = new URLSearchParams({
+                      window.location.href = buildCheckoutUrl({
                         productId: product.id,
                         storeId: product.store_id,
+                        productSlug: product.slug,
+                        storeSlug: artwork.stores?.slug,
                       });
-                      window.location.href = `/checkout?${checkoutParams.toString()}`;
                     }
                   }}
                 />

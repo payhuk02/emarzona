@@ -65,6 +65,7 @@ import type { ProductFAQ } from '@/types/product-form';
 import type { Product } from '@/types/marketplace';
 import type { Store } from '@/hooks/useStore';
 import { generateStoreUrl, generateProductUrl } from '@/lib/store-utils';
+import { buildCheckoutUrl } from '@/lib/checkout/checkout-route';
 import { toUserErrorMessage } from '@/lib/user-error-message';
 import { sanitizeProductDescription } from '@/lib/html-sanitizer';
 import { parsePhysicalCheckoutOptions } from '@/lib/physical/physical-checkout-display';
@@ -317,11 +318,11 @@ const ProductDetails = () => {
 
     let currentPrice = product.price || 0;
     let crossedOutPrice: number | null = null;
-    
+
     // Check for different promo price schemas based on product type
-    const backendPromotionalPrice = (product as any).promotional_price;
-    const backendCompareAtPrice = (product as any).compare_at_price;
-    
+    const backendPromotionalPrice = product.promotional_price;
+    const backendCompareAtPrice = product.compare_at_price;
+
     if (backendPromotionalPrice && backendPromotionalPrice < product.price) {
       // Service/Digital schema: price is regular, promotional_price is discounted
       currentPrice = backendPromotionalPrice;
@@ -390,16 +391,15 @@ const ProductDetails = () => {
     try {
       setIsPurchasing(true);
 
-      const checkoutParams = new URLSearchParams({
-        productId: String(product.id).trim(),
-        storeId: String(storeId).trim(),
-      });
-
-      if (selectedVariantId) {
-        checkoutParams.append('variantId', selectedVariantId);
-      }
-
-      navigate(`/checkout?${checkoutParams.toString()}`);
+      navigate(
+        buildCheckoutUrl({
+          productId: String(product.id).trim(),
+          storeId: String(storeId).trim(),
+          productSlug: product.slug,
+          storeSlug: store.slug,
+          variantId: selectedVariantId || undefined,
+        })
+      );
     } catch (_error: unknown) {
       logger.error('Erreur lors de la redirection vers checkout:', {
         error: toUserErrorMessage(_error) || 'Erreur inconnue',

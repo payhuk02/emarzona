@@ -1,8 +1,10 @@
 /**
- * Checkout canonique mono-produit : `/checkout?productId=…&storeId=…`
+ * Checkout mono-produit :
+ * - Premium: `/pay/:storeSlug/:productSlug` ou `/pay/:productSlug`
+ * - Legacy: `/checkout?productId=…&storeId=…`
  */
 import { lazy, Suspense, useMemo } from 'react';
-import { Navigate, useSearchParams } from 'react-router-dom';
+import { Navigate, useParams, useSearchParams } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
 import { resolveCheckoutMode } from '@/lib/checkout/checkout-route';
 
@@ -20,9 +22,11 @@ function CheckoutLoading() {
 
 export default function CheckoutPage() {
   const [searchParams] = useSearchParams();
+  const { productSlug } = useParams<{ productSlug?: string }>();
   const mode = useMemo(() => resolveCheckoutMode(searchParams), [searchParams]);
+  const hasShortCheckoutTarget = Boolean(productSlug);
 
-  if (mode === 'invalid') {
+  if (mode === 'invalid' && !hasShortCheckoutTarget) {
     return <Navigate to="/marketplace" replace />;
   }
 
