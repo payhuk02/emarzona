@@ -12,7 +12,138 @@
     "getStarted": "Kostenlos starten",
     "getStartedShort": "Starten",
     "menuOpen": "Menü öffnen",
-    "menuClose": "Menü schließen"
+    "menuClose": "Menü schließen",
+    "mega": {
+      "solutions": {
+        "columns": {
+          "sellWays": "Verkaufsmodelle"
+        },
+        "items": {
+          "physical": {
+            "title": "Physische Produkte",
+            "desc": "Lager, Versand, Nachnahme und Garantie"
+          },
+          "digital": {
+            "title": "Digitale Produkte",
+            "desc": "Dateien, Lizenzen, sofortige Lieferung"
+          },
+          "service": {
+            "title": "Dienstleistungen",
+            "desc": "Buchung und Kalender"
+          },
+          "courses": {
+            "title": "Online-Kurse",
+            "desc": "Schulungen, Drip-Content, Zertifikate"
+          },
+          "artist": {
+            "title": "Künstlerwerke",
+            "desc": "Galerie, Kollektionen, Authentizität"
+          },
+          "protect": {
+            "title": "Emarzona Protect",
+            "desc": "Käuferschutz für 45 Tage"
+          }
+        }
+      },
+      "features": {
+        "columns": {
+          "sell": "Verkaufen",
+          "grow": "Wachsen",
+          "operate": "Steuern"
+        },
+        "items": {
+          "storefront": {
+            "title": "Online-Shop",
+            "desc": "Schaufenster, Subdomain und eigene Domain"
+          },
+          "onlinePay": {
+            "title": "Online-Zahlung",
+            "desc": "Karten und Mobile Money"
+          },
+          "cod": {
+            "title": "Zahlung bei Lieferung",
+            "desc": "Der Kunde zahlt bei Erhalt"
+          },
+          "guarantee": {
+            "title": "Bestellgarantie",
+            "desc": "Anzahlung online, Rest bei Lieferung"
+          },
+          "whatsapp": {
+            "title": "WhatsApp-Kontakt",
+            "desc": "Chat direkt von der Produktseite"
+          },
+          "referral": {
+            "title": "Empfehlungen",
+            "desc": "Verkäufer einladen, Provisionen verdienen"
+          },
+          "affiliate": {
+            "title": "Affiliate",
+            "desc": "Getrackte Links für Promoter"
+          },
+          "marketplace": {
+            "title": "Marktplatz",
+            "desc": "Sichtbarkeit im Emarzona-Katalog"
+          },
+          "email": {
+            "title": "E-Mail-Marketing",
+            "desc": "Kampagnen und abgebrochene Warenkörbe"
+          },
+          "analytics": {
+            "title": "Analytics",
+            "desc": "Dashboards in Echtzeit"
+          },
+          "multiStore": {
+            "title": "Multi-Shop",
+            "desc": "Mehrere Marken, ein Konto"
+          },
+          "mobileMoney": {
+            "title": "Mobile-Money-Zahlungen",
+            "desc": "Lokale Annahme in FCFA"
+          }
+        },
+        "footer": "Alle Funktionen ansehen"
+      },
+      "resources": {
+        "columns": {
+          "learn": "Lernen & Hilfe",
+          "company": "Unternehmen"
+        },
+        "items": {
+          "blog": {
+            "title": "Blog",
+            "desc": "Guides und Plattform-News"
+          },
+          "faq": {
+            "title": "FAQ",
+            "desc": "Antworten für Verkäufer und Käufer"
+          },
+          "help": {
+            "title": "Hilfe-Center",
+            "desc": "Support und häufige Fragen"
+          },
+          "docs": {
+            "title": "Dokumentation",
+            "desc": "Erste Schritte und Themen-Guides"
+          },
+          "community": {
+            "title": "Community",
+            "desc": "Austausch mit anderen Creators"
+          },
+          "status": {
+            "title": "Status",
+            "desc": "Verfügbarkeit der Plattform"
+          },
+          "about": {
+            "title": "Über uns",
+            "desc": "Mission, Werte und Team"
+          },
+          "contact": {
+            "title": "Kontakt",
+            "desc": "Schreiben Sie dem Emarzona-Team"
+          }
+        }
+      }
+    }
   },
   "hero": {
     "eyebrow": "All-in-One-E-Commerce-Plattform",

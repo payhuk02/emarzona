@@ -45,6 +45,22 @@ export async function markWebhookProcessed(
     .eq('external_event_id', externalEventId);
 }
 
+async function resolveOrderIdFromTransaction(
+  supabase: SupabaseClient,
+  transactionId: string,
+  rpcOrderId?: string | null
+): Promise<string | null> {
+  if (rpcOrderId) {
+    return rpcOrderId;
+  }
+  const { data } = await supabase
+    .from('transactions')
+    .select('order_id')
+    .eq('id', transactionId)
+    .maybeSingle();
+  return data?.order_id ?? null;
+}
+
 export async function completeTransactionAndOrder(
   supabase: SupabaseClient,
   transactionId: string,
@@ -135,7 +151,12 @@ export async function completeTransactionAndOrder(
 
     if (!result?.success && result?.reason === 'duplicate_webhook') {
       console.warn('Duplicate webhook prevented by atomic RPC lock.');
-      return { orderId: null, alreadyCompleted: true };
+      const orderId = await resolveOrderIdFromTransaction(
+        supabase,
+        transactionId,
+        result?.order_id
+      );
+      return { orderId, alreadyCompleted: true };
     }
 
     return {
@@ -180,7 +201,7 @@ export async function completeTransactionAndOrder(
     const paidOrderStatus = await resolvePaidOrderStatusForOrder(supabase, orderId);
     const { data: orderRow } = await supabase
       .from('orders')
-      .select('remaining_amount, metadata')
+      .select('remaining_amount, metadata, paid_at')
       .eq('id', orderId)
       .maybeSingle();
     const checkoutMethod =
@@ -197,6 +218,7 @@ export async function completeTransactionAndOrder(
         status: paidOrderStatus,
         payment_provider_used:
           paymentProviderUsed !== 'unknown' ? paymentProviderUsed : transaction.payment_provider,
+        paid_at: orderRow?.paid_at ?? now,
         updated_at: now,
       })
       .eq('id', orderId);

@@ -12,7 +12,138 @@
     "getStarted": "Empezar gratis",
     "getStartedShort": "Empezar",
     "menuOpen": "Abrir menú",
-    "menuClose": "Cerrar menú"
+    "menuClose": "Cerrar menú",
+    "mega": {
+      "solutions": {
+        "columns": {
+          "sellWays": "Modelos de venta"
+        },
+        "items": {
+          "physical": {
+            "title": "Productos físicos",
+            "desc": "Stock, envío, pago contra reembolso y garantía"
+          },
+          "digital": {
+            "title": "Productos digitales",
+            "desc": "Archivos, licencias, entrega instantánea"
+          },
+          "service": {
+            "title": "Servicios",
+            "desc": "Reservas y calendario"
+          },
+          "courses": {
+            "title": "Cursos online",
+            "desc": "Formación, drip y certificados"
+          },
+          "artist": {
+            "title": "Obras de artista",
+            "desc": "Galería, colecciones, autenticidad"
+          },
+          "protect": {
+            "title": "Emarzona Protect",
+            "desc": "Protección del comprador durante 45 días"
+          }
+        }
+      },
+      "features": {
+        "columns": {
+          "sell": "Vender",
+          "grow": "Crecer",
+          "operate": "Gestionar"
+        },
+        "items": {
+          "storefront": {
+            "title": "Tienda online",
+            "desc": "Vitrina, subdominio y dominio propio"
+          },
+          "onlinePay": {
+            "title": "Pago online",
+            "desc": "Tarjetas y mobile money"
+          },
+          "cod": {
+            "title": "Pago contra reembolso",
+            "desc": "El cliente paga al recibir"
+          },
+          "guarantee": {
+            "title": "Garantía al pedir",
+            "desc": "Anticipo online, saldo a la entrega"
+          },
+          "whatsapp": {
+            "title": "Contacto WhatsApp",
+            "desc": "Chat directo desde la ficha"
+          },
+          "referral": {
+            "title": "Referidos",
+            "desc": "Invita vendedores y gana comisiones"
+          },
+          "affiliate": {
+            "title": "Afiliación",
+            "desc": "Enlaces con seguimiento para promotores"
+          },
+          "marketplace": {
+            "title": "Marketplace",
+            "desc": "Visibilidad en el catálogo Emarzona"
+          },
+          "email": {
+            "title": "Email marketing",
+            "desc": "Campañas y carritos abandonados"
+          },
+          "analytics": {
+            "title": "Analytics",
+            "desc": "Paneles en tiempo real"
+          },
+          "multiStore": {
+            "title": "Multi-tienda",
+            "desc": "Varias marcas, una cuenta"
+          },
+          "mobileMoney": {
+            "title": "Pagos mobile money",
+            "desc": "Cobro local en FCFA"
+          }
+        },
+        "footer": "Ver todas las funciones"
+      },
+      "resources": {
+        "columns": {
+          "learn": "Aprender y ayuda",
+          "company": "Empresa"
+        },
+        "items": {
+          "blog": {
+            "title": "Blog",
+            "desc": "Guías y novedades de la plataforma"
+          },
+          "faq": {
+            "title": "FAQ",
+            "desc": "Respuestas para vendedores y compradores"
+          },
+          "help": {
+            "title": "Centro de ayuda",
+            "desc": "Soporte y preguntas frecuentes"
+          },
+          "docs": {
+            "title": "Documentación",
+            "desc": "Primeros pasos y guías por tema"
+          },
+          "community": {
+            "title": "Comunidad",
+            "desc": "Conecta con otros creadores"
+          },
+          "status": {
+            "title": "Estado",
+            "desc": "Disponibilidad de la plataforma"
+          },
+          "about": {
+            "title": "Acerca de",
+            "desc": "Misión, valores y equipo"
+          },
+          "contact": {
+            "title": "Contacto",
+            "desc": "Escribe al equipo Emarzona"
+          }
+        }
+      }
+    }
   },
   "hero": {
     "eyebrow": "Plataforma e-commerce todo en uno",

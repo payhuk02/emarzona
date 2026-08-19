@@ -13,7 +13,9 @@ export const ADMIN_TRANSACTION_FIELDS = `
   updated_at,
   order:orders!transactions_order_id_fkey(
     order_number,
-    customer_email
+    customer_email,
+    paid_at,
+    payment_status
   )
 `;
 
@@ -33,7 +35,12 @@ export type AdminTransactionRow = {
   geniuspay_transaction_id: string | null;
   created_at: string;
   updated_at: string;
-  order: { order_number: string | null; customer_email: string | null } | null;
+  order: {
+    order_number: string | null;
+    customer_email: string | null;
+    paid_at: string | null;
+    payment_status: string | null;
+  } | null;
 };
 
 export type AdminTransactionStats = {
@@ -105,6 +112,8 @@ function mapTransactionRow(row: Record<string, unknown>): AdminTransactionRow {
       ? {
           order_number: order.order_number ? String(order.order_number) : null,
           customer_email: order.customer_email ? String(order.customer_email) : null,
+          paid_at: order.paid_at ? String(order.paid_at) : null,
+          payment_status: order.payment_status ? String(order.payment_status) : null,
         }
       : null,
   };

@@ -53,10 +53,19 @@ async function completePayPalPayment(
   if (orderId) {
     await runPostOrderPaymentFulfillment(supabase, orderId, transactionId);
   } else if (alreadyCompleted) {
-    console.log('PayPal payment webhook replay ignored (idempotent)', {
-      transactionId,
-      eventId: extras.externalEventId,
-    });
+    const { data: tx } = await supabase
+      .from('transactions')
+      .select('order_id')
+      .eq('id', transactionId)
+      .maybeSingle();
+    if (tx?.order_id) {
+      await runPostOrderPaymentFulfillment(supabase, tx.order_id, transactionId);
+    } else {
+      console.log('PayPal payment webhook replay ignored (idempotent)', {
+        transactionId,
+        eventId: extras.externalEventId,
+      });
+    }
   }
 
   return { alreadyCompleted, orderId };

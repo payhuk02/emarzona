@@ -16,6 +16,7 @@ import {
   recordWebhookEvent,
   validateOrderPaymentAmount,
 } from '../_shared/complete-order-payment.ts';
+import { handleMoneyFusionOrphanWebhook } from '../_shared/moneyfusion-orphan-payments.ts';
 import {
   activatePhysicalSubscriptionFromWebhook,
   billingCustomerFromTransaction,
@@ -43,13 +44,6 @@ function sanitizePayload(payload: Record<string, unknown>): Record<string, unkno
     numeroTransaction: payload.numeroTransaction ?? null,
     numeroRetrait: payload.numeroRetrait ?? null,
   };
-}
-
-async function hashPayload(raw: string): Promise<string> {
-  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(raw));
-  return Array.from(new Uint8Array(digest))
-    .map(b => b.toString(16).padStart(2, '0'))
-    .join('');
 }
 
 async function fetchVerifiedStatus(token: string): Promise<{
@@ -404,11 +398,27 @@ serve(async req => {
     }
 
     if (!transaction) {
-      console.error('[MoneyFusion webhook] Transaction not found — orphan PSP payment risk', {
+      console.error('[MoneyFusion webhook] Transaction not found — orphan PSP payment', {
         tokenPrefix: token.slice(0, 8),
         mappedStatus,
         verifiedAmount: verified.amount,
       });
+
+      const orphanResult = await handleMoneyFusionOrphanWebhook(supabase, {
+        token,
+        mappedStatus,
+        verifiedStatut: verified.statut,
+        verifiedAmount: verified.amount ?? null,
+        currency: typeof payload.devise === 'string' ? payload.devise : 'XOF',
+        eventType,
+        safePayload: {
+          ...safePayload,
+          verified_statut: verified.statut,
+          verified_amount: verified.amount ?? null,
+        },
+        personalInfo,
+      });
+
       try {
         await supabase.from('payment_webhook_events').insert({
           provider: 'moneyfusion',
@@ -419,27 +429,46 @@ serve(async req => {
             orphan: true,
             verified_statut: verified.statut,
             verified_amount: verified.amount ?? null,
+            auto_resolved: orphanResult.autoResolved,
           },
-          processing_error: 'transaction_not_found',
+          processing_error: orphanResult.autoResolved ? null : 'transaction_not_found',
+          processed_at: orphanResult.autoResolved ? new Date().toISOString() : null,
+          transaction_id: orphanResult.transactionId ?? null,
+          order_id: orphanResult.orderId ?? null,
         });
       } catch (orphanErr) {
         console.error('[MoneyFusion webhook] Failed to record orphan event', orphanErr);
       }
-      // 404 → MoneyFusion peut retenter ; l'événement orphan est visible admin/ops
+
+      if (orphanResult.autoResolved) {
+        return new Response(
+          JSON.stringify({
+            success: true,
+            orphan: true,
+            auto_resolved: true,
+            transactionId: orphanResult.transactionId,
+            orderId: orphanResult.orderId,
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // 200 : ticket admin créé — ne pas faire retenter MoneyFusion à l'infini
       return new Response(
         JSON.stringify({
-          error: 'Transaction not found',
+          success: true,
           orphan: true,
-          message: 'Paiement reçu sans transaction locale — à réconcilier',
+          queued: true,
+          orphanId: orphanResult.orphanId,
+          message: 'Paiement orphelin enregistré — à lier depuis l admin',
         }),
-        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     const transactionId = String(transaction.id);
     const orderId = (transaction.order_id as string | null) ?? null;
-    const payloadHash = await hashPayload(rawPayload);
-    const externalEventId = `moneyfusion:${token}:${mappedStatus}:${payloadHash.slice(0, 16)}`;
+    const externalEventId = `moneyfusion:${token}:${mappedStatus}`;
 
     if (mappedStatus !== 'completed') {
       const isNew = await recordWebhookEvent(

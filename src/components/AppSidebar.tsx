@@ -1,5 +1,5 @@
 import { LayoutDashboard, Search, Plus } from '@/components/icons';
-import { Circle, Lock, ShoppingBag, Key, Activity, Package } from 'lucide-react';
+import { Circle, Lock, ShoppingBag, Key, Package } from 'lucide-react';
 import { usePlatformLogo } from '@/hooks/usePlatformLogo';
 import { NavLink, Link, useNavigate, useLocation } from 'react-router-dom';
 import { SidebarCollapsibleSection } from '@/components/sidebar/SidebarCollapsibleSection';
@@ -182,12 +182,6 @@ export function AppSidebar() {
         title: t('command.inventory', 'Inventaire'),
         url: '/dashboard/inventory',
         icon: Package,
-        sectionLabel: t('command.quickActions', 'Actions rapides'),
-      },
-      {
-        title: t('command.platformStatus', 'Statut plateforme'),
-        url: '/status',
-        icon: Activity,
         sectionLabel: t('command.quickActions', 'Actions rapides'),
       },
     ];

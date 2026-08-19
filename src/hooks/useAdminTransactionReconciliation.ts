@@ -1,4 +1,10 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  fetchMoneyFusionOrphanPayments,
+  fetchPaymentRepairActivity,
+  ignoreMoneyFusionOrphan,
+  resolveMoneyFusionOrphan,
+} from '@/lib/admin/admin-moneyfusion-orphans';
 import {
   AdminTransactionTab,
   DEFAULT_ADMIN_TRANSACTION_PAGE_SIZE,
@@ -30,6 +36,42 @@ export function useAdminTransactionStats(options?: { enabled?: boolean }) {
     queryKey: ['admin-transactions-stats'],
     queryFn: fetchAdminTransactionStats,
     enabled: options?.enabled ?? true,
+  });
+}
+
+export function useMoneyFusionOrphans(status: 'open' | 'all' = 'open') {
+  return useQuery({
+    queryKey: ['admin-moneyfusion-orphans', status],
+    queryFn: () => fetchMoneyFusionOrphanPayments(status),
+  });
+}
+
+export function usePaymentRepairActivity() {
+  return useQuery({
+    queryKey: ['admin-payment-repair-activity'],
+    queryFn: fetchPaymentRepairActivity,
+  });
+}
+
+export function useResolveMoneyFusionOrphan() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: resolveMoneyFusionOrphan,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-moneyfusion-orphans'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-payment-repair-activity'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-transactions-reconciliation'] });
+    },
+  });
+}
+
+export function useIgnoreMoneyFusionOrphan() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ignoreMoneyFusionOrphan,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-moneyfusion-orphans'] });
+    },
   });
 }
 

@@ -20335,6 +20335,7 @@ export type Database = {
           id: string;
           metadata: Json | null;
           order_number: string;
+          paid_at: string | null;
           payment_connection_id: string | null;
           payment_provider_used: string | null;
           payment_status: string | null;
@@ -20360,6 +20361,7 @@ export type Database = {
           id?: string;
           metadata?: Json | null;
           order_number: string;
+          paid_at?: string | null;
           payment_connection_id?: string | null;
           payment_provider_used?: string | null;
           payment_status?: string | null;
@@ -20385,6 +20387,7 @@ export type Database = {
           id?: string;
           metadata?: Json | null;
           order_number?: string;
+          paid_at?: string | null;
           payment_connection_id?: string | null;
           payment_provider_used?: string | null;
           payment_status?: string | null;
@@ -23497,6 +23500,30 @@ export type Database = {
           permissions?: Json;
           role?: string;
           updated_at?: string;
+        };
+        Relationships: [];
+      };
+      platform_page_hero_images: {
+        Row: {
+          created_at: string;
+          image_url: string;
+          slug: string;
+          updated_at: string;
+          updated_by: string | null;
+        };
+        Insert: {
+          created_at?: string;
+          image_url: string;
+          slug: string;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          image_url?: string;
+          slug?: string;
+          updated_at?: string;
+          updated_by?: string | null;
         };
         Relationships: [];
       };
@@ -47820,6 +47847,48 @@ export type Database = {
       list_geniuspay_transactions_for_reconciliation: {
         Args: { p_hours_back?: number; p_limit?: number };
         Returns: Json;
+      };
+      list_moneyfusion_orphan_payments: {
+        Args: { p_limit?: number; p_status?: string };
+        Returns: {
+          created_at: string;
+          currency: string;
+          customer_email_hint: string | null;
+          id: string;
+          last_seen_at: string;
+          linked_order_id: string | null;
+          linked_transaction_id: string | null;
+          mapped_status: string;
+          mf_token: string;
+          order_id_hint: string | null;
+          order_number: string | null;
+          order_paid_at: string | null;
+          order_payment_status: string | null;
+          resolution_note: string | null;
+          resolution_status: string;
+          store_id_hint: string | null;
+          transaction_id_hint: string | null;
+          verified_amount: number | null;
+          verified_statut: string | null;
+          webhook_attempts: number;
+        }[];
+      };
+      list_payment_repair_activity: {
+        Args: { p_limit?: number };
+        Returns: {
+          created_at: string;
+          event_type: string;
+          id: string;
+          mf_token: string | null;
+          order_id: string | null;
+          order_number: string | null;
+          order_paid_at: string | null;
+          order_payment_status: string | null;
+          payment_provider: string | null;
+          response_data: Json;
+          status: string | null;
+          transaction_id: string;
+        }[];
       };
       list_my_artist_orders: { Args: never; Returns: Json };
       list_my_pay_balance_orders: { Args: never; Returns: Json };

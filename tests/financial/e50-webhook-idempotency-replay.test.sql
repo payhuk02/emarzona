@@ -64,5 +64,9 @@ BEGIN
     RAISE EXCEPTION 'Replay duplicate guard failed: %', v_second;
   END IF;
 
+  IF v_second->>'order_id' IS NULL THEN
+    RAISE EXCEPTION 'duplicate_webhook must return order_id for fulfillment retry: %', v_second;
+  END IF;
+
   RAISE NOTICE 'Replay duplicate guard OK for transaction %', v_tx_id;
 END $$;

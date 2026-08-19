@@ -12,7 +12,138 @@
     "getStarted": "Start for free",
     "getStartedShort": "Start",
     "menuOpen": "Open menu",
-    "menuClose": "Close menu"
+    "menuClose": "Close menu",
+    "mega": {
+      "solutions": {
+        "columns": {
+          "sellWays": "Ways to sell"
+        },
+        "items": {
+          "physical": {
+            "title": "Physical products",
+            "desc": "Inventory, shipping, cash on delivery and guarantee"
+          },
+          "digital": {
+            "title": "Digital products",
+            "desc": "Files, licenses, instant delivery"
+          },
+          "service": {
+            "title": "Services",
+            "desc": "Booking and calendar"
+          },
+          "courses": {
+            "title": "Online courses",
+            "desc": "Training, drip content, certificates"
+          },
+          "artist": {
+            "title": "Artist works",
+            "desc": "Gallery, collections, authenticity"
+          },
+          "protect": {
+            "title": "Emarzona Protect",
+            "desc": "Buyer protection for 45 days"
+          }
+        }
+      },
+      "features": {
+        "columns": {
+          "sell": "Sell",
+          "grow": "Grow",
+          "operate": "Run"
+        },
+        "items": {
+          "storefront": {
+            "title": "Online store",
+            "desc": "Storefront, subdomain and custom domain"
+          },
+          "onlinePay": {
+            "title": "Online payment",
+            "desc": "Cards and mobile money"
+          },
+          "cod": {
+            "title": "Cash on delivery",
+            "desc": "The customer pays on receipt"
+          },
+          "guarantee": {
+            "title": "Order guarantee",
+            "desc": "Deposit online, balance on delivery"
+          },
+          "whatsapp": {
+            "title": "WhatsApp contact",
+            "desc": "Chat from the product page"
+          },
+          "referral": {
+            "title": "Referrals",
+            "desc": "Invite sellers, earn commissions"
+          },
+          "affiliate": {
+            "title": "Affiliates",
+            "desc": "Tracked links for promoters"
+          },
+          "marketplace": {
+            "title": "Marketplace",
+            "desc": "Visibility on the Emarzona catalog"
+          },
+          "email": {
+            "title": "Email marketing",
+            "desc": "Campaigns and abandoned carts"
+          },
+          "analytics": {
+            "title": "Analytics",
+            "desc": "Real-time dashboards"
+          },
+          "multiStore": {
+            "title": "Multi-store",
+            "desc": "Several brands, one account"
+          },
+          "mobileMoney": {
+            "title": "Mobile money payments",
+            "desc": "Local collection in XOF"
+          }
+        },
+        "footer": "See all features"
+      },
+      "resources": {
+        "columns": {
+          "learn": "Learn & help",
+          "company": "Company"
+        },
+        "items": {
+          "blog": {
+            "title": "Blog",
+            "desc": "Guides and platform news"
+          },
+          "faq": {
+            "title": "FAQ",
+            "desc": "Answers for sellers and buyers"
+          },
+          "help": {
+            "title": "Help center",
+            "desc": "Support and common questions"
+          },
+          "docs": {
+            "title": "Documentation",
+            "desc": "Getting started and topic guides"
+          },
+          "community": {
+            "title": "Community",
+            "desc": "Connect with other creators"
+          },
+          "status": {
+            "title": "Status",
+            "desc": "Platform availability"
+          },
+          "about": {
+            "title": "About",
+            "desc": "Mission, values and team"
+          },
+          "contact": {
+            "title": "Contact",
+            "desc": "Write to the Emarzona team"
+          }
+        }
+      }
+    }
   },
   "platformHero": {
     "ariaLabel": "Emarzona ecosystem introduction",

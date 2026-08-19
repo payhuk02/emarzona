@@ -117,6 +117,24 @@ const ReferralShortLinkLanding = lazyPage(
   () => import('@/pages/referral/ReferralShortLinkLanding')
 );
 
+// Pages Solutions (marketing)
+const PhysicalSolutionPage = lazyPage(() => import('@/pages/solutions/PhysicalSolutionPage'));
+const DigitalSolutionPage = lazyPage(() => import('@/pages/solutions/DigitalSolutionPage'));
+const ServicesSolutionPage = lazyPage(() => import('@/pages/solutions/ServicesSolutionPage'));
+const CoursesSolutionPage = lazyPage(() => import('@/pages/solutions/CoursesSolutionPage'));
+const ArtistSolutionPage = lazyPage(() => import('@/pages/solutions/ArtistSolutionPage'));
+const ProtectSolutionPage = lazyPage(() => import('@/pages/solutions/ProtectSolutionPage'));
+
+// Pages Fonctionnalités (marketing)
+const StorefrontFeaturePage = lazyPage(() => import('@/pages/features/StorefrontFeaturePage'));
+const CheckoutFeaturePage = lazyPage(() => import('@/pages/features/CheckoutFeaturePage'));
+const WhatsappFeaturePage = lazyPage(() => import('@/pages/features/WhatsappFeaturePage'));
+const ReferralFeaturePage = lazyPage(() => import('@/pages/features/ReferralFeaturePage'));
+const AffiliateFeaturePage = lazyPage(() => import('@/pages/features/AffiliateFeaturePage'));
+const EmailFeaturePage = lazyPage(() => import('@/pages/features/EmailFeaturePage'));
+const AnalyticsFeaturePage = lazyPage(() => import('@/pages/features/AnalyticsFeaturePage'));
+const MultiStoreFeaturePage = lazyPage(() => import('@/pages/features/MultiStoreFeaturePage'));
+
 // Page test i18n
 const I18nTest = lazyPage(() => import('@/pages/I18nTest'));
 
@@ -288,6 +306,24 @@ export const publicRoutes = (
     <Route path="/auctions" element={<AuctionsListPage />} />
     <Route path="/auctions/:slug" element={<AuctionDetailPage />} />
     <Route path="/verify/:code" element={<VerifyCertificatePage />} />
+
+    {/* Solutions marketing */}
+    <Route path="/solutions/physical" element={<PhysicalSolutionPage />} />
+    <Route path="/solutions/digital" element={<DigitalSolutionPage />} />
+    <Route path="/solutions/services" element={<ServicesSolutionPage />} />
+    <Route path="/solutions/courses" element={<CoursesSolutionPage />} />
+    <Route path="/solutions/artist" element={<ArtistSolutionPage />} />
+    <Route path="/solutions/protect" element={<ProtectSolutionPage />} />
+
+    {/* Fonctionnalités marketing */}
+    <Route path="/features/storefront" element={<StorefrontFeaturePage />} />
+    <Route path="/features/checkout" element={<CheckoutFeaturePage />} />
+    <Route path="/features/whatsapp" element={<WhatsappFeaturePage />} />
+    <Route path="/features/referral" element={<ReferralFeaturePage />} />
+    <Route path="/features/affiliate" element={<AffiliateFeaturePage />} />
+    <Route path="/features/email" element={<EmailFeaturePage />} />
+    <Route path="/features/analytics" element={<AnalyticsFeaturePage />} />
+    <Route path="/features/multi-store" element={<MultiStoreFeaturePage />} />
 
     {/* Parrainage — lien court /p/abcdef */}
     <Route path="/p/:code" element={<ReferralShortLinkLanding />} />

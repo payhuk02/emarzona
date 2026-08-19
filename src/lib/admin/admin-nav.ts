@@ -399,6 +399,12 @@ export const ADMIN_NAV_SECTIONS: AdminNavSection[] = [
         path: '/admin/error-monitoring',
         permissions: ['analytics.view'],
       },
+      {
+        icon: Activity,
+        label: 'Statut plateforme',
+        path: '/status',
+        permissions: ['analytics.view'],
+      },
     ],
   },
   {

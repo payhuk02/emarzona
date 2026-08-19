@@ -5,6 +5,10 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'npm:@supabase/supabase-js@2.58.0';
 import { requireCronOrInternalAuth } from '../_shared/edge-auth-utils.ts';
+import {
+  completeTransactionAndOrder,
+} from '../_shared/complete-order-payment.ts';
+import { runPostOrderPaymentFulfillment } from '../_shared/post-order-payment-fulfillment.ts';
 
 const GENIUSPAY_API_URL = Deno.env.get('GENIUSPAY_API_URL') || 'https://geniuspay.ci/api/v1/merchant';
 
@@ -104,6 +108,7 @@ serve(async req => {
 
     const targets = (rawTargets ?? []) as ReconTarget[];
     let errors = 0;
+    let repaired = 0;
 
     for (const target of targets) {
       try {
@@ -119,6 +124,37 @@ serve(async req => {
         const statusMismatch = dbStatus !== geniuspayStatus && dbStatus !== 'partially_refunded';
 
         const matched = !amountMismatch && !statusMismatch;
+
+        // PSP completed mais DB en attente → compléter commande + fulfillment
+        if (
+          !matched &&
+          geniuspayStatus === 'completed' &&
+          dbStatus !== 'completed'
+        ) {
+          try {
+            const { orderId } = await completeTransactionAndOrder(
+              supabase,
+              target.transaction_id,
+              {
+                paymentProviderUsed: 'geniuspay',
+                externalEventId: `geniuspay-recon:${target.transaction_id}:completed`,
+                eventType: 'reconciliation.completed',
+                webhookPayload: paymentData,
+              }
+            );
+            if (orderId) {
+              await runPostOrderPaymentFulfillment(
+                supabase,
+                orderId,
+                target.transaction_id
+              );
+            }
+            repaired++;
+          } catch (repairErr) {
+            errors++;
+            console.error('GeniusPay recon repair failed:', target.transaction_id, repairErr);
+          }
+        }
 
         await supabase.rpc('record_geniuspay_reconciliation_result', {
           p_run_id: runId,
@@ -160,6 +196,7 @@ serve(async req => {
       success: true,
       run_id: runId,
       total_targets: targets.length,
+      repaired,
       errors,
       processed_at: new Date().toISOString(),
     };

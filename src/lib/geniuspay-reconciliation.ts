@@ -15,7 +15,13 @@ import {
 
 export interface ReconciliationResult {
   transactionId: string;
-  status: 'matched' | 'mismatched' | 'missing_in_db' | 'missing_in_geniuspay' | 'error';
+  status:
+    | 'matched'
+    | 'mismatched'
+    | 'repaired'
+    | 'missing_in_db'
+    | 'missing_in_geniuspay'
+    | 'error';
   discrepancies?: {
     amount?: { db: number; provider: number; geniuspay?: number };
     status?: { db: string; provider: string; geniuspay?: string };
@@ -181,6 +187,80 @@ export async function reconcileTransaction(transactionId: string): Promise<Recon
     }
 
     if (hasDiscrepancy) {
+      // MoneyFusion : finaliser via le pipeline unifié (pas de UPDATE direct sur transactions)
+      if (
+        isMoneyFusionProvider(transaction.payment_provider) &&
+        psp.status === 'completed' &&
+        dbStatus !== 'completed'
+      ) {
+        const { data: syncResponse, error: syncError } = await supabase.functions.invoke(
+          'moneyfusion',
+          {
+            body: {
+              action: 'reconcile_transaction',
+              data: {
+                transactionId: transaction.id,
+                paymentId: externalId,
+                token: externalId,
+              },
+            },
+          }
+        );
+
+        if (syncError) {
+          return {
+            transactionId,
+            status: 'error',
+            error: syncError.message || 'MoneyFusion reconcile failed',
+            discrepancies,
+          };
+        }
+
+        const sync = (syncResponse as { sync?: Record<string, unknown> })?.sync ?? syncResponse;
+        const syncOk = Boolean(
+          (syncResponse as { success?: boolean })?.success ??
+          (sync as { success?: boolean })?.success
+        );
+
+        await supabase.from('transaction_logs').insert({
+          transaction_id: transactionId,
+          event_type: 'reconciliation_repaired',
+          status: 'completed',
+          response_data: {
+            discrepancies,
+            provider: transaction.payment_provider,
+            sync,
+          },
+        });
+
+        return {
+          transactionId,
+          status: syncOk ? 'repaired' : 'error',
+          discrepancies,
+          error: syncOk ? undefined : String((sync as { error?: string })?.error || 'sync_failed'),
+        };
+      }
+
+      if (isMoneyFusionProvider(transaction.payment_provider)) {
+        await supabase.from('transaction_logs').insert({
+          transaction_id: transactionId,
+          event_type: 'reconciliation_mismatch',
+          status: psp.status,
+          response_data: {
+            discrepancies,
+            provider: transaction.payment_provider,
+            psp_data: psp.raw,
+            note: 'MoneyFusion mismatch logged — use admin retry or cron reconcile_stuck',
+          },
+        });
+
+        return {
+          transactionId,
+          status: 'mismatched',
+          discrepancies,
+        };
+      }
+
       await supabase
         .from('transactions')
         .update({

@@ -1,0 +1,491 @@
+{
+  "physical": {
+    "heroTag": "Produits physiques",
+    "heroTitle": "Vendez, expédiez et développez",
+    "heroTitleHighlight": "votre boutique physique.",
+    "heroSubtitle": "De la gestion de stock à la livraison FedEx, en passant par le paiement à la livraison et la garantie — tout ce dont une boutique physique a besoin, sur une seule plateforme.",
+    "statsItems": [
+      {
+        "value": "20+",
+        "label": "catégories de produits"
+      },
+      {
+        "value": "3",
+        "label": "modes de paiement physique"
+      },
+      {
+        "value": "100%",
+        "label": "automatisé"
+      }
+    ],
+    "categories": [
+      "Vétements & Mode",
+      "Accessoires",
+      "Artisanat",
+      "Électronique",
+      "Maison & Jardin",
+      "Sport & Fitness",
+      "Beauté & Cosmétiques",
+      "Livres & Papeterie",
+      "Jouets & Jeux",
+      "Alimentation & Épicerie",
+      "Décoration & Design",
+      "Bijoux & Montres",
+      "Santé & Bien-étre",
+      "Bébé & Enfant",
+      "Animalerie",
+      "Automobile & Moto",
+      "Outils & Bricolage",
+      "Jardinage & Plein air"
+    ],
+    "features": [
+      {
+        "title": "Gestion de stock & variantes",
+        "description": "Suivi en temps réel des quantités, gestion des tailles/couleurs/formats et alertes de rupture automatiques."
+      },
+      {
+        "title": "Expédition FedEx intégrée",
+        "description": "Calcul de tarifs en direct, impression d'étiquettes et suivi colis depuis votre tableau de bord."
+      },
+      {
+        "title": "Garantie à la commande",
+        "description": "Demandez un acompte au moment de la commande via mobile money, le client règle le solde à la livraison."
+      },
+      {
+        "title": "Paiement à la livraison (COD)",
+        "description": "Acceptez les paiements cash ou mobile money directement à la livraison, sans risque de fraude."
+      },
+      {
+        "title": "Contact WhatsApp sur fiche produit",
+        "description": "Un bouton WhatsApp directement sur la fiche permet à l'acheteur de vous contacter avant d'acheter."
+      },
+      {
+        "title": "Analytics & rapports de ventes",
+        "description": "Tableaux de bord en temps réel : revenus, articles les plus vendus, retours, paniers abandonnés."
+      },
+      {
+        "title": "Récupération de paniers abandonnés",
+        "description": "Relances e-mail automatiques pour les clients qui n'ont pas finalisé leur commande."
+      },
+      {
+        "title": "Multi-zones de livraison",
+        "description": "Définissez vos propres tarifs par ville, région ou pays et proposez la livraison gratuite à partir d'un seuil."
+      }
+    ],
+    "steps": [
+      {
+        "number": "01",
+        "title": "Créez votre boutique en 5 minutes",
+        "description": "Nom, logo, domaine personnalisé, thème — votre boutique est en ligne immédiatement."
+      },
+      {
+        "number": "02",
+        "title": "Ajoutez vos produits",
+        "description": "Photos, variantes, prix, stock — le wizard guidé vous accompagne à chaque étape."
+      },
+      {
+        "number": "03",
+        "title": "Vendez et encaissez",
+        "description": "Partagez votre lien boutique ou apparaissez sur le marketplace Emarzona. Payez en ligne, à la livraison ou avec garantie."
+      }
+    ],
+    "seoTitle": "Vendre des produits physiques en ligne | Emarzona",
+    "seoDescription": "Boutique e-commerce complète pour vendre vos produits physiques : gestion de stock, livraison FedEx, COD, garantie et mobile money. Lancez-vous en 5 minutes."
+  },
+  "digital": {
+    "heroTag": "Produits digitaux",
+    "heroTitle": "Livrez instantanément,",
+    "heroTitleHighlight": "encaissez automatiquement.",
+    "heroSubtitle": "Ebooks, templates, logiciels, cours, musique — vendez n'importe quel fichier numérique avec livraison instantanée, liens sécurisés et protection contre le partage non autorisé.",
+    "statsItems": [
+      {
+        "value": "23+",
+        "label": "types de produits digitaux"
+      },
+      {
+        "value": "0%",
+        "label": "commission sur certains types"
+      },
+      {
+        "value": "∞",
+        "label": "téléchargements par licence"
+      }
+    ],
+    "categories": [
+      "Ebooks & Guides",
+      "Templates & Modèles",
+      "Logiciels & Applications",
+      "Formations & Cours",
+      "Ressources graphiques",
+      "Audio & Musique",
+      "Vidéos & Montage",
+      "Plugins & Extensions",
+      "Thèmes & Presets",
+      "Scripts & Snippets",
+      "Polices de caractères",
+      "Modèles 3D",
+      "Photos & Vidéos stock",
+      "Podcasts"
+    ],
+    "features": [
+      {
+        "title": "Livraison instantanée sécurisée",
+        "description": "Le fichier est livré dès la confirmation du paiement, via un lien tokenisé à usage unique et à durée limitée."
+      },
+      {
+        "title": "Protection DRM & licences",
+        "description": "Chaque achat génère une licence unique liée à l'acheteur, protégeant votre contenu contre la redistribution."
+      },
+      {
+        "title": "Bundles & packs de produits",
+        "description": "Regroupez plusieurs fichiers en un bundle vendu à prix réduit pour augmenter votre panier moyen."
+      },
+      {
+        "title": "Vente internationale",
+        "description": "Acceptez les paiements en FCFA, EUR, USD et plus de 30 devises. Vos clients partout dans le monde."
+      },
+      {
+        "title": "Analytics de téléchargement",
+        "description": "Suivez les téléchargements, les licences actives et les revenus par produit depuis votre tableau de bord."
+      },
+      {
+        "title": "Programme d'affiliation",
+        "description": "Créez un réseau de promoteurs qui partagent vos produits contre commission — entièrement automatisé."
+      }
+    ],
+    "steps": [
+      {
+        "number": "01",
+        "title": "Uploadez votre fichier",
+        "description": "PDF, ZIP, MP3, MP4, EXE — tous les formats jusqu'à 2 Go. Hébergement inclus."
+      },
+      {
+        "number": "02",
+        "title": "Configurez votre offre",
+        "description": "Prix, prévisualisation, restrictions de téléchargement, affiliés — tout en un."
+      },
+      {
+        "number": "03",
+        "title": "Partagez et encaissez",
+        "description": "Lien direct, page boutique ou marketplace. Le paiement arrive, le fichier part — automatiquement."
+      }
+    ],
+    "seoTitle": "Vendre des produits digitaux | Emarzona",
+    "seoDescription": "Plateforme de vente de produits digitaux : ebooks, templates, logiciels, musique. Livraison instantanée, licences sécurisées, affiliation automatisée."
+  },
+  "services": {
+    "heroTag": "Services & prestations",
+    "heroTitle": "Vendez votre expertise,",
+    "heroTitleHighlight": "automatisez les réservations.",
+    "heroSubtitle": "Consultation, coaching, design, développement, photographie — proposez vos services avec calendrier de réservation, paiement en ligne et gestion de clientèle intégrée.",
+    "statsItems": [
+      {
+        "value": "26+",
+        "label": "catégories de services"
+      },
+      {
+        "value": "100%",
+        "label": "réservations automatisées"
+      },
+      {
+        "value": "0",
+        "label": "no-show grâce aux acomptes"
+      }
+    ],
+    "categories": [
+      "Consultation & Coaching",
+      "Design graphique",
+      "Développement web & mobile",
+      "Marketing & SEO",
+      "Rédaction & Traduction",
+      "UI/UX Design",
+      "Illustration & Animation",
+      "Vidéo & Montage",
+      "Audio & Musique",
+      "Voix-off & Podcast",
+      "Réseaux sociaux",
+      "Data & Analytics",
+      "Cloud & DevOps",
+      "Cybersécurité",
+      "Support technique"
+    ],
+    "features": [
+      {
+        "title": "Calendrier de réservation intégré",
+        "description": "Vos disponibilités en ligne, réservation en quelques clics pour vos clients, sans aller-retour par message."
+      },
+      {
+        "title": "Acomptes & paiement sécurisé",
+        "description": "Exigez un acompte à la réservation pour éviter les no-shows. Le client paie en ligne, vous étes protégé."
+      },
+      {
+        "title": "Rappels automatiques",
+        "description": "Emails et notifications de rappel envoyés automatiquement avant chaque rendez-vous."
+      },
+      {
+        "title": "Gestion des créneaux & durées",
+        "description": "Définissez la durée de vos prestations, vos jours de congé, les pauses entre rendez-vous."
+      },
+      {
+        "title": "Liste d'attente",
+        "description": "Si votre agenda est complet, les clients peuvent rejoindre une liste d'attente et étre notifiés automatiquement."
+      },
+      {
+        "title": "Avis vérifiés",
+        "description": "Collectez des avis clients après chaque prestation pour construire votre réputation sur la plateforme."
+      }
+    ],
+    "steps": [
+      {
+        "number": "01",
+        "title": "Créez votre offre de service",
+        "description": "Titre, description, tarif, durée, modes de prestation (en ligne, en personne, hybride)."
+      },
+      {
+        "number": "02",
+        "title": "Configurez votre calendrier",
+        "description": "Définissez vos disponibilités. Les clients voient vos créneaux libres en temps réel."
+      },
+      {
+        "number": "03",
+        "title": "Acceptez les réservations & encaissez",
+        "description": "Les clients réservent et paient en ligne. Vous recevez une notification et gérez tout depuis votre dashboard."
+      }
+    ],
+    "seoTitle": "Vendre des services en ligne | Emarzona",
+    "seoDescription": "Plateforme de vente de services : réservation en ligne, calendrier intégré, acomptes, rappels automatiques. Parfait pour consultants, coachs, freelances."
+  },
+  "courses": {
+    "heroTag": "Cours en ligne",
+    "heroTitle": "Enseignez au monde entier,",
+    "heroTitleHighlight": "monétisez votre savoir.",
+    "heroSubtitle": "Créez des formations complètes avec vidéos, quiz, certificats et contenu drip. Vos élèves progressent à leur rythme, vous encaissez en automatique — comme Udemy, mais votre propre marque.",
+    "statsItems": [
+      {
+        "value": "23+",
+        "label": "domaines de formation"
+      },
+      {
+        "value": "100%",
+        "label": "auto-hébergé"
+      },
+      {
+        "value": "∞",
+        "label": "élèves simultanés"
+      }
+    ],
+    "categories": [
+      "Programmation & Tech",
+      "Design & Créativité",
+      "Marketing Digital",
+      "Business & Entrepreneuriat",
+      "Langues",
+      "Photographie & Vidéo",
+      "Musique & Production",
+      "Écriture & Communication",
+      "Santé & Bien-étre",
+      "Cuisine & Arts de table",
+      "Sport & Fitness",
+      "Finance & Investissement",
+      "Psychologie & Développement personnel",
+      "Art & Dessin",
+      "Data Science & IA",
+      "Cybersécurité"
+    ],
+    "features": [
+      {
+        "title": "Lecteur vidéo intégré",
+        "description": "Uploadez vos vidéos directement, sans YouTube ni Vimeo. Lecture adaptative, sous-titres, vitesse de lecture."
+      },
+      {
+        "title": "Contenu drip (publication progressive)",
+        "description": "Débloquez les modules automatiquement selon l'avancement de l'élève ou un calendrier prédéfini."
+      },
+      {
+        "title": "Certificats de complétion",
+        "description": "Générez et émettez des certificats personnalisés vérifiables à la fin de chaque formation."
+      },
+      {
+        "title": "Quiz & évaluations",
+        "description": "Intégrez des quiz interactifs à chaque module pour tester la compréhension de vos élèves."
+      },
+      {
+        "title": "Espace communauté",
+        "description": "Créez un espace d'échange entre élèves et formateur directement dans la plateforme de formation."
+      },
+      {
+        "title": "Suivi de progression détaillé",
+        "description": "Tableaux de bord pour suivre l'avancement de chaque élève, le taux de complétion et les résultats des quiz."
+      }
+    ],
+    "steps": [
+      {
+        "number": "01",
+        "title": "Créez votre formation",
+        "description": "Structurez vos modules, uploadez vos vidéos, ajoutez quiz et ressources — le tout en quelques heures."
+      },
+      {
+        "number": "02",
+        "title": "Fixez votre prix",
+        "description": "Accès unique, abonnement ou bundle de formations. Coupon de réduction, prix de lancement."
+      },
+      {
+        "number": "03",
+        "title": "Inscriptions & certificats",
+        "description": "Partagez votre page de cours. Les élèves s'inscrivent, progressent et reçoivent leur certificat automatiquement."
+      }
+    ],
+    "seoTitle": "Créer et vendre des cours en ligne | Emarzona",
+    "seoDescription": "Plateforme de formation en ligne : vidéos, drip content, quiz, certificats, communauté. Lancez votre êcole en ligne comme Udemy, avec votre marque."
+  },
+  "artist": {
+    "heroTag": "Oeuvres & créations",
+    "heroTitle": "Exposez, vendez et protégez",
+    "heroTitleHighlight": "vos oeuvres d'artiste.",
+    "heroSubtitle": "Galerie portfolio, éditions limitées, certificats d'authenticité, enchères publiques — une vitrine premium pour les peintres, sculpteurs, illustrateurs, photographes et créateurs.",
+    "statsItems": [
+      {
+        "value": "16+",
+        "label": "disciplines artistiques"
+      },
+      {
+        "value": "100%",
+        "label": "traçabilité de provenance"
+      },
+      {
+        "value": "1",
+        "label": "certificat par oeuvre"
+      }
+    ],
+    "categories": [
+      "Peinture",
+      "Dessin & Illustration",
+      "Sculpture & Céramique",
+      "Photographie d'art",
+      "Art numérique",
+      "Gravure & Estampe",
+      "Collage & Techniques mixtes",
+      "Art mural",
+      "Art verrier",
+      "Art textile",
+      "Livre d'artiste"
+    ],
+    "features": [
+      {
+        "title": "Portfolio en ligne haute résolution",
+        "description": "Galerie immersive avec zoom, détails de l'oeuvre, dimensions, matériaux et prix. Impression de votre univers artistique."
+      },
+      {
+        "title": "Éditions limitées & numérotées",
+        "description": "Créez des séries limitées numérotées. Chaque acheteur sait qu'il possède l'original ou un numéro unique."
+      },
+      {
+        "title": "Certificat d'authenticité numérique",
+        "description": "Chaque vente génère un certificat vérifiable en ligne avec QR code, prévenant les contrefaçons."
+      },
+      {
+        "title": "Enchères publiques",
+        "description": "Proposez vos oeuvres à l'enchère et laissez le marché fixer le prix. Fonctionnement sécurisé avec mise à prix."
+      },
+      {
+        "title": "Collections & expositions",
+        "description": "Organisez vos oeuvres en collections thématiques ou chronologiques pour une meilleure mise en valeur."
+      },
+      {
+        "title": "Historique de provenance",
+        "description": "Chaque transfert de propriété est enregistré, constituant un pedigree numérique immuable pour l'oeuvre."
+      }
+    ],
+    "steps": [
+      {
+        "number": "01",
+        "title": "Créez votre galerie",
+        "description": "Bio d'artiste, portfolio, style, disciplines — votre page est votre carte de visite professionnelle."
+      },
+      {
+        "number": "02",
+        "title": "Publiez vos oeuvres",
+        "description": "Photos haute résolution, description, dimensions, édition, prix. Certificat d'authenticité généré automatiquement."
+      },
+      {
+        "number": "03",
+        "title": "Vendez & documentez",
+        "description": "Achat direct ou enchère. À chaque vente, le certificat et la provenance sont transmis au nouvel acquéreur."
+      }
+    ],
+    "seoTitle": "Vendre des oeuvres d'artiste en ligne | Emarzona",
+    "seoDescription": "Galerie e-commerce pour artistes : peinture, sculpture, illustration, photographie. Certificats d'authenticité, éditions limitées, enchères publiques."
+  },
+  "protect": {
+    "heroTag": "Protection acheteur",
+    "heroTitle": "Achetez en confiance,",
+    "heroTitleHighlight": "Emarzona vous protège.",
+    "heroSubtitle": "Emarzona Protect couvre chaque commande éligible : produits non reçus, non conformes, téléchargements défaillants. Réclamez sous 45 jours, remboursement assisté garanti.",
+    "statsItems": [
+      {
+        "value": "45",
+        "label": "jours pour réclamer"
+      },
+      {
+        "value": "5",
+        "label": "types de produits couverts"
+      },
+      {
+        "value": "100%",
+        "label": "sans frais pour l'acheteur"
+      }
+    ],
+    "categories": [
+      "Produits physiques",
+      "Produits digitaux",
+      "Services",
+      "Cours en ligne",
+      "Oeuvres d'artiste"
+    ],
+    "features": [
+      {
+        "title": "Fenétre de réclamation de 45 jours",
+        "description": "Vous avez 45 jours après la commande pour ouvrir un litige si quelque chose ne va pas."
+      },
+      {
+        "title": "Couverture sur tous les types",
+        "description": "Physique, digital, service, cours, artiste — Emarzona Protect couvre les 5 verticaux de la plateforme."
+      },
+      {
+        "title": "Remboursement assisté",
+        "description": "Un médiateur Emarzona analyse chaque litige. Remboursement partiel ou total selon le cas."
+      },
+      {
+        "title": "Protection contre la non-livraison",
+        "description": "Produit non reçu, accès non accordé, fichier corrompu — autant de motifs valides de réclamation."
+      },
+      {
+        "title": "Médiation équitable",
+        "description": "Système de preuve des deux côtés. La décision finale protège autant l'acheteur que le vendeur de bonne foi."
+      },
+      {
+        "title": "Sans frais pour l'acheteur",
+        "description": "Emarzona Protect est inclus dans chaque commande éligible. Aucun abonnement, aucun frais caché."
+      }
+    ],
+    "steps": [
+      {
+        "number": "01",
+        "title": "Commandez sur Emarzona",
+        "description": "Toute commande éligible est automatiquement couverte. Aucune action requise."
+      },
+      {
+        "number": "02",
+        "title": "Ouvrez un litige si nécessaire",
+        "description": "Dans les 45 jours, depuis votre espace client, décrivez le problème et ajoutez vos preuves."
+      },
+      {
+        "number": "03",
+        "title": "Résolution rapide",
+        "description": "L'équipe Emarzona médiatise et tranche. Remboursement traité sous 5 à 10 jours ouvrés."
+      }
+    ],
+    "seoTitle": "Emarzona Protect — Protection acheteur | Emarzona",
+    "seoDescription": "Protection acheteur Emarzona : 45 jours pour réclamer, couverture sur les 5 types de produits, remboursement assisté sans frais. Achetez en confiance."
+  }
+}

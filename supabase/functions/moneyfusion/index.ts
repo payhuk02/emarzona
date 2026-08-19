@@ -12,9 +12,15 @@ import { resolveOrderExpectedPayableAmount } from '../_shared/complete-order-pay
 import { handleMoneyFusionRefund } from '../_shared/handle-moneyfusion-refund.ts';
 import { handleMoneyFusionStoreWithdrawalPayout } from '../_shared/handle-moneyfusion-store-withdrawal.ts';
 import { authorizeCheckoutOrder } from '../_shared/order-checkout-auth.ts';
+import { assertPlatformAdmin, createSupabaseUserClient } from '../_shared/supabase-admin.ts';
 import { enforceRateLimit, getClientIp, RATE_LIMIT_PRESETS } from '../_shared/rate-limit.ts';
 import { moneyFusionFetch, moneyFusionPayInitiate, moneyFusionCheckoutUrlFromToken } from '../_shared/moneyfusion-http.ts';
-import { syncMoneyFusionTransactionFromToken } from '../_shared/moneyfusion-sync-from-status.ts';
+import { syncMoneyFusionTransactionFromToken, repairOrderPaymentFromCompletedTransaction } from '../_shared/moneyfusion-sync-from-status.ts';
+import {
+  autoResolveOpenMoneyFusionOrphans,
+  ignoreMoneyFusionOrphanPayment,
+  resolveMoneyFusionOrphanPayment,
+} from '../_shared/moneyfusion-orphan-payments.ts';
 
 const MONEYFUSION_STATUS_URL = 'https://www.pay.moneyfusion.net/paiementNotif';
 const SITE_URL = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
@@ -321,6 +327,7 @@ serve(async req => {
       let failed = 0;
       let stillPending = 0;
       let errors = 0;
+      let repaired = 0;
       const details: Array<Record<string, unknown>> = [];
 
       for (const row of targets || []) {
@@ -346,6 +353,86 @@ serve(async req => {
         await new Promise(r => setTimeout(r, 120));
       }
 
+      // Tx completed côté DB mais commande encore pending (webhook partiel / legacy)
+      const { data: desyncRows, error: desyncError } = await supabase
+        .from('transactions')
+        .select('id, payment_id, order_id, status, created_at')
+        .eq('payment_provider', 'moneyfusion')
+        .eq('status', 'completed')
+        .not('order_id', 'is', null)
+        .not('payment_id', 'is', null)
+        .gte('created_at', since)
+        .order('created_at', { ascending: true })
+        .limit(limit);
+
+      if (desyncError) {
+        console.error('[MoneyFusion reconcile_stuck] desync list failed', desyncError);
+      } else {
+        for (const row of desyncRows || []) {
+          const orderId = row.order_id as string | null;
+          const txId = String(row.id);
+          if (!orderId) continue;
+
+          const { data: order } = await supabase
+            .from('orders')
+            .select('payment_status, metadata')
+            .eq('id', orderId)
+            .maybeSingle();
+
+          const paymentStatus = String(order?.payment_status || '');
+          const meta =
+            order?.metadata && typeof order.metadata === 'object' && !Array.isArray(order.metadata)
+              ? (order.metadata as Record<string, unknown>)
+              : {};
+          const needsPaymentRepair = !['paid', 'deposit_paid', 'completed', 'cod_pending'].includes(
+            paymentStatus
+          );
+          const needsFulfillment = !meta.post_payment_fulfillment_at;
+
+          if (!needsPaymentRepair && !needsFulfillment) continue;
+
+          try {
+            if (needsPaymentRepair) {
+              const fixed = await repairOrderPaymentFromCompletedTransaction(
+                supabase,
+                txId,
+                orderId
+              );
+              if (fixed) repaired++;
+            }
+            const mfToken = String(row.payment_id || '').trim();
+            if (mfToken && needsFulfillment) {
+              const sync = await syncMoneyFusionTransactionFromToken(supabase, mfToken, {
+                source: 'reconcile_desync',
+                transactionIdHint: txId,
+              });
+              details.push({
+                transaction_id: txId,
+                order_id: orderId,
+                desync_repair: true,
+                result: sync,
+              });
+            }
+          } catch (repairErr) {
+            errors++;
+            details.push({
+              transaction_id: txId,
+              order_id: orderId,
+              desync_repair: true,
+              error: repairErr instanceof Error ? repairErr.message : String(repairErr),
+            });
+          }
+        }
+      }
+
+      let orphansResolved = 0;
+      try {
+        const orphanSweep = await autoResolveOpenMoneyFusionOrphans(supabase, 20);
+        orphansResolved = orphanSweep.resolved;
+      } catch (orphanSweepErr) {
+        console.error('[MoneyFusion reconcile_stuck] orphan sweep failed', orphanSweepErr);
+      }
+
       return new Response(
         JSON.stringify({
           success: true,
@@ -353,6 +440,8 @@ serve(async req => {
           completed,
           failed,
           still_pending: stillPending,
+          repaired,
+          orphans_resolved: orphansResolved,
           errors,
           hours_back: hoursBack,
           processed_at: new Date().toISOString(),
@@ -360,6 +449,117 @@ serve(async req => {
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
+    }
+
+    if (action === 'reconcile_transaction') {
+      const authHeader = req.headers.get('authorization') ?? '';
+      const cronSecret = req.headers.get('x-cron-secret')?.trim() ?? '';
+      const internalSecret = req.headers.get('x-internal-secret')?.trim() ?? '';
+      const expectedCron = (Deno.env.get('CRON_SECRET') || '').trim();
+      const expectedInternal = (Deno.env.get('EDGE_INTERNAL_SECRET') || '').trim();
+      const serviceKeyHeader = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+      const token = authHeader.replace(/^Bearer\s+/i, '').trim();
+      const allowed =
+        (expectedCron && cronSecret === expectedCron) ||
+        (expectedInternal && internalSecret === expectedInternal) ||
+        (serviceKeyHeader && token === serviceKeyHeader) ||
+        authHeader.startsWith('Bearer ');
+
+      if (!allowed) {
+        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      const d = (data || {}) as Record<string, unknown>;
+      const transactionId = String(d.transactionId || d.transaction_id || '').trim();
+      const mfToken = String(d.paymentId || d.token || d.payment_id || '').trim();
+
+      if (!transactionId && !mfToken) {
+        return new Response(JSON.stringify({ error: 'transactionId ou token requis' }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      let token = mfToken;
+      if (!token && transactionId) {
+        const { data: txRow } = await supabase
+          .from('transactions')
+          .select('payment_id, payment_provider')
+          .eq('id', transactionId)
+          .maybeSingle();
+        if (txRow?.payment_provider !== 'moneyfusion') {
+          return new Response(JSON.stringify({ error: 'Not a MoneyFusion transaction' }), {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+        token = String(txRow?.payment_id || '').trim();
+      }
+
+      if (!token) {
+        return new Response(JSON.stringify({ error: 'Token MoneyFusion introuvable' }), {
+          status: 404,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      const sync = await syncMoneyFusionTransactionFromToken(supabase, token, {
+        source: 'reconcile_transaction',
+        transactionIdHint: transactionId || undefined,
+      });
+
+      return new Response(JSON.stringify({ success: sync.success, sync }), {
+        status: sync.success ? 200 : 502,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (action === 'resolve_orphan' || action === 'ignore_orphan') {
+      const authHeader = req.headers.get('authorization');
+      let adminUserId: string;
+      try {
+        const admin = await assertPlatformAdmin(createSupabaseUserClient(authHeader));
+        adminUserId = admin.userId;
+      } catch {
+        return new Response(JSON.stringify({ error: 'Forbidden' }), {
+          status: 403,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      const d = (data || {}) as Record<string, unknown>;
+      const orphanId = String(d.orphanId || d.orphan_id || '').trim();
+      if (!orphanId) {
+        return new Response(JSON.stringify({ error: 'orphanId requis' }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      if (action === 'ignore_orphan') {
+        const ignored = await ignoreMoneyFusionOrphanPayment(supabase, {
+          orphanId,
+          note: typeof d.note === 'string' ? d.note : undefined,
+          resolvedBy: adminUserId,
+        });
+        return new Response(JSON.stringify(ignored), {
+          status: ignored.success ? 200 : 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      const resolved = await resolveMoneyFusionOrphanPayment(supabase, {
+        orphanId,
+        resolvedBy: adminUserId,
+        force: Boolean(d.force),
+      });
+      return new Response(JSON.stringify(resolved), {
+        status: resolved.success ? 200 : 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     if (action === 'verify_payment') {

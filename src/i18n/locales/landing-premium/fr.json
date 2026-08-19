@@ -12,7 +12,138 @@
     "getStarted": "Démarrer gratuitement",
     "getStartedShort": "Démarrer",
     "menuOpen": "Ouvrir le menu",
-    "menuClose": "Fermer le menu"
+    "menuClose": "Fermer le menu",
+    "mega": {
+      "solutions": {
+        "columns": {
+          "sellWays": "Modèles de vente"
+        },
+        "items": {
+          "physical": {
+            "title": "Produits physiques",
+            "desc": "Stock, livraison, paiement à la livraison et garantie"
+          },
+          "digital": {
+            "title": "Produits digitaux",
+            "desc": "Fichiers, licences, livraison instantanée"
+          },
+          "service": {
+            "title": "Services",
+            "desc": "Réservation et calendrier"
+          },
+          "courses": {
+            "title": "Cours en ligne",
+            "desc": "Formations, drip, certificats"
+          },
+          "artist": {
+            "title": "Œuvres d'artiste",
+            "desc": "Galerie, collections, authenticité"
+          },
+          "protect": {
+            "title": "Emarzona Protect",
+            "desc": "Protection acheteur pendant 45 jours"
+          }
+        }
+      },
+      "features": {
+        "columns": {
+          "sell": "Vendre",
+          "grow": "Croître",
+          "operate": "Piloter"
+        },
+        "items": {
+          "storefront": {
+            "title": "Boutique en ligne",
+            "desc": "Vitrine, sous-domaine et domaine personnalisé"
+          },
+          "onlinePay": {
+            "title": "Paiement en ligne",
+            "desc": "Cartes et mobile money"
+          },
+          "cod": {
+            "title": "Paiement à la livraison",
+            "desc": "Le client paie à réception"
+          },
+          "guarantee": {
+            "title": "Garantie à la commande",
+            "desc": "Acompte en ligne, solde à la livraison"
+          },
+          "whatsapp": {
+            "title": "Contact WhatsApp",
+            "desc": "Discussion directe depuis la fiche produit"
+          },
+          "referral": {
+            "title": "Parrainage",
+            "desc": "Invitez des vendeurs, gagnez des commissions"
+          },
+          "affiliate": {
+            "title": "Affiliation",
+            "desc": "Liens trackés pour promoteurs"
+          },
+          "marketplace": {
+            "title": "Marketplace",
+            "desc": "Visibilité sur le catalogue Emarzona"
+          },
+          "email": {
+            "title": "Marketing e-mail",
+            "desc": "Campagnes et paniers abandonnés"
+          },
+          "analytics": {
+            "title": "Analytics",
+            "desc": "Tableaux de bord en temps réel"
+          },
+          "multiStore": {
+            "title": "Multi-boutiques",
+            "desc": "Plusieurs marques, un seul compte"
+          },
+          "mobileMoney": {
+            "title": "Paiements mobile money",
+            "desc": "Encaissement local en FCFA"
+          }
+        },
+        "footer": "Voir toutes les fonctionnalités"
+      },
+      "resources": {
+        "columns": {
+          "learn": "Apprendre & aide",
+          "company": "Entreprise"
+        },
+        "items": {
+          "blog": {
+            "title": "Blog",
+            "desc": "Guides et actualités de la plateforme"
+          },
+          "faq": {
+            "title": "FAQ",
+            "desc": "Réponses pour vendeurs et acheteurs"
+          },
+          "help": {
+            "title": "Centre d'aide",
+            "desc": "Assistance et questions fréquentes"
+          },
+          "docs": {
+            "title": "Documentation",
+            "desc": "Premiers pas et guides par thème"
+          },
+          "community": {
+            "title": "Communauté",
+            "desc": "Échanger avec d'autres créateurs"
+          },
+          "status": {
+            "title": "Statut",
+            "desc": "Disponibilité de la plateforme"
+          },
+          "about": {
+            "title": "À propos",
+            "desc": "Mission, valeurs et équipe"
+          },
+          "contact": {
+            "title": "Contact",
+            "desc": "Écrire à l'équipe Emarzona"
+          }
+        }
+      }
+    }
   },
   "platformHero": {
     "ariaLabel": "Présentation de l'écosystème Emarzona",

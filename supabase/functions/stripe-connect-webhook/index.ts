@@ -284,13 +284,26 @@ serve(async (req) => {
               transactionId,
             );
           } else if (alreadyCompleted) {
-            console.log(
-              "Stripe checkout.session.completed replay ignored (idempotent)",
-              {
+            const { data: tx } = await supabase
+              .from("transactions")
+              .select("order_id")
+              .eq("id", transactionId)
+              .maybeSingle();
+            if (tx?.order_id) {
+              await runPostOrderPaymentFulfillment(
+                supabase,
+                tx.order_id,
                 transactionId,
-                eventId: event.id,
-              },
-            );
+              );
+            } else {
+              console.log(
+                "Stripe checkout.session.completed replay ignored (idempotent)",
+                {
+                  transactionId,
+                  eventId: event.id,
+                },
+              );
+            }
           }
 
           if (dlqEventId) {

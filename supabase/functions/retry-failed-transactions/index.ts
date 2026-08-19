@@ -87,7 +87,7 @@ async function verifyTransactionWithProvider(
     payment_id?: string | null;
     geniuspay_transaction_id?: string | null;
   }
-): Promise<{ success: boolean; newStatus?: string; error?: string }> {
+): Promise<{ success: boolean; newStatus?: string; error?: string; syncAlreadyApplied?: boolean }> {
   try {
     const provider = String(transaction.payment_provider || '').toLowerCase();
     const externalId = resolveExternalPaymentId(transaction);
@@ -118,6 +118,24 @@ async function verifyTransactionWithProvider(
       }
 
       const responseData = await response.json();
+      const syncPayload = (responseData.sync ?? responseData) as Record<string, unknown>;
+      const syncStatus = String(
+        syncPayload.status ??
+          (responseData.data as Record<string, unknown> | undefined)?.statut ??
+          'processing'
+      ).toLowerCase();
+
+      if (
+        responseData.success !== false &&
+        (syncStatus === 'completed' || syncPayload.alreadyCompleted === true)
+      ) {
+        return {
+          success: true,
+          newStatus: 'completed',
+          syncAlreadyApplied: true,
+        };
+      }
+
       const outer = responseData.data || responseData;
       const paymentData =
         outer?.data && typeof outer.data === 'object' ? outer.data : outer;
@@ -188,7 +206,7 @@ async function updateTransactionStatus(
   try {
     if (newStatus === 'completed') {
       const provider = String(paymentProvider || 'moneyfusion').toLowerCase();
-      const externalEventId = `retry-failed:${transactionId}:${Date.now()}`;
+      const externalEventId = `retry-failed:${transactionId}:completed`;
       const { orderId, alreadyCompleted } = await completeTransactionAndOrder(
         supabase,
         transactionId,
@@ -378,6 +396,22 @@ serve(async (req) => {
       const verificationResult = await verifyTransactionWithProvider(supabase, transaction);
 
       if (verificationResult.success && verificationResult.newStatus) {
+        if (verificationResult.syncAlreadyApplied) {
+          await supabase
+            .from('transaction_retries')
+            .update({
+              status: 'completed',
+              completed_at: new Date().toISOString(),
+              last_attempt_result: verificationResult,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', retryInfo.retry_id);
+
+          console.log(`✅ Transaction ${transaction.id} synced via MoneyFusion verify`);
+          updated++;
+          continue;
+        }
+
         // Mettre à jour la transaction
         const updateSuccess = await updateTransactionStatus(
           supabase,

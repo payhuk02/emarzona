@@ -8,9 +8,136 @@ import {
   validateOrderPaymentAmount,
 } from './complete-order-payment.ts';
 import { moneyFusionFetch, moneyFusionPaidAmount, moneyFusionAmountCandidates } from './moneyfusion-http.ts';
+import { resolvePaidOrderStatusForOrder } from './order-status.ts';
 import { runPostOrderPaymentFulfillment } from './post-order-payment-fulfillment.ts';
 
 const MONEYFUSION_STATUS_URL = 'https://www.pay.moneyfusion.net/paiementNotif';
+
+const PAID_ORDER_PAYMENT_STATUSES = new Set([
+  'paid',
+  'deposit_paid',
+  'completed',
+  'cod_pending',
+]);
+
+function parseOrderMetadata(metadata: unknown): Record<string, unknown> {
+  if (metadata == null) return {};
+  if (typeof metadata === 'string') {
+    try {
+      return JSON.parse(metadata) as Record<string, unknown>;
+    } catch {
+      return {};
+    }
+  }
+  if (typeof metadata === 'object' && !Array.isArray(metadata)) {
+    return metadata as Record<string, unknown>;
+  }
+  return {};
+}
+
+async function orderNeedsPaymentRepair(
+  supabase: SupabaseClient,
+  orderId: string
+): Promise<boolean> {
+  const { data } = await supabase
+    .from('orders')
+    .select('payment_status')
+    .eq('id', orderId)
+    .maybeSingle();
+  return !PAID_ORDER_PAYMENT_STATUSES.has(String(data?.payment_status || ''));
+}
+
+async function orderNeedsFulfillmentRetry(
+  supabase: SupabaseClient,
+  orderId: string
+): Promise<boolean> {
+  const { data } = await supabase
+    .from('orders')
+    .select('payment_status, metadata')
+    .eq('id', orderId)
+    .maybeSingle();
+  if (!data || !PAID_ORDER_PAYMENT_STATUSES.has(String(data.payment_status || ''))) {
+    return false;
+  }
+  const meta = parseOrderMetadata(data.metadata);
+  return !meta.post_payment_fulfillment_at;
+}
+
+/** Répare commande quand la tx est completed mais orders.payment_status est resté pending. */
+export async function repairOrderPaymentFromCompletedTransaction(
+  supabase: SupabaseClient,
+  transactionId: string,
+  orderId: string
+): Promise<boolean> {
+  const paidOrderStatus = await resolvePaidOrderStatusForOrder(supabase, orderId);
+  const { data: orderRow } = await supabase
+    .from('orders')
+    .select('remaining_amount, metadata, paid_at, payment_status')
+    .eq('id', orderId)
+    .maybeSingle();
+
+  if (!orderRow) return false;
+  if (PAID_ORDER_PAYMENT_STATUSES.has(String(orderRow.payment_status || ''))) {
+    return false;
+  }
+
+  const metadata = parseOrderMetadata(orderRow.metadata);
+  const checkoutMethod = String(metadata.checkout_method ?? '');
+  const remaining = Number(orderRow.remaining_amount) || 0;
+  const paymentStatus =
+    checkoutMethod === 'guarantee' && remaining > 0 ? 'deposit_paid' : 'paid';
+  const now = new Date().toISOString();
+
+  await supabase
+    .from('orders')
+    .update({
+      payment_status: paymentStatus,
+      status: paidOrderStatus,
+      paid_at: orderRow.paid_at ?? now,
+      updated_at: now,
+    })
+    .eq('id', orderId);
+
+  try {
+    await supabase.rpc('sync_payment_row_from_transaction', {
+      p_transaction_id: transactionId,
+    });
+    await supabase.rpc('ensure_order_invoice_paid', { p_order_id: orderId });
+  } catch (syncErr) {
+    console.error('[MoneyFusion repair] accounting sync failed', syncErr);
+  }
+
+  return true;
+}
+
+async function ensurePaidOrderSideEffects(
+  supabase: SupabaseClient,
+  transactionId: string,
+  orderId: string | null
+): Promise<{ repaired: boolean; fulfillmentRetried: boolean }> {
+  if (!orderId) {
+    return { repaired: false, fulfillmentRetried: false };
+  }
+
+  let repaired = false;
+  if (await orderNeedsPaymentRepair(supabase, orderId)) {
+    repaired = await repairOrderPaymentFromCompletedTransaction(
+      supabase,
+      transactionId,
+      orderId
+    );
+  }
+
+  let fulfillmentRetried = false;
+  if (repaired || (await orderNeedsFulfillmentRetry(supabase, orderId))) {
+    await runPostOrderPaymentFulfillment(supabase, orderId, transactionId).catch(err =>
+      console.error('[MoneyFusion sync] post-order fulfillment retry failed', err)
+    );
+    fulfillmentRetried = true;
+  }
+
+  return { repaired, fulfillmentRetried };
+}
 
 export type MoneyFusionMappedStatus = 'completed' | 'failed' | 'cancelled' | 'processing';
 
@@ -132,13 +259,14 @@ export async function syncMoneyFusionTransactionFromToken(
   const currentStatus = String(transaction.status || '');
 
   if (currentStatus === 'completed' && mappedStatus === 'completed') {
+    const sideEffects = await ensurePaidOrderSideEffects(supabase, transactionId, orderId);
     return {
       success: true,
       status: 'completed',
       transactionId,
       orderId,
       alreadyCompleted: true,
-      completed: false,
+      completed: sideEffects.repaired || sideEffects.fulfillmentRetried,
     };
   }
 
@@ -274,7 +402,7 @@ export async function syncMoneyFusionTransactionFromToken(
     }
   }
 
-  const externalEventId = `moneyfusion:sync:${source}:${token}:${mappedStatus}`;
+  const externalEventId = `moneyfusion:${token}:${mappedStatus}`;
   const { orderId: completedOrderId, alreadyCompleted } = await completeTransactionAndOrder(
     supabase,
     transactionId,

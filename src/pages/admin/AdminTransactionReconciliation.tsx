@@ -56,6 +56,10 @@ import {
   DEFAULT_ADMIN_TRANSACTION_PAGE_SIZE,
   useAdminTransactionStats,
   useAdminTransactionsList,
+  useIgnoreMoneyFusionOrphan,
+  useMoneyFusionOrphans,
+  usePaymentRepairActivity,
+  useResolveMoneyFusionOrphan,
   type AdminTransactionTab,
 } from '@/hooks/useAdminTransactionReconciliation';
 
@@ -69,8 +73,21 @@ export default function AdminTransactionReconciliation() {
   const [searchInput, setSearchInput] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [activeTab, setActiveTab] = useState<AdminTransactionTab>('pending');
+  const [section, setSection] = useState<'transactions' | 'orphans' | 'repairs'>('transactions');
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(DEFAULT_ADMIN_TRANSACTION_PAGE_SIZE);
+  const {
+    data: orphans = [],
+    isLoading: orphansLoading,
+    refetch: refetchOrphans,
+  } = useMoneyFusionOrphans('open');
+  const {
+    data: repairs = [],
+    isLoading: repairsLoading,
+    refetch: refetchRepairs,
+  } = usePaymentRepairActivity();
+  const resolveOrphanMutation = useResolveMoneyFusionOrphan();
+  const ignoreOrphanMutation = useIgnoreMoneyFusionOrphan();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const isMobile = useIsMobile();
@@ -204,6 +221,8 @@ export default function AdminTransactionReconciliation() {
       'Legacy GeniusPay ID',
       'Created At',
       'Updated At',
+      'Order paid_at',
+      'Order payment_status',
     ];
 
     const rows = transactions.map(t => [
@@ -218,6 +237,8 @@ export default function AdminTransactionReconciliation() {
       t.geniuspay_transaction_id || '',
       t.created_at,
       t.updated_at,
+      t.order?.paid_at || '',
+      t.order?.payment_status || '',
     ]);
 
     const csvContent = [
@@ -282,11 +303,19 @@ export default function AdminTransactionReconciliation() {
               Réconciliation des Transactions
             </h1>
             <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground">
-              Vérification et réconciliation manuelle des transactions
+              Vérification MoneyFusion, orphelins et réparations de commandes
             </p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => refetch()} disabled={isFetching}>
+            <Button
+              variant="outline"
+              onClick={() => {
+                refetch();
+                refetchOrphans();
+                refetchRepairs();
+              }}
+              disabled={isFetching}
+            >
               <RefreshCw className={`h-4 w-4 mr-2 ${isFetching ? 'animate-spin' : ''}`} />
               Actualiser
             </Button>
@@ -349,300 +378,509 @@ export default function AdminTransactionReconciliation() {
           </div>
         )}
 
-        {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={value => setActiveTab(value as AdminTransactionTab)}>
-          <TabsList className="w-full justify-start overflow-x-auto flex-nowrap [-webkit-overflow-scrolling:touch]">
-            <TabsTrigger value="pending">En Attente</TabsTrigger>
-            <TabsTrigger value="old">Anciennes (&gt; 24h)</TabsTrigger>
-            <TabsTrigger value="failed">Échouées</TabsTrigger>
-            <TabsTrigger value="all">Toutes</TabsTrigger>
+        <Tabs
+          value={section}
+          onValueChange={value => setSection(value as 'transactions' | 'orphans' | 'repairs')}
+        >
+          <TabsList className="w-full justify-start overflow-x-auto flex-nowrap">
+            <TabsTrigger value="transactions">Transactions</TabsTrigger>
+            <TabsTrigger value="orphans">
+              Orphelins MF
+              {orphans.length > 0 ? ` (${orphans.length})` : ''}
+            </TabsTrigger>
+            <TabsTrigger value="repairs">Réparations</TabsTrigger>
           </TabsList>
+        </Tabs>
 
-          <TabsContent value={activeTab} className="space-y-4">
-            {/* Search */}
-            <div className="flex items-center gap-2">
-              <div className="relative flex-1">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Rechercher par ID, order number, email..."
-                  value={searchInput}
-                  onChange={e => setSearchInput(e.target.value)}
-                  className="pl-8"
-                />
-              </div>
-            </div>
-
-            {/* Table */}
-            <Card ref={tableRef}>
-              <CardHeader>
-                <CardTitle>Transactions</CardTitle>
-                <CardDescription>
-                  {totalCount} transaction(s) — page {page}/{totalPages}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {isLoading ? (
-                  <div className="flex items-center justify-center py-8">
-                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                  </div>
-                ) : transactions.length === 0 ? (
-                  <Alert>
-                    <AlertDescription>Aucune transaction trouvée</AlertDescription>
-                  </Alert>
-                ) : isMobile ? (
-                  <MobileTableCard
-                    data={transactions as unknown as TransactionRowData[]}
-                    columns={[
-                      {
-                        key: 'id',
-                        header: 'ID',
-                        priority: 'high',
-                        render: value => (
-                          <span className="font-mono text-xs">
-                            {String(value).substring(0, 8)}...
-                          </span>
-                        ),
-                      },
-                      {
-                        key: 'order',
-                        header: 'Commande',
-                        priority: 'high',
-                        render: (_value, row) => {
-                          const t = row as unknown as Transaction;
-                          return (
-                            <div className="space-y-1">
-                              <div className="font-medium">
-                                {t.order?.order_number ||
-                                  (t.order_id ? t.order_id.substring(0, 8) : '') ||
-                                  'N/A'}
-                              </div>
-                              <div className="text-xs text-muted-foreground">
-                                {t.order?.customer_email || ''}
-                              </div>
+        {section === 'orphans' && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Paiements MoneyFusion orphelins</CardTitle>
+              <CardDescription>
+                Webhooks reçus sans transaction locale. Lier tente de rattacher token + commande.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {orphansLoading ? (
+                <div className="flex justify-center py-8">
+                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                </div>
+              ) : orphans.length === 0 ? (
+                <Alert>
+                  <AlertDescription>Aucun paiement orphelin ouvert</AlertDescription>
+                </Alert>
+              ) : (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Token</TableHead>
+                        <TableHead>Statut MF</TableHead>
+                        <TableHead>Montant</TableHead>
+                        <TableHead>Commande hint</TableHead>
+                        <TableHead>Vu</TableHead>
+                        <TableHead>Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {orphans.map(row => (
+                        <TableRow key={row.id}>
+                          <TableCell className="font-mono text-xs">
+                            {row.mf_token.slice(0, 12)}…
+                            <div className="text-[10px] text-muted-foreground">
+                              {row.webhook_attempts} tentative(s)
                             </div>
-                          );
-                        },
-                      },
-                      {
-                        key: 'amount',
-                        header: 'Montant',
-                        priority: 'high',
-                        render: (value, row) => {
-                          const t = row as unknown as Transaction;
-                          return (
-                            <div className="font-semibold">
-                              {Number(value || 0).toLocaleString('fr-FR')} {t.currency}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline">{row.mapped_status}</Badge>
+                          </TableCell>
+                          <TableCell>
+                            {row.verified_amount != null
+                              ? `${Number(row.verified_amount).toLocaleString('fr-FR')} ${row.currency}`
+                              : '—'}
+                          </TableCell>
+                          <TableCell>
+                            <div className="text-sm">
+                              {row.order_number || row.order_id_hint?.slice(0, 8) || '—'}
                             </div>
-                          );
-                        },
-                        className: 'font-semibold',
-                      },
-                      {
-                        key: 'status',
-                        header: 'Statut',
-                        priority: 'high',
-                        render: value => getStatusBadge(String(value)),
-                      },
-                      {
-                        key: 'payment_provider',
-                        header: 'Provider',
-                        priority: 'medium',
-                        render: value => <Badge variant="outline">{String(value)}</Badge>,
-                      },
-                      {
-                        key: 'created_at',
-                        header: 'Créée le',
-                        priority: 'medium',
-                        render: (value, _row) => (
-                          <div>
-                            <div className={`text-xs ${getAgeColor(String(value))}`}>
-                              {format(new Date(String(value)), 'dd MMM yyyy HH:mm', {
-                                locale: fr,
-                              })}
-                            </div>
-                            <div className="text-xs text-muted-foreground">
-                              {Math.round(
-                                (Date.now() - new Date(String(value)).getTime()) / (1000 * 60 * 60)
-                              )}
-                              h
-                            </div>
-                          </div>
-                        ),
-                      },
-                    ]}
-                    actions={row => (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => verifyTransactionMutation.mutate(String(row.id))}
-                        disabled={verifyTransactionMutation.isPending}
-                        className="min-h-[44px]"
-                      >
-                        {verifyTransactionMutation.isPending ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <>
-                            <RefreshCw className="h-4 w-4 mr-1" />
-                            Vérifier
-                          </>
-                        )}
-                      </Button>
-                    )}
-                  />
-                ) : (
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>ID</TableHead>
-                          <TableHead>Order</TableHead>
-                          <TableHead>Montant</TableHead>
-                          <TableHead>Statut</TableHead>
-                          <TableHead>Provider</TableHead>
-                          <TableHead>Créée le</TableHead>
-                          <TableHead>Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {transactions.map(transaction => (
-                          <TableRow key={transaction.id}>
-                            <TableCell className="font-mono text-xs">
-                              {transaction.id.substring(0, 8)}...
-                            </TableCell>
-                            <TableCell>
-                              <div className="space-y-1">
-                                <div className="font-medium">
-                                  {transaction.order?.order_number ||
-                                    transaction.order_id?.substring(0, 8) ||
-                                    'N/A'}
-                                </div>
-                                <div className="text-xs text-muted-foreground">
-                                  {transaction.order?.customer_email || ''}
-                                </div>
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <div className="font-semibold">
-                                {Number(transaction.amount ?? 0).toLocaleString('fr-FR')}{' '}
-                                {transaction.currency}
-                              </div>
-                            </TableCell>
-                            <TableCell>{getStatusBadge(transaction.status)}</TableCell>
-                            <TableCell>
-                              <div className="space-y-1">
-                                <Badge variant="outline">{transaction.payment_provider}</Badge>
-                                {(transaction.payment_id ||
-                                  transaction.geniuspay_transaction_id) && (
-                                  <div className="text-[10px] font-mono text-muted-foreground truncate max-w-[120px]">
-                                    {transaction.payment_id || transaction.geniuspay_transaction_id}
-                                  </div>
-                                )}
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <div className={`text-xs ${getAgeColor(transaction.created_at)}`}>
-                                {format(new Date(transaction.created_at), 'dd MMM yyyy HH:mm', {
+                            {row.order_paid_at && (
+                              <div className="text-[10px] text-muted-foreground">
+                                paid_at{' '}
+                                {format(new Date(row.order_paid_at), 'dd MMM HH:mm', {
                                   locale: fr,
                                 })}
                               </div>
-                              <div className="text-xs text-muted-foreground">
-                                {Math.round(
-                                  (Date.now() - new Date(transaction.created_at).getTime()) /
-                                    (1000 * 60 * 60)
-                                )}
-                                h
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => verifyTransactionMutation.mutate(transaction.id)}
-                                disabled={verifyTransactionMutation.isPending}
-                              >
-                                {verifyTransactionMutation.isPending ? (
-                                  <Loader2 className="h-4 w-4 animate-spin" />
-                                ) : (
-                                  <>
-                                    <RefreshCw className="h-4 w-4 mr-1" />
-                                    Vérifier
-                                  </>
-                                )}
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                )}
+                            )}
+                          </TableCell>
+                          <TableCell className="text-xs text-muted-foreground">
+                            {format(new Date(row.last_seen_at), 'dd MMM HH:mm', { locale: fr })}
+                          </TableCell>
+                          <TableCell className="space-x-2">
+                            <Button
+                              size="sm"
+                              onClick={() =>
+                                resolveOrphanMutation.mutate(row.id, {
+                                  onSuccess: result => {
+                                    toast({
+                                      title: result.success ? 'Orphelin lié' : 'Échec liaison',
+                                      description: result.success
+                                        ? `Tx ${result.transactionId?.slice(0, 8) ?? ''}`
+                                        : result.error,
+                                      variant: result.success ? 'default' : 'destructive',
+                                    });
+                                  },
+                                })
+                              }
+                              disabled={resolveOrphanMutation.isPending}
+                            >
+                              Lier
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => ignoreOrphanMutation.mutate(row.id)}
+                              disabled={ignoreOrphanMutation.isPending}
+                            >
+                              Ignorer
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
-                {totalCount > 0 && (
-                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t mt-4">
-                    <p className="text-sm text-muted-foreground">
-                      {from}–{to} sur {totalCount} transactions
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <Select
-                        value={pageSize.toString()}
-                        onValueChange={value => {
-                          setPageSize(Number(value));
-                          setPage(1);
-                        }}
-                      >
-                        <SelectTrigger className="w-[100px]">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {ADMIN_TRANSACTION_PAGE_SIZES.map(size => (
-                            <SelectItem key={size} value={size.toString()}>
-                              {size} / page
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        disabled={page <= 1}
-                        onClick={() => setPage(1)}
-                      >
-                        <ChevronsLeft className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        disabled={page <= 1}
-                        onClick={() => setPage(page - 1)}
-                      >
-                        <ChevronLeft className="h-4 w-4" />
-                      </Button>
-                      <span className="text-sm px-2">
-                        {page} / {totalPages}
-                      </span>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        disabled={page >= totalPages}
-                        onClick={() => setPage(page + 1)}
-                      >
-                        <ChevronRight className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        disabled={page >= totalPages}
-                        onClick={() => setPage(totalPages)}
-                      >
-                        <ChevronsRight className="h-4 w-4" />
-                      </Button>
-                    </div>
+        {section === 'repairs' && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Historique des réparations</CardTitle>
+              <CardDescription>
+                Réconciliations, retries et liaisons d’orphelins — avec paid_at commande.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {repairsLoading ? (
+                <div className="flex justify-center py-8">
+                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                </div>
+              ) : repairs.length === 0 ? (
+                <Alert>
+                  <AlertDescription>Aucune réparation récente</AlertDescription>
+                </Alert>
+              ) : (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Quand</TableHead>
+                        <TableHead>Type</TableHead>
+                        <TableHead>Tx / Commande</TableHead>
+                        <TableHead>paid_at</TableHead>
+                        <TableHead>Statut</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {repairs.map(row => (
+                        <TableRow key={row.id}>
+                          <TableCell className="text-xs">
+                            {format(new Date(row.created_at), 'dd MMM yyyy HH:mm', { locale: fr })}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline">{row.event_type}</Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="font-mono text-xs">
+                              {row.transaction_id.slice(0, 8)}…
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              {row.order_number || row.order_id?.slice(0, 8) || '—'}
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-xs">
+                            {row.order_paid_at
+                              ? format(new Date(row.order_paid_at), 'dd MMM HH:mm', { locale: fr })
+                              : '—'}
+                          </TableCell>
+                          <TableCell>
+                            {getStatusBadge(row.order_payment_status || row.status || '')}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {section === 'transactions' && (
+          <>
+            {/* Tabs */}
+            <Tabs
+              value={activeTab}
+              onValueChange={value => setActiveTab(value as AdminTransactionTab)}
+            >
+              <TabsList className="w-full justify-start overflow-x-auto flex-nowrap [-webkit-overflow-scrolling:touch]">
+                <TabsTrigger value="pending">En Attente</TabsTrigger>
+                <TabsTrigger value="old">Anciennes (&gt; 24h)</TabsTrigger>
+                <TabsTrigger value="failed">Échouées</TabsTrigger>
+                <TabsTrigger value="all">Toutes</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value={activeTab} className="space-y-4">
+                {/* Search */}
+                <div className="flex items-center gap-2">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Rechercher par ID, order number, email..."
+                      value={searchInput}
+                      onChange={e => setSearchInput(e.target.value)}
+                      className="pl-8"
+                    />
                   </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+                </div>
+
+                {/* Table */}
+                <Card ref={tableRef}>
+                  <CardHeader>
+                    <CardTitle>Transactions</CardTitle>
+                    <CardDescription>
+                      {totalCount} transaction(s) — page {page}/{totalPages}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {isLoading ? (
+                      <div className="flex items-center justify-center py-8">
+                        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                      </div>
+                    ) : transactions.length === 0 ? (
+                      <Alert>
+                        <AlertDescription>Aucune transaction trouvée</AlertDescription>
+                      </Alert>
+                    ) : isMobile ? (
+                      <MobileTableCard
+                        data={transactions as unknown as TransactionRowData[]}
+                        columns={[
+                          {
+                            key: 'id',
+                            header: 'ID',
+                            priority: 'high',
+                            render: value => (
+                              <span className="font-mono text-xs">
+                                {String(value).substring(0, 8)}...
+                              </span>
+                            ),
+                          },
+                          {
+                            key: 'order',
+                            header: 'Commande',
+                            priority: 'high',
+                            render: (_value, row) => {
+                              const t = row as unknown as Transaction;
+                              return (
+                                <div className="space-y-1">
+                                  <div className="font-medium">
+                                    {t.order?.order_number ||
+                                      (t.order_id ? t.order_id.substring(0, 8) : '') ||
+                                      'N/A'}
+                                  </div>
+                                  <div className="text-xs text-muted-foreground">
+                                    {t.order?.customer_email || ''}
+                                  </div>
+                                  {t.order?.paid_at && (
+                                    <div className="text-[10px] text-muted-foreground">
+                                      paid_at{' '}
+                                      {format(new Date(t.order.paid_at), 'dd MMM HH:mm', {
+                                        locale: fr,
+                                      })}
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            },
+                          },
+                          {
+                            key: 'amount',
+                            header: 'Montant',
+                            priority: 'high',
+                            render: (value, row) => {
+                              const t = row as unknown as Transaction;
+                              return (
+                                <div className="font-semibold">
+                                  {Number(value || 0).toLocaleString('fr-FR')} {t.currency}
+                                </div>
+                              );
+                            },
+                            className: 'font-semibold',
+                          },
+                          {
+                            key: 'status',
+                            header: 'Statut',
+                            priority: 'high',
+                            render: value => getStatusBadge(String(value)),
+                          },
+                          {
+                            key: 'payment_provider',
+                            header: 'Provider',
+                            priority: 'medium',
+                            render: value => <Badge variant="outline">{String(value)}</Badge>,
+                          },
+                          {
+                            key: 'created_at',
+                            header: 'Créée le',
+                            priority: 'medium',
+                            render: (value, _row) => (
+                              <div>
+                                <div className={`text-xs ${getAgeColor(String(value))}`}>
+                                  {format(new Date(String(value)), 'dd MMM yyyy HH:mm', {
+                                    locale: fr,
+                                  })}
+                                </div>
+                                <div className="text-xs text-muted-foreground">
+                                  {Math.round(
+                                    (Date.now() - new Date(String(value)).getTime()) /
+                                      (1000 * 60 * 60)
+                                  )}
+                                  h
+                                </div>
+                              </div>
+                            ),
+                          },
+                        ]}
+                        actions={row => (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => verifyTransactionMutation.mutate(String(row.id))}
+                            disabled={verifyTransactionMutation.isPending}
+                            className="min-h-[44px]"
+                          >
+                            {verifyTransactionMutation.isPending ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <>
+                                <RefreshCw className="h-4 w-4 mr-1" />
+                                Vérifier
+                              </>
+                            )}
+                          </Button>
+                        )}
+                      />
+                    ) : (
+                      <div className="overflow-x-auto">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>ID</TableHead>
+                              <TableHead>Order</TableHead>
+                              <TableHead>Montant</TableHead>
+                              <TableHead>Statut</TableHead>
+                              <TableHead>Provider</TableHead>
+                              <TableHead>Créée le</TableHead>
+                              <TableHead>Actions</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {transactions.map(transaction => (
+                              <TableRow key={transaction.id}>
+                                <TableCell className="font-mono text-xs">
+                                  {transaction.id.substring(0, 8)}...
+                                </TableCell>
+                                <TableCell>
+                                  <div className="space-y-1">
+                                    <div className="font-medium">
+                                      {transaction.order?.order_number ||
+                                        transaction.order_id?.substring(0, 8) ||
+                                        'N/A'}
+                                    </div>
+                                    <div className="text-xs text-muted-foreground">
+                                      {transaction.order?.customer_email || ''}
+                                    </div>
+                                    {transaction.order?.paid_at && (
+                                      <div className="text-[10px] text-muted-foreground">
+                                        paid_at{' '}
+                                        {format(
+                                          new Date(transaction.order.paid_at),
+                                          'dd MMM HH:mm',
+                                          {
+                                            locale: fr,
+                                          }
+                                        )}
+                                      </div>
+                                    )}
+                                  </div>
+                                </TableCell>
+                                <TableCell>
+                                  <div className="font-semibold">
+                                    {Number(transaction.amount ?? 0).toLocaleString('fr-FR')}{' '}
+                                    {transaction.currency}
+                                  </div>
+                                </TableCell>
+                                <TableCell>{getStatusBadge(transaction.status)}</TableCell>
+                                <TableCell>
+                                  <div className="space-y-1">
+                                    <Badge variant="outline">{transaction.payment_provider}</Badge>
+                                    {(transaction.payment_id ||
+                                      transaction.geniuspay_transaction_id) && (
+                                      <div className="text-[10px] font-mono text-muted-foreground truncate max-w-[120px]">
+                                        {transaction.payment_id ||
+                                          transaction.geniuspay_transaction_id}
+                                      </div>
+                                    )}
+                                  </div>
+                                </TableCell>
+                                <TableCell>
+                                  <div className={`text-xs ${getAgeColor(transaction.created_at)}`}>
+                                    {format(new Date(transaction.created_at), 'dd MMM yyyy HH:mm', {
+                                      locale: fr,
+                                    })}
+                                  </div>
+                                  <div className="text-xs text-muted-foreground">
+                                    {Math.round(
+                                      (Date.now() - new Date(transaction.created_at).getTime()) /
+                                        (1000 * 60 * 60)
+                                    )}
+                                    h
+                                  </div>
+                                </TableCell>
+                                <TableCell>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => verifyTransactionMutation.mutate(transaction.id)}
+                                    disabled={verifyTransactionMutation.isPending}
+                                  >
+                                    {verifyTransactionMutation.isPending ? (
+                                      <Loader2 className="h-4 w-4 animate-spin" />
+                                    ) : (
+                                      <>
+                                        <RefreshCw className="h-4 w-4 mr-1" />
+                                        Vérifier
+                                      </>
+                                    )}
+                                  </Button>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    )}
+
+                    {totalCount > 0 && (
+                      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t mt-4">
+                        <p className="text-sm text-muted-foreground">
+                          {from}–{to} sur {totalCount} transactions
+                        </p>
+                        <div className="flex items-center gap-2">
+                          <Select
+                            value={pageSize.toString()}
+                            onValueChange={value => {
+                              setPageSize(Number(value));
+                              setPage(1);
+                            }}
+                          >
+                            <SelectTrigger className="w-[100px]">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {ADMIN_TRANSACTION_PAGE_SIZES.map(size => (
+                                <SelectItem key={size} value={size.toString()}>
+                                  {size} / page
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            disabled={page <= 1}
+                            onClick={() => setPage(1)}
+                          >
+                            <ChevronsLeft className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            disabled={page <= 1}
+                            onClick={() => setPage(page - 1)}
+                          >
+                            <ChevronLeft className="h-4 w-4" />
+                          </Button>
+                          <span className="text-sm px-2">
+                            {page} / {totalPages}
+                          </span>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            disabled={page >= totalPages}
+                            onClick={() => setPage(page + 1)}
+                          >
+                            <ChevronRight className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            disabled={page >= totalPages}
+                            onClick={() => setPage(totalPages)}
+                          >
+                            <ChevronsRight className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+          </>
+        )}
       </div>
     </AdminLayout>
   );

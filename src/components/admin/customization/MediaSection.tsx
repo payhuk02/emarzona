@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { RefreshCw, UploadCloud, Info } from 'lucide-react';
 import { logger } from '@/lib/logger';
+import { PageHeroImagesMediaSection } from '@/components/admin/customization/PageHeroImagesMediaSection';
 
 // Default images imports (auth hero: admin upload only, no bundled fallback)
 import adaptPremiumPng from '@/assets/landing/adapt-entrepreneur.png';
@@ -175,6 +176,7 @@ export function MediaSection({ onChange }: MediaSectionProps) {
 
   return (
     <div className="space-y-6">
+      <PageHeroImagesMediaSection onChange={onChange} />
       <Card>
         <CardHeader>
           <CardTitle>Page de Connexion / Inscription</CardTitle>

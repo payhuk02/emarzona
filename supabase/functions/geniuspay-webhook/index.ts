@@ -59,23 +59,16 @@ async function calculateHMACSignature(timestamp: string, payload: string, secret
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-async function hashPayload(raw: string): Promise<string> {
-  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(raw));
-  return Array.from(new Uint8Array(digest))
-    .map(b => b.toString(16).padStart(2, '0'))
-    .join('');
-}
-
 function resolveGeniusPayExternalEventId(
   payload: Record<string, unknown>,
   transactionId: string,
-  payloadHash: string
+  mappedStatus: string
 ): string {
   const explicit = payload.event_id ?? payload.webhook_id ?? payload.id ?? payload.reference;
   if (explicit != null && String(explicit).trim() !== '') {
     return `geniuspay:${String(explicit).trim()}`;
   }
-  return `geniuspay:${transactionId}:${payloadHash}`;
+  return `geniuspay:${transactionId}:${mappedStatus}`;
 }
 
 function constantTimeEquals(a: string, b: string): boolean {
@@ -264,11 +257,10 @@ serve(async req => {
       });
     }
 
-    const payloadHash = await hashPayload(rawPayload);
     const externalEventId = resolveGeniusPayExternalEventId(
       payload as Record<string, unknown>,
       transaction_id,
-      payloadHash
+      mappedStatus
     );
 
     // For 'completed', we will handle idempotency inside the atomic RPC
@@ -417,15 +409,16 @@ serve(async req => {
           }
         );
 
-        if (orderId) {
-          await runPostOrderPaymentFulfillment(supabase, orderId, transaction.id);
+        const fulfillmentOrderId = orderId || transaction.order_id;
+        if (fulfillmentOrderId) {
+          await runPostOrderPaymentFulfillment(supabase, fulfillmentOrderId, transaction.id);
 
           const { data: orderData, error: orderError } = await supabase
             .from('orders')
             .select(
               'id,store_id,order_number,customer_id,total_amount,currency,status,payment_status,created_at,metadata'
             )
-            .eq('id', orderId)
+            .eq('id', fulfillmentOrderId)
             .single();
 
           if (orderError) {
@@ -709,14 +702,22 @@ serve(async req => {
       }
     }
 
-    const { error: updateError } = await supabase
-      .from('transactions')
-      .update(updates)
-      .eq('id', transaction.id);
+    if (mappedStatus !== 'completed') {
+      const { error: updateError } = await supabase
+        .from('transactions')
+        .update(updates)
+        .eq('id', transaction.id);
 
-    if (updateError) {
-      console.error('Error updating transaction:', updateError);
-      throw updateError;
+      if (updateError) {
+        console.error('Error updating transaction:', updateError);
+        throw updateError;
+      }
+    } else {
+      // Status/order already applied by process_payment_webhook_atomic.
+      await supabase
+        .from('transactions')
+        .update({ geniuspay_response: safePayloadForLogs })
+        .eq('id', transaction.id);
     }
 
     await supabase.from('transaction_logs').insert({
