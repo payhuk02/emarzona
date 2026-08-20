@@ -43,7 +43,11 @@ function assertMoneyFusionMinAmount(amount: number, currency?: string): void {
 }
 
 class MoneyFusionClient {
-  private async callFunction(action: string, data: object): Promise<unknown> {
+  private async callFunction(
+    functionName: 'moneyfusion' | 'moneyfusion-ops',
+    action: string,
+    data: object
+  ): Promise<unknown> {
     const payload = data as Record<string, unknown>;
     const metadata =
       payload.metadata && typeof payload.metadata === 'object' && !Array.isArray(payload.metadata)
@@ -53,7 +57,7 @@ class MoneyFusionClient {
       typeof metadata?.checkout_token === 'string' ? metadata.checkout_token : undefined;
 
     const { data: response, error } = await supabase.functions.invoke(
-      `moneyfusion?t=${Date.now()}`,
+      `${functionName}?t=${Date.now()}`,
       {
         body: { action, data: payload },
         headers: checkoutToken ? { 'x-checkout-token': checkoutToken } : undefined,
@@ -101,11 +105,15 @@ class MoneyFusionClient {
 
   async createCheckout(checkoutData: MoneyFusionCheckoutData): Promise<MoneyFusionCheckoutResult> {
     assertMoneyFusionMinAmount(checkoutData.amount, checkoutData.currency);
-    return (await this.callFunction('create_checkout', checkoutData)) as MoneyFusionCheckoutResult;
+    return (await this.callFunction(
+      'moneyfusion',
+      'create_checkout',
+      checkoutData
+    )) as MoneyFusionCheckoutResult;
   }
 
   async verifyPayment(token: string, transactionId?: string): Promise<unknown> {
-    return this.callFunction('verify_payment', {
+    return this.callFunction('moneyfusion', 'verify_payment', {
       paymentId: token,
       token,
       ...(transactionId ? { transactionId } : {}),
@@ -114,7 +122,7 @@ class MoneyFusionClient {
 
   /** Guest return: transaction_id only (Edge résout payment_id en service role). */
   async verifyPaymentByTransaction(transactionId: string): Promise<unknown> {
-    return this.callFunction('verify_payment', { transactionId });
+    return this.callFunction('moneyfusion', 'verify_payment', { transactionId });
   }
 }
 

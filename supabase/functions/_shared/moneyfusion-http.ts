@@ -15,8 +15,16 @@ function siteBase(): string {
   return (Deno.env.get('SITE_URL') || 'https://www.emarzona.com').trim().replace(/\/$/, '');
 }
 
+function internalSecrets(): string[] {
+  const secrets = [
+    (Deno.env.get('EDGE_INTERNAL_SECRET') || '').trim(),
+    (Deno.env.get('CRON_SECRET') || '').trim(),
+  ].filter(Boolean);
+  return [...new Set(secrets)];
+}
+
 function internalSecret(): string {
-  return (Deno.env.get('EDGE_INTERNAL_SECRET') || Deno.env.get('CRON_SECRET') || '').trim();
+  return internalSecrets()[0] || '';
 }
 
 function statusProxyBase(): string | null {
@@ -33,29 +41,35 @@ function payProxyBase(): string | null {
 
 async function fetchViaStatusProxy(token: string): Promise<Response | null> {
   const base = statusProxyBase();
-  const secret = internalSecret();
-  if (!base || !secret) return null;
+  const secrets = internalSecrets();
+  if (!base || secrets.length === 0) return null;
 
-  try {
-    const proxied = await fetch(`${base}?token=${encodeURIComponent(token)}`, {
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-        'x-internal-secret': secret,
-      },
-    });
+  for (const secret of secrets) {
+    try {
+      const proxied = await fetch(`${base}?token=${encodeURIComponent(token)}`, {
+        method: 'GET',
+        headers: {
+          Accept: 'application/json',
+          'x-internal-secret': secret,
+        },
+      });
 
-    // Auth / routing errors → fall back to TLS-tolerant direct fetch
-    if (proxied.status === 401 || proxied.status === 403 || proxied.status === 404 || proxied.status === 405) {
-      console.warn('[MoneyFusion] status proxy unavailable', proxied.status);
-      return null;
+      if (proxied.status === 401 || proxied.status === 403) {
+        console.warn('[MoneyFusion] status proxy unauthorized with one secret', proxied.status);
+        continue;
+      }
+      if (proxied.status === 404 || proxied.status === 405) {
+        console.warn('[MoneyFusion] status proxy unavailable', proxied.status);
+        return null;
+      }
+
+      return proxied;
+    } catch (err) {
+      console.warn('[MoneyFusion] status proxy failed, trying next/fallback', err);
     }
-
-    return proxied;
-  } catch (err) {
-    console.warn('[MoneyFusion] status proxy failed, falling back to direct', err);
-    return null;
   }
+
+  return null;
 }
 
 /** Initiate payin via Vercel TLS-tolerant proxy (preferred from Edge). */

@@ -59,11 +59,11 @@ describe('PaymentProviderSelector', () => {
     await waitFor(() => {
       expect(mockOnChange).toHaveBeenCalledWith('moneyfusion');
     });
-    expect(screen.getByText(/Paiement MoneyFusion/i)).toBeInTheDocument();
-    expect(screen.getByText(/Orange Money/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Paiement MoneyFusion/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Orange Money/i)).not.toBeInTheDocument();
   });
 
-  it('displays amount when moneyfusion selected', async () => {
+  it('does not list mobile-money operators on checkout', async () => {
     render(
       <PaymentProviderSelector
         value="moneyfusion"
@@ -75,8 +75,10 @@ describe('PaymentProviderSelector', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText(/Orange Money/i)).toBeInTheDocument();
+      expect(mockOnChange).toHaveBeenCalledWith('moneyfusion');
     });
+    expect(screen.queryByText(/Orange Money/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/MTN MoMo/i)).not.toBeInTheDocument();
   });
 
   it('never exposes GeniusPay as selectable option', async () => {

@@ -1,28 +1,16 @@
 /// <reference path="../deno.d.ts" />
 /**
- * Edge Function MoneyFusion (FusionPay) — initiation et vérification de paiement.
- * Doc: https://docs.moneyfusion.net/fr/webapi
- *
- * Secrets requis:
- * - MONEYFUSION_API_URL : lien API unique (ex. https://pay.moneyfusion.net/App/xxx/pay/)
+ * Edge Function MoneyFusion — create_checkout uniquement (boot léger).
+ * verify / reconcile / refund → moneyfusion-ops
  */
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'npm:@supabase/supabase-js@2.58.0';
-import { resolveOrderExpectedPayableAmount } from '../_shared/complete-order-payment.ts';
-import { handleMoneyFusionRefund } from '../_shared/handle-moneyfusion-refund.ts';
-import { handleMoneyFusionStoreWithdrawalPayout } from '../_shared/handle-moneyfusion-store-withdrawal.ts';
-import { authorizeCheckoutOrder } from '../_shared/order-checkout-auth.ts';
-import { assertPlatformAdmin, createSupabaseUserClient } from '../_shared/supabase-admin.ts';
-import { enforceRateLimit, getClientIp, RATE_LIMIT_PRESETS } from '../_shared/rate-limit.ts';
-import { moneyFusionFetch, moneyFusionPayInitiate, moneyFusionCheckoutUrlFromToken } from '../_shared/moneyfusion-http.ts';
-import { syncMoneyFusionTransactionFromToken, repairOrderPaymentFromCompletedTransaction } from '../_shared/moneyfusion-sync-from-status.ts';
 import {
-  autoResolveOpenMoneyFusionOrphans,
-  ignoreMoneyFusionOrphanPayment,
-  resolveMoneyFusionOrphanPayment,
-} from '../_shared/moneyfusion-orphan-payments.ts';
+  moneyFusionPayInitiate,
+  moneyFusionCheckoutUrlFromToken,
+} from '../_shared/moneyfusion-http.ts';
+import { syncMoneyFusionLite } from '../_shared/moneyfusion-sync-lite.ts';
 
-const MONEYFUSION_STATUS_URL = 'https://www.pay.moneyfusion.net/paiementNotif';
 const SITE_URL = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
 
 function getCorsOrigin(req: Request): string {
@@ -57,9 +45,11 @@ function getCorsHeaders(req: Request) {
   return {
     'Access-Control-Allow-Origin': getCorsOrigin(req),
     'Access-Control-Allow-Headers':
-      'authorization, x-client-info, apikey, content-type, x-checkout-token',
+      'authorization, x-client-info, apikey, content-type, x-checkout-token, x-cron-secret, x-internal-secret, prefer, x-supabase-api-version',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Access-Control-Allow-Credentials': 'true',
+    'Access-Control-Max-Age': '86400',
+    Vary: 'Origin',
   };
 }
 
@@ -114,10 +104,13 @@ function validateCreateCheckout(data: unknown): {
   }
   const customerEmail = String(d.customer_email || '').trim();
   if (!customerEmail || !isValidEmail(customerEmail)) {
-    return { valid: false, error: "Email client invalide" };
+    return { valid: false, error: 'Email client invalide' };
   }
   if (d.return_url && typeof d.return_url === 'string' && !isValidUrl(d.return_url)) {
     return { valid: false, error: 'URL de retour invalide' };
+  }
+  if (d.cancel_url && typeof d.cancel_url === 'string' && !isValidUrl(d.cancel_url)) {
+    return { valid: false, error: 'URL d annulation invalide' };
   }
   if (d.productId && typeof d.productId === 'string' && !isValidUUID(d.productId)) {
     return { valid: false, error: 'productId invalide' };
@@ -134,7 +127,7 @@ function validateCreateCheckout(data: unknown): {
     validated: {
       amount: Math.round(amount),
       currency,
-      description: d.description ? String(d.description).substring(0, 500) : undefined,
+      description: d.description ? String(d.description).substring(0, 200) : undefined,
       customer_email: customerEmail,
       customer_name: d.customer_name ? String(d.customer_name).substring(0, 200) : undefined,
       customer_phone: d.customer_phone ? String(d.customer_phone).substring(0, 50) : undefined,
@@ -146,6 +139,21 @@ function validateCreateCheckout(data: unknown): {
       metadata: (d.metadata as Record<string, unknown>) || undefined,
     },
   };
+}
+
+function parseMeta(metadata: unknown): Record<string, unknown> {
+  if (metadata == null) return {};
+  if (typeof metadata === 'string') {
+    try {
+      return JSON.parse(metadata) as Record<string, unknown>;
+    } catch {
+      return {};
+    }
+  }
+  if (typeof metadata === 'object' && !Array.isArray(metadata)) {
+    return metadata as Record<string, unknown>;
+  }
+  return {};
 }
 
 async function resolveAuthorizedAmount(
@@ -160,7 +168,7 @@ async function resolveAuthorizedAmount(
   if (orderId && isValidUUID(orderId)) {
     const { data: order, error } = await supabase
       .from('orders')
-      .select('id, currency, store_id')
+      .select('id, currency, store_id, total_amount, percentage_paid, remaining_amount, metadata')
       .eq('id', orderId)
       .single();
 
@@ -170,18 +178,23 @@ async function resolveAuthorizedAmount(
     if (validated.storeId && order.store_id !== validated.storeId) {
       return { valid: false, error: 'La boutique ne correspond pas à la commande' };
     }
-    const payable = await resolveOrderExpectedPayableAmount(supabase, orderId);
-    if (!payable.valid || payable.expectedAmount == null) {
-      return { valid: false, error: 'Commande introuvable' };
+
+    const meta = parseMeta(order.metadata);
+    const remaining = Number(order.remaining_amount) || 0;
+    const isGuarantee = String(meta.checkout_method ?? '') === 'guarantee' && remaining > 0;
+    let expected = Math.round(Number(order.total_amount) || 0);
+    if (isGuarantee) {
+      const pct = Math.round(Number(order.percentage_paid) || 0);
+      if (pct > 0) expected = pct;
     }
-    const expected = Math.round(payable.expectedAmount);
+
     if (Math.round(validated.amount) !== expected) {
       return { valid: false, error: 'Montant invalide pour cette commande' };
     }
     return {
       valid: true,
       amount: expected,
-      currency: (order.currency as string) || payable.currency || validated.currency,
+      currency: (order.currency as string) || validated.currency,
     };
   }
 
@@ -202,8 +215,7 @@ async function resolveAuthorizedAmount(
       return { valid: false, error: 'La boutique ne correspond pas au produit' };
     }
     const base = Number(product.price);
-    const promo =
-      product.promotional_price != null ? Number(product.promotional_price) : null;
+    const promo = product.promotional_price != null ? Number(product.promotional_price) : null;
     const expected =
       promo != null && !Number.isNaN(promo) && promo >= 0 && promo < base
         ? Math.round(promo)
@@ -221,22 +233,86 @@ async function resolveAuthorizedAmount(
   return { valid: true, amount: validated.amount, currency: validated.currency };
 }
 
+async function authorizeCheckoutOrderLite(
+  supabase: ReturnType<typeof createClient>,
+  req: Request,
+  orderId: string,
+  storeId: string,
+  amount: number,
+  checkoutToken?: string
+): Promise<{ ok: true } | { ok: false; status: number; error: string }> {
+  const { data: order, error } = await supabase
+    .from('orders')
+    .select('id, store_id, total_amount, payment_status, created_at, metadata, percentage_paid, remaining_amount')
+    .eq('id', orderId)
+    .maybeSingle();
+
+  if (error || !order) {
+    return { ok: false, status: 404, error: 'Commande introuvable' };
+  }
+  if (order.store_id !== storeId) {
+    return { ok: false, status: 403, error: 'Boutique incorrecte' };
+  }
+
+  const meta = parseMeta(order.metadata);
+  const remaining = Number(order.remaining_amount) || 0;
+  const isGuarantee = String(meta.checkout_method ?? '') === 'guarantee' && remaining > 0;
+  let expected = Math.round(Number(order.total_amount) || 0);
+  if (isGuarantee) {
+    const pct = Math.round(Number(order.percentage_paid) || 0);
+    if (pct > 0) expected = pct;
+  }
+  if (Math.round(amount) !== expected) {
+    return { ok: false, status: 400, error: 'Montant incorrect' };
+  }
+
+  const paid = ['paid', 'completed', 'refunded', 'cancelled'].includes(
+    String(order.payment_status || '')
+  );
+  if (paid) {
+    return { ok: false, status: 409, error: 'Commande déjà payée ou clôturée' };
+  }
+
+  const tokenFromOrder =
+    typeof meta.checkout_token === 'string' ? meta.checkout_token : null;
+  if (checkoutToken && tokenFromOrder && checkoutToken === tokenFromOrder) {
+    return { ok: true };
+  }
+
+  const authHeader = req.headers.get('Authorization');
+  if (authHeader?.startsWith('Bearer ')) {
+    const jwt = authHeader.slice(7).trim();
+    const anon = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
+    const url = Deno.env.get('SUPABASE_URL') ?? '';
+    if (anon && url && jwt) {
+      const userClient = createClient(url, anon, {
+        global: { headers: { Authorization: `Bearer ${jwt}` } },
+      });
+      const { data: userData } = await userClient.auth.getUser();
+      if (userData?.user) {
+        return { ok: true };
+      }
+    }
+  }
+
+  // Guest window: order created recently + matching checkout token (or no token stored)
+  const createdAt = new Date(String(order.created_at)).getTime();
+  const withinWindow = Number.isFinite(createdAt) && Date.now() - createdAt < 15 * 60 * 1000;
+  if (withinWindow && (!tokenFromOrder || (checkoutToken && checkoutToken === tokenFromOrder))) {
+    return { ok: true };
+  }
+
+  return { ok: false, status: 401, error: 'Accès checkout non autorisé' };
+}
+
 function normalizePhone(phone?: string): string {
   if (!phone) return '';
   const cleaned = phone.trim().replace(/\s/g, '');
-  // MoneyFusion attend un numéro national (ex. 75591378), pas +226...
   const digits = cleaned.replace(/\D/g, '');
   if (!digits) return cleaned;
-  // Burkina Faso / WAEMU courants : retirer l'indicatif pays
-  if (digits.startsWith('226') && digits.length >= 11) {
-    return digits.slice(3);
-  }
-  if (digits.startsWith('225') && digits.length >= 12) {
-    return digits.slice(3);
-  }
-  if (digits.startsWith('221') && digits.length >= 12) {
-    return digits.slice(3);
-  }
+  if (digits.startsWith('226') && digits.length >= 11) return digits.slice(3);
+  if (digits.startsWith('225') && digits.length >= 12) return digits.slice(3);
+  if (digits.startsWith('221') && digits.length >= 12) return digits.slice(3);
   return digits;
 }
 
@@ -254,17 +330,17 @@ function sanitizeArticleLabel(label: string): string {
 serve(async req => {
   const corsHeaders = getCorsHeaders(req);
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { status: 204, headers: corsHeaders });
   }
 
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
     const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
     if (!supabaseUrl || !serviceKey) {
-      return new Response(
-        JSON.stringify({ error: 'Configuration serveur incomplète' }),
-        { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return new Response(JSON.stringify({ error: 'Configuration serveur incomplète' }), {
+        status: 503,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     const supabase = createClient(supabaseUrl, serviceKey);
@@ -278,296 +354,38 @@ serve(async req => {
       });
     }
 
-    if (action === 'reconcile_stuck') {
-      // Cron / ops : rattrape processing/pending moneyfusion via paiementNotif
-      const authHeader = req.headers.get('authorization') ?? '';
-      const cronSecret = req.headers.get('x-cron-secret')?.trim() ?? '';
-      const internalSecret = req.headers.get('x-internal-secret')?.trim() ?? '';
-      const expectedCron = (Deno.env.get('CRON_SECRET') || '').trim();
-      const expectedInternal = (Deno.env.get('EDGE_INTERNAL_SECRET') || '').trim();
-      const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
-      const token = authHeader.replace(/^Bearer\s+/i, '').trim();
-      const allowed =
-        (expectedCron && cronSecret === expectedCron) ||
-        (expectedInternal && internalSecret === expectedInternal) ||
-        (serviceKey && token === serviceKey);
-      if (!allowed) {
-        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-          status: 401,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-
-      const d = (data || {}) as Record<string, unknown>;
-      const hoursBack = Number(d.hours_back ?? 72);
-      const limit = Math.min(Number(d.limit ?? 50), 100);
-      const minAgeMinutes = Number(d.min_age_minutes ?? 2);
-      const since = new Date(Date.now() - hoursBack * 60 * 60 * 1000).toISOString();
-      const olderThan = new Date(Date.now() - minAgeMinutes * 60 * 1000).toISOString();
-
-      const { data: targets, error: listError } = await supabase
-        .from('transactions')
-        .select('id, payment_id, status, amount, order_id, created_at')
-        .eq('payment_provider', 'moneyfusion')
-        .in('status', ['processing', 'pending'])
-        .not('payment_id', 'is', null)
-        .gte('created_at', since)
-        .lte('created_at', olderThan)
-        .order('created_at', { ascending: true })
-        .limit(limit);
-
-      if (listError) {
-        return new Response(JSON.stringify({ error: listError.message }), {
-          status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-
-      let completed = 0;
-      let failed = 0;
-      let stillPending = 0;
-      let errors = 0;
-      let repaired = 0;
-      const details: Array<Record<string, unknown>> = [];
-
-      for (const row of targets || []) {
-        const mfToken = String(row.payment_id || '').trim();
-        if (!mfToken) continue;
-        try {
-          const sync = await syncMoneyFusionTransactionFromToken(supabase, mfToken, {
-            source: 'reconcile_stuck',
-            transactionIdHint: String(row.id),
-          });
-          if (sync.completed) completed++;
-          else if (sync.status === 'failed' || sync.status === 'cancelled') failed++;
-          else if (sync.status === 'processing' || sync.status === 'completed') stillPending++;
-          else if (!sync.success) errors++;
-          details.push({ transaction_id: row.id, order_id: row.order_id, result: sync });
-        } catch (rowErr) {
-          errors++;
-          details.push({
-            transaction_id: row.id,
-            error: rowErr instanceof Error ? rowErr.message : String(rowErr),
-          });
-        }
-        await new Promise(r => setTimeout(r, 120));
-      }
-
-      // Tx completed côté DB mais commande encore pending (webhook partiel / legacy)
-      const { data: desyncRows, error: desyncError } = await supabase
-        .from('transactions')
-        .select('id, payment_id, order_id, status, created_at')
-        .eq('payment_provider', 'moneyfusion')
-        .eq('status', 'completed')
-        .not('order_id', 'is', null)
-        .not('payment_id', 'is', null)
-        .gte('created_at', since)
-        .order('created_at', { ascending: true })
-        .limit(limit);
-
-      if (desyncError) {
-        console.error('[MoneyFusion reconcile_stuck] desync list failed', desyncError);
-      } else {
-        for (const row of desyncRows || []) {
-          const orderId = row.order_id as string | null;
-          const txId = String(row.id);
-          if (!orderId) continue;
-
-          const { data: order } = await supabase
-            .from('orders')
-            .select('payment_status, metadata')
-            .eq('id', orderId)
-            .maybeSingle();
-
-          const paymentStatus = String(order?.payment_status || '');
-          const meta =
-            order?.metadata && typeof order.metadata === 'object' && !Array.isArray(order.metadata)
-              ? (order.metadata as Record<string, unknown>)
-              : {};
-          const needsPaymentRepair = !['paid', 'deposit_paid', 'completed', 'cod_pending'].includes(
-            paymentStatus
-          );
-          const needsFulfillment = !meta.post_payment_fulfillment_at;
-
-          if (!needsPaymentRepair && !needsFulfillment) continue;
-
-          try {
-            if (needsPaymentRepair) {
-              const fixed = await repairOrderPaymentFromCompletedTransaction(
-                supabase,
-                txId,
-                orderId
-              );
-              if (fixed) repaired++;
-            }
-            const mfToken = String(row.payment_id || '').trim();
-            if (mfToken && needsFulfillment) {
-              const sync = await syncMoneyFusionTransactionFromToken(supabase, mfToken, {
-                source: 'reconcile_desync',
-                transactionIdHint: txId,
-              });
-              details.push({
-                transaction_id: txId,
-                order_id: orderId,
-                desync_repair: true,
-                result: sync,
-              });
-            }
-          } catch (repairErr) {
-            errors++;
-            details.push({
-              transaction_id: txId,
-              order_id: orderId,
-              desync_repair: true,
-              error: repairErr instanceof Error ? repairErr.message : String(repairErr),
-            });
-          }
-        }
-      }
-
-      let orphansResolved = 0;
-      try {
-        const orphanSweep = await autoResolveOpenMoneyFusionOrphans(supabase, 20);
-        orphansResolved = orphanSweep.resolved;
-      } catch (orphanSweepErr) {
-        console.error('[MoneyFusion reconcile_stuck] orphan sweep failed', orphanSweepErr);
-      }
-
-      return new Response(
-        JSON.stringify({
-          success: true,
-          scanned: (targets || []).length,
-          completed,
-          failed,
-          still_pending: stillPending,
-          repaired,
-          orphans_resolved: orphansResolved,
-          errors,
-          hours_back: hoursBack,
-          processed_at: new Date().toISOString(),
-          details: details.slice(0, 20),
-        }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    if (action === 'ping') {
+      return new Response(JSON.stringify({ success: true, service: 'moneyfusion', mode: 'checkout' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
-    if (action === 'reconcile_transaction') {
-      const authHeader = req.headers.get('authorization') ?? '';
-      const cronSecret = req.headers.get('x-cron-secret')?.trim() ?? '';
-      const internalSecret = req.headers.get('x-internal-secret')?.trim() ?? '';
-      const expectedCron = (Deno.env.get('CRON_SECRET') || '').trim();
-      const expectedInternal = (Deno.env.get('EDGE_INTERNAL_SECRET') || '').trim();
-      const serviceKeyHeader = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
-      const token = authHeader.replace(/^Bearer\s+/i, '').trim();
-      const allowed =
-        (expectedCron && cronSecret === expectedCron) ||
-        (expectedInternal && internalSecret === expectedInternal) ||
-        (serviceKeyHeader && token === serviceKeyHeader) ||
-        authHeader.startsWith('Bearer ');
-
-      if (!allowed) {
-        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-          status: 401,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-
+    if (action === 'verify_payment' || action === 'reconcile_transaction') {
       const d = (data || {}) as Record<string, unknown>;
-      const transactionId = String(d.transactionId || d.transaction_id || '').trim();
-      const mfToken = String(d.paymentId || d.token || d.payment_id || '').trim();
+      let token = String(d.paymentId || d.token || d.payment_id || '').trim();
+      const transactionIdHint = String(d.transactionId || d.transaction_id || '').trim();
 
-      if (!transactionId && !mfToken) {
-        return new Response(JSON.stringify({ error: 'transactionId ou token requis' }), {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-
-      let token = mfToken;
-      if (!token && transactionId) {
-        const { data: txRow } = await supabase
-          .from('transactions')
-          .select('payment_id, payment_provider')
-          .eq('id', transactionId)
-          .maybeSingle();
-        if (txRow?.payment_provider !== 'moneyfusion') {
-          return new Response(JSON.stringify({ error: 'Not a MoneyFusion transaction' }), {
-            status: 400,
+      if (action === 'reconcile_transaction') {
+        const authHeader = req.headers.get('authorization') ?? '';
+        const cronSecret = req.headers.get('x-cron-secret')?.trim() ?? '';
+        const internalSecret = req.headers.get('x-internal-secret')?.trim() ?? '';
+        const expectedCron = (Deno.env.get('CRON_SECRET') || '').trim();
+        const expectedInternal = (Deno.env.get('EDGE_INTERNAL_SECRET') || '').trim();
+        const serviceKeyHeader = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+        const bearer = authHeader.replace(/^Bearer\s+/i, '').trim();
+        const allowed =
+          (expectedCron && cronSecret === expectedCron) ||
+          (expectedInternal && internalSecret === expectedInternal) ||
+          (serviceKeyHeader && bearer === serviceKeyHeader) ||
+          authHeader.startsWith('Bearer ');
+        if (!allowed) {
+          return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+            status: 401,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           });
         }
-        token = String(txRow?.payment_id || '').trim();
       }
 
-      if (!token) {
-        return new Response(JSON.stringify({ error: 'Token MoneyFusion introuvable' }), {
-          status: 404,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-
-      const sync = await syncMoneyFusionTransactionFromToken(supabase, token, {
-        source: 'reconcile_transaction',
-        transactionIdHint: transactionId || undefined,
-      });
-
-      return new Response(JSON.stringify({ success: sync.success, sync }), {
-        status: sync.success ? 200 : 502,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    if (action === 'resolve_orphan' || action === 'ignore_orphan') {
-      const authHeader = req.headers.get('authorization');
-      let adminUserId: string;
-      try {
-        const admin = await assertPlatformAdmin(createSupabaseUserClient(authHeader));
-        adminUserId = admin.userId;
-      } catch {
-        return new Response(JSON.stringify({ error: 'Forbidden' }), {
-          status: 403,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-
-      const d = (data || {}) as Record<string, unknown>;
-      const orphanId = String(d.orphanId || d.orphan_id || '').trim();
-      if (!orphanId) {
-        return new Response(JSON.stringify({ error: 'orphanId requis' }), {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-
-      if (action === 'ignore_orphan') {
-        const ignored = await ignoreMoneyFusionOrphanPayment(supabase, {
-          orphanId,
-          note: typeof d.note === 'string' ? d.note : undefined,
-          resolvedBy: adminUserId,
-        });
-        return new Response(JSON.stringify(ignored), {
-          status: ignored.success ? 200 : 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-
-      const resolved = await resolveMoneyFusionOrphanPayment(supabase, {
-        orphanId,
-        resolvedBy: adminUserId,
-        force: Boolean(d.force),
-      });
-      return new Response(JSON.stringify(resolved), {
-        status: resolved.success ? 200 : 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    if (action === 'verify_payment') {
-      const d = (data || {}) as Record<string, unknown>;
-      let token = String(d.paymentId || d.token || '').trim();
-      const transactionIdHint = String(d.transactionId || d.transaction_id || '').trim();
-
-      // Guest return URL has transaction_id but RLS blocks reading payment_id client-side
       if (!token && transactionIdHint) {
         const { data: txRow } = await supabase
           .from('transactions')
@@ -584,40 +402,16 @@ serve(async req => {
         });
       }
 
-      // Re-vérifie auprès de MF puis finalise la tx locale si paid
-      // (filet si le webhook n'a pas abouti).
-      const sync = await syncMoneyFusionTransactionFromToken(supabase, token, {
-        source: 'verify_payment',
+      const sync = await syncMoneyFusionLite(supabase, token, {
+        source: action,
         transactionIdHint: transactionIdHint || undefined,
       });
 
-      if (!sync.success && sync.error === 'transaction_not_found') {
-        // Fallback lecture seule (compat admin / debug)
-        const statusRes = await moneyFusionFetch(
-          `${MONEYFUSION_STATUS_URL}/${encodeURIComponent(token)}`,
-          {
-            method: 'GET',
-            headers: { Accept: 'application/json' },
-          }
-        );
-        const statusText = await statusRes.text();
-        let statusData: unknown = {};
-        try {
-          statusData = statusText ? JSON.parse(statusText) : {};
-        } catch {
-          statusData = { raw: statusText.slice(0, 200) };
-        }
-        return new Response(
-          JSON.stringify({
-            success: statusRes.ok,
-            data: statusData,
-            sync,
-          }),
-          {
-            status: statusRes.ok ? 200 : statusRes.status,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          }
-        );
+      if (action === 'reconcile_transaction') {
+        return new Response(JSON.stringify({ success: sync.success, sync }), {
+          status: sync.success ? 200 : 502,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
       }
 
       if (!sync.success) {
@@ -653,64 +447,15 @@ serve(async req => {
       );
     }
 
-    if (action === 'refund_payment') {
-      try {
-        const refundResult = await handleMoneyFusionRefund(
-          supabase,
-          req.headers.get('Authorization'),
-          (data || {}) as {
-            transactionId: string;
-            amount?: number;
-            reason?: string;
-            confirmManual?: boolean;
-          }
-        );
-        return new Response(JSON.stringify(refundResult.body), {
-          status: refundResult.status,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      } catch (refundErr) {
-        const message = refundErr instanceof Error ? refundErr.message : String(refundErr);
-        const status =
-          message === 'Unauthorized' ||
-          message === 'Forbidden' ||
-          message.includes('access denied')
-            ? 403
-            : 500;
-        return new Response(JSON.stringify({ success: false, error: message }), {
-          status,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-    }
-
-    if (action === 'payout_store_withdrawal') {
-      try {
-        const payoutResult = await handleMoneyFusionStoreWithdrawalPayout(
-          supabase,
-          req.headers.get('Authorization'),
-          (data || {}) as { withdrawalId: string }
-        );
-        return new Response(JSON.stringify(payoutResult.body), {
-          status: payoutResult.status,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      } catch (payoutErr) {
-        const message = payoutErr instanceof Error ? payoutErr.message : String(payoutErr);
-        const status =
-          message === 'Unauthorized' || message === 'Forbidden' ? 403 : 500;
-        return new Response(JSON.stringify({ success: false, error: message }), {
-          status,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-    }
-
     if (action !== 'create_checkout') {
-      return new Response(JSON.stringify({ error: 'Action non supportée' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      return new Response(
+        JSON.stringify({
+          error: 'Action non supportée sur moneyfusion',
+          message: 'Actions: ping, create_checkout, verify_payment, reconcile_transaction',
+          action,
+        }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     const apiUrl = (Deno.env.get('MONEYFUSION_API_URL') || '').trim();
@@ -739,31 +484,12 @@ serve(async req => {
       (validated.metadata?.orderId as string | undefined);
 
     if (orderIdForAuth && validated.storeId) {
-      const rateLimit = await enforceRateLimit(
-        supabase,
-        getClientIp(req),
-        'checkout',
-        RATE_LIMIT_PRESETS.checkout
-      );
-      if (!rateLimit.allowed) {
-        return new Response(
-          JSON.stringify({
-            error: 'Trop de tentatives de paiement',
-            message: 'Veuillez patienter avant de réessayer.',
-          }),
-          {
-            status: rateLimit.degraded ? 503 : 429,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          }
-        );
-      }
-
       const checkoutToken =
         (validated.metadata?.checkout_token as string | undefined) ||
         req.headers.get('x-checkout-token') ||
         undefined;
 
-      const checkoutAuth = await authorizeCheckoutOrder(
+      const checkoutAuth = await authorizeCheckoutOrderLite(
         supabase,
         req,
         orderIdForAuth,
@@ -798,10 +524,7 @@ serve(async req => {
 
     if (!validated.return_url) {
       return new Response(
-        JSON.stringify({
-          error: 'Validation échouée',
-          message: 'return_url est requis',
-        }),
+        JSON.stringify({ error: 'Validation échouée', message: 'return_url est requis' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -816,12 +539,8 @@ serve(async req => {
       );
     }
 
-    // MoneyFusion refuse les montants ≤ 200 F (XOF/XAF)
     const currencyUpper = validated.currency.toUpperCase();
-    if (
-      (currencyUpper === 'XOF' || currencyUpper === 'XAF') &&
-      validated.amount <= 200
-    ) {
+    if ((currencyUpper === 'XOF' || currencyUpper === 'XAF') && validated.amount <= 200) {
       return new Response(
         JSON.stringify({
           error: 'Montant trop bas',
@@ -991,10 +710,6 @@ serve(async req => {
     let checkoutUrl = String(mfData.url || mfData.payment_url || mfData.checkout_url || '');
     if (!checkoutUrl && token) {
       checkoutUrl = moneyFusionCheckoutUrlFromToken(token, validated.amount, customerName);
-      console.warn('[MoneyFusion] Synthesized checkout URL from token (API omitted url)', {
-        localTxId,
-        tokenPrefix: token.slice(0, 8),
-      });
     }
     if (!checkoutUrl) {
       await supabase

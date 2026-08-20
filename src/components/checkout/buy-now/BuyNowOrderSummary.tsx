@@ -26,7 +26,6 @@ import {
 } from 'lucide-react';
 import { MONEYFUSION_MIN_AMOUNT_XOF } from '@/lib/moneyfusion-client';
 import { computePhysicalGuaranteeBreakdown } from '@/lib/physical/physical-guarantee';
-import { MoneyFusionCheckoutMethods } from '@/components/checkout/MoneyFusionCheckoutMethods';
 
 const PRODUCT_TYPE_LABELS: Record<string, string> = {
   digital: 'Produit digital',
@@ -267,16 +266,14 @@ export default function BuyNowOrderSummary({
           <div className="flex items-start justify-center gap-2 text-[11px] sm:text-xs text-muted-foreground pt-0.5">
             <ShieldCheck className="h-3.5 w-3.5 mt-0.5 flex-shrink-0" aria-hidden="true" />
             <p className="text-center leading-snug">
-              Vous payez la garantie maintenant via MoneyFusion. Le solde est dû à la livraison.
+              Vous payez la garantie maintenant. Le solde est dû à la livraison.
             </p>
           </div>
         )}
         {!isCashOnDelivery && (
-          <div className="rounded-xl border border-border/50 bg-muted/20 px-3 py-2.5">
-            <p className="text-[11px] sm:text-xs font-medium text-foreground mb-1.5">
-              Paiement sécurisé MoneyFusion
-            </p>
-            <MoneyFusionCheckoutMethods compact />
+          <div className="flex items-center justify-center gap-2 text-[11px] sm:text-xs text-muted-foreground pt-0.5">
+            <Lock className="h-3.5 w-3.5 flex-shrink-0" aria-hidden="true" />
+            <p className="text-center leading-snug">Paiement sécurisé</p>
           </div>
         )}
       </CardContent>

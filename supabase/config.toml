@@ -34,6 +34,14 @@ verify_jwt = false
 [functions.moneyfusion-webhook]
 verify_jwt = false
 
+# Checkout navigateur : OPTIONS/preflight sans JWT gateway (auth dans la fonction)
+[functions.moneyfusion]
+verify_jwt = false
+
+# Ops MoneyFusion (verify/reconcile/refund) — JWT off; auth cron/admin dans la fonction
+[functions.moneyfusion-ops]
+verify_jwt = false
+
 [functions.process-subscription-renewals]
 verify_jwt = false
 

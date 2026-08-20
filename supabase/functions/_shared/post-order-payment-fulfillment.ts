@@ -3,7 +3,7 @@
  * Aligné sur geniuspay-webhook : bookings, certificats artiste, emails, webhooks store.
  */
 
-import type { SupabaseClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from 'npm:@supabase/supabase-js@2.58.0';
 import { logArtistFulfillmentEvent } from './artist-fulfillment-observability.ts';
 import { triggerEmailWorkflowsForEvent } from './workflow-executor.ts';
 import { triggerSequenceEnrollmentsForEvent } from './sequence-enrollment-utils.ts';

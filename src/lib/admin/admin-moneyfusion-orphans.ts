@@ -63,7 +63,7 @@ export async function resolveMoneyFusionOrphan(orphanId: string): Promise<{
   transactionId?: string;
   orderId?: string | null;
 }> {
-  const { data, error } = await supabase.functions.invoke('moneyfusion', {
+  const { data, error } = await supabase.functions.invoke('moneyfusion-ops', {
     body: {
       action: 'resolve_orphan',
       data: { orphanId },
@@ -82,7 +82,7 @@ export async function ignoreMoneyFusionOrphan(orphanId: string): Promise<{
   success: boolean;
   error?: string;
 }> {
-  const { data, error } = await supabase.functions.invoke('moneyfusion', {
+  const { data, error } = await supabase.functions.invoke('moneyfusion-ops', {
     body: {
       action: 'ignore_orphan',
       data: { orphanId },
