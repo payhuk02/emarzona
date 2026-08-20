@@ -1,17 +1,23 @@
 /**
- * Opérateurs Mobile Money par pays
- * Liste des opérateurs disponibles selon le pays
+ * Opérateurs / portefeuilles Mobile Money réellement présents par pays (ISO 3166-1 alpha-2).
+ * Aligné sur le catalogue MoneyFusion payout (CI, BF, BJ, TG, SN, ML, NE, CD, CG, CM, GA)
+ * et sur les opérateurs nationaux majeurs ailleurs.
+ * Les pays sans Mobile Money usuel retournent une liste vide — pas de fallback Afrique de l’Ouest.
  */
 
-export type MobileMoneyOperator = 
-  | 'orange_money' 
-  | 'mtn_mobile_money' 
-  | 'moov_money' 
-  | 'wave' 
+export type MobileMoneyOperator =
+  | 'orange_money'
+  | 'mtn_mobile_money'
+  | 'moov_money'
+  | 'wave'
   | 'free_money'
   | 'm_pesa'
   | 'airtel_money'
   | 'ecocash'
+  | 't_money'
+  | 'amana'
+  | 'zamani_cash'
+  | 'nita'
   | 'other';
 
 export interface MobileMoneyOperatorInfo {
@@ -20,164 +26,83 @@ export interface MobileMoneyOperatorInfo {
   description?: string;
 }
 
-/**
- * Opérateurs disponibles par pays (code ISO)
- */
-export const MOBILE_MONEY_OPERATORS_BY_COUNTRY : Record<string, MobileMoneyOperatorInfo[]> = {
-  // Burkina Faso
-  'BF': [
-    { value: 'orange_money', label: 'Orange Money' },
-    { value: 'moov_money', label: 'Moov Money' },
-    { value: 'wave', label: 'Wave' },
-    { value: 'other', label: 'Autre' },
-  ],
-  
-  // Côte d'Ivoire
-  'CI': [
-    { value: 'orange_money', label: 'Orange Money' },
-    { value: 'mtn_mobile_money', label: 'MTN Mobile Money' },
-    { value: 'moov_money', label: 'Moov Money' },
-    { value: 'wave', label: 'Wave' },
-    { value: 'other', label: 'Autre' },
-  ],
-  
-  // Sénégal
-  'SN': [
-    { value: 'orange_money', label: 'Orange Money' },
-    { value: 'free_money', label: 'Free Money' },
-    { value: 'wave', label: 'Wave' },
-    { value: 'other', label: 'Autre' },
-  ],
-  
-  // Mali
-  'ML': [
-    { value: 'orange_money', label: 'Orange Money' },
-    { value: 'moov_money', label: 'Moov Money' },
-    { value: 'wave', label: 'Wave' },
-    { value: 'other', label: 'Autre' },
-  ],
-  
-  // Bénin
-  'BJ': [
-    { value: 'orange_money', label: 'Orange Money' },
-    { value: 'moov_money', label: 'Moov Money' },
-    { value: 'mtn_mobile_money', label: 'MTN Mobile Money' },
-    { value: 'other', label: 'Autre' },
-  ],
-  
-  // Togo
-  'TG': [
-    { value: 'orange_money', label: 'Orange Money' },
-    { value: 'moov_money', label: 'Moov Money' },
-    { value: 'other', label: 'Autre' },
-  ],
-  
-  // Guinée
-  'GN': [
-    { value: 'orange_money', label: 'Orange Money' },
-    { value: 'mtn_mobile_money', label: 'MTN Mobile Money' },
-    { value: 'other', label: 'Autre' },
-  ],
-  
-  // Niger
-  'NE': [
-    { value: 'orange_money', label: 'Orange Money' },
-    { value: 'moov_money', label: 'Moov Money' },
-    { value: 'other', label: 'Autre' },
-  ],
-  
-  // Cameroun
-  'CM': [
-    { value: 'orange_money', label: 'Orange Money' },
-    { value: 'mtn_mobile_money', label: 'MTN Mobile Money' },
-    { value: 'other', label: 'Autre' },
-  ],
-  
-  // Gabon
-  'GA': [
-    { value: 'orange_money', label: 'Orange Money' },
-    { value: 'moov_money', label: 'Moov Money' },
-    { value: 'other', label: 'Autre' },
-  ],
-  
-  // Congo (RDC)
-  'CD': [
-    { value: 'orange_money', label: 'Orange Money' },
-    { value: 'mtn_mobile_money', label: 'MTN Mobile Money' },
-    { value: 'airtel_money', label: 'Airtel Money' },
-    { value: 'other', label: 'Autre' },
-  ],
-  
-  // Congo-Brazzaville
-  'CG': [
-    { value: 'orange_money', label: 'Orange Money' },
-    { value: 'mtn_mobile_money', label: 'MTN Mobile Money' },
-    { value: 'other', label: 'Autre' },
-  ],
-  
-  // Tchad
-  'TD': [
-    { value: 'orange_money', label: 'Orange Money' },
-    { value: 'other', label: 'Autre' },
-  ],
-  
-  // Centrafrique
-  'CF': [
-    { value: 'orange_money', label: 'Orange Money' },
-    { value: 'other', label: 'Autre' },
-  ],
-  
-  // Kenya (M-Pesa)
-  'KE': [
-    { value: 'm_pesa', label: 'M-Pesa' },
-    { value: 'airtel_money', label: 'Airtel Money' },
-    { value: 'other', label: 'Autre' },
-  ],
-  
-  // Tanzanie
-  'TZ': [
-    { value: 'm_pesa', label: 'M-Pesa' },
-    { value: 'airtel_money', label: 'Airtel Money' },
-    { value: 'other', label: 'Autre' },
-  ],
-  
-  // Zimbabwe (EcoCash)
-  'ZW': [
-    { value: 'ecocash', label: 'EcoCash' },
-    { value: 'other', label: 'Autre' },
-  ],
+const OM: MobileMoneyOperatorInfo = { value: 'orange_money', label: 'Orange Money' };
+const MTN: MobileMoneyOperatorInfo = { value: 'mtn_mobile_money', label: 'MTN Mobile Money' };
+const MOOV: MobileMoneyOperatorInfo = { value: 'moov_money', label: 'Moov Money' };
+const WAVE: MobileMoneyOperatorInfo = { value: 'wave', label: 'Wave' };
+const FREE: MobileMoneyOperatorInfo = { value: 'free_money', label: 'Free Money' };
+const MPESA: MobileMoneyOperatorInfo = { value: 'm_pesa', label: 'M-Pesa' };
+const AIRTEL: MobileMoneyOperatorInfo = { value: 'airtel_money', label: 'Airtel Money' };
+const ECO: MobileMoneyOperatorInfo = { value: 'ecocash', label: 'EcoCash' };
+const TMONEY: MobileMoneyOperatorInfo = { value: 't_money', label: 'T-Money' };
+const AMANA: MobileMoneyOperatorInfo = { value: 'amana', label: 'Amana' };
+const ZAMANI: MobileMoneyOperatorInfo = { value: 'zamani_cash', label: 'Zamani Cash' };
+const NITA: MobileMoneyOperatorInfo = { value: 'nita', label: 'Nita' };
+const OTHER: MobileMoneyOperatorInfo = { value: 'other', label: 'Autre' };
+
+const withOther = (ops: MobileMoneyOperatorInfo[]): MobileMoneyOperatorInfo[] => [...ops, OTHER];
+
+export const MOBILE_MONEY_OPERATORS_BY_COUNTRY: Record<string, MobileMoneyOperatorInfo[]> = {
+  // UEMOA / MoneyFusion
+  BF: withOther([OM, MOOV, WAVE]),
+  CI: withOther([OM, MTN, MOOV, WAVE]),
+  SN: withOther([OM, FREE, WAVE]),
+  ML: withOther([OM, MOOV, WAVE]),
+  BJ: withOther([MTN, MOOV]),
+  TG: withOther([TMONEY, MOOV]),
+  NE: withOther([AIRTEL, MOOV, AMANA, ZAMANI, NITA]),
+  // Afrique de l’Ouest / Centre
+  GN: withOther([OM, MTN]),
+  GW: withOther([OM, MTN]),
+  GM: withOther([WAVE]),
+  SL: withOther([OM]),
+  LR: withOther([OM, MTN]),
+  GH: withOther([MTN, AIRTEL, WAVE]),
+  NG: withOther([MTN, AIRTEL]),
+  CM: withOther([OM, MTN]),
+  GA: withOther([MOOV, AIRTEL]),
+  CG: withOther([MTN, AIRTEL]),
+  CD: withOther([MPESA, AIRTEL, OM]),
+  TD: withOther([AIRTEL, MOOV, OM]),
+  CF: withOther([OM]),
+  GQ: withOther([MTN]),
+  // Afrique de l’Est / Australe
+  KE: withOther([MPESA, AIRTEL]),
+  TZ: withOther([MPESA, AIRTEL]),
+  UG: withOther([MTN, AIRTEL]),
+  RW: withOther([MTN, AIRTEL]),
+  BI: withOther([ECO]),
+  MW: withOther([AIRTEL]),
+  ZM: withOther([MTN, AIRTEL]),
+  MZ: withOther([MPESA]),
+  MG: withOther([OM, AIRTEL]),
+  ZW: withOther([ECO]),
+  LS: withOther([ECO]),
+  ZA: withOther([MTN]),
+  // Maghreb
+  MA: withOther([OM]),
+  TN: withOther([OM]),
+  DZ: withOther([OM]),
 };
 
-/**
- * Opérateurs par défaut (si le pays n'est pas dans la liste)
- */
-export const DEFAULT_MOBILE_MONEY_OPERATORS : MobileMoneyOperatorInfo[] = [
-  { value: 'orange_money', label: 'Orange Money' },
-  { value: 'mtn_mobile_money', label: 'MTN Mobile Money' },
-  { value: 'moov_money', label: 'Moov Money' },
-  { value: 'wave', label: 'Wave' },
-  { value: 'other', label: 'Autre' },
-];
+export const DEFAULT_MOBILE_MONEY_OPERATORS: MobileMoneyOperatorInfo[] = [];
 
-/**
- * Obtenir les opérateurs disponibles pour un pays
- */
-export const getMobileMoneyOperatorsForCountry = (countryCode: string): MobileMoneyOperatorInfo[] => {
-  return MOBILE_MONEY_OPERATORS_BY_COUNTRY[countryCode] || DEFAULT_MOBILE_MONEY_OPERATORS;
+export const getMobileMoneyOperatorsForCountry = (
+  countryCode: string
+): MobileMoneyOperatorInfo[] => {
+  const code = (countryCode || '').trim().toUpperCase();
+  return MOBILE_MONEY_OPERATORS_BY_COUNTRY[code] || DEFAULT_MOBILE_MONEY_OPERATORS;
 };
 
-/**
- * Obtenir le premier opérateur par défaut pour un pays
- */
+export const countryHasMobileMoney = (countryCode: string): boolean => {
+  return getMobileMoneyOperatorsForCountry(countryCode).some(op => op.value !== 'other');
+};
+
 export const getDefaultOperatorForCountry = (countryCode: string): MobileMoneyOperator => {
   const operators = getMobileMoneyOperatorsForCountry(countryCode);
-  return operators[0]?.value || 'orange_money';
+  return operators.find(op => op.value !== 'other')?.value || operators[0]?.value || 'other';
 };
 
-
-
-
-
-
-
-
+export const isOperatorAvailableInCountry = (countryCode: string, operator: string): boolean => {
+  return getMobileMoneyOperatorsForCountry(countryCode).some(op => op.value === operator);
+};

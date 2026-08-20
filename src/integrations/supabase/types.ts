@@ -5376,10 +5376,13 @@ export type Database = {
         Row: {
           created_at: string;
           description: string | null;
+          icon: string | null;
           id: string;
+          image_url: string | null;
           is_active: boolean | null;
           name: string;
           parent_id: string | null;
+          product_types: string[] | null;
           slug: string;
           sort_order: number | null;
           updated_at: string;
@@ -5387,10 +5390,13 @@ export type Database = {
         Insert: {
           created_at?: string;
           description?: string | null;
+          icon?: string | null;
           id?: string;
+          image_url?: string | null;
           is_active?: boolean | null;
           name: string;
           parent_id?: string | null;
+          product_types?: string[] | null;
           slug: string;
           sort_order?: number | null;
           updated_at?: string;
@@ -5398,10 +5404,13 @@ export type Database = {
         Update: {
           created_at?: string;
           description?: string | null;
+          icon?: string | null;
           id?: string;
+          image_url?: string | null;
           is_active?: boolean | null;
           name?: string;
           parent_id?: string | null;
+          product_types?: string[] | null;
           slug?: string;
           sort_order?: number | null;
           updated_at?: string;
@@ -30676,32 +30685,98 @@ export type Database = {
           },
         ];
       };
+      service_gig_extras: {
+        Row: {
+          created_at: string;
+          currency: string;
+          description: string | null;
+          display_order: number;
+          extra_days: number;
+          id: string;
+          is_active: boolean;
+          name: string;
+          price: number;
+          service_product_id: string;
+          store_id: string;
+          updated_at: string;
+        };
+        Insert: {
+          created_at?: string;
+          currency?: string;
+          description?: string | null;
+          display_order?: number;
+          extra_days?: number;
+          id?: string;
+          is_active?: boolean;
+          name: string;
+          price?: number;
+          service_product_id: string;
+          store_id: string;
+          updated_at?: string;
+        };
+        Update: {
+          created_at?: string;
+          currency?: string;
+          description?: string | null;
+          display_order?: number;
+          extra_days?: number;
+          id?: string;
+          is_active?: boolean;
+          name?: string;
+          price?: number;
+          service_product_id?: string;
+          store_id?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'service_gig_extras_service_product_id_fkey';
+            columns: ['service_product_id'];
+            isOneToOne: false;
+            referencedRelation: 'service_products';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'service_gig_extras_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'stores';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       service_packages: {
         Row: {
           compare_at_price: number | null;
           created_at: string;
           credits_per_session: number | null;
+          delivery_days: number | null;
           description: string | null;
           expires_at: string | null;
           expires_in_days: number | null;
+          features: Json;
           id: string;
           image_url: string | null;
           is_active: boolean | null;
           is_featured: boolean | null;
           name: string | null;
+          package_kind: string;
           package_name: string;
           package_price: number;
           price: number | null;
           price_per_session: number | null;
           product_id: string;
           purchased_at: string;
+          revisions: number | null;
           service_product_id: string | null;
           sessions_count: number | null;
           sessions_remaining: number | null;
           sessions_used: number | null;
           slug: string | null;
+          sort_order: number;
           store_id: string | null;
           terms_and_conditions: string | null;
+          tier: string | null;
           total_credits: number | null;
           total_sessions: number;
           updated_at: string;
@@ -30711,57 +30786,69 @@ export type Database = {
           compare_at_price?: number | null;
           created_at?: string;
           credits_per_session?: number | null;
+          delivery_days?: number | null;
           description?: string | null;
           expires_at?: string | null;
           expires_in_days?: number | null;
+          features?: Json;
           id?: string;
           image_url?: string | null;
           is_active?: boolean | null;
           is_featured?: boolean | null;
           name?: string | null;
+          package_kind?: string;
           package_name: string;
           package_price: number;
           price?: number | null;
           price_per_session?: number | null;
           product_id: string;
           purchased_at?: string;
+          revisions?: number | null;
           service_product_id?: string | null;
           sessions_count?: number | null;
           sessions_remaining?: number | null;
           sessions_used?: number | null;
           slug?: string | null;
+          sort_order?: number;
           store_id?: string | null;
           terms_and_conditions?: string | null;
+          tier?: string | null;
           total_credits?: number | null;
-          total_sessions: number;
+          total_sessions?: number;
           updated_at?: string;
-          user_id: string;
+          user_id?: string;
         };
         Update: {
           compare_at_price?: number | null;
           created_at?: string;
           credits_per_session?: number | null;
+          delivery_days?: number | null;
           description?: string | null;
           expires_at?: string | null;
           expires_in_days?: number | null;
+          features?: Json;
           id?: string;
           image_url?: string | null;
           is_active?: boolean | null;
           is_featured?: boolean | null;
           name?: string | null;
+          package_kind?: string;
           package_name?: string;
           package_price?: number;
           price?: number | null;
           price_per_session?: number | null;
           product_id?: string;
           purchased_at?: string;
+          revisions?: number | null;
           service_product_id?: string | null;
           sessions_count?: number | null;
           sessions_remaining?: number | null;
           sessions_used?: number | null;
           slug?: string | null;
+          sort_order?: number;
           store_id?: string | null;
           terms_and_conditions?: string | null;
+          tier?: string | null;
           total_credits?: number | null;
           total_sessions?: number;
           updated_at?: string;
@@ -30880,6 +30967,7 @@ export type Database = {
           advance_booking_days: number | null;
           allow_booking_cancellation: boolean | null;
           average_rating: number | null;
+          brief_fields: Json;
           buffer_time_after: number | null;
           buffer_time_before: number | null;
           cancellation_deadline_hours: number | null;
@@ -30888,6 +30976,7 @@ export type Database = {
           deposit_required: boolean | null;
           deposit_type: string | null;
           duration_minutes: number;
+          fulfillment_mode: string;
           id: string;
           location_address: string | null;
           location_type: string;
@@ -30911,6 +31000,7 @@ export type Database = {
           advance_booking_days?: number | null;
           allow_booking_cancellation?: boolean | null;
           average_rating?: number | null;
+          brief_fields?: Json;
           buffer_time_after?: number | null;
           buffer_time_before?: number | null;
           cancellation_deadline_hours?: number | null;
@@ -30919,6 +31009,7 @@ export type Database = {
           deposit_required?: boolean | null;
           deposit_type?: string | null;
           duration_minutes: number;
+          fulfillment_mode?: string;
           id?: string;
           location_address?: string | null;
           location_type?: string;
@@ -30942,6 +31033,7 @@ export type Database = {
           advance_booking_days?: number | null;
           allow_booking_cancellation?: boolean | null;
           average_rating?: number | null;
+          brief_fields?: Json;
           buffer_time_after?: number | null;
           buffer_time_before?: number | null;
           cancellation_deadline_hours?: number | null;
@@ -30950,6 +31042,7 @@ export type Database = {
           deposit_required?: boolean | null;
           deposit_type?: string | null;
           duration_minutes?: number;
+          fulfillment_mode?: string;
           id?: string;
           location_address?: string | null;
           location_type?: string;
@@ -45478,6 +45571,23 @@ export type Database = {
         };
         Returns: Json;
       };
+      create_public_service_order: {
+        Args: {
+          p_affiliate_tracking_cookie?: string | null;
+          p_booking_id?: string | null;
+          p_coupon_code?: string | null;
+          p_customer_email: string;
+          p_customer_name: string;
+          p_customer_phone?: string | null;
+          p_gift_card_amount_requested?: number;
+          p_gift_card_id?: string | null;
+          p_guest_checkout?: boolean;
+          p_product_id: string;
+          p_service_metadata?: Json;
+          p_store_id: string;
+        };
+        Returns: Json;
+      };
       create_auction_winner_order: {
         Args: { p_auction_id: string };
         Returns: string;
@@ -45965,12 +46075,14 @@ export type Database = {
         Args: {
           p_calendar_available?: boolean;
           p_category?: string;
+          p_category_id?: string;
           p_limit?: number;
           p_location_type?: string;
           p_max_price?: number;
           p_min_price?: number;
           p_min_rating?: number;
           p_offset?: number;
+          p_parent_category_id?: string;
           p_service_type?: string;
           p_sort_by?: string;
           p_sort_order?: string;

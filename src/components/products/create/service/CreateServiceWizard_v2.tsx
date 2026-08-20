@@ -487,7 +487,10 @@ export const CreateServiceWizard = ({
               )
             );
           }
-          if (!formData.availability_slots || formData.availability_slots.length === 0) {
+          if (
+            formData.fulfillment_mode !== 'project' &&
+            (!formData.availability_slots || formData.availability_slots.length === 0)
+          ) {
             errors.push(
               t(
                 'services.errors.slotsRequired',

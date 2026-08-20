@@ -10,29 +10,31 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from '@/components/ui/dialog';
 import { BottomSheet, BottomSheetContent } from '@/components/ui/bottom-sheet';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { MobileFormField } from '@/components/ui/mobile-form-field';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { Loader2 } from '@/components/icons';
+import { Loader2, AlertCircle } from '@/components/icons';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useResponsiveModal } from '@/hooks/use-responsive-modal';
-import { 
-  SavedStorePaymentMethod, 
+import {
+  SavedStorePaymentMethod,
   StorePaymentMethodForm,
   StorePaymentMethod,
   MobileMoneyDetails,
   BankCardDetails,
   BankTransferDetails,
-  MobileMoneyOperator
+  MobileMoneyOperator,
 } from '@/types/store-withdrawals';
-import { COUNTRIES } from '@/lib/countries';
-import { getMobileMoneyOperatorsForCountry, getDefaultOperatorForCountry, MobileMoneyOperatorInfo } from '@/lib/mobile-money-operators';
+import PhoneCountryInput from '@/components/checkout/PhoneCountryInput';
+import { CountryPicker } from '@/components/checkout/CountryPicker';
+import {
+  countryHasMobileMoney,
+  getMobileMoneyOperatorsForCountry,
+  getDefaultOperatorForCountry,
+} from '@/lib/mobile-money-operators';
 
 interface PaymentMethodDialogProps {
   open: boolean;
@@ -61,8 +63,8 @@ export const PaymentMethodDialog = ({
   const [mobileOperator, setMobileOperator] = useState<MobileMoneyOperator>('orange_money');
   const [mobileFullName, setMobileFullName] = useState('');
 
-  // Opérateurs disponibles selon le pays
   const availableOperators = getMobileMoneyOperatorsForCountry(mobileCountry);
+  const hasMobileMoney = countryHasMobileMoney(mobileCountry);
 
   // Bank Card fields
   const [cardNumber, setCardNumber] = useState('');
@@ -130,14 +132,22 @@ export const PaymentMethodDialog = ({
     }
   }, [method, open]);
 
+  useEffect(() => {
+    const allowed = getMobileMoneyOperatorsForCountry(mobileCountry).map(op => op.value);
+    if (allowed.length > 0 && !allowed.includes(mobileOperator)) {
+      setMobileOperator(getDefaultOperatorForCountry(mobileCountry));
+    }
+  }, [mobileCountry, mobileOperator]);
+
   const handleSubmit = async () => {
     if (!label.trim()) {
       return;
     }
 
-    let  paymentDetails: MobileMoneyDetails | BankCardDetails | BankTransferDetails;
+    let paymentDetails: MobileMoneyDetails | BankCardDetails | BankTransferDetails;
 
     if (paymentMethod === 'mobile_money') {
+      if (!countryHasMobileMoney(mobileCountry)) return;
       if (!mobilePhone || !mobileOperator || !mobileCountry) return;
       paymentDetails = {
         phone: mobilePhone,
@@ -186,7 +196,9 @@ export const PaymentMethodDialog = ({
     if (!label.trim()) return false;
 
     if (paymentMethod === 'mobile_money') {
-      return !!mobilePhone && !!mobileOperator && !!mobileCountry;
+      return (
+        countryHasMobileMoney(mobileCountry) && !!mobilePhone && !!mobileOperator && !!mobileCountry
+      );
     } else if (paymentMethod === 'bank_card') {
       return !!cardNumber && !!cardholderName;
     } else {
@@ -196,266 +208,281 @@ export const PaymentMethodDialog = ({
 
   const formContent = (
     <div className="space-y-3 sm:space-y-4 py-3 sm:py-4">
-          {/* Label */}
+      {/* Label */}
+      <MobileFormField
+        label="Nom de la méthode"
+        name="label"
+        type="text"
+        value={label}
+        onChange={setLabel}
+        required
+        fieldProps={{
+          placeholder: 'Ex: Orange Money Principal, Carte UBA...',
+        }}
+      />
+
+      {/* Type de méthode */}
+      <MobileFormField
+        label="Type de paiement"
+        name="payment_method"
+        type="select"
+        value={paymentMethod}
+        onChange={value => setPaymentMethod(value as StorePaymentMethod)}
+        required
+        selectOptions={[
+          { value: 'mobile_money', label: 'Mobile Money' },
+          { value: 'bank_card', label: 'Carte bancaire' },
+          { value: 'bank_transfer', label: 'Virement bancaire' },
+        ]}
+      />
+
+      {/* Détails selon la méthode */}
+      {paymentMethod === 'mobile_money' && (
+        <div className="space-y-3 sm:space-y-4 p-3 sm:p-4 border rounded-lg">
+          <h4 className="font-semibold text-sm sm:text-base">Détails Mobile Money</h4>
+          <div className="space-y-1.5">
+            <Label htmlFor="saved_mobile_country">
+              Pays <span className="text-destructive">*</span>
+            </Label>
+            <CountryPicker
+              id="saved_mobile_country"
+              valueIso={mobileCountry}
+              onSelect={next => {
+                const iso = next.iso.toUpperCase();
+                setMobileCountry(iso);
+                setMobileOperator(getDefaultOperatorForCountry(iso));
+              }}
+            />
+          </div>
+          {hasMobileMoney ? (
+            <MobileFormField
+              label="Opérateur"
+              name="operator"
+              type="select"
+              value={
+                availableOperators.some(op => op.value === mobileOperator)
+                  ? mobileOperator
+                  : getDefaultOperatorForCountry(mobileCountry)
+              }
+              onChange={value => setMobileOperator(value as MobileMoneyOperator)}
+              required
+              selectOptions={availableOperators.map(op => ({
+                value: op.value,
+                label: op.label,
+              }))}
+            />
+          ) : (
+            <Alert>
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                Aucun portefeuille Mobile Money n&apos;est disponible pour ce pays. Choisissez un
+                virement bancaire ou une carte.
+              </AlertDescription>
+            </Alert>
+          )}
+          <div className="space-y-1.5">
+            <Label htmlFor="saved_mobile_phone">
+              Numéro de téléphone <span className="text-destructive">*</span>
+            </Label>
+            <PhoneCountryInput
+              id="saved_mobile_phone"
+              name="saved_mobile_phone"
+              value={mobilePhone}
+              countryIso={mobileCountry}
+              countryHint={mobileCountry}
+              required
+              onChange={setMobilePhone}
+              onCountryIsoChange={iso => {
+                setMobileCountry(iso);
+                setMobileOperator(getDefaultOperatorForCountry(iso));
+              }}
+            />
+          </div>
           <MobileFormField
-            label="Nom de la méthode"
-            name="label"
+            label="Nom complet"
+            name="mobile_full_name"
             type="text"
-            value={label}
-            onChange={setLabel}
-            required
+            value={mobileFullName}
+            onChange={setMobileFullName}
             fieldProps={{
-              placeholder: "Ex: Orange Money Principal, Carte UBA...",
+              placeholder: 'Nom complet du titulaire',
             }}
           />
-
-          {/* Type de méthode */}
-          <MobileFormField
-            label="Type de paiement"
-            name="payment_method"
-            type="select"
-            value={paymentMethod}
-            onChange={(value) => setPaymentMethod(value as any)}
-            required
-            selectOptions={[
-              { value: 'mobile_money', label: 'Mobile Money' },
-              { value: 'bank_card', label: 'Carte bancaire' },
-              { value: 'bank_transfer', label: 'Virement bancaire' },
-            ]}
-          />
-
-          {/* Détails selon la méthode */}
-          {paymentMethod === 'mobile_money' && (
-            <div className="space-y-3 sm:space-y-4 p-3 sm:p-4 border rounded-lg">
-              <h4 className="font-semibold text-sm sm:text-base">Détails Mobile Money</h4>
-              <MobileFormField
-                label="Pays"
-                name="mobile_country"
-                type="select"
-                value={mobileCountry}
-                onChange={(value) => {
-                  setMobileCountry(value);
-                  const defaultOp = getDefaultOperatorForCountry(value);
-                  setMobileOperator(defaultOp);
-                }}
-                required
-                selectOptions={COUNTRIES.map((country) => ({
-                  value: country.code,
-                  label: country.name,
-                }))}
-              />
-              <MobileFormField
-                label="Opérateur"
-                name="operator"
-                type="select"
-                value={mobileOperator}
-                onChange={(value) => setMobileOperator(value as any)}
-                required
-                selectOptions={availableOperators.map((op) => ({
-                  value: op.value,
-                  label: op.label,
-                }))}
-              />
-              <MobileFormField
-                label="Numéro de téléphone"
-                name="mobile_phone"
-                type="tel"
-                value={mobilePhone}
-                onChange={setMobilePhone}
-                required
-                fieldProps={{
-                  placeholder: "+226 XX XX XX XX",
-                }}
-              />
-              <MobileFormField
-                label="Nom complet"
-                name="mobile_full_name"
-                type="text"
-                value={mobileFullName}
-                onChange={setMobileFullName}
-                fieldProps={{
-                  placeholder: "Nom complet du titulaire",
-                }}
-              />
-            </div>
-          )}
-
-          {paymentMethod === 'bank_card' && (
-            <div className="space-y-3 sm:space-y-4 p-3 sm:p-4 border rounded-lg">
-              <h4 className="font-semibold text-sm sm:text-base">Détails Carte bancaire</h4>
-              <MobileFormField
-                label="Numéro de carte"
-                name="card_number"
-                type="text"
-                value={cardNumber}
-                onChange={setCardNumber}
-                required
-                fieldProps={{
-                  placeholder: "1234 5678 9012 3456",
-                  maxLength: 19,
-                }}
-              />
-              <MobileFormField
-                label="Nom du titulaire"
-                name="cardholder_name"
-                type="text"
-                value={cardholderName}
-                onChange={setCardholderName}
-                required
-                fieldProps={{
-                  placeholder: "Nom complet",
-                }}
-              />
-              <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                <MobileFormField
-                  label="Mois d'expiration"
-                  name="expiry_month"
-                  type="text"
-                  value={expiryMonth}
-                  onChange={setExpiryMonth}
-                  fieldProps={{
-                    placeholder: "MM",
-                    maxLength: 2,
-                  }}
-                />
-                <MobileFormField
-                  label="Année d'expiration"
-                  name="expiry_year"
-                  type="text"
-                  value={expiryYear}
-                  onChange={setExpiryYear}
-                  fieldProps={{
-                    placeholder: "YYYY",
-                    maxLength: 4,
-                  }}
-                />
-              </div>
-              <MobileFormField
-                label="Nom de la banque"
-                name="bank_name"
-                type="text"
-                value={bankName}
-                onChange={setBankName}
-                fieldProps={{
-                  placeholder: "Nom de la banque",
-                }}
-              />
-            </div>
-          )}
-
-          {paymentMethod === 'bank_transfer' && (
-            <div className="space-y-3 sm:space-y-4 p-3 sm:p-4 border rounded-lg">
-              <h4 className="font-semibold text-sm sm:text-base">Détails Virement bancaire</h4>
-              <MobileFormField
-                label="Numéro de compte"
-                name="account_number"
-                type="text"
-                value={accountNumber}
-                onChange={setAccountNumber}
-                required
-                fieldProps={{
-                  placeholder: "Numéro de compte bancaire",
-                }}
-              />
-              <MobileFormField
-                label="Nom de la banque"
-                name="transfer_bank_name"
-                type="text"
-                value={transferBankName}
-                onChange={setTransferBankName}
-                required
-                fieldProps={{
-                  placeholder: "Nom de la banque",
-                }}
-              />
-              <MobileFormField
-                label="Nom du titulaire"
-                name="account_holder_name"
-                type="text"
-                value={accountHolderName}
-                onChange={setAccountHolderName}
-                required
-                fieldProps={{
-                  placeholder: "Nom complet du titulaire",
-                }}
-              />
-              <MobileFormField
-                label="IBAN"
-                name="iban"
-                type="text"
-                value={iban}
-                onChange={setIban}
-                fieldProps={{
-                  placeholder: "IBAN",
-                }}
-              />
-            </div>
-          )}
-
-          {/* Options */}
-          <div className="space-y-3 p-3 sm:p-4 border rounded-lg">
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label htmlFor="is_default" className="text-xs sm:text-sm">Méthode par défaut</Label>
-                <p className="text-xs text-muted-foreground">
-                  Cette méthode sera sélectionnée automatiquement lors des retraits
-                </p>
-              </div>
-              <Switch
-                id="is_default"
-                checked={isDefault}
-                onCheckedChange={setIsDefault}
-              />
-            </div>
-            {method && (
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label htmlFor="is_active" className="text-xs sm:text-sm">Active</Label>
-                  <p className="text-xs text-muted-foreground">
-                    Désactiver pour masquer sans supprimer
-                  </p>
-                </div>
-                <Switch
-                  id="is_active"
-                  checked={isActive}
-                  onCheckedChange={setIsActive}
-                />
-              </div>
-            )}
-          </div>
-
-          {/* Notes */}
-          <MobileFormField
-            label="Notes"
-            name="notes"
-            type="textarea"
-            value={notes}
-            onChange={setNotes}
-            fieldProps={{
-              placeholder: "Informations supplémentaires...",
-              rows: 3,
-            }}
-          />
-
-          <div className="flex flex-col sm:flex-row justify-end gap-2 pt-4">
-            <Button 
-              variant="outline" 
-              onClick={() => onOpenChange(false)} 
-              disabled={loading}
-              className="w-full sm:w-auto"
-            >
-              Annuler
-            </Button>
-            <Button 
-              onClick={handleSubmit} 
-              disabled={!isValid() || loading}
-              className="w-full sm:w-auto"
-            >
-              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {method ? 'Enregistrer' : 'Ajouter'}
-            </Button>
-          </div>
         </div>
+      )}
+
+      {paymentMethod === 'bank_card' && (
+        <div className="space-y-3 sm:space-y-4 p-3 sm:p-4 border rounded-lg">
+          <h4 className="font-semibold text-sm sm:text-base">Détails Carte bancaire</h4>
+          <MobileFormField
+            label="Numéro de carte"
+            name="card_number"
+            type="text"
+            value={cardNumber}
+            onChange={setCardNumber}
+            required
+            fieldProps={{
+              placeholder: '1234 5678 9012 3456',
+              maxLength: 19,
+            }}
+          />
+          <MobileFormField
+            label="Nom du titulaire"
+            name="cardholder_name"
+            type="text"
+            value={cardholderName}
+            onChange={setCardholderName}
+            required
+            fieldProps={{
+              placeholder: 'Nom complet',
+            }}
+          />
+          <div className="grid grid-cols-2 gap-3 sm:gap-4">
+            <MobileFormField
+              label="Mois d'expiration"
+              name="expiry_month"
+              type="text"
+              value={expiryMonth}
+              onChange={setExpiryMonth}
+              fieldProps={{
+                placeholder: 'MM',
+                maxLength: 2,
+              }}
+            />
+            <MobileFormField
+              label="Année d'expiration"
+              name="expiry_year"
+              type="text"
+              value={expiryYear}
+              onChange={setExpiryYear}
+              fieldProps={{
+                placeholder: 'YYYY',
+                maxLength: 4,
+              }}
+            />
+          </div>
+          <MobileFormField
+            label="Nom de la banque"
+            name="bank_name"
+            type="text"
+            value={bankName}
+            onChange={setBankName}
+            fieldProps={{
+              placeholder: 'Nom de la banque',
+            }}
+          />
+        </div>
+      )}
+
+      {paymentMethod === 'bank_transfer' && (
+        <div className="space-y-3 sm:space-y-4 p-3 sm:p-4 border rounded-lg">
+          <h4 className="font-semibold text-sm sm:text-base">Détails Virement bancaire</h4>
+          <MobileFormField
+            label="Numéro de compte"
+            name="account_number"
+            type="text"
+            value={accountNumber}
+            onChange={setAccountNumber}
+            required
+            fieldProps={{
+              placeholder: 'Numéro de compte bancaire',
+            }}
+          />
+          <MobileFormField
+            label="Nom de la banque"
+            name="transfer_bank_name"
+            type="text"
+            value={transferBankName}
+            onChange={setTransferBankName}
+            required
+            fieldProps={{
+              placeholder: 'Nom de la banque',
+            }}
+          />
+          <MobileFormField
+            label="Nom du titulaire"
+            name="account_holder_name"
+            type="text"
+            value={accountHolderName}
+            onChange={setAccountHolderName}
+            required
+            fieldProps={{
+              placeholder: 'Nom complet du titulaire',
+            }}
+          />
+          <MobileFormField
+            label="IBAN"
+            name="iban"
+            type="text"
+            value={iban}
+            onChange={setIban}
+            fieldProps={{
+              placeholder: 'IBAN',
+            }}
+          />
+        </div>
+      )}
+
+      {/* Options */}
+      <div className="space-y-3 p-3 sm:p-4 border rounded-lg">
+        <div className="flex items-center justify-between">
+          <div className="space-y-0.5">
+            <Label htmlFor="is_default" className="text-xs sm:text-sm">
+              Méthode par défaut
+            </Label>
+            <p className="text-xs text-muted-foreground">
+              Cette méthode sera sélectionnée automatiquement lors des retraits
+            </p>
+          </div>
+          <Switch id="is_default" checked={isDefault} onCheckedChange={setIsDefault} />
+        </div>
+        {method && (
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="is_active" className="text-xs sm:text-sm">
+                Active
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                Désactiver pour masquer sans supprimer
+              </p>
+            </div>
+            <Switch id="is_active" checked={isActive} onCheckedChange={setIsActive} />
+          </div>
+        )}
+      </div>
+
+      {/* Notes */}
+      <MobileFormField
+        label="Notes"
+        name="notes"
+        type="textarea"
+        value={notes}
+        onChange={setNotes}
+        fieldProps={{
+          placeholder: 'Informations supplémentaires...',
+          rows: 3,
+        }}
+      />
+
+      <div className="flex flex-col sm:flex-row justify-end gap-2 pt-4">
+        <Button
+          variant="outline"
+          onClick={() => onOpenChange(false)}
+          disabled={loading}
+          className="w-full sm:w-auto"
+        >
+          Annuler
+        </Button>
+        <Button
+          onClick={handleSubmit}
+          disabled={!isValid() || loading}
+          className="w-full sm:w-auto"
+        >
+          {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          {method ? 'Enregistrer' : 'Ajouter'}
+        </Button>
+      </div>
+    </div>
   );
 
   return (
@@ -488,10 +515,3 @@ export const PaymentMethodDialog = ({
     </>
   );
 };
-
-
-
-
-
-
-

@@ -10,7 +10,6 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import {
   Calendar,
   Clock,
@@ -20,23 +19,24 @@ import {
   Navigation,
   Users,
   Star,
-  Edit,
-  Trash2,
-  MoreVertical,
   TrendingUp,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import type { ServiceProduct } from '@/hooks/service';
-import type { Product } from '@/types/product';
 import { ResponsiveProductImage } from '@/components/ui/ResponsiveProductImage';
 import { PriceStockAlertButton } from '@/components/marketplace/PriceStockAlertButton';
 import { supabase } from '@/integrations/supabase/client';
 import { ProductManagementActions } from '@/components/products/ProductManagementActions';
+import { getDisplayPrice } from '@/lib/product-helpers';
 
 interface ServiceCardProps {
-  service: ServiceProduct & { product?: Product };
+  service: ServiceProduct;
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
+  onDuplicate?: (id: string) => void;
+  onToggleStatus?: (id: string, isActive: boolean) => void;
+  storeSlug?: string;
+  storeSubdomain?: string;
   showActions?: boolean;
 }
 
@@ -44,6 +44,10 @@ const ServiceCardComponent = ({
   service,
   onEdit,
   onDelete,
+  onDuplicate,
+  onToggleStatus,
+  storeSlug,
+  storeSubdomain,
   showActions = true,
 }: ServiceCardProps) => {
   const navigate = useNavigate();
@@ -92,6 +96,11 @@ const ServiceCardComponent = ({
     return mins > 0 ? `${hours}h ${mins}min` : `${hours}h`;
   };
 
+  const display = getDisplayPrice({
+    price: Number(service.product?.price || 0),
+    promotional_price: Number(service.product?.promotional_price || 0),
+  });
+  const currency = String(service.product?.currency || 'XOF');
   const imageSizes =
     '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1536px) 33vw, 25vw';
 
@@ -119,15 +128,17 @@ const ServiceCardComponent = ({
           <div className="absolute top-2 right-2 z-10">
             <ProductManagementActions
               product={{
-                id: service.id,
-                slug: service.product?.slug || service.id,
+                id: service.product_id || service.product?.id || service.id,
+                slug: service.product?.slug || service.product_id || service.id,
                 name: service.product?.name,
-                is_active: service.product?.is_active,
+                is_active: Boolean(service.product?.is_active),
               }}
-              storeSlug={service.product?.store?.slug}
-              storeSubdomain={service.product?.store?.subdomain}
+              storeSlug={storeSlug}
+              storeSubdomain={storeSubdomain}
               onEdit={id => onEdit?.(service.product_id || service.product?.id || id)}
               onDelete={() => onDelete?.(service.id)}
+              onDuplicate={id => onDuplicate?.(service.product_id || service.product?.id || id)}
+              onToggleStatus={onToggleStatus}
               triggerProps={{
                 variant: 'secondary',
                 className:
@@ -179,9 +190,13 @@ const ServiceCardComponent = ({
             <div className="flex flex-col min-w-0 flex-1">
               <div className="flex items-baseline gap-1.5 sm:gap-2">
                 <p className="text-sm sm:text-base md:text-lg lg:text-2xl font-bold text-primary whitespace-nowrap">
-                  {service.product?.price?.toLocaleString() || 0}{' '}
-                  {service.product?.currency || 'XOF'}
+                  {display.price.toLocaleString('fr-FR')} {currency}
                 </p>
+                {display.originalPrice != null && (
+                  <span className="text-xs sm:text-sm text-muted-foreground line-through whitespace-nowrap">
+                    {display.originalPrice.toLocaleString('fr-FR')} {currency}
+                  </span>
+                )}
               </div>
               <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">
                 {service.pricing_type === 'fixed' && 'Prix fixe'}
@@ -189,11 +204,11 @@ const ServiceCardComponent = ({
                 {service.pricing_type === 'per_participant' && 'Par participant'}
               </p>
             </div>
-            {service.product?.id && (
+            {service.product?.id && !showActions && (
               <PriceStockAlertButton
                 productId={service.product.id}
                 productName={service.product.name}
-                currentPrice={service.product.price || 0}
+                currentPrice={display.price}
                 currency={service.product.currency || 'XOF'}
                 productType="service"
                 variant="outline"
@@ -258,8 +273,11 @@ const ServiceCard = React.memo(ServiceCardComponent, (prevProps, nextProps) => {
     prevProps.service.duration_minutes === nextProps.service.duration_minutes &&
     prevProps.service.location_type === nextProps.service.location_type &&
     prevProps.showActions === nextProps.showActions &&
+    prevProps.storeSlug === nextProps.storeSlug &&
     prevProps.onEdit === nextProps.onEdit &&
-    prevProps.onDelete === nextProps.onDelete
+    prevProps.onDelete === nextProps.onDelete &&
+    prevProps.onDuplicate === nextProps.onDuplicate &&
+    prevProps.onToggleStatus === nextProps.onToggleStatus
   );
 });
 
@@ -272,10 +290,14 @@ export default ServiceCard;
  * Grid of Service Cards
  */
 interface ServicesGridProps {
-  services: (ServiceProduct & { product?: Product })[];
+  services: ServiceProduct[];
   loading?: boolean;
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
+  onDuplicate?: (id: string) => void;
+  onToggleStatus?: (id: string, isActive: boolean) => void;
+  storeSlug?: string;
+  storeSubdomain?: string;
   showActions?: boolean;
 }
 
@@ -284,6 +306,10 @@ const ServicesGrid = ({
   loading,
   onEdit,
   onDelete,
+  onDuplicate,
+  onToggleStatus,
+  storeSlug,
+  storeSubdomain,
   showActions = true,
 }: ServicesGridProps) => {
   if (loading) {
@@ -325,6 +351,10 @@ const ServicesGrid = ({
           service={service}
           onEdit={onEdit}
           onDelete={onDelete}
+          onDuplicate={onDuplicate}
+          onToggleStatus={onToggleStatus}
+          storeSlug={storeSlug}
+          storeSubdomain={storeSubdomain}
           showActions={showActions}
         />
       ))}

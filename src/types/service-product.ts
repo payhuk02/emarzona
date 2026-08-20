@@ -35,6 +35,9 @@ export interface ServiceProductFormData {
   description: string;
   short_description?: string;
   price: number;
+  promotional_price?: number;
+  currency?: string;
+  pricing_model?: string;
   compare_at_price: number | null;
   category: string;
   category_id: string | null;

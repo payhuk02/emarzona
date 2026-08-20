@@ -16,6 +16,8 @@ export type ServiceWizardFormFields = {
   category?: string;
   parent_category_id?: string | null;
   fulfillment_mode?: 'appointment' | 'project' | 'both';
+  promotional_price?: number;
+  pricing_model?: string;
 };
 
 export type ServiceWizardStepValidationResult = {
@@ -60,6 +62,16 @@ export function validateServiceWizardStep(
 
     if (!formData.category_id) {
       errors.push('La catégorie et la sous-catégorie sont requises');
+    }
+
+    if (formData.pricing_model !== 'free') {
+      const promo = Number(formData.promotional_price);
+      const price = Number(formData.price);
+      if (!promo || promo <= 0) {
+        errors.push('Le prix promotionnel est requis : c’est le prix facturé au client');
+      } else if (price > 0 && promo >= price) {
+        errors.push('Le prix promotionnel doit être inférieur au prix de référence');
+      }
     }
   }
 

@@ -120,6 +120,19 @@ export interface CreateServiceOrderOptions {
 
   /** `cart` = réserve le créneau sans paiement immédiat (panier mixte) */
   checkoutMode?: 'immediate' | 'cart';
+
+  /**
+   * Commande projet (packages/extras). Le montant facturé est recalculé côté serveur
+   * depuis delivery_package_id + extra_ids — quoted_total client n'est qu'un audit.
+   */
+  projectOrder?: {
+    packageId: string;
+    packageName?: string;
+    totalDays?: number;
+    extraIds?: string[];
+    briefAnswers?: Record<string, string | boolean>;
+    quotedTotal?: number;
+  };
 }
 
 /**
@@ -208,6 +221,7 @@ export const useCreateServiceOrder = () => {
         giftCardId,
         giftCardAmount = 0,
         checkoutMode = 'immediate',
+        projectOrder,
       } = options;
 
       // 1. Récupérer les détails du produit (avec payment_options)
@@ -617,7 +631,35 @@ export const useCreateServiceOrder = () => {
       // 7. Créer la commande via RPC sécurisée
       const affiliateTrackingCookie = getAffiliateTrackingCookie();
 
-      const serviceMetadata = {
+      // Project fields may arrive via structured projectOrder or JSON notes (checkout)
+      let resolvedProject = projectOrder;
+      if (!resolvedProject && notes) {
+        try {
+          const parsed = JSON.parse(notes) as {
+            fulfillment_mode?: string;
+            delivery_package_id?: string;
+            package_name?: string;
+            total_days?: number;
+            extra_ids?: string[];
+            brief_answers?: Record<string, string | boolean>;
+            quoted_total?: number;
+          };
+          if (parsed?.fulfillment_mode === 'project' && parsed.delivery_package_id) {
+            resolvedProject = {
+              packageId: parsed.delivery_package_id,
+              packageName: parsed.package_name,
+              totalDays: parsed.total_days,
+              extraIds: parsed.extra_ids,
+              briefAnswers: parsed.brief_answers,
+              quotedTotal: parsed.quoted_total,
+            };
+          }
+        } catch {
+          // plain-text booking notes
+        }
+      }
+
+      const serviceMetadata: Record<string, unknown> = {
         booking_date: bookingDateTime,
         duration_minutes: actualDuration,
         number_of_participants: numberOfParticipants,
@@ -626,8 +668,17 @@ export const useCreateServiceOrder = () => {
         booking_id: booking.id,
       };
 
+      if (resolvedProject?.packageId) {
+        serviceMetadata.fulfillment_mode = 'project';
+        serviceMetadata.delivery_package_id = resolvedProject.packageId;
+        serviceMetadata.package_name = resolvedProject.packageName;
+        serviceMetadata.total_days = resolvedProject.totalDays;
+        serviceMetadata.extra_ids = resolvedProject.extraIds ?? [];
+        serviceMetadata.brief_answers = resolvedProject.briefAnswers ?? {};
+        serviceMetadata.quoted_total = resolvedProject.quotedTotal;
+      }
+
       const { data: rpcResult, error: orderError } = await supabase.rpc(
-        // @ts-expect-error: RPC type not yet updated in supabase types
         'create_public_service_order',
         {
           p_product_id: productId,
@@ -705,9 +756,9 @@ export const useCreateServiceOrder = () => {
         });
       });
 
-      const calcTotalPrice = product.price * numberOfParticipants;
+      const calcTotalPrice = Number(orderData.total_amount) || product.price * numberOfParticipants;
       const calcAmountToPay = finalAmountToPay;
-      const calcRemainingAmount = calcTotalPrice - calcAmountToPay;
+      const calcRemainingAmount = Math.max(0, calcTotalPrice - calcAmountToPay);
 
       // 11. Créer un secured_payment si paiement escrow
       if (paymentType === 'delivery_secured') {

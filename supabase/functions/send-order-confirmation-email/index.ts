@@ -417,6 +417,51 @@ serve(async req => {
   }
 });
 
+async function resolveDigitalLicense(
+  supabase: any,
+  orderId: string,
+  digitalProductId: string,
+  item: Record<string, unknown>
+): Promise<{ id: string; license_key: string } | null> {
+  const { data: byBoth } = await supabase
+    .from('digital_licenses')
+    .select('id, license_key')
+    .eq('order_id', orderId)
+    .eq('digital_product_id', digitalProductId)
+    .maybeSingle();
+  if (byBoth?.license_key) return byBoth;
+
+  const { data: byOrder } = await supabase
+    .from('digital_licenses')
+    .select('id, license_key')
+    .eq('order_id', orderId)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (byOrder?.license_key) return byOrder;
+
+  const licenseId = typeof item.license_id === 'string' ? item.license_id : null;
+  if (licenseId) {
+    const { data: byId } = await supabase
+      .from('digital_licenses')
+      .select('id, license_key')
+      .eq('id', licenseId)
+      .maybeSingle();
+    if (byId?.license_key) return byId;
+  }
+
+  const { data: legacy } = await supabase
+    .from('digital_product_licenses')
+    .select('id, license_key')
+    .eq('order_id', orderId)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (legacy?.license_key) return legacy;
+
+  return null;
+}
+
 // Helper functions pour chaque type de produit
 async function sendDigitalEmail(
   supabase: any,
@@ -469,12 +514,7 @@ async function sendDigitalEmail(
     minimumFractionDigits: (order.currency || 'XOF') === 'XOF' ? 0 : 2,
   }).format(price || 0);
 
-  const { data: license } = await supabase
-    .from('digital_licenses')
-    .select('id, license_key')
-    .eq('order_id', order.id)
-    .eq('digital_product_id', digitalProduct.id)
-    .maybeSingle();
+  const license = await resolveDigitalLicense(supabase, order.id, digitalProduct.id, item);
 
   const builtLinks = await buildDigitalDownloadLinks(supabase, {
     siteUrl,

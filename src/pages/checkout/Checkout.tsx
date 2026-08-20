@@ -651,6 +651,14 @@ const Checkout = () => {
                 brief_answers: projectOrder.briefAnswers,
                 quoted_total: projectOrder.totalPrice,
               }),
+              projectOrder: {
+                packageId: projectOrder.packageId!,
+                packageName: projectOrder.packageName,
+                totalDays: projectOrder.totalDays,
+                extraIds: projectOrder.extraIds,
+                briefAnswers: projectOrder.briefAnswers,
+                quotedTotal: projectOrder.totalPrice,
+              },
               checkoutMode: 'immediate',
             });
             sessionStorage.removeItem(projectKey);
@@ -931,13 +939,13 @@ const Checkout = () => {
                 Paiement sécurisé
               </span>
             </div>
-            <p className="text-muted-foreground mt-1.5 sm:mt-2 text-sm sm:text-base max-w-2xl leading-relaxed">
-              {isPhysicalCod
-                ? 'Complétez vos informations pour confirmer votre commande (paiement à la livraison).'
-                : isPhysicalGuarantee
-                  ? 'Complétez vos informations. Vous payez la garantie via MoneyFusion ; le solde est dû à la livraison.'
-                  : 'Complétez vos informations pour procéder au paiement sécurisé MoneyFusion.'}
-            </p>
+            {(isPhysicalCod || isPhysicalGuarantee) && (
+              <p className="text-muted-foreground mt-1.5 sm:mt-2 text-sm sm:text-base max-w-2xl leading-relaxed">
+                {isPhysicalCod
+                  ? 'Complétez vos informations pour confirmer votre commande (paiement à la livraison).'
+                  : 'Complétez vos informations. Vous payez la garantie ; le solde est dû à la livraison.'}
+              </p>
+            )}
           </header>
 
           {/* Mobile-first: formulaire d’abord, résumé ensuite ; desktop: 3/2 côte à côte */}

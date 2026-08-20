@@ -283,13 +283,18 @@ export const ServiceBasicInfoForm = ({ data, onUpdate }: ServiceBasicInfoFormPro
                 placeholder="25000"
                 value={data.price || ''}
                 onChange={e => onUpdate({ price: parseFloat(e.target.value) || 0 })}
-                required
+                required={data.pricing_model !== 'free'}
                 className="text-base sm:text-sm"
               />
+              <p className="text-xs text-muted-foreground">
+                Prix de référence, affiché barré sur les cartes produits.
+              </p>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="currency">Devise</Label>
+              <Label htmlFor="currency">
+                Devise <span className="text-red-500">*</span>
+              </Label>
               <CurrencySelect
                 value={data.currency || 'XOF'}
                 onValueChange={value => onUpdate({ currency: value })}
@@ -298,25 +303,42 @@ export const ServiceBasicInfoForm = ({ data, onUpdate }: ServiceBasicInfoFormPro
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="promotional_price">Prix promotionnel (optionnel)</Label>
+            <Label htmlFor="promotional_price">
+              Prix promotionnel <span className="text-red-500">*</span>
+            </Label>
             <Input
               id="promotional_price"
               type="number"
               min="0"
               step="0.01"
-              placeholder="0.00"
-              value={data.promotional_price || ''}
-              onChange={e =>
-                onUpdate({ promotional_price: parseFloat(e.target.value) || undefined })
-              }
+              placeholder="7500"
+              value={data.promotional_price ?? ''}
+              onChange={e => {
+                const raw = e.target.value;
+                onUpdate({
+                  promotional_price: raw === '' ? undefined : parseFloat(raw),
+                });
+              }}
+              required={data.pricing_model !== 'free'}
               className="text-base sm:text-sm"
             />
+            <p className="text-xs text-muted-foreground">
+              Prix réellement facturé au client. Il doit être inférieur au prix de référence.
+            </p>
             {data.promotional_price && data.price && data.promotional_price < data.price && (
               <p className="text-sm text-green-600">
                 Réduction de{' '}
                 {Math.round(((data.price - data.promotional_price) / data.price) * 100)}%
               </p>
             )}
+            {data.pricing_model !== 'free' &&
+              data.promotional_price != null &&
+              data.price > 0 &&
+              data.promotional_price >= data.price && (
+                <p className="text-sm text-destructive">
+                  Le prix promotionnel doit être inférieur au prix de référence.
+                </p>
+              )}
           </div>
 
           {/* Modèle de tarification */}

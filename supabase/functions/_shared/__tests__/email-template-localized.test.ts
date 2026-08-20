@@ -11,6 +11,22 @@ Deno.test('pickLocalized keeps plain string subjects', () => {
   assertEquals(pickLocalized('Sujet simple', 'fr'), 'Sujet simple');
 });
 
+Deno.test('replaceVariables includes digital license key when present', () => {
+  const html =
+    '<p>Produit : {{product_name}}</p>{{#if license_key}}<p>Licence : {{license_key}}</p>{{/if}}';
+  const withKey = replaceVariables(html, {
+    product_name: 'Pack Digital',
+    license_key: 'ABCD-1234-EFGH-5678',
+  });
+  assertEquals(withKey.includes('Licence : ABCD-1234-EFGH-5678'), true);
+
+  const withoutKey = replaceVariables(html, {
+    product_name: 'Pack Digital',
+    license_key: undefined,
+  });
+  assertEquals(withoutKey.includes('Licence :'), false);
+});
+
 Deno.test('replaceVariables renders single-language template', () => {
   const html =
     '<p>Produit : {{product_name}}</p>{{#if customer_portal_link}}<a href="{{customer_portal_link}}">Espace client</a>{{/if}}';

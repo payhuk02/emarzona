@@ -361,10 +361,6 @@ serve(async req => {
     }
 
     if (action === 'verify_payment' || action === 'reconcile_transaction') {
-      const d = (data || {}) as Record<string, unknown>;
-      let token = String(d.paymentId || d.token || d.payment_id || '').trim();
-      const transactionIdHint = String(d.transactionId || d.transaction_id || '').trim();
-
       if (action === 'reconcile_transaction') {
         const authHeader = req.headers.get('authorization') ?? '';
         const cronSecret = req.headers.get('x-cron-secret')?.trim() ?? '';
@@ -386,6 +382,11 @@ serve(async req => {
         }
       }
 
+      const d = (data || {}) as Record<string, unknown>;
+      let token = String(d.paymentId || d.token || d.payment_id || '').trim();
+      let transactionIdHint = String(d.transactionId || d.transaction_id || '').trim();
+      const orderIdHint = String(d.orderId || d.order_id || '').trim();
+
       if (!token && transactionIdHint) {
         const { data: txRow } = await supabase
           .from('transactions')
@@ -393,6 +394,22 @@ serve(async req => {
           .eq('id', transactionIdHint)
           .maybeSingle();
         token = String(txRow?.payment_id || '').trim();
+      }
+
+      if (!token && orderIdHint) {
+        const { data: txRow } = await supabase
+          .from('transactions')
+          .select('id, payment_id')
+          .eq('order_id', orderIdHint)
+          .eq('payment_provider', 'moneyfusion')
+          .in('status', ['processing', 'pending', 'completed'])
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        token = String(txRow?.payment_id || '').trim();
+        if (!transactionIdHint && txRow?.id) {
+          transactionIdHint = String(txRow.id);
+        }
       }
 
       if (!token) {

@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import GiftCardInput from '@/components/checkout/GiftCardInput';
+import PhoneCountryInput from '@/components/checkout/PhoneCountryInput';
 import { FormFieldWithValidation } from '@/components/checkout/FormFieldWithValidation';
 import type { AppliedGiftCard, ShippingAddress } from '@/pages/checkout/cart/checkout-types';
 import { validateShippingField } from '@/pages/checkout/cart/checkout-validation';
@@ -101,36 +102,37 @@ export default function CheckoutShippingSection({
           />
         </div>
 
-        <FormFieldWithValidation
-          label="Téléphone"
-          name="phone"
-          value={formData.phone}
-          onChange={value => {
-            setFormData(prev => ({ ...prev, phone: value }));
-            if (formErrors.phone) {
-              const error = validateField('phone', value);
-              setFormErrors(prev => ({ ...prev, phone: error || undefined }));
-            }
-          }}
-          onBlur={() => {
-            const error = validateField('phone', formData.phone);
-            setFormErrors(prev => ({ ...prev, phone: error || undefined }));
-          }}
-          error={formErrors.phone}
-          type="tel"
-          placeholder="+226 07 12 34 56 78"
-          required
-          autoComplete="tel"
-          validationRules={[
-            value => (!value.trim() ? 'Le téléphone est requis' : null),
-            value =>
-              !/^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,9}$/.test(
-                value.replace(/\s/g, '')
-              )
-                ? 'Format de téléphone invalide'
-                : null,
-          ]}
-        />
+        <div className="space-y-1.5">
+          <Label htmlFor="phone" className="text-sm font-medium">
+            Téléphone
+            <span className="text-destructive ml-0.5" aria-hidden="true">
+              *
+            </span>
+          </Label>
+          <PhoneCountryInput
+            id="phone"
+            name="phone"
+            value={formData.phone}
+            countryHint={formData.country}
+            error={formErrors.phone}
+            required
+            onChange={value => {
+              setFormData(prev => ({ ...prev, phone: value }));
+              if (formErrors.phone) {
+                const error = validateField('phone', value);
+                setFormErrors(prev => ({ ...prev, phone: error || undefined }));
+              }
+            }}
+            onCountryNameChange={name => {
+              setFormData(prev => (prev.country ? prev : { ...prev, country: name }));
+            }}
+          />
+          {formErrors.phone && (
+            <p className="text-sm text-destructive" role="alert">
+              {formErrors.phone}
+            </p>
+          )}
+        </div>
 
         <Separator />
 

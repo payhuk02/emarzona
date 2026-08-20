@@ -124,6 +124,11 @@ class MoneyFusionClient {
   async verifyPaymentByTransaction(transactionId: string): Promise<unknown> {
     return this.callFunction('moneyfusion', 'verify_payment', { transactionId });
   }
+
+  /** Guest return without tx in URL: order_id only. */
+  async verifyPaymentByOrder(orderId: string): Promise<unknown> {
+    return this.callFunction('moneyfusion', 'verify_payment', { orderId });
+  }
 }
 
 export const moneyfusionClient = new MoneyFusionClient();

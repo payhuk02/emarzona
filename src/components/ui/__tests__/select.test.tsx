@@ -11,6 +11,7 @@ import {
   SelectValue,
   SelectContent,
   SelectItem,
+  SelectField,
 } from '../select';
 
 // Mock du hook useIsMobile
@@ -89,7 +90,7 @@ describe('Select', () => {
             <SelectValue placeholder="Sélectionner..." />
           </SelectTrigger>
           <SelectContent>
-            {options.map((option) => (
+            {options.map(option => (
               <SelectItem key={option.value} value={option.value}>
                 {option.label}
               </SelectItem>
@@ -113,6 +114,22 @@ describe('Select', () => {
       expect(screen.getByText('Option 3')).toBeInTheDocument();
     });
 
+    it('devrait afficher le libellé de la valeur sélectionnée dans le trigger', () => {
+      render(
+        <SelectField label="Type" value="option2" placeholder="Sélectionner...">
+          {options.map(option => (
+            <SelectItem key={option.value} value={option.value}>
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectField>
+      );
+
+      const trigger = screen.getByRole('combobox');
+      expect(trigger).toHaveTextContent('Option 2');
+      expect(trigger).not.toHaveTextContent('Sélectionner...');
+    });
+
     it('devrait sélectionner une option', async () => {
       const user = userEvent.setup();
       const onValueChange = vi.fn();
@@ -123,7 +140,7 @@ describe('Select', () => {
             <SelectValue placeholder="Sélectionner..." />
           </SelectTrigger>
           <SelectContent>
-            {options.map((option) => (
+            {options.map(option => (
               <SelectItem key={option.value} value={option.value}>
                 {option.label}
               </SelectItem>
@@ -162,7 +179,7 @@ describe('Select', () => {
             <SelectValue placeholder="Sélectionner..." />
           </SelectTrigger>
           <SelectContent>
-            {options.map((option) => (
+            {options.map(option => (
               <SelectItem key={option.value} value={option.value}>
                 {option.label}
               </SelectItem>
@@ -209,8 +226,8 @@ describe('Select', () => {
           // Radix UI utilise data-disabled ou aria-disabled
           expect(
             disabledItem.hasAttribute('data-disabled') ||
-            disabledItem.getAttribute('aria-disabled') === 'true' ||
-            disabledItem.closest('[data-disabled]')
+              disabledItem.getAttribute('aria-disabled') === 'true' ||
+              disabledItem.closest('[data-disabled]')
           ).toBeTruthy();
         },
         { timeout: 3000 }
@@ -228,7 +245,7 @@ describe('Select', () => {
             <SelectValue placeholder="Sélectionner..." />
           </SelectTrigger>
           <SelectContent>
-            {options.map((option) => (
+            {options.map(option => (
               <SelectItem key={option.value} value={option.value}>
                 {option.label}
               </SelectItem>
@@ -272,7 +289,7 @@ describe('Select', () => {
             <SelectValue placeholder="Sélectionner..." />
           </SelectTrigger>
           <SelectContent>
-            {options.map((option) => (
+            {options.map(option => (
               <SelectItem key={option.value} value={option.value}>
                 {option.label}
               </SelectItem>
@@ -289,7 +306,7 @@ describe('Select', () => {
           const items = screen.getAllByRole('option');
           expect(items.length).toBeGreaterThan(0);
           // Vérifier que la classe min-h-[44px] est présente
-          items.forEach((item) => {
+          items.forEach(item => {
             expect(item.className).toContain('min-h-[44px]');
           });
         },
@@ -298,10 +315,3 @@ describe('Select', () => {
     });
   });
 });
-
-
-
-
-
-
-

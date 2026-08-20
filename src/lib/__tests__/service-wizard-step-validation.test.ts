@@ -14,11 +14,21 @@ describe('validateServiceWizardStep', () => {
     max_participants: 1,
     location_type: 'online',
     meeting_url: 'https://meet.example.com/room',
+    category_id: '00000000-0000-4000-8000-000000000001',
+    fulfillment_mode: 'appointment' as const,
     availability_slots: [{ day_of_week: 1, start_time: '09:00', end_time: '12:00' }],
   };
 
   it('accepts valid step 1', () => {
-    expect(validateServiceWizardStep(1, baseForm).valid).toBe(true);
+    expect(validateServiceWizardStep(1, { ...baseForm, promotional_price: 15000 }).valid).toBe(
+      true
+    );
+  });
+
+  it('rejects step 1 without promotional selling price', () => {
+    const result = validateServiceWizardStep(1, baseForm);
+    expect(result.valid).toBe(false);
+    expect(result.errors.some(msg => msg.toLowerCase().includes('promotionnel'))).toBe(true);
   });
 
   it('rejects step 1 without name', () => {
@@ -26,10 +36,24 @@ describe('validateServiceWizardStep', () => {
     expect(result.valid).toBe(false);
   });
 
-  it('rejects step 2 without availability slots', () => {
+  it('rejects step 1 without category_id', () => {
+    const result = validateServiceWizardStep(1, { ...baseForm, category_id: null });
+    expect(result.valid).toBe(false);
+  });
+
+  it('rejects step 2 without availability slots for appointment mode', () => {
     const result = validateServiceWizardStep(2, { ...baseForm, availability_slots: [] });
     expect(result.valid).toBe(false);
     expect(result.toastTitle).toBe('Créneaux requis');
+  });
+
+  it('allows step 2 without slots when fulfillment_mode is project', () => {
+    const result = validateServiceWizardStep(2, {
+      ...baseForm,
+      fulfillment_mode: 'project',
+      availability_slots: [],
+    });
+    expect(result.valid).toBe(true);
   });
 
   it('validateServiceWizardPublishSteps returns failedStep', () => {

@@ -12,7 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 const SERVICE_PRODUCT_FIELDS =
   'id, product_id, service_type, duration_minutes, location_type, location_address, meeting_url, timezone, requires_staff, max_participants, pricing_type, deposit_required, deposit_amount, deposit_type, allow_booking_cancellation, cancellation_deadline_hours, require_approval, buffer_time_before, buffer_time_after, max_bookings_per_day, advance_booking_days, total_bookings, total_completed_bookings, total_cancelled_bookings, total_revenue, average_rating, created_at, updated_at';
 const SERVICE_PRODUCT_ITEM_FIELDS =
-  'id, store_id, name, description, price, status, product_type, image_url, created_at, updated_at';
+  'id, store_id, name, description, price, promotional_price, currency, is_active, is_draft, product_type, image_url, slug, created_at, updated_at';
 const SERVICE_AVAILABILITY_SLOT_FIELDS =
   'id, service_product_id, day_of_week, start_time, end_time, is_available, max_bookings, created_at, updated_at';
 const SERVICE_STAFF_MEMBER_FIELDS =
@@ -59,32 +59,70 @@ export interface ServiceProduct {
   };
 }
 
+async function fetchServiceProductsForStore(storeId: string): Promise<ServiceProduct[]> {
+  const { data: products, error: productsError } = await supabase
+    .from('products')
+    .select(SERVICE_PRODUCT_ITEM_FIELDS)
+    .eq('store_id', storeId)
+    .eq('product_type', 'service')
+    .order('created_at', { ascending: false });
+
+  if (productsError) throw productsError;
+  if (!products?.length) return [];
+
+  const productIds = products.map(row => row.id);
+  const { data: rows, error } = await supabase
+    .from('service_products')
+    .select(SERVICE_PRODUCT_FIELDS)
+    .in('product_id', productIds)
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+
+  const byProductId = new Map((rows || []).map(row => [row.product_id, row]));
+
+  return products.map(product => {
+    const row = byProductId.get(product.id);
+    if (row) {
+      return { ...row, product } as ServiceProduct;
+    }
+
+    return {
+      id: product.id,
+      product_id: product.id,
+      service_type: 'other',
+      duration_minutes: 60,
+      location_type: 'flexible',
+      timezone: 'UTC',
+      requires_staff: false,
+      max_participants: 1,
+      pricing_type: 'fixed',
+      deposit_required: false,
+      allow_booking_cancellation: true,
+      cancellation_deadline_hours: 24,
+      require_approval: false,
+      buffer_time_before: 0,
+      buffer_time_after: 0,
+      advance_booking_days: 30,
+      total_bookings: 0,
+      total_completed_bookings: 0,
+      total_cancelled_bookings: 0,
+      total_revenue: 0,
+      average_rating: 0,
+      created_at: product.created_at,
+      updated_at: product.updated_at,
+      product,
+    } as ServiceProduct;
+  });
+}
+
 /**
  * Get all service products for a store
  */
 export const useServiceProducts = (storeId?: string) => {
   return useQuery({
     queryKey: ['service-products', storeId],
-    queryFn: async () => {
-      let query = supabase
-        .from('service_products')
-        .select(
-          `
-          ${SERVICE_PRODUCT_FIELDS},
-          product:products(${SERVICE_PRODUCT_ITEM_FIELDS})
-        `
-        )
-        .order('created_at', { ascending: false });
-
-      if (storeId) {
-        query = query.eq('product.store_id', storeId);
-      }
-
-      const { data, error } = await query;
-
-      if (error) throw error;
-      return data as ServiceProduct[];
-    },
+    queryFn: async () => fetchServiceProductsForStore(storeId!),
     enabled: !!storeId,
   });
 };
@@ -175,9 +213,22 @@ export const useDeleteServiceProduct = () => {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from('service_products').delete().eq('id', id);
+      const { data: deleted, error } = await supabase
+        .from('service_products')
+        .delete()
+        .or(`id.eq.${id},product_id.eq.${id}`)
+        .select('id, product_id');
 
       if (error) throw error;
+
+      if (!deleted?.length) {
+        const { error: productError } = await supabase
+          .from('products')
+          .delete()
+          .eq('id', id)
+          .eq('product_type', 'service');
+        if (productError) throw productError;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['service-products'] });
@@ -208,28 +259,50 @@ export const useServiceStats = (serviceProductId: string) => {
   });
 };
 
+async function fetchRankedServiceProducts(
+  storeId: string,
+  orderColumn: 'total_bookings' | 'average_rating',
+  limit: number,
+  minRating?: number
+): Promise<ServiceProduct[]> {
+  const { data: products, error: productsError } = await supabase
+    .from('products')
+    .select('id')
+    .eq('store_id', storeId)
+    .eq('product_type', 'service');
+
+  if (productsError) throw productsError;
+  const productIds = products?.map(row => row.id) || [];
+  if (productIds.length === 0) return [];
+
+  let query = supabase
+    .from('service_products')
+    .select(
+      `
+          ${SERVICE_PRODUCT_FIELDS},
+          product:products(${SERVICE_PRODUCT_ITEM_FIELDS})
+        `
+    )
+    .in('product_id', productIds)
+    .order(orderColumn, { ascending: false })
+    .limit(limit);
+
+  if (minRating != null) {
+    query = query.gte('average_rating', minRating);
+  }
+
+  const { data, error } = await query;
+  if (error) throw error;
+  return data as ServiceProduct[];
+}
+
 /**
  * Get popular services
  */
 export const usePopularServices = (storeId: string, limit = 5) => {
   return useQuery({
     queryKey: ['popular-services', storeId, limit],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('service_products')
-        .select(
-          `
-          ${SERVICE_PRODUCT_FIELDS},
-          product:products(${SERVICE_PRODUCT_ITEM_FIELDS})
-        `
-        )
-        .eq('product.store_id', storeId)
-        .order('total_bookings', { ascending: false })
-        .limit(limit);
-
-      if (error) throw error;
-      return data as ServiceProduct[];
-    },
+    queryFn: () => fetchRankedServiceProducts(storeId, 'total_bookings', limit),
     enabled: !!storeId,
   });
 };
@@ -240,23 +313,7 @@ export const usePopularServices = (storeId: string, limit = 5) => {
 export const useTopRatedServices = (storeId: string, limit = 5) => {
   return useQuery({
     queryKey: ['top-rated-services', storeId, limit],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('service_products')
-        .select(
-          `
-          ${SERVICE_PRODUCT_FIELDS},
-          product:products(${SERVICE_PRODUCT_ITEM_FIELDS})
-        `
-        )
-        .eq('product.store_id', storeId)
-        .gte('average_rating', 4.0)
-        .order('average_rating', { ascending: false })
-        .limit(limit);
-
-      if (error) throw error;
-      return data as ServiceProduct[];
-    },
+    queryFn: () => fetchRankedServiceProducts(storeId, 'average_rating', limit, 4.0),
     enabled: !!storeId,
   });
 };

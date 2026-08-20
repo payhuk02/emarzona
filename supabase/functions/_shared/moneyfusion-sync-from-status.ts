@@ -11,7 +11,7 @@ import { moneyFusionFetch, moneyFusionPaidAmount, moneyFusionAmountCandidates } 
 import { resolvePaidOrderStatusForOrder } from './order-status.ts';
 import { runPostOrderPaymentFulfillment } from './post-order-payment-fulfillment.ts';
 
-const MONEYFUSION_STATUS_URL = 'https://www.pay.moneyfusion.net/paiementNotif';
+const MONEYFUSION_STATUS_URL = 'https://pay.moneyfusion.net/paiementNotif';
 
 const PAID_ORDER_PAYMENT_STATUSES = new Set([
   'paid',

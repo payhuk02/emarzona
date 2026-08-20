@@ -30,7 +30,7 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
 };
 
-const MONEYFUSION_STATUS_URL = 'https://www.pay.moneyfusion.net/paiementNotif';
+const MONEYFUSION_STATUS_URL = 'https://pay.moneyfusion.net/paiementNotif';
 
 function sanitizePayload(payload: Record<string, unknown>): Record<string, unknown> {
   return {

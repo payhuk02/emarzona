@@ -29,6 +29,26 @@ import { AlertCircle, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { MobileSelect, type MobileSelectHandle } from './mobile-select';
 
+function findSelectItemContent(
+  children: React.ReactNode,
+  value?: string
+): React.ReactNode | undefined {
+  if (!value) return undefined;
+  let found: React.ReactNode | undefined;
+  React.Children.forEach(children, child => {
+    if (found || !React.isValidElement(child)) return;
+    const props = child.props as { value?: unknown; children?: React.ReactNode };
+    if (props.value === value) {
+      found = props.children;
+      return;
+    }
+    if (props.children) {
+      found = findSelectItemContent(props.children, value);
+    }
+  });
+  return found;
+}
+
 export interface SelectFieldProps {
   /**
    * Label du champ
@@ -132,6 +152,7 @@ export const SelectField = React.forwardRef<HTMLButtonElement, SelectFieldProps>
     const errorId = `${finalId}-error`;
     const descriptionId = `${finalId}-description`;
     const hasError = !!error;
+    const selectedContent = findSelectItemContent(children, value);
 
     return (
       <div className={cn('space-y-2', className)}>
@@ -161,7 +182,7 @@ export const SelectField = React.forwardRef<HTMLButtonElement, SelectFieldProps>
               aria-describedby={hasError ? errorId : description ? descriptionId : undefined}
               {...props}
             >
-              <SelectValue placeholder={placeholder} />
+              <SelectValue placeholder={placeholder}>{selectedContent}</SelectValue>
             </SelectTrigger>
             <SelectContent mobileVariant={contentVariant}>
               {loading ? (
@@ -191,7 +212,7 @@ export const SelectField = React.forwardRef<HTMLButtonElement, SelectFieldProps>
               aria-describedby={hasError ? errorId : description ? descriptionId : undefined}
               {...props}
             >
-              <SelectValue placeholder={placeholder} />
+              <SelectValue placeholder={placeholder}>{selectedContent}</SelectValue>
             </SelectTrigger>
             <SelectContent mobileVariant={contentVariant}>
               {loading ? (

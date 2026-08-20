@@ -72,7 +72,7 @@ const SelectTrigger = React.forwardRef<
     <SelectPrimitive.Trigger
       ref={ref}
       className={cn(
-        'flex min-h-[44px] h-11 w-full max-w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-xs sm:text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 [&>span]:text-left',
+        'flex min-h-[44px] h-11 w-full max-w-full items-center justify-between gap-2 rounded-md border border-input bg-background px-3 py-2 text-xs sm:text-sm text-foreground ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:min-w-0 [&>span]:flex-1 [&>span]:truncate [&>span]:text-left [&>span]:text-foreground [&>span[data-placeholder]]:text-muted-foreground',
         // État d'erreur
         hasError && 'border-destructive focus-visible:ring-destructive',
         // Optimisations tactiles
@@ -203,6 +203,7 @@ const SelectContentComponent = React.forwardRef<
     <SelectPrimitive.Portal>
       <SelectPrimitive.Content
         ref={contentRef}
+        forceMount
         className={cn(
           // Conteneur principal
           isMobileSheet
@@ -219,6 +220,7 @@ const SelectContentComponent = React.forwardRef<
             'data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1',
           // Optimisations mobile supplémentaires
           isMobile && !isMobileSheet && 'max-w-[calc(100vw-1rem)]',
+          'data-[state=closed]:hidden',
           className
         )}
         position={resolvedPosition}
@@ -334,7 +336,7 @@ const SelectItemComponent = React.forwardRef<
         </SelectPrimitive.ItemIndicator>
       </span>
 
-      <span className="truncate flex-1">{children}</span>
+      <SelectPrimitive.ItemText className="truncate flex-1">{children}</SelectPrimitive.ItemText>
     </SelectPrimitive.Item>
   );
 });

@@ -27,8 +27,11 @@ import {
 } from '@/types/store-withdrawals';
 import { formatCurrency } from '@/lib/utils';
 import { useStorePaymentMethods } from '@/hooks/useStorePaymentMethods';
-import { COUNTRIES } from '@/lib/countries';
+import { Label } from '@/components/ui/label';
+import PhoneCountryInput from '@/components/checkout/PhoneCountryInput';
+import { CountryPicker } from '@/components/checkout/CountryPicker';
 import {
+  countryHasMobileMoney,
   getMobileMoneyOperatorsForCountry,
   getDefaultOperatorForCountry,
 } from '@/lib/mobile-money-operators';
@@ -68,8 +71,9 @@ export const WithdrawalRequestDialog = ({
   const [mobileOperator, setMobileOperator] = useState<MobileMoneyOperator>('orange_money');
   const [mobileFullName, setMobileFullName] = useState('');
 
-  // Opérateurs disponibles selon le pays
+  // Opérateurs réellement disponibles selon le pays sélectionné
   const availableOperators = getMobileMoneyOperatorsForCountry(mobileCountry);
+  const hasMobileMoney = countryHasMobileMoney(mobileCountry);
 
   // Bank Card fields
   const [cardNumber, setCardNumber] = useState('');
@@ -135,6 +139,13 @@ export const WithdrawalRequestDialog = ({
     }
   }, [selectedSavedMethod, paymentMethods]);
 
+  useEffect(() => {
+    const allowed = getMobileMoneyOperatorsForCountry(mobileCountry).map(op => op.value);
+    if (allowed.length > 0 && !allowed.includes(mobileOperator)) {
+      setMobileOperator(getDefaultOperatorForCountry(mobileCountry));
+    }
+  }, [mobileCountry, mobileOperator]);
+
   // Réinitialiser quand le dialog s'ouvre
   useEffect(() => {
     if (open) {
@@ -164,6 +175,7 @@ export const WithdrawalRequestDialog = ({
     let paymentDetails: MobileMoneyDetails | BankCardDetails | BankTransferDetails;
 
     if (paymentMethod === 'mobile_money') {
+      if (!countryHasMobileMoney(mobileCountry)) return;
       if (!mobilePhone || !mobileOperator || !mobileCountry) return;
       paymentDetails = {
         phone: mobilePhone,
@@ -222,7 +234,9 @@ export const WithdrawalRequestDialog = ({
     }
 
     if (paymentMethod === 'mobile_money') {
-      return !!mobilePhone && !!mobileOperator && !!mobileCountry;
+      return (
+        countryHasMobileMoney(mobileCountry) && !!mobilePhone && !!mobileOperator && !!mobileCountry
+      );
     } else if (paymentMethod === 'bank_card') {
       return !!cardNumber && !!cardholderName;
     } else {
@@ -320,45 +334,64 @@ export const WithdrawalRequestDialog = ({
       {paymentMethod === 'mobile_money' && (
         <div className="space-y-3 sm:space-y-4 p-3 sm:p-4 border rounded-lg">
           <h4 className="font-semibold text-sm sm:text-base">Détails Mobile Money</h4>
-          <MobileFormField
-            label="Pays"
-            name="mobile_country"
-            type="select"
-            value={mobileCountry}
-            onChange={value => {
-              setMobileCountry(value);
-              const defaultOp = getDefaultOperatorForCountry(value);
-              setMobileOperator(defaultOp);
-            }}
-            required
-            selectOptions={COUNTRIES.map(country => ({
-              value: country.code,
-              label: country.name,
-            }))}
-          />
-          <MobileFormField
-            label="Opérateur"
-            name="operator"
-            type="select"
-            value={mobileOperator}
-            onChange={value => setMobileOperator(value as MobileMoneyOperator)}
-            required
-            selectOptions={availableOperators.map(op => ({
-              value: op.value,
-              label: op.label,
-            }))}
-          />
-          <MobileFormField
-            label="Numéro de téléphone"
-            name="mobile_phone"
-            type="tel"
-            value={mobilePhone}
-            onChange={setMobilePhone}
-            required
-            fieldProps={{
-              placeholder: '+226 XX XX XX XX',
-            }}
-          />
+          <div className="space-y-1.5">
+            <Label htmlFor="mobile_country">
+              Pays <span className="text-destructive">*</span>
+            </Label>
+            <CountryPicker
+              id="mobile_country"
+              valueIso={mobileCountry}
+              onSelect={next => {
+                const iso = next.iso.toUpperCase();
+                setMobileCountry(iso);
+                setMobileOperator(getDefaultOperatorForCountry(iso));
+              }}
+            />
+          </div>
+          {hasMobileMoney ? (
+            <MobileFormField
+              label="Opérateur"
+              name="operator"
+              type="select"
+              value={
+                availableOperators.some(op => op.value === mobileOperator)
+                  ? mobileOperator
+                  : getDefaultOperatorForCountry(mobileCountry)
+              }
+              onChange={value => setMobileOperator(value as MobileMoneyOperator)}
+              required
+              selectOptions={availableOperators.map(op => ({
+                value: op.value,
+                label: op.label,
+              }))}
+            />
+          ) : (
+            <Alert>
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                Aucun portefeuille Mobile Money n&apos;est disponible pour ce pays. Choisissez un
+                virement bancaire ou une carte.
+              </AlertDescription>
+            </Alert>
+          )}
+          <div className="space-y-1.5">
+            <Label htmlFor="mobile_phone">
+              Numéro de téléphone <span className="text-destructive">*</span>
+            </Label>
+            <PhoneCountryInput
+              id="mobile_phone"
+              name="mobile_phone"
+              value={mobilePhone}
+              countryIso={mobileCountry}
+              countryHint={mobileCountry}
+              required
+              onChange={setMobilePhone}
+              onCountryIsoChange={iso => {
+                setMobileCountry(iso);
+                setMobileOperator(getDefaultOperatorForCountry(iso));
+              }}
+            />
+          </div>
           <MobileFormField
             label="Nom complet (optionnel)"
             name="mobile_full_name"

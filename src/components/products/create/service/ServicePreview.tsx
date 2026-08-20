@@ -32,10 +32,14 @@ const DAYS_OF_WEEK_LABELS = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
 export const ServicePreview = ({ data }: ServicePreviewProps) => {
   const getLocationIcon = () => {
     switch (data.location_type) {
-      case 'on_site': return MapPin;
-      case 'online': return Video;
-      case 'customer_location': return Home;
-      default: return Navigation;
+      case 'on_site':
+        return MapPin;
+      case 'online':
+        return Video;
+      case 'customer_location':
+        return Home;
+      default:
+        return Navigation;
     }
   };
 
@@ -49,7 +53,7 @@ export const ServicePreview = ({ data }: ServicePreviewProps) => {
   };
 
   const getServiceTypeLabel = (type: string) => {
-    const  labels: Record<string, string> = {
+    const labels: Record<string, string> = {
       appointment: 'Rendez-vous',
       class: 'Cours / Formation',
       event: 'Événement',
@@ -160,9 +164,7 @@ export const ServicePreview = ({ data }: ServicePreviewProps) => {
             <div className="space-y-2">
               {data.availability_slots.map((slot, index) => (
                 <div key={index} className="flex items-center gap-3 p-3 bg-muted rounded-lg">
-                  <Badge variant="outline">
-                    {DAYS_OF_WEEK_LABELS[slot.day]}
-                  </Badge>
+                  <Badge variant="outline">{DAYS_OF_WEEK_LABELS[slot.day]}</Badge>
                   <span className="font-mono text-sm">
                     {slot.start_time} → {slot.end_time}
                   </span>
@@ -207,9 +209,7 @@ export const ServicePreview = ({ data }: ServicePreviewProps) => {
                   <div key={index} className="p-3 bg-muted rounded-lg">
                     <p className="font-semibold">{member.name}</p>
                     <p className="text-sm text-muted-foreground">{member.email}</p>
-                    {member.role && (
-                      <p className="text-sm text-muted-foreground">{member.role}</p>
-                    )}
+                    {member.role && <p className="text-sm text-muted-foreground">{member.role}</p>}
                   </div>
                 ))}
               </div>
@@ -221,7 +221,8 @@ export const ServicePreview = ({ data }: ServicePreviewProps) => {
           <div>
             <p className="text-sm font-medium text-muted-foreground">Capacité maximum</p>
             <p className="text-xl font-bold">
-              {data.max_participants} participant{data.max_participants && data.max_participants > 1 ? 's' : ''}
+              {data.max_participants} participant
+              {data.max_participants && data.max_participants > 1 ? 's' : ''}
             </p>
             {data.max_participants && data.max_participants > 1 && (
               <p className="text-sm text-muted-foreground">Service de groupe</p>
@@ -230,7 +231,9 @@ export const ServicePreview = ({ data }: ServicePreviewProps) => {
 
           {data.resources_needed && data.resources_needed.length > 0 && (
             <div>
-              <p className="text-sm font-medium text-muted-foreground mb-2">Ressources nécessaires</p>
+              <p className="text-sm font-medium text-muted-foreground mb-2">
+                Ressources nécessaires
+              </p>
               <div className="flex flex-wrap gap-2">
                 {data.resources_needed.map((resource, index) => (
                   <Badge key={index} variant="secondary">
@@ -254,10 +257,21 @@ export const ServicePreview = ({ data }: ServicePreviewProps) => {
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <p className="text-sm font-medium text-muted-foreground">Prix de base</p>
-            <p className="text-2xl font-bold text-primary">
-              {data.price?.toLocaleString()} XOF
-            </p>
+            <p className="text-sm font-medium text-muted-foreground">Prix de vente</p>
+            <div className="flex items-baseline gap-2">
+              <p className="text-2xl font-bold text-primary">
+                {(data.promotional_price && data.promotional_price < (data.price || 0)
+                  ? data.promotional_price
+                  : data.price
+                )?.toLocaleString()}{' '}
+                {data.currency || 'XOF'}
+              </p>
+              {data.promotional_price && data.promotional_price < (data.price || 0) && (
+                <span className="text-sm text-muted-foreground line-through">
+                  {data.price?.toLocaleString()} {data.currency || 'XOF'}
+                </span>
+              )}
+            </div>
             <p className="text-sm text-muted-foreground">
               {data.pricing_type === 'fixed' && 'Prix fixe'}
               {data.pricing_type === 'hourly' && 'Tarif horaire'}
@@ -269,8 +283,7 @@ export const ServicePreview = ({ data }: ServicePreviewProps) => {
             <div>
               <p className="text-sm font-medium text-muted-foreground">Acompte</p>
               <p className="font-semibold">
-                {data.deposit_amount}{' '}
-                {data.deposit_type === 'percentage' ? '%' : 'XOF'}
+                {data.deposit_amount} {data.deposit_type === 'percentage' ? '%' : 'XOF'}
               </p>
             </div>
           )}
@@ -307,21 +320,20 @@ export const ServicePreview = ({ data }: ServicePreviewProps) => {
             )}
           </div>
 
-          {(data.booking_options?.buffer_time_before || data.booking_options?.buffer_time_after) && (
+          {(data.booking_options?.buffer_time_before ||
+            data.booking_options?.buffer_time_after) && (
             <div>
               <p className="text-sm font-medium text-muted-foreground">Temps tampon</p>
               <p className="text-sm">
-                Avant: {data.booking_options.buffer_time_before} min / 
-                Après: {data.booking_options.buffer_time_after} min
+                Avant: {data.booking_options.buffer_time_before} min / Après:{' '}
+                {data.booking_options.buffer_time_after} min
               </p>
             </div>
           )}
 
           <div>
             <p className="text-sm font-medium text-muted-foreground">Réservation à l'avance</p>
-            <p className="text-sm">
-              Maximum {data.booking_options?.advance_booking_days} jours
-            </p>
+            <p className="text-sm">Maximum {data.booking_options?.advance_booking_days} jours</p>
           </div>
 
           {data.booking_options?.max_bookings_per_day && (
@@ -337,10 +349,3 @@ export const ServicePreview = ({ data }: ServicePreviewProps) => {
     </div>
   );
 };
-
-
-
-
-
-
-

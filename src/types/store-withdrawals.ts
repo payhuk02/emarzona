@@ -68,6 +68,10 @@ export type MobileMoneyOperator =
   | 'm_pesa'
   | 'airtel_money'
   | 'ecocash'
+  | 't_money'
+  | 'amana'
+  | 'zamani_cash'
+  | 'nita'
   | 'other';
 
 export interface MobileMoneyDetails {

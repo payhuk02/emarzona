@@ -186,8 +186,9 @@ export async function moneyFusionFetch(
   ).createHttpClient;
 
   if (typeof createHttpClient === 'function') {
+    // UnknownIssuer / NotValidForName on MF hosts — host list alone is not enough
     const client = createHttpClient({
-      unsafelyIgnoreCertificateErrors: MF_INSECURE_HOSTS,
+      unsafelyIgnoreCertificateErrors: true,
     });
     try {
       return await fetch(url, { ...init, client } as RequestInit & { client: unknown });

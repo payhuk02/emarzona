@@ -16,6 +16,7 @@ export {
   useTopRatedServices,
   type ServiceProduct,
 } from './useServiceProducts';
+export { filterServicesBySearch } from './filter-service-products';
 
 // Bookings
 export {

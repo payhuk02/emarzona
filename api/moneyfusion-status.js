@@ -7,7 +7,7 @@
  */
 import https from 'https';
 
-const MF_STATUS_HOST = 'www.pay.moneyfusion.net';
+const MF_STATUS_HOST = 'pay.moneyfusion.net';
 
 function assertInternal(req) {
   const expected = (process.env.EDGE_INTERNAL_SECRET || process.env.CRON_SECRET || '').trim();

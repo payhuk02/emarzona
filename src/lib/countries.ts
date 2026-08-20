@@ -8,7 +8,7 @@ export interface Country {
   name: string; // Nom en français
 }
 
-export const COUNTRIES : Country[] = [
+export const COUNTRIES: Country[] = [
   { code: 'AF', name: 'Afghanistan' },
   { code: 'ZA', name: 'Afrique du Sud' },
   { code: 'AL', name: 'Albanie' },
@@ -58,7 +58,7 @@ export const COUNTRIES : Country[] = [
   { code: 'KP', name: 'Corée du Nord' },
   { code: 'KR', name: 'Corée du Sud' },
   { code: 'CR', name: 'Costa Rica' },
-  { code: 'CI', name: 'Côte d\'Ivoire' },
+  { code: 'CI', name: "Côte d'Ivoire" },
   { code: 'HR', name: 'Croatie' },
   { code: 'CU', name: 'Cuba' },
   { code: 'CW', name: 'Curaçao' },
@@ -73,6 +73,7 @@ export const COUNTRIES : Country[] = [
   { code: 'ES', name: 'Espagne' },
   { code: 'EE', name: 'Estonie' },
   { code: 'SZ', name: 'Eswatini' },
+  { code: 'US', name: 'États-Unis' },
   { code: 'ET', name: 'Éthiopie' },
   { code: 'FJ', name: 'Fidji' },
   { code: 'FI', name: 'Finlande' },
@@ -246,7 +247,7 @@ export const COUNTRIES : Country[] = [
  * Obtenir un pays par son code ISO
  */
 export const getCountryByCode = (code: string): Country | undefined => {
-  return COUNTRIES.find((country) => country.code === code);
+  return COUNTRIES.find(country => country.code === code);
 };
 
 /**
@@ -256,11 +257,3 @@ export const getCountryName = (code: string): string => {
   const country = getCountryByCode(code);
   return country?.name || code;
 };
-
-
-
-
-
-
-
-

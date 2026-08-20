@@ -9,7 +9,7 @@ import {
 } from './complete-order-payment.ts';
 import { moneyFusionFetch, moneyFusionPaidAmount, moneyFusionAmountCandidates } from './moneyfusion-http.ts';
 
-const MONEYFUSION_STATUS_URL = 'https://www.pay.moneyfusion.net/paiementNotif';
+const MONEYFUSION_STATUS_URL = 'https://pay.moneyfusion.net/paiementNotif';
 
 export type MoneyFusionMappedStatus = 'completed' | 'failed' | 'cancelled' | 'processing';
 

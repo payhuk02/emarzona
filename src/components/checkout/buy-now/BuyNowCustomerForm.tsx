@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import type { CheckoutFormData } from '@/pages/checkout/buy-now/checkout-buy-now-types';
+import PhoneCountryInput from '@/components/checkout/PhoneCountryInput';
 import { User, MapPin, Mail, Phone } from 'lucide-react';
 
 export interface BuyNowCustomerFormProps {
@@ -182,18 +183,19 @@ export default function BuyNowCustomerForm({
                   </span>
                 </span>
               </Label>
-              <Input
+              <PhoneCountryInput
                 id="phone"
                 name="phone"
-                type="tel"
                 value={formData.phone}
-                onChange={e => onFieldChange('phone', e.target.value)}
-                placeholder="+226 XX XX XX XX"
-                autoComplete="tel"
-                inputMode="tel"
+                countryHint={formData.country}
+                error={formErrors.phone}
                 required
-                aria-invalid={formErrors.phone ? true : undefined}
-                className={`${inputClass} ${formErrors.phone ? 'border-destructive' : ''}`}
+                onChange={v => onFieldChange('phone', v)}
+                onCountryNameChange={name => {
+                  if (!formData.country || formData.country === name) {
+                    onFieldChange('country', name);
+                  }
+                }}
               />
               {formErrors.phone ? (
                 <p className="text-sm text-destructive" role="alert">

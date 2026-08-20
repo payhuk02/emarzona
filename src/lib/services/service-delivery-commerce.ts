@@ -103,8 +103,8 @@ function mapPackage(row: Record<string, unknown>): ServiceDeliveryPackage {
 export async function fetchDeliveryPackages(
   serviceProductId: string
 ): Promise<ServiceDeliveryPackage[]> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase.from('service_packages') as any)
+  const { data, error } = await supabase
+    .from('service_packages')
     .select(PACKAGE_FIELDS)
     .eq('service_product_id', serviceProductId)
     .eq('package_kind', 'delivery_tier')
@@ -131,8 +131,8 @@ export async function replaceDeliveryPackages(input: {
     sort_order?: number;
   }>;
 }): Promise<ServiceDeliveryPackage[]> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error: delError } = await (supabase.from('service_packages') as any)
+  const { error: delError } = await supabase
+    .from('service_packages')
     .delete()
     .eq('service_product_id', input.serviceProductId)
     .eq('package_kind', 'delivery_tier');
@@ -145,11 +145,13 @@ export async function replaceDeliveryPackages(input: {
     product_id: input.productId,
     store_id: input.storeId,
     name: pkg.name,
+    package_name: pkg.name,
     description: pkg.description ?? null,
     slug: `${slugify(pkg.name)}-${pkg.tier}-${index}`,
     package_kind: 'delivery_tier',
     tier: pkg.tier,
     price: pkg.price,
+    package_price: pkg.price,
     delivery_days: pkg.delivery_days,
     revisions: pkg.revisions,
     features: pkg.features,
@@ -158,10 +160,11 @@ export async function replaceDeliveryPackages(input: {
     is_featured: pkg.is_featured ?? pkg.tier === 'standard',
     sessions_count: null,
     credits_per_session: null,
+    total_sessions: 1,
   }));
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase.from('service_packages') as any)
+  const { data, error } = await supabase
+    .from('service_packages')
     .insert(rows)
     .select(PACKAGE_FIELDS);
   if (error) throw error;
@@ -169,8 +172,8 @@ export async function replaceDeliveryPackages(input: {
 }
 
 export async function fetchGigExtras(serviceProductId: string): Promise<ServiceGigExtra[]> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase.from('service_gig_extras') as any)
+  const { data, error } = await supabase
+    .from('service_gig_extras')
     .select(EXTRA_FIELDS)
     .eq('service_product_id', serviceProductId)
     .order('display_order', { ascending: true });
@@ -191,8 +194,8 @@ export async function replaceGigExtras(input: {
     display_order?: number;
   }>;
 }): Promise<ServiceGigExtra[]> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error: delError } = await (supabase.from('service_gig_extras') as any)
+  const { error: delError } = await supabase
+    .from('service_gig_extras')
     .delete()
     .eq('service_product_id', input.serviceProductId);
   if (delError) throw delError;
@@ -211,8 +214,8 @@ export async function replaceGigExtras(input: {
     display_order: extra.display_order ?? index,
   }));
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase.from('service_gig_extras') as any)
+  const { data, error } = await supabase
+    .from('service_gig_extras')
     .insert(rows)
     .select(EXTRA_FIELDS);
   if (error) throw error;
@@ -223,8 +226,8 @@ export async function updateServiceBriefFields(
   serviceProductId: string,
   briefFields: ServiceBriefField[]
 ): Promise<void> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (supabase.from('service_products') as any)
+  const { error } = await supabase
+    .from('service_products')
     .update({ brief_fields: briefFields, updated_at: new Date().toISOString() })
     .eq('id', serviceProductId);
   if (error) throw error;
@@ -233,8 +236,8 @@ export async function updateServiceBriefFields(
 export async function fetchServiceBriefFields(
   serviceProductId: string
 ): Promise<ServiceBriefField[]> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase.from('service_products') as any)
+  const { data, error } = await supabase
+    .from('service_products')
     .select('brief_fields')
     .eq('id', serviceProductId)
     .maybeSingle();

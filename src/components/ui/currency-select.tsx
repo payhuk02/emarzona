@@ -19,7 +19,20 @@ interface CurrencySelectProps {
   disabled?: boolean;
 }
 
-const AFRICAN_CURRENCIES = ['XOF', 'XAF', 'NGN', 'GHS', 'KES', 'ZAR', 'MAD', 'TND', 'EGP', 'UGX', 'TZS', 'RWF'];
+const AFRICAN_CURRENCIES = [
+  'XOF',
+  'XAF',
+  'NGN',
+  'GHS',
+  'KES',
+  'ZAR',
+  'MAD',
+  'TND',
+  'EGP',
+  'UGX',
+  'TZS',
+  'RWF',
+];
 const INTERNATIONAL_CURRENCIES = ['EUR', 'USD', 'GBP', 'CAD', 'CHF', 'JPY', 'CNY'];
 
 export const CurrencySelect = memo(({ value, onValueChange, disabled }: CurrencySelectProps) => {
@@ -43,24 +56,16 @@ export const CurrencySelect = memo(({ value, onValueChange, disabled }: Currency
           Devises africaines
         </div>
         {africanCurrencies.map(currency => (
-          <SelectItem key={currency.code} value={currency.code}>
-            <span className="flex items-center gap-2">
-              <span>{currency.flag}</span>
-              <span>{currency.name}</span>
-              <span className="text-muted-foreground">({currency.symbol})</span>
-            </span>
+          <SelectItem key={currency.code} value={currency.code} textValue={currency.code}>
+            {currency.code} — {currency.name}
           </SelectItem>
         ))}
         <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground border-t mt-1">
           Devises internationales
         </div>
         {internationalCurrencies.map(currency => (
-          <SelectItem key={currency.code} value={currency.code}>
-            <span className="flex items-center gap-2">
-              <span>{currency.flag}</span>
-              <span>{currency.name}</span>
-              <span className="text-muted-foreground">({currency.symbol})</span>
-            </span>
+          <SelectItem key={currency.code} value={currency.code} textValue={currency.code}>
+            {currency.code} — {currency.name}
           </SelectItem>
         ))}
       </SelectContent>
@@ -69,9 +74,3 @@ export const CurrencySelect = memo(({ value, onValueChange, disabled }: Currency
 });
 
 CurrencySelect.displayName = 'CurrencySelect';
-
-
-
-
-
-
