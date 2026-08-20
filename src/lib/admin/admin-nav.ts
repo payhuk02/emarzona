@@ -234,6 +234,12 @@ export const ADMIN_NAV_SECTIONS: AdminNavSection[] = [
         permissions: ['payments.manage'],
       },
       {
+        icon: Store,
+        label: 'Commerce par boutique',
+        path: '/admin/store-commerce',
+        permissions: ['payments.manage'],
+      },
+      {
         icon: Percent,
         label: 'Taxes',
         path: '/admin/taxes',

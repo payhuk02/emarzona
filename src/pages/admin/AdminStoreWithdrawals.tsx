@@ -119,7 +119,7 @@ const AdminStoreWithdrawals = () => {
             error?: string;
             tokenPay?: string;
             requires_manual?: boolean;
-          }>('moneyfusion', {
+          }>('moneyfusion-ops', {
             body: {
               action: 'payout_store_withdrawal',
               data: { withdrawalId: withdrawal.id },
@@ -157,56 +157,23 @@ const AdminStoreWithdrawals = () => {
           return;
         }
 
-        // Bank / card: manual processing path
-        // available_balance already excludes processing/completed; also reserve other pending.
-        const { data: earnings, error: earningsError } = await supabase
-          .from('store_earnings')
-          .select('available_balance')
-          .eq('store_id', withdrawal.store_id)
-          .single();
-
-        if (earningsError) {
-          logger.error('Error fetching earnings', { error: earningsError });
-          toast({
-            title: 'Erreur',
-            description: 'Impossible de vérifier le solde disponible',
-            variant: 'destructive',
-          });
-          return;
-        }
-
-        const { data: otherPending } = await supabase
-          .from('store_withdrawals')
-          .select('amount')
-          .eq('store_id', withdrawal.store_id)
-          .eq('status', 'pending')
-          .neq('id', withdrawal.id);
-
-        const otherPendingSum = (otherPending || []).reduce(
-          (sum, row) => sum + Number(row.amount || 0),
-          0
+        // Bank / card: atomic RPC — locks store_earnings for withdrawal.store_id
+        const { data: approveResult, error } = await supabase.rpc(
+          'approve_store_withdrawal_manual',
+          { p_withdrawal_id: withdrawal.id }
         );
-        const availableAfterPending = (earnings?.available_balance || 0) - otherPendingSum;
-
-        if (withdrawal.amount > availableAfterPending) {
-          toast({
-            title: 'Solde insuffisant',
-            description: `Disponible après autres retraits en attente : ${availableAfterPending} XOF (demande : ${withdrawal.amount} XOF)`,
-            variant: 'destructive',
-          });
-          return;
-        }
-
-        const { error } = await supabase
-          .from('store_withdrawals')
-          .update({
-            status: 'processing',
-            approved_at: new Date().toISOString(),
-            approved_by: (await supabase.auth.getUser()).data.user?.id,
-          })
-          .eq('id', withdrawal.id);
 
         if (error) throw error;
+        if (
+          approveResult &&
+          typeof approveResult === 'object' &&
+          'success' in approveResult &&
+          (approveResult as { success?: boolean }).success === false
+        ) {
+          throw new Error(
+            String((approveResult as { error?: string }).error || 'Approbation refusée')
+          );
+        }
 
         toast({
           title: 'Retrait approuvé',

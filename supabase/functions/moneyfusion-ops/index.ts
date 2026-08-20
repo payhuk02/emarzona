@@ -5,6 +5,7 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'npm:@supabase/supabase-js@2.58.0';
 import { syncMoneyFusionLite } from '../_shared/moneyfusion-sync-lite.ts';
+import { handleMoneyFusionStoreWithdrawalPayout } from '../_shared/handle-moneyfusion-store-withdrawal.ts';
 
 const SITE_URL = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
 
@@ -168,10 +169,32 @@ serve(async req => {
       );
     }
 
+    if (action === 'payout_store_withdrawal') {
+      try {
+        const payoutResult = await handleMoneyFusionStoreWithdrawalPayout(
+          supabase,
+          req.headers.get('Authorization'),
+          (data || {}) as { withdrawalId: string }
+        );
+        return new Response(JSON.stringify(payoutResult.body), {
+          status: payoutResult.status,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      } catch (payoutErr) {
+        const message = payoutErr instanceof Error ? payoutErr.message : String(payoutErr);
+        const status =
+          message === 'Unauthorized' || message === 'Forbidden' ? 403 : 500;
+        return new Response(JSON.stringify({ success: false, error: message }), {
+          status,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+    }
+
     return new Response(
       JSON.stringify({
         error: 'Action non supportée',
-        message: 'Actions: ping, verify_payment, reconcile_transaction',
+        message: 'Actions: ping, verify_payment, reconcile_transaction, payout_store_withdrawal',
         action,
       }),
       { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

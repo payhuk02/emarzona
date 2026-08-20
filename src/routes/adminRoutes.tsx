@@ -58,6 +58,7 @@ const AdminNotifications = lazyPage(() => import('@/pages/admin/AdminNotificatio
 const AdminDisputes = lazyPage(() => import('@/pages/admin/AdminDisputes'));
 const AdminAffiliates = lazyPage(() => import('@/pages/admin/AdminAffiliates'));
 const AdminStoreWithdrawals = lazyPage(() => import('@/pages/admin/AdminStoreWithdrawals'));
+const AdminStoreCommerce = lazyPage(() => import('@/pages/admin/AdminStoreCommerce'));
 const AdminReviews = lazyPage(() =>
   import('@/pages/admin/AdminReviews').then(m => ({ default: m.AdminReviews }))
 );
@@ -151,6 +152,7 @@ export const adminRoutes = (
     {pr('/admin/disputes', AdminDisputes)}
     {pr('/admin/affiliates', AdminAffiliates)}
     {pr('/admin/store-withdrawals', AdminStoreWithdrawals)}
+    {pr('/admin/store-commerce', AdminStoreCommerce)}
     {pr('/admin/reviews', AdminReviews)}
     {pr('/admin/inventory', AdminInventory)}
     {pr('/admin/support', AdminSupport)}

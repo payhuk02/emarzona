@@ -96,6 +96,35 @@ export async function handleMoneyFusionStoreWithdrawalPayout(
     withdrawal.payment_details && typeof withdrawal.payment_details === 'object'
       ? (withdrawal.payment_details as Record<string, unknown>)
       : {};
+
+  const existingMf =
+    details.moneyfusion_payout && typeof details.moneyfusion_payout === 'object'
+      ? (details.moneyfusion_payout as Record<string, unknown>)
+      : null;
+  const existingToken =
+    typeof existingMf?.tokenPay === 'string' ? existingMf.tokenPay.trim() : '';
+  if (existingToken) {
+    return {
+      status: 409,
+      body: {
+        success: false,
+        error: 'Payout already initiated (tokenPay present in payment_details)',
+        tokenPay: existingToken,
+        status: withdrawal.status,
+      },
+    };
+  }
+  if (existingMf?.payout_status === 'initiating') {
+    return {
+      status: 409,
+      body: {
+        success: false,
+        error: 'Payout initiation already in progress for this withdrawal',
+        status: withdrawal.status,
+      },
+    };
+  }
+
   const phone = typeof details.phone === 'string' ? details.phone : '';
   if (phone.replace(/\D/g, '').length < 8) {
     return {
@@ -134,11 +163,24 @@ export async function handleMoneyFusionStoreWithdrawalPayout(
     };
   }
 
+  // Refresh + re-check available_balance for THIS store only (never cross-store).
+  await supabaseAdmin.rpc('update_store_earnings', { p_store_id: withdrawal.store_id });
+
   const { data: earnings } = await supabaseAdmin
     .from('store_earnings')
-    .select('available_balance')
+    .select('available_balance, withdrawals_blocked, withdrawals_blocked_reason')
     .eq('store_id', withdrawal.store_id)
     .maybeSingle();
+
+  if (earnings?.withdrawals_blocked) {
+    return {
+      status: 403,
+      body: {
+        success: false,
+        error: `Retraits bloqués pour cette boutique: ${earnings.withdrawals_blocked_reason || ''}`,
+      },
+    };
+  }
 
   // available_balance already excludes processing/completed.
   // Also reserve other pending so concurrent approvals cannot over-draw.
@@ -162,21 +204,37 @@ export async function handleMoneyFusionStoreWithdrawalPayout(
         status: 400,
         body: {
           success: false,
-          error: `Insufficient store balance after other pending (${availableAfterPending}) for withdrawal ${withdrawal.amount}`,
+          error: `Solde insuffisant pour la boutique ${withdrawal.store_id}. Disponible après autres pending: ${availableAfterPending} (demande: ${withdrawal.amount})`,
+          store_id: withdrawal.store_id,
+          available_after_pending: availableAfterPending,
+          requested: Number(withdrawal.amount),
         },
       };
     }
   }
 
   const now = new Date().toISOString();
+  const claimPlaceholder = `mf-claim:${withdrawal.id}`;
 
   // Claim row first so concurrent admins cannot double-pay.
+  // Placeholder transaction_reference blocks retries until tokenPay is persisted (or rolled back).
   const { data: claimed, error: claimErr } = await supabaseAdmin
     .from('store_withdrawals')
     .update({
       status: 'processing',
       approved_at: now,
       approved_by: adminId,
+      transaction_reference: claimPlaceholder,
+      payment_details: {
+        ...details,
+        moneyfusion_payout: {
+          ...(existingMf || {}),
+          payout_status: 'initiating',
+          claim_placeholder: claimPlaceholder,
+          initiated_at: now,
+          initiated_by: adminId,
+        },
+      },
       updated_at: now,
     })
     .eq('id', withdrawal.id)
@@ -224,10 +282,20 @@ export async function handleMoneyFusionStoreWithdrawalPayout(
           status: 'pending',
           approved_at: null,
           approved_by: null,
+          transaction_reference: null,
           failure_reason: withdraw.message,
+          payment_details: {
+            ...details,
+            moneyfusion_payout: {
+              payout_status: 'failed_retryable',
+              last_error: withdraw.message,
+              failed_at: new Date().toISOString(),
+            },
+          },
           updated_at: new Date().toISOString(),
         })
-        .eq('id', withdrawal.id);
+        .eq('id', withdrawal.id)
+        .eq('transaction_reference', claimPlaceholder);
 
       return {
         status: 422,
@@ -247,9 +315,19 @@ export async function handleMoneyFusionStoreWithdrawalPayout(
         status: 'failed',
         failed_at: new Date().toISOString(),
         failure_reason: withdraw.message,
+        transaction_reference: null,
+        payment_details: {
+          ...details,
+          moneyfusion_payout: {
+            payout_status: 'failed',
+            last_error: withdraw.message,
+            failed_at: new Date().toISOString(),
+          },
+        },
         updated_at: new Date().toISOString(),
       })
-      .eq('id', withdrawal.id);
+      .eq('id', withdrawal.id)
+      .eq('transaction_reference', claimPlaceholder);
 
     return {
       status: 422,
@@ -257,7 +335,7 @@ export async function handleMoneyFusionStoreWithdrawalPayout(
     };
   }
 
-  // Persist tokenPay immediately after initiate (narrow webhook race window).
+  // Persist real tokenPay (replaces claim placeholder).
   const { error: tokenErr } = await supabaseAdmin
     .from('store_withdrawals')
     .update({
@@ -275,7 +353,8 @@ export async function handleMoneyFusionStoreWithdrawalPayout(
       },
       updated_at: new Date().toISOString(),
     })
-    .eq('id', withdrawal.id);
+    .eq('id', withdrawal.id)
+    .eq('transaction_reference', claimPlaceholder);
 
   if (tokenErr) {
     return {
@@ -294,11 +373,14 @@ export async function handleMoneyFusionStoreWithdrawalPayout(
     body: {
       success: true,
       withdrawal_id: withdrawal.id,
+      store_id: withdrawal.store_id,
       tokenPay: withdraw.tokenPay,
       amount: Number(withdrawal.amount),
       currency: String(withdrawal.currency || 'XOF').toUpperCase(),
       status: 'processing',
       mode: 'moneyfusion_payout',
+      platform_withdrawal_fee: 0,
+      note: 'No platform fee on withdrawal; sales commission already deducted in available_balance',
     },
   };
 }
