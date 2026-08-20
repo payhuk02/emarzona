@@ -1,5 +1,5 @@
 /**
- * Politique panier pour les services : réservation obligatoire avant ajout.
+ * Politique panier pour les services : réservation OU commande projet (package).
  */
 
 export function hasServiceBookingMetadata(metadata?: Record<string, unknown> | null): boolean {
@@ -14,12 +14,24 @@ export function hasServiceBookingMetadata(metadata?: Record<string, unknown> | n
   );
 }
 
-export function assertCanAddServiceToCart(metadata?: Record<string, unknown> | null): void {
-  if (!hasServiceBookingMetadata(metadata)) {
-    throw new Error(
-      'Les services doivent être réservés (créneau confirmé) avant d’être ajoutés au panier. Réservez depuis la fiche du service.'
-    );
+export function hasServiceProjectMetadata(metadata?: Record<string, unknown> | null): boolean {
+  if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata)) {
+    return false;
   }
+  return (
+    metadata.fulfillment_mode === 'project' ||
+    metadata.fulfillment_mode === 'both' ||
+    typeof metadata.delivery_package_id === 'string'
+  );
+}
+
+export function assertCanAddServiceToCart(metadata?: Record<string, unknown> | null): void {
+  if (hasServiceBookingMetadata(metadata) || hasServiceProjectMetadata(metadata)) {
+    return;
+  }
+  throw new Error(
+    'Les services doivent être réservés (créneau) ou commandés avec un package projet avant d’être ajoutés au panier.'
+  );
 }
 
 export function buildServiceCartMetadata(params: {

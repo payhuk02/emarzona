@@ -15,6 +15,7 @@ export type ServiceWizardFormFields = {
   category_id?: string | null;
   category?: string;
   parent_category_id?: string | null;
+  fulfillment_mode?: 'appointment' | 'project' | 'both';
 };
 
 export type ServiceWizardStepValidationResult = {
@@ -74,13 +75,18 @@ export function validateServiceWizardStep(
       errors.push("L'URL de réunion est requise pour les services en ligne");
     }
     if (!formData.availability_slots || formData.availability_slots.length === 0) {
-      return {
-        valid: false,
-        errors: ['Ajoutez au moins un créneau de disponibilité pour permettre les réservations'],
-        toastTitle: 'Créneaux requis',
-        toastDescription:
-          'Ajoutez au moins un créneau de disponibilité pour permettre les réservations',
-      };
+      const mode = formData.fulfillment_mode;
+      if (mode === 'project') {
+        // Project-only services do not require appointment slots
+      } else {
+        return {
+          valid: false,
+          errors: ['Ajoutez au moins un créneau de disponibilité pour permettre les réservations'],
+          toastTitle: 'Créneaux requis',
+          toastDescription:
+            'Ajoutez au moins un créneau de disponibilité pour permettre les réservations',
+        };
+      }
     }
   }
 

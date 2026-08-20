@@ -75,6 +75,7 @@ import {
   BookedTogetherRecommendations,
 } from '@/components/service/ServiceRecommendations';
 import { JoinWaitlistButton } from '@/components/service/JoinWaitlistButton';
+import { ServiceProjectOrderPanel } from '@/components/service/ServiceProjectOrderPanel';
 import { useServiceCategories } from '@/hooks/useServiceCategories';
 import { getCategoryBreadcrumb } from '@/lib/services/service-categories';
 
@@ -83,7 +84,7 @@ const PRODUCT_SERVICE_FIELDS =
 const PRODUCT_SERVICE_SELECT = PRODUCT_SERVICE_FIELDS;
 const STORE_PUBLIC_FIELDS = 'id, name, slug, logo_url';
 const SERVICE_PRODUCT_FIELDS =
-  'id, product_id, store_id, service_type, duration_minutes, location_type, location_address, max_participants, advance_booking_days, created_at, updated_at';
+  'id, product_id, store_id, service_type, duration_minutes, location_type, location_address, max_participants, advance_booking_days, fulfillment_mode, brief_fields, created_at, updated_at';
 const SERVICE_STAFF_FIELDS =
   'id, service_product_id, name, role, bio, avatar_url, is_active, created_at, updated_at';
 
@@ -818,336 +819,422 @@ export default function ServiceDetail() {
           </Tabs>
         </div>
 
-        {/* Right: Booking */}
+        {/* Right: Booking / Project order */}
         <div className="space-y-4">
-          <Card className="sticky top-4">
-            <CardHeader>
-              <div className="flex items-start justify-between mb-2">
-                <CardTitle>Réserver</CardTitle>
-                <div className="text-right">
-                  <div className="text-2xl font-bold">
-                    {currentPrice?.toLocaleString()} {service?.currency}
-                  </div>
-                  {service?.promotional_price && (
-                    <span className="text-sm line-through text-muted-foreground">
-                      {(service.price ?? 0).toLocaleString()} {service.currency}
-                    </span>
-                  )}
-                </div>
-              </div>
-              {isGroup && <CardDescription>Prix par personne</CardDescription>}
+          {(() => {
+            const fulfillmentMode =
+              (service?.service as { fulfillment_mode?: string } | null | undefined)
+                ?.fulfillment_mode || 'appointment';
+            const showProject =
+              Boolean(serviceProductId) &&
+              (fulfillmentMode === 'project' || fulfillmentMode === 'both');
+            const showAppointment = fulfillmentMode !== 'project';
 
-              {/* Type de licence, Modèle de tarification, Options de paiement et Commission */}
-              <div className="flex items-center gap-2 flex-wrap mt-3">
-                {/* Badge Type de licence */}
-                {service?.licensing_type && (
-                  <Badge
-                    variant="outline"
-                    className={`text-sm ${
-                      service.licensing_type === 'plr'
-                        ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20'
-                        : service.licensing_type === 'copyrighted'
-                          ? 'border-red-500 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20'
-                          : 'border-blue-500 text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20'
-                    }`}
-                  >
-                    <Shield className="h-3 w-3 mr-1" />
-                    {service.licensing_type === 'plr'
-                      ? 'PLR'
-                      : service.licensing_type === 'copyrighted'
-                        ? "Droit d'auteur"
-                        : 'Standard'}
-                  </Badge>
-                )}
-
-                {/* Badge Modèle de tarification */}
-                <PricingModelBadge pricingModel={service?.pricing_model} size="sm" />
-
-                {/* Badge Options de paiement */}
-                <PaymentOptionsBadge
-                  paymentOptions={getPaymentOptions(
-                    service as {
-                      payment_options?: {
-                        payment_type?: 'full' | 'percentage' | 'delivery_secured';
-                        percentage_rate?: number;
-                      } | null;
-                    }
-                  )}
-                  size="sm"
-                />
-
-                {/* Badge Taux de commission d'affiliation */}
-                {(() => {
-                  const serviceWithAffiliate = service as {
-                    product_affiliate_settings?:
-                      | Array<{ affiliate_enabled?: boolean; commission_rate?: number }>
-                      | { affiliate_enabled?: boolean; commission_rate?: number }
-                      | null;
-                  };
-                  const affiliateSettings = Array.isArray(
-                    serviceWithAffiliate?.product_affiliate_settings
-                  )
-                    ? serviceWithAffiliate.product_affiliate_settings[0]
-                    : serviceWithAffiliate?.product_affiliate_settings;
-
-                  return affiliateSettings?.affiliate_enabled &&
-                    affiliateSettings?.commission_rate > 0 ? (
-                    <Badge
-                      variant="secondary"
-                      className="text-sm bg-gradient-to-r from-orange-500 to-pink-500 text-white border-0"
-                      title={`Taux de commission d'affiliation: ${affiliateSettings.commission_rate}%`}
-                    >
-                      <TrendingUp className="h-3 w-3 mr-1" />
-                      {affiliateSettings.commission_rate}% commission
-                    </Badge>
-                  ) : null;
-                })()}
-
-                {/* Badge Preview Gratuit */}
-                {service.is_free_preview && (
-                  <Badge
-                    variant="outline"
-                    className="text-sm bg-gradient-to-r from-purple-500/10 to-pink-500/10 text-purple-700 border-purple-500/20"
-                  >
-                    <Eye className="h-3 w-3 mr-1" />
-                    Version Preview Gratuite
-                  </Badge>
-                )}
-                {/* Badge si service payant a un preview */}
-                {service.free_product && !service.is_free_preview && (
-                  <Badge
-                    variant="outline"
-                    className="text-sm bg-gradient-to-r from-green-500/10 to-emerald-500/10 text-green-700 border-green-500/20"
-                  >
-                    <Gift className="h-3 w-3 mr-1" />
-                    Version Preview Disponible
-                  </Badge>
-                )}
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Lien vers service preview ou payant */}
-              {service?.is_free_preview && service?.paid_product && (
-                <div className="p-4 rounded-lg bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border border-purple-200 dark:border-purple-800">
-                  <div className="flex items-start gap-3">
-                    <Gift className="h-5 w-5 text-purple-600 dark:text-purple-400 mt-0.5 flex-shrink-0" />
-                    <div className="flex-1">
-                      <p className="font-semibold text-purple-900 dark:text-purple-100 mb-1">
-                        Version Preview Gratuite
-                      </p>
-                      {service.preview_content_description && (
-                        <p className="text-sm text-purple-800 dark:text-purple-200 mb-3">
-                          {service.preview_content_description}
-                        </p>
-                      )}
-                      <Button
-                        onClick={() =>
-                          navigate(
-                            `/services/${service.paid_product.slug || service.paid_product.id}`
-                          )
-                        }
-                        className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
-                        size="sm"
-                      >
-                        <Package className="h-4 w-4 mr-2" />
-                        Accéder à la version complète ({service.paid_product.price.toLocaleString()}{' '}
-                        {service.paid_product.currency})
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Lien vers preview gratuit si service payant */}
-              {service?.free_product && !service?.is_free_preview && (
-                <div className="p-4 rounded-lg bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800">
-                  <div className="flex items-start gap-3">
-                    <Eye className="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
-                    <div className="flex-1">
-                      <p className="font-semibold text-green-900 dark:text-green-100 mb-1">
-                        Version Preview Gratuite Disponible
-                      </p>
-                      <p className="text-sm text-green-800 dark:text-green-200 mb-3">
-                        Réservez gratuitement un aperçu du service avant de commander la version
-                        complète.
-                      </p>
-                      <Button
-                        onClick={() =>
-                          navigate(
-                            `/services/${service.free_product.slug || service.free_product.id}`
-                          )
-                        }
-                        className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
-                        size="sm"
-                        variant="outline"
-                      >
-                        <Gift className="h-4 w-4 mr-2" />
-                        Essayer gratuitement
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              )}
-              {/* Participants (if group) */}
-              {isGroup && (
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Nombre de participants</label>
-                  <div className="flex items-center gap-3">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => setParticipants(Math.max(minParticipants, participants - 1))}
-                      disabled={participants <= minParticipants}
-                      aria-label="Diminuer le nombre de participants"
-                    >
-                      -
-                    </Button>
-                    <span className="text-lg font-medium w-12 text-center">{participants}</span>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => setParticipants(Math.min(maxParticipants, participants + 1))}
-                      disabled={participants >= maxParticipants}
-                      aria-label="Augmenter le nombre de participants"
-                    >
-                      +
-                    </Button>
-                  </div>
-                </div>
-              )}
-
-              {/* Calendar */}
-              <div>
-                <label className="text-sm font-medium mb-2 block">Sélectionnez une date</label>
-                <ServiceCalendarEnhanced
-                  serviceId={serviceId!}
-                  selectedDate={selectedDate || undefined}
-                  onDateSelect={nextDate => {
-                    setSelectedDate(nextDate);
-                    setSelectedSlot(null);
-                    setValidationError(null);
+            if (showProject && !showAppointment) {
+              return (
+                <ServiceProjectOrderPanel
+                  serviceProductId={serviceProductId!}
+                  productId={serviceId!}
+                  currency={service?.currency || 'XOF'}
+                  onContinue={payload => {
+                    sessionStorage.setItem(
+                      `service-project-order:${serviceId}`,
+                      JSON.stringify(payload)
+                    );
+                    const url = buildCheckoutUrl({
+                      productId: serviceId!,
+                      storeId: service?.store_id,
+                      buyNow: true,
+                      quantity: 1,
+                      guestEmail: guestEmail || undefined,
+                      guestName: guestName || undefined,
+                    });
+                    navigate(url);
                   }}
                 />
-              </div>
+              );
+            }
 
-              {/* Time Slots */}
-              {selectedDate && (
-                <div className="space-y-2" data-testid="service-time-slots">
-                  <label className="text-sm font-medium mb-2 block">Choisissez un créneau</label>
-                  <TimeSlotPicker
-                    serviceId={serviceId!}
-                    serviceProductId={serviceProductId ?? undefined}
-                    date={selectedDate}
-                    durationMinutes={service?.service?.duration_minutes ?? 60}
-                    onSlotSelect={setSelectedSlot}
-                  />
+            if (showProject && showAppointment) {
+              return (
+                <Tabs defaultValue="appointment">
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="appointment">Réserver</TabsTrigger>
+                    <TabsTrigger value="project">Package</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="project" className="mt-4">
+                    <ServiceProjectOrderPanel
+                      serviceProductId={serviceProductId!}
+                      productId={serviceId!}
+                      currency={service?.currency || 'XOF'}
+                      onContinue={payload => {
+                        sessionStorage.setItem(
+                          `service-project-order:${serviceId}`,
+                          JSON.stringify(payload)
+                        );
+                        const url = buildCheckoutUrl({
+                          productId: serviceId!,
+                          storeId: service?.store_id,
+                          buyNow: true,
+                          quantity: 1,
+                          guestEmail: guestEmail || undefined,
+                          guestName: guestName || undefined,
+                        });
+                        navigate(url);
+                      }}
+                    />
+                  </TabsContent>
+                  <TabsContent value="appointment" className="mt-4">
+                    {/* appointment card continues below via fragment flag — rendered in sticky card */}
+                    <Card className="sticky top-4">
+                      <CardHeader>
+                        <CardTitle>Réserver un créneau</CardTitle>
+                      </CardHeader>
+                      <CardContent className="text-sm text-muted-foreground">
+                        Utilisez le calendrier et le bouton de réservation ci-dessous.
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+                </Tabs>
+              );
+            }
 
-                  {/* Feedback validation en temps réel */}
-                  {isValidating && (
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      <span>Vérification de la disponibilité...</span>
+            return null;
+          })()}
+
+          {(!(service?.service as { fulfillment_mode?: string } | null | undefined)
+            ?.fulfillment_mode ||
+            (service?.service as { fulfillment_mode?: string }).fulfillment_mode !== 'project') && (
+            <Card className="sticky top-4">
+              <CardHeader>
+                <div className="flex items-start justify-between mb-2">
+                  <CardTitle>Réserver</CardTitle>
+                  <div className="text-right">
+                    <div className="text-2xl font-bold">
+                      {currentPrice?.toLocaleString()} {service?.currency}
                     </div>
-                  )}
-
-                  {validationError && !isValidating && (
-                    <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20">
-                      <div className="flex items-start gap-2">
-                        <AlertCircle className="h-4 w-4 text-destructive mt-0.5 flex-shrink-0" />
-                        <div className="flex-1">
-                          <p className="text-sm font-medium text-destructive">
-                            Créneau non disponible
-                          </p>
-                          <p className="text-xs text-destructive/80 mt-1">{validationError}</p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {!validationError && !isValidating && selectedSlot && (
-                    <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
-                      <CheckCircle2 className="h-4 w-4" />
-                      <span>Créneau disponible</span>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Total Price */}
-              {isGroup && (
-                <div className="p-4 bg-muted rounded-lg">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">Total</span>
-                    <span className="text-xl font-bold">
-                      {(service?.price * participants).toLocaleString()} {service?.currency}
-                    </span>
+                    {service?.promotional_price && (
+                      <span className="text-sm line-through text-muted-foreground">
+                        {(service.price ?? 0).toLocaleString()} {service.currency}
+                      </span>
+                    )}
                   </div>
                 </div>
-              )}
+                {isGroup && <CardDescription>Prix par personne</CardDescription>}
 
-              {selectedDate && selectedSlot && serviceProductId && (
-                <ServiceProductAddonsPicker
-                  addons={serviceAddons}
-                  isLoading={addonsLoading}
-                  selectedAddonProductIds={selectedAddonProductIds}
-                  onChange={setSelectedAddonProductIds}
-                />
-              )}
-
-              <Button
-                onClick={() => void handleBooking()}
-                className="w-full"
-                size="lg"
-                disabled={
-                  !selectedDate || !selectedSlot || isBooking || isValidating || !!validationError
-                }
-              >
-                {isBooking ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Redirection vers le paiement...
-                  </>
-                ) : !selectedDate || !selectedSlot ? (
-                  'Sélectionnez une date et un créneau'
-                ) : (
-                  'Réserver et payer'
-                )}
-              </Button>
-
-              <Separator />
-
-              {/* Waitlist Button */}
-              <JoinWaitlistButton
-                serviceId={serviceId!}
-                serviceName={service.name}
-                storeId={service.store_id ?? service.store?.id}
-                disabled={!user}
-              />
-
-              {/* Secondary Actions */}
-              <div className="grid grid-cols-2 gap-2">
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={handleWishlistToggle}
-                  disabled={isCheckingWishlist}
-                >
-                  {isCheckingWishlist ? (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  ) : (
-                    <Heart
-                      className={`h-4 w-4 mr-2 ${isInWishlist ? 'fill-red-500 text-red-500' : ''}`}
-                    />
+                {/* Type de licence, Modèle de tarification, Options de paiement et Commission */}
+                <div className="flex items-center gap-2 flex-wrap mt-3">
+                  {/* Badge Type de licence */}
+                  {service?.licensing_type && (
+                    <Badge
+                      variant="outline"
+                      className={`text-sm ${
+                        service.licensing_type === 'plr'
+                          ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20'
+                          : service.licensing_type === 'copyrighted'
+                            ? 'border-red-500 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20'
+                            : 'border-blue-500 text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20'
+                      }`}
+                    >
+                      <Shield className="h-3 w-3 mr-1" />
+                      {service.licensing_type === 'plr'
+                        ? 'PLR'
+                        : service.licensing_type === 'copyrighted'
+                          ? "Droit d'auteur"
+                          : 'Standard'}
+                    </Badge>
                   )}
-                  {isInWishlist ? 'Retiré' : 'Favori'}
+
+                  {/* Badge Modèle de tarification */}
+                  <PricingModelBadge pricingModel={service?.pricing_model} size="sm" />
+
+                  {/* Badge Options de paiement */}
+                  <PaymentOptionsBadge
+                    paymentOptions={getPaymentOptions(
+                      service as {
+                        payment_options?: {
+                          payment_type?: 'full' | 'percentage' | 'delivery_secured';
+                          percentage_rate?: number;
+                        } | null;
+                      }
+                    )}
+                    size="sm"
+                  />
+
+                  {/* Badge Taux de commission d'affiliation */}
+                  {(() => {
+                    const serviceWithAffiliate = service as {
+                      product_affiliate_settings?:
+                        | Array<{ affiliate_enabled?: boolean; commission_rate?: number }>
+                        | { affiliate_enabled?: boolean; commission_rate?: number }
+                        | null;
+                    };
+                    const affiliateSettings = Array.isArray(
+                      serviceWithAffiliate?.product_affiliate_settings
+                    )
+                      ? serviceWithAffiliate.product_affiliate_settings[0]
+                      : serviceWithAffiliate?.product_affiliate_settings;
+
+                    return affiliateSettings?.affiliate_enabled &&
+                      affiliateSettings?.commission_rate > 0 ? (
+                      <Badge
+                        variant="secondary"
+                        className="text-sm bg-gradient-to-r from-orange-500 to-pink-500 text-white border-0"
+                        title={`Taux de commission d'affiliation: ${affiliateSettings.commission_rate}%`}
+                      >
+                        <TrendingUp className="h-3 w-3 mr-1" />
+                        {affiliateSettings.commission_rate}% commission
+                      </Badge>
+                    ) : null;
+                  })()}
+
+                  {/* Badge Preview Gratuit */}
+                  {service.is_free_preview && (
+                    <Badge
+                      variant="outline"
+                      className="text-sm bg-gradient-to-r from-purple-500/10 to-pink-500/10 text-purple-700 border-purple-500/20"
+                    >
+                      <Eye className="h-3 w-3 mr-1" />
+                      Version Preview Gratuite
+                    </Badge>
+                  )}
+                  {/* Badge si service payant a un preview */}
+                  {service.free_product && !service.is_free_preview && (
+                    <Badge
+                      variant="outline"
+                      className="text-sm bg-gradient-to-r from-green-500/10 to-emerald-500/10 text-green-700 border-green-500/20"
+                    >
+                      <Gift className="h-3 w-3 mr-1" />
+                      Version Preview Disponible
+                    </Badge>
+                  )}
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Lien vers service preview ou payant */}
+                {service?.is_free_preview && service?.paid_product && (
+                  <div className="p-4 rounded-lg bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border border-purple-200 dark:border-purple-800">
+                    <div className="flex items-start gap-3">
+                      <Gift className="h-5 w-5 text-purple-600 dark:text-purple-400 mt-0.5 flex-shrink-0" />
+                      <div className="flex-1">
+                        <p className="font-semibold text-purple-900 dark:text-purple-100 mb-1">
+                          Version Preview Gratuite
+                        </p>
+                        {service.preview_content_description && (
+                          <p className="text-sm text-purple-800 dark:text-purple-200 mb-3">
+                            {service.preview_content_description}
+                          </p>
+                        )}
+                        <Button
+                          onClick={() =>
+                            navigate(
+                              `/services/${service.paid_product.slug || service.paid_product.id}`
+                            )
+                          }
+                          className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+                          size="sm"
+                        >
+                          <Package className="h-4 w-4 mr-2" />
+                          Accéder à la version complète (
+                          {service.paid_product.price.toLocaleString()}{' '}
+                          {service.paid_product.currency})
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Lien vers preview gratuit si service payant */}
+                {service?.free_product && !service?.is_free_preview && (
+                  <div className="p-4 rounded-lg bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800">
+                    <div className="flex items-start gap-3">
+                      <Eye className="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
+                      <div className="flex-1">
+                        <p className="font-semibold text-green-900 dark:text-green-100 mb-1">
+                          Version Preview Gratuite Disponible
+                        </p>
+                        <p className="text-sm text-green-800 dark:text-green-200 mb-3">
+                          Réservez gratuitement un aperçu du service avant de commander la version
+                          complète.
+                        </p>
+                        <Button
+                          onClick={() =>
+                            navigate(
+                              `/services/${service.free_product.slug || service.free_product.id}`
+                            )
+                          }
+                          className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
+                          size="sm"
+                          variant="outline"
+                        >
+                          <Gift className="h-4 w-4 mr-2" />
+                          Essayer gratuitement
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {/* Participants (if group) */}
+                {isGroup && (
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">Nombre de participants</label>
+                    <div className="flex items-center gap-3">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => setParticipants(Math.max(minParticipants, participants - 1))}
+                        disabled={participants <= minParticipants}
+                        aria-label="Diminuer le nombre de participants"
+                      >
+                        -
+                      </Button>
+                      <span className="text-lg font-medium w-12 text-center">{participants}</span>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => setParticipants(Math.min(maxParticipants, participants + 1))}
+                        disabled={participants >= maxParticipants}
+                        aria-label="Augmenter le nombre de participants"
+                      >
+                        +
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Calendar */}
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Sélectionnez une date</label>
+                  <ServiceCalendarEnhanced
+                    serviceId={serviceId!}
+                    selectedDate={selectedDate || undefined}
+                    onDateSelect={nextDate => {
+                      setSelectedDate(nextDate);
+                      setSelectedSlot(null);
+                      setValidationError(null);
+                    }}
+                  />
+                </div>
+
+                {/* Time Slots */}
+                {selectedDate && (
+                  <div className="space-y-2" data-testid="service-time-slots">
+                    <label className="text-sm font-medium mb-2 block">Choisissez un créneau</label>
+                    <TimeSlotPicker
+                      serviceId={serviceId!}
+                      serviceProductId={serviceProductId ?? undefined}
+                      date={selectedDate}
+                      durationMinutes={service?.service?.duration_minutes ?? 60}
+                      onSlotSelect={setSelectedSlot}
+                    />
+
+                    {/* Feedback validation en temps réel */}
+                    {isValidating && (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <span>Vérification de la disponibilité...</span>
+                      </div>
+                    )}
+
+                    {validationError && !isValidating && (
+                      <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20">
+                        <div className="flex items-start gap-2">
+                          <AlertCircle className="h-4 w-4 text-destructive mt-0.5 flex-shrink-0" />
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-destructive">
+                              Créneau non disponible
+                            </p>
+                            <p className="text-xs text-destructive/80 mt-1">{validationError}</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {!validationError && !isValidating && selectedSlot && (
+                      <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
+                        <CheckCircle2 className="h-4 w-4" />
+                        <span>Créneau disponible</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Total Price */}
+                {isGroup && (
+                  <div className="p-4 bg-muted rounded-lg">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Total</span>
+                      <span className="text-xl font-bold">
+                        {(service?.price * participants).toLocaleString()} {service?.currency}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {selectedDate && selectedSlot && serviceProductId && (
+                  <ServiceProductAddonsPicker
+                    addons={serviceAddons}
+                    isLoading={addonsLoading}
+                    selectedAddonProductIds={selectedAddonProductIds}
+                    onChange={setSelectedAddonProductIds}
+                  />
+                )}
+
+                <Button
+                  onClick={() => void handleBooking()}
+                  className="w-full"
+                  size="lg"
+                  disabled={
+                    !selectedDate || !selectedSlot || isBooking || isValidating || !!validationError
+                  }
+                >
+                  {isBooking ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Redirection vers le paiement...
+                    </>
+                  ) : !selectedDate || !selectedSlot ? (
+                    'Sélectionnez une date et un créneau'
+                  ) : (
+                    'Réserver et payer'
+                  )}
                 </Button>
-                <Button variant="outline" className="w-full" onClick={handleShare}>
-                  <Share2 className="h-4 w-4 mr-2" />
-                  Partager
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+
+                <Separator />
+
+                {/* Waitlist Button */}
+                <JoinWaitlistButton
+                  serviceId={serviceId!}
+                  serviceName={service.name}
+                  storeId={service.store_id ?? service.store?.id}
+                  disabled={!user}
+                />
+
+                {/* Secondary Actions */}
+                <div className="grid grid-cols-2 gap-2">
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={handleWishlistToggle}
+                    disabled={isCheckingWishlist}
+                  >
+                    {isCheckingWishlist ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Heart
+                        className={`h-4 w-4 mr-2 ${isInWishlist ? 'fill-red-500 text-red-500' : ''}`}
+                      />
+                    )}
+                    {isInWishlist ? 'Retiré' : 'Favori'}
+                  </Button>
+                  <Button variant="outline" className="w-full" onClick={handleShare}>
+                    <Share2 className="h-4 w-4 mr-2" />
+                    Partager
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
 

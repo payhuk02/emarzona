@@ -223,6 +223,7 @@ const CrossTypeBundlesPage = lazyPage(
   () => import('@/pages/dashboard/bundles/CrossTypeBundlesPage')
 );
 const ServiceAddonsPage = lazyPage(() => import('@/pages/service/ServiceAddonsPage'));
+const ServiceProjectOffersPage = lazyPage(() => import('@/pages/service/ServiceProjectOffersPage'));
 const CreateBundle = lazyPage(() => import('@/pages/digital/CreateBundle'));
 const MyLicensesRedirect = lazyPage(() => import('@/pages/digital/MyLicensesRedirect'));
 const PaymentOrderManageRedirect = lazyPage(
@@ -462,6 +463,7 @@ export const dashboardRoutes = (
     {pr('/dashboard/services/waitlist', ServiceWaitlistManagementPage)}
     {pr('/dashboard/services/reminders', BookingRemindersManagementPage)}
     {pr('/dashboard/services/addons', ServiceAddonsPage)}
+    {pr('/dashboard/services/project-offers', ServiceProjectOffersPage)}
 
     {/* Advanced Systems */}
     {pr('/orders/:orderId/messaging', OrderMessaging)}

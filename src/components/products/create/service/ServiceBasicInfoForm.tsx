@@ -209,10 +209,10 @@ export const ServiceBasicInfoForm = ({ data, onUpdate }: ServiceBasicInfoFormPro
             })
           }
           placeholder="Mode de prestation"
-          description="Par défaut : rendez-vous. Le mode projet (packages / livraison) arrive en P1."
+          description="Par défaut : rendez-vous. En mode projet / les deux, configurez packages & brief dans Dashboard → Offres projet."
         >
           <SelectItem value="appointment">Rendez-vous / réservation</SelectItem>
-          <SelectItem value="project">Prestation sur projet (bientôt)</SelectItem>
+          <SelectItem value="project">Prestation sur projet</SelectItem>
           <SelectItem value="both">Les deux</SelectItem>
         </SelectField>
       </div>

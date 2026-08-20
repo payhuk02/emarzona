@@ -584,9 +584,38 @@ const Checkout = () => {
           return;
         }
 
-        // Service : créneau transmis depuis la fiche service
+        // Service : créneau (appointment) OU package projet
         if (product.product_type === 'service') {
-          if (!scheduledAt) {
+          const projectKey = `service-project-order:${product.id}`;
+          let projectOrder: {
+            packageId?: string;
+            packageName?: string;
+            totalPrice?: number;
+            totalDays?: number;
+            extraIds?: string[];
+            briefAnswers?: Record<string, string | boolean>;
+          } | null = null;
+          try {
+            const raw = sessionStorage.getItem(projectKey);
+            if (raw) projectOrder = JSON.parse(raw) as typeof projectOrder;
+          } catch {
+            projectOrder = null;
+          }
+
+          const { data: serviceProductRow } = await supabase
+            .from('service_products')
+            .select('id, duration_minutes, fulfillment_mode')
+            .eq('product_id', product.id)
+            .maybeSingle();
+
+          const fulfillmentMode =
+            (serviceProductRow as { fulfillment_mode?: string } | null)?.fulfillment_mode ||
+            'appointment';
+          const isProjectCheckout =
+            Boolean(projectOrder?.packageId) &&
+            (fulfillmentMode === 'project' || fulfillmentMode === 'both');
+
+          if (!scheduledAt && !isProjectCheckout) {
             const params = new URLSearchParams({ guestEmail: formData.email });
             if (customerName) params.set('guestName', customerName);
             if (customerPhone) params.set('guestPhone', customerPhone);
@@ -595,14 +624,50 @@ const Checkout = () => {
             return;
           }
 
-          const { data: serviceProductRow } = await supabase
-            .from('service_products')
-            .select('id, duration_minutes')
-            .eq('product_id', product.id)
-            .maybeSingle();
-
           if (!serviceProductRow?.id) {
             throw new Error('Service introuvable');
+          }
+
+          if (isProjectCheckout && projectOrder) {
+            const deliveryDays = Math.max(1, Number(projectOrder.totalDays) || 3);
+            const projectStart = new Date();
+            projectStart.setDate(projectStart.getDate() + deliveryDays);
+            const serviceResult = await createServiceOrder({
+              serviceProductId: serviceProductRow.id,
+              productId: product.id,
+              storeId: store.id,
+              customerEmail: formData.email,
+              customerName,
+              customerPhone,
+              bookingDateTime: projectStart.toISOString(),
+              numberOfParticipants: 1,
+              durationMinutes: serviceProductRow.duration_minutes ?? undefined,
+              notes: JSON.stringify({
+                fulfillment_mode: 'project',
+                delivery_package_id: projectOrder.packageId,
+                package_name: projectOrder.packageName,
+                total_days: projectOrder.totalDays,
+                extra_ids: projectOrder.extraIds,
+                brief_answers: projectOrder.briefAnswers,
+                quoted_total: projectOrder.totalPrice,
+              }),
+              checkoutMode: 'immediate',
+            });
+            sessionStorage.removeItem(projectKey);
+            if (!serviceResult.checkoutUrl) {
+              toast({
+                title: 'Commande projet créée',
+                description: 'Votre commande a été enregistrée.',
+              });
+              navigate('/account/orders', { replace: true });
+              setSubmitting(false);
+              return;
+            }
+            safeRedirect(serviceResult.checkoutUrl, () => {
+              navigate('/account/orders', { replace: true });
+            });
+            setSubmitting(false);
+            return;
           }
 
           const serviceResult = await createServiceOrder({
@@ -612,7 +677,7 @@ const Checkout = () => {
             customerEmail: formData.email,
             customerName,
             customerPhone,
-            bookingDateTime: scheduledAt,
+            bookingDateTime: scheduledAt!,
             numberOfParticipants: serviceParticipants,
             durationMinutes: serviceProductRow.duration_minutes ?? undefined,
             notes: 'Réservation via checkout direct',
