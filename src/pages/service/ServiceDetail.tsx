@@ -6,7 +6,7 @@
  * Améliorée avec SEO, analytics, recommandations, partage social et wishlist
  */
 
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { AppPageShell } from '@/components/layout/AppPageShell';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -37,6 +37,7 @@ import {
   CheckCircle2,
   Shield,
   TrendingUp,
+  ChevronRight,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
@@ -74,9 +75,11 @@ import {
   BookedTogetherRecommendations,
 } from '@/components/service/ServiceRecommendations';
 import { JoinWaitlistButton } from '@/components/service/JoinWaitlistButton';
+import { useServiceCategories } from '@/hooks/useServiceCategories';
+import { getCategoryBreadcrumb } from '@/lib/services/service-categories';
 
 const PRODUCT_SERVICE_FIELDS =
-  'id, store_id, slug, name, description, short_description, category, tags, product_type, is_active, price, promotional_price, currency, image_url, images, created_at, updated_at, payment_options, pricing_model, licensing_type, license_terms';
+  'id, store_id, slug, name, description, short_description, category, category_id, tags, product_type, is_active, price, promotional_price, currency, image_url, images, created_at, updated_at, payment_options, pricing_model, licensing_type, license_terms';
 const PRODUCT_SERVICE_SELECT = PRODUCT_SERVICE_FIELDS;
 const STORE_PUBLIC_FIELDS = 'id, name, slug, logo_url';
 const SERVICE_PRODUCT_FIELDS =
@@ -98,6 +101,7 @@ export default function ServiceDetail() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
+  const { data: serviceCategories = [] } = useServiceCategories();
   // Type pour le créneau horaire sélectionné
   interface TimeSlot {
     time: string;
@@ -577,7 +581,47 @@ export default function ServiceDetail() {
 
           {/* Title & Category */}
           <div>
-            <Badge className="mb-2">{service?.category}</Badge>
+            {(() => {
+              const crumb = getCategoryBreadcrumb(
+                serviceCategories,
+                (service as { category_id?: string | null })?.category_id
+              );
+              if (crumb.parent || crumb.leaf) {
+                return (
+                  <nav
+                    aria-label="Fil d'Ariane catégories"
+                    className="flex flex-wrap items-center gap-1 text-sm text-muted-foreground mb-3"
+                  >
+                    <Link to="/marketplace?productType=service" className="hover:text-foreground">
+                      Services
+                    </Link>
+                    {crumb.parent && (
+                      <>
+                        <ChevronRight className="h-3.5 w-3.5" aria-hidden />
+                        <Link
+                          to={`/services/${crumb.parent.slug}`}
+                          className="hover:text-foreground"
+                        >
+                          {crumb.parent.name}
+                        </Link>
+                      </>
+                    )}
+                    {crumb.leaf && (
+                      <>
+                        <ChevronRight className="h-3.5 w-3.5" aria-hidden />
+                        <Link
+                          to={`/services/${crumb.parent?.slug ?? 'all'}/${crumb.leaf.slug}`}
+                          className="hover:text-foreground font-medium text-foreground"
+                        >
+                          {crumb.leaf.name}
+                        </Link>
+                      </>
+                    )}
+                  </nav>
+                );
+              }
+              return service?.category ? <Badge className="mb-2">{service.category}</Badge> : null;
+            })()}
             <h1 className="text-lg sm:text-2xl md:text-3xl font-bold mb-2">{service?.name}</h1>
             {service?.short_description && (
               <p className="text-sm sm:text-base md:text-lg text-muted-foreground">

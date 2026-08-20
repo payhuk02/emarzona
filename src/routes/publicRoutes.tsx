@@ -66,6 +66,7 @@ const PremiumUnlockPage = lazyPage(() => import('@/pages/digital/PremiumUnlockPa
 const ProductsCompare = lazyPage(() => import('@/pages/ProductsCompare'));
 const PhysicalProductDetail = lazyPage(() => import('@/pages/physical/PhysicalProductDetail'));
 const ServiceDetail = lazyPage(() => import('@/pages/service/ServiceDetail'));
+const ServicesCategoryListing = lazyPage(() => import('@/pages/service/ServicesCategoryListing'));
 const ArtistProductDetail = lazyPage(() => import('@/pages/artist/ArtistProductDetail'));
 const ArtistPortfolioPage = lazyPage(() => import('@/pages/artist/ArtistPortfolioPage'));
 const CollectionsPage = lazyPage(() =>
@@ -292,6 +293,8 @@ export const publicRoutes = (
     <Route path="/bundles/:bundleId" element={<BundleDetail />} />
     <Route path="/physical/:productId" element={<PhysicalProductDetail />} />
     <Route path="/service/:serviceId" element={<ServiceDetail />} />
+    <Route path="/services/:categorySlug/:subSlug" element={<ServicesCategoryListing />} />
+    <Route path="/services/:categorySlug" element={<ServicesCategoryListing />} />
     <Route path="/artist/:productId" element={<ArtistProductDetail />} />
     <Route path="/portfolio/:slug" element={<ArtistPortfolioPage />} />
     <Route path="/courses" element={<CoursesCatalog />} />

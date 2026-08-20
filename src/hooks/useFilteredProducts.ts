@@ -190,6 +190,8 @@ export function useFilteredServiceProducts(options: FilteredProductsOptions) {
           p_calendar_available: filters.calendarAvailable || null,
           p_sort_by: filters.sortBy || 'created_at',
           p_sort_order: filters.sortOrder || 'desc',
+          p_category_id: filters.serviceCategoryId || null,
+          p_parent_category_id: filters.serviceParentCategoryId || null,
         });
 
         if (error) {
@@ -368,9 +370,3 @@ export function useFilteredProducts(options: FilteredProductsOptions) {
       return { data: [], isLoading: false, isError: false, error: null };
   }
 }
-
-
-
-
-
-

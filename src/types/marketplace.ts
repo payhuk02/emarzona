@@ -69,6 +69,8 @@ export interface FilterState {
   serviceType?: string;
   locationType?: 'all' | 'online' | 'on_site' | 'customer_location';
   calendarAvailable?: boolean;
+  serviceCategoryId?: string;
+  serviceParentCategoryId?: string;
 
   // Filtres spécifiques Course
   difficulty?: 'all' | 'beginner' | 'intermediate' | 'advanced';

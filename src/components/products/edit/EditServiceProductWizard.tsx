@@ -67,7 +67,7 @@ import { useQuery } from '@tanstack/react-query';
 const PRODUCT_FIELDS =
   'id, store_id, name, slug, description, short_description, price, promotional_price, currency, category, category_id, tags, images, image_url, meta_title, meta_description, og_image, faqs, payment_options, hide_purchase_count, hide_likes_count, hide_recommendations_count, hide_downloads_count, hide_reviews_count, hide_rating, is_active, whatsapp_number, whatsapp_enabled';
 const SERVICE_PRODUCT_FIELDS =
-  'id, product_id, service_type, duration_minutes, location_type, location_address, meeting_url, timezone, requires_staff, max_participants, pricing_type, deposit_required, deposit_amount, deposit_type, allow_booking_cancellation, cancellation_deadline_hours, require_approval, buffer_time_before, buffer_time_after, advance_booking_days';
+  'id, product_id, service_type, duration_minutes, location_type, location_address, meeting_url, timezone, requires_staff, max_participants, pricing_type, deposit_required, deposit_amount, deposit_type, allow_booking_cancellation, cancellation_deadline_hours, require_approval, buffer_time_before, buffer_time_after, advance_booking_days, fulfillment_mode';
 const SERVICE_AVAILABILITY_SLOT_FIELDS =
   'id, service_product_id, day_of_week, start_time, end_time';
 const SERVICE_STAFF_FIELDS = 'id, service_product_id, name, email, role, avatar_url, availability';
@@ -223,8 +223,14 @@ const convertToFormData = async (
     price: product.price || 0,
     currency: product.currency || 'XOF',
     promotional_price: product.promotional_price || undefined,
-    category: product.category || 'consultation',
+    category: product.category || '',
     category_id: product.category_id || null,
+    parent_category_id: null,
+    fulfillment_mode:
+      (serviceProduct as { fulfillment_mode?: string } | null)?.fulfillment_mode === 'project' ||
+      (serviceProduct as { fulfillment_mode?: string } | null)?.fulfillment_mode === 'both'
+        ? ((serviceProduct as { fulfillment_mode: string }).fulfillment_mode as 'project' | 'both')
+        : 'appointment',
     tags: product.tags || [],
     images: product.images || (product.image_url ? [product.image_url] : []),
     image_url: product.image_url || '',
@@ -649,6 +655,7 @@ export const EditServiceProductWizard = ({
         deposit_required: formData.deposit_required || false,
         deposit_amount: formData.deposit_amount || null,
         deposit_type: formData.deposit_type || null,
+        fulfillment_mode: formData.fulfillment_mode || 'appointment',
         allow_booking_cancellation: formData.booking_options?.allow_booking_cancellation ?? true,
         cancellation_deadline_hours: formData.booking_options?.cancellation_deadline_hours || 24,
         require_approval: formData.booking_options?.require_approval || false,

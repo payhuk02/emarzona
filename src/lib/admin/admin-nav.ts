@@ -125,6 +125,12 @@ export const ADMIN_NAV_SECTIONS: AdminNavSection[] = [
         permissions: ['products.manage'],
       },
       {
+        icon: Layers,
+        label: 'Catégories Services',
+        path: '/admin/service-categories',
+        permissions: ['products.manage'],
+      },
+      {
         icon: GraduationCap,
         label: 'Cours',
         path: '/admin/courses',

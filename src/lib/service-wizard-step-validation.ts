@@ -12,6 +12,9 @@ export type ServiceWizardFormFields = {
   location_address?: string;
   location_type?: string;
   availability_slots?: unknown[];
+  category_id?: string | null;
+  category?: string;
+  parent_category_id?: string | null;
 };
 
 export type ServiceWizardStepValidationResult = {
@@ -52,6 +55,10 @@ export function validateServiceWizardStep(
         const message = getFieldError(result.errors, field);
         if (message) errors.push(message);
       }
+    }
+
+    if (!formData.category_id) {
+      errors.push('La catégorie et la sous-catégorie sont requises');
     }
   }
 

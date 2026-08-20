@@ -216,8 +216,10 @@ export const CreateServiceWizard = ({
     pricing_model: 'one-time',
     create_free_preview: false,
     preview_content_description: '',
-    category: 'consultation',
+    category: '',
     category_id: null,
+    parent_category_id: null,
+    fulfillment_mode: 'appointment',
     tags: [],
     images: [],
     service_type: 'appointment',
@@ -721,6 +723,7 @@ export const CreateServiceWizard = ({
         deposit_required: formData.deposit_required || false,
         deposit_amount: formData.deposit_amount,
         deposit_type: formData.deposit_type,
+        fulfillment_mode: formData.fulfillment_mode || 'appointment',
         allow_booking_cancellation:
           bookingOptions?.allow_booking_cancellation ?? formData.allow_booking_cancellation ?? true,
         cancellation_deadline_hours:

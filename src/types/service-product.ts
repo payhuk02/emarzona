@@ -38,6 +38,8 @@ export interface ServiceProductFormData {
   compare_at_price: number | null;
   category: string;
   category_id: string | null;
+  parent_category_id?: string | null;
+  fulfillment_mode?: 'appointment' | 'project' | 'both';
   tags: string[];
   images: string[];
 

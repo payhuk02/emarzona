@@ -28,7 +28,8 @@ import type { ServiceProductFormData } from '@/types/service-product';
 import { logger } from '@/lib/logger';
 import { useSpaceInputFix } from '@/hooks/useSpaceInputFix';
 import { buildSeoFromGenerated, mergeImages } from '@/lib/ai-product-apply';
-import { getCategoriesForProductType } from '@/constants/product-categories';
+import { useServiceCategoryTree } from '@/hooks/useServiceCategories';
+import { useMemo } from 'react';
 
 interface ServiceBasicInfoFormProps {
   data: Partial<ServiceProductFormData>;
@@ -36,12 +37,43 @@ interface ServiceBasicInfoFormProps {
   storeSlug?: string;
 }
 
-const SERVICE_CATEGORIES = getCategoriesForProductType('service');
-
 export const ServiceBasicInfoForm = ({ data, onUpdate }: ServiceBasicInfoFormProps) => {
   const { toast } = useToast();
   const { uploadMany, uploading, progress: uploadProgress } = useProductImageUpload('services');
   const { handleKeyDown: handleSpaceKeyDown } = useSpaceInputFix();
+  const { tree, isLoading: categoriesLoading } = useServiceCategoryTree();
+
+  const selectedParentId = useMemo(() => {
+    if (data.parent_category_id) return data.parent_category_id;
+    if (!data.category_id) return null;
+    for (const parent of tree) {
+      if (parent.id === data.category_id) return parent.id;
+      if (parent.children.some(c => c.id === data.category_id)) return parent.id;
+    }
+    return null;
+  }, [data.parent_category_id, data.category_id, tree]);
+
+  const childOptions = useMemo(() => {
+    if (!selectedParentId) return [];
+    return tree.find(p => p.id === selectedParentId)?.children ?? [];
+  }, [selectedParentId, tree]);
+
+  const handleParentChange = (parentId: string) => {
+    onUpdate({
+      parent_category_id: parentId,
+      category_id: null,
+      category: '',
+    });
+  };
+
+  const handleChildChange = (childId: string) => {
+    const child = childOptions.find(c => c.id === childId);
+    onUpdate({
+      category_id: childId,
+      category: child?.slug ?? '',
+      parent_category_id: selectedParentId,
+    });
+  };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -120,24 +152,68 @@ export const ServiceBasicInfoForm = ({ data, onUpdate }: ServiceBasicInfoFormPro
         <SelectItem value="other">Autre</SelectItem>
       </SelectField>
 
-      {/* Category */}
+      {/* Category cascade */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <SelectField
+            label="Catégorie *"
+            contentVariant="sheet"
+            useMobileSelectRoot
+            value={selectedParentId || undefined}
+            onValueChange={handleParentChange}
+            required
+            placeholder={categoriesLoading ? 'Chargement…' : 'Sélectionnez une catégorie'}
+            disabled={categoriesLoading || tree.length === 0}
+          >
+            {tree.map(cat => (
+              <SelectItem key={cat.id} value={cat.id}>
+                {cat.name}
+              </SelectItem>
+            ))}
+          </SelectField>
+        </div>
+        <div className="space-y-2">
+          <SelectField
+            label="Sous-catégorie *"
+            contentVariant="sheet"
+            useMobileSelectRoot
+            value={data.category_id || undefined}
+            onValueChange={handleChildChange}
+            required
+            placeholder={
+              !selectedParentId
+                ? 'Choisissez d’abord une catégorie'
+                : 'Sélectionnez une sous-catégorie'
+            }
+            disabled={!selectedParentId || childOptions.length === 0}
+          >
+            {childOptions.map(cat => (
+              <SelectItem key={cat.id} value={cat.id}>
+                {cat.name}
+              </SelectItem>
+            ))}
+          </SelectField>
+        </div>
+      </div>
+
+      {/* Fulfillment mode (hybrid foundation) */}
       <div className="space-y-2">
         <SelectField
-          label="Catégorie *"
+          label="Mode de prestation"
           contentVariant="sheet"
           useMobileSelectRoot
-          value={data.category || 'consultation'}
-          onValueChange={value => {
-            onUpdate({ category: value });
-          }}
-          required
-          placeholder="Sélectionnez une catégorie"
+          value={data.fulfillment_mode || 'appointment'}
+          onValueChange={value =>
+            onUpdate({
+              fulfillment_mode: value as 'appointment' | 'project' | 'both',
+            })
+          }
+          placeholder="Mode de prestation"
+          description="Par défaut : rendez-vous. Le mode projet (packages / livraison) arrive en P1."
         >
-          {SERVICE_CATEGORIES.map(cat => (
-            <SelectItem key={cat.value} value={cat.value}>
-              {cat.label}
-            </SelectItem>
-          ))}
+          <SelectItem value="appointment">Rendez-vous / réservation</SelectItem>
+          <SelectItem value="project">Prestation sur projet (bientôt)</SelectItem>
+          <SelectItem value="both">Les deux</SelectItem>
         </SelectField>
       </div>
 

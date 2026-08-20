@@ -29,7 +29,9 @@ import {
   MapPin,
   Clock,
   Award,
+  Layers,
 } from 'lucide-react';
+import { useServiceCategoryTree } from '@/hooks/useServiceCategories';
 
 interface ContextualFiltersProps {
   productType: string;
@@ -43,6 +45,12 @@ export function ContextualFilters({
   onFiltersChange,
 }: ContextualFiltersProps) {
   const { t: _t } = useTranslation();
+  const { tree } = useServiceCategoryTree();
+
+  const serviceChildren = useMemo(() => {
+    if (!filters.serviceParentCategoryId) return [];
+    return tree.find(p => p.id === filters.serviceParentCategoryId)?.children ?? [];
+  }, [tree, filters.serviceParentCategoryId]);
 
   const typeSpecificFilters = useMemo(() => {
     switch (productType) {
@@ -188,6 +196,64 @@ export function ContextualFilters({
       case 'service':
         return (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label className="text-sm font-medium mb-2 block text-slate-300">
+                <Layers className="inline h-4 w-4 mr-2" />
+                Catégorie
+              </Label>
+              <Select
+                value={filters.serviceParentCategoryId || 'all'}
+                onValueChange={value =>
+                  onFiltersChange({
+                    serviceParentCategoryId: value === 'all' ? undefined : value,
+                    serviceCategoryId: undefined,
+                    category: 'all',
+                  })
+                }
+              >
+                <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                  <SelectValue placeholder="Toutes les catégories" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Toutes les catégories</SelectItem>
+                  {tree.map(parent => (
+                    <SelectItem key={parent.id} value={parent.id}>
+                      {parent.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label className="text-sm font-medium mb-2 block text-slate-300">
+                Sous-catégorie
+              </Label>
+              <Select
+                value={filters.serviceCategoryId || 'all'}
+                onValueChange={value => {
+                  const child = serviceChildren.find(c => c.id === value);
+                  onFiltersChange({
+                    serviceCategoryId: value === 'all' ? undefined : value,
+                    category: child?.slug ?? 'all',
+                  });
+                }}
+                disabled={!filters.serviceParentCategoryId}
+              >
+                <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                  <SelectValue placeholder="Toutes les sous-catégories" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Toutes les sous-catégories</SelectItem>
+                  {serviceChildren.map(child => (
+                    <SelectItem key={child.id} value={child.id}>
+                      {child.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
             {/* Type de service */}
             <div>
               <Label className="text-sm font-medium mb-2 block text-slate-300">
@@ -453,7 +519,7 @@ export function ContextualFilters({
       default:
         return null;
     }
-  }, [productType, filters, onFiltersChange]);
+  }, [productType, filters, onFiltersChange, tree, serviceChildren]);
 
   const getProductTypeLabel = (type: string): string => {
     const labels: Record<string, string> = {
