@@ -146,7 +146,9 @@ SelectScrollDownButton.displayName = SelectPrimitive.ScrollDownButton.displayNam
  * </SelectContent>
  * ```
  */
-type SelectContentProps = React.ComponentPropsWithoutRef<typeof SelectPrimitive.Content> & {
+type RadixSelectContentProps = React.ComponentPropsWithoutRef<typeof SelectPrimitive.Content>;
+
+type AppSelectContentProps = RadixSelectContentProps & {
   /**
    * Variante d'affichage spécifique au mobile.
    * - "sheet": bottom sheet en bas de l'écran sur mobile (par défaut)
@@ -157,126 +159,140 @@ type SelectContentProps = React.ComponentPropsWithoutRef<typeof SelectPrimitive.
 
 const SelectContentComponent = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Content>,
-  SelectContentProps
->(({ className, children, position = 'popper', mobileVariant = 'sheet', ...props }, ref) => {
-  const isMobile = useIsMobile();
-  const { isKeyboardOpen, keyboardHeight } = useMobileKeyboard();
-  const contentRef = React.useRef<React.ElementRef<typeof SelectPrimitive.Content>>(null);
-  const [isOpen, setIsOpen] = React.useState(false);
+  AppSelectContentProps
+>(
+  (
+    {
+      className,
+      children,
+      position = 'popper',
+      mobileVariant = 'sheet',
+      style,
+      collisionPadding,
+      avoidCollisions,
+      sticky,
+      ...props
+    },
+    ref
+  ) => {
+    const isMobile = useIsMobile();
+    const { isKeyboardOpen, keyboardHeight } = useMobileKeyboard();
+    const contentRef = React.useRef<React.ElementRef<typeof SelectPrimitive.Content>>(null);
+    const [isOpen, setIsOpen] = React.useState(false);
 
-  const isMobileSheet = isMobile && mobileVariant === 'sheet';
-  const resolvedPosition = isMobileSheet ? 'item-aligned' : position;
+    const isMobileSheet = isMobile && mobileVariant === 'sheet';
+    const resolvedPosition = isMobileSheet ? 'item-aligned' : position;
 
-  // Exposer la ref interne à l'extérieur si nécessaire
-  React.useImperativeHandle(
-    ref,
-    () => contentRef.current as React.ElementRef<typeof SelectPrimitive.Content>
-  );
+    // Exposer la ref interne à l'extérieur si nécessaire
+    React.useImperativeHandle(
+      ref,
+      () => contentRef.current as React.ElementRef<typeof SelectPrimitive.Content>
+    );
 
-  // Suivre l'état d'ouverture via l'attribut data-state
-  React.useEffect(() => {
-    if (!contentRef.current) return;
+    // Suivre l'état d'ouverture via l'attribut data-state
+    React.useEffect(() => {
+      if (!contentRef.current) return;
 
-    const node = contentRef.current;
+      const node = contentRef.current;
 
-    const updateState = () => {
-      const state = node.getAttribute('data-state');
-      setIsOpen(state === 'open');
+      const updateState = () => {
+        const state = node.getAttribute('data-state');
+        setIsOpen(state === 'open');
+      };
+
+      const observer = new MutationObserver(updateState);
+      observer.observe(node, {
+        attributes: true,
+        attributeFilter: ['data-state'],
+      });
+
+      // État initial
+      updateState();
+
+      return () => {
+        observer.disconnect();
+        setIsOpen(false);
+      };
+    }, []);
+
+    // Verrouiller le scroll du body sur mobile quand le Select est ouvert
+    useBodyScrollLock(isMobile && isOpen);
+
+    const contentStyle: React.CSSProperties = {
+      ...style,
+      ...(isMobileSheet && {
+        position: 'fixed',
+        left: 0,
+        right: 0,
+        bottom: 0,
+        top: 'auto',
+        transform: 'none',
+        width: '100vw',
+        maxWidth: '100vw',
+      }),
+      ...(isMobile &&
+        isKeyboardOpen &&
+        keyboardHeight > 0 && {
+          marginBottom: `${keyboardHeight}px`,
+          maxHeight: `calc(80vh - ${keyboardHeight}px)`,
+        }),
     };
 
-    const observer = new MutationObserver(updateState);
-    observer.observe(node, {
-      attributes: true,
-      attributeFilter: ['data-state'],
-    });
-
-    // État initial
-    updateState();
-
-    return () => observer.disconnect();
-  }, []);
-
-  // Verrouiller le scroll du body sur mobile quand le Select est ouvert
-  useBodyScrollLock(isMobile && isOpen);
-
-  return (
-    <SelectPrimitive.Portal>
-      <SelectPrimitive.Content
-        ref={contentRef}
-        forceMount
-        className={cn(
-          // Conteneur principal
-          isMobileSheet
-            ? 'fixed inset-x-0 bottom-0 z-[1060] max-h-[80vh] w-full overflow-hidden rounded-t-2xl border bg-popover text-popover-foreground shadow-lg sm:relative sm:inset-auto sm:w-auto sm:max-h-[min(24rem,80vh)] sm:rounded-md'
-            : 'relative z-[1060] max-h-[min(24rem,80vh)] min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-lg',
-          // Animations optimisées pour mobile - CSS only, pas de JS
-          isMobile
-            ? isMobileSheet
-              ? 'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:slide-in-from-bottom-4 data-[state=closed]:slide-out-to-bottom-4 data-[state=open]:duration-150 data-[state=closed]:duration-100'
-              : 'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=open]:duration-150 data-[state=closed]:duration-100'
-            : 'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2',
-          !isMobileSheet &&
-            position === 'popper' &&
-            'data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1',
-          // Optimisations mobile supplémentaires
-          isMobile && !isMobileSheet && 'max-w-[calc(100vw-1rem)]',
-          'data-[state=closed]:hidden',
-          className
-        )}
-        position={resolvedPosition}
-        collisionPadding={
-          isMobile
-            ? MOBILE_COLLISION_PADDING
-            : (props.collisionPadding ?? DESKTOP_COLLISION_PADDING)
-        }
-        // En mode sheet mobile, on gère nous-mêmes le positionnement : pas de collisions Radix
-        avoidCollisions={isMobileSheet ? false : true}
-        sticky={isMobile ? 'always' : 'partial'}
-        style={{
-          ...props.style,
-          // Forcer un bottom sheet plein écran correctement centré sur mobile
-          ...(isMobileSheet && {
-            position: 'fixed',
-            left: 0,
-            right: 0,
-            bottom: 0,
-            top: 'auto',
-            transform: 'none',
-            width: '100vw',
-            maxWidth: '100vw',
-          }),
-          // Ajuster le positionnement si le clavier est ouvert
-          ...(isMobile &&
-            isKeyboardOpen &&
-            keyboardHeight > 0 && {
-              marginBottom: `${keyboardHeight}px`,
-              maxHeight: `calc(80vh - ${keyboardHeight}px)`,
-            }),
-        }}
-        {...props}
-      >
-        <SelectScrollUpButton />
-        <SelectPrimitive.Viewport
+    return (
+      <SelectPrimitive.Portal>
+        <SelectPrimitive.Content
+          ref={contentRef}
           className={cn(
-            'p-1 overflow-y-auto',
-            // Scroll optimisé pour mobile - performance
-            isMobile && 'overscroll-contain touch-pan-y [-webkit-overflow-scrolling:touch]',
-            // Empêcher le scroll du body parent
-            isMobile && 'will-change-scroll',
-            // Améliorer la réactivité du scroll sur mobile
-            isMobile && 'scroll-smooth',
-            position === 'popper' &&
-              !isMobileSheet &&
-              'h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]'
+            // Conteneur principal
+            isMobileSheet
+              ? 'fixed inset-x-0 bottom-0 z-[1060] max-h-[80vh] w-full overflow-hidden rounded-t-2xl border bg-popover text-popover-foreground shadow-lg sm:relative sm:inset-auto sm:w-auto sm:max-h-[min(24rem,80vh)] sm:rounded-md'
+              : 'relative z-[1060] max-h-[min(24rem,80vh)] min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-lg',
+            // Animations optimisées pour mobile - CSS only, pas de JS
+            isMobile
+              ? isMobileSheet
+                ? 'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:slide-in-from-bottom-4 data-[state=closed]:slide-out-to-bottom-4 data-[state=open]:duration-150 data-[state=closed]:duration-100'
+                : 'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=open]:duration-150 data-[state=closed]:duration-100'
+              : 'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2',
+            !isMobileSheet &&
+              position === 'popper' &&
+              'data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1',
+            // Optimisations mobile supplémentaires
+            isMobile && !isMobileSheet && 'max-w-[calc(100vw-1rem)]',
+            'data-[state=closed]:hidden',
+            className
           )}
+          position={resolvedPosition as NonNullable<RadixSelectContentProps['position']>}
+          collisionPadding={
+            isMobile ? MOBILE_COLLISION_PADDING : (collisionPadding ?? DESKTOP_COLLISION_PADDING)
+          }
+          avoidCollisions={isMobileSheet ? false : (avoidCollisions ?? true)}
+          sticky={isMobile ? 'always' : (sticky ?? 'partial')}
+          style={contentStyle}
+          {...props}
         >
-          {children}
-        </SelectPrimitive.Viewport>
-        <SelectScrollDownButton />
-      </SelectPrimitive.Content>
-    </SelectPrimitive.Portal>
-  );
-});
+          <SelectScrollUpButton />
+          <SelectPrimitive.Viewport
+            className={cn(
+              'p-1 overflow-y-auto',
+              // Scroll optimisé pour mobile - performance
+              isMobile && 'overscroll-contain touch-pan-y [-webkit-overflow-scrolling:touch]',
+              // Empêcher le scroll du body parent
+              isMobile && 'will-change-scroll',
+              // Améliorer la réactivité du scroll sur mobile
+              isMobile && 'scroll-smooth',
+              position === 'popper' &&
+                !isMobileSheet &&
+                'h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]'
+            )}
+          >
+            {children}
+          </SelectPrimitive.Viewport>
+          <SelectScrollDownButton />
+        </SelectPrimitive.Content>
+      </SelectPrimitive.Portal>
+    );
+  }
+);
 
 // Optimisation avec React.memo pour éviter les re-renders inutiles
 const SelectContent = React.memo(SelectContentComponent);

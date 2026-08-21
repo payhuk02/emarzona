@@ -36,6 +36,7 @@ import { logger } from '@/lib/logger';
 import { findOrCreateStoreCustomer } from '@/lib/orders/customers-data';
 import { generateOrderNumber } from '@/lib/orders/orders-data';
 import { insertOrderItem } from '@/lib/orders/order-items-client';
+import type { Json } from '@/integrations/supabase/types';
 
 const PRODUCT_FIELDS = 'id, name, price, promotional_price, currency, payment_options';
 const SERVICE_PRODUCT_FIELDS =
@@ -686,7 +687,7 @@ export const useCreateServiceOrder = () => {
           p_customer_email: customerEmail,
           p_customer_name: customerName || customerEmail.split('@')[0],
           p_customer_phone: customerPhone,
-          p_service_metadata: serviceMetadata,
+          p_service_metadata: serviceMetadata as Json,
           p_gift_card_id: giftCardId,
           p_gift_card_amount_requested: giftCardAmount || 0,
           p_coupon_code: undefined,
