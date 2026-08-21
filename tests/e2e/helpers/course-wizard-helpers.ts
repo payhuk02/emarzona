@@ -90,8 +90,25 @@ export async function advanceCourseWizardToPublishStep(page: Page): Promise<void
 }
 
 export async function publishCourseWizard(page: Page): Promise<void> {
-  await page.getByRole('button', { name: /Publier le cours|Publier$/i }).click();
-  await expect(page.getByText(/publi|succès|créé/i).first()).toBeVisible({ timeout: 60_000 });
+  const errorToast = page.getByText(/Validation incomplète|❌\s*Erreur/i).first();
+  const successToast = page.getByText(/Cours publié|est maintenant en ligne/i).first();
+
+  await page.getByRole('button', { name: /Publier le cours|^Publier$/i }).click();
+
+  await Promise.race([
+    successToast.waitFor({ state: 'visible', timeout: 90_000 }),
+    errorToast.waitFor({ state: 'visible', timeout: 90_000 }),
+    page.waitForURL(/\/dashboard\/courses(?:\/|$|\?)/, { timeout: 90_000 }),
+  ]).catch(() => undefined);
+
+  if (await errorToast.isVisible().catch(() => false)) {
+    const copy = (await errorToast.innerText().catch(() => '')).slice(0, 400);
+    throw new Error(`Course publish failed in UI: ${copy}`);
+  }
+
+  if (!/\/dashboard\/courses(?:\/|$|\?)/.test(page.url())) {
+    await expect(page).toHaveURL(/\/dashboard\/courses(?:\/|$|\?)/, { timeout: 45_000 });
+  }
 }
 
 export { clickWizardNext, goToWizardStep };

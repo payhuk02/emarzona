@@ -30,6 +30,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { initiatePayment } from '@/lib/payment-service';
+import { resolveServicePayableAmount } from '@/lib/service/service-payable-amount';
 import { useToast } from '@/hooks/use-toast';
 import { getAffiliateTrackingCookie } from '@/hooks/useAffiliateTracking';
 import { logger } from '@/lib/logger';
@@ -40,7 +41,7 @@ import type { Json } from '@/integrations/supabase/types';
 
 const PRODUCT_FIELDS = 'id, name, price, promotional_price, currency, payment_options';
 const SERVICE_PRODUCT_FIELDS =
-  'id, duration_minutes, max_participants, advance_booking_days, max_bookings_per_day, timezone, pricing_type, buffer_time_before, buffer_time_after';
+  'id, duration_minutes, max_participants, advance_booking_days, max_bookings_per_day, timezone, pricing_type, buffer_time_before, buffer_time_after, deposit_required, deposit_type, deposit_amount';
 const SERVICE_STAFF_FIELDS = 'id, service_product_id, is_active';
 const SERVICE_BOOKING_FIELDS =
   'id, scheduled_date, scheduled_start_time, scheduled_end_time, status';
@@ -134,6 +135,9 @@ export interface CreateServiceOrderOptions {
     briefAnswers?: Record<string, string | boolean>;
     quotedTotal?: number;
   };
+
+  /** Produits complémentaires sélectionnés (digital/physical) */
+  addonProductIds?: string[];
 }
 
 /**
@@ -223,6 +227,7 @@ export const useCreateServiceOrder = () => {
         giftCardAmount = 0,
         checkoutMode = 'immediate',
         projectOrder,
+        addonProductIds = [],
       } = options;
 
       // 1. Récupérer les détails du produit (avec payment_options)
@@ -715,7 +720,36 @@ export const useCreateServiceOrder = () => {
         total_amount: number;
       };
 
-      const finalAmountToPay = orderData.total_amount;
+      let billedTotal = Number(orderData.total_amount) || 0;
+      if (addonProductIds.length > 0) {
+        const { data: addonResult, error: addonError } = await supabase.rpc(
+          'attach_service_order_addons',
+          {
+            p_order_id: orderData.order_id,
+            p_service_product_id: serviceProductId,
+            p_addon_product_ids: addonProductIds,
+          }
+        );
+        if (addonError) {
+          await supabase
+            .from('service_bookings')
+            .update({ status: 'cancelled' })
+            .eq('id', booking.id);
+          logger.error('attach_service_order_addons failed', { error: addonError });
+          throw new Error('Impossible d’ajouter les produits complémentaires');
+        }
+        const addonPayload = addonResult as { total_amount?: number } | null;
+        if (typeof addonPayload?.total_amount === 'number') {
+          billedTotal = addonPayload.total_amount;
+        }
+      }
+
+      const payable = resolveServicePayableAmount(billedTotal, paymentOptions, {
+        deposit_required: serviceProduct.deposit_required,
+        deposit_type: serviceProduct.deposit_type,
+        deposit_amount: serviceProduct.deposit_amount,
+      });
+      const finalAmountToPay = payable.amountToPay;
       const orderId = orderData.order_id;
       const orderNumber = orderData.order_number;
       const customerId = orderData.customer_id;
@@ -757,9 +791,20 @@ export const useCreateServiceOrder = () => {
         });
       });
 
-      const calcTotalPrice = Number(orderData.total_amount) || product.price * numberOfParticipants;
-      const calcAmountToPay = finalAmountToPay;
-      const calcRemainingAmount = Math.max(0, calcTotalPrice - calcAmountToPay);
+      const calcTotalPrice = payable.totalAmount;
+      const calcAmountToPay = payable.amountToPay;
+      const calcRemainingAmount = payable.remainingAmount;
+
+      if (payable.paymentType === 'percentage') {
+        await supabase
+          .from('orders')
+          .update({
+            payment_type: 'percentage',
+            percentage_paid: payable.percentageRate,
+            remaining_amount: payable.remainingAmount,
+          })
+          .eq('id', orderId);
+      }
 
       // 11. Créer un secured_payment si paiement escrow
       if (paymentType === 'delivery_secured') {
@@ -786,8 +831,8 @@ export const useCreateServiceOrder = () => {
       });
 
       const paymentDescription =
-        paymentType === 'percentage'
-          ? `Acompte ${percentageRate}%: ${product.name} - ${formattedBookingDate}`
+        payable.paymentType === 'percentage'
+          ? `Acompte ${payable.percentageRate ?? percentageRate}%: ${product.name} - ${formattedBookingDate}`
           : paymentType === 'delivery_secured'
             ? `Paiement sécurisé: ${product.name} - ${formattedBookingDate}`
             : `Réservation: ${product.name} - ${formattedBookingDate}`;
@@ -811,8 +856,8 @@ export const useCreateServiceOrder = () => {
           duration_minutes: actualDuration,
           number_of_participants: numberOfParticipants,
           order_item_id: orderItemId,
-          payment_type: paymentType,
-          percentage_rate: paymentType === 'percentage' ? percentageRate : null,
+          payment_type: payable.paymentType,
+          percentage_rate: payable.percentageRate,
           total_price: calcTotalPrice,
           amount_paid: calcAmountToPay,
           remaining_amount: calcRemainingAmount,

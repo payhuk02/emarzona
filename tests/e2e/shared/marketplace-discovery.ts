@@ -118,6 +118,7 @@ export async function assertGuestMarketplaceProductVisible(
     type: productType,
     sort: 'created_at',
     order: 'desc',
+    q: productName,
   });
   await gotoApp(page, `/marketplace?${params.toString()}`);
   await assertMarketplaceGuestBuyCta(page, productName, buyLabelPattern);

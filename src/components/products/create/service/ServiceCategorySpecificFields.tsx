@@ -144,7 +144,7 @@ export function ServiceCategorySpecificFields({
   onChange,
 }: ServiceCategorySpecificFieldsProps) {
   return (
-    <Card>
+    <Card data-testid="service-category-specific-fields">
       <CardHeader>
         <div className="flex flex-wrap items-center gap-2">
           <CardTitle className="text-lg">{profile.headline}</CardTitle>

@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { initiatePayment } from '@/lib/payment-service';
+import { resolveServicePayableAmount } from '@/lib/service/service-payable-amount';
 import { getAffiliateTrackingCookie } from '@/hooks/useAffiliateTracking';
 import { logger } from '@/lib/logger';
 import { findOrCreateStoreCustomer } from '@/lib/orders/customers-data';
@@ -12,7 +13,7 @@ import {
 import { OrderStrategy, OrderStrategyContext, OrderCreationResult } from './OrderStrategy';
 
 const SERVICE_PRODUCT_FIELDS =
-  'id, duration_minutes, max_participants, advance_booking_days, max_bookings_per_day, timezone, pricing_type, buffer_time_before, buffer_time_after';
+  'id, duration_minutes, max_participants, advance_booking_days, max_bookings_per_day, timezone, pricing_type, buffer_time_before, buffer_time_after, deposit_required, deposit_type, deposit_amount';
 const SERVICE_STAFF_FIELDS = 'id, service_product_id, is_active';
 const SERVICE_BOOKING_FIELDS =
   'id, scheduled_date, scheduled_start_time, scheduled_end_time, status';
@@ -428,7 +429,30 @@ export class ServiceOrderStrategy implements OrderStrategy {
     const orderId = orderData.order_id;
     const orderItemId = orderData.order_item_id;
     const rpcCustomerId = orderData.customer_id || customerId;
-    const finalAmountToPay = Number(orderData.total_amount) || 0;
+    const payable = resolveServicePayableAmount(
+      Number(orderData.total_amount) || 0,
+      {
+        payment_type: paymentType,
+        percentage_rate: percentageRate,
+      },
+      {
+        deposit_required: serviceProduct.deposit_required,
+        deposit_type: serviceProduct.deposit_type,
+        deposit_amount: serviceProduct.deposit_amount,
+      }
+    );
+    const finalAmountToPay = payable.amountToPay;
+
+    if (payable.paymentType === 'percentage') {
+      await supabase
+        .from('orders')
+        .update({
+          payment_type: 'percentage',
+          percentage_paid: payable.percentageRate,
+          remaining_amount: payable.remainingAmount,
+        })
+        .eq('id', orderId);
+    }
 
     const { data: invoiceId, error: invoiceError } = await supabase.rpc(
       'create_invoice_from_order',
@@ -456,8 +480,8 @@ export class ServiceOrderStrategy implements OrderStrategy {
     if (paymentType === 'delivery_secured') {
       await supabase.from('secured_payments').insert({
         order_id: orderId,
-        total_amount: finalAmountToPay,
-        held_amount: finalAmountToPay,
+        total_amount: payable.totalAmount,
+        held_amount: payable.amountToPay,
         status: 'held',
         hold_reason: 'service_completion',
         release_conditions: { requires_service_completion: true, auto_release_days: 3 },
@@ -473,8 +497,8 @@ export class ServiceOrderStrategy implements OrderStrategy {
     });
 
     const paymentDescription =
-      paymentType === 'percentage'
-        ? `Acompte ${percentageRate}%: ${productData.name} - ${formattedBookingDate}`
+      payable.paymentType === 'percentage'
+        ? `Acompte ${payable.percentageRate ?? percentageRate}%: ${productData.name} - ${formattedBookingDate}`
         : paymentType === 'delivery_secured'
           ? `Paiement sécurisé: ${productData.name} - ${formattedBookingDate}`
           : `Réservation: ${productData.name} - ${formattedBookingDate}`;
@@ -500,11 +524,11 @@ export class ServiceOrderStrategy implements OrderStrategy {
         duration_minutes: actualDuration,
         number_of_participants: numberOfParticipants,
         order_item_id: orderItemId,
-        payment_type: paymentType,
-        percentage_rate: paymentType === 'percentage' ? percentageRate : null,
-        total_price: finalAmountToPay,
-        amount_paid: finalAmountToPay,
-        remaining_amount: 0,
+        payment_type: payable.paymentType,
+        percentage_rate: payable.percentageRate,
+        total_price: payable.totalAmount,
+        amount_paid: payable.amountToPay,
+        remaining_amount: payable.remainingAmount,
         ...(guestCheckout ? { guest_checkout: true } : {}),
       },
     });
