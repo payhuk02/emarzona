@@ -29,7 +29,10 @@ import { logger } from '@/lib/logger';
 import { useSpaceInputFix } from '@/hooks/useSpaceInputFix';
 import { buildSeoFromGenerated, mergeImages } from '@/lib/ai-product-apply';
 import { useServiceCategoryTree } from '@/hooks/useServiceCategories';
-import { useMemo } from 'react';
+import { resolveServiceCategorySelection } from '@/lib/services/service-categories';
+import { getServiceFormProfile, profileDefaultsPatch } from '@/lib/services/service-form-profiles';
+import { ServiceCategorySpecificFields } from './ServiceCategorySpecificFields';
+import { useEffect, useMemo } from 'react';
 
 interface ServiceBasicInfoFormProps {
   data: Partial<ServiceProductFormData>;
@@ -43,37 +46,69 @@ export const ServiceBasicInfoForm = ({ data, onUpdate }: ServiceBasicInfoFormPro
   const { handleKeyDown: handleSpaceKeyDown } = useSpaceInputFix();
   const { tree, isLoading: categoriesLoading } = useServiceCategoryTree();
 
-  const selectedParentId = useMemo(() => {
-    if (data.parent_category_id) return data.parent_category_id;
-    if (!data.category_id) return null;
-    for (const parent of tree) {
-      if (parent.id === data.category_id) return parent.id;
-      if (parent.children.some(c => c.id === data.category_id)) return parent.id;
-    }
-    return null;
-  }, [data.parent_category_id, data.category_id, tree]);
+  const resolvedCategory = useMemo(
+    () => resolveServiceCategorySelection(tree, data.parent_category_id, data.category_id),
+    [tree, data.parent_category_id, data.category_id]
+  );
 
-  const childOptions = useMemo(() => {
-    if (!selectedParentId) return [];
-    return tree.find(p => p.id === selectedParentId)?.children ?? [];
-  }, [selectedParentId, tree]);
+  const selectedParentId = resolvedCategory.parentId;
+  const childOptions = resolvedCategory.parent?.children ?? [];
+
+  useEffect(() => {
+    if (categoriesLoading || tree.length === 0) return;
+    const nextParent = resolvedCategory.parentId;
+    const nextChild = resolvedCategory.categoryId;
+    const nextSlug = resolvedCategory.leaf ? resolvedCategory.categorySlug : data.category || '';
+    if (
+      nextParent !== (data.parent_category_id ?? null) ||
+      nextChild !== (data.category_id ?? null) ||
+      (resolvedCategory.leaf && nextSlug !== (data.category || ''))
+    ) {
+      onUpdate({
+        parent_category_id: nextParent,
+        category_id: nextChild,
+        category: nextSlug,
+      });
+    }
+  }, [
+    categoriesLoading,
+    tree.length,
+    resolvedCategory.parentId,
+    resolvedCategory.categoryId,
+    resolvedCategory.categorySlug,
+    resolvedCategory.leaf,
+    data.parent_category_id,
+    data.category_id,
+    data.category,
+    onUpdate,
+  ]);
 
   const handleParentChange = (parentId: string) => {
     onUpdate({
       parent_category_id: parentId,
       category_id: null,
       category: '',
+      category_attributes: {},
     });
   };
 
   const handleChildChange = (childId: string) => {
     const child = childOptions.find(c => c.id === childId);
+    const parent = tree.find(p => p.id === selectedParentId);
+    const profile = getServiceFormProfile(parent?.slug, child?.slug);
     onUpdate({
       category_id: childId,
       category: child?.slug ?? '',
       parent_category_id: selectedParentId,
+      category_attributes: {},
+      ...(profile ? profileDefaultsPatch(profile) : {}),
     });
   };
+
+  const formProfile = getServiceFormProfile(
+    resolvedCategory.parent?.slug,
+    resolvedCategory.leaf?.slug || data.category
+  );
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -122,36 +157,6 @@ export const ServiceBasicInfoForm = ({ data, onUpdate }: ServiceBasicInfoFormPro
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      {/* Service Type */}
-      <SelectField
-        label="Type de service"
-        contentVariant="sheet"
-        useMobileSelectRoot
-        value={data.service_type}
-        onValueChange={value =>
-          onUpdate({
-            service_type: value as
-              | 'appointment'
-              | 'class'
-              | 'event'
-              | 'consultation'
-              | 'workshop'
-              | 'maintenance'
-              | 'installation'
-              | 'other',
-          })
-        }
-        required
-        placeholder="Sélectionnez un type"
-        description="Choisissez le type qui correspond le mieux à votre service"
-      >
-        <SelectItem value="appointment">Rendez-vous</SelectItem>
-        <SelectItem value="class">Cours / Formation</SelectItem>
-        <SelectItem value="event">Événement</SelectItem>
-        <SelectItem value="consultation">Consultation</SelectItem>
-        <SelectItem value="other">Autre</SelectItem>
-      </SelectField>
-
       {/* Category cascade */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
@@ -177,7 +182,7 @@ export const ServiceBasicInfoForm = ({ data, onUpdate }: ServiceBasicInfoFormPro
             label="Sous-catégorie *"
             contentVariant="sheet"
             useMobileSelectRoot
-            value={data.category_id || undefined}
+            value={resolvedCategory.categoryId || undefined}
             onValueChange={handleChildChange}
             required
             placeholder={
@@ -193,8 +198,47 @@ export const ServiceBasicInfoForm = ({ data, onUpdate }: ServiceBasicInfoFormPro
               </SelectItem>
             ))}
           </SelectField>
+          {selectedParentId && childOptions.length === 0 && !categoriesLoading && (
+            <p className="text-xs text-destructive">
+              Cette catégorie n’a pas de sous-catégorie. Choisissez-en une autre.
+            </p>
+          )}
         </div>
       </div>
+
+      {formProfile && resolvedCategory.leaf && (
+        <ServiceCategorySpecificFields
+          profile={formProfile}
+          leafLabel={resolvedCategory.leaf.name}
+          values={data.category_attributes || {}}
+          onChange={category_attributes => onUpdate({ category_attributes })}
+        />
+      )}
+
+      <SelectField
+        label="Type de service"
+        contentVariant="sheet"
+        useMobileSelectRoot
+        value={data.service_type}
+        onValueChange={value =>
+          onUpdate({
+            service_type: value as 'appointment' | 'class' | 'event' | 'consultation' | 'other',
+          })
+        }
+        required
+        placeholder="Sélectionnez un type"
+        description={
+          formProfile
+            ? `Prérempli pour ${formProfile.familyLabel}. Vous pouvez ajuster.`
+            : 'Choisissez le type qui correspond le mieux à votre service'
+        }
+      >
+        <SelectItem value="appointment">Rendez-vous</SelectItem>
+        <SelectItem value="class">Cours / Formation</SelectItem>
+        <SelectItem value="event">Événement</SelectItem>
+        <SelectItem value="consultation">Consultation</SelectItem>
+        <SelectItem value="other">Autre</SelectItem>
+      </SelectField>
 
       {/* Fulfillment mode (hybrid foundation) */}
       <div className="space-y-2">
@@ -209,7 +253,17 @@ export const ServiceBasicInfoForm = ({ data, onUpdate }: ServiceBasicInfoFormPro
             })
           }
           placeholder="Mode de prestation"
-          description="Par défaut : rendez-vous. En mode projet / les deux, configurez packages & brief dans Dashboard → Offres projet."
+          description={
+            formProfile
+              ? `Prérempli : ${
+                  formProfile.defaults.fulfillment_mode === 'project'
+                    ? 'prestation sur projet'
+                    : formProfile.defaults.fulfillment_mode === 'both'
+                      ? 'rendez-vous ou projet'
+                      : 'rendez-vous'
+                }. Ajustable.`
+              : 'Par défaut : rendez-vous. En mode projet / les deux, configurez packages & brief dans Dashboard → Offres projet.'
+          }
         >
           <SelectItem value="appointment">Rendez-vous / réservation</SelectItem>
           <SelectItem value="project">Prestation sur projet</SelectItem>

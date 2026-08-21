@@ -30990,6 +30990,7 @@ export type Database = {
           requires_staff: boolean | null;
           service_type: string;
           timezone: string | null;
+          category_attributes: Json;
           total_bookings: number | null;
           total_cancelled_bookings: number | null;
           total_completed_bookings: number | null;
@@ -31023,6 +31024,7 @@ export type Database = {
           requires_staff?: boolean | null;
           service_type?: string;
           timezone?: string | null;
+          category_attributes?: Json;
           total_bookings?: number | null;
           total_cancelled_bookings?: number | null;
           total_completed_bookings?: number | null;
@@ -31056,6 +31058,7 @@ export type Database = {
           requires_staff?: boolean | null;
           service_type?: string;
           timezone?: string | null;
+          category_attributes?: Json;
           total_bookings?: number | null;
           total_cancelled_bookings?: number | null;
           total_completed_bookings?: number | null;
@@ -45588,6 +45591,14 @@ export type Database = {
         };
         Returns: Json;
       };
+      attach_service_order_addons: {
+        Args: {
+          p_addon_product_ids: string[];
+          p_order_id: string;
+          p_service_product_id: string;
+        };
+        Returns: Json;
+      };
       create_auction_winner_order: {
         Args: { p_auction_id: string };
         Returns: string;
@@ -46091,6 +46102,8 @@ export type Database = {
           booking_required: boolean;
           calendar_available: boolean;
           category: string;
+          category_attributes: Json;
+          category_id: string;
           created_at: string;
           currency: string;
           description: string;

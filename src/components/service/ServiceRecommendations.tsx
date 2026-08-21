@@ -23,7 +23,7 @@ import {
   Clock,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { ServiceCard } from './ServiceCard';
+import { ServiceListingAttributeBadges } from './ServiceListingAttributeBadges';
 import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
 import { PAID_REVENUE_ELIGIBLE_STATUSES } from '@/lib/orders/order-status';
@@ -76,6 +76,7 @@ const useServiceRecommendations = (
           };
           service_products?: Array<{
             duration_minutes?: number;
+            category_attributes?: Record<string, string | number | boolean | string[]>;
           }>;
           recommendationScore?: number;
         }
@@ -394,9 +395,15 @@ export const ServiceRecommendations = ({
                 )}
               </div>
               {service.service_products?.[0] && (
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <Clock className="h-3 w-3" />
-                  <span>Durée: {service.service_products[0].duration_minutes || 0} min</span>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Clock className="h-3 w-3" />
+                    <span>Durée: {service.service_products[0].duration_minutes || 0} min</span>
+                  </div>
+                  <ServiceListingAttributeBadges
+                    categorySlug={service.category}
+                    attributes={service.service_products[0].category_attributes}
+                  />
                 </div>
               )}
             </CardContent>
@@ -542,7 +549,7 @@ export const BookedTogetherRecommendations = ({
             </div>
             <CardContent className="p-3">
               <h4 className="font-medium text-sm line-clamp-2 mb-2">{service.name}</h4>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between mb-2">
                 <span className="font-bold text-sm">
                   {service.promotional_price || service.price} {service.currency}
                 </span>
@@ -553,6 +560,11 @@ export const BookedTogetherRecommendations = ({
                   </div>
                 )}
               </div>
+              <ServiceListingAttributeBadges
+                max={2}
+                categorySlug={service.category}
+                attributes={service.service_products?.[0]?.category_attributes}
+              />
             </CardContent>
           </Card>
         ))}

@@ -83,6 +83,8 @@ export interface ServiceProductFormData {
   whatsapp_number?: string;
   whatsapp_enabled?: boolean;
 
+  category_attributes?: Record<string, string | number | boolean | string[]>;
+
   // Meta
   is_active: boolean;
 }

@@ -21,6 +21,7 @@ import {
   DollarSign,
 } from 'lucide-react';
 import { generateProductUrl } from '@/lib/store-utils';
+import { buildWwwProductPublicPath } from '@/lib/seo/product-public-url';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 
@@ -30,6 +31,7 @@ export interface ProductManagementActionsProps {
     slug: string;
     name?: string;
     is_active?: boolean | null;
+    product_type?: string | null;
   };
   storeSlug?: string;
   storeSubdomain?: string;
@@ -56,10 +58,16 @@ export const ProductManagementActions: React.FC<ProductManagementActionsProps> =
   const navigate = useNavigate();
 
   const productUrl = React.useMemo(() => {
+    const marketplacePath = buildWwwProductPublicPath({
+      id: product.id,
+      slug: product.slug,
+      product_type: product.product_type,
+    });
+    if (marketplacePath) return marketplacePath;
     return storeSlug && product.slug
       ? generateProductUrl(storeSlug, product.slug, storeSubdomain)
       : `/products/${product.slug || product.id}`;
-  }, [storeSlug, product.slug, product.id, storeSubdomain]);
+  }, [storeSlug, product.slug, product.id, product.product_type, storeSubdomain]);
 
   const checkoutUrl = React.useMemo(() => {
     // URL relative au domaine courant (on ajoute juste /checkout/)

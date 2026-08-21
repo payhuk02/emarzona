@@ -50,30 +50,19 @@ import { useWizardServerValidation } from '@/hooks/useWizardServerValidation';
 import { supabase } from '@/integrations/supabase/client';
 import { updateServiceProductTx } from '@/lib/products/product-update-rpc';
 import { persistProductWhatsApp } from '@/lib/products/persist-product-whatsapp';
+import { persistServiceCategoryAttributes } from '@/lib/service/persist-service-category-attributes';
+import { loadServiceProductFormData } from '@/lib/service/load-service-product-form';
+import { resolveServiceProductCategoryPayload } from '@/lib/services/service-categories';
+import { useServiceCategoryTree } from '@/hooks/useServiceCategories';
 import {
   validateServiceWizardPublishSteps,
   validateServiceWizardStep,
 } from '@/lib/service-wizard-step-validation';
 import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
-import type {
-  ServiceProductFormData,
-  ServiceStaffMember,
-  ServiceAvailabilitySlot,
-} from '@/types/service-product';
+import type { ServiceProductFormData } from '@/types/service-product';
 import { useCatalogCacheInvalidation } from '@/hooks/useCatalogCacheInvalidation';
 import { useQuery } from '@tanstack/react-query';
-
-const PRODUCT_FIELDS =
-  'id, store_id, name, slug, description, short_description, price, promotional_price, currency, category, category_id, tags, images, image_url, meta_title, meta_description, og_image, faqs, payment_options, hide_purchase_count, hide_likes_count, hide_recommendations_count, hide_downloads_count, hide_reviews_count, hide_rating, is_active, whatsapp_number, whatsapp_enabled';
-const SERVICE_PRODUCT_FIELDS =
-  'id, product_id, service_type, duration_minutes, location_type, location_address, meeting_url, timezone, requires_staff, max_participants, pricing_type, deposit_required, deposit_amount, deposit_type, allow_booking_cancellation, cancellation_deadline_hours, require_approval, buffer_time_before, buffer_time_after, advance_booking_days, fulfillment_mode';
-const SERVICE_AVAILABILITY_SLOT_FIELDS =
-  'id, service_product_id, day_of_week, start_time, end_time';
-const SERVICE_STAFF_FIELDS = 'id, service_product_id, name, email, role, avatar_url, availability';
-const SERVICE_RESOURCE_FIELDS = 'id, service_product_id, name, resource_name';
-const PRODUCT_AFFILIATE_FIELDS =
-  'id, product_id, affiliate_enabled, commission_rate, commission_type, fixed_commission_amount, cookie_duration_days, min_order_amount, allow_self_referral, require_approval, terms_and_conditions';
 
 const STEPS = [
   {
@@ -142,213 +131,7 @@ interface EditServiceProductWizardProps {
   onBack?: () => void;
 }
 
-/**
- * Convert service product from DB to form data
- * ✅ SÉCURITÉ: Inclut validation de propriété
- */
-const convertToFormData = async (
-  productId: string,
-  userId?: string
-): Promise<Partial<ServiceProductFormData>> => {
-  // ✅ SÉCURITÉ: Vérifier propriété du produit avant chargement
-  if (userId) {
-    const { data: ownershipCheck, error: ownershipError } = await supabase
-      .from('products')
-      .select(
-        `
-        id,
-        stores!inner(user_id)
-      `
-      )
-      .eq('id', productId)
-      .eq('stores.user_id', userId)
-      .single();
-
-    if (ownershipError || !ownershipCheck) {
-      throw new Error('Accès non autorisé à ce produit');
-    }
-  }
-
-  // Produit principal
-  const { data: product, error: productError } = await supabase
-    .from('products')
-    .select(PRODUCT_FIELDS)
-    .eq('id', productId)
-    .single();
-
-  if (productError) throw productError;
-  if (!product) throw new Error('Produit non trouvé');
-
-  // 🚀 PERFORMANCE: Requête parallèle pour les données de service
-  const { data: serviceProduct, error: serviceError } = await supabase
-    .from('service_products')
-    .select(SERVICE_PRODUCT_FIELDS)
-    .eq('product_id', productId)
-    .maybeSingle();
-
-  if (serviceError && serviceError.code !== 'PGRST116') throw serviceError;
-
-  // Load availability slots
-  const { data: availabilitySlots } = await supabase
-    .from('service_availability_slots')
-    .select(SERVICE_AVAILABILITY_SLOT_FIELDS)
-    .eq('service_product_id', serviceProduct?.id || productId);
-
-  // Load staff members
-  const { data: staffMembers } = await supabase
-    .from('service_staff_members')
-    .select(SERVICE_STAFF_FIELDS)
-    .eq('service_product_id', serviceProduct?.id || productId);
-
-  // Load resources
-  const { data: resources } = await supabase
-    .from('service_resources')
-    .select(SERVICE_RESOURCE_FIELDS)
-    .eq('service_product_id', serviceProduct?.id || productId);
-
-  // Load affiliate settings
-  const { data: affiliateSettings } = await supabase
-    .from('product_affiliate_settings')
-    .select(PRODUCT_AFFILIATE_FIELDS)
-    .eq('product_id', productId)
-    .limit(1)
-    .maybeSingle();
-
-  return {
-    // Basic Info
-    name: product.name || '',
-    slug: product.slug || '',
-    description: product.description || '',
-    short_description: product.short_description || '',
-    price: product.price || 0,
-    currency: product.currency || 'XOF',
-    promotional_price: product.promotional_price || undefined,
-    category: product.category || '',
-    category_id: product.category_id || null,
-    parent_category_id: null,
-    fulfillment_mode:
-      (serviceProduct as { fulfillment_mode?: string } | null)?.fulfillment_mode === 'project' ||
-      (serviceProduct as { fulfillment_mode?: string } | null)?.fulfillment_mode === 'both'
-        ? ((serviceProduct as { fulfillment_mode: string }).fulfillment_mode as 'project' | 'both')
-        : 'appointment',
-    tags: product.tags || [],
-    images: product.images || (product.image_url ? [product.image_url] : []),
-    image_url: product.image_url || '',
-
-    // Duration & Availability
-    service_type:
-      (serviceProduct?.service_type as
-        | 'appointment'
-        | 'class'
-        | 'event'
-        | 'consultation'
-        | 'other') || 'appointment',
-    duration: serviceProduct?.duration_minutes || 60,
-    duration_minutes: serviceProduct?.duration_minutes || 60,
-    location_type:
-      (serviceProduct?.location_type as 'on_site' | 'online' | 'customer_location' | 'flexible') ||
-      'on_site',
-    location_address: serviceProduct?.location_address || undefined,
-    meeting_url: serviceProduct?.meeting_url || undefined,
-    availability_slots: (availabilitySlots || []).map((slot: Record<string, unknown>) => ({
-      day: (slot.day_of_week as number) || 0,
-      start_time: (slot.start_time as string) || '09:00',
-      end_time: (slot.end_time as string) || '17:00',
-    })) as ServiceAvailabilitySlot[],
-    timezone: serviceProduct?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
-
-    // Staff & Resources
-    requires_staff: serviceProduct?.requires_staff ?? false,
-    staff_members: (staffMembers || []).map((staff: Record<string, unknown>) => ({
-      id: staff.id as string,
-      name: (staff.name as string) || '',
-      email: (staff.email as string) || '',
-      role: (staff.role as string) || undefined,
-      avatar_url: (staff.avatar_url as string) || undefined,
-      availability: staff.availability as Record<string, unknown> | undefined,
-    })) as ServiceStaffMember[],
-    max_participants: serviceProduct?.max_participants || 1,
-    resources: (resources || [])
-      .map((r: Record<string, unknown>) => (r.name as string) || (r.resource_name as string))
-      .filter(Boolean),
-    resources_needed: (resources || [])
-      .map((r: Record<string, unknown>) => (r.name as string) || (r.resource_name as string))
-      .filter(Boolean),
-
-    // Pricing & Options
-    pricing_type:
-      (serviceProduct?.pricing_type as 'fixed' | 'hourly' | 'per_participant') || 'fixed',
-    deposit_required: serviceProduct?.deposit_required || false,
-    deposit_amount: serviceProduct?.deposit_amount || undefined,
-    deposit_type: (serviceProduct?.deposit_type as 'fixed' | 'percentage') || undefined,
-    booking_options: {
-      allow_booking_cancellation: serviceProduct?.allow_booking_cancellation ?? true,
-      cancellation_deadline_hours: serviceProduct?.cancellation_deadline_hours || 24,
-      require_approval: serviceProduct?.require_approval || false,
-      buffer_time_before: serviceProduct?.buffer_time_before || 0,
-      buffer_time_after: serviceProduct?.buffer_time_after || 0,
-      advance_booking_days: serviceProduct?.advance_booking_days || 30,
-      max_bookings_per_day: serviceProduct?.max_bookings_per_day ?? undefined,
-    },
-
-    // Affiliation
-    affiliate: affiliateSettings
-      ? {
-          enabled: affiliateSettings.affiliate_enabled || false,
-          commission_rate: affiliateSettings.commission_rate || 10,
-          commission_type:
-            (affiliateSettings.commission_type as 'percentage' | 'fixed') || 'percentage',
-          fixed_commission_amount: affiliateSettings.fixed_commission_amount || 0,
-          cookie_duration_days: affiliateSettings.cookie_duration_days || 30,
-          min_order_amount: affiliateSettings.min_order_amount || 0,
-          allow_self_referral: affiliateSettings.allow_self_referral || false,
-          require_approval: affiliateSettings.require_approval || false,
-          terms_and_conditions: affiliateSettings.terms_and_conditions || '',
-        }
-      : {
-          enabled: false,
-          commission_rate: 10,
-          commission_type: 'percentage' as const,
-          fixed_commission_amount: 0,
-          cookie_duration_days: 30,
-          min_order_amount: 0,
-          allow_self_referral: false,
-          require_approval: false,
-          terms_and_conditions: '',
-        },
-
-    // SEO & FAQs
-    seo: {
-      meta_title: product.meta_title || '',
-      meta_description: product.meta_description || '',
-      meta_keywords: '',
-      og_title: '',
-      og_description: '',
-      og_image: product.og_image || '',
-    },
-    faqs: product.faqs || [],
-
-    // Payment Options
-    payment: product.payment_options || {
-      payment_type: 'full',
-      percentage_rate: 30,
-    },
-
-    // Statistics Display Settings
-    hide_purchase_count: product.hide_purchase_count || false,
-    hide_likes_count: product.hide_likes_count || false,
-    hide_recommendations_count: product.hide_recommendations_count || false,
-    hide_downloads_count: product.hide_downloads_count || false,
-    hide_reviews_count: product.hide_reviews_count || false,
-    hide_rating: product.hide_rating || false,
-
-    whatsapp_number: product.whatsapp_number || '',
-    whatsapp_enabled: Boolean(product.whatsapp_enabled),
-
-    // Meta
-    is_active: product.is_active ?? true,
-  };
-};
+const convertToFormData = loadServiceProductFormData;
 
 export const EditServiceProductWizard = ({
   productId,
@@ -364,6 +147,7 @@ export const EditServiceProductWizard = ({
   const { store: hookStore, loading: storeLoading } = useStore();
   const store = hookStore || (propsStoreId ? { id: propsStoreId } : null);
   const storeId = propsStoreId || store?.id;
+  const { tree: categoryTree } = useServiceCategoryTree();
   const invalidateCatalog = useCatalogCacheInvalidation();
 
   // Load existing product with security validation and cache optimisé
@@ -456,7 +240,7 @@ export const EditServiceProductWizard = ({
 
       switch (step) {
         case 1: {
-          const clientResult = validateServiceWizardStep(1, formData);
+          const clientResult = validateServiceWizardStep(1, formData, { categoryTree });
           if (!clientResult.valid) {
             setValidationErrors(prev => ({ ...prev, [step]: clientResult.errors }));
             return { valid: false, errors: clientResult.errors };
@@ -544,7 +328,7 @@ export const EditServiceProductWizard = ({
           return { valid: true, errors: [] };
       }
     },
-    [formData, storeId, validateServiceServer, clearServerErrors]
+    [formData, storeId, validateServiceServer, clearServerErrors, categoryTree]
   );
 
   /**
@@ -642,6 +426,13 @@ export const EditServiceProductWizard = ({
         is_active: formData.is_active,
       };
 
+      const syncedCategory = await resolveServiceProductCategoryPayload(
+        formData.parent_category_id,
+        formData.category_id
+      );
+      productPayload.category = syncedCategory.category;
+      productPayload.category_id = syncedCategory.category_id;
+
       const servicePayload: Record<string, unknown> = {
         service_type: formData.service_type || 'appointment',
         duration_minutes: formData.duration_minutes || 60,
@@ -663,6 +454,7 @@ export const EditServiceProductWizard = ({
         buffer_time_after: formData.booking_options?.buffer_time_after || 0,
         max_bookings_per_day: formData.booking_options?.max_bookings_per_day,
         advance_booking_days: formData.booking_options?.advance_booking_days || 30,
+        category_attributes: formData.category_attributes || {},
       };
 
       let affiliatePayload = null;
@@ -691,13 +483,21 @@ export const EditServiceProductWizard = ({
         email: staff.email,
         role: staff.role || null,
         avatar_url: staff.avatar_url || null,
-        availability: staff.availability || null,
+        is_active: true,
       }));
 
       const resourcesList = formData.resources || formData.resources_needed || [];
-      const resourcesData = resourcesList.map((resource: string) => ({
-        resource_name: resource,
-      }));
+      const resourcesData = resourcesList
+        .map((resource: string | { name?: string }) =>
+          typeof resource === 'string' ? resource : resource.name
+        )
+        .filter((name): name is string => Boolean(name?.trim()))
+        .map(name => ({
+          name,
+          resource_type: 'other',
+          quantity: 1,
+          is_required: true,
+        }));
 
       const rpcResult = await updateServiceProductTx(
         store.id,
@@ -711,6 +511,40 @@ export const EditServiceProductWizard = ({
       );
 
       await persistProductWhatsApp(productId, formData.whatsapp_number, formData.whatsapp_enabled);
+      await persistServiceCategoryAttributes(
+        rpcResult.service_product_id,
+        formData.category_attributes,
+        productId
+      );
+
+      const { data: existingAffiliate } = await supabase
+        .from('product_affiliate_settings')
+        .select('id')
+        .eq('product_id', productId)
+        .maybeSingle();
+
+      const affiliateRow = {
+        product_id: productId,
+        store_id: store.id,
+        affiliate_enabled: Boolean(formData.affiliate?.enabled),
+        commission_rate: formData.affiliate?.commission_rate ?? 10,
+        commission_type: formData.affiliate?.commission_type ?? 'percentage',
+        fixed_commission_amount: formData.affiliate?.fixed_commission_amount ?? 0,
+        cookie_duration_days: formData.affiliate?.cookie_duration_days ?? 30,
+        min_order_amount: formData.affiliate?.min_order_amount ?? 0,
+        allow_self_referral: formData.affiliate?.allow_self_referral ?? false,
+        require_approval: formData.affiliate?.require_approval ?? false,
+        terms_and_conditions: formData.affiliate?.terms_and_conditions ?? '',
+      };
+
+      if (existingAffiliate?.id) {
+        await supabase
+          .from('product_affiliate_settings')
+          .update(affiliateRow)
+          .eq('id', existingAffiliate.id);
+      } else if (formData.affiliate?.enabled) {
+        await supabase.from('product_affiliate_settings').insert(affiliateRow);
+      }
 
       const serviceProductId = rpcResult.service_product_id;
       if (!serviceProductId) {
@@ -762,7 +596,7 @@ export const EditServiceProductWizard = ({
   }, []);
 
   const handleSave = useCallback(async () => {
-    const publishValidation = validateServiceWizardPublishSteps(formData);
+    const publishValidation = validateServiceWizardPublishSteps(formData, { categoryTree });
     if (!publishValidation.valid) {
       if (publishValidation.failedStep) {
         setCurrentStep(publishValidation.failedStep);
@@ -791,7 +625,7 @@ export const EditServiceProductWizard = ({
     }
 
     await saveProduct();
-  }, [formData, validateStep, saveProduct, toast]);
+  }, [formData, validateStep, saveProduct, toast, categoryTree]);
 
   const getStepProps = useCallback(() => {
     const baseProps = {

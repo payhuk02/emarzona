@@ -61,4 +61,36 @@ describe('validateServiceWizardStep', () => {
     expect(result.valid).toBe(false);
     expect(result.failedStep).toBe(1);
   });
+
+  it('rejects step 1 when required category attributes are missing', () => {
+    const result = validateServiceWizardStep(1, {
+      ...baseForm,
+      promotional_price: 15000,
+      category: 'svc-traduction',
+      category_attributes: { word_count: 500 },
+    });
+    expect(result.valid).toBe(false);
+    expect(result.errors.some(msg => /requis/i.test(msg))).toBe(true);
+  });
+
+  it('allows step 2 without slots for marketing mode both', () => {
+    const result = validateServiceWizardStep(2, {
+      ...baseForm,
+      category: 'svc-community-management',
+      fulfillment_mode: 'both',
+      availability_slots: [],
+    });
+    expect(result.valid).toBe(true);
+  });
+
+  it('still requires slots for appointment mode even when family is project-first', () => {
+    const result = validateServiceWizardStep(2, {
+      ...baseForm,
+      category: 'svc-developpement-web',
+      fulfillment_mode: 'appointment',
+      availability_slots: [],
+    });
+    expect(result.valid).toBe(false);
+    expect(result.toastTitle).toBe('Créneaux requis');
+  });
 });

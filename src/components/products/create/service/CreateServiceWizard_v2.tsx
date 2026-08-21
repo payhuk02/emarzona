@@ -9,7 +9,7 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -51,12 +51,26 @@ import {
 } from './service-wizard-steps';
 import { useToast } from '@/hooks/use-toast';
 import { useStore } from '@/hooks/useStore';
+import { useAuth } from '@/contexts/AuthContext';
 import { useCatalogCacheInvalidation } from '@/hooks/useCatalogCacheInvalidation';
 import { useWizardServerValidation } from '@/hooks/useWizardServerValidation';
 import { createServiceProductTx } from '@/lib/products/product-create-rpc';
 import { persistProductWhatsApp } from '@/lib/products/persist-product-whatsapp';
 import { createDefaultServiceBookingOptions } from '@/lib/service/default-booking-options';
-import { validateServiceWizardPublishSteps } from '@/lib/service-wizard-step-validation';
+import {
+  asServiceDuplicateForm,
+  loadServiceProductFormData,
+} from '@/lib/service/load-service-product-form';
+import {
+  validateServiceWizardPublishSteps,
+  validateServiceCategorySelection,
+  resolveServiceFormProfile,
+  serviceWizardRequiresSlots,
+} from '@/lib/service-wizard-step-validation';
+import { validateServiceFormAttributes } from '@/lib/services/service-form-profiles';
+import { persistServiceCategoryAttributes } from '@/lib/service/persist-service-category-attributes';
+import { resolveServiceProductCategoryPayload } from '@/lib/services/service-categories';
+import { useServiceCategoryTree } from '@/hooks/useServiceCategories';
 import { supabase } from '@/integrations/supabase/client';
 import {
   validateWithZod,
@@ -176,9 +190,13 @@ export const CreateServiceWizard = ({
 }: CreateServiceWizardProps = {}) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const duplicateId = searchParams.get('duplicate');
   const { toast } = useToast();
+  const { user } = useAuth();
   const { store: hookStore, loading: storeLoading } = useStore();
   const store = hookStore || (propsStoreId ? { id: propsStoreId } : null);
+  const { tree: categoryTree } = useServiceCategoryTree();
   const [currentStep, setCurrentStep] = useState(1);
 
   // Auto-save
@@ -219,6 +237,7 @@ export const CreateServiceWizard = ({
     category: '',
     category_id: null,
     parent_category_id: null,
+    category_attributes: {},
     fulfillment_mode: 'appointment',
     tags: [],
     images: [],
@@ -346,9 +365,45 @@ export const CreateServiceWizard = ({
   );
 
   /**
+   * Duplicate an existing service into this wizard.
+   */
+  useEffect(() => {
+    if (!duplicateId || !user?.id) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const source = await loadServiceProductFormData(duplicateId, user.id);
+        if (cancelled) return;
+        setFormData(asServiceDuplicateForm(source));
+        try {
+          localStorage.removeItem('service-product-draft');
+        } catch {
+          // ignore
+        }
+        toast({
+          title: 'Copie chargée',
+          description: 'Vérifiez les informations puis publiez le nouveau service.',
+        });
+      } catch (error) {
+        if (cancelled) return;
+        logger.error('Error loading service duplicate', { error, duplicateId });
+        toast({
+          title: 'Duplication impossible',
+          description: error instanceof Error ? error.message : 'Service source introuvable',
+          variant: 'destructive',
+        });
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [duplicateId, toast, user?.id]);
+
+  /**
    * Load draft from localStorage
    */
   useEffect(() => {
+    if (duplicateId) return;
     let savedDraft: string | null = null;
     try {
       savedDraft = localStorage.getItem('service-product-draft');
@@ -371,7 +426,7 @@ export const CreateServiceWizard = ({
         }
       }
     }
-  }, []);
+  }, [duplicateId]);
 
   /**
    * Validate current step avec validation améliorée (client + serveur)
@@ -422,6 +477,14 @@ export const CreateServiceWizard = ({
               if (urlFormatError) errors.push(urlFormatError);
             }
           }
+
+          errors.push(...validateServiceCategorySelection(formData, categoryTree));
+          errors.push(
+            ...validateServiceFormAttributes(
+              resolveServiceFormProfile(formData, categoryTree),
+              formData.category_attributes
+            )
+          );
 
           // Si erreurs client, arrêter ici
           if (errors.length > 0) {
@@ -488,7 +551,7 @@ export const CreateServiceWizard = ({
             );
           }
           if (
-            formData.fulfillment_mode !== 'project' &&
+            serviceWizardRequiresSlots(formData, categoryTree) &&
             (!formData.availability_slots || formData.availability_slots.length === 0)
           ) {
             errors.push(
@@ -546,7 +609,16 @@ export const CreateServiceWizard = ({
 
       return isValid;
     },
-    [formData, t, storeId, validateServiceServer, validateSlug, serverErrors, clearServerErrors]
+    [
+      formData,
+      t,
+      storeId,
+      validateServiceServer,
+      validateSlug,
+      serverErrors,
+      clearServerErrors,
+      categoryTree,
+    ]
   );
 
   /**
@@ -710,6 +782,26 @@ export const CreateServiceWizard = ({
         is_active: !isDraft,
       };
 
+      if (!isDraft) {
+        const synced = await resolveServiceProductCategoryPayload(
+          formData.parent_category_id,
+          formData.category_id
+        );
+        productPayload.category = synced.category;
+        productPayload.category_id = synced.category_id;
+      } else if (formData.category_id) {
+        try {
+          const synced = await resolveServiceProductCategoryPayload(
+            formData.parent_category_id,
+            formData.category_id
+          );
+          productPayload.category = synced.category;
+          productPayload.category_id = synced.category_id;
+        } catch {
+          // Draft can be saved before a valid leaf is chosen.
+        }
+      }
+
       const bookingOptions = formData.booking_options;
       const effectiveDuration = formData.duration_minutes ?? formData.duration ?? 60;
 
@@ -737,6 +829,7 @@ export const CreateServiceWizard = ({
         max_bookings_per_day: bookingOptions?.max_bookings_per_day ?? formData.max_bookings_per_day,
         advance_booking_days:
           bookingOptions?.advance_booking_days ?? formData.advance_booking_days ?? 30,
+        category_attributes: formData.category_attributes || {},
       };
 
       let staffData: Record<string, unknown>[] = [];
@@ -787,23 +880,40 @@ export const CreateServiceWizard = ({
       }
 
       // 6. Create resources
-      const resourcesToSave: ServiceResource[] =
+      const resourcesToSave: ServiceResource[] = (
         formData.resources && formData.resources.length > 0
-          ? (formData.resources as ServiceResource[])
-          : (formData.resources_needed || []).map(name => ({
-              name,
-              type: 'other',
-              quantity_available: 1,
-              is_required: true,
-            }));
+          ? formData.resources
+          : formData.resources_needed || []
+      )
+        .map((item: unknown) => {
+          if (typeof item === 'string') {
+            const name = item.trim();
+            return name ? { name, type: 'other', quantity_available: 1, is_required: true } : null;
+          }
+          if (item && typeof item === 'object' && 'name' in item) {
+            const row = item as ServiceResource;
+            const name = String(row.name || '').trim();
+            return name
+              ? {
+                  name,
+                  description: row.description,
+                  type: row.type || 'other',
+                  quantity_available: row.quantity_available || 1,
+                  is_required: row.is_required !== false,
+                }
+              : null;
+          }
+          return null;
+        })
+        .filter((row): row is ServiceResource => row !== null);
 
       if (resourcesToSave.length > 0) {
         resourcesData = resourcesToSave.map(resource => ({
           name: resource.name,
           description: resource.description,
           resource_type: resource.type || 'other',
-          quantity_available: resource.quantity_available || 1,
-          is_active: resource.is_required !== false,
+          quantity: resource.quantity_available || 1,
+          is_required: resource.is_required !== false,
         }));
       }
 
@@ -820,6 +930,11 @@ export const CreateServiceWizard = ({
         rpcResult.product_id,
         formData.whatsapp_number,
         formData.whatsapp_enabled
+      );
+      await persistServiceCategoryAttributes(
+        rpcResult.service_product_id,
+        formData.category_attributes,
+        rpcResult.product_id
       );
 
       const product = {
@@ -953,7 +1068,7 @@ export const CreateServiceWizard = ({
    * Publish service
    */
   const handlePublish = useCallback(async () => {
-    const publishValidation = validateServiceWizardPublishSteps(formData);
+    const publishValidation = validateServiceWizardPublishSteps(formData, { categoryTree });
     if (!publishValidation.valid) {
       if (publishValidation.failedStep) {
         setCurrentStep(publishValidation.failedStep);
@@ -1116,6 +1231,7 @@ export const CreateServiceWizard = ({
     navigate,
     t,
     invalidateCatalog,
+    categoryTree,
   ]);
 
   /**

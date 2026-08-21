@@ -515,6 +515,7 @@ export const dashboardRoutes = (
       }
     />
     {pr('/dashboard/bookings', BookingsManagement)}
+    {pr('/dashboard/services/bookings', BookingsManagement)}
     {pr('/dashboard/advanced-calendar', AdvancedCalendarPage)}
     {pr('/dashboard/recurring-bookings', RecurringBookingsPage)}
     {pr('/dashboard/service-management', ServiceManagementPage)}

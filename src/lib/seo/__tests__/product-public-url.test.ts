@@ -21,5 +21,8 @@ describe('product-public-url', () => {
     expect(buildWwwProductPublicUrl({ id: 'd1', product_type: 'digital' })).toBe(
       'https://www.emarzona.com/digital/d1'
     );
+    expect(buildWwwProductPublicUrl({ id: 's1', product_type: 'service' })).toBe(
+      'https://www.emarzona.com/service/s1'
+    );
   });
 });

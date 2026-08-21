@@ -1,3 +1,11 @@
+import {
+  resolveServiceCategorySelection,
+  type ServiceCategoryTreeNode,
+} from '@/lib/services/service-categories';
+import {
+  getServiceFormProfile,
+  validateServiceFormAttributes,
+} from '@/lib/services/service-form-profiles';
 import { getFieldError, validateWithZod, serviceSchema } from '@/lib/wizard-validation';
 
 export type ServiceWizardFormFields = {
@@ -15,6 +23,7 @@ export type ServiceWizardFormFields = {
   category_id?: string | null;
   category?: string;
   parent_category_id?: string | null;
+  category_attributes?: Record<string, string | number | boolean | string[]>;
   fulfillment_mode?: 'appointment' | 'project' | 'both';
   promotional_price?: number;
   pricing_model?: string;
@@ -27,9 +36,60 @@ export type ServiceWizardStepValidationResult = {
   toastDescription?: string;
 };
 
+export type ServiceWizardValidationOptions = {
+  categoryTree?: ServiceCategoryTreeNode[];
+};
+
+export function validateServiceCategorySelection(
+  formData: Pick<ServiceWizardFormFields, 'category_id' | 'parent_category_id'>,
+  categoryTree?: ServiceCategoryTreeNode[]
+): string[] {
+  if (!categoryTree || categoryTree.length === 0) {
+    return formData.category_id ? [] : ['La catégorie et la sous-catégorie sont requises'];
+  }
+  const resolved = resolveServiceCategorySelection(
+    categoryTree,
+    formData.parent_category_id,
+    formData.category_id
+  );
+  return resolved.error ? [resolved.error] : [];
+}
+
+export function resolveServiceFormProfile(
+  formData: Pick<ServiceWizardFormFields, 'category' | 'category_id' | 'parent_category_id'>,
+  categoryTree?: ServiceCategoryTreeNode[]
+) {
+  if (categoryTree && categoryTree.length > 0) {
+    const resolved = resolveServiceCategorySelection(
+      categoryTree,
+      formData.parent_category_id,
+      formData.category_id
+    );
+    const fromIds = getServiceFormProfile(resolved.parent?.slug, resolved.leaf?.slug);
+    if (fromIds) return fromIds;
+  }
+  return getServiceFormProfile(undefined, formData.category);
+}
+
+/** Appointment always needs slots. Project never. "both" follows the family profile. */
+export function serviceWizardRequiresSlots(
+  formData: Pick<
+    ServiceWizardFormFields,
+    'fulfillment_mode' | 'category' | 'category_id' | 'parent_category_id'
+  >,
+  categoryTree?: ServiceCategoryTreeNode[]
+): boolean {
+  if (formData.fulfillment_mode === 'project') return false;
+  if (formData.fulfillment_mode === 'appointment') return true;
+  const profile = resolveServiceFormProfile(formData, categoryTree);
+  if (profile) return profile.requireSlots;
+  return true;
+}
+
 export function validateServiceWizardStep(
   step: number,
-  formData: ServiceWizardFormFields
+  formData: ServiceWizardFormFields,
+  options?: ServiceWizardValidationOptions
 ): ServiceWizardStepValidationResult {
   const errors: string[] = [];
 
@@ -60,9 +120,13 @@ export function validateServiceWizardStep(
       }
     }
 
-    if (!formData.category_id) {
-      errors.push('La catégorie et la sous-catégorie sont requises');
-    }
+    errors.push(...validateServiceCategorySelection(formData, options?.categoryTree));
+    errors.push(
+      ...validateServiceFormAttributes(
+        resolveServiceFormProfile(formData, options?.categoryTree),
+        formData.category_attributes
+      )
+    );
 
     if (formData.pricing_model !== 'free') {
       const promo = Number(formData.promotional_price);
@@ -86,19 +150,17 @@ export function validateServiceWizardStep(
     if (formData.location_type === 'online' && !formData.meeting_url?.trim()) {
       errors.push("L'URL de réunion est requise pour les services en ligne");
     }
-    if (!formData.availability_slots || formData.availability_slots.length === 0) {
-      const mode = formData.fulfillment_mode;
-      if (mode === 'project') {
-        // Project-only services do not require appointment slots
-      } else {
-        return {
-          valid: false,
-          errors: ['Ajoutez au moins un créneau de disponibilité pour permettre les réservations'],
-          toastTitle: 'Créneaux requis',
-          toastDescription:
-            'Ajoutez au moins un créneau de disponibilité pour permettre les réservations',
-        };
-      }
+    if (
+      (!formData.availability_slots || formData.availability_slots.length === 0) &&
+      serviceWizardRequiresSlots(formData, options?.categoryTree)
+    ) {
+      return {
+        valid: false,
+        errors: ['Ajoutez au moins un créneau de disponibilité pour permettre les réservations'],
+        toastTitle: 'Créneaux requis',
+        toastDescription:
+          'Ajoutez au moins un créneau de disponibilité pour permettre les réservations',
+      };
     }
   }
 
@@ -109,10 +171,11 @@ export function validateServiceWizardStep(
 }
 
 export function validateServiceWizardPublishSteps(
-  formData: ServiceWizardFormFields
+  formData: ServiceWizardFormFields,
+  options?: ServiceWizardValidationOptions
 ): ServiceWizardStepValidationResult & { failedStep?: number } {
   for (const step of [1, 2] as const) {
-    const result = validateServiceWizardStep(step, formData);
+    const result = validateServiceWizardStep(step, formData, options);
     if (!result.valid) {
       return { ...result, failedStep: step };
     }

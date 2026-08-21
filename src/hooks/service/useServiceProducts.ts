@@ -10,15 +10,15 @@ import { invalidateCatalogCaches } from '@/lib/cache-invalidation';
 import { supabase } from '@/integrations/supabase/client';
 
 const SERVICE_PRODUCT_FIELDS =
-  'id, product_id, service_type, duration_minutes, location_type, location_address, meeting_url, timezone, requires_staff, max_participants, pricing_type, deposit_required, deposit_amount, deposit_type, allow_booking_cancellation, cancellation_deadline_hours, require_approval, buffer_time_before, buffer_time_after, max_bookings_per_day, advance_booking_days, total_bookings, total_completed_bookings, total_cancelled_bookings, total_revenue, average_rating, created_at, updated_at';
+  'id, product_id, service_type, duration_minutes, location_type, location_address, meeting_url, timezone, requires_staff, max_participants, pricing_type, deposit_required, deposit_amount, deposit_type, allow_booking_cancellation, cancellation_deadline_hours, require_approval, buffer_time_before, buffer_time_after, max_bookings_per_day, advance_booking_days, fulfillment_mode, category_attributes, total_bookings, total_completed_bookings, total_cancelled_bookings, total_revenue, average_rating, created_at, updated_at';
 const SERVICE_PRODUCT_ITEM_FIELDS =
-  'id, store_id, name, description, price, promotional_price, currency, is_active, is_draft, product_type, image_url, slug, created_at, updated_at';
+  'id, store_id, name, description, price, promotional_price, currency, is_active, is_draft, product_type, image_url, slug, category, category_id, created_at, updated_at';
 const SERVICE_AVAILABILITY_SLOT_FIELDS =
-  'id, service_product_id, day_of_week, start_time, end_time, is_available, max_bookings, created_at, updated_at';
+  'id, service_product_id, day_of_week, start_time, end_time, is_active, created_at, updated_at';
 const SERVICE_STAFF_MEMBER_FIELDS =
-  'id, product_id, name, email, phone, role, specialties, is_available, created_at, updated_at';
+  'id, service_product_id, name, email, phone, role, is_active, created_at, updated_at';
 const SERVICE_RESOURCE_FIELDS =
-  'id, service_product_id, name, description, resource_type, quantity, is_active, created_at, updated_at';
+  'id, service_product_id, name, description, resource_type, quantity, is_required, created_at, updated_at';
 
 export interface ServiceProduct {
   id: string;
@@ -49,6 +49,8 @@ export interface ServiceProduct {
   average_rating: number;
   created_at: string;
   updated_at: string;
+  fulfillment_mode?: 'appointment' | 'project' | 'both';
+  category_attributes?: Record<string, string | number | boolean | string[]>;
   product?: {
     id: string;
     name: string;
@@ -221,14 +223,21 @@ export const useDeleteServiceProduct = () => {
 
       if (error) throw error;
 
-      if (!deleted?.length) {
-        const { error: productError } = await supabase
-          .from('products')
-          .delete()
-          .eq('id', id)
-          .eq('product_type', 'service');
-        if (productError) throw productError;
-      }
+      const productIds = [
+        ...new Set(
+          (deleted || [])
+            .map(row => row.product_id)
+            .filter((productId): productId is string => Boolean(productId))
+        ),
+      ];
+      if (!productIds.includes(id)) productIds.push(id);
+
+      const { error: productError } = await supabase
+        .from('products')
+        .delete()
+        .in('id', productIds)
+        .eq('product_type', 'service');
+      if (productError) throw productError;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['service-products'] });

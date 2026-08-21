@@ -121,6 +121,7 @@ export interface ServiceProduct extends BaseProduct {
   staff_required?: boolean;
   location_type?: 'online' | 'on_site' | 'customer_location';
   service_type?: 'appointment' | 'class' | 'event' | 'consultation' | 'other';
+  category_attributes?: Record<string, string | number | boolean | string[]>;
 }
 
 /**

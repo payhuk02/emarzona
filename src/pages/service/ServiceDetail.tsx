@@ -54,6 +54,10 @@ import { buildCheckoutUrl } from '@/lib/checkout/checkout-route';
 import { useServiceProductAddons } from '@/hooks/service/useServiceProductAddons';
 import { ServiceProductAddonsPicker } from '@/components/service/ServiceProductAddonsPicker';
 import {
+  addonEffectivePrice,
+  validateServiceAddonSelection,
+} from '@/lib/service/service-product-addons';
+import {
   useValidateServiceBooking,
   useQuickAvailabilityCheck,
 } from '@/hooks/service/useServiceBookingValidation';
@@ -78,13 +82,17 @@ import { JoinWaitlistButton } from '@/components/service/JoinWaitlistButton';
 import { ServiceProjectOrderPanel } from '@/components/service/ServiceProjectOrderPanel';
 import { useServiceCategories } from '@/hooks/useServiceCategories';
 import { getCategoryBreadcrumb } from '@/lib/services/service-categories';
+import {
+  formatServiceAttributeValue,
+  getServiceFormProfile,
+} from '@/lib/services/service-form-profiles';
 
 const PRODUCT_SERVICE_FIELDS =
   'id, store_id, slug, name, description, short_description, category, category_id, tags, product_type, is_active, price, promotional_price, currency, image_url, images, created_at, updated_at, payment_options, pricing_model, licensing_type, license_terms';
 const PRODUCT_SERVICE_SELECT = PRODUCT_SERVICE_FIELDS;
 const STORE_PUBLIC_FIELDS = 'id, name, slug, logo_url';
 const SERVICE_PRODUCT_FIELDS =
-  'id, product_id, store_id, service_type, duration_minutes, location_type, location_address, max_participants, advance_booking_days, fulfillment_mode, brief_fields, created_at, updated_at';
+  'id, product_id, store_id, service_type, duration_minutes, location_type, location_address, max_participants, advance_booking_days, fulfillment_mode, brief_fields, category_attributes, created_at, updated_at';
 const SERVICE_STAFF_FIELDS =
   'id, service_product_id, name, role, bio, avatar_url, is_active, created_at, updated_at';
 
@@ -429,6 +437,17 @@ export default function ServiceDetail() {
         throw new Error('Store ID manquant');
       }
 
+      const addonCheck = validateServiceAddonSelection(serviceAddons, selectedAddonProductIds);
+      if (!addonCheck.ok) {
+        toast({
+          title: 'Produits complémentaires',
+          description: addonCheck.message,
+          variant: 'destructive',
+        });
+        setIsBooking(false);
+        return;
+      }
+
       navigate(
         buildCheckoutUrl({
           productId: serviceId!,
@@ -439,6 +458,7 @@ export default function ServiceDetail() {
           participants,
           guestEmail: checkoutEmail,
           guestName: checkoutName,
+          addonIds: selectedAddonProductIds,
         })
       );
     } catch (_error: unknown) {
@@ -611,7 +631,11 @@ export default function ServiceDetail() {
                       <>
                         <ChevronRight className="h-3.5 w-3.5" aria-hidden />
                         <Link
-                          to={`/services/${crumb.parent?.slug ?? 'all'}/${crumb.leaf.slug}`}
+                          to={
+                            crumb.parent
+                              ? `/services/${crumb.parent.slug}/${crumb.leaf.slug}`
+                              : `/services/${crumb.leaf.slug}`
+                          }
                           className="hover:text-foreground font-medium text-foreground"
                         >
                           {crumb.leaf.name}
@@ -674,6 +698,47 @@ export default function ServiceDetail() {
               </div>
             </CardContent>
           </Card>
+
+          {(() => {
+            const crumb = getCategoryBreadcrumb(
+              serviceCategories,
+              (service as { category_id?: string | null }).category_id
+            );
+            const profile = getServiceFormProfile(
+              crumb.parent?.slug,
+              crumb.leaf?.slug || service.category
+            );
+            const attrs = (
+              service.service as {
+                category_attributes?: Record<string, string | number | boolean | string[]>;
+              } | null
+            )?.category_attributes;
+            if (!profile || !attrs) return null;
+            const rows = profile.fields
+              .map(field => ({
+                label: field.label,
+                value: formatServiceAttributeValue(field, attrs[field.key]),
+              }))
+              .filter(row => row.value);
+            if (rows.length === 0) return null;
+            return (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm sm:text-base md:text-lg">
+                    Spécificités · {profile.familyLabel}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {rows.map(row => (
+                    <div key={row.label}>
+                      <p className="text-sm text-muted-foreground">{row.label}</p>
+                      <p className="font-medium">{row.value}</p>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            );
+          })()}
 
           {/* Content Tabs */}
           <Tabs defaultValue="description" className="mt-6 space-y-6">
@@ -1026,11 +1091,7 @@ export default function ServiceDetail() {
                           </p>
                         )}
                         <Button
-                          onClick={() =>
-                            navigate(
-                              `/services/${service.paid_product.slug || service.paid_product.id}`
-                            )
-                          }
+                          onClick={() => navigate(`/service/${service.paid_product.id}`)}
                           className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
                           size="sm"
                         >
@@ -1058,11 +1119,7 @@ export default function ServiceDetail() {
                           complète.
                         </p>
                         <Button
-                          onClick={() =>
-                            navigate(
-                              `/services/${service.free_product.slug || service.free_product.id}`
-                            )
-                          }
+                          onClick={() => navigate(`/service/${service.free_product.id}`)}
                           className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
                           size="sm"
                           variant="outline"
@@ -1165,7 +1222,21 @@ export default function ServiceDetail() {
                     <div className="flex justify-between items-center">
                       <span className="text-sm">Total</span>
                       <span className="text-xl font-bold">
-                        {(service?.price * participants).toLocaleString()} {service?.currency}
+                        {(
+                          service?.price * participants +
+                          serviceAddons
+                            .filter(
+                              row =>
+                                row.is_required ||
+                                selectedAddonProductIds.includes(row.addon_product_id)
+                            )
+                            .reduce(
+                              (sum, row) =>
+                                sum + addonEffectivePrice(row.addon) * (row.quantity || 1),
+                              0
+                            )
+                        ).toLocaleString()}{' '}
+                        {service?.currency}
                       </span>
                     </div>
                   </div>

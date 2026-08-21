@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Plus, X, Users, Package } from '@/components/icons';
 import type { ServiceProductFormData, ServiceStaffMember } from '@/types/service-product';
+import { getServiceFormProfile } from '@/lib/services/service-form-profiles';
 
 interface ServiceStaffResourcesFormProps {
   data: Partial<ServiceProductFormData>;
@@ -18,8 +19,10 @@ interface ServiceStaffResourcesFormProps {
 }
 
 export const ServiceStaffResourcesForm = ({ data, onUpdate }: ServiceStaffResourcesFormProps) => {
+  const profile = getServiceFormProfile(undefined, data.category);
+
   const handleAddStaffMember = () => {
-    const  newMember: ServiceStaffMember = {
+    const newMember: ServiceStaffMember = {
       name: '',
       email: '',
       role: '',
@@ -36,7 +39,11 @@ export const ServiceStaffResourcesForm = ({ data, onUpdate }: ServiceStaffResour
     onUpdate({ staff_members: newMembers });
   };
 
-  const handleUpdateStaffMember = (index: number, field: keyof ServiceStaffMember, value: any) => {
+  const handleUpdateStaffMember = (
+    index: number,
+    field: keyof ServiceStaffMember,
+    value: ServiceStaffMember[keyof ServiceStaffMember]
+  ) => {
     const newMembers = [...(data.staff_members || [])];
     newMembers[index] = { ...newMembers[index], [field]: value };
     onUpdate({ staff_members: newMembers });
@@ -56,6 +63,13 @@ export const ServiceStaffResourcesForm = ({ data, onUpdate }: ServiceStaffResour
 
   return (
     <div className="space-y-6">
+      {profile && (
+        <p className="text-sm text-muted-foreground">
+          {profile.staffRecommended
+            ? `${profile.familyLabel} : un membre du personnel est recommandé (prise de RDV, intervention).`
+            : `${profile.familyLabel} : le personnel est optionnel pour ce type de prestation.`}
+        </p>
+      )}
       {/* Requires Staff */}
       <Card>
         <CardHeader>
@@ -65,13 +79,11 @@ export const ServiceStaffResourcesForm = ({ data, onUpdate }: ServiceStaffResour
                 <Users className="h-5 w-5" />
                 Personnel requis
               </CardTitle>
-              <CardDescription>
-                Ce service nécessite-t-il du personnel spécifique ?
-              </CardDescription>
+              <CardDescription>Ce service nécessite-t-il du personnel spécifique ?</CardDescription>
             </div>
             <Switch
               checked={data.requires_staff ?? true}
-              onCheckedChange={(checked) => onUpdate({ requires_staff: checked })}
+              onCheckedChange={checked => onUpdate({ requires_staff: checked })}
             />
           </div>
         </CardHeader>
@@ -100,7 +112,7 @@ export const ServiceStaffResourcesForm = ({ data, onUpdate }: ServiceStaffResour
                           id={`staff-name-${index}`}
                           placeholder="Jean Dupont"
                           value={member.name}
-                          onChange={(e) => handleUpdateStaffMember(index, 'name', e.target.value)}
+                          onChange={e => handleUpdateStaffMember(index, 'name', e.target.value)}
                         />
                       </div>
 
@@ -111,7 +123,7 @@ export const ServiceStaffResourcesForm = ({ data, onUpdate }: ServiceStaffResour
                           type="email"
                           placeholder="jean@exemple.fr"
                           value={member.email}
-                          onChange={(e) => handleUpdateStaffMember(index, 'email', e.target.value)}
+                          onChange={e => handleUpdateStaffMember(index, 'email', e.target.value)}
                         />
                       </div>
                     </div>
@@ -122,7 +134,7 @@ export const ServiceStaffResourcesForm = ({ data, onUpdate }: ServiceStaffResour
                         id={`staff-role-${index}`}
                         placeholder="Consultant senior"
                         value={member.role || ''}
-                        onChange={(e) => handleUpdateStaffMember(index, 'role', e.target.value)}
+                        onChange={e => handleUpdateStaffMember(index, 'role', e.target.value)}
                       />
                     </div>
                   </div>
@@ -146,9 +158,7 @@ export const ServiceStaffResourcesForm = ({ data, onUpdate }: ServiceStaffResour
       <Card>
         <CardHeader>
           <CardTitle>Capacité</CardTitle>
-          <CardDescription>
-            Combien de participants maximum par session ?
-          </CardDescription>
+          <CardDescription>Combien de participants maximum par session ?</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
@@ -158,7 +168,7 @@ export const ServiceStaffResourcesForm = ({ data, onUpdate }: ServiceStaffResour
               type="number"
               min="1"
               value={data.max_participants || 1}
-              onChange={(e) => onUpdate({ max_participants: parseInt(e.target.value) || 1 })}
+              onChange={e => onUpdate({ max_participants: parseInt(e.target.value) || 1 })}
             />
             <p className="text-xs text-muted-foreground">
               1 = service individuel, &gt;1 = service de groupe
@@ -168,8 +178,8 @@ export const ServiceStaffResourcesForm = ({ data, onUpdate }: ServiceStaffResour
           {data.max_participants && data.max_participants > 1 && (
             <div className="p-3 bg-blue-50 dark:bg-blue-950 rounded-lg border border-blue-200 dark:border-blue-800">
               <p className="text-sm text-blue-900 dark:text-blue-100">
-                <strong>Service de groupe:</strong> Plusieurs personnes pourront réserver le même créneau
-                (maximum {data.max_participants} participants)
+                <strong>Service de groupe:</strong> Plusieurs personnes pourront réserver le même
+                créneau (maximum {data.max_participants} participants)
               </p>
             </div>
           )}
@@ -183,9 +193,7 @@ export const ServiceStaffResourcesForm = ({ data, onUpdate }: ServiceStaffResour
             <Package className="h-5 w-5" />
             Ressources nécessaires
           </CardTitle>
-          <CardDescription>
-            Équipement, matériel ou ressources requis (optionnel)
-          </CardDescription>
+          <CardDescription>Équipement, matériel ou ressources requis (optionnel)</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Resources List */}
@@ -211,7 +219,7 @@ export const ServiceStaffResourcesForm = ({ data, onUpdate }: ServiceStaffResour
             <Input
               id="new-resource"
               placeholder="Ex: Ordinateur, Projecteur, Salle de réunion..."
-              onKeyDown={(e) => {
+              onKeyDown={e => {
                 if (e.key === 'Enter') {
                   e.preventDefault();
                   handleAddResource(e.currentTarget.value);
@@ -228,10 +236,3 @@ export const ServiceStaffResourcesForm = ({ data, onUpdate }: ServiceStaffResour
     </div>
   );
 };
-
-
-
-
-
-
-

@@ -167,7 +167,12 @@ export function useFilteredServiceProducts(options: FilteredProductsOptions) {
         const { data, error } = await supabase.rpc('filter_service_products', {
           p_limit: pagination.itemsPerPage,
           p_offset: startIndex,
-          p_category: filters.category !== 'all' ? filters.category : null,
+          p_category:
+            filters.serviceCategoryId || filters.serviceParentCategoryId
+              ? null
+              : filters.category !== 'all'
+                ? filters.category
+                : null,
           p_min_price:
             filters.priceRange !== 'all'
               ? (() => {

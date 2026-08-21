@@ -15,6 +15,7 @@ import { RedirectToPlatformVendorMessaging } from '@/components/auth/RedirectToP
 
 const Storefront = lazyPage(() => import('@/pages/Storefront'));
 const ProductDetail = lazyPage(() => import('@/pages/ProductDetail'));
+const ServiceDetail = lazyPage(() => import('@/pages/service/ServiceDetail'));
 const StoreLegalPage = lazyPage(() => import('@/pages/StoreLegalPage'));
 const Cart = lazyPage(() => import('@/pages/CartEnhanced'));
 const Checkout = lazyPage(() => import('@/pages/checkout/CheckoutPage'));
@@ -54,6 +55,7 @@ export function StoreSubdomainRoutes({ storeSlug }: StoreSubdomainRoutesProps) {
 
           {/* Produits */}
           <Route path="/products/:productSlug" element={<ProductDetail />} />
+          <Route path="/service/:serviceId" element={<ServiceDetail />} />
 
           {/* Pages légales */}
           <Route path="/legal/:page" element={<StoreLegalPage />} />

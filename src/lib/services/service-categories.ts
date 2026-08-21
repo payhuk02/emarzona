@@ -95,6 +95,112 @@ export function getCategoryBreadcrumb(
   return { parent, leaf };
 }
 
+export function formatServiceCategoryLabel(
+  rows: ServiceCategoryRow[],
+  input: { categoryId?: string | null; categorySlug?: string | null }
+): string {
+  const leaf =
+    findCategoryById(rows, input.categoryId) ?? findCategoryBySlug(rows, input.categorySlug);
+  if (!leaf) return input.categorySlug || '';
+  const parent = leaf.parent_id ? findCategoryById(rows, leaf.parent_id) : null;
+  if (parent && leaf.parent_id) return `${parent.name} · ${leaf.name}`;
+  if (leaf.parent_id) return leaf.name;
+  return leaf.name;
+}
+
+export type ResolvedServiceCategorySelection = {
+  parent: ServiceCategoryTreeNode | null;
+  leaf: ServiceCategoryRow | null;
+  parentId: string | null;
+  categoryId: string | null;
+  categorySlug: string;
+  error: string | null;
+};
+
+function findInServiceCategoryTree(
+  tree: ServiceCategoryTreeNode[],
+  id: string | null | undefined
+): { parent: ServiceCategoryTreeNode | null; leaf: ServiceCategoryRow | null; isParent: boolean } {
+  if (!id) return { parent: null, leaf: null, isParent: false };
+  for (const parent of tree) {
+    if (parent.id === id) return { parent, leaf: null, isParent: true };
+    const child = parent.children.find(c => c.id === id) ?? null;
+    if (child) return { parent, leaf: child, isParent: false };
+  }
+  return { parent: null, leaf: null, isParent: false };
+}
+
+/**
+ * Source of truth: subcategory (leaf) id. Parent is derived from the leaf.
+ * A parent UUID must never be persisted as products.category_id.
+ */
+export function resolveServiceCategorySelection(
+  tree: ServiceCategoryTreeNode[],
+  parentCategoryId: string | null | undefined,
+  categoryId: string | null | undefined
+): ResolvedServiceCategorySelection {
+  const empty = {
+    parent: null,
+    leaf: null,
+    parentId: null,
+    categoryId: null,
+    categorySlug: '',
+    error: 'La catégorie et la sous-catégorie sont requises' as string | null,
+  };
+
+  if (tree.length === 0) {
+    return {
+      ...empty,
+      parentId: parentCategoryId ?? null,
+      categoryId: categoryId ?? null,
+      error: null,
+    };
+  }
+
+  const fromCategoryId = findInServiceCategoryTree(tree, categoryId);
+  if (fromCategoryId.leaf && fromCategoryId.parent) {
+    return {
+      parent: fromCategoryId.parent,
+      leaf: fromCategoryId.leaf,
+      parentId: fromCategoryId.parent.id,
+      categoryId: fromCategoryId.leaf.id,
+      categorySlug: fromCategoryId.leaf.slug,
+      error: null,
+    };
+  }
+
+  const parentHint =
+    fromCategoryId.parent ?? findInServiceCategoryTree(tree, parentCategoryId).parent ?? null;
+
+  if (parentHint) {
+    const needsChildren = parentHint.children.length === 0;
+    return {
+      parent: parentHint,
+      leaf: null,
+      parentId: parentHint.id,
+      categoryId: null,
+      categorySlug: '',
+      error: needsChildren
+        ? 'Cette catégorie n’a pas de sous-catégorie. Choisissez-en une autre ou créez une sous-catégorie.'
+        : 'La sous-catégorie est requise',
+    };
+  }
+
+  return empty;
+}
+
+export async function resolveServiceProductCategoryPayload(
+  parentCategoryId: string | null | undefined,
+  categoryId: string | null | undefined
+): Promise<{ category_id: string; category: string }> {
+  const tree = buildServiceCategoryTree(await fetchServiceCategories());
+  const resolved = resolveServiceCategorySelection(tree, parentCategoryId, categoryId);
+  if (!resolved.categoryId || resolved.error) {
+    throw new Error(resolved.error || 'La catégorie et la sous-catégorie sont requises');
+  }
+  return { category_id: resolved.categoryId, category: resolved.categorySlug };
+}
+
 export async function upsertServiceCategory(input: {
   id?: string;
   name: string;
@@ -106,6 +212,31 @@ export async function upsertServiceCategory(input: {
   sort_order?: number | null;
   is_active?: boolean;
 }): Promise<ServiceCategoryRow> {
+  if (input.parent_id) {
+    const { data: parent, error: parentError } = await supabase
+      .from('categories')
+      .select('id, parent_id')
+      .eq('id', input.parent_id)
+      .maybeSingle();
+    if (parentError) throw parentError;
+    if (!parent || parent.parent_id) {
+      throw new Error('Une sous-catégorie doit être rattachée à une catégorie racine');
+    }
+  }
+
+  if (input.id && input.parent_id) {
+    const { count, error: childError } = await supabase
+      .from('categories')
+      .select('id', { count: 'exact', head: true })
+      .eq('parent_id', input.id);
+    if (childError) throw childError;
+    if ((count ?? 0) > 0) {
+      throw new Error(
+        'Impossible de transformer en sous-catégorie une catégorie qui a déjà des enfants'
+      );
+    }
+  }
+
   const payload = {
     name: input.name.trim(),
     slug: input.slug.trim(),
@@ -150,6 +281,16 @@ export async function setServiceCategoryActive(id: string, isActive: boolean): P
 export async function deleteServiceCategoryIfUnused(
   id: string
 ): Promise<'deleted' | 'deactivated'> {
+  const { count: childCount, error: childError } = await supabase
+    .from('categories')
+    .select('id', { count: 'exact', head: true })
+    .eq('parent_id', id);
+  if (childError) throw childError;
+  if ((childCount ?? 0) > 0) {
+    await setServiceCategoryActive(id, false);
+    return 'deactivated';
+  }
+
   const { count, error: countError } = await supabase
     .from('products')
     .select('id', { count: 'exact', head: true })

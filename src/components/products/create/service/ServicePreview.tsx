@@ -21,6 +21,10 @@ import {
   Tag,
 } from 'lucide-react';
 import type { ServiceProductFormData } from '@/types/service-product';
+import {
+  formatServiceAttributeValue,
+  getServiceFormProfile,
+} from '@/lib/services/service-form-profiles';
 
 interface ServicePreviewProps {
   data: Partial<ServiceProductFormData>;
@@ -30,6 +34,8 @@ interface ServicePreviewProps {
 const DAYS_OF_WEEK_LABELS = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
 
 export const ServicePreview = ({ data }: ServicePreviewProps) => {
+  const profile = getServiceFormProfile(undefined, data.category);
+
   const getLocationIcon = () => {
     switch (data.location_type) {
       case 'on_site':
@@ -85,6 +91,32 @@ export const ServicePreview = ({ data }: ServicePreviewProps) => {
             <p className="text-sm font-medium text-muted-foreground">Nom</p>
             <p className="text-lg font-semibold">{data.name || 'Non défini'}</p>
           </div>
+
+          {data.category && (
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">Catégorie</p>
+              <p className="text-sm">
+                {profile
+                  ? `${profile.familyLabel}${data.category ? ` · ${data.category}` : ''}`
+                  : data.category}
+              </p>
+            </div>
+          )}
+
+          {profile &&
+            profile.fields.map(field => {
+              const label = formatServiceAttributeValue(
+                field,
+                data.category_attributes?.[field.key]
+              );
+              if (!label) return null;
+              return (
+                <div key={field.key}>
+                  <p className="text-sm font-medium text-muted-foreground">{field.label}</p>
+                  <p className="text-sm">{label}</p>
+                </div>
+              );
+            })}
 
           <div>
             <p className="text-sm font-medium text-muted-foreground">Description</p>

@@ -28,6 +28,7 @@ import { PriceStockAlertButton } from '@/components/marketplace/PriceStockAlertB
 import { supabase } from '@/integrations/supabase/client';
 import { ProductManagementActions } from '@/components/products/ProductManagementActions';
 import { getDisplayPrice } from '@/lib/product-helpers';
+import { ServiceListingAttributeBadges } from '@/components/service/ServiceListingAttributeBadges';
 
 interface ServiceCardProps {
   service: ServiceProduct;
@@ -132,6 +133,7 @@ const ServiceCardComponent = ({
                 slug: service.product?.slug || service.product_id || service.id,
                 name: service.product?.name,
                 is_active: Boolean(service.product?.is_active),
+                product_type: 'service',
               }}
               storeSlug={storeSlug}
               storeSubdomain={storeSubdomain}
@@ -180,6 +182,10 @@ const ServiceCardComponent = ({
               </Badge>
             )}
           </div>
+          <ServiceListingAttributeBadges
+            categorySlug={service.product?.category as string | undefined}
+            attributes={service.category_attributes}
+          />
         </div>
       </CardHeader>
 
@@ -250,7 +256,7 @@ const ServiceCardComponent = ({
       </CardContent>
 
       <CardFooter className="pt-3">
-        <Button className="w-full" onClick={() => navigate(`/services/${service.product_id}`)}>
+        <Button className="w-full" onClick={() => navigate(`/service/${service.product_id}`)}>
           <Calendar className="h-4 w-4 mr-2" />
           Réserver
         </Button>
@@ -272,6 +278,7 @@ const ServiceCard = React.memo(ServiceCardComponent, (prevProps, nextProps) => {
     prevProps.service.average_rating === nextProps.service.average_rating &&
     prevProps.service.duration_minutes === nextProps.service.duration_minutes &&
     prevProps.service.location_type === nextProps.service.location_type &&
+    prevProps.service.category_attributes === nextProps.service.category_attributes &&
     prevProps.showActions === nextProps.showActions &&
     prevProps.storeSlug === nextProps.storeSlug &&
     prevProps.onEdit === nextProps.onEdit &&

@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Plus, X, MapPin, Video, Home, Navigation } from 'lucide-react';
 import type { ServiceProductFormData, ServiceAvailabilitySlot } from '@/types/service-product';
+import { getServiceFormProfile } from '@/lib/services/service-form-profiles';
 
 interface ServiceDurationAvailabilityFormProps {
   data: Partial<ServiceProductFormData>;
@@ -46,8 +47,10 @@ export const ServiceDurationAvailabilityForm = ({
   data,
   onUpdate,
 }: ServiceDurationAvailabilityFormProps) => {
+  const profile = getServiceFormProfile(undefined, data.category);
+
   const handleAddSlot = () => {
-    const  newSlot: ServiceAvailabilitySlot = {
+    const newSlot: ServiceAvailabilitySlot = {
       day: 1, // Lundi par défaut
       start_time: '09:00',
       end_time: '17:00',
@@ -94,8 +97,12 @@ export const ServiceDurationAvailabilityForm = ({
       {/* Duration */}
       <Card>
         <CardHeader>
-          <CardTitle>Durée du service</CardTitle>
-          <CardDescription>Combien de temps dure une session ?</CardDescription>
+          <CardTitle>{profile?.durationLabel || 'Durée du service'}</CardTitle>
+          <CardDescription>
+            {profile?.requireSlots
+              ? 'Combien de temps dure une session ?'
+              : 'Estimation visible par le client. Ajustable selon le brief.'}
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Quick Duration */}
@@ -212,7 +219,11 @@ export const ServiceDurationAvailabilityForm = ({
       <Card>
         <CardHeader>
           <CardTitle>Créneaux de disponibilité</CardTitle>
-          <CardDescription>Quand êtes-vous disponible pour ce service ?</CardDescription>
+          <CardDescription>
+            {profile && !profile.requireSlots
+              ? 'Optionnel pour une prestation sur projet. Ajoutez-en si vous acceptez aussi des rendez-vous.'
+              : 'Quand êtes-vous disponible pour ce service ?'}
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {data.availability_slots && data.availability_slots.length > 0 ? (
@@ -296,9 +307,3 @@ export const ServiceDurationAvailabilityForm = ({
     </div>
   );
 };
-
-
-
-
-
-

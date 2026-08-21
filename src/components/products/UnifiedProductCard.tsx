@@ -41,6 +41,7 @@ import {
 import { OptimizedImage } from '@/components/ui/OptimizedImage';
 import { ResponsiveProductImage } from '@/components/ui/ResponsiveProductImage';
 import { UnifiedProductCardProps } from '@/types/unified-product';
+import { ServiceListingAttributeBadges } from '@/components/service/ServiceListingAttributeBadges';
 import {
   getProductKeyInfo,
   getProductTypeBadge,
@@ -778,6 +779,11 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
                   <span>{product.location_type}</span>
                 </div>
               )}
+              <ServiceListingAttributeBadges
+                className="w-full"
+                categorySlug={product.category}
+                attributes={product.category_attributes}
+              />
             </>
           )}
 

@@ -232,10 +232,9 @@ export function ContextualFilters({
               <Select
                 value={filters.serviceCategoryId || 'all'}
                 onValueChange={value => {
-                  const child = serviceChildren.find(c => c.id === value);
                   onFiltersChange({
                     serviceCategoryId: value === 'all' ? undefined : value,
-                    category: child?.slug ?? 'all',
+                    category: 'all',
                   });
                 }}
                 disabled={!filters.serviceParentCategoryId}

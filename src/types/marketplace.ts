@@ -14,6 +14,8 @@ export interface Product {
   image_url: string | null;
   images?: JSONValue; // Json field
   category: string | null;
+  category_id?: string | null;
+  category_attributes?: Record<string, string | number | boolean | string[]> | null;
   product_type: string | null;
   rating: number | null;
   reviews_count: number | null;

@@ -144,6 +144,8 @@ export function transformToUnifiedProduct(product: DatabaseProduct): UnifiedProd
         staff_required: product.staff_required,
         location_type: product.location_type,
         service_type: product.service_type,
+        category_attributes:
+          (product.category_attributes as ServiceProduct['category_attributes']) || undefined,
       } as ServiceProduct;
 
     case 'course':

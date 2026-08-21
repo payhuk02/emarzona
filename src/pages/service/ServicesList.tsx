@@ -32,6 +32,9 @@ import { useQueryClient } from '@tanstack/react-query';
 import { invalidateCatalogCaches } from '@/lib/cache-invalidation';
 import { getDisplayPrice } from '@/lib/product-helpers';
 import { cn } from '@/lib/utils';
+import { useServiceCategories } from '@/hooks/useServiceCategories';
+import { formatServiceCategoryLabel } from '@/lib/services/service-categories';
+import { ServiceListingAttributeBadges } from '@/components/service/ServiceListingAttributeBadges';
 
 function formatDuration(minutes: number) {
   if (minutes < 60) return `${minutes} min`;
@@ -57,6 +60,7 @@ export const ServicesList = () => {
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
 
   const { data: services, isLoading, isError } = useServiceProducts(store?.id);
+  const { data: categoryRows = [] } = useServiceCategories();
   const deleteService = useDeleteServiceProduct();
 
   const filteredServices = filterServicesBySearch(services, searchQuery);
@@ -83,7 +87,7 @@ export const ServicesList = () => {
   const handleToggleStatus = async (productId: string, nextActive: boolean) => {
     const { error } = await supabase
       .from('products')
-      .update({ is_active: nextActive })
+      .update(nextActive ? { is_active: true, is_draft: false } : { is_active: false })
       .eq('id', productId);
     if (error) {
       toast({
@@ -104,6 +108,7 @@ export const ServicesList = () => {
         slug: service.product?.slug || service.product_id,
         name: service.product?.name,
         is_active: Boolean(service.product?.is_active),
+        product_type: 'service',
       }}
       storeSlug={store?.slug}
       storeSubdomain={store?.subdomain}
@@ -232,6 +237,21 @@ export const ServicesList = () => {
                         <Badge variant="outline" className="text-xs">
                           {locationLabel(service.location_type)}
                         </Badge>
+                        {(() => {
+                          const label = formatServiceCategoryLabel(categoryRows, {
+                            categoryId: service.product?.category_id as string | undefined,
+                            categorySlug: service.product?.category as string | undefined,
+                          });
+                          return label ? (
+                            <Badge variant="outline" className="text-xs">
+                              {label}
+                            </Badge>
+                          ) : null;
+                        })()}
+                        <ServiceListingAttributeBadges
+                          categorySlug={service.product?.category as string | undefined}
+                          attributes={service.category_attributes}
+                        />
                         {service.product?.is_active === false && (
                           <Badge variant="secondary" className="text-xs">
                             Brouillon
