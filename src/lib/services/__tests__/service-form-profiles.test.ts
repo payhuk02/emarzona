@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
   getServiceFormProfile,
+  getServiceLeafExtraFields,
+  listServiceLeafSlugs,
+  SERVICE_FAMILY_LEAVES,
   validateServiceFormAttributes,
 } from '@/lib/services/service-form-profiles';
 import { getServiceListingAttributeChips } from '@/lib/services/service-listing-attributes';
@@ -70,5 +73,29 @@ describe('getServiceListingAttributeChips', () => {
         attributes: {},
       })
     ).toEqual([]);
+  });
+});
+
+describe('leaf form coverage', () => {
+  const leaves = listServiceLeafSlugs();
+
+  it('maps every family leaf without duplicates', () => {
+    expect(leaves).toHaveLength(116);
+    expect(new Set(leaves).size).toBe(116);
+    expect(Object.keys(SERVICE_FAMILY_LEAVES)).toHaveLength(12);
+  });
+
+  it('gives every leaf a family profile plus a leaf-specific required field', () => {
+    for (const leaf of leaves) {
+      const profile = getServiceFormProfile(undefined, leaf);
+      const extras = getServiceLeafExtraFields(leaf);
+      expect(profile, leaf).not.toBeNull();
+      expect(extras.length, leaf).toBeGreaterThan(0);
+      expect(
+        extras.some(field => field.required),
+        leaf
+      ).toBe(true);
+      expect(profile?.fields[0]?.key).toBe(extras[0].key);
+    }
   });
 });

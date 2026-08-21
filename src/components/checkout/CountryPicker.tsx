@@ -60,7 +60,7 @@ export function CountryPicker({
   const items = useMemo(() => CHECKOUT_DIAL_COUNTRIES, []);
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover modal open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
           id={id}
@@ -68,6 +68,7 @@ export function CountryPicker({
           variant="outline"
           role="combobox"
           aria-expanded={open}
+          aria-haspopup="listbox"
           aria-label={
             compact
               ? `Indicatif ${country.name} +${country.dial}`
@@ -101,8 +102,9 @@ export function CountryPicker({
       <PopoverContent
         align="start"
         side="bottom"
-        className="w-[min(22rem,calc(100vw-1.5rem))] overflow-hidden p-0"
+        className="z-[1100] w-[min(22rem,calc(100vw-1.5rem))] overflow-hidden p-0 pointer-events-auto"
         collisionPadding={16}
+        onCloseAutoFocus={event => event.preventDefault()}
       >
         <Command>
           <CommandInput placeholder="Rechercher un pays ou un indicatif…" />
@@ -113,6 +115,7 @@ export function CountryPicker({
                 <CommandItem
                   key={item.iso}
                   value={`${item.name} ${item.iso} +${item.dial}`}
+                  onPointerDown={event => event.preventDefault()}
                   onSelect={() => {
                     onSelect(item);
                     setOpen(false);

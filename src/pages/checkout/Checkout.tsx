@@ -103,6 +103,10 @@ const Checkout = () => {
   const guestEmail = searchParams.get('guestEmail');
   const guestName = searchParams.get('guestName');
   const guestPhone = searchParams.get('guestPhone');
+  const addonIds = (searchParams.get('addons') || '')
+    .split(',')
+    .map(id => id.trim())
+    .filter(Boolean);
   const isGuestCheckout = Boolean(guestEmail?.trim());
 
   // États
@@ -690,6 +694,7 @@ const Checkout = () => {
             durationMinutes: serviceProductRow.duration_minutes ?? undefined,
             notes: 'Réservation via checkout direct',
             checkoutMode: 'immediate',
+            addonProductIds: addonIds,
           });
 
           if (!serviceResult.checkoutUrl) {
@@ -844,6 +849,7 @@ const Checkout = () => {
       checkoutQuantity,
       scheduledAt,
       serviceParticipants,
+      addonIds,
     ]
   );
 

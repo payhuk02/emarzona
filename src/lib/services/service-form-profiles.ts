@@ -590,12 +590,14 @@ const FAMILY_PROFILES: Record<
   },
 };
 
+const OS_MOBILE: ServiceFormFieldOption[] = [
+  { value: 'ios', label: 'iOS' },
+  { value: 'android', label: 'Android' },
+  { value: 'flutter', label: 'Flutter / cross-platform' },
+  { value: 'other', label: 'Autre' },
+];
+
 const LEAF_EXTRA_FIELDS: Record<string, ServiceFormField[]> = {
-  'svc-traduction': [
-    select('source_lang', 'Langue source', LANGS, { required: true }),
-    select('target_lang', 'Langue cible', LANGS, { required: true }),
-  ],
-  'svc-formation-langues': [select('teaching_lang', 'Langue enseignée', LANGS, { required: true })],
   'svc-developpement-web': [
     select(
       'cms',
@@ -610,29 +612,614 @@ const LEAF_EXTRA_FIELDS: Record<string, ServiceFormField[]> = {
       { required: true }
     ),
   ],
-  'svc-livraison': [
+  'svc-developpement-mobile': [
+    select('mobile_os', 'Plateforme mobile', OS_MOBILE, { required: true }),
+  ],
+  'svc-creation-logiciels': [
     select(
-      'parcel_type',
-      'Type de colis',
+      'software_type',
+      'Type de logiciel',
       [
-        { value: 'document', label: 'Document' },
-        { value: 'small', label: 'Petit colis' },
-        { value: 'medium', label: 'Moyen' },
-        { value: 'fragile', label: 'Fragile' },
+        { value: 'saas', label: 'SaaS / web app' },
+        { value: 'desktop', label: 'Desktop' },
+        { value: 'internal', label: 'Outil interne' },
+        { value: 'other', label: 'Autre' },
       ],
       { required: true }
     ),
   ],
-  'svc-coiffure': [
+  'svc-maintenance-informatique': [
     select(
-      'service_focus',
-      'Prestation',
+      'device_scope',
+      'Périmètre',
       [
-        { value: 'cut', label: 'Coupe' },
-        { value: 'color', label: 'Coloration' },
-        { value: 'braids', label: 'Tresses / locking' },
-        { value: 'styling', label: 'Coiffage' },
+        { value: 'pc', label: 'PC / laptop' },
+        { value: 'network', label: 'Réseau' },
+        { value: 'server', label: 'Serveur' },
         { value: 'other', label: 'Autre' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-cybersecurite': [
+    select(
+      'security_scope',
+      'Type d’audit',
+      [
+        { value: 'pentest', label: 'Pentest' },
+        { value: 'audit', label: 'Audit' },
+        { value: 'hardening', label: 'Durcissement' },
+        { value: 'awareness', label: 'Sensibilisation' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-bases-de-donnees': [
+    select(
+      'db_engine',
+      'Moteur',
+      [
+        { value: 'postgres', label: 'PostgreSQL' },
+        { value: 'mysql', label: 'MySQL' },
+        { value: 'mongo', label: 'MongoDB' },
+        { value: 'other', label: 'Autre' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-ia-automatisation': [
+    select(
+      'ai_use_case',
+      'Cas d’usage',
+      [
+        { value: 'chatbot', label: 'Chatbot' },
+        { value: 'workflow', label: 'Automatisation' },
+        { value: 'data', label: 'Données / ML' },
+        { value: 'other', label: 'Autre' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-support-technique': [
+    select(
+      'support_channel',
+      'Canal',
+      [
+        { value: 'remote', label: 'À distance' },
+        { value: 'onsite', label: 'Sur site' },
+        { value: 'ticket', label: 'Ticketing' },
+        { value: 'phone', label: 'Téléphone' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-installation-configuration': [
+    text('software_target', 'Logiciel / matériel à installer', { required: true }),
+  ],
+  'svc-hebergement-serveurs': [
+    select(
+      'hosting_type',
+      'Hébergement',
+      [
+        { value: 'vps', label: 'VPS' },
+        { value: 'cloud', label: 'Cloud' },
+        { value: 'dedicated', label: 'Dédié' },
+        { value: 'email', label: 'Mail' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-creation-logos': [
+    select(
+      'logo_style',
+      'Style',
+      [
+        { value: 'wordmark', label: 'Typographique' },
+        { value: 'symbol', label: 'Symbole' },
+        { value: 'mascot', label: 'Mascotte' },
+        { value: 'minimal', label: 'Minimal' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-identite-visuelle': [
+    flags(
+      'brand_elements',
+      'Éléments livrés',
+      [
+        { value: 'logo', label: 'Logo' },
+        { value: 'colors', label: 'Couleurs' },
+        { value: 'type', label: 'Typo' },
+        { value: 'guide', label: 'Charte' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-design-graphique': [
+    select(
+      'graphic_use',
+      'Usage',
+      [
+        { value: 'social', label: 'Réseaux sociaux' },
+        { value: 'print', label: 'Print' },
+        { value: 'ads', label: 'Publicité' },
+        { value: 'other', label: 'Autre' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-ui-ux-design': [
+    select(
+      'ux_product',
+      'Produit',
+      [
+        { value: 'web', label: 'Site / web app' },
+        { value: 'mobile', label: 'App mobile' },
+        { value: 'saas', label: 'SaaS' },
+        { value: 'other', label: 'Autre' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-design-sites-web': [
+    num('page_count', 'Nombre de pages maquettées', { required: true, placeholder: '8' }),
+  ],
+  'svc-flyers-affiches': [
+    select(
+      'print_format',
+      'Format',
+      [
+        { value: 'a6', label: 'A6' },
+        { value: 'a5', label: 'A5' },
+        { value: 'a4', label: 'A4' },
+        { value: 'a3', label: 'A3 / affiche' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-presentations-pro': [
+    num('slide_count', 'Nombre de slides', { required: true, placeholder: '12' }),
+  ],
+  'svc-packaging': [text('packaged_product', 'Produit à packager', { required: true })],
+  'svc-retouche-photo': [
+    num('photo_count', 'Nombre de photos', { required: true, placeholder: '10' }),
+  ],
+  'svc-illustration': [
+    select(
+      'illustration_style',
+      'Style',
+      [
+        { value: 'vector', label: 'Vectoriel' },
+        { value: 'digital', label: 'Digital painting' },
+        { value: 'comic', label: 'BD' },
+        { value: 'other', label: 'Autre' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-marketing-digital': [
+    select(
+      'digital_focus',
+      'Axe principal',
+      [
+        { value: 'acquisition', label: 'Acquisition' },
+        { value: 'branding', label: 'Notoriété' },
+        { value: 'retention', label: 'Rétention' },
+        { value: 'full', label: 'Mix complet' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-community-management': [
+    flags(
+      'cm_platforms',
+      'Plateformes',
+      [
+        { value: 'ig', label: 'Instagram' },
+        { value: 'fb', label: 'Facebook' },
+        { value: 'tt', label: 'TikTok' },
+        { value: 'li', label: 'LinkedIn' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-gestion-reseaux-sociaux': [
+    num('posts_per_week', 'Publications / semaine', { required: true, placeholder: '5' }),
+  ],
+  'svc-facebook-instagram-ads': [
+    select(
+      'meta_goal',
+      'Objectif ads',
+      [
+        { value: 'traffic', label: 'Trafic' },
+        { value: 'leads', label: 'Leads' },
+        { value: 'sales', label: 'Ventes' },
+        { value: 'awareness', label: 'Notoriété' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-google-ads': [
+    select(
+      'google_goal',
+      'Objectif Google Ads',
+      [
+        { value: 'search', label: 'Search' },
+        { value: 'shopping', label: 'Shopping' },
+        { value: 'display', label: 'Display' },
+        { value: 'youtube', label: 'YouTube' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-tiktok-ads': [
+    select(
+      'tiktok_goal',
+      'Objectif TikTok Ads',
+      [
+        { value: 'views', label: 'Vues' },
+        { value: 'traffic', label: 'Trafic' },
+        { value: 'conversions', label: 'Conversions' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-seo': [
+    select(
+      'seo_scope',
+      'Périmètre SEO',
+      [
+        { value: 'audit', label: 'Audit' },
+        { value: 'content', label: 'Contenu' },
+        { value: 'tech', label: 'Technique' },
+        { value: 'local', label: 'Local' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-email-marketing': [
+    num('list_size', 'Taille de liste (approx.)', { required: true, placeholder: '1000' }),
+  ],
+  'svc-copywriting-marketing': [
+    select(
+      'copy_asset',
+      'Livrable',
+      [
+        { value: 'landing', label: 'Landing page' },
+        { value: 'ads', label: 'Pubs' },
+        { value: 'email', label: 'Emails' },
+        { value: 'other', label: 'Autre' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-creation-contenu': [
+    select(
+      'content_format',
+      'Format',
+      [
+        { value: 'posts', label: 'Posts' },
+        { value: 'video', label: 'Vidéo courte' },
+        { value: 'blog', label: 'Articles' },
+        { value: 'mixed', label: 'Mix' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-strategie-marketing': [
+    select(
+      'strategy_horizon',
+      'Horizon',
+      [
+        { value: '30d', label: '30 jours' },
+        { value: '90d', label: '90 jours' },
+        { value: 'year', label: 'Année' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-influence-rp': [
+    select(
+      'influencer_tier',
+      'Profil influence',
+      [
+        { value: 'nano', label: 'Nano' },
+        { value: 'micro', label: 'Micro' },
+        { value: 'macro', label: 'Macro' },
+        { value: 'pr', label: 'Presse / RP' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-coaching-professionnel': [text('coaching_theme', 'Thème du coaching', { required: true })],
+  'svc-coaching-business': [
+    select(
+      'business_stage',
+      'Stade',
+      [
+        { value: 'idea', label: 'Idée' },
+        { value: 'launch', label: 'Lancement' },
+        { value: 'growth', label: 'Croissance' },
+        { value: 'scale', label: 'Scale' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-coaching-marketing': [text('marketing_skill', 'Compétence visée', { required: true })],
+  'svc-formation-informatique': [text('it_topic', 'Sujet de formation', { required: true })],
+  'svc-formation-ecommerce': [
+    select(
+      'ecom_platform',
+      'Plateforme',
+      [
+        { value: 'shopify', label: 'Shopify' },
+        { value: 'woocommerce', label: 'WooCommerce' },
+        { value: 'emarzona', label: 'Emarzona' },
+        { value: 'other', label: 'Autre' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-formation-langues': [select('teaching_lang', 'Langue enseignée', LANGS, { required: true })],
+  'svc-tutorat': [
+    select(
+      'school_level',
+      'Niveau',
+      [
+        { value: 'primary', label: 'Primaire' },
+        { value: 'middle', label: 'Collège' },
+        { value: 'high', label: 'Lycée' },
+        { value: 'uni', label: 'Supérieur' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-mentorat': [text('mentor_domain', 'Domaine de mentorat', { required: true })],
+  'svc-orientation-pro': [text('career_goal', 'Objectif professionnel', { required: true })],
+  'svc-accompagnement-perso': [text('personal_goal', 'Objectif personnel', { required: true })],
+  'svc-redaction-web': [
+    select(
+      'web_content_type',
+      'Type de contenu',
+      [
+        { value: 'blog', label: 'Blog' },
+        { value: 'product', label: 'Fiche produit' },
+        { value: 'landing', label: 'Landing' },
+        { value: 'other', label: 'Autre' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-copywriting-redaction': [
+    select(
+      'copy_goal',
+      'Objectif',
+      [
+        { value: 'convert', label: 'Conversion' },
+        { value: 'brand', label: 'Marque' },
+        { value: 'launch', label: 'Lancement' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-correction-relecture': [
+    select(
+      'document_type',
+      'Document',
+      [
+        { value: 'web', label: 'Web' },
+        { value: 'book', label: 'Livre' },
+        { value: 'academic', label: 'Académique' },
+        { value: 'business', label: 'Pro' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-traduction': [
+    select('source_lang', 'Langue source', LANGS, { required: true }),
+    select('target_lang', 'Langue cible', LANGS, { required: true }),
+  ],
+  'svc-transcription': [
+    select(
+      'media_type',
+      'Support',
+      [
+        { value: 'audio', label: 'Audio' },
+        { value: 'video', label: 'Vidéo' },
+        { value: 'meeting', label: 'Réunion' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-redaction-cv': [
+    select(
+      'cv_level',
+      'Niveau',
+      [
+        { value: 'junior', label: 'Junior' },
+        { value: 'confirmed', label: 'Confirmé' },
+        { value: 'exec', label: 'Cadre' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-lettres-motivation': [
+    text('application_target', 'Poste / formation visé(e)', { required: true }),
+  ],
+  'svc-redaction-rapports': [text('report_subject', 'Sujet du rapport', { required: true })],
+  'svc-redaction-academique': [
+    select(
+      'academic_level',
+      'Niveau',
+      [
+        { value: 'bachelor', label: 'Licence' },
+        { value: 'master', label: 'Master' },
+        { value: 'phd', label: 'Thèse' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-photographie': [
+    select(
+      'photo_event',
+      'Type de shooting',
+      [
+        { value: 'portrait', label: 'Portrait' },
+        { value: 'product', label: 'Produit' },
+        { value: 'event', label: 'Événement' },
+        { value: 'other', label: 'Autre' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-videographie': [
+    select(
+      'video_type',
+      'Type de vidéo',
+      [
+        { value: 'promo', label: 'Promo' },
+        { value: 'event', label: 'Événement' },
+        { value: 'interview', label: 'Interview' },
+        { value: 'other', label: 'Autre' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-montage-video': [
+    num('footage_hours', 'Heures de rushes', { required: true, placeholder: '2' }),
+  ],
+  'svc-motion-design': [
+    select(
+      'motion_format',
+      'Format',
+      [
+        { value: 'logo', label: 'Logo animé' },
+        { value: 'explainer', label: 'Explainer' },
+        { value: 'ads', label: 'Pub' },
+        { value: 'other', label: 'Autre' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-animation-2d-3d': [
+    select(
+      'animation_kind',
+      'Type',
+      [
+        { value: '2d', label: '2D' },
+        { value: '3d', label: '3D' },
+        { value: 'mixed', label: 'Mixte' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-voix-off': [select('voice_lang', 'Langue de la voix', LANGS, { required: true })],
+  'svc-production-audiovisuelle': [
+    select(
+      'production_scale',
+      'Échelle',
+      [
+        { value: 'short', label: 'Court' },
+        { value: 'spot', label: 'Spot' },
+        { value: 'documentary', label: 'Documentaire' },
+        { value: 'other', label: 'Autre' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-creation-reels': [
+    num('reel_count', 'Nombre de reels', { required: true, placeholder: '8' }),
+  ],
+  'svc-contenu-tiktok': [
+    num('tiktok_count', 'Nombre de vidéos', { required: true, placeholder: '8' }),
+  ],
+  'svc-production-evenementielle': [
+    text('event_name', 'Nom / type d’événement', { required: true }),
+  ],
+  'svc-creation-entreprise': [
+    select(
+      'legal_form',
+      'Forme visée',
+      [
+        { value: 'sarl', label: 'SARL' },
+        { value: 'sas', label: 'SAS / SASU' },
+        { value: 'ei', label: 'Entreprise individuelle' },
+        { value: 'other', label: 'Autre' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-domiciliation': [text('domicile_city', 'Ville de domiciliation', { required: true })],
+  'svc-gestion-administrative': [
+    num('docs_per_month', 'Volume docs / mois (approx.)', { required: true, placeholder: '30' }),
+  ],
+  'svc-secretariat-externalise': [
+    num('hours_per_week', 'Heures / semaine', { required: true, placeholder: '10' }),
+  ],
+  'svc-assistance-virtuelle': [text('va_tools', 'Outils utilisés', { required: true })],
+  'svc-centres-appels': [select('call_lang', 'Langue des appels', LANGS, { required: true })],
+  'svc-prospection-commerciale': [
+    select(
+      'lead_channel',
+      'Canal',
+      [
+        { value: 'phone', label: 'Téléphone' },
+        { value: 'email', label: 'Email' },
+        { value: 'linkedin', label: 'LinkedIn' },
+        { value: 'mixed', label: 'Mix' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-televiente': [text('product_sold', 'Offre vendue', { required: true })],
+  'svc-gestion-projets': [
+    select(
+      'methodology',
+      'Méthode',
+      [
+        { value: 'agile', label: 'Agile' },
+        { value: 'waterfall', label: 'Cycle en V' },
+        { value: 'hybrid', label: 'Hybride' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-externalisation-services': [
+    text('outsourced_function', 'Fonction externalisée', { required: true }),
+  ],
+  'svc-nettoyage': [
+    select(
+      'property_type',
+      'Type de lieu',
+      [
+        { value: 'home', label: 'Maison' },
+        { value: 'apartment', label: 'Appartement' },
+        { value: 'office', label: 'Bureau' },
+        { value: 'other', label: 'Autre' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-entretien': [
+    select(
+      'maintenance_freq',
+      'Fréquence',
+      [
+        { value: 'once', label: 'Ponctuel' },
+        { value: 'weekly', label: 'Hebdo' },
+        { value: 'monthly', label: 'Mensuel' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-jardinage': [
+    select(
+      'garden_type',
+      'Type d’espace',
+      [
+        { value: 'lawn', label: 'Pelouse' },
+        { value: 'plants', label: 'Plantes' },
+        { value: 'full', label: 'Jardin complet' },
       ],
       { required: true }
     ),
@@ -650,6 +1237,244 @@ const LEAF_EXTRA_FIELDS: Record<string, ServiceFormField[]> = {
       { required: true }
     ),
   ],
+  'svc-electricite': [
+    select(
+      'electrical_job',
+      'Intervention',
+      [
+        { value: 'repair', label: 'Dépannage' },
+        { value: 'install', label: 'Installation' },
+        { value: 'upgrade', label: 'Mise aux normes' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-climatisation': [
+    select(
+      'ac_job',
+      'Intervention',
+      [
+        { value: 'install', label: 'Pose' },
+        { value: 'service', label: 'Entretien' },
+        { value: 'repair', label: 'Réparation' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-peinture': [num('rooms_count', 'Nombre de pièces', { required: true, placeholder: '2' })],
+  'svc-menuiserie': [
+    select(
+      'wood_job',
+      'Ouvrage',
+      [
+        { value: 'door', label: 'Porte' },
+        { value: 'furniture', label: 'Meuble' },
+        { value: 'repair', label: 'Réparation' },
+        { value: 'other', label: 'Autre' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-reparation': [text('item_to_repair', 'Objet à réparer', { required: true })],
+  'svc-decoration-interieure': [text('room_focus', 'Pièce / espace', { required: true })],
+  'svc-coiffure': [
+    select(
+      'service_focus',
+      'Prestation',
+      [
+        { value: 'cut', label: 'Coupe' },
+        { value: 'color', label: 'Coloration' },
+        { value: 'braids', label: 'Tresses / locking' },
+        { value: 'styling', label: 'Coiffage' },
+        { value: 'other', label: 'Autre' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-maquillage': [
+    select(
+      'makeup_occasion',
+      'Occasion',
+      [
+        { value: 'wedding', label: 'Mariage' },
+        { value: 'event', label: 'Événement' },
+        { value: 'daily', label: 'Quotidien' },
+        { value: 'photo', label: 'Shooting' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-onglerie': [
+    select(
+      'nail_type',
+      'Prestation',
+      [
+        { value: 'gel', label: 'Gel' },
+        { value: 'acrylic', label: 'Résine' },
+        { value: 'semi', label: 'Semi-permanent' },
+        { value: 'care', label: 'Soin' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-esthetique': [text('aesthetic_care', 'Soin demandé', { required: true })],
+  'svc-massage': [
+    select(
+      'massage_type',
+      'Type de massage',
+      [
+        { value: 'relax', label: 'Relaxant' },
+        { value: 'sport', label: 'Sportif' },
+        { value: 'deep', label: 'Profond' },
+        { value: 'other', label: 'Autre' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-spa': [
+    select(
+      'spa_formula',
+      'Formule',
+      [
+        { value: 'massage', label: 'Massage' },
+        { value: 'ritual', label: 'Rituel' },
+        { value: 'day', label: 'Journée spa' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-coaching-sportif': [text('sport_goal', 'Objectif sportif', { required: true })],
+  'svc-nutrition-bien-etre': [text('diet_goal', 'Objectif nutrition', { required: true })],
+  'svc-beaute-domicile': [text('home_beauty_service', 'Prestation à domicile', { required: true })],
+  'svc-livraison': [
+    select(
+      'parcel_type',
+      'Type de colis',
+      [
+        { value: 'document', label: 'Document' },
+        { value: 'small', label: 'Petit colis' },
+        { value: 'medium', label: 'Moyen' },
+        { value: 'fragile', label: 'Fragile' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-transport-personnes': [
+    num('passenger_count', 'Nombre de passagers', { required: true, placeholder: '3' }),
+  ],
+  'svc-location-vehicules': [
+    select(
+      'vehicle_class',
+      'Catégorie',
+      [
+        { value: 'eco', label: 'Éco' },
+        { value: 'sedan', label: 'Berline' },
+        { value: 'suv', label: 'SUV' },
+        { value: 'van', label: 'Utilitaire' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-chauffeur-prive': [
+    select(
+      'trip_type',
+      'Trajet',
+      [
+        { value: 'airport', label: 'Aéroport' },
+        { value: 'city', label: 'Ville' },
+        { value: 'event', label: 'Événement' },
+        { value: 'day', label: 'Mise à disposition' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-entretien-automobile': [text('auto_service', 'Prestation entretien', { required: true })],
+  'svc-reparation-automobile': [text('auto_repair', 'Panne / réparation', { required: true })],
+  'svc-diagnostic-automobile': [text('vehicle_brand', 'Marque / modèle', { required: true })],
+  'svc-lavage-automobile': [
+    select(
+      'wash_type',
+      'Lavage',
+      [
+        { value: 'ext', label: 'Extérieur' },
+        { value: 'int', label: 'Intérieur' },
+        { value: 'full', label: 'Complet' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-assistance-routiere': [
+    select(
+      'breakdown_type',
+      'Type de panne',
+      [
+        { value: 'battery', label: 'Batterie' },
+        { value: 'tire', label: 'Pneu' },
+        { value: 'tow', label: 'Remorquage' },
+        { value: 'other', label: 'Autre' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-organisation-evenements': [
+    select(
+      'event_format',
+      'Format',
+      [
+        { value: 'wedding', label: 'Mariage' },
+        { value: 'corporate', label: 'Corporate' },
+        { value: 'private', label: 'Privé' },
+        { value: 'other', label: 'Autre' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-decoration-evenementielle': [text('event_theme', 'Thème / ambiance', { required: true })],
+  'svc-traiteur': [
+    select(
+      'menu_style',
+      'Style de menu',
+      [
+        { value: 'buffet', label: 'Buffet' },
+        { value: 'plated', label: 'Assis' },
+        { value: 'cocktail', label: 'Cocktail' },
+        { value: 'other', label: 'Autre' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-photo-evenementielle': [
+    num('coverage_hours', 'Heures de couverture', { required: true, placeholder: '6' }),
+  ],
+  'svc-video-evenementielle': [
+    select(
+      'video_deliverable',
+      'Livrable',
+      [
+        { value: 'highlight', label: 'Highlight' },
+        { value: 'full', label: 'Film complet' },
+        { value: 'teaser', label: 'Teaser' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-dj-animation': [text('music_style', 'Style musical', { required: true })],
+  'svc-location-materiel': [text('equipment_needed', 'Matériel demandé', { required: true })],
+  'svc-sonorisation': [
+    num('sound_capacity', 'Jauge (personnes)', { required: true, placeholder: '100' }),
+  ],
+  'svc-invitations-papeterie': [
+    select(
+      'invite_format',
+      'Format',
+      [
+        { value: 'print', label: 'Imprimé' },
+        { value: 'digital', label: 'Digital' },
+        { value: 'both', label: 'Les deux' },
+      ],
+      { required: true }
+    ),
+  ],
   'svc-consultation-juridique': [
     select(
       'format',
@@ -658,6 +1483,48 @@ const LEAF_EXTRA_FIELDS: Record<string, ServiceFormField[]> = {
         { value: 'visio', label: 'Visio' },
         { value: 'phone', label: 'Téléphone' },
         { value: 'office', label: 'Cabinet' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-redaction-contrats': [text('contract_type', 'Type de contrat', { required: true })],
+  'svc-creation-societes': [
+    select(
+      'company_form',
+      'Forme sociale',
+      [
+        { value: 'sarl', label: 'SARL' },
+        { value: 'sas', label: 'SAS' },
+        { value: 'ei', label: 'EI' },
+        { value: 'other', label: 'Autre' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-formalites-administratives': [text('formality_type', 'Formalité', { required: true })],
+  'svc-propriete-intellectuelle': [
+    select(
+      'ip_type',
+      'Objet',
+      [
+        { value: 'trademark', label: 'Marque' },
+        { value: 'copyright', label: 'Droit d’auteur' },
+        { value: 'patent', label: 'Brevet' },
+        { value: 'other', label: 'Autre' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-droit-affaires': [text('business_matter', 'Sujet', { required: true })],
+  'svc-mediation': [text('dispute_type', 'Nature du litige', { required: true })],
+  'svc-assistance-juridique': [
+    select(
+      'legal_urgency',
+      'Urgence',
+      [
+        { value: 'low', label: 'Conseil' },
+        { value: 'medium', label: 'Sous 48h' },
+        { value: 'high', label: 'Urgent' },
       ],
       { required: true }
     ),
@@ -698,6 +1565,14 @@ export function getServiceFormProfile(
 
 export function profileDefaultsPatch(profile: ServiceFormProfile): Partial<ServiceProductFormData> {
   return { ...profile.defaults };
+}
+
+export function listServiceLeafSlugs(): string[] {
+  return Object.values(SERVICE_FAMILY_LEAVES).flat();
+}
+
+export function getServiceLeafExtraFields(leafSlug: string): ServiceFormField[] {
+  return LEAF_EXTRA_FIELDS[leafSlug] ?? [];
 }
 
 export type ServiceCategoryAttributes = Record<string, string | number | boolean | string[]>;

@@ -16,7 +16,8 @@ function buildCorsHeaders(originHeader: string | null) {
   return {
     'Access-Control-Allow-Origin': resolveCorsOrigin(originHeader),
     Vary: 'Origin',
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Headers':
+      'authorization, x-client-info, apikey, content-type, x-checkout-token',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
   };
 }
@@ -31,20 +32,15 @@ serve(async (req: Request) => {
 
   try {
     const authHeader = req.headers.get('authorization');
-    const checkoutToken = req.headers.get('x-checkout-token');
-    const internalSecret = Deno.env.get('EDGE_INTERNAL_SECRET');
-    const token = authHeader?.replace('Bearer ', '').trim();
+    const checkoutToken = req.headers.get('x-checkout-token')?.trim();
+    const token = authHeader?.replace(/^Bearer\s+/i, '').trim();
 
+    // supabase.functions.invoke sends the anon/user JWT as Bearer — same gate as
+    // guest-checkout-provisioning / course-checkout-provisioning. Do not require
+    // EDGE_INTERNAL_SECRET here or guest booking returns 403.
     if (!token && !checkoutToken) {
       return new Response(JSON.stringify({ error: 'Unauthorized: Missing valid token or secret' }), {
         status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    if (token !== internalSecret && !checkoutToken) {
-      return new Response(JSON.stringify({ error: 'Unauthorized: Invalid token' }), {
-        status: 403,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }

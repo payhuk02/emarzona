@@ -39,9 +39,10 @@ describe('checkout-route', () => {
         storeSlug: 'agence-pro',
         scheduledAt: '2026-07-21T10:00:00.000Z',
         participants: 2,
+        addonIds: ['a1', 'a2'],
       })
     ).toBe(
-      '/pay/agence-pro/consultation-premium?scheduledAt=2026-07-21T10%3A00%3A00.000Z&participants=2'
+      '/pay/agence-pro/consultation-premium?scheduledAt=2026-07-21T10%3A00%3A00.000Z&participants=2&addons=a1%2Ca2'
     );
   });
 

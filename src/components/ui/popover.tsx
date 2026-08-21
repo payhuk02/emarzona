@@ -29,7 +29,8 @@ const PopoverContent = React.forwardRef<
         avoidCollisions={props.avoidCollisions ?? true}
         sticky={isMobile ? 'always' : (props.sticky ?? 'partial')}
         className={cn(
-          'z-[100] w-[calc(100vw-1rem)] sm:w-72 max-w-[calc(100vw-1rem)] sm:max-w-sm rounded-md border bg-popover p-3 sm:p-4 text-popover-foreground shadow-md outline-none',
+          // Au-dessus des Dialog/BottomSheet (z-1040/1050) pour rester cliquable dans une modale.
+          'z-[1060] pointer-events-auto w-[calc(100vw-1rem)] sm:w-72 max-w-[calc(100vw-1rem)] sm:max-w-sm rounded-md border bg-popover p-3 sm:p-4 text-popover-foreground shadow-md outline-none',
           // Mobile/iOS: éviter popover trop haut (clavier/barres) + scroll interne fluide
           'max-h-[min(24rem,calc(100vh-2rem))] max-h-[min(24rem,calc(100dvh-2rem))] overflow-y-auto overscroll-contain [-webkit-overflow-scrolling:touch]',
           // Animations optimisées pour mobile - CSS only
@@ -46,9 +47,3 @@ const PopoverContent = React.forwardRef<
 PopoverContent.displayName = PopoverPrimitive.Content.displayName;
 
 export { Popover, PopoverTrigger, PopoverContent };
-
-
-
-
-
-

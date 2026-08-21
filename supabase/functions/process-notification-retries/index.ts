@@ -29,6 +29,102 @@ function buildCorsHeaders(originHeader: string | null) {
   };
 }
 
+async function processDueServiceBookingReminders(supabase: ReturnType<typeof createClient>) {
+  const siteUrl = (Deno.env.get('SITE_URL') || 'https://www.emarzona.com').replace(/\/$/, '');
+  const { data: due, error } = await supabase
+    .from('service_booking_reminders')
+    .select(
+      'id, booking_id, user_id, store_id, reminder_type, reminder_subject, reminder_message, reminder_template, retry_count, max_retries'
+    )
+    .eq('status', 'pending')
+    .eq('reminder_sent', false)
+    .lte('reminder_scheduled_at', new Date().toISOString())
+    .order('reminder_scheduled_at', { ascending: true })
+    .limit(50);
+
+  if (error || !due?.length) {
+    return { processed: 0, sent: 0, failed: 0 };
+  }
+
+  const internalSecret = Deno.env.get('EDGE_INTERNAL_SECRET') ?? '';
+  const invokeHeaders: Record<string, string> = {};
+  if (internalSecret) invokeHeaders['x-internal-secret'] = internalSecret;
+
+  let sent = 0;
+  let failed = 0;
+
+  for (const reminder of due) {
+    try {
+      if (reminder.reminder_type !== 'email') {
+        await supabase
+          .from('service_booking_reminders')
+          .update({
+            status: 'cancelled',
+            error_message: 'Channel not supported by cron',
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', reminder.id);
+        continue;
+      }
+
+      const { data: emailResult, error: emailError } = await supabase.functions.invoke(
+        'send-notification-email',
+        {
+          body: {
+            user_id: reminder.user_id,
+            type: 'service_booking_reminder',
+            title: reminder.reminder_subject || 'Rappel de rendez-vous',
+            message: reminder.reminder_message,
+            store_id: reminder.store_id,
+            action_url: `${siteUrl}/account/bookings`,
+            action_label: 'Voir ma réservation',
+            metadata: {
+              booking_id: reminder.booking_id,
+              reminder_template: reminder.reminder_template,
+            },
+          },
+          headers: invokeHeaders,
+        }
+      );
+
+      const success =
+        !emailError &&
+        (emailResult as { success?: boolean; skipped?: boolean } | null)?.success !== false;
+
+      if (success) {
+        await supabase
+          .from('service_booking_reminders')
+          .update({
+            status: 'sent',
+            reminder_sent: true,
+            reminder_sent_at: new Date().toISOString(),
+            delivery_status: 'delivered',
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', reminder.id);
+        sent += 1;
+      } else {
+        throw emailError || new Error('Email reminder failed');
+      }
+    } catch (sendError) {
+      failed += 1;
+      const retries = (reminder.retry_count || 0) + 1;
+      const maxRetries = reminder.max_retries || 3;
+      await supabase
+        .from('service_booking_reminders')
+        .update({
+          status: retries >= maxRetries ? 'failed' : 'pending',
+          retry_count: retries,
+          error_message: sendError instanceof Error ? sendError.message : 'Unknown error',
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', reminder.id);
+    }
+  }
+
+  return { processed: due.length, sent, failed };
+}
+
 serve(async req => {
   const corsHeaders = buildCorsHeaders(req.headers.get('origin'));
 
@@ -60,10 +156,14 @@ serve(async req => {
     }
 
     if (!retries || retries.length === 0) {
-      return new Response(JSON.stringify({ processed: 0, succeeded: 0, failed: 0 }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200,
-      });
+      const reminders = await processDueServiceBookingReminders(supabase);
+      return new Response(
+        JSON.stringify({ processed: 0, succeeded: 0, failed: 0, reminders }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200,
+        }
+      );
     }
 
     let succeeded = 0;
@@ -180,11 +280,14 @@ serve(async req => {
       }
     }
 
+    const reminders = await processDueServiceBookingReminders(supabase);
+
     return new Response(
       JSON.stringify({
         processed: retries.length,
         succeeded,
         failed,
+        reminders,
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

@@ -668,22 +668,24 @@ async function sendServiceEmail(
   if (bookingId) {
     const { data: booking } = await supabase
       .from('service_bookings')
-      .select('id, scheduled_date, scheduled_time, status, meeting_link, start_time, notes')
+      .select(
+        'id, scheduled_date, scheduled_start_time, scheduled_end_time, status, meeting_url, customer_notes'
+      )
       .eq('id', bookingId)
       .maybeSingle();
 
     if (booking) {
       if (booking.scheduled_date) {
-        bookingDate = new Date(booking.scheduled_date).toLocaleDateString('fr-FR');
-      } else if (booking.start_time) {
-        bookingDate = new Date(booking.start_time).toLocaleDateString('fr-FR');
-        bookingTime = new Date(booking.start_time).toLocaleTimeString('fr-FR', {
-          hour: '2-digit',
-          minute: '2-digit',
-        });
+        const raw = String(booking.scheduled_date);
+        const ymd = /^(\d{4})-(\d{2})-(\d{2})/.exec(raw);
+        bookingDate = ymd
+          ? new Date(Number(ymd[1]), Number(ymd[2]) - 1, Number(ymd[3])).toLocaleDateString('fr-FR')
+          : raw;
       }
-      if (booking.scheduled_time) bookingTime = String(booking.scheduled_time);
-      if (booking.meeting_link) bookingLink = booking.meeting_link;
+      if (booking.scheduled_start_time) {
+        bookingTime = String(booking.scheduled_start_time).slice(0, 5);
+      }
+      if (booking.meeting_url) bookingLink = booking.meeting_url;
     }
   }
 

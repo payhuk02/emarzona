@@ -241,7 +241,6 @@ export const sendDigitalProductConfirmation = async (params: {
   fileSize?: string;
   licensingType?: 'standard' | 'plr' | 'copyrighted';
   licenseTerms?: string;
-  licenseKey?: string;
 }) => {
   return sendEmail({
     templateSlug: 'order-confirmation-digital',
@@ -261,7 +260,6 @@ export const sendDigitalProductConfirmation = async (params: {
       file_size: params.fileSize,
       licensing_type: params.licensingType,
       license_terms: params.licenseTerms,
-      license_key: params.licenseKey,
     },
   });
 };

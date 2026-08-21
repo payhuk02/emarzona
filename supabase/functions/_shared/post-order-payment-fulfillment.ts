@@ -121,6 +121,69 @@ async function sendOrderConfirmationEmail(
   }
 }
 
+async function scheduleConfirmedBookingReminders(
+  supabase: SupabaseClient,
+  bookingId: string
+): Promise<void> {
+  const { data: booking, error } = await supabase
+    .from('service_bookings')
+    .select('id, product_id, user_id, scheduled_date, scheduled_start_time')
+    .eq('id', bookingId)
+    .maybeSingle();
+
+  if (error || !booking?.user_id || !booking.scheduled_date || !booking.scheduled_start_time) {
+    return;
+  }
+
+  const { data: product } = await supabase
+    .from('products')
+    .select('store_id, name')
+    .eq('id', booking.product_id)
+    .maybeSingle();
+  const storeId = product?.store_id;
+  if (!storeId) return;
+
+  const start = `${booking.scheduled_date}T${String(booking.scheduled_start_time).slice(0, 8)}`;
+  const bookingAt = new Date(start);
+  if (Number.isNaN(bookingAt.getTime())) return;
+
+  const offsets: Array<{ hours: number; label: string }> = [
+    { hours: 24, label: '24h' },
+    { hours: 2, label: '2h' },
+  ];
+
+  for (const offset of offsets) {
+    const scheduledAt = new Date(bookingAt.getTime() - offset.hours * 60 * 60 * 1000);
+    if (scheduledAt.getTime() <= Date.now()) continue;
+
+    const { data: existing } = await supabase
+      .from('service_booking_reminders')
+      .select('id')
+      .eq('booking_id', bookingId)
+      .eq('reminder_type', 'email')
+      .eq('reminder_template', offset.label)
+      .eq('status', 'pending')
+      .maybeSingle();
+    if (existing?.id) continue;
+
+    const { error: insertError } = await supabase.from('service_booking_reminders').insert({
+      booking_id: bookingId,
+      service_id: booking.product_id,
+      store_id: storeId,
+      user_id: booking.user_id,
+      reminder_type: 'email',
+      reminder_template: offset.label,
+      reminder_scheduled_at: scheduledAt.toISOString(),
+      reminder_subject: `Rappel ${offset.label} — votre rendez-vous`,
+      reminder_message: `Rappel ${offset.label} : votre réservation approche (${booking.scheduled_date} à ${String(booking.scheduled_start_time).slice(0, 5)}).`,
+      status: 'pending',
+    });
+    if (insertError) {
+      console.error('scheduleConfirmedBookingReminders insert failed', insertError);
+    }
+  }
+}
+
 async function confirmServiceBookings(
   supabase: SupabaseClient,
   order: Record<string, unknown>
@@ -174,6 +237,8 @@ async function confirmServiceBookings(
       console.error(`Error confirming booking ${bookingId}:`, bookingUpdateError);
       continue;
     }
+
+    await scheduleConfirmedBookingReminders(supabase, bookingId);
 
     // Rattrapage : lier order_items.booking_id si manquant
     await supabase

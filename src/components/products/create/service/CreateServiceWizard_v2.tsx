@@ -63,21 +63,13 @@ import {
 } from '@/lib/service/load-service-product-form';
 import {
   validateServiceWizardPublishSteps,
-  validateServiceCategorySelection,
-  resolveServiceFormProfile,
-  serviceWizardRequiresSlots,
+  validateServiceWizardStep,
 } from '@/lib/service-wizard-step-validation';
-import { validateServiceFormAttributes } from '@/lib/services/service-form-profiles';
 import { persistServiceCategoryAttributes } from '@/lib/service/persist-service-category-attributes';
 import { resolveServiceProductCategoryPayload } from '@/lib/services/service-categories';
 import { useServiceCategoryTree } from '@/hooks/useServiceCategories';
 import { supabase } from '@/integrations/supabase/client';
-import {
-  validateWithZod,
-  formatValidators,
-  getFieldError,
-  serviceSchema,
-} from '@/lib/wizard-validation';
+import { formatValidators, getFieldError } from '@/lib/wizard-validation';
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { cn } from '@/lib/utils';
@@ -440,36 +432,9 @@ export const CreateServiceWizard = ({
 
       switch (step) {
         case 1: {
-          // 1. Validation client avec Zod
-          const effectiveDuration = formData.duration_minutes ?? formData.duration;
-          const result = validateWithZod(serviceSchema, {
-            name: formData.name,
-            slug: formData.slug,
-            description: formData.description,
-            price: formData.price,
-            duration: effectiveDuration,
-            max_participants: formData.max_participants,
-            meeting_url: formData.meeting_url,
-            location_address: formData.location_address,
-          });
+          const shared = validateServiceWizardStep(1, formData, { categoryTree });
+          errors.push(...shared.errors);
 
-          if (!result.valid) {
-            const nameError = getFieldError(result.errors, 'name');
-            const priceError = getFieldError(result.errors, 'price');
-            const descriptionError = getFieldError(result.errors, 'description');
-            const durationError = getFieldError(result.errors, 'duration');
-            const maxParticipantsError = getFieldError(result.errors, 'max_participants');
-            const meetingUrlError = getFieldError(result.errors, 'meeting_url');
-
-            if (nameError) errors.push(nameError);
-            if (priceError) errors.push(priceError);
-            if (descriptionError) errors.push(descriptionError);
-            if (durationError) errors.push(durationError);
-            if (maxParticipantsError) errors.push(maxParticipantsError);
-            if (meetingUrlError) errors.push(meetingUrlError);
-          }
-
-          // 2. Validation format URL si fournie (client)
           if (formData.meeting_url) {
             const urlResult = formatValidators.url(formData.meeting_url);
             if (!urlResult.valid) {
@@ -478,22 +443,13 @@ export const CreateServiceWizard = ({
             }
           }
 
-          errors.push(...validateServiceCategorySelection(formData, categoryTree));
-          errors.push(
-            ...validateServiceFormAttributes(
-              resolveServiceFormProfile(formData, categoryTree),
-              formData.category_attributes
-            )
-          );
-
-          // Si erreurs client, arrêter ici
           if (errors.length > 0) {
             setValidationErrors(prev => ({ ...prev, [step]: errors }));
             return false;
           }
 
-          // 3. Validation serveur (unicité slug, etc.)
           if (storeId) {
+            const effectiveDuration = formData.duration_minutes ?? formData.duration;
             const serverResult = await validateServiceServer({
               name: formData.name,
               slug: formData.slug,
@@ -530,37 +486,8 @@ export const CreateServiceWizard = ({
           break;
         }
         case 2: {
-          const effectiveDuration = formData.duration_minutes ?? formData.duration;
-          if (!effectiveDuration || effectiveDuration <= 0) {
-            errors.push(t('services.errors.durationRequired', 'La durée du service est requise'));
-          }
-          if (formData.location_type === 'on_site' && !formData.location_address?.trim()) {
-            errors.push(
-              t(
-                'services.errors.addressRequired',
-                "L'adresse est requise pour les services sur site"
-              )
-            );
-          }
-          if (formData.location_type === 'online' && !formData.meeting_url?.trim()) {
-            errors.push(
-              t(
-                'services.errors.meetingUrlRequired',
-                "L'URL de réunion est requise pour les services en ligne"
-              )
-            );
-          }
-          if (
-            serviceWizardRequiresSlots(formData, categoryTree) &&
-            (!formData.availability_slots || formData.availability_slots.length === 0)
-          ) {
-            errors.push(
-              t(
-                'services.errors.slotsRequired',
-                'Ajoutez au moins un créneau de disponibilité pour permettre les réservations'
-              )
-            );
-          }
+          const shared = validateServiceWizardStep(2, formData, { categoryTree });
+          errors.push(...shared.errors);
           break;
         }
 

@@ -70,7 +70,7 @@ export default function SharedWishlist() {
         navigate(`/products/physical/${product.id}`);
         break;
       case 'service':
-        navigate(`/services/${product.id}`);
+        navigate(`/service/${product.id}`);
         break;
       case 'course':
         navigate(`/courses/${product.id}`);
