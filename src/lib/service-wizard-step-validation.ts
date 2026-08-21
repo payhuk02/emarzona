@@ -27,6 +27,10 @@ export type ServiceWizardFormFields = {
   fulfillment_mode?: 'appointment' | 'project' | 'both';
   promotional_price?: number;
   pricing_model?: string;
+  requires_staff?: boolean;
+  staff_members?: unknown[];
+  deposit_required?: boolean;
+  deposit_amount?: number;
 };
 
 export type ServiceWizardStepValidationResult = {
@@ -164,6 +168,24 @@ export function validateServiceWizardStep(
     }
   }
 
+  if (step === 3) {
+    if (
+      formData.requires_staff &&
+      (!formData.staff_members || formData.staff_members.length === 0)
+    ) {
+      errors.push('Au moins un membre du personnel est requis');
+    }
+    if (!formData.max_participants || formData.max_participants < 1) {
+      errors.push('Le nombre maximum de participants doit être au moins 1');
+    }
+  }
+
+  if (step === 4 && formData.deposit_required) {
+    if (!formData.deposit_amount || formData.deposit_amount <= 0) {
+      errors.push("Le montant de l'acompte est requis");
+    }
+  }
+
   return {
     valid: errors.length === 0,
     errors,
@@ -174,7 +196,7 @@ export function validateServiceWizardPublishSteps(
   formData: ServiceWizardFormFields,
   options?: ServiceWizardValidationOptions
 ): ServiceWizardStepValidationResult & { failedStep?: number } {
-  for (const step of [1, 2] as const) {
+  for (const step of [1, 2, 3, 4] as const) {
     const result = validateServiceWizardStep(step, formData, options);
     if (!result.valid) {
       return { ...result, failedStep: step };

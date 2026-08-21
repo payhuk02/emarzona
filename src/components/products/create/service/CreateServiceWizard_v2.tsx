@@ -492,33 +492,11 @@ export const CreateServiceWizard = ({
         }
 
         case 3:
-          if (
-            formData.requires_staff &&
-            (!formData.staff_members || formData.staff_members.length === 0)
-          ) {
-            errors.push(
-              t('services.errors.staffRequired', 'Au moins un membre du personnel est requis')
-            );
-          }
-          if (!formData.max_participants || formData.max_participants < 1) {
-            errors.push(
-              t(
-                'services.errors.maxParticipantsRequired',
-                'Le nombre maximum de participants doit être au moins 1'
-              )
-            );
-          }
+        case 4: {
+          const shared = validateServiceWizardStep(step, formData, { categoryTree });
+          errors.push(...shared.errors);
           break;
-
-        case 4:
-          if (formData.deposit_required) {
-            if (!formData.deposit_amount || formData.deposit_amount <= 0) {
-              errors.push(
-                t('services.errors.depositRequired', "Le montant de l'acompte est requis")
-              );
-            }
-          }
-          break;
+        }
 
         case 5:
         case 6:
@@ -581,21 +559,30 @@ export const CreateServiceWizard = ({
 
   const handleStepClick = useCallback(
     async (stepId: number) => {
-      // Permettre de revenir en arrière, mais valider avant d'avancer
       if (stepId < currentStep) {
         setCurrentStep(stepId);
-        logger.info('Navigation directe vers étape', { to: stepId });
         window.scrollTo({ top: 0, behavior: 'smooth' });
-      } else {
-        const isValid = await validateStep(currentStep);
-        if (isValid) {
-          setCurrentStep(stepId);
-          logger.info('Navigation directe vers étape', { to: stepId });
-          window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+      for (let step = currentStep; step < stepId; step += 1) {
+        const isValid = await validateStep(step);
+        if (!isValid) {
+          setCurrentStep(step);
+          toast({
+            title: t('services.errors.validationTitle', 'Erreurs de validation'),
+            description: t(
+              'services.errors.validationDesc',
+              'Veuillez corriger les erreurs avant de continuer'
+            ),
+            variant: 'destructive',
+          });
+          return;
         }
       }
+      setCurrentStep(stepId);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     },
-    [currentStep, validateStep]
+    [currentStep, validateStep, toast, t]
   );
 
   /**
@@ -739,7 +726,7 @@ export const CreateServiceWizard = ({
         location_address: formData.location_address,
         meeting_url: formData.meeting_url,
         timezone: formData.timezone || 'UTC',
-        requires_staff: formData.requires_staff !== false,
+        requires_staff: formData.requires_staff ?? false,
         max_participants: formData.max_participants || 1,
         pricing_type: formData.pricing_type || 'fixed',
         deposit_required: formData.deposit_required || false,
@@ -895,6 +882,9 @@ export const CreateServiceWizard = ({
             error: affiliateError,
             productId: product.id,
           });
+          throw new Error(
+            "Le service a été créé, mais l'affiliation n'a pas pu être enregistrée. Rouvrez-le en édition."
+          );
         }
       }
 
@@ -1014,21 +1004,6 @@ export const CreateServiceWizard = ({
         variant: 'destructive',
       });
       return;
-    }
-
-    for (const step of [3, 4] as const) {
-      if (!(await validateStep(step))) {
-        setCurrentStep(step);
-        toast({
-          title: t('services.errors.validationAllTitle', '⚠️ Erreurs de validation'),
-          description: t(
-            'services.errors.validationAllDesc',
-            'Veuillez corriger toutes les erreurs avant de publier'
-          ),
-          variant: 'destructive',
-        });
-        return;
-      }
     }
 
     if (!(await validateStep(1))) {

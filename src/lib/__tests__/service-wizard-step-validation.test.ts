@@ -93,4 +93,24 @@ describe('validateServiceWizardStep', () => {
     expect(result.valid).toBe(false);
     expect(result.toastTitle).toBe('Créneaux requis');
   });
+
+  it('rejects step 3 when staff is required but missing', () => {
+    const result = validateServiceWizardStep(3, {
+      ...baseForm,
+      requires_staff: true,
+      staff_members: [],
+    });
+    expect(result.valid).toBe(false);
+  });
+
+  it('rejects publish on missing deposit amount', () => {
+    const result = validateServiceWizardPublishSteps({
+      ...baseForm,
+      promotional_price: 15000,
+      deposit_required: true,
+      deposit_amount: 0,
+    });
+    expect(result.valid).toBe(false);
+    expect(result.failedStep).toBe(4);
+  });
 });

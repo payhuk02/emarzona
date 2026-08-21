@@ -5,6 +5,7 @@
 
 export interface ServiceAvailabilitySlot {
   day: number; // 0-6 (Sunday-Saturday)
+  day_of_week?: number;
   start_time: string; // 'HH:MM'
   end_time: string; // 'HH:MM'
 }

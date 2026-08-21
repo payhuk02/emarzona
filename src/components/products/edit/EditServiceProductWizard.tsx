@@ -305,7 +305,23 @@ export const EditServiceProductWizard = ({
         }
 
         case 2: {
-          const clientResult = validateServiceWizardStep(2, formData);
+          const clientResult = validateServiceWizardStep(2, formData, { categoryTree });
+          if (!clientResult.valid) {
+            setValidationErrors(prev => ({ ...prev, [step]: clientResult.errors }));
+            return { valid: false, errors: clientResult.errors };
+          }
+
+          setValidationErrors(prev => {
+            const newErrors = { ...prev };
+            delete newErrors[step];
+            return newErrors;
+          });
+          return { valid: true, errors: [] };
+        }
+
+        case 3:
+        case 4: {
+          const clientResult = validateServiceWizardStep(step, formData, { categoryTree });
           if (!clientResult.valid) {
             setValidationErrors(prev => ({ ...prev, [step]: clientResult.errors }));
             return { valid: false, errors: clientResult.errors };
@@ -473,7 +489,7 @@ export const EditServiceProductWizard = ({
       }
 
       const slotsData = (formData.availability_slots || []).map(slot => ({
-        day_of_week: slot.day,
+        day_of_week: slot.day_of_week ?? slot.day,
         start_time: slot.start_time,
         end_time: slot.end_time,
       }));
