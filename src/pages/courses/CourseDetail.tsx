@@ -73,7 +73,7 @@ import { useProductPixels } from '@/hooks/courses/useProductPixels';
 import { ProductReviewsSummary } from '@/components/reviews';
 import { PaymentOptionsBadge, getPaymentOptions } from '@/components/products/PaymentOptionsBadge';
 import { PricingModelBadge } from '@/components/products/PricingModelBadge';
-import { useCreateCourseOrder } from '@/hooks/orders/useCreateCourseOrder';
+import { buildCheckoutUrl } from '@/lib/checkout/checkout-route';
 import { logSupabaseRuntimeProbe } from '@/lib/debug/supabase-runtime-probe';
 import { enrollUserInCourse } from '@/lib/courses/enroll-user';
 import { buildCourseLearnUrl } from '@/lib/courses/course-learn-redirect';
@@ -106,10 +106,6 @@ const CourseDetail = ({ learnMode = false }: CourseDetailProps) => {
     void logSupabaseRuntimeProbe(location.pathname);
   }, [isLearnRoute, slug, location.pathname]);
 
-  // Hook pour créer commande cours
-  const createCourseOrder = useCreateCourseOrder();
-
-  // Récupérer les infos d'affiliation
   const { isEnabled: affiliateEnabled, settings: affiliateSettings } = useIsAffiliateEnabled(
     data?.product?.id || ''
   );
@@ -287,20 +283,15 @@ const CourseDetail = ({ learnMode = false }: CourseDetailProps) => {
           return;
         }
 
-        const result = await createCourseOrder.mutateAsync({
-          courseId: course.id,
-          productId: product.id,
-          storeId: product.store_id,
-          customerEmail: checkoutEmail!,
-          customerName:
-            user?.user_metadata?.name || guestName || checkoutEmail!.split('@')[0] || '',
-        });
-
-        if (result.checkoutUrl) {
-          window.location.href = result.checkoutUrl;
-        } else {
-          throw new Error('URL de paiement non disponible');
-        }
+        navigate(
+          buildCheckoutUrl({
+            productId: product.id,
+            storeId: product.store_id,
+            productSlug: product.slug,
+            guestEmail: !user ? checkoutEmail : undefined,
+            guestName: !user ? guestName || undefined : undefined,
+          })
+        );
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : "Erreur lors de l'inscription";

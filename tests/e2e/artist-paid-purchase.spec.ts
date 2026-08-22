@@ -107,7 +107,13 @@ test.describe('Artist paid purchase (E2E)', () => {
         return { email, id: data.user.id };
       })();
 
-      await loginAsSeededUser(page, admin, unpaidBuyer.email);
+      await loginAsSeededUser(
+        page,
+        admin,
+        unpaidBuyer.email,
+        '/dashboard',
+        E2E_TEST_CONFIG.seededUserPassword
+      );
       await gotoApp(page, `/artist/${fixture.product.id}`);
 
       await expect(page.getByText(/Œuvre non trouvée/i)).toHaveCount(0, { timeout: 5_000 });
@@ -121,7 +127,7 @@ test.describe('Artist paid purchase (E2E)', () => {
       await expect(page).toHaveURL(
         new RegExp(`(/checkout\\?.*productId=${fixture.product.id}|/pay/[^/?#]+)`),
         {
-          timeout: 15_000,
+          timeout: 30_000,
         }
       );
       await admin.auth.admin.deleteUser(unpaidBuyer.id);

@@ -59,7 +59,7 @@ test.describe('Course wizard — publish (E2E)', () => {
     await advanceCourseWizardToPublishStep(page);
     await publishCourseWizard(page);
 
-    await expect(page).toHaveURL('/dashboard/courses', { timeout: 45_000 });
+    await expect(page).toHaveURL(/\/dashboard\/courses\/?(?:\?.*)?$/, { timeout: 45_000 });
 
     const { data: rows, error: queryError } = await admin
       .from('products')

@@ -5,6 +5,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { E2E_TEST_CONFIG } from '../shared/e2e-test-config';
 import { assertSafeE2ESupabaseUrl, resolveE2ESupabaseUrl } from './e2e-supabase-guard';
 import { withAuthAdminRetry } from './auth-admin-retry';
+import { retryOnTransientPostgrest } from './supabase-schema-cache-retry';
 
 export type SeededUser = { id: string; email: string; password: string };
 export type SeededStore = { id: string; slug: string; userId: string };
@@ -68,19 +69,21 @@ async function createStore(
 ): Promise<SeededStore> {
   const name = `E2E ${commerceType} ${runId}`;
   const slug = slugify(name);
-  const { data, error } = await admin
-    .from('stores')
-    .insert({
-      user_id: vendorId,
-      name,
-      slug,
-      description: `E2E ${commerceType} store`,
-      is_active: true,
-      commerce_type: commerceType,
-      metadata: { commerce_type: commerceType },
-    })
-    .select('id, slug')
-    .single();
+  const { data, error } = await retryOnTransientPostgrest(() =>
+    admin
+      .from('stores')
+      .insert({
+        user_id: vendorId,
+        name,
+        slug,
+        description: `E2E ${commerceType} store`,
+        is_active: true,
+        commerce_type: commerceType,
+        metadata: { commerce_type: commerceType },
+      })
+      .select('id, slug')
+      .single()
+  );
 
   if (error || !data) throw error ?? new Error('store insert failed');
   return { id: data.id, slug: data.slug, userId: vendorId };
@@ -144,21 +147,23 @@ export async function seedPaidCourseFixture(
 
   const productName = `E2E Cours ${runId}`;
   const productSlug = slugify(productName);
-  const { data: product, error: productError } = await admin
-    .from('products')
-    .insert({
-      store_id: store.id,
-      name: productName,
-      slug: productSlug,
-      description: 'Cours E2E payant',
-      price: 7500,
-      currency: 'XOF',
-      product_type: 'course',
-      is_active: true,
-      is_draft: false,
-    })
-    .select('id, slug, name')
-    .single();
+  const { data: product, error: productError } = await retryOnTransientPostgrest(() =>
+    admin
+      .from('products')
+      .insert({
+        store_id: store.id,
+        name: productName,
+        slug: productSlug,
+        description: 'Cours E2E payant',
+        price: 7500,
+        currency: 'XOF',
+        product_type: 'course',
+        is_active: true,
+        is_draft: false,
+      })
+      .select('id, slug, name')
+      .single()
+  );
 
   if (productError || !product) throw productError ?? new Error('product insert failed');
 
@@ -226,21 +231,23 @@ export async function seedPaidArtistFixture(
 
   const productName = `E2E Oeuvre ${runId}`;
   const productSlug = slugify(productName);
-  const { data: product, error: productError } = await admin
-    .from('products')
-    .insert({
-      store_id: store.id,
-      name: productName,
-      slug: productSlug,
-      description: 'Oeuvre E2E payante',
-      price: 12000,
-      currency: 'XOF',
-      product_type: 'artist',
-      is_active: true,
-      is_draft: false,
-    })
-    .select('id, slug, name')
-    .single();
+  const { data: product, error: productError } = await retryOnTransientPostgrest(() =>
+    admin
+      .from('products')
+      .insert({
+        store_id: store.id,
+        name: productName,
+        slug: productSlug,
+        description: 'Oeuvre E2E payante',
+        price: 12000,
+        currency: 'XOF',
+        product_type: 'artist',
+        is_active: true,
+        is_draft: false,
+      })
+      .select('id, slug, name')
+      .single()
+  );
 
   if (productError || !product) throw productError ?? new Error('product insert failed');
 

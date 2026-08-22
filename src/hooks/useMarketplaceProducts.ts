@@ -56,6 +56,7 @@ interface MarketplaceProductsParams {
   pagination: PaginationState;
   hasSearchQuery: boolean;
   shouldUseRPCFiltering: boolean;
+  searchQuery?: string;
 }
 
 interface MarketplaceProductsResponse {
@@ -127,6 +128,7 @@ export async function fetchMarketplaceProducts({
   pagination,
   hasSearchQuery,
   shouldUseRPCFiltering,
+  searchQuery,
 }: MarketplaceProductsParams): Promise<MarketplaceProductsResponse> {
   // Calculer les indices de pagination
   const startIndex = (pagination.currentPage - 1) * pagination.itemsPerPage;
@@ -161,7 +163,10 @@ export async function fetchMarketplaceProducts({
         p_min_rating: filters.rating !== 'all' ? Number(filters.rating) : null,
         p_sort_by: mapSortByForMarketplaceRpc(filters.sortBy || 'created_at'),
         p_sort_order: filters.sortOrder || 'desc',
-        p_search_query: hasSearchQuery && filters.search ? filters.search : null,
+        p_search_query: (() => {
+          const q = (searchQuery ?? filters.search ?? '').trim();
+          return hasSearchQuery && q ? q : null;
+        })(),
         p_featured_only: filters.category === 'featured' || filters.featuredOnly === true,
       });
 

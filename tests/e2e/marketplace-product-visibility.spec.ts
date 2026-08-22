@@ -123,7 +123,7 @@ test.describe('Marketplace — product visibility after wizard publish (E2E)', (
     await advanceCourseWizardToPublishStep(page);
     await publishCourseWizard(page);
 
-    await expect(page).toHaveURL('/dashboard/courses', { timeout: 45_000 });
+    await expect(page).toHaveURL(/\/dashboard\/courses\/?(?:\?.*)?$/, { timeout: 45_000 });
 
     const product = await fetchLatestPublishedProduct(admin, ctx.storeId, 'course');
     expect(product.name).toBe(courseTitle);

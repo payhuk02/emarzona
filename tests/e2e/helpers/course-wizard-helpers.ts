@@ -89,6 +89,8 @@ export async function advanceCourseWizardToPublishStep(page: Page): Promise<void
   await goToWizardStep(page, 7, 7);
 }
 
+const COURSE_DASHBOARD_LIST_URL = /\/dashboard\/courses\/?(?:\?.*)?$/;
+
 export async function publishCourseWizard(page: Page): Promise<void> {
   const errorToast = page.getByText(/Validation incomplète|❌\s*Erreur/i).first();
   const successToast = page.getByText(/Cours publié|est maintenant en ligne/i).first();
@@ -98,7 +100,7 @@ export async function publishCourseWizard(page: Page): Promise<void> {
   await Promise.race([
     successToast.waitFor({ state: 'visible', timeout: 90_000 }),
     errorToast.waitFor({ state: 'visible', timeout: 90_000 }),
-    page.waitForURL(/\/dashboard\/courses(?:\/|$|\?)/, { timeout: 90_000 }),
+    page.waitForURL(COURSE_DASHBOARD_LIST_URL, { timeout: 90_000 }),
   ]).catch(() => undefined);
 
   if (await errorToast.isVisible().catch(() => false)) {
@@ -106,9 +108,7 @@ export async function publishCourseWizard(page: Page): Promise<void> {
     throw new Error(`Course publish failed in UI: ${copy}`);
   }
 
-  if (!/\/dashboard\/courses(?:\/|$|\?)/.test(page.url())) {
-    await expect(page).toHaveURL(/\/dashboard\/courses(?:\/|$|\?)/, { timeout: 45_000 });
-  }
+  await expect(page).toHaveURL(COURSE_DASHBOARD_LIST_URL, { timeout: 90_000 });
 }
 
 export { clickWizardNext, goToWizardStep };

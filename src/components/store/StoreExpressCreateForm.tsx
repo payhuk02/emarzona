@@ -134,9 +134,15 @@ export function StoreExpressCreateForm({
     const timer = window.setTimeout(async () => {
       setIsCheckingSlug(true);
       try {
-        const available = await isStoreSlugAvailable(slug);
+        const available = await Promise.race([
+          isStoreSlugAvailable(slug),
+          new Promise<never>((_, reject) => {
+            window.setTimeout(() => reject(new Error('slug-check-timeout')), 8_000);
+          }),
+        ]);
         setSlugAvailable(available);
       } catch {
+        // Timeout / RPC down: do not block create — uniqueness is still enforced on insert.
         setSlugAvailable(null);
       } finally {
         setIsCheckingSlug(false);

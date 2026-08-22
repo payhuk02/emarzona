@@ -128,7 +128,7 @@ const MarketplacePage = () => {
   const hasSearchQuery: boolean = !!(debouncedSearch && debouncedSearch.trim().length > 0);
 
   const useTypeSpecificRpc = needsTypeSpecificRpc(filters);
-  const shouldUseUnifiedRpc = !hasSearchQuery && !useTypeSpecificRpc;
+  const shouldUseUnifiedRpc = !useTypeSpecificRpc;
 
   const {
     products: catalogQueryProducts,
@@ -210,10 +210,10 @@ const MarketplacePage = () => {
 
   const saveSearchHistory = useSaveSearchHistory();
 
-  const catalogLoading = hasSearchQuery
-    ? searchLoading
-    : useTypeSpecificRpc
-      ? typeRpcLoading
+  const catalogLoading = useTypeSpecificRpc
+    ? typeRpcLoading
+    : hasSearchQuery
+      ? queryIsLoading || searchLoading
       : queryIsLoading;
 
   const catalogError = hasSearchQuery
@@ -282,9 +282,16 @@ const MarketplacePage = () => {
   // Utiliser les résultats de recherche full-text si une recherche est active
   // Sinon, utiliser les produits chargés normalement
   const displayProducts = useMemo(() => {
-    // Si recherche active, utiliser les résultats de recherche full-text
-    if (hasSearchQuery && searchResults && Array.isArray(searchResults)) {
-      // Convertir les résultats de recherche en format Product
+    // Catalogue RPC (y compris q=) d'abord — search_products peut rater un produit tout juste publié.
+    if (hasSearchQuery && catalogProducts.length > 0) {
+      return catalogProducts;
+    }
+    if (
+      hasSearchQuery &&
+      searchResults &&
+      Array.isArray(searchResults) &&
+      searchResults.length > 0
+    ) {
       return searchResults.map((result: SearchResult) => ({
         id: result.id,
         name: result.name,

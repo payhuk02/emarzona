@@ -110,6 +110,7 @@ export function useMarketplaceCatalog({
           pagination,
           hasSearchQuery,
           shouldUseRPCFiltering,
+          searchQuery,
         }),
         fetchMarketplaceFacetsData(filters, searchQuery),
       ]);
@@ -129,7 +130,7 @@ export function useMarketplaceCatalog({
         facets,
       };
     },
-    enabled: enabled && !hasSearchQuery,
+    enabled: enabled,
     initialData,
     initialDataUpdatedAt:
       Math.max(cachedProducts?.fetchedAt ?? 0, cachedFacets?.fetchedAt ?? 0) || undefined,
@@ -152,6 +153,7 @@ export function useMarketplaceCatalog({
             pagination: { ...pagination, currentPage: page },
             hasSearchQuery,
             shouldUseRPCFiltering,
+            searchQuery,
           }),
           fetchMarketplaceFacetsData(filters, searchQuery),
         ]);

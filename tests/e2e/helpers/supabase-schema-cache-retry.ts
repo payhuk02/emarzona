@@ -3,7 +3,10 @@ import type { PostgrestError } from '@supabase/supabase-js';
 const TRANSIENT_POSTGREST_CODES = new Set(['PGRST000', 'PGRST001', 'PGRST002']);
 
 export function isTransientPostgrestError(error: PostgrestError | null): boolean {
-  return Boolean(error && TRANSIENT_POSTGREST_CODES.has(error.code));
+  if (!error) return false;
+  if (TRANSIENT_POSTGREST_CODES.has(error.code)) return true;
+  if (error.code === '57014') return true;
+  return /statement timeout|canceling statement/i.test(error.message || '');
 }
 
 export async function retryOnTransientPostgrest<T>(

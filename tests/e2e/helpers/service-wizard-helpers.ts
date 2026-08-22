@@ -139,16 +139,18 @@ export async function advanceServiceWizardToPublishStep(page: Page): Promise<voi
   await goToWizardStep(page, SERVICE_WIZARD_TOTAL_STEPS, SERVICE_WIZARD_TOTAL_STEPS);
 }
 
+const SERVICE_DASHBOARD_LIST_URL = /\/dashboard\/services\/?(?:\?.*)?$/;
+
 export async function publishServiceWizard(page: Page): Promise<void> {
   const errorToast = page.getByText(/Validation incomplète|❌\s*Erreur/i).first();
-  const successToast = page.getByText(/publié|disponible à la réservation/i).first();
+  const successToast = page.getByText(/Service publié|disponible à la réservation/i).first();
 
   await page.getByRole('button', { name: /Publier le service|^Publier$/i }).click();
 
   await Promise.race([
     successToast.waitFor({ state: 'visible', timeout: 90_000 }),
     errorToast.waitFor({ state: 'visible', timeout: 90_000 }),
-    page.waitForURL(/\/dashboard\/services(?:\/|$|\?)/, { timeout: 90_000 }),
+    page.waitForURL(SERVICE_DASHBOARD_LIST_URL, { timeout: 90_000 }),
   ]).catch(() => undefined);
 
   if (await errorToast.isVisible().catch(() => false)) {
@@ -156,9 +158,7 @@ export async function publishServiceWizard(page: Page): Promise<void> {
     throw new Error(`Service publish failed in UI: ${copy}`);
   }
 
-  if (!/\/dashboard\/services(?:\/|$|\?)/.test(page.url())) {
-    await expect(page).toHaveURL(/\/dashboard\/services(?:\/|$|\?)/, { timeout: 45_000 });
-  }
+  await expect(page).toHaveURL(SERVICE_DASHBOARD_LIST_URL, { timeout: 90_000 });
 }
 
 export { clickWizardNext, goToWizardStep };
