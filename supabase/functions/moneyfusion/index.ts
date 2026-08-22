@@ -156,6 +156,25 @@ function parseMeta(metadata: unknown): Record<string, unknown> {
   return {};
 }
 
+/** Acompte / garantie / cartes cadeau — même règle que GeniusPay et le webhook. */
+async function expectedPayableAmountForOrder(
+  supabase: ReturnType<typeof createClient>,
+  orderId: string
+): Promise<{ valid: true; amount: number; currency?: string } | { valid: false; error: string }> {
+  const { resolveOrderExpectedPayableAmount } = await import(
+    '../_shared/complete-order-payment.ts'
+  );
+  const payable = await resolveOrderExpectedPayableAmount(supabase, orderId);
+  if (!payable.valid || payable.expectedAmount == null) {
+    return { valid: false, error: 'Commande introuvable' };
+  }
+  return {
+    valid: true,
+    amount: Math.round(payable.expectedAmount),
+    currency: payable.currency,
+  };
+}
+
 async function resolveAuthorizedAmount(
   supabase: ReturnType<typeof createClient>,
   validated: CreateCheckoutInput
@@ -168,7 +187,7 @@ async function resolveAuthorizedAmount(
   if (orderId && isValidUUID(orderId)) {
     const { data: order, error } = await supabase
       .from('orders')
-      .select('id, currency, store_id, total_amount, percentage_paid, remaining_amount, metadata')
+      .select('id, currency, store_id')
       .eq('id', orderId)
       .single();
 
@@ -179,22 +198,24 @@ async function resolveAuthorizedAmount(
       return { valid: false, error: 'La boutique ne correspond pas à la commande' };
     }
 
-    const meta = parseMeta(order.metadata);
-    const remaining = Number(order.remaining_amount) || 0;
-    const isGuarantee = String(meta.checkout_method ?? '') === 'guarantee' && remaining > 0;
-    let expected = Math.round(Number(order.total_amount) || 0);
-    if (isGuarantee) {
-      const pct = Math.round(Number(order.percentage_paid) || 0);
-      if (pct > 0) expected = pct;
+    const payable = await expectedPayableAmountForOrder(supabase, orderId);
+    if (!payable.valid) {
+      return { valid: false, error: payable.error };
     }
+    const expected = payable.amount;
 
     if (Math.round(validated.amount) !== expected) {
+      console.warn('[MoneyFusion] Order amount mismatch', {
+        clientAmount: validated.amount,
+        serverAmount: expected,
+        orderId,
+      });
       return { valid: false, error: 'Montant invalide pour cette commande' };
     }
     return {
       valid: true,
       amount: expected,
-      currency: (order.currency as string) || validated.currency,
+      currency: (order.currency as string) || payable.currency || validated.currency,
     };
   }
 
@@ -243,7 +264,7 @@ async function authorizeCheckoutOrderLite(
 ): Promise<{ ok: true } | { ok: false; status: number; error: string }> {
   const { data: order, error } = await supabase
     .from('orders')
-    .select('id, store_id, total_amount, payment_status, created_at, metadata, percentage_paid, remaining_amount')
+    .select('id, store_id, payment_status, created_at, metadata')
     .eq('id', orderId)
     .maybeSingle();
 
@@ -255,14 +276,16 @@ async function authorizeCheckoutOrderLite(
   }
 
   const meta = parseMeta(order.metadata);
-  const remaining = Number(order.remaining_amount) || 0;
-  const isGuarantee = String(meta.checkout_method ?? '') === 'guarantee' && remaining > 0;
-  let expected = Math.round(Number(order.total_amount) || 0);
-  if (isGuarantee) {
-    const pct = Math.round(Number(order.percentage_paid) || 0);
-    if (pct > 0) expected = pct;
+  const payable = await expectedPayableAmountForOrder(supabase, orderId);
+  if (!payable.valid) {
+    return { ok: false, status: 404, error: payable.error };
   }
-  if (Math.round(amount) !== expected) {
+  if (Math.round(amount) !== payable.amount) {
+    console.warn('[MoneyFusion] Checkout amount mismatch', {
+      clientAmount: amount,
+      serverAmount: payable.amount,
+      orderId,
+    });
     return { ok: false, status: 400, error: 'Montant incorrect' };
   }
 

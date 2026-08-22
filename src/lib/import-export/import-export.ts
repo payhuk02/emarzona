@@ -1,9 +1,9 @@
 /**
  * Import/Export System
  * Date: 28 Janvier 2025
- * 
+ *
  * Système d'import/export pour produits, commandes, clients
- * 
+ *
  * AMÉLIORATIONS 2026:
  * - Batch processing pour import optimisé
  * - Validation unicité slug
@@ -41,7 +41,7 @@ export interface ImportPreviewResult {
     row: number;
     isValid: boolean;
     errors: Array<{ field?: string; message: string }>;
-    data?: any;
+    data?: Record<string, unknown>;
   }>;
   categoriesFound: Array<{ name: string; count: number; categoryId?: string }>;
   warnings: string[];
@@ -53,6 +53,23 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const MAX_PRODUCTS_PER_IMPORT = 1000; // Limite de produits par import
 const MAX_RETRIES = 3; // Nombre de tentatives pour erreurs réseau
 const RETRY_DELAY = 1000; // Délai entre tentatives (ms)
+
+function getUnknownErrorMessage(error: unknown, fallback = 'Erreur inconnue'): string {
+  if (error instanceof Error && error.message) return error.message;
+  if (typeof error === 'object' && error && 'message' in error) {
+    const message = (error as { message?: unknown }).message;
+    if (typeof message === 'string' && message) return message;
+  }
+  return fallback;
+}
+
+function getUnknownErrorCode(error: unknown): string | undefined {
+  if (typeof error === 'object' && error && 'code' in error) {
+    const code = (error as { code?: unknown }).code;
+    return typeof code === 'string' ? code : undefined;
+  }
+  return undefined;
+}
 
 const EXPORT_CUSTOMER_FIELDS =
   'id,store_id,name,full_name,email,phone,address,city,country,notes,total_orders,total_spent,metadata,created_at,updated_at';
@@ -89,11 +106,7 @@ function sanitizeHtml(text: string | null | undefined): string | null {
 export function exportImportErrorsToCSV(errors: ImportResult['errors']): string {
   const csvData = [
     ['Ligne', 'Champ', 'Erreur'],
-    ...errors.map(error => [
-      error.row.toString(),
-      error.field || '',
-      error.error
-    ])
+    ...errors.map(error => [error.row.toString(), error.field || '', error.error]),
   ];
 
   return convertToCSV(csvData);
@@ -112,8 +125,8 @@ export function exportPreviewResultsToCSV(previewResult: ImportPreviewResult): s
       result.errors.map(e => `${e.field || 'Global'}: ${e.message}`).join('; '),
       result.data?.name || '',
       result.data?.price?.toString() || '',
-      result.data?.category || ''
-    ])
+      result.data?.category || '',
+    ]),
   ];
 
   return convertToCSV(csvData);
@@ -129,41 +142,44 @@ export async function exportToCSV(
   endDate?: string
 ): Promise<{ success: boolean; data?: string; error?: string }> {
   try {
-    let  data: any[] = [];
+    let data: Record<string, unknown>[] = [];
 
     switch (type) {
-      case 'products':
+      case 'products': {
         const { data: products } = await supabase
           .from('products')
           .select(EXPORT_PRODUCT_FIELDS)
           .eq('store_id', storeId);
-        data = products || [];
+        data = (products || []) as Record<string, unknown>[];
         break;
+      }
 
-      case 'orders':
-        let  ordersQuery= supabase
+      case 'orders': {
+        let ordersQuery = supabase
           .from('orders')
           .select(EXPORT_ORDER_FIELDS)
           .eq('store_id', storeId);
-        
+
         if (startDate) {
           ordersQuery = ordersQuery.gte('created_at', startDate);
         }
         if (endDate) {
           ordersQuery = ordersQuery.lte('created_at', endDate);
         }
-        
-        const { data: orders } = await ordersQuery;
-        data = orders || [];
-        break;
 
-      case 'customers':
+        const { data: orders } = await ordersQuery;
+        data = (orders || []) as Record<string, unknown>[];
+        break;
+      }
+
+      case 'customers': {
         const { data: customers } = await supabase
           .from('customers')
           .select(EXPORT_CUSTOMER_FIELDS)
           .eq('store_id', storeId);
-        data = customers || [];
+        data = (customers || []) as Record<string, unknown>[];
         break;
+      }
     }
 
     // Convertir en CSV
@@ -185,43 +201,46 @@ export async function exportToJSON(
   type: ImportExportType,
   startDate?: string,
   endDate?: string
-): Promise<{ success: boolean; data?: any; error?: string }> {
+): Promise<{ success: boolean; data?: unknown; error?: string }> {
   try {
-    let  data: any[] = [];
+    let data: Record<string, unknown>[] = [];
 
     switch (type) {
-      case 'products':
+      case 'products': {
         const { data: products } = await supabase
           .from('products')
           .select(EXPORT_PRODUCT_FIELDS)
           .eq('store_id', storeId);
-        data = products || [];
+        data = (products || []) as Record<string, unknown>[];
         break;
+      }
 
-      case 'orders':
-        let  ordersQuery= supabase
+      case 'orders': {
+        let ordersQuery = supabase
           .from('orders')
           .select(EXPORT_ORDER_FIELDS)
           .eq('store_id', storeId);
-        
+
         if (startDate) {
           ordersQuery = ordersQuery.gte('created_at', startDate);
         }
         if (endDate) {
           ordersQuery = ordersQuery.lte('created_at', endDate);
         }
-        
-        const { data: orders } = await ordersQuery;
-        data = orders || [];
-        break;
 
-      case 'customers':
+        const { data: orders } = await ordersQuery;
+        data = (orders || []) as Record<string, unknown>[];
+        break;
+      }
+
+      case 'customers': {
         const { data: customers } = await supabase
           .from('customers')
           .select(EXPORT_CUSTOMER_FIELDS)
           .eq('store_id', storeId);
-        data = customers || [];
+        data = (customers || []) as Record<string, unknown>[];
         break;
+      }
     }
 
     return { success: true, data };
@@ -252,25 +271,29 @@ export async function importFromCSV(
         success: false,
         imported: 0,
         failed: 0,
-        errors: [{ 
-          row: 0, 
-          error: `Fichier trop volumineux. Taille maximum: ${MAX_FILE_SIZE / 1024 / 1024}MB` 
-        }],
+        errors: [
+          {
+            row: 0,
+            error: `Fichier trop volumineux. Taille maximum: ${MAX_FILE_SIZE / 1024 / 1024}MB`,
+          },
+        ],
       };
     }
 
     const rows = parseCSV(csvContent);
-    
+
     // Validation nombre de lignes
     if (rows.length > MAX_PRODUCTS_PER_IMPORT) {
       return {
         success: false,
         imported: 0,
         failed: 0,
-        errors: [{ 
-          row: 0, 
-          error: `Trop de produits. Maximum: ${MAX_PRODUCTS_PER_IMPORT} produits par import` 
-        }],
+        errors: [
+          {
+            row: 0,
+            error: `Trop de produits. Maximum: ${MAX_PRODUCTS_PER_IMPORT} produits par import`,
+          },
+        ],
       };
     }
 
@@ -298,16 +321,20 @@ export async function importFromCSV(
     // Import par batch pour performance optimale
     for (let i = 0; i < rows.length; i += BATCH_SIZE) {
       const batch = rows.slice(i, i + BATCH_SIZE);
-      
+
       // Traiter le batch en parallèle
       const batchResults = await Promise.allSettled(
-        batch.map((row, batchIndex) => 
+        batch.map((row, batchIndex) =>
           importRow(storeId, type, row)
-            .then(result => ({ success: result.success, error: result.error, rowIndex: i + batchIndex }))
-            .catch(error => ({ 
-              success: false, 
-              error: error instanceof Error ? error.message : 'Unknown error', 
-              rowIndex: i + batchIndex 
+            .then(result => ({
+              success: result.success,
+              error: result.error,
+              rowIndex: i + batchIndex,
+            }))
+            .catch(error => ({
+              success: false,
+              error: error instanceof Error ? error.message : 'Unknown error',
+              rowIndex: i + batchIndex,
             }))
         )
       );
@@ -354,13 +381,15 @@ export async function importFromCSV(
       failed: errors.length,
       errors,
     };
-  } catch (error: any) {
-    logger.error('Error importing from CSV', { error: error.message });
+  } catch (error: unknown) {
+    logger.error('Error importing from CSV', { error: getUnknownErrorMessage(error) });
     return {
       success: false,
       imported: 0,
       failed: 0,
-      errors: [{ row: 0, error: error.message || 'Erreur inconnue lors de l\'import' }],
+      errors: [
+        { row: 0, error: getUnknownErrorMessage(error, "Erreur inconnue lors de l'import") },
+      ],
     };
   }
 }
@@ -372,7 +401,7 @@ export async function importFromCSV(
 export async function previewImport(
   storeId: string,
   type: ImportExportType,
-  data: any[]
+  data: Record<string, unknown>[]
 ): Promise<ImportPreviewResult> {
   try {
     const validationResults: ImportPreviewResult['validationResults'] = [];
@@ -407,7 +436,10 @@ export async function previewImport(
 
           if (!slug || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
             isValid = false;
-            errors.push({ field: 'slug', message: 'Format de slug invalide (minuscules et tirets uniquement)' });
+            errors.push({
+              field: 'slug',
+              message: 'Format de slug invalide (minuscules et tirets uniquement)',
+            });
           }
 
           if (isNaN(price) || price <= 0) {
@@ -419,27 +451,32 @@ export async function previewImport(
             const promoValidation = validatePromotionalPrice(price, promotionalPrice);
             if (!promoValidation.valid) {
               isValid = false;
-              errors.push({ field: 'promotional_price', message: promoValidation.error || 'Prix promotionnel invalide' });
+              errors.push({
+                field: 'promotional_price',
+                message: promoValidation.error || 'Prix promotionnel invalide',
+              });
             }
           }
 
           // Validation unicité slug dans le fichier
-          const duplicateSlug = validationResults.find(r =>
-            r.isValid && r.data?.slug === slug
-          );
+          const duplicateSlug = validationResults.find(r => r.isValid && r.data?.slug === slug);
           if (duplicateSlug) {
             isValid = false;
-            errors.push({ field: 'slug', message: `Slug dupliqué avec la ligne ${duplicateSlug.row}` });
+            errors.push({
+              field: 'slug',
+              message: `Slug dupliqué avec la ligne ${duplicateSlug.row}`,
+            });
           }
 
           // Validation unicité SKU dans le fichier (si fourni)
           if (sku) {
-            const duplicateSku = validationResults.find(r =>
-              r.isValid && r.data?.sku === sku
-            );
+            const duplicateSku = validationResults.find(r => r.isValid && r.data?.sku === sku);
             if (duplicateSku) {
               isValid = false;
-              errors.push({ field: 'sku', message: `SKU dupliqué avec la ligne ${duplicateSku.row}` });
+              errors.push({
+                field: 'sku',
+                message: `SKU dupliqué avec la ligne ${duplicateSku.row}`,
+              });
             }
           }
 
@@ -452,15 +489,26 @@ export async function previewImport(
             row: rowIndex,
             isValid,
             errors,
-            data: isValid ? {
-              name,
-              slug,
-              sku,
-              price,
-              promotional_price: promotionalPrice,
-              category: categoryName,
-              product_type: row.product_type || 'digital'
-            } : undefined
+            data: isValid
+              ? {
+                  name,
+                  slug,
+                  sku,
+                  price,
+                  promotional_price: promotionalPrice,
+                  category: categoryName,
+                  product_type: row.product_type || 'digital',
+                  description: row.description || row.short_description || null,
+                  short_description: row.short_description || row.accroche || null,
+                  currency: row.currency || row.devise || 'XOF',
+                  image_url: row.image_url || null,
+                  duration_minutes: row.duration_minutes || null,
+                  location_type: row.location_type || null,
+                  pricing_type: row.pricing_type || null,
+                  fulfillment_mode: row.fulfillment_mode || null,
+                  service_type: row.service_type || null,
+                }
+              : undefined,
           });
         } else {
           // Pour autres types, validation basique
@@ -468,14 +516,14 @@ export async function previewImport(
             row: rowIndex,
             isValid: true,
             errors: [],
-            data: row
+            data: row,
           });
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         validationResults.push({
           row: rowIndex,
           isValid: false,
-          errors: [{ message: error.message || 'Erreur de validation' }],
+          errors: [{ message: getUnknownErrorMessage(error, 'Erreur de validation') }],
         });
       }
     }
@@ -488,7 +536,7 @@ export async function previewImport(
         categoriesFound.push({
           name: categoryName,
           count,
-          categoryId: categoryValidation.categoryId || undefined
+          categoryId: categoryValidation.categoryId || undefined,
         });
       } catch (error) {
         warnings.push(`Impossible de vérifier la catégorie "${categoryName}"`);
@@ -501,11 +549,11 @@ export async function previewImport(
       invalidRows: validationResults.filter(r => !r.isValid).length,
       validationResults,
       categoriesFound,
-      warnings
+      warnings,
     };
-  } catch (error: any) {
-    logger.error('Error in previewImport', { error: error.message });
-    throw new Error(`Erreur lors de la prévisualisation: ${error.message}`);
+  } catch (error: unknown) {
+    logger.error('Error in previewImport', { error: getUnknownErrorMessage(error) });
+    throw new Error(`Erreur lors de la prévisualisation: ${getUnknownErrorMessage(error)}`);
   }
 }
 
@@ -516,7 +564,7 @@ export async function previewImport(
 export async function importFromJSON(
   storeId: string,
   type: ImportExportType,
-  jsonData: any[],
+  jsonData: Record<string, unknown>[],
   options?: {
     onProgress?: (progress: { imported: number; total: number; percentage: number }) => void;
   }
@@ -528,10 +576,12 @@ export async function importFromJSON(
         success: false,
         imported: 0,
         failed: 0,
-        errors: [{ 
-          row: 0, 
-          error: `Trop de produits. Maximum: ${MAX_PRODUCTS_PER_IMPORT} produits par import` 
-        }],
+        errors: [
+          {
+            row: 0,
+            error: `Trop de produits. Maximum: ${MAX_PRODUCTS_PER_IMPORT} produits par import`,
+          },
+        ],
       };
     }
 
@@ -559,16 +609,20 @@ export async function importFromJSON(
     // Import par batch pour performance optimale
     for (let i = 0; i < jsonData.length; i += BATCH_SIZE) {
       const batch = jsonData.slice(i, i + BATCH_SIZE);
-      
+
       // Traiter le batch en parallèle
       const batchResults = await Promise.allSettled(
-        batch.map((row, batchIndex) => 
+        batch.map((row, batchIndex) =>
           importRow(storeId, type, row)
-            .then(result => ({ success: result.success, error: result.error, rowIndex: i + batchIndex }))
-            .catch(error => ({ 
-              success: false, 
-              error: error instanceof Error ? error.message : 'Unknown error', 
-              rowIndex: i + batchIndex 
+            .then(result => ({
+              success: result.success,
+              error: result.error,
+              rowIndex: i + batchIndex,
+            }))
+            .catch(error => ({
+              success: false,
+              error: error instanceof Error ? error.message : 'Unknown error',
+              rowIndex: i + batchIndex,
             }))
         )
       );
@@ -615,13 +669,15 @@ export async function importFromJSON(
       failed: errors.length,
       errors,
     };
-  } catch (error: any) {
-    logger.error('Error importing from JSON', { error: error.message });
+  } catch (error: unknown) {
+    logger.error('Error importing from JSON', { error: getUnknownErrorMessage(error) });
     return {
       success: false,
       imported: 0,
       failed: 0,
-      errors: [{ row: 0, error: error.message || 'Erreur inconnue lors de l\'import' }],
+      errors: [
+        { row: 0, error: getUnknownErrorMessage(error, "Erreur inconnue lors de l'import") },
+      ],
     };
   }
 }
@@ -630,7 +686,7 @@ export async function importFromJSON(
  * Valider l'unicité des slugs dans les données à importer
  */
 function validateSlugUniqueness(
-  rows: Record<string, any>[],
+  rows: Record<string, unknown>[],
   storeId: string
 ): { valid: boolean; duplicates: Array<{ row: number; slug: string; duplicateRow: number }> } {
   const slugMap = new Map<string, number>();
@@ -667,39 +723,40 @@ async function retryOperation<T>(
   maxRetries: number = MAX_RETRIES,
   delay: number = RETRY_DELAY
 ): Promise<T> {
-  let lastError: any;
-  
+  let lastError: unknown;
+
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
       return await operation();
-    } catch (error: any) {
+    } catch (error: unknown) {
       lastError = error;
-      
+      const code = getUnknownErrorCode(error);
+      const message = getUnknownErrorMessage(error);
+
       // Ne pas retry pour certaines erreurs (validation, etc.)
-      if (error.code && ['23505', '23503', 'PGRST116'].includes(error.code)) {
+      if (code && ['23505', '23503', 'PGRST116'].includes(code)) {
         throw error;
       }
-      
+
       // Vérifier si c'est une erreur réseau
-      const isNetworkError = 
-        error.message?.includes('network') ||
-        error.message?.includes('fetch') ||
-        error.message?.includes('timeout') ||
-        error.code === 'PGRST301' || // Supabase network error
-        !error.code; // Erreur sans code = probablement réseau
-      
+      const isNetworkError =
+        message.includes('network') ||
+        message.includes('fetch') ||
+        message.includes('timeout') ||
+        code === 'PGRST301' ||
+        !code;
+
       if (!isNetworkError || attempt === maxRetries) {
         throw error;
       }
-      
-      // Attendre avant de réessayer (exponential backoff)
+
       const waitTime = delay * Math.pow(2, attempt);
       await new Promise(resolve => setTimeout(resolve, waitTime));
-      
-      logger.info(`Retry attempt ${attempt + 1}/${maxRetries}`, { error: error.message });
+
+      logger.info(`Retry attempt ${attempt + 1}/${maxRetries}`, { error: message });
     }
   }
-  
+
   throw lastError;
 }
 
@@ -728,7 +785,7 @@ async function validateCategoryExists(
       if (error && error.code !== 'PGRST116') {
         throw error;
       }
-      
+
       return data;
     });
 
@@ -781,7 +838,7 @@ function validatePromotionalPrice(
 async function importRow(
   storeId: string,
   type: ImportExportType,
-  row: Record<string, any>
+  row: Record<string, unknown>
 ): Promise<{ success: boolean; error?: string }> {
   try {
     // Validation storeId
@@ -807,7 +864,10 @@ async function importRow(
         }
 
         if (!slug || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
-          return { success: false, error: 'Le slug doit être en minuscules avec tirets uniquement (ex: mon-produit)' };
+          return {
+            success: false,
+            error: 'Le slug doit être en minuscules avec tirets uniquement (ex: mon-produit)',
+          };
         }
 
         if (isNaN(price) || price <= 0) {
@@ -834,7 +894,10 @@ async function importRow(
           if (!skuValidation.valid) {
             return {
               success: false,
-              error: skuValidation.errors?.sku || skuValidation.error || 'Ce SKU est déjà utilisé dans cette boutique'
+              error:
+                skuValidation.errors?.sku ||
+                skuValidation.error ||
+                'Ce SKU est déjà utilisé dans cette boutique',
             };
           }
         }
@@ -842,23 +905,25 @@ async function importRow(
         // Insertion avec retry automatique pour erreurs réseau
         try {
           await retryOperation(async () => {
-            const { error } = await supabase
-              .from('products')
-              .insert({
-                store_id: storeId,
-                name,
-                slug,
-                sku,
-                description: sanitizeHtml(row.description), // ✅ Sanitization HTML
-                price,
-                promotional_price: promotionalPrice || null,
-                currency: row.currency || row.devise || 'XOF',
-                product_type: productType,
-                category: categoryName, // Garder category (texte) pour compatibilité
-                category_id: categoryValidation.categoryId || null, // Ajouter category_id si trouvé
-                tags: row.tags ? (Array.isArray(row.tags) ? row.tags : row.tags.split(',').map((t: string) => t.trim())) : [],
-                is_active: row.is_active !== undefined ? row.is_active : true,
-              });
+            const { error } = await supabase.from('products').insert({
+              store_id: storeId,
+              name,
+              slug,
+              sku,
+              description: sanitizeHtml(row.description), // ✅ Sanitization HTML
+              price,
+              promotional_price: promotionalPrice || null,
+              currency: row.currency || row.devise || 'XOF',
+              product_type: productType,
+              category: categoryName, // Garder category (texte) pour compatibilité
+              category_id: categoryValidation.categoryId || null, // Ajouter category_id si trouvé
+              tags: row.tags
+                ? Array.isArray(row.tags)
+                  ? row.tags
+                  : row.tags.split(',').map((t: string) => t.trim())
+                : [],
+              is_active: row.is_active !== undefined ? row.is_active : true,
+            });
 
             // Ne pas retry pour erreurs de validation
             if (error) {
@@ -868,15 +933,18 @@ async function importRow(
               throw error; // Autre erreur, retry possible
             }
           });
-        } catch (error: any) {
-          // Messages d'erreur plus spécifiques
-          if (error.code === '23505') {
+        } catch (error: unknown) {
+          const code = getUnknownErrorCode(error);
+          if (code === '23505') {
             return { success: false, error: `Le slug "${slug}" existe déjà dans cette boutique` };
           }
-          if (error.code === '23503') {
+          if (code === '23503') {
             return { success: false, error: 'Catégorie invalide ou introuvable' };
           }
-          return { success: false, error: error.message || 'Erreur lors de la création du produit' };
+          return {
+            success: false,
+            error: getUnknownErrorMessage(error, 'Erreur lors de la création du produit'),
+          };
         }
         break;
       }
@@ -893,32 +961,37 @@ async function importRow(
           return { success: false, error: 'Email invalide' };
         }
 
-        const { error: customerError } = await supabase
-          .from('customers')
-          .insert({
-            store_id: storeId,
-            name,
-            email,
-            phone: row.phone || row.telephone || null,
-          });
+        const { error: customerError } = await supabase.from('customers').insert({
+          store_id: storeId,
+          name,
+          email,
+          phone: row.phone || row.telephone || null,
+        });
 
         if (customerError) {
           if (customerError.code === '23505') {
             return { success: false, error: `Un client avec l'email "${email}" existe déjà` };
           }
-          return { success: false, error: customerError.message || 'Erreur lors de la création du client' };
+          return {
+            success: false,
+            error: customerError.message || 'Erreur lors de la création du client',
+          };
         }
         break;
       }
 
       case 'orders':
         // Les commandes sont généralement créées via le système de paiement
-        return { success: false, error: 'Les commandes ne peuvent pas être importées directement. Utilisez le système de paiement.' };
+        return {
+          success: false,
+          error:
+            'Les commandes ne peuvent pas être importées directement. Utilisez le système de paiement.',
+        };
     }
 
     return { success: true };
-  } catch (error: any) {
-    const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
+  } catch (error: unknown) {
+    const errorMessage = getUnknownErrorMessage(error);
     logger.error('Error in importRow', { error: errorMessage, type, row });
     return { success: false, error: errorMessage };
   }
@@ -927,17 +1000,20 @@ async function importRow(
 /**
  * Convertir des données en CSV
  */
-function convertToCSV(data: any[]): string {
+function convertToCSV(data: Record<string, unknown>[]): string {
   if (data.length === 0) return '';
 
   const headers = Object.keys(data[0]);
   const rows = data.map(row =>
-    headers.map(header => {
-      const value = row[header];
-      if (value === null || value === undefined) return '';
-      if (typeof value === 'object') return JSON.stringify(value);
-      return String(value).replace(/"/g, '""');
-    }).map(v => `"${v}"`).join(',')
+    headers
+      .map(header => {
+        const value = row[header];
+        if (value === null || value === undefined) return '';
+        if (typeof value === 'object') return JSON.stringify(value);
+        return String(value).replace(/"/g, '""');
+      })
+      .map(v => `"${v}"`)
+      .join(',')
   );
 
   return [headers.map(h => `"${h}"`).join(','), ...rows].join('\n');
@@ -946,16 +1022,16 @@ function convertToCSV(data: any[]): string {
 /**
  * Parser un CSV
  */
-function parseCSV(csv: string): Record<string, any>[] {
+function parseCSV(csv: string): Record<string, unknown>[] {
   const lines = csv.split('\n').filter(line => line.trim());
   if (lines.length === 0) return [];
 
   const headers = lines[0].split(',').map(h => h.replace(/^"|"$/g, '').trim());
-  const  rows: Record<string, any>[] = [];
+  const rows: Record<string, unknown>[] = [];
 
-  for (let  i= 1; i < lines.length; i++) {
+  for (let i = 1; i < lines.length; i++) {
     const values = lines[i].split(',').map(v => v.replace(/^"|"$/g, '').trim());
-    const  row: Record<string, any> = {};
+    const row: Record<string, unknown> = {};
     headers.forEach((header, index) => {
       row[header] = values[index] || '';
     });
@@ -964,10 +1040,3 @@ function parseCSV(csv: string): Record<string, any>[] {
 
   return rows;
 }
-
-
-
-
-
-
-

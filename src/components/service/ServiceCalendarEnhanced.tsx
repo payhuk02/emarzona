@@ -6,18 +6,18 @@
  * Alternative moderne au calendrier de base
  */
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { format, parse, startOfWeek, endOfWeek, getDay } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { LazyCalendarWrapper } from '@/components/calendar/LazyCalendarWrapper';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/useMediaQuery';
+import './ServiceBookingCalendar.css';
 
 const SERVICE_AVAILABILITY_SLOT_FIELDS =
   'id, service_product_id, day_of_week, start_time, end_time, is_active';
@@ -75,8 +75,17 @@ export const ServiceCalendarEnhanced = ({
   maxDate,
   disabledDates = [],
 }: ServiceCalendarEnhancedProps) => {
-  const [view, setView] = useState<CalendarView>('week');
+  const isCompact = useIsMobile(1024);
+  const [view, setView] = useState<CalendarView>(() =>
+    typeof window !== 'undefined' && window.innerWidth < 1024 ? 'day' : 'week'
+  );
   const [date, setDate] = useState(selectedDate || new Date());
+
+  useEffect(() => {
+    if (isCompact && (view === 'week' || view === 'work_week' || view === 'month')) {
+      setView('day');
+    }
+  }, [isCompact, view]);
 
   // Fetch service product ID
   const { data: serviceProduct } = useQuery({
@@ -331,16 +340,17 @@ export const ServiceCalendarEnhanced = ({
 
   return (
     <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
-            <CalendarIcon className="h-5 w-5" />
+      <CardHeader className="space-y-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+            <CalendarIcon className="h-5 w-5 shrink-0" />
             Disponibilités
           </CardTitle>
-          <div className="flex gap-1">
+          <div className="flex gap-1 self-start sm:self-auto">
             <Button
               variant="outline"
               size="icon"
+              className="min-h-11 min-w-11"
               onClick={() => {
                 const newDate = new Date(date);
                 newDate.setMonth(newDate.getMonth() - 1);
@@ -352,7 +362,8 @@ export const ServiceCalendarEnhanced = ({
             </Button>
             <Button
               variant="outline"
-              size="icon"
+              size="sm"
+              className="min-h-11 px-3"
               onClick={() => setDate(new Date())}
               aria-label="Aujourd'hui"
             >
@@ -361,6 +372,7 @@ export const ServiceCalendarEnhanced = ({
             <Button
               variant="outline"
               size="icon"
+              className="min-h-11 min-w-11"
               onClick={() => {
                 const newDate = new Date(date);
                 newDate.setMonth(newDate.getMonth() + 1);
@@ -398,7 +410,7 @@ export const ServiceCalendarEnhanced = ({
             </div>
           </div>
         )}
-        <div className="h-[600px]">
+        <div className="h-[380px] sm:h-[480px] lg:h-[560px] min-w-0 overflow-x-auto">
           {isLoading ? (
             <Skeleton className="h-full w-full" />
           ) : (
@@ -419,6 +431,11 @@ export const ServiceCalendarEnhanced = ({
                     startAccessor="start"
                     endAccessor="end"
                     view={view}
+                    views={
+                      isCompact
+                        ? { day: true, agenda: true }
+                        : { month: true, week: true, day: true, agenda: true }
+                    }
                     onView={nextView => setView(nextView as CalendarView)}
                     date={date}
                     onNavigate={setDate}
@@ -433,7 +450,7 @@ export const ServiceCalendarEnhanced = ({
                     max={new Date(0, 0, 0, 20, 0, 0)}
                     defaultDate={new Date()}
                     popup
-                    className="rbc-calendar"
+                    className="rbc-calendar rbc-calendar-service"
                   />
                 );
               }}

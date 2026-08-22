@@ -24,6 +24,47 @@ describe('resolveServicePayableAmount', () => {
     });
   });
 
+  it('prefers the service deposit over product payment_options percentage', () => {
+    expect(
+      resolveServicePayableAmount(
+        10000,
+        { payment_type: 'percentage', percentage_rate: 30 },
+        { deposit_required: true, deposit_type: 'percentage', deposit_amount: 50 }
+      )
+    ).toMatchObject({
+      paymentType: 'percentage',
+      percentageRate: 50,
+      amountToPay: 5000,
+      remainingAmount: 5000,
+    });
+  });
+
+  it('prefers a fixed service deposit over product percentage', () => {
+    expect(
+      resolveServicePayableAmount(
+        10000,
+        { payment_type: 'percentage', percentage_rate: 30 },
+        { deposit_required: true, deposit_type: 'fixed', deposit_amount: 2500 }
+      )
+    ).toMatchObject({
+      amountToPay: 2500,
+      remainingAmount: 7500,
+    });
+  });
+
+  it('uses product percentage when no service deposit is required', () => {
+    expect(
+      resolveServicePayableAmount(
+        10000,
+        { payment_type: 'percentage', percentage_rate: 30 },
+        { deposit_required: false, deposit_type: 'percentage', deposit_amount: 50 }
+      )
+    ).toMatchObject({
+      percentageRate: 30,
+      amountToPay: 3000,
+    });
+  });
+
   it('uses service deposit percentage when payment_options is full', () => {
     expect(
       resolveServicePayableAmount(

@@ -275,7 +275,6 @@ const ShippingServiceMessages = lazyPage(() => import('@/pages/shipping/Shipping
 const VendorMessaging = lazyPage(() => import('@/pages/vendor/VendorMessaging'));
 const BookingsManagement = lazyPage(() => import('@/pages/service/BookingsManagement'));
 const AdvancedCalendarPage = lazyPage(() => import('@/pages/service/AdvancedCalendarPage'));
-const ServiceManagementPage = lazyPage(() => import('@/pages/service/ServiceManagementPage'));
 const GamificationPage = lazyPage(() => import('@/pages/gamification/GamificationPage'));
 const ArtistPortfoliosManagement = lazyPage(
   () => import('@/pages/dashboard/ArtistPortfoliosManagement')
@@ -515,7 +514,14 @@ export const dashboardRoutes = (
       }
     />
     {pr('/dashboard/bookings', BookingsManagement)}
-    {pr('/dashboard/services/bookings', BookingsManagement)}
+    <Route
+      path="/dashboard/services/bookings"
+      element={
+        <ProtectedRoute>
+          <SellerLegacyPathRedirect to="/dashboard/bookings" />
+        </ProtectedRoute>
+      }
+    />
     {pr('/dashboard/advanced-calendar', AdvancedCalendarPage)}
     <Route
       path="/dashboard/recurring-bookings"
@@ -525,7 +531,14 @@ export const dashboardRoutes = (
         </ProtectedRoute>
       }
     />
-    {pr('/dashboard/service-management', ServiceManagementPage)}
+    <Route
+      path="/dashboard/service-management"
+      element={
+        <ProtectedRoute>
+          <SellerLegacyPathRedirect to="/dashboard/services/calendar" />
+        </ProtectedRoute>
+      }
+    />
     {pr('/dashboard/gamification', GamificationPage)}
     {pr('/dashboard/portfolios', ArtistPortfoliosManagement)}
     {pr('/dashboard/auctions', AuctionsManagementPage)}

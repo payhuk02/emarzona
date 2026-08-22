@@ -1,5 +1,12 @@
 import {
-  Briefcase, Calendar, Download, GraduationCap, Layers, Package, PenTool, TrendingUp,
+  Briefcase,
+  Calendar,
+  Download,
+  GraduationCap,
+  Layers,
+  Package,
+  PenTool,
+  TrendingUp,
 } from 'lucide-react';
 import type { PageConfig } from './types';
 
@@ -431,7 +438,7 @@ export const productsPagesConfig: PageConfig[] = [
   {
     id: 'serviceManagement',
     name: 'Gestion Services',
-    route: '/dashboard/service-management',
+    route: '/dashboard/services/calendar',
     description: 'Personnalisez tous les éléments de la page de gestion des services',
     icon: Briefcase,
     sections: [
@@ -1288,4 +1295,3 @@ export const productsPagesConfig: PageConfig[] = [
     ],
   },
 ];
-

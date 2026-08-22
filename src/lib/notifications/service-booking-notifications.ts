@@ -171,6 +171,21 @@ export async function sendBookingPush(
   }
 }
 
+export const GUEST_BOOKING_EMAIL_PREFERENCES: BookingNotificationPreferences = {
+  email_enabled: true,
+  sms_enabled: false,
+  push_enabled: false,
+  in_app_enabled: false,
+  reminder_24h_enabled: false,
+  reminder_2h_enabled: false,
+  reminder_30min_enabled: false,
+  confirmation_enabled: true,
+  reminder_enabled: true,
+  cancellation_enabled: true,
+  reschedule_enabled: true,
+  completion_enabled: true,
+};
+
 /**
  * Envoie une notification email pour une réservation
  */
@@ -182,11 +197,11 @@ export async function sendBookingEmail(
   try {
     const subject = getEmailSubject(type, data);
     const template = getEmailTemplate(type, data);
+    const recipientEmail = (email || data.customer_email || '').trim().toLowerCase();
 
-    // Récupérer le user_id depuis le booking
     const { data: booking, error: bookingError } = await supabase
       .from('service_bookings')
-      .select('user_id')
+      .select('user_id, product_id, products(store_id)')
       .eq('id', data.booking_id)
       .maybeSingle();
 
@@ -194,33 +209,88 @@ export async function sendBookingEmail(
       throw new Error(`Booking not found: ${data.booking_id}`);
     }
 
-    const userId = booking?.user_id;
-    if (!userId) {
-      logger.warn('Booking email skipped: no user_id (guest)', {
+    const productRel = booking?.products as { store_id?: string } | { store_id?: string }[] | null;
+    const storeId = (Array.isArray(productRel) ? productRel[0] : productRel)?.store_id;
+    const userId = booking?.user_id ?? null;
+
+    if (userId) {
+      await sendUnifiedNotification({
+        user_id: userId,
+        type: BOOKING_UNIFIED_TYPE[type],
+        title: subject,
+        message: template,
+        channels: ['email'],
+        recipient_email: recipientEmail.includes('@') ? recipientEmail : undefined,
+        recipient_name: data.customer_name,
+        metadata: {
+          booking_id: data.booking_id,
+          service_name: data.service_name,
+          booking_date: data.booking_date,
+          booking_time: data.booking_time,
+          store_id: storeId,
+        },
+      });
+
+      return {
+        success: true,
+        channel: 'email',
+        sent_at: new Date().toISOString(),
+      };
+    }
+
+    if (!recipientEmail.includes('@') || !storeId) {
+      logger.warn('Booking email skipped: guest without recipient or store', {
         bookingId: data.booking_id,
         type,
+        hasEmail: recipientEmail.includes('@'),
+        storeId,
       });
       return {
         success: false,
         channel: 'email',
-        error: 'guest_booking_no_user',
+        error: 'guest_booking_no_recipient',
       };
     }
 
-    // Utiliser le système de notifications unifié
-    await sendUnifiedNotification({
-      user_id: userId,
-      type: BOOKING_UNIFIED_TYPE[type],
-      title: subject,
-      message: template,
-      channel: 'email',
-      metadata: {
-        booking_id: data.booking_id,
-        service_name: data.service_name,
-        booking_date: data.booking_date,
-        booking_time: data.booking_time,
-      },
-    });
+    const { data: store, error: storeError } = await supabase
+      .from('stores')
+      .select('user_id')
+      .eq('id', storeId)
+      .maybeSingle();
+
+    if (storeError || !store?.user_id) {
+      throw new Error(`Store owner not found for booking ${data.booking_id}`);
+    }
+
+    const { data: sendResult, error: sendError } = await supabase.functions.invoke(
+      'send-notification-email',
+      {
+        body: {
+          user_id: store.user_id,
+          type: BOOKING_UNIFIED_TYPE[type],
+          title: subject,
+          message: template,
+          recipient_email: recipientEmail,
+          recipient_name: data.customer_name,
+          store_id: storeId,
+          metadata: {
+            booking_id: data.booking_id,
+            service_name: data.service_name,
+            booking_date: data.booking_date,
+            booking_time: data.booking_time,
+            store_id: storeId,
+          },
+        },
+      }
+    );
+
+    if (sendError) {
+      throw sendError;
+    }
+    const result = sendResult as { success?: boolean; error?: string } | null;
+    if (result?.success === false || result?.error) {
+      throw new Error(result.error || 'send-notification-email failed');
+    }
 
     return {
       success: true,
@@ -276,7 +346,7 @@ export async function sendBookingNotifications(
   }
 
   // Push
-  if (channels.includes('push') && preferences.push_enabled) {
+  if (userId && channels.includes('push') && preferences.push_enabled) {
     if (
       (type === 'confirmation' && preferences.confirmation_enabled) ||
       (type === 'reminder' && preferences.reminder_enabled) ||
@@ -289,7 +359,7 @@ export async function sendBookingNotifications(
   }
 
   // In-app
-  if (channels.includes('in_app') && preferences.in_app_enabled) {
+  if (userId && channels.includes('in_app') && preferences.in_app_enabled) {
     await sendUnifiedNotification({
       user_id: userId,
       type: BOOKING_UNIFIED_TYPE[type],

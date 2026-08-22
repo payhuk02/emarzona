@@ -138,7 +138,7 @@ export default function ServiceCalendarManagement() {
             </p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => navigate('/dashboard/services/bookings')}>
+            <Button variant="outline" onClick={() => navigate('/dashboard/bookings')}>
               <Settings className="h-4 w-4 mr-2" />
               Gérer
             </Button>

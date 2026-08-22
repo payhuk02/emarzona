@@ -147,6 +147,10 @@ export const ProductManagementActions: React.FC<ProductManagementActionsProps> =
   };
 
   const defaultDuplicate = (id: string) => {
+    if (product.product_type === 'service') {
+      navigate(`/dashboard/products/new/service?duplicate=${encodeURIComponent(id)}`);
+      return;
+    }
     navigate(`/dashboard/products/new?duplicate=${id}`);
   };
 

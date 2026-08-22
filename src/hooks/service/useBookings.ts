@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import {
   sendBookingNotifications,
   getUserBookingNotificationPreferences,
+  GUEST_BOOKING_EMAIL_PREFERENCES,
 } from '@/lib/notifications/service-booking-notifications';
 import { createServiceRefund } from '@/lib/services/cancellation-policy';
 import { createBookingMeeting } from '@/lib/service/create-booking-meeting';
@@ -90,6 +91,99 @@ export function mapMyBookingRows(data: unknown[]): ServiceBooking[] {
       service: firstRelation(service) ?? undefined,
     } as ServiceBooking & { service?: Record<string, unknown> };
   });
+}
+
+async function notifyBookingParties(args: {
+  bookingId: string;
+  productId: string;
+  userId?: string | null;
+  customerId?: string | null;
+  bookingDate?: string | null;
+  bookingTime?: string | null;
+  type: 'confirmation' | 'cancellation' | 'reschedule';
+  cancellationReason?: string;
+  meetingUrl?: string;
+  fallbackName?: string;
+  fallbackPhone?: string;
+}): Promise<void> {
+  if (!args.bookingDate || !args.bookingTime) return;
+
+  const [productResult, customerById, customerByUser] = await Promise.all([
+    supabase.from('products').select('name').eq('id', args.productId).single(),
+    args.customerId
+      ? supabase
+          .from('customers')
+          .select('name, email, phone')
+          .eq('id', args.customerId)
+          .maybeSingle()
+      : Promise.resolve({ data: null }),
+    args.userId
+      ? supabase
+          .from('customers')
+          .select('name, email, phone')
+          .eq('user_id', args.userId)
+          .limit(1)
+          .maybeSingle()
+      : Promise.resolve({ data: null }),
+  ]);
+
+  const product = productResult.data;
+  if (!product) return;
+
+  let customer = customerById.data || customerByUser.data;
+  if (!customer?.email) {
+    const { data: item } = await supabase
+      .from('order_items')
+      .select('orders(metadata, customers(name, email, phone))')
+      .eq('booking_id', args.bookingId)
+      .limit(1)
+      .maybeSingle();
+    const orderRel = item?.orders as
+      | {
+          metadata?: { customer_email?: string };
+          customers?: { name?: string; email?: string; phone?: string } | null;
+        }
+      | {
+          metadata?: { customer_email?: string };
+          customers?: { name?: string; email?: string; phone?: string } | null;
+        }[]
+      | null;
+    const order = Array.isArray(orderRel) ? orderRel[0] : orderRel;
+    const fromCustomer = order?.customers;
+    const metaEmail = order?.metadata?.customer_email;
+    if (fromCustomer?.email || metaEmail) {
+      customer = {
+        name: fromCustomer?.name || args.fallbackName || 'Client',
+        email: fromCustomer?.email || metaEmail || '',
+        phone: fromCustomer?.phone || args.fallbackPhone || null,
+      };
+    }
+  }
+
+  const email = customer?.email || '';
+  if (!args.userId && !email.includes('@')) return;
+
+  const preferences = args.userId
+    ? await getUserBookingNotificationPreferences(args.userId)
+    : GUEST_BOOKING_EMAIL_PREFERENCES;
+
+  await sendBookingNotifications(
+    args.userId || '',
+    preferences,
+    {
+      booking_id: args.bookingId,
+      service_name: product.name,
+      customer_name: customer?.name || args.fallbackName || 'Client',
+      customer_email: email,
+      customer_phone: customer?.phone || args.fallbackPhone,
+      booking_date: args.bookingDate,
+      booking_time: args.bookingTime,
+      cancellation_reason: args.cancellationReason,
+      meeting_url: args.meetingUrl,
+    },
+    args.type,
+    args.userId ? undefined : ['email', 'sms']
+  );
 }
 
 export interface ServiceBooking {
@@ -224,41 +318,16 @@ export const useCreateBooking = () => {
 
       if (result && bookingDate && bookingTime) {
         try {
-          // Récupérer les infos du produit et du client
-          const [productResult, customerResult] = await Promise.all([
-            supabase.from('products').select('name, store_id').eq('id', result.product_id).single(),
-            supabase
-              .from('customers')
-              .select('name, email, phone')
-              .eq('id', result.customer_id)
-              .maybeSingle(),
-          ]);
-
-          const product = productResult.data;
-          const customer = customerResult.data;
-
-          if (product && customer && result.user_id) {
-            // Récupérer les préférences
-            const preferences = await getUserBookingNotificationPreferences(result.user_id);
-
-            // Envoyer la notification de confirmation
-            await sendBookingNotifications(
-              result.user_id,
-              preferences,
-              {
-                booking_id: result.id,
-                service_name: product.name,
-                customer_name: customer.name || 'Client',
-                customer_email: customer.email || '',
-                customer_phone: customer.phone || undefined,
-                booking_date: bookingDate,
-                booking_time: bookingTime,
-              },
-              'confirmation'
-            );
-          }
+          await notifyBookingParties({
+            bookingId: result.id,
+            productId: result.product_id,
+            userId: result.user_id,
+            customerId: result.customer_id,
+            bookingDate,
+            bookingTime,
+            type: 'confirmation',
+          });
         } catch (notificationError) {
-          // Ne pas faire échouer la création si les notifications échouent
           logger.warn('Error sending booking notifications', {
             error: notificationError,
             bookingId: result.id,
@@ -324,59 +393,39 @@ export const useCancelBooking = () => {
       // 🆕 Envoyer la notification d'annulation et créer le remboursement
       if (result) {
         try {
-          const [productResult, userProfileResult, customerResult] = await Promise.all([
-            supabase.from('products').select('name').eq('id', result.product_id).single(),
-            supabase
-              .from('profiles')
-              .select('display_name, first_name, last_name, phone')
-              .eq('user_id', result.user_id)
-              .maybeSingle(),
-            supabase
-              .from('customers')
-              .select('name, email, phone')
-              .eq('user_id', result.user_id)
-              .limit(1)
-              .maybeSingle(),
-          ]);
+          const { data: userProfile } = result.user_id
+            ? await supabase
+                .from('profiles')
+                .select('display_name, first_name, last_name, phone')
+                .eq('user_id', result.user_id)
+                .maybeSingle()
+            : { data: null };
 
-          const product = productResult.data;
-          const userProfile = userProfileResult.data;
-          const customer = customerResult.data;
           const fullName =
             userProfile?.display_name ||
             [userProfile?.first_name, userProfile?.last_name].filter(Boolean).join(' ') ||
-            customer?.name ||
-            'Client';
+            undefined;
 
-          if (product && result.user_id) {
-            const preferences = await getUserBookingNotificationPreferences(result.user_id);
+          await notifyBookingParties({
+            bookingId: result.id,
+            productId: result.product_id,
+            userId: result.user_id,
+            customerId: result.customer_id,
+            bookingDate: result.scheduled_date || result.booking_date,
+            bookingTime: result.scheduled_start_time || result.booking_time,
+            type: 'cancellation',
+            cancellationReason: reason,
+            fallbackName: fullName,
+            fallbackPhone: userProfile?.phone || undefined,
+          });
 
-            await sendBookingNotifications(
-              result.user_id,
-              preferences,
-              {
-                booking_id: result.id,
-                service_name: product.name,
-                customer_name: fullName,
-                customer_email: customer?.email || '',
-                customer_phone: customer?.phone || userProfile?.phone || undefined,
-                booking_date: result.scheduled_date || result.booking_date,
-                booking_time: result.scheduled_start_time || result.booking_time,
-                cancellation_reason: reason,
-              },
-              'cancellation'
-            );
-
-            // 🆕 Créer automatiquement le remboursement selon la politique
-            try {
-              await createServiceRefund(result.id, 'original_payment', reason, false);
-            } catch (refundError) {
-              // Ne pas faire échouer l'annulation si le remboursement échoue
-              logger.warn('Error creating automatic refund', {
-                error: refundError,
-                bookingId: result.id,
-              });
-            }
+          try {
+            await createServiceRefund(result.id, 'original_payment', reason, false);
+          } catch (refundError) {
+            logger.warn('Error creating automatic refund', {
+              error: refundError,
+              bookingId: result.id,
+            });
           }
         } catch (notificationError) {
           logger.warn('Error sending cancellation notification', {
@@ -435,35 +484,26 @@ export const useConfirmBooking = () => {
       // 🆕 Envoyer la notification de confirmation
       if (result) {
         try {
-          const [productResult, userProfileResult, customerResult, meetingResult] =
-            await Promise.all([
-              supabase.from('products').select('name').eq('id', result.product_id).single(),
-              supabase
-                .from('profiles')
-                .select('display_name, first_name, last_name, phone')
-                .eq('user_id', result.user_id)
-                .maybeSingle(),
-              supabase
-                .from('customers')
-                .select('name, email, phone')
-                .eq('user_id', result.user_id)
-                .limit(1)
-                .maybeSingle(),
-              supabase
-                .from('service_bookings')
-                .select('meeting_url, meeting_platform')
-                .eq('id', result.id)
-                .maybeSingle(),
-            ]);
+          const [userProfileResult, meetingResult] = await Promise.all([
+            result.user_id
+              ? supabase
+                  .from('profiles')
+                  .select('display_name, first_name, last_name, phone')
+                  .eq('user_id', result.user_id)
+                  .maybeSingle()
+              : Promise.resolve({ data: null }),
+            supabase
+              .from('service_bookings')
+              .select('meeting_url, meeting_platform')
+              .eq('id', result.id)
+              .maybeSingle(),
+          ]);
 
-          const product = productResult.data;
           const userProfile = userProfileResult.data;
-          const customer = customerResult.data;
           const fullName =
             userProfile?.display_name ||
             [userProfile?.first_name, userProfile?.last_name].filter(Boolean).join(' ') ||
-            customer?.name ||
-            'Client';
+            undefined;
           const portal =
             typeof window !== 'undefined'
               ? `${window.location.origin}/account/bookings`
@@ -474,25 +514,18 @@ export const useConfirmBooking = () => {
             portalUrl: portal,
           });
 
-          if (product && result.user_id) {
-            const preferences = await getUserBookingNotificationPreferences(result.user_id);
-
-            await sendBookingNotifications(
-              result.user_id,
-              preferences,
-              {
-                booking_id: result.id,
-                service_name: product.name,
-                customer_name: fullName,
-                customer_email: customer?.email || '',
-                customer_phone: customer?.phone || userProfile?.phone || undefined,
-                booking_date: result.scheduled_date || result.booking_date,
-                booking_time: result.scheduled_start_time || result.booking_time,
-                meeting_url: meetingUrl,
-              },
-              'confirmation'
-            );
-          }
+          await notifyBookingParties({
+            bookingId: result.id,
+            productId: result.product_id,
+            userId: result.user_id,
+            customerId: result.customer_id,
+            bookingDate: result.scheduled_date || result.booking_date,
+            bookingTime: result.scheduled_start_time || result.booking_time,
+            type: 'confirmation',
+            meetingUrl,
+            fallbackName: fullName,
+            fallbackPhone: userProfile?.phone || undefined,
+          });
         } catch (notificationError) {
           logger.warn('Error sending confirmation notification', {
             error: notificationError,

@@ -50,6 +50,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useWizardServerValidation } from '@/hooks/useWizardServerValidation';
 import { supabase } from '@/integrations/supabase/client';
 import { updateServiceProductTx } from '@/lib/products/product-update-rpc';
+import { toServiceAffiliateRpcPayload } from '@/lib/products/service-affiliate-payload';
 import { persistProductWhatsApp } from '@/lib/products/persist-product-whatsapp';
 import { persistServiceCategoryAttributes } from '@/lib/service/persist-service-category-attributes';
 import { toPersistedPricingType } from '@/lib/service/service-pricing';
@@ -458,6 +459,11 @@ export const EditServiceProductWizard = ({
         location_type: formData.location_type || 'on_site',
         location_address: formData.location_address || null,
         meeting_url: formData.meeting_url || null,
+        preferred_meeting_platform: formData.meeting_url
+          ? 'custom'
+          : formData.location_type === 'online' || formData.location_type === 'flexible'
+            ? 'daily'
+            : null,
         timezone: formData.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
         requires_staff: formData.requires_staff ?? false,
         max_participants: formData.max_participants || 1,
@@ -476,20 +482,9 @@ export const EditServiceProductWizard = ({
         category_attributes: formData.category_attributes || {},
       };
 
-      let affiliatePayload = null;
-      if (formData.affiliate?.enabled) {
-        affiliatePayload = {
-          enabled: formData.affiliate.enabled ?? false,
-          commission_rate: formData.affiliate.commission_rate ?? 10,
-          commission_type: formData.affiliate.commission_type ?? 'percentage',
-          fixed_commission_amount: formData.affiliate.fixed_commission_amount ?? 0,
-          cookie_duration_days: formData.affiliate.cookie_duration_days ?? 30,
-          min_order_amount: formData.affiliate.min_order_amount ?? 0,
-          allow_self_referral: formData.affiliate.allow_self_referral ?? false,
-          require_approval: formData.affiliate.require_approval ?? false,
-          terms_and_conditions: formData.affiliate.terms_and_conditions ?? '',
-        };
-      }
+      const affiliatePayload = toServiceAffiliateRpcPayload(formData.affiliate, {
+        includeWhenDisabled: true,
+      });
 
       const slotsData = (formData.availability_slots || []).map(slot => ({
         day_of_week: slot.day_of_week ?? slot.day,
@@ -535,35 +530,6 @@ export const EditServiceProductWizard = ({
         formData.category_attributes,
         productId
       );
-
-      const { data: existingAffiliate } = await supabase
-        .from('product_affiliate_settings')
-        .select('id')
-        .eq('product_id', productId)
-        .maybeSingle();
-
-      const affiliateRow = {
-        product_id: productId,
-        store_id: store.id,
-        affiliate_enabled: Boolean(formData.affiliate?.enabled),
-        commission_rate: formData.affiliate?.commission_rate ?? 10,
-        commission_type: formData.affiliate?.commission_type ?? 'percentage',
-        fixed_commission_amount: formData.affiliate?.fixed_commission_amount ?? 0,
-        cookie_duration_days: formData.affiliate?.cookie_duration_days ?? 30,
-        min_order_amount: formData.affiliate?.min_order_amount ?? 0,
-        allow_self_referral: formData.affiliate?.allow_self_referral ?? false,
-        require_approval: formData.affiliate?.require_approval ?? false,
-        terms_and_conditions: formData.affiliate?.terms_and_conditions ?? '',
-      };
-
-      if (existingAffiliate?.id) {
-        await supabase
-          .from('product_affiliate_settings')
-          .update(affiliateRow)
-          .eq('id', existingAffiliate.id);
-      } else if (formData.affiliate?.enabled) {
-        await supabase.from('product_affiliate_settings').insert(affiliateRow);
-      }
 
       const serviceProductId = rpcResult.service_product_id;
       if (!serviceProductId) {

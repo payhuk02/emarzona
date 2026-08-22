@@ -9,6 +9,44 @@ export type ServiceDepositOptions = {
   deposit_amount?: number | null;
 } | null;
 
+function resolveDepositPayable(
+  total: number,
+  deposit?: ServiceDepositOptions
+): {
+  paymentType: string;
+  percentageRate: number | null;
+  amountToPay: number;
+  remainingAmount: number;
+  totalAmount: number;
+} | null {
+  if (!deposit?.deposit_required) return null;
+
+  if (deposit.deposit_type === 'percentage') {
+    const percentageRate = Math.min(90, Math.max(10, Number(deposit.deposit_amount) || 30));
+    const amountToPay = Math.max(1, Math.round((total * percentageRate) / 100));
+    return {
+      paymentType: 'percentage',
+      percentageRate,
+      amountToPay,
+      remainingAmount: Math.max(0, total - amountToPay),
+      totalAmount: total,
+    };
+  }
+
+  if (deposit.deposit_type === 'fixed' && Number(deposit.deposit_amount) > 0) {
+    const amountToPay = Math.min(total, Math.max(1, Math.round(Number(deposit.deposit_amount))));
+    return {
+      paymentType: 'percentage',
+      percentageRate: null,
+      amountToPay,
+      remainingAmount: Math.max(0, total - amountToPay),
+      totalAmount: total,
+    };
+  }
+
+  return null;
+}
+
 export function resolveServicePayableAmount(
   totalAmount: number,
   paymentOptions: ServicePaymentOptions,
@@ -21,6 +59,12 @@ export function resolveServicePayableAmount(
   totalAmount: number;
 } {
   const total = Math.max(0, Number(totalAmount) || 0);
+
+  const fromDeposit = resolveDepositPayable(total, deposit);
+  if (fromDeposit) {
+    return fromDeposit;
+  }
+
   const paymentType = paymentOptions?.payment_type || 'full';
 
   if (paymentType === 'percentage') {
@@ -36,30 +80,6 @@ export function resolveServicePayableAmount(
       remainingAmount: Math.max(0, total - amountToPay),
       totalAmount: total,
     };
-  }
-
-  if (deposit?.deposit_required) {
-    if (deposit.deposit_type === 'percentage') {
-      const percentageRate = Math.min(90, Math.max(10, Number(deposit.deposit_amount) || 30));
-      const amountToPay = Math.max(1, Math.round((total * percentageRate) / 100));
-      return {
-        paymentType: 'percentage',
-        percentageRate,
-        amountToPay,
-        remainingAmount: Math.max(0, total - amountToPay),
-        totalAmount: total,
-      };
-    }
-    if (deposit.deposit_type === 'fixed' && Number(deposit.deposit_amount) > 0) {
-      const amountToPay = Math.min(total, Math.max(1, Math.round(Number(deposit.deposit_amount))));
-      return {
-        paymentType: 'percentage',
-        percentageRate: null,
-        amountToPay,
-        remainingAmount: Math.max(0, total - amountToPay),
-        totalAmount: total,
-      };
-    }
   }
 
   return {

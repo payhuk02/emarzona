@@ -1,8 +1,8 @@
 /**
  * Service vertical pricing: category defaults, "À partir de", and UI/DB type mapping.
  *
- * UI uses `hourly`. The legacy RPC `create_public_service_order` compares
- * `pricing_type = 'per_hour'`, so we persist hourly as `per_hour`.
+ * UI uses `hourly`. We persist hourly as `per_hour`. Checkout RPC treats
+ * both `per_hour` and legacy `hourly` as duration × rate.
  */
 
 export type ServiceUiPricingType = 'fixed' | 'hourly' | 'per_participant';

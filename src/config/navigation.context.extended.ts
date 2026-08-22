@@ -258,11 +258,6 @@ export const LOGISTICS_CONTEXT_SIDEBAR: RawNavSection[] = [
         icon: Calendar,
       },
       {
-        title: 'Gestion Services',
-        url: '/dashboard/service-management',
-        icon: Calendar,
-      },
-      {
         title: 'Calendrier Staff',
         url: '/dashboard/services/staff-availability',
         icon: Users,

@@ -403,11 +403,6 @@ export const userMenuSections = [
         icon: Calendar,
       },
       {
-        title: 'Gestion des Services',
-        url: '/dashboard/service-management',
-        icon: Calendar,
-      },
-      {
         title: 'Calendrier Staff',
         url: '/dashboard/services/staff-availability',
         icon: Users,
@@ -944,8 +939,8 @@ export const adminMenuSections = [
         icon: Calendar,
       },
       {
-        title: 'Gestion des Services (Vendeur)',
-        url: '/dashboard/service-management',
+        title: 'Calendrier Services (Vendeur)',
+        url: '/dashboard/services/calendar',
         icon: Calendar,
       },
       {

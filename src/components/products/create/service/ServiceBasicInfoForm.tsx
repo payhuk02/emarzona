@@ -283,6 +283,24 @@ export const ServiceBasicInfoForm = ({ data, onUpdate }: ServiceBasicInfoFormPro
         />
       </div>
 
+      <div className="space-y-2">
+        <Label htmlFor="short_description">Accroche</Label>
+        <Textarea
+          id="short_description"
+          placeholder="Ex. Consultation juridique 1 h, en visio ou sur place"
+          value={data.short_description || ''}
+          onChange={e => onUpdate({ short_description: e.target.value.slice(0, 160) })}
+          onKeyDown={handleSpaceKeyDown}
+          rows={2}
+          maxLength={160}
+          className="min-h-[44px] sm:min-h-[auto] text-base sm:text-sm"
+        />
+        <p className="text-xs text-muted-foreground">
+          {(data.short_description || '').length}/160 — affichée sur les cartes marketplace et en
+          tête de fiche publique. L’IA peut la remplir ci-dessous.
+        </p>
+      </div>
+
       {/* Description */}
       <div className="space-y-2">
         <Label htmlFor="description">Description *</Label>

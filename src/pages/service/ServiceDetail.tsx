@@ -100,6 +100,11 @@ import {
   formatServiceAttributeValue,
   getServiceFormProfile,
 } from '@/lib/services/service-form-profiles';
+import {
+  formatServiceDurationMinutes,
+  serviceLocationTypeLabel,
+  serviceTypeLabel,
+} from '@/lib/service/service-detail-labels';
 
 const PRODUCT_SERVICE_FIELDS =
   'id, store_id, slug, name, description, short_description, category, category_id, tags, product_type, is_active, price, promotional_price, currency, image_url, images, created_at, updated_at, payment_options, pricing_model, licensing_type, license_terms';
@@ -624,7 +629,7 @@ export default function ServiceDetail() {
 
   return (
     <AppPageShell
-      mainClassName="p-8"
+      mainClassName={`px-4 py-4 sm:px-6 sm:py-6 lg:p-8 overflow-x-hidden ${showAppointment ? 'pb-24 lg:pb-8' : ''}`}
       hideSidebar={true}
       showUtilityBar={false}
       hideHorizontalNav={true}
@@ -673,22 +678,24 @@ export default function ServiceDetail() {
       )}
 
       {/* Back Button */}
-      <Button variant="ghost" className="mb-6" onClick={() => navigate(-1)}>
+      <Button variant="ghost" className="mb-4 sm:mb-6 -ml-2 min-h-11" onClick={() => navigate(-1)}>
         <ArrowLeft className="h-4 w-4 mr-2" />
         Retour
       </Button>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 min-w-0">
         {/* Left & Center: Service Info */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-6 min-w-0">
           {/* Images */}
-          <ProductImages
-            images={images}
-            productName={service?.name || 'Service'}
-            showThumbnails={true}
-            enableLightbox={true}
-            aspectRatio="video"
-          />
+          <div className="min-w-0 overflow-hidden rounded-lg">
+            <ProductImages
+              images={images}
+              productName={service?.name || 'Service'}
+              showThumbnails={true}
+              enableLightbox={true}
+              aspectRatio="video"
+            />
+          </div>
 
           {/* Title & Category */}
           <div>
@@ -762,49 +769,64 @@ export default function ServiceDetail() {
             </div>
           </div>
 
-          {/* Service Details */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm sm:text-base md:text-lg">Détails du service</CardTitle>
-            </CardHeader>
-            <CardContent className="grid grid-cols-2 gap-4">
-              <div className="flex items-center gap-3">
-                <Clock className="h-5 w-5 text-primary" />
-                <div>
-                  <p className="text-sm text-muted-foreground">Durée</p>
-                  <p className="font-medium">{service?.service?.duration_minutes} minutes</p>
-                </div>
-              </div>
+          {/* Service Details — single card (not repeated in the description tab) */}
+          {(() => {
+            const durationLabel = formatServiceDurationMinutes(service?.service?.duration_minutes);
+            const locationLabel = serviceLocationTypeLabel(service?.service?.location_type);
+            const kindLabel = serviceTypeLabel(service?.service?.service_type);
+            return (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm sm:text-base md:text-lg">
+                    Détails du service
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {durationLabel && (
+                    <div className="flex items-center gap-3 min-w-0">
+                      <Clock className="h-5 w-5 text-primary shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-sm text-muted-foreground">Durée</p>
+                        <p className="font-medium">{durationLabel}</p>
+                      </div>
+                    </div>
+                  )}
 
-              {isGroup && (
-                <div className="flex items-center gap-3">
-                  <Users className="h-5 w-5 text-primary" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">Participants</p>
-                    <p className="font-medium">Jusqu'à {maxParticipants} personnes</p>
+                  {isGroup && (
+                    <div className="flex items-center gap-3 min-w-0">
+                      <Users className="h-5 w-5 text-primary shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-sm text-muted-foreground">Participants</p>
+                        <p className="font-medium">Jusqu'à {maxParticipants} personnes</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {(locationLabel || service?.service?.location_address) && (
+                    <div className="flex items-start gap-3 min-w-0">
+                      <MapPin className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                      <div className="min-w-0">
+                        <p className="text-sm text-muted-foreground">Lieu</p>
+                        <p className="font-medium break-words">
+                          {service?.service?.location_address || locationLabel}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-3 min-w-0">
+                    <Calendar className="h-5 w-5 text-primary shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-sm text-muted-foreground">Type</p>
+                      <p className="font-medium">
+                        {kindLabel || (isGroup ? 'Groupe' : 'Individuel')}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              )}
-
-              {service?.service?.location_address && (
-                <div className="flex items-center gap-3">
-                  <MapPin className="h-5 w-5 text-primary" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">Lieu</p>
-                    <p className="font-medium">{service.service.location_address}</p>
-                  </div>
-                </div>
-              )}
-
-              <div className="flex items-center gap-3">
-                <Calendar className="h-5 w-5 text-primary" />
-                <div>
-                  <p className="text-sm text-muted-foreground">Type</p>
-                  <p className="font-medium">{isGroup ? 'Groupe' : 'Individuel'}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+                </CardContent>
+              </Card>
+            );
+          })()}
 
           <ServicePrestationsCatalog
             packages={deliveryPackages}
@@ -875,7 +897,7 @@ export default function ServiceDetail() {
                   <CardHeader>
                     <CardTitle>À propos de ce service</CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="overflow-x-auto">
                     <SafeHTML
                       html={service.description || ''}
                       className="bg-white dark:bg-white text-black dark:text-black prose max-w-none prose-headings:text-black dark:prose-headings:text-black prose-p:text-black dark:prose-p:text-black prose-a:text-primary prose-strong:text-black dark:prose-strong:text-black p-4 sm:p-6 rounded-lg"
@@ -883,62 +905,6 @@ export default function ServiceDetail() {
                   </CardContent>
                 </Card>
               )}
-
-              {/* Service Details */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-sm sm:text-base md:text-lg">
-                    Détails du service
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="grid grid-cols-2 gap-4">
-                  <div className="flex items-center gap-3">
-                    <Clock className="h-5 w-5 text-primary" />
-                    <div>
-                      <p className="text-sm text-muted-foreground">Durée</p>
-                      <p className="font-medium">{service?.service?.duration_minutes} minutes</p>
-                    </div>
-                  </div>
-
-                  {isGroup && (
-                    <div className="flex items-center gap-3">
-                      <Users className="h-5 w-5 text-primary" />
-                      <div>
-                        <p className="text-sm text-muted-foreground">Participants</p>
-                        <p className="font-medium">
-                          {minParticipants} - {maxParticipants} personnes
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
-                  {service?.service?.location_type && (
-                    <div className="flex items-center gap-3">
-                      <MapPin className="h-5 w-5 text-primary" />
-                      <div>
-                        <p className="text-sm text-muted-foreground">Lieu</p>
-                        <p className="font-medium">
-                          {service.service.location_type === 'on_site'
-                            ? 'Sur site'
-                            : service.service.location_type === 'online'
-                              ? 'En ligne'
-                              : service.service.location_type === 'home'
-                                ? 'À domicile'
-                                : 'Flexible'}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="flex items-center gap-3">
-                    <Calendar className="h-5 w-5 text-primary" />
-                    <div>
-                      <p className="text-sm text-muted-foreground">Type</p>
-                      <p className="font-medium">{service?.service?.service_type || 'Service'}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
             </TabsContent>
 
             {/* Team Tab */}
@@ -999,7 +965,7 @@ export default function ServiceDetail() {
         </div>
 
         {/* Right: Booking / Project order */}
-        <div className="space-y-4">
+        <div id="service-booking" className="space-y-4 min-w-0 scroll-mt-4">
           {(() => {
             if (showProject && !showAppointment) {
               return (
@@ -1056,7 +1022,7 @@ export default function ServiceDetail() {
                     />
                   </TabsContent>
                   <TabsContent value="appointment" className="mt-4">
-                    <Card className="sticky top-4">
+                    <Card>
                       <CardHeader>
                         <CardTitle>Réserver un créneau</CardTitle>
                       </CardHeader>
@@ -1073,9 +1039,9 @@ export default function ServiceDetail() {
           })()}
 
           {showAppointment && (
-            <Card className="sticky top-4">
+            <Card className="lg:sticky lg:top-4 min-w-0 overflow-hidden">
               <CardHeader>
-                <div className="flex items-start justify-between mb-2 gap-3">
+                <div className="flex items-start justify-between mb-2 gap-3 flex-wrap">
                   <CardTitle>Réserver</CardTitle>
                   <ServicePriceDisplay
                     display={appointmentPrice}
@@ -1273,6 +1239,7 @@ export default function ServiceDetail() {
                       <Input
                         id="guest-email"
                         type="email"
+                        className="min-h-11"
                         value={guestEmailDraft}
                         onChange={e => setGuestEmailDraft(e.target.value)}
                         placeholder="vous@email.com"
@@ -1282,6 +1249,7 @@ export default function ServiceDetail() {
                       <Label htmlFor="guest-name">Nom</Label>
                       <Input
                         id="guest-name"
+                        className="min-h-11"
                         value={guestNameDraft}
                         onChange={e => setGuestNameDraft(e.target.value)}
                         placeholder="Votre nom"
@@ -1413,7 +1381,7 @@ export default function ServiceDetail() {
 
                 <Button
                   onClick={() => void handleBooking()}
-                  className="w-full"
+                  className="w-full min-h-11"
                   size="lg"
                   disabled={
                     !selectedDate ||
@@ -1453,7 +1421,7 @@ export default function ServiceDetail() {
                 <div className="grid grid-cols-2 gap-2">
                   <Button
                     variant="outline"
-                    className="w-full"
+                    className="w-full min-h-11"
                     onClick={handleWishlistToggle}
                     disabled={isCheckingWishlist}
                   >
@@ -1466,7 +1434,7 @@ export default function ServiceDetail() {
                     )}
                     {isInWishlist ? 'Retiré' : 'Favori'}
                   </Button>
-                  <Button variant="outline" className="w-full" onClick={handleShare}>
+                  <Button variant="outline" className="w-full min-h-11" onClick={handleShare}>
                     <Share2 className="h-4 w-4 mr-2" />
                     Partager
                   </Button>
@@ -1490,6 +1458,23 @@ export default function ServiceDetail() {
       />
 
       <BookedTogetherRecommendations serviceId={serviceId!} limit={4} />
+
+      {showAppointment && (
+        <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 border-t bg-background px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+          <Button
+            className="w-full min-h-11"
+            size="lg"
+            onClick={() =>
+              document.getElementById('service-booking')?.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start',
+              })
+            }
+          >
+            Réserver · {appointmentPrice.amount.toLocaleString()} {service?.currency || 'XOF'}
+          </Button>
+        </div>
+      )}
     </AppPageShell>
   );
 }

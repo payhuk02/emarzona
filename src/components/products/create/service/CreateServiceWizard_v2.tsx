@@ -55,6 +55,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useCatalogCacheInvalidation } from '@/hooks/useCatalogCacheInvalidation';
 import { useWizardServerValidation } from '@/hooks/useWizardServerValidation';
 import { createServiceProductTx } from '@/lib/products/product-create-rpc';
+import { toServiceAffiliateRpcPayload } from '@/lib/products/service-affiliate-payload';
 import { persistProductWhatsApp } from '@/lib/products/persist-product-whatsapp';
 import { createDefaultServiceBookingOptions } from '@/lib/service/default-booking-options';
 import {
@@ -728,6 +729,11 @@ export const CreateServiceWizard = ({
         location_type: formData.location_type || 'on_site',
         location_address: formData.location_address,
         meeting_url: formData.meeting_url,
+        preferred_meeting_platform: formData.meeting_url
+          ? 'custom'
+          : formData.location_type === 'online' || formData.location_type === 'flexible'
+            ? 'daily'
+            : null,
         timezone: formData.timezone || 'UTC',
         requires_staff: formData.requires_staff ?? false,
         max_participants: formData.max_participants || 1,
@@ -840,7 +846,8 @@ export const CreateServiceWizard = ({
         servicePayload,
         staffData,
         slotsData,
-        resourcesData
+        resourcesData,
+        toServiceAffiliateRpcPayload(formData.affiliate)
       );
 
       await persistProductWhatsApp(
@@ -861,35 +868,6 @@ export const CreateServiceWizard = ({
         price: formData.pricing_model === 'free' ? 0 : formData.price || 0,
         currency: formData.currency || 'XOF',
       };
-      const serviceProduct = { id: rpcResult.service_product_id! };
-
-      // 7. Create affiliate settings if enabled
-      if (formData.affiliate && formData.affiliate.enabled) {
-        const { error: affiliateError } = await supabase.from('product_affiliate_settings').insert({
-          product_id: product.id,
-          store_id: store.id,
-          affiliate_enabled: formData.affiliate.enabled,
-          commission_rate: formData.affiliate.commission_rate,
-          commission_type: formData.affiliate.commission_type,
-          fixed_commission_amount: formData.affiliate.fixed_commission_amount,
-          cookie_duration_days: formData.affiliate.cookie_duration_days,
-          max_commission_per_sale: formData.affiliate.max_commission_per_sale,
-          min_order_amount: formData.affiliate.min_order_amount,
-          allow_self_referral: formData.affiliate.allow_self_referral,
-          require_approval: formData.affiliate.require_approval,
-          terms_and_conditions: formData.affiliate.terms_and_conditions,
-        });
-
-        if (affiliateError) {
-          logger.error('Affiliate settings error', {
-            error: affiliateError,
-            productId: product.id,
-          });
-          throw new Error(
-            "Le service a été créé, mais l'affiliation n'a pas pu être enregistrée. Rouvrez-le en édition."
-          );
-        }
-      }
 
       // 8. Create free preview service if requested
       if (formData.create_free_preview && !isDraft && formData.pricing_model !== 'free') {

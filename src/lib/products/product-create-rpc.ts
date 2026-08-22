@@ -72,7 +72,8 @@ export async function createServiceProductTx(
   service: Record<string, unknown>,
   staff: Record<string, unknown>[] = [],
   slots: Record<string, unknown>[] = [],
-  resources: Record<string, unknown>[] = []
+  resources: Record<string, unknown>[] = [],
+  affiliate: Record<string, unknown> | null = null
 ): Promise<ProductCreateRpcResult> {
   const { data, error } = await rpc('create_service_product_tx', {
     p_store_id: storeId,
@@ -81,6 +82,7 @@ export async function createServiceProductTx(
     p_staff: staff,
     p_slots: slots,
     p_resources: resources,
+    p_affiliate: affiliate,
   });
   return parseRpcResult(data, error);
 }

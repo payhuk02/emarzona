@@ -145,7 +145,6 @@ const ROUTE_CAPABILITY_RULES: readonly RouteRule[] = [
       '/dashboard/bookings',
       '/dashboard/advanced-calendar',
       '/dashboard/recurring-bookings',
-      '/dashboard/service-management',
     ],
   },
   {

@@ -100,4 +100,19 @@ describe('calculateServiceBuyNowPrice', () => {
       })
     ).toBe(breakdown.amountDueNow);
   });
+
+  it('keeps the service deposit when the product also has a percentage payment option', () => {
+    const breakdown = buildServiceBuyNowBreakdown({
+      product: {
+        ...serviceProduct,
+        payment_options: { payment_type: 'percentage', percentage_rate: 10 },
+      },
+      selectedVariant: null,
+      appliedCoupon: null,
+      deposit: { deposit_required: true, deposit_type: 'percentage', deposit_amount: 40 },
+    });
+    const full = applyCheckoutPlatformFee(15000, 'XOF');
+    expect(breakdown.amountDueNow).toBe(Math.max(1, Math.round((full * 40) / 100)));
+    expect(breakdown.isDeposit).toBe(true);
+  });
 });

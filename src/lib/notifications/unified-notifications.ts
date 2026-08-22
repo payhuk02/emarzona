@@ -79,6 +79,9 @@ export interface UnifiedNotification {
   title: string;
   message: string;
   metadata?: Record<string, unknown>;
+  /** Override destinataire (invité) — send-notification-email. */
+  recipient_email?: string;
+  recipient_name?: string;
   action_url?: string;
   action_label?: string;
   priority?: 'low' | 'normal' | 'high' | 'urgent';
@@ -411,6 +414,8 @@ async function sendEmailNotification(notification: UnifiedNotification): Promise
         metadata: notification.metadata,
         language,
         store_id: notification.metadata?.store_id as string | undefined,
+        recipient_email: notification.recipient_email,
+        recipient_name: notification.recipient_name,
       },
     });
 

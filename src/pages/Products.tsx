@@ -423,6 +423,11 @@ const Products = () => {
           return;
         }
 
+        if (product.product_type === 'service') {
+          navigate(`/dashboard/products/new/service?duplicate=${encodeURIComponent(productId)}`);
+          return;
+        }
+
         // Créer le nouveau produit dupliqué via useProductManagement
         const timestamp = Date.now();
         const newSlug = `${product.slug || product.id}-copie-${timestamp}`;
@@ -465,7 +470,7 @@ const Products = () => {
         });
       }
     },
-    [products, toast, refetch, queryClient]
+    [products, toast, refetch, queryClient, navigate, createProduct]
   );
 
   // Import CSV avec validation et batch processing optimisé
@@ -515,11 +520,35 @@ const Products = () => {
                 name: product.name,
                 slug: product.slug || product.id,
                 description: product.description || undefined,
+                short_description:
+                  'short_description' in product
+                    ? (product.short_description as string | undefined)
+                    : undefined,
                 price: product.price,
                 currency: product.currency || 'XOF',
                 category: product.category || undefined,
                 product_type: product.product_type || 'digital',
                 image_url: product.image_url || undefined,
+                duration_minutes:
+                  'duration_minutes' in product
+                    ? (product.duration_minutes as number | string | undefined)
+                    : undefined,
+                location_type:
+                  'location_type' in product
+                    ? (product.location_type as string | undefined)
+                    : undefined,
+                pricing_type:
+                  'pricing_type' in product
+                    ? (product.pricing_type as string | undefined)
+                    : undefined,
+                fulfillment_mode:
+                  'fulfillment_mode' in product
+                    ? (product.fulfillment_mode as string | undefined)
+                    : undefined,
+                service_type:
+                  'service_type' in product
+                    ? (product.service_type as string | undefined)
+                    : undefined,
               })
             )
           );
@@ -1350,18 +1379,23 @@ const Products = () => {
                 {(() => {
                   let currentPrice = quickViewProduct.price || 0;
                   let crossedOutPrice: number | null = null;
-                  
-                  const backendPromotionalPrice = (quickViewProduct as any).promotional_price;
-                  const backendCompareAtPrice = (quickViewProduct as any).compare_at_price;
-                  
+
+                  const backendPromotionalPrice = quickViewProduct.promotional_price;
+                  const backendCompareAtPrice = (
+                    quickViewProduct as Product & { compare_at_price?: number | null }
+                  ).compare_at_price;
+
                   if (backendPromotionalPrice && backendPromotionalPrice < quickViewProduct.price) {
                     currentPrice = backendPromotionalPrice;
                     crossedOutPrice = quickViewProduct.price;
-                  } else if (backendCompareAtPrice && backendCompareAtPrice > quickViewProduct.price) {
+                  } else if (
+                    backendCompareAtPrice &&
+                    backendCompareAtPrice > quickViewProduct.price
+                  ) {
                     currentPrice = quickViewProduct.price;
                     crossedOutPrice = backendCompareAtPrice;
                   }
-                  
+
                   return (
                     <div className="flex items-center gap-2">
                       {crossedOutPrice !== null && (

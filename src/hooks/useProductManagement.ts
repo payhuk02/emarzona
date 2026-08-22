@@ -6,6 +6,24 @@ import { generateSlug } from '@/lib/store-utils';
 import { withRateLimit } from '@/lib/rate-limiter';
 import { useAuth } from '@/contexts/AuthContext';
 import { invalidateCatalogCaches } from '@/lib/cache-invalidation';
+import { buildServiceImportPayload } from '@/lib/products/build-service-import-payload';
+
+export type ProductManagementCreateInput = {
+  name: string;
+  slug?: string;
+  description?: string;
+  short_description?: string;
+  price: number;
+  currency?: string;
+  category?: string;
+  product_type?: string;
+  image_url?: string;
+  duration_minutes?: number | string;
+  location_type?: string;
+  pricing_type?: string;
+  fulfillment_mode?: string;
+  service_type?: string;
+};
 
 export const useProductManagement = (storeId: string) => {
   const [loading, setLoading] = useState(false);
@@ -37,16 +55,7 @@ export const useProductManagement = (storeId: string) => {
     }
   };
 
-  const createProduct = async (productData: {
-    name: string;
-    slug?: string;
-    description?: string;
-    price: number;
-    currency?: string;
-    category?: string;
-    product_type?: string;
-    image_url?: string;
-  }): Promise<boolean> => {
+  const createProduct = async (productData: ProductManagementCreateInput): Promise<boolean> => {
     setLoading(true);
     try {
       // Appliquer le rate limiting pour la création de produits
@@ -66,13 +75,14 @@ export const useProductManagement = (storeId: string) => {
             return false;
           }
 
-          const baseProductPayload = {
+          const baseProductPayload: Record<string, unknown> = {
             name: productData.name,
             slug,
             description: productData.description || null,
+            short_description: productData.short_description || null,
             price: productData.price || 0,
             currency: productData.currency || 'XOF',
-            category_id: productData.category || null,
+            category: productData.category || null,
             image_url: productData.image_url || null,
             product_type: productData.product_type || 'digital',
             is_active: false, // Inactive by default for CSV imports/duplicates to allow review
@@ -88,10 +98,22 @@ export const useProductManagement = (storeId: string) => {
             });
             resultError = error;
           } else if (productData.product_type === 'service') {
+            const imported = await buildServiceImportPayload({
+              category: productData.category,
+              duration_minutes: productData.duration_minutes,
+              location_type: productData.location_type,
+              pricing_type: productData.pricing_type,
+              fulfillment_mode: productData.fulfillment_mode,
+              service_type: productData.service_type,
+            });
             const { error } = await supabase.rpc('create_service_product_tx', {
               p_store_id: storeId,
-              p_product: baseProductPayload,
-              p_service: { duration_minutes: 60 },
+              p_product: {
+                ...baseProductPayload,
+                category: imported.category,
+                category_id: imported.category_id,
+              },
+              p_service: imported.service,
             });
             resultError = error;
           } else if (productData.product_type === 'artist') {

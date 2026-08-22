@@ -6,105 +6,171 @@ import { z } from 'zod';
  */
 export const ProductImportSchema = z.object({
   // Champs obligatoires
-  name: z.string()
+  name: z
+    .string()
     .min(3, 'Le nom doit contenir au moins 3 caractères')
     .max(200, 'Le nom ne peut pas dépasser 200 caractères')
     .trim(),
-  
-  slug: z.string()
+
+  slug: z
+    .string()
     .min(3, 'Le slug doit contenir au moins 3 caractères')
     .max(200, 'Le slug ne peut pas dépasser 200 caractères')
     .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Le slug doit être en minuscules avec tirets uniquement')
     .trim(),
-  
+
   price: z.union([
     z.number().positive('Le prix doit être positif'),
-    z.string().transform((val) => {
+    z.string().transform(val => {
       const parsed = parseFloat(val.replace(/\s/g, '').replace(',', '.'));
       if (isNaN(parsed)) throw new Error('Prix invalide');
       return parsed;
-    })
+    }),
   ]),
-  
+
   currency: z.enum(['XOF', 'EUR', 'USD', 'GBP', 'CAD'], {
-    errorMap: () => ({ message: 'Devise non supportée (XOF, EUR, USD, GBP, CAD)' })
+    errorMap: () => ({ message: 'Devise non supportée (XOF, EUR, USD, GBP, CAD)' }),
   }),
-  
+
   product_type: z.enum(['digital', 'physical', 'service'], {
-    errorMap: () => ({ message: 'Type de produit invalide (digital, physical, service)' })
+    errorMap: () => ({ message: 'Type de produit invalide (digital, physical, service)' }),
   }),
-  
+
   // Licensing (optionnel)
-  licensing_type: z.union([
-    z.enum(['standard', 'plr', 'copyrighted']),
-    z.string().transform((val): 'standard' | 'plr' | 'copyrighted' | undefined => {
-      const v = (val || '').toString().trim().toLowerCase();
-      if (!v) return undefined;
-      if (v === 'standard' || v === 'plr' || v === 'copyrighted') return v;
-      return undefined;
-    })
-  ]).optional(),
-  
-  license_terms: z.string()
+  licensing_type: z
+    .union([
+      z.enum(['standard', 'plr', 'copyrighted']),
+      z.string().transform((val): 'standard' | 'plr' | 'copyrighted' | undefined => {
+        const v = (val || '').toString().trim().toLowerCase();
+        if (!v) return undefined;
+        if (v === 'standard' || v === 'plr' || v === 'copyrighted') return v;
+        return undefined;
+      }),
+    ])
+    .optional(),
+
+  license_terms: z
+    .string()
     .max(2000, 'Les conditions de licence ne peuvent pas dépasser 2000 caractères')
     .optional()
     .nullable()
-    .transform((val) => val || null),
-  
+    .transform(val => val || null),
+
+  short_description: z
+    .string()
+    .max(160, 'L’accroche ne peut pas dépasser 160 caractères')
+    .optional()
+    .nullable()
+    .transform(val => val || null),
+
+  duration_minutes: z
+    .union([
+      z.number().int().positive(),
+      z.string().transform(val => {
+        if (!val || val.trim() === '') return undefined;
+        const parsed = parseInt(val.replace(/\s/g, ''), 10);
+        return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
+      }),
+    ])
+    .optional(),
+
+  location_type: z.preprocess(
+    val => (typeof val === 'string' && val.trim() === '' ? undefined : val),
+    z.enum(['on_site', 'online', 'customer_location', 'flexible']).optional()
+  ),
+  pricing_type: z.preprocess(
+    val => (typeof val === 'string' && val.trim() === '' ? undefined : val),
+    z.enum(['fixed', 'hourly', 'per_hour', 'per_participant']).optional()
+  ),
+  fulfillment_mode: z.preprocess(
+    val => (typeof val === 'string' && val.trim() === '' ? undefined : val),
+    z.enum(['appointment', 'project', 'both']).optional()
+  ),
+  service_type: z.preprocess(
+    val => (typeof val === 'string' && val.trim() === '' ? undefined : val),
+    z.enum(['appointment', 'class', 'event', 'consultation', 'other']).optional()
+  ),
+
   // Champs optionnels
-  description: z.string()
+  description: z
+    .string()
     .max(5000, 'La description ne peut pas dépasser 5000 caractères')
     .optional()
     .nullable()
-    .transform((val) => val || null),
-  
-  category: z.string()
+    .transform(val => val || null),
+
+  category: z
+    .string()
     .max(100, 'La catégorie ne peut pas dépasser 100 caractères')
     .optional()
     .nullable()
-    .transform((val) => val || null),
-  
-  is_active: z.union([
-    z.boolean(),
-    z.string().transform((val) => {
-      const lower = val.toLowerCase().trim();
-      if (lower === 'true' || lower === '1' || lower === 'oui' || lower === 'yes' || lower === 'actif') return true;
-      if (lower === 'false' || lower === '0' || lower === 'non' || lower === 'no' || lower === 'inactif') return false;
-      return true; // Par défaut actif
-    })
-  ]).default(true),
-  
-  promotional_price: z.union([
-    z.number().positive().nullable(),
-    z.string().transform((val) => {
-      if (!val || val.trim() === '') return null;
-      const parsed = parseFloat(val.replace(/\s/g, '').replace(',', '.'));
-      if (isNaN(parsed)) return null;
-      return parsed;
-    })
-  ]).optional().nullable(),
-  
-  stock_quantity: z.union([
-    z.number().int().min(0, 'Le stock ne peut pas être négatif'),
-    z.string().transform((val) => {
-      if (!val || val.trim() === '') return 0;
-      const parsed = parseInt(val);
-      if (isNaN(parsed)) return 0;
-      return Math.max(0, parsed);
-    })
-  ]).optional().default(0),
-  
-  sku: z.string()
+    .transform(val => val || null),
+
+  is_active: z
+    .union([
+      z.boolean(),
+      z.string().transform(val => {
+        const lower = val.toLowerCase().trim();
+        if (
+          lower === 'true' ||
+          lower === '1' ||
+          lower === 'oui' ||
+          lower === 'yes' ||
+          lower === 'actif'
+        )
+          return true;
+        if (
+          lower === 'false' ||
+          lower === '0' ||
+          lower === 'non' ||
+          lower === 'no' ||
+          lower === 'inactif'
+        )
+          return false;
+        return true; // Par défaut actif
+      }),
+    ])
+    .default(true),
+
+  promotional_price: z
+    .union([
+      z.number().positive().nullable(),
+      z.string().transform(val => {
+        if (!val || val.trim() === '') return null;
+        const parsed = parseFloat(val.replace(/\s/g, '').replace(',', '.'));
+        if (isNaN(parsed)) return null;
+        return parsed;
+      }),
+    ])
+    .optional()
+    .nullable(),
+
+  stock_quantity: z
+    .union([
+      z.number().int().min(0, 'Le stock ne peut pas être négatif'),
+      z.string().transform(val => {
+        if (!val || val.trim() === '') return 0;
+        const parsed = parseInt(val);
+        if (isNaN(parsed)) return 0;
+        return Math.max(0, parsed);
+      }),
+    ])
+    .optional()
+    .default(0),
+
+  sku: z
+    .string()
     .max(100, 'Le SKU ne peut pas dépasser 100 caractères')
     .optional()
     .nullable()
-    .transform((val) => val || null),
-  
-  image_url: z.string()
-    .url('URL d\'image invalide')
+    .transform(val => val || null),
+
+  image_url: z
+    .string()
+    .url("URL d'image invalide")
     .optional()
     .nullable()
-    .transform((val) => val || null),
+    .transform(val => val || null),
 });
 
 /**
@@ -137,10 +203,10 @@ export function validateProductsImport(data: unknown[]) {
     result: ProductImportSchema.safeParse(item),
     originalData: item,
   }));
-  
+
   const successes = results.filter(r => r.result.success);
   const errors = results.filter(r => !r.result.success);
-  
+
   return {
     successes: successes.map(s => ({
       index: s.index,
@@ -167,10 +233,3 @@ export const ProductUpdateSchema = ProductImportSchema.partial();
  * Type pour la mise à jour de produit
  */
 export type ProductUpdateData = z.infer<typeof ProductUpdateSchema>;
-
-
-
-
-
-
-
