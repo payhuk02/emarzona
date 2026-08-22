@@ -287,6 +287,11 @@ export const LOGISTICS_CONTEXT_SIDEBAR: RawNavSection[] = [
         url: '/dashboard/services/reminders',
         icon: Bell,
       },
+      {
+        title: 'Analytics services',
+        url: '/dashboard/services/analytics',
+        icon: BarChart3,
+      },
     ],
   },
   {

@@ -15,7 +15,6 @@ import { useStore } from '@/hooks/useStore';
 import {
   useStoreWaitlist,
   useNotifyWaitlistEntry,
-  useConvertWaitlistToBooking,
   useRemoveFromWaitlist,
   useUpdateWaitlistStatus,
   useNotifyWaitlistCustomers,
@@ -33,7 +32,6 @@ export default function ServiceWaitlistManagementPage() {
   const { toast } = useToast();
   const { data: waitlist, isLoading } = useStoreWaitlist(store?.id || '');
   const notifyEntry = useNotifyWaitlistEntry();
-  const convertToBooking = useConvertWaitlistToBooking();
   const removeFromWaitlist = useRemoveFromWaitlist();
   const updateStatus = useUpdateWaitlistStatus();
   const notifyAll = useNotifyWaitlistCustomers();
@@ -60,7 +58,7 @@ export default function ServiceWaitlistManagementPage() {
     id: entry.id,
     serviceId: entry.service_id,
     serviceName: entry.products?.name || 'Service',
-    customerId: entry.user_id,
+    customerId: entry.user_id ?? '',
     customerName: entry.customer_name,
     customerEmail: entry.customer_email,
     customerPhone: entry.customer_phone,
@@ -115,14 +113,10 @@ export default function ServiceWaitlistManagementPage() {
     }
 
     try {
-      // Option 1: Si une réservation existe déjà (depuis la page de booking)
-      // On peut utiliser convertToBooking directement
-      // Option 2: Naviguer vers la page de booking avec pré-remplissage
-      // La page de booking créera la réservation et appellera convertToBooking
-
-      // Pour l'instant, naviguer vers la page de booking avec les paramètres waitlist
-      // La page ServiceBooking créera la réservation et appellera automatiquement convertToBooking
-      navigate(`/service/${entry.serviceId}/book?waitlist=${entryId}`, {
+      const params = new URLSearchParams({ waitlist: entryId });
+      if (entry.customerEmail) params.set('guestEmail', entry.customerEmail);
+      if (entry.customerName) params.set('guestName', entry.customerName);
+      navigate(`/service/${entry.serviceId}?${params.toString()}`, {
         state: {
           waitlistEntry: entry,
           prefillData: {

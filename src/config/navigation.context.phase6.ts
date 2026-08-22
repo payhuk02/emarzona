@@ -37,6 +37,7 @@ export const PHASE6_CONTEXT_CONFIGS = {
       '/dashboard/services/calendar-integrations',
       '/dashboard/services/waitlist',
       '/dashboard/services/reminders',
+      '/dashboard/services/analytics',
       '/dashboard/inventory',
       '/dashboard/shipping',
       '/dashboard/shipping-services',
@@ -99,6 +100,7 @@ export const PHASE6_CONTEXT_CONFIGS = {
           '/dashboard/services/calendar-integrations',
           '/dashboard/services/waitlist',
           '/dashboard/services/reminders',
+          '/dashboard/services/analytics',
         ],
       },
       {
@@ -162,6 +164,7 @@ export const PHASE6_CONTEXT_CONFIGS = {
       '/dashboard/services/calendar-integrations',
       '/dashboard/services/waitlist',
       '/dashboard/services/reminders',
+      '/dashboard/services/analytics',
     ],
     groups: [
       {
@@ -189,6 +192,7 @@ export const PHASE6_CONTEXT_CONFIGS = {
           '/dashboard/services/calendar-integrations',
           '/dashboard/services/waitlist',
           '/dashboard/services/reminders',
+          '/dashboard/services/analytics',
           '/dashboard/services/resource-conflicts',
         ],
       },

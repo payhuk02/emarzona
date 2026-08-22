@@ -79,7 +79,7 @@ export function JoinWaitlistButton({
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" disabled={disabled} className="w-full">
+        <Button variant="outline" disabled={disabled || !storeId} className="w-full">
           <Bell className="h-4 w-4 mr-2" />
           Rejoindre la liste d'attente
         </Button>
@@ -88,7 +88,8 @@ export function JoinWaitlistButton({
         <DialogHeader>
           <DialogTitle>Rejoindre la liste d'attente</DialogTitle>
           <DialogDescription>
-            Vous serez notifié dès qu'un créneau sera disponible pour {serviceName}
+            Indiquez votre e-mail : vous serez prévenu dès qu’un créneau se libère pour{' '}
+            {serviceName}. Un compte n’est pas obligatoire.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">

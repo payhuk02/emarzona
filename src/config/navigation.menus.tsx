@@ -433,6 +433,11 @@ export const userMenuSections = [
         icon: Bell,
       },
       {
+        title: 'Analytics services',
+        url: '/dashboard/services/analytics',
+        icon: BarChart3,
+      },
+      {
         title: 'Inventaire',
         url: '/dashboard/inventory',
         icon: Warehouse,

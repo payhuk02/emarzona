@@ -9,7 +9,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import {
   sendBookingNotifications,
-  scheduleBookingReminders,
   getUserBookingNotificationPreferences,
 } from '@/lib/notifications/service-booking-notifications';
 import { createServiceRefund } from '@/lib/services/cancellation-policy';
@@ -257,9 +256,6 @@ export const useCreateBooking = () => {
               },
               'confirmation'
             );
-
-            // Planifier les rappels automatiques
-            await scheduleBookingReminders(result.id, bookingDate, bookingTime, preferences);
           }
         } catch (notificationError) {
           // Ne pas faire échouer la création si les notifications échouent

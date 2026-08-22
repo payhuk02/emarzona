@@ -186,18 +186,25 @@ export async function sendBookingEmail(
     // Récupérer le user_id depuis le booking
     const { data: booking, error: bookingError } = await supabase
       .from('service_bookings')
-      .select('user_id, customer_id')
+      .select('user_id')
       .eq('id', data.booking_id)
-      .single();
+      .maybeSingle();
 
-    if (bookingError || !booking) {
+    if (bookingError) {
       throw new Error(`Booking not found: ${data.booking_id}`);
     }
 
-    // Utiliser user_id ou customer_id selon disponibilité
-    const userId = booking.user_id || booking.customer_id;
+    const userId = booking?.user_id;
     if (!userId) {
-      throw new Error(`No user_id or customer_id found for booking ${data.booking_id}`);
+      logger.warn('Booking email skipped: no user_id (guest)', {
+        bookingId: data.booking_id,
+        type,
+      });
+      return {
+        success: false,
+        channel: 'email',
+        error: 'guest_booking_no_user',
+      };
     }
 
     // Utiliser le système de notifications unifié
@@ -520,8 +527,8 @@ async function createReminder(
   // Récupérer les infos utilisateur
   const { data: userProfile } = await supabase
     .from('profiles')
-    .select('email, phone')
-    .eq('id', booking.user_id)
+    .select('phone')
+    .eq('user_id', booking.user_id)
     .maybeSingle();
 
   // Créer les rappels selon les canaux activés

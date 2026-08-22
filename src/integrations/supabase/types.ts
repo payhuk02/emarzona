@@ -31604,7 +31604,7 @@ export type Database = {
           status: string;
           store_id: string;
           updated_at: string;
-          user_id: string;
+          user_id: string | null;
         };
         Insert: {
           admin_notes?: string | null;
@@ -31630,7 +31630,7 @@ export type Database = {
           status?: string;
           store_id: string;
           updated_at?: string;
-          user_id: string;
+          user_id?: string | null;
         };
         Update: {
           admin_notes?: string | null;
@@ -31656,7 +31656,7 @@ export type Database = {
           status?: string;
           store_id?: string;
           updated_at?: string;
-          user_id?: string;
+          user_id?: string | null;
         };
         Relationships: [
           {
@@ -45533,6 +45533,19 @@ export type Database = {
         Args: { p_booking_id: string; p_waitlist_id: string };
         Returns: boolean;
       };
+      join_service_waitlist: {
+        Args: {
+          p_customer_email: string;
+          p_customer_name: string;
+          p_customer_notes?: string;
+          p_customer_phone?: string;
+          p_preferred_date?: string;
+          p_preferred_time?: string;
+          p_service_id: string;
+          p_store_id: string;
+        };
+        Returns: Json;
+      };
       count_broadcast_recipients: {
         Args: { p_audience: string; p_emails?: string[] };
         Returns: number;
@@ -46787,6 +46800,7 @@ export type Database = {
           calendar_available: boolean | null;
           requires_staff: boolean | null;
           package_starting_price: number | null;
+          category_attributes: Json;
         }[];
       };
       get_next_course_in_path: {

@@ -7,7 +7,6 @@ import type { SupabaseClient } from 'npm:@supabase/supabase-js@2.58.0';
 import { logArtistFulfillmentEvent } from './artist-fulfillment-observability.ts';
 import { triggerEmailWorkflowsForEvent } from './workflow-executor.ts';
 import { triggerSequenceEnrollmentsForEvent } from './sequence-enrollment-utils.ts';
-import { resolveServiceBookingEmailJoinUrl, zonedLocalDateTimeToUtc } from './daily-api.ts';
 
 /** Colonnes orders réelles (pas de customer_email / shipping_* / tracking_* sur orders). */
 const ORDER_SELECT =
@@ -125,95 +124,13 @@ async function sendOrderConfirmationEmail(
 async function scheduleConfirmedBookingReminders(
   supabase: SupabaseClient,
   bookingId: string,
-  order?: Record<string, unknown>
+  _order?: Record<string, unknown>
 ): Promise<void> {
-  const { data: booking, error } = await supabase
-    .from('service_bookings')
-    .select(
-      'id, product_id, user_id, scheduled_date, scheduled_start_time, timezone, meeting_url, meeting_platform'
-    )
-    .eq('id', bookingId)
-    .maybeSingle();
-
-  if (error || !booking?.scheduled_date || !booking.scheduled_start_time) {
-    return;
-  }
-
-  let reminderUserId = booking.user_id as string | null;
-  if (!reminderUserId) {
-    const customerId = order?.customer_id as string | undefined;
-    if (customerId) {
-      const { data: customer } = await supabase
-        .from('customers')
-        .select('user_id')
-        .eq('id', customerId)
-        .maybeSingle();
-      reminderUserId = customer?.user_id ?? null;
-    }
-  }
-  if (!reminderUserId) {
-    console.warn('scheduleConfirmedBookingReminders: no user_id for booking', bookingId);
-    return;
-  }
-
-  const { data: product } = await supabase
-    .from('products')
-    .select('store_id, name')
-    .eq('id', booking.product_id)
-    .maybeSingle();
-  const storeId = product?.store_id;
-  if (!storeId) return;
-
-  const start = zonedLocalDateTimeToUtc(
-    String(booking.scheduled_date).slice(0, 10),
-    String(booking.scheduled_start_time),
-    (booking.timezone as string | null) || 'UTC'
-  );
-  const bookingAt = start;
-  if (Number.isNaN(bookingAt.getTime())) return;
-
-  const siteUrl = (Deno.env.get('SITE_URL') || 'https://www.emarzona.com').replace(/\/$/, '');
-  const joinUrl = resolveServiceBookingEmailJoinUrl({
-    meetingUrl: booking.meeting_url as string | null,
-    meetingPlatform: booking.meeting_platform as string | null,
-    portalUrl: `${siteUrl}/account/bookings`,
+  const { error } = await supabase.rpc('create_booking_reminders', {
+    p_booking_id: bookingId,
   });
-  const meetingHint = ` Lien visio : ${joinUrl}`;
-
-  const offsets: Array<{ hours: number; label: string }> = [
-    { hours: 24, label: '24h' },
-    { hours: 2, label: '2h' },
-  ];
-
-  for (const offset of offsets) {
-    const scheduledAt = new Date(bookingAt.getTime() - offset.hours * 60 * 60 * 1000);
-    if (scheduledAt.getTime() <= Date.now()) continue;
-
-    const { data: existing } = await supabase
-      .from('service_booking_reminders')
-      .select('id')
-      .eq('booking_id', bookingId)
-      .eq('reminder_type', 'email')
-      .eq('reminder_template', offset.label)
-      .eq('status', 'pending')
-      .maybeSingle();
-    if (existing?.id) continue;
-
-    const { error: insertError } = await supabase.from('service_booking_reminders').insert({
-      booking_id: bookingId,
-      service_id: booking.product_id,
-      store_id: storeId,
-      user_id: reminderUserId,
-      reminder_type: 'email',
-      reminder_template: offset.label,
-      reminder_scheduled_at: scheduledAt.toISOString(),
-      reminder_subject: `Rappel ${offset.label} — votre rendez-vous`,
-      reminder_message: `Rappel ${offset.label} : votre réservation approche (${booking.scheduled_date} à ${String(booking.scheduled_start_time).slice(0, 5)}).${meetingHint}`,
-      status: 'pending',
-    });
-    if (insertError) {
-      console.error('scheduleConfirmedBookingReminders insert failed', insertError);
-    }
+  if (error) {
+    console.error('create_booking_reminders failed', bookingId, error);
   }
 }
 

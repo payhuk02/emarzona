@@ -847,6 +847,7 @@ const Checkout = () => {
                 couponDiscountAmount: appliedCouponCode.discountAmount,
               }
             : undefined,
+          serviceOptions: appliedCouponCode ? { couponCode: appliedCouponCode.code } : undefined,
           artistOptions:
             product.product_type === 'artist'
               ? {

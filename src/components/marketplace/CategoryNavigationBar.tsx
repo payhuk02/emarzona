@@ -41,10 +41,31 @@ import {
   DollarSign,
   ChevronLeft,
   ChevronRight,
+  type LucideIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
 import { getAllMarketplaceCategories, type CategoryOption } from '@/constants/product-categories';
+import { useServiceCategoryTree } from '@/hooks/useServiceCategories';
+
+const SERVICE_FAMILY_ICONS: Record<string, LucideIcon> = {
+  'svc-informatique-technologie': Code,
+  'svc-design-creation': Palette,
+  'svc-marketing-communication': TrendingUp,
+  'svc-formation-coaching': GraduationCap,
+  'svc-redaction-traduction': FileText,
+  'svc-photo-video-audiovisuel': Video,
+  'svc-services-entreprises': Briefcase,
+  'svc-maison-services-locaux': Wrench,
+  'svc-beaute-bien-etre': Sparkles,
+  'svc-transport-automobile': Package,
+  'svc-evenementiel': Gift,
+  'svc-juridique-administratif': Shield,
+  'svc-creations': Camera,
+};
+
+function serviceFamilyIcon(slug: string): LucideIcon {
+  return SERVICE_FAMILY_ICONS[slug] || Briefcase;
+}
 
 interface CategoryNavigationBarProps {
   categories: string[];
@@ -52,16 +73,19 @@ interface CategoryNavigationBarProps {
   onCategoryChange: (category: string) => void;
   /** Aligné sur le hero sombre du landing premium */
   theme?: 'default' | 'premium';
+  productType?: string;
 }
 
 export function CategoryNavigationBar({
-  categories,
+  categories: _categories,
   selectedCategory,
   onCategoryChange,
   theme = 'default',
+  productType = 'all',
 }: CategoryNavigationBarProps) {
   const isPremium = theme === 'premium';
   const { t } = useTranslation();
+  const { tree: serviceTree } = useServiceCategoryTree();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(true);
@@ -322,6 +346,22 @@ export function CategoryNavigationBar({
 
   // Combiner les catégories de base avec toutes les catégories des 5 systèmes
   const availableCategories = useMemo(() => {
+    const allAndFeatured = CATEGORY_CONFIG_BASE.filter(
+      cat => cat.value === 'all' || cat.value === 'featured'
+    );
+
+    if (productType === 'service') {
+      return [
+        ...allAndFeatured,
+        ...serviceTree.map(node => ({
+          value: node.slug,
+          label: node.name,
+          icon: serviceFamilyIcon(node.slug),
+          popular: true,
+        })),
+      ];
+    }
+
     const allCategories = [
       ...CATEGORY_CONFIG_BASE,
       ...getAllMarketplaceCategories().filter(
@@ -329,7 +369,7 @@ export function CategoryNavigationBar({
       ),
     ];
     return allCategories;
-  }, [CATEGORY_CONFIG_BASE]);
+  }, [CATEGORY_CONFIG_BASE, productType, serviceTree]);
 
   // Gérer le scroll horizontal
   const handleScroll = () => {

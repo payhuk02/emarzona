@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import {
   Edit,
   ExternalLink,
-  Copy,
+  BarChart3,
   Link as LinkIcon,
   Share2,
   FileStack,
@@ -183,6 +183,13 @@ export const ProductManagementActions: React.FC<ProductManagementActionsProps> =
           <ExternalLink className="h-4 w-4 mr-2" />
           Voir la page produit
         </DropdownMenuItem>
+
+        {product.product_type === 'service' && (
+          <DropdownMenuItem onClick={() => navigate(`/dashboard/services/${product.id}/analytics`)}>
+            <BarChart3 className="h-4 w-4 mr-2" />
+            Analytics
+          </DropdownMenuItem>
+        )}
 
         <DropdownMenuSeparator />
 

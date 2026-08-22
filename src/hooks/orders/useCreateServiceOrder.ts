@@ -30,7 +30,10 @@
 import { useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { initiatePayment } from '@/lib/payment-service';
-import { resolveServicePayableAmount } from '@/lib/service/service-payable-amount';
+import {
+  resolveServicePayableAmount,
+  toPartialPaymentOrderFields,
+} from '@/lib/service/service-payable-amount';
 import { useToast } from '@/hooks/use-toast';
 import { getAffiliateTrackingCookie } from '@/hooks/useAffiliateTracking';
 import { logger } from '@/lib/logger';
@@ -816,15 +819,9 @@ export const useCreateServiceOrder = () => {
       const calcAmountToPay = payable.amountToPay;
       const calcRemainingAmount = payable.remainingAmount;
 
-      if (payable.paymentType === 'percentage') {
-        await supabase
-          .from('orders')
-          .update({
-            payment_type: 'percentage',
-            percentage_paid: payable.percentageRate,
-            remaining_amount: payable.remainingAmount,
-          })
-          .eq('id', orderId);
+      const partialPayment = toPartialPaymentOrderFields(payable);
+      if (partialPayment) {
+        await supabase.from('orders').update(partialPayment).eq('id', orderId);
       }
 
       // 11. Créer un secured_payment si paiement escrow

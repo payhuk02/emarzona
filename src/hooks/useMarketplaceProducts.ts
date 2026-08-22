@@ -214,6 +214,8 @@ export async function fetchMarketplaceProducts({
               product.package_starting_price != null
                 ? Number(product.package_starting_price)
                 : null,
+            category_attributes:
+              (product.category_attributes as Product['category_attributes']) ?? null,
             licensing_type: product.licensing_type as string,
             license_terms: product.license_terms as string,
             is_featured: product.is_featured as boolean,

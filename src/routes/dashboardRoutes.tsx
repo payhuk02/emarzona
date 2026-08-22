@@ -260,6 +260,7 @@ const ServiceWaitlistManagementPage = lazyPage(
 const BookingRemindersManagementPage = lazyPage(
   () => import('@/pages/service/BookingRemindersManagementPage')
 );
+const ServiceAnalyticsPage = lazyPage(() => import('@/pages/service/ServiceAnalyticsPage'));
 const OrderMessaging = lazyPage(() => import('@/pages/orders/OrderMessaging'));
 const PaymentManagement = lazyPage(() => import('@/pages/payments/PaymentManagement'));
 const PaymentManagementList = lazyPage(() => import('@/pages/payments/PaymentManagementList'));
@@ -459,6 +460,8 @@ export const dashboardRoutes = (
     {pr('/dashboard/services/calendar-integrations', CalendarIntegrationsPage)}
     {pr('/dashboard/services/waitlist', ServiceWaitlistManagementPage)}
     {pr('/dashboard/services/reminders', BookingRemindersManagementPage)}
+    {pr('/dashboard/services/analytics', ServiceAnalyticsPage)}
+    {pr('/dashboard/services/:serviceId/analytics', ServiceAnalyticsPage)}
     {pr('/dashboard/services/addons', ServiceAddonsPage)}
     {pr('/dashboard/services/project-offers', ServiceProjectOffersPage)}
 

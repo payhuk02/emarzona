@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { resolveServicePayableAmount } from '../service-payable-amount';
+import {
+  resolveServicePayableAmount,
+  toPartialPaymentOrderFields,
+} from '../service-payable-amount';
 
 describe('resolveServicePayableAmount', () => {
   it('charges the full amount by default', () => {
@@ -45,5 +48,38 @@ describe('resolveServicePayableAmount', () => {
       resolveServicePayableAmount(1000, { payment_type: 'percentage', percentage_rate: 99 })
         .percentageRate
     ).toBe(90);
+  });
+});
+
+describe('toPartialPaymentOrderFields', () => {
+  it('stores the amount due now, not the percentage rate', () => {
+    const payable = resolveServicePayableAmount(10000, {
+      payment_type: 'percentage',
+      percentage_rate: 30,
+    });
+    expect(toPartialPaymentOrderFields(payable)).toEqual({
+      payment_type: 'percentage',
+      percentage_paid: 3000,
+      remaining_amount: 7000,
+    });
+  });
+
+  it('returns null for a full payment', () => {
+    expect(
+      toPartialPaymentOrderFields(resolveServicePayableAmount(10000, { payment_type: 'full' }))
+    ).toBeNull();
+  });
+
+  it('stores a fixed deposit as the payable amount', () => {
+    const payable = resolveServicePayableAmount(
+      10000,
+      { payment_type: 'full' },
+      { deposit_required: true, deposit_type: 'fixed', deposit_amount: 2500 }
+    );
+    expect(toPartialPaymentOrderFields(payable)).toEqual({
+      payment_type: 'percentage',
+      percentage_paid: 2500,
+      remaining_amount: 7500,
+    });
   });
 });

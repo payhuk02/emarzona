@@ -1,6 +1,9 @@
 import { supabase } from '@/integrations/supabase/client';
 import { initiatePayment } from '@/lib/payment-service';
-import { resolveServicePayableAmount } from '@/lib/service/service-payable-amount';
+import {
+  resolveServicePayableAmount,
+  toPartialPaymentOrderFields,
+} from '@/lib/service/service-payable-amount';
 import { getAffiliateTrackingCookie } from '@/hooks/useAffiliateTracking';
 import { logger } from '@/lib/logger';
 import { findOrCreateStoreCustomer } from '@/lib/orders/customers-data';
@@ -49,6 +52,7 @@ export class ServiceOrderStrategy implements OrderStrategy {
       giftCardAmount = 0,
       checkoutMode = 'immediate',
       addonProductIds = [],
+      couponCode,
     } = opts;
 
     if (!bookingDateTime) {
@@ -404,7 +408,7 @@ export class ServiceOrderStrategy implements OrderStrategy {
         p_service_metadata: serviceMetadata,
         p_gift_card_id: giftCardId ?? null,
         p_gift_card_amount_requested: giftCardAmount || 0,
-        p_coupon_code: null,
+        p_coupon_code: couponCode?.trim() || null,
         p_affiliate_tracking_cookie: affiliateTrackingCookie,
         p_guest_checkout: guestCheckout ?? !authenticatedUserId,
         p_booking_id: booking.id,
@@ -467,15 +471,9 @@ export class ServiceOrderStrategy implements OrderStrategy {
     );
     const finalAmountToPay = payable.amountToPay;
 
-    if (payable.paymentType === 'percentage') {
-      await supabase
-        .from('orders')
-        .update({
-          payment_type: 'percentage',
-          percentage_paid: payable.percentageRate,
-          remaining_amount: payable.remainingAmount,
-        })
-        .eq('id', orderId);
+    const partialPayment = toPartialPaymentOrderFields(payable);
+    if (partialPayment) {
+      await supabase.from('orders').update(partialPayment).eq('id', orderId);
     }
 
     const { data: invoiceId, error: invoiceError } = await supabase.rpc(

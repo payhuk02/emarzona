@@ -70,3 +70,23 @@ export function resolveServicePayableAmount(
     totalAmount: total,
   };
 }
+
+/** Champs orders pour un acompte : percentage_paid = montant dû maintenant (webhook MoneyFusion). */
+export function toPartialPaymentOrderFields(payable: {
+  paymentType: string;
+  amountToPay: number;
+  remainingAmount: number;
+}): {
+  payment_type: 'percentage';
+  percentage_paid: number;
+  remaining_amount: number;
+} | null {
+  if (payable.paymentType !== 'percentage' || payable.remainingAmount <= 0) {
+    return null;
+  }
+  return {
+    payment_type: 'percentage',
+    percentage_paid: payable.amountToPay,
+    remaining_amount: payable.remainingAmount,
+  };
+}

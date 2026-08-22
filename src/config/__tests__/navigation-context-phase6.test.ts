@@ -37,6 +37,7 @@ describe('context sidebar Phase 6', () => {
     const paths = nav.items.map(i => i.url.split('?')[0]);
     expect(paths).toContain('/dashboard/services/waitlist');
     expect(paths).toContain('/dashboard/services/reminders');
+    expect(paths).toContain('/dashboard/services/analytics');
   });
 
   it('resolves account portal without seller gamification leak', () => {

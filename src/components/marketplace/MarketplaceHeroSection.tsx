@@ -103,6 +103,7 @@ export const MarketplaceHeroSection = React.memo<MarketplaceHeroSectionProps>(
             selectedCategory={filters.category}
             onCategoryChange={category => onFilterChange({ category })}
             theme="premium"
+            productType={filters.productType}
           />
 
           <MarketplaceProductTypeFacets

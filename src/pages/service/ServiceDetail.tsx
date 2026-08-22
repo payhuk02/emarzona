@@ -1447,7 +1447,6 @@ export default function ServiceDetail() {
                   serviceId={serviceId!}
                   serviceName={service.name}
                   storeId={service.store_id ?? service.store?.id}
-                  disabled={!user}
                 />
 
                 {/* Secondary Actions */}
