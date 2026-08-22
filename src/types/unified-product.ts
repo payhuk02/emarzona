@@ -122,6 +122,9 @@ export interface ServiceProduct extends BaseProduct {
   location_type?: 'online' | 'on_site' | 'customer_location';
   service_type?: 'appointment' | 'class' | 'event' | 'consultation' | 'other';
   category_attributes?: Record<string, string | number | boolean | string[]>;
+  pricing_type?: 'fixed' | 'hourly' | 'per_hour' | 'per_participant';
+  fulfillment_mode?: 'appointment' | 'project' | 'both';
+  package_starting_price?: number | null;
 }
 
 /**

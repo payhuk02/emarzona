@@ -88,11 +88,38 @@ export function ServiceProjectOrderPanel({
     return <p className="text-sm text-muted-foreground">Chargement de l&apos;offre…</p>;
   }
 
+  if (activePackages.length === 0 && activeExtras.length === 0) {
+    return null;
+  }
+
   if (activePackages.length === 0) {
     return (
       <Card>
-        <CardContent className="py-8 text-sm text-muted-foreground text-center">
-          Aucun package projet publié pour ce service.
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">Options supplémentaires</CardTitle>
+          <CardDescription>
+            Ces extras s’ajoutent à une formule projet. Publiez un package dans Offres projet pour
+            permettre la commande.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {activeExtras.map(extra => (
+            <div
+              key={extra.id}
+              className="flex items-start justify-between gap-3 rounded-lg border p-3"
+            >
+              <div>
+                <p className="font-medium text-sm">{extra.name}</p>
+                {extra.description && (
+                  <p className="text-xs text-muted-foreground">{extra.description}</p>
+                )}
+              </div>
+              <p className="text-xs whitespace-nowrap">
+                +{formatCurrency(extra.price, extra.currency || currency)}
+                {extra.extra_days > 0 ? ` · +${extra.extra_days} j` : ''}
+              </p>
+            </div>
+          ))}
         </CardContent>
       </Card>
     );

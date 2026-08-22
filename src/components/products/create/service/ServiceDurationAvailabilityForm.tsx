@@ -196,19 +196,21 @@ export const ServiceDurationAvailabilityForm = ({
             </div>
           )}
 
-          {/* Meeting URL */}
+          {/* Meeting URL — Daily.co is created per booking; custom link is optional */}
           {data.location_type === 'online' && (
             <div className="space-y-2">
-              <Label htmlFor="meeting_url">URL de la réunion *</Label>
+              <Label htmlFor="meeting_url">Lien visio personnalisé (optionnel)</Label>
               <Input
                 id="meeting_url"
                 type="url"
-                placeholder="https://meet.google.com/xxx ou https://zoom.us/j/xxx"
+                placeholder="Laisser vide pour Emarzona Visio (Daily.co)"
                 value={data.meeting_url || ''}
                 onChange={e => onUpdate({ meeting_url: e.target.value })}
               />
               <p className="text-xs text-muted-foreground">
-                Lien envoyé automatiquement au client après réservation
+                Par défaut, une salle privée Daily.co est créée à la confirmation du rendez-vous
+                (lien unique client + animateur). Remplissez ce champ seulement si vous préférez
+                Zoom, Meet ou un autre lien fixe.
               </p>
             </div>
           )}

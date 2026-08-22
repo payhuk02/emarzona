@@ -66,6 +66,7 @@ import {
   validateServiceWizardStep,
 } from '@/lib/service-wizard-step-validation';
 import { persistServiceCategoryAttributes } from '@/lib/service/persist-service-category-attributes';
+import { toPersistedPricingType } from '@/lib/service/service-pricing';
 import { resolveServiceProductCategoryPayload } from '@/lib/services/service-categories';
 import { useServiceCategoryTree } from '@/hooks/useServiceCategories';
 import { supabase } from '@/integrations/supabase/client';
@@ -728,7 +729,7 @@ export const CreateServiceWizard = ({
         timezone: formData.timezone || 'UTC',
         requires_staff: formData.requires_staff ?? false,
         max_participants: formData.max_participants || 1,
-        pricing_type: formData.pricing_type || 'fixed',
+        pricing_type: toPersistedPricingType(formData.pricing_type),
         deposit_required: formData.deposit_required || false,
         deposit_amount: formData.deposit_amount,
         deposit_type: formData.deposit_type,
@@ -1037,14 +1038,19 @@ export const CreateServiceWizard = ({
       // Afficher le toast de succès IMMÉDIATEMENT après la publication réussie
       toast({
         title: t('services.published', '🎉 Service publié !'),
-        description: t(
-          'services.publishedDesc',
-          '"{{name}}" est maintenant disponible à la réservation{{affiliate}}',
-          {
-            name: product.name || 'Service',
-            affiliate: formData.affiliate?.enabled ? " avec programme d'affiliation activé" : '',
-          }
-        ),
+        description:
+          formData.fulfillment_mode === 'project' || formData.fulfillment_mode === 'both'
+            ? `"${product.name || 'Service'}" est publié. Configurez les formules (Basic / Standard / Premium) comme sur Fiverr.`
+            : t(
+                'services.publishedDesc',
+                '"{{name}}" est maintenant disponible à la réservation{{affiliate}}',
+                {
+                  name: product.name || 'Service',
+                  affiliate: formData.affiliate?.enabled
+                    ? " avec programme d'affiliation activé"
+                    : '',
+                }
+              ),
       });
 
       invalidateCatalog();
@@ -1056,7 +1062,11 @@ export const CreateServiceWizard = ({
           if (onSuccess) {
             onSuccess();
           } else {
-            navigate('/dashboard/services', { replace: true });
+            const offersNext =
+              formData.fulfillment_mode === 'project' || formData.fulfillment_mode === 'both';
+            navigate(offersNext ? '/dashboard/services/project-offers' : '/dashboard/services', {
+              replace: true,
+            });
           }
         } catch (navigationError) {
           // Logger l'erreur de navigation mais ne PAS afficher d'erreur à l'utilisateur

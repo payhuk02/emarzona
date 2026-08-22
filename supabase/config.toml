@@ -8,6 +8,10 @@ verify_jwt = false
 [functions.send-welcome-email]
 verify_jwt = true
 
+# Visio Daily.co — auth interne (paiement) ou propriétaire boutique
+[functions.service-booking-meeting]
+verify_jwt = false
+
 # Auth interne x-internal-secret (+ JWT utilisateur en mode restreint)
 [functions.send-email]
 verify_jwt = false

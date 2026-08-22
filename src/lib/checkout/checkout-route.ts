@@ -26,6 +26,7 @@ export interface CheckoutRouteParams {
   guestName?: string;
   guestPhone?: string;
   addonIds?: string[];
+  staffId?: string;
 }
 
 export function resolveCheckoutMode(searchParams: URLSearchParams): CheckoutMode {
@@ -61,6 +62,7 @@ function buildCheckoutQuery(
   if (params.guestName) sp.set('guestName', params.guestName);
   if (params.guestPhone) sp.set('guestPhone', params.guestPhone);
   if (params.addonIds?.length) sp.set('addons', params.addonIds.join(','));
+  if (params.staffId) sp.set('staffId', params.staffId);
 
   return sp;
 }

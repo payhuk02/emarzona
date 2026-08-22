@@ -13,6 +13,7 @@ import {
   buildPhysicalPaymentEmailVariables,
 } from '../_shared/seller-order-email-utils.ts';
 import { sendSellerOrderNotificationEmail, sendSellerPaymentFailedEmail } from '../_shared/seller-order-notification-email.ts';
+import { resolveServiceBookingEmailJoinUrl } from '../_shared/daily-api.ts';
 
 const ALLOWED_ORIGINS = (Deno.env.get('ALLOWED_ORIGINS') || '')
   .split(',')
@@ -669,7 +670,7 @@ async function sendServiceEmail(
     const { data: booking } = await supabase
       .from('service_bookings')
       .select(
-        'id, scheduled_date, scheduled_start_time, scheduled_end_time, status, meeting_url, customer_notes'
+        'id, scheduled_date, scheduled_start_time, scheduled_end_time, status, meeting_url, meeting_platform, customer_notes'
       )
       .eq('id', bookingId)
       .maybeSingle();
@@ -685,7 +686,12 @@ async function sendServiceEmail(
       if (booking.scheduled_start_time) {
         bookingTime = String(booking.scheduled_start_time).slice(0, 5);
       }
-      if (booking.meeting_url) bookingLink = booking.meeting_url;
+      const portal = `${siteUrl.replace(/\/$/, '')}/account/bookings`;
+      bookingLink = resolveServiceBookingEmailJoinUrl({
+        meetingUrl: booking.meeting_url,
+        meetingPlatform: booking.meeting_platform,
+        portalUrl: portal,
+      });
     }
   }
 

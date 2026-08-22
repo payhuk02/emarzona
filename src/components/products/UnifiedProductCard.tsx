@@ -43,6 +43,11 @@ import { ResponsiveProductImage } from '@/components/ui/ResponsiveProductImage';
 import { UnifiedProductCardProps } from '@/types/unified-product';
 import { ServiceListingAttributeBadges } from '@/components/service/ServiceListingAttributeBadges';
 import {
+  resolveServiceDisplayPrice,
+  getServicePricingGuidance,
+} from '@/lib/service/service-pricing';
+import { getServiceFormProfile } from '@/lib/services/service-form-profiles';
+import {
   getProductKeyInfo,
   getProductTypeBadge,
   getDisplayPrice,
@@ -127,7 +132,38 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
 
   const typeBadge = useMemo(() => getProductTypeBadge(product), [product]);
   const keyInfo = useMemo(() => getProductKeyInfo(product), [product]);
-  const priceInfo = useMemo(() => getDisplayPrice(product), [product]);
+  const priceInfo = useMemo(() => {
+    if (product.type === 'service') {
+      const profile = getServiceFormProfile(undefined, product.category);
+      const guidance = getServicePricingGuidance(profile?.familySlug);
+      const display = resolveServiceDisplayPrice({
+        price: product.price,
+        promotionalPrice: product.promo_price,
+        pricingType: product.pricing_type,
+        fulfillmentMode:
+          product.fulfillment_mode || (guidance.showStartingFrom ? 'project' : 'appointment'),
+        packagePrices:
+          product.package_starting_price != null && Number(product.package_starting_price) > 0
+            ? [Number(product.package_starting_price)]
+            : undefined,
+      });
+      return {
+        price: display.amount,
+        originalPrice: display.originalAmount,
+        discount:
+          display.originalAmount && display.originalAmount > display.amount
+            ? Math.round(((display.originalAmount - display.amount) / display.originalAmount) * 100)
+            : undefined,
+        showStartingFrom: display.showStartingFrom,
+        unitSuffix: display.unitSuffix,
+      };
+    }
+    return {
+      ...getDisplayPrice(product),
+      showStartingFrom: false,
+      unitSuffix: null as string | null,
+    };
+  }, [product]);
 
   // Custom logic for different types
   const productImage = useMemo(() => {
@@ -980,6 +1016,9 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
               />
             }
           >
+            {priceInfo.showStartingFrom && (
+              <span className="text-[10px] sm:text-xs text-gray-400 w-full">À partir de</span>
+            )}
             {priceInfo.originalPrice && (
               <span className="text-xs sm:text-sm text-gray-400 line-through">
                 {formatPrice(priceInfo.originalPrice, product.currency)}
@@ -987,6 +1026,11 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
             )}
             <span className="text-base sm:text-lg md:text-xl font-bold text-blue-400 whitespace-nowrap">
               {priceInfo.price === 0 ? 'Gratuit' : formatPrice(priceInfo.price, product.currency)}
+              {priceInfo.price > 0 && priceInfo.unitSuffix ? (
+                <span className="text-sm font-medium text-gray-400 ml-1">
+                  {priceInfo.unitSuffix}
+                </span>
+              ) : null}
             </span>
           </MarketplaceProductCardPriceRow>
 

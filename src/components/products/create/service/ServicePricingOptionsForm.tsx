@@ -16,6 +16,8 @@ import {
 } from '@/components/ui/select';
 import { DollarSign, Calendar } from 'lucide-react';
 import type { ServiceProductFormData } from '@/types/service-product';
+import { getServiceFormProfile } from '@/lib/services/service-form-profiles';
+import { getServicePricingGuidance } from '@/lib/service/service-pricing';
 
 interface ServicePricingOptionsFormProps {
   data: Partial<ServiceProductFormData>;
@@ -23,6 +25,9 @@ interface ServicePricingOptionsFormProps {
 }
 
 export const ServicePricingOptionsForm = ({ data, onUpdate }: ServicePricingOptionsFormProps) => {
+  const formProfile = getServiceFormProfile(undefined, data.category);
+  const pricingGuidance = getServicePricingGuidance(formProfile?.familySlug);
+
   return (
     <div className="space-y-6">
       {/* Pricing Type */}
@@ -32,7 +37,17 @@ export const ServicePricingOptionsForm = ({ data, onUpdate }: ServicePricingOpti
             <DollarSign className="h-5 w-5" />
             Type de tarification
           </CardTitle>
-          <CardDescription>Comment le prix est-il calculé ?</CardDescription>
+          <CardDescription>
+            {formProfile
+              ? `Prérempli pour ${formProfile.familyLabel} (${
+                  pricingGuidance.pricingType === 'hourly'
+                    ? 'horaire'
+                    : pricingGuidance.pricingType === 'per_participant'
+                      ? 'par participant'
+                      : 'prix fixe'
+                }). Ajustable.`
+              : 'Comment le prix est-il calculé ?'}
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <Select
@@ -51,15 +66,18 @@ export const ServicePricingOptionsForm = ({ data, onUpdate }: ServicePricingOpti
             </SelectContent>
           </Select>
 
+          <p className="text-sm text-muted-foreground">{pricingGuidance.wizardHint}</p>
+
           {data.pricing_type === 'hourly' && (
             <p className="text-sm text-muted-foreground">
-              Le prix sera calculé en fonction de la durée du service
+              Le prix de la fiche est le tarif d’une heure. La durée de séance reste celle définie à
+              l’étape Durée.
             </p>
           )}
 
           {data.pricing_type === 'per_participant' && (
             <p className="text-sm text-muted-foreground">
-              Le prix sera multiplié par le nombre de participants
+              Le prix sera multiplié par le nombre de participants à la réservation.
             </p>
           )}
         </CardContent>
@@ -283,9 +301,3 @@ export const ServicePricingOptionsForm = ({ data, onUpdate }: ServicePricingOpti
     </div>
   );
 };
-
-
-
-
-
-

@@ -16,6 +16,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   ArrowLeft,
@@ -80,6 +82,18 @@ import {
 } from '@/components/service/ServiceRecommendations';
 import { JoinWaitlistButton } from '@/components/service/JoinWaitlistButton';
 import { ServiceProjectOrderPanel } from '@/components/service/ServiceProjectOrderPanel';
+import { ServicePriceDisplay } from '@/components/service/ServicePriceDisplay';
+import { ServicePrestationsCatalog } from '@/components/service/ServicePrestationsCatalog';
+import { ServicePricingBadges } from '@/components/products/ServicePricingBadges';
+import {
+  useServiceDeliveryPackages,
+  useServiceGigExtras,
+} from '@/hooks/service/useServiceDeliveryCommerce';
+import {
+  resolveServiceAppointmentCharge,
+  resolveServiceAppointmentUnitPrice,
+  resolveServiceDisplayPrice,
+} from '@/lib/service/service-pricing';
 import { useServiceCategories } from '@/hooks/useServiceCategories';
 import { getCategoryBreadcrumb } from '@/lib/services/service-categories';
 import {
@@ -92,7 +106,7 @@ const PRODUCT_SERVICE_FIELDS =
 const PRODUCT_SERVICE_SELECT = PRODUCT_SERVICE_FIELDS;
 const STORE_PUBLIC_FIELDS = 'id, name, slug, logo_url';
 const SERVICE_PRODUCT_FIELDS =
-  'id, product_id, store_id, service_type, duration_minutes, location_type, location_address, max_participants, advance_booking_days, fulfillment_mode, brief_fields, category_attributes, created_at, updated_at';
+  'id, product_id, store_id, service_type, duration_minutes, location_type, location_address, max_participants, advance_booking_days, fulfillment_mode, brief_fields, category_attributes, pricing_type, deposit_required, deposit_amount, deposit_type, allow_booking_cancellation, cancellation_deadline_hours, requires_staff, created_at, updated_at';
 const SERVICE_STAFF_FIELDS =
   'id, service_product_id, name, role, bio, avatar_url, is_active, created_at, updated_at';
 
@@ -124,6 +138,9 @@ export default function ServiceDetail() {
   const [validationError, setValidationError] = useState<string | null>(null);
   const [isValidating, setIsValidating] = useState(false);
   const [selectedAddonProductIds, setSelectedAddonProductIds] = useState<string[]>([]);
+  const [selectedStaffId, setSelectedStaffId] = useState<string | null>(null);
+  const [guestEmailDraft, setGuestEmailDraft] = useState(guestEmail || '');
+  const [guestNameDraft, setGuestNameDraft] = useState(guestName || '');
 
   // Hooks de validation
   const { mutateAsync: validateBooking } = useValidateServiceBooking();
@@ -196,6 +213,9 @@ export default function ServiceDetail() {
   const serviceProductId = service?.service?.id ?? null;
   const { data: serviceAddons = [], isLoading: addonsLoading } =
     useServiceProductAddons(serviceProductId);
+  const { data: deliveryPackages = [], isLoading: packagesLoading } =
+    useServiceDeliveryPackages(serviceProductId);
+  const { data: gigExtras = [], isLoading: extrasLoading } = useServiceGigExtras(serviceProductId);
 
   useEffect(() => {
     const required = serviceAddons.filter(a => a.is_required).map(a => a.addon_product_id);
@@ -203,6 +223,13 @@ export default function ServiceDetail() {
       setSelectedAddonProductIds(prev => [...new Set([...prev, ...required])]);
     }
   }, [serviceAddons]);
+
+  useEffect(() => {
+    const staff = (service?.staff || []) as StaffMember[];
+    if (staff.length === 1 && !selectedStaffId) {
+      setSelectedStaffId(staff[0].id);
+    }
+  }, [service?.staff, selectedStaffId]);
 
   // Check if product is in wishlist
   // La vérification de wishlist est gérée par useWishlistToggle via useMarketplaceFavorites
@@ -326,7 +353,7 @@ export default function ServiceDetail() {
           ].join('-'),
           scheduledStartTime: bookingDate.toTimeString().slice(0, 8),
           scheduledEndTime: endDate.toTimeString().slice(0, 8),
-          staffMemberId: undefined, // À améliorer si staff spécifique
+          staffMemberId: selectedStaffId || undefined,
         });
 
         if (!result.isValid && result.errors.length > 0) {
@@ -343,7 +370,7 @@ export default function ServiceDetail() {
     // Debounce validation pour éviter trop de requêtes
     const timeoutId = setTimeout(validateSelection, 500);
     return () => clearTimeout(timeoutId);
-  }, [selectedDate, selectedSlot, service?.service, serviceId, validateBooking]);
+  }, [selectedDate, selectedSlot, service?.service, serviceId, validateBooking, selectedStaffId]);
 
   const handleBooking = async () => {
     if (!selectedDate || !selectedSlot) {
@@ -364,18 +391,35 @@ export default function ServiceDetail() {
       return;
     }
 
-    if (!user?.email && !guestEmail) {
+    const checkoutEmail = (user?.email || guestEmail || guestEmailDraft).trim();
+    const checkoutName = (
+      user?.user_metadata?.full_name ||
+      guestName ||
+      guestNameDraft ||
+      checkoutEmail.split('@')[0]
+    ).trim();
+
+    if (!checkoutEmail) {
       toast({
-        title: '❌ Authentification requise',
-        description: 'Veuillez vous connecter pour réserver',
+        title: 'Coordonnées requises',
+        description: 'Indiquez votre e-mail pour réserver, comme sur Calendly, ou connectez-vous.',
         variant: 'destructive',
       });
-      navigate('/login');
       return;
     }
 
-    const checkoutEmail = user?.email || guestEmail!;
-    const checkoutName = user?.user_metadata?.full_name || guestName || checkoutEmail.split('@')[0];
+    const requiresStaff = Boolean(
+      (service.service as { requires_staff?: boolean } | null)?.requires_staff
+    );
+    const staffList = (service.staff || []) as StaffMember[];
+    if (requiresStaff && staffList.length > 0 && !selectedStaffId) {
+      toast({
+        title: 'Prestataire requis',
+        description: 'Choisissez un membre de l’équipe pour ce rendez-vous.',
+        variant: 'destructive',
+      });
+      return;
+    }
 
     if (validationError) {
       toast({
@@ -459,6 +503,7 @@ export default function ServiceDetail() {
           guestEmail: checkoutEmail,
           guestName: checkoutName,
           addonIds: selectedAddonProductIds,
+          staffId: selectedStaffId || undefined,
         })
       );
     } catch (_error: unknown) {
@@ -525,7 +570,51 @@ export default function ServiceDetail() {
     return [];
   })();
   const availability = service?.is_active ? 'instock' : 'outofstock';
-  const currentPrice = service?.promotional_price || service?.price;
+  const serviceRecord = service?.service as
+    | {
+        id?: string;
+        fulfillment_mode?: string;
+        pricing_type?: string;
+        deposit_required?: boolean;
+        deposit_amount?: number;
+        deposit_type?: 'fixed' | 'percentage';
+        allow_booking_cancellation?: boolean;
+        cancellation_deadline_hours?: number;
+        duration_minutes?: number;
+        max_participants?: number;
+        requires_staff?: boolean;
+        location_address?: string;
+        category_attributes?: Record<string, string | number | boolean | string[]>;
+      }
+    | null
+    | undefined;
+  const fulfillmentMode = serviceRecord?.fulfillment_mode || 'appointment';
+  const activePackagePrices = deliveryPackages.filter(pkg => pkg.is_active).map(pkg => pkg.price);
+  const displayPrice = resolveServiceDisplayPrice({
+    price: service?.price,
+    promotionalPrice: service?.promotional_price,
+    pricingType: serviceRecord?.pricing_type,
+    fulfillmentMode,
+    packagePrices: activePackagePrices,
+  });
+  const appointmentPrice = resolveServiceAppointmentUnitPrice({
+    price: service?.price,
+    promotionalPrice: service?.promotional_price,
+    pricingType: serviceRecord?.pricing_type,
+  });
+  const appointmentCharge = resolveServiceAppointmentCharge({
+    price: service?.price,
+    promotionalPrice: service?.promotional_price,
+    pricingType: serviceRecord?.pricing_type,
+    durationMinutes: serviceRecord?.duration_minutes,
+    participants,
+  });
+  const currentPrice = displayPrice.amount;
+  const hasPublishedPackages = deliveryPackages.some(pkg => pkg.is_active);
+  const showProject =
+    Boolean(serviceProductId) &&
+    (fulfillmentMode === 'project' || fulfillmentMode === 'both' || hasPublishedPackages);
+  const showAppointment = fulfillmentMode !== 'project';
   const serviceUrl = `${window.location.origin}/service/${serviceId}`;
 
   const maxParticipants = service?.service?.max_participants || 1;
@@ -653,6 +742,23 @@ export default function ServiceDetail() {
                 {service.short_description}
               </p>
             )}
+            <div className="mt-4 space-y-2">
+              <ServicePriceDisplay
+                display={displayPrice}
+                currency={service?.currency || 'XOF'}
+                size="lg"
+              />
+              <ServicePricingBadges
+                pricingType={serviceRecord?.pricing_type}
+                depositRequired={serviceRecord?.deposit_required}
+                depositAmount={serviceRecord?.deposit_amount}
+                depositType={serviceRecord?.deposit_type}
+                allowCancellation={serviceRecord?.allow_booking_cancellation}
+                cancellationDeadlineHours={serviceRecord?.cancellation_deadline_hours}
+                maxParticipants={serviceRecord?.max_participants}
+                size="md"
+              />
+            </div>
           </div>
 
           {/* Service Details */}
@@ -698,6 +804,13 @@ export default function ServiceDetail() {
               </div>
             </CardContent>
           </Card>
+
+          <ServicePrestationsCatalog
+            packages={deliveryPackages}
+            extras={gigExtras}
+            currency={service?.currency || 'XOF'}
+            isLoading={packagesLoading || extrasLoading}
+          />
 
           {(() => {
             const crumb = getCategoryBreadcrumb(
@@ -887,14 +1000,6 @@ export default function ServiceDetail() {
         {/* Right: Booking / Project order */}
         <div className="space-y-4">
           {(() => {
-            const fulfillmentMode =
-              (service?.service as { fulfillment_mode?: string } | null | undefined)
-                ?.fulfillment_mode || 'appointment';
-            const showProject =
-              Boolean(serviceProductId) &&
-              (fulfillmentMode === 'project' || fulfillmentMode === 'both');
-            const showAppointment = fulfillmentMode !== 'project';
-
             if (showProject && !showAppointment) {
               return (
                 <ServiceProjectOrderPanel
@@ -922,10 +1027,10 @@ export default function ServiceDetail() {
 
             if (showProject && showAppointment) {
               return (
-                <Tabs defaultValue="appointment">
+                <Tabs defaultValue={hasPublishedPackages ? 'project' : 'appointment'}>
                   <TabsList className="grid w-full grid-cols-2">
                     <TabsTrigger value="appointment">Réserver</TabsTrigger>
-                    <TabsTrigger value="project">Package</TabsTrigger>
+                    <TabsTrigger value="project">Formules</TabsTrigger>
                   </TabsList>
                   <TabsContent value="project" className="mt-4">
                     <ServiceProjectOrderPanel
@@ -950,7 +1055,6 @@ export default function ServiceDetail() {
                     />
                   </TabsContent>
                   <TabsContent value="appointment" className="mt-4">
-                    {/* appointment card continues below via fragment flag — rendered in sticky card */}
                     <Card className="sticky top-4">
                       <CardHeader>
                         <CardTitle>Réserver un créneau</CardTitle>
@@ -967,25 +1071,25 @@ export default function ServiceDetail() {
             return null;
           })()}
 
-          {(!(service?.service as { fulfillment_mode?: string } | null | undefined)
-            ?.fulfillment_mode ||
-            (service?.service as { fulfillment_mode?: string }).fulfillment_mode !== 'project') && (
+          {showAppointment && (
             <Card className="sticky top-4">
               <CardHeader>
-                <div className="flex items-start justify-between mb-2">
+                <div className="flex items-start justify-between mb-2 gap-3">
                   <CardTitle>Réserver</CardTitle>
-                  <div className="text-right">
-                    <div className="text-2xl font-bold">
-                      {currentPrice?.toLocaleString()} {service?.currency}
-                    </div>
-                    {service?.promotional_price && (
-                      <span className="text-sm line-through text-muted-foreground">
-                        {(service.price ?? 0).toLocaleString()} {service.currency}
-                      </span>
-                    )}
-                  </div>
+                  <ServicePriceDisplay
+                    display={appointmentPrice}
+                    currency={service?.currency || 'XOF'}
+                    size="md"
+                    align="right"
+                  />
                 </div>
-                {isGroup && <CardDescription>Prix par personne</CardDescription>}
+                {isGroup && (
+                  <CardDescription>
+                    {appointmentPrice.pricingType === 'per_participant'
+                      ? 'Prix par participant'
+                      : 'Prix par personne'}
+                  </CardDescription>
+                )}
 
                 {/* Type de licence, Modèle de tarification, Options de paiement et Commission */}
                 <div className="flex items-center gap-2 flex-wrap mt-3">
@@ -1131,6 +1235,60 @@ export default function ServiceDetail() {
                     </div>
                   </div>
                 )}
+                {/* Prestataire (Fresha / Calendly) */}
+                {Array.isArray(service?.staff) && service.staff.length > 0 && (
+                  <div className="space-y-2">
+                    <Label>Prestataire</Label>
+                    <div className="grid grid-cols-1 gap-2">
+                      {(service.staff as StaffMember[]).map(member => {
+                        const selected = selectedStaffId === member.id;
+                        return (
+                          <button
+                            key={member.id}
+                            type="button"
+                            onClick={() => setSelectedStaffId(member.id)}
+                            className={`text-left rounded-lg border p-3 min-h-[44px] ${
+                              selected
+                                ? 'border-primary ring-2 ring-primary/20'
+                                : 'hover:border-primary/40'
+                            }`}
+                          >
+                            <p className="font-medium text-sm">{member.name}</p>
+                            {member.role && (
+                              <p className="text-xs text-muted-foreground">{member.role}</p>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {!user && (
+                  <div className="space-y-3 rounded-lg border p-3">
+                    <p className="text-sm font-medium">Réserver en invité</p>
+                    <div className="space-y-2">
+                      <Label htmlFor="guest-email">E-mail</Label>
+                      <Input
+                        id="guest-email"
+                        type="email"
+                        value={guestEmailDraft}
+                        onChange={e => setGuestEmailDraft(e.target.value)}
+                        placeholder="vous@email.com"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="guest-name">Nom</Label>
+                      <Input
+                        id="guest-name"
+                        value={guestNameDraft}
+                        onChange={e => setGuestNameDraft(e.target.value)}
+                        placeholder="Votre nom"
+                      />
+                    </div>
+                  </div>
+                )}
+
                 {/* Participants (if group) */}
                 {isGroup && (
                   <div>
@@ -1216,31 +1374,32 @@ export default function ServiceDetail() {
                   </div>
                 )}
 
-                {/* Total Price */}
-                {isGroup && (
-                  <div className="p-4 bg-muted rounded-lg">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm">Total</span>
-                      <span className="text-xl font-bold">
-                        {(
-                          service?.price * participants +
-                          serviceAddons
-                            .filter(
-                              row =>
-                                row.is_required ||
-                                selectedAddonProductIds.includes(row.addon_product_id)
-                            )
-                            .reduce(
-                              (sum, row) =>
-                                sum + addonEffectivePrice(row.addon) * (row.quantity || 1),
-                              0
-                            )
-                        ).toLocaleString()}{' '}
-                        {service?.currency}
-                      </span>
+                {/* Total Price — matches RPC appointment charge + addons */}
+                {(() => {
+                  const addonTotal = serviceAddons
+                    .filter(
+                      row =>
+                        row.is_required || selectedAddonProductIds.includes(row.addon_product_id)
+                    )
+                    .reduce(
+                      (sum, row) => sum + addonEffectivePrice(row.addon) * (row.quantity || 1),
+                      0
+                    );
+                  const bookingTotal = appointmentCharge + addonTotal;
+                  if (bookingTotal <= 0) return null;
+                  const differsFromUnit = bookingTotal !== appointmentPrice.amount;
+                  if (!differsFromUnit && !isGroup) return null;
+                  return (
+                    <div className="p-4 bg-muted rounded-lg">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Total</span>
+                        <span className="text-xl font-bold">
+                          {bookingTotal.toLocaleString()} {service?.currency}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                )}
+                  );
+                })()}
 
                 {selectedDate && selectedSlot && serviceProductId && (
                   <ServiceProductAddonsPicker
@@ -1256,7 +1415,16 @@ export default function ServiceDetail() {
                   className="w-full"
                   size="lg"
                   disabled={
-                    !selectedDate || !selectedSlot || isBooking || isValidating || !!validationError
+                    !selectedDate ||
+                    !selectedSlot ||
+                    isBooking ||
+                    isValidating ||
+                    !!validationError ||
+                    (Boolean(serviceRecord?.requires_staff) &&
+                      Array.isArray(service?.staff) &&
+                      service.staff.length > 0 &&
+                      !selectedStaffId) ||
+                    (!user && !guestEmailDraft.trim())
                   }
                 >
                   {isBooking ? (

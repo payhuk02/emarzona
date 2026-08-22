@@ -36,7 +36,12 @@ import type {
   CheckoutVariant,
 } from '@/pages/checkout/buy-now/checkout-buy-now-types';
 import { validateBuyNowForm } from '@/pages/checkout/buy-now/checkout-buy-now-validation';
-import { calculateBuyNowPrice } from '@/pages/checkout/buy-now/checkout-buy-now-pricing';
+import {
+  buildServiceBuyNowBreakdown,
+  calculateBuyNowPrice,
+  calculateServiceBuyNowPrice,
+  readServiceProjectQuotedTotal,
+} from '@/pages/checkout/buy-now/checkout-buy-now-pricing';
 import { htmlToPlainText } from '@/lib/html-sanitizer';
 import { isSupportedCurrency, type Currency } from '@/lib/currency-converter';
 import { useCreatePhysicalOrder } from '@/hooks/orders/useCreatePhysicalOrder';
@@ -100,6 +105,7 @@ const Checkout = () => {
   const scheduledAt = searchParams.get('scheduledAt');
   const participantsParam = searchParams.get('participants');
   const serviceParticipants = Math.max(1, Number.parseInt(participantsParam ?? '1', 10) || 1);
+  const staffId = searchParams.get('staffId') || undefined;
   const guestEmail = searchParams.get('guestEmail');
   const guestName = searchParams.get('guestName');
   const guestPhone = searchParams.get('guestPhone');
@@ -126,6 +132,16 @@ const Checkout = () => {
   const [user, setUser] = useState<CheckoutUser>(null);
   const [error, setError] = useState<string | null>(null);
   const [selectedVariant, setSelectedVariant] = useState<CheckoutVariant>(null);
+  const [serviceCheckout, setServiceCheckout] = useState<{
+    pricingType: string | null;
+    durationMinutes: number | null;
+    projectQuotedTotal: number | null;
+    addonTotal: number;
+    addonLines: Array<{ name: string; amount: number }>;
+    depositRequired: boolean;
+    depositType: string | null;
+    depositAmount: number | null;
+  } | null>(null);
 
   // State pour le code promo
   const [appliedCouponCode, setAppliedCouponCode] = useState<AppliedBuyNowCoupon | null>(null);
@@ -277,6 +293,62 @@ const Checkout = () => {
         }
 
         setProduct(productData as unknown as CheckoutProduct);
+
+        if ((productData as { product_type?: string }).product_type === 'service') {
+          let projectQuotedTotal: number | null = null;
+          try {
+            const raw = sessionStorage.getItem(`service-project-order:${productData.id}`);
+            if (raw) projectQuotedTotal = readServiceProjectQuotedTotal(JSON.parse(raw));
+          } catch {
+            projectQuotedTotal = null;
+          }
+
+          const { data: serviceProductRow } = await supabase
+            .from('service_products')
+            .select(
+              'id, pricing_type, duration_minutes, deposit_required, deposit_type, deposit_amount'
+            )
+            .eq('product_id', productData.id)
+            .maybeSingle();
+
+          let addonTotal = 0;
+          const addonLines: Array<{ name: string; amount: number }> = [];
+          if (addonIds.length > 0) {
+            const { data: addonProducts } = await supabase
+              .from('products')
+              .select('id, name, price, promotional_price')
+              .in('id', addonIds);
+            for (const row of addonProducts || []) {
+              const promo = Number(row.promotional_price);
+              const price = Number(row.price) || 0;
+              const amount = promo > 0 && promo < price ? promo : price;
+              addonTotal += amount;
+              addonLines.push({
+                name: String(row.name || 'Option'),
+                amount,
+              });
+            }
+          }
+
+          setServiceCheckout({
+            pricingType:
+              (serviceProductRow as { pricing_type?: string } | null)?.pricing_type ?? null,
+            durationMinutes:
+              (serviceProductRow as { duration_minutes?: number } | null)?.duration_minutes ?? null,
+            projectQuotedTotal,
+            addonTotal,
+            addonLines,
+            depositRequired: Boolean(
+              (serviceProductRow as { deposit_required?: boolean } | null)?.deposit_required
+            ),
+            depositType:
+              (serviceProductRow as { deposit_type?: string } | null)?.deposit_type ?? null,
+            depositAmount:
+              (serviceProductRow as { deposit_amount?: number } | null)?.deposit_amount ?? null,
+          });
+        } else {
+          setServiceCheckout(null);
+        }
 
         if (!storeData) {
           const { data: fetchedStoreData, error: storeError } = await supabase
@@ -450,10 +522,49 @@ const Checkout = () => {
    * // Retourne : 7000 XOF
    * ```
    */
-  const calculatePrice = useCallback(
-    (): number => calculateBuyNowPrice(product, selectedVariant, appliedCouponCode),
-    [product, selectedVariant, appliedCouponCode]
-  );
+  const calculatePrice = useCallback((): number => {
+    if (product?.product_type === 'service') {
+      return calculateServiceBuyNowPrice({
+        product,
+        selectedVariant,
+        appliedCoupon: appliedCouponCode,
+        pricingType: serviceCheckout?.pricingType,
+        durationMinutes: serviceCheckout?.durationMinutes,
+        participants: serviceParticipants,
+        projectQuotedTotal: serviceCheckout?.projectQuotedTotal,
+        addonTotal: serviceCheckout?.addonTotal,
+        deposit: serviceCheckout
+          ? {
+              deposit_required: serviceCheckout.depositRequired,
+              deposit_type: serviceCheckout.depositType,
+              deposit_amount: serviceCheckout.depositAmount,
+            }
+          : null,
+      });
+    }
+    return calculateBuyNowPrice(product, selectedVariant, appliedCouponCode);
+  }, [product, selectedVariant, appliedCouponCode, serviceCheckout, serviceParticipants]);
+
+  const serviceBreakdown = useMemo(() => {
+    if (product?.product_type !== 'service') return null;
+    return buildServiceBuyNowBreakdown({
+      product,
+      selectedVariant,
+      appliedCoupon: appliedCouponCode,
+      pricingType: serviceCheckout?.pricingType,
+      durationMinutes: serviceCheckout?.durationMinutes,
+      participants: serviceParticipants,
+      projectQuotedTotal: serviceCheckout?.projectQuotedTotal,
+      addonTotal: serviceCheckout?.addonTotal,
+      deposit: serviceCheckout
+        ? {
+            deposit_required: serviceCheckout.depositRequired,
+            deposit_type: serviceCheckout.depositType,
+            deposit_amount: serviceCheckout.depositAmount,
+          }
+        : null,
+    });
+  }, [product, selectedVariant, appliedCouponCode, serviceCheckout, serviceParticipants]);
 
   // Gérer le changement de champ
   const handleFieldChange = (field: keyof CheckoutFormData, value: string) => {
@@ -695,6 +806,7 @@ const Checkout = () => {
             notes: 'Réservation via checkout direct',
             checkoutMode: 'immediate',
             addonProductIds: addonIds,
+            staffId,
           });
 
           if (!serviceResult.checkoutUrl) {
@@ -850,6 +962,7 @@ const Checkout = () => {
       scheduledAt,
       serviceParticipants,
       addonIds,
+      staffId,
     ]
   );
 
@@ -992,6 +1105,8 @@ const Checkout = () => {
                   isGuarantee={isPhysicalGuarantee}
                   guaranteeAmount={physicalCheckout?.guarantee_amount}
                   checkoutQuantity={checkoutQuantity}
+                  serviceBreakdown={serviceBreakdown}
+                  addonLines={serviceCheckout?.addonLines}
                   onCouponApply={handleCouponApply}
                   onCouponRemove={handleCouponRemove}
                 />

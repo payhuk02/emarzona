@@ -1,6 +1,9 @@
 import type { CartItem } from '@/types/cart';
 import { getCartItemStoreId } from '@/lib/checkout/cart-validation';
-import { hasServiceBookingMetadata } from '@/lib/cart/service-cart-policy';
+import {
+  hasServiceBookingMetadata,
+  hasServiceProjectMetadata,
+} from '@/lib/cart/service-cart-policy';
 
 export function resolveIncomingCartStoreId(
   metadata?: Record<string, unknown> | null,
@@ -38,13 +41,16 @@ export function assertCompatibleCartAddition(
     .map(getCartItemStoreId)
     .filter((id): id is string => Boolean(id));
 
-  const hasBookedService = existingItems.some(
-    item => item.product_type === 'service' && hasServiceBookingMetadata(item.metadata)
+  const hasReadyService = existingItems.some(
+    item =>
+      item.product_type === 'service' &&
+      (hasServiceBookingMetadata(item.metadata) || hasServiceProjectMetadata(item.metadata))
   );
-  const incomingIsBookedService =
-    incoming.product_type === 'service' && hasServiceBookingMetadata(incoming.metadata);
+  const incomingIsReadyService =
+    incoming.product_type === 'service' &&
+    (hasServiceBookingMetadata(incoming.metadata) || hasServiceProjectMetadata(incoming.metadata));
 
-  if (!hasBookedService && !incomingIsBookedService) {
+  if (!hasReadyService && !incomingIsReadyService) {
     return;
   }
 
@@ -59,7 +65,7 @@ export function assertCompatibleCartAddition(
     );
   }
 
-  if (hasBookedService && incoming.product_type === 'service' && incomingIsBookedService) {
+  if (hasReadyService && incoming.product_type === 'service' && incomingIsReadyService) {
     throw new Error(
       'Une seule réservation de service par panier mixte. Finalisez le paiement ou retirez le service existant.'
     );

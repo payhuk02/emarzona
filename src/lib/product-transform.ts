@@ -133,20 +133,38 @@ export function transformToUnifiedProduct(product: DatabaseProduct): UnifiedProd
         barcode: product.barcode,
       } as PhysicalProduct;
 
-    case 'service':
+    case 'service': {
+      const nested = Array.isArray(product.service_products)
+        ? (product.service_products[0] as Record<string, unknown> | undefined)
+        : (product.service_products as Record<string, unknown> | undefined);
       return {
         ...base,
         type: 'service',
-        duration: product.duration,
+        duration: product.duration ?? nested?.duration_minutes,
         duration_unit: product.duration_unit || 'hour',
         booking_required: product.booking_required,
-        calendar_available: product.calendar_available,
-        staff_required: product.staff_required,
-        location_type: product.location_type,
-        service_type: product.service_type,
+        calendar_available: product.calendar_available ?? nested?.calendar_available,
+        staff_required: product.staff_required ?? nested?.requires_staff,
+        location_type: product.location_type ?? nested?.location_type,
+        service_type: product.service_type ?? nested?.service_type,
         category_attributes:
-          (product.category_attributes as ServiceProduct['category_attributes']) || undefined,
+          (product.category_attributes as ServiceProduct['category_attributes']) ||
+          (nested?.category_attributes as ServiceProduct['category_attributes']) ||
+          undefined,
+        pricing_type: (product.pricing_type ?? nested?.pricing_type) as
+          | ServiceProduct['pricing_type']
+          | undefined,
+        fulfillment_mode: (product.fulfillment_mode ?? nested?.fulfillment_mode) as
+          | ServiceProduct['fulfillment_mode']
+          | undefined,
+        package_starting_price:
+          product.package_starting_price != null
+            ? Number(product.package_starting_price)
+            : nested?.package_starting_price != null
+              ? Number(nested.package_starting_price)
+              : null,
       } as ServiceProduct;
+    }
 
     case 'course':
       return {

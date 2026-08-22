@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { normalizeServicePricingType } from '@/lib/service/service-pricing';
 import type {
   ServiceAvailabilitySlot,
   ServiceProductFormData,
@@ -153,8 +154,9 @@ export async function loadServiceProductFormData(
     max_participants: serviceProduct?.max_participants || 1,
     resources: resourceNames,
     resources_needed: resourceNames,
-    pricing_type:
-      (serviceProduct?.pricing_type as 'fixed' | 'hourly' | 'per_participant') || 'fixed',
+    pricing_type: normalizeServicePricingType(
+      serviceProduct?.pricing_type as string | null | undefined
+    ),
     deposit_required: serviceProduct?.deposit_required || false,
     deposit_amount: serviceProduct?.deposit_amount || undefined,
     deposit_type: (serviceProduct?.deposit_type as 'fixed' | 'percentage') || undefined,

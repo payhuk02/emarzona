@@ -198,6 +198,18 @@ export async function fetchMarketplaceProducts({
             reviews_count: product.reviews_count ? Number(product.reviews_count) : 0,
             category: product.category as string,
             product_type: product.product_type as string,
+            pricing_type: product.pricing_type as string | undefined,
+            fulfillment_mode: product.fulfillment_mode as string | undefined,
+            duration:
+              product.duration_minutes != null ? Number(product.duration_minutes) : undefined,
+            calendar_available:
+              product.calendar_available != null ? Boolean(product.calendar_available) : undefined,
+            staff_required:
+              product.requires_staff != null ? Boolean(product.requires_staff) : undefined,
+            package_starting_price:
+              product.package_starting_price != null
+                ? Number(product.package_starting_price)
+                : null,
             licensing_type: product.licensing_type as string,
             license_terms: product.license_terms as string,
             is_featured: product.is_featured as boolean,
@@ -293,8 +305,8 @@ export async function fetchMarketplaceProducts({
     selectQuery += `,digital_products!left(digital_type,license_type)`;
   }
 
-  if (filters.productType === 'service' && (filters.serviceType || filters.locationType)) {
-    selectQuery += `,service_products!left(service_type,location_type,calendar_available)`;
+  if (filters.productType === 'service' || filters.productType === 'all') {
+    selectQuery += `,service_products!left(service_type,location_type,calendar_available,pricing_type,fulfillment_mode,duration_minutes,requires_staff)`;
   }
 
   if (filters.productType === 'course' && (filters.difficulty || filters.accessType)) {
@@ -533,7 +545,28 @@ export async function fetchMarketplaceProducts({
   );
 
   const result = {
-    products: filteredData.map(p => mapStockToProductFields(p as Record<string, unknown>)),
+    products: filteredData.map(p => {
+      const row = p as Product & {
+        service_products?: Array<{
+          pricing_type?: string;
+          fulfillment_mode?: string;
+          duration_minutes?: number;
+          calendar_available?: boolean;
+          requires_staff?: boolean;
+        }>;
+      };
+      const serviceRow = row.service_products?.[0];
+      const mapped = mapStockToProductFields(row as Record<string, unknown>);
+      if (!serviceRow) return mapped;
+      return {
+        ...mapped,
+        pricing_type: serviceRow.pricing_type,
+        fulfillment_mode: serviceRow.fulfillment_mode,
+        duration: serviceRow.duration_minutes,
+        calendar_available: serviceRow.calendar_available,
+        staff_required: serviceRow.requires_staff,
+      };
+    }),
     totalCount: count || 0,
     filteredCount: filteredData.length,
   };

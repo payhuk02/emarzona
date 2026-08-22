@@ -7,6 +7,7 @@ import CouponInput from '@/components/checkout/CouponInput';
 import { formatPrice } from '@/lib/product-helpers';
 import { htmlToPlainText } from '@/lib/html-sanitizer';
 import { getBuyNowBasePrice } from '@/pages/checkout/buy-now/checkout-buy-now-pricing';
+import type { ServiceBuyNowBreakdown } from '@/pages/checkout/buy-now/checkout-buy-now-pricing';
 import type {
   AppliedBuyNowCoupon,
   CheckoutProduct,
@@ -51,6 +52,8 @@ export interface BuyNowOrderSummaryProps {
   isGuarantee?: boolean;
   guaranteeAmount?: number;
   checkoutQuantity?: number;
+  serviceBreakdown?: ServiceBuyNowBreakdown | null;
+  addonLines?: Array<{ name: string; amount: number }>;
   onCouponApply: (couponId: string, discountAmount: number, code: string) => void;
   onCouponRemove: () => void;
 }
@@ -71,6 +74,8 @@ export default function BuyNowOrderSummary({
   isGuarantee = false,
   guaranteeAmount = 0,
   checkoutQuantity = 1,
+  serviceBreakdown = null,
+  addonLines = [],
   onCouponApply,
   onCouponRemove,
 }: BuyNowOrderSummaryProps) {
@@ -160,7 +165,11 @@ export default function BuyNowOrderSummary({
             productId={productId || undefined}
             productType={product?.product_type}
             customerId={user?.id || undefined}
-            orderAmount={basePrice}
+            orderAmount={
+              serviceBreakdown
+                ? serviceBreakdown.serviceAmount + serviceBreakdown.addonTotal
+                : basePrice
+            }
             onApply={onCouponApply}
             onRemove={onCouponRemove}
             appliedCouponId={appliedCouponCode?.id || null}
@@ -171,12 +180,42 @@ export default function BuyNowOrderSummary({
 
         {/* Détail des montants */}
         <div className="space-y-2">
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Sous-total{qty > 1 ? ` × ${qty}` : ''}</span>
-            <span className="font-medium tabular-nums text-foreground">
-              {formatPrice(basePrice * qty, currency)}
-            </span>
-          </div>
+          {serviceBreakdown ? (
+            <>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">
+                  {serviceBreakdown.isProject ? 'Formule' : 'Prestation'}
+                </span>
+                <span className="font-medium tabular-nums text-foreground">
+                  {formatPrice(serviceBreakdown.serviceAmount, currency)}
+                </span>
+              </div>
+              {addonLines.length > 0
+                ? addonLines.map(line => (
+                    <div key={line.name} className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">{line.name}</span>
+                      <span className="font-medium tabular-nums text-foreground">
+                        {formatPrice(line.amount, currency)}
+                      </span>
+                    </div>
+                  ))
+                : serviceBreakdown.addonTotal > 0 && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Options</span>
+                      <span className="font-medium tabular-nums text-foreground">
+                        {formatPrice(serviceBreakdown.addonTotal, currency)}
+                      </span>
+                    </div>
+                  )}
+            </>
+          ) : (
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Sous-total{qty > 1 ? ` × ${qty}` : ''}</span>
+              <span className="font-medium tabular-nums text-foreground">
+                {formatPrice(basePrice * qty, currency)}
+              </span>
+            </div>
+          )}
           {appliedCouponCode && appliedCouponCode.discountAmount > 0 && (
             <div className="flex justify-between text-sm text-emerald-600 dark:text-emerald-400">
               <span>Code promo ({appliedCouponCode.code})</span>
@@ -196,6 +235,23 @@ export default function BuyNowOrderSummary({
             {formatPrice(totalAmount, currency)}
           </span>
         </div>
+
+        {serviceBreakdown?.isDeposit && (
+          <div className="space-y-2 rounded-xl border border-amber-500/30 bg-amber-500/5 px-3 py-2.5 text-sm">
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">À payer maintenant (acompte)</span>
+              <span className="font-semibold tabular-nums">
+                {formatPrice(serviceBreakdown.amountDueNow, currency)}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Solde après prestation</span>
+              <span className="font-semibold tabular-nums">
+                {formatPrice(serviceBreakdown.remainingAmount, currency)}
+              </span>
+            </div>
+          </div>
+        )}
 
         {guaranteeBreakdown && (
           <div className="space-y-2 rounded-xl border border-emerald-500/30 bg-emerald-500/5 px-3 py-2.5 text-sm">

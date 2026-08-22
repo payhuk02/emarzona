@@ -21,8 +21,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Calendar, Clock, Loader2, MapPin, RefreshCw, Video } from 'lucide-react';
+import { Calendar, Clock, Loader2, MapPin, RefreshCw } from 'lucide-react';
 import { useMyBookings, useCancelBooking, type ServiceBooking } from '@/hooks/service/useBookings';
+import { JoinServiceMeetingButton } from '@/components/service/JoinServiceMeetingButton';
 
 type BookingWithRelations = ServiceBooking & {
   scheduled_date?: string;
@@ -173,18 +174,15 @@ export default function CustomerMyBookings() {
                           {booking.service.location_address}
                         </p>
                       )}
-                      {(booking.meeting_url || booking.service?.meeting_url) && (
-                        <Button asChild variant="outline" size="sm">
-                          <a
-                            href={booking.meeting_url || booking.service?.meeting_url || '#'}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            <Video className="h-4 w-4 mr-2" />
-                            Rejoindre la visio
-                          </a>
-                        </Button>
-                      )}
+                      <JoinServiceMeetingButton
+                        bookingId={booking.id}
+                        role="guest"
+                        meetingUrl={booking.meeting_url || booking.service?.meeting_url}
+                        meetingPlatform={booking.meeting_platform}
+                        locationType={booking.service?.location_type}
+                        status={booking.status}
+                        label="Rejoindre la visio"
+                      />
                       {booking.product?.id && (
                         <Button asChild variant="link" className="px-0 h-auto">
                           <Link to={`/service/${booking.product.id}`}>Voir le service</Link>

@@ -3,6 +3,10 @@
  */
 
 import type { CartItem } from '@/types/cart';
+import {
+  hasServiceBookingMetadata,
+  hasServiceProjectMetadata,
+} from '@/lib/cart/service-cart-policy';
 
 export interface CheckoutCartValidation {
   canCheckout: boolean;
@@ -26,11 +30,9 @@ export function getCartItemStoreId(item: CartItem): string | null {
   return typeof storeId === 'string' && storeId.length > 0 ? storeId : null;
 }
 
-function hasServiceBookingMeta(item: CartItem): boolean {
+function hasServiceReadyMeta(item: CartItem): boolean {
   const meta = cartMetadata(item);
-  return Boolean(
-    meta.booking_id || meta.scheduled_at || meta.service_booking_id || meta.booking_date
-  );
+  return hasServiceBookingMetadata(meta) || hasServiceProjectMetadata(meta);
 }
 
 function validateSameStore(items: CartItem[]): { ok: boolean; message?: string } {
@@ -71,7 +73,7 @@ export function validateCheckoutCart(items: CartItem[]): CheckoutCartValidation 
     };
   }
 
-  const bookedServices = serviceItems.filter(hasServiceBookingMeta);
+  const bookedServices = serviceItems.filter(hasServiceReadyMeta);
   if (bookedServices.length === serviceItems.length) {
     const sameStore = validateSameStore(items);
     if (!sameStore.ok) {
@@ -98,6 +100,6 @@ export function validateCheckoutCart(items: CartItem[]): CheckoutCartValidation 
     serviceOnly: false,
     hasMixedWithService: true,
     message:
-      'Votre panier contient des services sans réservation. Finalisez la réservation sur chaque fiche service, ou retirez les services pour payer les autres articles.',
+      'Votre panier contient des services incomplets. Réservez un créneau ou choisissez une formule projet sur la fiche, ou retirez les services.',
   };
 }

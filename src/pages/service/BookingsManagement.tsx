@@ -65,6 +65,9 @@ interface ExtendedBookingEventResource {
   customerPhone?: string;
   bookingDate?: string;
   bookingTime?: string;
+  meetingUrl?: string;
+  meetingPlatform?: string;
+  locationType?: string;
 }
 
 interface ExtendedBookingEvent extends BookingEvent {
@@ -83,6 +86,7 @@ import {
   useMarkNoShow,
 } from '@/hooks/service/useBookings';
 import { useStore } from '@/hooks/useStore';
+import { JoinServiceMeetingButton } from '@/components/service/JoinServiceMeetingButton';
 
 /** Forme normalisée pour l'UI (alignée sur le schéma DB `scheduled_*`, `amount_paid`, `user_id`). */
 interface NormalizedServiceBooking {
@@ -99,6 +103,8 @@ interface NormalizedServiceBooking {
   deposit_paid?: number;
   cancellation_reason?: string;
   meeting_url?: string;
+  meeting_platform?: string;
+  location_type?: string;
   customer_notes?: string;
   internal_notes?: string;
   customer?: { full_name?: string; email?: string; phone?: string };
@@ -108,6 +114,7 @@ interface NormalizedServiceBooking {
     store_id?: string;
     service_type?: string;
     duration_minutes?: number;
+    location_type?: string;
     product?: { id: string; name: string; price: number; currency?: string };
   }>;
 }
@@ -120,8 +127,15 @@ interface VendorBookingRow {
   booking_date: string;
   status: string;
   total_price?: number;
+  start_time?: string;
+  booking_time?: string;
+  participants_count?: number;
+  participants?: number;
+  meeting_url?: string;
+  meeting_platform?: string;
+  location_type?: string;
   customer?: { full_name?: string; email?: string; phone?: string };
-  service_product?: Array<{ product?: { name?: string } }>;
+  service_product?: Array<{ product?: { name?: string }; location_type?: string }>;
 }
 
 export default function BookingsManagement() {
@@ -198,7 +212,8 @@ export default function BookingsManagement() {
               id,
               product_id,
               service_type,
-              duration_minutes
+              duration_minutes,
+              location_type
             )
           )
         `
@@ -212,22 +227,102 @@ export default function BookingsManagement() {
         throw error;
       }
 
-      return (data ?? []).map(row => {
-        const product = row.product as {
-          id: string;
-          name: string;
-          price: number;
-          currency?: string;
-          store_id?: string;
-          service_product?: {
-            id: string;
-            product_id: string;
-            service_type?: string;
-            duration_minutes?: number;
-          } | null;
-        } | null;
+      const rows = data ?? [];
+      const userIds = [
+        ...new Set(rows.map(row => row.user_id).filter((id): id is string => Boolean(id))),
+      ];
+      const [customersRes, profilesRes] =
+        userIds.length > 0
+          ? await Promise.all([
+              supabase
+                .from('customers')
+                .select('user_id, name, email, phone')
+                .in('user_id', userIds),
+              supabase
+                .from('profiles')
+                .select('user_id, display_name, first_name, last_name, phone')
+                .in('user_id', userIds),
+            ])
+          : [
+              {
+                data: [] as Array<{
+                  user_id: string;
+                  name?: string | null;
+                  email?: string | null;
+                  phone?: string | null;
+                }>,
+              },
+              {
+                data: [] as Array<{
+                  user_id: string;
+                  display_name?: string | null;
+                  first_name?: string | null;
+                  last_name?: string | null;
+                  phone?: string | null;
+                }>,
+              },
+            ];
 
-        const sp = product?.service_product;
+      const customerByUser = new Map<
+        string,
+        { name?: string | null; email?: string | null; phone?: string | null }
+      >();
+      for (const customer of customersRes.data ?? []) {
+        if (customer.user_id && !customerByUser.has(customer.user_id)) {
+          customerByUser.set(customer.user_id, customer);
+        }
+      }
+      const profileByUser = new Map<
+        string,
+        {
+          display_name?: string | null;
+          first_name?: string | null;
+          last_name?: string | null;
+          phone?: string | null;
+        }
+      >();
+      for (const profile of profilesRes.data ?? []) {
+        if (profile.user_id) profileByUser.set(profile.user_id, profile);
+      }
+
+      return rows.map(row => {
+        const productRaw = row.product as
+          | {
+              id: string;
+              name: string;
+              price: number;
+              currency?: string;
+              store_id?: string;
+              service_product?:
+                | {
+                    id: string;
+                    product_id: string;
+                    service_type?: string;
+                    duration_minutes?: number;
+                    location_type?: string;
+                  }
+                | Array<{
+                    id: string;
+                    product_id: string;
+                    service_type?: string;
+                    duration_minutes?: number;
+                    location_type?: string;
+                  }>
+                | null;
+            }
+          | Array<{
+              id: string;
+              name: string;
+              price: number;
+              currency?: string;
+              store_id?: string;
+              service_product?: unknown;
+            }>
+          | null;
+
+        const product = Array.isArray(productRaw) ? productRaw[0] : productRaw;
+        const spRaw = product?.service_product;
+        const sp = Array.isArray(spRaw) ? spRaw[0] : spRaw;
 
         return {
           id: row.id,
@@ -243,12 +338,25 @@ export default function BookingsManagement() {
           deposit_paid: row.deposit_paid ?? undefined,
           cancellation_reason: row.cancellation_reason ?? undefined,
           meeting_url: row.meeting_url ?? undefined,
+          meeting_platform: row.meeting_platform ?? undefined,
+          location_type: sp?.location_type,
           customer_notes: row.customer_notes ?? undefined,
           internal_notes: row.internal_notes ?? undefined,
           customer: {
-            full_name: row.customer_notes?.slice(0, 80) || 'Client',
-            email: '',
-            phone: '',
+            full_name:
+              profileByUser.get(row.user_id)?.display_name ||
+              [
+                profileByUser.get(row.user_id)?.first_name,
+                profileByUser.get(row.user_id)?.last_name,
+              ]
+                .filter(Boolean)
+                .join(' ') ||
+              customerByUser.get(row.user_id)?.name ||
+              row.customer_notes?.slice(0, 80) ||
+              'Client',
+            email: customerByUser.get(row.user_id)?.email || '',
+            phone:
+              customerByUser.get(row.user_id)?.phone || profileByUser.get(row.user_id)?.phone || '',
           },
           service_product: sp
             ? [
@@ -258,6 +366,7 @@ export default function BookingsManagement() {
                   store_id: product?.store_id,
                   service_type: sp.service_type,
                   duration_minutes: sp.duration_minutes,
+                  location_type: sp.location_type,
                   product: product
                     ? {
                         id: product.id,
@@ -347,6 +456,9 @@ export default function BookingsManagement() {
             price: booking.total_price,
             bookingDate: booking.booking_date,
             bookingTime: booking.start_time || booking.booking_time,
+            meetingUrl: booking.meeting_url,
+            meetingPlatform: booking.meeting_platform,
+            locationType: booking.location_type ?? booking.service_product?.[0]?.location_type,
           };
 
           bookingEvents.push({
@@ -1035,7 +1147,19 @@ export default function BookingsManagement() {
                                   {booking.service_product?.[0]?.product?.name || 'Service'}
                                 </p>
                               </div>
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <JoinServiceMeetingButton
+                                  bookingId={booking.id}
+                                  role="host"
+                                  meetingUrl={booking.meeting_url}
+                                  meetingPlatform={booking.meeting_platform}
+                                  locationType={
+                                    booking.location_type ??
+                                    booking.service_product?.[0]?.location_type
+                                  }
+                                  status={booking.status}
+                                  label="Rejoindre (animateur)"
+                                />
                                 {booking.status === 'pending' && (
                                   <Button
                                     size="sm"
@@ -1197,6 +1321,17 @@ export default function BookingsManagement() {
                 {/* Actions */}
                 {selectedEvent.type === 'booked' && selectedEvent.resource?.status && (
                   <div className="flex flex-wrap gap-2 pt-4 border-t">
+                    {selectedEvent.id && (
+                      <JoinServiceMeetingButton
+                        bookingId={selectedEvent.id}
+                        role="host"
+                        meetingUrl={selectedEvent.resource.meetingUrl}
+                        meetingPlatform={selectedEvent.resource.meetingPlatform}
+                        locationType={selectedEvent.resource.locationType}
+                        status={selectedEvent.resource.status}
+                        label="Rejoindre (animateur)"
+                      />
+                    )}
                     {selectedEvent.resource.status === 'pending' && (
                       <Button
                         onClick={() => selectedEvent.id && handleConfirmBooking(selectedEvent.id)}

@@ -51,6 +51,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { updateServiceProductTx } from '@/lib/products/product-update-rpc';
 import { persistProductWhatsApp } from '@/lib/products/persist-product-whatsapp';
 import { persistServiceCategoryAttributes } from '@/lib/service/persist-service-category-attributes';
+import { toPersistedPricingType } from '@/lib/service/service-pricing';
 import { loadServiceProductFormData } from '@/lib/service/load-service-product-form';
 import { resolveServiceProductCategoryPayload } from '@/lib/services/service-categories';
 import { useServiceCategoryTree } from '@/hooks/useServiceCategories';
@@ -458,7 +459,7 @@ export const EditServiceProductWizard = ({
         timezone: formData.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
         requires_staff: formData.requires_staff ?? false,
         max_participants: formData.max_participants || 1,
-        pricing_type: formData.pricing_type || 'fixed',
+        pricing_type: toPersistedPricingType(formData.pricing_type),
         deposit_required: formData.deposit_required || false,
         deposit_amount: formData.deposit_amount || null,
         deposit_type: formData.deposit_type || null,

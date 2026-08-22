@@ -14,10 +14,11 @@ import {
 } from '@/lib/notifications/service-booking-notifications';
 import { createServiceRefund } from '@/lib/services/cancellation-policy';
 import { createBookingMeeting } from '@/lib/service/create-booking-meeting';
+import { resolveServiceBookingEmailJoinUrl } from '@/lib/service/daily-meeting';
 import { logger } from '@/lib/logger';
 
 const SERVICE_BOOKING_FIELDS =
-  'id, product_id, user_id, provider_id, scheduled_date, scheduled_start_time, scheduled_end_time, timezone, status, staff_member_id, participants_count, meeting_url, customer_notes, internal_notes, reminder_sent_at, reminder_sent, cancelled_at, cancellation_reason, completed_at, duration_minutes, amount_paid, payment_id, deposit_paid, created_at, updated_at';
+  'id, product_id, user_id, provider_id, scheduled_date, scheduled_start_time, scheduled_end_time, timezone, status, staff_member_id, participants_count, meeting_url, meeting_id, meeting_platform, customer_notes, internal_notes, reminder_sent_at, reminder_sent, cancelled_at, cancellation_reason, completed_at, duration_minutes, amount_paid, payment_id, deposit_paid, created_at, updated_at';
 const BOOKING_PRODUCT_FIELDS =
   'id, store_id, name, description, price, status, product_type, image_url, created_at, updated_at';
 const BOOKING_CUSTOMER_FIELDS = 'id, name, email, phone, user_id, created_at, updated_at';
@@ -39,8 +40,13 @@ type MyBookingProductRow = {
   id: string;
   name: string;
   image_url?: string | null;
-  service?: Record<string, unknown> | null;
+  service?: Record<string, unknown> | Record<string, unknown>[] | null;
 };
+
+function firstRelation<T>(value: T | T[] | null | undefined): T | null {
+  if (value == null) return null;
+  return Array.isArray(value) ? (value[0] ?? null) : value;
+}
 
 type ServiceBookingRow = ServiceBooking & {
   scheduled_date?: string;
@@ -69,8 +75,10 @@ export function mapServiceBookingRows(data: unknown[]): ServiceBooking[] {
 /** Flatten nested product.service for customer portal components. */
 export function mapMyBookingRows(data: unknown[]): ServiceBooking[] {
   return data.map(row => {
-    const booking = row as ServiceBooking & { product?: MyBookingProductRow | null };
-    const product = booking.product;
+    const booking = row as ServiceBooking & {
+      product?: MyBookingProductRow | MyBookingProductRow[] | null;
+    };
+    const product = firstRelation(booking.product);
     if (!product) return booking;
     const { service, ...productSummary } = product;
     return {
@@ -80,7 +88,7 @@ export function mapMyBookingRows(data: unknown[]): ServiceBooking[] {
         name: productSummary.name,
         image_url: productSummary.image_url,
       },
-      service: service ?? undefined,
+      service: firstRelation(service) ?? undefined,
     } as ServiceBooking & { service?: Record<string, unknown> };
   });
 }
@@ -102,6 +110,8 @@ export interface ServiceBooking {
   deposit_paid: number;
   cancellation_reason?: string;
   meeting_url?: string;
+  meeting_id?: string;
+  meeting_platform?: string;
   customer_notes?: string;
   internal_notes?: string;
   reminder_sent_at?: string;
@@ -404,10 +414,7 @@ export const useConfirmBooking = () => {
             .maybeSingle();
 
           if (serviceRow?.location_type === 'online' && !result.meeting_url) {
-            await createBookingMeeting(
-              result.id,
-              (serviceRow.preferred_meeting_platform as 'zoom' | 'google_meet' | null) ?? undefined
-            );
+            await createBookingMeeting(result.id);
           }
         } catch (meetingError) {
           logger.warn('Auto meeting creation on confirm failed', {
@@ -420,17 +427,44 @@ export const useConfirmBooking = () => {
       // 🆕 Envoyer la notification de confirmation
       if (result) {
         try {
-          const [productResult, userProfileResult] = await Promise.all([
-            supabase.from('products').select('name').eq('id', result.product_id).single(),
-            supabase
-              .from('profiles')
-              .select('full_name, email, phone')
-              .eq('id', result.user_id)
-              .maybeSingle(),
-          ]);
+          const [productResult, userProfileResult, customerResult, meetingResult] =
+            await Promise.all([
+              supabase.from('products').select('name').eq('id', result.product_id).single(),
+              supabase
+                .from('profiles')
+                .select('display_name, first_name, last_name, phone')
+                .eq('user_id', result.user_id)
+                .maybeSingle(),
+              supabase
+                .from('customers')
+                .select('name, email, phone')
+                .eq('user_id', result.user_id)
+                .limit(1)
+                .maybeSingle(),
+              supabase
+                .from('service_bookings')
+                .select('meeting_url, meeting_platform')
+                .eq('id', result.id)
+                .maybeSingle(),
+            ]);
 
           const product = productResult.data;
           const userProfile = userProfileResult.data;
+          const customer = customerResult.data;
+          const fullName =
+            userProfile?.display_name ||
+            [userProfile?.first_name, userProfile?.last_name].filter(Boolean).join(' ') ||
+            customer?.name ||
+            'Client';
+          const portal =
+            typeof window !== 'undefined'
+              ? `${window.location.origin}/account/bookings`
+              : '/account/bookings';
+          const meetingUrl = resolveServiceBookingEmailJoinUrl({
+            meetingUrl: meetingResult.data?.meeting_url,
+            meetingPlatform: meetingResult.data?.meeting_platform,
+            portalUrl: portal,
+          });
 
           if (product && result.user_id) {
             const preferences = await getUserBookingNotificationPreferences(result.user_id);
@@ -441,11 +475,12 @@ export const useConfirmBooking = () => {
               {
                 booking_id: result.id,
                 service_name: product.name,
-                customer_name: userProfile?.full_name || 'Client',
-                customer_email: userProfile?.email || '',
-                customer_phone: userProfile?.phone || undefined,
+                customer_name: fullName,
+                customer_email: customer?.email || '',
+                customer_phone: customer?.phone || userProfile?.phone || undefined,
                 booking_date: result.scheduled_date || result.booking_date,
                 booking_time: result.scheduled_start_time || result.booking_time,
+                meeting_url: meetingUrl,
               },
               'confirmation'
             );
@@ -462,6 +497,7 @@ export const useConfirmBooking = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['service-bookings'] });
+      queryClient.invalidateQueries({ queryKey: ['my-bookings'] });
     },
   });
 };

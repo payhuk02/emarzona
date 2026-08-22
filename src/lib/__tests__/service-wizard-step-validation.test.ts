@@ -47,6 +47,14 @@ describe('validateServiceWizardStep', () => {
     expect(result.toastTitle).toBe('Créneaux requis');
   });
 
+  it('allows step 2 online without a static meeting URL (Daily.co per booking)', () => {
+    const result = validateServiceWizardStep(2, {
+      ...baseForm,
+      meeting_url: '',
+    });
+    expect(result.valid).toBe(true);
+  });
+
   it('allows step 2 without slots when fulfillment_mode is project', () => {
     const result = validateServiceWizardStep(2, {
       ...baseForm,

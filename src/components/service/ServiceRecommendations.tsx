@@ -24,9 +24,28 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { ServiceListingAttributeBadges } from './ServiceListingAttributeBadges';
+import { ServicePriceDisplay } from '@/components/service/ServicePriceDisplay';
+import { resolveServiceDisplayPrice } from '@/lib/service/service-pricing';
 import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
 import { PAID_REVENUE_ELIGIBLE_STATUSES } from '@/lib/orders/order-status';
+
+function recommendationPriceDisplay(service: {
+  price: number;
+  promotional_price?: number;
+  currency?: string;
+  service_products?: Array<{
+    pricing_type?: string;
+    fulfillment_mode?: string;
+  }>;
+}) {
+  return resolveServiceDisplayPrice({
+    price: service.price,
+    promotionalPrice: service.promotional_price,
+    pricingType: service.service_products?.[0]?.pricing_type,
+    fulfillmentMode: service.service_products?.[0]?.fulfillment_mode,
+  });
+}
 
 interface RecommendationsProps {
   serviceId: string;
@@ -76,6 +95,8 @@ const useServiceRecommendations = (
           };
           service_products?: Array<{
             duration_minutes?: number;
+            pricing_type?: string;
+            fulfillment_mode?: string;
             category_attributes?: Record<string, string | number | boolean | string[]>;
           }>;
           recommendationScore?: number;
@@ -384,9 +405,11 @@ export const ServiceRecommendations = ({
                 {service.short_description || service.description}
               </p>
               <div className="flex items-center justify-between mb-3">
-                <span className="font-bold text-lg">
-                  {service.promotional_price || service.price} {service.currency}
-                </span>
+                <ServicePriceDisplay
+                  display={recommendationPriceDisplay(service)}
+                  currency={service.currency || 'XOF'}
+                  size="sm"
+                />
                 {service.average_rating > 0 && (
                   <div className="flex items-center gap-1">
                     <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
@@ -550,9 +573,11 @@ export const BookedTogetherRecommendations = ({
             <CardContent className="p-3">
               <h4 className="font-medium text-sm line-clamp-2 mb-2">{service.name}</h4>
               <div className="flex items-center justify-between mb-2">
-                <span className="font-bold text-sm">
-                  {service.promotional_price || service.price} {service.currency}
-                </span>
+                <ServicePriceDisplay
+                  display={recommendationPriceDisplay(service)}
+                  currency={service.currency || 'XOF'}
+                  size="sm"
+                />
                 {service.average_rating > 0 && (
                   <div className="flex items-center gap-1">
                     <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />

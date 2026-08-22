@@ -30,11 +30,12 @@ import { ResponsiveProductImage } from '@/components/ui/ResponsiveProductImage';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { invalidateCatalogCaches } from '@/lib/cache-invalidation';
-import { getDisplayPrice } from '@/lib/product-helpers';
 import { cn } from '@/lib/utils';
 import { useServiceCategories } from '@/hooks/useServiceCategories';
 import { formatServiceCategoryLabel } from '@/lib/services/service-categories';
 import { ServiceListingAttributeBadges } from '@/components/service/ServiceListingAttributeBadges';
+import { ServicePriceDisplay } from '@/components/service/ServicePriceDisplay';
+import { resolveServiceDisplayPrice } from '@/lib/service/service-pricing';
 
 function formatDuration(minutes: number) {
   if (minutes < 60) return `${minutes} min`;
@@ -203,9 +204,11 @@ export const ServicesList = () => {
         ) : viewMode === 'list' ? (
           <div className="space-y-3">
             {filteredServices.map(service => {
-              const display = getDisplayPrice({
+              const display = resolveServiceDisplayPrice({
                 price: Number(service.product?.price || 0),
-                promotional_price: Number(service.product?.promotional_price || 0),
+                promotionalPrice: Number(service.product?.promotional_price || 0),
+                pricingType: service.pricing_type,
+                fulfillmentMode: service.fulfillment_mode,
               });
               const currency = String(service.product?.currency || 'XOF');
               return (
@@ -257,22 +260,25 @@ export const ServicesList = () => {
                             Brouillon
                           </Badge>
                         )}
-                        {display.discount ? (
-                          <Badge className="text-xs">-{display.discount}%</Badge>
+                        {display.originalAmount && display.originalAmount > display.amount ? (
+                          <Badge className="text-xs">
+                            -
+                            {Math.round(
+                              ((display.originalAmount - display.amount) / display.originalAmount) *
+                                100
+                            )}
+                            %
+                          </Badge>
                         ) : null}
                       </div>
                     </div>
                     <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
-                      <div className="text-right">
-                        <p className="text-base sm:text-lg font-bold whitespace-nowrap">
-                          {display.price.toLocaleString('fr-FR')} {currency}
-                        </p>
-                        {display.originalPrice != null && (
-                          <p className="text-xs text-muted-foreground line-through whitespace-nowrap">
-                            {display.originalPrice.toLocaleString('fr-FR')} {currency}
-                          </p>
-                        )}
-                      </div>
+                      <ServicePriceDisplay
+                        display={display}
+                        currency={currency}
+                        size="sm"
+                        align="right"
+                      />
                       {serviceActions(service)}
                     </div>
                   </div>

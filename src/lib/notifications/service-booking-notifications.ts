@@ -1,13 +1,23 @@
 /**
  * Système de Notifications pour Réservations de Services
  * Date: 3 Février 2025
- * 
+ *
  * SMS, notifications push, rappels automatiques
  */
 
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
-import { sendUnifiedNotification } from './unified-notifications';
+import { sendUnifiedNotification, type NotificationType } from './unified-notifications';
+
+const BOOKING_UNIFIED_TYPE: Record<
+  'confirmation' | 'reminder' | 'cancellation' | 'reschedule',
+  NotificationType
+> = {
+  confirmation: 'service_booking_confirmed',
+  reminder: 'service_booking_reminder',
+  cancellation: 'service_booking_cancelled',
+  reschedule: 'service_booking_confirmed',
+};
 
 // =====================================================
 // TYPES
@@ -18,12 +28,12 @@ export interface BookingNotificationPreferences {
   sms_enabled: boolean;
   push_enabled: boolean;
   in_app_enabled: boolean;
-  
+
   // Timing des rappels
   reminder_24h_enabled: boolean;
   reminder_2h_enabled: boolean;
   reminder_30min_enabled: boolean;
-  
+
   // Types de notifications
   confirmation_enabled: boolean;
   reminder_enabled: boolean;
@@ -71,7 +81,7 @@ export async function sendBookingSMS(
   try {
     // Récupérer les templates SMS depuis la base de données ou utiliser des templates par défaut
     const message = getSMSTemplate(type, data);
-    
+
     // Appeler une Edge Function ou API externe pour envoyer le SMS
     // Pour l'instant, on utilise une Edge Function Supabase
     const { data: result, error } = await supabase.functions.invoke('send-sms', {
@@ -81,7 +91,7 @@ export async function sendBookingSMS(
         type: 'booking_notification',
       },
     });
-    
+
     if (error) {
       logger.error('Error sending SMS', { error, phoneNumber, type });
       return {
@@ -90,7 +100,7 @@ export async function sendBookingSMS(
         error: error.message,
       };
     }
-    
+
     return {
       success: true,
       channel: 'sms',
@@ -117,25 +127,23 @@ export async function sendBookingPush(
   try {
     const title = getPushTitle(type, data);
     const body = getPushBody(type, data);
-    
+
     // Enregistrer la notification push dans la base de données
-    const { error } = await supabase
-      .from('notifications')
-      .insert({
-        user_id: userId,
-        type: `service_booking_${type}`,
-        title,
-        body,
-        data: {
-          booking_id: data.booking_id,
-          service_name: data.service_name,
-          booking_date: data.booking_date,
-          booking_time: data.booking_time,
-        },
-        channel: 'push',
-        read: false,
-      });
-    
+    const { error } = await supabase.from('notifications').insert({
+      user_id: userId,
+      type: `service_booking_${type}`,
+      title,
+      body,
+      data: {
+        booking_id: data.booking_id,
+        service_name: data.service_name,
+        booking_date: data.booking_date,
+        booking_time: data.booking_time,
+      },
+      channel: 'push',
+      read: false,
+    });
+
     if (error) {
       logger.error('Error creating push notification', { error, userId, type });
       return {
@@ -144,10 +152,10 @@ export async function sendBookingPush(
         error: error.message,
       };
     }
-    
+
     // Si l'utilisateur a un service worker enregistré, envoyer la notification push
     // Cela nécessite une configuration supplémentaire côté client
-    
+
     return {
       success: true,
       channel: 'push',
@@ -174,7 +182,7 @@ export async function sendBookingEmail(
   try {
     const subject = getEmailSubject(type, data);
     const template = getEmailTemplate(type, data);
-    
+
     // Récupérer le user_id depuis le booking
     const { data: booking, error: bookingError } = await supabase
       .from('service_bookings')
@@ -195,7 +203,7 @@ export async function sendBookingEmail(
     // Utiliser le système de notifications unifié
     await sendUnifiedNotification({
       user_id: userId,
-      type: `service_booking_${type}` as any,
+      type: BOOKING_UNIFIED_TYPE[type],
       title: subject,
       message: template,
       channel: 'email',
@@ -206,7 +214,7 @@ export async function sendBookingEmail(
         booking_time: data.booking_time,
       },
     });
-    
+
     return {
       success: true,
       channel: 'email',
@@ -232,8 +240,8 @@ export async function sendBookingNotifications(
   type: 'confirmation' | 'reminder' | 'cancellation' | 'reschedule',
   channels: ('email' | 'sms' | 'push' | 'in_app')[] = ['email', 'sms', 'push', 'in_app']
 ): Promise<NotificationResult[]> {
-  const  results: NotificationResult[] = [];
-  
+  const results: NotificationResult[] = [];
+
   // Email
   if (channels.includes('email') && preferences.email_enabled) {
     if (
@@ -246,7 +254,7 @@ export async function sendBookingNotifications(
       results.push(result);
     }
   }
-  
+
   // SMS
   if (channels.includes('sms') && preferences.sms_enabled && data.customer_phone) {
     if (
@@ -259,7 +267,7 @@ export async function sendBookingNotifications(
       results.push(result);
     }
   }
-  
+
   // Push
   if (channels.includes('push') && preferences.push_enabled) {
     if (
@@ -272,12 +280,12 @@ export async function sendBookingNotifications(
       results.push(result);
     }
   }
-  
+
   // In-app
   if (channels.includes('in_app') && preferences.in_app_enabled) {
     await sendUnifiedNotification({
       user_id: userId,
-      type: `service_booking_${type}` as any,
+      type: BOOKING_UNIFIED_TYPE[type],
       title: getPushTitle(type, data),
       message: getPushBody(type, data),
       channel: 'in_app',
@@ -288,14 +296,14 @@ export async function sendBookingNotifications(
         booking_time: data.booking_time,
       },
     });
-    
+
     results.push({
       success: true,
       channel: 'in_app',
       sent_at: new Date().toISOString(),
     });
   }
-  
+
   return results;
 }
 
@@ -310,16 +318,16 @@ function getSMSTemplate(
   switch (type) {
     case 'confirmation':
       return `Votre réservation pour ${data.service_name} est confirmée le ${formatDate(data.booking_date)} à ${data.booking_time}. Merci !`;
-    
+
     case 'reminder':
       return `Rappel: Votre réservation ${data.service_name} est prévue le ${formatDate(data.booking_date)} à ${data.booking_time}. À bientôt !`;
-    
+
     case 'cancellation':
       return `Votre réservation ${data.service_name} du ${formatDate(data.booking_date)} a été annulée.${data.cancellation_reason ? ` Raison: ${data.cancellation_reason}` : ''}`;
-    
+
     case 'reschedule':
       return `Votre réservation ${data.service_name} a été replanifiée au ${formatDate(data.reschedule_date || data.booking_date)} à ${data.reschedule_time || data.booking_time}.`;
-    
+
     default:
       return '';
   }
@@ -388,7 +396,7 @@ function getEmailTemplate(
       <h2>${getEmailSubject(type, data)}</h2>
       <p>Bonjour ${data.customer_name},</p>
   `;
-  
+
   switch (type) {
     case 'confirmation':
       return `${baseTemplate}
@@ -398,11 +406,11 @@ function getEmailTemplate(
           <p><strong>Heure:</strong> ${data.booking_time}${data.booking_end_time ? ` - ${data.booking_end_time}` : ''}</p>
           ${data.location ? `<p><strong>Lieu:</strong> ${data.location}</p>` : ''}
           ${data.staff_name ? `<p><strong>Prestataire:</strong> ${data.staff_name}</p>` : ''}
-          ${data.meeting_url ? `<p><strong>Lien de réunion:</strong> <a href="${data.meeting_url}">${data.meeting_url}</a></p>` : ''}
+          ${data.meeting_url ? `<p><strong>Lien de réunion:</strong> <a href="${data.meeting_url}">Rejoindre la visio</a></p>` : ''}
         </div>
         <p>Nous avons hâte de vous voir !</p>
       </div>`;
-    
+
     case 'reminder':
       return `${baseTemplate}
         <p>Ceci est un rappel pour votre réservation <strong>${data.service_name}</strong>.</p>
@@ -410,17 +418,18 @@ function getEmailTemplate(
           <p><strong>Date:</strong> ${formatDate(data.booking_date)}</p>
           <p><strong>Heure:</strong> ${data.booking_time}</p>
           ${data.location ? `<p><strong>Lieu:</strong> ${data.location}</p>` : ''}
+          ${data.meeting_url ? `<p><strong>Lien de réunion:</strong> <a href="${data.meeting_url}">Rejoindre la visio</a></p>` : ''}
         </div>
         <p>À bientôt !</p>
       </div>`;
-    
+
     case 'cancellation':
       return `${baseTemplate}
         <p>Votre réservation pour <strong>${data.service_name}</strong> du ${formatDate(data.booking_date)} a été annulée.</p>
         ${data.cancellation_reason ? `<p><strong>Raison:</strong> ${data.cancellation_reason}</p>` : ''}
         <p>Si vous avez des questions, n'hésitez pas à nous contacter.</p>
       </div>`;
-    
+
     case 'reschedule':
       return `${baseTemplate}
         <p>Votre réservation pour <strong>${data.service_name}</strong> a été replanifiée.</p>
@@ -430,7 +439,7 @@ function getEmailTemplate(
         </div>
         <p>Merci de votre compréhension.</p>
       </div>`;
-    
+
     default:
       return baseTemplate + '</div>';
   }
@@ -450,32 +459,32 @@ export async function scheduleBookingReminders(
   preferences: BookingNotificationPreferences
 ): Promise<void> {
   const bookingDateTime = new Date(`${bookingDate}T${bookingTime}`);
-  
+
   // Rappel 24h avant
   if (preferences.reminder_24h_enabled) {
     const reminder24h = new Date(bookingDateTime);
     reminder24h.setHours(reminder24h.getHours() - 24);
-    
+
     if (reminder24h > new Date()) {
       await createReminder(bookingId, reminder24h, '24h', preferences);
     }
   }
-  
+
   // Rappel 2h avant
   if (preferences.reminder_2h_enabled) {
     const reminder2h = new Date(bookingDateTime);
     reminder2h.setHours(reminder2h.getHours() - 2);
-    
+
     if (reminder2h > new Date()) {
       await createReminder(bookingId, reminder2h, '2h', preferences);
     }
   }
-  
+
   // Rappel 30min avant
   if (preferences.reminder_30min_enabled) {
     const reminder30min = new Date(bookingDateTime);
     reminder30min.setMinutes(reminder30min.getMinutes() - 30);
-    
+
     if (reminder30min > new Date()) {
       await createReminder(bookingId, reminder30min, '30min', preferences);
     }
@@ -494,30 +503,32 @@ async function createReminder(
   // Récupérer les infos de la réservation
   const { data: booking, error: bookingError } = await supabase
     .from('service_bookings')
-    .select(`
+    .select(
+      `
       *,
       products!inner (name, store_id)
-    `)
+    `
+    )
     .eq('id', bookingId)
     .single();
-  
+
   if (bookingError || !booking) {
     logger.error('Error fetching booking for reminder', { error: bookingError, bookingId });
     return;
   }
-  
+
   // Récupérer les infos utilisateur
   const { data: userProfile } = await supabase
     .from('profiles')
     .select('email, phone')
     .eq('id', booking.user_id)
     .maybeSingle();
-  
+
   // Créer les rappels selon les canaux activés
   const reminders = [];
   const serviceName = (booking.products as { name?: string })?.name || 'Service';
   const storeId = (booking.products as { store_id?: string })?.store_id || '';
-  
+
   if (preferences.email_enabled && preferences.reminder_enabled) {
     reminders.push({
       booking_id: bookingId,
@@ -530,7 +541,7 @@ async function createReminder(
       status: 'pending',
     });
   }
-  
+
   if (preferences.sms_enabled && preferences.reminder_enabled && userProfile?.phone) {
     reminders.push({
       booking_id: bookingId,
@@ -543,7 +554,7 @@ async function createReminder(
       status: 'pending',
     });
   }
-  
+
   if (preferences.push_enabled && preferences.reminder_enabled) {
     reminders.push({
       booking_id: bookingId,
@@ -556,12 +567,10 @@ async function createReminder(
       status: 'pending',
     });
   }
-  
+
   if (reminders.length > 0) {
-    const { error } = await supabase
-      .from('service_booking_reminders')
-      .insert(reminders);
-    
+    const { error } = await supabase.from('service_booking_reminders').insert(reminders);
+
     if (error) {
       logger.error('Error creating reminders', { error, bookingId });
     }
@@ -581,7 +590,7 @@ export async function getUserBookingNotificationPreferences(
     )
     .eq('user_id', userId)
     .maybeSingle();
-  
+
   if (error || !data) {
     // Retourner les préférences par défaut
     return {
@@ -599,7 +608,7 @@ export async function getUserBookingNotificationPreferences(
       completion_enabled: true,
     };
   }
-  
+
   return {
     email_enabled: data.email_enabled ?? true,
     sms_enabled: data.sms_enabled ?? false,
@@ -629,10 +638,3 @@ function formatDate(dateString: string): string {
     day: 'numeric',
   });
 }
-
-
-
-
-
-
-

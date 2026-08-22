@@ -7,6 +7,7 @@ import type { SupabaseClient } from 'npm:@supabase/supabase-js@2.58.0';
 import { logArtistFulfillmentEvent } from './artist-fulfillment-observability.ts';
 import { triggerEmailWorkflowsForEvent } from './workflow-executor.ts';
 import { triggerSequenceEnrollmentsForEvent } from './sequence-enrollment-utils.ts';
+import { resolveServiceBookingEmailJoinUrl, zonedLocalDateTimeToUtc } from './daily-api.ts';
 
 /** Colonnes orders réelles (pas de customer_email / shipping_* / tracking_* sur orders). */
 const ORDER_SELECT =
@@ -123,15 +124,35 @@ async function sendOrderConfirmationEmail(
 
 async function scheduleConfirmedBookingReminders(
   supabase: SupabaseClient,
-  bookingId: string
+  bookingId: string,
+  order?: Record<string, unknown>
 ): Promise<void> {
   const { data: booking, error } = await supabase
     .from('service_bookings')
-    .select('id, product_id, user_id, scheduled_date, scheduled_start_time')
+    .select(
+      'id, product_id, user_id, scheduled_date, scheduled_start_time, timezone, meeting_url, meeting_platform'
+    )
     .eq('id', bookingId)
     .maybeSingle();
 
-  if (error || !booking?.user_id || !booking.scheduled_date || !booking.scheduled_start_time) {
+  if (error || !booking?.scheduled_date || !booking.scheduled_start_time) {
+    return;
+  }
+
+  let reminderUserId = booking.user_id as string | null;
+  if (!reminderUserId) {
+    const customerId = order?.customer_id as string | undefined;
+    if (customerId) {
+      const { data: customer } = await supabase
+        .from('customers')
+        .select('user_id')
+        .eq('id', customerId)
+        .maybeSingle();
+      reminderUserId = customer?.user_id ?? null;
+    }
+  }
+  if (!reminderUserId) {
+    console.warn('scheduleConfirmedBookingReminders: no user_id for booking', bookingId);
     return;
   }
 
@@ -143,9 +164,21 @@ async function scheduleConfirmedBookingReminders(
   const storeId = product?.store_id;
   if (!storeId) return;
 
-  const start = `${booking.scheduled_date}T${String(booking.scheduled_start_time).slice(0, 8)}`;
-  const bookingAt = new Date(start);
+  const start = zonedLocalDateTimeToUtc(
+    String(booking.scheduled_date).slice(0, 10),
+    String(booking.scheduled_start_time),
+    (booking.timezone as string | null) || 'UTC'
+  );
+  const bookingAt = start;
   if (Number.isNaN(bookingAt.getTime())) return;
+
+  const siteUrl = (Deno.env.get('SITE_URL') || 'https://www.emarzona.com').replace(/\/$/, '');
+  const joinUrl = resolveServiceBookingEmailJoinUrl({
+    meetingUrl: booking.meeting_url as string | null,
+    meetingPlatform: booking.meeting_platform as string | null,
+    portalUrl: `${siteUrl}/account/bookings`,
+  });
+  const meetingHint = ` Lien visio : ${joinUrl}`;
 
   const offsets: Array<{ hours: number; label: string }> = [
     { hours: 24, label: '24h' },
@@ -170,17 +203,55 @@ async function scheduleConfirmedBookingReminders(
       booking_id: bookingId,
       service_id: booking.product_id,
       store_id: storeId,
-      user_id: booking.user_id,
+      user_id: reminderUserId,
       reminder_type: 'email',
       reminder_template: offset.label,
       reminder_scheduled_at: scheduledAt.toISOString(),
       reminder_subject: `Rappel ${offset.label} — votre rendez-vous`,
-      reminder_message: `Rappel ${offset.label} : votre réservation approche (${booking.scheduled_date} à ${String(booking.scheduled_start_time).slice(0, 5)}).`,
+      reminder_message: `Rappel ${offset.label} : votre réservation approche (${booking.scheduled_date} à ${String(booking.scheduled_start_time).slice(0, 5)}).${meetingHint}`,
       status: 'pending',
     });
     if (insertError) {
       console.error('scheduleConfirmedBookingReminders insert failed', insertError);
     }
+  }
+}
+
+async function createOnlineBookingMeeting(bookingId: string): Promise<void> {
+  const supabaseUrl = Deno.env.get('SUPABASE_URL');
+  const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+  if (!supabaseUrl || !supabaseServiceKey) return;
+
+  try {
+    const response = await fetch(`${supabaseUrl}/functions/v1/service-booking-meeting`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${supabaseServiceKey}`,
+        ...(Deno.env.get('EDGE_INTERNAL_SECRET')
+          ? { 'x-internal-secret': Deno.env.get('EDGE_INTERNAL_SECRET')! }
+          : {}),
+      },
+      body: JSON.stringify({ bookingId }),
+    });
+    if (!response.ok) {
+      console.warn(
+        `service-booking-meeting failed for ${bookingId}:`,
+        response.status,
+        await response.text()
+      );
+      return;
+    }
+    const payload = (await response.json().catch(() => null)) as {
+      skipped?: boolean;
+      reason?: string;
+      meeting?: { meeting_url?: string };
+    } | null;
+    if (payload?.skipped) {
+      console.log(`service-booking-meeting skipped for ${bookingId}: ${payload.reason}`);
+    }
+  } catch (err) {
+    console.error('createOnlineBookingMeeting error', bookingId, err);
   }
 }
 
@@ -238,7 +309,8 @@ async function confirmServiceBookings(
       continue;
     }
 
-    await scheduleConfirmedBookingReminders(supabase, bookingId);
+    await createOnlineBookingMeeting(bookingId);
+    await scheduleConfirmedBookingReminders(supabase, bookingId, order);
 
     // Rattrapage : lier order_items.booking_id si manquant
     await supabase

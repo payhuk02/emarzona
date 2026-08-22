@@ -13,9 +13,10 @@ import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { DollarSign, Clock, Users, CreditCard, XCircle, CheckCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { normalizeServicePricingType } from '@/lib/service/service-pricing';
 
 interface ServicePricingBadgesProps {
-  pricingType?: 'fixed' | 'hourly' | 'per_participant' | null;
+  pricingType?: string | null;
   depositRequired?: boolean | null;
   depositAmount?: number | null;
   depositType?: 'fixed' | 'percentage' | null;
@@ -34,11 +35,12 @@ export function ServicePricingTypeBadge({
   size = 'sm',
   className,
 }: {
-  pricingType?: 'fixed' | 'hourly' | 'per_participant' | null;
+  pricingType?: string | null;
   size?: 'sm' | 'md';
   className?: string;
 }) {
-  if (!pricingType || pricingType === 'fixed') return null;
+  const type = normalizeServicePricingType(pricingType);
+  if (type === 'fixed') return null;
 
   const sizeClasses = {
     sm: 'text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5',
@@ -50,7 +52,7 @@ export function ServicePricingTypeBadge({
     md: 'h-3 w-3 sm:h-4 sm:w-4',
   };
 
-  if (pricingType === 'hourly') {
+  if (type === 'hourly') {
     return (
       <Badge
         variant="outline"
@@ -68,7 +70,7 @@ export function ServicePricingTypeBadge({
     );
   }
 
-  if (pricingType === 'per_participant') {
+  if (type === 'per_participant') {
     return (
       <Badge
         variant="outline"
@@ -281,9 +283,3 @@ export function ServicePricingBadges({
     </div>
   );
 }
-
-
-
-
-
-

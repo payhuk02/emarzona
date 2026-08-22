@@ -151,9 +151,6 @@ export function validateServiceWizardStep(
     if (formData.location_type === 'on_site' && !formData.location_address?.trim()) {
       errors.push("L'adresse est requise pour les services sur site");
     }
-    if (formData.location_type === 'online' && !formData.meeting_url?.trim()) {
-      errors.push("L'URL de réunion est requise pour les services en ligne");
-    }
     if (
       (!formData.availability_slots || formData.availability_slots.length === 0) &&
       serviceWizardRequiresSlots(formData, options?.categoryTree)

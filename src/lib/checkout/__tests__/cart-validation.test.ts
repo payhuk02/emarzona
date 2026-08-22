@@ -55,6 +55,25 @@ describe('validateCheckoutCart', () => {
     expect(result.hasMixedWithService).toBe(true);
   });
 
+  it('allows mixed cart when services have a project package', () => {
+    const result = validateCheckoutCart([
+      item({
+        product_type: 'physical',
+        metadata: { store_id: 'store-1', physical_product_id: 'phys-1' },
+      }),
+      item({
+        product_type: 'service',
+        metadata: {
+          store_id: 'store-1',
+          fulfillment_mode: 'project',
+          delivery_package_id: 'pkg-1',
+        },
+      }),
+    ]);
+    expect(result.canCheckout).toBe(true);
+    expect(result.hasMixedWithService).toBe(true);
+  });
+
   it('blocks mixed cart when service lacks booking', () => {
     const result = validateCheckoutCart([
       item({ product_type: 'physical', metadata: { store_id: 'store-1' } }),

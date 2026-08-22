@@ -48,6 +48,7 @@ export class ServiceOrderStrategy implements OrderStrategy {
       giftCardId,
       giftCardAmount = 0,
       checkoutMode = 'immediate',
+      addonProductIds = [],
     } = opts;
 
     if (!bookingDateTime) {
@@ -429,8 +430,31 @@ export class ServiceOrderStrategy implements OrderStrategy {
     const orderId = orderData.order_id;
     const orderItemId = orderData.order_item_id;
     const rpcCustomerId = orderData.customer_id || customerId;
+    let billedTotal = Number(orderData.total_amount) || 0;
+    if (addonProductIds.length > 0) {
+      const { data: addonResult, error: addonError } = await supabase.rpc(
+        'attach_service_order_addons',
+        {
+          p_order_id: orderId,
+          p_service_product_id: resolvedServiceProductId,
+          p_addon_product_ids: addonProductIds,
+        }
+      );
+      if (addonError) {
+        await supabase
+          .from('service_bookings')
+          .update({ status: 'cancelled' })
+          .eq('id', booking.id);
+        logger.error('attach_service_order_addons failed', { error: addonError });
+        throw new Error('Impossible d’ajouter les produits complémentaires');
+      }
+      const addonPayload = addonResult as { total_amount?: number } | null;
+      if (typeof addonPayload?.total_amount === 'number') {
+        billedTotal = addonPayload.total_amount;
+      }
+    }
     const payable = resolveServicePayableAmount(
-      Number(orderData.total_amount) || 0,
+      billedTotal,
       {
         payment_type: paymentType,
         percentage_rate: percentageRate,

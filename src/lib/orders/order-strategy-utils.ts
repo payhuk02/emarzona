@@ -42,6 +42,7 @@ export interface OrderStrategyOptions {
   staffId?: string;
   numberOfParticipants?: number;
   notes?: string;
+  addonProductIds?: string[];
   checkoutMode?: string;
   generateLicense?: boolean;
   licenseType?: string;

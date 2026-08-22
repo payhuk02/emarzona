@@ -321,7 +321,11 @@ export const ServiceBasicInfoForm = ({ data, onUpdate }: ServiceBasicInfoFormPro
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">Tarification</CardTitle>
-          <CardDescription>Définissez le prix de votre service</CardDescription>
+          <CardDescription>
+            {formProfile
+              ? `Prix d’entrée pour ${formProfile.familyLabel}.`
+              : 'Définissez le prix de votre service'}
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3 sm:space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -341,7 +345,9 @@ export const ServiceBasicInfoForm = ({ data, onUpdate }: ServiceBasicInfoFormPro
                 className="text-base sm:text-sm"
               />
               <p className="text-xs text-muted-foreground">
-                Prix de référence, affiché barré sur les cartes produits.
+                {data.fulfillment_mode === 'project' || data.fulfillment_mode === 'both'
+                  ? 'Prix de référence (entrée). Sur la fiche, il s’affiche « À partir de » ; les formules précises se configurent dans Dashboard → Offres projet.'
+                  : 'Prix de référence, affiché barré sur les cartes produits.'}
               </p>
             </div>
 
@@ -377,7 +383,9 @@ export const ServiceBasicInfoForm = ({ data, onUpdate }: ServiceBasicInfoFormPro
               className="text-base sm:text-sm"
             />
             <p className="text-xs text-muted-foreground">
-              Prix réellement facturé au client. Il doit être inférieur au prix de référence.
+              {data.fulfillment_mode === 'project' || data.fulfillment_mode === 'both'
+                ? 'Prix d’entrée réellement affiché (« À partir de »). Il doit être inférieur au prix de référence. Les packages / extras personnalisent le devis sur la fiche produit.'
+                : 'Prix réellement facturé au client. Il doit être inférieur au prix de référence.'}
             </p>
             {data.promotional_price && data.price && data.promotional_price < data.price && (
               <p className="text-sm text-green-600">

@@ -34,6 +34,12 @@ export interface Product {
   payment_options?: Record<string, unknown> | string | null;
   whatsapp_number?: string | null;
   whatsapp_enabled?: boolean | null;
+  pricing_type?: string | null;
+  fulfillment_mode?: string | null;
+  duration?: number | null;
+  calendar_available?: boolean | null;
+  staff_required?: boolean | null;
+  package_starting_price?: number | null;
   stores?: {
     id: string;
     name: string;

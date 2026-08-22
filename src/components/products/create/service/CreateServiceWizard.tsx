@@ -1,7 +1,7 @@
 /**
  * Create Service Wizard - Professional
  * Date: 28 octobre 2025
- * 
+ *
  * Wizard professionnel en 5 étapes pour services
  * Inspiré de: Calendly, Acuity Scheduling, Square Appointments
  */
@@ -29,6 +29,7 @@ import { ServiceBasicInfoForm } from './ServiceBasicInfoForm';
 import { ServiceDurationAvailabilityForm } from './ServiceDurationAvailabilityForm';
 import { ServiceStaffResourcesForm } from './ServiceStaffResourcesForm';
 import { logger } from '@/lib/logger';
+import { toPersistedPricingType } from '@/lib/service/service-pricing';
 import { ServicePricingOptionsForm } from './ServicePricingOptionsForm';
 import { ServicePreview } from './ServicePreview';
 import { useToast } from '@/hooks/use-toast';
@@ -87,20 +88,20 @@ export const CreateServiceWizard = () => {
     category_id: null,
     tags: [],
     images: [],
-    
+
     // Duration & Availability (Step 2)
     service_type: 'appointment',
     duration_minutes: 60,
     location_type: 'on_site',
     availability_slots: [],
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-    
+
     // Staff & Resources (Step 3)
     requires_staff: true,
     staff_members: [],
     max_participants: 1,
     resources_needed: [],
-    
+
     // Pricing & Options (Step 4)
     pricing_type: 'fixed',
     deposit_required: false,
@@ -112,7 +113,7 @@ export const CreateServiceWizard = () => {
       buffer_time_after: 0,
       advance_booking_days: 30,
     },
-    
+
     // Meta
     is_active: true,
   });
@@ -124,7 +125,7 @@ export const CreateServiceWizard = () => {
    * Validate current step
    */
   const validateStep = (step: number): boolean => {
-    const  errors: string[] = [];
+    const errors: string[] = [];
 
     switch (step) {
       case 1:
@@ -141,8 +142,8 @@ export const CreateServiceWizard = () => {
         if (!formData.location_type) {
           errors.push('Le type de localisation est requis');
         }
-        if (formData.location_type === 'online' && !formData.meeting_url) {
-          errors.push('L\'URL de réunion est requise pour les services en ligne');
+        if (formData.location_type === 'on_site' && !formData.location_address) {
+          errors.push("L'adresse est requise pour les services sur site");
         }
         if (!formData.availability_slots || formData.availability_slots.length === 0) {
           errors.push('Au moins un créneau de disponibilité est requis');
@@ -150,7 +151,10 @@ export const CreateServiceWizard = () => {
         break;
 
       case 3:
-        if (formData.requires_staff && (!formData.staff_members || formData.staff_members.length === 0)) {
+        if (
+          formData.requires_staff &&
+          (!formData.staff_members || formData.staff_members.length === 0)
+        ) {
           errors.push('Au moins un membre du personnel est requis');
         }
         if (!formData.max_participants || formData.max_participants < 1) {
@@ -163,7 +167,7 @@ export const CreateServiceWizard = () => {
           errors.push('Le type de tarification est requis');
         }
         if (formData.deposit_required && !formData.deposit_amount) {
-          errors.push('Le montant de l\'acompte est requis');
+          errors.push("Le montant de l'acompte est requis");
         }
         break;
     }
@@ -209,10 +213,11 @@ export const CreateServiceWizard = () => {
     }
 
     // 1. Generate slug from name
-    const slug = formData.name
-      ?.toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '') || 'service';
+    const slug =
+      formData.name
+        ?.toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '') || 'service';
 
     // 2. Create base product
     const { data: product, error: productError } = await supabase
@@ -237,30 +242,28 @@ export const CreateServiceWizard = () => {
     if (productError) throw productError;
 
     // 3. Create service_product
-    const { error: serviceError } = await supabase
-      .from('service_products')
-      .insert({
-        product_id: product.id,
-        service_type: formData.service_type || 'appointment',
-        duration_minutes: formData.duration || 60,
-        location_type: formData.location_type || 'on_site',
-        location_address: formData.location_address,
-        meeting_url: formData.meeting_url,
-        timezone: formData.timezone || 'UTC',
-        requires_staff: formData.requires_staff !== false,
-        max_participants: formData.max_participants || 1,
-        pricing_type: formData.pricing_type || 'fixed',
-        deposit_required: formData.deposit_required || false,
-        deposit_amount: formData.deposit_amount,
-        deposit_type: formData.deposit_type,
-        allow_booking_cancellation: formData.allow_booking_cancellation !== false,
-        cancellation_deadline_hours: formData.cancellation_deadline_hours || 24,
-        require_approval: formData.require_approval || false,
-        buffer_time_before: formData.buffer_time_before || 0,
-        buffer_time_after: formData.buffer_time_after || 0,
-        max_bookings_per_day: formData.max_bookings_per_day,
-        advance_booking_days: formData.advance_booking_days || 30,
-      });
+    const { error: serviceError } = await supabase.from('service_products').insert({
+      product_id: product.id,
+      service_type: formData.service_type || 'appointment',
+      duration_minutes: formData.duration || 60,
+      location_type: formData.location_type || 'on_site',
+      location_address: formData.location_address,
+      meeting_url: formData.meeting_url,
+      timezone: formData.timezone || 'UTC',
+      requires_staff: formData.requires_staff !== false,
+      max_participants: formData.max_participants || 1,
+      pricing_type: toPersistedPricingType(formData.pricing_type),
+      deposit_required: formData.deposit_required || false,
+      deposit_amount: formData.deposit_amount,
+      deposit_type: formData.deposit_type,
+      allow_booking_cancellation: formData.allow_booking_cancellation !== false,
+      cancellation_deadline_hours: formData.cancellation_deadline_hours || 24,
+      require_approval: formData.require_approval || false,
+      buffer_time_before: formData.buffer_time_before || 0,
+      buffer_time_after: formData.buffer_time_after || 0,
+      max_bookings_per_day: formData.max_bookings_per_day,
+      advance_booking_days: formData.advance_booking_days || 30,
+    });
 
     if (serviceError) throw serviceError;
 
@@ -277,9 +280,7 @@ export const CreateServiceWizard = () => {
         is_active: member.is_active !== false,
       }));
 
-      const { error: staffError } = await supabase
-        .from('service_staff_members')
-        .insert(staffData);
+      const { error: staffError } = await supabase.from('service_staff_members').insert(staffData);
 
       if (staffError) throw staffError;
     }
@@ -329,18 +330,19 @@ export const CreateServiceWizard = () => {
     setIsSaving(true);
     try {
       const product = await saveServiceProduct(true);
-      
+
       toast({
         title: '✅ Brouillon sauvegardé',
         description: `Service "${product.name}" enregistré. Vous pouvez continuer plus tard.`,
       });
-      
+
       navigate('/dashboard/products');
     } catch (error) {
       logger.error('Save draft error', { error });
       toast({
         title: '❌ Erreur de sauvegarde',
-        description: error instanceof Error ? error.message : 'Impossible de sauvegarder le brouillon',
+        description:
+          error instanceof Error ? error.message : 'Impossible de sauvegarder le brouillon',
         variant: 'destructive',
       });
     } finally {
@@ -353,8 +355,8 @@ export const CreateServiceWizard = () => {
    */
   const handlePublish = async () => {
     // Validate all steps
-    let  allValid= true;
-    for (let  step= 1; step <= 4; step++) {
+    let allValid = true;
+    for (let step = 1; step <= 4; step++) {
       if (!validateStep(step)) {
         allValid = false;
       }
@@ -372,12 +374,12 @@ export const CreateServiceWizard = () => {
     setIsSaving(true);
     try {
       const product = await saveServiceProduct(false);
-      
+
       toast({
         title: '🎉 Service publié !',
         description: `"${product.name}" est maintenant disponible à la réservation`,
       });
-      
+
       navigate('/dashboard/products');
     } catch (error) {
       logger.error('Publish error', { error });
@@ -414,7 +416,9 @@ export const CreateServiceWizard = () => {
           {/* Progress Bar */}
           <div className="space-y-2">
             <div className="flex items-center justify-between text-sm">
-              <span className="font-medium">Étape {currentStep} sur {STEPS.length}</span>
+              <span className="font-medium">
+                Étape {currentStep} sur {STEPS.length}
+              </span>
               <span className="text-muted-foreground">{Math.round(progress)}% complété</span>
             </div>
             <Progress value={progress} className="h-2" />
@@ -424,7 +428,7 @@ export const CreateServiceWizard = () => {
         {/* Steps Indicator */}
         <div className="mb-8">
           <div className="grid grid-cols-5 gap-2">
-            {STEPS.map((step) => {
+            {STEPS.map(step => {
               const Icon = step.icon;
               const isActive = currentStep === step.id;
               const isCompleted = currentStep > step.id;
@@ -447,7 +451,9 @@ export const CreateServiceWizard = () => {
                   `}
                 >
                   <div className="flex items-center gap-2 mb-1">
-                    <Icon className={`h-4 w-4 ${isActive ? 'text-primary' : isCompleted ? 'text-green-600' : 'text-muted-foreground'}`} />
+                    <Icon
+                      className={`h-4 w-4 ${isActive ? 'text-primary' : isCompleted ? 'text-green-600' : 'text-muted-foreground'}`}
+                    />
                     {isCompleted && <CheckCircle2 className="h-3 w-3 text-green-600 ml-auto" />}
                     {hasErrors && <AlertCircle className="h-3 w-3 text-red-600 ml-auto" />}
                   </div>
@@ -479,15 +485,10 @@ export const CreateServiceWizard = () => {
               {React.createElement(STEPS[currentStep - 1].icon, { className: 'h-5 w-5' })}
               {STEPS[currentStep - 1].title}
             </CardTitle>
-            <CardDescription>
-              {STEPS[currentStep - 1].description}
-            </CardDescription>
+            <CardDescription>{STEPS[currentStep - 1].description}</CardDescription>
           </CardHeader>
           <CardContent>
-            <CurrentStepComponent
-              data={formData}
-              onUpdate={handleUpdateFormData}
-            />
+            <CurrentStepComponent data={formData} onUpdate={handleUpdateFormData} />
           </CardContent>
         </Card>
 
@@ -495,11 +496,7 @@ export const CreateServiceWizard = () => {
         <div className="flex items-center justify-between">
           <div className="flex gap-2">
             {currentStep > 1 && (
-              <Button
-                variant="outline"
-                onClick={handlePrevious}
-                disabled={isSaving}
-              >
+              <Button variant="outline" onClick={handlePrevious} disabled={isSaving}>
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Précédent
               </Button>
@@ -507,11 +504,7 @@ export const CreateServiceWizard = () => {
           </div>
 
           <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={handleSaveDraft}
-              disabled={isSaving}
-            >
+            <Button variant="outline" onClick={handleSaveDraft} disabled={isSaving}>
               <Save className="h-4 w-4 mr-2" />
               Sauvegarder brouillon
             </Button>
@@ -532,9 +525,3 @@ export const CreateServiceWizard = () => {
     </div>
   );
 };
-
-
-
-
-
-

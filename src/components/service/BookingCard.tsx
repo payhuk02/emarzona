@@ -1,7 +1,7 @@
 /**
  * Booking Card Component
  * Date: 28 octobre 2025
- * 
+ *
  * Professional card for displaying service bookings
  */
 
@@ -9,12 +9,11 @@ import React from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import {
   Calendar,
   Clock,
   User,
-  Video,
   Phone,
   Mail,
   MoreVertical,
@@ -26,6 +25,7 @@ import {
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import type { ServiceBooking } from '@/hooks/service';
+import { JoinServiceMeetingButton } from '@/components/service/JoinServiceMeetingButton';
 
 interface BookingProduct {
   id: string;
@@ -47,7 +47,11 @@ interface BookingStaff {
 }
 
 interface BookingCardProps {
-  booking: ServiceBooking & { product?: BookingProduct; customer?: BookingCustomer; staff?: BookingStaff };
+  booking: ServiceBooking & {
+    product?: BookingProduct;
+    customer?: BookingCustomer;
+    staff?: BookingStaff;
+  };
   onConfirm?: (id: string) => void;
   onCancel?: (id: string) => void;
   onComplete?: (id: string) => void;
@@ -126,7 +130,7 @@ const BookingCardComponent = ({
               <h3 className="font-semibold">{booking.product?.name}</h3>
               {getStatusBadge()}
             </div>
-            
+
             <div className="flex items-center gap-4 text-sm text-muted-foreground">
               <div className="flex items-center gap-1">
                 <Calendar className="h-3 w-3" />
@@ -143,10 +147,10 @@ const BookingCardComponent = ({
             <StableDropdownMenu
               triggerContent={<MoreVertical className="h-4 w-4" />}
               triggerProps={{
-                variant: "ghost" as const,
-                size: "icon" as const,
-                className: "h-8 w-8",
-                "aria-label": `Actions pour la réservation ${booking.id}`
+                variant: 'ghost' as const,
+                size: 'icon' as const,
+                className: 'h-8 w-8',
+                'aria-label': `Actions pour la réservation ${booking.id}`,
               }}
             >
               {booking.status === 'pending' && (
@@ -167,7 +171,8 @@ const BookingCardComponent = ({
                   Absent
                 </SelectItem>
               )}
-              <SelectItem value="view"
+              <SelectItem
+                value="view"
                 onSelect={() => onCancel?.(booking.id)}
                 className="text-destructive"
               >
@@ -217,27 +222,25 @@ const BookingCardComponent = ({
         )}
 
         {/* Meeting URL */}
-        {booking.meeting_url && (
-          <div className="flex items-center gap-2 text-sm">
-            <Video className="h-4 w-4 text-muted-foreground" />
-            <a
-              href={booking.meeting_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary hover:underline truncate"
-            >
-              Lien de visio
-            </a>
-          </div>
-        )}
+        <JoinServiceMeetingButton
+          bookingId={booking.id}
+          role="host"
+          meetingUrl={booking.meeting_url}
+          meetingPlatform={booking.meeting_platform}
+          locationType={
+            (booking as { location_type?: string }).location_type ??
+            (booking as { service_product?: Array<{ location_type?: string }> })
+              .service_product?.[0]?.location_type
+          }
+          status={booking.status}
+          label={booking.meeting_platform === 'daily' ? 'Rejoindre (animateur)' : 'Lien de visio'}
+        />
 
         {/* Participants Count */}
         {booking.participants_count > 1 && (
           <div className="flex items-center gap-2 text-sm">
             <User className="h-4 w-4 text-muted-foreground" />
-            <span className="text-muted-foreground">
-              {booking.participants_count} participants
-            </span>
+            <span className="text-muted-foreground">{booking.participants_count} participants</span>
           </div>
         )}
 
@@ -252,12 +255,8 @@ const BookingCardComponent = ({
         {/* Internal Notes */}
         {booking.internal_notes && showActions && (
           <div className="p-3 bg-yellow-50 dark:bg-yellow-950 rounded-lg text-sm border border-yellow-200 dark:border-yellow-800">
-            <p className="font-medium mb-1 text-yellow-900 dark:text-yellow-100">
-              Notes internes:
-            </p>
-            <p className="text-yellow-800 dark:text-yellow-200">
-              {booking.internal_notes}
-            </p>
+            <p className="font-medium mb-1 text-yellow-900 dark:text-yellow-100">Notes internes:</p>
+            <p className="text-yellow-800 dark:text-yellow-200">{booking.internal_notes}</p>
           </div>
         )}
 
@@ -267,9 +266,7 @@ const BookingCardComponent = ({
             <p className="font-medium mb-1 text-red-900 dark:text-red-100">
               Raison de l'annulation:
             </p>
-            <p className="text-red-800 dark:text-red-200">
-              {booking.cancellation_reason}
-            </p>
+            <p className="text-red-800 dark:text-red-200">{booking.cancellation_reason}</p>
           </div>
         )}
 
@@ -338,7 +335,7 @@ export const BookingsList = ({
   if (loading) {
     return (
       <div className="space-y-4">
-        {[1, 2, 3].map((i) => (
+        {[1, 2, 3].map(i => (
           <Card key={i} className="p-6">
             <div className="space-y-3">
               <div className="h-6 bg-muted rounded animate-pulse w-3/4" />
@@ -357,9 +354,7 @@ export const BookingsList = ({
         <div className="text-center">
           <Calendar className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
           <h3 className="text-lg font-semibold mb-2">Aucune réservation</h3>
-          <p className="text-muted-foreground">
-            Les réservations apparaîtront ici
-          </p>
+          <p className="text-muted-foreground">Les réservations apparaîtront ici</p>
         </div>
       </Card>
     );
@@ -367,7 +362,7 @@ export const BookingsList = ({
 
   return (
     <div className="space-y-4">
-      {bookings.map((booking) => (
+      {bookings.map(booking => (
         <BookingCard
           key={booking.id}
           booking={booking}
@@ -381,10 +376,3 @@ export const BookingsList = ({
     </div>
   );
 };
-
-
-
-
-
-
-

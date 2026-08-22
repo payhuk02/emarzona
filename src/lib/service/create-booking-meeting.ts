@@ -1,5 +1,5 @@
 /**
- * Epic 3.3.5 — Create Zoom/Google Meet for online service bookings
+ * Epic 3.3.5 — Create Daily.co (default), Zoom, or Google Meet for online service bookings
  */
 
 import { supabase } from '@/integrations/supabase/client';
@@ -20,13 +20,13 @@ export interface BookingMeetingResult {
 
 export async function createBookingMeeting(
   bookingId: string,
-  platform?: 'zoom' | 'google_meet'
+  platform?: 'daily' | 'zoom' | 'google_meet'
 ): Promise<BookingMeetingResult> {
   try {
     const { data, error } = await supabase.functions.invoke<BookingMeetingResult>(
       'service-booking-meeting',
       {
-        body: { bookingId, platform },
+        body: platform ? { bookingId, platform } : { bookingId },
       }
     );
 

@@ -7,6 +7,7 @@ import {
   validateServiceFormAttributes,
 } from '@/lib/services/service-form-profiles';
 import { getServiceListingAttributeChips } from '@/lib/services/service-listing-attributes';
+import { getServicePricingGuidance } from '@/lib/service/service-pricing';
 
 describe('getServiceFormProfile', () => {
   it('returns the IT project profile from a leaf slug', () => {
@@ -22,7 +23,29 @@ describe('getServiceFormProfile', () => {
     const profile = getServiceFormProfile('svc-beaute-bien-etre', 'svc-coiffure');
     expect(profile?.requireSlots).toBe(true);
     expect(profile?.defaults.requires_staff).toBe(true);
+    expect(profile?.defaults.pricing_type).toBe('fixed');
     expect(profile?.fields[0]?.key).toBe('service_focus');
+  });
+
+  it('sets pricing type defaults per family', () => {
+    expect(
+      getServiceFormProfile(undefined, 'svc-coaching-professionnel')?.defaults.pricing_type
+    ).toBe('hourly');
+    expect(
+      getServiceFormProfile(undefined, 'svc-consultation-juridique')?.defaults.pricing_type
+    ).toBe('hourly');
+    expect(
+      getServiceFormProfile(undefined, 'svc-organisation-evenements')?.defaults.pricing_type
+    ).toBe('per_participant');
+    expect(
+      getServiceFormProfile(undefined, 'svc-assistance-virtuelle')?.defaults.pricing_type
+    ).toBe('hourly');
+    expect(getServiceFormProfile(undefined, 'svc-developpement-web')?.defaults.pricing_type).toBe(
+      'fixed'
+    );
+    expect(
+      getServiceFormProfile(undefined, 'svc-developpement-web')?.defaults.fulfillment_mode
+    ).toBe('project');
   });
 
   it('rejects incomplete required attributes', () => {
@@ -96,6 +119,21 @@ describe('leaf form coverage', () => {
         leaf
       ).toBe(true);
       expect(profile?.fields[0]?.key).toBe(extras[0].key);
+    }
+  });
+});
+
+describe('pricing defaults stay synced with catalog guidance', () => {
+  it('matches type and À partir de for every family', () => {
+    for (const familySlug of Object.keys(SERVICE_FAMILY_LEAVES)) {
+      const leaf = SERVICE_FAMILY_LEAVES[familySlug][0];
+      const profile = getServiceFormProfile(familySlug, leaf);
+      const guidance = getServicePricingGuidance(familySlug);
+      expect(profile?.defaults.pricing_type, familySlug).toBe(guidance.pricingType);
+      const startingFromMode =
+        profile?.defaults.fulfillment_mode === 'project' ||
+        profile?.defaults.fulfillment_mode === 'both';
+      expect(guidance.showStartingFrom, familySlug).toBe(startingFromMode);
     }
   });
 });

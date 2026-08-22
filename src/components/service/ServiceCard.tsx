@@ -27,8 +27,9 @@ import { ResponsiveProductImage } from '@/components/ui/ResponsiveProductImage';
 import { PriceStockAlertButton } from '@/components/marketplace/PriceStockAlertButton';
 import { supabase } from '@/integrations/supabase/client';
 import { ProductManagementActions } from '@/components/products/ProductManagementActions';
-import { getDisplayPrice } from '@/lib/product-helpers';
 import { ServiceListingAttributeBadges } from '@/components/service/ServiceListingAttributeBadges';
+import { ServicePriceDisplay } from '@/components/service/ServicePriceDisplay';
+import { resolveServiceDisplayPrice } from '@/lib/service/service-pricing';
 
 interface ServiceCardProps {
   service: ServiceProduct;
@@ -97,9 +98,11 @@ const ServiceCardComponent = ({
     return mins > 0 ? `${hours}h ${mins}min` : `${hours}h`;
   };
 
-  const display = getDisplayPrice({
+  const display = resolveServiceDisplayPrice({
     price: Number(service.product?.price || 0),
-    promotional_price: Number(service.product?.promotional_price || 0),
+    promotionalPrice: Number(service.product?.promotional_price || 0),
+    pricingType: service.pricing_type,
+    fulfillmentMode: service.fulfillment_mode,
   });
   const currency = String(service.product?.currency || 'XOF');
   const imageSizes =
@@ -193,28 +196,17 @@ const ServiceCardComponent = ({
         <div className="space-y-3">
           {/* Price */}
           <div className="flex items-center justify-between gap-2">
-            <div className="flex flex-col min-w-0 flex-1">
-              <div className="flex items-baseline gap-1.5 sm:gap-2">
-                <p className="text-sm sm:text-base md:text-lg lg:text-2xl font-bold text-primary whitespace-nowrap">
-                  {display.price.toLocaleString('fr-FR')} {currency}
-                </p>
-                {display.originalPrice != null && (
-                  <span className="text-xs sm:text-sm text-muted-foreground line-through whitespace-nowrap">
-                    {display.originalPrice.toLocaleString('fr-FR')} {currency}
-                  </span>
-                )}
-              </div>
-              <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">
-                {service.pricing_type === 'fixed' && 'Prix fixe'}
-                {service.pricing_type === 'hourly' && 'Tarif horaire'}
-                {service.pricing_type === 'per_participant' && 'Par participant'}
-              </p>
-            </div>
+            <ServicePriceDisplay
+              display={display}
+              currency={currency}
+              size="md"
+              className="min-w-0 flex-1"
+            />
             {service.product?.id && !showActions && (
               <PriceStockAlertButton
                 productId={service.product.id}
                 productName={service.product.name}
-                currentPrice={display.price}
+                currentPrice={display.amount}
                 currency={service.product.currency || 'XOF'}
                 productType="service"
                 variant="outline"

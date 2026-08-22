@@ -177,10 +177,17 @@ export const ServicePreview = ({ data }: ServicePreviewProps) => {
             </div>
           )}
 
-          {data.meeting_url && (
+          {data.location_type === 'online' && (
             <div>
-              <p className="text-sm font-medium text-muted-foreground">URL de réunion</p>
-              <p className="text-sm text-primary font-mono break-all">{data.meeting_url}</p>
+              <p className="text-sm font-medium text-muted-foreground">Visio</p>
+              {data.meeting_url ? (
+                <p className="text-sm text-primary font-mono break-all">{data.meeting_url}</p>
+              ) : (
+                <p className="text-sm">
+                  Emarzona Visio (Daily.co) — une salle privée est créée à chaque rendez-vous
+                  confirmé.
+                </p>
+              )}
             </div>
           )}
         </CardContent>

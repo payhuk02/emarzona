@@ -50,7 +50,7 @@ export function useCreateBookingMeeting() {
       platform,
     }: {
       bookingId: string;
-      platform?: 'zoom' | 'google_meet';
+      platform?: 'daily' | 'zoom' | 'google_meet';
     }) => createBookingMeeting(bookingId, platform),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['service-bookings'] });

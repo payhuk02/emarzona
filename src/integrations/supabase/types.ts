@@ -43721,6 +43721,12 @@ export type Database = {
           updated_at: string | null;
           whatsapp_enabled: boolean | null;
           whatsapp_number: string | null;
+          pricing_type: string | null;
+          fulfillment_mode: string | null;
+          duration_minutes: number | null;
+          calendar_available: boolean | null;
+          requires_staff: boolean | null;
+          package_starting_price: number | null;
         };
         Relationships: [];
       };
@@ -46130,6 +46136,10 @@ export type Database = {
           store_slug: string;
           tags: string[];
           updated_at: string;
+          pricing_type: string | null;
+          fulfillment_mode: string | null;
+          requires_staff: boolean | null;
+          package_starting_price: number | null;
         }[];
       };
       find_similar_products:
@@ -46771,6 +46781,12 @@ export type Database = {
           updated_at: string;
           whatsapp_enabled: boolean;
           whatsapp_number: string | null;
+          pricing_type: string | null;
+          fulfillment_mode: string | null;
+          duration_minutes: number | null;
+          calendar_available: boolean | null;
+          requires_staff: boolean | null;
+          package_starting_price: number | null;
         }[];
       };
       get_next_course_in_path: {
