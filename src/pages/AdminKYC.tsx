@@ -27,8 +27,45 @@ import { useAdminKYC, KYCSubmission } from '@/hooks/useKYC';
 import { useCurrentAdminPermissions } from '@/hooks/useCurrentAdminPermissions';
 import { useAdminMFA } from '@/hooks/useAdminMFA';
 import { useToast } from '@/hooks/use-toast';
-import { Shield, CheckCircle2, XCircle, Clock, Eye } from 'lucide-react';
+import { Shield, CheckCircle2, XCircle, Clock, Eye, Loader2 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { resolveKycDocumentUrl } from '@/lib/kyc/kyc-storage';
+
+function KycDocumentButton({ stored, label }: { stored: string; label: string }) {
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+
+  const handleOpen = async () => {
+    setLoading(true);
+    try {
+      const url = await resolveKycDocumentUrl(stored);
+      if (url) {
+        window.open(url, '_blank', 'noopener,noreferrer');
+        return;
+      }
+      toast({
+        title: 'Document indisponible',
+        description: "Impossible d'ouvrir ce document KYC. Réessayez ou demandez un nouvel envoi.",
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Button
+      type="button"
+      variant="outline"
+      className="w-full"
+      onClick={() => void handleOpen()}
+      disabled={loading || !stored}
+    >
+      {loading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
+      {label}
+    </Button>
+  );
+}
 
 const AdminKYC = () => {
   const { can, loading: permLoading } = useCurrentAdminPermissions();
@@ -233,27 +270,15 @@ const AdminKYC = () => {
               <div className="space-y-3">
                 <Label>Documents</Label>
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <a
-                    href={selectedSubmission.document_front_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block"
-                  >
-                    <Button variant="outline" className="w-full">
-                      Voir le recto
-                    </Button>
-                  </a>
+                  <KycDocumentButton
+                    stored={selectedSubmission.document_front_url}
+                    label="Voir le recto"
+                  />
                   {selectedSubmission.document_back_url && (
-                    <a
-                      href={selectedSubmission.document_back_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block"
-                    >
-                      <Button variant="outline" className="w-full">
-                        Voir le verso
-                      </Button>
-                    </a>
+                    <KycDocumentButton
+                      stored={selectedSubmission.document_back_url}
+                      label="Voir le verso"
+                    />
                   )}
                 </div>
               </div>

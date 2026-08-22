@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { logAdminAction } from '@/lib/audit';
+import { KYC_DOCUMENTS_BUCKET } from '@/lib/kyc/kyc-storage';
 
 const KYC_SUBMISSION_FIELDS =
   'id, user_id, full_name, date_of_birth, address, city, country, document_type, document_front_url, document_back_url, status, rejection_reason, reviewed_by, reviewed_at, created_at, updated_at';
@@ -61,23 +62,21 @@ export const useKYC = () => {
   });
 
   const uploadDocument = async (file: File, userId: string, type: 'front' | 'back') => {
-    const fileExt = file.name.split('.').pop();
+    const fileExt = file.name.split('.').pop()?.toLowerCase() || 'bin';
     const fileName = `${userId}/${type}-${Date.now()}.${fileExt}`;
 
     const { error: uploadError } = await supabase.storage
-      .from('kyc-documents')
+      .from(KYC_DOCUMENTS_BUCKET)
       .upload(fileName, file, {
         cacheControl: '3600',
         upsert: false,
+        contentType: file.type || undefined,
       });
 
     if (uploadError) throw uploadError;
 
-    const {
-      data: { publicUrl },
-    } = supabase.storage.from('kyc-documents').getPublicUrl(fileName);
-
-    return publicUrl;
+    // Private bucket: persist the object path, not a public URL.
+    return fileName;
   };
 
   const submitKYC = useMutation({
