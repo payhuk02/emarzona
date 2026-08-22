@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { logAdminAction } from '@/lib/audit';
-import { KYC_DOCUMENTS_BUCKET } from '@/lib/kyc/kyc-storage';
+import { KYC_DOCUMENTS_BUCKET, kycErrorMessage } from '@/lib/kyc/kyc-storage';
 
 const KYC_SUBMISSION_FIELDS =
   'id, user_id, full_name, date_of_birth, address, city, country, document_type, document_front_url, document_back_url, status, rejection_reason, reviewed_by, reviewed_at, created_at, updated_at';
@@ -52,6 +52,7 @@ export const useKYC = () => {
         .from('kyc_submissions')
         .select(KYC_SUBMISSION_FIELDS)
         .eq('user_id', user.id)
+        .is('store_id', null)
         .limit(1);
 
       if (error) throw error;
@@ -98,17 +99,19 @@ export const useKYC = () => {
         .from('kyc_submissions')
         .insert({
           user_id: user.id,
+          store_id: null,
           full_name: formData.full_name,
           date_of_birth: formData.date_of_birth,
           address: formData.address,
           city: formData.city,
           country: formData.country,
           document_type: formData.document_type,
+          document_url: frontUrl,
           document_front_url: frontUrl,
           document_back_url: backUrl,
           status: 'pending',
         })
-        .select()
+        .select(KYC_SUBMISSION_FIELDS)
         .limit(1);
 
       if (error) throw error;
@@ -124,8 +127,7 @@ export const useKYC = () => {
     onError: (error: unknown) => {
       toast({
         title: 'Erreur',
-        description:
-          error instanceof Error ? error.message : 'Impossible de soumettre la demande KYC',
+        description: kycErrorMessage(error, 'Impossible de soumettre la demande KYC'),
         variant: 'destructive',
       });
     },
@@ -148,6 +150,7 @@ export const useAdminKYC = () => {
       const { data, error } = await supabase
         .from('kyc_submissions')
         .select(KYC_SUBMISSION_FIELDS)
+        .is('store_id', null)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -185,7 +188,7 @@ export const useAdminKYC = () => {
           reviewed_at: new Date().toISOString(),
         })
         .eq('id', submissionId)
-        .select()
+        .select(KYC_SUBMISSION_FIELDS)
         .limit(1);
 
       if (error) throw error;
@@ -213,8 +216,7 @@ export const useAdminKYC = () => {
     onError: (error: unknown) => {
       toast({
         title: 'Erreur',
-        description:
-          error instanceof Error ? error.message : 'Impossible de mettre à jour le statut',
+        description: kycErrorMessage(error, 'Impossible de mettre à jour le statut'),
         variant: 'destructive',
       });
     },

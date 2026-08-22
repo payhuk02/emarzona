@@ -17482,9 +17482,16 @@ export type Database = {
       };
       kyc_submissions: {
         Row: {
+          address: string | null;
+          city: string | null;
+          country: string | null;
           created_at: string;
+          date_of_birth: string | null;
+          document_back_url: string | null;
+          document_front_url: string | null;
           document_type: string;
           document_url: string;
+          full_name: string | null;
           id: string;
           rejection_reason: string | null;
           reviewed_at: string | null;
@@ -17495,9 +17502,16 @@ export type Database = {
           user_id: string;
         };
         Insert: {
+          address?: string | null;
+          city?: string | null;
+          country?: string | null;
           created_at?: string;
+          date_of_birth?: string | null;
+          document_back_url?: string | null;
+          document_front_url?: string | null;
           document_type: string;
           document_url: string;
+          full_name?: string | null;
           id?: string;
           rejection_reason?: string | null;
           reviewed_at?: string | null;
@@ -17508,9 +17522,16 @@ export type Database = {
           user_id: string;
         };
         Update: {
+          address?: string | null;
+          city?: string | null;
+          country?: string | null;
           created_at?: string;
+          date_of_birth?: string | null;
+          document_back_url?: string | null;
+          document_front_url?: string | null;
           document_type?: string;
           document_url?: string;
+          full_name?: string | null;
           id?: string;
           rejection_reason?: string | null;
           reviewed_at?: string | null;

@@ -2,6 +2,17 @@ import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 
 export const KYC_DOCUMENTS_BUCKET = 'kyc-documents';
+export const KYC_DEFAULT_CITY = 'Ouagadougou';
+export const KYC_DEFAULT_COUNTRY = 'Burkina Faso';
+
+export function kycErrorMessage(error: unknown, fallback: string): string {
+  if (error instanceof Error && error.message.trim()) return error.message;
+  if (typeof error === 'object' && error && 'message' in error) {
+    const message = (error as { message?: unknown }).message;
+    if (typeof message === 'string' && message.trim()) return message;
+  }
+  return fallback;
+}
 
 const KYC_PUBLIC_URL_RE = /\/storage\/v1\/object\/public\/kyc-documents\/(.+)$/;
 const KYC_SIGNED_URL_RE = /\/storage\/v1\/object\/sign\/kyc-documents\/(.+?)(?:\?|$)/;

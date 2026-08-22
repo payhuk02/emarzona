@@ -15,6 +15,7 @@ import { MobileFormField } from '@/components/ui/mobile-form-field';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useKYC, KYCFormData } from '@/hooks/useKYC';
+import { KYC_DEFAULT_CITY, KYC_DEFAULT_COUNTRY } from '@/lib/kyc/kyc-storage';
 import { Shield, Upload, CheckCircle2, XCircle, Clock } from 'lucide-react';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -222,7 +223,7 @@ const KYC = () => {
                       onChange={value => setFormData({ ...formData, city: value })}
                       required
                       fieldProps={{
-                        placeholder: 'Paris',
+                        placeholder: KYC_DEFAULT_CITY,
                       }}
                     />
                     <MobileFormField
@@ -233,7 +234,7 @@ const KYC = () => {
                       onChange={value => setFormData({ ...formData, country: value })}
                       required
                       fieldProps={{
-                        placeholder: 'France',
+                        placeholder: KYC_DEFAULT_COUNTRY,
                       }}
                     />
                   </div>

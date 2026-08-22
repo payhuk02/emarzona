@@ -1,4 +1,4 @@
-import { extractKycDocumentPath } from '../kyc-storage';
+import { extractKycDocumentPath, kycErrorMessage } from '../kyc-storage';
 
 describe('extractKycDocumentPath', () => {
   it('keeps a storage object path', () => {
@@ -15,5 +15,18 @@ describe('extractKycDocumentPath', () => {
 
   it('returns null for unrelated http URLs', () => {
     expect(extractKycDocumentPath('https://cdn.example.com/id.png')).toBeNull();
+  });
+});
+
+describe('kycErrorMessage', () => {
+  it('reads a PostgREST-style message object', () => {
+    expect(
+      kycErrorMessage(
+        {
+          message: "Could not find the 'full_name' column of 'kyc_submissions' in the schema cache",
+        },
+        'fallback'
+      )
+    ).toContain('full_name');
   });
 });
