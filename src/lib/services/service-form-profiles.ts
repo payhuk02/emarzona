@@ -51,6 +51,24 @@ const LANGS: ServiceFormFieldOption[] = [
   { value: 'other', label: 'Autre' },
 ];
 
+const SOCIAL_PLATFORMS: ServiceFormFieldOption[] = [
+  { value: 'ig', label: 'Instagram' },
+  { value: 'fb', label: 'Facebook' },
+  { value: 'tt', label: 'TikTok' },
+  { value: 'li', label: 'LinkedIn' },
+  { value: 'wa', label: 'WhatsApp Business' },
+  { value: 'yt', label: 'YouTube' },
+  { value: 'x', label: 'X / Twitter' },
+  { value: 'snap', label: 'Snapchat' },
+  { value: 'pin', label: 'Pinterest' },
+  { value: 'threads', label: 'Threads' },
+  { value: 'tg', label: 'Telegram' },
+  { value: 'kwai', label: 'Kwai' },
+  { value: 'gbp', label: 'Google Business' },
+  { value: 'twitch', label: 'Twitch' },
+  { value: 'discord', label: 'Discord' },
+];
+
 function select(
   key: string,
   label: string,
@@ -132,6 +150,7 @@ export const SERVICE_FAMILY_LEAVES: Record<string, string[]> = {
     'svc-marketing-digital',
     'svc-community-management',
     'svc-gestion-reseaux-sociaux',
+    'svc-configuration-reseaux-sociaux',
     'svc-facebook-instagram-ads',
     'svc-google-ads',
     'svc-tiktok-ads',
@@ -243,6 +262,24 @@ export const SERVICE_FAMILY_LEAVES: Record<string, string[]> = {
     'svc-droit-affaires',
     'svc-mediation',
     'svc-assistance-juridique',
+  ],
+  'svc-creations': [
+    'svc-creations-tiktok',
+    'svc-creations-facebook',
+    'svc-creations-instagram',
+    'svc-creations-linkedin',
+    'svc-creations-youtube',
+    'svc-creations-whatsapp',
+    'svc-creations-x',
+    'svc-creations-snapchat',
+    'svc-creations-pinterest',
+    'svc-creations-threads',
+    'svc-creations-telegram',
+    'svc-creations-kwai',
+    'svc-creations-google-business',
+    'svc-creations-twitch',
+    'svc-creations-discord',
+    'svc-creations-multi-reseaux',
   ],
 };
 
@@ -596,6 +633,35 @@ const FAMILY_PROFILES: Record<
       }),
     ],
   },
+  'svc-creations': {
+    familySlug: 'svc-creations',
+    familyLabel: 'Créations',
+    headline: 'Créations pour un réseau social',
+    description:
+      'Volume, formats fichiers et délai. Les champs du réseau choisi s’affichent au-dessus.',
+    defaults: PROJECT,
+    requireSlots: false,
+    staffRecommended: false,
+    durationLabel: 'Délai de livraison estimé',
+    fields: [
+      flags(
+        'formats',
+        'Formats fichiers',
+        [
+          { value: 'png', label: 'PNG' },
+          { value: 'jpg', label: 'JPG' },
+          { value: 'mp4', label: 'MP4' },
+          { value: 'gif', label: 'GIF' },
+          { value: 'source', label: 'Fichier source' },
+        ],
+        { required: true }
+      ),
+      num('visual_count', 'Nombre de visuels / vidéos', { required: true, placeholder: '10' }),
+      num('delivery_days', 'Délai (jours)', { required: true, placeholder: '7' }),
+      num('revisions', 'Révisions incluses', { placeholder: '2' }),
+      toggle('includes_copy', 'Textes / légendes inclus'),
+    ],
+  },
 };
 
 const OS_MOBILE: ServiceFormFieldOption[] = [
@@ -833,6 +899,321 @@ const LEAF_EXTRA_FIELDS: Record<string, ServiceFormField[]> = {
   ],
   'svc-gestion-reseaux-sociaux': [
     num('posts_per_week', 'Publications / semaine', { required: true, placeholder: '5' }),
+  ],
+  'svc-configuration-reseaux-sociaux': [
+    flags('channels', 'Plateformes à configurer', SOCIAL_PLATFORMS, { required: true }),
+    flags(
+      'setup_items',
+      'Prestations incluses',
+      [
+        { value: 'bio', label: 'Bio & description' },
+        { value: 'visuals', label: 'Photo de profil / couverture' },
+        { value: 'highlights', label: 'Stories à la une' },
+        { value: 'business_manager', label: 'Business Manager' },
+        { value: 'pixel', label: 'Pixel / événements' },
+        { value: 'catalog', label: 'Catalogue produits' },
+        { value: 'whatsapp', label: 'WhatsApp Business' },
+        { value: 'gbp', label: 'Fiche Google Business' },
+      ],
+      { required: true }
+    ),
+    num('account_count', 'Nombre de comptes', { required: true, placeholder: '3' }),
+    toggle('admin_access_provided', 'Le client fournit déjà les accès admin'),
+  ],
+  'svc-creations-tiktok': [
+    select(
+      'account_type',
+      'Type de compte',
+      [
+        { value: 'creator', label: 'Créateur' },
+        { value: 'business', label: 'Business' },
+        { value: 'shop', label: 'TikTok Shop' },
+      ],
+      { required: true }
+    ),
+    select(
+      'monetization_goal',
+      'Objectif monétisation',
+      [
+        { value: 'creativity_program', label: 'Creativity Program / fonds créateur' },
+        { value: 'live', label: 'Lives / cadeaux' },
+        { value: 'affiliate', label: 'Affiliation / vitrine' },
+        { value: 'brand_deals', label: 'Collabs / pubs de marque' },
+      ],
+      { required: true }
+    ),
+    flags(
+      'content_formats',
+      'Formats TikTok',
+      [
+        { value: 'video', label: 'Vidéos courtes' },
+        { value: 'carousel', label: 'Carrousels photo' },
+        { value: 'live_cover', label: 'Cover live' },
+        { value: 'shop_card', label: 'Fiches Shop' },
+      ],
+      { required: true }
+    ),
+    select('video_length', 'Durée cible', [
+      { value: '15', label: '15 secondes' },
+      { value: '30', label: '30 secondes' },
+      { value: '60', label: '60 secondes' },
+      { value: '180', label: '3 minutes+' },
+    ]),
+  ],
+  'svc-creations-facebook': [
+    select(
+      'page_type',
+      'Type de page',
+      [
+        { value: 'business', label: 'Page professionnelle' },
+        { value: 'creator', label: 'Profil créateur' },
+        { value: 'group', label: 'Groupe' },
+      ],
+      { required: true }
+    ),
+    flags(
+      'page_assets',
+      'Livrables Facebook',
+      [
+        { value: 'posts', label: 'Posts' },
+        { value: 'reels', label: 'Reels' },
+        { value: 'cover', label: 'Couverture' },
+        { value: 'ads', label: 'Visuels ads' },
+        { value: 'events', label: 'Événements' },
+      ],
+      { required: true }
+    ),
+    text('page_sector', 'Secteur de la page', { placeholder: 'Commerce, resto, coaching…' }),
+  ],
+  'svc-creations-instagram': [
+    select(
+      'account_type',
+      'Type de compte',
+      [
+        { value: 'business', label: 'Compte professionnel' },
+        { value: 'creator', label: 'Compte créateur' },
+      ],
+      { required: true }
+    ),
+    flags(
+      'ig_assets',
+      'Livrables Instagram',
+      [
+        { value: 'feed', label: 'Posts feed' },
+        { value: 'stories', label: 'Stories' },
+        { value: 'reels', label: 'Reels' },
+        { value: 'carousel', label: 'Carrousels' },
+        { value: 'highlights', label: 'Stories à la une' },
+      ],
+      { required: true }
+    ),
+    select('grid_style', 'Style de grille', [
+      { value: 'cohesive', label: 'Harmonisée' },
+      { value: 'color_block', label: 'Blocs de couleurs' },
+      { value: 'mixed', label: 'Mixte' },
+    ]),
+  ],
+  'svc-creations-linkedin': [
+    select(
+      'profile_type',
+      'Type de présence',
+      [
+        { value: 'company', label: 'Page entreprise' },
+        { value: 'personal', label: 'Profil professionnel' },
+      ],
+      { required: true }
+    ),
+    flags(
+      'li_assets',
+      'Livrables LinkedIn',
+      [
+        { value: 'posts', label: 'Posts' },
+        { value: 'carousel', label: 'Carrousels' },
+        { value: 'banner', label: 'Bannière' },
+        { value: 'articles', label: 'Articles / newsletters' },
+      ],
+      { required: true }
+    ),
+    select('li_tone', 'Ton', [
+      { value: 'corporate', label: 'Corporate' },
+      { value: 'thought', label: 'Thought leadership' },
+      { value: 'recruiting', label: 'Recrutement' },
+    ]),
+  ],
+  'svc-creations-youtube': [
+    select(
+      'yt_content',
+      'Type de contenu',
+      [
+        { value: 'shorts', label: 'Shorts' },
+        { value: 'long', label: 'Vidéos longues' },
+        { value: 'thumbs', label: 'Miniatures' },
+        { value: 'banners', label: 'Bannière / intro' },
+        { value: 'mix', label: 'Pack chaîne' },
+      ],
+      { required: true }
+    ),
+    select('yt_length', 'Durée (si vidéo)', [
+      { value: 'short', label: 'Short < 60 s' },
+      { value: 'mid', label: '3–10 min' },
+      { value: 'long', label: '10 min+' },
+    ]),
+  ],
+  'svc-creations-whatsapp': [
+    flags(
+      'wa_assets',
+      'Livrables WhatsApp Business',
+      [
+        { value: 'status', label: 'Statuts' },
+        { value: 'catalog', label: 'Catalogue' },
+        { value: 'broadcast', label: 'Messages diffusion' },
+        { value: 'channel', label: 'Canal' },
+        { value: 'profile', label: 'Photo / description' },
+      ],
+      { required: true }
+    ),
+    num('catalog_items', 'Articles catalogue (approx.)', { placeholder: '20' }),
+  ],
+  'svc-creations-x': [
+    flags(
+      'x_assets',
+      'Livrables X (Twitter)',
+      [
+        { value: 'posts', label: 'Posts' },
+        { value: 'threads', label: 'Threads' },
+        { value: 'header', label: 'En-tête' },
+        { value: 'cards', label: 'Cards / visuels' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-creations-snapchat': [
+    flags(
+      'snap_assets',
+      'Livrables Snapchat',
+      [
+        { value: 'stories', label: 'Stories' },
+        { value: 'spotlight', label: 'Spotlight' },
+        { value: 'ads', label: 'Snaps ads' },
+        { value: 'filters', label: 'Filtres / lenses' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-creations-pinterest': [
+    flags(
+      'pin_assets',
+      'Livrables Pinterest',
+      [
+        { value: 'pins', label: 'Épingles statiques' },
+        { value: 'idea', label: 'Idea Pins / vidéo' },
+        { value: 'boards', label: 'Tableaux' },
+        { value: 'ads', label: 'Pins ads' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-creations-threads': [
+    flags(
+      'threads_assets',
+      'Livrables Threads',
+      [
+        { value: 'posts', label: 'Posts' },
+        { value: 'carousels', label: 'Carrousels' },
+        { value: 'profile', label: 'Profil / bio' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-creations-telegram': [
+    flags(
+      'tg_assets',
+      'Livrables Telegram',
+      [
+        { value: 'channel', label: 'Posts canal' },
+        { value: 'stickers', label: 'Stickers' },
+        { value: 'banners', label: 'Bannières' },
+        { value: 'bots', label: 'Visuels bot' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-creations-kwai': [
+    select(
+      'kwai_goal',
+      'Objectif Kwai',
+      [
+        { value: 'viral', label: 'Vues / viralité' },
+        { value: 'live', label: 'Lives' },
+        { value: 'shop', label: 'Vitrine / shop' },
+      ],
+      { required: true }
+    ),
+    flags(
+      'kwai_assets',
+      'Formats Kwai',
+      [
+        { value: 'video', label: 'Vidéos' },
+        { value: 'live_cover', label: 'Cover live' },
+        { value: 'profile', label: 'Profil' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-creations-google-business': [
+    flags(
+      'gbp_assets',
+      'Livrables Google Business',
+      [
+        { value: 'posts', label: 'Posts' },
+        { value: 'cover', label: 'Photos couverture' },
+        { value: 'products', label: 'Fiches produits' },
+        { value: 'updates', label: 'Actualités / offres' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-creations-twitch': [
+    flags(
+      'twitch_assets',
+      'Livrables Twitch',
+      [
+        { value: 'overlay', label: 'Overlay live' },
+        { value: 'panels', label: 'Panneaux' },
+        { value: 'emotes', label: 'Emotes' },
+        { value: 'screens', label: 'Écrans (starting/ending)' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-creations-discord': [
+    flags(
+      'discord_assets',
+      'Livrables Discord',
+      [
+        { value: 'banner', label: 'Bannière serveur' },
+        { value: 'icon', label: 'Icône' },
+        { value: 'emojis', label: 'Emojis' },
+        { value: 'embeds', label: 'Embeds / visuels salon' },
+      ],
+      { required: true }
+    ),
+  ],
+  'svc-creations-multi-reseaux': [
+    select(
+      'creation_type',
+      'Type de création',
+      [
+        { value: 'feed', label: 'Posts feed' },
+        { value: 'stories', label: 'Stories' },
+        { value: 'carousel', label: 'Carrousels' },
+        { value: 'ads', label: 'Visuels publicitaires' },
+        { value: 'covers', label: 'Couvertures / bannières' },
+        { value: 'pack', label: 'Pack mixte' },
+      ],
+      { required: true }
+    ),
+    flags('channels', 'Plateformes', SOCIAL_PLATFORMS, { required: true }),
   ],
   'svc-facebook-instagram-ads': [
     select(
@@ -1539,6 +1920,81 @@ const LEAF_EXTRA_FIELDS: Record<string, ServiceFormField[]> = {
   ],
 };
 
+const LEAF_PROFILE_OVERRIDES: Record<
+  string,
+  Partial<Pick<ServiceFormProfile, 'headline' | 'description'>>
+> = {
+  'svc-configuration-reseaux-sociaux': {
+    headline: 'Mise en place des comptes',
+    description:
+      'Indiquez les plateformes, le nombre de comptes et les prestations (bio, pixel, catalogue…).',
+  },
+  'svc-creations-tiktok': {
+    headline: 'Créations TikTok monétisé',
+    description: 'Compte, objectif de monétisation et formats vidéo / Shop.',
+  },
+  'svc-creations-facebook': {
+    headline: 'Créations page Facebook professionnelle',
+    description: 'Posts, Reels, couverture et visuels ads pour une page pro.',
+  },
+  'svc-creations-instagram': {
+    headline: 'Créations Instagram professionnel',
+    description: 'Feed, stories, Reels, carrousels et grille.',
+  },
+  'svc-creations-linkedin': {
+    headline: 'Créations LinkedIn professionnel',
+    description: 'Page entreprise ou profil : posts, carrousels et bannière.',
+  },
+  'svc-creations-youtube': {
+    headline: 'Créations YouTube',
+    description: 'Shorts, miniatures, bannière ou pack chaîne.',
+  },
+  'svc-creations-whatsapp': {
+    headline: 'Créations WhatsApp Business',
+    description: 'Statuts, catalogue, canaux et visuels de diffusion.',
+  },
+  'svc-creations-x': {
+    headline: 'Créations X (Twitter)',
+    description: 'Posts, threads, en-tête et cards.',
+  },
+  'svc-creations-snapchat': {
+    headline: 'Créations Snapchat',
+    description: 'Stories, Spotlight, ads et filtres.',
+  },
+  'svc-creations-pinterest': {
+    headline: 'Créations Pinterest',
+    description: 'Épingles, Idea Pins, tableaux et ads.',
+  },
+  'svc-creations-threads': {
+    headline: 'Créations Threads',
+    description: 'Posts, carrousels et profil.',
+  },
+  'svc-creations-telegram': {
+    headline: 'Créations Telegram',
+    description: 'Canal, stickers, bannières et visuels bot.',
+  },
+  'svc-creations-kwai': {
+    headline: 'Créations Kwai',
+    description: 'Vidéos, lives et vitrine — format populaire en Afrique.',
+  },
+  'svc-creations-google-business': {
+    headline: 'Créations Google Business',
+    description: 'Posts, photos et fiches produits de la fiche d’établissement.',
+  },
+  'svc-creations-twitch': {
+    headline: 'Créations Twitch',
+    description: 'Overlay, panneaux, emotes et écrans de stream.',
+  },
+  'svc-creations-discord': {
+    headline: 'Créations Discord',
+    description: 'Bannière, icône, emojis et embeds du serveur.',
+  },
+  'svc-creations-multi-reseaux': {
+    headline: 'Pack créations multi-réseaux',
+    description: 'Un même pack de visuels décliné sur plusieurs plateformes.',
+  },
+};
+
 const LEAF_TO_FAMILY: Record<string, string> = Object.fromEntries(
   Object.entries(SERVICE_FAMILY_LEAVES).flatMap(([family, leaves]) =>
     leaves.map(leaf => [leaf, family])
@@ -1549,9 +2005,10 @@ export function findServiceFamilySlug(
   parentSlug?: string | null,
   leafSlug?: string | null
 ): string | null {
-  if (parentSlug && FAMILY_PROFILES[parentSlug]) return parentSlug;
-  if (leafSlug && FAMILY_PROFILES[leafSlug]) return leafSlug;
+  // Leaf is the source of truth: a stale parent_id must not swap the form family.
   if (leafSlug && LEAF_TO_FAMILY[leafSlug]) return LEAF_TO_FAMILY[leafSlug];
+  if (leafSlug && FAMILY_PROFILES[leafSlug]) return leafSlug;
+  if (parentSlug && FAMILY_PROFILES[parentSlug]) return parentSlug;
   return null;
 }
 
@@ -1563,10 +2020,17 @@ export function getServiceFormProfile(
   if (!familySlug) return null;
   const base = FAMILY_PROFILES[familySlug];
   if (!base) return null;
-  const extras = leafSlug ? (LEAF_EXTRA_FIELDS[leafSlug] ?? []) : [];
+  const extras = leafSlug
+    ? (LEAF_EXTRA_FIELDS[leafSlug] ??
+      (leafSlug === 'svc-creations'
+        ? (LEAF_EXTRA_FIELDS['svc-creations-multi-reseaux'] ?? [])
+        : []))
+    : [];
   const seen = new Set(extras.map(f => f.key));
+  const overrides = leafSlug ? (LEAF_PROFILE_OVERRIDES[leafSlug] ?? {}) : {};
   return {
     ...base,
+    ...overrides,
     fields: [...extras, ...base.fields.filter(f => !seen.has(f.key))],
   };
 }
@@ -1580,7 +2044,9 @@ export function listServiceLeafSlugs(): string[] {
 }
 
 export function getServiceLeafExtraFields(leafSlug: string): ServiceFormField[] {
-  return LEAF_EXTRA_FIELDS[leafSlug] ?? [];
+  if (LEAF_EXTRA_FIELDS[leafSlug]) return LEAF_EXTRA_FIELDS[leafSlug];
+  if (leafSlug === 'svc-creations') return LEAF_EXTRA_FIELDS['svc-creations-multi-reseaux'] ?? [];
+  return [];
 }
 
 export type ServiceCategoryAttributes = Record<string, string | number | boolean | string[]>;

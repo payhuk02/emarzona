@@ -43,6 +43,7 @@ import {
   type ServiceCategoryRow,
 } from '@/hooks/useServiceCategories';
 import { slugifyCategoryName } from '@/lib/services/service-categories';
+import { SERVICE_FAMILY_LEAVES } from '@/lib/services/service-form-profiles';
 
 type FormState = {
   id?: string;
@@ -204,7 +205,8 @@ export default function AdminServiceCategories() {
               Catégories Services
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
-              Taxonomie plateforme : catégorie → sous-catégorie (12 familles)
+              Taxonomie plateforme : catégorie → sous-catégorie (
+              {Object.keys(SERVICE_FAMILY_LEAVES).length} familles)
             </p>
           </div>
           <div className="flex gap-2">

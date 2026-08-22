@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import {
   getServiceFormProfile,
   getServiceLeafExtraFields,
@@ -103,9 +105,9 @@ describe('leaf form coverage', () => {
   const leaves = listServiceLeafSlugs();
 
   it('maps every family leaf without duplicates', () => {
-    expect(leaves).toHaveLength(116);
-    expect(new Set(leaves).size).toBe(116);
-    expect(Object.keys(SERVICE_FAMILY_LEAVES)).toHaveLength(12);
+    expect(leaves).toHaveLength(133);
+    expect(new Set(leaves).size).toBe(133);
+    expect(Object.keys(SERVICE_FAMILY_LEAVES)).toHaveLength(13);
   });
 
   it('gives every leaf a family profile plus a leaf-specific required field', () => {
@@ -119,6 +121,104 @@ describe('leaf form coverage', () => {
         leaf
       ).toBe(true);
       expect(profile?.fields[0]?.key).toBe(extras[0].key);
+    }
+  });
+
+  it('exposes dedicated forms for Créations networks and social setup', () => {
+    const tiktok = getServiceFormProfile('svc-creations', 'svc-creations-tiktok');
+    expect(tiktok?.familySlug).toBe('svc-creations');
+    expect(tiktok?.headline).toMatch(/TikTok/i);
+    expect(tiktok?.fields.map(f => f.key)).toEqual(
+      expect.arrayContaining([
+        'account_type',
+        'monetization_goal',
+        'content_formats',
+        'visual_count',
+      ])
+    );
+
+    const facebook = getServiceFormProfile('svc-creations', 'svc-creations-facebook');
+    expect(facebook?.headline).toMatch(/Facebook/i);
+    expect(facebook?.fields.some(f => f.key === 'page_assets')).toBe(true);
+
+    const instagram = getServiceFormProfile('svc-creations', 'svc-creations-instagram');
+    expect(instagram?.headline).toMatch(/Instagram/i);
+    expect(instagram?.fields.some(f => f.key === 'ig_assets')).toBe(true);
+
+    const linkedin = getServiceFormProfile('svc-creations', 'svc-creations-linkedin');
+    expect(linkedin?.headline).toMatch(/LinkedIn/i);
+    expect(linkedin?.fields.some(f => f.key === 'li_assets')).toBe(true);
+
+    const setup = getServiceFormProfile(
+      'svc-marketing-communication',
+      'svc-configuration-reseaux-sociaux'
+    );
+    expect(setup?.headline).toMatch(/Mise en place/i);
+    expect(setup?.fields.map(f => f.key)).toEqual(
+      expect.arrayContaining(['channels', 'setup_items', 'account_count'])
+    );
+    expect(setup?.fields.find(f => f.key === 'setup_items')?.required).toBe(true);
+    expect(validateServiceFormAttributes(setup, { channels: ['ig'], account_count: 2 })).toEqual(
+      expect.arrayContaining([expect.stringMatching(/Prestations/i)])
+    );
+    expect(
+      validateServiceFormAttributes(setup, {
+        channels: ['ig', 'fb'],
+        setup_items: ['bio', 'pixel'],
+        account_count: 2,
+        campaign_weeks: 1,
+        kpis: 'Comptes prêts',
+      })
+    ).toEqual([]);
+  });
+
+  it('keeps family profile, extras, and pricing keys aligned', () => {
+    const families = Object.keys(SERVICE_FAMILY_LEAVES);
+    for (const family of families) {
+      expect(
+        getServiceFormProfile(family, SERVICE_FAMILY_LEAVES[family][0]),
+        family
+      ).not.toBeNull();
+      expect(getServicePricingGuidance(family).catalogHint.length, family).toBeGreaterThan(0);
+    }
+    expect(families).toContain('svc-creations');
+    expect(SERVICE_FAMILY_LEAVES['svc-creations']).toEqual([
+      'svc-creations-tiktok',
+      'svc-creations-facebook',
+      'svc-creations-instagram',
+      'svc-creations-linkedin',
+      'svc-creations-youtube',
+      'svc-creations-whatsapp',
+      'svc-creations-x',
+      'svc-creations-snapchat',
+      'svc-creations-pinterest',
+      'svc-creations-threads',
+      'svc-creations-telegram',
+      'svc-creations-kwai',
+      'svc-creations-google-business',
+      'svc-creations-twitch',
+      'svc-creations-discord',
+      'svc-creations-multi-reseaux',
+    ]);
+  });
+
+  it('resolves TikTok creations from a stale marketing parent', () => {
+    const profile = getServiceFormProfile('svc-marketing-communication', 'svc-creations-tiktok');
+    expect(profile?.familySlug).toBe('svc-creations');
+    expect(profile?.fields[0]?.key).toBe('account_type');
+  });
+
+  it('keeps the SQL seed in sync with every Créations leaf', () => {
+    const sql = readFileSync(
+      resolve(
+        __dirname,
+        '../../../../supabase/migrations/20260822170000__service_creations_per_network.sql'
+      ),
+      'utf8'
+    );
+    expect(sql).toContain("'svc-creations'");
+    for (const slug of SERVICE_FAMILY_LEAVES['svc-creations']) {
+      expect(sql, slug).toContain(`'${slug}'`);
     }
   });
 });

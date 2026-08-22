@@ -186,6 +186,8 @@ describe('getServicePricingGuidance', () => {
     expect(getServicePricingGuidance('svc-services-entreprises').pricingType).toBe('hourly');
     expect(getServicePricingGuidance('svc-beaute-bien-etre').showStartingFrom).toBe(false);
     expect(getServicePricingGuidance('svc-maison-services-locaux').pricingType).toBe('fixed');
+    expect(getServicePricingGuidance('svc-creations').pricingType).toBe('fixed');
+    expect(getServicePricingGuidance('svc-creations').showStartingFrom).toBe(true);
   });
 
   it('returns a safe default for unknown families', () => {
