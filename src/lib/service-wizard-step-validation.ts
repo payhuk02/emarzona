@@ -171,6 +171,17 @@ export function validateServiceWizardStep(
       (!formData.staff_members || formData.staff_members.length === 0)
     ) {
       errors.push('Au moins un membre du personnel est requis');
+    } else if (formData.requires_staff && formData.staff_members) {
+      const invalidStaff = formData.staff_members.some(member => {
+        if (!member || typeof member !== 'object') return true;
+        const row = member as { name?: unknown; email?: unknown };
+        const name = typeof row.name === 'string' ? row.name.trim() : '';
+        const email = typeof row.email === 'string' ? row.email.trim() : '';
+        return !name || !email.includes('@');
+      });
+      if (invalidStaff) {
+        errors.push('Chaque membre du personnel doit avoir un nom et un e-mail valides');
+      }
     }
     if (!formData.max_participants || formData.max_participants < 1) {
       errors.push('Le nombre maximum de participants doit être au moins 1');

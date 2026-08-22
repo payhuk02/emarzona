@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { ToastAction } from '@/components/ui/toast';
 import {
   Calendar,
   Info,
@@ -421,9 +422,10 @@ export const EditServiceProductWizard = ({
         slug,
         description: formData.description,
         short_description: formData.short_description,
-        price: formData.price || 0,
+        price: formData.pricing_model === 'free' ? 0 : formData.price || 0,
         promotional_price: formData.promotional_price || null,
         currency: formData.currency || 'XOF',
+        pricing_model: formData.pricing_model || 'one-time',
         category: formData.category,
         category_id: formData.category_id,
         image_url: formData.images?.[0] || null,
@@ -568,9 +570,21 @@ export const EditServiceProductWizard = ({
         throw new Error('Enregistrement produit service introuvable');
       }
 
+      const offersNext =
+        formData.fulfillment_mode === 'project' || formData.fulfillment_mode === 'both';
       toast({
         title: '✅ Service mis à jour',
-        description: 'Le service a été modifié avec succès',
+        description: offersNext
+          ? 'Le service a été modifié. Vous pouvez mettre à jour les formules projet.'
+          : 'Le service a été modifié avec succès',
+        action: offersNext ? (
+          <ToastAction
+            altText="Ouvrir les offres projet"
+            onClick={() => navigate('/dashboard/services/project-offers')}
+          >
+            Offres projet
+          </ToastAction>
+        ) : undefined,
       });
 
       invalidateCatalog();
@@ -587,7 +601,7 @@ export const EditServiceProductWizard = ({
     } finally {
       setIsSaving(false);
     }
-  }, [formData, productId, store, onSuccess, toast, invalidateCatalog]);
+  }, [formData, productId, store, onSuccess, toast, invalidateCatalog, navigate]);
 
   const handleNext = useCallback(async () => {
     const result = await validateStep(currentStep);

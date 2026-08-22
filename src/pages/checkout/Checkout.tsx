@@ -775,6 +775,7 @@ const Checkout = () => {
                 quotedTotal: projectOrder.totalPrice,
               },
               checkoutMode: 'immediate',
+              couponCode: appliedCouponCode?.code || null,
             });
             sessionStorage.removeItem(projectKey);
             if (!serviceResult.checkoutUrl) {
@@ -807,6 +808,7 @@ const Checkout = () => {
             checkoutMode: 'immediate',
             addonProductIds: addonIds,
             staffId,
+            couponCode: appliedCouponCode?.code || null,
           });
 
           if (!serviceResult.checkoutUrl) {

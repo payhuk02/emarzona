@@ -248,3 +248,34 @@ function activePackagePrices(packagePrices?: Array<number | null | undefined> | 
     .map(value => Number(value))
     .filter(value => Number.isFinite(value) && value >= 0);
 }
+
+/** Prix listing (filtre / tri) : min formule si présent, sinon promo ou catalogue. */
+export function resolveServiceListingAmount(input: {
+  price?: number | null;
+  promotionalPrice?: number | null;
+  packageStartingPrice?: number | null;
+}): number {
+  return resolveServiceDisplayPrice({
+    price: input.price,
+    promotionalPrice: input.promotionalPrice,
+    packagePrices:
+      input.packageStartingPrice != null && Number(input.packageStartingPrice) > 0
+        ? [Number(input.packageStartingPrice)]
+        : undefined,
+  }).amount;
+}
+
+export function minActiveDeliveryTierPrice(
+  packages?: Array<{
+    price?: number | null;
+    package_price?: number | null;
+    package_kind?: string | null;
+    is_active?: boolean | null;
+  }> | null
+): number | null {
+  const prices = (packages ?? [])
+    .filter(pkg => pkg.package_kind === 'delivery_tier' && pkg.is_active !== false)
+    .map(pkg => Number(pkg.price) || Number(pkg.package_price) || 0)
+    .filter(value => Number.isFinite(value) && value > 0);
+  return prices.length > 0 ? Math.min(...prices) : null;
+}

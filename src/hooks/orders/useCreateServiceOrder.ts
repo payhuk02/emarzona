@@ -138,6 +138,9 @@ export interface CreateServiceOrderOptions {
 
   /** Produits complémentaires sélectionnés (digital/physical) */
   addonProductIds?: string[];
+
+  /** Code coupon checkout — appliqué par la RPC, pas seulement à l’affichage */
+  couponCode?: string | null;
 }
 
 /**
@@ -228,6 +231,7 @@ export const useCreateServiceOrder = () => {
         checkoutMode = 'immediate',
         projectOrder,
         addonProductIds = [],
+        couponCode,
       } = options;
 
       // 1. Récupérer les détails du produit (avec payment_options)
@@ -260,384 +264,6 @@ export const useCreateServiceOrder = () => {
         throw new Error('Service non trouvé');
       }
 
-      // 3. Vérifier capacité max participants
-      if (
-        serviceProduct.max_participants &&
-        numberOfParticipants > serviceProduct.max_participants
-      ) {
-        throw new Error(`Nombre maximum de participants: ${serviceProduct.max_participants}`);
-      }
-
-      // Calculer la durée maintenant pour l'utiliser partout
-      const actualDuration = durationMinutes || serviceProduct.duration_minutes;
-      const bookingStartDateTime = new Date(bookingDateTime);
-      const bookingEndDateTime = new Date(bookingStartDateTime.getTime() + actualDuration * 60000);
-      // Use local calendar date (not UTC from toISOString) so it matches availability + UI selection.
-      const bookingDate = [
-        bookingStartDateTime.getFullYear(),
-        String(bookingStartDateTime.getMonth() + 1).padStart(2, '0'),
-        String(bookingStartDateTime.getDate()).padStart(2, '0'),
-      ].join('-');
-      const bookingStartTime = bookingStartDateTime.toTimeString().slice(0, 8); // HH:MM:SS
-      const bookingEndTime = bookingEndDateTime.toTimeString().slice(0, 8);
-
-      // 3a. Vérifier advance_booking_days (réservation à l'avance maximum)
-      // Utilisation de la fonction SQL pour validation côté serveur (plus fiable)
-      if (serviceProduct.advance_booking_days) {
-        const { data: advanceCheck, error: advanceError } = await supabase.rpc(
-          'check_advance_booking_days',
-          {
-            p_product_id: productId,
-            p_scheduled_date: bookingDate,
-          }
-        );
-
-        if (!advanceError && advanceCheck && advanceCheck.length > 0 && !advanceCheck[0].is_valid) {
-          throw new Error(advanceCheck[0].message || 'Date de réservation invalide.');
-        }
-
-        // Fallback côté client si la fonction SQL n'est pas disponible
-        if (advanceError) {
-          const today = new Date();
-          today.setHours(0, 0, 0, 0);
-          const bookingDateObj = new Date(bookingDate);
-          bookingDateObj.setHours(0, 0, 0, 0);
-          const daysDifference = Math.floor(
-            (bookingDateObj.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
-          );
-
-          if (daysDifference > serviceProduct.advance_booking_days) {
-            throw new Error(
-              `Vous ne pouvez réserver que jusqu'à ${serviceProduct.advance_booking_days} jours à l'avance. La date demandée est dans ${daysDifference} jours.`
-            );
-          }
-
-          if (daysDifference < 0) {
-            throw new Error('Impossible de réserver une date dans le passé.');
-          }
-        }
-      }
-
-      // 3b. Vérifier max_bookings_per_day (limite quotidienne de réservations)
-      // Utilisation de la fonction SQL pour validation côté serveur (plus fiable)
-      if (serviceProduct.max_bookings_per_day) {
-        const { data: maxBookingsCheck, error: maxBookingsError } = await supabase.rpc(
-          'check_max_bookings_per_day',
-          {
-            p_product_id: productId,
-            p_scheduled_date: bookingDate,
-          }
-        );
-
-        if (
-          !maxBookingsError &&
-          maxBookingsCheck &&
-          maxBookingsCheck.length > 0 &&
-          !maxBookingsCheck[0].is_within_limit
-        ) {
-          throw new Error(
-            maxBookingsCheck[0].message || 'Limite quotidienne de réservations atteinte.'
-          );
-        }
-
-        // Fallback côté client si la fonction SQL n'est pas disponible
-        if (maxBookingsError) {
-          const { data: existingBookingsForDay, error: bookingsCountError } = await supabase
-            .from('service_bookings')
-            .select('id', { count: 'exact', head: true })
-            .eq('product_id', productId)
-            .eq('scheduled_date', bookingDate)
-            .in('status', ['pending', 'confirmed', 'rescheduled']);
-
-          if (bookingsCountError) {
-            logger.error('Erreur lors de la vérification max_bookings_per_day', {
-              error: bookingsCountError,
-            });
-            // Ne pas bloquer si erreur de comptage, mais logger
-          } else {
-            const currentBookingsCount = existingBookingsForDay?.length || 0;
-            if (currentBookingsCount >= serviceProduct.max_bookings_per_day) {
-              throw new Error(
-                `Le nombre maximum de réservations pour ce jour (${serviceProduct.max_bookings_per_day}) est atteint. Veuillez choisir une autre date.`
-              );
-            }
-          }
-        }
-      }
-
-      // 4. Vérifier la disponibilité du staff si requis et spécifié
-      if (staffId) {
-        const { data: staff, error: staffError } = await supabase
-          .from('service_staff_members')
-          .select(SERVICE_STAFF_FIELDS)
-          .eq('id', staffId)
-          .eq('service_product_id', serviceProductId)
-          .eq('is_active', true)
-          .single();
-
-        if (staffError || !staff) {
-          throw new Error('Personnel non disponible');
-        }
-
-        // 4a. Vérifier si le staff est déjà réservé pour ce créneau (CRITIQUE)
-        // Utilisation de la fonction SQL pour validation côté serveur (plus fiable)
-        const { data: conflictCheck, error: conflictError } = await supabase.rpc(
-          'check_booking_conflicts',
-          {
-            p_product_id: productId,
-            p_scheduled_date: bookingDate,
-            p_scheduled_start_time: bookingStartTime,
-            p_scheduled_end_time: bookingEndTime,
-            p_staff_member_id: staffId,
-          }
-        );
-
-        if (
-          !conflictError &&
-          conflictCheck &&
-          conflictCheck.length > 0 &&
-          conflictCheck[0].has_conflict
-        ) {
-          throw new Error(conflictCheck[0].conflict_message || 'Conflit de réservation détecté.');
-        }
-
-        // Fallback côté client si la fonction SQL n'est pas disponible
-        if (conflictError) {
-          logger.warn(
-            'Fonction SQL check_booking_conflicts non disponible, utilisation fallback client',
-            conflictError
-          );
-
-          // Vérifier les conflits avec les réservations existantes du staff
-          const { data: conflictingBookings, error: fallbackConflictError } = await supabase
-            .from('service_bookings')
-            .select(SERVICE_BOOKING_FIELDS)
-            .eq('product_id', productId)
-            .eq('staff_member_id', staffId)
-            .eq('scheduled_date', bookingDate)
-            .in('status', ['pending', 'confirmed', 'rescheduled']);
-
-          if (fallbackConflictError) {
-            logger.error(
-              'Erreur lors de la vérification des conflits staff',
-              fallbackConflictError
-            );
-            throw new Error('Erreur lors de la vérification de la disponibilité du personnel');
-          }
-
-          // Vérifier les chevauchements de temps
-          const hasConflict = conflictingBookings?.some(booking => {
-            const existingStart = new Date(
-              `${booking.scheduled_date}T${booking.scheduled_start_time}`
-            ).getTime();
-            const existingEnd = new Date(
-              `${booking.scheduled_date}T${booking.scheduled_end_time}`
-            ).getTime();
-            const requestStart = bookingStartDateTime.getTime();
-            const requestEnd = bookingEndDateTime.getTime();
-
-            // Il y a conflit si les périodes se chevauchent
-            return requestStart < existingEnd && requestEnd > existingStart;
-          });
-
-          if (hasConflict) {
-            throw new Error(
-              'Le membre du personnel est déjà réservé pour ce créneau. Veuillez choisir un autre horaire.'
-            );
-          }
-        }
-
-        // 4b. buffer_time : couvert par la vérification globale (4c) ci-dessous
-      }
-
-      // 4c. Vérifier buffer_time pour TOUS les bookings (même sans staff spécifique)
-      // Cette vérification s'applique à toutes les réservations du service
-      if (serviceProduct.buffer_time_before > 0 || serviceProduct.buffer_time_after > 0) {
-        // Récupérer toutes les réservations du service pour cette date
-        const { data: allBookingsForDate, error: allBookingsError } = await supabase
-          .from('service_bookings')
-          .select(SERVICE_BOOKING_FIELDS)
-          .eq('product_id', productId)
-          .eq('scheduled_date', bookingDate)
-          .in('status', ['pending', 'confirmed', 'rescheduled']);
-
-        if (!allBookingsError && allBookingsForDate && allBookingsForDate.length > 0) {
-          const bufferStart =
-            bookingStartDateTime.getTime() - serviceProduct.buffer_time_before * 60000;
-          const bufferEnd = bookingEndDateTime.getTime() + serviceProduct.buffer_time_after * 60000;
-
-          const hasGlobalBufferConflict = allBookingsForDate.some(booking => {
-            const existingStart = new Date(
-              `${booking.scheduled_date}T${booking.scheduled_start_time}`
-            ).getTime();
-            const existingEnd = new Date(
-              `${booking.scheduled_date}T${booking.scheduled_end_time}`
-            ).getTime();
-            const requestStart = bookingStartDateTime.getTime();
-            const requestEnd = bookingEndDateTime.getTime();
-
-            // Vérifier chevauchement direct ou avec buffer
-            return (
-              (requestStart < existingEnd && requestEnd > existingStart) ||
-              (existingStart < bufferEnd && existingEnd > bufferStart)
-            );
-          });
-
-          if (hasGlobalBufferConflict) {
-            throw new Error(
-              `Ce créneau n'est pas disponible en raison du temps de préparation nécessaire entre les réservations (${serviceProduct.buffer_time_before} min avant, ${serviceProduct.buffer_time_after} min après). Veuillez choisir un autre créneau.`
-            );
-          }
-        }
-      }
-
-      // 6. Créer le booking — RPC directe si connecté (évite edge function auth/hang) ;
-      //    edge function réservée au guest checkout.
-      const { data: authData } = await supabase.auth.getUser();
-      const authenticatedUserId = authData?.user?.id ?? null;
-
-      let bookingId: string;
-      let userId: string | null = authenticatedUserId;
-
-      if (authenticatedUserId) {
-        const rpcPromise = supabase.rpc(
-          // @ts-expect-error: RPC type not yet updated in supabase types
-          'reserve_service_booking',
-          {
-            p_product_id: productId,
-            p_user_id: authenticatedUserId,
-            p_staff_member_id: staffId ?? null,
-            p_scheduled_date: bookingDate,
-            p_scheduled_start_time: bookingStartTime,
-            p_scheduled_end_time: bookingEndTime,
-            p_timezone: serviceProduct.timezone || 'UTC',
-            p_duration_minutes: actualDuration,
-            p_participants_count: numberOfParticipants,
-            p_customer_notes: notes ?? null,
-          }
-        );
-
-        const timeoutPromise = new Promise<never>((_, reject) => {
-          setTimeout(
-            () => reject(new Error('Délai dépassé lors de la réservation. Réessayez.')),
-            45_000
-          );
-        });
-
-        const { data: bookingResult, error: bookingError } = await Promise.race([
-          rpcPromise,
-          timeoutPromise,
-        ]);
-
-        if (bookingError) {
-          logger.error('reserve_service_booking RPC error', { error: bookingError });
-          throw new Error(bookingError.message || 'Impossible de finaliser la réservation.');
-        }
-
-        const rows = bookingResult as unknown as Array<{
-          booking_id: string | null;
-          error_message: string | null;
-        }> | null;
-        const row = Array.isArray(rows) ? rows[0] : null;
-        if (row?.error_message) {
-          throw new Error(String(row.error_message));
-        }
-        if (!row?.booking_id) {
-          throw new Error('Erreur inattendue lors de la réservation');
-        }
-        bookingId = row.booking_id;
-      } else {
-        const invokePromise = supabase.functions.invoke('service-checkout-provisioning', {
-          body: {
-            email: customerEmail,
-            customerName: customerName,
-            productId: productId,
-            staffId: staffId,
-            bookingDate: bookingDate,
-            bookingStartTime: bookingStartTime,
-            bookingEndTime: bookingEndTime,
-            durationMinutes: actualDuration,
-            timezone: serviceProduct.timezone || 'UTC',
-            numberOfParticipants: numberOfParticipants,
-            notes: notes,
-            userId: null,
-          },
-        });
-
-        const timeoutPromise = new Promise<never>((_, reject) => {
-          setTimeout(
-            () => reject(new Error('Délai dépassé lors de la réservation. Réessayez.')),
-            45_000
-          );
-        });
-
-        const { data: provisionData, error: provisionError } = await Promise.race([
-          invokePromise,
-          timeoutPromise,
-        ]);
-
-        if (provisionError) {
-          logger.error('Service checkout provisioning error', { error: provisionError });
-          throw new Error(provisionError.message || 'Impossible de finaliser la réservation.');
-        }
-
-        if (provisionData?.error) {
-          throw new Error(provisionData.error);
-        }
-
-        if (!provisionData?.success || !provisionData?.booking_id) {
-          throw new Error('Erreur inattendue lors de la réservation');
-        }
-
-        bookingId = provisionData.booking_id as string;
-        userId = provisionData.user_id ?? null;
-      }
-
-      // On simule l'objet booking pour la suite du flux (webhooks)
-      const booking = {
-        id: bookingId,
-        scheduled_date: bookingDate,
-        scheduled_start_time: bookingStartTime,
-        scheduled_end_time: bookingEndTime,
-        created_at: new Date().toISOString(),
-      };
-
-      if (checkoutMode === 'cart') {
-        return {
-          orderId: '',
-          orderItemId: '',
-          bookingId: booking.id,
-          checkoutUrl: '',
-          transactionId: '',
-        };
-      }
-
-      // Déclencher webhook service.booking_created (asynchrone, ne bloque pas)
-      import('@/lib/webhooks').then(({ triggerServiceBookingCreatedWebhook }) => {
-        triggerServiceBookingCreatedWebhook(
-          booking.id,
-          {
-            product_id: productId,
-            user_id: userId,
-            scheduled_date: booking.scheduled_date || bookingDate,
-            scheduled_start_time: booking.scheduled_start_time || bookingStartTime,
-            scheduled_end_time: booking.scheduled_end_time || bookingEndTime,
-            status: 'pending',
-            created_at: booking.created_at || new Date().toISOString(),
-          },
-          storeId
-        ).catch(err => {
-          logger.error('Error in analytics tracking for booking', {
-            error: err,
-            bookingId: booking.id,
-          });
-        });
-      });
-
-      // 7. Créer la commande via RPC sécurisée
-      const affiliateTrackingCookie = getAffiliateTrackingCookie();
-
-      // Project fields may arrive via structured projectOrder or JSON notes (checkout)
       let resolvedProject = projectOrder;
       if (!resolvedProject && notes) {
         try {
@@ -664,6 +290,398 @@ export const useCreateServiceOrder = () => {
           // plain-text booking notes
         }
       }
+      const isProjectCheckout = Boolean(resolvedProject?.packageId);
+
+      // 3. Vérifier capacité max participants
+      if (
+        !isProjectCheckout &&
+        serviceProduct.max_participants &&
+        numberOfParticipants > serviceProduct.max_participants
+      ) {
+        throw new Error(`Nombre maximum de participants: ${serviceProduct.max_participants}`);
+      }
+
+      // Calculer la durée maintenant pour l'utiliser partout
+      const actualDuration = durationMinutes || serviceProduct.duration_minutes;
+      const bookingStartDateTime = new Date(bookingDateTime);
+      const bookingEndDateTime = new Date(bookingStartDateTime.getTime() + actualDuration * 60000);
+      // Use local calendar date (not UTC from toISOString) so it matches availability + UI selection.
+      const bookingDate = [
+        bookingStartDateTime.getFullYear(),
+        String(bookingStartDateTime.getMonth() + 1).padStart(2, '0'),
+        String(bookingStartDateTime.getDate()).padStart(2, '0'),
+      ].join('-');
+      const bookingStartTime = bookingStartDateTime.toTimeString().slice(0, 8); // HH:MM:SS
+      const bookingEndTime = bookingEndDateTime.toTimeString().slice(0, 8);
+
+      const { data: authData } = await supabase.auth.getUser();
+      const authenticatedUserId = authData?.user?.id ?? null;
+      let bookingId: string | null = null;
+      let userId: string | null = authenticatedUserId;
+
+      if (!isProjectCheckout) {
+        // 3a. Vérifier advance_booking_days (réservation à l'avance maximum)
+        // Utilisation de la fonction SQL pour validation côté serveur (plus fiable)
+        if (serviceProduct.advance_booking_days) {
+          const { data: advanceCheck, error: advanceError } = await supabase.rpc(
+            'check_advance_booking_days',
+            {
+              p_product_id: productId,
+              p_scheduled_date: bookingDate,
+            }
+          );
+
+          if (
+            !advanceError &&
+            advanceCheck &&
+            advanceCheck.length > 0 &&
+            !advanceCheck[0].is_valid
+          ) {
+            throw new Error(advanceCheck[0].message || 'Date de réservation invalide.');
+          }
+
+          // Fallback côté client si la fonction SQL n'est pas disponible
+          if (advanceError) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const bookingDateObj = new Date(bookingDate);
+            bookingDateObj.setHours(0, 0, 0, 0);
+            const daysDifference = Math.floor(
+              (bookingDateObj.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+            );
+
+            if (daysDifference > serviceProduct.advance_booking_days) {
+              throw new Error(
+                `Vous ne pouvez réserver que jusqu'à ${serviceProduct.advance_booking_days} jours à l'avance. La date demandée est dans ${daysDifference} jours.`
+              );
+            }
+
+            if (daysDifference < 0) {
+              throw new Error('Impossible de réserver une date dans le passé.');
+            }
+          }
+        }
+
+        // 3b. Vérifier max_bookings_per_day (limite quotidienne de réservations)
+        // Utilisation de la fonction SQL pour validation côté serveur (plus fiable)
+        if (serviceProduct.max_bookings_per_day) {
+          const { data: maxBookingsCheck, error: maxBookingsError } = await supabase.rpc(
+            'check_max_bookings_per_day',
+            {
+              p_product_id: productId,
+              p_scheduled_date: bookingDate,
+            }
+          );
+
+          if (
+            !maxBookingsError &&
+            maxBookingsCheck &&
+            maxBookingsCheck.length > 0 &&
+            !maxBookingsCheck[0].is_within_limit
+          ) {
+            throw new Error(
+              maxBookingsCheck[0].message || 'Limite quotidienne de réservations atteinte.'
+            );
+          }
+
+          // Fallback côté client si la fonction SQL n'est pas disponible
+          if (maxBookingsError) {
+            const { data: existingBookingsForDay, error: bookingsCountError } = await supabase
+              .from('service_bookings')
+              .select('id', { count: 'exact', head: true })
+              .eq('product_id', productId)
+              .eq('scheduled_date', bookingDate)
+              .in('status', ['pending', 'confirmed', 'rescheduled']);
+
+            if (bookingsCountError) {
+              logger.error('Erreur lors de la vérification max_bookings_per_day', {
+                error: bookingsCountError,
+              });
+              // Ne pas bloquer si erreur de comptage, mais logger
+            } else {
+              const currentBookingsCount = existingBookingsForDay?.length || 0;
+              if (currentBookingsCount >= serviceProduct.max_bookings_per_day) {
+                throw new Error(
+                  `Le nombre maximum de réservations pour ce jour (${serviceProduct.max_bookings_per_day}) est atteint. Veuillez choisir une autre date.`
+                );
+              }
+            }
+          }
+        }
+
+        // 4. Vérifier la disponibilité du staff si requis et spécifié
+        if (staffId) {
+          const { data: staff, error: staffError } = await supabase
+            .from('service_staff_members')
+            .select(SERVICE_STAFF_FIELDS)
+            .eq('id', staffId)
+            .eq('service_product_id', serviceProductId)
+            .eq('is_active', true)
+            .single();
+
+          if (staffError || !staff) {
+            throw new Error('Personnel non disponible');
+          }
+
+          // 4a. Vérifier si le staff est déjà réservé pour ce créneau (CRITIQUE)
+          // Utilisation de la fonction SQL pour validation côté serveur (plus fiable)
+          const { data: conflictCheck, error: conflictError } = await supabase.rpc(
+            'check_booking_conflicts',
+            {
+              p_product_id: productId,
+              p_scheduled_date: bookingDate,
+              p_scheduled_start_time: bookingStartTime,
+              p_scheduled_end_time: bookingEndTime,
+              p_staff_member_id: staffId,
+            }
+          );
+
+          if (
+            !conflictError &&
+            conflictCheck &&
+            conflictCheck.length > 0 &&
+            conflictCheck[0].has_conflict
+          ) {
+            throw new Error(conflictCheck[0].conflict_message || 'Conflit de réservation détecté.');
+          }
+
+          // Fallback côté client si la fonction SQL n'est pas disponible
+          if (conflictError) {
+            logger.warn(
+              'Fonction SQL check_booking_conflicts non disponible, utilisation fallback client',
+              conflictError
+            );
+
+            // Vérifier les conflits avec les réservations existantes du staff
+            const { data: conflictingBookings, error: fallbackConflictError } = await supabase
+              .from('service_bookings')
+              .select(SERVICE_BOOKING_FIELDS)
+              .eq('product_id', productId)
+              .eq('staff_member_id', staffId)
+              .eq('scheduled_date', bookingDate)
+              .in('status', ['pending', 'confirmed', 'rescheduled']);
+
+            if (fallbackConflictError) {
+              logger.error(
+                'Erreur lors de la vérification des conflits staff',
+                fallbackConflictError
+              );
+              throw new Error('Erreur lors de la vérification de la disponibilité du personnel');
+            }
+
+            // Vérifier les chevauchements de temps
+            const hasConflict = conflictingBookings?.some(booking => {
+              const existingStart = new Date(
+                `${booking.scheduled_date}T${booking.scheduled_start_time}`
+              ).getTime();
+              const existingEnd = new Date(
+                `${booking.scheduled_date}T${booking.scheduled_end_time}`
+              ).getTime();
+              const requestStart = bookingStartDateTime.getTime();
+              const requestEnd = bookingEndDateTime.getTime();
+
+              // Il y a conflit si les périodes se chevauchent
+              return requestStart < existingEnd && requestEnd > existingStart;
+            });
+
+            if (hasConflict) {
+              throw new Error(
+                'Le membre du personnel est déjà réservé pour ce créneau. Veuillez choisir un autre horaire.'
+              );
+            }
+          }
+
+          // 4b. buffer_time : couvert par la vérification globale (4c) ci-dessous
+        }
+
+        // 4c. Vérifier buffer_time pour TOUS les bookings (même sans staff spécifique)
+        // Cette vérification s'applique à toutes les réservations du service
+        if (serviceProduct.buffer_time_before > 0 || serviceProduct.buffer_time_after > 0) {
+          // Récupérer toutes les réservations du service pour cette date
+          const { data: allBookingsForDate, error: allBookingsError } = await supabase
+            .from('service_bookings')
+            .select(SERVICE_BOOKING_FIELDS)
+            .eq('product_id', productId)
+            .eq('scheduled_date', bookingDate)
+            .in('status', ['pending', 'confirmed', 'rescheduled']);
+
+          if (!allBookingsError && allBookingsForDate && allBookingsForDate.length > 0) {
+            const bufferStart =
+              bookingStartDateTime.getTime() - serviceProduct.buffer_time_before * 60000;
+            const bufferEnd =
+              bookingEndDateTime.getTime() + serviceProduct.buffer_time_after * 60000;
+
+            const hasGlobalBufferConflict = allBookingsForDate.some(booking => {
+              const existingStart = new Date(
+                `${booking.scheduled_date}T${booking.scheduled_start_time}`
+              ).getTime();
+              const existingEnd = new Date(
+                `${booking.scheduled_date}T${booking.scheduled_end_time}`
+              ).getTime();
+              const requestStart = bookingStartDateTime.getTime();
+              const requestEnd = bookingEndDateTime.getTime();
+
+              // Vérifier chevauchement direct ou avec buffer
+              return (
+                (requestStart < existingEnd && requestEnd > existingStart) ||
+                (existingStart < bufferEnd && existingEnd > bufferStart)
+              );
+            });
+
+            if (hasGlobalBufferConflict) {
+              throw new Error(
+                `Ce créneau n'est pas disponible en raison du temps de préparation nécessaire entre les réservations (${serviceProduct.buffer_time_before} min avant, ${serviceProduct.buffer_time_after} min après). Veuillez choisir un autre créneau.`
+              );
+            }
+          }
+        }
+
+        // 6. Créer le booking — RPC directe si connecté (évite edge function auth/hang) ;
+        //    edge function réservée au guest checkout.
+        if (authenticatedUserId) {
+          const rpcPromise = supabase.rpc(
+            // @ts-expect-error: RPC type not yet updated in supabase types
+            'reserve_service_booking',
+            {
+              p_product_id: productId,
+              p_user_id: authenticatedUserId,
+              p_staff_member_id: staffId ?? null,
+              p_scheduled_date: bookingDate,
+              p_scheduled_start_time: bookingStartTime,
+              p_scheduled_end_time: bookingEndTime,
+              p_timezone: serviceProduct.timezone || 'UTC',
+              p_duration_minutes: actualDuration,
+              p_participants_count: numberOfParticipants,
+              p_customer_notes: notes ?? null,
+            }
+          );
+
+          const timeoutPromise = new Promise<never>((_, reject) => {
+            setTimeout(
+              () => reject(new Error('Délai dépassé lors de la réservation. Réessayez.')),
+              45_000
+            );
+          });
+
+          const { data: bookingResult, error: bookingError } = await Promise.race([
+            rpcPromise,
+            timeoutPromise,
+          ]);
+
+          if (bookingError) {
+            logger.error('reserve_service_booking RPC error', { error: bookingError });
+            throw new Error(bookingError.message || 'Impossible de finaliser la réservation.');
+          }
+
+          const rows = bookingResult as unknown as Array<{
+            booking_id: string | null;
+            error_message: string | null;
+          }> | null;
+          const row = Array.isArray(rows) ? rows[0] : null;
+          if (row?.error_message) {
+            throw new Error(String(row.error_message));
+          }
+          if (!row?.booking_id) {
+            throw new Error('Erreur inattendue lors de la réservation');
+          }
+          bookingId = row.booking_id;
+        } else {
+          const invokePromise = supabase.functions.invoke('service-checkout-provisioning', {
+            body: {
+              email: customerEmail,
+              customerName: customerName,
+              productId: productId,
+              staffId: staffId,
+              bookingDate: bookingDate,
+              bookingStartTime: bookingStartTime,
+              bookingEndTime: bookingEndTime,
+              durationMinutes: actualDuration,
+              timezone: serviceProduct.timezone || 'UTC',
+              numberOfParticipants: numberOfParticipants,
+              notes: notes,
+              userId: null,
+            },
+          });
+
+          const timeoutPromise = new Promise<never>((_, reject) => {
+            setTimeout(
+              () => reject(new Error('Délai dépassé lors de la réservation. Réessayez.')),
+              45_000
+            );
+          });
+
+          const { data: provisionData, error: provisionError } = await Promise.race([
+            invokePromise,
+            timeoutPromise,
+          ]);
+
+          if (provisionError) {
+            logger.error('Service checkout provisioning error', { error: provisionError });
+            throw new Error(provisionError.message || 'Impossible de finaliser la réservation.');
+          }
+
+          if (provisionData?.error) {
+            throw new Error(provisionData.error);
+          }
+
+          if (!provisionData?.success || !provisionData?.booking_id) {
+            throw new Error('Erreur inattendue lors de la réservation');
+          }
+
+          bookingId = provisionData.booking_id as string;
+          userId = provisionData.user_id ?? null;
+        }
+      }
+
+      // On simule l'objet booking pour la suite du flux (webhooks)
+      const booking = bookingId
+        ? {
+            id: bookingId,
+            scheduled_date: bookingDate,
+            scheduled_start_time: bookingStartTime,
+            scheduled_end_time: bookingEndTime,
+            created_at: new Date().toISOString(),
+          }
+        : null;
+
+      if (checkoutMode === 'cart') {
+        if (!booking) {
+          throw new Error('Une réservation est requise pour ajouter ce service au panier');
+        }
+        return {
+          orderId: '',
+          orderItemId: '',
+          bookingId: booking.id,
+          checkoutUrl: '',
+          transactionId: '',
+        };
+      }
+
+      if (booking) {
+        import('@/lib/webhooks').then(({ triggerServiceBookingCreatedWebhook }) => {
+          triggerServiceBookingCreatedWebhook(
+            booking.id,
+            {
+              product_id: productId,
+              user_id: userId,
+              scheduled_date: booking.scheduled_date || bookingDate,
+              scheduled_start_time: booking.scheduled_start_time || bookingStartTime,
+              scheduled_end_time: booking.scheduled_end_time || bookingEndTime,
+              status: 'pending',
+              created_at: booking.created_at || new Date().toISOString(),
+            },
+            storeId
+          ).catch(err => {
+            logger.error('Error in analytics tracking for booking', {
+              error: err,
+              bookingId: booking.id,
+            });
+          });
+        });
+      }
+
+      // 7. Créer la commande via RPC sécurisée
+      const affiliateTrackingCookie = getAffiliateTrackingCookie();
 
       const serviceMetadata: Record<string, unknown> = {
         booking_date: bookingDateTime,
@@ -671,7 +689,7 @@ export const useCreateServiceOrder = () => {
         number_of_participants: numberOfParticipants,
         staff_id: staffId,
         notes,
-        booking_id: booking.id,
+        booking_id: booking?.id ?? null,
       };
 
       if (resolvedProject?.packageId) {
@@ -695,19 +713,20 @@ export const useCreateServiceOrder = () => {
           p_service_metadata: serviceMetadata as Json,
           p_gift_card_id: giftCardId,
           p_gift_card_amount_requested: giftCardAmount || 0,
-          p_coupon_code: undefined,
+          p_coupon_code: couponCode?.trim() || null,
           p_affiliate_tracking_cookie: affiliateTrackingCookie,
           p_guest_checkout: !authData?.user?.id,
-          p_booking_id: booking.id,
+          p_booking_id: booking?.id ?? null,
         }
       );
 
       if (orderError || !rpcResult) {
-        // Annuler le booking en cas d'erreur
-        await supabase
-          .from('service_bookings')
-          .update({ status: 'cancelled' })
-          .eq('id', booking.id);
+        if (booking) {
+          await supabase
+            .from('service_bookings')
+            .update({ status: 'cancelled' })
+            .eq('id', booking.id);
+        }
 
         throw new Error('Erreur lors de la création de la commande');
       }
@@ -731,10 +750,12 @@ export const useCreateServiceOrder = () => {
           }
         );
         if (addonError) {
-          await supabase
-            .from('service_bookings')
-            .update({ status: 'cancelled' })
-            .eq('id', booking.id);
+          if (booking) {
+            await supabase
+              .from('service_bookings')
+              .update({ status: 'cancelled' })
+              .eq('id', booking.id);
+          }
           logger.error('attach_service_order_addons failed', { error: addonError });
           throw new Error('Impossible d’ajouter les produits complémentaires');
         }
@@ -851,7 +872,7 @@ export const useCreateServiceOrder = () => {
         metadata: {
           product_type: 'service',
           service_product_id: serviceProductId,
-          booking_id: booking.id,
+          booking_id: booking?.id ?? null,
           booking_date: bookingDateTime,
           duration_minutes: actualDuration,
           number_of_participants: numberOfParticipants,
@@ -865,11 +886,12 @@ export const useCreateServiceOrder = () => {
       });
 
       if (!paymentResult.success || !paymentResult.checkout_url) {
-        // Annuler le booking
-        await supabase
-          .from('service_bookings')
-          .update({ status: 'cancelled' })
-          .eq('id', booking.id);
+        if (booking) {
+          await supabase
+            .from('service_bookings')
+            .update({ status: 'cancelled' })
+            .eq('id', booking.id);
+        }
 
         throw new Error("Erreur lors de l'initialisation du paiement");
       }
@@ -878,7 +900,7 @@ export const useCreateServiceOrder = () => {
       return {
         orderId: orderId,
         orderItemId: orderItemId,
-        bookingId: booking.id,
+        bookingId: booking?.id ?? '',
         checkoutUrl: paymentResult.checkout_url,
         transactionId: paymentResult.transaction_id,
       };

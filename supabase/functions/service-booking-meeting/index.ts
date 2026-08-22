@@ -36,6 +36,7 @@ type ServiceRow = {
   timezone: string | null;
   meeting_url: string | null;
   max_participants: number | null;
+  fulfillment_mode?: string | null;
 };
 
 type ProductRow = {
@@ -139,9 +140,30 @@ async function createZoomMeeting(
   return (await res.json()) as { id: string; join_url: string; password?: string };
 }
 
+function isProjectFulfillment(
+  service: ServiceRow,
+  customerNotes?: string | null
+): boolean {
+  if (service.fulfillment_mode === 'project') return true;
+  const raw = typeof customerNotes === 'string' ? customerNotes.trim() : '';
+  if (!raw.startsWith('{')) return false;
+  try {
+    const parsed = JSON.parse(raw) as { fulfillment_mode?: string };
+    return parsed?.fulfillment_mode === 'project';
+  } catch {
+    return false;
+  }
+}
+
 async function userCanHostMeeting(
   supabaseAdmin: SupabaseClient,
-  opts: { storeId: string; userId: string; providerId: string | null }
+  opts: {
+    storeId: string;
+    userId: string;
+    providerId: string | null;
+    staffMemberId?: string | null;
+    userEmail?: string | null;
+  }
 ): Promise<{ isHost: boolean; storeName: string | null }> {
   const { data: store } = await supabaseAdmin
     .from('stores')
@@ -161,7 +183,21 @@ async function userCanHostMeeting(
     .eq('user_id', opts.userId)
     .eq('status', 'active')
     .maybeSingle();
-  return { isHost: Boolean(member), storeName: store?.name ?? null };
+  if (member) {
+    return { isHost: true, storeName: store?.name ?? null };
+  }
+  if (opts.staffMemberId && opts.userEmail) {
+    const { data: staff } = await supabaseAdmin
+      .from('service_staff_members')
+      .select('email')
+      .eq('id', opts.staffMemberId)
+      .maybeSingle();
+    const staffEmail = typeof staff?.email === 'string' ? staff.email.trim().toLowerCase() : '';
+    if (staffEmail && staffEmail === opts.userEmail.trim().toLowerCase()) {
+      return { isHost: true, storeName: store?.name ?? null };
+    }
+  }
+  return { isHost: false, storeName: store?.name ?? null };
 }
 
 async function persistBookingMeeting(
@@ -237,13 +273,13 @@ serve(async req => {
       .from('service_bookings')
       .select(
         `
-        id, product_id, user_id, provider_id, scheduled_date, scheduled_start_time, scheduled_end_time,
-        timezone, status, meeting_url, meeting_id, meeting_platform,
+        id, product_id, user_id, provider_id, staff_member_id, scheduled_date, scheduled_start_time, scheduled_end_time,
+        timezone, status, meeting_url, meeting_id, meeting_platform, customer_notes,
         product:products!product_id (
           id, name, store_id,
           service:service_products (
             location_type, duration_minutes, preferred_meeting_platform, timezone,
-            meeting_url, max_participants
+            meeting_url, max_participants, fulfillment_mode
           )
         )
       `
@@ -284,6 +320,8 @@ serve(async req => {
           storeId: product.store_id,
           userId: user.id,
           providerId: (booking.provider_id as string | null) ?? null,
+          staffMemberId: (booking.staff_member_id as string | null) ?? null,
+          userEmail: user.email ?? null,
         });
         isHost = host.isHost;
         storeName = host.storeName;
@@ -324,7 +362,10 @@ serve(async req => {
 
       let roomName = isDailyBooking ? existingRoom : '';
       if (!roomName) {
-        if (service.location_type !== 'online') {
+        if (
+          service.location_type !== 'online' ||
+          isProjectFulfillment(service, (booking.customer_notes as string | null) ?? null)
+        ) {
           return jsonResponse({ error: 'Daily room not ready yet' }, 409, origin);
         }
         const room = await ensureDailyRoom({
@@ -356,6 +397,10 @@ serve(async req => {
 
     if (service.location_type !== 'online') {
       return jsonResponse({ skipped: true, reason: 'not_online_service' }, 200, origin);
+    }
+
+    if (isProjectFulfillment(service, (booking.customer_notes as string | null) ?? null)) {
+      return jsonResponse({ skipped: true, reason: 'project_fulfillment' }, 200, origin);
     }
 
     if (booking.meeting_url) {

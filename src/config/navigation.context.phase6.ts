@@ -94,7 +94,6 @@ export const PHASE6_CONTEXT_CONFIGS = {
           '/dashboard/services/recurring-bookings',
           '/dashboard/advanced-calendar',
           '/dashboard/service-management',
-          '/dashboard/recurring-bookings',
           '/dashboard/services/staff-availability',
           '/dashboard/services/resource-conflicts',
           '/dashboard/services/calendar-integrations',
@@ -170,7 +169,7 @@ export const PHASE6_CONTEXT_CONFIGS = {
         defaultLabel: 'Réservations',
         paths: [
           '/dashboard/bookings',
-          '/dashboard/recurring-bookings',
+          '/dashboard/services/recurring-bookings',
           '/dashboard/service-management',
         ],
       },
@@ -180,7 +179,6 @@ export const PHASE6_CONTEXT_CONFIGS = {
         paths: [
           '/dashboard/advanced-calendar',
           '/dashboard/services/calendar',
-          '/dashboard/services/recurring-bookings',
           '/dashboard/services/staff-availability',
         ],
       },

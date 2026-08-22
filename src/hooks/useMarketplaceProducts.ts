@@ -46,6 +46,10 @@ import { logger } from '@/lib/logger';
 import { Product, FilterState, PaginationState } from '@/types/marketplace';
 import { cacheStrategies } from '@/lib/cache-optimization';
 import {
+  minActiveDeliveryTierPrice,
+  resolveServiceListingAmount,
+} from '@/lib/service/service-pricing';
+import {
   cacheMarketplaceProducts,
   getCachedMarketplaceProductsSync,
   MARKETPLACE_CACHE_SOFT_STALE_MS,
@@ -306,7 +310,7 @@ export async function fetchMarketplaceProducts({
   }
 
   if (filters.productType === 'service' || filters.productType === 'all') {
-    selectQuery += `,service_products!left(service_type,location_type,calendar_available,pricing_type,fulfillment_mode,duration_minutes,requires_staff)`;
+    selectQuery += `,service_products!left(service_type,location_type,calendar_available,pricing_type,fulfillment_mode,duration_minutes,requires_staff,service_packages(price,package_price,package_kind,is_active))`;
   }
 
   if (filters.productType === 'course' && (filters.difficulty || filters.accessType)) {
@@ -340,7 +344,11 @@ export async function fetchMarketplaceProducts({
     query = query.eq('product_type', filters.productType);
   }
 
-  if (filters.priceRange !== 'all') {
+  if (
+    filters.priceRange !== 'all' &&
+    filters.productType !== 'service' &&
+    filters.productType !== 'all'
+  ) {
     const [min, max] = filters.priceRange.split('-').map(Number);
     if (max) {
       query = query.gte('price', min).lte('price', max);
@@ -544,31 +552,66 @@ export async function fetchMarketplaceProducts({
     `${filteredData.length} produits chargés après filtrage (page ${pagination.currentPage}/${Math.ceil((count || 0) / pagination.itemsPerPage)})`
   );
 
-  const result = {
-    products: filteredData.map(p => {
-      const row = p as Product & {
-        service_products?: Array<{
-          pricing_type?: string;
-          fulfillment_mode?: string;
-          duration_minutes?: number;
-          calendar_available?: boolean;
-          requires_staff?: boolean;
+  let mappedProducts = filteredData.map(p => {
+    const row = p as Product & {
+      service_products?: Array<{
+        pricing_type?: string;
+        fulfillment_mode?: string;
+        duration_minutes?: number;
+        calendar_available?: boolean;
+        requires_staff?: boolean;
+        service_packages?: Array<{
+          price?: number | null;
+          package_price?: number | null;
+          package_kind?: string | null;
+          is_active?: boolean | null;
         }>;
-      };
-      const serviceRow = row.service_products?.[0];
-      const mapped = mapStockToProductFields(row as Record<string, unknown>);
-      if (!serviceRow) return mapped;
-      return {
-        ...mapped,
-        pricing_type: serviceRow.pricing_type,
-        fulfillment_mode: serviceRow.fulfillment_mode,
-        duration: serviceRow.duration_minutes,
-        calendar_available: serviceRow.calendar_available,
-        staff_required: serviceRow.requires_staff,
-      };
-    }),
+      }>;
+    };
+    const serviceRow = row.service_products?.[0];
+    const mapped = mapStockToProductFields(row as Record<string, unknown>);
+    if (!serviceRow) return mapped;
+    return {
+      ...mapped,
+      pricing_type: serviceRow.pricing_type,
+      fulfillment_mode: serviceRow.fulfillment_mode,
+      duration: serviceRow.duration_minutes,
+      calendar_available: serviceRow.calendar_available,
+      staff_required: serviceRow.requires_staff,
+      package_starting_price: minActiveDeliveryTierPrice(serviceRow.service_packages),
+    };
+  });
+
+  if (
+    filters.priceRange !== 'all' &&
+    (filters.productType === 'service' || filters.productType === 'all')
+  ) {
+    const [minRaw, maxRaw] = filters.priceRange.split('-').map(Number);
+    const min = Number.isFinite(minRaw) ? minRaw : null;
+    const max = Number.isFinite(maxRaw) && maxRaw > 0 ? maxRaw : null;
+    mappedProducts = mappedProducts.filter(product => {
+      const amount =
+        product.product_type === 'service'
+          ? resolveServiceListingAmount({
+              price: product.price,
+              promotionalPrice: product.promotional_price,
+              packageStartingPrice: product.package_starting_price,
+            })
+          : product.promotional_price != null &&
+              product.promotional_price > 0 &&
+              product.promotional_price < product.price
+            ? product.promotional_price
+            : product.price;
+      if (min != null && amount < min) return false;
+      if (max != null && amount > max) return false;
+      return true;
+    });
+  }
+
+  const result = {
+    products: mappedProducts,
     totalCount: count || 0,
-    filteredCount: filteredData.length,
+    filteredCount: mappedProducts.length,
   };
 
   // ✅ OPTIMISATION: Mettre en cache les résultats

@@ -328,17 +328,29 @@ export const useCancelBooking = () => {
       // 🆕 Envoyer la notification d'annulation et créer le remboursement
       if (result) {
         try {
-          const [productResult, userProfileResult] = await Promise.all([
+          const [productResult, userProfileResult, customerResult] = await Promise.all([
             supabase.from('products').select('name').eq('id', result.product_id).single(),
             supabase
               .from('profiles')
-              .select('full_name, email, phone')
-              .eq('id', result.user_id)
+              .select('display_name, first_name, last_name, phone')
+              .eq('user_id', result.user_id)
+              .maybeSingle(),
+            supabase
+              .from('customers')
+              .select('name, email, phone')
+              .eq('user_id', result.user_id)
+              .limit(1)
               .maybeSingle(),
           ]);
 
           const product = productResult.data;
           const userProfile = userProfileResult.data;
+          const customer = customerResult.data;
+          const fullName =
+            userProfile?.display_name ||
+            [userProfile?.first_name, userProfile?.last_name].filter(Boolean).join(' ') ||
+            customer?.name ||
+            'Client';
 
           if (product && result.user_id) {
             const preferences = await getUserBookingNotificationPreferences(result.user_id);
@@ -349,9 +361,9 @@ export const useCancelBooking = () => {
               {
                 booking_id: result.id,
                 service_name: product.name,
-                customer_name: userProfile?.full_name || 'Client',
-                customer_email: userProfile?.email || '',
-                customer_phone: userProfile?.phone || undefined,
+                customer_name: fullName,
+                customer_email: customer?.email || '',
+                customer_phone: customer?.phone || userProfile?.phone || undefined,
                 booking_date: result.scheduled_date || result.booking_date,
                 booking_time: result.scheduled_start_time || result.booking_time,
                 cancellation_reason: reason,

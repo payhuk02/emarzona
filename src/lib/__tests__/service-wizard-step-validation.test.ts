@@ -111,6 +111,16 @@ describe('validateServiceWizardStep', () => {
     expect(result.valid).toBe(false);
   });
 
+  it('rejects step 3 when a staff member has no email', () => {
+    const result = validateServiceWizardStep(3, {
+      ...baseForm,
+      requires_staff: true,
+      staff_members: [{ name: 'Awa', email: '' }],
+    });
+    expect(result.valid).toBe(false);
+    expect(result.errors.some(msg => /e-mail/i.test(msg))).toBe(true);
+  });
+
   it('rejects publish on missing deposit amount', () => {
     const result = validateServiceWizardPublishSteps({
       ...baseForm,

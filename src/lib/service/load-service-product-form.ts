@@ -7,7 +7,7 @@ import type {
 } from '@/types/service-product';
 
 const PRODUCT_FIELDS =
-  'id, store_id, name, slug, description, short_description, price, promotional_price, currency, category, category_id, tags, images, image_url, meta_title, meta_description, og_image, faqs, payment_options, hide_purchase_count, hide_likes_count, hide_recommendations_count, hide_downloads_count, hide_reviews_count, hide_rating, is_active, whatsapp_number, whatsapp_enabled';
+  'id, store_id, name, slug, description, short_description, price, promotional_price, currency, pricing_model, category, category_id, tags, images, image_url, meta_title, meta_description, og_image, faqs, payment_options, hide_purchase_count, hide_likes_count, hide_recommendations_count, hide_downloads_count, hide_reviews_count, hide_rating, is_active, whatsapp_number, whatsapp_enabled';
 const SERVICE_PRODUCT_FIELDS =
   'id, product_id, service_type, duration_minutes, location_type, location_address, meeting_url, timezone, requires_staff, max_participants, pricing_type, deposit_required, deposit_amount, deposit_type, allow_booking_cancellation, cancellation_deadline_hours, require_approval, buffer_time_before, buffer_time_after, max_bookings_per_day, advance_booking_days, fulfillment_mode, category_attributes';
 const SERVICE_AVAILABILITY_SLOT_FIELDS =
@@ -106,6 +106,7 @@ export async function loadServiceProductFormData(
     price: product.price || 0,
     currency: product.currency || 'XOF',
     promotional_price: product.promotional_price || undefined,
+    pricing_model: product.pricing_model || 'one-time',
     category: categorySlug,
     category_id: product.category_id || null,
     parent_category_id: parentCategoryId,

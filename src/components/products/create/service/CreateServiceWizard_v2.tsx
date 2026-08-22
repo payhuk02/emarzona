@@ -221,6 +221,7 @@ export const CreateServiceWizard = ({
     // Basic Info (Step 1)
     name: '',
     description: '',
+    short_description: '',
     price: 0,
     currency: 'XOF',
     promotional_price: undefined,
@@ -673,6 +674,7 @@ export const CreateServiceWizard = ({
         name: formData.name,
         slug,
         description: formData.description,
+        short_description: formData.short_description || '',
         price: formData.pricing_model === 'free' ? 0 : formData.price || 0,
         currency: formData.currency || 'XOF',
         promotional_price: formData.promotional_price || null,

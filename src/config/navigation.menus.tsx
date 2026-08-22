@@ -393,7 +393,7 @@ export const userMenuSections = [
         icon: Calendar,
       },
       {
-        title: 'Séries récurrentes (par client)',
+        title: 'Séries récurrentes',
         url: '/dashboard/services/recurring-bookings',
         icon: Repeat,
       },
@@ -406,11 +406,6 @@ export const userMenuSections = [
         title: 'Gestion des Services',
         url: '/dashboard/service-management',
         icon: Calendar,
-      },
-      {
-        title: 'Abonnements récurrents (boutique)',
-        url: '/dashboard/recurring-bookings',
-        icon: Repeat,
       },
       {
         title: 'Calendrier Staff',
@@ -949,8 +944,8 @@ export const adminMenuSections = [
         icon: Calendar,
       },
       {
-        title: 'Abonnements récurrents (boutique)',
-        url: '/dashboard/recurring-bookings',
+        title: 'Séries récurrentes',
+        url: '/dashboard/services/recurring-bookings',
         icon: Repeat,
       },
       {

@@ -252,9 +252,7 @@ const StaffAvailabilityCalendar = lazyPage(
 const ResourceConflictManagement = lazyPage(
   () => import('@/pages/service/ResourceConflictManagement')
 );
-const RecurringBookingsManagement = lazyPage(
-  () => import('@/pages/service/RecurringBookingsManagement')
-);
+const RecurringBookingsPage = lazyPage(() => import('@/pages/service/RecurringBookingsPage'));
 const CalendarIntegrationsPage = lazyPage(() => import('@/pages/service/CalendarIntegrationsPage'));
 const ServiceWaitlistManagementPage = lazyPage(
   () => import('@/pages/service/ServiceWaitlistManagementPage')
@@ -276,7 +274,6 @@ const ShippingServiceMessages = lazyPage(() => import('@/pages/shipping/Shipping
 const VendorMessaging = lazyPage(() => import('@/pages/vendor/VendorMessaging'));
 const BookingsManagement = lazyPage(() => import('@/pages/service/BookingsManagement'));
 const AdvancedCalendarPage = lazyPage(() => import('@/pages/service/AdvancedCalendarPage'));
-const RecurringBookingsPage = lazyPage(() => import('@/pages/service/RecurringBookingsPage'));
 const ServiceManagementPage = lazyPage(() => import('@/pages/service/ServiceManagementPage'));
 const GamificationPage = lazyPage(() => import('@/pages/gamification/GamificationPage'));
 const ArtistPortfoliosManagement = lazyPage(
@@ -458,7 +455,7 @@ export const dashboardRoutes = (
     {pr('/dashboard/services/calendar/:serviceId', ServiceCalendarManagement)}
     {pr('/dashboard/services/staff-availability/:serviceId', StaffAvailabilityCalendar)}
     {pr('/dashboard/services/resource-conflicts', ResourceConflictManagement)}
-    {pr('/dashboard/services/recurring-bookings', RecurringBookingsManagement)}
+    {pr('/dashboard/services/recurring-bookings', RecurringBookingsPage)}
     {pr('/dashboard/services/calendar-integrations', CalendarIntegrationsPage)}
     {pr('/dashboard/services/waitlist', ServiceWaitlistManagementPage)}
     {pr('/dashboard/services/reminders', BookingRemindersManagementPage)}
@@ -517,7 +514,14 @@ export const dashboardRoutes = (
     {pr('/dashboard/bookings', BookingsManagement)}
     {pr('/dashboard/services/bookings', BookingsManagement)}
     {pr('/dashboard/advanced-calendar', AdvancedCalendarPage)}
-    {pr('/dashboard/recurring-bookings', RecurringBookingsPage)}
+    <Route
+      path="/dashboard/recurring-bookings"
+      element={
+        <ProtectedRoute>
+          <Navigate to="/dashboard/services/recurring-bookings" replace />
+        </ProtectedRoute>
+      }
+    />
     {pr('/dashboard/service-management', ServiceManagementPage)}
     {pr('/dashboard/gamification', GamificationPage)}
     {pr('/dashboard/portfolios', ArtistPortfoliosManagement)}

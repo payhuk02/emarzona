@@ -6,6 +6,7 @@ import {
   resolveServiceAppointmentCharge,
   resolveServiceAppointmentUnitPrice,
   resolveServiceDisplayPrice,
+  resolveServiceListingAmount,
   toPersistedPricingType,
   usesStartingFromPrice,
 } from '../service-pricing';
@@ -76,6 +77,22 @@ describe('resolveServiceDisplayPrice', () => {
     expect(display.showStartingFrom).toBe(true);
     expect(display.originalAmount).toBeUndefined();
     expect(display.unitLabel).toBe('Selon la formule');
+  });
+
+  it('resolveServiceListingAmount matches displayed À partir de', () => {
+    expect(
+      resolveServiceListingAmount({
+        price: 50000,
+        promotionalPrice: 40000,
+        packageStartingPrice: 15000,
+      })
+    ).toBe(15000);
+    expect(
+      resolveServiceListingAmount({
+        price: 50000,
+        promotionalPrice: 40000,
+      })
+    ).toBe(40000);
   });
 
   it('falls back to promo list price for project listings without packages', () => {

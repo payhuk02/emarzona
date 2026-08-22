@@ -12,6 +12,7 @@ import {
   ArtistProduct,
   BaseProduct,
 } from '@/types/unified-product';
+import { minActiveDeliveryTierPrice } from '@/lib/service/service-pricing';
 
 /**
  * Type pour un produit brut de la base de données (non typé)
@@ -162,7 +163,16 @@ export function transformToUnifiedProduct(product: DatabaseProduct): UnifiedProd
             ? Number(product.package_starting_price)
             : nested?.package_starting_price != null
               ? Number(nested.package_starting_price)
-              : null,
+              : minActiveDeliveryTierPrice(
+                  nested?.service_packages as
+                    | Array<{
+                        price?: number | null;
+                        package_price?: number | null;
+                        package_kind?: string | null;
+                        is_active?: boolean | null;
+                      }>
+                    | undefined
+                ),
       } as ServiceProduct;
     }
 

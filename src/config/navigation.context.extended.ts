@@ -263,11 +263,6 @@ export const LOGISTICS_CONTEXT_SIDEBAR: RawNavSection[] = [
         icon: Calendar,
       },
       {
-        title: 'Abonnements Boutique',
-        url: '/dashboard/recurring-bookings',
-        icon: Repeat,
-      },
-      {
         title: 'Calendrier Staff',
         url: '/dashboard/services/staff-availability',
         icon: Users,

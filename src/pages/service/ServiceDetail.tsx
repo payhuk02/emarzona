@@ -462,6 +462,7 @@ export default function ServiceDetail() {
         ].join('-'),
         scheduledStartTime: bookingDate.toTimeString().slice(0, 8),
         scheduledEndTime: endDate.toTimeString().slice(0, 8),
+        staffMemberId: selectedStaffId || undefined,
       });
 
       if (!validationResult.isValid) {
