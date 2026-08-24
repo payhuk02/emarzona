@@ -62,6 +62,9 @@ export interface CreateArtistOrderOptions {
 
   /** Montant de la carte cadeau à utiliser (optionnel) */
   giftCardAmount?: number;
+
+  /** Code promo checkout */
+  couponCode?: string;
 }
 
 /**

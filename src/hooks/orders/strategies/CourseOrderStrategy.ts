@@ -38,7 +38,7 @@ export class CourseOrderStrategy implements OrderStrategy {
     }
 
     const opts = parseStrategyOptions(options);
-    const { giftCardId, giftCardAmount = 0 } = opts;
+    const { giftCardId, giftCardAmount = 0, couponCode } = opts;
 
     let resolvedCourseId = asOptionalString(opts.courseId);
     if (!resolvedCourseId) {
@@ -114,7 +114,7 @@ export class CourseOrderStrategy implements OrderStrategy {
         p_customer_phone: customerPhone ?? null,
         p_gift_card_id: giftCardId ?? null,
         p_gift_card_amount_requested: giftCardAmount || 0,
-        p_coupon_code: null,
+        p_coupon_code: couponCode?.trim() || null,
         p_affiliate_tracking_cookie: affiliateTrackingCookie,
         p_guest_checkout: guestCheckout ?? !user,
       }

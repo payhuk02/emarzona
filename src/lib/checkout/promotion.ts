@@ -13,6 +13,25 @@ export interface ValidatedPromotion {
   orderTotalAfter: number;
 }
 
+type PromotionRpcRow = {
+  valid?: boolean;
+  error?: string;
+  error_message?: string;
+  promotion_id?: string;
+  code?: string;
+  discount_amount?: number;
+  order_total_before?: number;
+  order_total_after?: number;
+};
+
+/** PostgREST may return a composite RPC as an object or a one-row array. */
+export function unwrapPromotionRpcResult(data: unknown): PromotionRpcRow | null {
+  if (data == null) return null;
+  const row = Array.isArray(data) ? data[0] : data;
+  if (!row || typeof row !== 'object') return null;
+  return row as PromotionRpcRow;
+}
+
 export async function validateCheckoutPromotion(params: {
   code: string;
   storeId: string;
@@ -55,20 +74,12 @@ export async function validateCheckoutPromotion(params: {
     return { valid: false, message: error.message || 'Validation impossible' };
   }
 
-  const row = data as {
-    valid?: boolean;
-    error_message?: string;
-    promotion_id?: string;
-    code?: string;
-    discount_amount?: number;
-    order_total_before?: number;
-    order_total_after?: number;
-  } | null;
+  const row = unwrapPromotionRpcResult(data);
 
   if (!row?.valid || !row.promotion_id) {
     return {
       valid: false,
-      message: row?.error_message || 'Code promo invalide ou expiré',
+      message: row?.error_message || row?.error || 'Code promo invalide ou expiré',
     };
   }
 

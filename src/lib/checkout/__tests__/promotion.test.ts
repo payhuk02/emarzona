@@ -123,4 +123,56 @@ describe('validateCheckoutPromotion', () => {
 
     expect(result).toEqual({ valid: false, message: 'Expired' });
   });
+
+  it('reads the error key returned by the RPC', async () => {
+    mockProductsQuery([]);
+    rpcMock.mockResolvedValue({
+      data: { valid: false, error: 'Code promo invalide ou expiré' },
+      error: null,
+    });
+
+    const result = await validateCheckoutPromotion({
+      code: 'GF100',
+      storeId: 'store-1',
+      productIds: [],
+      orderAmount: 1000,
+    });
+
+    expect(result).toEqual({ valid: false, message: 'Code promo invalide ou expiré' });
+  });
+
+  it('reads a one-row array returned by a composite RPC', async () => {
+    mockProductsQuery([]);
+    rpcMock.mockResolvedValue({
+      data: [
+        {
+          valid: true,
+          promotion_id: 'promo-1',
+          code: 'GF100',
+          discount_amount: 2250,
+          order_total_before: 4500,
+          order_total_after: 2250,
+        },
+      ],
+      error: null,
+    });
+
+    const result = await validateCheckoutPromotion({
+      code: 'GF100',
+      storeId: 'store-1',
+      productIds: ['p1'],
+      orderAmount: 4500,
+    });
+
+    expect(result).toEqual({
+      valid: true,
+      promotion: {
+        promotionId: 'promo-1',
+        code: 'GF100',
+        discountAmount: 2250,
+        orderTotalBefore: 4500,
+        orderTotalAfter: 2250,
+      },
+    });
+  });
 });

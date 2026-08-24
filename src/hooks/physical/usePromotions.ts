@@ -9,6 +9,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
+import { unwrapPromotionRpcResult } from '@/lib/checkout/promotion';
 
 const PRODUCT_PROMOTION_FIELDS =
   'id, store_id, name, description, code, discount_type, discount_value, applies_to, product_ids, category_ids, collection_ids, applies_to_variants, variant_ids, min_purchase_amount, min_quantity, max_uses, max_uses_per_customer, current_uses, starts_at, ends_at, is_active, is_automatic, created_at, updated_at';
@@ -231,7 +232,15 @@ export const useValidateUnifiedPromotion = (
         } as PromotionValidationResult;
       }
 
-      const result = data as Record<string, unknown>;
+      const result = unwrapPromotionRpcResult(data) as Record<string, unknown> | null;
+      if (!result) {
+        return {
+          valid: false,
+          discount_amount: 0,
+          error: 'invalid_code',
+          message: 'Code promotionnel invalide',
+        } as PromotionValidationResult;
+      }
 
       // Map the RPC result to PromotionValidationResult format
       if (result.valid === false) {
@@ -239,7 +248,10 @@ export const useValidateUnifiedPromotion = (
           valid: false,
           discount_amount: 0,
           error: 'invalid_code',
-          message: result.error || 'Code promotionnel invalide',
+          message:
+            (typeof result.error_message === 'string' && result.error_message) ||
+            (typeof result.error === 'string' && result.error) ||
+            'Code promotionnel invalide',
         } as PromotionValidationResult;
       }
 

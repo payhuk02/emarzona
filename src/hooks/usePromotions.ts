@@ -1,7 +1,7 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { logger } from "@/lib/logger";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/lib/logger';
 
 export interface Promotion {
   id: string;
@@ -18,6 +18,53 @@ export interface Promotion {
   is_active: boolean;
   created_at: string;
   updated_at: string;
+}
+
+function promotionErrorMessage(error: unknown, fallback: string): string {
+  if (error instanceof Error && error.message) return error.message;
+  if (typeof error === 'object' && error !== null && 'message' in error) {
+    const msg = (error as { message?: unknown }).message;
+    if (typeof msg === 'string' && msg) return msg;
+  }
+  return fallback;
+}
+
+const PRODUCT_PROMOTION_LIST_FIELDS =
+  'id,store_id,code,name,description,discount_type,discount_value,min_purchase_amount,max_uses,current_uses,starts_at,ends_at,is_active,created_at,updated_at';
+
+function mapProductPromotionRow(row: {
+  id: string;
+  store_id: string;
+  code: string | null;
+  name?: string | null;
+  description: string | null;
+  discount_type: string;
+  discount_value: number;
+  min_purchase_amount: number | null;
+  max_uses: number | null;
+  current_uses: number | null;
+  starts_at: string;
+  ends_at: string | null;
+  is_active: boolean | null;
+  created_at: string | null;
+  updated_at: string | null;
+}): Promotion {
+  return {
+    id: row.id,
+    store_id: row.store_id,
+    code: row.code ?? '',
+    description: row.description ?? row.name ?? null,
+    discount_type: row.discount_type === 'fixed_amount' ? 'fixed' : row.discount_type,
+    discount_value: row.discount_value,
+    min_purchase_amount: row.min_purchase_amount ?? 0,
+    max_uses: row.max_uses,
+    used_count: row.current_uses ?? 0,
+    start_date: row.starts_at,
+    end_date: row.ends_at,
+    is_active: row.is_active ?? false,
+    created_at: row.created_at ?? '',
+    updated_at: row.updated_at ?? '',
+  };
 }
 
 export interface PromotionsQueryOptions {
@@ -40,25 +87,25 @@ export const usePromotions = (options: PromotionsQueryOptions = {}) => {
     queryFn: async () => {
       if (!storeId) return { data: [], total: 0, page, limit };
 
-      let  query= supabase
-        .from('promotions')
-        .select(
-          'id,store_id,code,description,discount_type,discount_value,min_purchase_amount,max_uses,used_count,start_date,end_date,is_active,created_at,updated_at',
-          { count: 'exact' }
-        )
+      let query = supabase
+        .from('product_promotions')
+        .select(PRODUCT_PROMOTION_LIST_FIELDS, { count: 'exact' })
         .eq('store_id', storeId)
+        .not('code', 'is', null)
         .order('created_at', { ascending: false });
 
       if (activeOnly) {
         const now = new Date().toISOString();
         query = query
           .eq('is_active', true)
-          .or(`start_date.is.null,start_date.lte.${now}`)
-          .or(`end_date.is.null,end_date.gte.${now}`);
+          .lte('starts_at', now)
+          .or(`ends_at.is.null,ends_at.gte.${now}`);
       }
 
       if (search) {
-        query = query.or(`code.ilike.%${search}%,description.ilike.%${search}%`);
+        query = query.or(
+          `code.ilike.%${search}%,name.ilike.%${search}%,description.ilike.%${search}%`
+        );
       }
 
       // Pagination
@@ -74,7 +121,7 @@ export const usePromotions = (options: PromotionsQueryOptions = {}) => {
       }
 
       return {
-        data: (data || []) as Promotion[],
+        data: (data || []).map(row => mapProductPromotionRow(row)),
         total: count || 0,
         page,
         limit,
@@ -96,14 +143,28 @@ export const useCreatePromotion = () => {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async (promotion: Omit<Promotion, 'id' | 'created_at' | 'updated_at' | 'used_count'>) => {
+    mutationFn: async (
+      promotion: Omit<Promotion, 'id' | 'created_at' | 'updated_at' | 'used_count'>
+    ) => {
       const { data, error } = await supabase
-        .from('promotions')
+        .from('product_promotions')
         .insert({
-          ...promotion,
+          store_id: promotion.store_id,
+          name: promotion.description || `Promo ${promotion.code}`,
+          description: promotion.description,
           code: promotion.code.toUpperCase().trim(),
+          discount_type:
+            promotion.discount_type === 'fixed' ? 'fixed_amount' : promotion.discount_type,
+          discount_value: promotion.discount_value,
+          applies_to: 'all_products',
+          min_purchase_amount: promotion.min_purchase_amount,
+          max_uses: promotion.max_uses,
+          starts_at: promotion.start_date || new Date().toISOString(),
+          ends_at: promotion.end_date,
+          is_active: promotion.is_active,
+          is_automatic: false,
         })
-        .select()
+        .select(PRODUCT_PROMOTION_LIST_FIELDS)
         .single();
 
       if (error) {
@@ -111,21 +172,21 @@ export const useCreatePromotion = () => {
         throw error;
       }
 
-      return data as Promotion;
+      return mapProductPromotionRow(data);
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['promotions', data.store_id] });
       toast({
-        title: "Succès",
-        description: "Promotion créée avec succès",
+        title: 'Succès',
+        description: 'Promotion créée avec succès',
       });
       logger.info('Promotion created', { promotionId: data.id });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast({
-        title: "Erreur",
-        description: error.message || "Impossible de créer la promotion",
-        variant: "destructive",
+        title: 'Erreur',
+        description: promotionErrorMessage(error, 'Impossible de créer la promotion'),
+        variant: 'destructive',
       });
     },
   });
@@ -140,16 +201,32 @@ export const useUpdatePromotion = () => {
 
   return useMutation({
     mutationFn: async ({ id, ...updates }: Partial<Promotion> & { id: string }) => {
-      const  updateData: any = { ...updates };
-      if (updates.code) {
-        updateData.code = updates.code.toUpperCase().trim();
-      }
-
       const { data, error } = await supabase
-        .from('promotions')
-        .update(updateData)
+        .from('product_promotions')
+        .update({
+          ...(updates.description !== undefined
+            ? { description: updates.description, name: updates.description }
+            : {}),
+          ...(updates.code ? { code: updates.code.toUpperCase().trim() } : {}),
+          ...(updates.discount_type
+            ? {
+                discount_type:
+                  updates.discount_type === 'fixed' ? 'fixed_amount' : updates.discount_type,
+              }
+            : {}),
+          ...(updates.discount_value !== undefined
+            ? { discount_value: updates.discount_value }
+            : {}),
+          ...(updates.min_purchase_amount !== undefined
+            ? { min_purchase_amount: updates.min_purchase_amount }
+            : {}),
+          ...(updates.max_uses !== undefined ? { max_uses: updates.max_uses } : {}),
+          ...(updates.start_date !== undefined ? { starts_at: updates.start_date } : {}),
+          ...(updates.end_date !== undefined ? { ends_at: updates.end_date } : {}),
+          ...(updates.is_active !== undefined ? { is_active: updates.is_active } : {}),
+        })
         .eq('id', id)
-        .select()
+        .select(PRODUCT_PROMOTION_LIST_FIELDS)
         .single();
 
       if (error) {
@@ -157,21 +234,21 @@ export const useUpdatePromotion = () => {
         throw error;
       }
 
-      return data as Promotion;
+      return mapProductPromotionRow(data);
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['promotions', data.store_id] });
       queryClient.invalidateQueries({ queryKey: ['promotion', data.id] });
       toast({
-        title: "Succès",
-        description: "Promotion mise à jour avec succès",
+        title: 'Succès',
+        description: 'Promotion mise à jour avec succès',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast({
-        title: "Erreur",
-        description: error.message || "Impossible de mettre à jour la promotion",
-        variant: "destructive",
+        title: 'Erreur',
+        description: promotionErrorMessage(error, 'Impossible de mettre à jour la promotion'),
+        variant: 'destructive',
       });
     },
   });
@@ -185,11 +262,8 @@ export const useDeletePromotion = () => {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({ id, storeId }: { id: string; storeId: string }) => {
-      const { error } = await supabase
-        .from('promotions')
-        .delete()
-        .eq('id', id);
+    mutationFn: async ({ id }: { id: string; storeId: string }) => {
+      const { error } = await supabase.from('product_promotions').delete().eq('id', id);
 
       if (error) {
         logger.error('Error deleting promotion', { error, id });
@@ -199,22 +273,16 @@ export const useDeletePromotion = () => {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['promotions', variables.storeId] });
       toast({
-        title: "Succès",
-        description: "Promotion supprimée avec succès",
+        title: 'Succès',
+        description: 'Promotion supprimée avec succès',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast({
-        title: "Erreur",
-        description: error.message || "Impossible de supprimer la promotion",
-        variant: "destructive",
+        title: 'Erreur',
+        description: promotionErrorMessage(error, 'Impossible de supprimer la promotion'),
+        variant: 'destructive',
       });
     },
   });
 };
-
-
-
-
-
-

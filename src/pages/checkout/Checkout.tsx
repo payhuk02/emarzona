@@ -848,6 +848,7 @@ const Checkout = () => {
               }
             : undefined,
           serviceOptions: appliedCouponCode ? { couponCode: appliedCouponCode.code } : undefined,
+          courseOptions: appliedCouponCode ? { couponCode: appliedCouponCode.code } : undefined,
           artistOptions:
             product.product_type === 'artist'
               ? {
@@ -858,6 +859,7 @@ const Checkout = () => {
                     country: formData.country,
                   },
                   quantity: checkoutQuantity,
+                  ...(appliedCouponCode ? { couponCode: appliedCouponCode.code } : {}),
                 }
               : undefined,
         });
