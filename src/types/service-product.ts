@@ -3,6 +3,11 @@
  * Date: 28 octobre 2025
  */
 
+import type {
+  ServiceGigExtraDraft,
+  ServiceGigPackageDraft,
+} from '@/lib/services/service-gig-package-drafts';
+
 export interface ServiceAvailabilitySlot {
   day: number; // 0-6 (Sunday-Saturday)
   day_of_week?: number;
@@ -85,6 +90,8 @@ export interface ServiceProductFormData {
   whatsapp_enabled?: boolean;
 
   category_attributes?: Record<string, string | number | boolean | string[]>;
+  delivery_packages?: ServiceGigPackageDraft[];
+  gig_extras?: ServiceGigExtraDraft[];
 
   // Meta
   is_active: boolean;

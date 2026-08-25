@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Plus, X, Users, Package } from '@/components/icons';
 import type { ServiceProductFormData, ServiceStaffMember } from '@/types/service-product';
-import { getServiceFormProfile } from '@/lib/services/service-form-profiles';
+import { getServiceFormProfile, isServiceGigFamily } from '@/lib/services/service-form-profiles';
 
 interface ServiceStaffResourcesFormProps {
   data: Partial<ServiceProductFormData>;
@@ -20,6 +20,7 @@ interface ServiceStaffResourcesFormProps {
 
 export const ServiceStaffResourcesForm = ({ data, onUpdate }: ServiceStaffResourcesFormProps) => {
   const profile = getServiceFormProfile(undefined, data.category);
+  const isGigFamily = isServiceGigFamily(profile);
 
   const handleAddStaffMember = () => {
     const newMember: ServiceStaffMember = {
@@ -63,128 +64,143 @@ export const ServiceStaffResourcesForm = ({ data, onUpdate }: ServiceStaffResour
 
   return (
     <div className="space-y-6">
-      {profile && (
+      {isGigFamily ? (
         <p className="text-sm text-muted-foreground">
-          {profile.staffRecommended
-            ? `${profile.familyLabel} : un membre du personnel est recommandé (prise de RDV, intervention).`
-            : `${profile.familyLabel} : le personnel est optionnel pour ce type de prestation.`}
+          Prestation sur projet : pas de personnel ni de capacité de créneau. Vous pouvez noter les
+          outils ou ressources utiles ci-dessous.
         </p>
-      )}
-      {/* Requires Staff */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5" />
-                Personnel requis
-              </CardTitle>
-              <CardDescription>Ce service nécessite-t-il du personnel spécifique ?</CardDescription>
-            </div>
-            <Switch
-              checked={data.requires_staff ?? true}
-              onCheckedChange={checked => onUpdate({ requires_staff: checked })}
-            />
-          </div>
-        </CardHeader>
-
-        {data.requires_staff && (
-          <CardContent className="space-y-4">
-            {data.staff_members && data.staff_members.length > 0 ? (
-              <div className="space-y-4">
-                {data.staff_members.map((member, index) => (
-                  <div key={index} className="p-4 bg-muted rounded-lg space-y-3">
-                    <div className="flex items-center justify-between">
-                      <h4 className="font-medium">Membre {index + 1}</h4>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleRemoveStaffMember(index)}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      <div className="space-y-2">
-                        <Label htmlFor={`staff-name-${index}`}>Nom *</Label>
-                        <Input
-                          id={`staff-name-${index}`}
-                          placeholder="Jean Dupont"
-                          value={member.name}
-                          onChange={e => handleUpdateStaffMember(index, 'name', e.target.value)}
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor={`staff-email-${index}`}>Email *</Label>
-                        <Input
-                          id={`staff-email-${index}`}
-                          type="email"
-                          placeholder="jean@exemple.fr"
-                          value={member.email}
-                          onChange={e => handleUpdateStaffMember(index, 'email', e.target.value)}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor={`staff-role-${index}`}>Rôle / Spécialité</Label>
-                      <Input
-                        id={`staff-role-${index}`}
-                        placeholder="Consultant senior"
-                        value={member.role || ''}
-                        onChange={e => handleUpdateStaffMember(index, 'role', e.target.value)}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground text-center py-4">
-                Aucun membre du personnel ajouté
-              </p>
-            )}
-
-            <Button onClick={handleAddStaffMember} variant="outline" className="w-full">
-              <Plus className="h-4 w-4 mr-2" />
-              Ajouter un membre du personnel
-            </Button>
-          </CardContent>
-        )}
-      </Card>
-
-      {/* Max Participants */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Capacité</CardTitle>
-          <CardDescription>Combien de participants maximum par session ?</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="max_participants">Nombre maximum de participants *</Label>
-            <Input
-              id="max_participants"
-              type="number"
-              min="1"
-              value={data.max_participants || 1}
-              onChange={e => onUpdate({ max_participants: parseInt(e.target.value) || 1 })}
-            />
-            <p className="text-xs text-muted-foreground">
-              1 = service individuel, &gt;1 = service de groupe
+      ) : (
+        <>
+          {profile && (
+            <p className="text-sm text-muted-foreground">
+              {profile.staffRecommended
+                ? `${profile.familyLabel} : un membre du personnel est recommandé (prise de RDV, intervention).`
+                : `${profile.familyLabel} : le personnel est optionnel pour ce type de prestation.`}
             </p>
-          </div>
-
-          {data.max_participants && data.max_participants > 1 && (
-            <div className="p-3 bg-blue-50 dark:bg-blue-950 rounded-lg border border-blue-200 dark:border-blue-800">
-              <p className="text-sm text-blue-900 dark:text-blue-100">
-                <strong>Service de groupe:</strong> Plusieurs personnes pourront réserver le même
-                créneau (maximum {data.max_participants} participants)
-              </p>
-            </div>
           )}
-        </CardContent>
-      </Card>
+        </>
+      )}
+      {!isGigFamily && (
+        <>
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="h-5 w-5" />
+                    Personnel requis
+                  </CardTitle>
+                  <CardDescription>
+                    Ce service nécessite-t-il du personnel spécifique ?
+                  </CardDescription>
+                </div>
+                <Switch
+                  checked={data.requires_staff ?? false}
+                  onCheckedChange={checked => onUpdate({ requires_staff: checked })}
+                />
+              </div>
+            </CardHeader>
+
+            {data.requires_staff && (
+              <CardContent className="space-y-4">
+                {data.staff_members && data.staff_members.length > 0 ? (
+                  <div className="space-y-4">
+                    {data.staff_members.map((member, index) => (
+                      <div key={index} className="p-4 bg-muted rounded-lg space-y-3">
+                        <div className="flex items-center justify-between">
+                          <h4 className="font-medium">Membre {index + 1}</h4>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleRemoveStaffMember(index)}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          <div className="space-y-2">
+                            <Label htmlFor={`staff-name-${index}`}>Nom *</Label>
+                            <Input
+                              id={`staff-name-${index}`}
+                              placeholder="Jean Dupont"
+                              value={member.name}
+                              onChange={e => handleUpdateStaffMember(index, 'name', e.target.value)}
+                            />
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label htmlFor={`staff-email-${index}`}>Email *</Label>
+                            <Input
+                              id={`staff-email-${index}`}
+                              type="email"
+                              placeholder="jean@exemple.fr"
+                              value={member.email}
+                              onChange={e =>
+                                handleUpdateStaffMember(index, 'email', e.target.value)
+                              }
+                            />
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor={`staff-role-${index}`}>Rôle / Spécialité</Label>
+                          <Input
+                            id={`staff-role-${index}`}
+                            placeholder="Consultant senior"
+                            value={member.role || ''}
+                            onChange={e => handleUpdateStaffMember(index, 'role', e.target.value)}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground text-center py-4">
+                    Aucun membre du personnel ajouté
+                  </p>
+                )}
+
+                <Button onClick={handleAddStaffMember} variant="outline" className="w-full">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Ajouter un membre du personnel
+                </Button>
+              </CardContent>
+            )}
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Capacité</CardTitle>
+              <CardDescription>Combien de participants maximum par session ?</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="max_participants">Nombre maximum de participants *</Label>
+                <Input
+                  id="max_participants"
+                  type="number"
+                  min="1"
+                  value={data.max_participants || 1}
+                  onChange={e => onUpdate({ max_participants: parseInt(e.target.value) || 1 })}
+                />
+                <p className="text-xs text-muted-foreground">
+                  1 = service individuel, &gt;1 = service de groupe
+                </p>
+              </div>
+
+              {data.max_participants && data.max_participants > 1 && (
+                <div className="p-3 bg-blue-50 dark:bg-blue-950 rounded-lg border border-blue-200 dark:border-blue-800">
+                  <p className="text-sm text-blue-900 dark:text-blue-100">
+                    <strong>Service de groupe:</strong> Plusieurs personnes pourront réserver le
+                    même créneau (maximum {data.max_participants} participants)
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </>
+      )}
 
       {/* Resources Needed */}
       <Card>

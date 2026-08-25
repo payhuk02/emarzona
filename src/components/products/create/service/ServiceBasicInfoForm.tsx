@@ -30,7 +30,12 @@ import { useSpaceInputFix } from '@/hooks/useSpaceInputFix';
 import { buildSeoFromGenerated, mergeImages } from '@/lib/ai-product-apply';
 import { useServiceCategoryTree } from '@/hooks/useServiceCategories';
 import { resolveServiceCategorySelection } from '@/lib/services/service-categories';
-import { getServiceFormProfile, profileDefaultsPatch } from '@/lib/services/service-form-profiles';
+import {
+  getServiceFormProfile,
+  isServiceGigFamily,
+  profileDefaultsPatch,
+} from '@/lib/services/service-form-profiles';
+import { createDefaultGigPackageDrafts } from '@/lib/services/service-gig-package-drafts';
 import { ServiceCategorySpecificFields } from './ServiceCategorySpecificFields';
 import { useEffect, useMemo } from 'react';
 
@@ -109,6 +114,35 @@ export const ServiceBasicInfoForm = ({ data, onUpdate }: ServiceBasicInfoFormPro
     resolvedCategory.parent?.slug,
     resolvedCategory.leaf?.slug || data.category
   );
+  const isGigFamily = isServiceGigFamily(formProfile);
+
+  useEffect(() => {
+    if (!isGigFamily) return;
+    const alreadyLocked =
+      data.fulfillment_mode === 'project' &&
+      !data.requires_staff &&
+      (!data.availability_slots || data.availability_slots.length === 0) &&
+      (data.delivery_packages?.length ?? 0) > 0;
+    if (alreadyLocked) return;
+    onUpdate({
+      fulfillment_mode: 'project',
+      requires_staff: false,
+      availability_slots: [],
+      delivery_packages:
+        data.delivery_packages && data.delivery_packages.length > 0
+          ? data.delivery_packages
+          : createDefaultGigPackageDrafts(Number(data.promotional_price || data.price || 0)),
+    });
+  }, [
+    isGigFamily,
+    data.fulfillment_mode,
+    data.requires_staff,
+    data.availability_slots,
+    data.delivery_packages,
+    data.promotional_price,
+    data.price,
+    onUpdate,
+  ]);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -240,36 +274,44 @@ export const ServiceBasicInfoForm = ({ data, onUpdate }: ServiceBasicInfoFormPro
         <SelectItem value="other">Autre</SelectItem>
       </SelectField>
 
-      {/* Fulfillment mode (hybrid foundation) */}
-      <div className="space-y-2">
-        <SelectField
-          label="Mode de prestation"
-          contentVariant="sheet"
-          useMobileSelectRoot
-          value={data.fulfillment_mode || 'appointment'}
-          onValueChange={value =>
-            onUpdate({
-              fulfillment_mode: value as 'appointment' | 'project' | 'both',
-            })
-          }
-          placeholder="Mode de prestation"
-          description={
-            formProfile
-              ? `Prérempli : ${
-                  formProfile.defaults.fulfillment_mode === 'project'
-                    ? 'prestation sur projet'
-                    : formProfile.defaults.fulfillment_mode === 'both'
+      {isGigFamily ? (
+        <div className="rounded-lg border bg-muted/40 p-3 space-y-1">
+          <p className="text-sm font-medium">Prestation sur projet</p>
+          <p className="text-xs text-muted-foreground">
+            Cette sous-catégorie se vend comme un livrable (site, design, texte…). Pas de calendrier
+            ni de créneaux : le client commande, vous livrez. Les packs et extras se configurent
+            après publication dans Dashboard → Offres projet.
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          <SelectField
+            label="Mode de prestation"
+            contentVariant="sheet"
+            useMobileSelectRoot
+            value={data.fulfillment_mode || formProfile?.defaults.fulfillment_mode || 'appointment'}
+            onValueChange={value =>
+              onUpdate({
+                fulfillment_mode: value as 'appointment' | 'project' | 'both',
+              })
+            }
+            placeholder="Mode de prestation"
+            description={
+              formProfile
+                ? `Prérempli : ${
+                    formProfile.defaults.fulfillment_mode === 'both'
                       ? 'rendez-vous ou projet'
                       : 'rendez-vous'
-                }. Ajustable.`
-              : 'Par défaut : rendez-vous. En mode projet / les deux, configurez packages & brief dans Dashboard → Offres projet.'
-          }
-        >
-          <SelectItem value="appointment">Rendez-vous / réservation</SelectItem>
-          <SelectItem value="project">Prestation sur projet</SelectItem>
-          <SelectItem value="both">Les deux</SelectItem>
-        </SelectField>
-      </div>
+                  }. En projet, le calendrier est masqué.`
+                : 'Rendez-vous (créneaux) ou projet (livrable sans calendrier).'
+            }
+          >
+            <SelectItem value="appointment">Rendez-vous / réservation</SelectItem>
+            <SelectItem value="project">Prestation sur projet</SelectItem>
+            <SelectItem value="both">Les deux</SelectItem>
+          </SelectField>
+        </div>
+      )}
 
       {/* Service Name */}
       <div className="space-y-2">

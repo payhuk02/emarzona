@@ -18,6 +18,13 @@ import { DollarSign, Calendar } from 'lucide-react';
 import type { ServiceProductFormData } from '@/types/service-product';
 import { getServiceFormProfile } from '@/lib/services/service-form-profiles';
 import { getServicePricingGuidance } from '@/lib/service/service-pricing';
+import { createDefaultServiceBookingOptions } from '@/lib/service/default-booking-options';
+import {
+  resolvePersistedFulfillmentMode,
+  serviceWizardShowsCalendar,
+} from '@/lib/service-wizard-step-validation';
+import { ServiceGigPackagesForm } from './ServiceGigPackagesForm';
+import { ServiceGigExtrasForm } from './ServiceGigExtrasForm';
 
 interface ServicePricingOptionsFormProps {
   data: Partial<ServiceProductFormData>;
@@ -27,61 +34,67 @@ interface ServicePricingOptionsFormProps {
 export const ServicePricingOptionsForm = ({ data, onUpdate }: ServicePricingOptionsFormProps) => {
   const formProfile = getServiceFormProfile(undefined, data.category);
   const pricingGuidance = getServicePricingGuidance(formProfile?.familySlug);
+  const showCalendar = serviceWizardShowsCalendar(data);
+  const persistMode = resolvePersistedFulfillmentMode(data);
+  const showPackages = persistMode === 'project' || persistMode === 'both';
 
   return (
     <div className="space-y-6">
-      {/* Pricing Type */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <DollarSign className="h-5 w-5" />
-            Type de tarification
-          </CardTitle>
-          <CardDescription>
-            {formProfile
-              ? `Prérempli pour ${formProfile.familyLabel} (${
-                  pricingGuidance.pricingType === 'hourly'
-                    ? 'horaire'
-                    : pricingGuidance.pricingType === 'per_participant'
-                      ? 'par participant'
-                      : 'prix fixe'
-                }). Ajustable.`
-              : 'Comment le prix est-il calculé ?'}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Select
-            value={data.pricing_type}
-            onValueChange={value =>
-              onUpdate({ pricing_type: value as 'fixed' | 'hourly' | 'per_participant' })
-            }
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent mobileVariant="sheet">
-              <SelectItem value="fixed">Prix fixe</SelectItem>
-              <SelectItem value="hourly">Tarif horaire</SelectItem>
-              <SelectItem value="per_participant">Par participant</SelectItem>
-            </SelectContent>
-          </Select>
+      {showPackages && <ServiceGigPackagesForm data={data} onUpdate={onUpdate} />}
+      {showPackages && <ServiceGigExtrasForm data={data} onUpdate={onUpdate} />}
+      {!showPackages && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <DollarSign className="h-5 w-5" />
+              Type de tarification
+            </CardTitle>
+            <CardDescription>
+              {formProfile
+                ? `Prérempli pour ${formProfile.familyLabel} (${
+                    pricingGuidance.pricingType === 'hourly'
+                      ? 'horaire'
+                      : pricingGuidance.pricingType === 'per_participant'
+                        ? 'par participant'
+                        : 'prix fixe'
+                  }). Ajustable.`
+                : 'Comment le prix est-il calculé ?'}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Select
+              value={data.pricing_type}
+              onValueChange={value =>
+                onUpdate({ pricing_type: value as 'fixed' | 'hourly' | 'per_participant' })
+              }
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent mobileVariant="sheet">
+                <SelectItem value="fixed">Prix fixe</SelectItem>
+                <SelectItem value="hourly">Tarif horaire</SelectItem>
+                <SelectItem value="per_participant">Par participant</SelectItem>
+              </SelectContent>
+            </Select>
 
-          <p className="text-sm text-muted-foreground">{pricingGuidance.wizardHint}</p>
+            <p className="text-sm text-muted-foreground">{pricingGuidance.wizardHint}</p>
 
-          {data.pricing_type === 'hourly' && (
-            <p className="text-sm text-muted-foreground">
-              Le prix de la fiche est le tarif d’une heure. La durée de séance reste celle définie à
-              l’étape Durée.
-            </p>
-          )}
+            {data.pricing_type === 'hourly' && (
+              <p className="text-sm text-muted-foreground">
+                Le prix de la fiche est le tarif d’une heure. La durée de séance reste celle définie
+                à l’étape Durée.
+              </p>
+            )}
 
-          {data.pricing_type === 'per_participant' && (
-            <p className="text-sm text-muted-foreground">
-              Le prix sera multiplié par le nombre de participants à la réservation.
-            </p>
-          )}
-        </CardContent>
-      </Card>
+            {data.pricing_type === 'per_participant' && (
+              <p className="text-sm text-muted-foreground">
+                Le prix sera multiplié par le nombre de participants à la réservation.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Deposit */}
       <Card>
@@ -89,7 +102,11 @@ export const ServicePricingOptionsForm = ({ data, onUpdate }: ServicePricingOpti
           <div className="flex items-center justify-between">
             <div>
               <CardTitle>Acompte requis</CardTitle>
-              <CardDescription>Demander un acompte à la réservation ?</CardDescription>
+              <CardDescription>
+                {showCalendar
+                  ? 'Demander un acompte à la réservation ?'
+                  : 'Demander un acompte à la commande ?'}
+              </CardDescription>
             </div>
             <Switch
               checked={data.deposit_required ?? false}
@@ -138,166 +155,167 @@ export const ServicePricingOptionsForm = ({ data, onUpdate }: ServicePricingOpti
         )}
       </Card>
 
-      {/* Booking Options */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calendar className="h-5 w-5" />
-            Options de réservation
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Allow Cancellation */}
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label>Autoriser l'annulation</Label>
-              <p className="text-sm text-muted-foreground">
-                Les clients peuvent annuler leur réservation
-              </p>
+      {showCalendar && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Calendar className="h-5 w-5" />
+              Options de réservation
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Allow Cancellation */}
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label>Autoriser l'annulation</Label>
+                <p className="text-sm text-muted-foreground">
+                  Les clients peuvent annuler leur réservation
+                </p>
+              </div>
+              <Switch
+                checked={data.booking_options?.allow_booking_cancellation ?? true}
+                onCheckedChange={checked =>
+                  onUpdate({
+                    booking_options: {
+                      ...(data.booking_options ?? createDefaultServiceBookingOptions()),
+                      allow_booking_cancellation: checked,
+                    },
+                  })
+                }
+              />
             </div>
-            <Switch
-              checked={data.booking_options?.allow_booking_cancellation ?? true}
-              onCheckedChange={checked =>
-                onUpdate({
-                  booking_options: {
-                    ...data.booking_options!,
-                    allow_booking_cancellation: checked,
-                  },
-                })
-              }
-            />
-          </div>
 
-          {/* Cancellation Deadline */}
-          {data.booking_options?.allow_booking_cancellation && (
+            {/* Cancellation Deadline */}
+            {data.booking_options?.allow_booking_cancellation && (
+              <div className="space-y-2">
+                <Label htmlFor="cancellation_deadline">Délai d'annulation (heures avant RDV)</Label>
+                <Input
+                  id="cancellation_deadline"
+                  type="number"
+                  min="0"
+                  value={data.booking_options?.cancellation_deadline_hours || 24}
+                  onChange={e =>
+                    onUpdate({
+                      booking_options: {
+                        ...(data.booking_options ?? createDefaultServiceBookingOptions()),
+                        cancellation_deadline_hours: parseInt(e.target.value) || 24,
+                      },
+                    })
+                  }
+                />
+                <p className="text-xs text-muted-foreground">
+                  Les annulations doivent être faites au moins X heures avant le RDV
+                </p>
+              </div>
+            )}
+
+            {/* Require Approval */}
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label>Approbation manuelle</Label>
+                <p className="text-sm text-muted-foreground">
+                  Vous devez approuver chaque réservation
+                </p>
+              </div>
+              <Switch
+                checked={data.booking_options?.require_approval ?? false}
+                onCheckedChange={checked =>
+                  onUpdate({
+                    booking_options: {
+                      ...(data.booking_options ?? createDefaultServiceBookingOptions()),
+                      require_approval: checked,
+                    },
+                  })
+                }
+              />
+            </div>
+
+            {/* Buffer Times */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="buffer_before">Temps tampon avant (min)</Label>
+                <Input
+                  id="buffer_before"
+                  type="number"
+                  min="0"
+                  value={data.booking_options?.buffer_time_before || 0}
+                  onChange={e =>
+                    onUpdate({
+                      booking_options: {
+                        ...(data.booking_options ?? createDefaultServiceBookingOptions()),
+                        buffer_time_before: parseInt(e.target.value) || 0,
+                      },
+                    })
+                  }
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="buffer_after">Temps tampon après (min)</Label>
+                <Input
+                  id="buffer_after"
+                  type="number"
+                  min="0"
+                  value={data.booking_options?.buffer_time_after || 0}
+                  onChange={e =>
+                    onUpdate({
+                      booking_options: {
+                        ...(data.booking_options ?? createDefaultServiceBookingOptions()),
+                        buffer_time_after: parseInt(e.target.value) || 0,
+                      },
+                    })
+                  }
+                />
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground">Temps de pause entre les rendez-vous</p>
+
+            {/* Advance Booking Days */}
             <div className="space-y-2">
-              <Label htmlFor="cancellation_deadline">Délai d'annulation (heures avant RDV)</Label>
+              <Label htmlFor="advance_booking_days">Réservation à l'avance (jours)</Label>
               <Input
-                id="cancellation_deadline"
+                id="advance_booking_days"
                 type="number"
-                min="0"
-                value={data.booking_options?.cancellation_deadline_hours || 24}
+                min="1"
+                value={data.booking_options?.advance_booking_days || 30}
                 onChange={e =>
                   onUpdate({
                     booking_options: {
-                      ...data.booking_options!,
-                      cancellation_deadline_hours: parseInt(e.target.value) || 24,
+                      ...(data.booking_options ?? createDefaultServiceBookingOptions()),
+                      advance_booking_days: parseInt(e.target.value) || 30,
                     },
                   })
                 }
               />
               <p className="text-xs text-muted-foreground">
-                Les annulations doivent être faites au moins X heures avant le RDV
+                Maximum de jours à l'avance que les clients peuvent réserver
               </p>
             </div>
-          )}
 
-          {/* Require Approval */}
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label>Approbation manuelle</Label>
-              <p className="text-sm text-muted-foreground">
-                Vous devez approuver chaque réservation
-              </p>
-            </div>
-            <Switch
-              checked={data.booking_options?.require_approval ?? false}
-              onCheckedChange={checked =>
-                onUpdate({
-                  booking_options: {
-                    ...data.booking_options!,
-                    require_approval: checked,
-                  },
-                })
-              }
-            />
-          </div>
-
-          {/* Buffer Times */}
-          <div className="grid grid-cols-2 gap-4">
+            {/* Max Bookings Per Day */}
             <div className="space-y-2">
-              <Label htmlFor="buffer_before">Temps tampon avant (min)</Label>
+              <Label htmlFor="max_bookings_per_day">
+                Maximum de réservations par jour (optionnel)
+              </Label>
               <Input
-                id="buffer_before"
+                id="max_bookings_per_day"
                 type="number"
                 min="0"
-                value={data.booking_options?.buffer_time_before || 0}
+                placeholder="Illimité"
+                value={data.booking_options?.max_bookings_per_day || ''}
                 onChange={e =>
                   onUpdate({
                     booking_options: {
-                      ...data.booking_options!,
-                      buffer_time_before: parseInt(e.target.value) || 0,
+                      ...(data.booking_options ?? createDefaultServiceBookingOptions()),
+                      max_bookings_per_day: parseInt(e.target.value) || undefined,
                     },
                   })
                 }
               />
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="buffer_after">Temps tampon après (min)</Label>
-              <Input
-                id="buffer_after"
-                type="number"
-                min="0"
-                value={data.booking_options?.buffer_time_after || 0}
-                onChange={e =>
-                  onUpdate({
-                    booking_options: {
-                      ...data.booking_options!,
-                      buffer_time_after: parseInt(e.target.value) || 0,
-                    },
-                  })
-                }
-              />
-            </div>
-          </div>
-          <p className="text-xs text-muted-foreground">Temps de pause entre les rendez-vous</p>
-
-          {/* Advance Booking Days */}
-          <div className="space-y-2">
-            <Label htmlFor="advance_booking_days">Réservation à l'avance (jours)</Label>
-            <Input
-              id="advance_booking_days"
-              type="number"
-              min="1"
-              value={data.booking_options?.advance_booking_days || 30}
-              onChange={e =>
-                onUpdate({
-                  booking_options: {
-                    ...data.booking_options!,
-                    advance_booking_days: parseInt(e.target.value) || 30,
-                  },
-                })
-              }
-            />
-            <p className="text-xs text-muted-foreground">
-              Maximum de jours à l'avance que les clients peuvent réserver
-            </p>
-          </div>
-
-          {/* Max Bookings Per Day */}
-          <div className="space-y-2">
-            <Label htmlFor="max_bookings_per_day">
-              Maximum de réservations par jour (optionnel)
-            </Label>
-            <Input
-              id="max_bookings_per_day"
-              type="number"
-              min="0"
-              placeholder="Illimité"
-              value={data.booking_options?.max_bookings_per_day || ''}
-              onChange={e =>
-                onUpdate({
-                  booking_options: {
-                    ...data.booking_options!,
-                    max_bookings_per_day: parseInt(e.target.value) || undefined,
-                  },
-                })
-              }
-            />
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };

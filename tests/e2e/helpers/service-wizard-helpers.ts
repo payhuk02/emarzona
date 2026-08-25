@@ -129,10 +129,24 @@ export async function fillServiceDurationAvailabilityStep(
 ): Promise<void> {
   const { locationAddress = '12 avenue E2E, Abidjan' } = options;
 
-  await page.getByRole('button', { name: /1 heure/i }).click();
-  await page.locator('#location_address').fill(locationAddress);
-  await page.getByRole('button', { name: /Ajouter un créneau/i }).click();
-  await expect(page.getByText(/Lundi|09:00/i).first()).toBeVisible({ timeout: 10_000 });
+  const hourChip = page.getByRole('button', { name: /1 heure/i });
+  const dayChip = page.getByRole('button', { name: /7 jours/i });
+  if (await hourChip.isVisible({ timeout: 5_000 }).catch(() => false)) {
+    await hourChip.click();
+  } else if (await dayChip.isVisible({ timeout: 3_000 }).catch(() => false)) {
+    await dayChip.click();
+  }
+
+  const address = page.locator('#location_address');
+  if (await address.isVisible({ timeout: 2_000 }).catch(() => false)) {
+    await address.fill(locationAddress);
+  }
+
+  const addSlot = page.getByRole('button', { name: /Ajouter un créneau/i });
+  if (await addSlot.isVisible({ timeout: 2_000 }).catch(() => false)) {
+    await addSlot.click();
+    await expect(page.getByText(/Lundi|09:00/i).first()).toBeVisible({ timeout: 10_000 });
+  }
 }
 
 export async function advanceServiceWizardToPublishStep(page: Page): Promise<void> {

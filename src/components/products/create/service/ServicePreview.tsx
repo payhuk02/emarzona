@@ -25,6 +25,7 @@ import {
   formatServiceAttributeValue,
   getServiceFormProfile,
 } from '@/lib/services/service-form-profiles';
+import { serviceWizardShowsCalendar } from '@/lib/service-wizard-step-validation';
 
 interface ServicePreviewProps {
   data: Partial<ServiceProductFormData>;
@@ -35,6 +36,7 @@ const DAYS_OF_WEEK_LABELS = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
 
 export const ServicePreview = ({ data }: ServicePreviewProps) => {
   const profile = getServiceFormProfile(undefined, data.category);
+  const showCalendar = serviceWizardShowsCalendar(data);
 
   const getLocationIcon = () => {
     switch (data.location_type) {
@@ -326,65 +328,114 @@ export const ServicePreview = ({ data }: ServicePreviewProps) => {
               </p>
             </div>
           )}
-        </CardContent>
-      </Card>
 
-      {/* Booking Options */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Options de réservation</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-sm">Annulation autorisée</span>
-            {data.booking_options?.allow_booking_cancellation ? (
-              <CheckCircle2 className="h-4 w-4 text-green-600" />
-            ) : (
-              <XCircle className="h-4 w-4 text-red-600" />
-            )}
-          </div>
-
-          {data.booking_options?.allow_booking_cancellation && (
-            <p className="text-sm text-muted-foreground">
-              Délai: {data.booking_options.cancellation_deadline_hours}h avant le RDV
-            </p>
-          )}
-
-          <div className="flex items-center justify-between">
-            <span className="text-sm">Approbation manuelle</span>
-            {data.booking_options?.require_approval ? (
-              <CheckCircle2 className="h-4 w-4 text-green-600" />
-            ) : (
-              <XCircle className="h-4 w-4 text-red-600" />
-            )}
-          </div>
-
-          {(data.booking_options?.buffer_time_before ||
-            data.booking_options?.buffer_time_after) && (
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">Temps tampon</p>
-              <p className="text-sm">
-                Avant: {data.booking_options.buffer_time_before} min / Après:{' '}
-                {data.booking_options.buffer_time_after} min
-              </p>
+          {data.delivery_packages && data.delivery_packages.some(pkg => pkg.price > 0) && (
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-muted-foreground">Formules projet</p>
+              <div className="space-y-2">
+                {data.delivery_packages
+                  .filter(pkg => pkg.price > 0 && pkg.name.trim())
+                  .map((pkg, index) => (
+                    <div
+                      key={`${pkg.tier}-${index}`}
+                      className="flex items-center justify-between rounded-md border px-3 py-2 text-sm"
+                    >
+                      <span>
+                        {pkg.name}
+                        {pkg.is_featured ? ' · recommandé' : ''}
+                      </span>
+                      <span className="font-medium">
+                        {pkg.price.toLocaleString()} {data.currency || 'XOF'} · {pkg.delivery_days}{' '}
+                        j
+                      </span>
+                    </div>
+                  ))}
+              </div>
             </div>
           )}
 
-          <div>
-            <p className="text-sm font-medium text-muted-foreground">Réservation à l'avance</p>
-            <p className="text-sm">Maximum {data.booking_options?.advance_booking_days} jours</p>
-          </div>
-
-          {data.booking_options?.max_bookings_per_day && (
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">Limite quotidienne</p>
-              <p className="text-sm">
-                {data.booking_options.max_bookings_per_day} réservations/jour
-              </p>
-            </div>
-          )}
+          {data.gig_extras &&
+            data.gig_extras.some(extra => extra.name.trim() && extra.price > 0) && (
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-muted-foreground">Extras</p>
+                <div className="space-y-2">
+                  {data.gig_extras
+                    .filter(extra => extra.name.trim() && extra.price > 0)
+                    .map((extra, index) => (
+                      <div
+                        key={`${extra.name}-${index}`}
+                        className="flex items-center justify-between rounded-md border px-3 py-2 text-sm"
+                      >
+                        <span>{extra.name}</span>
+                        <span className="font-medium">
+                          {extra.price.toLocaleString()} {data.currency || 'XOF'}
+                          {extra.extra_days > 0 ? ` · +${extra.extra_days} j` : ''}
+                        </span>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            )}
         </CardContent>
       </Card>
+
+      {showCalendar && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Options de réservation</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-sm">Annulation autorisée</span>
+              {data.booking_options?.allow_booking_cancellation ? (
+                <CheckCircle2 className="h-4 w-4 text-green-600" />
+              ) : (
+                <XCircle className="h-4 w-4 text-red-600" />
+              )}
+            </div>
+
+            {data.booking_options?.allow_booking_cancellation && (
+              <p className="text-sm text-muted-foreground">
+                Délai: {data.booking_options.cancellation_deadline_hours}h avant le RDV
+              </p>
+            )}
+
+            <div className="flex items-center justify-between">
+              <span className="text-sm">Approbation manuelle</span>
+              {data.booking_options?.require_approval ? (
+                <CheckCircle2 className="h-4 w-4 text-green-600" />
+              ) : (
+                <XCircle className="h-4 w-4 text-red-600" />
+              )}
+            </div>
+
+            {(data.booking_options?.buffer_time_before ||
+              data.booking_options?.buffer_time_after) && (
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Temps tampon</p>
+                <p className="text-sm">
+                  Avant: {data.booking_options.buffer_time_before} min / Après:{' '}
+                  {data.booking_options.buffer_time_after} min
+                </p>
+              </div>
+            )}
+
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">Réservation à l'avance</p>
+              <p className="text-sm">Maximum {data.booking_options?.advance_booking_days} jours</p>
+            </div>
+
+            {data.booking_options?.max_bookings_per_day && (
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Limite quotidienne</p>
+                <p className="text-sm">
+                  {data.booking_options.max_bookings_per_day} réservations/jour
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };

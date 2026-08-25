@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
+  resolvePersistedFulfillmentMode,
+  serviceWizardShowsCalendar,
   validateServiceWizardPublishSteps,
   validateServiceWizardStep,
 } from '@/lib/service-wizard-step-validation';
@@ -91,15 +93,45 @@ describe('validateServiceWizardStep', () => {
     expect(result.valid).toBe(true);
   });
 
-  it('still requires slots for appointment mode even when family is project-first', () => {
+  it('ignores appointment mode for locked gig families (no slots)', () => {
     const result = validateServiceWizardStep(2, {
       ...baseForm,
       category: 'svc-developpement-web',
       fulfillment_mode: 'appointment',
       availability_slots: [],
     });
+    expect(result.valid).toBe(true);
+  });
+
+  it('still requires slots for appointment mode on RDV families', () => {
+    const result = validateServiceWizardStep(2, {
+      ...baseForm,
+      category: 'svc-coiffure',
+      fulfillment_mode: 'appointment',
+      availability_slots: [],
+    });
     expect(result.valid).toBe(false);
     expect(result.toastTitle).toBe('Créneaux requis');
+  });
+
+  it('does not require slots for juridique contract gigs', () => {
+    const result = validateServiceWizardStep(2, {
+      ...baseForm,
+      category: 'svc-redaction-contrats',
+      fulfillment_mode: 'appointment',
+      availability_slots: [],
+    });
+    expect(result.valid).toBe(true);
+  });
+
+  it('skips staff validation for locked gig families', () => {
+    const result = validateServiceWizardStep(3, {
+      ...baseForm,
+      category: 'svc-developpement-web',
+      requires_staff: true,
+      staff_members: [],
+    });
+    expect(result.valid).toBe(true);
   });
 
   it('rejects step 3 when staff is required but missing', () => {
@@ -130,5 +162,63 @@ describe('validateServiceWizardStep', () => {
     });
     expect(result.valid).toBe(false);
     expect(result.failedStep).toBe(4);
+  });
+
+  it('requires at least one gig formula on step 4 for project families', () => {
+    const result = validateServiceWizardStep(4, {
+      ...baseForm,
+      category: 'svc-developpement-web',
+      fulfillment_mode: 'project',
+      delivery_packages: [],
+    });
+    expect(result.valid).toBe(false);
+    expect(result.errors.some(msg => /formule/i.test(msg))).toBe(true);
+  });
+
+  it('accepts step 4 when a gig formula has a price and delivery delay', () => {
+    const result = validateServiceWizardStep(4, {
+      ...baseForm,
+      category: 'svc-developpement-web',
+      fulfillment_mode: 'project',
+      delivery_packages: [
+        {
+          name: 'Basic',
+          tier: 'basic',
+          description: '',
+          price: 15000,
+          delivery_days: 7,
+          revisions: 1,
+          featuresText: 'Site vitrine',
+          is_featured: false,
+        },
+      ],
+    });
+    expect(result.valid).toBe(true);
+  });
+});
+
+describe('service calendar intent', () => {
+  it('hides calendar and persists project for gig families', () => {
+    const form = {
+      category: 'svc-developpement-web',
+      fulfillment_mode: 'appointment' as const,
+    };
+    expect(serviceWizardShowsCalendar(form)).toBe(false);
+    expect(resolvePersistedFulfillmentMode(form)).toBe('project');
+  });
+
+  it('shows calendar for hybrid both, hides it for hybrid project', () => {
+    expect(
+      serviceWizardShowsCalendar({
+        category: 'svc-community-management',
+        fulfillment_mode: 'both',
+      })
+    ).toBe(true);
+    expect(
+      serviceWizardShowsCalendar({
+        category: 'svc-community-management',
+        fulfillment_mode: 'project',
+      })
+    ).toBe(false);
   });
 });

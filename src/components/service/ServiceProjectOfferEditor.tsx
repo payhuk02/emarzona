@@ -28,21 +28,8 @@ import {
   useUpdateServiceBriefFields,
   type ServiceBriefField,
 } from '@/hooks/service/useServiceDeliveryCommerce';
-import type {
-  DeliveryPackageTier,
-  ServiceBriefFieldType,
-} from '@/lib/services/service-delivery-commerce';
-
-type DraftPackage = {
-  name: string;
-  tier: DeliveryPackageTier;
-  description: string;
-  price: number;
-  delivery_days: number;
-  revisions: number;
-  featuresText: string;
-  is_featured: boolean;
-};
+import type { ServiceBriefFieldType } from '@/lib/services/service-delivery-commerce';
+import { createDefaultGigPackageDrafts } from '@/lib/services/service-gig-package-drafts';
 
 type DraftExtra = {
   name: string;
@@ -50,39 +37,6 @@ type DraftExtra = {
   price: number;
   extra_days: number;
 };
-
-const DEFAULT_PACKAGES: DraftPackage[] = [
-  {
-    name: 'Basic',
-    tier: 'basic',
-    description: 'Offre essentielle',
-    price: 15000,
-    delivery_days: 5,
-    revisions: 1,
-    featuresText: 'Livrable principal\n1 révision',
-    is_featured: false,
-  },
-  {
-    name: 'Standard',
-    tier: 'standard',
-    description: 'Meilleur rapport qualité/prix',
-    price: 35000,
-    delivery_days: 3,
-    revisions: 2,
-    featuresText: 'Livrable principal\n2 révisions\nSupport prioritaire',
-    is_featured: true,
-  },
-  {
-    name: 'Premium',
-    tier: 'premium',
-    description: 'Offre complète',
-    price: 75000,
-    delivery_days: 2,
-    revisions: 5,
-    featuresText: 'Livrable principal\n5 révisions\nSupport prioritaire\nFichiers sources',
-    is_featured: false,
-  },
-];
 
 const BRIEF_TYPES: { value: ServiceBriefFieldType; label: string }[] = [
   { value: 'text', label: 'Texte' },
@@ -121,7 +75,7 @@ export function ServiceProjectOfferEditor({
   const replaceExtras = useReplaceGigExtras(serviceProductId);
   const updateBrief = useUpdateServiceBriefFields(serviceProductId);
 
-  const [draftPackages, setDraftPackages] = useState<DraftPackage[]>(DEFAULT_PACKAGES);
+  const [draftPackages, setDraftPackages] = useState(createDefaultGigPackageDrafts(15000));
   const [draftExtras, setDraftExtras] = useState<DraftExtra[]>([]);
   const [draftBrief, setDraftBrief] = useState<ServiceBriefField[]>([]);
 

@@ -4,9 +4,16 @@ import {
 } from '@/lib/services/service-categories';
 import {
   getServiceFormProfile,
+  isServiceGigFamily,
   validateServiceFormAttributes,
 } from '@/lib/services/service-form-profiles';
 import { getFieldError, validateWithZod, serviceSchema } from '@/lib/wizard-validation';
+import {
+  validateGigExtraDrafts,
+  validateGigPackageDrafts,
+  type ServiceGigExtraDraft,
+  type ServiceGigPackageDraft,
+} from '@/lib/services/service-gig-package-drafts';
 
 export type ServiceWizardFormFields = {
   name?: string;
@@ -31,6 +38,8 @@ export type ServiceWizardFormFields = {
   staff_members?: unknown[];
   deposit_required?: boolean;
   deposit_amount?: number;
+  delivery_packages?: ServiceGigPackageDraft[];
+  gig_extras?: ServiceGigExtraDraft[];
 };
 
 export type ServiceWizardStepValidationResult = {
@@ -75,7 +84,18 @@ export function resolveServiceFormProfile(
   return getServiceFormProfile(undefined, formData.category);
 }
 
-/** Appointment always needs slots. Project never. "both" follows the family profile. */
+function wizardFulfillmentContext(
+  formData: Pick<
+    ServiceWizardFormFields,
+    'fulfillment_mode' | 'category' | 'category_id' | 'parent_category_id'
+  >,
+  categoryTree?: ServiceCategoryTreeNode[]
+) {
+  const profile = resolveServiceFormProfile(formData, categoryTree);
+  return { profile, gig: isServiceGigFamily(profile) };
+}
+
+/** Gig families never need slots, even if the form still says appointment. */
 export function serviceWizardRequiresSlots(
   formData: Pick<
     ServiceWizardFormFields,
@@ -83,11 +103,41 @@ export function serviceWizardRequiresSlots(
   >,
   categoryTree?: ServiceCategoryTreeNode[]
 ): boolean {
+  const { profile, gig } = wizardFulfillmentContext(formData, categoryTree);
+  if (gig) return false;
   if (formData.fulfillment_mode === 'project') return false;
   if (formData.fulfillment_mode === 'appointment') return true;
-  const profile = resolveServiceFormProfile(formData, categoryTree);
   if (profile) return profile.requireSlots;
-  return true;
+  return false;
+}
+
+/** Show the calendar UI (slots, buffers, booking window). Hidden for locked gigs. */
+export function serviceWizardShowsCalendar(
+  formData: Pick<
+    ServiceWizardFormFields,
+    'fulfillment_mode' | 'category' | 'category_id' | 'parent_category_id'
+  >,
+  categoryTree?: ServiceCategoryTreeNode[]
+): boolean {
+  const { gig } = wizardFulfillmentContext(formData, categoryTree);
+  if (gig) return false;
+  if (formData.fulfillment_mode === 'project') return false;
+  if (formData.fulfillment_mode === 'appointment' || formData.fulfillment_mode === 'both') {
+    return true;
+  }
+  return serviceWizardRequiresSlots(formData, categoryTree);
+}
+
+export function resolvePersistedFulfillmentMode(
+  formData: Pick<
+    ServiceWizardFormFields,
+    'fulfillment_mode' | 'category' | 'category_id' | 'parent_category_id'
+  >,
+  categoryTree?: ServiceCategoryTreeNode[]
+): NonNullable<ServiceWizardFormFields['fulfillment_mode']> {
+  const { gig } = wizardFulfillmentContext(formData, categoryTree);
+  if (gig) return 'project';
+  return formData.fulfillment_mode || 'appointment';
 }
 
 export function validateServiceWizardStep(
@@ -166,12 +216,16 @@ export function validateServiceWizardStep(
   }
 
   if (step === 3) {
+    const gigFamily = isServiceGigFamily(
+      resolveServiceFormProfile(formData, options?.categoryTree)
+    );
     if (
+      !gigFamily &&
       formData.requires_staff &&
       (!formData.staff_members || formData.staff_members.length === 0)
     ) {
       errors.push('Au moins un membre du personnel est requis');
-    } else if (formData.requires_staff && formData.staff_members) {
+    } else if (!gigFamily && formData.requires_staff && formData.staff_members) {
       const invalidStaff = formData.staff_members.some(member => {
         if (!member || typeof member !== 'object') return true;
         const row = member as { name?: unknown; email?: unknown };
@@ -188,9 +242,16 @@ export function validateServiceWizardStep(
     }
   }
 
-  if (step === 4 && formData.deposit_required) {
-    if (!formData.deposit_amount || formData.deposit_amount <= 0) {
-      errors.push("Le montant de l'acompte est requis");
+  if (step === 4) {
+    if (formData.deposit_required) {
+      if (!formData.deposit_amount || formData.deposit_amount <= 0) {
+        errors.push("Le montant de l'acompte est requis");
+      }
+    }
+    const persistMode = resolvePersistedFulfillmentMode(formData, options?.categoryTree);
+    if (persistMode === 'project' || persistMode === 'both') {
+      errors.push(...validateGigPackageDrafts(formData.delivery_packages));
+      errors.push(...validateGigExtraDrafts(formData.gig_extras));
     }
   }
 

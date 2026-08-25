@@ -17,6 +17,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Plus, X, MapPin, Video, Home, Navigation } from 'lucide-react';
 import type { ServiceProductFormData, ServiceAvailabilitySlot } from '@/types/service-product';
 import { getServiceFormProfile } from '@/lib/services/service-form-profiles';
+import { serviceWizardShowsCalendar } from '@/lib/service-wizard-step-validation';
 
 interface ServiceDurationAvailabilityFormProps {
   data: Partial<ServiceProductFormData>;
@@ -33,7 +34,7 @@ const DAYS_OF_WEEK = [
   { value: 6, label: 'Samedi' },
 ];
 
-const COMMON_DURATIONS = [
+const SESSION_DURATIONS = [
   { value: 15, label: '15 minutes' },
   { value: 30, label: '30 minutes' },
   { value: 45, label: '45 minutes' },
@@ -43,11 +44,20 @@ const COMMON_DURATIONS = [
   { value: 180, label: '3 heures' },
 ];
 
+const GIG_DELIVERY_DURATIONS = [
+  { value: 1440, label: '1 jour' },
+  { value: 4320, label: '3 jours' },
+  { value: 10080, label: '7 jours' },
+  { value: 20160, label: '14 jours' },
+];
+
 export const ServiceDurationAvailabilityForm = ({
   data,
   onUpdate,
 }: ServiceDurationAvailabilityFormProps) => {
   const profile = getServiceFormProfile(undefined, data.category);
+  const showCalendar = serviceWizardShowsCalendar(data);
+  const durationPresets = showCalendar ? SESSION_DURATIONS : GIG_DELIVERY_DURATIONS;
 
   const handleAddSlot = () => {
     const newSlot: ServiceAvailabilitySlot = {
@@ -99,15 +109,15 @@ export const ServiceDurationAvailabilityForm = ({
         <CardHeader>
           <CardTitle>{profile?.durationLabel || 'Durée du service'}</CardTitle>
           <CardDescription>
-            {profile?.requireSlots
+            {showCalendar
               ? 'Combien de temps dure une session ?'
-              : 'Estimation visible par le client. Ajustable selon le brief.'}
+              : 'Délai de livraison estimé, visible par le client. Ajustable selon le brief.'}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Quick Duration */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-            {COMMON_DURATIONS.map(duration => (
+            {durationPresets.map(duration => (
               <Button
                 key={duration.value}
                 variant={data.duration_minutes === duration.value ? 'default' : 'outline'}
@@ -121,7 +131,9 @@ export const ServiceDurationAvailabilityForm = ({
 
           {/* Custom Duration */}
           <div className="space-y-2">
-            <Label htmlFor="duration_minutes">Durée personnalisée (minutes)</Label>
+            <Label htmlFor="duration_minutes">
+              {showCalendar ? 'Durée personnalisée (minutes)' : 'Délai personnalisé (minutes)'}
+            </Label>
             <Input
               id="duration_minutes"
               type="number"
@@ -197,7 +209,7 @@ export const ServiceDurationAvailabilityForm = ({
           )}
 
           {/* Meeting URL — Daily.co is created per booking; custom link is optional */}
-          {data.location_type === 'online' && (
+          {showCalendar && data.location_type === 'online' && (
             <div className="space-y-2">
               <Label htmlFor="meeting_url">Lien visio personnalisé (optionnel)</Label>
               <Input
@@ -217,95 +229,95 @@ export const ServiceDurationAvailabilityForm = ({
         </CardContent>
       </Card>
 
-      {/* Availability Slots */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Créneaux de disponibilité</CardTitle>
-          <CardDescription>
-            {profile && !profile.requireSlots
-              ? 'Optionnel pour une prestation sur projet. Ajoutez-en si vous acceptez aussi des rendez-vous.'
-              : 'Quand êtes-vous disponible pour ce service ?'}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {data.availability_slots && data.availability_slots.length > 0 ? (
-            <div className="space-y-3">
-              {data.availability_slots.map((slot, index) => (
-                <div
-                  key={index}
-                  className="grid grid-cols-1 sm:flex sm:items-center gap-3 p-4 bg-muted rounded-lg"
-                >
-                  {/* Day */}
-                  <Select
-                    value={slot.day.toString()}
-                    onValueChange={value => handleUpdateSlot(index, 'day', parseInt(value))}
-                  >
-                    <SelectTrigger className="w-full sm:w-[140px]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent mobileVariant="sheet">
-                      {DAYS_OF_WEEK.map(day => (
-                        <SelectItem key={day.value} value={day.value.toString()}>
-                          {day.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+      {showCalendar && (
+        <>
+          <Card>
+            <CardHeader>
+              <CardTitle>Créneaux de disponibilité</CardTitle>
+              <CardDescription>
+                {profile && !profile.requireSlots
+                  ? 'Optionnel si vous acceptez aussi des rendez-vous en plus du livrable.'
+                  : 'Quand êtes-vous disponible pour ce service ?'}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {data.availability_slots && data.availability_slots.length > 0 ? (
+                <div className="space-y-3">
+                  {data.availability_slots.map((slot, index) => (
+                    <div
+                      key={index}
+                      className="grid grid-cols-1 sm:flex sm:items-center gap-3 p-4 bg-muted rounded-lg"
+                    >
+                      <Select
+                        value={slot.day.toString()}
+                        onValueChange={value => handleUpdateSlot(index, 'day', parseInt(value))}
+                      >
+                        <SelectTrigger className="w-full sm:w-[140px]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent mobileVariant="sheet">
+                          {DAYS_OF_WEEK.map(day => (
+                            <SelectItem key={day.value} value={day.value.toString()}>
+                              {day.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
 
-                  {/* Start Time */}
-                  <Input
-                    type="time"
-                    value={slot.start_time}
-                    onChange={e => handleUpdateSlot(index, 'start_time', e.target.value)}
-                    className="w-full sm:w-[120px]"
-                  />
+                      <Input
+                        type="time"
+                        value={slot.start_time}
+                        onChange={e => handleUpdateSlot(index, 'start_time', e.target.value)}
+                        className="w-full sm:w-[120px]"
+                      />
 
-                  <span className="text-muted-foreground hidden sm:inline">→</span>
+                      <span className="text-muted-foreground hidden sm:inline">→</span>
 
-                  {/* End Time */}
-                  <Input
-                    type="time"
-                    value={slot.end_time}
-                    onChange={e => handleUpdateSlot(index, 'end_time', e.target.value)}
-                    className="w-full sm:w-[120px]"
-                  />
+                      <Input
+                        type="time"
+                        value={slot.end_time}
+                        onChange={e => handleUpdateSlot(index, 'end_time', e.target.value)}
+                        className="w-full sm:w-[120px]"
+                      />
 
-                  {/* Remove */}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleRemoveSlot(index)}
-                    className="justify-self-end"
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleRemoveSlot(index)}
+                        className="justify-self-end"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground text-center py-4">Aucun créneau ajouté</p>
-          )}
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  Aucun créneau ajouté
+                </p>
+              )}
 
-          <Button onClick={handleAddSlot} variant="outline" className="w-full">
-            <Plus className="h-4 w-4 mr-2" />
-            Ajouter un créneau
-          </Button>
-        </CardContent>
-      </Card>
+              <Button onClick={handleAddSlot} variant="outline" className="w-full">
+                <Plus className="h-4 w-4 mr-2" />
+                Ajouter un créneau
+              </Button>
+            </CardContent>
+          </Card>
 
-      {/* Timezone */}
-      <div className="space-y-2">
-        <Label htmlFor="timezone">Fuseau horaire</Label>
-        <Input
-          id="timezone"
-          value={data.timezone || ''}
-          onChange={e => onUpdate({ timezone: e.target.value })}
-          disabled
-        />
-        <p className="text-xs text-muted-foreground">
-          Détecté automatiquement depuis votre navigateur
-        </p>
-      </div>
+          <div className="space-y-2">
+            <Label htmlFor="timezone">Fuseau horaire</Label>
+            <Input
+              id="timezone"
+              value={data.timezone || ''}
+              onChange={e => onUpdate({ timezone: e.target.value })}
+              disabled
+            />
+            <p className="text-xs text-muted-foreground">
+              Détecté automatiquement depuis votre navigateur
+            </p>
+          </div>
+        </>
+      )}
     </div>
   );
 };

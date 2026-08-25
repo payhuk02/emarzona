@@ -1,5 +1,11 @@
 import { supabase } from '@/integrations/supabase/client';
 import { normalizeServicePricingType } from '@/lib/service/service-pricing';
+import { getServiceFormProfile, isServiceGigFamily } from '@/lib/services/service-form-profiles';
+import { fetchDeliveryPackages, fetchGigExtras } from '@/lib/services/service-delivery-commerce';
+import {
+  extrasFromGigRows,
+  packagesFromDeliveryRows,
+} from '@/lib/services/service-gig-package-drafts';
 import type {
   ServiceAvailabilitySlot,
   ServiceProductFormData,
@@ -98,6 +104,15 @@ export async function loadServiceProductFormData(
     if (categoryRow?.parent_id) parentCategoryId = categoryRow.parent_id;
   }
 
+  const gigLocked = isServiceGigFamily(getServiceFormProfile(undefined, categorySlug));
+  const storedMode = (serviceProduct as { fulfillment_mode?: string } | null)?.fulfillment_mode;
+  const deliveryPackages = serviceProduct?.id
+    ? packagesFromDeliveryRows(await fetchDeliveryPackages(serviceProduct.id))
+    : [];
+  const gigExtras = serviceProduct?.id
+    ? extrasFromGigRows(await fetchGigExtras(serviceProduct.id))
+    : [];
+
   return {
     name: product.name || '',
     slug: product.slug || '',
@@ -116,10 +131,10 @@ export async function loadServiceProductFormData(
           category_attributes?: Record<string, string | number | boolean | string[]>;
         } | null
       )?.category_attributes as Record<string, string | number | boolean | string[]>) || {},
-    fulfillment_mode:
-      (serviceProduct as { fulfillment_mode?: string } | null)?.fulfillment_mode === 'project' ||
-      (serviceProduct as { fulfillment_mode?: string } | null)?.fulfillment_mode === 'both'
-        ? ((serviceProduct as { fulfillment_mode: string }).fulfillment_mode as 'project' | 'both')
+    fulfillment_mode: gigLocked
+      ? 'project'
+      : storedMode === 'project' || storedMode === 'both'
+        ? storedMode
         : 'appointment',
     tags: product.tags || [],
     images: product.images || (product.image_url ? [product.image_url] : []),
@@ -216,6 +231,8 @@ export async function loadServiceProductFormData(
     whatsapp_number: product.whatsapp_number || '',
     whatsapp_enabled: Boolean(product.whatsapp_enabled),
     is_active: product.is_active ?? true,
+    delivery_packages: deliveryPackages,
+    gig_extras: gigExtras,
   };
 }
 

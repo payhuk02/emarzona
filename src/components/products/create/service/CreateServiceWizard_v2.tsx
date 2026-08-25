@@ -63,11 +63,15 @@ import {
   loadServiceProductFormData,
 } from '@/lib/service/load-service-product-form';
 import {
+  resolvePersistedFulfillmentMode,
+  serviceWizardShowsCalendar,
   validateServiceWizardPublishSteps,
   validateServiceWizardStep,
 } from '@/lib/service-wizard-step-validation';
 import { persistServiceCategoryAttributes } from '@/lib/service/persist-service-category-attributes';
+import { persistWizardGigPackages } from '@/lib/services/persist-wizard-gig-packages';
 import { toPersistedPricingType } from '@/lib/service/service-pricing';
+import { applyGigListingPrices } from '@/lib/services/service-gig-package-drafts';
 import { resolveServiceProductCategoryPayload } from '@/lib/services/service-categories';
 import { useServiceCategoryTree } from '@/hooks/useServiceCategories';
 import { supabase } from '@/integrations/supabase/client';
@@ -233,15 +237,14 @@ export const CreateServiceWizard = ({
     category_id: null,
     parent_category_id: null,
     category_attributes: {},
-    fulfillment_mode: 'appointment',
     tags: [],
     images: [],
-    service_type: 'appointment',
+    service_type: 'other',
 
     // Duration & Availability (Step 2)
     duration: 60,
     duration_minutes: 60,
-    location_type: 'on_site',
+    location_type: 'online',
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     availability_slots: [],
 
@@ -700,6 +703,8 @@ export const CreateServiceWizard = ({
         is_active: !isDraft,
       };
 
+      applyGigListingPrices(productPayload, formData.delivery_packages, formData.pricing_model);
+
       if (!isDraft) {
         const synced = await resolveServiceProductCategoryPayload(
           formData.parent_category_id,
@@ -724,9 +729,9 @@ export const CreateServiceWizard = ({
       const effectiveDuration = formData.duration_minutes ?? formData.duration ?? 60;
 
       const servicePayload: Record<string, unknown> = {
-        service_type: formData.service_type || 'appointment',
+        service_type: formData.service_type || 'other',
         duration_minutes: effectiveDuration,
-        location_type: formData.location_type || 'on_site',
+        location_type: formData.location_type || 'online',
         location_address: formData.location_address,
         meeting_url: formData.meeting_url,
         preferred_meeting_platform: formData.meeting_url
@@ -737,11 +742,15 @@ export const CreateServiceWizard = ({
         timezone: formData.timezone || 'UTC',
         requires_staff: formData.requires_staff ?? false,
         max_participants: formData.max_participants || 1,
-        pricing_type: toPersistedPricingType(formData.pricing_type),
+        pricing_type: toPersistedPricingType(
+          resolvePersistedFulfillmentMode(formData, categoryTree) === 'project'
+            ? 'fixed'
+            : formData.pricing_type
+        ),
         deposit_required: formData.deposit_required || false,
         deposit_amount: formData.deposit_amount,
         deposit_type: formData.deposit_type,
-        fulfillment_mode: formData.fulfillment_mode || 'appointment',
+        fulfillment_mode: resolvePersistedFulfillmentMode(formData, categoryTree),
         allow_booking_cancellation:
           bookingOptions?.allow_booking_cancellation ?? formData.allow_booking_cancellation ?? true,
         cancellation_deadline_hours:
@@ -773,7 +782,11 @@ export const CreateServiceWizard = ({
       }
 
       // 5. Create availability slots
-      if (formData.availability_slots && formData.availability_slots.length > 0) {
+      if (
+        serviceWizardShowsCalendar(formData, categoryTree) &&
+        formData.availability_slots &&
+        formData.availability_slots.length > 0
+      ) {
         slotsData = formData.availability_slots
           .map(
             (
@@ -860,6 +873,13 @@ export const CreateServiceWizard = ({
         formData.category_attributes,
         rpcResult.product_id
       );
+      await persistWizardGigPackages({
+        formData,
+        categoryTree,
+        serviceProductId: rpcResult.service_product_id,
+        productId: rpcResult.product_id,
+        storeId: store.id,
+      });
 
       const product = {
         id: rpcResult.product_id,
@@ -920,7 +940,7 @@ export const CreateServiceWizard = ({
 
       return product;
     },
-    [formData, store, t]
+    [formData, store, t, categoryTree]
   );
 
   /**
@@ -1019,8 +1039,9 @@ export const CreateServiceWizard = ({
       toast({
         title: t('services.published', '🎉 Service publié !'),
         description:
-          formData.fulfillment_mode === 'project' || formData.fulfillment_mode === 'both'
-            ? `"${product.name || 'Service'}" est publié. Configurez les formules (Basic / Standard / Premium) comme sur Fiverr.`
+          resolvePersistedFulfillmentMode(formData, categoryTree) === 'project' ||
+          resolvePersistedFulfillmentMode(formData, categoryTree) === 'both'
+            ? `"${product.name || 'Service'}" est publié avec ses formules. Brief client : Dashboard → Offres projet.`
             : t(
                 'services.publishedDesc',
                 '"{{name}}" est maintenant disponible à la réservation{{affiliate}}',
@@ -1042,8 +1063,8 @@ export const CreateServiceWizard = ({
           if (onSuccess) {
             onSuccess();
           } else {
-            const offersNext =
-              formData.fulfillment_mode === 'project' || formData.fulfillment_mode === 'both';
+            const persistedMode = resolvePersistedFulfillmentMode(formData, categoryTree);
+            const offersNext = persistedMode === 'project' || persistedMode === 'both';
             navigate(offersNext ? '/dashboard/services/project-offers' : '/dashboard/services', {
               replace: true,
             });

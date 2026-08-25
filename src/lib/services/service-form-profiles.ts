@@ -601,7 +601,8 @@ const FAMILY_PROFILES: Record<
     familySlug: 'svc-juridique-administratif',
     familyLabel: 'Juridique & Administratif',
     headline: 'Consultation ou formalités',
-    description: 'Domaine du droit et visio. Créneaux pour les consultations.',
+    description:
+      'Une consultation ou une médiation se réserve sur créneau. Rédaction de contrats, création de société et formalités se vendent comme un livrable (formules, sans calendrier).',
     defaults: {
       ...APPOINTMENT,
       service_type: 'consultation',
@@ -1922,7 +1923,17 @@ const LEAF_EXTRA_FIELDS: Record<string, ServiceFormField[]> = {
 
 const LEAF_PROFILE_OVERRIDES: Record<
   string,
-  Partial<Pick<ServiceFormProfile, 'headline' | 'description'>>
+  Partial<
+    Pick<
+      ServiceFormProfile,
+      | 'headline'
+      | 'description'
+      | 'requireSlots'
+      | 'staffRecommended'
+      | 'durationLabel'
+      | 'defaults'
+    >
+  >
 > = {
   'svc-configuration-reseaux-sociaux': {
     headline: 'Mise en place des comptes',
@@ -1993,6 +2004,39 @@ const LEAF_PROFILE_OVERRIDES: Record<
     headline: 'Pack créations multi-réseaux',
     description: 'Un même pack de visuels décliné sur plusieurs plateformes.',
   },
+  'svc-redaction-contrats': {
+    headline: 'Rédaction de contrats',
+    description:
+      'Livrable juridique sur projet : type d’acte, délai et formules. Pas de calendrier.',
+    requireSlots: false,
+    staffRecommended: false,
+    durationLabel: 'Délai de rédaction estimé',
+    defaults: { ...PROJECT, service_type: 'other', pricing_type: 'fixed' },
+  },
+  'svc-creation-societes': {
+    headline: 'Création de société',
+    description: 'Dossier et formalités de constitution, vendus comme une prestation livrable.',
+    requireSlots: false,
+    staffRecommended: false,
+    durationLabel: 'Délai de constitution estimé',
+    defaults: { ...PROJECT, service_type: 'other', pricing_type: 'fixed' },
+  },
+  'svc-formalites-administratives': {
+    headline: 'Formalités administratives',
+    description: 'Démarches et dossiers, sans rendez-vous. Le client commande, vous livrez.',
+    requireSlots: false,
+    staffRecommended: false,
+    durationLabel: 'Délai de traitement estimé',
+    defaults: { ...PROJECT, service_type: 'other', pricing_type: 'fixed' },
+  },
+  'svc-propriete-intellectuelle': {
+    headline: 'Propriété intellectuelle',
+    description: 'Dépôt de marque, droit d’auteur ou dossier PI — prestation sur projet.',
+    requireSlots: false,
+    staffRecommended: false,
+    durationLabel: 'Délai de dossier estimé',
+    defaults: { ...PROJECT, service_type: 'other', pricing_type: 'fixed' },
+  },
 };
 
 const LEAF_TO_FAMILY: Record<string, string> = Object.fromEntries(
@@ -2010,6 +2054,13 @@ export function findServiceFamilySlug(
   if (leafSlug && FAMILY_PROFILES[leafSlug]) return leafSlug;
   if (parentSlug && FAMILY_PROFILES[parentSlug]) return parentSlug;
   return null;
+}
+
+/** ComeUp/Fiverr-style gig: livrable, never a booking calendar. */
+export function isServiceGigFamily(profile: ServiceFormProfile | null | undefined): boolean {
+  return Boolean(
+    profile && profile.defaults.fulfillment_mode === 'project' && profile.requireSlots === false
+  );
 }
 
 export function getServiceFormProfile(
@@ -2031,12 +2082,18 @@ export function getServiceFormProfile(
   return {
     ...base,
     ...overrides,
+    defaults: { ...base.defaults, ...(overrides.defaults ?? {}) },
     fields: [...extras, ...base.fields.filter(f => !seen.has(f.key))],
   };
 }
 
 export function profileDefaultsPatch(profile: ServiceFormProfile): Partial<ServiceProductFormData> {
-  return { ...profile.defaults };
+  return {
+    ...profile.defaults,
+    ...(isServiceGigFamily(profile)
+      ? { availability_slots: [], requires_staff: false, fulfillment_mode: 'project' as const }
+      : {}),
+  };
 }
 
 export function listServiceLeafSlugs(): string[] {

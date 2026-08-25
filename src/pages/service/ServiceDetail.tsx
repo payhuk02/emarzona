@@ -100,11 +100,7 @@ import {
   formatServiceAttributeValue,
   getServiceFormProfile,
 } from '@/lib/services/service-form-profiles';
-import {
-  formatServiceDurationMinutes,
-  serviceLocationTypeLabel,
-  serviceTypeLabel,
-} from '@/lib/service/service-detail-labels';
+import { serviceWizardShowsCalendar } from '@/lib/service-wizard-step-validation';
 
 const PRODUCT_SERVICE_FIELDS =
   'id, store_id, slug, name, description, short_description, category, category_id, tags, product_type, is_active, price, promotional_price, currency, image_url, images, created_at, updated_at, payment_options, pricing_model, licensing_type, license_terms';
@@ -595,6 +591,10 @@ export default function ServiceDetail() {
     | null
     | undefined;
   const fulfillmentMode = serviceRecord?.fulfillment_mode || 'appointment';
+  const listingCategory = getCategoryBreadcrumb(
+    serviceCategories,
+    (service as { category_id?: string | null } | undefined)?.category_id
+  );
   const activePackagePrices = deliveryPackages.filter(pkg => pkg.is_active).map(pkg => pkg.price);
   const displayPrice = resolveServiceDisplayPrice({
     price: service?.price,
@@ -617,10 +617,23 @@ export default function ServiceDetail() {
   });
   const currentPrice = displayPrice.amount;
   const hasPublishedPackages = deliveryPackages.some(pkg => pkg.is_active);
+  const showAppointment = serviceWizardShowsCalendar({
+    fulfillment_mode:
+      fulfillmentMode === 'project' ||
+      fulfillmentMode === 'both' ||
+      fulfillmentMode === 'appointment'
+        ? fulfillmentMode
+        : 'appointment',
+    category: listingCategory.leaf?.slug || service?.category,
+    category_id: (service as { category_id?: string | null } | undefined)?.category_id,
+    parent_category_id: listingCategory.parent?.id ?? null,
+  });
   const showProject =
     Boolean(serviceProductId) &&
-    (fulfillmentMode === 'project' || fulfillmentMode === 'both' || hasPublishedPackages);
-  const showAppointment = fulfillmentMode !== 'project';
+    (fulfillmentMode === 'project' ||
+      fulfillmentMode === 'both' ||
+      hasPublishedPackages ||
+      !showAppointment);
   const serviceUrl = `${window.location.origin}/service/${serviceId}`;
 
   const maxParticipants = service?.service?.max_participants || 1;

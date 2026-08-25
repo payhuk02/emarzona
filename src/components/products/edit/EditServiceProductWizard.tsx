@@ -53,11 +53,15 @@ import { updateServiceProductTx } from '@/lib/products/product-update-rpc';
 import { toServiceAffiliateRpcPayload } from '@/lib/products/service-affiliate-payload';
 import { persistProductWhatsApp } from '@/lib/products/persist-product-whatsapp';
 import { persistServiceCategoryAttributes } from '@/lib/service/persist-service-category-attributes';
+import { persistWizardGigPackages } from '@/lib/services/persist-wizard-gig-packages';
 import { toPersistedPricingType } from '@/lib/service/service-pricing';
+import { applyGigListingPrices } from '@/lib/services/service-gig-package-drafts';
 import { loadServiceProductFormData } from '@/lib/service/load-service-product-form';
 import { resolveServiceProductCategoryPayload } from '@/lib/services/service-categories';
 import { useServiceCategoryTree } from '@/hooks/useServiceCategories';
 import {
+  resolvePersistedFulfillmentMode,
+  serviceWizardShowsCalendar,
   validateServiceWizardPublishSteps,
   validateServiceWizardStep,
 } from '@/lib/service-wizard-step-validation';
@@ -446,6 +450,8 @@ export const EditServiceProductWizard = ({
         is_active: formData.is_active,
       };
 
+      applyGigListingPrices(productPayload, formData.delivery_packages, formData.pricing_model);
+
       const syncedCategory = await resolveServiceProductCategoryPayload(
         formData.parent_category_id,
         formData.category_id
@@ -454,9 +460,9 @@ export const EditServiceProductWizard = ({
       productPayload.category_id = syncedCategory.category_id;
 
       const servicePayload: Record<string, unknown> = {
-        service_type: formData.service_type || 'appointment',
+        service_type: formData.service_type || 'other',
         duration_minutes: formData.duration_minutes || 60,
-        location_type: formData.location_type || 'on_site',
+        location_type: formData.location_type || 'online',
         location_address: formData.location_address || null,
         meeting_url: formData.meeting_url || null,
         preferred_meeting_platform: formData.meeting_url
@@ -467,11 +473,15 @@ export const EditServiceProductWizard = ({
         timezone: formData.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
         requires_staff: formData.requires_staff ?? false,
         max_participants: formData.max_participants || 1,
-        pricing_type: toPersistedPricingType(formData.pricing_type),
+        pricing_type: toPersistedPricingType(
+          resolvePersistedFulfillmentMode(formData, categoryTree) === 'project'
+            ? 'fixed'
+            : formData.pricing_type
+        ),
         deposit_required: formData.deposit_required || false,
         deposit_amount: formData.deposit_amount || null,
         deposit_type: formData.deposit_type || null,
-        fulfillment_mode: formData.fulfillment_mode || 'appointment',
+        fulfillment_mode: resolvePersistedFulfillmentMode(formData, categoryTree),
         allow_booking_cancellation: formData.booking_options?.allow_booking_cancellation ?? true,
         cancellation_deadline_hours: formData.booking_options?.cancellation_deadline_hours || 24,
         require_approval: formData.booking_options?.require_approval || false,
@@ -486,11 +496,13 @@ export const EditServiceProductWizard = ({
         includeWhenDisabled: true,
       });
 
-      const slotsData = (formData.availability_slots || []).map(slot => ({
-        day_of_week: slot.day_of_week ?? slot.day,
-        start_time: slot.start_time,
-        end_time: slot.end_time,
-      }));
+      const slotsData = serviceWizardShowsCalendar(formData, categoryTree)
+        ? (formData.availability_slots || []).map(slot => ({
+            day_of_week: slot.day_of_week ?? slot.day,
+            start_time: slot.start_time,
+            end_time: slot.end_time,
+          }))
+        : [];
 
       const staffData = (formData.staff_members || []).map(staff => ({
         name: staff.name,
@@ -530,6 +542,13 @@ export const EditServiceProductWizard = ({
         formData.category_attributes,
         productId
       );
+      await persistWizardGigPackages({
+        formData,
+        categoryTree,
+        serviceProductId: rpcResult.service_product_id,
+        productId,
+        storeId: store.id,
+      });
 
       const serviceProductId = rpcResult.service_product_id;
       if (!serviceProductId) {
@@ -537,11 +556,12 @@ export const EditServiceProductWizard = ({
       }
 
       const offersNext =
-        formData.fulfillment_mode === 'project' || formData.fulfillment_mode === 'both';
+        resolvePersistedFulfillmentMode(formData, categoryTree) === 'project' ||
+        resolvePersistedFulfillmentMode(formData, categoryTree) === 'both';
       toast({
         title: '✅ Service mis à jour',
         description: offersNext
-          ? 'Le service a été modifié. Vous pouvez mettre à jour les formules projet.'
+          ? 'Le service a été modifié. Formules et extras sont à jour (brief : Offres projet).'
           : 'Le service a été modifié avec succès',
         action: offersNext ? (
           <ToastAction
@@ -567,7 +587,7 @@ export const EditServiceProductWizard = ({
     } finally {
       setIsSaving(false);
     }
-  }, [formData, productId, store, onSuccess, toast, invalidateCatalog, navigate]);
+  }, [formData, productId, store, onSuccess, toast, invalidateCatalog, navigate, categoryTree]);
 
   const handleNext = useCallback(async () => {
     const result = await validateStep(currentStep);

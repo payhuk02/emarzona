@@ -4,6 +4,7 @@ import { resolve } from 'node:path';
 import {
   getServiceFormProfile,
   getServiceLeafExtraFields,
+  isServiceGigFamily,
   listServiceLeafSlugs,
   SERVICE_FAMILY_LEAVES,
   validateServiceFormAttributes,
@@ -19,6 +20,7 @@ describe('getServiceFormProfile', () => {
     expect(profile?.defaults.fulfillment_mode).toBe('project');
     expect(profile?.fields.some(f => f.key === 'cms')).toBe(true);
     expect(profile?.fields.some(f => f.key === 'deliverable')).toBe(true);
+    expect(isServiceGigFamily(profile)).toBe(true);
   });
 
   it('returns beauty appointment profile with coiffure override', () => {
@@ -27,6 +29,7 @@ describe('getServiceFormProfile', () => {
     expect(profile?.defaults.requires_staff).toBe(true);
     expect(profile?.defaults.pricing_type).toBe('fixed');
     expect(profile?.fields[0]?.key).toBe('service_focus');
+    expect(isServiceGigFamily(profile)).toBe(false);
   });
 
   it('sets pricing type defaults per family', () => {
@@ -48,6 +51,31 @@ describe('getServiceFormProfile', () => {
     expect(
       getServiceFormProfile(undefined, 'svc-developpement-web')?.defaults.fulfillment_mode
     ).toBe('project');
+  });
+
+  it('splits juridique leaves between consultation slots and gig dossiers', () => {
+    const consult = getServiceFormProfile(undefined, 'svc-consultation-juridique');
+    expect(consult?.requireSlots).toBe(true);
+    expect(consult?.defaults.fulfillment_mode).toBe('appointment');
+    expect(consult?.defaults.pricing_type).toBe('hourly');
+    expect(isServiceGigFamily(consult)).toBe(false);
+
+    const contract = getServiceFormProfile(undefined, 'svc-redaction-contrats');
+    expect(contract?.requireSlots).toBe(false);
+    expect(contract?.defaults.fulfillment_mode).toBe('project');
+    expect(contract?.defaults.pricing_type).toBe('fixed');
+    expect(isServiceGigFamily(contract)).toBe(true);
+
+    expect(isServiceGigFamily(getServiceFormProfile(undefined, 'svc-creation-societes'))).toBe(
+      true
+    );
+    expect(
+      isServiceGigFamily(getServiceFormProfile(undefined, 'svc-formalites-administratives'))
+    ).toBe(true);
+    expect(
+      isServiceGigFamily(getServiceFormProfile(undefined, 'svc-propriete-intellectuelle'))
+    ).toBe(true);
+    expect(isServiceGigFamily(getServiceFormProfile(undefined, 'svc-mediation'))).toBe(false);
   });
 
   it('rejects incomplete required attributes', () => {

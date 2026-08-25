@@ -117,8 +117,8 @@ const FAMILY_PRICING_GUIDANCE: Record<string, ServicePricingGuidance> = {
     pricingType: 'hourly',
     showStartingFrom: false,
     wizardHint:
-      'Tarif horaire de consultation. Un forfait formalités (création de société, contrats) peut s’ajouter via Offres projet.',
-    catalogHint: 'Consultation juridique — tarif horaire.',
+      'Consultation : tarif horaire et créneaux. Contrats, sociétés et formalités : formules Basic / Standard / Premium, sans calendrier.',
+    catalogHint: 'Consultation à l’heure, ou dossier juridique au forfait.',
   },
   'svc-creations': {
     pricingType: 'fixed',
