@@ -1,6 +1,9 @@
 import {
+  draftsToBriefPayload,
   replaceDeliveryPackages,
   replaceGigExtras,
+  updateServiceBriefFields,
+  type ServiceBriefField,
 } from '@/lib/services/service-delivery-commerce';
 import {
   draftsToExtrasPayload,
@@ -21,6 +24,7 @@ export async function persistWizardGigPackages(input: {
   > & {
     delivery_packages?: ServiceGigPackageDraft[];
     gig_extras?: ServiceGigExtraDraft[];
+    brief_fields?: ServiceBriefField[];
   };
   categoryTree?: ServiceCategoryTreeNode[];
   serviceProductId: string;
@@ -48,5 +52,11 @@ export async function persistWizardGigPackages(input: {
       storeId: input.storeId,
       extras: draftsToExtrasPayload(input.formData.gig_extras),
     });
+  }
+  if (input.formData.brief_fields) {
+    await updateServiceBriefFields(
+      input.serviceProductId,
+      draftsToBriefPayload(input.formData.brief_fields)
+    );
   }
 }

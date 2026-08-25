@@ -236,7 +236,7 @@ export const ServiceDurationAvailabilityForm = ({
               <CardTitle>Créneaux de disponibilité</CardTitle>
               <CardDescription>
                 {profile && !profile.requireSlots
-                  ? 'Optionnel si vous acceptez aussi des rendez-vous en plus du livrable.'
+                  ? 'Optionnel en mode mixte. Sans créneau, le calendrier n’apparaît pas sur la fiche publique.'
                   : 'Quand êtes-vous disponible pour ce service ?'}
               </CardDescription>
             </CardHeader>

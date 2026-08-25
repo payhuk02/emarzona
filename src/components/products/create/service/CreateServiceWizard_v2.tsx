@@ -315,7 +315,11 @@ export const CreateServiceWizard = ({
   const handleUpdateFormData = useCallback(
     (data: Partial<ServiceProductFormData> & Record<string, unknown>) => {
       setFormData(prev => {
-        const newData = { ...prev, ...data };
+        const patch =
+          data.category_id !== undefined && data.category_id !== prev.category_id
+            ? { ...data, category_attributes: data.category_attributes ?? {} }
+            : data;
+        const newData = { ...prev, ...patch };
 
         // Auto-save after 2 seconds of inactivity
         if (autoSaveTimeoutRef.current) {
@@ -656,7 +660,7 @@ export const CreateServiceWizard = ({
           break;
         }
 
-        // Slug existe déjà, générer un nouveau avec suffixe
+        // Slug existe déjà, générer un nouveau avec suffixe aléatoire court
         attempts++;
         const baseSlug =
           formData.slug ||
@@ -665,7 +669,8 @@ export const CreateServiceWizard = ({
             .replace(/[^a-z0-9]+/g, '-')
             .replace(/(^-|-$)/g, '') ||
           'service';
-        slug = `${baseSlug}-${attempts}`;
+        const randomSuffix = Math.random().toString(36).substring(2, 6);
+        slug = `${baseSlug}-${randomSuffix}`;
       }
 
       if (attempts >= maxAttempts) {
@@ -1041,7 +1046,7 @@ export const CreateServiceWizard = ({
         description:
           resolvePersistedFulfillmentMode(formData, categoryTree) === 'project' ||
           resolvePersistedFulfillmentMode(formData, categoryTree) === 'both'
-            ? `"${product.name || 'Service'}" est publié avec ses formules. Brief client : Dashboard → Offres projet.`
+            ? `"${product.name || 'Service'}" est publié avec ses formules, extras et brief.`
             : t(
                 'services.publishedDesc',
                 '"{{name}}" est maintenant disponible à la réservation{{affiliate}}',
@@ -1063,9 +1068,7 @@ export const CreateServiceWizard = ({
           if (onSuccess) {
             onSuccess();
           } else {
-            const persistedMode = resolvePersistedFulfillmentMode(formData, categoryTree);
-            const offersNext = persistedMode === 'project' || persistedMode === 'both';
-            navigate(offersNext ? '/dashboard/services/project-offers' : '/dashboard/services', {
+            navigate('/dashboard/services', {
               replace: true,
             });
           }

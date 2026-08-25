@@ -100,7 +100,10 @@ import {
   formatServiceAttributeValue,
   getServiceFormProfile,
 } from '@/lib/services/service-form-profiles';
-import { serviceWizardShowsCalendar } from '@/lib/service-wizard-step-validation';
+import {
+  servicePublicShowsCalendar,
+  serviceWizardShowsCalendar,
+} from '@/lib/service-wizard-step-validation';
 
 const PRODUCT_SERVICE_FIELDS =
   'id, store_id, slug, name, description, short_description, category, category_id, tags, product_type, is_active, price, promotional_price, currency, image_url, images, created_at, updated_at, payment_options, pricing_model, licensing_type, license_terms';
@@ -191,12 +194,19 @@ export default function ServiceDetail() {
 
       // Fetch staff (best-effort — schema differences must not crash the page)
       let staff: Array<Record<string, unknown>> = [];
+      let availabilitySlotCount = 0;
       if (serviceData?.id) {
         const { data: staffRows } = await supabase
           .from('service_staff_members')
           .select(SERVICE_STAFF_FIELDS)
           .eq('service_product_id', serviceData.id);
         staff = staffRows || [];
+        const { count } = await supabase
+          .from('service_availability_slots')
+          .select('id', { count: 'exact', head: true })
+          .eq('service_product_id', serviceData.id)
+          .eq('is_active', true);
+        availabilitySlotCount = count ?? 0;
       }
 
       return {
@@ -206,6 +216,7 @@ export default function ServiceDetail() {
         service: serviceData,
         staff,
         store: storePublic,
+        availabilitySlotCount,
       };
     },
     enabled: !!serviceId,
@@ -617,7 +628,7 @@ export default function ServiceDetail() {
   });
   const currentPrice = displayPrice.amount;
   const hasPublishedPackages = deliveryPackages.some(pkg => pkg.is_active);
-  const showAppointment = serviceWizardShowsCalendar({
+  const calendarForm = {
     fulfillment_mode:
       fulfillmentMode === 'project' ||
       fulfillmentMode === 'both' ||
@@ -627,13 +638,18 @@ export default function ServiceDetail() {
     category: listingCategory.leaf?.slug || service?.category,
     category_id: (service as { category_id?: string | null } | undefined)?.category_id,
     parent_category_id: listingCategory.parent?.id ?? null,
-  });
+  } as const;
+  const calendarIntent = serviceWizardShowsCalendar(calendarForm);
+  const showAppointment = servicePublicShowsCalendar(
+    calendarForm,
+    Number((service as { availabilitySlotCount?: number } | undefined)?.availabilitySlotCount ?? 0)
+  );
   const showProject =
     Boolean(serviceProductId) &&
     (fulfillmentMode === 'project' ||
       fulfillmentMode === 'both' ||
       hasPublishedPackages ||
-      !showAppointment);
+      !calendarIntent);
   const serviceUrl = `${window.location.origin}/service/${serviceId}`;
 
   const maxParticipants = service?.service?.max_participants || 1;
@@ -1050,6 +1066,17 @@ export default function ServiceDetail() {
 
             return null;
           })()}
+
+          {calendarIntent && !showAppointment && !showProject && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Réserver</CardTitle>
+              </CardHeader>
+              <CardContent className="text-sm text-muted-foreground">
+                Aucun créneau n’est publié pour le moment.
+              </CardContent>
+            </Card>
+          )}
 
           {showAppointment && (
             <Card className="lg:sticky lg:top-4 min-w-0 overflow-hidden">

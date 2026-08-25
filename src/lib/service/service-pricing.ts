@@ -37,7 +37,7 @@ const UNIT_LABEL: Record<ServiceUiPricingType, string> = {
 };
 
 const STARTING_FROM_PROJECT_HINT =
-  'Le prix d’entrée s’affiche « À partir de ». Les formules (Basic / Standard / Premium), extras et brief se configurent dans Dashboard → Offres projet et restent consultables sur la fiche produit.';
+  'Le prix d’entrée s’affiche « À partir de ». Formules, extras et brief se configurent à l’étape Tarification (modifiables ensuite dans Dashboard → Offres projet).';
 
 const FAMILY_PRICING_GUIDANCE: Record<string, ServicePricingGuidance> = {
   'svc-informatique-technologie': {
@@ -56,14 +56,14 @@ const FAMILY_PRICING_GUIDANCE: Record<string, ServicePricingGuidance> = {
     pricingType: 'fixed',
     showStartingFrom: true,
     wizardHint:
-      'Prix d’entrée affiché « À partir de ». Forfaits campagne / extras dans Offres projet ; un RDV reste possible en mode mixte.',
+      'Prix d’entrée affiché « À partir de ». Forfaits et extras à l’étape Tarification ; un RDV reste possible en mode mixte.',
     catalogHint: 'Campagne ou accompagnement — à partir de, forfaits selon le périmètre.',
   },
   'svc-formation-coaching': {
     pricingType: 'hourly',
     showStartingFrom: false,
     wizardHint:
-      'Tarif horaire / séance par défaut. Le prix affiché est le tarif d’une heure (ou d’une séance). Un pack de séances peut s’ajouter via Offres projet.',
+      'Tarif horaire / séance par défaut. Le prix affiché est le tarif d’une heure (ou d’une séance). Un pack de séances peut s’ajouter à l’étape Tarification si vous passez en mode projet.',
     catalogHint: 'Séance de coaching / formation — tarif horaire.',
   },
   'svc-redaction-traduction': {
@@ -76,14 +76,14 @@ const FAMILY_PRICING_GUIDANCE: Record<string, ServicePricingGuidance> = {
     pricingType: 'fixed',
     showStartingFrom: true,
     wizardHint:
-      'Prix de séance / captation en entrée (« À partir de »). Packages reportage, montage et extras dans Offres projet.',
+      'Prix de séance / captation en entrée (« À partir de »). Packages reportage, montage et extras à l’étape Tarification.',
     catalogHint: 'Captation ou post-production — à partir de, options selon le format.',
   },
   'svc-services-entreprises': {
     pricingType: 'hourly',
     showStartingFrom: true,
     wizardHint:
-      'Tarif horaire d’intervention. Un forfait mensuel ou un projet borné se configure dans Offres projet et s’affiche « À partir de ».',
+      'Tarif horaire d’intervention. Un forfait mensuel ou un projet borné se configure à l’étape Tarification et s’affiche « À partir de ».',
     catalogHint: 'Accompagnement B2B — tarif horaire ou forfait.',
   },
   'svc-maison-services-locaux': {
@@ -110,14 +110,14 @@ const FAMILY_PRICING_GUIDANCE: Record<string, ServicePricingGuidance> = {
     pricingType: 'per_participant',
     showStartingFrom: true,
     wizardHint:
-      'Prix par participant / jauge par défaut. Un forfait événement (date, lieu, extras) se configure dans Offres projet.',
+      'Prix par participant / jauge par défaut. Un forfait événement (date, lieu, extras) se configure à l’étape Tarification.',
     catalogHint: 'Prestation datée — tarif par personne ou forfait événement.',
   },
   'svc-juridique-administratif': {
     pricingType: 'hourly',
     showStartingFrom: false,
     wizardHint:
-      'Consultation : tarif horaire et créneaux. Contrats, sociétés et formalités : formules Basic / Standard / Premium, sans calendrier.',
+      'Consultation : tarif horaire et créneaux. Contrats, droit des affaires, sociétés et formalités : formules à l’étape Tarification, sans calendrier.',
     catalogHint: 'Consultation à l’heure, ou dossier juridique au forfait.',
   },
   'svc-creations': {

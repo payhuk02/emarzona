@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   resolvePersistedFulfillmentMode,
+  servicePublicShowsCalendar,
   serviceWizardShowsCalendar,
   validateServiceWizardPublishSteps,
   validateServiceWizardStep,
@@ -124,12 +125,34 @@ describe('validateServiceWizardStep', () => {
     expect(result.valid).toBe(true);
   });
 
+  it('does not require slots for droit des affaires gigs', () => {
+    const result = validateServiceWizardStep(2, {
+      ...baseForm,
+      category: 'svc-droit-affaires',
+      fulfillment_mode: 'appointment',
+      availability_slots: [],
+    });
+    expect(result.valid).toBe(true);
+  });
+
+  it('requires slots for support technique in hybrid mode', () => {
+    const result = validateServiceWizardStep(2, {
+      ...baseForm,
+      category: 'svc-support-technique',
+      fulfillment_mode: 'both',
+      availability_slots: [],
+    });
+    expect(result.valid).toBe(false);
+    expect(result.toastTitle).toBe('Créneaux requis');
+  });
+
   it('skips staff validation for locked gig families', () => {
     const result = validateServiceWizardStep(3, {
       ...baseForm,
       category: 'svc-developpement-web',
       requires_staff: true,
       staff_members: [],
+      max_participants: 0,
     });
     expect(result.valid).toBe(true);
   });
@@ -195,6 +218,29 @@ describe('validateServiceWizardStep', () => {
     });
     expect(result.valid).toBe(true);
   });
+
+  it('rejects a required brief question without a label', () => {
+    const result = validateServiceWizardStep(4, {
+      ...baseForm,
+      category: 'svc-developpement-web',
+      fulfillment_mode: 'project',
+      delivery_packages: [
+        {
+          name: 'Basic',
+          tier: 'basic',
+          description: '',
+          price: 15000,
+          delivery_days: 7,
+          revisions: 1,
+          featuresText: 'Site vitrine',
+          is_featured: false,
+        },
+      ],
+      brief_fields: [{ id: 'x', label: '', type: 'text', required: true }],
+    });
+    expect(result.valid).toBe(false);
+    expect(result.errors.some(msg => /brief/i.test(msg))).toBe(true);
+  });
 });
 
 describe('service calendar intent', () => {
@@ -205,6 +251,36 @@ describe('service calendar intent', () => {
     };
     expect(serviceWizardShowsCalendar(form)).toBe(false);
     expect(resolvePersistedFulfillmentMode(form)).toBe('project');
+  });
+
+  it('hides calendar for droit des affaires', () => {
+    expect(
+      serviceWizardShowsCalendar({
+        category: 'svc-droit-affaires',
+        fulfillment_mode: 'appointment',
+      })
+    ).toBe(false);
+    expect(
+      resolvePersistedFulfillmentMode({
+        category: 'svc-droit-affaires',
+        fulfillment_mode: 'appointment',
+      })
+    ).toBe('project');
+  });
+
+  it('shows calendar for support technique hybrid', () => {
+    expect(
+      serviceWizardShowsCalendar({
+        category: 'svc-support-technique',
+        fulfillment_mode: 'both',
+      })
+    ).toBe(true);
+    expect(
+      resolvePersistedFulfillmentMode({
+        category: 'svc-support-technique',
+        fulfillment_mode: 'both',
+      })
+    ).toBe('both');
   });
 
   it('shows calendar for hybrid both, hides it for hybrid project', () => {
@@ -220,5 +296,15 @@ describe('service calendar intent', () => {
         fulfillment_mode: 'project',
       })
     ).toBe(false);
+  });
+
+  it('hides the public calendar when hybrid both has no slots', () => {
+    const form = {
+      category: 'svc-community-management',
+      fulfillment_mode: 'both' as const,
+    };
+    expect(serviceWizardShowsCalendar(form)).toBe(true);
+    expect(servicePublicShowsCalendar(form, 0)).toBe(false);
+    expect(servicePublicShowsCalendar(form, 2)).toBe(true);
   });
 });

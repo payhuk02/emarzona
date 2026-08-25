@@ -260,3 +260,41 @@ export function computeProjectQuote(input: {
     totalDays: Number(input.deliveryDays || 0) + extrasDays,
   };
 }
+
+export function createDefaultBriefFields(): ServiceBriefField[] {
+  return [
+    {
+      id: 'brief-project',
+      label: 'Décrivez votre projet',
+      type: 'textarea',
+      required: true,
+      placeholder: 'Objectifs, périmètre, exemples…',
+    },
+    {
+      id: 'brief-links',
+      label: 'Liens ou références',
+      type: 'url',
+      required: false,
+    },
+  ];
+}
+
+export function validateBriefFieldDrafts(fields: ServiceBriefField[] | undefined): string[] {
+  const errors: string[] = [];
+  for (const field of fields || []) {
+    if (field.required && !field.label.trim()) {
+      errors.push('Chaque question de brief obligatoire doit avoir un libellé');
+    }
+  }
+  return errors;
+}
+
+export function draftsToBriefPayload(fields: ServiceBriefField[]): ServiceBriefField[] {
+  return fields
+    .filter(field => field.label.trim())
+    .map((field, index) => ({
+      ...field,
+      id: field.id || `brief-${index}`,
+      label: field.label.trim(),
+    }));
+}

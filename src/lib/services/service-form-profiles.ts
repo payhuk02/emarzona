@@ -103,6 +103,9 @@ function toggle(key: string, label: string, extra?: Partial<ServiceFormField>): 
   return { key, label, type: 'boolean', ...extra };
 }
 
+/** Default gig delivery delay (7 days). Matches step-2 chips; not used for hybrid session defaults. */
+export const GIG_DELIVERY_DEFAULT_MINUTES = 7 * 24 * 60;
+
 const PROJECT: ServiceFormDefaults = {
   fulfillment_mode: 'project',
   service_type: 'other',
@@ -602,7 +605,7 @@ const FAMILY_PROFILES: Record<
     familyLabel: 'Juridique & Administratif',
     headline: 'Consultation ou formalités',
     description:
-      'Une consultation ou une médiation se réserve sur créneau. Rédaction de contrats, création de société et formalités se vendent comme un livrable (formules, sans calendrier).',
+      'Une consultation ou une médiation se réserve sur créneau. Contrats, droit des affaires, création de société et formalités se vendent comme un livrable (formules, sans calendrier).',
     defaults: {
       ...APPOINTMENT,
       service_type: 'consultation',
@@ -2004,6 +2007,23 @@ const LEAF_PROFILE_OVERRIDES: Record<
     headline: 'Pack créations multi-réseaux',
     description: 'Un même pack de visuels décliné sur plusieurs plateformes.',
   },
+  'svc-support-technique': {
+    headline: 'Support technique sur créneau',
+    description:
+      'Intervention à distance ou sur site. Les créneaux permettent la prise de rendez-vous ; un forfait projet reste possible en mode mixte.',
+    requireSlots: true,
+    staffRecommended: true,
+    durationLabel: 'Durée d’une intervention',
+    defaults: {
+      ...APPOINTMENT,
+      fulfillment_mode: 'both',
+      service_type: 'appointment',
+      location_type: 'online',
+      duration_minutes: 60,
+      requires_staff: true,
+      pricing_type: 'hourly',
+    },
+  },
   'svc-redaction-contrats': {
     headline: 'Rédaction de contrats',
     description:
@@ -2032,6 +2052,15 @@ const LEAF_PROFILE_OVERRIDES: Record<
   'svc-propriete-intellectuelle': {
     headline: 'Propriété intellectuelle',
     description: 'Dépôt de marque, droit d’auteur ou dossier PI — prestation sur projet.',
+    requireSlots: false,
+    staffRecommended: false,
+    durationLabel: 'Délai de dossier estimé',
+    defaults: { ...PROJECT, service_type: 'other', pricing_type: 'fixed' },
+  },
+  'svc-droit-affaires': {
+    headline: 'Droit des affaires',
+    description:
+      'Dossier (statuts, pactes, conseils écrits) vendu comme un livrable. Formules sans calendrier.',
     requireSlots: false,
     staffRecommended: false,
     durationLabel: 'Délai de dossier estimé',
@@ -2091,7 +2120,12 @@ export function profileDefaultsPatch(profile: ServiceFormProfile): Partial<Servi
   return {
     ...profile.defaults,
     ...(isServiceGigFamily(profile)
-      ? { availability_slots: [], requires_staff: false, fulfillment_mode: 'project' as const }
+      ? {
+          availability_slots: [],
+          requires_staff: false,
+          fulfillment_mode: 'project' as const,
+          duration_minutes: GIG_DELIVERY_DEFAULT_MINUTES,
+        }
       : {}),
   };
 }

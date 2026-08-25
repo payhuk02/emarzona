@@ -24,7 +24,10 @@ import type { ServiceProductFormData } from '@/types/service-product';
 import {
   formatServiceAttributeValue,
   getServiceFormProfile,
+  isServiceGigFamily,
 } from '@/lib/services/service-form-profiles';
+import { formatServiceCategoryLabel } from '@/lib/services/service-categories';
+import { useServiceCategoryTree } from '@/hooks/useServiceCategories';
 import { serviceWizardShowsCalendar } from '@/lib/service-wizard-step-validation';
 
 interface ServicePreviewProps {
@@ -35,8 +38,15 @@ interface ServicePreviewProps {
 const DAYS_OF_WEEK_LABELS = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
 
 export const ServicePreview = ({ data }: ServicePreviewProps) => {
+  const { data: categoryRows = [] } = useServiceCategoryTree();
   const profile = getServiceFormProfile(undefined, data.category);
+  const isGigFamily = isServiceGigFamily(profile);
   const showCalendar = serviceWizardShowsCalendar(data);
+  const categoryLabel =
+    formatServiceCategoryLabel(categoryRows, {
+      categoryId: data.category_id,
+      categorySlug: data.category,
+    }) || data.category;
 
   const getLocationIcon = () => {
     switch (data.location_type) {
@@ -54,6 +64,10 @@ export const ServicePreview = ({ data }: ServicePreviewProps) => {
   const LocationIcon = getLocationIcon();
 
   const formatDuration = (minutes: number) => {
+    if (minutes >= 1440 && minutes % 1440 === 0) {
+      const days = minutes / 1440;
+      return days === 1 ? '1 jour' : `${days} jours`;
+    }
     if (minutes < 60) return `${minutes} min`;
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
@@ -94,14 +108,10 @@ export const ServicePreview = ({ data }: ServicePreviewProps) => {
             <p className="text-lg font-semibold">{data.name || 'Non défini'}</p>
           </div>
 
-          {data.category && (
+          {categoryLabel && (
             <div>
               <p className="text-sm font-medium text-muted-foreground">Catégorie</p>
-              <p className="text-sm">
-                {profile
-                  ? `${profile.familyLabel}${data.category ? ` · ${data.category}` : ''}`
-                  : data.category}
-              </p>
+              <p className="text-sm">{categoryLabel}</p>
             </div>
           )}
 
@@ -179,7 +189,7 @@ export const ServicePreview = ({ data }: ServicePreviewProps) => {
             </div>
           )}
 
-          {data.location_type === 'online' && (
+          {showCalendar && data.location_type === 'online' && (
             <div>
               <p className="text-sm font-medium text-muted-foreground">Visio</p>
               {data.meeting_url ? (
@@ -216,65 +226,17 @@ export const ServicePreview = ({ data }: ServicePreviewProps) => {
         </Card>
       )}
 
-      {/* Staff & Capacity */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5" />
-            Personnel & Capacité
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium">Personnel requis</span>
-            {data.requires_staff ? (
-              <Badge variant="default">
-                <CheckCircle2 className="h-3 w-3 mr-1" />
-                Oui
-              </Badge>
-            ) : (
-              <Badge variant="secondary">
-                <XCircle className="h-3 w-3 mr-1" />
-                Non
-              </Badge>
-            )}
-          </div>
-
-          {data.requires_staff && data.staff_members && data.staff_members.length > 0 && (
-            <div>
-              <p className="text-sm font-medium text-muted-foreground mb-2">
-                Membres du personnel ({data.staff_members.length})
-              </p>
-              <div className="space-y-2">
-                {data.staff_members.map((member, index) => (
-                  <div key={index} className="p-3 bg-muted rounded-lg">
-                    <p className="font-semibold">{member.name}</p>
-                    <p className="text-sm text-muted-foreground">{member.email}</p>
-                    {member.role && <p className="text-sm text-muted-foreground">{member.role}</p>}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <Separator />
-
-          <div>
-            <p className="text-sm font-medium text-muted-foreground">Capacité maximum</p>
-            <p className="text-xl font-bold">
-              {data.max_participants} participant
-              {data.max_participants && data.max_participants > 1 ? 's' : ''}
-            </p>
-            {data.max_participants && data.max_participants > 1 && (
-              <p className="text-sm text-muted-foreground">Service de groupe</p>
-            )}
-          </div>
-
-          {data.resources_needed && data.resources_needed.length > 0 && (
-            <div>
-              <p className="text-sm font-medium text-muted-foreground mb-2">
-                Ressources nécessaires
-              </p>
+      {isGigFamily ? (
+        data.resources_needed &&
+        data.resources_needed.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Package className="h-5 w-5" />
+                Ressources
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
               <div className="flex flex-wrap gap-2">
                 {data.resources_needed.map((resource, index) => (
                   <Badge key={index} variant="secondary">
@@ -283,10 +245,83 @@ export const ServicePreview = ({ data }: ServicePreviewProps) => {
                   </Badge>
                 ))}
               </div>
+            </CardContent>
+          </Card>
+        )
+      ) : (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              Personnel & Capacité
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium">Personnel requis</span>
+              {data.requires_staff ? (
+                <Badge variant="default">
+                  <CheckCircle2 className="h-3 w-3 mr-1" />
+                  Oui
+                </Badge>
+              ) : (
+                <Badge variant="secondary">
+                  <XCircle className="h-3 w-3 mr-1" />
+                  Non
+                </Badge>
+              )}
             </div>
-          )}
-        </CardContent>
-      </Card>
+
+            {data.requires_staff && data.staff_members && data.staff_members.length > 0 && (
+              <div>
+                <p className="text-sm font-medium text-muted-foreground mb-2">
+                  Membres du personnel ({data.staff_members.length})
+                </p>
+                <div className="space-y-2">
+                  {data.staff_members.map((member, index) => (
+                    <div key={index} className="p-3 bg-muted rounded-lg">
+                      <p className="font-semibold">{member.name}</p>
+                      <p className="text-sm text-muted-foreground">{member.email}</p>
+                      {member.role && (
+                        <p className="text-sm text-muted-foreground">{member.role}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <Separator />
+
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">Capacité maximum</p>
+              <p className="text-xl font-bold">
+                {data.max_participants} participant
+                {data.max_participants && data.max_participants > 1 ? 's' : ''}
+              </p>
+              {data.max_participants && data.max_participants > 1 && (
+                <p className="text-sm text-muted-foreground">Service de groupe</p>
+              )}
+            </div>
+
+            {data.resources_needed && data.resources_needed.length > 0 && (
+              <div>
+                <p className="text-sm font-medium text-muted-foreground mb-2">
+                  Ressources nécessaires
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {data.resources_needed.map((resource, index) => (
+                    <Badge key={index} variant="secondary">
+                      <Package className="h-3 w-3 mr-1" />
+                      {resource}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Pricing */}
       <Card>
@@ -376,6 +411,22 @@ export const ServicePreview = ({ data }: ServicePreviewProps) => {
                 </div>
               </div>
             )}
+
+          {data.brief_fields && data.brief_fields.some(field => field.label.trim()) && (
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-muted-foreground">Brief client</p>
+              <ul className="list-disc pl-5 text-sm space-y-1">
+                {data.brief_fields
+                  .filter(field => field.label.trim())
+                  .map(field => (
+                    <li key={field.id}>
+                      {field.label}
+                      {field.required ? ' *' : ''}
+                    </li>
+                  ))}
+              </ul>
+            </div>
+          )}
         </CardContent>
       </Card>
 

@@ -2,10 +2,12 @@ import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import {
+  GIG_DELIVERY_DEFAULT_MINUTES,
   getServiceFormProfile,
   getServiceLeafExtraFields,
   isServiceGigFamily,
   listServiceLeafSlugs,
+  profileDefaultsPatch,
   SERVICE_FAMILY_LEAVES,
   validateServiceFormAttributes,
 } from '@/lib/services/service-form-profiles';
@@ -75,7 +77,27 @@ describe('getServiceFormProfile', () => {
     expect(
       isServiceGigFamily(getServiceFormProfile(undefined, 'svc-propriete-intellectuelle'))
     ).toBe(true);
+    expect(isServiceGigFamily(getServiceFormProfile(undefined, 'svc-droit-affaires'))).toBe(true);
     expect(isServiceGigFamily(getServiceFormProfile(undefined, 'svc-mediation'))).toBe(false);
+  });
+
+  it('treats support technique as hybrid slots, not a locked gig', () => {
+    const support = getServiceFormProfile(undefined, 'svc-support-technique');
+    expect(isServiceGigFamily(support)).toBe(false);
+    expect(support?.requireSlots).toBe(true);
+    expect(support?.defaults.fulfillment_mode).toBe('both');
+    expect(support?.defaults.pricing_type).toBe('hourly');
+    expect(support?.defaults.requires_staff).toBe(true);
+  });
+
+  it('pre-fills seven days for gig category defaults', () => {
+    const web = getServiceFormProfile(undefined, 'svc-developpement-web');
+    expect(web).not.toBeNull();
+    expect(profileDefaultsPatch(web!).duration_minutes).toBe(GIG_DELIVERY_DEFAULT_MINUTES);
+    expect(profileDefaultsPatch(web!).duration_minutes).toBe(10080);
+
+    const coaching = getServiceFormProfile(undefined, 'svc-coaching-professionnel');
+    expect(profileDefaultsPatch(coaching!).duration_minutes).toBe(60);
   });
 
   it('rejects incomplete required attributes', () => {

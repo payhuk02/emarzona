@@ -25,6 +25,9 @@ import {
 } from '@/lib/service-wizard-step-validation';
 import { ServiceGigPackagesForm } from './ServiceGigPackagesForm';
 import { ServiceGigExtrasForm } from './ServiceGigExtrasForm';
+import { ServiceGigBriefForm } from './ServiceGigBriefForm';
+import { createDefaultBriefFields } from '@/lib/services/service-delivery-commerce';
+import { useEffect } from 'react';
 
 interface ServicePricingOptionsFormProps {
   data: Partial<ServiceProductFormData>;
@@ -38,10 +41,16 @@ export const ServicePricingOptionsForm = ({ data, onUpdate }: ServicePricingOpti
   const persistMode = resolvePersistedFulfillmentMode(data);
   const showPackages = persistMode === 'project' || persistMode === 'both';
 
+  useEffect(() => {
+    if (!showPackages || data.brief_fields !== undefined) return;
+    onUpdate({ brief_fields: createDefaultBriefFields() });
+  }, [showPackages, data.brief_fields, onUpdate]);
+
   return (
     <div className="space-y-6">
       {showPackages && <ServiceGigPackagesForm data={data} onUpdate={onUpdate} />}
       {showPackages && <ServiceGigExtrasForm data={data} onUpdate={onUpdate} />}
+      {showPackages && <ServiceGigBriefForm data={data} onUpdate={onUpdate} />}
       {!showPackages && (
         <Card>
           <CardHeader>

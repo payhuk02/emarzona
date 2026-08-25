@@ -198,8 +198,12 @@ export const EditServiceProductWizard = ({
   });
 
   const handleUpdateFormData = useCallback(
-    (updates: Partial<ServiceProductFormData> & Record<string, unknown>) => {
+    (incoming: Partial<ServiceProductFormData> & Record<string, unknown>) => {
       setFormData(prev => {
+        const updates =
+          incoming.category_id !== undefined && incoming.category_id !== prev.category_id
+            ? { ...incoming, category_attributes: incoming.category_attributes ?? {} }
+            : incoming;
         const newData = { ...prev, ...updates };
 
         // Handle nested objects
@@ -561,7 +565,7 @@ export const EditServiceProductWizard = ({
       toast({
         title: '✅ Service mis à jour',
         description: offersNext
-          ? 'Le service a été modifié. Formules et extras sont à jour (brief : Offres projet).'
+          ? 'Le service a été modifié. Formules, extras et brief sont à jour.'
           : 'Le service a été modifié avec succès',
         action: offersNext ? (
           <ToastAction

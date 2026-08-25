@@ -14,6 +14,10 @@ import {
   type ServiceGigExtraDraft,
   type ServiceGigPackageDraft,
 } from '@/lib/services/service-gig-package-drafts';
+import {
+  validateBriefFieldDrafts,
+  type ServiceBriefField,
+} from '@/lib/services/service-delivery-commerce';
 
 export type ServiceWizardFormFields = {
   name?: string;
@@ -40,6 +44,7 @@ export type ServiceWizardFormFields = {
   deposit_amount?: number;
   delivery_packages?: ServiceGigPackageDraft[];
   gig_extras?: ServiceGigExtraDraft[];
+  brief_fields?: ServiceBriefField[];
 };
 
 export type ServiceWizardStepValidationResult = {
@@ -126,6 +131,18 @@ export function serviceWizardShowsCalendar(
     return true;
   }
   return serviceWizardRequiresSlots(formData, categoryTree);
+}
+
+/** Public listing: never show an empty booking calendar. */
+export function servicePublicShowsCalendar(
+  formData: Pick<
+    ServiceWizardFormFields,
+    'fulfillment_mode' | 'category' | 'category_id' | 'parent_category_id'
+  >,
+  availabilitySlotCount: number,
+  categoryTree?: ServiceCategoryTreeNode[]
+): boolean {
+  return serviceWizardShowsCalendar(formData, categoryTree) && availabilitySlotCount > 0;
 }
 
 export function resolvePersistedFulfillmentMode(
@@ -237,7 +254,7 @@ export function validateServiceWizardStep(
         errors.push('Chaque membre du personnel doit avoir un nom et un e-mail valides');
       }
     }
-    if (!formData.max_participants || formData.max_participants < 1) {
+    if (!gigFamily && (!formData.max_participants || formData.max_participants < 1)) {
       errors.push('Le nombre maximum de participants doit être au moins 1');
     }
   }
@@ -252,6 +269,7 @@ export function validateServiceWizardStep(
     if (persistMode === 'project' || persistMode === 'both') {
       errors.push(...validateGigPackageDrafts(formData.delivery_packages));
       errors.push(...validateGigExtraDrafts(formData.gig_extras));
+      errors.push(...validateBriefFieldDrafts(formData.brief_fields));
     }
   }
 

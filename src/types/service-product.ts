@@ -7,6 +7,7 @@ import type {
   ServiceGigExtraDraft,
   ServiceGigPackageDraft,
 } from '@/lib/services/service-gig-package-drafts';
+import type { ServiceBriefField } from '@/lib/services/service-delivery-commerce';
 
 export interface ServiceAvailabilitySlot {
   day: number; // 0-6 (Sunday-Saturday)
@@ -92,6 +93,7 @@ export interface ServiceProductFormData {
   category_attributes?: Record<string, string | number | boolean | string[]>;
   delivery_packages?: ServiceGigPackageDraft[];
   gig_extras?: ServiceGigExtraDraft[];
+  brief_fields?: ServiceBriefField[];
 
   // Meta
   is_active: boolean;

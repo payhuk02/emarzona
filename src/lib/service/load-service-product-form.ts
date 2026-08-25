@@ -15,7 +15,7 @@ import type {
 const PRODUCT_FIELDS =
   'id, store_id, name, slug, description, short_description, price, promotional_price, currency, pricing_model, category, category_id, tags, images, image_url, meta_title, meta_description, og_image, faqs, payment_options, hide_purchase_count, hide_likes_count, hide_recommendations_count, hide_downloads_count, hide_reviews_count, hide_rating, is_active, whatsapp_number, whatsapp_enabled';
 const SERVICE_PRODUCT_FIELDS =
-  'id, product_id, service_type, duration_minutes, location_type, location_address, meeting_url, timezone, requires_staff, max_participants, pricing_type, deposit_required, deposit_amount, deposit_type, allow_booking_cancellation, cancellation_deadline_hours, require_approval, buffer_time_before, buffer_time_after, max_bookings_per_day, advance_booking_days, fulfillment_mode, category_attributes';
+  'id, product_id, service_type, duration_minutes, location_type, location_address, meeting_url, timezone, requires_staff, max_participants, pricing_type, deposit_required, deposit_amount, deposit_type, allow_booking_cancellation, cancellation_deadline_hours, require_approval, buffer_time_before, buffer_time_after, max_bookings_per_day, advance_booking_days, fulfillment_mode, category_attributes, brief_fields';
 const SERVICE_AVAILABILITY_SLOT_FIELDS =
   'id, service_product_id, day_of_week, start_time, end_time';
 const SERVICE_STAFF_FIELDS = 'id, service_product_id, name, email, role, avatar_url, is_active';
@@ -233,6 +233,10 @@ export async function loadServiceProductFormData(
     is_active: product.is_active ?? true,
     delivery_packages: deliveryPackages,
     gig_extras: gigExtras,
+    brief_fields: Array.isArray((serviceProduct as { brief_fields?: unknown } | null)?.brief_fields)
+      ? ((serviceProduct as { brief_fields: ServiceProductFormData['brief_fields'] })
+          .brief_fields ?? [])
+      : [],
   };
 }
 

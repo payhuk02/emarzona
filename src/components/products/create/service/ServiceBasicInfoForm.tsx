@@ -31,11 +31,13 @@ import { buildSeoFromGenerated, mergeImages } from '@/lib/ai-product-apply';
 import { useServiceCategoryTree } from '@/hooks/useServiceCategories';
 import { resolveServiceCategorySelection } from '@/lib/services/service-categories';
 import {
+  GIG_DELIVERY_DEFAULT_MINUTES,
   getServiceFormProfile,
   isServiceGigFamily,
   profileDefaultsPatch,
 } from '@/lib/services/service-form-profiles';
 import { createDefaultGigPackageDrafts } from '@/lib/services/service-gig-package-drafts';
+import { createDefaultBriefFields } from '@/lib/services/service-delivery-commerce';
 import { ServiceCategorySpecificFields } from './ServiceCategorySpecificFields';
 import { useEffect, useMemo } from 'react';
 
@@ -122,16 +124,21 @@ export const ServiceBasicInfoForm = ({ data, onUpdate }: ServiceBasicInfoFormPro
       data.fulfillment_mode === 'project' &&
       !data.requires_staff &&
       (!data.availability_slots || data.availability_slots.length === 0) &&
-      (data.delivery_packages?.length ?? 0) > 0;
+      (data.delivery_packages?.length ?? 0) > 0 &&
+      (data.duration_minutes ?? 0) >= 1440 &&
+      (data.brief_fields?.length ?? 0) > 0;
     if (alreadyLocked) return;
     onUpdate({
       fulfillment_mode: 'project',
       requires_staff: false,
       availability_slots: [],
+      duration_minutes:
+        (data.duration_minutes ?? 0) >= 1440 ? data.duration_minutes : GIG_DELIVERY_DEFAULT_MINUTES,
       delivery_packages:
         data.delivery_packages && data.delivery_packages.length > 0
           ? data.delivery_packages
           : createDefaultGigPackageDrafts(Number(data.promotional_price || data.price || 0)),
+      brief_fields: data.brief_fields ?? createDefaultBriefFields(),
     });
   }, [
     isGigFamily,
@@ -139,6 +146,8 @@ export const ServiceBasicInfoForm = ({ data, onUpdate }: ServiceBasicInfoFormPro
     data.requires_staff,
     data.availability_slots,
     data.delivery_packages,
+    data.duration_minutes,
+    data.brief_fields,
     data.promotional_price,
     data.price,
     onUpdate,
@@ -279,8 +288,9 @@ export const ServiceBasicInfoForm = ({ data, onUpdate }: ServiceBasicInfoFormPro
           <p className="text-sm font-medium">Prestation sur projet</p>
           <p className="text-xs text-muted-foreground">
             Cette sous-catégorie se vend comme un livrable (site, design, texte…). Pas de calendrier
-            ni de créneaux : le client commande, vous livrez. Les packs et extras se configurent
-            après publication dans Dashboard → Offres projet.
+            ni de créneaux : le client commande, vous livrez. Les formules Basic / Standard /
+            Premium, les extras et le brief se configurent à l’étape Tarification. Vous pourrez les
+            modifier ensuite dans Dashboard → Offres projet.
           </p>
         </div>
       ) : (
@@ -406,7 +416,7 @@ export const ServiceBasicInfoForm = ({ data, onUpdate }: ServiceBasicInfoFormPro
               />
               <p className="text-xs text-muted-foreground">
                 {data.fulfillment_mode === 'project' || data.fulfillment_mode === 'both'
-                  ? 'Prix de référence (entrée). Sur la fiche, il s’affiche « À partir de » ; les formules précises se configurent dans Dashboard → Offres projet.'
+                  ? 'Prix de référence (entrée). Sur la fiche, il s’affiche « À partir de » ; les formules précises se règlent à l’étape Tarification.'
                   : 'Prix de référence, affiché barré sur les cartes produits.'}
               </p>
             </div>
@@ -444,7 +454,7 @@ export const ServiceBasicInfoForm = ({ data, onUpdate }: ServiceBasicInfoFormPro
             />
             <p className="text-xs text-muted-foreground">
               {data.fulfillment_mode === 'project' || data.fulfillment_mode === 'both'
-                ? 'Prix d’entrée réellement affiché (« À partir de »). Il doit être inférieur au prix de référence. Les packages / extras personnalisent le devis sur la fiche produit.'
+                ? 'Prix d’entrée réellement affiché (« À partir de »). Il doit être inférieur au prix de référence. Les formules et extras de l’étape Tarification personnalisent le devis sur la fiche.'
                 : 'Prix réellement facturé au client. Il doit être inférieur au prix de référence.'}
             </p>
             {data.promotional_price && data.price && data.promotional_price < data.price && (
