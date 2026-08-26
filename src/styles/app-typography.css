@@ -4,14 +4,14 @@
  */
 
 .landing-premium.app-premium {
-  --app-font-display: clamp(1.75rem, 1.2vw + 1.35rem, 2.5rem);
-  --app-font-h1: clamp(1.5rem, 0.8vw + 1.2rem, 2rem);
-  --app-font-h2: clamp(1.125rem, 0.4vw + 1rem, 1.375rem);
-  --app-font-h3: 1rem;
-  --app-font-body: 0.9375rem;
-  --app-font-body-lg: 1rem;
-  --app-font-small: 0.8125rem;
-  --app-font-caption: 0.75rem;
+  --app-font-display: clamp(1.875rem, 1.2vw + 1.5rem, 2.625rem);
+  --app-font-h1: clamp(1.625rem, 0.8vw + 1.3rem, 2.125rem);
+  --app-font-h2: clamp(1.25rem, 0.4vw + 1.1rem, 1.5rem);
+  --app-font-h3: 1.125rem;
+  --app-font-body: 1.0625rem;
+  --app-font-body-lg: 1.125rem;
+  --app-font-small: 1rem;
+  --app-font-caption: 0.9375rem;
   --app-line-tight: 1.25;
   --app-line-normal: 1.5;
   --app-line-relaxed: 1.625;
@@ -109,6 +109,35 @@
 .landing-premium.app-premium main.flex-1.overflow-auto [class*='text-[11px]'] {
   font-size: var(--app-font-caption) !important;
   line-height: var(--app-line-normal) !important;
+}
+
+/* Tailwind compact trop petit dans l’app vendeur */
+.landing-premium.app-premium [class*='text-xs'] {
+  font-size: 0.9375rem !important;
+  line-height: 1.45 !important;
+}
+
+.landing-premium.app-premium [class*='text-sm'] {
+  font-size: 1rem !important;
+  line-height: 1.5 !important;
+}
+
+.landing-premium.app-premium [data-sidebar='sidebar'] [data-sidebar='menu-button'],
+.landing-premium.app-premium [data-sidebar='sidebar'] [data-sidebar='menu-button'] span {
+  font-size: 16px !important;
+  line-height: 1.4 !important;
+}
+
+.landing-premium.app-premium [data-sidebar='sidebar'] [data-sidebar='group-label'],
+.landing-premium.app-premium [data-sidebar='sidebar'] .app-sidebar-section-label {
+  font-size: 13px !important;
+  letter-spacing: 0.06em;
+}
+
+.landing-premium.app-premium .topnav-main-link,
+.landing-premium.app-premium [data-testid='horizontal-context-nav'] a,
+.landing-premium.app-premium [data-testid='horizontal-context-nav'] button {
+  font-size: 15px !important;
 }
 
 /* Classes sémantiques réutilisables */

@@ -39,8 +39,8 @@ interface StoreSubdomainRoutesProps {
 const LoadingFallback = () => (
   <div className="flex min-h-screen items-center justify-center">
     <div className="flex flex-col items-center space-y-4">
-      <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
-      <p className="text-muted-foreground">Chargement...</p>
+      <div className="h-8 w-8 animate-spin emz-page-spinner rounded-full border-4 border-primary border-t-transparent"></div>
+      <p className="text-muted-foreground text-base">Chargement...</p>
     </div>
   </div>
 );

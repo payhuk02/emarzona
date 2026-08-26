@@ -25,8 +25,8 @@ export const ProtectedRoute = ({ children }: { children: ReactNode }) => {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background to-muted">
         <div className="text-center space-y-4 flex flex-col items-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-muted-foreground">Chargement...</p>
+          <Loader2 className="h-8 w-8 animate-spin text-primary emz-page-spinner" />
+          <p className="text-muted-foreground text-base">Chargement...</p>
         </div>
       </div>
     );

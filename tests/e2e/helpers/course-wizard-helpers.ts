@@ -41,6 +41,11 @@ export async function fillCourseBasicInfoStep(
   if (await editor.isVisible({ timeout: 5_000 }).catch(() => false)) {
     await editor.click();
     await editor.fill(description);
+    const current = (await editor.innerText().catch(() => '')).trim();
+    if (current.length < 50) {
+      await editor.press('Control+A');
+      await editor.pressSequentially(description, { delay: 8 });
+    }
   }
 
   await selectWizardComboboxOption(page, 'Niveau du cours', /Débutant/i);
@@ -94,13 +99,29 @@ const COURSE_DASHBOARD_LIST_URL = /\/dashboard\/courses\/?(?:\?.*)?$/;
 export async function publishCourseWizard(page: Page): Promise<void> {
   const errorToast = page.getByText(/Validation incomplète|❌\s*Erreur/i).first();
   const successToast = page.getByText(/Cours publié|est maintenant en ligne/i).first();
+  const publishButton = page.getByRole('button', { name: /Publier le cours|^Publier$/i });
 
-  await page.getByRole('button', { name: /Publier le cours|^Publier$/i }).click();
+  await expect(publishButton).toBeEnabled({ timeout: 20_000 });
+
+  const rpcResponse = page.waitForResponse(
+    response =>
+      response.url().includes('/rest/v1/rpc/create_full_course') &&
+      response.request().method() === 'POST',
+    { timeout: 90_000 }
+  );
+
+  await publishButton.click();
 
   await Promise.race([
     successToast.waitFor({ state: 'visible', timeout: 90_000 }),
     errorToast.waitFor({ state: 'visible', timeout: 90_000 }),
     page.waitForURL(COURSE_DASHBOARD_LIST_URL, { timeout: 90_000 }),
+    rpcResponse.then(async response => {
+      if (response.status() >= 400) {
+        const body = (await response.text().catch(() => '')).slice(0, 400);
+        throw new Error(`create_full_course failed (${response.status()}): ${body}`);
+      }
+    }),
   ]).catch(() => undefined);
 
   if (await errorToast.isVisible().catch(() => false)) {

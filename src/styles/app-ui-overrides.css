@@ -181,6 +181,15 @@
   min-height: unset;
 }
 
+/* KPI dashboard : jamais de pastille derrière l’icône */
+.landing-premium.app-premium #main-content .dashboard-metric-card svg,
+.landing-premium.app-premium main.flex-1 .dashboard-metric-card svg {
+  background: none !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
 /* ——— Icônes Lucide / SVG décoratives → noir ——— */
 .landing-premium.app-premium #main-content svg.lucide,
 .landing-premium.app-premium #main-content svg[class*='lucide'],

@@ -42,7 +42,7 @@ export function DashboardSecondaryPanels({
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 items-stretch">
         {stats.recentOrders.length > 0 ? (
           <RecentOrdersCard orders={stats.recentOrders} variant="premium" />
         ) : (
@@ -57,7 +57,7 @@ export function DashboardSecondaryPanels({
             {t('dashboard.products.empty', 'Aucun produit vendu')}
           </div>
         )}
-        <div className="md:col-span-2 lg:col-span-1">
+        <div className="lg:col-span-1">
           <DashboardRecentActivity activities={stats.recentActivity} />
         </div>
       </div>

@@ -198,7 +198,7 @@ export const TopNavigationBar = () => {
                   onLockedClick={handlePlanLockedNav}
                   showLabel={false}
                   className={cn(
-                    'topnav-main-link inline-flex h-9 shrink-0 items-center gap-1.5 rounded-md px-2.5 xl:px-3 text-xs xl:text-sm font-medium transition-colors whitespace-nowrap',
+                    'topnav-main-link inline-flex h-10 shrink-0 items-center gap-1.5 rounded-md px-2.5 xl:px-3 text-base font-medium transition-colors whitespace-nowrap',
                     active
                       ? 'bg-primary text-primary-foreground shadow-sm'
                       : 'text-muted-foreground hover:bg-white/10 hover:text-white',
@@ -214,13 +214,11 @@ export const TopNavigationBar = () => {
             <div className="flex items-center gap-1 sm:gap-2 mr-1 sm:mr-2 pr-2 border-r">
               <Label
                 htmlFor="expert-mode"
-                className="hidden sm:inline text-xs font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:text-foreground"
+                className="hidden sm:inline text-sm font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:text-foreground"
               >
                 Mode Expert
               </Label>
-              <span className="sm:hidden text-[11px] font-medium text-muted-foreground">
-                Expert
-              </span>
+              <span className="sm:hidden text-sm font-medium text-muted-foreground">Expert</span>
               <Switch
                 id="expert-mode"
                 checked={isExpertMode}

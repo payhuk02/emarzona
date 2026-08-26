@@ -179,6 +179,7 @@ const ProductCardProfessionalComponent = ({
 
   return (
     <Card
+      data-testid="product-card"
       className="product-card-professional group relative overflow-hidden bg-white dark:bg-gray-800 transition-all duration-300 hover:-translate-y-2 rounded-lg flex flex-col min-h-[400px] xs:min-h-[450px] sm:min-h-[500px] md:min-h-[600px] lg:min-h-[700px] shadow-sm hover:shadow-lg will-change-transform"
       role="article"
       aria-label={`Produit: ${product.name}`}

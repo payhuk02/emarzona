@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 import { persistProductWhatsApp } from '@/lib/products/persist-product-whatsapp';
+import { validateCourseData } from '@/lib/validation/courseSchemas';
 
 const PRODUCT_FIELDS =
   'id, store_id, name, slug, description, image_url, price, currency, product_type, is_active, created_at, updated_at';

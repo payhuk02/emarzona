@@ -1,7 +1,6 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { ArrowRight, Package } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -89,25 +88,24 @@ const TopProductsCardComponent = ({ products, variant = 'default' }: TopProducts
       <ContentWrap
         className={cn(!isPremium && 'p-3 sm:p-4 md:p-6 pt-0', isPremium && 'flex-1 space-y-0')}
       >
-        <div className={isPremium ? 'divide-y divide-border/40' : 'space-y-4'}>
+        <div className={isPremium ? 'space-y-0' : 'space-y-4'}>
           {products.map((product, index) => (
             <div
               key={product.id}
               className={cn(
                 'cursor-pointer transition-colors touch-manipulation',
                 isPremium
-                  ? 'dashboard-order-row'
+                  ? 'dashboard-product-row'
                   : 'flex items-center gap-3 p-2 sm:p-3 md:p-4 rounded-lg border hover:bg-muted/50 min-h-[50px] sm:min-h-[60px]'
               )}
-              style={{ willChange: 'transform' }}
               onClick={() => navigate('/dashboard/products')}
             >
               <div
                 className={cn(
-                  'shrink-0',
+                  'shrink-0 flex items-center justify-center font-semibold tabular-nums',
                   isPremium
-                    ? 'dashboard-order-avatar text-primary'
-                    : 'flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full font-bold bg-primary/10 text-primary text-sm'
+                    ? 'h-8 w-8 text-sm text-foreground'
+                    : 'flex h-9 w-9 sm:h-10 sm:w-10 rounded-full font-bold bg-primary/10 text-primary text-sm'
                 )}
               >
                 {index + 1}
@@ -116,66 +114,59 @@ const TopProductsCardComponent = ({ products, variant = 'default' }: TopProducts
                 <LazyImage
                   src={product.image_url}
                   alt={product.name}
-                  className="h-10 w-10 sm:h-12 sm:w-12 object-cover rounded-md flex-shrink-0"
-                  width={48}
-                  height={48}
-                  placeholder="/api/placeholder/48/48"
+                  className="h-10 w-10 object-cover rounded-md flex-shrink-0"
+                  width={40}
+                  height={40}
+                  placeholder="/api/placeholder/40/40"
                 />
               ) : (
-                <div className="h-10 w-10 sm:h-12 sm:w-12 bg-muted rounded-md flex items-center justify-center flex-shrink-0">
-                  <Package className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-muted-foreground" />
+                <div className="h-10 w-10 bg-muted rounded-md flex items-center justify-center flex-shrink-0">
+                  <Package className="h-4 w-4 text-foreground" strokeWidth={1.75} />
                 </div>
               )}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap mb-0.5 sm:mb-1">
-                  <p
-                    className={cn(
-                      'font-medium truncate',
-                      isPremium ? 'text-sm sm:text-base' : 'text-sm'
-                    )}
-                  >
-                    {product.name}
-                  </p>
+              <div className={cn(isPremium ? 'dashboard-product-meta' : 'flex-1 min-w-0')}>
+                <p className={cn('font-medium truncate', isPremium ? 'text-sm' : 'text-sm')}>
+                  {product.name}
+                </p>
+                <div className="flex items-center gap-2 flex-wrap">
                   {product.product_type &&
                     (() => {
                       const productType = product.product_type as ProductType;
                       const config = PRODUCT_TYPE_CONFIG[productType];
                       if (!config) return null;
-                      const Icon = config.icon;
                       return (
-                        <Badge
-                          variant="outline"
-                          className={cn(
-                            'text-[8px] sm:text-[9px] md:text-[10px] px-1.5 sm:px-2 py-0.5 flex items-center gap-1',
-                            config.bgColor,
-                            config.textColor
-                          )}
-                        >
-                          <Icon className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
-                          <span>{config.label}</span>
-                        </Badge>
+                        <span className="text-[11px] text-muted-foreground">{config.label}</span>
                       );
                     })()}
+                  {!isPremium && (
+                    <p className="text-xs text-muted-foreground">
+                      {product.orderCount} vente{product.orderCount > 1 ? 's' : ''}
+                    </p>
+                  )}
+                  {isPremium && (
+                    <p className="text-xs text-muted-foreground sm:hidden">
+                      {formatFcfa(product.revenue ?? product.price)} · {product.orderCount} vente
+                      {product.orderCount > 1 ? 's' : ''}
+                    </p>
+                  )}
                 </div>
-                <p
-                  className={cn(
-                    'text-muted-foreground',
-                    isPremium ? 'text-xs sm:text-sm' : 'text-xs'
-                  )}
-                >
-                  {product.orderCount} vente{product.orderCount > 1 ? 's' : ''}
-                </p>
               </div>
-              <div className="text-right shrink-0">
-                <p
-                  className={cn(
-                    'font-bold tabular-nums',
-                    isPremium ? 'text-sm sm:text-base' : 'text-sm'
-                  )}
-                >
-                  {formatFcfa(product.revenue ?? product.price)}
-                </p>
-              </div>
+              {isPremium ? (
+                <div className="dashboard-product-stats hidden sm:flex">
+                  <p className="text-sm font-bold tabular-nums">
+                    {formatFcfa(product.revenue ?? product.price)}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {product.orderCount} vente{product.orderCount > 1 ? 's' : ''}
+                  </p>
+                </div>
+              ) : (
+                <div className="text-right shrink-0">
+                  <p className="text-sm font-bold tabular-nums">
+                    {formatFcfa(product.revenue ?? product.price)}
+                  </p>
+                </div>
+              )}
             </div>
           ))}
         </div>

@@ -177,7 +177,7 @@ export const DashboardActionCenter = React.memo<DashboardActionCenterProps>(
                     <Icon className="h-4 w-4 sm:h-5 sm:w-5 shrink-0 opacity-80" aria-hidden />
                     <span className="text-xl sm:text-2xl font-bold tabular-nums">{item.count}</span>
                   </div>
-                  <span className="text-xs sm:text-sm font-medium leading-snug line-clamp-2">
+                  <span className="text-sm sm:text-base font-medium leading-snug line-clamp-2">
                     {item.label}
                   </span>
                 </button>

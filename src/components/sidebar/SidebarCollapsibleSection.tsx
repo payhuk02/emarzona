@@ -40,7 +40,7 @@ export function SidebarCollapsibleSection({
             aria-controls={panelId}
             data-active={containsActiveRoute ? 'true' : undefined}
           >
-            <span className="text-[10px] uppercase tracking-[0.14em] font-bold text-muted-foreground">
+            <span className="app-sidebar-section-label uppercase tracking-[0.08em] font-bold text-muted-foreground">
               {label}
             </span>
             <ChevronDown

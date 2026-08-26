@@ -149,6 +149,7 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
 
   return (
     <article
+      data-testid="product-card"
       className="group relative flex flex-col rounded-xl bg-transparent border border-gray-200 dark:border-gray-700 overflow-hidden product-card product-card-mobile sm:product-card-tablet  _lg:product-card-desktop min-h-[400px] xs:min-h-[450px] sm:min-h-[500px] md:min-h-[600px] lg:min-h-[700px] hover:shadow-xl hover:scale-[1.02] transition-all duration-300"
       role="article"
       aria-labelledby={`product-title-${product.id}`}

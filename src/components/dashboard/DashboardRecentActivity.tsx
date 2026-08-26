@@ -46,18 +46,15 @@ export const DashboardRecentActivity = React.memo<DashboardRecentActivityProps>(
             list.map(item => {
               const Icon = TYPE_ICON[item.type] ?? Activity;
               return (
-                <div
-                  key={item.id}
-                  className="flex items-start gap-3 py-3.5 border-b border-border/40 last:border-0"
-                >
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
-                    <Icon className="h-4 w-4" />
+                <div key={item.id} className="dashboard-activity-row">
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center text-foreground">
+                    <Icon className="h-4 w-4" strokeWidth={1.75} />
                   </span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm sm:text-base font-medium text-foreground leading-snug">
+                  <div className="min-w-0 pt-0.5">
+                    <p className="text-sm font-medium text-foreground leading-snug line-clamp-2">
                       {item.message}
                     </p>
-                    <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+                    <p className="text-xs text-muted-foreground mt-1">
                       {formatDistanceToNow(new Date(item.timestamp), {
                         addSuffix: true,
                         locale: fr,

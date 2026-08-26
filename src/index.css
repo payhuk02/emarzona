@@ -5,6 +5,7 @@
 @import './styles/mobile-first-system.css';
 @import './styles/sidebar-optimized.css';
 @import './styles/emarzona-brand.css';
+@import './styles/app-typography.css';
 
 /**
  * Font optimization: font-display: swap
@@ -377,20 +378,8 @@ All colors MUST be HSL.
     }
   }
 
-  /* OPTIMISATION PERFORMANCE: Réduire les animations sur mobile pour économiser la batterie */
+  /* OPTIMISATION PERFORMANCE: pas d’override global `*` (ça accélérait les spinners à 0.2s) */
   @media (max-width: 768px) {
-    /* Réduire la durée des animations (sauf marquees landing) */
-    *:not(.lp-marquee-track):not(.lp-countries-marquee-track):not(.lp-currencies-marquee-track),
-    *:not(.lp-marquee-track):not(.lp-countries-marquee-track):not(
-        .lp-currencies-marquee-track
-      )::before,
-    *:not(.lp-marquee-track):not(.lp-countries-marquee-track):not(
-        .lp-currencies-marquee-track
-      )::after {
-      animation-duration: 0.2s !important;
-      transition-duration: 0.15s !important;
-    }
-
     /* Désactiver les animations non-essentielles */
     .animate-float,
     .animate-pulse:not([aria-busy='true']) {
@@ -1388,3 +1377,56 @@ All colors MUST be HSL.
 
 /* OPTIMISATION: CSS du sidebar déplacé dans sidebar-optimized.css
    pour permettre le chargement asynchrone et réduire le CSS critique */
+
+/* Spinner page : hors @layer pour gagner contre toute règle mobile héritée */
+@keyframes emz-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.emz-page-spinner,
+.animate-spin.emz-page-spinner,
+svg.emz-page-spinner,
+.animate-spin {
+  animation: emz-spin 1.2s linear infinite !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .emz-page-spinner,
+  .animate-spin {
+    animation: none !important;
+  }
+}
+
+/* Typo chrome app — px (text-[10px] sur les labels sidebar gagnait sur le parent) */
+[data-sidebar='sidebar'] [data-sidebar='menu-button'],
+[data-sidebar='sidebar'] [data-sidebar='menu-button'] span {
+  font-size: 16px !important;
+}
+
+[data-sidebar='sidebar'] [data-sidebar='group-label'],
+[data-sidebar='sidebar'] .app-sidebar-section-label {
+  font-size: 13px !important;
+}
+
+[data-testid='persona-tab-seller'],
+[data-testid='persona-tab-buyer'],
+[data-testid='persona-tab-admin'] {
+  font-size: 15px !important;
+}
+
+.dashboard-metric-label {
+  font-size: 17px !important;
+}
+
+.dashboard-metric-sub,
+.dashboard-premium-panel-subtitle {
+  font-size: 15px !important;
+}
+
+.app-premium-topnav .topnav-main-link,
+[data-testid='horizontal-context-nav'] a,
+[data-testid='horizontal-context-nav'] button {
+  font-size: 15px !important;
+}

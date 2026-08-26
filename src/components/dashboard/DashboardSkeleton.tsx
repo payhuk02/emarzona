@@ -14,8 +14,8 @@ export function DashboardMetricCardSkeleton() {
       aria-hidden
     >
       <div className="flex justify-between gap-3 mb-4">
-        <Skeleton className="h-10 w-10 rounded-xl" />
-        <Skeleton className="h-6 w-14 rounded-full" />
+        <Skeleton className="h-5 w-5 rounded-none bg-transparent" />
+        <Skeleton className="h-4 w-10 rounded-none bg-transparent" />
       </div>
       <Skeleton className="h-3 w-24 mb-3" />
       <Skeleton className="h-7 w-32 mb-2" />

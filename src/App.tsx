@@ -101,8 +101,8 @@ import { adminRoutes } from '@/routes/adminRoutes';
 const LoadingFallback = () => (
   <div className="flex min-h-screen items-center justify-center">
     <div className="flex flex-col items-center space-y-4">
-      <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      <p className="text-muted-foreground">Chargement...</p>
+      <Loader2 className="h-8 w-8 animate-spin text-primary emz-page-spinner" />
+      <p className="text-muted-foreground text-base">Chargement...</p>
     </div>
   </div>
 );

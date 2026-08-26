@@ -75,7 +75,7 @@ export const DashboardStats = React.memo<DashboardStatsProps>(({ stats }) => {
 
   return (
     <div ref={statsRef} className="space-y-3">
-      <p className="text-xs sm:text-sm text-muted-foreground">
+      <p className="text-sm sm:text-base text-muted-foreground">
         {t('dashboard.stats.periodHint', 'KPI sur la période : {{period}}', { period: periodHint })}
       </p>
       <div

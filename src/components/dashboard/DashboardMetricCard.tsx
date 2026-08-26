@@ -36,10 +36,8 @@ export function DashboardMetricCard({
     >
       <div className="dashboard-metric-wave" aria-hidden="true" />
 
-      <div className="flex items-start justify-between gap-2 relative z-10">
-        <div className="dashboard-metric-icon-wrap" aria-hidden="true">
-          <Icon />
-        </div>
+      <div className="flex items-center justify-between gap-3 relative z-10">
+        <Icon className="h-5 w-5 text-foreground shrink-0" strokeWidth={1.75} aria-hidden="true" />
         <span
           className={cn(
             'dashboard-metric-trend',

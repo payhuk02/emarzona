@@ -301,8 +301,9 @@ const admin = createClient(url, serviceKey, {
 
 function isTransientAuthAdminError(error) {
   const message = error?.message ?? String(error ?? '');
-  return /unrecognized JWT kid|unable to parse or verify signature|token is unverifiable|ES256/i.test(
-    message
+  const code = error?.code ?? '';
+  return /unrecognized JWT kid|unable to parse or verify signature|token is unverifiable|ES256|JWT issued at future|PGRST002|schema cache/i.test(
+    `${code} ${message}`
   );
 }
 
@@ -338,7 +339,26 @@ try {
   process.exit(1);
 }
 
-const { error: schemaError } = await admin.from('stores').select('id').limit(1);
+let schemaError = null;
+try {
+  const probe = await withAuthAdminRetry(
+    'commerce-e2e stores schema probe',
+    async () => {
+      const { error } = await admin.from('stores').select('id').limit(1);
+      if (error && isTransientAuthAdminError(error)) throw error;
+      return error;
+    },
+    { attempts: 6, initialDelayMs: 2000 }
+  );
+  schemaError = probe;
+} catch (error) {
+  const message = error?.message ?? String(error);
+  if (isTransientAuthAdminError(error)) {
+    skipOrFailInCi(`Schema probe failed for project ${projectRef}: ${message}`);
+  }
+  console.error(`Schema probe failed for project ${projectRef}: ${message}`);
+  process.exit(1);
+}
 const missingEmarzonaSchema =
   schemaError &&
   (schemaError.code === 'PGRST205' ||

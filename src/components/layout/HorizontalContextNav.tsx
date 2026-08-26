@@ -135,7 +135,7 @@ function MegaMenuPanel({
             <p
               className={cn(
                 'font-bold uppercase tracking-widest text-primary/80 mb-1',
-                isSidebar ? 'px-2.5 text-xs' : 'px-2 text-[10px]'
+                isSidebar ? 'px-2.5 text-sm' : 'px-2 text-sm'
               )}
             >
               {group.label}
@@ -193,7 +193,7 @@ function MobileDomainDrawer({
       <NavLink
         to={domain.rootPath}
         className={cn(
-          'inline-flex h-9 shrink-0 items-center rounded-full px-3 text-xs font-medium',
+          'inline-flex h-10 shrink-0 items-center rounded-full px-3 text-sm font-medium',
           domain.isActive && 'bg-primary/10 text-primary'
         )}
       >
@@ -210,7 +210,7 @@ function MobileDomainDrawer({
           variant="ghost"
           size="sm"
           className={cn(
-            'h-9 shrink-0 rounded-full px-3 text-xs font-medium gap-1 touch-manipulation',
+            'h-10 shrink-0 rounded-full px-3 text-sm font-medium gap-1 touch-manipulation',
             domain.isActive && 'bg-primary/10 text-primary'
           )}
           aria-expanded={open}
@@ -300,7 +300,7 @@ export function HorizontalContextNav() {
                         to={domain.rootPath}
                         className={cn(
                           navigationMenuTriggerStyle(),
-                          'h-9 px-3 text-sm font-medium',
+                          'h-9 px-3 text-base font-medium',
                           domain.isActive && 'bg-primary/10 text-primary shadow-none'
                         )}
                       >
@@ -311,7 +311,7 @@ export function HorizontalContextNav() {
                     <>
                       <NavigationMenuTrigger
                         className={cn(
-                          'h-9 bg-transparent px-3 text-sm font-medium data-[state=open]:bg-accent/50',
+                          'h-9 bg-transparent px-3 text-base font-medium data-[state=open]:bg-accent/50',
                           domain.isActive && 'text-primary bg-primary/5'
                         )}
                       >

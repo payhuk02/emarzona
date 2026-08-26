@@ -63,6 +63,7 @@ export function StorefrontPublishBanner({
                 type="button"
                 size="sm"
                 disabled={isSubmitting}
+                data-testid="storefront-publish-appearance"
                 onClick={() => void onPublishAppearance()}
                 className="gap-2"
               >

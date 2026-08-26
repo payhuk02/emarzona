@@ -321,7 +321,7 @@ export function AppSidebar() {
               aria-label={t('sidebar.chrome.searchAriaLabel')}
             >
               <Search className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
-              <span className="flex-1 truncate text-xs">
+              <span className="flex-1 truncate text-sm">
                 {t('sidebar.chrome.searchPlaceholder')}
               </span>
               <kbd className="hidden lg:inline-flex h-5 items-center rounded border border-border bg-muted px-1.5 text-[10px] font-medium text-muted-foreground">

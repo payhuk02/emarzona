@@ -335,6 +335,7 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
 
   return (
     <Card
+      data-testid="product-card"
       className={cn(
         'group relative flex flex-col h-full',
         storeCardStyleClass,

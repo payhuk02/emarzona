@@ -69,8 +69,8 @@ export function SidebarPersonaSwitch({
             onClick={() => onPersonaChange(option.id)}
             data-testid={`persona-tab-${option.id}`}
             className={cn(
-              'flex items-center justify-center gap-1.5 rounded-md text-xs font-medium transition-all duration-200',
-              isCollapsed ? 'h-8 w-full' : 'flex-1 h-8 px-2',
+              'flex items-center justify-center gap-1.5 rounded-md text-base font-medium transition-all duration-200',
+              isCollapsed ? 'h-9 w-full' : 'flex-1 h-9 px-2',
               isActive
                 ? 'bg-sidebar-accent text-foreground shadow-sm'
                 : 'text-muted-foreground hover:bg-sidebar-accent hover:text-foreground'

@@ -29,9 +29,9 @@ export default {
         mono: ['JetBrains Mono', 'Fira Code', 'Consolas', 'monospace'],
       },
       fontSize: {
-        xs: ['0.75rem', { lineHeight: '1.25rem', letterSpacing: '0' }], // 12px - Amélioré line-height pour lisibilité
-        sm: ['0.875rem', { lineHeight: '1.375rem', letterSpacing: '0' }], // 14px - Amélioré line-height
-        base: ['1rem', { lineHeight: '1.625rem', letterSpacing: '0' }], // 16px - Amélioré line-height
+        xs: ['0.875rem', { lineHeight: '1.375rem', letterSpacing: '0' }], // 14px
+        sm: ['1rem', { lineHeight: '1.5rem', letterSpacing: '0' }], // 16px
+        base: ['1.0625rem', { lineHeight: '1.65rem', letterSpacing: '0' }], // 17px
         lg: ['1.125rem', { lineHeight: '1.75rem', letterSpacing: '0' }],
         xl: ['1.25rem', { lineHeight: '1.75rem', letterSpacing: '0' }],
         '2xl': ['1.5rem', { lineHeight: '2rem', letterSpacing: '-0.01em' }],

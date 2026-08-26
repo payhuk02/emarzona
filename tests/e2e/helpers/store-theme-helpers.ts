@@ -147,7 +147,10 @@ export async function saveAppearanceDraft(page: Page): Promise<void> {
 }
 
 export async function publishStoreAppearanceFromUi(page: Page): Promise<void> {
-  const publishButton = page.getByRole('button', { name: /Publier sur la vitrine/i });
+  const publishButton = page
+    .getByTestId('storefront-publish-appearance')
+    .or(page.getByRole('button', { name: /Publier sur la vitrine|Publication/i }));
+  await expect(publishButton).toBeVisible({ timeout: 30_000 });
   await expect(publishButton).toBeEnabled({ timeout: 30_000 });
 
   const publishResponse = page.waitForResponse(
