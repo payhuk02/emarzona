@@ -31,7 +31,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { StableDropdownMenu, DropdownMenuSeparator } from '@/components/ui/stable-dropdown-menu';
+import {
+  StableDropdownMenu,
+  DropdownMenuSeparator,
+  DropdownMenuItem,
+} from '@/components/ui/stable-dropdown-menu';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Pagination,
@@ -785,30 +789,23 @@ export default function NotificationsManagement() {
                           }}
                         >
                           {!notification.is_read && (
-                            <SelectItem
-                              value="edit"
-                              onSelect={() => handleMarkAsRead(notification.id)}
-                            >
+                            <DropdownMenuItem onSelect={() => handleMarkAsRead(notification.id)}>
                               <CheckCircle2 className="h-4 w-4 mr-2" />
                               Marquer comme lu
-                            </SelectItem>
+                            </DropdownMenuItem>
                           )}
-                          <SelectItem
-                            value="delete"
-                            onSelect={() => handleArchive(notification.id)}
-                          >
+                          <DropdownMenuItem onSelect={() => handleArchive(notification.id)}>
                             <Archive className="h-4 w-4 mr-2" />
                             Archiver
-                          </SelectItem>
+                          </DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <SelectItem
-                            value="copy"
+                          <DropdownMenuItem
                             onSelect={() => handleDelete(notification.id)}
                             className="text-red-600"
                           >
                             <Trash2 className="h-4 w-4 mr-2" />
                             Supprimer
-                          </SelectItem>
+                          </DropdownMenuItem>
                         </StableDropdownMenu>
                       </div>
                     </div>

@@ -17,7 +17,10 @@ function loadRegisteredRoutePatterns(): string[] {
     '\n'
   );
   const patterns: string[] = [];
-  for (const re of [/(?:pr|protectedRoute)\(\s*['`]([^'`]+)['`]/g, /path=["']([^"']+)["']/g]) {
+  for (const re of [
+    /(?:prAuth|pr|protectedRoute)\(\s*['`]([^'`]+)['`]/g,
+    /path=["']([^"']+)["']/g,
+  ]) {
     let match: RegExpExecArray | null;
     while ((match = re.exec(content))) {
       patterns.push(match[1]);

@@ -173,6 +173,9 @@ export const physicalProductStep1Schema = z.object({
     .max(1000000, 'Le prix ne peut pas dépasser 1,000,000'),
 });
 
+/** Session ou délai de livraison gig (90 jours). */
+export const SERVICE_DURATION_MAX_MINUTES = 90 * 24 * 60;
+
 // Schéma Service
 export const serviceSchema = z.object({
   name: z
@@ -198,7 +201,10 @@ export const serviceSchema = z.object({
   duration: z
     .number()
     .positive('La durée doit être positive')
-    .max(1440, 'La durée ne peut pas dépasser 1440 minutes (24h)')
+    .max(
+      SERVICE_DURATION_MAX_MINUTES,
+      'La durée ou le délai de livraison ne peut pas dépasser 90 jours'
+    )
     .int('La durée doit être un nombre entier'),
 
   max_participants: z

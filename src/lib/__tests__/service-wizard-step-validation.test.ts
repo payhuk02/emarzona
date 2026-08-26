@@ -28,6 +28,16 @@ describe('validateServiceWizardStep', () => {
     );
   });
 
+  it('accepts a 7-day gig delivery delay on step 1', () => {
+    const result = validateServiceWizardStep(1, {
+      ...baseForm,
+      promotional_price: 15000,
+      duration_minutes: 7 * 24 * 60,
+    });
+    expect(result.errors.some(msg => /1440|24h/i.test(msg))).toBe(false);
+    expect(result.valid).toBe(true);
+  });
+
   it('rejects step 1 without promotional selling price', () => {
     const result = validateServiceWizardStep(1, baseForm);
     expect(result.valid).toBe(false);

@@ -6,6 +6,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type { StoreCommerceType } from '@/constants/store-commerce-types';
 import {
+  PRIMARY_PRODUCT_CREATE_PATH_BY_TYPE,
   VENDOR_PRODUCT_LIST_PATH_BY_TYPE,
   canAccessCommercePath,
   getRouteCapabilityRule,
@@ -233,12 +234,107 @@ export const SELLER_PREFIX_INCONSISTENCIES: readonly {
   { path: '/inventory', suggestedPrefix: '/dashboard/inventory', status: 'redirect' },
 ];
 
-/** Patterns d'extraction — pr, protectedRoute (customer), Route path= (redirects/subdomain). */
+/** Patterns d'extraction — pr / prAuth, protectedRoute (customer), Route path=. */
 export const ROUTE_PATH_EXTRACTION_PATTERNS: readonly RegExp[] = [
-  /\bpr\(\s*['"]([^'"]+)['"]/g,
+  /\bpr(?:Auth)?\(\s*['"]([^'"]+)['"]/g,
   /\bprotectedRoute\(\s*['"]([^'"]+)['"]/g,
   /<Route\s+path=["']([^"']+)["']/g,
 ];
+
+/** Fichiers nav — chaque `url:` doit matcher une route enregistrée. */
+export const PLATFORM_NAV_SOURCE_FILES = [
+  'src/config/navigation.menus.tsx',
+  'src/config/navigation.create.ts',
+  'src/config/navigation.horizontal.ts',
+  'src/config/navigation.context.extended.ts',
+  'src/config/navigation.context.phase6.ts',
+  'src/config/navigation.context.settings.ts',
+  'src/config/navigation.progressive.ts',
+] as const;
+
+const LAZY_IMPORT_RE = /import\(\s*['"](@\/[^'"]+)['"]\s*\)/g;
+const NAV_URL_RE = /\burl:\s*['"]([^'"]+)['"]/g;
+
+function resolveSrcModule(spec: string): string | null {
+  const rel = spec.replace(/^@\//, 'src/').replace(/\/$/, '');
+  const candidates = [
+    join(REPO_ROOT, `${rel}.tsx`),
+    join(REPO_ROOT, `${rel}.ts`),
+    join(REPO_ROOT, rel, 'index.tsx'),
+    join(REPO_ROOT, rel, 'index.ts'),
+    join(REPO_ROOT, rel),
+  ];
+  for (const candidate of candidates) {
+    try {
+      readFileSync(candidate, 'utf8');
+      return candidate;
+    } catch {
+      /* try next */
+    }
+  }
+  return null;
+}
+
+export function auditLazyRouteImportsExist(
+  sources: Record<string, string> = loadAllPlatformRouteSources()
+): string[] {
+  const missing: string[] = [];
+  const seen = new Set<string>();
+  for (const src of Object.values(sources)) {
+    const re = new RegExp(LAZY_IMPORT_RE.source, LAZY_IMPORT_RE.flags);
+    let match: RegExpExecArray | null;
+    while ((match = re.exec(src)) !== null) {
+      const spec = match[1].replace(/\/$/, '');
+      if (seen.has(spec)) continue;
+      seen.add(spec);
+      if (!resolveSrcModule(spec)) missing.push(spec);
+    }
+  }
+  return missing;
+}
+
+export function collectPlatformNavUrls(
+  navFiles: readonly string[] = PLATFORM_NAV_SOURCE_FILES
+): string[] {
+  const urls = new Set<string>();
+  for (const file of navFiles) {
+    const src = readFileSync(join(REPO_ROOT, file), 'utf8');
+    const re = new RegExp(NAV_URL_RE.source, NAV_URL_RE.flags);
+    let match: RegExpExecArray | null;
+    while ((match = re.exec(src)) !== null) {
+      urls.add(match[1]);
+    }
+  }
+  return [...urls].sort();
+}
+
+export function navUrlMatchesRegistered(url: string, registered: readonly string[]): boolean {
+  const itemPath = url.split('?')[0];
+  if (!itemPath.startsWith('/') || itemPath.startsWith('http') || itemPath === '#' || !itemPath) {
+    return true;
+  }
+  if (registered.includes(itemPath)) return true;
+  for (const pattern of registered) {
+    if (!pattern || pattern === '*') continue;
+    const regex = new RegExp(`^${pattern.replace(/:[^/]+/g, '[^/]+')}$`);
+    if (regex.test(itemPath)) return true;
+  }
+  return false;
+}
+
+export function auditNavUrlsAgainstRoutes(
+  registered: string[] = Object.values(loadAllPlatformRoutePaths()).flat()
+): string[] {
+  return collectPlatformNavUrls().filter(url => !navUrlMatchesRegistered(url, registered));
+}
+
+export function auditCreateWizardPathsRegistered(
+  dashboardPaths: string[] = loadAllPlatformRoutePaths()['src/routes/dashboardRoutes.tsx']
+): string[] {
+  return Object.values(PRIMARY_PRODUCT_CREATE_PATH_BY_TYPE).filter(
+    path => !navUrlMatchesRegistered(path, dashboardPaths)
+  );
+}
 
 /** Seuils minimum par module (régression couverture). */
 export const PLATFORM_ROUTE_MODULE_MIN_COUNTS: Record<(typeof ROUTE_FILES)[number], number> = {
@@ -474,6 +570,16 @@ export function runFullPlatformRouteAudit(): FullPlatformRouteAuditResult {
 
   const { missing } = auditDocumentedLinksRegistered(routes['src/routes/dashboardRoutes.tsx']);
   failures.push(...missing.map(l => `lien nav sans route: ${l}`));
+
+  failures.push(...auditLazyRouteImportsExist().map(s => `lazy import introuvable: ${s}`));
+  failures.push(
+    ...auditNavUrlsAgainstRoutes(Object.values(routes).flat()).map(u => `url nav sans route: ${u}`)
+  );
+  failures.push(
+    ...auditCreateWizardPathsRegistered(routes['src/routes/dashboardRoutes.tsx']).map(
+      p => `wizard create sans route: ${p}`
+    )
+  );
 
   for (const type of ['digital', 'course', 'artist', 'service', 'physical'] as const) {
     if (!auditVendorPrefetchAlignment(type).ok) {

@@ -18,6 +18,7 @@ import { Plus, X, MapPin, Video, Home, Navigation } from 'lucide-react';
 import type { ServiceProductFormData, ServiceAvailabilitySlot } from '@/types/service-product';
 import { getServiceFormProfile } from '@/lib/services/service-form-profiles';
 import { serviceWizardShowsCalendar } from '@/lib/service-wizard-step-validation';
+import { SERVICE_DURATION_MAX_MINUTES } from '@/lib/wizard-validation';
 
 interface ServiceDurationAvailabilityFormProps {
   data: Partial<ServiceProductFormData>;
@@ -49,6 +50,7 @@ const GIG_DELIVERY_DURATIONS = [
   { value: 4320, label: '3 jours' },
   { value: 10080, label: '7 jours' },
   { value: 20160, label: '14 jours' },
+  { value: 43200, label: '30 jours' },
 ];
 
 export const ServiceDurationAvailabilityForm = ({
@@ -138,6 +140,7 @@ export const ServiceDurationAvailabilityForm = ({
               id="duration_minutes"
               type="number"
               min="1"
+              max={SERVICE_DURATION_MAX_MINUTES}
               step="1"
               value={data.duration_minutes || ''}
               onChange={e => onUpdate({ duration_minutes: parseInt(e.target.value) || 60 })}

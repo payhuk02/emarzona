@@ -7,7 +7,12 @@ import {
   isServiceGigFamily,
   validateServiceFormAttributes,
 } from '@/lib/services/service-form-profiles';
-import { getFieldError, validateWithZod, serviceSchema } from '@/lib/wizard-validation';
+import {
+  getFieldError,
+  validateWithZod,
+  serviceSchema,
+  SERVICE_DURATION_MAX_MINUTES,
+} from '@/lib/wizard-validation';
 import {
   validateGigExtraDrafts,
   validateGigPackageDrafts,
@@ -214,6 +219,8 @@ export function validateServiceWizardStep(
     const effectiveDuration = formData.duration_minutes ?? formData.duration;
     if (!effectiveDuration || effectiveDuration <= 0) {
       errors.push('La durée du service est requise');
+    } else if (effectiveDuration > SERVICE_DURATION_MAX_MINUTES) {
+      errors.push('La durée ou le délai de livraison ne peut pas dépasser 90 jours');
     }
     if (formData.location_type === 'on_site' && !formData.location_address?.trim()) {
       errors.push("L'adresse est requise pour les services sur site");

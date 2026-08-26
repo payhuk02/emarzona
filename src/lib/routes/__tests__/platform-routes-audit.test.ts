@@ -23,6 +23,9 @@ import {
   runFullPlatformRouteAudit,
   auditRouteModuleMinimums,
   auditLegacyRoutesRedirectOnly,
+  auditLazyRouteImportsExist,
+  auditNavUrlsAgainstRoutes,
+  auditCreateWizardPathsRegistered,
   PLATFORM_ROUTE_MODULE_MIN_COUNTS,
   ROUTE_FILES,
   summarizePlatformRouteAudit,
@@ -162,6 +165,24 @@ describe('platform-routes-audit', () => {
     const { ok, violations } = auditLegacyRoutesRedirectOnly();
     expect(violations, violations.join('; ')).toEqual([]);
     expect(ok).toBe(true);
+  });
+
+  it('enregistre les routes prAuth (preview boutique, messagerie vendeur)', () => {
+    expect(dashboardPaths).toContain('/dashboard/store/preview');
+    expect(dashboardPaths).toContain('/vendor/messaging');
+    expect(dashboardPaths).toContain('/vendor/messaging/:storeId/:productId?');
+  });
+
+  it('résout tous les lazy imports des modules de routes', () => {
+    expect(auditLazyRouteImportsExist()).toEqual([]);
+  });
+
+  it('aligne toutes les URLs de navigation sur une route enregistrée', () => {
+    expect(auditNavUrlsAgainstRoutes()).toEqual([]);
+  });
+
+  it('enregistre les wizards de création par verticale', () => {
+    expect(auditCreateWizardPathsRegistered(dashboardPaths)).toEqual([]);
   });
 
   it('passe l’audit complet plateforme sans régression', () => {
