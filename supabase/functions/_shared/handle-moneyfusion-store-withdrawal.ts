@@ -6,6 +6,7 @@ import { assertPlatformAdmin, createSupabaseUserClient } from './supabase-admin.
 import {
   inferCountryCodeFromPhone,
   initiateMoneyFusionWithdraw,
+  normalizeMoneyFusionCountryCode,
   resolveWithdrawMode,
   MONEYFUSION_WITHDRAW_MIN_AMOUNT,
 } from './moneyfusion-payout.ts';
@@ -149,7 +150,7 @@ export async function handleMoneyFusionStoreWithdrawalPayout(
     };
   }
 
-  const countryCode = normalizeCountryCode(details.country, phone);
+  const countryCode = normalizeMoneyFusionCountryCode(normalizeCountryCode(details.country, phone));
   const operator = typeof details.operator === 'string' ? details.operator : null;
   const withdrawMode = await resolveWithdrawMode(operator, countryCode, privateKey);
   if (!withdrawMode) {

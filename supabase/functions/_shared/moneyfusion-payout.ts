@@ -7,6 +7,21 @@
  */
 
 import { moneyFusionFetch } from './moneyfusion-http.ts';
+import {
+  guessWithdrawMode,
+  normalizeMoneyFusionCountryCode,
+  normalizeWithdrawPhone,
+  operatorFamily,
+} from './moneyfusion-withdraw-mode.ts';
+
+export {
+  digitsOnlyPhone,
+  guessWithdrawMode,
+  inferCountryCodeFromPhone,
+  normalizeMoneyFusionCountryCode,
+  normalizeWithdrawPhone,
+  operatorFamily,
+} from './moneyfusion-withdraw-mode.ts';
 
 const WITHDRAW_URL = 'https://pay.moneyfusion.net/api/v1/withdraw';
 const WITHDRAW_METHODS_URL = 'https://pay.moneyfusion.net/api/v1/withdraw/methods';
@@ -107,137 +122,8 @@ export function formatMoneyFusionIpError(message: string): string {
   );
 }
 
-export function digitsOnlyPhone(phone: string): string {
-  return phone.replace(/\D/g, '');
-}
-
-/** National MSISDN for MF withdraw (strip common WAEMU country codes). */
-export function normalizeWithdrawPhone(phone: string): string {
-  const digits = digitsOnlyPhone(phone);
-  if (digits.startsWith('226') && digits.length >= 11) return digits.slice(3);
-  if (digits.startsWith('225') && digits.length >= 12) return digits.slice(3);
-  if (digits.startsWith('221') && digits.length >= 12) return digits.slice(3);
-  if (digits.startsWith('0') && digits.length >= 9) return digits.slice(1);
-  return digits;
-}
-
-export function inferCountryCodeFromPhone(phone: string): string {
-  const digits = digitsOnlyPhone(phone);
-  if (digits.startsWith('226')) return 'bf';
-  if (digits.startsWith('225')) return 'ci';
-  if (digits.startsWith('221')) return 'sn';
-  // Default marketplace corridor
-  return 'ci';
-}
-
-/** Operator family from seller form values (orange_money, mtn_mobile_money, …). */
-export function operatorFamily(moyen: string | null | undefined): string | null {
-  const raw = String(moyen || '')
-    .toLowerCase()
-    .replace(/_/g, '-')
-    .trim();
-  if (!raw) return null;
-  if (raw.includes('orange')) return 'orange';
-  if (raw.includes('mtn')) return 'mtn';
-  if (raw.includes('moov')) return 'moov';
-  if (raw.includes('wave')) return 'wave';
-  if (raw.includes('free')) return 'free';
-  if (raw.includes('t-money') || raw.includes('tmoney')) return 't-money';
-  if (raw.includes('mpesa') || raw.includes('m-pesa')) return 'mpesa';
-  if (raw.includes('airtel')) return 'airtel';
-  if (raw.includes('amana')) return 'amana';
-  if (raw.includes('zamani')) return 'zamani';
-  if (raw.includes('nita')) return 'nita';
-  if (raw.includes('crypto')) return 'crypto';
-  return null;
-}
-
-/**
- * MoneyFusion withdraw_mode keys from live GET /withdraw/methods (Jul 2026).
- * Prefer live catalog in resolveWithdrawMode; this is offline fallback only.
- */
-const MF_WITHDRAW_MODE_FALLBACK: Record<string, Partial<Record<string, string>>> = {
-  ci: {
-    orange: 'orange-money-ci',
-    mtn: 'mtn-ci',
-    moov: 'moov-ci',
-    wave: 'wave-ci',
-  },
-  bf: {
-    orange: 'orange-money-burkina',
-    moov: 'moov-burkina-faso',
-  },
-  bj: {
-    mtn: 'mtn-benin',
-    moov: 'moov-benin',
-  },
-  tg: {
-    't-money': 't-money-togo',
-  },
-  sn: {
-    orange: 'orange-money-senegal',
-    wave: 'wave-senegal',
-  },
-  ml: {
-    orange: 'orange-money-mali',
-  },
-  ne: {
-    airtel: 'airtel-money-ne',
-    amana: 'amana-ne',
-    zamani: 'zamanicash-ne',
-    moov: 'moov-money-ne',
-    nita: 'nita-ne',
-  },
-  cd: {
-    mpesa: 'mpesa-cd',
-  },
-  cg: {
-    mtn: 'mtn-cg',
-  },
-  cm: {
-    orange: 'orange-cm',
-    mtn: 'mtn-cm',
-  },
-  ga: {
-    airtel: 'airtel-ga',
-    moov: 'moov-ga',
-  },
-};
-
 /** MoneyFusion payout minimum (XOF / local unit as returned by API). */
 export const MONEYFUSION_WITHDRAW_MIN_AMOUNT = 200;
-
-export function guessWithdrawMode(moyen: string | null | undefined, countryCode: string): string | null {
-  const cc = String(countryCode || '')
-    .toLowerCase()
-    .trim();
-  const raw = String(moyen || '')
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, '-')
-    .replace(/_/g, '-');
-  if (!raw) return null;
-
-  // Full MF key already (orange-money-burkina, mtn-ci, …) — keep unless known-bad ISO suffix
-  if (/^(orange-money|mtn|moov|wave|free-money|t-money|airtel)(-[a-z0-9]+)+$/.test(raw)) {
-    const badIso = /-(bf|bj|tg|ml)$/.test(raw) && !/(burkina|benin|togo|mali)/.test(raw);
-    if (!badIso) return raw;
-  }
-
-  const family = operatorFamily(raw);
-  if (!family) return null;
-  const mapped = MF_WITHDRAW_MODE_FALLBACK[cc]?.[family];
-  if (mapped) return mapped;
-
-  // CI-style fallback only when we have no explicit map entry
-  if (cc === 'ci') {
-    if (family === 'orange') return 'orange-money-ci';
-    if (family === 'mtn') return 'mtn-ci';
-    if (family === 'moov') return 'moov-ci';
-    if (family === 'wave') return 'wave-ci';
-  }
-  return null;
-}
 
 type WithdrawMethodCountry = {
   code?: string;
@@ -290,6 +176,8 @@ function matchMethodKey(
     });
     if (match?.key) return match.key;
   }
+  // Known operator with no catalog match → static map (e.g. gn + orange_money → orange-gn)
+  if (family && family !== 'crypto') return null;
   return pool[0]?.key ?? null;
 }
 
@@ -318,14 +206,18 @@ export async function resolveWithdrawMode(
   countryCode: string,
   privateKey?: string
 ): Promise<string | null> {
-  const cc = String(countryCode || '')
-    .toLowerCase()
-    .trim();
+  const cc = normalizeMoneyFusionCountryCode(countryCode);
 
   // Prefer live MF catalog — ISO guesses are wrong for BF/BJ/TG/…
   try {
     const countries = await fetchWithdrawMethods(privateKey);
-    const country = countries.find(c => String(c.code || '').toLowerCase() === cc);
+    const country = countries.find(c => {
+      const code = normalizeMoneyFusionCountryCode(c.code);
+      const name = String((c as { country?: string }).country || '').toLowerCase();
+      if (code === cc) return true;
+      if (cc === 'gn' && /guin[eé]e|guinea/.test(name) && !/bissau/.test(name)) return true;
+      return false;
+    });
     const methods = country?.paymentMethods ?? [];
     const fromApi = matchMethodKey(methods, moyen);
     if (fromApi) return fromApi;

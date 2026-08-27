@@ -170,7 +170,7 @@ export function validateServiceWizardStep(
   const errors: string[] = [];
 
   if (step === 1) {
-    const effectiveDuration = formData.duration_minutes ?? formData.duration;
+    const effectiveDuration = formData.duration_minutes ?? formData.duration ?? 60;
     const result = validateWithZod(serviceSchema, {
       name: formData.name,
       slug: formData.slug,

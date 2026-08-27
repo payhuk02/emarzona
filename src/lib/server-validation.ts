@@ -264,7 +264,7 @@ export async function validateService(data: {
       p_name: data.name,
       p_slug: data.slug || null,
       p_price: data.price,
-      p_duration: data.duration || null,
+      p_duration: data.duration != null && data.duration > 0 ? data.duration : 60,
       p_max_participants: data.maxParticipants || null,
       p_meeting_url: data.meetingUrl || null,
       p_store_id: data.storeId,

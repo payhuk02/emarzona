@@ -1,6 +1,6 @@
 /**
  * Opérateurs / portefeuilles Mobile Money réellement présents par pays (ISO 3166-1 alpha-2).
- * Aligné sur le catalogue MoneyFusion payout (CI, BF, BJ, TG, SN, ML, NE, CD, CG, CM, GA)
+ * Aligné sur le catalogue MoneyFusion payout (CI, BF, BJ, TG, SN, ML, NE, CD, CG, CM, GA, GN, …)
  * et sur les opérateurs nationaux majeurs ailleurs.
  * Les pays sans Mobile Money usuel retournent une liste vide — pas de fallback Afrique de l’Ouest.
  */

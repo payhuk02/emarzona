@@ -271,7 +271,10 @@ export const EditServiceProductWizard = ({
             const serverResult = await validateServiceServer({
               name: formData.name || '',
               slug: slugForValidation,
-              price: formData.price || 0,
+              price: Number(formData.promotional_price || formData.price || 0),
+              duration: formData.duration_minutes ?? formData.duration ?? 60,
+              maxParticipants: formData.max_participants,
+              meetingUrl: formData.meeting_url,
             });
 
             if (!serverResult.valid) {

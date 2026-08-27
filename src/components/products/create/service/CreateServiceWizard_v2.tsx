@@ -459,11 +459,11 @@ export const CreateServiceWizard = ({
           }
 
           if (storeId) {
-            const effectiveDuration = formData.duration_minutes ?? formData.duration;
+            const effectiveDuration = formData.duration_minutes ?? formData.duration ?? 60;
             const serverResult = await validateServiceServer({
               name: formData.name,
               slug: formData.slug,
-              price: formData.price,
+              price: Number(formData.promotional_price || formData.price || 0),
               duration: effectiveDuration,
               maxParticipants: formData.max_participants,
               meetingUrl: formData.meeting_url,

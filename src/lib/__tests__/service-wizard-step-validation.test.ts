@@ -28,6 +28,17 @@ describe('validateServiceWizardStep', () => {
     );
   });
 
+  it('defaults a missing duration on step 1 so save is not blocked', () => {
+    const result = validateServiceWizardStep(1, {
+      ...baseForm,
+      promotional_price: 15000,
+      duration_minutes: undefined,
+      duration: undefined,
+    });
+    expect(result.errors.some(msg => /durée/i.test(msg))).toBe(false);
+    expect(result.valid).toBe(true);
+  });
+
   it('accepts a 7-day gig delivery delay on step 1', () => {
     const result = validateServiceWizardStep(1, {
       ...baseForm,

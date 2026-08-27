@@ -104,6 +104,11 @@ import {
   servicePublicShowsCalendar,
   serviceWizardShowsCalendar,
 } from '@/lib/service-wizard-step-validation';
+import {
+  formatServiceDurationMinutes,
+  serviceLocationTypeLabel,
+  serviceTypeLabel,
+} from '@/lib/service/service-detail-labels';
 
 const PRODUCT_SERVICE_FIELDS =
   'id, store_id, slug, name, description, short_description, category, category_id, tags, product_type, is_active, price, promotional_price, currency, image_url, images, created_at, updated_at, payment_options, pricing_model, licensing_type, license_terms';

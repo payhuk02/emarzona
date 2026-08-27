@@ -113,10 +113,55 @@ export async function fetchDeliveryPackages(
   return ((data as Record<string, unknown>[]) ?? []).map(mapPackage);
 }
 
+export function buildDeliveryPackageInsertRows(input: {
+  serviceProductId: string;
+  productId: string;
+  storeId: string;
+  userId: string;
+  packages: Array<{
+    id?: string;
+    name: string;
+    tier: DeliveryPackageTier;
+    description?: string;
+    price: number;
+    delivery_days: number;
+    revisions: number;
+    features: string[];
+    is_active?: boolean;
+    is_featured?: boolean;
+    sort_order?: number;
+  }>;
+}) {
+  return input.packages.map((pkg, index) => ({
+    service_product_id: input.serviceProductId,
+    product_id: input.productId,
+    store_id: input.storeId,
+    user_id: input.userId,
+    name: pkg.name,
+    package_name: pkg.name,
+    description: pkg.description ?? null,
+    slug: `${slugify(pkg.name)}-${pkg.tier}-${index}`,
+    package_kind: 'delivery_tier' as const,
+    tier: pkg.tier,
+    price: pkg.price,
+    package_price: pkg.price,
+    delivery_days: pkg.delivery_days,
+    revisions: pkg.revisions,
+    features: pkg.features,
+    sort_order: pkg.sort_order ?? index,
+    is_active: pkg.is_active ?? true,
+    is_featured: pkg.is_featured ?? pkg.tier === 'standard',
+    sessions_count: 1,
+    credits_per_session: 1,
+    total_sessions: 1,
+  }));
+}
+
 export async function replaceDeliveryPackages(input: {
   serviceProductId: string;
   productId: string;
   storeId: string;
+  userId?: string;
   packages: Array<{
     id?: string;
     name: string;
@@ -140,28 +185,19 @@ export async function replaceDeliveryPackages(input: {
 
   if (input.packages.length === 0) return [];
 
-  const rows = input.packages.map((pkg, index) => ({
-    service_product_id: input.serviceProductId,
-    product_id: input.productId,
-    store_id: input.storeId,
-    name: pkg.name,
-    package_name: pkg.name,
-    description: pkg.description ?? null,
-    slug: `${slugify(pkg.name)}-${pkg.tier}-${index}`,
-    package_kind: 'delivery_tier',
-    tier: pkg.tier,
-    price: pkg.price,
-    package_price: pkg.price,
-    delivery_days: pkg.delivery_days,
-    revisions: pkg.revisions,
-    features: pkg.features,
-    sort_order: pkg.sort_order ?? index,
-    is_active: pkg.is_active ?? true,
-    is_featured: pkg.is_featured ?? pkg.tier === 'standard',
-    sessions_count: null,
-    credits_per_session: null,
-    total_sessions: 1,
-  }));
+  let userId = input.userId?.trim() || '';
+  if (!userId) {
+    const { data: authData, error: authError } = await supabase.auth.getUser();
+    if (authError || !authData.user?.id) {
+      throw new Error('Impossible d’enregistrer les formules : utilisateur non authentifié');
+    }
+    userId = authData.user.id;
+  }
+
+  const rows = buildDeliveryPackageInsertRows({
+    ...input,
+    userId,
+  });
 
   const { data, error } = await supabase
     .from('service_packages')
