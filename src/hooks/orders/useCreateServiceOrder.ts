@@ -237,6 +237,12 @@ export const useCreateServiceOrder = () => {
         couponCode,
       } = options;
 
+      if (checkoutMode === 'cart') {
+        throw new Error(
+          'Les services se réservent et se paient depuis la fiche produit (Réserver et payer), pas via le panier.'
+        );
+      }
+
       // 1. Récupérer les détails du produit (avec payment_options)
       const { data: product, error: productError } = await supabase
         .from('products')
@@ -648,16 +654,10 @@ export const useCreateServiceOrder = () => {
         : null;
 
       if (checkoutMode === 'cart') {
-        if (!booking) {
-          throw new Error('Une réservation est requise pour ajouter ce service au panier');
-        }
-        return {
-          orderId: '',
-          orderItemId: '',
-          bookingId: booking.id,
-          checkoutUrl: '',
-          transactionId: '',
-        };
+        // Buy-now only : le panier mixte service n’est plus exposé sur la fiche.
+        throw new Error(
+          'Les services se réservent et se paient depuis la fiche produit (Réserver et payer), pas via le panier.'
+        );
       }
 
       if (booking) {

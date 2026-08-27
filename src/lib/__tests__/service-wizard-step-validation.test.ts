@@ -262,6 +262,61 @@ describe('validateServiceWizardStep', () => {
     expect(result.valid).toBe(false);
     expect(result.errors.some(msg => /brief/i.test(msg))).toBe(true);
   });
+
+  it('validates affiliate commission when enabled (step 5)', () => {
+    expect(
+      validateServiceWizardStep(5, {
+        ...baseForm,
+        affiliate: { enabled: true, commission_rate: 0 },
+      }).valid
+    ).toBe(false);
+    expect(
+      validateServiceWizardStep(5, {
+        ...baseForm,
+        affiliate: { enabled: true, commission_rate: 15 },
+      }).valid
+    ).toBe(true);
+  });
+
+  it('validates SEO length when provided (step 6)', () => {
+    expect(
+      validateServiceWizardStep(6, {
+        ...baseForm,
+        seo: { meta_title: 'x'.repeat(71) },
+      }).valid
+    ).toBe(false);
+    expect(
+      validateServiceWizardStep(6, {
+        ...baseForm,
+        seo: { meta_title: 'Consultation pro' },
+      }).valid
+    ).toBe(true);
+  });
+
+  it('validates payment type on step 7', () => {
+    expect(
+      validateServiceWizardStep(7, {
+        ...baseForm,
+        payment: { payment_type: 'percentage', percentage_rate: 5 },
+      }).valid
+    ).toBe(false);
+    expect(
+      validateServiceWizardStep(7, {
+        ...baseForm,
+        payment: { payment_type: 'delivery_secured' },
+      }).valid
+    ).toBe(true);
+  });
+
+  it('revalidates steps 5–7 on publish', () => {
+    const result = validateServiceWizardPublishSteps({
+      ...baseForm,
+      promotional_price: 15000,
+      affiliate: { enabled: true, commission_rate: 99 },
+    });
+    expect(result.valid).toBe(false);
+    expect(result.failedStep).toBe(5);
+  });
 });
 
 describe('service calendar intent', () => {

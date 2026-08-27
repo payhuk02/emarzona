@@ -502,17 +502,14 @@ export const CreateServiceWizard = ({
         }
 
         case 3:
-        case 4: {
+        case 4:
+        case 5:
+        case 6:
+        case 7: {
           const shared = validateServiceWizardStep(step, formData, { categoryTree });
           errors.push(...shared.errors);
           break;
         }
-
-        case 5:
-        case 6:
-        case 7:
-          // Optional steps
-          break;
       }
 
       setValidationErrors(prev => ({ ...prev, [step]: errors }));

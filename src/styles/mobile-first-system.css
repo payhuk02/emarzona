@@ -13,15 +13,15 @@
    ============================================ */
 
 :root {
-  /* Mobile-first font sizes (base: 16px) */
-  --font-size-xs: 0.75rem; /* 12px - Mobile only */
-  --font-size-sm: 0.875rem; /* 14px - Mobile base */
-  --font-size-base: 1rem; /* 16px - Mobile body, prevents iOS zoom */
-  --font-size-lg: 1.125rem; /* 18px - Mobile subheading */
-  --font-size-xl: 1.25rem; /* 20px - Mobile heading */
-  --font-size-2xl: 1.5rem; /* 24px - Mobile large heading */
-  --font-size-3xl: 1.875rem; /* 30px - Tablet heading */
-  --font-size-4xl: 2.25rem; /* 36px - Desktop heading */
+  /* Mobile-first font sizes (base: 16px, minimum 14px WCAG) */
+  --font-size-xs: 0.875rem; /* 14px — minimum lisible */
+  --font-size-sm: 0.9375rem; /* 15px */
+  --font-size-base: 1rem; /* 16px — corps, évite zoom iOS */
+  --font-size-lg: 1.0625rem; /* 17px */
+  --font-size-xl: 1.125rem; /* 18px */
+  --font-size-2xl: 1.25rem; /* 20px */
+  --font-size-3xl: 1.5rem; /* 24px */
+  --font-size-4xl: 1.75rem; /* 28px */
 
   /* Line heights optimized for mobile */
   --line-height-tight: 1.25;

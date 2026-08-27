@@ -4,14 +4,14 @@
  */
 
 .landing-premium.app-premium {
-  --app-font-display: clamp(1.875rem, 1.2vw + 1.5rem, 2.625rem);
-  --app-font-h1: clamp(1.625rem, 0.8vw + 1.3rem, 2.125rem);
-  --app-font-h2: clamp(1.25rem, 0.4vw + 1.1rem, 1.5rem);
-  --app-font-h3: 1.125rem;
-  --app-font-body: 1.0625rem;
-  --app-font-body-lg: 1.125rem;
-  --app-font-small: 1rem;
-  --app-font-caption: 0.9375rem;
+  --app-font-display: clamp(1.5rem, 0.6vw + 1.25rem, 2rem); /* 24–32px page hero */
+  --app-font-h1: clamp(1.375rem, 0.5vw + 1.15rem, 1.75rem); /* 22–28px page title */
+  --app-font-h2: clamp(1.125rem, 0.3vw + 1rem, 1.375rem); /* 18–22px section */
+  --app-font-h3: 1.0625rem; /* 17px card title */
+  --app-font-body: 1rem; /* 16px */
+  --app-font-body-lg: 1.0625rem; /* 17px desktop body */
+  --app-font-small: 0.9375rem; /* 15px */
+  --app-font-caption: 0.875rem; /* 14px minimum WCAG */
   --app-line-tight: 1.25;
   --app-line-normal: 1.5;
   --app-line-relaxed: 1.625;
@@ -35,6 +35,18 @@
   .landing-premium.app-premium main.flex-1.overflow-auto {
     font-size: var(--app-font-body-lg);
   }
+}
+
+/* Titres de page — pas de troncature, taille cohérente */
+.landing-premium.app-premium #main-content .app-premium-page-title,
+.landing-premium.app-premium main.flex-1 .app-premium-page-title,
+.landing-premium.app-premium main.flex-1.overflow-auto .app-premium-page-title {
+  font-size: var(--app-font-h1) !important;
+  line-height: var(--app-line-tight);
+  overflow: visible;
+  text-overflow: unset;
+  white-space: normal;
+  word-break: break-word;
 }
 
 /* Titres */
@@ -111,14 +123,14 @@
   line-height: var(--app-line-normal) !important;
 }
 
-/* Tailwind compact trop petit dans l’app vendeur */
+/* Tailwind compact — plancher 14px dans l'app vendeur */
 .landing-premium.app-premium [class*='text-xs'] {
-  font-size: 0.9375rem !important;
+  font-size: var(--app-font-caption) !important;
   line-height: 1.45 !important;
 }
 
 .landing-premium.app-premium [class*='text-sm'] {
-  font-size: 1rem !important;
+  font-size: var(--app-font-small) !important;
   line-height: 1.5 !important;
 }
 
@@ -142,20 +154,20 @@
 
 /* Classes sémantiques réutilisables */
 .landing-premium.app-premium .app-text-display {
-  font-family: var(--lp-serif);
+  font-family: var(--lp-sans);
   font-size: var(--app-font-display);
   font-weight: 700;
   line-height: var(--app-line-tight);
   letter-spacing: -0.02em;
-  color: #000;
+  color: hsl(var(--foreground));
 }
 
 .landing-premium.app-premium .app-text-title {
-  font-family: var(--lp-serif);
+  font-family: var(--lp-sans);
   font-size: var(--app-font-h1);
   font-weight: 700;
   line-height: var(--app-line-tight);
-  color: #000;
+  color: hsl(var(--foreground));
 }
 
 .landing-premium.app-premium .app-text-section {

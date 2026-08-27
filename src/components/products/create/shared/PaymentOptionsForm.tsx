@@ -42,7 +42,17 @@ export const PaymentOptionsForm: React.FC<PaymentOptionsFormProps> = ({
   // Sécuriser productPrice avec une valeur par défaut
   const safePrice = typeof productPrice === 'number' && !isNaN(productPrice) ? productPrice : 0;
 
+  // Services: acompte = dépôt étape 4 — éviter un 2e % concurrent ici
+  React.useEffect(() => {
+    if (productType === 'service' && data.payment_type === 'percentage') {
+      onUpdate({ ...data, payment_type: 'full' });
+    }
+    // Intentionally depend on payment_type only to avoid update loops
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- sync once when percentage slips in
+  }, [productType, data.payment_type]);
+
   const handlePaymentTypeChange = (value: PaymentType) => {
+    if (productType === 'service' && value === 'percentage') return;
     onUpdate({
       ...data,
       payment_type: value,
@@ -75,9 +85,19 @@ export const PaymentOptionsForm: React.FC<PaymentOptionsFormProps> = ({
       <Alert>
         <Info className="h-4 w-4" />
         <AlertDescription>
-          Choisissez comment vos clients paieront pour ce{' '}
-          {productType === 'service' ? 'service' : productType === 'artist' ? 'œuvre' : 'produit'}.
-          Les options de paiement flexible augmentent les conversions de +30% en moyenne.
+          {productType === 'service' ? (
+            <>
+              Pour les services, l&apos;acompte se configure à l&apos;étape{' '}
+              <strong>Tarification &amp; Options</strong> (dépôt). Ici : paiement intégral ou suivi
+              sécurisé jusqu&apos;à la prestation.
+            </>
+          ) : (
+            <>
+              Choisissez comment vos clients paieront pour ce{' '}
+              {productType === 'artist' ? 'œuvre' : 'produit'}. Les options de paiement flexible
+              augmentent les conversions de +30% en moyenne.
+            </>
+          )}
         </AlertDescription>
       </Alert>
 
@@ -125,83 +145,85 @@ export const PaymentOptionsForm: React.FC<PaymentOptionsFormProps> = ({
               </Label>
             </div>
 
-            {/* Percentage Payment */}
-            <div className="flex items-start space-x-3 p-4 sm:p-4 rounded-lg border-2 hover:border-primary transition-all duration-200 hover:shadow-md cursor-pointer touch-manipulation min-h-[120px]">
-              <RadioGroupItem
-                value="percentage"
-                id="percentage"
-                className="mt-1 min-w-[24px] min-h-[24px] touch-manipulation"
-              />
-              <Label htmlFor="percentage" className="flex-1 cursor-pointer">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Percent className="h-5 w-5 text-blue-600" />
-                      <span className="font-semibold text-base">Paiement Partiel</span>
-                      <Badge variant="default" className="bg-blue-600">
-                        <TrendingUp className="h-3 w-3 mr-1" />
-                        +30% conversions
-                      </Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-3">
-                      Le client paie un acompte maintenant et le solde plus tard. Idéal pour les
-                      gros montants.
-                    </p>
+            {/* Percentage Payment — pas pour services (dépôt = étape Tarification) */}
+            {productType !== 'service' && (
+              <div className="flex items-start space-x-3 p-4 sm:p-4 rounded-lg border-2 hover:border-primary transition-all duration-200 hover:shadow-md cursor-pointer touch-manipulation min-h-[120px]">
+                <RadioGroupItem
+                  value="percentage"
+                  id="percentage"
+                  className="mt-1 min-w-[24px] min-h-[24px] touch-manipulation"
+                />
+                <Label htmlFor="percentage" className="flex-1 cursor-pointer">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Percent className="h-5 w-5 text-blue-600" />
+                        <span className="font-semibold text-base">Paiement Partiel</span>
+                        <Badge variant="default" className="bg-blue-600">
+                          <TrendingUp className="h-3 w-3 mr-1" />
+                          +30% conversions
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-3">
+                        Le client paie un acompte maintenant et le solde plus tard. Idéal pour les
+                        gros montants.
+                      </p>
 
-                    {data.payment_type === 'percentage' && (
-                      <div className="space-y-3">
-                        <div>
-                          <Label htmlFor="percentage-rate" className="text-sm">
-                            Pourcentage d'acompte (10% - 90%)
-                          </Label>
-                          <div className="flex items-center gap-3 mt-2">
-                            <Input
-                              id="percentage-rate"
-                              type="number"
-                              min="10"
-                              max="90"
-                              step="5"
-                              value={data.percentage_rate || 30}
-                              onChange={e => handlePercentageChange(e.target.value)}
-                              className="w-24"
-                            />
-                            <span className="text-sm text-muted-foreground">%</span>
-                            <div className="flex-1 text-sm">
-                              <span className="text-muted-foreground">Acompte :</span>
-                              <span className="font-semibold ml-2">
+                      {data.payment_type === 'percentage' && (
+                        <div className="space-y-3">
+                          <div>
+                            <Label htmlFor="percentage-rate" className="text-sm">
+                              Pourcentage d'acompte (10% - 90%)
+                            </Label>
+                            <div className="flex items-center gap-3 mt-2">
+                              <Input
+                                id="percentage-rate"
+                                type="number"
+                                min="10"
+                                max="90"
+                                step="5"
+                                value={data.percentage_rate || 30}
+                                onChange={e => handlePercentageChange(e.target.value)}
+                                className="w-24"
+                              />
+                              <span className="text-sm text-muted-foreground">%</span>
+                              <div className="flex-1 text-sm">
+                                <span className="text-muted-foreground">Acompte :</span>
+                                <span className="font-semibold ml-2">
+                                  {calculateAmount(data.percentage_rate || 30).toLocaleString()} XOF
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div className="p-3 bg-blue-50 dark:bg-blue-950 rounded-md">
+                              <p className="text-xs text-blue-700 dark:text-blue-300 mb-1">
+                                Acompte (maintenant)
+                              </p>
+                              <p className="font-semibold text-blue-900 dark:text-blue-100">
                                 {calculateAmount(data.percentage_rate || 30).toLocaleString()} XOF
-                              </span>
+                              </p>
+                            </div>
+                            <div className="p-3 bg-orange-50 dark:bg-orange-950 rounded-md">
+                              <p className="text-xs text-orange-700 dark:text-orange-300 mb-1">
+                                Solde (plus tard)
+                              </p>
+                              <p className="font-semibold text-orange-900 dark:text-orange-100">
+                                {(
+                                  safePrice - calculateAmount(data.percentage_rate || 30)
+                                ).toLocaleString()}{' '}
+                                XOF
+                              </p>
                             </div>
                           </div>
                         </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                          <div className="p-3 bg-blue-50 dark:bg-blue-950 rounded-md">
-                            <p className="text-xs text-blue-700 dark:text-blue-300 mb-1">
-                              Acompte (maintenant)
-                            </p>
-                            <p className="font-semibold text-blue-900 dark:text-blue-100">
-                              {calculateAmount(data.percentage_rate || 30).toLocaleString()} XOF
-                            </p>
-                          </div>
-                          <div className="p-3 bg-orange-50 dark:bg-orange-950 rounded-md">
-                            <p className="text-xs text-orange-700 dark:text-orange-300 mb-1">
-                              Solde (plus tard)
-                            </p>
-                            <p className="font-semibold text-orange-900 dark:text-orange-100">
-                              {(
-                                safePrice - calculateAmount(data.percentage_rate || 30)
-                              ).toLocaleString()}{' '}
-                              XOF
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </div>
-                </div>
-              </Label>
-            </div>
+                </Label>
+              </div>
+            )}
 
             {/* Delivery Secured (Escrow) */}
             <div className="flex items-start space-x-3 p-4 sm:p-4 rounded-lg border-2 hover:border-primary transition-all duration-200 hover:shadow-md cursor-pointer touch-manipulation min-h-[120px]">
@@ -268,17 +290,34 @@ export const PaymentOptionsForm: React.FC<PaymentOptionsFormProps> = ({
           </CardTitle>
         </CardHeader>
         <CardContent className="text-sm text-blue-800 dark:text-blue-200 space-y-2">
-          <p>
-            <strong>Paiement complet</strong> : Idéal pour produits &lt; 50,000 XOF
-          </p>
-          <p>
-            <strong>Paiement partiel</strong> : Recommandé pour produits &gt; 50,000 XOF (débloque
-            gros achats)
-          </p>
-          <p>
-            <strong>Paiement sécurisé</strong> : Parfait pour nouveaux vendeurs ou produits premium
-            (rassure clients)
-          </p>
+          {productType === 'service' ? (
+            <>
+              <p>
+                <strong>Paiement complet</strong> : recommandé par défaut pour les rendez-vous
+              </p>
+              <p>
+                <strong>Acompte</strong> : configurez le dépôt à l&apos;étape Tarification &amp;
+                Options
+              </p>
+              <p>
+                <strong>Paiement sécurisé</strong> : suivi jusqu&apos;à confirmation de prestation
+              </p>
+            </>
+          ) : (
+            <>
+              <p>
+                <strong>Paiement complet</strong> : Idéal pour produits &lt; 50,000 XOF
+              </p>
+              <p>
+                <strong>Paiement partiel</strong> : Recommandé pour produits &gt; 50,000 XOF
+                (débloque gros achats)
+              </p>
+              <p>
+                <strong>Paiement sécurisé</strong> : Parfait pour nouveaux vendeurs ou produits
+                premium (rassure clients)
+              </p>
+            </>
+          )}
         </CardContent>
       </Card>
     </div>

@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import type { CartItem } from '@/types/cart';
 import { validateCheckoutCart } from '@/lib/checkout/cart-validation';
 import { resolveCheckoutCartItemsAsync } from '@/lib/checkout/resolve-checkout-cart';
+import { hasServiceProjectMetadata } from '@/lib/cart/service-cart-policy';
 
 function cartMetadata(item: CartItem): Record<string, unknown> {
   if (item.metadata && typeof item.metadata === 'object' && !Array.isArray(item.metadata)) {
@@ -221,9 +222,13 @@ export async function buildOrderItemRows(
   if (!isE2eStub) {
     const missingPhysical = rows.some(r => r.product_type === 'physical' && !r.physical_product_id);
     const missingDigital = rows.some(r => r.product_type === 'digital' && !r.digital_product_id);
-    const missingService = rows.some(
-      r => r.product_type === 'service' && (!r.service_product_id || !r.booking_id)
-    );
+    const missingService = rows.some(r => {
+      if (r.product_type !== 'service') return false;
+      if (!r.service_product_id) return true;
+      // RDV : booking_id requis. Projet : package / fulfillment_mode suffit.
+      if (r.booking_id) return false;
+      return !hasServiceProjectMetadata(r.item_metadata ?? null);
+    });
     if (missingPhysical || missingDigital || missingService) {
       throw new Error(
         'Certains articles du panier sont incomplets. Retirez-les et ajoutez-les à nouveau depuis la fiche produit.'

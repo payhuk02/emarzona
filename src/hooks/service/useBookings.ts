@@ -15,6 +15,7 @@ import {
 import { createServiceRefund } from '@/lib/services/cancellation-policy';
 import { createBookingMeeting } from '@/lib/service/create-booking-meeting';
 import { resolveServiceBookingEmailJoinUrl } from '@/lib/service/daily-meeting';
+import { canCancelServiceBooking } from '@/lib/service/service-booking-cancellation';
 import { logger } from '@/lib/logger';
 
 const SERVICE_BOOKING_FIELDS =
@@ -352,6 +353,14 @@ export const useUpdateBooking = () => {
 
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<ServiceBooking> }) => {
+      const { data: before } = await supabase
+        .from('service_bookings')
+        .select(
+          'id, product_id, user_id, customer_id, scheduled_date, scheduled_start_time, booking_date, booking_time'
+        )
+        .eq('id', id)
+        .maybeSingle();
+
       const { data: result, error } = await supabase
         .from('service_bookings')
         .update(data)
@@ -360,6 +369,34 @@ export const useUpdateBooking = () => {
         .single();
 
       if (error) throw error;
+
+      const scheduleChanged =
+        before &&
+        ((data.scheduled_date && data.scheduled_date !== before.scheduled_date) ||
+          (data.scheduled_start_time &&
+            data.scheduled_start_time !== before.scheduled_start_time) ||
+          (data.booking_date && data.booking_date !== before.booking_date) ||
+          (data.booking_time && data.booking_time !== before.booking_time));
+
+      if (result && scheduleChanged) {
+        try {
+          await notifyBookingParties({
+            bookingId: result.id,
+            productId: result.product_id,
+            userId: result.user_id,
+            customerId: result.customer_id,
+            bookingDate: result.scheduled_date || result.booking_date,
+            bookingTime: result.scheduled_start_time || result.booking_time,
+            type: 'reschedule',
+          });
+        } catch (notificationError) {
+          logger.warn('Error sending reschedule notification', {
+            error: notificationError,
+            bookingId: id,
+          });
+        }
+      }
+
       return result;
     },
     onSuccess: () => {
@@ -376,7 +413,59 @@ export const useCancelBooking = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, reason }: { id: string; reason?: string }) => {
+    mutationFn: async ({
+      id,
+      reason,
+      bypassPolicy = false,
+    }: {
+      id: string;
+      reason?: string;
+      /** Vendeur / admin : ignore allow_booking_cancellation client */
+      bypassPolicy?: boolean;
+    }) => {
+      const { data: existing, error: loadError } = await supabase
+        .from('service_bookings')
+        .select(
+          `
+          id, product_id, status, scheduled_date, scheduled_start_time, booking_date, booking_time,
+          product:products!product_id(
+            id,
+            service:service_products(allow_booking_cancellation, cancellation_deadline_hours)
+          )
+        `
+        )
+        .eq('id', id)
+        .maybeSingle();
+
+      if (loadError) throw loadError;
+      if (!existing) throw new Error('Réservation introuvable');
+
+      if (!bypassPolicy) {
+        const product = Array.isArray(existing.product) ? existing.product[0] : existing.product;
+        const serviceRaw =
+          product && typeof product === 'object'
+            ? (product as { service?: unknown }).service
+            : null;
+        const service = Array.isArray(serviceRaw) ? serviceRaw[0] : serviceRaw;
+        const eligibility = canCancelServiceBooking(
+          {
+            status: existing.status,
+            scheduled_date: existing.scheduled_date,
+            scheduled_start_time: existing.scheduled_start_time,
+            booking_date: existing.booking_date,
+            booking_time: existing.booking_time,
+          },
+          (service as {
+            allow_booking_cancellation?: boolean;
+            cancellation_deadline_hours?: number;
+          } | null) ?? null
+        );
+
+        if (!eligibility.allowed) {
+          throw new Error(eligibility.reason || 'Annulation impossible');
+        }
+      }
+
       const { data: result, error } = await supabase
         .from('service_bookings')
         .update({

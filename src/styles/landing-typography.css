@@ -1,0 +1,102 @@
+/**
+ * Typographie landing + marketplace — Inter, échelle professionnelle
+ * Scope : .landing-premium (hors .app-premium, géré par app-typography.css)
+ */
+
+.landing-premium:not(.app-premium) {
+  --lp-font-display: clamp(2rem, 2.5vw + 1.15rem, 3.25rem); /* 32–52px hero */
+  --lp-font-h1: clamp(1.75rem, 2vw + 1rem, 2.75rem); /* 28–44px */
+  --lp-font-h2: clamp(1.375rem, 1.2vw + 1rem, 2rem); /* 22–32px sections */
+  --lp-font-h3: clamp(1.125rem, 0.5vw + 1rem, 1.375rem); /* 18–22px */
+  --lp-font-body: 1rem; /* 16px */
+  --lp-font-body-lg: 1.0625rem; /* 17px */
+  --lp-font-small: 0.9375rem; /* 15px */
+  --lp-font-caption: 0.875rem; /* 14px minimum */
+  --lp-line-tight: 1.15;
+  --lp-line-normal: 1.55;
+  --lp-line-relaxed: 1.65;
+
+  font-size: var(--lp-font-body);
+  line-height: var(--lp-line-normal);
+}
+
+@media (min-width: 768px) {
+  .landing-premium:not(.app-premium) {
+    font-size: var(--lp-font-body-lg);
+  }
+}
+
+/* Display — lp-serif devient sans-serif display (rétrocompat classes) */
+.landing-premium:not(.app-premium) .lp-serif,
+.landing-premium:not(.app-premium) .lp-platform-hero__title,
+.landing-premium:not(.app-premium) .mp-hero__title {
+  font-family: var(--lp-sans) !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.025em;
+  line-height: var(--lp-line-tight);
+}
+
+.landing-premium:not(.app-premium) .lp-platform-hero__title {
+  font-size: var(--lp-font-display) !important;
+}
+
+.landing-premium:not(.app-premium) .lp-hero h1.lp-serif {
+  font-size: clamp(2rem, 2.8vw + 1.1rem, 3.5rem) !important;
+}
+
+.landing-premium:not(.app-premium) section h2.lp-serif {
+  font-size: var(--lp-font-h2) !important;
+}
+
+/* Corps & labels */
+.landing-premium:not(.app-premium) p,
+.landing-premium:not(.app-premium) li,
+.landing-premium:not(.app-premium) label,
+.landing-premium:not(.app-premium) .lp-footer-body,
+.landing-premium:not(.app-premium) .mp-hero__subtitle {
+  font-weight: 400;
+  line-height: var(--lp-line-normal);
+}
+
+/* Minimum lisible : text-xs / micro tailles */
+.landing-premium:not(.app-premium) [class*='text-xs'],
+.landing-premium:not(.app-premium) .lp-hero-caption,
+.landing-premium:not(.app-premium) .lp-eco-scene__disclaimer,
+.landing-premium:not(.app-premium) .lp-eco-node {
+  font-size: var(--lp-font-caption) !important;
+  line-height: 1.45 !important;
+}
+
+.landing-premium:not(.app-premium) [class*='text-sm'] {
+  font-size: var(--lp-font-small) !important;
+  line-height: 1.5 !important;
+}
+
+/* Marketplace */
+.landing-premium.marketplace-premium .mp-controls__title,
+.landing-premium.marketplace-premium .mp-quiz-banner h2,
+.landing-premium.marketplace-premium .mp-empty-state h3 {
+  font-family: var(--lp-sans) !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.02em;
+}
+
+.landing-premium.marketplace-premium .mp-controls__title {
+  font-size: var(--lp-font-h3) !important;
+}
+
+.landing-premium.marketplace-premium .mp-quiz-banner h2 {
+  font-size: var(--lp-font-h2) !important;
+}
+
+/* Nav & footer */
+.landing-premium:not(.app-premium) .lp-nav-link,
+.landing-premium:not(.app-premium) .lp-footer-col-title {
+  font-family: var(--lp-sans);
+  font-weight: 600;
+  font-size: var(--lp-font-small);
+}
+
+.landing-premium:not(.app-premium) .lp-footer-newsletter input {
+  font-size: 1rem !important; /* évite zoom iOS */
+}

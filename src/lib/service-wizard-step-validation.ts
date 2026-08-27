@@ -50,6 +50,23 @@ export type ServiceWizardFormFields = {
   delivery_packages?: ServiceGigPackageDraft[];
   gig_extras?: ServiceGigExtraDraft[];
   brief_fields?: ServiceBriefField[];
+  /** Étape Affiliation (optionnelle mais validée si activée) */
+  affiliate?: {
+    enabled?: boolean;
+    commission_rate?: number;
+  };
+  /** Étape SEO (champs optionnels — borne de longueur si renseignés) */
+  seo?: {
+    meta_title?: string;
+    meta_description?: string;
+  };
+  meta_title?: string;
+  meta_description?: string;
+  /** Étape Options de paiement */
+  payment?: {
+    payment_type?: string;
+    percentage_rate?: number;
+  };
 };
 
 export type ServiceWizardStepValidationResult = {
@@ -280,6 +297,41 @@ export function validateServiceWizardStep(
     }
   }
 
+  if (step === 5) {
+    if (formData.affiliate?.enabled) {
+      const rate = Number(formData.affiliate.commission_rate);
+      if (!Number.isFinite(rate) || rate < 1 || rate > 50) {
+        errors.push('Le taux de commission affilié doit être entre 1 % et 50 %');
+      }
+    }
+  }
+
+  if (step === 6) {
+    const title = (formData.seo?.meta_title ?? formData.meta_title)?.trim();
+    if (title && title.length > 70) {
+      errors.push('Le titre SEO ne doit pas dépasser 70 caractères');
+    }
+    const desc = (formData.seo?.meta_description ?? formData.meta_description)?.trim();
+    if (desc && desc.length > 160) {
+      errors.push('La meta description ne doit pas dépasser 160 caractères');
+    }
+  }
+
+  if (step === 7) {
+    const paymentType = formData.payment?.payment_type || 'full';
+    const allowed = new Set(['full', 'percentage', 'delivery_secured']);
+    if (!allowed.has(paymentType)) {
+      errors.push('Type de paiement invalide');
+    }
+    // Pour les services, le % acompte se configure via le dépôt (étape 4).
+    if (paymentType === 'percentage') {
+      const rate = Number(formData.payment?.percentage_rate);
+      if (!Number.isFinite(rate) || rate < 10 || rate > 90) {
+        errors.push("Le pourcentage d'acompte doit être entre 10 % et 90 %");
+      }
+    }
+  }
+
   return {
     valid: errors.length === 0,
     errors,
@@ -290,7 +342,7 @@ export function validateServiceWizardPublishSteps(
   formData: ServiceWizardFormFields,
   options?: ServiceWizardValidationOptions
 ): ServiceWizardStepValidationResult & { failedStep?: number } {
-  for (const step of [1, 2, 3, 4] as const) {
+  for (const step of [1, 2, 3, 4, 5, 6, 7] as const) {
     const result = validateServiceWizardStep(step, formData, options);
     if (!result.valid) {
       return { ...result, failedStep: step };

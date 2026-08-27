@@ -53,6 +53,7 @@ import { StaffCard } from '@/components/shared';
 import { ProductImages } from '@/components/shared';
 import type { StaffMember } from '@/hooks/service/useAvailability';
 import { buildCheckoutUrl } from '@/lib/checkout/checkout-route';
+import { resolveServicePayableAmount } from '@/lib/service/service-payable-amount';
 import { useServiceProductAddons } from '@/hooks/service/useServiceProductAddons';
 import { ServiceProductAddonsPicker } from '@/components/service/ServiceProductAddonsPicker';
 import {
@@ -800,6 +801,30 @@ export default function ServiceDetail() {
                 maxParticipants={serviceRecord?.max_participants}
                 size="md"
               />
+              {serviceRecord?.deposit_required &&
+                (() => {
+                  const payable = resolveServicePayableAmount(
+                    currentPrice,
+                    { payment_type: 'full' },
+                    {
+                      deposit_required: serviceRecord.deposit_required,
+                      deposit_type: serviceRecord.deposit_type,
+                      deposit_amount: serviceRecord.deposit_amount,
+                    }
+                  );
+                  if (payable.remainingAmount <= 0) return null;
+                  const currency = service?.currency || 'XOF';
+                  return (
+                    <p className="text-sm text-muted-foreground">
+                      À payer maintenant :{' '}
+                      <span className="font-medium text-foreground">
+                        {payable.amountToPay.toLocaleString()} {currency}
+                      </span>
+                      {' · '}
+                      Solde plus tard : {payable.remainingAmount.toLocaleString()} {currency}
+                    </p>
+                  );
+                })()}
             </div>
           </div>
 
@@ -1055,15 +1080,23 @@ export default function ServiceDetail() {
                       }}
                     />
                   </TabsContent>
-                  <TabsContent value="appointment" className="mt-4">
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Réserver un créneau</CardTitle>
-                      </CardHeader>
-                      <CardContent className="text-sm text-muted-foreground">
-                        Utilisez le calendrier et le bouton de réservation ci-dessous.
-                      </CardContent>
-                    </Card>
+                  <TabsContent value="appointment" className="mt-4 space-y-3">
+                    <p className="text-sm text-muted-foreground">
+                      Choisissez un créneau dans le calendrier ci-dessous, puis confirmez avec «
+                      Réserver et payer ».
+                    </p>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      className="w-full min-h-[44px] touch-manipulation"
+                      onClick={() =>
+                        document
+                          .getElementById('service-appointment-book')
+                          ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                      }
+                    >
+                      Voir le calendrier
+                    </Button>
                   </TabsContent>
                 </Tabs>
               );
@@ -1084,7 +1117,10 @@ export default function ServiceDetail() {
           )}
 
           {showAppointment && (
-            <Card className="lg:sticky lg:top-4 min-w-0 overflow-hidden">
+            <Card
+              id="service-appointment-book"
+              className="lg:sticky lg:top-4 min-w-0 overflow-hidden scroll-mt-4"
+            >
               <CardHeader>
                 <div className="flex items-start justify-between mb-2 gap-3 flex-wrap">
                   <CardTitle>Réserver</CardTitle>
@@ -1402,15 +1438,32 @@ export default function ServiceDetail() {
                   const bookingTotal = appointmentCharge + addonTotal;
                   if (bookingTotal <= 0) return null;
                   const differsFromUnit = bookingTotal !== appointmentPrice.amount;
-                  if (!differsFromUnit && !isGroup) return null;
+                  const payable = resolveServicePayableAmount(
+                    bookingTotal,
+                    { payment_type: 'full' },
+                    {
+                      deposit_required: serviceRecord?.deposit_required,
+                      deposit_type: serviceRecord?.deposit_type,
+                      deposit_amount: serviceRecord?.deposit_amount,
+                    }
+                  );
+                  const showDepositSplit = payable.remainingAmount > 0;
+                  if (!differsFromUnit && !isGroup && !showDepositSplit) return null;
                   return (
-                    <div className="p-4 bg-muted rounded-lg">
+                    <div className="p-4 bg-muted rounded-lg space-y-1">
                       <div className="flex justify-between items-center">
                         <span className="text-sm">Total</span>
                         <span className="text-xl font-bold">
                           {bookingTotal.toLocaleString()} {service?.currency}
                         </span>
                       </div>
+                      {showDepositSplit && (
+                        <p className="text-xs text-muted-foreground">
+                          À payer maintenant : {payable.amountToPay.toLocaleString()}{' '}
+                          {service?.currency} · Solde : {payable.remainingAmount.toLocaleString()}{' '}
+                          {service?.currency}
+                        </p>
+                      )}
                     </div>
                   );
                 })()}

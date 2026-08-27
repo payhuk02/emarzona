@@ -55,6 +55,12 @@ export class ServiceOrderStrategy implements OrderStrategy {
       couponCode,
     } = opts;
 
+    if (checkoutMode === 'cart') {
+      throw new Error(
+        'Les services se réservent et se paient depuis la fiche produit (Réserver et payer), pas via le panier.'
+      );
+    }
+
     if (!bookingDateTime) {
       throw new Error('Date et heure de réservation requises pour un service');
     }
@@ -363,11 +369,9 @@ export class ServiceOrderStrategy implements OrderStrategy {
     };
 
     if (checkoutMode === 'cart') {
-      return {
-        orderId: '',
-        orderItemId: '',
-        bookingId: booking.id,
-      };
+      throw new Error(
+        'Les services se réservent et se paient depuis la fiche produit (Réserver et payer), pas via le panier.'
+      );
     }
 
     import('@/lib/webhooks').then(({ triggerServiceBookingCreatedWebhook }) => {

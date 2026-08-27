@@ -60,10 +60,6 @@ import {
 } from '@/lib/sso/enforce-sso-login';
 import { AuthHeroPanel } from '@/components/auth/AuthHeroPanel';
 
-const AUTH_FONTS_ID = 'auth-premium-fonts';
-const AUTH_FONTS_HREF =
-  'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap';
-
 const AUTH_TRUST_ITEMS = [
   { icon: Shield, label: 'Paiement sécurisé' },
   { icon: Truck, label: 'Livraison rapide' },
@@ -118,16 +114,6 @@ const Auth = () => {
     );
     navigate(path, { replace: true });
   }, [navigate, returnTo]);
-
-  useEffect(() => {
-    if (!document.getElementById(AUTH_FONTS_ID)) {
-      const link = document.createElement('link');
-      link.id = AUTH_FONTS_ID;
-      link.rel = 'stylesheet';
-      link.href = AUTH_FONTS_HREF;
-      document.head.appendChild(link);
-    }
-  }, []);
 
   // Redirect if already logged in (admins → /admin, vendeurs → /dashboard)
   useEffect(() => {

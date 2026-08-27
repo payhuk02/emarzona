@@ -627,7 +627,11 @@ export default function BookingsManagement() {
       if (!confirm('Êtes-vous sûr de vouloir annuler cette réservation ?')) return;
 
       try {
-        await cancelBooking.mutateAsync({ id: bookingId, reason: "Annulé par l'administrateur" });
+        await cancelBooking.mutateAsync({
+          id: bookingId,
+          reason: "Annulé par l'administrateur",
+          bypassPolicy: true,
+        });
         toast({
           title: '✅ Réservation annulée',
           description: 'La réservation a été annulée avec succès.',

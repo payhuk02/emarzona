@@ -334,7 +334,10 @@ export const EditServiceProductWizard = ({
         }
 
         case 3:
-        case 4: {
+        case 4:
+        case 5:
+        case 6:
+        case 7: {
           const clientResult = validateServiceWizardStep(step, formData, { categoryTree });
           if (!clientResult.valid) {
             setValidationErrors(prev => ({ ...prev, [step]: clientResult.errors }));

@@ -90,6 +90,43 @@ describe('resolveServicePayableAmount', () => {
         .percentageRate
     ).toBe(90);
   });
+
+  it('treats delivery_secured as full payment', () => {
+    expect(resolveServicePayableAmount(10000, { payment_type: 'delivery_secured' })).toEqual({
+      paymentType: 'delivery_secured',
+      percentageRate: null,
+      amountToPay: 10000,
+      remainingAmount: 0,
+      totalAmount: 10000,
+    });
+  });
+
+  it('raises tiny deposits to MoneyFusion minimum when total allows', () => {
+    expect(
+      resolveServicePayableAmount(
+        10000,
+        { payment_type: 'full' },
+        { deposit_required: true, deposit_type: 'fixed', deposit_amount: 50 }
+      )
+    ).toMatchObject({
+      amountToPay: 201,
+      remainingAmount: 9799,
+    });
+  });
+
+  it('forces full payment when total is below MoneyFusion minimum', () => {
+    expect(
+      resolveServicePayableAmount(
+        150,
+        { payment_type: 'full' },
+        { deposit_required: true, deposit_type: 'fixed', deposit_amount: 50 }
+      )
+    ).toMatchObject({
+      paymentType: 'full',
+      amountToPay: 150,
+      remainingAmount: 0,
+    });
+  });
 });
 
 describe('toPartialPaymentOrderFields', () => {

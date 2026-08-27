@@ -42,7 +42,7 @@ All colors MUST be HSL.
     --secondary-foreground: 0 0% 12%; /* Noir doux */
 
     --muted: 0 0% 98%; /* Gris ultra clair */
-    --muted-foreground: 0 0% 35%; /* Gris foncé pour meilleur contraste sur fond blanc (WCAG AA) */
+    --muted-foreground: 0 0% 32%; /* Gris foncé — contraste WCAG AA */
 
     --accent: 38 92% 50%; /* Orange/Jaune moderne pour contraste avec primary */
     --accent-foreground: 0 0% 100%;
@@ -139,14 +139,15 @@ All colors MUST be HSL.
     @apply border-border;
   }
 
-  /* Times New Roman pour les titres */
+  /* Titres : même famille que le corps (Inter) — cohérence SaaS professionnelle */
   h1,
   h2,
   h3,
   h4,
   h5,
   h6 {
-    font-family: 'Times New Roman', Times, serif;
+    font-family: inherit;
+    color: hsl(var(--foreground));
   }
 
   /* OPTIMISATION: CSS du sidebar déplacé dans sidebar-optimized.css
@@ -178,60 +179,48 @@ All colors MUST be HSL.
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Hiérarchie typographique moderne */
+  /* Hiérarchie typographique — échelle modulaire 1.25 (14–32 px) */
   h1 {
-    font-size: 2.5rem; /* 40px */
-    line-height: 1.2;
+    font-size: clamp(1.5rem, 0.6vw + 1.25rem, 2rem); /* 24–32px */
+    line-height: 1.25;
     font-weight: 700;
     letter-spacing: -0.02em;
   }
 
   h2 {
-    font-size: 2rem; /* 32px */
-    line-height: 1.25;
+    font-size: clamp(1.25rem, 0.4vw + 1.1rem, 1.5rem); /* 20–24px */
+    line-height: 1.3;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+  }
+
+  h3 {
+    font-size: clamp(1.125rem, 0.25vw + 1rem, 1.25rem); /* 18–20px */
+    line-height: 1.35;
     font-weight: 600;
     letter-spacing: -0.01em;
   }
 
-  h3 {
-    font-size: 1.5rem; /* 24px */
-    line-height: 1.3;
-    font-weight: 600;
-    letter-spacing: 0;
-  }
-
   h4 {
-    font-size: 1.25rem; /* 20px */
+    font-size: 1.0625rem; /* 17px */
     line-height: 1.4;
     font-weight: 600;
     letter-spacing: 0;
   }
 
   h5 {
-    font-size: 1.125rem; /* 18px */
-    line-height: 1.4;
+    font-size: 1rem; /* 16px */
+    line-height: 1.45;
     font-weight: 600;
     letter-spacing: 0;
   }
 
   h6 {
-    font-size: 1rem; /* 16px */
-    line-height: 1.4;
+    font-size: 0.9375rem; /* 15px */
+    line-height: 1.45;
     font-weight: 600;
     letter-spacing: 0.01em;
-  }
-
-  /* Responsive typography */
-  @media (max-width: 768px) {
-    h1 {
-      font-size: 2rem; /* 32px */
-    }
-    h2 {
-      font-size: 1.75rem; /* 28px */
-    }
-    h3 {
-      font-size: 1.5rem; /* 24px */
-    }
+    text-transform: uppercase;
   }
 
   /* Optimisations pour très petits écrans (< 360px) */

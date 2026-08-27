@@ -9,8 +9,8 @@ export const landingCriticalCSS = `
   --lp-gold:#c9a227;
   --lp-blue-bright:#3b82f6;
   --lp-ease:cubic-bezier(0.22,1,0.36,1);
-  --lp-serif:'Cormorant Garamond',Georgia,'Times New Roman',serif;
-  --lp-sans:'DM Sans',system-ui,sans-serif;
+  --lp-sans:'Inter',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --lp-serif:var(--lp-sans);
   font-family:var(--lp-sans);
   color:#0f0f12;
   background:#fafaf9;
@@ -21,9 +21,9 @@ export const landingCriticalCSS = `
   color:var(--lp-text-on-dark);
 }
 .landing-premium .lp-serif {
-  font-family:var(--lp-serif);
-  font-weight:500;
-  letter-spacing:-0.02em;
+  font-family:var(--lp-sans);
+  font-weight:700;
+  letter-spacing:-0.025em;
 }
 .landing-premium .lp-gold-text {
   color:var(--lp-blue-bright);

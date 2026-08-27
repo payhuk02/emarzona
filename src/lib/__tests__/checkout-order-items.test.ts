@@ -162,6 +162,47 @@ describe('buildOrderItemRows', () => {
     expect(serviceRow?.service_product_id).toBe('svc-1');
   });
 
+  it('accepte une ligne service projet sans booking_id', async () => {
+    const rows = await buildOrderItemRows('order-1', [
+      baseItem({
+        product_type: 'physical',
+        metadata: { store_id: 'store-1', physical_product_id: 'phys-1' },
+      }),
+      baseItem({
+        product_id: 'prod-svc',
+        product_type: 'service',
+        metadata: {
+          store_id: 'store-1',
+          service_product_id: 'svc-1',
+          fulfillment_mode: 'project',
+          delivery_package_id: 'pkg-1',
+        },
+      }),
+    ]);
+    const serviceRow = rows.find(r => r.product_type === 'service');
+    expect(serviceRow?.service_product_id).toBe('svc-1');
+    expect(serviceRow?.booking_id).toBeUndefined();
+  });
+
+  it('rejette un service sans booking ni package projet', async () => {
+    await expect(
+      buildOrderItemRows('order-1', [
+        baseItem({
+          product_type: 'physical',
+          metadata: { store_id: 'store-1', physical_product_id: 'phys-1' },
+        }),
+        baseItem({
+          product_id: 'prod-svc',
+          product_type: 'service',
+          metadata: {
+            store_id: 'store-1',
+            service_product_id: 'svc-1',
+          },
+        }),
+      ])
+    ).rejects.toThrow(/incomplets|créneau|package/i);
+  });
+
   it('construit les 4 verticaux dans un même checkout', async () => {
     const rows = await buildOrderItemRows('order-1', [
       baseItem({

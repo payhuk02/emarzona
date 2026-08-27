@@ -61,7 +61,7 @@ export const DashboardHeader = React.memo<DashboardHeaderProps>(
                     className="h-5 w-5 sm:h-6 sm:w-6 text-foreground shrink-0"
                     aria-hidden="true"
                   />
-                  <span className="text-foreground font-bold truncate">
+                  <span className="text-foreground font-bold">
                     {getValue('dashboard.title') || t('dashboard.title')}
                   </span>
                   {isUpdating && (

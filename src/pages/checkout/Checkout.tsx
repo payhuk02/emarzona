@@ -734,6 +734,12 @@ const Checkout = () => {
             const params = new URLSearchParams({ guestEmail: formData.email });
             if (customerName) params.set('guestName', customerName);
             if (customerPhone) params.set('guestPhone', customerPhone);
+            toast({
+              title: 'Créneau requis',
+              description:
+                'Choisissez un créneau sur la fiche du service avant de payer, ou une formule projet.',
+              variant: 'destructive',
+            });
             navigate(`/service/${product.id}?${params.toString()}`);
             setSubmitting(false);
             return;
@@ -744,9 +750,11 @@ const Checkout = () => {
           }
 
           if (isProjectCheckout && projectOrder) {
+            // Deadline de livraison (pas un faux créneau RDV) — horodatage commande = maintenant
             const deliveryDays = Math.max(1, Number(projectOrder.totalDays) || 3);
-            const projectStart = new Date();
-            projectStart.setDate(projectStart.getDate() + deliveryDays);
+            const orderedAt = new Date();
+            const deliveryDeadline = new Date(orderedAt);
+            deliveryDeadline.setDate(deliveryDeadline.getDate() + deliveryDays);
             const serviceResult = await createServiceOrder({
               serviceProductId: serviceProductRow.id,
               productId: product.id,
@@ -754,11 +762,13 @@ const Checkout = () => {
               customerEmail: formData.email,
               customerName,
               customerPhone,
-              bookingDateTime: projectStart.toISOString(),
+              bookingDateTime: orderedAt.toISOString(),
               numberOfParticipants: 1,
               durationMinutes: serviceProductRow.duration_minutes ?? undefined,
               notes: JSON.stringify({
                 fulfillment_mode: 'project',
+                schedule_kind: 'project_delivery',
+                delivery_deadline: deliveryDeadline.toISOString(),
                 delivery_package_id: projectOrder.packageId,
                 package_name: projectOrder.packageName,
                 total_days: projectOrder.totalDays,

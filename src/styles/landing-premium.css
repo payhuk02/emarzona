@@ -1,6 +1,7 @@
 /* Emarzona Premium Landing — design system haute gamme */
-/* Polices chargées à la demande depuis Landing.tsx (évite @import bloquant) */
+/* Typographie : Inter (index.html) — voir landing-typography.css */
 @import './platform-hero-ecosystem.css';
+@import './landing-typography.css';
 
 .landing-premium {
   --lp-ink: #08080a;
@@ -29,8 +30,8 @@
   --lp-border: rgba(255, 255, 255, 0.08);
   --lp-border-light: rgba(15, 15, 18, 0.08);
   --lp-ease: cubic-bezier(0.22, 1, 0.36, 1);
-  --lp-serif: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
-  --lp-sans: 'DM Sans', system-ui, sans-serif;
+  --lp-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --lp-serif: var(--lp-sans);
   --lp-section-py: clamp(4rem, 8vw, 7rem);
 
   font-family: var(--lp-sans);
@@ -441,9 +442,9 @@
 }
 
 .landing-premium .lp-serif {
-  font-family: var(--lp-serif);
-  font-weight: 500;
-  letter-spacing: -0.02em;
+  font-family: var(--lp-sans);
+  font-weight: 700;
+  letter-spacing: -0.025em;
 }
 
 .landing-premium .lp-gold-text {
