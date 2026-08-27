@@ -368,12 +368,6 @@ export class ServiceOrderStrategy implements OrderStrategy {
       created_at: new Date().toISOString(),
     };
 
-    if (checkoutMode === 'cart') {
-      throw new Error(
-        'Les services se réservent et se paient depuis la fiche produit (Réserver et payer), pas via le panier.'
-      );
-    }
-
     import('@/lib/webhooks').then(({ triggerServiceBookingCreatedWebhook }) => {
       triggerServiceBookingCreatedWebhook(
         booking.id,

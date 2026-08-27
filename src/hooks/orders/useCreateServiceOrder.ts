@@ -123,7 +123,7 @@ export interface CreateServiceOrderOptions {
   /** Montant de la carte cadeau à utiliser (optionnel) */
   giftCardAmount?: number;
 
-  /** `cart` = réserve le créneau sans paiement immédiat (panier mixte) */
+  /** Buy-now uniquement ; `cart` est rejeté au début du flux */
   checkoutMode?: 'immediate' | 'cart';
 
   /**
@@ -652,13 +652,6 @@ export const useCreateServiceOrder = () => {
             created_at: new Date().toISOString(),
           }
         : null;
-
-      if (checkoutMode === 'cart') {
-        // Buy-now only : le panier mixte service n’est plus exposé sur la fiche.
-        throw new Error(
-          'Les services se réservent et se paient depuis la fiche produit (Réserver et payer), pas via le panier.'
-        );
-      }
 
       if (booking) {
         import('@/lib/webhooks').then(({ triggerServiceBookingCreatedWebhook }) => {
