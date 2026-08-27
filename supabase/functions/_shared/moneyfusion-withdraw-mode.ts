@@ -7,19 +7,6 @@ export function digitsOnlyPhone(phone: string): string {
   return phone.replace(/\D/g, '');
 }
 
-/** National MSISDN for MF withdraw (strip common country codes). */
-export function normalizeWithdrawPhone(phone: string): string {
-  const digits = digitsOnlyPhone(phone);
-  if (digits.startsWith('226') && digits.length >= 11) return digits.slice(3);
-  if (digits.startsWith('225') && digits.length >= 12) return digits.slice(3);
-  if (digits.startsWith('221') && digits.length >= 12) return digits.slice(3);
-  if (digits.startsWith('223') && digits.length >= 11) return digits.slice(3);
-  if (digits.startsWith('224') && digits.length >= 11) return digits.slice(3);
-  if (digits.startsWith('245') && digits.length >= 11) return digits.slice(3);
-  if (digits.startsWith('0') && digits.length >= 9) return digits.slice(1);
-  return digits;
-}
-
 const PHONE_PREFIX_TO_COUNTRY: Array<{ prefix: string; minLen: number; code: string }> = [
   { prefix: '226', minLen: 11, code: 'bf' },
   { prefix: '225', minLen: 12, code: 'ci' },
@@ -30,8 +17,33 @@ const PHONE_PREFIX_TO_COUNTRY: Array<{ prefix: string; minLen: number; code: str
   { prefix: '229', minLen: 11, code: 'bj' },
   { prefix: '228', minLen: 11, code: 'tg' },
   { prefix: '227', minLen: 11, code: 'ne' },
-  { prefix: '237', minLen: 11, code: 'cm' },
+  { prefix: '237', minLen: 12, code: 'cm' },
+  { prefix: '241', minLen: 11, code: 'ga' },
+  { prefix: '242', minLen: 11, code: 'cg' },
+  { prefix: '243', minLen: 12, code: 'cd' },
+  { prefix: '233', minLen: 12, code: 'gh' },
+  { prefix: '254', minLen: 12, code: 'ke' },
+  { prefix: '256', minLen: 12, code: 'ug' },
+  { prefix: '250', minLen: 12, code: 'rw' },
+  { prefix: '232', minLen: 11, code: 'sl' },
+  { prefix: '220', minLen: 10, code: 'gm' },
+  { prefix: '236', minLen: 11, code: 'cf' },
+  { prefix: '235', minLen: 11, code: 'td' },
+  { prefix: '255', minLen: 12, code: 'tz' },
+  { prefix: '222', minLen: 11, code: 'mr' },
 ];
+
+/** National MSISDN for MF withdraw (strip known country codes). */
+export function normalizeWithdrawPhone(phone: string): string {
+  const digits = digitsOnlyPhone(phone);
+  for (const row of PHONE_PREFIX_TO_COUNTRY) {
+    if (digits.startsWith(row.prefix) && digits.length >= row.minLen) {
+      return digits.slice(row.prefix.length);
+    }
+  }
+  if (digits.startsWith('0') && digits.length >= 9) return digits.slice(1);
+  return digits;
+}
 
 export function inferCountryCodeFromPhone(phone: string): string {
   const digits = digitsOnlyPhone(phone);
@@ -56,6 +68,38 @@ export function normalizeMoneyFusionCountryCode(raw: string | null | undefined):
     'guinea-conakry': 'gn',
     'guinee-conakry': 'gn',
     'gn-conakry': 'gn',
+    sen: 'sn',
+    senegal: 'sn',
+    bf: 'bf',
+    burkina: 'bf',
+    'burkina-faso': 'bf',
+    benin: 'bj',
+    togo: 'tg',
+    mali: 'ml',
+    niger: 'ne',
+    cameroun: 'cm',
+    cameroon: 'cm',
+    rdc: 'cd',
+    drc: 'cd',
+    'congo-rdc': 'cd',
+    'congo-kinshasa': 'cd',
+    'congo-brazzaville': 'cg',
+    gabon: 'ga',
+    ghana: 'gh',
+    kenya: 'ke',
+    uganda: 'ug',
+    ouganda: 'ug',
+    rwanda: 'rw',
+    tchad: 'td',
+    chad: 'td',
+    centrafrique: 'cf',
+    'sierra-leone': 'sl',
+    gambie: 'gm',
+    gambia: 'gm',
+    tanzanie: 'tz',
+    tanzania: 'tz',
+    mauritanie: 'mr',
+    mauritania: 'mr',
   };
   return aliases[cc] || cc;
 }
@@ -103,16 +147,19 @@ const MF_WITHDRAW_MODE_FALLBACK: Record<string, Partial<Record<string, string>>>
   },
   tg: {
     't-money': 't-money-togo',
+    moov: 'moov-togo',
   },
   sn: {
     orange: 'orange-money-senegal',
     wave: 'wave-senegal',
+    free: 'free-money-senegal',
   },
   ml: {
     orange: 'orange-money-mali',
   },
   ne: {
     airtel: 'airtel-money-ne',
+    mtn: 'mtn-ne',
     amana: 'amana-ne',
     zamani: 'zamanicash-ne',
     moov: 'moov-money-ne',
@@ -120,6 +167,7 @@ const MF_WITHDRAW_MODE_FALLBACK: Record<string, Partial<Record<string, string>>>
   },
   cd: {
     mpesa: 'mpesa-cd',
+    airtel: 'airtel-money-cd',
   },
   cg: {
     mtn: 'mtn-cg',
@@ -145,6 +193,10 @@ const MF_WITHDRAW_MODE_FALLBACK: Record<string, Partial<Record<string, string>>>
   },
   ke: {
     mpesa: 'm-pesa-ke',
+  },
+  tz: {
+    mpesa: 'm-pesa-tz',
+    airtel: 'airtel-money-tz',
   },
   sl: {
     orange: 'orange-sl',
@@ -176,8 +228,16 @@ export function guessWithdrawMode(moyen: string | null | undefined, countryCode:
     .replace(/_/g, '-');
   if (!raw) return null;
 
+  // Seller form slugs (orange_money → orange-money) must go through the country map —
+  // do not treat them as full MF withdraw_mode keys (mtn-ci, moov-togo, …).
+  const sellerFormSlug =
+    /^(orange-money|mtn-mobile-money|moov-money|wave|free-money|m-pesa|airtel-money|t-money|amana|zamani-cash|nita|ecocash|other)$/;
+
   // Full MF key already (orange-money-burkina, mtn-ci, …) — keep unless known-bad ISO suffix
-  if (/^(orange-money|mtn|moov|wave|free-money|t-money|airtel)(-[a-z0-9]+)+$/.test(raw)) {
+  if (
+    !sellerFormSlug.test(raw) &&
+    /^(orange-money|mtn|moov|wave|free-money|t-money|airtel)(-[a-z0-9]+)+$/.test(raw)
+  ) {
     const badIso = /-(bf|bj|tg|ml)$/.test(raw) && !/(burkina|benin|togo|mali)/.test(raw);
     if (!badIso) return raw;
   }

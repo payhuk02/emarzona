@@ -1,8 +1,8 @@
 /**
- * Opérateurs / portefeuilles Mobile Money réellement présents par pays (ISO 3166-1 alpha-2).
- * Aligné sur le catalogue MoneyFusion payout (CI, BF, BJ, TG, SN, ML, NE, CD, CG, CM, GA, GN, …)
- * et sur les opérateurs nationaux majeurs ailleurs.
- * Les pays sans Mobile Money usuel retournent une liste vide — pas de fallback Afrique de l’Ouest.
+ * Opérateurs Mobile Money proposés aux vendeurs pour un retrait MoneyFusion.
+ * Uniquement les couples pays/opérateur mappés dans moneyfusion-withdraw-mode
+ * (doc payout + catalogue live). Les autres pays : virement / carte.
+ * `ecocash` reste dans le type pour les méthodes de paiement déjà enregistrées.
  */
 
 export type MobileMoneyOperator =
@@ -33,7 +33,6 @@ const WAVE: MobileMoneyOperatorInfo = { value: 'wave', label: 'Wave' };
 const FREE: MobileMoneyOperatorInfo = { value: 'free_money', label: 'Free Money' };
 const MPESA: MobileMoneyOperatorInfo = { value: 'm_pesa', label: 'M-Pesa' };
 const AIRTEL: MobileMoneyOperatorInfo = { value: 'airtel_money', label: 'Airtel Money' };
-const ECO: MobileMoneyOperatorInfo = { value: 'ecocash', label: 'EcoCash' };
 const TMONEY: MobileMoneyOperatorInfo = { value: 't_money', label: 'T-Money' };
 const AMANA: MobileMoneyOperatorInfo = { value: 'amana', label: 'Amana' };
 const ZAMANI: MobileMoneyOperatorInfo = { value: 'zamani_cash', label: 'Zamani Cash' };
@@ -42,47 +41,32 @@ const OTHER: MobileMoneyOperatorInfo = { value: 'other', label: 'Autre' };
 
 const withOther = (ops: MobileMoneyOperatorInfo[]): MobileMoneyOperatorInfo[] => [...ops, OTHER];
 
+/**
+ * Catalogue UI = fallback offline MoneyFusion (voir moneyfusion-withdraw-mode.ts).
+ */
 export const MOBILE_MONEY_OPERATORS_BY_COUNTRY: Record<string, MobileMoneyOperatorInfo[]> = {
-  // UEMOA / MoneyFusion
-  BF: withOther([OM, MOOV, WAVE]),
+  BF: withOther([OM, MOOV]),
   CI: withOther([OM, MTN, MOOV, WAVE]),
   SN: withOther([OM, FREE, WAVE]),
-  ML: withOther([OM, MOOV, WAVE]),
+  ML: withOther([OM]),
   BJ: withOther([MTN, MOOV]),
   TG: withOther([TMONEY, MOOV]),
-  NE: withOther([AIRTEL, MOOV, AMANA, ZAMANI, NITA]),
-  // Afrique de l’Ouest / Centre
+  NE: withOther([AIRTEL, MTN, MOOV, AMANA, ZAMANI, NITA]),
   GN: withOther([OM, MTN]),
-  GW: withOther([OM, MTN]),
-  GM: withOther([WAVE]),
+  GW: withOther([MTN]),
+  GM: withOther([OM]),
   SL: withOther([OM]),
-  LR: withOther([OM, MTN]),
-  GH: withOther([MTN, AIRTEL, WAVE]),
-  NG: withOther([MTN, AIRTEL]),
+  GH: withOther([MTN, AIRTEL]),
   CM: withOther([OM, MTN]),
-  GA: withOther([MOOV, AIRTEL]),
-  CG: withOther([MTN, AIRTEL]),
-  CD: withOther([MPESA, AIRTEL, OM]),
-  TD: withOther([AIRTEL, MOOV, OM]),
+  GA: withOther([AIRTEL, MOOV]),
+  CG: withOther([MTN]),
+  CD: withOther([MPESA, AIRTEL]),
+  TD: withOther([AIRTEL, MOOV]),
   CF: withOther([OM]),
-  GQ: withOther([MTN]),
-  // Afrique de l’Est / Australe
-  KE: withOther([MPESA, AIRTEL]),
+  KE: withOther([MPESA]),
   TZ: withOther([MPESA, AIRTEL]),
-  UG: withOther([MTN, AIRTEL]),
-  RW: withOther([MTN, AIRTEL]),
-  BI: withOther([ECO]),
-  MW: withOther([AIRTEL]),
-  ZM: withOther([MTN, AIRTEL]),
-  MZ: withOther([MPESA]),
-  MG: withOther([OM, AIRTEL]),
-  ZW: withOther([ECO]),
-  LS: withOther([ECO]),
-  ZA: withOther([MTN]),
-  // Maghreb
-  MA: withOther([OM]),
-  TN: withOther([OM]),
-  DZ: withOther([OM]),
+  UG: withOther([MTN]),
+  RW: withOther([MTN]),
 };
 
 export const DEFAULT_MOBILE_MONEY_OPERATORS: MobileMoneyOperatorInfo[] = [];
