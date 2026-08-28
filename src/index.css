@@ -1,5 +1,6 @@
 /* All @import statements must come first */
 /* Google Fonts chargé via <link> dans index.html pour éviter les problèmes CSP */
+@import './styles/typography-tokens.css';
 @import './styles/animations.css';
 @import './styles/mobile-optimizations.css';
 @import './styles/mobile-first-system.css';
@@ -167,8 +168,8 @@ All colors MUST be HSL.
       system-ui,
       -apple-system,
       sans-serif;
-    font-size: 1rem; /* 16px - Taille professionnelle */
-    line-height: 1.625; /* Amélioré pour meilleure lisibilité */
+    font-size: var(--emz-text-base);
+    line-height: var(--emz-line-relaxed);
     letter-spacing: 0;
     overscroll-behavior: none;
     -webkit-tap-highlight-color: transparent;
@@ -179,45 +180,43 @@ All colors MUST be HSL.
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Hiérarchie typographique — échelle modulaire 1.25 (14–32 px) */
+  /* Hiérarchie typographique — échelle compacte responsive */
   h1 {
-    font-size: clamp(1.5rem, 0.6vw + 1.25rem, 2rem); /* 24–32px */
-    line-height: 1.25;
+    font-size: var(--emz-text-display);
+    line-height: var(--emz-line-tight);
     font-weight: 700;
     letter-spacing: -0.02em;
   }
 
   h2 {
-    font-size: clamp(1.25rem, 0.4vw + 1.1rem, 1.5rem); /* 20–24px */
-    line-height: 1.3;
+    font-size: var(--emz-text-2xl);
+    line-height: var(--emz-line-tight);
     font-weight: 600;
     letter-spacing: -0.015em;
   }
 
   h3 {
-    font-size: clamp(1.125rem, 0.25vw + 1rem, 1.25rem); /* 18–20px */
-    line-height: 1.35;
+    font-size: var(--emz-text-xl);
+    line-height: 1.3;
     font-weight: 600;
     letter-spacing: -0.01em;
   }
 
   h4 {
-    font-size: 1.0625rem; /* 17px */
-    line-height: 1.4;
+    font-size: var(--emz-text-lg);
+    line-height: 1.35;
     font-weight: 600;
-    letter-spacing: 0;
   }
 
   h5 {
-    font-size: 1rem; /* 16px */
-    line-height: 1.45;
+    font-size: var(--emz-text-md);
+    line-height: 1.4;
     font-weight: 600;
-    letter-spacing: 0;
   }
 
   h6 {
-    font-size: 0.9375rem; /* 15px */
-    line-height: 1.45;
+    font-size: var(--emz-text-base);
+    line-height: 1.4;
     font-weight: 600;
     letter-spacing: 0.01em;
     text-transform: uppercase;
@@ -1391,31 +1390,31 @@ svg.emz-page-spinner,
 /* Typo chrome app — px (text-[10px] sur les labels sidebar gagnait sur le parent) */
 [data-sidebar='sidebar'] [data-sidebar='menu-button'],
 [data-sidebar='sidebar'] [data-sidebar='menu-button'] span {
-  font-size: 16px !important;
+  font-size: var(--emz-text-small) !important;
 }
 
 [data-sidebar='sidebar'] [data-sidebar='group-label'],
 [data-sidebar='sidebar'] .app-sidebar-section-label {
-  font-size: 13px !important;
+  font-size: var(--emz-text-caption) !important;
 }
 
 [data-testid='persona-tab-seller'],
 [data-testid='persona-tab-buyer'],
 [data-testid='persona-tab-admin'] {
-  font-size: 15px !important;
+  font-size: var(--emz-text-small) !important;
 }
 
 .dashboard-metric-label {
-  font-size: 17px !important;
+  font-size: var(--emz-text-small) !important;
 }
 
 .dashboard-metric-sub,
 .dashboard-premium-panel-subtitle {
-  font-size: 15px !important;
+  font-size: var(--emz-text-base) !important;
 }
 
 .app-premium-topnav .topnav-main-link,
 [data-testid='horizontal-context-nav'] a,
 [data-testid='horizontal-context-nav'] button {
-  font-size: 15px !important;
+  font-size: var(--emz-text-small) !important;
 }

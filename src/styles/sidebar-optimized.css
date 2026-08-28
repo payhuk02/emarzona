@@ -35,13 +35,13 @@
 
 [data-sidebar='sidebar'] [data-sidebar='menu-button'],
 [data-sidebar='sidebar'] [data-sidebar='menu-button'] span {
-  font-size: 1rem !important;
+  font-size: var(--emz-text-small) !important;
   line-height: 1.4 !important;
 }
 
 [data-sidebar='sidebar'] [data-sidebar='group-label'] {
-  font-size: 0.875rem !important;
-  letter-spacing: 0.06em;
+  font-size: var(--emz-text-caption) !important;
+  letter-spacing: 0.07em;
 }
 
 [data-sidebar='sidebar'] svg:not([class*='text-orange']):not([class*='text-red']) {

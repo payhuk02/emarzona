@@ -39,14 +39,14 @@
   font-family: var(--lp-sans);
 }
 
-/* Typo app — px + !important (Tailwind text-sm/xs ne passaient pas) */
+/* Typo app — base 14px */
 .landing-premium.app-premium {
-  font-size: 16px;
+  font-size: var(--emz-text-base);
 }
 
 .landing-premium.app-premium [data-sidebar='sidebar'] [data-sidebar='group-label'] {
   color: hsl(var(--muted-foreground)) !important;
-  font-size: 13px !important;
+  font-size: var(--emz-text-caption) !important;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -54,14 +54,14 @@
 
 .landing-premium.app-premium [data-sidebar='sidebar'] [data-sidebar='menu-button'],
 .landing-premium.app-premium [data-sidebar='sidebar'] [data-sidebar='menu-button'] span {
-  font-size: 16px !important;
+  font-size: var(--emz-text-small) !important;
   line-height: 1.4 !important;
 }
 
 .landing-premium.app-premium [data-sidebar='sidebar'] button,
 .landing-premium.app-premium .app-sidebar-command-trigger,
 .landing-premium.app-premium .app-sidebar-command-trigger span {
-  font-size: 15px !important;
+  font-size: var(--emz-text-small) !important;
 }
 
 .landing-premium.app-premium .app-premium-topnav a,
@@ -69,25 +69,25 @@
 .landing-premium.app-premium .app-premium-topnav .topnav-main-link,
 .landing-premium.app-premium [data-testid='horizontal-context-nav'] a,
 .landing-premium.app-premium [data-testid='horizontal-context-nav'] button {
-  font-size: 15px !important;
+  font-size: var(--emz-text-small) !important;
 }
 
 .landing-premium.app-premium .app-sidebar-section-label {
-  font-size: 13px !important;
+  font-size: var(--emz-text-caption) !important;
   line-height: 1.3 !important;
 }
 
 .landing-premium.app-premium #main-content .dashboard-metric-label {
-  font-size: 17px !important;
+  font-size: var(--emz-text-small) !important;
 }
 
 .landing-premium.app-premium #main-content .dashboard-metric-sub,
 .landing-premium.app-premium #main-content .dashboard-premium-panel-subtitle {
-  font-size: 16px !important;
+  font-size: var(--emz-text-base) !important;
 }
 
 .landing-premium.app-premium #main-content .dashboard-premium-panel-title {
-  font-size: 22px !important;
+  font-size: var(--emz-text-2xl) !important;
 }
 
 /* Sidebar — fond blanc aligné sur sidebar-optimized */

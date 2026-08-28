@@ -13,15 +13,14 @@
    ============================================ */
 
 :root {
-  /* Mobile-first font sizes (base: 16px, minimum 14px WCAG) */
-  --font-size-xs: 0.875rem; /* 14px — minimum lisible */
-  --font-size-sm: 0.9375rem; /* 15px */
-  --font-size-base: 1rem; /* 16px — corps, évite zoom iOS */
-  --font-size-lg: 1.0625rem; /* 17px */
-  --font-size-xl: 1.125rem; /* 18px */
-  --font-size-2xl: 1.25rem; /* 20px */
-  --font-size-3xl: 1.5rem; /* 24px */
-  --font-size-4xl: 1.75rem; /* 28px */
+  --font-size-xs: var(--emz-text-caption);
+  --font-size-sm: var(--emz-text-small);
+  --font-size-base: var(--emz-text-base);
+  --font-size-lg: var(--emz-text-md);
+  --font-size-xl: var(--emz-text-lg);
+  --font-size-2xl: var(--emz-text-xl);
+  --font-size-3xl: var(--emz-text-2xl);
+  --font-size-4xl: var(--emz-text-3xl);
 
   /* Line heights optimized for mobile */
   --line-height-tight: 1.25;

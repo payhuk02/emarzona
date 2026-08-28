@@ -72,7 +72,7 @@ export const DashboardHeader = React.memo<DashboardHeaderProps>(
                   )}
                 </div>
               </h1>
-              <p className="text-sm md:text-base text-muted-foreground font-normal">
+              <p className="text-xs sm:text-sm text-muted-foreground font-normal">
                 {t('dashboard.description')}
               </p>
             </div>

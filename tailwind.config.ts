@@ -29,16 +29,16 @@ export default {
         mono: ['JetBrains Mono', 'Fira Code', 'Consolas', 'monospace'],
       },
       fontSize: {
-        xs: ['0.875rem', { lineHeight: '1.375rem', letterSpacing: '0' }], // 14px
-        sm: ['1rem', { lineHeight: '1.5rem', letterSpacing: '0' }], // 16px
-        base: ['1.0625rem', { lineHeight: '1.65rem', letterSpacing: '0' }], // 17px
-        lg: ['1.125rem', { lineHeight: '1.75rem', letterSpacing: '0' }],
-        xl: ['1.25rem', { lineHeight: '1.75rem', letterSpacing: '0' }],
-        '2xl': ['1.5rem', { lineHeight: '2rem', letterSpacing: '-0.01em' }],
-        '3xl': ['1.875rem', { lineHeight: '2.25rem', letterSpacing: '-0.01em' }],
-        '4xl': ['2.25rem', { lineHeight: '2.5rem', letterSpacing: '-0.02em' }],
-        '5xl': ['3rem', { lineHeight: '1.2', letterSpacing: '-0.02em' }],
-        '6xl': ['3.75rem', { lineHeight: '1.2', letterSpacing: '-0.02em' }],
+        xs: ['0.75rem', { lineHeight: '1.125rem', letterSpacing: '0' }], // 12px
+        sm: ['0.8125rem', { lineHeight: '1.25rem', letterSpacing: '0' }], // 13px
+        base: ['0.875rem', { lineHeight: '1.375rem', letterSpacing: '0' }], // 14px
+        lg: ['0.9375rem', { lineHeight: '1.5rem', letterSpacing: '0' }], // 15px
+        xl: ['1rem', { lineHeight: '1.5rem', letterSpacing: '0' }], // 16px
+        '2xl': ['1.125rem', { lineHeight: '1.5rem', letterSpacing: '-0.01em' }], // 18px
+        '3xl': ['1.25rem', { lineHeight: '1.625rem', letterSpacing: '-0.01em' }], // 20px
+        '4xl': ['1.5rem', { lineHeight: '1.75rem', letterSpacing: '-0.015em' }], // 24px
+        '5xl': ['1.875rem', { lineHeight: '2rem', letterSpacing: '-0.02em' }], // 30px
+        '6xl': ['2.25rem', { lineHeight: '2.25rem', letterSpacing: '-0.02em' }], // 36px
       },
       letterSpacing: {
         tighter: '-0.05em',

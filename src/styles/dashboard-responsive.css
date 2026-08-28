@@ -31,7 +31,8 @@
 
 .dashboard-section-title {
   font-family: var(--lp-sans, 'Inter', system-ui, sans-serif);
-  @apply text-lg sm:text-xl md:text-2xl font-semibold text-foreground tracking-tight;
+  font-size: var(--emz-text-xl);
+  @apply font-semibold text-foreground tracking-tight;
   letter-spacing: -0.02em;
 }
 
