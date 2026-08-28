@@ -6,6 +6,12 @@ import type {
 import { applyCheckoutPlatformFee, getCheckoutPlatformFee } from '@/lib/checkout/platform-fee';
 import { resolveServiceAppointmentCharge } from '@/lib/service/service-pricing';
 import { resolveServicePayableAmount } from '@/lib/service/service-payable-amount';
+import {
+  amountDueAtProjectCheckout,
+  computeServiceProjectMilestoneAmounts,
+  projectMilestonesEnabled,
+  type ServicePaymentOptionsWithMilestones,
+} from '@/lib/service/service-project-milestones';
 
 export function getBuyNowBasePrice(
   product: CheckoutProduct,
@@ -100,6 +106,9 @@ export type ServiceBuyNowBreakdown = {
   remainingAmount: number;
   isDeposit: boolean;
   isProject: boolean;
+  isProjectMilestones: boolean;
+  milestoneDueNow: number;
+  milestoneRemaining: number;
 };
 
 export function buildServiceBuyNowBreakdown(input: ServiceBuyNowInput): ServiceBuyNowBreakdown {
@@ -122,9 +131,30 @@ export function buildServiceBuyNowBreakdown(input: ServiceBuyNowInput): ServiceB
   const totalWithFee = applyCheckoutPlatformFee(subtotal, currency);
   const paymentOptions =
     input.product?.payment_options && typeof input.product.payment_options === 'object'
-      ? (input.product.payment_options as { payment_type?: string; percentage_rate?: number })
+      ? (input.product.payment_options as ServicePaymentOptionsWithMilestones)
       : null;
   const payable = resolveServicePayableAmount(totalWithFee, paymentOptions, input.deposit);
+
+  let amountDueNow = payable.amountToPay;
+  let remainingAmount = payable.remainingAmount;
+  let isProjectMilestones = false;
+  let milestoneDueNow = 0;
+  let milestoneRemaining = 0;
+
+  if (isProject && projectMilestonesEnabled(paymentOptions, true)) {
+    const milestones = computeServiceProjectMilestoneAmounts(
+      totalWithFee,
+      paymentOptions?.project_milestones
+    );
+    milestoneDueNow = amountDueAtProjectCheckout(milestones);
+    milestoneRemaining = Math.max(0, totalWithFee - milestoneDueNow);
+    if (milestoneDueNow > 0) {
+      isProjectMilestones = true;
+      amountDueNow = milestoneDueNow;
+      remainingAmount = milestoneRemaining;
+    }
+  }
+
   return {
     serviceAmount,
     addonTotal: addons,
@@ -132,10 +162,13 @@ export function buildServiceBuyNowBreakdown(input: ServiceBuyNowInput): ServiceB
     subtotal,
     platformFee,
     totalWithFee,
-    amountDueNow: payable.amountToPay,
-    remainingAmount: payable.remainingAmount,
-    isDeposit: payable.remainingAmount > 0,
+    amountDueNow,
+    remainingAmount,
+    isDeposit: payable.remainingAmount > 0 || isProjectMilestones,
     isProject,
+    isProjectMilestones,
+    milestoneDueNow,
+    milestoneRemaining,
   };
 }
 

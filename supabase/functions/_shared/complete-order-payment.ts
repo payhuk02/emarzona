@@ -273,7 +273,9 @@ export async function resolveOrderExpectedPayableAmount(
 }> {
   const { data: orderData } = await supabase
     .from('orders')
-    .select('total_amount, currency, payment_type, percentage_paid, remaining_amount, metadata')
+    .select(
+      'total_amount, currency, payment_type, percentage_paid, remaining_amount, delivery_status, metadata'
+    )
     .eq('id', orderId)
     .single();
 
@@ -291,15 +293,26 @@ export async function resolveOrderExpectedPayableAmount(
     orderData.metadata && typeof orderData.metadata === 'object' && !Array.isArray(orderData.metadata)
       ? (orderData.metadata as Record<string, unknown>)
       : {};
+  const remainingAmount =
+    typeof orderData.remaining_amount === 'string'
+      ? parseFloat(orderData.remaining_amount)
+      : Number(orderData.remaining_amount || 0);
+  const percentageAmount =
+    typeof orderData.percentage_paid === 'string'
+      ? parseFloat(orderData.percentage_paid)
+      : Number(orderData.percentage_paid || 0);
   const isGuarantee =
-    String(metadata.checkout_method ?? '') === 'guarantee' &&
-    Number(orderData.remaining_amount) > 0;
+    String(metadata.checkout_method ?? '') === 'guarantee' && remainingAmount > 0;
+
   if (isGuarantee || orderData.payment_type === 'percentage') {
-    const percentageAmount =
-      typeof orderData.percentage_paid === 'string'
-        ? parseFloat(orderData.percentage_paid)
-        : Number(orderData.percentage_paid || 0);
     if (Number.isFinite(percentageAmount) && percentageAmount > 0) {
+      baseAmount = percentageAmount;
+    }
+  } else if (orderData.payment_type === 'delivery_secured' && remainingAmount > 0) {
+    // Jalons projet : 1er paiement = percentage_paid (montant retenu), solde après livraison = remaining.
+    if (orderData.delivery_status === 'confirmed') {
+      baseAmount = remainingAmount;
+    } else if (Number.isFinite(percentageAmount) && percentageAmount > 0) {
       baseAmount = percentageAmount;
     }
   }

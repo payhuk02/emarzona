@@ -676,6 +676,10 @@ export default function ServiceDetail() {
       !calendarIntent);
   const serviceUrl = `${window.location.origin}/service/${serviceId}`;
 
+  const projectPaymentOptions = (service?.payment_options ?? null) as
+    | import('@/lib/service/service-project-milestones').ServicePaymentOptionsWithMilestones
+    | null;
+
   const maxParticipants = service?.service?.max_participants || 1;
   const minParticipants = 1;
   const isGroup = maxParticipants > 1;
@@ -1059,6 +1063,7 @@ export default function ServiceDetail() {
                   currency={service?.currency || 'XOF'}
                   selectedPackageId={selectedPackageId}
                   onPackageSelect={handleSelectPackage}
+                  paymentOptions={projectPaymentOptions}
                   onContinue={payload => {
                     sessionStorage.setItem(
                       `service-project-order:${serviceId}`,
@@ -1092,6 +1097,7 @@ export default function ServiceDetail() {
                       currency={service?.currency || 'XOF'}
                       selectedPackageId={selectedPackageId}
                       onPackageSelect={handleSelectPackage}
+                      paymentOptions={projectPaymentOptions}
                       onContinue={payload => {
                         sessionStorage.setItem(
                           `service-project-order:${serviceId}`,

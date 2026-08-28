@@ -57,12 +57,15 @@ import {
   type PaymentManagementOrder,
 } from '@/lib/payments/payment-management-orders';
 import { releaseOrderSecuredPayment } from '@/lib/payments/release-order-secured-payment';
+import { approveServiceProjectDelivery } from '@/lib/payments/service-order-milestone-flow';
 import { format } from 'date-fns';
 import { logger } from '@/lib/logger';
 import { fr } from 'date-fns/locale';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import type { AdvancedPayment } from '@/types/advanced-features';
+import { useServiceOrderMilestones } from '@/hooks/service/useServiceOrderMilestones';
+import { ServiceProjectMilestoneTimeline } from '@/components/service/ServiceProjectMilestoneTimeline';
+import { computeServiceProjectMilestoneAmounts } from '@/lib/service/service-project-milestones';
+import { orderHasProjectMilestones } from '@/lib/payments/service-order-milestone-flow';
 
 export default function PaymentManagement() {
   const { orderId } = useParams<{ orderId: string }>();
@@ -103,6 +106,33 @@ export default function PaymentManagement() {
   const effectiveStoreId = storeId ?? order?.store_id ?? undefined;
 
   const { payments, loading, stats, releasePayment } = useAdvancedPayments(effectiveStoreId);
+  const { data: orderMilestones = [] } = useServiceOrderMilestones(orderId);
+
+  const orderMetadata =
+    order?.metadata && typeof order.metadata === 'object' && !Array.isArray(order.metadata)
+      ? (order.metadata as Record<string, unknown>)
+      : {};
+  const hasProjectMilestones =
+    orderMilestones.length > 0 || orderHasProjectMilestones(orderMetadata);
+  const milestoneBalanceDue =
+    hasProjectMilestones &&
+    orderMilestones.some(
+      row => row.trigger_type === 'delivery_approved' && row.status === 'awaiting_payment'
+    );
+
+  const milestoneTimeline = useMemo(() => {
+    if (!hasProjectMilestones || orderMilestones.length === 0) return null;
+    const total = Number(order?.total_amount) || 0;
+    return computeServiceProjectMilestoneAmounts(
+      total,
+      orderMilestones.map(row => ({
+        id: row.id,
+        label: row.label,
+        percentage: Number(row.percentage),
+        trigger: row.trigger_type === 'delivery_approved' ? 'delivery_approved' : 'order_placed',
+      }))
+    );
+  }, [hasProjectMilestones, orderMilestones, order?.total_amount]);
 
   const [selectedPayment, setSelectedPayment] = useState<AdvancedPayment | null>(null);
   const [showReleaseDialog, setShowReleaseDialog] = useState(false);
@@ -129,14 +159,22 @@ export default function PaymentManagement() {
       await releaseOrderSecuredPayment(orderIdFromSyntheticPaymentId(selectedPayment.id));
       await queryClient.invalidateQueries({ queryKey: ['payment-management-orders'] });
       await queryClient.invalidateQueries({ queryKey: ['payment-management-order', orderId] });
+      await queryClient.invalidateQueries({ queryKey: ['service-order-milestones', orderId] });
       await queryClient.invalidateQueries({ queryKey: ['advanced-payments'] });
       return;
+    }
+
+    if (hasProjectMilestones && orderId) {
+      await approveServiceProjectDelivery(orderId);
     }
 
     const result = await releasePayment(selectedPayment.id, releasedBy);
     if (!result.success) {
       throw new Error(result.error || 'Impossible de libérer le paiement');
     }
+
+    await queryClient.invalidateQueries({ queryKey: ['service-order-milestones', orderId] });
+    await queryClient.invalidateQueries({ queryKey: ['payment-management-order', orderId] });
   };
 
   /**
@@ -178,6 +216,9 @@ export default function PaymentManagement() {
     try {
       setIsProcessing(true);
       await releaseSelectedPayment('customer_confirmed');
+
+      await queryClient.invalidateQueries({ queryKey: ['service-order-milestones', orderId] });
+      await queryClient.invalidateQueries({ queryKey: ['payment-management-order', orderId] });
 
       toast({
         title: '✅ Livraison confirmée',
@@ -356,6 +397,57 @@ export default function PaymentManagement() {
             </CardContent>
           </Card>
         </div>
+
+        {hasProjectMilestones && milestoneTimeline && (
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Shield className="h-5 w-5 text-yellow-600" />
+                Jalons de paiement projet
+              </CardTitle>
+              <CardDescription>
+                Paiement sécurisé en plusieurs étapes pour cette commande service
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <ServiceProjectMilestoneTimeline
+                milestones={milestoneTimeline}
+                currency={order?.currency || 'XOF'}
+                milestoneStatuses={orderMilestones.map(row => ({
+                  id: row.id,
+                  sort_order: row.sort_order,
+                  status: row.status,
+                }))}
+              />
+              {Number(order?.remaining_amount) > 0 &&
+                (!hasProjectMilestones || milestoneBalanceDue) && (
+                  <Alert>
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                      <span>
+                        Solde jalon à payer :{' '}
+                        <strong>
+                          {formatCurrency(
+                            Number(order?.remaining_amount),
+                            order?.currency || 'XOF'
+                          )}
+                        </strong>
+                      </span>
+                      {orderId && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => navigate(`/payments/${orderId}/balance`)}
+                        >
+                          Payer le solde
+                        </Button>
+                      )}
+                    </AlertDescription>
+                  </Alert>
+                )}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Tabs for Payment Types */}
         <Tabs defaultValue="secured" className="space-y-6">
@@ -642,7 +734,10 @@ export default function PaymentManagement() {
                                   Il reste {formatCurrency(remainingAmount)} à payer
                                 </AlertDescription>
                               </Alert>
-                              <Button className="w-full mt-3">
+                              <Button
+                                className="w-full mt-3"
+                                onClick={() => orderId && navigate(`/payments/${orderId}/balance`)}
+                              >
                                 <CreditCard className="h-4 w-4 mr-2" />
                                 Payer le solde
                               </Button>
@@ -741,11 +836,29 @@ export default function PaymentManagement() {
                 <Alert className="bg-green-50 dark:bg-green-950 border-green-200">
                   <CheckCircle className="h-4 w-4 text-green-600" />
                   <AlertDescription className="text-green-900 dark:text-green-100">
-                    En confirmant la livraison, le paiement de{' '}
-                    <strong>
-                      {formatCurrency(selectedPayment.held_amount || selectedPayment.amount)}
-                    </strong>{' '}
-                    sera transféré au vendeur.
+                    {hasProjectMilestones ? (
+                      <>
+                        En confirmant la livraison, le jalon de démarrage (
+                        <strong>
+                          {formatCurrency(
+                            selectedPayment.held_amount || selectedPayment.amount,
+                            selectedPayment.currency
+                          )}
+                        </strong>
+                        ) sera libéré au vendeur. Le solde restant devra être payé ensuite.
+                      </>
+                    ) : (
+                      <>
+                        En confirmant la livraison, le paiement de{' '}
+                        <strong>
+                          {formatCurrency(
+                            selectedPayment.held_amount || selectedPayment.amount,
+                            selectedPayment.currency
+                          )}
+                        </strong>{' '}
+                        sera transféré au vendeur.
+                      </>
+                    )}
                   </AlertDescription>
                 </Alert>
 

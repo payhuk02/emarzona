@@ -26,6 +26,12 @@ import {
   useServiceGigExtras,
 } from '@/hooks/service/useServiceDeliveryCommerce';
 import { cn } from '@/lib/utils';
+import { ServiceProjectMilestoneTimeline } from '@/components/service/ServiceProjectMilestoneTimeline';
+import {
+  computeServiceProjectMilestoneAmounts,
+  projectMilestonesEnabled,
+  type ServicePaymentOptionsWithMilestones,
+} from '@/lib/service/service-project-milestones';
 
 interface ServiceProjectOrderPanelProps {
   serviceProductId: string;
@@ -33,6 +39,7 @@ interface ServiceProjectOrderPanelProps {
   currency?: string;
   selectedPackageId?: string | null;
   onPackageSelect?: (packageId: string) => void;
+  paymentOptions?: ServicePaymentOptionsWithMilestones | null;
   onContinue: (payload: {
     packageId: string;
     packageName: string;
@@ -49,6 +56,7 @@ export function ServiceProjectOrderPanel({
   currency = 'XOF',
   selectedPackageId: controlledPackageId,
   onPackageSelect,
+  paymentOptions,
   onContinue,
 }: ServiceProjectOrderPanelProps) {
   const { data: packages = [], isLoading: packagesLoading } =
@@ -93,6 +101,15 @@ export function ServiceProjectOrderPanel({
       deliveryDays: selectedPackage.delivery_days,
     });
   }, [selectedPackage, selectedExtraIds, activeExtras]);
+
+  const milestonePreview = useMemo(() => {
+    if (!projectMilestonesEnabled(paymentOptions, true)) return null;
+    if (!selectedPackage) return null;
+    return computeServiceProjectMilestoneAmounts(
+      quote.totalPrice,
+      paymentOptions?.project_milestones
+    );
+  }, [paymentOptions, quote.totalPrice, selectedPackage]);
 
   const missingRequired = briefFields.filter(
     f => f.required && (briefAnswers[f.id] === undefined || briefAnswers[f.id] === '')
@@ -299,10 +316,19 @@ export function ServiceProjectOrderPanel({
 
       <Card>
         <CardContent className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div>
-            <p className="text-sm text-muted-foreground">Total estimé</p>
-            <p className="text-2xl font-bold">{formatCurrency(quote.totalPrice, currency)}</p>
-            <p className="text-xs text-muted-foreground">Délai : {quote.totalDays} jour(s)</p>
+          <div className="space-y-3 w-full sm:w-auto">
+            <div>
+              <p className="text-sm text-muted-foreground">Total estimé</p>
+              <p className="text-2xl font-bold">{formatCurrency(quote.totalPrice, currency)}</p>
+              <p className="text-xs text-muted-foreground">Délai : {quote.totalDays} jour(s)</p>
+            </div>
+            {milestonePreview && milestonePreview.length > 0 && (
+              <ServiceProjectMilestoneTimeline
+                milestones={milestonePreview}
+                currency={currency}
+                compact
+              />
+            )}
           </div>
           <Button
             className="min-h-[44px]"

@@ -15,6 +15,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { CreditCard, Percent, Shield, Info, CheckCircle, TrendingUp, Lock } from 'lucide-react';
 import { useAnalyticsTracking } from '@/hooks/useProductAnalytics';
+import { ServiceProjectMilestonesForm } from '../service/ServiceProjectMilestonesForm';
+import type { ServiceProjectMilestoneDraft } from '@/lib/service/service-project-milestones';
 
 export type PaymentType = 'full' | 'percentage' | 'delivery_secured';
 
@@ -22,6 +24,8 @@ interface PaymentOptionsData {
   payment_type: PaymentType;
   percentage_rate?: number;
   min_percentage?: number;
+  use_project_milestones?: boolean;
+  project_milestones?: ServiceProjectMilestoneDraft[];
 }
 
 interface PaymentOptionsFormProps {
@@ -280,6 +284,15 @@ export const PaymentOptionsForm: React.FC<PaymentOptionsFormProps> = ({
           </RadioGroup>
         </CardContent>
       </Card>
+
+      {productType === 'service' && data.payment_type === 'delivery_secured' && (
+        <ServiceProjectMilestonesForm
+          enabled={Boolean(data.use_project_milestones)}
+          milestones={data.project_milestones ?? []}
+          productPrice={safePrice}
+          onChange={patch => onUpdate({ ...data, ...patch })}
+        />
+      )}
 
       {/* Recommendations */}
       <Card className="bg-blue-50 dark:bg-blue-950 border-blue-200">

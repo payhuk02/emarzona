@@ -34,6 +34,13 @@ import {
   resolveServicePayableAmount,
   toPartialPaymentOrderFields,
 } from '@/lib/service/service-payable-amount';
+import {
+  amountDueAtProjectCheckout,
+  computeServiceProjectMilestoneAmounts,
+  projectMilestonesEnabled,
+  toMilestoneOrderFields,
+  type ServicePaymentOptionsWithMilestones,
+} from '@/lib/service/service-project-milestones';
 import { useToast } from '@/hooks/use-toast';
 import { getAffiliateTrackingCookie } from '@/hooks/useAffiliateTracking';
 import { logger } from '@/lib/logger';
@@ -255,10 +262,11 @@ export const useCreateServiceOrder = () => {
       }
 
       // Récupérer les options de paiement configurées
-      const paymentOptions = (product.payment_options as {
-        payment_type?: string;
-        percentage_rate?: number;
-      } | null) || { payment_type: 'full', percentage_rate: 30 };
+      const paymentOptions =
+        (product.payment_options as ServicePaymentOptionsWithMilestones | null) || {
+          payment_type: 'full',
+          percentage_rate: 30,
+        };
       const paymentType = paymentOptions.payment_type || 'full';
       const percentageRate = paymentOptions.percentage_rate || 30;
 
@@ -766,7 +774,24 @@ export const useCreateServiceOrder = () => {
         deposit_type: serviceProduct.deposit_type,
         deposit_amount: serviceProduct.deposit_amount,
       });
-      const finalAmountToPay = payable.amountToPay;
+
+      const milestonePlan = projectMilestonesEnabled(paymentOptions, isProjectCheckout)
+        ? computeServiceProjectMilestoneAmounts(billedTotal, paymentOptions.project_milestones)
+        : null;
+
+      let finalPayable = payable;
+      if (milestonePlan && milestonePlan.length > 0) {
+        const dueNow = amountDueAtProjectCheckout(milestonePlan);
+        finalPayable = {
+          paymentType: 'delivery_secured',
+          percentageRate: null,
+          amountToPay: dueNow > 0 ? dueNow : payable.amountToPay,
+          remainingAmount: Math.max(0, billedTotal - dueNow),
+          totalAmount: billedTotal,
+        };
+      }
+
+      const finalAmountToPay = finalPayable.amountToPay;
       const orderId = orderData.order_id;
       const orderNumber = orderData.order_number;
       const customerId = orderData.customer_id;
@@ -808,13 +833,17 @@ export const useCreateServiceOrder = () => {
         });
       });
 
-      const calcTotalPrice = payable.totalAmount;
-      const calcAmountToPay = payable.amountToPay;
-      const calcRemainingAmount = payable.remainingAmount;
+      const calcTotalPrice = finalPayable.totalAmount;
+      const calcAmountToPay = finalPayable.amountToPay;
+      const calcRemainingAmount = finalPayable.remainingAmount;
 
-      const partialPayment = toPartialPaymentOrderFields(payable);
+      const partialPayment = toPartialPaymentOrderFields(finalPayable);
+      const milestoneOrderFields =
+        milestonePlan && milestonePlan.length > 0 ? toMilestoneOrderFields(finalPayable) : null;
       if (partialPayment) {
         await supabase.from('orders').update(partialPayment).eq('id', orderId);
+      } else if (milestoneOrderFields) {
+        await supabase.from('orders').update(milestoneOrderFields).eq('id', orderId);
       }
 
       // 11. Créer un secured_payment si paiement escrow
@@ -828,8 +857,29 @@ export const useCreateServiceOrder = () => {
           release_conditions: {
             requires_service_completion: true,
             auto_release_days: 3,
+            project_milestones: Boolean(milestonePlan?.length),
           },
         });
+      }
+
+      if (milestonePlan && milestonePlan.length > 0) {
+        const { error: milestoneError } = await supabase.rpc(
+          // @ts-expect-error RPC ajouté en migration service_project_payment_milestones
+          'persist_service_order_milestones',
+          {
+            p_order_id: orderId,
+            p_milestones: milestonePlan.map(row => ({
+              label: row.label,
+              percentage: row.percentage,
+              amount: row.amount,
+              trigger: row.trigger,
+              sort_order: row.sort_order,
+            })),
+          }
+        );
+        if (milestoneError) {
+          logger.error('persist_service_order_milestones failed', { error: milestoneError });
+        }
       }
 
       // 12. Initier le paiement GeniusPay (avec amountToPay adapté)
@@ -842,11 +892,13 @@ export const useCreateServiceOrder = () => {
       });
 
       const paymentDescription =
-        payable.paymentType === 'percentage'
-          ? `Acompte ${payable.percentageRate ?? percentageRate}%: ${product.name} - ${formattedBookingDate}`
-          : paymentType === 'delivery_secured'
-            ? `Paiement sécurisé: ${product.name} - ${formattedBookingDate}`
-            : `Réservation: ${product.name} - ${formattedBookingDate}`;
+        finalPayable.paymentType === 'percentage'
+          ? `Acompte ${finalPayable.percentageRate ?? percentageRate}%: ${product.name} - ${formattedBookingDate}`
+          : paymentType === 'delivery_secured' && milestonePlan?.length
+            ? `Jalon 1/${milestonePlan.length} (sécurisé): ${product.name}`
+            : paymentType === 'delivery_secured'
+              ? `Paiement sécurisé: ${product.name} - ${formattedBookingDate}`
+              : `Réservation: ${product.name} - ${formattedBookingDate}`;
 
       const paymentResult = await initiatePayment({
         storeId,

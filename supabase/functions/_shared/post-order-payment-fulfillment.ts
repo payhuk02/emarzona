@@ -172,6 +172,50 @@ async function createOnlineBookingMeeting(bookingId: string): Promise<void> {
   }
 }
 
+async function syncServiceOrderMilestonesAfterPayment(
+  supabase: SupabaseClient,
+  order: Record<string, unknown>,
+  transactionId: string
+): Promise<void> {
+  const orderId = String(order.id ?? '');
+  if (!orderId) return;
+
+  const orderMeta = parseOrderMetadata(order.metadata);
+  const hasMilestones = orderMeta.project_milestones_enabled === true;
+  if (!hasMilestones) return;
+
+  const { data: awaitingDeliveryMilestones } = await supabase
+    .from('service_order_milestones')
+    .select('id')
+    .eq('order_id', orderId)
+    .eq('trigger_type', 'delivery_approved')
+    .eq('status', 'awaiting_payment')
+    .limit(1);
+
+  const isBalanceMilestonePayment = (awaitingDeliveryMilestones?.length ?? 0) > 0;
+
+  try {
+    if (isBalanceMilestonePayment) {
+      const { error } = await supabase.rpc('complete_service_milestone_balance_payment', {
+        p_order_id: orderId,
+      });
+      if (error) {
+        console.error('complete_service_milestone_balance_payment failed', orderId, error);
+      }
+      return;
+    }
+
+    const { error } = await supabase.rpc('activate_service_order_checkout_milestones', {
+      p_order_id: orderId,
+    });
+    if (error) {
+      console.error('activate_service_order_checkout_milestones failed', orderId, error);
+    }
+  } catch (err) {
+    console.error('syncServiceOrderMilestonesAfterPayment exception', orderId, err);
+  }
+}
+
 async function confirmServiceBookings(
   supabase: SupabaseClient,
   order: Record<string, unknown>
@@ -621,18 +665,26 @@ export async function runPostOrderPaymentFulfillment(
   }
 
   const orderMetadata = parseOrderMetadata((order as Record<string, unknown>).metadata);
-  if (orderMetadata.post_payment_fulfillment_at) {
-    console.log(
-      `Post-payment fulfillment already completed for order ${orderId} at ${orderMetadata.post_payment_fulfillment_at}`
-    );
-    return;
-  }
 
   const { data: transaction } = await supabase
     .from('transactions')
     .select('id, amount, currency, payment_provider, customer_id')
     .eq('id', transactionId)
     .single();
+
+  // Jalons service : synchroniser à chaque paiement (checkout initial + solde jalon).
+  await syncServiceOrderMilestonesAfterPayment(
+    supabase,
+    order as Record<string, unknown>,
+    transactionId
+  );
+
+  if (orderMetadata.post_payment_fulfillment_at) {
+    console.log(
+      `Post-payment fulfillment side-effects skipped for order ${orderId} (already at ${orderMetadata.post_payment_fulfillment_at}); milestone sync applied if needed`
+    );
+    return;
+  }
 
   if (transaction) {
     await triggerStoreWebhooks(supabase, order as Record<string, unknown>, transaction);

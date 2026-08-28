@@ -23,6 +23,7 @@ import {
   validateBriefFieldDrafts,
   type ServiceBriefField,
 } from '@/lib/services/service-delivery-commerce';
+import { validateServiceProjectMilestones } from '@/lib/service/service-project-milestones';
 import {
   findServiceWizardStepIndexByValidationStep,
   resolveServiceWizardSteps,
@@ -72,6 +73,8 @@ export type ServiceWizardFormFields = {
   payment?: {
     payment_type?: string;
     percentage_rate?: number;
+    use_project_milestones?: boolean;
+    project_milestones?: import('@/lib/service/service-project-milestones').ServiceProjectMilestoneDraft[];
   };
 };
 
@@ -335,6 +338,15 @@ export function validateServiceWizardStep(
       if (!Number.isFinite(rate) || rate < 10 || rate > 90) {
         errors.push("Le pourcentage d'acompte doit être entre 10 % et 90 %");
       }
+    }
+    if (paymentType === 'delivery_secured' && formData.payment?.use_project_milestones) {
+      errors.push(
+        ...validateServiceProjectMilestones(
+          (formData.payment as { project_milestones?: unknown }).project_milestones as
+            | import('@/lib/service/service-project-milestones').ServiceProjectMilestoneDraft[]
+            | undefined
+        )
+      );
     }
   }
 

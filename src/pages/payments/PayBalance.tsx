@@ -29,9 +29,11 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { safeRedirect } from '@/lib/url-validator';
 import { initiateOrderBalancePayment } from '@/lib/checkout/initiate-balance-payment';
+import { useServiceOrderMilestones } from '@/hooks/service/useServiceOrderMilestones';
+import { orderHasProjectMilestones } from '@/lib/payments/service-order-milestone-flow';
 
 const ORDER_FIELDS =
-  'id, store_id, customer_id, customer_email, order_number, created_at, total_amount, currency, percentage_paid, remaining_amount, payment_status, status';
+  'id, store_id, customer_id, customer_email, order_number, created_at, total_amount, currency, percentage_paid, remaining_amount, payment_status, status, delivery_status, metadata';
 const ORDER_CUSTOMER_FIELDS = 'name, email, phone';
 const ORDER_ITEM_FIELDS = 'id, product_name, quantity, unit_price, total_price';
 
@@ -70,6 +72,22 @@ export default function PayBalance() {
     enabled: !!orderId,
   });
 
+  const { data: orderMilestones = [] } = useServiceOrderMilestones(orderId);
+
+  const orderMetadata =
+    order?.metadata && typeof order.metadata === 'object' && !Array.isArray(order.metadata)
+      ? (order.metadata as Record<string, unknown>)
+      : {};
+  const hasProjectMilestones =
+    orderMilestones.length > 0 || orderHasProjectMilestones(orderMetadata);
+  const milestoneBalanceDue =
+    hasProjectMilestones &&
+    orderMilestones.some(
+      row => row.trigger_type === 'delivery_approved' && row.status === 'awaiting_payment'
+    );
+  const milestoneBalanceBlocked =
+    hasProjectMilestones && !milestoneBalanceDue && (order?.remaining_amount ?? 0) > 0;
+
   // Mutation pour initier le paiement du solde (orchestrateur V2 ou GeniusPay legacy)
   const payBalanceMutation = useMutation({
     mutationFn: async () => {
@@ -79,6 +97,12 @@ export default function PayBalance() {
 
       if (!order.remaining_amount || order.remaining_amount <= 0) {
         throw new Error('Aucun solde à payer');
+      }
+
+      if (milestoneBalanceBlocked) {
+        throw new Error(
+          'Le solde jalon sera disponible après validation de la prestation par le vendeur.'
+        );
       }
 
       // Récupérer les informations nécessaires
@@ -204,14 +228,26 @@ export default function PayBalance() {
           </CardHeader>
 
           <CardContent className="space-y-6">
+            {milestoneBalanceBlocked && (
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  Cette commande utilise des jalons de paiement. Le solde sera exigible une fois la
+                  prestation validée par le vendeur.
+                </AlertDescription>
+              </Alert>
+            )}
+
             {/* Payment Status */}
-            <Alert>
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>
-                Vous avez payé un acompte de {percentageRate}%. Le solde restant doit être payé pour
-                finaliser votre commande.
-              </AlertDescription>
-            </Alert>
+            {!milestoneBalanceBlocked && (
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  Vous avez payé un acompte de {percentageRate}%. Le solde restant doit être payé
+                  pour finaliser votre commande.
+                </AlertDescription>
+              </Alert>
+            )}
 
             {/* Payment Breakdown */}
             <div className="p-6 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950 rounded-lg border border-blue-200 dark:border-blue-800 space-y-4">
@@ -295,7 +331,7 @@ export default function PayBalance() {
               onClick={() => payBalanceMutation.mutate()}
               className="w-full"
               size="lg"
-              disabled={payBalanceMutation.isPending}
+              disabled={payBalanceMutation.isPending || milestoneBalanceBlocked}
             >
               {payBalanceMutation.isPending ? (
                 <>

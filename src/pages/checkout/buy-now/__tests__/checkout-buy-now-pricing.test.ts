@@ -115,4 +115,28 @@ describe('calculateServiceBuyNowPrice', () => {
     expect(breakdown.amountDueNow).toBe(Math.max(1, Math.round((full * 40) / 100)));
     expect(breakdown.isDeposit).toBe(true);
   });
+
+  it('charges only the first milestone for project delivery_secured checkout', () => {
+    const breakdown = buildServiceBuyNowBreakdown({
+      product: {
+        ...serviceProduct,
+        payment_options: {
+          payment_type: 'delivery_secured',
+          use_project_milestones: true,
+          project_milestones: [
+            { label: 'Démarrage', percentage: 50, trigger: 'order_placed' },
+            { label: 'Livraison', percentage: 50, trigger: 'delivery_approved' },
+          ],
+        },
+      },
+      selectedVariant: null,
+      appliedCoupon: null,
+      projectQuotedTotal: 100_000,
+    });
+    const full = applyCheckoutPlatformFee(100_000, 'XOF');
+    expect(breakdown.isProjectMilestones).toBe(true);
+    expect(breakdown.amountDueNow).toBe(Math.round(full / 2));
+    expect(breakdown.milestoneRemaining).toBe(full - breakdown.amountDueNow);
+    expect(breakdown.remainingAmount).toBe(breakdown.milestoneRemaining);
+  });
 });

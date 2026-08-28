@@ -27,6 +27,13 @@ import {
 } from 'lucide-react';
 import { MONEYFUSION_MIN_AMOUNT_XOF } from '@/lib/moneyfusion-client';
 import { computePhysicalGuaranteeBreakdown } from '@/lib/physical/physical-guarantee';
+import { ServiceProjectMilestoneTimeline } from '@/components/service/ServiceProjectMilestoneTimeline';
+import {
+  computeServiceProjectMilestoneAmounts,
+  projectMilestonesEnabled,
+  type ServicePaymentOptionsWithMilestones,
+} from '@/lib/service/service-project-milestones';
+import { useMemo } from 'react';
 
 const PRODUCT_TYPE_LABELS: Record<string, string> = {
   digital: 'Produit digital',
@@ -94,11 +101,26 @@ export default function BuyNowOrderSummary({
         guaranteeAmount,
       })
     : null;
-  const amountDueNow = guaranteeBreakdown?.guaranteeDueNow ?? totalAmount;
+  const amountDueNow =
+    guaranteeBreakdown?.guaranteeDueNow ??
+    (serviceBreakdown ? serviceBreakdown.amountDueNow : totalAmount);
   const belowMoneyFusionMin =
     !isCashOnDelivery &&
     (currency || 'XOF').toUpperCase() === 'XOF' &&
     amountDueNow < MONEYFUSION_MIN_AMOUNT_XOF;
+
+  const projectMilestonePreview = useMemo(() => {
+    if (!serviceBreakdown?.isProjectMilestones || !product?.payment_options) return null;
+    const paymentOptions =
+      typeof product.payment_options === 'object'
+        ? (product.payment_options as ServicePaymentOptionsWithMilestones)
+        : null;
+    if (!projectMilestonesEnabled(paymentOptions, true)) return null;
+    return computeServiceProjectMilestoneAmounts(
+      serviceBreakdown.totalWithFee,
+      paymentOptions?.project_milestones
+    );
+  }, [product?.payment_options, serviceBreakdown]);
 
   return (
     <Card className="lg:sticky lg:top-4 rounded-2xl border-border/50 shadow-none sm:shadow-sm overflow-hidden bg-card">
@@ -236,7 +258,29 @@ export default function BuyNowOrderSummary({
           </span>
         </div>
 
-        {serviceBreakdown?.isDeposit && (
+        {serviceBreakdown?.isProjectMilestones && projectMilestonePreview && (
+          <div className="space-y-2 rounded-xl border border-yellow-500/30 bg-yellow-500/5 px-3 py-2.5">
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">À payer maintenant (jalon 1)</span>
+              <span className="font-semibold tabular-nums">
+                {formatPrice(serviceBreakdown.milestoneDueNow, currency)}
+              </span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Solde après livraison</span>
+              <span className="font-semibold tabular-nums">
+                {formatPrice(serviceBreakdown.milestoneRemaining, currency)}
+              </span>
+            </div>
+            <ServiceProjectMilestoneTimeline
+              milestones={projectMilestonePreview}
+              currency={currency}
+              compact
+            />
+          </div>
+        )}
+
+        {serviceBreakdown?.isDeposit && !serviceBreakdown.isProjectMilestones && (
           <div className="space-y-2 rounded-xl border border-amber-500/30 bg-amber-500/5 px-3 py-2.5 text-sm">
             <div className="flex justify-between">
               <span className="text-muted-foreground">À payer maintenant (acompte)</span>
