@@ -1,20 +1,19 @@
 /**
  * Composant Visualiseur 3D pour Œuvres d'Artistes
  * Date: 1 Février 2025
- * 
+ *
  * Utilise react-three-fiber et drei pour afficher des modèles 3D
  */
 
 import { Suspense, useState, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Environment, Html, useProgress } from '@react-three/drei';
+import { OrbitControls, Html, useProgress } from '@react-three/drei';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { RotateCcw, Maximize, Minimize, Settings, Eye } from 'lucide-react';
+import { RotateCcw, Maximize, Minimize } from 'lucide-react';
 import { useGLTF } from '@react-three/drei';
-import * as THREE from 'three';
 
 interface Artwork3DViewerProps {
   modelUrl: string;
@@ -50,25 +49,24 @@ function Loader() {
 }
 
 // Composant pour charger et afficher le modèle GLTF/GLB
-function Model({ url, type }: { url: string; type: string }) {
-  let  model: any = null;
+function GlbModel({ url }: { url: string }) {
+  const { scene } = useGLTF(url);
+  return <primitive object={scene} />;
+}
 
+function Model({ url, type }: { url: string; type: string }) {
   if (type === 'glb' || type === 'gltf') {
-    model = useGLTF(url);
-  } else {
-    // Pour d'autres formats, on utiliserait des loaders spécifiques
-    // Pour l'instant, on affiche un message
-    return (
-      <Html center>
-        <div className="text-white text-center">
-          <p>Format {type} non supporté pour le moment</p>
-          <p className="text-sm text-gray-400">Utilisez GLB ou GLTF</p>
-        </div>
-      </Html>
-    );
+    return <GlbModel url={url} />;
   }
 
-  return <primitive object={model.scene} />;
+  return (
+    <Html center>
+      <div className="text-white text-center">
+        <p>Format {type} non supporté pour le moment</p>
+        <p className="text-sm text-gray-400">Utilisez GLB ou GLTF</p>
+      </div>
+    </Html>
+  );
 }
 
 export const Artwork3DViewer = ({
@@ -150,10 +148,11 @@ export const Artwork3DViewer = ({
               gl={{ antialias: true, alpha: true }}
             >
               <Suspense fallback={<Loader />}>
-                <ambientLight intensity={0.5} />
-                <directionalLight position={[10, 10, 5]} intensity={1} />
-                <pointLight position={[-10, -10, -5]} intensity={0.5} />
-                
+                <ambientLight intensity={0.65} />
+                <directionalLight position={[10, 10, 5]} intensity={1.2} />
+                <directionalLight position={[-6, 4, -4]} intensity={0.5} color="#ffd4a8" />
+                <pointLight position={[-10, -10, -5]} intensity={0.45} />
+
                 {modelType === 'glb' || modelType === 'gltf' ? (
                   <Model url={modelUrl} type={modelType} />
                 ) : (
@@ -173,8 +172,6 @@ export const Artwork3DViewer = ({
                     target={[cameraTarget.x, cameraTarget.y, cameraTarget.z]}
                   />
                 )}
-
-                <Environment preset="sunset" />
               </Suspense>
             </Canvas>
 
@@ -223,10 +220,3 @@ export const preload3DModel = (url: string) => {
     useGLTF.preload(url);
   }
 };
-
-
-
-
-
-
-
