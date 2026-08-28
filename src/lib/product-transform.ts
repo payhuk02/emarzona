@@ -12,7 +12,10 @@ import {
   ArtistProduct,
   BaseProduct,
 } from '@/types/unified-product';
-import { minActiveDeliveryTierPrice } from '@/lib/service/service-pricing';
+import {
+  minActiveDeliveryTierPrice,
+  summarizeServicePackageListingMetrics,
+} from '@/lib/service/service-pricing';
 
 /**
  * Type pour un produit brut de la base de données (non typé)
@@ -173,6 +176,40 @@ export function transformToUnifiedProduct(product: DatabaseProduct): UnifiedProd
                       }>
                     | undefined
                 ),
+        ...(() => {
+          const metrics = summarizeServicePackageListingMetrics(
+            (nested?.service_packages as
+              | Array<{
+                  package_kind?: string | null;
+                  is_active?: boolean | null;
+                  delivery_days?: number | null;
+                  revisions?: number | null;
+                }>
+              | undefined) ??
+              (product.service_packages as
+                | Array<{
+                    package_kind?: string | null;
+                    is_active?: boolean | null;
+                    delivery_days?: number | null;
+                    revisions?: number | null;
+                  }>
+                | undefined)
+          );
+          return {
+            package_min_delivery_days:
+              product.package_min_delivery_days != null
+                ? Number(product.package_min_delivery_days)
+                : metrics.minDeliveryDays,
+            package_max_delivery_days:
+              product.package_max_delivery_days != null
+                ? Number(product.package_max_delivery_days)
+                : metrics.maxDeliveryDays,
+            package_max_revisions:
+              product.package_max_revisions != null
+                ? Number(product.package_max_revisions)
+                : metrics.maxRevisions,
+          };
+        })(),
       } as ServiceProduct;
     }
 

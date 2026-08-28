@@ -125,6 +125,9 @@ export interface ServiceProduct extends BaseProduct {
   pricing_type?: 'fixed' | 'hourly' | 'per_hour' | 'per_participant';
   fulfillment_mode?: 'appointment' | 'project' | 'both';
   package_starting_price?: number | null;
+  package_min_delivery_days?: number | null;
+  package_max_delivery_days?: number | null;
+  package_max_revisions?: number | null;
 }
 
 /**

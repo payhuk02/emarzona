@@ -92,6 +92,7 @@ import {
   ServiceDepositBadge,
   ServiceCancellationBadge,
   ServiceMaxParticipantsBadge,
+  ServiceGigPackageMetricsBadge,
 } from '@/components/products/ServicePricingBadges';
 import {
   CourseDifficultyBadge,
@@ -821,6 +822,13 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
                 categorySlug={product.category}
                 attributes={product.category_attributes}
               />
+              <ServiceGigPackageMetricsBadge
+                fulfillmentMode={product.fulfillment_mode}
+                minDeliveryDays={product.package_min_delivery_days}
+                maxDeliveryDays={product.package_max_delivery_days}
+                maxRevisions={product.package_max_revisions}
+                size="sm"
+              />
             </>
           )}
 
@@ -964,6 +972,13 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
             />
             <ServiceMaxParticipantsBadge
               maxParticipants={(product as any).max_participants}
+              size="sm"
+            />
+            <ServiceGigPackageMetricsBadge
+              fulfillmentMode={product.fulfillment_mode}
+              minDeliveryDays={product.package_min_delivery_days}
+              maxDeliveryDays={product.package_max_delivery_days}
+              maxRevisions={product.package_max_revisions}
               size="sm"
             />
           </div>

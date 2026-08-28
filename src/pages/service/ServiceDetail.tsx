@@ -85,6 +85,7 @@ import { JoinWaitlistButton } from '@/components/service/JoinWaitlistButton';
 import { ServiceProjectOrderPanel } from '@/components/service/ServiceProjectOrderPanel';
 import { ServicePriceDisplay } from '@/components/service/ServicePriceDisplay';
 import { ServicePrestationsCatalog } from '@/components/service/ServicePrestationsCatalog';
+import { ServicePortfolioGallery } from '@/components/service/ServicePortfolioGallery';
 import { ServicePricingBadges } from '@/components/products/ServicePricingBadges';
 import {
   useServiceDeliveryPackages,
@@ -912,6 +913,8 @@ export default function ServiceDetail() {
             selectedPackageId={selectedPackageId}
             onSelectPackage={handleSelectPackage}
           />
+
+          {showProject && images.length >= 2 && <ServicePortfolioGallery images={images} />}
 
           {(() => {
             const crumb = getCategoryBreadcrumb(

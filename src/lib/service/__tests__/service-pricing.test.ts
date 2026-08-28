@@ -1,12 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import {
   chargedServiceAmount,
+  formatServiceDeliveryRange,
   getServicePricingGuidance,
   normalizeServicePricingType,
   resolveServiceAppointmentCharge,
   resolveServiceAppointmentUnitPrice,
   resolveServiceDisplayPrice,
   resolveServiceListingAmount,
+  summarizeServicePackageListingMetrics,
   toPersistedPricingType,
   usesStartingFromPrice,
 } from '../service-pricing';
@@ -193,5 +195,39 @@ describe('getServicePricingGuidance', () => {
   it('returns a safe default for unknown families', () => {
     expect(getServicePricingGuidance(null).pricingType).toBe('fixed');
     expect(getServicePricingGuidance('unknown').showStartingFrom).toBe(false);
+  });
+});
+
+describe('summarizeServicePackageListingMetrics', () => {
+  it('aggregates delivery days and max revisions from active tiers', () => {
+    const metrics = summarizeServicePackageListingMetrics([
+      {
+        package_kind: 'delivery_tier',
+        is_active: true,
+        delivery_days: 7,
+        revisions: 2,
+      },
+      {
+        package_kind: 'delivery_tier',
+        is_active: true,
+        delivery_days: 3,
+        revisions: 5,
+      },
+      { package_kind: 'delivery_tier', is_active: false, delivery_days: 1, revisions: 99 },
+    ]);
+    expect(metrics).toEqual({
+      minDeliveryDays: 3,
+      maxDeliveryDays: 7,
+      maxRevisions: 5,
+      activePackageCount: 2,
+    });
+  });
+});
+
+describe('formatServiceDeliveryRange', () => {
+  it('formats single and ranged delivery labels', () => {
+    expect(formatServiceDeliveryRange(5, 5)).toBe('5 j');
+    expect(formatServiceDeliveryRange(3, 7)).toBe('3–7 j');
+    expect(formatServiceDeliveryRange(null, null)).toBeNull();
   });
 });

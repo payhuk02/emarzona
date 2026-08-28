@@ -11,9 +11,20 @@
 
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
-import { DollarSign, Clock, Users, CreditCard, XCircle, CheckCircle } from 'lucide-react';
+import {
+  DollarSign,
+  Clock,
+  Users,
+  CreditCard,
+  XCircle,
+  CheckCircle,
+  RefreshCw,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { normalizeServicePricingType } from '@/lib/service/service-pricing';
+import {
+  formatServiceDeliveryRange,
+  normalizeServicePricingType,
+} from '@/lib/service/service-pricing';
 
 interface ServicePricingBadgesProps {
   pricingType?: string | null;
@@ -248,6 +259,79 @@ export function ServiceMaxParticipantsBadge({
       <span className="hidden sm:inline">Jusqu'à {maxParticipants} pers.</span>
       <span className="sm:hidden">{maxParticipants} pers.</span>
     </Badge>
+  );
+}
+
+/**
+ * Badge délai / révisions pour les offres projet (marketplace cards)
+ */
+export function ServiceGigPackageMetricsBadge({
+  fulfillmentMode,
+  minDeliveryDays,
+  maxDeliveryDays,
+  maxRevisions,
+  size = 'sm',
+  className,
+}: {
+  fulfillmentMode?: string | null;
+  minDeliveryDays?: number | null;
+  maxDeliveryDays?: number | null;
+  maxRevisions?: number | null;
+  size?: 'sm' | 'md';
+  className?: string;
+}) {
+  if (fulfillmentMode !== 'project' && fulfillmentMode !== 'both') {
+    return null;
+  }
+
+  const deliveryLabel = formatServiceDeliveryRange(
+    minDeliveryDays ?? null,
+    maxDeliveryDays ?? null
+  );
+  const sizeClasses = {
+    sm: 'text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5',
+    md: 'text-xs sm:text-sm px-2 sm:px-3 py-1',
+  };
+  const iconSizes = {
+    sm: 'h-2.5 w-2.5 sm:h-3 sm:w-3',
+    md: 'h-3 w-3 sm:h-4 sm:w-4',
+  };
+
+  if (!deliveryLabel && (maxRevisions == null || maxRevisions < 0)) {
+    return null;
+  }
+
+  return (
+    <>
+      {deliveryLabel && (
+        <Badge
+          variant="outline"
+          className={cn(
+            'border-violet-500 text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-900/20',
+            sizeClasses[size],
+            className
+          )}
+          title="Délai de livraison indicatif"
+        >
+          <Clock className={cn(iconSizes[size], 'mr-0.5 sm:mr-1')} />
+          {deliveryLabel}
+        </Badge>
+      )}
+      {maxRevisions != null && maxRevisions >= 0 && (
+        <Badge
+          variant="outline"
+          className={cn(
+            'border-teal-500 text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-900/20',
+            sizeClasses[size],
+            className
+          )}
+          title="Révisions incluses (max. sur les formules)"
+        >
+          <RefreshCw className={cn(iconSizes[size], 'mr-0.5 sm:mr-1')} />
+          {maxRevisions} rév. max
+        </Badge>
+      )}
+    </>
   );
 }
 

@@ -48,6 +48,7 @@ import { cacheStrategies } from '@/lib/cache-optimization';
 import {
   minActiveDeliveryTierPrice,
   resolveServiceListingAmount,
+  summarizeServicePackageListingMetrics,
 } from '@/lib/service/service-pricing';
 import {
   cacheMarketplaceProducts,
@@ -312,7 +313,7 @@ export async function fetchMarketplaceProducts({
   }
 
   if (filters.productType === 'service' || filters.productType === 'all') {
-    selectQuery += `,service_products!left(service_type,location_type,calendar_available,pricing_type,fulfillment_mode,duration_minutes,requires_staff,service_packages(price,package_price,package_kind,is_active))`;
+    selectQuery += `,service_products!left(service_type,location_type,calendar_available,pricing_type,fulfillment_mode,duration_minutes,requires_staff,service_packages(price,package_price,package_kind,is_active,delivery_days,revisions))`;
   }
 
   if (filters.productType === 'course' && (filters.difficulty || filters.accessType)) {
@@ -567,10 +568,13 @@ export async function fetchMarketplaceProducts({
           package_price?: number | null;
           package_kind?: string | null;
           is_active?: boolean | null;
+          delivery_days?: number | null;
+          revisions?: number | null;
         }>;
       }>;
     };
     const serviceRow = row.service_products?.[0];
+    const packageMetrics = summarizeServicePackageListingMetrics(serviceRow?.service_packages);
     const mapped = mapStockToProductFields(row as Record<string, unknown>);
     if (!serviceRow) return mapped;
     return {
@@ -581,6 +585,9 @@ export async function fetchMarketplaceProducts({
       calendar_available: serviceRow.calendar_available,
       staff_required: serviceRow.requires_staff,
       package_starting_price: minActiveDeliveryTierPrice(serviceRow.service_packages),
+      package_min_delivery_days: packageMetrics.minDeliveryDays,
+      package_max_delivery_days: packageMetrics.maxDeliveryDays,
+      package_max_revisions: packageMetrics.maxRevisions,
     };
   });
 

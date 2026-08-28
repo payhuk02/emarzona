@@ -285,3 +285,49 @@ export function minActiveDeliveryTierPrice(
     .filter(value => Number.isFinite(value) && value > 0);
   return prices.length > 0 ? Math.min(...prices) : null;
 }
+
+export type ServicePackageListingMetrics = {
+  minDeliveryDays: number | null;
+  maxDeliveryDays: number | null;
+  maxRevisions: number | null;
+  activePackageCount: number;
+};
+
+/** Aggregates delivery/revision metrics from active gig packages for listing cards. */
+export function summarizeServicePackageListingMetrics(
+  packages?: Array<{
+    package_kind?: string | null;
+    is_active?: boolean | null;
+    delivery_days?: number | null;
+    revisions?: number | null;
+  }> | null
+): ServicePackageListingMetrics {
+  const active = (packages ?? []).filter(
+    pkg => pkg.package_kind === 'delivery_tier' && pkg.is_active !== false
+  );
+  const deliveryDays = active
+    .map(pkg => Number(pkg.delivery_days))
+    .filter(days => Number.isFinite(days) && days > 0);
+  const revisions = active
+    .map(pkg => Number(pkg.revisions))
+    .filter(count => Number.isFinite(count) && count >= 0);
+
+  return {
+    minDeliveryDays: deliveryDays.length > 0 ? Math.min(...deliveryDays) : null,
+    maxDeliveryDays: deliveryDays.length > 0 ? Math.max(...deliveryDays) : null,
+    maxRevisions: revisions.length > 0 ? Math.max(...revisions) : null,
+    activePackageCount: active.length,
+  };
+}
+
+export function formatServiceDeliveryRange(
+  minDays: number | null,
+  maxDays: number | null
+): string | null {
+  if (minDays == null && maxDays == null) return null;
+  if (minDays != null && maxDays != null && minDays !== maxDays) {
+    return `${minDays}–${maxDays} j`;
+  }
+  const days = minDays ?? maxDays;
+  return days != null ? `${days} j` : null;
+}

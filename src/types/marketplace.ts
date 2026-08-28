@@ -40,6 +40,9 @@ export interface Product {
   calendar_available?: boolean | null;
   staff_required?: boolean | null;
   package_starting_price?: number | null;
+  package_min_delivery_days?: number | null;
+  package_max_delivery_days?: number | null;
+  package_max_revisions?: number | null;
   stores?: {
     id: string;
     name: string;
