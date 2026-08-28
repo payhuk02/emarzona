@@ -31,6 +31,8 @@ interface ServiceProjectOrderPanelProps {
   serviceProductId: string;
   productId: string;
   currency?: string;
+  selectedPackageId?: string | null;
+  onPackageSelect?: (packageId: string) => void;
   onContinue: (payload: {
     packageId: string;
     packageName: string;
@@ -45,6 +47,8 @@ export function ServiceProjectOrderPanel({
   serviceProductId,
   productId: _productId,
   currency = 'XOF',
+  selectedPackageId: controlledPackageId,
+  onPackageSelect,
   onContinue,
 }: ServiceProjectOrderPanelProps) {
   const { data: packages = [], isLoading: packagesLoading } =
@@ -55,9 +59,19 @@ export function ServiceProjectOrderPanel({
   const activePackages = packages.filter(p => p.is_active);
   const activeExtras = extras.filter(e => e.is_active);
 
-  const [selectedPackageId, setSelectedPackageId] = useState<string | null>(null);
+  const [internalPackageId, setInternalPackageId] = useState<string | null>(null);
   const [selectedExtraIds, setSelectedExtraIds] = useState<string[]>([]);
   const [briefAnswers, setBriefAnswers] = useState<Record<string, string | boolean>>({});
+
+  const isControlled = controlledPackageId !== undefined;
+  const selectedPackageId = isControlled ? controlledPackageId : internalPackageId;
+
+  const handlePackageSelect = (packageId: string) => {
+    if (!isControlled) {
+      setInternalPackageId(packageId);
+    }
+    onPackageSelect?.(packageId);
+  };
 
   const selectedPackage =
     activePackages.find(p => p.id === selectedPackageId) ||
@@ -134,7 +148,7 @@ export function ServiceProjectOrderPanel({
             <button
               key={pkg.id}
               type="button"
-              onClick={() => setSelectedPackageId(pkg.id)}
+              onClick={() => handlePackageSelect(pkg.id)}
               className={cn(
                 'text-left rounded-xl border p-4 transition-colors min-h-[44px]',
                 selected ? 'border-primary ring-2 ring-primary/20' : 'hover:border-primary/40'

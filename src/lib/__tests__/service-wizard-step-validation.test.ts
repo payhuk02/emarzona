@@ -6,6 +6,7 @@ import {
   validateServiceWizardPublishSteps,
   validateServiceWizardStep,
 } from '@/lib/service-wizard-step-validation';
+import { resolveServiceWizardSteps } from '@/lib/service/service-wizard-steps';
 
 describe('validateServiceWizardStep', () => {
   const baseForm = {
@@ -316,6 +317,37 @@ describe('validateServiceWizardStep', () => {
     });
     expect(result.valid).toBe(false);
     expect(result.failedStep).toBe(5);
+  });
+});
+
+describe('resolveServiceWizardSteps', () => {
+  it('hides staff step for locked gig families', () => {
+    const steps = resolveServiceWizardSteps({
+      category: 'svc-developpement-web',
+      fulfillment_mode: 'project',
+    });
+    expect(steps.some(step => step.key === 'staff')).toBe(false);
+    expect(steps.find(step => step.key === 'pricing')?.title).toMatch(/formules/i);
+  });
+
+  it('uses appointment labels for RDV mode', () => {
+    const steps = resolveServiceWizardSteps({
+      category: 'svc-coiffure',
+      fulfillment_mode: 'appointment',
+    });
+    expect(steps.find(step => step.key === 'scheduling')?.title).toMatch(/disponibilité/i);
+    expect(steps.find(step => step.key === 'pricing')?.title).toMatch(/réservation/i);
+    expect(steps.some(step => step.key === 'staff')).toBe(true);
+  });
+
+  it('uses hybrid labels in both mode', () => {
+    const steps = resolveServiceWizardSteps({
+      category: 'svc-support-technique',
+      fulfillment_mode: 'both',
+    });
+    expect(steps.find(step => step.key === 'scheduling')?.title).toMatch(/créneaux/i);
+    expect(steps.find(step => step.key === 'pricing')?.title).toMatch(/formules/i);
+    expect(steps.some(step => step.key === 'staff')).toBe(true);
   });
 });
 

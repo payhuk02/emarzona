@@ -92,7 +92,6 @@ export function PremiumPlatformHero() {
             alt={leftBackgroundAlt}
             variant="left"
           />
-          <div className="lp-platform-hero__left-bg-overlay absolute inset-0" aria-hidden />
         </div>
       ) : null}
 
@@ -142,18 +141,6 @@ export function PremiumPlatformHero() {
               ))}
             </motion.ul>
           </div>
-
-          <motion.div
-            custom={3}
-            initial="hidden"
-            animate="visible"
-            variants={fadeUpVariants}
-            className="lp-platform-hero__cta relative z-10 mt-auto hidden justify-center pb-6 pt-10 sm:pb-8 sm:pt-12 lg:flex lg:justify-start lg:pb-10 lg:pt-14"
-          >
-            <StoreCreateCtaLink className="lp-platform-hero__cta-btn inline-flex rounded-full px-6 py-3 text-sm font-semibold sm:px-7 sm:py-3.5">
-              {ctaLabel}
-            </StoreCreateCtaLink>
-          </motion.div>
         </div>
 
         <motion.div custom={4} initial="hidden" animate="visible" variants={fadeUpVariants}>

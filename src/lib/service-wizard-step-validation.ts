@@ -23,6 +23,12 @@ import {
   validateBriefFieldDrafts,
   type ServiceBriefField,
 } from '@/lib/services/service-delivery-commerce';
+import {
+  findServiceWizardStepIndexByValidationStep,
+  resolveServiceWizardSteps,
+  SERVICE_WIZARD_VALIDATION_STEP_BY_KEY,
+  type ServiceWizardStepKey,
+} from '@/lib/service/service-wizard-steps';
 
 export type ServiceWizardFormFields = {
   name?: string;
@@ -338,14 +344,41 @@ export function validateServiceWizardStep(
   };
 }
 
+export function validateServiceWizardStepByKey(
+  stepKey: Exclude<ServiceWizardStepKey, 'preview'>,
+  formData: ServiceWizardFormFields,
+  options?: ServiceWizardValidationOptions
+): ServiceWizardStepValidationResult {
+  return validateServiceWizardStep(
+    SERVICE_WIZARD_VALIDATION_STEP_BY_KEY[stepKey],
+    formData,
+    options
+  );
+}
+
 export function validateServiceWizardPublishSteps(
   formData: ServiceWizardFormFields,
   options?: ServiceWizardValidationOptions
-): ServiceWizardStepValidationResult & { failedStep?: number } {
-  for (const step of [1, 2, 3, 4, 5, 6, 7] as const) {
-    const result = validateServiceWizardStep(step, formData, options);
+): ServiceWizardStepValidationResult & {
+  failedStep?: number;
+  failedStepKey?: Exclude<ServiceWizardStepKey, 'preview'>;
+  failedStepIndex?: number;
+} {
+  const visibleSteps = resolveServiceWizardSteps(formData, options?.categoryTree);
+
+  for (const step of visibleSteps) {
+    if (!step.validationStep) continue;
+    const result = validateServiceWizardStep(step.validationStep, formData, options);
     if (!result.valid) {
-      return { ...result, failedStep: step };
+      return {
+        ...result,
+        failedStep: step.validationStep,
+        failedStepKey: step.key as Exclude<ServiceWizardStepKey, 'preview'>,
+        failedStepIndex: findServiceWizardStepIndexByValidationStep(
+          visibleSteps,
+          step.validationStep
+        ),
+      };
     }
   }
   return { valid: true, errors: [] };

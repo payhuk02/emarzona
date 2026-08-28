@@ -41,7 +41,7 @@ import {
   TrendingUp,
   ChevronRight,
 } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { ServiceCalendar } from '@/components/service/ServiceCalendar';
 import { ServiceCalendarEnhanced } from '@/components/service/ServiceCalendarEnhanced';
@@ -151,6 +151,7 @@ export default function ServiceDetail() {
   const [selectedStaffId, setSelectedStaffId] = useState<string | null>(null);
   const [guestEmailDraft, setGuestEmailDraft] = useState(guestEmail || '');
   const [guestNameDraft, setGuestNameDraft] = useState(guestName || '');
+  const [selectedPackageId, setSelectedPackageId] = useState<string | null>(null);
 
   // Hooks de validation
   const { mutateAsync: validateBooking } = useValidateServiceBooking();
@@ -234,6 +235,22 @@ export default function ServiceDetail() {
   const { data: deliveryPackages = [], isLoading: packagesLoading } =
     useServiceDeliveryPackages(serviceProductId);
   const { data: gigExtras = [], isLoading: extrasLoading } = useServiceGigExtras(serviceProductId);
+
+  useEffect(() => {
+    const active = deliveryPackages.filter(pkg => pkg.is_active);
+    if (active.length === 0) return;
+    setSelectedPackageId(prev => {
+      if (prev && active.some(pkg => pkg.id === prev)) return prev;
+      return active.find(pkg => pkg.is_featured)?.id ?? active[0]?.id ?? null;
+    });
+  }, [deliveryPackages]);
+
+  const handleSelectPackage = useCallback((packageId: string) => {
+    setSelectedPackageId(packageId);
+    document
+      .getElementById('service-booking')
+      ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, []);
 
   useEffect(() => {
     const required = serviceAddons.filter(a => a.is_required).map(a => a.addon_product_id);
@@ -892,6 +909,8 @@ export default function ServiceDetail() {
             extras={gigExtras}
             currency={service?.currency || 'XOF'}
             isLoading={packagesLoading || extrasLoading}
+            selectedPackageId={selectedPackageId}
+            onSelectPackage={handleSelectPackage}
           />
 
           {(() => {
@@ -1024,7 +1043,10 @@ export default function ServiceDetail() {
         </div>
 
         {/* Right: Booking / Project order */}
-        <div id="service-booking" className="space-y-4 min-w-0 scroll-mt-4">
+        <div
+          id="service-booking"
+          className={`space-y-4 min-w-0 scroll-mt-4${showProject ? ' lg:sticky lg:top-4 self-start' : ''}`}
+        >
           {(() => {
             if (showProject && !showAppointment) {
               return (
@@ -1032,6 +1054,8 @@ export default function ServiceDetail() {
                   serviceProductId={serviceProductId!}
                   productId={serviceId!}
                   currency={service?.currency || 'XOF'}
+                  selectedPackageId={selectedPackageId}
+                  onPackageSelect={handleSelectPackage}
                   onContinue={payload => {
                     sessionStorage.setItem(
                       `service-project-order:${serviceId}`,
@@ -1063,6 +1087,8 @@ export default function ServiceDetail() {
                       serviceProductId={serviceProductId!}
                       productId={serviceId!}
                       currency={service?.currency || 'XOF'}
+                      selectedPackageId={selectedPackageId}
+                      onPackageSelect={handleSelectPackage}
                       onContinue={payload => {
                         sessionStorage.setItem(
                           `service-project-order:${serviceId}`,

@@ -79,7 +79,6 @@
 
 .landing-premium .lp-platform-hero__left-bg .lp-platform-hero__left-photo,
 .landing-premium .lp-platform-hero__left-bg picture {
-  mask-image: linear-gradient(90deg, black 0%, black 52%, transparent 100%);
 }
 
 .landing-premium .lp-platform-hero__left-bg-overlay {
@@ -110,7 +109,6 @@
 
   .landing-premium .lp-platform-hero__left-bg .lp-platform-hero__left-photo,
   .landing-premium .lp-platform-hero__left-bg picture {
-    mask-image: linear-gradient(180deg, transparent 0%, black 18%, black 62%, transparent 100%);
   }
 
   .landing-premium .lp-platform-hero__left-bg-overlay {
@@ -131,8 +129,6 @@
 
 .landing-premium .lp-platform-hero--premium .lp-platform-hero__visual {
   background: transparent;
-  mask-image: radial-gradient(ellipse at 65% 50%, black 40%, transparent 75%);
-  -webkit-mask-image: radial-gradient(ellipse at 65% 50%, black 40%, transparent 75%);
 }
 
 .landing-premium

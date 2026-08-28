@@ -17,13 +17,6 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Calendar,
-  Info,
-  Clock,
-  Users,
-  DollarSign,
-  Share2,
-  Search,
-  Eye,
   ArrowLeft,
   ChevronLeft,
   ChevronRight,
@@ -31,7 +24,6 @@ import {
   AlertCircle,
   CheckCircle2,
   Check,
-  CreditCard,
   Sparkles,
   Loader2,
   Keyboard,
@@ -67,7 +59,13 @@ import {
   serviceWizardShowsCalendar,
   validateServiceWizardPublishSteps,
   validateServiceWizardStep,
+  validateServiceWizardStepByKey,
 } from '@/lib/service-wizard-step-validation';
+import {
+  resolveServiceWizardSteps,
+  serviceWizardSubtitle,
+  type ServiceWizardStepKey,
+} from '@/lib/service/service-wizard-steps';
 import { persistServiceCategoryAttributes } from '@/lib/service/persist-service-category-attributes';
 import { persistWizardGigPackages } from '@/lib/services/persist-wizard-gig-packages';
 import { toPersistedPricingType } from '@/lib/service/service-pricing';
@@ -114,64 +112,16 @@ interface PaymentData {
   [key: string]: unknown;
 }
 
-const STEPS = [
-  {
-    id: 1,
-    title: 'Informations de base',
-    description: 'Nom, description, type de service',
-    icon: Info,
-    component: LazyServiceBasicInfoForm,
-  },
-  {
-    id: 2,
-    title: 'Durée & Disponibilité',
-    description: 'Horaires, créneaux, localisation',
-    icon: Clock,
-    component: LazyServiceDurationAvailabilityForm,
-  },
-  {
-    id: 3,
-    title: 'Personnel & Ressources',
-    description: 'Staff, capacité, équipement',
-    icon: Users,
-    component: LazyServiceStaffResourcesForm,
-  },
-  {
-    id: 4,
-    title: 'Tarification & Options',
-    description: 'Prix, acompte, réservations',
-    icon: DollarSign,
-    component: LazyServicePricingOptionsForm,
-  },
-  {
-    id: 5,
-    title: 'Affiliation',
-    description: 'Commission, affiliés (optionnel)',
-    icon: Share2,
-    component: LazyServiceAffiliateSettings,
-  },
-  {
-    id: 6,
-    title: 'SEO & FAQs',
-    description: 'Référencement, questions',
-    icon: Search,
-    component: LazyServiceSEOAndFAQs,
-  },
-  {
-    id: 7,
-    title: 'Options de Paiement',
-    description: 'Complet, partiel, escrow',
-    icon: CreditCard,
-    component: LazyPaymentOptionsForm,
-  },
-  {
-    id: 8,
-    title: 'Aperçu & Validation',
-    description: 'Vérifier et publier',
-    icon: Eye,
-    component: LazyServicePreview,
-  },
-];
+const STEP_COMPONENTS = {
+  basic: LazyServiceBasicInfoForm,
+  scheduling: LazyServiceDurationAvailabilityForm,
+  staff: LazyServiceStaffResourcesForm,
+  pricing: LazyServicePricingOptionsForm,
+  affiliation: LazyServiceAffiliateSettings,
+  seo: LazyServiceSEOAndFAQs,
+  payment: LazyPaymentOptionsForm,
+  preview: LazyServicePreview,
+} as const;
 
 interface CreateServiceWizardProps {
   storeId?: string;
@@ -309,6 +259,25 @@ export const CreateServiceWizard = ({
   const [validationErrors, setValidationErrors] = useState<Record<number, string[]>>({});
   const [isSaving, setIsSaving] = useState(false);
 
+  const visibleSteps = useMemo(
+    () => resolveServiceWizardSteps(formData, categoryTree),
+    [
+      formData.fulfillment_mode,
+      formData.category_id,
+      formData.parent_category_id,
+      formData.category,
+      formData.requires_staff,
+      categoryTree,
+    ]
+  );
+
+  const currentStepDef = visibleSteps[currentStep - 1];
+  const currentStepKey: ServiceWizardStepKey = currentStepDef?.key ?? 'basic';
+
+  useEffect(() => {
+    setCurrentStep(prev => Math.min(prev, visibleSteps.length));
+  }, [visibleSteps.length]);
+
   /**
    * Update form data with auto-save
    */
@@ -434,102 +403,90 @@ export const CreateServiceWizard = ({
    * Validate current step avec validation améliorée (client + serveur)
    */
   const validateStep = useCallback(
-    async (step: number): Promise<boolean> => {
+    async (stepIndex: number): Promise<boolean> => {
       const errors: string[] = [];
+      const stepDef = visibleSteps[stepIndex - 1];
+      if (!stepDef?.validationStep) {
+        return true;
+      }
 
-      // Réinitialiser les erreurs serveur
       clearServerErrors();
 
-      switch (step) {
-        case 1: {
-          const shared = validateServiceWizardStep(1, formData, { categoryTree });
-          errors.push(...shared.errors);
+      if (stepDef.key === 'basic') {
+        const shared = validateServiceWizardStep(1, formData, { categoryTree });
+        errors.push(...shared.errors);
 
-          if (formData.meeting_url) {
-            const urlResult = formatValidators.url(formData.meeting_url);
-            if (!urlResult.valid) {
-              const urlFormatError = getFieldError(urlResult.errors, 'url');
-              if (urlFormatError) errors.push(urlFormatError);
-            }
+        if (formData.meeting_url) {
+          const urlResult = formatValidators.url(formData.meeting_url);
+          if (!urlResult.valid) {
+            const urlFormatError = getFieldError(urlResult.errors, 'url');
+            if (urlFormatError) errors.push(urlFormatError);
           }
+        }
 
-          if (errors.length > 0) {
-            setValidationErrors(prev => ({ ...prev, [step]: errors }));
+        if (errors.length > 0) {
+          setValidationErrors(prev => ({ ...prev, [stepIndex]: errors }));
+          return false;
+        }
+
+        if (storeId) {
+          const effectiveDuration = formData.duration_minutes ?? formData.duration ?? 60;
+          const serverResult = await validateServiceServer({
+            name: formData.name,
+            slug: formData.slug,
+            price: Number(formData.promotional_price || formData.price || 0),
+            duration: effectiveDuration,
+            maxParticipants: formData.max_participants,
+            meetingUrl: formData.meeting_url,
+          });
+
+          if (!serverResult.valid) {
+            if (serverResult.errors) {
+              serverResult.errors.forEach(err => {
+                errors.push(err.message);
+              });
+            }
+            logger.warn('Validation serveur échouée - Étape 1', { errors: serverResult.errors });
+            setValidationErrors(prev => ({ ...prev, [stepIndex]: errors }));
             return false;
           }
 
-          if (storeId) {
-            const effectiveDuration = formData.duration_minutes ?? formData.duration ?? 60;
-            const serverResult = await validateServiceServer({
-              name: formData.name,
-              slug: formData.slug,
-              price: Number(formData.promotional_price || formData.price || 0),
-              duration: effectiveDuration,
-              maxParticipants: formData.max_participants,
-              meetingUrl: formData.meeting_url,
-            });
-
-            if (!serverResult.valid) {
-              // Les erreurs sont déjà affichées dans le hook via toast
-              // Mais on les ajoute aussi aux erreurs de validation
-              if (serverResult.errors) {
-                serverResult.errors.forEach(err => {
-                  errors.push(err.message);
-                });
-              }
-              logger.warn('Validation serveur échouée - Étape 1', { errors: serverResult.errors });
-              setValidationErrors(prev => ({ ...prev, [step]: errors }));
+          if (formData.slug) {
+            const slugValid = await validateSlug(formData.slug);
+            if (!slugValid) {
+              errors.push(serverErrors.slug || 'Slug invalide');
+              setValidationErrors(prev => ({ ...prev, [stepIndex]: errors }));
               return false;
             }
-
-            // Validation slug spécifique si fourni
-            if (formData.slug) {
-              const slugValid = await validateSlug(formData.slug);
-              if (!slugValid) {
-                errors.push(serverErrors.slug || 'Slug invalide');
-                setValidationErrors(prev => ({ ...prev, [step]: errors }));
-                return false;
-              }
-            }
           }
-
-          break;
         }
-        case 2: {
-          const shared = validateServiceWizardStep(2, formData, { categoryTree });
-          errors.push(...shared.errors);
-          break;
-        }
-
-        case 3:
-        case 4:
-        case 5:
-        case 6:
-        case 7: {
-          const shared = validateServiceWizardStep(step, formData, { categoryTree });
-          errors.push(...shared.errors);
-          break;
-        }
+      } else {
+        const shared = validateServiceWizardStepByKey(
+          stepDef.key as Exclude<ServiceWizardStepKey, 'preview'>,
+          formData,
+          { categoryTree }
+        );
+        errors.push(...shared.errors);
       }
 
-      setValidationErrors(prev => ({ ...prev, [step]: errors }));
+      setValidationErrors(prev => ({ ...prev, [stepIndex]: errors }));
       const isValid = errors.length === 0;
 
       if (!isValid) {
-        logger.warn('Validation échouée', { step, errors });
+        logger.warn('Validation échouée', { step: stepIndex, stepKey: stepDef.key, errors });
       }
 
       return isValid;
     },
     [
       formData,
-      t,
       storeId,
       validateServiceServer,
       validateSlug,
       serverErrors,
       clearServerErrors,
       categoryTree,
+      visibleSteps,
     ]
   );
 
@@ -990,8 +947,8 @@ export const CreateServiceWizard = ({
   const handlePublish = useCallback(async () => {
     const publishValidation = validateServiceWizardPublishSteps(formData, { categoryTree });
     if (!publishValidation.valid) {
-      if (publishValidation.failedStep) {
-        setCurrentStep(publishValidation.failedStep);
+      if (publishValidation.failedStepIndex) {
+        setCurrentStep(publishValidation.failedStepIndex);
       }
       toast({
         title:
@@ -1156,8 +1113,8 @@ export const CreateServiceWizard = ({
       onUpdate: handleUpdateFormData,
     };
 
-    switch (currentStep) {
-      case 5: // Affiliation
+    switch (currentStepKey) {
+      case 'affiliation':
         return {
           productPrice: formData.price || 0,
           productName: formData.name || t('services.service', 'Service'),
@@ -1166,7 +1123,7 @@ export const CreateServiceWizard = ({
             handleUpdateFormData({ affiliate: affiliateData }),
         };
 
-      case 6: // SEO & FAQs
+      case 'seo':
         return {
           data: {
             seo: formData.seo || {},
@@ -1178,7 +1135,7 @@ export const CreateServiceWizard = ({
           onUpdate: handleUpdateFormData,
         };
 
-      case 7: // Payment Options
+      case 'payment':
         return {
           productPrice:
             typeof formData.price === 'number' && !isNaN(formData.price) ? formData.price : 0,
@@ -1190,15 +1147,13 @@ export const CreateServiceWizard = ({
       default:
         return baseProps;
     }
-  }, [currentStep, formData, handleUpdateFormData, t]);
+  }, [currentStepKey, formData, handleUpdateFormData, t]);
 
-  const CurrentStep = STEPS[currentStep - 1];
-  const CurrentStepComponent = CurrentStep.component;
-
-  /**
-   * Calculate progress
-   */
-  const progress = useMemo(() => (currentStep / STEPS.length) * 100, [currentStep]);
+  const CurrentStepComponent = STEP_COMPONENTS[currentStepKey];
+  const progress = useMemo(
+    () => (currentStep / visibleSteps.length) * 100,
+    [currentStep, visibleSteps.length]
+  );
 
   /**
    * Logging on mount
@@ -1263,7 +1218,7 @@ export const CreateServiceWizard = ({
                   {t('services.create.title', 'Nouveau Service')}
                 </h1>
                 <p className="text-xs sm:text-sm lg:text-base text-muted-foreground">
-                  {t('services.create.subtitle', 'Créez un service professionnel en 8 étapes')}
+                  {t('services.create.subtitle', serviceWizardSubtitle(formData, categoryTree))}
                 </p>
               </div>
             </div>
@@ -1273,7 +1228,8 @@ export const CreateServiceWizard = ({
           <div className="space-y-2">
             <div className="flex items-center justify-between text-xs sm:text-sm">
               <span className="font-medium">
-                {t('services.step', 'Étape')} {currentStep} {t('services.of', 'sur')} {STEPS.length}
+                {t('services.step', 'Étape')} {currentStep} {t('services.of', 'sur')}{' '}
+                {visibleSteps.length}
               </span>
               <div className="flex items-center gap-2">
                 {isAutoSaving && (
@@ -1299,20 +1255,30 @@ export const CreateServiceWizard = ({
           className="mb-6 sm:mb-8 border-border/50 bg-card/50 backdrop-blur-sm shadow-lg animate-in fade-in slide-in-from-bottom-4 duration-700"
         >
           <CardContent className="p-3 sm:p-4 lg:p-6">
-            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2 sm:gap-3">
-              {STEPS.map((step, index) => {
+            <div
+              className={cn(
+                'grid gap-2 sm:gap-3',
+                visibleSteps.length <= 4
+                  ? 'grid-cols-2 sm:grid-cols-4'
+                  : visibleSteps.length <= 6
+                    ? 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-6'
+                    : 'grid-cols-2 sm:grid-cols-4 lg:grid-cols-8'
+              )}
+            >
+              {visibleSteps.map((step, index) => {
                 const Icon = step.icon;
-                const isActive = currentStep === step.id;
-                const isCompleted = currentStep > step.id;
-                const hasErrors = validationErrors[step.id]?.length > 0;
+                const stepNumber = index + 1;
+                const isActive = currentStep === stepNumber;
+                const isCompleted = currentStep > stepNumber;
+                const hasErrors = validationErrors[stepNumber]?.length > 0;
 
                 return (
                   <button
-                    key={step.id}
-                    onClick={() => handleStepClick(step.id)}
+                    key={step.key}
+                    onClick={() => handleStepClick(stepNumber)}
                     role="tab"
                     aria-selected={isActive}
-                    aria-label={`${t('services.step', 'Étape')} ${step.id}: ${step.title}`}
+                    aria-label={`${t('services.step', 'Étape')} ${stepNumber}: ${step.title}`}
                     className={cn(
                       'relative p-2.5 sm:p-3 rounded-lg border-2 transition-all duration-300 text-left',
                       'hover:shadow-md hover:scale-[1.02] touch-manipulation',
@@ -1398,12 +1364,13 @@ export const CreateServiceWizard = ({
         >
           <CardHeader className="p-3 sm:p-4 lg:p-6">
             <CardTitle className="flex items-center gap-2 sm:gap-3 text-base sm:text-lg lg:text-xl">
-              {React.createElement(CurrentStep.icon, { className: 'h-4 w-4 sm:h-5 sm:w-5' })}
-              {CurrentStep.title}
+              {currentStepDef &&
+                React.createElement(currentStepDef.icon, { className: 'h-4 w-4 sm:h-5 sm:w-5' })}
+              {currentStepDef?.title}
             </CardTitle>
             <CardDescription className="text-xs sm:text-sm flex items-center gap-2">
-              {CurrentStep.description}
-              {currentStep >= 5 && currentStep <= 7 && (
+              {currentStepDef?.description}
+              {currentStepDef?.optional && (
                 <Badge variant="outline" className="text-[10px] sm:text-xs">
                   {t('services.optional', 'Optionnel')}
                 </Badge>
@@ -1412,7 +1379,7 @@ export const CreateServiceWizard = ({
           </CardHeader>
           <CardContent className="p-3 sm:p-4 lg:p-6 pt-0">
             <WizardStepSuspense>
-              {currentStep === 6 ? (
+              {currentStepKey === 'seo' ? (
                 <div className="space-y-6">
                   <CurrentStepComponent {...getStepProps()} />
                   <LazyProductStatisticsDisplaySettings
@@ -1482,7 +1449,7 @@ export const CreateServiceWizard = ({
                   </Badge>
                 </Button>
 
-                {currentStep < STEPS.length ? (
+                {currentStep < visibleSteps.length ? (
                   <Button
                     onClick={handleNext}
                     disabled={isSaving}

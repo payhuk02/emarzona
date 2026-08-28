@@ -18,13 +18,6 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ToastAction } from '@/components/ui/toast';
 import {
   Calendar,
-  Info,
-  Clock,
-  Users,
-  DollarSign,
-  Share2,
-  Search,
-  Eye,
   ArrowLeft,
   ChevronLeft,
   ChevronRight,
@@ -32,7 +25,6 @@ import {
   AlertCircle,
   CheckCircle2,
   Loader2,
-  CreditCard,
 } from 'lucide-react';
 import { ServiceBasicInfoForm } from '../create/service/ServiceBasicInfoForm';
 import { ServiceDurationAvailabilityForm } from '../create/service/ServiceDurationAvailabilityForm';
@@ -64,71 +56,29 @@ import {
   serviceWizardShowsCalendar,
   validateServiceWizardPublishSteps,
   validateServiceWizardStep,
+  validateServiceWizardStepByKey,
 } from '@/lib/service-wizard-step-validation';
+import {
+  resolveServiceWizardSteps,
+  serviceWizardSubtitle,
+  type ServiceWizardStepKey,
+} from '@/lib/service/service-wizard-steps';
 import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
 import type { ServiceProductFormData } from '@/types/service-product';
 import { useCatalogCacheInvalidation } from '@/hooks/useCatalogCacheInvalidation';
 import { useQuery } from '@tanstack/react-query';
 
-const STEPS = [
-  {
-    id: 1,
-    title: 'Informations de base',
-    description: 'Nom, description, type de service',
-    icon: Info,
-    component: ServiceBasicInfoForm,
-  },
-  {
-    id: 2,
-    title: 'Durée & Disponibilité',
-    description: 'Horaires, créneaux, localisation',
-    icon: Clock,
-    component: ServiceDurationAvailabilityForm,
-  },
-  {
-    id: 3,
-    title: 'Personnel & Ressources',
-    description: 'Staff, capacité, équipement',
-    icon: Users,
-    component: ServiceStaffResourcesForm,
-  },
-  {
-    id: 4,
-    title: 'Tarification & Options',
-    description: 'Prix, acompte, réservations',
-    icon: DollarSign,
-    component: ServicePricingOptionsForm,
-  },
-  {
-    id: 5,
-    title: 'Affiliation',
-    description: 'Commission, affiliés (optionnel)',
-    icon: Share2,
-    component: ServiceAffiliateSettings,
-  },
-  {
-    id: 6,
-    title: 'SEO & FAQs',
-    description: 'Référencement, questions',
-    icon: Search,
-    component: ServiceSEOAndFAQs,
-  },
-  {
-    id: 7,
-    title: 'Options de Paiement',
-    description: 'Complet, partiel, escrow',
-    icon: CreditCard,
-    component: PaymentOptionsForm,
-  },
-  {
-    id: 8,
-    title: 'Aperçu & Validation',
-    description: 'Vérifier et publier',
-    icon: Eye,
-    component: ServicePreview,
-  },
-];
+const STEP_COMPONENTS = {
+  basic: ServiceBasicInfoForm,
+  scheduling: ServiceDurationAvailabilityForm,
+  staff: ServiceStaffResourcesForm,
+  pricing: ServicePricingOptionsForm,
+  affiliation: ServiceAffiliateSettings,
+  seo: ServiceSEOAndFAQs,
+  payment: PaymentOptionsForm,
+  preview: ServicePreview,
+} as const;
 
 interface EditServiceProductWizardProps {
   productId: string;
@@ -179,6 +129,25 @@ export const EditServiceProductWizard = ({
   const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState<Partial<ServiceProductFormData>>({});
   const [validationErrors, setValidationErrors] = useState<Record<number, string[]>>({});
+
+  const visibleSteps = useMemo(
+    () => resolveServiceWizardSteps(formData, categoryTree),
+    [
+      formData.fulfillment_mode,
+      formData.category_id,
+      formData.parent_category_id,
+      formData.category,
+      formData.requires_staff,
+      categoryTree,
+    ]
+  );
+
+  const currentStepDef = visibleSteps[currentStep - 1];
+  const currentStepKey: ServiceWizardStepKey = currentStepDef?.key ?? 'basic';
+
+  useEffect(() => {
+    setCurrentStep(prev => Math.min(prev, visibleSteps.length));
+  }, [visibleSteps.length]);
 
   // Initialize form data when product is loaded
   useEffect(() => {
@@ -245,123 +214,96 @@ export const EditServiceProductWizard = ({
    * Validate current step
    */
   const validateStep = useCallback(
-    async (step: number): Promise<{ valid: boolean; errors: string[] }> => {
+    async (stepIndex: number): Promise<{ valid: boolean; errors: string[] }> => {
       const errors: string[] = [];
+      const stepDef = visibleSteps[stepIndex - 1];
+      if (!stepDef?.validationStep) {
+        return { valid: true, errors: [] };
+      }
+
       clearServerErrors();
 
-      switch (step) {
-        case 1: {
-          const clientResult = validateServiceWizardStep(1, formData, { categoryTree });
-          if (!clientResult.valid) {
-            setValidationErrors(prev => ({ ...prev, [step]: clientResult.errors }));
-            return { valid: false, errors: clientResult.errors };
-          }
+      if (stepDef.key === 'basic') {
+        const clientResult = validateServiceWizardStep(1, formData, { categoryTree });
+        if (!clientResult.valid) {
+          setValidationErrors(prev => ({ ...prev, [stepIndex]: clientResult.errors }));
+          return { valid: false, errors: clientResult.errors };
+        }
 
-          // Server validation
-          if (storeId && formData.name) {
-            // Générer le slug si nécessaire pour la validation
-            const slugForValidation =
-              formData.slug?.trim() ||
-              formData.name
-                ?.toLowerCase()
-                .replace(/[^a-z0-9]+/g, '-')
-                .replace(/(^-|-$)/g, '') ||
-              '';
+        if (storeId && formData.name) {
+          const slugForValidation =
+            formData.slug?.trim() ||
+            formData.name
+              ?.toLowerCase()
+              .replace(/[^a-z0-9]+/g, '-')
+              .replace(/(^-|-$)/g, '') ||
+            '';
 
-            const serverResult = await validateServiceServer({
-              name: formData.name || '',
-              slug: slugForValidation,
-              price: Number(formData.promotional_price || formData.price || 0),
-              duration: formData.duration_minutes ?? formData.duration ?? 60,
-              maxParticipants: formData.max_participants,
-              meetingUrl: formData.meeting_url,
-            });
+          const serverResult = await validateServiceServer({
+            name: formData.name || '',
+            slug: slugForValidation,
+            price: Number(formData.promotional_price || formData.price || 0),
+            duration: formData.duration_minutes ?? formData.duration ?? 60,
+            maxParticipants: formData.max_participants,
+            meetingUrl: formData.meeting_url,
+          });
 
-            if (!serverResult.valid) {
-              // Ajouter les erreurs du serveur si disponibles
-              // serverResult.errors est un tableau d'objets {field, message}
-              if (
-                serverResult.errors &&
-                Array.isArray(serverResult.errors) &&
-                serverResult.errors.length > 0
-              ) {
-                serverResult.errors.forEach(errorObj => {
-                  if (errorObj && errorObj.message && typeof errorObj.message === 'string') {
-                    errors.push(errorObj.message);
-                  }
-                });
-              }
-              // Si aucune erreur spécifique mais un message général, l'utiliser
-              if (errors.length === 0 && serverResult.message) {
-                errors.push(serverResult.message);
-              }
-              // Si toujours aucune erreur, utiliser un message par défaut
-              if (errors.length === 0) {
-                errors.push('Erreur de validation serveur. Veuillez vérifier vos données.');
-              }
-              logger.warn('[EditServiceProductWizard] Validation échouée', {
-                step,
-                errors,
-                serverResult,
-                formData: { name: formData.name, slug: slugForValidation, price: formData.price },
+          if (!serverResult.valid) {
+            if (
+              serverResult.errors &&
+              Array.isArray(serverResult.errors) &&
+              serverResult.errors.length > 0
+            ) {
+              serverResult.errors.forEach(errorObj => {
+                if (errorObj && errorObj.message && typeof errorObj.message === 'string') {
+                  errors.push(errorObj.message);
+                }
               });
-              setValidationErrors(prev => ({ ...prev, [step]: errors }));
-              return { valid: false, errors };
             }
+            if (errors.length === 0 && serverResult.message) {
+              errors.push(serverResult.message);
+            }
+            if (errors.length === 0) {
+              errors.push('Erreur de validation serveur. Veuillez vérifier vos données.');
+            }
+            logger.warn('[EditServiceProductWizard] Validation échouée', {
+              step: stepIndex,
+              stepKey: stepDef.key,
+              errors,
+              serverResult,
+              formData: { name: formData.name, slug: slugForValidation, price: formData.price },
+            });
+            setValidationErrors(prev => ({ ...prev, [stepIndex]: errors }));
+            return { valid: false, errors };
           }
-
-          setValidationErrors(prev => {
-            const newErrors = { ...prev };
-            delete newErrors[step];
-            return newErrors;
-          });
-          return { valid: true, errors: [] };
         }
 
-        case 2: {
-          const clientResult = validateServiceWizardStep(2, formData, { categoryTree });
-          if (!clientResult.valid) {
-            setValidationErrors(prev => ({ ...prev, [step]: clientResult.errors }));
-            return { valid: false, errors: clientResult.errors };
-          }
-
-          setValidationErrors(prev => {
-            const newErrors = { ...prev };
-            delete newErrors[step];
-            return newErrors;
-          });
-          return { valid: true, errors: [] };
-        }
-
-        case 3:
-        case 4:
-        case 5:
-        case 6:
-        case 7: {
-          const clientResult = validateServiceWizardStep(step, formData, { categoryTree });
-          if (!clientResult.valid) {
-            setValidationErrors(prev => ({ ...prev, [step]: clientResult.errors }));
-            return { valid: false, errors: clientResult.errors };
-          }
-
-          setValidationErrors(prev => {
-            const newErrors = { ...prev };
-            delete newErrors[step];
-            return newErrors;
-          });
-          return { valid: true, errors: [] };
-        }
-
-        default:
-          setValidationErrors(prev => {
-            const newErrors = { ...prev };
-            delete newErrors[step];
-            return newErrors;
-          });
-          return { valid: true, errors: [] };
+        setValidationErrors(prev => {
+          const newErrors = { ...prev };
+          delete newErrors[stepIndex];
+          return newErrors;
+        });
+        return { valid: true, errors: [] };
       }
+
+      const clientResult = validateServiceWizardStepByKey(
+        stepDef.key as Exclude<ServiceWizardStepKey, 'preview'>,
+        formData,
+        { categoryTree }
+      );
+      if (!clientResult.valid) {
+        setValidationErrors(prev => ({ ...prev, [stepIndex]: clientResult.errors }));
+        return { valid: false, errors: clientResult.errors };
+      }
+
+      setValidationErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[stepIndex];
+        return newErrors;
+      });
+      return { valid: true, errors: [] };
     },
-    [formData, storeId, validateServiceServer, clearServerErrors, categoryTree]
+    [formData, storeId, validateServiceServer, clearServerErrors, categoryTree, visibleSteps]
   );
 
   /**
@@ -602,7 +544,7 @@ export const EditServiceProductWizard = ({
   const handleNext = useCallback(async () => {
     const result = await validateStep(currentStep);
     if (result.valid) {
-      setCurrentStep(prev => Math.min(prev + 1, STEPS.length));
+      setCurrentStep(prev => Math.min(prev + 1, visibleSteps.length));
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
       const errorMessages =
@@ -615,7 +557,7 @@ export const EditServiceProductWizard = ({
         variant: 'destructive',
       });
     }
-  }, [currentStep, validateStep, toast]);
+  }, [currentStep, validateStep, toast, visibleSteps.length]);
 
   const handlePrevious = useCallback(() => {
     setCurrentStep(prev => Math.max(prev - 1, 1));
@@ -625,8 +567,8 @@ export const EditServiceProductWizard = ({
   const handleSave = useCallback(async () => {
     const publishValidation = validateServiceWizardPublishSteps(formData, { categoryTree });
     if (!publishValidation.valid) {
-      if (publishValidation.failedStep) {
-        setCurrentStep(publishValidation.failedStep);
+      if (publishValidation.failedStepIndex) {
+        setCurrentStep(publishValidation.failedStepIndex);
       }
       const errorMessages =
         publishValidation.errors.length > 0
@@ -660,14 +602,14 @@ export const EditServiceProductWizard = ({
       onUpdate: handleUpdateFormData,
     };
 
-    switch (currentStep) {
-      case 1:
+    switch (currentStepKey) {
+      case 'basic':
         return {
           ...baseProps,
           storeSlug: storeSlug || (store && 'slug' in store ? store.slug : undefined),
         };
 
-      case 5:
+      case 'affiliation':
         return {
           productPrice: formData.price || 0,
           productName: formData.name || t('products.product', 'Service'),
@@ -676,7 +618,7 @@ export const EditServiceProductWizard = ({
             handleUpdateFormData({ affiliate: affiliateData }),
         };
 
-      case 6:
+      case 'seo':
         return {
           data: {
             seo: formData.seo || {},
@@ -688,7 +630,7 @@ export const EditServiceProductWizard = ({
           onUpdate: handleUpdateFormData,
         };
 
-      case 7:
+      case 'payment':
         return {
           productPrice:
             typeof formData.price === 'number' && !isNaN(formData.price) ? formData.price : 0,
@@ -701,11 +643,13 @@ export const EditServiceProductWizard = ({
       default:
         return baseProps;
     }
-  }, [currentStep, formData, handleUpdateFormData, t, storeSlug, store]);
+  }, [currentStepKey, formData, handleUpdateFormData, t, storeSlug, store]);
 
-  const CurrentStep = STEPS[currentStep - 1];
-  const CurrentStepComponent = CurrentStep.component;
-  const progress = useMemo(() => (currentStep / STEPS.length) * 100, [currentStep]);
+  const CurrentStepComponent = STEP_COMPONENTS[currentStepKey];
+  const progress = useMemo(
+    () => (currentStep / visibleSteps.length) * 100,
+    [currentStep, visibleSteps.length]
+  );
 
   if (storeLoading || loadingProduct) {
     return (
@@ -751,7 +695,8 @@ export const EditServiceProductWizard = ({
 
           <Progress value={progress} className="h-2" />
           <p className="text-sm text-muted-foreground mt-2">
-            Étape {currentStep} sur {STEPS.length} ({Math.round(progress)}%)
+            {serviceWizardSubtitle(formData, categoryTree)} · Étape {currentStep} sur{' '}
+            {visibleSteps.length} ({Math.round(progress)}%)
           </p>
         </div>
 
@@ -773,13 +718,20 @@ export const EditServiceProductWizard = ({
         <Card className="mb-6">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              {React.createElement(CurrentStep.icon, { className: 'h-5 w-5' })}
-              {CurrentStep.title}
+              {currentStepDef && React.createElement(currentStepDef.icon, { className: 'h-5 w-5' })}
+              {currentStepDef?.title}
             </CardTitle>
-            <CardDescription>{CurrentStep.description}</CardDescription>
+            <CardDescription className="flex items-center gap-2">
+              {currentStepDef?.description}
+              {currentStepDef?.optional && (
+                <Badge variant="outline" className="text-xs">
+                  Optionnel
+                </Badge>
+              )}
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            {currentStep === 6 ? (
+            {currentStepKey === 'seo' ? (
               <div className="space-y-6">
                 {CurrentStepComponent && <CurrentStepComponent {...getStepProps()} />}
                 <ProductStatisticsDisplaySettings
@@ -842,7 +794,7 @@ export const EditServiceProductWizard = ({
                   )}
                 </Button>
 
-                {currentStep < STEPS.length ? (
+                {currentStep < visibleSteps.length ? (
                   <Button onClick={handleNext} className="min-h-[44px] touch-manipulation">
                     Suivant
                     <ChevronRight className="h-4 w-4 ml-2" />
