@@ -3,9 +3,14 @@ import { StoreCreateCtaLink } from '@/components/store/StoreCreateCtaLink';
 import { CreditCard, Zap, Headphones } from 'lucide-react';
 import { useLandingPremiumT } from '@/hooks/useLandingPremiumT';
 import { PremiumHeroTypewriterBadge } from './PremiumHeroTypewriterBadge';
+import { motion } from 'framer-motion';
 
 const PremiumHeroCarousel = lazy(() =>
   import('./PremiumHeroCarousel').then(m => ({ default: m.PremiumHeroCarousel }))
+);
+
+const PremiumHero3DScene = lazy(() =>
+  import('./PremiumHero3DScene').then(m => ({ default: m.PremiumHero3DScene }))
 );
 
 const trustIcons = [CreditCard, Zap, Headphones] as const;
@@ -14,6 +19,32 @@ const trustKeys = ['noCard', 'instant', 'support'] as const;
 function HeroVisualFallback() {
   return <div className="lp-hero-carousel-fallback mx-auto aspect-[1024/561] w-full" aria-hidden />;
 }
+
+const fadeUpVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: (custom: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: {
+      delay: custom * 0.08,
+      duration: 0.75,
+      ease: [0.22, 1, 0.36, 1],
+    },
+  }),
+};
+
+const scaleInVariants = {
+  hidden: { opacity: 0, scale: 0.96 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: {
+      delay: 0.2,
+      duration: 1,
+      ease: [0.22, 1, 0.36, 1],
+    },
+  },
+};
 
 export function PremiumHero() {
   const { t } = useLandingPremiumT();
@@ -30,25 +61,53 @@ export function PremiumHero() {
         }}
       />
 
+      <Suspense fallback={null}>
+        <PremiumHero3DScene />
+      </Suspense>
+
       <div className="relative mx-auto flex max-w-7xl flex-col gap-12 px-4 py-12 sm:px-5 sm:py-14 lg:grid lg:grid-cols-[1fr_1.05fr] lg:items-start lg:gap-8 lg:px-8 lg:py-20 xl:py-24">
         <div className="flex flex-col text-center lg:text-left">
-          <p className="lp-hero-animate lp-eyebrow mb-5 self-center lg:self-start">
+          <motion.p
+            custom={0}
+            initial="hidden"
+            animate="visible"
+            variants={fadeUpVariants}
+            className="lp-eyebrow mb-5 self-center lg:self-start"
+          >
             {t('hero.eyebrow')}
-          </p>
+          </motion.p>
 
-          <h1 className="lp-hero-animate lp-hero-animate--delay-1 lp-serif text-[2.5rem] leading-[1.08] text-white sm:text-[2.85rem] md:text-[3.35rem] lg:text-[4.5rem] xl:text-[5rem]">
+          <motion.h1
+            custom={1}
+            initial="hidden"
+            animate="visible"
+            variants={fadeUpVariants}
+            className="lp-serif text-[2.5rem] leading-[1.08] text-white sm:text-[2.85rem] md:text-[3.35rem] lg:text-[4.5rem] xl:text-[5rem]"
+          >
             {t('hero.titleLine1')}
             <br />
             {t('hero.titleLine2')}
             <br />
             <span className="lp-gold-text italic">{t('hero.titleHighlight')}</span>
-          </h1>
+          </motion.h1>
 
-          <p className="lp-hero-animate lp-hero-animate--delay-2 mx-auto mt-5 max-w-lg text-[15px] leading-relaxed text-[var(--lp-text-dim)] sm:text-lg lg:mx-0">
+          <motion.p
+            custom={2}
+            initial="hidden"
+            animate="visible"
+            variants={fadeUpVariants}
+            className="mx-auto mt-5 max-w-lg text-[15px] leading-relaxed text-[var(--lp-text-dim)] sm:text-lg lg:mx-0"
+          >
             {t('hero.subtitle')}
-          </p>
+          </motion.p>
 
-          <div className="lp-hero-animate lp-hero-animate--delay-3 mt-8 flex flex-wrap items-center justify-center gap-3 sm:mt-10 sm:gap-4 lg:justify-start">
+          <motion.div
+            custom={3}
+            initial="hidden"
+            animate="visible"
+            variants={fadeUpVariants}
+            className="mt-8 flex flex-wrap items-center justify-center gap-3 sm:mt-10 sm:gap-4 lg:justify-start"
+          >
             <StoreCreateCtaLink className="lp-btn-primary inline-flex rounded-full px-6 py-3 text-sm font-semibold sm:px-7 sm:py-3.5">
               {t('hero.ctaPrimary')}
             </StoreCreateCtaLink>
@@ -58,9 +117,15 @@ export function PremiumHero() {
             >
               {t('hero.ctaSecondary')}
             </a>
-          </div>
+          </motion.div>
 
-          <ul className="lp-hero-animate lp-hero-animate--delay-4 mt-8 flex flex-col items-center gap-3 text-sm text-white/45 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-6 lg:items-start lg:justify-start">
+          <motion.ul
+            custom={5}
+            initial="hidden"
+            animate="visible"
+            variants={fadeUpVariants}
+            className="mt-8 flex flex-col items-center gap-3 text-sm text-white/45 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-6 lg:items-start lg:justify-start"
+          >
             {trustKeys.map((key, i) => {
               const Icon = trustIcons[i];
               return (
@@ -70,15 +135,20 @@ export function PremiumHero() {
                 </li>
               );
             })}
-          </ul>
+          </motion.ul>
         </div>
 
-        <div className="lp-hero-animate-scale flex w-full min-w-0 flex-col items-center lg:items-start">
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={scaleInVariants}
+          className="flex w-full min-w-0 flex-col items-center lg:items-start"
+        >
           <PremiumHeroTypewriterBadge />
           <Suspense fallback={<HeroVisualFallback />}>
             <PremiumHeroCarousel />
           </Suspense>
-        </div>
+        </motion.div>
       </div>
     </section>
   );

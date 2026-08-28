@@ -4,6 +4,7 @@ import { PremiumNav } from './PremiumNav';
 import { PremiumPlatformHero } from './PremiumPlatformHero';
 import { PremiumHero } from './PremiumHero';
 import { LandingDeferredSection } from './LandingDeferredSection';
+import { ErrorBoundary } from '@/components/error/ErrorBoundary';
 
 const SellWaysSection = lazy(() =>
   import('./SellWaysSection').then(m => ({ default: m.SellWaysSection }))
@@ -38,51 +39,67 @@ export function PremiumLandingPage() {
         <PremiumHero />
 
         <LandingDeferredSection minHeight="28rem">
-          <Suspense fallback={null}>
-            <SellWaysSection />
-          </Suspense>
+          <ErrorBoundary level="section">
+            <Suspense fallback={null}>
+              <SellWaysSection />
+            </Suspense>
+          </ErrorBoundary>
         </LandingDeferredSection>
 
         <LandingDeferredSection minHeight="24rem">
-          <Suspense fallback={null}>
-            <FeaturesGridSection />
-          </Suspense>
+          <ErrorBoundary level="section">
+            <Suspense fallback={null}>
+              <FeaturesGridSection />
+            </Suspense>
+          </ErrorBoundary>
         </LandingDeferredSection>
 
         <LandingDeferredSection minHeight="20rem">
-          <Suspense fallback={null}>
-            <AdaptSection />
-          </Suspense>
+          <ErrorBoundary level="section">
+            <Suspense fallback={null}>
+              <AdaptSection />
+            </Suspense>
+          </ErrorBoundary>
         </LandingDeferredSection>
 
         <LandingDeferredSection minHeight="10rem">
-          <Suspense fallback={null}>
-            <StoresMarqueeSection />
-          </Suspense>
+          <ErrorBoundary level="section">
+            <Suspense fallback={null}>
+              <StoresMarqueeSection />
+            </Suspense>
+          </ErrorBoundary>
         </LandingDeferredSection>
 
         <LandingDeferredSection minHeight="8rem">
-          <Suspense fallback={null}>
-            <CountriesMarqueeSection />
-          </Suspense>
+          <ErrorBoundary level="section">
+            <Suspense fallback={null}>
+              <CountriesMarqueeSection />
+            </Suspense>
+          </ErrorBoundary>
         </LandingDeferredSection>
 
         <LandingDeferredSection minHeight="8rem">
-          <Suspense fallback={null}>
-            <CurrenciesMarqueeSection />
-          </Suspense>
+          <ErrorBoundary level="section">
+            <Suspense fallback={null}>
+              <CurrenciesMarqueeSection />
+            </Suspense>
+          </ErrorBoundary>
         </LandingDeferredSection>
 
         <LandingDeferredSection minHeight="32rem">
-          <Suspense fallback={null}>
-            <PricingSection />
-          </Suspense>
+          <ErrorBoundary level="section">
+            <Suspense fallback={null}>
+              <PricingSection />
+            </Suspense>
+          </ErrorBoundary>
         </LandingDeferredSection>
 
         <LandingDeferredSection minHeight="18rem">
-          <Suspense fallback={null}>
-            <FinalCtaSection />
-          </Suspense>
+          <ErrorBoundary level="section">
+            <Suspense fallback={null}>
+              <FinalCtaSection />
+            </Suspense>
+          </ErrorBoundary>
         </LandingDeferredSection>
       </main>
 

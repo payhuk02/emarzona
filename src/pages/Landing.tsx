@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { SEOMeta } from '@/components/seo/SEOMeta';
 import { WebsiteSchema } from '@/components/seo/WebsiteSchema';
 import { OrganizationSchema } from '@/components/seo/OrganizationSchema';
+import { SoftwareApplicationSchema } from '@/components/seo/SoftwareApplicationSchema';
 import { PremiumLandingPage } from '@/components/landing/premium/PremiumLandingPage';
 import { useLandingPremiumT } from '@/hooks/useLandingPremiumT';
 import { injectLandingCriticalCSS } from '@/lib/landing-critical-css';
@@ -123,6 +124,7 @@ function LandingContent({
       />
       <WebsiteSchema />
       <OrganizationSchema />
+      <SoftwareApplicationSchema />
       <PremiumLandingPage />
     </>
   );
