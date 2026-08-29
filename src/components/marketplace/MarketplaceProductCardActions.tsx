@@ -1,10 +1,9 @@
 /**
- * Actions marketplace — grille 2x2 (Acheter, Voir, Contacter, WhatsApp).
+ * Actions marketplace — CTA principal + contact vendeur (WhatsApp).
  */
-import { Link } from 'react-router-dom';
 import { VendorMessagingLink } from '@/components/vendor/VendorMessagingLink';
 import { Button } from '@/components/ui/button';
-import { Eye, MessageCircle, MessageSquare, ShoppingCart, Calendar, Loader2 } from 'lucide-react';
+import { MessageCircle, MessageSquare, ShoppingCart, Calendar, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { usePublicWhatsAppConfig } from '@/hooks/usePublicWhatsAppConfig';
 import { buildProductWhatsAppMessage, buildWhatsAppClickUrl } from '@/lib/whatsapp/whatsapp-url';
@@ -17,7 +16,6 @@ const actionBtnClass =
 export interface MarketplaceProductCardActionsProps {
   productId: string;
   productName: string;
-  productUrl: string;
   storeId?: string | null;
   buyLabel: string;
   buyAriaLabel: string;
@@ -25,7 +23,6 @@ export interface MarketplaceProductCardActionsProps {
   buyDisabled?: boolean;
   buyIcon?: MarketplaceCardBuyIcon;
   onBuy: (e: React.MouseEvent<HTMLButtonElement>) => void;
-  onView?: () => void;
   className?: string;
   whatsappNumber?: string | null;
   whatsappEnabled?: boolean | null;
@@ -35,7 +32,6 @@ export interface MarketplaceProductCardActionsProps {
 export function MarketplaceProductCardActions({
   productId,
   productName,
-  productUrl,
   storeId,
   buyLabel,
   buyAriaLabel,
@@ -43,7 +39,6 @@ export function MarketplaceProductCardActions({
   buyDisabled = false,
   buyIcon = 'cart',
   onBuy,
-  onView,
   className,
   whatsappNumber,
   whatsappEnabled,
@@ -74,7 +69,7 @@ export function MarketplaceProductCardActions({
         aria-label={buyAriaLabel}
         className={cn(
           actionBtnClass,
-          'font-semibold tracking-tight',
+          'col-span-2 font-semibold tracking-tight',
           'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700',
           'shadow-sm hover:shadow-md transition-all duration-200',
           'disabled:opacity-50 disabled:pointer-events-none'
@@ -88,28 +83,6 @@ export function MarketplaceProductCardActions({
           aria-hidden="true"
         />
         <span className="truncate min-w-0">{buyLabel}</span>
-      </Button>
-
-      <Button
-        variant="outline"
-        size="sm"
-        data-action="view"
-        className={cn(
-          actionBtnClass,
-          'bg-gradient-to-r from-amber-500/95 to-yellow-600/95 hover:from-amber-600 hover:to-yellow-700',
-          'border-amber-500/80'
-        )}
-        asChild
-      >
-        <Link
-          to={productUrl}
-          aria-label={`Voir les détails de ${productName}`}
-          onClick={() => onView?.()}
-          className="flex items-center justify-center gap-1.5 min-w-0"
-        >
-          <Eye className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" aria-hidden="true" />
-          <span className="truncate">Voir</span>
-        </Link>
       </Button>
 
       {storeId && (
@@ -145,6 +118,7 @@ export function MarketplaceProductCardActions({
           title={`WhatsApp — ${productName}`}
           className={cn(
             actionBtnClass,
+            !storeId && 'col-span-2',
             'bg-gradient-to-r from-green-500/95 to-emerald-600/95 hover:from-green-600 hover:to-emerald-700',
             'border-green-600/80'
           )}

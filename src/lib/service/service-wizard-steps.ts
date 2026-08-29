@@ -173,8 +173,8 @@ export function resolveServiceWizardSteps(
     },
     {
       key: 'payment',
-      title: 'Options de Paiement',
-      description: 'Complet, partiel, escrow',
+      title: 'Paiement & bouton',
+      description: 'Mode de paiement et libellé CTA carte',
       icon: CreditCard,
       optional: true,
       validationStep: 7,

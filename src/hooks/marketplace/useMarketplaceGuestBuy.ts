@@ -98,6 +98,12 @@ export function useMarketplaceGuestBuy({
       return;
     }
 
+    // Services : fiche complète (formules, brief, calendrier) avant paiement — style Fiverr/ComeUp
+    if (cta.action === 'service') {
+      navigate(`/service/${product.id}`);
+      return;
+    }
+
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -111,7 +117,7 @@ export function useMarketplaceGuestBuy({
     }
 
     setGuestOpen(true);
-  }, [proceedWithCustomer, product.store_id, toast]);
+  }, [cta.action, navigate, proceedWithCustomer, product.id, product.store_id, toast]);
 
   return {
     product,

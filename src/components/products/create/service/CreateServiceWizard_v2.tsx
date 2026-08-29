@@ -243,6 +243,7 @@ export const CreateServiceWizard = ({
     payment: {
       payment_type: 'full', // 'full' | 'percentage' | 'delivery_secured'
       percentage_rate: 30, // Pour paiement partiel (10-90%)
+      cta_button_label: 'Réserver',
     },
 
     // Statistics Display Settings
@@ -651,7 +652,11 @@ export const CreateServiceWizard = ({
         meta_description: formData.seo?.meta_description,
         og_image: formData.seo?.og_image,
         faqs: formData.faqs || [],
-        payment_options: formData.payment || { payment_type: 'full', percentage_rate: 30 },
+        payment_options: formData.payment || {
+          payment_type: 'full',
+          percentage_rate: 30,
+          cta_button_label: 'Réserver',
+        },
         hide_purchase_count: formData.hide_purchase_count ?? false,
         hide_likes_count: formData.hide_likes_count ?? false,
         hide_recommendations_count: formData.hide_recommendations_count ?? false,

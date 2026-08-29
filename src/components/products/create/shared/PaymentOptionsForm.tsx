@@ -13,13 +13,33 @@ import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { CreditCard, Percent, Shield, Info, CheckCircle, TrendingUp, Lock } from 'lucide-react';
+import {
+  CreditCard,
+  Percent,
+  Shield,
+  Info,
+  CheckCircle,
+  TrendingUp,
+  Lock,
+  MousePointerClick,
+} from 'lucide-react';
 import { useAnalyticsTracking } from '@/hooks/useProductAnalytics';
 import { ServiceProjectMilestonesForm } from '../service/ServiceProjectMilestonesForm';
 import {
   DEFAULT_SERVICE_PROJECT_MILESTONES,
   type ServiceProjectMilestoneDraft,
 } from '@/lib/service/service-project-milestones';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  DEFAULT_SERVICE_CTA_LABEL,
+  SERVICE_CTA_BUTTON_PRESETS,
+} from '@/constants/service-checkout-options';
 
 export type PaymentType = 'full' | 'percentage' | 'delivery_secured';
 
@@ -29,6 +49,7 @@ interface PaymentOptionsData {
   min_percentage?: number;
   use_project_milestones?: boolean;
   project_milestones?: ServiceProjectMilestoneDraft[];
+  cta_button_label?: string;
 }
 
 interface PaymentOptionsFormProps {
@@ -67,6 +88,11 @@ export const PaymentOptionsForm: React.FC<PaymentOptionsFormProps> = ({
   const securedBalanceAmount = milestonesActive
     ? Math.max(0, safePrice - dueNowMilestoneAmount)
     : safePrice;
+
+  const serviceCtaLabel = data.cta_button_label?.trim() || DEFAULT_SERVICE_CTA_LABEL;
+  const isServiceCtaPreset = SERVICE_CTA_BUTTON_PRESETS.includes(
+    serviceCtaLabel as (typeof SERVICE_CTA_BUTTON_PRESETS)[number]
+  );
 
   // Services: acompte = dépôt étape 4 — éviter un 2e % concurrent ici
   React.useEffect(() => {
@@ -331,6 +357,64 @@ export const PaymentOptionsForm: React.FC<PaymentOptionsFormProps> = ({
           productPrice={safePrice}
           onChange={patch => onUpdate({ ...data, ...patch })}
         />
+      )}
+
+      {productType === 'service' && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <MousePointerClick className="h-5 w-5" />
+              Bouton sur la carte marketplace
+            </CardTitle>
+            <CardDescription>
+              Ce libellé remplace le bouton principal sur la carte produit. Il mène vos clients vers
+              la fiche service complète (formules, détails, brief) avant le paiement — comme sur
+              Fiverr ou ComeUp.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="service-cta-preset">Suggestions</Label>
+              <Select
+                value={isServiceCtaPreset ? serviceCtaLabel : 'custom'}
+                onValueChange={value => {
+                  if (value !== 'custom') {
+                    onUpdate({ ...data, cta_button_label: value });
+                  }
+                }}
+              >
+                <SelectTrigger id="service-cta-preset">
+                  <SelectValue placeholder="Choisir un libellé" />
+                </SelectTrigger>
+                <SelectContent>
+                  {SERVICE_CTA_BUTTON_PRESETS.map(label => (
+                    <SelectItem key={label} value={label}>
+                      {label}
+                    </SelectItem>
+                  ))}
+                  <SelectItem value="custom">Personnalisé…</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="service-cta-custom">Libellé affiché</Label>
+              <Input
+                id="service-cta-custom"
+                value={serviceCtaLabel}
+                maxLength={40}
+                onChange={e => onUpdate({ ...data, cta_button_label: e.target.value })}
+                placeholder="Ex. Voir les formules"
+              />
+              <p className="text-xs text-muted-foreground">
+                Aperçu bouton :{' '}
+                <span className="inline-flex items-center rounded-md bg-blue-600 px-3 py-1 text-xs text-white">
+                  {serviceCtaLabel || DEFAULT_SERVICE_CTA_LABEL}
+                </span>
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {/* Recommendations */}

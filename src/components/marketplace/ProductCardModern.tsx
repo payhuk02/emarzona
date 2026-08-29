@@ -4,7 +4,6 @@ import {
   ShoppingCart,
   Star,
   Heart,
-  Eye,
   TrendingUp,
   CheckCircle,
   Loader2,
@@ -283,12 +282,6 @@ const ProductCardModernComponent = ({
         {/* Overlay gradient au hover - Amélioré pour produits digitaux */}
         {isDigital ? (
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2">
-            <Button size="sm" variant="secondary" asChild>
-              <Link to={productUrl}>
-                <Eye className="h-4 w-4 mr-2" />
-                Voir
-              </Link>
-            </Button>
             <Button size="sm" asChild>
               <Link to={productUrl}>
                 <Play className="h-4 w-4 mr-2" />
@@ -607,7 +600,6 @@ const ProductCardModernComponent = ({
         <MarketplaceProductCardActions
           productId={product.id}
           productName={product.name}
-          productUrl={productUrl}
           storeId={product.store_id}
           buyLabel={cta.buyLabel}
           buyAriaLabel={

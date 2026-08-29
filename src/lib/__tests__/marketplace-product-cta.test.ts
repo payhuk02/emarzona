@@ -44,8 +44,14 @@ describe('getMarketplaceProductCTA', () => {
     expect(cta.showAddToCart).toBe(false);
   });
 
-  it('keeps service and course defaults', () => {
+  it('keeps service default and supports vendor CTA label', () => {
     expect(getMarketplaceProductCTA('service').buyLabel).toBe('Réserver');
+    expect(
+      getMarketplaceProductCTA('service', {
+        payment_type: 'full',
+        cta_button_label: 'En savoir plus',
+      }).buyLabel
+    ).toBe('En savoir plus');
     expect(getMarketplaceProductCTA('course').buyLabel).toBe("S'inscrire");
   });
 });

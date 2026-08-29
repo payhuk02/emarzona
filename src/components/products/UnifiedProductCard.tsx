@@ -9,7 +9,6 @@ import { Button } from '@/components/ui/button';
 import {
   Star,
   ShoppingCart,
-  Eye,
   Percent,
   MessageSquare,
   Store,
@@ -211,7 +210,7 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
       product_type: product.type,
       currency: product.currency,
       payment_options:
-        product.type === 'physical' || product.type === 'artist'
+        product.type === 'physical' || product.type === 'artist' || product.type === 'service'
           ? product.payment_options
           : undefined,
     },
@@ -446,13 +445,6 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
 
         {/* Overlay gradient au hover */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2">
-          <Button size="sm" variant="secondary" asChild>
-            <Link to={productUrl}>
-              <Eye className="h-4 w-4 mr-2" />
-              Voir
-            </Link>
-          </Button>
-
           {(isDigital || isArtist || isCourse) && (
             <Button size="sm" asChild>
               <Link to={productUrl}>
@@ -492,12 +484,21 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
             </Button>
           )}
 
-          {product.type === 'service' && product.calendar_available && (
-            <Button size="sm" asChild>
-              <Link to={productUrl}>
+          {isService && isPremiumCard && (
+            <Button
+              size="sm"
+              onClick={e => {
+                e.preventDefault();
+                e.stopPropagation();
+                void marketplaceBuy.handleBuyClick();
+              }}
+            >
+              {product.calendar_available ? (
                 <Calendar className="h-4 w-4 mr-2" />
-                Réserver
-              </Link>
+              ) : (
+                <ShoppingCart className="h-4 w-4 mr-2" />
+              )}
+              {marketplaceBuy.cta.buyLabel}
             </Button>
           )}
         </div>
@@ -1059,7 +1060,6 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
             <MarketplaceProductCardActions
               productId={product.id}
               productName={productName}
-              productUrl={productUrl}
               storeId={product.store?.id}
               buyLabel={
                 product.type === 'physical' && product.stock === 0
@@ -1074,7 +1074,6 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
               buyIcon={
                 product.type === 'service' && product.calendar_available ? 'calendar' : 'cart'
               }
-              onView={() => handleAction('view')}
               onBuy={e => {
                 e.preventDefault();
                 e.stopPropagation();

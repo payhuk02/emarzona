@@ -1,5 +1,6 @@
 import type { PhysicalProductPaymentOptions } from '@/types/physical-product';
 import { parsePhysicalCheckoutOptions } from '@/lib/physical/physical-checkout-display';
+import { parseServiceCheckoutOptions } from '@/lib/service/service-checkout-display';
 
 export type MarketplaceProductCTAAction =
   | 'checkout'
@@ -32,14 +33,16 @@ export function getMarketplaceProductCTA(
   }
 
   switch (productType) {
-    case 'service':
+    case 'service': {
+      const parsed = parseServiceCheckoutOptions(paymentOptions);
       return {
         action: 'service',
-        buyLabel: 'Réserver',
-        buyAriaVerb: 'Réserver',
+        buyLabel: parsed.cta_button_label,
+        buyAriaVerb: parsed.cta_button_label,
         showAddToCart: false,
         showPhysicalCheckoutBadge: false,
       };
+    }
     case 'course':
       return {
         action: 'course',
