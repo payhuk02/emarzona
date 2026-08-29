@@ -1,5 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import { buildWwwProductPublicPath, buildWwwProductPublicUrl } from '../product-public-url';
+import {
+  buildWwwProductPublicPath,
+  buildWwwProductPublicUrl,
+  resolveMarketplaceProductCardUrl,
+} from '../product-public-url';
 
 describe('product-public-url', () => {
   it('maps product types to correct www paths', () => {
@@ -24,5 +28,23 @@ describe('product-public-url', () => {
     expect(buildWwwProductPublicUrl({ id: 's1', product_type: 'service' })).toBe(
       'https://www.emarzona.com/service/s1'
     );
+  });
+
+  it('resolveMarketplaceProductCardUrl prefers www paths for typed products', () => {
+    expect(
+      resolveMarketplaceProductCardUrl(
+        { id: 's1', slug: 'identite-visuelle', product_type: 'service' },
+        { slug: 'ecom-web' }
+      )
+    ).toBe('/service/s1');
+  });
+
+  it('resolveMarketplaceProductCardUrl falls back to storefront URL', () => {
+    expect(
+      resolveMarketplaceProductCardUrl(
+        { id: 'g1', slug: 'misc', product_type: 'generic' },
+        { slug: 'ecom-web' }
+      )
+    ).toBe('https://ecom-web.myemarzona.shop/products/misc');
   });
 });

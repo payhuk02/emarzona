@@ -46,7 +46,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { generateProductUrl, generatePaymentUrl } from '@/lib/store-utils';
+import { generatePaymentUrl } from '@/lib/store-utils';
+import { resolveMarketplaceProductCardUrl } from '@/lib/seo/product-public-url';
 
 interface ProductCardModernProps {
   product: {
@@ -247,6 +248,15 @@ const ProductCardModernComponent = ({
 
   const currentStoreSlug = storeSlug || product.stores?.slug || '';
 
+  const productUrl = useMemo(
+    () =>
+      resolveMarketplaceProductCardUrl(
+        { id: product.id, slug: product.slug, product_type: product.product_type },
+        { slug: currentStoreSlug }
+      ),
+    [product.id, product.slug, product.product_type, currentStoreSlug]
+  );
+
   return (
     <article
       data-testid="product-card"
@@ -258,10 +268,7 @@ const ProductCardModernComponent = ({
     >
       {/* Image Container - Prend plus d'espace, contenu repoussé en bas */}
       <div className="relative overflow-hidden bg-muted/30 flex-grow min-h-[250px] sm:min-h-[300px]">
-        <Link
-          to={generateProductUrl(currentStoreSlug, product.slug)}
-          className="block w-full h-full"
-        >
+        <Link to={productUrl} className="block w-full h-full">
           <ResponsiveProductImage
             src={product.image_url || '/placeholder.svg'}
             alt={product.name}
@@ -277,13 +284,13 @@ const ProductCardModernComponent = ({
         {isDigital ? (
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2">
             <Button size="sm" variant="secondary" asChild>
-              <Link to={generateProductUrl(currentStoreSlug, product.slug)}>
+              <Link to={productUrl}>
                 <Eye className="h-4 w-4 mr-2" />
                 Voir
               </Link>
             </Button>
             <Button size="sm" asChild>
-              <Link to={generateProductUrl(currentStoreSlug, product.slug)}>
+              <Link to={productUrl}>
                 <Play className="h-4 w-4 mr-2" />
                 Découvrir
               </Link>
@@ -385,7 +392,7 @@ const ProductCardModernComponent = ({
         )}
 
         {/* Titre du produit */}
-        <Link to={generateProductUrl(currentStoreSlug, product.slug)}>
+        <Link to={productUrl}>
           <h3
             className="font-semibold text-sm text-white mb-3 line-clamp-2 leading-tight"
             id={`product-title-${product.id}`}
@@ -600,7 +607,7 @@ const ProductCardModernComponent = ({
         <MarketplaceProductCardActions
           productId={product.id}
           productName={product.name}
-          productUrl={generateProductUrl(currentStoreSlug, product.slug)}
+          productUrl={productUrl}
           storeId={product.store_id}
           buyLabel={cta.buyLabel}
           buyAriaLabel={

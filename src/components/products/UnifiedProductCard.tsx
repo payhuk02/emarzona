@@ -2,6 +2,7 @@
 import React, { useMemo, useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { generateProductUrl, generatePaymentUrl } from '@/lib/store-utils';
+import { resolveMarketplaceProductCardUrl } from '@/lib/seo/product-public-url';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -218,13 +219,17 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
     storeSlug: product.store?.slug,
   });
 
-  const productUrl = useMemo(
-    () =>
-      product.store?.slug
-        ? generateProductUrl(product.store.slug, product.slug, product.store?.subdomain)
-        : `/products/${product.slug}`,
-    [product.store?.slug, product.store?.subdomain, product.slug]
-  );
+  const productUrl = useMemo(() => {
+    if (variant === 'marketplace') {
+      return resolveMarketplaceProductCardUrl(
+        { id: product.id, slug: product.slug, product_type: product.type },
+        product.store
+      );
+    }
+    return product.store?.slug
+      ? generateProductUrl(product.store.slug, product.slug, product.store?.subdomain)
+      : `/products/${product.slug}`;
+  }, [variant, product.id, product.slug, product.type, product.store]);
 
   const paymentUrl = useMemo(
     () =>

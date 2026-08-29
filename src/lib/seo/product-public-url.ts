@@ -2,6 +2,8 @@
  * URLs publiques produit sur www.emarzona.com (marketplace / catalogue plateforme).
  * Les boutiques vendeurs utilisent *.myemarzona.shop/products/:slug (voir store-utils).
  */
+import { generateProductUrl } from '@/lib/store-utils';
+
 export const WWW_SITE_ORIGIN = 'https://www.emarzona.com';
 
 export type MarketplaceProductType = 'digital' | 'physical' | 'service' | 'course' | 'artist';
@@ -41,4 +43,24 @@ export function buildWwwProductPublicUrl(
   if (!path) return null;
   const base = origin.replace(/\/+$/, '');
   return `${base}${path}`;
+}
+
+export interface MarketplaceCardStoreRef {
+  slug?: string;
+  subdomain?: string | null;
+}
+
+/** Lien « Voir » sur une carte marketplace — chemin www si disponible, sinon boutique. */
+export function resolveMarketplaceProductCardUrl(
+  product: MarketplaceProductRef,
+  store?: MarketplaceCardStoreRef | null
+): string {
+  const marketplacePath = buildWwwProductPublicPath(product);
+  if (marketplacePath) return marketplacePath;
+
+  if (store?.slug && product.slug) {
+    return generateProductUrl(store.slug, product.slug, store.subdomain);
+  }
+
+  return product.slug ? `/products/${product.slug}` : `/products/${product.id}`;
 }
