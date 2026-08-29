@@ -139,4 +139,29 @@ describe('calculateServiceBuyNowPrice', () => {
     expect(breakdown.milestoneRemaining).toBe(full - breakdown.amountDueNow);
     expect(breakdown.remainingAmount).toBe(breakdown.milestoneRemaining);
   });
+
+  it('applies coupon before computing milestone due at checkout', () => {
+    const breakdown = buildServiceBuyNowBreakdown({
+      product: {
+        ...serviceProduct,
+        payment_options: {
+          payment_type: 'delivery_secured',
+          use_project_milestones: true,
+          project_milestones: [
+            { label: 'Démarrage', percentage: 50, trigger: 'order_placed' },
+            { label: 'Livraison', percentage: 50, trigger: 'delivery_approved' },
+          ],
+        },
+      },
+      selectedVariant: null,
+      appliedCoupon: { id: 'coupon-1', code: 'SAVE10K', discountAmount: 10_000 },
+      projectQuotedTotal: 100_000,
+    });
+
+    const discountedFull = applyCheckoutPlatformFee(90_000, 'XOF');
+    expect(breakdown.couponDiscount).toBe(10_000);
+    expect(breakdown.totalWithFee).toBe(discountedFull);
+    expect(breakdown.amountDueNow).toBe(Math.round(discountedFull / 2));
+    expect(breakdown.milestoneRemaining).toBe(discountedFull - breakdown.amountDueNow);
+  });
 });

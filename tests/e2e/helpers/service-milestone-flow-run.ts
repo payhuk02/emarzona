@@ -60,23 +60,19 @@ export async function runServiceMilestoneP0P3Flow(
   });
 
   expect(orderError).toBeNull();
-  const orderPayload = orderRpc as { order_id: string; total_amount: number };
+  const orderPayload = orderRpc as {
+    order_id: string;
+    total_amount: number;
+    project_milestones?: { applied?: boolean };
+  };
   const orderId = orderPayload.order_id;
   expect(orderId).toBeTruthy();
+  expect(orderPayload.project_milestones?.applied).toBe(true);
 
   const expectedTotal = applyCheckoutPlatformFee(fixture.packagePrice);
   expect(Number(orderPayload.total_amount)).toBe(expectedTotal);
 
   const { first, second } = milestoneAmounts(expectedTotal);
-
-  const { error: persistError } = await admin.rpc('persist_service_order_milestones', {
-    p_order_id: orderId,
-    p_milestones: [
-      { label: 'Démarrage', percentage: 50, amount: first, trigger: 'order_placed' },
-      { label: 'Livraison', percentage: 50, amount: second, trigger: 'delivery_approved' },
-    ],
-  });
-  expect(persistError).toBeNull();
 
   const { data: milestonesAfterPersist } = await admin
     .from('service_order_milestones')
@@ -86,6 +82,8 @@ export async function runServiceMilestoneP0P3Flow(
   expect(milestonesAfterPersist?.length).toBe(2);
   expect((milestonesAfterPersist as MilestoneRow[])[0].status).toBe('awaiting_payment');
   expect((milestonesAfterPersist as MilestoneRow[])[1].status).toBe('pending');
+  expect(Number((milestonesAfterPersist as MilestoneRow[])[0].amount)).toBe(first);
+  expect(Number((milestonesAfterPersist as MilestoneRow[])[1].amount)).toBe(second);
 
   const { error: activateError } = await admin.rpc('activate_service_order_checkout_milestones', {
     p_order_id: orderId,

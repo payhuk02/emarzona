@@ -27,6 +27,7 @@ const scripts = {
   'vertical-paid': 'test:e2e:vertical-paid',
   'mixed-cart': 'test:e2e:mixed-cart',
   'service-milestones': 'test:e2e:service-milestones',
+  'service-project-wizard': 'test:e2e:service-project-wizard',
 };
 
 const npmScript = scripts[target];

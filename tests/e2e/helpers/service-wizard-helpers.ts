@@ -1,8 +1,62 @@
 import { expect, type Page } from '@playwright/test';
 import { clickWizardNext, goToWizardStep } from './vendor-e2e-helpers';
-import { openProductCreateWizard, selectWizardComboboxOption } from './product-wizard-helpers';
+import {
+  openProductCreateWizard,
+  selectWizardComboboxOption,
+  waitForProductCreatePageReady,
+} from './product-wizard-helpers';
 
 export const SERVICE_WIZARD_TOTAL_STEPS = 8;
+
+export async function readServiceWizardTotalSteps(page: Page): Promise<number> {
+  const text = await page
+    .getByText(/Étape \d+ sur \d+/i)
+    .first()
+    .textContent();
+  const match = text?.match(/sur (\d+)/i);
+  return match ? Number(match[1]) : SERVICE_WIZARD_TOTAL_STEPS;
+}
+
+export async function selectServiceFulfillmentMode(
+  page: Page,
+  mode: 'project' | 'appointment' | 'both'
+): Promise<void> {
+  const optionLabel =
+    mode === 'project' ? /Prestation sur projet/i : mode === 'both' ? /Les deux/i : /Rendez-vous/i;
+  await selectWizardComboboxOption(page, /Mode de prestation/i, optionLabel);
+}
+
+export async function fillServiceProjectPaymentStep(page: Page): Promise<void> {
+  await page.locator('#delivery_secured').click({ force: true });
+  const milestoneSwitch = page.locator('#use-milestones');
+  if (await milestoneSwitch.isVisible({ timeout: 8_000 }).catch(() => false)) {
+    const checked = await milestoneSwitch.isChecked();
+    if (!checked) await milestoneSwitch.click();
+  }
+  await expect(page.getByText(/Jalons de paiement \(projet\)/i)).toBeVisible({
+    timeout: 10_000,
+  });
+}
+
+export async function advanceServiceProjectWizardToPublishStep(page: Page): Promise<void> {
+  const total = await readServiceWizardTotalSteps(page);
+  await goToWizardStep(page, total, total);
+}
+
+export async function advanceToServicePaymentStep(page: Page): Promise<void> {
+  for (let guard = 0; guard < 10; guard += 1) {
+    if (
+      await page
+        .locator('#delivery_secured')
+        .isVisible({ timeout: 2_000 })
+        .catch(() => false)
+    ) {
+      return;
+    }
+    await clickWizardNext(page, 1);
+  }
+  throw new Error('Could not reach service payment step in wizard');
+}
 
 export type FillServiceBasicInfoOptions = {
   name: string;
@@ -15,9 +69,21 @@ function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-async function selectFirstServiceLeafCategory(page: Page): Promise<void> {
+async function waitForServiceCategoryPickerReady(page: Page): Promise<void> {
   const parent = page.getByRole('combobox', { name: /^Catégorie/ });
-  await expect(parent).toBeEnabled({ timeout: 30_000 });
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    if (await parent.isEnabled({ timeout: 20_000 }).catch(() => false)) {
+      return;
+    }
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await waitForProductCreatePageReady(page);
+  }
+  await expect(parent).toBeEnabled({ timeout: 60_000 });
+}
+
+async function selectFirstServiceLeafCategory(page: Page): Promise<void> {
+  await waitForServiceCategoryPickerReady(page);
+  const parent = page.getByRole('combobox', { name: /^Catégorie/ });
 
   await parent.click();
   const parentOptions = page.getByRole('option');

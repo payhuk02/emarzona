@@ -6,10 +6,17 @@ import {
   dismissPersonaOnboardingIfVisible,
   seedTermsConsent,
 } from './store-theme-helpers';
-import { waitForReactApp, waitForVendorStoreReady } from '../shared/e2e-test-config';
+import {
+  waitForReactApp,
+  waitForVendorStoreReady,
+  loginAsSeededUser,
+} from '../shared/e2e-test-config';
 import { retryOnTransientPostgrest } from './supabase-schema-cache-retry';
 import { withAuthAdminRetry } from './auth-admin-retry';
-import { waitForStoresLoaded } from './seller-dashboard-setup';
+import { waitForStoresLoaded, prepareSellerDashboardChrome } from './seller-dashboard-setup';
+import { createNodeSupabaseClient } from './create-node-supabase-client';
+import { resolveE2ESupabaseUrl } from './e2e-supabase-guard';
+import { createClient } from '@supabase/supabase-js';
 
 export type CommerceType = 'artist' | 'digital' | 'course' | 'physical' | 'service';
 
@@ -117,15 +124,25 @@ export async function loginE2EVendor(
   password: string,
   storeId?: string
 ): Promise<void> {
-  await page.goto('/login', { waitUntil: 'domcontentloaded' });
-  await page.locator('input[name="email-login"], input[type="email"]').first().fill(email);
-  await page.locator('#password-login').fill(password);
-  await page
-    .locator('form')
-    .filter({ has: page.locator('#password-login') })
-    .locator('button[type="submit"]')
-    .click();
-  await expect(page).toHaveURL('/dashboard', { timeout: 30_000 });
+  await prepareSellerDashboardChrome(page, { selectedStoreId: storeId });
+  const supabaseUrl = resolveE2ESupabaseUrl();
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
+
+  if (supabaseUrl && serviceKey) {
+    const admin = createNodeSupabaseClient(supabaseUrl, serviceKey);
+    await loginAsSeededUser(page, admin, email, '/dashboard');
+  } else {
+    await page.goto('/login', { waitUntil: 'domcontentloaded', timeout: 90_000 });
+    await page.locator('input[name="email-login"], input[type="email"]').first().fill(email);
+    await page.locator('#password-login').fill(password);
+    await page
+      .locator('form')
+      .filter({ has: page.locator('#password-login') })
+      .locator('button[type="submit"]')
+      .click();
+    await expect(page).toHaveURL(/\/dashboard/, { timeout: 60_000 });
+  }
+
   if (storeId) {
     await page.evaluate(id => {
       localStorage.setItem('selectedStoreId', id);
@@ -139,6 +156,41 @@ export async function loginE2EVendor(
   await dismissCookieBannerIfVisible(page);
   await dismissPersonaOnboardingIfVisible(page);
   await acceptTermsDialogIfVisible(page);
+}
+
+/** Injecte une session vendeur valide (signIn API) avant la première navigation Playwright. */
+export async function injectVendorAuthSession(
+  page: Page,
+  email: string,
+  password: string,
+  storeId: string,
+  anonKey: string
+): Promise<void> {
+  const supabaseUrl = resolveE2ESupabaseUrl();
+  if (!supabaseUrl?.trim() || !anonKey.trim()) {
+    throw new Error('injectVendorAuthSession requires VITE_SUPABASE_URL and anon key');
+  }
+
+  await prepareSellerDashboardChrome(page, { selectedStoreId: storeId });
+
+  const authClient = createClient(supabaseUrl, anonKey, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+  const { data, error } = await authClient.auth.signInWithPassword({ email, password });
+  if (error || !data.session) {
+    throw error ?? new Error(`signInWithPassword failed for ${email}`);
+  }
+
+  const projectRef = new URL(supabaseUrl).hostname.split('.')[0];
+  const storageKey = `sb-${projectRef}-auth-token`;
+
+  await page.addInitScript(
+    ({ key, session, sid }) => {
+      sessionStorage.setItem(key, JSON.stringify(session));
+      localStorage.setItem('selectedStoreId', sid);
+    },
+    { key: storageKey, session: data.session, sid: storeId }
+  );
 }
 
 /** Attend que la page création produit soit prête (boutique chargée + wizard monté). */

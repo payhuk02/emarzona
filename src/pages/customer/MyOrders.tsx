@@ -44,6 +44,7 @@ import {
   AlertCircle,
   Loader2,
   Palette,
+  CreditCard,
 } from 'lucide-react';
 import { generateInvoicePDF } from '@/lib/invoice-generator';
 import { useToast } from '@/hooks/use-toast';
@@ -51,6 +52,17 @@ import { buildOrderTimeline } from '@/lib/customer/order-timeline';
 import { resolveBuyerCustomerIds } from '@/lib/customer/resolve-buyer-customer-ids';
 import { OrderTimeline } from '@/components/customer/OrderTimeline';
 import { OrderProtectClaimButton } from '@/components/trust/OrderProtectClaimButton';
+import { ServiceProjectMilestoneTimeline } from '@/components/service/ServiceProjectMilestoneTimeline';
+import type { ServiceOrderMilestoneRow } from '@/lib/payments/service-order-milestone-flow';
+import { orderHasProjectMilestones } from '@/lib/payments/service-order-milestone-flow';
+import { ServiceProjectOrderSummary } from '@/components/service/ServiceProjectOrderSummary';
+import { parseServiceProjectOrderMetadata } from '@/lib/service/service-project-order-summary';
+import {
+  canPayMilestoneBalance,
+  milestonesToTimelineRows,
+  orderHasMilestonePaymentContext,
+  orderMilestoneBalanceBlocked,
+} from '@/lib/customer/customer-order-milestones';
 import { useEffect } from 'react';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
@@ -64,8 +76,13 @@ interface Order {
   currency: string;
   status: string;
   payment_status: string;
+  payment_type?: string | null;
+  remaining_amount?: number | null;
+  delivery_status?: string | null;
+  metadata?: Record<string, unknown> | null;
   created_at: string;
   items: OrderItem[];
+  milestones: ServiceOrderMilestoneRow[];
 }
 
 interface OrderItem {
@@ -76,12 +93,15 @@ interface OrderItem {
   quantity: number;
   unit_price: number;
   total_price: number;
+  item_metadata?: Record<string, unknown> | null;
 }
 
 const CUSTOMER_ORDER_FIELDS =
-  'id, order_number, total_amount, currency, status, payment_status, created_at';
+  'id, order_number, total_amount, currency, status, payment_status, payment_type, remaining_amount, delivery_status, metadata, created_at';
+const MILESTONE_FIELDS =
+  'id, order_id, sort_order, label, percentage, amount, trigger_type, status, paid_at, released_at';
 const ORDER_ITEM_FIELDS =
-  'id, order_id, product_id, product_name, product_type, quantity, unit_price, total_price';
+  'id, order_id, product_id, product_name, product_type, quantity, unit_price, total_price, item_metadata';
 
 export default function MyOrders() {
   const navigate = useNavigate();
@@ -190,12 +210,48 @@ export default function MyOrders() {
 
           return {
             ...order,
+            metadata:
+              order.metadata && typeof order.metadata === 'object' && !Array.isArray(order.metadata)
+                ? (order.metadata as Record<string, unknown>)
+                : null,
             items: items || [],
+            milestones: [] as ServiceOrderMilestoneRow[],
           } as Order;
         })
       );
 
-      return ordersWithItems.filter(order => order.items.length > 0);
+      const filteredOrders = ordersWithItems.filter(order => order.items.length > 0);
+
+      const milestoneOrderIds = filteredOrders
+        .filter(order => {
+          const remaining = Number(order.remaining_amount ?? 0);
+          return (
+            orderHasProjectMilestones(order.metadata) ||
+            (remaining > 0 && order.payment_status !== 'completed')
+          );
+        })
+        .map(order => order.id);
+
+      if (milestoneOrderIds.length > 0) {
+        const { data: milestoneRows } = await supabase
+          .from('service_order_milestones' as never)
+          .select(MILESTONE_FIELDS)
+          .in('order_id' as never, milestoneOrderIds)
+          .order('sort_order', { ascending: true });
+
+        const byOrder = new Map<string, ServiceOrderMilestoneRow[]>();
+        for (const row of (milestoneRows ?? []) as ServiceOrderMilestoneRow[]) {
+          const list = byOrder.get(row.order_id) ?? [];
+          list.push(row);
+          byOrder.set(row.order_id, list);
+        }
+
+        for (const order of filteredOrders) {
+          order.milestones = byOrder.get(order.id) ?? [];
+        }
+      }
+
+      return filteredOrders;
     },
     enabled: !!user?.email,
   });
@@ -335,6 +391,62 @@ export default function MyOrders() {
       artist: <Palette className="h-4 w-4" />,
     };
     return icons[type as keyof typeof icons] || <Package className="h-4 w-4" />;
+  };
+
+  const renderProjectOrderSummary = (order: Order) => {
+    const projectItem = order.items.find(
+      item =>
+        item.product_type === 'service' &&
+        parseServiceProjectOrderMetadata(item.item_metadata) != null
+    );
+    if (!projectItem) return null;
+
+    return (
+      <ServiceProjectOrderSummary
+        className="mb-4"
+        currency={order.currency}
+        itemMetadata={projectItem.item_metadata}
+      />
+    );
+  };
+
+  const renderMilestoneSection = (order: Order) => {
+    if (!orderHasMilestonePaymentContext(order, order.milestones)) return null;
+
+    return (
+      <div className="mb-4 rounded-lg border border-yellow-200/80 bg-yellow-50/40 p-3 dark:border-yellow-900/50 dark:bg-yellow-950/20">
+        <ServiceProjectMilestoneTimeline
+          milestones={milestonesToTimelineRows(order.milestones)}
+          currency={order.currency}
+          compact
+          milestoneStatuses={order.milestones.map(row => ({
+            id: row.id,
+            sort_order: row.sort_order,
+            status: row.status,
+          }))}
+        />
+        {orderMilestoneBalanceBlocked(order, order.milestones) && (
+          <p className="mt-2 text-xs text-muted-foreground">
+            Le solde sera disponible après validation de la prestation par le vendeur.
+          </p>
+        )}
+      </div>
+    );
+  };
+
+  const renderPayBalanceButton = (order: Order, className?: string) => {
+    if (!canPayMilestoneBalance(order, order.milestones)) return null;
+
+    return (
+      <Button
+        onClick={() => navigate(`/payments/${order.id}/balance`)}
+        className={className ?? 'flex-1 sm:flex-none min-h-[44px] text-xs sm:text-sm'}
+      >
+        <CreditCard className="h-4 w-4 sm:h-5 sm:w-5 mr-2 flex-shrink-0" />
+        Payer le solde ({Number(order.remaining_amount ?? 0).toLocaleString('fr-FR')}{' '}
+        {order.currency})
+      </Button>
+    );
   };
 
   if (isLoading) {
@@ -642,8 +754,16 @@ export default function MyOrders() {
                     ))}
                   </div>
 
+                  {renderProjectOrderSummary(order)}
+
+                  {renderMilestoneSection(order)}
+
                   {/* Actions */}
                   <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+                    {renderPayBalanceButton(
+                      order,
+                      'flex-1 sm:flex-none min-h-[44px] text-xs sm:text-sm bg-gradient-to-r from-amber-600 to-orange-600 text-white hover:from-amber-700 hover:to-orange-700 border-0'
+                    )}
                     <Button
                       variant="outline"
                       onClick={() => {
@@ -716,6 +836,10 @@ export default function MyOrders() {
 
                 <Separator />
 
+                {selectedOrder && renderProjectOrderSummary(selectedOrder)}
+
+                {selectedOrder && renderMilestoneSection(selectedOrder)}
+
                 <div className="space-y-2">
                   <h3 className="font-semibold text-sm">Suivi de commande</h3>
                   <OrderTimeline
@@ -780,6 +904,10 @@ export default function MyOrders() {
                     orderId={selectedOrder.id}
                     paymentStatus={selectedOrder.payment_status}
                   />
+                  {renderPayBalanceButton(
+                    selectedOrder,
+                    'w-full min-h-[44px] bg-gradient-to-r from-amber-600 to-orange-600 text-white hover:from-amber-700 hover:to-orange-700 border-0'
+                  )}
                   <div className="flex gap-2">
                     {(selectedOrder.payment_status === 'completed' ||
                       selectedOrder.payment_status === 'paid') && (

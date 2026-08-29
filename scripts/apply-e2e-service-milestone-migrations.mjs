@@ -50,6 +50,7 @@ const MIGRATION_FILES = [
   '20260820160000__service_project_order_price_enforcement_p1_1.sql',
   '20260828170000__service_project_payment_milestones.sql',
   '20260828180000__service_milestone_rpc_auth.sql',
+  '20260829120000__service_milestones_in_create_rpc.sql',
   '20260829100000__service_milestone_rpc_service_role.sql',
 ];
 

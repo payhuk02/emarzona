@@ -16,7 +16,10 @@ import { Badge } from '@/components/ui/badge';
 import { CreditCard, Percent, Shield, Info, CheckCircle, TrendingUp, Lock } from 'lucide-react';
 import { useAnalyticsTracking } from '@/hooks/useProductAnalytics';
 import { ServiceProjectMilestonesForm } from '../service/ServiceProjectMilestonesForm';
-import type { ServiceProjectMilestoneDraft } from '@/lib/service/service-project-milestones';
+import {
+  DEFAULT_SERVICE_PROJECT_MILESTONES,
+  type ServiceProjectMilestoneDraft,
+} from '@/lib/service/service-project-milestones';
 
 export type PaymentType = 'full' | 'percentage' | 'delivery_secured';
 
@@ -43,8 +46,27 @@ export const PaymentOptionsForm: React.FC<PaymentOptionsFormProps> = ({
 }) => {
   const { trackEvent } = useAnalyticsTracking();
 
-  // Sécuriser productPrice avec une valeur par défaut
   const safePrice = typeof productPrice === 'number' && !isNaN(productPrice) ? productPrice : 0;
+
+  const milestonesActive =
+    productType === 'service' &&
+    data.payment_type === 'delivery_secured' &&
+    Boolean(data.use_project_milestones);
+  const milestoneRows =
+    data.project_milestones && data.project_milestones.length > 0
+      ? data.project_milestones
+      : DEFAULT_SERVICE_PROJECT_MILESTONES;
+  const dueNowMilestonePct = milestonesActive
+    ? milestoneRows
+        .filter(row => row.trigger === 'order_placed')
+        .reduce((sum, row) => sum + (Number(row.percentage) || 0), 0)
+    : 0;
+  const dueNowMilestoneAmount = milestonesActive
+    ? Math.round((safePrice * dueNowMilestonePct) / 100)
+    : safePrice;
+  const securedBalanceAmount = milestonesActive
+    ? Math.max(0, safePrice - dueNowMilestoneAmount)
+    : safePrice;
 
   // Services: acompte = dépôt étape 4 — éviter un 2e % concurrent ici
   React.useEffect(() => {
@@ -254,8 +276,12 @@ export const PaymentOptionsForm: React.FC<PaymentOptionsFormProps> = ({
                     </div>
                     <p className="text-sm text-muted-foreground">
                       {productType === 'physical'
-                        ? 'Le client paie la totalité. Un suivi « sécurisé » accompagne la confirmation de livraison (médiation possible). Pas de séquestre bancaire séparé — le crédit suit le portefeuille boutique.'
-                        : 'Le client paie la totalité. Un suivi « sécurisé » accompagne la confirmation de prestation (médiation possible). Pas de séquestre bancaire séparé — le crédit suit le portefeuille boutique.'}
+                        ? milestonesActive
+                          ? 'Le client paie les jalons dus à la commande ; le solde est facturé selon les étapes configurées.'
+                          : 'Le client paie la totalité. Un suivi « sécurisé » accompagne la confirmation de livraison (médiation possible). Pas de séquestre bancaire séparé — le crédit suit le portefeuille boutique.'
+                        : milestonesActive
+                          ? 'Le client paie uniquement le(s) jalon(s) « à la commande » au checkout. Les jalons « à la livraison » sont facturés après validation de la prestation.'
+                          : 'Le client paie la totalité. Un suivi « sécurisé » accompagne la confirmation de prestation (médiation possible). Pas de séquestre bancaire séparé — le crédit suit le portefeuille boutique.'}
                     </p>
                     <div className="mt-3 p-3 bg-yellow-50 dark:bg-yellow-950 rounded-md border border-yellow-200">
                       <div className="space-y-2">
@@ -264,7 +290,20 @@ export const PaymentOptionsForm: React.FC<PaymentOptionsFormProps> = ({
                           <div className="text-sm text-yellow-900 dark:text-yellow-100">
                             <p className="font-medium mb-1">Protection acheteur et vendeur</p>
                             <ul className="text-xs space-y-1 text-yellow-800 dark:text-yellow-200">
-                              <li>• Client paie : {safePrice.toLocaleString()} XOF (encaissé)</li>
+                              {milestonesActive ? (
+                                <>
+                                  <li>
+                                    • Dû au checkout : {dueNowMilestoneAmount.toLocaleString()} XOF
+                                    ({dueNowMilestonePct} %)
+                                  </li>
+                                  <li>
+                                    • Solde selon jalons : {securedBalanceAmount.toLocaleString()}{' '}
+                                    XOF
+                                  </li>
+                                </>
+                              ) : (
+                                <li>• Client paie : {safePrice.toLocaleString()} XOF (encaissé)</li>
+                              )}
                               <li>
                                 • Statut sécurisé jusqu’à{' '}
                                 {productType === 'physical'
@@ -314,6 +353,7 @@ export const PaymentOptionsForm: React.FC<PaymentOptionsFormProps> = ({
               </p>
               <p>
                 <strong>Paiement sécurisé</strong> : suivi jusqu&apos;à confirmation de prestation
+                {milestonesActive ? ' (jalons multi-étapes)' : ''}
               </p>
             </>
           ) : (

@@ -862,25 +862,7 @@ export const useCreateServiceOrder = () => {
         });
       }
 
-      if (milestonePlan && milestonePlan.length > 0) {
-        const { error: milestoneError } = await supabase.rpc(
-          // @ts-expect-error RPC ajouté en migration service_project_payment_milestones
-          'persist_service_order_milestones',
-          {
-            p_order_id: orderId,
-            p_milestones: milestonePlan.map(row => ({
-              label: row.label,
-              percentage: row.percentage,
-              amount: row.amount,
-              trigger: row.trigger,
-              sort_order: row.sort_order,
-            })),
-          }
-        );
-        if (milestoneError) {
-          logger.error('persist_service_order_milestones failed', { error: milestoneError });
-        }
-      }
+      // Jalons persistés côté serveur par create_public_service_order (invité inclus).
 
       // 12. Initier le paiement GeniusPay (avec amountToPay adapté)
       const formattedBookingDate = new Date(bookingDateTime).toLocaleDateString('fr-FR', {

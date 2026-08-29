@@ -64,6 +64,8 @@ import { fr } from 'date-fns/locale';
 import type { AdvancedPayment } from '@/types/advanced-features';
 import { useServiceOrderMilestones } from '@/hooks/service/useServiceOrderMilestones';
 import { ServiceProjectMilestoneTimeline } from '@/components/service/ServiceProjectMilestoneTimeline';
+import { ServiceProjectOrderSummary } from '@/components/service/ServiceProjectOrderSummary';
+import { parseServiceProjectOrderMetadata } from '@/lib/service/service-project-order-summary';
 import { computeServiceProjectMilestoneAmounts } from '@/lib/service/service-project-milestones';
 import { orderHasProjectMilestones } from '@/lib/payments/service-order-milestone-flow';
 
@@ -87,7 +89,7 @@ export default function PaymentManagement() {
           `
           *,
           customers ( id, name, email ),
-          order_items ( id, product_name, quantity, unit_price, total_price )
+          order_items ( id, product_name, product_type, quantity, unit_price, total_price, item_metadata )
         `
         )
         .eq('id', orderId!);
@@ -133,6 +135,16 @@ export default function PaymentManagement() {
       }))
     );
   }, [hasProjectMilestones, orderMilestones, order?.total_amount]);
+
+  const projectOrderItem = useMemo(() => {
+    const items = order?.order_items ?? [];
+    return items.find(
+      item =>
+        item.product_type === 'service' &&
+        parseServiceProjectOrderMetadata((item as { item_metadata?: unknown }).item_metadata) !=
+          null
+    );
+  }, [order?.order_items]);
 
   const [selectedPayment, setSelectedPayment] = useState<AdvancedPayment | null>(null);
   const [showReleaseDialog, setShowReleaseDialog] = useState(false);
@@ -397,6 +409,14 @@ export default function PaymentManagement() {
             </CardContent>
           </Card>
         </div>
+
+        {projectOrderItem && (
+          <ServiceProjectOrderSummary
+            className="mb-6"
+            currency={order?.currency || 'XOF'}
+            itemMetadata={(projectOrderItem as { item_metadata?: unknown }).item_metadata}
+          />
+        )}
 
         {hasProjectMilestones && milestoneTimeline && (
           <Card className="mb-6">

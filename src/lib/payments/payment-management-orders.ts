@@ -18,7 +18,12 @@ export type PaymentManagementOrder = {
   customer_id?: string | null;
   created_at?: string;
   customers?: { name?: string; email?: string } | null;
-  order_items?: Array<{ product_name?: string }>;
+  order_items?: Array<{
+    id?: string;
+    product_name?: string;
+    product_type?: string;
+    item_metadata?: unknown;
+  }>;
 };
 
 const SETTLED_STATUSES = new Set(['paid', 'completed']);
