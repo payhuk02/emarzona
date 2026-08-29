@@ -34,6 +34,34 @@ export function milestoneAmounts(totalWithFee: number): { first: number; second:
   return { first, second: Math.max(0, totalWithFee - first) };
 }
 
+/** Vérifie que les migrations P0/P1/P3 sont appliquées sur le projet E2E. */
+export async function assertServiceMilestoneSchemaReady(admin: SupabaseClient): Promise<void> {
+  const { error: fulfillmentProbe } = await admin
+    .from('service_products')
+    .select('fulfillment_mode')
+    .limit(0);
+
+  if (fulfillmentProbe && /fulfillment_mode|PGRST204/i.test(fulfillmentProbe.message ?? '')) {
+    throw new Error(
+      'Schéma service P0 manquant (fulfillment_mode). Exécutez : npm run push:e2e-migrations'
+    );
+  }
+
+  const { error: milestoneProbe } = await admin
+    .from('service_order_milestones')
+    .select('id')
+    .limit(0);
+
+  if (
+    milestoneProbe &&
+    /service_order_milestones|PGRST205|PGRST204/i.test(milestoneProbe.message ?? '')
+  ) {
+    throw new Error(
+      'Schéma jalons P3 manquant (service_order_milestones). Exécutez : npm run push:e2e-migrations'
+    );
+  }
+}
+
 export async function seedServiceMilestoneFixture(
   admin: SupabaseClient,
   prefix = 'e2e-svc-milestone'
