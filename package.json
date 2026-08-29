@@ -126,6 +126,7 @@
     "setup:commerce-e2e-secret:mirror-prod": "node scripts/setup-commerce-e2e-github-secret.mjs --mirror-prod-secrets",
     "setup:commerce-e2e-secret:from-env": "node scripts/setup-commerce-e2e-github-secret.mjs --from-env",
     "push:e2e-migrations": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/push-e2e-supabase-migrations.ps1",
+    "apply:e2e-service-milestones": "node scripts/apply-e2e-service-milestone-migrations.mjs",
     "bootstrap:e2e-schema": "node scripts/bootstrap-e2e-schema-from-prod.mjs",
     "cleanup:e2e-orphans": "node scripts/cleanup-e2e-orphans.mjs",
     "test:visual": "playwright test visual-regression",

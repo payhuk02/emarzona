@@ -43,7 +43,7 @@ export async function assertServiceMilestoneSchemaReady(admin: SupabaseClient): 
 
   if (fulfillmentProbe && /fulfillment_mode|PGRST204/i.test(fulfillmentProbe.message ?? '')) {
     throw new Error(
-      'Schéma service P0 manquant (fulfillment_mode). Exécutez : npm run push:e2e-migrations'
+      'Schéma service P0 manquant (fulfillment_mode). Exécutez : npm run apply:e2e-service-milestones'
     );
   }
 
@@ -57,7 +57,7 @@ export async function assertServiceMilestoneSchemaReady(admin: SupabaseClient): 
     /service_order_milestones|PGRST205|PGRST204/i.test(milestoneProbe.message ?? '')
   ) {
     throw new Error(
-      'Schéma jalons P3 manquant (service_order_milestones). Exécutez : npm run push:e2e-migrations'
+      'Schéma jalons P3 manquant (service_order_milestones). Exécutez : npm run apply:e2e-service-milestones'
     );
   }
 }
@@ -128,18 +128,23 @@ export async function seedServiceMilestoneFixture(
       service_product_id: serviceProduct.id,
       product_id: product.id,
       store_id: ctx.storeId,
+      user_id: ctx.userId,
       name: 'Standard',
-      display_name: 'Standard',
+      package_name: 'Standard',
       slug: `standard-${runId}`,
       package_kind: 'delivery_tier',
       tier: 'standard',
       price: packagePrice,
+      package_price: packagePrice,
       delivery_days: 7,
       revisions: 2,
       features: ['Livraison source', 'Révisions'],
       sort_order: 0,
       is_active: true,
       is_featured: true,
+      sessions_count: 1,
+      credits_per_session: 1,
+      total_sessions: 1,
     })
     .select('id, price')
     .single();
