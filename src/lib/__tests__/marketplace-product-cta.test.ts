@@ -45,13 +45,15 @@ describe('getMarketplaceProductCTA', () => {
   });
 
   it('keeps service default and supports vendor CTA label', () => {
-    expect(getMarketplaceProductCTA('service').buyLabel).toBe('Réserver');
-    expect(
-      getMarketplaceProductCTA('service', {
-        payment_type: 'full',
-        cta_button_label: 'En savoir plus',
-      }).buyLabel
-    ).toBe('En savoir plus');
+    const defaultCta = getMarketplaceProductCTA('service');
+    expect(defaultCta.action).toBe('service');
+    expect(defaultCta.buyLabel).toBe('Réserver');
+    const customCta = getMarketplaceProductCTA('service', {
+      payment_type: 'full',
+      cta_button_label: 'En savoir plus',
+    });
+    expect(customCta.action).toBe('service');
+    expect(customCta.buyLabel).toBe('En savoir plus');
     expect(getMarketplaceProductCTA('course').buyLabel).toBe("S'inscrire");
   });
 });

@@ -118,7 +118,7 @@ import {
 import { parseServiceCheckoutOptions } from '@/lib/service/service-checkout-display';
 
 const PRODUCT_SERVICE_FIELDS =
-  'id, store_id, slug, name, description, short_description, category, category_id, tags, product_type, is_active, price, promotional_price, currency, image_url, images, created_at, updated_at, payment_options, pricing_model, licensing_type, license_terms, faqs, whatsapp_number, whatsapp_enabled';
+  'id, store_id, slug, name, description, short_description, category, category_id, tags, product_type, is_active, price, promotional_price, currency, image_url, images, created_at, updated_at, payment_options, pricing_model, licensing_type, license_terms, faqs, whatsapp_number, whatsapp_enabled, product_affiliate_settings!left(affiliate_enabled, commission_rate)';
 const PRODUCT_SERVICE_SELECT = PRODUCT_SERVICE_FIELDS;
 const STORE_PUBLIC_FIELDS = 'id, name, slug, logo_url';
 const SERVICE_PRODUCT_FIELDS =

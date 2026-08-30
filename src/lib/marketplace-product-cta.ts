@@ -1,6 +1,15 @@
 import type { PhysicalProductPaymentOptions } from '@/types/physical-product';
 import { parsePhysicalCheckoutOptions } from '@/lib/physical/physical-checkout-display';
-import { parseServiceCheckoutOptions } from '@/lib/service/service-checkout-display';
+import {
+  parseServiceCheckoutOptions,
+  type ServiceCheckoutPaymentOptions,
+} from '@/lib/service/service-checkout-display';
+
+export type MarketplacePaymentOptions =
+  | PhysicalProductPaymentOptions
+  | ServiceCheckoutPaymentOptions
+  | string
+  | null;
 
 export type MarketplaceProductCTAAction =
   | 'checkout'
@@ -19,10 +28,12 @@ export interface MarketplaceProductCTA {
 
 export function getMarketplaceProductCTA(
   productType?: string | null,
-  paymentOptions?: PhysicalProductPaymentOptions | string | null
+  paymentOptions?: MarketplacePaymentOptions
 ): MarketplaceProductCTA {
   if (productType === 'physical') {
-    const parsed = parsePhysicalCheckoutOptions(paymentOptions);
+    const parsed = parsePhysicalCheckoutOptions(
+      paymentOptions as PhysicalProductPaymentOptions | string | null | undefined
+    );
     return {
       action: 'checkout',
       buyLabel: parsed.cta_button_label,
@@ -34,7 +45,9 @@ export function getMarketplaceProductCTA(
 
   switch (productType) {
     case 'service': {
-      const parsed = parseServiceCheckoutOptions(paymentOptions);
+      const parsed = parseServiceCheckoutOptions(
+        paymentOptions as ServiceCheckoutPaymentOptions | string | null | undefined
+      );
       return {
         action: 'service',
         buyLabel: parsed.cta_button_label,

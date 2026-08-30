@@ -2,10 +2,12 @@ import { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { getMarketplaceProductCTA } from '@/lib/marketplace-product-cta';
+import {
+  getMarketplaceProductCTA,
+  type MarketplacePaymentOptions,
+} from '@/lib/marketplace-product-cta';
 import { buildCheckoutUrl } from '@/lib/checkout/checkout-route';
 import type { GuestCustomerInfo } from '@/components/checkout/GuestPurchaseDialog';
-import type { PhysicalProductPaymentOptions } from '@/types/physical-product';
 
 export type MarketplaceBuyProduct = {
   id: string;
@@ -14,7 +16,7 @@ export type MarketplaceBuyProduct = {
   store_id?: string;
   product_type?: string | null;
   currency?: string | null;
-  payment_options?: PhysicalProductPaymentOptions | string | null;
+  payment_options?: MarketplacePaymentOptions;
 };
 
 type UseMarketplaceGuestBuyOptions = {
