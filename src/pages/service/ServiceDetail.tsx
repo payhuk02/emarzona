@@ -89,6 +89,7 @@ import { JoinWaitlistButton } from '@/components/service/JoinWaitlistButton';
 import { ServiceProjectOrderPanel } from '@/components/service/ServiceProjectOrderPanel';
 import { ServicePriceDisplay } from '@/components/service/ServicePriceDisplay';
 import { ServicePrestationsCatalog } from '@/components/service/ServicePrestationsCatalog';
+import { ServiceSimpleOrderPanel } from '@/components/service/ServiceSimpleOrderPanel';
 import { ServicePortfolioGallery } from '@/components/service/ServicePortfolioGallery';
 import { ServicePricingBadges } from '@/components/products/ServicePricingBadges';
 import {
@@ -105,8 +106,11 @@ import { getCategoryBreadcrumb } from '@/lib/services/service-categories';
 import {
   formatServiceAttributeValue,
   getServiceFormProfile,
+  isServiceGigFamily,
 } from '@/lib/services/service-form-profiles';
 import {
+  resolvePersistedFulfillmentMode,
+  resolveServiceFormProfile,
   servicePublicShowsCalendar,
   serviceWizardShowsCalendar,
 } from '@/lib/service-wizard-step-validation';
@@ -257,6 +261,20 @@ export default function ServiceDetail() {
       .getElementById('service-booking')
       ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, []);
+
+  const handleSimpleCheckout = useCallback(() => {
+    if (!serviceId) return;
+    navigate(
+      buildCheckoutUrl({
+        productId: serviceId,
+        storeId: service?.store_id,
+        buyNow: true,
+        quantity: 1,
+        guestEmail: guestEmail || undefined,
+        guestName: guestName || undefined,
+      })
+    );
+  }, [guestEmail, guestName, navigate, service?.store_id, serviceId]);
 
   useEffect(() => {
     const required = serviceAddons.filter(a => a.is_required).map(a => a.addon_product_id);
@@ -657,6 +675,7 @@ export default function ServiceDetail() {
   });
   const currentPrice = displayPrice.amount;
   const hasPublishedPackages = deliveryPackages.some(pkg => pkg.is_active);
+  const hasActiveExtras = gigExtras.some(extra => extra.is_active);
   const calendarForm = {
     fulfillment_mode:
       fulfillmentMode === 'project' ||
@@ -668,17 +687,24 @@ export default function ServiceDetail() {
     category_id: (service as { category_id?: string | null } | undefined)?.category_id,
     parent_category_id: listingCategory.parent?.id ?? null,
   } as const;
-  const calendarIntent = serviceWizardShowsCalendar(calendarForm);
+  const effectiveFulfillmentMode = resolvePersistedFulfillmentMode(calendarForm, serviceCategories);
+  const serviceFormProfile = resolveServiceFormProfile(calendarForm, serviceCategories);
+  const isGigService = isServiceGigFamily(serviceFormProfile);
+  const calendarIntent = serviceWizardShowsCalendar(calendarForm, serviceCategories);
   const showAppointment = servicePublicShowsCalendar(
     calendarForm,
-    Number((service as { availabilitySlotCount?: number } | undefined)?.availabilitySlotCount ?? 0)
+    Number((service as { availabilitySlotCount?: number } | undefined)?.availabilitySlotCount ?? 0),
+    serviceCategories
   );
   const showProject =
     Boolean(serviceProductId) &&
-    (fulfillmentMode === 'project' ||
-      fulfillmentMode === 'both' ||
+    (effectiveFulfillmentMode === 'project' ||
+      effectiveFulfillmentMode === 'both' ||
       hasPublishedPackages ||
-      !calendarIntent);
+      hasActiveExtras ||
+      isGigService);
+  const showProjectOrderPanel = showProject && (hasPublishedPackages || hasActiveExtras);
+  const showSimpleCheckout = !showAppointment && !showProjectOrderPanel;
   const serviceUrl = `${window.location.origin}/service/${serviceId}`;
 
   const projectPaymentOptions = (service?.payment_options ?? null) as
@@ -686,6 +712,17 @@ export default function ServiceDetail() {
     | null;
   const serviceCtaLabel = parseServiceCheckoutOptions(service?.payment_options).cta_button_label;
   const faqs = (service?.faqs as ProductFAQ[] | null | undefined) ?? [];
+  const serviceAffiliateSettings = (() => {
+    const raw = (
+      service as {
+        product_affiliate_settings?:
+          | Array<{ affiliate_enabled?: boolean; commission_rate?: number }>
+          | { affiliate_enabled?: boolean; commission_rate?: number }
+          | null;
+      }
+    )?.product_affiliate_settings;
+    return Array.isArray(raw) ? raw[0] : raw;
+  })();
 
   const maxParticipants = service?.service?.max_participants || 1;
   const minParticipants = 1;
@@ -832,6 +869,15 @@ export default function ServiceDetail() {
                 maxParticipants={serviceRecord?.max_participants}
                 size="md"
               />
+              <div className="flex flex-wrap items-center gap-2">
+                <PricingModelBadge pricingModel={service?.pricing_model} size="sm" />
+                <PaymentOptionsBadge
+                  paymentOptions={getPaymentOptions({
+                    payment_options: projectPaymentOptions,
+                  })}
+                  size="sm"
+                />
+              </div>
               {serviceRecord?.deposit_required &&
                 (() => {
                   const payable = resolveServicePayableAmount(
@@ -1158,10 +1204,10 @@ export default function ServiceDetail() {
         {/* Right: Booking / Project order */}
         <div
           id="service-booking"
-          className={`space-y-4 min-w-0 scroll-mt-4${showProject ? ' lg:sticky lg:top-4 self-start' : ''}`}
+          className={`space-y-4 min-w-0 scroll-mt-4${showProjectOrderPanel || showSimpleCheckout ? ' lg:sticky lg:top-4 self-start' : ''}`}
         >
           {(() => {
-            if (showProject && !showAppointment) {
+            if (showProjectOrderPanel && !showAppointment) {
               return (
                 <ServiceProjectOrderPanel
                   serviceProductId={serviceProductId!}
@@ -1189,7 +1235,7 @@ export default function ServiceDetail() {
               );
             }
 
-            if (showProject && showAppointment) {
+            if (showProjectOrderPanel && showAppointment) {
               return (
                 <Tabs defaultValue={hasPublishedPackages ? 'project' : 'appointment'}>
                   <TabsList className="grid w-full grid-cols-2">
@@ -1246,7 +1292,24 @@ export default function ServiceDetail() {
             return null;
           })()}
 
-          {calendarIntent && !showAppointment && !showProject && (
+          {showSimpleCheckout && (
+            <ServiceSimpleOrderPanel
+              serviceCtaLabel={serviceCtaLabel}
+              displayPrice={displayPrice}
+              currency={service?.currency || 'XOF'}
+              paymentOptions={projectPaymentOptions}
+              pricingModel={service?.pricing_model}
+              licensingType={service?.licensing_type}
+              depositRequired={serviceRecord?.deposit_required}
+              depositAmount={serviceRecord?.deposit_amount}
+              depositType={serviceRecord?.deposit_type}
+              affiliateEnabled={serviceAffiliateSettings?.affiliate_enabled}
+              commissionRate={serviceAffiliateSettings?.commission_rate}
+              onCheckout={handleSimpleCheckout}
+            />
+          )}
+
+          {calendarIntent && !showAppointment && !showProjectOrderPanel && !showSimpleCheckout && (
             <Card>
               <CardHeader>
                 <CardTitle>{serviceCtaLabel}</CardTitle>

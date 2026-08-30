@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { normalizeServicePricingType } from '@/lib/service/service-pricing';
+import { parseServiceCheckoutOptions } from '@/lib/service/service-checkout-display';
 import { getServiceFormProfile, isServiceGigFamily } from '@/lib/services/service-form-profiles';
 import { fetchDeliveryPackages, fetchGigExtras } from '@/lib/services/service-delivery-commerce';
 import {
@@ -23,6 +24,32 @@ const SERVICE_RESOURCE_FIELDS =
   'id, service_product_id, name, resource_type, quantity, is_required';
 const PRODUCT_AFFILIATE_FIELDS =
   'id, product_id, affiliate_enabled, commission_rate, commission_type, fixed_commission_amount, cookie_duration_days, min_order_amount, allow_self_referral, require_approval, terms_and_conditions';
+
+function parseServicePaymentOptionsForForm(raw: unknown) {
+  let parsed: Record<string, unknown> | null = null;
+  if (typeof raw === 'string') {
+    try {
+      const json = JSON.parse(raw) as unknown;
+      parsed = json && typeof json === 'object' ? (json as Record<string, unknown>) : null;
+    } catch {
+      parsed = null;
+    }
+  } else if (raw && typeof raw === 'object') {
+    parsed = raw as Record<string, unknown>;
+  }
+
+  const cta = parseServiceCheckoutOptions(parsed);
+  return {
+    payment_type: (parsed?.payment_type as 'full' | 'percentage' | 'delivery_secured') ?? 'full',
+    percentage_rate: Number(parsed?.percentage_rate ?? 30),
+    use_project_milestones: Boolean(parsed?.use_project_milestones),
+    project_milestones: Array.isArray(parsed?.project_milestones)
+      ? parsed.project_milestones
+      : undefined,
+    ...parsed,
+    cta_button_label: cta.cta_button_label,
+  };
+}
 
 export async function loadServiceProductFormData(
   productId: string,
@@ -218,11 +245,7 @@ export async function loadServiceProductFormData(
       og_image: product.og_image || '',
     },
     faqs: product.faqs || [],
-    payment: product.payment_options || {
-      payment_type: 'full',
-      percentage_rate: 30,
-      cta_button_label: 'Réserver',
-    },
+    payment: parseServicePaymentOptionsForForm(product.payment_options),
     hide_purchase_count: product.hide_purchase_count || false,
     hide_likes_count: product.hide_likes_count || false,
     hide_recommendations_count: product.hide_recommendations_count || false,

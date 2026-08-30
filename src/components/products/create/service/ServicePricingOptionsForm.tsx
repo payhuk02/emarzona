@@ -27,6 +27,7 @@ import { ServiceGigPackagesForm } from './ServiceGigPackagesForm';
 import { ServiceGigExtrasForm } from './ServiceGigExtrasForm';
 import { ServiceGigBriefForm } from './ServiceGigBriefForm';
 import { createDefaultBriefFields } from '@/lib/services/service-delivery-commerce';
+import { ServiceCtaButtonFields } from './ServiceCtaButtonFields';
 import { useEffect } from 'react';
 
 interface ServicePricingOptionsFormProps {
@@ -325,6 +326,20 @@ export const ServicePricingOptionsForm = ({ data, onUpdate }: ServicePricingOpti
           </CardContent>
         </Card>
       )}
+
+      <ServiceCtaButtonFields
+        value={data.payment?.cta_button_label}
+        onChange={label =>
+          onUpdate({
+            payment: {
+              payment_type: data.payment?.payment_type ?? 'full',
+              percentage_rate: data.payment?.percentage_rate ?? 30,
+              ...data.payment,
+              cta_button_label: label,
+            },
+          })
+        }
+      />
     </div>
   );
 };
