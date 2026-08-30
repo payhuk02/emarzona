@@ -11,7 +11,8 @@ import { ServicePriceDisplay } from '@/components/service/ServicePriceDisplay';
 import { ServiceProjectMilestoneTimeline } from '@/components/service/ServiceProjectMilestoneTimeline';
 import {
   computeServiceProjectMilestoneAmounts,
-  projectMilestonesEnabled,
+  amountDueAtProjectCheckout,
+  serviceCheckoutMilestonesEnabled,
   type ServicePaymentOptionsWithMilestones,
 } from '@/lib/service/service-project-milestones';
 import { resolveServicePayableAmount } from '@/lib/service/service-payable-amount';
@@ -49,10 +50,15 @@ export function ServiceSimpleOrderPanel({
   onCheckout,
 }: ServiceSimpleOrderPanelProps) {
   const amount = displayPrice.amount;
-  const milestonesActive = projectMilestonesEnabled(paymentOptions, true);
+  const milestonesActive = serviceCheckoutMilestonesEnabled(paymentOptions, {
+    isFixedPriceBuyNow: true,
+  });
   const milestonePreview = milestonesActive
     ? computeServiceProjectMilestoneAmounts(amount, paymentOptions?.project_milestones)
     : null;
+  const milestoneDueNow = milestonePreview ? amountDueAtProjectCheckout(milestonePreview) : 0;
+  const milestoneRemaining =
+    milestonePreview && milestoneDueNow > 0 ? Math.max(0, amount - milestoneDueNow) : 0;
 
   const payable = resolveServicePayableAmount(
     amount,
@@ -103,7 +109,18 @@ export function ServiceSimpleOrderPanel({
           <ServiceProjectMilestoneTimeline milestones={milestonePreview} currency={currency} />
         )}
 
-        {payable.remainingAmount > 0 && (
+        {milestoneDueNow > 0 && milestoneRemaining > 0 && (
+          <p className="text-sm text-muted-foreground">
+            À payer maintenant :{' '}
+            <span className="font-medium text-foreground">
+              {milestoneDueNow.toLocaleString()} {currency}
+            </span>
+            {' · '}
+            Solde : {milestoneRemaining.toLocaleString()} {currency}
+          </p>
+        )}
+
+        {!milestonesActive && payable.remainingAmount > 0 && (
           <p className="text-sm text-muted-foreground">
             À payer maintenant :{' '}
             <span className="font-medium text-foreground">

@@ -35,10 +35,10 @@ import {
   toPartialPaymentOrderFields,
 } from '@/lib/service/service-payable-amount';
 import {
-  amountDueAtProjectCheckout,
   computeServiceProjectMilestoneAmounts,
-  projectMilestonesEnabled,
-  toMilestoneOrderFields,
+  parseServicePaymentOptions,
+  serviceCheckoutMilestonesEnabled,
+  syncServiceOrderMilestones,
   type ServicePaymentOptionsWithMilestones,
 } from '@/lib/service/service-project-milestones';
 import { useToast } from '@/hooks/use-toast';
@@ -151,6 +151,12 @@ export interface CreateServiceOrderOptions {
 
   /** Code coupon checkout — appliqué par la RPC, pas seulement à l’affichage */
   couponCode?: string | null;
+
+  /**
+   * Achat immédiat prix fixe (sans créneau ni package projet).
+   * Active les jalons delivery_secured sur commande appointment-less.
+   */
+  buyNowWithoutAppointment?: boolean;
 }
 
 /**
@@ -242,6 +248,7 @@ export const useCreateServiceOrder = () => {
         projectOrder,
         addonProductIds = [],
         couponCode,
+        buyNowWithoutAppointment = false,
       } = options;
 
       if (checkoutMode === 'cart') {
@@ -262,11 +269,10 @@ export const useCreateServiceOrder = () => {
       }
 
       // Récupérer les options de paiement configurées
-      const paymentOptions =
-        (product.payment_options as ServicePaymentOptionsWithMilestones | null) || {
-          payment_type: 'full',
-          percentage_rate: 30,
-        };
+      const paymentOptions = parseServicePaymentOptions(product.payment_options) ?? {
+        payment_type: 'full',
+        percentage_rate: 30,
+      };
       const paymentType = paymentOptions.payment_type || 'full';
       const percentageRate = paymentOptions.percentage_rate || 30;
 
@@ -308,10 +314,11 @@ export const useCreateServiceOrder = () => {
         }
       }
       const isProjectCheckout = Boolean(resolvedProject?.packageId);
+      const skipAppointmentBooking = isProjectCheckout || buyNowWithoutAppointment;
 
       // 3. Vérifier capacité max participants
       if (
-        !isProjectCheckout &&
+        !skipAppointmentBooking &&
         serviceProduct.max_participants &&
         numberOfParticipants > serviceProduct.max_participants
       ) {
@@ -336,7 +343,7 @@ export const useCreateServiceOrder = () => {
       let bookingId: string | null = null;
       let userId: string | null = authenticatedUserId;
 
-      if (!isProjectCheckout) {
+      if (!isProjectCheckout && !buyNowWithoutAppointment) {
         // 3a. Vérifier advance_booking_days (réservation à l'avance maximum)
         // Utilisation de la fonction SQL pour validation côté serveur (plus fiable)
         if (serviceProduct.advance_booking_days) {
@@ -775,27 +782,42 @@ export const useCreateServiceOrder = () => {
         deposit_amount: serviceProduct.deposit_amount,
       });
 
-      const milestonePlan = projectMilestonesEnabled(paymentOptions, isProjectCheckout)
-        ? computeServiceProjectMilestoneAmounts(billedTotal, paymentOptions.project_milestones)
-        : null;
-
-      let finalPayable = payable;
-      if (milestonePlan && milestonePlan.length > 0) {
-        const dueNow = amountDueAtProjectCheckout(milestonePlan);
-        finalPayable = {
-          paymentType: 'delivery_secured',
-          percentageRate: null,
-          amountToPay: dueNow > 0 ? dueNow : payable.amountToPay,
-          remainingAmount: Math.max(0, billedTotal - dueNow),
-          totalAmount: billedTotal,
-        };
-      }
-
-      const finalAmountToPay = finalPayable.amountToPay;
       const orderId = orderData.order_id;
       const orderNumber = orderData.order_number;
       const customerId = orderData.customer_id;
       const orderItemId = orderData.order_item_id;
+
+      const milestonesActive = serviceCheckoutMilestonesEnabled(paymentOptions, {
+        isProjectCheckout,
+        isFixedPriceBuyNow: buyNowWithoutAppointment,
+      });
+
+      let milestonePlan: ReturnType<typeof computeServiceProjectMilestoneAmounts> | null = null;
+      let finalPayable = payable;
+
+      if (milestonesActive) {
+        const synced = await syncServiceOrderMilestones(
+          supabase,
+          orderId,
+          billedTotal,
+          paymentOptions
+        );
+        milestonePlan = computeServiceProjectMilestoneAmounts(
+          billedTotal,
+          paymentOptions.project_milestones
+        );
+        if (synced.dueNow > 0) {
+          finalPayable = {
+            paymentType: 'delivery_secured',
+            percentageRate: null,
+            amountToPay: synced.dueNow,
+            remainingAmount: synced.remaining,
+            totalAmount: billedTotal,
+          };
+        }
+      }
+
+      const finalAmountToPay = finalPayable.amountToPay;
 
       // 9b. Créer automatiquement la facture
       try {
@@ -838,15 +860,11 @@ export const useCreateServiceOrder = () => {
       const calcRemainingAmount = finalPayable.remainingAmount;
 
       const partialPayment = toPartialPaymentOrderFields(finalPayable);
-      const milestoneOrderFields =
-        milestonePlan && milestonePlan.length > 0 ? toMilestoneOrderFields(finalPayable) : null;
       if (partialPayment) {
         await supabase.from('orders').update(partialPayment).eq('id', orderId);
-      } else if (milestoneOrderFields) {
-        await supabase.from('orders').update(milestoneOrderFields).eq('id', orderId);
       }
 
-      // 11. Créer un secured_payment si paiement escrow
+      // 11. Créer un secured_payment si paiement escrow (best-effort ; invité → RLS)
       if (paymentType === 'delivery_secured') {
         await supabase.from('secured_payments').insert({
           order_id: orderId,

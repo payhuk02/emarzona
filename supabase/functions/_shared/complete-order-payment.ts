@@ -239,6 +239,30 @@ export async function completeTransactionAndOrder(
   return { orderId, alreadyCompleted: false };
 }
 
+function isTruthyMetadataFlag(value: unknown): boolean {
+  return value === true || value === 'true' || value === 1 || value === '1';
+}
+
+async function sumAwaitingServiceMilestoneAmount(
+  supabase: SupabaseClient,
+  orderId: string
+): Promise<number> {
+  const { data: rows } = await supabase
+    .from('service_order_milestones')
+    .select('amount, status, trigger_type')
+    .eq('order_id', orderId)
+    .in('status', ['awaiting_payment', 'pending']);
+
+  if (!rows?.length) return 0;
+
+  return rows.reduce((sum, row) => {
+    if (row.status !== 'awaiting_payment') return sum;
+    const amount =
+      typeof row.amount === 'string' ? parseFloat(row.amount) : Number(row.amount ?? 0);
+    return sum + (Number.isFinite(amount) ? amount : 0);
+  }, 0);
+}
+
 export async function getMaxAmountTolerance(supabase: SupabaseClient): Promise<number> {
   try {
     const { data: settings } = await supabase
@@ -314,6 +338,15 @@ export async function resolveOrderExpectedPayableAmount(
       baseAmount = remainingAmount;
     } else if (Number.isFinite(percentageAmount) && percentageAmount > 0) {
       baseAmount = percentageAmount;
+    }
+  } else if (
+    isTruthyMetadataFlag(metadata.project_milestones_enabled) &&
+    remainingAmount <= 0 &&
+    (!Number.isFinite(percentageAmount) || percentageAmount <= 0)
+  ) {
+    const milestoneDue = await sumAwaitingServiceMilestoneAmount(supabase, orderId);
+    if (milestoneDue > 0) {
+      baseAmount = milestoneDue;
     }
   }
 

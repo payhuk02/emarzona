@@ -46,6 +46,10 @@ import { htmlToPlainText } from '@/lib/html-sanitizer';
 import { isSupportedCurrency, type Currency } from '@/lib/currency-converter';
 import { useCreatePhysicalOrder } from '@/hooks/orders/useCreatePhysicalOrder';
 import { useCreateServiceOrder } from '@/hooks/orders/useCreateServiceOrder';
+import {
+  serviceCheckoutMilestonesEnabled,
+  type ServicePaymentOptionsWithMilestones,
+} from '@/lib/service/service-project-milestones';
 import { parsePhysicalCheckoutOptions } from '@/lib/physical/physical-checkout-display';
 import { notifyPhysicalOrderPlaced } from '@/lib/notifications/physical-order-notification';
 import { buildGuestOrderConfirmationPath } from '@/lib/physical/guest-order-confirmation';
@@ -730,7 +734,16 @@ const Checkout = () => {
             Boolean(projectOrder?.packageId) &&
             (fulfillmentMode === 'project' || fulfillmentMode === 'both');
 
-          if (!scheduledAt && !isProjectCheckout) {
+          const paymentOptions =
+            product.payment_options && typeof product.payment_options === 'object'
+              ? (product.payment_options as ServicePaymentOptionsWithMilestones)
+              : null;
+          const isFixedPriceMilestoneCheckout =
+            !scheduledAt &&
+            !isProjectCheckout &&
+            serviceCheckoutMilestonesEnabled(paymentOptions, { isFixedPriceBuyNow: true });
+
+          if (!scheduledAt && !isProjectCheckout && !isFixedPriceMilestoneCheckout) {
             const params = new URLSearchParams({ guestEmail: formData.email });
             if (customerName) params.set('guestName', customerName);
             if (customerPhone) params.set('guestPhone', customerPhone);
@@ -747,6 +760,45 @@ const Checkout = () => {
 
           if (!serviceProductRow?.id) {
             throw new Error('Service introuvable');
+          }
+
+          if (isFixedPriceMilestoneCheckout) {
+            const orderedAt = new Date().toISOString();
+            const serviceResult = await createServiceOrder({
+              serviceProductId: serviceProductRow.id,
+              productId: product.id,
+              storeId: store.id,
+              customerEmail: formData.email,
+              customerName,
+              customerPhone,
+              bookingDateTime: orderedAt,
+              numberOfParticipants: 1,
+              durationMinutes: serviceProductRow.duration_minutes ?? undefined,
+              notes: JSON.stringify({
+                fulfillment_mode: 'fixed_price',
+                schedule_kind: 'immediate_buy_now',
+              }),
+              buyNowWithoutAppointment: true,
+              checkoutMode: 'immediate',
+              addonProductIds: addonIds,
+              couponCode: appliedCouponCode?.code || null,
+            });
+
+            if (!serviceResult.checkoutUrl) {
+              toast({
+                title: 'Commande créée',
+                description: 'Votre commande a été enregistrée.',
+              });
+              navigate('/account/orders', { replace: true });
+              setSubmitting(false);
+              return;
+            }
+
+            safeRedirect(serviceResult.checkoutUrl, () => {
+              navigate('/account/orders', { replace: true });
+            });
+            setSubmitting(false);
+            return;
           }
 
           if (isProjectCheckout && projectOrder) {

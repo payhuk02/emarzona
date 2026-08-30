@@ -4,6 +4,7 @@ import {
   computeServiceProjectMilestoneAmounts,
   DEFAULT_SERVICE_PROJECT_MILESTONES,
   projectMilestonesEnabled,
+  serviceCheckoutMilestonesEnabled,
   toMilestoneOrderFields,
   validateServiceProjectMilestones,
 } from '../service-project-milestones';
@@ -55,6 +56,34 @@ describe('projectMilestonesEnabled', () => {
       )
     ).toBe(false);
     expect(projectMilestonesEnabled({ payment_type: 'full' }, true)).toBe(false);
+  });
+});
+
+describe('serviceCheckoutMilestonesEnabled', () => {
+  const opts = {
+    payment_type: 'delivery_secured' as const,
+    use_project_milestones: true,
+  };
+
+  it('enables milestones for project checkout', () => {
+    expect(serviceCheckoutMilestonesEnabled(opts, { isProjectCheckout: true })).toBe(true);
+  });
+
+  it('enables milestones for fixed-price buy now', () => {
+    expect(serviceCheckoutMilestonesEnabled(opts, { isFixedPriceBuyNow: true })).toBe(true);
+  });
+
+  it('accepts string "true" for use_project_milestones', () => {
+    expect(
+      serviceCheckoutMilestonesEnabled(
+        { payment_type: 'delivery_secured', use_project_milestones: 'true' },
+        { isProjectCheckout: true }
+      )
+    ).toBe(true);
+  });
+
+  it('rejects when neither project nor fixed-price buy now', () => {
+    expect(serviceCheckoutMilestonesEnabled(opts, {})).toBe(false);
   });
 });
 

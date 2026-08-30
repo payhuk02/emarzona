@@ -9,7 +9,7 @@ import { resolveServicePayableAmount } from '@/lib/service/service-payable-amoun
 import {
   amountDueAtProjectCheckout,
   computeServiceProjectMilestoneAmounts,
-  projectMilestonesEnabled,
+  serviceCheckoutMilestonesEnabled,
   type ServicePaymentOptionsWithMilestones,
 } from '@/lib/service/service-project-milestones';
 
@@ -141,7 +141,12 @@ export function buildServiceBuyNowBreakdown(input: ServiceBuyNowInput): ServiceB
   let milestoneDueNow = 0;
   let milestoneRemaining = 0;
 
-  if (isProject && projectMilestonesEnabled(paymentOptions, true)) {
+  if (
+    serviceCheckoutMilestonesEnabled(paymentOptions, {
+      isProjectCheckout: isProject,
+      isFixedPriceBuyNow: !isProject,
+    })
+  ) {
     const milestones = computeServiceProjectMilestoneAmounts(
       totalWithFee,
       paymentOptions?.project_milestones
