@@ -126,7 +126,7 @@ const PRODUCT_SERVICE_FIELDS =
 const PRODUCT_SERVICE_SELECT = PRODUCT_SERVICE_FIELDS;
 const STORE_PUBLIC_FIELDS = 'id, name, slug, logo_url';
 const SERVICE_PRODUCT_FIELDS =
-  'id, product_id, store_id, service_type, duration_minutes, location_type, location_address, meeting_url, timezone, buffer_time_before, buffer_time_after, max_bookings_per_day, require_approval, max_participants, advance_booking_days, fulfillment_mode, brief_fields, category_attributes, pricing_type, deposit_required, deposit_amount, deposit_type, allow_booking_cancellation, cancellation_deadline_hours, requires_staff, created_at, updated_at';
+  'id, product_id, service_type, duration_minutes, location_type, location_address, meeting_url, timezone, buffer_time_before, buffer_time_after, max_bookings_per_day, require_approval, max_participants, advance_booking_days, fulfillment_mode, brief_fields, category_attributes, pricing_type, deposit_required, deposit_amount, deposit_type, allow_booking_cancellation, cancellation_deadline_hours, requires_staff, created_at, updated_at';
 const SERVICE_STAFF_FIELDS =
   'id, service_product_id, name, role, bio, avatar_url, is_active, created_at, updated_at';
 
@@ -202,12 +202,20 @@ export default function ServiceDetail() {
         storePublic = storeRow;
       }
 
-      // Fetch service details
-      const { data: serviceData } = await supabase
+      // Fetch service details (ignore unknown columns — must not crash the page)
+      const { data: serviceData, error: serviceProductError } = await supabase
         .from('service_products')
         .select(SERVICE_PRODUCT_FIELDS)
         .eq('product_id', serviceId)
         .maybeSingle();
+
+      if (serviceProductError) {
+        logger.warn('ServiceDetail: service_products fetch failed', {
+          serviceId,
+          message: serviceProductError.message,
+          code: serviceProductError.code,
+        });
+      }
 
       // Fetch staff (best-effort — schema differences must not crash the page)
       let staff: Array<Record<string, unknown>> = [];
@@ -711,7 +719,7 @@ export default function ServiceDetail() {
     | import('@/lib/service/service-project-milestones').ServicePaymentOptionsWithMilestones
     | null;
   const serviceCtaLabel = parseServiceCheckoutOptions(service?.payment_options).cta_button_label;
-  const faqs = (service?.faqs as ProductFAQ[] | null | undefined) ?? [];
+  const faqs = Array.isArray(service?.faqs) ? (service.faqs as ProductFAQ[]) : [];
   const serviceAffiliateSettings = (() => {
     const raw = (
       service as {
