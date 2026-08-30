@@ -101,7 +101,7 @@ import {
   resolveServiceAppointmentUnitPrice,
   resolveServiceDisplayPrice,
 } from '@/lib/service/service-pricing';
-import { useServiceCategories } from '@/hooks/useServiceCategories';
+import { useServiceCategoryTree } from '@/hooks/useServiceCategories';
 import { getCategoryBreadcrumb } from '@/lib/services/service-categories';
 import {
   formatServiceAttributeValue,
@@ -144,7 +144,7 @@ export default function ServiceDetail() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
-  const { data: serviceCategories = [] } = useServiceCategories();
+  const { tree: serviceCategoryTree, data: serviceCategoryRows = [] } = useServiceCategoryTree();
   // Type pour le créneau horaire sélectionné
   interface TimeSlot {
     time: string;
@@ -658,7 +658,7 @@ export default function ServiceDetail() {
     | undefined;
   const fulfillmentMode = serviceRecord?.fulfillment_mode || 'appointment';
   const listingCategory = getCategoryBreadcrumb(
-    serviceCategories,
+    serviceCategoryRows,
     (service as { category_id?: string | null } | undefined)?.category_id
   );
   const activePackagePrices = deliveryPackages.filter(pkg => pkg.is_active).map(pkg => pkg.price);
@@ -695,14 +695,17 @@ export default function ServiceDetail() {
     category_id: (service as { category_id?: string | null } | undefined)?.category_id,
     parent_category_id: listingCategory.parent?.id ?? null,
   } as const;
-  const effectiveFulfillmentMode = resolvePersistedFulfillmentMode(calendarForm, serviceCategories);
-  const serviceFormProfile = resolveServiceFormProfile(calendarForm, serviceCategories);
+  const effectiveFulfillmentMode = resolvePersistedFulfillmentMode(
+    calendarForm,
+    serviceCategoryTree
+  );
+  const serviceFormProfile = resolveServiceFormProfile(calendarForm, serviceCategoryTree);
   const isGigService = isServiceGigFamily(serviceFormProfile);
-  const calendarIntent = serviceWizardShowsCalendar(calendarForm, serviceCategories);
+  const calendarIntent = serviceWizardShowsCalendar(calendarForm, serviceCategoryTree);
   const showAppointment = servicePublicShowsCalendar(
     calendarForm,
     Number((service as { availabilitySlotCount?: number } | undefined)?.availabilitySlotCount ?? 0),
-    serviceCategories
+    serviceCategoryTree
   );
   const showProject =
     Boolean(serviceProductId) &&
@@ -812,7 +815,7 @@ export default function ServiceDetail() {
           <div>
             {(() => {
               const crumb = getCategoryBreadcrumb(
-                serviceCategories,
+                serviceCategoryRows,
                 (service as { category_id?: string | null })?.category_id
               );
               if (crumb.parent || crumb.leaf) {
@@ -1061,7 +1064,7 @@ export default function ServiceDetail() {
 
           {(() => {
             const crumb = getCategoryBreadcrumb(
-              serviceCategories,
+              serviceCategoryRows,
               (service as { category_id?: string | null }).category_id
             );
             const profile = getServiceFormProfile(

@@ -124,7 +124,7 @@ function findInServiceCategoryTree(
   if (!id) return { parent: null, leaf: null, isParent: false };
   for (const parent of tree) {
     if (parent.id === id) return { parent, leaf: null, isParent: true };
-    const child = parent.children.find(c => c.id === id) ?? null;
+    const child = parent.children?.find(c => c.id === id) ?? null;
     if (child) return { parent, leaf: child, isParent: false };
   }
   return { parent: null, leaf: null, isParent: false };
@@ -173,7 +173,7 @@ export function resolveServiceCategorySelection(
     fromCategoryId.parent ?? findInServiceCategoryTree(tree, parentCategoryId).parent ?? null;
 
   if (parentHint) {
-    const needsChildren = parentHint.children.length === 0;
+    const needsChildren = (parentHint.children?.length ?? 0) === 0;
     return {
       parent: parentHint,
       leaf: null,
