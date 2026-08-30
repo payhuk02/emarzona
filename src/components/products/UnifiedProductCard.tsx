@@ -2,7 +2,10 @@
 import React, { useMemo, useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { generateProductUrl, generatePaymentUrl } from '@/lib/store-utils';
-import { resolveMarketplaceProductCardUrl } from '@/lib/seo/product-public-url';
+import {
+  resolveMarketplaceProductCardUrl,
+  resolveStoreProductCardUrl,
+} from '@/lib/seo/product-public-url';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -37,6 +40,7 @@ import {
   Users,
   GraduationCap,
   Sparkles,
+  Eye,
 } from 'lucide-react';
 import { OptimizedImage } from '@/components/ui/OptimizedImage';
 import { ResponsiveProductImage } from '@/components/ui/ResponsiveProductImage';
@@ -224,6 +228,13 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
         { id: product.id, slug: product.slug, product_type: product.type },
         product.store
       );
+    }
+    if (variant === 'store') {
+      return resolveStoreProductCardUrl({
+        id: product.id,
+        slug: product.slug,
+        product_type: product.type,
+      });
     }
     return product.store?.slug
       ? generateProductUrl(product.store.slug, product.slug, product.store?.subdomain)
@@ -476,11 +487,11 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
               onClick={e => {
                 e.preventDefault();
                 e.stopPropagation();
-                setQuickOrderOpen(true);
+                void marketplaceBuy.handleBuyClick();
               }}
             >
               <ShoppingCart className="h-4 w-4 mr-2" />
-              Acheter
+              {physicalCheckoutDisplay?.cta_button_label ?? 'Acheter'}
             </Button>
           )}
 
@@ -499,6 +510,15 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
                 <ShoppingCart className="h-4 w-4 mr-2" />
               )}
               {marketplaceBuy.cta.buyLabel}
+            </Button>
+          )}
+
+          {product.type !== 'service' && (
+            <Button size="sm" variant="secondary" asChild>
+              <Link to={productUrl} onClick={() => handleAction('view')}>
+                <Eye className="h-4 w-4 mr-2" />
+                Voir
+              </Link>
             </Button>
           )}
         </div>
@@ -1060,6 +1080,8 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
             <MarketplaceProductCardActions
               productId={product.id}
               productName={productName}
+              productUrl={productUrl}
+              hideViewButton={product.type === 'service'}
               storeId={product.store?.id}
               buyLabel={
                 product.type === 'physical' && product.stock === 0
@@ -1080,6 +1102,7 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
                 if (product.type === 'physical' && product.stock === 0) return;
                 void marketplaceBuy.handleBuyClick();
               }}
+              onView={() => handleAction('view')}
               whatsappNumber={product.whatsapp_number}
               whatsappEnabled={product.whatsapp_enabled}
               paymentUrl={paymentUrl}

@@ -64,3 +64,14 @@ export function resolveMarketplaceProductCardUrl(
 
   return product.slug ? `/products/${product.slug}` : `/products/${product.id}`;
 }
+
+/** Lien carte produit sur la boutique (*.myemarzona.shop) — chemins relatifs sur le sous-domaine. */
+export function resolveStoreProductCardUrl(product: MarketplaceProductRef): string {
+  if (product.product_type === 'service') {
+    return `/service/${product.id}`;
+  }
+  if (product.product_type === 'course' && product.slug) {
+    return `/courses/${product.slug}`;
+  }
+  return product.slug ? `/products/${product.slug}` : `/products/${product.id}`;
+}

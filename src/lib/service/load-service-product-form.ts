@@ -221,6 +221,7 @@ export async function loadServiceProductFormData(
     payment: product.payment_options || {
       payment_type: 'full',
       percentage_rate: 30,
+      cta_button_label: 'Réserver',
     },
     hide_purchase_count: product.hide_purchase_count || false,
     hide_likes_count: product.hide_likes_count || false,

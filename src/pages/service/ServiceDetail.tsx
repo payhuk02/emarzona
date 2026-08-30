@@ -40,6 +40,8 @@ import {
   Shield,
   TrendingUp,
   ChevronRight,
+  HelpCircle,
+  Video,
 } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
@@ -69,6 +71,8 @@ import { logger } from '@/lib/logger';
 import { useAnalyticsTracking } from '@/hooks/useProductAnalytics';
 import { useWishlistToggle } from '@/hooks/wishlist/useWishlistToggle';
 import { SEOMeta, ProductSchema } from '@/components/seo';
+import { FAQSchema } from '@/components/seo/FAQSchema';
+import type { ProductFAQ } from '@/types/product-form';
 import { PaymentOptionsBadge, getPaymentOptions } from '@/components/products/PaymentOptionsBadge';
 import { PricingModelBadge } from '@/components/products/PricingModelBadge';
 import {
@@ -111,13 +115,14 @@ import {
   serviceLocationTypeLabel,
   serviceTypeLabel,
 } from '@/lib/service/service-detail-labels';
+import { parseServiceCheckoutOptions } from '@/lib/service/service-checkout-display';
 
 const PRODUCT_SERVICE_FIELDS =
-  'id, store_id, slug, name, description, short_description, category, category_id, tags, product_type, is_active, price, promotional_price, currency, image_url, images, created_at, updated_at, payment_options, pricing_model, licensing_type, license_terms';
+  'id, store_id, slug, name, description, short_description, category, category_id, tags, product_type, is_active, price, promotional_price, currency, image_url, images, created_at, updated_at, payment_options, pricing_model, licensing_type, license_terms, faqs, whatsapp_number, whatsapp_enabled';
 const PRODUCT_SERVICE_SELECT = PRODUCT_SERVICE_FIELDS;
 const STORE_PUBLIC_FIELDS = 'id, name, slug, logo_url';
 const SERVICE_PRODUCT_FIELDS =
-  'id, product_id, store_id, service_type, duration_minutes, location_type, location_address, max_participants, advance_booking_days, fulfillment_mode, brief_fields, category_attributes, pricing_type, deposit_required, deposit_amount, deposit_type, allow_booking_cancellation, cancellation_deadline_hours, requires_staff, created_at, updated_at';
+  'id, product_id, store_id, service_type, duration_minutes, location_type, location_address, meeting_url, timezone, buffer_time_before, buffer_time_after, max_bookings_per_day, require_approval, max_participants, advance_booking_days, fulfillment_mode, brief_fields, category_attributes, pricing_type, deposit_required, deposit_amount, deposit_type, allow_booking_cancellation, cancellation_deadline_hours, requires_staff, created_at, updated_at';
 const SERVICE_STAFF_FIELDS =
   'id, service_product_id, name, role, bio, avatar_url, is_active, created_at, updated_at';
 
@@ -679,6 +684,8 @@ export default function ServiceDetail() {
   const projectPaymentOptions = (service?.payment_options ?? null) as
     | import('@/lib/service/service-project-milestones').ServicePaymentOptionsWithMilestones
     | null;
+  const serviceCtaLabel = parseServiceCheckoutOptions(service?.payment_options).cta_button_label;
+  const faqs = (service?.faqs as ProductFAQ[] | null | undefined) ?? [];
 
   const maxParticipants = service?.service?.max_participants || 1;
   const minParticipants = 1;
@@ -733,6 +740,8 @@ export default function ServiceDetail() {
           url={serviceUrl}
         />
       )}
+
+      {faqs.length > 0 && <FAQSchema faqs={faqs} />}
 
       {/* Back Button */}
       <Button variant="ghost" className="mb-4 sm:mb-6 -ml-2 min-h-11" onClick={() => navigate(-1)}>
@@ -855,6 +864,20 @@ export default function ServiceDetail() {
             const durationLabel = formatServiceDurationMinutes(service?.service?.duration_minutes);
             const locationLabel = serviceLocationTypeLabel(service?.service?.location_type);
             const kindLabel = serviceTypeLabel(service?.service?.service_type);
+            const serviceRow = service?.service as {
+              location_type?: string;
+              meeting_url?: string | null;
+              timezone?: string | null;
+              buffer_time_before?: number | null;
+              buffer_time_after?: number | null;
+              max_bookings_per_day?: number | null;
+              require_approval?: boolean | null;
+            } | null;
+            const bufferBefore = serviceRow?.buffer_time_before;
+            const bufferAfter = serviceRow?.buffer_time_after;
+            const hasBuffer =
+              (bufferBefore != null && bufferBefore > 0) ||
+              (bufferAfter != null && bufferAfter > 0);
             return (
               <Card>
                 <CardHeader>
@@ -891,6 +914,68 @@ export default function ServiceDetail() {
                         <p className="font-medium break-words">
                           {service?.service?.location_address || locationLabel}
                         </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {serviceRow?.location_type === 'online' && (
+                    <div className="flex items-start gap-3 min-w-0">
+                      <Video className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                      <div className="min-w-0">
+                        <p className="text-sm text-muted-foreground">Visio</p>
+                        {serviceRow.meeting_url ? (
+                          <p className="font-medium break-all">{serviceRow.meeting_url}</p>
+                        ) : (
+                          <p className="font-medium">
+                            Emarzona Visio — une salle privée est créée à chaque rendez-vous
+                            confirmé.
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {serviceRow?.timezone && (
+                    <div className="flex items-center gap-3 min-w-0">
+                      <Clock className="h-5 w-5 text-primary shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-sm text-muted-foreground">Fuseau horaire</p>
+                        <p className="font-medium">{serviceRow.timezone}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {hasBuffer && (
+                    <div className="flex items-center gap-3 min-w-0">
+                      <RefreshCw className="h-5 w-5 text-primary shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-sm text-muted-foreground">Temps de battement</p>
+                        <p className="font-medium">
+                          {bufferBefore ? `${bufferBefore} min avant` : null}
+                          {bufferBefore && bufferAfter ? ' · ' : null}
+                          {bufferAfter ? `${bufferAfter} min après` : null}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {serviceRow?.max_bookings_per_day != null &&
+                    serviceRow.max_bookings_per_day > 0 && (
+                      <div className="flex items-center gap-3 min-w-0">
+                        <Calendar className="h-5 w-5 text-primary shrink-0" />
+                        <div className="min-w-0">
+                          <p className="text-sm text-muted-foreground">Réservations / jour</p>
+                          <p className="font-medium">{serviceRow.max_bookings_per_day}</p>
+                        </div>
+                      </div>
+                    )}
+
+                  {serviceRow?.require_approval && (
+                    <div className="flex items-center gap-3 min-w-0">
+                      <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-sm text-muted-foreground">Validation</p>
+                        <p className="font-medium">Réservation soumise à approbation</p>
                       </div>
                     </div>
                   )}
@@ -987,6 +1072,27 @@ export default function ServiceDetail() {
                       html={service.description || ''}
                       className="bg-white dark:bg-white text-black dark:text-black prose max-w-none prose-headings:text-black dark:prose-headings:text-black prose-p:text-black dark:prose-p:text-black prose-a:text-primary prose-strong:text-black dark:prose-strong:text-black p-4 sm:p-6 rounded-lg"
                     />
+                  </CardContent>
+                </Card>
+              )}
+
+              {faqs.length > 0 && (
+                <Card>
+                  <CardContent className="p-6">
+                    <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                      <HelpCircle className="w-5 h-5 text-blue-600" />
+                      Questions fréquentes
+                    </h2>
+                    <Accordion type="single" collapsible className="w-full">
+                      {faqs.map((faq: ProductFAQ, index: number) => (
+                        <AccordionItem key={index} value={`faq-${index}`}>
+                          <AccordionTrigger className="text-left">{faq.question}</AccordionTrigger>
+                          <AccordionContent className="text-muted-foreground">
+                            {faq.answer}
+                          </AccordionContent>
+                        </AccordionItem>
+                      ))}
+                    </Accordion>
                   </CardContent>
                 </Card>
               )}
@@ -1087,7 +1193,7 @@ export default function ServiceDetail() {
               return (
                 <Tabs defaultValue={hasPublishedPackages ? 'project' : 'appointment'}>
                   <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="appointment">Réserver</TabsTrigger>
+                    <TabsTrigger value="appointment">{serviceCtaLabel}</TabsTrigger>
                     <TabsTrigger value="project">Formules</TabsTrigger>
                   </TabsList>
                   <TabsContent value="project" className="mt-4">
@@ -1118,7 +1224,7 @@ export default function ServiceDetail() {
                   <TabsContent value="appointment" className="mt-4 space-y-3">
                     <p className="text-sm text-muted-foreground">
                       Choisissez un créneau dans le calendrier ci-dessous, puis confirmez avec «
-                      Réserver et payer ».
+                      {serviceCtaLabel} et payer ».
                     </p>
                     <Button
                       type="button"
@@ -1143,7 +1249,7 @@ export default function ServiceDetail() {
           {calendarIntent && !showAppointment && !showProject && (
             <Card>
               <CardHeader>
-                <CardTitle>Réserver</CardTitle>
+                <CardTitle>{serviceCtaLabel}</CardTitle>
               </CardHeader>
               <CardContent className="text-sm text-muted-foreground">
                 Aucun créneau n’est publié pour le moment.
@@ -1158,7 +1264,7 @@ export default function ServiceDetail() {
             >
               <CardHeader>
                 <div className="flex items-start justify-between mb-2 gap-3 flex-wrap">
-                  <CardTitle>Réserver</CardTitle>
+                  <CardTitle>{serviceCtaLabel}</CardTitle>
                   <ServicePriceDisplay
                     display={appointmentPrice}
                     currency={service?.currency || 'XOF'}
@@ -1537,7 +1643,7 @@ export default function ServiceDetail() {
                   ) : !selectedDate || !selectedSlot ? (
                     'Sélectionnez une date et un créneau'
                   ) : (
-                    'Réserver et payer'
+                    `${serviceCtaLabel} et payer`
                   )}
                 </Button>
 
@@ -1604,7 +1710,8 @@ export default function ServiceDetail() {
               })
             }
           >
-            Réserver · {appointmentPrice.amount.toLocaleString()} {service?.currency || 'XOF'}
+            {serviceCtaLabel} · {appointmentPrice.amount.toLocaleString()}{' '}
+            {service?.currency || 'XOF'}
           </Button>
         </div>
       )}

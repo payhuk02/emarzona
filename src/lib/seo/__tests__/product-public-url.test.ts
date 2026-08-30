@@ -3,6 +3,7 @@ import {
   buildWwwProductPublicPath,
   buildWwwProductPublicUrl,
   resolveMarketplaceProductCardUrl,
+  resolveStoreProductCardUrl,
 } from '../product-public-url';
 
 describe('product-public-url', () => {
@@ -46,5 +47,17 @@ describe('product-public-url', () => {
         { slug: 'ecom-web' }
       )
     ).toBe('https://ecom-web.myemarzona.shop/products/misc');
+  });
+
+  it('resolveStoreProductCardUrl routes services and courses correctly', () => {
+    expect(
+      resolveStoreProductCardUrl({ id: 's1', slug: 'identite-visuelle', product_type: 'service' })
+    ).toBe('/service/s1');
+    expect(
+      resolveStoreProductCardUrl({ id: 'c1', slug: 'mon-cours', product_type: 'course' })
+    ).toBe('/courses/mon-cours');
+    expect(resolveStoreProductCardUrl({ id: 'd1', slug: 'ebook', product_type: 'digital' })).toBe(
+      '/products/ebook'
+    );
   });
 });

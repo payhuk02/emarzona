@@ -18,6 +18,7 @@ import {
   Play,
   ZoomIn,
   Calendar,
+  Eye,
 } from 'lucide-react';
 import { useMarketplaceGuestBuy } from '@/hooks/marketplace/useMarketplaceGuestBuy';
 import { MarketplaceGuestBuyDialogs } from '@/components/marketplace/MarketplaceGuestBuyDialogs';
@@ -299,6 +300,12 @@ const ProductCardModernComponent = ({
                 Zoom
               </Button>
             )}
+            <Button size="sm" variant="secondary" asChild>
+              <Link to={productUrl}>
+                <Eye className="h-4 w-4 mr-2" />
+                Voir
+              </Link>
+            </Button>
           </div>
         ) : (
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100" />
@@ -600,6 +607,8 @@ const ProductCardModernComponent = ({
         <MarketplaceProductCardActions
           productId={product.id}
           productName={product.name}
+          productUrl={productUrl}
+          hideViewButton={product.product_type === 'service'}
           storeId={product.store_id}
           buyLabel={cta.buyLabel}
           buyAriaLabel={

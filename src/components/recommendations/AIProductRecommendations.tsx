@@ -4,15 +4,17 @@
  */
 
 import React, { useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useAIRecommendations } from '@/lib/ai/recommendation-engine';
-import { useProductsOptimized } from '@/hooks/useProducts';
 import { useRecommendationTracking } from '@/hooks/useRecommendationTracking';
+import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Sparkles, TrendingUp, Users, Package, Target } from 'lucide-react';
-import ProductCard from '@/components/marketplace/ProductCard';
+import UnifiedProductCard from '@/components/products/UnifiedProductCard';
+import { transformToUnifiedProduct } from '@/lib/product-transform';
 import { cn } from '@/lib/utils';
 import { logger } from '@/lib/logger';
 
@@ -28,6 +30,15 @@ interface AIProductRecommendationsProps {
   className?: string;
   layout?: 'grid' | 'horizontal' | 'compact';
 }
+
+const AI_RECOMMENDATION_PRODUCT_SELECT = `
+  id, store_id, name, slug, description, short_description, image_url, images, price, promotional_price, currency,
+  rating, reviews_count, category, product_type, licensing_type, payment_options, whatsapp_number, whatsapp_enabled,
+  created_at, updated_at, tags, stock_quantity,
+  stores:store_id(id, name, slug),
+  product_affiliate_settings(commission_rate, affiliate_enabled),
+  service_products(service_type, location_type, calendar_available, pricing_type, fulfillment_mode, duration_minutes, requires_staff, category_attributes, service_packages(price, package_price, package_kind, is_active, delivery_days, revisions))
+`;
 
 const AIProductRecommendations: React.FC<AIProductRecommendationsProps> = ({
   userId,
@@ -65,28 +76,42 @@ const AIProductRecommendations: React.FC<AIProductRecommendationsProps> = ({
     return recommendations?.map(rec => rec.productId) || [];
   }, [recommendations]);
 
-  const { data: productsData, isLoading: productsLoading } = useProductsOptimized(
-    null, // storeId (null pour tous les stores)
-    {
-      filters: { ids: productIds },
-      enabled: productIds.length > 0,
-    }
-  );
+  const { data: recommendedProducts = [], isLoading: productsLoading } = useQuery({
+    queryKey: ['ai-recommendation-products', productIds],
+    enabled: productIds.length > 0,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('products')
+        .select(AI_RECOMMENDATION_PRODUCT_SELECT)
+        .in('id', productIds)
+        .eq('is_active', true)
+        .eq('is_draft', false);
+
+      if (error) throw error;
+
+      const byId = new Map((data ?? []).map(row => [row.id as string, row]));
+      return productIds.map(id => byId.get(id)).filter(Boolean);
+    },
+    staleTime: 2 * 60 * 1000,
+  });
 
   // Combiner les recommandations avec les données des produits
   const enrichedRecommendations = useMemo(() => {
-    if (!recommendations || !productsData?.data) return [];
+    if (!recommendations || recommendedProducts.length === 0) return [];
 
     return recommendations
       .map(rec => {
-        const product = productsData.data.find(p => p.id === rec.productId);
+        const product = recommendedProducts.find(p => p.id === rec.productId);
+        if (!product) return null;
         return {
           ...rec,
-          product,
+          unifiedProduct: transformToUnifiedProduct(
+            product as Parameters<typeof transformToUnifiedProduct>[0]
+          ),
         };
       })
-      .filter(rec => rec.product); // Garder seulement les recommandations avec des produits valides
-  }, [recommendations, productsData]);
+      .filter((rec): rec is NonNullable<typeof rec> => rec !== null);
+  }, [recommendations, recommendedProducts]);
 
   // Gestionnaire d'analytics pour les clics sur recommandations
   const handleRecommendationClick = async (
@@ -264,12 +289,14 @@ const AIProductRecommendations: React.FC<AIProductRecommendationsProps> = ({
                 </div>
               )}
 
-              {/* Carte produit */}
+              {/* Carte produit — même composant que le catalogue marketplace */}
               <div onClick={() => handleRecommendationClick(recommendation, index + 1)}>
-                <ProductCard
-                  product={recommendation.product}
+                <UnifiedProductCard
+                  product={recommendation.unifiedProduct}
+                  variant="marketplace"
+                  showAffiliate={true}
+                  showActions={true}
                   className="h-full transition-transform group-hover:scale-[1.02]"
-                  priority={false}
                 />
               </div>
 
