@@ -56,10 +56,8 @@ import {
 import { useDebounce } from '@/hooks/useDebounce';
 import { useToast } from '@/hooks/use-toast';
 import { DigitalProductsGrid } from '@/components/digital/DigitalProductCard';
-import { ResponsiveProductImage } from '@/components/ui/ResponsiveProductImage';
 import { logger } from '@/lib/logger';
-import { htmlToPlainText } from '@/lib/html-sanitizer';
-import { resolveDigitalDisplayPrice } from '@/lib/digital/digital-product-display';
+import { DigitalSearchProductCard } from '@/components/digital/DigitalSearchProductCard';
 import { cn } from '@/lib/utils';
 
 interface SearchFilters {
@@ -753,61 +751,9 @@ export const DigitalProductsSearch = () => {
                 </p>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {searchResults.map(product => {
-                  const { displayPrice, compareAtPrice, hasPromo } = resolveDigitalDisplayPrice(
-                    product.price,
-                    product.promotional_price
-                  );
-                  const summary = htmlToPlainText(
-                    product.short_description || product.description || ''
-                  );
-
-                  return (
-                    <div key={product.id}>
-                      <Card
-                        className="group hover:shadow-lg transition-shadow cursor-pointer"
-                        onClick={() => navigate(`/digital/${product.id}`)}
-                      >
-                        <div className="aspect-video bg-muted rounded-t-lg overflow-hidden">
-                          <ResponsiveProductImage
-                            src={product.image_url}
-                            alt={product.name}
-                            className="w-full h-full"
-                            fit="cover"
-                            context="grid"
-                            fallbackIcon={<FileText className="h-16 w-16 text-muted-foreground" />}
-                          />
-                        </div>
-                        <CardContent className="p-4">
-                          <h3 className="font-semibold mb-2 line-clamp-2">{product.name}</h3>
-                          {summary && (
-                            <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                              {summary}
-                            </p>
-                          )}
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-baseline gap-2">
-                              <span className="text-lg font-bold text-primary">
-                                {displayPrice.toLocaleString()} {product.currency}
-                              </span>
-                              {hasPromo && compareAtPrice != null && (
-                                <span className="text-sm line-through text-muted-foreground">
-                                  {compareAtPrice.toLocaleString()} {product.currency}
-                                </span>
-                              )}
-                            </div>
-                            {product.average_rating > 0 && (
-                              <div className="flex items-center gap-1">
-                                <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                                <span className="text-sm">{product.average_rating.toFixed(1)}</span>
-                              </div>
-                            )}
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </div>
-                  );
-                })}
+                {searchResults.map(product => (
+                  <DigitalSearchProductCard key={product.id} product={product} />
+                ))}
               </div>
             </>
           ) : (

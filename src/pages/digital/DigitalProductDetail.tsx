@@ -57,9 +57,10 @@ import { ReviewForm } from '@/components/reviews/ReviewForm';
 import type { ProductFAQ } from '@/types/product-form';
 import { useEffect, useState } from 'react';
 import { useAnalyticsTracking } from '@/hooks/useProductAnalytics';
-import { useCreateDigitalOrder } from '@/hooks/orders/useCreateDigitalOrder';
 import { useAuth } from '@/contexts/AuthContext';
-import { logger } from '@/lib/logger';
+import { useMarketplaceGuestBuy } from '@/hooks/marketplace/useMarketplaceGuestBuy';
+import { MarketplaceGuestBuyDialogs } from '@/components/marketplace/MarketplaceGuestBuyDialogs';
+import { persistCheckoutCoupon } from '@/lib/checkout/persist-checkout-coupon';
 import { useAddToComparison } from './DigitalProductsCompare';
 import { FileVersionManager, FileMetadataEditor } from '@/components/digital/files';
 import CouponInput from '@/components/checkout/CouponInput';
@@ -93,13 +94,25 @@ export default function DigitalProductDetail() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
-  const [isPurchasing, setIsPurchasing] = useState(false);
   const [appliedCouponId, setAppliedCouponId] = useState<string | null>(null);
   const [appliedCouponCode, setAppliedCouponCode] = useState<string | null>(null);
   const [appliedDiscountAmount, setAppliedDiscountAmount] = useState<number | null>(null);
 
   // Fetch digital product with all relations
   const { data: digitalProduct, isLoading, error } = useDigitalProduct(productId || '');
+
+  const marketplaceBuy = useMarketplaceGuestBuy({
+    product: {
+      id: digitalProduct?.product?.id || productId || '',
+      slug: digitalProduct?.product?.slug || productId || '',
+      name: digitalProduct?.product?.name || 'Produit digital',
+      store_id: digitalProduct?.product?.store_id,
+      product_type: 'digital',
+      currency: digitalProduct?.product?.currency,
+    },
+    price: digitalProduct?.product?.promotional_price ?? digitalProduct?.product?.price ?? 0,
+    storeSlug: digitalProduct?.store?.slug,
+  });
 
   // Check if user has purchased this product
   const { data: accessData } = useHasDownloadAccess(productId || '');
@@ -108,8 +121,8 @@ export default function DigitalProductDetail() {
   // Track analytics event
   const { trackView } = useAnalyticsTracking();
 
-  // Hook pour créer une commande
-  const { mutateAsync: createDigitalOrder, isPending: isCreatingOrder } = useCreateDigitalOrder();
+  // Hook pour créer une commande — checkout canonique (invité ou connecté)
+  const isBuying = marketplaceBuy.loading;
 
   // Hook pour ajouter à la comparaison
   const addToComparison = useAddToComparison();
@@ -160,7 +173,7 @@ export default function DigitalProductDetail() {
 
   // Handler pour l'achat
   const handlePurchase = async () => {
-    if (!digitalProduct || !productId) {
+    if (!digitalProduct?.product || !productId) {
       toast({
         title: 'Erreur',
         description: 'Produit non disponible',
@@ -169,90 +182,26 @@ export default function DigitalProductDetail() {
       return;
     }
 
-    if (!user?.email) {
+    if (!digitalProduct.product.is_active) {
       toast({
-        title: 'Authentification requise',
-        description: 'Veuillez vous connecter pour effectuer un achat',
-        variant: 'destructive',
-      });
-      navigate('/login');
-      return;
-    }
-
-    const product = digitalProduct.product;
-    if (!product?.store_id) {
-      toast({
-        title: 'Erreur',
-        description: 'Boutique non disponible',
+        title: 'Produit indisponible',
+        description: "Ce produit n'est pas disponible à l'achat",
         variant: 'destructive',
       });
       return;
     }
 
-    try {
-      setIsPurchasing(true);
-
-      logger.debug('Initiating digital product purchase', {
-        digitalProductId: digitalProduct.id,
-        productId: product.id,
-        storeId: product.store_id,
-        userEmail: user.email,
+    if (appliedCouponId && appliedCouponCode && appliedDiscountAmount != null) {
+      persistCheckoutCoupon({
+        id: appliedCouponId,
+        code: appliedCouponCode,
+        discountAmount: appliedDiscountAmount,
       });
-
-      const result = await createDigitalOrder({
-        digitalProductId: digitalProduct.id,
-        productId: product.id,
-        storeId: product.store_id,
-        customerEmail: user.email,
-        customerName: user.user_metadata?.full_name || user.email.split('@')[0],
-        generateLicense: digitalProduct.license_type !== 'none',
-        licenseType:
-          digitalProduct.license_type === 'single'
-            ? 'single'
-            : digitalProduct.license_type === 'multi'
-              ? 'multi'
-              : 'unlimited',
-        maxActivations:
-          digitalProduct.license_type === 'multi'
-            ? (digitalProduct.max_activations ?? undefined)
-            : undefined,
-        couponCode: appliedCouponCode ?? undefined,
-        couponDiscountAmount: appliedDiscountAmount ?? undefined,
-        promotionId: appliedCouponId ?? undefined,
-      });
-
-      if (result.checkoutUrl) {
-        logger.info('Redirecting to payment checkout', {
-          orderId: result.orderId,
-          checkoutUrl: result.checkoutUrl,
-        });
-        const { safeRedirect } = await import('@/lib/url-validator');
-        safeRedirect(result.checkoutUrl, error => {
-          toast({
-            title: 'Erreur de redirection',
-            description: error,
-            variant: 'destructive',
-          });
-        });
-      } else {
-        throw new Error('URL de paiement non disponible');
-      }
-    } catch (purchaseError: unknown) {
-      const errorMessage =
-        purchaseError instanceof Error ? purchaseError.message : String(purchaseError);
-      logger.error('Error initiating purchase', {
-        error: errorMessage,
-        digitalProductId: digitalProduct.id,
-        productId: product.id,
-      });
-      toast({
-        title: 'Erreur',
-        description: errorMessage || "Impossible d'initialiser le paiement. Veuillez réessayer.",
-        variant: 'destructive',
-      });
-    } finally {
-      setIsPurchasing(false);
+    } else {
+      persistCheckoutCoupon(null);
     }
+
+    await marketplaceBuy.handleBuyClick();
   };
 
   if (isLoading) {
@@ -501,11 +450,9 @@ export default function DigitalProductDetail() {
                       size="lg"
                       className="w-full sm:w-auto sm:max-w-[min(100%,16rem)] sm:self-start px-6 sm:px-8 rounded-full font-semibold shadow-md hover:shadow-lg"
                       onClick={handlePurchase}
-                      disabled={
-                        isPurchasing || isCreatingOrder || !digitalProduct || !product.is_active
-                      }
+                      disabled={isBuying || !digitalProduct || !product.is_active}
                     >
-                      {isPurchasing || isCreatingOrder ? (
+                      {isBuying ? (
                         <>
                           <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                           Traitement...
@@ -513,11 +460,7 @@ export default function DigitalProductDetail() {
                       ) : (
                         <>
                           <Lock className="h-4 w-4 mr-2" />
-                          {!user
-                            ? 'Se connecter pour acheter'
-                            : isFreeProduct
-                              ? 'Obtenir gratuitement'
-                              : 'Acheter maintenant'}
+                          {isFreeProduct ? 'Obtenir gratuitement' : 'Acheter maintenant'}
                         </>
                       )}
                     </Button>
@@ -850,6 +793,17 @@ export default function DigitalProductDetail() {
           )}
         </div>
       </div>
+
+      <MarketplaceGuestBuyDialogs
+        product={marketplaceBuy.product}
+        price={displayPrice}
+        guestOpen={marketplaceBuy.guestOpen}
+        setGuestOpen={marketplaceBuy.setGuestOpen}
+        physicalOpen={marketplaceBuy.physicalOpen}
+        setPhysicalOpen={marketplaceBuy.setPhysicalOpen}
+        loading={marketplaceBuy.loading}
+        onGuestConfirm={marketplaceBuy.proceedWithCustomer}
+      />
     </div>
   );
 }
