@@ -89,17 +89,56 @@
   animation: fadeIn 0.3s ease-in-out;
 }
 
-/* Amélioration de la toolbar */
+/* Toolbar custom (ServiceBookingToolbar) — masquer la toolbar native */
 .rbc-calendar-service .rbc-toolbar {
-  padding: 0.5rem 0 1rem;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  row-gap: 0.5rem;
+  display: none;
 }
 
-.rbc-calendar-service .rbc-toolbar button {
-  transition: all 0.2s ease-in-out;
-  min-height: 44px;
+.service-cal-toolbar {
+  width: 100%;
+}
+
+/* Mode intégré (panneau réservation) */
+.rbc-calendar-service--embedded {
+  font-size: 0.8rem;
+}
+
+.rbc-calendar-service--embedded .rbc-month-view {
+  border: none;
+}
+
+.rbc-calendar-service--embedded .rbc-header {
+  padding: 0.35rem 0.25rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.rbc-calendar-service--embedded .rbc-date-cell {
+  padding: 0.15rem;
+}
+
+.rbc-calendar-service--embedded .rbc-date-cell .rbc-button-link {
+  font-size: 0.8rem;
+  min-width: 1.75rem;
+  min-height: 1.75rem;
+}
+
+.rbc-calendar-service--embedded .rbc-off-range-bg {
+  background: transparent;
+}
+
+.rbc-calendar-service--embedded .rbc-today {
+  background-color: rgba(59, 130, 246, 0.08);
+}
+
+.rbc-calendar-service--embedded .rbc-event {
+  font-size: 0.65rem;
+  padding: 1px 3px;
+  line-height: 1.2;
+}
+
+.rbc-calendar-service--embedded .rbc-month-row {
+  min-height: 3.5rem;
 }
 
 @media (max-width: 1023px) {

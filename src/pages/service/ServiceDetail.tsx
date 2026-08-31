@@ -45,7 +45,6 @@ import {
 } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { ServiceCalendar } from '@/components/service/ServiceCalendar';
 import { ServiceCalendarEnhanced } from '@/components/service/ServiceCalendarEnhanced';
 import { TimeSlotPicker } from '@/components/service/TimeSlotPicker';
 import { ProductReviewsSummary } from '@/components/reviews/ProductReviewsSummary';
@@ -121,6 +120,13 @@ import {
 } from '@/lib/service/service-detail-labels';
 import { parseServiceCheckoutOptions } from '@/lib/service/service-checkout-display';
 import { buildServicePublicPath, isProductUuid } from '@/lib/service/resolve-service-product-route';
+
+const APPOINTMENT_DATE_FORMATTER = new Intl.DateTimeFormat('fr-FR', {
+  weekday: 'long',
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+});
 
 const PRODUCT_SERVICE_FIELDS =
   'id, store_id, slug, name, description, short_description, category, category_id, tags, product_type, is_active, price, promotional_price, currency, image_url, images, created_at, updated_at, payment_options, pricing_model, licensing_type, license_terms, faqs, whatsapp_number, whatsapp_enabled, product_affiliate_settings!left(affiliate_enabled, commission_rate)';
@@ -1618,9 +1624,25 @@ export default function ServiceDetail() {
                 )}
 
                 {/* Calendar */}
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Sélectionnez une date</label>
+                <div className="space-y-3 rounded-xl border bg-muted/20 p-4">
+                  <div className="space-y-1">
+                    <label className="text-sm font-semibold block">Sélectionnez une date</label>
+                    <p className="text-xs text-muted-foreground">
+                      Choisissez un jour disponible, puis un créneau horaire ci-dessous.
+                    </p>
+                  </div>
+                  {selectedDate && (
+                    <div className="rounded-lg border border-primary/20 bg-primary/5 px-3 py-2.5">
+                      <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                        Date sélectionnée
+                      </p>
+                      <p className="mt-0.5 text-sm font-semibold capitalize">
+                        {APPOINTMENT_DATE_FORMATTER.format(selectedDate)}
+                      </p>
+                    </div>
+                  )}
                   <ServiceCalendarEnhanced
+                    variant="embedded"
                     serviceId={productId!}
                     selectedDate={selectedDate || undefined}
                     onDateSelect={nextDate => {
@@ -1633,8 +1655,17 @@ export default function ServiceDetail() {
 
                 {/* Time Slots */}
                 {selectedDate && (
-                  <div className="space-y-2" data-testid="service-time-slots">
-                    <label className="text-sm font-medium mb-2 block">Choisissez un créneau</label>
+                  <div
+                    className="space-y-3 rounded-xl border bg-muted/20 p-4"
+                    data-testid="service-time-slots"
+                  >
+                    <div className="space-y-1">
+                      <label className="text-sm font-semibold block">Choisissez un créneau</label>
+                      <p className="text-xs text-muted-foreground">
+                        Horaires disponibles pour le{' '}
+                        {APPOINTMENT_DATE_FORMATTER.format(selectedDate)}.
+                      </p>
+                    </div>
                     <TimeSlotPicker
                       serviceId={productId!}
                       serviceProductId={serviceProductId ?? undefined}
