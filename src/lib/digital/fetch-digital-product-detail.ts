@@ -7,7 +7,7 @@ export const PRODUCT_DIGITAL_FIELDS =
   'id, store_id, slug, name, description, short_description, category, tags, product_type, is_active, price, promotional_price, currency, pricing_model, image_url, images, meta_title, meta_description, og_image, faqs, licensing_type, license_terms, hide_purchase_count, hide_likes_count, hide_recommendations_count, hide_downloads_count, hide_reviews_count, hide_rating, whatsapp_number, whatsapp_enabled, created_at, updated_at';
 
 export const DIGITAL_PRODUCT_ROW_FIELDS =
-  'id, product_id, digital_type, license_type, license_duration_days, max_activations, max_licenses, allow_license_transfer, auto_generate_keys, main_file_url, main_file_size_mb, main_file_format, main_file_version, total_files, total_size_mb, download_limit, download_expiry_days, require_registration, watermark_enabled, watermark_text, version, total_downloads, created_at, updated_at';
+  'id, product_id, digital_type, license_type, license_duration_days, max_activations, allow_license_transfer, auto_generate_keys, main_file_url, main_file_size_mb, main_file_format, main_file_version, total_files, total_size_mb, download_limit, download_expiry_days, require_registration, watermark_enabled, watermark_text, version, total_downloads, created_at, updated_at';
 
 export const DIGITAL_PRODUCT_FILE_FIELDS =
   'id, digital_product_id, name, file_url, file_size_mb, file_type, category, version, is_main, is_preview, order_index, download_count';
@@ -76,7 +76,6 @@ export type DigitalProductDetailData = {
   license_type: string;
   license_duration_days: number | null;
   max_activations: number | null;
-  max_licenses: number | null;
   allow_license_transfer: boolean | null;
   auto_generate_keys: boolean | null;
   main_file_url: string | null;

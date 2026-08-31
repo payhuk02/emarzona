@@ -284,8 +284,26 @@ export const useAnalyticsTracking = () => {
             ? 'tablet'
             : 'desktop';
 
+        const storeIdFromEvent = typeof eventData.store_id === 'string' ? eventData.store_id : null;
+
+        let storeId = storeIdFromEvent;
+        if (!storeId) {
+          const { data: productRow } = await supabase
+            .from('products')
+            .select('store_id')
+            .eq('id', productId)
+            .maybeSingle();
+          storeId = productRow?.store_id ?? null;
+        }
+
+        if (!storeId) {
+          logger.debug('Skipping analytics event without store_id', { productId, eventType });
+          return sessionId;
+        }
+
         const eventPayload = {
           product_id: productId,
+          store_id: storeId,
           user_id: user?.id || null,
           event_type: eventType,
           event_data: eventData,
@@ -309,7 +327,7 @@ export const useAnalyticsTracking = () => {
           productId,
           eventType,
         });
-        throw err;
+        return null;
       }
     },
     [user]
