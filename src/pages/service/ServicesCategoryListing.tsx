@@ -13,6 +13,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { SEOMeta } from '@/components/seo';
 import { useServiceCategoryTree } from '@/hooks/useServiceCategories';
 import { formatServiceCategoryLabel } from '@/lib/services/service-categories';
+import { buildServicePublicPath } from '@/lib/service/resolve-service-product-route';
 import { ServiceListingAttributeBadges } from '@/components/service/ServiceListingAttributeBadges';
 import { useFilteredServiceProducts } from '@/hooks/useFilteredProducts';
 import { formatCurrency } from '@/lib/utils';
@@ -200,7 +201,9 @@ export default function ServicesCategoryListing() {
                     />
                   </div>
                   <Button asChild size="sm" className="min-h-[40px]">
-                    <Link to={`/service/${product.id}`}>Voir</Link>
+                    <Link to={buildServicePublicPath({ id: product.id, slug: product.slug })}>
+                      Voir
+                    </Link>
                   </Button>
                 </CardContent>
               </Card>

@@ -88,32 +88,40 @@ export function ServiceProjectMilestoneTimeline({
                 >
                   {isComplete ? <Check className="h-3.5 w-3.5" /> : index + 1}
                 </span>
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <p className="font-medium text-sm">{milestone.label}</p>
-                  <p className="text-xs text-muted-foreground flex flex-wrap items-center gap-1">
-                    <Clock className="h-3 w-3" />
-                    {TRIGGER_LABELS[milestone.trigger] || milestone.trigger}
-                    <Badge variant="outline" className="text-[10px]">
+                  <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                    <Clock className="h-3 w-3 shrink-0" />
+                    <span>{TRIGGER_LABELS[milestone.trigger] || milestone.trigger}</span>
+                  </p>
+                  <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+                    <Badge variant="outline" className="text-[10px] whitespace-nowrap shrink-0">
                       {STATUS_LABELS[status]}
                     </Badge>
                     {dueNow && (
-                      <Badge variant="secondary" className="text-[10px]">
+                      <Badge variant="secondary" className="text-[10px] whitespace-nowrap shrink-0">
                         Dû maintenant
                       </Badge>
                     )}
                     {status === 'held' && (
-                      <Badge variant="secondary" className="text-[10px] flex items-center gap-0.5">
+                      <Badge
+                        variant="secondary"
+                        className="text-[10px] flex items-center gap-0.5 whitespace-nowrap shrink-0"
+                      >
                         <Lock className="h-2.5 w-2.5" />
                         Escrow
                       </Badge>
                     )}
                     {status === 'released' && (
-                      <Badge variant="secondary" className="text-[10px] flex items-center gap-0.5">
+                      <Badge
+                        variant="secondary"
+                        className="text-[10px] flex items-center gap-0.5 whitespace-nowrap shrink-0"
+                      >
                         <Unlock className="h-2.5 w-2.5" />
                         Vendeur
                       </Badge>
                     )}
-                  </p>
+                  </div>
                 </div>
               </div>
               <div className="text-right shrink-0">

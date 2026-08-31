@@ -22,6 +22,7 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { buildServicePublicPath } from '@/lib/service/resolve-service-product-route';
 import type { ServiceProduct } from '@/hooks/service';
 import { ResponsiveProductImage } from '@/components/ui/ResponsiveProductImage';
 import { PriceStockAlertButton } from '@/components/marketplace/PriceStockAlertButton';
@@ -248,7 +249,17 @@ const ServiceCardComponent = ({
       </CardContent>
 
       <CardFooter className="pt-3">
-        <Button className="w-full" onClick={() => navigate(`/service/${service.product_id}`)}>
+        <Button
+          className="w-full"
+          onClick={() =>
+            navigate(
+              buildServicePublicPath({
+                id: service.product_id || service.product?.id || service.id,
+                slug: service.product?.slug,
+              })
+            )
+          }
+        >
           <Calendar className="h-4 w-4 mr-2" />
           Réserver
         </Button>

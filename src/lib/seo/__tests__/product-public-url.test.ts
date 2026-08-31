@@ -11,6 +11,13 @@ describe('product-public-url', () => {
     expect(buildWwwProductPublicPath({ id: 'd1', product_type: 'digital' })).toBe('/digital/d1');
     expect(buildWwwProductPublicPath({ id: 'p1', product_type: 'physical' })).toBe('/physical/p1');
     expect(buildWwwProductPublicPath({ id: 's1', product_type: 'service' })).toBe('/service/s1');
+    expect(
+      buildWwwProductPublicPath({
+        id: 's1',
+        slug: 'creation-page-facebook',
+        product_type: 'service',
+      })
+    ).toBe('/service/creation-page-facebook');
     expect(buildWwwProductPublicPath({ id: 'a1', product_type: 'artist' })).toBe('/artist/a1');
     expect(buildWwwProductPublicPath({ id: 'c1', product_type: 'course', slug: 'mon-cours' })).toBe(
       '/courses/mon-cours'
@@ -37,7 +44,7 @@ describe('product-public-url', () => {
         { id: 's1', slug: 'identite-visuelle', product_type: 'service' },
         { slug: 'ecom-web' }
       )
-    ).toBe('/service/s1');
+    ).toBe('/service/identite-visuelle');
   });
 
   it('resolveMarketplaceProductCardUrl falls back to storefront URL', () => {
@@ -52,7 +59,7 @@ describe('product-public-url', () => {
   it('resolveStoreProductCardUrl routes services and courses correctly', () => {
     expect(
       resolveStoreProductCardUrl({ id: 's1', slug: 'identite-visuelle', product_type: 'service' })
-    ).toBe('/service/s1');
+    ).toBe('/service/identite-visuelle');
     expect(
       resolveStoreProductCardUrl({ id: 'c1', slug: 'mon-cours', product_type: 'course' })
     ).toBe('/courses/mon-cours');

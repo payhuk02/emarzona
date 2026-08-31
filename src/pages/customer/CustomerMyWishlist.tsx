@@ -30,6 +30,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { generateProductUrl } from '@/lib/store-utils';
+import { buildServicePublicPath } from '@/lib/service/resolve-service-product-route';
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useMarketplaceFavorites } from '@/hooks/useMarketplaceFavorites';
 import { buildCheckoutUrl } from '@/lib/checkout/checkout-route';
@@ -659,7 +660,7 @@ export default function CustomerMyWishlist() {
           navigate(`/physical/${product.id}`);
           break;
         case 'service':
-          navigate(`/service/${product.id}`);
+          navigate(buildServicePublicPath({ id: product.id, slug: product.slug }));
           break;
         case 'course':
           // Route correcte pour cours : /courses/:slug (utilise slug, pas id)

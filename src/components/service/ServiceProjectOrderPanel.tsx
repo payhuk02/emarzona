@@ -158,44 +158,50 @@ export function ServiceProjectOrderPanel({
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
         {activePackages.map(pkg => {
           const selected = (effectivePackageId || selectedPackageId) === pkg.id;
           return (
-            <button
-              key={pkg.id}
-              type="button"
-              onClick={() => handlePackageSelect(pkg.id)}
-              className={cn(
-                'text-left rounded-xl border p-4 transition-colors min-h-[44px]',
-                selected ? 'border-primary ring-2 ring-primary/20' : 'hover:border-primary/40'
+            <div key={pkg.id} className="relative flex flex-col pt-7">
+              {pkg.is_featured && (
+                <Badge className="absolute top-0 left-1/2 -translate-x-1/2 text-xs whitespace-nowrap shadow-sm">
+                  Populaire
+                </Badge>
               )}
-            >
-              <div className="flex items-center justify-between gap-2 mb-2">
-                <span className="font-semibold">{pkg.name}</span>
-                {pkg.is_featured && <Badge>Populaire</Badge>}
-              </div>
-              <p className="text-lg font-bold">{formatCurrency(pkg.price, currency)}</p>
-              <div className="flex flex-wrap gap-2 text-xs text-muted-foreground mt-2">
-                <span className="inline-flex items-center gap-1">
-                  <Clock className="h-3 w-3" /> {pkg.delivery_days} j
-                </span>
-                <span className="inline-flex items-center gap-1">
-                  <RefreshCw className="h-3 w-3" /> {pkg.revisions} rév.
-                </span>
-              </div>
-              {pkg.description && (
-                <p className="text-xs text-muted-foreground mt-2 line-clamp-2">{pkg.description}</p>
-              )}
-              <ul className="mt-3 space-y-1">
-                {pkg.features.slice(0, 5).map(feat => (
-                  <li key={feat} className="text-xs flex items-start gap-1.5">
-                    <Check className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
-                    <span>{feat}</span>
-                  </li>
-                ))}
-              </ul>
-            </button>
+              <button
+                type="button"
+                onClick={() => handlePackageSelect(pkg.id)}
+                className={cn(
+                  'flex flex-col flex-1 text-left rounded-xl border p-4 transition-colors min-h-[44px] h-full',
+                  selected ? 'border-primary ring-2 ring-primary/20' : 'hover:border-primary/40',
+                  pkg.is_featured && 'border-primary/60'
+                )}
+              >
+                <span className="font-semibold block mb-2">{pkg.name}</span>
+                <p className="text-lg font-bold">{formatCurrency(pkg.price, currency)}</p>
+                <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground mt-2">
+                  <span className="inline-flex items-center gap-1">
+                    <Clock className="h-3 w-3 shrink-0" /> {pkg.delivery_days} j
+                  </span>
+                  <span className="inline-flex items-center gap-1">
+                    <RefreshCw className="h-3 w-3 shrink-0" /> {pkg.revisions} rév.
+                  </span>
+                </div>
+                {pkg.description && (
+                  <p className="text-xs text-muted-foreground mt-2 line-clamp-2 min-h-[2.5rem]">
+                    {pkg.description}
+                  </p>
+                )}
+                <ul className="mt-auto pt-3 space-y-1.5">
+                  {pkg.features.slice(0, 5).map(feat => (
+                    <li key={feat} className="text-xs flex items-start gap-1.5">
+                      <Check className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
+                      <span>{feat}</span>
+                    </li>
+                  ))}
+                </ul>
+              </button>
+            </div>
           );
         })}
       </div>
@@ -315,23 +321,22 @@ export function ServiceProjectOrderPanel({
       )}
 
       <Card>
-        <CardContent className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="space-y-3 w-full sm:w-auto">
-            <div>
-              <p className="text-sm text-muted-foreground">Total estimé</p>
-              <p className="text-2xl font-bold">{formatCurrency(quote.totalPrice, currency)}</p>
-              <p className="text-xs text-muted-foreground">Délai : {quote.totalDays} jour(s)</p>
-            </div>
-            {milestonePreview && milestonePreview.length > 0 && (
-              <ServiceProjectMilestoneTimeline
-                milestones={milestonePreview}
-                currency={currency}
-                compact
-              />
-            )}
+        <CardContent className="py-4 space-y-4">
+          <div>
+            <p className="text-sm text-muted-foreground">Total estimé</p>
+            <p className="text-2xl font-bold">{formatCurrency(quote.totalPrice, currency)}</p>
+            <p className="text-xs text-muted-foreground">Délai : {quote.totalDays} jour(s)</p>
           </div>
+          {milestonePreview && milestonePreview.length > 0 && (
+            <ServiceProjectMilestoneTimeline
+              milestones={milestonePreview}
+              currency={currency}
+              compact
+              className="w-full"
+            />
+          )}
           <Button
-            className="min-h-[44px]"
+            className="min-h-[44px] w-full whitespace-nowrap"
             disabled={!selectedPackage || missingRequired.length > 0}
             onClick={() => {
               if (!selectedPackage) return;

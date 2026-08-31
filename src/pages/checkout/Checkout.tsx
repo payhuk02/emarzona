@@ -11,6 +11,7 @@ import { safeRedirect } from '@/lib/url-validator';
 import { logger } from '@/lib/logger';
 import { useLCPPreload } from '@/hooks/useLCPPreload';
 import { generateProductUrl } from '@/lib/store-utils';
+import { buildServicePublicPath } from '@/lib/service/resolve-service-product-route';
 import { detectSubdomain } from '@/lib/subdomain-detector';
 import { normalizePhoneForPayment } from '@/lib/validation';
 
@@ -753,7 +754,9 @@ const Checkout = () => {
                 'Choisissez un créneau sur la fiche du service avant de payer, ou une formule projet.',
               variant: 'destructive',
             });
-            navigate(`/service/${product.id}?${params.toString()}`);
+            navigate(
+              `${buildServicePublicPath({ id: product.id, slug: product.slug })}?${params.toString()}`
+            );
             setSubmitting(false);
             return;
           }

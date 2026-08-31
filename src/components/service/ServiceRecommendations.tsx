@@ -28,6 +28,7 @@ import { ServicePriceDisplay } from '@/components/service/ServicePriceDisplay';
 import { resolveServiceDisplayPrice } from '@/lib/service/service-pricing';
 import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
+import { buildServicePublicPath } from '@/lib/service/resolve-service-product-route';
 import { PAID_REVENUE_ELIGIBLE_STATUSES } from '@/lib/orders/order-status';
 
 function recommendationPriceDisplay(service: {
@@ -384,7 +385,7 @@ export const ServiceRecommendations = ({
           <Card
             key={service.id}
             className="group hover:shadow-lg transition-shadow cursor-pointer"
-            onClick={() => navigate(`/service/${service.id}`)}
+            onClick={() => navigate(buildServicePublicPath({ id: service.id, slug: service.slug }))}
           >
             <div className="aspect-video bg-muted rounded-t-lg overflow-hidden">
               {service.image_url ? (
@@ -555,7 +556,7 @@ export const BookedTogetherRecommendations = ({
           <Card
             key={service.id}
             className="group hover:shadow-lg transition-shadow cursor-pointer"
-            onClick={() => navigate(`/service/${service.id}`)}
+            onClick={() => navigate(buildServicePublicPath({ id: service.id, slug: service.slug }))}
           >
             <div className="aspect-video bg-muted rounded-t-lg overflow-hidden">
               {service.image_url ? (

@@ -3,6 +3,7 @@
  * Les boutiques vendeurs utilisent *.myemarzona.shop/products/:slug (voir store-utils).
  */
 import { generateProductUrl } from '@/lib/store-utils';
+import { buildServicePublicPath } from '@/lib/service/resolve-service-product-route';
 
 export const WWW_SITE_ORIGIN = 'https://www.emarzona.com';
 
@@ -25,7 +26,7 @@ export function buildWwwProductPublicPath(product: MarketplaceProductRef): strin
     case 'physical':
       return `/physical/${id}`;
     case 'service':
-      return `/service/${id}`;
+      return buildServicePublicPath({ id, slug });
     case 'artist':
       return `/artist/${id}`;
     case 'course':
@@ -68,7 +69,7 @@ export function resolveMarketplaceProductCardUrl(
 /** Lien carte produit sur la boutique (*.myemarzona.shop) — chemins relatifs sur le sous-domaine. */
 export function resolveStoreProductCardUrl(product: MarketplaceProductRef): string {
   if (product.product_type === 'service') {
-    return `/service/${product.id}`;
+    return buildServicePublicPath(product);
   }
   if (product.product_type === 'course' && product.slug) {
     return `/courses/${product.slug}`;

@@ -6,7 +6,7 @@
  * Améliorée avec SEO, analytics, recommandations, partage social et wishlist
  */
 
-import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams, Link, useLocation } from 'react-router-dom';
 import { AppPageShell } from '@/components/layout/AppPageShell';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -120,6 +120,7 @@ import {
   serviceTypeLabel,
 } from '@/lib/service/service-detail-labels';
 import { parseServiceCheckoutOptions } from '@/lib/service/service-checkout-display';
+import { buildServicePublicPath, isProductUuid } from '@/lib/service/resolve-service-product-route';
 
 const PRODUCT_SERVICE_FIELDS =
   'id, store_id, slug, name, description, short_description, category, category_id, tags, product_type, is_active, price, promotional_price, currency, image_url, images, created_at, updated_at, payment_options, pricing_model, licensing_type, license_terms, faqs, whatsapp_number, whatsapp_enabled, product_affiliate_settings!left(affiliate_enabled, commission_rate)';
@@ -137,8 +138,9 @@ interface WindowWithTracking extends Window {
 }
 
 export default function ServiceDetail() {
-  const { serviceId } = useParams<{ serviceId: string }>();
+  const { serviceId: serviceRouteParam } = useParams<{ serviceId: string }>();
   const [searchParams] = useSearchParams();
+  const location = useLocation();
   const guestEmail = searchParams.get('guestEmail');
   const guestName = searchParams.get('guestName');
   const navigate = useNavigate();
@@ -167,29 +169,31 @@ export default function ServiceDetail() {
   const { mutateAsync: validateBooking } = useValidateServiceBooking();
   const quickAvailabilityCheck = useQuickAvailabilityCheck();
 
-  // Utiliser le hook unifié pour la wishlist
-  const {
-    isInWishlist,
-    toggle: handleWishlistToggle,
-    isLoading: isCheckingWishlist,
-  } = useWishlistToggle(serviceId);
-
   // Track analytics event
   const { trackView } = useAnalyticsTracking();
 
   // Fetch service data with store
   const { data: service, isLoading } = useQuery({
-    queryKey: ['service', serviceId],
+    queryKey: ['service', serviceRouteParam],
     queryFn: async () => {
+      if (!serviceRouteParam) throw new Error('Service introuvable');
+
       // Do not embed public.stores — buyers are blocked by stores RLS (owner-only).
       // Use stores_public for storefront-safe store metadata.
-      const { data: productData, error } = await supabase
+      let productQuery = supabase
         .from('products')
         .select(PRODUCT_SERVICE_SELECT)
-        .eq('id', serviceId)
-        .single();
+        .eq('product_type', 'service');
+
+      productQuery = isProductUuid(serviceRouteParam)
+        ? productQuery.eq('id', serviceRouteParam)
+        : productQuery.eq('slug', serviceRouteParam);
+
+      const { data: productData, error } = await productQuery.single();
 
       if (error) throw error;
+
+      const productId = productData.id;
 
       let storePublic: { id: string; name: string; slug: string; logo_url: string | null } | null =
         null;
@@ -206,12 +210,12 @@ export default function ServiceDetail() {
       const { data: serviceData, error: serviceProductError } = await supabase
         .from('service_products')
         .select(SERVICE_PRODUCT_FIELDS)
-        .eq('product_id', serviceId)
+        .eq('product_id', productId)
         .maybeSingle();
 
       if (serviceProductError) {
         logger.warn('ServiceDetail: service_products fetch failed', {
-          serviceId,
+          serviceId: productId,
           message: serviceProductError.message,
           code: serviceProductError.code,
         });
@@ -244,8 +248,25 @@ export default function ServiceDetail() {
         availabilitySlotCount,
       };
     },
-    enabled: !!serviceId,
+    enabled: !!serviceRouteParam,
   });
+
+  const productId = service?.id;
+
+  const {
+    isInWishlist,
+    toggle: handleWishlistToggle,
+    isLoading: isCheckingWishlist,
+  } = useWishlistToggle(productId);
+
+  useEffect(() => {
+    if (!service?.slug || !serviceRouteParam) return;
+    if (isProductUuid(serviceRouteParam) && serviceRouteParam !== service.slug) {
+      navigate(`${buildServicePublicPath(service)}${location.search}${location.hash}`, {
+        replace: true,
+      });
+    }
+  }, [service?.slug, serviceRouteParam, navigate, location.search, location.hash]);
 
   const serviceProductId = service?.service?.id ?? null;
   const { data: serviceAddons = [], isLoading: addonsLoading } =
@@ -271,10 +292,10 @@ export default function ServiceDetail() {
   }, []);
 
   const handleSimpleCheckout = useCallback(() => {
-    if (!serviceId) return;
+    if (!productId) return;
     navigate(
       buildCheckoutUrl({
-        productId: serviceId,
+        productId,
         storeId: service?.store_id,
         buyNow: true,
         quantity: 1,
@@ -282,7 +303,7 @@ export default function ServiceDetail() {
         guestName: guestName || undefined,
       })
     );
-  }, [guestEmail, guestName, navigate, service?.store_id, serviceId]);
+  }, [guestEmail, guestName, navigate, productId, service?.store_id]);
 
   useEffect(() => {
     const required = serviceAddons.filter(a => a.is_required).map(a => a.addon_product_id);
@@ -303,8 +324,8 @@ export default function ServiceDetail() {
 
   // Track service view on mount
   useEffect(() => {
-    if (serviceId && service) {
-      trackView(serviceId, {
+    if (productId && service) {
+      trackView(productId, {
         product_type: 'service',
         timestamp: new Date().toISOString(),
       });
@@ -317,7 +338,7 @@ export default function ServiceDetail() {
           windowWithTracking.gtag('event', 'view_item', {
             items: [
               {
-                item_id: serviceId,
+                item_id: productId,
                 item_name: service?.name || 'Service',
                 item_category: 'service',
                 price: service?.price,
@@ -331,7 +352,7 @@ export default function ServiceDetail() {
         if (windowWithTracking.fbq) {
           windowWithTracking.fbq('track', 'ViewContent', {
             content_type: 'product',
-            content_ids: [serviceId],
+            content_ids: [productId],
             content_category: 'service',
             value: service?.price,
             currency: service?.currency,
@@ -342,14 +363,14 @@ export default function ServiceDetail() {
         if (windowWithTracking.ttq) {
           windowWithTracking.ttq.track('ViewContent', {
             content_type: 'product',
-            content_id: serviceId,
+            content_id: productId,
             value: service?.price,
             currency: service?.currency,
           });
         }
       }
     }
-  }, [serviceId, trackView, service]);
+  }, [productId, trackView, service]);
 
   // La gestion de wishlist est gérée par useWishlistToggle (via handleWishlistToggle)
 
@@ -392,7 +413,7 @@ export default function ServiceDetail() {
   // Validation en temps réel lors de la sélection d'un créneau
   useEffect(() => {
     const validateSelection = async () => {
-      if (!selectedDate || !selectedSlot || !service?.service || !serviceId) {
+      if (!selectedDate || !selectedSlot || !service?.service || !productId) {
         setValidationError(null);
         return;
       }
@@ -412,7 +433,7 @@ export default function ServiceDetail() {
 
         // Utiliser product_id (serviceId est le product_id)
         const result = await validateBooking({
-          productId: serviceId!, // serviceId est le product_id
+          productId: productId!,
           scheduledDate: [
             selectedDate.getFullYear(),
             String(selectedDate.getMonth() + 1).padStart(2, '0'),
@@ -437,7 +458,7 @@ export default function ServiceDetail() {
     // Debounce validation pour éviter trop de requêtes
     const timeoutId = setTimeout(validateSelection, 500);
     return () => clearTimeout(timeoutId);
-  }, [selectedDate, selectedSlot, service?.service, serviceId, validateBooking, selectedStaffId]);
+  }, [selectedDate, selectedSlot, service?.service, productId, validateBooking, selectedStaffId]);
 
   const handleBooking = async () => {
     if (!selectedDate || !selectedSlot) {
@@ -521,7 +542,7 @@ export default function ServiceDetail() {
       endDate.setMinutes(endDate.getMinutes() + durationMinutes);
 
       const validationResult = await validateBooking({
-        productId: serviceId!,
+        productId: productId!,
         scheduledDate: [
           selectedDate.getFullYear(),
           String(selectedDate.getMonth() + 1).padStart(2, '0'),
@@ -562,7 +583,7 @@ export default function ServiceDetail() {
 
       navigate(
         buildCheckoutUrl({
-          productId: serviceId!,
+          productId: productId!,
           storeId,
           productSlug: service?.slug,
           storeSlug: service.store?.slug,
@@ -716,7 +737,7 @@ export default function ServiceDetail() {
       isGigService);
   const showProjectOrderPanel = showProject && (hasPublishedPackages || hasActiveExtras);
   const showSimpleCheckout = !showAppointment && !showProjectOrderPanel;
-  const serviceUrl = `${window.location.origin}/service/${serviceId}`;
+  const serviceUrl = `${window.location.origin}${buildServicePublicPath(service)}`;
 
   const projectPaymentOptions = (service?.payment_options ?? null) as
     | import('@/lib/service/service-project-milestones').ServicePaymentOptionsWithMilestones
@@ -1187,14 +1208,14 @@ export default function ServiceDetail() {
 
             {/* Reviews Tab */}
             <TabsContent value="reviews" className="space-y-6">
-              <ProductReviewsSummary productId={serviceId!} productType="service" />
+              <ProductReviewsSummary productId={productId!} productType="service" />
 
               <Card>
                 <CardHeader>
                   <CardTitle>Avis des utilisateurs</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ReviewsList productId={serviceId!} productType="service" />
+                  <ReviewsList productId={productId!} productType="service" />
                 </CardContent>
               </Card>
 
@@ -1204,7 +1225,7 @@ export default function ServiceDetail() {
                     <CardTitle>Donner votre avis</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <ReviewForm productId={serviceId!} productType="service" />
+                    <ReviewForm productId={productId!} productType="service" />
                   </CardContent>
                 </Card>
               )}
@@ -1222,18 +1243,18 @@ export default function ServiceDetail() {
               return (
                 <ServiceProjectOrderPanel
                   serviceProductId={serviceProductId!}
-                  productId={serviceId!}
+                  productId={productId!}
                   currency={service?.currency || 'XOF'}
                   selectedPackageId={selectedPackageId}
                   onPackageSelect={handleSelectPackage}
                   paymentOptions={projectPaymentOptions}
                   onContinue={payload => {
                     sessionStorage.setItem(
-                      `service-project-order:${serviceId}`,
+                      `service-project-order:${productId}`,
                       JSON.stringify(payload)
                     );
                     const url = buildCheckoutUrl({
-                      productId: serviceId!,
+                      productId: productId!,
                       storeId: service?.store_id,
                       buyNow: true,
                       quantity: 1,
@@ -1256,18 +1277,18 @@ export default function ServiceDetail() {
                   <TabsContent value="project" className="mt-4">
                     <ServiceProjectOrderPanel
                       serviceProductId={serviceProductId!}
-                      productId={serviceId!}
+                      productId={productId!}
                       currency={service?.currency || 'XOF'}
                       selectedPackageId={selectedPackageId}
                       onPackageSelect={handleSelectPackage}
                       paymentOptions={projectPaymentOptions}
                       onContinue={payload => {
                         sessionStorage.setItem(
-                          `service-project-order:${serviceId}`,
+                          `service-project-order:${productId}`,
                           JSON.stringify(payload)
                         );
                         const url = buildCheckoutUrl({
-                          productId: serviceId!,
+                          productId: productId!,
                           storeId: service?.store_id,
                           buyNow: true,
                           quantity: 1,
@@ -1458,7 +1479,14 @@ export default function ServiceDetail() {
                           </p>
                         )}
                         <Button
-                          onClick={() => navigate(`/service/${service.paid_product.id}`)}
+                          onClick={() =>
+                            navigate(
+                              buildServicePublicPath({
+                                id: service.paid_product.id,
+                                slug: service.paid_product.slug,
+                              })
+                            )
+                          }
                           className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
                           size="sm"
                         >
@@ -1486,7 +1514,14 @@ export default function ServiceDetail() {
                           complète.
                         </p>
                         <Button
-                          onClick={() => navigate(`/service/${service.free_product.id}`)}
+                          onClick={() =>
+                            navigate(
+                              buildServicePublicPath({
+                                id: service.free_product.id,
+                                slug: service.free_product.slug,
+                              })
+                            )
+                          }
                           className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
                           size="sm"
                           variant="outline"
@@ -1586,7 +1621,7 @@ export default function ServiceDetail() {
                 <div>
                   <label className="text-sm font-medium mb-2 block">Sélectionnez une date</label>
                   <ServiceCalendarEnhanced
-                    serviceId={serviceId!}
+                    serviceId={productId!}
                     selectedDate={selectedDate || undefined}
                     onDateSelect={nextDate => {
                       setSelectedDate(nextDate);
@@ -1601,7 +1636,7 @@ export default function ServiceDetail() {
                   <div className="space-y-2" data-testid="service-time-slots">
                     <label className="text-sm font-medium mb-2 block">Choisissez un créneau</label>
                     <TimeSlotPicker
-                      serviceId={serviceId!}
+                      serviceId={productId!}
                       serviceProductId={serviceProductId ?? undefined}
                       date={selectedDate}
                       durationMinutes={service?.service?.duration_minutes ?? 60}
@@ -1725,7 +1760,7 @@ export default function ServiceDetail() {
 
                 {/* Waitlist Button */}
                 <JoinWaitlistButton
-                  serviceId={serviceId!}
+                  serviceId={productId!}
                   serviceName={service.name}
                   storeId={service.store_id ?? service.store?.id}
                 />
@@ -1762,7 +1797,7 @@ export default function ServiceDetail() {
       <Separator className="my-12" />
 
       <ServiceRecommendations
-        serviceId={serviceId!}
+        serviceId={productId!}
         category={service?.category}
         tags={Array.isArray(service?.tags) ? service.tags : undefined}
         limit={6}
@@ -1770,7 +1805,7 @@ export default function ServiceDetail() {
         title="Services similaires"
       />
 
-      <BookedTogetherRecommendations serviceId={serviceId!} limit={4} />
+      <BookedTogetherRecommendations serviceId={productId!} limit={4} />
 
       {showAppointment && (
         <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 border-t bg-background px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">

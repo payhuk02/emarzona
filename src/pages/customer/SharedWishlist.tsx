@@ -11,6 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useSharedWishlist } from '@/hooks/wishlist/useWishlistShare';
 import { useNavigate } from 'react-router-dom';
+import { buildServicePublicPath } from '@/lib/service/resolve-service-product-route';
 import {
   Heart,
   Package,
@@ -70,7 +71,7 @@ export default function SharedWishlist() {
         navigate(`/products/physical/${product.id}`);
         break;
       case 'service':
-        navigate(`/service/${product.id}`);
+        navigate(buildServicePublicPath({ id: product.id, slug: product.slug }));
         break;
       case 'course':
         navigate(`/courses/${product.id}`);

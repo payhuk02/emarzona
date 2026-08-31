@@ -8,6 +8,7 @@
 import { useState } from 'react';
 import { AppPageShell } from '@/components/layout/AppPageShell';
 import { useNavigate } from 'react-router-dom';
+import { buildServicePublicPath } from '@/lib/service/resolve-service-product-route';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Users } from 'lucide-react';
@@ -116,7 +117,7 @@ export default function ServiceWaitlistManagementPage() {
       const params = new URLSearchParams({ waitlist: entryId });
       if (entry.customerEmail) params.set('guestEmail', entry.customerEmail);
       if (entry.customerName) params.set('guestName', entry.customerName);
-      navigate(`/service/${entry.serviceId}?${params.toString()}`, {
+      navigate(`${buildServicePublicPath({ id: entry.serviceId })}?${params.toString()}`, {
         state: {
           waitlistEntry: entry,
           prefillData: {

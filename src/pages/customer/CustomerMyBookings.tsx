@@ -5,6 +5,7 @@
 import { useMemo, useState } from 'react';
 import { AppPageShell } from '@/components/layout/AppPageShell';
 import { Link } from 'react-router-dom';
+import { buildServicePublicPath } from '@/lib/service/resolve-service-product-route';
 import { format, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -293,7 +294,14 @@ export default function CustomerMyBookings() {
                         />
                         {booking.product?.id && (
                           <Button asChild variant="link" className="px-0 h-auto">
-                            <Link to={`/service/${booking.product.id}`}>Voir le service</Link>
+                            <Link
+                              to={buildServicePublicPath({
+                                id: booking.product.id,
+                                slug: booking.product.slug,
+                              })}
+                            >
+                              Voir le service
+                            </Link>
                           </Button>
                         )}
                         <div className="flex flex-wrap gap-2">

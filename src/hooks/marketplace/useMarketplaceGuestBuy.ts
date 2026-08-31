@@ -7,6 +7,7 @@ import {
   type MarketplacePaymentOptions,
 } from '@/lib/marketplace-product-cta';
 import { buildCheckoutUrl } from '@/lib/checkout/checkout-route';
+import { buildServicePublicPath } from '@/lib/service/resolve-service-product-route';
 import type { GuestCustomerInfo } from '@/components/checkout/GuestPurchaseDialog';
 
 export type MarketplaceBuyProduct = {
@@ -53,7 +54,9 @@ export function useMarketplaceGuestBuy({
         if (cta.action === 'service') {
           const params = new URLSearchParams({ guestEmail: customer.email });
           if (customer.fullName) params.set('guestName', customer.fullName);
-          navigate(`/service/${product.id}?${params.toString()}`);
+          navigate(
+            `${buildServicePublicPath({ id: product.id, slug: product.slug })}?${params.toString()}`
+          );
           return;
         }
 
@@ -102,7 +105,7 @@ export function useMarketplaceGuestBuy({
 
     // Services : fiche complète (formules, brief, calendrier) avant paiement — style Fiverr/ComeUp
     if (cta.action === 'service') {
-      navigate(`/service/${product.id}`);
+      navigate(buildServicePublicPath({ id: product.id, slug: product.slug }));
       return;
     }
 

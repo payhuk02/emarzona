@@ -92,15 +92,18 @@ export function ServicePackageComparisonTable({
                     <th
                       key={pkg.id}
                       className={cn(
-                        'p-3 text-left align-top min-w-[160px] border-l',
-                        selected && 'bg-primary/5 ring-1 ring-inset ring-primary/20'
+                        'relative p-3 pt-10 text-left align-top min-w-[160px] border-l',
+                        selected && 'bg-primary/5 ring-1 ring-inset ring-primary/20',
+                        pkg.is_featured && 'bg-primary/[0.03]'
                       )}
                     >
                       <div className="space-y-2">
-                        <div className="flex items-center justify-between gap-2">
-                          <span className="font-semibold text-foreground">{pkg.name}</span>
-                          {pkg.is_featured && <Badge>Populaire</Badge>}
-                        </div>
+                        {pkg.is_featured && (
+                          <div className="absolute top-2 left-1/2 -translate-x-1/2">
+                            <Badge className="text-xs whitespace-nowrap shadow-sm">Populaire</Badge>
+                          </div>
+                        )}
+                        <span className="font-semibold text-foreground block">{pkg.name}</span>
                         <p className="text-lg font-bold">{formatCurrency(pkg.price, currency)}</p>
                         {onSelectPackage && (
                           <Button
