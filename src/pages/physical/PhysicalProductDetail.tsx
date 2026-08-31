@@ -52,6 +52,7 @@ import { logger } from '@/lib/logger';
 import { useAnalyticsTracking } from '@/hooks/useProductAnalytics';
 import { useWishlistToggle } from '@/hooks/wishlist/useWishlistToggle';
 import { SEOMeta, ProductSchema } from '@/components/seo';
+import { FAQSchema } from '@/components/seo/FAQSchema';
 import {
   Accordion,
   AccordionContent,
@@ -72,6 +73,7 @@ import {
   type PhysicalInventoryRow,
 } from '@/lib/physical/physical-product-display';
 import { usePhysicalProductDetail } from '@/hooks/physical/usePhysicalProductDetail';
+import type { ProductFAQ } from '@/types/product-form';
 
 // Types pour les APIs externes de tracking
 interface WindowWithGtag extends Window {
@@ -311,9 +313,11 @@ export default function PhysicalProductDetail() {
   const displayPrice = selectedVariant?.price ?? basePrice;
   const compareAtPrice =
     selectedVariant?.compare_at_price ??
+    product?.compare_at_price ??
     (product?.promotional_price != null && product.promotional_price < product.price
       ? product.price
       : null);
+  const faqs = Array.isArray(product?.faqs) ? (product.faqs as ProductFAQ[]) : [];
   const productUrl = `${window.location.origin}/physical/${productId}`;
 
   return (
@@ -325,21 +329,23 @@ export default function PhysicalProductDetail() {
     >
       {/* SEO Meta Tags */}
       <SEOMeta
-        title={product.name}
+        title={product.meta_title || product.name}
         description={
+          product.meta_description ||
           product.short_description ||
           product.description ||
           `${product.name} - Disponible sur Emarzona`
         }
         keywords={product.category}
         url={productUrl}
-        image={images[0]}
+        image={product.og_image || images[0]}
         imageAlt={product.name}
         type="product"
         price={displayPrice}
         currency={product.currency}
         availability={availability}
       />
+      {faqs.length > 0 && <FAQSchema faqs={faqs} />}
 
       {/* Product Schema.org */}
       {product.store && (
@@ -594,6 +600,11 @@ export default function PhysicalProductDetail() {
           <TabsTrigger value="reviews" className="min-h-[44px] shrink-0">
             Avis
           </TabsTrigger>
+          {faqs.length > 0 && (
+            <TabsTrigger value="faqs" className="min-h-[44px] shrink-0">
+              FAQs
+            </TabsTrigger>
+          )}
         </TabsList>
 
         {/* Description Tab */}
@@ -668,7 +679,43 @@ export default function PhysicalProductDetail() {
               )}
             </CardContent>
           </Card>
+          {product?.license_terms && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Conditions de licence</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <SafeHTML
+                  html={product.license_terms}
+                  className="prose max-w-none text-sm text-muted-foreground"
+                />
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
+
+        {/* FAQs Tab */}
+        {faqs.length > 0 && (
+          <TabsContent value="faqs" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Questions fréquentes</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Accordion type="single" collapsible className="w-full">
+                  {faqs.map((faq: ProductFAQ, index: number) => (
+                    <AccordionItem key={index} value={`faq-${index}`}>
+                      <AccordionTrigger className="text-left">{faq.question}</AccordionTrigger>
+                      <AccordionContent className="text-muted-foreground">
+                        {faq.answer}
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        )}
 
         {/* Reviews Tab */}
         <TabsContent value="reviews" className="space-y-6">

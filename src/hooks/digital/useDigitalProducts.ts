@@ -6,6 +6,10 @@ import { useStoreContext } from '@/contexts/StoreContext';
 import { shouldRetryError, getRetryDelay } from '@/lib/error-handling';
 import { PAID_REVENUE_ELIGIBLE_STATUSES } from '@/lib/orders/order-status';
 import { mapRemainingDownloadsResult } from '@/lib/digital/remaining-downloads';
+import {
+  fetchDigitalProductDetail,
+  type DigitalProductDetailData,
+} from '@/lib/digital/fetch-digital-product-detail';
 
 /**
  * Produit digital complet
@@ -466,28 +470,17 @@ export const useDigitalProducts = (
 };
 
 /**
- * useDigitalProduct - Hook pour récupérer un produit digital par ID
+ * useDigitalProduct - Détail marketplace par `products.id` (route /digital/:productId).
  */
 export const useDigitalProduct = (productId: string | undefined) => {
   return useQuery({
     queryKey: ['digitalProduct', productId],
-    queryFn: async () => {
-      if (!productId) throw new Error('ID produit manquant');
-
-      const { data, error } = await supabase
-        .from('digital_products')
-        .select(
-          'id,product_id,user_id,category,status,protection_level,tags,max_licenses,current_licenses,total_downloads,revenue,created_at,updated_at'
-        )
-        .eq('id', productId)
-        .single();
-
-      if (error) throw error;
-      return data as DigitalProduct;
-    },
+    queryFn: () => fetchDigitalProductDetail(productId!),
     enabled: !!productId,
   });
 };
+
+export type { DigitalProductDetailData };
 
 /**
  * useCreateDigitalProduct - Hook pour créer un produit digital
@@ -909,12 +902,12 @@ export const useRemainingDownloads = (digitalProductId: string | undefined) => {
  * useHasDownloadAccess - Hook pour vérifier si l'utilisateur a accès au téléchargement
  * Amélioré avec plusieurs méthodes de vérification pour plus de robustesse
  */
-export const useHasDownloadAccess = (digitalProductId: string | undefined) => {
+export const useHasDownloadAccess = (productId: string | undefined) => {
   return useQuery({
-    queryKey: ['digitalProduct', digitalProductId, 'hasAccess'],
+    queryKey: ['digitalProduct', productId, 'hasAccess'],
     queryFn: async () => {
-      if (!digitalProductId) {
-        logger.warn('Digital product ID missing for access check');
+      if (!productId) {
+        logger.warn('Product ID missing for download access check');
         return { hasAccess: false, purchaseCount: 0, paymentStatus: 'unknown', method: 'none' };
       }
 
@@ -930,25 +923,6 @@ export const useHasDownloadAccess = (digitalProductId: string | undefined) => {
           method: 'none',
         };
       }
-
-      // Étape 1: Récupérer le product_id depuis digital_products
-      const { data: digitalProduct, error: digitalError } = await supabase
-        .from('digital_products')
-        .select('product_id')
-        .eq('id', digitalProductId)
-        .single();
-
-      if (digitalError || !digitalProduct) {
-        logger.warn('Digital product not found', { digitalProductId, error: digitalError });
-        return {
-          hasAccess: false,
-          purchaseCount: 0,
-          paymentStatus: 'product_not_found',
-          method: 'none',
-        };
-      }
-
-      const productId = digitalProduct.product_id;
 
       // Étape 2: Méthode 1 - Vérification par customer_id (plus fiable)
       let hasAccessByCustomer = false;
@@ -1107,7 +1081,6 @@ export const useHasDownloadAccess = (digitalProductId: string | undefined) => {
       // Log pour debugging
       if (!hasAccess) {
         logger.debug('User does not have download access', {
-          digitalProductId,
           productId,
           userId: user.id,
           userEmail: user.email,
@@ -1116,7 +1089,6 @@ export const useHasDownloadAccess = (digitalProductId: string | undefined) => {
         });
       } else {
         logger.debug('User has download access', {
-          digitalProductId,
           productId,
           userId: user.id,
           method,
@@ -1132,7 +1104,7 @@ export const useHasDownloadAccess = (digitalProductId: string | undefined) => {
         method, // Retourner la méthode utilisée pour debug
       };
     },
-    enabled: !!digitalProductId,
+    enabled: !!productId,
     retry: 1, // Réessayer une fois en cas d'erreur réseau
     retryDelay: 1000,
   });

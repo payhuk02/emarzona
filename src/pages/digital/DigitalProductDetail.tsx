@@ -7,9 +7,8 @@
  */
 
 import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import { SEOMeta } from '@/components/seo/SEOMeta';
+import { FAQSchema } from '@/components/seo/FAQSchema';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -64,6 +63,8 @@ import { logger } from '@/lib/logger';
 import { useAddToComparison } from './DigitalProductsCompare';
 import { FileVersionManager, FileMetadataEditor } from '@/components/digital/files';
 import CouponInput from '@/components/checkout/CouponInput';
+import { PhysicalProductWhatsAppButton } from '@/components/physical/PhysicalProductWhatsAppButton';
+import { generatePaymentUrl } from '@/lib/store-utils';
 
 interface DigitalProductDetailParams {
   productId: string;
@@ -94,7 +95,8 @@ export default function DigitalProductDetail() {
   const { data: digitalProduct, isLoading, error } = useDigitalProduct(productId || '');
 
   // Check if user has purchased this product
-  const { data: hasAccess } = useHasDownloadAccess(productId || '');
+  const { data: accessData } = useHasDownloadAccess(productId || '');
+  const hasAccess = accessData?.hasAccess ?? false;
 
   // Track analytics event
   const { trackView } = useAnalyticsTracking();
@@ -204,7 +206,7 @@ export default function DigitalProductDetail() {
               ? 'multi'
               : 'unlimited',
         maxActivations:
-          digitalProduct.license_type === 'multi' ? digitalProduct.max_licenses : undefined,
+          digitalProduct.license_type === 'multi' ? digitalProduct.max_activations ?? undefined : undefined,
         couponCode: appliedCouponCode ?? undefined,
         couponDiscountAmount: appliedDiscountAmount ?? undefined,
         promotionId: appliedCouponId ?? undefined,
@@ -306,6 +308,8 @@ export default function DigitalProductDetail() {
 
   const product = digitalProduct.product;
   const files = digitalProduct.files || [];
+  const isFreeProduct =
+    product.pricing_model === 'free' || (product.price === 0 && !product.promotional_price);
 
   // Parse FAQs if exists
   const faqs = product.faqs ? (Array.isArray(product.faqs) ? product.faqs : []) : [];
@@ -313,14 +317,18 @@ export default function DigitalProductDetail() {
   return (
     <div className="min-h-screen bg-background">
       <SEOMeta
-        title={product.name}
-        description={(product.short_description || product.description || '').slice(0, 160)}
+        title={product.meta_title || product.name}
+        description={
+          product.meta_description ||
+          (product.short_description || product.description || '').slice(0, 160)
+        }
         url={`https://www.emarzona.com/digital/${productId}`}
-        image={product.image_url}
+        image={product.og_image || product.image_url}
         type="product"
-        price={product.price}
+        price={isFreeProduct ? 0 : (product.promotional_price ?? product.price)}
         currency={product.currency}
       />
+      {faqs.length > 0 && <FAQSchema faqs={faqs} />}
       {/* Header */}
       <div className="border-b bg-card">
         <div className="container mx-auto px-4 py-6 max-w-7xl">
@@ -368,17 +376,23 @@ export default function DigitalProductDetail() {
             <div className="space-y-6">
               {/* Title & Price */}
               <div>
-                <div className="flex items-start justify-between mb-2">
+                <div className="flex items-start justify-between gap-2 mb-2">
                   <h1 className="text-lg sm:text-2xl md:text-3xl font-bold">{product.name}</h1>
-                  <Badge variant={product.is_active ? 'default' : 'secondary'}>
-                    {product.is_active ? 'Actif' : 'Inactif'}
-                  </Badge>
+                  {digitalProduct.digital_type && (
+                    <Badge variant="secondary" className="shrink-0 capitalize">
+                      {digitalProduct.digital_type.replace(/_/g, ' ')}
+                    </Badge>
+                  )}
                 </div>
                 <p className="text-muted-foreground">{product.short_description}</p>
 
                 {/* Price */}
                 <div className="flex items-baseline gap-3 mt-4">
-                  {product.promotional_price ? (
+                  {isFreeProduct ? (
+                    <span className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-primary">
+                      Gratuit
+                    </span>
+                  ) : product.promotional_price ? (
                     <>
                       <span className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-primary">
                         {product.promotional_price.toLocaleString()} {product.currency}
@@ -487,10 +501,22 @@ export default function DigitalProductDetail() {
                       ) : (
                         <>
                           <Lock className="h-4 w-4 mr-2" />
-                          Acheter maintenant
+                          {isFreeProduct ? 'Obtenir gratuitement' : 'Acheter maintenant'}
                         </>
                       )}
                     </Button>
+                    <PhysicalProductWhatsAppButton
+                      productName={product.name}
+                      whatsappNumber={product.whatsapp_number}
+                      whatsappEnabled={product.whatsapp_enabled}
+                      paymentUrl={
+                        digitalProduct.store?.slug && product.slug
+                          ? generatePaymentUrl(digitalProduct.store.slug, product.slug)
+                          : undefined
+                      }
+                      className="w-full sm:w-auto"
+                      label="Contacter sur WhatsApp"
+                    />
                   </>
                 )}
 
@@ -566,6 +592,22 @@ export default function DigitalProductDetail() {
                     </div>
                   </div>
 
+                  {product.licensing_type && (
+                    <div className="flex items-center gap-2 col-span-2">
+                      <FileText className="h-4 w-4 text-muted-foreground" />
+                      <div>
+                        <p className="text-xs text-muted-foreground">Droits d&apos;utilisation</p>
+                        <p className="font-medium capitalize">
+                          {product.licensing_type === 'plr'
+                            ? 'PLR (Private Label Rights)'
+                            : product.licensing_type === 'copyrighted'
+                              ? "Protégé par droits d'auteur"
+                              : product.licensing_type}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="flex items-center gap-2">
                     {digitalProduct.watermark_enabled ? (
                       <Lock className="h-4 w-4 text-muted-foreground" />
@@ -581,6 +623,20 @@ export default function DigitalProductDetail() {
                   </div>
                 </CardContent>
               </Card>
+
+              {product.license_terms && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Conditions de licence</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <SafeHTML
+                      html={product.license_terms}
+                      className="prose max-w-none text-sm text-muted-foreground"
+                    />
+                  </CardContent>
+                </Card>
+              )}
 
               {/* License Card (if user owns) */}
               {hasAccess && <DigitalLicenseCard productId={productId || ''} />}
@@ -690,7 +746,7 @@ export default function DigitalProductDetail() {
 
               <TabsContent value="versions" className="space-y-4">
                 {files.length > 0 && files[0]?.id && (
-                  <FileVersionManager fileId={files[0].id} digitalProductId={productId || ''} />
+                  <FileVersionManager fileId={files[0].id} digitalProductId={digitalProduct.id} />
                 )}
               </TabsContent>
 

@@ -53,7 +53,7 @@ export default function DigitalProductVersionsManagement() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingVersion, setEditingVersion] = useState<string | null>(null);
 
-  const { data: product, isLoading: productLoading } = useDigitalProduct(productId || '');
+  const { data: digitalProduct, isLoading: productLoading } = useDigitalProduct(productId || '');
   const { data: currentVersion, isLoading: currentVersionLoading } =
     useCurrentDigitalProductVersion(productId || '');
   const { data: versionHistory = [], isLoading: historyLoading } = useDigitalProductVersionHistory(
@@ -92,7 +92,7 @@ export default function DigitalProductVersionsManagement() {
     );
   }
 
-  if (!product) {
+  if (!digitalProduct) {
     return (
       <AppPageShell>
         <div className="container mx-auto p-4 md:p-6">
@@ -122,7 +122,7 @@ export default function DigitalProductVersionsManagement() {
               Retour
             </Button>
             <h1 className="text-2xl md:text-3xl font-bold">Gestion des Versions</h1>
-            <p className="text-muted-foreground">{product.name || 'Produit'}</p>
+            <p className="text-muted-foreground">{digitalProduct?.product?.name || 'Produit'}</p>
           </div>
           <Button onClick={() => setIsCreateDialogOpen(true)}>
             <Plus className="h-4 w-4 mr-2" />
@@ -289,11 +289,11 @@ export default function DigitalProductVersionsManagement() {
         </Card>
 
         {/* Create Version Dialog */}
-        {product.digital_product_id && (
+        {digitalProduct?.id && (
           <CreateVersionDialog
             open={isCreateDialogOpen}
             onOpenChange={setIsCreateDialogOpen}
-            digitalProductId={product.digital_product_id}
+            digitalProductId={digitalProduct.id}
             productId={productId || ''}
             onSuccess={() => {
               // Refresh will happen automatically via React Query

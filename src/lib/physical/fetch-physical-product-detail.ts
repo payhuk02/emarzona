@@ -4,9 +4,9 @@ import type { PhysicalInventoryRow } from '@/lib/physical/physical-product-displ
 
 export const STORE_PUBLIC_FIELDS = 'id, name, slug, logo_url';
 export const PRODUCT_PHYSICAL_FIELDS =
-  'id, store_id, slug, name, description, short_description, category, tags, product_type, is_active, price, promotional_price, currency, image_url, images, stock, created_at, updated_at, payment_options, pricing_model, licensing_type, license_terms';
+  'id, store_id, slug, name, description, short_description, category, tags, product_type, is_active, price, promotional_price, compare_at_price, currency, image_url, images, stock, created_at, updated_at, payment_options, pricing_model, licensing_type, license_terms, meta_title, meta_description, og_image, faqs, hide_purchase_count, hide_likes_count, hide_recommendations_count, hide_downloads_count, hide_reviews_count, hide_rating, whatsapp_number, whatsapp_enabled';
 export const PHYSICAL_PRODUCT_FIELDS =
-  'id, product_id, store_id, sku, manufacturer, country_of_origin, weight, weight_unit, height, length, width, dimensions_unit, whatsapp_number, whatsapp_enabled, created_at, updated_at';
+  'id, product_id, store_id, sku, manufacturer, country_of_origin, weight, weight_unit, height, length, width, dimensions_unit, whatsapp_number, whatsapp_enabled, free_shipping, shipping_class, created_at, updated_at';
 export const PHYSICAL_VARIANT_FIELDS =
   'id, physical_product_id, option1_value, option2_value, option3_value, sku, price, compare_at_price, cost_per_item, quantity, barcode, weight, image_url, position, is_available, created_at, updated_at';
 export const PHYSICAL_INVENTORY_FIELDS =
@@ -32,12 +32,29 @@ export type PhysicalProductDetailData = {
   is_active: boolean;
   price: number;
   promotional_price: number | null;
+  compare_at_price: number | null;
   currency: string;
   image_url: string | null;
   images: string[] | null;
   stock: number | null;
   created_at: string;
   updated_at: string;
+  payment_options: unknown;
+  pricing_model: string | null;
+  licensing_type: string | null;
+  license_terms: string | null;
+  meta_title: string | null;
+  meta_description: string | null;
+  og_image: string | null;
+  faqs: unknown;
+  hide_purchase_count: boolean | null;
+  hide_likes_count: boolean | null;
+  hide_recommendations_count: boolean | null;
+  hide_downloads_count: boolean | null;
+  hide_reviews_count: boolean | null;
+  hide_rating: boolean | null;
+  whatsapp_number: string | null;
+  whatsapp_enabled: boolean | null;
   physical: Record<string, unknown> | null;
   variants: PhysicalProductVariant[];
   inventory: PhysicalInventoryRow[];
