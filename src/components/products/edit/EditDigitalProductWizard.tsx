@@ -41,6 +41,7 @@ import { ProductSEOForm } from '../create/shared/ProductSEOForm';
 import { ProductFAQForm } from '../create/shared/ProductFAQForm';
 import { ProductStatisticsDisplaySettings } from '../create/shared/ProductStatisticsDisplaySettings';
 import { ProductWhatsAppContactConfig } from '@/components/products/shared/ProductWhatsAppContactConfig';
+import { mapCategoryToDigitalType } from '@/lib/digital/digital-product-display';
 import { useToast } from '@/hooks/use-toast';
 import { useStore } from '@/hooks/useStore';
 import { useAuth } from '@/contexts/AuthContext';
@@ -210,7 +211,8 @@ const convertToFormData = async (
     description: product.description || '',
     short_description: product.short_description || '',
     category: product.category || 'ebook',
-    digital_type: digitalProduct?.digital_type || 'ebook',
+    digital_type:
+      mapCategoryToDigitalType(product.category) || digitalProduct?.digital_type || 'other',
     image_url: product.image_url || '',
     images: Array.isArray(product.images)
       ? (product.images as string[])
@@ -228,6 +230,13 @@ const convertToFormData = async (
     main_file_url: digitalProduct?.main_file_url || downloadableFiles[0]?.url || '',
     main_file_version: digitalProduct?.main_file_version || '1.0',
     downloadable_files: downloadableFiles,
+    listed_file_format: digitalProduct?.main_file_format || '',
+    listed_file_size:
+      digitalProduct?.total_size_mb && digitalProduct.total_size_mb >= 1024
+        ? Math.round((digitalProduct.total_size_mb / 1024) * 100) / 100
+        : digitalProduct?.total_size_mb || null,
+    listed_file_size_unit:
+      digitalProduct?.total_size_mb && digitalProduct.total_size_mb >= 1024 ? 'gb' : 'mb',
 
     // License Config
     license_type:

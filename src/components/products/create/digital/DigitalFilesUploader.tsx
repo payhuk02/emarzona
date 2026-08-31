@@ -9,6 +9,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { X, AlertCircle, Link2, Plus } from '@/components/icons';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import type {
   DigitalProductFormData,
@@ -291,6 +298,61 @@ export const DigitalFilesUploader = ({ formData, updateFormData }: DigitalFilesU
                 preview gratuit
               </p>
             )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Format et taille affichés</CardTitle>
+          <CardDescription>
+            Ces informations apparaissent sur la fiche produit (section Spécifications). Utile si
+            vous vendez via lien externe sans upload direct.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-4 sm:grid-cols-3">
+          <div className="space-y-2">
+            <Label htmlFor="listed_file_format">Format</Label>
+            <Input
+              id="listed_file_format"
+              placeholder="Ex: PDF, ZIP, MP4"
+              value={formData.listed_file_format || ''}
+              onChange={e => updateFormData({ listed_file_format: e.target.value })}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="listed_file_size">Taille</Label>
+            <Input
+              id="listed_file_size"
+              type="number"
+              min={0}
+              step="0.01"
+              placeholder="Ex: 2.5"
+              value={formData.listed_file_size ?? ''}
+              onChange={e => {
+                const raw = e.target.value;
+                updateFormData({
+                  listed_file_size: raw === '' ? null : Number.parseFloat(raw),
+                });
+              }}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="listed_file_size_unit">Unité</Label>
+            <Select
+              value={formData.listed_file_size_unit || 'mb'}
+              onValueChange={(value: 'mb' | 'gb') =>
+                updateFormData({ listed_file_size_unit: value })
+              }
+            >
+              <SelectTrigger id="listed_file_size_unit">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="mb">Mo (MB)</SelectItem>
+                <SelectItem value="gb">Go (GB)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </CardContent>
       </Card>
 

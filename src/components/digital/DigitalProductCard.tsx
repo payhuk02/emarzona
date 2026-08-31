@@ -43,6 +43,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { generateProductUrl } from '@/lib/store-utils';
+import { resolveDigitalDisplayPrice } from '@/lib/digital/digital-product-display';
 
 interface DigitalProductCardProps {
   product: {
@@ -52,6 +53,7 @@ interface DigitalProductCardProps {
     description?: string;
     is_active?: boolean | null;
     price: number;
+    promotional_price?: number | null;
     currency: string;
     image_url?: string;
     digital_type: string;
@@ -124,6 +126,11 @@ const DigitalProductCardComponent = ({
     variant === 'compact'
       ? '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw'
       : '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1536px) 33vw, 25vw';
+
+  const { displayPrice, compareAtPrice, hasPromo } = resolveDigitalDisplayPrice(
+    product.price,
+    product.promotional_price
+  );
 
   // Gérer les favoris
   const handleFavorite = useCallback(
@@ -419,13 +426,20 @@ const DigitalProductCardComponent = ({
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-baseline gap-1.5 sm:gap-2 min-w-0 flex-1">
             <span className="text-sm sm:text-base md:text-lg lg:text-2xl font-bold text-primary whitespace-nowrap">
-              {product.price === 0 ? 'Gratuit' : `${product.price} ${product.currency}`}
+              {displayPrice === 0
+                ? 'Gratuit'
+                : `${displayPrice.toLocaleString()} ${product.currency}`}
             </span>
+            {hasPromo && compareAtPrice != null && (
+              <span className="text-xs sm:text-sm line-through text-muted-foreground whitespace-nowrap">
+                {compareAtPrice.toLocaleString()} {product.currency}
+              </span>
+            )}
           </div>
           <PriceStockAlertButton
             productId={product.id}
             productName={product.name}
-            currentPrice={product.price}
+            currentPrice={displayPrice}
             currency={product.currency}
             productType="digital"
             variant="outline"

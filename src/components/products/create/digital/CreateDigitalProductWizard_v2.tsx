@@ -100,6 +100,9 @@ const getDefaultFormData = () => ({
   main_file_url: '',
   main_file_version: '1.0',
   downloadable_files: [],
+  listed_file_format: '',
+  listed_file_size: null,
+  listed_file_size_unit: 'mb' as const,
 
   // License Config
   license_type: 'single',

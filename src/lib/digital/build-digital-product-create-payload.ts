@@ -3,6 +3,7 @@ import type {
   DigitalProductFAQ,
   DigitalProductFormData,
 } from '@/types/digital-product-form';
+import { mapCategoryToDigitalType, listedSizeToMb } from '@/lib/digital/digital-product-display';
 import { buildDigitalProductFilesPayload } from '@/lib/digital/build-digital-product-files-payload';
 import { resolvePrimaryDigitalFile } from '@/lib/digital/resolve-primary-digital-file';
 import type { DigitalProductFileRpcPayload } from '@/lib/digital/build-digital-product-files-payload';
@@ -50,10 +51,11 @@ export function buildDigitalProductCreatePayloads(input: {
   const mainFile = resolvePrimaryDigitalFile(formData.downloadable_files);
   const mainFileUrl = formData.main_file_url?.trim() || mainFile?.url?.trim() || '';
   const mainFileFormat =
+    formData.listed_file_format?.trim() ||
     mainFile?.format ||
     (mainFile as { type?: string } | undefined)?.type?.split('/')[1] ||
     mainFile?.name?.split('.').pop() ||
-    'unknown';
+    null;
   const images = sanitizeStringArray(formData.images);
   const imageUrl = formData.image_url?.trim() || (images.length > 0 ? images[0] : '');
 
@@ -85,13 +87,18 @@ export function buildDigitalProductCreatePayloads(input: {
     hide_rating: formData.hide_rating ?? false,
   };
 
-  const totalSizeMB = computeTotalSizeMb(formData.downloadable_files);
+  const manualSizeMb = listedSizeToMb(
+    formData.listed_file_size,
+    formData.listed_file_size_unit || 'mb'
+  );
+  const computedSizeMb = computeTotalSizeMb(formData.downloadable_files);
+  const totalSizeMB = manualSizeMb > 0 ? manualSizeMb : computedSizeMb;
   const downloadLimit = typeof formData.download_limit === 'number' ? formData.download_limit : 5;
   const downloadExpiryDays =
     typeof formData.download_expiry_days === 'number' ? formData.download_expiry_days : 30;
 
   const digital: Record<string, unknown> = {
-    digital_type: formData.digital_type || 'other',
+    digital_type: mapCategoryToDigitalType(formData.category) || formData.digital_type || 'other',
     license_type: formData.license_type || 'single',
     license_duration_days: formData.license_duration_days ?? null,
     max_activations:
@@ -100,7 +107,8 @@ export function buildDigitalProductCreatePayloads(input: {
     allow_license_transfer: formData.allow_license_transfer ?? false,
     auto_generate_keys: formData.auto_generate_keys !== false,
     main_file_url: mainFileUrl,
-    main_file_size_mb: mainFile ? (mainFile.size ?? 0) / (1024 * 1024) : 0,
+    main_file_size_mb:
+      manualSizeMb > 0 ? manualSizeMb : mainFile ? (mainFile.size ?? 0) / (1024 * 1024) : 0,
     main_file_format: mainFileFormat,
     main_file_version: formData.main_file_version || '1.0',
     total_files: formData.downloadable_files?.length || (mainFileUrl ? 1 : 0),

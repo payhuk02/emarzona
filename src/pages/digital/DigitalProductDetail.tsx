@@ -65,6 +65,13 @@ import { FileVersionManager, FileMetadataEditor } from '@/components/digital/fil
 import CouponInput from '@/components/checkout/CouponInput';
 import { PhysicalProductWhatsAppButton } from '@/components/physical/PhysicalProductWhatsAppButton';
 import { generatePaymentUrl } from '@/lib/store-utils';
+import {
+  formatDigitalFileFormat,
+  formatDigitalFileSizeMb,
+  getDigitalCategoryLabel,
+  resolveDigitalDisplayPrice,
+} from '@/lib/digital/digital-product-display';
+import { htmlToPlainText } from '@/lib/html-sanitizer';
 
 interface DigitalProductDetailParams {
   productId: string;
@@ -206,7 +213,9 @@ export default function DigitalProductDetail() {
               ? 'multi'
               : 'unlimited',
         maxActivations:
-          digitalProduct.license_type === 'multi' ? digitalProduct.max_activations ?? undefined : undefined,
+          digitalProduct.license_type === 'multi'
+            ? (digitalProduct.max_activations ?? undefined)
+            : undefined,
         couponCode: appliedCouponCode ?? undefined,
         couponDiscountAmount: appliedDiscountAmount ?? undefined,
         promotionId: appliedCouponId ?? undefined,
@@ -310,8 +319,17 @@ export default function DigitalProductDetail() {
   const files = digitalProduct.files || [];
   const isFreeProduct =
     product.pricing_model === 'free' || (product.price === 0 && !product.promotional_price);
-
-  // Parse FAQs if exists
+  const categoryLabel = getDigitalCategoryLabel(product.category);
+  const shortDescription = htmlToPlainText(product.short_description || '');
+  const displaySizeMb =
+    digitalProduct.total_size_mb && digitalProduct.total_size_mb > 0
+      ? digitalProduct.total_size_mb
+      : digitalProduct.main_file_size_mb;
+  const displayFormat = digitalProduct.main_file_format;
+  const { displayPrice, compareAtPrice, hasPromo } = resolveDigitalDisplayPrice(
+    product.price,
+    product.promotional_price
+  );
   const faqs = product.faqs ? (Array.isArray(product.faqs) ? product.faqs : []) : [];
 
   return (
@@ -353,23 +371,25 @@ export default function DigitalProductDetail() {
                 />
               </div>
 
-              {/* File Preview */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <FileText className="h-5 w-5" />
-                    Fichiers inclus ({files.length})
-                  </CardTitle>
-                  <CardDescription>
-                    {hasAccess ? 'Téléchargez vos fichiers' : 'Aperçu des fichiers disponibles'}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {files.map(file => (
-                    <DigitalFilePreview key={file.id} file={file} isLocked={!hasAccess} />
-                  ))}
-                </CardContent>
-              </Card>
+              {/* File Preview — masqué si aucun fichier */}
+              {files.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <FileText className="h-5 w-5" />
+                      Fichiers inclus ({files.length})
+                    </CardTitle>
+                    <CardDescription>
+                      {hasAccess ? 'Téléchargez vos fichiers' : 'Aperçu des fichiers disponibles'}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {files.map(file => (
+                      <DigitalFilePreview key={file.id} file={file} isLocked={!hasAccess} />
+                    ))}
+                  </CardContent>
+                </Card>
+              )}
             </div>
 
             {/* Right: Product Info & Actions */}
@@ -378,13 +398,13 @@ export default function DigitalProductDetail() {
               <div>
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <h1 className="text-lg sm:text-2xl md:text-3xl font-bold">{product.name}</h1>
-                  {digitalProduct.digital_type && (
-                    <Badge variant="secondary" className="shrink-0 capitalize">
-                      {digitalProduct.digital_type.replace(/_/g, ' ')}
+                  {categoryLabel && (
+                    <Badge variant="secondary" className="shrink-0">
+                      {categoryLabel}
                     </Badge>
                   )}
                 </div>
-                <p className="text-muted-foreground">{product.short_description}</p>
+                {shortDescription && <p className="text-muted-foreground">{shortDescription}</p>}
 
                 {/* Price */}
                 <div className="flex items-baseline gap-3 mt-4">
@@ -392,20 +412,16 @@ export default function DigitalProductDetail() {
                     <span className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-primary">
                       Gratuit
                     </span>
-                  ) : product.promotional_price ? (
+                  ) : hasPromo ? (
                     <>
                       <span className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-primary">
-                        {product.promotional_price.toLocaleString()} {product.currency}
+                        {displayPrice.toLocaleString()} {product.currency}
                       </span>
                       <span className="text-base sm:text-lg md:text-xl line-through text-muted-foreground">
-                        {product.price.toLocaleString()} {product.currency}
+                        {compareAtPrice?.toLocaleString()} {product.currency}
                       </span>
                       <Badge variant="destructive">
-                        -
-                        {Math.round(
-                          ((product.price - product.promotional_price) / product.price) * 100
-                        )}
-                        %
+                        -{Math.round(((product.price - displayPrice) / product.price) * 100)}%
                       </Badge>
                     </>
                   ) : (
@@ -486,11 +502,7 @@ export default function DigitalProductDetail() {
                       className="w-full sm:w-auto sm:max-w-[min(100%,16rem)] sm:self-start px-6 sm:px-8 rounded-full font-semibold shadow-md hover:shadow-lg"
                       onClick={handlePurchase}
                       disabled={
-                        isPurchasing ||
-                        isCreatingOrder ||
-                        !digitalProduct ||
-                        !user ||
-                        !product.is_active
+                        isPurchasing || isCreatingOrder || !digitalProduct || !product.is_active
                       }
                     >
                       {isPurchasing || isCreatingOrder ? (
@@ -501,7 +513,11 @@ export default function DigitalProductDetail() {
                       ) : (
                         <>
                           <Lock className="h-4 w-4 mr-2" />
-                          {isFreeProduct ? 'Obtenir gratuitement' : 'Acheter maintenant'}
+                          {!user
+                            ? 'Se connecter pour acheter'
+                            : isFreeProduct
+                              ? 'Obtenir gratuitement'
+                              : 'Acheter maintenant'}
                         </>
                       )}
                     </Button>
@@ -546,9 +562,7 @@ export default function DigitalProductDetail() {
                     <HardDrive className="h-4 w-4 text-muted-foreground" />
                     <div>
                       <p className="text-xs text-muted-foreground">Taille</p>
-                      <p className="font-medium">
-                        {digitalProduct.total_size_mb?.toFixed(2) || 0} MB
-                      </p>
+                      <p className="font-medium">{formatDigitalFileSizeMb(displaySizeMb)}</p>
                     </div>
                   </div>
 
@@ -556,7 +570,7 @@ export default function DigitalProductDetail() {
                     <FileText className="h-4 w-4 text-muted-foreground" />
                     <div>
                       <p className="text-xs text-muted-foreground">Format</p>
-                      <p className="font-medium">{digitalProduct.main_file_format || 'N/A'}</p>
+                      <p className="font-medium">{formatDigitalFileFormat(displayFormat)}</p>
                     </div>
                   </div>
 

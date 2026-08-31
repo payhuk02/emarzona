@@ -32,6 +32,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import { getCategoriesForProductType } from '@/constants/product-categories';
+import { mapCategoryToDigitalType } from '@/lib/digital/digital-product-display';
 import { buildSeoFromGenerated, mergeImages } from '@/lib/ai-product-apply';
 
 import type {
@@ -262,7 +263,10 @@ export const DigitalBasicInfoForm = ({
           useMobileSelectRoot
           value={formData.category || 'ebook'}
           onValueChange={value => {
-            updateFormData({ category: value });
+            updateFormData({
+              category: value,
+              digital_type: mapCategoryToDigitalType(value),
+            });
             // Réinitialiser la catégorie personnalisée si on change de catégorie
             if (value !== 'autre') {
               setCustomCategory('');

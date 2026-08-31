@@ -69,6 +69,11 @@ export interface DigitalProductFormData {
   main_file_url: string;
   main_file_version: string;
   downloadable_files: DigitalProductDownloadableFile[];
+  /** Format affiché sur la fiche (ex: PDF, ZIP) — configuré à l'étape Fichiers */
+  listed_file_format?: string;
+  /** Taille affichée — configurée à l'étape Fichiers */
+  listed_file_size?: number | null;
+  listed_file_size_unit?: 'mb' | 'gb';
 
   // License Config
   license_type: 'single' | 'multi' | 'unlimited' | 'subscription' | 'lifetime';

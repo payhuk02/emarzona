@@ -58,6 +58,8 @@ import { useToast } from '@/hooks/use-toast';
 import { DigitalProductsGrid } from '@/components/digital/DigitalProductCard';
 import { ResponsiveProductImage } from '@/components/ui/ResponsiveProductImage';
 import { logger } from '@/lib/logger';
+import { htmlToPlainText } from '@/lib/html-sanitizer';
+import { resolveDigitalDisplayPrice } from '@/lib/digital/digital-product-display';
 import { cn } from '@/lib/utils';
 
 interface SearchFilters {
@@ -113,7 +115,7 @@ export const DigitalProductsSearch = () => {
 
   // Charger l'historique depuis localStorage
   useEffect(() => {
-    let  saved: string | null = null;
+    let saved: string | null = null;
     try {
       saved = localStorage.getItem('digital-products-search-history');
     } catch {
@@ -190,7 +192,7 @@ export const DigitalProductsSearch = () => {
             .filter(tag => tag?.toLowerCase().includes(debouncedQuery.toLowerCase()))
             .slice(0, 5) || [];
 
-        const  suggestions: SearchSuggestion[] = [
+        const suggestions: SearchSuggestion[] = [
           ...(products?.map(p => ({
             id: p.id,
             text: p.name,
@@ -209,7 +211,7 @@ export const DigitalProductsSearch = () => {
         ];
 
         return suggestions.slice(0, 10);
-      } catch ( _error: unknown) {
+      } catch (_error: unknown) {
         logger.error('Error fetching search suggestions', { error });
         return [];
       }
@@ -222,7 +224,7 @@ export const DigitalProductsSearch = () => {
     queryKey: ['digitalProductsSearch', filters],
     queryFn: async () => {
       try {
-        let  query= supabase
+        let query = supabase
           .from('products')
           .select(
             `
@@ -280,7 +282,7 @@ export const DigitalProductsSearch = () => {
 
         if (error) throw error;
         return data || [];
-      } catch ( _error: unknown) {
+      } catch (_error: unknown) {
         logger.error('Error searching digital products', { error });
         throw error;
       }
@@ -420,7 +422,7 @@ export const DigitalProductsSearch = () => {
 
   // Compteur de filtres actifs
   const activeFiltersCount = useMemo(() => {
-    let  count= 0;
+    let count = 0;
     if (filters.query) count++;
     if (filters.category !== 'all') count++;
     if (filters.priceRange[0] > 0 || filters.priceRange[1] < 1000000) count++;
@@ -751,15 +753,16 @@ export const DigitalProductsSearch = () => {
                 </p>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {searchResults.map(
-                  (product: {
-                    id: string;
-                    name: string;
-                    image_url?: string;
-                    price: number;
-                    currency: string;
-                    slug: string;
-                  }) => (
+                {searchResults.map(product => {
+                  const { displayPrice, compareAtPrice, hasPromo } = resolveDigitalDisplayPrice(
+                    product.price,
+                    product.promotional_price
+                  );
+                  const summary = htmlToPlainText(
+                    product.short_description || product.description || ''
+                  );
+
+                  return (
                     <div key={product.id}>
                       <Card
                         className="group hover:shadow-lg transition-shadow cursor-pointer"
@@ -777,13 +780,22 @@ export const DigitalProductsSearch = () => {
                         </div>
                         <CardContent className="p-4">
                           <h3 className="font-semibold mb-2 line-clamp-2">{product.name}</h3>
-                          <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                            {product.description}
-                          </p>
+                          {summary && (
+                            <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                              {summary}
+                            </p>
+                          )}
                           <div className="flex items-center justify-between">
-                            <span className="text-lg font-bold">
-                              {product.price.toLocaleString()} {product.currency}
-                            </span>
+                            <div className="flex items-baseline gap-2">
+                              <span className="text-lg font-bold text-primary">
+                                {displayPrice.toLocaleString()} {product.currency}
+                              </span>
+                              {hasPromo && compareAtPrice != null && (
+                                <span className="text-sm line-through text-muted-foreground">
+                                  {compareAtPrice.toLocaleString()} {product.currency}
+                                </span>
+                              )}
+                            </div>
                             {product.average_rating > 0 && (
                               <div className="flex items-center gap-1">
                                 <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
@@ -794,8 +806,8 @@ export const DigitalProductsSearch = () => {
                         </CardContent>
                       </Card>
                     </div>
-                  )
-                )}
+                  );
+                })}
               </div>
             </>
           ) : (
@@ -815,9 +827,3 @@ export const DigitalProductsSearch = () => {
     </div>
   );
 };
-
-
-
-
-
-
