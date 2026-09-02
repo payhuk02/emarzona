@@ -333,28 +333,34 @@ export const useStorefrontProducts = (storeId?: string | null) => {
       }
 
       try {
-        let { data, error } = await supabase
+        const withService = await supabase
           .from('products')
           .select(STOREFRONT_PRODUCT_SELECT_WITH_SERVICE)
           .eq('store_id', storeId)
           .eq('is_active', true);
 
-        if (error) {
-          logger.warn('Jointure service_products storefront échouée, repli sans jointure:', error);
-          ({ data, error } = await supabase
-            .from('products')
-            .select(STOREFRONT_PRODUCT_SELECT_BASE)
-            .eq('store_id', storeId)
-            .eq('is_active', true));
+        if (!withService.error) {
+          return (withService.data ?? []) as unknown as Product[];
         }
 
-        if (error) {
-          logger.error('Erreur chargement produits storefront:', error);
-          throw error;
+        logger.warn(
+          'Jointure service_products storefront échouée, repli sans jointure:',
+          withService.error
+        );
+
+        const fallback = await supabase
+          .from('products')
+          .select(STOREFRONT_PRODUCT_SELECT_BASE)
+          .eq('store_id', storeId)
+          .eq('is_active', true);
+
+        if (fallback.error) {
+          logger.error('Erreur chargement produits storefront:', fallback.error);
+          throw fallback.error;
         }
 
         // `data` peut contenir plus de champs que `Product` ou en omettre, on caste simplement via unknown
-        return (data ?? []) as unknown as Product[];
+        return (fallback.data ?? []) as unknown as Product[];
       } catch (_error: unknown) {
         logger.error('Erreur dans useStorefrontProducts', {
           error: _error instanceof Error ? _error.message : String(_error),
