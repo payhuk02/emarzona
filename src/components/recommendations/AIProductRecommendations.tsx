@@ -37,7 +37,7 @@ const AI_RECOMMENDATION_PRODUCT_SELECT = `
   created_at, updated_at, tags, stock_quantity,
   stores:store_id(id, name, slug),
   product_affiliate_settings(commission_rate, affiliate_enabled),
-  service_products(service_type, location_type, calendar_available, pricing_type, fulfillment_mode, duration_minutes, requires_staff, category_attributes, service_packages(price, package_price, package_kind, is_active, delivery_days, revisions))
+  service_products(service_type, location_type, pricing_type, fulfillment_mode, duration_minutes, requires_staff, category_attributes, service_packages(price, package_price, package_kind, is_active, delivery_days, revisions))
 `;
 
 const AIProductRecommendations: React.FC<AIProductRecommendationsProps> = ({

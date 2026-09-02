@@ -50,6 +50,7 @@ import {
   resolveServiceListingAmount,
   summarizeServicePackageListingMetrics,
 } from '@/lib/service/service-pricing';
+import { inferServiceCalendarAvailable } from '@/lib/product-transform';
 import {
   cacheMarketplaceProducts,
   getCachedMarketplaceProductsSync,
@@ -313,7 +314,7 @@ export async function fetchMarketplaceProducts({
   }
 
   if (filters.productType === 'service' || filters.productType === 'all') {
-    selectQuery += `,service_products!left(service_type,location_type,calendar_available,pricing_type,fulfillment_mode,duration_minutes,requires_staff,service_packages(price,package_price,package_kind,is_active,delivery_days,revisions))`;
+    selectQuery += `,service_products!left(service_type,location_type,pricing_type,fulfillment_mode,duration_minutes,requires_staff,service_packages(price,package_price,package_kind,is_active,delivery_days,revisions))`;
   }
 
   if (filters.productType === 'course' && (filters.difficulty || filters.accessType)) {
@@ -482,9 +483,9 @@ export async function fetchMarketplaceProducts({
     }
     if (filters.calendarAvailable) {
       filteredData = filteredData.filter(
-        (product: Product & { service_products?: Array<{ calendar_available?: boolean }> }) => {
+        (product: Product & { service_products?: Array<{ fulfillment_mode?: string }> }) => {
           const serviceProduct = product.service_products?.[0];
-          return serviceProduct?.calendar_available === true;
+          return inferServiceCalendarAvailable(serviceProduct?.fulfillment_mode) === true;
         }
       );
     }
@@ -582,7 +583,10 @@ export async function fetchMarketplaceProducts({
       pricing_type: serviceRow.pricing_type,
       fulfillment_mode: serviceRow.fulfillment_mode,
       duration: serviceRow.duration_minutes,
-      calendar_available: serviceRow.calendar_available,
+      calendar_available: inferServiceCalendarAvailable(
+        serviceRow.fulfillment_mode,
+        serviceRow.calendar_available
+      ),
       staff_required: serviceRow.requires_staff,
       package_starting_price: minActiveDeliveryTierPrice(serviceRow.service_packages),
       package_min_delivery_days: packageMetrics.minDeliveryDays,

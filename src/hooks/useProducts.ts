@@ -315,6 +315,12 @@ export const useProducts = useProductsOptimized;
  * Les autres filtres (type, catégorie, licence...) sont appliqués
  * côté React dans `Storefront.tsx`.
  */
+const STOREFRONT_PRODUCT_SELECT_BASE =
+  'id, store_id, name, slug, description, price, promotional_price, currency, image_url, category, product_type, rating, reviews_count, is_active, created_at, updated_at, whatsapp_number, whatsapp_enabled, payment_options';
+
+/** Colonnes service_products valides (calendar_available est calculé côté RPC, pas une colonne table). */
+const STOREFRONT_PRODUCT_SELECT_WITH_SERVICE = `${STOREFRONT_PRODUCT_SELECT_BASE}, service_products!left(service_type,location_type,pricing_type,fulfillment_mode,duration_minutes,requires_staff,service_packages(price,package_price,package_kind,is_active,delivery_days,revisions))`;
+
 export const useStorefrontProducts = (storeId?: string | null) => {
   const enabled = !!storeId;
 
@@ -327,13 +333,20 @@ export const useStorefrontProducts = (storeId?: string | null) => {
       }
 
       try {
-        const { data, error } = await supabase
+        let { data, error } = await supabase
           .from('products')
-          .select(
-            'id, store_id, name, slug, description, price, promotional_price, currency, image_url, category, product_type, rating, reviews_count, is_active, created_at, updated_at, whatsapp_number, whatsapp_enabled, payment_options, service_products!left(service_type,location_type,calendar_available,pricing_type,fulfillment_mode,duration_minutes,requires_staff,service_packages(price,package_price,package_kind,is_active,delivery_days,revisions))'
-          )
+          .select(STOREFRONT_PRODUCT_SELECT_WITH_SERVICE)
           .eq('store_id', storeId)
           .eq('is_active', true);
+
+        if (error) {
+          logger.warn('Jointure service_products storefront échouée, repli sans jointure:', error);
+          ({ data, error } = await supabase
+            .from('products')
+            .select(STOREFRONT_PRODUCT_SELECT_BASE)
+            .eq('store_id', storeId)
+            .eq('is_active', true));
+        }
 
         if (error) {
           logger.error('Erreur chargement produits storefront:', error);

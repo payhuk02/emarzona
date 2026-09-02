@@ -17,6 +17,15 @@ import {
   summarizeServicePackageListingMetrics,
 } from '@/lib/service/service-pricing';
 
+export function inferServiceCalendarAvailable(
+  fulfillmentMode?: string | null,
+  explicit?: boolean | null
+): boolean | undefined {
+  if (explicit != null) return Boolean(explicit);
+  if (fulfillmentMode === 'appointment' || fulfillmentMode === 'both') return true;
+  return undefined;
+}
+
 /**
  * Type pour un produit brut de la base de données (non typé)
  */
@@ -147,7 +156,11 @@ export function transformToUnifiedProduct(product: DatabaseProduct): UnifiedProd
         duration: product.duration ?? nested?.duration_minutes,
         duration_unit: product.duration_unit || 'hour',
         booking_required: product.booking_required,
-        calendar_available: product.calendar_available ?? nested?.calendar_available,
+        calendar_available: inferServiceCalendarAvailable(
+          (nested?.fulfillment_mode as string | undefined) ??
+            (product.fulfillment_mode as string | undefined),
+          (product.calendar_available ?? nested?.calendar_available) as boolean | null | undefined
+        ),
         staff_required: product.staff_required ?? nested?.requires_staff,
         location_type: product.location_type ?? nested?.location_type,
         service_type: product.service_type ?? nested?.service_type,
