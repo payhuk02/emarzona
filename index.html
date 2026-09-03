@@ -37,27 +37,16 @@
     <link rel="alternate" hreflang="x-default" href="https://www.emarzona.com/" />
 
     <!-- ✅ Resource Hints pour améliorer les Core Web Vitals -->
-    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
-    <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
     <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
     <link rel="dns-prefetch" href="https://www.google-analytics.com" />
     
     <link rel="dns-prefetch" href="https://images.unsplash.com" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-
-    <!-- Inter : police unique plateforme (app, landing, marketplace) -->
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;1,14..32,400&display=swap"
-    />
+    <!-- Inter self-hosted via @fontsource-variable/inter (bundlé Vite) -->
     <link rel="preconnect" href="https://hbdnzajbyjakdhuavrvb.supabase.co" />
     <link rel="preconnect" href="https://storage.googleapis.com" />
     <link rel="preconnect" href="https://api.moneroo.com" />
 
-    <!-- ✅ Prefetch pour routes critiques (améliore la navigation) -->
-    <!-- Note: React Router gère déjà le prefetch via lazy loading -->
-    <!-- Les prefetch de routes sont gérés dynamiquement par usePrefetchRoutes et useIntelligentPrefetch -->
+    <!-- Prefetch routes : chunks JS via usePrefetchRoutes (pas as=document) -->
 
     <!-- ✅ Open Graph (Facebook, WhatsApp, LinkedIn...) -->
 <meta property="og:type" content="website" />

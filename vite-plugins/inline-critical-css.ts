@@ -8,7 +8,7 @@
 import type { Plugin } from 'vite';
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { criticalCSS } from '../src/lib/critical-css';
+import { criticalCSS } from '../src/lib/critical-css-content';
 
 export function inlineCriticalCSS(): Plugin {
   return {

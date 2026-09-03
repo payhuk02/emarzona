@@ -193,32 +193,56 @@ export default function MyOrders() {
 
       if (error) throw error;
 
-      // Fetch order items for each order
-      const ordersWithItems = await Promise.all(
-        (ordersData || []).map(async order => {
-          let itemsQuery = supabase
-            .from('order_items')
-            .select(ORDER_ITEM_FIELDS)
-            .eq('order_id', order.id);
+      const ordersList = ordersData || [];
+      const orderIds = ordersList.map(order => order.id);
 
-          // Filter by product type
-          if (typeFilter !== 'all') {
-            itemsQuery = itemsQuery.eq('product_type', typeFilter);
-          }
+      // Une seule requête order_items (évite N+1)
+      const itemsByOrder = new Map<string, Order['items']>();
+      if (orderIds.length > 0) {
+        let itemsQuery = supabase
+          .from('order_items')
+          .select(ORDER_ITEM_FIELDS)
+          .in('order_id', orderIds);
 
-          const { data: items } = await itemsQuery;
+        if (typeFilter !== 'all') {
+          itemsQuery = itemsQuery.eq('product_type', typeFilter);
+        }
 
-          return {
-            ...order,
-            metadata:
-              order.metadata && typeof order.metadata === 'object' && !Array.isArray(order.metadata)
-                ? (order.metadata as Record<string, unknown>)
+        const { data: itemsData, error: itemsError } = await itemsQuery;
+        if (itemsError) throw itemsError;
+
+        for (const item of itemsData || []) {
+          const list = itemsByOrder.get(item.order_id) ?? [];
+          list.push({
+            id: item.id,
+            product_id: item.product_id,
+            product_name: item.product_name,
+            product_type: item.product_type,
+            quantity: item.quantity,
+            unit_price: item.unit_price,
+            total_price: item.total_price,
+            item_metadata:
+              item.item_metadata &&
+              typeof item.item_metadata === 'object' &&
+              !Array.isArray(item.item_metadata)
+                ? (item.item_metadata as Record<string, unknown>)
                 : null,
-            items: items || [],
-            milestones: [] as ServiceOrderMilestoneRow[],
-          } as Order;
-        })
-      );
+          });
+          itemsByOrder.set(item.order_id, list);
+        }
+      }
+
+      const ordersWithItems = ordersList.map(order => {
+        return {
+          ...order,
+          metadata:
+            order.metadata && typeof order.metadata === 'object' && !Array.isArray(order.metadata)
+              ? (order.metadata as Record<string, unknown>)
+              : null,
+          items: itemsByOrder.get(order.id) || [],
+          milestones: [] as ServiceOrderMilestoneRow[],
+        } as Order;
+      });
 
       const filteredOrders = ordersWithItems.filter(order => order.items.length > 0);
 

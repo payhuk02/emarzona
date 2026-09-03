@@ -1,5 +1,6 @@
 /* All @import statements must come first */
-/* Google Fonts chargé via <link> dans index.html pour éviter les problèmes CSP */
+/* Inter self-hosted (variable) — plus de Google Fonts render-blocking */
+@import '@fontsource-variable/inter/wght.css';
 @import './styles/typography-tokens.css';
 @import './styles/animations.css';
 @import './styles/mobile-optimizations.css';
@@ -9,10 +10,10 @@
 @import './styles/app-typography.css';
 
 /**
- * Font optimization: font-display: swap
+ * Font optimization: font-display: swap (via @fontsource-variable/inter)
  * Améliore le FCP (First Contentful Paint)
  * Évite le FOIT (Flash of Invisible Text)
- * 
+ *
  * Animations personnalisées importées depuis ./styles/animations.css
  */
 
@@ -164,7 +165,8 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground font-sans antialiased;
     font-family:
-      'Inter',
+      'Inter Variable',
+      Inter,
       system-ui,
       -apple-system,
       sans-serif;

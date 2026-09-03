@@ -26,7 +26,7 @@ import React, { Suspense, lazy, useEffect } from 'react';
 import { logger } from '@/lib/logger';
 import { canShowErrorDetails } from '@/lib/security/error-debug';
 import { SkipLink } from '@/components/accessibility/SkipLink';
-import { Loader2 } from 'lucide-react';
+import { RouteChunkFallback } from '@/components/navigation/RouteChunkFallback';
 
 // Lazy-loaded non-critical components
 const PerformanceOptimizer = lazy(() =>
@@ -97,15 +97,6 @@ import { publicRoutes } from '@/routes/publicRoutes';
 import { customerRoutes } from '@/routes/customerRoutes';
 import { dashboardRoutes } from '@/routes/dashboardRoutes';
 import { adminRoutes } from '@/routes/adminRoutes';
-
-const LoadingFallback = () => (
-  <div className="flex min-h-screen items-center justify-center">
-    <div className="flex flex-col items-center space-y-4">
-      <Loader2 className="h-8 w-8 animate-spin text-primary emz-page-spinner" />
-      <p className="text-muted-foreground text-base">Chargement...</p>
-    </div>
-  </div>
-);
 
 type ErrorFallbackProps = {
   error?: unknown;
@@ -298,7 +289,7 @@ const AppContent = () => {
           <ReferralClaimOnAuth />
         </Suspense>
         <PlatformVisitorTracker />
-        <Suspense fallback={<LoadingFallback />}>
+        <Suspense fallback={<RouteChunkFallback />}>
           {(() => {
             const routes = (
               <div

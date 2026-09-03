@@ -134,66 +134,84 @@ export default function AdminShippingConversations() {
         throw error;
       }
 
-      // Enrichir avec les informations utilisateur et messages
-      const enrichedConversations = await Promise.all(
-        (data || []).map(async (conv: ShippingConversation) => {
-          // Récupérer l'utilisateur du store
-          const { data: storeUser } = await supabase
-            .from('profiles')
-            .select('user_id, display_name, first_name, last_name')
-            .eq('user_id', conv.store_user_id)
-            .single();
+      const conversationsList = (data || []) as ShippingConversation[];
+      if (conversationsList.length === 0) return [];
 
-          // Compter les messages
-          const { count: messageCount } = await supabase
-            .from('shipping_service_messages')
-            .select('id', { count: 'exact', head: true })
-            .eq('conversation_id', conv.id);
+      const storeUserIds = [
+        ...new Set(conversationsList.map(c => c.store_user_id).filter(Boolean)),
+      ] as string[];
+      const conversationIds = conversationsList.map(c => c.id);
 
-          // Compter les messages non lus
-          const { count: unreadCount } = await supabase
-            .from('shipping_service_messages')
-            .select('id', { count: 'exact', head: true })
-            .eq('conversation_id', conv.id)
-            .eq('is_read', false);
+      // Batch : profils + messages (évite N+1 par conversation)
+      const [profilesResult, messagesResult] = await Promise.all([
+        storeUserIds.length > 0
+          ? supabase
+              .from('profiles')
+              .select('user_id, display_name, first_name, last_name')
+              .in('user_id', storeUserIds)
+          : Promise.resolve({
+              data: [] as Array<{
+                user_id: string;
+                display_name: string | null;
+                first_name: string | null;
+                last_name: string | null;
+              }>,
+              error: null,
+            }),
+        supabase
+          .from('shipping_service_messages')
+          .select('id, conversation_id, content, sender_type, created_at, is_read')
+          .in('conversation_id', conversationIds)
+          .order('created_at', { ascending: false }),
+      ]);
 
-          // Récupérer le dernier message
-          const { data: lastMessage } = await supabase
-            .from('shipping_service_messages')
-            .select('id, content, sender_type, created_at')
-            .eq('conversation_id', conv.id)
-            .order('created_at', { ascending: false })
-            .limit(1)
-            .single();
-
-          // Vérifier si c'est un litige (dans metadata)
-          const isDisputed =
-            conv.metadata?.is_disputed === true || conv.metadata?.disputed === true;
-
-          return {
-            ...conv,
-            store_user: storeUser,
-            message_count: messageCount || 0,
-            unread_count: unreadCount || 0,
-            last_message: lastMessage,
-            is_disputed: isDisputed,
-          };
-        })
+      const profileByUserId = new Map(
+        (profilesResult.data || []).map(p => [p.user_id, p] as const)
       );
+
+      type MsgRow = {
+        id: string;
+        conversation_id: string;
+        content: string;
+        sender_type: string;
+        created_at: string;
+        is_read: boolean | null;
+      };
+
+      const messagesByConv = new Map<string, MsgRow[]>();
+      for (const msg of (messagesResult.data || []) as MsgRow[]) {
+        const list = messagesByConv.get(msg.conversation_id) ?? [];
+        list.push(msg);
+        messagesByConv.set(msg.conversation_id, list);
+      }
+
+      const enrichedConversations = conversationsList.map(conv => {
+        const msgs = messagesByConv.get(conv.id) ?? [];
+        const lastMessage = msgs[0]
+          ? {
+              id: msgs[0].id,
+              content: msgs[0].content,
+              sender_type: msgs[0].sender_type,
+              created_at: msgs[0].created_at,
+            }
+          : null;
+        const isDisputed = conv.metadata?.is_disputed === true || conv.metadata?.disputed === true;
+
+        return {
+          ...conv,
+          store_user: profileByUserId.get(conv.store_user_id) ?? null,
+          message_count: msgs.length,
+          unread_count: msgs.filter(m => m.is_read === false).length,
+          last_message: lastMessage,
+          is_disputed: isDisputed,
+        };
+      });
 
       // Filtrer par litige si nécessaire
       if (disputedFilter === 'disputed') {
-        interface EnrichedConversation extends ShippingConversation {
-          is_disputed?: boolean;
-          [key: string]: unknown;
-        }
-        return enrichedConversations.filter((c: EnrichedConversation) => c.is_disputed);
+        return enrichedConversations.filter(c => c.is_disputed);
       } else if (disputedFilter === 'not_disputed') {
-        interface EnrichedConversation extends ShippingConversation {
-          is_disputed?: boolean;
-          [key: string]: unknown;
-        }
-        return enrichedConversations.filter((c: EnrichedConversation) => !c.is_disputed);
+        return enrichedConversations.filter(c => !c.is_disputed);
       }
 
       return enrichedConversations;

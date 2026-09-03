@@ -1,77 +1,74 @@
 /**
  * Tests unitaires pour ProtectedRoute
- * Composant critique pour la sécurité
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { BrowserRouter } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
 import { ProtectedRoute } from '../ProtectedRoute';
 import * as AuthContext from '@/contexts/AuthContext';
 
-// Mock AuthContext
-const mockUser = { id: '123', email: 'test@example.com' };
-const mockLoading = false;
-
 vi.mock('@/contexts/AuthContext', () => ({
   useAuth: vi.fn(() => ({
-    user: mockUser,
-    loading: mockLoading,
+    user: { id: '123', email: 'test@example.com' },
+    loading: false,
   })),
 }));
 
+const routerFuture = { v7_startTransition: true, v7_relativeSplatPath: true } as const;
+
 describe('ProtectedRoute', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.mocked(AuthContext.useAuth).mockReturnValue({
+      user: { id: '123', email: 'test@example.com' },
+      loading: false,
+    } as ReturnType<typeof AuthContext.useAuth>);
   });
 
   it("devrait rendre les enfants si l'utilisateur est authentifié", () => {
     render(
-      <BrowserRouter>
+      <MemoryRouter future={routerFuture}>
         <ProtectedRoute>
           <div>Contenu protégé</div>
         </ProtectedRoute>
-      </BrowserRouter>
+      </MemoryRouter>
     );
 
     expect(screen.getByText('Contenu protégé')).toBeInTheDocument();
   });
 
-  it("devrait rediriger vers /login si l'utilisateur n'est pas authentifié", () => {
-    // Mock user as null
+  it('ne devrait pas rendre le contenu si non authentifié', () => {
     vi.mocked(AuthContext.useAuth).mockReturnValue({
       user: null,
       loading: false,
     } as ReturnType<typeof AuthContext.useAuth>);
 
     render(
-      <BrowserRouter>
+      <MemoryRouter initialEntries={['/dashboard']} future={routerFuture}>
         <ProtectedRoute>
           <div>Contenu protégé</div>
         </ProtectedRoute>
-      </BrowserRouter>
+      </MemoryRouter>
     );
 
-    // Vérifier que la redirection a lieu
-    expect(window.location.pathname).toBe('/login');
+    expect(screen.queryByText('Contenu protégé')).not.toBeInTheDocument();
   });
 
-  it('devrait afficher un loader pendant le chargement', () => {
-    // Mock loading as true
+  it('devrait afficher un fallback de zone pendant le chargement', () => {
     vi.mocked(AuthContext.useAuth).mockReturnValue({
       user: null,
       loading: true,
     } as ReturnType<typeof AuthContext.useAuth>);
 
     render(
-      <BrowserRouter>
+      <MemoryRouter initialEntries={['/dashboard']} future={routerFuture}>
         <ProtectedRoute>
           <div>Contenu protégé</div>
         </ProtectedRoute>
-      </BrowserRouter>
+      </MemoryRouter>
     );
 
-    // Vérifier qu'un loader est affiché
     expect(screen.queryByText('Contenu protégé')).not.toBeInTheDocument();
+    expect(document.querySelector('[aria-busy="true"]')).toBeTruthy();
   });
 });

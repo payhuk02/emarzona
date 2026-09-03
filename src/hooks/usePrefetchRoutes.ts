@@ -1,24 +1,17 @@
 /**
- * Prefetch document des routes critiques (idle), selon profil auth/vendeur.
+ * usePrefetchRoutes — précharge les chunks JS des pages (import dynamique).
  */
 
 import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { logger } from '@/lib/logger';
+import { prefetchRouteChunk } from '@/lib/route-chunk-prefetch';
 
 export interface PrefetchRoutesOptions {
   enabled?: boolean;
   idleRoutes?: readonly string[];
   hoverRoutes?: readonly string[];
   idleDelayMs?: number;
-}
-
-function prefetchDocumentRoute(route: string) {
-  const link = document.createElement('link');
-  link.rel = 'prefetch';
-  link.href = route;
-  link.as = 'document';
-  document.head.appendChild(link);
 }
 
 export function usePrefetchRoutes(options: PrefetchRoutesOptions = {}) {
@@ -39,8 +32,10 @@ export function usePrefetchRoutes(options: PrefetchRoutesOptions = {}) {
         setTimeout(() => {
           if (prefetchedIdle.current.has(route)) return;
           prefetchedIdle.current.add(route);
-          prefetchDocumentRoute(route);
-          logger.debug(`Prefetched route (idle): ${route}`);
+          const started = prefetchRouteChunk(route);
+          if (started) {
+            logger.debug(`Prefetched route chunk (idle): ${route}`);
+          }
         }, index * 200);
       });
     };
@@ -70,8 +65,10 @@ export function usePrefetchRoutes(options: PrefetchRoutesOptions = {}) {
         const pathname = new URL(anchor.href).pathname;
         if (!hoverRoutes.includes(pathname) || prefetchedHover.has(pathname)) return;
         prefetchedHover.add(pathname);
-        prefetchDocumentRoute(pathname);
-        logger.debug(`Prefetched route (hover): ${pathname}`);
+        const started = prefetchRouteChunk(pathname);
+        if (started) {
+          logger.debug(`Prefetched route chunk (hover): ${pathname}`);
+        }
       } catch {
         // Liens externes ou href invalides
       }

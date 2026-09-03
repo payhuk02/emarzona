@@ -2,9 +2,16 @@ import { describe, it, expect } from 'vitest';
 import { getRoutePrefetchConfig, getVendorIdleRoutes } from '@/lib/route-prefetch-config';
 
 describe('getRoutePrefetchConfig', () => {
-  it('désactive le prefetch pendant le chargement auth/store', () => {
+  it('désactive le prefetch pendant le chargement auth uniquement', () => {
     expect(getRoutePrefetchConfig(true, false, null, 0).enabled).toBe(false);
-    expect(getRoutePrefetchConfig(false, true, 'u1', 1).enabled).toBe(false);
+    expect(getRoutePrefetchConfig(true, true, 'u1', 1).enabled).toBe(false);
+  });
+
+  it('précharge les routes publiques pendant storeLoading (pas de waterfall)', () => {
+    const cfg = getRoutePrefetchConfig(false, true, 'u1', 1);
+    expect(cfg.enabled).toBe(true);
+    expect(cfg.idleRoutes).toContain('/marketplace');
+    expect(cfg.idleRoutes).not.toContain('/dashboard');
   });
 
   it('prefetch public pour les anonymes', () => {

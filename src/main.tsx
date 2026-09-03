@@ -6,16 +6,12 @@ import App from './App.tsx';
 // ✅ PERFORMANCE: CSS critiques chargés immédiatement pour FCP
 // Note: Vite optimise automatiquement les imports CSS (minification, code splitting)
 import './index.css';
-import './styles/product-banners.css';
-import './styles/reviews-dark-mode.css';
-import './styles/reviews-mobile.css';
 
 // ✅ PERFORMANCE: Injecter le CSS critique pour améliorer le FCP
 import { injectCriticalCSS, loadNonCriticalCSS } from './lib/critical-css';
 injectCriticalCSS();
 
-// ✅ PERFORMANCE: Charger le CSS non-critique après le rendu initial
-// Utilise requestIdleCallback pour ne pas bloquer le FCP
+// ✅ PERFORMANCE: CSS banners/reviews hors chemin critique (idle)
 loadNonCriticalCSS();
 
 // ✅ PERFORMANCE: Initialisations critiques uniquement (nécessaires pour le fonctionnement de base)

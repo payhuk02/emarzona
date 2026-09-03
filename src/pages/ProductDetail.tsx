@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useCallback } from 'react';
+import { useEffect, useState, useMemo, useCallback, lazy, Suspense } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { VendorMessagingLink } from '@/components/vendor/VendorMessagingLink';
 import { supabase } from '@/integrations/supabase/client';
@@ -34,7 +34,6 @@ import {
   MessageSquare,
   TrendingUp,
 } from 'lucide-react';
-import StoreFooter from '@/components/storefront/StoreFooter';
 import { SafeHTML } from '@/components/security/SafeHTML';
 import { OptimizedImage } from '@/components/ui/OptimizedImage';
 import { ResponsiveProductImage } from '@/components/ui/ResponsiveProductImage';
@@ -45,14 +44,8 @@ import { CustomFieldsDisplay } from '@/components/products/CustomFieldsDisplay';
 import { ProductVariantSelector } from '@/components/products/ProductVariantSelector';
 import { SEOMeta, ProductSchema, BreadcrumbSchema } from '@/components/seo';
 import { FAQSchema } from '@/components/seo/FAQSchema';
-import { ProductReviewsSummary } from '@/components/reviews';
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
-import {
-  ProductRecommendations,
-  FrequentlyBoughtTogether,
-} from '@/components/marketplace/ProductRecommendations';
-import { AIProductRecommendations } from '@/components/recommendations/AIProductRecommendations';
 import { useAuth } from '@/contexts/AuthContext';
 import { PriceStockAlertButton } from '@/components/marketplace/PriceStockAlertButton';
 import { PaymentOptionsBadge, getPaymentOptions } from '@/components/products/PaymentOptionsBadge';
@@ -72,6 +65,32 @@ import { parsePhysicalCheckoutOptions } from '@/lib/physical/physical-checkout-d
 import { StoreThemeProvider } from '@/components/storefront/StoreThemeProvider';
 import { STOREFRONT_STORE_PUBLIC_SELECT } from '@/lib/storefront/store-public-fields';
 import type { Store as ThemedStore } from '@/hooks/useStores';
+
+const ProductReviewsSummary = lazy(() =>
+  import('@/components/reviews/ProductReviewsSummary').then(m => ({
+    default: m.ProductReviewsSummary,
+  }))
+);
+const FrequentlyBoughtTogether = lazy(() =>
+  import('@/components/marketplace/ProductRecommendations').then(m => ({
+    default: m.FrequentlyBoughtTogether,
+  }))
+);
+const ProductRecommendations = lazy(() =>
+  import('@/components/marketplace/ProductRecommendations').then(m => ({
+    default: m.ProductRecommendations,
+  }))
+);
+const AIProductRecommendations = lazy(() =>
+  import('@/components/recommendations/AIProductRecommendations').then(m => ({
+    default: m.AIProductRecommendations,
+  }))
+);
+const StoreFooter = lazy(() => import('@/components/storefront/StoreFooter'));
+
+function BelowFoldSkeleton() {
+  return <Skeleton className="h-40 w-full rounded-lg mb-8" />;
+}
 
 /** Colonnes réelles sur `public.products` (alignées types Supabase). Pas de video_url / variants JSON sur cette table en prod. */
 const PRODUCT_DETAIL_COLUMNS =
@@ -1413,80 +1432,90 @@ const ProductDetails = () => {
                   <h2 id="reviews-heading" className="sr-only">
                     Avis et évaluations
                   </h2>
-                  <ProductReviewsSummary
-                    productId={product.id}
-                    productType={product.product_type}
-                  />
+                  <Suspense fallback={<BelowFoldSkeleton />}>
+                    <ProductReviewsSummary
+                      productId={product.id}
+                      productType={product.product_type}
+                    />
+                  </Suspense>
                 </div>
               )}
 
               {/* Autres produits de la même boutique */}
               {product && product.store_id && (
                 <div className="mb-8 sm:mb-10 md:mb-12">
-                  <FrequentlyBoughtTogether
-                    productId={product.id}
-                    storeId={product.store_id}
-                    storeName={store?.name}
-                    limit={4}
-                  />
+                  <Suspense fallback={<BelowFoldSkeleton />}>
+                    <FrequentlyBoughtTogether
+                      productId={product.id}
+                      storeId={product.store_id}
+                      storeName={store?.name}
+                      limit={4}
+                    />
+                  </Suspense>
                 </div>
               )}
 
               {/* Produits similaires - Recommandations intelligentes */}
               {product && (
                 <div className="mb-8 sm:mb-10 md:mb-12">
-                  <ProductRecommendations
-                    productId={product.id}
-                    productCategory={product.category}
-                    limit={6}
-                    title="Produits similaires"
-                  />
+                  <Suspense fallback={<BelowFoldSkeleton />}>
+                    <ProductRecommendations
+                      productId={product.id}
+                      productCategory={product.category}
+                      limit={6}
+                      title="Produits similaires"
+                    />
+                  </Suspense>
                 </div>
               )}
 
               {/* Recommandations IA personnalisées */}
               {product && (
                 <div className="mb-8 sm:mb-10 md:mb-12">
-                  <AIProductRecommendations
-                    userId={user?.id}
-                    currentProductId={product.id}
-                    category={product.category || undefined}
-                    productType={
-                      product.product_type as
-                        | 'digital'
-                        | 'physical'
-                        | 'service'
-                        | 'course'
-                        | 'artist'
-                        | undefined
-                    }
-                    sameTypeOnly={true} // Recommander le même type de produit pour cohérence
-                    title="Recommandé pour vous"
-                    limit={6}
-                    showReasoning={true}
-                    layout="grid"
-                  />
+                  <Suspense fallback={<BelowFoldSkeleton />}>
+                    <AIProductRecommendations
+                      userId={user?.id}
+                      currentProductId={product.id}
+                      category={product.category || undefined}
+                      productType={
+                        product.product_type as
+                          | 'digital'
+                          | 'physical'
+                          | 'service'
+                          | 'course'
+                          | 'artist'
+                          | undefined
+                      }
+                      sameTypeOnly={true} // Recommander le même type de produit pour cohérence
+                      title="Recommandé pour vous"
+                      limit={6}
+                      showReasoning={true}
+                      layout="grid"
+                    />
+                  </Suspense>
                 </div>
               )}
             </div>
           </main>
 
           {/* Pied de page */}
-          <StoreFooter
-            storeName={store.name}
-            facebook_url={(store as Store & { facebook_url?: string | null }).facebook_url}
-            instagram_url={(store as Store & { instagram_url?: string | null }).instagram_url}
-            twitter_url={(store as Store & { twitter_url?: string | null }).twitter_url}
-            linkedin_url={(store as Store & { linkedin_url?: string | null }).linkedin_url}
-            youtube_url={(store as Store & { youtube_url?: string | null }).youtube_url}
-            tiktok_url={(store as Store & { tiktok_url?: string | null }).tiktok_url}
-            pinterest_url={(store as Store & { pinterest_url?: string | null }).pinterest_url}
-            snapchat_url={(store as Store & { snapchat_url?: string | null }).snapchat_url}
-            discord_url={(store as Store & { discord_url?: string | null }).discord_url}
-            twitch_url={(store as Store & { twitch_url?: string | null }).twitch_url}
-            store={store as ThemedStore}
-            storeSlug={store.slug}
-          />
+          <Suspense fallback={null}>
+            <StoreFooter
+              storeName={store.name}
+              facebook_url={(store as Store & { facebook_url?: string | null }).facebook_url}
+              instagram_url={(store as Store & { instagram_url?: string | null }).instagram_url}
+              twitter_url={(store as Store & { twitter_url?: string | null }).twitter_url}
+              linkedin_url={(store as Store & { linkedin_url?: string | null }).linkedin_url}
+              youtube_url={(store as Store & { youtube_url?: string | null }).youtube_url}
+              tiktok_url={(store as Store & { tiktok_url?: string | null }).tiktok_url}
+              pinterest_url={(store as Store & { pinterest_url?: string | null }).pinterest_url}
+              snapchat_url={(store as Store & { snapchat_url?: string | null }).snapchat_url}
+              discord_url={(store as Store & { discord_url?: string | null }).discord_url}
+              twitch_url={(store as Store & { twitch_url?: string | null }).twitch_url}
+              store={store as ThemedStore}
+              storeSlug={store.slug}
+            />
+          </Suspense>
         </div>
       </StoreThemeProvider>
     </>

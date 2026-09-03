@@ -49,7 +49,9 @@ export function getRoutePrefetchConfig(
   storeCount: number,
   commerceType?: StoreCommerceType | null
 ): RoutePrefetchConfig {
-  if (authLoading || storeLoading) {
+  // Attendre uniquement l'auth pour connaître le profil. Pendant storeLoading,
+  // on précharge déjà les hot paths publics (évite le waterfall Auth→Store).
+  if (authLoading) {
     return { enabled: false, idleRoutes: [], hoverRoutes: [], idleDelayMs: 0 };
   }
 
@@ -59,6 +61,15 @@ export function getRoutePrefetchConfig(
       idleRoutes: PUBLIC_IDLE_ROUTES,
       hoverRoutes: PUBLIC_HOVER_ROUTES,
       idleDelayMs: 3000,
+    };
+  }
+
+  if (storeLoading) {
+    return {
+      enabled: true,
+      idleRoutes: PUBLIC_IDLE_ROUTES,
+      hoverRoutes: PUBLIC_HOVER_ROUTES,
+      idleDelayMs: 2000,
     };
   }
 
