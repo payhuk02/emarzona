@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import { AUTH_RATE_LIMITS, checkAuthRateLimit } from '@/lib/auth-rate-limiter';
 import { buildAuthRateLimitEndpoint, hashAuthIdentifier } from '@/lib/auth-identifier-hash';
 
@@ -32,6 +32,11 @@ describe('checkAuthRateLimit', () => {
   beforeEach(() => {
     invokeMock.mockReset();
     sessionStorage.clear();
+    vi.useRealTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it('blocks when server returns rate limit exceeded', async () => {
@@ -95,5 +100,17 @@ describe('checkAuthRateLimit', () => {
     const blocked = await checkAuthRateLimit('login', 'fallback@example.com');
     expect(blocked.allowed).toBe(false);
     expect(blocked.source).toBe('client-fallback');
+  });
+
+  it('falls back to client storage when the rate-limiter edge times out', async () => {
+    vi.useFakeTimers();
+    invokeMock.mockImplementation(() => new Promise(() => undefined));
+
+    const pending = checkAuthRateLimit('login', 'timeout@example.com');
+    await vi.advanceTimersByTimeAsync(5_000);
+    const result = await pending;
+
+    expect(result.source).toBe('client-fallback');
+    expect(result.allowed).toBe(true);
   });
 });

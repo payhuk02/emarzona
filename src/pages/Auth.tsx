@@ -60,6 +60,8 @@ import {
 } from '@/lib/sso/enforce-sso-login';
 import { AuthHeroPanel } from '@/components/auth/AuthHeroPanel';
 
+const SIGN_IN_TIMEOUT_MS = 25_000;
+
 const AUTH_TRUST_ITEMS = [
   { icon: Shield, label: 'Paiement sécurisé' },
   { icon: Truck, label: 'Livraison rapide' },
@@ -468,12 +470,19 @@ const Auth = () => {
     }
 
     try {
-      const signInResult = await withTimeoutFallback(
-        supabase.auth.signInWithPassword({ email, password }),
-        20000,
-        null,
-        'signInWithPassword'
-      );
+      const attemptSignIn = () =>
+        withTimeoutFallback(
+          supabase.auth.signInWithPassword({ email, password }),
+          SIGN_IN_TIMEOUT_MS,
+          null,
+          'signInWithPassword'
+        );
+
+      let signInResult = await attemptSignIn();
+      if (!signInResult) {
+        logger.warn('Login timed out, retrying once', { email });
+        signInResult = await attemptSignIn();
+      }
 
       if (!signInResult) {
         setError(

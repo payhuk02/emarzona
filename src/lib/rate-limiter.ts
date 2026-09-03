@@ -6,7 +6,11 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from './logger';
+import { withTimeoutFallback } from '@/lib/promise-timeout';
 import * as Sentry from '@sentry/react';
+
+/** Cold start nocturne de l'Edge rate-limiter ne doit pas bloquer le login. */
+const AUTH_RATE_LIMIT_INVOKE_TIMEOUT_MS = 4000;
 
 export type RateLimitEndpoint =
   | 'default'
@@ -78,14 +82,32 @@ export async function checkServerAuthRateLimit(
   identifier: string
 ): Promise<RateLimitResponse & { degraded?: boolean }> {
   try {
-    const { data, error } = await supabase.functions.invoke('rate-limiter', {
-      body: {
-        endpoint: 'auth',
-        authAction,
-        identifier: identifier.trim().toLowerCase(),
-        timestamp: Date.now(),
-      },
-    });
+    const invokeResult = await withTimeoutFallback(
+      supabase.functions.invoke('rate-limiter', {
+        body: {
+          endpoint: 'auth',
+          authAction,
+          identifier: identifier.trim().toLowerCase(),
+          timestamp: Date.now(),
+        },
+      }),
+      AUTH_RATE_LIMIT_INVOKE_TIMEOUT_MS,
+      null,
+      'authRateLimiterInvoke'
+    );
+
+    if (!invokeResult) {
+      logger.warn('[AuthRateLimit] Server check timed out', { authAction });
+      return {
+        allowed: true,
+        remaining: 5,
+        limit: 5,
+        resetAt: new Date(Date.now() + 60000).toISOString(),
+        degraded: true,
+      };
+    }
+
+    const { data, error } = invokeResult;
 
     if (error) {
       const errorStatus =
