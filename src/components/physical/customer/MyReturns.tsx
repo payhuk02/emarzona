@@ -31,7 +31,14 @@ import { fr } from 'date-fns/locale';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useNavigate } from 'react-router-dom';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { ReturnRequestForm } from '@/components/physical/returns/ReturnRequestForm';
 import { useState } from 'react';
 
@@ -40,10 +47,16 @@ export const MyReturns = () => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
 
-  const { data: returns, isLoading, error } = useQuery({
+  const {
+    data: returns,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['customerReturns'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
       // Récupérer le customer_id
@@ -58,7 +71,8 @@ export const MyReturns = () => {
       // Récupérer les retours
       const { data, error: returnsError } = await supabase
         .from('product_returns')
-        .select(`
+        .select(
+          `
           *,
           order:orders (
             id,
@@ -70,7 +84,8 @@ export const MyReturns = () => {
             name,
             image_url
           )
-        `)
+        `
+        )
         .eq('user_id', user.id)
         .order('requested_at', { ascending: false });
 
@@ -164,7 +179,7 @@ export const MyReturns = () => {
             </div>
             <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
               <DialogTrigger asChild>
-                <Button 
+                <Button
                   onClick={() => setSelectedOrderId(null)}
                   className="min-h-[44px] sm:min-h-[36px] touch-manipulation w-full sm:w-auto"
                 >
@@ -192,9 +207,7 @@ export const MyReturns = () => {
                     <p className="text-muted-foreground mb-4">
                       Veuillez sélectionner une commande pour créer une demande de retour
                     </p>
-                    <Button onClick={() => navigate('/account/orders')}>
-                      Voir mes commandes
-                    </Button>
+                    <Button onClick={() => navigate('/account/orders')}>Voir mes commandes</Button>
                   </div>
                 )}
               </DialogContent>
@@ -209,7 +222,7 @@ export const MyReturns = () => {
               <p className="text-sm sm:text-base text-muted-foreground mb-4 px-4">
                 Vous n'avez pas encore effectué de demande de retour
               </p>
-              <Button 
+              <Button
                 onClick={() => setIsCreateDialogOpen(true)}
                 className="min-h-[44px] px-6 touch-manipulation"
                 size="lg"
@@ -232,12 +245,13 @@ export const MyReturns = () => {
                               #{returnItem.return_number}
                             </div>
                             <div className="text-xs text-muted-foreground">
-                              Commande: {returnItem.order?.order_number || returnItem.order_id?.slice(0, 8)}
+                              Commande:{' '}
+                              {returnItem.order?.order_number || returnItem.order_id?.slice(0, 8)}
                             </div>
                           </div>
                           {getStatusBadge(returnItem.status)}
                         </div>
-                        
+
                         <div className="flex items-start gap-2">
                           {returnItem.product?.image_url && (
                             <img
@@ -255,10 +269,12 @@ export const MyReturns = () => {
                             </div>
                           </div>
                         </div>
-                        
+
                         <div className="flex items-center justify-between pt-2 border-t">
                           <span className="text-xs text-muted-foreground">
-                            {format(new Date(returnItem.requested_at), 'dd/MM/yyyy', { locale: fr })}
+                            {format(new Date(returnItem.requested_at), 'dd/MM/yyyy', {
+                              locale: fr,
+                            })}
                           </span>
                           <Button
                             variant="outline"
@@ -293,9 +309,7 @@ export const MyReturns = () => {
                   <TableBody>
                     {returns.map((returnItem: any) => (
                       <TableRow key={returnItem.id}>
-                        <TableCell className="font-medium">
-                          #{returnItem.return_number}
-                        </TableCell>
+                        <TableCell className="font-medium">#{returnItem.return_number}</TableCell>
                         <TableCell>
                           {returnItem.order?.order_number || returnItem.order_id?.slice(0, 8)}
                         </TableCell>
@@ -319,7 +333,9 @@ export const MyReturns = () => {
                         <TableCell>{getStatusBadge(returnItem.status)}</TableCell>
                         <TableCell>
                           <span className="text-sm text-muted-foreground">
-                            {format(new Date(returnItem.requested_at), 'dd/MM/yyyy', { locale: fr })}
+                            {format(new Date(returnItem.requested_at), 'dd/MM/yyyy', {
+                              locale: fr,
+                            })}
                           </span>
                         </TableCell>
                         <TableCell className="text-right">
@@ -344,9 +360,3 @@ export const MyReturns = () => {
     </div>
   );
 };
-
-
-
-
-
-

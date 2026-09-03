@@ -23,15 +23,15 @@ interface UseStableSelectOptions {
 
 /**
  * Hook pour stabiliser la position d'un menu de sélection
- * 
+ *
  * Sur mobile, verrouille la position du menu une fois ouvert pour éviter
  * qu'il bouge pendant l'interaction utilisateur.
- * 
+ *
  * @example
  * ```tsx
  * const menuRef = useRef<HTMLDivElement>(null);
  * const [isOpen, setIsOpen] = useState(false);
- * 
+ *
  * useStableSelect({
  *   menuRef,
  *   isOpen,
@@ -41,11 +41,7 @@ interface UseStableSelectOptions {
  * });
  * ```
  */
-export function useStableSelect({
-  menuRef,
-  isOpen,
-  onPositionLocked,
-}: UseStableSelectOptions) {
+export function useStableSelect({ menuRef, isOpen, onPositionLocked }: UseStableSelectOptions) {
   const isMobile = useIsMobile();
   const lockedPositionRef = useRef<{ top: number; left: number; width: number } | null>(null);
   const observerRef = useRef<MutationObserver | null>(null);
@@ -131,10 +127,3 @@ export function useStableSelect({
     lockedPosition: lockedPositionRef.current,
   };
 }
-
-
-
-
-
-
-

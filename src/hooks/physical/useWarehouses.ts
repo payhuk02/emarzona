@@ -1,7 +1,7 @@
 /**
  * Warehouses Management Hooks
  * Date: 27 Janvier 2025
- * 
+ *
  * Hooks pour gérer les entrepôts, localisations, inventaire et transferts
  */
 
@@ -10,9 +10,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 
-const WAREHOUSE_FIELDS = 'id, store_id, name, code, description, contact_person, email, phone, address_line1, address_line2, city, state, postal_code, country, latitude, longitude, is_active, is_primary, is_fulfillment_center, is_receiving_center, max_capacity, current_capacity, capacity_unit, operational_hours, timezone, notes, tags, total_products, total_value, created_at, updated_at';
-const WAREHOUSE_LOCATION_FIELDS = 'id, warehouse_id, location_code, location_name, location_type, parent_location_id, max_capacity, current_capacity, length, width, height, dimensions_unit, is_active, is_reserved, notes, created_at, updated_at';
-const WAREHOUSE_TRANSFER_ITEM_FIELDS = 'id, transfer_id, product_id, variant_id, quantity_requested, quantity_received, from_location_id, to_location_id, notes, created_at, updated_at';
+const WAREHOUSE_FIELDS =
+  'id, store_id, name, code, description, contact_person, email, phone, address_line1, address_line2, city, state, postal_code, country, latitude, longitude, is_active, is_primary, is_fulfillment_center, is_receiving_center, max_capacity, current_capacity, capacity_unit, operational_hours, timezone, notes, tags, total_products, total_value, created_at, updated_at';
+const WAREHOUSE_LOCATION_FIELDS =
+  'id, warehouse_id, location_code, location_name, location_type, parent_location_id, max_capacity, current_capacity, length, width, height, dimensions_unit, is_active, is_reserved, notes, created_at, updated_at';
+const WAREHOUSE_TRANSFER_ITEM_FIELDS =
+  'id, transfer_id, product_id, variant_id, quantity_requested, quantity_received, from_location_id, to_location_id, notes, created_at, updated_at';
 
 // =====================================================
 // TYPES
@@ -200,24 +203,29 @@ export const useWarehouseLocations = (warehouseId?: string) => {
 /**
  * useWarehouseInventory - Récupère l'inventaire d'un entrepôt
  */
-export const useWarehouseInventory = (warehouseId?: string, filters?: {
-  productId?: string;
-  variantId?: string;
-  locationId?: string;
-}) => {
+export const useWarehouseInventory = (
+  warehouseId?: string,
+  filters?: {
+    productId?: string;
+    variantId?: string;
+    locationId?: string;
+  }
+) => {
   return useQuery({
     queryKey: ['warehouse-inventory', warehouseId, filters],
     queryFn: async () => {
       if (!warehouseId) throw new Error('Warehouse ID manquant');
 
-      let  query= supabase
+      let query = supabase
         .from('warehouse_inventory')
-        .select(`
+        .select(
+          `
           *,
           product:products (id, name, image_url),
           variant:product_variants (id, option1_value, option2_value),
           location:warehouse_locations (id, location_code, location_name)
-        `)
+        `
+        )
         .eq('warehouse_id', warehouseId);
 
       if (filters?.productId) {
@@ -248,29 +256,36 @@ export const useWarehouseInventory = (warehouseId?: string, filters?: {
 /**
  * useWarehouseTransfers - Récupère les transferts
  */
-export const useWarehouseTransfers = (storeId?: string, filters?: {
-  status?: WarehouseTransfer['status'];
-  warehouseId?: string;
-}) => {
+export const useWarehouseTransfers = (
+  storeId?: string,
+  filters?: {
+    status?: WarehouseTransfer['status'];
+    warehouseId?: string;
+  }
+) => {
   return useQuery({
     queryKey: ['warehouse-transfers', storeId, filters],
     queryFn: async () => {
       if (!storeId) throw new Error('Store ID manquant');
 
-      let  query= supabase
+      let query = supabase
         .from('warehouse_transfers')
-        .select(`
+        .select(
+          `
           *,
           from_warehouse:warehouses!from_warehouse_id (id, name, code),
           to_warehouse:warehouses!to_warehouse_id (id, name, code)
-        `)
+        `
+        )
         .eq('store_id', storeId);
 
       if (filters?.status) {
         query = query.eq('status', filters.status);
       }
       if (filters?.warehouseId) {
-        query = query.or(`from_warehouse_id.eq.${filters.warehouseId},to_warehouse_id.eq.${filters.warehouseId}`);
+        query = query.or(
+          `from_warehouse_id.eq.${filters.warehouseId},to_warehouse_id.eq.${filters.warehouseId}`
+        );
       }
 
       query = query.order('requested_date', { ascending: false });
@@ -291,22 +306,27 @@ export const useWarehouseTransfers = (storeId?: string, filters?: {
 /**
  * useWarehouseAllocations - Récupère les allocations
  */
-export const useWarehouseAllocations = (warehouseId?: string, filters?: {
-  orderId?: string;
-  status?: WarehouseAllocation['status'];
-}) => {
+export const useWarehouseAllocations = (
+  warehouseId?: string,
+  filters?: {
+    orderId?: string;
+    status?: WarehouseAllocation['status'];
+  }
+) => {
   return useQuery({
     queryKey: ['warehouse-allocations', warehouseId, filters],
     queryFn: async () => {
       if (!warehouseId) throw new Error('Warehouse ID manquant');
 
-      let  query= supabase
+      let query = supabase
         .from('warehouse_allocations')
-        .select(`
+        .select(
+          `
           *,
           product:products (id, name, image_url),
           order:orders (id, order_number)
-        `)
+        `
+        )
         .eq('warehouse_id', warehouseId);
 
       if (filters?.orderId) {
@@ -359,18 +379,18 @@ export const useCreateWarehouse = () => {
 
       return data as Warehouse;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['warehouses', data.store_id] });
       toast({
         title: '✅ Entrepôt créé',
-        description: 'L\'entrepôt a été créé avec succès',
+        description: "L'entrepôt a été créé avec succès",
       });
     },
     onError: (error: any) => {
       logger.error('Error in useCreateWarehouse', { error });
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de créer l\'entrepôt',
+        description: error.message || "Impossible de créer l'entrepôt",
         variant: 'destructive',
       });
     },
@@ -407,7 +427,9 @@ export const useCreateWarehouseTransfer = () => {
       notes?: string;
     }) => {
       // Générer numéro de transfert
-      const { data: transferNumber, error: transferNumberError } = await supabase.rpc('generate_warehouse_transfer_number');
+      const { data: transferNumber, error: transferNumberError } = await supabase.rpc(
+        'generate_warehouse_transfer_number'
+      );
       if (transferNumberError) throw transferNumberError;
 
       // Créer transfert
@@ -452,7 +474,7 @@ export const useCreateWarehouseTransfer = () => {
 
       return transfer as WarehouseTransfer;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['warehouse-transfers'] });
       queryClient.invalidateQueries({ queryKey: ['warehouse-inventory'] });
       toast({
@@ -488,7 +510,7 @@ export const useUpdateTransferStatus = () => {
       status: WarehouseTransfer['status'];
       userId?: string;
     }) => {
-      const  updateData: any = {
+      const updateData: any = {
         status,
         updated_at: new Date().toISOString(),
       };
@@ -578,10 +600,3 @@ export const useUpdateTransferStatus = () => {
     },
   });
 };
-
-
-
-
-
-
-

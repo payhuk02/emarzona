@@ -1,7 +1,7 @@
 /**
  * Store Tasks Kanban Component
  * Date: 2 Février 2025
- * 
+ *
  * Vue Kanban pour les tâches (drag & drop)
  */
 
@@ -28,11 +28,7 @@ import {
   closestCorners,
   useDroppable,
 } from '@dnd-kit/core';
-import {
-  SortableContext,
-  verticalListSortingStrategy,
-  useSortable,
-} from '@dnd-kit/sortable';
+import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
 interface StoreTasksKanbanProps {
@@ -40,7 +36,7 @@ interface StoreTasksKanbanProps {
   filters?: TaskFilters;
 }
 
-const  STATUS_COLUMNS: Array<{
+const STATUS_COLUMNS: Array<{
   id: StoreTask['status'];
   label: string;
   color: string;
@@ -73,14 +69,9 @@ interface SortableTaskProps {
 }
 
 const SortableTask = memo(({ task, onTaskClick }: SortableTaskProps) => {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: task.id });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: task.id,
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -125,15 +116,13 @@ const KanbanColumn = memo(({ status, label, color, tasks, onTaskClick }: KanbanC
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-2 max-h-[calc(100vh-250px)] sm:max-h-[calc(100vh-300px)] overflow-y-auto">
-          <SortableContext items={tasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
-            {tasks.map((task) => (
+          <SortableContext items={tasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
+            {tasks.map(task => (
               <SortableTask key={task.id} task={task} onTaskClick={onTaskClick} />
             ))}
           </SortableContext>
           {tasks.length === 0 && (
-            <div className="text-center py-8 text-muted-foreground text-sm">
-              Aucune tâche
-            </div>
+            <div className="text-center py-8 text-muted-foreground text-sm">Aucune tâche</div>
           )}
         </CardContent>
       </Card>
@@ -168,8 +157,8 @@ export const StoreTasksKanban = ({ storeId, filters }: StoreTasksKanbanProps) =>
         on_hold: [],
       } as Record<StoreTask['status'], StoreTask[]>;
     }
-    
-    const  grouped: Record<StoreTask['status'], StoreTask[]> = {
+
+    const grouped: Record<StoreTask['status'], StoreTask[]> = {
       pending: [],
       in_progress: [],
       review: [],
@@ -178,7 +167,7 @@ export const StoreTasksKanban = ({ storeId, filters }: StoreTasksKanbanProps) =>
       on_hold: [],
     };
 
-    tasks.forEach((task) => {
+    tasks.forEach(task => {
       if (grouped[task.status]) {
         grouped[task.status].push(task);
       }
@@ -187,36 +176,42 @@ export const StoreTasksKanban = ({ storeId, filters }: StoreTasksKanbanProps) =>
     return grouped;
   }, [tasks]);
 
-  const handleDragStart = useCallback((event: DragStartEvent) => {
-    const taskId = event.active.id as string;
-    const task = tasks?.find((t) => t.id === taskId);
-    if (task) {
-      setActiveTask(task);
-    }
-  }, [tasks]);
+  const handleDragStart = useCallback(
+    (event: DragStartEvent) => {
+      const taskId = event.active.id as string;
+      const task = tasks?.find(t => t.id === taskId);
+      if (task) {
+        setActiveTask(task);
+      }
+    },
+    [tasks]
+  );
 
-  const handleDragEnd = useCallback(async (event: DragEndEvent) => {
-    const { active, over } = event;
-    setActiveTask(null);
+  const handleDragEnd = useCallback(
+    async (event: DragEndEvent) => {
+      const { active, over } = event;
+      setActiveTask(null);
 
-    if (!over || active.id === over.id) return;
+      if (!over || active.id === over.id) return;
 
-    const taskId = active.id as string;
-    const newStatus = over.id as StoreTask['status'];
+      const taskId = active.id as string;
+      const newStatus = over.id as StoreTask['status'];
 
-    const task = tasks?.find((t) => t.id === taskId);
-    if (!task || task.status === newStatus) return;
+      const task = tasks?.find(t => t.id === taskId);
+      if (!task || task.status === newStatus) return;
 
-    try {
-      await updateTask.mutateAsync({
-        storeId,
-        taskId,
-        updateData: { status: newStatus },
-      });
-    } catch (error) {
-      // L'erreur est déjà gérée par le hook
-    }
-  }, [tasks, storeId, updateTask]);
+      try {
+        await updateTask.mutateAsync({
+          storeId,
+          taskId,
+          updateData: { status: newStatus },
+        });
+      } catch (error) {
+        // L'erreur est déjà gérée par le hook
+      }
+    },
+    [tasks, storeId, updateTask]
+  );
 
   if (isLoading) {
     return (
@@ -226,7 +221,7 @@ export const StoreTasksKanban = ({ storeId, filters }: StoreTasksKanbanProps) =>
         </CardHeader>
         <CardContent>
           <div className="flex gap-4">
-            {[1, 2, 3, 4].map((i) => (
+            {[1, 2, 3, 4].map(i => (
               <Skeleton key={i} className="h-96 w-64" />
             ))}
           </div>
@@ -243,11 +238,7 @@ export const StoreTasksKanban = ({ storeId, filters }: StoreTasksKanbanProps) =>
             <CheckSquare className="h-5 w-5" />
             <h2 className="text-base sm:text-lg font-semibold">Vue Kanban</h2>
           </div>
-          <Button
-            onClick={() => setCreateDialogOpen(true)}
-            className="w-full sm:w-auto"
-            size="sm"
-          >
+          <Button onClick={() => setCreateDialogOpen(true)} className="w-full sm:w-auto" size="sm">
             <Plus className="h-4 w-4 mr-2" />
             Créer une tâche
           </Button>
@@ -260,7 +251,7 @@ export const StoreTasksKanban = ({ storeId, filters }: StoreTasksKanbanProps) =>
           onDragEnd={handleDragEnd}
         >
           <div className="flex gap-2 sm:gap-4 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600">
-            {STATUS_COLUMNS.map((column) => (
+            {STATUS_COLUMNS.map(column => (
               <KanbanColumn
                 key={column.id}
                 status={column.id}
@@ -282,10 +273,7 @@ export const StoreTasksKanban = ({ storeId, filters }: StoreTasksKanbanProps) =>
         </DndContext>
       </div>
 
-      <StoreTaskCreateDialog
-        open={createDialogOpen}
-        onClose={() => setCreateDialogOpen(false)}
-      />
+      <StoreTaskCreateDialog open={createDialogOpen} onClose={() => setCreateDialogOpen(false)} />
 
       {selectedTask && (
         <StoreTaskDetailDialog
@@ -297,10 +285,3 @@ export const StoreTasksKanban = ({ storeId, filters }: StoreTasksKanbanProps) =>
     </>
   );
 };
-
-
-
-
-
-
-

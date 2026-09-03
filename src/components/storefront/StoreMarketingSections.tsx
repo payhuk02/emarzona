@@ -6,15 +6,15 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { 
-  MessageSquare, 
-  Target, 
-  Heart, 
-  BookOpen, 
-  Users, 
-  Star, 
+import {
+  MessageSquare,
+  Target,
+  Heart,
+  BookOpen,
+  Users,
+  Star,
   Award,
-  CheckCircle
+  CheckCircle,
 } from 'lucide-react';
 import type { StoreMarketingContent } from '@/hooks/useStores';
 import { useStoreTheme } from '@/hooks/useStoreTheme';
@@ -25,7 +25,7 @@ interface StoreMarketingSectionsProps {
   store: Store | null;
 }
 
-export const StoreMarketingSections : React.FC<StoreMarketingSectionsProps> = ({
+export const StoreMarketingSections: React.FC<StoreMarketingSectionsProps> = ({
   marketingContent,
   store,
 }) => {
@@ -40,22 +40,22 @@ export const StoreMarketingSections : React.FC<StoreMarketingSectionsProps> = ({
       {/* Message de bienvenue */}
       {marketingContent.welcome_message && (
         <section className="animate-fade-in">
-          <Card className="border-2 border-dashed" style={{ borderColor: theme.primaryColor + '40' }}>
+          <Card
+            className="border-2 border-dashed"
+            style={{ borderColor: theme.primaryColor + '40' }}
+          >
             <CardContent className="pt-6">
               <div className="flex items-start gap-3">
-                <div 
+                <div
                   className="p-2 rounded-lg flex-shrink-0"
                   style={{ backgroundColor: theme.primaryColor + '15' }}
                 >
-                  <MessageSquare 
-                    className="h-5 w-5" 
-                    style={{ color: theme.primaryColor }}
-                  />
+                  <MessageSquare className="h-5 w-5" style={{ color: theme.primaryColor }} />
                 </div>
                 <div className="flex-1">
-                  <p 
+                  <p
                     className="text-base sm:text-lg leading-relaxed whitespace-pre-wrap"
-                    style={{ 
+                    style={{
                       color: theme.textColor,
                       fontFamily: theme.bodyFont,
                     }}
@@ -77,18 +77,15 @@ export const StoreMarketingSections : React.FC<StoreMarketingSectionsProps> = ({
               <Card>
                 <CardContent className="pt-6">
                   <div className="flex items-start gap-3 mb-4">
-                    <div 
+                    <div
                       className="p-2 rounded-lg flex-shrink-0"
                       style={{ backgroundColor: theme.primaryColor + '15' }}
                     >
-                      <Target 
-                        className="h-5 w-5" 
-                        style={{ color: theme.primaryColor }}
-                      />
+                      <Target className="h-5 w-5" style={{ color: theme.primaryColor }} />
                     </div>
-                    <h3 
+                    <h3
                       className="text-lg sm:text-xl font-bold"
-                      style={{ 
+                      style={{
                         color: theme.textColor,
                         fontFamily: theme.headingFont,
                       }}
@@ -96,9 +93,9 @@ export const StoreMarketingSections : React.FC<StoreMarketingSectionsProps> = ({
                       Notre Mission
                     </h3>
                   </div>
-                  <p 
+                  <p
                     className="text-sm sm:text-base leading-relaxed whitespace-pre-wrap"
-                    style={{ 
+                    style={{
                       color: theme.textSecondaryColor,
                       fontFamily: theme.bodyFont,
                     }}
@@ -113,18 +110,15 @@ export const StoreMarketingSections : React.FC<StoreMarketingSectionsProps> = ({
               <Card>
                 <CardContent className="pt-6">
                   <div className="flex items-start gap-3 mb-4">
-                    <div 
+                    <div
                       className="p-2 rounded-lg flex-shrink-0"
                       style={{ backgroundColor: theme.secondaryColor + '15' }}
                     >
-                      <Target 
-                        className="h-5 w-5" 
-                        style={{ color: theme.secondaryColor }}
-                      />
+                      <Target className="h-5 w-5" style={{ color: theme.secondaryColor }} />
                     </div>
-                    <h3 
+                    <h3
                       className="text-lg sm:text-xl font-bold"
-                      style={{ 
+                      style={{
                         color: theme.textColor,
                         fontFamily: theme.headingFont,
                       }}
@@ -132,9 +126,9 @@ export const StoreMarketingSections : React.FC<StoreMarketingSectionsProps> = ({
                       Notre Vision
                     </h3>
                   </div>
-                  <p 
+                  <p
                     className="text-sm sm:text-base leading-relaxed whitespace-pre-wrap"
-                    style={{ 
+                    style={{
                       color: theme.textSecondaryColor,
                       fontFamily: theme.bodyFont,
                     }}
@@ -154,18 +148,15 @@ export const StoreMarketingSections : React.FC<StoreMarketingSectionsProps> = ({
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center gap-3 mb-6">
-                <div 
+                <div
                   className="p-2 rounded-lg"
                   style={{ backgroundColor: theme.accentColor + '15' }}
                 >
-                  <Heart 
-                    className="h-5 w-5" 
-                    style={{ color: theme.accentColor }}
-                  />
+                  <Heart className="h-5 w-5" style={{ color: theme.accentColor }} />
                 </div>
-                <h3 
+                <h3
                   className="text-lg sm:text-xl font-bold"
-                  style={{ 
+                  style={{
                     color: theme.textColor,
                     fontFamily: theme.headingFont,
                   }}
@@ -201,18 +192,15 @@ export const StoreMarketingSections : React.FC<StoreMarketingSectionsProps> = ({
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center gap-3 mb-6">
-                <div 
+                <div
                   className="p-2 rounded-lg"
                   style={{ backgroundColor: theme.secondaryColor + '15' }}
                 >
-                  <BookOpen 
-                    className="h-5 w-5" 
-                    style={{ color: theme.secondaryColor }}
-                  />
+                  <BookOpen className="h-5 w-5" style={{ color: theme.secondaryColor }} />
                 </div>
-                <h3 
+                <h3
                   className="text-lg sm:text-xl font-bold"
-                  style={{ 
+                  style={{
                     color: theme.textColor,
                     fontFamily: theme.headingFont,
                   }}
@@ -220,9 +208,9 @@ export const StoreMarketingSections : React.FC<StoreMarketingSectionsProps> = ({
                   Notre Histoire
                 </h3>
               </div>
-              <div 
+              <div
                 className="prose prose-sm sm:prose max-w-none"
-                style={{ 
+                style={{
                   color: theme.textColor,
                   fontFamily: theme.bodyFont,
                 }}
@@ -241,18 +229,15 @@ export const StoreMarketingSections : React.FC<StoreMarketingSectionsProps> = ({
         <section className="animate-fade-in">
           <div className="mb-6">
             <div className="flex items-center gap-3">
-              <div 
+              <div
                 className="p-2 rounded-lg"
                 style={{ backgroundColor: theme.primaryColor + '15' }}
               >
-                <Users 
-                  className="h-5 w-5" 
-                  style={{ color: theme.primaryColor }}
-                />
+                <Users className="h-5 w-5" style={{ color: theme.primaryColor }} />
               </div>
-              <h3 
+              <h3
                 className="text-lg sm:text-xl font-bold"
-                style={{ 
+                style={{
                   color: theme.textColor,
                   fontFamily: theme.headingFont,
                 }}
@@ -274,28 +259,28 @@ export const StoreMarketingSections : React.FC<StoreMarketingSectionsProps> = ({
                         style={{ borderColor: theme.primaryColor + '30' }}
                       />
                     ) : (
-                      <div 
+                      <div
                         className="w-20 h-20 sm:w-24 sm:h-24 rounded-full mx-auto mb-4 flex items-center justify-center"
                         style={{ backgroundColor: theme.primaryColor + '15' }}
                       >
-                        <Users 
+                        <Users
                           className="h-10 w-10 sm:h-12 sm:w-12"
                           style={{ color: theme.primaryColor }}
                         />
                       </div>
                     )}
-                    <h4 
+                    <h4
                       className="font-semibold text-base sm:text-lg mb-1"
-                      style={{ 
+                      style={{
                         color: theme.textColor,
                         fontFamily: theme.headingFont,
                       }}
                     >
                       {member.name}
                     </h4>
-                    <p 
+                    <p
                       className="text-sm sm:text-base mb-3"
-                      style={{ 
+                      style={{
                         color: theme.primaryColor,
                         fontFamily: theme.bodyFont,
                       }}
@@ -303,9 +288,9 @@ export const StoreMarketingSections : React.FC<StoreMarketingSectionsProps> = ({
                       {member.role}
                     </p>
                     {member.bio && (
-                      <p 
+                      <p
                         className="text-xs sm:text-sm leading-relaxed"
-                        style={{ 
+                        style={{
                           color: theme.textSecondaryColor,
                           fontFamily: theme.bodyFont,
                         }}
@@ -346,18 +331,12 @@ export const StoreMarketingSections : React.FC<StoreMarketingSectionsProps> = ({
         <section className="animate-fade-in">
           <div className="mb-6">
             <div className="flex items-center gap-3">
-              <div 
-                className="p-2 rounded-lg"
-                style={{ backgroundColor: theme.accentColor + '15' }}
-              >
-                <Star 
-                  className="h-5 w-5" 
-                  style={{ color: theme.accentColor }}
-                />
+              <div className="p-2 rounded-lg" style={{ backgroundColor: theme.accentColor + '15' }}>
+                <Star className="h-5 w-5" style={{ color: theme.accentColor }} />
               </div>
-              <h3 
+              <h3
                 className="text-lg sm:text-xl font-bold"
-                style={{ 
+                style={{
                   color: theme.textColor,
                   fontFamily: theme.headingFont,
                 }}
@@ -378,21 +357,18 @@ export const StoreMarketingSections : React.FC<StoreMarketingSectionsProps> = ({
                         className="w-16 h-16 rounded-full object-cover flex-shrink-0"
                       />
                     ) : (
-                      <div 
+                      <div
                         className="w-16 h-16 rounded-full flex items-center justify-center flex-shrink-0"
                         style={{ backgroundColor: theme.primaryColor + '15' }}
                       >
-                        <Users 
-                          className="h-8 w-8"
-                          style={{ color: theme.primaryColor }}
-                        />
+                        <Users className="h-8 w-8" style={{ color: theme.primaryColor }} />
                       </div>
                     )}
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
-                        <h4 
+                        <h4
                           className="font-semibold text-sm sm:text-base"
-                          style={{ 
+                          style={{
                             color: theme.textColor,
                             fontFamily: theme.headingFont,
                           }}
@@ -400,7 +376,7 @@ export const StoreMarketingSections : React.FC<StoreMarketingSectionsProps> = ({
                           {testimonial.author}
                         </h4>
                         {testimonial.company && (
-                          <span 
+                          <span
                             className="text-xs sm:text-sm"
                             style={{ color: theme.textSecondaryColor }}
                           >
@@ -409,7 +385,7 @@ export const StoreMarketingSections : React.FC<StoreMarketingSectionsProps> = ({
                         )}
                       </div>
                       <div className="flex items-center gap-1 mb-3">
-                        {[1, 2, 3, 4, 5].map((star) => (
+                        {[1, 2, 3, 4, 5].map(star => (
                           <Star
                             key={star}
                             className={`h-4 w-4 ${
@@ -420,9 +396,9 @@ export const StoreMarketingSections : React.FC<StoreMarketingSectionsProps> = ({
                           />
                         ))}
                       </div>
-                      <p 
+                      <p
                         className="text-xs sm:text-sm leading-relaxed italic"
-                        style={{ 
+                        style={{
                           color: theme.textSecondaryColor,
                           fontFamily: theme.bodyFont,
                         }}
@@ -443,18 +419,15 @@ export const StoreMarketingSections : React.FC<StoreMarketingSectionsProps> = ({
         <section className="animate-fade-in">
           <div className="mb-6">
             <div className="flex items-center gap-3">
-              <div 
+              <div
                 className="p-2 rounded-lg"
                 style={{ backgroundColor: theme.secondaryColor + '15' }}
               >
-                <Award 
-                  className="h-5 w-5" 
-                  style={{ color: theme.secondaryColor }}
-                />
+                <Award className="h-5 w-5" style={{ color: theme.secondaryColor }} />
               </div>
-              <h3 
+              <h3
                 className="text-lg sm:text-xl font-bold"
-                style={{ 
+                style={{
                   color: theme.textColor,
                   fontFamily: theme.headingFont,
                 }}
@@ -475,28 +448,28 @@ export const StoreMarketingSections : React.FC<StoreMarketingSectionsProps> = ({
                         className="w-full h-32 sm:h-40 object-contain rounded-lg mb-4"
                       />
                     ) : (
-                      <div 
+                      <div
                         className="w-full h-32 sm:h-40 rounded-lg mb-4 flex items-center justify-center"
                         style={{ backgroundColor: theme.secondaryColor + '15' }}
                       >
-                        <Award 
+                        <Award
                           className="h-12 w-12 sm:h-16 sm:w-16"
                           style={{ color: theme.secondaryColor }}
                         />
                       </div>
                     )}
-                    <h4 
+                    <h4
                       className="font-semibold text-sm sm:text-base mb-1"
-                      style={{ 
+                      style={{
                         color: theme.textColor,
                         fontFamily: theme.headingFont,
                       }}
                     >
                       {cert.name}
                     </h4>
-                    <p 
+                    <p
                       className="text-xs sm:text-sm mb-2"
-                      style={{ 
+                      style={{
                         color: theme.textSecondaryColor,
                         fontFamily: theme.bodyFont,
                       }}
@@ -504,10 +477,7 @@ export const StoreMarketingSections : React.FC<StoreMarketingSectionsProps> = ({
                       {cert.issuer}
                     </p>
                     {cert.expiry_date && (
-                      <p 
-                        className="text-xs mb-3"
-                        style={{ color: theme.textSecondaryColor }}
-                      >
+                      <p className="text-xs mb-3" style={{ color: theme.textSecondaryColor }}>
                         Expire le: {new Date(cert.expiry_date).toLocaleDateString('fr-FR')}
                       </p>
                     )}
@@ -536,11 +506,3 @@ export const StoreMarketingSections : React.FC<StoreMarketingSectionsProps> = ({
     </div>
   );
 };
-
-
-
-
-
-
-
-

@@ -10,10 +10,7 @@ export type KeyFunction<T, K> = (value: T) => K;
 /**
  * Transforme un tableau avec une fonction
  */
-export function transformArray<T, R>(
-  array: T[],
-  transform: TransformFunction<T, R>
-): R[] {
+export function transformArray<T, R>(array: T[], transform: TransformFunction<T, R>): R[] {
   return array.map(transform);
 }
 
@@ -24,7 +21,7 @@ export function transformObject<T, R>(
   obj: Record<string, T>,
   transform: TransformFunction<T, R>
 ): Record<string, R> {
-  const  result: Record<string, R> = {};
+  const result: Record<string, R> = {};
   for (const [key, value] of Object.entries(obj)) {
     result[key] = transform(value);
   }
@@ -38,7 +35,7 @@ export function transformObjectValues<T, R>(
   obj: Record<string, T>,
   transform: (value: T, key: string) => R
 ): Record<string, R> {
-  const  result: Record<string, R> = {};
+  const result: Record<string, R> = {};
   for (const [key, value] of Object.entries(obj)) {
     result[key] = transform(value, key);
   }
@@ -52,7 +49,7 @@ export function transformObjectKeys<T>(
   obj: Record<string, T>,
   transform: (key: string, value: T) => string
 ): Record<string, T> {
-  const  result: Record<string, T> = {};
+  const result: Record<string, T> = {};
   for (const [key, value] of Object.entries(obj)) {
     result[transform(key, value)] = value;
   }
@@ -95,12 +92,9 @@ export function indexBy<T, K extends string | number>(
 /**
  * Partitionne un tableau en deux selon un prédicat
  */
-export function partition<T>(
-  array: T[],
-  predicate: PredicateFunction<T>
-): [T[], T[]] {
-  const  truthy: T[] = [];
-  const  falsy: T[] = [];
+export function partition<T>(array: T[], predicate: PredicateFunction<T>): [T[], T[]] {
+  const truthy: T[] = [];
+  const falsy: T[] = [];
 
   for (const item of array) {
     if (predicate(item)) {
@@ -133,7 +127,7 @@ export function mapToObject<T, K extends string | number, V>(
  * Flatten un tableau de tableaux
  */
 export function flatten<T>(array: (T | T[])[]): T[] {
-  const  result: T[] = [];
+  const result: T[] = [];
   for (const item of array) {
     if (Array.isArray(item)) {
       result.push(...item);
@@ -148,7 +142,7 @@ export function flatten<T>(array: (T | T[])[]): T[] {
  * Flatten profondément un tableau
  */
 export function flattenDeep<T>(array: any[]): T[] {
-  const  result: T[] = [];
+  const result: T[] = [];
   for (const item of array) {
     if (Array.isArray(item)) {
       result.push(...flattenDeep(item));
@@ -166,7 +160,7 @@ export function objectToArray<T>(
   obj: Record<string, T>,
   transform?: (value: T, key: string) => any
 ): Array<{ key: string; value: T }> {
-  const  result: Array<{ key: string; value: T }> = [];
+  const result: Array<{ key: string; value: T }> = [];
   for (const [key, value] of Object.entries(obj)) {
     result.push({
       key,
@@ -261,8 +255,8 @@ export function normalizeArray<T extends Record<string, any>>(
   array: T[],
   keyField: keyof T
 ): { byId: Record<string, T>; allIds: string[] } {
-  const  byId: Record<string, T> = {};
-  const  allIds: string[] = [];
+  const byId: Record<string, T> = {};
+  const allIds: string[] = [];
 
   for (const item of array) {
     const id = String(item[keyField]);
@@ -276,15 +270,9 @@ export function normalizeArray<T extends Record<string, any>>(
 /**
  * Dénormalise un objet normalisé
  */
-export function denormalizeArray<T extends Record<string, any>>(
-  normalized: { byId: Record<string, T>; allIds: string[] }
-): T[] {
-  return normalized.allIds.map((id) => normalized.byId[id]).filter(Boolean);
+export function denormalizeArray<T extends Record<string, any>>(normalized: {
+  byId: Record<string, T>;
+  allIds: string[];
+}): T[] {
+  return normalized.allIds.map(id => normalized.byId[id]).filter(Boolean);
 }
-
-
-
-
-
-
-

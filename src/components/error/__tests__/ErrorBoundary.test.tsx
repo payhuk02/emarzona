@@ -22,7 +22,7 @@ describe('ErrorBoundary', () => {
     vi.spyOn(console, 'error').mockImplementation(() => {});
   });
 
-  it('devrait rendre les enfants normalement si pas d\'erreur', () => {
+  it("devrait rendre les enfants normalement si pas d'erreur", () => {
     render(
       <ErrorBoundary>
         <ThrowError shouldThrow={false} />
@@ -73,7 +73,7 @@ describe('ErrorBoundary', () => {
     );
   });
 
-  it('devrait permettre de réinitialiser l\'erreur', () => {
+  it("devrait permettre de réinitialiser l'erreur", () => {
     render(
       <ErrorBoundary>
         <ThrowError shouldThrow={true} />
@@ -88,7 +88,7 @@ describe('ErrorBoundary', () => {
     resetButton.click();
   });
 
-  it('devrait gérer différents niveaux d\'erreur', () => {
+  it("devrait gérer différents niveaux d'erreur", () => {
     render(
       <ErrorBoundary level="page">
         <ThrowError shouldThrow={true} />

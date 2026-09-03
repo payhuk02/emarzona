@@ -11,7 +11,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { useGradeAssignment, type AssignmentSubmission, type CourseAssignment } from '@/hooks/courses/useAssignments';
+import {
+  useGradeAssignment,
+  type AssignmentSubmission,
+  type CourseAssignment,
+} from '@/hooks/courses/useAssignments';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 
@@ -75,9 +79,8 @@ export const AssignmentGradingForm = ({
     );
   };
 
-  const gradePercentage = assignment.points_possible > 0 
-    ? Math.round((grade / assignment.points_possible) * 100)
-    : 0;
+  const gradePercentage =
+    assignment.points_possible > 0 ? Math.round((grade / assignment.points_possible) * 100) : 0;
 
   return (
     <Card>
@@ -93,9 +96,7 @@ export const AssignmentGradingForm = ({
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium">Soumission de l'étudiant</span>
             {submission.is_late && (
-              <Badge variant="destructive">
-                Retard: {submission.late_hours}h
-              </Badge>
+              <Badge variant="destructive">Retard: {submission.late_hours}h</Badge>
             )}
           </div>
           {submission.submission_text && (
@@ -149,7 +150,7 @@ export const AssignmentGradingForm = ({
                   min={0}
                   max={criterion.points}
                   value={rubricScores[criterion.criterion] || 0}
-                  onChange={(e) =>
+                  onChange={e =>
                     setRubricScores({
                       ...rubricScores,
                       [criterion.criterion]: parseInt(e.target.value) || 0,
@@ -164,9 +165,7 @@ export const AssignmentGradingForm = ({
 
         {/* Grade */}
         <div className="space-y-2">
-          <Label htmlFor="grade">
-            Note * (0 - {assignment.points_possible})
-          </Label>
+          <Label htmlFor="grade">Note * (0 - {assignment.points_possible})</Label>
           <div className="flex items-center gap-3">
             <Input
               id="grade"
@@ -174,7 +173,7 @@ export const AssignmentGradingForm = ({
               min={0}
               max={assignment.points_possible}
               value={grade}
-              onChange={(e) => setGrade(parseInt(e.target.value) || 0)}
+              onChange={e => setGrade(parseInt(e.target.value) || 0)}
               className="w-32"
             />
             <div className="flex items-center gap-2">
@@ -191,7 +190,7 @@ export const AssignmentGradingForm = ({
           <Textarea
             id="feedback"
             value={feedback}
-            onChange={(e) => setFeedback(e.target.value)}
+            onChange={e => setFeedback(e.target.value)}
             placeholder="Votre feedback pour l'étudiant..."
             rows={6}
           />
@@ -199,19 +198,11 @@ export const AssignmentGradingForm = ({
 
         {/* Actions */}
         <div className="flex items-center gap-2 pt-4">
-          <Button
-            onClick={handleSubmit}
-            disabled={gradeAssignment.isPending}
-            className="flex-1"
-          >
+          <Button onClick={handleSubmit} disabled={gradeAssignment.isPending} className="flex-1">
             {gradeAssignment.isPending ? 'Notation...' : 'Enregistrer la note'}
           </Button>
           {onCancel && (
-            <Button
-              variant="outline"
-              onClick={onCancel}
-              disabled={gradeAssignment.isPending}
-            >
+            <Button variant="outline" onClick={onCancel} disabled={gradeAssignment.isPending}>
               Annuler
             </Button>
           )}
@@ -220,10 +211,3 @@ export const AssignmentGradingForm = ({
     </Card>
   );
 };
-
-
-
-
-
-
-

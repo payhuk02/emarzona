@@ -1,7 +1,7 @@
 /**
  * Course Cohorts Hooks
  * Date: 27 Janvier 2025
- * 
+ *
  * Hooks pour gérer les cohorts (groupes d'étudiants)
  */
 
@@ -10,8 +10,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 
-const COURSE_COHORT_FIELDS = 'id, course_id, name, description, cohort_type, max_students, is_active, is_private, start_date, end_date, enrollment_date_range_start, enrollment_date_range_end, metadata, created_at, updated_at';
-const COHORT_DISCUSSION_FIELDS = 'id, cohort_id, course_id, user_id, title, content, discussion_type, is_pinned, is_locked, views_count, replies_count, likes_count, created_at, updated_at';
+const COURSE_COHORT_FIELDS =
+  'id, course_id, name, description, cohort_type, max_students, is_active, is_private, start_date, end_date, enrollment_date_range_start, enrollment_date_range_end, metadata, created_at, updated_at';
+const COHORT_DISCUSSION_FIELDS =
+  'id, cohort_id, course_id, user_id, title, content, discussion_type, is_pinned, is_locked, views_count, replies_count, likes_count, created_at, updated_at';
 
 // =====================================================
 // TYPES
@@ -114,10 +116,12 @@ export const useCourseCohorts = (courseId: string | undefined) => {
 
       const { data, error } = await supabase
         .from('course_cohorts')
-        .select(`
+        .select(
+          `
           *,
           member_count:course_cohort_members(count)
-        `)
+        `
+        )
         .eq('course_id', courseId)
         .order('created_at', { ascending: false });
 
@@ -172,14 +176,16 @@ export const useCohortMembers = (cohortId: string | undefined) => {
 
       const { data, error } = await supabase
         .from('course_cohort_members')
-        .select(`
+        .select(
+          `
           *,
           user:user_id (
             id,
             email,
             raw_user_meta_data
           )
-        `)
+        `
+        )
         .eq('cohort_id', cohortId)
         .eq('status', 'active')
         .order('joined_at', { ascending: true });
@@ -198,10 +204,7 @@ export const useCohortMembers = (cohortId: string | undefined) => {
 /**
  * useStudentCohorts - Récupère les cohorts d'un étudiant pour un cours
  */
-export const useStudentCohorts = (
-  courseId: string | undefined,
-  userId: string | undefined
-) => {
+export const useStudentCohorts = (courseId: string | undefined, userId: string | undefined) => {
   return useQuery({
     queryKey: ['student-cohorts', courseId, userId],
     queryFn: async () => {
@@ -284,7 +287,7 @@ export const useCreateCohort = () => {
 
       return data as CourseCohort;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['course-cohorts', data.course_id] });
       toast({
         title: '✅ Cohort créé',
@@ -352,7 +355,7 @@ export const useAddCohortMember = () => {
       logger.error('Error in useAddCohortMember', { error });
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible d\'ajouter le membre',
+        description: error.message || "Impossible d'ajouter le membre",
         variant: 'destructive',
       });
     },
@@ -428,16 +431,9 @@ export const useAutoAssignCohorts = () => {
       logger.error('Error in useAutoAssignCohorts', { error });
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible d\'assigner automatiquement',
+        description: error.message || "Impossible d'assigner automatiquement",
         variant: 'destructive',
       });
     },
   });
 };
-
-
-
-
-
-
-

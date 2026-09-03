@@ -31,11 +31,11 @@ export { CertificateTemplate } from './certificates/CertificateTemplate';
 export { CertificateGenerator } from './certificates/CertificateGenerator';
 
 // États partagés
-export { 
-  LoadingState, 
-  ErrorState, 
+export {
+  LoadingState,
+  ErrorState,
   EmptyState,
-  CourseDetailSkeleton 
+  CourseDetailSkeleton,
 } from './shared/CourseLoadingState';
 
 // Marketplace
@@ -46,21 +46,21 @@ export { CourseCard } from './marketplace/CourseCard';
 // ============================================================
 
 // Indicateurs de statut
-export { 
+export {
   CourseStatusIndicator,
   type CourseStatus,
   type CourseStatusVariant,
-  type CourseStatusIndicatorProps
+  type CourseStatusIndicatorProps,
 } from './CourseStatusIndicator';
 
 // Affichage des inscriptions
-export { 
+export {
   EnrollmentInfoDisplay,
   type EnrollmentStatus,
   type EnrollmentInfoVariant,
   type EnrollmentStudent,
   type EnrollmentCourse,
-  type EnrollmentInfoDisplayProps
+  type EnrollmentInfoDisplayProps,
 } from './EnrollmentInfoDisplay';
 
 // Gestion des listes de cours
@@ -70,7 +70,7 @@ export {
   type CourseSortField,
   type SortDirection,
   type CourseListItem,
-  type CoursesListProps
+  type CoursesListProps,
 } from './CoursesList';
 
 // Gestion des packages
@@ -81,7 +81,7 @@ export {
   type PackageCourse,
   type PackageTier,
   type CoursePackage,
-  type CoursePackageManagerProps
+  type CoursePackageManagerProps,
 } from './CoursePackageManager';
 
 // Historique des inscriptions
@@ -90,7 +90,7 @@ export {
   type EnrollmentEventType,
   type EnrollmentEvent,
   type PeriodFilter,
-  type EnrollmentHistoryProps
+  type EnrollmentHistoryProps,
 } from './EnrollmentHistory';
 
 // Mise à jour groupée
@@ -100,7 +100,7 @@ export {
   type UpdateMode,
   type BulkUpdateCourse,
   type BulkUpdateChange,
-  type BulkCourseUpdateProps
+  type BulkCourseUpdateProps,
 } from './BulkCourseUpdate';
 
 // Gestion de la progression
@@ -109,7 +109,7 @@ export {
   type ProgressMilestone,
   type CompletedLesson,
   type ProgressStats,
-  type StudentProgressManagerProps
+  type StudentProgressManagerProps,
 } from './StudentProgressManager';
 
 // Contrôle d'accès
@@ -120,7 +120,7 @@ export {
   type CoursePrerequisite,
   type GeoRestriction,
   type AccessConfig,
-  type CourseAccessManagerProps
+  type CourseAccessManagerProps,
 } from './CourseAccessManager';
 
 // Bundles de cours
@@ -130,7 +130,7 @@ export {
   type BundleDiscountType,
   type CourseBundle,
   type AvailableCourse,
-  type CourseBundleBuilderProps
+  type CourseBundleBuilderProps,
 } from './CourseBundleBuilder';
 
 // Dashboards
@@ -140,7 +140,7 @@ export {
   type PopularCourse,
   type RecentActivity,
   type CategoryPerformance,
-  type CoursesDashboardProps
+  type CoursesDashboardProps,
 } from './CoursesDashboard';
 
 export {
@@ -150,12 +150,5 @@ export {
   type AtRiskStudent,
   type StudentEngagement,
   type StudentLifecycle,
-  type StudentsDashboardProps
+  type StudentsDashboardProps,
 } from './StudentsDashboard';
-
-
-
-
-
-
-

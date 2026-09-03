@@ -1,7 +1,7 @@
 /**
  * Import Optimization Utilities
  * Date: 28 Janvier 2025
- * 
+ *
  * Utilitaires pour optimiser les imports et réduire le bundle size
  */
 
@@ -14,7 +14,7 @@ export function lazyLoad<T>(
   importFn: () => Promise<{ default: T }>,
   fallback?: T
 ): Promise<{ default: T }> {
-  return importFn().catch((error) => {
+  return importFn().catch(error => {
     logger.error('Erreur lors du chargement du module', { error });
     if (fallback) {
       return { default: fallback };
@@ -26,11 +26,9 @@ export function lazyLoad<T>(
 /**
  * Précharger un module de manière asynchrone
  */
-export function preloadModule<T>(
-  importFn: () => Promise<{ default: T }>
-): void {
+export function preloadModule<T>(importFn: () => Promise<{ default: T }>): void {
   // Précharger le module en arrière-plan
-  importFn().catch((error) => {
+  importFn().catch(error => {
     logger.warn('Erreur lors du préchargement du module', { error });
   });
 }
@@ -51,7 +49,7 @@ export async function conditionalImport<T>(
     const module = await importFn();
     return module.default;
   } catch (error) {
-    logger.error('Erreur lors de l\'import conditionnel', { error });
+    logger.error("Erreur lors de l'import conditionnel", { error });
     return fallback;
   }
 }
@@ -62,10 +60,7 @@ export async function conditionalImport<T>(
 export class ImportBatcher {
   private pending: Map<string, Promise<any>> = new Map();
 
-  async batch<T>(
-    key: string,
-    importFn: () => Promise<T>
-  ): Promise<T> {
+  async batch<T>(key: string, importFn: () => Promise<T>): Promise<T> {
     if (this.pending.has(key)) {
       return this.pending.get(key)!;
     }
@@ -84,10 +79,3 @@ export class ImportBatcher {
 }
 
 export const importBatcher = new ImportBatcher();
-
-
-
-
-
-
-

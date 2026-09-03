@@ -1,16 +1,32 @@
-import React, { useState, useCallback } from "react";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
-import { Card, CardContent } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
-import { MoreVertical, Edit, Trash2, Facebook, Globe, Music, Image } from "lucide-react";
-import { usePixels, Pixel } from "@/hooks/usePixels";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { EditPixelDialog } from "./EditPixelDialog";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import React, { useState, useCallback } from 'react';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
+import { Card, CardContent } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
+import { MoreVertical, Edit, Trash2, Facebook, Globe, Music, Image } from 'lucide-react';
+import { usePixels, Pixel } from '@/hooks/usePixels';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { EditPixelDialog } from './EditPixelDialog';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 
 const pixelIcons = {
   facebook: Facebook,
@@ -42,9 +58,12 @@ const PixelsTableComponent = ({ pixels }: { pixels: Pixel[] }) => {
     }
   }, [selectedPixel, deletePixel]);
 
-  const handleToggle = useCallback(async (pixel: Pixel, checked: boolean) => {
-    await togglePixel(pixel.id, checked);
-  }, [togglePixel]);
+  const handleToggle = useCallback(
+    async (pixel: Pixel, checked: boolean) => {
+      await togglePixel(pixel.id, checked);
+    },
+    [togglePixel]
+  );
 
   if (pixels.length === 0) {
     return (
@@ -52,7 +71,9 @@ const PixelsTableComponent = ({ pixels }: { pixels: Pixel[] }) => {
         <div className="p-4 rounded-full bg-gradient-to-br from-purple-500/10 to-pink-500/5 mb-4 animate-in zoom-in duration-500 inline-block">
           <Globe className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground opacity-20" />
         </div>
-        <p className="text-sm sm:text-base text-foreground font-medium">Aucun Pixel ajouté pour le moment</p>
+        <p className="text-sm sm:text-base text-foreground font-medium">
+          Aucun Pixel ajouté pour le moment
+        </p>
         <p className="text-xs sm:text-sm text-muted-foreground mt-2">
           Cliquez sur "Ajouter un Pixel" pour commencer
         </p>
@@ -65,90 +86,95 @@ const PixelsTableComponent = ({ pixels }: { pixels: Pixel[] }) => {
       {/* Desktop Table View */}
       <div className="hidden lg:block">
         <div className="border border-border/50 rounded-lg overflow-hidden">
-        <Table>
-          <TableHeader>
+          <Table>
+            <TableHeader>
               <TableRow className="bg-muted/50">
                 <TableHead className="text-xs sm:text-sm font-semibold">Type</TableHead>
                 <TableHead className="text-xs sm:text-sm font-semibold">Nom</TableHead>
                 <TableHead className="text-xs sm:text-sm font-semibold">ID Pixel</TableHead>
                 <TableHead className="text-xs sm:text-sm font-semibold">Statut</TableHead>
                 <TableHead className="text-xs sm:text-sm font-semibold">Créé le</TableHead>
-                <TableHead className="text-right text-xs sm:text-sm font-semibold">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {pixels.map((pixel) => {
-              const Icon = pixelIcons[pixel.pixel_type];
-              return (
+                <TableHead className="text-right text-xs sm:text-sm font-semibold">
+                  Actions
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {pixels.map(pixel => {
+                const Icon = pixelIcons[pixel.pixel_type];
+                return (
                   <TableRow key={pixel.id} className="hover:bg-muted/50 transition-colors">
                     <TableCell className="text-xs sm:text-sm">
-                    <div className="flex items-center gap-2">
-                      <Icon className="h-4 w-4 text-muted-foreground" />
+                      <div className="flex items-center gap-2">
+                        <Icon className="h-4 w-4 text-muted-foreground" />
                         <span>{pixelLabels[pixel.pixel_type]}</span>
-                    </div>
-                  </TableCell>
+                      </div>
+                    </TableCell>
                     <TableCell className="text-xs sm:text-sm">
-                    {pixel.pixel_name || <span className="text-muted-foreground">Sans nom</span>}
-                  </TableCell>
-                  <TableCell>
+                      {pixel.pixel_name || <span className="text-muted-foreground">Sans nom</span>}
+                    </TableCell>
+                    <TableCell>
                       <code className="text-xs bg-muted/50 px-2 py-1 rounded font-mono">
-                      {pixel.pixel_id.substring(0, 20)}
-                      {pixel.pixel_id.length > 20 && '...'}
-                    </code>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Switch
-                        checked={pixel.is_active}
-                        onCheckedChange={(checked) => handleToggle(pixel, checked)}
-                      />
-                        <Badge variant={pixel.is_active ? "default" : "secondary"} className="text-xs">
-                        {pixel.is_active ? 'Actif' : 'Inactif'}
-                      </Badge>
-                    </div>
-                  </TableCell>
+                        {pixel.pixel_id.substring(0, 20)}
+                        {pixel.pixel_id.length > 20 && '...'}
+                      </code>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Switch
+                          checked={pixel.is_active}
+                          onCheckedChange={checked => handleToggle(pixel, checked)}
+                        />
+                        <Badge
+                          variant={pixel.is_active ? 'default' : 'secondary'}
+                          className="text-xs"
+                        >
+                          {pixel.is_active ? 'Actif' : 'Inactif'}
+                        </Badge>
+                      </div>
+                    </TableCell>
                     <TableCell className="text-xs sm:text-sm text-muted-foreground">
-                      {format(new Date(pixel.created_at), "dd MMM yyyy", { locale: fr })}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setSelectedPixel(pixel);
-                          setEditDialogOpen(true);
-                        }}
+                      {format(new Date(pixel.created_at), 'dd MMM yyyy', { locale: fr })}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedPixel(pixel);
+                            setEditDialogOpen(true);
+                          }}
                           className="h-8 w-8 p-0"
                           aria-label={`Modifier le pixel ${pixel.pixel_name || pixel.pixel_id}`}
-                      >
+                        >
                           <Edit className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setSelectedPixel(pixel);
-                          setDeleteDialogOpen(true);
-                        }}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedPixel(pixel);
+                            setDeleteDialogOpen(true);
+                          }}
                           className="h-8 w-8 p-0"
                           aria-label={`Supprimer le pixel ${pixel.pixel_name || pixel.pixel_id}`}
-                      >
+                        >
                           <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
         </div>
       </div>
 
       {/* Mobile Card View */}
       <div className="lg:hidden space-y-3 sm:space-y-4">
-        {pixels.map((pixel) => {
+        {pixels.map(pixel => {
           const Icon = pixelIcons[pixel.pixel_type];
           return (
             <Card
@@ -172,12 +198,12 @@ const PixelsTableComponent = ({ pixels }: { pixels: Pixel[] }) => {
                   </div>
                   <Select>
                     <SelectTrigger className="h-8 w-8">
-
-                        <MoreVertical className="h-4 w-4" />
-                      
-</SelectTrigger>
+                      <MoreVertical className="h-4 w-4" />
+                    </SelectTrigger>
                     <SelectContent mobileVariant="sheet" className="min-w-[200px]">
-                      <SelectItem value="view" onSelect
+                      <SelectItem
+                        value="view"
+                        onSelect
                         onClick={() => {
                           setSelectedPixel(pixel);
                           setEditDialogOpen(true);
@@ -186,7 +212,9 @@ const PixelsTableComponent = ({ pixels }: { pixels: Pixel[] }) => {
                         <Edit className="h-4 w-4 mr-2" />
                         Modifier
                       </SelectItem>
-                      <SelectItem value="delete" onSelect
+                      <SelectItem
+                        value="delete"
+                        onSelect
                         onClick={() => {
                           setSelectedPixel(pixel);
                           setDeleteDialogOpen(true);
@@ -213,9 +241,12 @@ const PixelsTableComponent = ({ pixels }: { pixels: Pixel[] }) => {
                     <div className="flex items-center gap-2">
                       <Switch
                         checked={pixel.is_active}
-                        onCheckedChange={(checked) => handleToggle(pixel, checked)}
+                        onCheckedChange={checked => handleToggle(pixel, checked)}
                       />
-                      <Badge variant={pixel.is_active ? "default" : "secondary"} className="text-xs">
+                      <Badge
+                        variant={pixel.is_active ? 'default' : 'secondary'}
+                        className="text-xs"
+                      >
                         {pixel.is_active ? 'Actif' : 'Inactif'}
                       </Badge>
                     </div>
@@ -223,7 +254,7 @@ const PixelsTableComponent = ({ pixels }: { pixels: Pixel[] }) => {
                   <div className="flex items-center justify-between">
                     <p className="text-xs text-muted-foreground">Créé le</p>
                     <p className="text-xs text-muted-foreground">
-                      {format(new Date(pixel.created_at), "dd MMM yyyy", { locale: fr })}
+                      {format(new Date(pixel.created_at), 'dd MMM yyyy', { locale: fr })}
                     </p>
                   </div>
                 </div>
@@ -236,14 +267,22 @@ const PixelsTableComponent = ({ pixels }: { pixels: Pixel[] }) => {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent className="max-w-[90vw] sm:max-w-md">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-base sm:text-lg">Supprimer ce Pixel ?</AlertDialogTitle>
+            <AlertDialogTitle className="text-base sm:text-lg">
+              Supprimer ce Pixel ?
+            </AlertDialogTitle>
             <AlertDialogDescription className="text-xs sm:text-sm">
-              Cette action est irréversible. Le Pixel sera supprimé et ne sera plus injecté sur vos pages.
+              Cette action est irréversible. Le Pixel sera supprimé et ne sera plus injecté sur vos
+              pages.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-col sm:flex-row gap-2">
-            <AlertDialogCancel className="w-full sm:w-auto h-9 sm:h-10 text-xs sm:text-sm">Annuler</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="w-full sm:w-auto h-9 sm:h-10 text-xs sm:text-sm">
+            <AlertDialogCancel className="w-full sm:w-auto h-9 sm:h-10 text-xs sm:text-sm">
+              Annuler
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="w-full sm:w-auto h-9 sm:h-10 text-xs sm:text-sm"
+            >
               Supprimer
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -268,18 +307,13 @@ export const PixelsTable = React.memo(PixelsTableComponent, (prevProps, nextProp
   return (
     prevProps.pixels.length === nextProps.pixels.length &&
     // Comparaison superficielle des pixels (comparer les IDs et statuts)
-    prevProps.pixels.every((pixel, index) => 
-      pixel.id === nextProps.pixels[index]?.id &&
-      pixel.is_active === nextProps.pixels[index]?.is_active &&
-      pixel.pixel_name === nextProps.pixels[index]?.pixel_name
+    prevProps.pixels.every(
+      (pixel, index) =>
+        pixel.id === nextProps.pixels[index]?.id &&
+        pixel.is_active === nextProps.pixels[index]?.is_active &&
+        pixel.pixel_name === nextProps.pixels[index]?.pixel_name
     )
   );
 });
 
 PixelsTable.displayName = 'PixelsTable';
-
-
-
-
-
-

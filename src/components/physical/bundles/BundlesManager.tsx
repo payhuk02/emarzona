@@ -38,12 +38,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Package,
   Plus,
@@ -120,9 +115,10 @@ export function BundlesManager() {
     const total = bundles.length;
     const active = bundles.filter(b => b.is_active).length;
     const totalSavings = bundles.reduce((sum, b) => sum + (b.original_price - b.bundle_price), 0);
-    const avgDiscount = bundles.length > 0 
-      ? bundles.reduce((sum, b) => sum + b.discount_percentage, 0) / bundles.length 
-      : 0;
+    const avgDiscount =
+      bundles.length > 0
+        ? bundles.reduce((sum, b) => sum + b.discount_percentage, 0) / bundles.length
+        : 0;
     return { total, active, totalSavings, avgDiscount };
   }, [bundles]);
 
@@ -191,17 +187,17 @@ export function BundlesManager() {
   };
 
   const addProductToBundle = (productId: string, variantId?: string) => {
-    const product = products?.find((p) => p.id === productId);
+    const product = products?.find(p => p.id === productId);
     if (!product) return;
 
     const existingItem = bundleForm.items.find(
-      (item) => item.product_id === productId && item.variant_id === variantId
+      item => item.product_id === productId && item.variant_id === variantId
     );
 
     if (existingItem) {
       setBundleForm({
         ...bundleForm,
-        items: bundleForm.items.map((item) =>
+        items: bundleForm.items.map(item =>
           item.product_id === productId && item.variant_id === variantId
             ? { ...item, quantity: item.quantity + 1 }
             : item
@@ -224,10 +220,9 @@ export function BundlesManager() {
     }
 
     // Recalculer le prix du bundle automatiquement
-    const newOriginalPrice = bundleForm.items.reduce(
-      (sum, item) => sum + item.price * item.quantity,
-      0
-    ) + (product.price || 0);
+    const newOriginalPrice =
+      bundleForm.items.reduce((sum, item) => sum + item.price * item.quantity, 0) +
+      (product.price || 0);
     const suggestedDiscount = newOriginalPrice * 0.1; // 10% de réduction par défaut
     setBundleForm({
       ...bundleForm,
@@ -248,15 +243,38 @@ export function BundlesManager() {
     <div className="space-y-4 sm:space-y-6">
       {/* Stats Cards - Responsive */}
       {bundles && bundles.length > 0 && (
-        <div 
+        <div
           ref={statsRef}
           className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-4 animate-in fade-in slide-in-from-bottom-4 duration-700"
         >
           {[
-            { label: 'Total Bundles', value: stats.total, icon: ShoppingBag, color: 'from-purple-600 to-pink-600' },
-            { label: 'Actifs', value: stats.active, icon: CheckCircle2, color: 'from-green-600 to-emerald-600' },
-            { label: 'Économies Total', value: new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF' }).format(stats.totalSavings), icon: DollarSign, color: 'from-blue-600 to-cyan-600', isCurrency: true },
-            { label: 'Réduction Moyenne', value: `${stats.avgDiscount.toFixed(1)}%`, icon: TrendingDown, color: 'from-orange-600 to-yellow-600' },
+            {
+              label: 'Total Bundles',
+              value: stats.total,
+              icon: ShoppingBag,
+              color: 'from-purple-600 to-pink-600',
+            },
+            {
+              label: 'Actifs',
+              value: stats.active,
+              icon: CheckCircle2,
+              color: 'from-green-600 to-emerald-600',
+            },
+            {
+              label: 'Économies Total',
+              value: new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF' }).format(
+                stats.totalSavings
+              ),
+              icon: DollarSign,
+              color: 'from-blue-600 to-cyan-600',
+              isCurrency: true,
+            },
+            {
+              label: 'Réduction Moyenne',
+              value: `${stats.avgDiscount.toFixed(1)}%`,
+              icon: TrendingDown,
+              color: 'from-orange-600 to-yellow-600',
+            },
           ].map((stat, index) => {
             const Icon = stat.icon;
             return (
@@ -273,11 +291,15 @@ export function BundlesManager() {
                 </CardHeader>
                 <CardContent className="p-3 sm:p-4 pt-0">
                   {stat.isCurrency ? (
-                    <div className={`text-lg sm:text-xl lg:text-2xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
+                    <div
+                      className={`text-lg sm:text-xl lg:text-2xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}
+                    >
                       {stat.value}
                     </div>
                   ) : (
-                    <div className={`text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
+                    <div
+                      className={`text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}
+                    >
                       {stat.value}
                     </div>
                   )}
@@ -301,7 +323,7 @@ export function BundlesManager() {
                 Créez et gérez des bundles de produits avec promotions automatiques
               </CardDescription>
             </div>
-            <Button 
+            <Button
               onClick={() => setShowCreateDialog(true)}
               className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
               size="sm"
@@ -318,7 +340,7 @@ export function BundlesManager() {
               <p className="text-sm sm:text-base text-muted-foreground mb-2">
                 Aucun bundle créé. Créez votre premier bundle pour commencer.
               </p>
-              <Button 
+              <Button
                 onClick={() => setShowCreateDialog(true)}
                 className="mt-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
                 size="sm"
@@ -364,11 +386,13 @@ export function BundlesManager() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {bundles.map((bundle) => (
+                    {bundles.map(bundle => (
                       <TableRow key={bundle.id}>
                         <TableCell className="font-medium text-sm">{bundle.name}</TableCell>
                         <TableCell>
-                          <Badge variant="outline" className="text-xs">{bundle.type}</Badge>
+                          <Badge variant="outline" className="text-xs">
+                            {bundle.type}
+                          </Badge>
                         </TableCell>
                         <TableCell>
                           <span className="line-through text-muted-foreground text-sm">
@@ -382,8 +406,8 @@ export function BundlesManager() {
                         </TableCell>
                         <TableCell>
                           <Badge variant="default" className="bg-green-500 text-xs">
-                            <TrendingDown className="h-3 w-3 mr-1" />
-                            -{bundle.discount_percentage.toFixed(1)}%
+                            <TrendingDown className="h-3 w-3 mr-1" />-
+                            {bundle.discount_percentage.toFixed(1)}%
                           </Badge>
                         </TableCell>
                         <TableCell>
@@ -395,9 +419,13 @@ export function BundlesManager() {
                         </TableCell>
                         <TableCell>
                           {bundle.is_active ? (
-                            <Badge variant="default" className="bg-green-500 text-xs">Actif</Badge>
+                            <Badge variant="default" className="bg-green-500 text-xs">
+                              Actif
+                            </Badge>
                           ) : (
-                            <Badge variant="secondary" className="text-xs">Inactif</Badge>
+                            <Badge variant="secondary" className="text-xs">
+                              Inactif
+                            </Badge>
                           )}
                         </TableCell>
                         <TableCell className="text-right">
@@ -448,9 +476,15 @@ export function BundlesManager() {
           </DialogHeader>
           <Tabs defaultValue="info" className="space-y-4">
             <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="info" className="text-xs sm:text-sm">Informations</TabsTrigger>
-              <TabsTrigger value="products" className="text-xs sm:text-sm">Produits</TabsTrigger>
-              <TabsTrigger value="pricing" className="text-xs sm:text-sm">Prix</TabsTrigger>
+              <TabsTrigger value="info" className="text-xs sm:text-sm">
+                Informations
+              </TabsTrigger>
+              <TabsTrigger value="products" className="text-xs sm:text-sm">
+                Produits
+              </TabsTrigger>
+              <TabsTrigger value="pricing" className="text-xs sm:text-sm">
+                Prix
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="info" className="space-y-4">
@@ -458,7 +492,7 @@ export function BundlesManager() {
                 <Label className="text-xs sm:text-sm">Nom du Bundle</Label>
                 <Input
                   value={bundleForm.name}
-                  onChange={(e) => setBundleForm({ ...bundleForm, name: e.target.value })}
+                  onChange={e => setBundleForm({ ...bundleForm, name: e.target.value })}
                   placeholder="Ex: Pack Starter"
                   className="h-9 sm:h-10 text-xs sm:text-sm"
                 />
@@ -467,7 +501,7 @@ export function BundlesManager() {
                 <Label className="text-xs sm:text-sm">Description</Label>
                 <Textarea
                   value={bundleForm.description}
-                  onChange={(e) => setBundleForm({ ...bundleForm, description: e.target.value })}
+                  onChange={e => setBundleForm({ ...bundleForm, description: e.target.value })}
                   placeholder="Description du bundle..."
                   className="text-xs sm:text-sm"
                   rows={4}
@@ -477,7 +511,7 @@ export function BundlesManager() {
                 <Label className="text-xs sm:text-sm">Type de Bundle</Label>
                 <Select
                   value={bundleForm.type}
-                  onValueChange={(v) => setBundleForm({ ...bundleForm, type: v as BundleType })}
+                  onValueChange={v => setBundleForm({ ...bundleForm, type: v as BundleType })}
                 >
                   <SelectTrigger className="h-9 sm:h-10 text-xs sm:text-sm">
                     <SelectValue />
@@ -493,11 +527,13 @@ export function BundlesManager() {
                 <Switch
                   id="track-inventory"
                   checked={bundleForm.track_inventory}
-                  onCheckedChange={(checked) =>
+                  onCheckedChange={checked =>
                     setBundleForm({ ...bundleForm, track_inventory: checked })
                   }
                 />
-                <Label htmlFor="track-inventory" className="text-xs sm:text-sm">Suivre l'inventaire</Label>
+                <Label htmlFor="track-inventory" className="text-xs sm:text-sm">
+                  Suivre l'inventaire
+                </Label>
               </div>
               {bundleForm.track_inventory && (
                 <div className="space-y-2">
@@ -505,7 +541,7 @@ export function BundlesManager() {
                   <Input
                     type="number"
                     value={bundleForm.total_quantity}
-                    onChange={(e) =>
+                    onChange={e =>
                       setBundleForm({ ...bundleForm, total_quantity: Number(e.target.value) })
                     }
                     min="0"
@@ -519,7 +555,7 @@ export function BundlesManager() {
               <div className="space-y-2">
                 <Label className="text-xs sm:text-sm">Ajouter des produits</Label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-60 overflow-y-auto">
-                  {products?.map((product) => (
+                  {products?.map(product => (
                     <Button
                       key={product.id}
                       variant="outline"
@@ -548,15 +584,17 @@ export function BundlesManager() {
                       </TableHeader>
                       <TableBody>
                         {bundleForm.items.map((item, index) => {
-                          const product = products?.find((p) => p.id === item.product_id);
+                          const product = products?.find(p => p.id === item.product_id);
                           return (
                             <TableRow key={index}>
-                              <TableCell className="text-xs sm:text-sm">{product?.name || 'N/A'}</TableCell>
+                              <TableCell className="text-xs sm:text-sm">
+                                {product?.name || 'N/A'}
+                              </TableCell>
                               <TableCell>
                                 <Input
                                   type="number"
                                   value={item.quantity}
-                                  onChange={(e) => {
+                                  onChange={e => {
                                     const newItems = [...bundleForm.items];
                                     newItems[index].quantity = Number(e.target.value);
                                     setBundleForm({ ...bundleForm, items: newItems });
@@ -569,7 +607,7 @@ export function BundlesManager() {
                                 <Input
                                   type="number"
                                   value={item.price}
-                                  onChange={(e) => {
+                                  onChange={e => {
                                     const newItems = [...bundleForm.items];
                                     newItems[index].price = Number(e.target.value);
                                     setBundleForm({ ...bundleForm, items: newItems });
@@ -612,9 +650,12 @@ export function BundlesManager() {
                   <DollarSign className="h-4 w-4" />
                   <AlertDescription>
                     <div className="space-y-1 text-xs sm:text-sm">
-                      <p className="font-semibold">Prix Original: {bundleCalculations.originalPrice.toLocaleString()} FCFA</p>
+                      <p className="font-semibold">
+                        Prix Original: {bundleCalculations.originalPrice.toLocaleString()} FCFA
+                      </p>
                       <p className="text-muted-foreground">
-                        Économies: {bundleCalculations.discountAmount.toLocaleString()} FCFA ({bundleCalculations.discountPercentage.toFixed(1)}%)
+                        Économies: {bundleCalculations.discountAmount.toLocaleString()} FCFA (
+                        {bundleCalculations.discountPercentage.toFixed(1)}%)
                       </p>
                     </div>
                   </AlertDescription>
@@ -624,7 +665,7 @@ export function BundlesManager() {
                   <Input
                     type="number"
                     value={bundleForm.bundle_price}
-                    onChange={(e) =>
+                    onChange={e =>
                       setBundleForm({ ...bundleForm, bundle_price: Number(e.target.value) })
                     }
                     min="0"
@@ -638,21 +679,25 @@ export function BundlesManager() {
                   <Switch
                     id="show-savings"
                     checked={bundleForm.show_savings}
-                    onCheckedChange={(checked) =>
+                    onCheckedChange={checked =>
                       setBundleForm({ ...bundleForm, show_savings: checked })
                     }
                   />
-                  <Label htmlFor="show-savings" className="text-xs sm:text-sm">Afficher les économies</Label>
+                  <Label htmlFor="show-savings" className="text-xs sm:text-sm">
+                    Afficher les économies
+                  </Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Switch
                     id="show-individual"
                     checked={bundleForm.show_individual_prices}
-                    onCheckedChange={(checked) =>
+                    onCheckedChange={checked =>
                       setBundleForm({ ...bundleForm, show_individual_prices: checked })
                     }
                   />
-                  <Label htmlFor="show-individual" className="text-xs sm:text-sm">Afficher les prix individuels</Label>
+                  <Label htmlFor="show-individual" className="text-xs sm:text-sm">
+                    Afficher les prix individuels
+                  </Label>
                 </div>
               </div>
             </TabsContent>
@@ -693,7 +738,7 @@ export function BundlesManager() {
               <Label className="text-xs sm:text-sm">Type de promotion</Label>
               <Select
                 value={promotionType}
-                onValueChange={(v) => setPromotionType(v as 'percentage' | 'amount')}
+                onValueChange={v => setPromotionType(v as 'percentage' | 'amount')}
               >
                 <SelectTrigger className="h-9 sm:h-10 text-xs sm:text-sm">
                   <SelectValue />
@@ -706,13 +751,15 @@ export function BundlesManager() {
             </div>
             <div className="space-y-2">
               <Label className="text-xs sm:text-sm">
-                {promotionType === 'percentage' ? 'Pourcentage de réduction' : 'Montant de réduction'}
+                {promotionType === 'percentage'
+                  ? 'Pourcentage de réduction'
+                  : 'Montant de réduction'}
               </Label>
               <div className="flex items-center gap-2">
                 <Input
                   type="number"
                   value={promotionDiscount}
-                  onChange={(e) => setPromotionDiscount(Number(e.target.value))}
+                  onChange={e => setPromotionDiscount(Number(e.target.value))}
                   min="0"
                   max={promotionType === 'percentage' ? 100 : undefined}
                   className="h-9 sm:h-10 text-xs sm:text-sm"
@@ -729,7 +776,12 @@ export function BundlesManager() {
                   Prix actuel: {selectedBundle.bundle_price.toLocaleString()} FCFA
                   {promotionType === 'percentage' && promotionDiscount > 0 && (
                     <p className="mt-1">
-                      Nouveau prix: {((selectedBundle.original_price * (100 - promotionDiscount)) / 100).toLocaleString()} FCFA
+                      Nouveau prix:{' '}
+                      {(
+                        (selectedBundle.original_price * (100 - promotionDiscount)) /
+                        100
+                      ).toLocaleString()}{' '}
+                      FCFA
                     </p>
                   )}
                 </AlertDescription>
@@ -786,14 +838,20 @@ function BundleCard({ bundle, onPromotion, onEdit, animationDelay = 0 }: BundleC
                 {bundle.name}
               </CardTitle>
               <CardDescription className="text-xs sm:text-sm">
-                <Badge variant="outline" className="text-xs">{bundle.type}</Badge>
+                <Badge variant="outline" className="text-xs">
+                  {bundle.type}
+                </Badge>
               </CardDescription>
             </div>
           </div>
           {bundle.is_active ? (
-            <Badge variant="default" className="bg-green-500 text-xs">Actif</Badge>
+            <Badge variant="default" className="bg-green-500 text-xs">
+              Actif
+            </Badge>
           ) : (
-            <Badge variant="secondary" className="text-xs">Inactif</Badge>
+            <Badge variant="secondary" className="text-xs">
+              Inactif
+            </Badge>
           )}
         </div>
       </CardHeader>
@@ -805,13 +863,14 @@ function BundleCard({ bundle, onPromotion, onEdit, animationDelay = 0 }: BundleC
           </div>
           <div className="flex items-center justify-between">
             <span className="font-medium">Prix bundle:</span>
-            <span className="font-semibold text-green-600">{bundle.bundle_price.toLocaleString()} FCFA</span>
+            <span className="font-semibold text-green-600">
+              {bundle.bundle_price.toLocaleString()} FCFA
+            </span>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-muted-foreground">Économies:</span>
             <Badge variant="default" className="bg-green-500 text-xs">
-              <TrendingDown className="h-3 w-3 mr-1" />
-              -{bundle.discount_percentage.toFixed(1)}%
+              <TrendingDown className="h-3 w-3 mr-1" />-{bundle.discount_percentage.toFixed(1)}%
             </Badge>
           </div>
           <div className="flex items-center justify-between">
@@ -822,21 +881,11 @@ function BundleCard({ bundle, onPromotion, onEdit, animationDelay = 0 }: BundleC
           </div>
         </div>
         <div className="flex gap-2 pt-2">
-          <Button
-            onClick={onPromotion}
-            size="sm"
-            variant="outline"
-            className="flex-1"
-          >
+          <Button onClick={onPromotion} size="sm" variant="outline" className="flex-1">
             <Tag className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
             <span className="text-xs sm:text-sm">Promotion</span>
           </Button>
-          <Button
-            onClick={onEdit}
-            size="sm"
-            variant="outline"
-            className="flex-1"
-          >
+          <Button onClick={onEdit} size="sm" variant="outline" className="flex-1">
             <Edit className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
             <span className="text-xs sm:text-sm">Modifier</span>
           </Button>
@@ -845,8 +894,3 @@ function BundleCard({ bundle, onPromotion, onEdit, animationDelay = 0 }: BundleC
     </Card>
   );
 }
-
-
-
-
-

@@ -54,19 +54,23 @@ export const usePortfolioComments = (
     queryFn: async () => {
       if (!portfolioId) return [];
 
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
       // Récupérer les commentaires principaux (sans parent)
-      let  query= supabase
+      let query = supabase
         .from('portfolio_comments')
-        .select(`
+        .select(
+          `
           *,
           user:user_id (
             id,
             email,
             user_metadata
           )
-        `)
+        `
+        )
         .eq('portfolio_id', portfolioId)
         .is('parent_comment_id', null)
         .eq('is_approved', true)
@@ -75,11 +79,17 @@ export const usePortfolioComments = (
       // Tri
       const sortBy = options?.sortBy || 'newest';
       if (sortBy === 'newest') {
-        query = query.order('is_pinned', { ascending: false }).order('created_at', { ascending: false });
+        query = query
+          .order('is_pinned', { ascending: false })
+          .order('created_at', { ascending: false });
       } else if (sortBy === 'oldest') {
-        query = query.order('is_pinned', { ascending: false }).order('created_at', { ascending: true });
+        query = query
+          .order('is_pinned', { ascending: false })
+          .order('created_at', { ascending: true });
       } else if (sortBy === 'most_liked') {
-        query = query.order('is_pinned', { ascending: false }).order('likes_count', { ascending: false });
+        query = query
+          .order('is_pinned', { ascending: false })
+          .order('likes_count', { ascending: false });
       }
 
       const { data: comments, error } = await query;
@@ -91,26 +101,28 @@ export const usePortfolioComments = (
 
       // Récupérer les réponses si demandé
       if (options?.includeReplies && comments && comments.length > 0) {
-        const commentIds = comments.map((c) => c.id);
+        const commentIds = comments.map(c => c.id);
         const { data: replies } = await supabase
           .from('portfolio_comments')
-          .select(`
+          .select(
+            `
             *,
             user:user_id (
               id,
               email,
               user_metadata
             )
-          `)
+          `
+          )
           .in('parent_comment_id', commentIds)
           .eq('is_approved', true)
           .eq('is_hidden', false)
           .order('created_at', { ascending: true });
 
         // Grouper les réponses par commentaire parent
-        const commentsWithReplies = comments.map((comment) => ({
+        const commentsWithReplies = comments.map(comment => ({
           ...comment,
-          replies: replies?.filter((r) => r.parent_comment_id === comment.id) || [],
+          replies: replies?.filter(r => r.parent_comment_id === comment.id) || [],
         }));
 
         // Vérifier les likes de l'utilisateur
@@ -119,20 +131,18 @@ export const usePortfolioComments = (
             .from('portfolio_comment_likes')
             .select('comment_id')
             .eq('user_id', user.id)
-            .in('comment_id', [
-              ...commentIds,
-              ...(replies?.map((r) => r.id) || []),
-            ]);
+            .in('comment_id', [...commentIds, ...(replies?.map(r => r.id) || [])]);
 
-          const likedCommentIds = new Set(userLikes?.map((l) => l.comment_id) || []);
+          const likedCommentIds = new Set(userLikes?.map(l => l.comment_id) || []);
 
-          return commentsWithReplies.map((comment) => ({
+          return commentsWithReplies.map(comment => ({
             ...comment,
             is_liked: likedCommentIds.has(comment.id),
-            replies: comment.replies?.map((reply) => ({
-              ...reply,
-              is_liked: likedCommentIds.has(reply.id),
-            })) || [],
+            replies:
+              comment.replies?.map(reply => ({
+                ...reply,
+                is_liked: likedCommentIds.has(reply.id),
+              })) || [],
           })) as PortfolioComment[];
         }
 
@@ -141,16 +151,16 @@ export const usePortfolioComments = (
 
       // Vérifier les likes de l'utilisateur
       if (user && comments) {
-        const commentIds = comments.map((c) => c.id);
+        const commentIds = comments.map(c => c.id);
         const { data: userLikes } = await supabase
           .from('portfolio_comment_likes')
           .select('comment_id')
           .eq('user_id', user.id)
           .in('comment_id', commentIds);
 
-        const likedCommentIds = new Set(userLikes?.map((l) => l.comment_id) || []);
+        const likedCommentIds = new Set(userLikes?.map(l => l.comment_id) || []);
 
-        return comments.map((comment) => ({
+        return comments.map(comment => ({
           ...comment,
           is_liked: likedCommentIds.has(comment.id),
         })) as PortfolioComment[];
@@ -177,7 +187,9 @@ export const useCreateComment = () => {
       author_name?: string;
       author_email?: string;
     }) => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
       const { data: comment, error } = await supabase
         .from('portfolio_comments')
@@ -189,14 +201,16 @@ export const useCreateComment = () => {
           author_name: data.author_name || null,
           author_email: data.author_email || null,
         })
-        .select(`
+        .select(
+          `
           *,
           user:user_id (
             id,
             email,
             user_metadata
           )
-        `)
+        `
+        )
         .single();
 
       if (error) {
@@ -206,9 +220,9 @@ export const useCreateComment = () => {
 
       return comment as PortfolioComment;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['portfolio-comments', data.portfolio_id] });
-      
+
       toast({
         title: '✅ Commentaire publié',
         description: 'Votre commentaire a été publié avec succès.',
@@ -217,7 +231,8 @@ export const useCreateComment = () => {
     onError: (error: any) => {
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Une erreur est survenue lors de la publication du commentaire.',
+        description:
+          error.message || 'Une erreur est survenue lors de la publication du commentaire.',
         variant: 'destructive',
       });
     },
@@ -233,8 +248,10 @@ export const useToggleCommentLike = () => {
 
   return useMutation({
     mutationFn: async ({ commentId, isLiked }: { commentId: string; isLiked: boolean }) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
       if (!user) {
         throw new Error('Vous devez être connecté pour liker un commentaire');
       }
@@ -250,12 +267,10 @@ export const useToggleCommentLike = () => {
         if (error) throw error;
       } else {
         // Ajouter le like
-        const { error } = await supabase
-          .from('portfolio_comment_likes')
-          .insert({
-            comment_id: commentId,
-            user_id: user.id,
-          });
+        const { error } = await supabase.from('portfolio_comment_likes').insert({
+          comment_id: commentId,
+          user_id: user.id,
+        });
 
         if (error) throw error;
       }
@@ -284,21 +299,27 @@ export const useReportComment = () => {
   return useMutation({
     mutationFn: async (data: {
       comment_id: string;
-      reason: 'spam' | 'inappropriate' | 'harassment' | 'hate_speech' | 'false_information' | 'other';
+      reason:
+        | 'spam'
+        | 'inappropriate'
+        | 'harassment'
+        | 'hate_speech'
+        | 'false_information'
+        | 'other';
       details?: string;
       reporter_email?: string;
     }) => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-      const { error } = await supabase
-        .from('portfolio_comment_reports')
-        .insert({
-          comment_id: data.comment_id,
-          reason: data.reason,
-          details: data.details || null,
-          user_id: user?.id || null,
-          reporter_email: data.reporter_email || null,
-        });
+      const { error } = await supabase.from('portfolio_comment_reports').insert({
+        comment_id: data.comment_id,
+        reason: data.reason,
+        details: data.details || null,
+        user_id: user?.id || null,
+        reporter_email: data.reporter_email || null,
+      });
 
       if (error) {
         logger.error('Error reporting comment', { error });
@@ -344,9 +365,9 @@ export const useUpdateComment = () => {
 
       return data as PortfolioComment;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['portfolio-comments'] });
-      
+
       toast({
         title: '✅ Commentaire modifié',
         description: 'Votre commentaire a été modifié avec succès.',
@@ -371,10 +392,7 @@ export const useDeleteComment = () => {
 
   return useMutation({
     mutationFn: async (commentId: string) => {
-      const { error } = await supabase
-        .from('portfolio_comments')
-        .delete()
-        .eq('id', commentId);
+      const { error } = await supabase.from('portfolio_comments').delete().eq('id', commentId);
 
       if (error) {
         logger.error('Error deleting comment', { error });
@@ -383,7 +401,7 @@ export const useDeleteComment = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['portfolio-comments'] });
-      
+
       toast({
         title: '✅ Commentaire supprimé',
         description: 'Votre commentaire a été supprimé.',
@@ -398,10 +416,3 @@ export const useDeleteComment = () => {
     },
   });
 };
-
-
-
-
-
-
-

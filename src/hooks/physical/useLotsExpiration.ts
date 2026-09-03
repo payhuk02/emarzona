@@ -6,10 +6,14 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
-const PRODUCT_LOT_FIELDS = 'id, physical_product_id, variant_id, warehouse_id, lot_number, batch_number, serial_number, manufacturing_date, expiration_date, best_before_date, received_date, initial_quantity, current_quantity, reserved_quantity, unit_cost, total_cost, status, rotation_method, quality_status, inspection_date, inspection_notes, inspector_id, bin_location, shelf_location, supplier_batch_number, certificate_of_analysis, notes, created_at, updated_at';
-const LOT_MOVEMENT_FIELDS = 'id, lot_id, movement_type, quantity, order_id, order_item_id, transfer_id, user_id, reason, notes, movement_date, created_at';
-const EXPIRATION_ALERT_FIELDS = 'id, lot_id, alert_type, days_until_expiration, is_resolved, resolved_at, resolved_by, resolution_action, resolution_notes, notification_sent, notification_sent_at, created_at, updated_at';
-const LOT_TRANSFER_FIELDS = 'id, lot_id, from_warehouse_id, to_warehouse_id, quantity, status, transfer_date, expected_arrival_date, actual_arrival_date, initiated_by, received_by, tracking_number, notes, created_at, updated_at';
+const PRODUCT_LOT_FIELDS =
+  'id, physical_product_id, variant_id, warehouse_id, lot_number, batch_number, serial_number, manufacturing_date, expiration_date, best_before_date, received_date, initial_quantity, current_quantity, reserved_quantity, unit_cost, total_cost, status, rotation_method, quality_status, inspection_date, inspection_notes, inspector_id, bin_location, shelf_location, supplier_batch_number, certificate_of_analysis, notes, created_at, updated_at';
+const LOT_MOVEMENT_FIELDS =
+  'id, lot_id, movement_type, quantity, order_id, order_item_id, transfer_id, user_id, reason, notes, movement_date, created_at';
+const EXPIRATION_ALERT_FIELDS =
+  'id, lot_id, alert_type, days_until_expiration, is_resolved, resolved_at, resolved_by, resolution_action, resolution_notes, notification_sent, notification_sent_at, created_at, updated_at';
+const LOT_TRANSFER_FIELDS =
+  'id, lot_id, from_warehouse_id, to_warehouse_id, quantity, status, transfer_date, expected_arrival_date, actual_arrival_date, initiated_by, received_by, tracking_number, notes, created_at, updated_at';
 
 // =====================================================
 // TYPES
@@ -50,7 +54,15 @@ export interface ProductLot {
 export interface LotMovement {
   id: string;
   lot_id: string;
-  movement_type: 'received' | 'sold' | 'transferred' | 'adjusted' | 'expired' | 'damaged' | 'returned' | 'destroyed';
+  movement_type:
+    | 'received'
+    | 'sold'
+    | 'transferred'
+    | 'adjusted'
+    | 'expired'
+    | 'damaged'
+    | 'returned'
+    | 'destroyed';
   quantity: number;
   order_id?: string;
   order_item_id?: string;
@@ -115,7 +127,7 @@ export const useProductLots = (
   return useQuery({
     queryKey: ['product-lots', physicalProductId, options],
     queryFn: async () => {
-      let  query= supabase
+      let query = supabase
         .from('product_lots')
         .select(PRODUCT_LOT_FIELDS)
         .eq('physical_product_id', physicalProductId)
@@ -170,17 +182,15 @@ export const useCreateLot = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (lot: Omit<ProductLot, 'id' | 'created_at' | 'updated_at' | 'total_cost'>) => {
-      const { data, error } = await supabase
-        .from('product_lots')
-        .insert(lot)
-        .select()
-        .single();
+    mutationFn: async (
+      lot: Omit<ProductLot, 'id' | 'created_at' | 'updated_at' | 'total_cost'>
+    ) => {
+      const { data, error } = await supabase.from('product_lots').insert(lot).select().single();
 
       if (error) throw error;
       return data as ProductLot;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({
         queryKey: ['product-lots', data.physical_product_id],
       });
@@ -195,13 +205,7 @@ export const useUpdateLot = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({
-      lotId,
-      updates,
-    }: {
-      lotId: string;
-      updates: Partial<ProductLot>;
-    }) => {
+    mutationFn: async ({ lotId, updates }: { lotId: string; updates: Partial<ProductLot> }) => {
       const { data, error } = await supabase
         .from('product_lots')
         .update(updates)
@@ -212,7 +216,7 @@ export const useUpdateLot = () => {
       if (error) throw error;
       return data as ProductLot;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['lot', data.id] });
       queryClient.invalidateQueries({
         queryKey: ['product-lots', data.physical_product_id],
@@ -229,10 +233,7 @@ export const useDeleteLot = () => {
 
   return useMutation({
     mutationFn: async (lotId: string) => {
-      const { error } = await supabase
-        .from('product_lots')
-        .delete()
-        .eq('id', lotId);
+      const { error } = await supabase.from('product_lots').delete().eq('id', lotId);
 
       if (error) throw error;
     },
@@ -283,7 +284,7 @@ export const useCreateLotMovement = () => {
       if (error) throw error;
       return data as LotMovement;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['lot-movements', data.lot_id] });
       queryClient.invalidateQueries({ queryKey: ['lot', data.lot_id] });
     },
@@ -305,7 +306,7 @@ export const useExpirationAlerts = (options?: {
   return useQuery({
     queryKey: ['expiration-alerts', options],
     queryFn: async () => {
-      let  query= supabase
+      let query = supabase
         .from('expiration_alerts')
         .select(`${EXPIRATION_ALERT_FIELDS}, lot:product_lots(${PRODUCT_LOT_FIELDS})`)
         .order('created_at', { ascending: false });
@@ -341,7 +342,9 @@ export const useResolveExpirationAlert = () => {
       resolutionAction: ExpirationAlert['resolution_action'];
       resolutionNotes?: string;
     }) => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
       const { data, error } = await supabase
         .from('expiration_alerts')
@@ -376,7 +379,7 @@ export const useLotTransfers = (lotId?: string) => {
   return useQuery({
     queryKey: ['lot-transfers', lotId],
     queryFn: async () => {
-      let  query= supabase
+      let query = supabase
         .from('lot_transfers')
         .select(LOT_TRANSFER_FIELDS)
         .order('created_at', { ascending: false });
@@ -401,7 +404,9 @@ export const useCreateLotTransfer = () => {
 
   return useMutation({
     mutationFn: async (transfer: Omit<LotTransfer, 'id' | 'created_at' | 'updated_at'>) => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
       const { data, error } = await supabase
         .from('lot_transfers')
@@ -415,7 +420,7 @@ export const useCreateLotTransfer = () => {
       if (error) throw error;
       return data as LotTransfer;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['lot-transfers'] });
       queryClient.invalidateQueries({ queryKey: ['lot', data.lot_id] });
     },
@@ -438,9 +443,11 @@ export const useUpdateLotTransfer = () => {
       status: LotTransfer['status'];
       actualArrivalDate?: string;
     }) => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-      const  updates: any = {
+      const updates: any = {
         status,
       };
 
@@ -536,10 +543,3 @@ export const useAllocateLotForOrder = () => {
     },
   });
 };
-
-
-
-
-
-
-

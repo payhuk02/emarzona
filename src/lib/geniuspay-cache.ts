@@ -25,7 +25,7 @@ class Cache<T> {
 
   constructor(config: CacheConfig) {
     this.config = config;
-    
+
     // Nettoyer les entrées expirées toutes les 5 minutes
     setInterval(() => this.cleanup(), 5 * 60 * 1000);
   }
@@ -35,17 +35,17 @@ class Cache<T> {
    */
   get(key: string): T | null {
     const entry = this.cache.get(key);
-    
+
     if (!entry) {
       return null;
     }
-    
+
     // Vérifier si l'entrée a expiré
     if (Date.now() > entry.expiresAt) {
       this.cache.delete(key);
       return null;
     }
-    
+
     logger.debug('[GeniusPayCache] Cache hit', { key });
     return entry.data;
   }
@@ -62,16 +62,16 @@ class Cache<T> {
         logger.debug('[GeniusPayCache] Evicted oldest entry', { key: oldestKey });
       }
     }
-    
+
     const now = Date.now();
     const ttl = customTtl || this.config.ttl;
-    
+
     this.cache.set(key, {
       data: value,
       timestamp: now,
       expiresAt: now + ttl,
     });
-    
+
     logger.debug('[GeniusPayCache] Cache set', { key, ttl });
   }
 
@@ -96,37 +96,33 @@ class Cache<T> {
    */
   has(key: string): boolean {
     const entry = this.cache.get(key);
-    
+
     if (!entry) {
       return false;
     }
-    
+
     if (Date.now() > entry.expiresAt) {
       this.cache.delete(key);
       return false;
     }
-    
+
     return true;
   }
 
   /**
    * Obtient ou définit une valeur (get-or-set pattern)
    */
-  async getOrSet(
-    key: string,
-    factory: () => Promise<T>,
-    customTtl?: number
-  ): Promise<T> {
+  async getOrSet(key: string, factory: () => Promise<T>, customTtl?: number): Promise<T> {
     const cached = this.get(key);
-    
+
     if (cached !== null) {
       return cached;
     }
-    
+
     // Générer la valeur
     const value = await factory();
     this.set(key, value, customTtl);
-    
+
     return value;
   }
 
@@ -134,16 +130,16 @@ class Cache<T> {
    * Trouve la clé de l'entrée la plus ancienne
    */
   private findOldestKey(): string | null {
-    let  oldestKey: string | null = null;
-    let  oldestTimestamp= Infinity;
-    
+    let oldestKey: string | null = null;
+    let oldestTimestamp = Infinity;
+
     for (const [key, entry] of this.cache.entries()) {
       if (entry.timestamp < oldestTimestamp) {
         oldestTimestamp = entry.timestamp;
         oldestKey = key;
       }
     }
-    
+
     return oldestKey;
   }
 
@@ -152,15 +148,15 @@ class Cache<T> {
    */
   private cleanup(): void {
     const now = Date.now();
-    let  cleaned= 0;
-    
+    let cleaned = 0;
+
     for (const [key, entry] of this.cache.entries()) {
       if (now > entry.expiresAt) {
         this.cache.delete(key);
         cleaned++;
       }
     }
-    
+
     if (cleaned > 0) {
       logger.debug('[GeniusPayCache] Cleanup', { cleaned, remaining: this.cache.size });
     }
@@ -201,26 +197,18 @@ export function generateStatsCacheKey(
   storeId?: string
 ): string {
   const parts = ['geniuspay', 'stats', type];
-  
+
   if (startDate) {
     parts.push('start', startDate.toISOString().split('T')[0]);
   }
-  
+
   if (endDate) {
     parts.push('end', endDate.toISOString().split('T')[0]);
   }
-  
+
   if (storeId) {
     parts.push('store', storeId);
   }
-  
+
   return parts.join(':');
 }
-
-
-
-
-
-
-
-

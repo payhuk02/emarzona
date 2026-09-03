@@ -43,8 +43,8 @@ export const ShortLinkRedirect = () => {
         }
 
         // Trouver le lien correspondant (insensible à la casse)
-        const matchingLink = allLinks?.find(link =>
-          link.short_code.toLowerCase() === code.toLowerCase()
+        const matchingLink = allLinks?.find(
+          link => link.short_code.toLowerCase() === code.toLowerCase()
         );
 
         if (!matchingLink) {
@@ -120,10 +120,3 @@ export const ShortLinkRedirect = () => {
 
   return null;
 };
-
-
-
-
-
-
-

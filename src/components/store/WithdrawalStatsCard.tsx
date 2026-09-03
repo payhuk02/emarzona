@@ -12,15 +12,7 @@ import { useWithdrawalStats } from '@/hooks/useWithdrawalStats';
 import { formatCurrency } from '@/lib/utils';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { 
-  TrendingUp, 
-  Clock, 
-  CheckCircle2, 
-  XCircle, 
-  Wallet,
-  BarChart3,
-  Timer
-} from 'lucide-react';
+import { TrendingUp, Clock, CheckCircle2, XCircle, Wallet, BarChart3, Timer } from 'lucide-react';
 
 interface WithdrawalStatsCardProps {
   storeId?: string;
@@ -86,18 +78,32 @@ export const WithdrawalStatsCard = ({ storeId, startDate, endDate }: WithdrawalS
         {/* Statistiques générales */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
           <div className="space-y-1">
-            <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground">Total retraits</p>
-            <p className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold">{stats.total_withdrawals}</p>
+            <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground">
+              Total retraits
+            </p>
+            <p className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold">
+              {stats.total_withdrawals}
+            </p>
           </div>
           <div className="space-y-1">
-            <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground">Montant total</p>
-            <p className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold">{formatCurrency(stats.total_amount)}</p>
+            <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground">
+              Montant total
+            </p>
+            <p className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold">
+              {formatCurrency(stats.total_amount)}
+            </p>
           </div>
           <div className="space-y-1">
-            <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground">Taux de réussite</p>
+            <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground">
+              Taux de réussite
+            </p>
             <div className="flex items-center gap-1.5 sm:gap-2">
-              <p className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold">{stats.success_rate.toFixed(1)}%</p>
-              <TrendingUp className={`h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 ${stats.success_rate >= 80 ? 'text-green-500' : stats.success_rate >= 50 ? 'text-yellow-500' : 'text-red-500'}`} />
+              <p className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold">
+                {stats.success_rate.toFixed(1)}%
+              </p>
+              <TrendingUp
+                className={`h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 ${stats.success_rate >= 80 ? 'text-green-500' : stats.success_rate >= 50 ? 'text-yellow-500' : 'text-red-500'}`}
+              />
             </div>
           </div>
           <div className="space-y-1">
@@ -143,14 +149,18 @@ export const WithdrawalStatsCard = ({ storeId, startDate, endDate }: WithdrawalS
         {/* Par méthode de paiement */}
         <div className="space-y-3 sm:space-y-4">
           <h4 className="text-sm sm:text-base font-semibold flex items-center gap-2">
-            <Wallet  className ="h-4 w-4" />
+            <Wallet className="h-4 w-4" />
             Par méthode de paiement
           </h4>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
             {Object.entries(stats.by_payment_method).map(([method, data]) => (
               <div key={method} className="p-3 sm:p-4 border rounded-lg space-y-2">
                 <p className="text-xs sm:text-sm font-medium capitalize">
-                  {method === 'mobile_money' ? 'Mobile Money' : method === 'bank_card' ? 'Carte bancaire' : 'Virement'}
+                  {method === 'mobile_money'
+                    ? 'Mobile Money'
+                    : method === 'bank_card'
+                      ? 'Carte bancaire'
+                      : 'Virement'}
                 </p>
                 <div className="space-y-1">
                   <p className="text-xs text-muted-foreground">
@@ -177,33 +187,44 @@ export const WithdrawalStatsCard = ({ storeId, startDate, endDate }: WithdrawalS
               Évolution mensuelle
             </h4>
             <div className="space-y-2">
-              {stats.period_stats.slice(-6).reverse().map((period) => (
-                <div key={period.period} className="p-3 sm:p-4 border rounded-lg space-y-2">
-                  <div className="flex items-center justify-between">
-                    <p className="text-xs sm:text-sm font-medium">
-                      {format(new Date(period.period + '-01'), 'MMMM yyyy', { locale: fr })}
-                    </p>
-                    <Badge variant={period.success_rate >= 80 ? 'default' : period.success_rate >= 50 ? 'secondary' : 'destructive'}>
-                      {period.success_rate.toFixed(0)}%
-                    </Badge>
+              {stats.period_stats
+                .slice(-6)
+                .reverse()
+                .map(period => (
+                  <div key={period.period} className="p-3 sm:p-4 border rounded-lg space-y-2">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs sm:text-sm font-medium">
+                        {format(new Date(period.period + '-01'), 'MMMM yyyy', { locale: fr })}
+                      </p>
+                      <Badge
+                        variant={
+                          period.success_rate >= 80
+                            ? 'default'
+                            : period.success_rate >= 50
+                              ? 'secondary'
+                              : 'destructive'
+                        }
+                      >
+                        {period.success_rate.toFixed(0)}%
+                      </Badge>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2 text-xs sm:text-sm">
+                      <div>
+                        <p className="text-muted-foreground">Total</p>
+                        <p className="font-semibold">{period.total_count}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Complétés</p>
+                        <p className="font-semibold text-green-600">{period.completed_count}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Échoués</p>
+                        <p className="font-semibold text-red-600">{period.failed_count}</p>
+                      </div>
+                    </div>
+                    <Progress value={period.success_rate} className="h-2" />
                   </div>
-                  <div className="grid grid-cols-3 gap-2 text-xs sm:text-sm">
-                    <div>
-                      <p className="text-muted-foreground">Total</p>
-                      <p className="font-semibold">{period.total_count}</p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground">Complétés</p>
-                      <p className="font-semibold text-green-600">{period.completed_count}</p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground">Échoués</p>
-                      <p className="font-semibold text-red-600">{period.failed_count}</p>
-                    </div>
-                  </div>
-                  <Progress value={period.success_rate} className="h-2" />
-                </div>
-              ))}
+                ))}
             </div>
           </div>
         )}
@@ -211,10 +232,3 @@ export const WithdrawalStatsCard = ({ storeId, startDate, endDate }: WithdrawalS
     </Card>
   );
 };
-
-
-
-
-
-
-

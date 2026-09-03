@@ -18,12 +18,9 @@ describe('useThrottle', () => {
   });
 
   it('should throttle value changes', () => {
-    const { result, rerender } = renderHook(
-      ({ value, delay }) => useThrottle(value, delay),
-      {
-        initialProps: { value: 'initial', delay: 300 },
-      }
-    );
+    const { result, rerender } = renderHook(({ value, delay }) => useThrottle(value, delay), {
+      initialProps: { value: 'initial', delay: 300 },
+    });
 
     expect(result.current).toBe('initial');
 
@@ -43,12 +40,9 @@ describe('useThrottle', () => {
   });
 
   it('should use default delay of 300ms', () => {
-    const { result, rerender } = renderHook(
-      ({ value }) => useThrottle(value),
-      {
-        initialProps: { value: 'initial' },
-      }
-    );
+    const { result, rerender } = renderHook(({ value }) => useThrottle(value), {
+      initialProps: { value: 'initial' },
+    });
 
     expect(result.current).toBe('initial');
     act(() => {
@@ -64,8 +58,8 @@ describe('useThrottle', () => {
 });
 
 describe('useThrottledCallback', () => {
-  let  time= 0;
-  
+  let time = 0;
+
   beforeEach(() => {
     vi.useFakeTimers();
     // Mock Date.now() to return controlled time
@@ -81,9 +75,7 @@ describe('useThrottledCallback', () => {
 
   it('should throttle function calls', () => {
     const mockFn = vi.fn();
-    const { result } = renderHook(() =>
-      useThrottledCallback(mockFn, 300)
-    );
+    const { result } = renderHook(() => useThrottledCallback(mockFn, 300));
 
     // First call - will schedule a timeout since Date.now() - lastRan.current < delay
     act(() => {
@@ -108,9 +100,7 @@ describe('useThrottledCallback', () => {
 
   it('should pass arguments correctly', () => {
     const mockFn = vi.fn();
-    const { result } = renderHook(() =>
-      useThrottledCallback(mockFn, 300)
-    );
+    const { result } = renderHook(() => useThrottledCallback(mockFn, 300));
 
     act(() => {
       result.current('arg1', 'arg2', 42);
@@ -124,7 +114,7 @@ describe('useThrottledCallback', () => {
       time = 300;
       vi.advanceTimersByTime(300);
     });
-    
+
     // Should be called with arguments
     expect(mockFn).toHaveBeenCalledWith('arg1', 'arg2', 42);
     expect(mockFn).toHaveBeenCalledTimes(1);
@@ -132,9 +122,7 @@ describe('useThrottledCallback', () => {
 
   it('should handle different delay values', () => {
     const mockFn = vi.fn();
-    const { result } = renderHook(() =>
-      useThrottledCallback(mockFn, 500)
-    );
+    const { result } = renderHook(() => useThrottledCallback(mockFn, 500));
 
     // First call - scheduled
     act(() => {
@@ -165,8 +153,8 @@ describe('useThrottledCallback', () => {
 });
 
 describe('useThrottledCallbackAdvanced', () => {
-  let  time= 0;
-  
+  let time = 0;
+
   beforeEach(() => {
     vi.useFakeTimers();
     global.Date.now = vi.fn(() => time);
@@ -227,9 +215,7 @@ describe('useThrottledCallbackAdvanced', () => {
 
   it('should use both leading and trailing by default', () => {
     const mockFn = vi.fn();
-    const { result } = renderHook(() =>
-      useThrottledCallbackAdvanced(mockFn, 300)
-    );
+    const { result } = renderHook(() => useThrottledCallbackAdvanced(mockFn, 300));
 
     // At time 0, lastRan is 0, so timeSinceLastRun = 0 < delay
     // Leading won't execute, but trailing will be scheduled
@@ -289,10 +275,3 @@ describe('useThrottledCallbackAdvanced', () => {
     expect(mockFn).toHaveBeenCalledWith('third'); // Last arguments
   });
 });
-
-
-
-
-
-
-

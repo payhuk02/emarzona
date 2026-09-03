@@ -1,7 +1,7 @@
 /**
  * Physical Product - SEO & FAQs Configuration
  * Date: 28 octobre 2025
- * 
+ *
  * Combinaison de SEO et FAQs dans une seule étape
  */
 
@@ -71,14 +71,14 @@ export const PhysicalSEOAndFAQs = ({
                 productDescription={productDescription}
                 productPrice={productPrice}
                 data={data.seo || {}}
-                onUpdate={(seoData) => onUpdate({ ...data, seo: seoData })}
+                onUpdate={seoData => onUpdate({ ...data, seo: seoData })}
               />
             </TabsContent>
 
             <TabsContent value="faqs" className="mt-6">
               <ProductFAQForm
                 data={data.faqs || []}
-                onUpdate={(faqsData) => onUpdate({ ...data, faqs: faqsData })}
+                onUpdate={faqsData => onUpdate({ ...data, faqs: faqsData })}
               />
             </TabsContent>
           </Tabs>
@@ -87,10 +87,3 @@ export const PhysicalSEOAndFAQs = ({
     </div>
   );
 };
-
-
-
-
-
-
-

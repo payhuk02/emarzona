@@ -445,629 +445,600 @@ const AdminDisputes = () => {
 
   return (
     <AdminLayout>
-
-        <div className="space-y-6">
-          <Admin2FABanner />
-          {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
-            <div>
-              <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold tracking-tight flex items-center gap-1.5 sm:gap-2">
-                <Shield className="h-8 w-8 text-primary" />
-                Gestion des Litiges
-              </h1>
-              <p className="text-muted-foreground mt-1">
-                Gérez et résolvez les litiges entre clients et vendeurs
-              </p>
-            </div>
-            <ProtectedAction permission="disputes.manage">
-              <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <span>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          className="w-full sm:w-auto border-emerald-500/40"
-                          disabled={!isAAL2 || backfillProtect.isPending}
-                          onClick={async () => {
-                            try {
-                              const result = await backfillProtect.mutateAsync({
-                                daysBack: 365,
-                                limit: 500,
-                                reconcileIneligible: true,
-                              });
-                              toast({
-                                title: 'Rétro-enrollment Protect',
-                                description: `${result.activated} activations, ${result.reconciled} réconciliations.`,
-                              });
-                              await fetchDisputes();
-                            } catch (err) {
-                              toast({
-                                title: 'Échec backfill Protect',
-                                description: err instanceof Error ? err.message : 'Erreur inconnue',
-                                variant: 'destructive',
-                              });
-                            }
-                          }}
-                        >
-                          <Shield className="h-4 w-4 mr-2" />
-                          Backfill Protect
-                        </Button>
-                      </span>
-                    </TooltipTrigger>
-                    {!isAAL2 && (
-                      <TooltipContent>Activez la 2FA pour utiliser cette action</TooltipContent>
-                    )}
-                  </Tooltip>
-                </TooltipProvider>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <span>
-                        <Button
-                          onClick={handleExportCSV}
-                          variant="outline"
-                          className="w-full sm:w-auto"
-                          disabled={disputes.length === 0 || !isAAL2}
-                        >
-                          <Download className="h-4 w-4 mr-2" />
-                          Exporter CSV
-                        </Button>
-                      </span>
-                    </TooltipTrigger>
-                    {!isAAL2 && (
-                      <TooltipContent>Activez la 2FA pour utiliser cette action</TooltipContent>
-                    )}
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
-            </ProtectedAction>
+      <div className="space-y-6">
+        <Admin2FABanner />
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+          <div>
+            <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold tracking-tight flex items-center gap-1.5 sm:gap-2">
+              <Shield className="h-8 w-8 text-primary" />
+              Gestion des Litiges
+            </h1>
+            <p className="text-muted-foreground mt-1">
+              Gérez et résolvez les litiges entre clients et vendeurs
+            </p>
           </div>
-
-          {/* Stats Cards */}
-          {stats && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Total</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stats.total}</div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-1">
-                    <AlertTriangle className="h-4 w-4 text-yellow-600" />
-                    Ouverts
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-yellow-600">{stats.open}</div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-1">
-                    <Clock className="h-4 w-4 text-blue-600" />
-                    En investigation
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-blue-600">{stats.investigating}</div>
-                </CardContent>
-              </Card>
-
-              <Card className="border-orange-200 bg-orange-50/50">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-1">
-                    <User className="h-4 w-4 text-orange-600" />
-                    Attente client
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-orange-600">{stats.waiting_customer}</div>
-                </CardContent>
-              </Card>
-
-              <Card className="border-purple-200 bg-purple-50/50">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-1">
-                    <Store className="h-4 w-4 text-purple-600" />
-                    Attente vendeur
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-purple-600">{stats.waiting_seller}</div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-1">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    Résolus
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-green-600">{stats.resolved}</div>
-                </CardContent>
-              </Card>
-            </div>
-          )}
-
-          {/* Filters & Search */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Recherche et filtres</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Search Bar */}
-              <div className="relative w-full">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Rechercher par sujet, description ou ID commande..."
-                  value={searchInput}
-                  onChange={e => {
-                    setSearchInput(e.target.value);
-                    setPage(1); // Reset to page 1 on search
-                  }}
-                  className="pl-10 w-full"
-                />
-              </div>
-
-              {/* Filters Row */}
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Select
-                  value={statusFilter}
-                  onValueChange={value => {
-                    setStatusFilter(value as DisputeStatus | 'all');
-                    setPage(1);
-                  }}
-                >
-                  <SelectTrigger className="w-full sm:w-[200px]">
-                    <SelectValue placeholder="Statut" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Tous les statuts</SelectItem>
-                    <SelectItem value="open">Ouvert</SelectItem>
-                    <SelectItem value="investigating">En investigation</SelectItem>
-                    <SelectItem value="resolved">Résolu</SelectItem>
-                    <SelectItem value="closed">Fermé</SelectItem>
-                  </SelectContent>
-                </Select>
-
-                <Select
-                  value={initiatorFilter}
-                  onValueChange={value => {
-                    setInitiatorFilter(value as InitiatorType | 'all');
-                    setPage(1);
-                  }}
-                >
-                  <SelectTrigger className="w-full sm:w-[200px]">
-                    <SelectValue placeholder="Initiateur" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Tous</SelectItem>
-                    <SelectItem value="customer">Client</SelectItem>
-                    <SelectItem value="seller">Vendeur</SelectItem>
-                    <SelectItem value="admin">Admin</SelectItem>
-                  </SelectContent>
-                </Select>
-
-                <Select
-                  value={priorityFilter}
-                  onValueChange={value => {
-                    setPriorityFilter(value);
-                    setPage(1);
-                  }}
-                >
-                  <SelectTrigger className="w-full sm:w-[200px]">
-                    <SelectValue placeholder="Priorité" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Toutes priorités</SelectItem>
-                    <SelectItem value="urgent">🔴 Urgente</SelectItem>
-                    <SelectItem value="high">🟠 Élevée</SelectItem>
-                    <SelectItem value="normal">🔵 Normale</SelectItem>
-                    <SelectItem value="low">🟢 Basse</SelectItem>
-                  </SelectContent>
-                </Select>
-
-                {stats && stats.unassigned > 0 && (
-                  <Badge variant="destructive" className="h-10 flex items-center">
-                    {stats.unassigned} non assigné(s)
-                  </Badge>
-                )}
-
-                {/* Reset Filters Button */}
-                {(statusFilter !== 'all' ||
-                  initiatorFilter !== 'all' ||
-                  priorityFilter !== 'all' ||
-                  searchInput.trim()) && (
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setStatusFilter('all');
-                      setInitiatorFilter('all');
-                      setPriorityFilter('all');
-                      setSearchInput('');
-                      setPage(1);
-                    }}
-                  >
-                    Réinitialiser
-                  </Button>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Disputes Table */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Liste des Litiges ({totalCount} total)</CardTitle>
-              <CardDescription>
-                <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
-                  <span className="text-sm">
-                    Affichage {disputes.length} résultat(s) sur {totalCount}
-                  </span>
-                  {stats?.avgResolutionTime && (
-                    <>
-                      <span className="hidden sm:inline text-muted-foreground">•</span>
-                      <span className="text-sm">
-                        Temps moyen de résolution : {stats.avgResolutionTime}h
-                      </span>
-                    </>
-                  )}
-                </div>
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {disputes.length === 0 ? (
-                <div className="text-center py-12 text-muted-foreground">
-                  <Shield className="h-16 w-16 mx-auto mb-4 opacity-50" />
-                  <p>Aucun litige trouvé</p>
-                </div>
-              ) : isMobile ? (
-                <MobileTableCard
-                  data={disputes.map(d => ({ ...d, id: d.id }))}
-                  columns={[
-                    {
-                      key: 'order_id',
-                      header: 'Commande',
-                      priority: 'high',
-                      render: (row: Dispute) => (
-                        <div className="flex items-center gap-2">
-                          {row.order_id ? (
-                            <Link
-                              to={`/orders`}
-                              className="text-primary hover:underline flex items-center gap-1 font-medium"
-                            >
-                              {row.order_id.substring(0, 8)}
-                              <ExternalLink className="h-3 w-3" />
-                            </Link>
-                          ) : (
-                            <span className="text-muted-foreground">N/A</span>
-                          )}
-                          {isNewDispute(row.created_at) && (
-                            <Badge
-                              variant="secondary"
-                              className="text-xs bg-yellow-200 text-yellow-800"
-                            >
-                              NOUVEAU
-                            </Badge>
-                          )}
-                        </div>
-                      ),
-                    },
-                    {
-                      key: 'initiator',
-                      header: 'Initiateur',
-                      priority: 'medium',
-                      render: (row: Dispute) => getInitiatorBadge(row.initiator_type),
-                    },
-                    {
-                      key: 'subject',
-                      header: 'Sujet',
-                      priority: 'high',
-                      render: (row: Dispute) => (
-                        <div>
-                          <div className="flex flex-wrap items-center gap-2 mb-1">
-                            <EmarzonaProtectDisputeBadge
-                              isProtect={row.is_emarzona_protect}
-                              reasonCode={row.protect_reason_code}
-                            />
-                          </div>
-                          <p className="font-medium text-sm">{row.subject}</p>
-                          <p className="text-xs text-muted-foreground line-clamp-2">
-                            {row.description}
-                          </p>
-                        </div>
-                      ),
-                    },
-                    {
-                      key: 'priority',
-                      header: 'Priorité',
-                      priority: 'high',
-                      render: (row: Dispute) => getPriorityBadge(row.priority),
-                    },
-                    {
-                      key: 'status',
-                      header: 'Statut',
-                      priority: 'high',
-                      render: (row: Dispute) => getStatusBadge(row.status),
-                    },
-                    {
-                      key: 'assigned',
-                      header: 'Assigné',
-                      priority: 'low',
-                      render: (row: Dispute) =>
-                        row.assigned_admin_id ? (
-                          <div className="flex items-center gap-1">
-                            <Shield className="h-3 w-3 text-primary" />
-                            <span className="text-xs">Admin</span>
-                          </div>
-                        ) : (
-                          <Badge variant="outline" className="text-xs">
-                            Non assigné
-                          </Badge>
-                        ),
-                    },
-                    {
-                      key: 'created_at',
-                      header: 'Date',
-                      priority: 'low',
-                      render: (row: Dispute) => (
-                        <span className="text-xs text-muted-foreground">
-                          {format(new Date(row.created_at), 'dd MMM yyyy', { locale: fr })}
-                        </span>
-                      ),
-                    },
-                  ]}
-                  actions={(row: Dispute) => (
-                    <div className="flex flex-col gap-2">
+          <ProtectedAction permission="disputes.manage">
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span>
                       <Button
-                        size="sm"
+                        type="button"
                         variant="outline"
-                        onClick={() => {
-                          setSelectedDispute(row);
-                          setDetailsDialogOpen(true);
+                        className="w-full sm:w-auto border-emerald-500/40"
+                        disabled={!isAAL2 || backfillProtect.isPending}
+                        onClick={async () => {
+                          try {
+                            const result = await backfillProtect.mutateAsync({
+                              daysBack: 365,
+                              limit: 500,
+                              reconcileIneligible: true,
+                            });
+                            toast({
+                              title: 'Rétro-enrollment Protect',
+                              description: `${result.activated} activations, ${result.reconciled} réconciliations.`,
+                            });
+                            await fetchDisputes();
+                          } catch (err) {
+                            toast({
+                              title: 'Échec backfill Protect',
+                              description: err instanceof Error ? err.message : 'Erreur inconnue',
+                              variant: 'destructive',
+                            });
+                          }
                         }}
-                        className="min-h-[44px] w-full"
                       >
-                        <Eye className="h-4 w-4 mr-2" />
-                        Voir détails
+                        <Shield className="h-4 w-4 mr-2" />
+                        Backfill Protect
                       </Button>
-                      <ProtectedAction permission="disputes.manage">
-                        {!row.assigned_admin_id && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            disabled={!isAAL2}
-                            onClick={() => isAAL2 && handleOpenDialog(row, 'assign')}
-                            className="min-h-[44px] w-full"
+                    </span>
+                  </TooltipTrigger>
+                  {!isAAL2 && (
+                    <TooltipContent>Activez la 2FA pour utiliser cette action</TooltipContent>
+                  )}
+                </Tooltip>
+              </TooltipProvider>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span>
+                      <Button
+                        onClick={handleExportCSV}
+                        variant="outline"
+                        className="w-full sm:w-auto"
+                        disabled={disputes.length === 0 || !isAAL2}
+                      >
+                        <Download className="h-4 w-4 mr-2" />
+                        Exporter CSV
+                      </Button>
+                    </span>
+                  </TooltipTrigger>
+                  {!isAAL2 && (
+                    <TooltipContent>Activez la 2FA pour utiliser cette action</TooltipContent>
+                  )}
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+          </ProtectedAction>
+        </div>
+
+        {/* Stats Cards */}
+        {stats && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">Total</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.total}</div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-1">
+                  <AlertTriangle className="h-4 w-4 text-yellow-600" />
+                  Ouverts
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-yellow-600">{stats.open}</div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-1">
+                  <Clock className="h-4 w-4 text-blue-600" />
+                  En investigation
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-blue-600">{stats.investigating}</div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-orange-200 bg-orange-50/50">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-1">
+                  <User className="h-4 w-4 text-orange-600" />
+                  Attente client
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-orange-600">{stats.waiting_customer}</div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-purple-200 bg-purple-50/50">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-1">
+                  <Store className="h-4 w-4 text-purple-600" />
+                  Attente vendeur
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-purple-600">{stats.waiting_seller}</div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-1">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  Résolus
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-green-600">{stats.resolved}</div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Filters & Search */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Recherche et filtres</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Search Bar */}
+            <div className="relative w-full">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Rechercher par sujet, description ou ID commande..."
+                value={searchInput}
+                onChange={e => {
+                  setSearchInput(e.target.value);
+                  setPage(1); // Reset to page 1 on search
+                }}
+                className="pl-10 w-full"
+              />
+            </div>
+
+            {/* Filters Row */}
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Select
+                value={statusFilter}
+                onValueChange={value => {
+                  setStatusFilter(value as DisputeStatus | 'all');
+                  setPage(1);
+                }}
+              >
+                <SelectTrigger className="w-full sm:w-[200px]">
+                  <SelectValue placeholder="Statut" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tous les statuts</SelectItem>
+                  <SelectItem value="open">Ouvert</SelectItem>
+                  <SelectItem value="investigating">En investigation</SelectItem>
+                  <SelectItem value="resolved">Résolu</SelectItem>
+                  <SelectItem value="closed">Fermé</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select
+                value={initiatorFilter}
+                onValueChange={value => {
+                  setInitiatorFilter(value as InitiatorType | 'all');
+                  setPage(1);
+                }}
+              >
+                <SelectTrigger className="w-full sm:w-[200px]">
+                  <SelectValue placeholder="Initiateur" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tous</SelectItem>
+                  <SelectItem value="customer">Client</SelectItem>
+                  <SelectItem value="seller">Vendeur</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select
+                value={priorityFilter}
+                onValueChange={value => {
+                  setPriorityFilter(value);
+                  setPage(1);
+                }}
+              >
+                <SelectTrigger className="w-full sm:w-[200px]">
+                  <SelectValue placeholder="Priorité" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Toutes priorités</SelectItem>
+                  <SelectItem value="urgent">🔴 Urgente</SelectItem>
+                  <SelectItem value="high">🟠 Élevée</SelectItem>
+                  <SelectItem value="normal">🔵 Normale</SelectItem>
+                  <SelectItem value="low">🟢 Basse</SelectItem>
+                </SelectContent>
+              </Select>
+
+              {stats && stats.unassigned > 0 && (
+                <Badge variant="destructive" className="h-10 flex items-center">
+                  {stats.unassigned} non assigné(s)
+                </Badge>
+              )}
+
+              {/* Reset Filters Button */}
+              {(statusFilter !== 'all' ||
+                initiatorFilter !== 'all' ||
+                priorityFilter !== 'all' ||
+                searchInput.trim()) && (
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setStatusFilter('all');
+                    setInitiatorFilter('all');
+                    setPriorityFilter('all');
+                    setSearchInput('');
+                    setPage(1);
+                  }}
+                >
+                  Réinitialiser
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Disputes Table */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Liste des Litiges ({totalCount} total)</CardTitle>
+            <CardDescription>
+              <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+                <span className="text-sm">
+                  Affichage {disputes.length} résultat(s) sur {totalCount}
+                </span>
+                {stats?.avgResolutionTime && (
+                  <>
+                    <span className="hidden sm:inline text-muted-foreground">•</span>
+                    <span className="text-sm">
+                      Temps moyen de résolution : {stats.avgResolutionTime}h
+                    </span>
+                  </>
+                )}
+              </div>
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {disputes.length === 0 ? (
+              <div className="text-center py-12 text-muted-foreground">
+                <Shield className="h-16 w-16 mx-auto mb-4 opacity-50" />
+                <p>Aucun litige trouvé</p>
+              </div>
+            ) : isMobile ? (
+              <MobileTableCard
+                data={disputes.map(d => ({ ...d, id: d.id }))}
+                columns={[
+                  {
+                    key: 'order_id',
+                    header: 'Commande',
+                    priority: 'high',
+                    render: (row: Dispute) => (
+                      <div className="flex items-center gap-2">
+                        {row.order_id ? (
+                          <Link
+                            to={`/orders`}
+                            className="text-primary hover:underline flex items-center gap-1 font-medium"
                           >
-                            M'assigner
-                          </Button>
+                            {row.order_id.substring(0, 8)}
+                            <ExternalLink className="h-3 w-3" />
+                          </Link>
+                        ) : (
+                          <span className="text-muted-foreground">N/A</span>
                         )}
+                        {isNewDispute(row.created_at) && (
+                          <Badge
+                            variant="secondary"
+                            className="text-xs bg-yellow-200 text-yellow-800"
+                          >
+                            NOUVEAU
+                          </Badge>
+                        )}
+                      </div>
+                    ),
+                  },
+                  {
+                    key: 'initiator',
+                    header: 'Initiateur',
+                    priority: 'medium',
+                    render: (row: Dispute) => getInitiatorBadge(row.initiator_type),
+                  },
+                  {
+                    key: 'subject',
+                    header: 'Sujet',
+                    priority: 'high',
+                    render: (row: Dispute) => (
+                      <div>
+                        <div className="flex flex-wrap items-center gap-2 mb-1">
+                          <EmarzonaProtectDisputeBadge
+                            isProtect={row.is_emarzona_protect}
+                            reasonCode={row.protect_reason_code}
+                          />
+                        </div>
+                        <p className="font-medium text-sm">{row.subject}</p>
+                        <p className="text-xs text-muted-foreground line-clamp-2">
+                          {row.description}
+                        </p>
+                      </div>
+                    ),
+                  },
+                  {
+                    key: 'priority',
+                    header: 'Priorité',
+                    priority: 'high',
+                    render: (row: Dispute) => getPriorityBadge(row.priority),
+                  },
+                  {
+                    key: 'status',
+                    header: 'Statut',
+                    priority: 'high',
+                    render: (row: Dispute) => getStatusBadge(row.status),
+                  },
+                  {
+                    key: 'assigned',
+                    header: 'Assigné',
+                    priority: 'low',
+                    render: (row: Dispute) =>
+                      row.assigned_admin_id ? (
+                        <div className="flex items-center gap-1">
+                          <Shield className="h-3 w-3 text-primary" />
+                          <span className="text-xs">Admin</span>
+                        </div>
+                      ) : (
+                        <Badge variant="outline" className="text-xs">
+                          Non assigné
+                        </Badge>
+                      ),
+                  },
+                  {
+                    key: 'created_at',
+                    header: 'Date',
+                    priority: 'low',
+                    render: (row: Dispute) => (
+                      <span className="text-xs text-muted-foreground">
+                        {format(new Date(row.created_at), 'dd MMM yyyy', { locale: fr })}
+                      </span>
+                    ),
+                  },
+                ]}
+                actions={(row: Dispute) => (
+                  <div className="flex flex-col gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        setSelectedDispute(row);
+                        setDetailsDialogOpen(true);
+                      }}
+                      className="min-h-[44px] w-full"
+                    >
+                      <Eye className="h-4 w-4 mr-2" />
+                      Voir détails
+                    </Button>
+                    <ProtectedAction permission="disputes.manage">
+                      {!row.assigned_admin_id && (
                         <Button
                           size="sm"
                           variant="outline"
                           disabled={!isAAL2}
-                          onClick={() => isAAL2 && handleOpenDialog(row, 'notes')}
+                          onClick={() => isAAL2 && handleOpenDialog(row, 'assign')}
                           className="min-h-[44px] w-full"
                         >
-                          Notes
+                          M'assigner
                         </Button>
-                        {row.status !== 'resolved' && row.status !== 'closed' && (
-                          <Button
-                            size="sm"
-                            disabled={!isAAL2}
-                            onClick={() => isAAL2 && handleOpenDialog(row, 'resolve')}
-                            className="min-h-[44px] w-full"
-                          >
-                            Résoudre
-                          </Button>
-                        )}
-                        {row.status === 'resolved' && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            disabled={!isAAL2}
-                            onClick={() => isAAL2 && closeDispute(row.id)}
-                            className="min-h-[44px] w-full"
-                          >
-                            Fermer
-                          </Button>
-                        )}
-                      </ProtectedAction>
-                    </div>
-                  )}
-                />
-              ) : (
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <SortableHeader column="order_id" label="Commande" />
-                        <TableHead>Initiateur</TableHead>
-                        <SortableHeader column="subject" label="Sujet" />
-                        <TableHead>Priorité</TableHead>
-                        <TableHead>Statut</TableHead>
-                        <TableHead>Assigné à</TableHead>
-                        <SortableHeader column="created_at" label="Date" />
-                        <TableHead className="text-right">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {disputes.map(dispute => (
-                        <TableRow
-                          key={dispute.id}
-                          className={isNewDispute(dispute.created_at) ? 'bg-yellow-50/30' : ''}
+                      )}
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={!isAAL2}
+                        onClick={() => isAAL2 && handleOpenDialog(row, 'notes')}
+                        className="min-h-[44px] w-full"
+                      >
+                        Notes
+                      </Button>
+                      {row.status !== 'resolved' && row.status !== 'closed' && (
+                        <Button
+                          size="sm"
+                          disabled={!isAAL2}
+                          onClick={() => isAAL2 && handleOpenDialog(row, 'resolve')}
+                          className="min-h-[44px] w-full"
                         >
-                          <TableCell className="font-medium">
-                            {dispute.order_id ? (
-                              <div className="flex items-center gap-2">
-                                <Link
-                                  to={`/orders`}
-                                  className="text-primary hover:underline flex items-center gap-1"
-                                  title={`Voir la commande ${dispute.order_id}`}
+                          Résoudre
+                        </Button>
+                      )}
+                      {row.status === 'resolved' && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={!isAAL2}
+                          onClick={() => isAAL2 && closeDispute(row.id)}
+                          className="min-h-[44px] w-full"
+                        >
+                          Fermer
+                        </Button>
+                      )}
+                    </ProtectedAction>
+                  </div>
+                )}
+              />
+            ) : (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <SortableHeader column="order_id" label="Commande" />
+                      <TableHead>Initiateur</TableHead>
+                      <SortableHeader column="subject" label="Sujet" />
+                      <TableHead>Priorité</TableHead>
+                      <TableHead>Statut</TableHead>
+                      <TableHead>Assigné à</TableHead>
+                      <SortableHeader column="created_at" label="Date" />
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {disputes.map(dispute => (
+                      <TableRow
+                        key={dispute.id}
+                        className={isNewDispute(dispute.created_at) ? 'bg-yellow-50/30' : ''}
+                      >
+                        <TableCell className="font-medium">
+                          {dispute.order_id ? (
+                            <div className="flex items-center gap-2">
+                              <Link
+                                to={`/orders`}
+                                className="text-primary hover:underline flex items-center gap-1"
+                                title={`Voir la commande ${dispute.order_id}`}
+                              >
+                                {dispute.order_id.substring(0, 8)}
+                                <ExternalLink className="h-3 w-3" />
+                              </Link>
+                              {isNewDispute(dispute.created_at) && (
+                                <Badge
+                                  variant="secondary"
+                                  className="text-xs bg-yellow-200 text-yellow-800 border-yellow-300"
                                 >
-                                  {dispute.order_id.substring(0, 8)}
-                                  <ExternalLink className="h-3 w-3" />
-                                </Link>
-                                {isNewDispute(dispute.created_at) && (
-                                  <Badge
-                                    variant="secondary"
-                                    className="text-xs bg-yellow-200 text-yellow-800 border-yellow-300"
-                                  >
-                                    NOUVEAU
-                                  </Badge>
-                                )}
-                              </div>
-                            ) : (
-                              'N/A'
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex flex-col gap-1">
-                              {getInitiatorBadge(dispute.initiator_type)}
-                              <span className="text-xs text-muted-foreground capitalize">
-                                {dispute.initiator_type}
-                              </span>
+                                  NOUVEAU
+                                </Badge>
+                              )}
                             </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="max-w-xs">
-                              <EmarzonaProtectDisputeBadge
-                                isProtect={dispute.is_emarzona_protect}
-                                reasonCode={dispute.protect_reason_code}
-                                className="mb-1"
-                              />
-                              <p className="font-medium text-sm">{dispute.subject}</p>
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger className="w-full text-left">
-                                    <p className="text-xs text-muted-foreground truncate cursor-help">
-                                      {dispute.description}
-                                    </p>
-                                  </TooltipTrigger>
-                                  <TooltipContent side="bottom" className="max-w-md">
-                                    <p className="text-sm whitespace-normal">
-                                      {dispute.description}
-                                    </p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <ProtectedAction permission="disputes.manage">
-                              <Select
-                                value={dispute.priority || 'normal'}
-                                onValueChange={value => {
-                                  if (isAAL2) {
-                                    const priority = value as 'low' | 'normal' | 'high' | 'urgent';
-                                    updateDisputePriority(dispute.id, priority);
-                                  }
-                                }}
-                              >
-                                <SelectTrigger className="w-[140px] min-h-[44px]">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="low">⚪ Basse</SelectItem>
-                                  <SelectItem value="normal">🔵 Normale</SelectItem>
-                                  <SelectItem value="high">🟠 Élevée</SelectItem>
-                                  <SelectItem value="urgent">🔴 Urgente</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </ProtectedAction>
-                          </TableCell>
-                          <TableCell>
-                            <ProtectedAction permission="disputes.manage">
-                              <Select
-                                value={dispute.status}
-                                onValueChange={value =>
-                                  isAAL2 && updateDisputeStatus(dispute.id, value as DisputeStatus)
+                          ) : (
+                            'N/A'
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-col gap-1">
+                            {getInitiatorBadge(dispute.initiator_type)}
+                            <span className="text-xs text-muted-foreground capitalize">
+                              {dispute.initiator_type}
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="max-w-xs">
+                            <EmarzonaProtectDisputeBadge
+                              isProtect={dispute.is_emarzona_protect}
+                              reasonCode={dispute.protect_reason_code}
+                              className="mb-1"
+                            />
+                            <p className="font-medium text-sm">{dispute.subject}</p>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger className="w-full text-left">
+                                  <p className="text-xs text-muted-foreground truncate cursor-help">
+                                    {dispute.description}
+                                  </p>
+                                </TooltipTrigger>
+                                <TooltipContent side="bottom" className="max-w-md">
+                                  <p className="text-sm whitespace-normal">{dispute.description}</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <ProtectedAction permission="disputes.manage">
+                            <Select
+                              value={dispute.priority || 'normal'}
+                              onValueChange={value => {
+                                if (isAAL2) {
+                                  const priority = value as 'low' | 'normal' | 'high' | 'urgent';
+                                  updateDisputePriority(dispute.id, priority);
                                 }
-                              >
-                                <SelectTrigger className="w-[160px] min-h-[44px]">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="open">⚠️ Ouvert</SelectItem>
-                                  <SelectItem value="investigating">🔍 En investigation</SelectItem>
-                                  <SelectItem value="waiting_customer">
-                                    ⏳ Attente client
-                                  </SelectItem>
-                                  <SelectItem value="waiting_seller">⏳ Attente vendeur</SelectItem>
-                                  <SelectItem value="resolved">✅ Résolu</SelectItem>
-                                  <SelectItem value="closed">❌ Fermé</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </ProtectedAction>
-                          </TableCell>
-                          <TableCell>
-                            {dispute.assigned_admin_id ? (
-                              <div className="flex items-center gap-1">
-                                <Shield className="h-3 w-3 text-primary" />
-                                <span className="text-sm">Admin assigné</span>
-                              </div>
-                            ) : (
-                              <Badge variant="outline" className="text-xs">
-                                Non assigné
-                              </Badge>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                              <Calendar className="h-3 w-3" />
-                              {format(new Date(dispute.created_at), 'dd MMM yyyy', { locale: fr })}
+                              }}
+                            >
+                              <SelectTrigger className="w-[140px] min-h-[44px]">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="low">⚪ Basse</SelectItem>
+                                <SelectItem value="normal">🔵 Normale</SelectItem>
+                                <SelectItem value="high">🟠 Élevée</SelectItem>
+                                <SelectItem value="urgent">🔴 Urgente</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </ProtectedAction>
+                        </TableCell>
+                        <TableCell>
+                          <ProtectedAction permission="disputes.manage">
+                            <Select
+                              value={dispute.status}
+                              onValueChange={value =>
+                                isAAL2 && updateDisputeStatus(dispute.id, value as DisputeStatus)
+                              }
+                            >
+                              <SelectTrigger className="w-[160px] min-h-[44px]">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="open">⚠️ Ouvert</SelectItem>
+                                <SelectItem value="investigating">🔍 En investigation</SelectItem>
+                                <SelectItem value="waiting_customer">⏳ Attente client</SelectItem>
+                                <SelectItem value="waiting_seller">⏳ Attente vendeur</SelectItem>
+                                <SelectItem value="resolved">✅ Résolu</SelectItem>
+                                <SelectItem value="closed">❌ Fermé</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </ProtectedAction>
+                        </TableCell>
+                        <TableCell>
+                          {dispute.assigned_admin_id ? (
+                            <div className="flex items-center gap-1">
+                              <Shield className="h-3 w-3 text-primary" />
+                              <span className="text-sm">Admin assigné</span>
                             </div>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex justify-end gap-2">
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => {
-                                  setSelectedDispute(dispute);
-                                  setDetailsDialogOpen(true);
-                                }}
-                                title="Voir les détails"
-                              >
-                                <Eye className="h-4 w-4" />
-                              </Button>
-                              <ProtectedAction permission="disputes.manage">
-                                {!dispute.assigned_admin_id && (
-                                  <TooltipProvider>
-                                    <Tooltip>
-                                      <TooltipTrigger asChild>
-                                        <span>
-                                          <Button
-                                            size="sm"
-                                            variant="outline"
-                                            disabled={!isAAL2}
-                                            onClick={() =>
-                                              isAAL2 && handleOpenDialog(dispute, 'assign')
-                                            }
-                                          >
-                                            M'assigner
-                                          </Button>
-                                        </span>
-                                      </TooltipTrigger>
-                                      {!isAAL2 && (
-                                        <TooltipContent>
-                                          Activez la 2FA pour utiliser cette action
-                                        </TooltipContent>
-                                      )}
-                                    </Tooltip>
-                                  </TooltipProvider>
-                                )}
+                          ) : (
+                            <Badge variant="outline" className="text-xs">
+                              Non assigné
+                            </Badge>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                            <Calendar className="h-3 w-3" />
+                            {format(new Date(dispute.created_at), 'dd MMM yyyy', { locale: fr })}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => {
+                                setSelectedDispute(dispute);
+                                setDetailsDialogOpen(true);
+                              }}
+                              title="Voir les détails"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            <ProtectedAction permission="disputes.manage">
+                              {!dispute.assigned_admin_id && (
                                 <TooltipProvider>
                                   <Tooltip>
                                     <TooltipTrigger asChild>
@@ -1077,10 +1048,10 @@ const AdminDisputes = () => {
                                           variant="outline"
                                           disabled={!isAAL2}
                                           onClick={() =>
-                                            isAAL2 && handleOpenDialog(dispute, 'notes')
+                                            isAAL2 && handleOpenDialog(dispute, 'assign')
                                           }
                                         >
-                                          Notes
+                                          M'assigner
                                         </Button>
                                       </span>
                                     </TooltipTrigger>
@@ -1091,402 +1062,419 @@ const AdminDisputes = () => {
                                     )}
                                   </Tooltip>
                                 </TooltipProvider>
-                                {dispute.status !== 'resolved' && dispute.status !== 'closed' && (
-                                  <TooltipProvider>
-                                    <Tooltip>
-                                      <TooltipTrigger asChild>
-                                        <span>
-                                          <Button
-                                            size="sm"
-                                            disabled={!isAAL2}
-                                            onClick={() =>
-                                              isAAL2 && handleOpenDialog(dispute, 'resolve')
-                                            }
-                                          >
-                                            Résoudre
-                                          </Button>
-                                        </span>
-                                      </TooltipTrigger>
-                                      {!isAAL2 && (
-                                        <TooltipContent>
-                                          Activez la 2FA pour utiliser cette action
-                                        </TooltipContent>
-                                      )}
-                                    </Tooltip>
-                                  </TooltipProvider>
-                                )}
-                                {dispute.status === 'resolved' && (
-                                  <TooltipProvider>
-                                    <Tooltip>
-                                      <TooltipTrigger asChild>
-                                        <span>
-                                          <Button
-                                            size="sm"
-                                            variant="outline"
-                                            disabled={!isAAL2}
-                                            onClick={() => isAAL2 && closeDispute(dispute.id)}
-                                          >
-                                            Fermer
-                                          </Button>
-                                        </span>
-                                      </TooltipTrigger>
-                                      {!isAAL2 && (
-                                        <TooltipContent>
-                                          Activez la 2FA pour utiliser cette action
-                                        </TooltipContent>
-                                      )}
-                                    </Tooltip>
-                                  </TooltipProvider>
-                                )}
-                              </ProtectedAction>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              )}
-
-              {/* Pagination */}
-              {totalCount > pageSize && (
-                <div className="flex items-center justify-between border-t pt-4">
-                  <div className="text-sm text-muted-foreground">
-                    Page {page} sur {Math.ceil(totalCount / pageSize)}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setPage(p => Math.max(1, p - 1))}
-                      disabled={page === 1}
-                    >
-                      <ChevronLeft className="h-4 w-4 mr-1" />
-                      Précédent
-                    </Button>
-                    <div className="flex items-center gap-1">
-                      {Array.from({ length: Math.ceil(totalCount / pageSize) }, (_, i) => i + 1)
-                        .filter(p => {
-                          // Afficher 1-2-3...current-1-current-current+1...last-1-last
-                          return (
-                            p === 1 ||
-                            p === Math.ceil(totalCount / pageSize) ||
-                            Math.abs(p - page) <= 1
-                          );
-                        })
-                        .map((p, idx, arr) => (
-                          <div key={p} className="flex items-center">
-                            {idx > 0 && arr[idx - 1] !== p - 1 && (
-                              <span className="px-2 text-muted-foreground">...</span>
-                            )}
-                            <Button
-                              variant={p === page ? 'default' : 'outline'}
-                              size="sm"
-                              onClick={() => setPage(p)}
-                              className="min-w-[2rem]"
-                            >
-                              {p}
-                            </Button>
+                              )}
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <span>
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        disabled={!isAAL2}
+                                        onClick={() => isAAL2 && handleOpenDialog(dispute, 'notes')}
+                                      >
+                                        Notes
+                                      </Button>
+                                    </span>
+                                  </TooltipTrigger>
+                                  {!isAAL2 && (
+                                    <TooltipContent>
+                                      Activez la 2FA pour utiliser cette action
+                                    </TooltipContent>
+                                  )}
+                                </Tooltip>
+                              </TooltipProvider>
+                              {dispute.status !== 'resolved' && dispute.status !== 'closed' && (
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <span>
+                                        <Button
+                                          size="sm"
+                                          disabled={!isAAL2}
+                                          onClick={() =>
+                                            isAAL2 && handleOpenDialog(dispute, 'resolve')
+                                          }
+                                        >
+                                          Résoudre
+                                        </Button>
+                                      </span>
+                                    </TooltipTrigger>
+                                    {!isAAL2 && (
+                                      <TooltipContent>
+                                        Activez la 2FA pour utiliser cette action
+                                      </TooltipContent>
+                                    )}
+                                  </Tooltip>
+                                </TooltipProvider>
+                              )}
+                              {dispute.status === 'resolved' && (
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <span>
+                                        <Button
+                                          size="sm"
+                                          variant="outline"
+                                          disabled={!isAAL2}
+                                          onClick={() => isAAL2 && closeDispute(dispute.id)}
+                                        >
+                                          Fermer
+                                        </Button>
+                                      </span>
+                                    </TooltipTrigger>
+                                    {!isAAL2 && (
+                                      <TooltipContent>
+                                        Activez la 2FA pour utiliser cette action
+                                      </TooltipContent>
+                                    )}
+                                  </Tooltip>
+                                </TooltipProvider>
+                              )}
+                            </ProtectedAction>
                           </div>
-                        ))}
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() =>
-                        setPage(p => Math.min(Math.ceil(totalCount / pageSize), p + 1))
-                      }
-                      disabled={page >= Math.ceil(totalCount / pageSize)}
-                    >
-                      Suivant
-                      <ChevronRight className="h-4 w-4 ml-1" />
-                    </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+
+            {/* Pagination */}
+            {totalCount > pageSize && (
+              <div className="flex items-center justify-between border-t pt-4">
+                <div className="text-sm text-muted-foreground">
+                  Page {page} sur {Math.ceil(totalCount / pageSize)}
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPage(p => Math.max(1, p - 1))}
+                    disabled={page === 1}
+                  >
+                    <ChevronLeft className="h-4 w-4 mr-1" />
+                    Précédent
+                  </Button>
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: Math.ceil(totalCount / pageSize) }, (_, i) => i + 1)
+                      .filter(p => {
+                        // Afficher 1-2-3...current-1-current-current+1...last-1-last
+                        return (
+                          p === 1 ||
+                          p === Math.ceil(totalCount / pageSize) ||
+                          Math.abs(p - page) <= 1
+                        );
+                      })
+                      .map((p, idx, arr) => (
+                        <div key={p} className="flex items-center">
+                          {idx > 0 && arr[idx - 1] !== p - 1 && (
+                            <span className="px-2 text-muted-foreground">...</span>
+                          )}
+                          <Button
+                            variant={p === page ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => setPage(p)}
+                            className="min-w-[2rem]"
+                          >
+                            {p}
+                          </Button>
+                        </div>
+                      ))}
                   </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPage(p => Math.min(Math.ceil(totalCount / pageSize), p + 1))}
+                    disabled={page >= Math.ceil(totalCount / pageSize)}
+                  >
+                    Suivant
+                    <ChevronRight className="h-4 w-4 ml-1" />
+                  </Button>
                 </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
 
-        {/* Details Dialog */}
-        <Dialog open={detailsDialogOpen} onOpenChange={setDetailsDialogOpen}>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5" />
-                Détails du litige
-              </DialogTitle>
-            </DialogHeader>
+      {/* Details Dialog */}
+      <Dialog open={detailsDialogOpen} onOpenChange={setDetailsDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              Détails du litige
+            </DialogTitle>
+          </DialogHeader>
 
-            {selectedDispute && (
-              <div className="space-y-6">
-                {/* Statut et Badges */}
-                <div className="flex flex-wrap items-center gap-3">
-                  {getStatusBadge(selectedDispute.status)}
-                  {getInitiatorBadge(selectedDispute.initiator_type)}
-                  <EmarzonaProtectDisputeBadge
-                    isProtect={selectedDispute.is_emarzona_protect}
-                    reasonCode={selectedDispute.protect_reason_code}
-                  />
-                  {selectedDispute.assigned_admin_id && (
-                    <Badge variant="outline" className="flex items-center gap-1">
-                      <Shield className="h-3 w-3" />
-                      Assigné
-                    </Badge>
-                  )}
-                </div>
+          {selectedDispute && (
+            <div className="space-y-6">
+              {/* Statut et Badges */}
+              <div className="flex flex-wrap items-center gap-3">
+                {getStatusBadge(selectedDispute.status)}
+                {getInitiatorBadge(selectedDispute.initiator_type)}
+                <EmarzonaProtectDisputeBadge
+                  isProtect={selectedDispute.is_emarzona_protect}
+                  reasonCode={selectedDispute.protect_reason_code}
+                />
+                {selectedDispute.assigned_admin_id && (
+                  <Badge variant="outline" className="flex items-center gap-1">
+                    <Shield className="h-3 w-3" />
+                    Assigné
+                  </Badge>
+                )}
+              </div>
 
-                {/* Informations principales */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-3">
-                    <h3 className="font-semibold text-lg">Informations générales</h3>
-                    <div className="space-y-2 text-sm">
+              {/* Informations principales */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  <h3 className="font-semibold text-lg">Informations générales</h3>
+                  <div className="space-y-2 text-sm">
+                    <div>
+                      <span className="text-muted-foreground">ID Litige:</span>
+                      <p className="font-mono">{selectedDispute.id.substring(0, 13)}...</p>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">ID Commande:</span>
+                      <p className="font-mono">
+                        {selectedDispute.order_id
+                          ? selectedDispute.order_id.substring(0, 13) + '...'
+                          : 'N/A'}
+                      </p>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Date de création:</span>
+                      <p>
+                        {format(new Date(selectedDispute.created_at), "dd MMMM yyyy 'à' HH:mm", {
+                          locale: fr,
+                        })}
+                      </p>
+                    </div>
+                    {selectedDispute.resolved_at && (
                       <div>
-                        <span className="text-muted-foreground">ID Litige:</span>
-                        <p className="font-mono">{selectedDispute.id.substring(0, 13)}...</p>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">ID Commande:</span>
-                        <p className="font-mono">
-                          {selectedDispute.order_id
-                            ? selectedDispute.order_id.substring(0, 13) + '...'
-                            : 'N/A'}
-                        </p>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">Date de création:</span>
+                        <span className="text-muted-foreground">Date de résolution:</span>
                         <p>
-                          {format(new Date(selectedDispute.created_at), "dd MMMM yyyy 'à' HH:mm", {
+                          {format(new Date(selectedDispute.resolved_at), "dd MMMM yyyy 'à' HH:mm", {
                             locale: fr,
                           })}
                         </p>
                       </div>
-                      {selectedDispute.resolved_at && (
-                        <div>
-                          <span className="text-muted-foreground">Date de résolution:</span>
-                          <p>
-                            {format(
-                              new Date(selectedDispute.resolved_at),
-                              "dd MMMM yyyy 'à' HH:mm",
-                              { locale: fr }
-                            )}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="space-y-3">
-                    <h3 className="font-semibold text-lg">Priorité et responsabilité</h3>
-                    <div className="space-y-2 text-sm">
-                      <div>
-                        <span className="text-muted-foreground">Priorité:</span>
-                        <p className="capitalize">{selectedDispute.priority || 'Normale'}</p>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">Initiateur:</span>
-                        <p className="capitalize">{selectedDispute.initiator_type}</p>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">Assigné à:</span>
-                        <p>{selectedDispute.assigned_admin_id ? 'Admin assigné' : 'Non assigné'}</p>
-                      </div>
-                    </div>
+                    )}
                   </div>
                 </div>
 
-                {/* Sujet et Description */}
                 <div className="space-y-3">
-                  <h3 className="font-semibold text-lg">Sujet</h3>
-                  <p className="text-base">{selectedDispute.subject}</p>
+                  <h3 className="font-semibold text-lg">Priorité et responsabilité</h3>
+                  <div className="space-y-2 text-sm">
+                    <div>
+                      <span className="text-muted-foreground">Priorité:</span>
+                      <p className="capitalize">{selectedDispute.priority || 'Normale'}</p>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Initiateur:</span>
+                      <p className="capitalize">{selectedDispute.initiator_type}</p>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Assigné à:</span>
+                      <p>{selectedDispute.assigned_admin_id ? 'Admin assigné' : 'Non assigné'}</p>
+                    </div>
+                  </div>
                 </div>
+              </div>
 
+              {/* Sujet et Description */}
+              <div className="space-y-3">
+                <h3 className="font-semibold text-lg">Sujet</h3>
+                <p className="text-base">{selectedDispute.subject}</p>
+              </div>
+
+              <div className="space-y-3">
+                <h3 className="font-semibold text-lg">Description</h3>
+                <p className="text-sm whitespace-pre-wrap bg-muted p-4 rounded-lg">
+                  {selectedDispute.description}
+                </p>
+              </div>
+
+              {/* Résolution */}
+              {selectedDispute.resolution && (
                 <div className="space-y-3">
-                  <h3 className="font-semibold text-lg">Description</h3>
-                  <p className="text-sm whitespace-pre-wrap bg-muted p-4 rounded-lg">
-                    {selectedDispute.description}
+                  <h3 className="font-semibold text-lg text-green-600">Résolution</h3>
+                  <p className="text-sm whitespace-pre-wrap bg-green-50 border border-green-200 p-4 rounded-lg">
+                    {selectedDispute.resolution}
                   </p>
                 </div>
+              )}
 
-                {/* Résolution */}
-                {selectedDispute.resolution && (
-                  <div className="space-y-3">
-                    <h3 className="font-semibold text-lg text-green-600">Résolution</h3>
-                    <p className="text-sm whitespace-pre-wrap bg-green-50 border border-green-200 p-4 rounded-lg">
-                      {selectedDispute.resolution}
-                    </p>
-                  </div>
+              {/* Notes admin */}
+              {selectedDispute.admin_notes && (
+                <div className="space-y-3">
+                  <h3 className="font-semibold text-lg">Notes administrateur</h3>
+                  <p className="text-sm whitespace-pre-wrap bg-blue-50 border border-blue-200 p-4 rounded-lg">
+                    {selectedDispute.admin_notes}
+                  </p>
+                </div>
+              )}
+
+              {selectedDispute.is_emarzona_protect &&
+                selectedDispute.status !== 'resolved' &&
+                selectedDispute.status !== 'closed' && (
+                  <ProtectDisputeResolvePanel
+                    disputeId={selectedDispute.id}
+                    onResolved={async () => {
+                      await fetchDisputes();
+                      setDetailsDialogOpen(false);
+                    }}
+                  />
                 )}
 
-                {/* Notes admin */}
-                {selectedDispute.admin_notes && (
-                  <div className="space-y-3">
-                    <h3 className="font-semibold text-lg">Notes administrateur</h3>
-                    <p className="text-sm whitespace-pre-wrap bg-blue-50 border border-blue-200 p-4 rounded-lg">
-                      {selectedDispute.admin_notes}
-                    </p>
-                  </div>
-                )}
-
-                {selectedDispute.is_emarzona_protect &&
-                  selectedDispute.status !== 'resolved' &&
-                  selectedDispute.status !== 'closed' && (
-                    <ProtectDisputeResolvePanel
-                      disputeId={selectedDispute.id}
-                      onResolved={async () => {
-                        await fetchDisputes();
-                        setDetailsDialogOpen(false);
-                      }}
-                    />
-                  )}
-
-                {/* Actions rapides */}
-                <div className="flex flex-wrap items-center gap-2 pt-4 border-t">
-                  {!selectedDispute.assigned_admin_id && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={async () => {
-                        const {
-                          data: { user },
-                        } = await supabase.auth.getUser();
-                        if (user) {
-                          await assignDispute(selectedDispute.id, user.id);
-                          setDetailsDialogOpen(false);
-                        }
-                      }}
-                    >
-                      <Shield className="h-4 w-4 mr-2" />
-                      M'assigner
-                    </Button>
-                  )}
+              {/* Actions rapides */}
+              <div className="flex flex-wrap items-center gap-2 pt-4 border-t">
+                {!selectedDispute.assigned_admin_id && (
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => {
-                      setDetailsDialogOpen(false);
-                      handleOpenDialog(selectedDispute, 'notes');
+                    onClick={async () => {
+                      const {
+                        data: { user },
+                      } = await supabase.auth.getUser();
+                      if (user) {
+                        await assignDispute(selectedDispute.id, user.id);
+                        setDetailsDialogOpen(false);
+                      }
                     }}
                   >
-                    <FileText className="h-4 w-4 mr-2" />
-                    Modifier notes
+                    <Shield className="h-4 w-4 mr-2" />
+                    M'assigner
                   </Button>
-                  {selectedDispute.status !== 'resolved' &&
-                    selectedDispute.status !== 'closed' &&
-                    !selectedDispute.is_emarzona_protect && (
-                      <Button
-                        size="sm"
-                        onClick={() => {
-                          setDetailsDialogOpen(false);
-                          handleOpenDialog(selectedDispute, 'resolve');
-                        }}
-                      >
-                        <CheckCircle className="h-4 w-4 mr-2" />
-                        Résoudre
-                      </Button>
-                    )}
-                  {selectedDispute.status === 'resolved' && (
+                )}
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    setDetailsDialogOpen(false);
+                    handleOpenDialog(selectedDispute, 'notes');
+                  }}
+                >
+                  <FileText className="h-4 w-4 mr-2" />
+                  Modifier notes
+                </Button>
+                {selectedDispute.status !== 'resolved' &&
+                  selectedDispute.status !== 'closed' &&
+                  !selectedDispute.is_emarzona_protect && (
                     <Button
                       size="sm"
-                      variant="outline"
-                      onClick={async () => {
-                        await closeDispute(selectedDispute.id);
+                      onClick={() => {
                         setDetailsDialogOpen(false);
+                        handleOpenDialog(selectedDispute, 'resolve');
                       }}
                     >
-                      <XCircle className="h-4 w-4 mr-2" />
-                      Fermer
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      Résoudre
                     </Button>
                   )}
-                </div>
-              </div>
-            )}
-
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setDetailsDialogOpen(false)}>
-                Fermer
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-        {/* Action Dialog */}
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogContent className="sm:max-w-[600px]">
-            <DialogHeader>
-              <DialogTitle>
-                {actionType === 'assign' && 'Assigner le litige'}
-                {actionType === 'notes' && "Notes d'administration"}
-                {actionType === 'resolve' && 'Résoudre le litige'}
-              </DialogTitle>
-              <DialogDescription>
-                {selectedDispute && (
-                  <div className="mt-2 space-y-2">
-                    <p>
-                      <strong>Commande :</strong> {selectedDispute.order_id.substring(0, 13)}...
-                    </p>
-                    <p>
-                      <strong>Sujet :</strong> {selectedDispute.subject}
-                    </p>
-                    <p>
-                      <strong>Description :</strong> {selectedDispute.description}
-                    </p>
-                  </div>
+                {selectedDispute.status === 'resolved' && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={async () => {
+                      await closeDispute(selectedDispute.id);
+                      setDetailsDialogOpen(false);
+                    }}
+                  >
+                    <XCircle className="h-4 w-4 mr-2" />
+                    Fermer
+                  </Button>
                 )}
-              </DialogDescription>
-            </DialogHeader>
-
-            {actionType === 'assign' && (
-              <div className="py-4">
-                <p>Voulez-vous vous assigner ce litige ?</p>
-                <p className="text-sm text-muted-foreground mt-2">
-                  Le statut passera automatiquement à "En investigation"
-                </p>
               </div>
-            )}
+            </div>
+          )}
 
-            {actionType === 'notes' && (
-              <div className="py-4">
-                <label className="text-sm font-medium mb-2 block">
-                  Notes internes (admin uniquement)
-                </label>
-                <Textarea
-                  value={inputValue}
-                  onChange={e => setInputValue(e.target.value)}
-                  placeholder="Ajoutez vos notes ici..."
-                  rows={6}
-                />
-              </div>
-            )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDetailsDialogOpen(false)}>
+              Fermer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
-            {actionType === 'resolve' && (
-              <div className="py-4">
-                <label className="text-sm font-medium mb-2 block">Résolution du litige *</label>
-                <Textarea
-                  value={inputValue}
-                  onChange={e => setInputValue(e.target.value)}
-                  placeholder="Décrivez la solution apportée au litige..."
-                  rows={6}
-                />
-                <p className="text-xs text-muted-foreground mt-2">
-                  Cette résolution sera visible par le client et le vendeur
-                </p>
-              </div>
-            )}
+      {/* Action Dialog */}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>
+              {actionType === 'assign' && 'Assigner le litige'}
+              {actionType === 'notes' && "Notes d'administration"}
+              {actionType === 'resolve' && 'Résoudre le litige'}
+            </DialogTitle>
+            <DialogDescription>
+              {selectedDispute && (
+                <div className="mt-2 space-y-2">
+                  <p>
+                    <strong>Commande :</strong> {selectedDispute.order_id.substring(0, 13)}...
+                  </p>
+                  <p>
+                    <strong>Sujet :</strong> {selectedDispute.subject}
+                  </p>
+                  <p>
+                    <strong>Description :</strong> {selectedDispute.description}
+                  </p>
+                </div>
+              )}
+            </DialogDescription>
+          </DialogHeader>
 
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setDialogOpen(false)}>
-                Annuler
-              </Button>
-              <Button onClick={handleAction}>
-                {actionType === 'assign' && 'Assigner'}
-                {actionType === 'notes' && 'Enregistrer'}
-                {actionType === 'resolve' && 'Résoudre'}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+          {actionType === 'assign' && (
+            <div className="py-4">
+              <p>Voulez-vous vous assigner ce litige ?</p>
+              <p className="text-sm text-muted-foreground mt-2">
+                Le statut passera automatiquement à "En investigation"
+              </p>
+            </div>
+          )}
 
+          {actionType === 'notes' && (
+            <div className="py-4">
+              <label className="text-sm font-medium mb-2 block">
+                Notes internes (admin uniquement)
+              </label>
+              <Textarea
+                value={inputValue}
+                onChange={e => setInputValue(e.target.value)}
+                placeholder="Ajoutez vos notes ici..."
+                rows={6}
+              />
+            </div>
+          )}
+
+          {actionType === 'resolve' && (
+            <div className="py-4">
+              <label className="text-sm font-medium mb-2 block">Résolution du litige *</label>
+              <Textarea
+                value={inputValue}
+                onChange={e => setInputValue(e.target.value)}
+                placeholder="Décrivez la solution apportée au litige..."
+                rows={6}
+              />
+              <p className="text-xs text-muted-foreground mt-2">
+                Cette résolution sera visible par le client et le vendeur
+              </p>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDialogOpen(false)}>
+              Annuler
+            </Button>
+            <Button onClick={handleAction}>
+              {actionType === 'assign' && 'Assigner'}
+              {actionType === 'notes' && 'Enregistrer'}
+              {actionType === 'resolve' && 'Résoudre'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AdminLayout>
   );
 };

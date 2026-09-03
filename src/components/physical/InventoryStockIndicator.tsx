@@ -1,10 +1,10 @@
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { 
-  Package, 
-  AlertTriangle, 
-  CheckCircle2, 
+import {
+  Package,
+  AlertTriangle,
+  CheckCircle2,
   XCircle,
   TrendingDown,
   TrendingUp,
@@ -103,10 +103,7 @@ export function InventoryStockIndicator({
   // Compact variant
   if (variant === 'compact') {
     return (
-      <Badge 
-        variant={config.badgeVariant}
-        className={cn('gap-1', className)}
-      >
+      <Badge variant={config.badgeVariant} className={cn('gap-1', className)}>
         <Icon className="h-3 w-3" />
         {quantity > 0 ? quantity : config.label}
       </Badge>
@@ -131,8 +128,8 @@ export function InventoryStockIndicator({
         {/* Progress Bar */}
         {showProgress && quantity > 0 && (
           <div className="space-y-1">
-            <Progress 
-              value={stockPercentage} 
+            <Progress
+              value={stockPercentage}
               className={cn('h-2', {
                 'bg-green-100 [&>div]:bg-green-600': status === 'in_stock',
                 'bg-orange-100 [&>div]:bg-orange-600': status === 'low_stock',
@@ -171,10 +168,9 @@ export function InventoryStockIndicator({
   // Default variant
   return (
     <div className={cn('inline-flex items-center gap-2', className)}>
-      <div className={cn(
-        'flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border',
-        config.color
-      )}>
+      <div
+        className={cn('flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border', config.color)}
+      >
         <Icon className="h-4 w-4" />
         <div className="flex flex-col">
           <span className="text-xs font-medium">{config.label}</span>
@@ -221,9 +217,3 @@ export function StockBadge({ quantity, lowStockThreshold = 10, className }: Stoc
     </Badge>
   );
 }
-
-
-
-
-
-

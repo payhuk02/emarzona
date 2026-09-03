@@ -50,11 +50,8 @@ export interface SanitizeOptions {
 /**
  * Sanitize une chaîne de caractères
  */
-export function sanitizeString(
-  input: string,
-  options: SanitizeOptions = {}
-): string {
-  let  result= input;
+export function sanitizeString(input: string, options: SanitizeOptions = {}): string {
+  let result = input;
 
   const {
     trim = true,
@@ -109,11 +106,12 @@ export function validateEmail(email: string): ValidationResult<string> {
     return { valid: false, error: 'Email requis' };
   }
 
-  const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+  const emailRegex =
+    /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
   const sanitized = sanitizeString(email, { trim: true, toLowerCase: true });
 
   if (!emailRegex.test(sanitized)) {
-    return { valid: false, error: 'Format d\'email invalide' };
+    return { valid: false, error: "Format d'email invalide" };
   }
 
   return { valid: true, value: sanitized };
@@ -132,11 +130,11 @@ export function validateUrl(url: string): ValidationResult<string> {
   try {
     const urlObj = new URL(sanitized);
     if (!['http:', 'https:'].includes(urlObj.protocol)) {
-      return { valid: false, error: 'L\'URL doit commencer par http:// ou https://' };
+      return { valid: false, error: "L'URL doit commencer par http:// ou https://" };
     }
     return { valid: true, value: sanitized };
   } catch {
-    return { valid: false, error: 'Format d\'URL invalide' };
+    return { valid: false, error: "Format d'URL invalide" };
   }
 }
 
@@ -179,7 +177,10 @@ export function validateSlug(slug: string): ValidationResult<string> {
 
   const slugRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
   if (!slugRegex.test(sanitized)) {
-    return { valid: false, error: 'Format de slug invalide (minuscules, chiffres et tirets uniquement)' };
+    return {
+      valid: false,
+      error: 'Format de slug invalide (minuscules, chiffres et tirets uniquement)',
+    };
   }
 
   return { valid: true, value: sanitized };
@@ -213,11 +214,7 @@ export function validateLength(
 /**
  * Valide un nombre dans une plage
  */
-export function validateRange(
-  value: number,
-  min?: number,
-  max?: number
-): ValidationResult<number> {
+export function validateRange(value: number, min?: number, max?: number): ValidationResult<number> {
   if (typeof value !== 'number' || isNaN(value)) {
     return { valid: false, error: 'Valeur doit être un nombre' };
   }
@@ -240,8 +237,8 @@ export function validateFields<T extends Record<string, any>>(
   fields: T,
   validators: Partial<Record<keyof T, (value: any) => ValidationResult>>
 ): ValidationResult<T> {
-  const  errors: Record<string, string> = {};
-  const  values: Partial<T> = {};
+  const errors: Record<string, string> = {};
+  const values: Partial<T> = {};
 
   for (const [key, value] of Object.entries(fields)) {
     const validator = validators[key as keyof T];
@@ -292,7 +289,10 @@ export function validatePassword(
   }
 
   if (password.length < minLength) {
-    return { valid: false, error: `Le mot de passe doit contenir au moins ${minLength} caractères` };
+    return {
+      valid: false,
+      error: `Le mot de passe doit contenir au moins ${minLength} caractères`,
+    };
   }
 
   if (requireUppercase && !/[A-Z]/.test(password)) {
@@ -313,10 +313,3 @@ export function validatePassword(
 
   return { valid: true, value: password };
 }
-
-
-
-
-
-
-

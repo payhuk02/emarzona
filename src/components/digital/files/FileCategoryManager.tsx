@@ -23,13 +23,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import {
-  FolderTree,
-  Plus,
-  Edit,
-  Trash2,
-  MoreVertical,
-} from 'lucide-react';
+import { FolderTree, Plus, Edit, Trash2, MoreVertical } from 'lucide-react';
 import {
   useFileCategories,
   useCreateFileCategory,
@@ -133,7 +127,7 @@ export const FileCategoryManager = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {rootCategories.map((category) => (
+                {rootCategories.map(category => (
                   <>
                     <TableRow key={category.id}>
                       <TableCell className="font-medium">
@@ -149,9 +143,7 @@ export const FileCategoryManager = () => {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <code className="text-xs bg-muted px-2 py-1 rounded">
-                          {category.slug}
-                        </code>
+                        <code className="text-xs bg-muted px-2 py-1 rounded">{category.slug}</code>
                       </TableCell>
                       <TableCell>{category.description || '-'}</TableCell>
                       <TableCell>-</TableCell>
@@ -167,7 +159,7 @@ export const FileCategoryManager = () => {
                         </Button>
                       </TableCell>
                     </TableRow>
-                    {getChildren(category.id).map((child) => (
+                    {getChildren(category.id).map(child => (
                       <TableRow key={child.id} className="bg-muted/50">
                         <TableCell className="pl-8 font-medium">
                           <div className="flex items-center gap-2">
@@ -206,13 +198,11 @@ export const FileCategoryManager = () => {
 
       {/* Dialog d'édition */}
       {editingCategory && (
-        <Dialog open={!!editingCategory} onOpenChange={(open) => !open && setEditingCategory(null)}>
+        <Dialog open={!!editingCategory} onOpenChange={open => !open && setEditingCategory(null)}>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Modifier la catégorie</DialogTitle>
-              <DialogDescription>
-                Mettez à jour les informations de la catégorie
-              </DialogDescription>
+              <DialogDescription>Mettez à jour les informations de la catégorie</DialogDescription>
             </DialogHeader>
             <FileCategoryForm
               category={editingCategory}
@@ -225,10 +215,3 @@ export const FileCategoryManager = () => {
     </div>
   );
 };
-
-
-
-
-
-
-

@@ -1,7 +1,7 @@
 /**
  * Digital Products Analytics Hooks
  * Date: 27 octobre 2025
- * 
+ *
  * Hooks pour analytics avancés des produits digitaux
  */
 
@@ -9,7 +9,8 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { subDays, startOfDay } from 'date-fns';
 
-const DIGITAL_DOWNLOAD_FIELDS = 'id, digital_product_id, file_id, user_id, download_date, download_country, file_size_mb, download_success, file_version';
+const DIGITAL_DOWNLOAD_FIELDS =
+  'id, digital_product_id, file_id, user_id, download_date, download_country, file_size_mb, download_success, file_version';
 const DIGITAL_LICENSE_FIELDS = 'id, digital_product_id, user_id, status, created_at, expires_at';
 
 // =====================================================
@@ -59,21 +60,26 @@ export interface UserDownloadStats {
 /**
  * Get analytics for a specific digital product
  */
-export const useDigitalProductAnalytics = (productId: string, dateRange: { from: Date; to: Date }) => {
+export const useDigitalProductAnalytics = (
+  productId: string,
+  dateRange: { from: Date; to: Date }
+) => {
   return useQuery({
     queryKey: ['digital-product-analytics', productId, dateRange],
     queryFn: async () => {
       // Get product info
       const { data: product, error: productError } = await supabase
         .from('digital_products')
-        .select(`
+        .select(
+          `
           *,
           product:products (
             id,
             name,
             price
           )
-        `)
+        `
+        )
         .eq('product_id', productId)
         .single();
 
@@ -103,7 +109,7 @@ export const useDigitalProductAnalytics = (productId: string, dateRange: { from:
       const uniqueDownloaders = new Set(downloads.map(d => d.user_id)).size;
       const failedDownloads = totalDownloads - successfulDownloads;
       const successRate = totalDownloads > 0 ? (successfulDownloads / totalDownloads) * 100 : 0;
-      
+
       const activeLicenses = licenses.filter(l => l.status === 'active').length;
       const expiredLicenses = licenses.filter(l => l.status === 'expired').length;
 
@@ -113,7 +119,7 @@ export const useDigitalProductAnalytics = (productId: string, dateRange: { from:
         .reduce((sum, d) => sum + (d.file_size_mb || 0), 0);
       const bandwidthGB = bandwidthMB / 1024;
 
-      const  analytics: DigitalProductAnalytics = {
+      const analytics: DigitalProductAnalytics = {
         product_id: productId,
         product_name: product.product.name,
         total_downloads: totalDownloads,
@@ -162,9 +168,9 @@ export const useDownloadTrends = (digitalProductId: string, days: number = 30) =
       // Group by date
       const trends = new Map<string, DownloadTrend>();
 
-      data.forEach((download) => {
+      data.forEach(download => {
         const date = startOfDay(new Date(download.download_date)).toISOString().split('T')[0];
-        
+
         if (!trends.has(date)) {
           trends.set(date, {
             date,
@@ -180,21 +186,23 @@ export const useDownloadTrends = (digitalProductId: string, days: number = 30) =
       });
 
       // Calculate unique users per day
-      data.forEach((download) => {
+      data.forEach(download => {
         const date = startOfDay(new Date(download.download_date)).toISOString().split('T')[0];
         const trend = trends.get(date);
         if (trend && download.download_success) {
           // Count unique users (simplified, should use Set)
           trend.unique_users = new Set(
             data
-              .filter(d => startOfDay(new Date(d.download_date)).toISOString().split('T')[0] === date)
+              .filter(
+                d => startOfDay(new Date(d.download_date)).toISOString().split('T')[0] === date
+              )
               .map(d => d.user_id)
           ).size;
         }
       });
 
-      return Array.from(trends.values()).sort((a, b) => 
-        new Date(a.date).getTime() - new Date(b.date).getTime()
+      return Array.from(trends.values()).sort(
+        (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
       );
     },
     enabled: !!digitalProductId,
@@ -210,13 +218,15 @@ export const useTopDownloadedFiles = (digitalProductId: string, limit: number = 
     queryFn: async () => {
       const { data, error } = await supabase
         .from('digital_product_downloads')
-        .select(`
+        .select(
+          `
           file_id,
           digital_product_files (
             name,
             file_size_mb
           )
-        `)
+        `
+        )
         .eq('digital_product_id', digitalProductId)
         .eq('download_success', true);
 
@@ -225,7 +235,7 @@ export const useTopDownloadedFiles = (digitalProductId: string, limit: number = 
       // Count downloads per file
       const fileCounts = new Map<string, TopFile>();
 
-      data.forEach((download) => {
+      data.forEach(download => {
         if (!download.file_id || !download.digital_product_files) return;
 
         if (!fileCounts.has(download.file_id)) {
@@ -258,11 +268,13 @@ export const useUserDownloadStats = (digitalProductId: string, limit: number = 1
     queryFn: async () => {
       const { data, error } = await supabase
         .from('digital_product_downloads')
-        .select(`
+        .select(
+          `
           user_id,
           download_date,
           download_success
-        `)
+        `
+        )
         .eq('digital_product_id', digitalProductId)
         .eq('download_success', true)
         .order('download_date', { ascending: false });
@@ -292,7 +304,7 @@ export const useUserDownloadStats = (digitalProductId: string, limit: number = 1
 
         const stats = userStats.get(download.user_id)!;
         stats.total_downloads += 1;
-        
+
         // Update last download if more recent
         if (new Date(download.download_date) > new Date(stats.last_download)) {
           stats.last_download = download.download_date;
@@ -316,13 +328,15 @@ export const useLicenseAnalytics = (digitalProductId: string) => {
     queryFn: async () => {
       const { data: licenses, error } = await supabase
         .from('digital_licenses')
-        .select(`
+        .select(
+          `
           *,
           activations:digital_license_activations (
             id,
             is_active
           )
-        `)
+        `
+        )
         .eq('digital_product_id', digitalProductId);
 
       if (error) throw error;
@@ -331,12 +345,12 @@ export const useLicenseAnalytics = (digitalProductId: string) => {
       const active = licenses.filter(l => l.status === 'active').length;
       const expired = licenses.filter(l => l.status === 'expired').length;
       const suspended = licenses.filter(l => l.status === 'suspended').length;
-      
-      const totalActivations = licenses.reduce((sum, l) => 
-        sum + (l.activations?.length || 0), 0
-      );
-      const activeActivations = licenses.reduce((sum, l) => 
-        sum + (l.activations?.filter((a: { is_active: boolean }) => a.is_active).length || 0), 0
+
+      const totalActivations = licenses.reduce((sum, l) => sum + (l.activations?.length || 0), 0);
+      const activeActivations = licenses.reduce(
+        (sum, l) =>
+          sum + (l.activations?.filter((a: { is_active: boolean }) => a.is_active).length || 0),
+        0
       );
 
       return {
@@ -356,14 +370,18 @@ export const useLicenseAnalytics = (digitalProductId: string) => {
 /**
  * Get revenue analytics for digital products
  */
-export const useDigitalRevenueAnalytics = (storeId?: string, dateRange?: { from: Date; to: Date }) => {
+export const useDigitalRevenueAnalytics = (
+  storeId?: string,
+  dateRange?: { from: Date; to: Date }
+) => {
   return useQuery({
     queryKey: ['digital-revenue', storeId, dateRange],
     queryFn: async () => {
       // Get all digital products for this store
       const { data: products, error: productsError } = await supabase
         .from('digital_products')
-        .select(`
+        .select(
+          `
           id,
           product_id,
           product:products (
@@ -372,7 +390,8 @@ export const useDigitalRevenueAnalytics = (storeId?: string, dateRange?: { from:
             price,
             store_id
           )
-        `)
+        `
+        )
         .eq('product.store_id', storeId || '');
 
       if (productsError) throw productsError;
@@ -388,7 +407,7 @@ export const useDigitalRevenueAnalytics = (storeId?: string, dateRange?: { from:
       }
 
       const productIds = products.map(p => p.product_id).filter(Boolean);
-      
+
       if (productIds.length === 0) {
         return {
           total_revenue: 0,
@@ -401,7 +420,8 @@ export const useDigitalRevenueAnalytics = (storeId?: string, dateRange?: { from:
       // Get orders for these products
       let query = supabase
         .from('order_items')
-        .select(`
+        .select(
+          `
           id,
           quantity,
           price,
@@ -410,7 +430,8 @@ export const useDigitalRevenueAnalytics = (storeId?: string, dateRange?: { from:
             payment_status,
             created_at
           )
-        `)
+        `
+        )
         .in('product_id', productIds)
         .eq('orders.payment_status', 'paid');
 
@@ -442,9 +463,7 @@ export const useDigitalRevenueAnalytics = (storeId?: string, dateRange?: { from:
         };
       }
 
-      const totalRevenue = orderItems.reduce((sum, item) => 
-        sum + (item.price * item.quantity), 0
-      );
+      const totalRevenue = orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
       const totalOrders = new Set(orderItems.map(item => item.orders.id)).size;
 
@@ -469,11 +488,14 @@ export interface GeographicAnalytics {
   percentage: number;
 }
 
-export const useGeographicAnalytics = (digitalProductId: string, dateRange?: { from: Date; to: Date }) => {
+export const useGeographicAnalytics = (
+  digitalProductId: string,
+  dateRange?: { from: Date; to: Date }
+) => {
   return useQuery({
     queryKey: ['geographic-analytics', digitalProductId, dateRange],
     queryFn: async () => {
-      let  query= supabase
+      let query = supabase
         .from('digital_product_downloads')
         .select('download_country, user_id, download_success')
         .eq('digital_product_id', digitalProductId)
@@ -492,9 +514,9 @@ export const useGeographicAnalytics = (digitalProductId: string, dateRange?: { f
       // Group by country
       const countryMap = new Map<string, { downloads: number; users: Set<string> }>();
 
-      data.forEach((download) => {
+      data.forEach(download => {
         const country = download.download_country || 'Unknown';
-        
+
         if (!countryMap.has(country)) {
           countryMap.set(country, { downloads: 0, users: new Set() });
         }
@@ -508,7 +530,7 @@ export const useGeographicAnalytics = (digitalProductId: string, dateRange?: { f
 
       const totalDownloads = data.length;
 
-      const  analytics: GeographicAnalytics[] = Array.from(countryMap.entries())
+      const analytics: GeographicAnalytics[] = Array.from(countryMap.entries())
         .map(([country, stats]) => ({
           country,
           downloads: stats.downloads,
@@ -534,11 +556,14 @@ export interface VersionAnalytics {
   percentage: number;
 }
 
-export const useVersionAnalytics = (digitalProductId: string, dateRange?: { from: Date; to: Date }) => {
+export const useVersionAnalytics = (
+  digitalProductId: string,
+  dateRange?: { from: Date; to: Date }
+) => {
   return useQuery({
     queryKey: ['version-analytics', digitalProductId, dateRange],
     queryFn: async () => {
-      let  query= supabase
+      let query = supabase
         .from('digital_product_downloads')
         .select('file_version, user_id, download_success')
         .eq('digital_product_id', digitalProductId);
@@ -554,11 +579,14 @@ export const useVersionAnalytics = (digitalProductId: string, dateRange?: { from
       if (error) throw error;
 
       // Group by version
-      const versionMap = new Map<string, { downloads: number; successful: number; users: Set<string> }>();
+      const versionMap = new Map<
+        string,
+        { downloads: number; successful: number; users: Set<string> }
+      >();
 
-      data.forEach((download) => {
+      data.forEach(download => {
         const version = download.file_version || 'Unknown';
-        
+
         if (!versionMap.has(version)) {
           versionMap.set(version, { downloads: 0, successful: 0, users: new Set() });
         }
@@ -575,7 +603,7 @@ export const useVersionAnalytics = (digitalProductId: string, dateRange?: { from
 
       const totalDownloads = data.length;
 
-      const  analytics: VersionAnalytics[] = Array.from(versionMap.entries())
+      const analytics: VersionAnalytics[] = Array.from(versionMap.entries())
         .map(([version, stats]) => ({
           version,
           downloads: stats.downloads,
@@ -590,10 +618,3 @@ export const useVersionAnalytics = (digitalProductId: string, dateRange?: { from
     enabled: !!digitalProductId,
   });
 };
-
-
-
-
-
-
-

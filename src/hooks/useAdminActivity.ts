@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
-const ADMIN_ACTION_FIELDS = 'id, admin_id, action_type, target_type, target_id, details, created_at';
+const ADMIN_ACTION_FIELDS =
+  'id, admin_id, action_type, target_type, target_id, details, created_at';
 
 export interface AdminAction {
   id: string;
@@ -32,7 +33,7 @@ export const useAdminActivity = () => {
 
       // Récupérer les noms des admins
       const actionsWithNames = await Promise.all(
-        (data || []).map(async (action) => {
+        (data || []).map(async action => {
           // Vérifier que admin_id existe avant de faire la requête
           if (!action.admin_id) {
             return {
@@ -49,17 +50,20 @@ export const useAdminActivity = () => {
 
           return {
             ...action,
-            admin_name: profileData && profileData.length > 0 ? profileData[0].display_name || 'Admin' : 'Admin',
+            admin_name:
+              profileData && profileData.length > 0
+                ? profileData[0].display_name || 'Admin'
+                : 'Admin',
           };
         })
       );
 
       setActions(actionsWithNames);
-    } catch ( _error: any) {
+    } catch (_error: any) {
       toast({
-        title: "Erreur",
+        title: 'Erreur',
         description: error.message,
-        variant: "destructive",
+        variant: 'destructive',
       });
     } finally {
       setLoading(false);
@@ -72,9 +76,3 @@ export const useAdminActivity = () => {
 
   return { actions, loading, refetch: fetchActions };
 };
-
-
-
-
-
-

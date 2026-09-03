@@ -11,10 +11,3 @@ export default function CustomerLoyaltyPage() {
   const { t } = useTranslation();
   return <CustomerLoyalty />;
 }
-
-
-
-
-
-
-

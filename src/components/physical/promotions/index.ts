@@ -4,12 +4,3 @@
  */
 
 export { PromotionsManager } from './PromotionsManager';
-
-
-
-
-
-
-
-
-

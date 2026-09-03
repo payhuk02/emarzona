@@ -27,12 +27,15 @@ export function useAdminReviews(filters?: {
   return useQuery({
     queryKey: ['admin-reviews', filters, page, pageSize],
     queryFn: async () => {
-      let  query= supabase
+      let query = supabase
         .from('reviews')
-        .select(`
+        .select(
+          `
           *,
           product:products(name, product_type)
-        `, { count: 'exact' })
+        `,
+          { count: 'exact' }
+        )
         .order('created_at', { ascending: false });
 
       // Apply status filter
@@ -51,7 +54,9 @@ export function useAdminReviews(filters?: {
 
       // Apply search query filter
       if (filters?.searchQuery) {
-        query = query.or(`comment.ilike.%${filters.searchQuery}%,reviewer_name.ilike.%${filters.searchQuery}%`);
+        query = query.or(
+          `comment.ilike.%${filters.searchQuery}%,reviewer_name.ilike.%${filters.searchQuery}%`
+        );
       }
 
       // Apply pagination
@@ -92,7 +97,7 @@ export function useApproveReviews() {
     onError: (error, reviewIds) => {
       toast({
         title: '❌ Erreur',
-        description: 'Impossible d\'approuver les avis.',
+        description: "Impossible d'approuver les avis.",
         variant: 'destructive',
       });
       logger.error('Error approving reviews', { error, reviewIds });
@@ -177,10 +182,7 @@ export function useDeleteReviews() {
 
   return useMutation({
     mutationFn: async (reviewIds: string[]) => {
-      const { error } = await supabase
-        .from('reviews')
-        .delete()
-        .in('id', reviewIds);
+      const { error } = await supabase.from('reviews').delete().in('id', reviewIds);
 
       if (error) throw error;
     },
@@ -211,10 +213,23 @@ export function useAdminReviewStats() {
     queryKey: ['admin-review-stats'],
     queryFn: async () => {
       const [pending, flagged, approved, rejected] = await Promise.all([
-        supabase.from('reviews').select('id', { count: 'exact', head: true }).eq('is_approved', false).eq('is_flagged', false),
-        supabase.from('reviews').select('id', { count: 'exact', head: true }).eq('is_flagged', true),
-        supabase.from('reviews').select('id', { count: 'exact', head: true }).eq('is_approved', true),
-        supabase.from('reviews').select('id', { count: 'exact', head: true }).eq('is_approved', false),
+        supabase
+          .from('reviews')
+          .select('id', { count: 'exact', head: true })
+          .eq('is_approved', false)
+          .eq('is_flagged', false),
+        supabase
+          .from('reviews')
+          .select('id', { count: 'exact', head: true })
+          .eq('is_flagged', true),
+        supabase
+          .from('reviews')
+          .select('id', { count: 'exact', head: true })
+          .eq('is_approved', true),
+        supabase
+          .from('reviews')
+          .select('id', { count: 'exact', head: true })
+          .eq('is_approved', false),
       ]);
 
       return {
@@ -226,10 +241,3 @@ export function useAdminReviewStats() {
     },
   });
 }
-
-
-
-
-
-
-

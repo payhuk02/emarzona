@@ -1,7 +1,7 @@
 /**
  * OptimizedProductList Component
  * Date: 28 Janvier 2025
- * 
+ *
  * Liste de produits optimisée avec React.memo, virtual scrolling et lazy loading
  * Améliore les performances pour les grandes listes
  */
@@ -123,7 +123,7 @@ export function OptimizedProductList<T extends UnifiedProduct>({
             transform: `translateY(${items[0]?.start ?? 0}px)`,
           }}
         >
-          {items.map((virtualItem) => {
+          {items.map(virtualItem => {
             const product = memoizedProducts[virtualItem.index];
             return (
               <div
@@ -143,10 +143,3 @@ export function OptimizedProductList<T extends UnifiedProduct>({
     </div>
   );
 }
-
-
-
-
-
-
-

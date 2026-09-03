@@ -7,10 +7,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { 
-  WithdrawalAdvancedStats, 
-  WithdrawalPeriodStats, 
-  WithdrawalTimeStats 
+import {
+  WithdrawalAdvancedStats,
+  WithdrawalPeriodStats,
+  WithdrawalTimeStats,
 } from '@/types/store-withdrawals';
 import { logger } from '@/lib/logger';
 
@@ -31,7 +31,7 @@ export const useWithdrawalStats = (options: UseWithdrawalStatsOptions = {}) => {
       setLoading(true);
 
       // Récupérer tous les retraits
-      let  query= supabase
+      let query = supabase
         .from('store_withdrawals')
         .select('id, amount, status, payment_method, created_at, processed_at, approved_at');
 
@@ -76,16 +76,16 @@ export const useWithdrawalStats = (options: UseWithdrawalStatsOptions = {}) => {
       // Calculer les statistiques de base
       const total_withdrawals = withdrawals.length;
       const total_amount = withdrawals.reduce((sum, w) => sum + parseFloat(w.amount.toString()), 0);
-      const completed = withdrawals.filter((w) => w.status === 'completed');
+      const completed = withdrawals.filter(w => w.status === 'completed');
       const completed_count = completed.length;
       const success_rate = total_withdrawals > 0 ? (completed_count / total_withdrawals) * 100 : 0;
       const average_amount = total_withdrawals > 0 ? total_amount / total_withdrawals : 0;
 
       // Calculer les statistiques de temps
-      const  processingTimes: number[] = [];
-      const  completionTimes: number[] = [];
+      const processingTimes: number[] = [];
+      const completionTimes: number[] = [];
 
-      withdrawals.forEach((w) => {
+      withdrawals.forEach(w => {
         if (w.approved_at && w.processed_at) {
           const approved = new Date(w.approved_at).getTime();
           const processed = new Date(w.processed_at).getTime();
@@ -101,31 +101,36 @@ export const useWithdrawalStats = (options: UseWithdrawalStatsOptions = {}) => {
         }
       });
 
-      const  time_stats: WithdrawalTimeStats = {
-        average_processing_time_hours: processingTimes.length > 0
-          ? processingTimes.reduce((sum, t) => sum + t, 0) / processingTimes.length
-          : 0,
-        average_completion_time_hours: completionTimes.length > 0
-          ? completionTimes.reduce((sum, t) => sum + t, 0) / completionTimes.length
-          : 0,
+      const time_stats: WithdrawalTimeStats = {
+        average_processing_time_hours:
+          processingTimes.length > 0
+            ? processingTimes.reduce((sum, t) => sum + t, 0) / processingTimes.length
+            : 0,
+        average_completion_time_hours:
+          completionTimes.length > 0
+            ? completionTimes.reduce((sum, t) => sum + t, 0) / completionTimes.length
+            : 0,
         fastest_processing_hours: processingTimes.length > 0 ? Math.min(...processingTimes) : 0,
         slowest_processing_hours: processingTimes.length > 0 ? Math.max(...processingTimes) : 0,
       };
 
       // Calculer les statistiques par période (mensuel)
-      const periodMap = new Map<string, {
-        total_count: number;
-        total_amount: number;
-        completed_count: number;
-        completed_amount: number;
-        failed_count: number;
-        failed_amount: number;
-      }>();
+      const periodMap = new Map<
+        string,
+        {
+          total_count: number;
+          total_amount: number;
+          completed_count: number;
+          completed_amount: number;
+          failed_count: number;
+          failed_amount: number;
+        }
+      >();
 
-      withdrawals.forEach((w) => {
+      withdrawals.forEach(w => {
         const date = new Date(w.created_at);
         const period = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-        
+
         if (!periodMap.has(period)) {
           periodMap.set(period, {
             total_count: 0,
@@ -150,7 +155,7 @@ export const useWithdrawalStats = (options: UseWithdrawalStatsOptions = {}) => {
         }
       });
 
-      const  period_stats: WithdrawalPeriodStats[] = Array.from(periodMap.entries())
+      const period_stats: WithdrawalPeriodStats[] = Array.from(periodMap.entries())
         .map(([period, data]) => ({
           period,
           ...data,
@@ -165,7 +170,7 @@ export const useWithdrawalStats = (options: UseWithdrawalStatsOptions = {}) => {
         bank_transfer: { count: 0, amount: 0, completed: 0 },
       };
 
-      withdrawals.forEach((w) => {
+      withdrawals.forEach(w => {
         const method = w.payment_method as keyof typeof byMethod;
         if (byMethod[method]) {
           byMethod[method].count++;
@@ -180,23 +185,26 @@ export const useWithdrawalStats = (options: UseWithdrawalStatsOptions = {}) => {
         mobile_money: {
           count: byMethod.mobile_money.count,
           amount: byMethod.mobile_money.amount,
-          success_rate: byMethod.mobile_money.count > 0
-            ? (byMethod.mobile_money.completed / byMethod.mobile_money.count) * 100
-            : 0,
+          success_rate:
+            byMethod.mobile_money.count > 0
+              ? (byMethod.mobile_money.completed / byMethod.mobile_money.count) * 100
+              : 0,
         },
         bank_card: {
           count: byMethod.bank_card.count,
           amount: byMethod.bank_card.amount,
-          success_rate: byMethod.bank_card.count > 0
-            ? (byMethod.bank_card.completed / byMethod.bank_card.count) * 100
-            : 0,
+          success_rate:
+            byMethod.bank_card.count > 0
+              ? (byMethod.bank_card.completed / byMethod.bank_card.count) * 100
+              : 0,
         },
         bank_transfer: {
           count: byMethod.bank_transfer.count,
           amount: byMethod.bank_transfer.amount,
-          success_rate: byMethod.bank_transfer.count > 0
-            ? (byMethod.bank_transfer.completed / byMethod.bank_transfer.count) * 100
-            : 0,
+          success_rate:
+            byMethod.bank_transfer.count > 0
+              ? (byMethod.bank_transfer.completed / byMethod.bank_transfer.count) * 100
+              : 0,
         },
       };
 
@@ -209,7 +217,7 @@ export const useWithdrawalStats = (options: UseWithdrawalStatsOptions = {}) => {
         period_stats,
         by_payment_method,
       });
-    } catch ( _error: any) {
+    } catch (_error: any) {
       logger.error('Error fetching withdrawal stats', { error });
       toast({
         title: 'Erreur',
@@ -231,10 +239,3 @@ export const useWithdrawalStats = (options: UseWithdrawalStatsOptions = {}) => {
     refetch: fetchStats,
   };
 };
-
-
-
-
-
-
-

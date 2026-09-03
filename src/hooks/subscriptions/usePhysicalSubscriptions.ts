@@ -1,7 +1,7 @@
 /**
  * Physical Product Subscriptions Hook
  * Date: 30 Janvier 2025
- * 
+ *
  * Hook pour gérer les abonnements de produits physiques
  */
 
@@ -61,7 +61,8 @@ export const useCustomerPhysicalSubscriptions = (customerId?: string) => {
 
       const { data, error } = await supabase
         .from('physical_product_subscriptions')
-        .select(`
+        .select(
+          `
           *,
           physical_product:physical_products!inner (
             id,
@@ -71,7 +72,8 @@ export const useCustomerPhysicalSubscriptions = (customerId?: string) => {
               image_url
             )
           )
-        `)
+        `
+        )
         .eq('customer_id', customerId)
         .order('created_at', { ascending: false });
 
@@ -97,14 +99,16 @@ export const useStorePhysicalSubscriptions = (storeId?: string) => {
 
       const { data, error } = await supabase
         .from('physical_product_subscriptions')
-        .select(`
+        .select(
+          `
           *,
           customer:customers!inner (
             id,
             name,
             email
           )
-        `)
+        `
+        )
         .eq('store_id', storeId)
         .order('created_at', { ascending: false });
 
@@ -145,19 +149,19 @@ export const useCreatePhysicalSubscription = () => {
 
       return data as PhysicalProductSubscription;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['customer-physical-subscriptions'] });
       queryClient.invalidateQueries({ queryKey: ['store-physical-subscriptions'] });
       toast({
         title: '✅ Abonnement créé',
-        description: 'L\'abonnement a été créé avec succès',
+        description: "L'abonnement a été créé avec succès",
       });
     },
     onError: (error: any) => {
       logger.error('Error in useCreatePhysicalSubscription', { error });
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de créer l\'abonnement',
+        description: error.message || "Impossible de créer l'abonnement",
         variant: 'destructive',
       });
     },
@@ -205,23 +209,16 @@ export const useCancelPhysicalSubscription = () => {
       queryClient.invalidateQueries({ queryKey: ['store-physical-subscriptions'] });
       toast({
         title: '✅ Abonnement annulé',
-        description: 'L\'abonnement a été annulé avec succès',
+        description: "L'abonnement a été annulé avec succès",
       });
     },
     onError: (error: any) => {
       logger.error('Error in useCancelPhysicalSubscription', { error });
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible d\'annuler l\'abonnement',
+        description: error.message || "Impossible d'annuler l'abonnement",
         variant: 'destructive',
       });
     },
   });
 };
-
-
-
-
-
-
-

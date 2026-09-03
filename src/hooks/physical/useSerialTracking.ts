@@ -6,10 +6,14 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
-const SERIAL_NUMBER_FIELDS = 'id, physical_product_id, variant_id, lot_id, serial_number, imei, mac_address, barcode, qr_code, status, warehouse_id, bin_location, current_location, order_id, order_item_id, customer_id, manufacturing_date, manufacturing_location, batch_number, warranty_start_date, warranty_end_date, warranty_duration_months, warranty_type, notes, created_at, updated_at';
-const SERIAL_NUMBER_HISTORY_FIELDS = 'id, serial_number_id, event_type, from_location, to_location, from_warehouse_id, to_warehouse_id, from_customer_id, to_customer_id, order_id, order_item_id, return_id, warranty_claim_id, repair_id, description, notes, performed_by, metadata, event_date, created_at';
-const WARRANTY_CLAIM_FIELDS = 'id, serial_number_id, order_id, customer_id, claim_number, claim_date, issue_description, reported_by, status, resolution_type, resolution_notes, resolved_by, resolved_at, repair_cost, shipping_cost, total_cost, created_at, updated_at';
-const REPAIR_FIELDS = 'id, serial_number_id, warranty_claim_id, repair_number, repair_type, status, issue_description, diagnosis, repair_description, parts_used, labor_hours, parts_cost, labor_cost, shipping_cost, total_cost, received_date, started_date, completed_date, returned_date, technician_id, repair_center_id, internal_notes, customer_notes, created_at, updated_at';
+const SERIAL_NUMBER_FIELDS =
+  'id, physical_product_id, variant_id, lot_id, serial_number, imei, mac_address, barcode, qr_code, status, warehouse_id, bin_location, current_location, order_id, order_item_id, customer_id, manufacturing_date, manufacturing_location, batch_number, warranty_start_date, warranty_end_date, warranty_duration_months, warranty_type, notes, created_at, updated_at';
+const SERIAL_NUMBER_HISTORY_FIELDS =
+  'id, serial_number_id, event_type, from_location, to_location, from_warehouse_id, to_warehouse_id, from_customer_id, to_customer_id, order_id, order_item_id, return_id, warranty_claim_id, repair_id, description, notes, performed_by, metadata, event_date, created_at';
+const WARRANTY_CLAIM_FIELDS =
+  'id, serial_number_id, order_id, customer_id, claim_number, claim_date, issue_description, reported_by, status, resolution_type, resolution_notes, resolved_by, resolved_at, repair_cost, shipping_cost, total_cost, created_at, updated_at';
+const REPAIR_FIELDS =
+  'id, serial_number_id, warranty_claim_id, repair_number, repair_type, status, issue_description, diagnosis, repair_description, parts_used, labor_hours, parts_cost, labor_cost, shipping_cost, total_cost, received_date, started_date, completed_date, returned_date, technician_id, repair_center_id, internal_notes, customer_notes, created_at, updated_at';
 
 // =====================================================
 // TYPES
@@ -25,7 +29,18 @@ export interface SerialNumber {
   mac_address?: string;
   barcode?: string;
   qr_code?: string;
-  status: 'manufactured' | 'in_stock' | 'reserved' | 'sold' | 'shipped' | 'delivered' | 'returned' | 'refurbished' | 'warranty_repair' | 'damaged' | 'scrapped';
+  status:
+    | 'manufactured'
+    | 'in_stock'
+    | 'reserved'
+    | 'sold'
+    | 'shipped'
+    | 'delivered'
+    | 'returned'
+    | 'refurbished'
+    | 'warranty_repair'
+    | 'damaged'
+    | 'scrapped';
   warehouse_id?: string;
   bin_location?: string;
   current_location?: string;
@@ -47,7 +62,22 @@ export interface SerialNumber {
 export interface SerialNumberHistory {
   id: string;
   serial_number_id: string;
-  event_type: 'manufactured' | 'received' | 'reserved' | 'sold' | 'shipped' | 'delivered' | 'returned' | 'refurbished' | 'warranty_claim' | 'repair_started' | 'repair_completed' | 'transferred' | 'damaged' | 'scrapped' | 'status_changed';
+  event_type:
+    | 'manufactured'
+    | 'received'
+    | 'reserved'
+    | 'sold'
+    | 'shipped'
+    | 'delivered'
+    | 'returned'
+    | 'refurbished'
+    | 'warranty_claim'
+    | 'repair_started'
+    | 'repair_completed'
+    | 'transferred'
+    | 'damaged'
+    | 'scrapped'
+    | 'status_changed';
   from_location?: string;
   to_location?: string;
   from_warehouse_id?: string;
@@ -76,7 +106,17 @@ export interface WarrantyClaim {
   claim_date: string;
   issue_description: string;
   reported_by?: string;
-  status: 'pending' | 'under_review' | 'approved' | 'rejected' | 'repair_in_progress' | 'repaired' | 'replacement_sent' | 'refunded' | 'resolved' | 'cancelled';
+  status:
+    | 'pending'
+    | 'under_review'
+    | 'approved'
+    | 'rejected'
+    | 'repair_in_progress'
+    | 'repaired'
+    | 'replacement_sent'
+    | 'refunded'
+    | 'resolved'
+    | 'cancelled';
   resolution_type?: 'repair' | 'replacement' | 'refund' | 'credit' | 'denied';
   resolution_notes?: string;
   resolved_by?: string;
@@ -94,7 +134,14 @@ export interface Repair {
   warranty_claim_id?: string;
   repair_number: string;
   repair_type: 'warranty' | 'out_of_warranty' | 'customer_paid';
-  status: 'received' | 'diagnosed' | 'in_progress' | 'waiting_parts' | 'completed' | 'returned' | 'cancelled';
+  status:
+    | 'received'
+    | 'diagnosed'
+    | 'in_progress'
+    | 'waiting_parts'
+    | 'completed'
+    | 'returned'
+    | 'cancelled';
   issue_description: string;
   diagnosis?: string;
   repair_description?: string;
@@ -134,7 +181,7 @@ export const useProductSerialNumbers = (
   return useQuery({
     queryKey: ['product-serial-numbers', physicalProductId, options],
     queryFn: async () => {
-      let  query= supabase
+      let query = supabase
         .from('serial_numbers')
         .select(SERIAL_NUMBER_FIELDS)
         .eq('physical_product_id', physicalProductId)
@@ -213,7 +260,7 @@ export const useCreateSerialNumber = () => {
       if (error) throw error;
       return data as SerialNumber;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({
         queryKey: ['product-serial-numbers', data.physical_product_id],
       });
@@ -245,7 +292,7 @@ export const useUpdateSerialNumber = () => {
       if (error) throw error;
       return data as SerialNumber;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['serial-number', data.id] });
       queryClient.invalidateQueries({
         queryKey: ['product-serial-numbers', data.physical_product_id],
@@ -263,15 +310,12 @@ export const useBulkCreateSerialNumbers = () => {
 
   return useMutation({
     mutationFn: async (serials: Array<Omit<SerialNumber, 'id' | 'created_at' | 'updated_at'>>) => {
-      const { data, error } = await supabase
-        .from('serial_numbers')
-        .insert(serials)
-        .select();
+      const { data, error } = await supabase.from('serial_numbers').insert(serials).select();
 
       if (error) throw error;
       return data as SerialNumber[];
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       if (data.length > 0) {
         queryClient.invalidateQueries({
           queryKey: ['product-serial-numbers', data[0].physical_product_id],
@@ -348,7 +392,7 @@ export const useCreateSerialHistory = () => {
       if (error) throw error;
       return data as SerialNumberHistory;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['serial-history', data.serial_number_id] });
       queryClient.invalidateQueries({ queryKey: ['serial-traceability', data.serial_number_id] });
     },
@@ -370,7 +414,7 @@ export const useWarrantyClaims = (options?: {
   return useQuery({
     queryKey: ['warranty-claims', options],
     queryFn: async () => {
-      let  query= supabase
+      let query = supabase
         .from('warranty_claims')
         .select(WARRANTY_CLAIM_FIELDS)
         .order('claim_date', { ascending: false });
@@ -400,8 +444,12 @@ export const useCreateWarrantyClaim = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (claim: Omit<WarrantyClaim, 'id' | 'created_at' | 'updated_at' | 'claim_number'>) => {
-      const { data: { user } } = await supabase.auth.getUser();
+    mutationFn: async (
+      claim: Omit<WarrantyClaim, 'id' | 'created_at' | 'updated_at' | 'claim_number'>
+    ) => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
       // Generate claim number
       const claimNumber = `WC-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
@@ -419,7 +467,7 @@ export const useCreateWarrantyClaim = () => {
       if (error) throw error;
       return data as WarrantyClaim;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['warranty-claims'] });
       queryClient.invalidateQueries({ queryKey: ['serial-number', data.serial_number_id] });
       queryClient.invalidateQueries({ queryKey: ['serial-history', data.serial_number_id] });
@@ -441,7 +489,9 @@ export const useUpdateWarrantyClaim = () => {
       claimId: string;
       updates: Partial<WarrantyClaim>;
     }) => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
       if (updates.status === 'resolved' && !updates.resolved_at) {
         updates.resolved_at = new Date().toISOString();
@@ -458,7 +508,7 @@ export const useUpdateWarrantyClaim = () => {
       if (error) throw error;
       return data as WarrantyClaim;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['warranty-claims'] });
       queryClient.invalidateQueries({ queryKey: ['serial-number', data.serial_number_id] });
     },
@@ -480,7 +530,7 @@ export const useRepairs = (options?: {
   return useQuery({
     queryKey: ['repairs', options],
     queryFn: async () => {
-      let  query= supabase
+      let query = supabase
         .from('repairs')
         .select(REPAIR_FIELDS)
         .order('received_date', { ascending: false });
@@ -510,7 +560,9 @@ export const useCreateRepair = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (repair: Omit<Repair, 'id' | 'created_at' | 'updated_at' | 'repair_number'>) => {
+    mutationFn: async (
+      repair: Omit<Repair, 'id' | 'created_at' | 'updated_at' | 'repair_number'>
+    ) => {
       // Generate repair number
       const repairNumber = `REP-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
 
@@ -526,7 +578,7 @@ export const useCreateRepair = () => {
       if (error) throw error;
       return data as Repair;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['repairs'] });
       queryClient.invalidateQueries({ queryKey: ['serial-number', data.serial_number_id] });
       queryClient.invalidateQueries({ queryKey: ['serial-history', data.serial_number_id] });
@@ -541,13 +593,7 @@ export const useUpdateRepair = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({
-      repairId,
-      updates,
-    }: {
-      repairId: string;
-      updates: Partial<Repair>;
-    }) => {
+    mutationFn: async ({ repairId, updates }: { repairId: string; updates: Partial<Repair> }) => {
       const { data, error } = await supabase
         .from('repairs')
         .update(updates)
@@ -558,7 +604,7 @@ export const useUpdateRepair = () => {
       if (error) throw error;
       return data as Repair;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['repairs'] });
       queryClient.invalidateQueries({ queryKey: ['serial-number', data.serial_number_id] });
     },
@@ -586,12 +632,3 @@ export const useCheckSerialAvailability = (serialNumber: string) => {
     enabled: !!serialNumber,
   });
 };
-
-
-
-
-
-
-
-
-

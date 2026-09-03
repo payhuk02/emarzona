@@ -34,10 +34,9 @@ export async function verifyGeniusPayWebhookSignature(
     return constantTimeEquals(calculatedSignature, signature);
   } catch (error) {
     logger.error('Error verifying webhook signature', { error });
-    throw new GeniusPayWebhookSignatureError(
-      'Failed to verify webhook signature',
-      { error: error instanceof Error ? error.message : 'Unknown error' }
-    );
+    throw new GeniusPayWebhookSignatureError('Failed to verify webhook signature', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
   }
 }
 
@@ -60,7 +59,7 @@ async function calculateHMACSignature(payload: string, secret: string): Promise<
 
   // Générer la signature
   const signature = await crypto.subtle.sign('HMAC', key, messageData);
-  
+
   // Convertir en hexadécimal
   const hashArray = Array.from(new Uint8Array(signature));
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
@@ -75,8 +74,8 @@ function constantTimeEquals(a: string, b: string): boolean {
     return false;
   }
 
-  let  result= 0;
-  for (let  i= 0; i < a.length; i++) {
+  let result = 0;
+  for (let i = 0; i < a.length; i++) {
     result |= a.charCodeAt(i) ^ b.charCodeAt(i);
   }
 
@@ -89,9 +88,10 @@ function constantTimeEquals(a: string, b: string): boolean {
  */
 export function extractSignatureFromHeader(headers: Headers): string | null {
   // Essayer différents formats d'en-tête
-  const signature = headers.get('x-geniuspay-signature') || 
-                   headers.get('X-GeniusPay-Signature') ||
-                   headers.get('geniuspay-signature');
+  const signature =
+    headers.get('x-geniuspay-signature') ||
+    headers.get('X-GeniusPay-Signature') ||
+    headers.get('geniuspay-signature');
 
   if (!signature) {
     return null;
@@ -118,33 +118,16 @@ export async function validateGeniusPayWebhook(
   const signature = extractSignatureFromHeader(headers);
 
   if (!signature) {
-    throw new GeniusPayWebhookSignatureError(
-      'Webhook signature header missing',
-      { headers: Object.fromEntries(headers.entries()) }
-    );
+    throw new GeniusPayWebhookSignatureError('Webhook signature header missing', {
+      headers: Object.fromEntries(headers.entries()),
+    });
   }
 
   const isValid = await verifyGeniusPayWebhookSignature(payload, signature, secret);
 
   if (!isValid) {
-    throw new GeniusPayWebhookSignatureError(
-      'Invalid webhook signature',
-      { 
-        receivedSignature: signature.substring(0, 20) + '...', // Log partiel pour sécurité
-      }
-    );
+    throw new GeniusPayWebhookSignatureError('Invalid webhook signature', {
+      receivedSignature: signature.substring(0, 20) + '...', // Log partiel pour sécurité
+    });
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

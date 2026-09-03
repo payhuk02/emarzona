@@ -14,11 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   Lock,
   Unlock,
@@ -83,20 +79,20 @@ export interface AccessConfig {
   dripContentType: DripContentType;
   dripInterval?: number; // jours entre chaque leçon
   dripStartDate?: Date | string;
-  
+
   // Prérequis
   prerequisitesEnabled: boolean;
   prerequisites: CoursePrerequisite[];
-  
+
   // Limitations temporelles
   timeLimitEnabled: boolean;
   accessStartDate?: Date | string;
   accessEndDate?: Date | string;
-  
+
   // Restrictions géographiques
   geoRestrictionEnabled: boolean;
   geoRestriction?: GeoRestriction;
-  
+
   // Autres
   requireEmailVerification: boolean;
   maxDevices?: number;
@@ -108,29 +104,29 @@ export interface AccessConfig {
 export interface CourseAccessManagerProps {
   /** ID du cours */
   courseId: string;
-  
+
   /** Configuration actuelle */
   currentConfig: AccessConfig;
-  
+
   /** Leçons du cours */
   lessons: AccessControlledLesson[];
-  
+
   /** Callback de mise à jour */
   onUpdateConfig?: (config: AccessConfig) => void;
-  
+
   /** Callback de mise à jour des leçons */
   onUpdateLessons?: (lessons: AccessControlledLesson[]) => void;
-  
+
   /** Classe CSS personnalisée */
   className?: string;
 }
 
 /**
  * CourseAccessManager - Gestionnaire de contrôle d'accès aux cours
- * 
+ *
  * @example
  * ```tsx
- * <CourseAccessManager 
+ * <CourseAccessManager
  *   courseId="CRS-001"
  *   currentConfig={accessConfig}
  *   lessons={courseLessons}
@@ -138,7 +134,7 @@ export interface CourseAccessManagerProps {
  * />
  * ```
  */
-export const CourseAccessManager : React.FC<CourseAccessManagerProps> = ({
+export const CourseAccessManager: React.FC<CourseAccessManagerProps> = ({
   courseId,
   currentConfig,
   lessons,
@@ -158,7 +154,7 @@ export const CourseAccessManager : React.FC<CourseAccessManagerProps> = ({
 
   // Verrouiller/Déverrouiller une leçon
   const toggleLessonLock = (lessonId: string) => {
-    const updatedLessons = lessons.map((lesson) =>
+    const updatedLessons = lessons.map(lesson =>
       lesson.id === lessonId ? { ...lesson, isLocked: !lesson.isLocked } : lesson
     );
     onUpdateLessons?.(updatedLessons);
@@ -171,17 +167,15 @@ export const CourseAccessManager : React.FC<CourseAccessManagerProps> = ({
   };
 
   // Compter les leçons verrouillées/déverrouillées
-  const unlockedCount = lessons.filter((l) => !l.isLocked).length;
-  const lockedCount = lessons.filter((l) => l.isLocked).length;
+  const unlockedCount = lessons.filter(l => !l.isLocked).length;
+  const lockedCount = lessons.filter(l => l.isLocked).length;
 
   return (
     <div className={cn('space-y-6', className)}>
       {/* Header */}
       <div>
         <h2 className="text-2xl font-bold">Contrôle d'Accès au Cours</h2>
-        <p className="text-muted-foreground">
-          Gérez qui peut accéder au cours et quand
-        </p>
+        <p className="text-muted-foreground">Gérez qui peut accéder au cours et quand</p>
       </div>
 
       {/* Statistiques rapides */}
@@ -232,14 +226,12 @@ export const CourseAccessManager : React.FC<CourseAccessManagerProps> = ({
             </div>
             <div>
               <h3 className="font-semibold">Drip Content</h3>
-              <p className="text-sm text-muted-foreground">
-                Libérez le contenu progressivement
-              </p>
+              <p className="text-sm text-muted-foreground">Libérez le contenu progressivement</p>
             </div>
           </div>
           <Switch
             checked={config.dripContentEnabled}
-            onCheckedChange={(checked) => updateConfig({ dripContentEnabled: checked })}
+            onCheckedChange={checked => updateConfig({ dripContentEnabled: checked })}
           />
         </div>
 
@@ -283,13 +275,9 @@ export const CourseAccessManager : React.FC<CourseAccessManagerProps> = ({
                         <Calendar
                           mode="single"
                           selected={
-                            config.dripStartDate
-                              ? new Date(config.dripStartDate)
-                              : undefined
+                            config.dripStartDate ? new Date(config.dripStartDate) : undefined
                           }
-                          onSelect={(date) =>
-                            updateConfig({ dripStartDate: date?.toISOString() })
-                          }
+                          onSelect={date => updateConfig({ dripStartDate: date?.toISOString() })}
                         />
                       </PopoverContent>
                     </Popover>
@@ -300,9 +288,7 @@ export const CourseAccessManager : React.FC<CourseAccessManagerProps> = ({
                     <Input
                       type="number"
                       value={config.dripInterval || 1}
-                      onChange={(e) =>
-                        updateConfig({ dripInterval: parseInt(e.target.value) || 1 })
-                      }
+                      onChange={e => updateConfig({ dripInterval: parseInt(e.target.value) || 1 })}
                       min={1}
                     />
                   </div>
@@ -339,14 +325,12 @@ export const CourseAccessManager : React.FC<CourseAccessManagerProps> = ({
             </div>
             <div>
               <h3 className="font-semibold">Prérequis</h3>
-              <p className="text-sm text-muted-foreground">
-                Cours requis avant inscription
-              </p>
+              <p className="text-sm text-muted-foreground">Cours requis avant inscription</p>
             </div>
           </div>
           <Switch
             checked={config.prerequisitesEnabled}
-            onCheckedChange={(checked) => updateConfig({ prerequisitesEnabled: checked })}
+            onCheckedChange={checked => updateConfig({ prerequisitesEnabled: checked })}
           />
         </div>
 
@@ -354,7 +338,7 @@ export const CourseAccessManager : React.FC<CourseAccessManagerProps> = ({
           <>
             <Separator className="my-4" />
             <div className="space-y-2">
-              {config.prerequisites.map((prereq) => (
+              {config.prerequisites.map(prereq => (
                 <div
                   key={prereq.id}
                   className="flex items-center justify-between p-3 border rounded-lg"
@@ -386,14 +370,12 @@ export const CourseAccessManager : React.FC<CourseAccessManagerProps> = ({
             </div>
             <div>
               <h3 className="font-semibold">Limitations Temporelles</h3>
-              <p className="text-sm text-muted-foreground">
-                Période d'accès au cours
-              </p>
+              <p className="text-sm text-muted-foreground">Période d'accès au cours</p>
             </div>
           </div>
           <Switch
             checked={config.timeLimitEnabled}
-            onCheckedChange={(checked) => updateConfig({ timeLimitEnabled: checked })}
+            onCheckedChange={checked => updateConfig({ timeLimitEnabled: checked })}
           />
         </div>
 
@@ -407,22 +389,16 @@ export const CourseAccessManager : React.FC<CourseAccessManagerProps> = ({
                   <PopoverTrigger asChild>
                     <Button variant="outline" className="w-full justify-start">
                       <CalendarIcon className="h-4 w-4 mr-2" />
-                      {config.accessStartDate
-                        ? formatDate(config.accessStartDate)
-                        : 'Début'}
+                      {config.accessStartDate ? formatDate(config.accessStartDate) : 'Début'}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0">
                     <Calendar
                       mode="single"
                       selected={
-                        config.accessStartDate
-                          ? new Date(config.accessStartDate)
-                          : undefined
+                        config.accessStartDate ? new Date(config.accessStartDate) : undefined
                       }
-                      onSelect={(date) =>
-                        updateConfig({ accessStartDate: date?.toISOString() })
-                      }
+                      onSelect={date => updateConfig({ accessStartDate: date?.toISOString() })}
                     />
                   </PopoverContent>
                 </Popover>
@@ -434,22 +410,14 @@ export const CourseAccessManager : React.FC<CourseAccessManagerProps> = ({
                   <PopoverTrigger asChild>
                     <Button variant="outline" className="w-full justify-start">
                       <CalendarIcon className="h-4 w-4 mr-2" />
-                      {config.accessEndDate
-                        ? formatDate(config.accessEndDate)
-                        : 'Fin'}
+                      {config.accessEndDate ? formatDate(config.accessEndDate) : 'Fin'}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0">
                     <Calendar
                       mode="single"
-                      selected={
-                        config.accessEndDate
-                          ? new Date(config.accessEndDate)
-                          : undefined
-                      }
-                      onSelect={(date) =>
-                        updateConfig({ accessEndDate: date?.toISOString() })
-                      }
+                      selected={config.accessEndDate ? new Date(config.accessEndDate) : undefined}
+                      onSelect={date => updateConfig({ accessEndDate: date?.toISOString() })}
                     />
                   </PopoverContent>
                 </Popover>
@@ -468,16 +436,12 @@ export const CourseAccessManager : React.FC<CourseAccessManagerProps> = ({
             </div>
             <div>
               <h3 className="font-semibold">Restrictions Géographiques</h3>
-              <p className="text-sm text-muted-foreground">
-                Limiter l'accès par pays
-              </p>
+              <p className="text-sm text-muted-foreground">Limiter l'accès par pays</p>
             </div>
           </div>
           <Switch
             checked={config.geoRestrictionEnabled}
-            onCheckedChange={(checked) =>
-              updateConfig({ geoRestrictionEnabled: checked })
-            }
+            onCheckedChange={checked => updateConfig({ geoRestrictionEnabled: checked })}
           />
         </div>
 
@@ -490,8 +454,7 @@ export const CourseAccessManager : React.FC<CourseAccessManagerProps> = ({
                 <div className="text-sm">
                   <p className="font-medium text-yellow-700">Fonctionnalité Avancée</p>
                   <p className="text-yellow-600 mt-1">
-                    La restriction géographique nécessite une configuration backend
-                    supplémentaire.
+                    La restriction géographique nécessite une configuration backend supplémentaire.
                   </p>
                 </div>
               </div>
@@ -516,9 +479,7 @@ export const CourseAccessManager : React.FC<CourseAccessManagerProps> = ({
             </div>
             <Switch
               checked={config.requireEmailVerification}
-              onCheckedChange={(checked) =>
-                updateConfig({ requireEmailVerification: checked })
-              }
+              onCheckedChange={checked => updateConfig({ requireEmailVerification: checked })}
             />
           </div>
 
@@ -529,9 +490,7 @@ export const CourseAccessManager : React.FC<CourseAccessManagerProps> = ({
             <Input
               type="number"
               value={config.maxDevices || ''}
-              onChange={(e) =>
-                updateConfig({ maxDevices: parseInt(e.target.value) || undefined })
-              }
+              onChange={e => updateConfig({ maxDevices: parseInt(e.target.value) || undefined })}
               placeholder="Illimité"
               min={1}
             />
@@ -546,7 +505,7 @@ export const CourseAccessManager : React.FC<CourseAccessManagerProps> = ({
       <Card className="p-6">
         <h3 className="font-semibold mb-4">Gestion des Leçons Individuelles</h3>
         <div className="space-y-2">
-          {lessons.map((lesson) => (
+          {lessons.map(lesson => (
             <div
               key={lesson.id}
               className={cn(
@@ -555,12 +514,7 @@ export const CourseAccessManager : React.FC<CourseAccessManagerProps> = ({
               )}
             >
               <div className="flex items-center gap-3">
-                <div
-                  className={cn(
-                    'p-2 rounded',
-                    lesson.isLocked ? 'bg-red-100' : 'bg-green-100'
-                  )}
-                >
+                <div className={cn('p-2 rounded', lesson.isLocked ? 'bg-red-100' : 'bg-green-100')}>
                   {lesson.isLocked ? (
                     <Lock className="h-4 w-4 text-red-600" />
                   ) : (
@@ -574,11 +528,7 @@ export const CourseAccessManager : React.FC<CourseAccessManagerProps> = ({
                   </p>
                 </div>
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => toggleLessonLock(lesson.id)}
-              >
+              <Button variant="ghost" size="sm" onClick={() => toggleLessonLock(lesson.id)}>
                 {lesson.isLocked ? 'Déverrouiller' : 'Verrouiller'}
               </Button>
             </div>
@@ -592,11 +542,3 @@ export const CourseAccessManager : React.FC<CourseAccessManagerProps> = ({
 CourseAccessManager.displayName = 'CourseAccessManager';
 
 export default CourseAccessManager;
-
-
-
-
-
-
-
-

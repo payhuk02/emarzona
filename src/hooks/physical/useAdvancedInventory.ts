@@ -1,7 +1,7 @@
 /**
  * Advanced Inventory Management Hooks
  * Date: 2025-01-28
- * 
+ *
  * Hooks for managing multi-warehouse inventory, stock movements, and alerts
  */
 
@@ -10,9 +10,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 
-const WAREHOUSE_FIELDS = 'id, store_id, name, code, description, address_line1, address_line2, city, state, postal_code, country, phone, email, is_active, is_default, priority, created_at, updated_at';
-const ADVANCED_STOCK_MOVEMENT_FIELDS = 'id, inventory_item_id, movement_type, quantity, order_id, user_id, reason, notes, unit_cost, total_cost, movement_date, created_at';
-const WAREHOUSE_INVENTORY_FIELDS = 'id, warehouse_id, inventory_item_id, quantity_available, quantity_reserved, quantity_committed, bin_location, reorder_point, reorder_quantity, max_stock_level, last_counted_at, created_at, updated_at';
+const WAREHOUSE_FIELDS =
+  'id, store_id, name, code, description, address_line1, address_line2, city, state, postal_code, country, phone, email, is_active, is_default, priority, created_at, updated_at';
+const ADVANCED_STOCK_MOVEMENT_FIELDS =
+  'id, inventory_item_id, movement_type, quantity, order_id, user_id, reason, notes, unit_cost, total_cost, movement_date, created_at';
+const WAREHOUSE_INVENTORY_FIELDS =
+  'id, warehouse_id, inventory_item_id, quantity_available, quantity_reserved, quantity_committed, bin_location, reorder_point, reorder_quantity, max_stock_level, last_counted_at, created_at, updated_at';
 const ADVANCED_INVENTORY_ITEM_FIELDS = 'id, sku, physical_product_id, variant_id';
 
 // =====================================================
@@ -153,16 +156,12 @@ export const useCreateWarehouse = () => {
 
   return useMutation({
     mutationFn: async (warehouse: Omit<Warehouse, 'id' | 'created_at' | 'updated_at'>) => {
-      const { data, error } = await supabase
-        .from('warehouses')
-        .insert(warehouse)
-        .select()
-        .single();
+      const { data, error } = await supabase.from('warehouses').insert(warehouse).select().single();
 
       if (error) throw error;
       return data as Warehouse;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['warehouses', data.store_id] });
       toast({
         title: 'Entrepôt créé',
@@ -173,7 +172,7 @@ export const useCreateWarehouse = () => {
     onError: (error: any) => {
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible de créer l\'entrepôt.',
+        description: error.message || "Impossible de créer l'entrepôt.",
         variant: 'destructive',
       });
       logger.error('Error creating warehouse', { error });
@@ -200,7 +199,7 @@ export const useUpdateWarehouse = () => {
       if (error) throw error;
       return data as Warehouse;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['warehouses', data.store_id] });
       queryClient.invalidateQueries({ queryKey: ['warehouse', data.id] });
       toast({
@@ -211,7 +210,7 @@ export const useUpdateWarehouse = () => {
     onError: (error: any) => {
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible de mettre à jour l\'entrepôt.',
+        description: error.message || "Impossible de mettre à jour l'entrepôt.",
         variant: 'destructive',
       });
     },
@@ -227,10 +226,7 @@ export const useDeleteWarehouse = () => {
 
   return useMutation({
     mutationFn: async (warehouseId: string) => {
-      const { error } = await supabase
-        .from('warehouses')
-        .delete()
-        .eq('id', warehouseId);
+      const { error } = await supabase.from('warehouses').delete().eq('id', warehouseId);
 
       if (error) throw error;
     },
@@ -238,14 +234,14 @@ export const useDeleteWarehouse = () => {
       queryClient.invalidateQueries({ queryKey: ['warehouses'] });
       toast({
         title: 'Entrepôt supprimé',
-        description: 'L\'entrepôt a été supprimé avec succès.',
+        description: "L'entrepôt a été supprimé avec succès.",
       });
       logger.info('Warehouse deleted', { warehouseId });
     },
     onError: (error: any) => {
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible de supprimer l\'entrepôt.',
+        description: error.message || "Impossible de supprimer l'entrepôt.",
         variant: 'destructive',
       });
     },
@@ -267,13 +263,15 @@ export const useWarehouseInventory = (warehouseId?: string) => {
 
       const { data, error } = await supabase
         .from('warehouse_inventory')
-        .select(`
+        .select(
+          `
           ${WAREHOUSE_INVENTORY_FIELDS},
           warehouse:warehouses(${WAREHOUSE_FIELDS}),
           inventory_item:inventory_items(
             ${ADVANCED_INVENTORY_ITEM_FIELDS}
           )
-        `)
+        `
+        )
         .eq('warehouse_id', warehouseId)
         .order('created_at', { ascending: false });
 
@@ -295,10 +293,12 @@ export const useInventoryByItem = (inventoryItemId?: string) => {
 
       const { data, error } = await supabase
         .from('warehouse_inventory')
-        .select(`
+        .select(
+          `
           ${WAREHOUSE_INVENTORY_FIELDS},
           warehouse:warehouses(${WAREHOUSE_FIELDS})
-        `)
+        `
+        )
         .eq('inventory_item_id', inventoryItemId);
 
       if (error) throw error;
@@ -316,10 +316,7 @@ export const useUpdateWarehouseInventory = () => {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({
-      id,
-      ...updates
-    }: Partial<WarehouseInventory> & { id: string }) => {
+    mutationFn: async ({ id, ...updates }: Partial<WarehouseInventory> & { id: string }) => {
       const { data, error } = await supabase
         .from('warehouse_inventory')
         .update(updates)
@@ -330,7 +327,7 @@ export const useUpdateWarehouseInventory = () => {
       if (error) throw error;
       return data as WarehouseInventory;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['warehouse-inventory'] });
       queryClient.invalidateQueries({ queryKey: ['inventory-by-item'] });
       toast({
@@ -369,7 +366,7 @@ export const useStockAlerts = (storeId?: string, resolved?: boolean) => {
 
       if (!warehouses || warehouses.length === 0) return [];
 
-      const warehouseIds = warehouses.map((w) => w.id);
+      const warehouseIds = warehouses.map(w => w.id);
 
       // Get warehouse inventory IDs
       const { data: inventory } = await supabase
@@ -379,19 +376,21 @@ export const useStockAlerts = (storeId?: string, resolved?: boolean) => {
 
       if (!inventory || inventory.length === 0) return [];
 
-      const inventoryIds = inventory.map((i) => i.id);
+      const inventoryIds = inventory.map(i => i.id);
 
       // Get alerts
-      let  query= supabase
+      let query = supabase
         .from('stock_alerts')
-        .select(`
+        .select(
+          `
           *,
           warehouse_inventory:warehouse_inventory(
             ${WAREHOUSE_INVENTORY_FIELDS},
             warehouse:warehouses(${WAREHOUSE_FIELDS}),
             inventory_item:inventory_items(${ADVANCED_INVENTORY_ITEM_FIELDS})
           )
-        `)
+        `
+        )
         .in('warehouse_inventory_id', inventoryIds);
 
       if (resolved !== undefined) {
@@ -417,14 +416,10 @@ export const useResolveStockAlert = () => {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({
-      id,
-      resolution_notes,
-    }: {
-      id: string;
-      resolution_notes?: string;
-    }) => {
-      const { data: { user } } = await supabase.auth.getUser();
+    mutationFn: async ({ id, resolution_notes }: { id: string; resolution_notes?: string }) => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
       const { data, error } = await supabase
         .from('stock_alerts')
@@ -445,13 +440,13 @@ export const useResolveStockAlert = () => {
       queryClient.invalidateQueries({ queryKey: ['stock-alerts'] });
       toast({
         title: 'Alerte résolue',
-        description: 'L\'alerte de stock a été marquée comme résolue.',
+        description: "L'alerte de stock a été marquée comme résolue.",
       });
     },
     onError: (error: any) => {
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible de résoudre l\'alerte.',
+        description: error.message || "Impossible de résoudre l'alerte.",
         variant: 'destructive',
       });
     },
@@ -469,7 +464,7 @@ export const useStockMovements = (inventoryItemId?: string, limit = 50) => {
   return useQuery({
     queryKey: ['stock-movements', inventoryItemId, limit],
     queryFn: async () => {
-      let  query= supabase
+      let query = supabase
         .from('stock_movements')
         .select(ADVANCED_STOCK_MOVEMENT_FIELDS)
         .order('movement_date', { ascending: false })
@@ -495,10 +490,10 @@ export const useCreateStockMovement = () => {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async (
-      movement: Omit<StockMovement, 'id' | 'created_at' | 'total_cost'>
-    ) => {
-      const { data: { user } } = await supabase.auth.getUser();
+    mutationFn: async (movement: Omit<StockMovement, 'id' | 'created_at' | 'total_cost'>) => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
       const { data, error } = await supabase
         .from('stock_movements')
@@ -512,7 +507,7 @@ export const useCreateStockMovement = () => {
       if (error) throw error;
       return data as StockMovement;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['stock-movements'] });
       queryClient.invalidateQueries({ queryKey: ['warehouse-inventory'] });
       queryClient.invalidateQueries({ queryKey: ['inventory-by-item'] });
@@ -525,18 +520,9 @@ export const useCreateStockMovement = () => {
     onError: (error: any) => {
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible d\'enregistrer le mouvement.',
+        description: error.message || "Impossible d'enregistrer le mouvement.",
         variant: 'destructive',
       });
     },
   });
 };
-
-
-
-
-
-
-
-
-

@@ -279,4 +279,3 @@ export function applySecurityHeaders(headers: Headers): void {
     headers.set(key, value);
   });
 }
-

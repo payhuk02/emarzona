@@ -66,7 +66,7 @@ export const useCreateEmailSegment = () => {
     mutationFn: async (payload: CreateSegmentPayload): Promise<EmailSegment> => {
       return EmailSegmentService.createSegment(payload);
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['email-segments', data.store_id] });
       queryClient.setQueryData(['email-segment', data.id], data);
       toast({
@@ -102,7 +102,7 @@ export const useUpdateEmailSegment = () => {
     }): Promise<EmailSegment> => {
       return EmailSegmentService.updateSegment(segmentId, payload);
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['email-segments', data.store_id] });
       queryClient.setQueryData(['email-segment', data.id], data);
       toast({
@@ -233,10 +233,3 @@ export const useUpdateSegmentMemberCount = () => {
     },
   });
 };
-
-
-
-
-
-
-

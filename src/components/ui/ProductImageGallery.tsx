@@ -262,9 +262,3 @@ export const ProductImageGallery = ({
     </div>
   );
 };
-
-
-
-
-
-

@@ -1,10 +1,10 @@
 /**
  * 🧪 DEMO - JOUR 1 - Composants Courses
- * 
+ *
  * Ce fichier démontre l'utilisation des composants :
  * 1. CourseStatusIndicator (3 variants)
  * 2. EnrollmentInfoDisplay (3 variants)
- * 
+ *
  * Date : 29 Octobre 2025
  */
 
@@ -15,22 +15,22 @@ import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { CourseStatusIndicator, type CourseStatus } from './CourseStatusIndicator';
-import { 
-  EnrollmentInfoDisplay, 
+import {
+  EnrollmentInfoDisplay,
   type EnrollmentStatus,
   type EnrollmentStudent,
-  type EnrollmentCourse
+  type EnrollmentCourse,
 } from './EnrollmentInfoDisplay';
 
 /**
  * Composant de démonstration principale
  */
-export const CourseDay1Demo : React.FC = () => {
+export const CourseDay1Demo: React.FC = () => {
   const [courseStatus, setCourseStatus] = useState<CourseStatus>('published');
   const [enrollmentStatus, setEnrollmentStatus] = useState<EnrollmentStatus>('active');
 
   // Données de test - Étudiant
-  const  sampleStudent: EnrollmentStudent = {
+  const sampleStudent: EnrollmentStudent = {
     id: 'STU-001',
     name: 'Amadou Diallo',
     email: 'amadou.diallo@example.com',
@@ -38,7 +38,7 @@ export const CourseDay1Demo : React.FC = () => {
   };
 
   // Données de test - Cours
-  const  sampleCourse: EnrollmentCourse = {
+  const sampleCourse: EnrollmentCourse = {
     id: 'CRS-001',
     name: 'React & TypeScript Avancé',
     instructor: 'Sarah Martin',
@@ -57,9 +57,7 @@ export const CourseDay1Demo : React.FC = () => {
     <div className="p-6 max-w-7xl mx-auto space-y-8">
       {/* Header */}
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold">
-          🎓 Démonstration - Composants Courses Jour 1
-        </h1>
+        <h1 className="text-3xl font-bold">🎓 Démonstration - Composants Courses Jour 1</h1>
         <p className="text-muted-foreground">
           CourseStatusIndicator & EnrollmentInfoDisplay - 3 variants chacun
         </p>
@@ -78,18 +76,18 @@ export const CourseDay1Demo : React.FC = () => {
           <Card className="p-4">
             <p className="text-sm font-medium mb-3">Choisir un statut :</p>
             <div className="flex flex-wrap gap-2">
-              {(['draft', 'published', 'in_progress', 'completed', 'archived'] as CourseStatus[]).map(
-                (status) => (
-                  <Button
-                    key={status}
-                    variant={courseStatus === status ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setCourseStatus(status)}
-                  >
-                    {status}
-                  </Button>
-                )
-              )}
+              {(
+                ['draft', 'published', 'in_progress', 'completed', 'archived'] as CourseStatus[]
+              ).map(status => (
+                <Button
+                  key={status}
+                  variant={courseStatus === status ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setCourseStatus(status)}
+                >
+                  {status}
+                </Button>
+              ))}
             </div>
           </Card>
 
@@ -110,10 +108,7 @@ export const CourseDay1Demo : React.FC = () => {
                 enrolledStudents={12}
                 maxStudents={50}
               />
-              <CourseStatusIndicator
-                status="completed"
-                variant="compact"
-              />
+              <CourseStatusIndicator status="completed" variant="compact" />
             </Card>
           </div>
 
@@ -215,8 +210,15 @@ export const CourseDay1Demo : React.FC = () => {
             <p className="text-sm font-medium mb-3">Choisir un statut :</p>
             <div className="flex flex-wrap gap-2">
               {(
-                ['pending', 'active', 'completed', 'expired', 'cancelled', 'refunded'] as EnrollmentStatus[]
-              ).map((status) => (
+                [
+                  'pending',
+                  'active',
+                  'completed',
+                  'expired',
+                  'cancelled',
+                  'refunded',
+                ] as EnrollmentStatus[]
+              ).map(status => (
                 <Button
                   key={status}
                   variant={enrollmentStatus === status ? 'default' : 'outline'}
@@ -432,11 +434,3 @@ export const CourseDay1Demo : React.FC = () => {
 };
 
 export default CourseDay1Demo;
-
-
-
-
-
-
-
-

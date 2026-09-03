@@ -39,7 +39,7 @@ export function useHorizontalScroll(): UseHorizontalScrollReturn {
 
     // Vérifier lors du scroll
     element.addEventListener('scroll', checkScrollability);
-    
+
     // Vérifier lors du resize
     const resizeObserver = new ResizeObserver(checkScrollability);
     resizeObserver.observe(element);
@@ -103,10 +103,3 @@ export function useHorizontalScroll(): UseHorizontalScrollReturn {
     scrollToEnd,
   };
 }
-
-
-
-
-
-
-

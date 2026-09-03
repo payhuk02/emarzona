@@ -44,7 +44,9 @@ export const DigitalPreferences = () => {
   const { isLoading } = useQuery({
     queryKey: ['userDigitalPreferences'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
       // Récupérer depuis profiles.digital_preferences
@@ -54,12 +56,18 @@ export const DigitalPreferences = () => {
         .select('digital_preferences')
         .eq('user_id', user.id)
         .single();
-      
+
       // Si la colonne n'existe pas encore, retourner les préférences par défaut
       if (profileError) {
         // Si l'erreur est due à la colonne manquante (PGRST116 ou 400), retourner les préférences par défaut
-        if (profileError.code === 'PGRST116' || profileError.code === '42703' || profileError.message?.includes('digital_preferences')) {
-          logger.debug('digital_preferences column not found, using defaults', { error: profileError });
+        if (
+          profileError.code === 'PGRST116' ||
+          profileError.code === '42703' ||
+          profileError.message?.includes('digital_preferences')
+        ) {
+          logger.debug('digital_preferences column not found, using defaults', {
+            error: profileError,
+          });
           return preferences;
         }
         // Pour les autres erreurs, logger et retourner les préférences par défaut
@@ -77,7 +85,9 @@ export const DigitalPreferences = () => {
 
   const savePreferences = useMutation({
     mutationFn: async (prefs: UserPreferences) => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
       // Sauvegarder dans profiles.digital_preferences (JSONB)
@@ -109,7 +119,7 @@ export const DigitalPreferences = () => {
       logger.error('Error in savePreferences', { error });
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible d\'enregistrer les préférences',
+        description: error.message || "Impossible d'enregistrer les préférences",
         variant: 'destructive',
       });
     },
@@ -141,7 +151,7 @@ export const DigitalPreferences = () => {
             </div>
             <Switch
               checked={preferences.email_notifications}
-              onCheckedChange={(checked) =>
+              onCheckedChange={checked =>
                 setPreferences({ ...preferences, email_notifications: checked })
               }
             />
@@ -158,7 +168,7 @@ export const DigitalPreferences = () => {
             </div>
             <Switch
               checked={preferences.price_drop_alerts}
-              onCheckedChange={(checked) =>
+              onCheckedChange={checked =>
                 setPreferences({ ...preferences, price_drop_alerts: checked })
               }
               disabled={!preferences.email_notifications}
@@ -174,7 +184,7 @@ export const DigitalPreferences = () => {
             </div>
             <Switch
               checked={preferences.new_version_alerts}
-              onCheckedChange={(checked) =>
+              onCheckedChange={checked =>
                 setPreferences({ ...preferences, new_version_alerts: checked })
               }
               disabled={!preferences.email_notifications}
@@ -190,7 +200,7 @@ export const DigitalPreferences = () => {
             </div>
             <Switch
               checked={preferences.license_expiry_alerts}
-              onCheckedChange={(checked) =>
+              onCheckedChange={checked =>
                 setPreferences({ ...preferences, license_expiry_alerts: checked })
               }
               disabled={!preferences.email_notifications}
@@ -205,7 +215,7 @@ export const DigitalPreferences = () => {
                 min="1"
                 max="30"
                 value={preferences.license_expiry_days_before}
-                onChange={(e) =>
+                onChange={e =>
                   setPreferences({
                     ...preferences,
                     license_expiry_days_before: parseInt(e.target.value) || 7,
@@ -214,7 +224,8 @@ export const DigitalPreferences = () => {
                 className="max-w-xs"
               />
               <div className="text-sm text-muted-foreground">
-                Vous serez notifié {preferences.license_expiry_days_before} jour(s) avant l'expiration
+                Vous serez notifié {preferences.license_expiry_days_before} jour(s) avant
+                l'expiration
               </div>
             </div>
           )}
@@ -227,9 +238,7 @@ export const DigitalPreferences = () => {
             <Download className="h-5 w-5" />
             Téléchargements
           </CardTitle>
-          <CardDescription>
-            Paramètres liés aux téléchargements
-          </CardDescription>
+          <CardDescription>Paramètres liés aux téléchargements</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex items-center justify-between">
@@ -241,7 +250,7 @@ export const DigitalPreferences = () => {
             </div>
             <Switch
               checked={preferences.auto_download}
-              onCheckedChange={(checked) =>
+              onCheckedChange={checked =>
                 setPreferences({ ...preferences, auto_download: checked })
               }
             />
@@ -256,7 +265,7 @@ export const DigitalPreferences = () => {
             </div>
             <Switch
               checked={preferences.download_notifications}
-              onCheckedChange={(checked) =>
+              onCheckedChange={checked =>
                 setPreferences({ ...preferences, download_notifications: checked })
               }
               disabled={!preferences.email_notifications}
@@ -271,15 +280,13 @@ export const DigitalPreferences = () => {
             <Shield className="h-5 w-5" />
             Sécurité
           </CardTitle>
-          <CardDescription>
-            Paramètres de sécurité et confidentialité
-          </CardDescription>
+          <CardDescription>Paramètres de sécurité et confidentialité</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="p-4 bg-muted rounded-lg">
             <p className="text-sm text-muted-foreground">
-              Vos préférences sont stockées de manière sécurisée et ne sont utilisées que pour améliorer votre expérience.
-              Vous pouvez modifier ces paramètres à tout moment.
+              Vos préférences sont stockées de manière sécurisée et ne sont utilisées que pour
+              améliorer votre expérience. Vous pouvez modifier ces paramètres à tout moment.
             </p>
           </div>
         </CardContent>
@@ -287,11 +294,7 @@ export const DigitalPreferences = () => {
 
       {/* Bouton de sauvegarde */}
       <div className="flex justify-end">
-        <Button
-          onClick={handleSave}
-          disabled={savePreferences.isPending}
-          size="lg"
-        >
+        <Button onClick={handleSave} disabled={savePreferences.isPending} size="lg">
           <Save className="h-4 w-4 mr-2" />
           {savePreferences.isPending ? 'Enregistrement...' : 'Enregistrer les préférences'}
         </Button>
@@ -299,10 +302,3 @@ export const DigitalPreferences = () => {
     </div>
   );
 };
-
-
-
-
-
-
-

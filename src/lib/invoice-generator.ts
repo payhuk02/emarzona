@@ -44,9 +44,9 @@ export async function generateInvoicePDF(data: InvoiceData): Promise<void> {
     const doc = new jsPDF();
 
     // Configuration des couleurs
-    const  primaryColor: [number, number, number] = [124, 58, 237]; // Purple
-    const  textColor: [number, number, number] = [55, 65, 81]; // Gray-700
-    const  lightGray: [number, number, number] = [243, 244, 246]; // Gray-100
+    const primaryColor: [number, number, number] = [124, 58, 237]; // Purple
+    const textColor: [number, number, number] = [55, 65, 81]; // Gray-700
+    const lightGray: [number, number, number] = [243, 244, 246]; // Gray-100
 
     // En-tête
     doc.setFillColor(...primaryColor);
@@ -64,11 +64,15 @@ export async function generateInvoicePDF(data: InvoiceData): Promise<void> {
     // Date
     doc.setTextColor(...textColor);
     doc.setFontSize(10);
-    doc.text(`Date: ${new Date(data.orderDate).toLocaleDateString('fr-FR', {
-      day: '2-digit',
-      month: 'long',
-      year: 'numeric'
-    })}`, 150, 50);
+    doc.text(
+      `Date: ${new Date(data.orderDate).toLocaleDateString('fr-FR', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric',
+      })}`,
+      150,
+      50
+    );
 
     // Informations vendeur
     doc.setFontSize(12);
@@ -126,7 +130,8 @@ export async function generateInvoicePDF(data: InvoiceData): Promise<void> {
     });
 
     // Position après le tableau
-    const finalY = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable?.finalY || 150;
+    const finalY =
+      (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable?.finalY || 150;
 
     // Totaux
     const totalsY = finalY + 15;
@@ -136,18 +141,24 @@ export async function generateInvoicePDF(data: InvoiceData): Promise<void> {
     doc.setTextColor(...textColor);
     doc.setFontSize(10);
     doc.text('Sous-total:', 125, totalsY + 5);
-    doc.text(`${data.subtotal.toLocaleString('fr-FR')} ${data.currency}`, 180, totalsY + 5, { align: 'right' });
+    doc.text(`${data.subtotal.toLocaleString('fr-FR')} ${data.currency}`, 180, totalsY + 5, {
+      align: 'right',
+    });
 
     if (data.tax) {
       doc.text('TVA:', 125, totalsY + 13);
-      doc.text(`${data.tax.toLocaleString('fr-FR')} ${data.currency}`, 180, totalsY + 13, { align: 'right' });
+      doc.text(`${data.tax.toLocaleString('fr-FR')} ${data.currency}`, 180, totalsY + 13, {
+        align: 'right',
+      });
     }
 
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(12);
     doc.text('Total:', 125, totalsY + 23);
     doc.setTextColor(...primaryColor);
-    doc.text(`${data.total.toLocaleString('fr-FR')} ${data.currency}`, 180, totalsY + 23, { align: 'right' });
+    doc.text(`${data.total.toLocaleString('fr-FR')} ${data.currency}`, 180, totalsY + 23, {
+      align: 'right',
+    });
 
     // Statut de paiement
     doc.setTextColor(...textColor);
@@ -155,11 +166,15 @@ export async function generateInvoicePDF(data: InvoiceData): Promise<void> {
     doc.setFont('helvetica', 'normal');
     const statusY = totalsY + 45;
     doc.text(`Statut de paiement: `, 20, statusY);
-    
-    const statusText = data.paymentStatus === 'completed' ? 'PAYÉ' : 
-                       data.paymentStatus === 'pending' ? 'EN ATTENTE' : 
-                       data.paymentStatus;
-    const  statusColor: [number, number, number] = data.paymentStatus === 'completed' ? [34, 197, 94] : [234, 179, 8];
+
+    const statusText =
+      data.paymentStatus === 'completed'
+        ? 'PAYÉ'
+        : data.paymentStatus === 'pending'
+          ? 'EN ATTENTE'
+          : data.paymentStatus;
+    const statusColor: [number, number, number] =
+      data.paymentStatus === 'completed' ? [34, 197, 94] : [234, 179, 8];
     doc.setTextColor(...statusColor);
     doc.setFont('helvetica', 'bold');
     doc.text(statusText, 65, statusY);
@@ -175,22 +190,22 @@ export async function generateInvoicePDF(data: InvoiceData): Promise<void> {
     doc.setTextColor(150, 150, 150);
     doc.setFontSize(8);
     doc.text('Merci pour votre achat !', 105, pageHeight - 20, { align: 'center' });
-    doc.text(`Facture générée le ${new Date().toLocaleDateString('fr-FR')}`, 105, pageHeight - 15, { align: 'center' });
-    doc.text('Emarzona - Plateforme de ecommerce et marketing', 105, pageHeight - 10, { align: 'center' });
+    doc.text(`Facture générée le ${new Date().toLocaleDateString('fr-FR')}`, 105, pageHeight - 15, {
+      align: 'center',
+    });
+    doc.text('Emarzona - Plateforme de ecommerce et marketing', 105, pageHeight - 10, {
+      align: 'center',
+    });
 
     // Télécharger le PDF
     doc.save(`facture-${data.orderNumber}.pdf`);
 
     logger.info('Facture PDF générée avec succès', { orderNumber: data.orderNumber });
   } catch (error) {
-    logger.error('Erreur lors de la génération de la facture PDF', { error, orderNumber: data.orderNumber });
+    logger.error('Erreur lors de la génération de la facture PDF', {
+      error,
+      orderNumber: data.orderNumber,
+    });
     throw new Error('Impossible de générer la facture. Veuillez réessayer.');
   }
 }
-
-
-
-
-
-
-

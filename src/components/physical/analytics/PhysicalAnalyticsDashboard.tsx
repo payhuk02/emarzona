@@ -8,7 +8,13 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Badge } from '@/components/ui/badge';
@@ -26,7 +32,11 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { useStorePhysicalAnalytics, useStoreWarehousePerformance, useGeographicSalesPerformance } from '@/hooks/physical/usePhysicalAnalytics';
+import {
+  useStorePhysicalAnalytics,
+  useStoreWarehousePerformance,
+  useGeographicSalesPerformance,
+} from '@/hooks/physical/usePhysicalAnalytics';
 import { SalesOverview } from './SalesOverview';
 import { WarehousePerformanceChart } from './WarehousePerformanceChart';
 import { GeographicHeatmap } from './GeographicHeatmap';
@@ -39,7 +49,9 @@ interface PhysicalAnalyticsDashboardProps {
 }
 
 export function PhysicalAnalyticsDashboard({ storeId }: PhysicalAnalyticsDashboardProps) {
-  const [periodType, setPeriodType] = useState<'daily' | 'weekly' | 'monthly' | 'yearly'>('monthly');
+  const [periodType, setPeriodType] = useState<'daily' | 'weekly' | 'monthly' | 'yearly'>(
+    'monthly'
+  );
   const [dateRange, setDateRange] = useState<{ from: Date; to: Date }>({
     from: new Date(new Date().setMonth(new Date().getMonth() - 1)),
     to: new Date(),
@@ -51,17 +63,23 @@ export function PhysicalAnalyticsDashboard({ storeId }: PhysicalAnalyticsDashboa
     endDate: format(dateRange.to, 'yyyy-MM-dd'),
   });
 
-  const { data: warehousePerformance, isLoading: warehouseLoading } = useStoreWarehousePerformance(storeId, {
-    periodType,
-    startDate: format(dateRange.from, 'yyyy-MM-dd'),
-    endDate: format(dateRange.to, 'yyyy-MM-dd'),
-  });
+  const { data: warehousePerformance, isLoading: warehouseLoading } = useStoreWarehousePerformance(
+    storeId,
+    {
+      periodType,
+      startDate: format(dateRange.from, 'yyyy-MM-dd'),
+      endDate: format(dateRange.to, 'yyyy-MM-dd'),
+    }
+  );
 
-  const { data: geographicSales, isLoading: geographicLoading } = useGeographicSalesPerformance(storeId, {
-    periodType,
-    startDate: format(dateRange.from, 'yyyy-MM-dd'),
-    endDate: format(dateRange.to, 'yyyy-MM-dd'),
-  });
+  const { data: geographicSales, isLoading: geographicLoading } = useGeographicSalesPerformance(
+    storeId,
+    {
+      periodType,
+      startDate: format(dateRange.from, 'yyyy-MM-dd'),
+      endDate: format(dateRange.to, 'yyyy-MM-dd'),
+    }
+  );
 
   // Refs for animations
   const statsRef = useScrollAnimation<HTMLDivElement>();
@@ -72,7 +90,7 @@ export function PhysicalAnalyticsDashboard({ storeId }: PhysicalAnalyticsDashboa
       <div className="space-y-4">
         <Skeleton className="h-10 w-full" />
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {[1, 2, 3, 4].map((i) => (
+          {[1, 2, 3, 4].map(i => (
             <Skeleton key={i} className="h-32 w-full" />
           ))}
         </div>
@@ -97,7 +115,9 @@ export function PhysicalAnalyticsDashboard({ storeId }: PhysicalAnalyticsDashboa
       {/* Header with filters - Responsive */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700">
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold tracking-tight">Analytics Produits Physiques</h2>
+          <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
+            Analytics Produits Physiques
+          </h2>
           <p className="text-xs sm:text-sm text-muted-foreground">
             Analysez les performances de vos produits physiques
           </p>
@@ -116,7 +136,12 @@ export function PhysicalAnalyticsDashboard({ storeId }: PhysicalAnalyticsDashboa
           </Select>
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="outline" className={cn('w-full sm:w-[240px] justify-start text-left font-normal h-9 sm:h-10 text-xs sm:text-sm')}>
+              <Button
+                variant="outline"
+                className={cn(
+                  'w-full sm:w-[240px] justify-start text-left font-normal h-9 sm:h-10 text-xs sm:text-sm'
+                )}
+              >
                 <CalendarIcon className="mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 {dateRange.from && dateRange.to ? (
                   `${format(dateRange.from, 'dd MMM', { locale: fr })} - ${format(dateRange.to, 'dd MMM', { locale: fr })}`
@@ -144,42 +169,42 @@ export function PhysicalAnalyticsDashboard({ storeId }: PhysicalAnalyticsDashboa
       </div>
 
       {/* Key Metrics Cards - Responsive */}
-      <div 
+      <div
         ref={statsRef}
         className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 animate-in fade-in slide-in-from-bottom-4 duration-700"
       >
         {[
-          { 
-            label: 'Revenus Total', 
-            value: stats.total_revenue, 
+          {
+            label: 'Revenus Total',
+            value: stats.total_revenue,
             subtitle: `${stats.total_units_sold} unités vendues`,
-            icon: DollarSign, 
+            icon: DollarSign,
             color: 'from-purple-600 to-pink-600',
-            isCurrency: true
+            isCurrency: true,
           },
-          { 
-            label: 'Profit Brut', 
-            value: stats.total_gross_profit, 
+          {
+            label: 'Profit Brut',
+            value: stats.total_gross_profit,
             subtitle: `Marge: ${stats.average_gross_margin.toFixed(1)}%`,
-            icon: TrendingUp, 
+            icon: TrendingUp,
             color: 'from-green-600 to-emerald-600',
-            isCurrency: true
+            isCurrency: true,
           },
-          { 
-            label: 'Profit Net', 
-            value: stats.total_net_profit, 
+          {
+            label: 'Profit Net',
+            value: stats.total_net_profit,
             subtitle: `Marge: ${stats.average_net_margin.toFixed(1)}%`,
-            icon: TrendingDown, 
+            icon: TrendingDown,
             color: 'from-blue-600 to-cyan-600',
-            isCurrency: true
+            isCurrency: true,
           },
-          { 
-            label: 'Panier Moyen', 
-            value: stats.average_order_value, 
+          {
+            label: 'Panier Moyen',
+            value: stats.average_order_value,
             subtitle: `${stats.total_products} produits actifs`,
-            icon: Package, 
+            icon: Package,
             color: 'from-orange-600 to-red-600',
-            isCurrency: true
+            isCurrency: true,
           },
         ].map((stat, index) => {
           const Icon = stat.icon;
@@ -196,20 +221,18 @@ export function PhysicalAnalyticsDashboard({ storeId }: PhysicalAnalyticsDashboa
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-3 sm:p-4 pt-0">
-                <div className={`text-lg sm:text-xl lg:text-2xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent mb-1`}>
-                  {stat.isCurrency ? (
-                    new Intl.NumberFormat('fr-FR', {
-                      style: 'currency',
-                      currency: 'XOF',
-                      minimumFractionDigits: 0,
-                    }).format(stat.value)
-                  ) : (
-                    stat.value
-                  )}
+                <div
+                  className={`text-lg sm:text-xl lg:text-2xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent mb-1`}
+                >
+                  {stat.isCurrency
+                    ? new Intl.NumberFormat('fr-FR', {
+                        style: 'currency',
+                        currency: 'XOF',
+                        minimumFractionDigits: 0,
+                      }).format(stat.value)
+                    : stat.value}
                 </div>
-                <p className="text-xs sm:text-sm text-muted-foreground">
-                  {stat.subtitle}
-                </p>
+                <p className="text-xs sm:text-sm text-muted-foreground">{stat.subtitle}</p>
               </CardContent>
             </Card>
           );
@@ -220,7 +243,7 @@ export function PhysicalAnalyticsDashboard({ storeId }: PhysicalAnalyticsDashboa
       <div ref={tabsRef} className="animate-in fade-in slide-in-from-bottom-4 duration-700">
         <Tabs defaultValue="sales" className="space-y-4 sm:space-y-6">
           <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto p-1 bg-muted/50 backdrop-blur-sm">
-            <TabsTrigger 
+            <TabsTrigger
               value="sales"
               className="text-xs sm:text-sm px-2 sm:px-4 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
             >
@@ -228,7 +251,7 @@ export function PhysicalAnalyticsDashboard({ storeId }: PhysicalAnalyticsDashboa
               <span className="hidden xs:inline">Ventes</span>
               <span className="xs:hidden">Ventes</span>
             </TabsTrigger>
-            <TabsTrigger 
+            <TabsTrigger
               value="warehouses"
               className="text-xs sm:text-sm px-2 sm:px-4 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
             >
@@ -236,7 +259,7 @@ export function PhysicalAnalyticsDashboard({ storeId }: PhysicalAnalyticsDashboa
               <span className="hidden xs:inline">Entrepôts</span>
               <span className="xs:hidden">Entrep.</span>
             </TabsTrigger>
-            <TabsTrigger 
+            <TabsTrigger
               value="geographic"
               className="text-xs sm:text-sm px-2 sm:px-4 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
             >
@@ -244,7 +267,7 @@ export function PhysicalAnalyticsDashboard({ storeId }: PhysicalAnalyticsDashboa
               <span className="hidden xs:inline">Géographique</span>
               <span className="xs:hidden">Géo.</span>
             </TabsTrigger>
-            <TabsTrigger 
+            <TabsTrigger
               value="rotation"
               className="text-xs sm:text-sm px-2 sm:px-4 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
             >
@@ -271,9 +294,7 @@ export function PhysicalAnalyticsDashboard({ storeId }: PhysicalAnalyticsDashboa
           </TabsContent>
 
           <TabsContent value="geographic" className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
-            <GeographicHeatmap
-              geographicSales={geographicSales || []}
-            />
+            <GeographicHeatmap geographicSales={geographicSales || []} />
           </TabsContent>
 
           <TabsContent value="rotation" className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
@@ -288,8 +309,3 @@ export function PhysicalAnalyticsDashboard({ storeId }: PhysicalAnalyticsDashboa
     </div>
   );
 }
-
-
-
-
-

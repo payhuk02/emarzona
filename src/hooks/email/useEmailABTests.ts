@@ -47,7 +47,7 @@ export const useCreateEmailABTest = () => {
 
   return useMutation({
     mutationFn: (payload: CreateABTestPayload) => EmailABTestService.createABTest(payload),
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['emailABTests', data.campaign_id] });
       queryClient.invalidateQueries({ queryKey: ['emailABTest', data.id] });
       toast({
@@ -155,10 +155,3 @@ export const useDeleteEmailABTest = () => {
     },
   });
 };
-
-
-
-
-
-
-

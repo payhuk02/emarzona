@@ -1,7 +1,7 @@
 /**
  * Hooks pour la gestion avancée des cohorts de cours
  * Date: 1 Février 2025
- * 
+ *
  * Système de cohorts avancé avec analytics et progression
  */
 
@@ -10,8 +10,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 
-const COHORT_ANALYTICS_FIELDS = 'id, cohort_id, analytics_date, total_enrollments, active_enrollments, completed_enrollments, dropped_enrollments, average_progress, median_progress, students_completed, students_in_progress, students_not_started, average_time_spent_minutes, total_lessons_completed, total_assignments_submitted, total_quizzes_completed, average_grade, median_grade, pass_rate, retention_rate, dropout_rate, metadata, created_at';
-const COHORT_PROGRESS_SNAPSHOT_FIELDS = 'id, cohort_id, enrollment_id, snapshot_date, progress_percentage, lessons_completed, assignments_submitted, quizzes_completed, time_spent_minutes, last_accessed_at, current_grade, metadata, created_at';
+const COHORT_ANALYTICS_FIELDS =
+  'id, cohort_id, analytics_date, total_enrollments, active_enrollments, completed_enrollments, dropped_enrollments, average_progress, median_progress, students_completed, students_in_progress, students_not_started, average_time_spent_minutes, total_lessons_completed, total_assignments_submitted, total_quizzes_completed, average_grade, median_grade, pass_rate, retention_rate, dropout_rate, metadata, created_at';
+const COHORT_PROGRESS_SNAPSHOT_FIELDS =
+  'id, cohort_id, enrollment_id, snapshot_date, progress_percentage, lessons_completed, assignments_submitted, quizzes_completed, time_spent_minutes, last_accessed_at, current_grade, metadata, created_at';
 
 export interface CourseCohort {
   id: string;
@@ -121,14 +123,16 @@ export function useCourseCohorts(courseId: string) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('course_cohorts')
-        .select(`
+        .select(
+          `
           *,
           products (
             id,
             name,
             image_url
           )
-        `)
+        `
+        )
         .eq('course_id', courseId)
         .order('cohort_number', { ascending: true });
 
@@ -152,14 +156,16 @@ export function useStoreCohorts(storeId: string) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('course_cohorts')
-        .select(`
+        .select(
+          `
           *,
           products (
             id,
             name,
             image_url
           )
-        `)
+        `
+        )
         .eq('store_id', storeId)
         .order('start_date', { ascending: false });
 
@@ -183,14 +189,16 @@ export function useCohort(cohortId: string) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('course_cohorts')
-        .select(`
+        .select(
+          `
           *,
           products (
             id,
             name,
             image_url
           )
-        `)
+        `
+        )
         .eq('id', cohortId)
         .single();
 
@@ -214,14 +222,16 @@ export function useCohortEnrollments(cohortId: string) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('cohort_enrollments')
-        .select(`
+        .select(
+          `
           *,
           student:student_id (
             id,
             email,
             user_metadata
           )
-        `)
+        `
+        )
         .eq('cohort_id', cohortId)
         .order('enrolled_at', { ascending: false });
 
@@ -309,7 +319,7 @@ export function useCreateCohort() {
   return useMutation({
     mutationFn: async (cohortData: Partial<CourseCohort>) => {
       // Générer le slug si non fourni
-      let  slug= cohortData.cohort_slug;
+      let slug = cohortData.cohort_slug;
       if (!slug && cohortData.cohort_name) {
         slug = cohortData.cohort_name
           .toLowerCase()
@@ -335,7 +345,7 @@ export function useCreateCohort() {
 
       return data as CourseCohort;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['course-cohorts'] });
       queryClient.invalidateQueries({ queryKey: ['store-cohorts'] });
       toast({
@@ -377,7 +387,7 @@ export function useUpdateCohort() {
 
       return data as CourseCohort;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['cohort', data.id] });
       queryClient.invalidateQueries({ queryKey: ['course-cohorts'] });
       queryClient.invalidateQueries({ queryKey: ['store-cohorts'] });
@@ -405,10 +415,7 @@ export function useDeleteCohort() {
 
   return useMutation({
     mutationFn: async (cohortId: string) => {
-      const { error } = await supabase
-        .from('course_cohorts')
-        .delete()
-        .eq('id', cohortId);
+      const { error } = await supabase.from('course_cohorts').delete().eq('id', cohortId);
 
       if (error) {
         logger.error('Error deleting cohort', { error });
@@ -441,7 +448,15 @@ export function useEnrollInCohort() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({ cohortId, studentId, orderId }: { cohortId: string; studentId: string; orderId?: string }) => {
+    mutationFn: async ({
+      cohortId,
+      studentId,
+      orderId,
+    }: {
+      cohortId: string;
+      studentId: string;
+      orderId?: string;
+    }) => {
       const { data, error } = await supabase
         .from('cohort_enrollments')
         .insert({
@@ -471,7 +486,7 @@ export function useEnrollInCohort() {
     onError: (error: Error) => {
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible de créer l\'inscription.',
+        description: error.message || "Impossible de créer l'inscription.",
         variant: 'destructive',
       });
     },
@@ -497,8 +512,8 @@ export function useUpdateEnrollmentStatus() {
       completed_at?: string;
       dropped_at?: string;
     }) => {
-      const  updateData: any = { enrollment_status: status };
-      
+      const updateData: any = { enrollment_status: status };
+
       if (status === 'active' && !updates.started_at) {
         updateData.started_at = new Date().toISOString();
       }
@@ -523,12 +538,12 @@ export function useUpdateEnrollmentStatus() {
 
       return data as CohortEnrollment;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['cohort-enrollments', data.cohort_id] });
       queryClient.invalidateQueries({ queryKey: ['cohort', data.cohort_id] });
       toast({
         title: 'Statut mis à jour',
-        description: 'Le statut de l\'inscription a été mis à jour.',
+        description: "Le statut de l'inscription a été mis à jour.",
       });
     },
     onError: (error: Error) => {
@@ -548,7 +563,7 @@ export function useCohortProgressSnapshots(cohortId: string, enrollmentId?: stri
   return useQuery({
     queryKey: ['cohort-snapshots', cohortId, enrollmentId],
     queryFn: async () => {
-      let  query= supabase
+      let query = supabase
         .from('cohort_progress_snapshots')
         .select(COHORT_PROGRESS_SNAPSHOT_FIELDS)
         .eq('cohort_id', cohortId);
@@ -569,10 +584,3 @@ export function useCohortProgressSnapshots(cohortId: string, enrollmentId?: stri
     enabled: !!cohortId,
   });
 }
-
-
-
-
-
-
-

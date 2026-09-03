@@ -97,7 +97,7 @@ export function BarcodeGenerator({
           description: `Le code-barres ${format} a été généré avec succès`,
         });
       }
-    } catch ( _error: any) {
+    } catch (_error: any) {
       toast({
         title: 'Erreur',
         description: error.message || 'Erreur lors de la génération',
@@ -149,18 +149,20 @@ export function BarcodeGenerator({
       </CardHeader>
       <CardContent className="space-y-4 sm:space-y-6">
         <div className="space-y-2">
-          <Label htmlFor="barcode-value" className="text-xs sm:text-sm">Valeur du code-barres</Label>
+          <Label htmlFor="barcode-value" className="text-xs sm:text-sm">
+            Valeur du code-barres
+          </Label>
           <div className="flex gap-2">
             <Input
               id="barcode-value"
               value={barcodeValue}
-              onChange={(e) => setBarcodeValue(e.target.value)}
+              onChange={e => setBarcodeValue(e.target.value)}
               placeholder="Entrez ou scannez un code-barres"
               className="h-9 sm:h-10 text-xs sm:text-sm"
             />
             {productId && (
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={generateAutoBarcode}
                 className="h-9 sm:h-10 text-xs sm:text-sm"
               >
@@ -171,8 +173,10 @@ export function BarcodeGenerator({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="barcode-format" className="text-xs sm:text-sm">Format</Label>
-          <Select value={format} onValueChange={(value) => setFormat(value as BarcodeFormat)}>
+          <Label htmlFor="barcode-format" className="text-xs sm:text-sm">
+            Format
+          </Label>
+          <Select value={format} onValueChange={value => setFormat(value as BarcodeFormat)}>
             <SelectTrigger id="barcode-format" className="h-9 sm:h-10 text-xs sm:text-sm">
               <SelectValue />
             </SelectTrigger>
@@ -212,39 +216,35 @@ export function BarcodeGenerator({
               <CheckCircle2 className="h-4 w-4 text-green-500" />
               <AlertDescription>
                 <div className="space-y-2 text-xs sm:text-sm">
-                  <p className="font-semibold text-green-600 dark:text-green-400">Code-barres généré :</p>
+                  <p className="font-semibold text-green-600 dark:text-green-400">
+                    Code-barres généré :
+                  </p>
                   <div className="flex flex-wrap gap-2">
                     <Badge variant="outline" className="font-mono text-xs sm:text-sm">
                       {barcodeValue}
                     </Badge>
-                    <Badge variant="secondary" className="text-xs sm:text-sm">{format}</Badge>
+                    <Badge variant="secondary" className="text-xs sm:text-sm">
+                      {format}
+                    </Badge>
                   </div>
                 </div>
               </AlertDescription>
             </Alert>
 
             <div className="flex justify-center p-4 sm:p-6 bg-white dark:bg-gray-900 rounded-lg border border-border/50">
-              <img 
-                src={qrCodeUrl} 
-                alt="Code-barres" 
+              <img
+                src={qrCodeUrl}
+                alt="Code-barres"
                 className="max-w-full h-auto w-full max-w-[300px] sm:max-w-[400px]"
               />
             </div>
 
             <div className="flex flex-col sm:flex-row gap-2">
-              <Button 
-                variant="outline" 
-                onClick={handleDownload} 
-                className="flex-1"
-              >
+              <Button variant="outline" onClick={handleDownload} className="flex-1">
                 <Download className="mr-2 h-4 w-4" />
                 <span className="text-xs sm:text-sm">Télécharger</span>
               </Button>
-              <Button 
-                variant="outline" 
-                onClick={handleCopy} 
-                className="flex-1"
-              >
+              <Button variant="outline" onClick={handleCopy} className="flex-1">
                 <Copy className="mr-2 h-4 w-4" />
                 <span className="text-xs sm:text-sm">Copier</span>
               </Button>
@@ -255,8 +255,3 @@ export function BarcodeGenerator({
     </Card>
   );
 }
-
-
-
-
-

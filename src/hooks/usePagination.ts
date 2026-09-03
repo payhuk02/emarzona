@@ -282,9 +282,3 @@ export function useInfinitePagination<T>(
     reset,
   };
 }
-
-
-
-
-
-

@@ -80,22 +80,22 @@ export type PeriodFilter = 'all' | 'today' | 'week' | 'month' | 'year' | 'custom
 export interface DownloadHistoryProps {
   /** Liste des événements de téléchargement */
   events: DownloadEvent[];
-  
+
   /** Callback lors de la sélection d'un événement */
   onEventClick?: (event: DownloadEvent) => void;
-  
+
   /** Afficher les filtres */
   showFilters?: boolean;
-  
+
   /** Afficher la recherche */
   showSearch?: boolean;
-  
+
   /** Mode d'affichage */
   variant?: 'timeline' | 'table';
-  
+
   /** Classe CSS personnalisée */
   className?: string;
-  
+
   /** Nombre d'événements par page */
   pageSize?: number;
 }
@@ -103,7 +103,7 @@ export interface DownloadHistoryProps {
 /**
  * Configuration des types d'événements
  */
-const  EVENT_CONFIG: Record<
+const EVENT_CONFIG: Record<
   DownloadEventType,
   {
     label: string;
@@ -164,12 +164,12 @@ const  EVENT_CONFIG: Record<
 
 /**
  * DownloadHistory - Composant d'affichage de l'historique des téléchargements
- * 
+ *
  * @example
  * ```tsx
  * import { logger } from '@/lib/logger';
- * 
- * <DownloadHistory 
+ *
+ * <DownloadHistory
  *   events={downloadEvents}
  *   onEventClick={(event) => logger.info('Download event clicked', { eventId: event.id })}
  *   showFilters={true}
@@ -178,7 +178,7 @@ const  EVENT_CONFIG: Record<
  * />
  * ```
  */
-export const DownloadHistory : React.FC<DownloadHistoryProps> = ({
+export const DownloadHistory: React.FC<DownloadHistoryProps> = ({
   events,
   onEventClick,
   showFilters = true,
@@ -190,7 +190,9 @@ export const DownloadHistory : React.FC<DownloadHistoryProps> = ({
   // États
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState<DownloadEventType | 'all'>('all');
-  const [selectedStatus, setSelectedStatus] = useState<'all' | 'success' | 'warning' | 'error'>('all');
+  const [selectedStatus, setSelectedStatus] = useState<'all' | 'success' | 'warning' | 'error'>(
+    'all'
+  );
   const [periodFilter, setPeriodFilter] = useState<PeriodFilter>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [expandedEvents, setExpandedEvents] = useState<Set<string>>(new Set());
@@ -232,12 +234,11 @@ export const DownloadHistory : React.FC<DownloadHistoryProps> = ({
   // Filtrer les événements par période
   const filterByPeriod = (event: DownloadEvent): boolean => {
     if (periodFilter === 'all') return true;
-    
-    const eventDate = typeof event.timestamp === 'string' 
-      ? new Date(event.timestamp) 
-      : event.timestamp;
+
+    const eventDate =
+      typeof event.timestamp === 'string' ? new Date(event.timestamp) : event.timestamp;
     const now = new Date();
-    
+
     switch (periodFilter) {
       case 'today':
         return eventDate.toDateString() === now.toDateString();
@@ -260,13 +261,13 @@ export const DownloadHistory : React.FC<DownloadHistoryProps> = ({
 
   // Filtrer et trier les événements
   const filteredEvents = useMemo(() => {
-    let  result= [...events];
+    let result = [...events];
 
     // Recherche
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       result = result.filter(
-        (e) =>
+        e =>
           e.productName.toLowerCase().includes(query) ||
           e.customerName.toLowerCase().includes(query) ||
           e.customerEmail.toLowerCase().includes(query) ||
@@ -276,12 +277,12 @@ export const DownloadHistory : React.FC<DownloadHistoryProps> = ({
 
     // Filtre type
     if (selectedType !== 'all') {
-      result = result.filter((e) => e.type === selectedType);
+      result = result.filter(e => e.type === selectedType);
     }
 
     // Filtre statut
     if (selectedStatus !== 'all') {
-      result = result.filter((e) => e.status === selectedStatus);
+      result = result.filter(e => e.status === selectedStatus);
     }
 
     // Filtre période
@@ -318,7 +319,7 @@ export const DownloadHistory : React.FC<DownloadHistoryProps> = ({
   // Grouper par date pour le variant timeline
   const eventsByDate = useMemo(() => {
     const grouped = new Map<string, DownloadEvent[]>();
-    paginatedEvents.forEach((event) => {
+    paginatedEvents.forEach(event => {
       const dateKey = formatDate(event.timestamp);
       if (!grouped.has(dateKey)) {
         grouped.set(dateKey, []);
@@ -340,7 +341,7 @@ export const DownloadHistory : React.FC<DownloadHistoryProps> = ({
               <Input
                 placeholder="Rechercher par produit, client ou ID..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={e => setSearchQuery(e.target.value)}
                 className="pl-9"
               />
             </div>
@@ -355,7 +356,10 @@ export const DownloadHistory : React.FC<DownloadHistoryProps> = ({
               </div>
 
               {/* Période */}
-              <Select value={periodFilter} onValueChange={(value) => setPeriodFilter(value as PeriodFilter)}>
+              <Select
+                value={periodFilter}
+                onValueChange={value => setPeriodFilter(value as PeriodFilter)}
+              >
                 <SelectTrigger className="w-[160px]">
                   <SelectValue />
                 </SelectTrigger>
@@ -369,7 +373,10 @@ export const DownloadHistory : React.FC<DownloadHistoryProps> = ({
               </Select>
 
               {/* Type d'événement */}
-              <Select value={selectedType} onValueChange={(value) => setSelectedType(value as DownloadEventType | 'all')}>
+              <Select
+                value={selectedType}
+                onValueChange={value => setSelectedType(value as DownloadEventType | 'all')}
+              >
                 <SelectTrigger className="w-[200px]">
                   <SelectValue />
                 </SelectTrigger>
@@ -384,7 +391,12 @@ export const DownloadHistory : React.FC<DownloadHistoryProps> = ({
               </Select>
 
               {/* Statut */}
-              <Select value={selectedStatus} onValueChange={(value) => setSelectedStatus(value as 'all' | 'success' | 'warning' | 'error')}>
+              <Select
+                value={selectedStatus}
+                onValueChange={value =>
+                  setSelectedStatus(value as 'all' | 'success' | 'warning' | 'error')
+                }
+              >
                 <SelectTrigger className="w-[140px]">
                   <SelectValue />
                 </SelectTrigger>
@@ -412,7 +424,7 @@ export const DownloadHistory : React.FC<DownloadHistoryProps> = ({
               <div>
                 <p className="text-xs text-muted-foreground">Réussis</p>
                 <p className="font-semibold text-green-600">
-                  {filteredEvents.filter((e) => e.status === 'success').length}
+                  {filteredEvents.filter(e => e.status === 'success').length}
                 </p>
               </div>
             </div>
@@ -421,7 +433,7 @@ export const DownloadHistory : React.FC<DownloadHistoryProps> = ({
               <div>
                 <p className="text-xs text-muted-foreground">Avertissements</p>
                 <p className="font-semibold text-orange-600">
-                  {filteredEvents.filter((e) => e.status === 'warning').length}
+                  {filteredEvents.filter(e => e.status === 'warning').length}
                 </p>
               </div>
             </div>
@@ -430,7 +442,7 @@ export const DownloadHistory : React.FC<DownloadHistoryProps> = ({
               <div>
                 <p className="text-xs text-muted-foreground">Erreurs</p>
                 <p className="font-semibold text-red-600">
-                  {filteredEvents.filter((e) => e.status === 'error').length}
+                  {filteredEvents.filter(e => e.status === 'error').length}
                 </p>
               </div>
             </div>
@@ -462,7 +474,7 @@ export const DownloadHistory : React.FC<DownloadHistoryProps> = ({
 
                     {/* Events for this date */}
                     <div className="space-y-3 ml-7 border-l-2 border-border pl-6">
-                      {dateEvents.map((event) => {
+                      {dateEvents.map(event => {
                         const config = EVENT_CONFIG[event.type];
                         const Icon = config.icon;
                         const isExpanded = expandedEvents.has(event.id);
@@ -477,7 +489,12 @@ export const DownloadHistory : React.FC<DownloadHistoryProps> = ({
                             onClick={() => onEventClick?.(event)}
                           >
                             {/* Timeline dot */}
-                            <div className={cn('absolute left-0 top-3 w-4 h-4 rounded-full border-2 border-background', config.bgColor)} />
+                            <div
+                              className={cn(
+                                'absolute left-0 top-3 w-4 h-4 rounded-full border-2 border-background',
+                                config.bgColor
+                              )}
+                            />
 
                             <Card className={cn('p-4 ml-8', config.bgColor)}>
                               <div className="space-y-3">
@@ -487,18 +504,26 @@ export const DownloadHistory : React.FC<DownloadHistoryProps> = ({
                                     <Icon className={cn('h-5 w-5', config.color)} />
                                     <div className="flex-1">
                                       <p className="font-semibold">{config.label}</p>
-                                      <p className="text-sm text-muted-foreground">{formatTime(event.timestamp)}</p>
+                                      <p className="text-sm text-muted-foreground">
+                                        {formatTime(event.timestamp)}
+                                      </p>
                                     </div>
                                   </div>
                                   <div className="flex items-center gap-2">
-                                    {event.status === 'success' && <CheckCircle2 className="h-4 w-4 text-green-600" />}
-                                    {event.status === 'warning' && <AlertCircle className="h-4 w-4 text-orange-600" />}
-                                    {event.status === 'error' && <XCircle className="h-4 w-4 text-red-600" />}
+                                    {event.status === 'success' && (
+                                      <CheckCircle2 className="h-4 w-4 text-green-600" />
+                                    )}
+                                    {event.status === 'warning' && (
+                                      <AlertCircle className="h-4 w-4 text-orange-600" />
+                                    )}
+                                    {event.status === 'error' && (
+                                      <XCircle className="h-4 w-4 text-red-600" />
+                                    )}
                                     <Button
                                       variant="ghost"
                                       size="sm"
                                       className="h-6 w-6 p-0"
-                                      onClick={(e) => {
+                                      onClick={e => {
                                         e.stopPropagation();
                                         toggleEventExpansion(event.id);
                                       }}
@@ -526,7 +551,9 @@ export const DownloadHistory : React.FC<DownloadHistoryProps> = ({
 
                                 {/* Message */}
                                 {event.message && (
-                                  <p className="text-sm text-muted-foreground italic">{event.message}</p>
+                                  <p className="text-sm text-muted-foreground italic">
+                                    {event.message}
+                                  </p>
                                 )}
 
                                 {/* Expanded details */}
@@ -535,7 +562,9 @@ export const DownloadHistory : React.FC<DownloadHistoryProps> = ({
                                     {event.customerEmail && (
                                       <div className="flex items-center justify-between">
                                         <span className="text-muted-foreground">Email:</span>
-                                        <span className="font-mono text-xs">{event.customerEmail}</span>
+                                        <span className="font-mono text-xs">
+                                          {event.customerEmail}
+                                        </span>
                                       </div>
                                     )}
                                     {event.ipAddress && (
@@ -586,13 +615,14 @@ export const DownloadHistory : React.FC<DownloadHistoryProps> = ({
           {totalPages > 1 && (
             <div className="flex items-center justify-between border-t pt-4 mt-4">
               <p className="text-sm text-muted-foreground">
-                Page {currentPage} sur {totalPages} • {filteredEvents.length} événement{filteredEvents.length > 1 ? 's' : ''}
+                Page {currentPage} sur {totalPages} • {filteredEvents.length} événement
+                {filteredEvents.length > 1 ? 's' : ''}
               </p>
               <div className="flex gap-2">
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
                 >
                   Précédent
@@ -600,7 +630,7 @@ export const DownloadHistory : React.FC<DownloadHistoryProps> = ({
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
                 >
                   Suivant
@@ -624,11 +654,3 @@ export const DownloadHistory : React.FC<DownloadHistoryProps> = ({
 DownloadHistory.displayName = 'DownloadHistory';
 
 export default DownloadHistory;
-
-
-
-
-
-
-
-

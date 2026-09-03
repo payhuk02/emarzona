@@ -1,11 +1,11 @@
 /**
  * Composant ConfirmDialog - Dialog de confirmation réutilisable
  * Simplifie les confirmations d'actions destructives ou importantes
- * 
+ *
  * @example
  * ```tsx
  * const { confirm } = useConfirmDialog();
- * 
+ *
  * const handleDelete = async () => {
  *   const confirmed = await confirm({
  *     title: 'Supprimer le produit',
@@ -77,45 +77,41 @@ export function useConfirmDialog() {
     description: '',
   });
 
-  const confirm = useCallback(
-    (options: ConfirmDialogOptions): Promise<boolean> => {
-      return new Promise((resolve) => {
-        setState({
-          ...options,
-          open: true,
-          resolve,
-        });
+  const confirm = useCallback((options: ConfirmDialogOptions): Promise<boolean> => {
+    return new Promise(resolve => {
+      setState({
+        ...options,
+        open: true,
+        resolve,
       });
-    },
-    []
-  );
+    });
+  }, []);
 
   const handleConfirm = useCallback(() => {
-    setState((prev) => {
+    setState(prev => {
       prev.resolve?.(true);
       return { ...prev, open: false, resolve: undefined };
     });
   }, []);
 
   const handleCancel = useCallback(() => {
-    setState((prev) => {
+    setState(prev => {
       prev.resolve?.(false);
       return { ...prev, open: false, resolve: undefined };
     });
   }, []);
 
   const ConfirmDialogComponent = (
-    <AlertDialog open={state.open} onOpenChange={(open) => !open && handleCancel()}>
+    <AlertDialog open={state.open} onOpenChange={open => !open && handleCancel()}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-2">
-            {state.icon || (
-              state.variant === 'destructive' ? (
+            {state.icon ||
+              (state.variant === 'destructive' ? (
                 <AlertTriangle className="h-5 w-5 text-destructive" />
               ) : (
                 <Info className="h-5 w-5" />
-              )
-            )}
+              ))}
             {state.title}
           </AlertDialogTitle>
           <AlertDialogDescription>{state.description}</AlertDialogDescription>
@@ -170,10 +166,3 @@ export function useDeleteConfirmation() {
     ConfirmDialog,
   };
 }
-
-
-
-
-
-
-

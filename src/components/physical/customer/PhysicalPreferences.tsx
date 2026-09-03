@@ -12,10 +12,3 @@ export const PhysicalPreferences = () => {
     </div>
   );
 };
-
-
-
-
-
-
-

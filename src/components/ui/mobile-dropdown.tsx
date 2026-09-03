@@ -76,9 +76,7 @@ export const MobileDropdown: React.FC<MobileDropdownProps> = ({
 }) => {
   return (
     <Select value={value} onValueChange={onValueChange}>
-      <SelectTrigger className={cn('touch-manipulation', className)}>
-        {trigger}
-      </SelectTrigger>
+      <SelectTrigger className={cn('touch-manipulation', className)}>{trigger}</SelectTrigger>
       <SelectContent
         mobileVariant="sheet"
         className={cn(
@@ -95,9 +93,3 @@ export const MobileDropdown: React.FC<MobileDropdownProps> = ({
 };
 
 // Les composants enfants sont maintenant directement importés depuis @/components/ui/select
-
-
-
-
-
-

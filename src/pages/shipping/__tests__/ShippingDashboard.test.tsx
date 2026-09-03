@@ -138,7 +138,7 @@ describe('ShippingDashboard', () => {
 
   it('should display shipment statistics', async () => {
     renderComponent();
-    
+
     await waitFor(() => {
       expect(screen.getByText('2')).toBeInTheDocument(); // Total shipments
       expect(screen.getAllByText(/en transit/i)[0]).toBeInTheDocument();
@@ -148,7 +148,7 @@ describe('ShippingDashboard', () => {
 
   it('should display shipments in the list', async () => {
     renderComponent();
-    
+
     await waitFor(() => {
       expect(screen.getByText('TRACK123')).toBeInTheDocument();
       expect(screen.getByText('TRACK456')).toBeInTheDocument();
@@ -160,14 +160,14 @@ describe('ShippingDashboard', () => {
   it('should allow searching shipments', async () => {
     const user = userEvent.setup();
     renderComponent();
-    
+
     await waitFor(() => {
       expect(screen.getByText('TRACK123')).toBeInTheDocument();
     });
 
     const searchInput = screen.getByPlaceholderText(/rechercher/i);
     await user.type(searchInput, 'TRACK123');
-    
+
     await waitFor(() => {
       expect(screen.getByText('TRACK123')).toBeInTheDocument();
       expect(screen.queryByText('TRACK456')).not.toBeInTheDocument();
@@ -177,14 +177,14 @@ describe('ShippingDashboard', () => {
   it('should filter shipments by status tab', async () => {
     const user = userEvent.setup();
     renderComponent();
-    
+
     await waitFor(() => {
       expect(screen.getByText('TRACK123')).toBeInTheDocument();
     });
 
     const deliveredTab = screen.getByRole('tab', { name: /livré/i });
     await user.click(deliveredTab);
-    
+
     await waitFor(() => {
       expect(screen.getByText('TRACK456')).toBeInTheDocument();
       expect(screen.queryByText('TRACK123')).not.toBeInTheDocument();
@@ -199,12 +199,14 @@ describe('ShippingDashboard', () => {
     } as any);
 
     renderComponent();
-    
+
     await waitFor(() => {
       expect(screen.getByText('TRACK123')).toBeInTheDocument();
     });
 
-    const refreshButtons = screen.getAllByRole('button', { name: /actualiser|refresh|rafraîchir/i });
+    const refreshButtons = screen.getAllByRole('button', {
+      name: /actualiser|refresh|rafraîchir/i,
+    });
     if (refreshButtons.length > 0) {
       await user.click(refreshButtons[0]);
       expect(mockUpdate).toHaveBeenCalled();
@@ -214,18 +216,20 @@ describe('ShippingDashboard', () => {
   it('should allow exporting shipments to CSV', async () => {
     const user = userEvent.setup();
     renderComponent();
-    
+
     await waitFor(() => {
       expect(screen.getByText('TRACK123')).toBeInTheDocument();
     });
 
     const exportButton = screen.getByRole('button', { name: /exporter|download|export csv/i });
     await user.click(exportButton);
-    
+
     await waitFor(() => {
-      expect(mockToast).toHaveBeenCalledWith(expect.objectContaining({
-        title: expect.stringMatching(/export réussi/i),
-      }));
+      expect(mockToast).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: expect.stringMatching(/export réussi/i),
+        })
+      );
     });
   });
 
@@ -238,16 +242,9 @@ describe('ShippingDashboard', () => {
     } as any);
 
     renderComponent();
-    
+
     await waitFor(() => {
       expect(screen.getByText(/aucune expédition/i)).toBeInTheDocument();
     });
   });
 });
-
-
-
-
-
-
-

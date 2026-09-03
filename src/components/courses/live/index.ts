@@ -3,10 +3,3 @@
  */
 
 export { LiveSessionsList } from './LiveSessionsList';
-
-
-
-
-
-
-

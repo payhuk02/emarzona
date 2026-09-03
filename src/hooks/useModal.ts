@@ -1,11 +1,11 @@
 /**
  * Hook useModal - Gestion simplifiée des modales
  * Fournit une API simple pour gérer l'ouverture/fermeture des modales
- * 
+ *
  * @example
  * ```tsx
  * const { isOpen, open, close, toggle } = useModal();
- * 
+ *
  * <Button onClick={open}>Ouvrir</Button>
  * <Dialog open={isOpen} onOpenChange={setIsOpen}>
  * ```
@@ -176,12 +176,12 @@ export function useModals<T extends string>(
   );
 
   const closeAll = useCallback(() => {
-    modalNames.forEach((name) => {
+    modalNames.forEach(name => {
       modals[name].close();
     });
   }, [modalNames, modals]);
 
-  const isAnyOpen = modalNames.some((name) => modals[name].isOpen);
+  const isAnyOpen = modalNames.some(name => modals[name].isOpen);
 
   return {
     ...modals,
@@ -211,10 +211,3 @@ export function useResponsiveModal(options: UseModalOptions = {}) {
     useDialog: !isMobile,
   };
 }
-
-
-
-
-
-
-

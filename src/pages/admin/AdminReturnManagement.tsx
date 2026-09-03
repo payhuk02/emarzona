@@ -77,7 +77,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
-  ChevronsRight
+  ChevronsRight,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -92,7 +92,7 @@ export default function AdminReturnManagement() {
   const { isAdmin } = useAdmin();
   const { toast } = useToast();
   const isMobile = useIsMobile();
-  
+
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [page, setPage] = useState(1);
@@ -101,17 +101,22 @@ export default function AdminReturnManagement() {
 
   // If the user is admin and not acting as a store, pass undefined for storeId
   // The hook will fetch all returns if storeId is undefined.
-  const { returns, loading: isLoading, totalCount, refetch } = useAdminReturnsList({
+  const {
+    returns,
+    loading: isLoading,
+    totalCount,
+    refetch,
+  } = useAdminReturnsList({
     page,
     pageSize,
     search: debouncedSearch,
     status: statusFilter,
-    storeId: isAdmin && !store ? undefined : store?.id
+    storeId: isAdmin && !store ? undefined : store?.id,
   });
 
   const updateStatus = useUpdateReturnStatus();
   const processRefund = useProcessRefund();
-  
+
   const [selectedReturnId, setSelectedReturnId] = useState<string | null>(null);
   const [refundDialogOpen, setRefundDialogOpen] = useState(false);
   const [refundAmount, setRefundAmount] = useState('');
@@ -692,11 +697,12 @@ export default function AdminReturnManagement() {
                 </p>
               </div>
             )}
-            
+
             {totalCount > 0 && (
               <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 pt-4 border-t">
                 <p className="text-sm text-muted-foreground">
-                  {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, totalCount)} sur {totalCount}
+                  {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, totalCount)} sur{' '}
+                  {totalCount}
                 </p>
                 <div className="flex items-center gap-2">
                   <Select

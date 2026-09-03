@@ -9,7 +9,7 @@ export enum GiftCardStatus {
   REDEEMED = 'redeemed',
   EXPIRED = 'expired',
   CANCELLED = 'cancelled',
-  PENDING = 'pending'
+  PENDING = 'pending',
 }
 
 export enum GiftCardTransactionType {
@@ -17,7 +17,7 @@ export enum GiftCardTransactionType {
   REDEMPTION = 'redemption',
   REFUND = 'refund',
   EXPIRATION = 'expiration',
-  ADJUSTMENT = 'adjustment'
+  ADJUSTMENT = 'adjustment',
 }
 
 export interface GiftCard {
@@ -47,7 +47,7 @@ export interface GiftCard {
   last_used_at?: string | null;
   created_at: string;
   updated_at: string;
-  
+
   // Relations (optionnelles, chargées via join)
   store?: {
     id: string;
@@ -75,7 +75,7 @@ export interface GiftCardTransaction {
   user_id?: string | null;
   metadata?: RecordString;
   created_at: string;
-  
+
   // Relations (optionnelles)
   gift_card?: GiftCard;
   order?: {
@@ -127,10 +127,3 @@ export interface UpdateGiftCardInput {
   can_be_partially_used?: boolean;
   notes?: string;
 }
-
-
-
-
-
-
-

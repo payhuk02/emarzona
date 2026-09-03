@@ -45,7 +45,7 @@ interface ArtistFormFieldProps {
   validateOnChange?: boolean; // ✅ Nouvelle prop : désactive la validation en temps réel si false
 }
 
-export const ArtistFormField : React.FC<ArtistFormFieldProps> = ({
+export const ArtistFormField: React.FC<ArtistFormFieldProps> = ({
   id,
   label,
   value,
@@ -271,10 +271,3 @@ export const ArtistFormField : React.FC<ArtistFormFieldProps> = ({
     </div>
   );
 };
-
-
-
-
-
-
-

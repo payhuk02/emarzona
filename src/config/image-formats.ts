@@ -176,9 +176,3 @@ export const IMAGE_UPLOAD_GUIDELINES = {
 // ============================================================================
 
 export default IMAGE_FORMATS;
-
-
-
-
-
-

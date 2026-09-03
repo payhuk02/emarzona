@@ -8,7 +8,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 
-const RECURRING_BOOKING_PATTERN_FIELDS = 'id, product_id, user_id, staff_member_id, recurrence_type, interval_days, days_of_week, day_of_month, week_of_month, occurrence_limit, date_limit, start_time, duration_minutes, timezone, start_date, end_date, status, title, notes, customer_notes, total_occurrences, created_occurrences, skipped_occurrences, created_at, updated_at';
+const RECURRING_BOOKING_PATTERN_FIELDS =
+  'id, product_id, user_id, staff_member_id, recurrence_type, interval_days, days_of_week, day_of_month, week_of_month, occurrence_limit, date_limit, start_time, duration_minutes, timezone, start_date, end_date, status, title, notes, customer_notes, total_occurrences, created_occurrences, skipped_occurrences, created_at, updated_at';
 
 export interface RecurringBookingPattern {
   id: string;
@@ -160,7 +161,7 @@ export function useCreateRecurringBooking() {
 
       return data as RecurringBookingPattern;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: RECURRING_BOOKINGS_QUERY_KEY });
       queryClient.invalidateQueries({ queryKey: ['service-bookings'] });
       toast({
@@ -260,7 +261,7 @@ export function useCancelFutureRecurringBookings() {
 
       return data as number;
     },
-    onSuccess: (count) => {
+    onSuccess: count => {
       queryClient.invalidateQueries({ queryKey: RECURRING_BOOKINGS_QUERY_KEY });
       queryClient.invalidateQueries({ queryKey: ['service-bookings'] });
       toast({
@@ -272,7 +273,7 @@ export function useCancelFutureRecurringBookings() {
       logger.error('Error cancelling future bookings:', error);
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible d\'annuler les réservations',
+        description: error.message || "Impossible d'annuler les réservations",
         variant: 'destructive',
       });
     },
@@ -309,7 +310,7 @@ export function useRescheduleRecurringBookings() {
 
       return data as number;
     },
-    onSuccess: (count) => {
+    onSuccess: count => {
       queryClient.invalidateQueries({ queryKey: RECURRING_BOOKINGS_QUERY_KEY });
       queryClient.invalidateQueries({ queryKey: ['service-bookings'] });
       toast({
@@ -355,7 +356,7 @@ export function useGenerateMoreOccurrences() {
 
       return data as number;
     },
-    onSuccess: (count) => {
+    onSuccess: count => {
       queryClient.invalidateQueries({ queryKey: RECURRING_BOOKINGS_QUERY_KEY });
       queryClient.invalidateQueries({ queryKey: ['service-bookings'] });
       toast({
@@ -373,10 +374,3 @@ export function useGenerateMoreOccurrences() {
     },
   });
 }
-
-
-
-
-
-
-

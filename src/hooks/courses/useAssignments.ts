@@ -1,7 +1,7 @@
 /**
  * Assignments Hooks for Courses
  * Date: 27 Janvier 2025
- * 
+ *
  * Hooks pour gérer les assignments/devoirs : création, soumission, notation
  */
 
@@ -10,9 +10,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 
-const COURSE_ASSIGNMENT_FIELDS = 'id, course_id, section_id, title, description, instructions, assignment_type, max_file_size, allowed_file_types, max_files, points_possible, grading_type, due_date, allow_late_submission, late_penalty_percentage, is_required, is_visible, order_index, rubric, created_at, updated_at';
-const ASSIGNMENT_SUBMISSION_FIELDS = 'id, assignment_id, enrollment_id, course_id, user_id, submission_text, submission_files, submission_url, submission_code, status, submitted_at, graded_at, returned_at, grade, grade_percentage, grade_letter, is_passed, feedback, feedback_files, rubric_scores, needs_revision, revision_notes, is_late, late_hours, penalty_applied, version, previous_submission_id, created_at, updated_at';
-const ASSIGNMENT_GRADING_FIELDS = 'id, submission_id, graded_by, grade, grade_percentage, grade_letter, is_passed, feedback, feedback_files, rubric_scores, private_notes, graded_at, created_at';
+const COURSE_ASSIGNMENT_FIELDS =
+  'id, course_id, section_id, title, description, instructions, assignment_type, max_file_size, allowed_file_types, max_files, points_possible, grading_type, due_date, allow_late_submission, late_penalty_percentage, is_required, is_visible, order_index, rubric, created_at, updated_at';
+const ASSIGNMENT_SUBMISSION_FIELDS =
+  'id, assignment_id, enrollment_id, course_id, user_id, submission_text, submission_files, submission_url, submission_code, status, submitted_at, graded_at, returned_at, grade, grade_percentage, grade_letter, is_passed, feedback, feedback_files, rubric_scores, needs_revision, revision_notes, is_late, late_hours, penalty_applied, version, previous_submission_id, created_at, updated_at';
+const ASSIGNMENT_GRADING_FIELDS =
+  'id, submission_id, graded_by, grade, grade_percentage, grade_letter, is_passed, feedback, feedback_files, rubric_scores, private_notes, graded_at, created_at';
 
 // =====================================================
 // TYPES
@@ -221,10 +224,12 @@ export const useAssignmentSubmissions = (assignmentId: string | undefined) => {
 
       const { data, error } = await supabase
         .from('course_assignment_submissions')
-        .select(`
+        .select(
+          `
           *,
           assignment:course_assignments(*)
-        `)
+        `
+        )
         .eq('assignment_id', assignmentId)
         .order('submitted_at', { ascending: false });
 
@@ -253,10 +258,12 @@ export const useStudentAssignmentSubmission = (
 
       const { data, error } = await supabase
         .from('course_assignment_submissions')
-        .select(`
+        .select(
+          `
           *,
           assignment:course_assignments(*)
-        `)
+        `
+        )
         .eq('assignment_id', assignmentId)
         .eq('enrollment_id', enrollmentId)
         .order('version', { ascending: false })
@@ -301,15 +308,16 @@ export const useStudentAssignments = (
         .from('course_assignment_submissions')
         .select(ASSIGNMENT_SUBMISSION_FIELDS)
         .eq('enrollment_id', enrollmentId)
-        .in('assignment_id', (assignments || []).map(a => a.id));
+        .in(
+          'assignment_id',
+          (assignments || []).map(a => a.id)
+        );
 
       if (submissionsError) throw submissionsError;
 
       // Combiner données
       const assignmentsWithSubmissions = (assignments || []).map(assignment => {
-        const submission = (submissions || []).find(
-          s => s.assignment_id === assignment.id
-        );
+        const submission = (submissions || []).find(s => s.assignment_id === assignment.id);
         return {
           ...assignment,
           submission: submission || null,
@@ -361,7 +369,9 @@ export const useCreateAssignment = () => {
 
   return useMutation({
     mutationFn: async (assignmentData: CreateAssignmentData) => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
       const { data, error } = await supabase
@@ -379,7 +389,7 @@ export const useCreateAssignment = () => {
 
       return data as CourseAssignment;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['course-assignments', data.course_id] });
       toast({
         title: '✅ Assignment créé',
@@ -390,7 +400,7 @@ export const useCreateAssignment = () => {
       logger.error('Error in useCreateAssignment', { error });
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de créer l\'assignment',
+        description: error.message || "Impossible de créer l'assignment",
         variant: 'destructive',
       });
     },
@@ -434,11 +444,15 @@ export const useSubmitAssignment = () => {
       return data;
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['assignment-submissions', variables.assignmentId] });
-      queryClient.invalidateQueries({ queryKey: ['student-assignment-submission', variables.assignmentId, variables.enrollmentId] });
+      queryClient.invalidateQueries({
+        queryKey: ['assignment-submissions', variables.assignmentId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['student-assignment-submission', variables.assignmentId, variables.enrollmentId],
+      });
       queryClient.invalidateQueries({ queryKey: ['student-assignments'] });
       queryClient.invalidateQueries({ queryKey: ['student-points', variables.enrollmentId] });
-      
+
       toast({
         title: '✅ Assignment soumis',
         description: 'Votre devoir a été soumis avec succès',
@@ -448,7 +462,7 @@ export const useSubmitAssignment = () => {
       logger.error('Error in useSubmitAssignment', { error });
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de soumettre l\'assignment',
+        description: error.message || "Impossible de soumettre l'assignment",
         variant: 'destructive',
       });
     },
@@ -491,9 +505,11 @@ export const useGradeAssignment = () => {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['assignment-submissions'] });
-      queryClient.invalidateQueries({ queryKey: ['assignment-grading-history', variables.submissionId] });
+      queryClient.invalidateQueries({
+        queryKey: ['assignment-grading-history', variables.submissionId],
+      });
       queryClient.invalidateQueries({ queryKey: ['student-assignments'] });
-      
+
       toast({
         title: '✅ Assignment noté',
         description: 'La notation a été enregistrée avec succès',
@@ -503,7 +519,7 @@ export const useGradeAssignment = () => {
       logger.error('Error in useGradeAssignment', { error });
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de noter l\'assignment',
+        description: error.message || "Impossible de noter l'assignment",
         variant: 'destructive',
       });
     },
@@ -542,7 +558,7 @@ export const useUpdateAssignment = () => {
 
       return data as CourseAssignment;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['assignment', data.id] });
       queryClient.invalidateQueries({ queryKey: ['course-assignments', data.course_id] });
       toast({
@@ -554,7 +570,7 @@ export const useUpdateAssignment = () => {
       logger.error('Error in useUpdateAssignment', { error });
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de mettre à jour l\'assignment',
+        description: error.message || "Impossible de mettre à jour l'assignment",
         variant: 'destructive',
       });
     },
@@ -577,10 +593,7 @@ export const useDeleteAssignment = () => {
         .eq('id', assignmentId)
         .single();
 
-      const { error } = await supabase
-        .from('course_assignments')
-        .delete()
-        .eq('id', assignmentId);
+      const { error } = await supabase.from('course_assignments').delete().eq('id', assignmentId);
 
       if (error) {
         logger.error('Error deleting assignment', { error, assignmentId });
@@ -589,7 +602,7 @@ export const useDeleteAssignment = () => {
 
       return assignment?.course_id;
     },
-    onSuccess: (courseId) => {
+    onSuccess: courseId => {
       if (courseId) {
         queryClient.invalidateQueries({ queryKey: ['course-assignments', courseId] });
       }
@@ -602,16 +615,9 @@ export const useDeleteAssignment = () => {
       logger.error('Error in useDeleteAssignment', { error });
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de supprimer l\'assignment',
+        description: error.message || "Impossible de supprimer l'assignment",
         variant: 'destructive',
       });
     },
   });
 };
-
-
-
-
-
-
-

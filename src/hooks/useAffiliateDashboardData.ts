@@ -71,10 +71,3 @@ export const useAffiliateDashboardData = (affiliateId: string | undefined) => {
     staleTime: 30000, // Cache pendant 30 secondes
   });
 };
-
-
-
-
-
-
-

@@ -10,7 +10,7 @@ import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 vi.mock('@/integrations/supabase/client', () => ({
   supabase: {
     auth: {
-      onAuthStateChange: vi.fn((callback) => {
+      onAuthStateChange: vi.fn(callback => {
         // Simuler un changement d'état d'authentification
         setTimeout(() => {
           callback('SIGNED_IN', {
@@ -69,10 +69,3 @@ describe('useAuth', () => {
     expect(result.current.loading).toBe(true);
   });
 });
-
-
-
-
-
-
-

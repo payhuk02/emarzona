@@ -38,7 +38,8 @@ export const usePWA = (): PWACapabilities & PWAActions => {
     isInstalled,
     canInstall: !!deferredPrompt && !isInstalled,
     supportsNotifications: 'Notification' in window,
-    supportsBackgroundSync: 'serviceWorker' in navigator && 'sync' in window.ServiceWorkerRegistration.prototype,
+    supportsBackgroundSync:
+      'serviceWorker' in navigator && 'sync' in window.ServiceWorkerRegistration.prototype,
     supportsWebShare: 'share' in navigator,
     isOfflineReady,
   };

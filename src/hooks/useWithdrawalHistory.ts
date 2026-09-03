@@ -10,7 +10,8 @@ import { useToast } from '@/hooks/use-toast';
 import { StoreWithdrawalStatusHistory } from '@/types/store-withdrawals';
 import { logger } from '@/lib/logger';
 
-const STORE_WITHDRAWAL_STATUS_HISTORY_FIELDS = 'id, withdrawal_id, store_id, previous_status, new_status, changed_by, change_reason, metadata, created_at';
+const STORE_WITHDRAWAL_STATUS_HISTORY_FIELDS =
+  'id, withdrawal_id, store_id, previous_status, new_status, changed_by, change_reason, metadata, created_at';
 
 interface UseWithdrawalHistoryOptions {
   withdrawalId?: string;
@@ -33,7 +34,7 @@ export const useWithdrawalHistory = (options: UseWithdrawalHistoryOptions = {}) 
     try {
       setLoading(true);
 
-      let  query= supabase
+      let query = supabase
         .from('store_withdrawal_status_history')
         .select(STORE_WITHDRAWAL_STATUS_HISTORY_FIELDS)
         .order('created_at', { ascending: false });
@@ -52,7 +53,7 @@ export const useWithdrawalHistory = (options: UseWithdrawalHistoryOptions = {}) 
         if (withdrawalIds && withdrawalIds.length > 0) {
           query = query.in(
             'withdrawal_id',
-            withdrawalIds.map((w) => w.id)
+            withdrawalIds.map(w => w.id)
           );
         } else {
           setHistory([]);
@@ -66,11 +67,11 @@ export const useWithdrawalHistory = (options: UseWithdrawalHistoryOptions = {}) 
       if (error) throw error;
 
       setHistory(data || []);
-    } catch ( _error: any) {
+    } catch (_error: any) {
       logger.error('Error fetching withdrawal history', { error });
       toast({
         title: 'Erreur',
-        description: 'Impossible de charger l\'historique',
+        description: "Impossible de charger l'historique",
         variant: 'destructive',
       });
     } finally {
@@ -88,10 +89,3 @@ export const useWithdrawalHistory = (options: UseWithdrawalHistoryOptions = {}) 
     refetch: fetchHistory,
   };
 };
-
-
-
-
-
-
-

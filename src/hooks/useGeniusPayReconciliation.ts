@@ -29,8 +29,7 @@ export function useReconcileTransactions() {
     Error,
     { startDate?: Date; endDate?: Date; limit?: number }
   >({
-    mutationFn: ({ startDate, endDate, limit }) =>
-      reconcileTransactions(startDate, endDate, limit),
+    mutationFn: ({ startDate, endDate, limit }) => reconcileTransactions(startDate, endDate, limit),
   });
 }
 
@@ -38,25 +37,7 @@ export function useReconcileTransactions() {
  * Hook pour générer un rapport de réconciliation
  */
 export function useGenerateReconciliationReport() {
-  return useMutation<
-    ReconciliationReport,
-    Error,
-    { startDate?: Date; endDate?: Date }
-  >({
-    mutationFn: ({ startDate, endDate }) =>
-      generateReconciliationReport(startDate, endDate),
+  return useMutation<ReconciliationReport, Error, { startDate?: Date; endDate?: Date }>({
+    mutationFn: ({ startDate, endDate }) => generateReconciliationReport(startDate, endDate),
   });
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

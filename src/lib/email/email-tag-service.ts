@@ -43,20 +43,20 @@ export class EmailTagService {
   static validateAndNormalizeTag(tag: string): string {
     // Trim
     tag = tag.trim();
-    
+
     // Vérifier longueur (1-50 caractères)
     if (tag.length < 1 || tag.length > 50) {
       throw new Error('Tag must be between 1 and 50 characters');
     }
-    
+
     // Normaliser en lowercase
     tag = tag.toLowerCase();
-    
+
     // Vérifier caractères valides (alphanumériques, underscore, tiret)
     if (!/^[a-z0-9_-]+$/.test(tag)) {
       throw new Error('Tag can only contain lowercase letters, numbers, underscores, and hyphens');
     }
-    
+
     return tag;
   }
 
@@ -97,9 +97,15 @@ export class EmailTagService {
 
       logger.info('Tag added successfully', { userId, storeId, tag: normalizedTag, category });
       return data as string;
-    } catch ( _error: any) {
+    } catch (_error: any) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      logger.error('EmailTagService.addTag error', { error: errorMessage, userId, storeId, tag, category });
+      logger.error('EmailTagService.addTag error', {
+        error: errorMessage,
+        userId,
+        storeId,
+        tag,
+        category,
+      });
       throw new Error(`Failed to add tag: ${errorMessage}`);
     }
   }
@@ -107,11 +113,7 @@ export class EmailTagService {
   /**
    * Supprimer un tag d'un utilisateur
    */
-  static async removeTag(
-    userId: string,
-    storeId: string,
-    tag: string
-  ): Promise<boolean> {
+  static async removeTag(userId: string, storeId: string, tag: string): Promise<boolean> {
     try {
       // Normaliser le tag
       const normalizedTag = this.validateAndNormalizeTag(tag);
@@ -136,9 +138,14 @@ export class EmailTagService {
       }
 
       return removed;
-    } catch ( _error: any) {
+    } catch (_error: any) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      logger.error('EmailTagService.removeTag error', { error: errorMessage, userId, storeId, tag });
+      logger.error('EmailTagService.removeTag error', {
+        error: errorMessage,
+        userId,
+        storeId,
+        tag,
+      });
       throw new Error(`Failed to remove tag: ${errorMessage}`);
     }
   }
@@ -164,7 +171,7 @@ export class EmailTagService {
       }
 
       // Convertir les résultats en format EmailUserTag
-      const  tags: EmailUserTag[] = (data || []).map((item: any) => ({
+      const tags: EmailUserTag[] = (data || []).map((item: any) => ({
         id: '', // Non retourné par la fonction, mais nécessaire pour l'interface
         user_id: userId,
         store_id: storeId,
@@ -176,9 +183,14 @@ export class EmailTagService {
       }));
 
       return tags;
-    } catch ( _error: any) {
+    } catch (_error: any) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      logger.error('EmailTagService.getUserTags error', { error: errorMessage, userId, storeId, category });
+      logger.error('EmailTagService.getUserTags error', {
+        error: errorMessage,
+        userId,
+        storeId,
+        category,
+      });
       throw new Error(`Failed to get user tags: ${errorMessage}`);
     }
   }
@@ -205,7 +217,7 @@ export class EmailTagService {
       }
 
       return (data || []) as Array<{ user_id: string; email: string; added_at: string }>;
-    } catch ( _error: any) {
+    } catch (_error: any) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       logger.error('EmailTagService.getUsersByTag error', { error: errorMessage, storeId, tag });
       throw new Error(`Failed to get users by tag: ${errorMessage}`);
@@ -215,16 +227,12 @@ export class EmailTagService {
   /**
    * Vérifier si un utilisateur a un tag spécifique
    */
-  static async hasTag(
-    userId: string,
-    storeId: string,
-    tag: string
-  ): Promise<boolean> {
+  static async hasTag(userId: string, storeId: string, tag: string): Promise<boolean> {
     try {
       const tags = await this.getUserTags(userId, storeId);
       const normalizedTag = this.validateAndNormalizeTag(tag);
-      return tags.some((t) => t.tag === normalizedTag);
-    } catch ( _error: any) {
+      return tags.some(t => t.tag === normalizedTag);
+    } catch (_error: any) {
       logger.error('EmailTagService.hasTag error', { error, userId, storeId, tag });
       return false;
     }
@@ -241,8 +249,8 @@ export class EmailTagService {
     category: TagCategory = 'custom'
   ): Promise<string[]> {
     try {
-      const  results: string[] = [];
-      
+      const results: string[] = [];
+
       for (const tag of tags) {
         try {
           const tagId = await this.addTag(userId, storeId, tag, context, category);
@@ -254,9 +262,15 @@ export class EmailTagService {
       }
 
       return results;
-    } catch ( _error: any) {
+    } catch (_error: any) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      logger.error('EmailTagService.addTags error', { error: errorMessage, userId, storeId, tags, category });
+      logger.error('EmailTagService.addTags error', {
+        error: errorMessage,
+        userId,
+        storeId,
+        tags,
+        category,
+      });
       throw new Error(`Failed to add tags: ${errorMessage}`);
     }
   }
@@ -264,14 +278,10 @@ export class EmailTagService {
   /**
    * Supprimer plusieurs tags en une seule opération
    */
-  static async removeTags(
-    userId: string,
-    storeId: string,
-    tags: string[]
-  ): Promise<number> {
+  static async removeTags(userId: string, storeId: string, tags: string[]): Promise<number> {
     try {
-      let  removedCount= 0;
-      
+      let removedCount = 0;
+
       for (const tag of tags) {
         try {
           const removed = await this.removeTag(userId, storeId, tag);
@@ -285,9 +295,14 @@ export class EmailTagService {
       }
 
       return removedCount;
-    } catch ( _error: any) {
+    } catch (_error: any) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      logger.error('EmailTagService.removeTags error', { error: errorMessage, userId, storeId, tags });
+      logger.error('EmailTagService.removeTags error', {
+        error: errorMessage,
+        userId,
+        storeId,
+        tags,
+      });
       throw new Error(`Failed to remove tags: ${errorMessage}`);
     }
   }
@@ -295,12 +310,17 @@ export class EmailTagService {
   /**
    * Récupérer tous les tags uniques d'un store
    */
-  static async getStoreTags(storeId: string, category?: TagCategory): Promise<Array<{
-    tag: string;
-    category: TagCategory;
-    user_count: number;
-    last_used_at: string;
-  }>> {
+  static async getStoreTags(
+    storeId: string,
+    category?: TagCategory
+  ): Promise<
+    Array<{
+      tag: string;
+      category: TagCategory;
+      user_count: number;
+      last_used_at: string;
+    }>
+  > {
     try {
       const { data, error } = await supabase.rpc('get_store_tags_by_category', {
         p_store_id: storeId,
@@ -318,9 +338,13 @@ export class EmailTagService {
         user_count: item.user_count || 0,
         last_used_at: item.last_used_at,
       }));
-    } catch ( _error: any) {
+    } catch (_error: any) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      logger.error('EmailTagService.getStoreTags error', { error: errorMessage, storeId, category });
+      logger.error('EmailTagService.getStoreTags error', {
+        error: errorMessage,
+        storeId,
+        category,
+      });
       throw new Error(`Failed to get store tags: ${errorMessage}`);
     }
   }
@@ -362,7 +386,7 @@ export class EmailTagService {
           category: string;
         }>,
       };
-    } catch ( _error: any) {
+    } catch (_error: any) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       logger.error('EmailTagService.cleanupExpiredTags error', { error: errorMessage });
       throw new Error(`Failed to cleanup expired tags: ${errorMessage}`);
@@ -416,7 +440,7 @@ export class EmailTagService {
           added_at: string;
         }>,
       };
-    } catch ( _error: any) {
+    } catch (_error: any) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       logger.error('EmailTagService.cleanupUnusedTags error', {
         error: errorMessage,
@@ -433,14 +457,16 @@ export class EmailTagService {
   static async getExpiringTags(
     storeId?: string,
     daysAhead: number = 7
-  ): Promise<Array<{
-    user_id: string;
-    store_id: string;
-    tag: string;
-    category: string;
-    expires_at: string;
-    days_until_expiry: number;
-  }>> {
+  ): Promise<
+    Array<{
+      user_id: string;
+      store_id: string;
+      tag: string;
+      category: string;
+      expires_at: string;
+      days_until_expiry: number;
+    }>
+  > {
     try {
       const { data, error } = await supabase.rpc('get_expiring_tags', {
         p_store_id: storeId || null,
@@ -460,7 +486,7 @@ export class EmailTagService {
         expires_at: string;
         days_until_expiry: number;
       }>;
-    } catch ( _error: any) {
+    } catch (_error: any) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       logger.error('EmailTagService.getExpiringTags error', {
         error: errorMessage,
@@ -474,10 +500,3 @@ export class EmailTagService {
 
 // Export instance singleton
 export const emailTagService = EmailTagService;
-
-
-
-
-
-
-

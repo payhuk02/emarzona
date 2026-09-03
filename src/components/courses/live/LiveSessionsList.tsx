@@ -8,7 +8,11 @@ import { Video, Calendar, Clock, Users, ExternalLink } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { useUpcomingSessions, useRegisterForSession, type LiveSession } from '@/hooks/courses/useLiveSessions';
+import {
+  useUpcomingSessions,
+  useRegisterForSession,
+  type LiveSession,
+} from '@/hooks/courses/useLiveSessions';
 import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -25,13 +29,16 @@ const LiveSessionsListComponent = ({ courseId, enrollmentId, userId }: LiveSessi
   const { data: sessions = [], isLoading } = useUpcomingSessions(courseId);
   const registerForSession = useRegisterForSession();
 
-  const handleRegister = useCallback((sessionId: string) => {
-    registerForSession.mutate({
-      sessionId,
-      enrollmentId,
-      userId,
-    });
-  }, [registerForSession, enrollmentId, userId]);
+  const handleRegister = useCallback(
+    (sessionId: string) => {
+      registerForSession.mutate({
+        sessionId,
+        enrollmentId,
+        userId,
+      });
+    },
+    [registerForSession, enrollmentId, userId]
+  );
 
   if (isLoading) {
     return (
@@ -59,10 +66,10 @@ const LiveSessionsListComponent = ({ courseId, enrollmentId, userId }: LiveSessi
         const isPast = new Date(session.scheduled_end) < new Date();
 
         return (
-          <Card key={session.id} className={cn(
-            'hover:shadow-md transition-shadow',
-            isLive && 'border-green-500'
-          )}>
+          <Card
+            key={session.id}
+            className={cn('hover:shadow-md transition-shadow', isLive && 'border-green-500')}
+          >
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between">
                 <div className="flex items-start gap-3 flex-1">
@@ -84,12 +91,8 @@ const LiveSessionsListComponent = ({ courseId, enrollmentId, userId }: LiveSessi
                       En direct
                     </Badge>
                   )}
-                  {isUpcoming && !isLive && (
-                    <Badge variant="secondary">Programmée</Badge>
-                  )}
-                  {isPast && (
-                    <Badge variant="outline">Terminée</Badge>
-                  )}
+                  {isUpcoming && !isLive && <Badge variant="secondary">Programmée</Badge>}
+                  {isPast && <Badge variant="outline">Terminée</Badge>}
                 </div>
               </div>
             </CardHeader>
@@ -172,10 +175,3 @@ export const LiveSessionsList = React.memo(LiveSessionsListComponent, (prevProps
 });
 
 LiveSessionsList.displayName = 'LiveSessionsList';
-
-
-
-
-
-
-

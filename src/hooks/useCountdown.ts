@@ -1,7 +1,7 @@
 /**
  * Hook useCountdown - Compteur à rebours
  * Fournit une API simple pour créer des compteurs à rebours
- * 
+ *
  * @example
  * ```tsx
  * const { timeLeft, isFinished, start, pause, reset } = useCountdown({
@@ -67,15 +67,8 @@ export interface UseCountdownReturn {
 /**
  * Hook pour gérer un compteur à rebours
  */
-export function useCountdown(
-  options: UseCountdownOptions
-): UseCountdownReturn {
-  const {
-    initialTime,
-    onFinish,
-    autoStart = false,
-    interval = 1000,
-  } = options;
+export function useCountdown(options: UseCountdownOptions): UseCountdownReturn {
+  const { initialTime, onFinish, autoStart = false, interval = 1000 } = options;
 
   const [timeLeft, setTimeLeft] = useState(initialTime);
   const [isPaused, setIsPaused] = useState(!autoStart);
@@ -105,7 +98,7 @@ export function useCountdown(
     }
 
     intervalRef.current = setInterval(() => {
-      setTimeLeft((prev) => {
+      setTimeLeft(prev => {
         if (prev <= 1) {
           setIsPaused(true);
           onFinish?.();
@@ -139,10 +132,3 @@ export function useCountdown(
     formattedTime: formattedTime(),
   };
 }
-
-
-
-
-
-
-

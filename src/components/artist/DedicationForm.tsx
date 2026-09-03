@@ -1,7 +1,7 @@
 /**
  * Dedication Form Component
  * Date: 1 Février 2025
- * 
+ *
  * Formulaire pour créer une dédicace personnalisée
  */
 
@@ -102,9 +102,7 @@ export const DedicationForm = ({
     <Card className={className}>
       <CardHeader>
         <CardTitle>Dédicace Personnalisée</CardTitle>
-        <CardDescription>
-          Ajoutez une dédicace personnalisée à votre commande
-        </CardDescription>
+        <CardDescription>Ajoutez une dédicace personnalisée à votre commande</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -117,10 +115,7 @@ export const DedicationForm = ({
                 <FormItem>
                   <FormLabel>Nom du destinataire (optionnel)</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="Ex: Jean Dupont"
-                      {...field}
-                    />
+                    <Input placeholder="Ex: Jean Dupont" {...field} />
                   </FormControl>
                   <FormDescription>
                     Le nom de la personne à qui la dédicace est destinée
@@ -144,9 +139,7 @@ export const DedicationForm = ({
                       {...field}
                     />
                   </FormControl>
-                  <FormDescription>
-                    {field.value?.length || 0} / 500 caractères
-                  </FormDescription>
+                  <FormDescription>{field.value?.length || 0} / 500 caractères</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -172,9 +165,7 @@ export const DedicationForm = ({
                       <SelectItem value="formal">Formel</SelectItem>
                     </SelectContent>
                   </Select>
-                  <FormDescription>
-                    Choisissez le style de police pour la dédicace
-                  </FormDescription>
+                  <FormDescription>Choisissez le style de police pour la dédicace</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -199,9 +190,7 @@ export const DedicationForm = ({
                       <SelectItem value="bottom">Bas</SelectItem>
                     </SelectContent>
                   </Select>
-                  <FormDescription>
-                    Position de la dédicace sur l'œuvre
-                  </FormDescription>
+                  <FormDescription>Position de la dédicace sur l'œuvre</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -231,11 +220,7 @@ export const DedicationForm = ({
 
             {/* Actions */}
             <div className="flex items-center gap-4">
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-                className="flex-1"
-              >
+              <Button type="submit" disabled={isSubmitting} className="flex-1">
                 {isSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -245,11 +230,7 @@ export const DedicationForm = ({
                   'Confirmer la dédicace'
                 )}
               </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handlePreview}
-              >
+              <Button type="button" variant="outline" onClick={handlePreview}>
                 <Eye className="mr-2 h-4 w-4" />
                 Aperçu
               </Button>
@@ -260,10 +241,3 @@ export const DedicationForm = ({
     </Card>
   );
 };
-
-
-
-
-
-
-

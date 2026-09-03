@@ -107,7 +107,7 @@ describe('Multi-Stores Isolation Tests', () => {
       single: vi.fn(),
       then: vi.fn(),
     };
-    
+
     // Default chain behaviour (return self to allow chaining)
     chain.select.mockReturnValue(chain);
     chain.eq.mockReturnValue(chain);
@@ -154,7 +154,10 @@ describe('Multi-Stores Isolation Tests', () => {
       });
 
       // Vérifier que la requête a filtré par store_id
-      expect(supabase.rpc).toHaveBeenCalledWith('get_products_management', expect.objectContaining({ p_store_id: 'store-1' }));
+      expect(supabase.rpc).toHaveBeenCalledWith(
+        'get_products_management',
+        expect.objectContaining({ p_store_id: 'store-1' })
+      );
       expect(result.current.products).toHaveLength(2);
       expect(result.current.products.every(p => p.store_id === 'store-1')).toBe(true);
     });
@@ -203,7 +206,7 @@ describe('Multi-Stores Isolation Tests', () => {
         error: null,
         count: 2,
       };
-      
+
       const chain = (supabase.from as ReturnType<typeof vi.fn>)();
       chain.then.mockImplementation((resolve: any) => resolve(chainResponse));
 
@@ -231,7 +234,7 @@ describe('Multi-Stores Isolation Tests', () => {
         error: null,
         count: 2,
       };
-      
+
       const chain = (supabase.from as ReturnType<typeof vi.fn>)();
       chain.then.mockImplementation((resolve: any) => resolve(chainResponse));
 
@@ -488,8 +491,14 @@ describe('Multi-Stores Isolation Tests', () => {
       expect(result2.current.products[0].store_id).toBe('store-2');
 
       // Vérifier que les deux requêtes ont utilisé le bon store_id
-      expect(supabase.rpc).toHaveBeenCalledWith('get_products_management', expect.objectContaining({ p_store_id: 'store-1' }));
-      expect(supabase.rpc).toHaveBeenCalledWith('get_products_management', expect.objectContaining({ p_store_id: 'store-2' }));
+      expect(supabase.rpc).toHaveBeenCalledWith(
+        'get_products_management',
+        expect.objectContaining({ p_store_id: 'store-1' })
+      );
+      expect(supabase.rpc).toHaveBeenCalledWith(
+        'get_products_management',
+        expect.objectContaining({ p_store_id: 'store-2' })
+      );
     });
 
     it('should prevent orders from store-2 appearing in store-1 queries', async () => {
@@ -499,15 +508,17 @@ describe('Multi-Stores Isolation Tests', () => {
       const store2Orders = [
         { id: 'order-2', order_number: 'ORD-002', store_id: 'store-2', total_amount: 200 },
       ];
-      
+
       const chain = (supabase.from as ReturnType<typeof vi.fn>)();
-      
+
       // Test store-1
-      chain.then.mockImplementationOnce((resolve: any) => resolve({
-        data: store1Orders,
-        error: null,
-        count: 1,
-      }));
+      chain.then.mockImplementationOnce((resolve: any) =>
+        resolve({
+          data: store1Orders,
+          error: null,
+          count: 1,
+        })
+      );
 
       const { result: result1 } = renderHook(() => useOrders('store-1'), { wrapper });
 
@@ -519,11 +530,13 @@ describe('Multi-Stores Isolation Tests', () => {
       expect(result1.current.orders[0].store_id).toBe('store-1');
 
       // Test store-2
-      chain.then.mockImplementationOnce((resolve: any) => resolve({
-        data: store2Orders,
-        error: null,
-        count: 1,
-      }));
+      chain.then.mockImplementationOnce((resolve: any) =>
+        resolve({
+          data: store2Orders,
+          error: null,
+          count: 1,
+        })
+      );
 
       const { result: result2 } = renderHook(() => useOrders('store-2'), { wrapper });
 
@@ -560,7 +573,10 @@ describe('Multi-Stores Isolation Tests', () => {
       // Test products
       renderHook(() => useProducts('store-1'), { wrapper });
       await waitFor(() => {
-        expect(supabase.rpc).toHaveBeenCalledWith('get_products_management', expect.objectContaining({ p_store_id: 'store-1' }));
+        expect(supabase.rpc).toHaveBeenCalledWith(
+          'get_products_management',
+          expect.objectContaining({ p_store_id: 'store-1' })
+        );
       });
 
       vi.clearAllMocks();
@@ -575,11 +591,13 @@ describe('Multi-Stores Isolation Tests', () => {
 
       // Test customers
       const chain = (supabase.from as ReturnType<typeof vi.fn>)();
-      chain.then.mockImplementation((resolve: any) => resolve({
-        data: [],
-        error: null,
-        count: 0,
-      }));
+      chain.then.mockImplementation((resolve: any) =>
+        resolve({
+          data: [],
+          error: null,
+          count: 0,
+        })
+      );
       renderHook(() => useCustomers('store-1'), { wrapper });
       await waitFor(() => {
         expect(mockEq).toHaveBeenCalledWith('store_id', 'store-1');

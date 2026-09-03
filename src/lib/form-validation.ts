@@ -31,7 +31,7 @@ export const commonSchemas = {
    * Validation d'email
    */
   email: z.string().email({
-    message: validationMessages.email('L\'email'),
+    message: validationMessages.email("L'email"),
   }),
 
   /**
@@ -45,62 +45,83 @@ export const commonSchemas = {
    * Validation d'URL
    */
   url: z.string().url({
-    message: validationMessages.url('L\'URL'),
+    message: validationMessages.url("L'URL"),
   }),
 
   /**
    * Validation de nom (lettres, espaces, tirets, apostrophes)
    */
-  name: z.string().min(2, {
-    message: validationMessages.minLength('Le nom', 2),
-  }).max(100, {
-    message: validationMessages.maxLength('Le nom', 100),
-  }).regex(/^[a-zA-ZàâäéèêëïîôùûüÿñçÀÂÄÉÈÊËÏÎÔÙÛÜŸÑÇ\s'-]+$/, {
-    message: 'Le nom ne peut contenir que des lettres, espaces, tirets et apostrophes',
-  }),
+  name: z
+    .string()
+    .min(2, {
+      message: validationMessages.minLength('Le nom', 2),
+    })
+    .max(100, {
+      message: validationMessages.maxLength('Le nom', 100),
+    })
+    .regex(/^[a-zA-ZàâäéèêëïîôùûüÿñçÀÂÄÉÈÊËÏÎÔÙÛÜŸÑÇ\s'-]+$/, {
+      message: 'Le nom ne peut contenir que des lettres, espaces, tirets et apostrophes',
+    }),
 
   /**
    * Validation de prix (positif, max 2 décimales)
    */
-  price: z.number().positive({
-    message: validationMessages.positive('Le prix'),
-  }).max(999999999.99, {
-    message: validationMessages.max('Le prix', 999999999.99),
-  }).refine((val) => {
-    const decimals = val.toString().split('.')[1];
-    return !decimals || decimals.length <= 2;
-  }, {
-    message: validationMessages.decimal('Le prix', 2),
-  }),
+  price: z
+    .number()
+    .positive({
+      message: validationMessages.positive('Le prix'),
+    })
+    .max(999999999.99, {
+      message: validationMessages.max('Le prix', 999999999.99),
+    })
+    .refine(
+      val => {
+        const decimals = val.toString().split('.')[1];
+        return !decimals || decimals.length <= 2;
+      },
+      {
+        message: validationMessages.decimal('Le prix', 2),
+      }
+    ),
 
   /**
    * Validation de quantité (entier positif)
    */
-  quantity: z.number().int({
-    message: validationMessages.integer('La quantité'),
-  }).min(1, {
-    message: validationMessages.min('La quantité', 1),
-  }),
+  quantity: z
+    .number()
+    .int({
+      message: validationMessages.integer('La quantité'),
+    })
+    .min(1, {
+      message: validationMessages.min('La quantité', 1),
+    }),
 
   /**
    * Validation de slug (minuscules, tirets, chiffres)
    */
-  slug: z.string().min(2, {
-    message: validationMessages.minLength('Le slug', 2),
-  }).max(100, {
-    message: validationMessages.maxLength('Le slug', 100),
-  }).regex(/^[a-z0-9-]+$/, {
-    message: 'Le slug ne peut contenir que des minuscules, chiffres et tirets',
-  }),
+  slug: z
+    .string()
+    .min(2, {
+      message: validationMessages.minLength('Le slug', 2),
+    })
+    .max(100, {
+      message: validationMessages.maxLength('Le slug', 100),
+    })
+    .regex(/^[a-z0-9-]+$/, {
+      message: 'Le slug ne peut contenir que des minuscules, chiffres et tirets',
+    }),
 
   /**
    * Validation de mot de passe (min 8 caractères, au moins une majuscule, une minuscule, un chiffre)
    */
-  password: z.string().min(8, {
-    message: validationMessages.minLength('Le mot de passe', 8),
-  }).regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, {
-    message: 'Le mot de passe doit contenir au moins une majuscule, une minuscule et un chiffre',
-  }),
+  password: z
+    .string()
+    .min(8, {
+      message: validationMessages.minLength('Le mot de passe', 8),
+    })
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, {
+      message: 'Le mot de passe doit contenir au moins une majuscule, une minuscule et un chiffre',
+    }),
 
   /**
    * Validation de code postal
@@ -112,11 +133,14 @@ export const commonSchemas = {
   /**
    * Validation de code pays (ISO 3166-1 alpha-2)
    */
-  countryCode: z.string().length(2, {
-    message: 'Le code pays doit contenir 2 caractères',
-  }).regex(/^[A-Z]{2}$/, {
-    message: 'Le code pays doit être en majuscules (ex: FR, US)',
-  }),
+  countryCode: z
+    .string()
+    .length(2, {
+      message: 'Le code pays doit contenir 2 caractères',
+    })
+    .regex(/^[A-Z]{2}$/, {
+      message: 'Le code pays doit être en majuscules (ex: FR, US)',
+    }),
 };
 
 /**
@@ -131,8 +155,8 @@ export function validateForm<T extends z.ZodTypeAny>(
     return { success: true, data: result };
   } catch (error) {
     if (error instanceof z.ZodError) {
-      const  errors: Record<string, string> = {};
-      error.errors.forEach((err) => {
+      const errors: Record<string, string> = {};
+      error.errors.forEach(err => {
         const path = err.path.join('.');
         errors[path] = err.message;
       });
@@ -166,8 +190,12 @@ export function validateField<T extends z.ZodTypeAny>(
 export async function validateFormAsync<T extends z.ZodTypeAny>(
   schema: T,
   data: unknown,
-  serverValidation?: (data: z.infer<T>) => Promise<{ success: boolean; errors?: Record<string, string> }>
-): Promise<{ success: true; data: z.infer<T> } | { success: false; errors: Record<string, string> }> {
+  serverValidation?: (
+    data: z.infer<T>
+  ) => Promise<{ success: boolean; errors?: Record<string, string> }>
+): Promise<
+  { success: true; data: z.infer<T> } | { success: false; errors: Record<string, string> }
+> {
   // Validation côté client
   const clientValidation = validateForm(schema, data);
   if (!clientValidation.success) {
@@ -207,10 +235,7 @@ export function formatValidationErrors(
 /**
  * Fonction helper pour obtenir le message d'erreur d'un champ
  */
-export function getFieldError(
-  errors: Record<string, string>,
-  field: string
-): string | undefined {
+export function getFieldError(errors: Record<string, string>, field: string): string | undefined {
   return errors[field];
 }
 
@@ -230,20 +255,10 @@ export function clearFormErrors(
 ): Record<string, string> {
   if (fields) {
     const cleaned = { ...errors };
-    fields.forEach((field) => {
+    fields.forEach(field => {
       delete cleaned[field];
     });
     return cleaned;
   }
   return {};
 }
-
-
-
-
-
-
-
-
-
-

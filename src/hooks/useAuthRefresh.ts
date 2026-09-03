@@ -19,7 +19,7 @@ export const useAuthRefresh = (options: UseAuthRefreshOptions = {}) => {
   const {
     autoRefresh = true,
     refreshThreshold = 10, // 10 minutes avant expiration pour être plus prudent
-    maxRetries = 3
+    maxRetries = 3,
   } = options;
 
   const { user, signOut } = useAuth();
@@ -28,7 +28,9 @@ export const useAuthRefresh = (options: UseAuthRefreshOptions = {}) => {
   // Fonction pour vérifier si le token va expirer bientôt
   const isTokenExpiringSoon = useCallback(async (): Promise<boolean> => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
 
       if (!session?.expires_at) return false;
 
@@ -69,84 +71,89 @@ export const useAuthRefresh = (options: UseAuthRefreshOptions = {}) => {
   }, []);
 
   // Fonction pour gérer les erreurs d'authentification
-  const handleAuthError = useCallback(async (error: any): Promise<boolean> => {
-    // Vérifier si c'est une erreur JWT réellement expiré (très spécifique pour éviter les faux positifs)
-    const isJwtExpired = error?.code === 'PGRST303' ||
-                        (error?.message?.includes('JWT expired') && error?.message?.includes('expired')) ||
-                        (error?.message?.includes('Invalid JWT') && error?.message?.includes('expired'));
+  const handleAuthError = useCallback(
+    async (error: any): Promise<boolean> => {
+      // Vérifier si c'est une erreur JWT réellement expiré (très spécifique pour éviter les faux positifs)
+      const isJwtExpired =
+        error?.code === 'PGRST303' ||
+        (error?.message?.includes('JWT expired') && error?.message?.includes('expired')) ||
+        (error?.message?.includes('Invalid JWT') && error?.message?.includes('expired'));
 
-    // Considérer comme erreur réseau (et donc retriable) beaucoup plus de cas
-    const isNetworkError = error?.message?.includes('fetch') ||
-                          error?.message?.includes('Network') ||
-                          error?.message?.includes('Failed to fetch') ||
-                          error?.message?.includes('network') ||
-                          error?.code === 'NETWORK_ERROR' ||
-                          error?.status >= 500 ||
-                          error?.name === 'TypeError' ||
-                          !navigator.onLine || // Si offline, considérer comme erreur réseau
-                          error?.message?.includes('timeout') ||
-                          error?.message?.includes('aborted');
+      // Considérer comme erreur réseau (et donc retriable) beaucoup plus de cas
+      const isNetworkError =
+        error?.message?.includes('fetch') ||
+        error?.message?.includes('Network') ||
+        error?.message?.includes('Failed to fetch') ||
+        error?.message?.includes('network') ||
+        error?.code === 'NETWORK_ERROR' ||
+        error?.status >= 500 ||
+        error?.name === 'TypeError' ||
+        !navigator.onLine || // Si offline, considérer comme erreur réseau
+        error?.message?.includes('timeout') ||
+        error?.message?.includes('aborted');
 
-    // Ne pas déconnecter pour les erreurs réseau (retry automatique suffira)
-    if (isNetworkError) {
-      logger.warn('🌐 Erreur réseau détectée, pas de déconnexion automatique');
-      return false; // Laisser le retry automatique gérer
-    }
-
-    if (!isJwtExpired) return false;
-
-    logger.warn('⚠️ Token JWT expiré détecté, tentative de rafraîchissement');
-
-    // Essayer de rafraîchir le token
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
-      logger.info(`🔄 Tentative de rafraîchissement ${attempt}/${maxRetries}`);
-
-      const refreshed = await refreshToken();
-      if (refreshed) {
-        logger.info('✅ Token rafraîchi, nouvelle tentative de requête');
-        return true; // Réessayer la requête originale
+      // Ne pas déconnecter pour les erreurs réseau (retry automatique suffira)
+      if (isNetworkError) {
+        logger.warn('🌐 Erreur réseau détectée, pas de déconnexion automatique');
+        return false; // Laisser le retry automatique gérer
       }
 
-      // Attendre avant la prochaine tentative
-      if (attempt < maxRetries) {
-        await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
-      }
-    }
+      if (!isJwtExpired) return false;
 
-    // Toutes les tentatives ont échoué
-    logger.error('❌ Impossible de rafraîchir le token, déconnexion silencieuse');
+      logger.warn('⚠️ Token JWT expiré détecté, tentative de rafraîchissement');
 
-    // ✅ SILENCIEUX: Pas de toast visible, redirection automatique
-    // L'utilisateur sera automatiquement redirigé vers la page de connexion
-    await signOut();
+      // Essayer de rafraîchir le token
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        logger.info(`🔄 Tentative de rafraîchissement ${attempt}/${maxRetries}`);
 
-    return false; // Ne pas réessayer
-  }, [maxRetries, refreshToken, signOut, toast]);
+        const refreshed = await refreshToken();
+        if (refreshed) {
+          logger.info('✅ Token rafraîchi, nouvelle tentative de requête');
+          return true; // Réessayer la requête originale
+        }
 
-  // Wrapper pour les requêtes avec gestion automatique des erreurs JWT
-  const withAuthRetry = useCallback(async <T>(
-    queryFn: () => Promise<T>,
-    context?: string
-  ): Promise<T> => {
-    try {
-      return await queryFn();
-    } catch (error: any) {
-      const shouldRetry = await handleAuthError(error);
-
-      if (shouldRetry) {
-        try {
-          // Réessayer la requête avec le nouveau token
-          logger.info(`🔄 Nouvelle tentative pour ${context || 'requête'}`);
-          return await queryFn();
-        } catch (retryError) {
-          logger.error(`❌ Échec de la nouvelle tentative:`, retryError);
-          throw retryError;
+        // Attendre avant la prochaine tentative
+        if (attempt < maxRetries) {
+          await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
         }
       }
 
-      throw error;
-    }
-  }, [handleAuthError]);
+      // Toutes les tentatives ont échoué
+      logger.error('❌ Impossible de rafraîchir le token, déconnexion silencieuse');
+
+      // ✅ SILENCIEUX: Pas de toast visible, redirection automatique
+      // L'utilisateur sera automatiquement redirigé vers la page de connexion
+      await signOut();
+
+      return false; // Ne pas réessayer
+    },
+    [maxRetries, refreshToken, signOut, toast]
+  );
+
+  // Wrapper pour les requêtes avec gestion automatique des erreurs JWT
+  const withAuthRetry = useCallback(
+    async <T>(queryFn: () => Promise<T>, context?: string): Promise<T> => {
+      try {
+        return await queryFn();
+      } catch (error: any) {
+        const shouldRetry = await handleAuthError(error);
+
+        if (shouldRetry) {
+          try {
+            // Réessayer la requête avec le nouveau token
+            logger.info(`🔄 Nouvelle tentative pour ${context || 'requête'}`);
+            return await queryFn();
+          } catch (retryError) {
+            logger.error(`❌ Échec de la nouvelle tentative:`, retryError);
+            throw retryError;
+          }
+        }
+
+        throw error;
+      }
+    },
+    [handleAuthError]
+  );
 
   // Rafraîchissement automatique périodique
   useEffect(() => {

@@ -33,7 +33,7 @@ vi.mock('@/hooks/use-toast', () => ({
 }));
 
 describe('useReviews', () => {
-  let  queryClient: QueryClient;
+  let queryClient: QueryClient;
 
   beforeEach(() => {
     queryClient = new QueryClient({
@@ -77,10 +77,7 @@ describe('useReviews', () => {
 
       (supabase.from as any) = mockFrom;
 
-      const { result } = renderHook(
-        () => useProductReviewStats('product-123'),
-        { wrapper }
-      );
+      const { result } = renderHook(() => useProductReviewStats('product-123'), { wrapper });
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
       expect(result.current.data).toEqual(mockStats);
@@ -100,10 +97,7 @@ describe('useReviews', () => {
 
       (supabase.from as any) = mockFrom;
 
-      const { result } = renderHook(
-        () => useProductReviewStats('product-999'),
-        { wrapper }
-      );
+      const { result } = renderHook(() => useProductReviewStats('product-999'), { wrapper });
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
       expect(result.current.data).toBeNull();
@@ -123,10 +117,7 @@ describe('useReviews', () => {
 
       (supabase.from as any) = mockFrom;
 
-      const { result } = renderHook(
-        () => useProductReviewStats('product-123'),
-        { wrapper }
-      );
+      const { result } = renderHook(() => useProductReviewStats('product-123'), { wrapper });
 
       await waitFor(() => expect(result.current.isError).toBe(true));
     });
@@ -167,10 +158,7 @@ describe('useReviews', () => {
 
       (supabase.from as any) = mockFrom;
 
-      const { result } = renderHook(
-        () => useProductReviews('product-123'),
-        { wrapper }
-      );
+      const { result } = renderHook(() => useProductReviews('product-123'), { wrapper });
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
       expect(result.current.data).toHaveLength(2);
@@ -191,10 +179,9 @@ describe('useReviews', () => {
 
       (supabase.from as any) = mockFrom;
 
-      const { result } = renderHook(
-        () => useProductReviews('product-123', { min_rating: 4 }),
-        { wrapper }
-      );
+      const { result } = renderHook(() => useProductReviews('product-123', { min_rating: 4 }), {
+        wrapper,
+      });
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
       expect(mockFrom().select().gte).toHaveBeenCalledWith('rating', 4);
@@ -213,10 +200,7 @@ describe('useReviews', () => {
 
       (supabase.from as any) = mockFrom;
 
-      const { result } = renderHook(
-        () => useProductReviews('product-123'),
-        { wrapper }
-      );
+      const { result } = renderHook(() => useProductReviews('product-123'), { wrapper });
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
       expect(mockFrom().select().order).toHaveBeenCalledWith(
@@ -240,7 +224,8 @@ describe('useReviews', () => {
         error: null,
       };
 
-      const mockFrom = vi.fn()
+      const mockFrom = vi
+        .fn()
         .mockReturnValueOnce({
           select: vi.fn().mockReturnValue({
             eq: vi.fn().mockReturnThis(),
@@ -256,10 +241,7 @@ describe('useReviews', () => {
 
       (supabase.from as any) = mockFrom;
 
-      const { result } = renderHook(
-        () => useCanReview('product-123'),
-        { wrapper }
-      );
+      const { result } = renderHook(() => useCanReview('product-123'), { wrapper });
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
       expect(result.current.data).toBe(true);
@@ -280,10 +262,7 @@ describe('useReviews', () => {
 
       (supabase.from as any) = mockFrom;
 
-      const { result } = renderHook(
-        () => useCanReview('product-123'),
-        { wrapper }
-      );
+      const { result } = renderHook(() => useCanReview('product-123'), { wrapper });
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
       expect(result.current.data).toBe(false);
@@ -300,7 +279,8 @@ describe('useReviews', () => {
         error: null,
       };
 
-      const mockFrom = vi.fn()
+      const mockFrom = vi
+        .fn()
         .mockReturnValueOnce({
           select: vi.fn().mockReturnValue({
             eq: vi.fn().mockReturnThis(),
@@ -316,20 +296,10 @@ describe('useReviews', () => {
 
       (supabase.from as any) = mockFrom;
 
-      const { result } = renderHook(
-        () => useCanReview('product-123'),
-        { wrapper }
-      );
+      const { result } = renderHook(() => useCanReview('product-123'), { wrapper });
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
       expect(result.current.data).toBe(false);
     });
   });
 });
-
-
-
-
-
-
-

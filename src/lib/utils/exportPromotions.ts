@@ -1,7 +1,7 @@
 /**
  * Export Promotions Utilities
  * Date: 30 Janvier 2025
- * 
+ *
  * Utilitaires pour exporter les promotions en CSV
  */
 
@@ -17,31 +17,50 @@ export interface ExportOptions {
 /**
  * Convertit une promotion en ligne CSV
  */
-const promotionToCSVRow = (promotion: Promotion | ProductPromotion, dateFormat: 'iso' | 'french' = 'french'): string => {
+const promotionToCSVRow = (
+  promotion: Promotion | ProductPromotion,
+  dateFormat: 'iso' | 'french' = 'french'
+): string => {
   const formatDate = (date: string | null | undefined): string => {
     if (!date) return '';
     const d = new Date(date);
     if (dateFormat === 'french') {
-      return d.toLocaleDateString('fr-FR', { 
-        year: 'numeric', 
-        month: '2-digit', 
+      return d.toLocaleDateString('fr-FR', {
+        year: 'numeric',
+        month: '2-digit',
         day: '2-digit',
         hour: '2-digit',
-        minute: '2-digit'
+        minute: '2-digit',
       });
     }
     return d.toISOString();
   };
 
   const code = 'code' in promotion ? promotion.code : (promotion as ProductPromotion).code || '';
-  const description = 'description' in promotion ? promotion.description : (promotion as ProductPromotion).description || '';
-  const discountType = 'discount_type' in promotion ? promotion.discount_type : (promotion as ProductPromotion).discount_type;
-  const discountValue = 'discount_value' in promotion ? promotion.discount_value : (promotion as ProductPromotion).discount_value;
-  const isActive = 'is_active' in promotion ? promotion.is_active : (promotion as ProductPromotion).is_active;
-  const startDate = 'start_date' in promotion ? promotion.start_date : (promotion as ProductPromotion).starts_at;
-  const endDate = 'end_date' in promotion ? promotion.end_date : (promotion as ProductPromotion).ends_at;
-  const usedCount = 'used_count' in promotion ? promotion.used_count : (promotion as ProductPromotion).current_uses || 0;
-  const maxUses = 'max_uses' in promotion ? promotion.max_uses : (promotion as ProductPromotion).max_uses;
+  const description =
+    'description' in promotion
+      ? promotion.description
+      : (promotion as ProductPromotion).description || '';
+  const discountType =
+    'discount_type' in promotion
+      ? promotion.discount_type
+      : (promotion as ProductPromotion).discount_type;
+  const discountValue =
+    'discount_value' in promotion
+      ? promotion.discount_value
+      : (promotion as ProductPromotion).discount_value;
+  const isActive =
+    'is_active' in promotion ? promotion.is_active : (promotion as ProductPromotion).is_active;
+  const startDate =
+    'start_date' in promotion ? promotion.start_date : (promotion as ProductPromotion).starts_at;
+  const endDate =
+    'end_date' in promotion ? promotion.end_date : (promotion as ProductPromotion).ends_at;
+  const usedCount =
+    'used_count' in promotion
+      ? promotion.used_count
+      : (promotion as ProductPromotion).current_uses || 0;
+  const maxUses =
+    'max_uses' in promotion ? promotion.max_uses : (promotion as ProductPromotion).max_uses;
 
   return [
     code,
@@ -75,7 +94,7 @@ export const exportPromotionsToCSV = (
     'Utilisations max',
   ];
 
-  const  rows: string[] = [];
+  const rows: string[] = [];
 
   // Ajouter les en-têtes si demandé
   if (options.includeHeaders) {
@@ -93,9 +112,7 @@ export const exportPromotionsToCSV = (
 /**
  * Exporte les promotions en JSON
  */
-export const exportPromotionsToJSON = (
-  promotions: (Promotion | ProductPromotion)[]
-): string => {
+export const exportPromotionsToJSON = (promotions: (Promotion | ProductPromotion)[]): string => {
   return JSON.stringify(promotions, null, 2);
 };
 
@@ -124,8 +141,8 @@ export const exportAndDownloadPromotions = (
   const timestamp = new Date().toISOString().slice(0, 10);
   const filename = `promotions_${timestamp}.${options.format}`;
 
-  let  content: string;
-  let  mimeType: string;
+  let content: string;
+  let mimeType: string;
 
   if (options.format === 'csv') {
     content = exportPromotionsToCSV(promotions, options);
@@ -142,10 +159,3 @@ export const exportAndDownloadPromotions = (
 
   downloadFile(content, filename, mimeType);
 };
-
-
-
-
-
-
-

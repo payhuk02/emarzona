@@ -1,7 +1,7 @@
 /**
  * useFormValidation Hook
  * Date: 28 Janvier 2025
- * 
+ *
  * Hook réutilisable pour la validation de formulaires avec debouncing
  * Améliore les performances et l'UX
  */
@@ -32,17 +32,13 @@ export function useFormValidation<T extends Record<string, any>>(
   rules: Partial<Record<keyof T, ValidationRule[]>>,
   options: UseFormValidationOptions = {}
 ) {
-  const {
-    debounceMs = 300,
-    validateOnChange = true,
-    validateOnBlur = true,
-  } = options;
+  const { debounceMs = 300, validateOnChange = true, validateOnBlur = true } = options;
 
   const [values, setValues] = useState<T>(initialValues);
   const [errors, setErrors] = useState<Partial<Record<keyof T, string>>>({});
   const [touched, setTouched] = useState<Partial<Record<keyof T, boolean>>>({});
   const [dirty, setDirty] = useState<Partial<Record<keyof T, boolean>>>({});
-  
+
   const debounceTimerRef = useRef<Record<string, NodeJS.Timeout>>({});
 
   // Valider un champ spécifique
@@ -65,9 +61,9 @@ export function useFormValidation<T extends Record<string, any>>(
 
   // Valider tous les champs
   const validateAll = useCallback((): boolean => {
-    const  newErrors: Partial<Record<keyof T, string>> = {};
+    const newErrors: Partial<Record<keyof T, string>> = {};
 
-    Object.keys(values).forEach((key) => {
+    Object.keys(values).forEach(key => {
       const fieldName = key as keyof T;
       const error = validateField(fieldName, values[fieldName]);
       if (error) {
@@ -82,13 +78,13 @@ export function useFormValidation<T extends Record<string, any>>(
   // Mettre à jour la valeur d'un champ
   const setValue = useCallback(
     (fieldName: keyof T, value: T[keyof T]) => {
-      setValues((prev) => ({ ...prev, [fieldName]: value }));
-      setDirty((prev) => ({ ...prev, [fieldName]: true }));
+      setValues(prev => ({ ...prev, [fieldName]: value }));
+      setDirty(prev => ({ ...prev, [fieldName]: true }));
 
       // Valider avec debounce
       if (validateOnChange) {
         const timerKey = String(fieldName);
-        
+
         // Annuler le timer précédent
         if (debounceTimerRef.current[timerKey]) {
           clearTimeout(debounceTimerRef.current[timerKey]);
@@ -97,7 +93,7 @@ export function useFormValidation<T extends Record<string, any>>(
         // Créer un nouveau timer
         debounceTimerRef.current[timerKey] = setTimeout(() => {
           const error = validateField(fieldName, value);
-          setErrors((prev) => {
+          setErrors(prev => {
             if (error) {
               return { ...prev, [fieldName]: error };
             } else {
@@ -114,11 +110,11 @@ export function useFormValidation<T extends Record<string, any>>(
   // Gérer le blur d'un champ
   const handleBlur = useCallback(
     (fieldName: keyof T) => {
-      setTouched((prev) => ({ ...prev, [fieldName]: true }));
+      setTouched(prev => ({ ...prev, [fieldName]: true }));
 
       if (validateOnBlur) {
         const error = validateField(fieldName, values[fieldName]);
-        setErrors((prev) => {
+        setErrors(prev => {
           if (error) {
             return { ...prev, [fieldName]: error };
           } else {
@@ -137,9 +133,9 @@ export function useFormValidation<T extends Record<string, any>>(
     setErrors({});
     setTouched({});
     setDirty({});
-    
+
     // Nettoyer les timers
-    Object.values(debounceTimerRef.current).forEach((timer) => {
+    Object.values(debounceTimerRef.current).forEach(timer => {
       clearTimeout(timer);
     });
     debounceTimerRef.current = {};
@@ -165,7 +161,7 @@ export function useFormValidation<T extends Record<string, any>>(
   // Nettoyer les timers au démontage
   useEffect(() => {
     return () => {
-      Object.values(debounceTimerRef.current).forEach((timer) => {
+      Object.values(debounceTimerRef.current).forEach(timer => {
         clearTimeout(timer);
       });
     };
@@ -191,7 +187,7 @@ export function useFormValidation<T extends Record<string, any>>(
 // Règles de validation communes
 export const commonRules = {
   required: (message = 'Ce champ est requis'): ValidationRule => ({
-    validate: (value) => {
+    validate: value => {
       if (value === null || value === undefined || value === '') {
         return message;
       }
@@ -204,7 +200,7 @@ export const commonRules = {
   }),
 
   minLength: (min: number, message?: string): ValidationRule<string> => ({
-    validate: (value) => {
+    validate: value => {
       if (!value || value.length < min) {
         return message || `Minimum ${min} caractères requis`;
       }
@@ -214,7 +210,7 @@ export const commonRules = {
   }),
 
   maxLength: (max: number, message?: string): ValidationRule<string> => ({
-    validate: (value) => {
+    validate: value => {
       if (value && value.length > max) {
         return message || `Maximum ${max} caractères autorisés`;
       }
@@ -224,7 +220,7 @@ export const commonRules = {
   }),
 
   email: (message = 'Email invalide'): ValidationRule<string> => ({
-    validate: (value) => {
+    validate: value => {
       if (!value) return true; // Laisser required gérer les valeurs vides
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       return emailRegex.test(value) || message;
@@ -233,7 +229,7 @@ export const commonRules = {
   }),
 
   url: (message = 'URL invalide'): ValidationRule<string> => ({
-    validate: (value) => {
+    validate: value => {
       if (!value) return true;
       try {
         new URL(value);
@@ -246,7 +242,7 @@ export const commonRules = {
   }),
 
   min: (min: number, message?: string): ValidationRule<number> => ({
-    validate: (value) => {
+    validate: value => {
       if (value === null || value === undefined) return true;
       if (typeof value === 'number' && value < min) {
         return message || `La valeur doit être supérieure ou égale à ${min}`;
@@ -257,7 +253,7 @@ export const commonRules = {
   }),
 
   max: (max: number, message?: string): ValidationRule<number> => ({
-    validate: (value) => {
+    validate: value => {
       if (value === null || value === undefined) return true;
       if (typeof value === 'number' && value > max) {
         return message || `La valeur doit être inférieure ou égale à ${max}`;
@@ -268,17 +264,10 @@ export const commonRules = {
   }),
 
   pattern: (regex: RegExp, message: string): ValidationRule<string> => ({
-    validate: (value) => {
+    validate: value => {
       if (!value) return true;
       return regex.test(value) || message;
     },
     message,
   }),
 };
-
-
-
-
-
-
-

@@ -10,7 +10,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 
-const PRODUCT_WARRANTY_FIELDS = 'id, store_id, product_id, variant_id, warranty_type, warranty_name, description, duration_months, starts_from, coverage_type, coverage_details, conditions, exclusions, requires_registration, requires_invoice, transferable, transfer_fee, is_active, is_default, terms_url, support_contact, support_email, support_phone, created_at, updated_at';
+const PRODUCT_WARRANTY_FIELDS =
+  'id, store_id, product_id, variant_id, warranty_type, warranty_name, description, duration_months, starts_from, coverage_type, coverage_details, conditions, exclusions, requires_registration, requires_invoice, transferable, transfer_fee, is_active, is_default, terms_url, support_contact, support_email, support_phone, created_at, updated_at';
 
 // =====================================================
 // TYPES
@@ -119,7 +120,7 @@ export const useProductWarranties = (productId?: string, variantId?: string) => 
     queryFn: async () => {
       if (!productId) throw new Error('Product ID manquant');
 
-      let  query= supabase
+      let query = supabase
         .from('product_warranties')
         .select(PRODUCT_WARRANTY_FIELDS)
         .eq('product_id', productId)
@@ -163,7 +164,7 @@ export const useWarrantyRegistrations = (
     queryFn: async () => {
       if (!userId) throw new Error('User ID manquant');
 
-      let  query= supabase
+      let query = supabase
         .from('warranty_registrations')
         .select(
           `
@@ -220,7 +221,7 @@ export const useWarrantyClaims = (
     queryFn: async () => {
       if (!userId) throw new Error('User ID manquant');
 
-      let  query= supabase
+      let query = supabase
         .from('warranty_claims')
         .select(
           `
@@ -459,9 +460,3 @@ export const useCreateWarrantyClaim = () => {
     },
   });
 };
-
-
-
-
-
-

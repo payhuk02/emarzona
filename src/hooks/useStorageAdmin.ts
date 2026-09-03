@@ -41,7 +41,7 @@ export const useStorageAdmin = () => {
       supabase: false,
       indexeddb: false,
       localstorage: false,
-      lastCheck: new Date().toISOString()
+      lastCheck: new Date().toISOString(),
     },
     metrics: {
       totalSize: 0,
@@ -49,10 +49,10 @@ export const useStorageAdmin = () => {
       itemsCount: 0,
       syncPending: 0,
       conflictsCount: 0,
-      backupsCount: 0
+      backupsCount: 0,
     },
     loading: true,
-    lastUpdate: new Date().toISOString()
+    lastUpdate: new Date().toISOString(),
   });
 
   // Mise à jour des métriques
@@ -62,10 +62,11 @@ export const useStorageAdmin = () => {
         hybridStorage.getStorageStats(),
         syncService.getSyncStats(),
         backupService.getBackupStats(),
-        recoveryService.getHealthStatus()
+        recoveryService.getHealthStatus(),
       ]);
 
-      const totalSize = (storageStats.indexeddb?.size || 0) + (storageStats.localstorage?.size || 0);
+      const totalSize =
+        (storageStats.indexeddb?.size || 0) + (storageStats.localstorage?.size || 0);
 
       setState(prev => ({
         ...prev,
@@ -73,7 +74,7 @@ export const useStorageAdmin = () => {
           supabase: healthStatus.storage?.supabase?.available || false,
           indexeddb: !!healthStatus.storage?.indexeddb,
           localstorage: !!healthStatus.storage?.localstorage,
-          lastCheck: new Date().toISOString()
+          lastCheck: new Date().toISOString(),
         },
         metrics: {
           totalSize,
@@ -81,12 +82,11 @@ export const useStorageAdmin = () => {
           itemsCount: storageStats.indexeddb?.items || 0,
           syncPending: syncStats.queue?.pending || 0,
           conflictsCount: syncStats.conflicts?.unresolved || 0,
-          backupsCount: backupStats.total || 0
+          backupsCount: backupStats.total || 0,
         },
         loading: false,
-        lastUpdate: new Date().toISOString()
+        lastUpdate: new Date().toISOString(),
       }));
-
     } catch (error) {
       logger.error('Erreur mise à jour métriques stockage:', error);
       setState(prev => ({ ...prev, loading: false }));
@@ -110,78 +110,81 @@ export const useStorageAdmin = () => {
       const totalErrors = results.reduce((sum, r) => sum + r.errors, 0);
 
       toast({
-        title: "Synchronisation terminée",
+        title: 'Synchronisation terminée',
         description: `${totalSynced} éléments synchronisés, ${totalErrors} erreurs`,
-        variant: totalErrors > 0 ? "destructive" : "default"
+        variant: totalErrors > 0 ? 'destructive' : 'default',
       });
 
       await updateMetrics();
       return { success: true, results };
-
     } catch (error) {
       toast({
-        title: "Erreur de synchronisation",
+        title: 'Erreur de synchronisation',
         description: error.message,
-        variant: "destructive"
+        variant: 'destructive',
       });
       setState(prev => ({ ...prev, loading: false }));
       return { success: false, error };
     }
   }, [toast, updateMetrics]);
 
-  const createManualBackup = useCallback(async (name?: string, description?: string) => {
-    try {
-      setState(prev => ({ ...prev, loading: true }));
+  const createManualBackup = useCallback(
+    async (name?: string, description?: string) => {
+      try {
+        setState(prev => ({ ...prev, loading: true }));
 
-      const backupId = await backupService.createManualBackup(
-        name || `Sauvegarde manuelle ${new Date().toLocaleString('fr-FR')}`,
-        description || 'Créée depuis l\'interface d\'administration'
-      );
+        const backupId = await backupService.createManualBackup(
+          name || `Sauvegarde manuelle ${new Date().toLocaleString('fr-FR')}`,
+          description || "Créée depuis l'interface d'administration"
+        );
 
-      toast({
-        title: "Sauvegarde créée",
-        description: `Sauvegarde ${backupId} créée avec succès`,
-      });
+        toast({
+          title: 'Sauvegarde créée',
+          description: `Sauvegarde ${backupId} créée avec succès`,
+        });
 
-      await updateMetrics();
-      return { success: true, backupId };
+        await updateMetrics();
+        return { success: true, backupId };
+      } catch (error) {
+        toast({
+          title: 'Erreur de sauvegarde',
+          description: error.message,
+          variant: 'destructive',
+        });
+        setState(prev => ({ ...prev, loading: false }));
+        return { success: false, error };
+      }
+    },
+    [toast, updateMetrics]
+  );
 
-    } catch (error) {
-      toast({
-        title: "Erreur de sauvegarde",
-        description: error.message,
-        variant: "destructive"
-      });
-      setState(prev => ({ ...prev, loading: false }));
-      return { success: false, error };
-    }
-  }, [toast, updateMetrics]);
+  const createEmergencyBackup = useCallback(
+    async (reason: string) => {
+      try {
+        setState(prev => ({ ...prev, loading: true }));
 
-  const createEmergencyBackup = useCallback(async (reason: string) => {
-    try {
-      setState(prev => ({ ...prev, loading: true }));
+        const backupId = await backupService.createEmergencyBackup(reason);
 
-      const backupId = await backupService.createEmergencyBackup(reason);
+        toast({
+          title: "Sauvegarde d'urgence créée",
+          description: `Sauvegarde ${backupId} créée en raison: ${reason}`,
+          variant: 'destructive',
+        });
 
-      toast({
-        title: "Sauvegarde d'urgence créée",
-        description: `Sauvegarde ${backupId} créée en raison: ${reason}`,
-        variant: "destructive"
-      });
-
-      await updateMetrics();
-      return { success: true, backupId };
-
-    } catch (error) {
-      toast({
-        title: "Erreur sauvegarde d'urgence",
-        description: error.message,
-        variant: "destructive"
-      });
-      setState(prev => ({ ...prev, loading: false }));
-      return { success: false, error };
-    }
-  }, [toast, updateMetrics]);
+        await updateMetrics();
+        return { success: true, backupId };
+      } catch (error) {
+        toast({
+          title: "Erreur sauvegarde d'urgence",
+          description: error.message,
+          variant: 'destructive',
+        });
+        setState(prev => ({ ...prev, loading: false }));
+        return { success: false, error };
+      }
+    },
+    [toast, updateMetrics]
+  );
 
   const exportData = useCallback(async () => {
     try {
@@ -202,48 +205,49 @@ export const useStorageAdmin = () => {
       URL.revokeObjectURL(url);
 
       toast({
-        title: "Export réussi",
-        description: "Les données ont été téléchargées",
+        title: 'Export réussi',
+        description: 'Les données ont été téléchargées',
       });
 
       setState(prev => ({ ...prev, loading: false }));
       return { success: true };
-
     } catch (error) {
       toast({
         title: "Erreur d'export",
         description: error.message,
-        variant: "destructive"
+        variant: 'destructive',
       });
       setState(prev => ({ ...prev, loading: false }));
       return { success: false, error };
     }
   }, [toast]);
 
-  const importData = useCallback(async (file: File) => {
-    try {
-      setState(prev => ({ ...prev, loading: true }));
+  const importData = useCallback(
+    async (file: File) => {
+      try {
+        setState(prev => ({ ...prev, loading: true }));
 
-      await backupService.importBackupFromFile(file);
+        await backupService.importBackupFromFile(file);
 
-      toast({
-        title: "Import réussi",
-        description: "Les données ont été importées",
-      });
+        toast({
+          title: 'Import réussi',
+          description: 'Les données ont été importées',
+        });
 
-      await updateMetrics();
-      return { success: true };
-
-    } catch (error) {
-      toast({
-        title: "Erreur d'import",
-        description: error.message,
-        variant: "destructive"
-      });
-      setState(prev => ({ ...prev, loading: false }));
-      return { success: false, error };
-    }
-  }, [toast, updateMetrics]);
+        await updateMetrics();
+        return { success: true };
+      } catch (error) {
+        toast({
+          title: "Erreur d'import",
+          description: error.message,
+          variant: 'destructive',
+        });
+        setState(prev => ({ ...prev, loading: false }));
+        return { success: false, error };
+      }
+    },
+    [toast, updateMetrics]
+  );
 
   const clearCache = useCallback(async () => {
     try {
@@ -252,9 +256,7 @@ export const useStorageAdmin = () => {
       // Nettoyer le cache local (simplifié)
       if ('caches' in window) {
         const cacheNames = await caches.keys();
-        await Promise.all(
-          cacheNames.map(cacheName => caches.delete(cacheName))
-        );
+        await Promise.all(cacheNames.map(cacheName => caches.delete(cacheName)));
       }
 
       // Nettoyer localStorage des clés temporaires
@@ -268,18 +270,17 @@ export const useStorageAdmin = () => {
       keysToRemove.forEach(key => localStorage.removeItem(key));
 
       toast({
-        title: "Cache nettoyé",
-        description: "Le cache a été vidé avec succès",
+        title: 'Cache nettoyé',
+        description: 'Le cache a été vidé avec succès',
       });
 
       await updateMetrics();
       return { success: true };
-
     } catch (error) {
       toast({
-        title: "Erreur nettoyage cache",
+        title: 'Erreur nettoyage cache',
         description: error.message,
-        variant: "destructive"
+        variant: 'destructive',
       });
       setState(prev => ({ ...prev, loading: false }));
       return { success: false, error };
@@ -293,18 +294,17 @@ export const useStorageAdmin = () => {
       await recoveryService.forceHealthCheck();
 
       toast({
-        title: "Vérification santé terminée",
-        description: "Le système a été vérifié",
+        title: 'Vérification santé terminée',
+        description: 'Le système a été vérifié',
       });
 
       await updateMetrics();
       return { success: true };
-
     } catch (error) {
       toast({
-        title: "Erreur vérification santé",
+        title: 'Erreur vérification santé',
         description: error.message,
-        variant: "destructive"
+        variant: 'destructive',
       });
       setState(prev => ({ ...prev, loading: false }));
       return { success: false, error };
@@ -326,19 +326,18 @@ export const useStorageAdmin = () => {
       const recoveryResult = await recoveryService.testRecovery('supabase_down');
 
       toast({
-        title: "Test de résilience terminé",
+        title: 'Test de résilience terminé',
         description: `Récupération: ${recoveryResult.success ? 'Réussie' : 'Échouée'}`,
-        variant: recoveryResult.success ? "default" : "destructive"
+        variant: recoveryResult.success ? 'default' : 'destructive',
       });
 
       await updateMetrics();
       return { success: true, recoveryResult };
-
     } catch (error) {
       toast({
-        title: "Erreur test résilience",
+        title: 'Erreur test résilience',
         description: error.message,
-        variant: "destructive"
+        variant: 'destructive',
       });
       setState(prev => ({ ...prev, loading: false }));
       return { success: false, error };
@@ -367,7 +366,7 @@ export const useStorageAdmin = () => {
       const sizes = ['Bytes', 'KB', 'MB', 'GB'];
       const i = Math.floor(Math.log(bytes) / Math.log(k));
       return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-    }
+    },
   };
 };
 

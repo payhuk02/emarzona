@@ -1,7 +1,7 @@
 /**
  * Calendar Integration Service
  * Date: 2 Février 2025
- * 
+ *
  * Service pour exporter les tâches vers des calendriers (iCal, Google Calendar, etc.)
  */
 
@@ -43,7 +43,7 @@ export function generateICalForTask(task: StoreTask): string {
     'END:VEVENT',
     'END:VCALENDAR',
   ]
-    .filter((line) => line !== '')
+    .filter(line => line !== '')
     .join('\r\n');
 
   return ical;
@@ -58,7 +58,7 @@ export function generateICalForTasks(tasks: StoreTask[]): string {
   };
 
   const now = new Date();
-  const events = tasks.map((task) => {
+  const events = tasks.map(task => {
     const startDate = task.due_date ? new Date(task.due_date) : new Date(task.created_at);
     const endDate = new Date(startDate.getTime() + 60 * 60 * 1000);
 
@@ -75,7 +75,7 @@ export function generateICalForTasks(tasks: StoreTask[]): string {
       `URL:${window.location.origin}/dashboard/tasks?task=${task.id}`,
       'END:VEVENT',
     ]
-      .filter((line) => line !== '')
+      .filter(line => line !== '')
       .join('\r\n');
   });
 
@@ -174,10 +174,3 @@ function getPriorityNumber(priority: StoreTask['priority']): string {
   };
   return priorityMap[priority] || '3';
 }
-
-
-
-
-
-
-

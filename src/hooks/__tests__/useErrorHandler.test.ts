@@ -55,9 +55,7 @@ describe('useErrorHandler', () => {
   it('devrait utiliser un message personnalisé si fourni', () => {
     mockToast.mockClear();
 
-    const { result } = renderHook(() => 
-      useErrorHandler({ customMessage: 'Message personnalisé' })
-    );
+    const { result } = renderHook(() => useErrorHandler({ customMessage: 'Message personnalisé' }));
 
     const error = new Error('Erreur test');
     result.current.handleError(error);
@@ -71,9 +69,7 @@ describe('useErrorHandler', () => {
   });
 
   it('ne devrait pas afficher de toast pour les erreurs non-critiques en mode silent', () => {
-    const { result } = renderHook(() => 
-      useErrorHandler({ silent: true })
-    );
+    const { result } = renderHook(() => useErrorHandler({ silent: true }));
 
     const lowSeverityError = { code: '42P01', message: 'Table does not exist' };
     const normalized = result.current.handleError(lowSeverityError);
@@ -83,9 +79,7 @@ describe('useErrorHandler', () => {
 
   it('devrait appeler le callback onError si fourni', () => {
     const onError = vi.fn();
-    const { result } = renderHook(() => 
-      useErrorHandler({ onError })
-    );
+    const { result } = renderHook(() => useErrorHandler({ onError }));
 
     const error = new Error('Test error');
     result.current.handleError(error);
@@ -93,7 +87,7 @@ describe('useErrorHandler', () => {
     expect(onError).toHaveBeenCalledTimes(1);
   });
 
-  it('devrait inclure le contexte dans la gestion d\'erreur', () => {
+  it("devrait inclure le contexte dans la gestion d'erreur", () => {
     const { result } = renderHook(() => useErrorHandler());
 
     const error = new Error('Test error');
@@ -126,10 +120,3 @@ describe('useMutationErrorHandler', () => {
     expect(normalized).toBeDefined();
   });
 });
-
-
-
-
-
-
-

@@ -35,7 +35,10 @@ export const OPEN_COOKIE_SETTINGS_EVENT = 'emarzona:open-cookie-settings';
 export function hasCookieConsentGiven(): boolean {
   // Check cookie first (new), then fall back to localStorage (legacy migration)
   if (getCookie(CONSENT_COOKIE) === 'true') return true;
-  if (typeof localStorage !== 'undefined' && localStorage.getItem('cookieConsentGiven') === 'true') {
+  if (
+    typeof localStorage !== 'undefined' &&
+    localStorage.getItem('cookieConsentGiven') === 'true'
+  ) {
     // Migrate legacy localStorage value to cookie
     setCookie(CONSENT_COOKIE, 'true');
     return true;
@@ -49,7 +52,9 @@ export function getStoredCookiePreferences(): Partial<CookiePreferences> | null 
   if (fromCookie) {
     try {
       return JSON.parse(fromCookie) as Partial<CookiePreferences>;
-    } catch { /* fall through */ }
+    } catch {
+      /* fall through */
+    }
   }
   if (typeof localStorage !== 'undefined') {
     const saved = localStorage.getItem('cookiePreferences');
@@ -59,7 +64,9 @@ export function getStoredCookiePreferences(): Partial<CookiePreferences> | null 
         // Migrate to cookie
         setCookie(PREFS_COOKIE, saved);
         return prefs;
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
     }
   }
   return null;

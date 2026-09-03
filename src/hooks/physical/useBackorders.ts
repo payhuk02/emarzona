@@ -7,9 +7,16 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-const BACKORDER_RECEIVE_FIELDS = 'id, status, received_quantity, ordered_quantity, pending_quantity, auto_fulfill_on_arrival';
+const BACKORDER_RECEIVE_FIELDS =
+  'id, status, received_quantity, ordered_quantity, pending_quantity, auto_fulfill_on_arrival';
 
-export type BackorderStatus = 'pending' | 'ordered' | 'in_transit' | 'partially_received' | 'received' | 'fulfilled';
+export type BackorderStatus =
+  | 'pending'
+  | 'ordered'
+  | 'in_transit'
+  | 'partially_received'
+  | 'received'
+  | 'fulfilled';
 export type BackorderPriority = 'low' | 'medium' | 'high' | 'urgent';
 
 export interface Backorder {
@@ -72,18 +79,22 @@ export interface BackorderCustomer {
 /**
  * Récupérer tous les backorders d'un store
  */
-export function useBackorders(storeId: string | null, filters?: {
-  status?: BackorderStatus;
-  priority?: BackorderPriority;
-}) {
+export function useBackorders(
+  storeId: string | null,
+  filters?: {
+    status?: BackorderStatus;
+    priority?: BackorderPriority;
+  }
+) {
   return useQuery({
     queryKey: ['backorders', storeId, filters],
     queryFn: async () => {
       if (!storeId) return [];
 
-      let  query= supabase
+      let query = supabase
         .from('backorders')
-        .select(`
+        .select(
+          `
           *,
           product:products!inner(
             id,
@@ -93,7 +104,8 @@ export function useBackorders(storeId: string | null, filters?: {
             id,
             name
           )
-        `)
+        `
+        )
         .eq('store_id', storeId)
         .order('created_at', { ascending: false });
 
@@ -125,7 +137,8 @@ export function useBackorder(backorderId: string | null) {
 
       const { data, error } = await supabase
         .from('backorders')
-        .select(`
+        .select(
+          `
           *,
           product:products!inner(
             id,
@@ -135,7 +148,8 @@ export function useBackorder(backorderId: string | null) {
             id,
             name
           )
-        `)
+        `
+        )
         .eq('id', backorderId)
         .single();
 
@@ -157,7 +171,8 @@ export function useBackorderCustomers(backorderId: string | null) {
 
       const { data, error } = await supabase
         .from('backorder_customers')
-        .select(`
+        .select(
+          `
           *,
           customer:customers!inner(
             id,
@@ -168,7 +183,8 @@ export function useBackorderCustomers(backorderId: string | null) {
             id,
             order_number
           )
-        `)
+        `
+        )
         .eq('backorder_id', backorderId)
         .order('requested_at', { ascending: false });
 
@@ -318,7 +334,7 @@ export function useReceiveBackorderStock() {
       const newPendingQuantity = Math.max(0, backorder.pending_quantity - quantity);
 
       // Déterminer le nouveau statut
-      let  newStatus: BackorderStatus = backorder.status;
+      let newStatus: BackorderStatus = backorder.status;
       if (newReceivedQuantity >= backorder.ordered_quantity) {
         newStatus = 'received';
       } else if (newReceivedQuantity > 0) {
@@ -344,10 +360,7 @@ export function useReceiveBackorderStock() {
       if (backorder.auto_fulfill_on_arrival && newStatus === 'received') {
         // Logique de fulfillment automatique (à implémenter selon votre système de commandes)
         // Pour l'instant, on marque juste comme fulfilled
-        await supabase
-          .from('backorders')
-          .update({ status: 'fulfilled' })
-          .eq('id', backorderId);
+        await supabase.from('backorders').update({ status: 'fulfilled' }).eq('id', backorderId);
       }
 
       return data;
@@ -403,7 +416,7 @@ export function useNotifyBackorderCustomers() {
 
       return { success: true, notified: count || 0 };
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['backorders'] });
       queryClient.invalidateQueries({ queryKey: ['backorder-customers'] });
       toast({
@@ -453,7 +466,10 @@ export function useMarkBackorderOrdered() {
 
       if (fetchError) throw fetchError;
 
-      const pendingQuantity = Math.max(0, backorder.customer_demand - (backorder.received_quantity || 0));
+      const pendingQuantity = Math.max(
+        0,
+        backorder.customer_demand - (backorder.received_quantity || 0)
+      );
 
       const { data, error } = await supabase
         .from('backorders')
@@ -490,10 +506,3 @@ export function useMarkBackorderOrdered() {
     },
   });
 }
-
-
-
-
-
-
-

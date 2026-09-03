@@ -87,10 +87,7 @@ export async function fetchAdminOrderStats(): Promise<AdminOrderStats> {
       .from('orders')
       .select('id', { count: 'exact', head: true })
       .or('delivery_status.eq.delivered,status.eq.completed,status.eq.delivered'),
-    supabase
-      .from('orders')
-      .select('total_amount')
-      .in('payment_status', ['completed', 'paid']),
+    supabase.from('orders').select('total_amount').in('payment_status', ['completed', 'paid']),
   ]);
 
   const totalRevenue = ((paidOrdersRes.data as any[]) || []).reduce(

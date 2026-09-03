@@ -1,7 +1,7 @@
 /**
  * Digital Product Notifications Hooks
  * Date: 2025-01-27
- * 
+ *
  * Hooks React Query pour gérer les notifications email automatiques
  */
 
@@ -36,23 +36,23 @@ export const useSendPriceDropNotification = () => {
     mutationFn: async (notification: PriceDropNotification) => {
       return await sendPriceDropNotification(notification);
     },
-    onSuccess: (result) => {
+    onSuccess: result => {
       if (result.success) {
         toast({
           title: 'Notification envoyée',
-          description: 'L\'email de baisse de prix a été envoyé avec succès',
+          description: "L'email de baisse de prix a été envoyé avec succès",
         });
         queryClient.invalidateQueries({ queryKey: ['priceDropAlerts'] });
       } else {
         toast({
           title: 'Erreur',
-          description: result.error || 'Impossible d\'envoyer la notification',
+          description: result.error || "Impossible d'envoyer la notification",
           variant: 'destructive',
         });
       }
     },
     onError: (error: Error) => {
-      logger.error('Erreur lors de l\'envoi de la notification de baisse de prix', { error });
+      logger.error("Erreur lors de l'envoi de la notification de baisse de prix", { error });
       toast({
         title: 'Erreur',
         description: error.message,
@@ -73,7 +73,7 @@ export const useSendNewVersionNotification = () => {
     mutationFn: async (notification: NewVersionNotification) => {
       return await sendNewVersionNotification(notification);
     },
-    onSuccess: (result) => {
+    onSuccess: result => {
       if (result.success) {
         toast({
           title: 'Notifications envoyées',
@@ -83,13 +83,13 @@ export const useSendNewVersionNotification = () => {
       } else {
         toast({
           title: 'Erreur',
-          description: result.error || 'Impossible d\'envoyer les notifications',
+          description: result.error || "Impossible d'envoyer les notifications",
           variant: 'destructive',
         });
       }
     },
     onError: (error: Error) => {
-      logger.error('Erreur lors de l\'envoi des notifications de nouvelle version', { error });
+      logger.error("Erreur lors de l'envoi des notifications de nouvelle version", { error });
       toast({
         title: 'Erreur',
         description: error.message,
@@ -109,22 +109,22 @@ export const useSendLicenseExpiringNotification = () => {
     mutationFn: async (notification: LicenseExpiringNotification) => {
       return await sendLicenseExpiringNotification(notification);
     },
-    onSuccess: (result) => {
+    onSuccess: result => {
       if (result.success) {
         toast({
           title: 'Notification envoyée',
-          description: 'L\'email de licence expirant a été envoyé avec succès',
+          description: "L'email de licence expirant a été envoyé avec succès",
         });
       } else {
         toast({
           title: 'Erreur',
-          description: result.error || 'Impossible d\'envoyer la notification',
+          description: result.error || "Impossible d'envoyer la notification",
           variant: 'destructive',
         });
       }
     },
     onError: (error: Error) => {
-      logger.error('Erreur lors de l\'envoi de la notification de licence expirant', { error });
+      logger.error("Erreur lors de l'envoi de la notification de licence expirant", { error });
       toast({
         title: 'Erreur',
         description: error.message,
@@ -144,22 +144,22 @@ export const useSendLicenseExpiredNotification = () => {
     mutationFn: async (notification: LicenseExpiredNotification) => {
       return await sendLicenseExpiredNotification(notification);
     },
-    onSuccess: (result) => {
+    onSuccess: result => {
       if (result.success) {
         toast({
           title: 'Notification envoyée',
-          description: 'L\'email de licence expirée a été envoyé avec succès',
+          description: "L'email de licence expirée a été envoyé avec succès",
         });
       } else {
         toast({
           title: 'Erreur',
-          description: result.error || 'Impossible d\'envoyer la notification',
+          description: result.error || "Impossible d'envoyer la notification",
           variant: 'destructive',
         });
       }
     },
     onError: (error: Error) => {
-      logger.error('Erreur lors de l\'envoi de la notification de licence expirée', { error });
+      logger.error("Erreur lors de l'envoi de la notification de licence expirée", { error });
       toast({
         title: 'Erreur',
         description: error.message,
@@ -181,7 +181,7 @@ export const useCheckPriceDropNotifications = () => {
     mutationFn: async () => {
       return await checkAndSendPriceDropNotifications();
     },
-    onSuccess: (result) => {
+    onSuccess: result => {
       toast({
         title: 'Vérification terminée',
         description: `${result.sent} notification(s) envoyée(s), ${result.errors} erreur(s)`,
@@ -211,7 +211,7 @@ export const useCheckLicenseExpiringNotifications = () => {
     mutationFn: async () => {
       return await checkAndSendLicenseExpiringNotifications();
     },
-    onSuccess: (result) => {
+    onSuccess: result => {
       toast({
         title: 'Vérification terminée',
         description: `${result.sent} notification(s) envoyée(s), ${result.errors} erreur(s)`,
@@ -228,10 +228,3 @@ export const useCheckLicenseExpiringNotifications = () => {
     },
   });
 };
-
-
-
-
-
-
-

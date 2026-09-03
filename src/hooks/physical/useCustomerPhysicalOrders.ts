@@ -1,7 +1,7 @@
 /**
  * Customer Physical Orders Hooks
  * Date: 2025-01-27
- * 
+ *
  * Hooks pour récupérer les commandes de produits physiques d'un client
  */
 
@@ -9,10 +9,13 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 
-const SHIPMENT_FIELDS = 'id, order_id, tracking_number, tracking_url, status, carrier_id, estimated_delivery, actual_delivery';
+const SHIPMENT_FIELDS =
+  'id, order_id, tracking_number, tracking_url, status, carrier_id, estimated_delivery, actual_delivery';
 const RETURN_FIELDS = 'id, order_id, return_number, status, return_reason, requested_at';
-const CUSTOMER_ORDER_FIELDS = 'id, order_number, store_id, customer_id, total_amount, currency, payment_status, status, shipping_address, created_at, delivered_at';
-const CUSTOMER_ORDER_ITEM_FIELDS = 'id, order_id, product_id, quantity, price, variant_id, created_at, updated_at';
+const CUSTOMER_ORDER_FIELDS =
+  'id, order_number, store_id, customer_id, total_amount, currency, payment_status, status, shipping_address, created_at, delivered_at';
+const CUSTOMER_ORDER_ITEM_FIELDS =
+  'id, order_id, product_id, quantity, price, variant_id, created_at, updated_at';
 const CUSTOMER_ORDER_PRODUCT_FIELDS = 'id, name, image_url, product_type';
 const CUSTOMER_ORDER_VARIANT_FIELDS = 'id, name';
 
@@ -124,7 +127,9 @@ export const useCustomerPhysicalOrders = () => {
   return useQuery({
     queryKey: ['customerPhysicalOrders'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) {
         logger.warn('useCustomerPhysicalOrders: User not authenticated.');
         return [];
@@ -138,7 +143,10 @@ export const useCustomerPhysicalOrders = () => {
         .single();
 
       if (customerError || !customerData) {
-        logger.error('useCustomerPhysicalOrders: Error fetching customer ID or customer not found.', { customerError });
+        logger.error(
+          'useCustomerPhysicalOrders: Error fetching customer ID or customer not found.',
+          { customerError }
+        );
         return [];
       }
 
@@ -147,7 +155,8 @@ export const useCustomerPhysicalOrders = () => {
       // Récupérer les commandes avec produits physiques
       const { data: orders, error: ordersError } = await supabase
         .from('orders')
-        .select(`
+        .select(
+          `
           id,
           order_number,
           store_id,
@@ -176,7 +185,8 @@ export const useCustomerPhysicalOrders = () => {
               name
             )
           )
-        `)
+        `
+        )
         .eq('customer_id', customerId)
         .eq('payment_status', 'paid')
         .order('created_at', { ascending: false });
@@ -188,9 +198,7 @@ export const useCustomerPhysicalOrders = () => {
 
       // Filtrer pour ne garder que les commandes avec produits physiques
       const physicalOrders = (orders || []).filter((order: SupabaseOrder) => {
-        return order.order_items?.some((item) => 
-          item.products?.product_type === 'physical'
-        );
+        return order.order_items?.some(item => item.products?.product_type === 'physical');
       });
 
       if (physicalOrders.length === 0) {
@@ -198,12 +206,14 @@ export const useCustomerPhysicalOrders = () => {
       }
 
       // OPTIMIZED: Fetch all shipments and returns in batch (N+1 fix)
-      const orderIds = physicalOrders.map((order) => order.id);
+      const orderIds = physicalOrders.map(order => order.id);
 
       // Fetch all shipments for all orders in one query
       const { data: allShipments } = await supabase
         .from('shipments')
-        .select('id, order_id, tracking_number, tracking_url, status, carrier_id, estimated_delivery, actual_delivery')
+        .select(
+          'id, order_id, tracking_number, tracking_url, status, carrier_id, estimated_delivery, actual_delivery'
+        )
         .in('order_id', orderIds);
 
       // Fetch all returns for all orders in one query
@@ -214,17 +224,19 @@ export const useCustomerPhysicalOrders = () => {
         .order('requested_at', { ascending: false });
 
       // Get unique carrier IDs
-      const carrierIds = [...new Set((allShipments || [])
-        .map((s: SupabaseShipment) => s.carrier_id)
-        .filter((id): id is string => id !== null && id !== undefined))];
+      const carrierIds = [
+        ...new Set(
+          (allShipments || [])
+            .map((s: SupabaseShipment) => s.carrier_id)
+            .filter((id): id is string => id !== null && id !== undefined)
+        ),
+      ];
 
       // Fetch all carriers in one query (N+1 fix)
-      const { data: allCarriers } = carrierIds.length > 0
-        ? await supabase
-            .from('shipping_carriers')
-            .select('id, name, code')
-            .in('id', carrierIds)
-        : { data: [] };
+      const { data: allCarriers } =
+        carrierIds.length > 0
+          ? await supabase.from('shipping_carriers').select('id, name, code').in('id', carrierIds)
+          : { data: [] };
 
       // Create a map for quick lookup
       const carriersMap = new Map<string, SupabaseCarrier>(
@@ -232,15 +244,18 @@ export const useCustomerPhysicalOrders = () => {
       );
 
       // Group shipments and returns by order_id
-      const shipmentsByOrder = new Map<string, Array<{
-        id: string;
-        tracking_number?: string;
-        tracking_url?: string;
-        status: string;
-        carrier_name?: string;
-        estimated_delivery?: string;
-        actual_delivery?: string;
-      }>>();
+      const shipmentsByOrder = new Map<
+        string,
+        Array<{
+          id: string;
+          tracking_number?: string;
+          tracking_url?: string;
+          status: string;
+          carrier_name?: string;
+          estimated_delivery?: string;
+          actual_delivery?: string;
+        }>
+      >();
       const returnsByOrder = new Map<string, SupabaseReturn[]>();
 
       (allShipments || []).forEach((shipment: SupabaseShipment) => {
@@ -250,8 +265,10 @@ export const useCustomerPhysicalOrders = () => {
         }
         shipmentsByOrder.get(orderId)!.push({
           ...shipment,
-          carrier_name: shipment.carrier_id 
-            ? (carriersMap.get(shipment.carrier_id)?.name || carriersMap.get(shipment.carrier_id)?.code || undefined)
+          carrier_name: shipment.carrier_id
+            ? carriersMap.get(shipment.carrier_id)?.name ||
+              carriersMap.get(shipment.carrier_id)?.code ||
+              undefined
             : undefined,
         });
       });
@@ -265,32 +282,35 @@ export const useCustomerPhysicalOrders = () => {
       });
 
       // Map orders with their shipments and returns
-      const ordersWithDetails = physicalOrders.map((order: SupabaseOrder) => ({
-        id: order.id,
-        order_number: order.order_number || order.id,
-        store_id: order.store_id,
-        customer_id: order.customer_id,
-        total_amount: order.total_amount,
-        currency: order.currency || 'XOF',
-        payment_status: order.payment_status,
-        status: order.status,
-        shipping_address: order.shipping_address || {},
-        created_at: order.created_at,
-        delivered_at: order.delivered_at,
-        order_items: (order.order_items || []).map((item: SupabaseOrderItem) => ({
-          id: item.id,
-          product_id: item.product_id,
-          product_name: item.products?.name || 'Produit inconnu',
-          product_image_url: item.products?.image_url,
-          variant_id: item.variant_id,
-          variant_name: item.physical_product_variants?.name,
-          quantity: item.quantity,
-          price: item.price,
-          total: item.price * item.quantity,
-        })),
-        shipments: shipmentsByOrder.get(order.id) || [],
-        returns: returnsByOrder.get(order.id) || [],
-      } as CustomerPhysicalOrder));
+      const ordersWithDetails = physicalOrders.map(
+        (order: SupabaseOrder) =>
+          ({
+            id: order.id,
+            order_number: order.order_number || order.id,
+            store_id: order.store_id,
+            customer_id: order.customer_id,
+            total_amount: order.total_amount,
+            currency: order.currency || 'XOF',
+            payment_status: order.payment_status,
+            status: order.status,
+            shipping_address: order.shipping_address || {},
+            created_at: order.created_at,
+            delivered_at: order.delivered_at,
+            order_items: (order.order_items || []).map((item: SupabaseOrderItem) => ({
+              id: item.id,
+              product_id: item.product_id,
+              product_name: item.products?.name || 'Produit inconnu',
+              product_image_url: item.products?.image_url,
+              variant_id: item.variant_id,
+              variant_name: item.physical_product_variants?.name,
+              quantity: item.quantity,
+              price: item.price,
+              total: item.price * item.quantity,
+            })),
+            shipments: shipmentsByOrder.get(order.id) || [],
+            returns: returnsByOrder.get(order.id) || [],
+          }) as CustomerPhysicalOrder
+      );
 
       return ordersWithDetails;
     },
@@ -306,7 +326,9 @@ export const useCustomerPhysicalOrder = (orderId: string | undefined) => {
     queryFn: async () => {
       if (!orderId) throw new Error('Order ID manquant');
 
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
       // Récupérer le customer_id
@@ -321,14 +343,16 @@ export const useCustomerPhysicalOrder = (orderId: string | undefined) => {
       // Récupérer la commande
       const { data: order, error } = await supabase
         .from('orders')
-        .select(`
+        .select(
+          `
           ${CUSTOMER_ORDER_FIELDS},
           order_items (
             ${CUSTOMER_ORDER_ITEM_FIELDS},
             products (${CUSTOMER_ORDER_PRODUCT_FIELDS}),
             physical_product_variants (${CUSTOMER_ORDER_VARIANT_FIELDS})
           )
-        `)
+        `
+        )
         .eq('id', orderId)
         .eq('customer_id', customerData.id)
         .single();
@@ -355,13 +379,3 @@ export const useCustomerPhysicalOrder = (orderId: string | undefined) => {
     enabled: !!orderId,
   });
 };
-
-
-
-
-
-
-
-
-
-

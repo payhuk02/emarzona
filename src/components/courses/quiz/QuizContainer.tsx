@@ -9,12 +9,7 @@ import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  PlayCircle, 
-  Trophy,
-  Clock,
-  HelpCircle
-} from 'lucide-react';
+import { PlayCircle, Trophy, Clock, HelpCircle } from 'lucide-react';
 import { QuizTaker } from './QuizTaker';
 import { QuizResults } from './QuizResults';
 import { useQuiz, useQuizAttempts } from '@/hooks/courses/useQuiz';
@@ -26,9 +21,11 @@ interface QuizContainerProps {
 }
 
 export const QuizContainer = ({ quizId, enrollmentId, onCertificateReady }: QuizContainerProps) => {
-  const [quizState, setQuizState] = useState<'not_started' | 'in_progress' | 'completed'>('not_started');
+  const [quizState, setQuizState] = useState<'not_started' | 'in_progress' | 'completed'>(
+    'not_started'
+  );
   const [currentAttempt, setCurrentAttempt] = useState<any>(null);
-  
+
   const { data: quiz } = useQuiz(quizId);
   const { data: attempts } = useQuizAttempts(quizId, enrollmentId);
 
@@ -39,7 +36,7 @@ export const QuizContainer = ({ quizId, enrollmentId, onCertificateReady }: Quiz
   const handleComplete = (result: any) => {
     setCurrentAttempt(result.attempt);
     setQuizState('completed');
-    
+
     // Si réussi et que le callback est fourni
     if (result.passed && onCertificateReady) {
       onCertificateReady();
@@ -63,9 +60,10 @@ export const QuizContainer = ({ quizId, enrollmentId, onCertificateReady }: Quiz
 
   // État : Pas commencé
   if (quizState === 'not_started') {
-    const bestAttempt = attempts && attempts.length > 0 
-      ? attempts.reduce((best, current) => current.score > best.score ? current : best)
-      : null;
+    const bestAttempt =
+      attempts && attempts.length > 0
+        ? attempts.reduce((best, current) => (current.score > best.score ? current : best))
+        : null;
 
     return (
       <Card>
@@ -77,9 +75,7 @@ export const QuizContainer = ({ quizId, enrollmentId, onCertificateReady }: Quiz
                 <HelpCircle className="w-8 h-8 text-orange-600" />
               </div>
               <h2 className="text-2xl font-bold">{quiz.title}</h2>
-              {quiz.description && (
-                <p className="text-muted-foreground">{quiz.description}</p>
-              )}
+              {quiz.description && <p className="text-muted-foreground">{quiz.description}</p>}
             </div>
 
             {/* Informations */}
@@ -89,7 +85,7 @@ export const QuizContainer = ({ quizId, enrollmentId, onCertificateReady }: Quiz
                 <p className="text-sm text-muted-foreground">Questions</p>
                 <p className="text-xl font-bold">{quiz.total_questions}</p>
               </div>
-              
+
               {quiz.time_limit_minutes && (
                 <div className="text-center p-4 bg-muted rounded-lg">
                   <Clock className="w-6 h-6 mx-auto mb-2 text-orange-600" />
@@ -97,7 +93,7 @@ export const QuizContainer = ({ quizId, enrollmentId, onCertificateReady }: Quiz
                   <p className="text-xl font-bold">{quiz.time_limit_minutes} min</p>
                 </div>
               )}
-              
+
               <div className="text-center p-4 bg-muted rounded-lg">
                 <Trophy className="w-6 h-6 mx-auto mb-2 text-orange-600" />
                 <p className="text-sm text-muted-foreground">Score requis</p>
@@ -109,16 +105,15 @@ export const QuizContainer = ({ quizId, enrollmentId, onCertificateReady }: Quiz
             {bestAttempt && (
               <div className="text-center">
                 <Badge variant={bestAttempt.passed ? 'default' : 'secondary'}>
-                  Meilleur score : {bestAttempt.score}%
-                  {bestAttempt.passed && ' ✓ Réussi'}
+                  Meilleur score : {bestAttempt.score}%{bestAttempt.passed && ' ✓ Réussi'}
                 </Badge>
               </div>
             )}
 
             {/* Bouton démarrer */}
-            <Button 
-              onClick={handleStart} 
-              size="lg" 
+            <Button
+              onClick={handleStart}
+              size="lg"
               className="w-full bg-orange-600 hover:bg-orange-700"
             >
               <PlayCircle className="w-5 h-5 mr-2" />
@@ -128,7 +123,8 @@ export const QuizContainer = ({ quizId, enrollmentId, onCertificateReady }: Quiz
             {/* Nombre de tentatives */}
             {attempts && attempts.length > 0 && (
               <p className="text-sm text-center text-muted-foreground">
-                {attempts.length} tentative{attempts.length > 1 ? 's' : ''} effectuée{attempts.length > 1 ? 's' : ''}
+                {attempts.length} tentative{attempts.length > 1 ? 's' : ''} effectuée
+                {attempts.length > 1 ? 's' : ''}
               </p>
             )}
           </div>
@@ -139,13 +135,7 @@ export const QuizContainer = ({ quizId, enrollmentId, onCertificateReady }: Quiz
 
   // État : En cours
   if (quizState === 'in_progress') {
-    return (
-      <QuizTaker
-        quizId={quizId}
-        enrollmentId={enrollmentId}
-        onComplete={handleComplete}
-      />
-    );
+    return <QuizTaker quizId={quizId} enrollmentId={enrollmentId} onComplete={handleComplete} />;
   }
 
   // État : Terminé
@@ -159,10 +149,3 @@ export const QuizContainer = ({ quizId, enrollmentId, onCertificateReady }: Quiz
     />
   );
 };
-
-
-
-
-
-
-

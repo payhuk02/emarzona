@@ -1,7 +1,7 @@
 /**
  * File Upload Enhanced Component
  * Date: 28 Janvier 2025
- * 
+ *
  * Composant d'upload amélioré avec :
  * - Progression réelle
  * - Preview avant upload
@@ -26,7 +26,10 @@ import {
   Trash2,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { uploadFileWithProgress, uploadMultipleFilesWithProgress } from '@/utils/fileUploadWithProgress';
+import {
+  uploadFileWithProgress,
+  uploadMultipleFilesWithProgress,
+} from '@/utils/fileUploadWithProgress';
 import { cn } from '@/lib/utils';
 import { logger } from '@/lib/logger';
 
@@ -55,7 +58,7 @@ interface FilePreview {
   url?: string;
 }
 
-export const FileUploadEnhanced : React.FC<FileUploadEnhancedProps> = ({
+export const FileUploadEnhanced: React.FC<FileUploadEnhancedProps> = ({
   value,
   onChange,
   multiple = false,
@@ -84,7 +87,7 @@ export const FileUploadEnhanced : React.FC<FileUploadEnhancedProps> = ({
     return new Promise((resolve, reject) => {
       if (file.type.startsWith('image/')) {
         const reader = new FileReader();
-        reader.onload = (e) => resolve(e.target?.result as string);
+        reader.onload = e => resolve(e.target?.result as string);
         reader.onerror = reject;
         reader.readAsDataURL(file);
       } else {
@@ -96,127 +99,133 @@ export const FileUploadEnhanced : React.FC<FileUploadEnhancedProps> = ({
   /**
    * Compresser image si nécessaire
    */
-  const compressImage = useCallback(async (file: File): Promise<File> => {
-    if (!compressImages || !file.type.startsWith('image/')) {
-      return file;
-    }
+  const compressImage = useCallback(
+    async (file: File): Promise<File> => {
+      if (!compressImages || !file.type.startsWith('image/')) {
+        return file;
+      }
 
-    try {
-      // Utiliser Canvas API pour compresser
-      const img = new Image();
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
+      try {
+        // Utiliser Canvas API pour compresser
+        const img = new Image();
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
 
-      return new Promise((resolve, reject) => {
-        img.onload = () => {
-          // Redimensionner si trop grand (max 1920px)
-          const maxWidth = 1920;
-          const maxHeight = 1920;
-          let  width= img.width;
-          let  height= img.height;
+        return new Promise((resolve, reject) => {
+          img.onload = () => {
+            // Redimensionner si trop grand (max 1920px)
+            const maxWidth = 1920;
+            const maxHeight = 1920;
+            let width = img.width;
+            let height = img.height;
 
-          if (width > maxWidth || height > maxHeight) {
-            if (width > height) {
-              height = (height * maxWidth) / width;
-              width = maxWidth;
-            } else {
-              width = (width * maxHeight) / height;
-              height = maxHeight;
-            }
-          }
-
-          canvas.width = width;
-          canvas.height = height;
-
-          ctx?.drawImage(img, 0, 0, width, height);
-
-          canvas.toBlob(
-            (blob) => {
-              if (blob) {
-                const compressedFile = new File([blob], file.name, {
-                  type: file.type,
-                  lastModified: Date.now(),
-                });
-                resolve(compressedFile);
+            if (width > maxWidth || height > maxHeight) {
+              if (width > height) {
+                height = (height * maxWidth) / width;
+                width = maxWidth;
               } else {
-                resolve(file);
+                width = (width * maxHeight) / height;
+                height = maxHeight;
               }
-            },
-            file.type,
-            0.85 // Qualité 85%
-          );
-        };
+            }
 
-        img.onerror = reject;
-        img.src = URL.createObjectURL(file);
-      });
-    } catch (error) {
-      logger.warn('Erreur compression image', { error, fileName: file.name });
-      return file; // Retourner fichier original en cas d'erreur
-    }
-  }, [compressImages]);
+            canvas.width = width;
+            canvas.height = height;
+
+            ctx?.drawImage(img, 0, 0, width, height);
+
+            canvas.toBlob(
+              blob => {
+                if (blob) {
+                  const compressedFile = new File([blob], file.name, {
+                    type: file.type,
+                    lastModified: Date.now(),
+                  });
+                  resolve(compressedFile);
+                } else {
+                  resolve(file);
+                }
+              },
+              file.type,
+              0.85 // Qualité 85%
+            );
+          };
+
+          img.onerror = reject;
+          img.src = URL.createObjectURL(file);
+        });
+      } catch (error) {
+        logger.warn('Erreur compression image', { error, fileName: file.name });
+        return file; // Retourner fichier original en cas d'erreur
+      }
+    },
+    [compressImages]
+  );
 
   /**
    * Gérer sélection de fichiers
    */
-  const handleFileSelect = useCallback(async (files: FileList | null) => {
-    if (!files || files.length === 0) return;
+  const handleFileSelect = useCallback(
+    async (files: FileList | null) => {
+      if (!files || files.length === 0) return;
 
-    const fileArray = Array.from(files);
+      const fileArray = Array.from(files);
 
-    // Validation
-    for (const file of fileArray) {
-      if (!acceptedFormats.includes(file.type)) {
+      // Validation
+      for (const file of fileArray) {
+        if (!acceptedFormats.includes(file.type)) {
+          toast({
+            title: 'Format non supporté',
+            description: `Le fichier ${file.name} n'est pas dans un format supporté.`,
+            variant: 'destructive',
+          });
+          return;
+        }
+
+        if (file.size > maxSize * 1024 * 1024) {
+          toast({
+            title: 'Fichier trop volumineux',
+            description: `Le fichier ${file.name} dépasse la taille maximale de ${maxSize}MB.`,
+            variant: 'destructive',
+          });
+          return;
+        }
+      }
+
+      if (!multiple && fileArray.length > 1) {
         toast({
-          title: 'Format non supporté',
-          description: `Le fichier ${file.name} n'est pas dans un format supporté.`,
+          title: 'Trop de fichiers',
+          description: "Vous ne pouvez sélectionner qu'un seul fichier.",
           variant: 'destructive',
         });
         return;
       }
 
-      if (file.size > maxSize * 1024 * 1024) {
+      const currentCount = Array.isArray(value) ? value.length : value ? 1 : 0;
+      if (multiple && fileArray.length + currentCount > maxFiles) {
         toast({
-          title: 'Fichier trop volumineux',
-          description: `Le fichier ${file.name} dépasse la taille maximale de ${maxSize}MB.`,
+          title: 'Limite de fichiers atteinte',
+          description: `Vous ne pouvez pas télécharger plus de ${maxFiles} fichiers.`,
           variant: 'destructive',
         });
         return;
       }
-    }
 
-    if (!multiple && fileArray.length > 1) {
-      toast({
-        title: 'Trop de fichiers',
-        description: 'Vous ne pouvez sélectionner qu\'un seul fichier.',
-        variant: 'destructive',
-      });
-      return;
-    }
+      // Créer previews
+      const newPreviews: FilePreview[] = [];
+      for (const file of fileArray) {
+        const preview = await generatePreview(file);
+        newPreviews.push({
+          file,
+          preview,
+          status: 'pending',
+        });
+      }
 
-    const currentCount = Array.isArray(value) ? value.length : (value ? 1 : 0);
-    if (multiple && fileArray.length + currentCount > maxFiles) {
-      toast({
-        title: 'Limite de fichiers atteinte',
-        description: `Vous ne pouvez pas télécharger plus de ${maxFiles} fichiers.`,
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    // Créer previews
-    const  newPreviews: FilePreview[] = [];
-    for (const file of fileArray) {
-      const preview = await generatePreview(file);
-      newPreviews.push({
-        file,
-        preview,
-        status: 'pending',
-      });
-    }
-
-    setPreviews((prev) => [...prev, ...newPreviews]);
-  }, [acceptedFormats, maxSize, multiple, maxFiles, value, toast, generatePreview]);
+      setPreviews(prev => [...prev, ...newPreviews]);
+    },
+    [acceptedFormats, maxSize, multiple, maxFiles, value, toast, generatePreview]
+  );
 
   /**
    * Uploader les fichiers
@@ -227,14 +236,14 @@ export const FileUploadEnhanced : React.FC<FileUploadEnhancedProps> = ({
     setUploading(true);
     setGlobalProgress(0);
 
-    const  uploadedUrls: string[] = [];
+    const uploadedUrls: string[] = [];
 
     try {
-      for (let  i= 0; i < previews.length; i++) {
+      for (let i = 0; i < previews.length; i++) {
         const preview = previews[i];
-        
+
         // Mettre à jour statut
-        setPreviews((prev) => {
+        setPreviews(prev => {
           const updated = [...prev];
           updated[i] = { ...updated[i], status: 'uploading', progress: 0 };
           return updated;
@@ -248,8 +257,8 @@ export const FileUploadEnhanced : React.FC<FileUploadEnhancedProps> = ({
           const result = await uploadFileWithProgress(fileToUpload, {
             bucket,
             path: path || (storeId ? `stores/${storeId}` : undefined),
-            onProgress: (progress) => {
-              setPreviews((prev) => {
+            onProgress: progress => {
+              setPreviews(prev => {
                 const updated = [...prev];
                 updated[i] = { ...updated[i], progress };
                 return updated;
@@ -260,8 +269,8 @@ export const FileUploadEnhanced : React.FC<FileUploadEnhancedProps> = ({
 
           if (result.success && result.url) {
             uploadedUrls.push(result.url);
-            
-            setPreviews((prev) => {
+
+            setPreviews(prev => {
               const updated = [...prev];
               updated[i] = {
                 ...updated[i],
@@ -276,8 +285,8 @@ export const FileUploadEnhanced : React.FC<FileUploadEnhancedProps> = ({
           }
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
-          
-          setPreviews((prev) => {
+
+          setPreviews(prev => {
             const updated = [...prev];
             updated[i] = {
               ...updated[i],
@@ -287,13 +296,16 @@ export const FileUploadEnhanced : React.FC<FileUploadEnhancedProps> = ({
             return updated;
           });
 
-          logger.error('Erreur upload fichier', { error: errorMessage, fileName: preview.file.name });
+          logger.error('Erreur upload fichier', {
+            error: errorMessage,
+            fileName: preview.file.name,
+          });
         }
       }
 
       // Mettre à jour la valeur
       if (multiple) {
-        const currentValues = Array.isArray(value) ? value : (value ? [value] : []);
+        const currentValues = Array.isArray(value) ? value : value ? [value] : [];
         onChange([...currentValues, ...uploadedUrls]);
       } else if (uploadedUrls.length > 0) {
         onChange(uploadedUrls[0]);
@@ -312,7 +324,7 @@ export const FileUploadEnhanced : React.FC<FileUploadEnhancedProps> = ({
       logger.error('Erreur upload fichiers', { error });
       toast({
         title: 'Erreur',
-        description: 'Une erreur est survenue lors de l\'upload.',
+        description: "Une erreur est survenue lors de l'upload.",
         variant: 'destructive',
       });
     } finally {
@@ -325,19 +337,22 @@ export const FileUploadEnhanced : React.FC<FileUploadEnhancedProps> = ({
    * Supprimer preview
    */
   const handleRemovePreview = useCallback((index: number) => {
-    setPreviews((prev) => prev.filter((_, i) => i !== index));
+    setPreviews(prev => prev.filter((_, i) => i !== index));
   }, []);
 
   /**
    * Gérer drag & drop
    */
-  const handleDragOver = useCallback((e: DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (!disabled) {
-      setDragOver(true);
-    }
-  }, [disabled]);
+  const handleDragOver = useCallback(
+    (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!disabled) {
+        setDragOver(true);
+      }
+    },
+    [disabled]
+  );
 
   const handleDragLeave = useCallback((e: DragEvent) => {
     e.preventDefault();
@@ -345,15 +360,18 @@ export const FileUploadEnhanced : React.FC<FileUploadEnhancedProps> = ({
     setDragOver(false);
   }, []);
 
-  const handleDrop = useCallback((e: DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragOver(false);
-    
-    if (disabled) return;
-    
-    handleFileSelect(e.dataTransfer.files);
-  }, [disabled, handleFileSelect]);
+  const handleDrop = useCallback(
+    (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setDragOver(false);
+
+      if (disabled) return;
+
+      handleFileSelect(e.dataTransfer.files);
+    },
+    [disabled, handleFileSelect]
+  );
 
   return (
     <div className={cn('space-y-4', className)}>
@@ -373,14 +391,10 @@ export const FileUploadEnhanced : React.FC<FileUploadEnhancedProps> = ({
             <div className="p-4 rounded-full bg-muted">
               <Upload className="h-8 w-8 text-muted-foreground" />
             </div>
-            
+
             <div className="text-center space-y-2">
-              <p className="text-sm font-medium">
-                Glissez-déposez vos fichiers ici
-              </p>
-              <p className="text-xs text-muted-foreground">
-                ou cliquez pour sélectionner
-              </p>
+              <p className="text-sm font-medium">Glissez-déposez vos fichiers ici</p>
+              <p className="text-xs text-muted-foreground">ou cliquez pour sélectionner</p>
             </div>
 
             <Button
@@ -398,7 +412,7 @@ export const FileUploadEnhanced : React.FC<FileUploadEnhancedProps> = ({
               type="file"
               multiple={multiple}
               accept={acceptedFormats.join(',')}
-              onChange={(e) => handleFileSelect(e.target.files)}
+              onChange={e => handleFileSelect(e.target.files)}
               className="hidden"
               disabled={disabled || uploading}
             />
@@ -460,9 +474,7 @@ export const FileUploadEnhanced : React.FC<FileUploadEnhancedProps> = ({
                   {preview.status === 'success' && (
                     <CheckCircle2 className="h-5 w-5 text-green-500" />
                   )}
-                  {preview.status === 'error' && (
-                    <AlertCircle className="h-5 w-5 text-red-500" />
-                  )}
+                  {preview.status === 'error' && <AlertCircle className="h-5 w-5 text-red-500" />}
 
                   {/* Bouton supprimer */}
                   <Button
@@ -504,11 +516,3 @@ export const FileUploadEnhanced : React.FC<FileUploadEnhancedProps> = ({
     </div>
   );
 };
-
-
-
-
-
-
-
-

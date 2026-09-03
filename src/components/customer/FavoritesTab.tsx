@@ -1,7 +1,7 @@
 /**
  * Favorites Tab Component
  * Date: 27 Janvier 2025
- * 
+ *
  * Onglet pour afficher les produits favoris
  */
 
@@ -26,12 +26,15 @@ export const FavoritesTab = () => {
   const { data: favorites, isLoading } = useQuery({
     queryKey: ['userFavorites'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
       const { data, error } = await supabase
         .from('user_favorites')
-        .select(`
+        .select(
+          `
           *,
           product:products (
             id,
@@ -48,7 +51,8 @@ export const FavoritesTab = () => {
               name
             )
           )
-        `)
+        `
+        )
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
@@ -60,7 +64,9 @@ export const FavoritesTab = () => {
   // Supprimer un favori
   const removeFavorite = useMutation({
     mutationFn: async (productId: string) => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
       const { error } = await supabase
@@ -90,7 +96,7 @@ export const FavoritesTab = () => {
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {[1, 2, 3, 4, 5, 6].map((i) => (
+        {[1, 2, 3, 4, 5, 6].map(i => (
           <Card key={i}>
             <CardHeader>
               <Skeleton className="h-48 w-full" />
@@ -114,9 +120,7 @@ export const FavoritesTab = () => {
           <p className="text-muted-foreground mb-4">
             Vous n'avez pas encore de produits dans vos favoris
           </p>
-          <Button onClick={() => navigate('/marketplace')}>
-            Découvrir les produits
-          </Button>
+          <Button onClick={() => navigate('/marketplace')}>Découvrir les produits</Button>
         </div>
       </Card>
     );
@@ -164,9 +168,7 @@ export const FavoritesTab = () => {
                     {product.price?.toLocaleString('fr-FR')} {product.currency || 'XOF'}
                   </div>
                   {product.store && (
-                    <div className="text-sm text-muted-foreground">
-                      Par {product.store.name}
-                    </div>
+                    <div className="text-sm text-muted-foreground">Par {product.store.name}</div>
                   )}
                 </div>
               </div>
@@ -179,10 +181,7 @@ export const FavoritesTab = () => {
                   <ExternalLink className="h-4 w-4 mr-2" />
                   Voir
                 </Button>
-                <Button
-                  className="flex-1"
-                  onClick={() => navigate(`/products/${product.slug}`)}
-                >
+                <Button className="flex-1" onClick={() => navigate(`/products/${product.slug}`)}>
                   <ShoppingCart className="h-4 w-4 mr-2" />
                   Acheter
                 </Button>
@@ -197,10 +196,3 @@ export const FavoritesTab = () => {
     </div>
   );
 };
-
-
-
-
-
-
-

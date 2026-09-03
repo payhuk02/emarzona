@@ -6,13 +6,7 @@ export { ImageStudioField } from './ImageStudioField';
 export type { ImageStudioFieldProps } from './ImageStudioField';
 export { ImageStudioFormField } from './ImageStudioFormField';
 export type { ImageStudioFormFieldProps } from './ImageStudioFormField';
-export {
-  detectImageContext,
-  detectImageContextDetailed,
-} from '@/lib/images/detectContext';
+export { detectImageContext, detectImageContextDetailed } from '@/lib/images/detectContext';
 export { useImageOptimizer } from '@/hooks/useImageOptimizer';
-export {
-  buildTransformedUrl,
-  buildSrcSet,
-} from '@/lib/images/supabaseTransform';
+export { buildTransformedUrl, buildSrcSet } from '@/lib/images/supabaseTransform';
 export { compressImage, blobToFile } from '@/lib/images/compress';

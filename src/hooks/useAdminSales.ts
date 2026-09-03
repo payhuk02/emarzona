@@ -28,9 +28,7 @@ export const useAdminSalesList = (options: UseAdminSalesOptions = {}) => {
     try {
       setLoading(true);
 
-      let query = supabase
-        .from('payments')
-        .select(ADMIN_PAYMENT_FIELDS, { count: 'exact' });
+      let query = supabase.from('payments').select(ADMIN_PAYMENT_FIELDS, { count: 'exact' });
 
       query = query.order('created_at', { ascending: false });
 
@@ -43,19 +41,19 @@ export const useAdminSalesList = (options: UseAdminSalesOptions = {}) => {
       if (error) throw error;
 
       setTotalCount(count || 0);
-      
+
       // Client-side filtering if search is provided
       let finalData = (data as unknown as Payment[]) || [];
       if (search && search.trim()) {
         finalData = finalData.filter(sale => {
-           // @ts-expect-error - Supabase types might not perfectly map the joined relation array vs object
-           const storeName = sale.stores?.[0]?.name || sale.stores?.name || '';
-           // @ts-expect-error - same here
-           const orderNumber = sale.orders?.[0]?.order_number || sale.orders?.order_number || '';
-           return (
-             storeName.toLowerCase().includes(search.toLowerCase()) ||
-             orderNumber.toLowerCase().includes(search.toLowerCase())
-           );
+          // @ts-expect-error - Supabase types might not perfectly map the joined relation array vs object
+          const storeName = sale.stores?.[0]?.name || sale.stores?.name || '';
+          // @ts-expect-error - same here
+          const orderNumber = sale.orders?.[0]?.order_number || sale.orders?.order_number || '';
+          return (
+            storeName.toLowerCase().includes(search.toLowerCase()) ||
+            orderNumber.toLowerCase().includes(search.toLowerCase())
+          );
         });
       }
 

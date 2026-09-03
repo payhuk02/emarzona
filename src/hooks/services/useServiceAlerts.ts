@@ -1,6 +1,6 @@
 /**
  * useServiceAlerts Hook
- * 
+ *
  * Capacity alerts, booking notifications, and staff alerts
  * Date: 29 Octobre 2025
  */
@@ -8,20 +8,22 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
-const SERVICE_ALERT_FIELDS = 'id, user_id, type, priority, title, message, service_id, booking_id, staff_id, metadata, is_read, created_at, expires_at';
-const ALERT_SETTINGS_FIELDS = 'id, user_id, enable_email, enable_push, enable_sms, low_capacity_threshold, upcoming_hours, alert_types';
+const SERVICE_ALERT_FIELDS =
+  'id, user_id, type, priority, title, message, service_id, booking_id, staff_id, metadata, is_read, created_at, expires_at';
+const ALERT_SETTINGS_FIELDS =
+  'id, user_id, enable_email, enable_push, enable_sms, low_capacity_threshold, upcoming_hours, alert_types';
 
 /**
  * Alert types
  */
-export type AlertType = 
-  | 'low_capacity'      // Capacité faible
-  | 'fully_booked'      // Complet
-  | 'new_booking'       // Nouvelle réservation
-  | 'cancellation'      // Annulation
-  | 'upcoming'          // Rendez-vous imminent
-  | 'missed'            // No-show
-  | 'staff_assigned';   // Staff assigné
+export type AlertType =
+  | 'low_capacity' // Capacité faible
+  | 'fully_booked' // Complet
+  | 'new_booking' // Nouvelle réservation
+  | 'cancellation' // Annulation
+  | 'upcoming' // Rendez-vous imminent
+  | 'missed' // No-show
+  | 'staff_assigned'; // Staff assigné
 
 /**
  * Alert priority
@@ -121,7 +123,7 @@ export const useMarkAlertAsRead = () => {
       if (error) throw error;
       return data as ServiceAlert;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       // Invalider les queries pour forcer un refresh
       queryClient.invalidateQueries({ queryKey: ['service-alerts'] });
       queryClient.invalidateQueries({ queryKey: ['service-alerts-unread'] });
@@ -161,10 +163,7 @@ export const useDeleteAlert = () => {
 
   return useMutation({
     mutationFn: async (alertId: string) => {
-      const { error } = await supabase
-        .from('service_alerts')
-        .delete()
-        .eq('id', alertId);
+      const { error } = await supabase.from('service_alerts').delete().eq('id', alertId);
 
       if (error) throw error;
       return { id: alertId };
@@ -254,7 +253,7 @@ export const useUpdateAlertSettings = () => {
       if (error) throw error;
       return data as AlertSettings;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['alert-settings', data.user_id] });
     },
   });
@@ -277,7 +276,7 @@ export const useCreateAlert = () => {
       if (error) throw error;
       return data as ServiceAlert;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['service-alerts', data.user_id] });
       queryClient.invalidateQueries({ queryKey: ['service-alerts-unread', data.user_id] });
     },
@@ -291,7 +290,15 @@ export const useCheckLowCapacity = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ userId, storeId, threshold = 20 }: { userId: string; storeId: string; threshold?: number }) => {
+    mutationFn: async ({
+      userId,
+      storeId,
+      threshold = 20,
+    }: {
+      userId: string;
+      storeId: string;
+      threshold?: number;
+    }) => {
       // Fetch all services with their booking counts
       const { data: services, error: servicesError } = await supabase
         .from('services')
@@ -301,7 +308,7 @@ export const useCheckLowCapacity = () => {
 
       if (servicesError) throw servicesError;
 
-      const  alerts: Partial<ServiceAlert>[] = [];
+      const alerts: Partial<ServiceAlert>[] = [];
 
       for (const service of services || []) {
         // Count bookings for this service
@@ -351,10 +358,7 @@ export const useCheckLowCapacity = () => {
 
       // Insert all alerts
       if (alerts.length > 0) {
-        const { data, error } = await supabase
-          .from('service_alerts')
-          .insert(alerts)
-          .select();
+        const { data, error } = await supabase.from('service_alerts').insert(alerts).select();
 
         if (error) throw error;
         return data as ServiceAlert[];
@@ -389,7 +393,7 @@ export const useCheckUpcomingBookings = () => {
 
       if (error) throw error;
 
-      const  alerts: Partial<ServiceAlert>[] = (bookings || []).map((booking) => ({
+      const alerts: Partial<ServiceAlert>[] = (bookings || []).map(booking => ({
         user_id: userId,
         type: 'upcoming',
         priority: 'medium',
@@ -425,10 +429,3 @@ export const useCheckUpcomingBookings = () => {
 };
 
 export default useServiceAlerts;
-
-
-
-
-
-
-

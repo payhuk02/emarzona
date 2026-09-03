@@ -1,7 +1,7 @@
 /**
  * LoadingState Component
  * Date: 28 Janvier 2025
- * 
+ *
  * Composant réutilisable pour les états de chargement avec différents styles
  * Améliore l'UX avec des feedbacks visuels clairs
  */
@@ -65,9 +65,7 @@ export const LoadingState = ({
         return (
           <div className={cn('flex flex-col items-center justify-center gap-3', className)}>
             <Loader2 className={cn('animate-spin text-primary', sizeClasses[size])} />
-            {message && (
-              <p className="text-sm text-muted-foreground">{message}</p>
-            )}
+            {message && <p className="text-sm text-muted-foreground">{message}</p>}
           </div>
         );
 
@@ -79,9 +77,7 @@ export const LoadingState = ({
               <div className="h-2 w-2 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]" />
               <div className="h-2 w-2 bg-primary rounded-full animate-bounce" />
             </div>
-            {message && (
-              <p className="text-sm text-muted-foreground">{message}</p>
-            )}
+            {message && <p className="text-sm text-muted-foreground">{message}</p>}
           </div>
         );
 
@@ -89,9 +85,7 @@ export const LoadingState = ({
         return (
           <div className={cn('flex flex-col items-center justify-center gap-3', className)}>
             <div className={cn('bg-primary rounded-full animate-pulse', sizeClasses[size])} />
-            {message && (
-              <p className="text-sm text-muted-foreground">{message}</p>
-            )}
+            {message && <p className="text-sm text-muted-foreground">{message}</p>}
           </div>
         );
 
@@ -99,13 +93,7 @@ export const LoadingState = ({
         return (
           <div className={cn('space-y-3', className)}>
             {Array.from({ length: skeletonCount }).map((_, i) => (
-              <div
-                key={i}
-                className={cn(
-                  'animate-pulse bg-muted rounded-md',
-                  skeletonHeight
-                )}
-              />
+              <div key={i} className={cn('animate-pulse bg-muted rounded-md', skeletonHeight)} />
             ))}
           </div>
         );
@@ -114,9 +102,7 @@ export const LoadingState = ({
         return (
           <div className={cn('flex items-center gap-2', className)}>
             <Loader2 className={cn('animate-spin text-primary', sizeClasses[size])} />
-            {message && (
-              <span className="text-sm text-muted-foreground">{message}</span>
-            )}
+            {message && <span className="text-sm text-muted-foreground">{message}</span>}
           </div>
         );
 
@@ -130,9 +116,7 @@ export const LoadingState = ({
   if (inCard) {
     return (
       <Card>
-        <CardContent className="py-12">
-          {content}
-        </CardContent>
+        <CardContent className="py-12">{content}</CardContent>
       </Card>
     );
   }
@@ -171,12 +155,7 @@ export const ErrorState = ({
       <div className="text-center space-y-2">
         <p className="font-medium text-destructive">{message}</p>
         {onRetry && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onRetry}
-            className="mt-4"
-          >
+          <Button variant="outline" size="sm" onClick={onRetry} className="mt-4">
             <RefreshCw className="h-4 w-4 mr-2" />
             Réessayer
           </Button>
@@ -188,9 +167,7 @@ export const ErrorState = ({
   if (inCard) {
     return (
       <Card>
-        <CardContent className="py-12">
-          {content}
-        </CardContent>
+        <CardContent className="py-12">{content}</CardContent>
       </Card>
     );
   }
@@ -232,9 +209,7 @@ export const EmptyState = ({
     <div className={cn('flex flex-col items-center justify-center gap-4 py-12', className)}>
       <div className="text-center space-y-2">
         <p className="text-lg font-medium text-muted-foreground">{message}</p>
-        {description && (
-          <p className="text-sm text-muted-foreground">{description}</p>
-        )}
+        {description && <p className="text-sm text-muted-foreground">{description}</p>}
         {action && <div className="mt-4">{action}</div>}
       </div>
     </div>
@@ -243,19 +218,10 @@ export const EmptyState = ({
   if (inCard) {
     return (
       <Card>
-        <CardContent>
-          {content}
-        </CardContent>
+        <CardContent>{content}</CardContent>
       </Card>
     );
   }
 
   return content;
 };
-
-
-
-
-
-
-

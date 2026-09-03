@@ -1,6 +1,6 @@
 /**
  * Tests unitaires pour geniuspay-rate-limiter.ts
- * 
+ *
  * Pour exécuter: npm test geniuspay-rate-limiter
  */
 
@@ -20,7 +20,7 @@ describe('GeniusPayRateLimiter', () => {
         windowMs: 60000,
       });
 
-      for (let  i= 0; i < 5; i++) {
+      for (let i = 0; i < 5; i++) {
         expect(limiter.canMakeRequest()).toBe(true);
         limiter.recordRequest();
       }
@@ -33,7 +33,7 @@ describe('GeniusPayRateLimiter', () => {
       });
 
       // Faire 3 requêtes
-      for (let  i= 0; i < 3; i++) {
+      for (let i = 0; i < 3; i++) {
         expect(limiter.canMakeRequest()).toBe(true);
         limiter.recordRequest();
       }
@@ -63,7 +63,7 @@ describe('GeniusPayRateLimiter', () => {
       });
 
       // Utilisateur 1
-      for (let  i= 0; i < 5; i++) {
+      for (let i = 0; i < 5; i++) {
         expect(limiter.canMakeRequest('user1')).toBe(true);
         limiter.recordRequest('user1');
       }
@@ -77,7 +77,7 @@ describe('GeniusPayRateLimiter', () => {
   describe('checkRateLimit', () => {
     it('devrait lancer une erreur si la limite est dépassée', () => {
       // Remplir la limite
-      for (let  i= 0; i < 100; i++) {
+      for (let i = 0; i < 100; i++) {
         geniuspayRateLimiter.canMakeRequest();
         geniuspayRateLimiter.recordRequest();
       }
@@ -90,11 +90,3 @@ describe('GeniusPayRateLimiter', () => {
     });
   });
 });
-
-
-
-
-
-
-
-

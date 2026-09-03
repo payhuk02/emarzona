@@ -7,7 +7,8 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 
-const VARIANT_IMAGE_FIELDS = 'id, variant_id, url, alt_text, is_primary, display_order, file_size, width, height, created_at';
+const VARIANT_IMAGE_FIELDS =
+  'id, variant_id, url, alt_text, is_primary, display_order, file_size, width, height, created_at';
 
 export interface VariantImage {
   id: string;
@@ -68,7 +69,7 @@ export function useVariantImages(physicalProductId: string | undefined) {
       }
 
       // Grouper les images par variant
-      const  variantsWithImages: VariantWithImages[] = (variants || []).map(variant => {
+      const variantsWithImages: VariantWithImages[] = (variants || []).map(variant => {
         const variantImages = (images || []).filter(img => img.variant_id === variant.id);
 
         return {
@@ -132,10 +133,3 @@ export function useVariantImagesByVariant(variantId: string | undefined) {
     enabled: !!variantId,
   });
 }
-
-
-
-
-
-
-

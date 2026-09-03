@@ -4,7 +4,14 @@
  */
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { useStockRotationReports } from '@/hooks/physical/usePhysicalAnalytics';
 import { useQuery } from '@tanstack/react-query';
@@ -33,7 +40,7 @@ export function StockRotationTable({ storeId, startDate, endDate }: StockRotatio
     enabled: !!storeId,
   });
 
-  const productIds = products?.map((p) => p.id) || [];
+  const productIds = products?.map(p => p.id) || [];
 
   const { data: rotationReports, isLoading } = useStockRotationReports(undefined, {
     startDate,
@@ -41,9 +48,8 @@ export function StockRotationTable({ storeId, startDate, endDate }: StockRotatio
   });
 
   // Filter reports for products in this store
-  const filteredReports = rotationReports?.filter((report) =>
-    productIds.includes(report.physical_product_id)
-  ) || [];
+  const filteredReports =
+    rotationReports?.filter(report => productIds.includes(report.physical_product_id)) || [];
 
   // Get product names
   const { data: productNames } = useQuery({
@@ -54,7 +60,7 @@ export function StockRotationTable({ storeId, startDate, endDate }: StockRotatio
       const { data, error } = await supabase
         .from('products')
         .select('id, name')
-        .in('id', products?.map((p) => (p as any).product?.id) || []);
+        .in('id', products?.map(p => (p as any).product?.id) || []);
 
       if (error) throw error;
       return data || [];
@@ -65,9 +71,17 @@ export function StockRotationTable({ storeId, startDate, endDate }: StockRotatio
   const getVelocityBadge = (velocity: string) => {
     switch (velocity) {
       case 'fast':
-        return <Badge variant="default" className="bg-green-500">Rapide</Badge>;
+        return (
+          <Badge variant="default" className="bg-green-500">
+            Rapide
+          </Badge>
+        );
       case 'medium':
-        return <Badge variant="default" className="bg-blue-500">Moyen</Badge>;
+        return (
+          <Badge variant="default" className="bg-blue-500">
+            Moyen
+          </Badge>
+        );
       case 'slow':
         return <Badge variant="secondary">Lent</Badge>;
       case 'stagnant':
@@ -94,9 +108,7 @@ export function StockRotationTable({ storeId, startDate, endDate }: StockRotatio
           <RefreshCw className="h-5 w-5" />
           Rotation des Stocks
         </CardTitle>
-        <CardDescription>
-          Analyse de la rotation des stocks par produit
-        </CardDescription>
+        <CardDescription>Analyse de la rotation des stocks par produit</CardDescription>
       </CardHeader>
       <CardContent>
         <Table>
@@ -119,11 +131,11 @@ export function StockRotationTable({ storeId, startDate, endDate }: StockRotatio
                 </TableCell>
               </TableRow>
             ) : (
-              filteredReports.map((report) => {
-                const product = products?.find((p) => p.id === report.physical_product_id);
-                const productName = productNames?.find(
-                  (p) => p.id === (product as any)?.product?.id
-                )?.name || 'Produit inconnu';
+              filteredReports.map(report => {
+                const product = products?.find(p => p.id === report.physical_product_id);
+                const productName =
+                  productNames?.find(p => p.id === (product as any)?.product?.id)?.name ||
+                  'Produit inconnu';
 
                 return (
                   <TableRow key={report.id}>
@@ -133,9 +145,11 @@ export function StockRotationTable({ storeId, startDate, endDate }: StockRotatio
                     <TableCell className="text-right">{report.units_sold}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">
-                        {report.turnover_change_percentage && report.turnover_change_percentage > 0 ? (
+                        {report.turnover_change_percentage &&
+                        report.turnover_change_percentage > 0 ? (
                           <TrendingUp className="h-4 w-4 text-green-500" />
-                        ) : report.turnover_change_percentage && report.turnover_change_percentage < 0 ? (
+                        ) : report.turnover_change_percentage &&
+                          report.turnover_change_percentage < 0 ? (
                           <TrendingDown className="h-4 w-4 text-red-500" />
                         ) : null}
                         {report.inventory_turnover_ratio.toFixed(2)}x
@@ -155,11 +169,3 @@ export function StockRotationTable({ storeId, startDate, endDate }: StockRotatio
     </Card>
   );
 }
-
-
-
-
-
-
-
-

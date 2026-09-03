@@ -1,7 +1,7 @@
 /**
  * SearchInput Component
  * Date: 28 Janvier 2025
- * 
+ *
  * Composant d'input de recherche avec debouncing intégré et indicateur visuel
  * Améliore l'UX et réduit les appels API
  */
@@ -72,19 +72,13 @@ export const SearchInput = ({
   'aria-label': ariaLabel,
   disabled = false,
 }: SearchInputProps) => {
-  const {
-    inputValue,
-    debouncedValue,
-    isSearching,
-    setInputValue,
-    reset,
-    isValid,
-  } = useDebouncedSearch({
-    debounceMs,
-    initialValue: controlledValue || '',
-    onSearchChange,
-    minLength,
-  });
+  const { inputValue, debouncedValue, isSearching, setInputValue, reset, isValid } =
+    useDebouncedSearch({
+      debounceMs,
+      initialValue: controlledValue || '',
+      onSearchChange,
+      minLength,
+    });
 
   // Synchroniser avec la valeur contrôlée si fournie
   const displayValue = controlledValue !== undefined ? controlledValue : inputValue;
@@ -114,7 +108,7 @@ export const SearchInput = ({
       {showSearchIcon && (
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
       )}
-      
+
       <Input
         id={id}
         type="search"
@@ -126,16 +120,14 @@ export const SearchInput = ({
         aria-busy={isSearching}
         className={cn(
           showSearchIcon && 'pl-10',
-          (showClearButton && hasValue) && 'pr-20',
+          showClearButton && hasValue && 'pr-20',
           isSearching && 'pr-20'
         )}
       />
 
       <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
-        {isSearching && (
-          <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-        )}
-        
+        {isSearching && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+
         {showClearButton && hasValue && !isSearching && (
           <Button
             type="button"
@@ -158,10 +150,3 @@ export const SearchInput = ({
     </div>
   );
 };
-
-
-
-
-
-
-

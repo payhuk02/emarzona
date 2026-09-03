@@ -5,12 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Dialog,
   DialogContent,
@@ -118,10 +113,10 @@ export interface StudentProgressManagerProps {
 
 /**
  * StudentProgressManager - Gestionnaire de progression détaillée
- * 
+ *
  * @example
  * ```tsx
- * <StudentProgressManager 
+ * <StudentProgressManager
  *   enrollmentId="ENR-12345"
  *   studentName="John Doe"
  *   courseName="React Avancé"
@@ -132,7 +127,7 @@ export interface StudentProgressManagerProps {
  * />
  * ```
  */
-export const StudentProgressManager : React.FC<StudentProgressManagerProps> = ({
+export const StudentProgressManager: React.FC<StudentProgressManagerProps> = ({
   enrollmentId,
   studentName,
   courseName,
@@ -220,7 +215,9 @@ export const StudentProgressManager : React.FC<StudentProgressManagerProps> = ({
           </div>
           <Progress value={stats.completionPercentage} className="h-3" />
           <div className="flex justify-between text-xs text-muted-foreground">
-            <span>{stats.completedLessons}/{stats.totalLessons} leçons</span>
+            <span>
+              {stats.completedLessons}/{stats.totalLessons} leçons
+            </span>
             <span>Temps estimé restant: {stats.estimatedTimeToComplete}h</span>
           </div>
         </div>
@@ -359,7 +356,7 @@ export const StudentProgressManager : React.FC<StudentProgressManagerProps> = ({
             </div>
             <ScrollArea className="h-[400px] pr-4">
               <div className="space-y-3">
-                {completedLessons.slice(0, 10).map((lesson) => (
+                {completedLessons.slice(0, 10).map(lesson => (
                   <div
                     key={lesson.id}
                     className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
@@ -401,7 +398,9 @@ export const StudentProgressManager : React.FC<StudentProgressManagerProps> = ({
                 <div className="grid grid-cols-2 gap-4">
                   <div className="p-4 bg-muted/50 rounded-lg">
                     <p className="text-xs text-muted-foreground">Taux de complétion</p>
-                    <p className="text-2xl font-bold text-green-600">{stats.completionPercentage}%</p>
+                    <p className="text-2xl font-bold text-green-600">
+                      {stats.completionPercentage}%
+                    </p>
                   </div>
                   <div className="p-4 bg-muted/50 rounded-lg">
                     <p className="text-xs text-muted-foreground">Score moyen</p>
@@ -425,7 +424,9 @@ export const StudentProgressManager : React.FC<StudentProgressManagerProps> = ({
                   <div className="flex justify-between items-center">
                     <span className="text-sm">Temps moyen par leçon</span>
                     <span className="font-semibold">
-                      {formatDuration(Math.round(stats.totalTimeSpent / stats.completedLessons || 0))}
+                      {formatDuration(
+                        Math.round(stats.totalTimeSpent / stats.completedLessons || 0)
+                      )}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
@@ -466,12 +467,13 @@ export const StudentProgressManager : React.FC<StudentProgressManagerProps> = ({
           <DialogHeader>
             <DialogTitle>Toutes les leçons complétées</DialogTitle>
             <DialogDescription>
-              {completedLessons.length} leçon{completedLessons.length > 1 ? 's' : ''} terminée{completedLessons.length > 1 ? 's' : ''}
+              {completedLessons.length} leçon{completedLessons.length > 1 ? 's' : ''} terminée
+              {completedLessons.length > 1 ? 's' : ''}
             </DialogDescription>
           </DialogHeader>
           <ScrollArea className="h-[500px] pr-4">
             <div className="space-y-2">
-              {completedLessons.map((lesson) => (
+              {completedLessons.map(lesson => (
                 <div key={lesson.id} className="p-3 border rounded-lg">
                   <div className="flex items-center justify-between mb-2">
                     <p className="font-medium">{lesson.title}</p>
@@ -504,11 +506,3 @@ export const StudentProgressManager : React.FC<StudentProgressManagerProps> = ({
 StudentProgressManager.displayName = 'StudentProgressManager';
 
 export default StudentProgressManager;
-
-
-
-
-
-
-
-

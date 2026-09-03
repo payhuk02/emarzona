@@ -38,7 +38,9 @@ export const useGlobalAffiliateStats = () => {
   return useQuery({
     queryKey: ['global-affiliate-stats'],
     queryFn: async (): Promise<GlobalAffiliateStats> => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) {
         throw new Error('Non connecté');
       }
@@ -80,14 +82,12 @@ export const useGlobalAffiliateStats = () => {
 
       const totalConversions = links.reduce((sum, l) => sum + (l.conversions_count || 0), 0);
       const totalCommission = commissions?.reduce((sum, c) => sum + c.amount, 0) || 0;
-      const paidCommission = commissions
-        ?.filter(c => c.status === 'paid')
-        .reduce((sum, c) => sum + c.amount, 0) || 0;
+      const paidCommission =
+        commissions?.filter(c => c.status === 'paid').reduce((sum, c) => sum + c.amount, 0) || 0;
       const pendingCommission = totalCommission - paidCommission;
 
-      const conversionRate = totalClicks && totalConversions
-        ? (totalConversions / totalClicks) * 100
-        : 0;
+      const conversionRate =
+        totalClicks && totalConversions ? (totalConversions / totalClicks) * 100 : 0;
 
       return {
         total_courses: uniqueProductIds.length,
@@ -110,7 +110,9 @@ export const usePromotedCourses = () => {
   return useQuery({
     queryKey: ['promoted-courses'],
     queryFn: async (): Promise<PromotedCourse[]> => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) {
         throw new Error('Non connecté');
       }
@@ -118,7 +120,8 @@ export const usePromotedCourses = () => {
       // Récupérer tous les liens avec les produits
       const { data: links } = await supabase
         .from('affiliate_links')
-        .select(`
+        .select(
+          `
           id,
           product_id,
           conversions_count,
@@ -129,7 +132,8 @@ export const usePromotedCourses = () => {
             price,
             product_type
           )
-        `)
+        `
+        )
         .eq('user_id', user.id)
         .eq('status', 'active')
         .eq('products.product_type', 'course');
@@ -139,20 +143,25 @@ export const usePromotedCourses = () => {
       }
 
       // Grouper par produit
-      type LinkWithProduct = typeof links[0] & { products?: { id: string; name: string; slug: string; price: number } };
-      const productMap = new Map<string, {
-        product_id: string;
-        product_name: string;
-        product_slug: string;
-        product_price: number;
-        commission_rate: number;
-        commission_type: 'percentage' | 'fixed';
-        total_links: number;
-        total_clicks: number;
-        total_conversions: number;
-        total_commission: number;
-        link_ids: string[];
-      }>();
+      type LinkWithProduct = (typeof links)[0] & {
+        products?: { id: string; name: string; slug: string; price: number };
+      };
+      const productMap = new Map<
+        string,
+        {
+          product_id: string;
+          product_name: string;
+          product_slug: string;
+          product_price: number;
+          commission_rate: number;
+          commission_type: 'percentage' | 'fixed';
+          total_links: number;
+          total_clicks: number;
+          total_conversions: number;
+          total_commission: number;
+          link_ids: string[];
+        }
+      >();
 
       for (const link of links as LinkWithProduct[]) {
         const product = link.products;
@@ -182,7 +191,7 @@ export const usePromotedCourses = () => {
 
       // Récupérer les settings d'affiliation et les stats pour chaque cours
       const courses = await Promise.all(
-        Array.from(productMap.values()).map(async (course) => {
+        Array.from(productMap.values()).map(async course => {
           // Settings d'affiliation
           const { data: settings } = await supabase
             .from('product_affiliate_settings')
@@ -223,10 +232,3 @@ export const usePromotedCourses = () => {
     },
   });
 };
-
-
-
-
-
-
-

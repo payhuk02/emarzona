@@ -19,10 +19,7 @@ export interface RoundOptions {
 /**
  * Arrondit un nombre avec options
  */
-export function round(
-  value: number,
-  options: RoundOptions = {}
-): number {
+export function round(value: number, options: RoundOptions = {}): number {
   const { decimals = 2, mode = 'round' } = options;
   const multiplier = Math.pow(10, decimals);
 
@@ -102,10 +99,7 @@ export function formatPercentage(
 /**
  * Formate un nombre en notation compacte (1K, 1M, etc.)
  */
-export function formatCompact(
-  value: number,
-  locale: string = 'fr-FR'
-): string {
+export function formatCompact(value: number, locale: string = 'fr-FR'): string {
   return new Intl.NumberFormat(locale, {
     notation: 'compact',
     compactDisplay: 'short',
@@ -145,11 +139,7 @@ export function isNumeric(value: unknown): value is number {
 /**
  * Calcule le pourcentage d'une valeur par rapport à un total
  */
-export function calculatePercentage(
-  value: number,
-  total: number,
-  decimals: number = 1
-): number {
+export function calculatePercentage(value: number, total: number, decimals: number = 1): number {
   if (total === 0) return 0;
   return round((value / total) * 100, { decimals });
 }
@@ -224,11 +214,7 @@ export function normalize(value: number, min: number, max: number): number {
 /**
  * Dénormalise un nombre (inverse de normalize)
  */
-export function denormalize(
-  normalized: number,
-  min: number,
-  max: number
-): number {
+export function denormalize(normalized: number, min: number, max: number): number {
   return normalized * (max - min) + min;
 }
 
@@ -255,17 +241,6 @@ export function formatWithPrefixSuffix(
 /**
  * Vérifie si deux nombres sont approximativement égaux (avec tolérance)
  */
-export function isApproximatelyEqual(
-  a: number,
-  b: number,
-  tolerance: number = 0.0001
-): boolean {
+export function isApproximatelyEqual(a: number, b: number, tolerance: number = 0.0001): boolean {
   return Math.abs(a - b) < tolerance;
 }
-
-
-
-
-
-
-

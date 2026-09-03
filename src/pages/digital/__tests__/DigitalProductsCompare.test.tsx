@@ -39,12 +39,14 @@ vi.mock('@/integrations/supabase/client', () => ({
                     currency: 'XOF',
                     image_url: 'https://example.com/image1.jpg',
                     category: 'Software',
-                    digital_products: [{
-                      license_type: 'standard',
-                      main_file_format: 'PDF',
-                      total_size_mb: 10,
-                      total_downloads: 100,
-                    }],
+                    digital_products: [
+                      {
+                        license_type: 'standard',
+                        main_file_format: 'PDF',
+                        total_size_mb: 10,
+                        total_downloads: 100,
+                      },
+                    ],
                     average_rating: 4.5,
                     total_reviews: 20,
                     is_active: true,
@@ -58,12 +60,14 @@ vi.mock('@/integrations/supabase/client', () => ({
                     currency: 'XOF',
                     image_url: 'https://example.com/image2.jpg',
                     category: 'Template',
-                    digital_products: [{
-                      license_type: 'plr',
-                      main_file_format: 'ZIP',
-                      total_size_mb: 25,
-                      total_downloads: 50,
-                    }],
+                    digital_products: [
+                      {
+                        license_type: 'plr',
+                        main_file_format: 'ZIP',
+                        total_size_mb: 25,
+                        total_downloads: 50,
+                      },
+                    ],
                     average_rating: 4.0,
                     total_reviews: 15,
                     is_active: true,
@@ -119,7 +123,7 @@ describe('DigitalProductsCompare', () => {
 
   it('should render comparison page with products', async () => {
     renderComponent();
-    
+
     await waitFor(() => {
       expect(screen.getByText('Comparaison de produits')).toBeInTheDocument();
       expect(screen.getByText('Produit Digital 1')).toBeInTheDocument();
@@ -129,7 +133,7 @@ describe('DigitalProductsCompare', () => {
 
   it('should display product details in comparison table', async () => {
     renderComponent();
-    
+
     await waitFor(() => {
       expect(screen.getByText('Produit Digital 1')).toBeInTheDocument();
       expect(screen.getByText('Produit Digital 2')).toBeInTheDocument();
@@ -141,7 +145,7 @@ describe('DigitalProductsCompare', () => {
   it('should allow removing a product from comparison', async () => {
     const user = userEvent.setup();
     renderComponent();
-    
+
     await waitFor(() => {
       expect(screen.getByText('Produit Digital 1')).toBeInTheDocument();
     });
@@ -149,11 +153,13 @@ describe('DigitalProductsCompare', () => {
     const removeButtons = screen.getAllByRole('button', { name: /remove|retirer/i });
     if (removeButtons.length > 0) {
       await user.click(removeButtons[0]);
-      
+
       await waitFor(() => {
-        expect(mockToast).toHaveBeenCalledWith(expect.objectContaining({
-          title: 'Produit retiré',
-        }));
+        expect(mockToast).toHaveBeenCalledWith(
+          expect.objectContaining({
+            title: 'Produit retiré',
+          })
+        );
       });
     }
   });
@@ -172,14 +178,14 @@ describe('DigitalProductsCompare', () => {
     } as any);
 
     renderComponent('/digital/compare');
-    
+
     expect(screen.getByText(/aucun produit à comparer/i)).toBeInTheDocument();
   });
 
   it('should allow adding more products', async () => {
     const user = userEvent.setup();
     renderComponent();
-    
+
     await waitFor(() => {
       expect(screen.getByText('Comparaison de produits')).toBeInTheDocument();
     });
@@ -194,24 +200,26 @@ describe('DigitalProductsCompare', () => {
   it('should clear all products when clear button is clicked', async () => {
     const user = userEvent.setup();
     renderComponent();
-    
+
     await waitFor(() => {
       expect(screen.getByText('Produit Digital 1')).toBeInTheDocument();
     });
 
     const clearButton = screen.getByRole('button', { name: /vider/i });
     await user.click(clearButton);
-    
+
     await waitFor(() => {
-      expect(mockToast).toHaveBeenCalledWith(expect.objectContaining({
-        title: 'Comparaison vidée',
-      }));
+      expect(mockToast).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'Comparaison vidée',
+        })
+      );
     });
   });
 
   it('should display product properties in comparison table', async () => {
     renderComponent();
-    
+
     await waitFor(() => {
       expect(screen.getByText('Nom')).toBeInTheDocument();
       expect(screen.getByText('Prix')).toBeInTheDocument();
@@ -228,7 +236,7 @@ describe('DigitalProductsCompare', () => {
   it('should navigate to product detail when "Voir les détails" is clicked', async () => {
     const user = userEvent.setup();
     renderComponent();
-    
+
     await waitFor(() => {
       expect(screen.getByText('Produit Digital 1')).toBeInTheDocument();
     });
@@ -265,17 +273,10 @@ describe('DigitalProductsCompare', () => {
     } as any);
 
     renderComponent('/digital/compare?ids=prod1,prod2,prod3,prod4,prod5');
-    
+
     await waitFor(() => {
       // Devrait limiter à 4 produits maximum
       expect(screen.queryByText('Produit 5')).not.toBeInTheDocument();
     });
   });
 });
-
-
-
-
-
-
-

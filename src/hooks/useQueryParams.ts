@@ -1,11 +1,11 @@
 /**
  * Hook useQueryParams - Gestion simplifiée des paramètres d'URL
  * Fournit une API simple pour lire et modifier les query parameters
- * 
+ *
  * @example
  * ```tsx
  * const { getParam, setParam, removeParam, getAllParams } = useQueryParams();
- * 
+ *
  * const page = getParam('page', '1');
  * setParam('page', '2');
  * ```
@@ -88,7 +88,7 @@ export function useQueryParams(): UseQueryParamsReturn {
 
   const setParam = useCallback(
     (key: string, value: string | number | null) => {
-      setSearchParams((prev) => {
+      setSearchParams(prev => {
         const newParams = new URLSearchParams(prev);
         if (value === null || value === '') {
           newParams.delete(key);
@@ -103,7 +103,7 @@ export function useQueryParams(): UseQueryParamsReturn {
 
   const removeParam = useCallback(
     (key: string) => {
-      setSearchParams((prev) => {
+      setSearchParams(prev => {
         const newParams = new URLSearchParams(prev);
         newParams.delete(key);
         return newParams;
@@ -114,7 +114,7 @@ export function useQueryParams(): UseQueryParamsReturn {
 
   const setParams = useCallback(
     (params: Record<string, string | number | null>) => {
-      setSearchParams((prev) => {
+      setSearchParams(prev => {
         const newParams = new URLSearchParams(prev);
         Object.entries(params).forEach(([key, value]) => {
           if (value === null || value === '') {
@@ -131,9 +131,9 @@ export function useQueryParams(): UseQueryParamsReturn {
 
   const removeParams = useCallback(
     (keys: string[]) => {
-      setSearchParams((prev) => {
+      setSearchParams(prev => {
         const newParams = new URLSearchParams(prev);
-        keys.forEach((key) => {
+        keys.forEach(key => {
           newParams.delete(key);
         });
         return newParams;
@@ -147,7 +147,7 @@ export function useQueryParams(): UseQueryParamsReturn {
   }, [setSearchParams]);
 
   const getAllParams = useCallback((): Record<string, string> => {
-    const  params: Record<string, string> = {};
+    const params: Record<string, string> = {};
     searchParams.forEach((value, key) => {
       params[key] = value;
     });
@@ -194,10 +194,3 @@ export function useQueryParam<T extends string | number = string>(
 
   return [value, setValue];
 }
-
-
-
-
-
-
-

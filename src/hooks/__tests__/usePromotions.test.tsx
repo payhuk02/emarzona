@@ -2,7 +2,12 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
-import { usePromotions, useCreatePromotion, useUpdatePromotion, useDeletePromotion } from '../usePromotions';
+import {
+  usePromotions,
+  useCreatePromotion,
+  useUpdatePromotion,
+  useDeletePromotion,
+} from '../usePromotions';
 import { supabase } from '@/integrations/supabase/client';
 
 // Mock Supabase
@@ -27,15 +32,15 @@ vi.mock('@/hooks/use-toast', () => ({
 }));
 
 describe('usePromotions', () => {
-  let  queryClient: QueryClient;
-  let  mockFrom: ReturnType<typeof vi.fn>;
-  let  mockQuery: ReturnType<typeof vi.fn>;
-  let  mockSelect: ReturnType<typeof vi.fn>;
-  let  mockEq: ReturnType<typeof vi.fn>;
-  let  mockOrder: ReturnType<typeof vi.fn>;
-  let  mockOr: ReturnType<typeof vi.fn>;
-  let  mockRange: ReturnType<typeof vi.fn>;
-  let  mockIlike: ReturnType<typeof vi.fn>;
+  let queryClient: QueryClient;
+  let mockFrom: ReturnType<typeof vi.fn>;
+  let mockQuery: ReturnType<typeof vi.fn>;
+  let mockSelect: ReturnType<typeof vi.fn>;
+  let mockEq: ReturnType<typeof vi.fn>;
+  let mockOrder: ReturnType<typeof vi.fn>;
+  let mockOr: ReturnType<typeof vi.fn>;
+  let mockRange: ReturnType<typeof vi.fn>;
+  let mockIlike: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     queryClient = new QueryClient({
@@ -113,10 +118,7 @@ describe('usePromotions', () => {
         count: 1,
       });
 
-      const { result } = renderHook(
-        () => usePromotions({ storeId: 'store1' }),
-        { wrapper }
-      );
+      const { result } = renderHook(() => usePromotions({ storeId: 'store1' }), { wrapper });
 
       await waitFor(() => {
         expect(result.current.isSuccess).toBe(true);
@@ -152,10 +154,9 @@ describe('usePromotions', () => {
         count: 1,
       });
 
-      const { result } = renderHook(
-        () => usePromotions({ storeId: 'store1', activeOnly: true }),
-        { wrapper }
-      );
+      const { result } = renderHook(() => usePromotions({ storeId: 'store1', activeOnly: true }), {
+        wrapper,
+      });
 
       await waitFor(() => {
         expect(result.current.isSuccess).toBe(true);
@@ -190,10 +191,9 @@ describe('usePromotions', () => {
         count: 1,
       });
 
-      const { result } = renderHook(
-        () => usePromotions({ storeId: 'store1', search: 'SAVE10' }),
-        { wrapper }
-      );
+      const { result } = renderHook(() => usePromotions({ storeId: 'store1', search: 'SAVE10' }), {
+        wrapper,
+      });
 
       await waitFor(() => {
         expect(result.current.isSuccess).toBe(true);
@@ -244,7 +244,13 @@ describe('usePromotions', () => {
         insert: vi.fn().mockReturnValue({
           select: vi.fn().mockReturnThis(),
           single: vi.fn().mockResolvedValue({
-            data: { ...newPromotion, id: 'new-id', created_at: new Date().toISOString(), updated_at: new Date().toISOString(), used_count: 0 },
+            data: {
+              ...newPromotion,
+              id: 'new-id',
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+              used_count: 0,
+            },
             error: null,
           }),
         }),
@@ -263,10 +269,3 @@ describe('usePromotions', () => {
     });
   });
 });
-
-
-
-
-
-
-

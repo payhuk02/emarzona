@@ -1,7 +1,7 @@
 /**
  * Carrier Shipping Options Component
  * Date: 28 Janvier 2025
- * 
+ *
  * Composant pour afficher et sélectionner les options de livraison
  * avec calcul temps réel via APIs transporteurs (DHL, FedEx, UPS)
  */
@@ -14,16 +14,11 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Truck, Clock, Package, CheckCircle2, Loader2, AlertCircle, Zap } from '@/components/icons';
 import {
-  Truck,
-  Clock,
-  Package,
-  CheckCircle2,
-  Loader2,
-  AlertCircle,
-  Zap,
-} from '@/components/icons';
-import { useShippingCarriers, useCalculateCarrierRates } from '@/hooks/physical/useShippingCarriers';
+  useShippingCarriers,
+  useCalculateCarrierRates,
+} from '@/hooks/physical/useShippingCarriers';
 import { useStore } from '@/hooks/useStore';
 import { cn } from '@/lib/utils';
 import { logger } from '@/lib/logger';
@@ -95,7 +90,7 @@ export const CarrierShippingOptions = ({
       setIsCalculating(true);
       setCalculationErrors({});
 
-      const ratesPromises = carriers.map(async (carrier) => {
+      const ratesPromises = carriers.map(async carrier => {
         try {
           const rates = await calculateRates.mutateAsync({
             carrierId: carrier.id,
@@ -118,8 +113,11 @@ export const CarrierShippingOptions = ({
             rates: rates || [],
             isLoading: false,
           } as CarrierRate;
-        } catch ( _error: any) {
-          logger.error(`Error calculating rates for ${carrier.display_name}`, { error, carrierId: carrier.id });
+        } catch (_error: any) {
+          logger.error(`Error calculating rates for ${carrier.display_name}`, {
+            error,
+            carrierId: carrier.id,
+          });
           return {
             carrierId: carrier.id,
             carrierName: carrier.carrier_name,
@@ -168,7 +166,7 @@ export const CarrierShippingOptions = ({
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {[1, 2, 3].map((i) => (
+            {[1, 2, 3].map(i => (
               <Skeleton key={i} className="h-24 w-full" />
             ))}
           </div>
@@ -190,7 +188,8 @@ export const CarrierShippingOptions = ({
           <Alert>
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              Aucun transporteur configuré. Veuillez configurer au moins un transporteur dans les paramètres.
+              Aucun transporteur configuré. Veuillez configurer au moins un transporteur dans les
+              paramètres.
             </AlertDescription>
           </Alert>
         </CardContent>
@@ -198,8 +197,8 @@ export const CarrierShippingOptions = ({
     );
   }
 
-  const allRates = carrierRates.flatMap((carrier) =>
-    carrier.rates.map((rate) => ({
+  const allRates = carrierRates.flatMap(carrier =>
+    carrier.rates.map(rate => ({
       ...rate,
       carrierId: carrier.carrierId,
       carrierName: carrier.carrierName,
@@ -231,17 +230,21 @@ export const CarrierShippingOptions = ({
       <CardContent>
         {isCalculating ? (
           <div className="space-y-4">
-            {carriers.map((carrier) => (
+            {carriers.map(carrier => (
               <Skeleton key={carrier.id} className="h-24 w-full" />
             ))}
           </div>
         ) : (
           <RadioGroup
-            value={selectedCarrierId && selectedServiceType ? `${selectedCarrierId}-${selectedServiceType}` : undefined}
-            onValueChange={(value) => {
+            value={
+              selectedCarrierId && selectedServiceType
+                ? `${selectedCarrierId}-${selectedServiceType}`
+                : undefined
+            }
+            onValueChange={value => {
               const [carrierId, serviceType] = value.split('-');
               const rate = allRates.find(
-                (r) => r.carrierId === carrierId && r.serviceType === serviceType
+                r => r.carrierId === carrierId && r.serviceType === serviceType
               );
               if (rate) {
                 handleSelectRate(carrierId, serviceType, rate);
@@ -253,11 +256,12 @@ export const CarrierShippingOptions = ({
               <Alert>
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
-                  Aucun tarif disponible pour cette destination. Veuillez vérifier l'adresse de livraison.
+                  Aucun tarif disponible pour cette destination. Veuillez vérifier l'adresse de
+                  livraison.
                 </AlertDescription>
               </Alert>
             ) : (
-              allRates.map((rate) => {
+              allRates.map(rate => {
                 const isSelected =
                   selectedCarrierId === rate.carrierId && selectedServiceType === rate.serviceType;
                 const isFastest = rate.estimatedDeliveryDays <= 2;
@@ -274,16 +278,16 @@ export const CarrierShippingOptions = ({
                       htmlFor={`rate-${rate.carrierId}-${rate.serviceType}`}
                       className={cn(
                         'flex cursor-pointer items-center justify-between rounded-lg border-2 p-4 transition-all hover:bg-accent',
-                        isSelected
-                          ? 'border-primary bg-primary/5'
-                          : 'border-muted bg-card'
+                        isSelected ? 'border-primary bg-primary/5' : 'border-muted bg-card'
                       )}
                     >
                       <div className="flex-1 space-y-2">
                         <div className="flex items-center gap-2">
                           <Package className="h-4 w-4 text-muted-foreground" />
                           <span className="font-semibold">{rate.displayName}</span>
-                          <span className="text-sm text-muted-foreground">- {rate.serviceName}</span>
+                          <span className="text-sm text-muted-foreground">
+                            - {rate.serviceName}
+                          </span>
                           {isFastest && (
                             <Badge variant="secondary" className="gap-1">
                               <Zap className="h-3 w-3" />
@@ -301,7 +305,8 @@ export const CarrierShippingOptions = ({
                           <div className="flex items-center gap-1">
                             <Clock className="h-3 w-3" />
                             <span>
-                              {rate.estimatedDeliveryDays} jour{rate.estimatedDeliveryDays > 1 ? 's' : ''}
+                              {rate.estimatedDeliveryDays} jour
+                              {rate.estimatedDeliveryDays > 1 ? 's' : ''}
                             </span>
                             {rate.estimatedDeliveryDate && (
                               <span className="ml-1">
@@ -331,7 +336,7 @@ export const CarrierShippingOptions = ({
         {Object.keys(calculationErrors).length > 0 && (
           <div className="mt-4 space-y-2">
             {Object.entries(calculationErrors).map(([carrierId, error]) => {
-              const carrier = carriers.find((c) => c.id === carrierId);
+              const carrier = carriers.find(c => c.id === carrierId);
               return (
                 <Alert key={carrierId} variant="destructive">
                   <AlertCircle className="h-4 w-4" />
@@ -347,10 +352,3 @@ export const CarrierShippingOptions = ({
     </Card>
   );
 };
-
-
-
-
-
-
-

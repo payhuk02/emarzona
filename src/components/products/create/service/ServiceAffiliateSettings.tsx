@@ -1,7 +1,7 @@
 /**
  * Service Product - Affiliate Settings
  * Date: 28 octobre 2025
- * 
+ *
  * Composant réutilisant DigitalAffiliateSettings pour services
  */
 
@@ -29,9 +29,3 @@ export const ServiceAffiliateSettings = ({
     />
   );
 };
-
-
-
-
-
-

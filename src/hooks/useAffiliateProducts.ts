@@ -37,9 +37,10 @@ export const useAffiliateProducts = (searchQuery?: string) => {
     try {
       setLoading(true);
 
-      let  query= supabase
+      let query = supabase
         .from('product_affiliate_settings')
-        .select(`
+        .select(
+          `
           *,
           product:products!inner(
             id,
@@ -54,7 +55,8 @@ export const useAffiliateProducts = (searchQuery?: string) => {
               slug
             )
           )
-        `)
+        `
+        )
         .eq('affiliate_enabled', true)
         .eq('product.is_active', true);
 
@@ -70,7 +72,7 @@ export const useAffiliateProducts = (searchQuery?: string) => {
       if (error) throw error;
 
       // Transformer les données
-      const  transformedProducts: AffiliateProduct[] = (data || []).map((item: any) => ({
+      const transformedProducts: AffiliateProduct[] = (data || []).map((item: any) => ({
         id: item.product.id,
         name: item.product.name,
         slug: item.product.slug,
@@ -90,7 +92,7 @@ export const useAffiliateProducts = (searchQuery?: string) => {
       }));
 
       setProducts(transformedProducts);
-    } catch ( _error: any) {
+    } catch (_error: any) {
       logger.error('Error fetching affiliate products:', error);
       toast({
         title: 'Erreur',
@@ -112,10 +114,3 @@ export const useAffiliateProducts = (searchQuery?: string) => {
     refetch: fetchProducts,
   };
 };
-
-
-
-
-
-
-

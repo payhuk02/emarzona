@@ -33,7 +33,7 @@ export function hexToRgb(hex: string): RGB | null {
  * Convertit RGB en hex
  */
 export function rgbToHex(r: number, g: number, b: number): string {
-  return '#' + [r, g, b].map((x) => x.toString(16).padStart(2, '0')).join('');
+  return '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('');
 }
 
 /**
@@ -46,8 +46,8 @@ export function rgbToHsl(r: number, g: number, b: number): HSL {
 
   const max = Math.max(r, g, b);
   const min = Math.min(r, g, b);
-  let  h= 0;
-  let  s= 0;
+  let h = 0;
+  let s = 0;
   const l = (max + min) / 2;
 
   if (max !== min) {
@@ -85,9 +85,9 @@ export function hslToRgb(h: number, s: number, l: number): RGB {
   const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
   const m = l - c / 2;
 
-  let  r= 0;
-  let  g= 0;
-  let  b= 0;
+  let r = 0;
+  let g = 0;
+  let b = 0;
 
   if (0 <= h && h < 60) {
     r = c;
@@ -130,7 +130,7 @@ export function getLuminance(hex: string): number {
   if (!rgb) return 0;
 
   const { r, g, b } = rgb;
-  const [rs, gs, bs] = [r, g, b].map((val) => {
+  const [rs, gs, bs] = [r, g, b].map(val => {
     val = val / 255;
     return val <= 0.03928 ? val / 12.92 : Math.pow((val + 0.055) / 1.055, 2.4);
   });
@@ -154,7 +154,11 @@ export function getContrastRatio(color1: string, color2: string): number {
 /**
  * Vérifie si le contraste est suffisant (WCAG AA)
  */
-export function hasSufficientContrast(color1: string, color2: string, level: 'AA' | 'AAA' = 'AA'): boolean {
+export function hasSufficientContrast(
+  color1: string,
+  color2: string,
+  level: 'AA' | 'AAA' = 'AA'
+): boolean {
   const ratio = getContrastRatio(color1, color2);
   return level === 'AA' ? ratio >= 4.5 : ratio >= 7;
 }
@@ -267,10 +271,3 @@ export function parseColor(color: string): RGB | null {
 
   return null;
 }
-
-
-
-
-
-
-

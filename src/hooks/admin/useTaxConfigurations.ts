@@ -10,7 +10,8 @@ import { logger } from '@/lib/logger';
 import type { TaxConfiguration } from '@/types/invoice';
 
 const TAX_CONFIG_QUERY_KEY = ['tax-configurations'];
-const TAX_CONFIGURATION_FIELDS = 'id, store_id, country_code, state_province, tax_type, tax_name, rate, applies_to_product_types, applies_to_shipping, tax_inclusive, priority, effective_from, effective_to, is_active, created_at, updated_at';
+const TAX_CONFIGURATION_FIELDS =
+  'id, store_id, country_code, state_province, tax_type, tax_name, rate, applies_to_product_types, applies_to_shipping, tax_inclusive, priority, effective_from, effective_to, is_active, created_at, updated_at';
 
 /**
  * Récupérer toutes les configurations de taxes
@@ -19,7 +20,7 @@ export function useTaxConfigurations(storeId?: string) {
   return useQuery({
     queryKey: [...TAX_CONFIG_QUERY_KEY, storeId],
     queryFn: async (): Promise<TaxConfiguration[]> => {
-      let  query= supabase
+      let query = supabase
         .from('tax_configurations')
         .select(TAX_CONFIGURATION_FIELDS)
         .order('country_code', { ascending: true })
@@ -131,7 +132,10 @@ export function useUpdateTaxConfiguration() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, ...data }: Partial<TaxConfiguration> & { id: string }): Promise<TaxConfiguration> => {
+    mutationFn: async ({
+      id,
+      ...data
+    }: Partial<TaxConfiguration> & { id: string }): Promise<TaxConfiguration> => {
       const { data: config, error } = await supabase
         .from('tax_configurations')
         .update({
@@ -186,10 +190,7 @@ export function useDeleteTaxConfiguration() {
 
   return useMutation({
     mutationFn: async (taxId: string): Promise<void> => {
-      const { error } = await supabase
-        .from('tax_configurations')
-        .delete()
-        .eq('id', taxId);
+      const { error } = await supabase.from('tax_configurations').delete().eq('id', taxId);
 
       if (error) {
         logger.error('Error deleting tax configuration:', error);
@@ -213,10 +214,3 @@ export function useDeleteTaxConfiguration() {
     },
   });
 }
-
-
-
-
-
-
-

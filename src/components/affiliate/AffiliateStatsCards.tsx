@@ -120,7 +120,9 @@ const AffiliateStatsCardsComponent = ({
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs sm:text-sm text-muted-foreground mb-1">{stat.title}</p>
-                  <p className={`text-xl sm:text-2xl font-bold bg-gradient-to-r ${stat.gradient} bg-clip-text text-transparent`}>
+                  <p
+                    className={`text-xl sm:text-2xl font-bold bg-gradient-to-r ${stat.gradient} bg-clip-text text-transparent`}
+                  >
                     {stat.value}
                   </p>
                 </div>
@@ -137,24 +139,20 @@ const AffiliateStatsCardsComponent = ({
 };
 
 // Optimisation avec React.memo pour éviter les re-renders inutiles
-export const AffiliateStatsCards = React.memo(AffiliateStatsCardsComponent, (prevProps, nextProps) => {
-  return (
-    prevProps.totalCourses === nextProps.totalCourses &&
-    prevProps.totalLinks === nextProps.totalLinks &&
-    prevProps.totalClicks === nextProps.totalClicks &&
-    prevProps.totalConversions === nextProps.totalConversions &&
-    prevProps.conversionRate === nextProps.conversionRate &&
-    prevProps.totalCommission === nextProps.totalCommission &&
-    prevProps.pendingCommission === nextProps.pendingCommission &&
-    prevProps.paidCommission === nextProps.paidCommission
-  );
-});
+export const AffiliateStatsCards = React.memo(
+  AffiliateStatsCardsComponent,
+  (prevProps, nextProps) => {
+    return (
+      prevProps.totalCourses === nextProps.totalCourses &&
+      prevProps.totalLinks === nextProps.totalLinks &&
+      prevProps.totalClicks === nextProps.totalClicks &&
+      prevProps.totalConversions === nextProps.totalConversions &&
+      prevProps.conversionRate === nextProps.conversionRate &&
+      prevProps.totalCommission === nextProps.totalCommission &&
+      prevProps.pendingCommission === nextProps.pendingCommission &&
+      prevProps.paidCommission === nextProps.paidCommission
+    );
+  }
+);
 
 AffiliateStatsCards.displayName = 'AffiliateStatsCards';
-
-
-
-
-
-
-

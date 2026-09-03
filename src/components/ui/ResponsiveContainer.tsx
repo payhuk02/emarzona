@@ -3,8 +3,8 @@
  * Container optimisé pour toutes les tailles d'écran
  */
 
-import { cn } from "@/lib/utils";
-import { ReactNode } from "react";
+import { cn } from '@/lib/utils';
+import { ReactNode } from 'react';
 
 interface ResponsiveContainerProps {
   children: ReactNode;
@@ -89,18 +89,5 @@ export function ResponsiveSection({
     xl: 'py-12 sm:py-16 lg:py-24',
   };
 
-  return (
-    <section className={cn(spacingClasses[spacing], className)}>
-      {children}
-    </section>
-  );
+  return <section className={cn(spacingClasses[spacing], className)}>{children}</section>;
 }
-
-
-
-
-
-
-
-
-

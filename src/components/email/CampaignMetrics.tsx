@@ -86,13 +86,10 @@ export const CampaignMetrics = ({ campaign }: CampaignMetricsProps) => {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {statCards.map((stat) => {
+            {statCards.map(stat => {
               const Icon = stat.icon;
               return (
-                <div
-                  key={stat.label}
-                  className="p-4 rounded-lg border bg-card"
-                >
+                <div key={stat.label} className="p-4 rounded-lg border bg-card">
                   <div className="flex items-center justify-between mb-2">
                     <div className={`p-2 rounded-lg ${stat.bgColor}`}>
                       <Icon className={`h-5 w-5 ${stat.color}`} />
@@ -105,12 +102,7 @@ export const CampaignMetrics = ({ campaign }: CampaignMetricsProps) => {
                   </div>
                   <p className="text-2xl font-bold">{stat.value}</p>
                   <p className="text-sm text-muted-foreground">{stat.label}</p>
-                  {stat.rate !== undefined && (
-                    <Progress
-                      value={stat.rate}
-                      className="mt-2 h-2"
-                    />
-                  )}
+                  {stat.rate !== undefined && <Progress value={stat.rate} className="mt-2 h-2" />}
                 </div>
               );
             })}
@@ -136,10 +128,3 @@ export const CampaignMetrics = ({ campaign }: CampaignMetricsProps) => {
     </div>
   );
 };
-
-
-
-
-
-
-

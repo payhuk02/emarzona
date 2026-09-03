@@ -1,11 +1,11 @@
 /**
  * Hook useToastHelpers - Simplifie l'utilisation des toasts
  * Fournit des méthodes helper pour les patterns courants (success, error, info, warning)
- * 
+ *
  * @example
  * ```tsx
  * const { showSuccess, showError, showInfo, showWarning } = useToastHelpers();
- * 
+ *
  * showSuccess('Opération réussie');
  * showError('Une erreur est survenue');
  * ```
@@ -126,7 +126,7 @@ export function useToastHelpers() {
    * Affiche un toast de promesse (loading -> success/error)
    */
   const showPromise = useCallback(
-    <T,>(
+    <T>(
       promise: Promise<T>,
       messages: {
         loading: string;
@@ -137,22 +137,18 @@ export function useToastHelpers() {
       const loadingToastId = showLoading(messages.loading);
 
       return promise
-        .then((data) => {
+        .then(data => {
           // Fermer le toast de chargement
           // Note: L'API toast ne permet pas de fermer un toast spécifique facilement
           // On affiche simplement le toast de succès qui remplacera le loading
           const successMessage =
-            typeof messages.success === 'function'
-              ? messages.success(data)
-              : messages.success;
+            typeof messages.success === 'function' ? messages.success(data) : messages.success;
           showSuccess(successMessage);
           return data;
         })
-        .catch((error) => {
+        .catch(error => {
           const errorMessage =
-            typeof messages.error === 'function'
-              ? messages.error(error)
-              : messages.error;
+            typeof messages.error === 'function' ? messages.error(error) : messages.error;
           showError(errorMessage);
           throw error;
         });
@@ -205,10 +201,3 @@ export function useToastHelpers() {
     toast, // Exposer aussi le toast original pour les cas avancés
   };
 }
-
-
-
-
-
-
-

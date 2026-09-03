@@ -1,7 +1,7 @@
 /**
  * License Generator Component
  * Date: 27 octobre 2025
- * 
+ *
  * Générateur de licenses pour produits digitaux
  */
 
@@ -44,7 +44,7 @@ export const LicenseGenerator = ({ onSuccess }: LicenseGeneratorProps) => {
     const segments = 4;
     const segmentLength = 4;
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    
+
     const key = Array(segments)
       .fill(0)
       .map(() => {
@@ -75,7 +75,7 @@ export const LicenseGenerator = ({ onSuccess }: LicenseGeneratorProps) => {
     navigator.clipboard.writeText(key);
     setCopiedIndex(index);
     setTimeout(() => setCopiedIndex(null), 2000);
-    
+
     toast({
       title: 'Copié',
       description: 'Clé copiée dans le presse-papier',
@@ -85,7 +85,7 @@ export const LicenseGenerator = ({ onSuccess }: LicenseGeneratorProps) => {
   const handleCopyAll = () => {
     const allKeys = generatedKeys.join('\n');
     navigator.clipboard.writeText(allKeys);
-    
+
     toast({
       title: 'Toutes les clés copiées',
       description: `${generatedKeys.length} clé(s) copiée(s)`,
@@ -103,10 +103,10 @@ export const LicenseGenerator = ({ onSuccess }: LicenseGeneratorProps) => {
     }
 
     setIsSaving(true);
-    
+
     try {
       // Calculate expiry date
-      const expiresAt = duration 
+      const expiresAt = duration
         ? new Date(Date.now() + parseInt(duration) * 24 * 60 * 60 * 1000).toISOString()
         : null;
 
@@ -121,9 +121,7 @@ export const LicenseGenerator = ({ onSuccess }: LicenseGeneratorProps) => {
         is_active: true,
       }));
 
-      const { error } = await supabase
-        .from('digital_licenses')
-        .insert(licensesData);
+      const { error } = await supabase.from('digital_licenses').insert(licensesData);
 
       if (error) throw error;
 
@@ -131,18 +129,18 @@ export const LicenseGenerator = ({ onSuccess }: LicenseGeneratorProps) => {
         title: '✅ Succès',
         description: `${generatedKeys.length} license(s) enregistrée(s) avec succès`,
       });
-      
+
       // Reset form
       setGeneratedKeys([]);
       setProductId('');
       setQuantity(1);
-      
+
       onSuccess?.();
-    } catch ( _error: any) {
+    } catch (_error: any) {
       logger.error('Save licenses error', { error, productId, quantity });
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible d\'enregistrer les licenses',
+        description: error.message || "Impossible d'enregistrer les licenses",
         variant: 'destructive',
       });
     } finally {
@@ -158,11 +156,11 @@ export const LicenseGenerator = ({ onSuccess }: LicenseGeneratorProps) => {
           <Label htmlFor="product">Produit Digital *</Label>
           <Select value={productId} onValueChange={setProductId} disabled={isLoading}>
             <SelectTrigger id="product">
-              <SelectValue placeholder={isLoading ? "Chargement..." : "Sélectionner un produit"} />
+              <SelectValue placeholder={isLoading ? 'Chargement...' : 'Sélectionner un produit'} />
             </SelectTrigger>
             <SelectContent>
               {digitalProducts && digitalProducts.length > 0 ? (
-                digitalProducts.map((product) => (
+                digitalProducts.map(product => (
                   <SelectItem key={product.id} value={product.id}>
                     {product.product?.name || 'Produit sans nom'}
                   </SelectItem>
@@ -184,7 +182,7 @@ export const LicenseGenerator = ({ onSuccess }: LicenseGeneratorProps) => {
             min="1"
             max="100"
             value={quantity}
-            onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
+            onChange={e => setQuantity(parseInt(e.target.value) || 1)}
           />
         </div>
 
@@ -221,12 +219,7 @@ export const LicenseGenerator = ({ onSuccess }: LicenseGeneratorProps) => {
       </div>
 
       {/* Generate Button */}
-      <Button
-        onClick={handleGenerate}
-        disabled={!productId}
-        className="w-full"
-        size="lg"
-      >
+      <Button onClick={handleGenerate} disabled={!productId} className="w-full" size="lg">
         <RefreshCw className="h-4 w-4 mr-2" />
         Générer {quantity} License{quantity > 1 ? 's' : ''}
       </Button>
@@ -235,9 +228,7 @@ export const LicenseGenerator = ({ onSuccess }: LicenseGeneratorProps) => {
       {generatedKeys.length > 0 && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="font-semibold">
-              Clés Générées ({generatedKeys.length})
-            </h3>
+            <h3 className="font-semibold">Clés Générées ({generatedKeys.length})</h3>
             <Button variant="outline" size="sm" onClick={handleCopyAll}>
               <Copy className="h-4 w-4 mr-2" />
               Copier tout
@@ -251,15 +242,9 @@ export const LicenseGenerator = ({ onSuccess }: LicenseGeneratorProps) => {
                   <div className="flex items-center justify-between gap-4">
                     <div className="flex items-center gap-3 flex-1 min-w-0">
                       <Badge variant="outline">{index + 1}</Badge>
-                      <code className="font-mono text-sm flex-1 truncate">
-                        {key}
-                      </code>
+                      <code className="font-mono text-sm flex-1 truncate">{key}</code>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleCopy(key, index)}
-                    >
+                    <Button variant="ghost" size="sm" onClick={() => handleCopy(key, index)}>
                       {copiedIndex === index ? (
                         <Check className="h-4 w-4 text-green-600" />
                       ) : (
@@ -277,7 +262,11 @@ export const LicenseGenerator = ({ onSuccess }: LicenseGeneratorProps) => {
             <Button variant="outline" onClick={() => setGeneratedKeys([])} className="flex-1">
               Annuler
             </Button>
-            <Button onClick={handleSave} className="flex-1" disabled={isSaving || !productId || generatedKeys.length === 0}>
+            <Button
+              onClick={handleSave}
+              className="flex-1"
+              disabled={isSaving || !productId || generatedKeys.length === 0}
+            >
               {isSaving ? 'Enregistrement...' : 'Sauvegarder les Licenses'}
             </Button>
           </div>
@@ -286,10 +275,3 @@ export const LicenseGenerator = ({ onSuccess }: LicenseGeneratorProps) => {
     </div>
   );
 };
-
-
-
-
-
-
-

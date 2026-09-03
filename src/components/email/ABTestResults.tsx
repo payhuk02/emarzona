@@ -61,21 +61,25 @@ export const ABTestResults = ({ abTestId }: ABTestResultsProps) => {
     <div className="space-y-6">
       {/* En-tête avec gagnant */}
       {hasWinner && (
-        <Card className={cn(
-          'border-2',
-          isAVictory ? 'border-green-500 bg-green-50/50 dark:bg-green-950/20' :
-          'border-blue-500 bg-blue-50/50 dark:bg-blue-950/20'
-        )}>
+        <Card
+          className={cn(
+            'border-2',
+            isAVictory
+              ? 'border-green-500 bg-green-50/50 dark:bg-green-950/20'
+              : 'border-blue-500 bg-blue-50/50 dark:bg-blue-950/20'
+          )}
+        >
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-2">
-                <Trophy className={cn('h-6 w-6', isAVictory ? 'text-green-600' : 'text-blue-600')} />
-                Gagnant : {isAVictory ? variantA.name || 'Variante A' : variantB.name || 'Variante B'}
+                <Trophy
+                  className={cn('h-6 w-6', isAVictory ? 'text-green-600' : 'text-blue-600')}
+                />
+                Gagnant :{' '}
+                {isAVictory ? variantA.name || 'Variante A' : variantB.name || 'Variante B'}
               </CardTitle>
               {abTest.confidence_level && (
-                <Badge variant="outline">
-                  Confiance : {abTest.confidence_level.toFixed(1)}%
-                </Badge>
+                <Badge variant="outline">Confiance : {abTest.confidence_level.toFixed(1)}%</Badge>
               )}
             </div>
           </CardHeader>
@@ -97,9 +101,7 @@ export const ABTestResults = ({ abTestId }: ABTestResultsProps) => {
       {/* Comparaison des variantes */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Variante A */}
-        <Card className={cn(
-          isAVictory && 'border-2 border-green-500'
-        )}>
+        <Card className={cn(isAVictory && 'border-2 border-green-500')}>
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
               <span>{variantA.name || 'Variante A'}</span>
@@ -111,7 +113,7 @@ export const ABTestResults = ({ abTestId }: ABTestResultsProps) => {
               <p className="text-sm text-muted-foreground mb-1">Sujet</p>
               <p className="font-medium">{variantA.subject}</p>
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-sm text-muted-foreground">Envoyés</p>
@@ -124,21 +126,17 @@ export const ABTestResults = ({ abTestId }: ABTestResultsProps) => {
               <div>
                 <p className="text-sm text-muted-foreground">Ouverts</p>
                 <p className="text-2xl font-bold">{resultsA.opened}</p>
-                <p className="text-xs text-muted-foreground">
-                  {openRateA.toFixed(2)}%
-                </p>
+                <p className="text-xs text-muted-foreground">{openRateA.toFixed(2)}%</p>
                 <Progress value={openRateA} className="mt-1 h-2" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Clics</p>
                 <p className="text-2xl font-bold">{resultsA.clicked}</p>
-                <p className="text-xs text-muted-foreground">
-                  {clickRateA.toFixed(2)}%
-                </p>
+                <p className="text-xs text-muted-foreground">{clickRateA.toFixed(2)}%</p>
                 <Progress value={clickRateA} className="mt-1 h-2" />
               </div>
             </div>
-            
+
             {resultsA.revenue > 0 && (
               <div>
                 <p className="text-sm text-muted-foreground">Revenus</p>
@@ -154,9 +152,7 @@ export const ABTestResults = ({ abTestId }: ABTestResultsProps) => {
         </Card>
 
         {/* Variante B */}
-        <Card className={cn(
-          isBVictory && 'border-2 border-blue-500'
-        )}>
+        <Card className={cn(isBVictory && 'border-2 border-blue-500')}>
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
               <span>{variantB.name || 'Variante B'}</span>
@@ -168,7 +164,7 @@ export const ABTestResults = ({ abTestId }: ABTestResultsProps) => {
               <p className="text-sm text-muted-foreground mb-1">Sujet</p>
               <p className="font-medium">{variantB.subject}</p>
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-sm text-muted-foreground">Envoyés</p>
@@ -181,21 +177,17 @@ export const ABTestResults = ({ abTestId }: ABTestResultsProps) => {
               <div>
                 <p className="text-sm text-muted-foreground">Ouverts</p>
                 <p className="text-2xl font-bold">{resultsB.opened}</p>
-                <p className="text-xs text-muted-foreground">
-                  {openRateB.toFixed(2)}%
-                </p>
+                <p className="text-xs text-muted-foreground">{openRateB.toFixed(2)}%</p>
                 <Progress value={openRateB} className="mt-1 h-2" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Clics</p>
                 <p className="text-2xl font-bold">{resultsB.clicked}</p>
-                <p className="text-xs text-muted-foreground">
-                  {clickRateB.toFixed(2)}%
-                </p>
+                <p className="text-xs text-muted-foreground">{clickRateB.toFixed(2)}%</p>
                 <Progress value={clickRateB} className="mt-1 h-2" />
               </div>
             </div>
-            
+
             {resultsB.revenue > 0 && (
               <div>
                 <p className="text-sm text-muted-foreground">Revenus</p>
@@ -240,10 +232,3 @@ export const ABTestResults = ({ abTestId }: ABTestResultsProps) => {
     </div>
   );
 };
-
-
-
-
-
-
-

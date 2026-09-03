@@ -23,7 +23,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import {
   History,
   Plus,
@@ -86,9 +86,7 @@ export const FileVersionManager = ({ fileId, fileName }: FileVersionManagerProps
                 <History className="h-5 w-5" />
                 Versions de {fileName}
               </CardTitle>
-              <CardDescription>
-                Gérez l'historique des versions de ce fichier
-              </CardDescription>
+              <CardDescription>Gérez l'historique des versions de ce fichier</CardDescription>
             </div>
             <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
               <DialogTrigger asChild>
@@ -100,9 +98,7 @@ export const FileVersionManager = ({ fileId, fileName }: FileVersionManagerProps
               <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>Créer une nouvelle version</DialogTitle>
-                  <DialogDescription>
-                    Ajoutez une nouvelle version de ce fichier
-                  </DialogDescription>
+                  <DialogDescription>Ajoutez une nouvelle version de ce fichier</DialogDescription>
                 </DialogHeader>
                 <FileVersionForm
                   fileId={fileId}
@@ -140,11 +136,9 @@ export const FileVersionManager = ({ fileId, fileName }: FileVersionManagerProps
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {versions.map((version) => (
+                {versions.map(version => (
                   <TableRow key={version.id}>
-                    <TableCell className="font-medium">
-                      {version.version_number}
-                    </TableCell>
+                    <TableCell className="font-medium">{version.version_number}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <Tag className="h-4 w-4 text-muted-foreground" />
@@ -159,15 +153,9 @@ export const FileVersionManager = ({ fileId, fileName }: FileVersionManagerProps
                             Stable
                           </Badge>
                         )}
-                        {version.is_beta && (
-                          <Badge variant="secondary">Beta</Badge>
-                        )}
-                        {version.is_alpha && (
-                          <Badge variant="outline">Alpha</Badge>
-                        )}
-                        {version.deprecated_at && (
-                          <Badge variant="destructive">Déprécié</Badge>
-                        )}
+                        {version.is_beta && <Badge variant="secondary">Beta</Badge>}
+                        {version.is_alpha && <Badge variant="outline">Alpha</Badge>}
+                        {version.deprecated_at && <Badge variant="destructive">Déprécié</Badge>}
                       </div>
                     </TableCell>
                     <TableCell>{version.file_size_mb.toFixed(2)} MB</TableCell>
@@ -190,19 +178,18 @@ export const FileVersionManager = ({ fileId, fileName }: FileVersionManagerProps
                     <TableCell className="text-right">
                       <Select>
                         <SelectTrigger>
-
-                            <MoreVertical className="h-4 w-4" />
-                          
-</SelectTrigger>
+                          <MoreVertical className="h-4 w-4" />
+                        </SelectTrigger>
                         <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <SelectItem value="edit" onSelect={() => window.open(version.file_url, '_blank')}
+                          <SelectItem
+                            value="edit"
+                            onSelect={() => window.open(version.file_url, '_blank')}
                           >
                             <Download className="h-4 w-4 mr-2" />
                             Télécharger
                           </SelectItem>
-                          <SelectItem value="delete" onSelect={() => setSelectedVersion(version)}
-                          >
+                          <SelectItem value="delete" onSelect={() => setSelectedVersion(version)}>
                             <AlertCircle className="h-4 w-4 mr-2" />
                             Voir les détails
                           </SelectItem>
@@ -219,17 +206,17 @@ export const FileVersionManager = ({ fileId, fileName }: FileVersionManagerProps
 
       {/* Dialog de détails de version */}
       {selectedVersion && (
-        <Dialog open={!!selectedVersion} onOpenChange={(open) => !open && setSelectedVersion(null)}>
-          <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto
+        <Dialog open={!!selectedVersion} onOpenChange={open => !open && setSelectedVersion(null)}>
+          <DialogContent
+            className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto
             pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))]
-            overscroll-contain -webkit-overflow-scrolling-touch">
+            overscroll-contain -webkit-overflow-scrolling-touch"
+          >
             <DialogHeader>
               <DialogTitle>
                 Version {selectedVersion.version_number} - {selectedVersion.version_label}
               </DialogTitle>
-              <DialogDescription>
-                Détails et notes de version
-              </DialogDescription>
+              <DialogDescription>Détails et notes de version</DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
@@ -294,10 +281,3 @@ export const FileVersionManager = ({ fileId, fileName }: FileVersionManagerProps
     </div>
   );
 };
-
-
-
-
-
-
-

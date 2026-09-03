@@ -42,7 +42,7 @@ export class FormErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // Incrémenter le compteur d'erreurs
-    this.setState((prev) => ({
+    this.setState(prev => ({
       errorCount: prev.errorCount + 1,
     }));
 
@@ -76,7 +76,7 @@ export class FormErrorBoundary extends Component<Props, State> {
       hasError: false,
       error: null,
     });
-    
+
     // Callback de reset personnalisé
     if (this.props.onReset) {
       this.props.onReset();
@@ -96,9 +96,8 @@ export class FormErrorBoundary extends Component<Props, State> {
             <AlertTitle>Erreurs répétées détectées</AlertTitle>
             <AlertDescription className="mt-2 space-y-3">
               <p>
-                Le formulaire{formName && ` "${formName}"`} rencontre des erreurs
-                répétées. Veuillez rafraîchir la page ou contacter le support si
-                le problème persiste.
+                Le formulaire{formName && ` "${formName}"`} rencontre des erreurs répétées. Veuillez
+                rafraîchir la page ou contacter le support si le problème persiste.
               </p>
               <div className="flex gap-2">
                 <Button
@@ -122,15 +121,10 @@ export class FormErrorBoundary extends Component<Props, State> {
           <AlertTitle>Erreur du formulaire</AlertTitle>
           <AlertDescription className="mt-2 space-y-3">
             <p>
-              Une erreur s'est produite{formName && ` dans le formulaire "${formName}"`}.
-              Vos données n'ont pas été perdues.
+              Une erreur s'est produite{formName && ` dans le formulaire "${formName}"`}. Vos
+              données n'ont pas été perdues.
             </p>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={this.handleReset}
-              className="gap-2"
-            >
+            <Button variant="outline" size="sm" onClick={this.handleReset} className="gap-2">
               <RefreshCw className="h-3 w-3" />
               Réessayer
             </Button>
@@ -142,10 +136,3 @@ export class FormErrorBoundary extends Component<Props, State> {
     return children;
   }
 }
-
-
-
-
-
-
-

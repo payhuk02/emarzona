@@ -1,7 +1,7 @@
 /**
  * Générateur Automatique de Certificats pour Commandes Artistes
  * Date: 28 Janvier 2025
- * 
+ *
  * Génère automatiquement un certificat d'authenticité après confirmation de paiement
  */
 
@@ -15,8 +15,8 @@ import type { ArtistCertificateData } from '@/lib/artist-certificate-generator';
  */
 function generateVerificationCode(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Exclut les caractères ambigus
-  let  code= '';
-  for (let  i= 0; i < 8; i++) {
+  let code = '';
+  for (let i = 0; i < 8; i++) {
     code += chars.charAt(Math.floor(Math.random() * chars.length));
   }
   return code;
@@ -84,7 +84,7 @@ export async function autoGenerateArtistCertificate(
       .single();
 
     if (existingCertificate) {
-      logger.info('Certificat déjà existant, retour de l\'existant', {
+      logger.info("Certificat déjà existant, retour de l'existant", {
         certificateId: existingCertificate.id,
       });
       return {
@@ -103,19 +103,21 @@ export async function autoGenerateArtistCertificate(
       const year = new Date().getFullYear();
       const random = Math.random().toString(36).substring(2, 8).toUpperCase();
       const certificateNumber = `ART-${year}-${random}`;
-      
+
       logger.warn('Fonction SQL non disponible, utilisation fallback', {
         certificateNumber,
       });
     }
 
-    const certificateNumber = certNumberData || `ART-${new Date().getFullYear()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+    const certificateNumber =
+      certNumberData ||
+      `ART-${new Date().getFullYear()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
 
     // 6. Générer le code de vérification
     const verificationCode = generateVerificationCode();
 
     // 7. Préparer les données du certificat
-    const  certificateData: ArtistCertificateData = {
+    const certificateData: ArtistCertificateData = {
       certificateNumber,
       artworkTitle: artistProduct.artwork_title,
       artistName: artistProduct.artist_name,
@@ -128,20 +130,16 @@ export async function autoGenerateArtistCertificate(
       purchaseDate: order.created_at || new Date().toISOString(),
       buyerName: (order.customers as any)?.name || (order.customers as any)?.full_name || 'Client',
       buyerEmail: (order.customers as any)?.email || order.customer_email || undefined,
-      certificateType: artistProduct.certificate_of_authenticity 
-        ? 'authenticity' 
+      certificateType: artistProduct.certificate_of_authenticity
+        ? 'authenticity'
         : artistProduct.artwork_edition_type === 'limited_edition'
-        ? 'limited_edition'
-        : 'handmade',
+          ? 'limited_edition'
+          : 'handmade',
       verificationCode,
     };
 
     // 8. Générer et uploader le PDF
-    const { pdfUrl } = await generateAndUploadCertificate(
-      certificateData,
-      orderId,
-      productId
-    );
+    const { pdfUrl } = await generateAndUploadCertificate(certificateData, orderId, productId);
 
     // 9. Créer l'enregistrement dans la base de données
     const { data: certificate, error: insertError } = await supabase
@@ -191,7 +189,6 @@ export async function autoGenerateArtistCertificate(
       certificateId: certificate.id,
       certificateNumber: certificate.certificate_number,
     };
-
   } catch (error) {
     logger.error('Erreur dans autoGenerateArtistCertificate', {
       error: error instanceof Error ? error.message : String(error),
@@ -207,9 +204,7 @@ export async function autoGenerateArtistCertificate(
  * Vérifie si un certificat doit être généré pour une commande
  * (vérifie si le produit artiste a certificate_of_authenticity = true)
  */
-export async function shouldGenerateCertificate(
-  artistProductId: string
-): Promise<boolean> {
+export async function shouldGenerateCertificate(artistProductId: string): Promise<boolean> {
   try {
     const { data: artistProduct, error } = await supabase
       .from('artist_products')
@@ -233,10 +228,3 @@ export async function shouldGenerateCertificate(
     return false;
   }
 }
-
-
-
-
-
-
-

@@ -1,7 +1,7 @@
 /**
  * Product Kits Management Component
  * Date: 27 Janvier 2025
- * 
+ *
  * Gestion des kits produits (création, édition, gestion composants)
  * Design responsive avec cards sur mobile et table sur desktop
  */
@@ -13,7 +13,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import {
   Dialog,
   DialogContent,
@@ -138,7 +145,7 @@ export default function ProductKitsManagement() {
         });
       }
       handleCloseDialog();
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
@@ -152,10 +159,7 @@ export default function ProductKitsManagement() {
     if (!confirm('Êtes-vous sûr de vouloir supprimer ce kit ?')) return;
 
     try {
-      const { error } = await supabase
-        .from('product_kits')
-        .delete()
-        .eq('id', kitId);
+      const { error } = await supabase.from('product_kits').delete().eq('id', kitId);
 
       if (error) throw error;
 
@@ -164,7 +168,7 @@ export default function ProductKitsManagement() {
         title: '✅ Kit supprimé',
         description: 'Le kit a été supprimé avec succès',
       });
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
@@ -176,8 +180,9 @@ export default function ProductKitsManagement() {
 
   // Filtrer les kits par recherche
   const filteredKits = useMemo(() => {
-    return kits.filter((kit) => {
-      const matchesSearch = !debouncedSearch || 
+    return kits.filter(kit => {
+      const matchesSearch =
+        !debouncedSearch ||
         kit.kit_name?.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
         (kit.kit_product as any)?.name?.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
         kit.kit_description?.toLowerCase().includes(debouncedSearch.toLowerCase());
@@ -225,7 +230,7 @@ export default function ProductKitsManagement() {
             type="text"
             placeholder="Rechercher par nom, description ou produit..."
             value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
+            onChange={e => setSearchInput(e.target.value)}
             className="pl-9 pr-9 h-10 sm:h-11 text-sm"
           />
           {searchInput && (
@@ -244,7 +249,7 @@ export default function ProductKitsManagement() {
             </Badge>
           </div>
         </div>
-        <Button 
+        <Button
           onClick={() => handleOpenDialog()}
           className="h-10 sm:h-11 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
         >
@@ -260,7 +265,8 @@ export default function ProductKitsManagement() {
           <CardTitle className="text-lg sm:text-xl">Liste des kits</CardTitle>
           <CardDescription className="text-xs sm:text-sm">
             {filteredKits.length} kit{filteredKits.length > 1 ? 's' : ''}
-            {debouncedSearch && ` trouvé${filteredKits.length > 1 ? 's' : ''} pour "${debouncedSearch}"`}
+            {debouncedSearch &&
+              ` trouvé${filteredKits.length > 1 ? 's' : ''} pour "${debouncedSearch}"`}
           </CardDescription>
         </CardHeader>
         <CardContent className="p-4 sm:p-6 pt-0">
@@ -292,7 +298,7 @@ export default function ProductKitsManagement() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredKits.map((kit) => (
+                    {filteredKits.map(kit => (
                       <TableRow key={kit.id}>
                         <TableCell>
                           <div className="flex items-center gap-2">
@@ -317,19 +323,27 @@ export default function ProductKitsManagement() {
                               }).format(kit.kit_price)}
                             </span>
                           ) : (
-                            <span className="text-muted-foreground text-sm">Calculé automatiquement</span>
+                            <span className="text-muted-foreground text-sm">
+                              Calculé automatiquement
+                            </span>
                           )}
                         </TableCell>
                         <TableCell>
                           <div className="flex flex-wrap gap-1 text-xs">
                             {kit.requires_assembly && (
-                              <Badge variant="outline" className="w-fit">Assemblage</Badge>
+                              <Badge variant="outline" className="w-fit">
+                                Assemblage
+                              </Badge>
                             )}
                             {kit.track_kit_inventory && (
-                              <Badge variant="outline" className="w-fit">Inventaire</Badge>
+                              <Badge variant="outline" className="w-fit">
+                                Inventaire
+                              </Badge>
                             )}
                             {kit.auto_allocate && (
-                              <Badge variant="outline" className="w-fit">Auto</Badge>
+                              <Badge variant="outline" className="w-fit">
+                                Auto
+                              </Badge>
                             )}
                           </div>
                         </TableCell>
@@ -340,18 +354,10 @@ export default function ProductKitsManagement() {
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleOpenDialog(kit)}
-                            >
+                            <Button variant="ghost" size="sm" onClick={() => handleOpenDialog(kit)}>
                               <Edit className="h-4 w-4" />
                             </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleDelete(kit.id)}
-                            >
+                            <Button variant="ghost" size="sm" onClick={() => handleDelete(kit.id)}>
                               <Trash2 className="h-4 w-4 text-destructive" />
                             </Button>
                           </div>
@@ -364,7 +370,7 @@ export default function ProductKitsManagement() {
 
               {/* Mobile Card View */}
               <div className="md:hidden space-y-4">
-                {filteredKits.map((kit) => (
+                {filteredKits.map(kit => (
                   <Card
                     key={kit.id}
                     className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-md transition-all duration-300"
@@ -383,7 +389,10 @@ export default function ProductKitsManagement() {
                               {(kit.kit_product as any)?.name || 'N/A'}
                             </p>
                           </div>
-                          <Badge variant={kit.is_active ? 'default' : 'secondary'} className="text-xs shrink-0">
+                          <Badge
+                            variant={kit.is_active ? 'default' : 'secondary'}
+                            className="text-xs shrink-0"
+                          >
                             {kit.is_active ? 'Actif' : 'Inactif'}
                           </Badge>
                         </div>
@@ -402,16 +411,24 @@ export default function ProductKitsManagement() {
                           )}
                         </div>
 
-                        {(kit.requires_assembly || kit.track_kit_inventory || kit.auto_allocate) && (
+                        {(kit.requires_assembly ||
+                          kit.track_kit_inventory ||
+                          kit.auto_allocate) && (
                           <div className="flex flex-wrap gap-1 text-xs">
                             {kit.requires_assembly && (
-                              <Badge variant="outline" className="text-xs">Assemblage</Badge>
+                              <Badge variant="outline" className="text-xs">
+                                Assemblage
+                              </Badge>
                             )}
                             {kit.track_kit_inventory && (
-                              <Badge variant="outline" className="text-xs">Inventaire</Badge>
+                              <Badge variant="outline" className="text-xs">
+                                Inventaire
+                              </Badge>
                             )}
                             {kit.auto_allocate && (
-                              <Badge variant="outline" className="text-xs">Auto</Badge>
+                              <Badge variant="outline" className="text-xs">
+                                Auto
+                              </Badge>
                             )}
                           </div>
                         )}
@@ -463,22 +480,26 @@ export default function ProductKitsManagement() {
             <div className="grid gap-3 sm:gap-4 py-3 sm:py-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="kit_product_id" className="text-xs sm:text-sm">ID Produit principal *</Label>
+                  <Label htmlFor="kit_product_id" className="text-xs sm:text-sm">
+                    ID Produit principal *
+                  </Label>
                   <Input
                     id="kit_product_id"
                     value={formData.kit_product_id || ''}
-                    onChange={(e) => setFormData({ ...formData, kit_product_id: e.target.value })}
+                    onChange={e => setFormData({ ...formData, kit_product_id: e.target.value })}
                     placeholder="UUID du produit"
                     className="text-sm h-9 sm:h-10"
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="kit_name" className="text-xs sm:text-sm">Nom du kit *</Label>
+                  <Label htmlFor="kit_name" className="text-xs sm:text-sm">
+                    Nom du kit *
+                  </Label>
                   <Input
                     id="kit_name"
                     value={formData.kit_name || ''}
-                    onChange={(e) => setFormData({ ...formData, kit_name: e.target.value })}
+                    onChange={e => setFormData({ ...formData, kit_name: e.target.value })}
                     className="text-sm h-9 sm:h-10"
                     required
                   />
@@ -486,7 +507,9 @@ export default function ProductKitsManagement() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="kit_type" className="text-xs sm:text-sm">Type de kit *</Label>
+                <Label htmlFor="kit_type" className="text-xs sm:text-sm">
+                  Type de kit *
+                </Label>
                 <Select
                   value={formData.kit_type || 'fixed'}
                   onValueChange={(value: string) => setFormData({ ...formData, kit_type: value })}
@@ -505,11 +528,13 @@ export default function ProductKitsManagement() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="kit_description" className="text-xs sm:text-sm">Description</Label>
+                <Label htmlFor="kit_description" className="text-xs sm:text-sm">
+                  Description
+                </Label>
                 <Textarea
                   id="kit_description"
                   value={formData.kit_description || ''}
-                  onChange={(e) => setFormData({ ...formData, kit_description: e.target.value })}
+                  onChange={e => setFormData({ ...formData, kit_description: e.target.value })}
                   rows={3}
                   className="text-sm resize-none"
                 />
@@ -518,24 +543,35 @@ export default function ProductKitsManagement() {
               {formData.kit_type === 'flexible' && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="min_items" className="text-xs sm:text-sm">Minimum d'items</Label>
+                    <Label htmlFor="min_items" className="text-xs sm:text-sm">
+                      Minimum d'items
+                    </Label>
                     <Input
                       id="min_items"
                       type="number"
                       min="1"
                       value={formData.min_items || 1}
-                      onChange={(e) => setFormData({ ...formData, min_items: parseInt(e.target.value) || 1 })}
+                      onChange={e =>
+                        setFormData({ ...formData, min_items: parseInt(e.target.value) || 1 })
+                      }
                       className="text-sm h-9 sm:h-10"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="max_items" className="text-xs sm:text-sm">Maximum d'items</Label>
+                    <Label htmlFor="max_items" className="text-xs sm:text-sm">
+                      Maximum d'items
+                    </Label>
                     <Input
                       id="max_items"
                       type="number"
                       min="1"
                       value={formData.max_items || ''}
-                      onChange={(e) => setFormData({ ...formData, max_items: parseInt(e.target.value) || undefined })}
+                      onChange={e =>
+                        setFormData({
+                          ...formData,
+                          max_items: parseInt(e.target.value) || undefined,
+                        })
+                      }
                       className="text-sm h-9 sm:h-10"
                     />
                   </div>
@@ -544,20 +580,29 @@ export default function ProductKitsManagement() {
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="kit_price" className="text-xs sm:text-sm">Prix du kit (optionnel)</Label>
+                  <Label htmlFor="kit_price" className="text-xs sm:text-sm">
+                    Prix du kit (optionnel)
+                  </Label>
                   <Input
                     id="kit_price"
                     type="number"
                     step="0.01"
                     min="0"
                     value={formData.kit_price || ''}
-                    onChange={(e) => setFormData({ ...formData, kit_price: parseFloat(e.target.value) || undefined })}
+                    onChange={e =>
+                      setFormData({
+                        ...formData,
+                        kit_price: parseFloat(e.target.value) || undefined,
+                      })
+                    }
                     placeholder="Auto si vide"
                     className="text-sm h-9 sm:h-10"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="discount_percentage" className="text-xs sm:text-sm">Réduction (%)</Label>
+                  <Label htmlFor="discount_percentage" className="text-xs sm:text-sm">
+                    Réduction (%)
+                  </Label>
                   <Input
                     id="discount_percentage"
                     type="number"
@@ -565,19 +610,28 @@ export default function ProductKitsManagement() {
                     min="0"
                     max="100"
                     value={formData.discount_percentage || 0}
-                    onChange={(e) => setFormData({ ...formData, discount_percentage: parseFloat(e.target.value) || 0 })}
+                    onChange={e =>
+                      setFormData({
+                        ...formData,
+                        discount_percentage: parseFloat(e.target.value) || 0,
+                      })
+                    }
                     className="text-sm h-9 sm:h-10"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="discount_amount" className="text-xs sm:text-sm">Réduction (montant)</Label>
+                  <Label htmlFor="discount_amount" className="text-xs sm:text-sm">
+                    Réduction (montant)
+                  </Label>
                   <Input
                     id="discount_amount"
                     type="number"
                     step="0.01"
                     min="0"
                     value={formData.discount_amount || 0}
-                    onChange={(e) => setFormData({ ...formData, discount_amount: parseFloat(e.target.value) || 0 })}
+                    onChange={e =>
+                      setFormData({ ...formData, discount_amount: parseFloat(e.target.value) || 0 })
+                    }
                     className="text-sm h-9 sm:h-10"
                   />
                 </div>
@@ -586,22 +640,33 @@ export default function ProductKitsManagement() {
               {formData.requires_assembly && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="assembly_time_minutes" className="text-xs sm:text-sm">Temps d'assemblage (minutes)</Label>
+                    <Label htmlFor="assembly_time_minutes" className="text-xs sm:text-sm">
+                      Temps d'assemblage (minutes)
+                    </Label>
                     <Input
                       id="assembly_time_minutes"
                       type="number"
                       min="0"
                       value={formData.assembly_time_minutes || ''}
-                      onChange={(e) => setFormData({ ...formData, assembly_time_minutes: parseInt(e.target.value) || undefined })}
+                      onChange={e =>
+                        setFormData({
+                          ...formData,
+                          assembly_time_minutes: parseInt(e.target.value) || undefined,
+                        })
+                      }
                       className="text-sm h-9 sm:h-10"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="assembly_instructions" className="text-xs sm:text-sm">Instructions d'assemblage</Label>
+                    <Label htmlFor="assembly_instructions" className="text-xs sm:text-sm">
+                      Instructions d'assemblage
+                    </Label>
                     <Input
                       id="assembly_instructions"
                       value={formData.assembly_instructions || ''}
-                      onChange={(e) => setFormData({ ...formData, assembly_instructions: e.target.value })}
+                      onChange={e =>
+                        setFormData({ ...formData, assembly_instructions: e.target.value })
+                      }
                       placeholder="URL ou référence"
                       className="text-sm h-9 sm:h-10"
                     />
@@ -614,47 +679,61 @@ export default function ProductKitsManagement() {
                   <Switch
                     id="is_active"
                     checked={formData.is_active ?? true}
-                    onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
+                    onCheckedChange={checked => setFormData({ ...formData, is_active: checked })}
                   />
-                  <Label htmlFor="is_active" className="text-xs sm:text-sm">Actif</Label>
+                  <Label htmlFor="is_active" className="text-xs sm:text-sm">
+                    Actif
+                  </Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Switch
                     id="requires_assembly"
                     checked={formData.requires_assembly ?? false}
-                    onCheckedChange={(checked) => setFormData({ ...formData, requires_assembly: checked })}
+                    onCheckedChange={checked =>
+                      setFormData({ ...formData, requires_assembly: checked })
+                    }
                   />
-                  <Label htmlFor="requires_assembly" className="text-xs sm:text-sm">Nécessite assemblage</Label>
+                  <Label htmlFor="requires_assembly" className="text-xs sm:text-sm">
+                    Nécessite assemblage
+                  </Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Switch
                     id="track_kit_inventory"
                     checked={formData.track_kit_inventory ?? true}
-                    onCheckedChange={(checked) => setFormData({ ...formData, track_kit_inventory: checked })}
+                    onCheckedChange={checked =>
+                      setFormData({ ...formData, track_kit_inventory: checked })
+                    }
                   />
-                  <Label htmlFor="track_kit_inventory" className="text-xs sm:text-sm">Suivre inventaire kit</Label>
+                  <Label htmlFor="track_kit_inventory" className="text-xs sm:text-sm">
+                    Suivre inventaire kit
+                  </Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Switch
                     id="auto_allocate"
                     checked={formData.auto_allocate ?? false}
-                    onCheckedChange={(checked) => setFormData({ ...formData, auto_allocate: checked })}
+                    onCheckedChange={checked =>
+                      setFormData({ ...formData, auto_allocate: checked })
+                    }
                   />
-                  <Label htmlFor="auto_allocate" className="text-xs sm:text-sm">Allocation automatique</Label>
+                  <Label htmlFor="auto_allocate" className="text-xs sm:text-sm">
+                    Allocation automatique
+                  </Label>
                 </div>
               </div>
             </div>
             <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
-              <Button 
-                type="button" 
-                variant="outline" 
+              <Button
+                type="button"
+                variant="outline"
                 onClick={handleCloseDialog}
                 className="w-full sm:w-auto h-9 sm:h-10 text-sm"
               >
                 Annuler
               </Button>
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 disabled={createKit.isPending}
                 className="w-full sm:w-auto h-9 sm:h-10 text-sm bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
               >
@@ -667,10 +746,3 @@ export default function ProductKitsManagement() {
     </div>
   );
 }
-
-
-
-
-
-
-

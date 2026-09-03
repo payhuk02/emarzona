@@ -106,7 +106,7 @@ export const StockAlertForm = ({
         notify_on_low_stock: formData.notify_on_low_stock,
       });
       onSuccess();
-    } catch ( _error: any) {
+    } catch (_error: any) {
       // L'erreur est déjà gérée par le hook
     }
   };
@@ -117,14 +117,14 @@ export const StockAlertForm = ({
         <Label htmlFor="product_id">Produit *</Label>
         <Select
           value={formData.product_id}
-          onValueChange={(value) => setFormData({ ...formData, product_id: value, variant_id: '' })}
+          onValueChange={value => setFormData({ ...formData, product_id: value, variant_id: '' })}
           required
         >
           <SelectTrigger id="product_id">
             <SelectValue placeholder="Sélectionner un produit" />
           </SelectTrigger>
           <SelectContent>
-            {products?.map((product) => (
+            {products?.map(product => (
               <SelectItem key={product.id} value={product.id}>
                 {product.name}
               </SelectItem>
@@ -138,14 +138,16 @@ export const StockAlertForm = ({
           <Label htmlFor="variant_id">Variante (optionnel)</Label>
           <Select
             value={formData.variant_id || '__none__'}
-            onValueChange={(value) => setFormData({ ...formData, variant_id: value === '__none__' ? '' : value })}
+            onValueChange={value =>
+              setFormData({ ...formData, variant_id: value === '__none__' ? '' : value })
+            }
           >
             <SelectTrigger id="variant_id">
               <SelectValue placeholder="Toutes les variantes" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="__none__">Toutes les variantes</SelectItem>
-              {variants.map((variant) => (
+              {variants.map(variant => (
                 <SelectItem key={variant.id} value={variant.id}>
                   {variant.name}
                 </SelectItem>
@@ -162,7 +164,7 @@ export const StockAlertForm = ({
           type="number"
           min="1"
           value={formData.min_quantity_required}
-          onChange={(e) => setFormData({ ...formData, min_quantity_required: e.target.value })}
+          onChange={e => setFormData({ ...formData, min_quantity_required: e.target.value })}
         />
         <p className="text-xs text-muted-foreground">
           Alerte déclenchée lorsque le stock atteint cette quantité
@@ -179,7 +181,7 @@ export const StockAlertForm = ({
           </div>
           <Switch
             checked={formData.notify_on_back_in_stock}
-            onCheckedChange={(checked) =>
+            onCheckedChange={checked =>
               setFormData({ ...formData, notify_on_back_in_stock: checked })
             }
           />
@@ -194,9 +196,7 @@ export const StockAlertForm = ({
           </div>
           <Switch
             checked={formData.notify_on_low_stock}
-            onCheckedChange={(checked) =>
-              setFormData({ ...formData, notify_on_low_stock: checked })
-            }
+            onCheckedChange={checked => setFormData({ ...formData, notify_on_low_stock: checked })}
           />
         </div>
       </div>
@@ -206,19 +206,10 @@ export const StockAlertForm = ({
           Annuler
         </Button>
         <Button type="submit" disabled={createAlert.isPending}>
-          {createAlert.isPending && (
-            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-          )}
+          {createAlert.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
           Créer l'alerte
         </Button>
       </div>
     </form>
   );
 };
-
-
-
-
-
-
-

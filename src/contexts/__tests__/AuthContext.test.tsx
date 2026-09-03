@@ -11,16 +11,20 @@ import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 vi.mock('@/integrations/supabase/client', () => {
   const mockSupabase = {
     auth: {
-      onAuthStateChange: vi.fn((callback) => {
+      onAuthStateChange: vi.fn(callback => {
         // Simuler un changement d'état
         setTimeout(() => {
-          callback('SIGNED_IN', {
-            user: {
-              id: 'test-user-id',
-              email: 'test@example.com',
-              user_metadata: { username: 'testuser' },
-            },
-          } as any, null);
+          callback(
+            'SIGNED_IN',
+            {
+              user: {
+                id: 'test-user-id',
+                email: 'test@example.com',
+                user_metadata: { username: 'testuser' },
+              },
+            } as any,
+            null
+          );
         }, 0);
         return { data: { subscription: { unsubscribe: vi.fn() } } };
       }),
@@ -92,10 +96,3 @@ describe('AuthContext', () => {
     expect(supabase.auth.signOut).toHaveBeenCalled();
   });
 });
-
-
-
-
-
-
-

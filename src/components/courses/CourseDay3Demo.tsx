@@ -1,10 +1,10 @@
 /**
  * 🧪 DEMO - JOUR 3 - Composants Courses
- * 
+ *
  * Ce fichier démontre l'utilisation des composants :
  * 1. EnrollmentHistory
  * 2. BulkCourseUpdate
- * 
+ *
  * Date : 29 Octobre 2025
  */
 
@@ -16,7 +16,7 @@ import { EnrollmentHistory, type EnrollmentEvent } from './EnrollmentHistory';
 import { BulkCourseUpdate, type BulkUpdateCourse, type BulkUpdateChange } from './BulkCourseUpdate';
 
 // Données de test - Événements
-const  sampleEvents: EnrollmentEvent[] = [
+const sampleEvents: EnrollmentEvent[] = [
   {
     id: 'EVT-001',
     enrollmentId: 'ENR-12345',
@@ -156,7 +156,7 @@ const  sampleEvents: EnrollmentEvent[] = [
 ];
 
 // Données de test - Cours pour bulk update
-const  sampleCoursesForUpdate: BulkUpdateCourse[] = [
+const sampleCoursesForUpdate: BulkUpdateCourse[] = [
   {
     id: 'CRS-001',
     name: 'React & TypeScript Avancé',
@@ -242,14 +242,14 @@ const  sampleCoursesForUpdate: BulkUpdateCourse[] = [
 /**
  * Composant de démonstration principale
  */
-export const CourseDay3Demo : React.FC = () => {
+export const CourseDay3Demo: React.FC = () => {
   const [events] = useState<EnrollmentEvent[]>(sampleEvents);
   const [courses, setCourses] = useState<BulkUpdateCourse[]>(sampleCoursesForUpdate);
 
   // Handlers pour EnrollmentHistory
   const handleRefresh = () => {
     logger.info('Refresh events');
-    alert('Rafraîchissement de l\'historique...');
+    alert("Rafraîchissement de l'historique...");
   };
 
   const handleViewDetails = (enrollmentId: string) => {
@@ -262,8 +262,8 @@ export const CourseDay3Demo : React.FC = () => {
     logger.info('Bulk update', { courseIds, changesCount: Object.keys(changes).length });
 
     // Simuler la mise à jour
-    setCourses((prevCourses) =>
-      prevCourses.map((course) => {
+    setCourses(prevCourses =>
+      prevCourses.map(course => {
         if (!courseIds.includes(course.id)) return course;
 
         const updatedCourse = { ...course };
@@ -312,9 +312,7 @@ export const CourseDay3Demo : React.FC = () => {
     <div className="p-6 max-w-[1600px] mx-auto space-y-8">
       {/* Header */}
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold">
-          🎓 Démonstration - Composants Courses Jour 3
-        </h1>
+        <h1 className="text-3xl font-bold">🎓 Démonstration - Composants Courses Jour 3</h1>
         <p className="text-muted-foreground">
           EnrollmentHistory & BulkCourseUpdate - Historique et mises à jour groupées
         </p>
@@ -352,11 +350,3 @@ export const CourseDay3Demo : React.FC = () => {
 };
 
 export default CourseDay3Demo;
-
-
-
-
-
-
-
-

@@ -19,7 +19,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -107,7 +107,7 @@ function OptionEditor({
   const handleRemoveValue = (value: string) => {
     onUpdate({
       ...option,
-      values: option.values.filter((v) => v !== value),
+      values: option.values.filter(v => v !== value),
     });
   };
 
@@ -124,20 +124,25 @@ function OptionEditor({
           <Grid3x3 className="h-4 w-4 text-muted-foreground" />
           <Input
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={e => setName(e.target.value)}
             onBlur={handleNameChange}
             className="max-w-[200px] font-medium"
             placeholder="Nom de l'option"
           />
         </div>
-        <Button variant="ghost" size="sm" onClick={onDelete} aria-label={`Supprimer l'option ${option.name}`}>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onDelete}
+          aria-label={`Supprimer l'option ${option.name}`}
+        >
           <Trash2 className="h-4 w-4 text-destructive" />
         </Button>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Existing values */}
         <div className="flex flex-wrap gap-2">
-          {option.values.map((value) => (
+          {option.values.map(value => (
             <Badge key={value} variant="secondary" className="gap-2 pr-1">
               {value}
               <button
@@ -154,11 +159,15 @@ function OptionEditor({
         <div className="flex gap-2">
           <Input
             value={newValue}
-            onChange={(e) => setNewValue(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleAddValue()}
+            onChange={e => setNewValue(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleAddValue()}
             placeholder={`Ajouter une valeur (ex: ${option.name === 'Couleur' ? 'Rouge' : option.name === 'Taille' ? 'M' : 'Standard'})`}
           />
-          <Button onClick={handleAddValue} size="sm" aria-label={`Ajouter une valeur à l'option ${option.name}`}>
+          <Button
+            onClick={handleAddValue}
+            size="sm"
+            aria-label={`Ajouter une valeur à l'option ${option.name}`}
+          >
             <Plus className="h-4 w-4" />
           </Button>
         </div>
@@ -188,7 +197,7 @@ export function VariantManager({
 
   // Add new option
   const handleAddOption = () => {
-    if (newOptionName.trim() && !options.some((o) => o.name === newOptionName.trim())) {
+    if (newOptionName.trim() && !options.some(o => o.name === newOptionName.trim())) {
       onOptionsChange([
         ...options,
         {
@@ -204,18 +213,16 @@ export function VariantManager({
 
   // Update option
   const handleUpdateOption = (optionId: string, updatedOption: VariantOption) => {
-    onOptionsChange(options.map((o) => (o.id === optionId ? updatedOption : o)));
+    onOptionsChange(options.map(o => (o.id === optionId ? updatedOption : o)));
   };
 
   // Delete option
   const handleDeleteOption = (optionId: string) => {
-    onOptionsChange(options.filter((o) => o.id !== optionId));
+    onOptionsChange(options.filter(o => o.id !== optionId));
     // Also remove all variants using this option
-    const option = options.find((o) => o.id === optionId);
+    const option = options.find(o => o.id === optionId);
     if (option) {
-      onVariantsChange(
-        variants.filter((v) => !Object.keys(v.option_values).includes(option.name))
-      );
+      onVariantsChange(variants.filter(v => !Object.keys(v.option_values).includes(option.name)));
     }
   };
 
@@ -226,22 +233,22 @@ export function VariantManager({
     // Cartesian product of all option values
     const generateCombinations = (opts: VariantOption[]): Record<string, string>[] => {
       if (opts.length === 0) return [{}];
-      
+
       const [first, ...rest] = opts;
       const restCombinations = generateCombinations(rest);
-      
-      const  combinations: Record<string, string>[] = [];
+
+      const combinations: Record<string, string>[] = [];
       for (const value of first.values) {
         for (const combo of restCombinations) {
           combinations.push({ [first.name]: value, ...combo });
         }
       }
-      
+
       return combinations;
     };
 
     const combinations = generateCombinations(options);
-    const  newVariants: ProductVariant[] = combinations.map((combo, index) => ({
+    const newVariants: ProductVariant[] = combinations.map((combo, index) => ({
       id: `var_${Date.now()}_${index}`,
       sku: '',
       barcode: '',
@@ -257,17 +264,17 @@ export function VariantManager({
 
   // Edit variant
   const handleSaveVariant = (variant: ProductVariant) => {
-    onVariantsChange(variants.map((v) => (v.id === variant.id ? variant : v)));
+    onVariantsChange(variants.map(v => (v.id === variant.id ? variant : v)));
     setEditingVariant(null);
   };
 
   // Delete variant(s)
   const handleDeleteVariants = () => {
     if (deleteVariantId) {
-      onVariantsChange(variants.filter((v) => v.id !== deleteVariantId));
+      onVariantsChange(variants.filter(v => v.id !== deleteVariantId));
       setDeleteVariantId(null);
     } else if (selectedVariants.length > 0) {
-      onVariantsChange(variants.filter((v) => !selectedVariants.includes(v.id)));
+      onVariantsChange(variants.filter(v => !selectedVariants.includes(v.id)));
       setSelectedVariants([]);
     }
   };
@@ -275,7 +282,7 @@ export function VariantManager({
   // Bulk actions
   const handleBulkPriceAdjustment = (adjustment: number) => {
     onVariantsChange(
-      variants.map((v) =>
+      variants.map(v =>
         selectedVariants.includes(v.id) ? { ...v, price_adjustment: adjustment } : v
       )
     );
@@ -284,7 +291,7 @@ export function VariantManager({
 
   const handleBulkToggleActive = (isActive: boolean) => {
     onVariantsChange(
-      variants.map((v) => (selectedVariants.includes(v.id) ? { ...v, is_active: isActive } : v))
+      variants.map(v => (selectedVariants.includes(v.id) ? { ...v, is_active: isActive } : v))
     );
     setSelectedVariants([]);
   };
@@ -314,7 +321,12 @@ export function VariantManager({
               Définissez les options (couleur, taille, etc.)
             </p>
           </div>
-          <Button onClick={() => setShowAddOption(true)} variant="outline" size="sm" className="gap-2">
+          <Button
+            onClick={() => setShowAddOption(true)}
+            variant="outline"
+            size="sm"
+            className="gap-2"
+          >
             <Plus className="h-4 w-4" />
             Ajouter Option
           </Button>
@@ -329,11 +341,11 @@ export function VariantManager({
             </div>
           ) : (
             <div className="space-y-4">
-              {options.map((option) => (
+              {options.map(option => (
                 <OptionEditor
                   key={option.id}
                   option={option}
-                  onUpdate={(updated) => handleUpdateOption(option.id, updated)}
+                  onUpdate={updated => handleUpdateOption(option.id, updated)}
                   onDelete={() => handleDeleteOption(option.id)}
                 />
               ))}
@@ -354,11 +366,7 @@ export function VariantManager({
           <div className="flex gap-2">
             {selectedVariants.length > 0 && (
               <Select>
-                <SelectTrigger>
-
-                    Actions ({selectedVariants.length})
-                  
-</SelectTrigger>
+                <SelectTrigger>Actions ({selectedVariants.length})</SelectTrigger>
                 <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                   <SelectItem value="edit" onSelect={() => handleBulkToggleActive(true)}>
                     <Check className="h-4 w-4 mr-2" />
@@ -369,7 +377,9 @@ export function VariantManager({
                     Désactiver
                   </SelectItem>
                   <DropdownMenuSeparator />
-                  <SelectItem value="copy" onSelect={() => setDeleteVariantId('bulk')}
+                  <SelectItem
+                    value="copy"
+                    onSelect={() => setDeleteVariantId('bulk')}
                     className="text-destructive"
                   >
                     <Trash2 className="h-4 w-4 mr-2" />
@@ -380,7 +390,7 @@ export function VariantManager({
             )}
             <Button
               onClick={handleGenerateVariants}
-              disabled={options.length === 0 || options.some((o) => o.values.length === 0)}
+              disabled={options.length === 0 || options.some(o => o.values.length === 0)}
               size="sm"
               className="gap-2"
             >
@@ -408,8 +418,8 @@ export function VariantManager({
                     <TableHead className="w-[40px]">
                       <Checkbox
                         checked={selectedVariants.length === variants.length}
-                        onCheckedChange={(checked) => {
-                          setSelectedVariants(checked ? variants.map((v) => v.id) : []);
+                        onCheckedChange={checked => {
+                          setSelectedVariants(checked ? variants.map(v => v.id) : []);
                         }}
                       />
                     </TableHead>
@@ -422,7 +432,7 @@ export function VariantManager({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {variants.map((variant) => {
+                  {variants.map(variant => {
                     const stockStatus = getStockStatus(variant);
                     const finalPrice = basePrice + variant.price_adjustment;
 
@@ -432,11 +442,11 @@ export function VariantManager({
                         <TableCell>
                           <Checkbox
                             checked={selectedVariants.includes(variant.id)}
-                            onCheckedChange={(checked) => {
+                            onCheckedChange={checked => {
                               setSelectedVariants(
                                 checked
                                   ? [...selectedVariants, variant.id]
-                                  : selectedVariants.filter((id) => id !== variant.id)
+                                  : selectedVariants.filter(id => id !== variant.id)
                               );
                             }}
                           />
@@ -463,9 +473,7 @@ export function VariantManager({
                         {/* SKU / Barcode */}
                         <TableCell>
                           <div className="space-y-1">
-                            {variant.sku && (
-                              <p className="text-sm font-mono">{variant.sku}</p>
-                            )}
+                            {variant.sku && <p className="text-sm font-mono">{variant.sku}</p>}
                             {variant.barcode && (
                               <p className="text-xs text-muted-foreground font-mono">
                                 {variant.barcode}
@@ -487,9 +495,7 @@ export function VariantManager({
                               <p
                                 className={cn(
                                   'text-xs',
-                                  variant.price_adjustment > 0
-                                    ? 'text-green-600'
-                                    : 'text-red-600'
+                                  variant.price_adjustment > 0 ? 'text-green-600' : 'text-red-600'
                                 )}
                               >
                                 {variant.price_adjustment > 0 ? '+' : ''}
@@ -507,8 +513,8 @@ export function VariantManager({
                                 stockStatus === 'out_of_stock'
                                   ? 'destructive'
                                   : stockStatus === 'low_stock'
-                                  ? 'secondary'
-                                  : 'default'
+                                    ? 'secondary'
+                                    : 'default'
                               }
                               className="gap-1"
                             >
@@ -531,17 +537,17 @@ export function VariantManager({
                         <TableCell className="text-right">
                           <Select>
                             <SelectTrigger>
-
-                                <MoreVertical className="h-4 w-4" />
-                              
-</SelectTrigger>
+                              <MoreVertical className="h-4 w-4" />
+                            </SelectTrigger>
                             <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                               <SelectItem value="view" onSelect={() => setEditingVariant(variant)}>
                                 <Edit className="h-4 w-4 mr-2" />
                                 Modifier
                               </SelectItem>
                               <DropdownMenuSeparator />
-                              <SelectItem value="export" onSelect={() => setDeleteVariantId(variant.id)}
+                              <SelectItem
+                                value="export"
+                                onSelect={() => setDeleteVariantId(variant.id)}
                                 className="text-destructive"
                               >
                                 <Trash2 className="h-4 w-4 mr-2" />
@@ -575,9 +581,9 @@ export function VariantManager({
               <Input
                 id="option-name"
                 value={newOptionName}
-                onChange={(e) => setNewOptionName(e.target.value)}
+                onChange={e => setNewOptionName(e.target.value)}
                 placeholder="ex: Couleur, Taille, Matériau"
-                onKeyDown={(e) => e.key === 'Enter' && handleAddOption()}
+                onKeyDown={e => e.key === 'Enter' && handleAddOption()}
               />
             </div>
           </div>
@@ -607,9 +613,7 @@ export function VariantManager({
                   <Input
                     id="edit-sku"
                     value={editingVariant.sku || ''}
-                    onChange={(e) =>
-                      setEditingVariant({ ...editingVariant, sku: e.target.value })
-                    }
+                    onChange={e => setEditingVariant({ ...editingVariant, sku: e.target.value })}
                     placeholder="SKU-001"
                   />
                 </div>
@@ -618,7 +622,7 @@ export function VariantManager({
                   <Input
                     id="edit-barcode"
                     value={editingVariant.barcode || ''}
-                    onChange={(e) =>
+                    onChange={e =>
                       setEditingVariant({ ...editingVariant, barcode: e.target.value })
                     }
                     placeholder="123456789"
@@ -633,7 +637,7 @@ export function VariantManager({
                     id="edit-price"
                     type="number"
                     value={editingVariant.price_adjustment}
-                    onChange={(e) =>
+                    onChange={e =>
                       setEditingVariant({
                         ...editingVariant,
                         price_adjustment: Number(e.target.value),
@@ -653,7 +657,7 @@ export function VariantManager({
                     type="number"
                     min="0"
                     value={editingVariant.quantity}
-                    onChange={(e) =>
+                    onChange={e =>
                       setEditingVariant({ ...editingVariant, quantity: Number(e.target.value) })
                     }
                   />
@@ -668,7 +672,7 @@ export function VariantManager({
                     type="number"
                     min="0"
                     value={editingVariant.low_stock_threshold || ''}
-                    onChange={(e) =>
+                    onChange={e =>
                       setEditingVariant({
                         ...editingVariant,
                         low_stock_threshold: e.target.value ? Number(e.target.value) : undefined,
@@ -682,7 +686,7 @@ export function VariantManager({
                   <Input
                     id="edit-image"
                     value={editingVariant.image_url || ''}
-                    onChange={(e) =>
+                    onChange={e =>
                       setEditingVariant({ ...editingVariant, image_url: e.target.value })
                     }
                     placeholder="https://..."
@@ -694,7 +698,7 @@ export function VariantManager({
                 <Checkbox
                   id="edit-active"
                   checked={editingVariant.is_active}
-                  onCheckedChange={(checked) =>
+                  onCheckedChange={checked =>
                     setEditingVariant({ ...editingVariant, is_active: !!checked })
                   }
                 />

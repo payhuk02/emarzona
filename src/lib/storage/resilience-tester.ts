@@ -61,7 +61,9 @@ export class ResilienceTester {
       const localStorageWorks = retrieved && retrieved.test === 'resilience_test';
 
       // Tester la création d'une sauvegarde d'urgence
-      const backupId = await backupService.createEmergencyBackup('Test de résilience - panne Supabase');
+      const backupId = await backupService.createEmergencyBackup(
+        'Test de résilience - panne Supabase'
+      );
 
       // Restaurer Supabase
       this.restoreSupabase();
@@ -85,15 +87,16 @@ export class ResilienceTester {
           localStorageWorked: localStorageWorks,
           emergencyBackupCreated: !!backupId,
           syncAfterRecovery: syncWorked,
-          syncResults
+          syncResults,
         },
-        recommendations: success ? [] : [
-          'Vérifier la configuration du stockage local',
-          'Améliorer la détection de panne Supabase',
-          'Optimiser la synchronisation post-récupération'
-        ]
+        recommendations: success
+          ? []
+          : [
+              'Vérifier la configuration du stockage local',
+              'Améliorer la détection de panne Supabase',
+              'Optimiser la synchronisation post-récupération',
+            ],
       };
-
     } catch (error) {
       logger.error('Erreur test panne Supabase:', error);
       return {
@@ -102,7 +105,7 @@ export class ResilienceTester {
         duration: Date.now() - startTime,
         timestamp: new Date().toISOString(),
         details: { error: error.message },
-        recommendations: ['Corriger les erreurs de gestion des pannes Supabase']
+        recommendations: ['Corriger les erreurs de gestion des pannes Supabase'],
       };
     }
   }
@@ -141,14 +144,15 @@ export class ResilienceTester {
         details: {
           healthStatus,
           testDataStored: true,
-          integrityCheck: success
+          integrityCheck: success,
         },
-        recommendations: success ? [] : [
-          'Implémenter une meilleure validation d\'intégrité des données',
-          'Ajouter des checksums pour la détection de corruption'
-        ]
+        recommendations: success
+          ? []
+          : [
+              "Implémenter une meilleure validation d'intégrité des données",
+              'Ajouter des checksums pour la détection de corruption',
+            ],
       };
-
     } catch (error) {
       logger.error('Erreur test corruption IndexedDB:', error);
       return {
@@ -157,7 +161,7 @@ export class ResilienceTester {
         duration: Date.now() - startTime,
         timestamp: new Date().toISOString(),
         details: { error: error.message },
-        recommendations: ['Améliorer la gestion des erreurs IndexedDB']
+        recommendations: ['Améliorer la gestion des erreurs IndexedDB'],
       };
     }
   }
@@ -204,14 +208,16 @@ export class ResilienceTester {
           baseOperationTime: baseTime,
           latencyOperationTime: latencyTime,
           operationSucceeded,
-          latencySimulated: 5000
+          latencySimulated: 5000,
         },
-        recommendations: latencyTime > 10000 ? [
-          'Implémenter un timeout plus agressif pour les opérations réseau',
-          'Améliorer la stratégie de cache local pendant les périodes de latence'
-        ] : []
+        recommendations:
+          latencyTime > 10000
+            ? [
+                'Implémenter un timeout plus agressif pour les opérations réseau',
+                'Améliorer la stratégie de cache local pendant les périodes de latence',
+              ]
+            : [],
       };
-
     } catch (error) {
       logger.error('Erreur test latence réseau:', error);
       return {
@@ -220,7 +226,7 @@ export class ResilienceTester {
         duration: Date.now() - startTime,
         timestamp: new Date().toISOString(),
         details: { error: error.message },
-        recommendations: ['Améliorer la gestion des timeouts réseau']
+        recommendations: ['Améliorer la gestion des timeouts réseau'],
       };
     }
   }
@@ -266,7 +272,7 @@ export class ResilienceTester {
         if (conflict) {
           await syncService.resolveConflict({
             ...conflict,
-            strategy: 'merge'
+            strategy: 'merge',
           });
         }
       }
@@ -287,14 +293,15 @@ export class ResilienceTester {
           conflictDetected,
           conflictResolved,
           finalData,
-          conflictsFound: conflicts.length
+          conflictsFound: conflicts.length,
         },
-        recommendations: !success ? [
-          'Améliorer la détection des conflits',
-          'Optimiser les stratégies de résolution automatique'
-        ] : []
+        recommendations: !success
+          ? [
+              'Améliorer la détection des conflits',
+              'Optimiser les stratégies de résolution automatique',
+            ]
+          : [],
       };
-
     } catch (error) {
       logger.error('Erreur test conflits sync:', error);
       return {
@@ -303,7 +310,7 @@ export class ResilienceTester {
         duration: Date.now() - startTime,
         timestamp: new Date().toISOString(),
         details: { error: error.message },
-        recommendations: ['Corriger la gestion des conflits de synchronisation']
+        recommendations: ['Corriger la gestion des conflits de synchronisation'],
       };
     }
   }
@@ -355,14 +362,15 @@ export class ResilienceTester {
           systemRecovered: recovered,
           syncRecovered,
           healthAfter,
-          syncResults
+          syncResults,
         },
-        recommendations: !success ? [
-          'Améliorer le système de sauvegarde d\'urgence',
-          'Optimiser la récupération automatique'
-        ] : []
+        recommendations: !success
+          ? [
+              "Améliorer le système de sauvegarde d'urgence",
+              'Optimiser la récupération automatique',
+            ]
+          : [],
       };
-
     } catch (error) {
       logger.error('Erreur test récupération auto:', error);
       return {
@@ -371,7 +379,7 @@ export class ResilienceTester {
         duration: Date.now() - startTime,
         timestamp: new Date().toISOString(),
         details: { error: error.message },
-        recommendations: ['Corriger les mécanismes de récupération automatique']
+        recommendations: ['Corriger les mécanismes de récupération automatique'],
       };
     }
   }
@@ -392,9 +400,7 @@ export class ResilienceTester {
       // Créer beaucoup d'éléments
       const createPromises = [];
       for (let i = 0; i < testItems; i++) {
-        createPromises.push(
-          hybridStorage.set('load_test', `item_${i}`, { ...testData, id: i })
-        );
+        createPromises.push(hybridStorage.set('load_test', `item_${i}`, { ...testData, id: i }));
       }
 
       const createStart = Date.now();
@@ -404,9 +410,7 @@ export class ResilienceTester {
       // Lire tous les éléments
       const readPromises = [];
       for (let i = 0; i < testItems; i++) {
-        readPromises.push(
-          hybridStorage.get('load_test', `item_${i}`)
-        );
+        readPromises.push(hybridStorage.get('load_test', `item_${i}`));
       }
 
       const readStart = Date.now();
@@ -440,15 +444,17 @@ export class ResilienceTester {
           readTime,
           syncTime,
           allReadSuccessful,
-          syncResults
+          syncResults,
         },
-        recommendations: createTime > 5000 || readTime > 5000 ? [
-          'Optimiser les performances d\'écriture',
-          'Améliorer les performances de lecture',
-          'Considérer l\'implémentation d\'un cache plus efficace'
-        ] : []
+        recommendations:
+          createTime > 5000 || readTime > 5000
+            ? [
+                "Optimiser les performances d'écriture",
+                'Améliorer les performances de lecture',
+                "Considérer l'implémentation d'un cache plus efficace",
+              ]
+            : [],
       };
-
     } catch (error) {
       logger.error('Erreur test charge stockage:', error);
       return {
@@ -457,7 +463,7 @@ export class ResilienceTester {
         duration: Date.now() - startTime,
         timestamp: new Date().toISOString(),
         details: { error: error.message },
-        recommendations: ['Améliorer la gestion de charge du système de stockage']
+        recommendations: ['Améliorer la gestion de charge du système de stockage'],
       };
     }
   }
@@ -470,40 +476,40 @@ export class ResilienceTester {
       name: 'Emarzona Resilience Test Suite',
       description: 'Suite complète de tests de résilience du système de stockage',
       tests: [],
-      results: []
+      results: [],
     };
 
     const tests: ResilienceTest[] = [
       {
         name: 'Supabase Outage',
         description: 'Test de panne complète de Supabase',
-        run: () => this.testSupabaseOutage()
+        run: () => this.testSupabaseOutage(),
       },
       {
         name: 'IndexedDB Corruption',
         description: 'Test de corruption des données IndexedDB',
-        run: () => this.testIndexedDBCorruption()
+        run: () => this.testIndexedDBCorruption(),
       },
       {
         name: 'Network Latency',
         description: 'Test de latence réseau élevée',
-        run: () => this.testNetworkLatency()
+        run: () => this.testNetworkLatency(),
       },
       {
         name: 'Sync Conflicts',
         description: 'Test des conflits de synchronisation',
-        run: () => this.testSyncConflicts()
+        run: () => this.testSyncConflicts(),
       },
       {
         name: 'Auto Recovery',
         description: 'Test de récupération automatique',
-        run: () => this.testAutoRecovery()
+        run: () => this.testAutoRecovery(),
       },
       {
         name: 'Storage Load',
         description: 'Test de charge du système de stockage',
-        run: () => this.testStorageLoad()
-      }
+        run: () => this.testStorageLoad(),
+      },
     ];
 
     suite.tests = tests;
@@ -515,7 +521,9 @@ export class ResilienceTester {
         logger.info(`Exécution test: ${test.name}`);
         const result = await test.run();
         suite.results.push(result);
-        logger.info(`Test ${test.name}: ${result.success ? 'RÉUSSI' : 'ÉCHOUÉ'} (${result.duration}ms)`);
+        logger.info(
+          `Test ${test.name}: ${result.success ? 'RÉUSSI' : 'ÉCHOUÉ'} (${result.duration}ms)`
+        );
       } catch (error) {
         logger.error(`Erreur exécution test ${test.name}:`, error);
         suite.results.push({
@@ -524,7 +532,7 @@ export class ResilienceTester {
           duration: 0,
           timestamp: new Date().toISOString(),
           details: { error: error.message },
-          recommendations: ['Corriger les erreurs d\'exécution des tests']
+          recommendations: ["Corriger les erreurs d'exécution des tests"],
         });
       }
 
@@ -544,7 +552,7 @@ export class ResilienceTester {
     // Sauvegarder les méthodes originales
     this.originalSupabaseMethods = {
       from: supabase.from,
-      auth: supabase.auth
+      auth: supabase.auth,
     };
 
     // Remplacer par des mocks qui échouent
@@ -553,7 +561,7 @@ export class ResilienceTester {
       insert: () => ({ error: new Error('Simulated Supabase outage') }),
       update: () => ({ error: new Error('Simulated Supabase outage') }),
       delete: () => ({ error: new Error('Simulated Supabase outage') }),
-      upsert: () => ({ error: new Error('Simulated Supabase outage') })
+      upsert: () => ({ error: new Error('Simulated Supabase outage') }),
     })) as any;
 
     logger.info('Panne Supabase simulée activée');
@@ -585,13 +593,13 @@ export class ResilienceTester {
 
       originalMethods.forEach(method => {
         const originalMethod = result[method];
-        result[method] = ((...methodArgs: any[]) => {
-          return new Promise((resolve) => {
+        result[method] = (...methodArgs: any[]) => {
+          return new Promise(resolve => {
             setTimeout(() => {
               resolve(originalMethod.apply(result, methodArgs));
             }, delayMs);
           });
-        });
+        };
       });
 
       return result;
@@ -610,7 +618,11 @@ export class ResilienceTester {
   /**
    * Simuler un conflit distant
    */
-  private async simulateRemoteConflict(collection: string, id: string, remoteData: any): Promise<void> {
+  private async simulateRemoteConflict(
+    collection: string,
+    id: string,
+    remoteData: any
+  ): Promise<void> {
     // Injecter manuellement un conflit pour les tests
     await hybridStorage.set(collection, `${id}_remote_conflict`, {
       id,
@@ -621,8 +633,8 @@ export class ResilienceTester {
         version: 2,
         source: 'supabase',
         syncStatus: 'synced',
-        checksum: 'conflict_checksum'
-      }
+        checksum: 'conflict_checksum',
+      },
     });
   }
 
@@ -639,7 +651,8 @@ export class ResilienceTester {
   generateResilienceReport(suite: ResilienceTestSuite): string {
     const passed = suite.results.filter(r => r.success).length;
     const failed = suite.results.length - passed;
-    const avgDuration = suite.results.reduce((sum, r) => sum + r.duration, 0) / suite.results.length;
+    const avgDuration =
+      suite.results.reduce((sum, r) => sum + r.duration, 0) / suite.results.length;
 
     let report = `# Rapport de Résilience Emarzona\n\n`;
     report += `**Date:** ${new Date().toLocaleString('fr-FR')}\n\n`;

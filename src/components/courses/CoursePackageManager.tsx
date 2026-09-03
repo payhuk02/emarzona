@@ -117,7 +117,7 @@ export interface CoursePackage {
 export interface CoursePackageManagerProps {
   /** Liste des packages */
   packages: CoursePackage[];
-  
+
   /** Liste de tous les cours disponibles */
   availableCourses: Array<{
     id: string;
@@ -126,25 +126,25 @@ export interface CoursePackageManagerProps {
     duration: number;
     thumbnail?: string;
   }>;
-  
+
   /** Callback de création de package */
   onCreate?: (packageData: Partial<CoursePackage>) => void;
-  
+
   /** Callback de mise à jour */
   onUpdate?: (packageId: string, packageData: Partial<CoursePackage>) => void;
-  
+
   /** Callback de suppression */
   onDelete?: (packageId: string) => void;
-  
+
   /** Callback de duplication */
   onDuplicate?: (packageId: string) => void;
-  
+
   /** Callback d'activation/désactivation */
   onToggleActive?: (packageId: string, isActive: boolean) => void;
-  
+
   /** Chargement en cours */
   isLoading?: boolean;
-  
+
   /** Classe CSS personnalisée */
   className?: string;
 }
@@ -152,18 +152,18 @@ export interface CoursePackageManagerProps {
 /**
  * Mapping des types de packages
  */
-const  PACKAGE_TYPE_LABELS: Record<PackageType, { label: string; icon: React.ElementType }> = {
+const PACKAGE_TYPE_LABELS: Record<PackageType, { label: string; icon: React.ElementType }> = {
   bundle: { label: 'Bundle', icon: Package },
-  learning_path: { label: 'Parcours d\'apprentissage', icon: Target },
+  learning_path: { label: "Parcours d'apprentissage", icon: Target },
   subscription: { label: 'Abonnement', icon: Calendar },
 };
 
 /**
  * CoursePackageManager - Gestionnaire de packages/bundles de cours
- * 
+ *
  * @example
  * ```tsx
- * <CoursePackageManager 
+ * <CoursePackageManager
  *   packages={myPackages}
  *   availableCourses={allCourses}
  *   onCreate={(data) => createPackage(data)}
@@ -171,7 +171,7 @@ const  PACKAGE_TYPE_LABELS: Record<PackageType, { label: string; icon: React.Ele
  * />
  * ```
  */
-export const CoursePackageManager : React.FC<CoursePackageManagerProps> = ({
+export const CoursePackageManager: React.FC<CoursePackageManagerProps> = ({
   packages,
   availableCourses,
   onCreate,
@@ -232,10 +232,10 @@ export const CoursePackageManager : React.FC<CoursePackageManagerProps> = ({
 
   // Ajouter un cours au package
   const addCourseToPackage = (courseId: string) => {
-    const course = availableCourses.find((c) => c.id === courseId);
+    const course = availableCourses.find(c => c.id === courseId);
     if (!course) return;
 
-    const  newCourse: PackageCourse = {
+    const newCourse: PackageCourse = {
       id: course.id,
       name: course.name,
       price: course.price,
@@ -245,7 +245,7 @@ export const CoursePackageManager : React.FC<CoursePackageManagerProps> = ({
       order: (formData.courses?.length || 0) + 1,
     };
 
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
       courses: [...(prev.courses || []), newCourse],
     }));
@@ -253,15 +253,15 @@ export const CoursePackageManager : React.FC<CoursePackageManagerProps> = ({
 
   // Retirer un cours du package
   const removeCourseFromPackage = (courseId: string) => {
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
-      courses: prev.courses?.filter((c) => c.id !== courseId) || [],
+      courses: prev.courses?.filter(c => c.id !== courseId) || [],
     }));
   };
 
   // Ajouter un tier
   const addTier = () => {
-    const  newTier: PackageTier = {
+    const newTier: PackageTier = {
       id: `tier-${Date.now()}`,
       name: '',
       description: '',
@@ -272,7 +272,7 @@ export const CoursePackageManager : React.FC<CoursePackageManagerProps> = ({
       isPopular: false,
     };
 
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
       tiers: [...(prev.tiers || []), newTier],
     }));
@@ -280,19 +280,17 @@ export const CoursePackageManager : React.FC<CoursePackageManagerProps> = ({
 
   // Mettre à jour un tier
   const updateTier = (tierId: string, updates: Partial<PackageTier>) => {
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
-      tiers: prev.tiers?.map((tier) =>
-        tier.id === tierId ? { ...tier, ...updates } : tier
-      ) || [],
+      tiers: prev.tiers?.map(tier => (tier.id === tierId ? { ...tier, ...updates } : tier)) || [],
     }));
   };
 
   // Supprimer un tier
   const removeTier = (tierId: string) => {
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
-      tiers: prev.tiers?.filter((t) => t.id !== tierId) || [],
+      tiers: prev.tiers?.filter(t => t.id !== tierId) || [],
     }));
   };
 
@@ -338,9 +336,7 @@ export const CoursePackageManager : React.FC<CoursePackageManagerProps> = ({
             </div>
             <div>
               <p className="text-xs text-muted-foreground">Actifs</p>
-              <p className="text-2xl font-bold">
-                {packages.filter((p) => p.isActive).length}
-              </p>
+              <p className="text-2xl font-bold">{packages.filter(p => p.isActive).length}</p>
             </div>
           </div>
         </Card>
@@ -376,18 +372,23 @@ export const CoursePackageManager : React.FC<CoursePackageManagerProps> = ({
 
       {/* Liste des packages */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {packages.map((pkg) => {
+        {packages.map(pkg => {
           const Icon = PACKAGE_TYPE_LABELS[pkg.type].icon;
-          const avgPrice = pkg.tiers.length > 0
-            ? pkg.tiers.reduce((sum, t) => sum + t.price, 0) / pkg.tiers.length
-            : pkg.totalValue;
+          const avgPrice =
+            pkg.tiers.length > 0
+              ? pkg.tiers.reduce((sum, t) => sum + t.price, 0) / pkg.tiers.length
+              : pkg.totalValue;
 
           return (
             <Card key={pkg.id} className={cn('overflow-hidden', !pkg.isActive && 'opacity-60')}>
               {/* Thumbnail */}
               {pkg.thumbnail && (
                 <div className="h-32 bg-muted overflow-hidden">
-                  <LazyImage src={pkg.thumbnail} alt={pkg.name} className="w-full h-full object-cover" />
+                  <LazyImage
+                    src={pkg.thumbnail}
+                    alt={pkg.name}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
               )}
 
@@ -403,7 +404,7 @@ export const CoursePackageManager : React.FC<CoursePackageManagerProps> = ({
                     </div>
                     <Switch
                       checked={pkg.isActive}
-                      onCheckedChange={(checked) => onToggleActive?.(pkg.id, checked)}
+                      onCheckedChange={checked => onToggleActive?.(pkg.id, checked)}
                     />
                   </div>
                   <h3 className="font-bold text-lg">{pkg.name}</h3>
@@ -451,10 +452,11 @@ export const CoursePackageManager : React.FC<CoursePackageManagerProps> = ({
                 {pkg.tiers.length > 0 && (
                   <div className="space-y-1">
                     <p className="text-xs font-medium text-muted-foreground">
-                      {pkg.tiers.length} tier{pkg.tiers.length > 1 ? 's' : ''} disponible{pkg.tiers.length > 1 ? 's' : ''}
+                      {pkg.tiers.length} tier{pkg.tiers.length > 1 ? 's' : ''} disponible
+                      {pkg.tiers.length > 1 ? 's' : ''}
                     </p>
                     <div className="flex flex-wrap gap-1">
-                      {pkg.tiers.map((tier) => (
+                      {pkg.tiers.map(tier => (
                         <Badge
                           key={tier.id}
                           variant={tier.isPopular ? 'default' : 'secondary'}
@@ -470,22 +472,19 @@ export const CoursePackageManager : React.FC<CoursePackageManagerProps> = ({
 
                 {/* Actions */}
                 <div className="flex gap-2 pt-2">
-                  <Button variant="outline" size="sm" className="flex-1" onClick={() => openDialog(pkg)}>
-                    <Edit className="h-3 w-3 mr-1" />
-                    Éditer
-                  </Button>
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => onDuplicate?.(pkg.id)}
+                    className="flex-1"
+                    onClick={() => openDialog(pkg)}
                   >
+                    <Edit className="h-3 w-3 mr-1" />
+                    Éditer
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => onDuplicate?.(pkg.id)}>
                     <Copy className="h-3 w-3" />
                   </Button>
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => onDelete?.(pkg.id)}
-                  >
+                  <Button variant="destructive" size="sm" onClick={() => onDelete?.(pkg.id)}>
                     <Trash2 className="h-3 w-3" />
                   </Button>
                 </div>
@@ -521,9 +520,7 @@ export const CoursePackageManager : React.FC<CoursePackageManagerProps> = ({
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-3xl max-h-[90vh]">
           <DialogHeader>
-            <DialogTitle>
-              {editingPackage ? 'Éditer le package' : 'Nouveau package'}
-            </DialogTitle>
+            <DialogTitle>{editingPackage ? 'Éditer le package' : 'Nouveau package'}</DialogTitle>
             <DialogDescription>
               Configurez les cours, tiers et tarification de votre package
             </DialogDescription>
@@ -538,7 +535,7 @@ export const CoursePackageManager : React.FC<CoursePackageManagerProps> = ({
                   <Input
                     id="name"
                     value={formData.name || ''}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    onChange={e => setFormData({ ...formData, name: e.target.value })}
                     placeholder="Ex: Pack Développeur Full-Stack"
                   />
                 </div>
@@ -548,7 +545,7 @@ export const CoursePackageManager : React.FC<CoursePackageManagerProps> = ({
                   <Textarea
                     id="description"
                     value={formData.description || ''}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    onChange={e => setFormData({ ...formData, description: e.target.value })}
                     placeholder="Décrivez votre package..."
                     rows={3}
                   />
@@ -559,7 +556,9 @@ export const CoursePackageManager : React.FC<CoursePackageManagerProps> = ({
                     <Label htmlFor="type">Type de package</Label>
                     <Select
                       value={formData.type}
-                      onValueChange={(value: PackageType) => setFormData({ ...formData, type: value })}
+                      onValueChange={(value: PackageType) =>
+                        setFormData({ ...formData, type: value })
+                      }
                     >
                       <SelectTrigger>
                         <SelectValue />
@@ -578,7 +577,7 @@ export const CoursePackageManager : React.FC<CoursePackageManagerProps> = ({
                     <Label htmlFor="currency">Devise</Label>
                     <Select
                       value={formData.currency}
-                      onValueChange={(value) => setFormData({ ...formData, currency: value })}
+                      onValueChange={value => setFormData({ ...formData, currency: value })}
                     >
                       <SelectTrigger>
                         <SelectValue />
@@ -605,8 +604,8 @@ export const CoursePackageManager : React.FC<CoursePackageManagerProps> = ({
                     </SelectTrigger>
                     <SelectContent>
                       {availableCourses
-                        .filter((c) => !formData.courses?.find((pc) => pc.id === c.id))
-                        .map((course) => (
+                        .filter(c => !formData.courses?.find(pc => pc.id === c.id))
+                        .map(course => (
                           <SelectItem key={course.id} value={course.id}>
                             {course.name}
                           </SelectItem>
@@ -617,7 +616,7 @@ export const CoursePackageManager : React.FC<CoursePackageManagerProps> = ({
 
                 {formData.courses && formData.courses.length > 0 && (
                   <div className="space-y-2">
-                    {formData.courses.map((course) => (
+                    {formData.courses.map(course => (
                       <Card key={course.id} className="p-3">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
@@ -688,7 +687,7 @@ export const CoursePackageManager : React.FC<CoursePackageManagerProps> = ({
                                 <Label>Nom du tier</Label>
                                 <Input
                                   value={tier.name}
-                                  onChange={(e) => updateTier(tier.id, { name: e.target.value })}
+                                  onChange={e => updateTier(tier.id, { name: e.target.value })}
                                   placeholder="Ex: Basic, Pro, Premium"
                                 />
                               </div>
@@ -697,7 +696,7 @@ export const CoursePackageManager : React.FC<CoursePackageManagerProps> = ({
                                 <Input
                                   type="number"
                                   value={tier.price}
-                                  onChange={(e) =>
+                                  onChange={e =>
                                     updateTier(tier.id, { price: parseFloat(e.target.value) || 0 })
                                   }
                                 />
@@ -708,7 +707,7 @@ export const CoursePackageManager : React.FC<CoursePackageManagerProps> = ({
                               <Label>Description</Label>
                               <Textarea
                                 value={tier.description}
-                                onChange={(e) => updateTier(tier.id, { description: e.target.value })}
+                                onChange={e => updateTier(tier.id, { description: e.target.value })}
                                 rows={2}
                               />
                             </div>
@@ -717,7 +716,7 @@ export const CoursePackageManager : React.FC<CoursePackageManagerProps> = ({
                               <div className="flex items-center gap-2">
                                 <Switch
                                   checked={tier.isPopular}
-                                  onCheckedChange={(checked) =>
+                                  onCheckedChange={checked =>
                                     updateTier(tier.id, { isPopular: checked })
                                   }
                                 />
@@ -747,7 +746,10 @@ export const CoursePackageManager : React.FC<CoursePackageManagerProps> = ({
             <Button variant="outline" onClick={closeDialog}>
               Annuler
             </Button>
-            <Button onClick={handleSave} disabled={!formData.name || (formData.courses?.length || 0) === 0}>
+            <Button
+              onClick={handleSave}
+              disabled={!formData.name || (formData.courses?.length || 0) === 0}
+            >
               {editingPackage ? 'Mettre à jour' : 'Créer'}
             </Button>
           </DialogFooter>
@@ -760,11 +762,3 @@ export const CoursePackageManager : React.FC<CoursePackageManagerProps> = ({
 CoursePackageManager.displayName = 'CoursePackageManager';
 
 export default CoursePackageManager;
-
-
-
-
-
-
-
-

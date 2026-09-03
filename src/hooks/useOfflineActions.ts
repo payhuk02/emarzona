@@ -62,7 +62,7 @@ export const useOfflineActions = () => {
       // Options
       {
         priority: 5, // Haute priorité pour les commandes
-        fallbackValue: { success: true, offline: true }
+        fallbackValue: { success: true, offline: true },
       }
     );
   };
@@ -86,7 +86,7 @@ export const useOfflineActions = () => {
       },
       {
         priority: 4, // Priorité moyenne pour les mises à jour produit
-        fallbackValue: { success: true, offline: true }
+        fallbackValue: { success: true, offline: true },
       }
     );
   };
@@ -110,7 +110,7 @@ export const useOfflineActions = () => {
       },
       {
         priority: 3, // Priorité normale pour le panier
-        fallbackValue: { success: true, offline: true }
+        fallbackValue: { success: true, offline: true },
       }
     );
   };
@@ -118,13 +118,11 @@ export const useOfflineActions = () => {
   /**
    * Crée une boutique (admin seulement)
    */
-  const createStore = async (
-    storeData: {
-      name: string;
-      description?: string;
-      owner_id: string;
-    }
-  ): Promise<{ success: boolean; offline: boolean }> => {
+  const createStore = async (storeData: {
+    name: string;
+    description?: string;
+    owner_id: string;
+  }): Promise<{ success: boolean; offline: boolean }> => {
     return executeAction(
       { success: true, offline: false },
       'create_store',
@@ -137,7 +135,7 @@ export const useOfflineActions = () => {
       },
       {
         priority: 5, // Haute priorité
-        fallbackValue: { success: true, offline: true }
+        fallbackValue: { success: true, offline: true },
       }
     );
   };
@@ -145,13 +143,11 @@ export const useOfflineActions = () => {
   /**
    * Crée un utilisateur (admin seulement)
    */
-  const createUser = async (
-    userData: {
-      email: string;
-      full_name?: string;
-      role?: string;
-    }
-  ): Promise<{ success: boolean; offline: boolean }> => {
+  const createUser = async (userData: {
+    email: string;
+    full_name?: string;
+    role?: string;
+  }): Promise<{ success: boolean; offline: boolean }> => {
     return executeAction(
       { success: true, offline: false },
       'create_user',
@@ -164,7 +160,7 @@ export const useOfflineActions = () => {
       },
       {
         priority: 4, // Haute priorité
-        fallbackValue: { success: true, offline: true }
+        fallbackValue: { success: true, offline: true },
       }
     );
   };
@@ -210,10 +206,10 @@ export const useOfflineActions = () => {
     // Utilitaires
     showOfflineMessage: () => {
       toast({
-        title: "Mode hors ligne",
-        description: "Votre action sera synchronisée automatiquement",
+        title: 'Mode hors ligne',
+        description: 'Votre action sera synchronisée automatiquement',
       });
-    }
+    },
   };
 };
 

@@ -57,10 +57,11 @@ export default function AdminSecurity() {
         setUri(data.totp.uri);
       }
     } catch (e: unknown) {
-      const errorMsg = e instanceof Error ? e.message : String(e) || 'Erreur lors de l\'enrollment 2FA';
+      const errorMsg =
+        e instanceof Error ? e.message : String(e) || "Erreur lors de l'enrollment 2FA";
       setError(errorMsg);
       toast({
-        title: 'Erreur d\'activation',
+        title: "Erreur d'activation",
         description: errorMsg,
         variant: 'destructive',
       });
@@ -73,7 +74,7 @@ export default function AdminSecurity() {
     if (!factorId) {
       toast({
         title: 'Erreur',
-        description: 'Aucun facteur en cours d\'enrollment',
+        description: "Aucun facteur en cours d'enrollment",
         variant: 'destructive',
       });
       return;
@@ -94,7 +95,8 @@ export default function AdminSecurity() {
         if (error.message?.includes('not found') || error.message?.includes('challenge ID')) {
           toast({
             title: 'Facteur expiré',
-            description: 'Le QR code a expiré. Veuillez cliquer sur "Commencer l\'activation" pour en générer un nouveau.',
+            description:
+              'Le QR code a expiré. Veuillez cliquer sur "Commencer l\'activation" pour en générer un nouveau.',
             variant: 'destructive',
           });
           // Reset pour permettre un nouvel enrollment
@@ -107,14 +109,16 @@ export default function AdminSecurity() {
         }
         toast({
           title: 'Code invalide',
-          description: error.message || 'Le code entré est incorrect. Vérifiez que l\'heure de votre appareil est correcte.',
+          description:
+            error.message ||
+            "Le code entré est incorrect. Vérifiez que l'heure de votre appareil est correcte.",
           variant: 'destructive',
         });
         return;
       }
       toast({
         title: '2FA activée',
-        description: 'L\'authentification à deux facteurs a été activée avec succès',
+        description: "L'authentification à deux facteurs a été activée avec succès",
       });
       const aal = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
       setIsAAL2(aal.data?.currentLevel === 'aal2');
@@ -172,79 +176,99 @@ export default function AdminSecurity() {
                 )}
                 {!qr && !secret ? (
                   <Button onClick={startEnroll} disabled={enrolling} className="min-h-[44px]">
-                    {enrolling ? 'Activation en cours...' : 'Commencer l\'activation'}
+                    {enrolling ? 'Activation en cours...' : "Commencer l'activation"}
                   </Button>
                 ) : (
                   <div className="space-y-4">
                     <div>
                       <p className="text-sm text-muted-foreground mb-3">
-                        Scannez ce QR code avec votre application d'authentification (Google Authenticator, Authy, Microsoft Authenticator, etc.), puis entrez le code à 6 chiffres généré.
+                        Scannez ce QR code avec votre application d'authentification (Google
+                        Authenticator, Authy, Microsoft Authenticator, etc.), puis entrez le code à
+                        6 chiffres généré.
                       </p>
                       <Alert className="mb-3">
                         <AlertCircle className="h-4 w-4" />
                         <AlertDescription className="text-xs">
-                          ⚠️ <strong>Important :</strong> Ce QR code expire après quelques minutes. Si vous obtenez une erreur "not found", cliquez à nouveau sur "Commencer l'activation" pour générer un nouveau QR code.
+                          ⚠️ <strong>Important :</strong> Ce QR code expire après quelques minutes.
+                          Si vous obtenez une erreur "not found", cliquez à nouveau sur "Commencer
+                          l'activation" pour générer un nouveau QR code.
                         </AlertDescription>
                       </Alert>
                       {qr ? (
                         <div className="flex justify-center mb-4">
-                          <img 
-                            src={qr} 
-                            alt="QR Code 2FA" 
-                            className="w-64 h-64 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white p-2" 
+                          <img
+                            src={qr}
+                            alt="QR Code 2FA"
+                            className="w-64 h-64 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white p-2"
                           />
                         </div>
                       ) : (
                         <Alert>
                           <AlertCircle className="h-4 w-4" />
                           <AlertDescription>
-                            Le QR code n'a pas pu être généré. Utilisez le secret ci-dessous pour l'ajout manuel.
+                            Le QR code n'a pas pu être généré. Utilisez le secret ci-dessous pour
+                            l'ajout manuel.
                           </AlertDescription>
                         </Alert>
                       )}
                     </div>
-                    
+
                     {secret && (
                       <div className="space-y-2">
-                        <p className="text-sm font-medium">Secret de secours (pour ajout manuel) :</p>
+                        <p className="text-sm font-medium">
+                          Secret de secours (pour ajout manuel) :
+                        </p>
                         <div className="flex items-center gap-2">
-                          <Input 
-                            value={secret} 
-                            readOnly 
+                          <Input
+                            value={secret}
+                            readOnly
                             className="font-mono text-sm min-h-[44px]"
                           />
-                          <Button 
-                            variant="outline" 
+                          <Button
+                            variant="outline"
                             size="sm"
                             onClick={copySecret}
                             className="min-h-[44px] min-w-[44px]"
                           >
-                            {secretCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                            {secretCopied ? (
+                              <Check className="h-4 w-4" />
+                            ) : (
+                              <Copy className="h-4 w-4" />
+                            )}
                           </Button>
                         </div>
                         <p className="text-xs text-muted-foreground">
-                          Si le scan QR ne fonctionne pas, copiez ce secret et ajoutez-le manuellement dans votre app d'authentification.
+                          Si le scan QR ne fonctionne pas, copiez ce secret et ajoutez-le
+                          manuellement dans votre app d'authentification.
                         </p>
                       </div>
                     )}
 
                     <div className="pt-4 border-t space-y-3">
-                      <p className="text-sm font-medium mb-2">Entrez le code à 6 chiffres de votre application :</p>
+                      <p className="text-sm font-medium mb-2">
+                        Entrez le code à 6 chiffres de votre application :
+                      </p>
                       <div className="flex items-center gap-2">
-                        <Input 
-                          placeholder="000000" 
-                          value={verifyCode} 
-                          onChange={e => setVerifyCode(e.target.value.replace(/\D/g, '').slice(0, 6))} 
+                        <Input
+                          placeholder="000000"
+                          value={verifyCode}
+                          onChange={e =>
+                            setVerifyCode(e.target.value.replace(/\D/g, '').slice(0, 6))
+                          }
                           className="w-48 font-mono text-center text-lg tracking-widest min-h-[44px]"
                           maxLength={6}
                         />
-                        <Button onClick={verifyEnroll} disabled={!verifyCode || verifyCode.length !== 6} className="min-h-[44px]">
+                        <Button
+                          onClick={verifyEnroll}
+                          disabled={!verifyCode || verifyCode.length !== 6}
+                          className="min-h-[44px]"
+                        >
                           Vérifier
                         </Button>
                       </div>
                       <div className="flex justify-center">
-                        <Button 
-                          variant="outline" 
+                        <Button
+                          variant="outline"
                           size="sm"
                           onClick={startEnroll}
                           disabled={enrolling}
@@ -264,11 +288,3 @@ export default function AdminSecurity() {
     </AdminLayout>
   );
 }
-
-
-
-
-
-
-
-

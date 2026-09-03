@@ -1,19 +1,19 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { 
-  CreditCard, 
-  TrendingUp, 
-  DollarSign, 
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import {
+  CreditCard,
+  TrendingUp,
+  DollarSign,
   Clock,
   CheckCircle,
   XCircle,
   AlertCircle,
   BarChart3,
   Calendar,
-  Users
-} from "lucide-react";
-import { Payment } from "@/hooks/usePayments";
-import { Transaction } from "@/hooks/useTransactions";
+  Users,
+} from 'lucide-react';
+import { Payment } from '@/hooks/usePayments';
+import { Transaction } from '@/hooks/useTransactions';
 
 interface PaymentStatsProps {
   payments: Payment[];
@@ -27,24 +27,31 @@ const PaymentStats = ({ payments, filteredPayments, transactions }: PaymentStats
   const pendingPayments = payments.filter(p => p.status === 'pending').length;
   const failedPayments = payments.filter(p => p.status === 'failed').length;
   const refundedPayments = payments.filter(p => p.status === 'refunded').length;
-  
-  const totalRevenue = payments.filter(p => p.status === 'completed').reduce((sum, p) => sum + p.amount, 0);
+
+  const totalRevenue = payments
+    .filter(p => p.status === 'completed')
+    .reduce((sum, p) => sum + p.amount, 0);
   const averagePayment = completedPayments > 0 ? totalRevenue / completedPayments : 0;
-  
+
   const totalTransactions = transactions.length;
   const completedTransactions = transactions.filter(t => t.status === 'completed').length;
   const pendingTransactions = transactions.filter(t => t.status === 'pending').length;
   const failedTransactions = transactions.filter(t => t.status === 'failed').length;
-  
-  const transactionRevenue = transactions.filter(t => t.status === 'completed').reduce((sum, t) => sum + t.amount, 0);
-  
-  // Méthodes de paiement les plus utilisées
-  const paymentMethods = payments.reduce((acc, payment) => {
-    acc[payment.payment_method] = (acc[payment.payment_method] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
 
-  const topMethod = Object.entries(paymentMethods).sort(([,a], [,b]) => b - a)[0];
+  const transactionRevenue = transactions
+    .filter(t => t.status === 'completed')
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  // Méthodes de paiement les plus utilisées
+  const paymentMethods = payments.reduce(
+    (acc, payment) => {
+      acc[payment.payment_method] = (acc[payment.payment_method] || 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>
+  );
+
+  const topMethod = Object.entries(paymentMethods).sort(([, a], [, b]) => b - a)[0];
 
   // Statistiques par période
   const today = new Date();
@@ -98,9 +105,7 @@ const PaymentStats = ({ payments, filteredPayments, transactions }: PaymentStats
           <div className="text-2xl font-bold">{totalTransactions}</div>
           <div className="flex items-center gap-2 mt-1">
             <div className="h-2 w-2 rounded-full bg-green-500"></div>
-            <span className="text-xs text-muted-foreground">
-              {completedTransactions} réussies
-            </span>
+            <span className="text-xs text-muted-foreground">{completedTransactions} réussies</span>
           </div>
         </CardContent>
       </Card>
@@ -111,11 +116,11 @@ const PaymentStats = ({ payments, filteredPayments, transactions }: PaymentStats
           <TrendingUp className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">
-            {topMethod ? topMethod[0] : "Aucune"}
-          </div>
+          <div className="text-2xl font-bold">{topMethod ? topMethod[0] : 'Aucune'}</div>
           <p className="text-xs text-muted-foreground mt-1">
-            {topMethod ? `${topMethod[1]} paiement${topMethod[1] > 1 ? "s" : ""}` : "Pas de données"}
+            {topMethod
+              ? `${topMethod[1]} paiement${topMethod[1] > 1 ? 's' : ''}`
+              : 'Pas de données'}
           </p>
         </CardContent>
       </Card>
@@ -128,9 +133,7 @@ const PaymentStats = ({ payments, filteredPayments, transactions }: PaymentStats
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{todayPayments}</div>
-          <p className="text-xs text-muted-foreground mt-1">
-            Paiements aujourd'hui
-          </p>
+          <p className="text-xs text-muted-foreground mt-1">Paiements aujourd'hui</p>
         </CardContent>
       </Card>
 
@@ -141,9 +144,7 @@ const PaymentStats = ({ payments, filteredPayments, transactions }: PaymentStats
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{weekPayments}</div>
-          <p className="text-xs text-muted-foreground mt-1">
-            Paiements cette semaine
-          </p>
+          <p className="text-xs text-muted-foreground mt-1">Paiements cette semaine</p>
         </CardContent>
       </Card>
 
@@ -154,9 +155,7 @@ const PaymentStats = ({ payments, filteredPayments, transactions }: PaymentStats
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{monthPayments}</div>
-          <p className="text-xs text-muted-foreground mt-1">
-            Paiements ce mois
-          </p>
+          <p className="text-xs text-muted-foreground mt-1">Paiements ce mois</p>
         </CardContent>
       </Card>
 
@@ -169,9 +168,7 @@ const PaymentStats = ({ payments, filteredPayments, transactions }: PaymentStats
           <div className="text-2xl font-bold">
             {totalPayments > 0 ? Math.round((completedPayments / totalPayments) * 100) : 0}%
           </div>
-          <p className="text-xs text-muted-foreground mt-1">
-            Paiements réussis
-          </p>
+          <p className="text-xs text-muted-foreground mt-1">Paiements réussis</p>
         </CardContent>
       </Card>
     </div>
@@ -179,9 +176,3 @@ const PaymentStats = ({ payments, filteredPayments, transactions }: PaymentStats
 };
 
 export default PaymentStats;
-
-
-
-
-
-

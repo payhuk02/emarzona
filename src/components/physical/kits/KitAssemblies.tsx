@@ -1,7 +1,7 @@
 /**
  * Kit Assemblies Component
  * Date: 27 Janvier 2025
- * 
+ *
  * Gestion des assemblages de kits
  */
 
@@ -12,7 +12,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import {
   Select,
   SelectContent,
@@ -20,7 +27,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useKitAssemblies, useCreateKitAssembly, useUpdateAssemblyStatus, KitAssembly } from '@/hooks/physical/useProductKits';
+import {
+  useKitAssemblies,
+  useCreateKitAssembly,
+  useUpdateAssemblyStatus,
+  KitAssembly,
+} from '@/hooks/physical/useProductKits';
 import { useStore } from '@/hooks/useStore';
 import { Package, Search, Calendar, CheckCircle } from 'lucide-react';
 import { format } from 'date-fns';
@@ -29,7 +41,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 
-const  ASSEMBLY_STATUSES: { value: KitAssembly['status']; label: string; color: string }[] = [
+const ASSEMBLY_STATUSES: { value: KitAssembly['status']; label: string; color: string }[] = [
   { value: 'pending', label: 'En attente', color: 'bg-yellow-500' },
   { value: 'in_progress', label: 'En cours', color: 'bg-blue-500' },
   { value: 'completed', label: 'Terminé', color: 'bg-green-500' },
@@ -45,12 +57,14 @@ export default function KitAssemblies() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const { data: assemblies, isLoading } = useKitAssemblies(selectedKitId, {
-    status: statusFilter !== 'all' ? statusFilter as any : undefined,
+    status: statusFilter !== 'all' ? (statusFilter as any) : undefined,
   });
   const updateStatus = useUpdateAssemblyStatus();
 
   const handleStatusUpdate = async (assemblyId: string, newStatus: KitAssembly['status']) => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     await updateStatus.mutateAsync({
       assemblyId,
       status: newStatus,
@@ -58,10 +72,12 @@ export default function KitAssemblies() {
     });
   };
 
-  const filteredAssemblies = assemblies?.filter(assembly =>
-    assembly.assembly_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (assembly.order as any)?.order_number?.toLowerCase().includes(searchQuery.toLowerCase())
-  ) || [];
+  const filteredAssemblies =
+    assemblies?.filter(
+      assembly =>
+        assembly.assembly_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (assembly.order as any)?.order_number?.toLowerCase().includes(searchQuery.toLowerCase())
+    ) || [];
 
   if (isLoading) {
     return (
@@ -77,15 +93,13 @@ export default function KitAssemblies() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Assemblages de Kits</h2>
-          <p className="text-muted-foreground">
-            Suivez et gérez les assemblages de vos kits
-          </p>
+          <p className="text-muted-foreground">Suivez et gérez les assemblages de vos kits</p>
         </div>
         <div className="flex items-center gap-4">
           <Input
             placeholder="ID du kit"
             value={selectedKitId}
-            onChange={(e) => setSelectedKitId(e.target.value)}
+            onChange={e => setSelectedKitId(e.target.value)}
             className="w-64"
           />
         </div>
@@ -95,9 +109,7 @@ export default function KitAssemblies() {
         <Card>
           <CardContent className="py-12 text-center">
             <Package className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-            <p className="text-muted-foreground">
-              Entrez l'ID d'un kit pour voir ses assemblages
-            </p>
+            <p className="text-muted-foreground">Entrez l'ID d'un kit pour voir ses assemblages</p>
           </CardContent>
         </Card>
       ) : (
@@ -114,7 +126,7 @@ export default function KitAssemblies() {
                 <Input
                   placeholder="Rechercher..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={e => setSearchQuery(e.target.value)}
                   className="w-64"
                 />
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -123,7 +135,7 @@ export default function KitAssemblies() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Tous les statuts</SelectItem>
-                    {ASSEMBLY_STATUSES.map((status) => (
+                    {ASSEMBLY_STATUSES.map(status => (
                       <SelectItem key={status.value} value={status.value}>
                         {status.label}
                       </SelectItem>
@@ -155,19 +167,19 @@ export default function KitAssemblies() {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    filteredAssemblies.map((assembly) => {
+                    filteredAssemblies.map(assembly => {
                       const status = ASSEMBLY_STATUSES.find(s => s.value === assembly.status);
                       return (
                         <TableRow key={assembly.id}>
                           <TableCell className="font-medium">{assembly.assembly_number}</TableCell>
-                          <TableCell>
-                            {(assembly.order as any)?.order_number || 'N/A'}
-                          </TableCell>
+                          <TableCell>{(assembly.order as any)?.order_number || 'N/A'}</TableCell>
                           <TableCell>
                             {assembly.scheduled_date ? (
                               <div className="flex items-center gap-1">
                                 <Calendar className="h-4 w-4 text-muted-foreground" />
-                                {format(new Date(assembly.scheduled_date), 'dd MMM yyyy', { locale: fr })}
+                                {format(new Date(assembly.scheduled_date), 'dd MMM yyyy', {
+                                  locale: fr,
+                                })}
                               </div>
                             ) : (
                               <span className="text-muted-foreground">Non programmée</span>
@@ -184,7 +196,7 @@ export default function KitAssemblies() {
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
-                                {ASSEMBLY_STATUSES.map((s) => (
+                                {ASSEMBLY_STATUSES.map(s => (
                                   <SelectItem key={s.value} value={s.value}>
                                     {s.label}
                                   </SelectItem>
@@ -194,7 +206,9 @@ export default function KitAssemblies() {
                           </TableCell>
                           <TableCell>
                             {assembly.completed_date ? (
-                              format(new Date(assembly.completed_date), 'dd MMM yyyy', { locale: fr })
+                              format(new Date(assembly.completed_date), 'dd MMM yyyy', {
+                                locale: fr,
+                              })
                             ) : (
                               <span className="text-muted-foreground">-</span>
                             )}
@@ -229,10 +243,3 @@ export default function KitAssemblies() {
     </div>
   );
 }
-
-
-
-
-
-
-

@@ -16,7 +16,7 @@ import {
   CheckCircle,
   Clock,
   Database,
-  Zap
+  Zap,
 } from 'lucide-react';
 import { useOfflineMode } from '@/hooks/useOfflineMode';
 import { syncService } from '@/services/syncService';
@@ -36,7 +36,7 @@ export const OfflineStatus = ({ showQueueStats = true, compact = false }: Offlin
     connectionStatus,
     forceSync,
     retryFailed,
-    updateQueueStats
+    updateQueueStats,
   } = useOfflineMode();
 
   const [syncStatus, setSyncStatus] = useState<any>(null);
@@ -131,7 +131,7 @@ export const OfflineStatus = ({ showQueueStats = true, compact = false }: Offlin
     const diffMins = Math.floor(diffMs / (1000 * 60));
     const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
 
-    if (diffMins < 1) return 'À l\'instant';
+    if (diffMins < 1) return "À l'instant";
     if (diffMins < 60) return `Il y a ${diffMins} min`;
     if (diffHours < 24) return `Il y a ${diffHours}h`;
     return date.toLocaleDateString('fr-FR');
@@ -151,12 +151,7 @@ export const OfflineStatus = ({ showQueueStats = true, compact = false }: Offlin
         )}
 
         {connectionStatus !== 'online' && (
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={handleForceSync}
-            disabled={isLoading}
-          >
+          <Button size="sm" variant="outline" onClick={handleForceSync} disabled={isLoading}>
             {isLoading ? (
               <RefreshCw className="w-3 h-3 animate-spin" />
             ) : (
@@ -191,7 +186,8 @@ export const OfflineStatus = ({ showQueueStats = true, compact = false }: Offlin
             <WifiOff className="h-4 w-4" />
             <AlertTitle>Hors ligne</AlertTitle>
             <AlertDescription>
-              Vous êtes actuellement hors ligne. Les actions seront synchronisées automatiquement à la reconnexion.
+              Vous êtes actuellement hors ligne. Les actions seront synchronisées automatiquement à
+              la reconnexion.
             </AlertDescription>
           </Alert>
         )}
@@ -201,7 +197,8 @@ export const OfflineStatus = ({ showQueueStats = true, compact = false }: Offlin
             <AlertTriangle className="h-4 w-4" />
             <AlertTitle>Service indisponible</AlertTitle>
             <AlertDescription>
-              Le serveur est temporairement indisponible. Vos actions sont enregistrées localement et seront synchronisées automatiquement.
+              Le serveur est temporairement indisponible. Vos actions sont enregistrées localement
+              et seront synchronisées automatiquement.
             </AlertDescription>
           </Alert>
         )}
@@ -210,9 +207,7 @@ export const OfflineStatus = ({ showQueueStats = true, compact = false }: Offlin
           <Alert>
             <RefreshCw className="h-4 w-4 animate-spin" />
             <AlertTitle>Synchronisation en cours</AlertTitle>
-            <AlertDescription>
-              Synchronisation des données locales en cours...
-            </AlertDescription>
+            <AlertDescription>Synchronisation des données locales en cours...</AlertDescription>
           </Alert>
         )}
 
@@ -231,9 +226,7 @@ export const OfflineStatus = ({ showQueueStats = true, compact = false }: Offlin
           </div>
 
           <div className="text-center p-3 border rounded-lg">
-            <div className="text-2xl font-bold text-red-600">
-              {syncStatus?.queue?.failed || 0}
-            </div>
+            <div className="text-2xl font-bold text-red-600">{syncStatus?.queue?.failed || 0}</div>
             <p className="text-sm text-muted-foreground">Échouées</p>
           </div>
 
@@ -289,8 +282,8 @@ export const OfflineStatus = ({ showQueueStats = true, compact = false }: Offlin
         <div className="text-sm text-muted-foreground bg-blue-50 p-3 rounded-lg">
           <p className="flex items-center gap-2">
             <CheckCircle className="h-4 w-4 text-green-600" />
-            <strong>Sécurité garantie :</strong> Toutes les données locales sont chiffrées
-            et validées par le serveur avant application.
+            <strong>Sécurité garantie :</strong> Toutes les données locales sont chiffrées et
+            validées par le serveur avant application.
           </p>
         </div>
       </CardContent>

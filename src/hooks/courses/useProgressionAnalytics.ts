@@ -7,9 +7,12 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
-const PROGRESSION_SNAPSHOT_FIELDS = 'id, course_id, enrollment_id, user_id, snapshot_date, progress_percentage, completed_lessons, total_lessons, completed_sections, total_sections, total_watch_time_minutes, average_lesson_watch_time_minutes, last_activity_at, days_since_enrollment, days_active, average_quiz_score, quizzes_completed, quizzes_passed, assignments_submitted, assignments_passed, notes_count, forum_posts_count, forum_replies_count, status, metadata, created_at';
-const COURSE_PROGRESSION_ANALYTICS_FIELDS = 'id, course_id, analytics_date, total_enrollments, active_enrollments, completed_enrollments, dropped_enrollments, new_enrollments, average_progress, median_progress, average_completion_time_days, median_completion_time_days, students_0_25_percent, students_25_50_percent, students_50_75_percent, students_75_100_percent, students_completed, average_watch_time_minutes, total_watch_time_minutes, average_session_duration_minutes, average_quiz_score, average_assignment_score, pass_rate, average_notes_per_student, total_forum_posts, active_students_count, retention_rate_7d, retention_rate_30d, dropout_rate, metadata, created_at';
-const LESSON_ANALYTICS_FIELDS = 'id, course_id, lesson_id, analytics_date, total_views, unique_students_viewed, completion_rate, average_watch_time_minutes, total_watch_time_minutes, average_completion_time_minutes, average_rewatches, notes_count, exit_points, metadata, created_at';
+const PROGRESSION_SNAPSHOT_FIELDS =
+  'id, course_id, enrollment_id, user_id, snapshot_date, progress_percentage, completed_lessons, total_lessons, completed_sections, total_sections, total_watch_time_minutes, average_lesson_watch_time_minutes, last_activity_at, days_since_enrollment, days_active, average_quiz_score, quizzes_completed, quizzes_passed, assignments_submitted, assignments_passed, notes_count, forum_posts_count, forum_replies_count, status, metadata, created_at';
+const COURSE_PROGRESSION_ANALYTICS_FIELDS =
+  'id, course_id, analytics_date, total_enrollments, active_enrollments, completed_enrollments, dropped_enrollments, new_enrollments, average_progress, median_progress, average_completion_time_days, median_completion_time_days, students_0_25_percent, students_25_50_percent, students_50_75_percent, students_75_100_percent, students_completed, average_watch_time_minutes, total_watch_time_minutes, average_session_duration_minutes, average_quiz_score, average_assignment_score, pass_rate, average_notes_per_student, total_forum_posts, active_students_count, retention_rate_7d, retention_rate_30d, dropout_rate, metadata, created_at';
+const LESSON_ANALYTICS_FIELDS =
+  'id, course_id, lesson_id, analytics_date, total_views, unique_students_viewed, completion_rate, average_watch_time_minutes, total_watch_time_minutes, average_completion_time_minutes, average_rewatches, notes_count, exit_points, metadata, created_at';
 
 // Types
 export interface ProgressionSnapshot {
@@ -202,7 +205,7 @@ export const useCourseProgressionSnapshots = (courseId: string | undefined, date
     queryFn: async (): Promise<ProgressionSnapshot[]> => {
       if (!courseId) return [];
 
-      let  query= supabase
+      let query = supabase
         .from('course_progression_snapshots')
         .select(PROGRESSION_SNAPSHOT_FIELDS)
         .eq('course_id', courseId);
@@ -286,9 +289,3 @@ export const useCalculateCourseProgressionAnalytics = () => {
     },
   });
 };
-
-
-
-
-
-

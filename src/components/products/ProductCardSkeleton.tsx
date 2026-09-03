@@ -3,25 +3,25 @@
  * Dimensions fixes pour éviter CLS (Cumulative Layout Shift)
  */
 
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export const ProductCardSkeleton = () => {
   return (
-    <Card 
+    <Card
       className="shadow-sm flex flex-col min-h-[400px] md:min-h-[500px] lg:min-h-[600px]"
       style={{ willChange: 'auto' }}
     >
       {/* Image skeleton avec dimensions fixes */}
       <CardHeader className="p-0 relative overflow-hidden rounded-t-lg flex-[0.6] min-h-[240px] md:min-h-[300px] lg:min-h-[360px]">
-        <div 
+        <div
           className="h-full w-full rounded-t-lg overflow-hidden bg-muted relative"
           style={{ aspectRatio: '4/3' }}
         >
           <Skeleton className="h-full w-full" />
         </div>
       </CardHeader>
-      
+
       {/* Content skeleton */}
       <CardContent className="p-2.5 sm:p-3 lg:p-4 space-y-2 sm:space-y-2.5 lg:space-y-3 flex-[0.4] flex flex-col">
         {/* Title skeleton */}
@@ -57,9 +57,3 @@ export const ProductCardSkeleton = () => {
     </Card>
   );
 };
-
-
-
-
-
-

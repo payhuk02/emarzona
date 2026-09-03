@@ -1,7 +1,7 @@
 /**
  * Hook useErrorState - Gestion simplifiée des états d'erreur
  * Fournit une API simple pour gérer les erreurs dans les composants
- * 
+ *
  * @example
  * ```tsx
  * const { error, setError, clearError, hasError } = useErrorState();
@@ -57,17 +57,20 @@ export function useErrorState(): UseErrorStateReturn {
     setErrorState(null);
   }, []);
 
-  const execute = useCallback(async <T,>(operation: () => Promise<T>): Promise<T | undefined> => {
-    try {
-      clearError();
-      const result = await operation();
-      return result;
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error(String(err));
-      setError(error);
-      return undefined;
-    }
-  }, [clearError, setError]);
+  const execute = useCallback(
+    async <T>(operation: () => Promise<T>): Promise<T | undefined> => {
+      try {
+        clearError();
+        const result = await operation();
+        return result;
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        setError(error);
+        return undefined;
+      }
+    },
+    [clearError, setError]
+  );
 
   const errorMessage = error?.message || null;
   const hasError = error !== null;
@@ -81,10 +84,3 @@ export function useErrorState(): UseErrorStateReturn {
     execute,
   };
 }
-
-
-
-
-
-
-

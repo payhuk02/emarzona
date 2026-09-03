@@ -1,12 +1,18 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import React, { useState, useEffect, useCallback } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface CreatePaymentDialogProps {
   open: boolean;
@@ -38,16 +44,16 @@ const CreatePaymentDialogComponent = ({
   const [loading, setLoading] = useState(false);
   const [orders, setOrders] = useState<Order[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
-  
+
   const [formData, setFormData] = useState({
-    order_id: "",
-    customer_id: "",
-    payment_method: "cash",
-    amount: "",
-    currency: "XOF",
-    status: "completed",
-    transaction_id: "",
-    notes: "",
+    order_id: '',
+    customer_id: '',
+    payment_method: 'cash',
+    amount: '',
+    currency: 'XOF',
+    status: 'completed',
+    transaction_id: '',
+    notes: '',
   });
 
   useEffect(() => {
@@ -59,85 +65,91 @@ const CreatePaymentDialogComponent = ({
 
   const fetchOrders = async () => {
     const { data } = await supabase
-      .from("orders")
-      .select("id, order_number, total_amount, customer_id")
-      .eq("store_id", storeId)
-      .order("created_at", { ascending: false });
-    
+      .from('orders')
+      .select('id, order_number, total_amount, customer_id')
+      .eq('store_id', storeId)
+      .order('created_at', { ascending: false });
+
     setOrders(data || []);
   };
 
   const fetchCustomers = async () => {
     const { data } = await supabase
-      .from("customers")
-      .select("id, name, email")
-      .eq("store_id", storeId)
-      .order("name");
-    
+      .from('customers')
+      .select('id, name, email')
+      .eq('store_id', storeId)
+      .order('name');
+
     setCustomers(data || []);
   };
 
-  const handleOrderChange = useCallback((orderId: string) => {
-    const order = orders.find(o => o.id === orderId);
-    if (order) {
-      setFormData(prev => ({
-        ...prev,
-        order_id: orderId,
-        customer_id: order.customer_id || "",
-        amount: order.total_amount.toString(),
-      }));
-    } else {
-      setFormData(prev => ({ ...prev, order_id: orderId }));
-    }
-  }, [orders]);
+  const handleOrderChange = useCallback(
+    (orderId: string) => {
+      const order = orders.find(o => o.id === orderId);
+      if (order) {
+        setFormData(prev => ({
+          ...prev,
+          order_id: orderId,
+          customer_id: order.customer_id || '',
+          amount: order.total_amount.toString(),
+        }));
+      } else {
+        setFormData(prev => ({ ...prev, order_id: orderId }));
+      }
+    },
+    [orders]
+  );
 
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      setLoading(true);
 
-    try {
-      const { error } = await supabase.from("payments").insert({
-        store_id: storeId,
-        order_id: formData.order_id || null,
-        customer_id: formData.customer_id || null,
-        payment_method: formData.payment_method,
-        amount: parseFloat(formData.amount),
-        currency: formData.currency,
-        status: formData.status,
-        transaction_id: formData.transaction_id || null,
-        notes: formData.notes || null,
-      });
+      try {
+        const { error } = await supabase.from('payments').insert({
+          store_id: storeId,
+          order_id: formData.order_id || null,
+          customer_id: formData.customer_id || null,
+          payment_method: formData.payment_method,
+          amount: parseFloat(formData.amount),
+          currency: formData.currency,
+          status: formData.status,
+          transaction_id: formData.transaction_id || null,
+          notes: formData.notes || null,
+        });
 
-      if (error) throw error;
+        if (error) throw error;
 
-      toast({
-        title: "Succès",
-        description: "Paiement créé avec succès",
-      });
+        toast({
+          title: 'Succès',
+          description: 'Paiement créé avec succès',
+        });
 
-      onPaymentCreated();
-      onOpenChange(false);
-      setFormData({
-        order_id: "",
-        customer_id: "",
-        payment_method: "cash",
-        amount: "",
-        currency: "XOF",
-        status: "completed",
-        transaction_id: "",
-        notes: "",
-      });
-    } catch ( _error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      toast({
-        title: "Erreur",
-        description: errorMessage,
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [formData, storeId, onPaymentCreated, onOpenChange, toast]);
+        onPaymentCreated();
+        onOpenChange(false);
+        setFormData({
+          order_id: '',
+          customer_id: '',
+          payment_method: 'cash',
+          amount: '',
+          currency: 'XOF',
+          status: 'completed',
+          transaction_id: '',
+          notes: '',
+        });
+      } catch (_error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        toast({
+          title: 'Erreur',
+          description: errorMessage,
+          variant: 'destructive',
+        });
+      } finally {
+        setLoading(false);
+      }
+    },
+    [formData, storeId, onPaymentCreated, onOpenChange, toast]
+  );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -154,7 +166,7 @@ const CreatePaymentDialogComponent = ({
                   <SelectValue placeholder="Sélectionner une commande" />
                 </SelectTrigger>
                 <SelectContent>
-                  {orders.map((order) => (
+                  {orders.map(order => (
                     <SelectItem key={order.id} value={order.id}>
                       {order.order_number} - {order.total_amount} XOF
                     </SelectItem>
@@ -165,12 +177,15 @@ const CreatePaymentDialogComponent = ({
 
             <div className="space-y-2">
               <Label htmlFor="customer_id">Client (optionnel)</Label>
-              <Select value={formData.customer_id} onValueChange={(value) => setFormData({ ...formData, customer_id: value })}>
+              <Select
+                value={formData.customer_id}
+                onValueChange={value => setFormData({ ...formData, customer_id: value })}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Sélectionner un client" />
                 </SelectTrigger>
                 <SelectContent>
-                  {customers.map((customer) => (
+                  {customers.map(customer => (
                     <SelectItem key={customer.id} value={customer.id}>
                       {customer.name}
                     </SelectItem>
@@ -181,7 +196,10 @@ const CreatePaymentDialogComponent = ({
 
             <div className="space-y-2">
               <Label htmlFor="payment_method">Méthode de paiement *</Label>
-              <Select value={formData.payment_method} onValueChange={(value) => setFormData({ ...formData, payment_method: value })}>
+              <Select
+                value={formData.payment_method}
+                onValueChange={value => setFormData({ ...formData, payment_method: value })}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -203,20 +221,29 @@ const CreatePaymentDialogComponent = ({
                 type="number"
                 step="0.01"
                 value={formData.amount}
-                onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                onChange={e => setFormData({ ...formData, amount: e.target.value })}
                 required
               />
               {formData.amount && (
                 <div className="text-sm text-muted-foreground space-y-1">
-                  <p>Commission plateforme (10%): {(parseFloat(formData.amount) * 0.10).toFixed(2)} {formData.currency}</p>
-                  <p>Reversement vendeur (90%): {(parseFloat(formData.amount) * 0.90).toFixed(2)} {formData.currency}</p>
+                  <p>
+                    Commission plateforme (10%): {(parseFloat(formData.amount) * 0.1).toFixed(2)}{' '}
+                    {formData.currency}
+                  </p>
+                  <p>
+                    Reversement vendeur (90%): {(parseFloat(formData.amount) * 0.9).toFixed(2)}{' '}
+                    {formData.currency}
+                  </p>
                 </div>
               )}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="currency">Devise</Label>
-              <Select value={formData.currency} onValueChange={(value) => setFormData({ ...formData, currency: value })}>
+              <Select
+                value={formData.currency}
+                onValueChange={value => setFormData({ ...formData, currency: value })}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -230,7 +257,10 @@ const CreatePaymentDialogComponent = ({
 
             <div className="space-y-2">
               <Label htmlFor="status">Statut *</Label>
-              <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>
+              <Select
+                value={formData.status}
+                onValueChange={value => setFormData({ ...formData, status: value })}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -248,7 +278,7 @@ const CreatePaymentDialogComponent = ({
               <Input
                 id="transaction_id"
                 value={formData.transaction_id}
-                onChange={(e) => setFormData({ ...formData, transaction_id: e.target.value })}
+                onChange={e => setFormData({ ...formData, transaction_id: e.target.value })}
                 placeholder="Ex: TRX123456"
               />
             </div>
@@ -259,7 +289,7 @@ const CreatePaymentDialogComponent = ({
             <Textarea
               id="notes"
               value={formData.notes}
-              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+              onChange={e => setFormData({ ...formData, notes: e.target.value })}
               rows={3}
             />
           </div>
@@ -269,7 +299,7 @@ const CreatePaymentDialogComponent = ({
               Annuler
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? "Création..." : "Créer le paiement"}
+              {loading ? 'Création...' : 'Créer le paiement'}
             </Button>
           </div>
         </form>
@@ -281,21 +311,18 @@ const CreatePaymentDialogComponent = ({
 CreatePaymentDialogComponent.displayName = 'CreatePaymentDialogComponent';
 
 // Optimisation avec React.memo pour éviter les re-renders inutiles
-export const CreatePaymentDialog = React.memo(CreatePaymentDialogComponent, (prevProps, nextProps) => {
-  return (
-    prevProps.open === nextProps.open &&
-    prevProps.onOpenChange === nextProps.onOpenChange &&
-    prevProps.storeId === nextProps.storeId &&
-    prevProps.onPaymentCreated === nextProps.onPaymentCreated
-  );
-});
+export const CreatePaymentDialog = React.memo(
+  CreatePaymentDialogComponent,
+  (prevProps, nextProps) => {
+    return (
+      prevProps.open === nextProps.open &&
+      prevProps.onOpenChange === nextProps.onOpenChange &&
+      prevProps.storeId === nextProps.storeId &&
+      prevProps.onPaymentCreated === nextProps.onPaymentCreated
+    );
+  }
+);
 
 CreatePaymentDialog.displayName = 'CreatePaymentDialog';
 
 export default CreatePaymentDialog;
-
-
-
-
-
-

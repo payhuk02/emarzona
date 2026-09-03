@@ -8,8 +8,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 
-const ARTIST_PORTFOLIO_FIELDS = 'id, artist_product_id, store_id, portfolio_name, portfolio_slug, portfolio_description, portfolio_bio, portfolio_image_url, portfolio_links, is_public, is_featured, display_order, total_artworks, total_views, total_likes, created_at, updated_at';
-const ARTIST_GALLERY_FIELDS = 'id, portfolio_id, gallery_name, gallery_slug, gallery_description, gallery_cover_image_url, gallery_category, gallery_tags, is_public, display_order, total_artworks, total_views, created_at, updated_at';
+const ARTIST_PORTFOLIO_FIELDS =
+  'id, artist_product_id, store_id, portfolio_name, portfolio_slug, portfolio_description, portfolio_bio, portfolio_image_url, portfolio_links, is_public, is_featured, display_order, total_artworks, total_views, total_likes, created_at, updated_at';
+const ARTIST_GALLERY_FIELDS =
+  'id, portfolio_id, gallery_name, gallery_slug, gallery_description, gallery_cover_image_url, gallery_category, gallery_tags, is_public, display_order, total_artworks, total_views, created_at, updated_at';
 
 export interface ArtistPortfolio {
   id: string;
@@ -72,7 +74,8 @@ export const useArtistPortfolio = (portfolioId: string | undefined) => {
 
       const { data, error } = await supabase
         .from('artist_portfolios')
-        .select(`
+        .select(
+          `
           *,
           artist_products (
             id,
@@ -80,7 +83,8 @@ export const useArtistPortfolio = (portfolioId: string | undefined) => {
             artist_type,
             artist_bio
           )
-        `)
+        `
+        )
         .eq('id', portfolioId)
         .single();
 
@@ -106,9 +110,10 @@ export const useArtistPortfolioBySlug = (slug: string | undefined, storeId?: str
     queryFn: async () => {
       if (!slug) return null;
 
-      let  query= supabase
+      let query = supabase
         .from('artist_portfolios')
-        .select(`
+        .select(
+          `
           *,
           artist_products (
             id,
@@ -118,7 +123,8 @@ export const useArtistPortfolioBySlug = (slug: string | undefined, storeId?: str
             artist_website,
             artist_social_links
           )
-        `)
+        `
+        )
         .eq('portfolio_slug', slug)
         .eq('is_public', true);
 
@@ -147,16 +153,19 @@ export const useArtistPortfolioBySlug = (slug: string | undefined, storeId?: str
 /**
  * Hook pour récupérer les portfolios d'un store
  */
-export const useStorePortfolios = (storeId: string | undefined, options?: {
-  featuredOnly?: boolean;
-  publicOnly?: boolean;
-}) => {
+export const useStorePortfolios = (
+  storeId: string | undefined,
+  options?: {
+    featuredOnly?: boolean;
+    publicOnly?: boolean;
+  }
+) => {
   return useQuery({
     queryKey: ['store-portfolios', storeId, options],
     queryFn: async () => {
       if (!storeId) return [];
 
-      let  query= supabase
+      let query = supabase
         .from('artist_portfolios')
         .select(ARTIST_PORTFOLIO_FIELDS)
         .eq('store_id', storeId)
@@ -187,16 +196,19 @@ export const useStorePortfolios = (storeId: string | undefined, options?: {
 /**
  * Hook pour récupérer les galeries d'un portfolio
  */
-export const usePortfolioGalleries = (portfolioId: string | undefined, options?: {
-  category?: string;
-  publicOnly?: boolean;
-}) => {
+export const usePortfolioGalleries = (
+  portfolioId: string | undefined,
+  options?: {
+    category?: string;
+    publicOnly?: boolean;
+  }
+) => {
   return useQuery({
     queryKey: ['portfolio-galleries', portfolioId, options],
     queryFn: async () => {
       if (!portfolioId) return [];
 
-      let  query= supabase
+      let query = supabase
         .from('artist_galleries')
         .select(ARTIST_GALLERY_FIELDS)
         .eq('portfolio_id', portfolioId)
@@ -227,17 +239,21 @@ export const usePortfolioGalleries = (portfolioId: string | undefined, options?:
 /**
  * Hook pour récupérer les œuvres d'une galerie
  */
-export const useGalleryArtworks = (galleryId: string | undefined, options?: {
-  featuredOnly?: boolean;
-}) => {
+export const useGalleryArtworks = (
+  galleryId: string | undefined,
+  options?: {
+    featuredOnly?: boolean;
+  }
+) => {
   return useQuery({
     queryKey: ['gallery-artworks', galleryId, options],
     queryFn: async () => {
       if (!galleryId) return [];
 
-      let  query= supabase
+      let query = supabase
         .from('artist_gallery_artworks')
-        .select(`
+        .select(
+          `
           *,
           products (
             id,
@@ -253,7 +269,8 @@ export const useGalleryArtworks = (galleryId: string | undefined, options?: {
             artwork_year,
             artwork_medium
           )
-        `)
+        `
+        )
         .eq('gallery_id', galleryId)
         .order('display_order', { ascending: true })
         .order('added_at', { ascending: false });
@@ -294,13 +311,10 @@ export const useCreatePortfolio = () => {
       is_public?: boolean;
     }) => {
       // Générer le slug
-      const { data: slugData, error: slugError } = await supabase.rpc(
-        'generate_portfolio_slug',
-        {
-          portfolio_name: data.portfolio_name,
-          store_id: data.store_id,
-        }
-      );
+      const { data: slugData, error: slugError } = await supabase.rpc('generate_portfolio_slug', {
+        portfolio_name: data.portfolio_name,
+        store_id: data.store_id,
+      });
 
       if (slugError) {
         throw new Error(`Erreur génération slug: ${slugError.message}`);
@@ -323,10 +337,10 @@ export const useCreatePortfolio = () => {
 
       return portfolio as ArtistPortfolio;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['store-portfolios'] });
       queryClient.invalidateQueries({ queryKey: ['artist-portfolio', data.id] });
-      
+
       toast({
         title: '✅ Portfolio créé',
         description: 'Votre portfolio a été créé avec succès.',
@@ -360,13 +374,10 @@ export const useCreateGallery = () => {
       is_public?: boolean;
     }) => {
       // Générer le slug
-      const { data: slugData, error: slugError } = await supabase.rpc(
-        'generate_gallery_slug',
-        {
-          gallery_name: data.gallery_name,
-          portfolio_id: data.portfolio_id,
-        }
-      );
+      const { data: slugData, error: slugError } = await supabase.rpc('generate_gallery_slug', {
+        gallery_name: data.gallery_name,
+        portfolio_id: data.portfolio_id,
+      });
 
       if (slugError) {
         throw new Error(`Erreur génération slug: ${slugError.message}`);
@@ -389,10 +400,10 @@ export const useCreateGallery = () => {
 
       return gallery as ArtistGallery;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['portfolio-galleries'] });
       queryClient.invalidateQueries({ queryKey: ['gallery', data.id] });
-      
+
       toast({
         title: '✅ Galerie créée',
         description: 'Votre galerie a été créée avec succès.',
@@ -441,19 +452,19 @@ export const useAddArtworkToGallery = () => {
 
       return artwork as GalleryArtwork;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['gallery-artworks'] });
       queryClient.invalidateQueries({ queryKey: ['portfolio-galleries'] });
-      
+
       toast({
         title: '✅ Œuvre ajoutée',
-        description: 'L\'œuvre a été ajoutée à la galerie.',
+        description: "L'œuvre a été ajoutée à la galerie.",
       });
     },
     onError: (error: any) => {
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Une erreur est survenue lors de l\'ajout de l\'œuvre.',
+        description: error.message || "Une erreur est survenue lors de l'ajout de l'œuvre.",
         variant: 'destructive',
       });
     },
@@ -466,21 +477,21 @@ export const useAddArtworkToGallery = () => {
 export const useTrackPortfolioView = () => {
   return useMutation({
     mutationFn: async (portfolioId: string) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
       // Générer un session ID si utilisateur anonyme
-      let  sessionId: string | null = null;
+      let sessionId: string | null = null;
       if (!user) {
         sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       }
 
-      const { error } = await supabase
-        .from('artist_portfolio_views')
-        .insert({
-          portfolio_id: portfolioId,
-          user_id: user?.id || null,
-          session_id: sessionId,
-        });
+      const { error } = await supabase.from('artist_portfolio_views').insert({
+        portfolio_id: portfolioId,
+        user_id: user?.id || null,
+        session_id: sessionId,
+      });
 
       if (error) {
         logger.error('Error tracking portfolio view', { error, portfolioId });
@@ -499,8 +510,10 @@ export const useTogglePortfolioLike = () => {
 
   return useMutation({
     mutationFn: async ({ portfolioId, isLiked }: { portfolioId: string; isLiked: boolean }) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
       if (!user) {
         throw new Error('Vous devez être connecté pour liker un portfolio');
       }
@@ -516,12 +529,10 @@ export const useTogglePortfolioLike = () => {
         if (error) throw error;
       } else {
         // Ajouter le like
-        const { error } = await supabase
-          .from('artist_portfolio_likes')
-          .insert({
-            portfolio_id: portfolioId,
-            user_id: user.id,
-          });
+        const { error } = await supabase.from('artist_portfolio_likes').insert({
+          portfolio_id: portfolioId,
+          user_id: user.id,
+        });
 
         if (error) throw error;
       }
@@ -549,7 +560,9 @@ export const usePortfolioLikeStatus = (portfolioId: string | undefined) => {
     queryFn: async () => {
       if (!portfolioId) return false;
 
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return false;
 
       const { data, error } = await supabase
@@ -569,10 +582,3 @@ export const usePortfolioLikeStatus = (portfolioId: string | undefined) => {
     enabled: !!portfolioId,
   });
 };
-
-
-
-
-
-
-

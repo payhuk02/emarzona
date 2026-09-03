@@ -24,7 +24,7 @@ export interface Affiliate {
   display_name?: string;
   avatar_url?: string;
   affiliate_code: string;
-  
+
   // Stats
   total_clicks: number;
   total_sales: number;
@@ -32,16 +32,16 @@ export interface Affiliate {
   total_commission_earned: number;
   total_commission_paid: number;
   pending_commission: number;
-  
+
   // Payment info
   payment_method?: PaymentMethod;
   payment_details?: Record<string, unknown>;
-  
+
   // Status
   status: AffiliateStatus;
   suspension_reason?: string;
   suspended_at?: string;
-  
+
   // Dates
   created_at: string;
   updated_at: string;
@@ -56,31 +56,31 @@ export interface ProductAffiliateSettings {
   id: string;
   product_id: string;
   store_id: string;
-  
+
   // Configuration
   affiliate_enabled: boolean;
   commission_rate: number;
   commission_type: CommissionType;
   fixed_commission_amount?: number;
-  
+
   // Tracking
   cookie_duration_days: number;
-  
+
   // Restrictions
   max_commission_per_sale?: number;
   min_order_amount: number;
   allow_self_referral: boolean;
   require_approval: boolean;
-  
+
   // Content
   terms_and_conditions?: string;
   promotional_materials?: Record<string, unknown>;
-  
+
   // Dates
   created_at: string;
   updated_at: string;
   created_by?: string;
-  
+
   // Relations (optionnel)
   product?: {
     id: string;
@@ -100,31 +100,31 @@ export interface AffiliateLink {
   affiliate_id: string;
   product_id: string;
   store_id: string;
-  
+
   // Link
   link_code: string;
   full_url: string;
-  
+
   // Stats
   total_clicks: number;
   total_sales: number;
   total_revenue: number;
   total_commission: number;
-  
+
   // Tracking
   utm_source?: string;
   utm_medium?: string;
   utm_campaign?: string;
   custom_parameters?: Record<string, unknown>;
-  
+
   // Status
   status: LinkStatus;
-  
+
   // Dates
   created_at: string;
   updated_at: string;
   last_used_at?: string;
-  
+
   // Relations (optionnel)
   product?: {
     id: string;
@@ -141,7 +141,7 @@ export interface AffiliateLink {
     display_name?: string;
     affiliate_code: string;
   };
-  
+
   // Lien court associé (optionnel)
   short_link?: AffiliateShortLink;
 }
@@ -154,36 +154,36 @@ export interface AffiliateShortLink {
   id: string;
   affiliate_link_id: string;
   affiliate_id: string;
-  
+
   // Code court unique
-  short_code: string;  // Ex: "ABC123"
-  
+  short_code: string; // Ex: "ABC123"
+
   // URL complète vers laquelle rediriger
   target_url: string;
-  
+
   // Statistiques
   total_clicks: number;
   unique_clicks: number;
-  
+
   // Métadonnées
-  custom_alias?: string;  // Alias personnalisé optionnel
-  expires_at?: string;  // Date d'expiration optionnelle
+  custom_alias?: string; // Alias personnalisé optionnel
+  expires_at?: string; // Date d'expiration optionnelle
   is_active: boolean;
-  
+
   // Dates
   created_at: string;
   updated_at: string;
   last_used_at?: string;
-  
+
   // Relations (optionnel)
   affiliate_link?: AffiliateLink;
 }
 
 export interface CreateShortLinkForm {
   affiliate_link_id: string;
-  custom_alias?: string;  // Alias personnalisé (optionnel)
-  expires_at?: string;  // Date d'expiration (optionnelle) - LEGACY
-  short_code_length?: number;  // Longueur du code (4-10, défaut: 6)
+  custom_alias?: string; // Alias personnalisé (optionnel)
+  expires_at?: string; // Date d'expiration (optionnelle) - LEGACY
+  short_code_length?: number; // Longueur du code (4-10, défaut: 6)
   expiration_rule?: ShortLinkExpirationRule; // Nouvelle règle d'expiration flexible
 }
 
@@ -206,7 +206,7 @@ export interface AffiliateClick {
   affiliate_link_id: string;
   affiliate_id: string;
   product_id: string;
-  
+
   // Visitor info
   ip_address?: string;
   user_agent?: string;
@@ -216,16 +216,16 @@ export interface AffiliateClick {
   device_type?: string;
   browser?: string;
   os?: string;
-  
+
   // Tracking
   tracking_cookie: string;
   cookie_expires_at: string;
-  
+
   // Conversion
   converted: boolean;
   order_id?: string;
   converted_at?: string;
-  
+
   // Dates
   clicked_at: string;
   created_at: string;
@@ -243,34 +243,34 @@ export interface AffiliateCommission {
   store_id: string;
   order_id: string;
   payment_id?: string;
-  
+
   // Amounts
   order_total: number;
   commission_base: number;
   commission_rate: number;
   commission_type: CommissionType;
   commission_amount: number;
-  
+
   // Status
   status: CommissionStatus;
   approved_at?: string;
   approved_by?: string;
   rejected_at?: string;
   rejection_reason?: string;
-  
+
   // Payment
   paid_at?: string;
   paid_by?: string;
   payment_method?: string;
   payment_reference?: string;
   payment_proof_url?: string;
-  
+
   // Meta
   notes?: string;
   metadata?: Record<string, unknown>;
   created_at: string;
   updated_at: string;
-  
+
   // Relations (optionnel)
   product?: {
     name: string;
@@ -293,42 +293,42 @@ export interface AffiliateCommission {
 export interface AffiliateWithdrawal {
   id: string;
   affiliate_id: string;
-  
+
   // Amount
   amount: number;
   currency: string;
-  
+
   // Payment method
   payment_method: PaymentMethod;
   payment_details: Record<string, unknown>;
-  
+
   // Status
   status: WithdrawalStatus;
-  
+
   // Approval
   approved_at?: string;
   approved_by?: string;
   rejected_at?: string;
   rejection_reason?: string;
-  
+
   // Processing
   processed_at?: string;
   processed_by?: string;
   transaction_reference?: string;
   proof_url?: string;
-  
+
   // Failure
   failed_at?: string;
   failure_reason?: string;
-  
+
   // Notes
   notes?: string;
   admin_notes?: string;
-  
+
   // Dates
   created_at: string;
   updated_at: string;
-  
+
   // Relations (optionnel)
   affiliate?: {
     display_name?: string;
@@ -602,7 +602,13 @@ export interface AffiliatePerformanceChart {
 export interface AffiliateNotification {
   id: string;
   affiliate_id: string;
-  type: 'new_sale' | 'commission_approved' | 'commission_paid' | 'withdrawal_approved' | 'withdrawal_completed' | 'new_product_available';
+  type:
+    | 'new_sale'
+    | 'commission_approved'
+    | 'commission_paid'
+    | 'withdrawal_approved'
+    | 'withdrawal_completed'
+    | 'new_product_available';
   title: string;
   message: string;
   data?: Record<string, unknown>;
@@ -629,14 +635,17 @@ export interface FormState<T> {
 // HELPER TYPES
 // ==============================================
 
-export type AffiliateSortBy = 'created_at' | 'total_sales' | 'total_revenue' | 'total_commission_earned' | 'conversion_rate';
+export type AffiliateSortBy =
+  | 'created_at'
+  | 'total_sales'
+  | 'total_revenue'
+  | 'total_commission_earned'
+  | 'conversion_rate';
 export type CommissionSortBy = 'created_at' | 'commission_amount' | 'order_total' | 'status';
-export type LinkSortBy = 'created_at' | 'total_clicks' | 'total_sales' | 'total_revenue' | 'conversion_rate';
+export type LinkSortBy =
+  | 'created_at'
+  | 'total_clicks'
+  | 'total_sales'
+  | 'total_revenue'
+  | 'conversion_rate';
 export type WithdrawalSortBy = 'created_at' | 'amount' | 'status';
-
-
-
-
-
-
-

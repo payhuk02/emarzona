@@ -1,12 +1,19 @@
 /**
  * Digital Bundle Card Component
  * Date: 27 Janvier 2025
- * 
+ *
  * Composant pour afficher une carte de bundle de produits digitaux
  */
 
 import React from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -61,16 +68,17 @@ export const DigitalBundleCard = ({
   // Calculer le prix individuel total (approximation)
   const individualTotal = bundle.products?.reduce((sum, p) => sum + (p.price || 0), 0) || 0;
   const savings = individualTotal - bundle.bundle_price;
-  const savingsPercentage = individualTotal > 0 
-    ? Math.round((savings / individualTotal) * 100) 
-    : bundle.discount_percentage || 0;
+  const savingsPercentage =
+    individualTotal > 0
+      ? Math.round((savings / individualTotal) * 100)
+      : bundle.discount_percentage || 0;
 
   if (variant === 'compact') {
     return (
-      <Card 
+      <Card
         className={cn(
-          "group hover:shadow-lg transition-all duration-300 cursor-pointer",
-          bundle.is_featured && "border-primary",
+          'group hover:shadow-lg transition-all duration-300 cursor-pointer',
+          bundle.is_featured && 'border-primary',
           className
         )}
         style={{ willChange: 'transform' }}
@@ -101,7 +109,9 @@ export const DigitalBundleCard = ({
               <div className="flex items-center justify-between">
                 <div className="flex items-baseline gap-2">
                   <span className="text-lg font-bold text-primary">
-                    {bundle.promotional_price?.toLocaleString() || bundle.bundle_price.toLocaleString()} {bundle.currency}
+                    {bundle.promotional_price?.toLocaleString() ||
+                      bundle.bundle_price.toLocaleString()}{' '}
+                    {bundle.currency}
                   </span>
                   {bundle.promotional_price && (
                     <span className="text-sm line-through text-muted-foreground">
@@ -125,9 +135,9 @@ export const DigitalBundleCard = ({
   return (
     <Card
       className={cn(
-        "group hover:shadow-xl transition-all duration-300 overflow-hidden",
-        bundle.is_featured && "border-primary border-2",
-        variant === 'featured' && "bg-gradient-to-br from-primary/5 to-primary/10",
+        'group hover:shadow-xl transition-all duration-300 overflow-hidden',
+        bundle.is_featured && 'border-primary border-2',
+        variant === 'featured' && 'bg-gradient-to-br from-primary/5 to-primary/10',
         className
       )}
       style={{ willChange: 'transform' }}
@@ -145,7 +155,7 @@ export const DigitalBundleCard = ({
             <Package className="h-16 w-16 text-white/50" />
           </div>
         )}
-        
+
         {/* Badges overlay */}
         <div className="absolute top-3 left-3 flex gap-2">
           {bundle.is_featured && (
@@ -154,11 +164,7 @@ export const DigitalBundleCard = ({
               Vedette
             </Badge>
           )}
-          {savingsPercentage > 0 && (
-            <Badge variant="destructive">
-              -{savingsPercentage}% OFF
-            </Badge>
-          )}
+          {savingsPercentage > 0 && <Badge variant="destructive">-{savingsPercentage}% OFF</Badge>}
         </div>
 
         {/* Products count badge */}
@@ -181,7 +187,8 @@ export const DigitalBundleCard = ({
         <div className="space-y-2">
           <div className="flex items-baseline gap-3">
             <span className="text-3xl font-bold text-primary">
-              {bundle.promotional_price?.toLocaleString() || bundle.bundle_price.toLocaleString()} {bundle.currency}
+              {bundle.promotional_price?.toLocaleString() || bundle.bundle_price.toLocaleString()}{' '}
+              {bundle.currency}
             </span>
             {bundle.promotional_price && (
               <span className="text-xl line-through text-muted-foreground">
@@ -189,11 +196,13 @@ export const DigitalBundleCard = ({
               </span>
             )}
           </div>
-          
+
           {savings > 0 && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Check className="h-4 w-4 text-green-600" />
-              <span>Économisez {savings.toLocaleString()} {bundle.currency}</span>
+              <span>
+                Économisez {savings.toLocaleString()} {bundle.currency}
+              </span>
             </div>
           )}
         </div>
@@ -203,7 +212,7 @@ export const DigitalBundleCard = ({
           <div className="space-y-2">
             <p className="text-sm font-medium">Produits inclus :</p>
             <div className="grid grid-cols-2 gap-2">
-              {bundle.products.slice(0, 4).map((product) => (
+              {bundle.products.slice(0, 4).map(product => (
                 <div
                   key={product.id}
                   className="flex items-center gap-2 p-2 rounded-lg bg-muted/50 text-sm"
@@ -251,7 +260,7 @@ export const DigitalBundleCard = ({
           <Button
             variant="outline"
             className="flex-1"
-            onClick={(e) => {
+            onClick={e => {
               e.stopPropagation();
               handleView();
             }}
@@ -261,7 +270,7 @@ export const DigitalBundleCard = ({
           </Button>
           <Button
             className="flex-1"
-            onClick={(e) => {
+            onClick={e => {
               e.stopPropagation();
               handlePurchase();
             }}
@@ -294,7 +303,7 @@ export const DigitalBundlesGrid = ({
   if (loading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {[1, 2, 3, 4, 5, 6].map((i) => (
+        {[1, 2, 3, 4, 5, 6].map(i => (
           <Card key={i} className="animate-pulse">
             <div className="h-48 bg-muted" />
             <CardHeader>
@@ -326,7 +335,7 @@ export const DigitalBundlesGrid = ({
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {bundles.map((bundle) => (
+      {bundles.map(bundle => (
         <DigitalBundleCard
           key={bundle.id}
           bundle={bundle}
@@ -338,10 +347,3 @@ export const DigitalBundlesGrid = ({
     </div>
   );
 };
-
-
-
-
-
-
-

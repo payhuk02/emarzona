@@ -118,7 +118,7 @@ async function checkFileExists(storagePath: string): Promise<{ exists: boolean; 
                 error: `HTTP ${getResponse.status}: ${getResponse.statusText}`,
               };
             }
-          } catch ( _getError: unknown) {
+          } catch (_getError: unknown) {
             const errorMessage = getError instanceof Error ? getError.message : 'Erreur inconnue';
             return {
               exists: false,
@@ -126,7 +126,7 @@ async function checkFileExists(storagePath: string): Promise<{ exists: boolean; 
             };
           }
         }
-      } catch ( _fetchError: unknown) {
+      } catch (_fetchError: unknown) {
         return {
           exists: false,
           error: `Erreur lors de la vérification: ${fetchError.message}`,
@@ -135,7 +135,7 @@ async function checkFileExists(storagePath: string): Promise<{ exists: boolean; 
     }
 
     return { exists: false, error: 'Impossible de générer une URL signée' };
-  } catch ( _error: unknown) {
+  } catch (_error: unknown) {
     return {
       exists: false,
       error: error.message || 'Erreur inconnue',
@@ -177,12 +177,12 @@ export async function diagnoseVendorMessageAttachments(): Promise<DiagnosticRepo
 
     logger.info(`📦 Vérification de ${attachments.length} fichiers...`);
 
-    const  diagnostics: StorageFileDiagnostic[] = [];
-    let  existingCount= 0;
-    let  missingCount= 0;
+    const diagnostics: StorageFileDiagnostic[] = [];
+    let existingCount = 0;
+    let missingCount = 0;
 
     // Vérifier chaque fichier
-    for (let  i= 0; i < attachments.length; i++) {
+    for (let i = 0; i < attachments.length; i++) {
       const attachment = attachments[i];
       const progress = (((i + 1) / attachments.length) * 100).toFixed(1);
 
@@ -193,8 +193,8 @@ export async function diagnoseVendorMessageAttachments(): Promise<DiagnosticRepo
       );
 
       // Vérifier aussi si on peut générer une URL signée
-      let  canGenerateSignedUrl= false;
-      let  signedUrlError: string | undefined;
+      let canGenerateSignedUrl = false;
+      let signedUrlError: string | undefined;
 
       // Toujours essayer de générer une URL signée pour voir l'erreur exacte
       try {
@@ -226,13 +226,13 @@ export async function diagnoseVendorMessageAttachments(): Promise<DiagnosticRepo
               canGenerateSignedUrl = false;
               signedUrlError = `URL signée générée mais retourne ${testResponse.status} ou JSON`;
             }
-          } catch ( _fetchErr: unknown) {
+          } catch (_fetchErr: unknown) {
             canGenerateSignedUrl = false;
             const errorMessage = fetchErr instanceof Error ? fetchErr.message : 'Erreur inconnue';
             signedUrlError = `Erreur lors du test de l'URL signée: ${errorMessage}`;
           }
         }
-      } catch ( _err: unknown) {
+      } catch (_err: unknown) {
         const errorMessage = err instanceof Error ? err.message : 'Erreur inconnue';
         signedUrlError = errorMessage || "Erreur lors de la génération de l'URL signée";
       }
@@ -269,7 +269,7 @@ export async function diagnoseVendorMessageAttachments(): Promise<DiagnosticRepo
       d => !d.exists && d.canGenerateSignedUrl && d.signedUrlError
     ).length;
 
-    const  recommendations: string[] = [];
+    const recommendations: string[] = [];
 
     if (missingCount > 0) {
       recommendations.push(
@@ -295,7 +295,7 @@ export async function diagnoseVendorMessageAttachments(): Promise<DiagnosticRepo
       recommendations.push('✅ Tous les fichiers existent dans le bucket');
     }
 
-    const  report: DiagnosticReport = {
+    const report: DiagnosticReport = {
       totalFiles: attachments.length,
       existingFiles: existingCount,
       missingFiles: missingCount,
@@ -314,7 +314,7 @@ export async function diagnoseVendorMessageAttachments(): Promise<DiagnosticRepo
     });
 
     return report;
-  } catch ( _error: unknown) {
+  } catch (_error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
     logger.error('❌ Erreur lors du diagnostic', { error: errorMessage });
     throw error;
@@ -333,8 +333,8 @@ export async function cleanupMissingFiles(
   }
 
   const missingFiles = report.files.filter(f => !f.exists);
-  const  deleted: string[] = [];
-  const  errors: string[] = [];
+  const deleted: string[] = [];
+  const errors: string[] = [];
 
   for (const file of missingFiles) {
     try {
@@ -348,7 +348,7 @@ export async function cleanupMissingFiles(
       } else {
         deleted.push(file.attachmentId);
       }
-    } catch ( _err: unknown) {
+    } catch (_err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Erreur inconnue';
       errors.push(`Exception lors de la suppression de ${file.fileName}: ${errorMessage}`);
     }
@@ -430,9 +430,3 @@ export function displayDiagnosticReport(report: DiagnosticReport): void {
   logger.info('💡 Recommandations:');
   report.summary.recommendations.forEach(rec => logger.info(rec));
 }
-
-
-
-
-
-

@@ -1,7 +1,7 @@
 /**
  * Learning Paths Hooks
  * Date: 27 Janvier 2025
- * 
+ *
  * Hooks pour gérer les parcours d'apprentissage (Learning Paths)
  */
 
@@ -11,8 +11,10 @@ import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 import { useAuth } from '@/contexts/AuthContext';
 
-const LEARNING_PATH_FIELDS = 'id, store_id, created_by, title, description, short_description, image_url, level, estimated_duration_hours, estimated_duration_days, is_active, is_featured, is_free, price, currency, learning_objectives, target_audience, total_courses, total_students, completion_rate, average_rating, display_order, created_at, updated_at';
-const PATH_ENROLLMENT_FIELDS = 'id, learning_path_id, user_id, status, current_course_index, completed_courses_count, total_courses_count, progress_percentage, enrolled_at, started_at, completed_at, last_accessed_at, created_at, updated_at';
+const LEARNING_PATH_FIELDS =
+  'id, store_id, created_by, title, description, short_description, image_url, level, estimated_duration_hours, estimated_duration_days, is_active, is_featured, is_free, price, currency, learning_objectives, target_audience, total_courses, total_students, completion_rate, average_rating, display_order, created_at, updated_at';
+const PATH_ENROLLMENT_FIELDS =
+  'id, learning_path_id, user_id, status, current_course_index, completed_courses_count, total_courses_count, progress_percentage, enrolled_at, started_at, completed_at, last_accessed_at, created_at, updated_at';
 
 // =====================================================
 // TYPES
@@ -126,7 +128,7 @@ export const useLearningPaths = (storeId?: string) => {
   return useQuery({
     queryKey: ['learning-paths', storeId],
     queryFn: async () => {
-      let  query= supabase
+      let query = supabase
         .from('learning_paths')
         .select(LEARNING_PATH_FIELDS)
         .eq('is_active', true)
@@ -173,7 +175,8 @@ export const useLearningPath = (pathId: string | undefined) => {
       // Récupérer les cours du path
       const { data: pathCourses, error: coursesError } = await supabase
         .from('learning_path_courses')
-        .select(`
+        .select(
+          `
           *,
           course:courses (
             id,
@@ -189,7 +192,8 @@ export const useLearningPath = (pathId: string | undefined) => {
               image_url
             )
           )
-        `)
+        `
+        )
         .eq('learning_path_id', pathId)
         .order('order_index', { ascending: true });
 
@@ -218,10 +222,12 @@ export const useStudentLearningPaths = (userId: string | undefined) => {
 
       const { data, error } = await supabase
         .from('learning_path_enrollments')
-        .select(`
+        .select(
+          `
           *,
           learning_path:learning_paths (*)
-        `)
+        `
+        )
         .eq('user_id', userId)
         .order('enrolled_at', { ascending: false });
 
@@ -239,10 +245,7 @@ export const useStudentLearningPaths = (userId: string | undefined) => {
 /**
  * usePathEnrollment - Récupère l'enrollment d'un étudiant pour un path
  */
-export const usePathEnrollment = (
-  pathId: string | undefined,
-  userId: string | undefined
-) => {
+export const usePathEnrollment = (pathId: string | undefined, userId: string | undefined) => {
   return useQuery({
     queryKey: ['path-enrollment', pathId, userId],
     queryFn: async () => {
@@ -302,11 +305,11 @@ export const useCreateLearningPath = () => {
 
       return data as LearningPath;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['learning-paths', data.store_id] });
       toast({
         title: '✅ Parcours créé',
-        description: 'Le parcours d\'apprentissage a été créé avec succès',
+        description: "Le parcours d'apprentissage a été créé avec succès",
       });
     },
     onError: (error: any) => {
@@ -349,7 +352,7 @@ export const useAddCourseToPath = () => {
 
       return data as PathCourse;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['learning-path', data.learning_path_id] });
       toast({
         title: '✅ Cours ajouté',
@@ -360,7 +363,7 @@ export const useAddCourseToPath = () => {
       logger.error('Error in useAddCourseToPath', { error });
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible d\'ajouter le cours',
+        description: error.message || "Impossible d'ajouter le cours",
         variant: 'destructive',
       });
     },
@@ -407,7 +410,9 @@ export const useEnrollInPath = () => {
       return data as PathEnrollment;
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['path-enrollment', variables.pathId, variables.userId] });
+      queryClient.invalidateQueries({
+        queryKey: ['path-enrollment', variables.pathId, variables.userId],
+      });
       queryClient.invalidateQueries({ queryKey: ['student-learning-paths', variables.userId] });
       toast({
         title: '✅ Inscription réussie',
@@ -418,7 +423,7 @@ export const useEnrollInPath = () => {
       logger.error('Error in useEnrollInPath', { error });
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de s\'inscrire',
+        description: error.message || "Impossible de s'inscrire",
         variant: 'destructive',
       });
     },
@@ -433,13 +438,7 @@ export const useUpdatePathProgress = () => {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({
-      enrollmentId,
-      courseId,
-    }: {
-      enrollmentId: string;
-      courseId: string;
-    }) => {
+    mutationFn: async ({ enrollmentId, courseId }: { enrollmentId: string; courseId: string }) => {
       const { data, error } = await supabase.rpc('update_path_progress', {
         p_path_enrollment_id: enrollmentId,
         p_course_id: courseId,
@@ -466,10 +465,3 @@ export const useUpdatePathProgress = () => {
     },
   });
 };
-
-
-
-
-
-
-

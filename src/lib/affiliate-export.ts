@@ -7,11 +7,7 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { logger } from './logger';
 import { formatCurrency } from './utils';
-import type { 
-  AffiliateCommission, 
-  AffiliateLink, 
-  AffiliateWithdrawal 
-} from '@/types/affiliate';
+import type { AffiliateCommission, AffiliateLink, AffiliateWithdrawal } from '@/types/affiliate';
 
 /**
  * Échappe une valeur pour CSV
@@ -20,17 +16,17 @@ const escapeCsvValue = (value: unknown): string => {
   if (value === null || value === undefined) {
     return '';
   }
-  
+
   const stringValue = String(value);
-  
+
   // Échapper les guillemets doubles
   const escapedValue = stringValue.replace(/"/g, '""');
-  
+
   // Si la valeur contient des caractères spéciaux, l'entourer de guillemets
   if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
     return `"${escapedValue}"`;
   }
-  
+
   return escapedValue;
 };
 
@@ -41,19 +37,19 @@ const downloadCSV = (csvContent: string, filename: string): void => {
   // Ajouter BOM UTF-8 pour compatibilité Excel
   const BOM = '\uFEFF';
   const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
-  
+
   // Créer le lien de téléchargement
   const link = document.createElement('a');
   const url = URL.createObjectURL(blob);
-  
+
   link.setAttribute('href', url);
   link.setAttribute('download', filename);
   link.style.visibility = 'hidden';
-  
+
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
-  
+
   // Nettoyer l'URL
   URL.revokeObjectURL(url);
 };
@@ -104,29 +100,41 @@ export const exportCommissionsToCSV = (
       escapeCsvValue(commission.commission_type === 'percentage' ? 'Pourcentage' : 'Fixe'),
       escapeCsvValue(formatCurrency(commission.commission_amount)),
       escapeCsvValue(
-        commission.status === 'pending' ? 'En attente' :
-        commission.status === 'approved' ? 'Approuvée' :
-        commission.status === 'paid' ? 'Payée' :
-        commission.status === 'rejected' ? 'Rejetée' :
-        'Annulée'
+        commission.status === 'pending'
+          ? 'En attente'
+          : commission.status === 'approved'
+            ? 'Approuvée'
+            : commission.status === 'paid'
+              ? 'Payée'
+              : commission.status === 'rejected'
+                ? 'Rejetée'
+                : 'Annulée'
       ),
-      escapeCsvValue(commission.approved_at ? format(new Date(commission.approved_at), 'dd/MM/yyyy HH:mm', { locale: fr }) : ''),
-      escapeCsvValue(commission.paid_at ? format(new Date(commission.paid_at), 'dd/MM/yyyy HH:mm', { locale: fr }) : ''),
+      escapeCsvValue(
+        commission.approved_at
+          ? format(new Date(commission.approved_at), 'dd/MM/yyyy HH:mm', { locale: fr })
+          : ''
+      ),
+      escapeCsvValue(
+        commission.paid_at
+          ? format(new Date(commission.paid_at), 'dd/MM/yyyy HH:mm', { locale: fr })
+          : ''
+      ),
       escapeCsvValue(commission.payment_reference || ''),
     ]);
 
     // Construire le CSV
-    const csvContent = [
-      headers.join(','),
-      ...rows.map(row => row.join(','))
-    ].join('\n');
+    const csvContent = [headers.join(','), ...rows.map(row => row.join(','))].join('\n');
 
     // Télécharger
     downloadCSV(csvContent, csvFilename);
 
-    logger.info('Export CSV des commissions réussi', { count: commissions.length, filename: csvFilename });
+    logger.info('Export CSV des commissions réussi', {
+      count: commissions.length,
+      filename: csvFilename,
+    });
   } catch (error) {
-    logger.error('Erreur lors de l\'export CSV des commissions', { error });
+    logger.error("Erreur lors de l'export CSV des commissions", { error });
     throw error;
   }
 };
@@ -134,10 +142,7 @@ export const exportCommissionsToCSV = (
 /**
  * Exporte les liens d'affiliation en CSV
  */
-export const exportLinksToCSV = (
-  links: AffiliateLink[],
-  filename?: string
-): void => {
+export const exportLinksToCSV = (links: AffiliateLink[], filename?: string): void => {
   try {
     if (!links || links.length === 0) {
       throw new Error('Aucun lien à exporter');
@@ -165,9 +170,8 @@ export const exportLinksToCSV = (
 
     // Lignes de données
     const rows = links.map(link => {
-      const conversionRate = link.total_clicks > 0
-        ? ((link.total_sales / link.total_clicks) * 100).toFixed(2)
-        : '0.00';
+      const conversionRate =
+        link.total_clicks > 0 ? ((link.total_sales / link.total_clicks) * 100).toFixed(2) : '0.00';
 
       return [
         escapeCsvValue(link.id),
@@ -176,9 +180,7 @@ export const exportLinksToCSV = (
         escapeCsvValue(link.link_code),
         escapeCsvValue(link.full_url),
         escapeCsvValue(
-          link.status === 'active' ? 'Actif' :
-          link.status === 'paused' ? 'En pause' :
-          'Supprimé'
+          link.status === 'active' ? 'Actif' : link.status === 'paused' ? 'En pause' : 'Supprimé'
         ),
         escapeCsvValue(link.total_clicks.toString()),
         escapeCsvValue(link.total_sales.toString()),
@@ -186,22 +188,23 @@ export const exportLinksToCSV = (
         escapeCsvValue(formatCurrency(link.total_commission)),
         escapeCsvValue(conversionRate),
         escapeCsvValue(format(new Date(link.created_at), 'dd/MM/yyyy HH:mm', { locale: fr })),
-        escapeCsvValue(link.last_used_at ? format(new Date(link.last_used_at), 'dd/MM/yyyy HH:mm', { locale: fr }) : ''),
+        escapeCsvValue(
+          link.last_used_at
+            ? format(new Date(link.last_used_at), 'dd/MM/yyyy HH:mm', { locale: fr })
+            : ''
+        ),
       ];
     });
 
     // Construire le CSV
-    const csvContent = [
-      headers.join(','),
-      ...rows.map(row => row.join(','))
-    ].join('\n');
+    const csvContent = [headers.join(','), ...rows.map(row => row.join(','))].join('\n');
 
     // Télécharger
     downloadCSV(csvContent, csvFilename);
 
     logger.info('Export CSV des liens réussi', { count: links.length, filename: csvFilename });
   } catch (error) {
-    logger.error('Erreur lors de l\'export CSV des liens', { error });
+    logger.error("Erreur lors de l'export CSV des liens", { error });
     throw error;
   }
 };
@@ -254,21 +257,36 @@ export const exportWithdrawalsToCSV = (
         escapeCsvValue(formatCurrency(withdrawal.amount)),
         escapeCsvValue(withdrawal.currency),
         escapeCsvValue(
-          withdrawal.payment_method === 'mobile_money' ? 'Mobile Money' :
-          withdrawal.payment_method === 'bank_transfer' ? 'Virement bancaire' :
-          withdrawal.payment_method === 'paypal' ? 'PayPal' :
-          'Stripe'
+          withdrawal.payment_method === 'mobile_money'
+            ? 'Mobile Money'
+            : withdrawal.payment_method === 'bank_transfer'
+              ? 'Virement bancaire'
+              : withdrawal.payment_method === 'paypal'
+                ? 'PayPal'
+                : 'Stripe'
         ),
         escapeCsvValue(paymentDetailsStr),
         escapeCsvValue(
-          withdrawal.status === 'pending' ? 'En attente' :
-          withdrawal.status === 'processing' ? 'En traitement' :
-          withdrawal.status === 'completed' ? 'Complété' :
-          withdrawal.status === 'failed' ? 'Échoué' :
-          'Annulé'
+          withdrawal.status === 'pending'
+            ? 'En attente'
+            : withdrawal.status === 'processing'
+              ? 'En traitement'
+              : withdrawal.status === 'completed'
+                ? 'Complété'
+                : withdrawal.status === 'failed'
+                  ? 'Échoué'
+                  : 'Annulé'
         ),
-        escapeCsvValue(withdrawal.approved_at ? format(new Date(withdrawal.approved_at), 'dd/MM/yyyy HH:mm', { locale: fr }) : ''),
-        escapeCsvValue(withdrawal.processed_at ? format(new Date(withdrawal.processed_at), 'dd/MM/yyyy HH:mm', { locale: fr }) : ''),
+        escapeCsvValue(
+          withdrawal.approved_at
+            ? format(new Date(withdrawal.approved_at), 'dd/MM/yyyy HH:mm', { locale: fr })
+            : ''
+        ),
+        escapeCsvValue(
+          withdrawal.processed_at
+            ? format(new Date(withdrawal.processed_at), 'dd/MM/yyyy HH:mm', { locale: fr })
+            : ''
+        ),
         escapeCsvValue(withdrawal.transaction_reference || ''),
         escapeCsvValue(withdrawal.rejection_reason || withdrawal.failure_reason || ''),
         escapeCsvValue(format(new Date(withdrawal.created_at), 'dd/MM/yyyy HH:mm', { locale: fr })),
@@ -276,17 +294,17 @@ export const exportWithdrawalsToCSV = (
     });
 
     // Construire le CSV
-    const csvContent = [
-      headers.join(','),
-      ...rows.map(row => row.join(','))
-    ].join('\n');
+    const csvContent = [headers.join(','), ...rows.map(row => row.join(','))].join('\n');
 
     // Télécharger
     downloadCSV(csvContent, csvFilename);
 
-    logger.info('Export CSV des retraits réussi', { count: withdrawals.length, filename: csvFilename });
+    logger.info('Export CSV des retraits réussi', {
+      count: withdrawals.length,
+      filename: csvFilename,
+    });
   } catch (error) {
-    logger.error('Erreur lors de l\'export CSV des retraits', { error });
+    logger.error("Erreur lors de l'export CSV des retraits", { error });
     throw error;
   }
 };
@@ -330,13 +348,26 @@ export const exportFullAffiliateReport = (
         escapeCsvValue(comm.commission_rate.toFixed(2)),
         escapeCsvValue(comm.commission_type === 'percentage' ? 'Pourcentage' : 'Fixe'),
         escapeCsvValue(formatCurrency(comm.commission_amount)),
-        escapeCsvValue(comm.status === 'pending' ? 'En attente' : comm.status === 'approved' ? 'Approuvée' : 'Payée'),
+        escapeCsvValue(
+          comm.status === 'pending'
+            ? 'En attente'
+            : comm.status === 'approved'
+              ? 'Approuvée'
+              : 'Payée'
+        ),
       ]);
       return [headers.join(','), ...rows.map(row => row.join(','))].join('\n');
     };
 
     const generateLinksCSV = (): string => {
-      const headers = ['ID', 'Produit', 'Code lien', 'Total clics', 'Total ventes', 'Total commission (XOF)'];
+      const headers = [
+        'ID',
+        'Produit',
+        'Code lien',
+        'Total clics',
+        'Total ventes',
+        'Total commission (XOF)',
+      ];
       const rows = links.map(link => [
         escapeCsvValue(link.id),
         escapeCsvValue(link.product?.name || ''),
@@ -361,7 +392,7 @@ export const exportFullAffiliateReport = (
 
     // Résumé en haut
     const summary = [
-      ['RAPPORT COMPLET D\'AFFILIATION'],
+      ["RAPPORT COMPLET D'AFFILIATION"],
       ['Date génération', format(new Date(), 'dd/MM/yyyy HH:mm', { locale: fr })],
       [''],
       ['RÉSUMÉ'],
@@ -372,7 +403,7 @@ export const exportFullAffiliateReport = (
       ['COMMISSIONS'],
       generateCommissionsCSV(),
       [''],
-      ['LIENS D\'AFFILIATION'],
+      ["LIENS D'AFFILIATION"],
       generateLinksCSV(),
       [''],
       ['RETRAITS'],
@@ -385,21 +416,14 @@ export const exportFullAffiliateReport = (
     // Télécharger
     downloadCSV(csvContent, csvFilename);
 
-    logger.info('Export CSV du rapport complet réussi', { 
+    logger.info('Export CSV du rapport complet réussi', {
       commissions: commissions.length,
       links: links.length,
       withdrawals: withdrawals.length,
-      filename: csvFilename 
+      filename: csvFilename,
     });
   } catch (error) {
-    logger.error('Erreur lors de l\'export CSV du rapport complet', { error });
+    logger.error("Erreur lors de l'export CSV du rapport complet", { error });
     throw error;
   }
 };
-
-
-
-
-
-
-

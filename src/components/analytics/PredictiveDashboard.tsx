@@ -19,14 +19,14 @@ import {
   Target,
   BarChart3,
   Zap,
-  Download
+  Download,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import {
   useSalesPredictions,
   useStockPredictions,
-  useCategoryTrends
+  useCategoryTrends,
 } from '@/lib/analytics/predictive-analytics';
 import { useStoreContext } from '@/contexts/StoreContext';
 import { logger } from '@/lib/logger';
@@ -61,7 +61,10 @@ export const PredictiveDashboard: React.FC<PredictiveDashboardProps> = ({ classN
             ...new Set(
               storeProducts
                 .map(p => p.category)
-                .filter((category): category is string => typeof category === 'string' && category.length > 0)
+                .filter(
+                  (category): category is string =>
+                    typeof category === 'string' && category.length > 0
+                )
             ),
           ];
 
@@ -69,7 +72,10 @@ export const PredictiveDashboard: React.FC<PredictiveDashboardProps> = ({ classN
           setCategories(uniqueCategories);
         }
       } catch (error) {
-        logger.error('Error fetching store data for predictions', { error, storeId: selectedStore.id });
+        logger.error('Error fetching store data for predictions', {
+          error,
+          storeId: selectedStore.id,
+        });
       }
     };
 
@@ -85,11 +91,15 @@ export const PredictiveDashboard: React.FC<PredictiveDashboardProps> = ({ classN
   const globalMetrics = useMemo(() => {
     if (!salesPredictions || !stockPredictions) return null;
 
-    const totalPredictedSales = salesPredictions.reduce((sum, pred) => sum + pred.predictedSales, 0);
-    const avgConfidence = salesPredictions.reduce((sum, pred) => sum + pred.confidence, 0) / salesPredictions.length;
+    const totalPredictedSales = salesPredictions.reduce(
+      (sum, pred) => sum + pred.predictedSales,
+      0
+    );
+    const avgConfidence =
+      salesPredictions.reduce((sum, pred) => sum + pred.confidence, 0) / salesPredictions.length;
 
-    const stockAlerts = stockPredictions.filter(pred =>
-      pred.currentStock <= pred.recommendedStock * 0.2 // Stock critique (< 20% du recommandé)
+    const stockAlerts = stockPredictions.filter(
+      pred => pred.currentStock <= pred.recommendedStock * 0.2 // Stock critique (< 20% du recommandé)
     ).length;
 
     const growingProducts = salesPredictions.filter(pred => pred.trend === 'increasing').length;
@@ -101,7 +111,7 @@ export const PredictiveDashboard: React.FC<PredictiveDashboardProps> = ({ classN
       stockAlerts,
       growingProducts,
       decliningProducts,
-      totalProducts: products.length
+      totalProducts: products.length,
     };
   }, [salesPredictions, stockPredictions, products.length]);
 
@@ -112,7 +122,7 @@ export const PredictiveDashboard: React.FC<PredictiveDashboardProps> = ({ classN
 
   if (salesLoading || stockLoading || trendsLoading) {
     return (
-      <div className={cn("space-y-6", className)}>
+      <div className={cn('space-y-6', className)}>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <Card key={i}>
@@ -140,7 +150,7 @@ export const PredictiveDashboard: React.FC<PredictiveDashboardProps> = ({ classN
   }
 
   return (
-    <div className={cn("space-y-6", className)}>
+    <div className={cn('space-y-6', className)}>
       {/* Header avec contrôles */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
@@ -153,7 +163,7 @@ export const PredictiveDashboard: React.FC<PredictiveDashboardProps> = ({ classN
         <div className="flex items-center gap-2">
           {/* Sélecteur de période */}
           <div className="flex items-center gap-1">
-            {(['7d', '30d', '90d'] as const).map((period) => (
+            {(['7d', '30d', '90d'] as const).map(period => (
               <Button
                 key={period}
                 variant={selectedTimeframe === period ? 'default' : 'outline'}
@@ -193,7 +203,9 @@ export const PredictiveDashboard: React.FC<PredictiveDashboardProps> = ({ classN
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Confiance Moyenne</p>
-                  <p className="text-2xl font-bold">{Math.round(globalMetrics.avgConfidence * 100)}%</p>
+                  <p className="text-2xl font-bold">
+                    {Math.round(globalMetrics.avgConfidence * 100)}%
+                  </p>
                   <p className="text-xs text-muted-foreground">Précision des prédictions</p>
                 </div>
                 <Target className="h-8 w-8 text-blue-500" />
@@ -220,8 +232,12 @@ export const PredictiveDashboard: React.FC<PredictiveDashboardProps> = ({ classN
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Tendance Produits</p>
                   <div className="flex items-center gap-2">
-                    <span className="text-lg font-bold text-green-600">+{globalMetrics.growingProducts}</span>
-                    <span className="text-lg font-bold text-red-600">-{globalMetrics.decliningProducts}</span>
+                    <span className="text-lg font-bold text-green-600">
+                      +{globalMetrics.growingProducts}
+                    </span>
+                    <span className="text-lg font-bold text-red-600">
+                      -{globalMetrics.decliningProducts}
+                    </span>
                   </div>
                   <p className="text-xs text-muted-foreground">Croissance vs Déclin</p>
                 </div>
@@ -237,8 +253,8 @@ export const PredictiveDashboard: React.FC<PredictiveDashboardProps> = ({ classN
         <Alert className="border-red-200 bg-red-50">
           <AlertTriangle className="h-4 w-4 text-red-600" />
           <AlertDescription className="text-red-800">
-            <strong>{globalMetrics.stockAlerts} produit(s)</strong> nécessitent une attention immédiate.
-            Vérifiez les prédictions de stock ci-dessous.
+            <strong>{globalMetrics.stockAlerts} produit(s)</strong> nécessitent une attention
+            immédiate. Vérifiez les prédictions de stock ci-dessous.
           </AlertDescription>
         </Alert>
       )}
@@ -256,31 +272,50 @@ export const PredictiveDashboard: React.FC<PredictiveDashboardProps> = ({ classN
             <div className="space-y-4">
               {stockPredictions
                 .filter(pred => pred.currentStock <= pred.recommendedStock * 0.5) // Stock faible
-                .sort((a, b) => a.currentStock / Math.max(a.predictedDemand, 1) - b.currentStock / Math.max(b.predictedDemand, 1))
+                .sort(
+                  (a, b) =>
+                    a.currentStock / Math.max(a.predictedDemand, 1) -
+                    b.currentStock / Math.max(b.predictedDemand, 1)
+                )
                 .slice(0, 5)
-                .map((prediction) => (
-                  <div key={prediction.productId} className="flex items-center justify-between p-4 border rounded-lg">
+                .map(prediction => (
+                  <div
+                    key={prediction.productId}
+                    className="flex items-center justify-between p-4 border rounded-lg"
+                  >
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <Package className="h-4 w-4 text-muted-foreground" />
-                        <span className="font-medium">Produit {prediction.productId.slice(0, 8)}</span>
+                        <span className="font-medium">
+                          Produit {prediction.productId.slice(0, 8)}
+                        </span>
                         <Badge variant={prediction.confidence > 0.7 ? 'default' : 'secondary'}>
                           {Math.round(prediction.confidence * 100)}% confiance
                         </Badge>
                       </div>
                       <div className="grid grid-cols-3 gap-4 text-sm text-muted-foreground">
                         <div>
-                          Stock actuel: <span className="font-medium text-foreground">{prediction.currentStock}</span>
+                          Stock actuel:{' '}
+                          <span className="font-medium text-foreground">
+                            {prediction.currentStock}
+                          </span>
                         </div>
                         <div>
-                          Demand prédite: <span className="font-medium text-foreground">{prediction.predictedDemand}</span>
+                          Demand prédite:{' '}
+                          <span className="font-medium text-foreground">
+                            {prediction.predictedDemand}
+                          </span>
                         </div>
                         <div>
-                          Recommandé: <span className="font-medium text-green-600">{prediction.recommendedStock}</span>
+                          Recommandé:{' '}
+                          <span className="font-medium text-green-600">
+                            {prediction.recommendedStock}
+                          </span>
                         </div>
                       </div>
                       <div className="mt-2 text-xs text-muted-foreground">
-                        Réapprovisionnement conseillé avant le {prediction.restockDate.toLocaleDateString()}
+                        Réapprovisionnement conseillé avant le{' '}
+                        {prediction.restockDate.toLocaleDateString()}
                       </div>
                     </div>
                     <Button size="sm" variant="outline">
@@ -288,7 +323,8 @@ export const PredictiveDashboard: React.FC<PredictiveDashboardProps> = ({ classN
                     </Button>
                   </div>
                 ))}
-              {stockPredictions.filter(pred => pred.currentStock <= pred.recommendedStock * 0.5).length === 0 && (
+              {stockPredictions.filter(pred => pred.currentStock <= pred.recommendedStock * 0.5)
+                .length === 0 && (
                 <p className="text-center text-muted-foreground py-8">
                   Aucun problème de stock détecté. Tous vos produits sont bien approvisionnés ! 🎉
                 </p>
@@ -317,7 +353,7 @@ export const PredictiveDashboard: React.FC<PredictiveDashboardProps> = ({ classN
                 .filter(trend => trend.trendStrength > 0.1)
                 .sort((a, b) => b.trendStrength - a.trendStrength)
                 .slice(0, 4)
-                .map((trend) => (
+                .map(trend => (
                   <div key={trend.category} className="p-4 border rounded-lg">
                     <div className="flex items-center justify-between mb-3">
                       <h4 className="font-medium capitalize">{trend.category}</h4>
@@ -327,11 +363,14 @@ export const PredictiveDashboard: React.FC<PredictiveDashboardProps> = ({ classN
                         ) : (
                           <TrendingDown className="h-4 w-4 text-red-500" />
                         )}
-                        <span className={cn(
-                          "text-sm font-medium",
-                          trend.predictedGrowth > 0 ? "text-green-600" : "text-red-600"
-                        )}>
-                          {trend.predictedGrowth > 0 ? '+' : ''}{Math.round(trend.predictedGrowth)}
+                        <span
+                          className={cn(
+                            'text-sm font-medium',
+                            trend.predictedGrowth > 0 ? 'text-green-600' : 'text-red-600'
+                          )}
+                        >
+                          {trend.predictedGrowth > 0 ? '+' : ''}
+                          {Math.round(trend.predictedGrowth)}
                         </span>
                       </div>
                     </div>
@@ -339,16 +378,19 @@ export const PredictiveDashboard: React.FC<PredictiveDashboardProps> = ({ classN
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">Force de tendance</span>
-                        <span className="font-medium">{Math.round(trend.trendStrength * 100)}%</span>
+                        <span className="font-medium">
+                          {Math.round(trend.trendStrength * 100)}%
+                        </span>
                       </div>
 
                       {trend.topProducts.length > 0 && (
                         <div>
                           <p className="text-sm text-muted-foreground mb-1">Top produits :</p>
                           <div className="flex flex-wrap gap-1">
-                            {trend.topProducts.slice(0, 3).map((product) => (
+                            {trend.topProducts.slice(0, 3).map(product => (
                               <Badge key={product.productId} variant="outline" className="text-xs">
-                                {product.productId.slice(0, 6)} (+{Math.round(product.predictedGrowth)})
+                                {product.productId.slice(0, 6)} (+
+                                {Math.round(product.predictedGrowth)})
                               </Badge>
                             ))}
                           </div>

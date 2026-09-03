@@ -1,11 +1,11 @@
 /**
  * Hook useInterval - Gérer les intervalles
  * Fournit une API simple pour créer et nettoyer des intervalles
- * 
+ *
  * @example
  * ```tsx
  * const [count, setCount] = useState(0);
- * 
+ *
  * useInterval(() => {
  *   setCount(c => c + 1);
  * }, 1000);
@@ -61,10 +61,3 @@ export function useInterval(
     return () => clearInterval(id);
   }, [delay, immediate]);
 }
-
-
-
-
-
-
-

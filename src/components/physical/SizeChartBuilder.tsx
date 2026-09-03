@@ -28,17 +28,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import {
-  Ruler,
-  Plus,
-  Trash2,
-  Edit,
-  Copy,
-  Download,
-  Upload,
-  Eye,
-  Save,
-} from 'lucide-react';
+import { Ruler, Plus, Trash2, Edit, Copy, Download, Upload, Eye, Save } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 // ============================================================================
@@ -120,7 +110,7 @@ export function SizeChartBuilder({
   const handleAddSize = () => {
     if (!newSizeName.trim() || chart.sizes?.includes(newSizeName.trim())) return;
 
-    setChart((prev) => ({
+    setChart(prev => ({
       ...prev,
       sizes: [...(prev.sizes || []), newSizeName.trim()],
     }));
@@ -129,14 +119,15 @@ export function SizeChartBuilder({
 
   // Remove size
   const handleRemoveSize = (sizeName: string) => {
-    setChart((prev) => ({
+    setChart(prev => ({
       ...prev,
-      sizes: prev.sizes?.filter((s) => s !== sizeName) || [],
-      measurements: prev.measurements?.map((m) => {
-        const newValues = { ...m.values };
-        delete newValues[sizeName];
-        return { ...m, values: newValues };
-      }) || [],
+      sizes: prev.sizes?.filter(s => s !== sizeName) || [],
+      measurements:
+        prev.measurements?.map(m => {
+          const newValues = { ...m.values };
+          delete newValues[sizeName];
+          return { ...m, values: newValues };
+        }) || [],
     }));
   };
 
@@ -144,18 +135,18 @@ export function SizeChartBuilder({
   const handleAddMeasurement = () => {
     if (!newMeasurementLabel.trim()) return;
 
-    const  newMeasurement: SizeChartMeasurement = {
+    const newMeasurement: SizeChartMeasurement = {
       label: newMeasurementLabel.trim(),
       unit: 'cm',
       values: {},
     };
 
     // Initialize values for all sizes
-    chart.sizes?.forEach((size) => {
+    chart.sizes?.forEach(size => {
       newMeasurement.values[size] = '';
     });
 
-    setChart((prev) => ({
+    setChart(prev => ({
       ...prev,
       measurements: [...(prev.measurements || []), newMeasurement],
     }));
@@ -164,7 +155,7 @@ export function SizeChartBuilder({
 
   // Remove measurement
   const handleRemoveMeasurement = (index: number) => {
-    setChart((prev) => ({
+    setChart(prev => ({
       ...prev,
       measurements: prev.measurements?.filter((_, i) => i !== index) || [],
     }));
@@ -176,24 +167,25 @@ export function SizeChartBuilder({
     sizeName: string,
     value: string | number
   ) => {
-    setChart((prev) => ({
+    setChart(prev => ({
       ...prev,
-      measurements: prev.measurements?.map((m, i) => {
-        if (i !== measurementIndex) return m;
-        return {
-          ...m,
-          values: {
-            ...m.values,
-            [sizeName]: value,
-          },
-        };
-      }) || [],
+      measurements:
+        prev.measurements?.map((m, i) => {
+          if (i !== measurementIndex) return m;
+          return {
+            ...m,
+            values: {
+              ...m.values,
+              [sizeName]: value,
+            },
+          };
+        }) || [],
     }));
   };
 
   // Load template
   const handleLoadTemplate = (templateId: string) => {
-    const template = SIZE_CHART_TEMPLATES.find((t) => t.id === templateId);
+    const template = SIZE_CHART_TEMPLATES.find(t => t.id === templateId);
     if (!template) return;
 
     // Convertir automatiquement les unités selon le système
@@ -215,20 +207,18 @@ export function SizeChartBuilder({
 
   // Convert unit for a measurement
   const handleConvertMeasurementUnit = (measurementIndex: number, targetUnit: MeasurementUnit) => {
-    setChart((prev) => {
+    setChart(prev => {
       const measurement = prev.measurements?.[measurementIndex];
       if (!measurement) return prev;
 
-      const converted = convertSizeChartUnit(
-        { measurements: [measurement] },
-        targetUnit
-      );
+      const converted = convertSizeChartUnit({ measurements: [measurement] }, targetUnit);
 
       return {
         ...prev,
-        measurements: prev.measurements?.map((m, i) =>
-          i === measurementIndex ? converted.measurements[0] : m
-        ) || [],
+        measurements:
+          prev.measurements?.map((m, i) =>
+            i === measurementIndex ? converted.measurements[0] : m
+          ) || [],
       };
     });
   };
@@ -240,7 +230,7 @@ export function SizeChartBuilder({
       return;
     }
 
-    const  finalChart: SizeChart = {
+    const finalChart: SizeChart = {
       id: chart.id || `chart_${Date.now()}`,
       name: chart.name,
       system: chart.system || 'universal',
@@ -306,7 +296,7 @@ export function SizeChartBuilder({
                 id="chart-name"
                 placeholder="Ex: Guide T-Shirt Homme"
                 value={chart.name || ''}
-                onChange={(e) => setChart({ ...chart, name: e.target.value })}
+                onChange={e => setChart({ ...chart, name: e.target.value })}
               />
             </div>
 
@@ -340,8 +330,8 @@ export function SizeChartBuilder({
               <Input
                 placeholder="Ex: S, M, L, XL, 38, 40..."
                 value={newSizeName}
-                onChange={(e) => setNewSizeName(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleAddSize()}
+                onChange={e => setNewSizeName(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleAddSize()}
               />
               <Button onClick={handleAddSize} className="gap-2">
                 <Plus className="h-4 w-4" />
@@ -351,7 +341,7 @@ export function SizeChartBuilder({
 
             {chart.sizes && chart.sizes.length > 0 && (
               <div className="flex flex-wrap gap-2">
-                {chart.sizes.map((size) => (
+                {chart.sizes.map(size => (
                   <Badge key={size} variant="secondary" className="gap-2 px-3 py-1">
                     {size}
                     <button
@@ -376,8 +366,8 @@ export function SizeChartBuilder({
               <Input
                 placeholder="Ex: Tour de poitrine, Longueur, Largeur..."
                 value={newMeasurementLabel}
-                onChange={(e) => setNewMeasurementLabel(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleAddMeasurement()}
+                onChange={e => setNewMeasurementLabel(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleAddMeasurement()}
               />
               <Button
                 onClick={handleAddMeasurement}
@@ -395,59 +385,62 @@ export function SizeChartBuilder({
               </p>
             )}
 
-            {chart.measurements && chart.measurements.length > 0 && chart.sizes && chart.sizes.length > 0 && (
-              <div className="rounded-md border overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[200px]">Mesure</TableHead>
-                      {chart.sizes.map((size) => (
-                        <TableHead key={size} className="text-center">
-                          {size}
-                        </TableHead>
-                      ))}
-                      <TableHead className="w-[100px]"></TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {chart.measurements.map((measurement, mIndex) => (
-                      <TableRow key={mIndex}>
-                        <TableCell>
-                          <div>
-                            <p className="font-medium">{measurement.label}</p>
-                            <Badge variant="outline" className="text-xs mt-1">
-                              {measurement.unit}
-                            </Badge>
-                          </div>
-                        </TableCell>
-                        {chart.sizes!.map((size) => (
-                          <TableCell key={size}>
-                            <Input
-                              type="text"
-                              placeholder="-"
-                              value={measurement.values[size] || ''}
-                              onChange={(e) =>
-                                handleUpdateMeasurement(mIndex, size, e.target.value)
-                              }
-                              className="text-center"
-                            />
-                          </TableCell>
+            {chart.measurements &&
+              chart.measurements.length > 0 &&
+              chart.sizes &&
+              chart.sizes.length > 0 && (
+                <div className="rounded-md border overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-[200px]">Mesure</TableHead>
+                        {chart.sizes.map(size => (
+                          <TableHead key={size} className="text-center">
+                            {size}
+                          </TableHead>
                         ))}
-                        <TableCell>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleRemoveMeasurement(mIndex)}
-                          >
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
-                        </TableCell>
+                        <TableHead className="w-[100px]"></TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
+                    </TableHeader>
+                    <TableBody>
+                      {chart.measurements.map((measurement, mIndex) => (
+                        <TableRow key={mIndex}>
+                          <TableCell>
+                            <div>
+                              <p className="font-medium">{measurement.label}</p>
+                              <Badge variant="outline" className="text-xs mt-1">
+                                {measurement.unit}
+                              </Badge>
+                            </div>
+                          </TableCell>
+                          {chart.sizes!.map(size => (
+                            <TableCell key={size}>
+                              <Input
+                                type="text"
+                                placeholder="-"
+                                value={measurement.values[size] || ''}
+                                onChange={e =>
+                                  handleUpdateMeasurement(mIndex, size, e.target.value)
+                                }
+                                className="text-center"
+                              />
+                            </TableCell>
+                          ))}
+                          <TableCell>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleRemoveMeasurement(mIndex)}
+                            >
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
           </div>
 
           {/* Notes */}
@@ -457,7 +450,7 @@ export function SizeChartBuilder({
               id="notes"
               placeholder="Ex: Les mesures sont en centimètres. Mesurez à plat. Tolérance ±1cm."
               value={chart.notes || ''}
-              onChange={(e) => setChart({ ...chart, notes: e.target.value })}
+              onChange={e => setChart({ ...chart, notes: e.target.value })}
               rows={3}
             />
           </div>
@@ -476,7 +469,11 @@ export function SizeChartBuilder({
 
           <div className="grid gap-4 md:grid-cols-2 py-4">
             {Object.entries(SIZE_TEMPLATES).map(([key, template]) => (
-              <Card key={key} className="cursor-pointer hover:border-primary" onClick={() => handleLoadTemplate(key)}>
+              <Card
+                key={key}
+                className="cursor-pointer hover:border-primary"
+                onClick={() => handleLoadTemplate(key)}
+              >
                 <CardHeader>
                   <CardTitle className="text-base flex items-center gap-2">
                     <Ruler className="h-4 w-4" />
@@ -513,19 +510,20 @@ export function SizeChartBuilder({
         <DialogContent className="max-w-4xl">
           <DialogHeader>
             <DialogTitle>{chart.name || 'Guide des Tailles'}</DialogTitle>
-            <DialogDescription>
-              Aperçu du guide tel qu'il apparaîtra aux clients
-            </DialogDescription>
+            <DialogDescription>Aperçu du guide tel qu'il apparaîtra aux clients</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
-            {chart.measurements && chart.measurements.length > 0 && chart.sizes && chart.sizes.length > 0 ? (
+            {chart.measurements &&
+            chart.measurements.length > 0 &&
+            chart.sizes &&
+            chart.sizes.length > 0 ? (
               <div className="rounded-md border overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>Mesure</TableHead>
-                      {chart.sizes.map((size) => (
+                      {chart.sizes.map(size => (
                         <TableHead key={size} className="text-center font-bold">
                           {size}
                         </TableHead>
@@ -538,7 +536,7 @@ export function SizeChartBuilder({
                         <TableCell className="font-medium">
                           {measurement.label} ({measurement.unit})
                         </TableCell>
-                        {chart.sizes!.map((size) => (
+                        {chart.sizes!.map(size => (
                           <TableCell key={size} className="text-center">
                             {measurement.values[size] || '-'}
                           </TableCell>
@@ -570,10 +568,3 @@ export function SizeChartBuilder({
     </div>
   );
 }
-
-
-
-
-
-
-

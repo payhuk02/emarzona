@@ -37,17 +37,19 @@ export const StoreSitemapGenerator = ({ store }: StoreSitemapGeneratorProps) => 
 
       // Déterminer l'URL de base
       const baseUrl = window.location.origin;
-      const storeUrl = store.custom_domain 
-        ? (store.ssl_enabled ? `https://${store.custom_domain}` : `http://${store.custom_domain}`)
+      const storeUrl = store.custom_domain
+        ? store.ssl_enabled
+          ? `https://${store.custom_domain}`
+          : `http://${store.custom_domain}`
         : undefined;
 
       // Pages additionnelles à inclure
-      const  includePages: string[] = [];
-      
+      const includePages: string[] = [];
+
       // Ajouter les pages légales si disponibles
       if (store.legal_pages) {
-        const legalPages = Object.keys(store.legal_pages).filter(key => 
-          store.legal_pages?.[key as keyof typeof store.legal_pages]
+        const legalPages = Object.keys(store.legal_pages).filter(
+          key => store.legal_pages?.[key as keyof typeof store.legal_pages]
         );
         legalPages.forEach(page => {
           includePages.push(`/legal/${page}`);
@@ -60,7 +62,7 @@ export const StoreSitemapGenerator = ({ store }: StoreSitemapGeneratorProps) => 
         storeSlug: store.slug,
         storeUrl,
         products: products || [],
-        includePages
+        includePages,
       });
 
       // Télécharger le sitemap
@@ -71,7 +73,7 @@ export const StoreSitemapGenerator = ({ store }: StoreSitemapGeneratorProps) => 
         title: 'Sitemap généré',
         description: `Le sitemap a été téléchargé avec ${(products?.length || 0) + 1 + includePages.length} URLs.`,
       });
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       logger.error('Error generating sitemap', { error, storeId: store.id });
       toast({
         title: 'Erreur',
@@ -97,8 +99,9 @@ export const StoreSitemapGenerator = ({ store }: StoreSitemapGeneratorProps) => 
       <CardContent>
         <div className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            Un sitemap XML aide les moteurs de recherche à découvrir et indexer toutes les pages de votre boutique.
-            Il inclut automatiquement votre page d'accueil, tous vos produits actifs et vos pages légales.
+            Un sitemap XML aide les moteurs de recherche à découvrir et indexer toutes les pages de
+            votre boutique. Il inclut automatiquement votre page d'accueil, tous vos produits actifs
+            et vos pages légales.
           </p>
 
           <Button
@@ -120,18 +123,17 @@ export const StoreSitemapGenerator = ({ store }: StoreSitemapGeneratorProps) => 
           </Button>
 
           <div className="text-xs text-muted-foreground space-y-1">
-            <p>💡 <strong>Astuce :</strong> Après téléchargement, soumettez votre sitemap à Google Search Console.</p>
-            <p>📝 Le fichier sitemap.xml doit être placé à la racine de votre domaine ou configuré via votre hébergeur.</p>
+            <p>
+              💡 <strong>Astuce :</strong> Après téléchargement, soumettez votre sitemap à Google
+              Search Console.
+            </p>
+            <p>
+              📝 Le fichier sitemap.xml doit être placé à la racine de votre domaine ou configuré
+              via votre hébergeur.
+            </p>
           </div>
         </div>
       </CardContent>
     </Card>
   );
 };
-
-
-
-
-
-
-

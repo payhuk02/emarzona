@@ -34,7 +34,7 @@ declare module 'react-big-calendar' {
 
   export type View = 'month' | 'week' | 'work_week' | 'day' | 'agenda';
 
-  export const Views : {
+  export const Views: {
     MONTH: 'month';
     WEEK: 'week';
     WORK_WEEK: 'work_week';
@@ -92,7 +92,12 @@ declare module 'react-big-calendar' {
     toolbar?: boolean;
     showMultiDayTimes?: boolean;
     scrollToTime?: Date;
-    onSelectSlot?: (slotInfo: { start: Date; end: Date; slots: Date[]; action: 'select' | 'click' | 'doubleClick' }) => void;
+    onSelectSlot?: (slotInfo: {
+      start: Date;
+      end: Date;
+      slots: Date[];
+      action: 'select' | 'click' | 'doubleClick';
+    }) => void;
     onSelecting?: (range: { start: Date; end: Date }) => boolean;
     onRangeChange?: (range: Date[] | { start: Date; end: Date }) => void;
     resourceIdAccessor?: string | ((event: TEvent) => any);
@@ -114,13 +119,7 @@ declare module 'react-big-calendar' {
     [key: string]: unknown;
   }
 
-  export class Calendar<TEvent extends Event = Event, TResource = any> extends Component<CalendarProps<TEvent, TResource>> {}
+  export class Calendar<TEvent extends Event = Event, TResource = any> extends Component<
+    CalendarProps<TEvent, TResource>
+  > {}
 }
-
-
-
-
-
-
-
-

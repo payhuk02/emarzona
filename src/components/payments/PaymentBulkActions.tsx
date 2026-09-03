@@ -1,18 +1,18 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { 
-  CheckSquare, 
-  Square, 
-  CheckCircle, 
-  XCircle, 
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import {
+  CheckSquare,
+  Square,
+  CheckCircle,
+  XCircle,
   Clock,
-  Trash2, 
-  Copy, 
+  Trash2,
+  Copy,
   Download,
-  MoreHorizontal
-} from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
+  MoreHorizontal,
+} from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,9 +22,9 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Payment } from "@/hooks/usePayments";
-import { useToast } from "@/hooks/use-toast";
+} from '@/components/ui/alert-dialog';
+import { Payment } from '@/hooks/usePayments';
+import { useToast } from '@/hooks/use-toast';
 
 interface PaymentBulkActionsProps {
   selectedPayments: string[];
@@ -60,24 +60,24 @@ const PaymentBulkActions = ({
   const handleBulkComplete = () => {
     onBulkAction('complete', selectedPayments);
     toast({
-      title: "Paiements complétés",
-      description: `${selectedCount} paiement${selectedCount > 1 ? "s" : ""} marqué${selectedCount > 1 ? "s" : ""} comme complété${selectedCount > 1 ? "s" : ""}`,
+      title: 'Paiements complétés',
+      description: `${selectedCount} paiement${selectedCount > 1 ? 's' : ''} marqué${selectedCount > 1 ? 's' : ''} comme complété${selectedCount > 1 ? 's' : ''}`,
     });
   };
 
   const handleBulkFail = () => {
     onBulkAction('fail', selectedPayments);
     toast({
-      title: "Paiements échoués",
-      description: `${selectedCount} paiement${selectedCount > 1 ? "s" : ""} marqué${selectedCount > 1 ? "s" : ""} comme échoué${selectedCount > 1 ? "s" : ""}`,
+      title: 'Paiements échoués',
+      description: `${selectedCount} paiement${selectedCount > 1 ? 's' : ''} marqué${selectedCount > 1 ? 's' : ''} comme échoué${selectedCount > 1 ? 's' : ''}`,
     });
   };
 
   const handleBulkPending = () => {
     onBulkAction('pending', selectedPayments);
     toast({
-      title: "Paiements en attente",
-      description: `${selectedCount} paiement${selectedCount > 1 ? "s" : ""} marqué${selectedCount > 1 ? "s" : ""} comme en attente`,
+      title: 'Paiements en attente',
+      description: `${selectedCount} paiement${selectedCount > 1 ? 's' : ''} marqué${selectedCount > 1 ? 's' : ''} comme en attente`,
     });
   };
 
@@ -90,26 +90,38 @@ const PaymentBulkActions = ({
     onSelectionChange([]);
     setShowDeleteDialog(false);
     toast({
-      title: "Paiements supprimés",
-      description: `${selectedCount} paiement${selectedCount > 1 ? "s" : ""} supprimé${selectedCount > 1 ? "s" : ""}`,
+      title: 'Paiements supprimés',
+      description: `${selectedCount} paiement${selectedCount > 1 ? 's' : ''} supprimé${selectedCount > 1 ? 's' : ''}`,
     });
   };
 
   const handleExport = () => {
     const selectedPaymentsData = payments.filter(p => selectedPayments.includes(p.id));
     const csvContent = [
-      ['ID Transaction', 'Client', 'Montant', 'Devise', 'Méthode', 'Statut', 'Commande', 'Date', 'Notes'].join(','),
-      ...selectedPaymentsData.map(payment => [
-        `"${payment.transaction_id || ''}"`,
-        `"${payment.customers?.name || ''}"`,
-        payment.amount,
-        payment.currency,
-        `"${payment.payment_method}"`,
-        `"${payment.status}"`,
-        `"${payment.orders?.order_number || ''}"`,
-        new Date(payment.created_at).toLocaleDateString('fr-FR'),
-        `"${payment.notes || ''}"`
-      ].join(','))
+      [
+        'ID Transaction',
+        'Client',
+        'Montant',
+        'Devise',
+        'Méthode',
+        'Statut',
+        'Commande',
+        'Date',
+        'Notes',
+      ].join(','),
+      ...selectedPaymentsData.map(payment =>
+        [
+          `"${payment.transaction_id || ''}"`,
+          `"${payment.customers?.name || ''}"`,
+          payment.amount,
+          payment.currency,
+          `"${payment.payment_method}"`,
+          `"${payment.status}"`,
+          `"${payment.orders?.order_number || ''}"`,
+          new Date(payment.created_at).toLocaleDateString('fr-FR'),
+          `"${payment.notes || ''}"`,
+        ].join(',')
+      ),
     ].join('\n');
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -123,29 +135,18 @@ const PaymentBulkActions = ({
     document.body.removeChild(link);
 
     toast({
-      title: "Export réussi",
-      description: `${selectedCount} paiement${selectedCount > 1 ? "s" : ""} exporté${selectedCount > 1 ? "s" : ""}`,
+      title: 'Export réussi',
+      description: `${selectedCount} paiement${selectedCount > 1 ? 's' : ''} exporté${selectedCount > 1 ? 's' : ''}`,
     });
   };
 
   if (selectedCount === 0) {
     return (
       <div className="flex items-center gap-2">
-        <Button
-          variant="ghost"
-          size="sm"
-          onSelect={handleSelectAll}
-          className="h-8 w-8 p-0"
-        >
-          {isAllSelected ? (
-            <CheckSquare className="h-4 w-4" />
-          ) : (
-            <Square className="h-4 w-4" />
-          )}
+        <Button variant="ghost" size="sm" onSelect={handleSelectAll} className="h-8 w-8 p-0">
+          {isAllSelected ? <CheckSquare className="h-4 w-4" /> : <Square className="h-4 w-4" />}
         </Button>
-        <span className="text-sm text-muted-foreground">
-          Sélectionner tout
-        </span>
+        <span className="text-sm text-muted-foreground">Sélectionner tout</span>
       </div>
     );
   }
@@ -154,12 +155,7 @@ const PaymentBulkActions = ({
     <>
       <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg border">
         <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onSelect={handleSelectAll}
-            className="h-6 w-6 p-0"
-          >
+          <Button variant="ghost" size="sm" onSelect={handleSelectAll} className="h-6 w-6 p-0">
             {isAllSelected ? (
               <CheckSquare className="h-4 w-4" />
             ) : isIndeterminate ? (
@@ -169,48 +165,31 @@ const PaymentBulkActions = ({
             )}
           </Button>
           <Badge variant="secondary" className="text-xs">
-            {selectedCount} sélectionné{selectedCount > 1 ? "s" : ""}
+            {selectedCount} sélectionné{selectedCount > 1 ? 's' : ''}
           </Badge>
         </div>
 
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onSelect={handleBulkComplete}
-            className="text-xs"
-          >
+          <Button variant="outline" size="sm" onSelect={handleBulkComplete} className="text-xs">
             <CheckCircle className="h-3 w-3 mr-1" />
             Compléter
           </Button>
-          
-          <Button
-            variant="outline"
-            size="sm"
-            onSelect={handleBulkPending}
-            className="text-xs"
-          >
+
+          <Button variant="outline" size="sm" onSelect={handleBulkPending} className="text-xs">
             <Clock className="h-3 w-3 mr-1" />
             En attente
           </Button>
 
-          <Button
-            variant="outline"
-            size="sm"
-            onSelect={handleBulkFail}
-            className="text-xs"
-          >
+          <Button variant="outline" size="sm" onSelect={handleBulkFail} className="text-xs">
             <XCircle className="h-3 w-3 mr-1" />
             Échoué
           </Button>
 
           <Select>
             <SelectTrigger className="text-xs">
-
-                <MoreHorizontal className="h-3 w-3 mr-1" />
-                Plus
-              
-</SelectTrigger>
+              <MoreHorizontal className="h-3 w-3 mr-1" />
+              Plus
+            </SelectTrigger>
             <SelectContent mobileVariant="sheet" className="min-w-[200px]">
               <SelectItem value="edit" onSelect={handleExport}>
                 <Download className="h-4 w-4 mr-2" />
@@ -231,13 +210,17 @@ const PaymentBulkActions = ({
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
             <AlertDialogDescription>
-              Êtes-vous sûr de vouloir supprimer {selectedCount} paiement{selectedCount > 1 ? "s" : ""} ? 
-              Cette action est irréversible et supprimera définitivement {selectedCount > 1 ? "ces paiements" : "ce paiement"}.
+              Êtes-vous sûr de vouloir supprimer {selectedCount} paiement
+              {selectedCount > 1 ? 's' : ''} ? Cette action est irréversible et supprimera
+              définitivement {selectedCount > 1 ? 'ces paiements' : 'ce paiement'}.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Annuler</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
               Supprimer
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -248,9 +231,3 @@ const PaymentBulkActions = ({
 };
 
 export default PaymentBulkActions;
-
-
-
-
-
-

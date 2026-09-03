@@ -1,7 +1,7 @@
 /**
  * Google Meet Integration Service
  * Date: 31 Janvier 2025
- * 
+ *
  * Service d'intégration Google Meet pour créer des réunions automatiquement
  * Utilise Google Calendar API pour créer des événements avec Meet
  */
@@ -90,7 +90,8 @@ class GoogleMeetService {
    * Crée un événement Google Calendar avec Google Meet
    */
   async createMeeting(config: GoogleMeetConfig): Promise<GoogleMeetEvent> {
-    const requestId = config.conferenceData?.createRequest?.requestId || 
+    const requestId =
+      config.conferenceData?.createRequest?.requestId ||
       `meet-${Date.now()}-${Math.random().toString(36).substring(7)}`;
 
     const event = {
@@ -123,7 +124,7 @@ class GoogleMeetService {
       {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${this.accessToken}`,
+          Authorization: `Bearer ${this.accessToken}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(event),
@@ -131,13 +132,13 @@ class GoogleMeetService {
     );
 
     if (!response.ok) {
-      const  error: GoogleMeetError = await response.json();
+      const error: GoogleMeetError = await response.json();
       throw new Error(
         `Failed to create Google Meet: ${error.error?.message || response.statusText}`
       );
     }
 
-    const  meeting: GoogleMeetEvent = await response.json();
+    const meeting: GoogleMeetEvent = await response.json();
     return meeting;
   }
 
@@ -150,20 +151,18 @@ class GoogleMeetService {
       {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${this.accessToken}`,
+          Authorization: `Bearer ${this.accessToken}`,
           'Content-Type': 'application/json',
         },
       }
     );
 
     if (!response.ok) {
-      const  error: GoogleMeetError = await response.json();
-      throw new Error(
-        `Failed to get Google Meet: ${error.error?.message || response.statusText}`
-      );
+      const error: GoogleMeetError = await response.json();
+      throw new Error(`Failed to get Google Meet: ${error.error?.message || response.statusText}`);
     }
 
-    const  meeting: GoogleMeetEvent = await response.json();
+    const meeting: GoogleMeetEvent = await response.json();
     return meeting;
   }
 
@@ -180,7 +179,8 @@ class GoogleMeetService {
     const updatedEvent = {
       ...existingEvent,
       summary: config.summary || existingEvent.summary,
-      description: config.description !== undefined ? config.description : existingEvent.description,
+      description:
+        config.description !== undefined ? config.description : existingEvent.description,
       start: config.startTime
         ? {
             dateTime: config.startTime,
@@ -201,7 +201,7 @@ class GoogleMeetService {
       {
         method: 'PUT',
         headers: {
-          'Authorization': `Bearer ${this.accessToken}`,
+          Authorization: `Bearer ${this.accessToken}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(updatedEvent),
@@ -209,13 +209,13 @@ class GoogleMeetService {
     );
 
     if (!response.ok) {
-      const  error: GoogleMeetError = await response.json();
+      const error: GoogleMeetError = await response.json();
       throw new Error(
         `Failed to update Google Meet: ${error.error?.message || response.statusText}`
       );
     }
 
-    const  meeting: GoogleMeetEvent = await response.json();
+    const meeting: GoogleMeetEvent = await response.json();
     return meeting;
   }
 
@@ -228,13 +228,13 @@ class GoogleMeetService {
       {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${this.accessToken}`,
+          Authorization: `Bearer ${this.accessToken}`,
         },
       }
     );
 
     if (!response.ok && response.status !== 404) {
-      const  error: GoogleMeetError = await response.json();
+      const error: GoogleMeetError = await response.json();
       throw new Error(
         `Failed to delete Google Meet: ${error.error?.message || response.statusText}`
       );
@@ -251,9 +251,7 @@ class GoogleMeetService {
     }
 
     if (event.conferenceData?.entryPoints) {
-      const videoEntry = event.conferenceData.entryPoints.find(
-        (ep) => ep.entryPointType === 'video'
-      );
+      const videoEntry = event.conferenceData.entryPoints.find(ep => ep.entryPointType === 'video');
       if (videoEntry) {
         return videoEntry.uri;
       }
@@ -264,10 +262,3 @@ class GoogleMeetService {
 }
 
 export default GoogleMeetService;
-
-
-
-
-
-
-

@@ -9,7 +9,7 @@ interface PageTransitionProps {
   children: React.ReactNode;
 }
 
-export const PageTransition : React.FC<PageTransitionProps> = ({ children }) => {
+export const PageTransition: React.FC<PageTransitionProps> = ({ children }) => {
   const location = useLocation();
 
   useEffect(() => {
@@ -17,17 +17,5 @@ export const PageTransition : React.FC<PageTransitionProps> = ({ children }) => 
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [location.pathname]);
 
-  return (
-    <div className="page-enter page-enter-active">
-      {children}
-    </div>
-  );
+  return <div className="page-enter page-enter-active">{children}</div>;
 };
-
-
-
-
-
-
-
-

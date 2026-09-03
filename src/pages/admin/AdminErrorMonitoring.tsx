@@ -28,7 +28,17 @@ import {
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { getErrorLogs, clearErrorLogs, ErrorLog } from '@/lib/error-logger';
-import { AlertCircle, RefreshCw, Trash2, Filter, Search, TrendingUp, AlertTriangle, Info, XCircle } from 'lucide-react';
+import {
+  AlertCircle,
+  RefreshCw,
+  Trash2,
+  Filter,
+  Search,
+  TrendingUp,
+  AlertTriangle,
+  Info,
+  XCircle,
+} from 'lucide-react';
 import { logger } from '@/lib/logger';
 import { useToast } from '@/hooks/use-toast';
 import { DataTableErrorBoundary } from '@/components/errors/DataTableErrorBoundary';
@@ -55,7 +65,7 @@ export default function AdminErrorMonitoring() {
       setLoading(false);
       toast({
         title: 'Erreur',
-        description: 'Impossible de charger les logs d\'erreur',
+        description: "Impossible de charger les logs d'erreur",
         variant: 'destructive',
       });
     }
@@ -67,12 +77,12 @@ export default function AdminErrorMonitoring() {
 
   // Filtrer les logs
   useEffect(() => {
-    let  filtered= [...errorLogs];
+    let filtered = [...errorLogs];
 
     // Filtre par recherche
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter((log) => {
+      filtered = filtered.filter(log => {
         return (
           log.error.message.toLowerCase().includes(query) ||
           log.error.name.toLowerCase().includes(query) ||
@@ -84,17 +94,19 @@ export default function AdminErrorMonitoring() {
 
     // Filtre par niveau
     if (levelFilter !== 'all') {
-      filtered = filtered.filter((log) => log.context.level === levelFilter);
+      filtered = filtered.filter(log => log.context.level === levelFilter);
     }
 
     // Filtre par type
     if (typeFilter !== 'all') {
-      filtered = filtered.filter((log) => {
+      filtered = filtered.filter(log => {
         if (typeFilter === 'network') {
           return log.error.name === 'NetworkError';
         }
         if (typeFilter === 'validation') {
-          return log.error.message.includes('validation') || log.error.message.includes('Validation');
+          return (
+            log.error.message.includes('validation') || log.error.message.includes('Validation')
+          );
         }
         if (typeFilter === 'api') {
           return log.error.message.includes('API') || log.error.message.includes('api');
@@ -109,22 +121,33 @@ export default function AdminErrorMonitoring() {
   // Statistiques
   const stats = useMemo(() => {
     const total = errorLogs.length;
-    const byLevel = errorLogs.reduce((acc, log) => {
-      const level = log.context.level || 'component';
-      acc[level] = (acc[level] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const byLevel = errorLogs.reduce(
+      (acc, log) => {
+        const level = log.context.level || 'component';
+        acc[level] = (acc[level] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
 
-    const byType = errorLogs.reduce((acc, log) => {
-      let  type= 'other';
-      if (log.error.name === 'NetworkError') type = 'network';
-      else if (log.error.message.includes('validation') || log.error.message.includes('Validation')) type = 'validation';
-      else if (log.error.message.includes('API') || log.error.message.includes('api')) type = 'api';
-      acc[type] = (acc[type] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const byType = errorLogs.reduce(
+      (acc, log) => {
+        let type = 'other';
+        if (log.error.name === 'NetworkError') type = 'network';
+        else if (
+          log.error.message.includes('validation') ||
+          log.error.message.includes('Validation')
+        )
+          type = 'validation';
+        else if (log.error.message.includes('API') || log.error.message.includes('api'))
+          type = 'api';
+        acc[type] = (acc[type] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
 
-    const recent = errorLogs.filter((log) => {
+    const recent = errorLogs.filter(log => {
       const logDate = new Date(log.timestamp);
       const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
       return logDate > dayAgo;
@@ -146,13 +169,13 @@ export default function AdminErrorMonitoring() {
       setFilteredLogs([]);
       toast({
         title: 'Succès',
-        description: 'Les logs d\'erreur ont été vidés',
+        description: "Les logs d'erreur ont été vidés",
       });
     } catch (error) {
       logger.error('Error clearing error logs:', error);
       toast({
         title: 'Erreur',
-        description: 'Impossible de vider les logs d\'erreur',
+        description: "Impossible de vider les logs d'erreur",
         variant: 'destructive',
       });
     }
@@ -173,7 +196,9 @@ export default function AdminErrorMonitoring() {
   };
 
   // Obtenir la couleur du badge selon le niveau
-  const getLevelBadgeVariant = (level?: string): "default" | "secondary" | "destructive" | "outline" => {
+  const getLevelBadgeVariant = (
+    level?: string
+  ): 'default' | 'secondary' | 'destructive' | 'outline' => {
     switch (level) {
       case 'app':
         return 'destructive';
@@ -216,9 +241,7 @@ export default function AdminErrorMonitoring() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.total}</div>
-            <p className="text-xs text-muted-foreground">
-              {stats.recent} dans les dernières 24h
-            </p>
+            <p className="text-xs text-muted-foreground">{stats.recent} dans les dernières 24h</p>
           </CardContent>
         </Card>
 
@@ -229,9 +252,7 @@ export default function AdminErrorMonitoring() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.byLevel.app || 0}</div>
-            <p className="text-xs text-muted-foreground">
-              Erreurs critiques
-            </p>
+            <p className="text-xs text-muted-foreground">Erreurs critiques</p>
           </CardContent>
         </Card>
 
@@ -242,9 +263,7 @@ export default function AdminErrorMonitoring() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.byLevel.page || 0}</div>
-            <p className="text-xs text-muted-foreground">
-              Erreurs de page
-            </p>
+            <p className="text-xs text-muted-foreground">Erreurs de page</p>
           </CardContent>
         </Card>
 
@@ -255,9 +274,7 @@ export default function AdminErrorMonitoring() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.byType.network || 0}</div>
-            <p className="text-xs text-muted-foreground">
-              Erreurs de connexion
-            </p>
+            <p className="text-xs text-muted-foreground">Erreurs de connexion</p>
           </CardContent>
         </Card>
       </div>
@@ -277,7 +294,7 @@ export default function AdminErrorMonitoring() {
                 <Input
                   placeholder="Rechercher..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={e => setSearchQuery(e.target.value)}
                   className="pl-8 min-h-[44px]"
                 />
               </div>
@@ -339,131 +356,127 @@ export default function AdminErrorMonitoring() {
                   Aucune erreur ne correspond aux critères de filtrage.
                 </AlertDescription>
               </Alert>
+            ) : isMobile ? (
+              <MobileTableCard
+                data={filteredLogs.map((log, index) => ({ ...log, id: `log-${index}` }))}
+                columns={[
+                  {
+                    key: 'timestamp',
+                    label: 'Timestamp',
+                    priority: 'high',
+                    render: (row: ErrorLog) => (
+                      <span className="font-mono text-xs">
+                        {new Date(row.timestamp).toLocaleString('fr-FR')}
+                      </span>
+                    ),
+                  },
+                  {
+                    key: 'level',
+                    label: 'Niveau',
+                    priority: 'high',
+                    render: (row: ErrorLog) => (
+                      <Badge variant={getLevelBadgeVariant(row.context.level)}>
+                        {getLevelIcon(row.context.level)}
+                        <span className="ml-1">{row.context.level || 'component'}</span>
+                      </Badge>
+                    ),
+                  },
+                  {
+                    key: 'type',
+                    label: 'Type',
+                    priority: 'high',
+                    render: (row: ErrorLog) => <Badge variant="outline">{row.error.name}</Badge>,
+                  },
+                  {
+                    key: 'message',
+                    label: 'Message',
+                    priority: 'high',
+                    render: (row: ErrorLog) => (
+                      <div className="truncate text-xs" title={row.error.message}>
+                        {row.error.message}
+                      </div>
+                    ),
+                  },
+                  {
+                    key: 'url',
+                    label: 'URL',
+                    priority: 'medium',
+                    render: (row: ErrorLog) => (
+                      <div className="truncate text-xs text-muted-foreground" title={row.url}>
+                        {row.url}
+                      </div>
+                    ),
+                  },
+                  {
+                    key: 'user',
+                    label: 'Utilisateur',
+                    priority: 'low',
+                    render: (row: ErrorLog) => (
+                      <span className="text-xs text-muted-foreground">
+                        {row.context.userId ? (
+                          <span title={row.context.userId}>
+                            {row.context.userId.substring(0, 8)}...
+                          </span>
+                        ) : (
+                          '-'
+                        )}
+                      </span>
+                    ),
+                  },
+                ]}
+              />
             ) : (
-              isMobile ? (
-                <MobileTableCard
-                  data={filteredLogs.map((log, index) => ({ ...log, id: `log-${index}` }))}
-                  columns={[
-                    {
-                      key: 'timestamp',
-                      label: 'Timestamp',
-                      priority: 'high',
-                      render: (row: ErrorLog) => (
-                        <span className="font-mono text-xs">
-                          {new Date(row.timestamp).toLocaleString('fr-FR')}
-                        </span>
-                      ),
-                    },
-                    {
-                      key: 'level',
-                      label: 'Niveau',
-                      priority: 'high',
-                      render: (row: ErrorLog) => (
-                        <Badge variant={getLevelBadgeVariant(row.context.level)}>
-                          {getLevelIcon(row.context.level)}
-                          <span className="ml-1">{row.context.level || 'component'}</span>
-                        </Badge>
-                      ),
-                    },
-                    {
-                      key: 'type',
-                      label: 'Type',
-                      priority: 'high',
-                      render: (row: ErrorLog) => (
-                        <Badge variant="outline">{row.error.name}</Badge>
-                      ),
-                    },
-                    {
-                      key: 'message',
-                      label: 'Message',
-                      priority: 'high',
-                      render: (row: ErrorLog) => (
-                        <div className="truncate text-xs" title={row.error.message}>
-                          {row.error.message}
-                        </div>
-                      ),
-                    },
-                    {
-                      key: 'url',
-                      label: 'URL',
-                      priority: 'medium',
-                      render: (row: ErrorLog) => (
-                        <div className="truncate text-xs text-muted-foreground" title={row.url}>
-                          {row.url}
-                        </div>
-                      ),
-                    },
-                    {
-                      key: 'user',
-                      label: 'Utilisateur',
-                      priority: 'low',
-                      render: (row: ErrorLog) => (
-                        <span className="text-xs text-muted-foreground">
-                          {row.context.userId ? (
-                            <span title={row.context.userId}>
-                              {row.context.userId.substring(0, 8)}...
-                            </span>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Timestamp</TableHead>
+                      <TableHead>Niveau</TableHead>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Message</TableHead>
+                      <TableHead>URL</TableHead>
+                      <TableHead>Utilisateur</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredLogs.map((log, index) => (
+                      <TableRow key={index}>
+                        <TableCell className="font-mono text-xs">
+                          {new Date(log.timestamp).toLocaleString('fr-FR')}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={getLevelBadgeVariant(log.context.level)}>
+                            {getLevelIcon(log.context.level)}
+                            <span className="ml-1">{log.context.level || 'component'}</span>
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline">{log.error.name}</Badge>
+                        </TableCell>
+                        <TableCell className="max-w-md">
+                          <div className="truncate" title={log.error.message}>
+                            {log.error.message}
+                          </div>
+                        </TableCell>
+                        <TableCell className="max-w-xs">
+                          <div className="truncate text-xs text-muted-foreground" title={log.url}>
+                            {log.url}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground">
+                          {log.context.userId ? (
+                            <div className="truncate" title={log.context.userId}>
+                              {log.context.userId.substring(0, 8)}...
+                            </div>
                           ) : (
                             '-'
                           )}
-                        </span>
-                      ),
-                    },
-                  ]}
-                />
-              ) : (
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Timestamp</TableHead>
-                        <TableHead>Niveau</TableHead>
-                        <TableHead>Type</TableHead>
-                        <TableHead>Message</TableHead>
-                        <TableHead>URL</TableHead>
-                        <TableHead>Utilisateur</TableHead>
+                        </TableCell>
                       </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredLogs.map((log, index) => (
-                        <TableRow key={index}>
-                          <TableCell className="font-mono text-xs">
-                            {new Date(log.timestamp).toLocaleString('fr-FR')}
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant={getLevelBadgeVariant(log.context.level)}>
-                              {getLevelIcon(log.context.level)}
-                              <span className="ml-1">{log.context.level || 'component'}</span>
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="outline">{log.error.name}</Badge>
-                          </TableCell>
-                          <TableCell className="max-w-md">
-                            <div className="truncate" title={log.error.message}>
-                              {log.error.message}
-                            </div>
-                          </TableCell>
-                          <TableCell className="max-w-xs">
-                            <div className="truncate text-xs text-muted-foreground" title={log.url}>
-                              {log.url}
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-xs text-muted-foreground">
-                            {log.context.userId ? (
-                              <div className="truncate" title={log.context.userId}>
-                                {log.context.userId.substring(0, 8)}...
-                              </div>
-                            ) : (
-                              '-'
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              )
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             )}
           </CardContent>
         </Card>
@@ -471,13 +484,3 @@ export default function AdminErrorMonitoring() {
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-

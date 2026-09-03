@@ -27,7 +27,7 @@ interface WithdrawalHistoryDialogProps {
 }
 
 const getStatusLabel = (status: StoreWithdrawalStatus | null): string => {
-  const  labels: Record<StoreWithdrawalStatus, string> = {
+  const labels: Record<StoreWithdrawalStatus, string> = {
     pending: 'En attente',
     processing: 'En cours',
     completed: 'Complété',
@@ -39,7 +39,7 @@ const getStatusLabel = (status: StoreWithdrawalStatus | null): string => {
 
 const getStatusIcon = (status: StoreWithdrawalStatus | null) => {
   if (!status) return Clock;
-  const  icons: Record<StoreWithdrawalStatus, any> = {
+  const icons: Record<StoreWithdrawalStatus, any> = {
     pending: Clock,
     processing: AlertCircle,
     completed: CheckCircle2,
@@ -49,9 +49,14 @@ const getStatusIcon = (status: StoreWithdrawalStatus | null) => {
   return icons[status];
 };
 
-const getStatusVariant = (status: StoreWithdrawalStatus | null): 'default' | 'secondary' | 'destructive' | 'outline' => {
+const getStatusVariant = (
+  status: StoreWithdrawalStatus | null
+): 'default' | 'secondary' | 'destructive' | 'outline' => {
   if (!status) return 'outline';
-  const  variants: Record<StoreWithdrawalStatus, 'default' | 'secondary' | 'destructive' | 'outline'> = {
+  const variants: Record<
+    StoreWithdrawalStatus,
+    'default' | 'secondary' | 'destructive' | 'outline'
+  > = {
     pending: 'secondary',
     processing: 'default',
     completed: 'default',
@@ -99,10 +104,7 @@ export const WithdrawalHistoryDialog = ({
                 const NewIcon = getStatusIcon(item.new_status);
 
                 return (
-                  <div
-                    key={item.id}
-                    className="flex gap-3 sm:gap-4 p-3 sm:p-4 border rounded-lg"
-                  >
+                  <div key={item.id} className="flex gap-3 sm:gap-4 p-3 sm:p-4 border rounded-lg">
                     <div className="flex-shrink-0">
                       <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                         <NewIcon className="h-5 w-5 text-primary" />
@@ -148,10 +150,3 @@ export const WithdrawalHistoryDialog = ({
     </Dialog>
   );
 };
-
-
-
-
-
-
-

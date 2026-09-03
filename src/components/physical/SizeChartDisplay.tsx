@@ -24,8 +24,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { SizeChartComparator } from './SizeChartComparator';
 import { logger } from '@/lib/logger';
 
-const SIZE_CHART_FIELDS = 'id, store_id, name, system, sizes, notes, is_default, created_at, updated_at';
-const SIZE_CHART_MEASUREMENT_FIELDS = 'id, size_chart_id, label, unit, values, description, display_order, created_at, updated_at';
+const SIZE_CHART_FIELDS =
+  'id, store_id, name, system, sizes, notes, is_default, created_at, updated_at';
+const SIZE_CHART_MEASUREMENT_FIELDS =
+  'id, size_chart_id, label, unit, values, description, display_order, created_at, updated_at';
 
 interface SizeChartDisplayProps {
   sizeChartId: string;
@@ -154,7 +156,7 @@ export function SizeChartDisplay({
   }
 
   const getSystemLabel = (system: string) => {
-    const  labels: Record<string, string> = {
+    const labels: Record<string, string> = {
       eu: 'EU',
       us: 'US',
       uk: 'UK',
@@ -303,9 +305,3 @@ export function SizeChartDisplay({
     </Card>
   );
 }
-
-
-
-
-
-

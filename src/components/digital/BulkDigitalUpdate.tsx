@@ -63,10 +63,10 @@ export type BulkUpdateField =
  * Mode de mise à jour
  */
 export type UpdateMode =
-  | 'set'        // Définir une nouvelle valeur
-  | 'adjust'     // Ajuster (+ ou -)
-  | 'append'     // Ajouter (pour tags)
-  | 'remove';    // Retirer (pour tags)
+  | 'set' // Définir une nouvelle valeur
+  | 'adjust' // Ajuster (+ ou -)
+  | 'append' // Ajouter (pour tags)
+  | 'remove'; // Retirer (pour tags)
 
 /**
  * Produit digital pour mise à jour groupée
@@ -99,13 +99,13 @@ export interface BulkUpdateChange {
 export interface BulkDigitalUpdateProps {
   /** Liste des produits à mettre à jour */
   products: BulkUpdateDigitalProduct[];
-  
+
   /** Callback lors de la sauvegarde */
   onSave?: (productIds: string[], changes: BulkUpdateChange[]) => void;
-  
+
   /** Callback lors de l'annulation */
   onCancel?: () => void;
-  
+
   /** Classe CSS personnalisée */
   className?: string;
 }
@@ -113,7 +113,7 @@ export interface BulkDigitalUpdateProps {
 /**
  * Configuration des champs
  */
-const  FIELD_CONFIG: Record<
+const FIELD_CONFIG: Record<
   BulkUpdateField,
   {
     label: string;
@@ -157,19 +157,19 @@ const  FIELD_CONFIG: Record<
 
 /**
  * BulkDigitalUpdate - Composant de mise à jour groupée de produits digitaux
- * 
+ *
  * @example
  * ```tsx
  * import { logger } from '@/lib/logger';
- * 
- * <BulkDigitalUpdate 
+ *
+ * <BulkDigitalUpdate
  *   products={selectedProducts}
  *   onSave={(ids, changes) => logger.info('Bulk update', { productIds: ids, changes })}
  *   onCancel={() => logger.info('Bulk update cancelled')}
  * />
  * ```
  */
-export const BulkDigitalUpdate : React.FC<BulkDigitalUpdateProps> = ({
+export const BulkDigitalUpdate: React.FC<BulkDigitalUpdateProps> = ({
   products,
   onSave,
   onCancel,
@@ -177,7 +177,7 @@ export const BulkDigitalUpdate : React.FC<BulkDigitalUpdateProps> = ({
 }) => {
   // États
   const [selectedProducts, setSelectedProducts] = useState<Set<string>>(
-    new Set(products.map((p) => p.id))
+    new Set(products.map(p => p.id))
   );
   const [updateField, setUpdateField] = useState<BulkUpdateField>('price');
   const [updateMode, setUpdateMode] = useState<UpdateMode>('set');
@@ -200,7 +200,7 @@ export const BulkDigitalUpdate : React.FC<BulkDigitalUpdateProps> = ({
     if (selectedProducts.size === products.length) {
       setSelectedProducts(new Set());
     } else {
-      setSelectedProducts(new Set(products.map((p) => p.id)));
+      setSelectedProducts(new Set(products.map(p => p.id)));
     }
   };
 
@@ -208,12 +208,13 @@ export const BulkDigitalUpdate : React.FC<BulkDigitalUpdateProps> = ({
   const addChange = () => {
     if (!updateValue.trim()) return;
 
-    const  newChange: BulkUpdateChange = {
+    const newChange: BulkUpdateChange = {
       field: updateField,
       mode: updateMode,
-      value: updateField === 'price' || updateField === 'maxLicenses'
-        ? parseFloat(updateValue)
-        : updateValue,
+      value:
+        updateField === 'price' || updateField === 'maxLicenses'
+          ? parseFloat(updateValue)
+          : updateValue,
     };
 
     setChanges([...changes, newChange]);
@@ -227,25 +228,26 @@ export const BulkDigitalUpdate : React.FC<BulkDigitalUpdateProps> = ({
 
   // Obtenir les produits sélectionnés
   const selected = useMemo(() => {
-    return products.filter((p) => selectedProducts.has(p.id));
+    return products.filter(p => selectedProducts.has(p.id));
   }, [products, selectedProducts]);
 
   // Calculer l'aperçu des changements
   const previewChanges = useMemo(() => {
     if (selected.length === 0) return [];
 
-    return selected.map((product) => {
-      const  preview: Record<string, any> = { ...product };
+    return selected.map(product => {
+      const preview: Record<string, any> = { ...product };
 
-      changes.forEach((change) => {
+      changes.forEach(change => {
         switch (change.field) {
           case 'price':
             if (change.mode === 'set') {
               preview.price = change.value;
             } else if (change.mode === 'adjust') {
-              const adjustValue = typeof change.value === 'string' && change.value.includes('%')
-                ? product.price * (parseFloat(change.value) / 100)
-                : parseFloat(change.value as string);
+              const adjustValue =
+                typeof change.value === 'string' && change.value.includes('%')
+                  ? product.price * (parseFloat(change.value) / 100)
+                  : parseFloat(change.value as string);
               preview.price = Math.max(0, product.price + adjustValue);
             }
             break;
@@ -266,7 +268,7 @@ export const BulkDigitalUpdate : React.FC<BulkDigitalUpdateProps> = ({
             if (change.mode === 'append') {
               preview.tags = [...new Set([...product.tags, change.value])];
             } else if (change.mode === 'remove') {
-              preview.tags = product.tags.filter((t) => t !== change.value);
+              preview.tags = product.tags.filter(t => t !== change.value);
             }
             break;
 
@@ -312,7 +314,8 @@ export const BulkDigitalUpdate : React.FC<BulkDigitalUpdateProps> = ({
           </p>
         </div>
         <Badge variant="secondary" className="text-base">
-          {selectedProducts.size} / {products.length} sélectionné{selectedProducts.size > 1 ? 's' : ''}
+          {selectedProducts.size} / {products.length} sélectionné
+          {selectedProducts.size > 1 ? 's' : ''}
         </Badge>
       </div>
 
@@ -340,7 +343,7 @@ export const BulkDigitalUpdate : React.FC<BulkDigitalUpdateProps> = ({
 
             <ScrollArea className="h-[400px] pr-4">
               <div className="space-y-2">
-                {products.map((product) => (
+                {products.map(product => (
                   <div
                     key={product.id}
                     className={cn(
@@ -374,18 +377,25 @@ export const BulkDigitalUpdate : React.FC<BulkDigitalUpdateProps> = ({
                         {product.tags.length > 0 && (
                           <>
                             <span>•</span>
-                            <span>{product.tags.length} tag{product.tags.length > 1 ? 's' : ''}</span>
+                            <span>
+                              {product.tags.length} tag{product.tags.length > 1 ? 's' : ''}
+                            </span>
                           </>
                         )}
                       </div>
                     </div>
 
-                    <Badge variant={
-                      product.status === 'active' ? 'default' :
-                      product.status === 'published' ? 'secondary' :
-                      product.status === 'draft' ? 'outline' :
-                      'destructive'
-                    }>
+                    <Badge
+                      variant={
+                        product.status === 'active'
+                          ? 'default'
+                          : product.status === 'published'
+                            ? 'secondary'
+                            : product.status === 'draft'
+                              ? 'outline'
+                              : 'destructive'
+                      }
+                    >
                       {product.status}
                     </Badge>
                   </div>
@@ -405,7 +415,7 @@ export const BulkDigitalUpdate : React.FC<BulkDigitalUpdateProps> = ({
                   <Label htmlFor="field">Champ à modifier</Label>
                   <Select
                     value={updateField}
-                    onValueChange={(value) => setUpdateField(value as BulkUpdateField)}
+                    onValueChange={value => setUpdateField(value as BulkUpdateField)}
                   >
                     <SelectTrigger id="field">
                       <SelectValue />
@@ -431,13 +441,13 @@ export const BulkDigitalUpdate : React.FC<BulkDigitalUpdateProps> = ({
                   <Label htmlFor="mode">Mode</Label>
                   <Select
                     value={updateMode}
-                    onValueChange={(value) => setUpdateMode(value as UpdateMode)}
+                    onValueChange={value => setUpdateMode(value as UpdateMode)}
                   >
                     <SelectTrigger id="mode">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {availableModes.map((mode) => (
+                      {availableModes.map(mode => (
                         <SelectItem key={mode} value={mode}>
                           {mode === 'set' && 'Définir'}
                           {mode === 'adjust' && 'Ajuster (+/-)'}
@@ -482,15 +492,17 @@ export const BulkDigitalUpdate : React.FC<BulkDigitalUpdateProps> = ({
                     <Input
                       id="value"
                       value={updateValue}
-                      onChange={(e) => setUpdateValue(e.target.value)}
+                      onChange={e => setUpdateValue(e.target.value)}
                       placeholder={
                         updateField === 'price' && updateMode === 'adjust'
                           ? 'Ex: +10 ou -15% ou -5'
                           : updateField === 'tags'
-                          ? 'Nom du tag'
-                          : 'Nouvelle valeur'
+                            ? 'Nom du tag'
+                            : 'Nouvelle valeur'
                       }
-                      type={updateField === 'price' || updateField === 'maxLicenses' ? 'text' : 'text'}
+                      type={
+                        updateField === 'price' || updateField === 'maxLicenses' ? 'text' : 'text'
+                      }
                       className="flex-1"
                     />
                   )}
@@ -535,11 +547,7 @@ export const BulkDigitalUpdate : React.FC<BulkDigitalUpdateProps> = ({
                               </p>
                             </div>
                           </div>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => removeChange(index)}
-                          >
+                          <Button variant="ghost" size="sm" onClick={() => removeChange(index)}>
                             <X className="h-4 w-4" />
                           </Button>
                         </div>
@@ -593,25 +601,23 @@ export const BulkDigitalUpdate : React.FC<BulkDigitalUpdateProps> = ({
                   <ScrollArea className="h-[200px]">
                     <div className="space-y-2">
                       {previewChanges.slice(0, 5).map((preview, index) => (
-                        <div
-                          key={index}
-                          className="p-2 bg-muted/50 rounded text-xs space-y-1"
-                        >
+                        <div key={index} className="p-2 bg-muted/50 rounded text-xs space-y-1">
                           <p className="font-semibold truncate">{preview.name}</p>
-                          {changes.some((c) => c.field === 'price') && (
+                          {changes.some(c => c.field === 'price') && (
                             <p>Prix : {preview.price.toFixed(2)} EUR</p>
                           )}
-                          {changes.some((c) => c.field === 'status') && (
+                          {changes.some(c => c.field === 'status') && (
                             <p>Statut : {preview.status}</p>
                           )}
-                          {changes.some((c) => c.field === 'tags') && (
+                          {changes.some(c => c.field === 'tags') && (
                             <p>Tags : {preview.tags.join(', ')}</p>
                           )}
                         </div>
                       ))}
                       {previewChanges.length > 5 && (
                         <p className="text-xs text-muted-foreground text-center">
-                          Et {previewChanges.length - 5} autre{previewChanges.length - 5 > 1 ? 's' : ''}...
+                          Et {previewChanges.length - 5} autre
+                          {previewChanges.length - 5 > 1 ? 's' : ''}...
                         </p>
                       )}
                     </div>
@@ -639,15 +645,13 @@ export const BulkDigitalUpdate : React.FC<BulkDigitalUpdateProps> = ({
                     <AlertDialogTitle>Confirmer les modifications ?</AlertDialogTitle>
                     <AlertDialogDescription>
                       Vous êtes sur le point de modifier {selectedProducts.size} produit
-                      {selectedProducts.size > 1 ? 's' : ''}. Cette action peut affecter vos
-                      ventes et vos clients.
+                      {selectedProducts.size > 1 ? 's' : ''}. Cette action peut affecter vos ventes
+                      et vos clients.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Annuler</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleSave}>
-                      Confirmer
-                    </AlertDialogAction>
+                    <AlertDialogAction onClick={handleSave}>Confirmer</AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
@@ -668,7 +672,8 @@ export const BulkDigitalUpdate : React.FC<BulkDigitalUpdateProps> = ({
               <div className="text-sm text-blue-700">
                 <p className="font-semibold mb-1">Astuce</p>
                 <p className="text-xs">
-                  Pour ajuster les prix, utilisez + ou - suivi d'un nombre ou d'un pourcentage (ex: +10%, -5)
+                  Pour ajuster les prix, utilisez + ou - suivi d'un nombre ou d'un pourcentage (ex:
+                  +10%, -5)
                 </p>
               </div>
             </div>
@@ -682,11 +687,3 @@ export const BulkDigitalUpdate : React.FC<BulkDigitalUpdateProps> = ({
 BulkDigitalUpdate.displayName = 'BulkDigitalUpdate';
 
 export default BulkDigitalUpdate;
-
-
-
-
-
-
-
-

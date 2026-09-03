@@ -43,8 +43,7 @@ interface ProductTypePerformanceMetricsProps {
 
 export const ProductTypePerformanceMetrics = React.memo<ProductTypePerformanceMetricsProps>(
   ({ performanceMetricsByType, selectedType = 'all', className }) => {
-    const typesToShow =
-      selectedType === 'all' ? getAllProductTypes() : [selectedType];
+    const typesToShow = selectedType === 'all' ? getAllProductTypes() : [selectedType];
 
     return (
       <Card className={cn('border-border/50 bg-card/50 backdrop-blur-sm', className)}>
@@ -143,9 +142,3 @@ export const ProductTypePerformanceMetrics = React.memo<ProductTypePerformanceMe
 );
 
 ProductTypePerformanceMetrics.displayName = 'ProductTypePerformanceMetrics';
-
-
-
-
-
-

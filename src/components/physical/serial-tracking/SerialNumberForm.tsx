@@ -25,7 +25,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useCreateSerialNumber, useUpdateSerialNumber, useSerialNumber } from '@/hooks/physical/useSerialTracking';
+import {
+  useCreateSerialNumber,
+  useUpdateSerialNumber,
+  useSerialNumber,
+} from '@/hooks/physical/useSerialTracking';
 import { useEffect } from 'react';
 import { logger } from '@/lib/logger';
 
@@ -35,7 +39,21 @@ const serialFormSchema = z.object({
   mac_address: z.string().optional(),
   barcode: z.string().optional(),
   qr_code: z.string().optional(),
-  status: z.enum(['manufactured', 'in_stock', 'reserved', 'sold', 'shipped', 'delivered', 'returned', 'refurbished', 'warranty_repair', 'damaged', 'scrapped']).default('in_stock'),
+  status: z
+    .enum([
+      'manufactured',
+      'in_stock',
+      'reserved',
+      'sold',
+      'shipped',
+      'delivered',
+      'returned',
+      'refurbished',
+      'warranty_repair',
+      'damaged',
+      'scrapped',
+    ])
+    .default('in_stock'),
   warehouse_id: z.string().optional(),
   bin_location: z.string().optional(),
   current_location: z.string().optional(),
@@ -58,7 +76,12 @@ interface SerialNumberFormProps {
   onSuccess: () => void;
 }
 
-export function SerialNumberForm({ serialNumberId, physicalProductId, variantId, onSuccess }: SerialNumberFormProps) {
+export function SerialNumberForm({
+  serialNumberId,
+  physicalProductId,
+  variantId,
+  onSuccess,
+}: SerialNumberFormProps) {
   const { data: existingSerial } = useSerialNumber(serialNumberId || '');
   const createSerial = useCreateSerialNumber();
   const updateSerial = useUpdateSerialNumber();
@@ -259,7 +282,7 @@ export function SerialNumberForm({ serialNumberId, physicalProductId, variantId,
                   <Input
                     type="number"
                     {...field}
-                    onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                    onChange={e => field.onChange(parseInt(e.target.value) || 0)}
                   />
                 </FormControl>
                 <FormMessage />
@@ -291,12 +314,3 @@ export function SerialNumberForm({ serialNumberId, physicalProductId, variantId,
     </Form>
   );
 }
-
-
-
-
-
-
-
-
-

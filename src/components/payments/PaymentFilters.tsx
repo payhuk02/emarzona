@@ -1,6 +1,12 @@
-import React from "react";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import React from 'react';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Search } from '@/components/icons';
 
 interface PaymentFiltersProps {
@@ -27,11 +33,11 @@ const PaymentFiltersComponent = ({
         <Input
           placeholder="Rechercher par transaction, notes..."
           value={searchTerm}
-          onChange={(e) => onSearchChange(e.target.value)}
+          onChange={e => onSearchChange(e.target.value)}
           className="pl-9"
         />
       </div>
-      
+
       <Select value={statusFilter} onValueChange={onStatusChange}>
         <SelectTrigger>
           <SelectValue placeholder="Tous les statuts" />
@@ -78,9 +84,3 @@ export const PaymentFilters = React.memo(PaymentFiltersComponent, (prevProps, ne
 });
 
 PaymentFilters.displayName = 'PaymentFilters';
-
-
-
-
-
-

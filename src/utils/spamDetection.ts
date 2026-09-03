@@ -12,15 +12,37 @@ export interface SpamDetectionResult {
 // Spam keywords (can be expanded)
 const SPAM_KEYWORDS = [
   // Promotional
-  'click here', 'buy now', 'limited offer', 'act now', 'free money',
-  'make money', 'earn money', 'work from home', 'get paid',
+  'click here',
+  'buy now',
+  'limited offer',
+  'act now',
+  'free money',
+  'make money',
+  'earn money',
+  'work from home',
+  'get paid',
   // URLs/Links
-  'http://', 'https://', 'www.', '.com', '.net', '.org',
+  'http://',
+  'https://',
+  'www.',
+  '.com',
+  '.net',
+  '.org',
   // Cryptocurrency/Gambling
-  'bitcoin', 'crypto', 'casino', 'poker', 'lottery',
+  'bitcoin',
+  'crypto',
+  'casino',
+  'poker',
+  'lottery',
   // Typical spam
-  'congratulations', 'winner', 'prize', 'claim', 'verified',
-  'nigerian prince', 'inheritance', 'bank account',
+  'congratulations',
+  'winner',
+  'prize',
+  'claim',
+  'verified',
+  'nigerian prince',
+  'inheritance',
+  'bank account',
 ];
 
 // Suspicious patterns
@@ -37,15 +59,13 @@ const SUSPICIOUS_PATTERNS = [
  * Detect spam in review content
  */
 export function detectSpam(content: string, title?: string): SpamDetectionResult {
-  const  reasons: string[] = [];
-  let  spamScore= 0;
+  const reasons: string[] = [];
+  let spamScore = 0;
 
   const fullText = `${title || ''} ${content}`.toLowerCase();
 
   // Check for spam keywords
-  const keywordMatches = SPAM_KEYWORDS.filter((keyword) =>
-    fullText.includes(keyword.toLowerCase())
-  );
+  const keywordMatches = SPAM_KEYWORDS.filter(keyword => fullText.includes(keyword.toLowerCase()));
 
   if (keywordMatches.length > 0) {
     spamScore += keywordMatches.length * 0.2;
@@ -53,7 +73,7 @@ export function detectSpam(content: string, title?: string): SpamDetectionResult
   }
 
   // Check for suspicious patterns
-  SUSPICIOUS_PATTERNS.forEach((pattern) => {
+  SUSPICIOUS_PATTERNS.forEach(pattern => {
     const matches = fullText.match(pattern);
     if (matches && matches.length > 0) {
       spamScore += matches.length * 0.15;
@@ -79,7 +99,7 @@ export function detectSpam(content: string, title?: string): SpamDetectionResult
 
   // Check for repetitive content
   const words = content.split(/\s+/);
-  const uniqueWords = new Set(words.map((w) => w.toLowerCase()));
+  const uniqueWords = new Set(words.map(w => w.toLowerCase()));
   const repetitionRatio = 1 - uniqueWords.size / words.length;
   if (repetitionRatio > 0.7 && words.length > 10) {
     spamScore += 0.3;
@@ -105,7 +125,7 @@ export function batchDetectSpam(
 ): Map<string, SpamDetectionResult> {
   const results = new Map<string, SpamDetectionResult>();
 
-  reviews.forEach((review) => {
+  reviews.forEach(review => {
     const result = detectSpam(review.content, review.title);
     results.set(review.id, result);
   });
@@ -123,21 +143,19 @@ export function shouldAutoFlag(result: SpamDetectionResult): boolean {
 /**
  * Get spam report summary
  */
-export function getSpamReportSummary(
-  results: Map<string, SpamDetectionResult>
-): {
+export function getSpamReportSummary(results: Map<string, SpamDetectionResult>): {
   total: number;
   spam: number;
   suspicious: number;
   clean: number;
   autoFlagged: number;
 } {
-  let  spam= 0;
-  let  suspicious= 0;
-  let  clean= 0;
-  let  autoFlagged= 0;
+  let spam = 0;
+  let suspicious = 0;
+  let clean = 0;
+  let autoFlagged = 0;
 
-  results.forEach((result) => {
+  results.forEach(result => {
     if (result.isSpam) {
       spam++;
       if (shouldAutoFlag(result)) {
@@ -158,10 +176,3 @@ export function getSpamReportSummary(
     autoFlagged,
   };
 }
-
-
-
-
-
-
-

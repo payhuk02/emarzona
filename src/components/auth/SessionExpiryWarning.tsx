@@ -23,7 +23,7 @@ export const SessionExpiryWarning = ({
   showRefreshButton = true,
   showSignOutButton = true,
   warningThreshold = 10, // 10 minutes par défaut
-  className = ''
+  className = '',
 }: SessionExpiryWarningProps) => {
   const [showWarning, setShowWarning] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
@@ -39,7 +39,9 @@ export const SessionExpiryWarning = ({
   useEffect(() => {
     const checkSession = async () => {
       try {
-        const { data: { session } } = await import('@/integrations/supabase/client').then(m => m.supabase.auth.getSession());
+        const {
+          data: { session },
+        } = await import('@/integrations/supabase/client').then(m => m.supabase.auth.getSession());
 
         if (!session?.expires_at) {
           setShowWarning(false);
@@ -60,7 +62,8 @@ export const SessionExpiryWarning = ({
         setIsSessionExpired(isExpired);
 
         // Afficher l'avertissement si moins de warningThreshold minutes restantes ou déjà expiré
-        const shouldShowWarning = (minutesRemaining <= warningThreshold && minutesRemaining > 0) || isExpired;
+        const shouldShowWarning =
+          (minutesRemaining <= warningThreshold && minutesRemaining > 0) || isExpired;
         setShowWarning(shouldShowWarning);
 
         // Log pour debug
@@ -69,7 +72,6 @@ export const SessionExpiryWarning = ({
         } else if (shouldShowWarning) {
           logger.warn(`⚠️ Session expire dans ${minutesRemaining} minutes`);
         }
-
       } catch (error) {
         logger.error('Erreur vérification session:', error);
         setShowWarning(false);
@@ -135,14 +137,14 @@ export const SessionExpiryWarning = ({
   };
 
   return (
-    <Alert className={`border-orange-200 bg-orange-50 dark:border-orange-800 dark:bg-orange-950 ${className}`}>
+    <Alert
+      className={`border-orange-200 bg-orange-50 dark:border-orange-800 dark:bg-orange-950 ${className}`}
+    >
       <AlertTriangle className="h-4 w-4 text-orange-600" />
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2">
           <span className="font-medium">Session expirant bientôt</span>
-          <Badge variant={getUrgencyColor()}>
-            {getUrgencyMessage()}
-          </Badge>
+          <Badge variant={getUrgencyColor()}>{getUrgencyMessage()}</Badge>
         </div>
 
         <div className="flex items-center gap-2">
@@ -165,7 +167,7 @@ export const SessionExpiryWarning = ({
 
           {showSignOutButton && (
             <Button
-              variant={isSessionExpired ? "default" : "outline"}
+              variant={isSessionExpired ? 'default' : 'outline'}
               size="sm"
               onClick={handleSignOut}
               className="text-xs"

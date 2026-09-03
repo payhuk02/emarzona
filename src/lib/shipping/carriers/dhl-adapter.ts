@@ -5,7 +5,11 @@
  */
 
 import { logger } from '@/lib/logger';
-import type { CarrierAdapter, CarrierTrackingResponse, TrackingUpdate } from '../automatic-tracking';
+import type {
+  CarrierAdapter,
+  CarrierTrackingResponse,
+  TrackingUpdate,
+} from '../automatic-tracking';
 
 export class DHLAdapter implements CarrierAdapter {
   name = 'DHL';
@@ -13,10 +17,13 @@ export class DHLAdapter implements CarrierAdapter {
   private baseUrl = 'https://api-eu.dhl.com';
 
   constructor(config?: Record<string, unknown>) {
-    this.apiKey = config?.apiKey as string || import.meta.env.VITE_DHL_API_KEY;
+    this.apiKey = (config?.apiKey as string) || import.meta.env.VITE_DHL_API_KEY;
   }
 
-  async track(trackingNumber: string, carrierConfig?: Record<string, unknown>): Promise<CarrierTrackingResponse> {
+  async track(
+    trackingNumber: string,
+    carrierConfig?: Record<string, unknown>
+  ): Promise<CarrierTrackingResponse> {
     try {
       if (!this.apiKey) {
         logger.warn('DHL API key not configured, using simulation', { trackingNumber });
@@ -47,7 +54,7 @@ export class DHLAdapter implements CarrierAdapter {
         method: 'GET',
         headers: {
           'DHL-API-Key': this.apiKey!,
-          'Accept': 'application/json',
+          Accept: 'application/json',
         },
       }
     );
@@ -64,12 +71,12 @@ export class DHLAdapter implements CarrierAdapter {
    */
   private transformResponse(trackingNumber: string, data: any): CarrierTrackingResponse {
     const shipment = data?.shipments?.[0];
-    
+
     if (!shipment) {
       return this.simulateTracking(trackingNumber);
     }
 
-    const  events: TrackingUpdate[] = [];
+    const events: TrackingUpdate[] = [];
     const eventsData = shipment.events || [];
 
     for (const event of eventsData) {
@@ -103,12 +110,12 @@ export class DHLAdapter implements CarrierAdapter {
    * Mappe les statuts DHL vers nos statuts standard
    */
   private mapDHLStatus(dhlStatus: string): string {
-    const  statusMap: Record<string, string> = {
+    const statusMap: Record<string, string> = {
       'pre-transit': 'label_created',
-      'transit': 'in_transit',
-      'delivered': 'delivered',
-      'exception': 'failed',
-      'unknown': 'unknown',
+      transit: 'in_transit',
+      delivered: 'delivered',
+      exception: 'failed',
+      unknown: 'unknown',
     };
 
     return statusMap[dhlStatus.toLowerCase()] || 'in_transit';
@@ -136,10 +143,3 @@ export class DHLAdapter implements CarrierAdapter {
     };
   }
 }
-
-
-
-
-
-
-

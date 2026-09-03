@@ -1,7 +1,7 @@
 /**
  * Hook useMediaQuery - Gestion réutilisable des media queries
  * Simplifie l'utilisation des media queries dans les composants React
- * 
+ *
  * @example
  * ```tsx
  * const isMobile = useMediaQuery('(max-width: 768px)');
@@ -90,7 +90,7 @@ export function usePrefersHighContrast(): boolean {
  * Hook pour obtenir plusieurs media queries à la fois
  */
 export function useMediaQueries(queries: Record<string, string>): Record<string, boolean> {
-  const  results: Record<string, boolean> = {};
+  const results: Record<string, boolean> = {};
 
   for (const [key, query] of Object.entries(queries)) {
     results[key] = useMediaQuery(query);
@@ -102,13 +102,15 @@ export function useMediaQueries(queries: Record<string, string>): Record<string,
 /**
  * Hook pour obtenir le breakpoint actuel
  */
-export function useBreakpoint(breakpoints: Record<string, number> = {
-  sm: 640,
-  md: 768,
-  lg: 1024,
-  xl: 1280,
-  '2xl': 1536,
-}): string | null {
+export function useBreakpoint(
+  breakpoints: Record<string, number> = {
+    sm: 640,
+    md: 768,
+    lg: 1024,
+    xl: 1280,
+    '2xl': 1536,
+  }
+): string | null {
   const [breakpoint, setBreakpoint] = useState<string | null>(null);
 
   useEffect(() => {
@@ -137,10 +139,3 @@ export function useBreakpoint(breakpoints: Record<string, number> = {
 
   return breakpoint;
 }
-
-
-
-
-
-
-

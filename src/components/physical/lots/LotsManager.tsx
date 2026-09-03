@@ -7,9 +7,22 @@
 import { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -57,7 +70,11 @@ export function LotsManager({ physicalProductId, variantId, warehouseId }: LotsM
       return <Badge variant="destructive">Expiré</Badge>;
     }
     if (status === 'expiring_soon') {
-      return <Badge variant="default" className="bg-orange-500">Expire bientôt</Badge>;
+      return (
+        <Badge variant="default" className="bg-orange-500">
+          Expire bientôt
+        </Badge>
+      );
     }
     if (status === 'active') {
       if (expirationDate) {
@@ -65,16 +82,24 @@ export function LotsManager({ physicalProductId, variantId, warehouseId }: LotsM
           (new Date(expirationDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
         );
         if (daysUntilExpiration <= 7) {
-          return <Badge variant="default" className="bg-yellow-500">Expire dans {daysUntilExpiration}j</Badge>;
+          return (
+            <Badge variant="default" className="bg-yellow-500">
+              Expire dans {daysUntilExpiration}j
+            </Badge>
+          );
         }
       }
-      return <Badge variant="default" className="bg-green-500">Actif</Badge>;
+      return (
+        <Badge variant="default" className="bg-green-500">
+          Actif
+        </Badge>
+      );
     }
     return <Badge variant="secondary">{status}</Badge>;
   };
 
   const getRotationMethodLabel = (method: string) => {
-    const  labels: Record<string, string> = {
+    const labels: Record<string, string> = {
       FIFO: 'Premier entré, premier sorti',
       LIFO: 'Dernier entré, premier sorti',
       FEFO: 'Premier expiré, premier sorti',
@@ -87,9 +112,9 @@ export function LotsManager({ physicalProductId, variantId, warehouseId }: LotsM
   const stats = useMemo(() => {
     if (!lots) return { total: 0, active: 0, expired: 0, expiringSoon: 0 };
     const total = lots.length;
-    const active = lots.filter((lot) => lot.status === 'active').length;
-    const expired = lots.filter((lot) => lot.status === 'expired').length;
-    const expiringSoon = lots.filter((lot) => lot.status === 'expiring_soon').length;
+    const active = lots.filter(lot => lot.status === 'active').length;
+    const expired = lots.filter(lot => lot.status === 'expired').length;
+    const expiringSoon = lots.filter(lot => lot.status === 'expiring_soon').length;
     return { total, active, expired, expiringSoon };
   }, [lots]);
 
@@ -98,7 +123,7 @@ export function LotsManager({ physicalProductId, variantId, warehouseId }: LotsM
       <div className="space-y-4 sm:space-y-6 w-full">
         <Skeleton className="h-10 sm:h-12 w-full" />
         <div className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-4">
-          {[1, 2, 3, 4].map((i) => (
+          {[1, 2, 3, 4].map(i => (
             <Skeleton key={i} className="h-24 sm:h-28 w-full" />
           ))}
         </div>
@@ -107,9 +132,9 @@ export function LotsManager({ physicalProductId, variantId, warehouseId }: LotsM
     );
   }
 
-  const activeLots = lots?.filter((lot) => lot.status === 'active') || [];
-  const expiredLots = lots?.filter((lot) => lot.status === 'expired') || [];
-  const expiringSoonLots = lots?.filter((lot) => lot.status === 'expiring_soon') || [];
+  const activeLots = lots?.filter(lot => lot.status === 'active') || [];
+  const expiredLots = lots?.filter(lot => lot.status === 'expired') || [];
+  const expiringSoonLots = lots?.filter(lot => lot.status === 'expiring_soon') || [];
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -123,7 +148,7 @@ export function LotsManager({ physicalProductId, variantId, warehouseId }: LotsM
         </div>
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
-            <Button 
+            <Button
               className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
               size="sm"
             >
@@ -148,15 +173,35 @@ export function LotsManager({ physicalProductId, variantId, warehouseId }: LotsM
 
       {/* Stats Cards - Responsive */}
       {lots && lots.length > 0 && (
-        <div 
+        <div
           ref={statsRef}
           className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-4 animate-in fade-in slide-in-from-bottom-4 duration-700"
         >
           {[
-            { label: 'Total Lots', value: stats.total, icon: Package, color: 'from-purple-600 to-pink-600' },
-            { label: 'Actifs', value: stats.active, icon: CheckCircle2, color: 'from-green-600 to-emerald-600' },
-            { label: 'Expirés', value: stats.expired, icon: AlertTriangle, color: 'from-red-600 to-pink-600' },
-            { label: 'Expirent Bientôt', value: stats.expiringSoon, icon: Clock, color: 'from-orange-600 to-yellow-600' },
+            {
+              label: 'Total Lots',
+              value: stats.total,
+              icon: Package,
+              color: 'from-purple-600 to-pink-600',
+            },
+            {
+              label: 'Actifs',
+              value: stats.active,
+              icon: CheckCircle2,
+              color: 'from-green-600 to-emerald-600',
+            },
+            {
+              label: 'Expirés',
+              value: stats.expired,
+              icon: AlertTriangle,
+              color: 'from-red-600 to-pink-600',
+            },
+            {
+              label: 'Expirent Bientôt',
+              value: stats.expiringSoon,
+              icon: Clock,
+              color: 'from-orange-600 to-yellow-600',
+            },
           ].map((stat, index) => {
             const Icon = stat.icon;
             return (
@@ -172,7 +217,9 @@ export function LotsManager({ physicalProductId, variantId, warehouseId }: LotsM
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-3 sm:p-4 pt-0">
-                  <div className={`text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
+                  <div
+                    className={`text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}
+                  >
                     {stat.value}
                   </div>
                 </CardContent>
@@ -186,19 +233,19 @@ export function LotsManager({ physicalProductId, variantId, warehouseId }: LotsM
       <div ref={tabsRef} className="animate-in fade-in slide-in-from-bottom-4 duration-700">
         <Tabs defaultValue="all" className="space-y-4 sm:space-y-6">
           <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto p-1 bg-muted/50 backdrop-blur-sm gap-1">
-            <TabsTrigger 
+            <TabsTrigger
               value="all"
               className="text-xs sm:text-sm px-2 sm:px-3 md:px-4 py-2 sm:py-2.5 min-h-[44px] touch-manipulation data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
             >
               Tous ({lots?.length || 0})
             </TabsTrigger>
-            <TabsTrigger 
+            <TabsTrigger
               value="active"
               className="text-xs sm:text-sm px-2 sm:px-3 md:px-4 py-2 sm:py-2.5 min-h-[44px] touch-manipulation data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
             >
               Actifs ({activeLots.length})
             </TabsTrigger>
-            <TabsTrigger 
+            <TabsTrigger
               value="expiring"
               className="text-xs sm:text-sm px-2 sm:px-3 md:px-4 py-2 sm:py-2.5 min-h-[44px] touch-manipulation data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300 flex items-center justify-center gap-1.5 sm:gap-2"
             >
@@ -207,7 +254,7 @@ export function LotsManager({ physicalProductId, variantId, warehouseId }: LotsM
               <span className="xs:hidden truncate">Expirent</span>
               <span className="flex-shrink-0">({expiringSoonLots.length})</span>
             </TabsTrigger>
-            <TabsTrigger 
+            <TabsTrigger
               value="expired"
               className="text-xs sm:text-sm px-2 sm:px-3 md:px-4 py-2 sm:py-2.5 min-h-[44px] touch-manipulation data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
             >
@@ -219,7 +266,7 @@ export function LotsManager({ physicalProductId, variantId, warehouseId }: LotsM
             <LotsTable
               lots={lots || []}
               onEdit={setEditingLot}
-              onDelete={(lotId) => {
+              onDelete={lotId => {
                 if (confirm('Êtes-vous sûr de vouloir supprimer ce lot ?')) {
                   deleteLot.mutate(lotId);
                 }
@@ -233,7 +280,7 @@ export function LotsManager({ physicalProductId, variantId, warehouseId }: LotsM
             <LotsTable
               lots={activeLots}
               onEdit={setEditingLot}
-              onDelete={(lotId) => {
+              onDelete={lotId => {
                 if (confirm('Êtes-vous sûr de vouloir supprimer ce lot ?')) {
                   deleteLot.mutate(lotId);
                 }
@@ -247,7 +294,7 @@ export function LotsManager({ physicalProductId, variantId, warehouseId }: LotsM
             <LotsTable
               lots={expiringSoonLots}
               onEdit={setEditingLot}
-              onDelete={(lotId) => {
+              onDelete={lotId => {
                 if (confirm('Êtes-vous sûr de vouloir supprimer ce lot ?')) {
                   deleteLot.mutate(lotId);
                 }
@@ -261,7 +308,7 @@ export function LotsManager({ physicalProductId, variantId, warehouseId }: LotsM
             <LotsTable
               lots={expiredLots}
               onEdit={setEditingLot}
-              onDelete={(lotId) => {
+              onDelete={lotId => {
                 if (confirm('Êtes-vous sûr de vouloir supprimer ce lot ?')) {
                   deleteLot.mutate(lotId);
                 }
@@ -351,7 +398,7 @@ function LotsTable({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {lots.map((lot) => (
+                {lots.map(lot => (
                   <TableRow key={lot.id}>
                     <TableCell className="font-medium">{lot.lot_number}</TableCell>
                     <TableCell>
@@ -365,9 +412,13 @@ function LotsTable({
                       </div>
                     </TableCell>
                     <TableCell>
-                      {lot.received_date
-                        ? <span className="text-sm truncate block">{format(new Date(lot.received_date), 'dd MMM yyyy', { locale: fr })}</span>
-                        : '-'}
+                      {lot.received_date ? (
+                        <span className="text-sm truncate block">
+                          {format(new Date(lot.received_date), 'dd MMM yyyy', { locale: fr })}
+                        </span>
+                      ) : (
+                        '-'
+                      )}
                     </TableCell>
                     <TableCell>
                       {lot.expiration_date ? (
@@ -382,15 +433,27 @@ function LotsTable({
                       )}
                     </TableCell>
                     <TableCell>
-                      <span className="text-sm truncate block">{getRotationMethodLabel(lot.rotation_method)}</span>
+                      <span className="text-sm truncate block">
+                        {getRotationMethodLabel(lot.rotation_method)}
+                      </span>
                     </TableCell>
                     <TableCell>{getStatusBadge(lot.status, lot.expiration_date)}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="sm" onClick={() => onEdit(lot.id)} className="h-8 w-8 p-0">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onEdit(lot.id)}
+                          className="h-8 w-8 p-0"
+                        >
                           <Edit className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="sm" onClick={() => onDelete(lot.id)} className="h-8 w-8 p-0">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onDelete(lot.id)}
+                          className="h-8 w-8 p-0"
+                        >
                           <Trash2 className="h-4 w-4 text-destructive" />
                         </Button>
                       </div>
@@ -416,7 +479,14 @@ interface LotCardProps {
   animationDelay?: number;
 }
 
-function LotCard({ lot, onEdit, onDelete, getStatusBadge, getRotationMethodLabel, animationDelay = 0 }: LotCardProps) {
+function LotCard({
+  lot,
+  onEdit,
+  onDelete,
+  getStatusBadge,
+  getRotationMethodLabel,
+  animationDelay = 0,
+}: LotCardProps) {
   return (
     <Card
       className="hover:shadow-lg transition-all duration-300 group overflow-hidden animate-in fade-in slide-in-from-bottom-4 touch-manipulation"
@@ -444,7 +514,9 @@ function LotCard({ lot, onEdit, onDelete, getStatusBadge, getRotationMethodLabel
         <div className="space-y-2 text-xs sm:text-sm">
           <div className="flex items-center gap-2">
             <span className="font-medium">Quantité: </span>
-            <span>{lot.current_quantity - lot.reserved_quantity} / {lot.initial_quantity}</span>
+            <span>
+              {lot.current_quantity - lot.reserved_quantity} / {lot.initial_quantity}
+            </span>
             {lot.reserved_quantity > 0 && (
               <span className="text-muted-foreground">({lot.reserved_quantity} réservé)</span>
             )}
@@ -452,32 +524,26 @@ function LotCard({ lot, onEdit, onDelete, getStatusBadge, getRotationMethodLabel
           {lot.received_date && (
             <div className="flex items-center gap-2 text-muted-foreground">
               <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
-              <span>Reçu: {format(new Date(lot.received_date), 'dd MMM yyyy', { locale: fr })}</span>
+              <span>
+                Reçu: {format(new Date(lot.received_date), 'dd MMM yyyy', { locale: fr })}
+              </span>
             </div>
           )}
           {lot.expiration_date && (
             <div className="flex items-center gap-2 text-muted-foreground">
               <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
-              <span>Expire: {format(new Date(lot.expiration_date), 'dd MMM yyyy', { locale: fr })}</span>
+              <span>
+                Expire: {format(new Date(lot.expiration_date), 'dd MMM yyyy', { locale: fr })}
+              </span>
             </div>
           )}
         </div>
         <div className="flex gap-2 pt-2">
-          <Button
-            onClick={onEdit}
-            size="sm"
-            variant="outline"
-            className="flex-1"
-          >
+          <Button onClick={onEdit} size="sm" variant="outline" className="flex-1">
             <Edit className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
             <span className="text-xs sm:text-sm">Modifier</span>
           </Button>
-          <Button
-            onClick={onDelete}
-            size="sm"
-            variant="destructive"
-            className="flex-1"
-          >
+          <Button onClick={onDelete} size="sm" variant="destructive" className="flex-1">
             <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
             <span className="text-xs sm:text-sm">Supprimer</span>
           </Button>
@@ -486,9 +552,3 @@ function LotCard({ lot, onEdit, onDelete, getStatusBadge, getRotationMethodLabel
     </Card>
   );
 }
-
-
-
-
-
-

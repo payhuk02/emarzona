@@ -1,7 +1,7 @@
 /**
  * Store Tasks List Component
  * Date: 2 Février 2025
- * 
+ *
  * Affiche la liste des tâches d'une boutique
  */
 
@@ -28,14 +28,14 @@ interface StoreTasksListProps {
   storeId: string;
 }
 
-const  PRIORITY_LABELS: Record<StoreTask['priority'], string> = {
+const PRIORITY_LABELS: Record<StoreTask['priority'], string> = {
   low: 'Basse',
   medium: 'Moyenne',
   high: 'Haute',
   urgent: 'Urgente',
 };
 
-const  STATUS_LABELS: Record<StoreTask['status'], string> = {
+const STATUS_LABELS: Record<StoreTask['status'], string> = {
   pending: 'En attente',
   in_progress: 'En cours',
   review: 'En révision',
@@ -50,13 +50,17 @@ export const StoreTasksList = ({ storeId }: StoreTasksListProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'list' | 'kanban'>('list');
 
-  const { data: tasks, isLoading, error } = useStoreTasks(storeId, {
+  const {
+    data: tasks,
+    isLoading,
+    error,
+  } = useStoreTasks(storeId, {
     ...filters,
     search: searchQuery || undefined,
   });
 
   const handleFilterChange = useCallback((key: keyof TaskFilters, value: string | undefined) => {
-    setFilters((prev) => ({
+    setFilters(prev => ({
       ...prev,
       [key]: value || undefined,
     }));
@@ -77,7 +81,7 @@ export const StoreTasksList = ({ storeId }: StoreTasksListProps) => {
           <Skeleton className="h-4 w-64 mt-2" />
         </CardHeader>
         <CardContent className="space-y-4">
-          {[1, 2, 3].map((i) => (
+          {[1, 2, 3].map(i => (
             <Skeleton key={i} className="h-32 w-full" />
           ))}
         </CardContent>
@@ -108,31 +112,31 @@ export const StoreTasksList = ({ storeId }: StoreTasksListProps) => {
               {tasks?.length || 0} tâche{tasks && tasks.length > 1 ? 's' : ''} au total
             </CardDescription>
           </div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <div className="flex items-center gap-1 border rounded-md p-1">
-                <Button
-                  variant={viewMode === 'list' ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => setViewMode('list')}
-                  className="h-8"
-                >
-                  <List className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant={viewMode === 'kanban' ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => setViewMode('kanban')}
-                  className="h-8"
-                >
-                  <LayoutGrid className="h-4 w-4" />
-                </Button>
-              </div>
-              <StoreTaskCalendarExport storeId={storeId} />
-              <Button onClick={() => setCreateDialogOpen(true)} className="w-full sm:w-auto">
-                <Plus className="h-4 w-4 mr-2" />
-                Créer une tâche
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-1 border rounded-md p-1">
+              <Button
+                variant={viewMode === 'list' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('list')}
+                className="h-8"
+              >
+                <List className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={viewMode === 'kanban' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('kanban')}
+                className="h-8"
+              >
+                <LayoutGrid className="h-4 w-4" />
               </Button>
             </div>
+            <StoreTaskCalendarExport storeId={storeId} />
+            <Button onClick={() => setCreateDialogOpen(true)} className="w-full sm:w-auto">
+              <Plus className="h-4 w-4 mr-2" />
+              Créer une tâche
+            </Button>
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Filtres */}
@@ -142,13 +146,15 @@ export const StoreTasksList = ({ storeId }: StoreTasksListProps) => {
               <Input
                 placeholder="Rechercher une tâche..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={e => setSearchQuery(e.target.value)}
                 className="pl-9"
               />
             </div>
             <Select
               value={filters.status || 'all'}
-              onValueChange={(value) => handleFilterChange('status', value === 'all' ? undefined : value)}
+              onValueChange={value =>
+                handleFilterChange('status', value === 'all' ? undefined : value)
+              }
             >
               <SelectTrigger className="w-full sm:w-[150px]">
                 <SelectValue placeholder="Statut" />
@@ -164,7 +170,9 @@ export const StoreTasksList = ({ storeId }: StoreTasksListProps) => {
             </Select>
             <Select
               value={filters.priority || 'all'}
-              onValueChange={(value) => handleFilterChange('priority', value === 'all' ? undefined : value)}
+              onValueChange={value =>
+                handleFilterChange('priority', value === 'all' ? undefined : value)
+              }
             >
               <SelectTrigger className="w-full sm:w-[150px]">
                 <SelectValue placeholder="Priorité" />
@@ -188,10 +196,13 @@ export const StoreTasksList = ({ storeId }: StoreTasksListProps) => {
 
           {/* Liste ou Kanban des tâches */}
           {viewMode === 'kanban' ? (
-            <StoreTasksKanban storeId={storeId} filters={{ ...filters, search: searchQuery || undefined }} />
+            <StoreTasksKanban
+              storeId={storeId}
+              filters={{ ...filters, search: searchQuery || undefined }}
+            />
           ) : tasks && tasks.length > 0 ? (
             <div className="space-y-3">
-              {tasks.map((task) => (
+              {tasks.map(task => (
                 <StoreTaskCard key={task.id} task={task} />
               ))}
             </div>
@@ -215,17 +226,7 @@ export const StoreTasksList = ({ storeId }: StoreTasksListProps) => {
         </CardContent>
       </Card>
 
-      <StoreTaskCreateDialog
-        open={createDialogOpen}
-        onClose={() => setCreateDialogOpen(false)}
-      />
+      <StoreTaskCreateDialog open={createDialogOpen} onClose={() => setCreateDialogOpen(false)} />
     </>
   );
 };
-
-
-
-
-
-
-

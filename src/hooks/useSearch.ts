@@ -1,7 +1,7 @@
 /**
  * Hook useSearch - Gestion simplifiée de la recherche
  * Fournit une API simple pour gérer la recherche avec debounce
- * 
+ *
  * @example
  * ```tsx
  * const { query, results, isSearching, clearSearch } = useSearch(items, {
@@ -73,10 +73,7 @@ export interface UseSearchReturn<T> {
 /**
  * Hook pour rechercher dans une liste
  */
-export function useSearch<T>(
-  items: T[],
-  options: UseSearchOptions<T> = {}
-): UseSearchReturn<T> {
+export function useSearch<T>(items: T[], options: UseSearchOptions<T> = {}): UseSearchReturn<T> {
   const {
     searchKeys = [],
     debounceMs = 300,
@@ -97,14 +94,14 @@ export function useSearch<T>(
 
     const searchTerm = caseSensitive ? debouncedQuery : debouncedQuery.toLowerCase();
 
-    return items.filter((item) => {
+    return items.filter(item => {
       if (searchFn) {
         return searchFn(item, debouncedQuery);
       }
 
       // Recherche par défaut sur les clés spécifiées
       if (searchKeys.length > 0) {
-        return searchKeys.some((key) => {
+        return searchKeys.some(key => {
           const value = (item as any)[key];
           if (value == null) return false;
 
@@ -116,7 +113,7 @@ export function useSearch<T>(
       }
 
       // Si aucune clé spécifiée, rechercher dans toutes les valeurs de l'objet
-      return Object.values(item).some((value) => {
+      return Object.values(item).some(value => {
         if (value == null) return false;
         const stringValue = String(value);
         const searchValue = caseSensitive ? stringValue : stringValue.toLowerCase();
@@ -141,10 +138,3 @@ export function useSearch<T>(
     resultCount,
   };
 }
-
-
-
-
-
-
-

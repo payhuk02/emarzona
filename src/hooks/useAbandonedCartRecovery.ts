@@ -56,7 +56,8 @@ export const useAbandonedCartRecovery = (userId?: string) => {
 
       const { data, error } = await supabase
         .from('abandoned_carts')
-        .select(`
+        .select(
+          `
           *,
           profiles (email, full_name),
           abandoned_cart_items (
@@ -66,7 +67,8 @@ export const useAbandonedCartRecovery = (userId?: string) => {
             price,
             products (name, images)
           )
-        `)
+        `
+        )
         .eq('user_id', effectiveUserId)
         .eq('recovered_at', null)
         .order('abandoned_at', { ascending: false });
@@ -78,14 +80,15 @@ export const useAbandonedCartRecovery = (userId?: string) => {
 
       return data.map(cart => ({
         ...cart,
-        items: cart.abandoned_cart_items?.map((item: any) => ({
-          id: item.id,
-          product_id: item.product_id,
-          quantity: item.quantity,
-          price: item.price,
-          product_name: item.products?.name || 'Produit inconnu',
-          product_image: item.products?.images?.[0],
-        })) || [],
+        items:
+          cart.abandoned_cart_items?.map((item: any) => ({
+            id: item.id,
+            product_id: item.product_id,
+            quantity: item.quantity,
+            price: item.price,
+            product_name: item.products?.name || 'Produit inconnu',
+            product_image: item.products?.images?.[0],
+          })) || [],
       }));
     },
     enabled: !!effectiveUserId,
@@ -170,13 +173,13 @@ export const useAbandonedCartRecovery = (userId?: string) => {
       queryClient.invalidateQueries({ queryKey: ['abandoned-carts'] });
       toast({
         title: 'Email de récupération envoyé',
-        description: 'L\'email de récupération du panier a été envoyé avec succès.',
+        description: "L'email de récupération du panier a été envoyé avec succès.",
       });
     },
-    onError: (error) => {
+    onError: error => {
       toast({
         title: 'Erreur',
-        description: 'Impossible d\'envoyer l\'email de récupération.',
+        description: "Impossible d'envoyer l'email de récupération.",
         variant: 'destructive',
       });
     },
@@ -203,34 +206,39 @@ export const useAbandonedCartRecovery = (userId?: string) => {
   });
 
   // Auto-track cart abandonment (call this when cart is updated)
-  const trackCartUpdate = useCallback(async (cartItems: any[], storeId: string) => {
-    if (!effectiveUserId || cartItems.length === 0) return;
+  const trackCartUpdate = useCallback(
+    async (cartItems: any[], storeId: string) => {
+      if (!effectiveUserId || cartItems.length === 0) return;
 
-    const totalAmount = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      const totalAmount = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-    await trackAbandonedCart.mutateAsync({
-      userId: effectiveUserId,
-      items: cartItems.map(item => ({
-        product_id: item.product_id || item.id,
-        quantity: item.quantity,
-        price: item.price,
-        product_name: item.name,
-        product_image: item.image,
-      })),
-      totalAmount,
-      currency: 'XAF', // Default currency
-      storeId,
-    });
-  }, [effectiveUserId, trackAbandonedCart]);
+      await trackAbandonedCart.mutateAsync({
+        userId: effectiveUserId,
+        items: cartItems.map(item => ({
+          product_id: item.product_id || item.id,
+          quantity: item.quantity,
+          price: item.price,
+          product_name: item.name,
+          product_image: item.image,
+        })),
+        totalAmount,
+        currency: 'XAF', // Default currency
+        storeId,
+      });
+    },
+    [effectiveUserId, trackAbandonedCart]
+  );
 
   // Auto-send recovery emails (call this periodically)
-  const processRecoveryEmails = useCallback(async (hoursSinceAbandonment = 1) => {
-    const cutoffTime = new Date();
-    cutoffTime.setHours(cutoffTime.getHours() - hoursSinceAbandonment);
+  const processRecoveryEmails = useCallback(
+    async (hoursSinceAbandonment = 1) => {
+      const cutoffTime = new Date();
+      cutoffTime.setHours(cutoffTime.getHours() - hoursSinceAbandonment);
 
-    const { data: cartsToRecover, error } = await supabase
-      .from('abandoned_carts')
-      .select(`
+      const { data: cartsToRecover, error } = await supabase
+        .from('abandoned_carts')
+        .select(
+          `
         *,
         profiles (email, full_name),
         abandoned_cart_items (
@@ -240,40 +248,44 @@ export const useAbandonedCartRecovery = (userId?: string) => {
           price,
           products (name, images)
         )
-      `)
-      .eq('recovery_sent', false)
-      .eq('recovered_at', null)
-      .lt('abandoned_at', cutoffTime.toISOString())
-      .limit(10); // Process in batches
+      `
+        )
+        .eq('recovery_sent', false)
+        .eq('recovered_at', null)
+        .lt('abandoned_at', cutoffTime.toISOString())
+        .limit(10); // Process in batches
 
-    if (error) {
-      logger.error('Error fetching carts for recovery', { error });
-      return;
-    }
+      if (error) {
+        logger.error('Error fetching carts for recovery', { error });
+        return;
+      }
 
-    for (const cart of cartsToRecover || []) {
-      const items: AbandonedCartItem[] = cart.abandoned_cart_items?.map((item: any) => ({
-        id: item.id,
-        product_id: item.product_id,
-        quantity: item.quantity,
-        price: item.price,
-        product_name: item.products?.name || 'Produit inconnu',
-        product_image: item.products?.images?.[0],
-      })) || [];
+      for (const cart of cartsToRecover || []) {
+        const items: AbandonedCartItem[] =
+          cart.abandoned_cart_items?.map((item: any) => ({
+            id: item.id,
+            product_id: item.product_id,
+            quantity: item.quantity,
+            price: item.price,
+            product_name: item.products?.name || 'Produit inconnu',
+            product_image: item.products?.images?.[0],
+          })) || [];
 
-      await sendRecoveryEmail.mutateAsync({
-        cartId: cart.id,
-        userEmail: cart.profiles?.email,
-        userName: cart.profiles?.full_name,
-        items,
-        totalAmount: cart.total_amount,
-        currency: cart.currency,
-        recoveryUrl: `${window.location.origin}/cart?recovery=${cart.id}`,
-        discountCode: 'RECOVERY10', // Generate dynamic discount codes
-        discountAmount: Math.round(cart.total_amount * 0.1), // 10% discount
-      });
-    }
-  }, [sendRecoveryEmail]);
+        await sendRecoveryEmail.mutateAsync({
+          cartId: cart.id,
+          userEmail: cart.profiles?.email,
+          userName: cart.profiles?.full_name,
+          items,
+          totalAmount: cart.total_amount,
+          currency: cart.currency,
+          recoveryUrl: `${window.location.origin}/cart?recovery=${cart.id}`,
+          discountCode: 'RECOVERY10', // Generate dynamic discount codes
+          discountAmount: Math.round(cart.total_amount * 0.1), // 10% discount
+        });
+      }
+    },
+    [sendRecoveryEmail]
+  );
 
   return {
     abandonedCarts: abandonedCarts || [],

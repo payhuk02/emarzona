@@ -40,7 +40,8 @@ import { fr } from 'date-fns/locale';
 import { DigitalProductUpdate } from '@/hooks/digital/useProductUpdates';
 import { cn } from '@/lib/utils';
 
-const DIGITAL_PRODUCT_UPDATE_FIELDS = 'id, digital_product_id, version, title, description, release_type, release_date, is_published, is_forced, download_count';
+const DIGITAL_PRODUCT_UPDATE_FIELDS =
+  'id, digital_product_id, version, title, description, release_type, release_date, is_published, is_forced, download_count';
 
 interface UpdatesListProps {
   digitalProductId: string;

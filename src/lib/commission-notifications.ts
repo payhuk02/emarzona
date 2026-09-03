@@ -2,8 +2,8 @@
  * Service de notifications pour les commissions
  * Envoie des notifications pour les événements liés aux commissions (création, approbation, paiement, etc.)
  */
-import { supabase } from "@/integrations/supabase/client";
-import { logger } from "./logger";
+import { supabase } from '@/integrations/supabase/client';
+import { logger } from './logger';
 
 export type CommissionNotificationType =
   | 'commission_created'
@@ -79,7 +79,7 @@ const createNotification = async (
     });
 
     return { success: true, notification_id: notification.id };
-  } catch ( _error: unknown) {
+  } catch (_error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
     logger.error('Error in createNotification', { error: errorMessage });
     return { success: false, error: errorMessage };
@@ -264,7 +264,9 @@ export const sendBulkNotifications = async (
   );
 
   const successful = results.filter(r => r.status === 'fulfilled' && r.value.success).length;
-  const failed = results.filter(r => r.status === 'rejected' || (r.status === 'fulfilled' && !r.value.success)).length;
+  const failed = results.filter(
+    r => r.status === 'rejected' || (r.status === 'fulfilled' && !r.value.success)
+  ).length;
   const errors = results
     .filter(r => r.status === 'fulfilled' && !r.value.success)
     .map(r => (r as PromiseFulfilledResult<{ success: boolean; error?: string }>).value.error)
@@ -284,10 +286,3 @@ export const sendBulkNotifications = async (
     errors: errors.length > 0 ? errors : undefined,
   };
 };
-
-
-
-
-
-
-

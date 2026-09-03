@@ -110,19 +110,19 @@ export function AffiliateLinkTracker() {
           localStorage.setItem(
             'affiliate_tracking_info',
             JSON.stringify({
-               tracking_cookie: trackingData.tracking_cookie,
-               product_id: trackingData.product_id,
-               store_id: trackingData.store_id,
-               click_id: trackingData.click_id,
-               expires_at: trackingData.expires_at,
+              tracking_cookie: trackingData.tracking_cookie,
+              product_id: trackingData.product_id,
+              store_id: trackingData.store_id,
+              click_id: trackingData.click_id,
+              expires_at: trackingData.expires_at,
               link_code: affiliateCode,
             })
           );
 
           logger.info('Affiliate click tracked successfully', {
             code: affiliateCode,
-             click_id: trackingData.click_id,
-             expires_at: trackingData.expires_at,
+            click_id: trackingData.click_id,
+            expires_at: trackingData.expires_at,
           });
 
           // Marquer comme tracké dans cette session

@@ -64,11 +64,11 @@ export const VIDEO_MIME_TYPES = [
 
 /**
  * Détecte le type de média à partir du nom de fichier et du type MIME
- * 
+ *
  * @param fileName - Nom du fichier (avec extension)
  * @param fileType - Type MIME du fichier
  * @returns Le type de média détecté ('image', 'video', ou 'file')
- * 
+ *
  * @example
  * detectMediaType('photo.jpg', 'image/jpeg') // 'image'
  * detectMediaType('video.mp4', 'video/mp4') // 'video'
@@ -83,26 +83,26 @@ export function detectMediaType(fileName: string, fileType: string): MediaType {
   const isVideoByExtension = VIDEO_EXTENSIONS.some(ext => fileNameLower.endsWith(ext));
 
   // Détection par type MIME (fallback)
-  const isImageByMime = fileTypeLower.startsWith('image/') || 
-    IMAGE_MIME_TYPES.some(mime => fileTypeLower === mime);
-  const isVideoByMime = fileTypeLower.startsWith('video/') || 
-    VIDEO_MIME_TYPES.some(mime => fileTypeLower === mime);
+  const isImageByMime =
+    fileTypeLower.startsWith('image/') || IMAGE_MIME_TYPES.some(mime => fileTypeLower === mime);
+  const isVideoByMime =
+    fileTypeLower.startsWith('video/') || VIDEO_MIME_TYPES.some(mime => fileTypeLower === mime);
 
   // Priorité : extension > MIME
   // Si l'extension indique un type, l'utiliser en priorité
   if (isImageByExtension) {
     return 'image';
   }
-  
+
   if (isVideoByExtension) {
     return 'video';
   }
-  
+
   // Sinon, utiliser le MIME type comme fallback
   if (isImageByMime) {
     return 'image';
   }
-  
+
   if (isVideoByMime) {
     return 'video';
   }
@@ -130,9 +130,3 @@ export function isVideo(fileName: string, fileType: string): boolean {
 export function isFile(fileName: string, fileType: string): boolean {
   return detectMediaType(fileName, fileType) === 'file';
 }
-
-
-
-
-
-

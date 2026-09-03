@@ -1,7 +1,7 @@
 /**
  * Coupon Enhancements Hooks
  * Date: 2025-01-27
- * 
+ *
  * Hooks pour les améliorations des coupons : combinables, usage unique par client
  */
 
@@ -11,7 +11,8 @@ import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 import { useState } from 'react';
 
-const COUPON_CUSTOMER_USAGE_FIELDS = 'id, coupon_id, customer_id, order_id, used_at, discount_amount, order_total_before, order_total_after';
+const COUPON_CUSTOMER_USAGE_FIELDS =
+  'id, coupon_id, customer_id, order_id, used_at, discount_amount, order_total_before, order_total_after';
 
 // =====================================================
 // TYPES
@@ -140,7 +141,7 @@ export const useRecordCouponUsage = () => {
       logger.error('Error in useRecordCouponUsage', { error });
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible d\'enregistrer l\'usage du coupon',
+        description: error.message || "Impossible d'enregistrer l'usage du coupon",
         variant: 'destructive',
       });
     },
@@ -158,7 +159,7 @@ export const useCouponCustomerUsage = (couponId?: string, customerId?: string) =
         return [];
       }
 
-      let  query= supabase
+      let query = supabase
         .from('coupon_customer_usage')
         .select(COUPON_CUSTOMER_USAGE_FIELDS)
         .order('used_at', { ascending: false });
@@ -225,7 +226,7 @@ export const useValidateCombinedCoupons = () => {
       }
 
       // Vérifier l'usage unique pour chaque coupon si customerId fourni
-      const  coupons: Array<{
+      const coupons: Array<{
         id: string;
         code: string;
         discount: number;
@@ -235,7 +236,7 @@ export const useValidateCombinedCoupons = () => {
       if (customerId) {
         for (const couponId of couponIds) {
           const canUseCoupon = await canUseMutation.mutateAsync({ couponId, customerId });
-          
+
           // Récupérer les infos du coupon
           const { data: coupon } = await supabase
             .from('digital_product_coupons')
@@ -244,9 +245,10 @@ export const useValidateCombinedCoupons = () => {
             .single();
 
           if (coupon) {
-            const discount = coupon.discount_type === 'percentage'
-              ? (orderTotal * coupon.discount_value / 100)
-              : coupon.discount_value;
+            const discount =
+              coupon.discount_type === 'percentage'
+                ? (orderTotal * coupon.discount_value) / 100
+                : coupon.discount_value;
 
             coupons.push({
               id: coupon.id,
@@ -285,10 +287,3 @@ export const useValidateCombinedCoupons = () => {
     },
   });
 };
-
-
-
-
-
-
-

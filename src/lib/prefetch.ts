@@ -22,15 +22,15 @@ export function prefetchURL(url: string, options: PrefetchOptions = {}): void {
   const link = document.createElement('link');
   link.rel = 'prefetch';
   link.href = url;
-  
+
   if (options.as) {
     link.as = options.as;
   }
-  
+
   if (options.crossOrigin) {
     link.crossOrigin = options.crossOrigin;
   }
-  
+
   document.head.appendChild(link);
   logger.debug('URL prefetched', { url });
 }
@@ -39,7 +39,7 @@ export function prefetchURL(url: string, options: PrefetchOptions = {}): void {
  * Précharger plusieurs URLs
  */
 export function prefetchURLs(urls: string[], options?: PrefetchOptions): void {
-  urls.forEach((url) => prefetchURL(url, options));
+  urls.forEach(url => prefetchURL(url, options));
 }
 
 /**
@@ -81,13 +81,13 @@ export function prefetchOnHover(selector: string): () => void {
     }
   };
 
-  links.forEach((link) => {
+  links.forEach(link => {
     link.addEventListener('mouseenter', handleMouseEnter, { once: true });
   });
 
   // Cleanup
   return () => {
-    links.forEach((link) => {
+    links.forEach(link => {
       link.removeEventListener('mouseenter', handleMouseEnter);
     });
   };
@@ -100,8 +100,8 @@ export function prefetchOnViewport(selector: string): IntersectionObserver {
   const prefetched = new Set<string>();
 
   const observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
+    entries => {
+      entries.forEach(entry => {
         if (entry.isIntersecting) {
           const target = entry.target as HTMLAnchorElement;
           const url = target.href;
@@ -120,7 +120,7 @@ export function prefetchOnViewport(selector: string): IntersectionObserver {
   );
 
   const links = document.querySelectorAll<HTMLAnchorElement>(selector);
-  links.forEach((link) => observer.observe(link));
+  links.forEach(link => observer.observe(link));
 
   return observer;
 }
@@ -130,8 +130,8 @@ export function prefetchOnViewport(selector: string): IntersectionObserver {
  */
 export function prefetchImagesOnViewport(selector: string = 'img[data-src]'): IntersectionObserver {
   const observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
+    entries => {
+      entries.forEach(entry => {
         if (entry.isIntersecting) {
           const img = entry.target as HTMLImageElement;
           const src = img.dataset.src;
@@ -150,7 +150,7 @@ export function prefetchImagesOnViewport(selector: string = 'img[data-src]'): In
   );
 
   const images = document.querySelectorAll<HTMLImageElement>(selector);
-  images.forEach((img) => observer.observe(img));
+  images.forEach(img => observer.observe(img));
 
   return observer;
 }
@@ -160,23 +160,16 @@ export function prefetchImagesOnViewport(selector: string = 'img[data-src]'): In
  */
 export function prefetchCriticalResources(): void {
   // API endpoints critiques
-  const criticalEndpoints = [
-    '/api/user',
-    '/api/products',
-    '/api/cart',
-  ];
+  const criticalEndpoints = ['/api/user', '/api/products', '/api/cart'];
 
-  criticalEndpoints.forEach((endpoint) => {
+  criticalEndpoints.forEach(endpoint => {
     prefetchURL(endpoint, { as: 'fetch' });
   });
 
   // Domaines externes critiques
-  const externalDomains = [
-    'https://fonts.googleapis.com',
-    'https://fonts.gstatic.com',
-  ];
+  const externalDomains = ['https://fonts.googleapis.com', 'https://fonts.gstatic.com'];
 
-  externalDomains.forEach((domain) => {
+  externalDomains.forEach(domain => {
     preconnect(domain);
   });
 
@@ -266,10 +259,3 @@ export function setupAutoPrefetch(): () => void {
     return () => {};
   }
 }
-
-
-
-
-
-
-

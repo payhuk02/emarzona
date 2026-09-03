@@ -62,7 +62,12 @@ export const useVideoTracking = (options: VideoTrackingOptions) => {
           },
         });
 
-        logger.debug('Video event tracked', { eventType: eventData.event_type, productId, lessonId, sessionId });
+        logger.debug('Video event tracked', {
+          eventType: eventData.event_type,
+          productId,
+          lessonId,
+          sessionId,
+        });
       } catch (error) {
         logger.error('Error tracking video event', { error, eventData, productId, lessonId });
       }
@@ -115,10 +120,7 @@ export const useVideoTracking = (options: VideoTrackingOptions) => {
       const milestones = [25, 50, 75, 100];
 
       for (const milestone of milestones) {
-        if (
-          progressPercent >= milestone &&
-          !milestonesReached.current.has(milestone)
-        ) {
+        if (progressPercent >= milestone && !milestonesReached.current.has(milestone)) {
           milestonesReached.current.add(milestone);
 
           trackVideoEvent({
@@ -129,7 +131,12 @@ export const useVideoTracking = (options: VideoTrackingOptions) => {
             lesson_id: lessonId,
           });
 
-          logger.debug('Video milestone reached', { milestone, productId, lessonId, progressPercent });
+          logger.debug('Video milestone reached', {
+            milestone,
+            productId,
+            lessonId,
+            progressPercent,
+          });
         }
       }
     },
@@ -173,21 +180,23 @@ export const useVideoPosition = (enrollmentId?: string, lessonId?: string) => {
       lastSaveTime.current = now;
 
       try {
-        await supabase
-          .from('course_lesson_progress')
-          .upsert(
-            {
-              enrollment_id: enrollmentId,
-              lesson_id: lessonId,
-              last_watched_position_seconds: Math.floor(currentTime),
-              updated_at: new Date().toISOString(),
-            },
-            {
-              onConflict: 'enrollment_id,lesson_id',
-            }
-          );
+        await supabase.from('course_lesson_progress').upsert(
+          {
+            enrollment_id: enrollmentId,
+            lesson_id: lessonId,
+            last_watched_position_seconds: Math.floor(currentTime),
+            updated_at: new Date().toISOString(),
+          },
+          {
+            onConflict: 'enrollment_id,lesson_id',
+          }
+        );
 
-        logger.debug('Video position saved', { currentTime: Math.floor(currentTime), enrollmentId, lessonId });
+        logger.debug('Video position saved', {
+          currentTime: Math.floor(currentTime),
+          enrollmentId,
+          lessonId,
+        });
       } catch (error) {
         logger.error('Error saving video position', { error, enrollmentId, lessonId, currentTime });
       }
@@ -230,7 +239,12 @@ export const useWatchTime = (enrollmentId?: string, lessonId?: string) => {
         p_seconds: watchDuration,
       });
 
-      logger.debug('Watch time saved', { watchDuration, totalWatchTime: totalWatchTime.current, enrollmentId, lessonId });
+      logger.debug('Watch time saved', {
+        watchDuration,
+        totalWatchTime: totalWatchTime.current,
+        enrollmentId,
+        lessonId,
+      });
     } catch (error) {
       logger.error('Error saving watch time', { error, enrollmentId, lessonId, watchDuration });
     }
@@ -253,10 +267,3 @@ export const useWatchTime = (enrollmentId?: string, lessonId?: string) => {
     totalWatchTime: totalWatchTime.current,
   };
 };
-
-
-
-
-
-
-

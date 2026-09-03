@@ -24,7 +24,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import {
   Package,
   Plus,
@@ -164,7 +164,7 @@ export const StockAlertManager = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {alerts.map((alert) => (
+                {alerts.map(alert => (
                   <TableRow key={alert.id}>
                     <TableCell className="font-medium">
                       Produit #{alert.product_id.slice(0, 8)}
@@ -197,7 +197,7 @@ export const StockAlertManager = () => {
                       <div className="flex items-center gap-2">
                         <Switch
                           checked={alert.is_active}
-                          onCheckedChange={(checked) =>
+                          onCheckedChange={checked =>
                             toggleAlert.mutate({ alertId: alert.id, isActive: checked })
                           }
                           disabled={toggleAlert.isPending}
@@ -227,13 +227,13 @@ export const StockAlertManager = () => {
                     <TableCell className="text-right">
                       <Select>
                         <SelectTrigger>
-
-                            <MoreVertical className="h-4 w-4" />
-                          
-</SelectTrigger>
+                          <MoreVertical className="h-4 w-4" />
+                        </SelectTrigger>
                         <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <SelectItem value="edit" onSelect={() =>
+                          <SelectItem
+                            value="edit"
+                            onSelect={() =>
                               deleteAlert.mutate(alert.id, {
                                 onSuccess: () => {
                                   // Toast déjà géré par le hook
@@ -258,10 +258,3 @@ export const StockAlertManager = () => {
     </div>
   );
 };
-
-
-
-
-
-
-

@@ -8,7 +8,7 @@ import { logger } from './logger';
  * Valide un nom de domaine
  * @param domain - Le nom de domaine à valider
  * @returns true si le domaine est valide, false sinon
- * 
+ *
  * @example
  * validateDomain('example.com') // true
  * validateDomain('mon-site.fr') // true
@@ -24,21 +24,22 @@ export const validateDomain = (domain: string): boolean => {
   // - Commence et finit par un caractère alphanumérique
   // - Peut contenir des tirets au milieu
   // - Doit avoir une extension valide (.com, .fr, .co.uk, etc.)
-  const domainRegex = /^[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9]?\.([a-zA-Z]{2,}|[a-zA-Z]{2,}\.[a-zA-Z]{2,})$/;
-  
+  const domainRegex =
+    /^[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9]?\.([a-zA-Z]{2,}|[a-zA-Z]{2,}\.[a-zA-Z]{2,})$/;
+
   return domainRegex.test(domain);
 };
 
 /**
  * Génère un token de vérification unique pour un domaine
  * @returns Un token unique au format "emarzona-verify-{random}"
- * 
+ *
  * @example
  * generateVerificationToken() // "emarzona-verify-abc123def456"
  */
 export const generateVerificationToken = (): string => {
-  const randomString = Math.random().toString(36).substring(2, 15) + 
-                       Math.random().toString(36).substring(2, 15);
+  const randomString =
+    Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
   return `emarzona-verify-${randomString}`;
 };
 
@@ -55,22 +56,22 @@ export const getDNSInstructions = (domain: string, token: string) => {
       name: domain,
       value: '185.158.133.1',
       ttl: 3600,
-      description: 'Enregistrement A principal pour le domaine'
+      description: 'Enregistrement A principal pour le domaine',
     },
     wwwRecord: {
       type: 'A' as const,
       name: `www.${domain}`,
       value: '185.158.133.1',
       ttl: 3600,
-      description: 'Enregistrement A pour le sous-domaine www'
+      description: 'Enregistrement A pour le sous-domaine www',
     },
     txtRecord: {
       type: 'TXT' as const,
       name: `_emarzona-verification.${domain}`,
       value: token,
       ttl: 3600,
-      description: 'Enregistrement TXT de vérification Emarzona'
-    }
+      description: 'Enregistrement TXT de vérification Emarzona',
+    },
   };
 };
 
@@ -80,17 +81,14 @@ export const getDNSInstructions = (domain: string, token: string) => {
  * @param verificationToken - Le token de vérification attendu
  * @returns Les résultats de la vérification DNS
  */
-export const checkDNSPropagation = async (
-  domain: string,
-  verificationToken: string
-) => {
+export const checkDNSPropagation = async (domain: string, verificationToken: string) => {
   const startTime = Date.now();
-  const  errors: string[] = [];
+  const errors: string[] = [];
   const details = {
     aRecord: false,
     wwwRecord: false,
     txtRecord: false,
-    cnameRecord: false
+    cnameRecord: false,
   };
 
   try {
@@ -98,16 +96,20 @@ export const checkDNSPropagation = async (
     try {
       const aResponse = await fetch(`https://dns.google/resolve?name=${domain}&type=A`);
       const aData = await aResponse.json();
-      
+
       if (aData.Answer && aData.Answer.length > 0) {
         // IPs Vercel pour domaines personnalisés (utiliser CNAME recommandé, mais A record aussi supporté)
         const targetIPs = ['76.76.19.61', '76.76.21.61', '185.158.133.1'];
-        details.aRecord = aData.Answer.some((answer: { data: string }) => targetIPs.includes(answer.data));
+        details.aRecord = aData.Answer.some((answer: { data: string }) =>
+          targetIPs.includes(answer.data)
+        );
         if (!details.aRecord) {
-          errors.push(`Enregistrement A incorrect: pointe vers ${aData.Answer[0].data}. IPs attendues: ${targetIPs.join(', ')}`);
+          errors.push(
+            `Enregistrement A incorrect: pointe vers ${aData.Answer[0].data}. IPs attendues: ${targetIPs.join(', ')}`
+          );
         }
       } else {
-        errors.push("Enregistrement A manquant");
+        errors.push('Enregistrement A manquant');
       }
     } catch (_e) {
       errors.push("Erreur lors de la vérification de l'enregistrement A");
@@ -117,16 +119,20 @@ export const checkDNSPropagation = async (
     try {
       const wwwResponse = await fetch(`https://dns.google/resolve?name=www.${domain}&type=A`);
       const wwwData = await wwwResponse.json();
-      
+
       if (wwwData.Answer && wwwData.Answer.length > 0) {
         // IPs Vercel pour domaines personnalisés
         const targetIPs = ['76.76.19.61', '76.76.21.61', '185.158.133.1'];
-        details.wwwRecord = wwwData.Answer.some((answer: { data: string }) => targetIPs.includes(answer.data));
+        details.wwwRecord = wwwData.Answer.some((answer: { data: string }) =>
+          targetIPs.includes(answer.data)
+        );
         if (!details.wwwRecord) {
-          errors.push(`Enregistrement WWW incorrect: pointe vers ${wwwData.Answer[0].data}. IPs attendues: ${targetIPs.join(', ')}`);
+          errors.push(
+            `Enregistrement WWW incorrect: pointe vers ${wwwData.Answer[0].data}. IPs attendues: ${targetIPs.join(', ')}`
+          );
         }
       } else {
-        errors.push("Enregistrement WWW manquant");
+        errors.push('Enregistrement WWW manquant');
       }
     } catch (_e) {
       errors.push("Erreur lors de la vérification de l'enregistrement WWW");
@@ -134,18 +140,21 @@ export const checkDNSPropagation = async (
 
     // Vérifier enregistrement TXT de vérification
     try {
-      const txtResponse = await fetch(`https://dns.google/resolve?name=_emarzona-verification.${domain}&type=TXT`);
+      const txtResponse = await fetch(
+        `https://dns.google/resolve?name=_emarzona-verification.${domain}&type=TXT`
+      );
       const txtData = await txtResponse.json();
-      
+
       if (txtData.Answer && txtData.Answer.length > 0) {
-        details.txtRecord = txtData.Answer.some((answer: { data: string }) => 
-          answer.data && answer.data.replace(/"/g, '') === verificationToken
+        details.txtRecord = txtData.Answer.some(
+          (answer: { data: string }) =>
+            answer.data && answer.data.replace(/"/g, '') === verificationToken
         );
         if (!details.txtRecord) {
-          errors.push("Token de vérification TXT incorrect ou manquant");
+          errors.push('Token de vérification TXT incorrect ou manquant');
         }
       } else {
-        errors.push("Enregistrement TXT de vérification manquant");
+        errors.push('Enregistrement TXT de vérification manquant');
       }
     } catch (_e) {
       errors.push("Erreur lors de la vérification de l'enregistrement TXT");
@@ -156,13 +165,13 @@ export const checkDNSPropagation = async (
 
     const isPropagated = details.aRecord && details.wwwRecord && details.txtRecord;
     const propagationTime = Date.now() - startTime;
-    
+
     return {
       isPropagated,
       details,
       errors,
       propagationTime,
-      lastCheck: new Date()
+      lastCheck: new Date(),
     };
   } catch (error) {
     logger.error('Error checking DNS propagation', { error });
@@ -172,11 +181,11 @@ export const checkDNSPropagation = async (
         aRecord: false,
         wwwRecord: false,
         txtRecord: false,
-        cnameRecord: false
+        cnameRecord: false,
       },
-      errors: ["Erreur générale lors de la vérification DNS"],
+      errors: ['Erreur générale lors de la vérification DNS'],
       propagationTime: 0,
-      lastCheck: new Date()
+      lastCheck: new Date(),
     };
   }
 };
@@ -194,13 +203,6 @@ export const formatPropagationTime = (milliseconds: number): string => {
   if (minutes > 0) {
     return `${minutes} minute${minutes > 1 ? 's' : ''} ${remainingSeconds} seconde${remainingSeconds > 1 ? 's' : ''}`;
   }
-  
+
   return `${seconds} seconde${seconds > 1 ? 's' : ''}`;
 };
-
-
-
-
-
-
-

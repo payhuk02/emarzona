@@ -40,8 +40,8 @@ vi.mock('@/hooks/use-toast', () => ({
 }));
 
 describe('useProducts', () => {
-  let  queryClient: QueryClient;
-  let  wrapper: ({ children }: { children: React.ReactNode }) => JSX.Element;
+  let queryClient: QueryClient;
+  let wrapper: ({ children }: { children: React.ReactNode }) => JSX.Element;
 
   beforeEach(() => {
     queryClient = new QueryClient({
@@ -113,4 +113,3 @@ describe('useProducts', () => {
     expect(typeof result.current.refetch).toBe('function');
   });
 });
-

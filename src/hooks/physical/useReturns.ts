@@ -1,7 +1,7 @@
 /**
  * Physical Product Returns Hooks
  * Date: 27 Janvier 2025
- * 
+ *
  * Hooks pour gérer les retours de produits physiques (RMA)
  */
 
@@ -12,9 +12,12 @@ import { logger } from '@/lib/logger';
 import { useAuth } from '@/contexts/AuthContext';
 import { DHLService, FedExService, UPSService, ChronopostService } from '@/integrations/shipping';
 
-const RETURN_POLICY_FIELDS = 'id, store_id, name, description, return_window_days, requires_receipt, requires_photos, requires_original_packaging, requires_tags, accepted_conditions, restocking_fee_percentage, restocking_fee_fixed, return_shipping_paid_by, accepted_reasons, allowed_refund_methods, excluded_product_ids, excluded_category_ids, applies_to_all_products, specific_product_ids, is_active, is_default, created_at, updated_at';
-const SHIPPING_LABEL_FIELDS = 'id, store_id, order_id, carrier_id, label_number, tracking_number, service_type, service_name, shipping_cost, currency, insurance_cost, label_url, label_format, weight, weight_unit, dimensions, from_address, to_address, status, generated_at, api_response, notes, created_at, updated_at';
-const RETURN_CARRIER_FIELDS = 'id, store_id, name, code, carrier_name, account_number, meter_number, api_key, api_secret, api_url, test_mode, is_active, supports_tracking, supports_label_generation, created_at, updated_at';
+const RETURN_POLICY_FIELDS =
+  'id, store_id, name, description, return_window_days, requires_receipt, requires_photos, requires_original_packaging, requires_tags, accepted_conditions, restocking_fee_percentage, restocking_fee_fixed, return_shipping_paid_by, accepted_reasons, allowed_refund_methods, excluded_product_ids, excluded_category_ids, applies_to_all_products, specific_product_ids, is_active, is_default, created_at, updated_at';
+const SHIPPING_LABEL_FIELDS =
+  'id, store_id, order_id, carrier_id, label_number, tracking_number, service_type, service_name, shipping_cost, currency, insurance_cost, label_url, label_format, weight, weight_unit, dimensions, from_address, to_address, status, generated_at, api_response, notes, created_at, updated_at';
+const RETURN_CARRIER_FIELDS =
+  'id, store_id, name, code, carrier_name, account_number, meter_number, api_key, api_secret, api_url, test_mode, is_active, supports_tracking, supports_label_generation, created_at, updated_at';
 
 // =====================================================
 // TYPES
@@ -27,8 +30,29 @@ export interface ProductReturn {
   order_item_id: string;
   user_id: string;
   return_number: string;
-  status: 'pending' | 'approved' | 'rejected' | 'return_shipped' | 'return_received' | 'inspecting' | 'refund_processing' | 'refunded' | 'store_credit_issued' | 'exchange_processing' | 'exchanged' | 'cancelled';
-  return_reason: 'defective' | 'wrong_item' | 'not_as_described' | 'damaged' | 'size_issue' | 'color_issue' | 'changed_mind' | 'late_delivery' | 'other';
+  status:
+    | 'pending'
+    | 'approved'
+    | 'rejected'
+    | 'return_shipped'
+    | 'return_received'
+    | 'inspecting'
+    | 'refund_processing'
+    | 'refunded'
+    | 'store_credit_issued'
+    | 'exchange_processing'
+    | 'exchanged'
+    | 'cancelled';
+  return_reason:
+    | 'defective'
+    | 'wrong_item'
+    | 'not_as_described'
+    | 'damaged'
+    | 'size_issue'
+    | 'color_issue'
+    | 'changed_mind'
+    | 'late_delivery'
+    | 'other';
   return_reason_details?: string;
   product_id?: string;
   variant_id?: string;
@@ -140,7 +164,8 @@ export const useReturns = (userId?: string) => {
 
       const { data, error } = await supabase
         .from('product_returns')
-        .select(`
+        .select(
+          `
           *,
           order:orders (
             id,
@@ -152,7 +177,8 @@ export const useReturns = (userId?: string) => {
             name,
             image_url
           )
-        `)
+        `
+        )
         .eq('user_id', userId)
         .order('requested_at', { ascending: false });
 
@@ -170,19 +196,23 @@ export const useReturns = (userId?: string) => {
 /**
  * useStoreReturns - Récupère les retours d'un store (admin)
  */
-export const useStoreReturns = (storeId?: string, filters?: {
-  status?: ProductReturn['status'];
-  dateFrom?: string;
-  dateTo?: string;
-}) => {
+export const useStoreReturns = (
+  storeId?: string,
+  filters?: {
+    status?: ProductReturn['status'];
+    dateFrom?: string;
+    dateTo?: string;
+  }
+) => {
   return useQuery({
     queryKey: ['store-returns', storeId, filters],
     queryFn: async () => {
       if (!storeId) throw new Error('Store ID manquant');
 
-      let  query= supabase
+      let query = supabase
         .from('product_returns')
-        .select(`
+        .select(
+          `
           *,
           order:orders (
             id,
@@ -194,7 +224,8 @@ export const useStoreReturns = (storeId?: string, filters?: {
             name,
             image_url
           )
-        `)
+        `
+        )
         .eq('store_id', storeId);
 
       if (filters?.status) {
@@ -233,7 +264,8 @@ export const useReturn = (returnId: string | undefined) => {
 
       const { data, error } = await supabase
         .from('product_returns')
-        .select(`
+        .select(
+          `
           *,
           order:orders (
             id,
@@ -245,7 +277,8 @@ export const useReturn = (returnId: string | undefined) => {
             name,
             image_url
           )
-        `)
+        `
+        )
         .eq('id', returnId)
         .single();
 
@@ -381,7 +414,7 @@ export const useCreateReturn = () => {
 
       return data as ProductReturn;
     },
-    onSuccess: async (data) => {
+    onSuccess: async data => {
       queryClient.invalidateQueries({ queryKey: ['returns'] });
       queryClient.invalidateQueries({ queryKey: ['store-returns'] });
       toast({
@@ -392,11 +425,11 @@ export const useCreateReturn = () => {
       // Déclencher la notification de retour (création)
       import('@/services/physical/notificationTriggers')
         .then(({ triggerReturnNotification }) => {
-          triggerReturnNotification(data.id, 'requested').catch((error) => {
+          triggerReturnNotification(data.id, 'requested').catch(error => {
             logger.error('Error triggering return notification', { error });
           });
         })
-        .catch((error) => {
+        .catch(error => {
           logger.error('Error loading notification triggers', { error });
         });
 
@@ -416,11 +449,11 @@ export const useCreateReturn = () => {
                 quantity: data.quantity,
               },
               data.id
-            ).catch((error) => {
+            ).catch(error => {
               logger.error('Error triggering return_requested webhook', { error });
             });
           })
-          .catch((error) => {
+          .catch(error => {
             logger.error('Error loading unified webhook service', { error });
           });
       }
@@ -467,7 +500,7 @@ export const useApproveReturn = () => {
 
       return data as ProductReturn;
     },
-    onSuccess: async (data) => {
+    onSuccess: async data => {
       queryClient.invalidateQueries({ queryKey: ['returns'] });
       queryClient.invalidateQueries({ queryKey: ['store-returns'] });
       toast({
@@ -478,11 +511,11 @@ export const useApproveReturn = () => {
       // Déclencher la notification de retour
       import('@/services/physical/notificationTriggers')
         .then(({ triggerReturnNotification }) => {
-          triggerReturnNotification(data.id, 'approved').catch((error) => {
+          triggerReturnNotification(data.id, 'approved').catch(error => {
             logger.error('Error triggering return notification', { error });
           });
         })
-        .catch((error) => {
+        .catch(error => {
           logger.error('Error loading notification triggers', { error });
         });
 
@@ -500,11 +533,11 @@ export const useApproveReturn = () => {
                 status: 'approved',
               },
               data.id
-            ).catch((error) => {
+            ).catch(error => {
               logger.error('Error triggering return_approved webhook', { error });
             });
           })
-          .catch((error) => {
+          .catch(error => {
             logger.error('Error loading unified webhook service', { error });
           });
       }
@@ -513,7 +546,7 @@ export const useApproveReturn = () => {
       logger.error('Error in useApproveReturn', { error });
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible d\'approuver le retour',
+        description: error.message || "Impossible d'approuver le retour",
         variant: 'destructive',
       });
     },
@@ -528,7 +561,15 @@ export const useRejectReturn = () => {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({ returnId, rejectionReason, adminNotes }: { returnId: string; rejectionReason: string; adminNotes?: string }) => {
+    mutationFn: async ({
+      returnId,
+      rejectionReason,
+      adminNotes,
+    }: {
+      returnId: string;
+      rejectionReason: string;
+      adminNotes?: string;
+    }) => {
       const { data: user } = await supabase.auth.getUser();
       if (!user.user) throw new Error('Non authentifié');
 
@@ -552,7 +593,7 @@ export const useRejectReturn = () => {
 
       return data as ProductReturn;
     },
-    onSuccess: async (data) => {
+    onSuccess: async data => {
       queryClient.invalidateQueries({ queryKey: ['returns'] });
       queryClient.invalidateQueries({ queryKey: ['store-returns'] });
       toast({
@@ -563,11 +604,11 @@ export const useRejectReturn = () => {
       // Déclencher la notification de retour
       import('@/services/physical/notificationTriggers')
         .then(({ triggerReturnNotification }) => {
-          triggerReturnNotification(data.id, 'rejected').catch((error) => {
+          triggerReturnNotification(data.id, 'rejected').catch(error => {
             logger.error('Error triggering return notification', { error });
           });
         })
-        .catch((error) => {
+        .catch(error => {
           logger.error('Error loading notification triggers', { error });
         });
 
@@ -586,11 +627,11 @@ export const useRejectReturn = () => {
                 rejection_reason: data.rejection_reason || variables.rejectionReason,
               },
               data.id
-            ).catch((error) => {
+            ).catch(error => {
               logger.error('Error triggering return_rejected webhook', { error });
             });
           })
-          .catch((error) => {
+          .catch(error => {
             logger.error('Error loading unified webhook service', { error });
           });
       }
@@ -627,7 +668,7 @@ export const useUpdateReturnStatus = () => {
       carrier?: string;
       adminNotes?: string;
     }) => {
-      const  updateData: any = {
+      const updateData: any = {
         status,
         admin_notes: adminNotes,
       };
@@ -670,11 +711,11 @@ export const useUpdateReturnStatus = () => {
       // Déclencher la notification de retour
       import('@/services/physical/notificationTriggers')
         .then(({ triggerReturnNotification }) => {
-          triggerReturnNotification(data.id, variables.status).catch((error) => {
+          triggerReturnNotification(data.id, variables.status).catch(error => {
             logger.error('Error triggering return notification', { error });
           });
         })
-        .catch((error) => {
+        .catch(error => {
           logger.error('Error loading notification triggers', { error });
         });
 
@@ -682,11 +723,11 @@ export const useUpdateReturnStatus = () => {
       if (data.store_id) {
         import('@/lib/webhooks/unified-webhook-service')
           .then(({ triggerUnifiedWebhook }) => {
-            const  eventTypeMap: Record<string, string> = {
-              'approved': 'return.approved',
-              'rejected': 'return.rejected',
-              'return_received': 'return.received',
-              'refunded': 'return.refunded',
+            const eventTypeMap: Record<string, string> = {
+              approved: 'return.approved',
+              rejected: 'return.rejected',
+              return_received: 'return.received',
+              refunded: 'return.refunded',
             };
 
             const eventType = eventTypeMap[variables.status];
@@ -702,12 +743,12 @@ export const useUpdateReturnStatus = () => {
                   refund_amount: data.refund_amount,
                 },
                 data.id
-              ).catch((error) => {
+              ).catch(error => {
                 logger.error(`Error triggering ${eventType} webhook`, { error });
               });
             }
           })
-          .catch((error) => {
+          .catch(error => {
             logger.error('Error loading unified webhook service', { error });
           });
       }
@@ -725,7 +766,7 @@ export const useUpdateReturnStatus = () => {
 
 /**
  * useGenerateReturnLabel - Générer une étiquette de retour
- * 
+ *
  * Récupère les détails de la commande originale, inverse les adresses,
  * et génère un label de retour via le même transporteur
  */
@@ -744,7 +785,8 @@ export const useGenerateReturnLabel = () => {
       // 1. Récupérer les détails du retour
       const { data: returnData, error: returnError } = await supabase
         .from('product_returns')
-        .select(`
+        .select(
+          `
           *,
           order:orders(
             id,
@@ -753,7 +795,8 @@ export const useGenerateReturnLabel = () => {
             customer_email,
             customer_phone
           )
-        `)
+        `
+        )
         .eq('id', returnId)
         .single();
 
@@ -774,10 +817,12 @@ export const useGenerateReturnLabel = () => {
       // 2. Récupérer le label d'expédition original de la commande
       const { data: originalLabel, error: labelError } = await supabase
         .from('shipping_labels')
-        .select(`
+        .select(
+          `
           ${SHIPPING_LABEL_FIELDS},
           carrier:shipping_carriers(${RETURN_CARRIER_FIELDS})
-        `)
+        `
+        )
         .eq('order_id', returnItem.order_id)
         .eq('status', 'generated')
         .order('created_at', { ascending: false })
@@ -785,7 +830,9 @@ export const useGenerateReturnLabel = () => {
         .single();
 
       if (labelError || !originalLabel) {
-        throw new Error('Label d\'expédition original non trouvé. Impossible de générer un label de retour.');
+        throw new Error(
+          "Label d'expédition original non trouvé. Impossible de générer un label de retour."
+        );
       }
 
       const carrier = originalLabel.carrier as Record<string, unknown> | null;
@@ -804,12 +851,24 @@ export const useGenerateReturnLabel = () => {
       // 4. Préparer les adresses (inversées pour le retour)
       const fromAddress = {
         name: returnItem.order.shipping_address?.name || 'Client',
-        addressLine1: returnItem.order.shipping_address?.address_line1 || returnItem.order.shipping_address?.address || '',
+        addressLine1:
+          returnItem.order.shipping_address?.address_line1 ||
+          returnItem.order.shipping_address?.address ||
+          '',
         addressLine2: returnItem.order.shipping_address?.address_line2 || '',
         city: returnItem.order.shipping_address?.city || '',
-        state: returnItem.order.shipping_address?.state || returnItem.order.shipping_address?.state_province || '',
-        postalCode: returnItem.order.shipping_address?.postal_code || returnItem.order.shipping_address?.zip_code || '',
-        country: returnItem.order.shipping_address?.country || returnItem.order.shipping_address?.country_code || '',
+        state:
+          returnItem.order.shipping_address?.state ||
+          returnItem.order.shipping_address?.state_province ||
+          '',
+        postalCode:
+          returnItem.order.shipping_address?.postal_code ||
+          returnItem.order.shipping_address?.zip_code ||
+          '',
+        country:
+          returnItem.order.shipping_address?.country ||
+          returnItem.order.shipping_address?.country_code ||
+          '',
         phone: returnItem.order.customer_phone || returnItem.order.shipping_address?.phone || '',
         email: returnItem.order.customer_email || returnItem.order.shipping_address?.email || '',
       };
@@ -834,7 +893,7 @@ export const useGenerateReturnLabel = () => {
       const { data: labelNumber } = await supabase.rpc('generate_shipping_label_number');
 
       // 7. Générer l'étiquette via l'API du transporteur
-      let  labelResponse: any;
+      let labelResponse: any;
 
       if (carrier.carrier_name === 'DHL' || carrier.carrier_name === 'DHL_Express') {
         const dhlService = new DHLService({
@@ -848,10 +907,12 @@ export const useGenerateReturnLabel = () => {
           shipment: {
             shipper: fromAddress,
             recipient: toAddress,
-            packages: [{
-              weight,
-              dimensions: dimensions as { length: number; width: number; height: number },
-            }],
+            packages: [
+              {
+                weight,
+                dimensions: dimensions as { length: number; width: number; height: number },
+              },
+            ],
             serviceType,
           },
         });
@@ -869,10 +930,12 @@ export const useGenerateReturnLabel = () => {
           shipment: {
             shipper: fromAddress,
             recipient: toAddress,
-            packages: [{
-              weight,
-              dimensions: dimensions as { length: number; width: number; height: number },
-            }],
+            packages: [
+              {
+                weight,
+                dimensions: dimensions as { length: number; width: number; height: number },
+              },
+            ],
             serviceType,
           },
         });
@@ -895,10 +958,12 @@ export const useGenerateReturnLabel = () => {
               ...toAddress,
               state: toAddress.state || toAddress.state,
             },
-            packages: [{
-              weight,
-              dimensions: dimensions as { length: number; width: number; height: number },
-            }],
+            packages: [
+              {
+                weight,
+                dimensions: dimensions as { length: number; width: number; height: number },
+              },
+            ],
             serviceType,
           },
         });
@@ -914,10 +979,12 @@ export const useGenerateReturnLabel = () => {
           shipment: {
             shipper: fromAddress,
             recipient: toAddress,
-            packages: [{
-              weight,
-              dimensions: dimensions as { length: number; width: number; height: number },
-            }],
+            packages: [
+              {
+                weight,
+                dimensions: dimensions as { length: number; width: number; height: number },
+              },
+            ],
             serviceType,
           },
         });
@@ -980,7 +1047,7 @@ export const useGenerateReturnLabel = () => {
         labelUrl: labelResponse.labelUrl,
       };
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['returns'] });
       queryClient.invalidateQueries({ queryKey: ['store-returns'] });
       queryClient.invalidateQueries({ queryKey: ['shipping-labels'] });
@@ -993,16 +1060,9 @@ export const useGenerateReturnLabel = () => {
       logger.error('Error in useGenerateReturnLabel', { error });
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de générer l\'étiquette de retour',
+        description: error.message || "Impossible de générer l'étiquette de retour",
         variant: 'destructive',
       });
     },
   });
 };
-
-
-
-
-
-
-

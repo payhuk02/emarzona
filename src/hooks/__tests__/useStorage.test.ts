@@ -4,7 +4,7 @@ import { useStorage, useLocalStorage, useSessionStorage } from '../useStorage';
 
 // Mock localStorage and sessionStorage
 const localStorageMock = (() => {
-  let  store: Record<string, string> = {};
+  let store: Record<string, string> = {};
 
   return {
     getItem: (key: string) => store[key] || null,
@@ -21,7 +21,7 @@ const localStorageMock = (() => {
 })();
 
 const sessionStorageMock = (() => {
-  let  store: Record<string, string> = {};
+  let store: Record<string, string> = {};
 
   return {
     getItem: (key: string) => store[key] || null,
@@ -52,9 +52,7 @@ describe('useStorage', () => {
   });
 
   it('should return initial value when storage is empty', () => {
-    const { result } = renderHook(() =>
-      useStorage('test-key', 'initial-value')
-    );
+    const { result } = renderHook(() => useStorage('test-key', 'initial-value'));
 
     expect(result.current[0]).toBe('initial-value');
   });
@@ -106,18 +104,16 @@ describe('useStorage', () => {
   });
 
   it('should support functional updates', () => {
-    const { result } = renderHook(() =>
-      useStorage('test-key', 0, { storageType: 'local' })
-    );
+    const { result } = renderHook(() => useStorage('test-key', 0, { storageType: 'local' }));
 
     act(() => {
-      result.current[1]((prev) => prev + 1);
+      result.current[1](prev => prev + 1);
     });
 
     expect(result.current[0]).toBe(1);
 
     act(() => {
-      result.current[1]((prev) => prev + 1);
+      result.current[1](prev => prev + 1);
     });
 
     expect(result.current[0]).toBe(2);
@@ -212,9 +208,7 @@ describe('useLocalStorage', () => {
   });
 
   it('should use localStorage by default', () => {
-    const { result } = renderHook(() =>
-      useLocalStorage('test-key', 'initial')
-    );
+    const { result } = renderHook(() => useLocalStorage('test-key', 'initial'));
 
     act(() => {
       result.current[1]('updated');
@@ -232,9 +226,7 @@ describe('useSessionStorage', () => {
   });
 
   it('should use sessionStorage by default', () => {
-    const { result } = renderHook(() =>
-      useSessionStorage('test-key', 'initial')
-    );
+    const { result } = renderHook(() => useSessionStorage('test-key', 'initial'));
 
     act(() => {
       result.current[1]('updated');
@@ -244,10 +236,3 @@ describe('useSessionStorage', () => {
     expect(localStorageMock.getItem('test-key')).toBeNull();
   });
 });
-
-
-
-
-
-
-

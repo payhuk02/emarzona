@@ -24,7 +24,7 @@ const RecommendationAnalyticsPage = () => {
     end: Date;
   }>({
     start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 jours
-    end: new Date()
+    end: new Date(),
   });
 
   const handleExportData = () => {
@@ -50,16 +50,14 @@ const RecommendationAnalyticsPage = () => {
               <Button
                 variant="outline"
                 className={cn(
-                  "justify-start text-left font-normal",
-                  !dateRange && "text-muted-foreground"
+                  'justify-start text-left font-normal',
+                  !dateRange && 'text-muted-foreground'
                 )}
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
-                {dateRange ? (
-                  `${format(dateRange.start, "dd/MM/yyyy", { locale: fr })} - ${format(dateRange.end, "dd/MM/yyyy", { locale: fr })}`
-                ) : (
-                  "Sélectionner une période"
-                )}
+                {dateRange
+                  ? `${format(dateRange.start, 'dd/MM/yyyy', { locale: fr })} - ${format(dateRange.end, 'dd/MM/yyyy', { locale: fr })}`
+                  : 'Sélectionner une période'}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="end">
@@ -69,9 +67,9 @@ const RecommendationAnalyticsPage = () => {
                 defaultMonth={dateRange.start}
                 selected={{
                   from: dateRange.start,
-                  to: dateRange.end
+                  to: dateRange.end,
                 }}
-                onSelect={(range) => {
+                onSelect={range => {
                   if (range?.from && range?.to) {
                     setDateRange({ start: range.from, end: range.to });
                   }
@@ -90,10 +88,7 @@ const RecommendationAnalyticsPage = () => {
       </div>
 
       {/* Métriques principales */}
-      <RecommendationAnalytics
-        storeId={store?.id}
-        dateRange={dateRange}
-      />
+      <RecommendationAnalytics storeId={store?.id} dateRange={dateRange} />
 
       {/* Conseils d'optimisation */}
       <Card>
@@ -122,8 +117,8 @@ const RecommendationAnalyticsPage = () => {
                 <h4 className="font-medium">Analyser les tendances</h4>
               </div>
               <p className="text-sm text-muted-foreground">
-                Identifiez les types de recommandations qui convertissent le mieux et ajustez
-                vos stratégies de recommandation en conséquence.
+                Identifiez les types de recommandations qui convertissent le mieux et ajustez vos
+                stratégies de recommandation en conséquence.
               </p>
             </div>
           </div>
@@ -151,20 +146,32 @@ const RecommendationAnalyticsPage = () => {
               <h4 className="font-medium mb-2">Types de recommandations</h4>
               <div className="space-y-2 text-sm">
                 <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="text-xs">Collaboratif</Badge>
-                  <span className="text-muted-foreground">Basé sur les achats d'utilisateurs similaires</span>
+                  <Badge variant="outline" className="text-xs">
+                    Collaboratif
+                  </Badge>
+                  <span className="text-muted-foreground">
+                    Basé sur les achats d'utilisateurs similaires
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="text-xs">Contenu</Badge>
+                  <Badge variant="outline" className="text-xs">
+                    Contenu
+                  </Badge>
                   <span className="text-muted-foreground">Produits similaires à l'historique</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="text-xs">Complémentaire</Badge>
+                  <Badge variant="outline" className="text-xs">
+                    Complémentaire
+                  </Badge>
                   <span className="text-muted-foreground">Produits souvent achetés ensemble</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="text-xs">Tendance</Badge>
-                  <span className="text-muted-foreground">Produits populaires dans vos catégories</span>
+                  <Badge variant="outline" className="text-xs">
+                    Tendance
+                  </Badge>
+                  <span className="text-muted-foreground">
+                    Produits populaires dans vos catégories
+                  </span>
                 </div>
               </div>
             </div>

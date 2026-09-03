@@ -1,7 +1,7 @@
 /**
  * Digital Product Drip Content Hooks
  * Date: 27 Janvier 2025
- * 
+ *
  * Hooks pour gérer le contenu progressif (drip content)
  */
 
@@ -10,7 +10,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 
-const DRIP_SCHEDULE_FIELDS = 'id, digital_product_id, file_id, release_delay_days, release_delay_hours, release_delay_minutes, release_type, release_date, release_condition, email_notification, notification_subject, notification_body, display_order, release_title, release_message, is_active, metadata, created_at, updated_at';
+const DRIP_SCHEDULE_FIELDS =
+  'id, digital_product_id, file_id, release_delay_days, release_delay_hours, release_delay_minutes, release_type, release_date, release_condition, email_notification, notification_subject, notification_body, display_order, release_title, release_message, is_active, metadata, created_at, updated_at';
 
 // =====================================================
 // TYPES
@@ -117,16 +118,15 @@ export const useDripSchedules = (digitalProductId: string | undefined) => {
 /**
  * useCustomerDripReleases - Liste les releases de drip content d'un client
  */
-export const useCustomerDripReleases = (
-  customerId?: string,
-  digitalProductId?: string
-) => {
+export const useCustomerDripReleases = (customerId?: string, digitalProductId?: string) => {
   return useQuery({
     queryKey: ['customerDripReleases', customerId, digitalProductId],
     queryFn: async () => {
       if (!customerId) {
         // Récupérer le customer_id depuis l'utilisateur connecté
-        const { data: { user } } = await supabase.auth.getUser();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
         if (!user) throw new Error('Non authentifié');
 
         const { data: customer } = await supabase
@@ -142,9 +142,10 @@ export const useCustomerDripReleases = (
         customerId = customer[0].id;
       }
 
-      let  query= supabase
+      let query = supabase
         .from('drip_content_releases')
-        .select(`
+        .select(
+          `
           *,
           drip_schedule:digital_product_drip_schedule (*),
           file:digital_product_files (
@@ -153,7 +154,8 @@ export const useCustomerDripReleases = (
             file_url,
             file_size_mb
           )
-        `)
+        `
+        )
         .eq('customer_id', customerId)
         .in('release_status', ['scheduled', 'released'])
         .order('scheduled_release_date', { ascending: true });
@@ -178,15 +180,14 @@ export const useCustomerDripReleases = (
 /**
  * useAvailableDripContent - Récupère le contenu drip disponible pour un client
  */
-export const useAvailableDripContent = (
-  customerId?: string,
-  digitalProductId?: string
-) => {
+export const useAvailableDripContent = (customerId?: string, digitalProductId?: string) => {
   return useQuery({
     queryKey: ['availableDripContent', customerId, digitalProductId],
     queryFn: async () => {
       if (!customerId) {
-        const { data: { user } } = await supabase.auth.getUser();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
         if (!user) throw new Error('Non authentifié');
 
         const { data: customer } = await supabase
@@ -294,7 +295,7 @@ export const useUpdateDripSchedule = () => {
 
       return data as DripSchedule;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['dripSchedules', data.digital_product_id] });
       toast({
         title: '✅ Schedule mis à jour',
@@ -320,7 +321,13 @@ export const useDeleteDripSchedule = () => {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({ scheduleId, digitalProductId }: { scheduleId: string; digitalProductId: string }) => {
+    mutationFn: async ({
+      scheduleId,
+      digitalProductId,
+    }: {
+      scheduleId: string;
+      digitalProductId: string;
+    }) => {
       const { error } = await supabase
         .from('digital_product_drip_schedule')
         .delete()
@@ -357,13 +364,7 @@ export const useCreateDripReleasesForOrder = () => {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({
-      orderId,
-      customerId,
-    }: {
-      orderId: string;
-      customerId: string;
-    }) => {
+    mutationFn: async ({ orderId, customerId }: { orderId: string; customerId: string }) => {
       const { data, error } = await supabase.rpc('create_drip_releases_for_order', {
         p_order_id: orderId,
         p_customer_id: customerId,
@@ -474,10 +475,3 @@ export const useTrackDripContentAccess = () => {
     },
   });
 };
-
-
-
-
-
-
-

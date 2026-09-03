@@ -1,15 +1,15 @@
 /**
  * Lazy loading pour les modules GeniusPay
  * Optimise le bundle initial en chargeant GeniusPay uniquement lors du checkout
- * 
+ *
  * @module geniuspay-lazy
  */
 
 /**
  * Charge le module de paiement GeniusPay de manière asynchrone
- * 
+ *
  * @returns {Promise<typeof import('./geniuspay-payment')>} Module de paiement GeniusPay
- * 
+ *
  * @example
  * ```typescript
  * const { initiateGeniusPayPayment } = await loadGeniusPayPayment();
@@ -23,9 +23,9 @@ export async function loadGeniusPayPayment() {
 
 /**
  * Charge le client GeniusPay de manière asynchrone
- * 
+ *
  * @returns {Promise<typeof import('./geniuspay-client')>} Client GeniusPay
- * 
+ *
  * @example
  * ```typescript
  * const { geniuspayClient } = await loadGeniusPayClient();
@@ -39,9 +39,9 @@ export async function loadGeniusPayClient() {
 
 /**
  * Charge les statistiques GeniusPay de manière asynchrone
- * 
+ *
  * @returns {Promise<typeof import('./geniuspay-stats')>} Module de statistiques GeniusPay
- * 
+ *
  * @example
  * ```typescript
  * const { getAllGeniusPayStats } = await loadGeniusPayStats();
@@ -56,7 +56,7 @@ export async function loadGeniusPayStats() {
 /**
  * Précharge les modules GeniusPay pour améliorer les performances
  * Appelé lors du hover sur le bouton de paiement ou lors de la navigation vers le checkout
- * 
+ *
  * @example
  * ```typescript
  * useEffect(() => {
@@ -89,9 +89,3 @@ export function prefetchGeniusPay() {
     }, 100);
   }
 }
-
-
-
-
-
-

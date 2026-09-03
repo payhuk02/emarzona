@@ -1,6 +1,6 @@
 /**
  * Composant réutilisable pour l'affichage des pièces jointes (images, vidéos, fichiers)
- * 
+ *
  * Version simplifiée - Logique d'erreur extraite dans useMediaErrorHandler
  * Date: 1 Février 2025
  */
@@ -84,10 +84,7 @@ function MediaAttachmentComponent({
   }, [errorState.signedUrl, correctedUrl, attachment.file_url]);
 
   // Classes CSS pour la taille
-  const sizeClasses = useMemo(
-    () => MEDIA_SIZES[size],
-    [size]
-  );
+  const sizeClasses = useMemo(() => MEDIA_SIZES[size], [size]);
 
   // Gérer l'erreur de chargement d'image
   const handleImageError = useCallback(async () => {
@@ -100,13 +97,19 @@ function MediaAttachmentComponent({
   // Vérifier immédiatement si l'URL retourne du JSON avant même le chargement
   useEffect(() => {
     // Ne vérifier que si on n'a pas encore essayé l'URL signée et qu'on a une URL
-    if (!errorState.triedSignedUrl && displayUrl && !errorState.isLoading && !errorState.hasError && !errorState.allAttemptsFailed) {
+    if (
+      !errorState.triedSignedUrl &&
+      displayUrl &&
+      !errorState.isLoading &&
+      !errorState.hasError &&
+      !errorState.allAttemptsFailed
+    ) {
       // Vérifier rapidement si l'URL retourne du JSON
       const checkUrl = async () => {
         try {
           const response = await fetch(displayUrl, { method: 'HEAD', cache: 'no-cache' });
           const contentType = response.headers.get('content-type') || '';
-          
+
           // Si c'est du JSON, le fichier n'existe pas - essayer immédiatement l'URL signée
           if (response.ok && contentType.includes('application/json')) {
             // Analyser d'abord pour mettre à jour l'état
@@ -123,12 +126,20 @@ function MediaAttachmentComponent({
           // On laissera le navigateur essayer de charger l'image normalement
         }
       };
-      
+
       // Délai court pour éviter de surcharger
       const timeoutId = setTimeout(checkUrl, 50);
       return () => clearTimeout(timeoutId);
     }
-  }, [displayUrl, errorState.triedSignedUrl, errorState.isLoading, errorState.hasError, errorState.allAttemptsFailed, analyzeErrorResponse, handleError]);
+  }, [
+    displayUrl,
+    errorState.triedSignedUrl,
+    errorState.isLoading,
+    errorState.hasError,
+    errorState.allAttemptsFailed,
+    analyzeErrorResponse,
+    handleError,
+  ]);
 
   // Affichage selon le type de média
   if (mediaType === 'image') {
@@ -136,15 +147,15 @@ function MediaAttachmentComponent({
     if (errorState.allAttemptsFailed && errorState.hasError) {
       return (
         <div className={cn('relative group', className)}>
-          <div className={cn(
-            sizeClasses.className,
-            'rounded-lg object-contain border border-destructive/50 shadow-sm bg-muted/50 flex items-center justify-center min-h-[200px]'
-          )}>
+          <div
+            className={cn(
+              sizeClasses.className,
+              'rounded-lg object-contain border border-destructive/50 shadow-sm bg-muted/50 flex items-center justify-center min-h-[200px]'
+            )}
+          >
             <div className="flex flex-col items-center justify-center gap-3 p-4 text-center max-w-full">
               <FileWarning className="h-8 w-8 text-destructive flex-shrink-0" />
-              <p className="text-sm font-medium text-foreground">
-                Image non disponible
-              </p>
+              <p className="text-sm font-medium text-foreground">Image non disponible</p>
               {errorState.errorStatus && (
                 <div className="text-xs text-muted-foreground space-y-1">
                   <p>
@@ -152,21 +163,32 @@ function MediaAttachmentComponent({
                     {errorState.errorStatus === 403 && ' - Permissions insuffisantes'}
                     {errorState.errorStatus === 404 && ' - Fichier introuvable'}
                   </p>
-                  {errorState.errorStatus === 200 && errorState.contentType && !errorState.contentType.startsWith('image/') && (
-                    <div className="flex flex-col items-center gap-1 mt-1">
-                      <span className="text-[10px] text-destructive font-medium">
-                        ⚠️ Le serveur retourne {errorState.contentType.includes('html') ? 'du HTML' : errorState.contentType.includes('json') ? 'du JSON' : errorState.contentType} au lieu d'une image
-                      </span>
-                      {errorState.contentType.includes('json') && (
-                        <span className="text-[9px] text-muted-foreground text-center max-w-[200px]">
-                          Le fichier n'existe probablement pas dans le bucket
+                  {errorState.errorStatus === 200 &&
+                    errorState.contentType &&
+                    !errorState.contentType.startsWith('image/') && (
+                      <div className="flex flex-col items-center gap-1 mt-1">
+                        <span className="text-[10px] text-destructive font-medium">
+                          ⚠️ Le serveur retourne{' '}
+                          {errorState.contentType.includes('html')
+                            ? 'du HTML'
+                            : errorState.contentType.includes('json')
+                              ? 'du JSON'
+                              : errorState.contentType}{' '}
+                          au lieu d'une image
                         </span>
-                      )}
-                    </div>
-                  )}
+                        {errorState.contentType.includes('json') && (
+                          <span className="text-[9px] text-muted-foreground text-center max-w-[200px]">
+                            Le fichier n'existe probablement pas dans le bucket
+                          </span>
+                        )}
+                      </div>
+                    )}
                 </div>
               )}
-              <p className="text-xs text-muted-foreground text-center max-w-[200px] truncate" title={attachment.file_name}>
+              <p
+                className="text-xs text-muted-foreground text-center max-w-[200px] truncate"
+                title={attachment.file_name}
+              >
                 {attachment.file_name}
               </p>
               <div className="flex flex-col gap-2 items-center">
@@ -175,7 +197,7 @@ function MediaAttachmentComponent({
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-xs bg-primary text-primary-foreground px-3 py-2 rounded hover:bg-primary/90 transition-colors"
-                  onClick={(e) => {
+                  onClick={e => {
                     e.stopPropagation();
                     if (onClick) {
                       onClick();
@@ -190,7 +212,7 @@ function MediaAttachmentComponent({
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-[9px] text-primary hover:text-primary/80 underline"
-                    onClick={(e) => {
+                    onClick={e => {
                       e.stopPropagation();
                     }}
                   >
@@ -259,18 +281,26 @@ function MediaAttachmentComponent({
                     {errorState.errorStatus === 403 && ' - Permissions insuffisantes'}
                     {errorState.errorStatus === 404 && ' - Fichier introuvable'}
                   </p>
-                  {errorState.errorStatus === 200 && errorState.contentType && !errorState.contentType.startsWith('image/') && (
-                    <div className="flex flex-col items-center gap-1 mt-1">
-                      <span className="text-[10px] text-destructive font-medium">
-                        ⚠️ Le serveur retourne {errorState.contentType.includes('html') ? 'du HTML' : errorState.contentType.includes('json') ? 'du JSON' : errorState.contentType} au lieu d'une image
-                      </span>
-                      {errorState.contentType.includes('json') && (
-                        <span className="text-[9px] text-muted-foreground text-center max-w-[200px]">
-                          Le fichier n'existe probablement pas dans le bucket
+                  {errorState.errorStatus === 200 &&
+                    errorState.contentType &&
+                    !errorState.contentType.startsWith('image/') && (
+                      <div className="flex flex-col items-center gap-1 mt-1">
+                        <span className="text-[10px] text-destructive font-medium">
+                          ⚠️ Le serveur retourne{' '}
+                          {errorState.contentType.includes('html')
+                            ? 'du HTML'
+                            : errorState.contentType.includes('json')
+                              ? 'du JSON'
+                              : errorState.contentType}{' '}
+                          au lieu d'une image
                         </span>
-                      )}
-                    </div>
-                  )}
+                        {errorState.contentType.includes('json') && (
+                          <span className="text-[9px] text-muted-foreground text-center max-w-[200px]">
+                            Le fichier n'existe probablement pas dans le bucket
+                          </span>
+                        )}
+                      </div>
+                    )}
                 </div>
               )}
               <p className="text-xs text-muted-foreground text-center max-w-[200px]">
@@ -283,7 +313,7 @@ function MediaAttachmentComponent({
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-xs bg-primary text-primary-foreground px-3 py-2 rounded hover:bg-primary/90 transition-colors"
-                onClick={(e) => {
+                onClick={e => {
                   e.stopPropagation();
                   if (onClick) {
                     onClick();
@@ -341,7 +371,7 @@ function MediaAttachmentComponent({
         target="_blank"
         rel="noopener noreferrer"
         className="flex items-center gap-2 text-sm underline text-muted-foreground p-2 bg-muted rounded hover:text-primary transition-colors"
-        onClick={(e) => {
+        onClick={e => {
           if (onClick) {
             e.preventDefault();
             onClick();
@@ -369,9 +399,3 @@ export const MediaAttachment = memo(MediaAttachmentComponent, (prevProps, nextPr
     prevProps.className === nextProps.className
   );
 });
-
-
-
-
-
-

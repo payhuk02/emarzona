@@ -115,7 +115,12 @@ function ImageCard({
           <Eye className="h-4 w-4" />
         </Button>
         {!isPrimary && (
-          <Button variant="secondary" size="sm" onClick={onSetPrimary} aria-label="Définir comme image principale">
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={onSetPrimary}
+            aria-label="Définir comme image principale"
+          >
             <Star className="h-4 w-4" />
           </Button>
         )}
@@ -155,13 +160,13 @@ export function VariantImageGallery({
   const [uploadUrls, setUploadUrls] = useState<string[]>(['']);
   const [isUploading, setIsUploading] = useState(false);
 
-  const selectedVariant = variants.find((v) => v.id === selectedVariantId);
+  const selectedVariant = variants.find(v => v.id === selectedVariantId);
 
   // Add URL to list
   const handleAddUrl = (url: string) => {
     if (!selectedVariant || !url.trim()) return;
 
-    const  newImage: VariantImage = {
+    const newImage: VariantImage = {
       id: `img_${Date.now()}`,
       url: url.trim(),
       is_primary: selectedVariant.images.length === 0,
@@ -176,12 +181,12 @@ export function VariantImageGallery({
   const handleAddMultipleUrls = () => {
     if (!selectedVariant) return;
 
-    const validUrls = uploadUrls.filter((url) => url.trim());
+    const validUrls = uploadUrls.filter(url => url.trim());
     if (validUrls.length === 0) return;
 
     setIsUploading(true);
 
-    const  newImages: VariantImage[] = validUrls.map((url, index) => ({
+    const newImages: VariantImage[] = validUrls.map((url, index) => ({
       id: `img_${Date.now()}_${index}`,
       url: url.trim(),
       is_primary: selectedVariant.images.length === 0 && index === 0,
@@ -200,7 +205,7 @@ export function VariantImageGallery({
   const handleSetPrimary = (imageId: string) => {
     if (!selectedVariant) return;
 
-    const updatedImages = selectedVariant.images.map((img) => ({
+    const updatedImages = selectedVariant.images.map(img => ({
       ...img,
       is_primary: img.id === imageId,
     }));
@@ -212,10 +217,10 @@ export function VariantImageGallery({
   const handleDeleteImage = (imageId: string) => {
     if (!selectedVariant) return;
 
-    const updatedImages = selectedVariant.images.filter((img) => img.id !== imageId);
+    const updatedImages = selectedVariant.images.filter(img => img.id !== imageId);
 
     // If we deleted the primary, make the first one primary
-    if (updatedImages.length > 0 && !updatedImages.some((img) => img.is_primary)) {
+    if (updatedImages.length > 0 && !updatedImages.some(img => img.is_primary)) {
       updatedImages[0].is_primary = true;
     }
 
@@ -227,17 +232,14 @@ export function VariantImageGallery({
   const handleReorder = (imageId: string, direction: 'up' | 'down') => {
     if (!selectedVariant) return;
 
-    const currentIndex = selectedVariant.images.findIndex((img) => img.id === imageId);
+    const currentIndex = selectedVariant.images.findIndex(img => img.id === imageId);
     if (currentIndex === -1) return;
 
     const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
     if (newIndex < 0 || newIndex >= selectedVariant.images.length) return;
 
     const reordered = [...selectedVariant.images];
-    [reordered[currentIndex], reordered[newIndex]] = [
-      reordered[newIndex],
-      reordered[currentIndex],
-    ];
+    [reordered[currentIndex], reordered[newIndex]] = [reordered[newIndex], reordered[currentIndex]];
 
     // Update display_order
     const updatedImages = reordered.map((img, index) => ({
@@ -251,8 +253,8 @@ export function VariantImageGallery({
   // Stats
   const stats = {
     total_images: variants.reduce((sum, v) => sum + v.images.length, 0),
-    variants_with_images: variants.filter((v) => v.images.length > 0).length,
-    variants_without_images: variants.filter((v) => v.images.length === 0).length,
+    variants_with_images: variants.filter(v => v.images.length > 0).length,
+    variants_without_images: variants.filter(v => v.images.length === 0).length,
     avg_images_per_variant:
       variants.length > 0
         ? (variants.reduce((sum, v) => sum + v.images.length, 0) / variants.length).toFixed(1)
@@ -330,12 +332,8 @@ export function VariantImageGallery({
           {/* Variant Selector */}
           <Tabs value={selectedVariantId} onValueChange={setSelectedVariantId}>
             <TabsList className="w-full overflow-x-auto flex-wrap h-auto">
-              {variants.map((variant) => (
-                <TabsTrigger
-                  key={variant.id}
-                  value={variant.id}
-                  className="gap-2 relative"
-                >
+              {variants.map(variant => (
+                <TabsTrigger key={variant.id} value={variant.id} className="gap-2 relative">
                   {variant.variant_label}
                   <Badge variant="secondary" className="text-xs">
                     {variant.images.length}
@@ -347,7 +345,7 @@ export function VariantImageGallery({
               ))}
             </TabsList>
 
-            {variants.map((variant) => (
+            {variants.map(variant => (
               <TabsContent key={variant.id} value={variant.id} className="space-y-4 mt-6">
                 {/* Variant Info */}
                 <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
@@ -380,9 +378,7 @@ export function VariantImageGallery({
                 {variant.images.length === 0 ? (
                   <div className="text-center py-12 border-2 border-dashed rounded-lg">
                     <ImageIcon className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-                    <p className="text-lg font-medium text-muted-foreground mb-2">
-                      Aucune image
-                    </p>
+                    <p className="text-lg font-medium text-muted-foreground mb-2">Aucune image</p>
                     <p className="text-sm text-muted-foreground mb-4">
                       Ajoutez des images pour cette variante
                     </p>
@@ -401,7 +397,7 @@ export function VariantImageGallery({
                   >
                     {variant.images
                       .sort((a, b) => a.display_order - b.display_order)
-                      .map((image) => (
+                      .map(image => (
                         <ImageCard
                           key={image.id}
                           image={image}
@@ -436,7 +432,7 @@ export function VariantImageGallery({
                   <Input
                     placeholder="https://exemple.com/image.jpg"
                     value={url}
-                    onChange={(e) => {
+                    onChange={e => {
                       const newUrls = [...uploadUrls];
                       newUrls[index] = e.target.value;
                       setUploadUrls(newUrls);
@@ -472,9 +468,7 @@ export function VariantImageGallery({
                 <li>• Utilisez des images haute résolution (min 800x800px)</li>
                 <li>• Format recommandé : JPG ou PNG</li>
                 <li>• La première image sera définie comme image principale</li>
-                <li>
-                  • Maximum {maxImagesPerVariant} images par variante
-                </li>
+                <li>• Maximum {maxImagesPerVariant} images par variante</li>
               </ul>
             </div>
           </div>
@@ -485,7 +479,7 @@ export function VariantImageGallery({
             </Button>
             <Button
               onClick={handleAddMultipleUrls}
-              disabled={uploadUrls.filter((u) => u.trim()).length === 0 || isUploading}
+              disabled={uploadUrls.filter(u => u.trim()).length === 0 || isUploading}
               className="gap-2"
             >
               {isUploading ? (
@@ -493,7 +487,7 @@ export function VariantImageGallery({
               ) : (
                 <>
                   <Upload className="h-4 w-4" />
-                  Ajouter ({uploadUrls.filter((u) => u.trim()).length})
+                  Ajouter ({uploadUrls.filter(u => u.trim()).length})
                 </>
               )}
             </Button>
@@ -540,7 +534,12 @@ export function VariantImageGallery({
                 Fermer
               </Button>
               <Button asChild>
-                <a href={viewingImage.url} target="_blank" rel="noopener noreferrer" className="gap-2">
+                <a
+                  href={viewingImage.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="gap-2"
+                >
                   <Download className="h-4 w-4" />
                   Télécharger
                 </a>
@@ -575,10 +574,3 @@ export function VariantImageGallery({
     </div>
   );
 }
-
-
-
-
-
-
-

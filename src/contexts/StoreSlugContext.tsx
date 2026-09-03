@@ -14,9 +14,7 @@ const StoreSlugContext = createContext<StoreSlugContextType>({ storeSlug: null }
 
 export function StoreSlugProvider({ slug, children }: { slug: string; children: ReactNode }) {
   return (
-    <StoreSlugContext.Provider value={{ storeSlug: slug }}>
-      {children}
-    </StoreSlugContext.Provider>
+    <StoreSlugContext.Provider value={{ storeSlug: slug }}>{children}</StoreSlugContext.Provider>
   );
 }
 

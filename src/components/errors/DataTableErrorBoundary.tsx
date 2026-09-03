@@ -44,7 +44,7 @@ export class DataTableErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // Incrémenter le compteur d'erreurs
-    this.setState((prev) => ({
+    this.setState(prev => ({
       errorCount: prev.errorCount + 1,
     }));
 
@@ -78,7 +78,7 @@ export class DataTableErrorBoundary extends Component<Props, State> {
       hasError: false,
       error: null,
     });
-    
+
     // Callback de reset personnalisé
     if (this.props.onReset) {
       this.props.onReset();
@@ -103,9 +103,8 @@ export class DataTableErrorBoundary extends Component<Props, State> {
             <AlertTitle>Erreurs répétées dans le tableau</AlertTitle>
             <AlertDescription className="mt-2 space-y-3">
               <p>
-                Le tableau{tableName && ` "${tableName}"`} rencontre des erreurs
-                répétées. Veuillez rafraîchir la page ou contacter le support si
-                le problème persiste.
+                Le tableau{tableName && ` "${tableName}"`} rencontre des erreurs répétées. Veuillez
+                rafraîchir la page ou contacter le support si le problème persiste.
               </p>
               <div className="flex gap-2">
                 <Button
@@ -131,20 +130,14 @@ export class DataTableErrorBoundary extends Component<Props, State> {
           <AlertDescription className="mt-2 space-y-3">
             <p>
               Une erreur s'est produite lors du chargement du tableau
-              {tableName && ` "${tableName}"`}.
-              Nous avons été notifiés du problème.
+              {tableName && ` "${tableName}"`}. Nous avons été notifiés du problème.
             </p>
             {process.env.NODE_ENV === 'development' && this.state.error && (
               <div className="mt-2 p-2 bg-red-50 dark:bg-red-900/10 rounded text-xs font-mono text-red-600 dark:text-red-400 overflow-auto max-h-32">
                 {this.state.error.message}
               </div>
             )}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={this.handleReset}
-              className="gap-2"
-            >
+            <Button variant="outline" size="sm" onClick={this.handleReset} className="gap-2">
               <RefreshCw className="h-3 w-3" />
               Réessayer
             </Button>
@@ -160,7 +153,11 @@ export class DataTableErrorBoundary extends Component<Props, State> {
 /**
  * Placeholder à afficher pendant le chargement ou en cas d'erreur
  */
-export const DataTablePlaceholder = ({ message = 'Chargement des données...' }: { message?: string }) => {
+export const DataTablePlaceholder = ({
+  message = 'Chargement des données...',
+}: {
+  message?: string;
+}) => {
   return (
     <div className="flex items-center justify-center p-8 text-muted-foreground">
       <div className="flex flex-col items-center gap-2">
@@ -170,10 +167,3 @@ export const DataTablePlaceholder = ({ message = 'Chargement des données...' }:
     </div>
   );
 };
-
-
-
-
-
-
-

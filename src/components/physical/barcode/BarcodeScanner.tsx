@@ -41,11 +41,13 @@ export function BarcodeScanner({
     const checkPermission = async () => {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        stream.getTracks().forEach((track) => track.stop());
+        stream.getTracks().forEach(track => track.stop());
         setHasPermission(true);
       } catch (err) {
         setHasPermission(false);
-        setError('Accès à la caméra refusé. Veuillez autoriser l\'accès dans les paramètres de votre navigateur.');
+        setError(
+          "Accès à la caméra refusé. Veuillez autoriser l'accès dans les paramètres de votre navigateur."
+        );
       }
     };
 
@@ -89,7 +91,7 @@ export function BarcodeScanner({
         { facingMode: 'environment' }, // Caméra arrière sur mobile
         config,
         (decodedText, decodedResult) => {
-          const  result: BarcodeScanResult = {
+          const result: BarcodeScanResult = {
             code: decodedText,
             format: decodedResult.result.format?.formatName || 'UNKNOWN',
             timestamp: new Date(),
@@ -102,14 +104,14 @@ export function BarcodeScanner({
             stopScan();
           }
         },
-        (errorMessage) => {
+        errorMessage => {
           // Ignorer les erreurs de scan continu (normal pendant la recherche)
         }
       );
 
       setIsScanning(true);
       setIsInitializing(false);
-    } catch ( _err: any) {
+    } catch (_err: any) {
       setError(err.message || 'Erreur lors du démarrage du scanner');
       setIsInitializing(false);
       setIsScanning(false);
@@ -123,7 +125,7 @@ export function BarcodeScanner({
         await scannerRef.current.stop();
         await scannerRef.current.clear();
       } catch (err) {
-        logger.error('Erreur lors de l\'arrêt du scanner', { error: err });
+        logger.error("Erreur lors de l'arrêt du scanner", { error: err });
       }
       scannerRef.current = null;
     }
@@ -149,7 +151,12 @@ export function BarcodeScanner({
             <CardDescription>{description}</CardDescription>
           </div>
           {onClose && (
-            <Button variant="ghost" size="icon" onClick={onClose} aria-label="Fermer le scanner de code-barres">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onClose}
+              aria-label="Fermer le scanner de code-barres"
+            >
               <X className="h-4 w-4" />
             </Button>
           )}
@@ -231,9 +238,3 @@ export function BarcodeScanner({
     </Card>
   );
 }
-
-
-
-
-
-

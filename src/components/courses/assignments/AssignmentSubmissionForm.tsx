@@ -39,12 +39,14 @@ export const AssignmentSubmissionForm = ({
   const [submissionText, setSubmissionText] = useState('');
   const [submissionUrl, setSubmissionUrl] = useState('');
   const [submissionCode, setSubmissionCode] = useState('');
-  const [uploadedFiles, setUploadedFiles] = useState<Array<{
-    url: string;
-    name: string;
-    size: number;
-    type: string;
-  }>>([]);
+  const [uploadedFiles, setUploadedFiles] = useState<
+    Array<{
+      url: string;
+      name: string;
+      size: number;
+      type: string;
+    }>
+  >([]);
   const [isUploading, setIsUploading] = useState(false);
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -63,7 +65,7 @@ export const AssignmentSubmissionForm = ({
     setIsUploading(true);
 
     try {
-      const  uploaded: typeof uploadedFiles = [];
+      const uploaded: typeof uploadedFiles = [];
 
       for (const file of Array.from(files)) {
         // Vérifier type
@@ -109,10 +111,10 @@ export const AssignmentSubmissionForm = ({
       }
 
       setUploadedFiles([...uploadedFiles, ...uploaded]);
-    } catch ( _error: any) {
+    } catch (_error: any) {
       toast({
         title: 'Erreur',
-        description: error.message || 'Erreur lors de l\'upload',
+        description: error.message || "Erreur lors de l'upload",
         variant: 'destructive',
       });
     } finally {
@@ -216,7 +218,7 @@ export const AssignmentSubmissionForm = ({
             <Textarea
               id="submission-text"
               value={submissionText}
-              onChange={(e) => setSubmissionText(e.target.value)}
+              onChange={e => setSubmissionText(e.target.value)}
               onKeyDown={handleSpaceKeyDown}
               placeholder="Saisissez votre réponse ici..."
               rows={10}
@@ -233,7 +235,7 @@ export const AssignmentSubmissionForm = ({
               id="submission-url"
               type="url"
               value={submissionUrl}
-              onChange={(e) => setSubmissionUrl(e.target.value)}
+              onChange={e => setSubmissionUrl(e.target.value)}
               placeholder="https://..."
               className="font-mono"
             />
@@ -247,7 +249,7 @@ export const AssignmentSubmissionForm = ({
             <Textarea
               id="submission-code"
               value={submissionCode}
-              onChange={(e) => setSubmissionCode(e.target.value)}
+              onChange={e => setSubmissionCode(e.target.value)}
               onKeyDown={handleSpaceKeyDown}
               placeholder="// Votre code ici..."
               rows={15}
@@ -257,7 +259,8 @@ export const AssignmentSubmissionForm = ({
         )}
 
         {/* File upload */}
-        {(assignment.assignment_type === 'file_upload' || assignment.assignment_type === 'mixed') && (
+        {(assignment.assignment_type === 'file_upload' ||
+          assignment.assignment_type === 'mixed') && (
           <div className="space-y-2">
             <Label>Fichiers *</Label>
             <div className="border-2 border-dashed rounded-lg p-6 text-center">
@@ -284,9 +287,7 @@ export const AssignmentSubmissionForm = ({
                   disabled={isUploading || uploadedFiles.length >= assignment.max_files}
                   asChild
                 >
-                  <span>
-                    {isUploading ? 'Upload en cours...' : 'Choisir fichiers'}
-                  </span>
+                  <span>{isUploading ? 'Upload en cours...' : 'Choisir fichiers'}</span>
                 </Button>
               </Label>
             </div>
@@ -331,11 +332,7 @@ export const AssignmentSubmissionForm = ({
             {submitAssignment.isPending ? 'Soumission...' : 'Soumettre'}
           </Button>
           {onCancel && (
-            <Button
-              variant="outline"
-              onClick={onCancel}
-              disabled={submitAssignment.isPending}
-            >
+            <Button variant="outline" onClick={onCancel} disabled={submitAssignment.isPending}>
               Annuler
             </Button>
           )}
@@ -344,10 +341,3 @@ export const AssignmentSubmissionForm = ({
     </Card>
   );
 };
-
-
-
-
-
-
-

@@ -198,7 +198,9 @@ export const ReviewModerationTable: React.FC<ReviewModerationTableProps> = ({
                 key: 'rating',
                 label: 'Note',
                 priority: 'high',
-                render: (_value: unknown, row: Record<string, unknown>) => <ReviewStars rating={(row as unknown as Review).rating} size="sm" />,
+                render: (_value: unknown, row: Record<string, unknown>) => (
+                  <ReviewStars rating={(row as unknown as Review).rating} size="sm" />
+                ),
               },
               {
                 key: 'author',
@@ -207,14 +209,14 @@ export const ReviewModerationTable: React.FC<ReviewModerationTableProps> = ({
                 render: (_value: unknown, row: Record<string, unknown>) => {
                   const r = row as unknown as Review;
                   return (
-                  <div className="space-y-1">
-                    <p className="text-xs font-medium">{r.reviewer_name || 'Anonyme'}</p>
-                    {r.verified_purchase && (
-                      <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
-                        Vérifié
-                      </Badge>
-                    )}
-                  </div>
+                    <div className="space-y-1">
+                      <p className="text-xs font-medium">{r.reviewer_name || 'Anonyme'}</p>
+                      {r.verified_purchase && (
+                        <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+                          Vérifié
+                        </Badge>
+                      )}
+                    </div>
                   );
                 },
               },
@@ -225,9 +227,9 @@ export const ReviewModerationTable: React.FC<ReviewModerationTableProps> = ({
                 render: (_value: unknown, row: Record<string, unknown>) => {
                   const r = row as unknown as Review;
                   return (
-                  <Badge variant="outline" className="text-xs">
-                    {r.product_type}
-                  </Badge>
+                    <Badge variant="outline" className="text-xs">
+                      {r.product_type}
+                    </Badge>
                   );
                 },
               },
@@ -273,12 +275,12 @@ export const ReviewModerationTable: React.FC<ReviewModerationTableProps> = ({
                 render: (_value: unknown, row: Record<string, unknown>) => {
                   const r = row as unknown as Review;
                   return (
-                  <span className="text-xs text-muted-foreground">
-                    {new Date(r.created_at).toLocaleDateString('fr-FR', {
-                      day: '2-digit',
-                      month: '2-digit',
-                    })}
-                  </span>
+                    <span className="text-xs text-muted-foreground">
+                      {new Date(r.created_at).toLocaleDateString('fr-FR', {
+                        day: '2-digit',
+                        month: '2-digit',
+                      })}
+                    </span>
                   );
                 },
               },
@@ -286,54 +288,54 @@ export const ReviewModerationTable: React.FC<ReviewModerationTableProps> = ({
             actions={(row: Record<string, unknown>) => {
               const r = row as unknown as Review;
               return (
-              <div className="flex flex-col gap-2">
-                <Checkbox
-                  checked={selectedReviews.includes(r.id)}
-                  onCheckedChange={() => toggleSelect(r.id)}
-                  className="h-4 w-4"
-                />
-                <div className="flex gap-2">
-                  {!r.is_approved && (
+                <div className="flex flex-col gap-2">
+                  <Checkbox
+                    checked={selectedReviews.includes(r.id)}
+                    onCheckedChange={() => toggleSelect(r.id)}
+                    className="h-4 w-4"
+                  />
+                  <div className="flex gap-2">
+                    {!r.is_approved && (
+                      <Button
+                        size="sm"
+                        variant="default"
+                        onClick={() => handleApprove([r.id])}
+                        className="min-h-[44px] flex-1"
+                      >
+                        <CheckCircle className="h-4 w-4 mr-2" />
+                        Approuver
+                      </Button>
+                    )}
                     <Button
                       size="sm"
-                      variant="default"
-                      onClick={() => handleApprove([r.id])}
+                      variant="destructive"
+                      onClick={() => handleReject([r.id])}
                       className="min-h-[44px] flex-1"
                     >
-                      <CheckCircle className="h-4 w-4 mr-2" />
-                      Approuver
+                      <XCircle className="h-4 w-4 mr-2" />
+                      Rejeter
                     </Button>
-                  )}
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    onClick={() => handleReject([r.id])}
-                    className="min-h-[44px] flex-1"
-                  >
-                    <XCircle className="h-4 w-4 mr-2" />
-                    Rejeter
-                  </Button>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleFlag([r.id])}
+                      className="min-h-[44px] flex-1"
+                    >
+                      <Flag className="h-4 w-4 mr-2" />
+                      Signaler
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleDelete([r.id])}
+                      className="min-h-[44px] flex-1 text-destructive"
+                    >
+                      Supprimer
+                    </Button>
+                  </div>
                 </div>
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleFlag([r.id])}
-                    className="min-h-[44px] flex-1"
-                  >
-                    <Flag className="h-4 w-4 mr-2" />
-                    Signaler
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleDelete([r.id])}
-                    className="min-h-[44px] flex-1 text-destructive"
-                  >
-                    Supprimer
-                  </Button>
-                </div>
-              </div>
               );
             }}
           />

@@ -48,9 +48,7 @@ const OrdersListVirtualizedComponent = ({
         <div className="text-center">
           <Package className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
           <h3 className="text-lg font-semibold mb-2">Aucune commande</h3>
-          <p className="text-muted-foreground">
-            Les commandes apparaîtront ici une fois créées
-          </p>
+          <p className="text-muted-foreground">Les commandes apparaîtront ici une fois créées</p>
         </div>
       </Card>
     );
@@ -70,9 +68,9 @@ const OrdersListVirtualizedComponent = ({
             position: 'relative',
           }}
         >
-          {items.map((virtualItem) => {
+          {items.map(virtualItem => {
             const order = orders[virtualItem.index];
-            
+
             return (
               <div
                 key={virtualItem.key}
@@ -87,18 +85,14 @@ const OrdersListVirtualizedComponent = ({
                 }}
               >
                 <div className="p-2">
-                  <OrderCard
-                    order={order}
-                    onUpdate={onUpdate}
-                    storeId={storeId}
-                  />
+                  <OrderCard order={order} onUpdate={onUpdate} storeId={storeId} />
                 </div>
               </div>
             );
           })}
         </div>
       </div>
-      
+
       {/* Statistiques de performance */}
       <div className="mt-2 text-xs text-muted-foreground text-center">
         Affichage de {items.length} sur {orders.length} commandes
@@ -108,27 +102,24 @@ const OrdersListVirtualizedComponent = ({
 };
 
 // Optimisation avec React.memo pour éviter les re-renders inutiles
-export const OrdersListVirtualized = React.memo(OrdersListVirtualizedComponent, (prevProps, nextProps) => {
-  return (
-    prevProps.orders.length === nextProps.orders.length &&
-    prevProps.storeId === nextProps.storeId &&
-    prevProps.onUpdate === nextProps.onUpdate &&
-    prevProps.className === nextProps.className &&
-    prevProps.itemHeight === nextProps.itemHeight &&
-    prevProps.containerHeight === nextProps.containerHeight &&
-    // Comparaison superficielle des orders (comparer les IDs)
-    prevProps.orders.every((order, index) => 
-      order.id === nextProps.orders[index]?.id &&
-      order.status === nextProps.orders[index]?.status
-    )
-  );
-});
+export const OrdersListVirtualized = React.memo(
+  OrdersListVirtualizedComponent,
+  (prevProps, nextProps) => {
+    return (
+      prevProps.orders.length === nextProps.orders.length &&
+      prevProps.storeId === nextProps.storeId &&
+      prevProps.onUpdate === nextProps.onUpdate &&
+      prevProps.className === nextProps.className &&
+      prevProps.itemHeight === nextProps.itemHeight &&
+      prevProps.containerHeight === nextProps.containerHeight &&
+      // Comparaison superficielle des orders (comparer les IDs)
+      prevProps.orders.every(
+        (order, index) =>
+          order.id === nextProps.orders[index]?.id &&
+          order.status === nextProps.orders[index]?.status
+      )
+    );
+  }
+);
 
 OrdersListVirtualized.displayName = 'OrdersListVirtualized';
-
-
-
-
-
-
-

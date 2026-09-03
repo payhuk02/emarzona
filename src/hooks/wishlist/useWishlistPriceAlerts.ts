@@ -45,10 +45,13 @@ export const useUpdatePriceAlertSettings = () => {
       enabled?: boolean;
       threshold?: number;
     }) => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
-      const updates: Partial<{ price_drop_alert_enabled: boolean; price_drop_threshold: number }> = {};
+      const updates: Partial<{ price_drop_alert_enabled: boolean; price_drop_threshold: number }> =
+        {};
       if (enabled !== undefined) updates.price_drop_alert_enabled = enabled;
       if (threshold !== undefined) updates.price_drop_threshold = threshold;
 
@@ -64,7 +67,7 @@ export const useUpdatePriceAlertSettings = () => {
       queryClient.invalidateQueries({ queryKey: ['user-favorites'] });
       toast({
         title: 'Paramètres mis à jour',
-        description: 'Vos paramètres d\'alerte prix ont été enregistrés',
+        description: "Vos paramètres d'alerte prix ont été enregistrés",
       });
     },
     onError: (error: any) => {
@@ -87,7 +90,9 @@ export const useMarkPriceAlertAsRead = () => {
 
   return useMutation({
     mutationFn: async (productId: string) => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
       const { error } = await supabase
@@ -109,16 +114,9 @@ export const useMarkPriceAlertAsRead = () => {
       logger.error('Error marking price alert as read', { error });
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible de marquer l\'alerte comme lue',
+        description: error.message || "Impossible de marquer l'alerte comme lue",
         variant: 'destructive',
       });
     },
   });
 };
-
-
-
-
-
-
-

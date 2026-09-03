@@ -40,11 +40,3 @@ export function installConsoleGuard(): void {
     console.debug = original.debug;
   };
 }
-
-
-
-
-
-
-
-

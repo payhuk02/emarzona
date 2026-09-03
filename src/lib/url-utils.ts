@@ -48,10 +48,13 @@ export function parseUrl(url: string): URLParts | null {
 /**
  * Ajoute des paramètres de requête à une URL
  */
-export function addQueryParams(url: string, params: Record<string, string | number | boolean | null | undefined>): string {
+export function addQueryParams(
+  url: string,
+  params: Record<string, string | number | boolean | null | undefined>
+): string {
   try {
     const urlObj = new URL(url, window.location.origin);
-    
+
     Object.entries(params).forEach(([key, value]) => {
       if (value !== null && value !== undefined) {
         urlObj.searchParams.set(key, String(value));
@@ -70,8 +73,8 @@ export function addQueryParams(url: string, params: Record<string, string | numb
 export function removeQueryParams(url: string, keys: string[]): string {
   try {
     const urlObj = new URL(url, window.location.origin);
-    
-    keys.forEach((key) => {
+
+    keys.forEach(key => {
       urlObj.searchParams.delete(key);
     });
 
@@ -99,8 +102,8 @@ export function getQueryParam(url: string, key: string): string | null {
 export function getAllQueryParams(url: string): Record<string, string> {
   try {
     const urlObj = new URL(url, window.location.origin);
-    const  params: Record<string, string> = {};
-    
+    const params: Record<string, string> = {};
+
     urlObj.searchParams.forEach((value, key) => {
       params[key] = value;
     });
@@ -114,13 +117,16 @@ export function getAllQueryParams(url: string): Record<string, string> {
 /**
  * Remplace tous les paramètres de requête d'une URL
  */
-export function setQueryParams(url: string, params: Record<string, string | number | boolean | null | undefined>): string {
+export function setQueryParams(
+  url: string,
+  params: Record<string, string | number | boolean | null | undefined>
+): string {
   try {
     const urlObj = new URL(url, window.location.origin);
-    
+
     // Supprimer tous les paramètres existants
     urlObj.search = '';
-    
+
     // Ajouter les nouveaux paramètres
     Object.entries(params).forEach(([key, value]) => {
       if (value !== null && value !== undefined) {
@@ -137,27 +143,33 @@ export function setQueryParams(url: string, params: Record<string, string | numb
 /**
  * Construit une URL relative à partir d'un chemin
  */
-export function buildRelativeUrl(path: string, params?: Record<string, string | number | boolean | null | undefined>): string {
+export function buildRelativeUrl(
+  path: string,
+  params?: Record<string, string | number | boolean | null | undefined>
+): string {
   const url = path.startsWith('/') ? path : `/${path}`;
-  
+
   if (params) {
     return addQueryParams(url, params);
   }
-  
+
   return url;
 }
 
 /**
  * Construit une URL absolue à partir d'un chemin
  */
-export function buildAbsoluteUrl(path: string, params?: Record<string, string | number | boolean | null | undefined>): string {
+export function buildAbsoluteUrl(
+  path: string,
+  params?: Record<string, string | number | boolean | null | undefined>
+): string {
   const origin = window.location.origin;
   const url = path.startsWith('/') ? `${origin}${path}` : `${origin}/${path}`;
-  
+
   if (params) {
     return addQueryParams(url, params);
   }
-  
+
   return url;
 }
 
@@ -241,32 +253,25 @@ export function isSameDomain(url1: string, url2: string): boolean {
 export function createSafeRedirectUrl(url: string, allowedDomains?: string[]): string | null {
   try {
     const urlObj = new URL(url, window.location.origin);
-    
+
     // Si des domaines autorisés sont spécifiés, vérifier
     if (allowedDomains && allowedDomains.length > 0) {
       const domain = urlObj.hostname;
-      const isAllowed = allowedDomains.some((allowed) => {
+      const isAllowed = allowedDomains.some(allowed => {
         if (allowed.startsWith('.')) {
           // Domaine avec wildcard (ex: .example.com)
           return domain.endsWith(allowed) || domain === allowed.slice(1);
         }
         return domain === allowed;
       });
-      
+
       if (!isAllowed) {
         return null;
       }
     }
-    
+
     return urlObj.toString();
   } catch {
     return null;
   }
 }
-
-
-
-
-
-
-

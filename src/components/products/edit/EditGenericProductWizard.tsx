@@ -438,10 +438,7 @@ const GenericPreview = ({ formData }: { formData: GenericProductFormData }) => {
             <CardTitle>Description</CardTitle>
           </CardHeader>
           <CardContent>
-            <SafeHTML
-              html={formData.description}
-              className="prose prose-sm max-w-none"
-            />
+            <SafeHTML html={formData.description} className="prose prose-sm max-w-none" />
           </CardContent>
         </Card>
       )}

@@ -22,7 +22,7 @@ import {
   RotateCcw,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import { useState } from 'react';
 
 interface PaymentCardDashboardProps {

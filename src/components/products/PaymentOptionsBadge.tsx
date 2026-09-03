@@ -141,9 +141,3 @@ export function getPaymentOptions(
     percentage_rate: 30,
   };
 }
-
-
-
-
-
-

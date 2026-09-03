@@ -14,14 +14,62 @@ export default function I18nTest() {
   const { t, i18n } = useTranslation();
 
   const testKeys = [
-    { category: 'Common', keys: ['common.welcome', 'common.loading', 'common.error', 'common.success', 'common.save', 'common.cancel'] },
-    { category: 'Navigation', keys: ['nav.home', 'nav.marketplace', 'nav.dashboard', 'nav.products', 'nav.orders', 'nav.settings'] },
-    { category: 'Auth', keys: ['auth.login.title', 'auth.signup.title', 'auth.login.button', 'auth.signup.button'] },
-    { category: 'Marketplace', keys: ['marketplace.title', 'marketplace.subtitle', 'marketplace.searchPlaceholder', 'marketplace.viewProduct'] },
-    { category: 'Products', keys: ['products.title', 'products.add', 'products.edit', 'products.delete', 'products.view'] },
-    { category: 'Cart', keys: ['cart.title', 'cart.empty', 'cart.checkout', 'cart.continueShopping'] },
-    { category: 'Orders', keys: ['orders.title', 'orders.status', 'orders.viewDetails', 'orders.trackOrder'] },
-    { category: 'Dashboard', keys: ['dashboard.welcome', 'dashboard.stats.totalSales', 'dashboard.stats.totalOrders', 'dashboard.quickActions'] },
+    {
+      category: 'Common',
+      keys: [
+        'common.welcome',
+        'common.loading',
+        'common.error',
+        'common.success',
+        'common.save',
+        'common.cancel',
+      ],
+    },
+    {
+      category: 'Navigation',
+      keys: [
+        'nav.home',
+        'nav.marketplace',
+        'nav.dashboard',
+        'nav.products',
+        'nav.orders',
+        'nav.settings',
+      ],
+    },
+    {
+      category: 'Auth',
+      keys: ['auth.login.title', 'auth.signup.title', 'auth.login.button', 'auth.signup.button'],
+    },
+    {
+      category: 'Marketplace',
+      keys: [
+        'marketplace.title',
+        'marketplace.subtitle',
+        'marketplace.searchPlaceholder',
+        'marketplace.viewProduct',
+      ],
+    },
+    {
+      category: 'Products',
+      keys: ['products.title', 'products.add', 'products.edit', 'products.delete', 'products.view'],
+    },
+    {
+      category: 'Cart',
+      keys: ['cart.title', 'cart.empty', 'cart.checkout', 'cart.continueShopping'],
+    },
+    {
+      category: 'Orders',
+      keys: ['orders.title', 'orders.status', 'orders.viewDetails', 'orders.trackOrder'],
+    },
+    {
+      category: 'Dashboard',
+      keys: [
+        'dashboard.welcome',
+        'dashboard.stats.totalSales',
+        'dashboard.stats.totalOrders',
+        'dashboard.quickActions',
+      ],
+    },
   ];
 
   const currentLang = i18n.language;
@@ -40,11 +88,14 @@ export default function I18nTest() {
                   Test i18n - Système Multilingue
                 </CardTitle>
                 <CardDescription className="text-lg mt-2">
-                  {t('common.welcome')} ! Langue actuelle : <Badge variant="default" className="ml-2">{currentLang.toUpperCase()}</Badge>
+                  {t('common.welcome')} ! Langue actuelle :{' '}
+                  <Badge variant="default" className="ml-2">
+                    {currentLang.toUpperCase()}
+                  </Badge>
                 </CardDescription>
               </div>
               <div className="flex gap-2">
-                {allLanguages.map((lang) => (
+                {allLanguages.map(lang => (
                   <Button
                     key={lang}
                     variant={currentLang === lang ? 'default' : 'outline'}
@@ -83,17 +134,15 @@ export default function I18nTest() {
         </Card>
 
         {/* Test de toutes les catégories */}
-        {testKeys.map((category) => (
+        {testKeys.map(category => (
           <Card key={category.category}>
             <CardHeader>
               <CardTitle className="text-xl">🔤 {category.category}</CardTitle>
-              <CardDescription>
-                Test de {category.keys.length} clés de traduction
-              </CardDescription>
+              <CardDescription>Test de {category.keys.length} clés de traduction</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {category.keys.map((key) => {
+                {category.keys.map(key => {
                   const translation = t(key);
                   const isMissing = translation === key; // Si traduction = clé, elle est manquante
 
@@ -135,7 +184,9 @@ export default function I18nTest() {
               <div className="font-medium">{t('dashboard.welcome', { name: 'John Doe' })}</div>
             </div>
             <div className="p-3 rounded-lg border bg-blue-50 border-blue-200">
-              <div className="text-sm text-muted-foreground mb-1">orders.orderNumber (avec numéro)</div>
+              <div className="text-sm text-muted-foreground mb-1">
+                orders.orderNumber (avec numéro)
+              </div>
               <div className="font-medium">{t('orders.orderNumber', { number: '12345' })}</div>
             </div>
           </CardContent>
@@ -148,12 +199,8 @@ export default function I18nTest() {
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-2">
-              <Button onClick={() => i18n.changeLanguage('fr')}>
-                🇫🇷 Passer en Français
-              </Button>
-              <Button onClick={() => i18n.changeLanguage('en')}>
-                🇬🇧 Switch to English
-              </Button>
+              <Button onClick={() => i18n.changeLanguage('fr')}>🇫🇷 Passer en Français</Button>
+              <Button onClick={() => i18n.changeLanguage('en')}>🇬🇧 Switch to English</Button>
               <Button variant="outline" onClick={() => window.location.reload()}>
                 Recharger la page
               </Button>
@@ -177,9 +224,9 @@ export default function I18nTest() {
                   {`import { useTranslation } from 'react-i18next';`}
                 </pre>
               </div>
-              
+
               <Separator />
-              
+
               <div>
                 <h4 className="font-semibold mb-2">2. Utiliser dans le composant</h4>
                 <pre className="bg-muted p-3 rounded-lg text-sm overflow-x-auto">
@@ -190,18 +237,18 @@ export default function I18nTest() {
 };`}
                 </pre>
               </div>
-              
+
               <Separator />
-              
+
               <div>
                 <h4 className="font-semibold mb-2">3. Avec variables (interpolation)</h4>
                 <pre className="bg-muted p-3 rounded-lg text-sm overflow-x-auto">
                   {`{t('dashboard.welcome', { name: userName })}`}
                 </pre>
               </div>
-              
+
               <Separator />
-              
+
               <div>
                 <h4 className="font-semibold mb-2">4. Changer la langue programmatiquement</h4>
                 <pre className="bg-muted p-3 rounded-lg text-sm overflow-x-auto">
@@ -215,17 +262,16 @@ i18n.changeLanguage('en'); // ou 'fr'`}
 
         {/* Footer */}
         <div className="text-center text-sm text-muted-foreground">
-          <p>✅ Système i18n opérationnel | 🌐 {allLanguages.length} langues disponibles | 📦 {testKeys.reduce((acc, cat) => acc + cat.keys.length, 0)} clés testées</p>
-          <p className="mt-2">Cette page de test est temporaire et doit être supprimée avant le déploiement en production.</p>
+          <p>
+            ✅ Système i18n opérationnel | 🌐 {allLanguages.length} langues disponibles | 📦{' '}
+            {testKeys.reduce((acc, cat) => acc + cat.keys.length, 0)} clés testées
+          </p>
+          <p className="mt-2">
+            Cette page de test est temporaire et doit être supprimée avant le déploiement en
+            production.
+          </p>
         </div>
       </div>
     </div>
   );
 }
-
-
-
-
-
-
-

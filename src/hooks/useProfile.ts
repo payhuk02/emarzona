@@ -48,11 +48,12 @@ export const useProfile = () => {
     try {
       setLoading(true);
       logger.info('Fetching profile for user', { userId: user.id });
-      
+
       // Charger tous les champs du profil
       const { data, error } = await supabase
         .from('profiles')
-        .select(`
+        .select(
+          `
           id, 
           user_id, 
           avatar_url, 
@@ -72,7 +73,8 @@ export const useProfile = () => {
           suspended_by,
           created_at, 
           updated_at
-        `)
+        `
+        )
         .eq('user_id', user.id)
         .limit(1);
 
@@ -98,7 +100,8 @@ export const useProfile = () => {
               website: null,
             },
           ])
-          .select(`
+          .select(
+            `
             id, 
             user_id, 
             avatar_url, 
@@ -118,21 +121,22 @@ export const useProfile = () => {
             suspended_by,
             created_at, 
             updated_at
-          `)
+          `
+          )
           .limit(1);
 
         if (createError) {
           logger.error('Profile creation error', { error: createError });
           throw createError;
         }
-        
+
         logger.info('Profile created', { profile: newProfile });
         setProfile(newProfile && newProfile.length > 0 ? newProfile[0] : null);
       } else {
         logger.info('Profile found', { profile: data });
         setProfile(data[0]);
       }
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error fetching profile', { error });
       toast({
@@ -166,7 +170,7 @@ export const useProfile = () => {
       if (file.size > 5 * 1024 * 1024) {
         toast({
           title: 'Erreur',
-          description: 'L\'image ne doit pas dépasser 5 Mo',
+          description: "L'image ne doit pas dépasser 5 Mo",
           variant: 'destructive',
         });
         return null;
@@ -176,9 +180,7 @@ export const useProfile = () => {
       if (profile?.avatar_url) {
         const oldPath = profile.avatar_url.split('/').pop();
         if (oldPath) {
-          await supabase.storage
-            .from('avatars')
-            .remove([`${user.id}/${oldPath}`]);
+          await supabase.storage.from('avatars').remove([`${user.id}/${oldPath}`]);
         }
       }
 
@@ -187,16 +189,14 @@ export const useProfile = () => {
       const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
       const filePath = `${user.id}/${fileName}`;
 
-      const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(filePath, file);
+      const { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, file);
 
       if (uploadError) throw uploadError;
 
       // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(filePath);
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from('avatars').getPublicUrl(filePath);
 
       // Update profile
       const { error: updateError } = await supabase
@@ -206,7 +206,7 @@ export const useProfile = () => {
 
       if (updateError) throw updateError;
 
-      setProfile((prev) => prev ? { ...prev, avatar_url: publicUrl } : null);
+      setProfile(prev => (prev ? { ...prev, avatar_url: publicUrl } : null));
 
       toast({
         title: 'Succès',
@@ -214,7 +214,7 @@ export const useProfile = () => {
       });
 
       return publicUrl;
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error uploading avatar', { error });
       toast({
@@ -237,9 +237,7 @@ export const useProfile = () => {
       // Delete from storage
       const oldPath = profile.avatar_url.split('/').pop();
       if (oldPath) {
-        await supabase.storage
-          .from('avatars')
-          .remove([`${user.id}/${oldPath}`]);
+        await supabase.storage.from('avatars').remove([`${user.id}/${oldPath}`]);
       }
 
       // Update profile
@@ -250,13 +248,13 @@ export const useProfile = () => {
 
       if (error) throw error;
 
-      setProfile((prev) => prev ? { ...prev, avatar_url: null } : null);
+      setProfile(prev => (prev ? { ...prev, avatar_url: null } : null));
 
       toast({
         title: 'Succès',
         description: 'Photo de profil supprimée',
       });
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error removing avatar', { error });
       toast({
@@ -280,15 +278,15 @@ export const useProfile = () => {
 
       if (error) throw error;
 
-      setProfile((prev) => prev ? { ...prev, display_name: displayName } : null);
+      setProfile(prev => (prev ? { ...prev, display_name: displayName } : null));
 
       toast({
         title: 'Succès',
-        description: 'Nom d\'affichage mis à jour',
+        description: "Nom d'affichage mis à jour",
       });
 
       return true;
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error updating display name', { error });
       toast({
@@ -300,9 +298,9 @@ export const useProfile = () => {
     }
   };
 
-  const updateProfile = async (updates: { 
-    first_name?: string; 
-    last_name?: string; 
+  const updateProfile = async (updates: {
+    first_name?: string;
+    last_name?: string;
     display_name?: string;
     bio?: string;
     phone?: string;
@@ -313,8 +311,8 @@ export const useProfile = () => {
 
     try {
       // Mettre à jour tous les champs disponibles
-      const  safeUpdates: Record<string, unknown> = {};
-      
+      const safeUpdates: Record<string, unknown> = {};
+
       if (updates.first_name !== undefined) safeUpdates.first_name = updates.first_name;
       if (updates.last_name !== undefined) safeUpdates.last_name = updates.last_name;
       if (updates.display_name !== undefined) safeUpdates.display_name = updates.display_name;
@@ -330,7 +328,7 @@ export const useProfile = () => {
 
       if (error) throw error;
 
-      setProfile((prev) => prev ? { ...prev, ...safeUpdates } : null);
+      setProfile(prev => (prev ? { ...prev, ...safeUpdates } : null));
 
       toast({
         title: 'Succès',
@@ -338,7 +336,7 @@ export const useProfile = () => {
       });
 
       return true;
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error updating profile', { error });
       toast({
@@ -355,12 +353,11 @@ export const useProfile = () => {
     if (!user) return null;
 
     try {
-      const { data, error } = await supabase
-        .rpc('get_profile_stats', { profile_user_id: user.id });
+      const { data, error } = await supabase.rpc('get_profile_stats', { profile_user_id: user.id });
 
       if (error) throw error;
       return data;
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error getting profile stats', { error });
       return null;
@@ -379,9 +376,9 @@ export const useProfile = () => {
       profile.phone,
       profile.location,
       profile.website,
-      profile.avatar_url
+      profile.avatar_url,
     ];
-    
+
     const completedFields = fields.filter(field => field && field.trim() !== '').length;
     return Math.round((completedFields / fields.length) * 100);
   };
@@ -399,7 +396,7 @@ export const useProfile = () => {
 
       if (error) throw error;
       return data && data.length > 0 ? data[0] : null;
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error getting referral info', { error });
       return null;
@@ -419,7 +416,7 @@ export const useProfile = () => {
 
       if (error) throw error;
       return data || [];
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error getting referred profiles', { error });
       return [];
@@ -441,9 +438,3 @@ export const useProfile = () => {
     refetch: fetchProfile,
   };
 };
-
-
-
-
-
-

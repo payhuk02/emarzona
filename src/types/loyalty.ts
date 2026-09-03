@@ -6,21 +6,21 @@ import type { RecordString } from './common';
 
 export type LoyaltyTierType = 'bronze' | 'silver' | 'gold' | 'platinum';
 
-export type LoyaltyTransactionType = 
-  | 'earned'      // Points gagnés
-  | 'redeemed'    // Points échangés
-  | 'expired'     // Points expirés
-  | 'adjusted'    // Ajustement manuel
-  | 'bonus'       // Bonus spécial
-  | 'refunded';   // Points remboursés
+export type LoyaltyTransactionType =
+  | 'earned' // Points gagnés
+  | 'redeemed' // Points échangés
+  | 'expired' // Points expirés
+  | 'adjusted' // Ajustement manuel
+  | 'bonus' // Bonus spécial
+  | 'refunded'; // Points remboursés
 
-export type LoyaltyRewardType = 
-  | 'discount'        // Réduction
-  | 'free_product'    // Produit gratuit
-  | 'free_shipping'   // Livraison gratuite
-  | 'gift_card'       // Carte cadeau
-  | 'cash_back'       // Cashback
-  | 'custom';         // Récompense personnalisée
+export type LoyaltyRewardType =
+  | 'discount' // Réduction
+  | 'free_product' // Produit gratuit
+  | 'free_shipping' // Livraison gratuite
+  | 'gift_card' // Carte cadeau
+  | 'cash_back' // Cashback
+  | 'custom'; // Récompense personnalisée
 
 export type LoyaltyRewardStatus = 'active' | 'inactive' | 'expired';
 
@@ -71,7 +71,7 @@ export interface LoyaltyPoints {
   metadata: RecordString;
   created_at: string;
   updated_at: string;
-  
+
   // Relations
   current_tier?: LoyaltyTier;
 }
@@ -111,7 +111,7 @@ export interface LoyaltyReward {
   reward_type: LoyaltyRewardType;
   status: LoyaltyRewardStatus;
   points_cost: number;
-  
+
   // Valeur de la récompense
   discount_percentage: number | null;
   discount_amount: number | null;
@@ -119,25 +119,25 @@ export interface LoyaltyReward {
   gift_card_amount: number | null;
   cash_back_amount: number | null;
   custom_value: RecordString | null;
-  
+
   // Limitations
   max_redemptions: number | null;
   max_redemptions_per_customer: number | null;
   redemption_count: number;
-  
+
   // Disponibilité
   available_from: string | null;
   available_until: string | null;
-  
+
   // Conditions
   min_tier: LoyaltyTierType | null;
   applicable_to_product_types: string[];
   applicable_to_products: string[];
-  
+
   // Visuel
   image_url: string | null;
   badge_text: string | null;
-  
+
   // Configuration
   display_order: number;
   created_at: string;
@@ -163,7 +163,7 @@ export interface LoyaltyRewardRedemption {
   applied_at: string | null;
   metadata: RecordString;
   created_at: string;
-  
+
   // Relations
   reward?: LoyaltyReward;
 }
@@ -194,7 +194,7 @@ export interface CreateLoyaltyRewardForm {
   description?: string;
   reward_type: LoyaltyRewardType;
   points_cost: number;
-  
+
   // Valeur
   discount_percentage?: number;
   discount_amount?: number;
@@ -202,20 +202,20 @@ export interface CreateLoyaltyRewardForm {
   gift_card_amount?: number;
   cash_back_amount?: number;
   custom_value?: RecordString;
-  
+
   // Limitations
   max_redemptions?: number;
   max_redemptions_per_customer?: number;
-  
+
   // Disponibilité
   available_from?: string;
   available_until?: string;
-  
+
   // Conditions
   min_tier?: LoyaltyTierType;
   applicable_to_product_types?: string[];
   applicable_to_products?: string[];
-  
+
   // Visuel
   image_url?: string;
   badge_text?: string;
@@ -242,10 +242,3 @@ export interface LoyaltyFilters {
   date_from?: string;
   date_to?: string;
 }
-
-
-
-
-
-
-

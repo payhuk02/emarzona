@@ -6,10 +6,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { 
-  Package, 
-  DollarSign, 
-  Warehouse, 
+import {
+  Package,
+  DollarSign,
+  Warehouse,
   Truck,
   Tag,
   Image as ImageIcon,
@@ -115,11 +115,9 @@ export const PhysicalPreview = ({ data }: PhysicalPreviewProps) => {
             {data.cost_per_item && (
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Coût unitaire</p>
-                <p className="text-xl font-semibold">
-                  {data.cost_per_item.toLocaleString()} XOF
-                </p>
+                <p className="text-xl font-semibold">{data.cost_per_item.toLocaleString()} XOF</p>
                 <p className="text-xs text-green-600">
-                  Marge: {((data.price! - data.cost_per_item) / data.price! * 100).toFixed(0)}%
+                  Marge: {(((data.price! - data.cost_per_item) / data.price!) * 100).toFixed(0)}%
                 </p>
               </div>
             )}
@@ -136,7 +134,10 @@ export const PhysicalPreview = ({ data }: PhysicalPreviewProps) => {
           <CardContent>
             <div className="space-y-2">
               {data.variants.slice(0, 5).map((variant, index) => (
-                <div key={index} className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                <div
+                  key={index}
+                  className="flex items-center justify-between p-3 bg-muted rounded-lg"
+                >
                   <span className="font-medium">
                     {variant.option1_value}
                     {variant.option2_value && ` / ${variant.option2_value}`}
@@ -170,9 +171,13 @@ export const PhysicalPreview = ({ data }: PhysicalPreviewProps) => {
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium">Suivi des stocks</span>
             {data.track_inventory ? (
-              <Badge variant="default"><Check className="h-3 w-3 mr-1" /> Activé</Badge>
+              <Badge variant="default">
+                <Check className="h-3 w-3 mr-1" /> Activé
+              </Badge>
             ) : (
-              <Badge variant="secondary"><X className="h-3 w-3 mr-1" /> Désactivé</Badge>
+              <Badge variant="secondary">
+                <X className="h-3 w-3 mr-1" /> Désactivé
+              </Badge>
             )}
           </div>
 
@@ -224,9 +229,13 @@ export const PhysicalPreview = ({ data }: PhysicalPreviewProps) => {
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium">Expédition requise</span>
             {data.requires_shipping ? (
-              <Badge variant="default"><Check className="h-3 w-3 mr-1" /> Oui</Badge>
+              <Badge variant="default">
+                <Check className="h-3 w-3 mr-1" /> Oui
+              </Badge>
             ) : (
-              <Badge variant="secondary"><X className="h-3 w-3 mr-1" /> Non</Badge>
+              <Badge variant="secondary">
+                <X className="h-3 w-3 mr-1" /> Non
+              </Badge>
             )}
           </div>
 
@@ -245,7 +254,8 @@ export const PhysicalPreview = ({ data }: PhysicalPreviewProps) => {
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Dimensions</p>
                     <p className="font-semibold">
-                      {data.dimensions.length} × {data.dimensions.width} × {data.dimensions.height} {data.dimensions.unit}
+                      {data.dimensions.length} × {data.dimensions.width} × {data.dimensions.height}{' '}
+                      {data.dimensions.unit}
                     </p>
                   </div>
                 )}
@@ -254,7 +264,9 @@ export const PhysicalPreview = ({ data }: PhysicalPreviewProps) => {
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Livraison gratuite</span>
                 {data.free_shipping ? (
-                  <Badge variant="default" className="bg-green-600">Oui</Badge>
+                  <Badge variant="default" className="bg-green-600">
+                    Oui
+                  </Badge>
                 ) : (
                   <Badge variant="secondary">Non</Badge>
                 )}
@@ -266,9 +278,3 @@ export const PhysicalPreview = ({ data }: PhysicalPreviewProps) => {
     </div>
   );
 };
-
-
-
-
-
-

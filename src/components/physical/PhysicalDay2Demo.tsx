@@ -1,7 +1,7 @@
 /**
  * DEMO FILE - Physical Products Day 2 Components
  * PhysicalProductsList + VariantManager
- * 
+ *
  * DO NOT USE IN PRODUCTION - TESTING ONLY
  */
 
@@ -66,12 +66,8 @@ export function PhysicalDay2Demo() {
     <div className="container mx-auto p-6 space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">
-          🔨 DEMO - Physical Products Day 2
-          </CardTitle>
-          <p className="text-muted-foreground">
-            PhysicalProductsList + VariantManager Components
-          </p>
+          <CardTitle className="text-2xl">🔨 DEMO - Physical Products Day 2</CardTitle>
+          <p className="text-muted-foreground">PhysicalProductsList + VariantManager Components</p>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="list" className="w-full">
@@ -84,8 +80,8 @@ export function PhysicalDay2Demo() {
               <PhysicalProductsList
                 storeId="demo-store-123"
                 onCreateProduct={() => logger.info('Create product action')}
-                onEditProduct={(id) => logger.info('Edit product', { productId: id })}
-                onViewProduct={(id) => logger.info('View product', { productId: id })}
+                onEditProduct={id => logger.info('Edit product', { productId: id })}
+                onViewProduct={id => logger.info('View product', { productId: id })}
               />
             </TabsContent>
 
@@ -112,18 +108,11 @@ export function PhysicalDay2Demo() {
           <div className="space-y-2 text-xs font-mono">
             <p>Options: {options.length}</p>
             <p>Variants: {variants.length}</p>
-            <p>Active Variants: {variants.filter((v) => v.is_active).length}</p>
-            <p>Out of Stock: {variants.filter((v) => v.quantity === 0).length}</p>
+            <p>Active Variants: {variants.filter(v => v.is_active).length}</p>
+            <p>Out of Stock: {variants.filter(v => v.quantity === 0).length}</p>
           </div>
         </CardContent>
       </Card>
     </div>
   );
 }
-
-
-
-
-
-
-

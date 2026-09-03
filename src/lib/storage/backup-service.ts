@@ -49,7 +49,7 @@ export class BackupService {
     compress: true,
     encrypt: false,
     storage: 'indexeddb',
-    collections: ['admin_config', 'user_data', 'products', 'orders', 'analytics']
+    collections: ['admin_config', 'user_data', 'products', 'orders', 'analytics'],
   };
 
   private backupInterval: NodeJS.Timeout | null = null;
@@ -87,13 +87,16 @@ export class BackupService {
   private startAutomaticBackups(): void {
     if (!this.config.enabled || !this.config.automatic) return;
 
-    this.backupInterval = setInterval(async () => {
-      try {
-        await this.createAutomaticBackup();
-      } catch (error) {
-        logger.error('Erreur sauvegarde automatique:', error);
-      }
-    }, this.config.intervalHours * 60 * 60 * 1000);
+    this.backupInterval = setInterval(
+      async () => {
+        try {
+          await this.createAutomaticBackup();
+        } catch (error) {
+          logger.error('Erreur sauvegarde automatique:', error);
+        }
+      },
+      this.config.intervalHours * 60 * 60 * 1000
+    );
 
     logger.info(`Sauvegardes automatiques démarrées (intervalle: ${this.config.intervalHours}h)`);
   }
@@ -132,14 +135,18 @@ export class BackupService {
       id: backupId,
       name: `Sauvegarde automatique ${new Date().toLocaleString('fr-FR')}`,
       type: 'automatic',
-      collections: this.config.collections
+      collections: this.config.collections,
     });
   }
 
   /**
    * Crée une sauvegarde manuelle
    */
-  async createManualBackup(name: string, description?: string, collections?: string[]): Promise<string> {
+  async createManualBackup(
+    name: string,
+    description?: string,
+    collections?: string[]
+  ): Promise<string> {
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     const backupId = `${this.BACKUP_PREFIX}manual_${timestamp}`;
 
@@ -148,7 +155,7 @@ export class BackupService {
       name,
       description,
       type: 'manual',
-      collections: collections || this.config.collections
+      collections: collections || this.config.collections,
     });
 
     return backupId;
@@ -168,7 +175,7 @@ export class BackupService {
       name: `Sauvegarde d'urgence - ${reason}`,
       description: `Créée automatiquement en raison: ${reason}`,
       type: 'emergency',
-      collections: this.config.collections
+      collections: this.config.collections,
     });
 
     return backupId;
@@ -199,7 +206,7 @@ export class BackupService {
         checksum: '',
         compressed: this.config.compress,
         encrypted: this.config.encrypt,
-        status: 'in_progress'
+        status: 'in_progress',
       };
 
       await this.saveBackupMetadata(metadata);
@@ -244,7 +251,6 @@ export class BackupService {
       await this.cleanupOldBackups();
 
       logger.info(`Sauvegarde ${id} créée avec succès (${metadata.size} octets)`);
-
     } catch (error) {
       logger.error(`Erreur création sauvegarde ${id}:`, error);
 
@@ -260,7 +266,7 @@ export class BackupService {
         compressed: false,
         encrypted: false,
         status: 'failed',
-        error: error.message
+        error: error.message,
       };
 
       await this.saveBackupMetadata(errorMetadata);
@@ -285,7 +291,9 @@ export class BackupService {
 
     // Depuis Supabase si disponible
     try {
-      const { data, error } = await supabase.from(collection).select('id,data,metadata,created_at,updated_at');
+      const { data, error } = await supabase
+        .from(collection)
+        .select('id,data,metadata,created_at,updated_at');
       if (!error && data) {
         data.forEach(item => {
           items.push({
@@ -297,8 +305,8 @@ export class BackupService {
               version: 1,
               source: 'supabase',
               syncStatus: 'synced',
-              checksum: ''
-            }
+              checksum: '',
+            },
           });
         });
       }
@@ -451,7 +459,7 @@ export class BackupService {
         await supabase.from('system_backups').upsert({
           id,
           data,
-          created_at: new Date().toISOString()
+          created_at: new Date().toISOString(),
         });
         break;
 
@@ -482,7 +490,9 @@ export class BackupService {
 
       if (automaticBackups.length > this.config.maxBackups) {
         // Trie par date et supprime les plus anciennes
-        automaticBackups.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        automaticBackups.sort(
+          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
 
         const toDelete = automaticBackups.slice(this.config.maxBackups);
         for (const backup of toDelete) {
@@ -505,7 +515,8 @@ export class BackupService {
       const parsed = JSON.parse(exportData);
       const metadata = parsed.collections['backup_metadata'] || [];
 
-      return metadata.map((item: StorageItem) => item.data as BackupMetadata)
+      return metadata
+        .map((item: StorageItem) => item.data as BackupMetadata)
         .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     } catch (error) {
       logger.error('Erreur listage sauvegardes:', error);
@@ -542,7 +553,10 @@ export class BackupService {
   /**
    * Restaure une sauvegarde
    */
-  async restoreBackup(backupId: string, options: RestoreOptions = { overwrite: true, validateData: true, dryRun: false }): Promise<void> {
+  async restoreBackup(
+    backupId: string,
+    options: RestoreOptions = { overwrite: true, validateData: true, dryRun: false }
+  ): Promise<void> {
     try {
       logger.info(`Début restauration sauvegarde ${backupId}`);
 
@@ -561,7 +575,11 @@ export class BackupService {
           break;
 
         case 'supabase':
-          const { data } = await supabase.from('system_backups').select('data').eq('id', backupId).single();
+          const { data } = await supabase
+            .from('system_backups')
+            .select('data')
+            .eq('id', backupId)
+            .single();
           backupData = data?.data;
           break;
 
@@ -593,7 +611,9 @@ export class BackupService {
 
       // Mode dry-run
       if (options.dryRun) {
-        logger.info(`Mode dry-run: ${Object.keys(parsedData).length} collections seraient restaurées`);
+        logger.info(
+          `Mode dry-run: ${Object.keys(parsedData).length} collections seraient restaurées`
+        );
         return;
       }
 
@@ -602,7 +622,9 @@ export class BackupService {
 
       for (const collection of collectionsToRestore) {
         if (parsedData[collection]) {
-          logger.info(`Restauration collection ${collection}: ${parsedData[collection].length} éléments`);
+          logger.info(
+            `Restauration collection ${collection}: ${parsedData[collection].length} éléments`
+          );
 
           for (const item of parsedData[collection]) {
             try {
@@ -622,7 +644,6 @@ export class BackupService {
       }
 
       logger.info(`Restauration sauvegarde ${backupId} terminée avec succès`);
-
     } catch (error) {
       logger.error(`Erreur restauration sauvegarde ${backupId}:`, error);
       throw error;
@@ -675,7 +696,11 @@ export class BackupService {
           break;
 
         case 'supabase':
-          const { data } = await supabase.from('system_backups').select('data').eq('id', backupId).single();
+          const { data } = await supabase
+            .from('system_backups')
+            .select('data')
+            .eq('id', backupId)
+            .single();
           backupData = data?.data;
           break;
       }
@@ -689,7 +714,7 @@ export class BackupService {
         metadata,
         data: backupData,
         exportedAt: new Date().toISOString(),
-        version: '1.0'
+        version: '1.0',
       };
 
       const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
@@ -704,7 +729,6 @@ export class BackupService {
       URL.revokeObjectURL(url);
 
       logger.info(`Sauvegarde ${backupId} exportée vers fichier`);
-
     } catch (error) {
       logger.error(`Erreur export sauvegarde ${backupId}:`, error);
       throw error;
@@ -745,7 +769,6 @@ export class BackupService {
       await this.saveBackupMetadata(metadata);
 
       logger.info(`Sauvegarde ${metadata.id} importée depuis fichier`);
-
     } catch (error) {
       logger.error('Erreur import sauvegarde:', error);
       throw error;
@@ -764,16 +787,16 @@ export class BackupService {
         byType: {
           automatic: backups.filter(b => b.type === 'automatic').length,
           manual: backups.filter(b => b.type === 'manual').length,
-          emergency: backups.filter(b => b.type === 'emergency').length
+          emergency: backups.filter(b => b.type === 'emergency').length,
         },
         byStatus: {
           completed: backups.filter(b => b.status === 'completed').length,
           failed: backups.filter(b => b.status === 'failed').length,
-          inProgress: backups.filter(b => b.status === 'in_progress').length
+          inProgress: backups.filter(b => b.status === 'in_progress').length,
         },
         totalSize: backups.reduce((sum, b) => sum + b.size, 0),
         lastBackup: backups.length > 0 ? backups[0].createdAt : null,
-        oldestBackup: backups.length > 0 ? backups[backups.length - 1].createdAt : null
+        oldestBackup: backups.length > 0 ? backups[backups.length - 1].createdAt : null,
       };
 
       return stats;

@@ -1,7 +1,7 @@
 /**
  * Supplier Products Component
  * Date: 27 Janvier 2025
- * 
+ *
  * Gestion des produits fournisseurs (catalogue, coûts, disponibilité)
  */
 
@@ -12,7 +12,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import {
   Dialog,
   DialogContent,
@@ -44,7 +51,17 @@ import { useSupplierProducts, useSuppliers, SupplierProduct } from '@/hooks/phys
 import { useStore } from '@/hooks/useStore';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
-import { Plus, Edit, Trash2, Package, Search, DollarSign, Clock, X, MoreVertical } from 'lucide-react';
+import {
+  Plus,
+  Edit,
+  Trash2,
+  Package,
+  Search,
+  DollarSign,
+  Clock,
+  X,
+  MoreVertical,
+} from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
@@ -98,10 +115,11 @@ export default function SupplierProducts() {
     if (!debouncedSearch) return products;
 
     const query = debouncedSearch.toLowerCase();
-    return products.filter(product =>
-      product.supplier_product_name?.toLowerCase().includes(query) ||
-      product.supplier_sku?.toLowerCase().includes(query) ||
-      (product.product as any)?.name?.toLowerCase().includes(query)
+    return products.filter(
+      product =>
+        product.supplier_product_name?.toLowerCase().includes(query) ||
+        product.supplier_sku?.toLowerCase().includes(query) ||
+        (product.product as any)?.name?.toLowerCase().includes(query)
     );
   }, [products, debouncedSearch]);
 
@@ -116,97 +134,103 @@ export default function SupplierProducts() {
     }
   }, []);
 
-  const handleOpenDialog = useCallback((product?: SupplierProduct, supplierId?: string) => {
-    if (product) {
-      setEditingProduct(product);
-      setFormData(product);
-    } else {
-      setEditingProduct(null);
-      setFormData({
-        supplier_id: supplierId || selectedSupplier || '',
-        product_id: '',
-        variant_id: '',
-        supplier_sku: '',
-        supplier_product_name: '',
-        unit_cost: 0,
-        currency: 'XOF',
-        minimum_order_quantity: 1,
-        bulk_pricing: [],
-        lead_time_days: 7,
-        estimated_delivery_days: 7,
-        is_available: true,
-        stock_available: true,
-        notes: '',
-        catalog_url: '',
-        is_active: true,
-        is_preferred: false,
-      });
-    }
-    setIsDialogOpen(true);
-  }, [selectedSupplier]);
+  const handleOpenDialog = useCallback(
+    (product?: SupplierProduct, supplierId?: string) => {
+      if (product) {
+        setEditingProduct(product);
+        setFormData(product);
+      } else {
+        setEditingProduct(null);
+        setFormData({
+          supplier_id: supplierId || selectedSupplier || '',
+          product_id: '',
+          variant_id: '',
+          supplier_sku: '',
+          supplier_product_name: '',
+          unit_cost: 0,
+          currency: 'XOF',
+          minimum_order_quantity: 1,
+          bulk_pricing: [],
+          lead_time_days: 7,
+          estimated_delivery_days: 7,
+          is_available: true,
+          stock_available: true,
+          notes: '',
+          catalog_url: '',
+          is_active: true,
+          is_preferred: false,
+        });
+      }
+      setIsDialogOpen(true);
+    },
+    [selectedSupplier]
+  );
 
   const handleCloseDialog = useCallback(() => {
     setIsDialogOpen(false);
     setEditingProduct(null);
   }, []);
 
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.supplier_id) {
-      toast({
-        title: '❌ Erreur',
-        description: 'Veuillez sélectionner un fournisseur',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    try {
-      if (editingProduct) {
-        // Update
-        const { error } = await supabase
-          .from('supplier_products')
-          .update({
-            ...formData,
-            updated_at: new Date().toISOString(),
-          })
-          .eq('id', editingProduct.id);
-
-        if (error) throw error;
-
-        queryClient.invalidateQueries({ queryKey: ['supplier-products', formData.supplier_id] });
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!formData.supplier_id) {
         toast({
-          title: '✅ Produit mis à jour',
-          description: 'Le produit fournisseur a été mis à jour',
+          title: '❌ Erreur',
+          description: 'Veuillez sélectionner un fournisseur',
+          variant: 'destructive',
         });
-      } else {
-        // Create
-        const { error } = await supabase
-          .from('supplier_products')
-          .insert({
-            ...formData,
-          })
-          .select()
-          .single();
+        return;
+      }
 
-        if (error) throw error;
+      try {
+        if (editingProduct) {
+          // Update
+          const { error } = await supabase
+            .from('supplier_products')
+            .update({
+              ...formData,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', editingProduct.id);
 
-        queryClient.invalidateQueries({ queryKey: ['supplier-products', formData.supplier_id] });
+          if (error) throw error;
+
+          queryClient.invalidateQueries({ queryKey: ['supplier-products', formData.supplier_id] });
+          toast({
+            title: '✅ Produit mis à jour',
+            description: 'Le produit fournisseur a été mis à jour',
+          });
+        } else {
+          // Create
+          const { error } = await supabase
+            .from('supplier_products')
+            .insert({
+              ...formData,
+            })
+            .select()
+            .single();
+
+          if (error) throw error;
+
+          queryClient.invalidateQueries({ queryKey: ['supplier-products', formData.supplier_id] });
+          toast({
+            title: '✅ Produit créé',
+            description: 'Le produit fournisseur a été créé',
+          });
+        }
+        handleCloseDialog();
+      } catch (_error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
         toast({
-          title: '✅ Produit créé',
-          description: 'Le produit fournisseur a été créé',
+          title: '❌ Erreur',
+          description: errorMessage || 'Une erreur est survenue',
+          variant: 'destructive',
         });
       }
-      handleCloseDialog();
-    } catch ( _error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      toast({
-        title: '❌ Erreur',
-        description: errorMessage || 'Une erreur est survenue',
-        variant: 'destructive',
-      });
-    }
-  }, [formData, editingProduct, queryClient, toast, handleCloseDialog]);
+    },
+    [formData, editingProduct, queryClient, toast, handleCloseDialog]
+  );
 
   const handleDeleteClick = useCallback((product: SupplierProduct) => {
     setProductToDelete(product);
@@ -231,7 +255,7 @@ export default function SupplierProducts() {
       });
       setDeleteDialogOpen(false);
       setProductToDelete(null);
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
@@ -260,12 +284,16 @@ export default function SupplierProducts() {
         ref={actionsRef}
         className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-center animate-in fade-in slide-in-from-bottom-4 duration-700"
       >
-        <Select value={selectedSupplier} onValueChange={setSelectedSupplier} className="flex-1 sm:flex-none sm:w-64">
+        <Select
+          value={selectedSupplier}
+          onValueChange={setSelectedSupplier}
+          className="flex-1 sm:flex-none sm:w-64"
+        >
           <SelectTrigger className="h-10 sm:h-11 text-sm">
             <SelectValue placeholder="Sélectionner un fournisseur" />
           </SelectTrigger>
           <SelectContent>
-            {suppliers?.map((supplier) => (
+            {suppliers?.map(supplier => (
               <SelectItem key={supplier.id} value={supplier.id}>
                 {supplier.name}
               </SelectItem>
@@ -281,7 +309,7 @@ export default function SupplierProducts() {
                 type="text"
                 placeholder="Rechercher par nom, SKU ou produit..."
                 value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
+                onChange={e => setSearchInput(e.target.value)}
                 onKeyDown={handleKeyDown}
                 className="pl-9 pr-9 h-10 sm:h-11 text-sm"
               />
@@ -302,7 +330,7 @@ export default function SupplierProducts() {
                 </Badge>
               </div>
             </div>
-            <Button 
+            <Button
               onClick={() => handleOpenDialog(undefined, selectedSupplier)}
               className="h-10 sm:h-11 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
             >
@@ -315,10 +343,7 @@ export default function SupplierProducts() {
       </div>
 
       {/* Products List */}
-      <div
-        ref={productsRef}
-        className="animate-in fade-in slide-in-from-bottom-4 duration-700"
-      >
+      <div ref={productsRef} className="animate-in fade-in slide-in-from-bottom-4 duration-700">
         {!selectedSupplier ? (
           <Card className="border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in zoom-in-95 duration-500">
             <CardContent className="pt-8 sm:pt-12 pb-8 sm:pb-12 text-center">
@@ -363,18 +388,22 @@ export default function SupplierProducts() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredProducts.map((product) => (
+                  {filteredProducts.map(product => (
                     <TableRow key={product.id}>
                       <TableCell className="text-xs sm:text-sm">
                         <div className="flex items-center gap-2">
                           <Package className="h-4 w-4 text-muted-foreground shrink-0" />
                           <div className="flex-1 min-w-0">
                             <div className="font-medium truncate">
-                              {product.supplier_product_name || (product.product as any)?.name || 'N/A'}
+                              {product.supplier_product_name ||
+                                (product.product as any)?.name ||
+                                'N/A'}
                             </div>
                           </div>
                           {product.is_preferred && (
-                            <Badge variant="outline" className="text-xs shrink-0">Préféré</Badge>
+                            <Badge variant="outline" className="text-xs shrink-0">
+                              Préféré
+                            </Badge>
                           )}
                         </div>
                       </TableCell>
@@ -393,7 +422,9 @@ export default function SupplierProducts() {
                         </div>
                       </TableCell>
                       <TableCell className="text-xs sm:text-sm">
-                        <Badge variant="outline" className="text-xs">{product.minimum_order_quantity}</Badge>
+                        <Badge variant="outline" className="text-xs">
+                          {product.minimum_order_quantity}
+                        </Badge>
                       </TableCell>
                       <TableCell className="text-xs sm:text-sm">
                         <div className="flex items-center gap-1">
@@ -403,34 +434,43 @@ export default function SupplierProducts() {
                       </TableCell>
                       <TableCell className="text-xs sm:text-sm">
                         <div className="flex flex-col gap-1">
-                          <Badge variant={product.is_available ? 'default' : 'secondary'} className="text-xs w-fit">
+                          <Badge
+                            variant={product.is_available ? 'default' : 'secondary'}
+                            className="text-xs w-fit"
+                          >
                             {product.is_available ? 'Disponible' : 'Indisponible'}
                           </Badge>
                           {product.stock_available !== undefined && (
-                            <Badge variant={product.stock_available ? 'outline' : 'destructive'} className="text-xs w-fit">
+                            <Badge
+                              variant={product.stock_available ? 'outline' : 'destructive'}
+                              className="text-xs w-fit"
+                            >
                               {product.stock_available ? 'En stock' : 'Rupture'}
                             </Badge>
                           )}
                         </div>
                       </TableCell>
                       <TableCell className="text-xs sm:text-sm">
-                        <Badge variant={product.is_active ? 'default' : 'secondary'} className="text-xs">
+                        <Badge
+                          variant={product.is_active ? 'default' : 'secondary'}
+                          className="text-xs"
+                        >
                           {product.is_active ? 'Actif' : 'Inactif'}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
                         <Select>
                           <SelectTrigger className="h-8 w-8 p-0">
-
-                              <MoreVertical className="h-4 w-4" />
-                            
-</SelectTrigger>
+                            <MoreVertical className="h-4 w-4" />
+                          </SelectTrigger>
                           <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                             <SelectItem value="edit" onSelect={() => handleOpenDialog(product)}>
                               <Edit className="mr-2 h-4 w-4" />
                               Modifier
                             </SelectItem>
-                            <SelectItem value="delete" onSelect={() => handleDeleteClick(product)}
+                            <SelectItem
+                              value="delete"
+                              onSelect={() => handleDeleteClick(product)}
                               className="text-destructive"
                             >
                               <Trash2 className="mr-2 h-4 w-4" />
@@ -447,7 +487,7 @@ export default function SupplierProducts() {
 
             {/* Mobile Cards */}
             <div className="md:hidden space-y-4">
-              {filteredProducts.map((product) => (
+              {filteredProducts.map(product => (
                 <Card
                   key={product.id}
                   className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-md transition-all duration-300"
@@ -459,10 +499,14 @@ export default function SupplierProducts() {
                           <div className="flex items-center gap-2 mb-1">
                             <Package className="h-4 w-4 text-muted-foreground shrink-0" />
                             <h3 className="font-medium text-sm sm:text-base truncate">
-                              {product.supplier_product_name || (product.product as any)?.name || 'N/A'}
+                              {product.supplier_product_name ||
+                                (product.product as any)?.name ||
+                                'N/A'}
                             </h3>
                             {product.is_preferred && (
-                              <Badge variant="outline" className="text-xs shrink-0">Préféré</Badge>
+                              <Badge variant="outline" className="text-xs shrink-0">
+                                Préféré
+                              </Badge>
                             )}
                           </div>
                           {product.supplier_sku && (
@@ -473,16 +517,16 @@ export default function SupplierProducts() {
                         </div>
                         <Select>
                           <SelectTrigger className="h-8 w-8 p-0">
-
-                              <MoreVertical className="h-4 w-4" />
-                            
-</SelectTrigger>
+                            <MoreVertical className="h-4 w-4" />
+                          </SelectTrigger>
                           <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                             <SelectItem value="copy" onSelect={() => handleOpenDialog(product)}>
                               <Edit className="mr-2 h-4 w-4" />
                               Modifier
                             </SelectItem>
-                            <SelectItem value="view" onSelect={() => handleDeleteClick(product)}
+                            <SelectItem
+                              value="view"
+                              onSelect={() => handleDeleteClick(product)}
                               className="text-destructive"
                             >
                               <Trash2 className="mr-2 h-4 w-4" />
@@ -505,7 +549,8 @@ export default function SupplierProducts() {
                       <div className="flex items-center gap-2 text-xs sm:text-sm">
                         <Clock className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                         <span className="text-muted-foreground">
-                          Délai: {product.lead_time_days} jour{product.lead_time_days > 1 ? 's' : ''}
+                          Délai: {product.lead_time_days} jour
+                          {product.lead_time_days > 1 ? 's' : ''}
                         </span>
                       </div>
 
@@ -513,15 +558,24 @@ export default function SupplierProducts() {
                         <Badge variant="outline" className="text-xs">
                           Min: {product.minimum_order_quantity}
                         </Badge>
-                        <Badge variant={product.is_available ? 'default' : 'secondary'} className="text-xs">
+                        <Badge
+                          variant={product.is_available ? 'default' : 'secondary'}
+                          className="text-xs"
+                        >
                           {product.is_available ? 'Disponible' : 'Indisponible'}
                         </Badge>
                         {product.stock_available !== undefined && (
-                          <Badge variant={product.stock_available ? 'outline' : 'destructive'} className="text-xs">
+                          <Badge
+                            variant={product.stock_available ? 'outline' : 'destructive'}
+                            className="text-xs"
+                          >
                             {product.stock_available ? 'En stock' : 'Rupture'}
                           </Badge>
                         )}
-                        <Badge variant={product.is_active ? 'default' : 'secondary'} className="text-xs ml-auto">
+                        <Badge
+                          variant={product.is_active ? 'default' : 'secondary'}
+                          className="text-xs ml-auto"
+                        >
                           {product.is_active ? 'Actif' : 'Inactif'}
                         </Badge>
                       </div>
@@ -550,10 +604,12 @@ export default function SupplierProducts() {
           <form onSubmit={handleSubmit}>
             <div className="grid gap-4 py-4">
               <div className="space-y-2">
-                <Label htmlFor="supplier_id" className="text-xs sm:text-sm">Fournisseur *</Label>
+                <Label htmlFor="supplier_id" className="text-xs sm:text-sm">
+                  Fournisseur *
+                </Label>
                 <Select
                   value={formData.supplier_id || ''}
-                  onValueChange={(value) => setFormData({ ...formData, supplier_id: value })}
+                  onValueChange={value => setFormData({ ...formData, supplier_id: value })}
                   required
                   disabled={!!editingProduct}
                 >
@@ -561,7 +617,7 @@ export default function SupplierProducts() {
                     <SelectValue placeholder="Sélectionner un fournisseur" />
                   </SelectTrigger>
                   <SelectContent>
-                    {suppliers?.map((supplier) => (
+                    {suppliers?.map(supplier => (
                       <SelectItem key={supplier.id} value={supplier.id}>
                         {supplier.name}
                       </SelectItem>
@@ -572,21 +628,25 @@ export default function SupplierProducts() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="product_id" className="text-xs sm:text-sm">ID Produit (optionnel)</Label>
+                  <Label htmlFor="product_id" className="text-xs sm:text-sm">
+                    ID Produit (optionnel)
+                  </Label>
                   <Input
                     id="product_id"
                     value={formData.product_id || ''}
-                    onChange={(e) => setFormData({ ...formData, product_id: e.target.value })}
+                    onChange={e => setFormData({ ...formData, product_id: e.target.value })}
                     placeholder="UUID du produit"
                     className="text-sm"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="variant_id" className="text-xs sm:text-sm">ID Variante (optionnel)</Label>
+                  <Label htmlFor="variant_id" className="text-xs sm:text-sm">
+                    ID Variante (optionnel)
+                  </Label>
                   <Input
                     id="variant_id"
                     value={formData.variant_id || ''}
-                    onChange={(e) => setFormData({ ...formData, variant_id: e.target.value })}
+                    onChange={e => setFormData({ ...formData, variant_id: e.target.value })}
                     placeholder="UUID de la variante"
                     className="text-sm"
                   />
@@ -595,21 +655,27 @@ export default function SupplierProducts() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="supplier_sku" className="text-xs sm:text-sm">SKU Fournisseur</Label>
+                  <Label htmlFor="supplier_sku" className="text-xs sm:text-sm">
+                    SKU Fournisseur
+                  </Label>
                   <Input
                     id="supplier_sku"
                     value={formData.supplier_sku || ''}
-                    onChange={(e) => setFormData({ ...formData, supplier_sku: e.target.value })}
+                    onChange={e => setFormData({ ...formData, supplier_sku: e.target.value })}
                     placeholder="Référence produit fournisseur"
                     className="text-sm"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="supplier_product_name" className="text-xs sm:text-sm">Nom produit fournisseur</Label>
+                  <Label htmlFor="supplier_product_name" className="text-xs sm:text-sm">
+                    Nom produit fournisseur
+                  </Label>
                   <Input
                     id="supplier_product_name"
                     value={formData.supplier_product_name || ''}
-                    onChange={(e) => setFormData({ ...formData, supplier_product_name: e.target.value })}
+                    onChange={e =>
+                      setFormData({ ...formData, supplier_product_name: e.target.value })
+                    }
                     placeholder="Nom du produit chez le fournisseur"
                     className="text-sm"
                   />
@@ -618,14 +684,16 @@ export default function SupplierProducts() {
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="unit_cost" className="text-xs sm:text-sm">Coût unitaire *</Label>
+                  <Label htmlFor="unit_cost" className="text-xs sm:text-sm">
+                    Coût unitaire *
+                  </Label>
                   <Input
                     id="unit_cost"
                     type="number"
                     step="0.01"
                     min="0"
                     value={formData.unit_cost || 0}
-                    onChange={(e) =>
+                    onChange={e =>
                       setFormData({ ...formData, unit_cost: parseFloat(e.target.value) || 0 })
                     }
                     required
@@ -633,10 +701,12 @@ export default function SupplierProducts() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="currency" className="text-xs sm:text-sm">Devise</Label>
+                  <Label htmlFor="currency" className="text-xs sm:text-sm">
+                    Devise
+                  </Label>
                   <Select
                     value={formData.currency || 'XOF'}
-                    onValueChange={(value) => setFormData({ ...formData, currency: value })}
+                    onValueChange={value => setFormData({ ...formData, currency: value })}
                   >
                     <SelectTrigger className="text-sm">
                       <SelectValue />
@@ -649,14 +719,19 @@ export default function SupplierProducts() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="minimum_order_quantity" className="text-xs sm:text-sm">Quantité minimum *</Label>
+                  <Label htmlFor="minimum_order_quantity" className="text-xs sm:text-sm">
+                    Quantité minimum *
+                  </Label>
                   <Input
                     id="minimum_order_quantity"
                     type="number"
                     min="1"
                     value={formData.minimum_order_quantity || 1}
-                    onChange={(e) =>
-                      setFormData({ ...formData, minimum_order_quantity: parseInt(e.target.value) || 1 })
+                    onChange={e =>
+                      setFormData({
+                        ...formData,
+                        minimum_order_quantity: parseInt(e.target.value) || 1,
+                      })
                     }
                     required
                     className="text-sm"
@@ -666,13 +741,15 @@ export default function SupplierProducts() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="lead_time_days" className="text-xs sm:text-sm">Délai de livraison (jours) *</Label>
+                  <Label htmlFor="lead_time_days" className="text-xs sm:text-sm">
+                    Délai de livraison (jours) *
+                  </Label>
                   <Input
                     id="lead_time_days"
                     type="number"
                     min="0"
                     value={formData.lead_time_days || 7}
-                    onChange={(e) =>
+                    onChange={e =>
                       setFormData({ ...formData, lead_time_days: parseInt(e.target.value) || 0 })
                     }
                     required
@@ -680,14 +757,19 @@ export default function SupplierProducts() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="estimated_delivery_days" className="text-xs sm:text-sm">Délai estimé (jours)</Label>
+                  <Label htmlFor="estimated_delivery_days" className="text-xs sm:text-sm">
+                    Délai estimé (jours)
+                  </Label>
                   <Input
                     id="estimated_delivery_days"
                     type="number"
                     min="0"
                     value={formData.estimated_delivery_days || ''}
-                    onChange={(e) =>
-                      setFormData({ ...formData, estimated_delivery_days: parseInt(e.target.value) || undefined })
+                    onChange={e =>
+                      setFormData({
+                        ...formData,
+                        estimated_delivery_days: parseInt(e.target.value) || undefined,
+                      })
                     }
                     className="text-sm"
                   />
@@ -695,23 +777,27 @@ export default function SupplierProducts() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="catalog_url" className="text-xs sm:text-sm">URL Catalogue</Label>
+                <Label htmlFor="catalog_url" className="text-xs sm:text-sm">
+                  URL Catalogue
+                </Label>
                 <Input
                   id="catalog_url"
                   type="url"
                   value={formData.catalog_url || ''}
-                  onChange={(e) => setFormData({ ...formData, catalog_url: e.target.value })}
+                  onChange={e => setFormData({ ...formData, catalog_url: e.target.value })}
                   placeholder="https://..."
                   className="text-sm"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="notes" className="text-xs sm:text-sm">Notes</Label>
+                <Label htmlFor="notes" className="text-xs sm:text-sm">
+                  Notes
+                </Label>
                 <Textarea
                   id="notes"
                   value={formData.notes || ''}
-                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                  onChange={e => setFormData({ ...formData, notes: e.target.value })}
                   rows={3}
                   className="text-sm"
                 />
@@ -722,38 +808,53 @@ export default function SupplierProducts() {
                   <Switch
                     id="is_active"
                     checked={formData.is_active ?? true}
-                    onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
+                    onCheckedChange={checked => setFormData({ ...formData, is_active: checked })}
                   />
-                  <Label htmlFor="is_active" className="text-xs sm:text-sm">Actif</Label>
+                  <Label htmlFor="is_active" className="text-xs sm:text-sm">
+                    Actif
+                  </Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Switch
                     id="is_available"
                     checked={formData.is_available ?? true}
-                    onCheckedChange={(checked) => setFormData({ ...formData, is_available: checked })}
+                    onCheckedChange={checked => setFormData({ ...formData, is_available: checked })}
                   />
-                  <Label htmlFor="is_available" className="text-xs sm:text-sm">Disponible</Label>
+                  <Label htmlFor="is_available" className="text-xs sm:text-sm">
+                    Disponible
+                  </Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Switch
                     id="stock_available"
                     checked={formData.stock_available ?? true}
-                    onCheckedChange={(checked) => setFormData({ ...formData, stock_available: checked })}
+                    onCheckedChange={checked =>
+                      setFormData({ ...formData, stock_available: checked })
+                    }
                   />
-                  <Label htmlFor="stock_available" className="text-xs sm:text-sm">En stock</Label>
+                  <Label htmlFor="stock_available" className="text-xs sm:text-sm">
+                    En stock
+                  </Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Switch
                     id="is_preferred"
                     checked={formData.is_preferred ?? false}
-                    onCheckedChange={(checked) => setFormData({ ...formData, is_preferred: checked })}
+                    onCheckedChange={checked => setFormData({ ...formData, is_preferred: checked })}
                   />
-                  <Label htmlFor="is_preferred" className="text-xs sm:text-sm">Fournisseur préféré</Label>
+                  <Label htmlFor="is_preferred" className="text-xs sm:text-sm">
+                    Fournisseur préféré
+                  </Label>
                 </div>
               </div>
             </div>
             <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
-              <Button type="button" variant="outline" onClick={handleCloseDialog} className="w-full sm:w-auto text-sm">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleCloseDialog}
+                className="w-full sm:w-auto text-sm"
+              >
                 Annuler
               </Button>
               <Button type="submit" className="w-full sm:w-auto text-sm">
@@ -768,7 +869,9 @@ export default function SupplierProducts() {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent className="max-w-[95vw] sm:max-w-md">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-base sm:text-lg">Supprimer le produit</AlertDialogTitle>
+            <AlertDialogTitle className="text-base sm:text-lg">
+              Supprimer le produit
+            </AlertDialogTitle>
             <AlertDialogDescription className="text-xs sm:text-sm">
               Êtes-vous sûr de vouloir supprimer ce produit ? Cette action est irréversible.
             </AlertDialogDescription>

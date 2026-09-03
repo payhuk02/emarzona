@@ -15,10 +15,10 @@ interface AssignmentsListProps {
   onAssignmentClick?: (assignmentId: string) => void;
 }
 
-const AssignmentsListComponent = ({ 
-  courseId, 
+const AssignmentsListComponent = ({
+  courseId,
   enrollmentId,
-  onAssignmentClick 
+  onAssignmentClick,
 }: AssignmentsListProps) => {
   const { data: assignmentsData, isLoading } = useStudentAssignments(courseId, enrollmentId);
 
@@ -68,10 +68,3 @@ export const AssignmentsList = React.memo(AssignmentsListComponent, (prevProps, 
 });
 
 AssignmentsList.displayName = 'AssignmentsList';
-
-
-
-
-
-
-

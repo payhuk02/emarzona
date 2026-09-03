@@ -3,10 +3,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { 
-  Truck, 
-  Package, 
-  MapPin, 
+import {
+  Truck,
+  Package,
+  MapPin,
   Calendar,
   Clock,
   DollarSign,
@@ -24,13 +24,13 @@ import { fr } from 'date-fns/locale';
 // TYPES
 // ============================================================================
 
-export type ShippingStatus = 
-  | 'pending' 
-  | 'processing' 
-  | 'shipped' 
-  | 'in_transit' 
+export type ShippingStatus =
+  | 'pending'
+  | 'processing'
+  | 'shipped'
+  | 'in_transit'
   | 'out_for_delivery'
-  | 'delivered' 
+  | 'delivered'
   | 'failed'
   | 'returned';
 
@@ -155,9 +155,7 @@ export function ShippingInfoDisplay({
           {config.label}
         </Badge>
         {shipping.trackingNumber && (
-          <span className="text-xs text-muted-foreground font-mono">
-            {shipping.trackingNumber}
-          </span>
+          <span className="text-xs text-muted-foreground font-mono">{shipping.trackingNumber}</span>
         )}
       </div>
     );
@@ -183,9 +181,7 @@ export function ShippingInfoDisplay({
               {shipping.trackingNumber && (
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">Numéro de suivi</span>
-                  <span className="text-sm font-mono font-medium">
-                    {shipping.trackingNumber}
-                  </span>
+                  <span className="text-sm font-mono font-medium">{shipping.trackingNumber}</span>
                 </div>
               )}
               {shipping.carrier && (
@@ -248,7 +244,8 @@ export function ShippingInfoDisplay({
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">Dimensions</span>
                 <span className="font-medium">
-                  {shipping.dimensions.length} × {shipping.dimensions.width} × {shipping.dimensions.height} {shipping.dimensions.unit}
+                  {shipping.dimensions.length} × {shipping.dimensions.width} ×{' '}
+                  {shipping.dimensions.height} {shipping.dimensions.unit}
                 </span>
               </div>
             )}
@@ -285,9 +282,11 @@ export function ShippingInfoDisplay({
                     <div>
                       <p className="text-xs text-muted-foreground">Destination</p>
                       <p className="text-sm">
-                        {shipping.destinationAddress.street && `${shipping.destinationAddress.street}, `}
+                        {shipping.destinationAddress.street &&
+                          `${shipping.destinationAddress.street}, `}
                         {shipping.destinationAddress.city}
-                        {shipping.destinationAddress.postalCode && ` ${shipping.destinationAddress.postalCode}`}
+                        {shipping.destinationAddress.postalCode &&
+                          ` ${shipping.destinationAddress.postalCode}`}
                         <br />
                         {shipping.destinationAddress.country}
                       </p>
@@ -302,8 +301,8 @@ export function ShippingInfoDisplay({
           {showTracking && shipping.trackingUrl && (
             <>
               <Separator />
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 className="w-full gap-2"
                 onClick={() => window.open(shipping.trackingUrl, '_blank')}
               >
@@ -343,8 +342,8 @@ export function ShippingInfoDisplay({
           </div>
         </div>
         {shipping.trackingNumber && showTracking && shipping.trackingUrl && (
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             size="sm"
             onClick={() => window.open(shipping.trackingUrl, '_blank')}
             className="gap-1"
@@ -421,9 +420,3 @@ export function ShippingStatusBadge({ status, className }: ShippingStatusBadgePr
     </Badge>
   );
 }
-
-
-
-
-
-

@@ -9,10 +9,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { 
+import {
   validatePageAccessibility,
   checkElementContrast,
-  type AccessibilityReport 
+  type AccessibilityReport,
 } from '@/lib/accessibility-enhanced';
 import { AlertTriangle, CheckCircle, XCircle, RefreshCw, Download } from 'lucide-react';
 
@@ -24,7 +24,7 @@ export default function AdminAccessibilityReport() {
   const generateReport = () => {
     setLoading(true);
     setCurrentUrl(window.location.href);
-    
+
     // Attendre un peu pour que la page soit complètement chargée
     setTimeout(() => {
       const newReport = validatePageAccessibility();
@@ -85,9 +85,7 @@ ${report.recommendations.map(r => `- ${r}`).join('\n')}
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold">Rapport d'Accessibilité</h1>
-            <p className="text-muted-foreground">
-              Analyse WCAG 2.1 de la page actuelle
-            </p>
+            <p className="text-muted-foreground">Analyse WCAG 2.1 de la page actuelle</p>
           </div>
           <div className="flex gap-2">
             <Button onClick={generateReport} disabled={loading} className="min-h-[44px]">
@@ -138,9 +136,13 @@ ${report.recommendations.map(r => `- ${r}`).join('\n')}
                   <div className="w-full bg-gray-200 rounded-full h-4">
                     <div
                       className={`h-4 rounded-full transition-all ${
-                        report.score >= 90 ? 'bg-green-500' :
-                        report.score >= 70 ? 'bg-yellow-500' :
-                        report.score >= 50 ? 'bg-orange-500' : 'bg-red-500'
+                        report.score >= 90
+                          ? 'bg-green-500'
+                          : report.score >= 70
+                            ? 'bg-yellow-500'
+                            : report.score >= 50
+                              ? 'bg-orange-500'
+                              : 'bg-red-500'
                       }`}
                       style={{ width: `${report.score}%` }}
                     />
@@ -170,7 +172,8 @@ ${report.recommendations.map(r => `- ${r}`).join('\n')}
                       <AlertTriangle className="h-4 w-4" />
                       <AlertTitle className="flex items-center justify-between">
                         <span>
-                          {violation.severity === 'error' ? 'Erreur' : 'Avertissement'}: {violation.type}
+                          {violation.severity === 'error' ? 'Erreur' : 'Avertissement'}:{' '}
+                          {violation.type}
                         </span>
                         <Badge variant="outline">{violation.element}</Badge>
                       </AlertTitle>
@@ -240,7 +243,8 @@ ${report.recommendations.map(r => `- ${r}`).join('\n')}
                   <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
                   <h3 className="text-xl font-semibold mb-2">Excellent !</h3>
                   <p className="text-muted-foreground">
-                    Aucune violation ou avertissement détecté. La page respecte les standards WCAG 2.1 AA.
+                    Aucune violation ou avertissement détecté. La page respecte les standards WCAG
+                    2.1 AA.
                   </p>
                 </CardContent>
               </Card>
@@ -251,10 +255,3 @@ ${report.recommendations.map(r => `- ${r}`).join('\n')}
     </AdminLayout>
   );
 }
-
-
-
-
-
-
-

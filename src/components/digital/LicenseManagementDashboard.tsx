@@ -37,7 +37,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Key,
@@ -330,21 +330,24 @@ export const LicenseManagementDashboard = ({
                     <TableCell className="text-right">
                       <Select>
                         <SelectTrigger>
-
-                            <MoreVertical className="h-4 w-4" />
-                          
-</SelectTrigger>
+                          <MoreVertical className="h-4 w-4" />
+                        </SelectTrigger>
                         <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                           <SelectItem value="edit" onSelect={() => setSelectedLicense(license)}>
                             <Eye className="h-4 w-4 mr-2" />
                             Voir détails
                           </SelectItem>
-                          <SelectItem value="delete" onSelect={() => handleCopyKey(license.license_key)}>
+                          <SelectItem
+                            value="delete"
+                            onSelect={() => handleCopyKey(license.license_key)}
+                          >
                             <Copy className="h-4 w-4 mr-2" />
                             Copier clé
                           </SelectItem>
                           <DropdownMenuSeparator />
-                          <SelectItem value="copy" onSelect={() => handleRevoke(license.id)}
+                          <SelectItem
+                            value="copy"
+                            onSelect={() => handleRevoke(license.id)}
                             className="text-destructive"
                             disabled={license.status === 'revoked' || isRevoking}
                           >
@@ -575,9 +578,3 @@ const LicenseGeneratorDialog = ({
     </Dialog>
   );
 };
-
-
-
-
-
-

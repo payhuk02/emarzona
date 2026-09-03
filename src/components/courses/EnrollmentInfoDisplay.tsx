@@ -29,12 +29,12 @@ import { cn } from '@/lib/utils';
  * Statuts possibles pour une inscription
  */
 export type EnrollmentStatus =
-  | 'pending'        // En attente de paiement/confirmation
-  | 'active'         // Actif
-  | 'completed'      // Cours terminé
-  | 'expired'        // Accès expiré
-  | 'cancelled'      // Annulé
-  | 'refunded';      // Remboursé
+  | 'pending' // En attente de paiement/confirmation
+  | 'active' // Actif
+  | 'completed' // Cours terminé
+  | 'expired' // Accès expiré
+  | 'cancelled' // Annulé
+  | 'refunded'; // Remboursé
 
 /**
  * Variantes d'affichage du composant
@@ -70,55 +70,55 @@ export interface EnrollmentCourse {
 export interface EnrollmentInfoDisplayProps {
   /** ID unique de l'inscription */
   enrollmentId: string;
-  
+
   /** Statut de l'inscription */
   status: EnrollmentStatus;
-  
+
   /** Date d'inscription */
   enrolledDate: Date | string;
-  
+
   /** Informations étudiant */
   student: EnrollmentStudent;
-  
+
   /** Informations cours */
   course: EnrollmentCourse;
-  
+
   /** Progression (0-100%) */
   progress?: number;
-  
+
   /** Leçons complétées */
   completedLessons?: number;
-  
+
   /** Temps passé (en minutes) */
   timeSpent?: number;
-  
+
   /** Variante d'affichage */
   variant?: EnrollmentInfoVariant;
-  
+
   /** Classe CSS personnalisée */
   className?: string;
-  
+
   /** Date de dernière activité */
   lastActivity?: Date | string;
-  
+
   /** Date d'expiration (pour accès limité) */
   expiryDate?: Date | string;
-  
+
   /** Montant payé */
   amountPaid?: number;
-  
+
   /** Méthode de paiement */
   paymentMethod?: string;
-  
+
   /** Certificat obtenu */
   hasCertificate?: boolean;
-  
+
   /** Note moyenne (si quiz) */
   averageScore?: number;
-  
+
   /** Callback pour actions */
   onAction?: (action: string) => void;
-  
+
   /** Afficher les boutons d'action */
   showActions?: boolean;
 }
@@ -126,7 +126,7 @@ export interface EnrollmentInfoDisplayProps {
 /**
  * Configuration des statuts
  */
-const  STATUS_CONFIG: Record<
+const STATUS_CONFIG: Record<
   EnrollmentStatus,
   {
     label: string;
@@ -182,10 +182,10 @@ const  STATUS_CONFIG: Record<
 
 /**
  * EnrollmentInfoDisplay - Composant d'affichage des informations d'inscription
- * 
+ *
  * @example
  * ```tsx
- * <EnrollmentInfoDisplay 
+ * <EnrollmentInfoDisplay
  *   enrollmentId="ENR-001"
  *   status="active"
  *   enrolledDate={new Date()}
@@ -196,7 +196,7 @@ const  STATUS_CONFIG: Record<
  * />
  * ```
  */
-export const EnrollmentInfoDisplay : React.FC<EnrollmentInfoDisplayProps> = ({
+export const EnrollmentInfoDisplay: React.FC<EnrollmentInfoDisplayProps> = ({
   enrollmentId,
   status,
   enrolledDate,
@@ -259,9 +259,7 @@ export const EnrollmentInfoDisplay : React.FC<EnrollmentInfoDisplayProps> = ({
           </div>
 
           <div className="text-right">
-            {progress !== undefined && (
-              <p className="text-sm font-medium">{progress}%</p>
-            )}
+            {progress !== undefined && <p className="text-sm font-medium">{progress}%</p>}
             <p className="text-xs text-muted-foreground">#{enrollmentId}</p>
           </div>
         </div>
@@ -281,9 +279,7 @@ export const EnrollmentInfoDisplay : React.FC<EnrollmentInfoDisplayProps> = ({
                 <Icon className={cn('h-5 w-5', config.color)} />
               </div>
               <div>
-                <p className={cn('font-semibold', config.textColor)}>
-                  {config.label}
-                </p>
+                <p className={cn('font-semibold', config.textColor)}>{config.label}</p>
                 <p className="text-sm text-muted-foreground">#{enrollmentId}</p>
               </div>
             </div>
@@ -344,11 +340,7 @@ export const EnrollmentInfoDisplay : React.FC<EnrollmentInfoDisplayProps> = ({
           {/* Actions */}
           {showActions && onAction && status === 'active' && (
             <div className="flex gap-2 pt-2">
-              <Button
-                size="sm"
-                onClick={() => onAction('continue')}
-                className="flex-1"
-              >
+              <Button size="sm" onClick={() => onAction('continue')} className="flex-1">
                 <PlayCircle className="h-4 w-4 mr-2" />
                 Continuer
               </Button>
@@ -370,12 +362,8 @@ export const EnrollmentInfoDisplay : React.FC<EnrollmentInfoDisplayProps> = ({
               <Icon className={cn('h-6 w-6', config.color)} />
             </div>
             <div>
-              <h3 className={cn('text-lg font-bold', config.textColor)}>
-                {config.label}
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                Inscription #{enrollmentId}
-              </p>
+              <h3 className={cn('text-lg font-bold', config.textColor)}>{config.label}</h3>
+              <p className="text-sm text-muted-foreground">Inscription #{enrollmentId}</p>
             </div>
           </div>
           <div className="flex gap-2">
@@ -403,22 +391,18 @@ export const EnrollmentInfoDisplay : React.FC<EnrollmentInfoDisplayProps> = ({
               <Calendar className="h-5 w-5 text-muted-foreground" />
               <div>
                 <p className="text-xs text-muted-foreground font-medium">Date d'inscription</p>
-                <p className="text-base font-semibold mt-1">
-                  {formatDate(enrolledDate)}
-                </p>
+                <p className="text-base font-semibold mt-1">{formatDate(enrolledDate)}</p>
               </div>
             </div>
           </Card>
-          
+
           {lastActivity && (
             <Card className="p-4 bg-muted/30">
               <div className="flex items-center gap-3">
                 <Clock className="h-5 w-5 text-muted-foreground" />
                 <div>
                   <p className="text-xs text-muted-foreground font-medium">Dernière activité</p>
-                  <p className="text-base font-semibold mt-1">
-                    {formatDate(lastActivity)}
-                  </p>
+                  <p className="text-base font-semibold mt-1">{formatDate(lastActivity)}</p>
                 </div>
               </div>
             </Card>
@@ -435,11 +419,7 @@ export const EnrollmentInfoDisplay : React.FC<EnrollmentInfoDisplayProps> = ({
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 {student.avatar && (
-                  <img
-                    src={student.avatar}
-                    alt={student.name}
-                    className="h-10 w-10 rounded-full"
-                  />
+                  <img src={student.avatar} alt={student.name} className="h-10 w-10 rounded-full" />
                 )}
                 <div>
                   <p className="font-semibold">{student.name}</p>
@@ -522,7 +502,7 @@ export const EnrollmentInfoDisplay : React.FC<EnrollmentInfoDisplayProps> = ({
                 <span className="text-2xl font-bold text-primary">{progress}%</span>
               </div>
               <Progress value={progress} className="h-3" />
-              
+
               <div className="grid grid-cols-2 gap-4 pt-2">
                 {completedLessons !== undefined && course.totalLessons && (
                   <div>
@@ -563,11 +543,7 @@ export const EnrollmentInfoDisplay : React.FC<EnrollmentInfoDisplayProps> = ({
           <div className="flex gap-3 pt-4">
             {status === 'active' && (
               <>
-                <Button
-                  size="default"
-                  onClick={() => onAction('view_course')}
-                  className="flex-1"
-                >
+                <Button size="default" onClick={() => onAction('view_course')} className="flex-1">
                   <ExternalLink className="h-4 w-4 mr-2" />
                   Voir le cours
                 </Button>
@@ -613,11 +589,3 @@ export const EnrollmentInfoDisplay : React.FC<EnrollmentInfoDisplayProps> = ({
 EnrollmentInfoDisplay.displayName = 'EnrollmentInfoDisplay';
 
 export default EnrollmentInfoDisplay;
-
-
-
-
-
-
-
-

@@ -6,9 +6,18 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
-import { CheckCircle2, XCircle, Loader2, RefreshCw, Database, User, AlertCircle } from 'lucide-react';
+import {
+  CheckCircle2,
+  XCircle,
+  Loader2,
+  RefreshCw,
+  Database,
+  User,
+  AlertCircle,
+} from 'lucide-react';
 
-const PROFILE_FIELDS = 'id, user_id, avatar_url, display_name, first_name, last_name, bio, phone, location, website, created_at, updated_at';
+const PROFILE_FIELDS =
+  'id, user_id, avatar_url, display_name, first_name, last_name, bio, phone, location, website, created_at, updated_at';
 
 export const ProfileDebug = () => {
   const { user } = useAuth();
@@ -19,14 +28,14 @@ export const ProfileDebug = () => {
   const runTests = async () => {
     setLoading(true);
     setTestResults([]);
-    
+
     const tests = [
       {
         name: 'Connexion utilisateur',
         test: async () => {
           if (!user) throw new Error('Aucun utilisateur connecté');
           return { user: user.email, id: user.id };
-        }
+        },
       },
       {
         name: 'Accès à la table profiles',
@@ -36,22 +45,24 @@ export const ProfileDebug = () => {
             .select(PROFILE_FIELDS)
             .eq('user_id', user?.id)
             .maybeSingle();
-          
+
           if (error) throw error;
           return data;
-        }
+        },
       },
       {
         name: 'Structure de la table profiles',
         test: async () => {
           const { data, error } = await supabase
             .from('profiles')
-            .select('id, user_id, avatar_url, display_name, first_name, last_name, bio, phone, location, website, created_at, updated_at')
+            .select(
+              'id, user_id, avatar_url, display_name, first_name, last_name, bio, phone, location, website, created_at, updated_at'
+            )
             .limit(1);
-          
+
           if (error) throw error;
           return { columns: Object.keys(data?.[0] || {}), sample: data?.[0] };
-        }
+        },
       },
       {
         name: 'Création de profil (si nécessaire)',
@@ -61,11 +72,11 @@ export const ProfileDebug = () => {
             .select('id')
             .eq('user_id', user?.id)
             .maybeSingle();
-          
+
           if (existing) {
             return { message: 'Profil existe déjà', profile: existing };
           }
-          
+
           const { data, error } = await supabase
             .from('profiles')
             .insert([
@@ -82,11 +93,11 @@ export const ProfileDebug = () => {
             ])
             .select()
             .limit(1);
-          
+
           if (error) throw error;
           return { message: 'Profil créé', profile: data };
-        }
-      }
+        },
+      },
     ];
 
     const results = [];
@@ -98,7 +109,7 @@ export const ProfileDebug = () => {
           status: 'success',
           result,
         });
-      } catch ( _error: any) {
+      } catch (_error: any) {
         results.push({
           name: test.name,
           status: 'error',
@@ -106,25 +117,25 @@ export const ProfileDebug = () => {
         });
       }
     }
-    
+
     setTestResults(results);
     setLoading(false);
   };
 
   const fetchProfileData = async () => {
     if (!user) return;
-    
+
     const { data, error } = await supabase
       .from('profiles')
       .select(PROFILE_FIELDS)
       .eq('user_id', user.id)
       .single();
-    
+
     if (error) {
       logger.error('Error fetching profile', { error, userId: user.id });
       return;
     }
-    
+
     setProfileData(data);
   };
 
@@ -162,7 +173,10 @@ export const ProfileDebug = () => {
             <div className="space-y-3">
               <h3 className="font-semibold">Résultats des tests :</h3>
               {testResults.map((result, index) => (
-                <div key={index} className="flex items-center gap-3 p-3 bg-muted/50 rounded-md border border-border">
+                <div
+                  key={index}
+                  className="flex items-center gap-3 p-3 bg-muted/50 rounded-md border border-border"
+                >
                   {result.status === 'success' ? (
                     <CheckCircle2 className="h-5 w-5 text-green-500" />
                   ) : (
@@ -212,9 +226,3 @@ export const ProfileDebug = () => {
     </div>
   );
 };
-
-
-
-
-
-

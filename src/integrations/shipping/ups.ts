@@ -294,7 +294,7 @@ class UPSService {
       const data = await response.json();
 
       // Parser la réponse UPS
-      const  rates: UPSRate[] = [];
+      const rates: UPSRate[] = [];
       const ratedShipment = data.RateResponse?.RatedShipment;
 
       interface UPSShipment {
@@ -560,7 +560,7 @@ class UPSService {
         Location?: { Address?: { City?: string } };
         Date?: string;
       }
-      const  events: TrackingEvent[] = [];
+      const events: TrackingEvent[] = [];
       if (Array.isArray(trackingDetails)) {
         trackingDetails.forEach((activity: UPSActivity) => {
           events.push({
@@ -581,9 +581,3 @@ class UPSService {
 }
 
 export default UPSService;
-
-
-
-
-
-

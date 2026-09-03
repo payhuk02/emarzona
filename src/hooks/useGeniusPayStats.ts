@@ -46,7 +46,12 @@ export function usePaymentStats(options: UseGeniusPayStatsOptions = {}) {
   const { startDate, endDate, storeId, enabled = true } = options;
 
   return useQuery<PaymentStats>({
-    queryKey: ['geniuspay-payment-stats', startDate?.toISOString(), endDate?.toISOString(), storeId],
+    queryKey: [
+      'geniuspay-payment-stats',
+      startDate?.toISOString(),
+      endDate?.toISOString(),
+      storeId,
+    ],
     queryFn: () => getPaymentStats(startDate, endDate, storeId),
     enabled,
     staleTime: 5 * 60 * 1000,
@@ -61,7 +66,12 @@ export function useRevenueStats(options: UseGeniusPayStatsOptions = {}) {
   const { startDate, endDate, storeId, enabled = true } = options;
 
   return useQuery<RevenueStats>({
-    queryKey: ['geniuspay-revenue-stats', startDate?.toISOString(), endDate?.toISOString(), storeId],
+    queryKey: [
+      'geniuspay-revenue-stats',
+      startDate?.toISOString(),
+      endDate?.toISOString(),
+      storeId,
+    ],
     queryFn: () => getRevenueStats(startDate, endDate, storeId),
     enabled,
     staleTime: 5 * 60 * 1000,
@@ -106,23 +116,15 @@ export function useStatsByDate(options: UseGeniusPayStatsOptions = {}) {
   const { startDate, endDate, storeId, enabled = true } = options;
 
   return useQuery<Array<{ date: string; count: number; amount: number }>>({
-    queryKey: ['geniuspay-stats-by-date', startDate?.toISOString(), endDate?.toISOString(), storeId],
+    queryKey: [
+      'geniuspay-stats-by-date',
+      startDate?.toISOString(),
+      endDate?.toISOString(),
+      storeId,
+    ],
     queryFn: () => getStatsByDate(startDate, endDate, storeId),
     enabled,
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
   });
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

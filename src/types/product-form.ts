@@ -1,7 +1,7 @@
 /**
  * Types stricts pour ProductForm
  * Date: 31 Janvier 2025
- * 
+ *
  * Remplace les types `any` dans ProductForm.tsx
  */
 
@@ -70,31 +70,31 @@ export interface ProductFormData {
   price: number;
   promotional_price: number | null;
   currency: string;
-  
+
   // Description et contenu
   description: string;
   short_description: string;
   features: string[];
   specifications: ProductSpecification[];
-  
+
   // Images et médias
   image_url: string;
   images: string[];
   video_url: string;
   gallery_images: string[];
-  
+
   // Fichiers et téléchargements
   downloadable_files: DownloadableFile[];
   file_access_type: string;
   download_limit: number | null;
   download_expiry_days: number | null;
-  
+
   // Champs personnalisés
   custom_fields: CustomField[];
-  
+
   // FAQ
   faqs: ProductFAQ[];
-  
+
   // SEO et métadonnées
   meta_title: string;
   meta_description: string;
@@ -102,7 +102,7 @@ export interface ProductFormData {
   og_image: string;
   og_title: string;
   og_description: string;
-  
+
   // Analytics et tracking
   analytics_enabled: boolean;
   track_views: boolean;
@@ -116,12 +116,12 @@ export interface ProductFormData {
   pinterest_pixel_id: string;
   advanced_tracking: boolean;
   custom_events: string[];
-  
+
   // Pixels et tracking
   pixels_enabled: boolean;
   conversion_pixels: ConversionPixel[];
   retargeting_pixels: RetargetingPixel[];
-  
+
   // Variantes et attributs
   variants: ProductVariant[];
   color_variants: boolean;
@@ -137,14 +137,14 @@ export interface ProductFormData {
   different_prices_per_variant: boolean;
   price_surcharge: boolean;
   quantity_discounts: boolean;
-  
+
   // Promotions
   promotions_enabled: boolean;
   discount_percentage: boolean;
   discount_fixed: boolean;
   buy_one_get_one: boolean;
   family_pack: boolean;
-  
+
   // Dates et métadonnées
   created_at?: string;
   updated_at?: string;
@@ -157,10 +157,3 @@ export interface ProductFormData {
 export type ProductFormDataUpdate = Partial<ProductFormData> & {
   [key: string]: unknown; // Pour permettre les mises à jour dynamiques
 };
-
-
-
-
-
-
-

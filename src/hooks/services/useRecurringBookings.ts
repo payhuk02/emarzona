@@ -1,7 +1,7 @@
 /**
  * useRecurringBookings Hook
  * Date: 27 Janvier 2025
- * 
+ *
  * Gestion des réservations récurrentes avec Supabase et React Query
  */
 
@@ -10,7 +10,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 
-const SERIES_BOOKING_FIELDS = 'id, parent_booking_id, product_id, user_id, staff_member_id, scheduled_date, scheduled_start_time, scheduled_end_time, participants_count, amount_paid, status, customer_notes, meeting_url, is_recurring, recurrence_pattern, recurrence_interval, recurrence_end_date, recurrence_count, recurrence_days_of_week, recurrence_day_of_month, recurrence_exceptions, created_at, updated_at';
+const SERIES_BOOKING_FIELDS =
+  'id, parent_booking_id, product_id, user_id, staff_member_id, scheduled_date, scheduled_start_time, scheduled_end_time, participants_count, amount_paid, status, customer_notes, meeting_url, is_recurring, recurrence_pattern, recurrence_interval, recurrence_end_date, recurrence_count, recurrence_days_of_week, recurrence_day_of_month, recurrence_exceptions, created_at, updated_at';
 
 // =====================================================
 // TYPES
@@ -61,7 +62,8 @@ export const useRecurringSeries = (storeId?: string) => {
 
       const { data, error } = await supabase
         .from('recurring_bookings_series')
-        .select(`
+        .select(
+          `
           *,
           parent_booking:service_bookings!parent_booking_id (
             id,
@@ -78,7 +80,8 @@ export const useRecurringSeries = (storeId?: string) => {
               image_url
             )
           )
-        `)
+        `
+        )
         .eq('store_id', storeId)
         .eq('is_active', true)
         .order('created_at', { ascending: false });
@@ -105,7 +108,8 @@ export const useRecurringSeriesById = (seriesId?: string) => {
 
       const { data, error } = await supabase
         .from('recurring_bookings_series')
-        .select(`
+        .select(
+          `
           *,
           parent_booking:service_bookings!parent_booking_id (*),
           service:service_products!service_product_id (
@@ -116,7 +120,8 @@ export const useRecurringSeriesById = (seriesId?: string) => {
               image_url
             )
           )
-        `)
+        `
+        )
         .eq('id', seriesId)
         .single();
 
@@ -330,7 +335,7 @@ export const useCancelRecurringSeries = () => {
       logger.error('Error in useCancelRecurringSeries', { error });
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible d\'annuler la série',
+        description: error.message || "Impossible d'annuler la série",
         variant: 'destructive',
       });
     },
@@ -383,10 +388,3 @@ export const useUpdateRecurringSeries = () => {
     },
   });
 };
-
-
-
-
-
-
-

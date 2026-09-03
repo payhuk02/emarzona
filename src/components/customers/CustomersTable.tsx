@@ -1,24 +1,49 @@
-import React, { useState, useCallback, useMemo } from "react";
-import { Card } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { MoreHorizontal, Edit, Trash2, Mail, Phone, MapPin, ShoppingBag, DollarSign, Calendar } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { Customer } from "@/hooks/useCustomers";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { useScrollAnimation } from "@/hooks/useScrollAnimation";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { MobileTableCard } from "@/components/ui/mobile-table-card";
+import React, { useState, useCallback, useMemo } from 'react';
+import { Card } from '@/components/ui/card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
+import {
+  MoreHorizontal,
+  Edit,
+  Trash2,
+  Mail,
+  Phone,
+  MapPin,
+  ShoppingBag,
+  DollarSign,
+  Calendar,
+} from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { Customer } from '@/hooks/useCustomers';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { MobileTableCard } from '@/components/ui/mobile-table-card';
 
 interface CustomersTableProps {
   customers: Customer[];
   onUpdate: () => void;
 }
-
 
 const CustomersTableComponent = ({ customers, onUpdate }: CustomersTableProps) => {
   const isMobile = useIsMobile();
@@ -32,26 +57,23 @@ const CustomersTableComponent = ({ customers, onUpdate }: CustomersTableProps) =
     setLoading(true);
 
     try {
-      const { error } = await supabase
-        .from('customers')
-        .delete()
-        .eq('id', deleteId);
+      const { error } = await supabase.from('customers').delete().eq('id', deleteId);
 
       if (error) throw error;
 
       toast({
-        title: "Succès",
-        description: "Client supprimé avec succès",
+        title: 'Succès',
+        description: 'Client supprimé avec succès',
       });
 
       onUpdate();
       setDeleteId(null);
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
-        title: "Erreur",
+        title: 'Erreur',
         description: errorMessage,
-        variant: "destructive",
+        variant: 'destructive',
       });
     } finally {
       setLoading(false);
@@ -62,7 +84,7 @@ const CustomersTableComponent = ({ customers, onUpdate }: CustomersTableProps) =
     <>
       {isMobile ? (
         <MobileTableCard
-          data={useMemo(() => customers.map((c) => ({ id: c.id, ...c })), [customers])}
+          data={useMemo(() => customers.map(c => ({ id: c.id, ...c })), [customers])}
           columns={[
             {
               key: 'name',
@@ -74,7 +96,7 @@ const CustomersTableComponent = ({ customers, onUpdate }: CustomersTableProps) =
               key: 'email',
               header: 'Contact',
               priority: 'high',
-              render: (row) => (
+              render: row => (
                 <div className="flex flex-col gap-1">
                   {row.email && (
                     <div className="flex items-center gap-1.5 text-muted-foreground">
@@ -95,17 +117,16 @@ const CustomersTableComponent = ({ customers, onUpdate }: CustomersTableProps) =
               key: 'location',
               header: 'Localisation',
               priority: 'medium',
-              render: (row) => (
+              render: row =>
                 row.city && row.country
                   ? `${row.city}, ${row.country}`
-                  : row.city || row.country || "—"
-              ),
+                  : row.city || row.country || '—',
             },
             {
               key: 'total_orders',
               header: 'Commandes',
               priority: 'high',
-              render: (row) => (
+              render: row => (
                 <div className="flex items-center gap-2">
                   <ShoppingBag className="h-4 w-4 text-blue-500 flex-shrink-0" />
                   <span>{row.total_orders || 0}</span>
@@ -116,10 +137,12 @@ const CustomersTableComponent = ({ customers, onUpdate }: CustomersTableProps) =
               key: 'total_spent',
               header: 'Total dépensé',
               priority: 'high',
-              render: (row) => (
+              render: row => (
                 <div className="flex items-center gap-2">
                   <DollarSign className="h-4 w-4 text-green-500 flex-shrink-0" />
-                  <span className="font-medium">{Number(row.total_spent).toLocaleString()} XOF</span>
+                  <span className="font-medium">
+                    {Number(row.total_spent).toLocaleString()} XOF
+                  </span>
                 </div>
               ),
               className: 'font-medium',
@@ -128,15 +151,15 @@ const CustomersTableComponent = ({ customers, onUpdate }: CustomersTableProps) =
               key: 'created_at',
               header: 'Inscrit le',
               priority: 'low',
-              render: (row) => (
+              render: row => (
                 <div className="flex items-center gap-2">
                   <Calendar className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
-                  <span>{format(new Date(row.created_at), "dd MMM yyyy", { locale: fr })}</span>
+                  <span>{format(new Date(row.created_at), 'dd MMM yyyy', { locale: fr })}</span>
                 </div>
               ),
             },
           ]}
-          actions={(row) => (
+          actions={row => (
             <Select>
               <SelectTrigger
                 className="min-h-[44px] min-w-[44px] touch-manipulation"
@@ -151,7 +174,11 @@ const CustomersTableComponent = ({ customers, onUpdate }: CustomersTableProps) =
                     Modifier
                   </div>
                 </SelectItem>
-                <SelectItem value="delete" onSelect={() => setDeleteId(row.id)} className="text-destructive">
+                <SelectItem
+                  value="delete"
+                  onSelect={() => setDeleteId(row.id)}
+                  className="text-destructive"
+                >
                   <div className="flex items-center">
                     <Trash2 className="h-4 w-4 mr-2" />
                     Supprimer
@@ -178,9 +205,11 @@ const CustomersTableComponent = ({ customers, onUpdate }: CustomersTableProps) =
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {customers.map((customer) => (
+                  {customers.map(customer => (
                     <TableRow key={customer.id} className="hover:bg-muted/50 transition-colors">
-                      <TableCell className="font-medium text-xs sm:text-sm">{customer.name}</TableCell>
+                      <TableCell className="font-medium text-xs sm:text-sm">
+                        {customer.name}
+                      </TableCell>
                       <TableCell>
                         <div className="flex flex-col gap-1 text-xs sm:text-sm">
                           {customer.email && (
@@ -200,14 +229,16 @@ const CustomersTableComponent = ({ customers, onUpdate }: CustomersTableProps) =
                       <TableCell className="text-xs sm:text-sm">
                         {customer.city && customer.country
                           ? `${customer.city}, ${customer.country}`
-                          : customer.city || customer.country || "—"}
+                          : customer.city || customer.country || '—'}
                       </TableCell>
-                      <TableCell className="text-xs sm:text-sm">{customer.total_orders || 0}</TableCell>
+                      <TableCell className="text-xs sm:text-sm">
+                        {customer.total_orders || 0}
+                      </TableCell>
                       <TableCell className="text-xs sm:text-sm font-medium">
                         {Number(customer.total_spent).toLocaleString()} XOF
                       </TableCell>
                       <TableCell className="text-xs sm:text-sm">
-                        {format(new Date(customer.created_at), "dd MMM yyyy", { locale: fr })}
+                        {format(new Date(customer.created_at), 'dd MMM yyyy', { locale: fr })}
                       </TableCell>
                       <TableCell className="text-right">
                         <Select>
@@ -224,7 +255,11 @@ const CustomersTableComponent = ({ customers, onUpdate }: CustomersTableProps) =
                                 Modifier
                               </div>
                             </SelectItem>
-                            <SelectItem value="delete" onSelect={() => setDeleteId(customer.id)} className="text-destructive">
+                            <SelectItem
+                              value="delete"
+                              onSelect={() => setDeleteId(customer.id)}
+                              className="text-destructive"
+                            >
                               <div className="flex items-center">
                                 <Trash2 className="h-4 w-4 mr-2" />
                                 Supprimer
@@ -251,13 +286,15 @@ const CustomersTableComponent = ({ customers, onUpdate }: CustomersTableProps) =
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-col sm:flex-row gap-2">
-            <AlertDialogCancel disabled={loading} className="w-full sm:w-auto">Annuler</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleDelete} 
+            <AlertDialogCancel disabled={loading} className="w-full sm:w-auto">
+              Annuler
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
               disabled={loading}
               className="w-full sm:w-auto bg-destructive hover:bg-destructive/90"
             >
-              {loading ? "Suppression..." : "Supprimer"}
+              {loading ? 'Suppression...' : 'Supprimer'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -272,19 +309,14 @@ export const CustomersTable = React.memo(CustomersTableComponent, (prevProps, ne
     prevProps.customers.length === nextProps.customers.length &&
     prevProps.onUpdate === nextProps.onUpdate &&
     // Comparaison superficielle des customers (comparer les IDs)
-    prevProps.customers.every((customer, index) => 
-      customer.id === nextProps.customers[index]?.id &&
-      customer.name === nextProps.customers[index]?.name &&
-      customer.total_orders === nextProps.customers[index]?.total_orders &&
-      customer.total_spent === nextProps.customers[index]?.total_spent
+    prevProps.customers.every(
+      (customer, index) =>
+        customer.id === nextProps.customers[index]?.id &&
+        customer.name === nextProps.customers[index]?.name &&
+        customer.total_orders === nextProps.customers[index]?.total_orders &&
+        customer.total_spent === nextProps.customers[index]?.total_spent
     )
   );
 });
 
 CustomersTable.displayName = 'CustomersTable';
-
-
-
-
-
-

@@ -42,31 +42,21 @@ export const CertificateTemplate = ({
 
         {/* Titre */}
         <div className="space-y-2">
-          <h1 className="text-5xl font-bold text-gray-900 tracking-wide">
-            CERTIFICAT
-          </h1>
-          <p className="text-2xl text-orange-600 font-semibold">
-            de Réussite
-          </p>
+          <h1 className="text-5xl font-bold text-gray-900 tracking-wide">CERTIFICAT</h1>
+          <p className="text-2xl text-orange-600 font-semibold">de Réussite</p>
         </div>
 
         {/* Message principal */}
         <div className="space-y-6 max-w-3xl">
-          <p className="text-lg text-gray-700">
-            Ceci certifie que
-          </p>
-          
+          <p className="text-lg text-gray-700">Ceci certifie que</p>
+
           <p className="text-4xl font-bold text-gray-900 border-b-2 border-orange-600 pb-2 px-8">
             {studentName}
           </p>
 
-          <p className="text-lg text-gray-700">
-            a terminé avec succès le cours
-          </p>
+          <p className="text-lg text-gray-700">a terminé avec succès le cours</p>
 
-          <p className="text-3xl font-semibold text-orange-700">
-            {courseName}
-          </p>
+          <p className="text-3xl font-semibold text-orange-700">{courseName}</p>
         </div>
 
         {/* Informations supplémentaires */}
@@ -103,10 +93,3 @@ export const CertificateTemplate = ({
     </div>
   );
 };
-
-
-
-
-
-
-

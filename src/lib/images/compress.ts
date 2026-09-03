@@ -25,7 +25,7 @@ function loadImage(file: File | Blob): Promise<HTMLImageElement> {
       URL.revokeObjectURL(url);
       resolve(img);
     };
-    img.onerror = (e) => {
+    img.onerror = e => {
       URL.revokeObjectURL(url);
       reject(e);
     };
@@ -39,7 +39,7 @@ function loadImage(file: File | Blob): Promise<HTMLImageElement> {
  */
 export async function compressImage(
   file: File,
-  options: CompressOptions = {},
+  options: CompressOptions = {}
 ): Promise<{ blob: Blob; width: number; height: number; ratio: number }> {
   const opts = { ...DEFAULTS, ...options };
   const img = await loadImage(file);
@@ -58,8 +58,8 @@ export async function compressImage(
   ctx.imageSmoothingQuality = 'high';
   ctx.drawImage(img, 0, 0, width, height);
 
-  const blob = await new Promise<Blob | null>((resolve) =>
-    canvas.toBlob(resolve, opts.mimeType, opts.quality),
+  const blob = await new Promise<Blob | null>(resolve =>
+    canvas.toBlob(resolve, opts.mimeType, opts.quality)
   );
   if (!blob) throw new Error('Compression échouée');
 
@@ -79,10 +79,10 @@ export function blobToFile(blob: Blob, originalName: string): File {
     blob.type === 'image/webp'
       ? '.webp'
       : blob.type === 'image/jpeg'
-      ? '.jpg'
-      : blob.type === 'image/png'
-      ? '.png'
-      : '';
+        ? '.jpg'
+        : blob.type === 'image/png'
+          ? '.png'
+          : '';
   const base = originalName.replace(/\.[^.]+$/, '');
   return new File([blob], `${base}${ext}`, { type: blob.type });
 }

@@ -28,15 +28,9 @@ export interface SitemapOptions {
  * Génère un sitemap XML pour une boutique
  */
 export function generateStoreSitemap(options: SitemapOptions): string {
-  const {
-    baseUrl,
-    storeSlug,
-    storeUrl,
-    products = [],
-    includePages = []
-  } = options;
+  const { baseUrl, storeSlug, storeUrl, products = [], includePages = [] } = options;
 
-  const  urls: SitemapUrl[] = [];
+  const urls: SitemapUrl[] = [];
   const storeBaseUrl = storeUrl || generateStoreUrl(storeSlug);
 
   // URL principale de la boutique
@@ -44,7 +38,7 @@ export function generateStoreSitemap(options: SitemapOptions): string {
     loc: storeBaseUrl,
     changefreq: 'daily',
     priority: 1.0,
-    lastmod: new Date().toISOString().split('T')[0]
+    lastmod: new Date().toISOString().split('T')[0],
   });
 
   // Pages de produits
@@ -53,9 +47,9 @@ export function generateStoreSitemap(options: SitemapOptions): string {
       loc: `${storeBaseUrl}/products/${product.slug}`,
       changefreq: 'weekly',
       priority: 0.8,
-      lastmod: product.updated_at 
+      lastmod: product.updated_at
         ? new Date(product.updated_at).toISOString().split('T')[0]
-        : undefined
+        : undefined,
     });
   });
 
@@ -64,19 +58,35 @@ export function generateStoreSitemap(options: SitemapOptions): string {
     urls.push({
       loc: `${storeBaseUrl}${page.startsWith('/') ? '' : '/'}${page}`,
       changefreq: 'monthly',
-      priority: 0.5
+      priority: 0.5,
     });
   });
 
   // Générer le XML
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urls.map(url => `  <url>
-    <loc>${escapeXml(url.loc)}</loc>${url.lastmod ? `
-    <lastmod>${url.lastmod}</lastmod>` : ''}${url.changefreq ? `
-    <changefreq>${url.changefreq}</changefreq>` : ''}${url.priority !== undefined ? `
-    <priority>${url.priority.toFixed(1)}</priority>` : ''}
-  </url>`).join('\n')}
+${urls
+  .map(
+    url => `  <url>
+    <loc>${escapeXml(url.loc)}</loc>${
+      url.lastmod
+        ? `
+    <lastmod>${url.lastmod}</lastmod>`
+        : ''
+    }${
+      url.changefreq
+        ? `
+    <changefreq>${url.changefreq}</changefreq>`
+        : ''
+    }${
+      url.priority !== undefined
+        ? `
+    <priority>${url.priority.toFixed(1)}</priority>`
+        : ''
+    }
+  </url>`
+  )
+  .join('\n')}
 </urlset>`;
 
   return xml;
@@ -86,14 +96,20 @@ ${urls.map(url => `  <url>
  * Échappe les caractères XML spéciaux
  */
 function escapeXml(unsafe: string): string {
-  return unsafe.replace(/[<>&'"]/g, (c) => {
+  return unsafe.replace(/[<>&'"]/g, c => {
     switch (c) {
-      case '<': return '&lt;';
-      case '>': return '&gt;';
-      case '&': return '&amp;';
-      case '\'': return '&apos;';
-      case '"': return '&quot;';
-      default: return c;
+      case '<':
+        return '&lt;';
+      case '>':
+        return '&gt;';
+      case '&':
+        return '&amp;';
+      case "'":
+        return '&apos;';
+      case '"':
+        return '&quot;';
+      default:
+        return c;
     }
   });
 }
@@ -129,18 +145,19 @@ export function generateSitemapIndex(
 ): string {
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${sitemaps.map(sitemap => `  <sitemap>
-    <loc>${escapeXml(sitemap.loc)}</loc>${sitemap.lastmod ? `
-    <lastmod>${sitemap.lastmod}</lastmod>` : ''}
-  </sitemap>`).join('\n')}
+${sitemaps
+  .map(
+    sitemap => `  <sitemap>
+    <loc>${escapeXml(sitemap.loc)}</loc>${
+      sitemap.lastmod
+        ? `
+    <lastmod>${sitemap.lastmod}</lastmod>`
+        : ''
+    }
+  </sitemap>`
+  )
+  .join('\n')}
 </sitemapindex>`;
 
   return xml;
 }
-
-
-
-
-
-
-

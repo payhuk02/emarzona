@@ -10,13 +10,15 @@ interface ResponsiveTestProps {
 }
 
 export const ResponsiveDesignTest = ({ className }: ResponsiveTestProps) => {
-  const [currentViewport, setCurrentViewport] = useState<'mobile' | 'tablet' | 'desktop'>('desktop');
+  const [currentViewport, setCurrentViewport] = useState<'mobile' | 'tablet' | 'desktop'>(
+    'desktop'
+  );
   const [screenWidth, setScreenWidth] = useState(0);
 
   useEffect(() => {
     const updateScreenWidth = () => {
       setScreenWidth(window.innerWidth);
-      
+
       if (window.innerWidth < 640) {
         setCurrentViewport('mobile');
       } else if (window.innerWidth < 1024) {
@@ -28,7 +30,7 @@ export const ResponsiveDesignTest = ({ className }: ResponsiveTestProps) => {
 
     updateScreenWidth();
     window.addEventListener('resize', updateScreenWidth);
-    
+
     return () => window.removeEventListener('resize', updateScreenWidth);
   }, []);
 
@@ -37,47 +39,51 @@ export const ResponsiveDesignTest = ({ className }: ResponsiveTestProps) => {
     {
       id: '1',
       name: 'Formation Complète en Marketing Digital',
-      image_url: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1920&h=1080&fit=crop&crop=center',
+      image_url:
+        'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1920&h=1080&fit=crop&crop=center',
       price: 25000,
       promo_price: 15000,
       category: 'Formation',
       rating: 4.8,
       reviews_count: 156,
-      purchases_count: 89
+      purchases_count: 89,
     },
     {
       id: '2',
       name: 'Template PowerPoint Professionnel',
-      image_url: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1920&h=1080&fit=crop&crop=center',
+      image_url:
+        'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1920&h=1080&fit=crop&crop=center',
       price: 15000,
       promo_price: null,
       category: 'Template',
       rating: 4.5,
       reviews_count: 78,
-      purchases_count: 45
+      purchases_count: 45,
     },
     {
       id: '3',
       name: 'E-book Guide Complet du E-commerce',
-      image_url: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=1920&h=1080&fit=crop&crop=center',
+      image_url:
+        'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=1920&h=1080&fit=crop&crop=center',
       price: 8000,
       promo_price: 5000,
       category: 'E-book',
       rating: 4.9,
       reviews_count: 203,
-      purchases_count: 127
+      purchases_count: 127,
     },
     {
       id: '4',
       name: 'Logiciel de Gestion de Projet',
-      image_url: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1920&h=1080&fit=crop&crop=center',
+      image_url:
+        'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1920&h=1080&fit=crop&crop=center',
       price: 45000,
       promo_price: null,
       category: 'Logiciel',
       rating: 4.7,
       reviews_count: 92,
-      purchases_count: 34
-    }
+      purchases_count: 34,
+    },
   ];
 
   const getViewportIcon = () => {
@@ -85,7 +91,7 @@ export const ResponsiveDesignTest = ({ className }: ResponsiveTestProps) => {
       case 'mobile':
         return <Smartphone className="h-4 w-4" />;
       case 'tablet':
-        return <Tablet  className ="h-4 w-4" />;
+        return <Tablet className="h-4 w-4" />;
       case 'desktop':
         return <Monitor className="h-4 w-4" />;
     }
@@ -126,7 +132,9 @@ export const ResponsiveDesignTest = ({ className }: ResponsiveTestProps) => {
               <Badge variant="outline" className="mb-2">
                 Largeur Écran
               </Badge>
-              <p className="text-sm font-medium">{screenWidth}px ({viewportInfo.width})</p>
+              <p className="text-sm font-medium">
+                {screenWidth}px ({viewportInfo.width})
+              </p>
             </div>
             <div className="text-center">
               <Badge variant="outline" className="mb-2">
@@ -148,7 +156,7 @@ export const ResponsiveDesignTest = ({ className }: ResponsiveTestProps) => {
         </CardHeader>
         <CardContent>
           <div className="products-grid-mobile sm:products-grid-tablet  _lg:products-grid-desktop gap-4">
-            {testProducts.map((product) => {
+            {testProducts.map(product => {
               const hasPromo = product.promo_price && product.promo_price < product.price;
               const discountPercent = hasPromo
                 ? Math.round(((product.price - product.promo_price!) / product.price) * 100)
@@ -189,11 +197,13 @@ export const ResponsiveDesignTest = ({ className }: ResponsiveTestProps) => {
 
                     <div className="flex items-center gap-1 text-sm text-muted-foreground">
                       <div className="flex items-center gap-0.5">
-                        {[1, 2, 3, 4, 5].map((star) => (
+                        {[1, 2, 3, 4, 5].map(star => (
                           <Star
                             key={star}
                             className={`h-4 w-4 ${
-                              star <= product.rating ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground"
+                              star <= product.rating
+                                ? 'fill-yellow-400 text-yellow-400'
+                                : 'text-muted-foreground'
                             }`}
                           />
                         ))}
@@ -236,9 +246,7 @@ export const ResponsiveDesignTest = ({ className }: ResponsiveTestProps) => {
       {/* Instructions de test */}
       <Card className="border-2 border-green-500 bg-green-50 dark:bg-green-950/20">
         <CardHeader>
-          <CardTitle className="text-green-700 dark:text-green-300">
-            Instructions de Test
-          </CardTitle>
+          <CardTitle className="text-green-700 dark:text-green-300">Instructions de Test</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -255,9 +263,15 @@ export const ResponsiveDesignTest = ({ className }: ResponsiveTestProps) => {
             <div>
               <h4 className="font-semibold mb-2">📱 Breakpoints :</h4>
               <ul className="text-sm space-y-1">
-                <li>• <strong>Mobile:</strong> &lt; 640px (1 colonne)</li>
-                <li>• <strong>Tablet:</strong> 640px - 1024px (2 colonnes)</li>
-                <li>• <strong>Desktop:</strong> &gt; 1024px (3-4 colonnes)</li>
+                <li>
+                  • <strong>Mobile:</strong> &lt; 640px (1 colonne)
+                </li>
+                <li>
+                  • <strong>Tablet:</strong> 640px - 1024px (2 colonnes)
+                </li>
+                <li>
+                  • <strong>Desktop:</strong> &gt; 1024px (3-4 colonnes)
+                </li>
               </ul>
             </div>
           </div>
@@ -266,9 +280,3 @@ export const ResponsiveDesignTest = ({ className }: ResponsiveTestProps) => {
     </div>
   );
 };
-
-
-
-
-
-

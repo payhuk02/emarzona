@@ -15,11 +15,25 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue
+  SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import {
   Plus,
   Edit,
@@ -34,7 +48,7 @@ import {
   MessageSquare,
   MoreVertical,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
@@ -43,17 +57,20 @@ import {
   NotificationTrigger,
   NotificationCondition,
   NotificationTemplate,
-  NotificationChannel
+  NotificationChannel,
 } from '@/lib/notifications/smart-notification-engine';
 import { useToast } from '@/hooks/use-toast';
 
-const NOTIFICATION_RULE_FIELDS = 'id, name, description, trigger, conditions, template, priority, channels, cooldown, enabled, created_at, updated_at';
+const NOTIFICATION_RULE_FIELDS =
+  'id, name, description, trigger, conditions, template, priority, channels, cooldown, enabled, created_at, updated_at';
 
 interface NotificationRulesManagerProps {
   className?: string;
 }
 
-export const NotificationRulesManager: React.FC<NotificationRulesManagerProps> = ({ className }) => {
+export const NotificationRulesManager: React.FC<NotificationRulesManagerProps> = ({
+  className,
+}) => {
   const [rules, setRules] = useState<NotificationRule[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedRule, setSelectedRule] = useState<NotificationRule | null>(null);
@@ -81,7 +98,7 @@ export const NotificationRulesManager: React.FC<NotificationRulesManagerProps> =
         trigger: JSON.parse(rule.trigger),
         conditions: JSON.parse(rule.conditions),
         template: JSON.parse(rule.template),
-        channels: JSON.parse(rule.channels)
+        channels: JSON.parse(rule.channels),
       })) as NotificationRule[];
 
       setRules(parsedRules);
@@ -90,7 +107,7 @@ export const NotificationRulesManager: React.FC<NotificationRulesManagerProps> =
       toast({
         title: 'Erreur',
         description: 'Impossible de charger les règles de notification',
-        variant: 'destructive'
+        variant: 'destructive',
       });
     } finally {
       setLoading(false);
@@ -104,24 +121,22 @@ export const NotificationRulesManager: React.FC<NotificationRulesManagerProps> =
         id: crypto.randomUUID(),
         enabled: true,
         created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       };
 
-      const { error } = await supabase
-        .from('notification_rules')
-        .insert({
-          ...newRule,
-          trigger: JSON.stringify(newRule.trigger),
-          conditions: JSON.stringify(newRule.conditions),
-          template: JSON.stringify(newRule.template),
-          channels: JSON.stringify(newRule.channels)
-        });
+      const { error } = await supabase.from('notification_rules').insert({
+        ...newRule,
+        trigger: JSON.stringify(newRule.trigger),
+        conditions: JSON.stringify(newRule.conditions),
+        template: JSON.stringify(newRule.template),
+        channels: JSON.stringify(newRule.channels),
+      });
 
       if (error) throw error;
 
       toast({
         title: 'Règle créée',
-        description: 'La règle de notification a été créée avec succès'
+        description: 'La règle de notification a été créée avec succès',
       });
 
       setIsCreateDialogOpen(false);
@@ -131,7 +146,7 @@ export const NotificationRulesManager: React.FC<NotificationRulesManagerProps> =
       toast({
         title: 'Erreur',
         description: 'Impossible de créer la règle de notification',
-        variant: 'destructive'
+        variant: 'destructive',
       });
     }
   };
@@ -146,7 +161,7 @@ export const NotificationRulesManager: React.FC<NotificationRulesManagerProps> =
           conditions: updates.conditions ? JSON.stringify(updates.conditions) : undefined,
           template: updates.template ? JSON.stringify(updates.template) : undefined,
           channels: updates.channels ? JSON.stringify(updates.channels) : undefined,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
         .eq('id', ruleId);
 
@@ -154,7 +169,7 @@ export const NotificationRulesManager: React.FC<NotificationRulesManagerProps> =
 
       toast({
         title: 'Règle mise à jour',
-        description: 'La règle de notification a été mise à jour avec succès'
+        description: 'La règle de notification a été mise à jour avec succès',
       });
 
       setIsEditDialogOpen(false);
@@ -165,23 +180,20 @@ export const NotificationRulesManager: React.FC<NotificationRulesManagerProps> =
       toast({
         title: 'Erreur',
         description: 'Impossible de mettre à jour la règle de notification',
-        variant: 'destructive'
+        variant: 'destructive',
       });
     }
   };
 
   const handleDeleteRule = async (ruleId: string) => {
     try {
-      const { error } = await supabase
-        .from('notification_rules')
-        .delete()
-        .eq('id', ruleId);
+      const { error } = await supabase.from('notification_rules').delete().eq('id', ruleId);
 
       if (error) throw error;
 
       toast({
         title: 'Règle supprimée',
-        description: 'La règle de notification a été supprimée avec succès'
+        description: 'La règle de notification a été supprimée avec succès',
       });
 
       loadRules();
@@ -190,7 +202,7 @@ export const NotificationRulesManager: React.FC<NotificationRulesManagerProps> =
       toast({
         title: 'Erreur',
         description: 'Impossible de supprimer la règle de notification',
-        variant: 'destructive'
+        variant: 'destructive',
       });
     }
   };
@@ -315,10 +327,7 @@ export const NotificationRulesManager: React.FC<NotificationRulesManagerProps> =
             <div className="text-center py-8">
               <Bell className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
               <p className="text-muted-foreground">Aucune règle de notification configurée</p>
-              <Button
-                className="mt-4"
-                onClick={() => setIsCreateDialogOpen(true)}
-              >
+              <Button className="mt-4" onClick={() => setIsCreateDialogOpen(true)}>
                 <Plus className="mr-2 h-4 w-4" />
                 Créer votre première règle
               </Button>
@@ -336,7 +345,7 @@ export const NotificationRulesManager: React.FC<NotificationRulesManagerProps> =
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {rules.map((rule) => (
+                {rules.map(rule => (
                   <TableRow key={rule.id}>
                     <TableCell>
                       <div>
@@ -362,7 +371,7 @@ export const NotificationRulesManager: React.FC<NotificationRulesManagerProps> =
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-1">
-                        {rule.channels.map((channel) => (
+                        {rule.channels.map(channel => (
                           <div key={channel} className="text-muted-foreground">
                             {getChannelIcon(channel)}
                           </div>
@@ -376,20 +385,18 @@ export const NotificationRulesManager: React.FC<NotificationRulesManagerProps> =
                         ) : (
                           <AlertCircle className="h-4 w-4 text-gray-400" />
                         )}
-                        <span className="text-sm">
-                          {rule.enabled ? 'Activé' : 'Désactivé'}
-                        </span>
+                        <span className="text-sm">{rule.enabled ? 'Activé' : 'Désactivé'}</span>
                       </div>
                     </TableCell>
                     <TableCell>
                       <Select>
                         <SelectTrigger>
-
-                            <MoreVertical className="h-4 w-4" />
-                          
-</SelectTrigger>
+                          <MoreVertical className="h-4 w-4" />
+                        </SelectTrigger>
                         <SelectContent mobileVariant="sheet" className="min-w-[200px]">
-                          <SelectItem value="view" onSelect
+                          <SelectItem
+                            value="view"
+                            onSelect
                             onClick={() => {
                               setSelectedRule(rule);
                               setIsEditDialogOpen(true);
@@ -398,7 +405,9 @@ export const NotificationRulesManager: React.FC<NotificationRulesManagerProps> =
                             <Edit className="mr-2 h-4 w-4" />
                             Modifier
                           </SelectItem>
-                          <SelectItem value="view" onSelect
+                          <SelectItem
+                            value="view"
+                            onSelect
                             onClick={() => toggleRuleStatus(rule.id, !rule.enabled)}
                           >
                             {rule.enabled ? (
@@ -413,13 +422,19 @@ export const NotificationRulesManager: React.FC<NotificationRulesManagerProps> =
                               </>
                             )}
                           </SelectItem>
-                          <SelectItem value="export" onSelect
-                            onClick={() => navigator.clipboard.writeText(JSON.stringify(rule, null, 2))}
+                          <SelectItem
+                            value="export"
+                            onSelect
+                            onClick={() =>
+                              navigator.clipboard.writeText(JSON.stringify(rule, null, 2))
+                            }
                           >
                             <Copy className="mr-2 h-4 w-4" />
                             Copier JSON
                           </SelectItem>
-                          <SelectItem value="delete" onSelect
+                          <SelectItem
+                            value="delete"
+                            onSelect
                             onClick={() => handleDeleteRule(rule.id)}
                             className="text-red-600"
                           >
@@ -449,7 +464,7 @@ export const NotificationRulesManager: React.FC<NotificationRulesManagerProps> =
           {selectedRule && (
             <RuleForm
               initialData={selectedRule}
-              onSubmit={(data) => handleUpdateRule(selectedRule.id, data)}
+              onSubmit={data => handleUpdateRule(selectedRule.id, data)}
             />
           )}
         </DialogContent>
@@ -473,13 +488,13 @@ const RuleForm: React.FC<RuleFormProps> = ({ initialData, onSubmit }) => {
     template: {
       title: '',
       message: '',
-      variables: {}
+      variables: {},
     },
     priority: 'medium',
     channels: ['in_app'],
     cooldown: 60,
     enabled: true,
-    ...initialData
+    ...initialData,
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -496,7 +511,7 @@ const RuleForm: React.FC<RuleFormProps> = ({ initialData, onSubmit }) => {
           <Input
             id="name"
             value={formData.name || ''}
-            onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+            onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))}
             placeholder="Ex: Notification d'achat réussi"
             required
           />
@@ -507,7 +522,7 @@ const RuleForm: React.FC<RuleFormProps> = ({ initialData, onSubmit }) => {
           <Textarea
             id="description"
             value={formData.description || ''}
-            onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+            onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))}
             placeholder="Décrivez le but de cette règle..."
           />
         </div>
@@ -518,10 +533,12 @@ const RuleForm: React.FC<RuleFormProps> = ({ initialData, onSubmit }) => {
         <Label>Type de déclencheur</Label>
         <Select
           value={formData.trigger?.type || 'event'}
-          onValueChange={(value: any) => setFormData(prev => ({
-            ...prev,
-            trigger: { ...prev.trigger, type: value }
-          }))}
+          onValueChange={(value: any) =>
+            setFormData(prev => ({
+              ...prev,
+              trigger: { ...prev.trigger, type: value },
+            }))
+          }
         >
           <SelectTrigger>
             <SelectValue />
@@ -543,10 +560,12 @@ const RuleForm: React.FC<RuleFormProps> = ({ initialData, onSubmit }) => {
           <Input
             id="title"
             value={formData.template?.title || ''}
-            onChange={(e) => setFormData(prev => ({
-              ...prev,
-              template: { ...prev.template!, title: e.target.value }
-            }))}
+            onChange={e =>
+              setFormData(prev => ({
+                ...prev,
+                template: { ...prev.template!, title: e.target.value },
+              }))
+            }
             placeholder="Titre de la notification"
             required
           />
@@ -557,10 +576,12 @@ const RuleForm: React.FC<RuleFormProps> = ({ initialData, onSubmit }) => {
           <Textarea
             id="message"
             value={formData.template?.message || ''}
-            onChange={(e) => setFormData(prev => ({
-              ...prev,
-              template: { ...prev.template!, message: e.target.value }
-            }))}
+            onChange={e =>
+              setFormData(prev => ({
+                ...prev,
+                template: { ...prev.template!, message: e.target.value },
+              }))
+            }
             placeholder="Contenu de la notification"
             required
           />
@@ -593,7 +614,7 @@ const RuleForm: React.FC<RuleFormProps> = ({ initialData, onSubmit }) => {
             id="cooldown"
             type="number"
             value={formData.cooldown || 60}
-            onChange={(e) => setFormData(prev => ({ ...prev, cooldown: parseInt(e.target.value) }))}
+            onChange={e => setFormData(prev => ({ ...prev, cooldown: parseInt(e.target.value) }))}
           />
         </div>
       </div>
@@ -602,7 +623,7 @@ const RuleForm: React.FC<RuleFormProps> = ({ initialData, onSubmit }) => {
       <div>
         <Label>Canaux de notification</Label>
         <div className="flex gap-2 mt-2">
-          {(['email', 'push', 'in_app', 'sms'] as NotificationChannel[]).map((channel) => (
+          {(['email', 'push', 'in_app', 'sms'] as NotificationChannel[]).map(channel => (
             <Button
               key={channel}
               type="button"
@@ -613,7 +634,7 @@ const RuleForm: React.FC<RuleFormProps> = ({ initialData, onSubmit }) => {
                   ...prev,
                   channels: prev.channels?.includes(channel)
                     ? prev.channels.filter(c => c !== channel)
-                    : [...(prev.channels || []), channel]
+                    : [...(prev.channels || []), channel],
                 }));
               }}
             >
@@ -626,9 +647,7 @@ const RuleForm: React.FC<RuleFormProps> = ({ initialData, onSubmit }) => {
 
       {/* Actions */}
       <div className="flex justify-end gap-2">
-        <Button type="submit">
-          {initialData ? 'Mettre à jour' : 'Créer'} la règle
-        </Button>
+        <Button type="submit">{initialData ? 'Mettre à jour' : 'Créer'} la règle</Button>
       </div>
     </form>
   );

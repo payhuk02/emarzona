@@ -1,7 +1,7 @@
 /**
  * Gamification Hooks for Courses
  * Date: 27 Janvier 2025
- * 
+ *
  * Hooks pour gérer la gamification : points, badges, achievements, leaderboard, streaks
  */
 
@@ -10,10 +10,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 
-const STUDENT_POINTS_FIELDS = 'id, enrollment_id, course_id, user_id, total_points, points_earned_today, current_streak_days, longest_streak_days, last_activity_date, total_lessons_completed, total_quizzes_passed, total_quizzes_perfect_score, total_discussions_participated, total_assignments_submitted, current_level, experience_points, created_at, updated_at';
-const COURSE_BADGE_FIELDS = 'id, course_id, name, description, icon_url, badge_type, points_required, criteria, display_order, is_visible, created_at, updated_at';
-const COURSE_ACHIEVEMENT_FIELDS = 'id, course_id, title, description, icon_url, achievement_type, criteria, reward_points, display_order, is_visible, created_at, updated_at';
-const POINTS_HISTORY_FIELDS = 'id, enrollment_id, user_id, points_earned, points_before, points_after, source_type, source_id, source_description, created_at';
+const STUDENT_POINTS_FIELDS =
+  'id, enrollment_id, course_id, user_id, total_points, points_earned_today, current_streak_days, longest_streak_days, last_activity_date, total_lessons_completed, total_quizzes_passed, total_quizzes_perfect_score, total_discussions_participated, total_assignments_submitted, current_level, experience_points, created_at, updated_at';
+const COURSE_BADGE_FIELDS =
+  'id, course_id, name, description, icon_url, badge_type, points_required, criteria, display_order, is_visible, created_at, updated_at';
+const COURSE_ACHIEVEMENT_FIELDS =
+  'id, course_id, title, description, icon_url, achievement_type, criteria, reward_points, display_order, is_visible, created_at, updated_at';
+const POINTS_HISTORY_FIELDS =
+  'id, enrollment_id, user_id, points_earned, points_before, points_after, source_type, source_id, source_description, created_at';
 
 // =====================================================
 // TYPES
@@ -99,7 +103,16 @@ export interface PointsHistory {
   points_earned: number;
   points_before: number;
   points_after: number;
-  source_type: 'lesson_completed' | 'quiz_passed' | 'quiz_perfect' | 'discussion' | 'assignment' | 'streak' | 'achievement' | 'badge' | 'manual';
+  source_type:
+    | 'lesson_completed'
+    | 'quiz_passed'
+    | 'quiz_perfect'
+    | 'discussion'
+    | 'assignment'
+    | 'streak'
+    | 'achievement'
+    | 'badge'
+    | 'manual';
   source_id?: string;
   source_description?: string;
   created_at: string;
@@ -156,10 +169,12 @@ export const useStudentBadges = (enrollmentId: string | undefined) => {
 
       const { data, error } = await supabase
         .from('course_student_badges')
-        .select(`
+        .select(
+          `
           *,
           badge:course_badges(*)
-        `)
+        `
+        )
         .eq('enrollment_id', enrollmentId)
         .order('earned_at', { ascending: false });
 
@@ -185,10 +200,12 @@ export const useStudentAchievements = (enrollmentId: string | undefined) => {
 
       const { data, error } = await supabase
         .from('course_student_achievements')
-        .select(`
+        .select(
+          `
           *,
           achievement:course_achievements(*)
-        `)
+        `
+        )
         .eq('enrollment_id', enrollmentId)
         .order('earned_at', { ascending: false });
 
@@ -295,7 +312,8 @@ export const useCourseLeaderboard = (courseId: string | undefined, limit: number
 
       const { data, error } = await supabase
         .from('course_student_points')
-        .select(`
+        .select(
+          `
           user_id,
           total_points,
           current_streak_days,
@@ -304,7 +322,8 @@ export const useCourseLeaderboard = (courseId: string | undefined, limit: number
             id,
             raw_user_meta_data
           )
-        `)
+        `
+        )
         .eq('course_id', courseId)
         .order('total_points', { ascending: false })
         .limit(limit);
@@ -321,7 +340,7 @@ export const useCourseLeaderboard = (courseId: string | undefined, limit: number
           avatar_url?: string;
         };
       };
-      const  leaderboard: LeaderboardEntry[] = (data || []).map((entry, index) => {
+      const leaderboard: LeaderboardEntry[] = (data || []).map((entry, index) => {
         const user = entry.user as UserWithMetadata | null;
         return {
           user_id: entry.user_id,
@@ -396,7 +415,8 @@ export const useAwardPoints = () => {
       });
     },
     onError: (error: unknown) => {
-      const errorMessage = error instanceof Error ? error.message : 'Impossible d\'attribuer les points';
+      const errorMessage =
+        error instanceof Error ? error.message : "Impossible d'attribuer les points";
       logger.error('Error in useAwardPoints', { error });
       toast({
         title: 'Erreur',
@@ -425,11 +445,14 @@ export const useMarkLessonCompleteWithPoints = () => {
       points?: number;
     }) => {
       // D'abord marquer la leçon comme complétée
-      const { data: lessonComplete, error: lessonError } = await supabase.rpc('mark_lesson_complete', {
-        p_enrollment_id: enrollmentId,
-        p_lesson_id: lessonId,
-        p_user_id: userId,
-      });
+      const { data: lessonComplete, error: lessonError } = await supabase.rpc(
+        'mark_lesson_complete',
+        {
+          p_enrollment_id: enrollmentId,
+          p_lesson_id: lessonId,
+          p_user_id: userId,
+        }
+      );
 
       if (lessonError) throw lessonError;
 
@@ -469,7 +492,9 @@ export const useCreateBadge = () => {
 
   return useMutation({
     mutationFn: async (badgeData: Partial<CourseBadge>) => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
       const { data, error } = await supabase
@@ -487,7 +512,7 @@ export const useCreateBadge = () => {
 
       return data as CourseBadge;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['course-badges', data.course_id] });
       toast({
         title: '✅ Badge créé',
@@ -515,7 +540,9 @@ export const useCreateAchievement = () => {
 
   return useMutation({
     mutationFn: async (achievementData: Partial<CourseAchievement>) => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
       const { data, error } = await supabase
@@ -533,15 +560,16 @@ export const useCreateAchievement = () => {
 
       return data as CourseAchievement;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['course-achievements', data.course_id] });
       toast({
         title: '✅ Achievement créé',
-        description: 'L\'achievement a été créé avec succès',
+        description: "L'achievement a été créé avec succès",
       });
     },
     onError: (error: unknown) => {
-      const errorMessage = error instanceof Error ? error.message : 'Impossible de créer l\'achievement';
+      const errorMessage =
+        error instanceof Error ? error.message : "Impossible de créer l'achievement";
       logger.error('Error in useCreateAchievement', { error });
       toast({
         title: '❌ Erreur',
@@ -551,10 +579,3 @@ export const useCreateAchievement = () => {
     },
   });
 };
-
-
-
-
-
-
-

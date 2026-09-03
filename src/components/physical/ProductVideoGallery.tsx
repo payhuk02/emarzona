@@ -1,7 +1,7 @@
 /**
  * Product Video Gallery Component
  * Date: 1 Février 2025
- * 
+ *
  * Composant pour afficher des vidéos produits intégrées
  */
 
@@ -99,7 +99,7 @@ export const ProductVideoGallery = ({
     <div className={cn('space-y-4', className)}>
       {/* Grille de vidéos */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {videos.map((video) => (
+        {videos.map(video => (
           <div
             key={video.id}
             className="relative aspect-video bg-muted rounded-lg overflow-hidden group cursor-pointer"
@@ -142,7 +142,7 @@ export const ProductVideoGallery = ({
       </div>
 
       {/* Dialog vidéo */}
-      <Dialog open={!!selectedVideo} onOpenChange={(open) => !open && setSelectedVideo(null)}>
+      <Dialog open={!!selectedVideo} onOpenChange={open => !open && setSelectedVideo(null)}>
         <DialogContent className="max-w-4xl p-0">
           {selectedVideo && (
             <div className="relative aspect-video bg-black">
@@ -163,7 +163,7 @@ export const ProductVideoGallery = ({
                     autoPlay={isPlaying}
                     muted={isMuted}
                   />
-                  
+
                   {/* Contrôles personnalisés (optionnel) */}
                   <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/70 rounded-lg px-4 py-2">
                     <Button
@@ -172,11 +172,7 @@ export const ProductVideoGallery = ({
                       onClick={handlePlayPause}
                       className="text-white hover:text-white hover:bg-white/20"
                     >
-                      {isPlaying ? (
-                        <Pause className="h-4 w-4" />
-                      ) : (
-                        <Play className="h-4 w-4" />
-                      )}
+                      {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
                     </Button>
 
                     <Button
@@ -185,11 +181,7 @@ export const ProductVideoGallery = ({
                       onClick={handleMute}
                       className="text-white hover:text-white hover:bg-white/20"
                     >
-                      {isMuted ? (
-                        <VolumeX className="h-4 w-4" />
-                      ) : (
-                        <Volume2 className="h-4 w-4" />
-                      )}
+                      {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
                     </Button>
 
                     <Button
@@ -210,10 +202,3 @@ export const ProductVideoGallery = ({
     </div>
   );
 };
-
-
-
-
-
-
-

@@ -1,6 +1,6 @@
 /**
  * Hook centralisé pour l'upload de fichiers vers Supabase Storage
- * 
+ *
  * La logique métier est dans src/services/fileUploadService.ts.
  * Ce hook gère uniquement l'état React et les toasts.
  */
@@ -9,10 +9,7 @@ import { useState, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 import { validateFile } from '@/utils/fileValidation';
-import {
-  uploadSingleFileToStorage,
-  uploadFileToStorage,
-} from '@/services/fileUploadService';
+import { uploadSingleFileToStorage, uploadFileToStorage } from '@/services/fileUploadService';
 
 // Re-export types and standalone function for backward compatibility
 export type { UploadConfig, UploadResult } from '@/services/fileUploadService';
@@ -97,19 +94,18 @@ export function useFileUpload() {
       const finalState: UploadState = {
         uploading: false,
         progress: 100,
-        error: failed.length > 0
-          ? `${failed.length} fichier(s) n'ont pas pu être uploadés`
-          : null,
+        error: failed.length > 0 ? `${failed.length} fichier(s) n'ont pas pu être uploadés` : null,
         uploaded: results,
         failed,
       };
       setState(finalState);
 
       if (failed.length > 0) {
-        const aggregatedError = Object.assign(
-          new Error(finalState.error!),
-          { failedFiles: failed, successCount: results.length, failedCount: failed.length }
-        );
+        const aggregatedError = Object.assign(new Error(finalState.error!), {
+          failedFiles: failed,
+          successCount: results.length,
+          failedCount: failed.length,
+        });
         throw aggregatedError;
       }
 

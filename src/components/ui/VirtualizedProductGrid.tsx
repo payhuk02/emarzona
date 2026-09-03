@@ -2,7 +2,7 @@
  * VirtualizedProductGrid - Grille de produits avec virtual scrolling
  * Optimisé pour grandes listes (20+ produits)
  * Utilise @tanstack/react-virtual pour améliorer les performances
- * 
+ *
  * Date: 30 Janvier 2025
  */
 
@@ -62,7 +62,7 @@ interface VirtualizedProductGridProps {
  * Composant de grille virtualisée pour produits
  * Active automatiquement le virtual scrolling pour les listes de 20+ éléments
  */
-export const VirtualizedProductGrid : React.FC<VirtualizedProductGridProps> = ({
+export const VirtualizedProductGrid: React.FC<VirtualizedProductGridProps> = ({
   count,
   renderItem,
   estimateSize,
@@ -89,13 +89,18 @@ export const VirtualizedProductGrid : React.FC<VirtualizedProductGridProps> = ({
     estimateSize: () => defaultEstimateSize,
     overscan: defaultOverscan,
     // Mesure dynamique pour s'adapter aux différentes tailles d'éléments
-    measureElement: (element) => element?.getBoundingClientRect().height ?? defaultEstimateSize,
+    measureElement: element => element?.getBoundingClientRect().height ?? defaultEstimateSize,
   });
 
   // État de chargement
   if (loading) {
     return (
-      <div className={cn('grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6', className)}>
+      <div
+        className={cn(
+          'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6',
+          className
+        )}
+      >
         {Array.from({ length: loadingCount }).map((_, i) => (
           <Skeleton key={i} className="h-[400px] sm:h-[450px] w-full rounded-lg" />
         ))}
@@ -115,11 +120,14 @@ export const VirtualizedProductGrid : React.FC<VirtualizedProductGridProps> = ({
   // Pour les petites listes, pas besoin de virtual scrolling
   if (count < threshold) {
     return (
-      <div className={cn('grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6', className)}>
+      <div
+        className={cn(
+          'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6',
+          className
+        )}
+      >
         {Array.from({ length: count }).map((_, index) => (
-          <React.Fragment key={index}>
-            {renderItem(index)}
-          </React.Fragment>
+          <React.Fragment key={index}>{renderItem(index)}</React.Fragment>
         ))}
       </div>
     );
@@ -161,7 +169,7 @@ export const VirtualizedProductGrid : React.FC<VirtualizedProductGridProps> = ({
             transform: `translateY(${virtualItems[0]?.start ?? 0}px)`,
           }}
         >
-          {virtualItems.map((virtualItem) => (
+          {virtualItems.map(virtualItem => (
             <div
               key={virtualItem.key}
               data-index={virtualItem.index}
@@ -180,11 +188,3 @@ export const VirtualizedProductGrid : React.FC<VirtualizedProductGridProps> = ({
 };
 
 VirtualizedProductGrid.displayName = 'VirtualizedProductGrid';
-
-
-
-
-
-
-
-

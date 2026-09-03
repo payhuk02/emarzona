@@ -5,9 +5,33 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import {
   Archive,
   Download,
@@ -18,7 +42,7 @@ import {
   AlertTriangle,
   CheckCircle,
   Clock,
-  FileText
+  FileText,
 } from 'lucide-react';
 import { backupService, type BackupMetadata } from '@/lib/storage/backup-service';
 import { useToast } from '@/hooks/use-toast';
@@ -46,7 +70,7 @@ export const BackupManager = ({ onBackupCreated, onBackupRestored }: BackupManag
   const [backupForm, setBackupForm] = useState({
     name: '',
     description: '',
-    collections: [] as string[]
+    collections: [] as string[],
   });
 
   // Chargement des sauvegardes
@@ -58,9 +82,9 @@ export const BackupManager = ({ onBackupCreated, onBackupRestored }: BackupManag
     } catch (error) {
       logger.error('Erreur chargement sauvegardes:', { error });
       toast({
-        title: "Erreur",
-        description: "Impossible de charger les sauvegardes",
-        variant: "destructive"
+        title: 'Erreur',
+        description: 'Impossible de charger les sauvegardes',
+        variant: 'destructive',
       });
     } finally {
       setLoading(false);
@@ -75,9 +99,9 @@ export const BackupManager = ({ onBackupCreated, onBackupRestored }: BackupManag
   const handleCreateBackup = async () => {
     if (!backupForm.name.trim()) {
       toast({
-        title: "Erreur",
-        description: "Le nom de la sauvegarde est requis",
-        variant: "destructive"
+        title: 'Erreur',
+        description: 'Le nom de la sauvegarde est requis',
+        variant: 'destructive',
       });
       return;
     }
@@ -91,7 +115,7 @@ export const BackupManager = ({ onBackupCreated, onBackupRestored }: BackupManag
       );
 
       toast({
-        title: "Sauvegarde créée",
+        title: 'Sauvegarde créée',
         description: `Sauvegarde "${backupForm.name}" créée avec succès`,
       });
 
@@ -102,12 +126,11 @@ export const BackupManager = ({ onBackupCreated, onBackupRestored }: BackupManag
       // Reload
       await loadBackups();
       onBackupCreated?.();
-
     } catch (error) {
       toast({
-        title: "Erreur",
+        title: 'Erreur',
         description: getErrorMessage(error),
-        variant: "destructive"
+        variant: 'destructive',
       });
     } finally {
       setCreating(false);
@@ -115,7 +138,10 @@ export const BackupManager = ({ onBackupCreated, onBackupRestored }: BackupManag
   };
 
   // Restaurer une sauvegarde
-  const handleRestoreBackup = async (backupId: string, options: { overwrite: boolean; collections?: string[] }) => {
+  const handleRestoreBackup = async (
+    backupId: string,
+    options: { overwrite: boolean; collections?: string[] }
+  ) => {
     try {
       setRestoring(backupId);
       await backupService.restoreBackup(backupId, {
@@ -126,19 +152,18 @@ export const BackupManager = ({ onBackupCreated, onBackupRestored }: BackupManag
       });
 
       toast({
-        title: "Restauration terminée",
-        description: "La sauvegarde a été restaurée avec succès",
+        title: 'Restauration terminée',
+        description: 'La sauvegarde a été restaurée avec succès',
       });
 
       setShowRestoreDialog(false);
       setSelectedBackup(null);
       onBackupRestored?.();
-
     } catch (error) {
       toast({
-        title: "Erreur de restauration",
+        title: 'Erreur de restauration',
         description: getErrorMessage(error),
-        variant: "destructive"
+        variant: 'destructive',
       });
     } finally {
       setRestoring(null);
@@ -151,17 +176,16 @@ export const BackupManager = ({ onBackupCreated, onBackupRestored }: BackupManag
       await backupService.deleteBackup(backupId);
 
       toast({
-        title: "Sauvegarde supprimée",
-        description: "La sauvegarde a été supprimée",
+        title: 'Sauvegarde supprimée',
+        description: 'La sauvegarde a été supprimée',
       });
 
       await loadBackups();
-
     } catch (error) {
       toast({
-        title: "Erreur",
+        title: 'Erreur',
         description: getErrorMessage(error),
-        variant: "destructive"
+        variant: 'destructive',
       });
     }
   };
@@ -171,14 +195,14 @@ export const BackupManager = ({ onBackupCreated, onBackupRestored }: BackupManag
     try {
       await backupService.exportBackupToFile(backupId);
       toast({
-        title: "Export réussi",
-        description: "La sauvegarde a été téléchargée",
+        title: 'Export réussi',
+        description: 'La sauvegarde a été téléchargée',
       });
     } catch (error) {
       toast({
         title: "Erreur d'export",
         description: getErrorMessage(error),
-        variant: "destructive"
+        variant: 'destructive',
       });
     }
   };
@@ -188,11 +212,12 @@ export const BackupManager = ({ onBackupCreated, onBackupRestored }: BackupManag
     const file = event.target.files?.[0];
     if (!file) return;
 
-    backupService.importBackupFromFile(file)
+    backupService
+      .importBackupFromFile(file)
       .then(() => {
         toast({
-          title: "Import réussi",
-          description: "La sauvegarde a été importée",
+          title: 'Import réussi',
+          description: 'La sauvegarde a été importée',
         });
         loadBackups();
       })
@@ -200,7 +225,7 @@ export const BackupManager = ({ onBackupCreated, onBackupRestored }: BackupManag
         toast({
           title: "Erreur d'import",
           description: getErrorMessage(error),
-          variant: "destructive"
+          variant: 'destructive',
         });
       });
   };
@@ -218,11 +243,26 @@ export const BackupManager = ({ onBackupCreated, onBackupRestored }: BackupManag
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'completed':
-        return <Badge className="bg-green-100 text-green-800"><CheckCircle className="w-3 h-3 mr-1" />Terminée</Badge>;
+        return (
+          <Badge className="bg-green-100 text-green-800">
+            <CheckCircle className="w-3 h-3 mr-1" />
+            Terminée
+          </Badge>
+        );
       case 'failed':
-        return <Badge variant="destructive"><AlertTriangle className="w-3 h-3 mr-1" />Échouée</Badge>;
+        return (
+          <Badge variant="destructive">
+            <AlertTriangle className="w-3 h-3 mr-1" />
+            Échouée
+          </Badge>
+        );
       case 'in_progress':
-        return <Badge className="bg-blue-100 text-blue-800"><Clock className="w-3 h-3 mr-1" />En cours</Badge>;
+        return (
+          <Badge className="bg-blue-100 text-blue-800">
+            <Clock className="w-3 h-3 mr-1" />
+            En cours
+          </Badge>
+        );
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -232,11 +272,23 @@ export const BackupManager = ({ onBackupCreated, onBackupRestored }: BackupManag
   const getTypeBadge = (type: string) => {
     switch (type) {
       case 'automatic':
-        return <Badge variant="outline" className="bg-blue-50">Automatique</Badge>;
+        return (
+          <Badge variant="outline" className="bg-blue-50">
+            Automatique
+          </Badge>
+        );
       case 'manual':
-        return <Badge variant="outline" className="bg-green-50">Manuelle</Badge>;
+        return (
+          <Badge variant="outline" className="bg-green-50">
+            Manuelle
+          </Badge>
+        );
       case 'emergency':
-        return <Badge variant="destructive" className="bg-red-50">Urgence</Badge>;
+        return (
+          <Badge variant="destructive" className="bg-red-50">
+            Urgence
+          </Badge>
+        );
       default:
         return <Badge variant="outline">{type}</Badge>;
     }
@@ -263,9 +315,7 @@ export const BackupManager = ({ onBackupCreated, onBackupRestored }: BackupManag
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Créer une Sauvegarde</DialogTitle>
-                <DialogDescription>
-                  Créez une sauvegarde manuelle de vos données
-                </DialogDescription>
+                <DialogDescription>Créez une sauvegarde manuelle de vos données</DialogDescription>
               </DialogHeader>
               <div className="space-y-4">
                 <div>
@@ -273,7 +323,7 @@ export const BackupManager = ({ onBackupCreated, onBackupRestored }: BackupManag
                   <Input
                     id="backup-name"
                     value={backupForm.name}
-                    onChange={(e) => setBackupForm(prev => ({ ...prev, name: e.target.value }))}
+                    onChange={e => setBackupForm(prev => ({ ...prev, name: e.target.value }))}
                     placeholder="Sauvegarde complète du système"
                   />
                 </div>
@@ -282,7 +332,9 @@ export const BackupManager = ({ onBackupCreated, onBackupRestored }: BackupManag
                   <Textarea
                     id="backup-description"
                     value={backupForm.description}
-                    onChange={(e) => setBackupForm(prev => ({ ...prev, description: e.target.value }))}
+                    onChange={e =>
+                      setBackupForm(prev => ({ ...prev, description: e.target.value }))
+                    }
                     placeholder="Description de la sauvegarde..."
                   />
                 </div>
@@ -293,10 +345,15 @@ export const BackupManager = ({ onBackupCreated, onBackupRestored }: BackupManag
                   </p>
                   <Input
                     value={backupForm.collections.join(', ')}
-                    onChange={(e) => setBackupForm(prev => ({
-                      ...prev,
-                      collections: e.target.value.split(',').map(s => s.trim()).filter(Boolean)
-                    }))}
+                    onChange={e =>
+                      setBackupForm(prev => ({
+                        ...prev,
+                        collections: e.target.value
+                          .split(',')
+                          .map(s => s.trim())
+                          .filter(Boolean),
+                      }))
+                    }
                     placeholder="products, users, orders"
                   />
                 </div>
@@ -306,7 +363,11 @@ export const BackupManager = ({ onBackupCreated, onBackupRestored }: BackupManag
                   Annuler
                 </Button>
                 <Button onClick={handleCreateBackup} disabled={creating}>
-                  {creating ? <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> : <Archive className="w-4 h-4 mr-2" />}
+                  {creating ? (
+                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Archive className="w-4 h-4 mr-2" />
+                  )}
                   Créer
                 </Button>
               </div>
@@ -392,9 +453,7 @@ export const BackupManager = ({ onBackupCreated, onBackupRestored }: BackupManag
       <Card>
         <CardHeader>
           <CardTitle>Sauvegardes Disponibles</CardTitle>
-          <CardDescription>
-            Liste de toutes les sauvegardes créées
-          </CardDescription>
+          <CardDescription>Liste de toutes les sauvegardes créées</CardDescription>
         </CardHeader>
         <CardContent>
           {loading ? (
@@ -418,7 +477,7 @@ export const BackupManager = ({ onBackupCreated, onBackupRestored }: BackupManag
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {backups.map((backup) => (
+                {backups.map(backup => (
                   <TableRow key={backup.id}>
                     <TableCell>
                       <div>
@@ -437,7 +496,7 @@ export const BackupManager = ({ onBackupCreated, onBackupRestored }: BackupManag
                         month: 'short',
                         day: 'numeric',
                         hour: '2-digit',
-                        minute: '2-digit'
+                        minute: '2-digit',
                       })}
                     </TableCell>
                     <TableCell>
@@ -451,10 +510,13 @@ export const BackupManager = ({ onBackupCreated, onBackupRestored }: BackupManag
                           <Download className="w-3 h-3" />
                         </Button>
 
-                        <Dialog open={showRestoreDialog && selectedBackup?.id === backup.id} onOpenChange={(open) => {
-                          setShowRestoreDialog(open);
-                          if (!open) setSelectedBackup(null);
-                        }}>
+                        <Dialog
+                          open={showRestoreDialog && selectedBackup?.id === backup.id}
+                          onOpenChange={open => {
+                            setShowRestoreDialog(open);
+                            if (!open) setSelectedBackup(null);
+                          }}
+                        >
                           <DialogTrigger asChild>
                             <Button
                               size="sm"
@@ -469,14 +531,18 @@ export const BackupManager = ({ onBackupCreated, onBackupRestored }: BackupManag
                             <DialogHeader>
                               <DialogTitle>Restaurer la Sauvegarde</DialogTitle>
                               <DialogDescription>
-                                Êtes-vous sûr de vouloir restaurer cette sauvegarde ? Cette action peut écraser des données existantes.
+                                Êtes-vous sûr de vouloir restaurer cette sauvegarde ? Cette action
+                                peut écraser des données existantes.
                               </DialogDescription>
                             </DialogHeader>
                             <div className="space-y-4">
                               <div>
                                 <p className="font-medium">{selectedBackup?.name}</p>
                                 <p className="text-sm text-muted-foreground">
-                                  Créée le {selectedBackup ? new Date(selectedBackup.createdAt).toLocaleString('fr-FR') : ''}
+                                  Créée le{' '}
+                                  {selectedBackup
+                                    ? new Date(selectedBackup.createdAt).toLocaleString('fr-FR')
+                                    : ''}
                                 </p>
                               </div>
                               <div className="flex items-center space-x-2">
@@ -518,7 +584,8 @@ export const BackupManager = ({ onBackupCreated, onBackupRestored }: BackupManag
                             <AlertDialogHeader>
                               <AlertDialogTitle>Supprimer la sauvegarde</AlertDialogTitle>
                               <AlertDialogDescription>
-                                Êtes-vous sûr de vouloir supprimer cette sauvegarde ? Cette action est irréversible.
+                                Êtes-vous sûr de vouloir supprimer cette sauvegarde ? Cette action
+                                est irréversible.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>

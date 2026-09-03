@@ -6,7 +6,7 @@ export interface Currency {
   flag: string;
 }
 
-export const CURRENCIES : Currency[] = [
+export const CURRENCIES: Currency[] = [
   // Devises africaines
   { code: 'XOF', name: 'Franc CFA (BCEAO)', symbol: 'FCFA', locale: 'fr-BF', flag: '🇧🇫' },
   { code: 'XAF', name: 'Franc CFA (BEAC)', symbol: 'FCFA', locale: 'fr-CM', flag: '🇨🇲' },
@@ -20,7 +20,7 @@ export const CURRENCIES : Currency[] = [
   { code: 'UGX', name: 'Shilling ougandais', symbol: 'USh', locale: 'en-UG', flag: '🇺🇬' },
   { code: 'TZS', name: 'Shilling tanzanien', symbol: 'TSh', locale: 'en-TZ', flag: '🇹🇿' },
   { code: 'RWF', name: 'Franc rwandais', symbol: 'FRw', locale: 'rw-RW', flag: '🇷🇼' },
-  
+
   // Devises internationales
   { code: 'EUR', name: 'Euro', symbol: '€', locale: 'fr-FR', flag: '🇪🇺' },
   { code: 'USD', name: 'Dollar américain', symbol: '$', locale: 'en-US', flag: '🇺🇸' },
@@ -37,7 +37,7 @@ export const getCurrencyByCode = (code: string): Currency | undefined => {
 
 export const formatCurrency = (amount: number, currencyCode: string = 'XOF'): string => {
   const currency = getCurrencyByCode(currencyCode);
-  
+
   if (!currency) {
     return `${amount.toLocaleString()} ${currencyCode}`;
   }
@@ -59,10 +59,3 @@ export const getCurrencySymbol = (currencyCode: string): string => {
   const currency = getCurrencyByCode(currencyCode);
   return currency?.symbol || currencyCode;
 };
-
-
-
-
-
-
-

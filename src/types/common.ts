@@ -1,7 +1,7 @@
 /**
  * Types communs pour remplacer les `any` fréquents
  * Date: Janvier 2025
- * 
+ *
  * Ce fichier contient des types génériques réutilisables pour éviter l'utilisation de `any`
  */
 
@@ -92,12 +92,12 @@ export type GenericEventHandler = (event: GenericEvent) => void;
 /**
  * Type pour les valeurs JSON sérialisables
  */
-export type JSONValue = 
-  | string 
-  | number 
-  | boolean 
-  | null 
-  | JSONValue[] 
+export type JSONValue =
+  | string
+  | number
+  | boolean
+  | null
+  | JSONValue[]
   | { [key: string]: JSONValue };
 
 /**
@@ -209,10 +209,3 @@ export interface HTTPResponse<T = unknown> {
   data: T;
   headers: HTTPHeaders;
 }
-
-
-
-
-
-
-

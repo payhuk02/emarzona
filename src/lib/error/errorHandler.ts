@@ -1,7 +1,7 @@
 /**
  * Error Handler
  * Date: 30 Janvier 2025
- * 
+ *
  * Gestion centralisée des erreurs
  */
 
@@ -87,9 +87,7 @@ export function createValidationError(
 /**
  * Create authentication error
  */
-export function createAuthenticationError(
-  message: string = 'Non authentifié'
-): AppError {
+export function createAuthenticationError(message: string = 'Non authentifié'): AppError {
   return createError(ErrorType.AUTHENTICATION, message, {
     statusCode: 401,
   });
@@ -98,9 +96,7 @@ export function createAuthenticationError(
 /**
  * Create authorization error
  */
-export function createAuthorizationError(
-  message: string = 'Accès non autorisé'
-): AppError {
+export function createAuthorizationError(message: string = 'Accès non autorisé'): AppError {
   return createError(ErrorType.AUTHORIZATION, message, {
     statusCode: 403,
   });
@@ -109,9 +105,7 @@ export function createAuthorizationError(
 /**
  * Create not found error
  */
-export function createNotFoundError(
-  message: string = 'Ressource non trouvée'
-): AppError {
+export function createNotFoundError(message: string = 'Ressource non trouvée'): AppError {
   return createError(ErrorType.NOT_FOUND, message, {
     statusCode: 404,
   });
@@ -138,7 +132,7 @@ export function createServerError(
  * Handle error and log it
  */
 export function handleError(error: unknown, context?: string): AppError {
-  let  appError: AppError;
+  let appError: AppError;
 
   if (isAppError(error)) {
     appError = error;
@@ -187,7 +181,7 @@ export function getUserFriendlyMessage(error: AppError): string {
     case ErrorType.NOT_FOUND:
       return 'La ressource demandée est introuvable.';
     case ErrorType.SERVER:
-      return "Une erreur serveur est survenue. Veuillez réessayer plus tard.";
+      return 'Une erreur serveur est survenue. Veuillez réessayer plus tard.';
     default:
       return error.message || 'Une erreur est survenue.';
   }
@@ -214,10 +208,3 @@ export function resetErrorBoundary(): ErrorBoundaryState {
     error: null,
   };
 }
-
-
-
-
-
-
-

@@ -1,7 +1,7 @@
 /**
  * Hook useThrottle - Throttle une valeur ou une fonction
  * Limite l'exécution d'une fonction à un certain intervalle
- * 
+ *
  * @example
  * ```tsx
  * const throttledValue = useThrottle(value, 1000);
@@ -18,12 +18,15 @@ export function useThrottle<T>(value: T, delay: number = 300): T {
   const lastRan = useRef<number>(Date.now());
 
   useEffect(() => {
-    const handler = setTimeout(() => {
-      if (Date.now() - lastRan.current >= delay) {
-        setThrottledValue(value);
-        lastRan.current = Date.now();
-      }
-    }, delay - (Date.now() - lastRan.current));
+    const handler = setTimeout(
+      () => {
+        if (Date.now() - lastRan.current >= delay) {
+          setThrottledValue(value);
+          lastRan.current = Date.now();
+        }
+      },
+      delay - (Date.now() - lastRan.current)
+    );
 
     return () => {
       clearTimeout(handler);
@@ -52,10 +55,13 @@ export function useThrottledCallback<T extends (...args: any[]) => any>(
         if (timeoutRef.current) {
           clearTimeout(timeoutRef.current);
         }
-        timeoutRef.current = setTimeout(() => {
-          callback(...args);
-          lastRan.current = Date.now();
-        }, delay - (Date.now() - lastRan.current));
+        timeoutRef.current = setTimeout(
+          () => {
+            callback(...args);
+            lastRan.current = Date.now();
+          },
+          delay - (Date.now() - lastRan.current)
+        );
       }
     },
     [callback, delay]
@@ -127,10 +133,3 @@ export function useThrottledCallbackAdvanced<T extends (...args: any[]) => any>(
 
   return throttledCallback;
 }
-
-
-
-
-
-
-

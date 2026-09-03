@@ -1,16 +1,22 @@
-import React, { useState, useCallback } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { BottomSheet, BottomSheetContent } from "@/components/ui/bottom-sheet";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { MobileFormField } from "@/components/ui/mobile-form-field";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { useSpaceInputFix } from "@/hooks/useSpaceInputFix";
-import { logger } from "@/lib/logger";
-import { useResponsiveModal } from "@/hooks/use-responsive-modal";
+import React, { useState, useCallback } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { BottomSheet, BottomSheetContent } from '@/components/ui/bottom-sheet';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { MobileFormField } from '@/components/ui/mobile-form-field';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { useSpaceInputFix } from '@/hooks/useSpaceInputFix';
+import { logger } from '@/lib/logger';
+import { useResponsiveModal } from '@/hooks/use-responsive-modal';
 
 interface CreateCustomerDialogProps {
   open: boolean;
@@ -19,82 +25,90 @@ interface CreateCustomerDialogProps {
   storeId: string;
 }
 
-const CreateCustomerDialogComponent = ({ open, onOpenChange, onSuccess, storeId }: CreateCustomerDialogProps) => {
+const CreateCustomerDialogComponent = ({
+  open,
+  onOpenChange,
+  onSuccess,
+  storeId,
+}: CreateCustomerDialogProps) => {
   const { toast } = useToast();
   const { handleKeyDown: handleSpaceKeyDown } = useSpaceInputFix();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    address: "",
-    city: "",
-    country: "",
-    notes: "",
+    name: '',
+    email: '',
+    phone: '',
+    address: '',
+    city: '',
+    country: '',
+    notes: '',
   });
 
   const resetForm = useCallback(() => {
     setFormData({
-      name: "",
-      email: "",
-      phone: "",
-      address: "",
-      city: "",
-      country: "",
-      notes: "",
+      name: '',
+      email: '',
+      phone: '',
+      address: '',
+      city: '',
+      country: '',
+      notes: '',
     });
   }, []);
 
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      setLoading(true);
 
-    try {
-      const { data: customer, error } = await supabase
-        .from('customers')
-        .insert({
-          store_id: storeId,
-          ...formData,
-        })
-        .select()
-        .single();
+      try {
+        const { data: customer, error } = await supabase
+          .from('customers')
+          .insert({
+            store_id: storeId,
+            ...formData,
+          })
+          .select()
+          .single();
 
-      if (error) throw error;
+        if (error) throw error;
 
-      // Déclencher webhook customer.created (asynchrone)
-      if (customer) {
-        import('@/lib/webhooks/webhook-system').then(({ triggerWebhook }) => {
-          triggerWebhook(storeId, 'customer.created', {
-            customer_id: customer.id,
-            name: customer.name,
-            email: customer.email,
-            phone: customer.phone,
-            created_at: customer.created_at,
-          }).catch((err) => {
-            logger.error('Error triggering webhook', { error: err });
+        // Déclencher webhook customer.created (asynchrone)
+        if (customer) {
+          import('@/lib/webhooks/webhook-system').then(({ triggerWebhook }) => {
+            triggerWebhook(storeId, 'customer.created', {
+              customer_id: customer.id,
+              name: customer.name,
+              email: customer.email,
+              phone: customer.phone,
+              created_at: customer.created_at,
+            }).catch(err => {
+              logger.error('Error triggering webhook', { error: err });
+            });
           });
+        }
+
+        toast({
+          title: 'Succès',
+          description: 'Client créé avec succès',
         });
+
+        onSuccess();
+        onOpenChange(false);
+        resetForm();
+      } catch (_error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        toast({
+          title: 'Erreur',
+          description: errorMessage,
+          variant: 'destructive',
+        });
+      } finally {
+        setLoading(false);
       }
-
-      toast({
-        title: "Succès",
-        description: "Client créé avec succès",
-      });
-
-      onSuccess();
-      onOpenChange(false);
-      resetForm();
-    } catch ( _error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      toast({
-        title: "Erreur",
-        description: errorMessage,
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [formData, storeId, onSuccess, onOpenChange, resetForm]); // Note: toast est stable
+    },
+    [formData, storeId, onSuccess, onOpenChange, resetForm]
+  ); // Note: toast est stable
 
   const { useBottomSheet } = useResponsiveModal();
 
@@ -105,7 +119,7 @@ const CreateCustomerDialogComponent = ({ open, onOpenChange, onSuccess, storeId 
         name="name"
         type="text"
         value={formData.name}
-        onChange={(value) => setFormData({ ...formData, name: value })}
+        onChange={value => setFormData({ ...formData, name: value })}
         required
         fieldProps={{
           onKeyDown: handleSpaceKeyDown,
@@ -118,7 +132,7 @@ const CreateCustomerDialogComponent = ({ open, onOpenChange, onSuccess, storeId 
           name="email"
           type="email"
           value={formData.email}
-          onChange={(value) => setFormData({ ...formData, email: value })}
+          onChange={value => setFormData({ ...formData, email: value })}
         />
 
         <MobileFormField
@@ -126,7 +140,7 @@ const CreateCustomerDialogComponent = ({ open, onOpenChange, onSuccess, storeId 
           name="phone"
           type="tel"
           value={formData.phone}
-          onChange={(value) => setFormData({ ...formData, phone: value })}
+          onChange={value => setFormData({ ...formData, phone: value })}
         />
       </div>
 
@@ -135,7 +149,7 @@ const CreateCustomerDialogComponent = ({ open, onOpenChange, onSuccess, storeId 
         name="address"
         type="text"
         value={formData.address}
-        onChange={(value) => setFormData({ ...formData, address: value })}
+        onChange={value => setFormData({ ...formData, address: value })}
         fieldProps={{
           onKeyDown: handleSpaceKeyDown,
         }}
@@ -147,7 +161,7 @@ const CreateCustomerDialogComponent = ({ open, onOpenChange, onSuccess, storeId 
           name="city"
           type="text"
           value={formData.city}
-          onChange={(value) => setFormData({ ...formData, city: value })}
+          onChange={value => setFormData({ ...formData, city: value })}
           fieldProps={{
             onKeyDown: handleSpaceKeyDown,
           }}
@@ -158,7 +172,7 @@ const CreateCustomerDialogComponent = ({ open, onOpenChange, onSuccess, storeId 
           name="country"
           type="text"
           value={formData.country}
-          onChange={(value) => setFormData({ ...formData, country: value })}
+          onChange={value => setFormData({ ...formData, country: value })}
           fieldProps={{
             onKeyDown: handleSpaceKeyDown,
           }}
@@ -170,10 +184,10 @@ const CreateCustomerDialogComponent = ({ open, onOpenChange, onSuccess, storeId 
         name="notes"
         type="textarea"
         value={formData.notes}
-        onChange={(value) => setFormData({ ...formData, notes: value })}
+        onChange={value => setFormData({ ...formData, notes: value })}
         fieldProps={{
           onKeyDown: handleSpaceKeyDown,
-          placeholder: "Notes sur le client...",
+          placeholder: 'Notes sur le client...',
         }}
       />
 
@@ -188,7 +202,7 @@ const CreateCustomerDialogComponent = ({ open, onOpenChange, onSuccess, storeId 
           Annuler
         </Button>
         <Button type="submit" disabled={loading} className="w-full sm:w-auto">
-          {loading ? "Création..." : "Créer le client"}
+          {loading ? 'Création...' : 'Créer le client'}
         </Button>
       </div>
     </form>
@@ -226,19 +240,16 @@ const CreateCustomerDialogComponent = ({ open, onOpenChange, onSuccess, storeId 
 CreateCustomerDialogComponent.displayName = 'CreateCustomerDialogComponent';
 
 // Optimisation avec React.memo pour éviter les re-renders inutiles
-export const CreateCustomerDialog = React.memo(CreateCustomerDialogComponent, (prevProps, nextProps) => {
-  return (
-    prevProps.open === nextProps.open &&
-    prevProps.onOpenChange === nextProps.onOpenChange &&
-    prevProps.onSuccess === nextProps.onSuccess &&
-    prevProps.storeId === nextProps.storeId
-  );
-});
+export const CreateCustomerDialog = React.memo(
+  CreateCustomerDialogComponent,
+  (prevProps, nextProps) => {
+    return (
+      prevProps.open === nextProps.open &&
+      prevProps.onOpenChange === nextProps.onOpenChange &&
+      prevProps.onSuccess === nextProps.onSuccess &&
+      prevProps.storeId === nextProps.storeId
+    );
+  }
+);
 
 CreateCustomerDialog.displayName = 'CreateCustomerDialog';
-
-
-
-
-
-

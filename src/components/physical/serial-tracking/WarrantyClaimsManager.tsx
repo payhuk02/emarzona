@@ -5,7 +5,14 @@
  */
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -29,14 +36,29 @@ export function WarrantyClaimsManager({ storeId }: WarrantyClaimsManagerProps) {
   const claimsRef = useScrollAnimation<HTMLDivElement>();
 
   const getStatusBadge = (status: string) => {
-    const  badges: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; className?: string }> = {
+    const badges: Record<
+      string,
+      {
+        label: string;
+        variant: 'default' | 'secondary' | 'destructive' | 'outline';
+        className?: string;
+      }
+    > = {
       pending: { label: 'En Attente', variant: 'secondary' },
       under_review: { label: 'En Examen', variant: 'default', className: 'bg-yellow-500' },
       approved: { label: 'Approuvée', variant: 'default', className: 'bg-green-500' },
       rejected: { label: 'Rejetée', variant: 'destructive' },
-      repair_in_progress: { label: 'Réparation en Cours', variant: 'default', className: 'bg-blue-500' },
+      repair_in_progress: {
+        label: 'Réparation en Cours',
+        variant: 'default',
+        className: 'bg-blue-500',
+      },
       repaired: { label: 'Réparée', variant: 'default', className: 'bg-green-500' },
-      replacement_sent: { label: 'Remplacement Envoyé', variant: 'default', className: 'bg-purple-500' },
+      replacement_sent: {
+        label: 'Remplacement Envoyé',
+        variant: 'default',
+        className: 'bg-purple-500',
+      },
       refunded: { label: 'Remboursée', variant: 'default', className: 'bg-indigo-500' },
       resolved: { label: 'Résolue', variant: 'default', className: 'bg-green-500' },
       cancelled: { label: 'Annulée', variant: 'secondary' },
@@ -54,8 +76,12 @@ export function WarrantyClaimsManager({ storeId }: WarrantyClaimsManagerProps) {
   const stats = useMemo(() => {
     if (!claims) return { total: 0, pending: 0, resolved: 0, totalCost: 0 };
     const total = claims.length;
-    const pending = claims.filter(c => ['pending', 'under_review', 'repair_in_progress'].includes(c.status)).length;
-    const resolved = claims.filter(c => ['resolved', 'repaired', 'replacement_sent', 'refunded'].includes(c.status)).length;
+    const pending = claims.filter(c =>
+      ['pending', 'under_review', 'repair_in_progress'].includes(c.status)
+    ).length;
+    const resolved = claims.filter(c =>
+      ['resolved', 'repaired', 'replacement_sent', 'refunded'].includes(c.status)
+    ).length;
     const totalCost = claims.reduce((sum, c) => sum + c.total_cost, 0);
     return { total, pending, resolved, totalCost };
   }, [claims]);
@@ -73,15 +99,38 @@ export function WarrantyClaimsManager({ storeId }: WarrantyClaimsManagerProps) {
     <div className="space-y-4 sm:space-y-6">
       {/* Stats Cards - Responsive */}
       {claims && claims.length > 0 && (
-        <div 
+        <div
           ref={statsRef}
           className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-4 animate-in fade-in slide-in-from-bottom-4 duration-700"
         >
           {[
-            { label: 'Total Réclamations', value: stats.total, icon: AlertTriangle, color: 'from-purple-600 to-pink-600' },
-            { label: 'En Attente', value: stats.pending, icon: Clock, color: 'from-yellow-600 to-orange-600' },
-            { label: 'Résolues', value: stats.resolved, icon: CheckCircle2, color: 'from-green-600 to-emerald-600' },
-            { label: 'Coût Total', value: new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF' }).format(stats.totalCost), icon: DollarSign, color: 'from-blue-600 to-cyan-600', isCurrency: true },
+            {
+              label: 'Total Réclamations',
+              value: stats.total,
+              icon: AlertTriangle,
+              color: 'from-purple-600 to-pink-600',
+            },
+            {
+              label: 'En Attente',
+              value: stats.pending,
+              icon: Clock,
+              color: 'from-yellow-600 to-orange-600',
+            },
+            {
+              label: 'Résolues',
+              value: stats.resolved,
+              icon: CheckCircle2,
+              color: 'from-green-600 to-emerald-600',
+            },
+            {
+              label: 'Coût Total',
+              value: new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF' }).format(
+                stats.totalCost
+              ),
+              icon: DollarSign,
+              color: 'from-blue-600 to-cyan-600',
+              isCurrency: true,
+            },
           ].map((stat, index) => {
             const Icon = stat.icon;
             return (
@@ -98,11 +147,15 @@ export function WarrantyClaimsManager({ storeId }: WarrantyClaimsManagerProps) {
                 </CardHeader>
                 <CardContent className="p-3 sm:p-4 pt-0">
                   {stat.isCurrency ? (
-                    <div className={`text-lg sm:text-xl lg:text-2xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
+                    <div
+                      className={`text-lg sm:text-xl lg:text-2xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}
+                    >
                       {stat.value}
                     </div>
                   ) : (
-                    <div className={`text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
+                    <div
+                      className={`text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}
+                    >
                       {stat.value}
                     </div>
                   )}
@@ -128,7 +181,9 @@ export function WarrantyClaimsManager({ storeId }: WarrantyClaimsManagerProps) {
           {!claims || claims.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-64 text-center py-8 sm:py-12">
               <AlertTriangle className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground mb-4 animate-in zoom-in-95 duration-500" />
-              <p className="text-sm sm:text-base text-muted-foreground">Aucune réclamation garantie</p>
+              <p className="text-sm sm:text-base text-muted-foreground">
+                Aucune réclamation garantie
+              </p>
             </div>
           ) : (
             <>
@@ -158,16 +213,20 @@ export function WarrantyClaimsManager({ storeId }: WarrantyClaimsManagerProps) {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {claims.map((claim) => (
+                    {claims.map(claim => (
                       <TableRow key={claim.id}>
-                        <TableCell className="font-medium font-mono">{claim.claim_number}</TableCell>
+                        <TableCell className="font-medium font-mono">
+                          {claim.claim_number}
+                        </TableCell>
                         <TableCell>
                           <span className="text-sm truncate block">
                             {format(new Date(claim.claim_date), 'dd MMM yyyy', { locale: fr })}
                           </span>
                         </TableCell>
                         <TableCell>
-                          <span className="text-sm truncate block max-w-xs">{claim.issue_description}</span>
+                          <span className="text-sm truncate block max-w-xs">
+                            {claim.issue_description}
+                          </span>
                         </TableCell>
                         <TableCell>{getStatusBadge(claim.status)}</TableCell>
                         <TableCell>
@@ -180,7 +239,12 @@ export function WarrantyClaimsManager({ storeId }: WarrantyClaimsManagerProps) {
                           </span>
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0" aria-label={`Voir les détails de la réclamation ${claim.id || ''}`}>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0"
+                            aria-label={`Voir les détails de la réclamation ${claim.id || ''}`}
+                          >
                             <Eye className="h-4 w-4" />
                           </Button>
                         </TableCell>
@@ -254,9 +318,3 @@ function ClaimCard({ claim, getStatusBadge, animationDelay = 0 }: ClaimCardProps
     </Card>
   );
 }
-
-
-
-
-
-

@@ -13,14 +13,16 @@ interface StoreFormModeToggleProps {
   className?: string;
 }
 
-export const StoreFormModeToggle = ({ 
-  advancedMode, 
-  onToggle, 
-  className = '' 
+export const StoreFormModeToggle = ({
+  advancedMode,
+  onToggle,
+  className = '',
 }: StoreFormModeToggleProps) => {
   return (
     <TooltipProvider>
-      <div className={`flex items-center justify-between gap-3 p-3 border rounded-lg bg-muted/30 ${className}`}>
+      <div
+        className={`flex items-center justify-between gap-3 p-3 border rounded-lg bg-muted/30 ${className}`}
+      >
         <div className="flex items-center gap-2">
           {advancedMode ? (
             <Settings className="h-4 w-4 text-primary" />
@@ -32,8 +34,8 @@ export const StoreFormModeToggle = ({
               {advancedMode ? 'Mode Avancé' : 'Mode Simplifié'}
             </Label>
             <p className="text-xs text-muted-foreground">
-              {advancedMode 
-                ? 'Accès à tous les paramètres de personnalisation' 
+              {advancedMode
+                ? 'Accès à tous les paramètres de personnalisation'
                 : 'Paramètres essentiels uniquement'}
             </p>
           </div>
@@ -51,9 +53,9 @@ export const StoreFormModeToggle = ({
           </TooltipTrigger>
           <TooltipContent>
             <p className="text-sm">
-              {advancedMode 
-                ? 'Basculer vers le mode simplifié' 
-                : 'Basculer vers le mode avancé pour plus d\'options'}
+              {advancedMode
+                ? 'Basculer vers le mode simplifié'
+                : "Basculer vers le mode avancé pour plus d'options"}
             </p>
           </TooltipContent>
         </Tooltip>
@@ -61,10 +63,3 @@ export const StoreFormModeToggle = ({
     </TooltipProvider>
   );
 };
-
-
-
-
-
-
-

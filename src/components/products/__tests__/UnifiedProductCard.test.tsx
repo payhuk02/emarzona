@@ -23,7 +23,9 @@ vi.mock('@/components/marketplace/MarketplaceProductCardActions', () => ({
   MarketplaceProductCardActions: ({ buyAriaLabel }: any) => (
     <div>
       <button aria-label="Acheter Test Product pour 5000">Acheter</button>
-      <button aria-label="Voir les détails de Test Product">Voir les détails de Test Product</button>
+      <button aria-label="Voir les détails de Test Product">
+        Voir les détails de Test Product
+      </button>
     </div>
   ),
   MarketplaceProductCardPriceRow: ({ children }: any) => <div>{children}</div>,

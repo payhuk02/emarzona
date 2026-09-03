@@ -92,37 +92,37 @@ export interface DigitalBundle {
 export interface DigitalBundleManagerProps {
   /** Bundle à éditer (optionnel, pour création vide) */
   bundle?: Partial<DigitalBundle>;
-  
+
   /** Liste des produits disponibles */
   availableProducts: BundleDigitalProduct[];
-  
+
   /** Callback lors de la sauvegarde */
   onSave?: (bundle: DigitalBundle) => void;
-  
+
   /** Callback lors de l'annulation */
   onCancel?: () => void;
-  
+
   /** Mode édition ou création */
   mode?: 'create' | 'edit';
-  
+
   /** Classe CSS personnalisée */
   className?: string;
 }
 
 /**
  * DigitalBundleManager - Gestionnaire de création/édition de bundles de produits digitaux
- * 
+ *
  * @example
  * ```tsx
  * import { logger } from '@/lib/logger';
- * 
- * <DigitalBundleManager 
+ *
+ * <DigitalBundleManager
  *   availableProducts={products}
  *   onSave={(bundle) => logger.info('Bundle saved', { bundleId: bundle.id })}
  *   mode="create"
  * />
- * 
- * <DigitalBundleManager 
+ *
+ * <DigitalBundleManager
  *   bundle={existingBundle}
  *   availableProducts={products}
  *   onSave={(bundle) => logger.info('Bundle updated', { bundleId: bundle.id })}
@@ -130,7 +130,7 @@ export interface DigitalBundleManagerProps {
  * />
  * ```
  */
-export const DigitalBundleManager : React.FC<DigitalBundleManagerProps> = ({
+export const DigitalBundleManager: React.FC<DigitalBundleManagerProps> = ({
   bundle,
   availableProducts,
   onSave,
@@ -157,7 +157,7 @@ export const DigitalBundleManager : React.FC<DigitalBundleManagerProps> = ({
 
   // Calculer les produits sélectionnés
   const selectedProducts = useMemo(() => {
-    return availableProducts.filter((p) => selectedProductIds.includes(p.id));
+    return availableProducts.filter(p => selectedProductIds.includes(p.id));
   }, [availableProducts, selectedProductIds]);
 
   // Calculer le prix total sans réduction
@@ -182,8 +182,8 @@ export const DigitalBundleManager : React.FC<DigitalBundleManagerProps> = ({
 
   // Toggle sélection de produit
   const toggleProduct = (productId: string) => {
-    setSelectedProductIds((prev) =>
-      prev.includes(productId) ? prev.filter((id) => id !== productId) : [...prev, productId]
+    setSelectedProductIds(prev =>
+      prev.includes(productId) ? prev.filter(id => id !== productId) : [...prev, productId]
     );
   };
 
@@ -197,12 +197,12 @@ export const DigitalBundleManager : React.FC<DigitalBundleManagerProps> = ({
 
   // Supprimer un tag
   const removeTag = (tag: string) => {
-    setTags(tags.filter((t) => t !== tag));
+    setTags(tags.filter(t => t !== tag));
   };
 
   // Valider le formulaire
   const validate = (): boolean => {
-    const  newErrors: Record<string, string> = {};
+    const newErrors: Record<string, string> = {};
 
     if (!name.trim()) {
       newErrors.name = 'Le nom du bundle est requis';
@@ -232,7 +232,7 @@ export const DigitalBundleManager : React.FC<DigitalBundleManagerProps> = ({
   const handleSave = () => {
     if (!validate()) return;
 
-    const  bundleData: DigitalBundle = {
+    const bundleData: DigitalBundle = {
       ...(bundle?.id && { id: bundle.id }),
       name,
       description,
@@ -260,7 +260,10 @@ export const DigitalBundleManager : React.FC<DigitalBundleManagerProps> = ({
             Regroupez plusieurs produits digitaux avec une réduction spéciale
           </p>
         </div>
-        <Badge variant={isActive ? 'default' : 'secondary'} className="self-start sm:self-auto shrink-0">
+        <Badge
+          variant={isActive ? 'default' : 'secondary'}
+          className="self-start sm:self-auto shrink-0"
+        >
           {isActive ? 'Actif' : 'Inactif'}
         </Badge>
       </div>
@@ -270,7 +273,9 @@ export const DigitalBundleManager : React.FC<DigitalBundleManagerProps> = ({
         <div className="lg:col-span-2 space-y-4 sm:space-y-6">
           {/* Informations de base */}
           <Card className="p-3 sm:p-4 lg:p-6">
-            <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Informations du bundle</h3>
+            <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">
+              Informations du bundle
+            </h3>
             <div className="space-y-3 sm:space-y-4">
               {/* Nom */}
               <div>
@@ -280,26 +285,23 @@ export const DigitalBundleManager : React.FC<DigitalBundleManagerProps> = ({
                 <Input
                   id="name"
                   value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  onChange={e => setName(e.target.value)}
                   onKeyDown={handleSpaceKeyDown}
                   placeholder="Ex: Pack Formation Complète React"
-                  className={cn(
-                    'h-9 sm:h-10 text-xs sm:text-sm',
-                    errors.name && 'border-red-500'
-                  )}
+                  className={cn('h-9 sm:h-10 text-xs sm:text-sm', errors.name && 'border-red-500')}
                 />
-                {errors.name && (
-                  <p className="text-xs text-red-500 mt-1">{errors.name}</p>
-                )}
+                {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name}</p>}
               </div>
 
               {/* Description */}
               <div>
-                <Label htmlFor="description" className="text-xs sm:text-sm">Description</Label>
+                <Label htmlFor="description" className="text-xs sm:text-sm">
+                  Description
+                </Label>
                 <Textarea
                   id="description"
                   value={description}
-                  onChange={(e) => setDescription(e.target.value)}
+                  onChange={e => setDescription(e.target.value)}
                   onKeyDown={handleSpaceKeyDown}
                   placeholder="Décrivez ce que contient ce bundle..."
                   rows={3}
@@ -309,25 +311,37 @@ export const DigitalBundleManager : React.FC<DigitalBundleManagerProps> = ({
 
               {/* Tags */}
               <div>
-                <Label htmlFor="tags" className="text-xs sm:text-sm">Tags</Label>
+                <Label htmlFor="tags" className="text-xs sm:text-sm">
+                  Tags
+                </Label>
                 <div className="flex gap-2 mb-2">
                   <Input
                     id="tags"
                     value={newTag}
-                    onChange={(e) => setNewTag(e.target.value)}
+                    onChange={e => setNewTag(e.target.value)}
                     onKeyDown={handleSpaceKeyDown}
                     placeholder="Ajouter un tag"
-                    onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
+                    onKeyPress={e => e.key === 'Enter' && (e.preventDefault(), addTag())}
                     className="h-9 sm:h-10 text-xs sm:text-sm"
                   />
-                  <Button type="button" variant="outline" onClick={addTag} size="sm" className="h-9 sm:h-10 px-2 sm:px-3 shrink-0">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={addTag}
+                    size="sm"
+                    className="h-9 sm:h-10 px-2 sm:px-3 shrink-0"
+                  >
                     <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   </Button>
                 </div>
                 {tags.length > 0 && (
                   <div className="flex flex-wrap gap-1.5 sm:gap-2">
-                    {tags.map((tag) => (
-                      <Badge key={tag} variant="secondary" className="gap-1 text-xs px-1.5 sm:px-2 py-0.5 sm:py-1">
+                    {tags.map(tag => (
+                      <Badge
+                        key={tag}
+                        variant="secondary"
+                        className="gap-1 text-xs px-1.5 sm:px-2 py-0.5 sm:py-1"
+                      >
                         <Tag className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                         <span className="truncate max-w-[100px] sm:max-w-none">{tag}</span>
                         <button
@@ -349,11 +363,14 @@ export const DigitalBundleManager : React.FC<DigitalBundleManagerProps> = ({
                 <Checkbox
                   id="is-active"
                   checked={isActive}
-                  onCheckedChange={(checked) => setIsActive(checked as boolean)}
+                  onCheckedChange={checked => setIsActive(checked as boolean)}
                   className="mt-0.5 sm:mt-0 shrink-0"
                 />
                 <div className="flex-1 min-w-0">
-                  <Label htmlFor="is-active" className="cursor-pointer font-medium text-xs sm:text-sm">
+                  <Label
+                    htmlFor="is-active"
+                    className="cursor-pointer font-medium text-xs sm:text-sm"
+                  >
                     Bundle actif
                   </Label>
                   <p className="text-xs text-muted-foreground mt-0.5">
@@ -369,12 +386,14 @@ export const DigitalBundleManager : React.FC<DigitalBundleManagerProps> = ({
 
               {/* Limite d'utilisations */}
               <div>
-                <Label htmlFor="max-uses" className="text-xs sm:text-sm">Limite d'utilisations (optionnel)</Label>
+                <Label htmlFor="max-uses" className="text-xs sm:text-sm">
+                  Limite d'utilisations (optionnel)
+                </Label>
                 <Input
                   id="max-uses"
                   type="number"
                   value={maxUses}
-                  onChange={(e) => setMaxUses(e.target.value)}
+                  onChange={e => setMaxUses(e.target.value)}
                   placeholder="Illimité"
                   min="0"
                   className="h-9 sm:h-10 text-xs sm:text-sm"
@@ -414,7 +433,7 @@ export const DigitalBundleManager : React.FC<DigitalBundleManagerProps> = ({
                     <p className="text-xs sm:text-sm">Aucun produit disponible</p>
                   </div>
                 ) : (
-                  availableProducts.map((product) => (
+                  availableProducts.map(product => (
                     <div
                       key={product.id}
                       className={cn(
@@ -454,7 +473,10 @@ export const DigitalBundleManager : React.FC<DigitalBundleManagerProps> = ({
                           {product.price} {product.currency || 'EUR'}
                         </p>
                         {!product.isAvailable && (
-                          <Badge variant="destructive" className="text-[10px] sm:text-xs mt-0.5 sm:mt-1">
+                          <Badge
+                            variant="destructive"
+                            className="text-[10px] sm:text-xs mt-0.5 sm:mt-1"
+                          >
                             Indisponible
                           </Badge>
                         )}
@@ -476,18 +498,26 @@ export const DigitalBundleManager : React.FC<DigitalBundleManagerProps> = ({
             <div className="space-y-3 sm:space-y-4">
               {/* Type de réduction */}
               <div>
-                <Label htmlFor="discount-type" className="text-xs sm:text-sm">Type de réduction</Label>
+                <Label htmlFor="discount-type" className="text-xs sm:text-sm">
+                  Type de réduction
+                </Label>
                 <Select
                   value={discountType}
-                  onValueChange={(value) => setDiscountType(value as BundleDiscountType)}
+                  onValueChange={value => setDiscountType(value as BundleDiscountType)}
                 >
                   <SelectTrigger id="discount-type" className="h-9 sm:h-10 text-xs sm:text-sm">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none" className="text-xs sm:text-sm">Aucune réduction</SelectItem>
-                    <SelectItem value="percentage" className="text-xs sm:text-sm">Pourcentage</SelectItem>
-                    <SelectItem value="fixed" className="text-xs sm:text-sm">Montant fixe</SelectItem>
+                    <SelectItem value="none" className="text-xs sm:text-sm">
+                      Aucune réduction
+                    </SelectItem>
+                    <SelectItem value="percentage" className="text-xs sm:text-sm">
+                      Pourcentage
+                    </SelectItem>
+                    <SelectItem value="fixed" className="text-xs sm:text-sm">
+                      Montant fixe
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -505,7 +535,7 @@ export const DigitalBundleManager : React.FC<DigitalBundleManagerProps> = ({
                       id="discount-value"
                       type="number"
                       value={discountValue}
-                      onChange={(e) => setDiscountValue(parseFloat(e.target.value) || 0)}
+                      onChange={e => setDiscountValue(parseFloat(e.target.value) || 0)}
                       placeholder="0"
                       min="0"
                       max={discountType === 'percentage' ? 100 : undefined}
@@ -538,11 +568,10 @@ export const DigitalBundleManager : React.FC<DigitalBundleManagerProps> = ({
                   </div>
                   <div className="text-xs sm:text-sm text-green-700 space-y-1">
                     <p>
-                      Prix original: <span className="line-through">{originalTotalPrice.toFixed(2)} EUR</span>
+                      Prix original:{' '}
+                      <span className="line-through">{originalTotalPrice.toFixed(2)} EUR</span>
                     </p>
-                    <p>
-                      Réduction: -{(originalTotalPrice - discountedPrice).toFixed(2)} EUR
-                    </p>
+                    <p>Réduction: -{(originalTotalPrice - discountedPrice).toFixed(2)} EUR</p>
                     <p className="font-bold text-sm sm:text-base mt-1">
                       Prix final: {discountedPrice.toFixed(2)} EUR
                     </p>
@@ -568,10 +597,15 @@ export const DigitalBundleManager : React.FC<DigitalBundleManagerProps> = ({
 
               {selectedProducts.length > 0 && (
                 <div className="space-y-1.5 sm:space-y-2 max-h-[120px] sm:max-h-[200px] overflow-y-auto pr-2">
-                  {selectedProducts.map((product) => (
-                    <div key={product.id} className="flex items-center justify-between text-xs gap-2">
+                  {selectedProducts.map(product => (
+                    <div
+                      key={product.id}
+                      className="flex items-center justify-between text-xs gap-2"
+                    >
                       <span className="truncate flex-1 min-w-0">{product.name}</span>
-                      <span className="font-medium shrink-0 whitespace-nowrap ml-2">{product.price} EUR</span>
+                      <span className="font-medium shrink-0 whitespace-nowrap ml-2">
+                        {product.price} EUR
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -584,10 +618,14 @@ export const DigitalBundleManager : React.FC<DigitalBundleManagerProps> = ({
             <div className="space-y-1.5 sm:space-y-2">
               <div className="flex items-center justify-between text-xs sm:text-sm">
                 <span className="text-muted-foreground">Prix total</span>
-                <span className={cn(
-                  'font-semibold',
-                  discountType !== 'none' && discountValue > 0 && 'line-through text-muted-foreground'
-                )}>
+                <span
+                  className={cn(
+                    'font-semibold',
+                    discountType !== 'none' &&
+                      discountValue > 0 &&
+                      'line-through text-muted-foreground'
+                  )}
+                >
                   {originalTotalPrice.toFixed(2)} EUR
                 </span>
               </div>
@@ -645,7 +683,9 @@ export const DigitalBundleManager : React.FC<DigitalBundleManagerProps> = ({
               {tags.length > 0 && (
                 <div className="flex items-center gap-2">
                   <Tag className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
-                  <span>{tags.length} tag{tags.length > 1 ? 's' : ''}</span>
+                  <span>
+                    {tags.length} tag{tags.length > 1 ? 's' : ''}
+                  </span>
                 </div>
               )}
             </div>
@@ -656,11 +696,17 @@ export const DigitalBundleManager : React.FC<DigitalBundleManagerProps> = ({
             <div className="space-y-2">
               <Button onClick={handleSave} className="w-full h-9 sm:h-10 text-xs sm:text-sm">
                 <Save className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
-                <span className="truncate">{mode === 'create' ? 'Créer le bundle' : 'Sauvegarder'}</span>
+                <span className="truncate">
+                  {mode === 'create' ? 'Créer le bundle' : 'Sauvegarder'}
+                </span>
               </Button>
 
               {onCancel && (
-                <Button onClick={onCancel} variant="outline" className="w-full h-9 sm:h-10 text-xs sm:text-sm">
+                <Button
+                  onClick={onCancel}
+                  variant="outline"
+                  className="w-full h-9 sm:h-10 text-xs sm:text-sm"
+                >
                   <X className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
                   Annuler
                 </Button>
@@ -676,13 +722,17 @@ export const DigitalBundleManager : React.FC<DigitalBundleManagerProps> = ({
                   </AlertDialogTrigger>
                   <AlertDialogContent className="max-w-[90vw] sm:max-w-md">
                     <AlertDialogHeader>
-                      <AlertDialogTitle className="text-base sm:text-lg">Supprimer ce bundle ?</AlertDialogTitle>
+                      <AlertDialogTitle className="text-base sm:text-lg">
+                        Supprimer ce bundle ?
+                      </AlertDialogTitle>
                       <AlertDialogDescription className="text-xs sm:text-sm">
                         Cette action est irréversible. Le bundle sera définitivement supprimé.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
-                      <AlertDialogCancel className="w-full sm:w-auto text-xs sm:text-sm">Annuler</AlertDialogCancel>
+                      <AlertDialogCancel className="w-full sm:w-auto text-xs sm:text-sm">
+                        Annuler
+                      </AlertDialogCancel>
                       <AlertDialogAction className="w-full sm:w-auto bg-red-600 text-xs sm:text-sm">
                         Supprimer
                       </AlertDialogAction>
@@ -700,7 +750,8 @@ export const DigitalBundleManager : React.FC<DigitalBundleManagerProps> = ({
               <div className="text-xs sm:text-sm text-blue-700">
                 <p className="font-semibold mb-1">Conseil</p>
                 <p>
-                  Les bundles avec une réduction de 20-30% ont généralement le meilleur taux de conversion.
+                  Les bundles avec une réduction de 20-30% ont généralement le meilleur taux de
+                  conversion.
                 </p>
               </div>
             </div>
@@ -714,11 +765,3 @@ export const DigitalBundleManager : React.FC<DigitalBundleManagerProps> = ({
 DigitalBundleManager.displayName = 'DigitalBundleManager';
 
 export default DigitalBundleManager;
-
-
-
-
-
-
-
-

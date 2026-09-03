@@ -16,10 +16,7 @@ export interface ExportReviewsOptions {
 /**
  * Convert reviews array to CSV string
  */
-export function reviewsToCSV(
-  reviews: Review[],
-  options: ExportReviewsOptions = {}
-): string {
+export function reviewsToCSV(reviews: Review[], options: ExportReviewsOptions = {}): string {
   if (!reviews || reviews.length === 0) {
     return 'No reviews to export';
   }
@@ -58,16 +55,17 @@ export function reviewsToCSV(
   }
 
   // Build CSV rows
-  const rows = reviews.map((review) => {
+  const rows = reviews.map(review => {
     const date =
       dateFormat === 'locale'
         ? new Date(review.created_at).toLocaleDateString()
         : review.created_at;
 
-    const mediaUrls = review.review_media
-      ?.map((m: { media_url?: string }) => m.media_url)
-      .filter(Boolean)
-      .join(' | ') || '';
+    const mediaUrls =
+      review.review_media
+        ?.map((m: { media_url?: string }) => m.media_url)
+        .filter(Boolean)
+        .join(' | ') || '';
 
     const row = [
       review.id,
@@ -96,19 +94,14 @@ export function reviewsToCSV(
     ];
 
     if (includeMedia) {
-      row.push(
-        String(review.review_media?.length || 0),
-        escapeCsvValue(mediaUrls)
-      );
+      row.push(String(review.review_media?.length || 0), escapeCsvValue(mediaUrls));
     }
 
     return row;
   });
 
   // Combine headers and rows
-  const csvContent = [headers, ...rows]
-    .map((row) => row.join(','))
-    .join('\n');
+  const csvContent = [headers, ...rows].map(row => row.join(',')).join('\n');
 
   return csvContent;
 }
@@ -118,15 +111,15 @@ export function reviewsToCSV(
  */
 function escapeCsvValue(value: string): string {
   if (!value) return '';
-  
+
   // Convert to string
   const stringValue = String(value);
-  
+
   // If contains comma, quote, or newline, wrap in quotes and escape quotes
   if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
     return `"${stringValue.replace(/"/g, '""')}"`;
   }
-  
+
   return stringValue;
 }
 
@@ -137,19 +130,19 @@ export function downloadCSV(csvContent: string, filename: string = 'reviews.csv'
   // Add UTF-8 BOM for Excel compatibility
   const BOM = '\uFEFF';
   const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
-  
+
   // Create download link
   const link = document.createElement('a');
   const url = URL.createObjectURL(blob);
-  
+
   link.setAttribute('href', url);
   link.setAttribute('download', filename);
   link.style.visibility = 'hidden';
-  
+
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
-  
+
   // Clean up
   URL.revokeObjectURL(url);
 }
@@ -163,17 +156,17 @@ export async function exportReviewsToCSV(
 ): Promise<void> {
   try {
     const { filename = `reviews_export_${new Date().toISOString().split('T')[0]}.csv` } = options;
-    
+
     if (!reviews || reviews.length === 0) {
       throw new Error('No reviews to export');
     }
 
     // Convert to CSV
     const csvContent = reviewsToCSV(reviews, options);
-    
+
     // Download
     downloadCSV(csvContent, filename);
-    
+
     logger.info('Reviews exported to CSV', { count: reviews.length, filename });
   } catch (error) {
     logger.error('Error exporting reviews to CSV', { error, filename });
@@ -194,46 +187,36 @@ export interface ExportFilters {
   approvedOnly?: boolean;
 }
 
-export function filterReviewsForExport(
-  reviews: Review[],
-  filters: ExportFilters
-): Review[] {
-  let  filtered= [...reviews];
+export function filterReviewsForExport(reviews: Review[], filters: ExportFilters): Review[] {
+  let filtered = [...reviews];
 
   if (filters.productId) {
-    filtered = filtered.filter((r) => r.product_id === filters.productId);
+    filtered = filtered.filter(r => r.product_id === filters.productId);
   }
 
   if (filters.minRating !== undefined) {
-    filtered = filtered.filter((r) => r.rating >= filters.minRating!);
+    filtered = filtered.filter(r => r.rating >= filters.minRating!);
   }
 
   if (filters.maxRating !== undefined) {
-    filtered = filtered.filter((r) => r.rating <= filters.maxRating!);
+    filtered = filtered.filter(r => r.rating <= filters.maxRating!);
   }
 
   if (filters.startDate) {
-    filtered = filtered.filter((r) => r.created_at >= filters.startDate!);
+    filtered = filtered.filter(r => r.created_at >= filters.startDate!);
   }
 
   if (filters.endDate) {
-    filtered = filtered.filter((r) => r.created_at <= filters.endDate!);
+    filtered = filtered.filter(r => r.created_at <= filters.endDate!);
   }
 
   if (filters.verifiedOnly) {
-    filtered = filtered.filter((r) => r.is_verified_purchase);
+    filtered = filtered.filter(r => r.is_verified_purchase);
   }
 
   if (filters.approvedOnly) {
-    filtered = filtered.filter((r) => r.is_approved);
+    filtered = filtered.filter(r => r.is_approved);
   }
 
   return filtered;
 }
-
-
-
-
-
-
-

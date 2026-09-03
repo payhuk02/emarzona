@@ -1,10 +1,17 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Order } from "@/hooks/useOrders";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Order } from '@/hooks/useOrders';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 import { ShoppingCart } from '@/components/icons';
 
 interface RecentOrdersProps {
@@ -27,25 +34,21 @@ export const RecentOrders = ({ orders, loading }: RecentOrdersProps) => {
   }
 
   const getStatusBadge = (status: string) => {
-    const  variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-      pending: "secondary",
-      processing: "default",
-      completed: "outline",
-      cancelled: "destructive",
+    const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
+      pending: 'secondary',
+      processing: 'default',
+      completed: 'outline',
+      cancelled: 'destructive',
     };
 
-    const  labels: Record<string, string> = {
-      pending: "En attente",
-      processing: "En cours",
-      completed: "Terminée",
-      cancelled: "Annulée",
+    const labels: Record<string, string> = {
+      pending: 'En attente',
+      processing: 'En cours',
+      completed: 'Terminée',
+      cancelled: 'Annulée',
     };
 
-    return (
-      <Badge variant={variants[status] || "default"}>
-        {labels[status] || status}
-      </Badge>
-    );
+    return <Badge variant={variants[status] || 'default'}>{labels[status] || status}</Badge>;
   };
 
   return (
@@ -63,7 +66,9 @@ export const RecentOrders = ({ orders, loading }: RecentOrdersProps) => {
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-muted/50">
-                      <TableHead className="text-xs sm:text-sm font-semibold">N° Commande</TableHead>
+                      <TableHead className="text-xs sm:text-sm font-semibold">
+                        N° Commande
+                      </TableHead>
                       <TableHead className="text-xs sm:text-sm font-semibold">Client</TableHead>
                       <TableHead className="text-xs sm:text-sm font-semibold">Montant</TableHead>
                       <TableHead className="text-xs sm:text-sm font-semibold">Statut</TableHead>
@@ -71,18 +76,20 @@ export const RecentOrders = ({ orders, loading }: RecentOrdersProps) => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {orders.map((order) => (
+                    {orders.map(order => (
                       <TableRow key={order.id} className="hover:bg-muted/50 transition-colors">
-                        <TableCell className="text-xs sm:text-sm font-medium">{order.order_number}</TableCell>
+                        <TableCell className="text-xs sm:text-sm font-medium">
+                          {order.order_number}
+                        </TableCell>
                         <TableCell className="text-xs sm:text-sm">
-                          {order.customers?.name || "Client non spécifié"}
+                          {order.customers?.name || 'Client non spécifié'}
                         </TableCell>
                         <TableCell className="text-xs sm:text-sm font-semibold">
                           {order.total_amount.toLocaleString()} {order.currency}
                         </TableCell>
                         <TableCell>{getStatusBadge(order.status)}</TableCell>
                         <TableCell className="text-xs sm:text-sm">
-                          {format(new Date(order.created_at), "dd MMM yyyy", { locale: fr })}
+                          {format(new Date(order.created_at), 'dd MMM yyyy', { locale: fr })}
                         </TableCell>
                       </TableRow>
                     ))}
@@ -93,7 +100,7 @@ export const RecentOrders = ({ orders, loading }: RecentOrdersProps) => {
 
             {/* Mobile Card View */}
             <div className="lg:hidden space-y-3 sm:space-y-4">
-              {orders.map((order) => (
+              {orders.map(order => (
                 <Card
                   key={order.id}
                   className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300"
@@ -101,9 +108,11 @@ export const RecentOrders = ({ orders, loading }: RecentOrdersProps) => {
                   <CardContent className="p-4 sm:p-5">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex-1">
-                        <h3 className="font-semibold text-base sm:text-lg mb-1">{order.order_number}</h3>
+                        <h3 className="font-semibold text-base sm:text-lg mb-1">
+                          {order.order_number}
+                        </h3>
                         <p className="text-xs sm:text-sm text-muted-foreground mb-2">
-                          {order.customers?.name || "Client non spécifié"}
+                          {order.customers?.name || 'Client non spécifié'}
                         </p>
                         <div className="flex items-center gap-2 mb-2">
                           <p className="text-sm sm:text-base font-semibold">
@@ -111,12 +120,10 @@ export const RecentOrders = ({ orders, loading }: RecentOrdersProps) => {
                           </p>
                         </div>
                         <p className="text-xs text-muted-foreground">
-                          {format(new Date(order.created_at), "dd MMM yyyy", { locale: fr })}
+                          {format(new Date(order.created_at), 'dd MMM yyyy', { locale: fr })}
                         </p>
                       </div>
-                      <div className="ml-2">
-                        {getStatusBadge(order.status)}
-                      </div>
+                      <div className="ml-2">{getStatusBadge(order.status)}</div>
                     </div>
                   </CardContent>
                 </Card>
@@ -135,9 +142,3 @@ export const RecentOrders = ({ orders, loading }: RecentOrdersProps) => {
     </Card>
   );
 };
-
-
-
-
-
-

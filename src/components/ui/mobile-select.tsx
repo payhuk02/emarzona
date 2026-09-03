@@ -112,9 +112,3 @@ export const MobileSelect = React.forwardRef<MobileSelectHandle, MobileSelectPro
 );
 
 MobileSelect.displayName = 'MobileSelect';
-
-
-
-
-
-

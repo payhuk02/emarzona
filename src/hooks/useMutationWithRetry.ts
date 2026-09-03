@@ -1,21 +1,32 @@
 /**
  * Hook useMutation avec Retry Intelligent et Exponential Backoff
  * Date: 28 Janvier 2025
- * 
+ *
  * Wrapper pour useMutation avec retry automatique basé sur le type d'erreur
  */
 
 import { useMutation, UseMutationOptions, UseMutationResult } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
-import { normalizeError, shouldRetryError, getRetryDelay, ErrorSeverity } from '@/lib/error-handling';
-import { getUserFriendlyError, getShortErrorMessage, getShortErrorTitle } from '@/lib/user-friendly-errors';
+import {
+  normalizeError,
+  shouldRetryError,
+  getRetryDelay,
+  ErrorSeverity,
+} from '@/lib/error-handling';
+import {
+  getUserFriendlyError,
+  getShortErrorMessage,
+  getShortErrorTitle,
+} from '@/lib/user-friendly-errors';
 
 /**
  * Options pour useMutationWithRetry
  */
-export interface MutationWithRetryOptions<TData, TError, TVariables, TContext>
-  extends Omit<UseMutationOptions<TData, TError, TVariables, TContext>, 'retry' | 'retryDelay'> {
+export interface MutationWithRetryOptions<TData, TError, TVariables, TContext> extends Omit<
+  UseMutationOptions<TData, TError, TVariables, TContext>,
+  'retry' | 'retryDelay'
+> {
   /**
    * Nombre maximum de tentatives (défaut: 3)
    * Si 0, pas de retry
@@ -55,7 +66,7 @@ export interface MutationWithRetryOptions<TData, TError, TVariables, TContext>
 
 /**
  * Hook useMutation avec retry intelligent et exponential backoff
- * 
+ *
  * @example
  * ```tsx
  * const mutation = useMutationWithRetry({
@@ -72,7 +83,12 @@ export interface MutationWithRetryOptions<TData, TError, TVariables, TContext>
  * });
  * ```
  */
-export function useMutationWithRetry<TData = unknown, TError = Error, TVariables = void, TContext = unknown>(
+export function useMutationWithRetry<
+  TData = unknown,
+  TError = Error,
+  TVariables = void,
+  TContext = unknown,
+>(
   options: MutationWithRetryOptions<TData, TError, TVariables, TContext>
 ): UseMutationResult<TData, TError, TVariables, TContext> {
   const { toast } = useToast();
@@ -106,7 +122,7 @@ export function useMutationWithRetry<TData = unknown, TError = Error, TVariables
       // Utiliser la logique de retry intelligente
       return shouldRetryError(error, failureCount);
     },
-    retryDelay: (attemptIndex) => {
+    retryDelay: attemptIndex => {
       // Calculer le délai avec exponential backoff
       const delay = getRetryDelay(attemptIndex, baseDelay, maxDelay);
 
@@ -138,12 +154,14 @@ export function useMutationWithRetry<TData = unknown, TError = Error, TVariables
         const friendlyError = getUserFriendlyError(normalized, {
           operation: mutationOptions.mutationKey?.[0] as string,
         });
-        
+
         toast({
           title: errorToastTitle || friendlyError.title,
           description: friendlyError.description,
           variant: normalized.severity === ErrorSeverity.CRITICAL ? 'destructive' : 'default',
-          duration: friendlyError.duration || (normalized.severity === ErrorSeverity.CRITICAL ? 10000 : 5000),
+          duration:
+            friendlyError.duration ||
+            (normalized.severity === ErrorSeverity.CRITICAL ? 10000 : 5000),
         });
       }
 
@@ -157,7 +175,12 @@ export function useMutationWithRetry<TData = unknown, TError = Error, TVariables
       // Appeler le callback personnalisé
       onSuccess?.(data, variables, context);
     },
-    onSettled: (data: TData | undefined, error: TError | null, variables: TVariables, context: TContext | undefined) => {
+    onSettled: (
+      data: TData | undefined,
+      error: TError | null,
+      variables: TVariables,
+      context: TContext | undefined
+    ) => {
       // Si erreur et max retries atteint, appeler onMaxRetriesExceeded
       if (error && onMaxRetriesExceeded) {
         // Note: On ne peut pas savoir exactement combien de retries ont été faits
@@ -175,8 +198,16 @@ export function useMutationWithRetry<TData = unknown, TError = Error, TVariables
  * Hook useMutation avec retry pour les opérations critiques
  * Utilise des paramètres plus agressifs (plus de retries, délais plus longs)
  */
-export function useMutationWithRetryCritical<TData = unknown, TError = Error, TVariables = void, TContext = unknown>(
-  options: Omit<MutationWithRetryOptions<TData, TError, TVariables, TContext>, 'maxRetries' | 'baseDelay' | 'maxDelay'>
+export function useMutationWithRetryCritical<
+  TData = unknown,
+  TError = Error,
+  TVariables = void,
+  TContext = unknown,
+>(
+  options: Omit<
+    MutationWithRetryOptions<TData, TError, TVariables, TContext>,
+    'maxRetries' | 'baseDelay' | 'maxDelay'
+  >
 ): UseMutationResult<TData, TError, TVariables, TContext> {
   return useMutationWithRetry({
     ...options,
@@ -190,8 +221,16 @@ export function useMutationWithRetryCritical<TData = unknown, TError = Error, TV
  * Hook useMutation avec retry pour les opérations non-critiques
  * Utilise des paramètres moins agressifs (moins de retries, délais plus courts)
  */
-export function useMutationWithRetryLight<TData = unknown, TError = Error, TVariables = void, TContext = unknown>(
-  options: Omit<MutationWithRetryOptions<TData, TError, TVariables, TContext>, 'maxRetries' | 'baseDelay' | 'maxDelay'>
+export function useMutationWithRetryLight<
+  TData = unknown,
+  TError = Error,
+  TVariables = void,
+  TContext = unknown,
+>(
+  options: Omit<
+    MutationWithRetryOptions<TData, TError, TVariables, TContext>,
+    'maxRetries' | 'baseDelay' | 'maxDelay'
+  >
 ): UseMutationResult<TData, TError, TVariables, TContext> {
   return useMutationWithRetry({
     ...options,
@@ -200,10 +239,3 @@ export function useMutationWithRetryLight<TData = unknown, TError = Error, TVari
     maxDelay: 5000, // Délai maximum plus court
   });
 }
-
-
-
-
-
-
-

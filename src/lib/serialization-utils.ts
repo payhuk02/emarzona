@@ -131,7 +131,7 @@ export function serializeBase64<T>(value: T): string {
  * Désérialise depuis Base64
  */
 export function deserializeBase64<T>(base64: string): T {
-  let  json: string;
+  let json: string;
   if (typeof atob === 'function') {
     json = atob(base64);
   } else {
@@ -224,9 +224,3 @@ export function getSerializedSize<T>(value: T): number {
   const json = serialize(value);
   return new Blob([json]).size;
 }
-
-
-
-
-
-

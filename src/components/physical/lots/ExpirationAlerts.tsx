@@ -5,17 +5,43 @@
  */
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { AlertTriangle, Calendar, CheckCircle2, Package, Clock, TrendingDown } from '@/components/icons';
+import {
+  AlertTriangle,
+  Calendar,
+  CheckCircle2,
+  Package,
+  Clock,
+  TrendingDown,
+} from '@/components/icons';
 import { useExpirationAlerts, useResolveExpirationAlert } from '@/hooks/physical/useLotsExpiration';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useState, useMemo } from 'react';
 import { logger } from '@/lib/logger';
@@ -59,7 +85,11 @@ export function ExpirationAlerts() {
       case 'expiring_today':
         return <Badge variant="destructive">Expire aujourd'hui</Badge>;
       case 'expiring_soon':
-        return <Badge variant="default" className="bg-orange-500">Expire bientôt</Badge>;
+        return (
+          <Badge variant="default" className="bg-orange-500">
+            Expire bientôt
+          </Badge>
+        );
       case 'expired':
         return <Badge variant="destructive">Expiré</Badge>;
       default:
@@ -70,7 +100,7 @@ export function ExpirationAlerts() {
   // Stats calculées
   const stats = useMemo(() => {
     if (!alerts) return { total: 0, expired: 0, expiringToday: 0, expiringSoon: 0 };
-    const unresolved = alerts.filter((alert) => !alert.is_resolved);
+    const unresolved = alerts.filter(alert => !alert.is_resolved);
     const total = unresolved.length;
     const expired = unresolved.filter(a => a.alert_type === 'expired').length;
     const expiringToday = unresolved.filter(a => a.alert_type === 'expiring_today').length;
@@ -83,7 +113,7 @@ export function ExpirationAlerts() {
       <div className="space-y-4 sm:space-y-6 w-full">
         <Skeleton className="h-10 sm:h-12 w-full" />
         <div className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-4">
-          {[1, 2, 3, 4].map((i) => (
+          {[1, 2, 3, 4].map(i => (
             <Skeleton key={i} className="h-24 sm:h-28 w-full" />
           ))}
         </div>
@@ -92,7 +122,7 @@ export function ExpirationAlerts() {
     );
   }
 
-  const unresolvedAlerts = alerts?.filter((alert) => !alert.is_resolved) || [];
+  const unresolvedAlerts = alerts?.filter(alert => !alert.is_resolved) || [];
 
   if (unresolvedAlerts.length === 0) {
     return (
@@ -108,9 +138,7 @@ export function ExpirationAlerts() {
         </CardHeader>
         <CardContent className="py-8 sm:py-12 text-center">
           <CheckCircle2 className="h-12 w-12 sm:h-16 sm:w-16 mx-auto text-green-500 mb-4 animate-in zoom-in-95 duration-500" />
-          <p className="text-sm sm:text-base text-muted-foreground">
-            Tous vos lots sont à jour
-          </p>
+          <p className="text-sm sm:text-base text-muted-foreground">Tous vos lots sont à jour</p>
         </CardContent>
       </Card>
     );
@@ -119,15 +147,35 @@ export function ExpirationAlerts() {
   return (
     <div className="space-y-4 sm:space-y-6">
       {/* Stats Cards - Responsive */}
-      <div 
+      <div
         ref={statsRef}
         className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-4 animate-in fade-in slide-in-from-bottom-4 duration-700"
       >
         {[
-          { label: 'Total Alertes', value: stats.total, icon: AlertTriangle, color: 'from-red-600 to-orange-600' },
-          { label: 'Expirés', value: stats.expired, icon: Package, color: 'from-red-600 to-pink-600' },
-          { label: 'Expirent Aujourd\'hui', value: stats.expiringToday, icon: Clock, color: 'from-orange-600 to-red-600' },
-          { label: 'Expirent Bientôt', value: stats.expiringSoon, icon: TrendingDown, color: 'from-yellow-600 to-orange-600' },
+          {
+            label: 'Total Alertes',
+            value: stats.total,
+            icon: AlertTriangle,
+            color: 'from-red-600 to-orange-600',
+          },
+          {
+            label: 'Expirés',
+            value: stats.expired,
+            icon: Package,
+            color: 'from-red-600 to-pink-600',
+          },
+          {
+            label: "Expirent Aujourd'hui",
+            value: stats.expiringToday,
+            icon: Clock,
+            color: 'from-orange-600 to-red-600',
+          },
+          {
+            label: 'Expirent Bientôt',
+            value: stats.expiringSoon,
+            icon: TrendingDown,
+            color: 'from-yellow-600 to-orange-600',
+          },
         ].map((stat, index) => {
           const Icon = stat.icon;
           return (
@@ -143,7 +191,9 @@ export function ExpirationAlerts() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-3 sm:p-4 pt-0">
-                <div className={`text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
+                <div
+                  className={`text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}
+                >
                   {stat.value}
                 </div>
               </CardContent>
@@ -193,7 +243,7 @@ export function ExpirationAlerts() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {unresolvedAlerts.map((alert) => (
+                  {unresolvedAlerts.map(alert => (
                     <TableRow key={alert.id}>
                       <TableCell className="font-medium">{alert.lot.lot_number}</TableCell>
                       <TableCell>
@@ -206,7 +256,9 @@ export function ExpirationAlerts() {
                           <div className="flex items-center gap-2 text-sm">
                             <Calendar className="h-4 w-4 flex-shrink-0" />
                             <span className="truncate">
-                              {format(new Date(alert.lot.expiration_date), 'dd MMM yyyy', { locale: fr })}
+                              {format(new Date(alert.lot.expiration_date), 'dd MMM yyyy', {
+                                locale: fr,
+                              })}
                             </span>
                           </div>
                         ) : (
@@ -215,11 +267,15 @@ export function ExpirationAlerts() {
                       </TableCell>
                       <TableCell>
                         {alert.days_until_expiration !== undefined ? (
-                          <span className={cn(
-                            "text-sm",
-                            alert.days_until_expiration <= 0 && 'text-red-500 font-bold',
-                            alert.days_until_expiration > 0 && alert.days_until_expiration <= 7 && 'text-orange-500'
-                          )}>
+                          <span
+                            className={cn(
+                              'text-sm',
+                              alert.days_until_expiration <= 0 && 'text-red-500 font-bold',
+                              alert.days_until_expiration > 0 &&
+                                alert.days_until_expiration <= 7 &&
+                                'text-orange-500'
+                            )}
+                          >
                             {alert.days_until_expiration} jours
                           </span>
                         ) : (
@@ -229,15 +285,23 @@ export function ExpirationAlerts() {
                       <TableCell>{getAlertTypeBadge(alert.alert_type)}</TableCell>
                       <TableCell>{alert.lot.current_quantity}</TableCell>
                       <TableCell className="text-right">
-                        <Dialog open={resolvingAlert === alert.id} onOpenChange={(open) => {
-                          if (!open) {
-                            setResolvingAlert(null);
-                            setResolutionAction('');
-                            setResolutionNotes('');
-                          }
-                        }}>
+                        <Dialog
+                          open={resolvingAlert === alert.id}
+                          onOpenChange={open => {
+                            if (!open) {
+                              setResolvingAlert(null);
+                              setResolutionAction('');
+                              setResolutionNotes('');
+                            }
+                          }}
+                        >
                           <DialogTrigger asChild>
-                            <Button variant="outline" size="sm" onClick={() => setResolvingAlert(alert.id)} className="h-8">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setResolvingAlert(alert.id)}
+                              className="h-8"
+                            >
                               <CheckCircle2 className="mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
                               <span className="text-xs sm:text-sm">Résoudre</span>
                             </Button>
@@ -249,14 +313,19 @@ export function ExpirationAlerts() {
                             <div className="space-y-4">
                               <div>
                                 <Label>Action de Résolution</Label>
-                                <Select value={resolutionAction} onValueChange={setResolutionAction}>
+                                <Select
+                                  value={resolutionAction}
+                                  onValueChange={setResolutionAction}
+                                >
                                   <SelectTrigger>
                                     <SelectValue placeholder="Sélectionner une action" />
                                   </SelectTrigger>
                                   <SelectContent>
                                     <SelectItem value="sold">Vendu</SelectItem>
                                     <SelectItem value="discounted">Soldé</SelectItem>
-                                    <SelectItem value="returned">Retourné au fournisseur</SelectItem>
+                                    <SelectItem value="returned">
+                                      Retourné au fournisseur
+                                    </SelectItem>
                                     <SelectItem value="destroyed">Détruit</SelectItem>
                                     <SelectItem value="transferred">Transféré</SelectItem>
                                     <SelectItem value="other">Autre</SelectItem>
@@ -268,7 +337,7 @@ export function ExpirationAlerts() {
                                 <Textarea
                                   placeholder="Notes sur la résolution..."
                                   value={resolutionNotes}
-                                  onChange={(e) => setResolutionNotes(e.target.value)}
+                                  onChange={e => setResolutionNotes(e.target.value)}
                                   rows={4}
                                 />
                               </div>
@@ -283,9 +352,7 @@ export function ExpirationAlerts() {
                                 >
                                   Annuler
                                 </Button>
-                                <Button onClick={() => handleResolve(alert.id)}>
-                                  Confirmer
-                                </Button>
+                                <Button onClick={() => handleResolve(alert.id)}>Confirmer</Button>
                               </div>
                             </div>
                           </DialogContent>
@@ -315,10 +382,10 @@ function AlertCard({ alert, getAlertTypeBadge, onResolve, animationDelay = 0 }: 
   return (
     <Card
       className={cn(
-        "hover:shadow-lg transition-all duration-300 group overflow-hidden animate-in fade-in slide-in-from-bottom-4 touch-manipulation",
-        alert.alert_type === 'expired' && "border-l-4 border-l-red-500",
-        alert.alert_type === 'expiring_today' && "border-l-4 border-l-orange-500",
-        alert.alert_type === 'expiring_soon' && "border-l-4 border-l-yellow-500"
+        'hover:shadow-lg transition-all duration-300 group overflow-hidden animate-in fade-in slide-in-from-bottom-4 touch-manipulation',
+        alert.alert_type === 'expired' && 'border-l-4 border-l-red-500',
+        alert.alert_type === 'expiring_today' && 'border-l-4 border-l-orange-500',
+        alert.alert_type === 'expiring_soon' && 'border-l-4 border-l-yellow-500'
       )}
       style={{ animationDelay: `${animationDelay}ms` }}
     >
@@ -345,16 +412,22 @@ function AlertCard({ alert, getAlertTypeBadge, onResolve, animationDelay = 0 }: 
           {alert.lot.expiration_date && (
             <div className="flex items-center gap-2 text-muted-foreground">
               <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
-              <span>Expire: {format(new Date(alert.lot.expiration_date), 'dd MMM yyyy', { locale: fr })}</span>
+              <span>
+                Expire: {format(new Date(alert.lot.expiration_date), 'dd MMM yyyy', { locale: fr })}
+              </span>
             </div>
           )}
           {alert.days_until_expiration !== undefined && (
             <div className="flex items-center gap-2">
               <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
-              <span className={cn(
-                alert.days_until_expiration <= 0 && 'text-red-500 font-bold',
-                alert.days_until_expiration > 0 && alert.days_until_expiration <= 7 && 'text-orange-500'
-              )}>
+              <span
+                className={cn(
+                  alert.days_until_expiration <= 0 && 'text-red-500 font-bold',
+                  alert.days_until_expiration > 0 &&
+                    alert.days_until_expiration <= 7 &&
+                    'text-orange-500'
+                )}
+              >
                 {alert.days_until_expiration} jours restants
               </span>
             </div>
@@ -364,12 +437,7 @@ function AlertCard({ alert, getAlertTypeBadge, onResolve, animationDelay = 0 }: 
             <span>Quantité: {alert.lot.current_quantity}</span>
           </div>
         </div>
-        <Button
-          onClick={onResolve}
-          size="sm"
-          variant="outline"
-          className="w-full"
-        >
+        <Button onClick={onResolve} size="sm" variant="outline" className="w-full">
           <CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
           <span className="text-xs sm:text-sm">Résoudre</span>
         </Button>
@@ -377,9 +445,3 @@ function AlertCard({ alert, getAlertTypeBadge, onResolve, animationDelay = 0 }: 
     </Card>
   );
 }
-
-
-
-
-
-

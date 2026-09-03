@@ -1,7 +1,7 @@
 /**
  * useKeyboardNavigation Hook
  * Date: 28 Janvier 2025
- * 
+ *
  * Hook pour améliorer la navigation clavier dans les composants
  * Support des flèches, Tab, Enter, Escape, etc.
  */
@@ -63,7 +63,7 @@ export function useKeyboardNavigation(
     const elements = Array.from(
       containerRef.current.querySelectorAll<HTMLElement>(focusableSelector)
     ).filter(
-      (el) =>
+      el =>
         !el.hasAttribute('disabled') &&
         el.tabIndex !== -1 &&
         window.getComputedStyle(el).display !== 'none'
@@ -79,7 +79,7 @@ export function useKeyboardNavigation(
       const elements = getFocusableElements();
       if (elements.length === 0) return;
 
-      let  targetIndex= index;
+      let targetIndex = index;
       if (circular) {
         targetIndex = ((index % elements.length) + elements.length) % elements.length;
       } else {
@@ -107,7 +107,7 @@ export function useKeyboardNavigation(
       e.preventDefault();
       e.stopPropagation();
 
-      let  newIndex= currentIndexRef.current;
+      let newIndex = currentIndexRef.current;
 
       if (orientation === 'horizontal' || orientation === 'both') {
         if (direction === 'left') {
@@ -138,7 +138,7 @@ export function useKeyboardNavigation(
 
       // Trouver l'index de l'élément actuellement focusé
       const currentElement = document.activeElement as HTMLElement;
-      const currentIndex = elements.findIndex((el) => el === currentElement);
+      const currentIndex = elements.findIndex(el => el === currentElement);
       if (currentIndex !== -1) {
         currentIndexRef.current = currentIndex;
       }
@@ -202,9 +202,3 @@ export function useKeyboardNavigation(
     currentIndex: currentIndexRef.current,
   };
 }
-
-
-
-
-
-

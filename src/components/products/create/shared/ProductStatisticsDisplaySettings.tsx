@@ -1,7 +1,7 @@
 /**
  * ProductStatisticsDisplaySettings - Composant partagé pour les options d'affichage des statistiques
  * Date: 2 Février 2025
- * 
+ *
  * Permet aux vendeurs de contrôler l'affichage des statistiques sur les cartes produits
  * Utilisé dans les wizards de création et les formulaires d'édition
  */
@@ -27,7 +27,7 @@ interface ProductStatisticsDisplaySettingsProps {
   variant?: 'default' | 'compact';
 }
 
-export const ProductStatisticsDisplaySettings : React.FC<ProductStatisticsDisplaySettingsProps> = ({
+export const ProductStatisticsDisplaySettings: React.FC<ProductStatisticsDisplaySettingsProps> = ({
   formData,
   updateFormData,
   productType,
@@ -47,7 +47,9 @@ export const ProductStatisticsDisplaySettings : React.FC<ProductStatisticsDispla
       </CardHeader>
       <CardContent className={isCompact ? 'space-y-3' : 'space-y-4'}>
         {/* Masquer le nombre d'achats */}
-        <div className={`flex items-center justify-between ${isCompact ? 'p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-gray-300 hover:bg-gray-100 transition-colors' : 'gap-4 min-h-[60px]'}`}>
+        <div
+          className={`flex items-center justify-between ${isCompact ? 'p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-gray-300 hover:bg-gray-100 transition-colors' : 'gap-4 min-h-[60px]'}`}
+        >
           <div className="space-y-1 flex-1">
             <div className="flex items-center gap-2">
               <Label className={isCompact ? 'text-sm font-medium text-gray-900' : ''}>
@@ -55,7 +57,9 @@ export const ProductStatisticsDisplaySettings : React.FC<ProductStatisticsDispla
               </Label>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <HelpCircle className={`h-3 w-3 ${isCompact ? 'text-gray-500' : 'text-muted-foreground'}`} />
+                  <HelpCircle
+                    className={`h-3 w-3 ${isCompact ? 'text-gray-500' : 'text-muted-foreground'}`}
+                  />
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>Ne pas afficher le nombre d'achats sur les cartes produits</p>
@@ -68,13 +72,15 @@ export const ProductStatisticsDisplaySettings : React.FC<ProductStatisticsDispla
           </div>
           <Switch
             checked={formData.hide_purchase_count || false}
-            onCheckedChange={(checked) => updateFormData('hide_purchase_count', checked)}
+            onCheckedChange={checked => updateFormData('hide_purchase_count', checked)}
             aria-label="Masquer le nombre d'achats"
           />
         </div>
 
         {/* Masquer le nombre de likes */}
-        <div className={`flex items-center justify-between ${isCompact ? 'p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-gray-300 hover:bg-gray-100 transition-colors' : 'gap-4 min-h-[60px]'}`}>
+        <div
+          className={`flex items-center justify-between ${isCompact ? 'p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-gray-300 hover:bg-gray-100 transition-colors' : 'gap-4 min-h-[60px]'}`}
+        >
           <div className="space-y-1 flex-1">
             <div className="flex items-center gap-2">
               <Label className={isCompact ? 'text-sm font-medium text-gray-900' : ''}>
@@ -82,7 +88,9 @@ export const ProductStatisticsDisplaySettings : React.FC<ProductStatisticsDispla
               </Label>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <HelpCircle className={`h-3 w-3 ${isCompact ? 'text-gray-500' : 'text-muted-foreground'}`} />
+                  <HelpCircle
+                    className={`h-3 w-3 ${isCompact ? 'text-gray-500' : 'text-muted-foreground'}`}
+                  />
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>Ne pas afficher le nombre de likes sur les cartes produits</p>
@@ -95,13 +103,15 @@ export const ProductStatisticsDisplaySettings : React.FC<ProductStatisticsDispla
           </div>
           <Switch
             checked={formData.hide_likes_count || false}
-            onCheckedChange={(checked) => updateFormData('hide_likes_count', checked)}
+            onCheckedChange={checked => updateFormData('hide_likes_count', checked)}
             aria-label="Masquer le nombre de likes"
           />
         </div>
 
         {/* Masquer le nombre de recommandations */}
-        <div className={`flex items-center justify-between ${isCompact ? 'p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-gray-300 hover:bg-gray-100 transition-colors' : 'gap-4 min-h-[60px]'}`}>
+        <div
+          className={`flex items-center justify-between ${isCompact ? 'p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-gray-300 hover:bg-gray-100 transition-colors' : 'gap-4 min-h-[60px]'}`}
+        >
           <div className="space-y-1 flex-1">
             <div className="flex items-center gap-2">
               <Label className={isCompact ? 'text-sm font-medium text-gray-900' : ''}>
@@ -109,7 +119,9 @@ export const ProductStatisticsDisplaySettings : React.FC<ProductStatisticsDispla
               </Label>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <HelpCircle className={`h-3 w-3 ${isCompact ? 'text-gray-500' : 'text-muted-foreground'}`} />
+                  <HelpCircle
+                    className={`h-3 w-3 ${isCompact ? 'text-gray-500' : 'text-muted-foreground'}`}
+                  />
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>Ne pas afficher le nombre de recommandations sur les cartes produits</p>
@@ -122,14 +134,16 @@ export const ProductStatisticsDisplaySettings : React.FC<ProductStatisticsDispla
           </div>
           <Switch
             checked={formData.hide_recommendations_count || false}
-            onCheckedChange={(checked) => updateFormData('hide_recommendations_count', checked)}
+            onCheckedChange={checked => updateFormData('hide_recommendations_count', checked)}
             aria-label="Masquer le nombre de recommandations"
           />
         </div>
 
         {/* Masquer le nombre de téléchargements (produits digitaux uniquement) */}
         {(productType === 'digital' || !productType) && (
-          <div className={`flex items-center justify-between ${isCompact ? 'p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-gray-300 hover:bg-gray-100 transition-colors' : 'gap-4 min-h-[60px]'}`}>
+          <div
+            className={`flex items-center justify-between ${isCompact ? 'p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-gray-300 hover:bg-gray-100 transition-colors' : 'gap-4 min-h-[60px]'}`}
+          >
             <div className="space-y-1 flex-1">
               <div className="flex items-center gap-2">
                 <Label className={isCompact ? 'text-sm font-medium text-gray-900' : ''}>
@@ -137,10 +151,14 @@ export const ProductStatisticsDisplaySettings : React.FC<ProductStatisticsDispla
                 </Label>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <HelpCircle className={`h-3 w-3 ${isCompact ? 'text-gray-500' : 'text-muted-foreground'}`} />
+                    <HelpCircle
+                      className={`h-3 w-3 ${isCompact ? 'text-gray-500' : 'text-muted-foreground'}`}
+                    />
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Ne pas afficher le nombre de téléchargements (produits digitaux uniquement)</p>
+                    <p>
+                      Ne pas afficher le nombre de téléchargements (produits digitaux uniquement)
+                    </p>
                   </TooltipContent>
                 </Tooltip>
               </div>
@@ -150,14 +168,16 @@ export const ProductStatisticsDisplaySettings : React.FC<ProductStatisticsDispla
             </div>
             <Switch
               checked={formData.hide_downloads_count || false}
-              onCheckedChange={(checked) => updateFormData('hide_downloads_count', checked)}
+              onCheckedChange={checked => updateFormData('hide_downloads_count', checked)}
               aria-label="Masquer le nombre de téléchargements"
             />
           </div>
         )}
 
         {/* Masquer le nombre d'avis */}
-        <div className={`flex items-center justify-between ${isCompact ? 'p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-gray-300 hover:bg-gray-100 transition-colors' : 'gap-4 min-h-[60px]'}`}>
+        <div
+          className={`flex items-center justify-between ${isCompact ? 'p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-gray-300 hover:bg-gray-100 transition-colors' : 'gap-4 min-h-[60px]'}`}
+        >
           <div className="space-y-1 flex-1">
             <div className="flex items-center gap-2">
               <Label className={isCompact ? 'text-sm font-medium text-gray-900' : ''}>
@@ -165,7 +185,9 @@ export const ProductStatisticsDisplaySettings : React.FC<ProductStatisticsDispla
               </Label>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <HelpCircle className={`h-3 w-3 ${isCompact ? 'text-gray-500' : 'text-muted-foreground'}`} />
+                  <HelpCircle
+                    className={`h-3 w-3 ${isCompact ? 'text-gray-500' : 'text-muted-foreground'}`}
+                  />
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>Ne pas afficher le nombre d'avis sur les cartes produits</p>
@@ -178,13 +200,15 @@ export const ProductStatisticsDisplaySettings : React.FC<ProductStatisticsDispla
           </div>
           <Switch
             checked={formData.hide_reviews_count || false}
-            onCheckedChange={(checked) => updateFormData('hide_reviews_count', checked)}
+            onCheckedChange={checked => updateFormData('hide_reviews_count', checked)}
             aria-label="Masquer le nombre d'avis"
           />
         </div>
 
         {/* Masquer la note moyenne */}
-        <div className={`flex items-center justify-between ${isCompact ? 'p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-gray-300 hover:bg-gray-100 transition-colors' : 'gap-4 min-h-[60px]'}`}>
+        <div
+          className={`flex items-center justify-between ${isCompact ? 'p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-gray-300 hover:bg-gray-100 transition-colors' : 'gap-4 min-h-[60px]'}`}
+        >
           <div className="space-y-1 flex-1">
             <div className="flex items-center gap-2">
               <Label className={isCompact ? 'text-sm font-medium text-gray-900' : ''}>
@@ -192,7 +216,9 @@ export const ProductStatisticsDisplaySettings : React.FC<ProductStatisticsDispla
               </Label>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <HelpCircle className={`h-3 w-3 ${isCompact ? 'text-gray-500' : 'text-muted-foreground'}`} />
+                  <HelpCircle
+                    className={`h-3 w-3 ${isCompact ? 'text-gray-500' : 'text-muted-foreground'}`}
+                  />
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>Ne pas afficher la note moyenne (étoiles) sur les cartes produits</p>
@@ -205,7 +231,7 @@ export const ProductStatisticsDisplaySettings : React.FC<ProductStatisticsDispla
           </div>
           <Switch
             checked={formData.hide_rating || false}
-            onCheckedChange={(checked) => updateFormData('hide_rating', checked)}
+            onCheckedChange={checked => updateFormData('hide_rating', checked)}
             aria-label="Masquer la note moyenne"
           />
         </div>
@@ -213,11 +239,3 @@ export const ProductStatisticsDisplaySettings : React.FC<ProductStatisticsDispla
     </Card>
   );
 };
-
-
-
-
-
-
-
-

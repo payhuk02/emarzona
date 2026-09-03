@@ -1,7 +1,7 @@
 /**
  * Store Task Detail Dialog Component
  * Date: 2 Février 2025
- * 
+ *
  * Dialog affichant les détails d'une tâche avec commentaires
  */
 
@@ -27,21 +27,21 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useAuth } from '@/contexts/AuthContext';
 
-const  PRIORITY_COLORS: Record<string, string> = {
+const PRIORITY_COLORS: Record<string, string> = {
   low: 'bg-gray-500/10 text-gray-700 dark:text-gray-400 border-gray-500/20',
   medium: 'bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20',
   high: 'bg-orange-500/10 text-orange-700 dark:text-orange-400 border-orange-500/20',
   urgent: 'bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20',
 };
 
-const  PRIORITY_LABELS: Record<string, string> = {
+const PRIORITY_LABELS: Record<string, string> = {
   low: 'Basse',
   medium: 'Moyenne',
   high: 'Haute',
   urgent: 'Urgente',
 };
 
-const  STATUS_COLORS: Record<string, string> = {
+const STATUS_COLORS: Record<string, string> = {
   pending: 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-500/20',
   in_progress: 'bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20',
   review: 'bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/20',
@@ -50,7 +50,7 @@ const  STATUS_COLORS: Record<string, string> = {
   on_hold: 'bg-orange-500/10 text-orange-700 dark:text-orange-400 border-orange-500/20',
 };
 
-const  STATUS_LABELS: Record<string, string> = {
+const STATUS_LABELS: Record<string, string> = {
   pending: 'En attente',
   in_progress: 'En cours',
   review: 'En révision',
@@ -69,9 +69,7 @@ export const StoreTaskDetailDialog = ({ open, onClose, taskId }: StoreTaskDetail
   const { store } = useStore();
   const { user } = useAuth();
   const { data: task, isLoading } = useStoreTask(store?.id || null, taskId);
-  const { data: comments, isLoading: commentsLoading } = useStoreTaskComments(
-    open ? taskId : null
-  );
+  const { data: comments, isLoading: commentsLoading } = useStoreTaskComments(open ? taskId : null);
   const createComment = useStoreTaskCommentCreate();
   const updateTask = useStoreTaskUpdate();
   const [commentText, setCommentText] = useState('');
@@ -111,10 +109,7 @@ export const StoreTaskDetailDialog = ({ open, onClose, taskId }: StoreTaskDetail
   };
 
   const getInitials = (email: string): string => {
-    return email
-      .split('@')[0]
-      .slice(0, 2)
-      .toUpperCase();
+    return email.split('@')[0].slice(0, 2).toUpperCase();
   };
 
   if (isLoading) {
@@ -166,7 +161,9 @@ export const StoreTaskDetailDialog = ({ open, onClose, taskId }: StoreTaskDetail
           {task.description && (
             <div>
               <h3 className="font-semibold mb-2">Description</h3>
-              <p className="text-sm text-muted-foreground whitespace-pre-wrap">{task.description}</p>
+              <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                {task.description}
+              </p>
             </div>
           )}
 
@@ -214,7 +211,7 @@ export const StoreTaskDetailDialog = ({ open, onClose, taskId }: StoreTaskDetail
                 Assigné à
               </h3>
               <div className="flex items-center gap-2 flex-wrap">
-                {task.assigned_to_users.map((user) => (
+                {task.assigned_to_users.map(user => (
                   <div key={user.id} className="flex items-center gap-2">
                     <Avatar className="h-8 w-8">
                       <AvatarImage src={user.user_metadata?.avatar_url} />
@@ -238,11 +235,7 @@ export const StoreTaskDetailDialog = ({ open, onClose, taskId }: StoreTaskDetail
               >
                 Commencer
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleStatusChange('completed')}
-              >
+              <Button variant="outline" size="sm" onClick={() => handleStatusChange('completed')}>
                 Marquer comme terminée
               </Button>
             </div>
@@ -258,19 +251,17 @@ export const StoreTaskDetailDialog = ({ open, onClose, taskId }: StoreTaskDetail
             {/* Liste des commentaires */}
             {commentsLoading ? (
               <div className="space-y-4">
-                {[1, 2].map((i) => (
+                {[1, 2].map(i => (
                   <Skeleton key={i} className="h-20 w-full" />
                 ))}
               </div>
             ) : comments && comments.length > 0 ? (
               <div className="space-y-4 max-h-64 overflow-y-auto">
-                {comments.map((comment) => (
+                {comments.map(comment => (
                   <div key={comment.id} className="flex items-start gap-3 p-3 border rounded-lg">
                     <Avatar className="h-8 w-8">
                       <AvatarImage src={comment.user?.user_metadata?.avatar_url} />
-                      <AvatarFallback>
-                        {getInitials(comment.user?.email || '')}
-                      </AvatarFallback>
+                      <AvatarFallback>{getInitials(comment.user?.email || '')}</AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
@@ -278,7 +269,9 @@ export const StoreTaskDetailDialog = ({ open, onClose, taskId }: StoreTaskDetail
                           {comment.user?.user_metadata?.display_name || comment.user?.email}
                         </p>
                         <span className="text-xs text-muted-foreground">
-                          {format(new Date(comment.created_at), 'dd MMM yyyy à HH:mm', { locale: fr })}
+                          {format(new Date(comment.created_at), 'dd MMM yyyy à HH:mm', {
+                            locale: fr,
+                          })}
                         </span>
                       </div>
                       <p className="text-sm text-muted-foreground whitespace-pre-wrap">
@@ -298,7 +291,7 @@ export const StoreTaskDetailDialog = ({ open, onClose, taskId }: StoreTaskDetail
                 <Textarea
                   placeholder="Ajouter un commentaire..."
                   value={commentText}
-                  onChange={(e) => setCommentText(e.target.value)}
+                  onChange={e => setCommentText(e.target.value)}
                   rows={3}
                   disabled={isSubmittingComment}
                 />
@@ -319,10 +312,3 @@ export const StoreTaskDetailDialog = ({ open, onClose, taskId }: StoreTaskDetail
     </Dialog>
   );
 };
-
-
-
-
-
-
-

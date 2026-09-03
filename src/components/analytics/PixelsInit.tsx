@@ -54,10 +54,3 @@ export const PixelsInit = ({
   // Composant invisible
   return null;
 };
-
-
-
-
-
-
-

@@ -24,7 +24,8 @@ export const AchievementsDisplay = ({
   className,
   showLocked = false,
 }: AchievementsDisplayProps) => {
-  const { data: earnedAchievements, isLoading: isLoadingEarned } = useStudentAchievements(enrollmentId);
+  const { data: earnedAchievements, isLoading: isLoadingEarned } =
+    useStudentAchievements(enrollmentId);
   const { data: allAchievements, isLoading: isLoadingAll } = useCourseAchievements(courseId);
 
   const isLoading = isLoadingEarned || isLoadingAll;
@@ -37,7 +38,7 @@ export const AchievementsDisplay = ({
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {[1, 2, 3].map((i) => (
+            {[1, 2, 3].map(i => (
               <Skeleton key={i} className="h-20 w-full" />
             ))}
           </div>
@@ -46,20 +47,21 @@ export const AchievementsDisplay = ({
     );
   }
 
-  const earnedAchievementIds = new Set((earnedAchievements || []).map((a) => a.achievement_id));
+  const earnedAchievementIds = new Set((earnedAchievements || []).map(a => a.achievement_id));
 
   // Si showLocked, afficher tous les achievements, sinon seulement ceux gagnés
-  const achievementsToShow = showLocked && allAchievements
-    ? allAchievements.map((achievement) => ({
-        achievement,
-        earned: earnedAchievementIds.has(achievement.id),
-        earnedAt: earnedAchievements?.find((ea) => ea.achievement_id === achievement.id)?.earned_at,
-      }))
-    : (earnedAchievements || []).map((ea) => ({
-        achievement: ea.achievement,
-        earned: true,
-        earnedAt: ea.earned_at,
-      }));
+  const achievementsToShow =
+    showLocked && allAchievements
+      ? allAchievements.map(achievement => ({
+          achievement,
+          earned: earnedAchievementIds.has(achievement.id),
+          earnedAt: earnedAchievements?.find(ea => ea.achievement_id === achievement.id)?.earned_at,
+        }))
+      : (earnedAchievements || []).map(ea => ({
+          achievement: ea.achievement,
+          earned: true,
+          earnedAt: ea.earned_at,
+        }));
 
   if (achievementsToShow.length === 0) {
     return (
@@ -112,9 +114,7 @@ export const AchievementsDisplay = ({
                       <div
                         className={cn(
                           'h-12 w-12 rounded-full flex items-center justify-center flex-shrink-0',
-                          earned
-                            ? 'bg-primary/10 text-primary'
-                            : 'bg-muted text-muted-foreground'
+                          earned ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'
                         )}
                       >
                         {achievement.icon_url ? (
@@ -123,12 +123,10 @@ export const AchievementsDisplay = ({
                             alt={achievement.title}
                             className="h-10 w-10 rounded-full object-cover"
                           />
+                        ) : earned ? (
+                          <Star className="h-6 w-6 fill-primary" />
                         ) : (
-                          earned ? (
-                            <Star className="h-6 w-6 fill-primary" />
-                          ) : (
-                            <Lock className="h-6 w-6" />
-                          )
+                          <Lock className="h-6 w-6" />
                         )}
                       </div>
 
@@ -143,7 +141,12 @@ export const AchievementsDisplay = ({
                           )}
                         </div>
                         {achievement.description && (
-                          <p className={cn('text-sm mt-1', earned ? 'text-muted-foreground' : 'text-muted-foreground/70')}>
+                          <p
+                            className={cn(
+                              'text-sm mt-1',
+                              earned ? 'text-muted-foreground' : 'text-muted-foreground/70'
+                            )}
+                          >
                             {achievement.description}
                           </p>
                         )}
@@ -186,10 +189,3 @@ export const AchievementsDisplay = ({
     </Card>
   );
 };
-
-
-
-
-
-
-

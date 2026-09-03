@@ -1,5 +1,15 @@
 import {
-  Award, Bell, BookOpen, Download, FileText, Gift, Heart, Package, RotateCcw, ShoppingBag, User,
+  Award,
+  Bell,
+  BookOpen,
+  Download,
+  FileText,
+  Gift,
+  Heart,
+  Package,
+  RotateCcw,
+  ShoppingBag,
+  User,
 } from 'lucide-react';
 import type { PageConfig } from './types';
 

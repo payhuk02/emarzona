@@ -16,7 +16,8 @@ export function useCommunityPostComments(postId: string) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('community_comments')
-        .select(`
+        .select(
+          `
           *,
           author:community_members!author_id (
             id,
@@ -26,7 +27,8 @@ export function useCommunityPostComments(postId: string) {
             profession,
             company
           )
-        `)
+        `
+        )
         .eq('post_id', postId)
         .eq('status', 'published')
         .is('parent_comment_id', null)
@@ -39,10 +41,11 @@ export function useCommunityPostComments(postId: string) {
 
       // Fetch replies for each comment
       const commentsWithReplies = await Promise.all(
-        (data || []).map(async (comment) => {
+        (data || []).map(async comment => {
           const { data: replies } = await supabase
             .from('community_comments')
-            .select(`
+            .select(
+              `
               *,
               author:community_members!author_id (
                 id,
@@ -52,7 +55,8 @@ export function useCommunityPostComments(postId: string) {
                 profession,
                 company
               )
-            `)
+            `
+            )
             .eq('parent_comment_id', comment.id)
             .eq('status', 'published')
             .order('created_at', { ascending: true });
@@ -76,8 +80,16 @@ export function useCreateCommunityComment() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({ postId, formData }: { postId: string; formData: CommunityCommentFormData }) => {
-      const { data: { user } } = await supabase.auth.getUser();
+    mutationFn: async ({
+      postId,
+      formData,
+    }: {
+      postId: string;
+      formData: CommunityCommentFormData;
+    }) => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
       // Get current user's community member profile
@@ -99,7 +111,8 @@ export function useCreateCommunityComment() {
           author_id: member.id,
           ...formData,
         })
-        .select(`
+        .select(
+          `
           *,
           author:community_members!author_id (
             id,
@@ -109,7 +122,8 @@ export function useCreateCommunityComment() {
             profession,
             company
           )
-        `)
+        `
+        )
         .single();
 
       if (error) {
@@ -119,7 +133,7 @@ export function useCreateCommunityComment() {
 
       return data as CommunityComment;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['community-post-comments', data.post_id] });
       queryClient.invalidateQueries({ queryKey: ['community-post', data.post_id] });
       queryClient.invalidateQueries({ queryKey: ['community-posts'] });
@@ -150,7 +164,8 @@ export function useUpdateCommunityComment() {
         .from('community_comments')
         .update({ content })
         .eq('id', commentId)
-        .select(`
+        .select(
+          `
           *,
           author:community_members!author_id (
             id,
@@ -160,7 +175,8 @@ export function useUpdateCommunityComment() {
             profession,
             company
           )
-        `)
+        `
+        )
         .single();
 
       if (error) {
@@ -170,7 +186,7 @@ export function useUpdateCommunityComment() {
 
       return data as CommunityComment;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['community-post-comments', data.post_id] });
       toast({
         title: 'Commentaire mis à jour',
@@ -213,7 +229,7 @@ export function useDeleteCommunityComment() {
 
       return comment?.post_id;
     },
-    onSuccess: (postId) => {
+    onSuccess: postId => {
       if (postId) {
         queryClient.invalidateQueries({ queryKey: ['community-post-comments', postId] });
         queryClient.invalidateQueries({ queryKey: ['community-post', postId] });
@@ -233,10 +249,3 @@ export function useDeleteCommunityComment() {
     },
   });
 }
-
-
-
-
-
-
-

@@ -1,7 +1,7 @@
 /**
  * useDebounce Hook
  * Date: 30 Janvier 2025
- * 
+ *
  * Hook pour debouncer une valeur
  */
 
@@ -28,9 +28,3 @@ export function useDebounce<T>(value: T, delay: number = 300): T {
 
   return debouncedValue;
 }
-
-
-
-
-
-

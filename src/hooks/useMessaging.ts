@@ -46,7 +46,7 @@ export const useMessaging = (
     }
 
     try {
-      let  query= supabase.from('conversations').select(`
+      let query = supabase.from('conversations').select(`
           *,
           order:orders (order_number, total_amount, currency, store_id),
           store:stores (name, slug),
@@ -132,7 +132,7 @@ export const useMessaging = (
 
       if (error) throw error;
       setConversations(data || []);
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error fetching conversations:', error);
       toast({
@@ -154,7 +154,7 @@ export const useMessaging = (
         const from = (page - 1) * messagesPageSize;
         const to = from + messagesPageSize - 1;
 
-        let  query= supabase
+        let query = supabase
           .from('messages')
           .select(
             `
@@ -196,7 +196,7 @@ export const useMessaging = (
         } else {
           setMessages(prev => [...(data || []), ...prev]);
         }
-      } catch ( _error: unknown) {
+      } catch (_error: unknown) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         logger.error('Error fetching messages:', error);
         toast({
@@ -307,7 +307,7 @@ export const useMessaging = (
         unread_messages: unreadMessages,
         admin_interventions: adminInterventions,
       });
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error fetching conversation stats:', error);
     }
@@ -362,7 +362,7 @@ export const useMessaging = (
       await fetchStats();
 
       return data && data.length > 0 ? data[0] : null;
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error creating conversation:', error);
       toast({
@@ -393,7 +393,7 @@ export const useMessaging = (
         .eq('id', conversationId)
         .single();
 
-      let  senderType: 'customer' | 'store' | 'admin' = 'customer';
+      let senderType: 'customer' | 'store' | 'admin' = 'customer';
       if (user.id === conversation?.store_user_id) {
         senderType = 'store';
       } else if (user.id === conversation?.customer_user_id) {
@@ -466,7 +466,7 @@ export const useMessaging = (
               orderId: convData.order_id,
               storeId: convData.store_id,
               messagePreview: formData.content,
-            }).catch( err => {
+            }).catch(err => {
               // Ne pas bloquer l'envoi du message si la notification échoue
               logger.warn('Failed to send order message notification', err);
             });
@@ -483,7 +483,7 @@ export const useMessaging = (
       });
 
       return message;
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error sending message:', error);
       toast({
@@ -502,7 +502,7 @@ export const useMessaging = (
     messageId: string,
     files: File[]
   ): Promise<MessageAttachment[]> => {
-    const  attachments: MessageAttachment[] = [];
+    const attachments: MessageAttachment[] = [];
 
     if (files.length === 0) return attachments;
 
@@ -547,7 +547,7 @@ export const useMessaging = (
         if (data && data.length > 0) {
           attachments.push(data[0]);
         }
-      } catch ( _error: unknown) {
+      } catch (_error: unknown) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         logger.error('Error uploading attachment:', error);
         toast({
@@ -573,7 +573,7 @@ export const useMessaging = (
         .eq('conversation_id', conversationId)
         .neq('sender_id', userId)
         .eq('is_read', false);
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error marking messages as read:', error);
     }
@@ -591,7 +591,7 @@ export const useMessaging = (
         title: 'Conversation fermée',
         description: 'La conversation a été fermée',
       });
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error closing conversation:', error);
       toast({
@@ -625,7 +625,7 @@ export const useMessaging = (
       setMessagesPage(1);
       setHasMoreMessages(true);
       await fetchMessages(conversationId, 1, true);
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error opening conversation:', error);
       toast({
@@ -659,7 +659,7 @@ export const useMessaging = (
         title: 'Intervention admin activée',
         description: 'Un administrateur peut maintenant intervenir dans cette conversation',
       });
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error enabling admin intervention:', error);
       toast({
@@ -758,9 +758,3 @@ export const useMessaging = (
     totalMessagesCount,
   };
 };
-
-
-
-
-
-

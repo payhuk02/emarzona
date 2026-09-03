@@ -1,7 +1,7 @@
 /**
  * Warranties Management Component
  * Date: 27 Janvier 2025
- * 
+ *
  * Gestion des garanties produits (pour admins/store owners)
  */
 
@@ -12,7 +12,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import {
   Dialog,
   DialogContent,
@@ -38,7 +45,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { ProductWarranty } from '@/hooks/physical/useWarranties';
 import { useSpaceInputFix } from '@/hooks/useSpaceInputFix';
 
-const PRODUCT_WARRANTY_FIELDS = 'id, store_id, product_id, warranty_type, warranty_name, description, duration_months, starts_from, coverage_type, coverage_details, requires_registration, requires_invoice, transferable, transfer_fee, is_active, is_default, created_at, updated_at';
+const PRODUCT_WARRANTY_FIELDS =
+  'id, store_id, product_id, warranty_type, warranty_name, description, duration_months, starts_from, coverage_type, coverage_details, requires_registration, requires_invoice, transferable, transfer_fee, is_active, is_default, created_at, updated_at';
 
 export default function WarrantiesManagement() {
   const { store } = useStore();
@@ -84,7 +92,7 @@ export default function WarrantiesManagement() {
 
       if (error) throw error;
       setWarranties(data || []);
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
@@ -168,7 +176,7 @@ export default function WarrantiesManagement() {
       }
       handleCloseDialog();
       loadWarranties();
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
@@ -182,10 +190,7 @@ export default function WarrantiesManagement() {
     if (!confirm('Êtes-vous sûr de vouloir supprimer cette garantie ?')) return;
 
     try {
-      const { error } = await supabase
-        .from('product_warranties')
-        .delete()
-        .eq('id', warrantyId);
+      const { error } = await supabase.from('product_warranties').delete().eq('id', warrantyId);
 
       if (error) throw error;
 
@@ -194,7 +199,7 @@ export default function WarrantiesManagement() {
         description: 'La garantie a été supprimée avec succès',
       });
       loadWarranties();
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
@@ -204,9 +209,10 @@ export default function WarrantiesManagement() {
     }
   };
 
-  const filteredWarranties = warranties.filter(warranty =>
-    warranty.warranty_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    warranty.description?.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredWarranties = warranties.filter(
+    warranty =>
+      warranty.warranty_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      warranty.description?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -214,18 +220,14 @@ export default function WarrantiesManagement() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Gestion des Garanties</h2>
-          <p className="text-muted-foreground">
-            Configurez les garanties pour vos produits
-          </p>
+          <p className="text-muted-foreground">Configurez les garanties pour vos produits</p>
         </div>
       </div>
 
       <Card>
         <CardHeader>
           <CardTitle>Configuration</CardTitle>
-          <CardDescription>
-            Sélectionnez un produit pour gérer ses garanties
-          </CardDescription>
+          <CardDescription>Sélectionnez un produit pour gérer ses garanties</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center gap-4 mb-4">
@@ -234,7 +236,7 @@ export default function WarrantiesManagement() {
               <Input
                 id="product_id"
                 value={productId}
-                onChange={(e) => setProductId(e.target.value)}
+                onChange={e => setProductId(e.target.value)}
                 placeholder="UUID du produit"
               />
             </div>
@@ -264,7 +266,7 @@ export default function WarrantiesManagement() {
               <Input
                 placeholder="Rechercher..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={e => setSearchQuery(e.target.value)}
                 className="max-w-sm"
               />
             </div>
@@ -294,7 +296,7 @@ export default function WarrantiesManagement() {
                         </TableCell>
                       </TableRow>
                     ) : (
-                      filteredWarranties.map((warranty) => (
+                      filteredWarranties.map(warranty => (
                         <TableRow key={warranty.id}>
                           <TableCell>
                             <div className="flex items-center gap-2">
@@ -302,7 +304,9 @@ export default function WarrantiesManagement() {
                               <div>
                                 <div className="font-medium">{warranty.warranty_name}</div>
                                 {warranty.is_default && (
-                                  <Badge variant="outline" className="text-xs mt-1">Par défaut</Badge>
+                                  <Badge variant="outline" className="text-xs mt-1">
+                                    Par défaut
+                                  </Badge>
                                 )}
                               </div>
                             </div>
@@ -317,10 +321,14 @@ export default function WarrantiesManagement() {
                           <TableCell>
                             <div className="flex flex-col gap-1 text-xs">
                               {warranty.requires_registration && (
-                                <Badge variant="outline" className="w-fit">Enregistrement requis</Badge>
+                                <Badge variant="outline" className="w-fit">
+                                  Enregistrement requis
+                                </Badge>
                               )}
                               {warranty.transferable && (
-                                <Badge variant="outline" className="w-fit">Transférable</Badge>
+                                <Badge variant="outline" className="w-fit">
+                                  Transférable
+                                </Badge>
                               )}
                             </div>
                           </TableCell>
@@ -378,7 +386,9 @@ export default function WarrantiesManagement() {
                   <Label htmlFor="warranty_type">Type de garantie *</Label>
                   <Select
                     value={formData.warranty_type || 'store'}
-                    onValueChange={(value: string) => setFormData({ ...formData, warranty_type: value })}
+                    onValueChange={(value: string) =>
+                      setFormData({ ...formData, warranty_type: value })
+                    }
                     required
                   >
                     <SelectTrigger>
@@ -397,7 +407,7 @@ export default function WarrantiesManagement() {
                   <Input
                     id="warranty_name"
                     value={formData.warranty_name || ''}
-                    onChange={(e) => setFormData({ ...formData, warranty_name: e.target.value })}
+                    onChange={e => setFormData({ ...formData, warranty_name: e.target.value })}
                     onKeyDown={handleSpaceKeyDown}
                     required
                   />
@@ -409,7 +419,7 @@ export default function WarrantiesManagement() {
                 <Textarea
                   id="description"
                   value={formData.description || ''}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  onChange={e => setFormData({ ...formData, description: e.target.value })}
                   onKeyDown={handleSpaceKeyDown}
                   rows={3}
                 />
@@ -423,7 +433,9 @@ export default function WarrantiesManagement() {
                     type="number"
                     min="1"
                     value={formData.duration_months || 12}
-                    onChange={(e) => setFormData({ ...formData, duration_months: parseInt(e.target.value) || 12 })}
+                    onChange={e =>
+                      setFormData({ ...formData, duration_months: parseInt(e.target.value) || 12 })
+                    }
                     required
                   />
                 </div>
@@ -431,7 +443,9 @@ export default function WarrantiesManagement() {
                   <Label htmlFor="starts_from">Début *</Label>
                   <Select
                     value={formData.starts_from || 'purchase'}
-                    onValueChange={(value: string) => setFormData({ ...formData, starts_from: value })}
+                    onValueChange={(value: string) =>
+                      setFormData({ ...formData, starts_from: value })
+                    }
                     required
                   >
                     <SelectTrigger>
@@ -448,7 +462,9 @@ export default function WarrantiesManagement() {
                   <Label htmlFor="coverage_type">Couverture *</Label>
                   <Select
                     value={formData.coverage_type || 'full'}
-                    onValueChange={(value: string) => setFormData({ ...formData, coverage_type: value })}
+                    onValueChange={(value: string) =>
+                      setFormData({ ...formData, coverage_type: value })
+                    }
                     required
                   >
                     <SelectTrigger>
@@ -469,7 +485,7 @@ export default function WarrantiesManagement() {
                   <Switch
                     id="is_active"
                     checked={formData.is_active ?? true}
-                    onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
+                    onCheckedChange={checked => setFormData({ ...formData, is_active: checked })}
                   />
                   <Label htmlFor="is_active">Active</Label>
                 </div>
@@ -477,7 +493,7 @@ export default function WarrantiesManagement() {
                   <Switch
                     id="is_default"
                     checked={formData.is_default ?? false}
-                    onCheckedChange={(checked) => setFormData({ ...formData, is_default: checked })}
+                    onCheckedChange={checked => setFormData({ ...formData, is_default: checked })}
                   />
                   <Label htmlFor="is_default">Par défaut</Label>
                 </div>
@@ -485,7 +501,9 @@ export default function WarrantiesManagement() {
                   <Switch
                     id="requires_registration"
                     checked={formData.requires_registration ?? false}
-                    onCheckedChange={(checked) => setFormData({ ...formData, requires_registration: checked })}
+                    onCheckedChange={checked =>
+                      setFormData({ ...formData, requires_registration: checked })
+                    }
                   />
                   <Label htmlFor="requires_registration">Enregistrement requis</Label>
                 </div>
@@ -493,7 +511,7 @@ export default function WarrantiesManagement() {
                   <Switch
                     id="transferable"
                     checked={formData.transferable ?? false}
-                    onCheckedChange={(checked) => setFormData({ ...formData, transferable: checked })}
+                    onCheckedChange={checked => setFormData({ ...formData, transferable: checked })}
                   />
                   <Label htmlFor="transferable">Transférable</Label>
                 </div>
@@ -503,9 +521,7 @@ export default function WarrantiesManagement() {
               <Button type="button" variant="outline" onClick={handleCloseDialog}>
                 Annuler
               </Button>
-              <Button type="submit">
-                {editingWarranty ? 'Mettre à jour' : 'Créer'}
-              </Button>
+              <Button type="submit">{editingWarranty ? 'Mettre à jour' : 'Créer'}</Button>
             </DialogFooter>
           </form>
         </DialogContent>
@@ -513,10 +529,3 @@ export default function WarrantiesManagement() {
     </div>
   );
 }
-
-
-
-
-
-
-

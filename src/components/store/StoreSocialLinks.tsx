@@ -75,7 +75,7 @@ export const StoreSocialLinks = ({
           placeholder="https://facebook.com/votre-page"
           disabled={isSubmitting}
           touched={fieldTouched.facebook_url}
-          validationFn={(val) => validateField?.('facebook_url', val)}
+          validationFn={val => validateField?.('facebook_url', val)}
         />
         <StoreFieldWithValidation
           id="instagram-url"
@@ -87,7 +87,7 @@ export const StoreSocialLinks = ({
           placeholder="https://instagram.com/votre-compte"
           disabled={isSubmitting}
           touched={fieldTouched.instagram_url}
-          validationFn={(val) => validateField?.('instagram_url', val)}
+          validationFn={val => validateField?.('instagram_url', val)}
         />
         <StoreFieldWithValidation
           id="twitter-url"
@@ -99,7 +99,7 @@ export const StoreSocialLinks = ({
           placeholder="https://twitter.com/votre-compte"
           disabled={isSubmitting}
           touched={fieldTouched.twitter_url}
-          validationFn={(val) => validateField?.('twitter_url', val)}
+          validationFn={val => validateField?.('twitter_url', val)}
         />
         <StoreFieldWithValidation
           id="linkedin-url"
@@ -111,7 +111,7 @@ export const StoreSocialLinks = ({
           placeholder="https://linkedin.com/company/votre-entreprise"
           disabled={isSubmitting}
           touched={fieldTouched.linkedin_url}
-          validationFn={(val) => validateField?.('linkedin_url', val)}
+          validationFn={val => validateField?.('linkedin_url', val)}
         />
         <StoreFieldWithValidation
           id="youtube-url"
@@ -123,7 +123,7 @@ export const StoreSocialLinks = ({
           placeholder="https://youtube.com/@votre-chaine"
           disabled={isSubmitting}
           touched={fieldTouched.youtube_url}
-          validationFn={(val) => validateField?.('youtube_url', val)}
+          validationFn={val => validateField?.('youtube_url', val)}
         />
         <StoreFieldWithValidation
           id="tiktok-url"
@@ -135,7 +135,7 @@ export const StoreSocialLinks = ({
           placeholder="https://tiktok.com/@votre-compte"
           disabled={isSubmitting}
           touched={fieldTouched.tiktok_url}
-          validationFn={(val) => validateField?.('tiktok_url', val)}
+          validationFn={val => validateField?.('tiktok_url', val)}
         />
         <StoreFieldWithValidation
           id="pinterest-url"
@@ -147,7 +147,7 @@ export const StoreSocialLinks = ({
           placeholder="https://pinterest.com/votre-compte"
           disabled={isSubmitting}
           touched={fieldTouched.pinterest_url}
-          validationFn={(val) => validateField?.('pinterest_url', val)}
+          validationFn={val => validateField?.('pinterest_url', val)}
         />
         <div className="space-y-2">
           <Label htmlFor="snapchat-url">Snapchat</Label>
@@ -155,7 +155,7 @@ export const StoreSocialLinks = ({
             id="snapchat-url"
             type="url"
             value={snapchatUrl}
-            onChange={(e) => setSnapchatUrl(e.target.value)}
+            onChange={e => setSnapchatUrl(e.target.value)}
             placeholder="https://snapchat.com/add/votre-compte"
             disabled={isSubmitting}
           />
@@ -166,7 +166,7 @@ export const StoreSocialLinks = ({
             id="discord-url"
             type="url"
             value={discordUrl}
-            onChange={(e) => setDiscordUrl(e.target.value)}
+            onChange={e => setDiscordUrl(e.target.value)}
             placeholder="https://discord.gg/votre-serveur"
             disabled={isSubmitting}
           />
@@ -181,7 +181,7 @@ export const StoreSocialLinks = ({
           placeholder="https://twitch.tv/votre-compte"
           disabled={isSubmitting}
           touched={fieldTouched.twitch_url}
-          validationFn={(val) => validateField?.('twitch_url', val)}
+          validationFn={val => validateField?.('twitch_url', val)}
         />
       </div>
     </div>

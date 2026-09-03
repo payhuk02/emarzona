@@ -75,16 +75,3 @@ export type RpcResult<T> = {
   data: T | null;
   error: RpcError | null;
 };
-
-
-
-
-
-
-
-
-
-
-
-
-

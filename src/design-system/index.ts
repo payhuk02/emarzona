@@ -2,7 +2,7 @@
  * 🎨 EMARZONA DESIGN SYSTEM
  * Design system unifié pour tous les templates
  * Inspiré de: Shopify, Systeme.io, Tailwind CSS
- * 
+ *
  * @version 1.0.0
  * @date 2025-01-30
  */
@@ -25,7 +25,7 @@ export const colors = {
     800: '#3730A3',
     900: '#312E81',
   },
-  
+
   // Secondary colors
   secondary: {
     50: '#F5F3FF',
@@ -39,7 +39,7 @@ export const colors = {
     800: '#5B21B6',
     900: '#4C1D95',
   },
-  
+
   // Accent colors
   accent: {
     50: '#FDF2F8',
@@ -53,7 +53,7 @@ export const colors = {
     800: '#9F1239',
     900: '#831843',
   },
-  
+
   // Neutral colors
   gray: {
     50: '#F9FAFB',
@@ -67,7 +67,7 @@ export const colors = {
     800: '#1F2937',
     900: '#111827',
   },
-  
+
   // Semantic colors
   success: {
     50: '#ECFDF5',
@@ -81,7 +81,7 @@ export const colors = {
     800: '#065F46',
     900: '#064E3B',
   },
-  
+
   warning: {
     50: '#FFFBEB',
     100: '#FEF3C7',
@@ -94,7 +94,7 @@ export const colors = {
     800: '#92400E',
     900: '#78350F',
   },
-  
+
   error: {
     50: '#FEF2F2',
     100: '#FEE2E2',
@@ -107,7 +107,7 @@ export const colors = {
     800: '#991B1B',
     900: '#7F1D1D',
   },
-  
+
   // Base colors
   white: '#FFFFFF',
   black: '#000000',
@@ -123,20 +123,20 @@ export const typography = {
     serif: ['Georgia', 'serif'],
     mono: ['JetBrains Mono', 'Fira Code', 'Consolas', 'monospace'],
   },
-  
+
   fontSize: {
-    xs: ['0.75rem', { lineHeight: '1rem' }],      // 12px
-    sm: ['0.875rem', { lineHeight: '1.25rem' }],  // 14px
-    base: ['1rem', { lineHeight: '1.5rem' }],     // 16px
-    lg: ['1.125rem', { lineHeight: '1.75rem' }],  // 18px
-    xl: ['1.25rem', { lineHeight: '1.75rem' }],   // 20px
-    '2xl': ['1.5rem', { lineHeight: '2rem' }],    // 24px
+    xs: ['0.75rem', { lineHeight: '1rem' }], // 12px
+    sm: ['0.875rem', { lineHeight: '1.25rem' }], // 14px
+    base: ['1rem', { lineHeight: '1.5rem' }], // 16px
+    lg: ['1.125rem', { lineHeight: '1.75rem' }], // 18px
+    xl: ['1.25rem', { lineHeight: '1.75rem' }], // 20px
+    '2xl': ['1.5rem', { lineHeight: '2rem' }], // 24px
     '3xl': ['1.875rem', { lineHeight: '2.25rem' }], // 30px
-    '4xl': ['2.25rem', { lineHeight: '2.5rem' }],   // 36px
-    '5xl': ['3rem', { lineHeight: '1' }],          // 48px
-    '6xl': ['3.75rem', { lineHeight: '1' }],       // 60px
+    '4xl': ['2.25rem', { lineHeight: '2.5rem' }], // 36px
+    '5xl': ['3rem', { lineHeight: '1' }], // 48px
+    '6xl': ['3.75rem', { lineHeight: '1' }], // 60px
   },
-  
+
   fontWeight: {
     light: 300,
     normal: 400,
@@ -145,7 +145,7 @@ export const typography = {
     bold: 700,
     extrabold: 800,
   },
-  
+
   letterSpacing: {
     tighter: '-0.05em',
     tight: '-0.025em',
@@ -162,19 +162,19 @@ export const typography = {
 
 export const spacing = {
   0: '0',
-  1: '0.25rem',   // 4px
-  2: '0.5rem',    // 8px
-  3: '0.75rem',   // 12px
-  4: '1rem',      // 16px
-  5: '1.25rem',   // 20px
-  6: '1.5rem',    // 24px
-  8: '2rem',      // 32px
-  10: '2.5rem',   // 40px
-  12: '3rem',     // 48px
-  16: '4rem',     // 64px
-  20: '5rem',     // 80px
-  24: '6rem',     // 96px
-  32: '8rem',     // 128px
+  1: '0.25rem', // 4px
+  2: '0.5rem', // 8px
+  3: '0.75rem', // 12px
+  4: '1rem', // 16px
+  5: '1.25rem', // 20px
+  6: '1.5rem', // 24px
+  8: '2rem', // 32px
+  10: '2.5rem', // 40px
+  12: '3rem', // 48px
+  16: '4rem', // 64px
+  20: '5rem', // 80px
+  24: '6rem', // 96px
+  32: '8rem', // 128px
 } as const;
 
 // ============================================================================
@@ -182,9 +182,10 @@ export const spacing = {
 // ============================================================================
 
 export const breakpoints = {
-  sm: '640px',   // Mobile landscape
-  md: '768px',   // Tablet _lg: '1024px',  // Desktop
-  xl: '1280px',  // Large desktop
+  sm: '640px', // Mobile landscape
+  md: '768px', // Tablet
+  _lg: '1024px', // Desktop
+  xl: '1280px', // Large desktop
   '2xl': '1536px', // Extra large
 } as const;
 
@@ -209,13 +210,13 @@ export const shadows = {
 
 export const borderRadius = {
   none: '0',
-  sm: '0.125rem',   // 2px
-  base: '0.25rem',  // 4px
-  md: '0.375rem',   // 6px
-  lg: '0.5rem',     // 8px
-  xl: '0.75rem',    // 12px
-  '2xl': '1rem',    // 16px
-  '3xl': '1.5rem',  // 24px
+  sm: '0.125rem', // 2px
+  base: '0.25rem', // 4px
+  md: '0.375rem', // 6px
+  lg: '0.5rem', // 8px
+  xl: '0.75rem', // 12px
+  '2xl': '1rem', // 16px
+  '3xl': '1.5rem', // 24px
   full: '9999px',
 } as const;
 
@@ -253,14 +254,3 @@ export const designSystem = {
 } as const;
 
 export default designSystem;
-
-
-
-
-
-
-
-
-
-
-

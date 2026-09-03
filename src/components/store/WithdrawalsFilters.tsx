@@ -9,21 +9,17 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Calendar } from '@/components/ui/calendar';
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Filter, 
-  X, 
-  Calendar as CalendarIcon,
-  Search,
-  DollarSign
-} from 'lucide-react';
+import { Filter, X, Calendar as CalendarIcon, Search, DollarSign } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -43,10 +39,10 @@ interface WithdrawalsFiltersProps {
   showQuickFilters?: boolean;
 }
 
-export const WithdrawalsFilters = ({ 
-  onFiltersChange, 
+export const WithdrawalsFilters = ({
+  onFiltersChange,
   onQuickFilter,
-  showQuickFilters = true 
+  showQuickFilters = true,
 }: WithdrawalsFiltersProps) => {
   const [status, setStatus] = useState<StoreWithdrawalStatus | 'all'>('all');
   const [paymentMethod, setPaymentMethod] = useState<StorePaymentMethod | 'all'>('all');
@@ -80,7 +76,14 @@ export const WithdrawalsFilters = ({
     onFiltersChange({});
   };
 
-  const hasActiveFilters = status !== 'all' || paymentMethod !== 'all' || dateFrom || dateTo || minAmount || maxAmount || search;
+  const hasActiveFilters =
+    status !== 'all' ||
+    paymentMethod !== 'all' ||
+    dateFrom ||
+    dateTo ||
+    minAmount ||
+    maxAmount ||
+    search;
 
   return (
     <Card>
@@ -122,15 +125,17 @@ export const WithdrawalsFilters = ({
       <CardContent className="space-y-3 sm:space-y-4">
         {/* Recherche */}
         <div className="space-y-2">
-          <Label htmlFor="search" className="text-[10px] sm:text-xs md:text-sm">Recherche</Label>
+          <Label htmlFor="search" className="text-[10px] sm:text-xs md:text-sm">
+            Recherche
+          </Label>
           <div className="relative">
             <Search className="absolute left-2.5 sm:left-3 top-1/2 transform -translate-y-1/2 h-3 w-3 sm:h-3.5 sm:w-3.5 text-muted-foreground" />
             <Input
               id="search"
               placeholder="Rechercher par référence, boutique..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleApplyFilters()}
+              onChange={e => setSearch(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleApplyFilters()}
               className="pl-8 sm:pl-10 h-8 sm:h-9 text-[10px] sm:text-xs md:text-sm"
             />
           </div>
@@ -185,8 +190,13 @@ export const WithdrawalsFilters = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 pt-2 border-t">
             {/* Statut */}
             <div className="space-y-2">
-              <Label htmlFor="status" className="text-[10px] sm:text-xs md:text-sm">Statut</Label>
-              <Select value={status} onValueChange={(value: StoreWithdrawalStatus | 'all') => setStatus(value)}>
+              <Label htmlFor="status" className="text-[10px] sm:text-xs md:text-sm">
+                Statut
+              </Label>
+              <Select
+                value={status}
+                onValueChange={(value: StoreWithdrawalStatus | 'all') => setStatus(value)}
+              >
                 <SelectTrigger id="status" className="h-8 sm:h-9 text-[10px] sm:text-xs md:text-sm">
                   <SelectValue />
                 </SelectTrigger>
@@ -203,9 +213,17 @@ export const WithdrawalsFilters = ({
 
             {/* Méthode de paiement */}
             <div className="space-y-2">
-              <Label htmlFor="payment_method" className="text-[10px] sm:text-xs md:text-sm">Méthode de paiement</Label>
-              <Select value={paymentMethod} onValueChange={(value: StorePaymentMethod | 'all') => setPaymentMethod(value)}>
-                <SelectTrigger id="payment_method" className="h-8 sm:h-9 text-[10px] sm:text-xs md:text-sm">
+              <Label htmlFor="payment_method" className="text-[10px] sm:text-xs md:text-sm">
+                Méthode de paiement
+              </Label>
+              <Select
+                value={paymentMethod}
+                onValueChange={(value: StorePaymentMethod | 'all') => setPaymentMethod(value)}
+              >
+                <SelectTrigger
+                  id="payment_method"
+                  className="h-8 sm:h-9 text-[10px] sm:text-xs md:text-sm"
+                >
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent position="popper" className="z-[1060]">
@@ -225,12 +243,12 @@ export const WithdrawalsFilters = ({
                   <Button
                     variant="outline"
                     className={cn(
-                      "w-full justify-start text-left font-normal text-[10px] sm:text-xs md:text-sm h-8 sm:h-9",
-                      !dateFrom && "text-muted-foreground"
+                      'w-full justify-start text-left font-normal text-[10px] sm:text-xs md:text-sm h-8 sm:h-9',
+                      !dateFrom && 'text-muted-foreground'
                     )}
                   >
                     <CalendarIcon className="mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                    {dateFrom ? format(dateFrom, "dd/MM/yyyy", { locale: fr }) : "Sélectionner"}
+                    {dateFrom ? format(dateFrom, 'dd/MM/yyyy', { locale: fr }) : 'Sélectionner'}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -253,12 +271,12 @@ export const WithdrawalsFilters = ({
                   <Button
                     variant="outline"
                     className={cn(
-                      "w-full justify-start text-left font-normal text-[10px] sm:text-xs md:text-sm h-8 sm:h-9",
-                      !dateTo && "text-muted-foreground"
+                      'w-full justify-start text-left font-normal text-[10px] sm:text-xs md:text-sm h-8 sm:h-9',
+                      !dateTo && 'text-muted-foreground'
                     )}
                   >
                     <CalendarIcon className="mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                    {dateTo ? format(dateTo, "dd/MM/yyyy", { locale: fr }) : "Sélectionner"}
+                    {dateTo ? format(dateTo, 'dd/MM/yyyy', { locale: fr }) : 'Sélectionner'}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -275,7 +293,9 @@ export const WithdrawalsFilters = ({
 
             {/* Montant minimum */}
             <div className="space-y-2">
-              <Label htmlFor="min_amount" className="text-[10px] sm:text-xs md:text-sm">Montant minimum (XOF)</Label>
+              <Label htmlFor="min_amount" className="text-[10px] sm:text-xs md:text-sm">
+                Montant minimum (XOF)
+              </Label>
               <div className="relative">
                 <DollarSign className="absolute left-2.5 sm:left-3 top-1/2 transform -translate-y-1/2 h-3 w-3 sm:h-3.5 sm:w-3.5 text-muted-foreground" />
                 <Input
@@ -283,7 +303,7 @@ export const WithdrawalsFilters = ({
                   type="number"
                   placeholder="0"
                   value={minAmount}
-                  onChange={(e) => setMinAmount(e.target.value)}
+                  onChange={e => setMinAmount(e.target.value)}
                   className="pl-8 sm:pl-10 h-8 sm:h-9 text-[10px] sm:text-xs md:text-sm"
                 />
               </div>
@@ -291,7 +311,9 @@ export const WithdrawalsFilters = ({
 
             {/* Montant maximum */}
             <div className="space-y-2">
-              <Label htmlFor="max_amount" className="text-[10px] sm:text-xs md:text-sm">Montant maximum (XOF)</Label>
+              <Label htmlFor="max_amount" className="text-[10px] sm:text-xs md:text-sm">
+                Montant maximum (XOF)
+              </Label>
               <div className="relative">
                 <DollarSign className="absolute left-2.5 sm:left-3 top-1/2 transform -translate-y-1/2 h-3 w-3 sm:h-3.5 sm:w-3.5 text-muted-foreground" />
                 <Input
@@ -299,7 +321,7 @@ export const WithdrawalsFilters = ({
                   type="number"
                   placeholder="0"
                   value={maxAmount}
-                  onChange={(e) => setMaxAmount(e.target.value)}
+                  onChange={e => setMaxAmount(e.target.value)}
                   className="pl-8 sm:pl-10 h-8 sm:h-9 text-[10px] sm:text-xs md:text-sm"
                 />
               </div>
@@ -321,10 +343,3 @@ export const WithdrawalsFilters = ({
     </Card>
   );
 };
-
-
-
-
-
-
-

@@ -1,7 +1,7 @@
 /**
  * Course Prerequisites Hooks
  * Date: 27 Janvier 2025
- * 
+ *
  * Hooks pour gérer les prérequis avancés avec validation
  */
 
@@ -89,7 +89,8 @@ export const useCoursePrerequisites = (courseId: string | undefined) => {
 
       const { data, error } = await supabase
         .from('course_prerequisites')
-        .select(`
+        .select(
+          `
           *,
           required_course:courses!required_course_id (
             id,
@@ -100,7 +101,8 @@ export const useCoursePrerequisites = (courseId: string | undefined) => {
               slug
             )
           )
-        `)
+        `
+        )
         .eq('course_id', courseId)
         .order('order_index', { ascending: true });
 
@@ -142,10 +144,12 @@ export const usePrerequisiteValidations = (
       // Puis récupérer les validations
       const { data, error } = await supabase
         .from('course_prerequisite_validations')
-        .select(`
+        .select(
+          `
           *,
           prerequisite:course_prerequisites (*)
-        `)
+        `
+        )
         .eq('enrollment_id', enrollmentId)
         .in('prerequisite_id', prerequisiteIds);
 
@@ -163,10 +167,7 @@ export const usePrerequisiteValidations = (
 /**
  * useCheckCourseAccess - Vérifie si un utilisateur a accès à un cours
  */
-export const useCheckCourseAccess = (
-  courseId: string | undefined,
-  userId: string | undefined
-) => {
+export const useCheckCourseAccess = (courseId: string | undefined, userId: string | undefined) => {
   return useQuery({
     queryKey: ['course-access', courseId, userId],
     queryFn: async () => {
@@ -261,7 +262,7 @@ export const useCreatePrerequisite = () => {
 
       return data as CoursePrerequisite;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['course-prerequisites', data.course_id] });
       toast({
         title: '✅ Prérequis créé',
@@ -278,10 +279,3 @@ export const useCreatePrerequisite = () => {
     },
   });
 };
-
-
-
-
-
-
-

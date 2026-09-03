@@ -9,7 +9,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { NotificationRulesManager } from '@/components/notifications/NotificationRulesManager';
-import { Bell, Settings, BarChart3, Users, Zap, Mail, Smartphone, MessageSquare } from 'lucide-react';
+import {
+  Bell,
+  Settings,
+  BarChart3,
+  Users,
+  Zap,
+  Mail,
+  Smartphone,
+  MessageSquare,
+} from 'lucide-react';
 import { useStoreContext } from '@/contexts/StoreContext';
 
 const SmartNotificationsPage = () => {
@@ -62,7 +71,9 @@ const SmartNotificationsPage = () => {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Notifications Aujourd'hui</p>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Notifications Aujourd'hui
+                </p>
                 <p className="text-2xl font-bold">247</p>
                 <p className="text-xs text-green-600">+12% vs hier</p>
               </div>
@@ -234,9 +245,7 @@ const SmartNotificationsPage = () => {
               <div className="h-64 flex items-center justify-center border-2 border-dashed border-muted-foreground/25 rounded-lg">
                 <div className="text-center">
                   <BarChart3 className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <p className="text-muted-foreground">
-                    Graphiques de performance à implémenter
-                  </p>
+                  <p className="text-muted-foreground">Graphiques de performance à implémenter</p>
                   <p className="text-sm text-muted-foreground mt-2">
                     Intégration avec Chart.js ou Recharts prévue
                   </p>
@@ -270,8 +279,10 @@ const SmartNotificationsPage = () => {
                     <Badge>Actif</Badge>
                   </div>
                   <div className="text-sm text-muted-foreground bg-muted p-3 rounded">
-                    <strong>Objet:</strong> 🎉 Commande confirmée - {{orderNumber}}<br/>
-                    <strong>Contenu:</strong> Votre commande de {{totalAmount}}€ a été confirmée. Livraison prévue le {{deliveryDate}}.
+                    <strong>Objet:</strong> 🎉 Commande confirmée - {{ orderNumber }}
+                    <br />
+                    <strong>Contenu:</strong> Votre commande de {{ totalAmount }}€ a été confirmée.
+                    Livraison prévue le {{ deliveryDate }}.
                   </div>
                 </div>
 
@@ -289,8 +300,10 @@ const SmartNotificationsPage = () => {
                     <Badge>Actif</Badge>
                   </div>
                   <div className="text-sm text-muted-foreground bg-muted p-3 rounded">
-                    <strong>Titre:</strong> 🛒 Votre panier vous attend<br/>
-                    <strong>Message:</strong> Vous avez {{itemCount}} article(s) en attente. Finalisez votre commande !
+                    <strong>Titre:</strong> 🛒 Votre panier vous attend
+                    <br />
+                    <strong>Message:</strong> Vous avez {{ itemCount }} article(s) en attente.
+                    Finalisez votre commande !
                   </div>
                 </div>
 
@@ -308,8 +321,10 @@ const SmartNotificationsPage = () => {
                     <Badge>Actif</Badge>
                   </div>
                   <div className="text-sm text-muted-foreground bg-muted p-3 rounded">
-                    <strong>Titre:</strong> 💡 Rien que pour vous<br/>
-                    <strong>Message:</strong> Basé sur vos achats, {{productName}} pourrait vous plaire !
+                    <strong>Titre:</strong> 💡 Rien que pour vous
+                    <br />
+                    <strong>Message:</strong> Basé sur vos achats, {{ productName }} pourrait vous
+                    plaire !
                   </div>
                 </div>
               </div>

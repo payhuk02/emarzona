@@ -1,7 +1,7 @@
 /**
  * Warehouse Transfers Component
  * Date: 27 Janvier 2025
- * 
+ *
  * Gestion des transferts entre entrepôts
  * Design responsive avec le même style que Mes Templates
  */
@@ -13,7 +13,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import {
   Dialog,
   DialogContent,
@@ -30,11 +37,28 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { useWarehouses, useWarehouseTransfers, useCreateWarehouseTransfer, useUpdateTransferStatus, WarehouseTransfer } from '@/hooks/physical/useWarehouses';
+import {
+  useWarehouses,
+  useWarehouseTransfers,
+  useCreateWarehouseTransfer,
+  useUpdateTransferStatus,
+  WarehouseTransfer,
+} from '@/hooks/physical/useWarehouses';
 
 type TransferStatus = WarehouseTransfer['status'];
 import { useStore } from '@/hooks/useStore';
-import { Plus, Truck, ArrowRight, Calendar, Search, X, RefreshCw, Package, Clock, CheckCircle2 } from 'lucide-react';
+import {
+  Plus,
+  Truck,
+  ArrowRight,
+  Calendar,
+  Search,
+  X,
+  RefreshCw,
+  Package,
+  Clock,
+  CheckCircle2,
+} from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
@@ -44,7 +68,7 @@ import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useDebounce } from '@/hooks/useDebounce';
 import { cn } from '@/lib/utils';
 
-const  TRANSFER_STATUSES: { value: TransferStatus; label: string; color: string }[] = [
+const TRANSFER_STATUSES: { value: TransferStatus; label: string; color: string }[] = [
   { value: 'pending', label: 'En attente', color: 'bg-yellow-500' },
   { value: 'approved', label: 'Approuvé', color: 'bg-blue-500' },
   { value: 'in_transit', label: 'En transit', color: 'bg-purple-500' },
@@ -68,13 +92,15 @@ export default function WarehouseTransfers() {
   const debouncedSearch = useDebounce(searchInput, 300);
   const [fromWarehouse, setFromWarehouse] = useState<string>('');
   const [toWarehouse, setToWarehouse] = useState<string>('');
-  const [transferItems, setTransferItems] = useState<Array<{
-    product_id: string;
-    variant_id?: string;
-    quantity: number;
-    from_location_id?: string;
-    to_location_id?: string;
-  }>>([{ product_id: '', quantity: 1 }]);
+  const [transferItems, setTransferItems] = useState<
+    Array<{
+      product_id: string;
+      variant_id?: string;
+      quantity: number;
+      from_location_id?: string;
+      to_location_id?: string;
+    }>
+  >([{ product_id: '', quantity: 1 }]);
   const [reason, setReason] = useState('');
   const [notes, setNotes] = useState('');
 
@@ -87,10 +113,14 @@ export default function WarehouseTransfers() {
     return transfers.filter(transfer => {
       const matchesStatus = statusFilter === 'all' || transfer.status === statusFilter;
       const searchLower = debouncedSearch.toLowerCase();
-      const matchesSearch = 
+      const matchesSearch =
         transfer.transfer_number.toLowerCase().includes(searchLower) ||
-        (transfer.from_warehouse as { name?: string } | null)?.name?.toLowerCase().includes(searchLower) ||
-        (transfer.to_warehouse as { name?: string } | null)?.name?.toLowerCase().includes(searchLower);
+        (transfer.from_warehouse as { name?: string } | null)?.name
+          ?.toLowerCase()
+          .includes(searchLower) ||
+        (transfer.to_warehouse as { name?: string } | null)?.name
+          ?.toLowerCase()
+          .includes(searchLower);
       return matchesStatus && matchesSearch;
     });
   }, [transfers, statusFilter, debouncedSearch]);
@@ -154,7 +184,7 @@ export default function WarehouseTransfers() {
       setNotes('');
       setFromWarehouse('');
       setToWarehouse('');
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
@@ -165,7 +195,9 @@ export default function WarehouseTransfers() {
   };
 
   const handleStatusUpdate = async (transferId: string, newStatus: string) => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     await updateStatus.mutateAsync({
       transferId,
       status: newStatus as any,
@@ -199,12 +231,14 @@ export default function WarehouseTransfers() {
       {/* Header Section - Responsive */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700">
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold tracking-tight">Transferts entre Entrepôts</h2>
+          <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
+            Transferts entre Entrepôts
+          </h2>
           <p className="text-xs sm:text-sm text-muted-foreground">
             Gérez les transferts de stock entre vos entrepôts
           </p>
         </div>
-        <Button 
+        <Button
           onClick={() => setIsDialogOpen(true)}
           className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
           size="sm"
@@ -216,15 +250,35 @@ export default function WarehouseTransfers() {
       </div>
 
       {/* Stats Cards - Responsive */}
-      <div 
+      <div
         ref={statsRef}
         className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-4 animate-in fade-in slide-in-from-bottom-4 duration-700"
       >
         {[
-          { label: 'Total Transferts', value: stats.total, icon: Truck, color: 'from-purple-600 to-pink-600' },
-          { label: 'En attente', value: stats.pending, icon: Clock, color: 'from-yellow-600 to-orange-600' },
-          { label: 'En transit', value: stats.inTransit, icon: Package, color: 'from-blue-600 to-cyan-600' },
-          { label: 'Terminés', value: stats.completed, icon: CheckCircle2, color: 'from-green-600 to-emerald-600' },
+          {
+            label: 'Total Transferts',
+            value: stats.total,
+            icon: Truck,
+            color: 'from-purple-600 to-pink-600',
+          },
+          {
+            label: 'En attente',
+            value: stats.pending,
+            icon: Clock,
+            color: 'from-yellow-600 to-orange-600',
+          },
+          {
+            label: 'En transit',
+            value: stats.inTransit,
+            icon: Package,
+            color: 'from-blue-600 to-cyan-600',
+          },
+          {
+            label: 'Terminés',
+            value: stats.completed,
+            icon: CheckCircle2,
+            color: 'from-green-600 to-emerald-600',
+          },
         ].map((stat, index) => {
           const Icon = stat.icon;
           return (
@@ -240,7 +294,9 @@ export default function WarehouseTransfers() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-3 sm:p-4 pt-0">
-                <div className={`text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
+                <div
+                  className={`text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}
+                >
                   {stat.value}
                 </div>
               </CardContent>
@@ -259,7 +315,7 @@ export default function WarehouseTransfers() {
               <Input
                 placeholder="Rechercher..."
                 value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
+                onChange={e => setSearchInput(e.target.value)}
                 className="pl-8 sm:pl-10 h-9 sm:h-10 text-xs sm:text-sm"
                 aria-label="Rechercher"
               />
@@ -283,7 +339,7 @@ export default function WarehouseTransfers() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Tous les statuts</SelectItem>
-                {TRANSFER_STATUSES.map((status) => (
+                {TRANSFER_STATUSES.map(status => (
                   <SelectItem key={status.value} value={status.value}>
                     {status.label}
                   </SelectItem>
@@ -318,7 +374,9 @@ export default function WarehouseTransfers() {
             <div className="text-center py-8 sm:py-12">
               <Truck className="h-12 w-12 sm:h-16 sm:w-16 mx-auto text-muted-foreground mb-4 animate-in zoom-in-95 duration-500" />
               <p className="text-sm sm:text-base text-muted-foreground mb-4">
-                {searchInput || statusFilter !== 'all' ? 'Aucun transfert trouvé' : 'Aucun transfert enregistré'}
+                {searchInput || statusFilter !== 'all'
+                  ? 'Aucun transfert trouvé'
+                  : 'Aucun transfert enregistré'}
               </p>
             </div>
           ) : (
@@ -354,7 +412,7 @@ export default function WarehouseTransfers() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredTransfers.map((transfer) => {
+                    {filteredTransfers.map(transfer => {
                       const status = TRANSFER_STATUSES.find(s => s.value === transfer.status);
                       return (
                         <TableRow key={transfer.id}>
@@ -376,20 +434,22 @@ export default function WarehouseTransfers() {
                             <div className="flex items-center gap-1 text-sm">
                               <Calendar className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                               <span className="truncate">
-                                {format(new Date(transfer.requested_date), 'dd MMM yyyy', { locale: fr })}
+                                {format(new Date(transfer.requested_date), 'dd MMM yyyy', {
+                                  locale: fr,
+                                })}
                               </span>
                             </div>
                           </TableCell>
                           <TableCell>
                             <Select
                               value={transfer.status}
-                              onValueChange={(value) => handleStatusUpdate(transfer.id, value)}
+                              onValueChange={value => handleStatusUpdate(transfer.id, value)}
                             >
                               <SelectTrigger className="w-full sm:w-40 h-8 sm:h-9 text-xs sm:text-sm">
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
-                                {TRANSFER_STATUSES.map((s) => (
+                                {TRANSFER_STATUSES.map(s => (
                                   <SelectItem key={s.value} value={s.value}>
                                     {s.label}
                                   </SelectItem>
@@ -400,7 +460,9 @@ export default function WarehouseTransfers() {
                           <TableCell>
                             {transfer.expected_delivery_date ? (
                               <span className="text-sm truncate block">
-                                {format(new Date(transfer.expected_delivery_date), 'dd MMM yyyy', { locale: fr })}
+                                {format(new Date(transfer.expected_delivery_date), 'dd MMM yyyy', {
+                                  locale: fr,
+                                })}
                               </span>
                             ) : (
                               <span className="text-muted-foreground text-sm">Non définie</span>
@@ -427,9 +489,7 @@ export default function WarehouseTransfers() {
         <DialogContent className="max-w-[95vw] sm:max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Nouveau transfert entrepôt</DialogTitle>
-            <DialogDescription>
-              Créez un transfert de stock entre deux entrepôts
-            </DialogDescription>
+            <DialogDescription>Créez un transfert de stock entre deux entrepôts</DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit}>
             <div className="grid gap-4 py-4">
@@ -441,7 +501,7 @@ export default function WarehouseTransfers() {
                       <SelectValue placeholder="Sélectionner" />
                     </SelectTrigger>
                     <SelectContent>
-                      {warehouses?.map((warehouse) => (
+                      {warehouses?.map(warehouse => (
                         <SelectItem key={warehouse.id} value={warehouse.id}>
                           {warehouse.name} ({warehouse.code})
                         </SelectItem>
@@ -456,11 +516,13 @@ export default function WarehouseTransfers() {
                       <SelectValue placeholder="Sélectionner" />
                     </SelectTrigger>
                     <SelectContent>
-                      {warehouses?.filter(w => w.id !== fromWarehouse).map((warehouse) => (
-                        <SelectItem key={warehouse.id} value={warehouse.id}>
-                          {warehouse.name} ({warehouse.code})
-                        </SelectItem>
-                      ))}
+                      {warehouses
+                        ?.filter(w => w.id !== fromWarehouse)
+                        .map(warehouse => (
+                          <SelectItem key={warehouse.id} value={warehouse.id}>
+                            {warehouse.name} ({warehouse.code})
+                          </SelectItem>
+                        ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -482,7 +544,7 @@ export default function WarehouseTransfers() {
                       <Input
                         placeholder="UUID du produit"
                         value={item.product_id}
-                        onChange={(e) => handleUpdateItem(index, 'product_id', e.target.value)}
+                        onChange={e => handleUpdateItem(index, 'product_id', e.target.value)}
                         required
                       />
                     </div>
@@ -492,7 +554,9 @@ export default function WarehouseTransfers() {
                         type="number"
                         min="1"
                         value={item.quantity}
-                        onChange={(e) => handleUpdateItem(index, 'quantity', parseInt(e.target.value) || 0)}
+                        onChange={e =>
+                          handleUpdateItem(index, 'quantity', parseInt(e.target.value) || 0)
+                        }
                         required
                       />
                     </div>
@@ -501,7 +565,9 @@ export default function WarehouseTransfers() {
                       <Input
                         placeholder="UUID variante"
                         value={item.variant_id || ''}
-                        onChange={(e) => handleUpdateItem(index, 'variant_id', e.target.value || undefined)}
+                        onChange={e =>
+                          handleUpdateItem(index, 'variant_id', e.target.value || undefined)
+                        }
                       />
                     </div>
                     <div className="col-span-1 sm:col-span-1">
@@ -526,7 +592,7 @@ export default function WarehouseTransfers() {
                 <Input
                   id="reason"
                   value={reason}
-                  onChange={(e) => setReason(e.target.value)}
+                  onChange={e => setReason(e.target.value)}
                   placeholder="Ex: Réapprovisionnement, réorganisation..."
                 />
               </div>
@@ -536,7 +602,7 @@ export default function WarehouseTransfers() {
                 <Textarea
                   id="notes"
                   value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
+                  onChange={e => setNotes(e.target.value)}
                   rows={3}
                   placeholder="Notes supplémentaires..."
                 />
@@ -590,8 +656,8 @@ function TransferCard({ transfer, status, onStatusUpdate, animationDelay = 0 }: 
             </div>
           </div>
           {status && (
-            <Badge 
-              variant="outline" 
+            <Badge
+              variant="outline"
               className="flex-shrink-0"
               style={{ borderColor: status.color }}
             >
@@ -614,20 +680,23 @@ function TransferCard({ transfer, status, onStatusUpdate, animationDelay = 0 }: 
           {transfer.expected_delivery_date && (
             <div className="flex items-center gap-2 text-muted-foreground">
               <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
-              <span>Prévu: {format(new Date(transfer.expected_delivery_date), 'dd MMM yyyy', { locale: fr })}</span>
+              <span>
+                Prévu:{' '}
+                {format(new Date(transfer.expected_delivery_date), 'dd MMM yyyy', { locale: fr })}
+              </span>
             </div>
           )}
         </div>
         <div className="flex gap-2 pt-2">
           <Select
             value={transfer.status}
-            onValueChange={(value) => onStatusUpdate(transfer.id, value)}
+            onValueChange={value => onStatusUpdate(transfer.id, value)}
           >
             <SelectTrigger className="flex-1 h-9 text-xs sm:text-sm">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {TRANSFER_STATUSES.map((s) => (
+              {TRANSFER_STATUSES.map(s => (
                 <SelectItem key={s.value} value={s.value}>
                   {s.label}
                 </SelectItem>
@@ -642,9 +711,3 @@ function TransferCard({ transfer, status, onStatusUpdate, animationDelay = 0 }: 
     </Card>
   );
 }
-
-
-
-
-
-

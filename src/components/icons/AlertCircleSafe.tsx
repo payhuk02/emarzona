@@ -9,7 +9,7 @@ import { AlertCircleIcon } from './AlertCircleIcon';
 import { logger } from '@/lib/logger';
 
 // Essayer d'importer AlertCircle de lucide-react, mais utiliser AlertCircleIcon en fallback
-let  AlertCircle: React.ComponentType<any> | null = null;
+let AlertCircle: React.ComponentType<any> | null = null;
 
 try {
   // Import dynamique pour éviter les problèmes de bundling
@@ -33,23 +33,15 @@ interface AlertCircleSafeProps {
  * Composant AlertCircle sécurisé qui utilise AlertCircleIcon en fallback
  * Utilisez ce composant au lieu de AlertCircle directement pour éviter les erreurs en production
  */
-export const AlertCircleSafe : React.FC<AlertCircleSafeProps> = (props) => {
+export const AlertCircleSafe: React.FC<AlertCircleSafeProps> = props => {
   // Si AlertCircle est disponible, l'utiliser, sinon utiliser AlertCircleIcon
   if (AlertCircle) {
     return <AlertCircle {...props} />;
   }
-  
+
   // Fallback vers AlertCircleIcon
   return <AlertCircleIcon {...props} />;
 };
 
 // Export par défaut pour faciliter l'import
 export default AlertCircleSafe;
-
-
-
-
-
-
-
-

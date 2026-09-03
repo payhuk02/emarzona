@@ -83,7 +83,9 @@ export function SerialTraceabilityView({ serialNumberId }: SerialTraceabilityVie
               {serial.warranty_end_date && (
                 <div>
                   <div className="text-sm text-muted-foreground">Garantie jusqu'au</div>
-                  <div>{format(new Date(serial.warranty_end_date), 'dd MMM yyyy', { locale: fr })}</div>
+                  <div>
+                    {format(new Date(serial.warranty_end_date), 'dd MMM yyyy', { locale: fr })}
+                  </div>
                 </div>
               )}
             </div>
@@ -105,12 +107,16 @@ export function SerialTraceabilityView({ serialNumberId }: SerialTraceabilityVie
             <div className="space-y-4">
               {traceability.map((event, index) => (
                 <div key={index} className="flex gap-4 pb-4 border-b last:border-0">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white ${getEventColor(event.event_type)}`}>
+                  <div
+                    className={`w-10 h-10 rounded-full flex items-center justify-center text-white ${getEventColor(event.event_type)}`}
+                  >
                     {getEventIcon(event.event_type)}
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center justify-between mb-1">
-                      <div className="font-medium capitalize">{event.event_type.replace('_', ' ')}</div>
+                      <div className="font-medium capitalize">
+                        {event.event_type.replace('_', ' ')}
+                      </div>
                       <div className="text-sm text-muted-foreground">
                         {format(new Date(event.event_date), 'dd MMM yyyy HH:mm', { locale: fr })}
                       </div>
@@ -126,7 +132,9 @@ export function SerialTraceabilityView({ serialNumberId }: SerialTraceabilityVie
                       </div>
                     )}
                     {event.order_number && (
-                      <div className="text-xs text-muted-foreground">Commande: {event.order_number}</div>
+                      <div className="text-xs text-muted-foreground">
+                        Commande: {event.order_number}
+                      </div>
                     )}
                   </div>
                 </div>
@@ -138,10 +146,3 @@ export function SerialTraceabilityView({ serialNumberId }: SerialTraceabilityVie
     </div>
   );
 }
-
-
-
-
-
-
-

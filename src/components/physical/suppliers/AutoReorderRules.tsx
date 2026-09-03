@@ -1,7 +1,7 @@
 /**
  * Auto Reorder Rules Component
  * Date: 27 Janvier 2025
- * 
+ *
  * Gestion des règles de réapprovisionnement automatique
  */
 
@@ -12,7 +12,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import {
   Dialog,
   DialogContent,
@@ -44,7 +51,17 @@ import { useAutoReorderRules, useSuppliers, AutoReorderRule } from '@/hooks/phys
 import { useStore } from '@/hooks/useStore';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
-import { Plus, Edit, Trash2, AlertTriangle, Package, RefreshCw, Search, X, MoreVertical } from 'lucide-react';
+import {
+  Plus,
+  Edit,
+  Trash2,
+  AlertTriangle,
+  Package,
+  RefreshCw,
+  Search,
+  X,
+  MoreVertical,
+} from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
@@ -92,11 +109,12 @@ export default function AutoReorderRules() {
     if (!debouncedSearch) return rules;
 
     const query = debouncedSearch.toLowerCase();
-    return rules.filter(rule =>
-      (rule.product as any)?.name?.toLowerCase().includes(query) ||
-      (rule.supplier as any)?.name?.toLowerCase().includes(query) ||
-      rule.product_id?.toLowerCase().includes(query) ||
-      rule.variant_id?.toLowerCase().includes(query)
+    return rules.filter(
+      rule =>
+        (rule.product as any)?.name?.toLowerCase().includes(query) ||
+        (rule.supplier as any)?.name?.toLowerCase().includes(query) ||
+        rule.product_id?.toLowerCase().includes(query) ||
+        rule.variant_id?.toLowerCase().includes(query)
     );
   }, [rules, debouncedSearch]);
 
@@ -140,57 +158,60 @@ export default function AutoReorderRules() {
     setEditingRule(null);
   }, []);
 
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!store?.id) return;
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!store?.id) return;
 
-    try {
-      if (editingRule) {
-        // Update
-        const { error } = await supabase
-          .from('auto_reorder_rules')
-          .update({
-            ...formData,
-            updated_at: new Date().toISOString(),
-          })
-          .eq('id', editingRule.id);
+      try {
+        if (editingRule) {
+          // Update
+          const { error } = await supabase
+            .from('auto_reorder_rules')
+            .update({
+              ...formData,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', editingRule.id);
 
-        if (error) throw error;
+          if (error) throw error;
 
-        queryClient.invalidateQueries({ queryKey: ['auto-reorder-rules', store.id] });
+          queryClient.invalidateQueries({ queryKey: ['auto-reorder-rules', store.id] });
+          toast({
+            title: '✅ Règle mise à jour',
+            description: 'La règle de réapprovisionnement a été mise à jour',
+          });
+        } else {
+          // Create
+          const { error } = await supabase
+            .from('auto_reorder_rules')
+            .insert({
+              ...formData,
+              store_id: store.id,
+            })
+            .select()
+            .single();
+
+          if (error) throw error;
+
+          queryClient.invalidateQueries({ queryKey: ['auto-reorder-rules', store.id] });
+          toast({
+            title: '✅ Règle créée',
+            description: 'La règle de réapprovisionnement a été créée',
+          });
+        }
+        handleCloseDialog();
+      } catch (_error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
         toast({
-          title: '✅ Règle mise à jour',
-          description: 'La règle de réapprovisionnement a été mise à jour',
-        });
-      } else {
-        // Create
-        const { error } = await supabase
-          .from('auto_reorder_rules')
-          .insert({
-            ...formData,
-            store_id: store.id,
-          })
-          .select()
-          .single();
-
-        if (error) throw error;
-
-        queryClient.invalidateQueries({ queryKey: ['auto-reorder-rules', store.id] });
-        toast({
-          title: '✅ Règle créée',
-          description: 'La règle de réapprovisionnement a été créée',
+          title: '❌ Erreur',
+          description: errorMessage || 'Une erreur est survenue',
+          variant: 'destructive',
         });
       }
-      handleCloseDialog();
-    } catch ( _error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      toast({
-        title: '❌ Erreur',
-        description: errorMessage || 'Une erreur est survenue',
-        variant: 'destructive',
-      });
-    }
-  }, [store?.id, editingRule, formData, queryClient, toast, handleCloseDialog]);
+    },
+    [store?.id, editingRule, formData, queryClient, toast, handleCloseDialog]
+  );
 
   const handleDeleteClick = useCallback((rule: AutoReorderRule) => {
     setRuleToDelete(rule);
@@ -215,7 +236,7 @@ export default function AutoReorderRules() {
       });
       setDeleteDialogOpen(false);
       setRuleToDelete(null);
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
@@ -251,7 +272,7 @@ export default function AutoReorderRules() {
             type="text"
             placeholder="Rechercher par produit, fournisseur ou ID..."
             value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
+            onChange={e => setSearchInput(e.target.value)}
             onKeyDown={handleKeyDown}
             className="pl-9 pr-9 h-10 sm:h-11 text-sm"
           />
@@ -272,7 +293,7 @@ export default function AutoReorderRules() {
             </Badge>
           </div>
         </div>
-        <Button 
+        <Button
           onClick={() => handleOpenDialog()}
           className="h-10 sm:h-11 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
         >
@@ -283,10 +304,7 @@ export default function AutoReorderRules() {
       </div>
 
       {/* Rules List */}
-      <div
-        ref={rulesRef}
-        className="animate-in fade-in slide-in-from-bottom-4 duration-700"
-      >
+      <div ref={rulesRef} className="animate-in fade-in slide-in-from-bottom-4 duration-700">
         {!rules || filteredRules.length === 0 ? (
           <Card className="border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in zoom-in-95 duration-500">
             <CardContent className="pt-8 sm:pt-12 pb-8 sm:pb-12 text-center">
@@ -319,7 +337,7 @@ export default function AutoReorderRules() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredRules.map((rule) => (
+                  {filteredRules.map(rule => (
                     <TableRow key={rule.id}>
                       <TableCell className="text-xs sm:text-sm">
                         {(rule.product as any)?.name || rule.product_id || 'N/A'}
@@ -345,34 +363,43 @@ export default function AutoReorderRules() {
                       <TableCell className="text-xs sm:text-sm">
                         <div className="flex flex-col gap-1">
                           {rule.auto_create_order && (
-                            <Badge variant="outline" className="text-xs w-fit">Auto-création</Badge>
+                            <Badge variant="outline" className="text-xs w-fit">
+                              Auto-création
+                            </Badge>
                           )}
                           {rule.require_approval && (
-                            <Badge variant="outline" className="text-xs w-fit">Approbation requise</Badge>
+                            <Badge variant="outline" className="text-xs w-fit">
+                              Approbation requise
+                            </Badge>
                           )}
                           {rule.notify_on_reorder && (
-                            <Badge variant="outline" className="text-xs w-fit">Notifications</Badge>
+                            <Badge variant="outline" className="text-xs w-fit">
+                              Notifications
+                            </Badge>
                           )}
                         </div>
                       </TableCell>
                       <TableCell className="text-xs sm:text-sm">
-                        <Badge variant={rule.is_active ? 'default' : 'secondary'} className="text-xs">
+                        <Badge
+                          variant={rule.is_active ? 'default' : 'secondary'}
+                          className="text-xs"
+                        >
                           {rule.is_active ? 'Actif' : 'Inactif'}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
                         <Select>
                           <SelectTrigger className="h-8 w-8 p-0">
-
-                              <MoreVertical className="h-4 w-4" />
-                            
-</SelectTrigger>
+                            <MoreVertical className="h-4 w-4" />
+                          </SelectTrigger>
                           <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                             <SelectItem value="edit" onSelect={() => handleOpenDialog(rule)}>
                               <Edit className="mr-2 h-4 w-4" />
                               Modifier
                             </SelectItem>
-                            <SelectItem value="delete" onSelect={() => handleDeleteClick(rule)}
+                            <SelectItem
+                              value="delete"
+                              onSelect={() => handleDeleteClick(rule)}
                               className="text-destructive"
                             >
                               <Trash2 className="mr-2 h-4 w-4" />
@@ -389,7 +416,7 @@ export default function AutoReorderRules() {
 
             {/* Mobile Cards */}
             <div className="md:hidden space-y-4">
-              {filteredRules.map((rule) => (
+              {filteredRules.map(rule => (
                 <Card
                   key={rule.id}
                   className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-md transition-all duration-300"
@@ -410,16 +437,16 @@ export default function AutoReorderRules() {
                         </div>
                         <Select>
                           <SelectTrigger className="h-8 w-8 p-0">
-
-                              <MoreVertical className="h-4 w-4" />
-                            
-</SelectTrigger>
+                            <MoreVertical className="h-4 w-4" />
+                          </SelectTrigger>
                           <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                             <SelectItem value="copy" onSelect={() => handleOpenDialog(rule)}>
                               <Edit className="mr-2 h-4 w-4" />
                               Modifier
                             </SelectItem>
-                            <SelectItem value="view" onSelect={() => handleDeleteClick(rule)}
+                            <SelectItem
+                              value="view"
+                              onSelect={() => handleDeleteClick(rule)}
                               className="text-destructive"
                             >
                               <Trash2 className="mr-2 h-4 w-4" />
@@ -432,13 +459,17 @@ export default function AutoReorderRules() {
                       <div className="flex items-center gap-2 text-xs sm:text-sm">
                         <AlertTriangle className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                         <span className="text-muted-foreground">Seuil:</span>
-                        <Badge variant="outline" className="text-xs">{rule.reorder_point}</Badge>
+                        <Badge variant="outline" className="text-xs">
+                          {rule.reorder_point}
+                        </Badge>
                       </div>
 
                       <div className="flex items-center gap-2 text-xs sm:text-sm">
                         <Package className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                         <span className="text-muted-foreground">Quantité:</span>
-                        <Badge variant="secondary" className="text-xs">{rule.reorder_quantity}</Badge>
+                        <Badge variant="secondary" className="text-xs">
+                          {rule.reorder_quantity}
+                        </Badge>
                       </div>
 
                       {rule.max_stock_level && (
@@ -448,22 +479,33 @@ export default function AutoReorderRules() {
                         </div>
                       )}
 
-                      {(rule.auto_create_order || rule.require_approval || rule.notify_on_reorder) && (
+                      {(rule.auto_create_order ||
+                        rule.require_approval ||
+                        rule.notify_on_reorder) && (
                         <div className="flex flex-wrap gap-1 text-xs">
                           {rule.auto_create_order && (
-                            <Badge variant="outline" className="text-xs">Auto-création</Badge>
+                            <Badge variant="outline" className="text-xs">
+                              Auto-création
+                            </Badge>
                           )}
                           {rule.require_approval && (
-                            <Badge variant="outline" className="text-xs">Approbation requise</Badge>
+                            <Badge variant="outline" className="text-xs">
+                              Approbation requise
+                            </Badge>
                           )}
                           {rule.notify_on_reorder && (
-                            <Badge variant="outline" className="text-xs">Notifications</Badge>
+                            <Badge variant="outline" className="text-xs">
+                              Notifications
+                            </Badge>
                           )}
                         </div>
                       )}
 
                       <div className="flex items-center gap-2 pt-2 border-t border-border/50">
-                        <Badge variant={rule.is_active ? 'default' : 'secondary'} className="text-xs">
+                        <Badge
+                          variant={rule.is_active ? 'default' : 'secondary'}
+                          className="text-xs"
+                        >
                           {rule.is_active ? 'Actif' : 'Inactif'}
                         </Badge>
                       </div>
@@ -493,21 +535,25 @@ export default function AutoReorderRules() {
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="product_id" className="text-xs sm:text-sm">ID Produit</Label>
+                  <Label htmlFor="product_id" className="text-xs sm:text-sm">
+                    ID Produit
+                  </Label>
                   <Input
                     id="product_id"
                     value={formData.product_id || ''}
-                    onChange={(e) => setFormData({ ...formData, product_id: e.target.value })}
+                    onChange={e => setFormData({ ...formData, product_id: e.target.value })}
                     placeholder="UUID du produit"
                     className="text-sm"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="variant_id" className="text-xs sm:text-sm">ID Variante (optionnel)</Label>
+                  <Label htmlFor="variant_id" className="text-xs sm:text-sm">
+                    ID Variante (optionnel)
+                  </Label>
                   <Input
                     id="variant_id"
                     value={formData.variant_id || ''}
-                    onChange={(e) => setFormData({ ...formData, variant_id: e.target.value })}
+                    onChange={e => setFormData({ ...formData, variant_id: e.target.value })}
                     placeholder="UUID de la variante"
                     className="text-sm"
                   />
@@ -515,17 +561,19 @@ export default function AutoReorderRules() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="supplier_id" className="text-xs sm:text-sm">Fournisseur *</Label>
+                <Label htmlFor="supplier_id" className="text-xs sm:text-sm">
+                  Fournisseur *
+                </Label>
                 <Select
                   value={formData.supplier_id || ''}
-                  onValueChange={(value) => setFormData({ ...formData, supplier_id: value })}
+                  onValueChange={value => setFormData({ ...formData, supplier_id: value })}
                   required
                 >
                   <SelectTrigger className="text-sm">
                     <SelectValue placeholder="Sélectionner un fournisseur" />
                   </SelectTrigger>
                   <SelectContent>
-                    {suppliers?.map((supplier) => (
+                    {suppliers?.map(supplier => (
                       <SelectItem key={supplier.id} value={supplier.id}>
                         {supplier.name}
                       </SelectItem>
@@ -536,13 +584,15 @@ export default function AutoReorderRules() {
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="reorder_point" className="text-xs sm:text-sm">Seuil de réapprovisionnement *</Label>
+                  <Label htmlFor="reorder_point" className="text-xs sm:text-sm">
+                    Seuil de réapprovisionnement *
+                  </Label>
                   <Input
                     id="reorder_point"
                     type="number"
                     min="0"
                     value={formData.reorder_point || 10}
-                    onChange={(e) =>
+                    onChange={e =>
                       setFormData({ ...formData, reorder_point: parseInt(e.target.value) || 0 })
                     }
                     required
@@ -550,13 +600,15 @@ export default function AutoReorderRules() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="reorder_quantity" className="text-xs sm:text-sm">Quantité à commander *</Label>
+                  <Label htmlFor="reorder_quantity" className="text-xs sm:text-sm">
+                    Quantité à commander *
+                  </Label>
                   <Input
                     id="reorder_quantity"
                     type="number"
                     min="1"
                     value={formData.reorder_quantity || 50}
-                    onChange={(e) =>
+                    onChange={e =>
                       setFormData({ ...formData, reorder_quantity: parseInt(e.target.value) || 0 })
                     }
                     required
@@ -564,14 +616,19 @@ export default function AutoReorderRules() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="max_stock_level" className="text-xs sm:text-sm">Stock maximum</Label>
+                  <Label htmlFor="max_stock_level" className="text-xs sm:text-sm">
+                    Stock maximum
+                  </Label>
                   <Input
                     id="max_stock_level"
                     type="number"
                     min="0"
                     value={formData.max_stock_level || ''}
-                    onChange={(e) =>
-                      setFormData({ ...formData, max_stock_level: parseInt(e.target.value) || undefined })
+                    onChange={e =>
+                      setFormData({
+                        ...formData,
+                        max_stock_level: parseInt(e.target.value) || undefined,
+                      })
                     }
                     className="text-sm"
                   />
@@ -583,55 +640,70 @@ export default function AutoReorderRules() {
                   <Switch
                     id="is_active"
                     checked={formData.is_active ?? true}
-                    onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
+                    onCheckedChange={checked => setFormData({ ...formData, is_active: checked })}
                   />
-                  <Label htmlFor="is_active" className="text-xs sm:text-sm">Règle active</Label>
+                  <Label htmlFor="is_active" className="text-xs sm:text-sm">
+                    Règle active
+                  </Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Switch
                     id="auto_create_order"
                     checked={formData.auto_create_order ?? true}
-                    onCheckedChange={(checked) =>
+                    onCheckedChange={checked =>
                       setFormData({ ...formData, auto_create_order: checked })
                     }
                   />
-                  <Label htmlFor="auto_create_order" className="text-xs sm:text-sm">Créer automatiquement la commande</Label>
+                  <Label htmlFor="auto_create_order" className="text-xs sm:text-sm">
+                    Créer automatiquement la commande
+                  </Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Switch
                     id="require_approval"
                     checked={formData.require_approval ?? false}
-                    onCheckedChange={(checked) =>
+                    onCheckedChange={checked =>
                       setFormData({ ...formData, require_approval: checked })
                     }
                   />
-                  <Label htmlFor="require_approval" className="text-xs sm:text-sm">Approbation requise</Label>
+                  <Label htmlFor="require_approval" className="text-xs sm:text-sm">
+                    Approbation requise
+                  </Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Switch
                     id="notify_on_reorder"
                     checked={formData.notify_on_reorder ?? true}
-                    onCheckedChange={(checked) =>
+                    onCheckedChange={checked =>
                       setFormData({ ...formData, notify_on_reorder: checked })
                     }
                   />
-                  <Label htmlFor="notify_on_reorder" className="text-xs sm:text-sm">Notifier lors du réapprovisionnement</Label>
+                  <Label htmlFor="notify_on_reorder" className="text-xs sm:text-sm">
+                    Notifier lors du réapprovisionnement
+                  </Label>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="notes" className="text-xs sm:text-sm">Notes</Label>
+                <Label htmlFor="notes" className="text-xs sm:text-sm">
+                  Notes
+                </Label>
                 <Textarea
                   id="notes"
                   value={formData.notes || ''}
-                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                  onChange={e => setFormData({ ...formData, notes: e.target.value })}
                   rows={3}
                   className="text-sm"
                 />
               </div>
             </div>
             <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
-              <Button type="button" variant="outline" onClick={handleCloseDialog} className="w-full sm:w-auto text-sm">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleCloseDialog}
+                className="w-full sm:w-auto text-sm"
+              >
                 Annuler
               </Button>
               <Button type="submit" className="w-full sm:w-auto text-sm">
@@ -665,9 +737,3 @@ export default function AutoReorderRules() {
     </div>
   );
 }
-
-
-
-
-
-

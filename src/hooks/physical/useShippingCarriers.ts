@@ -1,7 +1,7 @@
 /**
  * Shipping Carriers Hooks
  * Date: 27 Janvier 2025
- * 
+ *
  * Hooks pour gérer les transporteurs et génération d'étiquettes
  */
 
@@ -11,8 +11,10 @@ import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 import { DHLService, FedExService, UPSService, ChronopostService } from '@/integrations/shipping';
 
-const SHIPPING_CARRIER_FIELDS = 'id, store_id, carrier_name, display_name, api_key, api_secret, api_url, account_number, meter_number, is_active, is_default, test_mode, available_services, requires_signature, requires_insurance, requires_customs, supported_countries, supported_states, metadata, created_at, updated_at';
-const SHIPPING_TRACKING_EVENT_FIELDS = 'id, shipping_label_id, tracking_number, event_type, event_description, event_location, latitude, longitude, event_timestamp, metadata, source, created_at';
+const SHIPPING_CARRIER_FIELDS =
+  'id, store_id, carrier_name, display_name, api_key, api_secret, api_url, account_number, meter_number, is_active, is_default, test_mode, available_services, requires_signature, requires_insurance, requires_customs, supported_countries, supported_states, metadata, created_at, updated_at';
+const SHIPPING_TRACKING_EVENT_FIELDS =
+  'id, shipping_label_id, tracking_number, event_type, event_description, event_location, latitude, longitude, event_timestamp, metadata, source, created_at';
 
 // =====================================================
 // TYPES
@@ -21,7 +23,15 @@ const SHIPPING_TRACKING_EVENT_FIELDS = 'id, shipping_label_id, tracking_number, 
 export interface ShippingCarrier {
   id: string;
   store_id: string;
-  carrier_name: 'DHL' | 'FedEx' | 'UPS' | 'Chronopost' | 'DHL_Express' | 'FedEx_Express' | 'UPS_Express' | 'Custom';
+  carrier_name:
+    | 'DHL'
+    | 'FedEx'
+    | 'UPS'
+    | 'Chronopost'
+    | 'DHL_Express'
+    | 'FedEx_Express'
+    | 'UPS_Express'
+    | 'Custom';
   display_name: string;
   api_key?: string;
   api_secret?: string;
@@ -152,8 +162,8 @@ export const useCalculateCarrierRates = () => {
       }
 
       // Initialiser service selon transporteur
-      let  rates: any[] = [];
-      
+      let rates: any[] = [];
+
       if (carrier.carrier_name === 'DHL' || carrier.carrier_name === 'DHL_Express') {
         const dhlService = new DHLService({
           apiKey: carrier.api_key || '',
@@ -161,7 +171,7 @@ export const useCalculateCarrierRates = () => {
           apiUrl: carrier.api_url,
           testMode: carrier.test_mode,
         });
-        
+
         rates = await dhlService.getRates({
           from,
           to,
@@ -178,7 +188,7 @@ export const useCalculateCarrierRates = () => {
           apiUrl: carrier.api_url,
           testMode: carrier.test_mode,
         });
-        
+
         rates = await fedexService.getRates({
           from,
           to,
@@ -193,7 +203,7 @@ export const useCalculateCarrierRates = () => {
           accountNumber: carrier.account_number,
           testMode: carrier.test_mode,
         });
-        
+
         const upsRates = await upsService.getRates({
           from: {
             country: from.country,
@@ -207,7 +217,7 @@ export const useCalculateCarrierRates = () => {
           weightUnit: 'kg',
           dimensions,
         });
-        
+
         // Convertir format UPS vers format standard
         rates = upsRates.map(rate => ({
           serviceType: rate.serviceType,
@@ -283,8 +293,8 @@ export const useGenerateShippingLabel = () => {
       const { data: labelNumber } = await supabase.rpc('generate_shipping_label_number');
 
       // Générer étiquette via API transporteur
-      let  labelResponse: any;
-      
+      let labelResponse: any;
+
       if (carrier.carrier_name === 'DHL' || carrier.carrier_name === 'DHL_Express') {
         const dhlService = new DHLService({
           apiKey: carrier.api_key || '',
@@ -292,15 +302,17 @@ export const useGenerateShippingLabel = () => {
           apiUrl: carrier.api_url,
           testMode: carrier.test_mode,
         });
-        
+
         labelResponse = await dhlService.createLabel({
           shipment: {
             shipper: fromAddress,
             recipient: toAddress,
-            packages: [{
-              weight,
-              dimensions: dimensions || { length: 0, width: 0, height: 0 },
-            }],
+            packages: [
+              {
+                weight,
+                dimensions: dimensions || { length: 0, width: 0, height: 0 },
+              },
+            ],
             serviceType,
           },
         });
@@ -313,15 +325,17 @@ export const useGenerateShippingLabel = () => {
           apiUrl: carrier.api_url,
           testMode: carrier.test_mode,
         });
-        
+
         labelResponse = await fedexService.createLabel({
           shipment: {
             shipper: fromAddress,
             recipient: toAddress,
-            packages: [{
-              weight,
-              dimensions: dimensions || { length: 0, width: 0, height: 0 },
-            }],
+            packages: [
+              {
+                weight,
+                dimensions: dimensions || { length: 0, width: 0, height: 0 },
+              },
+            ],
             serviceType,
           },
         });
@@ -333,7 +347,7 @@ export const useGenerateShippingLabel = () => {
           apiUrl: carrier.api_url,
           testMode: carrier.test_mode,
         });
-        
+
         labelResponse = await upsService.createLabel({
           shipment: {
             shipper: {
@@ -344,10 +358,12 @@ export const useGenerateShippingLabel = () => {
               ...toAddress,
               state: toAddress.state || toAddress.state_province,
             },
-            packages: [{
-              weight,
-              dimensions: dimensions || { length: 0, width: 0, height: 0 },
-            }],
+            packages: [
+              {
+                weight,
+                dimensions: dimensions || { length: 0, width: 0, height: 0 },
+              },
+            ],
             serviceType,
           },
         });
@@ -358,15 +374,17 @@ export const useGenerateShippingLabel = () => {
           apiUrl: carrier.api_url,
           testMode: carrier.test_mode,
         });
-        
+
         labelResponse = await chronopostService.createLabel({
           shipment: {
             shipper: fromAddress,
             recipient: toAddress,
-            packages: [{
-              weight,
-              dimensions: dimensions || { length: 0, width: 0, height: 0 },
-            }],
+            packages: [
+              {
+                weight,
+                dimensions: dimensions || { length: 0, width: 0, height: 0 },
+              },
+            ],
             serviceType,
           },
         });
@@ -409,14 +427,14 @@ export const useGenerateShippingLabel = () => {
       queryClient.invalidateQueries({ queryKey: ['shipping-labels'] });
       toast({
         title: '✅ Étiquette générée',
-        description: 'L\'étiquette d\'expédition a été générée avec succès',
+        description: "L'étiquette d'expédition a été générée avec succès",
       });
     },
     onError: (error: any) => {
       logger.error('Error in useGenerateShippingLabel', { error });
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de générer l\'étiquette',
+        description: error.message || "Impossible de générer l'étiquette",
         variant: 'destructive',
       });
     },
@@ -434,7 +452,8 @@ export const useShippingLabels = (storeId?: string) => {
 
       const { data, error } = await supabase
         .from('shipping_labels')
-        .select(`
+        .select(
+          `
           *,
           carrier:shipping_carriers (
             id,
@@ -445,7 +464,8 @@ export const useShippingLabels = (storeId?: string) => {
             id,
             order_number
           )
-        `)
+        `
+        )
         .eq('store_id', storeId)
         .order('created_at', { ascending: false });
 
@@ -502,18 +522,21 @@ export const useTrackShipment = (trackingNumber?: string, carrierId?: string) =>
 
                 if (label) {
                   for (const event of events) {
-                    await supabase.from('shipping_tracking_events').upsert({
-                      shipping_label_id: label.id,
-                      tracking_number: trackingNumber,
-                      event_type: event.eventType,
-                      event_description: event.eventDescription,
-                      event_location: event.eventLocation,
-                      event_timestamp: event.eventTimestamp,
-                      metadata: event,
-                      source: 'api',
-                    }, {
-                      onConflict: 'tracking_number,event_timestamp,event_type',
-                    });
+                    await supabase.from('shipping_tracking_events').upsert(
+                      {
+                        shipping_label_id: label.id,
+                        tracking_number: trackingNumber,
+                        event_type: event.eventType,
+                        event_description: event.eventDescription,
+                        event_location: event.eventLocation,
+                        event_timestamp: event.eventTimestamp,
+                        metadata: event,
+                        source: 'api',
+                      },
+                      {
+                        onConflict: 'tracking_number,event_timestamp,event_type',
+                      }
+                    );
                   }
                 }
               }
@@ -553,18 +576,21 @@ export const useTrackShipment = (trackingNumber?: string, carrierId?: string) =>
 
                 if (label) {
                   for (const event of events) {
-                    await supabase.from('shipping_tracking_events').upsert({
-                      shipping_label_id: label.id,
-                      tracking_number: trackingNumber,
-                      event_type: event.eventType,
-                      event_description: event.eventDescription,
-                      event_location: event.eventLocation,
-                      event_timestamp: event.eventTimestamp,
-                      metadata: event,
-                      source: 'api',
-                    }, {
-                      onConflict: 'tracking_number,event_timestamp,event_type',
-                    });
+                    await supabase.from('shipping_tracking_events').upsert(
+                      {
+                        shipping_label_id: label.id,
+                        tracking_number: trackingNumber,
+                        event_type: event.eventType,
+                        event_description: event.eventDescription,
+                        event_location: event.eventLocation,
+                        event_timestamp: event.eventTimestamp,
+                        metadata: event,
+                        source: 'api',
+                      },
+                      {
+                        onConflict: 'tracking_number,event_timestamp,event_type',
+                      }
+                    );
                   }
                 }
               }
@@ -610,10 +636,3 @@ export const useTrackShipment = (trackingNumber?: string, carrierId?: string) =>
     refetchInterval: 300000, // Refetch toutes les 5 minutes
   });
 };
-
-
-
-
-
-
-

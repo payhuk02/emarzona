@@ -215,7 +215,9 @@ export default function AdminVendorBilling() {
                         <TableRow key={p.id}>
                           <TableCell className="font-medium">{p.name}</TableCell>
                           <TableCell>{p.trial_days ? `${p.trial_days} jours` : '—'}</TableCell>
-                          <TableCell>{formatCurrency(convertCurrency(Number(p.monthly_price), 'USD', 'XOF'))}</TableCell>
+                          <TableCell>
+                            {formatCurrency(convertCurrency(Number(p.monthly_price), 'USD', 'XOF'))}
+                          </TableCell>
                           <TableCell>
                             {stats.byPlan.find(b => b.plan === p.name)?.count ?? 0}
                           </TableCell>
@@ -270,7 +272,11 @@ export default function AdminVendorBilling() {
                             <TableCell className="font-medium">{row.stores?.name ?? '—'}</TableCell>
                             <TableCell>{row.platform_vendor_plans?.name ?? '—'}</TableCell>
                             <TableCell>{statusBadge(row.status)}</TableCell>
-                            <TableCell>{formatCurrency(convertCurrency(Number(row.mrr_amount), 'USD', 'XOF'))}</TableCell>
+                            <TableCell>
+                              {formatCurrency(
+                                convertCurrency(Number(row.mrr_amount), 'USD', 'XOF')
+                              )}
+                            </TableCell>
                             <TableCell className="text-sm text-muted-foreground">
                               {row.current_period_end
                                 ? format(new Date(row.current_period_end), 'dd MMM yyyy', {

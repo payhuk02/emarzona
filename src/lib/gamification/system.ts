@@ -53,7 +53,8 @@ export interface LeaderboardEntry {
  * Classe principale pour la gamification
  */
 export class GamificationSystem {
-  private static readonly USER_BADGE_FIELDS = 'id,user_id,badge_id,earned_at,progress,max_progress,created_at,updated_at';
+  private static readonly USER_BADGE_FIELDS =
+    'id,user_id,badge_id,earned_at,progress,max_progress,created_at,updated_at';
 
   /**
    * Ajouter des points à un utilisateur
@@ -74,7 +75,9 @@ export class GamificationSystem {
         .single();
 
       if (transactionError || !transactionData) {
-        throw new Error(`Failed to add points transaction: ${transactionError?.message || 'Unknown error'}`);
+        throw new Error(
+          `Failed to add points transaction: ${transactionError?.message || 'Unknown error'}`
+        );
       }
 
       // Mettre à jour le total de points de l'utilisateur
@@ -89,7 +92,10 @@ export class GamificationSystem {
       }
 
       const currentPoints = userPoints?.total_points || 0;
-      const newTotal = transaction.type === 'earn' ? currentPoints + transaction.amount : currentPoints - transaction.amount;
+      const newTotal =
+        transaction.type === 'earn'
+          ? currentPoints + transaction.amount
+          : currentPoints - transaction.amount;
 
       const { error: updateError } = await supabase.from('user_points').upsert(
         {
@@ -201,7 +207,11 @@ export class GamificationSystem {
       }
 
       // Ajouter des points si le badge en donne
-      const { data: badge } = await supabase.from('badges').select('points').eq('id', badgeId).single();
+      const { data: badge } = await supabase
+        .from('badges')
+        .select('points')
+        .eq('id', badgeId)
+        .single();
       if (badge?.points) {
         await this.addPoints({
           userId,
@@ -243,9 +253,9 @@ export class GamificationSystem {
         throw new Error(`Failed to get leaderboard: ${error.message}`);
       }
 
-      const  leaderboard: LeaderboardEntry[] = [];
+      const leaderboard: LeaderboardEntry[] = [];
 
-      for (let  i= 0; i < (users || []).length; i++) {
+      for (let i = 0; i < (users || []).length; i++) {
         const user = users[i];
         const points = user.total_points || 0;
         const level = this.calculateLevel(points);
@@ -359,11 +369,3 @@ export class GamificationSystem {
 
 // Instance singleton
 export const gamificationSystem = new GamificationSystem();
-
-
-
-
-
-
-
-

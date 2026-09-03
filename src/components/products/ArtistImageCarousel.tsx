@@ -147,9 +147,3 @@ export function ArtistImageCarousel({
     </div>
   );
 }
-
-
-
-
-
-

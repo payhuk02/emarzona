@@ -29,13 +29,11 @@ export const PhysicalInventoryConfig = ({ data, onUpdate }: PhysicalInventoryCon
                 <Package className="h-5 w-5" />
                 Suivi des stocks
               </CardTitle>
-              <CardDescription>
-                Gérez automatiquement la quantité disponible
-              </CardDescription>
+              <CardDescription>Gérez automatiquement la quantité disponible</CardDescription>
             </div>
             <Switch
               checked={data.track_inventory ?? true}
-              onCheckedChange={(checked) => onUpdate({ track_inventory: checked })}
+              onCheckedChange={checked => onUpdate({ track_inventory: checked })}
             />
           </div>
         </CardHeader>
@@ -49,11 +47,9 @@ export const PhysicalInventoryConfig = ({ data, onUpdate }: PhysicalInventoryCon
                 id="sku"
                 placeholder="Ex: TSH-COT-BLK-L"
                 value={data.sku || ''}
-                onChange={(e) => onUpdate({ sku: e.target.value })}
+                onChange={e => onUpdate({ sku: e.target.value })}
               />
-              <p className="text-xs text-muted-foreground">
-                Identifiant unique pour ce produit
-              </p>
+              <p className="text-xs text-muted-foreground">Identifiant unique pour ce produit</p>
             </div>
 
             {/* Barcode */}
@@ -63,7 +59,7 @@ export const PhysicalInventoryConfig = ({ data, onUpdate }: PhysicalInventoryCon
                 id="barcode"
                 placeholder="Ex: 123456789012"
                 value={data.barcode || ''}
-                onChange={(e) => onUpdate({ barcode: e.target.value })}
+                onChange={e => onUpdate({ barcode: e.target.value })}
               />
             </div>
 
@@ -76,7 +72,7 @@ export const PhysicalInventoryConfig = ({ data, onUpdate }: PhysicalInventoryCon
                   type="number"
                   min="0"
                   value={data.quantity || 0}
-                  onChange={(e) => onUpdate({ quantity: parseInt(e.target.value) || 0 })}
+                  onChange={e => onUpdate({ quantity: parseInt(e.target.value) || 0 })}
                 />
               </div>
             )}
@@ -86,7 +82,9 @@ export const PhysicalInventoryConfig = ({ data, onUpdate }: PhysicalInventoryCon
               <Label>Politique de stock</Label>
               <RadioGroup
                 value={data.inventory_policy || 'deny'}
-                onValueChange={(value) => onUpdate({ inventory_policy: value as 'deny' | 'continue' })}
+                onValueChange={value =>
+                  onUpdate({ inventory_policy: value as 'deny' | 'continue' })
+                }
               >
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="deny" id="deny" />
@@ -125,10 +123,3 @@ export const PhysicalInventoryConfig = ({ data, onUpdate }: PhysicalInventoryCon
     </div>
   );
 };
-
-
-
-
-
-
-

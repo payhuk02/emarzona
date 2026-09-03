@@ -10,7 +10,7 @@ import { logger } from '@/lib/logger';
  * - DigitalProductStatusIndicator
  * - DownloadInfoDisplay
  */
-export const DigitalDay1Demo : React.FC = () => {
+export const DigitalDay1Demo: React.FC = () => {
   return (
     <div className="container mx-auto py-8 space-y-8">
       <div className="space-y-2">
@@ -74,7 +74,7 @@ export const DigitalDay1Demo : React.FC = () => {
           <TabsContent value="default" className="space-y-4">
             <Card className="p-6 space-y-4">
               <h3 className="font-semibold mb-4">Exemples Default</h3>
-              
+
               {/* Published avec revenue */}
               <DigitalProductStatusIndicator
                 status="published"
@@ -116,7 +116,7 @@ export const DigitalDay1Demo : React.FC = () => {
           <TabsContent value="detailed" className="space-y-4">
             <Card className="p-6 space-y-4">
               <h3 className="font-semibold mb-4">Exemples Detailed</h3>
-              
+
               {/* Active avec toutes les métriques */}
               <DigitalProductStatusIndicator
                 status="active"
@@ -327,7 +327,7 @@ export const DigitalDay1Demo : React.FC = () => {
                 licenseKey="REACT-2024-ABCD-1234-EFGH"
                 protectionLevel="standard"
                 showActions={true}
-                onAction={(action) => logger.info('Action', { action })}
+                onAction={action => logger.info('Action', { action })}
               />
 
               {/* Completed */}
@@ -378,7 +378,7 @@ export const DigitalDay1Demo : React.FC = () => {
                 downloadCount={0}
                 downloadLimit={10}
                 showActions={true}
-                onAction={(action) => logger.info('Action', { action })}
+                onAction={action => logger.info('Action', { action })}
               />
             </Card>
           </TabsContent>
@@ -400,7 +400,8 @@ export const DigitalDay1Demo : React.FC = () => {
                   id: 'cust-premium-001',
                   name: 'Marie Dupont',
                   email: 'marie.dupont@example.com',
-                  avatar: 'https://ui-avatars.com/api/?name=Marie+Dupont&background=3b82f6&color=fff',
+                  avatar:
+                    'https://ui-avatars.com/api/?name=Marie+Dupont&background=3b82f6&color=fff',
                   location: 'Paris, France',
                   ipAddress: '192.168.1.1',
                 }}
@@ -420,7 +421,7 @@ export const DigitalDay1Demo : React.FC = () => {
                 paymentMethod="Carte bancaire"
                 protectionLevel="advanced"
                 showActions={true}
-                onAction={(action) => logger.info('Action', { action })}
+                onAction={action => logger.info('Action', { action })}
               />
 
               {/* Completed sans licence restante */}
@@ -434,7 +435,8 @@ export const DigitalDay1Demo : React.FC = () => {
                   id: 'cust-002',
                   name: 'Jean Martin',
                   email: 'jean.martin@example.com',
-                  avatar: 'https://ui-avatars.com/api/?name=Jean+Martin&background=10b981&color=fff',
+                  avatar:
+                    'https://ui-avatars.com/api/?name=Jean+Martin&background=10b981&color=fff',
                   location: 'Lyon, France',
                 }}
                 product={{
@@ -465,7 +467,8 @@ export const DigitalDay1Demo : React.FC = () => {
                   id: 'cust-003',
                   name: 'Sophie Leblanc',
                   email: 'sophie@example.com',
-                  avatar: 'https://ui-avatars.com/api/?name=Sophie+Leblanc&background=ef4444&color=fff',
+                  avatar:
+                    'https://ui-avatars.com/api/?name=Sophie+Leblanc&background=ef4444&color=fff',
                   location: 'Marseille, France',
                 }}
                 product={{
@@ -483,7 +486,7 @@ export const DigitalDay1Demo : React.FC = () => {
                 paymentMethod="Stripe"
                 protectionLevel="basic"
                 showActions={true}
-                onAction={(action) => logger.info('Action', { action })}
+                onAction={action => logger.info('Action', { action })}
               />
 
               {/* Suspended avec activité suspecte */}
@@ -497,7 +500,8 @@ export const DigitalDay1Demo : React.FC = () => {
                   id: 'cust-004',
                   name: 'Lucas Bernard',
                   email: 'lucas@example.com',
-                  avatar: 'https://ui-avatars.com/api/?name=Lucas+Bernard&background=ec4899&color=fff',
+                  avatar:
+                    'https://ui-avatars.com/api/?name=Lucas+Bernard&background=ec4899&color=fff',
                   location: 'Toulouse, France',
                 }}
                 product={{
@@ -537,11 +541,3 @@ export const DigitalDay1Demo : React.FC = () => {
 };
 
 export default DigitalDay1Demo;
-
-
-
-
-
-
-
-

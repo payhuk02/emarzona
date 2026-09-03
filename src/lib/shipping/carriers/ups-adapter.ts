@@ -5,7 +5,11 @@
  */
 
 import { logger } from '@/lib/logger';
-import type { CarrierAdapter, CarrierTrackingResponse, TrackingUpdate } from '../automatic-tracking';
+import type {
+  CarrierAdapter,
+  CarrierTrackingResponse,
+  TrackingUpdate,
+} from '../automatic-tracking';
 
 export class UPSAdapter implements CarrierAdapter {
   name = 'UPS';
@@ -18,7 +22,10 @@ export class UPSAdapter implements CarrierAdapter {
     this.clientSecret = config?.clientSecret as string;
   }
 
-  async track(trackingNumber: string, carrierConfig?: Record<string, unknown>): Promise<CarrierTrackingResponse> {
+  async track(
+    trackingNumber: string,
+    carrierConfig?: Record<string, unknown>
+  ): Promise<CarrierTrackingResponse> {
     try {
       if (!this.clientId || !this.clientSecret) {
         logger.warn('UPS API credentials not configured, using simulation', { trackingNumber });
@@ -54,7 +61,7 @@ export class UPSAdapter implements CarrierAdapter {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
-          'Authorization': `Basic ${credentials}`,
+          Authorization: `Basic ${credentials}`,
         },
         body: 'grant_type=client_credentials',
       });
@@ -78,10 +85,10 @@ export class UPSAdapter implements CarrierAdapter {
     const response = await fetch(`${this.baseUrl}/api/track/v1/details/${trackingNumber}`, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${accessToken}`,
+        Authorization: `Bearer ${accessToken}`,
         'Content-Type': 'application/json',
-        'transId': `track-${Date.now()}`,
-        'transactionSrc': 'emarzona',
+        transId: `track-${Date.now()}`,
+        transactionSrc: 'emarzona',
       },
     });
 
@@ -97,18 +104,21 @@ export class UPSAdapter implements CarrierAdapter {
    */
   private transformResponse(trackingNumber: string, data: any): CarrierTrackingResponse {
     const trackResponse = data?.TrackResponse?.Shipment?.[0];
-    
+
     if (!trackResponse) {
       return this.simulateTracking(trackingNumber);
     }
 
-    const  events: TrackingUpdate[] = [];
+    const events: TrackingUpdate[] = [];
     const activities = trackResponse.Package?.[0]?.Activity || [];
 
     for (const activity of activities) {
       events.push({
         event_type: this.mapUPSStatus(activity.Status?.StatusType?.Code || ''),
-        description: activity.Status?.StatusType?.Description || activity.Status?.Description || 'Événement de tracking',
+        description:
+          activity.Status?.StatusType?.Description ||
+          activity.Status?.Description ||
+          'Événement de tracking',
         event_timestamp: activity.Date || new Date().toISOString(),
         location: {
           city: activity.ActivityLocation?.Address?.City || '',
@@ -120,7 +130,9 @@ export class UPSAdapter implements CarrierAdapter {
       });
     }
 
-    const latestStatus = this.mapUPSStatus(trackResponse.Package?.[0]?.Activity?.[0]?.Status?.StatusType?.Code || '');
+    const latestStatus = this.mapUPSStatus(
+      trackResponse.Package?.[0]?.Activity?.[0]?.Status?.StatusType?.Code || ''
+    );
     const estimatedDelivery = trackResponse.ScheduledDelivery?.Date;
 
     return {
@@ -136,13 +148,13 @@ export class UPSAdapter implements CarrierAdapter {
    * Mappe les statuts UPS vers nos statuts standard
    */
   private mapUPSStatus(upsStatus: string): string {
-    const  statusMap: Record<string, string> = {
-      'I': 'in_transit', // In Transit
-      'D': 'delivered', // Delivered
-      'X': 'cancelled', // Cancelled
-      'P': 'picked_up', // Picked Up
-      'M': 'label_created', // Manifested
-      'O': 'out_for_delivery', // Out for Delivery
+    const statusMap: Record<string, string> = {
+      I: 'in_transit', // In Transit
+      D: 'delivered', // Delivered
+      X: 'cancelled', // Cancelled
+      P: 'picked_up', // Picked Up
+      M: 'label_created', // Manifested
+      O: 'out_for_delivery', // Out for Delivery
     };
 
     return statusMap[upsStatus] || 'in_transit';
@@ -160,10 +172,3 @@ export class UPSAdapter implements CarrierAdapter {
     };
   }
 }
-
-
-
-
-
-
-

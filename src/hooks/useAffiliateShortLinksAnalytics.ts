@@ -55,10 +55,7 @@ export interface OptimizationSuggestions {
 /**
  * Hook pour récupérer les analytics avancés des liens courts
  */
-export const useAffiliateShortLinksAnalytics = (
-  affiliateId?: string,
-  days: number = 30
-) => {
+export const useAffiliateShortLinksAnalytics = (affiliateId?: string, days: number = 30) => {
   return useQuery({
     queryKey: ['affiliate-short-links-analytics', affiliateId, days],
     queryFn: async (): Promise<ShortLinksAnalytics> => {
@@ -115,10 +112,7 @@ export const useShortLinkOptimizationSuggestions = (affiliateId?: string) => {
 /**
  * Hook helper pour combiner analytics et suggestions
  */
-export const useAffiliateShortLinksInsights = (
-  affiliateId?: string,
-  days: number = 30
-) => {
+export const useAffiliateShortLinksInsights = (affiliateId?: string, days: number = 30) => {
   const analytics = useAffiliateShortLinksAnalytics(affiliateId, days);
   const suggestions = useShortLinkOptimizationSuggestions(affiliateId);
 

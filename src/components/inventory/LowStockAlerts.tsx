@@ -17,8 +17,8 @@ interface LowStockAlertsProps {
 export function LowStockAlerts({ alerts, className }: LowStockAlertsProps) {
   if (alerts.length === 0) return null;
 
-  const outOfStock = alerts.filter((a) => a.alert_type === 'out_of_stock');
-  const lowStock = alerts.filter((a) => a.alert_type === 'low_stock');
+  const outOfStock = alerts.filter(a => a.alert_type === 'out_of_stock');
+  const lowStock = alerts.filter(a => a.alert_type === 'low_stock');
 
   return (
     <div className={cn('space-y-4', className)}>
@@ -26,9 +26,7 @@ export function LowStockAlerts({ alerts, className }: LowStockAlertsProps) {
       {outOfStock.length > 0 && (
         <Alert variant="destructive">
           <XCircle className="h-4 w-4" />
-          <AlertTitle className="font-bold">
-            Rupture de Stock ({outOfStock.length})
-          </AlertTitle>
+          <AlertTitle className="font-bold">Rupture de Stock ({outOfStock.length})</AlertTitle>
           <AlertDescription>
             <div className="mt-3 space-y-2">
               {outOfStock.slice(0, 5).map((alert, i) => (
@@ -72,9 +70,7 @@ export function LowStockAlerts({ alerts, className }: LowStockAlertsProps) {
                     <p className="text-xs text-muted-foreground">SKU: {alert.sku}</p>
                   </div>
                   <div className="text-right">
-                    <Badge className="bg-orange-500">
-                      {alert.quantity_available} en stock
-                    </Badge>
+                    <Badge className="bg-orange-500">{alert.quantity_available} en stock</Badge>
                     <p className="text-xs text-muted-foreground mt-1">
                       Seuil: {alert.reorder_point}
                     </p>
@@ -93,10 +89,3 @@ export function LowStockAlerts({ alerts, className }: LowStockAlertsProps) {
     </div>
   );
 }
-
-
-
-
-
-
-

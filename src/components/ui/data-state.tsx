@@ -1,7 +1,7 @@
 /**
  * Composant DataState - Gère les états de données (loading, error, empty, success)
  * Simplifie la gestion des états dans les composants
- * 
+ *
  * @example
  * ```tsx
  * <DataState
@@ -68,7 +68,7 @@ export interface DataStateProps {
 /**
  * Composant DataState
  */
-export const DataState : React.FC<DataStateProps> = ({
+export const DataState: React.FC<DataStateProps> = ({
   loading = false,
   error = null,
   empty = false,
@@ -97,7 +97,7 @@ export const DataState : React.FC<DataStateProps> = ({
             ))}
           </div>
         )}
-        
+
         {skeletonVariant === 'list' && (
           <div className="space-y-3">
             {Array.from({ length: skeletonCount }).map((_, i) => (
@@ -111,7 +111,7 @@ export const DataState : React.FC<DataStateProps> = ({
             ))}
           </div>
         )}
-        
+
         {skeletonVariant === 'table' && (
           <div className="space-y-3">
             <div className="h-10 bg-muted animate-pulse rounded-md" />
@@ -120,7 +120,7 @@ export const DataState : React.FC<DataStateProps> = ({
             ))}
           </div>
         )}
-        
+
         {skeletonVariant === 'default' && (
           <div className="flex flex-col items-center justify-center py-12 space-y-4">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -134,7 +134,7 @@ export const DataState : React.FC<DataStateProps> = ({
   // État d'erreur
   if (error) {
     const errorMessage = typeof error === 'string' ? error : error.message;
-    
+
     return (
       <Alert variant="destructive" className={className}>
         <AlertCircle className="h-4 w-4" />
@@ -142,12 +142,7 @@ export const DataState : React.FC<DataStateProps> = ({
         <AlertDescription className="flex items-center justify-between">
           <span>{errorMessage}</span>
           {onRetry && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onRetry}
-              className="ml-4"
-            >
+            <Button variant="outline" size="sm" onClick={onRetry} className="ml-4">
               <RefreshCw className="h-4 w-4 mr-2" />
               Réessayer
             </Button>
@@ -206,11 +201,3 @@ export function useDataState<T>(
     hasData: !loading && !error && !empty,
   };
 }
-
-
-
-
-
-
-
-

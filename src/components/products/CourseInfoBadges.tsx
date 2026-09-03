@@ -93,7 +93,7 @@ export function CourseLanguageBadge({
     md: 'h-3 w-3 sm:h-4 sm:w-4',
   };
 
-  const  languageLabels: Record<string, string> = {
+  const languageLabels: Record<string, string> = {
     fr: '🇫🇷 Français',
     en: '🇬🇧 Anglais',
     es: '🇪🇸 Espagnol',
@@ -144,7 +144,7 @@ export function CourseDurationBadge({
     md: 'h-3 w-3 sm:h-4 sm:w-4',
   };
 
-  let  displayDuration= '';
+  let displayDuration = '';
   if (durationUnit === 'hours') {
     displayDuration = `${totalDuration}h`;
   } else if (durationUnit === 'minutes') {
@@ -221,10 +221,3 @@ export function CourseModulesBadge({
     </Badge>
   );
 }
-
-
-
-
-
-
-

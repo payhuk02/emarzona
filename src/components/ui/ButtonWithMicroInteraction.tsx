@@ -3,10 +3,10 @@
  * Version améliorée du Button avec animations subtiles et feedback haptique
  */
 
-import * as React from "react";
-import { Button, ButtonProps } from "./button";
-import { useMicroInteractions } from "@/hooks/useMicroInteractions";
-import { cn } from "@/lib/utils";
+import * as React from 'react';
+import { Button, ButtonProps } from './button';
+import { useMicroInteractions } from '@/hooks/useMicroInteractions';
+import { cn } from '@/lib/utils';
 
 interface ButtonWithMicroInteractionProps extends ButtonProps {
   /**
@@ -28,7 +28,7 @@ interface ButtonWithMicroInteractionProps extends ButtonProps {
 
 /**
  * Button avec micro-interactions améliorées
- * 
+ *
  * @example
  * ```tsx
  * <ButtonWithMicroInteraction
@@ -43,13 +43,7 @@ interface ButtonWithMicroInteractionProps extends ButtonProps {
 export const ButtonWithMicroInteraction = React.forwardRef<
   HTMLButtonElement,
   ButtonWithMicroInteractionProps
->(({ 
-  className,
-  animation = 'scale',
-  haptic = true,
-  hapticType = 'light',
-  ...props 
-}, ref) => {
+>(({ className, animation = 'scale', haptic = true, hapticType = 'light', ...props }, ref) => {
   const { interactionProps } = useMicroInteractions({
     haptic,
     hapticType,
@@ -57,21 +51,7 @@ export const ButtonWithMicroInteraction = React.forwardRef<
     duration: 150,
   });
 
-  return (
-    <Button
-      ref={ref}
-      className={cn(className)}
-      {...interactionProps}
-      {...props}
-    />
-  );
+  return <Button ref={ref} className={cn(className)} {...interactionProps} {...props} />;
 });
 
-ButtonWithMicroInteraction.displayName = "ButtonWithMicroInteraction";
-
-
-
-
-
-
-
+ButtonWithMicroInteraction.displayName = 'ButtonWithMicroInteraction';

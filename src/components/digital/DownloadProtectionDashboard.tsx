@@ -1,11 +1,5 @@
 import React, { useState } from 'react';
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
-  CardTitle 
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -16,10 +10,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { 
-  Shield, 
-  Download, 
-  TrendingUp, 
+import {
+  Shield,
+  Download,
+  TrendingUp,
   Activity,
   Clock,
   CheckCircle2,
@@ -30,7 +24,7 @@ import {
 } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { 
+import {
   useDownloadAnalytics,
   useProductDownloadTokens,
   useRevokeDownloadToken,
@@ -90,7 +84,7 @@ export function DownloadProtectionDashboard({ productId }: DownloadProtectionDas
             </p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Taux de réussite</CardTitle>
@@ -113,9 +107,7 @@ export function DownloadProtectionDashboard({ productId }: DownloadProtectionDas
             <div className="text-2xl font-bold text-blue-600">
               {analytics?.totalBytesGB.toFixed(2) || 0} GB
             </div>
-            <p className="text-xs text-muted-foreground">
-              Données transférées
-            </p>
+            <p className="text-xs text-muted-foreground">Données transférées</p>
           </CardContent>
         </Card>
 
@@ -126,11 +118,10 @@ export function DownloadProtectionDashboard({ productId }: DownloadProtectionDas
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {tokens?.filter(t => !t.is_revoked && new Date(t.expires_at) > new Date()).length || 0}
+              {tokens?.filter(t => !t.is_revoked && new Date(t.expires_at) > new Date()).length ||
+                0}
             </div>
-            <p className="text-xs text-muted-foreground">
-              Sur {tokens?.length || 0} total
-            </p>
+            <p className="text-xs text-muted-foreground">Sur {tokens?.length || 0} total</p>
           </CardContent>
         </Card>
       </div>
@@ -148,7 +139,9 @@ export function DownloadProtectionDashboard({ productId }: DownloadProtectionDas
             <div className="text-center py-12 text-muted-foreground">
               <Shield className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p className="text-lg font-medium">Aucun token généré</p>
-              <p className="text-sm">Les tokens seront créés automatiquement lors des téléchargements</p>
+              <p className="text-sm">
+                Les tokens seront créés automatiquement lors des téléchargements
+              </p>
             </div>
           ) : (
             <Table>
@@ -163,7 +156,7 @@ export function DownloadProtectionDashboard({ productId }: DownloadProtectionDas
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {tokens.slice(0, 20).map((token) => {
+                {tokens.slice(0, 20).map(token => {
                   const isExpired = new Date(token.expires_at) < new Date();
                   const isActive = !token.is_revoked && !isExpired;
 
@@ -200,9 +193,9 @@ export function DownloadProtectionDashboard({ productId }: DownloadProtectionDas
                       </TableCell>
                       <TableCell>
                         <div className="text-sm">
-                          {formatDistanceToNow(new Date(token.expires_at), { 
-                            addSuffix: true, 
-                            locale: fr 
+                          {formatDistanceToNow(new Date(token.expires_at), {
+                            addSuffix: true,
+                            locale: fr,
                           })}
                         </div>
                       </TableCell>
@@ -213,16 +206,16 @@ export function DownloadProtectionDashboard({ productId }: DownloadProtectionDas
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-2">
-                          <Button 
-                            variant="ghost" 
+                          <Button
+                            variant="ghost"
                             size="sm"
                             onClick={() => copyToClipboard(token.token)}
                           >
                             <Copy className="h-4 w-4" />
                           </Button>
                           {isActive && (
-                            <Button 
-                              variant="ghost" 
+                            <Button
+                              variant="ghost"
                               size="sm"
                               onClick={() => {
                                 if (confirm('Révoquer ce token ?')) {
@@ -248,9 +241,7 @@ export function DownloadProtectionDashboard({ productId }: DownloadProtectionDas
       <Card>
         <CardHeader>
           <CardTitle>Activité Récente</CardTitle>
-          <CardDescription>
-            Les 10 derniers téléchargements
-          </CardDescription>
+          <CardDescription>Les 10 derniers téléchargements</CardDescription>
         </CardHeader>
         <CardContent>
           {!analytics?.logs || analytics.logs.length === 0 ? (
@@ -260,8 +251,11 @@ export function DownloadProtectionDashboard({ productId }: DownloadProtectionDas
             </div>
           ) : (
             <div className="space-y-2">
-              {analytics.logs.slice(0, 10).map((log) => (
-                <div key={log.id} className="flex items-center justify-between border-b pb-2 last:border-0">
+              {analytics.logs.slice(0, 10).map(log => (
+                <div
+                  key={log.id}
+                  className="flex items-center justify-between border-b pb-2 last:border-0"
+                >
                   <div className="flex items-center gap-3">
                     {log.download_completed ? (
                       <CheckCircle2 className="h-4 w-4 text-green-600" />
@@ -274,7 +268,8 @@ export function DownloadProtectionDashboard({ productId }: DownloadProtectionDas
                       </div>
                       <div className="text-xs text-muted-foreground">
                         {log.ip_address && `IP: ${log.ip_address}`}
-                        {log.bytes_downloaded && ` • ${(log.bytes_downloaded / (1024 * 1024)).toFixed(2)} MB`}
+                        {log.bytes_downloaded &&
+                          ` • ${(log.bytes_downloaded / (1024 * 1024)).toFixed(2)} MB`}
                       </div>
                     </div>
                   </div>
@@ -290,10 +285,3 @@ export function DownloadProtectionDashboard({ productId }: DownloadProtectionDas
     </div>
   );
 }
-
-
-
-
-
-
-

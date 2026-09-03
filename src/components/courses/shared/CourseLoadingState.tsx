@@ -32,10 +32,7 @@ interface ErrorStateProps {
   onRetry?: () => void;
 }
 
-export const ErrorState = ({ 
-  message = 'Une erreur est survenue', 
-  onRetry 
-}: ErrorStateProps) => {
+export const ErrorState = ({ message = 'Une erreur est survenue', onRetry }: ErrorStateProps) => {
   return (
     <Card>
       <CardContent className="p-12">
@@ -65,12 +62,7 @@ interface EmptyStateProps {
   action?: React.ReactNode;
 }
 
-export const EmptyState = ({ 
-  icon, 
-  title, 
-  description, 
-  action 
-}: EmptyStateProps) => {
+export const EmptyState = ({ icon, title, description, action }: EmptyStateProps) => {
   return (
     <Card>
       <CardContent className="p-12">
@@ -82,9 +74,7 @@ export const EmptyState = ({
           )}
           <div className="space-y-2">
             <h3 className="text-xl font-semibold">{title}</h3>
-            {description && (
-              <p className="text-muted-foreground">{description}</p>
-            )}
+            {description && <p className="text-muted-foreground">{description}</p>}
           </div>
           {action}
         </div>
@@ -102,7 +92,7 @@ export const CourseDetailSkeleton = ({ showSidebar = true }: CourseDetailSkeleto
     <div className="space-y-6">
       {/* Hero */}
       <Skeleton className="h-64 w-full" />
-      
+
       {/* Content */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-4">
@@ -110,7 +100,7 @@ export const CourseDetailSkeleton = ({ showSidebar = true }: CourseDetailSkeleto
           <Skeleton className="h-48 w-full" />
           <Skeleton className="h-64 w-full" />
         </div>
-        
+
         {showSidebar && (
           <div className="space-y-4">
             <Skeleton className="h-96 w-full" />
@@ -121,10 +111,3 @@ export const CourseDetailSkeleton = ({ showSidebar = true }: CourseDetailSkeleto
     </div>
   );
 };
-
-
-
-
-
-
-

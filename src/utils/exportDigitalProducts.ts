@@ -46,7 +46,7 @@ export const exportDigitalProductsToCSV = (products: DigitalProductExportData[])
     'Date de création',
   ];
 
-  const  csvRows: string[] = [headers.join(',')];
+  const csvRows: string[] = [headers.join(',')];
 
   for (const product of products) {
     const row = [
@@ -223,7 +223,7 @@ export const exportDigitalProductsToPDF = async (
 
     // Footer avec pagination
     const totalPages = doc.getNumberOfPages();
-    for (let  i= 1; i <= totalPages; i++) {
+    for (let i = 1; i <= totalPages; i++) {
       doc.setPage(i);
       doc.setFontSize(8);
       doc.text(`Page ${i} / ${totalPages}`, pageWidth / 2, pageHeight - 10, { align: 'center' });
@@ -237,9 +237,3 @@ export const exportDigitalProductsToPDF = async (
     throw new Error("Impossible d'exporter en PDF");
   }
 };
-
-
-
-
-
-

@@ -11,15 +11,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Plus, 
-  Trash2, 
-  GripVertical, 
-  CheckCircle2,
-  Save
-} from 'lucide-react';
+import { Plus, Trash2, GripVertical, CheckCircle2, Save } from 'lucide-react';
 import { useCreateQuiz } from '@/hooks/courses/useQuiz';
 
 interface Question {
@@ -47,7 +47,7 @@ export const QuizBuilder = ({ courseId, onSuccess }: QuizBuilderProps) => {
   const createQuiz = useCreateQuiz();
 
   const addQuestion = () => {
-    const  newQuestion: Question = {
+    const newQuestion: Question = {
       id: `temp-${Date.now()}`,
       text: '',
       type: 'multiple_choice',
@@ -60,9 +60,7 @@ export const QuizBuilder = ({ courseId, onSuccess }: QuizBuilderProps) => {
   };
 
   const updateQuestion = (id: string, updates: Partial<Question>) => {
-    setQuestions(questions.map(q => 
-      q.id === id ? { ...q, ...updates } : q
-    ));
+    setQuestions(questions.map(q => (q.id === id ? { ...q, ...updates } : q)));
   };
 
   const deleteQuestion = (id: string) => {
@@ -70,14 +68,16 @@ export const QuizBuilder = ({ courseId, onSuccess }: QuizBuilderProps) => {
   };
 
   const updateOption = (questionId: string, optionIndex: number, value: string) => {
-    setQuestions(questions.map(q => {
-      if (q.id === questionId && q.options) {
-        const newOptions = [...q.options];
-        newOptions[optionIndex] = value;
-        return { ...q, options: newOptions };
-      }
-      return q;
-    }));
+    setQuestions(
+      questions.map(q => {
+        if (q.id === questionId && q.options) {
+          const newOptions = [...q.options];
+          newOptions[optionIndex] = value;
+          return { ...q, options: newOptions };
+        }
+        return q;
+      })
+    );
   };
 
   const handleSubmit = async () => {
@@ -95,23 +95,26 @@ export const QuizBuilder = ({ courseId, onSuccess }: QuizBuilderProps) => {
       orderIndex: index,
     }));
 
-    createQuiz.mutate({
-      courseId,
-      title,
-      description,
-      passingScore,
-      timeLimit,
-      questionsData,
-      orderIndex: 0,
-    }, {
-      onSuccess: () => {
-        if (onSuccess) onSuccess();
-        // Reset form
-        setTitle('');
-        setDescription('');
-        setQuestions([]);
+    createQuiz.mutate(
+      {
+        courseId,
+        title,
+        description,
+        passingScore,
+        timeLimit,
+        questionsData,
+        orderIndex: 0,
       },
-    });
+      {
+        onSuccess: () => {
+          if (onSuccess) onSuccess();
+          // Reset form
+          setTitle('');
+          setDescription('');
+          setQuestions([]);
+        },
+      }
+    );
   };
 
   return (
@@ -127,7 +130,7 @@ export const QuizBuilder = ({ courseId, onSuccess }: QuizBuilderProps) => {
             <Input
               id="quiz-title"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={e => setTitle(e.target.value)}
               placeholder="Ex: Quiz - Module 1"
             />
           </div>
@@ -137,7 +140,7 @@ export const QuizBuilder = ({ courseId, onSuccess }: QuizBuilderProps) => {
             <Textarea
               id="quiz-description"
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={e => setDescription(e.target.value)}
               placeholder="Décrivez ce quiz..."
               rows={3}
             />
@@ -152,7 +155,7 @@ export const QuizBuilder = ({ courseId, onSuccess }: QuizBuilderProps) => {
                 min="0"
                 max="100"
                 value={passingScore}
-                onChange={(e) => setPassingScore(Number(e.target.value))}
+                onChange={e => setPassingScore(Number(e.target.value))}
               />
             </div>
 
@@ -163,7 +166,7 @@ export const QuizBuilder = ({ courseId, onSuccess }: QuizBuilderProps) => {
                 type="number"
                 min="0"
                 value={timeLimit || ''}
-                onChange={(e) => setTimeLimit(e.target.value ? Number(e.target.value) : undefined)}
+                onChange={e => setTimeLimit(e.target.value ? Number(e.target.value) : undefined)}
                 placeholder="Aucune limite"
               />
             </div>
@@ -189,11 +192,7 @@ export const QuizBuilder = ({ courseId, onSuccess }: QuizBuilderProps) => {
                   <GripVertical className="w-5 h-5 text-gray-400" />
                   <Badge variant="outline">Question {index + 1}</Badge>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => deleteQuestion(question.id)}
-                >
+                <Button variant="ghost" size="sm" onClick={() => deleteQuestion(question.id)}>
                   <Trash2 className="w-4 h-4 text-red-600" />
                 </Button>
               </div>
@@ -204,11 +203,13 @@ export const QuizBuilder = ({ courseId, onSuccess }: QuizBuilderProps) => {
                 <Label>Type de question</Label>
                 <Select
                   value={question.type}
-                  onValueChange={(value: any) => updateQuestion(question.id, { 
-                    type: value,
-                    options: value === 'multiple_choice' ? ['', '', '', ''] : undefined,
-                    correctAnswer: value === 'true_false' ? false : '',
-                  })}
+                  onValueChange={(value: any) =>
+                    updateQuestion(question.id, {
+                      type: value,
+                      options: value === 'multiple_choice' ? ['', '', '', ''] : undefined,
+                      correctAnswer: value === 'true_false' ? false : '',
+                    })
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -226,7 +227,7 @@ export const QuizBuilder = ({ courseId, onSuccess }: QuizBuilderProps) => {
                 <Label>Question *</Label>
                 <Textarea
                   value={question.text}
-                  onChange={(e) => updateQuestion(question.id, { text: e.target.value })}
+                  onChange={e => updateQuestion(question.id, { text: e.target.value })}
                   placeholder="Posez votre question..."
                   rows={2}
                 />
@@ -239,7 +240,7 @@ export const QuizBuilder = ({ courseId, onSuccess }: QuizBuilderProps) => {
                   type="number"
                   min="1"
                   value={question.points}
-                  onChange={(e) => updateQuestion(question.id, { points: Number(e.target.value) })}
+                  onChange={e => updateQuestion(question.id, { points: Number(e.target.value) })}
                   className="w-24"
                 />
               </div>
@@ -252,7 +253,7 @@ export const QuizBuilder = ({ courseId, onSuccess }: QuizBuilderProps) => {
                     <div key={optIndex} className="flex items-center gap-2">
                       <Input
                         value={option}
-                        onChange={(e) => updateOption(question.id, optIndex, e.target.value)}
+                        onChange={e => updateOption(question.id, optIndex, e.target.value)}
                         placeholder={`Option ${optIndex + 1}`}
                       />
                       <Button
@@ -295,7 +296,7 @@ export const QuizBuilder = ({ courseId, onSuccess }: QuizBuilderProps) => {
                   <Label>Réponse correcte attendue</Label>
                   <Input
                     value={question.correctAnswer || ''}
-                    onChange={(e) => updateQuestion(question.id, { correctAnswer: e.target.value })}
+                    onChange={e => updateQuestion(question.id, { correctAnswer: e.target.value })}
                     placeholder="La réponse attendue..."
                   />
                 </div>
@@ -306,7 +307,7 @@ export const QuizBuilder = ({ courseId, onSuccess }: QuizBuilderProps) => {
                 <Label>Explication (optionnel)</Label>
                 <Textarea
                   value={question.explanation || ''}
-                  onChange={(e) => updateQuestion(question.id, { explanation: e.target.value })}
+                  onChange={e => updateQuestion(question.id, { explanation: e.target.value })}
                   placeholder="Expliquez pourquoi c'est la bonne réponse..."
                   rows={2}
                 />
@@ -339,10 +340,3 @@ export const QuizBuilder = ({ courseId, onSuccess }: QuizBuilderProps) => {
     </div>
   );
 };
-
-
-
-
-
-
-

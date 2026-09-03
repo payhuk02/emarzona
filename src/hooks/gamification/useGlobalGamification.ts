@@ -1,7 +1,7 @@
 /**
  * Global Gamification Hook
  * Date: 30 Janvier 2025
- * 
+ *
  * Hook pour gérer la gamification globale (points, badges, achievements, leaderboard)
  */
 
@@ -11,10 +11,14 @@ import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 import { useAuth } from '@/contexts/AuthContext';
 
-const USER_GAMIFICATION_FIELDS = 'id, user_id, total_points, points_earned_today, points_earned_this_week, points_earned_this_month, current_streak_days, longest_streak_days, last_activity_date, current_level, experience_points, experience_points_to_next_level, total_products_purchased, total_orders_completed, total_reviews_written, total_referrals, total_badges_earned, total_achievements_unlocked, global_rank, monthly_rank, weekly_rank, created_at, updated_at';
-const GLOBAL_BADGE_FIELDS = 'id, name, description, icon_url, badge_type, points_required, criteria, display_order, is_visible, created_at, updated_at';
-const GLOBAL_ACHIEVEMENT_FIELDS = 'id, title, description, icon_url, achievement_type, criteria, reward_points, display_order, is_visible, created_at, updated_at';
-const USER_POINTS_HISTORY_FIELDS = 'id, user_id, points_earned, points_before, points_after, source_type, source_id, source_description, created_at';
+const USER_GAMIFICATION_FIELDS =
+  'id, user_id, total_points, points_earned_today, points_earned_this_week, points_earned_this_month, current_streak_days, longest_streak_days, last_activity_date, current_level, experience_points, experience_points_to_next_level, total_products_purchased, total_orders_completed, total_reviews_written, total_referrals, total_badges_earned, total_achievements_unlocked, global_rank, monthly_rank, weekly_rank, created_at, updated_at';
+const GLOBAL_BADGE_FIELDS =
+  'id, name, description, icon_url, badge_type, points_required, criteria, display_order, is_visible, created_at, updated_at';
+const GLOBAL_ACHIEVEMENT_FIELDS =
+  'id, title, description, icon_url, achievement_type, criteria, reward_points, display_order, is_visible, created_at, updated_at';
+const USER_POINTS_HISTORY_FIELDS =
+  'id, user_id, points_earned, points_before, points_after, source_type, source_id, source_description, created_at';
 
 // =====================================================
 // TYPES
@@ -98,7 +102,15 @@ export interface PointsHistory {
   points_earned: number;
   points_before: number;
   points_after: number;
-  source_type: 'purchase' | 'review' | 'referral' | 'streak' | 'achievement' | 'badge' | 'engagement' | 'manual';
+  source_type:
+    | 'purchase'
+    | 'review'
+    | 'referral'
+    | 'streak'
+    | 'achievement'
+    | 'badge'
+    | 'engagement'
+    | 'manual';
   source_id?: string;
   source_description?: string;
   created_at: string;
@@ -144,25 +156,27 @@ export const useUserGamification = (userId?: string) => {
           // Essayer d'abord l'insert direct (plus simple)
           const { data: insertData, error: insertError } = await supabase
             .from('user_gamification')
-            .insert([{
-              user_id: targetUserId,
-              total_points: 0,
-              experience_points: 0,
-              current_level: 1,
-              experience_points_to_next_level: 100,
-              points_earned_today: 0,
-              points_earned_this_week: 0,
-              points_earned_this_month: 0,
-              current_streak_days: 0,
-              longest_streak_days: 0,
-              last_activity_date: new Date().toISOString().split('T')[0],
-              total_products_purchased: 0,
-              total_orders_completed: 0,
-              total_reviews_written: 0,
-              total_referrals: 0,
-              total_badges_earned: 0,
-              total_achievements_unlocked: 0,
-            }])
+            .insert([
+              {
+                user_id: targetUserId,
+                total_points: 0,
+                experience_points: 0,
+                current_level: 1,
+                experience_points_to_next_level: 100,
+                points_earned_today: 0,
+                points_earned_this_week: 0,
+                points_earned_this_month: 0,
+                current_streak_days: 0,
+                longest_streak_days: 0,
+                last_activity_date: new Date().toISOString().split('T')[0],
+                total_products_purchased: 0,
+                total_orders_completed: 0,
+                total_reviews_written: 0,
+                total_referrals: 0,
+                total_badges_earned: 0,
+                total_achievements_unlocked: 0,
+              },
+            ])
             .select(USER_GAMIFICATION_FIELDS)
             .single();
 
@@ -176,15 +190,20 @@ export const useUserGamification = (userId?: string) => {
 
             if (retryError) {
               // Si la récupération échoue aussi, essayer la fonction RPC
-              const { data: rpcData, error: rpcError } = await supabase
-                .rpc('initialize_user_gamification', { p_user_id: targetUserId });
+              const { data: rpcData, error: rpcError } = await supabase.rpc(
+                'initialize_user_gamification',
+                { p_user_id: targetUserId }
+              );
 
               if (rpcError) {
                 // Si la fonction RPC échoue, logger l'erreur et relancer l'erreur d'insert
-                logger.error('Error initializing gamification via RPC', { error: rpcError, userId: targetUserId });
+                logger.error('Error initializing gamification via RPC', {
+                  error: rpcError,
+                  userId: targetUserId,
+                });
                 throw insertError; // Relancer l'erreur d'insert original
               }
-              
+
               // La fonction RPC retourne un SETOF (tableau), prendre le premier élément
               if (Array.isArray(rpcData) && rpcData.length > 0) {
                 return rpcData[0] as UserGamification;
@@ -221,10 +240,12 @@ export const useUserBadges = (userId?: string) => {
 
       const { data, error } = await supabase
         .from('user_badges')
-        .select(`
+        .select(
+          `
           *,
           badge:global_badges(${GLOBAL_BADGE_FIELDS})
-        `)
+        `
+        )
         .eq('user_id', targetUserId)
         .order('earned_at', { ascending: false });
 
@@ -256,10 +277,12 @@ export const useUserAchievements = (userId?: string) => {
 
       const { data, error } = await supabase
         .from('user_achievements')
-        .select(`
+        .select(
+          `
           *,
           achievement:global_achievements(${GLOBAL_ACHIEVEMENT_FIELDS})
-        `)
+        `
+        )
         .eq('user_id', targetUserId)
         .order('earned_at', { ascending: false });
 
@@ -281,7 +304,10 @@ export const useUserAchievements = (userId?: string) => {
  * useGlobalLeaderboard - Récupère le leaderboard global
  * Note: Essaie d'abord d'utiliser la vue optimisée, sinon récupère les données séparément
  */
-export const useGlobalLeaderboard = (limit: number = 10, period: 'all' | 'monthly' | 'weekly' = 'all') => {
+export const useGlobalLeaderboard = (
+  limit: number = 10,
+  period: 'all' | 'monthly' | 'weekly' = 'all'
+) => {
   return useQuery({
     queryKey: ['global-leaderboard', limit, period],
     queryFn: async () => {
@@ -289,12 +315,14 @@ export const useGlobalLeaderboard = (limit: number = 10, period: 'all' | 'monthl
       try {
         const { data: viewData, error: viewError } = await supabase
           .from('gamification_leaderboard_view')
-          .select('user_id, user_name, avatar_url, total_points, current_level, current_streak_days, total_products_purchased')
+          .select(
+            'user_id, user_name, avatar_url, total_points, current_level, current_streak_days, total_products_purchased'
+          )
           .limit(limit);
 
         if (!viewError && viewData && viewData.length > 0) {
           // Transformer les données de la vue
-          const  leaderboard: LeaderboardEntry[] = viewData.map((entry: any, index: number) => ({
+          const leaderboard: LeaderboardEntry[] = viewData.map((entry: any, index: number) => ({
             user_id: entry.user_id,
             user_name: entry.user_name || 'Utilisateur',
             user_avatar: entry.avatar_url || undefined,
@@ -314,13 +342,15 @@ export const useGlobalLeaderboard = (limit: number = 10, period: 'all' | 'monthl
       // Méthode de fallback : récupérer les données de gamification (sans jointure)
       const { data: gamificationData, error: gamificationError } = await supabase
         .from('user_gamification')
-        .select(`
+        .select(
+          `
           user_id,
           total_points,
           current_level,
           current_streak_days,
           total_products_purchased
-        `)
+        `
+        )
         .order('total_points', { ascending: false })
         .limit(limit);
 
@@ -336,7 +366,7 @@ export const useGlobalLeaderboard = (limit: number = 10, period: 'all' | 'monthl
           details: gamificationError.details,
           hint: gamificationError.hint,
         });
-        
+
         // Pour toutes les erreurs, retourner un tableau vide pour éviter de casser l'UI
         // L'utilisateur verra simplement "Aucun classement disponible"
         return [] as LeaderboardEntry[];
@@ -349,8 +379,8 @@ export const useGlobalLeaderboard = (limit: number = 10, period: 'all' | 'monthl
 
       // Récupérer les profils séparément pour les user_id trouvés
       const userIds = gamificationData.map(entry => entry.user_id).filter(Boolean) as string[];
-      
-      let  profilesMap= new Map();
+
+      let profilesMap = new Map();
       if (userIds.length > 0) {
         const { data: profilesData, error: profilesError } = await supabase
           .from('profiles')
@@ -359,21 +389,20 @@ export const useGlobalLeaderboard = (limit: number = 10, period: 'all' | 'monthl
 
         // Ignorer les erreurs de profils (pas critique si les profils ne sont pas disponibles)
         if (!profilesError && profilesData) {
-          profilesMap = new Map(
-            profilesData.map(profile => [profile.user_id, profile])
-          );
+          profilesMap = new Map(profilesData.map(profile => [profile.user_id, profile]));
         }
       }
 
       // Transformer les données en combinant gamification et profils
-      const  leaderboard: LeaderboardEntry[] = gamificationData.map((entry, index) => {
+      const leaderboard: LeaderboardEntry[] = gamificationData.map((entry, index) => {
         const profile = profilesMap.get(entry.user_id);
         return {
           user_id: entry.user_id,
-          user_name: profile?.display_name || 
-                    (profile?.first_name || profile?.last_name 
-                      ? `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim()
-                      : 'Utilisateur'),
+          user_name:
+            profile?.display_name ||
+            (profile?.first_name || profile?.last_name
+              ? `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim()
+              : 'Utilisateur'),
           user_avatar: profile?.avatar_url || undefined,
           total_points: entry.total_points || 0,
           current_level: entry.current_level || 1,
@@ -485,16 +514,9 @@ export const useAwardGlobalPoints = () => {
       logger.error('Error in useAwardGlobalPoints', { error });
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible d\'attribuer les points',
+        description: error.message || "Impossible d'attribuer les points",
         variant: 'destructive',
       });
     },
   });
 };
-
-
-
-
-
-
-

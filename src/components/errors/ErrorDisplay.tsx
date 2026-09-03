@@ -65,12 +65,13 @@ export function ErrorDisplay({
     }
   };
 
-  const displayTitle = title || 
-    (normalized.severity === ErrorSeverity.CRITICAL 
-      ? 'Erreur critique' 
+  const displayTitle =
+    title ||
+    (normalized.severity === ErrorSeverity.CRITICAL
+      ? 'Erreur critique'
       : normalized.severity === ErrorSeverity.HIGH
-      ? 'Erreur'
-      : 'Attention');
+        ? 'Erreur'
+        : 'Attention');
 
   return (
     <Alert variant={getVariant()} className={className}>
@@ -106,11 +107,3 @@ export function ErrorDisplay({
     </Alert>
   );
 }
-
-
-
-
-
-
-
-

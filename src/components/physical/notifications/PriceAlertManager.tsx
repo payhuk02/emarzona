@@ -23,16 +23,8 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
-import {
-  DollarSign,
-  Plus,
-  MoreVertical,
-  Trash2,
-  Bell,
-  BellOff,
-  TrendingDown,
-} from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
+import { DollarSign, Plus, MoreVertical, Trash2, Bell, BellOff, TrendingDown } from 'lucide-react';
 import {
   usePriceAlerts,
   useCreatePriceAlert,
@@ -135,7 +127,7 @@ export const PriceAlertManager = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {alerts.map((alert) => {
+                {alerts.map(alert => {
                   const priceDrop = alert.original_price - alert.current_price;
                   const priceDropPercentage = (priceDrop / alert.original_price) * 100;
 
@@ -169,7 +161,7 @@ export const PriceAlertManager = () => {
                         <div className="flex items-center gap-2">
                           <Switch
                             checked={alert.is_active}
-                            onCheckedChange={(checked) =>
+                            onCheckedChange={checked =>
                               toggleAlert.mutate({ alertId: alert.id, isActive: checked })
                             }
                             disabled={toggleAlert.isPending}
@@ -199,13 +191,13 @@ export const PriceAlertManager = () => {
                       <TableCell className="text-right">
                         <Select>
                           <SelectTrigger>
-
-                              <MoreVertical className="h-4 w-4" />
-                            
-</SelectTrigger>
+                            <MoreVertical className="h-4 w-4" />
+                          </SelectTrigger>
                           <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <SelectItem value="edit" onSelect={() =>
+                            <SelectItem
+                              value="edit"
+                              onSelect={() =>
                                 deleteAlert.mutate(alert.id, {
                                   onSuccess: () => {
                                     // Toast déjà géré par le hook
@@ -231,10 +223,3 @@ export const PriceAlertManager = () => {
     </div>
   );
 };
-
-
-
-
-
-
-

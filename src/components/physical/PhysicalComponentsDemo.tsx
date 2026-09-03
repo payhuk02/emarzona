@@ -22,7 +22,7 @@ import type { ShippingInfo } from './ShippingInfoDisplay';
 
 export function PhysicalComponentsDemo() {
   // Sample shipping data
-  const  sampleShipping: ShippingInfo = {
+  const sampleShipping: ShippingInfo = {
     status: 'in_transit',
     trackingNumber: 'TRK123456789',
     carrier: 'DHL Express',
@@ -70,7 +70,7 @@ export function PhysicalComponentsDemo() {
           {/* Variants */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Variants</h3>
-            
+
             <div className="space-y-2">
               <p className="text-sm text-muted-foreground">Compact (in stock)</p>
               <CompactStockIndicator quantity={50} lowStockThreshold={10} />
@@ -83,8 +83,8 @@ export function PhysicalComponentsDemo() {
 
             <div className="space-y-2">
               <p className="text-sm text-muted-foreground">Detailed (out of stock)</p>
-              <DetailedStockIndicator 
-                quantity={0} 
+              <DetailedStockIndicator
+                quantity={0}
                 lowStockThreshold={10}
                 totalSold={45}
                 showProgress={true}
@@ -113,7 +113,7 @@ export function PhysicalComponentsDemo() {
           {/* Variants */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Variants</h3>
-            
+
             <div className="space-y-2">
               <p className="text-sm text-muted-foreground">Compact</p>
               <CompactShippingInfo shipping={sampleShipping} />
@@ -155,8 +155,8 @@ export function PhysicalComponentsDemo() {
           <div className="grid md:grid-cols-2 gap-6">
             <div>
               <h4 className="text-sm font-semibold mb-3">Stock Information</h4>
-              <DetailedStockIndicator 
-                quantity={25} 
+              <DetailedStockIndicator
+                quantity={25}
                 lowStockThreshold={10}
                 totalSold={15}
                 showProgress={true}
@@ -165,12 +165,12 @@ export function PhysicalComponentsDemo() {
             </div>
             <div>
               <h4 className="text-sm font-semibold mb-3">Shipping Information</h4>
-              <ShippingInfoDisplay 
+              <ShippingInfoDisplay
                 shipping={{
                   ...sampleShipping,
                   status: 'delivered',
                   actualDelivery: new Date().toISOString(),
-                }} 
+                }}
               />
             </div>
           </div>
@@ -179,10 +179,3 @@ export function PhysicalComponentsDemo() {
     </div>
   );
 }
-
-
-
-
-
-
-

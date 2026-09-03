@@ -51,7 +51,10 @@ import {
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
-import { StableDropdownMenu, DropdownMenuSeparator as StableDropdownMenuSeparator } from '@/components/ui/dropdown-menu';
+import {
+  StableDropdownMenu,
+  DropdownMenuSeparator as StableDropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
 import type { RecurringBookingPattern } from '@/hooks/service/useRecurringBookings';
 

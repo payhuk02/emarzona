@@ -224,9 +224,3 @@ export const PhysicalShippingConfig = ({ data, onUpdate }: PhysicalShippingConfi
     </div>
   );
 };
-
-
-
-
-
-

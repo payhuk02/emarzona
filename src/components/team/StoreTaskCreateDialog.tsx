@@ -1,7 +1,7 @@
 /**
  * Store Task Create Dialog Component
  * Date: 2 Février 2025
- * 
+ *
  * Dialog pour créer une nouvelle tâche
  */
 
@@ -82,7 +82,7 @@ export const StoreTaskCreateDialog = ({ open, onClose }: StoreTaskCreateDialogPr
   const createTask = useStoreTaskCreate();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const activeMembers = members?.filter((m) => m.status === 'active') || [];
+  const activeMembers = members?.filter(m => m.status === 'active') || [];
 
   const form = useForm<TaskFormValues>({
     resolver: zodResolver(taskSchema),
@@ -115,7 +115,8 @@ export const StoreTaskCreateDialog = ({ open, onClose }: StoreTaskCreateDialogPr
           description: values.description || undefined,
           category: values.category,
           priority: values.priority,
-          assigned_to: values.assigned_to && values.assigned_to.length > 0 ? values.assigned_to : undefined,
+          assigned_to:
+            values.assigned_to && values.assigned_to.length > 0 ? values.assigned_to : undefined,
           due_date: values.due_date || undefined,
           tags: values.tags && values.tags.length > 0 ? values.tags : undefined,
         },
@@ -150,7 +151,11 @@ export const StoreTaskCreateDialog = ({ open, onClose }: StoreTaskCreateDialogPr
                 <FormItem>
                   <FormLabel>Titre *</FormLabel>
                   <FormControl>
-                    <Input placeholder="Ex: Créer un nouveau produit" {...field} disabled={isSubmitting} />
+                    <Input
+                      placeholder="Ex: Créer un nouveau produit"
+                      {...field}
+                      disabled={isSubmitting}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -194,7 +199,7 @@ export const StoreTaskCreateDialog = ({ open, onClose }: StoreTaskCreateDialogPr
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {CATEGORY_OPTIONS.map((category) => (
+                        {CATEGORY_OPTIONS.map(category => (
                           <SelectItem key={category.value} value={category.value}>
                             {category.label}
                           </SelectItem>
@@ -223,7 +228,7 @@ export const StoreTaskCreateDialog = ({ open, onClose }: StoreTaskCreateDialogPr
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {PRIORITY_OPTIONS.map((priority) => (
+                        {PRIORITY_OPTIONS.map(priority => (
                           <SelectItem key={priority.value} value={priority.value}>
                             {priority.label}
                           </SelectItem>
@@ -269,7 +274,7 @@ export const StoreTaskCreateDialog = ({ open, onClose }: StoreTaskCreateDialogPr
                       </FormDescription>
                     </div>
                     <div className="space-y-2 max-h-48 overflow-y-auto border rounded-md p-4">
-                      {activeMembers.map((member) => (
+                      {activeMembers.map(member => (
                         <FormField
                           key={member.id}
                           control={form.control}
@@ -283,11 +288,11 @@ export const StoreTaskCreateDialog = ({ open, onClose }: StoreTaskCreateDialogPr
                                 <FormControl>
                                   <Checkbox
                                     checked={field.value?.includes(member.user_id)}
-                                    onCheckedChange={(checked) => {
+                                    onCheckedChange={checked => {
                                       return checked
                                         ? field.onChange([...(field.value || []), member.user_id])
                                         : field.onChange(
-                                            field.value?.filter((value) => value !== member.user_id)
+                                            field.value?.filter(value => value !== member.user_id)
                                           );
                                     }}
                                   />
@@ -327,10 +332,3 @@ export const StoreTaskCreateDialog = ({ open, onClose }: StoreTaskCreateDialogPr
     </Dialog>
   );
 };
-
-
-
-
-
-
-

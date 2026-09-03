@@ -8,11 +8,11 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { generateProductUrl } from '@/lib/store-utils';
 import { useToast } from '@/hooks/use-toast';
-import { 
-  AffiliateLink, 
+import {
+  AffiliateLink,
   CreateAffiliateLinkForm,
   LinkFilters,
-  PaginationParams
+  PaginationParams,
 } from '@/types/affiliate';
 import { logger } from '@/lib/logger';
 import { handleSupabaseError, AffiliateErrors } from '@/lib/affiliate-errors';
@@ -22,23 +22,26 @@ import { handleSupabaseError, AffiliateErrors } from '@/lib/affiliate-errors';
  * Utilisée temporairement si la fonction RPC n'est pas disponible
  * TODO: Retirer cette fonction une fois la migration SQL exécutée
  */
-async function generateLinkCodeClientSide(affiliateCode: string, productSlug: string): Promise<string> {
+async function generateLinkCodeClientSide(
+  affiliateCode: string,
+  productSlug: string
+): Promise<string> {
   try {
     // Générer un UUID v4 côté client
     const uuid = crypto.randomUUID();
-    
+
     // Créer la chaîne d'entrée
     const input = `${affiliateCode}-${productSlug}-${uuid}`;
-    
+
     // Utiliser l'API Web Crypto native pour créer un hash SHA256
     const encoder = new TextEncoder();
     const data = encoder.encode(input);
     const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-    
+
     // Convertir le hash en hexadécimal
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-    
+
     // Prendre les 12 premiers caractères et les mettre en majuscules
     return hashHex.substring(0, 12).toUpperCase();
   } catch (error) {
@@ -50,7 +53,7 @@ async function generateLinkCodeClientSide(affiliateCode: string, productSlug: st
 }
 
 export const useAffiliateLinks = (
-  affiliateId?: string, 
+  affiliateId?: string,
   filters?: LinkFilters,
   pagination?: PaginationParams
 ) => {
@@ -66,7 +69,7 @@ export const useAffiliateLinks = (
       setLoading(true);
 
       // Compter le total
-      let  countQuery= supabase
+      let countQuery = supabase
         .from('affiliate_links')
         .select('id', { count: 'exact', head: true });
 
@@ -87,7 +90,9 @@ export const useAffiliateLinks = (
       }
 
       if (filters?.search) {
-        countQuery = countQuery.or(`link_code.ilike.%${filters.search}%,full_url.ilike.%${filters.search}%`);
+        countQuery = countQuery.or(
+          `link_code.ilike.%${filters.search}%,full_url.ilike.%${filters.search}%`
+        );
       }
 
       const { count, error: countError } = await countQuery;
@@ -98,9 +103,10 @@ export const useAffiliateLinks = (
       const from = (currentPage - 1) * pageSize;
       const to = from + pageSize - 1;
 
-      let  query= supabase
+      let query = supabase
         .from('affiliate_links')
-        .select(`
+        .select(
+          `
           *,
           product:products!inner(
             id,
@@ -111,7 +117,8 @@ export const useAffiliateLinks = (
             store:stores!inner(name, slug)
           ),
           affiliate:affiliates!inner(display_name, affiliate_code)
-        `)
+        `
+        )
         .order('created_at', { ascending: false })
         .range(from, to);
 
@@ -144,7 +151,7 @@ export const useAffiliateLinks = (
 
       setLinks(data || []);
       setPage(currentPage);
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const affiliateError = handleSupabaseError(error);
       logger.error('Error fetching affiliate links:', affiliateError);
       toast({
@@ -165,7 +172,8 @@ export const useAffiliateLinks = (
       // Vérifier que le produit a l'affiliation activée
       const { data: settingsData, error: settingsError } = await supabase
         .from('product_affiliate_settings')
-        .select(`
+        .select(
+          `
           *,
           product:products!inner(
             id,
@@ -174,13 +182,17 @@ export const useAffiliateLinks = (
             name,
             store:stores!inner(id, slug)
           )
-        `)
+        `
+        )
         .eq('product_id', formData.product_id)
         .eq('affiliate_enabled', true)
         .single();
 
       if (settingsError || !settingsData) {
-        logger.error('Error fetching product affiliate settings:', { settingsError, productId: formData.product_id });
+        logger.error('Error fetching product affiliate settings:', {
+          settingsError,
+          productId: formData.product_id,
+        });
         throw AffiliateErrors.productAffiliateDisabled(formData.product_id);
       }
 
@@ -217,20 +229,33 @@ export const useAffiliateLinks = (
 
       // Générer le code du lien
       // Solution temporaire : génération côté client si la fonction RPC échoue
-      let  linkCode: string;
-      
+      let linkCode: string;
+
       try {
-        const { data: codeData, error: codeError } = await supabase.rpc('generate_affiliate_link_code', {
-          p_affiliate_code: affiliateData.affiliate_code,
-          p_product_slug: settingsData.product.slug,
-        });
+        const { data: codeData, error: codeError } = await supabase.rpc(
+          'generate_affiliate_link_code',
+          {
+            p_affiliate_code: affiliateData.affiliate_code,
+            p_product_slug: settingsData.product.slug,
+          }
+        );
 
         if (codeError) {
           // Si l'erreur est liée à la fonction manquante (404) ou à pgcrypto (42883),
           // utiliser la génération côté client comme fallback
-          if (codeError.code === '42883' || codeError.code === 'PGRST301' || codeError.message?.includes('digest')) {
-            logger.warn('RPC function  _unavailable, using client-side code generation as fallback:', codeError);
-            linkCode = await generateLinkCodeClientSide(affiliateData.affiliate_code, settingsData.product.slug);
+          if (
+            codeError.code === '42883' ||
+            codeError.code === 'PGRST301' ||
+            codeError.message?.includes('digest')
+          ) {
+            logger.warn(
+              'RPC function  _unavailable, using client-side code generation as fallback:',
+              codeError
+            );
+            linkCode = await generateLinkCodeClientSide(
+              affiliateData.affiliate_code,
+              settingsData.product.slug
+            );
           } else {
             logger.error('Error generating affiliate link code:', codeError);
             throw handleSupabaseError(codeError);
@@ -243,8 +268,13 @@ export const useAffiliateLinks = (
           } else if (typeof codeData === 'string') {
             linkCode = codeData;
           } else {
-            logger.error('Invalid link code returned from RPC:', { codeData, type: typeof codeData });
-            throw AffiliateErrors.databaseError(new Error('Impossible de générer le code du lien d\'affiliation'));
+            logger.error('Invalid link code returned from RPC:', {
+              codeData,
+              type: typeof codeData,
+            });
+            throw AffiliateErrors.databaseError(
+              new Error("Impossible de générer le code du lien d'affiliation")
+            );
           }
 
           if (!linkCode || linkCode.trim() === '') {
@@ -252,11 +282,17 @@ export const useAffiliateLinks = (
             throw AffiliateErrors.databaseError(new Error('Le code du lien généré est vide'));
           }
         }
-      } catch ( _error: unknown) {
+      } catch (_error: unknown) {
         // Fallback vers génération côté client en cas d'erreur réseau ou autre
-        if (error instanceof Error && (error.message.includes('404') || error.message.includes('digest'))) {
+        if (
+          error instanceof Error &&
+          (error.message.includes('404') || error.message.includes('digest'))
+        ) {
           logger.warn('Using client-side code generation as fallback due to error:', error);
-          linkCode = await generateLinkCodeClientSide(affiliateData.affiliate_code, settingsData.product.slug);
+          linkCode = await generateLinkCodeClientSide(
+            affiliateData.affiliate_code,
+            settingsData.product.slug
+          );
         } else {
           throw error;
         }
@@ -282,10 +318,12 @@ export const useAffiliateLinks = (
           utm_campaign: formData.utm_campaign,
           custom_parameters: formData.custom_parameters,
         })
-        .select(`
+        .select(
+          `
           *,
           product:products(id, name, slug, price, image_url)
-        `)
+        `
+        )
         .single();
 
       if (error) {
@@ -299,7 +337,7 @@ export const useAffiliateLinks = (
 
       await fetchLinks(page);
       return data;
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const affiliateError = handleSupabaseError(error);
       logger.error('Error creating affiliate link:', affiliateError);
       toast({
@@ -322,14 +360,14 @@ export const useAffiliateLinks = (
         throw handleSupabaseError(error);
       }
 
-      toast({ 
+      toast({
         title: 'Lien mis en pause',
-        description: 'Les clics ne seront plus comptabilisés' 
+        description: 'Les clics ne seront plus comptabilisés',
       });
-      
+
       await fetchLinks(page);
       return true;
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const affiliateError = handleSupabaseError(error);
       logger.error('Error pausing link:', affiliateError);
       toast({
@@ -352,14 +390,14 @@ export const useAffiliateLinks = (
         throw handleSupabaseError(error);
       }
 
-      toast({ 
+      toast({
         title: 'Lien activé ✅',
-        description: 'Le lien est à nouveau opérationnel' 
+        description: 'Le lien est à nouveau opérationnel',
       });
-      
+
       await fetchLinks(page);
       return true;
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const affiliateError = handleSupabaseError(error);
       logger.error('Error activating link:', affiliateError);
       toast({
@@ -382,14 +420,14 @@ export const useAffiliateLinks = (
         throw handleSupabaseError(error);
       }
 
-      toast({ 
+      toast({
         title: 'Lien supprimé',
-        description: 'Le lien a été désactivé' 
+        description: 'Le lien a été désactivé',
       });
-      
+
       await fetchLinks(page);
       return true;
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const affiliateError = handleSupabaseError(error);
       logger.error('Error deleting link:', affiliateError);
       toast({
@@ -404,12 +442,12 @@ export const useAffiliateLinks = (
   const copyLink = async (link: AffiliateLink): Promise<boolean> => {
     try {
       await navigator.clipboard.writeText(link.full_url);
-      
+
       toast({
         title: 'Lien copié ! 📋',
         description: 'Le lien a été copié dans le presse-papier',
       });
-      
+
       return true;
     } catch (error) {
       toast({
@@ -506,9 +544,8 @@ export const useLinkStats = (linkId?: string) => {
 
         if (error) throw error;
 
-        const conversion_rate = data.total_clicks > 0 
-          ? (data.total_sales / data.total_clicks) * 100 
-          : 0;
+        const conversion_rate =
+          data.total_clicks > 0 ? (data.total_sales / data.total_clicks) * 100 : 0;
 
         setStats({
           ...data,
@@ -526,10 +563,3 @@ export const useLinkStats = (linkId?: string) => {
 
   return { stats, loading };
 };
-
-
-
-
-
-
-

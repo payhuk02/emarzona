@@ -9,7 +9,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useShippingCarriers } from '@/hooks/physical/useShippingCarriers';
 import { useStore } from '@/hooks/useStore';
@@ -54,12 +60,10 @@ export const CarrierSettings = ({ storeId }: CarrierSettingsProps) => {
 
         if (error) throw error;
       } else {
-        const { error } = await supabase
-          .from('shipping_carriers')
-          .insert({
-            store_id: storeId,
-            ...formData,
-          });
+        const { error } = await supabase.from('shipping_carriers').insert({
+          store_id: storeId,
+          ...formData,
+        });
 
         if (error) throw error;
       }
@@ -84,7 +88,7 @@ export const CarrierSettings = ({ storeId }: CarrierSettingsProps) => {
         is_default: false,
       });
       refetch();
-    } catch ( _error: any) {
+    } catch (_error: any) {
       logger.error('Error saving carrier', { error });
       toast({
         title: '❌ Erreur',
@@ -115,10 +119,7 @@ export const CarrierSettings = ({ storeId }: CarrierSettingsProps) => {
     if (!confirm('Supprimer ce transporteur ?')) return;
 
     try {
-      const { error } = await supabase
-        .from('shipping_carriers')
-        .delete()
-        .eq('id', carrierId);
+      const { error } = await supabase.from('shipping_carriers').delete().eq('id', carrierId);
 
       if (error) throw error;
 
@@ -128,7 +129,7 @@ export const CarrierSettings = ({ storeId }: CarrierSettingsProps) => {
       });
 
       refetch();
-    } catch ( _error: any) {
+    } catch (_error: any) {
       logger.error('Error deleting carrier', { error });
       toast({
         title: '❌ Erreur',
@@ -158,7 +159,7 @@ export const CarrierSettings = ({ storeId }: CarrierSettingsProps) => {
 
       {/* Liste des transporteurs */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {carriers.map((carrier) => (
+        {carriers.map(carrier => (
           <Card key={carrier.id}>
             <CardHeader>
               <div className="flex items-center justify-between">
@@ -181,24 +182,14 @@ export const CarrierSettings = ({ storeId }: CarrierSettingsProps) => {
               <div className="text-sm text-muted-foreground">
                 <p>Type: {carrier.carrier_name}</p>
                 <p>Statut: {carrier.is_active ? 'Actif' : 'Inactif'}</p>
-                {carrier.api_key && (
-                  <p>API Key: {carrier.api_key.substring(0, 8)}...</p>
-                )}
+                {carrier.api_key && <p>API Key: {carrier.api_key.substring(0, 8)}...</p>}
               </div>
               <div className="flex items-center gap-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => handleEdit(carrier)}
-                >
+                <Button size="sm" variant="outline" onClick={() => handleEdit(carrier)}>
                   <Edit className="h-4 w-4 mr-2" />
                   Modifier
                 </Button>
-                <Button
-                  size="sm"
-                  variant="destructive"
-                  onClick={() => handleDelete(carrier.id)}
-                >
+                <Button size="sm" variant="destructive" onClick={() => handleDelete(carrier.id)}>
                   <Trash2 className="h-4 w-4 mr-2" />
                   Supprimer
                 </Button>
@@ -212,12 +203,8 @@ export const CarrierSettings = ({ storeId }: CarrierSettingsProps) => {
       {isAdding && (
         <Card>
           <CardHeader>
-            <CardTitle>
-              {editingId ? 'Modifier le transporteur' : 'Nouveau transporteur'}
-            </CardTitle>
-            <CardDescription>
-              Configurez les paramètres API pour votre transporteur
-            </CardDescription>
+            <CardTitle>{editingId ? 'Modifier le transporteur' : 'Nouveau transporteur'}</CardTitle>
+            <CardDescription>Configurez les paramètres API pour votre transporteur</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
@@ -225,7 +212,7 @@ export const CarrierSettings = ({ storeId }: CarrierSettingsProps) => {
                 <Label htmlFor="carrier-name">Transporteur *</Label>
                 <Select
                   value={formData.carrier_name}
-                  onValueChange={(value) => setFormData({ ...formData, carrier_name: value as any })}
+                  onValueChange={value => setFormData({ ...formData, carrier_name: value as any })}
                 >
                   <SelectTrigger id="carrier-name">
                     <SelectValue />
@@ -243,7 +230,7 @@ export const CarrierSettings = ({ storeId }: CarrierSettingsProps) => {
                 <Input
                   id="display-name"
                   value={formData.display_name}
-                  onChange={(e) => setFormData({ ...formData, display_name: e.target.value })}
+                  onChange={e => setFormData({ ...formData, display_name: e.target.value })}
                   placeholder="DHL Express"
                 />
               </div>
@@ -253,7 +240,7 @@ export const CarrierSettings = ({ storeId }: CarrierSettingsProps) => {
                   id="api-key"
                   type="password"
                   value={formData.api_key}
-                  onChange={(e) => setFormData({ ...formData, api_key: e.target.value })}
+                  onChange={e => setFormData({ ...formData, api_key: e.target.value })}
                   placeholder="Votre clé API"
                 />
               </div>
@@ -263,7 +250,7 @@ export const CarrierSettings = ({ storeId }: CarrierSettingsProps) => {
                   id="api-secret"
                   type="password"
                   value={formData.api_secret}
-                  onChange={(e) => setFormData({ ...formData, api_secret: e.target.value })}
+                  onChange={e => setFormData({ ...formData, api_secret: e.target.value })}
                   placeholder="Votre secret API"
                 />
               </div>
@@ -274,7 +261,7 @@ export const CarrierSettings = ({ storeId }: CarrierSettingsProps) => {
                     <Input
                       id="account-number"
                       value={formData.account_number}
-                      onChange={(e) => setFormData({ ...formData, account_number: e.target.value })}
+                      onChange={e => setFormData({ ...formData, account_number: e.target.value })}
                     />
                   </div>
                   <div className="space-y-2">
@@ -282,7 +269,7 @@ export const CarrierSettings = ({ storeId }: CarrierSettingsProps) => {
                     <Input
                       id="meter-number"
                       value={formData.meter_number}
-                      onChange={(e) => setFormData({ ...formData, meter_number: e.target.value })}
+                      onChange={e => setFormData({ ...formData, meter_number: e.target.value })}
                     />
                   </div>
                 </>
@@ -295,7 +282,7 @@ export const CarrierSettings = ({ storeId }: CarrierSettingsProps) => {
                   <Switch
                     id="test-mode"
                     checked={formData.test_mode}
-                    onCheckedChange={(checked) => setFormData({ ...formData, test_mode: checked })}
+                    onCheckedChange={checked => setFormData({ ...formData, test_mode: checked })}
                   />
                   <Label htmlFor="test-mode">Mode test</Label>
                 </div>
@@ -303,7 +290,7 @@ export const CarrierSettings = ({ storeId }: CarrierSettingsProps) => {
                   <Switch
                     id="is-active"
                     checked={formData.is_active}
-                    onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
+                    onCheckedChange={checked => setFormData({ ...formData, is_active: checked })}
                   />
                   <Label htmlFor="is-active">Actif</Label>
                 </div>
@@ -311,7 +298,7 @@ export const CarrierSettings = ({ storeId }: CarrierSettingsProps) => {
                   <Switch
                     id="is-default"
                     checked={formData.is_default}
-                    onCheckedChange={(checked) => setFormData({ ...formData, is_default: checked })}
+                    onCheckedChange={checked => setFormData({ ...formData, is_default: checked })}
                   />
                   <Label htmlFor="is-default">Par défaut</Label>
                 </div>
@@ -319,9 +306,7 @@ export const CarrierSettings = ({ storeId }: CarrierSettingsProps) => {
             </div>
 
             <div className="flex items-center gap-2 pt-4 border-t">
-              <Button onClick={handleSave}>
-                {editingId ? 'Modifier' : 'Ajouter'}
-              </Button>
+              <Button onClick={handleSave}>{editingId ? 'Modifier' : 'Ajouter'}</Button>
               <Button
                 variant="outline"
                 onClick={() => {
@@ -338,10 +323,3 @@ export const CarrierSettings = ({ storeId }: CarrierSettingsProps) => {
     </div>
   );
 };
-
-
-
-
-
-
-

@@ -5,9 +5,3 @@
 
 export { BarcodeScanner } from './BarcodeScanner';
 export { BarcodeGenerator } from './BarcodeGenerator';
-
-
-
-
-
-

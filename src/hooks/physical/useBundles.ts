@@ -7,7 +7,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-const BUNDLE_FIELDS = 'id, store_id, name, description, type, image_url, original_price, bundle_price, discount_percentage, discount_amount, min_products, max_products, track_inventory, total_quantity, is_active, show_savings, show_individual_prices, created_at, updated_at';
+const BUNDLE_FIELDS =
+  'id, store_id, name, description, type, image_url, original_price, bundle_price, discount_percentage, discount_amount, min_products, max_products, track_inventory, total_quantity, is_active, show_savings, show_individual_prices, created_at, updated_at';
 
 export type BundleType = 'fixed' | 'flexible' | 'mix_and_match';
 
@@ -60,16 +61,19 @@ export interface BundleWithItems extends Bundle {
 /**
  * Récupérer tous les bundles d'un store
  */
-export function useBundles(storeId: string | null, filters?: {
-  is_active?: boolean;
-  type?: BundleType;
-}) {
+export function useBundles(
+  storeId: string | null,
+  filters?: {
+    is_active?: boolean;
+    type?: BundleType;
+  }
+) {
   return useQuery({
     queryKey: ['bundles', storeId, filters],
     queryFn: async () => {
       if (!storeId) return [];
 
-      let  query= supabase
+      let query = supabase
         .from('product_bundles')
         .select(BUNDLE_FIELDS)
         .eq('store_id', storeId)
@@ -113,7 +117,8 @@ export function useBundle(bundleId: string | null) {
       // Récupérer les items
       const { data: items, error: itemsError } = await supabase
         .from('bundle_items')
-        .select(`
+        .select(
+          `
           *,
           product:products!inner(
             id,
@@ -123,7 +128,8 @@ export function useBundle(bundleId: string | null) {
             id,
             name
           )
-        `)
+        `
+        )
         .eq('bundle_id', bundleId)
         .order('display_order', { ascending: true });
 
@@ -143,9 +149,11 @@ export function useBundle(bundleId: string | null) {
  */
 export function useCalculateBundlePrice() {
   return useMutation({
-    mutationFn: async (items: Array<{ product_id: string; variant_id?: string; quantity: number }>) => {
+    mutationFn: async (
+      items: Array<{ product_id: string; variant_id?: string; quantity: number }>
+    ) => {
       // Récupérer les prix des produits
-      const productIds = items.map((item) => item.product_id);
+      const productIds = items.map(item => item.product_id);
       const { data: products, error } = await supabase
         .from('products')
         .select('id, price')
@@ -154,9 +162,9 @@ export function useCalculateBundlePrice() {
       if (error) throw error;
 
       // Calculer le prix total
-      let  totalPrice= 0;
+      let totalPrice = 0;
       for (const item of items) {
-        const product = products?.find((p) => p.id === item.product_id);
+        const product = products?.find(p => p.id === item.product_id);
         if (product) {
           totalPrice += (product.price || 0) * item.quantity;
         }
@@ -240,9 +248,7 @@ export function useCreateBundle() {
         display_order: item.display_order ?? index,
       }));
 
-      const { error: itemsError } = await supabase
-        .from('bundle_items')
-        .insert(itemsToInsert);
+      const { error: itemsError } = await supabase.from('bundle_items').insert(itemsToInsert);
 
       if (itemsError) throw itemsError;
 
@@ -328,9 +334,7 @@ export function useUpdateBundle() {
           display_order: item.display_order ?? index,
         }));
 
-        const { error: itemsError } = await supabase
-          .from('bundle_items')
-          .insert(itemsToInsert);
+        const { error: itemsError } = await supabase.from('bundle_items').insert(itemsToInsert);
 
         if (itemsError) throw itemsError;
       }
@@ -408,11 +412,12 @@ export function useApplyBundlePromotion() {
 
       if (fetchError) throw fetchError;
 
-      let  newBundlePrice= bundle.bundle_price;
-      let  newDiscountAmount= bundle.original_price - bundle.bundle_price;
-      let  newDiscountPercentage= bundle.original_price > 0
-        ? ((bundle.original_price - bundle.bundle_price) / bundle.original_price) * 100
-        : 0;
+      let newBundlePrice = bundle.bundle_price;
+      let newDiscountAmount = bundle.original_price - bundle.bundle_price;
+      let newDiscountPercentage =
+        bundle.original_price > 0
+          ? ((bundle.original_price - bundle.bundle_price) / bundle.original_price) * 100
+          : 0;
 
       // Appliquer la promotion
       if (discountPercentage !== undefined) {
@@ -422,9 +427,8 @@ export function useApplyBundlePromotion() {
       } else if (discountAmount !== undefined) {
         newDiscountAmount = discountAmount;
         newBundlePrice = bundle.original_price - discountAmount;
-        newDiscountPercentage = bundle.original_price > 0
-          ? (discountAmount / bundle.original_price) * 100
-          : 0;
+        newDiscountPercentage =
+          bundle.original_price > 0 ? (discountAmount / bundle.original_price) * 100 : 0;
       }
 
       // Mettre à jour le bundle
@@ -462,10 +466,3 @@ export function useApplyBundlePromotion() {
     },
   });
 }
-
-
-
-
-
-
-

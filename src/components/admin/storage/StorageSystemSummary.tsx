@@ -11,7 +11,7 @@ import {
   CheckCircle,
   Zap,
   FileText,
-  Settings
+  Settings,
 } from 'lucide-react';
 
 interface StorageSystemSummaryProps {
@@ -31,8 +31,8 @@ export const StorageSystemSummary = ({ onNavigateToStorage }: StorageSystemSumma
         <div>
           <h2 className="text-2xl font-bold">Système de Stockage Résilient Emarzona</h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Plateforme complète de gestion des données avec résilience avancée,
-            synchronisation intelligente et récupération automatique en cas de panne.
+            Plateforme complète de gestion des données avec résilience avancée, synchronisation
+            intelligente et récupération automatique en cas de panne.
           </p>
         </div>
       </div>
@@ -56,8 +56,8 @@ export const StorageSystemSummary = ({ onNavigateToStorage }: StorageSystemSumma
                 <h4 className="font-medium">Stockage Hybride</h4>
               </div>
               <p className="text-sm text-muted-foreground">
-                Combinaison intelligente de Supabase, IndexedDB et localStorage
-                avec stratégies de fallback automatiques.
+                Combinaison intelligente de Supabase, IndexedDB et localStorage avec stratégies de
+                fallback automatiques.
               </p>
             </div>
 
@@ -67,8 +67,8 @@ export const StorageSystemSummary = ({ onNavigateToStorage }: StorageSystemSumma
                 <h4 className="font-medium">Synchronisation</h4>
               </div>
               <p className="text-sm text-muted-foreground">
-                Sync temps réel et par lot avec résolution automatique des conflits
-                et gestion adaptative de la connectivité.
+                Sync temps réel et par lot avec résolution automatique des conflits et gestion
+                adaptative de la connectivité.
               </p>
             </div>
 
@@ -78,8 +78,8 @@ export const StorageSystemSummary = ({ onNavigateToStorage }: StorageSystemSumma
                 <h4 className="font-medium">Sauvegarde</h4>
               </div>
               <p className="text-sm text-muted-foreground">
-                Sauvegardes automatiques et manuelles avec compression,
-                chiffrement et restauration point-in-time.
+                Sauvegardes automatiques et manuelles avec compression, chiffrement et restauration
+                point-in-time.
               </p>
             </div>
 
@@ -89,8 +89,8 @@ export const StorageSystemSummary = ({ onNavigateToStorage }: StorageSystemSumma
                 <h4 className="font-medium">Récupération</h4>
               </div>
               <p className="text-sm text-muted-foreground">
-                Récupération automatique en cas de panne avec stratégies
-                multiples et intervention manuelle si nécessaire.
+                Récupération automatique en cas de panne avec stratégies multiples et intervention
+                manuelle si nécessaire.
               </p>
             </div>
 
@@ -100,8 +100,8 @@ export const StorageSystemSummary = ({ onNavigateToStorage }: StorageSystemSumma
                 <h4 className="font-medium">Monitoring</h4>
               </div>
               <p className="text-sm text-muted-foreground">
-                Surveillance continue de la santé du système avec alertes
-                et métriques en temps réel.
+                Surveillance continue de la santé du système avec alertes et métriques en temps
+                réel.
               </p>
             </div>
 
@@ -111,8 +111,7 @@ export const StorageSystemSummary = ({ onNavigateToStorage }: StorageSystemSumma
                 <h4 className="font-medium">Tests</h4>
               </div>
               <p className="text-sm text-muted-foreground">
-                Suite complète de tests de résilience pour valider
-                la robustesse du système.
+                Suite complète de tests de résilience pour valider la robustesse du système.
               </p>
             </div>
           </div>
@@ -123,9 +122,7 @@ export const StorageSystemSummary = ({ onNavigateToStorage }: StorageSystemSumma
       <Card>
         <CardHeader>
           <CardTitle>Fonctionnalités Avancées</CardTitle>
-          <CardDescription>
-            Capacités uniques du système de stockage résilient
-          </CardDescription>
+          <CardDescription>Capacités uniques du système de stockage résilient</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -188,23 +185,27 @@ export const StorageSystemSummary = ({ onNavigateToStorage }: StorageSystemSumma
       <Card>
         <CardHeader>
           <CardTitle>Avantages pour Emarzona</CardTitle>
-          <CardDescription>
-            Impact business du système de stockage résilient
-          </CardDescription>
+          <CardDescription>Impact business du système de stockage résilient</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="text-center p-4">
               <div className="text-2xl font-bold text-green-600 mb-2">99.9%</div>
-              <p className="text-sm text-muted-foreground">Disponibilité garantie même en cas de panne Supabase</p>
+              <p className="text-sm text-muted-foreground">
+                Disponibilité garantie même en cas de panne Supabase
+              </p>
             </div>
             <div className="text-center p-4">
               <div className="text-2xl font-bold text-blue-600 mb-2">&lt; 30s</div>
-              <p className="text-sm text-muted-foreground">Récupération automatique en cas d'incident</p>
+              <p className="text-sm text-muted-foreground">
+                Récupération automatique en cas d'incident
+              </p>
             </div>
             <div className="text-center p-4">
               <div className="text-2xl font-bold text-purple-600 mb-2">0</div>
-              <p className="text-sm text-muted-foreground">Perte de données grâce aux sauvegardes multiples</p>
+              <p className="text-sm text-muted-foreground">
+                Perte de données grâce aux sauvegardes multiples
+              </p>
             </div>
           </div>
         </CardContent>

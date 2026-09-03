@@ -11,14 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import {
-  HelpCircle,
-  Plus,
-  Trash2,
-  GripVertical,
-  Info,
-  Sparkles,
-} from 'lucide-react';
+import { HelpCircle, Plus, Trash2, GripVertical, Info, Sparkles } from 'lucide-react';
 
 interface CourseFAQFormProps {
   data: FAQ[];
@@ -33,39 +26,45 @@ export interface FAQ {
 
 const SUGGESTED_FAQS = [
   {
-    question: "Combien de temps ai-je accès au cours ?",
-    answer: "Vous avez un accès à vie au cours une fois inscrit. Vous pouvez le suivre à votre rythme et y revenir autant de fois que vous le souhaitez."
+    question: 'Combien de temps ai-je accès au cours ?',
+    answer:
+      'Vous avez un accès à vie au cours une fois inscrit. Vous pouvez le suivre à votre rythme et y revenir autant de fois que vous le souhaitez.',
   },
   {
-    question: "Y a-t-il des prérequis pour suivre ce cours ?",
-    answer: "Les prérequis sont listés dans la section \"Prérequis\" ci-dessus. En général, ce cours est accessible aux débutants avec une connaissance de base en [domaine]."
+    question: 'Y a-t-il des prérequis pour suivre ce cours ?',
+    answer:
+      'Les prérequis sont listés dans la section "Prérequis" ci-dessus. En général, ce cours est accessible aux débutants avec une connaissance de base en [domaine].',
   },
   {
-    question: "Est-ce que je reçois un certificat à la fin ?",
-    answer: "Oui ! Vous recevez un certificat de complétion une fois que vous avez terminé toutes les leçons et réussi le quiz final."
+    question: 'Est-ce que je reçois un certificat à la fin ?',
+    answer:
+      'Oui ! Vous recevez un certificat de complétion une fois que vous avez terminé toutes les leçons et réussi le quiz final.',
   },
   {
-    question: "Puis-je télécharger les vidéos ?",
-    answer: "Les vidéos sont disponibles en streaming sur la plateforme. Cependant, vous pouvez télécharger les ressources supplémentaires (PDF, code source, etc.)."
+    question: 'Puis-je télécharger les vidéos ?',
+    answer:
+      'Les vidéos sont disponibles en streaming sur la plateforme. Cependant, vous pouvez télécharger les ressources supplémentaires (PDF, code source, etc.).',
   },
   {
     question: "Comment contacter l'instructeur ?",
-    answer: "Vous pouvez poser vos questions directement dans la section Discussions de chaque leçon. L'instructeur répond généralement sous 24-48h."
+    answer:
+      "Vous pouvez poser vos questions directement dans la section Discussions de chaque leçon. L'instructeur répond généralement sous 24-48h.",
   },
   {
-    question: "Y a-t-il une garantie satisfait ou remboursé ?",
-    answer: "Oui ! Nous offrons une garantie de remboursement de 30 jours si le cours ne répond pas à vos attentes."
-  }
+    question: 'Y a-t-il une garantie satisfait ou remboursé ?',
+    answer:
+      'Oui ! Nous offrons une garantie de remboursement de 30 jours si le cours ne répond pas à vos attentes.',
+  },
 ];
 
 export const CourseFAQForm = ({ data, onChange }: CourseFAQFormProps) => {
   const [expandedFAQ, setExpandedFAQ] = useState<string | null>(null);
 
   const addFAQ = () => {
-    const  newFAQ: FAQ = {
+    const newFAQ: FAQ = {
       id: Math.random().toString(36).substring(7),
       question: '',
-      answer: ''
+      answer: '',
     };
     onChange([...data, newFAQ]);
     setExpandedFAQ(newFAQ.id);
@@ -76,16 +75,14 @@ export const CourseFAQForm = ({ data, onChange }: CourseFAQFormProps) => {
   };
 
   const updateFAQ = (id: string, field: 'question' | 'answer', value: string) => {
-    onChange(data.map(faq => 
-      faq.id === id ? { ...faq, [field]: value } : faq
-    ));
+    onChange(data.map(faq => (faq.id === id ? { ...faq, [field]: value } : faq)));
   };
 
   const addSuggestedFAQ = (suggested: { question: string; answer: string }) => {
-    const  newFAQ: FAQ = {
+    const newFAQ: FAQ = {
       id: Math.random().toString(36).substring(7),
       question: suggested.question,
-      answer: suggested.answer
+      answer: suggested.answer,
     };
     onChange([...data, newFAQ]);
   };
@@ -93,7 +90,7 @@ export const CourseFAQForm = ({ data, onChange }: CourseFAQFormProps) => {
   const moveFAQ = (index: number, direction: 'up' | 'down') => {
     const newData = [...data];
     const newIndex = direction === 'up' ? index - 1 : index + 1;
-    
+
     if (newIndex >= 0 && newIndex < newData.length) {
       [newData[index], newData[newIndex]] = [newData[newIndex], newData[index]];
       onChange(newData);
@@ -117,9 +114,8 @@ export const CourseFAQForm = ({ data, onChange }: CourseFAQFormProps) => {
       <Alert>
         <Info className="h-4 w-4" />
         <AlertDescription>
-          <strong>Pourquoi ajouter des FAQs ?</strong> Les FAQs répondent aux objections 
-          avant l'achat et peuvent augmenter vos inscriptions de 20-30%. Elles améliorent 
-          aussi votre SEO.
+          <strong>Pourquoi ajouter des FAQs ?</strong> Les FAQs répondent aux objections avant
+          l'achat et peuvent augmenter vos inscriptions de 20-30%. Elles améliorent aussi votre SEO.
         </AlertDescription>
       </Alert>
 
@@ -214,25 +210,21 @@ export const CourseFAQForm = ({ data, onChange }: CourseFAQFormProps) => {
 
                   {/* Question */}
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">
-                      Question
-                    </label>
+                    <label className="text-sm font-medium">Question</label>
                     <Input
                       placeholder="Ex: Combien de temps ai-je accès au cours ?"
                       value={faq.question}
-                      onChange={(e) => updateFAQ(faq.id, 'question', e.target.value)}
+                      onChange={e => updateFAQ(faq.id, 'question', e.target.value)}
                     />
                   </div>
 
                   {/* Réponse */}
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">
-                      Réponse
-                    </label>
+                    <label className="text-sm font-medium">Réponse</label>
                     <Textarea
                       placeholder="Ex: Vous avez un accès à vie au cours une fois inscrit..."
                       value={faq.answer}
-                      onChange={(e) => updateFAQ(faq.id, 'answer', e.target.value)}
+                      onChange={e => updateFAQ(faq.id, 'answer', e.target.value)}
                       rows={3}
                     />
                   </div>
@@ -260,20 +252,23 @@ export const CourseFAQForm = ({ data, onChange }: CourseFAQFormProps) => {
           <CardTitle className="text-sm">💡 Conseils pour de bonnes FAQs</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2 text-sm">
-          <p>✅ <strong>Soyez concis</strong> : Réponses courtes et directes</p>
-          <p>✅ <strong>Anticipez les objections</strong> : Prix, durée, difficulté, etc.</p>
-          <p>✅ <strong>Utilisez "vous"</strong> : Parlez directement à l'étudiant</p>
-          <p>✅ <strong>Ajoutez des chiffres</strong> : "24-48h", "30 jours", etc.</p>
-          <p>✅ <strong>5-8 FAQs idéal</strong> : Assez pour rassurer, pas trop pour submerger</p>
+          <p>
+            ✅ <strong>Soyez concis</strong> : Réponses courtes et directes
+          </p>
+          <p>
+            ✅ <strong>Anticipez les objections</strong> : Prix, durée, difficulté, etc.
+          </p>
+          <p>
+            ✅ <strong>Utilisez "vous"</strong> : Parlez directement à l'étudiant
+          </p>
+          <p>
+            ✅ <strong>Ajoutez des chiffres</strong> : "24-48h", "30 jours", etc.
+          </p>
+          <p>
+            ✅ <strong>5-8 FAQs idéal</strong> : Assez pour rassurer, pas trop pour submerger
+          </p>
         </CardContent>
       </Card>
     </div>
   );
 };
-
-
-
-
-
-
-

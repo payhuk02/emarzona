@@ -1,7 +1,7 @@
 /**
  * File Upload with Real Progress
  * Date: 28 Janvier 2025
- * 
+ *
  * Utilitaire pour upload de fichiers avec progression réelle
  * Utilise XMLHttpRequest pour avoir une progression précise
  */
@@ -26,7 +26,7 @@ export interface UploadProgressResult {
 
 /**
  * Upload un fichier avec progression réelle via XMLHttpRequest
- * 
+ *
  * Note: Supabase Storage utilise REST API, donc on peut utiliser XHR pour avoir la progression
  */
 export async function uploadFileWithProgress(
@@ -59,7 +59,9 @@ export async function uploadFileWithProgress(
       const filePath = path ? `${path}/${fileName}` : fileName;
 
       // Obtenir l'URL d'upload depuis Supabase
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       if (!session) {
         const error = new Error('Non authentifié');
         onError?.(error);
@@ -75,7 +77,7 @@ export async function uploadFileWithProgress(
       const xhr = new XMLHttpRequest();
 
       // Gérer la progression
-      xhr.upload.addEventListener('progress', (e) => {
+      xhr.upload.addEventListener('progress', e => {
         if (e.lengthComputable) {
           const progress = (e.loaded / e.total) * 100;
           onProgress?.(progress, e.loaded, e.total);
@@ -86,9 +88,9 @@ export async function uploadFileWithProgress(
       xhr.addEventListener('load', () => {
         if (xhr.status >= 200 && xhr.status < 300) {
           // Récupérer l'URL publique
-          const { data: { publicUrl } } = supabase.storage
-            .from(bucket)
-            .getPublicUrl(filePath);
+          const {
+            data: { publicUrl },
+          } = supabase.storage.from(bucket).getPublicUrl(filePath);
 
           resolve({
             url: publicUrl,
@@ -104,7 +106,7 @@ export async function uploadFileWithProgress(
 
       // Gérer les erreurs
       xhr.addEventListener('error', () => {
-        const error = new Error('Erreur réseau lors de l\'upload');
+        const error = new Error("Erreur réseau lors de l'upload");
         onError?.(error);
         reject(error);
       });
@@ -139,7 +141,7 @@ function formatFileSize(bytes: number): string {
   const k = 1024;
   const sizes = ['Bytes', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+  return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
 }
 
 /**
@@ -150,25 +152,25 @@ export async function uploadMultipleFilesWithProgress(
   options: UploadProgressOptions,
   onFileProgress?: (fileIndex: number, progress: number) => void
 ): Promise<UploadProgressResult[]> {
-  const  results: UploadProgressResult[] = [];
+  const results: UploadProgressResult[] = [];
   const totalFiles = files.length;
 
-  for (let  i= 0; i < files.length; i++) {
+  for (let i = 0; i < files.length; i++) {
     const file = files[i];
-    
+
     try {
       const result = await uploadFileWithProgress(file, {
         ...options,
         onProgress: (progress, loaded, total) => {
           // Progression pour ce fichier
           onFileProgress?.(i, progress);
-          
+
           // Progression globale
           const globalProgress = ((i + progress / 100) / totalFiles) * 100;
           options.onProgress?.(globalProgress, loaded, total);
         },
       });
-      
+
       results.push(result);
     } catch (error) {
       results.push({
@@ -182,10 +184,3 @@ export async function uploadMultipleFilesWithProgress(
 
   return results;
 }
-
-
-
-
-
-
-

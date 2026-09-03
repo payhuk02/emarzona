@@ -1,6 +1,4 @@
-import {
-  CheckCircle2, CreditCard, XCircle,
-} from 'lucide-react';
+import { CheckCircle2, CreditCard, XCircle } from 'lucide-react';
 import type { PageConfig } from './types';
 
 export const checkoutPagesConfig: PageConfig[] = [

@@ -111,7 +111,7 @@ export function parseGeniusPayError(error: unknown): GeniusPayError {
     if (error.message.includes('timeout') || error.message.includes('TIMEOUT')) {
       return new GeniusPayTimeoutError(error.message);
     }
-    
+
     if (error.message.includes('network') || error.message.includes('fetch')) {
       return new GeniusPayNetworkError(error.message);
     }
@@ -131,23 +131,7 @@ export function parseGeniusPayError(error: unknown): GeniusPayError {
   }
 
   // Erreur inconnue
-  return new GeniusPayError(
-    'Unknown error occurred',
-    'UNKNOWN_ERROR',
-    500,
-    { originalError: error }
-  );
+  return new GeniusPayError('Unknown error occurred', 'UNKNOWN_ERROR', 500, {
+    originalError: error,
+  });
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

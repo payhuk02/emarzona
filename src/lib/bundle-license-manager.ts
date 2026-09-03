@@ -1,7 +1,7 @@
 /**
  * Bundle License Manager
  * Date: 31 Janvier 2025
- * 
+ *
  * Gestion automatique des licences multiples lors de l'achat d'un bundle
  */
 
@@ -33,7 +33,7 @@ export async function generateBundleLicenses(
   config: BundleLicenseConfig
 ): Promise<GeneratedLicense[]> {
   try {
-    const  licenses: GeneratedLicense[] = [];
+    const licenses: GeneratedLicense[] = [];
 
     // Récupérer les informations de chaque produit digital
     const { data: digitalProducts, error: productsError } = await supabase
@@ -61,8 +61,8 @@ export async function generateBundleLicenses(
         digitalProduct.license_type === 'single'
           ? 'single'
           : digitalProduct.license_type === 'multi'
-          ? 'multi'
-          : 'unlimited';
+            ? 'multi'
+            : 'unlimited';
 
       // Calculer la date d'expiration
       const expiresAt = config.licenseDurationDays
@@ -138,9 +138,7 @@ function generateLicenseKey(): string {
 /**
  * Vérifier si un bundle nécessite la génération de licences
  */
-export async function shouldGenerateBundleLicenses(
-  bundleId: string
-): Promise<boolean> {
+export async function shouldGenerateBundleLicenses(bundleId: string): Promise<boolean> {
   try {
     const { data: bundle, error } = await supabase
       .from('digital_product_bundles')
@@ -179,7 +177,7 @@ export async function getBundleLicenses(
       throw error;
     }
 
-    return (licenses || []).map((license) => ({
+    return (licenses || []).map(license => ({
       productId: license.digital_product_id,
       licenseId: license.id,
       licenseKey: license.license_key,
@@ -190,10 +188,3 @@ export async function getBundleLicenses(
     throw error;
   }
 }
-
-
-
-
-
-
-

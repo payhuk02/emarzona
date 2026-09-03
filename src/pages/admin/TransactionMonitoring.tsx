@@ -9,7 +9,17 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AdminLayout } from '@/components/admin/AdminLayout';
-import { Loader2, AlertCircle, CheckCircle2, XCircle, Clock, RefreshCw, FileText, TrendingUp, TrendingDown } from 'lucide-react';
+import {
+  Loader2,
+  AlertCircle,
+  CheckCircle2,
+  XCircle,
+  Clock,
+  RefreshCw,
+  FileText,
+  TrendingUp,
+  TrendingDown,
+} from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { formatCurrency } from '@/lib/currency-converter';
@@ -53,12 +63,10 @@ export default function TransactionMonitoring() {
   const loadStats = async () => {
     try {
       // Statistiques globales
-      const { data: transactions } = await supabase
-        .from('transactions')
-        .select('status, amount');
+      const { data: transactions } = await supabase.from('transactions').select('status, amount');
 
       if (transactions) {
-        const  statsData: TransactionStats = {
+        const statsData: TransactionStats = {
           total: transactions.length,
           completed: transactions.filter(t => t.status === 'completed').length,
           failed: transactions.filter(t => t.status === 'failed').length,
@@ -152,11 +160,7 @@ export default function TransactionMonitoring() {
             </p>
           </div>
           <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={loadStats}
-              className="min-h-[44px]"
-            >
+            <Button variant="outline" onClick={loadStats} className="min-h-[44px]">
               <RefreshCw className="h-4 w-4 mr-2" />
               Actualiser
             </Button>
@@ -377,10 +381,7 @@ export default function TransactionMonitoring() {
                     <h4 className="font-medium">Détails des incohérences</h4>
                     <div className="max-h-96 overflow-y-auto space-y-2">
                       {report.issues.map((issue: Record<string, any>, index: number) => (
-                        <div
-                          key={index}
-                          className="p-3 border rounded-lg text-sm"
-                        >
+                        <div key={index} className="p-3 border rounded-lg text-sm">
                           <div className="flex items-center justify-between">
                             <div>
                               <p className="font-medium">{issue.issue_type}</p>
@@ -391,8 +392,8 @@ export default function TransactionMonitoring() {
                                 issue.severity === 'high'
                                   ? 'destructive'
                                   : issue.severity === 'medium'
-                                  ? 'default'
-                                  : 'outline'
+                                    ? 'default'
+                                    : 'outline'
                               }
                             >
                               {issue.severity}
@@ -411,10 +412,3 @@ export default function TransactionMonitoring() {
     </AdminLayout>
   );
 }
-
-
-
-
-
-
-

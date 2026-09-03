@@ -3,8 +3,22 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import {
   RefreshCw as Sync,
   AlertTriangle,
@@ -12,7 +26,7 @@ import {
   Clock,
   Wifi,
   WifiOff,
-  Settings
+  Settings,
 } from 'lucide-react';
 import { syncService, type ConflictResolution, type SyncResult } from '@/lib/storage/sync-service';
 import { useToast } from '@/hooks/use-toast';
@@ -50,7 +64,7 @@ export const SyncMonitor = ({ onSyncComplete }: SyncMonitorProps) => {
     try {
       const [stats, unresolvedConflicts] = await Promise.all([
         syncService.getSyncStats(),
-        syncService.getUnresolvedConflicts()
+        syncService.getUnresolvedConflicts(),
       ]);
 
       setSyncStats(stats as SyncStats);
@@ -78,19 +92,18 @@ export const SyncMonitor = ({ onSyncComplete }: SyncMonitorProps) => {
       const totalErrors = results.reduce((sum, r) => sum + r.errors, 0);
 
       toast({
-        title: "Synchronisation terminée",
+        title: 'Synchronisation terminée',
         description: `${totalSynced} synchronisés, ${totalConflicts} conflits, ${totalErrors} erreurs`,
-        variant: totalErrors > 0 ? "destructive" : "default"
+        variant: totalErrors > 0 ? 'destructive' : 'default',
       });
 
       await loadData();
       onSyncComplete?.();
-
     } catch (error) {
       toast({
-        title: "Erreur de synchronisation",
+        title: 'Erreur de synchronisation',
         description: getErrorMessage(error),
-        variant: "destructive"
+        variant: 'destructive',
       });
     } finally {
       setSyncing(false);
@@ -98,7 +111,10 @@ export const SyncMonitor = ({ onSyncComplete }: SyncMonitorProps) => {
   };
 
   // Résoudre un conflit
-  const handleResolveConflict = async (conflictId: string, strategy: 'local' | 'remote' | 'merge') => {
+  const handleResolveConflict = async (
+    conflictId: string,
+    strategy: 'local' | 'remote' | 'merge'
+  ) => {
     try {
       const conflict = conflicts.find(c => c.id === conflictId);
       if (!conflict) return;
@@ -107,18 +123,17 @@ export const SyncMonitor = ({ onSyncComplete }: SyncMonitorProps) => {
       await syncService.resolveConflict(conflict);
 
       toast({
-        title: "Conflit résolu",
+        title: 'Conflit résolu',
         description: `Résolu avec stratégie: ${strategy}`,
       });
 
       await loadData();
       setSelectedConflict(null);
-
     } catch (error) {
       toast({
-        title: "Erreur résolution conflit",
+        title: 'Erreur résolution conflit',
         description: getErrorMessage(error),
-        variant: "destructive"
+        variant: 'destructive',
       });
     }
   };
@@ -128,7 +143,6 @@ export const SyncMonitor = ({ onSyncComplete }: SyncMonitorProps) => {
     // Cette logique pourrait être améliorée avec un vrai monitoring
     return navigator.onLine;
   };
-
 
   return (
     <div className="space-y-6">
@@ -148,15 +162,10 @@ export const SyncMonitor = ({ onSyncComplete }: SyncMonitorProps) => {
             ) : (
               <WifiOff className="h-4 w-4 text-red-600" />
             )}
-            <span className="text-sm">
-              {getConnectivityStatus() ? 'Connecté' : 'Hors ligne'}
-            </span>
+            <span className="text-sm">{getConnectivityStatus() ? 'Connecté' : 'Hors ligne'}</span>
           </div>
 
-          <Button
-            onClick={handleFullSync}
-            disabled={syncing || !getConnectivityStatus()}
-          >
+          <Button onClick={handleFullSync} disabled={syncing || !getConnectivityStatus()}>
             {syncing ? (
               <Sync className="w-4 h-4 mr-2 animate-spin" />
             ) : (
@@ -202,9 +211,7 @@ export const SyncMonitor = ({ onSyncComplete }: SyncMonitorProps) => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Échecs</p>
-                <p className="text-2xl font-bold text-red-600">
-                  {syncStats.queue?.failed || 0}
-                </p>
+                <p className="text-2xl font-bold text-red-600">{syncStats.queue?.failed || 0}</p>
               </div>
               <AlertTriangle className="h-8 w-8 text-red-600" />
             </div>
@@ -217,13 +224,12 @@ export const SyncMonitor = ({ onSyncComplete }: SyncMonitorProps) => {
               <div>
                 <p className="text-sm text-muted-foreground">Dernière sync</p>
                 <p className="text-sm font-medium">
-                  {syncStats.lastFullSync ?
-                    new Date(syncStats.lastFullSync).toLocaleTimeString('fr-FR', {
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    }) :
-                    'Jamais'
-                  }
+                  {syncStats.lastFullSync
+                    ? new Date(syncStats.lastFullSync).toLocaleTimeString('fr-FR', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })
+                    : 'Jamais'}
                 </p>
               </div>
               <Sync className="h-8 w-8 text-muted-foreground" />
@@ -238,7 +244,8 @@ export const SyncMonitor = ({ onSyncComplete }: SyncMonitorProps) => {
           <AlertTriangle className="h-4 w-4" />
           <AlertTitle>Conflits de synchronisation détectés</AlertTitle>
           <AlertDescription>
-            {syncStats.conflicts?.unresolved ?? 0} conflit(s) non résolu(s) nécessite(nt) votre attention.
+            {syncStats.conflicts?.unresolved ?? 0} conflit(s) non résolu(s) nécessite(nt) votre
+            attention.
             <Button
               variant="link"
               className="p-0 h-auto ml-2"
@@ -254,19 +261,18 @@ export const SyncMonitor = ({ onSyncComplete }: SyncMonitorProps) => {
       <Card>
         <CardHeader>
           <CardTitle>Activité de Synchronisation Récente</CardTitle>
-          <CardDescription>
-            Résultats des dernières opérations de synchronisation
-          </CardDescription>
+          <CardDescription>Résultats des dernières opérations de synchronisation</CardDescription>
         </CardHeader>
         <CardContent>
           {syncResults.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              Aucune activité récente
-            </div>
+            <div className="text-center py-8 text-muted-foreground">Aucune activité récente</div>
           ) : (
             <div className="space-y-4">
               {syncResults.slice(0, 10).map((result, index) => (
-                <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
+                <div
+                  key={index}
+                  className="flex items-center justify-between p-4 border rounded-lg"
+                >
                   <div className="flex items-center gap-3">
                     {result.success ? (
                       <CheckCircle className="h-5 w-5 text-green-600" />
@@ -317,9 +323,7 @@ export const SyncMonitor = ({ onSyncComplete }: SyncMonitorProps) => {
 
           <div className="space-y-4">
             {conflicts.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                Aucun conflit non résolu
-              </div>
+              <div className="text-center py-8 text-muted-foreground">Aucun conflit non résolu</div>
             ) : (
               <Table>
                 <TableHeader>
@@ -330,14 +334,12 @@ export const SyncMonitor = ({ onSyncComplete }: SyncMonitorProps) => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {conflicts.map((conflict) => (
+                  {conflicts.map(conflict => (
                     <TableRow key={conflict.id}>
                       <TableCell>
                         <Badge variant="outline">{conflict.collection}</Badge>
                       </TableCell>
-                      <TableCell>
-                        {new Date(conflict.timestamp).toLocaleString('fr-FR')}
-                      </TableCell>
+                      <TableCell>{new Date(conflict.timestamp).toLocaleString('fr-FR')}</TableCell>
                       <TableCell>
                         <div className="flex gap-2">
                           <Dialog>
@@ -379,21 +381,27 @@ export const SyncMonitor = ({ onSyncComplete }: SyncMonitorProps) => {
                                     <Button
                                       size="sm"
                                       variant="outline"
-                                      onClick={() => handleResolveConflict(selectedConflict.id, 'local')}
+                                      onClick={() =>
+                                        handleResolveConflict(selectedConflict.id, 'local')
+                                      }
                                     >
                                       Garder Local
                                     </Button>
                                     <Button
                                       size="sm"
                                       variant="outline"
-                                      onClick={() => handleResolveConflict(selectedConflict.id, 'remote')}
+                                      onClick={() =>
+                                        handleResolveConflict(selectedConflict.id, 'remote')
+                                      }
                                     >
                                       Garder Distant
                                     </Button>
                                     <Button
                                       size="sm"
                                       variant="outline"
-                                      onClick={() => handleResolveConflict(selectedConflict.id, 'merge')}
+                                      onClick={() =>
+                                        handleResolveConflict(selectedConflict.id, 'merge')
+                                      }
                                     >
                                       Fusionner
                                     </Button>

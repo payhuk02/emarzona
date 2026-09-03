@@ -1,9 +1,15 @@
-import React, { useState, useCallback, useMemo } from "react";
-import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { SlidersHorizontal, X } from "lucide-react";
+import React, { useState, useCallback, useMemo } from 'react';
+import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { SlidersHorizontal, X } from 'lucide-react';
 
 interface MarketplaceFiltersProps {
   categoryFilter: string;
@@ -25,15 +31,15 @@ const MarketplaceFilters = ({
   categories,
 }: MarketplaceFiltersProps) => {
   const [open, setOpen] = useState(false);
-  
+
   const hasActiveFilters = useMemo(() => {
-    return categoryFilter !== "all" || priceRange !== "all" || sortBy !== "recent";
+    return categoryFilter !== 'all' || priceRange !== 'all' || sortBy !== 'recent';
   }, [categoryFilter, priceRange, sortBy]);
 
   const clearFilters = useCallback(() => {
-    onCategoryChange("all");
-    onPriceChange("all");
-    onSortChange("recent");
+    onCategoryChange('all');
+    onPriceChange('all');
+    onSortChange('recent');
   }, [onCategoryChange, onPriceChange, onSortChange]);
 
   return (
@@ -46,7 +52,7 @@ const MarketplaceFilters = ({
           </SelectTrigger>
           <SelectContent className="z-50 bg-background">
             <SelectItem value="all">Toutes les catégories</SelectItem>
-            {categories.map((cat) => (
+            {categories.map(cat => (
               <SelectItem key={cat} value={cat}>
                 {cat}
               </SelectItem>
@@ -80,12 +86,7 @@ const MarketplaceFilters = ({
         </Select>
 
         {hasActiveFilters && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={clearFilters}
-            className="gap-2"
-          >
+          <Button variant="ghost" size="sm" onClick={clearFilters} className="gap-2">
             <X className="h-4 w-4" />
             Réinitialiser
           </Button>
@@ -120,7 +121,7 @@ const MarketplaceFilters = ({
                 </SelectTrigger>
                 <SelectContent className="z-[60] bg-background">
                   <SelectItem value="all">Toutes les catégories</SelectItem>
-                  {categories.map((cat) => (
+                  {categories.map(cat => (
                     <SelectItem key={cat} value={cat}>
                       {cat}
                     </SelectItem>
@@ -200,9 +201,3 @@ const MarketplaceFiltersMemo = React.memo(MarketplaceFilters, (prevProps, nextPr
 MarketplaceFiltersMemo.displayName = 'MarketplaceFilters';
 
 export default MarketplaceFiltersMemo;
-
-
-
-
-
-

@@ -5,7 +5,14 @@
 
 import { ReactNode } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { cn } from '@/lib/utils';
 
 interface ResponsiveTableProps {
@@ -13,23 +20,23 @@ interface ResponsiveTableProps {
    * En-têtes de la table (desktop)
    */
   headers: ReactNode[];
-  
+
   /**
    * Données à afficher
    */
   rows: ReactNode[][];
-  
+
   /**
    * Fonction pour rendre une carte mobile
    * Reçoit les données de la ligne (cells) et l'index
    */
   renderMobileCard?: (cells: ReactNode[], index: number) => ReactNode;
-  
+
   /**
    * Message à afficher si aucune donnée
    */
   emptyMessage?: ReactNode;
-  
+
   /**
    * Classes CSS additionnelles
    */
@@ -38,7 +45,7 @@ interface ResponsiveTableProps {
 
 /**
  * Composant de table responsive
- * 
+ *
  * @example
  * ```tsx
  * <ResponsiveTable
@@ -73,7 +80,7 @@ export const ResponsiveTable = ({
 }: ResponsiveTableProps) => {
   if (rows.length === 0) {
     return (
-      <div className={cn("text-center py-12 text-muted-foreground", className)}>
+      <div className={cn('text-center py-12 text-muted-foreground', className)}>
         {emptyMessage || (
           <>
             <p className="font-medium">Aucune donnée</p>
@@ -116,7 +123,7 @@ export const ResponsiveTable = ({
           if (renderMobileCard) {
             return <div key={index}>{renderMobileCard(row, index)}</div>;
           }
-          
+
           // Rendu par défaut si pas de renderMobileCard
           return (
             <Card key={index} className="border-border">
@@ -125,8 +132,8 @@ export const ResponsiveTable = ({
                   <div
                     key={cellIndex}
                     className={cn(
-                      "flex items-center justify-between gap-2",
-                      cellIndex === row.length - 1 && "pt-2 border-t"
+                      'flex items-center justify-between gap-2',
+                      cellIndex === row.length - 1 && 'pt-2 border-t'
                     )}
                   >
                     <span className="text-sm font-medium text-muted-foreground">
@@ -143,10 +150,3 @@ export const ResponsiveTable = ({
     </>
   );
 };
-
-
-
-
-
-
-

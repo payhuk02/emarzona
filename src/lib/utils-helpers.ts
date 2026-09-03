@@ -10,14 +10,14 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
   func: T,
   wait: number
 ): (...args: Parameters<T>) => void {
-  let  timeout: NodeJS.Timeout | null = null;
-  
+  let timeout: NodeJS.Timeout | null = null;
+
   return function executedFunction(...args: Parameters<T>) {
     const later = () => {
       timeout = null;
       func(...args);
     };
-    
+
     if (timeout) {
       clearTimeout(timeout);
     }
@@ -32,8 +32,8 @@ export function throttle<T extends (...args: unknown[]) => unknown>(
   func: T,
   limit: number
 ): (...args: Parameters<T>) => void {
-  let  inThrottle: boolean;
-  
+  let inThrottle: boolean;
+
   return function executedFunction(...args: Parameters<T>) {
     if (!inThrottle) {
       func(...args);
@@ -78,10 +78,8 @@ export function formatDate(
   locale: string = 'fr-FR',
   options?: Intl.DateTimeFormatOptions
 ): string {
-  const dateObj = typeof date === 'string' || typeof date === 'number' 
-    ? new Date(date) 
-    : date;
-  
+  const dateObj = typeof date === 'string' || typeof date === 'number' ? new Date(date) : date;
+
   return new Intl.DateTimeFormat(locale, {
     year: 'numeric',
     month: 'long',
@@ -93,18 +91,13 @@ export function formatDate(
 /**
  * Formate une date relative (il y a X jours)
  */
-export function formatRelativeTime(
-  date: Date | string | number,
-  locale: string = 'fr'
-): string {
-  const dateObj = typeof date === 'string' || typeof date === 'number' 
-    ? new Date(date) 
-    : date;
-  
+export function formatRelativeTime(date: Date | string | number, locale: string = 'fr'): string {
+  const dateObj = typeof date === 'string' || typeof date === 'number' ? new Date(date) : date;
+
   const rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
   const now = new Date();
   const diffInSeconds = Math.floor((dateObj.getTime() - now.getTime()) / 1000);
-  
+
   const intervals = [
     { unit: 'year' as const, seconds: 31536000 },
     { unit: 'month' as const, seconds: 2592000 },
@@ -113,29 +106,25 @@ export function formatRelativeTime(
     { unit: 'hour' as const, seconds: 3600 },
     { unit: 'minute' as const, seconds: 60 },
   ];
-  
+
   for (const { unit, seconds } of intervals) {
     const interval = Math.floor(Math.abs(diffInSeconds) / seconds);
     if (interval >= 1) {
       return rtf.format(Math.sign(diffInSeconds) * interval, unit);
     }
   }
-  
+
   return rtf.format(0, 'second');
 }
 
 /**
  * Tronque un texte avec ellipsis
  */
-export function truncate(
-  text: string,
-  maxLength: number,
-  suffix: string = '...'
-): string {
+export function truncate(text: string, maxLength: number, suffix: string = '...'): string {
   if (text.length <= maxLength) {
     return text;
   }
-  
+
   return text.substring(0, maxLength - suffix.length) + suffix;
 }
 
@@ -180,7 +169,7 @@ export async function copyToClipboard(text: string): Promise<boolean> {
       await navigator.clipboard.writeText(text);
       return true;
     }
-    
+
     // Fallback pour navigateurs plus anciens
     const textArea = document.createElement('textarea');
     textArea.value = text;
@@ -188,7 +177,7 @@ export async function copyToClipboard(text: string): Promise<boolean> {
     textArea.style.opacity = '0';
     document.body.appendChild(textArea);
     textArea.select();
-    
+
     try {
       document.execCommand('copy');
       document.body.removeChild(textArea);
@@ -210,10 +199,8 @@ export function downloadFile(
   filename: string,
   mimeType: string = 'application/octet-stream'
 ): void {
-  const blob = typeof content === 'string' 
-    ? new Blob([content], { type: mimeType })
-    : content;
-  
+  const blob = typeof content === 'string' ? new Blob([content], { type: mimeType }) : content;
+
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
@@ -229,11 +216,11 @@ export function downloadFile(
  */
 export function formatFileSize(bytes: number): string {
   if (bytes === 0) return '0 Bytes';
-  
+
   const k = 1024;
   const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  
+
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
 }
 
@@ -251,19 +238,19 @@ export function isEmpty(value: unknown): boolean {
   if (value === null || value === undefined) {
     return true;
   }
-  
+
   if (typeof value === 'string' && value.trim() === '') {
     return true;
   }
-  
+
   if (Array.isArray(value) && value.length === 0) {
     return true;
   }
-  
+
   if (typeof value === 'object' && Object.keys(value).length === 0) {
     return true;
   }
-  
+
   return false;
 }
 
@@ -274,15 +261,15 @@ export function deepClone<T>(obj: T): T {
   if (obj === null || typeof obj !== 'object') {
     return obj;
   }
-  
+
   if (obj instanceof Date) {
     return new Date(obj.getTime()) as unknown as T;
   }
-  
+
   if (obj instanceof Array) {
     return obj.map(item => deepClone(item)) as unknown as T;
   }
-  
+
   if (typeof obj === 'object') {
     const cloned = {} as T;
     for (const key in obj) {
@@ -292,19 +279,16 @@ export function deepClone<T>(obj: T): T {
     }
     return cloned;
   }
-  
+
   return obj;
 }
 
 /**
  * Merge deux objets en profondeur
  */
-export function deepMerge<T extends Record<string, unknown>>(
-  target: T,
-  source: Partial<T>
-): T {
+export function deepMerge<T extends Record<string, unknown>>(target: T, source: Partial<T>): T {
   const output = { ...target };
-  
+
   if (isObject(target) && isObject(source)) {
     Object.keys(source).forEach(key => {
       if (isObject(source[key])) {
@@ -318,7 +302,7 @@ export function deepMerge<T extends Record<string, unknown>>(
       }
     });
   }
-  
+
   return output;
 }
 
@@ -341,26 +325,19 @@ export async function retry<T>(
   maxRetries: number = 3,
   delayMs: number = 1000
 ): Promise<T> {
-  let  lastError: Error;
-  
-  for (let  i= 0; i < maxRetries; i++) {
+  let lastError: Error;
+
+  for (let i = 0; i < maxRetries; i++) {
     try {
       return await fn();
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error));
-      
+
       if (i < maxRetries - 1) {
         await delay(delayMs * Math.pow(2, i)); // Exponential backoff
       }
     }
   }
-  
+
   throw lastError!;
 }
-
-
-
-
-
-
-

@@ -40,9 +40,9 @@ const LearningPathsGridComponent = ({ storeId, onPathClick }: LearningPathsGridP
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {paths.map((path) => {
+      {paths.map(path => {
         const enrollment = enrollments.find(e => e.learning_path_id === path.id);
-        
+
         return (
           <LearningPathCard
             key={path.id}
@@ -59,17 +59,7 @@ const LearningPathsGridComponent = ({ storeId, onPathClick }: LearningPathsGridP
 
 // Optimisation avec React.memo pour éviter les re-renders inutiles
 export const LearningPathsGrid = React.memo(LearningPathsGridComponent, (prevProps, nextProps) => {
-  return (
-    prevProps.storeId === nextProps.storeId &&
-    prevProps.onPathClick === nextProps.onPathClick
-  );
+  return prevProps.storeId === nextProps.storeId && prevProps.onPathClick === nextProps.onPathClick;
 });
 
 LearningPathsGrid.displayName = 'LearningPathsGrid';
-
-
-
-
-
-
-

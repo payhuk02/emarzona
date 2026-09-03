@@ -16,10 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  useFileVersions,
-  useCreateFileVersion,
-} from '@/hooks/digital/useAdvancedFileManagement';
+import { useFileVersions, useCreateFileVersion } from '@/hooks/digital/useAdvancedFileManagement';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from '@/components/icons';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -78,7 +75,7 @@ export const FileVersionForm = ({ fileId, onSuccess, onCancel }: FileVersionForm
         ...formData,
       });
       onSuccess();
-    } catch ( _error: any) {
+    } catch (_error: any) {
       // L'erreur est déjà gérée par le hook
     }
   };
@@ -93,7 +90,7 @@ export const FileVersionForm = ({ fileId, onSuccess, onCancel }: FileVersionForm
             type="number"
             min="1"
             value={formData.version_number}
-            onChange={(e) =>
+            onChange={e =>
               setFormData({ ...formData, version_number: parseInt(e.target.value) || 1 })
             }
             required
@@ -104,7 +101,7 @@ export const FileVersionForm = ({ fileId, onSuccess, onCancel }: FileVersionForm
           <Input
             id="version_label"
             value={formData.version_label}
-            onChange={(e) => setFormData({ ...formData, version_label: e.target.value })}
+            onChange={e => setFormData({ ...formData, version_label: e.target.value })}
             placeholder="Ex: 1.0.0, beta, rc1"
             required
           />
@@ -117,7 +114,7 @@ export const FileVersionForm = ({ fileId, onSuccess, onCancel }: FileVersionForm
           id="file_url"
           type="url"
           value={formData.file_url}
-          onChange={(e) => setFormData({ ...formData, file_url: e.target.value })}
+          onChange={e => setFormData({ ...formData, file_url: e.target.value })}
           placeholder="https://..."
           required
         />
@@ -132,7 +129,7 @@ export const FileVersionForm = ({ fileId, onSuccess, onCancel }: FileVersionForm
             step="0.01"
             min="0"
             value={formData.file_size_mb}
-            onChange={(e) =>
+            onChange={e =>
               setFormData({ ...formData, file_size_mb: parseFloat(e.target.value) || 0 })
             }
             required
@@ -143,7 +140,7 @@ export const FileVersionForm = ({ fileId, onSuccess, onCancel }: FileVersionForm
           <Input
             id="checksum_sha256"
             value={formData.checksum_sha256}
-            onChange={(e) => setFormData({ ...formData, checksum_sha256: e.target.value })}
+            onChange={e => setFormData({ ...formData, checksum_sha256: e.target.value })}
             placeholder="Optionnel"
           />
         </div>
@@ -154,7 +151,7 @@ export const FileVersionForm = ({ fileId, onSuccess, onCancel }: FileVersionForm
         <Textarea
           id="changelog"
           value={formData.changelog}
-          onChange={(e) => setFormData({ ...formData, changelog: e.target.value })}
+          onChange={e => setFormData({ ...formData, changelog: e.target.value })}
           placeholder="Liste des changements..."
           rows={4}
         />
@@ -165,7 +162,7 @@ export const FileVersionForm = ({ fileId, onSuccess, onCancel }: FileVersionForm
         <Textarea
           id="release_notes"
           value={formData.release_notes}
-          onChange={(e) => setFormData({ ...formData, release_notes: e.target.value })}
+          onChange={e => setFormData({ ...formData, release_notes: e.target.value })}
           placeholder="Notes détaillées pour les utilisateurs..."
           rows={4}
         />
@@ -181,7 +178,7 @@ export const FileVersionForm = ({ fileId, onSuccess, onCancel }: FileVersionForm
           </div>
           <Switch
             checked={formData.is_stable}
-            onCheckedChange={(checked) => {
+            onCheckedChange={checked => {
               setFormData({ ...formData, is_stable: checked, is_beta: false, is_alpha: false });
             }}
           />
@@ -196,7 +193,7 @@ export const FileVersionForm = ({ fileId, onSuccess, onCancel }: FileVersionForm
           </div>
           <Switch
             checked={formData.is_beta}
-            onCheckedChange={(checked) => {
+            onCheckedChange={checked => {
               setFormData({ ...formData, is_beta: checked, is_stable: !checked });
             }}
             disabled={formData.is_stable}
@@ -206,13 +203,11 @@ export const FileVersionForm = ({ fileId, onSuccess, onCancel }: FileVersionForm
         <div className="flex items-center justify-between">
           <div className="space-y-0.5">
             <Label>Version alpha</Label>
-            <div className="text-sm text-muted-foreground">
-              Version de développement, instable
-            </div>
+            <div className="text-sm text-muted-foreground">Version de développement, instable</div>
           </div>
           <Switch
             checked={formData.is_alpha}
-            onCheckedChange={(checked) => {
+            onCheckedChange={checked => {
               setFormData({ ...formData, is_alpha: checked, is_stable: !checked });
             }}
             disabled={formData.is_stable}
@@ -225,19 +220,10 @@ export const FileVersionForm = ({ fileId, onSuccess, onCancel }: FileVersionForm
           Annuler
         </Button>
         <Button type="submit" disabled={createVersion.isPending}>
-          {createVersion.isPending && (
-            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-          )}
+          {createVersion.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
           Créer la version
         </Button>
       </div>
     </form>
   );
 };
-
-
-
-
-
-
-

@@ -79,9 +79,10 @@ export const useShippingServiceMessaging = (storeId?: string, shippingServiceId?
     queryFn: async () => {
       if (!storeId) return [];
 
-      let  query= supabase
+      let query = supabase
         .from('shipping_service_conversations')
-        .select(`
+        .select(
+          `
           *,
           shipping_service:global_shipping_services (
             id,
@@ -97,7 +98,8 @@ export const useShippingServiceMessaging = (storeId?: string, shippingServiceId?
             sender_id,
             sender_type
           )
-        `)
+        `
+        )
         .eq('store_id', storeId)
         .order('last_message_at', { ascending: false });
 
@@ -138,7 +140,9 @@ export const useShippingServiceMessaging = (storeId?: string, shippingServiceId?
       shippingServiceId: string;
       subject?: string;
     }) => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Utilisateur non authentifié');
 
       const { data: store } = await supabase
@@ -157,7 +161,8 @@ export const useShippingServiceMessaging = (storeId?: string, shippingServiceId?
           store_user_id: store.user_id,
           subject,
         })
-        .select(`
+        .select(
+          `
           *,
           shipping_service:global_shipping_services (
             id,
@@ -165,7 +170,8 @@ export const useShippingServiceMessaging = (storeId?: string, shippingServiceId?
             contact_email,
             contact_phone
           )
-        `)
+        `
+        )
         .single();
 
       if (error) throw error;
@@ -199,7 +205,9 @@ export const useShippingServiceMessaging = (storeId?: string, shippingServiceId?
       conversationId: string;
       formData: ShippingServiceMessageFormData;
     }) => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Utilisateur non authentifié');
 
       // Déterminer le type d'expéditeur
@@ -209,7 +217,7 @@ export const useShippingServiceMessaging = (storeId?: string, shippingServiceId?
         .eq('id', conversationId)
         .single();
 
-      let  senderType: 'store' | 'shipping_service' | 'admin' = 'store';
+      let senderType: 'store' | 'shipping_service' | 'admin' = 'store';
       if (user.id === conversation?.store_user_id) {
         senderType = 'store';
       } else {
@@ -254,7 +262,7 @@ export const useShippingServiceMessaging = (storeId?: string, shippingServiceId?
       logger.error('Error sending message', error);
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible d\'envoyer le message.',
+        description: error.message || "Impossible d'envoyer le message.",
         variant: 'destructive',
       });
     },
@@ -264,7 +272,8 @@ export const useShippingServiceMessaging = (storeId?: string, shippingServiceId?
   const fetchMessages = useCallback(async (conversationId: string) => {
     const { data, error } = await supabase
       .from('shipping_service_messages')
-      .select(`
+      .select(
+        `
         *,
         sender:profiles!shipping_service_messages_sender_id_fkey (
           user_id,
@@ -274,7 +283,8 @@ export const useShippingServiceMessaging = (storeId?: string, shippingServiceId?
           avatar_url
         ),
         attachments:shipping_service_message_attachments (*)
-      `)
+      `
+      )
       .eq('conversation_id', conversationId)
       .order('created_at', { ascending: true });
 
@@ -291,7 +301,9 @@ export const useShippingServiceMessaging = (storeId?: string, shippingServiceId?
   // Marquer les messages comme lus
   const markAsReadMutation = useMutation({
     mutationFn: async (conversationId: string) => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Utilisateur non authentifié');
 
       const { error } = await supabase
@@ -322,10 +334,3 @@ export const useShippingServiceMessaging = (storeId?: string, shippingServiceId?
     isSending: sendMessageMutation.isPending,
   };
 };
-
-
-
-
-
-
-

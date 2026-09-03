@@ -41,33 +41,36 @@ export const OrderCreator = ({ storeId, userId, onOrderCreated }: OrderCreatorPr
       street: '',
       city: '',
       postal_code: '',
-      country: ''
+      country: '',
     },
     billing_address: {
       street: '',
       city: '',
       postal_code: '',
-      country: ''
+      country: '',
     },
     payment_method: 'card',
-    items: [] as OrderItem[]
+    items: [] as OrderItem[],
   });
 
   // Ajouter un produit à la commande
   const addProduct = () => {
     setOrderData(prev => ({
       ...prev,
-      items: [...prev.items, {
-        product_id: `product_${Date.now()}`, // En production: ID réel du produit
-        quantity: 1,
-        unit_price: 10.00 // En production: prix réel du produit
-      }]
+      items: [
+        ...prev.items,
+        {
+          product_id: `product_${Date.now()}`, // En production: ID réel du produit
+          quantity: 1,
+          unit_price: 10.0, // En production: prix réel du produit
+        },
+      ],
     }));
   };
 
   // Calculer le total
   const calculateTotal = () => {
-    return orderData.items.reduce((total, item) => total + (item.quantity * item.unit_price), 0);
+    return orderData.items.reduce((total, item) => total + item.quantity * item.unit_price, 0);
   };
 
   // Créer la commande
@@ -90,7 +93,7 @@ export const OrderCreator = ({ storeId, userId, onOrderCreated }: OrderCreatorPr
         total_amount: calculateTotal(),
         // En production, ces données viendraient du contexte utilisateur
         user_id: userId,
-        store_id: storeId
+        store_id: storeId,
       };
 
       const result = await createOrder(storeId, finalOrderData);
@@ -114,22 +117,20 @@ export const OrderCreator = ({ storeId, userId, onOrderCreated }: OrderCreatorPr
             street: '',
             city: '',
             postal_code: '',
-            country: ''
+            country: '',
           },
           billing_address: {
             street: '',
             city: '',
             postal_code: '',
-            country: ''
+            country: '',
           },
           payment_method: 'card',
-          items: []
+          items: [],
         });
-
       } else {
         alert('Erreur lors de la création de la commande');
       }
-
     } catch (error) {
       logger.error('Erreur création commande:', error);
       alert('Erreur lors de la création de la commande');
@@ -143,13 +144,15 @@ export const OrderCreator = ({ storeId, userId, onOrderCreated }: OrderCreatorPr
   return (
     <div className="space-y-6">
       {/* Statut de connectivité */}
-      <Alert className={isOffline ? "border-orange-200 bg-orange-50" : "border-green-200 bg-green-50"}>
+      <Alert
+        className={isOffline ? 'border-orange-200 bg-orange-50' : 'border-green-200 bg-green-50'}
+      >
         {isOffline ? (
           <WifiOff className="h-4 w-4 text-orange-600" />
         ) : (
           <Wifi className="h-4 w-4 text-green-600" />
         )}
-        <AlertDescription className={isOffline ? "text-orange-800" : "text-green-800"}>
+        <AlertDescription className={isOffline ? 'text-orange-800' : 'text-green-800'}>
           {isOffline ? (
             <>
               <strong>Mode hors ligne détecté</strong> - Votre commande sera enregistrée localement
@@ -179,9 +182,7 @@ export const OrderCreator = ({ storeId, userId, onOrderCreated }: OrderCreatorPr
             <ShoppingCart className="h-5 w-5" />
             Créer une commande
           </CardTitle>
-          <CardDescription>
-            Création de commande avec support offline automatique
-          </CardDescription>
+          <CardDescription>Création de commande avec support offline automatique</CardDescription>
         </CardHeader>
 
         <CardContent className="space-y-6">
@@ -192,7 +193,7 @@ export const OrderCreator = ({ storeId, userId, onOrderCreated }: OrderCreatorPr
               <Input
                 id="order_number"
                 value={orderData.order_number}
-                onChange={(e) => setOrderData(prev => ({ ...prev, order_number: e.target.value }))}
+                onChange={e => setOrderData(prev => ({ ...prev, order_number: e.target.value }))}
                 placeholder="CMD-2025-001"
               />
             </div>
@@ -203,7 +204,7 @@ export const OrderCreator = ({ storeId, userId, onOrderCreated }: OrderCreatorPr
                 id="payment_method"
                 className="w-full p-2 border rounded"
                 value={orderData.payment_method}
-                onChange={(e) => setOrderData(prev => ({ ...prev, payment_method: e.target.value }))}
+                onChange={e => setOrderData(prev => ({ ...prev, payment_method: e.target.value }))}
               >
                 <option value="card">Carte bancaire</option>
                 <option value="paypal">PayPal</option>
@@ -222,36 +223,44 @@ export const OrderCreator = ({ storeId, userId, onOrderCreated }: OrderCreatorPr
                 <Input
                   placeholder="Rue"
                   value={orderData.shipping_address.street}
-                  onChange={(e) => setOrderData(prev => ({
-                    ...prev,
-                    shipping_address: { ...prev.shipping_address, street: e.target.value }
-                  }))}
+                  onChange={e =>
+                    setOrderData(prev => ({
+                      ...prev,
+                      shipping_address: { ...prev.shipping_address, street: e.target.value },
+                    }))
+                  }
                 />
                 <div className="grid grid-cols-2 gap-2">
                   <Input
                     placeholder="Ville"
                     value={orderData.shipping_address.city}
-                    onChange={(e) => setOrderData(prev => ({
-                      ...prev,
-                      shipping_address: { ...prev.shipping_address, city: e.target.value }
-                    }))}
+                    onChange={e =>
+                      setOrderData(prev => ({
+                        ...prev,
+                        shipping_address: { ...prev.shipping_address, city: e.target.value },
+                      }))
+                    }
                   />
                   <Input
                     placeholder="Code postal"
                     value={orderData.shipping_address.postal_code}
-                    onChange={(e) => setOrderData(prev => ({
-                      ...prev,
-                      shipping_address: { ...prev.shipping_address, postal_code: e.target.value }
-                    }))}
+                    onChange={e =>
+                      setOrderData(prev => ({
+                        ...prev,
+                        shipping_address: { ...prev.shipping_address, postal_code: e.target.value },
+                      }))
+                    }
                   />
                 </div>
                 <Input
                   placeholder="Pays"
                   value={orderData.shipping_address.country}
-                  onChange={(e) => setOrderData(prev => ({
-                    ...prev,
-                    shipping_address: { ...prev.shipping_address, country: e.target.value }
-                  }))}
+                  onChange={e =>
+                    setOrderData(prev => ({
+                      ...prev,
+                      shipping_address: { ...prev.shipping_address, country: e.target.value },
+                    }))
+                  }
                 />
               </div>
             </div>
@@ -263,36 +272,44 @@ export const OrderCreator = ({ storeId, userId, onOrderCreated }: OrderCreatorPr
                 <Input
                   placeholder="Rue"
                   value={orderData.billing_address.street}
-                  onChange={(e) => setOrderData(prev => ({
-                    ...prev,
-                    billing_address: { ...prev.billing_address, street: e.target.value }
-                  }))}
+                  onChange={e =>
+                    setOrderData(prev => ({
+                      ...prev,
+                      billing_address: { ...prev.billing_address, street: e.target.value },
+                    }))
+                  }
                 />
                 <div className="grid grid-cols-2 gap-2">
                   <Input
                     placeholder="Ville"
                     value={orderData.billing_address.city}
-                    onChange={(e) => setOrderData(prev => ({
-                      ...prev,
-                      billing_address: { ...prev.billing_address, city: e.target.value }
-                    }))}
+                    onChange={e =>
+                      setOrderData(prev => ({
+                        ...prev,
+                        billing_address: { ...prev.billing_address, city: e.target.value },
+                      }))
+                    }
                   />
                   <Input
                     placeholder="Code postal"
                     value={orderData.billing_address.postal_code}
-                    onChange={(e) => setOrderData(prev => ({
-                      ...prev,
-                      billing_address: { ...prev.billing_address, postal_code: e.target.value }
-                    }))}
+                    onChange={e =>
+                      setOrderData(prev => ({
+                        ...prev,
+                        billing_address: { ...prev.billing_address, postal_code: e.target.value },
+                      }))
+                    }
                   />
                 </div>
                 <Input
                   placeholder="Pays"
                   value={orderData.billing_address.country}
-                  onChange={(e) => setOrderData(prev => ({
-                    ...prev,
-                    billing_address: { ...prev.billing_address, country: e.target.value }
-                  }))}
+                  onChange={e =>
+                    setOrderData(prev => ({
+                      ...prev,
+                      billing_address: { ...prev.billing_address, country: e.target.value },
+                    }))
+                  }
                 />
               </div>
             </div>
@@ -308,9 +325,7 @@ export const OrderCreator = ({ storeId, userId, onOrderCreated }: OrderCreatorPr
             </div>
 
             {orderData.items.length === 0 ? (
-              <p className="text-muted-foreground text-center py-4">
-                Aucun produit ajouté
-              </p>
+              <p className="text-muted-foreground text-center py-4">Aucun produit ajouté</p>
             ) : (
               <div className="space-y-2">
                 {orderData.items.map((item, index) => (
@@ -325,7 +340,7 @@ export const OrderCreator = ({ storeId, userId, onOrderCreated }: OrderCreatorPr
                       onClick={() => {
                         setOrderData(prev => ({
                           ...prev,
-                          items: prev.items.filter((_, i) => i !== index)
+                          items: prev.items.filter((_, i) => i !== index),
                         }));
                       }}
                       variant="outline"
@@ -372,9 +387,9 @@ export const OrderCreator = ({ storeId, userId, onOrderCreated }: OrderCreatorPr
             <p className="flex items-start gap-2">
               <CheckCircle className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
               <span>
-                <strong>Sécurité garantie :</strong> Toutes les commandes sont validées
-                par le serveur avant application. En mode hors ligne, vos données sont
-                chiffrées localement et synchronisées automatiquement.
+                <strong>Sécurité garantie :</strong> Toutes les commandes sont validées par le
+                serveur avant application. En mode hors ligne, vos données sont chiffrées localement
+                et synchronisées automatiquement.
               </span>
             </p>
           </div>

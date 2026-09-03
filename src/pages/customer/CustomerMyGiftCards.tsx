@@ -11,8 +11,18 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useCustomerGiftCards, useCustomerGiftCardTransactions } from '@/hooks/giftCards/useGiftCards';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  useCustomerGiftCards,
+  useCustomerGiftCardTransactions,
+} from '@/hooks/giftCards/useGiftCards';
 import { useAuth } from '@/contexts/AuthContext';
 import { Gift, Copy, Check, Loader2, Calendar, CreditCard, TrendingUp } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
@@ -21,14 +31,14 @@ import { fr } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
 import { GiftCardStatus } from '@/types/giftCards';
 
-const  STATUS_COLORS: Record<GiftCardStatus, string> = {
+const STATUS_COLORS: Record<GiftCardStatus, string> = {
   active: 'bg-green-500/10 text-green-600 border-green-500/20',
   used: 'bg-blue-500/10 text-blue-600 border-blue-500/20',
   expired: 'bg-red-500/10 text-red-600 border-red-500/20',
   cancelled: 'bg-gray-500/10 text-gray-600 border-gray-500/20',
 };
 
-const  STATUS_LABELS: Record<GiftCardStatus, string> = {
+const STATUS_LABELS: Record<GiftCardStatus, string> = {
   active: 'Active',
   used: 'Utilisée',
   expired: 'Expirée',
@@ -85,9 +95,12 @@ export default function CustomerMyGiftCards() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-base sm:text-xl md:text-2xl font-bold">{formatCurrency(totalBalance)}</div>
+            <div className="text-base sm:text-xl md:text-2xl font-bold">
+              {formatCurrency(totalBalance)}
+            </div>
             <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
-              {activeCards.length} carte{activeCards.length > 1 ? 's' : ''} active{activeCards.length > 1 ? 's' : ''}
+              {activeCards.length} carte{activeCards.length > 1 ? 's' : ''} active
+              {activeCards.length > 1 ? 's' : ''}
             </p>
           </CardContent>
         </Card>
@@ -101,9 +114,7 @@ export default function CustomerMyGiftCards() {
           </CardHeader>
           <CardContent>
             <div className="text-base sm:text-xl md:text-2xl font-bold">{giftCards.length}</div>
-            <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
-              Reçues au total
-            </p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">Reçues au total</p>
           </CardContent>
         </Card>
 
@@ -116,9 +127,7 @@ export default function CustomerMyGiftCards() {
           </CardHeader>
           <CardContent>
             <div className="text-base sm:text-xl md:text-2xl font-bold">{transactions.length}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Historique complet
-            </p>
+            <p className="text-xs text-muted-foreground mt-1">Historique complet</p>
           </CardContent>
         </Card>
       </div>
@@ -134,7 +143,7 @@ export default function CustomerMyGiftCards() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {activeCards.map((card) => (
+              {activeCards.map(card => (
                 <Card key={card.id} className="border-2">
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
@@ -189,9 +198,7 @@ export default function CustomerMyGiftCards() {
                     )}
 
                     {card.recipient_name && (
-                      <div className="text-xs text-muted-foreground">
-                        De: {card.recipient_name}
-                      </div>
+                      <div className="text-xs text-muted-foreground">De: {card.recipient_name}</div>
                     )}
                   </CardContent>
                 </Card>
@@ -216,9 +223,7 @@ export default function CustomerMyGiftCards() {
         <Card>
           <CardHeader>
             <CardTitle>Toutes mes Cartes Cadeaux</CardTitle>
-            <CardDescription>
-              Historique de toutes vos cartes cadeaux
-            </CardDescription>
+            <CardDescription>Historique de toutes vos cartes cadeaux</CardDescription>
           </CardHeader>
           <CardContent>
             <Table>
@@ -233,14 +238,16 @@ export default function CustomerMyGiftCards() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {giftCards.map((card) => (
+                {giftCards.map(card => (
                   <TableRow key={card.id}>
                     <TableCell>
                       <code className="font-mono text-sm">{card.code}</code>
                     </TableCell>
                     <TableCell>{formatCurrency(card.initial_amount)}</TableCell>
                     <TableCell>
-                      <span className={card.balance === 0 ? 'text-muted-foreground' : 'font-medium'}>
+                      <span
+                        className={card.balance === 0 ? 'text-muted-foreground' : 'font-medium'}
+                      >
                         {formatCurrency(card.balance || 0)}
                       </span>
                     </TableCell>
@@ -251,16 +258,16 @@ export default function CustomerMyGiftCards() {
                     </TableCell>
                     <TableCell>
                       {card.expires_at ? (
-                        <span className={new Date(card.expires_at) < new Date() ? 'text-red-600' : ''}>
+                        <span
+                          className={new Date(card.expires_at) < new Date() ? 'text-red-600' : ''}
+                        >
                           {format(new Date(card.expires_at), 'PP', { locale: fr })}
                         </span>
                       ) : (
                         <span className="text-muted-foreground">Jamais</span>
                       )}
                     </TableCell>
-                    <TableCell>
-                      {format(new Date(card.created_at), 'PP', { locale: fr })}
-                    </TableCell>
+                    <TableCell>{format(new Date(card.created_at), 'PP', { locale: fr })}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -274,9 +281,7 @@ export default function CustomerMyGiftCards() {
         <Card>
           <CardHeader>
             <CardTitle>Historique des Transactions</CardTitle>
-            <CardDescription>
-              Toutes les transactions liées à vos cartes cadeaux
-            </CardDescription>
+            <CardDescription>Toutes les transactions liées à vos cartes cadeaux</CardDescription>
           </CardHeader>
           <CardContent>
             <Table>
@@ -290,7 +295,7 @@ export default function CustomerMyGiftCards() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {transactions.map((transaction) => (
+                {transactions.map(transaction => (
                   <TableRow key={transaction.id}>
                     <TableCell>
                       {format(new Date(transaction.created_at), 'PPp', { locale: fr })}
@@ -300,7 +305,13 @@ export default function CustomerMyGiftCards() {
                         {transaction.transaction_type === 'redemption' ? 'Rédemption' : 'Recharge'}
                       </Badge>
                     </TableCell>
-                    <TableCell className={transaction.transaction_type === 'redemption' ? 'text-red-600' : 'text-green-600'}>
+                    <TableCell
+                      className={
+                        transaction.transaction_type === 'redemption'
+                          ? 'text-red-600'
+                          : 'text-green-600'
+                      }
+                    >
                       {transaction.transaction_type === 'redemption' ? '-' : '+'}
                       {formatCurrency(Math.abs(transaction.amount))}
                     </TableCell>
@@ -324,10 +335,3 @@ export default function CustomerMyGiftCards() {
     </div>
   );
 }
-
-
-
-
-
-
-

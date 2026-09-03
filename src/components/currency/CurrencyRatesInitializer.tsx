@@ -29,9 +29,12 @@ export function CurrencyRatesInitializer() {
     initializeRates();
 
     // Mettre à jour les taux toutes les heures
-    const intervalId = setInterval(() => {
-      initializeRates();
-    }, 60 * 60 * 1000); // 1 heure
+    const intervalId = setInterval(
+      () => {
+        initializeRates();
+      },
+      60 * 60 * 1000
+    ); // 1 heure
 
     return () => {
       clearInterval(intervalId);
@@ -41,16 +44,3 @@ export function CurrencyRatesInitializer() {
   // Ce composant ne rend rien
   return null;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -1,7 +1,7 @@
 /**
  * useCartOptimistic Hook
  * Date: 28 Janvier 2025
- * 
+ *
  * Hook panier avec optimistic updates pour meilleure UX
  */
 
@@ -18,7 +18,8 @@ import {
 import type { CartItem, AddToCartOptions, UpdateCartItemOptions } from '@/types/cart';
 
 const CART_QUERY_KEY = ['cart'];
-const CART_ITEM_FIELDS = 'id, user_id, session_id, product_id, product_type, product_name, product_image_url, variant_id, variant_name, quantity, unit_price, discount_amount, coupon_code, metadata, currency, added_at, updated_at';
+const CART_ITEM_FIELDS =
+  'id, user_id, session_id, product_id, product_type, product_name, product_image_url, variant_id, variant_name, quantity, unit_price, discount_amount, coupon_code, metadata, currency, added_at, updated_at';
 
 /**
  * Hook pour ajouter un item au panier avec optimistic update
@@ -29,7 +30,7 @@ export function useAddToCartOptimistic() {
 
   const listUpdate = createListOptimisticUpdate<CartItem, AddToCartOptions>(
     CART_QUERY_KEY,
-    (variables) => {
+    variables => {
       // Créer un item temporaire (sera remplacé par la vraie réponse)
       return {
         id: `temp-${Date.now()}`,
@@ -64,8 +65,10 @@ export function useAddToCartOptimistic() {
       const finalPrice = product.promotional_price || product.price;
 
       // Vérifier si le produit existe déjà
-      const { data: { user } } = await supabase.auth.getUser();
-      let  query= supabase
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      let query = supabase
         .from('cart_items')
         .select(CART_ITEM_FIELDS)
         .eq('product_id', options.product_id);
@@ -105,7 +108,9 @@ export function useAddToCartOptimistic() {
             quantity: options.quantity || 1,
             unit_price: finalPrice,
             user_id: user?.id || null,
-            session_id: user ? null : localStorage.getItem('cart_session_id') || `session_${Date.now()}`,
+            session_id: user
+              ? null
+              : localStorage.getItem('cart_session_id') || `session_${Date.now()}`,
           })
           .select()
           .single();
@@ -114,7 +119,7 @@ export function useAddToCartOptimistic() {
         return data as CartItem;
       }
     },
-    onMutate: async (variables) => {
+    onMutate: async variables => {
       // Annuler les requêtes en cours
       await queryClient.cancelQueries({ queryKey: CART_QUERY_KEY });
 
@@ -122,7 +127,7 @@ export function useAddToCartOptimistic() {
       const previousData = queryClient.getQueryData<CartItem[]>(CART_QUERY_KEY);
 
       // Appliquer optimistic update
-      queryClient.setQueryData<CartItem[]>(CART_QUERY_KEY, (oldData) => {
+      queryClient.setQueryData<CartItem[]>(CART_QUERY_KEY, oldData => {
         return listUpdate.add(oldData, variables);
       });
 
@@ -137,23 +142,23 @@ export function useAddToCartOptimistic() {
       logger.error('Erreur ajout panier', { error, variables });
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible d\'ajouter le produit au panier',
+        description: error.message || "Impossible d'ajouter le produit au panier",
         variant: 'destructive',
       });
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       // Remplacer l'item temporaire par la vraie réponse
-      queryClient.setQueryData<CartItem[]>(CART_QUERY_KEY, (oldData) => {
+      queryClient.setQueryData<CartItem[]>(CART_QUERY_KEY, oldData => {
         if (!oldData) return [data];
-        
+
         // Remplacer l'item temporaire
-        const index = oldData.findIndex((item) => item.id?.startsWith('temp-'));
+        const index = oldData.findIndex(item => item.id?.startsWith('temp-'));
         if (index !== -1) {
           const updated = [...oldData];
           updated[index] = data;
           return updated;
         }
-        
+
         // Ou ajouter si pas trouvé
         return [data, ...oldData];
       });
@@ -179,7 +184,7 @@ export function useUpdateCartItemOptimistic() {
 
   const listUpdate = createListOptimisticUpdate<CartItem, UpdateCartItemOptions>(
     CART_QUERY_KEY,
-    () => ({} as CartItem), // Pas utilisé pour update
+    () => ({}) as CartItem, // Pas utilisé pour update
     (item, variables) => item.id === variables.item_id,
     (item, variables) => ({
       ...item,
@@ -193,7 +198,7 @@ export function useUpdateCartItemOptimistic() {
     baseDelay: 1000,
     errorToastTitle: 'Erreur panier',
     mutationFn: async (options: UpdateCartItemOptions) => {
-      const  updates: Partial<CartItem> = {};
+      const updates: Partial<CartItem> = {};
       if (options.quantity !== undefined) updates.quantity = options.quantity;
       if (options.unit_price !== undefined) updates.unit_price = options.unit_price;
 
@@ -207,12 +212,12 @@ export function useUpdateCartItemOptimistic() {
       if (error) throw error;
       return data as CartItem;
     },
-    onMutate: async (variables) => {
+    onMutate: async variables => {
       await queryClient.cancelQueries({ queryKey: CART_QUERY_KEY });
 
       const previousData = queryClient.getQueryData<CartItem[]>(CART_QUERY_KEY);
 
-      queryClient.setQueryData<CartItem[]>(CART_QUERY_KEY, (oldData) => {
+      queryClient.setQueryData<CartItem[]>(CART_QUERY_KEY, oldData => {
         return listUpdate.update(oldData, variables);
       });
 
@@ -251,7 +256,7 @@ export function useRemoveFromCartOptimistic() {
 
   const listUpdate = createListOptimisticUpdate<CartItem, { item_id: string }>(
     CART_QUERY_KEY,
-    () => ({} as CartItem), // Pas utilisé pour delete
+    () => ({}) as CartItem, // Pas utilisé pour delete
     undefined,
     undefined,
     (item, variables) => item.id === variables.item_id
@@ -262,20 +267,17 @@ export function useRemoveFromCartOptimistic() {
     baseDelay: 1000,
     errorToastTitle: 'Erreur panier',
     mutationFn: async ({ item_id }: { item_id: string }) => {
-      const { error } = await supabase
-        .from('cart_items')
-        .delete()
-        .eq('id', item_id);
+      const { error } = await supabase.from('cart_items').delete().eq('id', item_id);
 
       if (error) throw error;
       return item_id;
     },
-    onMutate: async (variables) => {
+    onMutate: async variables => {
       await queryClient.cancelQueries({ queryKey: CART_QUERY_KEY });
 
       const previousData = queryClient.getQueryData<CartItem[]>(CART_QUERY_KEY);
 
-      queryClient.setQueryData<CartItem[]>(CART_QUERY_KEY, (oldData) => {
+      queryClient.setQueryData<CartItem[]>(CART_QUERY_KEY, oldData => {
         return listUpdate.remove(oldData, variables);
       });
 
@@ -289,14 +291,14 @@ export function useRemoveFromCartOptimistic() {
       logger.error('Erreur suppression panier', { error, variables });
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible de supprimer l\'item du panier',
+        description: error.message || "Impossible de supprimer l'item du panier",
         variant: 'destructive',
       });
     },
     onSuccess: () => {
       toast({
         title: '✅ Item supprimé',
-        description: 'L\'item a été supprimé du panier',
+        description: "L'item a été supprimé du panier",
       });
     },
     onSettled: () => {
@@ -304,10 +306,3 @@ export function useRemoveFromCartOptimistic() {
     },
   });
 }
-
-
-
-
-
-
-

@@ -1,14 +1,30 @@
-import React, { useState, useCallback, useMemo } from "react";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Trash2, Edit, CreditCard } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { Payment } from "@/hooks/usePayments";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import React, { useState, useCallback, useMemo } from 'react';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Trash2, Edit, CreditCard } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { Payment } from '@/hooks/usePayments';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 
 interface PaymentsTableProps {
   payments: Payment[];
@@ -24,25 +40,22 @@ const PaymentsTableComponent = ({ payments, loading, onPaymentUpdated }: Payment
     if (!deleteId) return;
 
     try {
-      const { error } = await supabase
-        .from("payments")
-        .delete()
-        .eq("id", deleteId);
+      const { error } = await supabase.from('payments').delete().eq('id', deleteId);
 
       if (error) throw error;
 
       toast({
-        title: "Succès",
-        description: "Paiement supprimé avec succès",
+        title: 'Succès',
+        description: 'Paiement supprimé avec succès',
       });
 
       onPaymentUpdated();
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
-        title: "Erreur",
+        title: 'Erreur',
         description: errorMessage,
-        variant: "destructive",
+        variant: 'destructive',
       });
     } finally {
       setDeleteId(null);
@@ -50,35 +63,31 @@ const PaymentsTableComponent = ({ payments, loading, onPaymentUpdated }: Payment
   }, [deleteId, onPaymentUpdated]); // Note: toast est stable, pas besoin de le mettre dans les dépendances
 
   const getStatusBadge = useCallback((status: string) => {
-    const  variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-      pending: "secondary",
-      completed: "default",
-      failed: "destructive",
-      refunded: "outline",
+    const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
+      pending: 'secondary',
+      completed: 'default',
+      failed: 'destructive',
+      refunded: 'outline',
     };
 
-    const  labels: Record<string, string> = {
-      pending: "En attente",
-      completed: "Complété",
-      failed: "Échoué",
-      refunded: "Remboursé",
+    const labels: Record<string, string> = {
+      pending: 'En attente',
+      completed: 'Complété',
+      failed: 'Échoué',
+      refunded: 'Remboursé',
     };
 
-    return (
-      <Badge variant={variants[status] || "default"}>
-        {labels[status] || status}
-      </Badge>
-    );
+    return <Badge variant={variants[status] || 'default'}>{labels[status] || status}</Badge>;
   }, []);
 
   const getMethodLabel = useCallback((method: string) => {
-    const  labels: Record<string, string> = {
-      cash: "Espèces",
-      card: "Carte bancaire",
-      mobile_money: "Mobile Money",
-      bank_transfer: "Virement bancaire",
-      check: "Chèque",
-      other: "Autre",
+    const labels: Record<string, string> = {
+      cash: 'Espèces',
+      card: 'Carte bancaire',
+      mobile_money: 'Mobile Money',
+      bank_transfer: 'Virement bancaire',
+      check: 'Chèque',
+      other: 'Autre',
     };
 
     return labels[method] || method;
@@ -93,9 +102,7 @@ const PaymentsTableComponent = ({ payments, loading, onPaymentUpdated }: Payment
       <div className="text-center py-12 border rounded-lg bg-muted/50">
         <CreditCard className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
         <h3 className="text-lg font-semibold mb-2">Aucun paiement</h3>
-        <p className="text-muted-foreground">
-          Commencez par créer votre premier paiement
-        </p>
+        <p className="text-muted-foreground">Commencez par créer votre premier paiement</p>
       </div>
     );
   }
@@ -117,25 +124,19 @@ const PaymentsTableComponent = ({ payments, loading, onPaymentUpdated }: Payment
             </TableRow>
           </TableHeader>
           <TableBody>
-            {payments.map((payment) => (
+            {payments.map(payment => (
               <TableRow key={payment.id}>
                 <TableCell>
-                  {format(new Date(payment.created_at), "dd MMM yyyy", { locale: fr })}
+                  {format(new Date(payment.created_at), 'dd MMM yyyy', { locale: fr })}
                 </TableCell>
-                <TableCell>
-                  {payment.orders?.order_number || "-"}
-                </TableCell>
-                <TableCell>
-                  {payment.customers?.name || "-"}
-                </TableCell>
+                <TableCell>{payment.orders?.order_number || '-'}</TableCell>
+                <TableCell>{payment.customers?.name || '-'}</TableCell>
                 <TableCell>{getMethodLabel(payment.payment_method)}</TableCell>
                 <TableCell className="font-medium">
                   {payment.amount} {payment.currency}
                 </TableCell>
                 <TableCell>{getStatusBadge(payment.status)}</TableCell>
-                <TableCell className="font-mono text-xs">
-                  {payment.transaction_id || "-"}
-                </TableCell>
+                <TableCell className="font-mono text-xs">{payment.transaction_id || '-'}</TableCell>
                 <TableCell className="text-right">
                   <Button
                     variant="ghost"
@@ -177,18 +178,13 @@ export const PaymentsTable = React.memo(PaymentsTableComponent, (prevProps, next
     prevProps.payments.length === nextProps.payments.length &&
     prevProps.onPaymentUpdated === nextProps.onPaymentUpdated &&
     // Comparaison superficielle des payments (comparer les IDs)
-    prevProps.payments.every((payment, index) => 
-      payment.id === nextProps.payments[index]?.id &&
-      payment.amount === nextProps.payments[index]?.amount &&
-      payment.status === nextProps.payments[index]?.status
+    prevProps.payments.every(
+      (payment, index) =>
+        payment.id === nextProps.payments[index]?.id &&
+        payment.amount === nextProps.payments[index]?.amount &&
+        payment.status === nextProps.payments[index]?.status
     )
   );
 });
 
 PaymentsTable.displayName = 'PaymentsTable';
-
-
-
-
-
-

@@ -51,8 +51,8 @@ vi.mock('@/lib/logger', () => ({
 }));
 
 describe('useOrders', () => {
-  let  queryClient: QueryClient;
-  let  wrapper: ({ children }: { children: React.ReactNode }) => JSX.Element;
+  let queryClient: QueryClient;
+  let wrapper: ({ children }: { children: React.ReactNode }) => JSX.Element;
 
   beforeEach(() => {
     queryClient = new QueryClient({
@@ -118,10 +118,9 @@ describe('useOrders', () => {
   });
 
   it('should support pagination', async () => {
-    const { result } = renderHook(
-      () => useOrders('store-1', { page: 1, pageSize: 10 }),
-      { wrapper }
-    );
+    const { result } = renderHook(() => useOrders('store-1', { page: 1, pageSize: 10 }), {
+      wrapper,
+    });
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
@@ -143,4 +142,3 @@ describe('useOrders', () => {
     expect(result.current.orders).toBeDefined();
   });
 });
-

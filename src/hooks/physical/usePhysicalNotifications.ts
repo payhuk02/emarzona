@@ -1,7 +1,7 @@
 /**
  * Physical Products Notifications Hooks
  * Date: 2025-01-27
- * 
+ *
  * Hooks React Query pour gérer les notifications de produits physiques
  */
 
@@ -17,10 +17,14 @@ import {
   sendReturnNotification,
 } from '@/utils/physicalNotifications';
 
-const PRICE_ALERT_FIELDS = 'id, user_id, product_id, variant_id, original_price, target_price, price_drop_threshold, current_price, is_active, alert_sent, alert_sent_at, created_at, updated_at';
-const STOCK_ALERT_FIELDS = 'id, user_id, product_id, variant_id, min_quantity_required, notify_on_back_in_stock, notify_on_low_stock, is_active, alert_sent, alert_sent_at, stock_status, created_at, updated_at';
-const PROMOTION_ALERT_FIELDS = 'id, user_id, product_id, category_id, min_discount_percentage, notify_on_promotion_start, notify_on_promotion_end, is_active, last_alert_sent_at, created_at, updated_at';
-const NOTIFICATION_PREFERENCES_FIELDS = 'id, user_id, email_price_alerts, email_stock_alerts, email_promotion_alerts, email_shipment_updates, email_return_updates, email_order_updates, email_marketing, sms_price_alerts, sms_stock_alerts, sms_shipment_updates, sms_return_updates, sms_order_updates, push_price_alerts, push_stock_alerts, push_promotion_alerts, push_shipment_updates, push_return_updates, notification_frequency, created_at, updated_at';
+const PRICE_ALERT_FIELDS =
+  'id, user_id, product_id, variant_id, original_price, target_price, price_drop_threshold, current_price, is_active, alert_sent, alert_sent_at, created_at, updated_at';
+const STOCK_ALERT_FIELDS =
+  'id, user_id, product_id, variant_id, min_quantity_required, notify_on_back_in_stock, notify_on_low_stock, is_active, alert_sent, alert_sent_at, stock_status, created_at, updated_at';
+const PROMOTION_ALERT_FIELDS =
+  'id, user_id, product_id, category_id, min_discount_percentage, notify_on_promotion_start, notify_on_promotion_end, is_active, last_alert_sent_at, created_at, updated_at';
+const NOTIFICATION_PREFERENCES_FIELDS =
+  'id, user_id, email_price_alerts, email_stock_alerts, email_promotion_alerts, email_shipment_updates, email_return_updates, email_order_updates, email_marketing, sms_price_alerts, sms_stock_alerts, sms_shipment_updates, sms_return_updates, sms_order_updates, push_price_alerts, push_stock_alerts, push_promotion_alerts, push_shipment_updates, push_return_updates, notification_frequency, created_at, updated_at';
 
 // =====================================================
 // TYPES
@@ -108,7 +112,9 @@ export const usePriceAlerts = () => {
   return useQuery({
     queryKey: ['physicalPriceAlerts'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
       const { data, error } = await supabase
@@ -134,7 +140,9 @@ export const useStockAlerts = () => {
   return useQuery({
     queryKey: ['physicalStockAlerts'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
       const { data, error } = await supabase
@@ -160,7 +168,9 @@ export const usePromotionAlerts = () => {
   return useQuery({
     queryKey: ['physicalPromotionAlerts'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
       const { data, error } = await supabase
@@ -186,7 +196,9 @@ export const useNotificationPreferences = () => {
   return useQuery({
     queryKey: ['physicalNotificationPreferences'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
       const { data, error } = await supabase
@@ -227,7 +239,9 @@ export const useCreatePriceAlert = () => {
       target_price?: number;
       price_drop_threshold?: number;
     }) => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
       // Récupérer le prix actuel du produit
@@ -239,7 +253,7 @@ export const useCreatePriceAlert = () => {
 
       if (!product) throw new Error('Produit non trouvé');
 
-      let  variantPrice= product.price;
+      let variantPrice = product.price;
       if (data.variant_id) {
         const { data: variant } = await supabase
           .from('physical_product_variants')
@@ -284,7 +298,7 @@ export const useCreatePriceAlert = () => {
       logger.error('Error in useCreatePriceAlert', { error });
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible de créer l\'alerte',
+        description: error.message || "Impossible de créer l'alerte",
         variant: 'destructive',
       });
     },
@@ -306,7 +320,9 @@ export const useCreateStockAlert = () => {
       notify_on_back_in_stock?: boolean;
       notify_on_low_stock?: boolean;
     }) => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
       const { data: alert, error } = await supabase
@@ -340,7 +356,7 @@ export const useCreateStockAlert = () => {
       logger.error('Error in useCreateStockAlert', { error });
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible de créer l\'alerte',
+        description: error.message || "Impossible de créer l'alerte",
         variant: 'destructive',
       });
     },
@@ -356,7 +372,9 @@ export const useUpdateNotificationPreferences = () => {
 
   return useMutation({
     mutationFn: async (preferences: Partial<NotificationPreferences>) => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
       // Vérifier si les préférences existent
@@ -366,7 +384,7 @@ export const useUpdateNotificationPreferences = () => {
         .eq('user_id', user.id)
         .single();
 
-      let  _result;
+      let _result;
       if (existing) {
         // Mise à jour
         const { data, error } = await supabase
@@ -436,14 +454,14 @@ export const useTogglePriceAlert = () => {
       queryClient.invalidateQueries({ queryKey: ['physicalPriceAlerts'] });
       toast({
         title: 'Alerte mise à jour',
-        description: 'Le statut de l\'alerte a été modifié',
+        description: "Le statut de l'alerte a été modifié",
       });
     },
     onError: (error: Error) => {
       logger.error('Error in useTogglePriceAlert', { error });
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible de modifier l\'alerte',
+        description: error.message || "Impossible de modifier l'alerte",
         variant: 'destructive',
       });
     },
@@ -473,14 +491,14 @@ export const useToggleStockAlert = () => {
       queryClient.invalidateQueries({ queryKey: ['physicalStockAlerts'] });
       toast({
         title: 'Alerte mise à jour',
-        description: 'Le statut de l\'alerte a été modifié',
+        description: "Le statut de l'alerte a été modifié",
       });
     },
     onError: (error: Error) => {
       logger.error('Error in useToggleStockAlert', { error });
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible de modifier l\'alerte',
+        description: error.message || "Impossible de modifier l'alerte",
         variant: 'destructive',
       });
     },
@@ -510,14 +528,14 @@ export const useDeletePriceAlert = () => {
       queryClient.invalidateQueries({ queryKey: ['physicalPriceAlerts'] });
       toast({
         title: 'Alerte supprimée',
-        description: 'L\'alerte de prix a été supprimée',
+        description: "L'alerte de prix a été supprimée",
       });
     },
     onError: (error: Error) => {
       logger.error('Error in useDeletePriceAlert', { error });
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible de supprimer l\'alerte',
+        description: error.message || "Impossible de supprimer l'alerte",
         variant: 'destructive',
       });
     },
@@ -547,23 +565,16 @@ export const useDeleteStockAlert = () => {
       queryClient.invalidateQueries({ queryKey: ['physicalStockAlerts'] });
       toast({
         title: 'Alerte supprimée',
-        description: 'L\'alerte de stock a été supprimée',
+        description: "L'alerte de stock a été supprimée",
       });
     },
     onError: (error: Error) => {
       logger.error('Error in useDeleteStockAlert', { error });
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible de supprimer l\'alerte',
+        description: error.message || "Impossible de supprimer l'alerte",
         variant: 'destructive',
       });
     },
   });
 };
-
-
-
-
-
-
-

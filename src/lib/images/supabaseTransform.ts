@@ -17,8 +17,7 @@ export interface TransformOptions {
   format?: ImageFormat;
 }
 
-const SUPABASE_PUBLIC_REGEX =
-  /\/storage\/v1\/object\/public\/([^/]+)\/(.+)$/;
+const SUPABASE_PUBLIC_REGEX = /\/storage\/v1\/object\/public\/([^/]+)\/(.+)$/;
 
 /**
  * Transforme une URL Supabase Storage en URL CDN avec resize/qualité.
@@ -27,7 +26,7 @@ const SUPABASE_PUBLIC_REGEX =
  */
 export function buildTransformedUrl(
   url: string | null | undefined,
-  opts: TransformOptions = {},
+  opts: TransformOptions = {}
 ): string {
   if (!url) return '';
   // Asset local ou data URI: on ne touche pas
@@ -57,9 +56,7 @@ export function buildTransformedUrl(
 export function buildSrcSet(
   url: string,
   widths: number[] = [320, 640, 960, 1280, 1920],
-  opts: Omit<TransformOptions, 'width'> = {},
+  opts: Omit<TransformOptions, 'width'> = {}
 ): string {
-  return widths
-    .map((w) => `${buildTransformedUrl(url, { ...opts, width: w })} ${w}w`)
-    .join(', ');
+  return widths.map(w => `${buildTransformedUrl(url, { ...opts, width: w })} ${w}w`).join(', ');
 }

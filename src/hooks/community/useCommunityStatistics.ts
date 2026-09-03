@@ -26,9 +26,7 @@ export function useCommunityStatistics() {
         postsByCategoryResult,
       ] = await Promise.all([
         // Total members
-        supabase
-          .from('community_members')
-          .select('id', { count: 'exact', head: true }),
+        supabase.from('community_members').select('id', { count: 'exact', head: true }),
 
         // Active members (approved)
         supabase
@@ -43,9 +41,7 @@ export function useCommunityStatistics() {
           .eq('status', 'pending'),
 
         // Total posts
-        supabase
-          .from('community_posts')
-          .select('id', { count: 'exact', head: true }),
+        supabase.from('community_posts').select('id', { count: 'exact', head: true }),
 
         // Published posts
         supabase
@@ -60,15 +56,10 @@ export function useCommunityStatistics() {
           .eq('status', 'published'),
 
         // Total reactions
-        supabase
-          .from('community_reactions')
-          .select('id', { count: 'exact', head: true }),
+        supabase.from('community_reactions').select('id', { count: 'exact', head: true }),
 
         // Members by country
-        supabase
-          .from('community_members')
-          .select('country')
-          .eq('status', 'approved'),
+        supabase.from('community_members').select('country').eq('status', 'approved'),
 
         // Members by profession
         supabase
@@ -87,7 +78,7 @@ export function useCommunityStatistics() {
 
       // Process country distribution
       const countryMap = new Map<string, number>();
-      (membersByCountryResult.data || []).forEach((member) => {
+      (membersByCountryResult.data || []).forEach(member => {
         const country = member.country || 'Unknown';
         countryMap.set(country, (countryMap.get(country) || 0) + 1);
       });
@@ -98,18 +89,20 @@ export function useCommunityStatistics() {
 
       // Process profession distribution
       const professionMap = new Map<string, number>();
-      (membersByProfessionResult.data || []).forEach((member) => {
+      (membersByProfessionResult.data || []).forEach(member => {
         const profession = member.profession || 'Unknown';
         professionMap.set(profession, (professionMap.get(profession) || 0) + 1);
       });
-      const members_by_profession = Array.from(professionMap.entries()).map(([profession, count]) => ({
-        profession,
-        count,
-      }));
+      const members_by_profession = Array.from(professionMap.entries()).map(
+        ([profession, count]) => ({
+          profession,
+          count,
+        })
+      );
 
       // Process category distribution
       const categoryMap = new Map<string, number>();
-      (postsByCategoryResult.data || []).forEach((post) => {
+      (postsByCategoryResult.data || []).forEach(post => {
         const category = post.category || 'Uncategorized';
         categoryMap.set(category, (categoryMap.get(category) || 0) + 1);
       });
@@ -143,17 +136,17 @@ export function useCommunityStatistics() {
       ]);
 
       const recent_activity = [
-        ...(recentPosts.data || []).map((post) => ({
+        ...(recentPosts.data || []).map(post => ({
           type: 'post' as const,
           description: `Nouveau post: ${post.title || 'Sans titre'}`,
           created_at: post.created_at,
         })),
-        ...(recentComments.data || []).map((comment) => ({
+        ...(recentComments.data || []).map(comment => ({
           type: 'comment' as const,
           description: 'Nouveau commentaire',
           created_at: comment.created_at,
         })),
-        ...(recentMembers.data || []).map((member) => ({
+        ...(recentMembers.data || []).map(member => ({
           type: 'member' as const,
           description: `Nouveau membre: ${member.first_name} ${member.last_name}`,
           created_at: member.created_at,
@@ -162,7 +155,7 @@ export function useCommunityStatistics() {
         .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
         .slice(0, 10);
 
-      const  statistics: CommunityStatistics = {
+      const statistics: CommunityStatistics = {
         total_members: membersResult.count || 0,
         active_members: activeMembersResult.count || 0,
         pending_members: pendingMembersResult.count || 0,
@@ -180,10 +173,3 @@ export function useCommunityStatistics() {
     },
   });
 }
-
-
-
-
-
-
-

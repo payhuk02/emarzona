@@ -31,14 +31,13 @@ export const LearningPathCard = ({
   const isCompleted = enrollment?.status === 'completed';
 
   return (
-    <Card className={cn('hover:shadow-lg transition-all', className)} style={{ willChange: 'transform' }}>
+    <Card
+      className={cn('hover:shadow-lg transition-all', className)}
+      style={{ willChange: 'transform' }}
+    >
       {path.image_url && (
         <div className="relative h-48 w-full overflow-hidden rounded-t-lg">
-          <img
-            src={path.image_url}
-            alt={path.title}
-            className="w-full h-full object-cover"
-          />
+          <img src={path.image_url} alt={path.title} className="w-full h-full object-cover" />
           {path.is_featured && (
             <Badge className="absolute top-2 right-2 bg-orange-600">
               <TrendingUp className="h-3 w-3 mr-1" />
@@ -52,9 +51,7 @@ export const LearningPathCard = ({
           <div className="flex-1">
             <CardTitle className="text-xl mb-2">{path.title}</CardTitle>
             {path.short_description && (
-              <p className="text-sm text-muted-foreground line-clamp-2">
-                {path.short_description}
-              </p>
+              <p className="text-sm text-muted-foreground line-clamp-2">{path.short_description}</p>
             )}
           </div>
         </div>
@@ -91,7 +88,8 @@ export const LearningPathCard = ({
             <Progress value={enrollment.progress_percentage} className="h-2" />
             <div className="flex items-center justify-between text-xs text-muted-foreground">
               <span>
-                {enrollment.completed_courses_count}/{enrollment.total_courses_count} cours complétés
+                {enrollment.completed_courses_count}/{enrollment.total_courses_count} cours
+                complétés
               </span>
               {isCompleted && (
                 <Badge variant="default" className="bg-green-600">
@@ -127,11 +125,7 @@ export const LearningPathCard = ({
             <ArrowRight className="h-4 w-4 ml-2" />
           </Button>
           {onView && (
-            <Button
-              variant="outline"
-              onClick={onView}
-              size="sm"
-            >
+            <Button variant="outline" onClick={onView} size="sm">
               Détails
             </Button>
           )}
@@ -140,10 +134,3 @@ export const LearningPathCard = ({
     </Card>
   );
 };
-
-
-
-
-
-
-

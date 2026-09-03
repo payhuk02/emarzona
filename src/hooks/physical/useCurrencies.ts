@@ -7,9 +7,12 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-const CURRENCY_FIELDS = 'id, code, name, symbol, decimal_places, symbol_position, thousands_separator, decimal_separator, is_active, is_base_currency, country_code, region, created_at, updated_at';
-const EXCHANGE_RATE_FIELDS = 'id, from_currency, to_currency, rate, source, auto_update, last_updated, valid_from, valid_to, is_active, created_at, updated_at';
-const REGIONAL_PRICE_FIELDS = 'id, product_id, currency_code, price, promotional_price, country_codes, region, priority, is_active, created_at, updated_at';
+const CURRENCY_FIELDS =
+  'id, code, name, symbol, decimal_places, symbol_position, thousands_separator, decimal_separator, is_active, is_base_currency, country_code, region, created_at, updated_at';
+const EXCHANGE_RATE_FIELDS =
+  'id, from_currency, to_currency, rate, source, auto_update, last_updated, valid_from, valid_to, is_active, created_at, updated_at';
+const REGIONAL_PRICE_FIELDS =
+  'id, product_id, currency_code, price, promotional_price, country_codes, region, priority, is_active, created_at, updated_at';
 
 export interface Currency {
   id: string;
@@ -64,7 +67,7 @@ export function useCurrencies(activeOnly: boolean = true) {
   return useQuery({
     queryKey: ['currencies', activeOnly],
     queryFn: async () => {
-      let  query= supabase
+      let query = supabase
         .from('currencies')
         .select(CURRENCY_FIELDS)
         .order('is_base_currency', { ascending: false })
@@ -89,7 +92,7 @@ export function useExchangeRates(fromCurrency?: string, toCurrency?: string) {
   return useQuery({
     queryKey: ['exchange-rates', fromCurrency, toCurrency],
     queryFn: async () => {
-      let  query= supabase
+      let query = supabase
         .from('exchange_rates')
         .select(EXCHANGE_RATE_FIELDS)
         .eq('is_active', true)
@@ -250,26 +253,29 @@ export function useUpdateExchangeRates() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (rates: Array<{
-      from_currency: string;
-      to_currency: string;
-      rate: number;
-      source?: string;
-    }>) => {
+    mutationFn: async (
+      rates: Array<{
+        from_currency: string;
+        to_currency: string;
+        rate: number;
+        source?: string;
+      }>
+    ) => {
       const updates = [];
 
       for (const rateData of rates) {
-        const { error } = await supabase
-          .from('exchange_rates')
-          .upsert({
+        const { error } = await supabase.from('exchange_rates').upsert(
+          {
             from_currency: rateData.from_currency,
             to_currency: rateData.to_currency,
             rate: rateData.rate,
             source: rateData.source || 'manual',
             last_updated: new Date().toISOString(),
-          }, {
+          },
+          {
             onConflict: 'from_currency,to_currency',
-          });
+          }
+        );
 
         if (error) {
           updates.push({ ...rateData, success: false, error: error.message });
@@ -280,9 +286,9 @@ export function useUpdateExchangeRates() {
 
       return updates;
     },
-    onSuccess: (results) => {
+    onSuccess: results => {
       queryClient.invalidateQueries({ queryKey: ['exchange-rates'] });
-      const successCount = results.filter((r) => r.success).length;
+      const successCount = results.filter(r => r.success).length;
       toast({
         title: 'Taux mis à jour',
         description: `${successCount} taux de change mis à jour`,
@@ -305,7 +311,7 @@ export function useFormatCurrency() {
   const { data: currencies } = useCurrencies(true);
 
   const formatCurrency = (amount: number, currencyCode: string) => {
-    const currency = currencies?.find((c) => c.code === currencyCode);
+    const currency = currencies?.find(c => c.code === currencyCode);
     if (!currency) {
       return `${amount} ${currencyCode}`;
     }
@@ -324,10 +330,3 @@ export function useFormatCurrency() {
 
   return { formatCurrency };
 }
-
-
-
-
-
-
-

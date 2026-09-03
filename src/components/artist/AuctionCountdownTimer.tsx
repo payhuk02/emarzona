@@ -73,10 +73,3 @@ export function CountdownTimer({ endDate }: { endDate: string }) {
     </div>
   );
 }
-
-
-
-
-
-
-

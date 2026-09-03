@@ -1,9 +1,9 @@
 /**
  * Composant Two-Factor Authentication (2FA)
- * 
+ *
  * Authentification à deux facteurs pour sécuriser les comptes admins
  * Utilise Supabase MFA (Multi-Factor Authentication)
- * 
+ *
  * @module TwoFactorAuth
  */
 
@@ -46,18 +46,19 @@ export const TwoFactorAuth = () => {
   const loadFactors = async () => {
     setIsLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
       if (!user) {
         throw new Error('Utilisateur non connecté');
       }
 
       // Note: Supabase MFA API
       // const { data, error } = await supabase.auth.mfa.listFactors();
-      
+
       // Pour l'instant, simuler (Supabase MFA nécessite configuration serveur)
       setFactors([]);
-      
     } catch (error) {
       logger.error('Erreur chargement 2FA', { error });
       toast({
@@ -85,7 +86,7 @@ export const TwoFactorAuth = () => {
         // data contient : id, type, totp { qr_code, secret, uri }
         setFactorId(data.id);
         setSecret(data.totp.secret);
-        
+
         // Générer QR Code pour l'app authenticator
         const qrUrl = await QRCode.toDataURL(data.totp.uri);
         setQrCodeUrl(qrUrl);
@@ -95,11 +96,11 @@ export const TwoFactorAuth = () => {
           description: 'Scannez le QR code avec votre app authentificator',
         });
       }
-    } catch ( _error: any) {
+    } catch (_error: any) {
       logger.error('Erreur activation 2FA', { error });
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible d\'activer le 2FA',
+        description: error.message || "Impossible d'activer le 2FA",
         variant: 'destructive',
       });
     } finally {
@@ -138,7 +139,7 @@ export const TwoFactorAuth = () => {
 
         toast({
           title: '2FA activé !',
-          description: 'Votre compte est maintenant protégé par l\'authentification à deux facteurs',
+          description: "Votre compte est maintenant protégé par l'authentification à deux facteurs",
         });
 
         // Reset et recharger
@@ -148,7 +149,7 @@ export const TwoFactorAuth = () => {
         setFactorId(null);
         await loadFactors();
       }
-    } catch ( _error: any) {
+    } catch (_error: any) {
       logger.error('Erreur vérification 2FA', { error, factorId });
       toast({
         title: 'Code incorrect',
@@ -163,16 +164,16 @@ export const TwoFactorAuth = () => {
   const disable2FA = async (factorId: string) => {
     try {
       const { error } = await supabase.auth.mfa.unenroll({ factorId });
-      
+
       if (error) throw error;
 
       toast({
         title: '2FA désactivé',
-        description: 'L\'authentification à deux facteurs a été désactivée',
+        description: "L'authentification à deux facteurs a été désactivée",
       });
 
       await loadFactors();
-    } catch ( _error: any) {
+    } catch (_error: any) {
       toast({
         title: 'Erreur',
         description: error.message || 'Impossible de désactiver le 2FA',
@@ -247,18 +248,14 @@ export const TwoFactorAuth = () => {
           </CardHeader>
           <CardContent>
             {factors.length === 0 ? (
-              <Button 
-                onClick={enable2FA} 
-                disabled={isEnabling}
-                className="w-full"
-              >
+              <Button onClick={enable2FA} disabled={isEnabling} className="w-full">
                 <Smartphone className="h-4 w-4 mr-2" />
                 {isEnabling ? 'Initialisation...' : 'Activer le 2FA'}
               </Button>
             ) : (
               <div className="space-y-4">
-                {factors.map((factor) => (
-                  <div 
+                {factors.map(factor => (
+                  <div
                     key={factor.id}
                     className="flex items-center justify-between p-4 border rounded-lg"
                   >
@@ -275,11 +272,7 @@ export const TwoFactorAuth = () => {
                       <Badge variant={factor.status === 'verified' ? 'default' : 'secondary'}>
                         {factor.status === 'verified' ? 'Vérifié' : 'En attente'}
                       </Badge>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => disable2FA(factor.id)}
-                      >
+                      <Button variant="destructive" size="sm" onClick={() => disable2FA(factor.id)}>
                         Désactiver
                       </Button>
                     </div>
@@ -293,9 +286,7 @@ export const TwoFactorAuth = () => {
         <Card>
           <CardHeader>
             <CardTitle>Scanner le QR Code</CardTitle>
-            <CardDescription>
-              Utilisez votre app authenticator pour scanner ce code
-            </CardDescription>
+            <CardDescription>Utilisez votre app authenticator pour scanner ce code</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             {/* QR Code */}
@@ -308,16 +299,15 @@ export const TwoFactorAuth = () => {
             {/* Clé manuelle */}
             {secret && (
               <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">
-                  Ou entrez manuellement cette clé :
-                </p>
+                <p className="text-sm text-muted-foreground">Ou entrez manuellement cette clé :</p>
                 <div className="flex gap-2">
-                  <Input 
-                    value={secret} 
-                    readOnly 
-                    className="font-mono text-sm"
-                  />
-                  <Button variant="outline" size="icon" onClick={copySecret} aria-label="Copier le secret 2FA">
+                  <Input value={secret} readOnly className="font-mono text-sm" />
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={copySecret}
+                    aria-label="Copier le secret 2FA"
+                  >
                     <Copy className="h-4 w-4" />
                   </Button>
                 </div>
@@ -332,7 +322,7 @@ export const TwoFactorAuth = () => {
                   type="text"
                   placeholder="000000"
                   value={verificationCode}
-                  onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  onChange={e => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                   maxLength={6}
                   className="mt-2 text-center text-2xl tracking-widest font-mono"
                 />
@@ -391,10 +381,3 @@ export const TwoFactorAuth = () => {
     </div>
   );
 };
-
-
-
-
-
-
-

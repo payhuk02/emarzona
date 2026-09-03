@@ -100,44 +100,44 @@ export interface StudentLifecycle {
 export interface StudentsDashboardProps {
   /** Statistiques globales */
   stats: StudentDashboardStats;
-  
+
   /** Top performers */
   topStudents: TopStudent[];
-  
+
   /** Étudiants à risque */
   atRiskStudents: AtRiskStudent[];
-  
+
   /** Engagement par jour */
   engagementData: StudentEngagement[];
-  
+
   /** Cycle de vie */
   lifecycleData: StudentLifecycle[];
-  
+
   /** Callback de rafraîchissement */
   onRefresh?: () => void;
-  
+
   /** Callback d'export */
   onExport?: () => void;
-  
+
   /** Callback de vue détails étudiant */
   onViewStudent?: (studentId: string) => void;
-  
+
   /** Callback de contact étudiant */
   onContactStudent?: (studentId: string) => void;
-  
+
   /** Chargement en cours */
   isLoading?: boolean;
-  
+
   /** Classe CSS personnalisée */
   className?: string;
 }
 
 /**
  * StudentsDashboard - Dashboard de gestion des étudiants
- * 
+ *
  * @example
  * ```tsx
- * <StudentsDashboard 
+ * <StudentsDashboard
  *   stats={studentStats}
  *   topStudents={performers}
  *   atRiskStudents={riskyStudents}
@@ -147,7 +147,7 @@ export interface StudentsDashboardProps {
  * />
  * ```
  */
-export const StudentsDashboard : React.FC<StudentsDashboardProps> = ({
+export const StudentsDashboard: React.FC<StudentsDashboardProps> = ({
   stats,
   topStudents,
   atRiskStudents,
@@ -169,7 +169,7 @@ export const StudentsDashboard : React.FC<StudentsDashboardProps> = ({
   };
 
   // Labels du cycle de vie
-  const  lifecycleLabels: Record<string, string> = {
+  const lifecycleLabels: Record<string, string> = {
     new: 'Nouveaux',
     active: 'Actifs',
     engaged: 'Engagés',
@@ -178,7 +178,7 @@ export const StudentsDashboard : React.FC<StudentsDashboardProps> = ({
   };
 
   // Couleurs du cycle de vie
-  const  lifecycleColors: Record<string, string> = {
+  const lifecycleColors: Record<string, string> = {
     new: 'bg-blue-500',
     active: 'bg-green-500',
     engaged: 'bg-purple-500',
@@ -206,7 +206,9 @@ export const StudentsDashboard : React.FC<StudentsDashboardProps> = ({
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Dashboard Étudiants</h1>
-          <p className="text-muted-foreground">Suivez l'engagement et la progression de vos étudiants</p>
+          <p className="text-muted-foreground">
+            Suivez l'engagement et la progression de vos étudiants
+          </p>
         </div>
         <div className="flex items-center gap-3">
           {onExport && (
@@ -215,7 +217,13 @@ export const StudentsDashboard : React.FC<StudentsDashboardProps> = ({
               Exporter
             </Button>
           )}
-          <Button variant="outline" size="icon" onClick={onRefresh} disabled={isLoading} aria-label="Actualiser le tableau de bord des étudiants">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={onRefresh}
+            disabled={isLoading}
+            aria-label="Actualiser le tableau de bord des étudiants"
+          >
             <RefreshCw className={cn('h-4 w-4', isLoading && 'animate-spin')} />
           </Button>
         </div>
@@ -233,10 +241,12 @@ export const StudentsDashboard : React.FC<StudentsDashboardProps> = ({
               <div className="flex items-baseline gap-2">
                 <p className="text-2xl font-bold">{stats.totalStudents.toLocaleString()}</p>
                 {stats.studentGrowth !== 0 && (
-                  <div className={cn(
-                    'flex items-center text-xs',
-                    stats.studentGrowth > 0 ? 'text-green-600' : 'text-red-600'
-                  )}>
+                  <div
+                    className={cn(
+                      'flex items-center text-xs',
+                      stats.studentGrowth > 0 ? 'text-green-600' : 'text-red-600'
+                    )}
+                  >
                     {stats.studentGrowth > 0 ? (
                       <TrendingUp className="h-3 w-3 mr-1" />
                     ) : (
@@ -297,19 +307,16 @@ export const StudentsDashboard : React.FC<StudentsDashboardProps> = ({
         <h3 className="font-semibold mb-4">Cycle de Vie des Étudiants</h3>
         <div className="space-y-4">
           <div className="flex gap-2">
-            {lifecycleData.map((stage) => (
+            {lifecycleData.map(stage => (
               <div
                 key={stage.stage}
-                className={cn(
-                  'h-3 rounded-full transition-all',
-                  lifecycleColors[stage.stage]
-                )}
+                className={cn('h-3 rounded-full transition-all', lifecycleColors[stage.stage])}
                 style={{ width: `${stage.percentage}%` }}
               />
             ))}
           </div>
           <div className="grid grid-cols-5 gap-4">
-            {lifecycleData.map((stage) => (
+            {lifecycleData.map(stage => (
               <div key={stage.stage} className="text-center">
                 <div className="flex items-center justify-center gap-2 mb-1">
                   <div className={cn('w-3 h-3 rounded-full', lifecycleColors[stage.stage])} />
@@ -341,7 +348,7 @@ export const StudentsDashboard : React.FC<StudentsDashboardProps> = ({
                 <Input
                   placeholder="Rechercher..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={e => setSearchQuery(e.target.value)}
                   className="w-[200px]"
                 />
               </div>
@@ -353,18 +360,25 @@ export const StudentsDashboard : React.FC<StudentsDashboardProps> = ({
                     key={student.id}
                     className="flex items-center gap-4 p-4 border rounded-lg hover:bg-muted/50 transition-colors"
                   >
-                    <div className={cn(
-                      'flex items-center justify-center w-10 h-10 rounded-full font-bold',
-                      index === 0 && 'bg-yellow-100 text-yellow-700',
-                      index === 1 && 'bg-gray-100 text-gray-700',
-                      index === 2 && 'bg-orange-100 text-orange-700',
-                      index > 2 && 'bg-muted text-muted-foreground'
-                    )}>
+                    <div
+                      className={cn(
+                        'flex items-center justify-center w-10 h-10 rounded-full font-bold',
+                        index === 0 && 'bg-yellow-100 text-yellow-700',
+                        index === 1 && 'bg-gray-100 text-gray-700',
+                        index === 2 && 'bg-orange-100 text-orange-700',
+                        index > 2 && 'bg-muted text-muted-foreground'
+                      )}
+                    >
                       #{index + 1}
                     </div>
 
                     {student.avatar && (
-                      <LazyImage src={student.avatar} alt={student.name} className="w-10 h-10 rounded-full object-cover" aspectRatio="1/1" />
+                      <LazyImage
+                        src={student.avatar}
+                        alt={student.name}
+                        className="w-10 h-10 rounded-full object-cover"
+                        aspectRatio="1/1"
+                      />
                     )}
 
                     <div className="flex-1">
@@ -388,19 +402,29 @@ export const StudentsDashboard : React.FC<StudentsDashboardProps> = ({
                     </div>
 
                     <div className="text-right">
-                      <p className="text-sm font-semibold">{formatDuration(student.totalTimeSpent)}</p>
+                      <p className="text-sm font-semibold">
+                        {formatDuration(student.totalTimeSpent)}
+                      </p>
                       <p className="text-xs text-muted-foreground">temps passé</p>
                     </div>
 
                     <div className="flex flex-col gap-2">
                       {onViewStudent && (
-                        <Button variant="outline" size="sm" onClick={() => onViewStudent(student.id)}>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => onViewStudent(student.id)}
+                        >
                           <Eye className="h-3 w-3 mr-1" />
                           Voir
                         </Button>
                       )}
                       {onContactStudent && (
-                        <Button variant="ghost" size="sm" onClick={() => onContactStudent(student.id)}>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onContactStudent(student.id)}
+                        >
                           <MessageSquare className="h-3 w-3 mr-1" />
                           Contacter
                         </Button>
@@ -424,7 +448,7 @@ export const StudentsDashboard : React.FC<StudentsDashboardProps> = ({
             </div>
             <ScrollArea className="h-[500px] pr-4">
               <div className="space-y-3">
-                {atRiskStudents.map((student) => (
+                {atRiskStudents.map(student => (
                   <div
                     key={student.id}
                     className="p-4 border-2 border-orange-200 bg-orange-50 rounded-lg"
@@ -448,14 +472,19 @@ export const StudentsDashboard : React.FC<StudentsDashboardProps> = ({
                       <div className="flex items-center justify-between text-sm mt-2">
                         <span className="text-muted-foreground">Dernière activité</span>
                         <span className="font-medium text-orange-700">
-                          Il y a {student.lastActivityDays} jour{student.lastActivityDays > 1 ? 's' : ''}
+                          Il y a {student.lastActivityDays} jour
+                          {student.lastActivityDays > 1 ? 's' : ''}
                         </span>
                       </div>
                     </div>
 
                     <div className="flex gap-2 mt-4">
                       {onViewStudent && (
-                        <Button size="sm" variant="outline" onClick={() => onViewStudent(student.id)}>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => onViewStudent(student.id)}
+                        >
                           <Eye className="h-3 w-3 mr-1" />
                           Voir Détails
                         </Button>
@@ -482,7 +511,7 @@ export const StudentsDashboard : React.FC<StudentsDashboardProps> = ({
               Engagement des Étudiants (7 derniers jours)
             </h3>
             <div className="space-y-4">
-              {engagementData.map((day) => (
+              {engagementData.map(day => (
                 <div key={day.date} className="space-y-2">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -525,11 +554,3 @@ export const StudentsDashboard : React.FC<StudentsDashboardProps> = ({
 StudentsDashboard.displayName = 'StudentsDashboard';
 
 export default StudentsDashboard;
-
-
-
-
-
-
-
-

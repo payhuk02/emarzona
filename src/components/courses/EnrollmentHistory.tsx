@@ -38,14 +38,14 @@ import { EnrollmentStatus } from './EnrollmentInfoDisplay';
  * Type d'événement dans l'historique
  */
 export type EnrollmentEventType =
-  | 'enrolled'          // Nouvelle inscription
-  | 'payment_received'  // Paiement reçu
-  | 'lesson_completed'  // Leçon terminée
-  | 'quiz_passed'       // Quiz réussi
+  | 'enrolled' // Nouvelle inscription
+  | 'payment_received' // Paiement reçu
+  | 'lesson_completed' // Leçon terminée
+  | 'quiz_passed' // Quiz réussi
   | 'certificate_issued' // Certificat émis
-  | 'refund_issued'     // Remboursement effectué
-  | 'access_expired'    // Accès expiré
-  | 'completed';        // Cours terminé
+  | 'refund_issued' // Remboursement effectué
+  | 'access_expired' // Accès expiré
+  | 'completed'; // Cours terminé
 
 /**
  * Événement d'inscription
@@ -81,22 +81,22 @@ export type PeriodFilter = 'today' | 'week' | 'month' | 'year' | 'all';
 export interface EnrollmentHistoryProps {
   /** Liste des événements */
   events: EnrollmentEvent[];
-  
+
   /** Callback de rafraîchissement */
   onRefresh?: () => void;
-  
+
   /** Callback de vue de détails */
   onViewDetails?: (enrollmentId: string) => void;
-  
+
   /** Chargement en cours */
   isLoading?: boolean;
-  
+
   /** Classe CSS personnalisée */
   className?: string;
-  
+
   /** Afficher les filtres */
   showFilters?: boolean;
-  
+
   /** Afficher les stats */
   showStats?: boolean;
 }
@@ -104,7 +104,7 @@ export interface EnrollmentHistoryProps {
 /**
  * Configuration des types d'événements
  */
-const  EVENT_CONFIG: Record<
+const EVENT_CONFIG: Record<
   EnrollmentEventType,
   {
     label: string;
@@ -165,10 +165,10 @@ const  EVENT_CONFIG: Record<
 
 /**
  * EnrollmentHistory - Historique complet des inscriptions
- * 
+ *
  * @example
  * ```tsx
- * <EnrollmentHistory 
+ * <EnrollmentHistory
  *   events={enrollmentEvents}
  *   onRefresh={() => fetchEvents()}
  *   showFilters={true}
@@ -176,7 +176,7 @@ const  EVENT_CONFIG: Record<
  * />
  * ```
  */
-export const EnrollmentHistory : React.FC<EnrollmentHistoryProps> = ({
+export const EnrollmentHistory: React.FC<EnrollmentHistoryProps> = ({
   events,
   onRefresh,
   onViewDetails,
@@ -191,13 +191,13 @@ export const EnrollmentHistory : React.FC<EnrollmentHistoryProps> = ({
 
   // Filtrer les événements
   const filteredEvents = useMemo(() => {
-    let  result= [...events];
+    let result = [...events];
 
     // Recherche
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       result = result.filter(
-        (event) =>
+        event =>
           event.studentName.toLowerCase().includes(query) ||
           event.studentEmail.toLowerCase().includes(query) ||
           event.courseName.toLowerCase().includes(query)
@@ -206,7 +206,7 @@ export const EnrollmentHistory : React.FC<EnrollmentHistoryProps> = ({
 
     // Filtrer par type
     if (selectedEventType !== 'all') {
-      result = result.filter((event) => event.type === selectedEventType);
+      result = result.filter(event => event.type === selectedEventType);
     }
 
     // Filtrer par période
@@ -229,7 +229,7 @@ export const EnrollmentHistory : React.FC<EnrollmentHistoryProps> = ({
           break;
       }
 
-      result = result.filter((event) => {
+      result = result.filter(event => {
         const eventDate = new Date(event.timestamp);
         return eventDate >= filterDate;
       });
@@ -247,12 +247,12 @@ export const EnrollmentHistory : React.FC<EnrollmentHistoryProps> = ({
 
   // Statistiques
   const stats = useMemo(() => {
-    const totalEnrollments = filteredEvents.filter((e) => e.type === 'enrolled').length;
+    const totalEnrollments = filteredEvents.filter(e => e.type === 'enrolled').length;
     const totalPayments = filteredEvents
-      .filter((e) => e.type === 'payment_received')
+      .filter(e => e.type === 'payment_received')
       .reduce((sum, e) => sum + (e.metadata?.amount || 0), 0);
-    const totalCompletions = filteredEvents.filter((e) => e.type === 'completed').length;
-    const totalCertificates = filteredEvents.filter((e) => e.type === 'certificate_issued').length;
+    const totalCompletions = filteredEvents.filter(e => e.type === 'completed').length;
+    const totalCertificates = filteredEvents.filter(e => e.type === 'certificate_issued').length;
 
     return {
       totalEnrollments,
@@ -283,7 +283,7 @@ export const EnrollmentHistory : React.FC<EnrollmentHistoryProps> = ({
     const diffHours = Math.floor(diffMins / 60);
     const diffDays = Math.floor(diffHours / 24);
 
-    if (diffMins < 1) return 'À l\'instant';
+    if (diffMins < 1) return "À l'instant";
     if (diffMins < 60) return `Il y a ${diffMins} min`;
     if (diffHours < 24) return `Il y a ${diffHours}h`;
     if (diffDays < 7) return `Il y a ${diffDays}j`;
@@ -294,7 +294,7 @@ export const EnrollmentHistory : React.FC<EnrollmentHistoryProps> = ({
   const handleExportCSV = () => {
     const csvContent = [
       ['Date', 'Type', 'Étudiant', 'Email', 'Cours', 'Description'],
-      ...filteredEvents.map((event) => [
+      ...filteredEvents.map(event => [
         formatDate(event.timestamp),
         EVENT_CONFIG[event.type].label,
         event.studentName,
@@ -303,7 +303,7 @@ export const EnrollmentHistory : React.FC<EnrollmentHistoryProps> = ({
         event.description,
       ]),
     ]
-      .map((row) => row.join(','))
+      .map(row => row.join(','))
       .join('\n');
 
     const blob = new Blob([csvContent], { type: 'text/csv' });
@@ -330,7 +330,13 @@ export const EnrollmentHistory : React.FC<EnrollmentHistoryProps> = ({
             <Download className="h-4 w-4 mr-2" />
             Exporter
           </Button>
-          <Button variant="outline" size="icon" onClick={onRefresh} disabled={isLoading} aria-label="Actualiser l'historique des inscriptions">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={onRefresh}
+            disabled={isLoading}
+            aria-label="Actualiser l'historique des inscriptions"
+          >
             <RefreshCw className={cn('h-4 w-4', isLoading && 'animate-spin')} />
           </Button>
         </div>
@@ -399,7 +405,7 @@ export const EnrollmentHistory : React.FC<EnrollmentHistoryProps> = ({
               <Input
                 placeholder="Rechercher par nom, email ou cours..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={e => setSearchQuery(e.target.value)}
                 className="pl-10"
               />
             </div>
@@ -410,7 +416,9 @@ export const EnrollmentHistory : React.FC<EnrollmentHistoryProps> = ({
                 <label className="text-sm font-medium">Type d'événement</label>
                 <Select
                   value={selectedEventType}
-                  onValueChange={(value) => setSelectedEventType(value as EnrollmentEventType | 'all')}
+                  onValueChange={value =>
+                    setSelectedEventType(value as EnrollmentEventType | 'all')
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -430,7 +438,7 @@ export const EnrollmentHistory : React.FC<EnrollmentHistoryProps> = ({
                 <label className="text-sm font-medium">Période</label>
                 <Select
                   value={selectedPeriod}
-                  onValueChange={(value) => setSelectedPeriod(value as PeriodFilter)}
+                  onValueChange={value => setSelectedPeriod(value as PeriodFilter)}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -558,11 +566,3 @@ export const EnrollmentHistory : React.FC<EnrollmentHistoryProps> = ({
 EnrollmentHistory.displayName = 'EnrollmentHistory';
 
 export default EnrollmentHistory;
-
-
-
-
-
-
-
-

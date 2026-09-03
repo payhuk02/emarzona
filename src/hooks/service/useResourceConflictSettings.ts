@@ -8,7 +8,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 
-const RESOURCE_CONFLICT_SETTINGS_FIELDS = 'id, store_id, auto_detect_conflicts, detect_interval_minutes, prevent_double_booking, check_resource_availability, check_capacity, check_time_slots, notify_on_conflict, auto_resolve_conflicts, conflict_resolution_method, created_at, updated_at';
+const RESOURCE_CONFLICT_SETTINGS_FIELDS =
+  'id, store_id, auto_detect_conflicts, detect_interval_minutes, prevent_double_booking, check_resource_availability, check_capacity, check_time_slots, notify_on_conflict, auto_resolve_conflicts, conflict_resolution_method, created_at, updated_at';
 
 export interface ResourceConflictSettings {
   id: string;
@@ -26,7 +27,10 @@ export interface ResourceConflictSettings {
   updated_at: string;
 }
 
-const  defaultSettings: Omit<ResourceConflictSettings, 'id' | 'store_id' | 'created_at' | 'updated_at'> = {
+const defaultSettings: Omit<
+  ResourceConflictSettings,
+  'id' | 'store_id' | 'created_at' | 'updated_at'
+> = {
   auto_detect_conflicts: true,
   detect_interval_minutes: 30,
   prevent_double_booking: true,
@@ -80,7 +84,7 @@ export const useResourceConflictSettings = (storeId: string | undefined) => {
     enabled: !!storeId,
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: 2,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 };
 
@@ -141,7 +145,7 @@ export const useUpdateResourceConflictSettings = () => {
         return data as ResourceConflictSettings;
       }
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       // Invalider les queries liées
       queryClient.invalidateQueries({
         queryKey: ['resource-conflict-settings', data.store_id],
@@ -162,10 +166,3 @@ export const useUpdateResourceConflictSettings = () => {
     },
   });
 };
-
-
-
-
-
-
-

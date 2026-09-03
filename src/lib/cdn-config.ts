@@ -8,12 +8,12 @@ export interface CDNConfig {
    * URL de base du CDN
    */
   baseUrl: string;
-  
+
   /**
    * Si true, utilise le CDN pour les assets
    */
   enabled: boolean;
-  
+
   /**
    * Domaines autorisés pour les images
    */
@@ -24,7 +24,7 @@ export interface CDNConfig {
  * Configuration CDN par défaut
  * Peut être surchargée via variables d'environnement
  */
-const  defaultCDNConfig: CDNConfig = {
+const defaultCDNConfig: CDNConfig = {
   baseUrl: import.meta.env.VITE_CDN_URL || '',
   enabled: import.meta.env.VITE_CDN_ENABLED === 'true',
   allowedImageDomains: [
@@ -38,7 +38,7 @@ const  defaultCDNConfig: CDNConfig = {
   ],
 };
 
-let  cdnConfig: CDNConfig = defaultCDNConfig;
+let cdnConfig: CDNConfig = defaultCDNConfig;
 
 /**
  * Configure le CDN
@@ -73,8 +73,8 @@ export function getCDNUrl(path: string): string {
   const cleanPath = path.startsWith('/') ? path.slice(1) : path;
 
   // Construire l'URL CDN
-  const baseUrl = cdnConfig.baseUrl.endsWith('/') 
-    ? cdnConfig.baseUrl.slice(0, -1) 
+  const baseUrl = cdnConfig.baseUrl.endsWith('/')
+    ? cdnConfig.baseUrl.slice(0, -1)
     : cdnConfig.baseUrl;
 
   return `${baseUrl}/${cleanPath}`;
@@ -86,9 +86,7 @@ export function getCDNUrl(path: string): string {
 export function isImageUrlAllowed(url: string): boolean {
   try {
     const urlObj = new URL(url);
-    return cdnConfig.allowedImageDomains.some(domain => 
-      urlObj.hostname.includes(domain)
-    );
+    return cdnConfig.allowedImageDomains.some(domain => urlObj.hostname.includes(domain));
   } catch {
     // Si l'URL n'est pas valide, retourner false
     return false;
@@ -120,19 +118,19 @@ export function optimizeImageUrl(
 
   // Construire les paramètres de requête
   const params = new URLSearchParams();
-  
+
   if (options.width) {
     params.set('w', options.width.toString());
   }
-  
+
   if (options.height) {
     params.set('h', options.height.toString());
   }
-  
+
   if (options.quality) {
     params.set('q', options.quality.toString());
   }
-  
+
   if (options.format) {
     params.set('f', options.format);
   }
@@ -150,7 +148,7 @@ export function initCDNConnections(): void {
   // La configuration est déjà initialisée avec defaultCDNConfig
   // Cette fonction peut être étendue pour des initialisations supplémentaires
   // comme la préconnexion aux domaines CDN, etc.
-  
+
   if (cdnConfig.enabled && cdnConfig.baseUrl) {
     // Optionnel: Préconnexion au CDN pour améliorer les performances
     if ('dns-prefetch' in document.createElement('link')) {
@@ -161,9 +159,3 @@ export function initCDNConnections(): void {
     }
   }
 }
-
-
-
-
-
-

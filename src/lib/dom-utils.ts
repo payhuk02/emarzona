@@ -26,9 +26,7 @@ export function querySelectorAll<T extends Element = Element>(
 /**
  * Obtient un élément par ID
  */
-export function getElementById<T extends HTMLElement = HTMLElement>(
-  id: string
-): T | null {
+export function getElementById<T extends HTMLElement = HTMLElement>(id: string): T | null {
   return document.getElementById(id) as T | null;
 }
 
@@ -59,10 +57,7 @@ export function createElement<T extends keyof HTMLElementTagNameMap>(
   tagName: T,
   options?: ElementCreationOptions
 ): HTMLElementTagNameMap[T];
-export function createElement(
-  tagName: string,
-  options?: ElementCreationOptions
-): HTMLElement {
+export function createElement(tagName: string, options?: ElementCreationOptions): HTMLElement {
   return document.createElement(tagName, options);
 }
 
@@ -94,31 +89,21 @@ export function createTextNode(text: string): Text {
 /**
  * Ajoute un enfant à un élément
  */
-export function appendChild<T extends Node>(
-  parent: Node,
-  child: T
-): T {
+export function appendChild<T extends Node>(parent: Node, child: T): T {
   return parent.appendChild(child);
 }
 
 /**
  * Supprime un enfant d'un élément
  */
-export function removeChild<T extends Node>(
-  parent: Node,
-  child: T
-): T {
+export function removeChild<T extends Node>(parent: Node, child: T): T {
   return parent.removeChild(child);
 }
 
 /**
  * Remplace un enfant d'un élément
  */
-export function replaceChild<T extends Node>(
-  parent: Node,
-  newChild: Node,
-  oldChild: T
-): T {
+export function replaceChild<T extends Node>(parent: Node, newChild: Node, oldChild: T): T {
   return parent.replaceChild(newChild, oldChild);
 }
 
@@ -213,21 +198,14 @@ export function getComputedStyleProperty(
 /**
  * Définit un style inline
  */
-export function setStyle(
-  element: HTMLElement,
-  property: string,
-  value: string
-): void {
+export function setStyle(element: HTMLElement, property: string, value: string): void {
   element.style.setProperty(property, value);
 }
 
 /**
  * Définit plusieurs styles inline
  */
-export function setStyles(
-  element: HTMLElement,
-  styles: Record<string, string>
-): void {
+export function setStyles(element: HTMLElement, styles: Record<string, string>): void {
   Object.entries(styles).forEach(([property, value]) => {
     setStyle(element, property, value);
   });
@@ -264,11 +242,7 @@ export function removeClass(element: Element, className: string): void {
 /**
  * Toggle une classe sur un élément
  */
-export function toggleClass(
-  element: Element,
-  className: string,
-  force?: boolean
-): boolean {
+export function toggleClass(element: Element, className: string, force?: boolean): boolean {
   return element.classList.toggle(className, force);
 }
 
@@ -310,11 +284,7 @@ export function getAttribute(element: Element, name: string): string | null {
 /**
  * Définit un attribut sur un élément
  */
-export function setAttribute(
-  element: Element,
-  name: string,
-  value: string
-): void {
+export function setAttribute(element: Element, name: string, value: string): void {
   element.setAttribute(name, value);
 }
 
@@ -397,10 +367,7 @@ export function getBoundingClientRect(element: Element): DOMRect {
 /**
  * Scroll vers un élément
  */
-export function scrollToElement(
-  element: Element,
-  options?: ScrollIntoViewOptions
-): void {
+export function scrollToElement(element: Element, options?: ScrollIntoViewOptions): void {
   element.scrollIntoView(options);
 }
 
@@ -423,11 +390,7 @@ export function blurElement(element: HTMLElement): void {
  */
 export function isVisible(element: HTMLElement): boolean {
   const styles = getComputedStyles(element);
-  return (
-    styles.display !== 'none' &&
-    styles.visibility !== 'hidden' &&
-    styles.opacity !== '0'
-  );
+  return styles.display !== 'none' && styles.visibility !== 'hidden' && styles.opacity !== '0';
 }
 
 /**
@@ -451,10 +414,3 @@ export function isFocusable(element: HTMLElement): boolean {
 
   return tabIndex >= 0;
 }
-
-
-
-
-
-
-

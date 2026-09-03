@@ -14,16 +14,8 @@
  */
 
 import React from 'react';
-import {
-  useController,
-  type Control,
-  type FieldPath,
-  type FieldValues,
-} from 'react-hook-form';
-import {
-  ImageStudioField,
-  type ImageStudioFieldProps,
-} from './ImageStudioField';
+import { useController, type Control, type FieldPath, type FieldValues } from 'react-hook-form';
+import { ImageStudioField, type ImageStudioFieldProps } from './ImageStudioField';
 
 export interface ImageStudioFormFieldProps<
   TFieldValues extends FieldValues = FieldValues,
@@ -38,12 +30,7 @@ export interface ImageStudioFormFieldProps<
 export function ImageStudioFormField<
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
->({
-  name,
-  control,
-  fieldName,
-  ...rest
-}: ImageStudioFormFieldProps<TFieldValues, TName>) {
+>({ name, control, fieldName, ...rest }: ImageStudioFormFieldProps<TFieldValues, TName>) {
   const {
     field: { value, onChange },
   } = useController({ name, control });

@@ -4,7 +4,11 @@
  */
 
 import { supabase } from '@/integrations/supabase/client';
-import { optimizeImage, validateImageDimensions, type ImageOptimizationOptions } from '@/lib/image-optimization';
+import {
+  optimizeImage,
+  validateImageDimensions,
+  type ImageOptimizationOptions,
+} from '@/lib/image-optimization';
 import { logger } from '@/lib/logger';
 
 export interface UploadResult {
@@ -62,8 +66,9 @@ export async function uploadOptimizedImage(
       throw new Error('Le fichier doit être une image');
     }
 
-    if (file.size > 10 * 1024 * 1024) { // 10MB max
-      throw new Error('L\'image ne doit pas dépasser 10MB');
+    if (file.size > 10 * 1024 * 1024) {
+      // 10MB max
+      throw new Error("L'image ne doit pas dépasser 10MB");
     }
 
     // Convertir en buffer pour Sharp
@@ -72,10 +77,7 @@ export async function uploadOptimizedImage(
 
     // Validation des dimensions
     const metadata = await import('sharp').then(sharp => sharp.default(buffer).metadata());
-    const validation = validateImageDimensions(
-      metadata.width || 0,
-      metadata.height || 0
-    );
+    const validation = validateImageDimensions(metadata.width || 0, metadata.height || 0);
 
     if (!validation.valid) {
       throw new Error(validation.error);
@@ -85,7 +87,7 @@ export async function uploadOptimizedImage(
     const optimizationResult = await optimizeImage(buffer, {
       quality,
       format,
-      ...optimizationOptions
+      ...optimizationOptions,
     });
 
     // Générer le nom du fichier optimisé
@@ -98,7 +100,7 @@ export async function uploadOptimizedImage(
       .upload(filePath, optimizationResult.optimized, {
         contentType: `image/${format}`,
         cacheControl: '31536000', // 1 an
-        upsert: false
+        upsert: false,
       });
 
     if (uploadError) {
@@ -106,9 +108,7 @@ export async function uploadOptimizedImage(
     }
 
     // Générer l'URL publique
-    const { data: urlData } = supabase.storage
-      .from(bucketName)
-      .getPublicUrl(filePath);
+    const { data: urlData } = supabase.storage.from(bucketName).getPublicUrl(filePath);
 
     let thumbnailUrl: string | undefined;
     let sizesUrls: { [key: string]: string } | undefined;
@@ -116,27 +116,24 @@ export async function uploadOptimizedImage(
     // Générer la miniature si demandé
     if (generateThumbnail && thumbnailSize > 0) {
       const thumbnailBuffer = await import('sharp').then(sharp =>
-        sharp.default(buffer)
+        sharp
+          .default(buffer)
           .resize(thumbnailSize, thumbnailSize, {
             fit: 'cover',
-            position: 'center'
+            position: 'center',
           })
           [format]({ quality: Math.min(quality + 10, 95) })
           .toBuffer()
       );
 
       const thumbnailPath = `${folder}/thumbnails/${fileName}`;
-      await supabase.storage
-        .from(bucketName)
-        .upload(thumbnailPath, thumbnailBuffer, {
-          contentType: `image/${format}`,
-          cacheControl: '31536000',
-          upsert: false
-        });
+      await supabase.storage.from(bucketName).upload(thumbnailPath, thumbnailBuffer, {
+        contentType: `image/${format}`,
+        cacheControl: '31536000',
+        upsert: false,
+      });
 
-      const { data: thumbUrl } = supabase.storage
-        .from(bucketName)
-        .getPublicUrl(thumbnailPath);
+      const { data: thumbUrl } = supabase.storage.from(bucketName).getPublicUrl(thumbnailPath);
 
       thumbnailUrl = thumbUrl.publicUrl;
     }
@@ -146,17 +143,13 @@ export async function uploadOptimizedImage(
       sizesUrls = {};
       for (const [sizeKey, sizeBuffer] of Object.entries(optimizationResult.sizes)) {
         const sizePath = `${folder}/sizes/${sizeKey}/${fileName}`;
-        await supabase.storage
-          .from(bucketName)
-          .upload(sizePath, sizeBuffer, {
-            contentType: `image/${format}`,
-            cacheControl: '31536000',
-            upsert: false
-          });
+        await supabase.storage.from(bucketName).upload(sizePath, sizeBuffer, {
+          contentType: `image/${format}`,
+          cacheControl: '31536000',
+          upsert: false,
+        });
 
-        const { data: sizeUrl } = supabase.storage
-          .from(bucketName)
-          .getPublicUrl(sizePath);
+        const { data: sizeUrl } = supabase.storage.from(bucketName).getPublicUrl(sizePath);
 
         sizesUrls[sizeKey] = sizeUrl.publicUrl;
       }
@@ -176,7 +169,7 @@ export async function uploadOptimizedImage(
       optimizedSize: optimizationResult.metadata.optimizedSize,
       compressionRatio: optimizationResult.metadata.compressionRatio,
       seoScore: seoScore.score,
-      format: optimizationResult.metadata.format
+      format: optimizationResult.metadata.format,
     });
 
     return {
@@ -187,18 +180,17 @@ export async function uploadOptimizedImage(
       sizes: sizesUrls,
       metadata: {
         ...optimizationResult.metadata,
-        seoScore: seoScore.score
-      }
+        seoScore: seoScore.score,
+      },
     };
-
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Erreur lors de l\'upload';
+    const errorMessage = error instanceof Error ? error.message : "Erreur lors de l'upload";
 
     logger.error('Erreur upload image optimisée', { error });
 
     return {
       success: false,
-      error: errorMessage
+      error: errorMessage,
     };
   }
 }
@@ -217,9 +209,7 @@ export async function uploadMultipleOptimizedImages(
   const batchSize = 3; // Max 3 uploads simultanés
   for (let i = 0; i < files.length; i += batchSize) {
     const batch = files.slice(i, i + batchSize);
-    const batchPromises = batch.map(file =>
-      uploadOptimizedImage(file, bucketName, options)
-    );
+    const batchPromises = batch.map(file => uploadOptimizedImage(file, bucketName, options));
 
     const batchResults = await Promise.all(batchPromises);
     results.push(...batchResults);
@@ -233,7 +223,7 @@ export async function uploadMultipleOptimizedImages(
   logger.info('Batch upload terminé', {
     total: files.length,
     success: results.filter(r => r.success).length,
-    failed: results.filter(r => !r.success).length
+    failed: results.filter(r => !r.success).length,
   });
 
   return results;
@@ -256,9 +246,7 @@ export async function deleteOptimizedImage(
     const filePath = urlParts[1].split('/').slice(1).join('/'); // Supprimer le nom du bucket
 
     // Supprimer le fichier principal
-    const { error } = await supabase.storage
-      .from(bucketName)
-      .remove([filePath]);
+    const { error } = await supabase.storage.from(bucketName).remove([filePath]);
 
     if (error) {
       throw error;
@@ -267,15 +255,13 @@ export async function deleteOptimizedImage(
     // Supprimer les variantes (thumbnail, tailles)
     const variants = [
       `thumbnails/${filePath.split('/').pop()}`,
-      ...['400w', '800w', '1200w', '1600w'].map(size =>
-        `sizes/${size}/${filePath.split('/').pop()}`
-      )
+      ...['400w', '800w', '1200w', '1600w'].map(
+        size => `sizes/${size}/${filePath.split('/').pop()}`
+      ),
     ].filter(Boolean);
 
     // Supprimer les variantes existantes (ignorer les erreurs)
-    await supabase.storage
-      .from(bucketName)
-      .remove(variants.filter(v => v));
+    await supabase.storage.from(bucketName).remove(variants.filter(v => v));
 
     logger.info('Image supprimée avec variantes', { filePath });
 
@@ -351,7 +337,7 @@ export function useOptimizedImageUpload() {
   return {
     uploadImage,
     isUploading,
-    progress
+    progress,
   };
 }
 
@@ -415,9 +401,8 @@ export function useOptimizedImageUpload() {
       setProgress(100);
 
       return result;
-
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Erreur d\'upload';
+      const errorMessage = error instanceof Error ? error.message : "Erreur d'upload";
       logger.error('Erreur upload image via API', { error, fileName: file.name });
       throw new Error(errorMessage);
     } finally {
@@ -429,7 +414,7 @@ export function useOptimizedImageUpload() {
   return {
     uploadImage,
     isUploading,
-    progress
+    progress,
   };
 }
 
@@ -467,6 +452,6 @@ export function useOptimizedImageUploadLegacy() {
   return {
     uploadImage,
     isUploading,
-    progress
+    progress,
   };
 }

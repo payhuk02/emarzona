@@ -6,18 +6,21 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { 
-  Package, 
-  DollarSign, 
-  File, 
-  Key, 
-  Download, 
+import {
+  Package,
+  DollarSign,
+  File,
+  Key,
+  Download,
   Calendar,
   CheckCircle2,
-  AlertTriangle
+  AlertTriangle,
 } from 'lucide-react';
 
-import type { DigitalProductFormData, DigitalProductDownloadableFile } from '@/types/digital-product-form';
+import type {
+  DigitalProductFormData,
+  DigitalProductDownloadableFile,
+} from '@/types/digital-product-form';
 
 interface DigitalPreviewProps {
   formData: DigitalProductFormData;
@@ -32,7 +35,7 @@ export const DigitalPreview = ({ formData }: DigitalPreviewProps) => {
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
   };
 
   /**
@@ -42,19 +45,17 @@ export const DigitalPreview = ({ formData }: DigitalPreviewProps) => {
     if (!formData.downloadable_files || formData.downloadable_files.length === 0) {
       return 0;
     }
-    return formData.downloadable_files.reduce((total: number, file: DigitalProductDownloadableFile) => total + (file.size || 0), 0);
+    return formData.downloadable_files.reduce(
+      (total: number, file: DigitalProductDownloadableFile) => total + (file.size || 0),
+      0
+    );
   };
 
   /**
    * Check if ready to publish
    */
   const isReadyToPublish = () => {
-    return (
-      formData.name &&
-      formData.price >= 0 &&
-      formData.main_file_url &&
-      formData.category
-    );
+    return formData.name && formData.price >= 0 && formData.main_file_url && formData.category;
   };
 
   const readyItems = [
@@ -69,7 +70,13 @@ export const DigitalPreview = ({ formData }: DigitalPreviewProps) => {
   return (
     <div className="space-y-6">
       {/* Readiness Check */}
-      <Card className={isReadyToPublish() ? 'bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-900' : 'bg-yellow-50 dark:bg-yellow-950/20 border-yellow-200 dark:border-yellow-900'}>
+      <Card
+        className={
+          isReadyToPublish()
+            ? 'bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-900'
+            : 'bg-yellow-50 dark:bg-yellow-950/20 border-yellow-200 dark:border-yellow-900'
+        }
+      >
         <CardHeader>
           <div className="flex items-center gap-3">
             {isReadyToPublish() ? (
@@ -96,7 +103,13 @@ export const DigitalPreview = ({ formData }: DigitalPreviewProps) => {
                 ) : (
                   <div className="h-4 w-4 rounded-full border-2 border-yellow-600" />
                 )}
-                <span className={item.ready ? 'text-green-900 dark:text-green-100' : 'text-yellow-900 dark:text-yellow-100'}>
+                <span
+                  className={
+                    item.ready
+                      ? 'text-green-900 dark:text-green-100'
+                      : 'text-yellow-900 dark:text-yellow-100'
+                  }
+                >
                   {item.label}
                 </span>
               </div>
@@ -127,14 +140,15 @@ export const DigitalPreview = ({ formData }: DigitalPreviewProps) => {
                     loading="lazy"
                   />
                 ))}
-                {formData.image_url && (!formData.images || !formData.images.includes(formData.image_url)) && (
-                  <img
-                    src={formData.image_url}
-                    alt={formData.name}
-                    className="h-24 w-full object-cover rounded-lg border"
-                    loading="lazy"
-                  />
-                )}
+                {formData.image_url &&
+                  (!formData.images || !formData.images.includes(formData.image_url)) && (
+                    <img
+                      src={formData.image_url}
+                      alt={formData.name}
+                      className="h-24 w-full object-cover rounded-lg border"
+                      loading="lazy"
+                    />
+                  )}
               </div>
             </div>
           )}
@@ -188,7 +202,11 @@ export const DigitalPreview = ({ formData }: DigitalPreviewProps) => {
                   {formData.price} {formData.currency}
                 </span>
                 <Badge variant="destructive">
-                  -{Math.round(((formData.price - formData.promotional_price) / formData.price) * 100)}%
+                  -
+                  {Math.round(
+                    ((formData.price - formData.promotional_price) / formData.price) * 100
+                  )}
+                  %
                 </Badge>
               </>
             ) : (
@@ -216,9 +234,7 @@ export const DigitalPreview = ({ formData }: DigitalPreviewProps) => {
                 {formData.main_file_url ? 'Configuré' : 'Non configuré'}
               </p>
             </div>
-            {formData.main_file_url && (
-              <CheckCircle2 className="h-5 w-5 text-green-600" />
-            )}
+            {formData.main_file_url && <CheckCircle2 className="h-5 w-5 text-green-600" />}
           </div>
 
           {formData.downloadable_files && formData.downloadable_files.length > 0 && (
@@ -227,14 +243,19 @@ export const DigitalPreview = ({ formData }: DigitalPreviewProps) => {
                 Fichiers additionnels ({formData.downloadable_files.length})
               </p>
               <div className="space-y-2">
-                {formData.downloadable_files.map((file: DigitalProductDownloadableFile, index: number) => (
-                  <div key={index} className="flex items-center justify-between p-2 border rounded">
-                    <span className="text-sm">{file.name}</span>
-                    <span className="text-xs text-muted-foreground">
-                      {formatFileSize(file.size)}
-                    </span>
-                  </div>
-                ))}
+                {formData.downloadable_files.map(
+                  (file: DigitalProductDownloadableFile, index: number) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-2 border rounded"
+                    >
+                      <span className="text-sm">{file.name}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {formatFileSize(file.size)}
+                      </span>
+                    </div>
+                  )
+                )}
               </div>
               <p className="text-sm text-muted-foreground mt-2">
                 Taille totale : {formatFileSize(getTotalSize())}
@@ -274,7 +295,9 @@ export const DigitalPreview = ({ formData }: DigitalPreviewProps) => {
           <div className="flex items-center justify-between">
             <span className="text-sm text-muted-foreground">Validité du lien</span>
             <span className="font-medium">
-              {formData.download_expiry_days === -1 ? 'Permanent' : `${formData.download_expiry_days || 30} jours`}
+              {formData.download_expiry_days === -1
+                ? 'Permanent'
+                : `${formData.download_expiry_days || 30} jours`}
             </span>
           </div>
 
@@ -299,11 +322,3 @@ export const DigitalPreview = ({ formData }: DigitalPreviewProps) => {
     </div>
   );
 };
-
-
-
-
-
-
-
-

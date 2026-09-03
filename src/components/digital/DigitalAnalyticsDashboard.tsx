@@ -1,7 +1,7 @@
 /**
  * Digital Product Analytics Dashboard
  * Date: 27 octobre 2025
- * 
+ *
  * Dashboard analytics professionnel pour produits digitaux
  */
 
@@ -39,8 +39,12 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { subDays } from 'date-fns';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
-import { exportAnalyticsToPDF, exportAnalyticsToExcel, exportAnalyticsToCSV } from '@/utils/exportDigitalAnalytics';
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
+import {
+  exportAnalyticsToPDF,
+  exportAnalyticsToExcel,
+  exportAnalyticsToCSV,
+} from '@/utils/exportDigitalAnalytics';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 
@@ -59,14 +63,17 @@ export const DigitalAnalyticsDashboard = ({
     to: new Date(),
   });
 
-  const { data: analytics, isLoading: analyticsLoading } = useDigitalProductAnalytics(productId, dateRange);
+  const { data: analytics, isLoading: analyticsLoading } = useDigitalProductAnalytics(
+    productId,
+    dateRange
+  );
   const { data: trends } = useDownloadTrends(digitalProductId, 30);
   const { data: topFiles } = useTopDownloadedFiles(digitalProductId, 5);
   const { data: userStats } = useUserDownloadStats(digitalProductId, 10);
   const { data: licenseAnalytics } = useLicenseAnalytics(digitalProductId);
   const { data: geographicAnalytics } = useGeographicAnalytics(digitalProductId, dateRange);
   const { data: versionAnalytics } = useVersionAnalytics(digitalProductId, dateRange);
-  
+
   // Export handlers
   const handleExportPDF = async () => {
     try {
@@ -87,12 +94,14 @@ export const DigitalAnalyticsDashboard = ({
             downloads: f.downloads,
             size: f.size,
           })),
-          licenseStats: licenseAnalytics ? {
-            total: licenseAnalytics.total_licenses || 0,
-            active: licenseAnalytics.active_licenses || 0,
-            expired: licenseAnalytics.expired_licenses || 0,
-            suspended: licenseAnalytics.suspended_licenses || 0,
-          } : undefined,
+          licenseStats: licenseAnalytics
+            ? {
+                total: licenseAnalytics.total_licenses || 0,
+                active: licenseAnalytics.active_licenses || 0,
+                expired: licenseAnalytics.expired_licenses || 0,
+                suspended: licenseAnalytics.suspended_licenses || 0,
+              }
+            : undefined,
         },
         {
           format: 'pdf',
@@ -105,15 +114,15 @@ export const DigitalAnalyticsDashboard = ({
         description: 'Le rapport PDF a été téléchargé avec succès',
       });
     } catch (error) {
-      logger.error('Erreur lors de l\'export PDF', { error });
+      logger.error("Erreur lors de l'export PDF", { error });
       toast({
         title: 'Erreur',
-        description: 'Impossible d\'exporter le rapport PDF',
+        description: "Impossible d'exporter le rapport PDF",
         variant: 'destructive',
       });
     }
   };
-  
+
   const handleExportExcel = () => {
     try {
       exportAnalyticsToExcel(
@@ -133,12 +142,14 @@ export const DigitalAnalyticsDashboard = ({
             downloads: f.downloads,
             size: f.size,
           })),
-          licenseStats: licenseAnalytics ? {
-            total: licenseAnalytics.total_licenses || 0,
-            active: licenseAnalytics.active_licenses || 0,
-            expired: licenseAnalytics.expired_licenses || 0,
-            suspended: licenseAnalytics.suspended_licenses || 0,
-          } : undefined,
+          licenseStats: licenseAnalytics
+            ? {
+                total: licenseAnalytics.total_licenses || 0,
+                active: licenseAnalytics.active_licenses || 0,
+                expired: licenseAnalytics.expired_licenses || 0,
+                suspended: licenseAnalytics.suspended_licenses || 0,
+              }
+            : undefined,
         },
         {
           format: 'excel',
@@ -150,15 +161,15 @@ export const DigitalAnalyticsDashboard = ({
         description: 'Le rapport Excel a été téléchargé avec succès',
       });
     } catch (error) {
-      logger.error('Erreur lors de l\'export Excel', { error });
+      logger.error("Erreur lors de l'export Excel", { error });
       toast({
         title: 'Erreur',
-        description: 'Impossible d\'exporter le rapport Excel',
+        description: "Impossible d'exporter le rapport Excel",
         variant: 'destructive',
       });
     }
   };
-  
+
   const handleExportCSV = () => {
     try {
       exportAnalyticsToCSV(
@@ -178,12 +189,14 @@ export const DigitalAnalyticsDashboard = ({
             downloads: f.downloads,
             size: f.size,
           })),
-          licenseStats: licenseAnalytics ? {
-            total: licenseAnalytics.total_licenses || 0,
-            active: licenseAnalytics.active_licenses || 0,
-            expired: licenseAnalytics.expired_licenses || 0,
-            suspended: licenseAnalytics.suspended_licenses || 0,
-          } : undefined,
+          licenseStats: licenseAnalytics
+            ? {
+                total: licenseAnalytics.total_licenses || 0,
+                active: licenseAnalytics.active_licenses || 0,
+                expired: licenseAnalytics.expired_licenses || 0,
+                suspended: licenseAnalytics.suspended_licenses || 0,
+              }
+            : undefined,
         },
         {
           format: 'csv',
@@ -195,10 +208,10 @@ export const DigitalAnalyticsDashboard = ({
         description: 'Le rapport CSV a été téléchargé avec succès',
       });
     } catch (error) {
-      logger.error('Erreur lors de l\'export CSV', { error });
+      logger.error("Erreur lors de l'export CSV", { error });
       toast({
         title: 'Erreur',
-        description: 'Impossible d\'exporter le rapport CSV',
+        description: "Impossible d'exporter le rapport CSV",
         variant: 'destructive',
       });
     }
@@ -208,7 +221,7 @@ export const DigitalAnalyticsDashboard = ({
     return (
       <div className="space-y-6 animate-pulse">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[1, 2, 3, 4].map((i) => (
+          {[1, 2, 3, 4].map(i => (
             <Card key={i}>
               <CardContent className="p-6">
                 <div className="h-20 bg-muted rounded" />
@@ -226,11 +239,9 @@ export const DigitalAnalyticsDashboard = ({
       <div className="flex justify-end">
         <Select>
           <SelectTrigger>
-
-              <FileDown className="h-4 w-4 mr-2" />
-              Exporter
-            
-</SelectTrigger>
+            <FileDown className="h-4 w-4 mr-2" />
+            Exporter
+          </SelectTrigger>
           <SelectContent mobileVariant="sheet" className="min-w-[200px]">
             <SelectItem value="edit" onSelect={handleExportPDF}>
               <FileText className="h-4 w-4 mr-2" />
@@ -247,7 +258,7 @@ export const DigitalAnalyticsDashboard = ({
           </SelectContent>
         </Select>
       </div>
-      
+
       {/* Overview Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
@@ -277,9 +288,7 @@ export const DigitalAnalyticsDashboard = ({
             <div className="text-2xl font-bold">
               {analytics?.total_revenue.toLocaleString() || 0} XOF
             </div>
-            <p className="text-xs text-muted-foreground">
-              30 derniers jours
-            </p>
+            <p className="text-xs text-muted-foreground">30 derniers jours</p>
           </CardContent>
         </Card>
 
@@ -307,9 +316,7 @@ export const DigitalAnalyticsDashboard = ({
             <div className="text-2xl font-bold">
               {analytics?.bandwidth_used_gb.toFixed(2) || 0} GB
             </div>
-            <p className="text-xs text-muted-foreground">
-              Utilisée ce mois
-            </p>
+            <p className="text-xs text-muted-foreground">Utilisée ce mois</p>
           </CardContent>
         </Card>
       </div>
@@ -334,17 +341,19 @@ export const DigitalAnalyticsDashboard = ({
             </CardHeader>
             <CardContent>
               <LazyRechartsWrapper>
-                {(recharts) => (
+                {recharts => (
                   <recharts.ResponsiveContainer width="100%" height={300}>
                     <recharts.LineChart data={trends || []}>
                       <recharts.CartesianGrid strokeDasharray="3 3" />
                       <recharts.XAxis
                         dataKey="date"
-                        tickFormatter={(value) => format(new Date(value), 'dd MMM', { locale: fr })}
+                        tickFormatter={value => format(new Date(value), 'dd MMM', { locale: fr })}
                       />
                       <recharts.YAxis />
                       <recharts.Tooltip
-                        labelFormatter={(value) => format(new Date(value as string), 'dd MMMM yyyy', { locale: fr })}
+                        labelFormatter={value =>
+                          format(new Date(value as string), 'dd MMMM yyyy', { locale: fr })
+                        }
                       />
                       <recharts.Legend />
                       <recharts.Line
@@ -381,12 +390,12 @@ export const DigitalAnalyticsDashboard = ({
                 <div className="space-y-4">
                   {/* Bar Chart */}
                   <LazyRechartsWrapper>
-                    {(recharts) => (
+                    {recharts => (
                       <recharts.ResponsiveContainer width="100%" height={300}>
                         <recharts.BarChart data={geographicAnalytics.slice(0, 10)}>
                           <recharts.CartesianGrid strokeDasharray="3 3" />
-                          <recharts.XAxis 
-                            dataKey="country" 
+                          <recharts.XAxis
+                            dataKey="country"
                             angle={-45}
                             textAnchor="end"
                             height={80}
@@ -395,7 +404,11 @@ export const DigitalAnalyticsDashboard = ({
                           <recharts.Tooltip />
                           <recharts.Legend />
                           <recharts.Bar dataKey="downloads" fill="#8884d8" name="Téléchargements" />
-                          <recharts.Bar dataKey="unique_users" fill="#82ca9d" name="Utilisateurs uniques" />
+                          <recharts.Bar
+                            dataKey="unique_users"
+                            fill="#82ca9d"
+                            name="Utilisateurs uniques"
+                          />
                         </recharts.BarChart>
                       </recharts.ResponsiveContainer>
                     )}
@@ -403,7 +416,7 @@ export const DigitalAnalyticsDashboard = ({
 
                   {/* Pie Chart */}
                   <LazyRechartsWrapper>
-                    {(recharts) => (
+                    {recharts => (
                       <recharts.ResponsiveContainer width="100%" height={300}>
                         <recharts.PieChart>
                           <recharts.Pie
@@ -413,10 +426,13 @@ export const DigitalAnalyticsDashboard = ({
                             cx="50%"
                             cy="50%"
                             outerRadius={100}
-                            label={(entry) => `${entry.country}: ${entry.downloads}`}
+                            label={entry => `${entry.country}: ${entry.downloads}`}
                           >
                             {geographicAnalytics.slice(0, 10).map((entry, index) => (
-                              <recharts.Cell key={`cell-${index}`} fill={`hsl(${index * 36}, 70%, 50%)`} />
+                              <recharts.Cell
+                                key={`cell-${index}`}
+                                fill={`hsl(${index * 36}, 70%, 50%)`}
+                              />
                             ))}
                           </recharts.Pie>
                           <recharts.Tooltip />
@@ -431,7 +447,10 @@ export const DigitalAnalyticsDashboard = ({
                     <h4 className="font-medium">Top Pays</h4>
                     <div className="space-y-2">
                       {geographicAnalytics.slice(0, 10).map((geo, index) => (
-                        <div key={geo.country} className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                        <div
+                          key={geo.country}
+                          className="flex items-center justify-between p-3 bg-muted rounded-lg"
+                        >
                           <div className="flex items-center gap-3">
                             <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-bold text-sm">
                               {index + 1}
@@ -468,14 +487,16 @@ export const DigitalAnalyticsDashboard = ({
           <Card>
             <CardHeader>
               <CardTitle>Analytics par Version</CardTitle>
-              <CardDescription>Répartition des téléchargements par version de fichier</CardDescription>
+              <CardDescription>
+                Répartition des téléchargements par version de fichier
+              </CardDescription>
             </CardHeader>
             <CardContent>
               {versionAnalytics && versionAnalytics.length > 0 ? (
                 <div className="space-y-4">
                   {/* Bar Chart */}
                   <LazyRechartsWrapper>
-                    {(recharts) => (
+                    {recharts => (
                       <recharts.ResponsiveContainer width="100%" height={300}>
                         <recharts.BarChart data={versionAnalytics}>
                           <recharts.CartesianGrid strokeDasharray="3 3" />
@@ -484,7 +505,11 @@ export const DigitalAnalyticsDashboard = ({
                           <recharts.Tooltip />
                           <recharts.Legend />
                           <recharts.Bar dataKey="downloads" fill="#8884d8" name="Téléchargements" />
-                          <recharts.Bar dataKey="unique_users" fill="#82ca9d" name="Utilisateurs uniques" />
+                          <recharts.Bar
+                            dataKey="unique_users"
+                            fill="#82ca9d"
+                            name="Utilisateurs uniques"
+                          />
                         </recharts.BarChart>
                       </recharts.ResponsiveContainer>
                     )}
@@ -495,7 +520,10 @@ export const DigitalAnalyticsDashboard = ({
                     <h4 className="font-medium">Versions</h4>
                     <div className="space-y-2">
                       {versionAnalytics.map((version, index) => (
-                        <div key={version.version} className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                        <div
+                          key={version.version}
+                          className="flex items-center justify-between p-3 bg-muted rounded-lg"
+                        >
                           <div className="flex items-center gap-3">
                             <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-bold text-sm">
                               {index + 1}
@@ -503,7 +531,8 @@ export const DigitalAnalyticsDashboard = ({
                             <div>
                               <h4 className="font-medium">Version {version.version}</h4>
                               <p className="text-xs text-muted-foreground">
-                                {version.unique_users} utilisateurs uniques • {version.success_rate.toFixed(1)}% succès
+                                {version.unique_users} utilisateurs uniques •{' '}
+                                {version.success_rate.toFixed(1)}% succès
                               </p>
                             </div>
                           </div>
@@ -538,7 +567,10 @@ export const DigitalAnalyticsDashboard = ({
               <div className="space-y-4">
                 {topFiles && topFiles.length > 0 ? (
                   topFiles.map((file, index) => (
-                    <div key={file.file_id} className="flex items-center justify-between p-4 bg-muted rounded-lg">
+                    <div
+                      key={file.file_id}
+                      className="flex items-center justify-between p-4 bg-muted rounded-lg"
+                    >
                       <div className="flex items-center gap-4">
                         <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-bold">
                           {index + 1}
@@ -577,7 +609,10 @@ export const DigitalAnalyticsDashboard = ({
               <div className="space-y-3">
                 {userStats && userStats.length > 0 ? (
                   userStats.map((user, index) => (
-                    <div key={user.user_id} className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                    <div
+                      key={user.user_id}
+                      className="flex items-center justify-between p-3 bg-muted rounded-lg"
+                    >
                       <div className="flex items-center gap-3">
                         <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-bold text-sm">
                           {index + 1}
@@ -585,7 +620,8 @@ export const DigitalAnalyticsDashboard = ({
                         <div>
                           <h4 className="font-medium text-sm">{user.user_email}</h4>
                           <p className="text-xs text-muted-foreground">
-                            Dernier téléchargement: {format(new Date(user.last_download), 'dd MMM yyyy', { locale: fr })}
+                            Dernier téléchargement:{' '}
+                            {format(new Date(user.last_download), 'dd MMM yyyy', { locale: fr })}
                           </p>
                         </div>
                       </div>
@@ -614,9 +650,7 @@ export const DigitalAnalyticsDashboard = ({
                 <Shield className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">
-                  {licenseAnalytics?.total_licenses || 0}
-                </div>
+                <div className="text-2xl font-bold">{licenseAnalytics?.total_licenses || 0}</div>
               </CardContent>
             </Card>
 
@@ -644,9 +678,7 @@ export const DigitalAnalyticsDashboard = ({
                 <div className="text-2xl font-bold">
                   {licenseAnalytics?.average_activations_per_license.toFixed(1) || 0}
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  activations/license
-                </p>
+                <p className="text-xs text-muted-foreground">activations/license</p>
               </CardContent>
             </Card>
           </div>
@@ -657,7 +689,7 @@ export const DigitalAnalyticsDashboard = ({
             </CardHeader>
             <CardContent>
               <LazyRechartsWrapper>
-                {(recharts) => (
+                {recharts => (
                   <recharts.ResponsiveContainer width="100%" height={250}>
                     <recharts.BarChart
                       data={[
@@ -694,10 +726,3 @@ export const DigitalAnalyticsDashboard = ({
     </div>
   );
 };
-
-
-
-
-
-
-

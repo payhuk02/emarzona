@@ -1,7 +1,7 @@
 /**
  * Create Update Dialog Component
  * Date: 28 Janvier 2025
- * 
+ *
  * Dialog pour créer une nouvelle mise à jour de produit digital
  */
 
@@ -78,7 +78,7 @@ export function CreateUpdateDialog({
   // Calculer la prochaine version suggérée
   const getSuggestedVersion = () => {
     const [major, minor, patch] = currentVersion.split('.').map(Number);
-    
+
     switch (releaseType) {
       case 'major':
         return `${major + 1}.0.0`;
@@ -126,25 +126,21 @@ export function CreateUpdateDialog({
       // Note: Supabase Storage ne supporte pas onUploadProgress côté client
       // On simule la progression pour l'UX
       setUploadProgress(50);
-      
-      const { data, error } = await supabase.storage
-        .from('product-files')
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: false,
-        });
-      
+
+      const { data, error } = await supabase.storage.from('product-files').upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: false,
+      });
+
       setUploadProgress(100);
 
       if (error) throw error;
 
       // Obtenir l'URL publique
-      const { data: urlData } = supabase.storage
-        .from('product-files')
-        .getPublicUrl(filePath);
+      const { data: urlData } = supabase.storage.from('product-files').getPublicUrl(filePath);
 
       return urlData.publicUrl;
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error uploading update file', { error, digitalProductId });
       toast({
@@ -259,8 +255,9 @@ export function CreateUpdateDialog({
 
           if (digitalProduct?.product_id) {
             // Importer et appeler la fonction de notification
-            const { notifyAllCustomersOfUpdate } = await import('@/lib/products/digital-product-updates');
-            
+            const { notifyAllCustomersOfUpdate } =
+              await import('@/lib/products/digital-product-updates');
+
             await notifyAllCustomersOfUpdate({
               product_id: digitalProduct.product_id,
               version,
@@ -304,7 +301,7 @@ export function CreateUpdateDialog({
       setIsForced(false);
       setPublishImmediately(true);
       onOpenChange(false);
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error creating update', { error, digitalProductId });
       toast({
@@ -355,9 +352,7 @@ export function CreateUpdateDialog({
             <Sparkles className="h-5 w-5 text-purple-500" />
             Nouvelle mise à jour - {productName}
           </DialogTitle>
-          <DialogDescription>
-            Créez une nouvelle version de votre produit digital
-          </DialogDescription>
+          <DialogDescription>Créez une nouvelle version de votre produit digital</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
@@ -369,7 +364,7 @@ export function CreateUpdateDialog({
                 <Input
                   id="version"
                   value={version}
-                  onChange={(e) => setVersion(e.target.value)}
+                  onChange={e => setVersion(e.target.value)}
                   placeholder={suggestedVersion}
                   className="flex-1"
                 />
@@ -382,9 +377,7 @@ export function CreateUpdateDialog({
                   Utiliser {suggestedVersion}
                 </Button>
               </div>
-              <p className="text-xs text-muted-foreground">
-                Version actuelle: {currentVersion}
-              </p>
+              <p className="text-xs text-muted-foreground">Version actuelle: {currentVersion}</p>
             </div>
 
             <div className="space-y-2">
@@ -429,7 +422,7 @@ export function CreateUpdateDialog({
             <Input
               id="title"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={e => setTitle(e.target.value)}
               placeholder="Ex: Nouvelle version avec améliorations majeures"
             />
           </div>
@@ -440,7 +433,7 @@ export function CreateUpdateDialog({
             <Textarea
               id="description"
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={e => setDescription(e.target.value)}
               placeholder="Description courte de la mise à jour (optionnel)"
               rows={2}
             />
@@ -452,7 +445,7 @@ export function CreateUpdateDialog({
             <Textarea
               id="changelog"
               value={changelog}
-              onChange={(e) => setChangelog(e.target.value)}
+              onChange={e => setChangelog(e.target.value)}
               placeholder="Liste détaillée des modifications (une par ligne)"
               rows={6}
               className="font-mono text-sm"
@@ -515,7 +508,7 @@ export function CreateUpdateDialog({
               <Checkbox
                 id="publishImmediately"
                 checked={publishImmediately}
-                onCheckedChange={(checked) => setPublishImmediately(checked === true)}
+                onCheckedChange={checked => setPublishImmediately(checked === true)}
               />
               <Label htmlFor="publishImmediately" className="cursor-pointer">
                 Publier immédiatement
@@ -526,7 +519,7 @@ export function CreateUpdateDialog({
               <Checkbox
                 id="isForced"
                 checked={isForced}
-                onCheckedChange={(checked) => setIsForced(checked === true)}
+                onCheckedChange={checked => setIsForced(checked === true)}
               />
               <Label htmlFor="isForced" className="cursor-pointer">
                 Mise à jour forcée (les clients devront mettre à jour)
@@ -536,7 +529,8 @@ export function CreateUpdateDialog({
               <Alert>
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
-                  Les mises à jour forcées sont recommandées uniquement pour les corrections de sécurité critiques.
+                  Les mises à jour forcées sont recommandées uniquement pour les corrections de
+                  sécurité critiques.
                 </AlertDescription>
               </Alert>
             )}
@@ -565,10 +559,3 @@ export function CreateUpdateDialog({
     </Dialog>
   );
 }
-
-
-
-
-
-
-

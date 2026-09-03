@@ -24,7 +24,7 @@ export interface AlertThresholds {
 /**
  * Seuils par défaut
  */
-const  DEFAULT_THRESHOLDS: AlertThresholds = {
+const DEFAULT_THRESHOLDS: AlertThresholds = {
   errorRate: 10, // 10 erreurs par minute
   errorCount: 50, // 50 erreurs en 5 minutes
   performanceThreshold: 3000, // 3 secondes
@@ -83,9 +83,7 @@ class ErrorTracker {
   getErrorRateByType(type: string, windowMinutes: number = 1): number {
     const windowMs = windowMinutes * 60 * 1000;
     const cutoff = Date.now() - windowMs;
-    const recentErrors = this.errors.filter(
-      e => e.timestamp > cutoff && e.type === type
-    );
+    const recentErrors = this.errors.filter(e => e.timestamp > cutoff && e.type === type);
     return recentErrors.length / windowMinutes;
   }
 }
@@ -142,11 +140,14 @@ export function sendAlert(
     [key: string]: any;
   }
 ): void {
-  const  level: Sentry.SeverityLevel = 
-    severity === 'critical' ? 'error' :
-    severity === 'error' ? 'error' :
-    severity === 'warning' ? 'warning' :
-    'info';
+  const level: Sentry.SeverityLevel =
+    severity === 'critical'
+      ? 'error'
+      : severity === 'error'
+        ? 'error'
+        : severity === 'warning'
+          ? 'warning'
+          : 'info';
 
   Sentry.captureMessage(data.message, {
     level,
@@ -170,7 +171,7 @@ export function sendAlert(
  */
 export function trackError(type: string, severity: AlertSeverity = 'error'): void {
   errorTracker.addError(type, severity);
-  
+
   // Vérifier les seuils après chaque erreur critique
   if (severity === 'critical' || severity === 'error') {
     checkAlertThresholds();
@@ -181,10 +182,12 @@ export function trackError(type: string, severity: AlertSeverity = 'error'): voi
  * Enregistrer une erreur API
  */
 export function trackApiError(endpoint: string, statusCode?: number): void {
-  const  severity: AlertSeverity = 
-    statusCode && statusCode >= 500 ? 'critical' :
-    statusCode && statusCode >= 400 ? 'error' :
-    'warning';
+  const severity: AlertSeverity =
+    statusCode && statusCode >= 500
+      ? 'critical'
+      : statusCode && statusCode >= 400
+        ? 'error'
+        : 'warning';
 
   trackError('api', severity);
 
@@ -208,7 +211,7 @@ export function trackPerformanceIssue(
 ): void {
   if (duration >= threshold) {
     trackError('performance', 'warning');
-    
+
     sendAlert('performance-threshold', 'warning', {
       message: `Opération lente : ${operation} a pris ${duration}ms (seuil: ${threshold}ms)`,
       operation,
@@ -246,11 +249,3 @@ export function getErrorStats(): {
     apiErrorRate: errorTracker.getErrorRateByType('api', 1),
   };
 }
-
-
-
-
-
-
-
-

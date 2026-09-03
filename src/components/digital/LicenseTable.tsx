@@ -1,7 +1,7 @@
 /**
  * License Table Component
  * Date: 27 octobre 2025
- * 
+ *
  * Table de gestion des licenses avec actions massives
  */
 
@@ -17,7 +17,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import { MoreHorizontal, Ban, RefreshCw, Trash2, Eye } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { format } from 'date-fns';
@@ -43,7 +43,7 @@ export const LicenseTable = ({ searchQuery, statusFilter }: LicenseTableProps) =
   const [selectedLicenses, setSelectedLicenses] = useState<string[]>([]);
 
   // Mock data - À remplacer par les vrais hooks
-  const  licenses: License[] = [];
+  const licenses: License[] = [];
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -80,9 +80,7 @@ export const LicenseTable = ({ searchQuery, statusFilter }: LicenseTableProps) =
             </svg>
           </div>
           <h3 className="text-lg font-semibold mb-2">Aucune license</h3>
-          <p className="text-muted-foreground">
-            Générez votre première license pour commencer
-          </p>
+          <p className="text-muted-foreground">Générez votre première license pour commencer</p>
         </div>
       </Card>
     );
@@ -93,9 +91,7 @@ export const LicenseTable = ({ searchQuery, statusFilter }: LicenseTableProps) =
       <div className="p-6">
         {selectedLicenses.length > 0 && (
           <div className="flex items-center gap-2 mb-4 p-3 bg-muted rounded-lg">
-            <span className="text-sm font-medium">
-              {selectedLicenses.length} sélectionnée(s)
-            </span>
+            <span className="text-sm font-medium">{selectedLicenses.length} sélectionnée(s)</span>
             <Button variant="outline" size="sm">
               <RefreshCw className="h-4 w-4 mr-2" />
               Renouveler
@@ -128,25 +124,21 @@ export const LicenseTable = ({ searchQuery, statusFilter }: LicenseTableProps) =
               </TableRow>
             </TableHeader>
             <TableBody>
-              {licenses.map((license) => (
+              {licenses.map(license => (
                 <TableRow key={license.id}>
                   <TableCell>
                     <Checkbox
                       checked={selectedLicenses.includes(license.id)}
-                      onCheckedChange={(checked) => {
+                      onCheckedChange={checked => {
                         if (checked) {
                           setSelectedLicenses([...selectedLicenses, license.id]);
                         } else {
-                          setSelectedLicenses(
-                            selectedLicenses.filter((id) => id !== license.id)
-                          );
+                          setSelectedLicenses(selectedLicenses.filter(id => id !== license.id));
                         }
                       }}
                     />
                   </TableCell>
-                  <TableCell className="font-mono text-sm">
-                    {license.license_key}
-                  </TableCell>
+                  <TableCell className="font-mono text-sm">{license.license_key}</TableCell>
                   <TableCell>{license.product_name}</TableCell>
                   <TableCell>{license.user_email}</TableCell>
                   <TableCell>{getStatusBadge(license.status)}</TableCell>
@@ -161,10 +153,8 @@ export const LicenseTable = ({ searchQuery, statusFilter }: LicenseTableProps) =
                   <TableCell className="text-right">
                     <Select>
                       <SelectTrigger>
-
-                          <MoreHorizontal className="h-4 w-4" />
-                        
-</SelectTrigger>
+                        <MoreHorizontal className="h-4 w-4" />
+                      </SelectTrigger>
                       <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                         <SelectItem value="edit" onSelect>
                           <Eye className="h-4 w-4 mr-2" />
@@ -194,10 +184,3 @@ export const LicenseTable = ({ searchQuery, statusFilter }: LicenseTableProps) =
     </Card>
   );
 };
-
-
-
-
-
-
-

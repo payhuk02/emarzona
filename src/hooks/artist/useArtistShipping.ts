@@ -48,7 +48,7 @@ export function useValidateArtistShippingConfig() {
     mutationFn: (config: Partial<ArtistShippingConfig>) => {
       return validateArtistShippingConfig(config);
     },
-    onError: (error) => {
+    onError: error => {
       logger.error('Error validating artist shipping config', { error });
       toast({
         title: '❌ Erreur de validation',
@@ -58,10 +58,3 @@ export function useValidateArtistShippingConfig() {
     },
   });
 }
-
-
-
-
-
-
-

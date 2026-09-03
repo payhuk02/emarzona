@@ -15,7 +15,7 @@ const DEFAULT_PAGINATION: PaginationState = {
 
 /**
  * Hook pour gérer la pagination du marketplace
- * 
+ *
  * @param initialItemsPerPage - Nombre d'éléments par page (défaut: 12)
  * @returns Objet contenant l'état de pagination et les fonctions de navigation
  */
@@ -36,10 +36,7 @@ export function useMarketplacePagination(initialItemsPerPage: number = 12) {
   /**
    * Vérifie si on peut aller à la page précédente
    */
-  const canGoPrevious = useMemo(
-    () => pagination.currentPage > 1,
-    [pagination.currentPage]
-  );
+  const canGoPrevious = useMemo(() => pagination.currentPage > 1, [pagination.currentPage]);
 
   /**
    * Vérifie si on peut aller à la page suivante

@@ -43,7 +43,7 @@ export const Leaderboard = ({ courseId, className, limit = 10 }: LeaderboardProp
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {[1, 2, 3].map((i) => (
+            {[1, 2, 3].map(i => (
               <Skeleton key={i} className="h-16 w-full" />
             ))}
           </div>
@@ -83,14 +83,15 @@ export const Leaderboard = ({ courseId, className, limit = 10 }: LeaderboardProp
       </CardHeader>
       <CardContent>
         <div className="space-y-2">
-          {leaderboard.map((entry) => {
+          {leaderboard.map(entry => {
             const isCurrentUser = entry.user_id === user?.id;
-            const initials = entry.user_name
-              ?.split(' ')
-              .map((n) => n[0])
-              .join('')
-              .toUpperCase()
-              .slice(0, 2) || '??';
+            const initials =
+              entry.user_name
+                ?.split(' ')
+                .map(n => n[0])
+                .join('')
+                .toUpperCase()
+                .slice(0, 2) || '??';
 
             return (
               <div
@@ -107,7 +108,10 @@ export const Leaderboard = ({ courseId, className, limit = 10 }: LeaderboardProp
                   {entry.rank <= 3 ? (
                     getRankIcon(entry.rank)
                   ) : (
-                    <Badge variant={getRankBadgeVariant(entry.rank)} className="w-8 h-8 rounded-full flex items-center justify-center p-0">
+                    <Badge
+                      variant={getRankBadgeVariant(entry.rank)}
+                      className="w-8 h-8 rounded-full flex items-center justify-center p-0"
+                    >
                       {entry.rank}
                     </Badge>
                   )}
@@ -155,10 +159,3 @@ export const Leaderboard = ({ courseId, className, limit = 10 }: LeaderboardProp
     </Card>
   );
 };
-
-
-
-
-
-
-

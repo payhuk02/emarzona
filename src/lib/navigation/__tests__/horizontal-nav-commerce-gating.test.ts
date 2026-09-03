@@ -75,7 +75,9 @@ describe('horizontal nav commerce gating', () => {
       t: mockT,
     });
 
-    const logistique = domains.find(d => d.domainKey === 'logistique' || d.domainKey === 'ventes_logistique');
+    const logistique = domains.find(
+      d => d.domainKey === 'logistique' || d.domainKey === 'ventes_logistique'
+    );
     const physicalGroup = logistique?.subgroups?.find(g => g.groupKey === 'produits_physiques');
     expect(physicalGroup).toBeDefined();
     expect(physicalGroup!.items.map(i => i.path)).toContain('/dashboard/physical-products');

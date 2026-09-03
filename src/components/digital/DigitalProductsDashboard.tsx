@@ -89,32 +89,32 @@ export interface CategoryPerformance {
 export interface DigitalProductsDashboardProps {
   /** Statistiques générales */
   stats: DashboardStats;
-  
+
   /** Produits populaires */
   popularProducts: PopularProduct[];
-  
+
   /** Activités récentes */
   recentActivities: RecentActivity[];
-  
+
   /** Performance par catégorie */
   categoryPerformance: CategoryPerformance[];
-  
+
   /** Callback pour voir tous les produits */
   onViewAllProducts?: () => void;
-  
+
   /** Callback pour créer un produit */
   onCreateProduct?: () => void;
-  
+
   /** Classe CSS personnalisée */
   className?: string;
 }
 
 /**
  * DigitalProductsDashboard - Dashboard principal pour les produits digitaux
- * 
+ *
  * @example
  * ```tsx
- * <DigitalProductsDashboard 
+ * <DigitalProductsDashboard
  *   stats={dashboardStats}
  *   popularProducts={topProducts}
  *   recentActivities={activities}
@@ -124,7 +124,7 @@ export interface DigitalProductsDashboardProps {
  * />
  * ```
  */
-export const DigitalProductsDashboard : React.FC<DigitalProductsDashboardProps> = ({
+export const DigitalProductsDashboard: React.FC<DigitalProductsDashboardProps> = ({
   stats,
   popularProducts,
   recentActivities,
@@ -142,7 +142,7 @@ export const DigitalProductsDashboard : React.FC<DigitalProductsDashboardProps> 
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
 
-    if (diffMins < 1) return 'À l\'instant';
+    if (diffMins < 1) return "À l'instant";
     if (diffMins < 60) return `Il y a ${diffMins} min`;
     if (diffHours < 24) return `Il y a ${diffHours}h`;
     return `Il y a ${diffDays}j`;
@@ -150,11 +150,14 @@ export const DigitalProductsDashboard : React.FC<DigitalProductsDashboardProps> 
 
   // Calculer la santé globale
   const overallHealth = useMemo(() => {
-    const activeRatio = stats.totalProducts > 0 ? (stats.activeProducts / stats.totalProducts) * 100 : 0;
+    const activeRatio =
+      stats.totalProducts > 0 ? (stats.activeProducts / stats.totalProducts) * 100 : 0;
     const growth = (stats.revenueGrowth + stats.downloadGrowth) / 2;
-    
-    if (activeRatio > 70 && growth > 10) return { label: 'Excellent', color: 'text-green-600', icon: CheckCircle2 };
-    if (activeRatio > 50 && growth > 0) return { label: 'Bon', color: 'text-blue-600', icon: TrendingUp };
+
+    if (activeRatio > 70 && growth > 10)
+      return { label: 'Excellent', color: 'text-green-600', icon: CheckCircle2 };
+    if (activeRatio > 50 && growth > 0)
+      return { label: 'Bon', color: 'text-blue-600', icon: TrendingUp };
     if (activeRatio > 30) return { label: 'Moyen', color: 'text-orange-600', icon: Clock };
     return { label: 'À améliorer', color: 'text-red-600', icon: AlertCircle };
   }, [stats]);
@@ -200,7 +203,9 @@ export const DigitalProductsDashboard : React.FC<DigitalProductsDashboardProps> 
               <p className="text-sm font-medium text-muted-foreground">Produits Totaux</p>
               <p className="text-3xl font-bold">{stats.totalProducts}</p>
               <div className="flex items-center gap-2 text-xs">
-                <Badge variant="default" className="bg-green-600">{stats.activeProducts} actifs</Badge>
+                <Badge variant="default" className="bg-green-600">
+                  {stats.activeProducts} actifs
+                </Badge>
                 <Badge variant="secondary">{stats.draftProducts} brouillons</Badge>
               </div>
             </div>
@@ -288,7 +293,12 @@ export const DigitalProductsDashboard : React.FC<DigitalProductsDashboardProps> 
       <Card className="p-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className={cn('p-4 rounded-xl bg-opacity-10', `bg-${overallHealth.color.split('-')[1]}-100`)}>
+            <div
+              className={cn(
+                'p-4 rounded-xl bg-opacity-10',
+                `bg-${overallHealth.color.split('-')[1]}-100`
+              )}
+            >
               <HealthIcon className={cn('h-8 w-8', overallHealth.color)} />
             </div>
             <div>
@@ -300,7 +310,9 @@ export const DigitalProductsDashboard : React.FC<DigitalProductsDashboardProps> 
           </div>
           <div className="flex gap-4">
             <div className="text-center">
-              <p className="text-2xl font-bold">{Math.round((stats.activeProducts / stats.totalProducts) * 100)}%</p>
+              <p className="text-2xl font-bold">
+                {Math.round((stats.activeProducts / stats.totalProducts) * 100)}%
+              </p>
               <p className="text-xs text-muted-foreground">Taux d'activation</p>
             </div>
             <Separator orientation="vertical" className="h-12" />
@@ -335,7 +347,10 @@ export const DigitalProductsDashboard : React.FC<DigitalProductsDashboardProps> 
                 </div>
               ) : (
                 popularProducts.map((product, index) => (
-                  <div key={product.id} className="flex items-center gap-4 p-4 hover:bg-muted/50 rounded-lg transition-colors">
+                  <div
+                    key={product.id}
+                    className="flex items-center gap-4 p-4 hover:bg-muted/50 rounded-lg transition-colors"
+                  >
                     <div className="flex items-center gap-3 flex-1">
                       <div className="font-bold text-lg text-muted-foreground w-6">
                         #{index + 1}
@@ -361,7 +376,9 @@ export const DigitalProductsDashboard : React.FC<DigitalProductsDashboardProps> 
                       <div className="text-right">
                         <div className="flex items-center gap-1">
                           <Download className="h-4 w-4 text-blue-600" />
-                          <span className="font-semibold">{product.downloads.toLocaleString()}</span>
+                          <span className="font-semibold">
+                            {product.downloads.toLocaleString()}
+                          </span>
                         </div>
                         <p className="text-xs text-muted-foreground">téléchargements</p>
                       </div>
@@ -405,25 +422,29 @@ export const DigitalProductsDashboard : React.FC<DigitalProductsDashboardProps> 
                     <p>Aucune activité récente</p>
                   </div>
                 ) : (
-                  recentActivities.map((activity) => {
+                  recentActivities.map(activity => {
                     const ActivityIcon = getActivityIcon(activity.type);
 
                     return (
                       <div key={activity.id} className="flex items-start gap-3">
-                        <div className={cn(
-                          'p-2 rounded-lg',
-                          activity.type === 'purchase' && 'bg-green-50',
-                          activity.type === 'download' && 'bg-blue-50',
-                          activity.type === 'license' && 'bg-purple-50',
-                          activity.type === 'alert' && 'bg-orange-50'
-                        )}>
-                          <ActivityIcon className={cn(
-                            'h-4 w-4',
-                            activity.type === 'purchase' && 'text-green-600',
-                            activity.type === 'download' && 'text-blue-600',
-                            activity.type === 'license' && 'text-purple-600',
-                            activity.type === 'alert' && 'text-orange-600'
-                          )} />
+                        <div
+                          className={cn(
+                            'p-2 rounded-lg',
+                            activity.type === 'purchase' && 'bg-green-50',
+                            activity.type === 'download' && 'bg-blue-50',
+                            activity.type === 'license' && 'bg-purple-50',
+                            activity.type === 'alert' && 'bg-orange-50'
+                          )}
+                        >
+                          <ActivityIcon
+                            className={cn(
+                              'h-4 w-4',
+                              activity.type === 'purchase' && 'text-green-600',
+                              activity.type === 'download' && 'text-blue-600',
+                              activity.type === 'license' && 'text-purple-600',
+                              activity.type === 'alert' && 'text-orange-600'
+                            )}
+                          />
                         </div>
 
                         <div className="flex-1">
@@ -464,7 +485,7 @@ export const DigitalProductsDashboard : React.FC<DigitalProductsDashboardProps> 
               <p>Aucune donnée de performance</p>
             </div>
           ) : (
-            categoryPerformance.map((category) => (
+            categoryPerformance.map(category => (
               <div key={category.category}>
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-3">
@@ -496,10 +517,7 @@ export const DigitalProductsDashboard : React.FC<DigitalProductsDashboardProps> 
                     </div>
                   </div>
                 </div>
-                <Progress 
-                  value={(category.revenue / stats.totalRevenue) * 100} 
-                  className="h-2"
-                />
+                <Progress value={(category.revenue / stats.totalRevenue) * 100} className="h-2" />
               </div>
             ))
           )}
@@ -512,11 +530,3 @@ export const DigitalProductsDashboard : React.FC<DigitalProductsDashboardProps> 
 DigitalProductsDashboard.displayName = 'DigitalProductsDashboard';
 
 export default DigitalProductsDashboard;
-
-
-
-
-
-
-
-

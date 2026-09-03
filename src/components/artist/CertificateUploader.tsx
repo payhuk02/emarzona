@@ -1,7 +1,7 @@
 /**
  * Certificate Uploader Component for Artist Products
  * Date: 28 Janvier 2025
- * 
+ *
  * Composant dédié pour uploader et gérer les certificats d'authenticité
  */
 
@@ -11,13 +11,13 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Shield, 
-  Upload, 
-  FileText, 
-  X, 
-  CheckCircle2, 
-  Info, 
+import {
+  Shield,
+  Upload,
+  FileText,
+  X,
+  CheckCircle2,
+  Info,
   Download,
   Eye,
   Loader2,
@@ -52,7 +52,7 @@ export const CertificateUploader = ({
     // Validation du type de fichier
     const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
     const allowedExtensions = ['pdf', 'jpg', 'jpeg', 'png'];
-    
+
     const fileExt = file.name.split('.').pop()?.toLowerCase();
     const isValidType = allowedTypes.includes(file.type);
     const isValidExt = fileExt && allowedExtensions.includes(fileExt);
@@ -85,7 +85,7 @@ export const CertificateUploader = ({
     try {
       // Simuler la progression (pour UX)
       const progressInterval = setInterval(() => {
-        setUploadProgress((prev) => {
+        setUploadProgress(prev => {
           if (prev >= 90) {
             clearInterval(progressInterval);
             return 90;
@@ -107,7 +107,7 @@ export const CertificateUploader = ({
 
       if (url) {
         onCertificateChange(url);
-        
+
         // Si c'est une image, créer une URL de prévisualisation
         if (file.type.startsWith('image/')) {
           setPreviewUrl(url);
@@ -115,7 +115,7 @@ export const CertificateUploader = ({
 
         toast({
           title: '✅ Certificat uploadé',
-          description: 'Le certificat d\'authenticité a été uploadé avec succès',
+          description: "Le certificat d'authenticité a été uploadé avec succès",
         });
 
         logger.info('Certificat uploadé avec succès', {
@@ -130,10 +130,11 @@ export const CertificateUploader = ({
         error: error instanceof Error ? error.message : String(error),
         productId,
       });
-      
+
       toast({
-        title: '❌ Erreur d\'upload',
-        description: error instanceof Error ? error.message : 'Une erreur est survenue lors de l\'upload',
+        title: "❌ Erreur d'upload",
+        description:
+          error instanceof Error ? error.message : "Une erreur est survenue lors de l'upload",
         variant: 'destructive',
       });
     } finally {
@@ -160,7 +161,7 @@ export const CertificateUploader = ({
       const fileName = certificateUrl.split('/').pop() || 'certificate';
       const response = await fetch(certificateUrl);
       const blob = await response.blob();
-      
+
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -189,17 +190,16 @@ export const CertificateUploader = ({
     window.open(certificateUrl, '_blank');
   };
 
-  const isImage = certificateUrl && (
-    certificateUrl.endsWith('.jpg') ||
-    certificateUrl.endsWith('.jpeg') ||
-    certificateUrl.endsWith('.png') ||
-    certificateUrl.includes('image')
-  );
+  const isImage =
+    certificateUrl &&
+    (certificateUrl.endsWith('.jpg') ||
+      certificateUrl.endsWith('.jpeg') ||
+      certificateUrl.endsWith('.png') ||
+      certificateUrl.includes('image'));
 
-  const isPDF = certificateUrl && (
-    certificateUrl.endsWith('.pdf') ||
-    certificateUrl.includes('application/pdf')
-  );
+  const isPDF =
+    certificateUrl &&
+    (certificateUrl.endsWith('.pdf') || certificateUrl.includes('application/pdf'));
 
   return (
     <Card>
@@ -266,21 +266,11 @@ export const CertificateUploader = ({
             {/* Actions */}
             {!readOnly && (
               <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handlePreview}
-                  className="flex-1"
-                >
+                <Button variant="outline" size="sm" onClick={handlePreview} className="flex-1">
                   <Eye className="h-4 w-4 mr-2" />
                   Aperçu
                 </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleDownload}
-                  className="flex-1"
-                >
+                <Button variant="outline" size="sm" onClick={handleDownload} className="flex-1">
                   <Download className="h-4 w-4 mr-2" />
                   Télécharger
                 </Button>
@@ -298,21 +288,11 @@ export const CertificateUploader = ({
 
             {readOnly && (
               <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handlePreview}
-                  className="flex-1"
-                >
+                <Button variant="outline" size="sm" onClick={handlePreview} className="flex-1">
                   <Eye className="h-4 w-4 mr-2" />
                   Voir le certificat
                 </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleDownload}
-                  className="flex-1"
-                >
+                <Button variant="outline" size="sm" onClick={handleDownload} className="flex-1">
                   <Download className="h-4 w-4 mr-2" />
                   Télécharger
                 </Button>
@@ -371,18 +351,11 @@ export const CertificateUploader = ({
         <Alert>
           <Info className="h-4 w-4" />
           <AlertDescription>
-            Le certificat d'authenticité sera visible par les acheteurs sur la page produit. 
-            Il renforce la confiance et la valeur de l'œuvre.
+            Le certificat d'authenticité sera visible par les acheteurs sur la page produit. Il
+            renforce la confiance et la valeur de l'œuvre.
           </AlertDescription>
         </Alert>
       </CardContent>
     </Card>
   );
 };
-
-
-
-
-
-
-

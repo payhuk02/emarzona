@@ -8,7 +8,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { useLearningPath, usePathEnrollment, useEnrollInPath, type PathCourse } from '@/hooks/courses/useLearningPaths';
+import {
+  useLearningPath,
+  usePathEnrollment,
+  useEnrollInPath,
+  type PathCourse,
+} from '@/hooks/courses/useLearningPaths';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -47,11 +52,11 @@ export const LearningPathDetail = ({ pathId }: LearningPathDetailProps) => {
     if (!isEnrolled) return false;
     if (courseIndex === 0) return true;
     if (!enrollment) return false;
-    
+
     // Vérifier si le cours précédent est complété
     const previousCourse = path?.courses?.find(c => c.order_index === courseIndex - 1);
     if (!previousCourse?.unlock_after_completion) return true;
-    
+
     return enrollment.current_course_index >= courseIndex;
   };
 
@@ -71,9 +76,7 @@ export const LearningPathDetail = ({ pathId }: LearningPathDetailProps) => {
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <CardTitle className="text-3xl mb-2">{path.title}</CardTitle>
-              {path.description && (
-                <p className="text-muted-foreground mb-4">{path.description}</p>
-              )}
+              {path.description && <p className="text-muted-foreground mb-4">{path.description}</p>}
               <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                 <div className="flex items-center gap-1">
                   <BookOpen className="h-4 w-4" />
@@ -93,7 +96,9 @@ export const LearningPathDetail = ({ pathId }: LearningPathDetailProps) => {
             </div>
             {!isEnrolled && (
               <Button onClick={handleEnroll} disabled={enrollInPath.isPending}>
-                {path.is_free ? 'Commencer gratuitement' : `S'inscrire - ${path.price} ${path.currency}`}
+                {path.is_free
+                  ? 'Commencer gratuitement'
+                  : `S'inscrire - ${path.price} ${path.currency}`}
               </Button>
             )}
           </div>
@@ -144,12 +149,18 @@ export const LearningPathDetail = ({ pathId }: LearningPathDetailProps) => {
                   )}
                 >
                   {/* Numéro */}
-                  <div className={cn(
-                    'flex items-center justify-center w-10 h-10 rounded-full font-bold shrink-0',
-                    isCompleted ? 'bg-green-600 text-white' :
-                    isCurrent ? 'bg-primary text-white' :
-                    isUnlocked ? 'bg-muted' : 'bg-muted opacity-50'
-                  )}>
+                  <div
+                    className={cn(
+                      'flex items-center justify-center w-10 h-10 rounded-full font-bold shrink-0',
+                      isCompleted
+                        ? 'bg-green-600 text-white'
+                        : isCurrent
+                          ? 'bg-primary text-white'
+                          : isUnlocked
+                            ? 'bg-muted'
+                            : 'bg-muted opacity-50'
+                    )}
+                  >
                     {isCompleted ? (
                       <CheckCircle2 className="h-5 w-5" />
                     ) : (
@@ -168,9 +179,7 @@ export const LearningPathDetail = ({ pathId }: LearningPathDetailProps) => {
                               En cours
                             </Badge>
                           )}
-                          {!isUnlocked && (
-                            <Lock className="h-4 w-4 text-muted-foreground" />
-                          )}
+                          {!isUnlocked && <Lock className="h-4 w-4 text-muted-foreground" />}
                         </h3>
                         {course && (
                           <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
@@ -211,10 +220,3 @@ export const LearningPathDetail = ({ pathId }: LearningPathDetailProps) => {
     </div>
   );
 };
-
-
-
-
-
-
-

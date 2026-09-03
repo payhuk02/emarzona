@@ -1,7 +1,7 @@
 /**
  * Native Streaming Player Component
  * Date: 30 Janvier 2025
- * 
+ *
  * Composant pour le streaming natif (WebRTC, HLS, RTMP)
  */
 
@@ -189,9 +189,7 @@ export const NativeStreamingPlayer = ({
               <Video className="h-5 w-5" />
               {title || 'Live Stream'}
             </CardTitle>
-            {description && (
-              <CardDescription>{description}</CardDescription>
-            )}
+            {description && <CardDescription>{description}</CardDescription>}
           </div>
           <div className="flex items-center gap-2">
             {isLive && (
@@ -227,13 +225,9 @@ export const NativeStreamingPlayer = ({
                 size="icon"
                 variant="secondary"
                 onClick={togglePlay}
-                aria-label={isPlaying ? "Mettre en pause" : "Lire"}
+                aria-label={isPlaying ? 'Mettre en pause' : 'Lire'}
               >
-                {isPlaying ? (
-                  <Pause className="h-4 w-4" />
-                ) : (
-                  <Play className="h-4 w-4" />
-                )}
+                {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
               </Button>
 
               <div className="flex items-center gap-2 flex-1">
@@ -241,13 +235,9 @@ export const NativeStreamingPlayer = ({
                   size="icon"
                   variant="ghost"
                   onClick={toggleMute}
-                  aria-label={isMuted ? "Activer le son" : "Couper le son"}
+                  aria-label={isMuted ? 'Activer le son' : 'Couper le son'}
                 >
-                  {isMuted ? (
-                    <VolumeX className="h-4 w-4" />
-                  ) : (
-                    <Volume2 className="h-4 w-4" />
-                  )}
+                  {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
                 </Button>
                 <input
                   type="range"
@@ -297,10 +287,3 @@ export const NativeStreamingPlayer = ({
     </Card>
   );
 };
-
-
-
-
-
-
-

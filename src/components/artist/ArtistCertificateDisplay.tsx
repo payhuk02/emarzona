@@ -1,7 +1,7 @@
 /**
  * Artist Certificate Display Component
  * Date: 28 Janvier 2025
- * 
+ *
  * Composant pour afficher le certificat d'authenticité sur la page de détail produit
  */
 
@@ -10,14 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { 
-  Shield, 
-  FileText, 
-  Download,
-  Eye,
-  CheckCircle2,
-  Info,
-} from 'lucide-react';
+import { Shield, FileText, Download, Eye, CheckCircle2, Info } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 
@@ -49,7 +42,7 @@ const ArtistCertificateDisplayComponent = ({
       const fileName = certificateUrl.split('/').pop() || 'certificate';
       const response = await fetch(certificateUrl);
       const blob = await response.blob();
-      
+
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -78,17 +71,16 @@ const ArtistCertificateDisplayComponent = ({
     window.open(certificateUrl, '_blank');
   };
 
-  const isImage = certificateUrl && (
-    certificateUrl.endsWith('.jpg') ||
-    certificateUrl.endsWith('.jpeg') ||
-    certificateUrl.endsWith('.png') ||
-    certificateUrl.includes('image')
-  );
+  const isImage =
+    certificateUrl &&
+    (certificateUrl.endsWith('.jpg') ||
+      certificateUrl.endsWith('.jpeg') ||
+      certificateUrl.endsWith('.png') ||
+      certificateUrl.includes('image'));
 
-  const isPDF = certificateUrl && (
-    certificateUrl.endsWith('.pdf') ||
-    certificateUrl.includes('application/pdf')
-  );
+  const isPDF =
+    certificateUrl &&
+    (certificateUrl.endsWith('.pdf') || certificateUrl.includes('application/pdf'));
 
   // Ne rien afficher si aucun certificat et pas d'authentification
   if (!certificateOfAuthenticity && !signatureAuthenticated && !certificateUrl) {
@@ -102,9 +94,7 @@ const ArtistCertificateDisplayComponent = ({
           <Shield className="h-5 w-5 text-green-600 dark:text-green-400" />
           Authenticité & Certification
         </CardTitle>
-        <CardDescription>
-          Informations sur l'authenticité de cette œuvre
-        </CardDescription>
+        <CardDescription>Informations sur l'authenticité de cette œuvre</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Certificat d'authenticité */}
@@ -153,21 +143,11 @@ const ArtistCertificateDisplayComponent = ({
 
                 {/* Actions */}
                 <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handlePreview}
-                    className="flex-1"
-                  >
+                  <Button variant="outline" size="sm" onClick={handlePreview} className="flex-1">
                     <Eye className="h-4 w-4 mr-2" />
                     Aperçu
                   </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleDownload}
-                    className="flex-1"
-                  >
+                  <Button variant="outline" size="sm" onClick={handleDownload} className="flex-1">
                     <Download className="h-4 w-4 mr-2" />
                     Télécharger
                   </Button>
@@ -218,7 +198,7 @@ const ArtistCertificateDisplayComponent = ({
         <Alert className="bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800">
           <Shield className="h-4 w-4 text-green-600 dark:text-green-400" />
           <AlertDescription className="text-green-900 dark:text-green-100">
-            Cette œuvre est certifiée authentique. Les certificats et signatures authentifiées 
+            Cette œuvre est certifiée authentique. Les certificats et signatures authentifiées
             garantissent l'authenticité et augmentent la valeur de l'œuvre.
           </AlertDescription>
         </Alert>
@@ -228,9 +208,3 @@ const ArtistCertificateDisplayComponent = ({
 };
 
 export const ArtistCertificateDisplay = React.memo(ArtistCertificateDisplayComponent);
-
-
-
-
-
-

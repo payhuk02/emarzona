@@ -1,7 +1,7 @@
 /**
  * Product Kits Management Hooks
  * Date: 27 Janvier 2025
- * 
+ *
  * Hooks pour gérer les kits produits et assemblages
  */
 
@@ -87,25 +87,30 @@ export interface KitAssembly {
 /**
  * useProductKits - Récupère les kits d'un store
  */
-export const useProductKits = (storeId?: string, filters?: {
-  productId?: string;
-  kitType?: ProductKit['kit_type'];
-}) => {
+export const useProductKits = (
+  storeId?: string,
+  filters?: {
+    productId?: string;
+    kitType?: ProductKit['kit_type'];
+  }
+) => {
   return useQuery({
     queryKey: ['product-kits', storeId, filters],
     queryFn: async () => {
       if (!storeId) throw new Error('Store ID manquant');
 
-      let  query= supabase
+      let query = supabase
         .from('product_kits')
-        .select(`
+        .select(
+          `
           *,
           kit_product:products!kit_product_id (
             id,
             name,
             image_url
           )
-        `)
+        `
+        )
         .eq('store_id', storeId);
 
       if (filters?.productId) {
@@ -115,7 +120,8 @@ export const useProductKits = (storeId?: string, filters?: {
         query = query.eq('kit_type', filters.kitType);
       }
 
-      query = query.eq('is_active', true)
+      query = query
+        .eq('is_active', true)
         .order('display_order', { ascending: true })
         .order('kit_name', { ascending: true });
 
@@ -143,7 +149,8 @@ export const useKitComponents = (kitId?: string) => {
 
       const { data, error } = await supabase
         .from('kit_components')
-        .select(`
+        .select(
+          `
           *,
           component_product:products!component_product_id (
             id,
@@ -157,7 +164,8 @@ export const useKitComponents = (kitId?: string) => {
             option2_value,
             price
           )
-        `)
+        `
+        )
         .eq('kit_id', kitId)
         .order('display_order', { ascending: true })
         .order('is_required', { ascending: false });
@@ -176,22 +184,27 @@ export const useKitComponents = (kitId?: string) => {
 /**
  * useKitAssemblies - Récupère les assemblages
  */
-export const useKitAssemblies = (kitId?: string, filters?: {
-  orderId?: string;
-  status?: KitAssembly['status'];
-}) => {
+export const useKitAssemblies = (
+  kitId?: string,
+  filters?: {
+    orderId?: string;
+    status?: KitAssembly['status'];
+  }
+) => {
   return useQuery({
     queryKey: ['kit-assemblies', kitId, filters],
     queryFn: async () => {
       if (!kitId) throw new Error('Kit ID manquant');
 
-      let  query= supabase
+      let query = supabase
         .from('kit_assemblies')
-        .select(`
+        .select(
+          `
           *,
           order:orders (id, order_number),
           kit:product_kits (id, kit_name)
-        `)
+        `
+        )
         .eq('kit_id', kitId);
 
       if (filters?.orderId) {
@@ -244,7 +257,7 @@ export const useCreateProductKit = () => {
 
       return data as ProductKit;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['product-kits', data.store_id] });
       toast({
         title: '✅ Kit créé',
@@ -286,7 +299,9 @@ export const useCreateKitAssembly = () => {
       assignedTo?: string;
     }) => {
       // Générer numéro d'assemblage
-      const { data: assemblyNumber, error: assemblyNumberError } = await supabase.rpc('generate_kit_assembly_number');
+      const { data: assemblyNumber, error: assemblyNumberError } = await supabase.rpc(
+        'generate_kit_assembly_number'
+      );
       if (assemblyNumberError) throw assemblyNumberError;
 
       // Créer assemblage
@@ -312,7 +327,7 @@ export const useCreateKitAssembly = () => {
 
       return data as KitAssembly;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['kit-assemblies', data.kit_id] });
       toast({
         title: '✅ Assemblage créé',
@@ -323,7 +338,7 @@ export const useCreateKitAssembly = () => {
       logger.error('Error in useCreateKitAssembly', { error });
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de créer l\'assemblage',
+        description: error.message || "Impossible de créer l'assemblage",
         variant: 'destructive',
       });
     },
@@ -353,7 +368,7 @@ export const useUpdateAssemblyStatus = () => {
       qualityCheckNotes?: string;
       componentsUsed?: Array<{ component_id: string; quantity: number; serial_number?: string }>;
     }) => {
-      const  updateData: any = {
+      const updateData: any = {
         status,
         updated_at: new Date().toISOString(),
       };
@@ -414,7 +429,7 @@ export const useUpdateAssemblyStatus = () => {
       queryClient.invalidateQueries({ queryKey: ['kit-assemblies'] });
       toast({
         title: '✅ Statut mis à jour',
-        description: 'Le statut de l\'assemblage a été mis à jour',
+        description: "Le statut de l'assemblage a été mis à jour",
       });
     },
     onError: (error: any) => {
@@ -447,10 +462,3 @@ export const useCalculateKitPrice = () => {
     },
   });
 };
-
-
-
-
-
-
-

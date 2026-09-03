@@ -1,7 +1,7 @@
 /**
  * Diagnostic automatique de la configuration du bucket "attachments"
  * Date: 1 Février 2025
- * 
+ *
  * Vérifie automatiquement si le bucket est correctement configuré
  * et fournit des instructions claires pour corriger le problème
  */
@@ -24,7 +24,7 @@ export interface BucketDiagnosticResult {
  * Diagnostique la configuration du bucket "attachments"
  */
 export async function diagnoseAttachmentsBucket(): Promise<BucketDiagnosticResult> {
-  const  result: BucketDiagnosticResult = {
+  const result: BucketDiagnosticResult = {
     bucketExists: false,
     bucketIsPublic: false,
     publicReadPolicyExists: false,
@@ -37,7 +37,7 @@ export async function diagnoseAttachmentsBucket(): Promise<BucketDiagnosticResul
   try {
     // 1. Vérifier si le bucket existe
     const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
-    
+
     if (bucketsError) {
       result.issues.push(`Erreur lors de la récupération des buckets: ${bucketsError.message}`);
       result.solutions.push('Vérifiez votre connexion à Supabase');
@@ -78,11 +78,13 @@ export async function diagnoseAttachmentsBucket(): Promise<BucketDiagnosticResul
         // On ne peut pas vérifier les politiques directement, mais on peut suggérer
         result.publicReadPolicyExists = true; // Optimiste
       } else {
-        result.issues.push('Impossible d\'accéder au bucket (vérifiez les politiques RLS)');
-        result.solutions.push('Exécutez la migration SQL: supabase/migrations/20250201_create_and_configure_attachments_bucket.sql');
+        result.issues.push("Impossible d'accéder au bucket (vérifiez les politiques RLS)");
+        result.solutions.push(
+          'Exécutez la migration SQL: supabase/migrations/20250201_create_and_configure_attachments_bucket.sql'
+        );
         result.solutions.push('Dans Supabase Dashboard > SQL Editor, exécutez cette migration');
       }
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       result.issues.push(`Erreur lors de la vérification des politiques: ${errorMessage}`);
     }
@@ -96,21 +98,23 @@ export async function diagnoseAttachmentsBucket(): Promise<BucketDiagnosticResul
     }
 
     // 5. Déterminer si tout est configuré
-    result.isConfigured = 
-      result.bucketExists && 
-      result.bucketIsPublic && 
-      result.publicReadPolicyExists;
+    result.isConfigured =
+      result.bucketExists && result.bucketIsPublic && result.publicReadPolicyExists;
 
     // 6. Ajouter des solutions générales si nécessaire
     if (!result.isConfigured) {
       result.solutions.push('');
       result.solutions.push('📋 MIGRATION SQL À EXÉCUTER:');
       result.solutions.push('1. Allez dans Supabase Dashboard > SQL Editor');
-      
+
       // Utiliser la migration complète qui crée ET configure le bucket
-      result.solutions.push('2. Copiez le contenu de: supabase/migrations/20250201_create_and_configure_attachments_bucket.sql');
-      result.solutions.push('   (Cette migration CRÉE le bucket s\'il n\'existe pas ET configure tout)');
-      
+      result.solutions.push(
+        '2. Copiez le contenu de: supabase/migrations/20250201_create_and_configure_attachments_bucket.sql'
+      );
+      result.solutions.push(
+        "   (Cette migration CRÉE le bucket s'il n'existe pas ET configure tout)"
+      );
+
       result.solutions.push('3. Exécutez la migration');
       result.solutions.push('4. Attendez 2-3 minutes (délai de propagation)');
       result.solutions.push('5. Rechargez cette page et réessayez');
@@ -119,7 +123,7 @@ export async function diagnoseAttachmentsBucket(): Promise<BucketDiagnosticResul
     logger.info('Bucket diagnostic completed', result);
 
     return result;
-  } catch ( _error: unknown) {
+  } catch (_error: unknown) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     logger.error('Error diagnosing bucket configuration', { error });
     result.issues.push(`Erreur lors du diagnostic: ${errorMessage}`);
@@ -131,11 +135,11 @@ export async function diagnoseAttachmentsBucket(): Promise<BucketDiagnosticResul
  * Formate le résultat du diagnostic pour affichage
  */
 export function formatDiagnosticResult(result: BucketDiagnosticResult): string {
-  const  lines: string[] = [];
+  const lines: string[] = [];
 
   lines.push('🔍 DIAGNOSTIC DE LA CONFIGURATION DU BUCKET "attachments"');
   lines.push('');
-  
+
   lines.push('📊 ÉTAT:');
   lines.push(`  • Bucket existe: ${result.bucketExists ? '✅' : '❌'}`);
   lines.push(`  • Bucket public: ${result.bucketIsPublic ? '✅' : '❌'}`);
@@ -160,17 +164,10 @@ export function formatDiagnosticResult(result: BucketDiagnosticResult): string {
   }
 
   if (result.publicUrlExample) {
-    lines.push('📝 EXEMPLE D\'URL PUBLIQUE:');
+    lines.push("📝 EXEMPLE D'URL PUBLIQUE:");
     lines.push(`  ${result.publicUrlExample}`);
     lines.push('');
   }
 
   return lines.join('\n');
 }
-
-
-
-
-
-
-

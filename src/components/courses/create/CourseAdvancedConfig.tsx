@@ -348,9 +348,3 @@ export const CourseAdvancedConfig = ({ formData, onChange }: CourseAdvancedConfi
     </div>
   );
 };
-
-
-
-
-
-

@@ -18,12 +18,12 @@ interface LessonCompletionButtonProps {
   points?: number; // Points à attribuer (défaut: 10)
 }
 
-export const LessonCompletionButton = ({ 
-  enrollmentId, 
-  lessonId, 
+export const LessonCompletionButton = ({
+  enrollmentId,
+  lessonId,
   variant = 'default',
   showText = true,
-  points = 10
+  points = 10,
 }: LessonCompletionButtonProps) => {
   const { data: progress, isLoading } = useLessonProgress(enrollmentId, lessonId);
   const { user } = useAuth();
@@ -33,11 +33,11 @@ export const LessonCompletionButton = ({
 
   const handleToggleComplete = () => {
     if (!isCompleted && user) {
-      markComplete.mutate({ 
-        enrollmentId, 
+      markComplete.mutate({
+        enrollmentId,
         lessonId,
         userId: user.id,
-        points
+        points,
       });
     }
   };
@@ -72,10 +72,3 @@ export const LessonCompletionButton = ({
     </Button>
   );
 };
-
-
-
-
-
-
-

@@ -28,7 +28,10 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { X } from 'lucide-react';
 import { useState } from 'react';
-import { useCreateCommunityPost, useUpdateCommunityPost } from '@/hooks/community/useCommunityPosts';
+import {
+  useCreateCommunityPost,
+  useUpdateCommunityPost,
+} from '@/hooks/community/useCommunityPosts';
 import type { CommunityPost } from '@/types/community';
 
 const postFormSchema = z.object({
@@ -76,7 +79,10 @@ export function CommunityPostForm({ post, onSuccess, onCancel }: CommunityPostFo
   };
 
   const removeTag = (tagToRemove: string) => {
-    form.setValue('tags', tags.filter((tag) => tag !== tagToRemove));
+    form.setValue(
+      'tags',
+      tags.filter(tag => tag !== tagToRemove)
+    );
   };
 
   const onSubmit = async (data: PostFormData) => {
@@ -179,7 +185,7 @@ export function CommunityPostForm({ post, onSuccess, onCancel }: CommunityPostFo
             <FormItem>
               <FormLabel>Tags</FormLabel>
               <div className="flex flex-wrap gap-2 mb-2">
-                {tags.map((tag) => (
+                {tags.map(tag => (
                   <Badge key={tag} variant="secondary" className="flex items-center gap-1">
                     {tag}
                     <button
@@ -196,8 +202,8 @@ export function CommunityPostForm({ post, onSuccess, onCancel }: CommunityPostFo
               <div className="flex gap-2">
                 <Input
                   value={tagInput}
-                  onChange={(e) => setTagInput(e.target.value)}
-                  onKeyDown={(e) => {
+                  onChange={e => setTagInput(e.target.value)}
+                  onKeyDown={e => {
                     if (e.key === 'Enter') {
                       e.preventDefault();
                       addTag();
@@ -253,10 +259,3 @@ export function CommunityPostForm({ post, onSuccess, onCancel }: CommunityPostFo
     </Form>
   );
 }
-
-
-
-
-
-
-

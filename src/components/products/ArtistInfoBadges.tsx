@@ -102,10 +102,3 @@ export function ArtistSignatureBadge({
     </Badge>
   );
 }
-
-
-
-
-
-
-

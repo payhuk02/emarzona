@@ -7,13 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import {
-  Package,
-  Calendar,
-  DollarSign,
-  TrendingUp,
-  ShoppingBag,
-} from '@/components/icons';
+import { Package, Calendar, DollarSign, TrendingUp, ShoppingBag } from '@/components/icons';
 import { useCustomerPhysicalOrders } from '@/hooks/physical/useCustomerPhysicalOrders';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -50,14 +44,17 @@ export const OrderHistory = () => {
   const averageOrderValue = totalOrders > 0 ? totalSpent / totalOrders : 0;
 
   // Grouper par mois
-  const ordersByMonth = orders?.reduce((acc, order) => {
-    const monthKey = format(new Date(order.created_at), 'MMMM yyyy', { locale: fr });
-    if (!acc[monthKey]) {
-      acc[monthKey] = [];
-    }
-    acc[monthKey].push(order);
-    return acc;
-  }, {} as Record<string, typeof orders>);
+  const ordersByMonth = orders?.reduce(
+    (acc, order) => {
+      const monthKey = format(new Date(order.created_at), 'MMMM yyyy', { locale: fr });
+      if (!acc[monthKey]) {
+        acc[monthKey] = [];
+      }
+      acc[monthKey].push(order);
+      return acc;
+    },
+    {} as Record<string, typeof orders>
+  );
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -70,9 +67,7 @@ export const OrderHistory = () => {
           </CardHeader>
           <CardContent className="px-3 sm:px-4 pb-3 sm:pb-4">
             <div className="text-xl sm:text-2xl font-bold">{totalOrders}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Commandes produits physiques
-            </p>
+            <p className="text-xs text-muted-foreground mt-1">Commandes produits physiques</p>
           </CardContent>
         </Card>
         <Card>
@@ -87,9 +82,7 @@ export const OrderHistory = () => {
                 currency: orders?.[0]?.currency || 'XOF',
               })}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Sur tous vos achats
-            </p>
+            <p className="text-xs text-muted-foreground mt-1">Sur tous vos achats</p>
           </CardContent>
         </Card>
         <Card className="xs:col-span-2 md:col-span-1">
@@ -104,9 +97,7 @@ export const OrderHistory = () => {
                 currency: orders?.[0]?.currency || 'XOF',
               })}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Par commande
-            </p>
+            <p className="text-xs text-muted-foreground mt-1">Par commande</p>
           </CardContent>
         </Card>
       </div>
@@ -143,14 +134,16 @@ export const OrderHistory = () => {
                       </p>
                     </div>
                     <Badge variant="outline" className="self-start sm:self-auto whitespace-nowrap">
-                      {monthOrders.reduce((sum, o) => sum + o.total_amount, 0).toLocaleString('fr-FR', {
-                        style: 'currency',
-                        currency: orders[0]?.currency || 'XOF',
-                      })}
+                      {monthOrders
+                        .reduce((sum, o) => sum + o.total_amount, 0)
+                        .toLocaleString('fr-FR', {
+                          style: 'currency',
+                          currency: orders[0]?.currency || 'XOF',
+                        })}
                     </Badge>
                   </div>
                   <div className="space-y-3 sm:space-y-3 ml-2 sm:ml-4 border-l-2 border-muted pl-3 sm:pl-4">
-                    {monthOrders.map((order) => (
+                    {monthOrders.map(order => (
                       <div key={order.id} className="relative">
                         <div className="absolute -left-[9px] sm:-left-7 top-2 h-2.5 w-2.5 sm:h-3 sm:w-3 rounded-full bg-primary border-2 border-background" />
                         <Card className="hover:shadow-md transition-shadow">
@@ -161,16 +154,25 @@ export const OrderHistory = () => {
                                   <h4 className="text-sm sm:text-base font-medium break-words">
                                     Commande #{order.order_number}
                                   </h4>
-                                  <Badge variant="outline" className="self-start xs:self-auto text-xs">
-                                    {order.order_items.length} article{order.order_items.length > 1 ? 's' : ''}
+                                  <Badge
+                                    variant="outline"
+                                    className="self-start xs:self-auto text-xs"
+                                  >
+                                    {order.order_items.length} article
+                                    {order.order_items.length > 1 ? 's' : ''}
                                   </Badge>
                                 </div>
                                 <p className="text-xs sm:text-sm text-muted-foreground mb-2">
-                                  {format(new Date(order.created_at), 'dd MMMM yyyy à HH:mm', { locale: fr })}
+                                  {format(new Date(order.created_at), 'dd MMMM yyyy à HH:mm', {
+                                    locale: fr,
+                                  })}
                                 </p>
                                 <div className="space-y-1.5">
-                                  {order.order_items.slice(0, 2).map((item) => (
-                                    <div key={item.id} className="flex items-center gap-2 text-xs sm:text-sm">
+                                  {order.order_items.slice(0, 2).map(item => (
+                                    <div
+                                      key={item.id}
+                                      className="flex items-center gap-2 text-xs sm:text-sm"
+                                    >
                                       {item.product_image_url && (
                                         <img
                                           src={item.product_image_url}
@@ -225,13 +227,3 @@ export const OrderHistory = () => {
     </div>
   );
 };
-
-
-
-
-
-
-
-
-
-

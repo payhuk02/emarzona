@@ -17,8 +17,10 @@ import {
   type TransformOptions,
 } from '@/lib/images/supabaseTransform';
 
-export interface SmartImageProps
-  extends Omit<React.ImgHTMLAttributes<HTMLImageElement>, 'srcSet' | 'sizes'> {
+export interface SmartImageProps extends Omit<
+  React.ImgHTMLAttributes<HTMLImageElement>,
+  'srcSet' | 'sizes'
+> {
   src: string | null | undefined;
   alt: string;
   /** Largeur cible d'affichage (sert au srcSet). */
@@ -66,7 +68,7 @@ export const SmartImage: React.FC<SmartImageProps> = ({
   const [loaded, setLoaded] = useState(false);
   const [errored, setErrored] = useState(false);
 
-  const finalSrc = errored && fallbackSrc ? fallbackSrc : src ?? '';
+  const finalSrc = errored && fallbackSrc ? fallbackSrc : (src ?? '');
 
   const optimizedSrc = useMemo(
     () =>
@@ -76,7 +78,7 @@ export const SmartImage: React.FC<SmartImageProps> = ({
         quality,
         resize,
       }),
-    [finalSrc, width, height, quality, resize],
+    [finalSrc, width, height, quality, resize]
   );
 
   const srcSet = useMemo(() => {
@@ -94,7 +96,7 @@ export const SmartImage: React.FC<SmartImageProps> = ({
       <div
         className={cn(
           'flex items-center justify-center bg-muted text-muted-foreground text-xs',
-          wrapperClassName,
+          wrapperClassName
         )}
         style={{ width, height }}
         aria-label={alt}
@@ -112,7 +114,7 @@ export const SmartImage: React.FC<SmartImageProps> = ({
           className={cn(
             'absolute inset-0',
             placeholder === 'skeleton' && 'animate-pulse bg-muted',
-            placeholder === 'blur' && 'bg-muted/60 backdrop-blur-md',
+            placeholder === 'blur' && 'bg-muted/60 backdrop-blur-md'
           )}
         />
       )}
@@ -126,18 +128,18 @@ export const SmartImage: React.FC<SmartImageProps> = ({
         loading={priority ? 'eager' : 'lazy'}
         decoding="async"
         fetchPriority={priority ? 'high' : 'auto'}
-        onLoad={(e) => {
+        onLoad={e => {
           setLoaded(true);
           onLoad?.(e);
         }}
-        onError={(e) => {
+        onError={e => {
           setErrored(true);
           onError?.(e);
         }}
         className={cn(
           'h-full w-full object-cover transition-opacity duration-500',
           loaded ? 'opacity-100' : 'opacity-0',
-          className,
+          className
         )}
         {...rest}
       />

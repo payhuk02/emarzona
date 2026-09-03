@@ -1,7 +1,7 @@
 /**
  * Digital Product Update Manager
  * Date: 28 Janvier 2025
- * 
+ *
  * Composant pour gérer les mises à jour de produits digitaux
  */
 
@@ -13,22 +13,18 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import {
-  Upload,
-  RefreshCw,
-  CheckCircle2,
-  AlertCircle,
-  History,
-  Send,
-  Loader2,
-} from 'lucide-react';
+import { Upload, RefreshCw, CheckCircle2, AlertCircle, History, Send, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { createProductVersion, notifyAllCustomersOfUpdate } from '@/lib/products/digital-product-updates';
+import {
+  createProductVersion,
+  notifyAllCustomersOfUpdate,
+} from '@/lib/products/digital-product-updates';
 import { uploadToSupabaseStorage } from '@/utils/uploadToSupabase';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 
-const DIGITAL_PRODUCT_UPDATE_FIELDS = 'id, product_id, version, version_notes, is_major_update, total_customers, notified_count, created_at';
+const DIGITAL_PRODUCT_UPDATE_FIELDS =
+  'id, product_id, version, version_notes, is_major_update, total_customers, notified_count, created_at';
 
 interface DigitalProductUpdateManagerProps {
   productId: string;
@@ -67,7 +63,7 @@ export const DigitalProductUpdateManager = ({
 
       if (error) throw error;
       setUpdateHistory(data || []);
-    } catch ( _error: any) {
+    } catch (_error: any) {
       logger.error('Error loading update history', { error: error.message });
     } finally {
       setLoading(false);
@@ -86,7 +82,7 @@ export const DigitalProductUpdateManager = ({
         bucket: 'product-files',
         path: 'digital',
         filePrefix: `v${newVersion || 'update'}`,
-        onProgress: (progress) => setUploadProgress(progress),
+        onProgress: progress => setUploadProgress(progress),
       });
 
       if (error) throw error;
@@ -98,9 +94,9 @@ export const DigitalProductUpdateManager = ({
           description: 'Le nouveau fichier a été uploadé avec succès',
         });
       }
-    } catch ( _error: any) {
+    } catch (_error: any) {
       toast({
-        title: '❌ Erreur d\'upload',
+        title: "❌ Erreur d'upload",
         description: error.message || 'Une erreur est survenue',
         variant: 'destructive',
       });
@@ -141,13 +137,13 @@ export const DigitalProductUpdateManager = ({
         setVersionNotes('');
         setIsMajorUpdate(false);
         setNewFileUrl('');
-        
+
         // Recharger l'historique
         await loadUpdateHistory();
       } else {
         throw new Error(result.error);
       }
-    } catch ( _error: any) {
+    } catch (_error: any) {
       toast({
         title: '❌ Erreur',
         description: error.message || 'Une erreur est survenue',
@@ -184,7 +180,7 @@ export const DigitalProductUpdateManager = ({
       } else {
         throw new Error(result.error);
       }
-    } catch ( _error: any) {
+    } catch (_error: any) {
       toast({
         title: '❌ Erreur',
         description: error.message || 'Une erreur est survenue',
@@ -196,7 +192,7 @@ export const DigitalProductUpdateManager = ({
   // Calculer la prochaine version suggérée
   const getSuggestedVersion = () => {
     if (!currentVersion) return '1.0.0';
-    
+
     const parts = currentVersion.split('.');
     if (parts.length === 3) {
       const [major, minor, patch] = parts.map(Number);
@@ -242,11 +238,9 @@ export const DigitalProductUpdateManager = ({
                 id="new_version"
                 placeholder="1.1.0"
                 value={newVersion}
-                onChange={(e) => setNewVersion(e.target.value)}
+                onChange={e => setNewVersion(e.target.value)}
               />
-              <p className="text-xs text-muted-foreground">
-                Format recommandé : X.Y.Z (ex: 1.1.0)
-              </p>
+              <p className="text-xs text-muted-foreground">Format recommandé : X.Y.Z (ex: 1.1.0)</p>
             </div>
 
             <div className="space-y-2">
@@ -256,7 +250,7 @@ export const DigitalProductUpdateManager = ({
                   type="checkbox"
                   id="is_major"
                   checked={isMajorUpdate}
-                  onChange={(e) => setIsMajorUpdate(e.target.checked)}
+                  onChange={e => setIsMajorUpdate(e.target.checked)}
                   className="h-4 w-4"
                 />
                 <Label htmlFor="is_major" className="cursor-pointer">
@@ -272,7 +266,7 @@ export const DigitalProductUpdateManager = ({
               id="version_notes"
               placeholder="Décrivez les améliorations et corrections de cette version..."
               value={versionNotes}
-              onChange={(e) => setVersionNotes(e.target.value)}
+              onChange={e => setVersionNotes(e.target.value)}
               rows={4}
             />
           </div>
@@ -285,16 +279,10 @@ export const DigitalProductUpdateManager = ({
                   <CheckCircle2 className="h-5 w-5 text-green-500" />
                   <div>
                     <p className="font-medium">Fichier uploadé</p>
-                    <p className="text-xs text-muted-foreground">
-                      {newFileUrl.split('/').pop()}
-                    </p>
+                    <p className="text-xs text-muted-foreground">{newFileUrl.split('/').pop()}</p>
                   </div>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setNewFileUrl('')}
-                >
+                <Button variant="ghost" size="sm" onClick={() => setNewFileUrl('')}>
                   Changer
                 </Button>
               </div>
@@ -337,8 +325,8 @@ export const DigitalProductUpdateManager = ({
           <Alert>
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              Tous les clients qui ont acheté ce produit recevront automatiquement 
-              une notification par email et in-app avec le lien de téléchargement.
+              Tous les clients qui ont acheté ce produit recevront automatiquement une notification
+              par email et in-app avec le lien de téléchargement.
             </AlertDescription>
           </Alert>
         </CardContent>
@@ -363,7 +351,7 @@ export const DigitalProductUpdateManager = ({
             </div>
           ) : (
             <div className="space-y-3">
-              {updateHistory.map((update) => (
+              {updateHistory.map(update => (
                 <div
                   key={update.id}
                   className="flex items-center justify-between p-4 border rounded-lg"
@@ -373,17 +361,13 @@ export const DigitalProductUpdateManager = ({
                       <Badge variant={update.is_major_update ? 'default' : 'secondary'}>
                         v{update.version}
                       </Badge>
-                      {update.is_major_update && (
-                        <Badge variant="destructive">Majeure</Badge>
-                      )}
+                      {update.is_major_update && <Badge variant="destructive">Majeure</Badge>}
                       <span className="text-sm text-muted-foreground">
                         {new Date(update.created_at).toLocaleDateString('fr-FR')}
                       </span>
                     </div>
                     {update.version_notes && (
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {update.version_notes}
-                      </p>
+                      <p className="text-sm text-muted-foreground mt-1">{update.version_notes}</p>
                     )}
                     <p className="text-xs text-muted-foreground mt-2">
                       {update.notified_count} / {update.total_customers} clients notifiés
@@ -398,10 +382,3 @@ export const DigitalProductUpdateManager = ({
     </div>
   );
 };
-
-
-
-
-
-
-

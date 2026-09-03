@@ -10,7 +10,7 @@ vi.mock('@/integrations/supabase/client');
 const mockLogger = {
   error: vi.fn(),
   info: vi.fn(),
-  warn: vi.fn()
+  warn: vi.fn(),
 };
 
 const mockSupabase = {
@@ -22,28 +22,28 @@ const mockSupabase = {
             lte: vi.fn(() => ({
               order: vi.fn(() => ({
                 data: [],
-                error: null
-              }))
-            }))
-          }))
-        }))
-      }))
+                error: null,
+              })),
+            })),
+          })),
+        })),
+      })),
     })),
     insert: vi.fn(() => ({
       select: vi.fn(() => ({
         single: vi.fn(() => ({
           data: null,
-          error: null
-        }))
-      }))
+          error: null,
+        })),
+      })),
     })),
     update: vi.fn(() => ({
       eq: vi.fn(() => ({
         data: null,
-        error: null
-      }))
-    }))
-  }))
+        error: null,
+      })),
+    })),
+  })),
 };
 
 // Apply mocks
@@ -71,28 +71,35 @@ describe('AdvancedLoyaltyEngine', () => {
             eq: vi.fn(() => ({
               gte: vi.fn(() => ({
                 lte: vi.fn(() => ({
-                  order: vi.fn(() => Promise.resolve({
-                    data: [{
-                      id: 'rule-1',
-                      name: 'Purchase Rule',
-                      event_type: 'purchase',
-                      points: 100,
-                      conditions: null,
-                      is_active: true,
-                      priority: 1,
-                      multiplier: null,
-                      store_id: null
-                    }],
-                    error: null
-                  }))
-                }))
-              }))
-            }))
-          }))
-        }))
+                  order: vi.fn(() =>
+                    Promise.resolve({
+                      data: [
+                        {
+                          id: 'rule-1',
+                          name: 'Purchase Rule',
+                          event_type: 'purchase',
+                          points: 100,
+                          conditions: null,
+                          is_active: true,
+                          priority: 1,
+                          multiplier: null,
+                          store_id: null,
+                        },
+                      ],
+                      error: null,
+                    })
+                  ),
+                })),
+              })),
+            })),
+          })),
+        })),
       });
 
-      const points = await engine.calculatePoints('user-1', 'purchase', { orderId: 'order-123', total: 50 });
+      const points = await engine.calculatePoints('user-1', 'purchase', {
+        orderId: 'order-123',
+        total: 50,
+      });
 
       expect(points).toBe(100);
     });
@@ -105,28 +112,35 @@ describe('AdvancedLoyaltyEngine', () => {
             eq: vi.fn(() => ({
               gte: vi.fn(() => ({
                 lte: vi.fn(() => ({
-                  order: vi.fn(() => Promise.resolve({
-                    data: [{
-                      id: 'rule-1',
-                      name: 'High Value Purchase',
-                      event_type: 'purchase',
-                      points: 100,
-                      conditions: null,
-                      is_active: true,
-                      priority: 1,
-                      multiplier: 2,
-                      store_id: null
-                    }],
-                    error: null
-                  }))
-                }))
-              }))
-            }))
-          }))
-        }))
+                  order: vi.fn(() =>
+                    Promise.resolve({
+                      data: [
+                        {
+                          id: 'rule-1',
+                          name: 'High Value Purchase',
+                          event_type: 'purchase',
+                          points: 100,
+                          conditions: null,
+                          is_active: true,
+                          priority: 1,
+                          multiplier: 2,
+                          store_id: null,
+                        },
+                      ],
+                      error: null,
+                    })
+                  ),
+                })),
+              })),
+            })),
+          })),
+        })),
       });
 
-      const points = await engine.calculatePoints('user-1', 'purchase', { orderId: 'order-123', total: 100 });
+      const points = await engine.calculatePoints('user-1', 'purchase', {
+        orderId: 'order-123',
+        total: 100,
+      });
 
       expect(points).toBe(200); // 100 * 2
     });
@@ -139,15 +153,17 @@ describe('AdvancedLoyaltyEngine', () => {
             eq: vi.fn(() => ({
               gte: vi.fn(() => ({
                 lte: vi.fn(() => ({
-                  order: vi.fn(() => Promise.resolve({
-                    data: [],
-                    error: null
-                  }))
-                }))
-              }))
-            }))
-          }))
-        }))
+                  order: vi.fn(() =>
+                    Promise.resolve({
+                      data: [],
+                      error: null,
+                    })
+                  ),
+                })),
+              })),
+            })),
+          })),
+        })),
       });
 
       const points = await engine.calculatePoints('user-1', 'review', { productId: 'prod-1' });
@@ -161,28 +177,32 @@ describe('AdvancedLoyaltyEngine', () => {
       const mockSupabaseInstance = vi.mocked(supabase);
       const mockInsert = vi.fn(() => ({
         select: vi.fn(() => ({
-          single: vi.fn(() => Promise.resolve({
-            data: {
-              id: 'transaction-1',
-              user_id: 'user-1',
-              points: 100,
-              type: 'earned',
-              reason: 'Test points',
-              created_at: new Date().toISOString()
-            },
-            error: null
-          }))
-        }))
+          single: vi.fn(() =>
+            Promise.resolve({
+              data: {
+                id: 'transaction-1',
+                user_id: 'user-1',
+                points: 100,
+                type: 'earned',
+                reason: 'Test points',
+                created_at: new Date().toISOString(),
+              },
+              error: null,
+            })
+          ),
+        })),
       }));
 
       mockSupabase.from.mockReturnValue({
         insert: mockInsert,
         update: vi.fn(() => ({
-          eq: vi.fn(() => Promise.resolve({
-            data: null,
-            error: null
-          }))
-        }))
+          eq: vi.fn(() =>
+            Promise.resolve({
+              data: null,
+              error: null,
+            })
+          ),
+        })),
       });
 
       const result = await engine.awardPoints('user-1', 100, 'Test points');
@@ -194,7 +214,9 @@ describe('AdvancedLoyaltyEngine', () => {
     });
 
     it('should reject negative points', async () => {
-      await expect(engine.awardPoints('user-1', -50, 'Negative points')).rejects.toThrow('Points must be positive');
+      await expect(engine.awardPoints('user-1', -50, 'Negative points')).rejects.toThrow(
+        'Points must be positive'
+      );
     });
   });
 
@@ -206,40 +228,48 @@ describe('AdvancedLoyaltyEngine', () => {
       mockSupabase.from
         .mockReturnValueOnce({
           select: vi.fn(() => ({
-            eq: vi.fn(() => Promise.resolve({
-              data: [{
-                user_id: 'user-1',
-                points: 100,
-                type: 'earned',
-                expires_at: null
-              }],
-              error: null
-            }))
-          }))
+            eq: vi.fn(() =>
+              Promise.resolve({
+                data: [
+                  {
+                    user_id: 'user-1',
+                    points: 100,
+                    type: 'earned',
+                    expires_at: null,
+                  },
+                ],
+                error: null,
+              })
+            ),
+          })),
         })
         // Mock insert transaction
         .mockReturnValueOnce({
           insert: vi.fn(() => ({
             select: vi.fn(() => ({
-              single: vi.fn(() => Promise.resolve({
-                data: {
-                  id: 'transaction-1',
-                  user_id: 'user-1',
-                  points: -50,
-                  type: 'spent',
-                  reason: 'Redemption',
-                  created_at: new Date().toISOString()
-                },
-                error: null
-              }))
-            }))
+              single: vi.fn(() =>
+                Promise.resolve({
+                  data: {
+                    id: 'transaction-1',
+                    user_id: 'user-1',
+                    points: -50,
+                    type: 'spent',
+                    reason: 'Redemption',
+                    created_at: new Date().toISOString(),
+                  },
+                  error: null,
+                })
+              ),
+            })),
           })),
           update: vi.fn(() => ({
-            eq: vi.fn(() => Promise.resolve({
-              data: null,
-              error: null
-            }))
-          }))
+            eq: vi.fn(() =>
+              Promise.resolve({
+                data: null,
+                error: null,
+              })
+            ),
+          })),
         });
 
       const result = await engine.redeemPoints('user-1', 50, 'Test redemption');
@@ -253,14 +283,18 @@ describe('AdvancedLoyaltyEngine', () => {
 
       mockSupabase.from.mockReturnValue({
         select: vi.fn(() => ({
-          eq: vi.fn(() => Promise.resolve({
-            data: [], // Pas de points disponibles
-            error: null
-          }))
-        }))
+          eq: vi.fn(() =>
+            Promise.resolve({
+              data: [], // Pas de points disponibles
+              error: null,
+            })
+          ),
+        })),
       });
 
-      await expect(engine.redeemPoints('user-1', 50, 'Redemption')).rejects.toThrow('Insufficient points balance');
+      await expect(engine.redeemPoints('user-1', 50, 'Redemption')).rejects.toThrow(
+        'Insufficient points balance'
+      );
     });
   });
 
@@ -272,38 +306,44 @@ describe('AdvancedLoyaltyEngine', () => {
       mockSupabase.from
         .mockReturnValueOnce({
           select: vi.fn(() => ({
-            eq: vi.fn(() => Promise.resolve({
-              data: {
-                user_id: 'user-1',
-                total_points: 500,
-                available_points: 450,
-                spent_points: 50,
-                current_tier_id: 'tier-1',
-                referral_code: 'REF123ABC',
-                preferences: { notificationsEnabled: true }
-              },
-              error: null
-            }))
-          }))
+            eq: vi.fn(() =>
+              Promise.resolve({
+                data: {
+                  user_id: 'user-1',
+                  total_points: 500,
+                  available_points: 450,
+                  spent_points: 50,
+                  current_tier_id: 'tier-1',
+                  referral_code: 'REF123ABC',
+                  preferences: { notificationsEnabled: true },
+                },
+                error: null,
+              })
+            ),
+          })),
         })
         // Mock tiers data
         .mockReturnValueOnce({
           select: vi.fn(() => ({
-            order: vi.fn(() => Promise.resolve({
-              data: [{
-                id: 'tier-1',
-                name: 'Gold',
-                description: 'Gold tier',
-                level: 2,
-                min_points: 200,
-                max_points: 1000,
-                benefits: [],
-                badge_color: '#FFD700',
-                badge_icon: 'star'
-              }],
-              error: null
-            }))
-          }))
+            order: vi.fn(() =>
+              Promise.resolve({
+                data: [
+                  {
+                    id: 'tier-1',
+                    name: 'Gold',
+                    description: 'Gold tier',
+                    level: 2,
+                    min_points: 200,
+                    max_points: 1000,
+                    benefits: [],
+                    badge_color: '#FFD700',
+                    badge_icon: 'star',
+                  },
+                ],
+                error: null,
+              })
+            ),
+          })),
         });
 
       const profile = await engine.getUserProfile('user-1');
@@ -320,34 +360,42 @@ describe('AdvancedLoyaltyEngine', () => {
       mockSupabase.from
         .mockReturnValueOnce({
           select: vi.fn(() => ({
-            eq: vi.fn(() => Promise.resolve({
-              data: null, // Profil inexistant
-              error: { code: 'PGRST116' }
-            }))
-          }))
+            eq: vi.fn(() =>
+              Promise.resolve({
+                data: null, // Profil inexistant
+                error: { code: 'PGRST116' },
+              })
+            ),
+          })),
         })
         .mockReturnValueOnce({
           select: vi.fn(() => ({
-            order: vi.fn(() => Promise.resolve({
-              data: [{
-                id: 'tier-default',
-                name: 'Bronze',
-                description: 'Default tier',
-                level: 1,
-                min_points: 0,
-                benefits: [],
-                badge_color: '#CD7F32',
-                badge_icon: 'star'
-              }],
-              error: null
-            }))
-          }))
+            order: vi.fn(() =>
+              Promise.resolve({
+                data: [
+                  {
+                    id: 'tier-default',
+                    name: 'Bronze',
+                    description: 'Default tier',
+                    level: 1,
+                    min_points: 0,
+                    benefits: [],
+                    badge_color: '#CD7F32',
+                    badge_icon: 'star',
+                  },
+                ],
+                error: null,
+              })
+            ),
+          })),
         })
         .mockReturnValueOnce({
-          insert: vi.fn(() => Promise.resolve({
-            data: null,
-            error: null
-          }))
+          insert: vi.fn(() =>
+            Promise.resolve({
+              data: null,
+              error: null,
+            })
+          ),
         });
 
       const profile = await engine.getUserProfile('new-user');
@@ -371,45 +419,55 @@ describe('AdvancedLoyaltyEngine', () => {
               eq: vi.fn(() => ({
                 gte: vi.fn(() => ({
                   lte: vi.fn(() => ({
-                    order: vi.fn(() => Promise.resolve({
-                      data: [{
-                        id: 'rule-1',
-                        event_type: 'purchase',
-                        points: 50,
-                        is_active: true,
-                        priority: 1
-                      }],
-                      error: null
-                    }))
-                  }))
-                }))
-              }))
-            }))
-          }))
+                    order: vi.fn(() =>
+                      Promise.resolve({
+                        data: [
+                          {
+                            id: 'rule-1',
+                            event_type: 'purchase',
+                            points: 50,
+                            is_active: true,
+                            priority: 1,
+                          },
+                        ],
+                        error: null,
+                      })
+                    ),
+                  })),
+                })),
+              })),
+            })),
+          })),
         })
         // Mock awardPoints
         .mockReturnValueOnce({
           insert: vi.fn(() => ({
             select: vi.fn(() => ({
-              single: vi.fn(() => Promise.resolve({
-                data: {
-                  id: 'transaction-1',
-                  points: 50,
-                  type: 'earned'
-                },
-                error: null
-              }))
-            }))
+              single: vi.fn(() =>
+                Promise.resolve({
+                  data: {
+                    id: 'transaction-1',
+                    points: 50,
+                    type: 'earned',
+                  },
+                  error: null,
+                })
+              ),
+            })),
           })),
           update: vi.fn(() => ({
-            eq: vi.fn(() => Promise.resolve({
-              data: null,
-              error: null
-            }))
-          }))
+            eq: vi.fn(() =>
+              Promise.resolve({
+                data: null,
+                error: null,
+              })
+            ),
+          })),
         });
 
-      const result = await engine.processLoyaltyEvent('user-1', 'purchase', { orderId: 'order-123' });
+      const result = await engine.processLoyaltyEvent('user-1', 'purchase', {
+        orderId: 'order-123',
+      });
 
       expect(result.pointsAwarded).toBe(50);
       expect(result.newTotalPoints).toBeGreaterThanOrEqual(50);
@@ -425,21 +483,25 @@ describe('AdvancedLoyaltyEngine', () => {
             eq: vi.fn(() => ({
               gte: vi.fn(() => ({
                 lte: vi.fn(() => ({
-                  order: vi.fn(() => Promise.resolve({
-                    data: [{
-                      id: 'rule-1',
-                      event_type: 'purchase',
-                      points: 25,
-                      is_active: true,
-                      priority: 1
-                    }],
-                    error: null
-                  }))
-                }))
-              }))
-            }))
-          }))
-        }))
+                  order: vi.fn(() =>
+                    Promise.resolve({
+                      data: [
+                        {
+                          id: 'rule-1',
+                          event_type: 'purchase',
+                          points: 25,
+                          is_active: true,
+                          priority: 1,
+                        },
+                      ],
+                      error: null,
+                    })
+                  ),
+                })),
+              })),
+            })),
+          })),
+        })),
       }));
 
       mockSupabase.from.mockImplementation(mockQuery);
@@ -463,15 +525,17 @@ describe('AdvancedLoyaltyEngine', () => {
             eq: vi.fn(() => ({
               gte: vi.fn(() => ({
                 lte: vi.fn(() => ({
-                  order: vi.fn(() => Promise.resolve({
-                    data: null,
-                    error: { message: 'Database connection failed' }
-                  }))
-                }))
-              }))
-            }))
-          }))
-        }))
+                  order: vi.fn(() =>
+                    Promise.resolve({
+                      data: null,
+                      error: { message: 'Database connection failed' },
+                    })
+                  ),
+                })),
+              })),
+            })),
+          })),
+        })),
       });
 
       await expect(engine.calculatePoints('user-1', 'purchase', {})).rejects.toThrow();

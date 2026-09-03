@@ -5,7 +5,14 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Timeline, TimelineItem, TimelineContent, TimelineSeparator, TimelineConnector, TimelineDot } from '@/components/ui/timeline';
+import {
+  Timeline,
+  TimelineItem,
+  TimelineContent,
+  TimelineSeparator,
+  TimelineConnector,
+  TimelineDot,
+} from '@/components/ui/timeline';
 import { Calendar, MapPin, User, CheckCircle2, FileText, Award } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -16,7 +23,7 @@ interface ArtworkProvenanceDisplayProps {
   className?: string;
 }
 
-const  provenanceTypeLabels: Record<string, string> = {
+const provenanceTypeLabels: Record<string, string> = {
   creation: 'Création',
   ownership: 'Propriété',
   exhibition: 'Exposition',
@@ -27,7 +34,7 @@ const  provenanceTypeLabels: Record<string, string> = {
   other: 'Autre',
 };
 
-const  provenanceTypeColors: Record<string, string> = {
+const provenanceTypeColors: Record<string, string> = {
   creation: 'bg-blue-500',
   ownership: 'bg-green-500',
   exhibition: 'bg-purple-500',
@@ -65,16 +72,16 @@ export const ArtworkProvenanceDisplay = ({
           <FileText className="h-5 w-5" />
           Provenance
         </CardTitle>
-        <CardDescription>
-          Historique complet de provenance de l'œuvre
-        </CardDescription>
+        <CardDescription>Historique complet de provenance de l'œuvre</CardDescription>
       </CardHeader>
       <CardContent>
         <Timeline>
           {provenanceHistory.map((item, index) => (
             <TimelineItem key={item.id}>
               <TimelineSeparator>
-                <TimelineDot className={provenanceTypeColors[item.provenance_type] || 'bg-gray-500'}>
+                <TimelineDot
+                  className={provenanceTypeColors[item.provenance_type] || 'bg-gray-500'}
+                >
                   {item.is_verified && <CheckCircle2 className="h-3 w-3 text-white" />}
                 </TimelineDot>
                 {index < provenanceHistory.length - 1 && <TimelineConnector />}
@@ -92,7 +99,7 @@ export const ArtworkProvenanceDisplay = ({
                       </Badge>
                     )}
                   </div>
-                  
+
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Calendar className="h-4 w-4" />
                     {format(new Date(item.event_date), 'PP', { locale: fr })}
@@ -116,15 +123,11 @@ export const ArtworkProvenanceDisplay = ({
                       {item.previous_owner_name && item.current_owner_name && (
                         <span className="mx-2">→</span>
                       )}
-                      {item.current_owner_name && (
-                        <span>À: {item.current_owner_name}</span>
-                      )}
+                      {item.current_owner_name && <span>À: {item.current_owner_name}</span>}
                     </div>
                   )}
 
-                  {item.description && (
-                    <p className="text-sm mt-2">{item.description}</p>
-                  )}
+                  {item.description && <p className="text-sm mt-2">{item.description}</p>}
 
                   {item.documents && item.documents.length > 0 && (
                     <div className="mt-2 flex flex-wrap gap-2">
@@ -141,12 +144,8 @@ export const ArtworkProvenanceDisplay = ({
                     <div className="mt-2 p-2 bg-gray-100 dark:bg-gray-800 rounded text-xs font-mono break-all">
                       <div className="font-semibold mb-1">Blockchain:</div>
                       <div>Hash: {item.blockchain_hash}</div>
-                      {item.blockchain_tx_id && (
-                        <div>TX: {item.blockchain_tx_id}</div>
-                      )}
-                      {item.blockchain_network && (
-                        <div>Réseau: {item.blockchain_network}</div>
-                      )}
+                      {item.blockchain_tx_id && <div>TX: {item.blockchain_tx_id}</div>}
+                      {item.blockchain_network && <div>Réseau: {item.blockchain_network}</div>}
                     </div>
                   )}
                 </div>
@@ -158,10 +157,3 @@ export const ArtworkProvenanceDisplay = ({
     </Card>
   );
 };
-
-
-
-
-
-
-

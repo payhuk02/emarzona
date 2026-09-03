@@ -55,7 +55,10 @@ export class PredictiveAnalyticsEngine {
   /**
    * Prédire les ventes futures pour un produit
    */
-  async predictProductSales(productId: string, days: number = this.PREDICTION_HORIZON_DAYS): Promise<SalesPrediction> {
+  async predictProductSales(
+    productId: string,
+    days: number = this.PREDICTION_HORIZON_DAYS
+  ): Promise<SalesPrediction> {
     try {
       // Récupérer l'historique des ventes
       const salesHistory = await this.getProductSalesHistory(productId, 90); // 90 jours d'historique
@@ -65,7 +68,7 @@ export class PredictiveAnalyticsEngine {
           productId,
           predictedSales: 0,
           confidence: 0.1,
-          trend: 'stable'
+          trend: 'stable',
         };
       }
 
@@ -88,7 +91,7 @@ export class PredictiveAnalyticsEngine {
         predictedSales: Math.round(predictedSales),
         confidence,
         trend: trend.direction,
-        seasonality: seasonality.strength > 0.3 ? seasonality : undefined
+        seasonality: seasonality.strength > 0.3 ? seasonality : undefined,
       };
     } catch (error) {
       logger.error('Error predicting product sales', { error, productId });
@@ -96,7 +99,7 @@ export class PredictiveAnalyticsEngine {
         productId,
         predictedSales: 0,
         confidence: 0,
-        trend: 'stable'
+        trend: 'stable',
       };
     }
   }
@@ -138,7 +141,7 @@ export class PredictiveAnalyticsEngine {
         predictedDemand: salesPrediction.predictedSales,
         recommendedStock,
         restockDate,
-        confidence: salesPrediction.confidence
+        confidence: salesPrediction.confidence,
       };
     } catch (error) {
       logger.error('Error predicting stock needs', { error, productId });
@@ -163,13 +166,13 @@ export class PredictiveAnalyticsEngine {
           category,
           trendStrength: 0,
           predictedGrowth: 0,
-          topProducts: []
+          topProducts: [],
         };
       }
 
       // Analyser chaque produit
       const productPredictions = await Promise.all(
-        products.map(async (product) => {
+        products.map(async product => {
           const prediction = await this.predictProductSales(product.id, 30);
           const currentSales = await this.getCurrentSales(product.id);
 
@@ -177,7 +180,7 @@ export class PredictiveAnalyticsEngine {
             productId: product.id,
             name: product.name,
             predictedGrowth: prediction.predictedSales - currentSales,
-            confidence: prediction.confidence
+            confidence: prediction.confidence,
           };
         })
       );
@@ -189,8 +192,14 @@ export class PredictiveAnalyticsEngine {
         .slice(0, 5);
 
       // Calculer la tendance globale de la catégorie
-      const totalCurrentSales = productPredictions.reduce((sum, p) => sum + this.getCurrentSales(p.productId), 0);
-      const totalPredictedSales = productPredictions.reduce((sum, p) => sum + (this.getCurrentSales(p.productId) + p.predictedGrowth), 0);
+      const totalCurrentSales = productPredictions.reduce(
+        (sum, p) => sum + this.getCurrentSales(p.productId),
+        0
+      );
+      const totalPredictedSales = productPredictions.reduce(
+        (sum, p) => sum + (this.getCurrentSales(p.productId) + p.predictedGrowth),
+        0
+      );
       const predictedGrowth = totalPredictedSales - totalCurrentSales;
       const trendStrength = Math.min(1, Math.abs(predictedGrowth) / Math.max(totalCurrentSales, 1));
 
@@ -200,8 +209,8 @@ export class PredictiveAnalyticsEngine {
         predictedGrowth,
         topProducts: sortedProducts.map(p => ({
           productId: p.productId,
-          predictedGrowth: p.predictedGrowth
-        }))
+          predictedGrowth: p.predictedGrowth,
+        })),
       };
     } catch (error) {
       logger.error('Error analyzing category trends', { error, category });
@@ -209,7 +218,7 @@ export class PredictiveAnalyticsEngine {
         category,
         trendStrength: 0,
         predictedGrowth: 0,
-        topProducts: []
+        topProducts: [],
       };
     }
   }
@@ -228,7 +237,7 @@ export class PredictiveAnalyticsEngine {
           predictedChurnRisk: 0.8,
           predictedLifetimeValue: 50,
           recommendedActions: ['send_welcome_email', 'offer_discount'],
-          confidence: 0.3
+          confidence: 0.3,
         };
       }
 
@@ -249,7 +258,7 @@ export class PredictiveAnalyticsEngine {
         predictedChurnRisk: churnRisk,
         predictedLifetimeValue: clv,
         recommendedActions,
-        confidence: 0.8 // Confiance élevée basée sur l'historique
+        confidence: 0.8, // Confiance élevée basée sur l'historique
       };
     } catch (error) {
       logger.error('Error predicting customer behavior', { error, userId });
@@ -258,14 +267,17 @@ export class PredictiveAnalyticsEngine {
         predictedChurnRisk: 0.5,
         predictedLifetimeValue: 0,
         recommendedActions: [],
-        confidence: 0
+        confidence: 0,
       };
     }
   }
 
   // Méthodes utilitaires privées
 
-  private async getProductSalesHistory(productId: string, days: number): Promise<Array<{ date: Date; sales: number }>> {
+  private async getProductSalesHistory(
+    productId: string,
+    days: number
+  ): Promise<Array<{ date: Date; sales: number }>> {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
 
@@ -291,10 +303,12 @@ export class PredictiveAnalyticsEngine {
       }
     });
 
-    return Object.entries(salesByDay).map(([date, sales]) => ({
-      date: new Date(date),
-      sales
-    })).sort((a, b) => a.date.getTime() - b.date.getTime());
+    return Object.entries(salesByDay)
+      .map(([date, sales]) => ({
+        date: new Date(date),
+        sales,
+      }))
+      .sort((a, b) => a.date.getTime() - b.date.getTime());
   }
 
   private async getCurrentSales(productId: string): Promise<number> {
@@ -351,12 +365,15 @@ export class PredictiveAnalyticsEngine {
 
     const dayAverages = Object.entries(dayOfWeekSales).map(([day, sales]) => ({
       day: parseInt(day),
-      average: sales.reduce((sum, sale) => sum + sale, 0) / sales.length
+      average: sales.reduce((sum, sale) => sum + sale, 0) / sales.length,
     }));
 
-    const overallAverage = dayAverages.reduce((sum, day) => sum + day.average, 0) / dayAverages.length;
+    const overallAverage =
+      dayAverages.reduce((sum, day) => sum + day.average, 0) / dayAverages.length;
 
-    const maxVariation = Math.max(...dayAverages.map(day => Math.abs(day.average - overallAverage)));
+    const maxVariation = Math.max(
+      ...dayAverages.map(day => Math.abs(day.average - overallAverage))
+    );
     const strength = maxVariation / overallAverage;
 
     const bestDay = dayAverages.reduce((best, current) =>
@@ -365,7 +382,7 @@ export class PredictiveAnalyticsEngine {
 
     return {
       pattern: `weekday_${bestDay.day}`,
-      strength
+      strength,
     };
   }
 
@@ -374,7 +391,8 @@ export class PredictiveAnalyticsEngine {
 
     const values = salesHistory.map(item => item.sales);
     const mean = values.reduce((sum, value) => sum + value, 0) / values.length;
-    const variance = values.reduce((sum, value) => sum + Math.pow(value - mean, 2), 0) / values.length;
+    const variance =
+      values.reduce((sum, value) => sum + Math.pow(value - mean, 2), 0) / values.length;
 
     return Math.sqrt(variance) / mean; // Coefficient de variation
   }
@@ -400,7 +418,8 @@ export class PredictiveAnalyticsEngine {
     // Facteur de récurrence basé sur la fréquence des achats
     const firstOrder = new Date(history[history.length - 1].created_at);
     const lastOrder = new Date(history[0].created_at);
-    const daysSinceFirstOrder = (lastOrder.getTime() - firstOrder.getTime()) / (1000 * 60 * 60 * 24);
+    const daysSinceFirstOrder =
+      (lastOrder.getTime() - firstOrder.getTime()) / (1000 * 60 * 60 * 24);
 
     const purchaseFrequency = daysSinceFirstOrder > 0 ? history.length / daysSinceFirstOrder : 0;
     const recurrenceFactor = Math.min(1, purchaseFrequency * 30); // Achat par mois

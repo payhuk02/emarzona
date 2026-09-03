@@ -27,17 +27,17 @@ interface ProductPricingData {
 
 /**
  * Hook personnalisé pour gérer la logique de tarification des produits
- * 
+ *
  * Gère:
  * - Calcul du pourcentage de réduction
  * - Conversion pourcentage → prix promotionnel
  * - Calcul de la marge brute
  * - Historique des prix avec persistance localStorage
- * 
+ *
  * @param formData - Données du formulaire contenant les prix
  * @param updateFormData - Fonction pour mettre à jour les données du formulaire
  * @returns Objet contenant les fonctions et états liés à la tarification
- * 
+ *
  * @example
  * ```tsx
  * const {
@@ -92,9 +92,7 @@ export const useProductPricing = (
       formData.promotional_price &&
       formData.promotional_price < formData.price
     ) {
-      return Math.round(
-        ((formData.price - formData.promotional_price) / formData.price) * 100
-      );
+      return Math.round(((formData.price - formData.promotional_price) / formData.price) * 100);
     }
     return 0;
   }, [formData.price, formData.promotional_price]);
@@ -122,17 +120,14 @@ export const useProductPricing = (
    * @param price - Prix principal du produit
    * @param promotionalPrice - Prix promotionnel optionnel
    */
-  const addPriceToHistory = useCallback(
-    (price: number, promotionalPrice?: number) => {
-      const  newEntry: PriceHistoryEntry = {
-        date: new Date().toISOString(),
-        price,
-        promotional_price: promotionalPrice,
-      };
-      setPriceHistory((prev) => [newEntry, ...prev.slice(0, MAX_PRICE_HISTORY_ENTRIES - 1)]);
-    },
-    []
-  );
+  const addPriceToHistory = useCallback((price: number, promotionalPrice?: number) => {
+    const newEntry: PriceHistoryEntry = {
+      date: new Date().toISOString(),
+      price,
+      promotional_price: promotionalPrice,
+    };
+    setPriceHistory(prev => [newEntry, ...prev.slice(0, MAX_PRICE_HISTORY_ENTRIES - 1)]);
+  }, []);
 
   /**
    * Calcule la marge brute du produit
@@ -157,7 +152,11 @@ export const useProductPricing = (
    * @returns Valeur de l'économie ou 0
    */
   const calculateSavings = useCallback(() => {
-    if (formData.price && formData.promotional_price && formData.promotional_price < formData.price) {
+    if (
+      formData.price &&
+      formData.promotional_price &&
+      formData.promotional_price < formData.price
+    ) {
       return formData.price - formData.promotional_price;
     }
     return 0;
@@ -172,10 +171,3 @@ export const useProductPricing = (
     calculateSavings,
   };
 };
-
-
-
-
-
-
-

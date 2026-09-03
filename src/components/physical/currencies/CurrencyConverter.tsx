@@ -19,13 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  ArrowRightLeft,
-  DollarSign,
-  TrendingUp,
-  Loader2,
-  RefreshCw,
-} from 'lucide-react';
+import { ArrowRightLeft, DollarSign, TrendingUp, Loader2, RefreshCw } from 'lucide-react';
 import {
   useCurrencies,
   useConvertCurrency,
@@ -47,7 +41,7 @@ export function CurrencyConverter() {
   const [convertedAmount, setConvertedAmount] = useState<number | null>(null);
 
   const currentRate = exchangeRates?.find(
-    (r) => r.from_currency === fromCurrency && r.to_currency === toCurrency
+    r => r.from_currency === fromCurrency && r.to_currency === toCurrency
   );
 
   const handleConvert = async () => {
@@ -80,7 +74,7 @@ export function CurrencyConverter() {
   }
 
   return (
-    <Card 
+    <Card
       ref={converterRef}
       className="border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-700"
     >
@@ -102,7 +96,7 @@ export function CurrencyConverter() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {currencies?.map((currency) => (
+                {currencies?.map(currency => (
                   <SelectItem key={currency.code} value={currency.code}>
                     {currency.symbol} {currency.name}
                   </SelectItem>
@@ -117,7 +111,7 @@ export function CurrencyConverter() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {currencies?.map((currency) => (
+                {currencies?.map(currency => (
                   <SelectItem key={currency.code} value={currency.code}>
                     {currency.symbol} {currency.name}
                   </SelectItem>
@@ -132,7 +126,7 @@ export function CurrencyConverter() {
           <Input
             type="number"
             value={amount}
-            onChange={(e) => setAmount(Number(e.target.value))}
+            onChange={e => setAmount(Number(e.target.value))}
             min="0"
             step="0.01"
             className="h-9 sm:h-10 text-xs sm:text-sm"
@@ -145,19 +139,20 @@ export function CurrencyConverter() {
             <AlertDescription>
               <div className="space-y-1 text-xs sm:text-sm">
                 <p>
-                  Taux actuel: <span className="font-mono font-semibold">1 {fromCurrency} = {currentRate.rate.toFixed(6)} {toCurrency}</span>
+                  Taux actuel:{' '}
+                  <span className="font-mono font-semibold">
+                    1 {fromCurrency} = {currentRate.rate.toFixed(6)} {toCurrency}
+                  </span>
                 </p>
-                <p className="text-muted-foreground">
-                  Source: {currentRate.source}
-                </p>
+                <p className="text-muted-foreground">Source: {currentRate.source}</p>
               </div>
             </AlertDescription>
           </Alert>
         )}
 
         <div className="flex items-center gap-2">
-          <Button 
-            onClick={handleConvert} 
+          <Button
+            onClick={handleConvert}
             disabled={convertMutation.isPending}
             className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
           >
@@ -173,9 +168,9 @@ export function CurrencyConverter() {
               </>
             )}
           </Button>
-          <Button 
-            variant="outline" 
-            size="icon" 
+          <Button
+            variant="outline"
+            size="icon"
             onClick={handleSwapCurrencies}
             className="h-9 sm:h-10 w-9 sm:w-10"
             aria-label="Inverser les devises"
@@ -201,9 +196,3 @@ export function CurrencyConverter() {
     </Card>
   );
 }
-
-
-
-
-
-

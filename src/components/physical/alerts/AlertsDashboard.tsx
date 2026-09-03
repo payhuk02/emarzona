@@ -8,22 +8,34 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useActiveAlerts, useAcknowledgeAlert, useResolveAlert, useDismissAlert, type PhysicalProductAlert } from '@/hooks/physical/useAlerts';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  useActiveAlerts,
+  useAcknowledgeAlert,
+  useResolveAlert,
+  useDismissAlert,
+  type PhysicalProductAlert,
+} from '@/hooks/physical/useAlerts';
 import { useStore } from '@/hooks/useStore';
 import { AlertTriangle, CheckCircle2, XCircle, Package, Filter, Bell } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
-const  SEVERITY_COLORS: Record<PhysicalProductAlert['severity'], string> = {
+const SEVERITY_COLORS: Record<PhysicalProductAlert['severity'], string> = {
   low: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
   medium: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
   high: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300',
   critical: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
 };
 
-const  ALERT_TYPE_LABELS: Record<PhysicalProductAlert['alert_type'], string> = {
+const ALERT_TYPE_LABELS: Record<PhysicalProductAlert['alert_type'], string> = {
   low_stock: 'Stock faible',
   out_of_stock: 'Stock épuisé',
   reorder_needed: 'Réapprovisionnement nécessaire',
@@ -39,16 +51,17 @@ interface AlertsDashboardProps {
 }
 
 export const AlertsDashboard = ({ storeId }: AlertsDashboardProps) => {
-  const [selectedType, setSelectedType] = useState<PhysicalProductAlert['alert_type'] | 'all'>('all');
+  const [selectedType, setSelectedType] = useState<PhysicalProductAlert['alert_type'] | 'all'>(
+    'all'
+  );
   const { data: alerts = [], isLoading } = useActiveAlerts(storeId);
-  
+
   const acknowledgeAlert = useAcknowledgeAlert();
   const resolveAlert = useResolveAlert();
   const dismissAlert = useDismissAlert();
 
-  const filteredAlerts = selectedType === 'all' 
-    ? alerts 
-    : alerts.filter(a => a.alert_type === selectedType);
+  const filteredAlerts =
+    selectedType === 'all' ? alerts : alerts.filter(a => a.alert_type === selectedType);
 
   const criticalAlerts = filteredAlerts.filter(a => a.severity === 'critical');
   const highAlerts = filteredAlerts.filter(a => a.severity === 'high');
@@ -69,10 +82,14 @@ export const AlertsDashboard = ({ storeId }: AlertsDashboardProps) => {
             Alertes Produits
           </h1>
           <p className="text-muted-foreground">
-            {filteredAlerts.length} alerte{filteredAlerts.length > 1 ? 's' : ''} active{filteredAlerts.length > 1 ? 's' : ''}
+            {filteredAlerts.length} alerte{filteredAlerts.length > 1 ? 's' : ''} active
+            {filteredAlerts.length > 1 ? 's' : ''}
           </p>
         </div>
-        <Select value={selectedType} onValueChange={(value) => setSelectedType(value as typeof selectedType)}>
+        <Select
+          value={selectedType}
+          onValueChange={value => setSelectedType(value as typeof selectedType)}
+        >
           <SelectTrigger className="w-[200px]">
             <SelectValue />
           </SelectTrigger>
@@ -145,11 +162,14 @@ export const AlertsDashboard = ({ storeId }: AlertsDashboardProps) => {
             </CardContent>
           </Card>
         ) : (
-          filteredAlerts.map((alert) => (
-            <Card key={alert.id} className={cn(
-              alert.severity === 'critical' && 'border-red-500',
-              alert.severity === 'high' && 'border-orange-500'
-            )}>
+          filteredAlerts.map(alert => (
+            <Card
+              key={alert.id}
+              className={cn(
+                alert.severity === 'critical' && 'border-red-500',
+                alert.severity === 'high' && 'border-orange-500'
+              )}
+            >
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -158,9 +178,7 @@ export const AlertsDashboard = ({ storeId }: AlertsDashboardProps) => {
                       <Badge className={cn(SEVERITY_COLORS[alert.severity])}>
                         {alert.severity}
                       </Badge>
-                      <Badge variant="outline">
-                        {ALERT_TYPE_LABELS[alert.alert_type]}
-                      </Badge>
+                      <Badge variant="outline">{ALERT_TYPE_LABELS[alert.alert_type]}</Badge>
                     </div>
                     <p className="text-sm text-muted-foreground">
                       {format(new Date(alert.triggered_at), 'PPp', { locale: fr })}
@@ -196,10 +214,7 @@ export const AlertsDashboard = ({ storeId }: AlertsDashboardProps) => {
                 {/* Actions */}
                 <div className="flex items-center gap-2 pt-2 border-t">
                   {alert.action_url && (
-                    <Button
-                      size="sm"
-                      onClick={() => window.open(alert.action_url, '_blank')}
-                    >
+                    <Button size="sm" onClick={() => window.open(alert.action_url, '_blank')}>
                       {alert.action_label || 'Agir'}
                     </Button>
                   )}
@@ -238,9 +253,3 @@ export const AlertsDashboard = ({ storeId }: AlertsDashboardProps) => {
     </div>
   );
 };
-
-
-
-
-
-

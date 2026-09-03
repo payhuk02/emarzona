@@ -24,10 +24,7 @@ export const PriceAlertBadge = ({
   const priceDropPercentage = ((priceDrop / oldPrice) * 100).toFixed(0);
 
   return (
-    <Badge
-      variant="destructive"
-      className={cn('flex items-center gap-1', className)}
-    >
+    <Badge variant="destructive" className={cn('flex items-center gap-1', className)}>
       <TrendingDown className="h-3 w-3" />
       <span>
         -{priceDropPercentage}% ({priceDrop.toLocaleString()} {currency})
@@ -35,10 +32,3 @@ export const PriceAlertBadge = ({
     </Badge>
   );
 };
-
-
-
-
-
-
-

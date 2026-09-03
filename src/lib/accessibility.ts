@@ -43,7 +43,10 @@ export function trapFocus(element: HTMLElement): () => void {
 /**
  * Annonce une modification à l'écran pour les lecteurs d'écran
  */
-export function announceToScreenReader(message: string, priority: 'polite' | 'assertive' = 'polite'): void {
+export function announceToScreenReader(
+  message: string,
+  priority: 'polite' | 'assertive' = 'polite'
+): void {
   const announcement = document.createElement('div');
   announcement.setAttribute('role', 'status');
   announcement.setAttribute('aria-live', priority);
@@ -73,7 +76,7 @@ export function handleKeyboardNavigation(
   items: HTMLElement[],
   onSelect: (index: number) => void
 ): (e: KeyboardEvent) => void {
-  let  currentIndex= -1;
+  let currentIndex = -1;
 
   return (e: KeyboardEvent) => {
     switch (e.key) {
@@ -112,7 +115,10 @@ export function handleKeyboardNavigation(
  * Vérifie le contraste des couleurs (WCAG AA)
  * @deprecated Utiliser checkColorContrast de accessibility-enhanced.ts pour un calcul précis
  */
-export function checkColorContrast(foreground: string, background: string): {
+export function checkColorContrast(
+  foreground: string,
+  background: string
+): {
   ratio: number;
   passesAA: boolean;
   passesAAA: boolean;
@@ -135,13 +141,17 @@ export function checkColorContrast(foreground: string, background: string): {
 /**
  * Gère le skip link pour la navigation clavier
  */
-export function createSkipLink(targetId: string, label: string = 'Aller au contenu principal'): HTMLElement {
+export function createSkipLink(
+  targetId: string,
+  label: string = 'Aller au contenu principal'
+): HTMLElement {
   const skipLink = document.createElement('a');
   skipLink.href = `#${targetId}`;
   skipLink.textContent = label;
-  skipLink.className = 'sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary-500 focus:text-white focus:rounded-lg';
-  
-  skipLink.addEventListener('click', (e) => {
+  skipLink.className =
+    'sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary-500 focus:text-white focus:rounded-lg';
+
+  skipLink.addEventListener('click', e => {
     e.preventDefault();
     const target = document.getElementById(targetId);
     if (target) {
@@ -149,7 +159,7 @@ export function createSkipLink(targetId: string, label: string = 'Aller au conte
       target.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   });
-  
+
   return skipLink;
 }
 
@@ -170,23 +180,23 @@ export function addAriaAttributes(
   if (attributes.label) {
     element.setAttribute('aria-label', attributes.label);
   }
-  
+
   if (attributes.describedBy) {
     element.setAttribute('aria-describedby', attributes.describedBy);
   }
-  
+
   if (attributes.expanded !== undefined) {
     element.setAttribute('aria-expanded', String(attributes.expanded));
   }
-  
+
   if (attributes.hidden !== undefined) {
     element.setAttribute('aria-hidden', String(attributes.hidden));
   }
-  
+
   if (attributes.live) {
     element.setAttribute('aria-live', attributes.live);
   }
-  
+
   if (attributes.atomic !== undefined) {
     element.setAttribute('aria-atomic', String(attributes.atomic));
   }
@@ -198,11 +208,8 @@ export function addAriaAttributes(
 export function isElementVisible(element: HTMLElement): boolean {
   const rect = element.getBoundingClientRect();
   const viewHeight = Math.max(document.documentElement.clientHeight, window.innerHeight);
-  
-  return !(
-    rect.bottom < 0 ||
-    rect.top - viewHeight >= 0
-  );
+
+  return !(rect.bottom < 0 || rect.top - viewHeight >= 0);
 }
 
 /**
@@ -219,13 +226,13 @@ export function setupFocusVisible(): void {
     isKeyboardNavigation = false;
   });
 
-  document.addEventListener('focusin', (e) => {
+  document.addEventListener('focusin', e => {
     if (isKeyboardNavigation && e.target instanceof HTMLElement) {
       e.target.classList.add('focus-visible');
     }
   });
 
-  document.addEventListener('focusout', (e) => {
+  document.addEventListener('focusout', e => {
     if (e.target instanceof HTMLElement) {
       e.target.classList.remove('focus-visible');
     }
@@ -238,21 +245,21 @@ export function setupFocusVisible(): void {
 export function initAccessibility(): void {
   // Setup focus visible
   setupFocusVisible();
-  
+
   // Ajouter skip link si non présent
   if (!document.querySelector('a[href="#main-content"]')) {
     const skipLink = createSkipLink('main-content', 'Aller au contenu principal');
     document.body.insertBefore(skipLink, document.body.firstChild);
   }
-  
+
   // Vérifier et ajouter les attributs ARIA manquants
   const buttons = document.querySelectorAll('button:not([aria-label])');
-  buttons.forEach((button) => {
+  buttons.forEach(button => {
     if (!button.textContent?.trim() && !button.querySelector('img, svg')) {
       button.setAttribute('aria-label', 'Bouton');
     }
   });
-  
+
   // Initialiser les raccourcis clavier améliorés
   try {
     const { setupKeyboardShortcuts } = require('./accessibility-enhanced');
@@ -260,15 +267,6 @@ export function initAccessibility(): void {
   } catch {
     // Ignorer si le module n'est pas disponible
   }
-  
+
   logger.info('✅ Accessibilité initialisée');
 }
-
-
-
-
-
-
-
-
-

@@ -1,9 +1,15 @@
-import React, { useCallback } from "react";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
+import React, { useCallback } from 'react';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
 import { Search, X } from '@/components/icons';
-import { useScrollAnimation } from "@/hooks/useScrollAnimation";
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
 interface CustomerFiltersProps {
   searchQuery: string;
@@ -25,11 +31,11 @@ const CustomerFiltersComponent = ({
   const filtersRef = useScrollAnimation<HTMLDivElement>();
 
   const handleClearSearch = useCallback(() => {
-    onSearchChange("");
+    onSearchChange('');
   }, [onSearchChange]);
 
   return (
-    <div 
+    <div
       ref={filtersRef}
       className="flex flex-col sm:flex-row gap-3 sm:gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700"
     >
@@ -38,7 +44,7 @@ const CustomerFiltersComponent = ({
         <Input
           placeholder="Rechercher par nom, email ou téléphone..."
           value={searchQuery}
-          onChange={(e) => onSearchChange(e.target.value)}
+          onChange={e => onSearchChange(e.target.value)}
           className="pl-9 pr-12 min-h-[44px] h-11 sm:h-12 text-xs sm:text-sm"
         />
         {searchQuery && (
@@ -65,12 +71,12 @@ const CustomerFiltersComponent = ({
           <SelectItem value="total_spent">Total dépensé</SelectItem>
         </SelectContent>
       </Select>
-      
+
       {onSortOrderChange && (
         <Select value={sortOrder} onValueChange={onSortOrderChange}>
-        <SelectTrigger className="w-full sm:w-[150px] min-h-[44px] h-11 sm:h-12 text-xs sm:text-sm">
-          <SelectValue placeholder="Ordre" />
-        </SelectTrigger>
+          <SelectTrigger className="w-full sm:w-[150px] min-h-[44px] h-11 sm:h-12 text-xs sm:text-sm">
+            <SelectValue placeholder="Ordre" />
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value="asc">Croissant</SelectItem>
             <SelectItem value="desc">Décroissant</SelectItem>
@@ -96,9 +102,3 @@ export const CustomerFilters = React.memo(CustomerFiltersComponent, (prevProps, 
 });
 
 CustomerFilters.displayName = 'CustomerFilters';
-
-
-
-
-
-

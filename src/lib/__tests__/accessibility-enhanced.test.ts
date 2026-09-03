@@ -65,7 +65,7 @@ describe('Accessibility Enhanced', () => {
   });
 
   describe('checkElementContrast', () => {
-    it('devrait vérifier le contraste d\'un élément', () => {
+    it("devrait vérifier le contraste d'un élément", () => {
       const element = document.createElement('div');
       element.style.color = '#000000';
       element.style.backgroundColor = '#FFFFFF';
@@ -124,7 +124,7 @@ describe('Accessibility Enhanced', () => {
       expect(report.violations.some(v => v.type === 'missing-input-label')).toBe(true);
     });
 
-    it('devrait calculer un score d\'accessibilité', () => {
+    it("devrait calculer un score d'accessibilité", () => {
       const report = validatePageAccessibility();
       expect(report.score).toBeGreaterThanOrEqual(0);
       expect(report.score).toBeLessThanOrEqual(100);
@@ -139,7 +139,7 @@ describe('Accessibility Enhanced', () => {
       expect(report.recommendations.length).toBeGreaterThan(0);
     });
 
-    it('devrait détecter l\'absence de landmark main', () => {
+    it("devrait détecter l'absence de landmark main", () => {
       const report = validatePageAccessibility();
       const hasMainWarning = report.warnings.some(w => w.type === 'missing-landmark');
       // Peut être présent ou non selon le DOM
@@ -151,23 +151,16 @@ describe('Accessibility Enhanced', () => {
     it('devrait configurer les raccourcis clavier', () => {
       const cleanup = setupKeyboardShortcuts();
       expect(typeof cleanup).toBe('function');
-      
+
       // Nettoyer
       cleanup();
     });
 
     it('devrait permettre de nettoyer les raccourcis', () => {
       const cleanup = setupKeyboardShortcuts();
-      
+
       // Vérifier que la fonction de nettoyage existe
       expect(() => cleanup()).not.toThrow();
     });
   });
 });
-
-
-
-
-
-
-

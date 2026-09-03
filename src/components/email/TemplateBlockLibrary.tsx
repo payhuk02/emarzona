@@ -26,7 +26,7 @@ interface EmailBlock {
   icon: React.ComponentType<{ className?: string }>;
 }
 
-const  EMAIL_BLOCKS: EmailBlock[] = [
+const EMAIL_BLOCKS: EmailBlock[] = [
   {
     id: 'header',
     name: 'En-tête',
@@ -89,7 +89,7 @@ const  EMAIL_BLOCKS: EmailBlock[] = [
   {
     id: 'cta-button',
     name: 'Bouton CTA',
-    description: 'Bouton d\'appel à l\'action',
+    description: "Bouton d'appel à l'action",
     category: 'cta',
     html: `
       <table width="100%" cellpadding="0" cellspacing="0">
@@ -167,14 +167,14 @@ interface TemplateBlockLibraryProps {
   onInsertBlock: (html: string) => void;
 }
 
-const  CATEGORY_LABELS: Record<string, string> = {
+const CATEGORY_LABELS: Record<string, string> = {
   header: 'En-tête',
   content: 'Contenu',
   footer: 'Pied de page',
-  cta: 'Appel à l\'action',
+  cta: "Appel à l'action",
 };
 
-const  CATEGORY_COLORS: Record<string, string> = {
+const CATEGORY_COLORS: Record<string, string> = {
   header: 'bg-blue-500/10 text-blue-700 dark:text-blue-400',
   content: 'bg-green-500/10 text-green-700 dark:text-green-400',
   footer: 'bg-gray-500/10 text-gray-700 dark:text-gray-400',
@@ -186,13 +186,16 @@ export const TemplateBlockLibrary = ({ onInsertBlock }: TemplateBlockLibraryProp
     onInsertBlock(block.html);
   };
 
-  const blocksByCategory = EMAIL_BLOCKS.reduce((acc, block) => {
-    if (!acc[block.category]) {
-      acc[block.category] = [];
-    }
-    acc[block.category].push(block);
-    return acc;
-  }, {} as Record<string, EmailBlock[]>);
+  const blocksByCategory = EMAIL_BLOCKS.reduce(
+    (acc, block) => {
+      if (!acc[block.category]) {
+        acc[block.category] = [];
+      }
+      acc[block.category].push(block);
+      return acc;
+    },
+    {} as Record<string, EmailBlock[]>
+  );
 
   return (
     <Card>
@@ -211,7 +214,7 @@ export const TemplateBlockLibrary = ({ onInsertBlock }: TemplateBlockLibraryProp
               </Badge>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {blocks.map((block) => {
+              {blocks.map(block => {
                 const Icon = block.icon;
                 return (
                   <Card
@@ -242,10 +245,3 @@ export const TemplateBlockLibrary = ({ onInsertBlock }: TemplateBlockLibraryProp
     </Card>
   );
 };
-
-
-
-
-
-
-

@@ -1,7 +1,7 @@
 /**
  * Store Team Analytics Component
  * Date: 2 Février 2025
- * 
+ *
  * Analytics avancés pour l'équipe (performance par membre, temps de traitement)
  */
 
@@ -38,38 +38,34 @@ export const StoreTeamAnalytics = ({ storeId }: StoreTeamAnalyticsProps) => {
   const memberPerformance = useMemo(() => {
     if (!members || !tasks) return [];
 
-    const activeMembers = members.filter((m) => m.status === 'active');
-    const  performance: MemberPerformance[] = [];
+    const activeMembers = members.filter(m => m.status === 'active');
+    const performance: MemberPerformance[] = [];
 
-    activeMembers.forEach((member) => {
-      const memberTasks = tasks.filter((task) => task.assigned_to.includes(member.user_id));
-      const completedTasks = memberTasks.filter((t) => t.status === 'completed');
-      const inProgressTasks = memberTasks.filter((t) => t.status === 'in_progress');
-      const pendingTasks = memberTasks.filter((t) => t.status === 'pending');
-      
+    activeMembers.forEach(member => {
+      const memberTasks = tasks.filter(task => task.assigned_to.includes(member.user_id));
+      const completedTasks = memberTasks.filter(t => t.status === 'completed');
+      const inProgressTasks = memberTasks.filter(t => t.status === 'in_progress');
+      const pendingTasks = memberTasks.filter(t => t.status === 'pending');
+
       // Calculer le temps moyen de traitement
-      const completedWithTimes = completedTasks.filter(
-        (t) => t.started_at && t.completed_at
-      );
+      const completedWithTimes = completedTasks.filter(t => t.started_at && t.completed_at);
       const totalHours = completedWithTimes.reduce((acc, task) => {
         if (task.started_at && task.completed_at) {
           return acc + differenceInHours(new Date(task.completed_at), new Date(task.started_at));
         }
         return acc;
       }, 0);
-      const averageCompletionTime = completedWithTimes.length > 0 
-        ? totalHours / completedWithTimes.length 
-        : 0;
+      const averageCompletionTime =
+        completedWithTimes.length > 0 ? totalHours / completedWithTimes.length : 0;
 
       // Tâches en retard
       const overdueTasks = memberTasks.filter(
-        (t) => t.due_date && t.status !== 'completed' && new Date(t.due_date) < new Date()
+        t => t.due_date && t.status !== 'completed' && new Date(t.due_date) < new Date()
       ).length;
 
       // Taux de complétion
-      const completionRate = memberTasks.length > 0 
-        ? (completedTasks.length / memberTasks.length) * 100 
-        : 0;
+      const completionRate =
+        memberTasks.length > 0 ? (completedTasks.length / memberTasks.length) * 100 : 0;
 
       performance.push({
         memberId: member.user_id,
@@ -91,14 +87,14 @@ export const StoreTeamAnalytics = ({ storeId }: StoreTeamAnalyticsProps) => {
   const overallStats = useMemo(() => {
     if (!tasks) return null;
 
-    const completed = tasks.filter((t) => t.status === 'completed');
-    const inProgress = tasks.filter((t) => t.status === 'in_progress');
-    const pending = tasks.filter((t) => t.status === 'pending');
+    const completed = tasks.filter(t => t.status === 'completed');
+    const inProgress = tasks.filter(t => t.status === 'in_progress');
+    const pending = tasks.filter(t => t.status === 'pending');
     const overdue = tasks.filter(
-      (t) => t.due_date && t.status !== 'completed' && new Date(t.due_date) < new Date()
+      t => t.due_date && t.status !== 'completed' && new Date(t.due_date) < new Date()
     );
 
-    const completedWithTimes = completed.filter((t) => t.started_at && t.completed_at);
+    const completedWithTimes = completed.filter(t => t.started_at && t.completed_at);
     const totalHours = completedWithTimes.reduce((acc, task) => {
       if (task.started_at && task.completed_at) {
         return acc + differenceInHours(new Date(task.completed_at), new Date(task.started_at));
@@ -198,23 +194,19 @@ export const StoreTeamAnalytics = ({ storeId }: StoreTeamAnalyticsProps) => {
             <BarChart3 className="h-5 w-5" />
             Performance par membre
           </CardTitle>
-          <CardDescription>
-            Statistiques détaillées pour chaque membre de l'équipe
-          </CardDescription>
+          <CardDescription>Statistiques détaillées pour chaque membre de l'équipe</CardDescription>
         </CardHeader>
         <CardContent>
           {memberPerformance.length > 0 ? (
             <div className="space-y-4">
-              {memberPerformance.map((member) => (
+              {memberPerformance.map(member => (
                 <div
                   key={member.memberId}
                   className="p-4 border rounded-lg hover:bg-accent/50 transition-colors"
                 >
                   <div className="flex items-start justify-between gap-4 mb-3">
                     <div className="flex-1">
-                      <h3 className="font-semibold">
-                        {member.memberName || member.memberEmail}
-                      </h3>
+                      <h3 className="font-semibold">{member.memberName || member.memberEmail}</h3>
                       <p className="text-sm text-muted-foreground">{member.memberEmail}</p>
                     </div>
                     <div className="text-right">
@@ -252,9 +244,7 @@ export const StoreTeamAnalytics = ({ storeId }: StoreTeamAnalyticsProps) => {
 
                   <div className="mt-4 pt-4 border-t grid grid-cols-2 gap-4">
                     <div>
-                      <div className="text-sm font-medium">
-                        {member.completionRate.toFixed(1)}%
-                      </div>
+                      <div className="text-sm font-medium">{member.completionRate.toFixed(1)}%</div>
                       <p className="text-xs text-muted-foreground">Taux de complétion</p>
                     </div>
                     <div>
@@ -280,10 +270,3 @@ export const StoreTeamAnalytics = ({ storeId }: StoreTeamAnalyticsProps) => {
     </div>
   );
 };
-
-
-
-
-
-
-

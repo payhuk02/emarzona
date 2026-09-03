@@ -18,7 +18,7 @@ import {
   Info,
   Zap,
   TrendingUp,
-  FileImage
+  FileImage,
 } from 'lucide-react';
 import { useOptimizedImageUpload } from '@/lib/image-upload-service';
 import { useImageOptimization } from '@/hooks/useImageOptimization';
@@ -75,7 +75,7 @@ export const OptimizedImageUpload: React.FC<OptimizedImageUploadProps> = ({
   className,
   requireAltText = true,
   showSEOAnalysis = true,
-  autoGenerateAlt = true
+  autoGenerateAlt = true,
 }) => {
   const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
   const [dragActive, setDragActive] = useState(false);
@@ -84,113 +84,121 @@ export const OptimizedImageUpload: React.FC<OptimizedImageUploadProps> = ({
   const { uploadImage, isUploading, progress } = useOptimizedImageUpload();
 
   // Gestionnaire de sélection de fichiers
-  const handleFileSelect = useCallback(async (files: FileList | null) => {
-    if (!files) return;
+  const handleFileSelect = useCallback(
+    async (files: FileList | null) => {
+      if (!files) return;
 
-    const fileArray = Array.from(files);
-    const validFiles: File[] = [];
+      const fileArray = Array.from(files);
+      const validFiles: File[] = [];
 
-    // Validation des fichiers
-    for (const file of fileArray) {
-      // Vérifier le type
-      if (!acceptedTypes.includes(file.type)) {
-        onUploadError?.(`Type de fichier non supporté: ${file.type}`);
-        continue;
-      }
-
-      // Vérifier la taille
-      if (file.size > maxSizeMB * 1024 * 1024) {
-        onUploadError?.(`Fichier trop volumineux: ${(file.size / 1024 / 1024).toFixed(1)}MB (max ${maxSizeMB}MB)`);
-        continue;
-      }
-
-      validFiles.push(file);
-    }
-
-    // Vérifier la limite de fichiers
-    if (uploadedImages.length + validFiles.length > maxFiles) {
-      onUploadError?.(`Maximum ${maxFiles} fichiers autorisés`);
-      return;
-    }
-
-    // Créer les objets d'upload
-    const newUploads: UploadedImage[] = validFiles.map(file => ({
-      id: `${Date.now()}-${Math.random()}`,
-      file,
-      preview: URL.createObjectURL(file),
-      status: 'uploading' as const
-    }));
-
-    setUploadedImages(prev => [...prev, ...newUploads]);
-
-    // Upload parallèle des fichiers
-    for (const upload of newUploads) {
-      try {
-        const result = await uploadImage(upload.file, bucketName, {
-          quality,
-          format,
-          generateThumbnail,
-          folder,
-          sizes: generateSizes ? [400, 800, 1200, 1600] : undefined,
-          seo: {
-            altText: autoGenerateAlt ? generateAltText(upload.file.name) : undefined
-          }
-        });
-
-        if (result.success) {
-          // Calculer les stats de compression
-          const compressionStats = result.metadata ? {
-            ratio: `${result.metadata.compressionRatio.toFixed(1)}%`,
-            saved: `${((result.metadata.originalSize - result.metadata.optimizedSize) / 1024).toFixed(1)} KB`,
-            finalSize: `${(result.metadata.optimizedSize / 1024).toFixed(1)} KB`
-          } : undefined;
-
-          setUploadedImages(prev => prev.map(img =>
-            img.id === upload.id
-              ? {
-                  ...img,
-                  status: 'success',
-                  result,
-                  seoScore: result.metadata?.seoScore,
-                  compressionStats
-                }
-              : img
-          ));
-
-          onUploadComplete?.(result);
-        } else {
-          throw new Error(result.error || 'Erreur d\'upload');
+      // Validation des fichiers
+      for (const file of fileArray) {
+        // Vérifier le type
+        if (!acceptedTypes.includes(file.type)) {
+          onUploadError?.(`Type de fichier non supporté: ${file.type}`);
+          continue;
         }
 
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Erreur d\'upload';
+        // Vérifier la taille
+        if (file.size > maxSizeMB * 1024 * 1024) {
+          onUploadError?.(
+            `Fichier trop volumineux: ${(file.size / 1024 / 1024).toFixed(1)}MB (max ${maxSizeMB}MB)`
+          );
+          continue;
+        }
 
-        setUploadedImages(prev => prev.map(img =>
-          img.id === upload.id
-            ? { ...img, status: 'error', error: errorMessage }
-            : img
-        ));
-
-        onUploadError?.(errorMessage);
-        logger.error('Erreur upload image optimisée', { error, fileName: upload.file.name });
+        validFiles.push(file);
       }
-    }
-  }, [
-    uploadedImages.length,
-    maxFiles,
-    acceptedTypes,
-    maxSizeMB,
-    uploadImage,
-    bucketName,
-    quality,
-    format,
-    generateThumbnail,
-    folder,
-    generateSizes,
-    autoGenerateAlt,
-    onUploadComplete,
-    onUploadError
-  ]);
+
+      // Vérifier la limite de fichiers
+      if (uploadedImages.length + validFiles.length > maxFiles) {
+        onUploadError?.(`Maximum ${maxFiles} fichiers autorisés`);
+        return;
+      }
+
+      // Créer les objets d'upload
+      const newUploads: UploadedImage[] = validFiles.map(file => ({
+        id: `${Date.now()}-${Math.random()}`,
+        file,
+        preview: URL.createObjectURL(file),
+        status: 'uploading' as const,
+      }));
+
+      setUploadedImages(prev => [...prev, ...newUploads]);
+
+      // Upload parallèle des fichiers
+      for (const upload of newUploads) {
+        try {
+          const result = await uploadImage(upload.file, bucketName, {
+            quality,
+            format,
+            generateThumbnail,
+            folder,
+            sizes: generateSizes ? [400, 800, 1200, 1600] : undefined,
+            seo: {
+              altText: autoGenerateAlt ? generateAltText(upload.file.name) : undefined,
+            },
+          });
+
+          if (result.success) {
+            // Calculer les stats de compression
+            const compressionStats = result.metadata
+              ? {
+                  ratio: `${result.metadata.compressionRatio.toFixed(1)}%`,
+                  saved: `${((result.metadata.originalSize - result.metadata.optimizedSize) / 1024).toFixed(1)} KB`,
+                  finalSize: `${(result.metadata.optimizedSize / 1024).toFixed(1)} KB`,
+                }
+              : undefined;
+
+            setUploadedImages(prev =>
+              prev.map(img =>
+                img.id === upload.id
+                  ? {
+                      ...img,
+                      status: 'success',
+                      result,
+                      seoScore: result.metadata?.seoScore,
+                      compressionStats,
+                    }
+                  : img
+              )
+            );
+
+            onUploadComplete?.(result);
+          } else {
+            throw new Error(result.error || "Erreur d'upload");
+          }
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : "Erreur d'upload";
+
+          setUploadedImages(prev =>
+            prev.map(img =>
+              img.id === upload.id ? { ...img, status: 'error', error: errorMessage } : img
+            )
+          );
+
+          onUploadError?.(errorMessage);
+          logger.error('Erreur upload image optimisée', { error, fileName: upload.file.name });
+        }
+      }
+    },
+    [
+      uploadedImages.length,
+      maxFiles,
+      acceptedTypes,
+      maxSizeMB,
+      uploadImage,
+      bucketName,
+      quality,
+      format,
+      generateThumbnail,
+      folder,
+      generateSizes,
+      autoGenerateAlt,
+      onUploadComplete,
+      onUploadError,
+    ]
+  );
 
   // Gestionnaire de drag & drop
   const handleDrag = useCallback((e: React.DragEvent) => {
@@ -203,13 +211,16 @@ export const OptimizedImageUpload: React.FC<OptimizedImageUploadProps> = ({
     }
   }, []);
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setDragActive(false);
 
-    handleFileSelect(e.dataTransfer.files);
-  }, [handleFileSelect]);
+      handleFileSelect(e.dataTransfer.files);
+    },
+    [handleFileSelect]
+  );
 
   // Supprimer une image
   const removeImage = useCallback((id: string) => {
@@ -256,11 +267,10 @@ export const OptimizedImageUpload: React.FC<OptimizedImageUploadProps> = ({
             <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
 
             <div className="space-y-2">
-              <p className="text-lg font-medium">
-                Glissez-déposez vos images ici
-              </p>
+              <p className="text-lg font-medium">Glissez-déposez vos images ici</p>
               <p className="text-sm text-muted-foreground">
-                ou <button
+                ou{' '}
+                <button
                   type="button"
                   className="text-blue-500 hover:text-blue-600 underline"
                   onClick={() => fileInputRef.current?.click()}
@@ -281,7 +291,7 @@ export const OptimizedImageUpload: React.FC<OptimizedImageUploadProps> = ({
               type="file"
               multiple
               accept={acceptedTypes.join(',')}
-              onChange={(e) => handleFileSelect(e.target.files)}
+              onChange={e => handleFileSelect(e.target.files)}
               className="hidden"
             />
           </div>
@@ -317,11 +327,7 @@ export const OptimizedImageUpload: React.FC<OptimizedImageUploadProps> = ({
                 )}
               </div>
 
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setUploadedImages([])}
-              >
+              <Button variant="outline" size="sm" onClick={() => setUploadedImages([])}>
                 Vider
               </Button>
             </div>
@@ -332,7 +338,7 @@ export const OptimizedImageUpload: React.FC<OptimizedImageUploadProps> = ({
       {/* Liste des images uploadées */}
       {uploadedImages.length > 0 && (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {uploadedImages.map((image) => (
+          {uploadedImages.map(image => (
             <Card key={image.id} className="overflow-hidden">
               <div className="relative">
                 <img
@@ -404,7 +410,13 @@ export const OptimizedImageUpload: React.FC<OptimizedImageUploadProps> = ({
                       <span className="text-xs">SEO Score</span>
                     </div>
                     <Badge
-                      variant={image.seoScore >= 80 ? 'default' : image.seoScore >= 60 ? 'secondary' : 'destructive'}
+                      variant={
+                        image.seoScore >= 80
+                          ? 'default'
+                          : image.seoScore >= 60
+                            ? 'secondary'
+                            : 'destructive'
+                      }
                       className="text-xs"
                     >
                       {image.seoScore}/100
@@ -416,9 +428,7 @@ export const OptimizedImageUpload: React.FC<OptimizedImageUploadProps> = ({
                 {image.status === 'error' && image.error && (
                   <Alert className="py-2">
                     <AlertTriangle className="h-3 w-3" />
-                    <AlertDescription className="text-xs">
-                      {image.error}
-                    </AlertDescription>
+                    <AlertDescription className="text-xs">{image.error}</AlertDescription>
                   </Alert>
                 )}
 
@@ -428,9 +438,7 @@ export const OptimizedImageUpload: React.FC<OptimizedImageUploadProps> = ({
                     <p className="text-xs text-green-600 font-medium mb-1">
                       ✅ Image optimisée et uploadée
                     </p>
-                    <p className="text-xs text-muted-foreground break-all">
-                      {image.result.url}
-                    </p>
+                    <p className="text-xs text-muted-foreground break-all">{image.result.url}</p>
                   </div>
                 )}
               </CardContent>
@@ -444,8 +452,8 @@ export const OptimizedImageUpload: React.FC<OptimizedImageUploadProps> = ({
         <Info className="h-4 w-4" />
         <AlertTitle>Optimisation automatique</AlertTitle>
         <AlertDescription>
-          Toutes les images sont automatiquement optimisées pour le SEO :
-          compression WebP, tailles responsive, métadonnées optimisées.
+          Toutes les images sont automatiquement optimisées pour le SEO : compression WebP, tailles
+          responsive, métadonnées optimisées.
         </AlertDescription>
       </Alert>
     </div>

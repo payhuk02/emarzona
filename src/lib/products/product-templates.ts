@@ -1,7 +1,7 @@
 /**
  * Product Templates System
  * Date: 28 Janvier 2025
- * 
+ *
  * Système de templates pour tous les types de produits
  * Permet de créer des produits à partir de templates pré-configurés
  */
@@ -19,7 +19,7 @@ export interface ProductTemplate {
   category?: string;
   icon?: string;
   preview_image?: string;
-  
+
   // Données du template
   template_data: {
     // Informations de base
@@ -30,49 +30,49 @@ export interface ProductTemplate {
     currency?: string;
     category?: string;
     tags?: string[];
-    
+
     // Spécifique par type
     digital?: {
       category?: string;
       license_type?: string;
       download_limit?: number;
     };
-    
+
     physical?: {
       has_variants?: boolean;
       track_inventory?: boolean;
       requires_shipping?: boolean;
     };
-    
+
     service?: {
       service_type?: string;
       duration?: number;
       location_type?: string;
     };
-    
+
     course?: {
       level?: string;
       language?: string;
       certificate_enabled?: boolean;
     };
-    
+
     artist?: {
       artist_type?: string;
       edition_type?: string;
     };
-    
+
     // Commun
     seo?: {
       meta_title?: string;
       meta_description?: string;
     };
-    
+
     affiliate?: {
       enabled?: boolean;
       commission_rate?: number;
     };
   };
-  
+
   // Métadonnées
   created_by?: string;
   is_public: boolean;
@@ -87,7 +87,7 @@ const PRODUCT_TEMPLATE_FIELDS =
 /**
  * Templates prédéfinis
  */
-export const PREDEFINED_TEMPLATES : Omit<ProductTemplate, 'id' | 'created_at' | 'updated_at'>[] = [
+export const PREDEFINED_TEMPLATES: Omit<ProductTemplate, 'id' | 'created_at' | 'updated_at'>[] = [
   // Digital
   {
     name: 'Ebook Standard',
@@ -141,7 +141,7 @@ export const PREDEFINED_TEMPLATES : Omit<ProductTemplate, 'id' | 'created_at' | 
     is_public: true,
     usage_count: 0,
   },
-  
+
   // Physical
   {
     name: 'Produit Simple',
@@ -185,7 +185,7 @@ export const PREDEFINED_TEMPLATES : Omit<ProductTemplate, 'id' | 'created_at' | 
     is_public: true,
     usage_count: 0,
   },
-  
+
   // Service
   {
     name: 'Consultation',
@@ -229,7 +229,7 @@ export const PREDEFINED_TEMPLATES : Omit<ProductTemplate, 'id' | 'created_at' | 
     is_public: true,
     usage_count: 0,
   },
-  
+
   // Course
   {
     name: 'Cours Débutant',
@@ -252,11 +252,11 @@ export const PREDEFINED_TEMPLATES : Omit<ProductTemplate, 'id' | 'created_at' | 
     is_public: true,
     usage_count: 0,
   },
-  
+
   // Artist
   {
     name: 'Œuvre Originale',
-    description: 'Template pour une œuvre d\'art originale',
+    description: "Template pour une œuvre d'art originale",
     product_type: 'artist',
     category: 'visual_artist',
     icon: '🎨',
@@ -304,7 +304,7 @@ export async function getProductTemplates(
   includePrivate: boolean = false
 ): Promise<ProductTemplate[]> {
   try {
-    let  query= supabase
+    let query = supabase
       .from('product_templates')
       .select(PRODUCT_TEMPLATE_FIELDS)
       .order('usage_count', { ascending: false });
@@ -371,7 +371,7 @@ export async function createProductFromTemplate(
     };
 
     // Créer le produit selon le type
-    let  productId: string;
+    let productId: string;
 
     switch (template.product_type) {
       case 'digital':
@@ -490,7 +490,11 @@ export async function createProductFromTemplate(
     // Incrémenter le compteur d'utilisation du template
     await incrementTemplateUsage(templateId);
 
-    logger.info('Product created from template', { templateId, productId, productType: template.product_type });
+    logger.info('Product created from template', {
+      templateId,
+      productId,
+      productType: template.product_type,
+    });
 
     return { success: true, productId };
   } catch (caughtError: unknown) {
@@ -543,11 +547,3 @@ export async function saveProductTemplate(
     return { success: false, error: errorMessage };
   }
 }
-
-
-
-
-
-
-
-

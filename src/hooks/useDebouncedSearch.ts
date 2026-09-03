@@ -1,7 +1,7 @@
 /**
  * useDebouncedSearch Hook
  * Date: 28 Janvier 2025
- * 
+ *
  * Hook spécialisé pour les recherches avec debouncing et indicateur de chargement
  * Améliore l'UX et réduit les appels API
  */
@@ -61,12 +61,7 @@ export interface UseDebouncedSearchReturn {
 export function useDebouncedSearch(
   options: UseDebouncedSearchOptions = {}
 ): UseDebouncedSearchReturn {
-  const {
-    debounceMs = 500,
-    initialValue = '',
-    onSearchChange,
-    minLength = 0,
-  } = options;
+  const { debounceMs = 500, initialValue = '', onSearchChange, minLength = 0 } = options;
 
   const [inputValue, setInputValue] = useState(initialValue);
   const debouncedValue = useDebounce(inputValue, debounceMs);
@@ -79,7 +74,7 @@ export function useDebouncedSearch(
   useEffect(() => {
     if (debouncedValue !== previousDebouncedValue.current) {
       previousDebouncedValue.current = debouncedValue;
-      
+
       if (onSearchChange) {
         onSearchChange(debouncedValue);
       }
@@ -103,10 +98,3 @@ export function useDebouncedSearch(
     isValid,
   };
 }
-
-
-
-
-
-
-

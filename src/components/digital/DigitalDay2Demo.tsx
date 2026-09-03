@@ -2,17 +2,13 @@ import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card } from '@/components/ui/card';
 import { DigitalProductsList, DigitalProductListItem } from './DigitalProductsList';
-import {
-  DigitalBundleManager,
-  BundleDigitalProduct,
-  DigitalBundle,
-} from './DigitalBundleManager';
+import { DigitalBundleManager, BundleDigitalProduct, DigitalBundle } from './DigitalBundleManager';
 import { logger } from '@/lib/logger';
 
 /**
  * Données de démonstration - Produits digitaux
  */
-const  mockProducts: DigitalProductListItem[] = [
+const mockProducts: DigitalProductListItem[] = [
   {
     id: 'prod-001',
     name: 'Ebook React Avancé',
@@ -76,7 +72,7 @@ const  mockProducts: DigitalProductListItem[] = [
   {
     id: 'prod-004',
     name: 'Plugin WordPress SEO',
-    description: 'Plugin d\'optimisation SEO',
+    description: "Plugin d'optimisation SEO",
     category: 'plugin',
     status: 'published',
     price: 59,
@@ -174,7 +170,7 @@ const  mockProducts: DigitalProductListItem[] = [
 /**
  * Produits disponibles pour les bundles
  */
-const  availableProductsForBundles: BundleDigitalProduct[] = mockProducts.map((p) => ({
+const availableProductsForBundles: BundleDigitalProduct[] = mockProducts.map(p => ({
   id: p.id,
   name: p.name,
   description: p.description,
@@ -188,10 +184,10 @@ const  availableProductsForBundles: BundleDigitalProduct[] = mockProducts.map((p
 /**
  * Bundle exemple pour le mode édition
  */
-const  existingBundle: Partial<DigitalBundle> = {
+const existingBundle: Partial<DigitalBundle> = {
   id: 'bundle-001',
   name: 'Pack Développeur Full-Stack',
-  description: 'Tout ce qu\'il faut pour devenir développeur full-stack',
+  description: "Tout ce qu'il faut pour devenir développeur full-stack",
   productIds: ['prod-001', 'prod-002', 'prod-003'],
   discountType: 'percentage',
   discountValue: 25,
@@ -206,7 +202,7 @@ const  existingBundle: Partial<DigitalBundle> = {
  * - DigitalProductsList
  * - DigitalBundleManager
  */
-export const DigitalDay2Demo : React.FC = () => {
+export const DigitalDay2Demo: React.FC = () => {
   return (
     <div className="container mx-auto py-8 space-y-8">
       <div className="space-y-2">
@@ -227,12 +223,12 @@ export const DigitalDay2Demo : React.FC = () => {
 
         <DigitalProductsList
           products={mockProducts}
-          onSelect={(ids) => logger.info('Selected products', { count: ids.length, ids })}
-          onEdit={(id) => logger.info('Edit product', { productId: id })}
-          onDelete={(id) => logger.info('Delete product', { productId: id })}
-          onDuplicate={(id) => logger.info('Duplicate product', { productId: id })}
-          onArchive={(id) => logger.info('Archive product', { productId: id })}
-          onView={(id) => logger.info('View product', { productId: id })}
+          onSelect={ids => logger.info('Selected products', { count: ids.length, ids })}
+          onEdit={id => logger.info('Edit product', { productId: id })}
+          onDelete={id => logger.info('Delete product', { productId: id })}
+          onDuplicate={id => logger.info('Duplicate product', { productId: id })}
+          onArchive={id => logger.info('Archive product', { productId: id })}
+          onView={id => logger.info('View product', { productId: id })}
           showBulkActions={true}
           showFilters={true}
           showSearch={true}
@@ -260,7 +256,7 @@ export const DigitalDay2Demo : React.FC = () => {
             <Card className="p-6">
               <DigitalBundleManager
                 availableProducts={availableProductsForBundles}
-                onSave={(bundle) => {
+                onSave={bundle => {
                   logger.info('Bundle created', { bundleId: bundle.id, bundleName: bundle.name });
                   alert(`Bundle "${bundle.name}" créé avec succès !`);
                 }}
@@ -276,7 +272,7 @@ export const DigitalDay2Demo : React.FC = () => {
               <DigitalBundleManager
                 bundle={existingBundle}
                 availableProducts={availableProductsForBundles}
-                onSave={(bundle) => {
+                onSave={bundle => {
                   logger.info('Bundle updated', { bundleId: bundle.id });
                   alert(`Bundle "${bundle.name}" mis à jour !`);
                 }}
@@ -383,11 +379,3 @@ export const DigitalDay2Demo : React.FC = () => {
 };
 
 export default DigitalDay2Demo;
-
-
-
-
-
-
-
-

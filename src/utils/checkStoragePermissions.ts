@@ -23,7 +23,7 @@ export interface StoragePermissionCheck {
  * Vérifie les permissions de stockage pour le bucket "attachments"
  */
 export async function checkStoragePermissions(): Promise<StoragePermissionCheck> {
-  const  result: StoragePermissionCheck = {
+  const result: StoragePermissionCheck = {
     bucketExists: false,
     bucketPublic: false,
     userAuthenticated: false,
@@ -48,11 +48,11 @@ export async function checkStoragePermissions(): Promise<StoragePermissionCheck>
     result.userId = user.id;
 
     // 2. Vérifier le bucket (avec retry pour gérer la propagation)
-    let  attachmentsBucket= null;
-    let  bucketsError= null;
+    let attachmentsBucket = null;
+    let bucketsError = null;
 
     // Essayer jusqu'à 3 fois avec délai (pour gérer la propagation Supabase)
-    for (let  attempt= 0; attempt < 3; attempt++) {
+    for (let attempt = 0; attempt < 3; attempt++) {
       const { data: buckets, error: error } = await supabase.storage.listBuckets();
       bucketsError = error;
 
@@ -155,7 +155,7 @@ export async function checkStoragePermissions(): Promise<StoragePermissionCheck>
 
     logger.info('✅ Vérification des permissions de stockage réussie', result);
     return result;
-  } catch ( _error: unknown) {
+  } catch (_error: unknown) {
     const err = error instanceof Error ? error : new Error(String(error));
     result.errors.push(`Erreur lors de la vérification: ${err.message || String(error)}`);
     logger.error('Erreur lors de la vérification des permissions de stockage', { error });
@@ -167,7 +167,7 @@ export async function checkStoragePermissions(): Promise<StoragePermissionCheck>
  * Affiche un rapport de vérification des permissions
  */
 export function formatPermissionCheckReport(check: StoragePermissionCheck): string {
-  const  lines: string[] = [];
+  const lines: string[] = [];
 
   lines.push('📋 RAPPORT DE VÉRIFICATION DES PERMISSIONS');
   lines.push('==========================================');
@@ -222,9 +222,3 @@ export function formatPermissionCheckReport(check: StoragePermissionCheck): stri
 
   return lines.join('\n');
 }
-
-
-
-
-
-

@@ -1,7 +1,7 @@
 /**
  * Index d'export pour les hooks courses
  * Facilite les imports dans toute l'application
- * 
+ *
  * @author Emarzona Team
  * @date 29 Octobre 2025
  */
@@ -178,10 +178,3 @@ export {
   type PrerequisiteValidation,
   type CreatePrerequisiteData,
 } from './usePrerequisites';
-
-
-
-
-
-
-

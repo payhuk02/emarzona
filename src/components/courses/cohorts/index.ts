@@ -3,10 +3,3 @@
  */
 
 export { CohortsList } from './CohortsList';
-
-
-
-
-
-
-

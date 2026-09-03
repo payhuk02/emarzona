@@ -14,14 +14,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
-import {
-  History,
-  Calendar,
-  DollarSign,
-  Package,
-  Search,
-  Filter,
-} from '@/components/icons';
+import { History, Calendar, DollarSign, Package, Search, Filter } from '@/components/icons';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -57,10 +50,16 @@ export const PurchaseHistory = () => {
   const [dateFilter, setDateFilter] = useState<string>('all');
 
   // Récupérer l'historique des achats
-  const { data: orders, isLoading, error } = useQuery({
+  const {
+    data: orders,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['customerPurchaseHistory', statusFilter, dateFilter],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
       const { data: customer } = await supabase
@@ -71,9 +70,10 @@ export const PurchaseHistory = () => {
 
       if (!customer) throw new Error('Client non trouvé');
 
-      let  query= supabase
+      let query = supabase
         .from('orders')
-        .select(`
+        .select(
+          `
           *,
           order_items(
             *,
@@ -83,7 +83,8 @@ export const PurchaseHistory = () => {
               product_type
             )
           )
-        `)
+        `
+        )
         .eq('customer_id', customer.id)
         .order('created_at', { ascending: false });
 
@@ -99,7 +100,7 @@ export const PurchaseHistory = () => {
       // Filtrer par date
       if (dateFilter !== 'all') {
         const now = new Date();
-        let  startDate: Date;
+        let startDate: Date;
 
         switch (dateFilter) {
           case 'week':
@@ -123,7 +124,7 @@ export const PurchaseHistory = () => {
       if (ordersError) throw ordersError;
 
       // Filtrer pour ne garder que les produits physiques
-      const physicalOrders = (ordersData || []).filter((order) => {
+      const physicalOrders = (ordersData || []).filter(order => {
         const items = order.order_items || [];
         return items.some(
           (item: OrderItemWithProduct) => item.products?.product_type === 'physical'
@@ -135,7 +136,7 @@ export const PurchaseHistory = () => {
   });
 
   // Filtrer par terme de recherche
-  const filteredOrders = orders?.filter((order) => {
+  const filteredOrders = orders?.filter(order => {
     if (!searchTerm) return true;
     const searchLower = searchTerm.toLowerCase();
     return (
@@ -166,7 +167,7 @@ export const PurchaseHistory = () => {
   }
 
   const getStatusBadge = (status: string) => {
-    const  variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
+    const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
       pending: 'secondary',
       processing: 'default',
       confirmed: 'default',
@@ -176,7 +177,7 @@ export const PurchaseHistory = () => {
       cancelled: 'destructive',
     };
 
-    const  labels: Record<string, string> = {
+    const labels: Record<string, string> = {
       pending: 'En attente',
       processing: 'En traitement',
       confirmed: 'Confirmée',
@@ -186,20 +187,14 @@ export const PurchaseHistory = () => {
       cancelled: 'Annulée',
     };
 
-    return (
-      <Badge variant={variants[status] || 'default'}>
-        {labels[status] || status}
-      </Badge>
-    );
+    return <Badge variant={variants[status] || 'default'}>{labels[status] || status}</Badge>;
   };
 
   // Calculer les statistiques
   const stats = {
     total: filteredOrders?.length || 0,
     totalSpent: filteredOrders?.reduce((sum, order) => sum + (order.total_amount || 0), 0) || 0,
-    averageOrder: filteredOrders
-      ? (stats.totalSpent / (filteredOrders.length || 1))
-      : 0,
+    averageOrder: filteredOrders ? stats.totalSpent / (filteredOrders.length || 1) : 0,
   };
 
   return (
@@ -243,9 +238,7 @@ export const PurchaseHistory = () => {
             <History className="h-5 w-5" />
             Historique des Achats
           </CardTitle>
-          <CardDescription>
-            Consultez toutes vos commandes de produits physiques
-          </CardDescription>
+          <CardDescription>Consultez toutes vos commandes de produits physiques</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-col sm:flex-row gap-4">
@@ -255,7 +248,7 @@ export const PurchaseHistory = () => {
                 <Input
                   placeholder="Rechercher par numéro de commande ou produit..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={e => setSearchTerm(e.target.value)}
                   className="pl-10"
                 />
               </div>
@@ -301,7 +294,7 @@ export const PurchaseHistory = () => {
             </div>
           ) : (
             <div className="space-y-4">
-              {filteredOrders.map((order) => {
+              {filteredOrders.map(order => {
                 const physicalItems = (order.order_items || []).filter(
                   (item: OrderItemWithProduct) => item.products?.product_type === 'physical'
                 );
@@ -380,10 +373,3 @@ export const PurchaseHistory = () => {
     </div>
   );
 };
-
-
-
-
-
-
-

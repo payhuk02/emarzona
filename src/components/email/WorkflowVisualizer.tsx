@@ -14,7 +14,7 @@ interface WorkflowVisualizerProps {
   className?: string;
 }
 
-const  ACTION_ICONS: Record<string, React.ReactNode> = {
+const ACTION_ICONS: Record<string, React.ReactNode> = {
   send_email: <Mail className="h-4 w-4" />,
   wait: <Clock className="h-4 w-4" />,
   add_tag: <Tag className="h-4 w-4" />,
@@ -22,7 +22,7 @@ const  ACTION_ICONS: Record<string, React.ReactNode> = {
   update_segment: <Users className="h-4 w-4" />,
 };
 
-const  ACTION_LABELS: Record<string, string> = {
+const ACTION_LABELS: Record<string, string> = {
   send_email: 'Envoyer email',
   wait: 'Attendre',
   add_tag: 'Ajouter tag',
@@ -30,7 +30,7 @@ const  ACTION_LABELS: Record<string, string> = {
   update_segment: 'Mettre à jour segment',
 };
 
-const  TRIGGER_LABELS: Record<string, string> = {
+const TRIGGER_LABELS: Record<string, string> = {
   event: 'Événement',
   time: 'Temps',
   condition: 'Condition',
@@ -44,12 +44,22 @@ export const WorkflowVisualizer = ({ workflow, className }: WorkflowVisualizerPr
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg">Prévisualisation du workflow</CardTitle>
-          <Badge variant="outline" className={cn(
-            workflow.status === 'active' && 'bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20',
-            workflow.status === 'paused' && 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-500/20',
-            workflow.status === 'archived' && 'bg-gray-500/10 text-gray-700 dark:text-gray-400 border-gray-500/20',
-          )}>
-            {workflow.status === 'active' ? 'Actif' : workflow.status === 'paused' ? 'En pause' : 'Archivé'}
+          <Badge
+            variant="outline"
+            className={cn(
+              workflow.status === 'active' &&
+                'bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20',
+              workflow.status === 'paused' &&
+                'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-500/20',
+              workflow.status === 'archived' &&
+                'bg-gray-500/10 text-gray-700 dark:text-gray-400 border-gray-500/20'
+            )}
+          >
+            {workflow.status === 'active'
+              ? 'Actif'
+              : workflow.status === 'paused'
+                ? 'En pause'
+                : 'Archivé'}
           </Badge>
         </div>
       </CardHeader>
@@ -67,9 +77,7 @@ export const WorkflowVisualizer = ({ workflow, className }: WorkflowVisualizerPr
               </Badge>
             )}
           </div>
-          {sortedActions.length > 0 && (
-            <ArrowDown className="h-4 w-4 text-muted-foreground" />
-          )}
+          {sortedActions.length > 0 && <ArrowDown className="h-4 w-4 text-muted-foreground" />}
         </div>
 
         {/* Actions */}
@@ -95,11 +103,12 @@ export const WorkflowVisualizer = ({ workflow, className }: WorkflowVisualizerPr
                         {action.config.duration} minutes
                       </div>
                     )}
-                    {(action.type === 'add_tag' || action.type === 'remove_tag') && action.config?.tag && (
-                      <div className="text-xs text-muted-foreground mt-1">
-                        Tag: {action.config.tag}
-                      </div>
-                    )}
+                    {(action.type === 'add_tag' || action.type === 'remove_tag') &&
+                      action.config?.tag && (
+                        <div className="text-xs text-muted-foreground mt-1">
+                          Tag: {action.config.tag}
+                        </div>
+                      )}
                   </div>
                   <Badge variant="outline" className="text-xs">
                     Étape {action.order}
@@ -143,10 +152,3 @@ export const WorkflowVisualizer = ({ workflow, className }: WorkflowVisualizerPr
     </Card>
   );
 };
-
-
-
-
-
-
-

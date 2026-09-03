@@ -8,7 +8,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useCreateReturn, type CreateReturnData } from '@/hooks/physical/useReturns';
 import { Upload, AlertCircle, CheckCircle2, X, Loader2 } from 'lucide-react';
@@ -36,11 +42,14 @@ export const ReturnRequestForm = ({
 }: ReturnRequestFormProps) => {
   const { toast } = useToast();
   const createReturn = useCreateReturn();
-  
-  const [returnReason, setReturnReason] = useState<CreateReturnData['return_reason']>('changed_mind');
+
+  const [returnReason, setReturnReason] =
+    useState<CreateReturnData['return_reason']>('changed_mind');
   const [returnReasonDetails, setReturnReasonDetails] = useState('');
   const [returnQuantity, setReturnQuantity] = useState(1);
-  const [refundMethod, setRefundMethod] = useState<'original_payment' | 'store_credit' | 'exchange'>('original_payment');
+  const [refundMethod, setRefundMethod] = useState<
+    'original_payment' | 'store_credit' | 'exchange'
+  >('original_payment');
   const [customerNotes, setCustomerNotes] = useState('');
   const [photos, setPhotos] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -49,7 +58,9 @@ export const ReturnRequestForm = ({
 
   // Get current user ID for upload path
   const getUserId = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     return user?.id || 'anonymous';
   };
 
@@ -79,7 +90,7 @@ export const ReturnRequestForm = ({
           filePrefix: 'return-photo',
           maxSizeBytes: 5 * 1024 * 1024,
           allowedTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
-          onProgress: (progress) => {
+          onProgress: progress => {
             const totalProgress = ((index + progress / 100) / files.length) * 100;
             setUploadProgress(Math.round(totalProgress));
           },
@@ -101,10 +112,10 @@ export const ReturnRequestForm = ({
           description: `${validUrls.length} photo(s) ajoutée(s) avec succès`,
         });
       }
-    } catch ( _error: any) {
+    } catch (_error: any) {
       logger.error('Erreur upload photos retour', error);
       toast({
-        title: '❌ Erreur d\'upload',
+        title: "❌ Erreur d'upload",
         description: error.message || 'Impossible de télécharger les photos',
         variant: 'destructive',
       });
@@ -179,7 +190,7 @@ export const ReturnRequestForm = ({
             <Label htmlFor="return-reason">Raison du retour *</Label>
             <Select
               value={returnReason}
-              onValueChange={(value) => setReturnReason(value as CreateReturnData['return_reason'])}
+              onValueChange={value => setReturnReason(value as CreateReturnData['return_reason'])}
             >
               <SelectTrigger id="return-reason">
                 <SelectValue />
@@ -204,7 +215,7 @@ export const ReturnRequestForm = ({
             <Textarea
               id="return-reason-details"
               value={returnReasonDetails}
-              onChange={(e) => setReturnReasonDetails(e.target.value)}
+              onChange={e => setReturnReasonDetails(e.target.value)}
               placeholder="Décrivez le problème ou la raison du retour..."
               rows={3}
             />
@@ -215,7 +226,7 @@ export const ReturnRequestForm = ({
             <Label htmlFor="return-quantity">Quantité à retourner *</Label>
             <Select
               value={returnQuantity.toString()}
-              onValueChange={(value) => setReturnQuantity(parseInt(value))}
+              onValueChange={value => setReturnQuantity(parseInt(value))}
             >
               <SelectTrigger id="return-quantity">
                 <SelectValue />
@@ -235,13 +246,15 @@ export const ReturnRequestForm = ({
             <Label htmlFor="refund-method">Méthode de remboursement *</Label>
             <Select
               value={refundMethod}
-              onValueChange={(value) => setRefundMethod(value as typeof refundMethod)}
+              onValueChange={value => setRefundMethod(value as typeof refundMethod)}
             >
               <SelectTrigger id="refund-method">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="original_payment">Remboursement méthode de paiement originale</SelectItem>
+                <SelectItem value="original_payment">
+                  Remboursement méthode de paiement originale
+                </SelectItem>
                 <SelectItem value="store_credit">Crédit store</SelectItem>
                 <SelectItem value="exchange">Échange</SelectItem>
               </SelectContent>
@@ -254,7 +267,8 @@ export const ReturnRequestForm = ({
             <Alert>
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                Les photos aident à traiter votre retour plus rapidement. Montrez le produit et tout dommage éventuel.
+                Les photos aident à traiter votre retour plus rapidement. Montrez le produit et tout
+                dommage éventuel.
               </AlertDescription>
             </Alert>
             <input
@@ -285,7 +299,7 @@ export const ReturnRequestForm = ({
                 </>
               )}
             </Button>
-            
+
             {/* Photo previews */}
             {photos.length > 0 && (
               <div className="grid grid-cols-3 gap-2 mt-2">
@@ -318,7 +332,7 @@ export const ReturnRequestForm = ({
             <Textarea
               id="customer-notes"
               value={customerNotes}
-              onChange={(e) => setCustomerNotes(e.target.value)}
+              onChange={e => setCustomerNotes(e.target.value)}
               placeholder="Toute information supplémentaire..."
               rows={3}
             />
@@ -328,16 +342,13 @@ export const ReturnRequestForm = ({
           <Alert>
             <CheckCircle2 className="h-4 w-4" />
             <AlertDescription>
-              Votre demande de retour sera examinée et vous recevrez une réponse sous 2-3 jours ouvrables.
+              Votre demande de retour sera examinée et vous recevrez une réponse sous 2-3 jours
+              ouvrables.
             </AlertDescription>
           </Alert>
 
           {/* Submit */}
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={createReturn.isPending}
-          >
+          <Button type="submit" className="w-full" disabled={createReturn.isPending}>
             {createReturn.isPending ? 'Envoi en cours...' : 'Soumettre la demande de retour'}
           </Button>
         </form>
@@ -345,10 +356,3 @@ export const ReturnRequestForm = ({
     </Card>
   );
 };
-
-
-
-
-
-
-

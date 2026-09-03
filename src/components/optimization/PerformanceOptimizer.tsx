@@ -95,7 +95,7 @@ export const AccessibilityEnhancer = () => {
     enhanceAccessibility();
 
     // Observer les changements DOM pour appliquer aux nouveaux éléments
-    let  rafId: number | null = null;
+    let rafId: number | null = null;
     const observer = new MutationObserver(mutations => {
       // Filtrer: ne réagir que si des noeuds sont ajoutés.
       const hasAddedNodes = mutations.some(m => m.addedNodes && m.addedNodes.length > 0);
@@ -237,9 +237,3 @@ export const PerformanceOptimizer = () => {
     </>
   );
 };
-
-
-
-
-
-

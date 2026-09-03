@@ -229,34 +229,38 @@ ORDER BY policyname;`;
 
   return (
     <div className="space-y-6">
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>
-                  <strong>Action requise :</strong> Script SQL pour corriger l'erreur "null value in column id" et recréer la table profiles correctement.
-                </AlertDescription>
-              </Alert>
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>
+          <strong>Action requise :</strong> Script SQL pour corriger l'erreur "null value in column
+          id" et recréer la table profiles correctement.
+        </AlertDescription>
+      </Alert>
 
       <Card className="bg-background border-border shadow-sm">
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
             <Database className="h-5 w-5 text-primary" /> Instructions de Migration
           </CardTitle>
-                  <CardDescription>
-                    Suivez ces étapes pour appliquer le script SQL qui corrige l'erreur d'ID et recrée la table profiles.
-                  </CardDescription>
+          <CardDescription>
+            Suivez ces étapes pour appliquer le script SQL qui corrige l'erreur d'ID et recrée la
+            table profiles.
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-3">
             <div className="flex items-start gap-3">
-              <Badge variant="outline" className="mt-1">1</Badge>
+              <Badge variant="outline" className="mt-1">
+                1
+              </Badge>
               <div>
                 <p className="font-medium">Ouvrir le Dashboard Supabase</p>
                 <p className="text-sm text-muted-foreground">
                   Connectez-vous à votre projet Supabase
                 </p>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
+                <Button
+                  variant="outline"
+                  size="sm"
                   className="mt-2"
                   onClick={() => window.open('https://supabase.com/dashboard', '_blank')}
                 >
@@ -266,7 +270,9 @@ ORDER BY policyname;`;
             </div>
 
             <div className="flex items-start gap-3">
-              <Badge variant="outline" className="mt-1">2</Badge>
+              <Badge variant="outline" className="mt-1">
+                2
+              </Badge>
               <div>
                 <p className="font-medium">Naviguer vers l'éditeur SQL</p>
                 <p className="text-sm text-muted-foreground">
@@ -276,12 +282,15 @@ ORDER BY policyname;`;
             </div>
 
             <div className="flex items-start gap-3">
-              <Badge variant="outline" className="mt-1">3</Badge>
+              <Badge variant="outline" className="mt-1">
+                3
+              </Badge>
               <div>
                 <p className="font-medium">Exécuter le script SQL</p>
-                        <p className="text-sm text-muted-foreground mb-2">
-                          Copiez et exécutez le script SQL pour corriger l'erreur d'ID et recréer la table profiles :
-                        </p>
+                <p className="text-sm text-muted-foreground mb-2">
+                  Copiez et exécutez le script SQL pour corriger l'erreur d'ID et recréer la table
+                  profiles :
+                </p>
                 <div className="relative">
                   <pre className="bg-muted p-4 rounded-md text-sm overflow-x-auto border">
                     {sqlCode}
@@ -299,7 +308,9 @@ ORDER BY policyname;`;
             </div>
 
             <div className="flex items-start gap-3">
-              <Badge variant="outline" className="mt-1">4</Badge>
+              <Badge variant="outline" className="mt-1">
+                4
+              </Badge>
               <div>
                 <p className="font-medium">Vérifier l'exécution</p>
                 <p className="text-sm text-muted-foreground">
@@ -309,7 +320,9 @@ ORDER BY policyname;`;
             </div>
 
             <div className="flex items-start gap-3">
-              <Badge variant="outline" className="mt-1">5</Badge>
+              <Badge variant="outline" className="mt-1">
+                5
+              </Badge>
               <div>
                 <p className="font-medium">Actualiser la page</p>
                 <p className="text-sm text-muted-foreground">
@@ -319,21 +332,16 @@ ORDER BY policyname;`;
             </div>
           </div>
 
-                  <Alert className="bg-blue-500/10 border-blue-500 text-blue-300">
-                    <Info className="h-4 w-4" />
-                    <AlertDescription>
-                      <strong>Note :</strong> Ce script supprime et recrée la table profiles avec la bonne structure.
-                      Cela corrigera définitivement l'erreur d'ID. Vos données utilisateur existantes seront préservées.
-                    </AlertDescription>
-                  </Alert>
+          <Alert className="bg-blue-500/10 border-blue-500 text-blue-300">
+            <Info className="h-4 w-4" />
+            <AlertDescription>
+              <strong>Note :</strong> Ce script supprime et recrée la table profiles avec la bonne
+              structure. Cela corrigera définitivement l'erreur d'ID. Vos données utilisateur
+              existantes seront préservées.
+            </AlertDescription>
+          </Alert>
         </CardContent>
       </Card>
     </div>
   );
 };
-
-
-
-
-
-

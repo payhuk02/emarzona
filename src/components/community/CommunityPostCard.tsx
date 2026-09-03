@@ -10,12 +10,12 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { formatDistanceToNow } from 'date-fns';
 import { SafeHTML } from '@/components/security/SafeHTML';
 import { fr } from 'date-fns/locale';
-import { 
-  Heart, 
-  MessageCircle, 
-  Share2, 
-  MoreVertical, 
-  Pin, 
+import {
+  Heart,
+  MessageCircle,
+  Share2,
+  MoreVertical,
+  Pin,
   Star,
   Eye,
   ThumbsUp,
@@ -23,12 +23,7 @@ import {
   Frown,
   AlertCircle,
 } from 'lucide-react';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import { useToggleReaction } from '@/hooks/community/useCommunityReactions';
 import { useCurrentUserPostReaction } from '@/hooks/community/useCommunityReactions';
 import { useNavigate } from 'react-router-dom';
@@ -54,7 +49,9 @@ export function CommunityPostCard({
   const { data: userReaction } = useCurrentUserPostReaction(post.id);
   const toggleReaction = useToggleReaction();
 
-  const handleReaction = async (reactionType: 'like' | 'love' | 'laugh' | 'wow' | 'sad' | 'angry' | 'support') => {
+  const handleReaction = async (
+    reactionType: 'like' | 'love' | 'laugh' | 'wow' | 'sad' | 'angry' | 'support'
+  ) => {
     await toggleReaction.mutateAsync({ postId: post.id, reactionType });
   };
 
@@ -73,11 +70,13 @@ export function CommunityPostCard({
   };
 
   return (
-    <Card className={cn(
-      "hover:shadow-lg transition-all duration-300",
-      post.is_pinned && "border-primary border-2",
-      post.is_featured && "bg-gradient-to-br from-primary/5 to-primary/10"
-    )}>
+    <Card
+      className={cn(
+        'hover:shadow-lg transition-all duration-300',
+        post.is_pinned && 'border-primary border-2',
+        post.is_featured && 'bg-gradient-to-br from-primary/5 to-primary/10'
+      )}
+    >
       <CardHeader className="p-4 sm:p-6">
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
@@ -99,7 +98,9 @@ export function CommunityPostCard({
                 )}
               </div>
               <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
-                <span>{formatDistanceToNow(new Date(post.created_at), { addSuffix: true, locale: fr })}</span>
+                <span>
+                  {formatDistanceToNow(new Date(post.created_at), { addSuffix: true, locale: fr })}
+                </span>
                 {post.is_pinned && (
                   <Badge variant="outline" className="text-xs shrink-0">
                     <Pin className="h-3 w-3 mr-1" />
@@ -133,13 +134,20 @@ export function CommunityPostCard({
                   </SelectItem>
                 )}
                 {onFeature && (
-                  <SelectItem value="feature" onSelect={() => onFeature(post.id, !post.is_featured)}>
+                  <SelectItem
+                    value="feature"
+                    onSelect={() => onFeature(post.id, !post.is_featured)}
+                  >
                     <Star className="h-4 w-4 mr-2" />
                     {post.is_featured ? 'Retirer de la vedette' : 'Mettre en vedette'}
                   </SelectItem>
                 )}
                 {onDelete && (
-                  <SelectItem value="delete" onSelect={() => onDelete(post.id)} className="text-destructive">
+                  <SelectItem
+                    value="delete"
+                    onSelect={() => onDelete(post.id)}
+                    className="text-destructive"
+                  >
                     <AlertCircle className="h-4 w-4 mr-2" />
                     Supprimer
                   </SelectItem>
@@ -150,10 +158,8 @@ export function CommunityPostCard({
         </div>
       </CardHeader>
       <CardContent className="space-y-3 sm:space-y-4 p-4 sm:p-6 pt-0">
-        {post.title && (
-          <h4 className="text-base sm:text-lg font-semibold">{post.title}</h4>
-        )}
-        
+        {post.title && <h4 className="text-base sm:text-lg font-semibold">{post.title}</h4>}
+
         <div className="prose prose-sm max-w-none dark:prose-invert text-sm sm:text-base">
           {post.content_type === 'markdown' ? (
             <SafeHTML html={post.content} />
@@ -165,13 +171,16 @@ export function CommunityPostCard({
         {(post.category || (post.tags && post.tags.length > 0)) && (
           <div className="flex flex-wrap gap-2">
             {post.category && (
-              <Badge variant="outline" className="text-xs">{post.category}</Badge>
-            )}
-            {post.tags && post.tags.map((tag) => (
-              <Badge key={tag} variant="secondary" className="text-xs">
-                #{tag}
+              <Badge variant="outline" className="text-xs">
+                {post.category}
               </Badge>
-            ))}
+            )}
+            {post.tags &&
+              post.tags.map(tag => (
+                <Badge key={tag} variant="secondary" className="text-xs">
+                  #{tag}
+                </Badge>
+              ))}
           </div>
         )}
 
@@ -184,10 +193,12 @@ export function CommunityPostCard({
               disabled={toggleReaction.isPending}
               className="min-h-[36px] sm:min-h-[40px]"
             >
-              <ThumbsUp className={cn(
-                "h-4 w-4 sm:mr-2",
-                userReaction?.reaction_type === 'like' && "fill-current"
-              )} />
+              <ThumbsUp
+                className={cn(
+                  'h-4 w-4 sm:mr-2',
+                  userReaction?.reaction_type === 'like' && 'fill-current'
+                )}
+              />
               <span>{post.likes_count || 0}</span>
             </Button>
 
@@ -209,7 +220,11 @@ export function CommunityPostCard({
             </Button>
           </div>
 
-          <Button variant="ghost" size="sm" className="min-h-[36px] sm:min-h-[40px] w-full sm:w-auto">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="min-h-[36px] sm:min-h-[40px] w-full sm:w-auto"
+          >
             <Share2 className="h-4 w-4 sm:mr-2" />
             <span className="hidden sm:inline">Partager</span>
             <span className="sm:hidden">Partager</span>
@@ -219,10 +234,3 @@ export function CommunityPostCard({
     </Card>
   );
 }
-
-
-
-
-
-
-

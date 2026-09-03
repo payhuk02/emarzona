@@ -8,14 +8,24 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 
-const ARTWORK_CERTIFICATE_FIELDS = 'id, product_id, store_id, certificate_type, certificate_number, issued_by, issued_by_contact, issued_date, expiry_date, certificate_content, certificate_pdf_url, is_verified, verification_code, qr_code_url, metadata, created_at, updated_at';
-const ARTWORK_3D_MODEL_FIELDS = 'id, product_id, store_id, model_url, model_type, model_size_bytes, thumbnail_url, preview_images, model_metadata, auto_rotate, auto_play, show_controls, background_color, camera_position, camera_target, views_count, interactions_count, created_at, updated_at';
+const ARTWORK_CERTIFICATE_FIELDS =
+  'id, product_id, store_id, certificate_type, certificate_number, issued_by, issued_by_contact, issued_date, expiry_date, certificate_content, certificate_pdf_url, is_verified, verification_code, qr_code_url, metadata, created_at, updated_at';
+const ARTWORK_3D_MODEL_FIELDS =
+  'id, product_id, store_id, model_url, model_type, model_size_bytes, thumbnail_url, preview_images, model_metadata, auto_rotate, auto_play, show_controls, background_color, camera_position, camera_target, views_count, interactions_count, created_at, updated_at';
 
 export interface ArtworkProvenance {
   id: string;
   product_id: string;
   store_id: string;
-  provenance_type: 'creation' | 'ownership' | 'exhibition' | 'publication' | 'restoration' | 'authentication' | 'certification' | 'other';
+  provenance_type:
+    | 'creation'
+    | 'ownership'
+    | 'exhibition'
+    | 'publication'
+    | 'restoration'
+    | 'authentication'
+    | 'certification'
+    | 'other';
   event_date: string;
   recorded_date: string;
   previous_owner_id?: string;
@@ -178,17 +188,17 @@ export function useCreateProvenance() {
 
       return data as ArtworkProvenance;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['artwork-provenance', data.product_id] });
       toast({
         title: 'Provenance créée',
-        description: 'L\'entrée de provenance a été créée avec succès.',
+        description: "L'entrée de provenance a été créée avec succès.",
       });
     },
     onError: (error: Error) => {
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible de créer l\'entrée de provenance.',
+        description: error.message || "Impossible de créer l'entrée de provenance.",
         variant: 'destructive',
       });
     },
@@ -223,7 +233,7 @@ export function useCreateCertificate() {
 
       return data as ArtworkCertificate;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['artwork-certificates', data.product_id] });
       toast({
         title: 'Certificat créé',
@@ -264,10 +274,3 @@ export function useIncrement3DModelViews() {
     },
   });
 }
-
-
-
-
-
-
-

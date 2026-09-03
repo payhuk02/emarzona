@@ -27,15 +27,17 @@ export const RecommendationAnalytics: React.FC<RecommendationAnalyticsProps> = (
   userId,
   storeId,
   dateRange,
-  className
+  className,
 }) => {
   // Récupérer les statistiques de recommandations
-  const { data: analytics, isLoading, error } = useQuery({
+  const {
+    data: analytics,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['recommendation-analytics', userId, storeId, dateRange],
     queryFn: async () => {
-      let query = supabase
-        .from('recommendation_analytics')
-        .select(`
+      let query = supabase.from('recommendation_analytics').select(`
           *,
           recommended_product:products!recommendation_analytics_recommended_product_id_fkey(
             id, name, category, store_id
@@ -82,24 +84,37 @@ export const RecommendationAnalytics: React.FC<RecommendationAnalyticsProps> = (
     const conversionRate = totalViews > 0 ? (totalPurchases / totalViews) * 100 : 0;
 
     // Statistiques par raison
-    const reasonStats = analytics.reduce((acc, item) => {
-      if (!acc[item.reason]) {
-        acc[item.reason] = {
-          views: 0,
-          clicks: 0,
-          purchases: 0,
-          clickRate: 0,
-          purchaseRate: 0,
-          conversionRate: 0
-        };
-      }
+    const reasonStats = analytics.reduce(
+      (acc, item) => {
+        if (!acc[item.reason]) {
+          acc[item.reason] = {
+            views: 0,
+            clicks: 0,
+            purchases: 0,
+            clickRate: 0,
+            purchaseRate: 0,
+            conversionRate: 0,
+          };
+        }
 
-      acc[item.reason].views++;
-      if (item.clicked) acc[item.reason].clicks++;
-      if (item.purchased) acc[item.reason].purchases++;
+        acc[item.reason].views++;
+        if (item.clicked) acc[item.reason].clicks++;
+        if (item.purchased) acc[item.reason].purchases++;
 
-      return acc;
-    }, {} as Record<string, { views: number; clicks: number; purchases: number; clickRate: number; purchaseRate: number; conversionRate: number }>);
+        return acc;
+      },
+      {} as Record<
+        string,
+        {
+          views: number;
+          clicks: number;
+          purchases: number;
+          clickRate: number;
+          purchaseRate: number;
+          conversionRate: number;
+        }
+      >
+    );
 
     // Calculer les taux pour chaque raison
     Object.keys(reasonStats).forEach(reason => {
@@ -116,13 +131,13 @@ export const RecommendationAnalytics: React.FC<RecommendationAnalyticsProps> = (
       clickRate,
       purchaseRate,
       conversionRate,
-      reasonStats
+      reasonStats,
     };
   }, [analytics]);
 
   if (isLoading) {
     return (
-      <div className={cn("grid gap-4 md:grid-cols-2 lg:grid-cols-4", className)}>
+      <div className={cn('grid gap-4 md:grid-cols-2 lg:grid-cols-4', className)}>
         {Array.from({ length: 4 }).map((_, i) => (
           <Card key={i}>
             <CardContent className="p-6">
@@ -137,7 +152,7 @@ export const RecommendationAnalytics: React.FC<RecommendationAnalyticsProps> = (
 
   if (error || !metrics) {
     return (
-      <Card className={cn("", className)}>
+      <Card className={cn('', className)}>
         <CardContent className="p-6 text-center">
           <p className="text-muted-foreground">
             Erreur lors du chargement des analytics de recommandations
@@ -150,7 +165,7 @@ export const RecommendationAnalytics: React.FC<RecommendationAnalyticsProps> = (
   const formatRate = (rate: number) => `${rate.toFixed(1)}%`;
 
   return (
-    <div className={cn("space-y-6", className)}>
+    <div className={cn('space-y-6', className)}>
       {/* Métriques principales */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
@@ -209,47 +224,60 @@ export const RecommendationAnalytics: React.FC<RecommendationAnalyticsProps> = (
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {Object.entries(metrics.reasonStats).map(([reason, stats]: [string, { views: number; clicks: number; purchases: number; clickRate: number; purchaseRate: number; conversionRate: number }]) => (
-              <div key={reason} className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Badge variant="outline" className="capitalize">
-                      {reason}
-                    </Badge>
-                    <span className="text-sm text-muted-foreground">
-                      {stats.views} vues
-                    </span>
+            {Object.entries(metrics.reasonStats).map(
+              ([reason, stats]: [
+                string,
+                {
+                  views: number;
+                  clicks: number;
+                  purchases: number;
+                  clickRate: number;
+                  purchaseRate: number;
+                  conversionRate: number;
+                },
+              ]) => (
+                <div
+                  key={reason}
+                  className="flex items-center justify-between p-4 border rounded-lg"
+                >
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Badge variant="outline" className="capitalize">
+                        {reason}
+                      </Badge>
+                      <span className="text-sm text-muted-foreground">{stats.views} vues</span>
+                    </div>
+                    <div className="grid grid-cols-3 gap-4 text-sm">
+                      <div>
+                        <span className="text-muted-foreground">Clics: </span>
+                        <span className="font-medium">{stats.clicks}</span>
+                        <span className="text-muted-foreground ml-1">
+                          ({formatRate(stats.clickRate)})
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Achats: </span>
+                        <span className="font-medium">{stats.purchases}</span>
+                        <span className="text-muted-foreground ml-1">
+                          ({formatRate(stats.purchaseRate)})
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Conversion: </span>
+                        <span className="font-medium">{formatRate(stats.conversionRate)}</span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="grid grid-cols-3 gap-4 text-sm">
-                    <div>
-                      <span className="text-muted-foreground">Clics: </span>
-                      <span className="font-medium">{stats.clicks}</span>
-                      <span className="text-muted-foreground ml-1">
-                        ({formatRate(stats.clickRate)})
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Achats: </span>
-                      <span className="font-medium">{stats.purchases}</span>
-                      <span className="text-muted-foreground ml-1">
-                        ({formatRate(stats.purchaseRate)})
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Conversion: </span>
-                      <span className="font-medium">{formatRate(stats.conversionRate)}</span>
-                    </div>
+                  <div className="flex items-center gap-1">
+                    {stats.conversionRate > metrics.conversionRate ? (
+                      <TrendingUp className="h-4 w-4 text-green-500" />
+                    ) : stats.conversionRate < metrics.conversionRate ? (
+                      <TrendingDown className="h-4 w-4 text-red-500" />
+                    ) : null}
                   </div>
                 </div>
-                <div className="flex items-center gap-1">
-                  {stats.conversionRate > metrics.conversionRate ? (
-                    <TrendingUp className="h-4 w-4 text-green-500" />
-                  ) : stats.conversionRate < metrics.conversionRate ? (
-                    <TrendingDown className="h-4 w-4 text-red-500" />
-                  ) : null}
-                </div>
-              </div>
-            ))}
+              )
+            )}
           </div>
         </CardContent>
       </Card>

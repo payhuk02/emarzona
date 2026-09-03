@@ -248,10 +248,10 @@ const ProductListView = ({
                 {(() => {
                   let currentPrice = product.price || 0;
                   let crossedOutPrice: number | null = null;
-                  
+
                   const backendPromotionalPrice = (product as any).promotional_price;
                   const backendCompareAtPrice = (product as any).compare_at_price;
-                  
+
                   if (backendPromotionalPrice && backendPromotionalPrice < product.price) {
                     currentPrice = backendPromotionalPrice;
                     crossedOutPrice = product.price;
@@ -259,7 +259,7 @@ const ProductListView = ({
                     currentPrice = product.price;
                     crossedOutPrice = backendCompareAtPrice;
                   }
-                  
+
                   return (
                     <div className="flex items-center gap-1.5">
                       {crossedOutPrice !== null && (

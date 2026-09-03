@@ -22,12 +22,12 @@ import { cn } from '@/lib/utils';
 /**
  * Statuts possibles pour un produit digital
  */
-export type DigitalProductStatus = 
-  | 'draft'         // Brouillon
-  | 'published'     // Publié
-  | 'active'        // Actif avec ventes
-  | 'archived'      // Archivé
-  | 'suspended';    // Suspendu (violation, etc.)
+export type DigitalProductStatus =
+  | 'draft' // Brouillon
+  | 'published' // Publié
+  | 'active' // Actif avec ventes
+  | 'archived' // Archivé
+  | 'suspended'; // Suspendu (violation, etc.)
 
 /**
  * Variantes d'affichage du composant
@@ -40,43 +40,43 @@ export type DigitalStatusVariant = 'compact' | 'default' | 'detailed';
 export interface DigitalProductStatusIndicatorProps {
   /** Statut actuel du produit */
   status: DigitalProductStatus;
-  
+
   /** Nombre total de téléchargements */
   totalDownloads?: number;
-  
+
   /** Téléchargements récents (7 derniers jours) */
   recentDownloads?: number;
-  
+
   /** Tendance des téléchargements */
   downloadTrend?: 'up' | 'down' | 'stable';
-  
+
   /** Nombre de licences actives */
   activeLicenses?: number;
-  
+
   /** Nombre de licences totales */
   totalLicenses?: number;
-  
+
   /** Seuil de licence faible (par défaut: 20%) */
   lowLicenseThreshold?: number;
-  
+
   /** Afficher la barre de progression */
   showProgress?: boolean;
-  
+
   /** Variante d'affichage */
   variant?: DigitalStatusVariant;
-  
+
   /** Classe CSS personnalisée */
   className?: string;
-  
+
   /** Revenue généré */
   revenue?: number;
-  
+
   /** Devise */
   currency?: string;
-  
+
   /** Nombre de clients actifs */
   activeCustomers?: number;
-  
+
   /** Niveau de protection */
   protectionLevel?: 'basic' | 'standard' | 'advanced';
 }
@@ -84,7 +84,7 @@ export interface DigitalProductStatusIndicatorProps {
 /**
  * Configuration des statuts avec leurs propriétés visuelles
  */
-const  STATUS_CONFIG: Record<
+const STATUS_CONFIG: Record<
   DigitalProductStatus,
   {
     label: string;
@@ -146,7 +146,7 @@ const  STATUS_CONFIG: Record<
 /**
  * Configuration des niveaux de protection
  */
-const  PROTECTION_LEVELS: Record<string, { label: string; color: string }> = {
+const PROTECTION_LEVELS: Record<string, { label: string; color: string }> = {
   basic: { label: 'Basique', color: 'text-gray-600' },
   standard: { label: 'Standard', color: 'text-blue-600' },
   advanced: { label: 'Avancé', color: 'text-green-600' },
@@ -154,26 +154,26 @@ const  PROTECTION_LEVELS: Record<string, { label: string; color: string }> = {
 
 /**
  * DigitalProductStatusIndicator - Composant d'affichage du statut de produit digital
- * 
+ *
  * @example
  * ```tsx
  * // Compact variant
- * <DigitalProductStatusIndicator 
- *   status="active" 
+ * <DigitalProductStatusIndicator
+ *   status="active"
  *   variant="compact"
  * />
- * 
+ *
  * // Default with downloads
- * <DigitalProductStatusIndicator 
- *   status="published" 
+ * <DigitalProductStatusIndicator
+ *   status="published"
  *   totalDownloads={450}
  *   recentDownloads={12}
  *   showProgress={true}
  * />
- * 
+ *
  * // Detailed with all metrics
- * <DigitalProductStatusIndicator 
- *   status="active" 
+ * <DigitalProductStatusIndicator
+ *   status="active"
  *   variant="detailed"
  *   totalDownloads={1250}
  *   recentDownloads={85}
@@ -187,7 +187,7 @@ const  PROTECTION_LEVELS: Record<string, { label: string; color: string }> = {
  * />
  * ```
  */
-export const DigitalProductStatusIndicator : React.FC<DigitalProductStatusIndicatorProps> = ({
+export const DigitalProductStatusIndicator: React.FC<DigitalProductStatusIndicatorProps> = ({
   status,
   totalDownloads,
   recentDownloads,
@@ -207,13 +207,13 @@ export const DigitalProductStatusIndicator : React.FC<DigitalProductStatusIndica
   const Icon = config.icon;
 
   // Calculer le pourcentage de licences utilisées
-  const licensePercentage = activeLicenses !== undefined && totalLicenses
-    ? (activeLicenses / totalLicenses) * 100
-    : 0;
+  const licensePercentage =
+    activeLicenses !== undefined && totalLicenses ? (activeLicenses / totalLicenses) * 100 : 0;
 
-  const isLowLicense = activeLicenses !== undefined && totalLicenses
-    ? ((totalLicenses - activeLicenses) / totalLicenses) * 100 <= lowLicenseThreshold
-    : false;
+  const isLowLicense =
+    activeLicenses !== undefined && totalLicenses
+      ? ((totalLicenses - activeLicenses) / totalLicenses) * 100 <= lowLicenseThreshold
+      : false;
 
   // Obtenir l'icône de tendance
   const getTrendIcon = () => {
@@ -277,9 +277,7 @@ export const DigitalProductStatusIndicator : React.FC<DigitalProductStatusIndica
                 <Icon className={cn('h-5 w-5', config.color)} />
               </div>
               <div>
-                <p className={cn('font-semibold text-sm', config.textColor)}>
-                  {config.label}
-                </p>
+                <p className={cn('font-semibold text-sm', config.textColor)}>{config.label}</p>
                 {protectionLevel && (
                   <p className={cn('text-xs', PROTECTION_LEVELS[protectionLevel].color)}>
                     Protection {PROTECTION_LEVELS[protectionLevel].label}
@@ -306,12 +304,9 @@ export const DigitalProductStatusIndicator : React.FC<DigitalProductStatusIndica
                   {activeLicenses}/{totalLicenses}
                 </span>
               </div>
-              <Progress 
-                value={licensePercentage} 
-                className={cn(
-                  'h-2',
-                  isLowLicense && 'bg-orange-100'
-                )}
+              <Progress
+                value={licensePercentage}
+                className={cn('h-2', isLowLicense && 'bg-orange-100')}
               />
             </div>
           )}
@@ -351,9 +346,7 @@ export const DigitalProductStatusIndicator : React.FC<DigitalProductStatusIndica
               <Icon className={cn('h-6 w-6', config.color)} />
             </div>
             <div>
-              <p className={cn('font-bold text-base', config.textColor)}>
-                {config.label}
-              </p>
+              <p className={cn('font-bold text-base', config.textColor)}>{config.label}</p>
               {protectionLevel && (
                 <div className="flex items-center gap-1 mt-1">
                   <Shield className={cn('h-3 w-3', PROTECTION_LEVELS[protectionLevel].color)} />
@@ -372,9 +365,7 @@ export const DigitalProductStatusIndicator : React.FC<DigitalProductStatusIndica
                 <Download className="h-3 w-3 mr-1" />
                 {totalDownloads.toLocaleString()}
               </Badge>
-              <p className="text-xs text-muted-foreground mt-1">
-                téléchargements
-              </p>
+              <p className="text-xs text-muted-foreground mt-1">téléchargements</p>
             </div>
           )}
         </div>
@@ -386,12 +377,9 @@ export const DigitalProductStatusIndicator : React.FC<DigitalProductStatusIndica
               <span className="text-muted-foreground">Licences actives</span>
               <span className="font-medium">{Math.round(licensePercentage)}%</span>
             </div>
-            <Progress 
-              value={licensePercentage} 
-              className={cn(
-                'h-3',
-                isLowLicense ? 'bg-orange-100' : 'bg-green-100'
-              )}
+            <Progress
+              value={licensePercentage}
+              className={cn('h-3', isLowLicense ? 'bg-orange-100' : 'bg-green-100')}
             />
             <p className="text-xs text-muted-foreground">
               {activeLicenses} sur {totalLicenses} licences utilisées
@@ -468,9 +456,7 @@ export const DigitalProductStatusIndicator : React.FC<DigitalProductStatusIndica
           <div className="flex items-start gap-2 p-3 bg-gray-50 border border-gray-200 rounded-lg">
             <Clock className="h-5 w-5 text-gray-600 mt-0.5" />
             <div>
-              <p className="text-sm font-medium text-gray-700">
-                Produit en brouillon
-              </p>
+              <p className="text-sm font-medium text-gray-700">Produit en brouillon</p>
               <p className="text-xs text-gray-600 mt-1">
                 Publiez ce produit pour le rendre disponible au téléchargement
               </p>
@@ -482,9 +468,7 @@ export const DigitalProductStatusIndicator : React.FC<DigitalProductStatusIndica
           <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
             <AlertCircle className="h-5 w-5 text-red-600 mt-0.5" />
             <div>
-              <p className="text-sm font-medium text-red-700">
-                Produit suspendu
-              </p>
+              <p className="text-sm font-medium text-red-700">Produit suspendu</p>
               <p className="text-xs text-red-600 mt-1">
                 Ce produit n'est plus accessible aux clients
               </p>
@@ -499,11 +483,3 @@ export const DigitalProductStatusIndicator : React.FC<DigitalProductStatusIndica
 DigitalProductStatusIndicator.displayName = 'DigitalProductStatusIndicator';
 
 export default DigitalProductStatusIndicator;
-
-
-
-
-
-
-
-

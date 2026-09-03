@@ -1,7 +1,7 @@
 /**
  * Updates Tab Component
  * Date: 27 Janvier 2025
- * 
+ *
  * Onglet pour afficher les mises à jour disponibles
  */
 
@@ -10,7 +10,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useCustomerProductUpdates, useCustomerProductVersions } from '@/hooks/digital/useProductUpdates';
+import {
+  useCustomerProductUpdates,
+  useCustomerProductVersions,
+} from '@/hooks/digital/useProductUpdates';
 import { Download, AlertCircle, Package, Sparkles, Shield } from '@/components/icons';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -43,7 +46,7 @@ export const UpdatesTab = () => {
   if (isLoading) {
     return (
       <div className="space-y-4">
-        {[1, 2, 3].map((i) => (
+        {[1, 2, 3].map(i => (
           <Card key={i}>
             <CardHeader>
               <Skeleton className="h-6 w-64" />
@@ -66,9 +69,7 @@ export const UpdatesTab = () => {
         <div className="text-center">
           <Package className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
           <h3 className="text-lg font-semibold mb-2">Aucune mise à jour</h3>
-          <p className="text-muted-foreground">
-            Tous vos produits digitaux sont à jour
-          </p>
+          <p className="text-muted-foreground">Tous vos produits digitaux sont à jour</p>
         </div>
       </Card>
     );
@@ -77,17 +78,13 @@ export const UpdatesTab = () => {
   return (
     <Tabs defaultValue="updates" className="space-y-4">
       <TabsList>
-        <TabsTrigger value="updates">
-          Mises à jour ({updates?.length || 0})
-        </TabsTrigger>
-        <TabsTrigger value="versions">
-          Versions ({versions?.length || 0})
-        </TabsTrigger>
+        <TabsTrigger value="updates">Mises à jour ({updates?.length || 0})</TabsTrigger>
+        <TabsTrigger value="versions">Versions ({versions?.length || 0})</TabsTrigger>
       </TabsList>
 
       <TabsContent value="updates" className="space-y-4">
         {updates && updates.length > 0 ? (
-          updates.map((update) => (
+          updates.map(update => (
             <Card key={update.id} className="hover:shadow-md transition-shadow">
               <CardHeader>
                 <div className="flex items-start justify-between">
@@ -151,16 +148,14 @@ export const UpdatesTab = () => {
           ))
         ) : (
           <Card className="p-8">
-            <div className="text-center text-muted-foreground">
-              Aucune mise à jour disponible
-            </div>
+            <div className="text-center text-muted-foreground">Aucune mise à jour disponible</div>
           </Card>
         )}
       </TabsContent>
 
       <TabsContent value="versions" className="space-y-4">
         {versions && versions.length > 0 ? (
-          versions.map((version) => (
+          versions.map(version => (
             <Card key={version.id} className="hover:shadow-md transition-shadow">
               <CardHeader>
                 <div className="flex items-start justify-between">
@@ -203,7 +198,9 @@ export const UpdatesTab = () => {
                           )}
                           {version.release_date && (
                             <span className="text-xs">
-                              {format(new Date(version.release_date), 'dd MMM yyyy', { locale: fr })}
+                              {format(new Date(version.release_date), 'dd MMM yyyy', {
+                                locale: fr,
+                              })}
                             </span>
                           )}
                         </div>
@@ -217,7 +214,9 @@ export const UpdatesTab = () => {
                   <div>
                     <h4 className="font-semibold mb-2">{version.changelog_title}</h4>
                     {version.changelog_markdown && (
-                      <div className="text-sm whitespace-pre-wrap">{version.changelog_markdown}</div>
+                      <div className="text-sm whitespace-pre-wrap">
+                        {version.changelog_markdown}
+                      </div>
                     )}
                   </div>
                 )}
@@ -262,19 +261,10 @@ export const UpdatesTab = () => {
           ))
         ) : (
           <Card className="p-8">
-            <div className="text-center text-muted-foreground">
-              Aucune version disponible
-            </div>
+            <div className="text-center text-muted-foreground">Aucune version disponible</div>
           </Card>
         )}
       </TabsContent>
     </Tabs>
   );
 };
-
-
-
-
-
-
-

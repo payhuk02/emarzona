@@ -26,8 +26,7 @@ const REVIEW_REPLY_FIELDS =
   'id, review_id, user_id, content, reply_type, is_official, created_at, updated_at';
 const REVIEW_MEDIA_FIELDS =
   'id, review_id, media_type, media_url, mime_type, display_order, created_at';
-const REVIEW_VOTE_FIELDS =
-  'id, review_id, user_id, is_helpful, created_at, updated_at';
+const REVIEW_VOTE_FIELDS = 'id, review_id, user_id, is_helpful, created_at, updated_at';
 const PRODUCT_REVIEW_STATS_FIELDS =
   'id, product_id, store_id, average_rating, total_reviews, rating_1_count, rating_2_count, rating_3_count, rating_4_count, rating_5_count, last_updated, created_at, updated_at';
 
@@ -44,7 +43,7 @@ export const useProductReviews = (productId?: string, filters?: ReviewFilters) =
     queryFn: async (): Promise<Review[]> => {
       if (!productId) return [];
 
-      let  query= supabase
+      let query = supabase
         .from('reviews')
         .select(
           `
@@ -419,7 +418,7 @@ export const useCreateReview = () => {
 
       // Upload media si présent
       if (payload.media_files && payload.media_files.length > 0) {
-        for (let  i= 0; i < payload.media_files.length; i++) {
+        for (let i = 0; i < payload.media_files.length; i++) {
           const file = payload.media_files[i];
           const fileExt = file.name.split('.').pop();
           const fileName = `${data.id}/${Date.now()}.${fileExt}`;
@@ -459,9 +458,12 @@ export const useCreateReview = () => {
           rating: variables.rating,
           storeId: review.store_id,
         });
-        logger.info("Loyalty points awarded for review", { reviewId: review.id, reward });
+        logger.info('Loyalty points awarded for review', { reviewId: review.id, reward });
       } catch (loyaltyError) {
-        logger.error("Failed to award loyalty points for review", { error: loyaltyError, reviewId: review.id });
+        logger.error('Failed to award loyalty points for review', {
+          error: loyaltyError,
+          reviewId: review.id,
+        });
       }
 
       toast({
@@ -725,9 +727,3 @@ export const useUserReviews = (userId?: string, limit: number = 50) => {
     staleTime: 1000 * 60 * 5,
   });
 };
-
-
-
-
-
-

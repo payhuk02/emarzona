@@ -8,7 +8,8 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 
-const AFFILIATE_SETTINGS_FIELDS = 'id, product_id, store_id, affiliate_enabled, commission_rate, commission_type, fixed_commission_amount, cookie_duration_days, max_commission_per_sale, min_order_amount, allow_self_referral, require_approval, terms_and_conditions, created_at, updated_at';
+const AFFILIATE_SETTINGS_FIELDS =
+  'id, product_id, store_id, affiliate_enabled, commission_rate, commission_type, fixed_commission_amount, cookie_duration_days, max_commission_per_sale, min_order_amount, allow_self_referral, require_approval, terms_and_conditions, created_at, updated_at';
 
 interface AffiliateSettings {
   id: string;
@@ -67,10 +68,7 @@ export const useIsAffiliateEnabled = (productId: string) => {
 /**
  * Hook pour calculer la commission estimée pour un affilié
  */
-export const useCalculateCommission = (
-  productId: string,
-  productPrice: number
-) => {
+export const useCalculateCommission = (productId: string, productPrice: number) => {
   const { data: settings } = useCourseAffiliateSettings(productId);
 
   const calculateCommission = () => {
@@ -80,8 +78,8 @@ export const useCalculateCommission = (
 
     if (settings.commission_type === 'percentage') {
       // Commission sur le montant vendeur (après commission plateforme 10%)
-      const sellerAmount = productPrice * 0.90;
-      let  commission= (sellerAmount * settings.commission_rate) / 100;
+      const sellerAmount = productPrice * 0.9;
+      let commission = (sellerAmount * settings.commission_rate) / 100;
 
       // Appliquer la limite max si définie
       if (settings.max_commission_per_sale && commission > settings.max_commission_per_sale) {
@@ -137,7 +135,10 @@ export const useCourseAffiliateStats = (productId: string) => {
         .eq('status', 'paid');
 
       if (commissionsError && commissionsError.code !== 'PGRST116') {
-        logger.error('Error fetching affiliate commissions', { error: commissionsError, productId });
+        logger.error('Error fetching affiliate commissions', {
+          error: commissionsError,
+          productId,
+        });
       }
 
       const totalCommissions = commissions?.reduce((sum, c) => sum + c.amount, 0) || 0;
@@ -151,10 +152,3 @@ export const useCourseAffiliateStats = (productId: string) => {
     enabled: !!productId,
   });
 };
-
-
-
-
-
-
-

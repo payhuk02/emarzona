@@ -93,9 +93,7 @@ export const CourseAnalyticsDashboard = ({ productId }: CourseAnalyticsDashboard
               <CardContent className="p-6">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-muted-foreground mb-1">
-                      {kpi.title}
-                    </p>
+                    <p className="text-sm font-medium text-muted-foreground mb-1">{kpi.title}</p>
                     <div className="flex items-baseline gap-2">
                       <p className="text-2xl font-bold">{kpi.value}</p>
                       {kpi.change !== undefined && kpi.change !== 0 && (
@@ -137,22 +135,23 @@ export const CourseAnalyticsDashboard = ({ productId }: CourseAnalyticsDashboard
             <BarChart3 className="w-5 h-5" />
             Vues des 7 derniers jours
           </CardTitle>
-          <CardDescription>
-            Évolution des visites sur votre cours
-          </CardDescription>
+          <CardDescription>Évolution des visites sur votre cours</CardDescription>
         </CardHeader>
         <CardContent>
           {timeline && timeline.length > 0 ? (
             <LazyRechartsWrapper>
-              {(recharts) => (
+              {recharts => (
                 <recharts.ResponsiveContainer width="100%" height={300}>
                   <recharts.LineChart data={timeline}>
                     <recharts.CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
                     <recharts.XAxis
                       dataKey="date"
-                      tickFormatter={(value) => {
+                      tickFormatter={value => {
                         const date = new Date(value);
-                        return date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
+                        return date.toLocaleDateString('fr-FR', {
+                          day: '2-digit',
+                          month: '2-digit',
+                        });
                       }}
                       stroke="#888"
                     />
@@ -163,7 +162,7 @@ export const CourseAnalyticsDashboard = ({ productId }: CourseAnalyticsDashboard
                         border: '1px solid #e0e0e0',
                         borderRadius: '8px',
                       }}
-                      labelFormatter={(value) => {
+                      labelFormatter={value => {
                         const date = new Date(value);
                         return date.toLocaleDateString('fr-FR', {
                           weekday: 'long',
@@ -239,7 +238,7 @@ export const CourseAnalyticsDashboard = ({ productId }: CourseAnalyticsDashboard
                   </p>
                   <p className="text-xs text-green-700 mt-1">
                     Votre cours convertit bien ({'>'}
-{analytics.conversion_rate}%)
+                    {analytics.conversion_rate}%)
                   </p>
                 </div>
               </div>
@@ -257,9 +256,7 @@ export const CourseAnalyticsDashboard = ({ productId }: CourseAnalyticsDashboard
               <div className="flex items-start gap-2 p-3 bg-yellow-50 rounded-lg">
                 <TrendingDown className="w-5 h-5 text-yellow-600 mt-0.5" />
                 <div>
-                  <p className="text-sm font-semibold text-yellow-900">
-                    Amélioration possible
-                  </p>
+                  <p className="text-sm font-semibold text-yellow-900">Amélioration possible</p>
                   <p className="text-xs text-yellow-700 mt-1">
                     Optimisez description et vidéo preview
                   </p>
@@ -284,9 +281,3 @@ export const CourseAnalyticsDashboard = ({ productId }: CourseAnalyticsDashboard
     </div>
   );
 };
-
-
-
-
-
-

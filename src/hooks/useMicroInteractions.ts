@@ -15,26 +15,21 @@ interface MicroInteractionOptions {
 
 /**
  * Hook pour ajouter des micro-interactions aux éléments
- * 
+ *
  * @example
  * ```tsx
  * const { interactionProps, isInteracting } = useMicroInteractions({
  *   haptic: true,
  *   animation: 'scale'
  * });
- * 
+ *
  * <button {...interactionProps} onClick={handleClick}>
  *   Cliquer
  * </button>
  * ```
  */
 export function useMicroInteractions(options: MicroInteractionOptions = {}) {
-  const {
-    haptic = false,
-    hapticType = 'medium',
-    animation = 'scale',
-    duration = 200,
-  } = options;
+  const { haptic = false, hapticType = 'medium', animation = 'scale', duration = 200 } = options;
 
   const [isInteracting, setIsInteracting] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout>();
@@ -42,7 +37,7 @@ export function useMicroInteractions(options: MicroInteractionOptions = {}) {
 
   const handleInteractionStart = useCallback(() => {
     setIsInteracting(true);
-    
+
     if (haptic) {
       triggerHaptic(hapticType);
     }
@@ -96,10 +91,7 @@ export function useMicroInteractions(options: MicroInteractionOptions = {}) {
 /**
  * Hook pour animer un compteur
  */
-export function useAnimatedCounter(
-  targetValue: number,
-  duration: number = 1000
-) {
+export function useAnimatedCounter(targetValue: number, duration: number = 1000) {
   const [displayValue, setDisplayValue] = useState(0);
 
   useEffect(() => {
@@ -165,15 +157,6 @@ export function useScrollAnimation(threshold: number = 0.1) {
   return {
     ref: elementRef,
     isVisible,
-    className: isVisible
-      ? 'animate-in fade-in slide-in-from-bottom-4 duration-700'
-      : 'opacity-0',
+    className: isVisible ? 'animate-in fade-in slide-in-from-bottom-4 duration-700' : 'opacity-0',
   };
 }
-
-
-
-
-
-
-

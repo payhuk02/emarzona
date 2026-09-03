@@ -42,7 +42,7 @@ export function useAIChatbot(): UseAIChatbotReturn {
       try {
         const state = JSON.parse(savedState);
         // Vérifier si la session est obsolète
-        if (state.lastUpdate && (Date.now() - state.lastUpdate > cleanupThreshold)) {
+        if (state.lastUpdate && Date.now() - state.lastUpdate > cleanupThreshold) {
           logger.info('Chatbot state in localStorage is too old, clearing it.');
           localStorage.removeItem('ai-chatbot-state');
           localStorage.removeItem(`ai-chatbot-session-initialized-${state.sessionId}`); // Nettoyer aussi l'indicateur d'initialisation
@@ -54,10 +54,15 @@ export function useAIChatbot(): UseAIChatbotReturn {
           setIsMinimized(state.isMinimized || false);
           setMessages(state.messages || []);
           setUnreadCount(state.unreadCount || 0);
-          setSessionId(state.sessionId || `chat_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
+          setSessionId(
+            state.sessionId || `chat_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+          );
         }
       } catch (error) {
-        logger.warn('Impossible de restaurer l\'état du chatbot depuis localStorage, le réinitialise.', { error });
+        logger.warn(
+          "Impossible de restaurer l'état du chatbot depuis localStorage, le réinitialise.",
+          { error }
+        );
         localStorage.removeItem('ai-chatbot-state');
         setSessionId(`chat_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
         setMessages([]);
@@ -77,7 +82,7 @@ export function useAIChatbot(): UseAIChatbotReturn {
       messages,
       unreadCount,
       sessionId,
-      lastUpdate: Date.now()
+      lastUpdate: Date.now(),
     };
 
     localStorage.setItem('ai-chatbot-state', JSON.stringify(state));
@@ -86,7 +91,8 @@ export function useAIChatbot(): UseAIChatbotReturn {
   // Auto-ouverture pour les nouveaux visiteurs
   useEffect(() => {
     const hasVisited = localStorage.getItem('ai-chatbot-visited');
-    const timeSinceLastVisit = Date.now() - (parseInt(localStorage.getItem('ai-chatbot-last-visit') || '0'));
+    const timeSinceLastVisit =
+      Date.now() - parseInt(localStorage.getItem('ai-chatbot-last-visit') || '0');
 
     // Ouvrir automatiquement après 30 secondes pour les nouveaux visiteurs
     if (!hasVisited && timeSinceLastVisit > 30000) {
@@ -114,67 +120,69 @@ export function useAIChatbot(): UseAIChatbotReturn {
     setIsMinimized(prev => !prev);
   }, []);
 
-  const sendMessage = useCallback(async (message: string) => {
-    if (!message.trim()) return;
+  const sendMessage = useCallback(
+    async (message: string) => {
+      if (!message.trim()) return;
 
-    setIsTyping(true);
+      setIsTyping(true);
 
-    try {
-      // Ajouter le message utilisateur
-      const userMessage: ChatMessage = {
-        id: `user_${Date.now()}`,
-        content: message,
-        role: 'user',
-        timestamp: new Date()
-      };
+      try {
+        // Ajouter le message utilisateur
+        const userMessage: ChatMessage = {
+          id: `user_${Date.now()}`,
+          content: message,
+          role: 'user',
+          timestamp: new Date(),
+        };
 
-      setMessages(prev => [...prev, userMessage]);
+        setMessages(prev => [...prev, userMessage]);
 
-      // Traiter avec le chatbot IA
-      const response = await aiChatbot.processMessage(sessionId, message, user?.id);
+        // Traiter avec le chatbot IA
+        const response = await aiChatbot.processMessage(sessionId, message, user?.id);
 
-      // Ajouter la réponse
-      const assistantMessage: ChatMessage = {
-        id: `assistant_${Date.now()}`,
-        content: response.message,
-        role: 'assistant',
-        timestamp: new Date(),
-        metadata: {
-          actions: response.actions,
-          suggestions: response.suggestions
+        // Ajouter la réponse
+        const assistantMessage: ChatMessage = {
+          id: `assistant_${Date.now()}`,
+          content: response.message,
+          role: 'assistant',
+          timestamp: new Date(),
+          metadata: {
+            actions: response.actions,
+            suggestions: response.suggestions,
+          },
+        };
+
+        setMessages(prev => [...prev, assistantMessage]);
+
+        // Incrémenter le compteur non lu si minimisé ou fermé
+        if (isMinimized || !isOpen) {
+          setUnreadCount(prev => prev + 1);
         }
-      };
 
-      setMessages(prev => [...prev, assistantMessage]);
+        // Logger l'interaction
+        logger.info('Chatbot interaction', {
+          sessionId,
+          userId: user?.id,
+          messageLength: message.length,
+          hasActions: !!response.actions?.length,
+        });
+      } catch (error) {
+        logger.error("Erreur lors de l'envoi du message chatbot", { error, sessionId, message });
 
-      // Incrémenter le compteur non lu si minimisé ou fermé
-      if (isMinimized || !isOpen) {
-        setUnreadCount(prev => prev + 1);
+        const errorMessage: ChatMessage = {
+          id: `error_${Date.now()}`,
+          content: 'Désolé, je rencontre un problème technique. Veuillez réessayer.',
+          role: 'assistant',
+          timestamp: new Date(),
+        };
+
+        setMessages(prev => [...prev, errorMessage]);
+      } finally {
+        setIsTyping(false);
       }
-
-      // Logger l'interaction
-      logger.info('Chatbot interaction', {
-        sessionId,
-        userId: user?.id,
-        messageLength: message.length,
-        hasActions: !!response.actions?.length
-      });
-
-    } catch (error) {
-      logger.error('Erreur lors de l\'envoi du message chatbot', { error, sessionId, message });
-
-      const errorMessage: ChatMessage = {
-        id: `error_${Date.now()}`,
-        content: "Désolé, je rencontre un problème technique. Veuillez réessayer.",
-        role: 'assistant',
-        timestamp: new Date()
-      };
-
-      setMessages(prev => [...prev, errorMessage]);
-    } finally {
-      setIsTyping(false);
-    }
-  }, [sessionId, user?.id, isMinimized, isOpen]);
+    },
+    [sessionId, user?.id, isMinimized, isOpen]
+  );
 
   const clearMessages = useCallback(() => {
     setMessages([]);
@@ -188,19 +196,24 @@ export function useAIChatbot(): UseAIChatbotReturn {
 
   // Envoyer un message de bienvenue lors de la première ouverture ou si la session est nouvelle
   useEffect(() => {
-    if (sessionId && messages.length === 0 && !localStorage.getItem(`ai-chatbot-session-initialized-${sessionId}`)) {
+    if (
+      sessionId &&
+      messages.length === 0 &&
+      !localStorage.getItem(`ai-chatbot-session-initialized-${sessionId}`)
+    ) {
       const welcomeMessage: ChatMessage = {
         id: 'welcome',
-        content: "👋 Bonjour ! Je suis votre assistant IA. Je peux vous aider avec vos commandes, recommandations de produits, informations de livraison, et bien plus encore. Que puis-je faire pour vous ?",
+        content:
+          '👋 Bonjour ! Je suis votre assistant IA. Je peux vous aider avec vos commandes, recommandations de produits, informations de livraison, et bien plus encore. Que puis-je faire pour vous ?',
         role: 'assistant',
         timestamp: new Date(),
         metadata: {
           suggestions: [
-            "Où en est ma commande ?",
-            "Quels produits recommandez-vous ?",
-            "Informations de livraison"
-          ]
-        }
+            'Où en est ma commande ?',
+            'Quels produits recommandez-vous ?',
+            'Informations de livraison',
+          ],
+        },
       };
 
       setMessages([welcomeMessage]);
@@ -218,6 +231,6 @@ export function useAIChatbot(): UseAIChatbotReturn {
     minimizeChatbot,
     sendMessage,
     clearMessages,
-    markAsRead
+    markAsRead,
   };
 }

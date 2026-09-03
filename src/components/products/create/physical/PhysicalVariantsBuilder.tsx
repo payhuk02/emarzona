@@ -19,7 +19,11 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Plus, X, Trash2 } from '@/components/icons';
-import type { PhysicalProductFormData, PhysicalProductOption, PhysicalProductVariant } from '@/types/physical-product';
+import type {
+  PhysicalProductFormData,
+  PhysicalProductOption,
+  PhysicalProductVariant,
+} from '@/types/physical-product';
 
 interface PhysicalVariantsBuilderProps {
   data: Partial<PhysicalProductFormData>;
@@ -40,7 +44,7 @@ export const PhysicalVariantsBuilder = ({ data, onUpdate }: PhysicalVariantsBuil
   const handleAddOption = () => {
     if (!newOptionName.trim()) return;
 
-    const  newOption: PhysicalProductOption = {
+    const newOption: PhysicalProductOption = {
       name: newOptionName.trim(),
       values: [],
     };
@@ -54,10 +58,10 @@ export const PhysicalVariantsBuilder = ({ data, onUpdate }: PhysicalVariantsBuil
 
     const options = [...(data.options || [])];
     options[optionIndex].values.push(newOptionValue.trim());
-    
+
     onUpdate({ options });
     setNewOptionValue('');
-    
+
     // Regenerate variants
     generateVariants(options);
   };
@@ -82,7 +86,7 @@ export const PhysicalVariantsBuilder = ({ data, onUpdate }: PhysicalVariantsBuil
       return;
     }
 
-    const  combinations: PhysicalProductVariant[] = [];
+    const combinations: PhysicalProductVariant[] = [];
 
     const generateCombinations = (
       optionIndex: number,
@@ -101,7 +105,7 @@ export const PhysicalVariantsBuilder = ({ data, onUpdate }: PhysicalVariantsBuil
       }
 
       const option = options[optionIndex];
-      option.values.forEach((value) => {
+      option.values.forEach(value => {
         const next = { ...current };
         if (optionIndex === 0) next.option1_value = value;
         else if (optionIndex === 1) next.option2_value = value;
@@ -127,14 +131,9 @@ export const PhysicalVariantsBuilder = ({ data, onUpdate }: PhysicalVariantsBuil
           <div className="flex items-center justify-between">
             <div>
               <CardTitle>Variantes de produit</CardTitle>
-              <CardDescription>
-                Créez des variantes (tailles, couleurs, etc.)
-              </CardDescription>
+              <CardDescription>Créez des variantes (tailles, couleurs, etc.)</CardDescription>
             </div>
-            <Switch
-              checked={false}
-              onCheckedChange={handleToggleVariants}
-            />
+            <Switch checked={false} onCheckedChange={handleToggleVariants} />
           </div>
         </CardHeader>
         <CardContent>
@@ -158,10 +157,7 @@ export const PhysicalVariantsBuilder = ({ data, onUpdate }: PhysicalVariantsBuil
                 {data.options?.length || 0} option(s), {data.variants?.length || 0} variante(s)
               </CardDescription>
             </div>
-            <Switch
-              checked={true}
-              onCheckedChange={handleToggleVariants}
-            />
+            <Switch checked={true} onCheckedChange={handleToggleVariants} />
           </div>
         </CardHeader>
       </Card>
@@ -170,20 +166,14 @@ export const PhysicalVariantsBuilder = ({ data, onUpdate }: PhysicalVariantsBuil
       <Card>
         <CardHeader>
           <CardTitle>Options</CardTitle>
-          <CardDescription>
-            Ajoutez des options comme la taille, la couleur, etc.
-          </CardDescription>
+          <CardDescription>Ajoutez des options comme la taille, la couleur, etc.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {data.options?.map((option, optionIndex) => (
             <div key={optionIndex} className="p-4 border rounded-lg space-y-3">
               <div className="flex items-center justify-between">
                 <h4 className="font-medium">{option.name}</h4>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleRemoveOption(optionIndex)}
-                >
+                <Button variant="ghost" size="sm" onClick={() => handleRemoveOption(optionIndex)}>
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </div>
@@ -206,18 +196,15 @@ export const PhysicalVariantsBuilder = ({ data, onUpdate }: PhysicalVariantsBuil
                 <Input
                   placeholder="Nouvelle valeur"
                   value={newOptionValue}
-                  onChange={(e) => setNewOptionValue(e.target.value)}
-                  onKeyDown={(e) => {
+                  onChange={e => setNewOptionValue(e.target.value)}
+                  onKeyDown={e => {
                     if (e.key === 'Enter') {
                       e.preventDefault();
                       handleAddOptionValue(optionIndex);
                     }
                   }}
                 />
-                <Button
-                  onClick={() => handleAddOptionValue(optionIndex)}
-                  variant="outline"
-                >
+                <Button onClick={() => handleAddOptionValue(optionIndex)} variant="outline">
                   <Plus className="h-4 w-4" />
                 </Button>
               </div>
@@ -229,7 +216,7 @@ export const PhysicalVariantsBuilder = ({ data, onUpdate }: PhysicalVariantsBuil
               <Input
                 placeholder="Nom de l'option (ex: Taille)"
                 value={newOptionName}
-                onChange={(e) => setNewOptionName(e.target.value)}
+                onChange={e => setNewOptionName(e.target.value)}
               />
               <Button onClick={handleAddOption}>
                 <Plus className="h-4 w-4 mr-2" />
@@ -245,9 +232,7 @@ export const PhysicalVariantsBuilder = ({ data, onUpdate }: PhysicalVariantsBuil
         <Card>
           <CardHeader>
             <CardTitle>Variantes générées</CardTitle>
-            <CardDescription>
-              Configurez le prix, SKU et stock pour chaque variante
-            </CardDescription>
+            <CardDescription>Configurez le prix, SKU et stock pour chaque variante</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="rounded-md border overflow-x-auto">
@@ -272,14 +257,16 @@ export const PhysicalVariantsBuilder = ({ data, onUpdate }: PhysicalVariantsBuil
                         <Input
                           type="number"
                           value={variant.price}
-                          onChange={(e) => handleUpdateVariant(index, 'price', parseFloat(e.target.value))}
+                          onChange={e =>
+                            handleUpdateVariant(index, 'price', parseFloat(e.target.value))
+                          }
                           className="w-24"
                         />
                       </TableCell>
                       <TableCell>
                         <Input
                           value={variant.sku}
-                          onChange={(e) => handleUpdateVariant(index, 'sku', e.target.value)}
+                          onChange={e => handleUpdateVariant(index, 'sku', e.target.value)}
                           className="w-32"
                         />
                       </TableCell>
@@ -287,7 +274,9 @@ export const PhysicalVariantsBuilder = ({ data, onUpdate }: PhysicalVariantsBuil
                         <Input
                           type="number"
                           value={variant.quantity}
-                          onChange={(e) => handleUpdateVariant(index, 'quantity', parseInt(e.target.value))}
+                          onChange={e =>
+                            handleUpdateVariant(index, 'quantity', parseInt(e.target.value))
+                          }
                           className="w-20"
                         />
                       </TableCell>
@@ -302,9 +291,3 @@ export const PhysicalVariantsBuilder = ({ data, onUpdate }: PhysicalVariantsBuil
     </div>
   );
 };
-
-
-
-
-
-

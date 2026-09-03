@@ -1,7 +1,7 @@
 /**
  * Advanced File Management Hooks
  * Date: 2025-01-27
- * 
+ *
  * Hooks pour gérer les versions, catégories et métadonnées de fichiers
  */
 
@@ -10,9 +10,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 
-const FILE_VERSION_FIELDS = 'id, file_id, version_number, version_label, file_url, file_size_mb, file_hash, checksum_sha256, changelog, release_notes, is_stable, is_beta, is_alpha, released_at, deprecated_at, download_count, metadata, created_at, created_by';
-const FILE_CATEGORY_FIELDS = 'id, store_id, name, slug, description, icon, color, parent_category_id, order_index, metadata, created_at, updated_at';
-const FILE_METADATA_FIELDS = 'id, file_id, width, height, duration_seconds, bitrate, sample_rate, channels, codec, format_version, page_count, word_count, language, author, publisher, isbn, copyright, platform, architecture, minimum_requirements, recommended_requirements, custom_fields, created_at, updated_at';
+const FILE_VERSION_FIELDS =
+  'id, file_id, version_number, version_label, file_url, file_size_mb, file_hash, checksum_sha256, changelog, release_notes, is_stable, is_beta, is_alpha, released_at, deprecated_at, download_count, metadata, created_at, created_by';
+const FILE_CATEGORY_FIELDS =
+  'id, store_id, name, slug, description, icon, color, parent_category_id, order_index, metadata, created_at, updated_at';
+const FILE_METADATA_FIELDS =
+  'id, file_id, width, height, duration_seconds, bitrate, sample_rate, channels, codec, format_version, page_count, word_count, language, author, publisher, isbn, copyright, platform, architecture, minimum_requirements, recommended_requirements, custom_fields, created_at, updated_at';
 
 // =====================================================
 // TYPES
@@ -195,7 +198,9 @@ export const useFileCategories = (storeId?: string) => {
     queryKey: ['fileCategories', storeId],
     queryFn: async () => {
       if (!storeId) {
-        const { data: { user } } = await supabase.auth.getUser();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
         if (!user) throw new Error('Non authentifié');
 
         const { data: stores } = await supabase
@@ -271,7 +276,9 @@ export const useCreateFileVersion = () => {
 
   return useMutation({
     mutationFn: async (data: CreateFileVersionData) => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
       const { data: version, error } = await supabase
@@ -357,13 +364,7 @@ export const useUpdateFileMetadata = () => {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({
-      fileId,
-      data,
-    }: {
-      fileId: string;
-      data: UpdateFileMetadataData;
-    }) => {
+    mutationFn: async ({ fileId, data }: { fileId: string; data: UpdateFileMetadataData }) => {
       // Vérifier si les métadonnées existent
       const { data: existing } = await supabase
         .from('digital_product_file_metadata')
@@ -371,7 +372,7 @@ export const useUpdateFileMetadata = () => {
         .eq('file_id', fileId)
         .single();
 
-      let  _result;
+      let _result;
       if (existing) {
         // Mise à jour
         const { data: updated, error } = await supabase
@@ -451,7 +452,7 @@ export const useArchiveFile = () => {
       logger.error('Error in useArchiveFile', { error });
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible d\'archiver le fichier',
+        description: error.message || "Impossible d'archiver le fichier",
         variant: 'destructive',
       });
     },
@@ -517,10 +518,3 @@ export const useUpdateFile = () => {
     },
   });
 };
-
-
-
-
-
-
-

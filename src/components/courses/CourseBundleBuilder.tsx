@@ -92,36 +92,36 @@ export interface AvailableCourse {
 export interface CourseBundleBuilderProps {
   /** Liste des cours disponibles */
   availableCourses: AvailableCourse[];
-  
+
   /** Bundle en cours d'édition (optionnel) */
   editingBundle?: CourseBundle;
-  
+
   /** Callback de sauvegarde */
   onSave?: (bundle: CourseBundle) => void;
-  
+
   /** Callback d'annulation */
   onCancel?: () => void;
-  
+
   /** Classe CSS personnalisée */
   className?: string;
-  
+
   /** Devise */
   currency?: string;
 }
 
 /**
  * CourseBundleBuilder - Constructeur de packs de cours
- * 
+ *
  * @example
  * ```tsx
- * <CourseBundleBuilder 
+ * <CourseBundleBuilder
  *   availableCourses={myCourses}
  *   onSave={(bundle) => createBundle(bundle)}
  *   currency="EUR"
  * />
  * ```
  */
-export const CourseBundleBuilder : React.FC<CourseBundleBuilderProps> = ({
+export const CourseBundleBuilder: React.FC<CourseBundleBuilderProps> = ({
   availableCourses,
   editingBundle,
   onSave,
@@ -169,10 +169,10 @@ export const CourseBundleBuilder : React.FC<CourseBundleBuilderProps> = ({
 
   // Ajouter un cours
   const addCourse = (courseId: string) => {
-    const course = availableCourses.find((c) => c.id === courseId);
+    const course = availableCourses.find(c => c.id === courseId);
     if (!course) return;
 
-    const  bundleCourse: BundleCourse = {
+    const bundleCourse: BundleCourse = {
       id: course.id,
       name: course.name,
       price: course.price,
@@ -187,21 +187,19 @@ export const CourseBundleBuilder : React.FC<CourseBundleBuilderProps> = ({
 
   // Retirer un cours
   const removeCourse = (courseId: string) => {
-    setSelectedCourses(selectedCourses.filter((c) => c.id !== courseId));
+    setSelectedCourses(selectedCourses.filter(c => c.id !== courseId));
   };
 
   // Basculer le statut "requis"
   const toggleRequired = (courseId: string) => {
     setSelectedCourses(
-      selectedCourses.map((c) =>
-        c.id === courseId ? { ...c, isRequired: !c.isRequired } : c
-      )
+      selectedCourses.map(c => (c.id === courseId ? { ...c, isRequired: !c.isRequired } : c))
     );
   };
 
   // Sauvegarder le bundle
   const handleSave = () => {
-    const  bundle: CourseBundle = {
+    const bundle: CourseBundle = {
       id: editingBundle?.id,
       name: bundleName,
       description,
@@ -251,7 +249,7 @@ export const CourseBundleBuilder : React.FC<CourseBundleBuilderProps> = ({
                 <Input
                   id="bundle-name"
                   value={bundleName}
-                  onChange={(e) => setBundleName(e.target.value)}
+                  onChange={e => setBundleName(e.target.value)}
                   placeholder="Ex: Pack Développeur Full-Stack"
                 />
               </div>
@@ -261,7 +259,7 @@ export const CourseBundleBuilder : React.FC<CourseBundleBuilderProps> = ({
                 <Textarea
                   id="description"
                   value={description}
-                  onChange={(e) => setDescription(e.target.value)}
+                  onChange={e => setDescription(e.target.value)}
                   placeholder="Décrivez votre bundle..."
                   rows={3}
                 />
@@ -270,11 +268,12 @@ export const CourseBundleBuilder : React.FC<CourseBundleBuilderProps> = ({
               <div className="flex items-center justify-between">
                 <div>
                   <p className="font-medium text-sm">Bundle actif</p>
-                  <p className="text-xs text-muted-foreground">
-                    Visible dans la boutique
-                  </p>
+                  <p className="text-xs text-muted-foreground">Visible dans la boutique</p>
                 </div>
-                <Checkbox checked={isActive} onCheckedChange={(checked) => setIsActive(checked === true)} />
+                <Checkbox
+                  checked={isActive}
+                  onCheckedChange={checked => setIsActive(checked === true)}
+                />
               </div>
             </div>
           </Card>
@@ -291,8 +290,8 @@ export const CourseBundleBuilder : React.FC<CourseBundleBuilderProps> = ({
                   </SelectTrigger>
                   <SelectContent>
                     {availableCourses
-                      .filter((course) => !selectedCourses.find((c) => c.id === course.id))
-                      .map((course) => (
+                      .filter(course => !selectedCourses.find(c => c.id === course.id))
+                      .map(course => (
                         <SelectItem key={course.id} value={course.id}>
                           <div className="flex items-center justify-between w-full">
                             <span>{course.name}</span>
@@ -311,7 +310,7 @@ export const CourseBundleBuilder : React.FC<CourseBundleBuilderProps> = ({
                   <Separator />
                   <ScrollArea className="h-[300px] pr-4">
                     <div className="space-y-2">
-                      {selectedCourses.map((course) => (
+                      {selectedCourses.map(course => (
                         <div key={course.id} className="p-3 border rounded-lg">
                           <div className="flex items-start justify-between mb-2">
                             <div className="flex-1">
@@ -366,7 +365,7 @@ export const CourseBundleBuilder : React.FC<CourseBundleBuilderProps> = ({
                   id="max-students"
                   type="number"
                   value={maxStudents || ''}
-                  onChange={(e) =>
+                  onChange={e =>
                     setMaxStudents(e.target.value ? parseInt(e.target.value) : undefined)
                   }
                   placeholder="Illimité"
@@ -380,7 +379,7 @@ export const CourseBundleBuilder : React.FC<CourseBundleBuilderProps> = ({
                   id="validity"
                   type="number"
                   value={validityPeriod || ''}
-                  onChange={(e) =>
+                  onChange={e =>
                     setValidityPeriod(e.target.value ? parseInt(e.target.value) : undefined)
                   }
                   placeholder="Accès à vie"
@@ -423,7 +422,7 @@ export const CourseBundleBuilder : React.FC<CourseBundleBuilderProps> = ({
                     <Input
                       type="number"
                       value={discountValue}
-                      onChange={(e) => setDiscountValue(parseFloat(e.target.value) || 0)}
+                      onChange={e => setDiscountValue(parseFloat(e.target.value) || 0)}
                       min={0}
                       max={discountType === 'percentage' ? 100 : totalValue}
                     />
@@ -565,11 +564,3 @@ export const CourseBundleBuilder : React.FC<CourseBundleBuilderProps> = ({
 CourseBundleBuilder.displayName = 'CourseBundleBuilder';
 
 export default CourseBundleBuilder;
-
-
-
-
-
-
-
-

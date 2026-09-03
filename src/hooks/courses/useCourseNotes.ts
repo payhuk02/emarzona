@@ -1,7 +1,7 @@
 /**
  * Course Notes Hooks
  * Date: 27 Janvier 2025
- * 
+ *
  * Hooks pour gérer les notes personnelles avec timestamps
  */
 
@@ -10,8 +10,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 
-const COURSE_NOTE_FIELDS = 'id, enrollment_id, lesson_id, course_id, user_id, content, timestamp_seconds, note_type, tags, is_private, order_index, created_at, updated_at';
-const COURSE_BOOKMARK_FIELDS = 'id, enrollment_id, lesson_id, course_id, user_id, timestamp_seconds, title, description, created_at';
+const COURSE_NOTE_FIELDS =
+  'id, enrollment_id, lesson_id, course_id, user_id, content, timestamp_seconds, note_type, tags, is_private, order_index, created_at, updated_at';
+const COURSE_BOOKMARK_FIELDS =
+  'id, enrollment_id, lesson_id, course_id, user_id, timestamp_seconds, title, description, created_at';
 
 // =====================================================
 // TYPES
@@ -62,10 +64,7 @@ export interface CreateNoteData {
 /**
  * useLessonNotes - Récupère toutes les notes d'une leçon
  */
-export const useLessonNotes = (
-  enrollmentId: string | undefined,
-  lessonId: string | undefined
-) => {
+export const useLessonNotes = (enrollmentId: string | undefined, lessonId: string | undefined) => {
   return useQuery({
     queryKey: ['lesson-notes', enrollmentId, lessonId],
     queryFn: async () => {
@@ -92,10 +91,7 @@ export const useLessonNotes = (
 /**
  * useCourseNotes - Récupère toutes les notes d'un cours
  */
-export const useCourseNotes = (
-  enrollmentId: string | undefined,
-  courseId: string | undefined
-) => {
+export const useCourseNotes = (enrollmentId: string | undefined, courseId: string | undefined) => {
   return useQuery({
     queryKey: ['course-notes', enrollmentId, courseId],
     queryFn: async () => {
@@ -165,13 +161,7 @@ export const useAddNote = () => {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({
-      userId,
-      noteData,
-    }: {
-      userId: string;
-      noteData: CreateNoteData;
-    }) => {
+    mutationFn: async ({ userId, noteData }: { userId: string; noteData: CreateNoteData }) => {
       const { data, error } = await supabase.rpc('add_lesson_note', {
         p_enrollment_id: noteData.enrollment_id,
         p_lesson_id: noteData.lesson_id,
@@ -207,7 +197,7 @@ export const useAddNote = () => {
       logger.error('Error in useAddNote', { error });
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible d\'ajouter la note',
+        description: error.message || "Impossible d'ajouter la note",
         variant: 'destructive',
       });
     },
@@ -246,7 +236,7 @@ export const useUpdateNote = () => {
 
       return data as CourseNote;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['lesson-notes'] });
       queryClient.invalidateQueries({ queryKey: ['course-notes'] });
 
@@ -275,10 +265,7 @@ export const useDeleteNote = () => {
 
   return useMutation({
     mutationFn: async (noteId: string) => {
-      const { error } = await supabase
-        .from('course_notes')
-        .delete()
-        .eq('id', noteId);
+      const { error } = await supabase.from('course_notes').delete().eq('id', noteId);
 
       if (error) {
         logger.error('Error deleting note', { error, noteId });
@@ -332,17 +319,20 @@ export const useAddBookmark = () => {
     }) => {
       const { data, error } = await supabase
         .from('course_note_bookmarks')
-        .upsert({
-          enrollment_id: enrollmentId,
-          lesson_id: lessonId,
-          course_id: courseId,
-          user_id: userId,
-          timestamp_seconds: timestampSeconds,
-          title,
-          description,
-        }, {
-          onConflict: 'enrollment_id,lesson_id,timestamp_seconds',
-        })
+        .upsert(
+          {
+            enrollment_id: enrollmentId,
+            lesson_id: lessonId,
+            course_id: courseId,
+            user_id: userId,
+            timestamp_seconds: timestampSeconds,
+            title,
+            description,
+          },
+          {
+            onConflict: 'enrollment_id,lesson_id,timestamp_seconds',
+          }
+        )
         .select()
         .single();
 
@@ -367,7 +357,7 @@ export const useAddBookmark = () => {
       logger.error('Error in useAddBookmark', { error });
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible d\'ajouter le marque-page',
+        description: error.message || "Impossible d'ajouter le marque-page",
         variant: 'destructive',
       });
     },
@@ -383,10 +373,7 @@ export const useDeleteBookmark = () => {
 
   return useMutation({
     mutationFn: async (bookmarkId: string) => {
-      const { error } = await supabase
-        .from('course_note_bookmarks')
-        .delete()
-        .eq('id', bookmarkId);
+      const { error } = await supabase.from('course_note_bookmarks').delete().eq('id', bookmarkId);
 
       if (error) {
         logger.error('Error deleting bookmark', { error, bookmarkId });
@@ -411,10 +398,3 @@ export const useDeleteBookmark = () => {
     },
   });
 };
-
-
-
-
-
-
-

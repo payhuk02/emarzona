@@ -90,17 +90,11 @@ class ColissimoService {
   private testMode: boolean;
   private apiUrl: string;
 
-  constructor(config: {
-    contractNumber: string;
-    password: string;
-    testMode?: boolean;
-  }) {
+  constructor(config: { contractNumber: string; password: string; testMode?: boolean }) {
     this.contractNumber = config.contractNumber;
     this.password = config.password;
     this.testMode = config.testMode ?? false;
-    this.apiUrl = this.testMode
-      ? 'https://ws.colissimo.fr'
-      : 'https://ws.colissimo.fr';
+    this.apiUrl = this.testMode ? 'https://ws.colissimo.fr' : 'https://ws.colissimo.fr';
   }
 
   /**
@@ -168,14 +162,15 @@ class ColissimoService {
       const data = await response.json();
 
       // Parser la réponse Colissimo
-      const  rates: ColissimoRate[] = data.products?.map((product: any) => ({
-        serviceType: product.productCode || '',
-        serviceName: product.productName || '',
-        shippingCost: parseFloat(product.price || '0') * 100, // Convertir en centimes
-        currency: 'EUR',
-        estimatedDelivery: product.deliveryDate || '',
-        transitTime: product.deliveryTime || 0,
-      })) || [];
+      const rates: ColissimoRate[] =
+        data.products?.map((product: any) => ({
+          serviceType: product.productCode || '',
+          serviceName: product.productName || '',
+          shippingCost: parseFloat(product.price || '0') * 100, // Convertir en centimes
+          currency: 'EUR',
+          estimatedDelivery: product.deliveryDate || '',
+          transitTime: product.deliveryTime || 0,
+        })) || [];
 
       return rates;
     } catch (error) {
@@ -287,17 +282,20 @@ class ColissimoService {
         };
       }
 
-      const response = await fetch(`${this.apiUrl}/sls-ws/SlsServiceWSRest/2.0/getLetterParcelStatus`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contractNumber: this.contractNumber,
-          password: this.password,
-          parcelNumber: trackingNumber,
-        }),
-      });
+      const response = await fetch(
+        `${this.apiUrl}/sls-ws/SlsServiceWSRest/2.0/getLetterParcelStatus`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            contractNumber: this.contractNumber,
+            password: this.password,
+            parcelNumber: trackingNumber,
+          }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`Colissimo API error: ${response.statusText}`);
@@ -310,11 +308,12 @@ class ColissimoService {
         status: data.status || 'unknown',
         currentLocation: data.location || '',
         estimatedDelivery: data.deliveryDate || '',
-        events: data.events?.map((event: any) => ({
-          date: event.date || '',
-          location: event.location || '',
-          description: event.description || '',
-        })) || [],
+        events:
+          data.events?.map((event: any) => ({
+            date: event.date || '',
+            location: event.location || '',
+            description: event.description || '',
+          })) || [],
       };
     } catch (error) {
       logger.error('Colissimo trackShipment error', { error, trackingNumber });
@@ -324,11 +323,3 @@ class ColissimoService {
 }
 
 export default ColissimoService;
-
-
-
-
-
-
-
-

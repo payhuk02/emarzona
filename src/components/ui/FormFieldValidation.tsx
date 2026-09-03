@@ -1,7 +1,7 @@
 /**
  * Form Field Validation Component
  * Date: 28 Janvier 2025
- * 
+ *
  * Composant réutilisable pour afficher les erreurs de validation de champs
  * Améliore l'UX et l'accessibilité
  */
@@ -38,8 +38,9 @@ export const FormFieldValidation = ({
   fieldId,
 }: FormFieldValidationProps) => {
   const generatedId = React.useId();
-  const messageId = id || (error ? `${generatedId}-error` : (hint ? `${generatedId}-hint` : undefined));
-  
+  const messageId =
+    id || (error ? `${generatedId}-error` : hint ? `${generatedId}-hint` : undefined);
+
   if (!error && !success && !hint) return null;
 
   return (
@@ -57,18 +58,8 @@ export const FormFieldValidation = ({
     >
       {showIcon && (
         <>
-          {error && (
-            <AlertCircle
-              className="h-4 w-4 shrink-0 mt-0.5"
-              aria-hidden="true"
-            />
-          )}
-          {success && (
-            <CheckCircle2
-              className="h-4 w-4 shrink-0 mt-0.5"
-              aria-hidden="true"
-            />
-          )}
+          {error && <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" aria-hidden="true" />}
+          {success && <CheckCircle2 className="h-4 w-4 shrink-0 mt-0.5" aria-hidden="true" />}
         </>
       )}
       <span className="flex-1">
@@ -79,10 +70,3 @@ export const FormFieldValidation = ({
     </div>
   );
 };
-
-
-
-
-
-
-

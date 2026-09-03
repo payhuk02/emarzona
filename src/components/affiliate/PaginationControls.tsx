@@ -4,7 +4,13 @@
  */
 
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from '@/components/icons';
 import { cn } from '@/lib/utils';
 
@@ -35,7 +41,12 @@ export const PaginationControls = ({
   const endItem = Math.min(page * pageSize, total);
 
   return (
-    <div className={cn('flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-2 px-2', className)}>
+    <div
+      className={cn(
+        'flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-2 px-2',
+        className
+      )}
+    >
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
         <p className="text-xs sm:text-sm text-muted-foreground">
           Affichage de <span className="font-medium">{startItem}</span> à{' '}
@@ -44,7 +55,7 @@ export const PaginationControls = ({
         </p>
         <Select
           value={pageSize.toString()}
-          onValueChange={(value) => onPageSizeChange(Number(value))}
+          onValueChange={value => onPageSizeChange(Number(value))}
         >
           <SelectTrigger className="min-h-[44px] h-11 sm:h-8 w-full sm:w-[70px]">
             <SelectValue />
@@ -79,10 +90,10 @@ export const PaginationControls = ({
         >
           <ChevronLeft className="h-4 w-4" />
         </Button>
-        
+
         <div className="flex items-center gap-1">
           {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-            let  pageNum: number;
+            let pageNum: number;
             if (totalPages <= 5) {
               pageNum = i + 1;
             } else if (page <= 3) {
@@ -132,10 +143,3 @@ export const PaginationControls = ({
     </div>
   );
 };
-
-
-
-
-
-
-

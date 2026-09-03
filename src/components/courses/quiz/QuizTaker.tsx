@@ -13,14 +13,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { 
-  Clock, 
-  CheckCircle2, 
-  AlertCircle,
-  ChevronLeft,
-  ChevronRight,
-  Send
-} from 'lucide-react';
+import { Clock, CheckCircle2, AlertCircle, ChevronLeft, ChevronRight, Send } from 'lucide-react';
 import { useQuiz, useQuizQuestions, useSubmitQuiz } from '@/hooks/courses/useQuiz';
 
 interface QuizTakerProps {
@@ -96,17 +89,20 @@ export const QuizTaker = ({ quizId, enrollmentId, onComplete }: QuizTakerProps) 
 
     setIsSubmitted(true);
 
-    submitQuiz.mutate({
-      quizId: quiz.id,
-      enrollmentId,
-      answers,
-    }, {
-      onSuccess: (result) => {
-        if (onComplete) {
-          onComplete(result);
-        }
+    submitQuiz.mutate(
+      {
+        quizId: quiz.id,
+        enrollmentId,
+        answers,
       },
-    });
+      {
+        onSuccess: result => {
+          if (onComplete) {
+            onComplete(result);
+          }
+        },
+      }
+    );
   };
 
   if (!quiz || !questions || questions.length === 0) {
@@ -132,7 +128,7 @@ export const QuizTaker = ({ quizId, enrollmentId, onComplete }: QuizTakerProps) 
               )}
             </div>
             {timeRemaining !== null && (
-              <Badge 
+              <Badge
                 variant={timeRemaining < 60 ? 'destructive' : 'secondary'}
                 className="text-lg px-4 py-2"
               >
@@ -146,7 +142,9 @@ export const QuizTaker = ({ quizId, enrollmentId, onComplete }: QuizTakerProps) 
           {/* Barre de progression */}
           <div className="space-y-2">
             <div className="flex items-center justify-between text-sm">
-              <span>Question {currentQuestionIndex + 1} sur {questions.length}</span>
+              <span>
+                Question {currentQuestionIndex + 1} sur {questions.length}
+              </span>
               <span className="text-muted-foreground">
                 {answeredCount}/{questions.length} répondues
               </span>
@@ -175,10 +173,13 @@ export const QuizTaker = ({ quizId, enrollmentId, onComplete }: QuizTakerProps) 
             {currentQuestion.question_type === 'multiple_choice' && currentQuestion.options && (
               <RadioGroup
                 value={answers[currentQuestion.id]?.toString() || ''}
-                onValueChange={(value) => handleAnswer(Number(value))}
+                onValueChange={value => handleAnswer(Number(value))}
               >
                 {currentQuestion.options.map((option: string, index: number) => (
-                  <div key={index} className="flex items-center space-x-2 p-4 border rounded-lg hover:bg-muted/50">
+                  <div
+                    key={index}
+                    className="flex items-center space-x-2 p-4 border rounded-lg hover:bg-muted/50"
+                  >
                     <RadioGroupItem value={index.toString()} id={`option-${index}`} />
                     <Label htmlFor={`option-${index}`} className="flex-1 cursor-pointer">
                       {option}
@@ -216,7 +217,7 @@ export const QuizTaker = ({ quizId, enrollmentId, onComplete }: QuizTakerProps) 
                 <Label>Votre réponse</Label>
                 <Input
                   value={answers[currentQuestion.id] || ''}
-                  onChange={(e) => handleAnswer(e.target.value)}
+                  onChange={e => handleAnswer(e.target.value)}
                   placeholder="Écrivez votre réponse..."
                   className="mt-2"
                 />
@@ -250,9 +251,7 @@ export const QuizTaker = ({ quizId, enrollmentId, onComplete }: QuizTakerProps) 
                 {submitQuiz.isPending ? 'Envoi...' : 'Soumettre le quiz'}
               </Button>
             ) : (
-              <Button
-                onClick={handleNext}
-              >
+              <Button onClick={handleNext}>
                 Suivant
                 <ChevronRight className="w-4 h-4 ml-2" />
               </Button>
@@ -264,8 +263,8 @@ export const QuizTaker = ({ quizId, enrollmentId, onComplete }: QuizTakerProps) 
             <Alert className="mt-4">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                Attention : {questions.length - answeredCount} question(s) non répondue(s).
-                Vous pouvez quand même soumettre.
+                Attention : {questions.length - answeredCount} question(s) non répondue(s). Vous
+                pouvez quand même soumettre.
               </AlertDescription>
             </Alert>
           )}
@@ -274,10 +273,3 @@ export const QuizTaker = ({ quizId, enrollmentId, onComplete }: QuizTakerProps) 
     </div>
   );
 };
-
-
-
-
-
-
-

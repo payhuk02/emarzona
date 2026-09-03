@@ -31,8 +31,10 @@ import { logger } from '@/lib/logger';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
-const SIZE_CHART_FIELDS = 'id, store_id, name, system, sizes, notes, is_default, created_at, updated_at';
-const SIZE_CHART_MEASUREMENT_FIELDS = 'id, size_chart_id, label, unit, values, description, display_order, created_at, updated_at';
+const SIZE_CHART_FIELDS =
+  'id, store_id, name, system, sizes, notes, is_default, created_at, updated_at';
+const SIZE_CHART_MEASUREMENT_FIELDS =
+  'id, size_chart_id, label, unit, values, description, display_order, created_at, updated_at';
 
 interface PhysicalSizeChartSelectorProps {
   selectedSizeChartId?: string;
@@ -236,7 +238,7 @@ export function PhysicalSizeChartSelector({
 
       setIsBuilderOpen(false);
       refetch();
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: 'Erreur',
@@ -336,9 +338,3 @@ export function PhysicalSizeChartSelector({
     </Card>
   );
 }
-
-
-
-
-
-

@@ -1,12 +1,12 @@
 /**
  * Composant AccessibleImage - Garantit toujours un attribut alt
  * Wrapper autour de img qui force la présence d'un alt pour l'accessibilité
- * 
+ *
  * @example
  * ```tsx
- * <AccessibleImage 
- *   src="/logo.png" 
- *   alt="Logo Emarzona" 
+ * <AccessibleImage
+ *   src="/logo.png"
+ *   alt="Logo Emarzona"
  *   className="h-8 w-8"
  * />
  * ```
@@ -47,25 +47,17 @@ export const AccessibleImage = React.forwardRef<HTMLImageElement, AccessibleImag
       if (decorative) {
         return ''; // Alt vide pour images décoratives (WCAG 2.1)
       }
-      
+
       if (alt !== undefined && alt !== null && alt.trim() !== '') {
         return alt;
       }
-      
+
       // Générer un alt par défaut basé sur le nom du fichier ou le contexte
       const fileName = src.split('/').pop()?.split('.')[0] || 'image';
       return `Image: ${fileName}`;
     }, [alt, decorative, src]);
 
-    return (
-      <img
-        ref={ref}
-        src={src}
-        alt={finalAlt}
-        className={cn('block', className)}
-        {...props}
-      />
-    );
+    return <img ref={ref} src={src} alt={finalAlt} className={cn('block', className)} {...props} />;
   }
 );
 
@@ -74,11 +66,7 @@ AccessibleImage.displayName = 'AccessibleImage';
 /**
  * Hook pour générer un alt descriptif basé sur le contexte
  */
-export function useImageAlt(
-  context: string,
-  index?: number,
-  total?: number
-): string {
+export function useImageAlt(context: string, index?: number, total?: number): string {
   return React.useMemo(() => {
     if (index !== undefined && total !== undefined && total > 1) {
       return `${context} - Image ${index + 1} sur ${total}`;
@@ -86,10 +74,3 @@ export function useImageAlt(
     return context;
   }, [context, index, total]);
 }
-
-
-
-
-
-
-

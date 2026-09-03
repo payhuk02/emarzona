@@ -11,27 +11,29 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useProductAffiliateSettings } from '@/hooks/useProductAffiliateSettings';
 import { ProductAffiliateSettingsForm } from '@/types/affiliate';
-import { 
-  TrendingUp, 
-  Users, 
-  Clock, 
-  DollarSign, 
-  Settings, 
+import {
+  TrendingUp,
+  Users,
+  Clock,
+  DollarSign,
+  Settings,
   Info,
   Save,
   Trash2,
-  CheckCircle2
+  CheckCircle2,
 } from '@/components/icons';
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from '@/components/ui/alert';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface ProductAffiliateSettingsProps {
@@ -47,8 +49,15 @@ export const ProductAffiliateSettings = ({
   productName,
   productPrice,
 }: ProductAffiliateSettingsProps) => {
-  const { settings, loading, hasSettings, isEnabled, createOrUpdateSettings, toggleAffiliateEnabled, deleteSettings } = 
-    useProductAffiliateSettings(productId);
+  const {
+    settings,
+    loading,
+    hasSettings,
+    isEnabled,
+    createOrUpdateSettings,
+    toggleAffiliateEnabled,
+    deleteSettings,
+  } = useProductAffiliateSettings(productId);
 
   const [formData, setFormData] = useState<ProductAffiliateSettingsForm>({
     affiliate_enabled: false,
@@ -88,7 +97,7 @@ export const ProductAffiliateSettings = ({
     setSaving(true);
     const success = await createOrUpdateSettings(productId, storeId, formData);
     setSaving(false);
-    
+
     if (success) {
       // Actualiser les données
     }
@@ -99,7 +108,7 @@ export const ProductAffiliateSettings = ({
   };
 
   const handleDelete = async () => {
-    if (window.confirm('Êtes-vous sûr de vouloir supprimer la configuration d\'affiliation ?')) {
+    if (window.confirm("Êtes-vous sûr de vouloir supprimer la configuration d'affiliation ?")) {
       await deleteSettings(productId);
     }
   };
@@ -107,7 +116,7 @@ export const ProductAffiliateSettings = ({
   const calculateCommission = () => {
     if (formData.commission_type === 'percentage') {
       // Commission sur le montant vendeur (après commission plateforme 10%)
-      const sellerAmount = productPrice * 0.90;
+      const sellerAmount = productPrice * 0.9;
       return (sellerAmount * formData.commission_rate) / 100;
     }
     return formData.fixed_commission_amount;
@@ -148,7 +157,7 @@ export const ProductAffiliateSettings = ({
             </div>
             <Switch
               checked={formData.affiliate_enabled}
-              onCheckedChange={(checked) => {
+              onCheckedChange={checked => {
                 setFormData({ ...formData, affiliate_enabled: checked });
                 if (hasSettings) {
                   handleToggle();
@@ -190,19 +199,23 @@ export const ProductAffiliateSettings = ({
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
-              <Card 
+              <Card
                 className={`cursor-pointer transition-all ${
-                  formData.commission_type === 'percentage' 
-                    ? 'border-2 border-primary bg-primary/5' 
+                  formData.commission_type === 'percentage'
+                    ? 'border-2 border-primary bg-primary/5'
                     : 'border-2 border-transparent hover:border-muted'
                 }`}
                 onClick={() => setFormData({ ...formData, commission_type: 'percentage' })}
               >
                 <CardContent className="pt-6">
                   <div className="flex items-start gap-3">
-                    <TrendingUp className={`h-5 w-5 mt-0.5 ${
-                      formData.commission_type === 'percentage' ? 'text-primary' : 'text-muted-foreground'
-                    }`} />
+                    <TrendingUp
+                      className={`h-5 w-5 mt-0.5 ${
+                        formData.commission_type === 'percentage'
+                          ? 'text-primary'
+                          : 'text-muted-foreground'
+                      }`}
+                    />
                     <div>
                       <h4 className="font-semibold">Pourcentage</h4>
                       <p className="text-sm text-muted-foreground mt-1">
@@ -213,19 +226,23 @@ export const ProductAffiliateSettings = ({
                 </CardContent>
               </Card>
 
-              <Card 
+              <Card
                 className={`cursor-pointer transition-all ${
-                  formData.commission_type === 'fixed' 
-                    ? 'border-2 border-primary bg-primary/5' 
+                  formData.commission_type === 'fixed'
+                    ? 'border-2 border-primary bg-primary/5'
                     : 'border-2 border-transparent hover:border-muted'
                 }`}
                 onClick={() => setFormData({ ...formData, commission_type: 'fixed' })}
               >
                 <CardContent className="pt-6">
                   <div className="flex items-start gap-3">
-                    <DollarSign className={`h-5 w-5 mt-0.5 ${
-                      formData.commission_type === 'fixed' ? 'text-primary' : 'text-muted-foreground'
-                    }`} />
+                    <DollarSign
+                      className={`h-5 w-5 mt-0.5 ${
+                        formData.commission_type === 'fixed'
+                          ? 'text-primary'
+                          : 'text-muted-foreground'
+                      }`}
+                    />
                     <div>
                       <h4 className="font-semibold">Montant fixe</h4>
                       <p className="text-sm text-muted-foreground mt-1">
@@ -257,27 +274,40 @@ export const ProductAffiliateSettings = ({
                   max="100"
                   step="0.5"
                   value={formData.commission_rate}
-                  onChange={(e) => setFormData({ ...formData, commission_rate: parseFloat(e.target.value) })}
+                  onChange={e =>
+                    setFormData({ ...formData, commission_rate: parseFloat(e.target.value) })
+                  }
                   className="max-w-xs"
                 />
                 <Badge variant="outline" className="text-base px-4 py-2">
                   {formData.commission_rate}%
                 </Badge>
               </div>
-              
+
               {/* Calcul exemple */}
               <Alert>
                 <Info className="h-4 w-4" />
                 <AlertTitle>Exemple de calcul</AlertTitle>
                 <AlertDescription>
                   <div className="mt-2 space-y-1 text-sm">
-                    <p>Prix produit : <strong>{productPrice} XOF</strong></p>
-                    <p>Commission plateforme (10%) : <strong>{(productPrice * 0.10).toFixed(0)} XOF</strong></p>
-                    <p>Montant vendeur : <strong>{(productPrice * 0.90).toFixed(0)} XOF</strong></p>
-                    <p className="text-primary font-semibold">
-                      Commission affilié ({formData.commission_rate}%) : {calculateCommission().toFixed(0)} XOF
+                    <p>
+                      Prix produit : <strong>{productPrice} XOF</strong>
                     </p>
-                    <p>Vous recevrez : <strong>{(productPrice * 0.90 - calculateCommission()).toFixed(0)} XOF</strong></p>
+                    <p>
+                      Commission plateforme (10%) :{' '}
+                      <strong>{(productPrice * 0.1).toFixed(0)} XOF</strong>
+                    </p>
+                    <p>
+                      Montant vendeur : <strong>{(productPrice * 0.9).toFixed(0)} XOF</strong>
+                    </p>
+                    <p className="text-primary font-semibold">
+                      Commission affilié ({formData.commission_rate}%) :{' '}
+                      {calculateCommission().toFixed(0)} XOF
+                    </p>
+                    <p>
+                      Vous recevrez :{' '}
+                      <strong>{(productPrice * 0.9 - calculateCommission()).toFixed(0)} XOF</strong>
+                    </p>
                   </div>
                 </AlertDescription>
               </Alert>
@@ -293,7 +323,9 @@ export const ProductAffiliateSettings = ({
                 min="0"
                 step="100"
                 value={formData.fixed_commission_amount}
-                onChange={(e) => setFormData({ ...formData, fixed_commission_amount: parseFloat(e.target.value) })}
+                onChange={e =>
+                  setFormData({ ...formData, fixed_commission_amount: parseFloat(e.target.value) })
+                }
                 className="max-w-xs"
               />
               <p className="text-sm text-muted-foreground">
@@ -306,7 +338,10 @@ export const ProductAffiliateSettings = ({
 
           {/* Durée du cookie */}
           <div className="space-y-3">
-            <Label htmlFor="cookie_duration" className="text-base font-semibold flex items-center gap-2">
+            <Label
+              htmlFor="cookie_duration"
+              className="text-base font-semibold flex items-center gap-2"
+            >
               <Clock className="h-4 w-4" />
               Durée du cookie de tracking
             </Label>
@@ -315,7 +350,9 @@ export const ProductAffiliateSettings = ({
             </p>
             <Select
               value={formData.cookie_duration_days.toString()}
-              onValueChange={(value) => setFormData({ ...formData, cookie_duration_days: parseInt(value) })}
+              onValueChange={value =>
+                setFormData({ ...formData, cookie_duration_days: parseInt(value) })
+              }
             >
               <SelectTrigger className="max-w-xs">
                 <SelectValue />
@@ -346,7 +383,9 @@ export const ProductAffiliateSettings = ({
                 min="0"
                 step="1000"
                 value={formData.min_order_amount}
-                onChange={(e) => setFormData({ ...formData, min_order_amount: parseFloat(e.target.value) })}
+                onChange={e =>
+                  setFormData({ ...formData, min_order_amount: parseFloat(e.target.value) })
+                }
                 className="max-w-xs"
               />
               <p className="text-xs text-muted-foreground">
@@ -365,10 +404,14 @@ export const ProductAffiliateSettings = ({
                 step="1000"
                 placeholder="Illimité"
                 value={formData.max_commission_per_sale || ''}
-                onChange={(e) => setFormData({ 
-                  ...formData, 
-                  max_commission_per_sale: e.target.value ? parseFloat(e.target.value) : undefined 
-                })}
+                onChange={e =>
+                  setFormData({
+                    ...formData,
+                    max_commission_per_sale: e.target.value
+                      ? parseFloat(e.target.value)
+                      : undefined,
+                  })
+                }
                 className="max-w-xs"
               />
             </div>
@@ -383,7 +426,9 @@ export const ProductAffiliateSettings = ({
               <Switch
                 id="self_referral"
                 checked={formData.allow_self_referral}
-                onCheckedChange={(checked) => setFormData({ ...formData, allow_self_referral: checked })}
+                onCheckedChange={checked =>
+                  setFormData({ ...formData, allow_self_referral: checked })
+                }
               />
             </div>
 
@@ -397,7 +442,7 @@ export const ProductAffiliateSettings = ({
               <Switch
                 id="require_approval"
                 checked={formData.require_approval}
-                onCheckedChange={(checked) => setFormData({ ...formData, require_approval: checked })}
+                onCheckedChange={checked => setFormData({ ...formData, require_approval: checked })}
               />
             </div>
           </div>
@@ -413,7 +458,7 @@ export const ProductAffiliateSettings = ({
               id="terms"
               placeholder="Ex: Les affiliés doivent promouvoir le produit de manière éthique..."
               value={formData.terms_and_conditions}
-              onChange={(e) => setFormData({ ...formData, terms_and_conditions: e.target.value })}
+              onChange={e => setFormData({ ...formData, terms_and_conditions: e.target.value })}
               rows={4}
             />
           </div>
@@ -424,22 +469,13 @@ export const ProductAffiliateSettings = ({
       <div className="flex items-center justify-between">
         <div>
           {hasSettings && (
-            <Button
-              variant="destructive"
-              onClick={handleDelete}
-              className="gap-2"
-            >
+            <Button variant="destructive" onClick={handleDelete} className="gap-2">
               <Trash2 className="h-4 w-4" />
               Supprimer la configuration
             </Button>
           )}
         </div>
-        <Button
-          onClick={handleSave}
-          disabled={saving}
-          className="gap-2"
-          size="lg"
-        >
+        <Button onClick={handleSave} disabled={saving} className="gap-2" size="lg">
           {saving ? (
             <>
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent" />
@@ -456,10 +492,3 @@ export const ProductAffiliateSettings = ({
     </div>
   );
 };
-
-
-
-
-
-
-

@@ -138,7 +138,7 @@ export const CreateAffiliateLinkDialog = memo(
 
     return (
       <BottomSheet open={open} onOpenChange={handleClose}>
-        <BottomSheetContent 
+        <BottomSheetContent
           className="sm:max-w-2xl"
           title="Créer un nouveau lien d'affiliation"
           description="Sélectionnez un produit et générez votre lien unique de promotion"

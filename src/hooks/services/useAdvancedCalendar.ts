@@ -1,7 +1,7 @@
 /**
  * Advanced Calendar Hook
  * Date: 27 Janvier 2025
- * 
+ *
  * Hook pour gérer le calendrier avancé avec vues multiples et multi-staff
  */
 
@@ -9,10 +9,19 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
-import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfDay, endOfDay } from 'date-fns';
+import {
+  format,
+  startOfWeek,
+  endOfWeek,
+  startOfMonth,
+  endOfMonth,
+  startOfDay,
+  endOfDay,
+} from 'date-fns';
 
 const CALENDAR_STAFF_MEMBER_FIELDS = 'id, name, email, avatar_url';
-const CALENDAR_AVAILABILITY_SLOT_FIELDS = 'id, service_product_id, day_of_week, start_time, end_time, staff_member_id, is_active, created_at, updated_at';
+const CALENDAR_AVAILABILITY_SLOT_FIELDS =
+  'id, service_product_id, day_of_week, start_time, end_time, staff_member_id, is_active, created_at, updated_at';
 
 // =====================================================
 // TYPES
@@ -62,10 +71,7 @@ export interface CalendarFilters {
 /**
  * useCalendarBookings - Récupère les réservations pour le calendrier
  */
-export const useCalendarBookings = (
-  storeId?: string,
-  filters?: CalendarFilters
-) => {
+export const useCalendarBookings = (storeId?: string, filters?: CalendarFilters) => {
   return useQuery({
     queryKey: ['calendar-bookings', storeId, filters],
     queryFn: async () => {
@@ -85,16 +91,18 @@ export const useCalendarBookings = (
       }
 
       // Récupérer les réservations
-      let  query= supabase
+      let query = supabase
         .from('service_bookings')
-        .select(`
+        .select(
+          `
           *,
           product:products!product_id (
             id,
             name,
             image_url
           )
-        `)
+        `
+        )
         .in('product_id', productIds);
 
       // Appliquer filtres
@@ -120,17 +128,18 @@ export const useCalendarBookings = (
       }
 
       // Récupérer le staff séparément
-      const staffIds = [...new Set((data || []).map((b) => b.staff_member_id).filter(Boolean))];
-      
-      const { data: staffMembers } = staffIds.length > 0
-        ? await supabase
-            .from('service_staff_members')
-            .select('id, name, email, avatar_url')
-            .in('id', staffIds)
-        : { data: [] };
+      const staffIds = [...new Set((data || []).map(b => b.staff_member_id).filter(Boolean))];
+
+      const { data: staffMembers } =
+        staffIds.length > 0
+          ? await supabase
+              .from('service_staff_members')
+              .select('id, name, email, avatar_url')
+              .in('id', staffIds)
+          : { data: [] };
 
       // Transformer en format calendrier
-      const  bookings: CalendarBooking[] = (data || []).map((booking) => {
+      const bookings: CalendarBooking[] = (data || []).map(booking => {
         const scheduledDate = new Date(booking.scheduled_date);
         const startTime = booking.scheduled_start_time?.split(':') || ['9', '0'];
         const endTime = booking.scheduled_end_time?.split(':') || ['10', '0'];
@@ -141,7 +150,7 @@ export const useCalendarBookings = (
         const end = new Date(scheduledDate);
         end.setHours(parseInt(endTime[0]), parseInt(endTime[1]), 0, 0);
 
-        const staff = staffMembers?.find((s) => s.id === booking.staff_member_id);
+        const staff = staffMembers?.find(s => s.id === booking.staff_member_id);
 
         return {
           id: booking.id,
@@ -180,7 +189,7 @@ export const useCalendarStaff = (storeId?: string, serviceId?: string) => {
     queryFn: async () => {
       if (!storeId) throw new Error('Store ID manquant');
 
-      let  query= supabase
+      let query = supabase
         .from('service_staff_members')
         .select(CALENDAR_STAFF_MEMBER_FIELDS)
         .eq('store_id', storeId)
@@ -209,7 +218,7 @@ export const useCalendarStaff = (storeId?: string, serviceId?: string) => {
         '#84cc16', // lime
       ];
 
-      const  staff: CalendarStaff[] = (data || []).map((member, index) => ({
+      const staff: CalendarStaff[] = (data || []).map((member, index) => ({
         id: member.id,
         name: member.name,
         email: member.email,
@@ -299,7 +308,7 @@ export const useUpdateBookingTime = () => {
       queryClient.invalidateQueries({ queryKey: ['bookings'] });
       toast({
         title: '✅ Réservation mise à jour',
-        description: 'L\'heure de la réservation a été modifiée',
+        description: "L'heure de la réservation a été modifiée",
       });
     },
     onError: (error: any) => {
@@ -321,13 +330,7 @@ export const useUpdateBookingStaff = () => {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({
-      bookingId,
-      staffId,
-    }: {
-      bookingId: string;
-      staffId?: string;
-    }) => {
+    mutationFn: async ({ bookingId, staffId }: { bookingId: string; staffId?: string }) => {
       const { data, error } = await supabase
         .from('service_bookings')
         .update({
@@ -363,10 +366,3 @@ export const useUpdateBookingStaff = () => {
     },
   });
 };
-
-
-
-
-
-
-

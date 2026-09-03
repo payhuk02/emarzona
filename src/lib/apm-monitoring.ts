@@ -6,10 +6,10 @@
 import * as Sentry from '@sentry/react';
 import { onCLS, onINP, onLCP, onFCP, onTTFB, Metric } from 'web-vitals';
 import { logger } from './logger';
-import { 
-  startMemoryMonitoring, 
+import {
+  startMemoryMonitoring,
   startErrorRateMonitoring,
-  recordMetric 
+  recordMetric,
 } from './monitoring-enhanced';
 
 /**
@@ -29,7 +29,7 @@ interface APMConfig {
 const getAPMConfig = (): APMConfig => {
   const env = import.meta.env.MODE;
   const enabled = import.meta.env.VITE_APM_ENABLED !== 'false';
-  
+
   return {
     enabled,
     sampleRate: env === 'production' ? 0.2 : 1.0,
@@ -44,17 +44,22 @@ const getAPMConfig = (): APMConfig => {
  */
 const sendWebVitalsToSentry = (metric: Metric): void => {
   const config = getAPMConfig();
-  
+
   if (!config.enabled || !config.enableWebVitals) return;
 
   // Envoyer comme mesure personnalisée
   Sentry.setMeasurement(metric.name, metric.value, 'millisecond');
-  
+
   // Ajouter comme breadcrumb
   Sentry.addBreadcrumb({
     category: 'web-vitals',
     message: `${metric.name}: ${metric.value.toFixed(2)}`,
-    level: metric.rating === 'good' ? 'info' : metric.rating === 'needs-improvement' ? 'warning' : 'error',
+    level:
+      metric.rating === 'good'
+        ? 'info'
+        : metric.rating === 'needs-improvement'
+          ? 'warning'
+          : 'error',
     data: {
       name: metric.name,
       value: metric.value,
@@ -87,7 +92,7 @@ const sendWebVitalsToSentry = (metric: Metric): void => {
  */
 export const initWebVitalsMonitoring = (): void => {
   const config = getAPMConfig();
-  
+
   if (!config.enabled || !config.enableWebVitals) {
     logger.info('[APM] Web Vitals monitoring désactivé');
     return;
@@ -95,33 +100,33 @@ export const initWebVitalsMonitoring = (): void => {
 
   // CLS - Cumulative Layout Shift
   onCLS(sendWebVitalsToSentry);
-  
+
   // INP - Interaction to Next Paint
   onINP(sendWebVitalsToSentry);
-  
+
   // LCP - Largest Contentful Paint
   onLCP(sendWebVitalsToSentry);
-  
+
   // FCP - First Contentful Paint
   onFCP(sendWebVitalsToSentry);
-  
+
   // TTFB - Time to First Byte
   onTTFB(sendWebVitalsToSentry);
-  
+
   logger.info('[APM] Web Vitals monitoring initialisé');
 };
 
 /**
  * Mesurer la performance d'une transaction
  */
-export const measureTransaction = async <T,>(
+export const measureTransaction = async <T>(
   name: string,
   operation: string,
   fn: () => Promise<T> | T,
   tags?: Record<string, string>
 ): Promise<T> => {
   const config = getAPMConfig();
-  
+
   if (!config.enabled || !config.enablePerformance) {
     return await fn();
   }
@@ -132,16 +137,16 @@ export const measureTransaction = async <T,>(
       op: operation,
       attributes: tags,
     },
-    async (span) => {
+    async span => {
       const startTime = performance.now();
-      
+
       try {
         const result = await fn();
         const duration = performance.now() - startTime;
-        
+
         span?.setStatus({ code: 1 }); // OK
         span?.setData('duration', duration);
-        
+
         // Logger si la transaction est lente
         if (duration > 1000) {
           logger.warn(`[APM] Slow transaction: ${name}`, {
@@ -149,14 +154,14 @@ export const measureTransaction = async <T,>(
             operation,
           });
         }
-        
+
         return result;
       } catch (error) {
         const duration = performance.now() - startTime;
         span?.setStatus({ code: 2 }); // ERROR
         span?.setData('duration', duration);
         span?.setData('error', error);
-        
+
         Sentry.captureException(error as Error, {
           tags: {
             component: 'apm',
@@ -164,7 +169,7 @@ export const measureTransaction = async <T,>(
             operation,
           },
         });
-        
+
         throw error;
       }
     }
@@ -174,47 +179,40 @@ export const measureTransaction = async <T,>(
 /**
  * Mesurer la performance d'une requête API
  */
-export const measureAPIRequest = async <T,>(
+export const measureAPIRequest = async <T>(
   url: string,
   method: string,
   fn: () => Promise<T>
 ): Promise<T> => {
-  return measureTransaction(
-    `API ${method} ${url}`,
-    'http.client',
-    fn,
-    {
-      'http.method': method,
-      'http.url': url,
-    }
-  );
+  return measureTransaction(`API ${method} ${url}`, 'http.client', fn, {
+    'http.method': method,
+    'http.url': url,
+  });
 };
 
 /**
  * Mesurer le rendu d'un composant React
  */
-export const measureComponentRender = <T,>(
-  componentName: string,
-  fn: () => T
-): T => {
+export const measureComponentRender = <T>(componentName: string, fn: () => T): T => {
   const config = getAPMConfig();
-  
+
   if (!config.enabled || !config.enablePerformance) {
     return fn();
   }
 
   const startTime = performance.now();
-  
+
   try {
     const result = fn();
     const duration = performance.now() - startTime;
-    
+
     // Logger si le rendu est lent
-    if (duration > 16) { // Plus d'une frame (60fps)
+    if (duration > 16) {
+      // Plus d'une frame (60fps)
       logger.warn(`[APM] Slow component render: ${componentName}`, {
         duration,
       });
-      
+
       Sentry.addBreadcrumb({
         category: 'performance',
         message: `Slow render: ${componentName}`,
@@ -225,7 +223,7 @@ export const measureComponentRender = <T,>(
         },
       });
     }
-    
+
     return result;
   } catch (error) {
     Sentry.captureException(error as Error, {
@@ -243,7 +241,7 @@ export const measureComponentRender = <T,>(
  */
 export const initAPMMonitoring = (): void => {
   const config = getAPMConfig();
-  
+
   if (!config.enabled) {
     logger.info('[APM] APM monitoring désactivé');
     return;
@@ -251,10 +249,10 @@ export const initAPMMonitoring = (): void => {
 
   // Initialiser Web Vitals
   initWebVitalsMonitoring();
-  
+
   // Monitorer les erreurs de performance
   if (typeof window !== 'undefined') {
-    window.addEventListener('error', (event) => {
+    window.addEventListener('error', event => {
       Sentry.captureException(event.error, {
         tags: {
           component: 'apm',
@@ -262,8 +260,8 @@ export const initAPMMonitoring = (): void => {
         },
       });
     });
-    
-    window.addEventListener('unhandledrejection', (event) => {
+
+    window.addEventListener('unhandledrejection', event => {
       Sentry.captureException(event.reason, {
         tags: {
           component: 'apm',
@@ -276,16 +274,16 @@ export const initAPMMonitoring = (): void => {
     try {
       // Démarrer le monitoring de la mémoire
       startMemoryMonitoring(60000); // Toutes les minutes
-      
+
       // Démarrer le monitoring du taux d'erreur
       startErrorRateMonitoring();
-      
+
       // Enregistrer les Web Vitals dans le système amélioré
       const originalOnCLS = onCLS;
       const originalOnLCP = onLCP;
       const originalOnFCP = onFCP;
-      
-      onCLS((metric) => {
+
+      onCLS(metric => {
         recordMetric({
           name: 'Cumulative Layout Shift',
           type: 'page_load',
@@ -293,8 +291,8 @@ export const initAPMMonitoring = (): void => {
           unit: 'ratio',
         });
       });
-      
-      onLCP((metric) => {
+
+      onLCP(metric => {
         recordMetric({
           name: 'Largest Contentful Paint',
           type: 'page_load',
@@ -302,8 +300,8 @@ export const initAPMMonitoring = (): void => {
           unit: 'ms',
         });
       });
-      
-      onFCP((metric) => {
+
+      onFCP(metric => {
         recordMetric({
           name: 'First Contentful Paint',
           type: 'page_load',
@@ -311,13 +309,13 @@ export const initAPMMonitoring = (): void => {
           unit: 'ms',
         });
       });
-      
+
       logger.info('[APM] Monitoring amélioré initialisé');
     } catch (error) {
-      logger.warn('[APM] Impossible d\'initialiser le monitoring amélioré', error);
+      logger.warn("[APM] Impossible d'initialiser le monitoring amélioré", error);
     }
   }
-  
+
   logger.info('[APM] APM monitoring initialisé avec succès', {
     webVitals: config.enableWebVitals,
     performance: config.enablePerformance,
@@ -341,7 +339,9 @@ export const getPerformanceMetrics = (): {
     };
   }
 
-  const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
+  const navigation = performance.getEntriesByType('navigation')[0] as
+    | PerformanceNavigationTiming
+    | undefined;
   const paint = performance.getEntriesByType('paint') as PerformancePaintTiming[];
   const resource = performance.getEntriesByType('resource') as PerformanceResourceTiming[];
 
@@ -351,12 +351,3 @@ export const getPerformanceMetrics = (): {
     resource: resource.length > 0 ? resource : null,
   };
 };
-
-
-
-
-
-
-
-
-

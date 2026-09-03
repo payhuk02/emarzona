@@ -1,7 +1,7 @@
 /**
  * Hook useWindowEvents - Gestion optimisée des événements window
  * Fournit des hooks pour resize, scroll, visibility avec throttling/debouncing
- * 
+ *
  * @example
  * ```tsx
  * const { width, height } = useWindowSize();
@@ -52,7 +52,7 @@ export function useWindowSize(options: UseWindowSizeOptions = {}) {
     };
 
     // Throttler la fonction
-    let  timeoutId: NodeJS.Timeout;
+    let timeoutId: NodeJS.Timeout;
     const throttledHandleResize = () => {
       if (timeoutId) clearTimeout(timeoutId);
       timeoutId = setTimeout(handleResize, throttleMs);
@@ -105,7 +105,7 @@ export function useWindowScroll(options: UseWindowScrollOptions = {}) {
     };
 
     // Throttler la fonction
-    let  timeoutId: NodeJS.Timeout;
+    let timeoutId: NodeJS.Timeout;
     const throttledHandleScroll = () => {
       if (timeoutId) clearTimeout(timeoutId);
       timeoutId = setTimeout(handleScroll, throttleMs);
@@ -178,12 +178,14 @@ export function useWindowFocus() {
 /**
  * Hook combiné pour tous les événements window
  */
-export function useWindowEvents(options: {
-  onResize?: (size: { width: number; height: number }) => void;
-  onScroll?: (scroll: { x: number; y: number }) => void;
-  onVisibilityChange?: (isVisible: boolean) => void;
-  onFocusChange?: (isFocused: boolean) => void;
-} = {}) {
+export function useWindowEvents(
+  options: {
+    onResize?: (size: { width: number; height: number }) => void;
+    onScroll?: (scroll: { x: number; y: number }) => void;
+    onVisibilityChange?: (isVisible: boolean) => void;
+    onFocusChange?: (isFocused: boolean) => void;
+  } = {}
+) {
   const { onResize, onScroll, onVisibilityChange, onFocusChange } = options;
   const size = useWindowSize();
   const scroll = useWindowScroll();
@@ -213,10 +215,3 @@ export function useWindowEvents(options: {
     isFocused,
   };
 }
-
-
-
-
-
-
-

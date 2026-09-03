@@ -123,7 +123,7 @@ class FedExService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
           'X-locale': 'fr_FR',
         },
         body: JSON.stringify({
@@ -178,7 +178,7 @@ class FedExService {
       return rateReplyDetails.map((rate: any) => ({
         serviceType: rate.serviceType || 'standard',
         serviceName: rate.serviceName || 'FedEx Service',
-        totalPrice: (parseFloat(rate.totalNetCharge?.amount || '0') * 100) || 0,
+        totalPrice: parseFloat(rate.totalNetCharge?.amount || '0') * 100 || 0,
         currency: rate.totalNetCharge?.currency || 'XOF',
         estimatedDeliveryDays: rate.commit?.daysInTransit || 5,
       }));
@@ -212,7 +212,7 @@ class FedExService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
           'X-locale': 'fr_FR',
         },
         body: JSON.stringify({
@@ -292,7 +292,7 @@ class FedExService {
         labelNumber: masterTrackingNumber.trackingNumber || `FEDEX-${Date.now()}`,
         trackingNumber: masterTrackingNumber.trackingNumber || '',
         labelUrl: labelResult.customerReference || '',
-        shippingCost: (parseFloat(output.totalNetCharge?.amount || '0') * 100) || 0,
+        shippingCost: parseFloat(output.totalNetCharge?.amount || '0') * 100 || 0,
         currency: output.totalNetCharge?.currency || 'XOF',
       };
     } catch (error) {
@@ -364,7 +364,7 @@ class FedExService {
       const response = await fetch(trackingUrl, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
           'Content-Type': 'application/json',
           'X-locale': 'fr_FR',
         },
@@ -388,7 +388,7 @@ class FedExService {
       const data = await response.json();
 
       // Parser les événements de suivi
-      const  events: any[] = [];
+      const events: any[] = [];
       const output = data.output || {};
       const completeTrackResults = output.completeTrackResults || [];
 
@@ -407,8 +407,8 @@ class FedExService {
         });
       });
 
-      return events.sort((a, b) => 
-        new Date(b.eventTimestamp).getTime() - new Date(a.eventTimestamp).getTime()
+      return events.sort(
+        (a, b) => new Date(b.eventTimestamp).getTime() - new Date(a.eventTimestamp).getTime()
       );
     } catch (error) {
       logger.error('FedEx trackShipment error', { error, trackingNumber });
@@ -418,10 +418,3 @@ class FedExService {
 }
 
 export default FedExService;
-
-
-
-
-
-
-

@@ -1,7 +1,7 @@
 /**
  * Performance Optimizer
  * Date: 30 Janvier 2025
- * 
+ *
  * Utilitaires pour optimiser les performances de l'application
  */
 
@@ -19,7 +19,7 @@ export function debounce<T extends (...args: any[]) => any>(
   func: T,
   wait: number
 ): (...args: Parameters<T>) => void {
-  let  timeout: NodeJS.Timeout | null = null;
+  let timeout: NodeJS.Timeout | null = null;
 
   return function executedFunction(...args: Parameters<T>) {
     const later = () => {
@@ -41,7 +41,7 @@ export function throttle<T extends (...args: any[]) => any>(
   func: T,
   limit: number
 ): (...args: Parameters<T>) => void {
-  let  inThrottle: boolean;
+  let inThrottle: boolean;
 
   return function executedFunction(...args: Parameters<T>) {
     if (!inThrottle) {
@@ -98,7 +98,7 @@ export function memoize<T extends (...args: any[]) => any>(
 
   return ((...args: Parameters<T>): ReturnType<T> => {
     const key = getKey ? getKey(...args) : JSON.stringify(args);
-    
+
     if (cache.has(key)) {
       return cache.get(key)!;
     }
@@ -112,9 +112,7 @@ export function memoize<T extends (...args: any[]) => any>(
 /**
  * Clear memoization cache
  */
-export function clearMemoizationCache<T extends (...args: any[]) => any>(
-  memoizedFunc: T
-): void {
+export function clearMemoizationCache<T extends (...args: any[]) => any>(memoizedFunc: T): void {
   // This is a placeholder - actual implementation depends on cache structure
   // In a real scenario, you'd need to expose the cache or use a WeakMap
 }
@@ -126,9 +124,7 @@ export function clearMemoizationCache<T extends (...args: any[]) => any>(
 /**
  * Dynamic import helper
  */
-export async function dynamicImport<T>(
-  importFn: () => Promise<{ default: T }>
-): Promise<T> {
+export async function dynamicImport<T>(importFn: () => Promise<{ default: T }>): Promise<T> {
   try {
     const module = await importFn();
     return module.default;
@@ -145,10 +141,7 @@ export async function dynamicImport<T>(
 /**
  * Measure function execution time
  */
-export function measurePerformance<T>(
-  label: string,
-  fn: () => T
-): T {
+export function measurePerformance<T>(label: string, fn: () => T): T {
   const start = performance.now();
   const result = fn();
   const end = performance.now();
@@ -166,10 +159,7 @@ export function measurePerformance<T>(
 /**
  * Measure async function execution time
  */
-export async function measureAsyncPerformance<T>(
-  label: string,
-  fn: () => Promise<T>
-): Promise<T> {
+export async function measureAsyncPerformance<T>(label: string, fn: () => Promise<T>): Promise<T> {
   const start = performance.now();
   const result = await fn();
   const end = performance.now();
@@ -211,10 +201,7 @@ export function useStableCallback<T extends (...args: any[]) => any>(
 /**
  * Custom hook for memoized values
  */
-export function useStableMemo<T>(
-  factory: () => T,
-  deps: React.DependencyList
-): T {
+export function useStableMemo<T>(factory: () => T, deps: React.DependencyList): T {
   return useMemo(factory, deps);
 }
 
@@ -295,10 +282,3 @@ export class SimpleCache<K, V> {
     return this.cache.has(key) && this.get(key) !== undefined;
   }
 }
-
-
-
-
-
-
-

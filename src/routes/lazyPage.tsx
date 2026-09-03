@@ -30,7 +30,7 @@ export function lazyPage<T extends ComponentType<unknown>>(
   pageName?: string
 ): LazyExoticComponent<T> {
   return lazy(() => {
-    return new Promise<{ default: T }>((resolve) => {
+    return new Promise<{ default: T }>(resolve => {
       let attempts = 0;
       const maxRetries = 3;
       const interval = 1000;
@@ -39,20 +39,22 @@ export function lazyPage<T extends ComponentType<unknown>>(
         attempts++;
         importFn()
           .then(resolve)
-          .catch((error) => {
+          .catch(error => {
             if (attempts >= maxRetries) {
               const inferred = pageName ?? inferPageName(importFn);
-              const errName = isErrorLike(error) && 'name' in error ? String(error.name) : undefined;
-              const errStack = isErrorLike(error) && 'stack' in error ? String(error.stack) : undefined;
+              const errName =
+                isErrorLike(error) && 'name' in error ? String(error.name) : undefined;
+              const errStack =
+                isErrorLike(error) && 'stack' in error ? String(error.stack) : undefined;
               logger.error('Page chunk load failed after retries', {
                 pageName: inferred,
                 error,
                 errorName: errName,
                 errorStack: errStack,
-                attempts
+                attempts,
               });
-              
-              // Affichage du composant de fallback au lieu de jeter l'erreur 
+
+              // Affichage du composant de fallback au lieu de jeter l'erreur
               // pour éviter de déclencher le ErrorBoundary global.
               const Fallback = () => <PageLoadError pageName={inferred} />;
               resolve({ default: Fallback as unknown as T });

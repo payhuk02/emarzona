@@ -25,11 +25,7 @@ interface StockAdjustmentDialogProps {
   item: any;
 }
 
-export function StockAdjustmentDialog({
-  open,
-  onOpenChange,
-  item,
-}: StockAdjustmentDialogProps) {
+export function StockAdjustmentDialog({ open, onOpenChange, item }: StockAdjustmentDialogProps) {
   const { toast } = useToast();
   const adjustStock = useAdjustStock();
 
@@ -61,10 +57,10 @@ export function StockAdjustmentDialog({
       setReason('');
       setNotes('');
       onOpenChange(false);
-    } catch ( _error: any) {
+    } catch (_error: any) {
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible d\'ajuster le stock',
+        description: error.message || "Impossible d'ajuster le stock",
         variant: 'destructive',
       });
     }
@@ -73,9 +69,7 @@ export function StockAdjustmentDialog({
   if (!item) return null;
 
   const productName =
-    item.physical_product?.product?.name ||
-    item.variant?.physical_product?.product?.name ||
-    'N/A';
+    item.physical_product?.product?.name || item.variant?.physical_product?.product?.name || 'N/A';
 
   const variantInfo = item.variant
     ? ` (${item.variant.option1_value}${
@@ -116,8 +110,8 @@ export function StockAdjustmentDialog({
                       newQuantity < 0
                         ? 'text-red-600'
                         : newQuantity > item.quantity_available
-                        ? 'text-green-600'
-                        : 'text-blue-600'
+                          ? 'text-green-600'
+                          : 'text-blue-600'
                     }`}
                   >
                     {newQuantity}
@@ -160,7 +154,7 @@ export function StockAdjustmentDialog({
               type="number"
               min="0"
               value={quantity}
-              onChange={(e) => setQuantity(e.target.value)}
+              onChange={e => setQuantity(e.target.value)}
               placeholder="0"
               className="mt-2"
             />
@@ -172,7 +166,7 @@ export function StockAdjustmentDialog({
             <Input
               id="reason"
               value={reason}
-              onChange={(e) => setReason(e.target.value)}
+              onChange={e => setReason(e.target.value)}
               placeholder="Ex: Réception fournisseur, Inventaire physique..."
               className="mt-2"
             />
@@ -184,7 +178,7 @@ export function StockAdjustmentDialog({
             <Textarea
               id="notes"
               value={notes}
-              onChange={(e) => setNotes(e.target.value)}
+              onChange={e => setNotes(e.target.value)}
               placeholder="Commentaires additionnels..."
               className="mt-2"
               rows={3}
@@ -200,11 +194,7 @@ export function StockAdjustmentDialog({
 
           {/* Actions */}
           <div className="flex gap-3">
-            <Button
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              className="flex-1"
-            >
+            <Button variant="outline" onClick={() => onOpenChange(false)} className="flex-1">
               Annuler
             </Button>
             <Button
@@ -220,10 +210,3 @@ export function StockAdjustmentDialog({
     </Dialog>
   );
 }
-
-
-
-
-
-
-

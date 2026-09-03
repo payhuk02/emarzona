@@ -5,7 +5,11 @@
  */
 
 import { logger } from '@/lib/logger';
-import type { CarrierAdapter, CarrierTrackingResponse, TrackingUpdate } from '../automatic-tracking';
+import type {
+  CarrierAdapter,
+  CarrierTrackingResponse,
+  TrackingUpdate,
+} from '../automatic-tracking';
 
 export class ChronopostAdapter implements CarrierAdapter {
   name = 'Chronopost';
@@ -14,11 +18,15 @@ export class ChronopostAdapter implements CarrierAdapter {
   private baseUrl = 'https://api.chronopost.com';
 
   constructor(config?: Record<string, unknown>) {
-    this.accountNumber = config?.accountNumber as string || import.meta.env.VITE_CHRONOPOST_ACCOUNT_NUMBER;
-    this.password = config?.password as string || import.meta.env.VITE_CHRONOPOST_PASSWORD;
+    this.accountNumber =
+      (config?.accountNumber as string) || import.meta.env.VITE_CHRONOPOST_ACCOUNT_NUMBER;
+    this.password = (config?.password as string) || import.meta.env.VITE_CHRONOPOST_PASSWORD;
   }
 
-  async track(trackingNumber: string, carrierConfig?: Record<string, unknown>): Promise<CarrierTrackingResponse> {
+  async track(
+    trackingNumber: string,
+    carrierConfig?: Record<string, unknown>
+  ): Promise<CarrierTrackingResponse> {
     try {
       if (!this.accountNumber || !this.password) {
         logger.warn('Chronopost credentials not configured, using simulation', { trackingNumber });
@@ -50,7 +58,7 @@ export class ChronopostAdapter implements CarrierAdapter {
       {
         method: 'GET',
         headers: {
-          'Accept': 'application/json',
+          Accept: 'application/json',
         },
       }
     );
@@ -67,12 +75,12 @@ export class ChronopostAdapter implements CarrierAdapter {
    */
   private transformResponse(trackingNumber: string, data: any): CarrierTrackingResponse {
     const listEvents = data?.return?.listEvents || [];
-    
+
     if (!listEvents || listEvents.length === 0) {
       return this.simulateTracking(trackingNumber);
     }
 
-    const  events: TrackingUpdate[] = [];
+    const events: TrackingUpdate[] = [];
 
     for (const event of listEvents) {
       events.push({
@@ -103,13 +111,13 @@ export class ChronopostAdapter implements CarrierAdapter {
    */
   private mapChronopostStatus(chronopostCode: string): string {
     // Codes Chronopost (exemples, à adapter selon la vraie documentation)
-    const  statusMap: Record<string, string> = {
-      'D1': 'label_created', // Colis déposé
-      'D2': 'picked_up', // Colis ramassé
-      'D3': 'in_transit', // En transit
-      'D4': 'out_for_delivery', // En cours de livraison
-      'D5': 'delivered', // Livré
-      'D6': 'failed', // Échec de livraison
+    const statusMap: Record<string, string> = {
+      D1: 'label_created', // Colis déposé
+      D2: 'picked_up', // Colis ramassé
+      D3: 'in_transit', // En transit
+      D4: 'out_for_delivery', // En cours de livraison
+      D5: 'delivered', // Livré
+      D6: 'failed', // Échec de livraison
     };
 
     return statusMap[chronopostCode] || 'in_transit';
@@ -127,10 +135,3 @@ export class ChronopostAdapter implements CarrierAdapter {
     };
   }
 }
-
-
-
-
-
-
-

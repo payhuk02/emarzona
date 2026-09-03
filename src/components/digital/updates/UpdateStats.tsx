@@ -1,7 +1,7 @@
 /**
  * Update Stats Component
  * Date: 28 Janvier 2025
- * 
+ *
  * Statistiques des mises à jour d'un produit digital
  */
 
@@ -9,18 +9,12 @@ import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import {
-  Download,
-  TrendingUp,
-  Users,
-  Calendar,
-  Package,
-  Sparkles,
-} from '@/components/icons';
+import { Download, TrendingUp, Users, Calendar, Package, Sparkles } from '@/components/icons';
 import { supabase } from '@/integrations/supabase/client';
 import { DigitalProductUpdate } from '@/hooks/digital/useProductUpdates';
 
-const DIGITAL_PRODUCT_UPDATE_FIELDS = 'id, digital_product_id, version, title, description, release_type, release_date, is_published, is_forced, download_count';
+const DIGITAL_PRODUCT_UPDATE_FIELDS =
+  'id, digital_product_id, version, title, description, release_type, release_date, is_published, is_forced, download_count';
 
 interface UpdateStatsProps {
   digitalProductId: string;
@@ -44,7 +38,7 @@ export function UpdateStats({ digitalProductId }: UpdateStatsProps) {
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {[1, 2, 3, 4].map((i) => (
+        {[1, 2, 3, 4].map(i => (
           <Card key={i}>
             <CardHeader>
               <Skeleton className="h-4 w-24" />
@@ -59,8 +53,8 @@ export function UpdateStats({ digitalProductId }: UpdateStatsProps) {
   }
 
   const totalDownloads = updates.reduce((sum, update) => sum + (update.download_count || 0), 0);
-  const publishedUpdates = updates.filter((u) => u.is_published).length;
-  const forcedUpdates = updates.filter((u) => u.is_forced).length;
+  const publishedUpdates = updates.filter(u => u.is_published).length;
+  const forcedUpdates = updates.filter(u => u.is_forced).length;
   const latestUpdate = updates[0];
 
   const stats = [
@@ -120,8 +114,8 @@ export function UpdateStats({ digitalProductId }: UpdateStatsProps) {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {['major', 'minor', 'patch', 'hotfix'].map((type) => {
-              const count = updates.filter((u) => u.release_type === type).length;
+            {['major', 'minor', 'patch', 'hotfix'].map(type => {
+              const count = updates.filter(u => u.release_type === type).length;
               return (
                 <div key={type} className="text-center">
                   <div className="text-3xl font-bold">{count}</div>
@@ -135,10 +129,3 @@ export function UpdateStats({ digitalProductId }: UpdateStatsProps) {
     </div>
   );
 }
-
-
-
-
-
-
-

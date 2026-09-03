@@ -42,13 +42,15 @@ const CalendarLoadingFallback = () => (
  * </LazyCalendarWrapper>
  */
 export const LazyCalendarWrapper = ({ children }: LazyCalendarWrapperProps) => {
-  const [calendarModule, setCalendarModule] = useState<typeof import('react-big-calendar') | null>(null);
+  const [calendarModule, setCalendarModule] = useState<typeof import('react-big-calendar') | null>(
+    null
+  );
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     Promise.all([
       import('react-big-calendar'),
-      import('react-big-calendar/lib/css/react-big-calendar.css')
+      import('react-big-calendar/lib/css/react-big-calendar.css'),
     ]).then(([module]) => {
       setCalendarModule(module);
       setLoading(false);
@@ -70,10 +72,3 @@ export const LazyCalendarWrapper = ({ children }: LazyCalendarWrapperProps) => {
     </>
   );
 };
-
-
-
-
-
-
-

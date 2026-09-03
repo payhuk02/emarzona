@@ -66,7 +66,7 @@ export async function optimizeImage(
     progressive = true,
     sizes = [400, 800, 1200, 1600],
     maxWidth = 2000,
-    maxHeight = 2000
+    maxHeight = 2000,
   } = options;
 
   // Vérifier si on est côté serveur et si sharp est disponible
@@ -83,8 +83,8 @@ export async function optimizeImage(
         compressionRatio: 0,
         format: 'original',
         width: 0,
-        height: 0
-      }
+        height: 0,
+      },
     };
   }
 
@@ -94,11 +94,10 @@ export async function optimizeImage(
     const originalSize = inputBuffer.length;
 
     // Configuration Sharp selon le format
-    let sharpInstance = sharp(inputBuffer)
-      .resize(maxWidth, maxHeight, {
-        fit: 'inside',
-        withoutEnlargement: true
-      });
+    let sharpInstance = sharp(inputBuffer).resize(maxWidth, maxHeight, {
+      fit: 'inside',
+      withoutEnlargement: true,
+    });
 
     // Appliquer les options selon le format
     switch (format) {
@@ -106,26 +105,26 @@ export async function optimizeImage(
         sharpInstance = sharpInstance.jpeg({
           quality,
           progressive,
-          mozjpeg: true
+          mozjpeg: true,
         });
         break;
       case 'png':
         sharpInstance = sharpInstance.png({
           quality,
           progressive,
-          compressionLevel: 6
+          compressionLevel: 6,
         });
         break;
       case 'webp':
         sharpInstance = sharpInstance.webp({
           quality,
-          effort: 4 // Meilleur équilibre qualité/compression
+          effort: 4, // Meilleur équilibre qualité/compression
         });
         break;
       case 'avif':
         sharpInstance = sharpInstance.avif({
           quality,
-          effort: 4
+          effort: 4,
         });
         break;
     }
@@ -142,13 +141,13 @@ export async function optimizeImage(
         const resizedBuffer = await sharp(inputBuffer)
           .resize(size, null, {
             fit: 'inside',
-            withoutEnlargement: true
+            withoutEnlargement: true,
           })
           [format]({
             quality: Math.min(quality + 5, 95), // Qualité légèrement supérieure pour les petites tailles
             ...(format === 'jpeg' && { progressive }),
             ...(format === 'webp' && { effort: 4 }),
-            ...(format === 'avif' && { effort: 4 })
+            ...(format === 'avif' && { effort: 4 }),
           })
           .toBuffer();
 
@@ -166,13 +165,12 @@ export async function optimizeImage(
         compressionRatio: ((originalSize - optimizedBuffer.length) / originalSize) * 100,
         format: optimizedMetadata.format || format,
         width: optimizedMetadata.width || 0,
-        height: optimizedMetadata.height || 0
-      }
+        height: optimizedMetadata.height || 0,
+      },
     };
-
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    logger.error('Erreur lors de l\'optimisation d\'image', { error: errorMessage });
+    logger.error("Erreur lors de l'optimisation d'image", { error: errorMessage });
     throw new Error(`Impossible d'optimiser l'image: ${errorMessage}`);
   }
 }
@@ -212,14 +210,14 @@ export function validateImageDimensions(
   if (width < minWidth || height < minHeight) {
     return {
       valid: false,
-      error: `Image trop petite. Minimum: ${minWidth}x${minHeight}px`
+      error: `Image trop petite. Minimum: ${minWidth}x${minHeight}px`,
     };
   }
 
   if (width > maxWidth || height > maxHeight) {
     return {
       valid: false,
-      error: `Image trop grande. Maximum: ${maxWidth}x${maxHeight}px`
+      error: `Image trop grande. Maximum: ${maxWidth}x${maxHeight}px`,
     };
   }
 
@@ -228,7 +226,7 @@ export function validateImageDimensions(
   if (ratio > 10) {
     return {
       valid: false,
-      error: 'Ratio d\'aspect trop extrême (max 10:1)'
+      error: "Ratio d'aspect trop extrême (max 10:1)",
     };
   }
 
@@ -273,11 +271,11 @@ export function calculateImageSEOScore(
   // Vérifier les dimensions
   if (!width || !height) {
     score -= 15;
-    issues.push('Dimensions d\'image non disponibles');
+    issues.push("Dimensions d'image non disponibles");
   } else {
     if (width < 400) {
       score -= 10;
-      issues.push('Largeur d\'image insuffisante pour mobile');
+      issues.push("Largeur d'image insuffisante pour mobile");
       recommendations.push('Utiliser au moins 400px de largeur');
     }
     if (width > 2000) {
@@ -289,7 +287,7 @@ export function calculateImageSEOScore(
   return {
     score: Math.max(0, score),
     issues,
-    recommendations
+    recommendations,
   };
 }
 
@@ -312,11 +310,12 @@ export function generateImageSEOAttributes(
     width,
     height,
     // Attributs pour Core Web Vitals
-    fetchpriority: loading === 'eager' ? 'high' as const : 'auto' as const,
+    fetchpriority: loading === 'eager' ? ('high' as const) : ('auto' as const),
     // Métadonnées SEO
     'data-seo-score': seoScore.score,
     'data-seo-issues': seoScore.issues.length,
     // Classes CSS pour optimisation
-    className: `seo-image seo-score-${Math.floor(seoScore.score / 20) * 20} ${loading === 'lazy' ? 'lazy-loaded' : ''}`.trim()
+    className:
+      `seo-image seo-score-${Math.floor(seoScore.score / 20) * 20} ${loading === 'lazy' ? 'lazy-loaded' : ''}`.trim(),
   };
 }

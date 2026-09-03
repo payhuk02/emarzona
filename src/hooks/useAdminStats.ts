@@ -68,13 +68,10 @@ async function fetchTopStoresByEarnings(): Promise<AdminStats['topStores']> {
     .slice(0, 5);
 
   const topIds = topStoreIdsAndTotals.map(s => s.id);
-  
+
   if (topIds.length > 0) {
-    const { data: stores } = await supabase
-      .from('stores')
-      .select('id, name')
-      .in('id', topIds);
-      
+    const { data: stores } = await supabase.from('stores').select('id, name').in('id', topIds);
+
     if (stores) {
       const storeNameMap = new Map(stores.map(s => [s.id, s.name]));
       for (const item of topStoreIdsAndTotals) {
@@ -113,13 +110,10 @@ async function fetchTopStoresByOrders(): Promise<AdminStats['topStores']> {
     .slice(0, 5);
 
   const topIds = topStoreIdsAndTotals.map(s => s.id);
-  
+
   if (topIds.length > 0) {
-    const { data: stores } = await supabase
-      .from('stores')
-      .select('id, name')
-      .in('id', topIds);
-      
+    const { data: stores } = await supabase.from('stores').select('id, name').in('id', topIds);
+
     if (stores) {
       const storeNameMap = new Map(stores.map(s => [s.id, s.name]));
       for (const item of topStoreIdsAndTotals) {
@@ -174,8 +168,14 @@ export const useAdminStats = () => {
         supabase.from('stores').select('id', { count: 'exact', head: true }),
         supabase.from('products').select('id', { count: 'exact', head: true }),
         supabase.from('orders').select('id', { count: 'exact', head: true }),
-        supabase.from('payments').select('amount').in('status', ['completed', 'succeeded', 'paid', 'successful']),
-        supabase.from('platform_commissions').select('commission_amount').in('status', ['completed', 'paid', 'successful']),
+        supabase
+          .from('payments')
+          .select('amount')
+          .in('status', ['completed', 'succeeded', 'paid', 'successful']),
+        supabase
+          .from('platform_commissions')
+          .select('commission_amount')
+          .in('status', ['completed', 'paid', 'successful']),
         supabase.from('store_platform_subscriptions').select('mrr_amount, status'),
         supabase.from('referrals').select('id', { count: 'exact', head: true }),
         supabase

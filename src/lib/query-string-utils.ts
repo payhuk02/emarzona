@@ -11,7 +11,7 @@ export interface QueryParams {
  * Parse une query string en objet
  */
 export function parseQueryString(queryString: string): QueryParams {
-  const  params: QueryParams = {};
+  const params: QueryParams = {};
 
   if (!queryString || queryString.length === 0) {
     return params;
@@ -51,7 +51,7 @@ export function parseQueryString(queryString: string): QueryParams {
  * Construit une query string depuis un objet
  */
 export function buildQueryString(params: QueryParams): string {
-  const  pairs: string[] = [];
+  const pairs: string[] = [];
 
   for (const [key, value] of Object.entries(params)) {
     if (value === null || value === undefined) {
@@ -106,7 +106,7 @@ export function setQueryParam(
   }
 
   const params = getCurrentQueryParams();
-  
+
   if (value === null || value === undefined) {
     delete params[name];
   } else {
@@ -241,13 +241,9 @@ export function hasQueryParam(name: string): boolean {
 /**
  * Construit une URL avec des paramètres
  */
-export function buildUrl(
-  baseUrl: string,
-  params?: QueryParams,
-  hash?: string
-): string {
+export function buildUrl(baseUrl: string, params?: QueryParams, hash?: string): string {
   const url = new URL(baseUrl, window.location.origin);
-  
+
   if (params) {
     const queryString = buildQueryString(params);
     url.search = queryString.startsWith('?') ? queryString.slice(1) : queryString;
@@ -304,10 +300,3 @@ export function parseUrl(url: string): {
     };
   }
 }
-
-
-
-
-
-
-

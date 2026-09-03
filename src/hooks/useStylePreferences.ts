@@ -9,7 +9,8 @@ import { logger } from '@/lib/logger';
 import { useAuth } from '@/contexts/AuthContext';
 import type { StyleProfile } from '@/components/personalization/StyleQuiz';
 
-const USER_STYLE_PREFERENCES_FIELDS = 'id, user_id, profile, quiz_completed_at, recommendations_viewed, last_updated';
+const USER_STYLE_PREFERENCES_FIELDS =
+  'id, user_id, profile, quiz_completed_at, recommendations_viewed, last_updated';
 
 interface StylePreferences {
   id: string;
@@ -28,7 +29,7 @@ export function useStylePreferences() {
   const {
     data: preferences,
     isLoading,
-    error
+    error,
   } = useQuery({
     queryKey: ['style-preferences', user?.id],
     queryFn: async (): Promise<StylePreferences | null> => {
@@ -40,7 +41,8 @@ export function useStylePreferences() {
         .eq('user_id', user.id)
         .single();
 
-      if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
+      if (error && error.code !== 'PGRST116') {
+        // PGRST116 = no rows returned
         logger.error('Error fetching style preferences', { error, userId: user.id });
         throw error;
       }
@@ -64,7 +66,7 @@ export function useStylePreferences() {
         profile,
         quiz_completed_at: now,
         last_updated: now,
-        recommendations_viewed: 0
+        recommendations_viewed: 0,
       };
 
       // Upsert les préférences
@@ -72,7 +74,7 @@ export function useStylePreferences() {
         .from('user_style_preferences')
         .upsert(preferencesData, {
           onConflict: 'user_id',
-          ignoreDuplicates: false
+          ignoreDuplicates: false,
         })
         .select()
         .single();
@@ -90,9 +92,9 @@ export function useStylePreferences() {
       queryClient.invalidateQueries({ queryKey: ['style-preferences', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['product-recommendations'] });
     },
-    onError: (error) => {
+    onError: error => {
       logger.error('Failed to save style preferences', { error, userId: user?.id });
-    }
+    },
   });
 
   // Mettre à jour le compteur de recommandations vues
@@ -104,7 +106,7 @@ export function useStylePreferences() {
         .from('user_style_preferences')
         .update({
           recommendations_viewed: (preferences.recommendations_viewed || 0) + 1,
-          last_updated: new Date().toISOString()
+          last_updated: new Date().toISOString(),
         })
         .eq('id', preferences.id);
 
@@ -115,7 +117,7 @@ export function useStylePreferences() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['style-preferences', user?.id] });
-    }
+    },
   });
 
   // Supprimer les préférences (reset)
@@ -138,7 +140,7 @@ export function useStylePreferences() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['style-preferences', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['product-recommendations'] });
-    }
+    },
   });
 
   return {
@@ -152,6 +154,6 @@ export function useStylePreferences() {
     isDeleting: deleteMutation.isPending,
     hasCompletedQuiz: !!preferences?.quiz_completed_at,
     profile: preferences?.profile || null,
-    recommendationsViewedCount: preferences?.recommendations_viewed || 0
+    recommendationsViewedCount: preferences?.recommendations_viewed || 0,
   };
 }

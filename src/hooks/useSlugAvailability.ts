@@ -9,24 +9,24 @@ const MIN_SLUG_LENGTH = 3;
 
 /**
  * Hook personnalisé pour gérer la vérification de disponibilité du slug
- * 
+ *
  * Gère:
  * - Vérification asynchrone de disponibilité
  * - Debouncing pour limiter les appels API
  * - États de chargement
  * - Gestion d'erreurs avec Sentry
- * 
+ *
  * @param slug - Le slug à vérifier
  * @param checkSlugAvailability - Fonction asynchrone pour vérifier la disponibilité
  * @returns Objet contenant l'état de disponibilité et de chargement
- * 
+ *
  * @example
  * ```tsx
  * const { slugAvailable, checkingSlug } = useSlugAvailability(
  *   formData.slug,
  *   checkSlugAvailability
  * );
- * 
+ *
  * // Dans le render:
  * {checkingSlug && <Spinner />}
  * {slugAvailable === true && <CheckIcon />}
@@ -80,12 +80,12 @@ export const useSlugAvailability = (
 
 /**
  * Hook pour gérer la génération automatique de slug à partir du nom
- * 
+ *
  * @param name - Nom du produit
  * @param currentSlug - Slug actuel
  * @param generateSlug - Fonction pour générer un slug depuis un nom
  * @param updateSlug - Fonction pour mettre à jour le slug
- * 
+ *
  * @example
  * ```tsx
  * useSlugGeneration(
@@ -113,10 +113,3 @@ export const useSlugGeneration = (
     }
   }, [name, currentSlug, generateSlug, updateSlug, autoGenerate]);
 };
-
-
-
-
-
-
-

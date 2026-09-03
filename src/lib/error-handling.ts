@@ -1,7 +1,7 @@
 /**
  * Error Handling Utilities
  * Date: 28 Janvier 2025
- * 
+ *
  * Utilitaires pour une gestion d'erreurs professionnelle et cohérente
  */
 
@@ -15,30 +15,30 @@ export enum ErrorType {
   // Erreurs réseau
   NETWORK_ERROR = 'NETWORK_ERROR',
   TIMEOUT_ERROR = 'TIMEOUT_ERROR',
-  
+
   // Erreurs de permissions
   PERMISSION_DENIED = 'PERMISSION_DENIED',
   UNAUTHORIZED = 'UNAUTHORIZED',
-  
+
   // Erreurs de ressources
   NOT_FOUND = 'NOT_FOUND',
   RESOURCE_MISSING = 'RESOURCE_MISSING',
-  
+
   // Erreurs de validation
   VALIDATION_ERROR = 'VALIDATION_ERROR',
   INVALID_INPUT = 'INVALID_INPUT',
-  
+
   // Erreurs de base de données
   TABLE_NOT_EXISTS = 'TABLE_NOT_EXISTS',
   FUNCTION_NOT_EXISTS = 'FUNCTION_NOT_EXISTS',
   CONSTRAINT_VIOLATION = 'CONSTRAINT_VIOLATION',
-  
+
   // Erreurs critiques
   CRITICAL_ERROR = 'CRITICAL_ERROR',
-  
+
   // Erreurs non-critiques (ne bloquent pas l'UI)
   NON_CRITICAL = 'NON_CRITICAL',
-  
+
   // Erreur inconnue
   UNKNOWN = 'UNKNOWN',
 }
@@ -47,9 +47,9 @@ export enum ErrorType {
  * Niveaux de sévérité
  */
 export enum ErrorSeverity {
-  LOW = 'LOW',           // Ne pas afficher de notification
-  MEDIUM = 'MEDIUM',     // Afficher notification discrète
-  HIGH = 'HIGH',         // Afficher notification importante
+  LOW = 'LOW', // Ne pas afficher de notification
+  MEDIUM = 'MEDIUM', // Afficher notification discrète
+  HIGH = 'HIGH', // Afficher notification importante
   CRITICAL = 'CRITICAL', // Afficher notification + Error Boundary
 }
 
@@ -73,19 +73,19 @@ const ERROR_CODES = {
   // Table/Function n'existe pas
   TABLE_NOT_EXISTS: '42P01',
   FUNCTION_NOT_EXISTS: '42883',
-  
+
   // Permissions
   PERMISSION_DENIED: '42501',
-  
+
   // Validation
   INVALID_PARAMETER: '22023',
   RAISE_EXCEPTION: 'P0001',
-  
+
   // Contraintes
   UNIQUE_VIOLATION: '23505',
   FOREIGN_KEY_VIOLATION: '23503',
   NOT_NULL_VIOLATION: '23502',
-  
+
   // Supabase PostgREST
   BAD_REQUEST: 'PGRST116',
 } as const;
@@ -95,9 +95,8 @@ const ERROR_CODES = {
  */
 export function normalizeError(error: unknown): NormalizedError {
   const errorMessage = toUserErrorMessage(error) || 'Erreur inconnue';
-  const errorCode = error && typeof error === 'object' && 'code' in error 
-    ? String(error.code) 
-    : undefined;
+  const errorCode =
+    error && typeof error === 'object' && 'code' in error ? String(error.code) : undefined;
 
   // Erreurs réseau
   if (
@@ -139,9 +138,10 @@ export function normalizeError(error: unknown): NormalizedError {
     (errorMessage.includes('function') && errorMessage.includes('does not exist'))
   ) {
     return {
-      type: errorCode === ERROR_CODES.FUNCTION_NOT_EXISTS 
-        ? ErrorType.FUNCTION_NOT_EXISTS 
-        : ErrorType.TABLE_NOT_EXISTS,
+      type:
+        errorCode === ERROR_CODES.FUNCTION_NOT_EXISTS
+          ? ErrorType.FUNCTION_NOT_EXISTS
+          : ErrorType.TABLE_NOT_EXISTS,
       severity: ErrorSeverity.LOW,
       message: errorMessage,
       userMessage: 'Cette fonctionnalité nécessite une mise à jour de la base de données.',
@@ -163,7 +163,7 @@ export function normalizeError(error: unknown): NormalizedError {
       type: ErrorType.PERMISSION_DENIED,
       severity: ErrorSeverity.HIGH,
       message: errorMessage,
-      userMessage: 'Vous n\'avez pas les permissions nécessaires pour effectuer cette action.',
+      userMessage: "Vous n'avez pas les permissions nécessaires pour effectuer cette action.",
       code: errorCode,
       retryable: false,
       originalError: error,
@@ -189,7 +189,7 @@ export function normalizeError(error: unknown): NormalizedError {
       type: ErrorType.NOT_FOUND,
       severity: ErrorSeverity.MEDIUM,
       message: errorMessage,
-      userMessage: 'La ressource demandée n\'a pas été trouvée.',
+      userMessage: "La ressource demandée n'a pas été trouvée.",
       code: errorCode,
       retryable: false,
       originalError: error,
@@ -225,9 +225,10 @@ export function normalizeError(error: unknown): NormalizedError {
       type: ErrorType.CONSTRAINT_VIOLATION,
       severity: ErrorSeverity.MEDIUM,
       message: errorMessage,
-      userMessage: errorCode === ERROR_CODES.UNIQUE_VIOLATION
-        ? 'Cette valeur existe déjà. Veuillez en choisir une autre.'
-        : 'Les données fournies ne respectent pas les contraintes. Veuillez vérifier.',
+      userMessage:
+        errorCode === ERROR_CODES.UNIQUE_VIOLATION
+          ? 'Cette valeur existe déjà. Veuillez en choisir une autre.'
+          : 'Les données fournies ne respectent pas les contraintes. Veuillez vérifier.',
       code: errorCode,
       retryable: false,
       originalError: error,
@@ -239,7 +240,7 @@ export function normalizeError(error: unknown): NormalizedError {
     type: ErrorType.UNKNOWN,
     severity: ErrorSeverity.MEDIUM,
     message: errorMessage,
-    userMessage: 'Une erreur inattendue s\'est produite. Veuillez réessayer.',
+    userMessage: "Une erreur inattendue s'est produite. Veuillez réessayer.",
     code: errorCode,
     retryable: true,
     originalError: error,
@@ -251,7 +252,7 @@ export function normalizeError(error: unknown): NormalizedError {
  */
 export function shouldRetryError(error: unknown, attemptIndex: number): boolean {
   const normalized = normalizeError(error);
-  
+
   // Ne pas retry si non-retryable
   if (!normalized.retryable) {
     return false;
@@ -272,7 +273,11 @@ export function shouldRetryError(error: unknown, attemptIndex: number): boolean 
  * @param baseDelay Délai de base en ms (défaut: 1000)
  * @param maxDelay Délai maximum en ms (défaut: 30000)
  */
-export function getRetryDelay(attemptIndex: number, baseDelay: number = 1000, maxDelay: number = 30000): number {
+export function getRetryDelay(
+  attemptIndex: number,
+  baseDelay: number = 1000,
+  maxDelay: number = 30000
+): number {
   // Exponential backoff: baseDelay * 2^attemptIndex, max maxDelay
   return Math.min(baseDelay * Math.pow(2, attemptIndex), maxDelay);
 }
@@ -282,7 +287,7 @@ export function getRetryDelay(attemptIndex: number, baseDelay: number = 1000, ma
  */
 export function logError(error: unknown, context?: Record<string, unknown>): NormalizedError {
   const normalized = normalizeError(error);
-  
+
   const logData = {
     type: normalized.type,
     severity: normalized.severity,
@@ -309,10 +314,3 @@ export function logError(error: unknown, context?: Record<string, unknown>): Nor
 
   return normalized;
 }
-
-
-
-
-
-
-

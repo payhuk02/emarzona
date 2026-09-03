@@ -1,7 +1,7 @@
 /**
  * Interactive Zoom Component
  * Date: 1 Février 2025
- * 
+ *
  * Composant pour zoom interactif sur images produits
  * Supporte zoom souris, touch, et boutons
  */
@@ -51,7 +51,7 @@ export const InteractiveZoom = ({
   const handleWheel = (e: React.WheelEvent) => {
     e.preventDefault();
     const delta = e.deltaY > 0 ? -0.1 : 0.1;
-    setZoomLevel((prev) => Math.max(minZoom, Math.min(maxZoom, prev + delta)));
+    setZoomLevel(prev => Math.max(minZoom, Math.min(maxZoom, prev + delta)));
   };
 
   // Gestion drag pour déplacer image zoomée
@@ -66,17 +66,17 @@ export const InteractiveZoom = ({
     if (isDragging && zoomLevel > minZoom) {
       const newX = e.clientX - dragStart.x;
       const newY = e.clientY - dragStart.y;
-      
+
       // Limiter le déplacement aux bords
       if (containerRef.current && imageRef.current) {
         const containerRect = containerRef.current.getBoundingClientRect();
         const imageRect = imageRef.current.getBoundingClientRect();
         const scaledWidth = imageRect.width * zoomLevel;
         const scaledHeight = imageRect.height * zoomLevel;
-        
+
         const maxX = (scaledWidth - containerRect.width) / 2;
         const maxY = (scaledHeight - containerRect.height) / 2;
-        
+
         setPosition({
           x: Math.max(-maxX, Math.min(maxX, newX)),
           y: Math.max(-maxY, Math.min(maxY, newY)),
@@ -101,10 +101,7 @@ export const InteractiveZoom = ({
       // Pinch to zoom
       const touch1 = e.touches[0];
       const touch2 = e.touches[1];
-      const distance = Math.hypot(
-        touch2.clientX - touch1.clientX,
-        touch2.clientY - touch1.clientY
-      );
+      const distance = Math.hypot(touch2.clientX - touch1.clientX, touch2.clientY - touch1.clientY);
       // Stocker distance initiale pour calcul zoom
     }
   };
@@ -123,11 +120,11 @@ export const InteractiveZoom = ({
 
   // Contrôles zoom
   const handleZoomIn = () => {
-    setZoomLevel((prev) => Math.min(maxZoom, prev + 0.5));
+    setZoomLevel(prev => Math.min(maxZoom, prev + 0.5));
   };
 
   const handleZoomOut = () => {
-    setZoomLevel((prev) => {
+    setZoomLevel(prev => {
       const newZoom = Math.max(minZoom, prev - 0.5);
       if (newZoom === minZoom) {
         setPosition({ x: 0, y: 0 });
@@ -162,7 +159,11 @@ export const InteractiveZoom = ({
         ref={containerRef}
         className={cn(
           'relative aspect-square bg-muted rounded-lg overflow-hidden',
-          isDragging && zoomLevel > minZoom ? 'cursor-grabbing' : zoomLevel > minZoom ? 'cursor-grab' : 'cursor-zoom-in'
+          isDragging && zoomLevel > minZoom
+            ? 'cursor-grabbing'
+            : zoomLevel > minZoom
+              ? 'cursor-grab'
+              : 'cursor-zoom-in'
         )}
         onWheel={handleWheel}
         onMouseDown={handleMouseDown}
@@ -173,11 +174,7 @@ export const InteractiveZoom = ({
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-        <div
-          ref={imageRef}
-          style={imageStyle}
-          className="w-full h-full"
-        >
+        <div ref={imageRef} style={imageStyle} className="w-full h-full">
           <OptimizedImage
             src={displayImage}
             alt={productName}
@@ -234,22 +231,10 @@ export const InteractiveZoom = ({
           <ZoomIn className="h-4 w-4" />
         </Button>
 
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleFullscreen}
-          aria-label="Plein écran"
-        >
+        <Button variant="outline" size="sm" onClick={handleFullscreen} aria-label="Plein écran">
           <Maximize2 className="h-4 w-4" />
         </Button>
       </div>
     </div>
   );
 };
-
-
-
-
-
-
-

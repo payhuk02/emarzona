@@ -1,7 +1,7 @@
 /**
  * Dedication Preview Component
  * Date: 1 Février 2025
- * 
+ *
  * Aperçu de la dédicace avec différents styles et positions
  */
 
@@ -43,9 +43,7 @@ export const DedicationPreview = ({
   onDownload,
   className,
 }: DedicationPreviewProps) => {
-  const fullText = recipientName
-    ? `Pour ${recipientName},\n\n${dedicationText}`
-    : dedicationText;
+  const fullText = recipientName ? `Pour ${recipientName},\n\n${dedicationText}` : dedicationText;
 
   return (
     <Card className={className}>
@@ -53,9 +51,7 @@ export const DedicationPreview = ({
         <div className="flex items-center justify-between">
           <div>
             <CardTitle>Aperçu de la dédicace</CardTitle>
-            <CardDescription>
-              Voici comment votre dédicace apparaîtra
-            </CardDescription>
+            <CardDescription>Voici comment votre dédicace apparaîtra</CardDescription>
           </div>
           <div className="flex items-center gap-2">
             <Badge variant="outline">{fontStyle}</Badge>
@@ -110,10 +106,3 @@ export const DedicationPreview = ({
     </Card>
   );
 };
-
-
-
-
-
-
-

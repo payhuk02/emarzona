@@ -7,7 +7,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 
-const PHYSICAL_PRODUCT_IMAGE_FIELDS = 'id, product_id, physical_product_id, image_url, image_type, is_360, images_360_urls, rotation_steps, supports_zoom, zoom_image_url, zoom_levels, is_video, video_url, video_thumbnail_url, video_duration_seconds, video_provider, variant_id, display_order, alt_text, caption, created_at, updated_at';
+const PHYSICAL_PRODUCT_IMAGE_FIELDS =
+  'id, product_id, physical_product_id, image_url, image_type, is_360, images_360_urls, rotation_steps, supports_zoom, zoom_image_url, zoom_levels, is_video, video_url, video_thumbnail_url, video_duration_seconds, video_provider, variant_id, display_order, alt_text, caption, created_at, updated_at';
 
 export interface PhysicalProductImage {
   id: string;
@@ -98,7 +99,9 @@ export const useCreatePhysicalProductImage = () => {
       return data as PhysicalProductImage;
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['physical-product-images', variables.product_id] });
+      queryClient.invalidateQueries({
+        queryKey: ['physical-product-images', variables.product_id],
+      });
     },
   });
 };
@@ -125,7 +128,7 @@ export const useUpdatePhysicalProductImage = () => {
 
       return data as PhysicalProductImage;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['physical-product-images', data.product_id] });
     },
   });
@@ -139,10 +142,7 @@ export const useDeletePhysicalProductImage = () => {
 
   return useMutation({
     mutationFn: async ({ id, productId }: { id: string; productId: string }) => {
-      const { error } = await supabase
-        .from('physical_product_images')
-        .delete()
-        .eq('id', id);
+      const { error } = await supabase.from('physical_product_images').delete().eq('id', id);
 
       if (error) {
         logger.error('Error deleting physical product image', { error, id });
@@ -154,10 +154,3 @@ export const useDeletePhysicalProductImage = () => {
     },
   });
 };
-
-
-
-
-
-
-

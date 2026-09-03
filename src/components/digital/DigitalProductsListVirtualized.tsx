@@ -56,11 +56,7 @@ const DigitalProductsListVirtualizedComponent = ({
 
   return (
     <div className={cn('w-full', className)}>
-      <div
-        ref={parentRef}
-        className="overflow-auto"
-        style={{ height: containerHeight }}
-      >
+      <div ref={parentRef} className="overflow-auto" style={{ height: containerHeight }}>
         <div
           style={{
             height: `${virtualizer.getTotalSize()}px`,
@@ -68,9 +64,9 @@ const DigitalProductsListVirtualizedComponent = ({
             position: 'relative',
           }}
         >
-          {items.map((virtualItem) => {
+          {items.map(virtualItem => {
             const product = products[virtualItem.index];
-            
+
             return (
               <div
                 key={virtualItem.key}
@@ -93,7 +89,7 @@ const DigitalProductsListVirtualizedComponent = ({
                           alt={product.name || 'Produit digital'}
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                           loading="lazy"
-                          onError={(e) => {
+                          onError={e => {
                             const target = e.target as HTMLImageElement;
                             target.style.display = 'none';
                           }}
@@ -104,7 +100,7 @@ const DigitalProductsListVirtualizedComponent = ({
                         </div>
                       )}
                     </div>
-                    
+
                     <div className="flex-1 p-3 sm:p-4">
                       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4">
                         <div className="flex-1 min-w-0">
@@ -117,7 +113,8 @@ const DigitalProductsListVirtualizedComponent = ({
                             )}
                             <Badge variant="outline">
                               <Download className="h-3 w-3 mr-1" />
-                              {product.total_downloads || product.totalDownloads || 0} téléchargements
+                              {product.total_downloads || product.totalDownloads || 0}{' '}
+                              téléchargements
                             </Badge>
                             <Badge variant="outline" className="font-semibold">
                               {product.price?.toLocaleString() || 0} XOF
@@ -129,24 +126,16 @@ const DigitalProductsListVirtualizedComponent = ({
                             </p>
                           )}
                         </div>
-                        
+
                         <div className="flex items-center gap-2">
                           {onView && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => onView(product.id)}
-                            >
+                            <Button variant="outline" size="sm" onClick={() => onView(product.id)}>
                               <Eye className="h-4 w-4 mr-2" />
                               <span className="hidden sm:inline">Voir</span>
                             </Button>
                           )}
                           {onEdit && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => onEdit(product.id)}
-                            >
+                            <Button variant="outline" size="sm" onClick={() => onEdit(product.id)}>
                               <Edit className="h-4 w-4 mr-2" />
                               <span className="hidden sm:inline">Modifier</span>
                             </Button>
@@ -161,7 +150,7 @@ const DigitalProductsListVirtualizedComponent = ({
           })}
         </div>
       </div>
-      
+
       {/* Statistiques de performance */}
       <div className="mt-2 text-xs text-muted-foreground text-center">
         Affichage de {items.length} sur {products.length} produits
@@ -171,28 +160,25 @@ const DigitalProductsListVirtualizedComponent = ({
 };
 
 // Optimisation avec React.memo pour éviter les re-renders inutiles
-export const DigitalProductsListVirtualized = React.memo(DigitalProductsListVirtualizedComponent, (prevProps, nextProps) => {
-  return (
-    prevProps.products.length === nextProps.products.length &&
-    prevProps.onView === nextProps.onView &&
-    prevProps.onEdit === nextProps.onEdit &&
-    prevProps.className === nextProps.className &&
-    prevProps.itemHeight === nextProps.itemHeight &&
-    prevProps.containerHeight === nextProps.containerHeight &&
-    // Comparaison superficielle des products (comparer les IDs)
-    prevProps.products.every((product, index) => 
-      product.id === nextProps.products[index]?.id &&
-      product.is_active === nextProps.products[index]?.is_active &&
-      product.price === nextProps.products[index]?.price
-    )
-  );
-});
+export const DigitalProductsListVirtualized = React.memo(
+  DigitalProductsListVirtualizedComponent,
+  (prevProps, nextProps) => {
+    return (
+      prevProps.products.length === nextProps.products.length &&
+      prevProps.onView === nextProps.onView &&
+      prevProps.onEdit === nextProps.onEdit &&
+      prevProps.className === nextProps.className &&
+      prevProps.itemHeight === nextProps.itemHeight &&
+      prevProps.containerHeight === nextProps.containerHeight &&
+      // Comparaison superficielle des products (comparer les IDs)
+      prevProps.products.every(
+        (product, index) =>
+          product.id === nextProps.products[index]?.id &&
+          product.is_active === nextProps.products[index]?.is_active &&
+          product.price === nextProps.products[index]?.price
+      )
+    );
+  }
+);
 
 DigitalProductsListVirtualized.displayName = 'DigitalProductsListVirtualized';
-
-
-
-
-
-
-

@@ -1,7 +1,7 @@
 /**
  * Mock FedEx API Service
  * Date: 28 octobre 2025
- * 
+ *
  * Service simulant l'API FedEx pour développement
  * Architecture prête pour basculer vers la vraie API
  */
@@ -142,7 +142,7 @@ class MockFedexService {
    * Simulate API delay
    */
   private async simulateDelay() {
-    await new Promise((resolve) => setTimeout(resolve, this.mockDelay));
+    await new Promise(resolve => setTimeout(resolve, this.mockDelay));
   }
 
   /**
@@ -181,10 +181,7 @@ class MockFedexService {
   /**
    * Calculate shipping cost
    */
-  private calculateCost(
-    serviceType: keyof typeof MOCK_SERVICE_TYPES,
-    weight: number
-  ): number {
+  private calculateCost(serviceType: keyof typeof MOCK_SERVICE_TYPES, weight: number): number {
     const service = MOCK_SERVICE_TYPES[serviceType];
     return service.base_cost + service.cost_per_kg * weight;
   }
@@ -205,13 +202,10 @@ class MockFedexService {
   /**
    * Create shipment and generate label
    */
-  async createShipment(
-    request: FedexShipmentRequest
-  ): Promise<FedexShipmentResponse> {
+  async createShipment(request: FedexShipmentRequest): Promise<FedexShipmentResponse> {
     await this.simulateDelay();
 
-    const serviceType = (request.service_type ||
-      'FEDEX_GROUND') as keyof typeof MOCK_SERVICE_TYPES;
+    const serviceType = (request.service_type || 'FEDEX_GROUND') as keyof typeof MOCK_SERVICE_TYPES;
     const service = MOCK_SERVICE_TYPES[serviceType];
     const trackingNumber = this.generateTrackingNumber();
     const cost = this.calculateCost(serviceType, request.package.weight);
@@ -238,12 +232,12 @@ class MockFedexService {
 
     // Generate mock tracking events
     const now = new Date();
-    const  events: FedexTrackingEvent[] = [];
+    const events: FedexTrackingEvent[] = [];
 
     // Simulate progression through statuses
     const statusIndex = Math.floor(Math.random() * MOCK_TRACKING_STATUSES.length);
 
-    for (let  i= 0; i <= statusIndex; i++) {
+    for (let i = 0; i <= statusIndex; i++) {
       const status = MOCK_TRACKING_STATUSES[i];
       const eventDate = new Date(now);
       eventDate.setHours(eventDate.getHours() - (statusIndex - i) * 12);
@@ -268,9 +262,7 @@ class MockFedexService {
       success: true,
       tracking_number: trackingNumber,
       status: currentStatus,
-      estimated_delivery: !isDelivered
-        ? this.calculateDeliveryDate(3)
-        : undefined,
+      estimated_delivery: !isDelivered ? this.calculateDeliveryDate(3) : undefined,
       actual_delivery: isDelivered ? events[events.length - 1].timestamp : undefined,
       events: events.reverse(), // Most recent first
       current_location: events[0]?.location,
@@ -283,19 +275,17 @@ class MockFedexService {
   async getRates(request: FedexRateRequest): Promise<FedexRate[]> {
     await this.simulateDelay();
 
-    const  rates: FedexRate[] = Object.entries(MOCK_SERVICE_TYPES).map(
-      ([code, service]) => ({
-        service_type: code,
-        service_name: service.name,
-        total_cost: this.calculateCost(
-          code as keyof typeof MOCK_SERVICE_TYPES,
-          request.package.weight
-        ),
-        currency: 'XOF',
-        estimated_days: service.days,
-        delivery_date: this.calculateDeliveryDate(service.days),
-      })
-    );
+    const rates: FedexRate[] = Object.entries(MOCK_SERVICE_TYPES).map(([code, service]) => ({
+      service_type: code,
+      service_name: service.name,
+      total_cost: this.calculateCost(
+        code as keyof typeof MOCK_SERVICE_TYPES,
+        request.package.weight
+      ),
+      currency: 'XOF',
+      estimated_days: service.days,
+      delivery_date: this.calculateDeliveryDate(service.days),
+    }));
 
     // Sort by cost
     return rates.sort((a, b) => a.total_cost - b.total_cost);
@@ -337,20 +327,13 @@ class MockFedexService {
   // =====================================================
 
   private getMockCity(index: number): string {
-    const cities = [
-      'Ouagadougou',
-      'Abidjan',
-      'Dakar',
-      'Bamako',
-      'Niamey',
-      'Cotonou',
-    ];
+    const cities = ['Ouagadougou', 'Abidjan', 'Dakar', 'Bamako', 'Niamey', 'Cotonou'];
     return cities[index % cities.length];
   }
 
   private getStatusDescription(status: string): string {
-    const  descriptions: Record<string, string> = {
-      LABEL_CREATED: 'Étiquette d\'expédition créée',
+    const descriptions: Record<string, string> = {
+      LABEL_CREATED: "Étiquette d'expédition créée",
       PICKED_UP: 'Colis ramassé par FedEx',
       IN_TRANSIT: 'En transit vers la destination',
       OUT_FOR_DELIVERY: 'En cours de livraison',
@@ -367,10 +350,3 @@ class MockFedexService {
 
 export const mockFedexService = new MockFedexService();
 export default mockFedexService;
-
-
-
-
-
-
-

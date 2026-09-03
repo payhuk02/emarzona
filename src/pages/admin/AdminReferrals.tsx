@@ -4,7 +4,14 @@ import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { MobileTableCard } from '@/components/ui/mobile-table-card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -77,11 +84,15 @@ const AdminReferrals = () => {
     },
   });
 
-  const stats = useMemo(() => ({
-    totalReferrals: referrals?.length || 0,
-    activeReferrals: referrals?.filter(r => r.status === 'active').length || 0,
-    totalCommissions: referralCommissions?.reduce((sum, c) => sum + Number(c.commission_amount), 0) || 0,
-  }), [referrals, referralCommissions]);
+  const stats = useMemo(
+    () => ({
+      totalReferrals: referrals?.length || 0,
+      activeReferrals: referrals?.filter(r => r.status === 'active').length || 0,
+      totalCommissions:
+        referralCommissions?.reduce((sum, c) => sum + Number(c.commission_amount), 0) || 0,
+    }),
+    [referrals, referralCommissions]
+  );
 
   useEffect(() => {
     if (!isLoading && referrals) {
@@ -121,11 +132,16 @@ const AdminReferrals = () => {
     });
   }, [referrals, toast]);
 
-  const filteredReferrals = useMemo(() => referrals?.filter((ref: ReferralWithRelations) =>
-    ref.referrer?.display_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    ref.referred?.display_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    ref.referral_code?.toLowerCase().includes(searchTerm.toLowerCase())
-  ) || [], [referrals, searchTerm]);
+  const filteredReferrals = useMemo(
+    () =>
+      referrals?.filter(
+        (ref: ReferralWithRelations) =>
+          ref.referrer?.display_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          ref.referred?.display_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          ref.referral_code?.toLowerCase().includes(searchTerm.toLowerCase())
+      ) || [],
+    [referrals, searchTerm]
+  );
 
   if (isLoading) {
     return (
@@ -148,18 +164,24 @@ const AdminReferrals = () => {
         {/* Header */}
         <div ref={headerRef} className="flex items-center justify-between" role="banner">
           <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent" id="admin-referrals-title">
+            <h1
+              className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent"
+              id="admin-referrals-title"
+            >
               Gestion des parrainages
             </h1>
-            <p className="text-muted-foreground mt-2">
-              Suivi des parrainages et commissions (2%)
-            </p>
+            <p className="text-muted-foreground mt-2">Suivi des parrainages et commissions (2%)</p>
           </div>
           <UserPlus className="h-8 w-8 text-muted-foreground" aria-hidden="true" />
         </div>
 
         {/* Stats Cards */}
-        <div ref={statsRef} className="grid gap-6 md:grid-cols-3" role="region" aria-label="Statistiques des parrainages">
+        <div
+          ref={statsRef}
+          className="grid gap-6 md:grid-cols-3"
+          role="region"
+          aria-label="Statistiques des parrainages"
+        >
           <Card className="hover-scale">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -168,12 +190,8 @@ const AdminReferrals = () => {
               <Users className="h-4 w-4 text-blue-600" aria-hidden="true" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-blue-600">
-                {stats.totalReferrals}
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {stats.activeReferrals} actifs
-              </p>
+              <div className="text-2xl font-bold text-blue-600">{stats.totalReferrals}</div>
+              <p className="text-xs text-muted-foreground mt-1">{stats.activeReferrals} actifs</p>
             </CardContent>
           </Card>
 
@@ -188,9 +206,7 @@ const AdminReferrals = () => {
               <div className="text-2xl font-bold text-pink-600">
                 {formatCurrency(stats.totalCommissions)}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                2% sur ventes filleuls
-              </p>
+              <p className="text-xs text-muted-foreground mt-1">2% sur ventes filleuls</p>
             </CardContent>
           </Card>
 
@@ -203,11 +219,12 @@ const AdminReferrals = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-emerald-600">
-                {stats.totalReferrals > 0 ? Math.round((stats.activeReferrals / stats.totalReferrals) * 100) : 0}%
+                {stats.totalReferrals > 0
+                  ? Math.round((stats.activeReferrals / stats.totalReferrals) * 100)
+                  : 0}
+                %
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Parrainages actifs
-              </p>
+              <p className="text-xs text-muted-foreground mt-1">Parrainages actifs</p>
             </CardContent>
           </Card>
         </div>
@@ -218,9 +235,7 @@ const AdminReferrals = () => {
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle>Liste des parrainages</CardTitle>
-                <CardDescription>
-                  Tous les parrainages de la plateforme
-                </CardDescription>
+                <CardDescription>Tous les parrainages de la plateforme</CardDescription>
               </div>
               <Button onClick={exportToCSV} variant="outline" size="sm" className="min-h-[44px]">
                 <Download className="h-4 w-4 mr-2" />
@@ -232,7 +247,7 @@ const AdminReferrals = () => {
               <Input
                 placeholder="Rechercher par nom ou code..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={e => setSearchTerm(e.target.value)}
                 className="pl-10 min-h-[44px]"
               />
             </div>
@@ -249,9 +264,9 @@ const AdminReferrals = () => {
                       priority: 'high',
                       render: (row: ReferralWithRelations) => (
                         <span className="font-medium">
-                          {row.referrer?.display_name || 
-                           `${row.referrer?.first_name || ''} ${row.referrer?.last_name || ''}`.trim() || 
-                           'N/A'}
+                          {row.referrer?.display_name ||
+                            `${row.referrer?.first_name || ''} ${row.referrer?.last_name || ''}`.trim() ||
+                            'N/A'}
                         </span>
                       ),
                     },
@@ -259,11 +274,10 @@ const AdminReferrals = () => {
                       key: 'referred',
                       header: 'Filleul',
                       priority: 'high',
-                      render: (row: ReferralWithRelations) => (
-                        row.referred?.display_name || 
-                        `${row.referred?.first_name || ''} ${row.referred?.last_name || ''}`.trim() || 
-                        'N/A'
-                      ),
+                      render: (row: ReferralWithRelations) =>
+                        row.referred?.display_name ||
+                        `${row.referred?.first_name || ''} ${row.referred?.last_name || ''}`.trim() ||
+                        'N/A',
                     },
                     {
                       key: 'referral_code',
@@ -311,14 +325,14 @@ const AdminReferrals = () => {
                       {filteredReferrals.map((referral: ReferralWithRelations) => (
                         <TableRow key={referral.id}>
                           <TableCell className="font-medium">
-                            {referral.referrer?.display_name || 
-                             `${referral.referrer?.first_name || ''} ${referral.referrer?.last_name || ''}`.trim() || 
-                             'N/A'}
+                            {referral.referrer?.display_name ||
+                              `${referral.referrer?.first_name || ''} ${referral.referrer?.last_name || ''}`.trim() ||
+                              'N/A'}
                           </TableCell>
                           <TableCell>
-                            {referral.referred?.display_name || 
-                             `${referral.referred?.first_name || ''} ${referral.referred?.last_name || ''}`.trim() || 
-                             'N/A'}
+                            {referral.referred?.display_name ||
+                              `${referral.referred?.first_name || ''} ${referral.referred?.last_name || ''}`.trim() ||
+                              'N/A'}
                           </TableCell>
                           <TableCell>
                             <Badge variant="outline">{referral.referral_code}</Badge>
@@ -338,9 +352,7 @@ const AdminReferrals = () => {
                 </div>
               )
             ) : (
-              <div className="text-center py-12 text-muted-foreground">
-                Aucun parrainage trouvé
-              </div>
+              <div className="text-center py-12 text-muted-foreground">Aucun parrainage trouvé</div>
             )}
           </CardContent>
         </Card>
@@ -349,9 +361,7 @@ const AdminReferrals = () => {
         <Card>
           <CardHeader>
             <CardTitle>Commissions de parrainage</CardTitle>
-            <CardDescription>
-              Historique des commissions générées (2%)
-            </CardDescription>
+            <CardDescription>Historique des commissions générées (2%)</CardDescription>
           </CardHeader>
           <CardContent>
             <Table>
@@ -364,7 +374,7 @@ const AdminReferrals = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {referralCommissions?.map((commission) => (
+                {referralCommissions?.map(commission => (
                   <TableRow key={commission.id}>
                     <TableCell>
                       {new Date(commission.created_at).toLocaleDateString('fr-FR')}
@@ -397,9 +407,3 @@ const AdminReferrals = () => {
 };
 
 export default AdminReferrals;
-
-
-
-
-
-

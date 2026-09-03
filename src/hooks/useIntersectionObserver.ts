@@ -1,7 +1,7 @@
 /**
  * Hook useIntersectionObserver - Gestion améliorée de l'Intersection Observer
  * Fournit une API simple et flexible pour observer les éléments
- * 
+ *
  * @example
  * ```tsx
  * const { ref, isIntersecting, entry } = useIntersectionObserver({
@@ -91,7 +91,7 @@ export function useIntersectionObserver(
 
     // Créer l'observer
     observerRef.current = new IntersectionObserver(
-      (entries) => {
+      entries => {
         const [firstEntry] = entries;
         if (!firstEntry) return;
 
@@ -163,19 +163,17 @@ export function useIntersectionObserverMultiple(
   useEffect(() => {
     if (!enabled) return;
 
-    const elements = refs
-      .map((ref) => ref.current)
-      .filter((el): el is HTMLElement => el !== null);
+    const elements = refs.map(ref => ref.current).filter((el): el is HTMLElement => el !== null);
 
     if (elements.length === 0) return;
 
     // Créer l'observer
     observerRef.current = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          const index = refs.findIndex((ref) => ref.current === entry.target);
+      entries => {
+        entries.forEach(entry => {
+          const index = refs.findIndex(ref => ref.current === entry.target);
           if (index !== -1) {
-            setIntersections((prev) => {
+            setIntersections(prev => {
               const next = new Map(prev);
               next.set(index, entry);
               return next;
@@ -198,7 +196,7 @@ export function useIntersectionObserverMultiple(
     );
 
     // Observer tous les éléments
-    elements.forEach((element) => {
+    elements.forEach(element => {
       observerRef.current?.observe(element);
     });
 
@@ -213,10 +211,3 @@ export function useIntersectionObserverMultiple(
 
   return intersections;
 }
-
-
-
-
-
-
-

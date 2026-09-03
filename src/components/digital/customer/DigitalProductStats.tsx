@@ -32,10 +32,11 @@ export const DigitalProductStats = () => {
   const totalLicenses = products?.filter(p => p.license_key).length || 0;
 
   // Graphique par type de produit
-  const productsByType = products?.reduce((acc: Record<string, number>, product) => {
-    acc[product.digital_type] = (acc[product.digital_type] || 0) + 1;
-    return acc;
-  }, {}) || {};
+  const productsByType =
+    products?.reduce((acc: Record<string, number>, product) => {
+      acc[product.digital_type] = (acc[product.digital_type] || 0) + 1;
+      return acc;
+    }, {}) || {};
 
   const typeChartData = Object.entries(productsByType).map(([type, count]) => ({
     name: type.charAt(0).toUpperCase() + type.slice(1),
@@ -53,11 +54,12 @@ export const DigitalProductStats = () => {
     };
   });
 
-  const downloadsByDate = downloads?.reduce((acc: Record<string, number>, download: any) => {
-    const date = format(new Date(download.download_date), 'dd/MM', { locale: fr });
-    acc[date] = (acc[date] || 0) + 1;
-    return acc;
-  }, {}) || {};
+  const downloadsByDate =
+    downloads?.reduce((acc: Record<string, number>, download: any) => {
+      const date = format(new Date(download.download_date), 'dd/MM', { locale: fr });
+      acc[date] = (acc[date] || 0) + 1;
+      return acc;
+    }, {}) || {};
 
   const downloadsChartData = last7Days.map(day => ({
     ...day,
@@ -65,13 +67,14 @@ export const DigitalProductStats = () => {
   }));
 
   // Top 5 produits téléchargés
-  const productDownloadsCount = downloads?.reduce((acc: Record<string, number>, download: any) => {
-    const productId = download.digital_product?.product?.id;
-    if (productId) {
-      acc[productId] = (acc[productId] || 0) + 1;
-    }
-    return acc;
-  }, {}) || {};
+  const productDownloadsCount =
+    downloads?.reduce((acc: Record<string, number>, download: any) => {
+      const productId = download.digital_product?.product?.id;
+      if (productId) {
+        acc[productId] = (acc[productId] || 0) + 1;
+      }
+      return acc;
+    }, {}) || {};
 
   const topProducts = Object.entries(productDownloadsCount)
     .sort(([, a], [, b]) => b - a)
@@ -144,7 +147,7 @@ export const DigitalProductStats = () => {
           </CardHeader>
           <CardContent>
             <LazyRechartsWrapper>
-              {(recharts) => (
+              {recharts => (
                 <recharts.ResponsiveContainer width="100%" height={300}>
                   <recharts.BarChart data={downloadsChartData}>
                     <recharts.CartesianGrid strokeDasharray="3 3" />
@@ -167,7 +170,7 @@ export const DigitalProductStats = () => {
           </CardHeader>
           <CardContent>
             <LazyRechartsWrapper>
-              {(recharts) => (
+              {recharts => (
                 <recharts.ResponsiveContainer width="100%" height={300}>
                   <recharts.PieChart>
                     <recharts.Pie
@@ -175,7 +178,9 @@ export const DigitalProductStats = () => {
                       cx="50%"
                       cy="50%"
                       labelLine={false}
-                      label={({ name, percent }: { name: string; percent: number }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                      label={({ name, percent }: { name: string; percent: number }) =>
+                        `${name} ${(percent * 100).toFixed(0)}%`
+                      }
                       outerRadius={80}
                       fill="#8884d8"
                       dataKey="value"
@@ -207,7 +212,10 @@ export const DigitalProductStats = () => {
           ) : (
             <div className="space-y-4">
               {topProducts.map((product, index) => (
-                <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
+                <div
+                  key={index}
+                  className="flex items-center justify-between p-4 border rounded-lg"
+                >
                   <div className="flex items-center gap-4">
                     <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold">
                       {index + 1}
@@ -229,10 +237,3 @@ export const DigitalProductStats = () => {
     </div>
   );
 };
-
-
-
-
-
-
-

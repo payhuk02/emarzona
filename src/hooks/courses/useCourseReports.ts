@@ -1,12 +1,12 @@
 /**
  * useCourseReports - Hook pour la génération de rapports de cours
- * 
+ *
  * Fournit 4 types de rapports :
  * 1. Rapport d'inscription (enrollment report)
  * 2. Rapport de revenue (revenue report)
  * 3. Rapport d'étudiants (student report)
  * 4. Rapport de complétion (completion report)
- * 
+ *
  * @author Emarzona Team
  * @date 29 Octobre 2025
  */
@@ -194,12 +194,14 @@ export const useCourseReports = (config: ReportConfig) => {
   const { data: enrollmentReport, isLoading: isLoadingEnrollment } = useQuery({
     queryKey: ['enrollment-report', period, course_id, dates],
     queryFn: async () => {
-      let  query= supabase
+      let query = supabase
         .from('enrollments')
-        .select(`
+        .select(
+          `
           *,
           courses!inner(name)
-        `)
+        `
+        )
         .gte('enrolled_at', dates.start.toISOString())
         .lte('enrolled_at', dates.end.toISOString());
 
@@ -214,22 +216,25 @@ export const useCourseReports = (config: ReportConfig) => {
       const enrollments = data || [];
 
       // Calculer les métriques
-      const  report: EnrollmentReport = {
+      const report: EnrollmentReport = {
         period,
         total_enrollments: enrollments.length,
-        new_enrollments: enrollments.filter((e) => e.status === 'active' || e.status === 'pending')
+        new_enrollments: enrollments.filter(e => e.status === 'active' || e.status === 'pending')
           .length,
-        active_enrollments: enrollments.filter((e) => e.status === 'active').length,
-        completed_enrollments: enrollments.filter((e) => e.status === 'completed').length,
-        cancelled_enrollments: enrollments.filter((e) => e.status === 'cancelled' || e.status === 'refunded').length,
+        active_enrollments: enrollments.filter(e => e.status === 'active').length,
+        completed_enrollments: enrollments.filter(e => e.status === 'completed').length,
+        cancelled_enrollments: enrollments.filter(
+          e => e.status === 'cancelled' || e.status === 'refunded'
+        ).length,
         growth_rate: (() => {
           // Calculate growth rate vs previous period
           if (!dateRange.start || !dateRange.end) return 0;
-          
-          const currentPeriod = new Date(dateRange.end).getTime() - new Date(dateRange.start).getTime();
+
+          const currentPeriod =
+            new Date(dateRange.end).getTime() - new Date(dateRange.start).getTime();
           const previousStart = new Date(new Date(dateRange.start).getTime() - currentPeriod);
           const previousEnd = new Date(dateRange.start);
-          
+
           // This would require a separate query for previous period enrollments
           // For now, return 0 if we can't calculate it
           // In production, you'd fetch enrollments for previous period and compare
@@ -242,7 +247,7 @@ export const useCourseReports = (config: ReportConfig) => {
 
       // Grouper par jour
       const byDay = new Map<string, number>();
-      enrollments.forEach((enrollment) => {
+      enrollments.forEach(enrollment => {
         const date = new Date(enrollment.enrolled_at).toISOString().split('T')[0];
         byDay.set(date, (byDay.get(date) || 0) + 1);
       });
@@ -253,7 +258,7 @@ export const useCourseReports = (config: ReportConfig) => {
 
       // Grouper par cours
       const byCourse = new Map<string, { course_name: string; count: number }>();
-      enrollments.forEach((enrollment) => {
+      enrollments.forEach(enrollment => {
         const existing = byCourse.get(enrollment.course_id) || {
           course_name: enrollment.courses.name,
           count: 0,
@@ -271,7 +276,7 @@ export const useCourseReports = (config: ReportConfig) => {
 
       // Grouper par statut
       const byStatus = new Map<string, number>();
-      enrollments.forEach((enrollment) => {
+      enrollments.forEach(enrollment => {
         byStatus.set(enrollment.status, (byStatus.get(enrollment.status) || 0) + 1);
       });
       report.enrollments_by_status = Array.from(byStatus.entries()).map(([status, count]) => ({
@@ -289,12 +294,14 @@ export const useCourseReports = (config: ReportConfig) => {
   const { data: revenueReport, isLoading: isLoadingRevenue } = useQuery({
     queryKey: ['revenue-report', period, course_id, dates],
     queryFn: async () => {
-      let  query= supabase
+      let query = supabase
         .from('enrollments')
-        .select(`
+        .select(
+          `
           *,
           courses!inner(name)
-        `)
+        `
+        )
         .gte('enrolled_at', dates.start.toISOString())
         .lte('enrolled_at', dates.end.toISOString());
 
@@ -311,19 +318,19 @@ export const useCourseReports = (config: ReportConfig) => {
       // Calculer les métriques
       const totalRevenue = enrollments.reduce((sum, e) => sum + (e.amount_paid || 0), 0);
       const pendingRevenue = enrollments
-        .filter((e) => e.status === 'pending')
+        .filter(e => e.status === 'pending')
         .reduce((sum, e) => sum + (e.amount_paid || 0), 0);
       const refundedRevenue = enrollments
-        .filter((e) => e.status === 'refunded')
+        .filter(e => e.status === 'refunded')
         .reduce((sum, e) => sum + (e.amount_paid || 0), 0);
 
-      const  report: RevenueReport = {
+      const report: RevenueReport = {
         period,
         total_revenue: totalRevenue,
         revenue_growth: (() => {
           // Calculate revenue growth vs previous period
           if (!dateRange.start || !dateRange.end) return 0;
-          
+
           // This would require a separate query for previous period revenue
           // For now, return 0 if we can't calculate it
           return 0; // Placeholder - would need previous period data
@@ -339,7 +346,7 @@ export const useCourseReports = (config: ReportConfig) => {
 
       // Grouper par jour
       const byDay = new Map<string, number>();
-      enrollments.forEach((enrollment) => {
+      enrollments.forEach(enrollment => {
         const date = new Date(enrollment.enrolled_at).toISOString().split('T')[0];
         byDay.set(date, (byDay.get(date) || 0) + (enrollment.amount_paid || 0));
       });
@@ -353,7 +360,7 @@ export const useCourseReports = (config: ReportConfig) => {
         string,
         { course_name: string; revenue: number; enrollments: number }
       >();
-      enrollments.forEach((enrollment) => {
+      enrollments.forEach(enrollment => {
         const existing = byCourse.get(enrollment.course_id) || {
           course_name: enrollment.courses.name,
           revenue: 0,
@@ -363,18 +370,19 @@ export const useCourseReports = (config: ReportConfig) => {
         existing.enrollments++;
         byCourse.set(enrollment.course_id, existing);
       });
-      report.revenue_by_course = Array.from(byCourse.entries()).map(
-        ([course_id, data]) => ({
-          course_id,
-          ...data,
-        })
-      );
+      report.revenue_by_course = Array.from(byCourse.entries()).map(([course_id, data]) => ({
+        course_id,
+        ...data,
+      }));
 
       // Grouper par méthode de paiement
       const byPaymentMethod = new Map<string, number>();
-      enrollments.forEach((enrollment) => {
+      enrollments.forEach(enrollment => {
         const method = enrollment.payment_method || 'Non spécifié';
-        byPaymentMethod.set(method, (byPaymentMethod.get(method) || 0) + (enrollment.amount_paid || 0));
+        byPaymentMethod.set(
+          method,
+          (byPaymentMethod.get(method) || 0) + (enrollment.amount_paid || 0)
+        );
       });
       report.revenue_by_payment_method = Array.from(byPaymentMethod.entries()).map(
         ([method, amount]) => ({
@@ -393,12 +401,14 @@ export const useCourseReports = (config: ReportConfig) => {
   const { data: studentReport, isLoading: isLoadingStudent } = useQuery({
     queryKey: ['student-report', period, student_id, dates],
     queryFn: async () => {
-      let  query= supabase
+      let query = supabase
         .from('enrollments')
-        .select(`
+        .select(
+          `
           *,
           students:auth.users!inner(raw_user_meta_data)
-        `)
+        `
+        )
         .gte('enrolled_at', dates.start.toISOString())
         .lte('enrolled_at', dates.end.toISOString());
 
@@ -413,16 +423,16 @@ export const useCourseReports = (config: ReportConfig) => {
       const enrollments = data || [];
 
       // Compter les étudiants uniques
-      const uniqueStudents = new Set(enrollments.map((e) => e.student_id));
+      const uniqueStudents = new Set(enrollments.map(e => e.student_id));
 
-      const  report: StudentReport = {
+      const report: StudentReport = {
         period,
         total_students: uniqueStudents.size,
-        active_students: enrollments.filter((e) => e.status === 'active').length,
+        active_students: enrollments.filter(e => e.status === 'active').length,
         new_students: (() => {
           // Filter truly new students (first enrollment in this period)
-          const firstEnrollments = enrollments.filter((e, index, arr) => 
-            arr.findIndex(e2 => e2.student_id === e.student_id) === index
+          const firstEnrollments = enrollments.filter(
+            (e, index, arr) => arr.findIndex(e2 => e2.student_id === e.student_id) === index
           );
           return firstEnrollments.length;
         })(),
@@ -431,20 +441,21 @@ export const useCourseReports = (config: ReportConfig) => {
           // This would require checking enrollment history
           // For now, approximate as: total unique - new students
           const uniqueCount = uniqueStudents.size;
-          const newCount = enrollments.filter((e, index, arr) => 
-            arr.findIndex(e2 => e2.student_id === e.student_id) === index
+          const newCount = enrollments.filter(
+            (e, index, arr) => arr.findIndex(e2 => e2.student_id === e.student_id) === index
           ).length;
           return Math.max(0, uniqueCount - newCount);
         })(),
         churn_rate: (() => {
           // Calculate churn rate (cancelled / total active)
           const totalActive = enrollments.filter(e => e.status === 'active').length;
-          const cancelled = enrollments.filter(e => 
-            e.status === 'cancelled' || e.status === 'refunded'
+          const cancelled = enrollments.filter(
+            e => e.status === 'cancelled' || e.status === 'refunded'
           ).length;
           return totalActive > 0 ? (cancelled / totalActive) * 100 : 0;
         })(),
-        avg_courses_per_student: uniqueStudents.size > 0 ? enrollments.length / uniqueStudents.size : 0,
+        avg_courses_per_student:
+          uniqueStudents.size > 0 ? enrollments.length / uniqueStudents.size : 0,
         avg_completion_rate:
           enrollments.length > 0
             ? enrollments.reduce((sum, e) => sum + (e.progress || 0), 0) / enrollments.length
@@ -464,7 +475,7 @@ export const useCourseReports = (config: ReportConfig) => {
         }
       >();
 
-      enrollments.forEach((enrollment) => {
+      enrollments.forEach(enrollment => {
         const existing = studentStats.get(enrollment.student_id) || {
           student_name: enrollment.students.raw_user_meta_data?.full_name || 'Inconnu',
           courses_enrolled: 0,
@@ -499,12 +510,14 @@ export const useCourseReports = (config: ReportConfig) => {
   const { data: completionReport, isLoading: isLoadingCompletion } = useQuery({
     queryKey: ['completion-report', period, course_id, dates],
     queryFn: async () => {
-      let  query= supabase
+      let query = supabase
         .from('enrollments')
-        .select(`
+        .select(
+          `
           *,
           courses!inner(name)
-        `)
+        `
+        )
         .gte('enrolled_at', dates.start.toISOString())
         .lte('enrolled_at', dates.end.toISOString());
 
@@ -518,9 +531,9 @@ export const useCourseReports = (config: ReportConfig) => {
 
       const enrollments = data || [];
 
-      const completions = enrollments.filter((e) => e.status === 'completed');
+      const completions = enrollments.filter(e => e.status === 'completed');
 
-      const  report: CompletionReport = {
+      const report: CompletionReport = {
         period,
         total_completions: completions.length,
         avg_completion_rate:
@@ -531,19 +544,19 @@ export const useCourseReports = (config: ReportConfig) => {
           // Calculate average completion time in days
           const completed = enrollments.filter(e => e.status === 'completed' && e.completed_at);
           if (completed.length === 0) return 0;
-          
+
           const totalDays = completed.reduce((sum, e) => {
             const enrolled = new Date(e.enrolled_at).getTime();
             const completed = new Date(e.completed_at!).getTime();
             const days = (completed - enrolled) / (1000 * 60 * 60 * 24);
             return sum + days;
           }, 0);
-          
+
           return Math.round(totalDays / completed.length);
         })(),
         completion_by_course: [],
         completion_trend: [],
-        certificates_issued: enrollments.filter((e) => e.has_certificate).length,
+        certificates_issued: enrollments.filter(e => e.has_certificate).length,
         avg_quiz_score:
           enrollments.length > 0
             ? enrollments.reduce((sum, e) => sum + (e.average_score || 0), 0) / enrollments.length
@@ -561,7 +574,7 @@ export const useCourseReports = (config: ReportConfig) => {
         }
       >();
 
-      enrollments.forEach((enrollment) => {
+      enrollments.forEach(enrollment => {
         const existing = byCourse.get(enrollment.course_id) || {
           course_name: enrollment.courses.name,
           total: 0,
@@ -582,20 +595,18 @@ export const useCourseReports = (config: ReportConfig) => {
         byCourse.set(enrollment.course_id, existing);
       });
 
-      report.completion_by_course = Array.from(byCourse.entries()).map(
-        ([course_id, data]) => ({
-          course_id,
-          course_name: data.course_name,
-          total_enrollments: data.total,
-          completions: data.completed,
-          completion_rate: data.total > 0 ? (data.completed / data.total) * 100 : 0,
-          avg_time: data.completed > 0 ? data.total_days / data.completed : 0,
-        })
-      );
+      report.completion_by_course = Array.from(byCourse.entries()).map(([course_id, data]) => ({
+        course_id,
+        course_name: data.course_name,
+        total_enrollments: data.total,
+        completions: data.completed,
+        completion_rate: data.total > 0 ? (data.completed / data.total) * 100 : 0,
+        avg_time: data.completed > 0 ? data.total_days / data.completed : 0,
+      }));
 
       // Tendance de complétion
       const byDay = new Map<string, number>();
-      completions.forEach((enrollment) => {
+      completions.forEach(enrollment => {
         const date = new Date(enrollment.updated_at).toISOString().split('T')[0];
         byDay.set(date, (byDay.get(date) || 0) + 1);
       });
@@ -612,8 +623,8 @@ export const useCourseReports = (config: ReportConfig) => {
    * Exporter un rapport
    */
   const exportReport = (type: ReportType, format: ExportFormat = 'csv') => {
-    let  data: any;
-    let  filename: string;
+    let data: any;
+    let filename: string;
 
     switch (type) {
       case 'enrollment':
@@ -669,8 +680,7 @@ export const useCourseReports = (config: ReportConfig) => {
     isLoadingRevenue,
     isLoadingStudent,
     isLoadingCompletion,
-    isLoading:
-      isLoadingEnrollment || isLoadingRevenue || isLoadingStudent || isLoadingCompletion,
+    isLoading: isLoadingEnrollment || isLoadingRevenue || isLoadingStudent || isLoadingCompletion,
 
     // Utilitaires
     exportReport,
@@ -680,10 +690,3 @@ export const useCourseReports = (config: ReportConfig) => {
 };
 
 export default useCourseReports;
-
-
-
-
-
-
-

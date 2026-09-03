@@ -24,7 +24,8 @@ export function useOffline() {
         setOnline(false);
         toast({
           title: 'Hors ligne',
-          description: 'Vous êtes actuellement hors ligne. Certaines fonctionnalités peuvent être limitées.',
+          description:
+            'Vous êtes actuellement hors ligne. Certaines fonctionnalités peuvent être limitées.',
           variant: 'destructive',
         });
       }
@@ -48,7 +49,7 @@ export function useServiceWorker() {
 
   useEffect(() => {
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.ready.then((reg) => {
+      navigator.serviceWorker.ready.then(reg => {
         setRegistration(reg);
 
         // Écouter les mises à jour
@@ -107,10 +108,3 @@ export function useNotifications() {
     requestPermission,
   };
 }
-
-
-
-
-
-
-

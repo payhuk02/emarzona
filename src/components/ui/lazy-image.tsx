@@ -6,7 +6,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 
-interface LazyImageProps extends Omit<React.ImgHTMLAttributes<HTMLImageElement>, 'src' | 'loading'> {
+interface LazyImageProps extends Omit<
+  React.ImgHTMLAttributes<HTMLImageElement>,
+  'src' | 'loading'
+> {
   src: string;
   alt: string;
   placeholder?: string;
@@ -17,16 +20,7 @@ interface LazyImageProps extends Omit<React.ImgHTMLAttributes<HTMLImageElement>,
 }
 
 export const LazyImage = React.forwardRef<HTMLImageElement, LazyImageProps>(
-  ({
-    src,
-    alt,
-    placeholder,
-    fallbackSrc,
-    className,
-    onLoad,
-    onError,
-    ...props
-  }, ref) => {
+  ({ src, alt, placeholder, fallbackSrc, className, onLoad, onError, ...props }, ref) => {
     const [isLoaded, setIsLoaded] = useState(false);
     const [isInView, setIsInView] = useState(false);
     const [hasError, setHasError] = useState(false);

@@ -21,17 +21,14 @@ export interface FormattedFileSize {
 /**
  * Formate la taille d'un fichier en octets vers une unité lisible
  */
-export function formatFileSize(
-  bytes: number,
-  decimals: number = 2
-): FormattedFileSize {
+export function formatFileSize(bytes: number, decimals: number = 2): FormattedFileSize {
   if (bytes === 0) {
     return { value: 0, unit: 'B', formatted: '0 B' };
   }
 
   const k = 1024;
   const dm = decimals < 0 ? 0 : decimals;
-  const  sizes: FileSizeUnit[] = ['B', 'KB', 'MB', 'GB', 'TB'];
+  const sizes: FileSizeUnit[] = ['B', 'KB', 'MB', 'GB', 'TB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
 
   const value = parseFloat((bytes / Math.pow(k, i)).toFixed(dm));
@@ -56,7 +53,7 @@ export function parseFileSize(size: string): number {
   const value = parseFloat(match[1]);
   const unit = match[2].toUpperCase() as FileSizeUnit;
 
-  const  multipliers: Record<FileSizeUnit, number> = {
+  const multipliers: Record<FileSizeUnit, number> = {
     B: 1,
     KB: 1024,
     MB: 1024 * 1024,
@@ -88,7 +85,7 @@ export function getFileNameWithoutExtension(filename: string): string {
  */
 export function isFileType(file: File | string, types: string[]): boolean {
   const fileType = typeof file === 'string' ? file : file.type || getFileExtension(file.name);
-  return types.some((type) => {
+  return types.some(type => {
     if (type.includes('*')) {
       const pattern = type.replace('*', '.*');
       return new RegExp(pattern, 'i').test(fileType);
@@ -141,12 +138,9 @@ export function isDocumentFile(file: File | string): boolean {
 /**
  * Télécharge un fichier depuis une URL ou un Blob
  */
-export async function downloadFile(
-  source: string | Blob,
-  filename: string
-): Promise<void> {
-  let  url: string;
-  let  shouldRevoke= false;
+export async function downloadFile(source: string | Blob, filename: string): Promise<void> {
+  let url: string;
+  let shouldRevoke = false;
 
   if (typeof source === 'string') {
     url = source;
@@ -174,7 +168,7 @@ export async function downloadFile(
 export function readFileAsText(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = (e) => resolve(e.target?.result as string);
+    reader.onload = e => resolve(e.target?.result as string);
     reader.onerror = reject;
     reader.readAsText(file);
   });
@@ -186,7 +180,7 @@ export function readFileAsText(file: File): Promise<string> {
 export function readFileAsDataURL(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = (e) => resolve(e.target?.result as string);
+    reader.onload = e => resolve(e.target?.result as string);
     reader.onerror = reject;
     reader.readAsDataURL(file);
   });
@@ -198,7 +192,7 @@ export function readFileAsDataURL(file: File): Promise<string> {
 export function readFileAsArrayBuffer(file: File): Promise<ArrayBuffer> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = (e) => resolve(e.target?.result as ArrayBuffer);
+    reader.onload = e => resolve(e.target?.result as ArrayBuffer);
     reader.onerror = reject;
     reader.readAsArrayBuffer(file);
   });
@@ -207,10 +201,7 @@ export function readFileAsArrayBuffer(file: File): Promise<ArrayBuffer> {
 /**
  * Crée un Blob à partir d'une chaîne
  */
-export function createBlobFromString(
-  content: string,
-  mimeType: string = 'text/plain'
-): Blob {
+export function createBlobFromString(content: string, mimeType: string = 'text/plain'): Blob {
   return new Blob([content], { type: mimeType });
 }
 
@@ -231,10 +222,7 @@ export function createFileFromBlob(
 /**
  * Valide la taille d'un fichier
  */
-export function validateFileSize(
-  file: File,
-  maxSize: number
-): { valid: boolean; error?: string } {
+export function validateFileSize(file: File, maxSize: number): { valid: boolean; error?: string } {
   if (file.size > maxSize) {
     const maxSizeFormatted = formatFileSize(maxSize);
     return {
@@ -276,10 +264,7 @@ export function getFileInfo(file: File): FileInfo {
 /**
  * Génère un nom de fichier unique
  */
-export function generateUniqueFileName(
-  originalName: string,
-  prefix?: string
-): string {
+export function generateUniqueFileName(originalName: string, prefix?: string): string {
   const extension = getFileExtension(originalName);
   const nameWithoutExt = getFileNameWithoutExtension(originalName);
   const timestamp = Date.now();
@@ -289,10 +274,3 @@ export function generateUniqueFileName(
 
   return `${prefixPart}${nameWithoutExt}-${timestamp}-${random}${extPart}`;
 }
-
-
-
-
-
-
-

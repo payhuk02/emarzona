@@ -6,7 +6,9 @@ import React, { Component, ReactNode, Suspense, lazy } from 'react';
 import { logError } from '@/lib/error-logger';
 
 // Lazy load ErrorFallback pour éviter les problèmes de bundling en production
-const ErrorFallback = lazy(() => import('./ErrorFallback').then(module => ({ default: module.ErrorFallback })));
+const ErrorFallback = lazy(() =>
+  import('./ErrorFallback').then(module => ({ default: module.ErrorFallback }))
+);
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -133,10 +135,3 @@ export function withErrorBoundary<P extends object>(
     </ErrorBoundary>
   );
 }
-
-
-
-
-
-
-

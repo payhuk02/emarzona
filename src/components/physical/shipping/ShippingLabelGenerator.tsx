@@ -7,10 +7,20 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { useShippingCarriers, useGenerateShippingLabel, useShippingLabels } from '@/hooks/physical/useShippingCarriers';
+import {
+  useShippingCarriers,
+  useGenerateShippingLabel,
+  useShippingLabels,
+} from '@/hooks/physical/useShippingCarriers';
 import { useStore } from '@/hooks/useStore';
 import { Package, Download, Printer, CheckCircle2 } from 'lucide-react';
 import { format } from 'date-fns';
@@ -90,14 +100,15 @@ export const ShippingLabelGenerator = ({
         {orderLabels.length > 0 && (
           <div className="space-y-2">
             <h3 className="font-semibold">Étiquettes existantes</h3>
-            {orderLabels.map((label) => (
-              <div key={label.id} className="flex items-center justify-between p-3 border rounded-lg">
+            {orderLabels.map(label => (
+              <div
+                key={label.id}
+                className="flex items-center justify-between p-3 border rounded-lg"
+              >
                 <div>
                   <p className="font-medium">{label.label_number}</p>
                   {label.tracking_number && (
-                    <p className="text-sm text-muted-foreground">
-                      Suivi: {label.tracking_number}
-                    </p>
+                    <p className="text-sm text-muted-foreground">Suivi: {label.tracking_number}</p>
                   )}
                   <p className="text-sm text-muted-foreground">
                     {format(new Date(label.created_at), 'PPp', { locale: fr })}
@@ -133,7 +144,7 @@ export const ShippingLabelGenerator = ({
                 <SelectValue placeholder="Sélectionner un transporteur" />
               </SelectTrigger>
               <SelectContent>
-                {carriers.map((carrier) => (
+                {carriers.map(carrier => (
                   <SelectItem key={carrier.id} value={carrier.id}>
                     {carrier.display_name}
                   </SelectItem>
@@ -151,7 +162,7 @@ export const ShippingLabelGenerator = ({
                   <SelectValue placeholder="Sélectionner un service" />
                 </SelectTrigger>
                 <SelectContent>
-                  {selectedCarrierData.available_services.map((service) => (
+                  {selectedCarrierData.available_services.map(service => (
                     <SelectItem key={service} value={service}>
                       {service}
                     </SelectItem>
@@ -170,7 +181,7 @@ export const ShippingLabelGenerator = ({
                 <Input
                   id="from-name"
                   value={fromAddress.name}
-                  onChange={(e) => setFromAddress({ ...fromAddress, name: e.target.value })}
+                  onChange={e => setFromAddress({ ...fromAddress, name: e.target.value })}
                 />
               </div>
               <div className="space-y-2">
@@ -178,7 +189,7 @@ export const ShippingLabelGenerator = ({
                 <Input
                   id="from-city"
                   value={fromAddress.city}
-                  onChange={(e) => setFromAddress({ ...fromAddress, city: e.target.value })}
+                  onChange={e => setFromAddress({ ...fromAddress, city: e.target.value })}
                 />
               </div>
               <div className="space-y-2">
@@ -186,7 +197,7 @@ export const ShippingLabelGenerator = ({
                 <Input
                   id="from-address"
                   value={fromAddress.addressLine1}
-                  onChange={(e) => setFromAddress({ ...fromAddress, addressLine1: e.target.value })}
+                  onChange={e => setFromAddress({ ...fromAddress, addressLine1: e.target.value })}
                 />
               </div>
               <div className="space-y-2">
@@ -194,7 +205,7 @@ export const ShippingLabelGenerator = ({
                 <Input
                   id="from-postal"
                   value={fromAddress.postalCode}
-                  onChange={(e) => setFromAddress({ ...fromAddress, postalCode: e.target.value })}
+                  onChange={e => setFromAddress({ ...fromAddress, postalCode: e.target.value })}
                 />
               </div>
             </div>
@@ -209,7 +220,7 @@ export const ShippingLabelGenerator = ({
                 <Input
                   id="to-name"
                   value={toAddress.name}
-                  onChange={(e) => setToAddress({ ...toAddress, name: e.target.value })}
+                  onChange={e => setToAddress({ ...toAddress, name: e.target.value })}
                 />
               </div>
               <div className="space-y-2">
@@ -217,7 +228,7 @@ export const ShippingLabelGenerator = ({
                 <Input
                   id="to-city"
                   value={toAddress.city}
-                  onChange={(e) => setToAddress({ ...toAddress, city: e.target.value })}
+                  onChange={e => setToAddress({ ...toAddress, city: e.target.value })}
                 />
               </div>
               <div className="space-y-2">
@@ -225,7 +236,7 @@ export const ShippingLabelGenerator = ({
                 <Input
                   id="to-address"
                   value={toAddress.addressLine1}
-                  onChange={(e) => setToAddress({ ...toAddress, addressLine1: e.target.value })}
+                  onChange={e => setToAddress({ ...toAddress, addressLine1: e.target.value })}
                 />
               </div>
               <div className="space-y-2">
@@ -233,7 +244,7 @@ export const ShippingLabelGenerator = ({
                 <Input
                   id="to-postal"
                   value={toAddress.postalCode}
-                  onChange={(e) => setToAddress({ ...toAddress, postalCode: e.target.value })}
+                  onChange={e => setToAddress({ ...toAddress, postalCode: e.target.value })}
                 />
               </div>
             </div>
@@ -259,10 +270,3 @@ export const ShippingLabelGenerator = ({
     </Card>
   );
 };
-
-
-
-
-
-
-

@@ -1,13 +1,13 @@
 /**
  * useCourses - Hook pour la gestion des cours
- * 
+ *
  * Fournit toutes les opérations CRUD pour les cours :
  * - Listing et filtrage
  * - Création et mise à jour
  * - Suppression
  * - Publication/Dépublication
  * - Statistiques
- * 
+ *
  * @author Emarzona Team
  * @date 29 Octobre 2025
  */
@@ -18,7 +18,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { CourseStatus } from '@/components/courses/CourseStatusIndicator';
 import { CourseCategory } from '@/components/courses/CoursesList';
 
-const COURSE_FIELDS = 'id, name, description, instructor_id, instructor_name, status, category, price, currency, max_students, enrolled_students, completion_rate, revenue, duration, total_lessons, thumbnail_url, is_active, created_at, updated_at';
+const COURSE_FIELDS =
+  'id, name, description, instructor_id, instructor_name, status, category, price, currency, max_students, enrolled_students, completion_rate, revenue, duration, total_lessons, thumbnail_url, is_active, created_at, updated_at';
 
 /**
  * Interface pour un cours
@@ -95,10 +96,15 @@ export const useCourses = () => {
   /**
    * Récupérer tous les cours avec filtres
    */
-  const { data: courses, isLoading, error, refetch } = useQuery({
+  const {
+    data: courses,
+    isLoading,
+    error,
+    refetch,
+  } = useQuery({
     queryKey: ['courses', filters],
     queryFn: async () => {
-      let  query= supabase
+      let query = supabase
         .from('courses')
         .select(COURSE_FIELDS)
         .order('created_at', { ascending: false });
@@ -150,16 +156,14 @@ export const useCourses = () => {
   const { data: stats } = useQuery({
     queryKey: ['course-stats'],
     queryFn: async () => {
-      const { data: allCourses, error } = await supabase
-        .from('courses')
-        .select(COURSE_FIELDS);
+      const { data: allCourses, error } = await supabase.from('courses').select(COURSE_FIELDS);
 
       if (error) throw error;
 
       const courses = allCourses as Course[];
 
       // Calculer les statistiques
-      const  stats: CourseStats = {
+      const stats: CourseStats = {
         total_courses: courses.length,
         active_courses: courses.filter(c => c.is_active).length,
         total_students: courses.reduce((sum, c) => sum + c.enrolled_students, 0),
@@ -241,10 +245,7 @@ export const useCourses = () => {
    */
   const deleteCourseMutation = useMutation({
     mutationFn: async (courseId: string) => {
-      const { error } = await supabase
-        .from('courses')
-        .delete()
-        .eq('id', courseId);
+      const { error } = await supabase.from('courses').delete().eq('id', courseId);
 
       if (error) throw error;
       return courseId;
@@ -445,9 +446,3 @@ export const useCourses = () => {
 };
 
 export default useCourses;
-
-
-
-
-
-

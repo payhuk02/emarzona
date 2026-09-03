@@ -66,10 +66,3 @@ export interface CouponApplication {
   valid: boolean;
   message?: string;
 }
-
-
-
-
-
-
-

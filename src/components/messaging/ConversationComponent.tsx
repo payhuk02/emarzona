@@ -15,7 +15,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import {
   Send,
   Paperclip,
@@ -245,7 +245,7 @@ const ConversationItem = memo<ConversationItemProps>(({ conversation, isActive, 
 ConversationItem.displayName = 'ConversationItem';
 
 // Composant principal optimisé
-const  ConversationComponent: React.FC<ConversationComponentProps> = ({
+const ConversationComponent: React.FC<ConversationComponentProps> = ({
   orderId,
   storeId,
   customerId,
@@ -326,7 +326,7 @@ const  ConversationComponent: React.FC<ConversationComponentProps> = ({
     if (!messageContent.trim() && selectedFiles.length === 0) return;
     if (!currentConversation) return;
 
-    const  messageType: MessageType = selectedFiles.length > 0 ? 'file' : 'text';
+    const messageType: MessageType = selectedFiles.length > 0 ? 'file' : 'text';
 
     const formData = {
       content: messageContent,
@@ -490,10 +490,8 @@ const  ConversationComponent: React.FC<ConversationComponentProps> = ({
               </div>
               <Select>
                 <SelectTrigger className="shrink-0" aria-label="Actions de la conversation">
-
-                    <MoreVertical className="h-4 w-4" />
-                  
-</SelectTrigger>
+                  <MoreVertical className="h-4 w-4" />
+                </SelectTrigger>
                 <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                   {!currentConversation.admin_intervention && (
                     <SelectItem value="edit" onSelect={handleEnableAdminIntervention}>
@@ -502,7 +500,11 @@ const  ConversationComponent: React.FC<ConversationComponentProps> = ({
                     </SelectItem>
                   )}
                   <DropdownMenuSeparator />
-                  <SelectItem value="delete" onSelect={handleCloseConversation} className="text-destructive">
+                  <SelectItem
+                    value="delete"
+                    onSelect={handleCloseConversation}
+                    className="text-destructive"
+                  >
                     <Lock className="h-4 w-4 mr-2" />
                     Fermer la conversation
                   </SelectItem>
@@ -674,9 +676,3 @@ const  ConversationComponent: React.FC<ConversationComponentProps> = ({
 };
 
 export default memo(ConversationComponent);
-
-
-
-
-
-

@@ -20,7 +20,7 @@ export function lazyWithRetry<T extends ComponentType<any>>(
       const attemptLoad = (attemptNumber: number) => {
         importFunc()
           .then(resolve)
-          .catch((error) => {
+          .catch(error => {
             if (attemptNumber >= retries) {
               reject(error);
             } else {
@@ -67,10 +67,3 @@ export function conditionalLazyLoad<T extends ComponentType<any>>(
   }
   return lazyWithRetry(importFunc);
 }
-
-
-
-
-
-
-

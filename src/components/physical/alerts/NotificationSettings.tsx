@@ -7,8 +7,17 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useNotificationPreferences, useUpdateNotificationPreferences } from '@/hooks/physical/useAlerts';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  useNotificationPreferences,
+  useUpdateNotificationPreferences,
+} from '@/hooks/physical/useAlerts';
 import { useStore } from '@/hooks/useStore';
 import { useAuth } from '@/contexts/AuthContext';
 import { Bell, Mail, Smartphone } from 'lucide-react';
@@ -87,14 +96,14 @@ export const NotificationSettings = ({ storeId }: NotificationSettingsProps) => 
             <Mail className="h-5 w-5" />
             <h3 className="font-semibold">Notifications Email</h3>
           </div>
-          
+
           <div className="space-y-3 pl-7">
             <div className="flex items-center justify-between">
               <Label htmlFor="email-low-stock">Stock faible</Label>
               <Switch
                 id="email-low-stock"
                 checked={settings.email_low_stock}
-                onCheckedChange={(checked) => setSettings({ ...settings, email_low_stock: checked })}
+                onCheckedChange={checked => setSettings({ ...settings, email_low_stock: checked })}
               />
             </div>
             <div className="flex items-center justify-between">
@@ -102,7 +111,9 @@ export const NotificationSettings = ({ storeId }: NotificationSettingsProps) => 
               <Switch
                 id="email-out-of-stock"
                 checked={settings.email_out_of_stock}
-                onCheckedChange={(checked) => setSettings({ ...settings, email_out_of_stock: checked })}
+                onCheckedChange={checked =>
+                  setSettings({ ...settings, email_out_of_stock: checked })
+                }
               />
             </div>
             <div className="flex items-center justify-between">
@@ -110,7 +121,7 @@ export const NotificationSettings = ({ storeId }: NotificationSettingsProps) => 
               <Switch
                 id="email-new-order"
                 checked={settings.email_new_order}
-                onCheckedChange={(checked) => setSettings({ ...settings, email_new_order: checked })}
+                onCheckedChange={checked => setSettings({ ...settings, email_new_order: checked })}
               />
             </div>
             <div className="flex items-center justify-between">
@@ -118,7 +129,9 @@ export const NotificationSettings = ({ storeId }: NotificationSettingsProps) => 
               <Switch
                 id="email-order-shipped"
                 checked={settings.email_order_shipped}
-                onCheckedChange={(checked) => setSettings({ ...settings, email_order_shipped: checked })}
+                onCheckedChange={checked =>
+                  setSettings({ ...settings, email_order_shipped: checked })
+                }
               />
             </div>
             <div className="flex items-center justify-between">
@@ -126,7 +139,9 @@ export const NotificationSettings = ({ storeId }: NotificationSettingsProps) => 
               <Switch
                 id="email-order-delivered"
                 checked={settings.email_order_delivered}
-                onCheckedChange={(checked) => setSettings({ ...settings, email_order_delivered: checked })}
+                onCheckedChange={checked =>
+                  setSettings({ ...settings, email_order_delivered: checked })
+                }
               />
             </div>
             <div className="flex items-center justify-between">
@@ -134,7 +149,9 @@ export const NotificationSettings = ({ storeId }: NotificationSettingsProps) => 
               <Switch
                 id="email-return-request"
                 checked={settings.email_return_request}
-                onCheckedChange={(checked) => setSettings({ ...settings, email_return_request: checked })}
+                onCheckedChange={checked =>
+                  setSettings({ ...settings, email_return_request: checked })
+                }
               />
             </div>
             <div className="flex items-center justify-between">
@@ -142,7 +159,9 @@ export const NotificationSettings = ({ storeId }: NotificationSettingsProps) => 
               <Switch
                 id="email-refund-processed"
                 checked={settings.email_refund_processed}
-                onCheckedChange={(checked) => setSettings({ ...settings, email_refund_processed: checked })}
+                onCheckedChange={checked =>
+                  setSettings({ ...settings, email_refund_processed: checked })
+                }
               />
             </div>
           </div>
@@ -154,14 +173,14 @@ export const NotificationSettings = ({ storeId }: NotificationSettingsProps) => 
             <Smartphone className="h-5 w-5" />
             <h3 className="font-semibold">Notifications Push</h3>
           </div>
-          
+
           <div className="space-y-3 pl-7">
             <div className="flex items-center justify-between">
               <Label htmlFor="push-low-stock">Stock faible</Label>
               <Switch
                 id="push-low-stock"
                 checked={settings.push_low_stock}
-                onCheckedChange={(checked) => setSettings({ ...settings, push_low_stock: checked })}
+                onCheckedChange={checked => setSettings({ ...settings, push_low_stock: checked })}
               />
             </div>
             <div className="flex items-center justify-between">
@@ -169,7 +188,7 @@ export const NotificationSettings = ({ storeId }: NotificationSettingsProps) => 
               <Switch
                 id="push-new-order"
                 checked={settings.push_new_order}
-                onCheckedChange={(checked) => setSettings({ ...settings, push_new_order: checked })}
+                onCheckedChange={checked => setSettings({ ...settings, push_new_order: checked })}
               />
             </div>
             <div className="flex items-center justify-between">
@@ -177,7 +196,9 @@ export const NotificationSettings = ({ storeId }: NotificationSettingsProps) => 
               <Switch
                 id="push-return-request"
                 checked={settings.push_return_request}
-                onCheckedChange={(checked) => setSettings({ ...settings, push_return_request: checked })}
+                onCheckedChange={checked =>
+                  setSettings({ ...settings, push_return_request: checked })
+                }
               />
             </div>
           </div>
@@ -188,7 +209,12 @@ export const NotificationSettings = ({ storeId }: NotificationSettingsProps) => 
           <Label htmlFor="notification-frequency">Fréquence des notifications</Label>
           <Select
             value={settings.notification_frequency}
-            onValueChange={(value) => setSettings({ ...settings, notification_frequency: value as typeof settings.notification_frequency })}
+            onValueChange={value =>
+              setSettings({
+                ...settings,
+                notification_frequency: value as typeof settings.notification_frequency,
+              })
+            }
           >
             <SelectTrigger id="notification-frequency">
               <SelectValue />
@@ -203,11 +229,7 @@ export const NotificationSettings = ({ storeId }: NotificationSettingsProps) => 
 
         {/* Save Button */}
         <div className="pt-4 border-t">
-          <Button
-            onClick={handleSave}
-            disabled={updatePreferences.isPending}
-            className="w-full"
-          >
+          <Button onClick={handleSave} disabled={updatePreferences.isPending} className="w-full">
             {updatePreferences.isPending ? 'Enregistrement...' : 'Enregistrer les préférences'}
           </Button>
         </div>
@@ -215,9 +237,3 @@ export const NotificationSettings = ({ storeId }: NotificationSettingsProps) => 
     </Card>
   );
 };
-
-
-
-
-
-

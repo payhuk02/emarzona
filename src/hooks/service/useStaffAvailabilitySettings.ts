@@ -8,7 +8,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 
-const STAFF_AVAILABILITY_SETTINGS_FIELDS = 'id, store_id, service_id, auto_block_on_time_off, max_bookings_per_day, booking_density_warning_threshold, booking_density_critical_threshold, default_work_hours_start, default_work_hours_end, buffer_time_between_bookings, created_at, updated_at';
+const STAFF_AVAILABILITY_SETTINGS_FIELDS =
+  'id, store_id, service_id, auto_block_on_time_off, max_bookings_per_day, booking_density_warning_threshold, booking_density_critical_threshold, default_work_hours_start, default_work_hours_end, buffer_time_between_bookings, created_at, updated_at';
 
 export interface StaffAvailabilitySettings {
   id: string;
@@ -25,7 +26,10 @@ export interface StaffAvailabilitySettings {
   updated_at: string;
 }
 
-const  defaultSettings: Omit<StaffAvailabilitySettings, 'id' | 'store_id' | 'service_id' | 'created_at' | 'updated_at'> = {
+const defaultSettings: Omit<
+  StaffAvailabilitySettings,
+  'id' | 'store_id' | 'service_id' | 'created_at' | 'updated_at'
+> = {
   auto_block_on_time_off: true,
   max_bookings_per_day: 8,
   booking_density_warning_threshold: 70,
@@ -49,7 +53,7 @@ export const useStaffAvailabilitySettings = (
         throw new Error('Store ID is required');
       }
 
-      let  query= supabase
+      let query = supabase
         .from('staff_availability_settings')
         .select(STAFF_AVAILABILITY_SETTINGS_FIELDS)
         .eq('store_id', storeId);
@@ -89,7 +93,7 @@ export const useStaffAvailabilitySettings = (
     enabled: !!storeId,
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: 2,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 };
 
@@ -101,13 +105,15 @@ export const useUpdateStaffAvailabilitySettings = () => {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async (settings: Partial<StaffAvailabilitySettings> & { store_id: string; service_id?: string }) => {
+    mutationFn: async (
+      settings: Partial<StaffAvailabilitySettings> & { store_id: string; service_id?: string }
+    ) => {
       if (!settings.store_id) {
         throw new Error('Store ID is required');
       }
 
       // Vérifier si les paramètres existent déjà
-      let  query= supabase
+      let query = supabase
         .from('staff_availability_settings')
         .select('id')
         .eq('store_id', settings.store_id);
@@ -157,7 +163,7 @@ export const useUpdateStaffAvailabilitySettings = () => {
         return data as StaffAvailabilitySettings;
       }
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       // Invalider les queries liées
       queryClient.invalidateQueries({
         queryKey: ['staff-availability-settings', data.store_id, data.service_id],
@@ -181,10 +187,3 @@ export const useUpdateStaffAvailabilitySettings = () => {
     },
   });
 };
-
-
-
-
-
-
-

@@ -25,7 +25,9 @@ export const useProductPixels = (productId: string) => {
     queryFn: async (): Promise<ProductPixels | null> => {
       const { data, error } = await supabase
         .from('product_analytics')
-        .select('tracking_enabled, google_analytics_id, facebook_pixel_id, google_tag_manager_id, tiktok_pixel_id')
+        .select(
+          'tracking_enabled, google_analytics_id, facebook_pixel_id, google_tag_manager_id, tiktok_pixel_id'
+        )
         .eq('product_id', productId)
         .maybeSingle();
 
@@ -39,10 +41,3 @@ export const useProductPixels = (productId: string) => {
     enabled: !!productId,
   });
 };
-
-
-
-
-
-
-

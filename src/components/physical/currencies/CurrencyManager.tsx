@@ -18,12 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   DollarSign,
   RefreshCw,
@@ -58,7 +53,7 @@ export function CurrencyManager() {
 
   const [isUpdating, setIsUpdating] = useState(false);
 
-  const baseCurrency = currencies?.find((c) => c.is_base_currency);
+  const baseCurrency = currencies?.find(c => c.is_base_currency);
 
   // Stats calculées
   const stats = useMemo(() => {
@@ -99,15 +94,35 @@ export function CurrencyManager() {
     <div className="space-y-4 sm:space-y-6">
       {/* Stats Cards - Responsive */}
       {currencies && currencies.length > 0 && (
-        <div 
+        <div
           ref={statsRef}
           className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-4 animate-in fade-in slide-in-from-bottom-4 duration-700"
         >
           {[
-            { label: 'Total Devises', value: stats.total, icon: Globe, color: 'from-purple-600 to-pink-600' },
-            { label: 'Actives', value: stats.active, icon: CheckCircle2, color: 'from-green-600 to-emerald-600' },
-            { label: 'Taux de Change', value: stats.totalRates, icon: TrendingUp, color: 'from-blue-600 to-cyan-600' },
-            { label: 'Auto-update', value: stats.autoUpdate, icon: RefreshCw, color: 'from-orange-600 to-yellow-600' },
+            {
+              label: 'Total Devises',
+              value: stats.total,
+              icon: Globe,
+              color: 'from-purple-600 to-pink-600',
+            },
+            {
+              label: 'Actives',
+              value: stats.active,
+              icon: CheckCircle2,
+              color: 'from-green-600 to-emerald-600',
+            },
+            {
+              label: 'Taux de Change',
+              value: stats.totalRates,
+              icon: TrendingUp,
+              color: 'from-blue-600 to-cyan-600',
+            },
+            {
+              label: 'Auto-update',
+              value: stats.autoUpdate,
+              icon: RefreshCw,
+              color: 'from-orange-600 to-yellow-600',
+            },
           ].map((stat, index) => {
             const Icon = stat.icon;
             return (
@@ -123,7 +138,9 @@ export function CurrencyManager() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-3 sm:p-4 pt-0">
-                  <div className={`text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
+                  <div
+                    className={`text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}
+                  >
                     {stat.value}
                   </div>
                 </CardContent>
@@ -146,8 +163,8 @@ export function CurrencyManager() {
                 Gérez les devises, taux de change et prix régionaux
               </CardDescription>
             </div>
-            <Button 
-              onClick={handleUpdateRates} 
+            <Button
+              onClick={handleUpdateRates}
               disabled={isUpdating}
               className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
               size="sm"
@@ -169,13 +186,13 @@ export function CurrencyManager() {
         <CardContent>
           <Tabs defaultValue="currencies" className="space-y-4 sm:space-y-6">
             <TabsList className="grid w-full grid-cols-2 h-auto p-1 bg-muted/50 backdrop-blur-sm">
-              <TabsTrigger 
+              <TabsTrigger
                 value="currencies"
                 className="text-xs sm:text-sm px-2 sm:px-4 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
               >
                 Devises
               </TabsTrigger>
-              <TabsTrigger 
+              <TabsTrigger
                 value="rates"
                 className="text-xs sm:text-sm px-2 sm:px-4 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
               >
@@ -203,7 +220,9 @@ export function CurrencyManager() {
               {!currencies || currencies.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-64 text-center py-8 sm:py-12">
                   <Globe className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground mb-4 animate-in zoom-in-95 duration-500" />
-                  <p className="text-sm sm:text-base text-muted-foreground">Aucune devise configurée</p>
+                  <p className="text-sm sm:text-base text-muted-foreground">
+                    Aucune devise configurée
+                  </p>
                 </div>
               ) : (
                 <>
@@ -233,12 +252,14 @@ export function CurrencyManager() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {currencies.map((currency) => (
+                        {currencies.map(currency => (
                           <TableRow key={currency.id}>
                             <TableCell>
-                              <Badge 
+                              <Badge
                                 variant={currency.is_base_currency ? 'default' : 'outline'}
-                                className={currency.is_base_currency ? 'bg-blue-500 text-xs' : 'text-xs'}
+                                className={
+                                  currency.is_base_currency ? 'bg-blue-500 text-xs' : 'text-xs'
+                                }
                               >
                                 {currency.code}
                               </Badge>
@@ -256,7 +277,9 @@ export function CurrencyManager() {
                                   Active
                                 </Badge>
                               ) : (
-                                <Badge variant="secondary" className="text-xs">Inactive</Badge>
+                                <Badge variant="secondary" className="text-xs">
+                                  Inactive
+                                </Badge>
                               )}
                             </TableCell>
                           </TableRow>
@@ -273,7 +296,9 @@ export function CurrencyManager() {
                 <TrendingUp className="h-4 w-4 text-blue-500" />
                 <AlertDescription>
                   <div className="space-y-1 text-xs sm:text-sm">
-                    <p className="font-semibold text-blue-600 dark:text-blue-400">Taux de change en temps réel</p>
+                    <p className="font-semibold text-blue-600 dark:text-blue-400">
+                      Taux de change en temps réel
+                    </p>
                     <p className="text-muted-foreground">
                       Les taux sont mis à jour automatiquement
                     </p>
@@ -284,18 +309,16 @@ export function CurrencyManager() {
               {!exchangeRates || exchangeRates.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-64 text-center py-8 sm:py-12">
                   <TrendingUp className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground mb-4 animate-in zoom-in-95 duration-500" />
-                  <p className="text-sm sm:text-base text-muted-foreground">Aucun taux de change configuré</p>
+                  <p className="text-sm sm:text-base text-muted-foreground">
+                    Aucun taux de change configuré
+                  </p>
                 </div>
               ) : (
                 <>
                   {/* Mobile View - Cards */}
                   <div className="block md:hidden space-y-3 sm:space-y-4">
                     {exchangeRates.map((rate, index) => (
-                      <RateCard
-                        key={rate.id}
-                        rate={rate}
-                        animationDelay={index * 50}
-                      />
+                      <RateCard key={rate.id} rate={rate} animationDelay={index * 50} />
                     ))}
                   </div>
 
@@ -313,22 +336,30 @@ export function CurrencyManager() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {exchangeRates.map((rate) => (
+                        {exchangeRates.map(rate => (
                           <TableRow key={rate.id}>
                             <TableCell>
-                              <Badge variant="outline" className="text-xs">{rate.from_currency}</Badge>
+                              <Badge variant="outline" className="text-xs">
+                                {rate.from_currency}
+                              </Badge>
                             </TableCell>
                             <TableCell>
-                              <Badge variant="outline" className="text-xs">{rate.to_currency}</Badge>
+                              <Badge variant="outline" className="text-xs">
+                                {rate.to_currency}
+                              </Badge>
                             </TableCell>
                             <TableCell className="font-mono font-semibold text-sm">
                               {rate.rate.toFixed(6)}
                             </TableCell>
                             <TableCell>
-                              <Badge variant="secondary" className="text-xs">{rate.source}</Badge>
+                              <Badge variant="secondary" className="text-xs">
+                                {rate.source}
+                              </Badge>
                             </TableCell>
                             <TableCell className="text-sm text-muted-foreground">
-                              {format(new Date(rate.last_updated), 'dd/MM/yyyy HH:mm', { locale: fr })}
+                              {format(new Date(rate.last_updated), 'dd/MM/yyyy HH:mm', {
+                                locale: fr,
+                              })}
                             </TableCell>
                             <TableCell>
                               {rate.auto_update ? (
@@ -337,7 +368,9 @@ export function CurrencyManager() {
                                   Oui
                                 </Badge>
                               ) : (
-                                <Badge variant="outline" className="text-xs">Non</Badge>
+                                <Badge variant="outline" className="text-xs">
+                                  Non
+                                </Badge>
                               )}
                             </TableCell>
                           </TableRow>
@@ -366,8 +399,8 @@ function CurrencyCard({ currency, isBase, animationDelay = 0 }: CurrencyCardProp
   return (
     <Card
       className={cn(
-        "hover:shadow-lg transition-all duration-300 group overflow-hidden animate-in fade-in slide-in-from-bottom-4 touch-manipulation",
-        isBase && "border-l-4 border-l-blue-500"
+        'hover:shadow-lg transition-all duration-300 group overflow-hidden animate-in fade-in slide-in-from-bottom-4 touch-manipulation',
+        isBase && 'border-l-4 border-l-blue-500'
       )}
       style={{ animationDelay: `${animationDelay}ms` }}
     >
@@ -387,7 +420,7 @@ function CurrencyCard({ currency, isBase, animationDelay = 0 }: CurrencyCardProp
             </div>
           </div>
           <div className="flex flex-col gap-1.5 items-end">
-            <Badge 
+            <Badge
               variant={isBase ? 'default' : 'outline'}
               className={isBase ? 'bg-blue-500 text-xs' : 'text-xs'}
             >
@@ -399,7 +432,9 @@ function CurrencyCard({ currency, isBase, animationDelay = 0 }: CurrencyCardProp
                 Active
               </Badge>
             ) : (
-              <Badge variant="secondary" className="text-xs">Inactive</Badge>
+              <Badge variant="secondary" className="text-xs">
+                Inactive
+              </Badge>
             )}
           </div>
         </div>
@@ -411,7 +446,10 @@ function CurrencyCard({ currency, isBase, animationDelay = 0 }: CurrencyCardProp
         </div>
         {isBase && (
           <div className="pt-2 border-t">
-            <Badge variant="outline" className="bg-blue-500/10 border-blue-500/20 text-blue-600 dark:text-blue-400 text-xs">
+            <Badge
+              variant="outline"
+              className="bg-blue-500/10 border-blue-500/20 text-blue-600 dark:text-blue-400 text-xs"
+            >
               Devise de base
             </Badge>
           </div>
@@ -454,7 +492,9 @@ function RateCard({ rate, animationDelay = 0 }: RateCardProps) {
               Auto
             </Badge>
           ) : (
-            <Badge variant="outline" className="text-xs">Manuel</Badge>
+            <Badge variant="outline" className="text-xs">
+              Manuel
+            </Badge>
           )}
         </div>
       </CardHeader>
@@ -467,9 +507,3 @@ function RateCard({ rate, animationDelay = 0 }: RateCardProps) {
     </Card>
   );
 }
-
-
-
-
-
-

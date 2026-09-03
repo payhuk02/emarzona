@@ -1,11 +1,11 @@
 /**
  * Hook useTimeout - Gérer les timeouts
  * Fournit une API simple pour créer et nettoyer des timeouts
- * 
+ *
  * @example
  * ```tsx
  * const [showMessage, setShowMessage] = useState(false);
- * 
+ *
  * useTimeout(() => {
  *   setShowMessage(true);
  * }, 3000);
@@ -28,10 +28,7 @@ export interface UseTimeoutOptions {
 /**
  * Hook pour gérer les timeouts
  */
-export function useTimeout(
-  callback: () => void,
-  delay: number | null
-): void {
+export function useTimeout(callback: () => void, delay: number | null): void {
   const savedCallback = useRef<() => void>();
 
   // Sauvegarder le callback
@@ -50,10 +47,3 @@ export function useTimeout(
     return () => clearTimeout(id);
   }, [delay]);
 }
-
-
-
-
-
-
-

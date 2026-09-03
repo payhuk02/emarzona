@@ -14,9 +14,10 @@ export function useCommunityPosts(filter?: CommunityPostsFilter) {
   return useQuery({
     queryKey: ['community-posts', filter],
     queryFn: async () => {
-      let  query= supabase
+      let query = supabase
         .from('community_posts')
-        .select(`
+        .select(
+          `
           *,
           author:community_members!author_id (
             id,
@@ -26,7 +27,8 @@ export function useCommunityPosts(filter?: CommunityPostsFilter) {
             profession,
             company
           )
-        `)
+        `
+        )
         .order('is_pinned', { ascending: false })
         .order('created_at', { ascending: false });
 
@@ -77,10 +79,12 @@ export function useCommunityPost(postId: string) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('community_posts')
-        .select(`
+        .select(
+          `
           *,
           author:community_members!author_id (*)
-        `)
+        `
+        )
         .eq('id', postId)
         .single();
 
@@ -111,7 +115,9 @@ export function useCreateCommunityPost() {
 
   return useMutation({
     mutationFn: async (formData: CommunityPostFormData) => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
       // Get current user's community member profile
@@ -133,7 +139,8 @@ export function useCreateCommunityPost() {
           ...formData,
           published_at: formData.status === 'published' ? new Date().toISOString() : null,
         })
-        .select(`
+        .select(
+          `
           *,
           author:community_members!author_id (
             id,
@@ -143,7 +150,8 @@ export function useCreateCommunityPost() {
             profession,
             company
           )
-        `)
+        `
+        )
         .single();
 
       if (error) {
@@ -177,7 +185,13 @@ export function useUpdateCommunityPost() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({ postId, formData }: { postId: string; formData: Partial<CommunityPostFormData> }) => {
+    mutationFn: async ({
+      postId,
+      formData,
+    }: {
+      postId: string;
+      formData: Partial<CommunityPostFormData>;
+    }) => {
       const { data, error } = await supabase
         .from('community_posts')
         .update({
@@ -185,7 +199,8 @@ export function useUpdateCommunityPost() {
           published_at: formData.status === 'published' ? new Date().toISOString() : undefined,
         })
         .eq('id', postId)
-        .select(`
+        .select(
+          `
           *,
           author:community_members!author_id (
             id,
@@ -195,7 +210,8 @@ export function useUpdateCommunityPost() {
             profession,
             company
           )
-        `)
+        `
+        )
         .single();
 
       if (error) {
@@ -205,7 +221,7 @@ export function useUpdateCommunityPost() {
 
       return data as CommunityPost;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['community-posts'] });
       queryClient.invalidateQueries({ queryKey: ['community-post', data.id] });
       toast({
@@ -284,7 +300,7 @@ export function useTogglePostPin() {
       queryClient.invalidateQueries({ queryKey: ['community-posts'] });
       toast({
         title: 'Post épinglé',
-        description: 'Le statut d\'épinglage du post a été mis à jour.',
+        description: "Le statut d'épinglage du post a été mis à jour.",
       });
     },
   });
@@ -320,10 +336,3 @@ export function useTogglePostFeatured() {
     },
   });
 }
-
-
-
-
-
-
-

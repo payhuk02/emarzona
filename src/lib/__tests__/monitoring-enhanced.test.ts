@@ -65,7 +65,7 @@ describe('Monitoring Enhanced', () => {
     });
 
     it('devrait respecter la limite', () => {
-      for (let  i= 0; i < 5; i++) {
+      for (let i = 0; i < 5; i++) {
         recordMetric({
           name: `Metric ${i}`,
           type: 'page_load',
@@ -91,7 +91,7 @@ describe('Monitoring Enhanced', () => {
   });
 
   describe('Alert Thresholds', () => {
-    it('devrait configurer un seuil d\'alerte', () => {
+    it("devrait configurer un seuil d'alerte", () => {
       setAlertThreshold({
         metricType: 'page_load',
         warning: 2000,
@@ -189,13 +189,9 @@ describe('Monitoring Enhanced', () => {
 
   describe('measureOperation', () => {
     it('devrait mesurer une opération synchrone', async () => {
-      const result = await measureOperation(
-        'Test Operation',
-        'api_response',
-        () => {
-          return 'success';
-        }
-      );
+      const result = await measureOperation('Test Operation', 'api_response', () => {
+        return 'success';
+      });
 
       expect(result).toBe('success');
 
@@ -205,14 +201,10 @@ describe('Monitoring Enhanced', () => {
     });
 
     it('devrait mesurer une opération asynchrone', async () => {
-      const result = await measureOperation(
-        'Async Operation',
-        'page_load',
-        async () => {
-          await new Promise(resolve => setTimeout(resolve, 10));
-          return 'done';
-        }
-      );
+      const result = await measureOperation('Async Operation', 'page_load', async () => {
+        await new Promise(resolve => setTimeout(resolve, 10));
+        return 'done';
+      });
 
       expect(result).toBe('done');
 
@@ -220,15 +212,11 @@ describe('Monitoring Enhanced', () => {
       expect(metrics.length).toBeGreaterThan(0);
     });
 
-    it('devrait enregistrer une métrique d\'erreur en cas d\'échec', async () => {
+    it("devrait enregistrer une métrique d'erreur en cas d'échec", async () => {
       try {
-        await measureOperation(
-          'Failing Operation',
-          'api_response',
-          async () => {
-            throw new Error('Test error');
-          }
-        );
+        await measureOperation('Failing Operation', 'api_response', async () => {
+          throw new Error('Test error');
+        });
       } catch (error) {
         // Erreur attendue
       }
@@ -239,10 +227,3 @@ describe('Monitoring Enhanced', () => {
     });
   });
 });
-
-
-
-
-
-
-

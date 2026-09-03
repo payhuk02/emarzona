@@ -88,7 +88,7 @@ export const VideoPlayerWithNotes = ({
             />
           )}
         </div>
-        
+
         {/* Notes Panel - 1/3 width (si inscrit) */}
         {isEnrolled && enrollmentId && (
           <div className="lg:col-span-1">
@@ -106,10 +106,3 @@ export const VideoPlayerWithNotes = ({
     </div>
   );
 };
-
-
-
-
-
-
-

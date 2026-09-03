@@ -33,14 +33,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Globe,
-  Plus,
-  Trash2,
-  AlertCircle,
-  Loader2,
-  MapPin,
-} from 'lucide-react';
+import { Globe, Plus, Trash2, AlertCircle, Loader2, MapPin } from 'lucide-react';
 import {
   useRegionalPrices,
   useCreateRegionalPrice,
@@ -138,7 +131,12 @@ export function RegionalPriceManager({
             <MapPin className="h-4 w-4" />
             <AlertDescription>
               <div className="space-y-1">
-                <p className="font-semibold">Prix de base: {formatCurrency ? formatCurrency(basePrice, baseCurrency) : `${basePrice} ${baseCurrency}`}</p>
+                <p className="font-semibold">
+                  Prix de base:{' '}
+                  {formatCurrency
+                    ? formatCurrency(basePrice, baseCurrency)
+                    : `${basePrice} ${baseCurrency}`}
+                </p>
                 <p className="text-sm text-muted-foreground">
                   Les clients verront automatiquement le prix dans leur devise locale
                 </p>
@@ -167,8 +165,8 @@ export function RegionalPriceManager({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {regionalPrices.map((regionalPrice) => {
-                  const currency = currencies?.find((c) => c.code === regionalPrice.currency_code);
+                {regionalPrices.map(regionalPrice => {
+                  const currency = currencies?.find(c => c.code === regionalPrice.currency_code);
                   return (
                     <TableRow key={regionalPrice.id}>
                       <TableCell>
@@ -177,12 +175,19 @@ export function RegionalPriceManager({
                         </Badge>
                       </TableCell>
                       <TableCell className="font-semibold">
-                        {formatCurrency ? formatCurrency(regionalPrice.price, regionalPrice.currency_code) : regionalPrice.price}
+                        {formatCurrency
+                          ? formatCurrency(regionalPrice.price, regionalPrice.currency_code)
+                          : regionalPrice.price}
                       </TableCell>
                       <TableCell>
                         {regionalPrice.promotional_price ? (
                           <span className="text-green-600 font-semibold">
-                            {formatCurrency ? formatCurrency(regionalPrice.promotional_price, regionalPrice.currency_code) : regionalPrice.promotional_price}
+                            {formatCurrency
+                              ? formatCurrency(
+                                  regionalPrice.promotional_price,
+                                  regionalPrice.currency_code
+                                )
+                              : regionalPrice.promotional_price}
                           </span>
                         ) : (
                           <span className="text-muted-foreground">-</span>
@@ -200,7 +205,11 @@ export function RegionalPriceManager({
                         )}
                       </TableCell>
                       <TableCell>
-                        <Button variant="ghost" size="sm" aria-label={`Supprimer le prix régional pour ${regionalPrice.region || regionalPrice.country_codes?.join(', ') || 'cette région'}`}>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          aria-label={`Supprimer le prix régional pour ${regionalPrice.region || regionalPrice.country_codes?.join(', ') || 'cette région'}`}
+                        >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </TableCell>
@@ -227,15 +236,13 @@ export function RegionalPriceManager({
               <Label>Devise</Label>
               <Select
                 value={formData.currency_code}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, currency_code: value })
-                }
+                onValueChange={value => setFormData({ ...formData, currency_code: value })}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Sélectionnez une devise" />
                 </SelectTrigger>
                 <SelectContent>
-                  {currencies?.map((currency) => (
+                  {currencies?.map(currency => (
                     <SelectItem key={currency.code} value={currency.code}>
                       {currency.symbol} {currency.name} ({currency.code})
                     </SelectItem>
@@ -248,9 +255,7 @@ export function RegionalPriceManager({
               <Input
                 type="number"
                 value={formData.price}
-                onChange={(e) =>
-                  setFormData({ ...formData, price: Number(e.target.value) })
-                }
+                onChange={e => setFormData({ ...formData, price: Number(e.target.value) })}
                 min="0"
                 step="0.01"
               />
@@ -260,7 +265,7 @@ export function RegionalPriceManager({
               <Input
                 type="number"
                 value={formData.promotional_price}
-                onChange={(e) =>
+                onChange={e =>
                   setFormData({ ...formData, promotional_price: Number(e.target.value) })
                 }
                 min="0"
@@ -271,9 +276,7 @@ export function RegionalPriceManager({
               <Label>Région (optionnel)</Label>
               <Input
                 value={formData.region}
-                onChange={(e) =>
-                  setFormData({ ...formData, region: e.target.value })
-                }
+                onChange={e => setFormData({ ...formData, region: e.target.value })}
                 placeholder="Ex: Europe, Afrique de l'Ouest, etc."
               />
             </div>
@@ -284,7 +287,9 @@ export function RegionalPriceManager({
             </Button>
             <Button
               onClick={handleCreate}
-              disabled={createRegionalPrice.isPending || !formData.currency_code || formData.price <= 0}
+              disabled={
+                createRegionalPrice.isPending || !formData.currency_code || formData.price <= 0
+              }
             >
               {createRegionalPrice.isPending ? (
                 <>
@@ -301,10 +306,3 @@ export function RegionalPriceManager({
     </div>
   );
 }
-
-
-
-
-
-
-

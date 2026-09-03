@@ -18,7 +18,8 @@ export function useCommunityPostReactions(postId: string) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('community_reactions')
-        .select(`
+        .select(
+          `
           ${COMMUNITY_REACTION_FIELDS},
           member:community_members!member_id (
             id,
@@ -26,7 +27,8 @@ export function useCommunityPostReactions(postId: string) {
             last_name,
             profile_image_url
           )
-        `)
+        `
+        )
         .eq('post_id', postId);
 
       if (error) {
@@ -45,7 +47,9 @@ export function useCurrentUserPostReaction(postId: string) {
   return useQuery({
     queryKey: ['current-user-post-reaction', postId],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return null;
 
       const { data: member } = await supabase
@@ -80,8 +84,16 @@ export function useToggleReaction() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({ postId, reactionType }: { postId: string; reactionType: ReactionType }) => {
-      const { data: { user } } = await supabase.auth.getUser();
+    mutationFn: async ({
+      postId,
+      reactionType,
+    }: {
+      postId: string;
+      reactionType: ReactionType;
+    }) => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
       const { data: member } = await supabase
@@ -160,10 +172,3 @@ export function useToggleReaction() {
     },
   });
 }
-
-
-
-
-
-
-

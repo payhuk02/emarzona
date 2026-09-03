@@ -7,8 +7,10 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 
-const ARTIST_DEDICATION_FIELDS = 'id, artist_product_id, product_id, order_id, dedication_text, recipient_name, font_style, text_position, status, completed_at, notes, preview_image_url, created_at, updated_at';
-const DEDICATION_TEMPLATE_FIELDS = 'id, artist_product_id, store_id, name, template_text, font_style, text_position, is_active, is_default, created_at, updated_at';
+const ARTIST_DEDICATION_FIELDS =
+  'id, artist_product_id, product_id, order_id, dedication_text, recipient_name, font_style, text_position, status, completed_at, notes, preview_image_url, created_at, updated_at';
+const DEDICATION_TEMPLATE_FIELDS =
+  'id, artist_product_id, store_id, name, template_text, font_style, text_position, is_active, is_default, created_at, updated_at';
 
 export interface ArtistDedication {
   id: string;
@@ -156,15 +158,8 @@ export const useUpdateDedication = () => {
 
       return data as ArtistDedication;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['artist-dedications', data.product_id] });
     },
   });
 };
-
-
-
-
-
-
-

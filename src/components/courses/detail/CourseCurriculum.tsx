@@ -7,14 +7,14 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  ChevronDown, 
-  ChevronUp, 
-  PlayCircle, 
-  Lock, 
+import {
+  ChevronDown,
+  ChevronUp,
+  PlayCircle,
+  Lock,
   CheckCircle2,
   Clock,
-  FileText
+  FileText,
 } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { SectionLockIndicator } from '@/components/courses/drip';
@@ -49,23 +49,21 @@ interface CourseCurriculumProps {
   onLessonClick: (lesson: Lesson) => void;
 }
 
-export const CourseCurriculum = ({ 
-  sections, 
-  isEnrolled, 
+export const CourseCurriculum = ({
+  sections,
+  isEnrolled,
   currentLessonId,
   enrollmentId,
   courseId,
-  onLessonClick 
+  onLessonClick,
 }: CourseCurriculumProps) => {
   const [openSections, setOpenSections] = useState<string[]>(
     sections.map(s => s.id) // Toutes les sections ouvertes par défaut
   );
 
   const toggleSection = (sectionId: string) => {
-    setOpenSections(prev => 
-      prev.includes(sectionId)
-        ? prev.filter(id => id !== sectionId)
-        : [...prev, sectionId]
+    setOpenSections(prev =>
+      prev.includes(sectionId) ? prev.filter(id => id !== sectionId) : [...prev, sectionId]
     );
   };
 
@@ -81,16 +79,21 @@ export const CourseCurriculum = ({
   };
 
   const getCompletedLessons = () => {
-    return sections.reduce((total, section) => 
-      total + section.lessons.filter(l => l.is_completed).length, 0
+    return sections.reduce(
+      (total, section) => total + section.lessons.filter(l => l.is_completed).length,
+      0
     );
   };
 
   const getTotalDuration = () => {
-    const total = sections.reduce((sum, section) => 
-      sum + section.lessons.reduce((lessonSum, lesson) => 
-        lessonSum + (lesson.video_duration_seconds || 0), 0
-      ), 0
+    const total = sections.reduce(
+      (sum, section) =>
+        sum +
+        section.lessons.reduce(
+          (lessonSum, lesson) => lessonSum + (lesson.video_duration_seconds || 0),
+          0
+        ),
+      0
     );
     const hours = Math.floor(total / 3600);
     const mins = Math.floor((total % 3600) / 60);
@@ -107,7 +110,9 @@ export const CourseCurriculum = ({
           </CardTitle>
           <div className="flex gap-2 text-sm text-muted-foreground">
             {isEnrolled && (
-              <span>{getCompletedLessons()}/{getTotalLessons()} leçons</span>
+              <span>
+                {getCompletedLessons()}/{getTotalLessons()} leçons
+              </span>
             )}
             <span>•</span>
             <span>{getTotalDuration()}</span>
@@ -143,9 +148,7 @@ export const CourseCurriculum = ({
                         )}
                       </div>
                       {section.description && (
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {section.description}
-                        </p>
+                        <p className="text-sm text-muted-foreground mt-1">{section.description}</p>
                       )}
                       <p className="text-xs text-muted-foreground mt-1">
                         {section.lessons.length} leçon{section.lessons.length > 1 ? 's' : ''}
@@ -198,11 +201,7 @@ export const CourseCurriculum = ({
                                 Aperçu gratuit
                               </Badge>
                             )}
-                            {isCurrent && (
-                              <Badge className="text-xs bg-orange-600">
-                                En cours
-                              </Badge>
-                            )}
+                            {isCurrent && <Badge className="text-xs bg-orange-600">En cours</Badge>}
                           </div>
                           {lesson.description && (
                             <p className="text-xs text-muted-foreground mt-1 line-clamp-1">
@@ -228,10 +227,3 @@ export const CourseCurriculum = ({
     </Card>
   );
 };
-
-
-
-
-
-
-

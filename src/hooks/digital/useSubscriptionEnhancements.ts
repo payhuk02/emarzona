@@ -1,7 +1,7 @@
 /**
  * Subscription Enhancements Hooks
  * Date: 2025-01-27
- * 
+ *
  * Hooks pour les améliorations des subscriptions : essais gratuits, pauses, upgrades/downgrades
  */
 
@@ -46,14 +46,14 @@ export const useStartTrial = () => {
       queryClient.invalidateQueries({ queryKey: ['storeSubscriptions'] });
       toast({
         title: 'Essai gratuit démarré',
-        description: 'L\'essai gratuit a été activé avec succès',
+        description: "L'essai gratuit a été activé avec succès",
       });
     },
     onError: (error: Error) => {
       logger.error('Error in useStartTrial', { error });
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible de démarrer l\'essai gratuit',
+        description: error.message || "Impossible de démarrer l'essai gratuit",
         variant: 'destructive',
       });
     },
@@ -95,14 +95,14 @@ export const usePauseSubscription = () => {
       queryClient.invalidateQueries({ queryKey: ['storeSubscriptions'] });
       toast({
         title: 'Abonnement mis en pause',
-        description: 'L\'abonnement a été mis en pause avec succès',
+        description: "L'abonnement a été mis en pause avec succès",
       });
     },
     onError: (error: Error) => {
       logger.error('Error in usePauseSubscription', { error });
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible de mettre en pause l\'abonnement',
+        description: error.message || "Impossible de mettre en pause l'abonnement",
         variant: 'destructive',
       });
     },
@@ -134,14 +134,14 @@ export const useResumeSubscription = () => {
       queryClient.invalidateQueries({ queryKey: ['storeSubscriptions'] });
       toast({
         title: 'Abonnement repris',
-        description: 'L\'abonnement a été repris avec succès',
+        description: "L'abonnement a été repris avec succès",
       });
     },
     onError: (error: Error) => {
       logger.error('Error in useResumeSubscription', { error });
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible de reprendre l\'abonnement',
+        description: error.message || "Impossible de reprendre l'abonnement",
         variant: 'destructive',
       });
     },
@@ -235,16 +235,9 @@ export const useApplyPlanChange = () => {
       logger.error('Error in useApplyPlanChange', { error });
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible d\'appliquer le changement de plan',
+        description: error.message || "Impossible d'appliquer le changement de plan",
         variant: 'destructive',
       });
     },
   });
 };
-
-
-
-
-
-
-

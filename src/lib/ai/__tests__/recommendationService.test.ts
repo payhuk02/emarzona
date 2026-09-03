@@ -1,5 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { RecommendationService, RecommendationSettings, type RecommendedProduct } from '../recommendationService';
+import {
+  RecommendationService,
+  RecommendationSettings,
+  type RecommendedProduct,
+} from '../recommendationService';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 import { ChatSessionContext } from '../chatbot'; // Import added for explicit type casting
@@ -100,7 +104,9 @@ describe('RecommendationService', () => {
       // Force reload settings to ensure mock is used
       await (service as { loadSettings: () => Promise<void> }).loadSettings();
       expect(mockSupabaseRpc).toHaveBeenCalledWith('get_ai_recommendation_settings');
-      expect((service as { settings: RecommendationSettings }).settings.limits.maxRecommendationsPerPage).toBe(10);
+      expect(
+        (service as { settings: RecommendationSettings }).settings.limits.maxRecommendationsPerPage
+      ).toBe(10);
     });
 
     it('should use default settings if supabase returns no data', async () => {
@@ -108,24 +114,43 @@ describe('RecommendationService', () => {
 
       await (service as { loadSettings: () => Promise<void> }).loadSettings();
       // Check against a default value that is different from mockSettings
-      expect((service as { settings: RecommendationSettings }).settings.limits.maxRecommendationsPerPage).not.toBe(mockSettings.limits.maxRecommendationsPerPage);
-      expect(logger.warn).toHaveBeenCalledWith('Invalid recommendation settings format, using defaults.');
+      expect(
+        (service as { settings: RecommendationSettings }).settings.limits.maxRecommendationsPerPage
+      ).not.toBe(mockSettings.limits.maxRecommendationsPerPage);
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Invalid recommendation settings format, using defaults.'
+      );
     });
 
     it('should use default settings if there is a supabase error', async () => {
       mockSupabaseRpc.mockResolvedValue({ data: null, error: new Error('DB Error') });
 
       await (service as { loadSettings: () => Promise<void> }).loadSettings();
-      expect((service as { settings: RecommendationSettings }).settings.limits.maxRecommendationsPerPage).not.toBe(mockSettings.limits.maxRecommendationsPerPage);
-      expect(logger.error).toHaveBeenCalledWith('Error loading recommendation settings', { error: expect.any(Error) });
-      expect(logger.warn).toHaveBeenCalledWith('Using default recommendation settings due to load error.');
+      expect(
+        (service as { settings: RecommendationSettings }).settings.limits.maxRecommendationsPerPage
+      ).not.toBe(mockSettings.limits.maxRecommendationsPerPage);
+      expect(logger.error).toHaveBeenCalledWith('Error loading recommendation settings', {
+        error: expect.any(Error),
+      });
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Using default recommendation settings due to load error.'
+      );
     });
   });
 
   describe('getRecommendations', () => {
     it('should return an empty array if no algorithms are enabled', async () => {
       // Temporarily disable all algorithms
-      service.updateSettings({ ...mockSettings, algorithms: { collaborative: false, contentBased: false, trending: false, behavioral: false, crossType: false } });
+      service.updateSettings({
+        ...mockSettings,
+        algorithms: {
+          collaborative: false,
+          contentBased: false,
+          trending: false,
+          behavioral: false,
+          crossType: false,
+        },
+      });
       const recommendations = await service.getRecommendations('user1', {});
       expect(recommendations).toEqual([]);
     });
@@ -135,17 +160,22 @@ describe('RecommendationService', () => {
       mockSupabaseFrom.mockReturnValue({
         select: vi.fn().mockReturnThis(),
         order: vi.fn().mockReturnThis(),
-        limit: vi.fn().mockResolvedValue({ data: [
-          { id: 'p1', name: 'Product 1', category: 'cat1', type: 'digital' },
-          { id: 'p2', name: 'Product 2', category: 'cat2', type: 'physical' },
-          { id: 'p3', name: 'Product 3', category: 'cat1', type: 'digital' },
-        ], error: null }),
+        limit: vi.fn().mockResolvedValue({
+          data: [
+            { id: 'p1', name: 'Product 1', category: 'cat1', type: 'digital' },
+            { id: 'p2', name: 'Product 2', category: 'cat2', type: 'physical' },
+            { id: 'p3', name: 'Product 3', category: 'cat1', type: 'digital' },
+          ],
+          error: null,
+        }),
       } as {
-        select: () => { order: () => { limit: () => Promise<{ data: any[]; error: any }> } },
+        select: () => { order: () => { limit: () => Promise<{ data: any[]; error: any }> } };
       });
 
       const recommendations = await service.getRecommendations('user1', {});
-      expect(recommendations.length).toBeLessThanOrEqual(mockSettings.limits.maxRecommendationsPerPage);
+      expect(recommendations.length).toBeLessThanOrEqual(
+        mockSettings.limits.maxRecommendationsPerPage
+      );
       // Ensure no duplicates by ID
       const ids = recommendations.map(r => r.id);
       expect(new Set(ids).size).toBe(ids.length);
@@ -153,27 +183,77 @@ describe('RecommendationService', () => {
 
     it('should apply fallback to trending if initial recommendations are insufficient', async () => {
       // Mock all algo functions to return fewer than maxRecommendationsPerPage
-      vi.spyOn(service as { getCollaborativeRecommendations: (userId: string | undefined, _sessionContext: ChatSessionContext) => Promise<RecommendedProduct[]> }, 'getCollaborativeRecommendations').mockResolvedValue([]);
-      vi.spyOn(service as { getContentBasedRecommendations: (currentProductId: string | undefined, _sessionContext: ChatSessionContext) => Promise<RecommendedProduct[]> }, 'getContentBasedRecommendations').mockResolvedValue([]);
-      vi.spyOn(service as { getBehavioralRecommendations: (userId: string | undefined, _sessionContext: ChatSessionContext) => Promise<RecommendedProduct[]> }, 'getBehavioralRecommendations').mockResolvedValue([]);
-      vi.spyOn(service as { getCrossTypeRecommendations: (currentProductId: string | undefined, _sessionContext: ChatSessionContext) => Promise<RecommendedProduct[]> }, 'getCrossTypeRecommendations').mockResolvedValue([]);
+      vi.spyOn(
+        service as {
+          getCollaborativeRecommendations: (
+            userId: string | undefined,
+            _sessionContext: ChatSessionContext
+          ) => Promise<RecommendedProduct[]>;
+        },
+        'getCollaborativeRecommendations'
+      ).mockResolvedValue([]);
+      vi.spyOn(
+        service as {
+          getContentBasedRecommendations: (
+            currentProductId: string | undefined,
+            _sessionContext: ChatSessionContext
+          ) => Promise<RecommendedProduct[]>;
+        },
+        'getContentBasedRecommendations'
+      ).mockResolvedValue([]);
+      vi.spyOn(
+        service as {
+          getBehavioralRecommendations: (
+            userId: string | undefined,
+            _sessionContext: ChatSessionContext
+          ) => Promise<RecommendedProduct[]>;
+        },
+        'getBehavioralRecommendations'
+      ).mockResolvedValue([]);
+      vi.spyOn(
+        service as {
+          getCrossTypeRecommendations: (
+            currentProductId: string | undefined,
+            _sessionContext: ChatSessionContext
+          ) => Promise<RecommendedProduct[]>;
+        },
+        'getCrossTypeRecommendations'
+      ).mockResolvedValue([]);
 
       // Mock getTrendingRecommendations to return some products for fallback
-      vi.spyOn(service as any, 'getTrendingRecommendations').mockResolvedValueOnce([ // eslint-disable-line @typescript-eslint/no-explicit-any
-        { id: 't1', name: 'Trending 1', category: 't_cat', type: 'digital', score: 0.9, reason: 'trending' },
-        { id: 't2', name: 'Trending 2', category: 't_cat', type: 'digital', score: 0.8, reason: 'trending' },
+      vi.spyOn(service as any, 'getTrendingRecommendations').mockResolvedValueOnce([
+        // eslint-disable-line @typescript-eslint/no-explicit-any
+        {
+          id: 't1',
+          name: 'Trending 1',
+          category: 't_cat',
+          type: 'digital',
+          score: 0.9,
+          reason: 'trending',
+        },
+        {
+          id: 't2',
+          name: 'Trending 2',
+          category: 't_cat',
+          type: 'digital',
+          score: 0.8,
+          reason: 'trending',
+        },
       ]);
 
       // Mock getPopularProducts for internal fallback call (getTrendingRecommendations uses it)
       mockSupabaseFrom.mockReturnValue({
         select: vi.fn().mockReturnThis(),
         order: vi.fn().mockReturnThis(),
-        limit: vi.fn().mockResolvedValue({ data: [
-          { id: 't1', name: 'Trending 1', category: 't_cat', type: 'digital' },
-          { id: 't2', name: 'Trending 2', category: 't_cat', type: 'digital' },
-        ], error: null }),
+        limit: vi.fn().mockResolvedValue({
+          data: [
+            { id: 't1', name: 'Trending 1', category: 't_cat', type: 'digital' },
+            { id: 't2', name: 'Trending 2', category: 't_cat', type: 'digital' },
+          ],
+          error: null,
+        }),
       } as {
-        select: () => { order: () => { limit: () => Promise<{ data: any[]; error: any }> } },
+        select: () => { order: () => { limit: () => Promise<{ data: any[]; error: any }> } };
       });
 
       const recommendations = await service.getRecommendations('user1', {});
@@ -182,10 +262,37 @@ describe('RecommendationService', () => {
     });
 
     it('should not fetch personalized recommendations if personalization is disabled', async () => {
-      mockSupabaseRpc.mockResolvedValue({ data: { ...mockSettings, limits: { ...mockSettings.limits, enablePersonalization: false } }, error: null });
-      vi.spyOn(service as { getCollaborativeRecommendations: (userId: string | undefined, _sessionContext: ChatSessionContext) => Promise<RecommendedProduct[]> }, 'getCollaborativeRecommendations').mockResolvedValue([]);
-      const spyCollab = vi.spyOn(service as { getCollaborativeRecommendations: (userId: string | undefined, _sessionContext: ChatSessionContext) => Promise<RecommendedProduct[]> }, 'getCollaborativeRecommendations');
-      const spyBehav = vi.spyOn(service as { getBehavioralRecommendations: (userId: string | undefined, _sessionContext: ChatSessionContext) => Promise<RecommendedProduct[]> }, 'getBehavioralRecommendations');
+      mockSupabaseRpc.mockResolvedValue({
+        data: { ...mockSettings, limits: { ...mockSettings.limits, enablePersonalization: false } },
+        error: null,
+      });
+      vi.spyOn(
+        service as {
+          getCollaborativeRecommendations: (
+            userId: string | undefined,
+            _sessionContext: ChatSessionContext
+          ) => Promise<RecommendedProduct[]>;
+        },
+        'getCollaborativeRecommendations'
+      ).mockResolvedValue([]);
+      const spyCollab = vi.spyOn(
+        service as {
+          getCollaborativeRecommendations: (
+            userId: string | undefined,
+            _sessionContext: ChatSessionContext
+          ) => Promise<RecommendedProduct[]>;
+        },
+        'getCollaborativeRecommendations'
+      );
+      const spyBehav = vi.spyOn(
+        service as {
+          getBehavioralRecommendations: (
+            userId: string | undefined,
+            _sessionContext: ChatSessionContext
+          ) => Promise<RecommendedProduct[]>;
+        },
+        'getBehavioralRecommendations'
+      );
 
       // Mock getPopularProducts for other algorithm calls
       mockSupabaseFrom.mockReturnValue({
@@ -193,7 +300,7 @@ describe('RecommendationService', () => {
         order: vi.fn().mockReturnThis(),
         limit: vi.fn().mockResolvedValue({ data: [], error: null }),
       } as {
-        select: () => { order: () => { limit: () => Promise<{ data: any[]; error: any }> } },
+        select: () => { order: () => { limit: () => Promise<{ data: any[]; error: any }> } };
       });
 
       await service.getRecommendations('user1', {});
@@ -208,11 +315,25 @@ describe('RecommendationService', () => {
       const mockChain = {
         select: vi.fn().mockReturnThis(),
         order: vi.fn().mockReturnThis(),
-        limit: vi.fn().mockResolvedValue({ data: [{ id: 'pop1', name: 'Popular Product', category: 'cat', type: 'digital' }], error: null }),
+        limit: vi
+          .fn()
+          .mockResolvedValue({
+            data: [{ id: 'pop1', name: 'Popular Product', category: 'cat', type: 'digital' }],
+            error: null,
+          }),
       };
       mockSupabaseFrom.mockReturnValue(mockChain as any);
 
-      const products = await (service as { getPopularProducts: (limit: number, score: number, reasonTag: string, reasonText: string) => Promise<RecommendedProduct[]> }).getPopularProducts(1, 0.8, 'test', 'test reason');
+      const products = await (
+        service as {
+          getPopularProducts: (
+            limit: number,
+            score: number,
+            reasonTag: string,
+            reasonText: string
+          ) => Promise<RecommendedProduct[]>;
+        }
+      ).getPopularProducts(1, 0.8, 'test', 'test reason');
       expect(mockSupabaseFrom).toHaveBeenCalledWith('products');
       expect(mockChain.select).toHaveBeenCalledWith('id, name, category, type');
       expect(mockChain.order).toHaveBeenCalledWith('view_count', { ascending: false });
@@ -225,23 +346,46 @@ describe('RecommendationService', () => {
   // Test for getCategoryRecommendations
   describe('getCategoryRecommendations', () => {
     it('should fetch products from the same category', async () => {
-      mockSupabaseFrom.mockReturnValueOnce({
-        select: vi.fn().mockReturnThis(),
-        eq: vi.fn().mockReturnThis(),
-        single: vi.fn().mockResolvedValueOnce({ data: { category: 'Electronics' }, error: null }),
-      } as {
-        select: () => { eq: () => { single: () => Promise<{ data: { category: string } | null; error: any }> } },
-      }).mockReturnValueOnce({
-        select: vi.fn().mockReturnThis(),
-        eq: vi.fn().mockReturnThis(),
-        neq: vi.fn().mockReturnThis(),
-        order: vi.fn().mockReturnThis(),
-        limit: vi.fn().mockResolvedValueOnce({ data: [{ id: 'cat2', name: 'Category Product', category: 'Electronics', type: 'physical' }], error: null }),
-      } as {
-        select: () => { eq: () => { neq: () => { order: () => { limit: () => Promise<{ data: any[]; error: any }> } } } },
-      });
+      mockSupabaseFrom
+        .mockReturnValueOnce({
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          single: vi.fn().mockResolvedValueOnce({ data: { category: 'Electronics' }, error: null }),
+        } as {
+          select: () => {
+            eq: () => { single: () => Promise<{ data: { category: string } | null; error: any }> };
+          };
+        })
+        .mockReturnValueOnce({
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          neq: vi.fn().mockReturnThis(),
+          order: vi.fn().mockReturnThis(),
+          limit: vi
+            .fn()
+            .mockResolvedValueOnce({
+              data: [
+                { id: 'cat2', name: 'Category Product', category: 'Electronics', type: 'physical' },
+              ],
+              error: null,
+            }),
+        } as {
+          select: () => {
+            eq: () => {
+              neq: () => { order: () => { limit: () => Promise<{ data: any[]; error: any }> } };
+            };
+          };
+        });
 
-      const products = await (service as { getCategoryRecommendations: (currentProductId: string, limit: number, score: number) => Promise<RecommendedProduct[]> }).getCategoryRecommendations('prod1', 1, 0.7);
+      const products = await (
+        service as {
+          getCategoryRecommendations: (
+            currentProductId: string,
+            limit: number,
+            score: number
+          ) => Promise<RecommendedProduct[]>;
+        }
+      ).getCategoryRecommendations('prod1', 1, 0.7);
       expect(mockSupabaseFrom).toHaveBeenCalledWith('products'); // Called twice
       expect(products).toHaveLength(1);
       expect(products[0].category).toBe('Electronics');
@@ -251,23 +395,44 @@ describe('RecommendationService', () => {
   // Test for getStoreRecommendations
   describe('getStoreRecommendations', () => {
     it('should fetch products from the same store', async () => {
-      mockSupabaseFrom.mockReturnValueOnce({
-        select: vi.fn().mockReturnThis(),
-        eq: vi.fn().mockReturnThis(),
-        single: vi.fn().mockResolvedValueOnce({ data: { store_id: 'store1' }, error: null }),
-      } as {
-        select: () => { eq: () => { single: () => Promise<{ data: { store_id: string } | null; error: any }> } },
-      }).mockReturnValueOnce({
-        select: vi.fn().mockReturnThis(),
-        eq: vi.fn().mockReturnThis(),
-        neq: vi.fn().mockReturnThis(),
-        order: vi.fn().mockReturnThis(),
-        limit: vi.fn().mockResolvedValueOnce({ data: [{ id: 'st2', name: 'Store Product', category: 'cat', type: 'digital' }], error: null }),
-      } as {
-        select: () => { eq: () => { neq: () => { order: () => { limit: () => Promise<{ data: any[]; error: any }> } } } },
-      });
+      mockSupabaseFrom
+        .mockReturnValueOnce({
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          single: vi.fn().mockResolvedValueOnce({ data: { store_id: 'store1' }, error: null }),
+        } as {
+          select: () => {
+            eq: () => { single: () => Promise<{ data: { store_id: string } | null; error: any }> };
+          };
+        })
+        .mockReturnValueOnce({
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          neq: vi.fn().mockReturnThis(),
+          order: vi.fn().mockReturnThis(),
+          limit: vi
+            .fn()
+            .mockResolvedValueOnce({
+              data: [{ id: 'st2', name: 'Store Product', category: 'cat', type: 'digital' }],
+              error: null,
+            }),
+        } as {
+          select: () => {
+            eq: () => {
+              neq: () => { order: () => { limit: () => Promise<{ data: any[]; error: any }> } };
+            };
+          };
+        });
 
-      const products = await (service as { getStoreRecommendations: (currentProductId: string, limit: number, score: number) => Promise<RecommendedProduct[]> }).getStoreRecommendations('prod1', 1, 0.7);
+      const products = await (
+        service as {
+          getStoreRecommendations: (
+            currentProductId: string,
+            limit: number,
+            score: number
+          ) => Promise<RecommendedProduct[]>;
+        }
+      ).getStoreRecommendations('prod1', 1, 0.7);
       expect(mockSupabaseFrom).toHaveBeenCalledWith('products'); // Called twice
       expect(products).toHaveLength(1);
     });

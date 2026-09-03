@@ -20,7 +20,7 @@ import {
   Maximize2,
   ThumbsUp,
   ThumbsDown,
-  RefreshCw
+  RefreshCw,
 } from 'lucide-react';
 import { ChatMessage, ChatAction } from '@/lib/ai/chatbot';
 import { logger } from '@/lib/logger';
@@ -68,53 +68,64 @@ const AIChatbot: React.FC<AIChatbotProps> = ({
     }
   }, [isOpen, isMinimized]);
 
-  const handleSendMessage = useCallback(async (message?: string) => {
-    const messageToSend = message || inputValue.trim();
-    if (!messageToSend || isTyping) return;
+  const handleSendMessage = useCallback(
+    async (message?: string) => {
+      const messageToSend = message || inputValue.trim();
+      if (!messageToSend || isTyping) return;
 
-    setInputValue('');
-    await sendMessage(messageToSend); // Utiliser le sendMessage du hook
+      setInputValue('');
+      await sendMessage(messageToSend); // Utiliser le sendMessage du hook
+    },
+    [inputValue, isTyping, sendMessage]
+  );
 
-  }, [inputValue, isTyping, sendMessage]);
+  const handleActionClick = useCallback(
+    async (action: ChatAction) => {
+      switch (action.type) {
+        case 'quick_reply':
+          await handleSendMessage(action.payload.message);
+          break;
+        case 'navigation':
+          window.location.href = action.payload.path;
+          break;
+        case 'product_recommendation':
+          window.location.href = `/product/${action.payload.productId}`;
+          break;
+        case 'order_status':
+          window.location.href = '/orders';
+          break;
+        case 'support_ticket':
+          // Implémentation future du système de tickets
+          logger.info('Support ticket requested', { payload: action.payload });
+          break;
+        default:
+          logger.warn('Unknown action type', { action });
+      }
+    },
+    [handleSendMessage]
+  );
 
-  const handleActionClick = useCallback(async (action: ChatAction) => {
-    switch (action.type) {
-      case 'quick_reply':
-        await handleSendMessage(action.payload.message);
-        break;
-      case 'navigation':
-        window.location.href = action.payload.path;
-        break;
-      case 'product_recommendation':
-        window.location.href = `/product/${action.payload.productId}`;
-        break;
-      case 'order_status':
-        window.location.href = '/orders';
-        break;
-      case 'support_ticket':
-        // Implémentation future du système de tickets
-        logger.info('Support ticket requested', { payload: action.payload });
-        break;
-      default:
-        logger.warn('Unknown action type', { action });
-    }
-  }, [handleSendMessage]);
+  const handleKeyPress = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        handleSendMessage();
+      }
+    },
+    [handleSendMessage]
+  );
 
-  const handleKeyPress = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
-    }
-  }, [handleSendMessage]);
-
-  const handleFeedback = useCallback((messageId: string, isPositive: boolean) => {
-    logger.info('Chatbot feedback received', { messageId, isPositive, sessionId });
-    // Ici on pourrait envoyer le feedback à une API pour améliorer le modèle
-  }, [sessionId]);
+  const handleFeedback = useCallback(
+    (messageId: string, isPositive: boolean) => {
+      logger.info('Chatbot feedback received', { messageId, isPositive, sessionId });
+      // Ici on pourrait envoyer le feedback à une API pour améliorer le modèle
+    },
+    [sessionId]
+  );
 
   if (!isOpen) {
     return (
-      <div className={cn("fixed bottom-4 right-4 z-50", className)}>
+      <div className={cn('fixed bottom-4 right-4 z-50', className)}>
         <Button
           onClick={onToggle}
           size="lg"
@@ -128,11 +139,13 @@ const AIChatbot: React.FC<AIChatbotProps> = ({
   }
 
   return (
-    <div className={cn("fixed bottom-4 right-4 z-50", className)}>
-      <Card className={cn(
-        "w-96 max-w-[calc(100vw-2rem)] shadow-2xl border-2 transition-all duration-200",
-        isMinimized ? "h-14" : "h-[600px] max-h-[calc(100vh-2rem)]"
-      )}>
+    <div className={cn('fixed bottom-4 right-4 z-50', className)}>
+      <Card
+        className={cn(
+          'w-96 max-w-[calc(100vw-2rem)] shadow-2xl border-2 transition-all duration-200',
+          isMinimized ? 'h-14' : 'h-[600px] max-h-[calc(100vh-2rem)]'
+        )}
+      >
         {/* Header */}
         <CardHeader className="pb-3 cursor-pointer" onClick={minimizeChatbot}>
           <div className="flex items-center justify-between">
@@ -154,20 +167,19 @@ const AIChatbot: React.FC<AIChatbotProps> = ({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={(e) => {
+                onClick={e => {
                   e.stopPropagation();
                   minimizeChatbot();
                 }}
-                aria-label={isMinimized ? "Agrandir le chat" : "Réduire le chat"}
+                aria-label={isMinimized ? 'Agrandir le chat' : 'Réduire le chat'}
               >
-                {isMinimized ? <Maximize2 className="w-4 h-4" /> : <Minimize2 className="w-4 h-4" />}
+                {isMinimized ? (
+                  <Maximize2 className="w-4 h-4" />
+                ) : (
+                  <Minimize2 className="w-4 h-4" />
+                )}
               </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onToggle}
-                aria-label="Fermer le chatbot"
-              >
+              <Button variant="ghost" size="sm" onClick={onToggle} aria-label="Fermer le chatbot">
                 <X className="w-4 h-4" />
               </Button>
             </div>
@@ -180,11 +192,14 @@ const AIChatbot: React.FC<AIChatbotProps> = ({
             <CardContent className="flex-1 p-0">
               <ScrollArea className="h-96 px-4">
                 <div className="space-y-4 pb-4">
-                  {messages.map((message) => (
-                    <div key={message.id} className={cn(
-                      "flex gap-3",
-                      message.role === 'user' ? "justify-end" : "justify-start"
-                    )}>
+                  {messages.map(message => (
+                    <div
+                      key={message.id}
+                      className={cn(
+                        'flex gap-3',
+                        message.role === 'user' ? 'justify-end' : 'justify-start'
+                      )}
+                    >
                       {message.role === 'assistant' && (
                         <Avatar className="w-8 h-8 mt-1">
                           <AvatarFallback className="bg-primary/10">
@@ -193,12 +208,14 @@ const AIChatbot: React.FC<AIChatbotProps> = ({
                         </Avatar>
                       )}
 
-                      <div className={cn(
-                        "max-w-[80%] rounded-lg px-3 py-2",
-                        message.role === 'user'
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-muted"
-                      )}>
+                      <div
+                        className={cn(
+                          'max-w-[80%] rounded-lg px-3 py-2',
+                          message.role === 'user'
+                            ? 'bg-primary text-primary-foreground'
+                            : 'bg-muted'
+                        )}
+                      >
                         <p className="text-sm whitespace-pre-wrap">{message.content}</p>
 
                         {/* Actions du message */}
@@ -279,9 +296,18 @@ const AIChatbot: React.FC<AIChatbotProps> = ({
                       </Avatar>
                       <div className="bg-muted rounded-lg px-3 py-2">
                         <div className="flex gap-1">
-                          <div className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                          <div className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                          <div className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                          <div
+                            className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce"
+                            style={{ animationDelay: '0ms' }}
+                          ></div>
+                          <div
+                            className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce"
+                            style={{ animationDelay: '150ms' }}
+                          ></div>
+                          <div
+                            className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce"
+                            style={{ animationDelay: '300ms' }}
+                          ></div>
                         </div>
                       </div>
                     </div>
@@ -298,7 +324,7 @@ const AIChatbot: React.FC<AIChatbotProps> = ({
                 <Input
                   ref={inputRef}
                   value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
+                  onChange={e => setInputValue(e.target.value)}
                   onKeyPress={handleKeyPress}
                   placeholder="Tapez votre message..."
                   disabled={isTyping}

@@ -20,26 +20,28 @@ const testProducts = [
     reviews_count: 156,
     purchases_count: 89,
     category: 'Templates',
-    store_id: 'test-store'
+    store_id: 'test-store',
   },
   {
     id: 'test-2',
     name: 'Logo Design Professionnel',
     slug: 'logo-design-professionnel',
-    image_url: 'https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=1920&h=1080&fit=crop',
+    image_url:
+      'https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=1920&h=1080&fit=crop',
     price: 15000,
     currency: 'FCFA',
     rating: 4.9,
     reviews_count: 203,
     purchases_count: 145,
     category: 'Design',
-    store_id: 'test-store'
+    store_id: 'test-store',
   },
   {
     id: 'test-3',
     name: 'Application Mobile React Native',
     slug: 'app-mobile-react-native',
-    image_url: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=1920&h=1080&fit=crop',
+    image_url:
+      'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=1920&h=1080&fit=crop',
     price: 75000,
     promo_price: 60000,
     currency: 'FCFA',
@@ -47,26 +49,28 @@ const testProducts = [
     reviews_count: 78,
     purchases_count: 34,
     category: 'Développement',
-    store_id: 'test-store'
+    store_id: 'test-store',
   },
   {
     id: 'test-4',
     name: 'Formation E-commerce Complète',
     slug: 'formation-ecommerce-complete',
-    image_url: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1920&h=1080&fit=crop',
+    image_url:
+      'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1920&h=1080&fit=crop',
     price: 45000,
     currency: 'FCFA',
     rating: 4.6,
     reviews_count: 92,
     purchases_count: 67,
     category: 'Formation',
-    store_id: 'test-store'
+    store_id: 'test-store',
   },
   {
     id: 'test-5',
     name: 'Plugin WordPress Avancé',
     slug: 'plugin-wordpress-avance',
-    image_url: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=1920&h=1080&fit=crop',
+    image_url:
+      'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=1920&h=1080&fit=crop',
     price: 35000,
     promo_price: 28000,
     currency: 'FCFA',
@@ -74,27 +78,28 @@ const testProducts = [
     reviews_count: 134,
     purchases_count: 98,
     category: 'Plugins',
-    store_id: 'test-store'
+    store_id: 'test-store',
   },
   {
     id: 'test-6',
     name: 'Site Web Vitrine Moderne',
     slug: 'site-web-vitrine-moderne',
-    image_url: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1920&h=1080&fit=crop',
+    image_url:
+      'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1920&h=1080&fit=crop',
     price: 55000,
     currency: 'FCFA',
     rating: 4.9,
     reviews_count: 187,
     purchases_count: 123,
     category: 'Sites Web',
-    store_id: 'test-store'
-  }
+    store_id: 'test-store',
+  },
 ];
 
 // Composant de carte produit de test
-const TestProductCard = ({ product }: { product: typeof testProducts[0] }) => {
+const TestProductCard = ({ product }: { product: (typeof testProducts)[0] }) => {
   const [loading, setLoading] = useState(false);
-  
+
   const price = product.promo_price ?? product.price;
   const hasPromo = product.promo_price && product.promo_price < product.price;
   const discountPercent = hasPromo
@@ -103,11 +108,11 @@ const TestProductCard = ({ product }: { product: typeof testProducts[0] }) => {
 
   const renderStars = (rating: number) => (
     <div className="flex items-center gap-0.5">
-      {[1, 2, 3, 4, 5].map((star) => (
+      {[1, 2, 3, 4, 5].map(star => (
         <Star
           key={star}
           className={`h-4 w-4 ${
-            star <= rating ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground"
+            star <= rating ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground'
           }`}
         />
       ))}
@@ -122,7 +127,7 @@ const TestProductCard = ({ product }: { product: typeof testProducts[0] }) => {
   };
 
   return (
-    <article 
+    <article
       className="group relative flex flex-col rounded-2xl border border-border bg-card overflow-hidden transition-all duration-300 hover:-translate-y-1 product-card product-card-mobile sm:product-card-tablet  _lg:product-card-desktop"
       role="article"
       aria-labelledby={`product-title-${product.id}`}
@@ -136,7 +141,11 @@ const TestProductCard = ({ product }: { product: typeof testProducts[0] }) => {
           fallbackIcon={<ShoppingCart className="h-16 w-16 opacity-20" />}
           badges={
             hasPromo ? (
-              <div className="product-badge" role="img" aria-label={`Réduction de ${discountPercent}%`}>
+              <div
+                className="product-badge"
+                role="img"
+                aria-label={`Réduction de ${discountPercent}%`}
+              >
                 <div className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-md flex items-center gap-1">
                   <Percent className="h-3 w-3" /> -{discountPercent}%
                 </div>
@@ -148,25 +157,37 @@ const TestProductCard = ({ product }: { product: typeof testProducts[0] }) => {
 
       <div className="product-card-content">
         <div className="flex-1">
-          <span className="text-xs font-medium text-primary uppercase tracking-wide mb-2 block" aria-label={`Catégorie: ${product.category}`}>
+          <span
+            className="text-xs font-medium text-primary uppercase tracking-wide mb-2 block"
+            aria-label={`Catégorie: ${product.category}`}
+          >
             {product.category}
           </span>
 
-          <h3 
+          <h3
             id={`product-title-${product.id}`}
             className="product-title group-hover:text-primary transition-colors mb-2"
           >
             {product.name}
           </h3>
 
-          <div className="product-rating mb-3" role="img" aria-label={`Note: ${product.rating} sur 5 étoiles`}>
+          <div
+            className="product-rating mb-3"
+            role="img"
+            aria-label={`Note: ${product.rating} sur 5 étoiles`}
+          >
             {renderStars(product.rating)}
-            <span className="ml-1 text-xs" aria-label={`${product.reviews_count} avis`}>({product.reviews_count})</span>
+            <span className="ml-1 text-xs" aria-label={`${product.reviews_count} avis`}>
+              ({product.reviews_count})
+            </span>
           </div>
 
           <div className="flex items-baseline gap-2 mb-4" aria-label="Prix du produit">
             {hasPromo && (
-              <span className="text-sm text-muted-foreground line-through" aria-label="Prix original">
+              <span
+                className="text-sm text-muted-foreground line-through"
+                aria-label="Prix original"
+              >
                 {product.price.toLocaleString()} {product.currency}
               </span>
             )}
@@ -181,8 +202,8 @@ const TestProductCard = ({ product }: { product: typeof testProducts[0] }) => {
         </div>
 
         <div className="product-actions" role="group" aria-label="Actions du produit">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             className="product-button product-button-secondary"
             aria-label={`Voir les détails du produit ${product.name}`}
           >
@@ -224,7 +245,7 @@ const MarketplaceDisplayTest = () => {
     responsive: false,
     lazyLoading: false,
     accessibility: false,
-    performance: false
+    performance: false,
   });
 
   useEffect(() => {
@@ -232,21 +253,21 @@ const MarketplaceDisplayTest = () => {
     const runTests = () => {
       // Test responsive
       const isResponsive = window.innerWidth > 0;
-      
+
       // Test lazy loading (vérifier si IntersectionObserver est disponible)
       const hasLazyLoading = 'IntersectionObserver' in window;
-      
+
       // Test accessibilité (vérifier si les éléments ont les bons attributs)
       const hasAccessibility = document.querySelectorAll('[role="article"]').length > 0;
-      
+
       // Test performance (vérifier si les images sont optimisées)
       const hasPerformance = document.querySelectorAll('img[loading="lazy"]').length > 0;
-      
+
       setTestResults({
         responsive: isResponsive,
         lazyLoading: hasLazyLoading,
         accessibility: hasAccessibility,
-        performance: hasPerformance
+        performance: hasPerformance,
       });
     };
 
@@ -260,7 +281,7 @@ const MarketplaceDisplayTest = () => {
         {/* En-tête de test */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-4">Test d'Affichage Marketplace - Emarzona</h1>
-          
+
           {/* Résultats des tests */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             <Card className="p-4">
@@ -275,7 +296,7 @@ const MarketplaceDisplayTest = () => {
                 </div>
               </CardContent>
             </Card>
-            
+
             <Card className="p-4">
               <CardContent className="p-0">
                 <div className="flex items-center gap-2">
@@ -288,7 +309,7 @@ const MarketplaceDisplayTest = () => {
                 </div>
               </CardContent>
             </Card>
-            
+
             <Card className="p-4">
               <CardContent className="p-0">
                 <div className="flex items-center gap-2">
@@ -301,7 +322,7 @@ const MarketplaceDisplayTest = () => {
                 </div>
               </CardContent>
             </Card>
-            
+
             <Card className="p-4">
               <CardContent className="p-0">
                 <div className="flex items-center gap-2">
@@ -335,7 +356,9 @@ const MarketplaceDisplayTest = () => {
           <div className="space-y-4">
             <div className="p-4 bg-muted rounded-lg">
               <h3 className="font-medium mb-2">Mobile (&lt; 640px)</h3>
-              <p className="text-sm text-muted-foreground">1 produit par ligne, quasi-plein écran</p>
+              <p className="text-sm text-muted-foreground">
+                1 produit par ligne, quasi-plein écran
+              </p>
             </div>
             <div className="p-4 bg-muted rounded-lg">
               <h3 className="font-medium mb-2">Tablette (640px - 1024px)</h3>
@@ -365,9 +388,3 @@ const MarketplaceDisplayTest = () => {
 };
 
 export default MarketplaceDisplayTest;
-
-
-
-
-
-

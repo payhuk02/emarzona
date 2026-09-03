@@ -6,7 +6,15 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
 import { logger } from '@/lib/logger';
-import { CheckCircle2, XCircle, Loader2, RefreshCw, User, AlertCircle, Database } from 'lucide-react';
+import {
+  CheckCircle2,
+  XCircle,
+  Loader2,
+  RefreshCw,
+  User,
+  AlertCircle,
+  Database,
+} from 'lucide-react';
 
 export const ProfileTest = () => {
   const { user } = useAuth();
@@ -55,7 +63,11 @@ export const ProfileTest = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex gap-2">
-            <Button onClick={runProfileTest} disabled={testLoading || loading} className="btn-primary">
+            <Button
+              onClick={runProfileTest}
+              disabled={testLoading || loading}
+              className="btn-primary"
+            >
               {(testLoading || loading) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               <RefreshCw className="mr-2 h-4 w-4" />
               Tester le profil
@@ -68,9 +80,15 @@ export const ProfileTest = () => {
                 <User className="h-4 w-4" /> Utilisateur
               </h3>
               <div className="p-3 bg-muted/50 rounded-md border border-border">
-                <p className="text-sm"><strong>Email:</strong> {user.email}</p>
-                <p className="text-sm"><strong>ID:</strong> {user.id}</p>
-                <p className="text-sm"><strong>Connecté:</strong> {user.created_at ? 'Oui' : 'Non'}</p>
+                <p className="text-sm">
+                  <strong>Email:</strong> {user.email}
+                </p>
+                <p className="text-sm">
+                  <strong>ID:</strong> {user.id}
+                </p>
+                <p className="text-sm">
+                  <strong>Connecté:</strong> {user.created_at ? 'Oui' : 'Non'}
+                </p>
               </div>
             </div>
 
@@ -90,13 +108,27 @@ export const ProfileTest = () => {
                       <CheckCircle2 className="h-4 w-4 text-green-500" />
                       <span className="text-sm font-medium">Profil trouvé</span>
                     </div>
-                    <p className="text-sm"><strong>Nom:</strong> {profile.display_name || 'Non défini'}</p>
-                    <p className="text-sm"><strong>Prénom:</strong> {profile.first_name || 'Non défini'}</p>
-                    <p className="text-sm"><strong>Nom:</strong> {profile.last_name || 'Non défini'}</p>
-                    <p className="text-sm"><strong>Bio:</strong> {profile.bio ? 'Définie' : 'Non définie'}</p>
-                    <p className="text-sm"><strong>Téléphone:</strong> {profile.phone || 'Non défini'}</p>
-                    <p className="text-sm"><strong>Localisation:</strong> {profile.location || 'Non définie'}</p>
-                    <p className="text-sm"><strong>Site web:</strong> {profile.website || 'Non défini'}</p>
+                    <p className="text-sm">
+                      <strong>Nom:</strong> {profile.display_name || 'Non défini'}
+                    </p>
+                    <p className="text-sm">
+                      <strong>Prénom:</strong> {profile.first_name || 'Non défini'}
+                    </p>
+                    <p className="text-sm">
+                      <strong>Nom:</strong> {profile.last_name || 'Non défini'}
+                    </p>
+                    <p className="text-sm">
+                      <strong>Bio:</strong> {profile.bio ? 'Définie' : 'Non définie'}
+                    </p>
+                    <p className="text-sm">
+                      <strong>Téléphone:</strong> {profile.phone || 'Non défini'}
+                    </p>
+                    <p className="text-sm">
+                      <strong>Localisation:</strong> {profile.location || 'Non définie'}
+                    </p>
+                    <p className="text-sm">
+                      <strong>Site web:</strong> {profile.website || 'Non défini'}
+                    </p>
                   </div>
                 ) : (
                   <div className="flex items-center gap-2">
@@ -123,9 +155,3 @@ export const ProfileTest = () => {
     </div>
   );
 };
-
-
-
-
-
-

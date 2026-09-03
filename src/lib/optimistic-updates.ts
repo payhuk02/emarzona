@@ -1,7 +1,7 @@
 /**
  * Optimistic Updates Utilities
  * Date: 28 Janvier 2025
- * 
+ *
  * Utilitaires pour gérer les optimistic updates avec React Query
  * Permet d'améliorer l'UX en mettant à jour l'UI immédiatement
  */
@@ -32,7 +32,7 @@ export function applyOptimisticUpdate<TData, TVariables>(
   const previousData = queryClient.getQueryData<TData>(queryKey);
 
   // Appliquer l'update optimiste
-  queryClient.setQueryData<TData>(queryKey, (oldData) => {
+  queryClient.setQueryData<TData>(queryKey, oldData => {
     return updateFn(oldData, variables);
   });
 
@@ -54,7 +54,7 @@ export function rollbackOptimisticUpdate<TData, TVariables>(
 
   if (rollbackFn) {
     // Utiliser la fonction de rollback personnalisée
-    queryClient.setQueryData<TData>(queryKey, (oldData) => {
+    queryClient.setQueryData<TData>(queryKey, oldData => {
       return rollbackFn(oldData, variables);
     });
   } else {
@@ -85,15 +85,13 @@ export function createListOptimisticUpdate<TItem, TVariables>(
     // Mettre à jour un item
     update: (oldData: TItem[] | undefined, variables: TVariables): TItem[] => {
       if (!oldData || !findItem || !updateItem) return oldData || [];
-      return oldData.map((item) =>
-        findItem(item, variables) ? updateItem(item, variables) : item
-      );
+      return oldData.map(item => (findItem(item, variables) ? updateItem(item, variables) : item));
     },
 
     // Supprimer un item
     remove: (oldData: TItem[] | undefined, variables: TVariables): TItem[] => {
       if (!oldData || !findItem || !deleteItem) return oldData || [];
-      return oldData.filter((item) => !deleteItem(item, variables));
+      return oldData.filter(item => !deleteItem(item, variables));
     },
   };
 }
@@ -120,7 +118,12 @@ export interface OptimisticMutationConfig<TData, TVariables, TError = Error> {
   onMutate?: (variables: TVariables) => Promise<TData | undefined> | TData | undefined;
   onError?: (error: TError, variables: TVariables, context: TData | undefined) => void;
   onSuccess?: (data: unknown, variables: TVariables, context: TData | undefined) => void;
-  onSettled?: (data: unknown, error: TError | null, variables: TVariables, context: TData | undefined) => void;
+  onSettled?: (
+    data: unknown,
+    error: TError | null,
+    variables: TVariables,
+    context: TData | undefined
+  ) => void;
 }
 
 /**
@@ -150,10 +153,3 @@ export function createOptimisticMutationConfig<TData, TVariables, TError = Error
     },
   };
 }
-
-
-
-
-
-
-

@@ -112,7 +112,7 @@ export function EditPortfolioDialog({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['artist-portfolio', portfolioId] });
       queryClient.invalidateQueries({ queryKey: ['store-portfolios'] });
-      
+
       toast({
         title: '✅ Portfolio mis à jour',
         description: 'Les modifications ont été enregistrées.',
@@ -131,10 +131,13 @@ export function EditPortfolioDialog({
     },
   });
 
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    await updatePortfolio.mutateAsync();
-  }, [updatePortfolio]);
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      await updatePortfolio.mutateAsync();
+    },
+    [updatePortfolio]
+  );
 
   if (isLoading) {
     return (
@@ -153,9 +156,7 @@ export function EditPortfolioDialog({
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Modifier le portfolio</DialogTitle>
-          <DialogDescription>
-            Modifiez les informations de votre portfolio
-          </DialogDescription>
+          <DialogDescription>Modifiez les informations de votre portfolio</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -165,7 +166,7 @@ export function EditPortfolioDialog({
             <Input
               id="portfolio_name"
               value={formData.portfolio_name}
-              onChange={(e) => setFormData({ ...formData, portfolio_name: e.target.value })}
+              onChange={e => setFormData({ ...formData, portfolio_name: e.target.value })}
               required
             />
           </div>
@@ -176,7 +177,7 @@ export function EditPortfolioDialog({
             <Textarea
               id="portfolio_description"
               value={formData.portfolio_description}
-              onChange={(e) => setFormData({ ...formData, portfolio_description: e.target.value })}
+              onChange={e => setFormData({ ...formData, portfolio_description: e.target.value })}
               rows={3}
             />
           </div>
@@ -187,7 +188,7 @@ export function EditPortfolioDialog({
             <Textarea
               id="portfolio_bio"
               value={formData.portfolio_bio}
-              onChange={(e) => setFormData({ ...formData, portfolio_bio: e.target.value })}
+              onChange={e => setFormData({ ...formData, portfolio_bio: e.target.value })}
               rows={4}
             />
           </div>
@@ -199,7 +200,7 @@ export function EditPortfolioDialog({
               id="portfolio_image_url"
               type="url"
               value={formData.portfolio_image_url}
-              onChange={(e) => setFormData({ ...formData, portfolio_image_url: e.target.value })}
+              onChange={e => setFormData({ ...formData, portfolio_image_url: e.target.value })}
             />
           </div>
 
@@ -210,32 +211,32 @@ export function EditPortfolioDialog({
               <Input
                 placeholder="Site web"
                 value={portfolioLinks.website}
-                onChange={(e) => setPortfolioLinks({ ...portfolioLinks, website: e.target.value })}
+                onChange={e => setPortfolioLinks({ ...portfolioLinks, website: e.target.value })}
               />
               <Input
                 placeholder="Instagram"
                 value={portfolioLinks.instagram}
-                onChange={(e) => setPortfolioLinks({ ...portfolioLinks, instagram: e.target.value })}
+                onChange={e => setPortfolioLinks({ ...portfolioLinks, instagram: e.target.value })}
               />
               <Input
                 placeholder="Facebook"
                 value={portfolioLinks.facebook}
-                onChange={(e) => setPortfolioLinks({ ...portfolioLinks, facebook: e.target.value })}
+                onChange={e => setPortfolioLinks({ ...portfolioLinks, facebook: e.target.value })}
               />
               <Input
                 placeholder="Twitter"
                 value={portfolioLinks.twitter}
-                onChange={(e) => setPortfolioLinks({ ...portfolioLinks, twitter: e.target.value })}
+                onChange={e => setPortfolioLinks({ ...portfolioLinks, twitter: e.target.value })}
               />
               <Input
                 placeholder="YouTube"
                 value={portfolioLinks.youtube}
-                onChange={(e) => setPortfolioLinks({ ...portfolioLinks, youtube: e.target.value })}
+                onChange={e => setPortfolioLinks({ ...portfolioLinks, youtube: e.target.value })}
               />
               <Input
                 placeholder="TikTok"
                 value={portfolioLinks.tiktok}
-                onChange={(e) => setPortfolioLinks({ ...portfolioLinks, tiktok: e.target.value })}
+                onChange={e => setPortfolioLinks({ ...portfolioLinks, tiktok: e.target.value })}
               />
             </div>
           </div>
@@ -247,7 +248,7 @@ export function EditPortfolioDialog({
               <Switch
                 id="is_public"
                 checked={formData.is_public}
-                onCheckedChange={(checked) => setFormData({ ...formData, is_public: checked })}
+                onCheckedChange={checked => setFormData({ ...formData, is_public: checked })}
               />
             </div>
             <div className="flex items-center justify-between">
@@ -255,7 +256,7 @@ export function EditPortfolioDialog({
               <Switch
                 id="is_featured"
                 checked={formData.is_featured}
-                onCheckedChange={(checked) => setFormData({ ...formData, is_featured: checked })}
+                onCheckedChange={checked => setFormData({ ...formData, is_featured: checked })}
               />
             </div>
           </div>
@@ -281,10 +282,3 @@ export function EditPortfolioDialog({
     </Dialog>
   );
 }
-
-
-
-
-
-
-

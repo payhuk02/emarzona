@@ -4,20 +4,26 @@ import { useToast } from '@/hooks/use-toast';
 import type { LessonProgress } from '@/types/courses';
 import { logger } from '@/lib/logger';
 
-const LESSON_PROGRESS_FIELDS = 'id, enrollment_id, lesson_id, user_id, is_completed, completed_at, last_position_seconds, watch_time_seconds, times_watched, personal_notes, created_at, updated_at';
+const LESSON_PROGRESS_FIELDS =
+  'id, enrollment_id, lesson_id, user_id, is_completed, completed_at, last_position_seconds, watch_time_seconds, times_watched, personal_notes, created_at, updated_at';
 
 /**
  * Hook pour récupérer la progression d'une leçon
  * @param enrollmentId - ID de l'inscription
  * @param lessonId - ID de la leçon
  */
-export const useLessonProgress = (enrollmentId: string | undefined, lessonId: string | undefined) => {
+export const useLessonProgress = (
+  enrollmentId: string | undefined,
+  lessonId: string | undefined
+) => {
   return useQuery({
     queryKey: ['lesson-progress', enrollmentId, lessonId],
     queryFn: async () => {
       if (!enrollmentId || !lessonId) return null;
 
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return null;
 
       const { data, error } = await supabase
@@ -52,7 +58,9 @@ export const useAllLessonProgress = (enrollmentId: string | undefined) => {
     queryFn: async () => {
       if (!enrollmentId) return [];
 
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return [];
 
       const { data, error } = await supabase
@@ -86,7 +94,9 @@ export const useUpdateVideoPosition = () => {
       position: number;
       watchTime: number;
     }) => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Utilisateur non connecté');
 
       // Essayer de mettre à jour ou créer
@@ -133,8 +143,8 @@ export const useUpdateVideoPosition = () => {
       }
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ 
-        queryKey: ['lesson-progress', variables.enrollmentId, variables.lessonId] 
+      queryClient.invalidateQueries({
+        queryKey: ['lesson-progress', variables.enrollmentId, variables.lessonId],
       });
     },
   });
@@ -158,7 +168,9 @@ export const useMarkLessonComplete = () => {
       lessonId: string;
       points?: number;
     }) => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Utilisateur non connecté');
 
       // Utiliser la fonction SQL pour marquer comme complétée
@@ -182,28 +194,32 @@ export const useMarkLessonComplete = () => {
         });
       } catch (pointsError) {
         // Ne pas bloquer si l'attribution de points échoue
-        logger.error('Error awarding points for lesson', { error: pointsError, enrollmentId, lessonId });
+        logger.error('Error awarding points for lesson', {
+          error: pointsError,
+          enrollmentId,
+          lessonId,
+        });
       }
 
       return data;
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ 
-        queryKey: ['lesson-progress', variables.enrollmentId, variables.lessonId] 
+      queryClient.invalidateQueries({
+        queryKey: ['lesson-progress', variables.enrollmentId, variables.lessonId],
       });
-      queryClient.invalidateQueries({ 
-        queryKey: ['all-lesson-progress', variables.enrollmentId] 
+      queryClient.invalidateQueries({
+        queryKey: ['all-lesson-progress', variables.enrollmentId],
       });
-      queryClient.invalidateQueries({ 
-        queryKey: ['course-enrollment', variables.enrollmentId] 
+      queryClient.invalidateQueries({
+        queryKey: ['course-enrollment', variables.enrollmentId],
       });
-      queryClient.invalidateQueries({ 
-        queryKey: ['student-points', variables.enrollmentId] 
+      queryClient.invalidateQueries({
+        queryKey: ['student-points', variables.enrollmentId],
       });
-      queryClient.invalidateQueries({ 
-        queryKey: ['course-leaderboard'] 
+      queryClient.invalidateQueries({
+        queryKey: ['course-leaderboard'],
       });
-      
+
       toast({
         title: 'Leçon complétée ! 🎉',
         description: `+${variables.points || 10} points gagnés !`,
@@ -236,7 +252,9 @@ export const useAddLessonNote = () => {
       lessonId: string;
       note: string;
     }) => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Utilisateur non connecté');
 
       // Récupérer ou créer le progress
@@ -280,10 +298,10 @@ export const useAddLessonNote = () => {
       }
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ 
-        queryKey: ['lesson-progress', variables.enrollmentId, variables.lessonId] 
+      queryClient.invalidateQueries({
+        queryKey: ['lesson-progress', variables.enrollmentId, variables.lessonId],
       });
-      
+
       toast({
         title: 'Note enregistrée',
         description: 'Votre note a été sauvegardée.',
@@ -324,10 +342,3 @@ export const useCourseProgressPercentage = (enrollmentId: string | undefined) =>
     totalLessons,
   };
 };
-
-
-
-
-
-
-

@@ -23,7 +23,7 @@ function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
  * Convertit une couleur RGB en luminance relative
  */
 function getLuminance(r: number, g: number, b: number): number {
-  const [rs, gs, bs] = [r, g, b].map((c) => {
+  const [rs, gs, bs] = [r, g, b].map(c => {
     c = c / 255;
     return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
   });
@@ -34,10 +34,7 @@ function getLuminance(r: number, g: number, b: number): number {
  * Calcule le ratio de contraste entre deux couleurs (WCAG)
  * Retourne un ratio entre 1 et 21
  */
-export function calculateContrastRatio(
-  foreground: string,
-  background: string
-): number {
+export function calculateContrastRatio(foreground: string, background: string): number {
   const fgRgb = hexToRgb(foreground);
   const bgRgb = hexToRgb(background);
 
@@ -84,23 +81,17 @@ export function checkColorContrast(
   const passesAA = ratio >= aaThreshold;
   const passesAAA = ratio >= aaaThreshold;
 
-  const  level: 'AA' | 'AAA' | 'fail' = passesAAA ? 'AAA' : passesAA ? 'AA' : 'fail';
+  const level: 'AA' | 'AAA' | 'fail' = passesAAA ? 'AAA' : passesAA ? 'AA' : 'fail';
 
-  const  recommendations: string[] = [];
+  const recommendations: string[] = [];
   if (!passesAA) {
-    recommendations.push(
-      `Le contraste actuel (${ratio.toFixed(2)}:1) ne respecte pas WCAG AA.`
-    );
-    recommendations.push(
-      `Augmentez le contraste pour atteindre au moins ${aaThreshold}:1.`
-    );
+    recommendations.push(`Le contraste actuel (${ratio.toFixed(2)}:1) ne respecte pas WCAG AA.`);
+    recommendations.push(`Augmentez le contraste pour atteindre au moins ${aaThreshold}:1.`);
   } else if (!passesAAA) {
     recommendations.push(
       `Le contraste actuel (${ratio.toFixed(2)}:1) respecte WCAG AA mais pas AAA.`
     );
-    recommendations.push(
-      `Pour atteindre AAA, augmentez le contraste à ${aaaThreshold}:1.`
-    );
+    recommendations.push(`Pour atteindre AAA, augmentez le contraste à ${aaaThreshold}:1.`);
   }
 
   return {
@@ -118,7 +109,7 @@ export function checkColorContrast(
 export function getComputedColor(element: HTMLElement): string | null {
   const styles = window.getComputedStyle(element);
   const color = styles.color;
-  
+
   // Convertir rgb() en hex si nécessaire
   if (color.startsWith('rgb')) {
     const rgb = color.match(/\d+/g);
@@ -129,7 +120,7 @@ export function getComputedColor(element: HTMLElement): string | null {
       return `#${[r, g, b].map(x => x.toString(16).padStart(2, '0')).join('')}`;
     }
   }
-  
+
   return color.startsWith('#') ? color : null;
 }
 
@@ -149,8 +140,8 @@ export function checkElementContrast(element: HTMLElement): {
   const isBold = parseInt(fontWeight) >= 600 || fontWeight === 'bold';
 
   // Trouver l'arrière-plan effectif
-  let  background: string | null = null;
-  let  current: HTMLElement | null = element;
+  let background: string | null = null;
+  let current: HTMLElement | null = element;
 
   while (current && !background) {
     const bgColor = window.getComputedStyle(current).backgroundColor;
@@ -208,9 +199,9 @@ export interface AccessibilityReport {
 }
 
 export function validatePageAccessibility(): AccessibilityReport {
-  const  violations: AccessibilityReport['violations'] = [];
-  const  warnings: AccessibilityReport['warnings'] = [];
-  const  recommendations: string[] = [];
+  const violations: AccessibilityReport['violations'] = [];
+  const warnings: AccessibilityReport['warnings'] = [];
+  const recommendations: string[] = [];
 
   // Vérifier les images sans alt
   const images = document.querySelectorAll('img');
@@ -231,7 +222,7 @@ export function validatePageAccessibility(): AccessibilityReport {
     const hasText = button.textContent?.trim();
     const hasAriaLabel = button.getAttribute('aria-label');
     const hasAriaLabelledBy = button.getAttribute('aria-labelledby');
-    
+
     if (!hasText && !hasAriaLabel && !hasAriaLabelledBy) {
       violations.push({
         type: 'missing-button-label',
@@ -248,7 +239,7 @@ export function validatePageAccessibility(): AccessibilityReport {
     const hasText = link.textContent?.trim();
     const hasAriaLabel = link.getAttribute('aria-label');
     const hasTitle = link.getAttribute('title');
-    
+
     if (!hasText && !hasAriaLabel && !hasTitle) {
       violations.push({
         type: 'missing-link-text',
@@ -267,7 +258,7 @@ export function validatePageAccessibility(): AccessibilityReport {
     const hasAriaLabel = input.getAttribute('aria-label');
     const hasAriaLabelledBy = input.getAttribute('aria-labelledby');
     const hasPlaceholder = input.getAttribute('placeholder');
-    
+
     if (!hasLabel && !hasAriaLabel && !hasAriaLabelledBy && !hasPlaceholder) {
       violations.push({
         type: 'missing-input-label',
@@ -279,14 +270,17 @@ export function validatePageAccessibility(): AccessibilityReport {
   });
 
   // Vérifier le contraste des textes
-  const textElements = document.querySelectorAll('p, span, div, h1, h2, h3, h4, h5, h6, a, button, label');
-  let  contrastIssues= 0;
-  textElements.forEach((el) => {
+  const textElements = document.querySelectorAll(
+    'p, span, div, h1, h2, h3, h4, h5, h6, a, button, label'
+  );
+  let contrastIssues = 0;
+  textElements.forEach(el => {
     if (el instanceof HTMLElement && el.textContent?.trim()) {
       const contrast = checkElementContrast(el);
       if (!contrast.passesAA) {
         contrastIssues++;
-        if (contrastIssues <= 5) { // Limiter les warnings
+        if (contrastIssues <= 5) {
+          // Limiter les warnings
           warnings.push({
             type: 'low-contrast',
             element: el.tagName.toLowerCase(),
@@ -300,7 +294,7 @@ export function validatePageAccessibility(): AccessibilityReport {
   // Vérifier la présence de landmarks
   const hasMain = !!document.querySelector('main, [role="main"]');
   const hasNav = !!document.querySelector('nav, [role="navigation"]');
-  
+
   if (!hasMain) {
     warnings.push({
       type: 'missing-landmark',
@@ -312,9 +306,7 @@ export function validatePageAccessibility(): AccessibilityReport {
   // Calculer le score (0-100)
   const totalChecks = images.length + buttons.length + links.length + inputs.length;
   const errors = violations.filter(v => v.severity === 'error').length;
-  const score = totalChecks > 0 
-    ? Math.max(0, Math.round((1 - errors / totalChecks) * 100))
-    : 100;
+  const score = totalChecks > 0 ? Math.max(0, Math.round((1 - errors / totalChecks) * 100)) : 100;
 
   // Recommandations générales
   if (violations.length > 0) {
@@ -364,8 +356,8 @@ export function setupKeyboardShortcuts(): () => void {
   // Raccourci pour afficher le rapport d'accessibilité (Alt+A)
   shortcuts.set('Alt+a', () => {
     const report = validatePageAccessibility();
-    logger.info('📊 Rapport d\'accessibilité:', { report });
-    
+    logger.info("📊 Rapport d'accessibilité:", { report });
+
     // Annoncer le score
     const announcement = document.createElement('div');
     announcement.setAttribute('role', 'status');
@@ -373,7 +365,7 @@ export function setupKeyboardShortcuts(): () => void {
     announcement.className = 'sr-only';
     announcement.textContent = `Score d'accessibilité: ${report.score} sur 100. ${report.violations.length} violation(s) détectée(s).`;
     document.body.appendChild(announcement);
-    
+
     setTimeout(() => {
       document.body.removeChild(announcement);
     }, 3000);
@@ -394,10 +386,3 @@ export function setupKeyboardShortcuts(): () => void {
     document.removeEventListener('keydown', handleKeyDown);
   };
 }
-
-
-
-
-
-
-

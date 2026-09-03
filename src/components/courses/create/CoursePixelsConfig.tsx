@@ -20,7 +20,12 @@ import {
   ExternalLink,
   CheckCircle2,
 } from 'lucide-react';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 
 export interface CoursePixelsData {
   tracking_enabled: boolean;
@@ -69,11 +74,14 @@ export const CoursePixelsConfig = ({ data, onChange }: CoursePixelsConfigProps) 
             <div className="flex items-center gap-3">
               <Switch
                 checked={data.tracking_enabled}
-                onCheckedChange={(checked) => handleChange('tracking_enabled', checked)}
+                onCheckedChange={checked => handleChange('tracking_enabled', checked)}
                 id="tracking-enabled"
               />
               <div>
-                <Label htmlFor="tracking-enabled" className="text-base font-semibold cursor-pointer">
+                <Label
+                  htmlFor="tracking-enabled"
+                  className="text-base font-semibold cursor-pointer"
+                >
                   Activer le tracking avancé
                 </Label>
                 <p className="text-sm text-muted-foreground">
@@ -105,7 +113,7 @@ export const CoursePixelsConfig = ({ data, onChange }: CoursePixelsConfigProps) 
               <div className="flex items-start gap-3 p-3 border rounded-lg">
                 <Switch
                   checked={data.track_video_events}
-                  onCheckedChange={(checked) => handleChange('track_video_events', checked)}
+                  onCheckedChange={checked => handleChange('track_video_events', checked)}
                   id="track-video"
                 />
                 <div className="flex-1">
@@ -121,7 +129,7 @@ export const CoursePixelsConfig = ({ data, onChange }: CoursePixelsConfigProps) 
               <div className="flex items-start gap-3 p-3 border rounded-lg">
                 <Switch
                   checked={data.track_lesson_completion}
-                  onCheckedChange={(checked) => handleChange('track_lesson_completion', checked)}
+                  onCheckedChange={checked => handleChange('track_lesson_completion', checked)}
                   id="track-lesson"
                 />
                 <div className="flex-1">
@@ -137,7 +145,7 @@ export const CoursePixelsConfig = ({ data, onChange }: CoursePixelsConfigProps) 
               <div className="flex items-start gap-3 p-3 border rounded-lg">
                 <Switch
                   checked={data.track_quiz_attempts}
-                  onCheckedChange={(checked) => handleChange('track_quiz_attempts', checked)}
+                  onCheckedChange={checked => handleChange('track_quiz_attempts', checked)}
                   id="track-quiz"
                 />
                 <div className="flex-1">
@@ -153,7 +161,7 @@ export const CoursePixelsConfig = ({ data, onChange }: CoursePixelsConfigProps) 
               <div className="flex items-start gap-3 p-3 border rounded-lg">
                 <Switch
                   checked={data.track_certificate_downloads}
-                  onCheckedChange={(checked) => handleChange('track_certificate_downloads', checked)}
+                  onCheckedChange={checked => handleChange('track_certificate_downloads', checked)}
                   id="track-cert"
                 />
                 <div className="flex-1">
@@ -175,9 +183,7 @@ export const CoursePixelsConfig = ({ data, onChange }: CoursePixelsConfigProps) 
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">Intégrations Pixels</CardTitle>
-            <CardDescription>
-              Connectez vos outils d'analytics externe (optionnel)
-            </CardDescription>
+            <CardDescription>Connectez vos outils d'analytics externe (optionnel)</CardDescription>
           </CardHeader>
           <CardContent>
             <Accordion type="single" collapsible className="w-full">
@@ -187,7 +193,11 @@ export const CoursePixelsConfig = ({ data, onChange }: CoursePixelsConfigProps) 
                   <div className="flex items-center gap-2">
                     <BarChart3 className="w-5 h-5 text-orange-600" />
                     <span>Google Analytics</span>
-                    {isGAValid && <Badge variant="secondary" className="text-xs">Configuré</Badge>}
+                    {isGAValid && (
+                      <Badge variant="secondary" className="text-xs">
+                        Configuré
+                      </Badge>
+                    )}
                   </div>
                 </AccordionTrigger>
                 <AccordionContent className="space-y-3 pt-3">
@@ -197,11 +207,17 @@ export const CoursePixelsConfig = ({ data, onChange }: CoursePixelsConfigProps) 
                       id="ga-id"
                       placeholder="G-XXXXXXXXXX ou UA-XXXXXXXXX-X"
                       value={data.google_analytics_id || ''}
-                      onChange={(e) => handleChange('google_analytics_id', e.target.value)}
+                      onChange={e => handleChange('google_analytics_id', e.target.value)}
                       className={isGAValid ? 'border-green-500' : ''}
                     />
                     <p className="text-xs text-muted-foreground mt-1">
-                      Trouvez votre ID dans <a href="https://analytics.google.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline inline-flex items-center gap-1">
+                      Trouvez votre ID dans{' '}
+                      <a
+                        href="https://analytics.google.com"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:underline inline-flex items-center gap-1"
+                      >
                         Google Analytics <ExternalLink className="w-3 h-3" />
                       </a>
                     </p>
@@ -223,7 +239,11 @@ export const CoursePixelsConfig = ({ data, onChange }: CoursePixelsConfigProps) 
                   <div className="flex items-center gap-2">
                     <Eye className="w-5 h-5 text-blue-600" />
                     <span>Facebook Pixel</span>
-                    {isFBValid && <Badge variant="secondary" className="text-xs">Configuré</Badge>}
+                    {isFBValid && (
+                      <Badge variant="secondary" className="text-xs">
+                        Configuré
+                      </Badge>
+                    )}
                   </div>
                 </AccordionTrigger>
                 <AccordionContent className="space-y-3 pt-3">
@@ -233,11 +253,17 @@ export const CoursePixelsConfig = ({ data, onChange }: CoursePixelsConfigProps) 
                       id="fb-id"
                       placeholder="123456789012345"
                       value={data.facebook_pixel_id || ''}
-                      onChange={(e) => handleChange('facebook_pixel_id', e.target.value)}
+                      onChange={e => handleChange('facebook_pixel_id', e.target.value)}
                       className={isFBValid ? 'border-green-500' : ''}
                     />
                     <p className="text-xs text-muted-foreground mt-1">
-                      ID à 15-16 chiffres trouvé dans <a href="https://business.facebook.com/events_manager2" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline inline-flex items-center gap-1">
+                      ID à 15-16 chiffres trouvé dans{' '}
+                      <a
+                        href="https://business.facebook.com/events_manager2"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:underline inline-flex items-center gap-1"
+                      >
                         Events Manager <ExternalLink className="w-3 h-3" />
                       </a>
                     </p>
@@ -259,7 +285,11 @@ export const CoursePixelsConfig = ({ data, onChange }: CoursePixelsConfigProps) 
                   <div className="flex items-center gap-2">
                     <MousePointerClick className="w-5 h-5 text-green-600" />
                     <span>Google Tag Manager</span>
-                    {isGTMValid && <Badge variant="secondary" className="text-xs">Configuré</Badge>}
+                    {isGTMValid && (
+                      <Badge variant="secondary" className="text-xs">
+                        Configuré
+                      </Badge>
+                    )}
                   </div>
                 </AccordionTrigger>
                 <AccordionContent className="space-y-3 pt-3">
@@ -269,13 +299,20 @@ export const CoursePixelsConfig = ({ data, onChange }: CoursePixelsConfigProps) 
                       id="gtm-id"
                       placeholder="GTM-XXXXXXX"
                       value={data.google_tag_manager_id || ''}
-                      onChange={(e) => handleChange('google_tag_manager_id', e.target.value)}
+                      onChange={e => handleChange('google_tag_manager_id', e.target.value)}
                       className={isGTMValid ? 'border-green-500' : ''}
                     />
                     <p className="text-xs text-muted-foreground mt-1">
-                      Format : GTM-XXXXXXX (trouvé dans <a href="https://tagmanager.google.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline inline-flex items-center gap-1">
+                      Format : GTM-XXXXXXX (trouvé dans{' '}
+                      <a
+                        href="https://tagmanager.google.com"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:underline inline-flex items-center gap-1"
+                      >
                         Tag Manager <ExternalLink className="w-3 h-3" />
-                      </a>)
+                      </a>
+                      )
                     </p>
                   </div>
                   {isGTMValid && (
@@ -295,7 +332,11 @@ export const CoursePixelsConfig = ({ data, onChange }: CoursePixelsConfigProps) 
                   <div className="flex items-center gap-2">
                     <Users className="w-5 h-5 text-pink-600" />
                     <span>TikTok Pixel</span>
-                    {isTikTokValid && <Badge variant="secondary" className="text-xs">Configuré</Badge>}
+                    {isTikTokValid && (
+                      <Badge variant="secondary" className="text-xs">
+                        Configuré
+                      </Badge>
+                    )}
                   </div>
                 </AccordionTrigger>
                 <AccordionContent className="space-y-3 pt-3">
@@ -305,7 +346,7 @@ export const CoursePixelsConfig = ({ data, onChange }: CoursePixelsConfigProps) 
                       id="tiktok-id"
                       placeholder="ABC123DEF456GHI789JK"
                       value={data.tiktok_pixel_id || ''}
-                      onChange={(e) => handleChange('tiktok_pixel_id', e.target.value)}
+                      onChange={e => handleChange('tiktok_pixel_id', e.target.value)}
                       className={isTikTokValid ? 'border-green-500' : ''}
                     />
                     <p className="text-xs text-muted-foreground mt-1">
@@ -331,16 +372,10 @@ export const CoursePixelsConfig = ({ data, onChange }: CoursePixelsConfigProps) 
       <Alert>
         <Info className="h-4 w-4" />
         <AlertDescription>
-          <strong>Note :</strong> Les pixels externes sont optionnels. Le tracking natif Emarzona fonctionne sans configuration supplémentaire.
+          <strong>Note :</strong> Les pixels externes sont optionnels. Le tracking natif Emarzona
+          fonctionne sans configuration supplémentaire.
         </AlertDescription>
       </Alert>
     </div>
   );
 };
-
-
-
-
-
-
-

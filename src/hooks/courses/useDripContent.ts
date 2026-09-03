@@ -1,7 +1,7 @@
 /**
  * Drip Content Hooks for Courses
  * Date: 27 Janvier 2025
- * 
+ *
  * Hooks pour gérer le déverrouillage automatique du contenu drip
  */
 
@@ -9,7 +9,8 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 
-const SECTION_UNLOCK_STATUS_FIELDS = 'section_id, course_id, enrollment_id, is_unlocked, unlock_date, days_until_unlock';
+const SECTION_UNLOCK_STATUS_FIELDS =
+  'section_id, course_id, enrollment_id, is_unlocked, unlock_date, days_until_unlock';
 
 // =====================================================
 // TYPES
@@ -117,7 +118,12 @@ export const useNextUnlockDate = (
       });
 
       if (error) {
-        logger.error('Error fetching next unlock date', { error, courseId, sectionId, enrollmentId });
+        logger.error('Error fetching next unlock date', {
+          error,
+          courseId,
+          sectionId,
+          enrollmentId,
+        });
         throw error;
       }
 
@@ -158,10 +164,3 @@ export const useSectionUnlockStatus = (
     enabled: !!sectionId && !!enrollmentId,
   });
 };
-
-
-
-
-
-
-

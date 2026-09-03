@@ -22,10 +22,17 @@ export interface SEOMetadata {
 /**
  * Métadonnées par défaut
  */
-const  DEFAULT_METADATA: SEOMetadata = {
+const DEFAULT_METADATA: SEOMetadata = {
   title: 'Emarzona - Plateforme de ecommerce et marketing',
-  description: 'Créez et gérez votre boutique en ligne avec Emarzona. Support pour produits digitaux, physiques, services, cours en ligne et œuvres d\'artistes.',
-  keywords: ['e-commerce', 'boutique en ligne', 'vente en ligne', 'plateforme e-commerce', 'multi-boutiques'],
+  description:
+    "Créez et gérez votre boutique en ligne avec Emarzona. Support pour produits digitaux, physiques, services, cours en ligne et œuvres d'artistes.",
+  keywords: [
+    'e-commerce',
+    'boutique en ligne',
+    'vente en ligne',
+    'plateforme e-commerce',
+    'multi-boutiques',
+  ],
   ogType: 'website',
   robots: 'index, follow',
 };
@@ -35,40 +42,40 @@ const  DEFAULT_METADATA: SEOMetadata = {
  */
 export function updateSEOMetadata(metadata: Partial<SEOMetadata>): void {
   const fullMetadata = { ...DEFAULT_METADATA, ...metadata };
-  
+
   // Title
   if (fullMetadata.title) {
     document.title = fullMetadata.title;
-    
+
     // Meta title
     updateMetaTag('title', fullMetadata.title);
     updateMetaTag('og:title', fullMetadata.title);
     updateMetaTag('twitter:title', fullMetadata.title);
   }
-  
+
   // Description
   if (fullMetadata.description) {
     updateMetaTag('description', fullMetadata.description);
     updateMetaTag('og:description', fullMetadata.description);
     updateMetaTag('twitter:description', fullMetadata.description);
   }
-  
+
   // Keywords
   if (fullMetadata.keywords && fullMetadata.keywords.length > 0) {
     updateMetaTag('keywords', fullMetadata.keywords.join(', '));
   }
-  
+
   // OG Image
   if (fullMetadata.ogImage) {
     updateMetaTag('og:image', fullMetadata.ogImage);
     updateMetaTag('twitter:image', fullMetadata.ogImage);
   }
-  
+
   // OG Type
   if (fullMetadata.ogType) {
     updateMetaTag('og:type', fullMetadata.ogType);
   }
-  
+
   // Canonical
   if (fullMetadata.canonical) {
     updateLinkTag('canonical', fullMetadata.canonical);
@@ -76,17 +83,17 @@ export function updateSEOMetadata(metadata: Partial<SEOMetadata>): void {
     // Canonical par défaut : URL actuelle
     updateLinkTag('canonical', window.location.href);
   }
-  
+
   // Robots
   if (fullMetadata.robots) {
     updateMetaTag('robots', fullMetadata.robots);
   }
-  
+
   // Author
   if (fullMetadata.author) {
     updateMetaTag('author', fullMetadata.author);
   }
-  
+
   logger.debug('Métadonnées SEO mises à jour', { metadata: fullMetadata });
 }
 
@@ -95,27 +102,27 @@ export function updateSEOMetadata(metadata: Partial<SEOMetadata>): void {
  */
 function updateMetaTag(property: string, content: string): void {
   // Essayer par name d'abord
-  let  element= document.querySelector(`meta[name="${property}"]`) as HTMLMetaElement;
-  
+  let element = document.querySelector(`meta[name="${property}"]`) as HTMLMetaElement;
+
   // Si pas trouvé, essayer par property (pour Open Graph)
   if (!element) {
     element = document.querySelector(`meta[property="${property}"]`) as HTMLMetaElement;
   }
-  
+
   // Si toujours pas trouvé, créer la balise
   if (!element) {
     element = document.createElement('meta');
-    
+
     // Déterminer si c'est property ou name
     if (property.startsWith('og:') || property.startsWith('twitter:')) {
       element.setAttribute('property', property);
     } else {
       element.setAttribute('name', property);
     }
-    
+
     document.head.appendChild(element);
   }
-  
+
   element.setAttribute('content', content);
 }
 
@@ -123,14 +130,14 @@ function updateMetaTag(property: string, content: string): void {
  * Mettre à jour une balise link
  */
 function updateLinkTag(rel: string, href: string): void {
-  let  element= document.querySelector(`link[rel="${rel}"]`) as HTMLLinkElement;
-  
+  let element = document.querySelector(`link[rel="${rel}"]`) as HTMLLinkElement;
+
   if (!element) {
     element = document.createElement('link');
     element.setAttribute('rel', rel);
     document.head.appendChild(element);
   }
-  
+
   element.setAttribute('href', href);
 }
 
@@ -146,19 +153,19 @@ export function generateSchemaOrg(data: {
     '@type': data.type,
     ...data,
   };
-  
+
   // Supprimer l'ancien schema s'il existe
   const existingScript = document.querySelector('script[type="application/ld+json"]');
   if (existingScript) {
     existingScript.remove();
   }
-  
+
   // Créer le nouveau script
   const script = document.createElement('script');
   script.type = 'application/ld+json';
   script.textContent = JSON.stringify(schema);
   document.head.appendChild(script);
-  
+
   logger.debug('Schema.org JSON-LD généré', { type: data.type });
 }
 
@@ -229,7 +236,7 @@ export function optimizeImageForSEO(img: HTMLImageElement, alt: string): void {
   img.setAttribute('alt', alt);
   img.setAttribute('loading', 'lazy');
   img.setAttribute('decoding', 'async');
-  
+
   // Ajouter width et height si disponibles
   if (img.naturalWidth && img.naturalHeight) {
     img.setAttribute('width', img.naturalWidth.toString());
@@ -240,22 +247,22 @@ export function optimizeImageForSEO(img: HTMLImageElement, alt: string): void {
 /**
  * Ajouter des structured data pour les avis
  */
-export function generateReviewSchema(reviews: Array<{
-  author: string;
-  rating: number;
-  reviewBody: string;
-  datePublished: string;
-}>): void {
+export function generateReviewSchema(
+  reviews: Array<{
+    author: string;
+    rating: number;
+    reviewBody: string;
+    datePublished: string;
+  }>
+): void {
   if (reviews.length === 0) return;
-  
+
   const aggregateRating = {
     '@type': 'AggregateRating',
-    ratingValue: (
-      reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
-    ).toFixed(1),
+    ratingValue: (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1),
     reviewCount: reviews.length,
   };
-  
+
   generateSchemaOrg({
     type: 'Product',
     aggregateRating,
@@ -274,11 +281,3 @@ export function generateReviewSchema(reviews: Array<{
     })),
   });
 }
-
-
-
-
-
-
-
-

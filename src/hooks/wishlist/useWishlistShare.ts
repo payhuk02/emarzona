@@ -8,7 +8,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 
-const WISHLIST_SHARE_FIELDS = 'id, user_id, share_token, is_active, expires_at, view_count, created_at';
+const WISHLIST_SHARE_FIELDS =
+  'id, user_id, share_token, is_active, expires_at, view_count, created_at';
 
 interface WishlistShare {
   id: string;
@@ -35,7 +36,7 @@ export const useCreateWishlistShare = () => {
       if (error) throw error;
       return data as string;
     },
-    onSuccess: (token) => {
+    onSuccess: token => {
       queryClient.invalidateQueries({ queryKey: ['wishlist-share'] });
       toast({
         title: 'Lien de partage créé',
@@ -61,7 +62,9 @@ export const useWishlistShare = () => {
   return useQuery({
     queryKey: ['wishlist-share'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return null;
 
       const { data, error } = await supabase
@@ -104,7 +107,7 @@ export const useSharedWishlist = (shareToken: string) => {
       }
 
       if (!shareData.is_active) {
-        throw new Error('Ce lien de partage n\'est plus actif');
+        throw new Error("Ce lien de partage n'est plus actif");
       }
 
       if (shareData.expires_at && new Date(shareData.expires_at) < new Date()) {
@@ -120,7 +123,8 @@ export const useSharedWishlist = (shareToken: string) => {
       // Récupérer les produits de la wishlist
       const { data: favorites, error: favoritesError } = await supabase
         .from('user_favorites')
-        .select(`
+        .select(
+          `
           product_id,
           created_at,
           products!inner (
@@ -140,7 +144,8 @@ export const useSharedWishlist = (shareToken: string) => {
               slug
             )
           )
-        `)
+        `
+        )
         .eq('user_id', shareData.user_id)
         .order('created_at', { ascending: false });
 
@@ -167,7 +172,9 @@ export const useDeactivateWishlistShare = () => {
 
   return useMutation({
     mutationFn: async (shareToken: string) => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
       const { error } = await supabase
@@ -195,10 +202,3 @@ export const useDeactivateWishlistShare = () => {
     },
   });
 };
-
-
-
-
-
-
-

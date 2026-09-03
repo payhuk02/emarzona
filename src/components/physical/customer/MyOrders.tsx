@@ -160,7 +160,7 @@ export const MyOrders = () => {
             <p className="text-sm sm:text-base text-muted-foreground mb-4 px-4">
               Vous n'avez pas encore de commandes de produits physiques
             </p>
-            <Button 
+            <Button
               onClick={() => navigate('/marketplace?productType=physical')}
               className="min-h-[44px] px-6 touch-manipulation"
               size="lg"
@@ -170,7 +170,7 @@ export const MyOrders = () => {
           </div>
         ) : (
           <div className="space-y-3 sm:space-y-4">
-            {orders.map((order) => {
+            {orders.map(order => {
               const shipmentStatus = getShipmentStatus(order.shipments || []);
               const ShipmentIcon = shipmentStatus.icon;
 
@@ -193,7 +193,8 @@ export const MyOrders = () => {
                             <span className="flex items-center gap-1.5">
                               <Package className="h-3 w-3 sm:h-3.5 sm:w-3.5 flex-shrink-0" />
                               <span className="whitespace-nowrap">
-                                {order.order_items.length} article{order.order_items.length > 1 ? 's' : ''}
+                                {order.order_items.length} article
+                                {order.order_items.length > 1 ? 's' : ''}
                               </span>
                             </span>
                           </div>
@@ -214,8 +215,11 @@ export const MyOrders = () => {
                     {/* Items */}
                     <div className="mb-3 sm:mb-4">
                       <div className="space-y-2 sm:space-y-3">
-                        {order.order_items.slice(0, 3).map((item) => (
-                          <div key={item.id} className="flex items-start gap-2 sm:gap-3 text-xs sm:text-sm">
+                        {order.order_items.slice(0, 3).map(item => (
+                          <div
+                            key={item.id}
+                            className="flex items-start gap-2 sm:gap-3 text-xs sm:text-sm"
+                          >
                             {item.product_image_url && (
                               <img
                                 src={item.product_image_url}
@@ -231,7 +235,8 @@ export const MyOrders = () => {
                                 </div>
                               )}
                               <div className="text-xs text-muted-foreground mt-1">
-                                Quantité: {item.quantity} × {item.price.toLocaleString('fr-FR', {
+                                Quantité: {item.quantity} ×{' '}
+                                {item.price.toLocaleString('fr-FR', {
                                   style: 'currency',
                                   currency: order.currency || 'XOF',
                                 })}
@@ -253,7 +258,9 @@ export const MyOrders = () => {
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
                           <div className="flex items-center gap-2">
                             <ShipmentIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
-                            <span className="text-xs sm:text-sm font-medium">{shipmentStatus.text}</span>
+                            <span className="text-xs sm:text-sm font-medium">
+                              {shipmentStatus.text}
+                            </span>
                           </div>
                           {order.shipments[0].tracking_number && (
                             <Button
@@ -273,7 +280,10 @@ export const MyOrders = () => {
                         </div>
                         {order.shipments[0].estimated_delivery && (
                           <div className="text-xs text-muted-foreground mt-2">
-                            Livraison estimée: {format(new Date(order.shipments[0].estimated_delivery), 'dd/MM/yyyy', { locale: fr })}
+                            Livraison estimée:{' '}
+                            {format(new Date(order.shipments[0].estimated_delivery), 'dd/MM/yyyy', {
+                              locale: fr,
+                            })}
                           </div>
                         )}
                       </div>
@@ -322,9 +332,3 @@ export const MyOrders = () => {
     </Card>
   );
 };
-
-
-
-
-
-

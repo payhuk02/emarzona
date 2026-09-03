@@ -3,15 +3,4 @@
  */
 
 export { ErrorBoundary, withErrorBoundary } from './ErrorBoundary';
-export {
-  ErrorFallback,
-  NotFoundFallback,
-  NetworkErrorFallback,
-} from './ErrorFallback';
-
-
-
-
-
-
-
+export { ErrorFallback, NotFoundFallback, NetworkErrorFallback } from './ErrorFallback';

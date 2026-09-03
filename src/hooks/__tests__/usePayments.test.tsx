@@ -33,8 +33,8 @@ vi.mock('@/lib/logger', () => ({
 }));
 
 describe('usePayments', () => {
-  let  queryClient: QueryClient;
-  let  wrapper: ({ children }: { children: React.ReactNode }) => JSX.Element;
+  let queryClient: QueryClient;
+  let wrapper: ({ children }: { children: React.ReactNode }) => JSX.Element;
 
   beforeEach(() => {
     queryClient = new QueryClient({
@@ -86,9 +86,3 @@ describe('usePayments', () => {
     });
   });
 });
-
-
-
-
-
-

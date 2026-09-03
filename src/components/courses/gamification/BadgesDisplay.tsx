@@ -37,7 +37,7 @@ export const BadgesDisplay = ({
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-4 gap-4">
-            {[1, 2, 3, 4].map((i) => (
+            {[1, 2, 3, 4].map(i => (
               <Skeleton key={i} className="h-20 w-20 rounded-full" />
             ))}
           </div>
@@ -46,20 +46,21 @@ export const BadgesDisplay = ({
     );
   }
 
-  const earnedBadgeIds = new Set((earnedBadges || []).map((b) => b.badge_id));
+  const earnedBadgeIds = new Set((earnedBadges || []).map(b => b.badge_id));
 
   // Si showLocked, afficher tous les badges, sinon seulement ceux gagnés
-  const badgesToShow = showLocked && allBadges
-    ? allBadges.map((badge) => ({
-        badge,
-        earned: earnedBadgeIds.has(badge.id),
-        earnedAt: earnedBadges?.find((eb) => eb.badge_id === badge.id)?.earned_at,
-      }))
-    : (earnedBadges || []).map((eb) => ({
-        badge: eb.badge,
-        earned: true,
-        earnedAt: eb.earned_at,
-      }));
+  const badgesToShow =
+    showLocked && allBadges
+      ? allBadges.map(badge => ({
+          badge,
+          earned: earnedBadgeIds.has(badge.id),
+          earnedAt: earnedBadges?.find(eb => eb.badge_id === badge.id)?.earned_at,
+        }))
+      : (earnedBadges || []).map(eb => ({
+          badge: eb.badge,
+          earned: true,
+          earnedAt: eb.earned_at,
+        }));
 
   if (badgesToShow.length === 0) {
     return (
@@ -118,16 +119,10 @@ export const BadgesDisplay = ({
                         <div
                           className={cn(
                             'h-16 w-16 rounded-full flex items-center justify-center',
-                            earned
-                              ? 'bg-primary/10 text-primary'
-                              : 'bg-muted text-muted-foreground'
+                            earned ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'
                           )}
                         >
-                          {earned ? (
-                            <Award className="h-8 w-8" />
-                          ) : (
-                            <Lock className="h-8 w-8" />
-                          )}
+                          {earned ? <Award className="h-8 w-8" /> : <Lock className="h-8 w-8" />}
                         </div>
                       )}
                       {earned && (
@@ -135,7 +130,12 @@ export const BadgesDisplay = ({
                           <Sparkles className="h-4 w-4 text-yellow-500 fill-yellow-500" />
                         </div>
                       )}
-                      <p className={cn('text-xs text-center font-medium', earned || 'text-muted-foreground')}>
+                      <p
+                        className={cn(
+                          'text-xs text-center font-medium',
+                          earned || 'text-muted-foreground'
+                        )}
+                      >
                         {badge.name}
                       </p>
                     </div>
@@ -143,7 +143,9 @@ export const BadgesDisplay = ({
                   <TooltipContent side="top" className="max-w-xs">
                     <div className="space-y-1">
                       <p className="font-semibold">{badge.name}</p>
-                      {badge.description && <p className="text-sm text-muted-foreground">{badge.description}</p>}
+                      {badge.description && (
+                        <p className="text-sm text-muted-foreground">{badge.description}</p>
+                      )}
                       {earned && earnedAt && (
                         <p className="text-xs text-muted-foreground mt-2">
                           Gagné le {new Date(earnedAt).toLocaleDateString('fr-FR')}
@@ -165,10 +167,3 @@ export const BadgesDisplay = ({
     </Card>
   );
 };
-
-
-
-
-
-
-

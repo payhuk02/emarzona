@@ -88,34 +88,34 @@ export interface CustomerAccess {
 export interface CustomerAccessManagerProps {
   /** Liste des accès clients */
   customerAccess: CustomerAccess[];
-  
+
   /** Callback lors de la révocation d'accès */
   onRevokeAccess?: (accessId: string, reason?: string) => void;
-  
+
   /** Callback lors de la restauration d'accès */
   onRestoreAccess?: (accessId: string) => void;
-  
+
   /** Callback lors de la modification de la limite */
   onUpdateLimit?: (accessId: string, newLimit: number) => void;
-  
+
   /** Callback lors de la prolongation */
   onExtendAccess?: (accessId: string, newDate: Date) => void;
-  
+
   /** Callback lors de la visualisation des détails */
   onViewDetails?: (access: CustomerAccess) => void;
-  
+
   /** Classe CSS personnalisée */
   className?: string;
 }
 
 /**
  * CustomerAccessManager - Gestionnaire des accès clients aux produits digitaux
- * 
+ *
  * @example
  * ```tsx
  * import { logger } from '@/lib/logger';
- * 
- * <CustomerAccessManager 
+ *
+ * <CustomerAccessManager
  *   customerAccess={accessList}
  *   onRevokeAccess={(id, reason) => logger.info('Revoke access', { accessId: id, reason })}
  *   onRestoreAccess={(id) => logger.info('Restore access', { accessId: id })}
@@ -123,7 +123,7 @@ export interface CustomerAccessManagerProps {
  * />
  * ```
  */
-export const CustomerAccessManager : React.FC<CustomerAccessManagerProps> = ({
+export const CustomerAccessManager: React.FC<CustomerAccessManagerProps> = ({
   customerAccess,
   onRevokeAccess,
   onRestoreAccess,
@@ -154,7 +154,7 @@ export const CustomerAccessManager : React.FC<CustomerAccessManagerProps> = ({
   // Obtenir la liste unique des produits
   const uniqueProducts = useMemo(() => {
     const products = new Map();
-    customerAccess.forEach((access) => {
+    customerAccess.forEach(access => {
       if (!products.has(access.productId)) {
         products.set(access.productId, access.productName);
       }
@@ -164,13 +164,13 @@ export const CustomerAccessManager : React.FC<CustomerAccessManagerProps> = ({
 
   // Filtrer les accès
   const filteredAccess = useMemo(() => {
-    let  result= [...customerAccess];
+    let result = [...customerAccess];
 
     // Recherche
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       result = result.filter(
-        (a) =>
+        a =>
           a.customerName.toLowerCase().includes(query) ||
           a.customerEmail.toLowerCase().includes(query) ||
           a.productName.toLowerCase().includes(query) ||
@@ -180,12 +180,12 @@ export const CustomerAccessManager : React.FC<CustomerAccessManagerProps> = ({
 
     // Filtre statut
     if (statusFilter !== 'all') {
-      result = result.filter((a) => a.status === statusFilter);
+      result = result.filter(a => a.status === statusFilter);
     }
 
     // Filtre produit
     if (productFilter !== 'all') {
-      result = result.filter((a) => a.productId === productFilter);
+      result = result.filter(a => a.productId === productFilter);
     }
 
     return result;
@@ -194,10 +194,10 @@ export const CustomerAccessManager : React.FC<CustomerAccessManagerProps> = ({
   // Statistiques
   const stats = useMemo(() => {
     const total = customerAccess.length;
-    const active = customerAccess.filter((a) => a.status === 'active').length;
-    const suspended = customerAccess.filter((a) => a.status === 'suspended').length;
-    const revoked = customerAccess.filter((a) => a.status === 'revoked').length;
-    const expired = customerAccess.filter((a) => a.status === 'expired').length;
+    const active = customerAccess.filter(a => a.status === 'active').length;
+    const suspended = customerAccess.filter(a => a.status === 'suspended').length;
+    const revoked = customerAccess.filter(a => a.status === 'revoked').length;
+    const expired = customerAccess.filter(a => a.status === 'expired').length;
     const totalRevenue = customerAccess.reduce((sum, a) => sum + a.amountPaid, 0);
 
     return { total, active, suspended, revoked, expired, totalRevenue };
@@ -207,9 +207,19 @@ export const CustomerAccessManager : React.FC<CustomerAccessManagerProps> = ({
   const getStatusConfig = (status: CustomerAccess['status']) => {
     switch (status) {
       case 'active':
-        return { icon: CheckCircle2, color: 'text-green-600', bgColor: 'bg-green-50', label: 'Actif' };
+        return {
+          icon: CheckCircle2,
+          color: 'text-green-600',
+          bgColor: 'bg-green-50',
+          label: 'Actif',
+        };
       case 'suspended':
-        return { icon: Clock, color: 'text-orange-600', bgColor: 'bg-orange-50', label: 'Suspendu' };
+        return {
+          icon: Clock,
+          color: 'text-orange-600',
+          bgColor: 'bg-orange-50',
+          label: 'Suspendu',
+        };
       case 'revoked':
         return { icon: Ban, color: 'text-red-600', bgColor: 'bg-red-50', label: 'Révoqué' };
       case 'expired':
@@ -315,7 +325,7 @@ export const CustomerAccessManager : React.FC<CustomerAccessManagerProps> = ({
             <Input
               placeholder="Rechercher par client, email, produit ou licence..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={e => setSearchQuery(e.target.value)}
               className="pl-9"
             />
           </div>
@@ -385,7 +395,7 @@ export const CustomerAccessManager : React.FC<CustomerAccessManagerProps> = ({
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredAccess.map((access) => {
+                filteredAccess.map(access => {
                   const statusConfig = getStatusConfig(access.status);
                   const StatusIcon = statusConfig.icon;
                   const isEditingThisLimit = editingLimit === access.id;
@@ -428,7 +438,12 @@ export const CustomerAccessManager : React.FC<CustomerAccessManagerProps> = ({
 
                       {/* Statut */}
                       <TableCell>
-                        <div className={cn('inline-flex items-center gap-2 px-3 py-1 rounded-full', statusConfig.bgColor)}>
+                        <div
+                          className={cn(
+                            'inline-flex items-center gap-2 px-3 py-1 rounded-full',
+                            statusConfig.bgColor
+                          )}
+                        >
                           <StatusIcon className={cn('h-4 w-4', statusConfig.color)} />
                           <span className={cn('text-sm font-medium', statusConfig.color)}>
                             {statusConfig.label}
@@ -443,7 +458,7 @@ export const CustomerAccessManager : React.FC<CustomerAccessManagerProps> = ({
                             <Input
                               type="number"
                               value={newLimit}
-                              onChange={(e) => setNewLimit(parseInt(e.target.value) || 0)}
+                              onChange={e => setNewLimit(parseInt(e.target.value) || 0)}
                               className="w-20 h-8"
                               min="0"
                             />
@@ -497,7 +512,9 @@ export const CustomerAccessManager : React.FC<CustomerAccessManagerProps> = ({
                         {access.licenseKey ? (
                           <div className="flex items-center gap-2">
                             <Key className="h-4 w-4 text-purple-600" />
-                            <code className="text-xs font-mono">{access.licenseKey.slice(0, 12)}...</code>
+                            <code className="text-xs font-mono">
+                              {access.licenseKey.slice(0, 12)}...
+                            </code>
                           </div>
                         ) : (
                           <span className="text-xs text-muted-foreground">Aucune</span>
@@ -537,7 +554,12 @@ export const CustomerAccessManager : React.FC<CustomerAccessManagerProps> = ({
                           {access.status === 'active' && onRevokeAccess && (
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
-                                <Button size="sm" variant="ghost" className="h-8 text-red-600" aria-label={`Révoquer l'accès pour ${access.customerName}`}>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="h-8 text-red-600"
+                                  aria-label={`Révoquer l'accès pour ${access.customerName}`}
+                                >
                                   <Ban className="h-4 w-4" />
                                 </Button>
                               </AlertDialogTrigger>
@@ -555,7 +577,7 @@ export const CustomerAccessManager : React.FC<CustomerAccessManagerProps> = ({
                                     id="reason"
                                     placeholder="Ex: Violation des conditions d'utilisation"
                                     value={revokeReason}
-                                    onChange={(e) => setRevokeReason(e.target.value)}
+                                    onChange={e => setRevokeReason(e.target.value)}
                                   />
                                 </div>
                                 <AlertDialogFooter>
@@ -603,11 +625,3 @@ export const CustomerAccessManager : React.FC<CustomerAccessManagerProps> = ({
 CustomerAccessManager.displayName = 'CustomerAccessManager';
 
 export default CustomerAccessManager;
-
-
-
-
-
-
-
-

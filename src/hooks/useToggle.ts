@@ -1,11 +1,11 @@
 /**
  * Hook useToggle - Gestion simplifiée des états toggle
  * Fournit une API simple pour gérer les états booléens
- * 
+ *
  * @example
  * ```tsx
  * const [isOpen, toggle, open, close] = useToggle(false);
- * 
+ *
  * <Button onClick={toggle}>Toggle</Button>
  * ```
  */
@@ -42,7 +42,7 @@ export function useToggle(initialValue: boolean = false): UseToggleReturn {
   const [value, setValue] = useState(initialValue);
 
   const toggle = useCallback(() => {
-    setValue((prev) => !prev);
+    setValue(prev => !prev);
   }, []);
 
   const setTrue = useCallback(() => {
@@ -77,32 +77,32 @@ export function useToggles<T extends Record<string, boolean>>(
 } {
   const [values, setValues] = useState<T>(initialValues);
 
-  const setValue = useCallback(<K extends keyof T>(
-    key: K,
-    value: boolean | ((prev: boolean) => boolean)
-  ) => {
-    setValues((prev) => ({
-      ...prev,
-      [key]: typeof value === 'function' ? value(prev[key]) : value,
-    }));
-  }, []);
+  const setValue = useCallback(
+    <K extends keyof T>(key: K, value: boolean | ((prev: boolean) => boolean)) => {
+      setValues(prev => ({
+        ...prev,
+        [key]: typeof value === 'function' ? value(prev[key]) : value,
+      }));
+    },
+    []
+  );
 
   const toggle = useCallback(<K extends keyof T>(key: K) => {
-    setValues((prev) => ({
+    setValues(prev => ({
       ...prev,
       [key]: !prev[key],
     }));
   }, []);
 
   const setTrue = useCallback(<K extends keyof T>(key: K) => {
-    setValues((prev) => ({
+    setValues(prev => ({
       ...prev,
       [key]: true,
     }));
   }, []);
 
   const setFalse = useCallback(<K extends keyof T>(key: K) => {
-    setValues((prev) => ({
+    setValues(prev => ({
       ...prev,
       [key]: false,
     }));
@@ -121,10 +121,3 @@ export function useToggles<T extends Record<string, boolean>>(
     reset,
   };
 }
-
-
-
-
-
-
-

@@ -18,12 +18,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Download,
   Upload,
@@ -34,7 +29,11 @@ import {
   X,
   FileText,
 } from 'lucide-react';
-import { useExportInventoryCSV, useImportInventoryCSV, CSVImportResult } from '@/hooks/physical/useInventoryCSV';
+import {
+  useExportInventoryCSV,
+  useImportInventoryCSV,
+  CSVImportResult,
+} from '@/hooks/physical/useInventoryCSV';
 import { useToast } from '@/hooks/use-toast';
 import { useInventoryItems } from '@/hooks/physical/useInventory';
 import { useStore } from '@/hooks/useStore';
@@ -98,7 +97,7 @@ export function InventoryCSVManager() {
     try {
       // Simuler la progression
       const progressInterval = setInterval(() => {
-        setImportProgress((prev) => Math.min(prev + 10, 90));
+        setImportProgress(prev => Math.min(prev + 10, 90));
       }, 200);
 
       const result = await importFromCSV(file, importOptions);
@@ -127,10 +126,10 @@ export function InventoryCSVManager() {
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
-    } catch ( _error: any) {
+    } catch (_error: any) {
       toast({
         title: 'Erreur import',
-        description: error.message || 'Impossible d\'importer le fichier',
+        description: error.message || "Impossible d'importer le fichier",
         variant: 'destructive',
       });
     } finally {
@@ -160,8 +159,8 @@ export function InventoryCSVManager() {
           <TabsContent value="export" className="space-y-4">
             <div className="space-y-2">
               <p className="text-sm text-muted-foreground">
-                Exportez tous les articles de votre inventaire dans un fichier CSV.
-                Le fichier inclut : SKU, nom produit, quantités, emplacements, codes-barres, etc.
+                Exportez tous les articles de votre inventaire dans un fichier CSV. Le fichier
+                inclut : SKU, nom produit, quantités, emplacements, codes-barres, etc.
               </p>
               <Button
                 onClick={handleExport}
@@ -225,7 +224,7 @@ export function InventoryCSVManager() {
                       type="checkbox"
                       id="update-existing"
                       checked={importOptions.updateExisting}
-                      onChange={(e) =>
+                      onChange={e =>
                         setImportOptions({ ...importOptions, updateExisting: e.target.checked })
                       }
                       className="rounded border-gray-300"
@@ -239,7 +238,7 @@ export function InventoryCSVManager() {
                       type="checkbox"
                       id="create-missing"
                       checked={importOptions.createMissing}
-                      onChange={(e) =>
+                      onChange={e =>
                         setImportOptions({ ...importOptions, createMissing: e.target.checked })
                       }
                       className="rounded border-gray-300"
@@ -253,7 +252,7 @@ export function InventoryCSVManager() {
                       type="checkbox"
                       id="dry-run"
                       checked={importOptions.dryRun}
-                      onChange={(e) =>
+                      onChange={e =>
                         setImportOptions({ ...importOptions, dryRun: e.target.checked })
                       }
                       className="rounded border-gray-300"
@@ -278,8 +277,8 @@ export function InventoryCSVManager() {
               <Alert>
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription className="text-sm">
-                  <strong>Format CSV requis :</strong> SKU, Quantité Disponible, Emplacement Entrepôt (optionnel),
-                  Point Réapprovisionnement (optionnel)
+                  <strong>Format CSV requis :</strong> SKU, Quantité Disponible, Emplacement
+                  Entrepôt (optionnel), Point Réapprovisionnement (optionnel)
                 </AlertDescription>
               </Alert>
             </div>
@@ -292,9 +291,7 @@ export function InventoryCSVManager() {
         <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Résultat de l'Import</DialogTitle>
-            <DialogDescription>
-              Détails de l'import CSV
-            </DialogDescription>
+            <DialogDescription>Détails de l'import CSV</DialogDescription>
           </DialogHeader>
           {importResult && (
             <div className="space-y-4">
@@ -337,7 +334,8 @@ export function InventoryCSVManager() {
                       <Alert key={index}>
                         <AlertCircle className="h-4 w-4" />
                         <AlertDescription className="text-xs">
-                          <strong>Ligne {warning.row}</strong> (SKU: {warning.sku}): {warning.warning}
+                          <strong>Ligne {warning.row}</strong> (SKU: {warning.sku}):{' '}
+                          {warning.warning}
                         </AlertDescription>
                       </Alert>
                     ))}
@@ -360,10 +358,3 @@ export function InventoryCSVManager() {
     </Card>
   );
 }
-
-
-
-
-
-
-

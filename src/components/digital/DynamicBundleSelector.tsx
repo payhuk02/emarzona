@@ -1,7 +1,7 @@
 /**
  * Dynamic Bundle Selector - Permet aux clients de créer leur propre bundle
  * Date: 2025-01-27
- * 
+ *
  * Le client peut sélectionner les produits qu'il veut dans un bundle
  * et obtenir un prix personnalisé basé sur sa sélection
  */
@@ -77,14 +77,12 @@ export const DynamicBundleSelector = ({
 
   // Filtrer les produits disponibles
   const availableProducts = useMemo(() => {
-    return products.filter(
-      (p) => config.availableProducts.includes(p.id) && p.isAvailable
-    );
+    return products.filter(p => config.availableProducts.includes(p.id) && p.isAvailable);
   }, [products, config.availableProducts]);
 
   // Produits sélectionnés
   const selectedProducts = useMemo(() => {
-    return availableProducts.filter((p) => selectedProductIds.includes(p.id));
+    return availableProducts.filter(p => selectedProductIds.includes(p.id));
   }, [availableProducts, selectedProductIds]);
 
   // Calculer le prix total sans réduction
@@ -104,7 +102,7 @@ export const DynamicBundleSelector = ({
       return config.baseDiscount;
     } else if (config.discountType === 'progressive' && config.progressiveDiscounts) {
       // Trouver la remise progressive la plus élevée applicable
-      let  maxDiscount= 0;
+      let maxDiscount = 0;
       for (const progDiscount of config.progressiveDiscounts.sort(
         (a, b) => b.minProducts - a.minProducts
       )) {
@@ -141,14 +139,14 @@ export const DynamicBundleSelector = ({
 
   // Toggle sélection
   const toggleProduct = (productId: string) => {
-    setSelectedProductIds((prev) => {
+    setSelectedProductIds(prev => {
       const newSelection = prev.includes(productId)
-        ? prev.filter((id) => id !== productId)
+        ? prev.filter(id => id !== productId)
         : [...prev, productId];
 
       // Notifier le parent
       if (onSelectionChange) {
-        const selected = availableProducts.filter((p) => newSelection.includes(p.id));
+        const selected = availableProducts.filter(p => newSelection.includes(p.id));
         const total = selected.reduce((sum, p) => sum + p.price, 0);
         const discountAmount = calculateDiscount(total, newSelection.length);
         onSelectionChange(newSelection, total, discountAmount);
@@ -213,8 +211,8 @@ export const DynamicBundleSelector = ({
           <div className="text-sm text-muted-foreground">
             <p>
               Sélectionnez entre <strong>{config.minProducts}</strong>
-              {config.maxProducts && ` et ${config.maxProducts}`} produit(s) pour bénéficier
-              d'une remise.
+              {config.maxProducts && ` et ${config.maxProducts}`} produit(s) pour bénéficier d'une
+              remise.
             </p>
             {config.discountType === 'progressive' && config.progressiveDiscounts && (
               <p className="mt-1">
@@ -229,7 +227,7 @@ export const DynamicBundleSelector = ({
           <Label>Produits disponibles ({availableProducts.length})</Label>
           <ScrollArea className="h-[400px] pr-4">
             <div className="space-y-3">
-              {availableProducts.map((product) => {
+              {availableProducts.map(product => {
                 const isSelected = selectedProductIds.includes(product.id);
                 return (
                   <Card
@@ -245,7 +243,7 @@ export const DynamicBundleSelector = ({
                         <Checkbox
                           checked={isSelected}
                           onCheckedChange={() => toggleProduct(product.id)}
-                          onClick={(e) => e.stopPropagation()}
+                          onClick={e => e.stopPropagation()}
                         />
                         {product.image_url && (
                           <img
@@ -262,9 +260,7 @@ export const DynamicBundleSelector = ({
                             </p>
                           )}
                           <div className="flex items-center gap-2 mt-2">
-                            <Badge variant="outline">
-                              {product.price.toLocaleString()} XOF
-                            </Badge>
+                            <Badge variant="outline">{product.price.toLocaleString()} XOF</Badge>
                             {product.category && (
                               <Badge variant="secondary" className="text-xs">
                                 {product.category}
@@ -272,9 +268,7 @@ export const DynamicBundleSelector = ({
                             )}
                           </div>
                         </div>
-                        {isSelected && (
-                          <CheckCircle2 className="h-5 w-5 text-primary" />
-                        )}
+                        {isSelected && <CheckCircle2 className="h-5 w-5 text-primary" />}
                       </div>
                     </CardContent>
                   </Card>
@@ -300,9 +294,7 @@ export const DynamicBundleSelector = ({
             <div className="space-y-2 p-4 bg-muted rounded-lg">
               <div className="flex justify-between text-sm">
                 <span>Prix total:</span>
-                <span className="font-semibold">
-                  {originalTotal.toLocaleString()} XOF
-                </span>
+                <span className="font-semibold">{originalTotal.toLocaleString()} XOF</span>
               </div>
               {discount > 0 && (
                 <>
@@ -315,9 +307,7 @@ export const DynamicBundleSelector = ({
                   <Separator />
                   <div className="flex justify-between text-lg font-bold">
                     <span>Prix final:</span>
-                    <span className="text-primary">
-                      {finalPrice.toLocaleString()} XOF
-                    </span>
+                    <span className="text-primary">{finalPrice.toLocaleString()} XOF</span>
                   </div>
                 </>
               )}
@@ -341,10 +331,3 @@ export const DynamicBundleSelector = ({
     </Card>
   );
 };
-
-
-
-
-
-
-

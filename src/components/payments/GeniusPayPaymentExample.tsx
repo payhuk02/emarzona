@@ -1,10 +1,10 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useGeniusPay } from "@/hooks/useGeniusPay";
-import { logger } from "@/lib/logger";
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useGeniusPay } from '@/hooks/useGeniusPay';
+import { logger } from '@/lib/logger';
 
 /**
  * Exemple de composant utilisant GeniusPay pour initier un paiement
@@ -12,27 +12,27 @@ import { logger } from "@/lib/logger";
  */
 export const GeniusPayPaymentExample = () => {
   const { createCheckout, loading } = useGeniusPay();
-  const [amount, setAmount] = useState("10000");
-  const [email, setEmail] = useState("");
-  const [name, setName] = useState("");
+  const [amount, setAmount] = useState('10000');
+  const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
 
   const handlePayment = async () => {
     try {
       await createCheckout({
         amount: parseFloat(amount),
-        currency: "XOF",
-        description: "Achat de produit",
+        currency: 'XOF',
+        description: 'Achat de produit',
         customer_email: email,
         customer_name: name,
         return_url: `${window.location.origin}/payment/success`,
         cancel_url: `${window.location.origin}/payment/cancel`,
         metadata: {
-          source: "web",
-          product_id: "example-123",
+          source: 'web',
+          product_id: 'example-123',
         },
       });
     } catch (error) {
-      logger.error("Erreur paiement", { error, amount, email });
+      logger.error('Erreur paiement', { error, amount, email });
     }
   };
 
@@ -40,9 +40,7 @@ export const GeniusPayPaymentExample = () => {
     <Card className="max-w-md mx-auto">
       <CardHeader>
         <CardTitle>Paiement GeniusPay</CardTitle>
-        <CardDescription>
-          Exemple d'intégration du paiement GeniusPay
-        </CardDescription>
+        <CardDescription>Exemple d'intégration du paiement GeniusPay</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
@@ -50,18 +48,18 @@ export const GeniusPayPaymentExample = () => {
           <Input
             id="name"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={e => setName(e.target.value)}
             placeholder="Votre nom"
           />
         </div>
-        
+
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
           <Input
             id="email"
             type="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={e => setEmail(e.target.value)}
             placeholder="votre@email.com"
           />
         </div>
@@ -72,25 +70,19 @@ export const GeniusPayPaymentExample = () => {
             id="amount"
             type="number"
             value={amount}
-            onChange={(e) => setAmount(e.target.value)}
+            onChange={e => setAmount(e.target.value)}
             placeholder="10000"
           />
         </div>
 
-        <Button 
-          onClick={handlePayment} 
+        <Button
+          onClick={handlePayment}
           disabled={loading || !email || !name || !amount}
           className="w-full"
         >
-          {loading ? "Traitement..." : "Payer maintenant"}
+          {loading ? 'Traitement...' : 'Payer maintenant'}
         </Button>
       </CardContent>
     </Card>
   );
 };
-
-
-
-
-
-

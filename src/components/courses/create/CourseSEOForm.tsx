@@ -47,11 +47,11 @@ export interface CourseSEOData {
   og_image: string;
 }
 
-export const CourseSEOForm = ({ 
-  data, 
+export const CourseSEOForm = ({
+  data,
   onChange,
   courseTitle = '',
-  courseDescription = ''
+  courseDescription = '',
 }: CourseSEOFormProps) => {
   const [showPreview, setShowPreview] = useState(false);
 
@@ -70,22 +70,34 @@ export const CourseSEOForm = ({
   const validation = {
     meta_title: {
       isValid: data.meta_title.length > 0 && data.meta_title.length <= 60,
-      message: data.meta_title.length > 60 
-        ? '⚠️ Trop long (max 60 caractères)' 
-        : data.meta_title.length === 0
-        ? '❌ Requis'
-        : `✅ ${data.meta_title.length}/60`,
-      color: data.meta_title.length > 60 ? 'destructive' : data.meta_title.length === 0 ? 'secondary' : 'default'
+      message:
+        data.meta_title.length > 60
+          ? '⚠️ Trop long (max 60 caractères)'
+          : data.meta_title.length === 0
+            ? '❌ Requis'
+            : `✅ ${data.meta_title.length}/60`,
+      color:
+        data.meta_title.length > 60
+          ? 'destructive'
+          : data.meta_title.length === 0
+            ? 'secondary'
+            : 'default',
     },
     meta_description: {
       isValid: data.meta_description.length > 0 && data.meta_description.length <= 160,
-      message: data.meta_description.length > 160 
-        ? '⚠️ Trop long (max 160 caractères)' 
-        : data.meta_description.length === 0
-        ? '❌ Requis'
-        : `✅ ${data.meta_description.length}/160`,
-      color: data.meta_description.length > 160 ? 'destructive' : data.meta_description.length === 0 ? 'secondary' : 'default'
-    }
+      message:
+        data.meta_description.length > 160
+          ? '⚠️ Trop long (max 160 caractères)'
+          : data.meta_description.length === 0
+            ? '❌ Requis'
+            : `✅ ${data.meta_description.length}/160`,
+      color:
+        data.meta_description.length > 160
+          ? 'destructive'
+          : data.meta_description.length === 0
+            ? 'secondary'
+            : 'default',
+    },
   };
 
   return (
@@ -102,12 +114,7 @@ export const CourseSEOForm = ({
           </p>
         </div>
         <div className="flex gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={autoFill}
-            className="gap-2"
-          >
+          <Button type="button" variant="outline" onClick={autoFill} className="gap-2">
             <TrendingUp className="w-4 h-4" />
             Auto-remplir
           </Button>
@@ -127,8 +134,9 @@ export const CourseSEOForm = ({
       <Alert>
         <Info className="h-4 w-4" />
         <AlertDescription>
-          <strong>Pourquoi c'est important ?</strong> Un bon SEO augmente la visibilité de votre cours 
-          sur Google, Bing et les réseaux sociaux, ce qui peut doubler voire tripler vos inscriptions.
+          <strong>Pourquoi c'est important ?</strong> Un bon SEO augmente la visibilité de votre
+          cours sur Google, Bing et les réseaux sociaux, ce qui peut doubler voire tripler vos
+          inscriptions.
         </AlertDescription>
       </Alert>
 
@@ -161,8 +169,16 @@ export const CourseSEOForm = ({
             <div className="flex items-center gap-2">
               <Search className="w-5 h-5" />
               SEO Basique (Google, Bing)
-              <Badge variant={validation.meta_title.isValid && validation.meta_description.isValid ? 'default' : 'destructive'}>
-                {validation.meta_title.isValid && validation.meta_description.isValid ? 'Valide' : 'À compléter'}
+              <Badge
+                variant={
+                  validation.meta_title.isValid && validation.meta_description.isValid
+                    ? 'default'
+                    : 'destructive'
+                }
+              >
+                {validation.meta_title.isValid && validation.meta_description.isValid
+                  ? 'Valide'
+                  : 'À compléter'}
               </Badge>
             </div>
           </AccordionTrigger>
@@ -181,7 +197,7 @@ export const CourseSEOForm = ({
                   id="meta_title"
                   placeholder="Ex: Maîtrisez React et TypeScript - Formation Complète 2025"
                   value={data.meta_title}
-                  onChange={(e) => onChange({ ...data, meta_title: e.target.value })}
+                  onChange={e => onChange({ ...data, meta_title: e.target.value })}
                   maxLength={70}
                 />
                 <p className="text-xs text-muted-foreground">
@@ -202,7 +218,7 @@ export const CourseSEOForm = ({
                   id="meta_description"
                   placeholder="Ex: Apprenez React et TypeScript de zéro à expert. Formation pratique avec 50+ projets, quiz et certificat. Accès à vie. Commencez aujourd'hui !"
                   value={data.meta_description}
-                  onChange={(e) => onChange({ ...data, meta_description: e.target.value })}
+                  onChange={e => onChange({ ...data, meta_description: e.target.value })}
                   maxLength={170}
                   rows={3}
                 />
@@ -221,7 +237,7 @@ export const CourseSEOForm = ({
                   id="meta_keywords"
                   placeholder="Ex: cours react, formation typescript, développement web, javascript"
                   value={data.meta_keywords}
-                  onChange={(e) => onChange({ ...data, meta_keywords: e.target.value })}
+                  onChange={e => onChange({ ...data, meta_keywords: e.target.value })}
                 />
                 <p className="text-xs text-muted-foreground">
                   Mots-clés séparés par des virgules. Utilisés par certains moteurs de recherche.
@@ -245,33 +261,30 @@ export const CourseSEOForm = ({
               <Alert>
                 <Info className="h-4 w-4" />
                 <AlertDescription>
-                  Ces informations s'affichent quand quelqu'un partage votre cours sur les réseaux sociaux.
+                  Ces informations s'affichent quand quelqu'un partage votre cours sur les réseaux
+                  sociaux.
                 </AlertDescription>
               </Alert>
 
               {/* OG Title */}
               <div className="space-y-2">
-                <Label htmlFor="og_title">
-                  Titre pour réseaux sociaux
-                </Label>
+                <Label htmlFor="og_title">Titre pour réseaux sociaux</Label>
                 <Input
                   id="og_title"
                   placeholder="Laissez vide pour utiliser le titre SEO"
                   value={data.og_title}
-                  onChange={(e) => onChange({ ...data, og_title: e.target.value })}
+                  onChange={e => onChange({ ...data, og_title: e.target.value })}
                 />
               </div>
 
               {/* OG Description */}
               <div className="space-y-2">
-                <Label htmlFor="og_description">
-                  Description pour réseaux sociaux
-                </Label>
+                <Label htmlFor="og_description">Description pour réseaux sociaux</Label>
                 <Textarea
                   id="og_description"
                   placeholder="Laissez vide pour utiliser la description SEO"
                   value={data.og_description}
-                  onChange={(e) => onChange({ ...data, og_description: e.target.value })}
+                  onChange={e => onChange({ ...data, og_description: e.target.value })}
                   rows={2}
                 />
               </div>
@@ -287,7 +300,7 @@ export const CourseSEOForm = ({
                   type="url"
                   placeholder="https://exemple.com/image-cours.jpg"
                   value={data.og_image}
-                  onChange={(e) => onChange({ ...data, og_image: e.target.value })}
+                  onChange={e => onChange({ ...data, og_image: e.target.value })}
                 />
                 <p className="text-xs text-muted-foreground flex items-center gap-2">
                   Image affichée lors du partage. Dimensions recommandées : 1200x630px (Open Graph).
@@ -296,7 +309,9 @@ export const CourseSEOForm = ({
                     target="_blank"
                     rel="noreferrer"
                     className="text-blue-600 underline"
-                  >Voir Médias</a>
+                  >
+                    Voir Médias
+                  </a>
                 </p>
               </div>
             </div>
@@ -316,36 +331,36 @@ export const CourseSEOForm = ({
               <div className="flex items-start gap-2">
                 <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
                 <div>
-                  <strong>Utilisez des chiffres :</strong> "Formation React 2025 - 50+ Projets" 
+                  <strong>Utilisez des chiffres :</strong> "Formation React 2025 - 50+ Projets"
                   performe mieux que "Formation React Complète"
                 </div>
               </div>
               <div className="flex items-start gap-2">
                 <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
                 <div>
-                  <strong>Incluez des mots-clés :</strong> Mettez les mots importants 
-                  au début du titre (ex: "React TypeScript" au lieu de "Formation à React et TypeScript")
+                  <strong>Incluez des mots-clés :</strong> Mettez les mots importants au début du
+                  titre (ex: "React TypeScript" au lieu de "Formation à React et TypeScript")
                 </div>
               </div>
               <div className="flex items-start gap-2">
                 <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
                 <div>
-                  <strong>Soyez spécifique :</strong> "Apprendre Python pour Data Science" 
+                  <strong>Soyez spécifique :</strong> "Apprendre Python pour Data Science"
                   {' > '} "Apprendre Python"
                 </div>
               </div>
               <div className="flex items-start gap-2">
                 <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
                 <div>
-                  <strong>Call-to-action :</strong> Ajoutez "Commencez aujourd'hui", 
-                  "Inscrivez-vous maintenant" dans la description
+                  <strong>Call-to-action :</strong> Ajoutez "Commencez aujourd'hui", "Inscrivez-vous
+                  maintenant" dans la description
                 </div>
               </div>
               <div className="flex items-start gap-2">
                 <AlertCircle className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" />
                 <div>
-                  <strong>Évitez le keyword stuffing :</strong> Répéter trop de fois 
-                  les mêmes mots-clés est pénalisé par Google
+                  <strong>Évitez le keyword stuffing :</strong> Répéter trop de fois les mêmes
+                  mots-clés est pénalisé par Google
                 </div>
               </div>
             </div>
@@ -360,16 +375,27 @@ export const CourseSEOForm = ({
             <div>
               <div className="text-sm font-medium text-muted-foreground">Score SEO</div>
               <div className="text-3xl font-bold">
-                {validation.meta_title.isValid && validation.meta_description.isValid ? '85%' : '45%'}
+                {validation.meta_title.isValid && validation.meta_description.isValid
+                  ? '85%'
+                  : '45%'}
               </div>
             </div>
             <div className="text-right">
-              <Badge variant={validation.meta_title.isValid && validation.meta_description.isValid ? 'default' : 'destructive'} className="text-sm">
-                {validation.meta_title.isValid && validation.meta_description.isValid ? 'Bon' : 'À améliorer'}
+              <Badge
+                variant={
+                  validation.meta_title.isValid && validation.meta_description.isValid
+                    ? 'default'
+                    : 'destructive'
+                }
+                className="text-sm"
+              >
+                {validation.meta_title.isValid && validation.meta_description.isValid
+                  ? 'Bon'
+                  : 'À améliorer'}
               </Badge>
               <p className="text-xs text-muted-foreground mt-1">
-                {validation.meta_title.isValid && validation.meta_description.isValid 
-                  ? 'Votre cours est bien optimisé !' 
+                {validation.meta_title.isValid && validation.meta_description.isValid
+                  ? 'Votre cours est bien optimisé !'
                   : 'Complétez les champs requis'}
               </p>
             </div>
@@ -379,10 +405,3 @@ export const CourseSEOForm = ({
     </div>
   );
 };
-
-
-
-
-
-
-

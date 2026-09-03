@@ -1,7 +1,7 @@
 /**
  * Cost Optimization & Margin Analysis Hooks
  * Date: 27 Janvier 2025
- * 
+ *
  * Hooks pour gérer les coûts, marges et recommandations d'optimisation
  */
 
@@ -75,7 +75,13 @@ export interface PriceOptimizationRecommendation {
   store_id: string;
   product_id: string;
   variant_id?: string;
-  recommendation_type: 'increase_price' | 'decrease_price' | 'maintain_price' | 'promotional_price' | 'bundle_pricing' | 'volume_discount';
+  recommendation_type:
+    | 'increase_price'
+    | 'decrease_price'
+    | 'maintain_price'
+    | 'promotional_price'
+    | 'bundle_pricing'
+    | 'volume_discount';
   priority: 'low' | 'normal' | 'high' | 'urgent';
   current_price: number;
   recommended_price: number;
@@ -110,12 +116,14 @@ export const useProductCosts = (storeId?: string, productId?: string) => {
     queryFn: async () => {
       if (!storeId) throw new Error('Store ID manquant');
 
-      let  query= supabase
+      let query = supabase
         .from('product_costs')
-        .select(`
+        .select(
+          `
           *,
           product:products (id, name, image_url)
-        `)
+        `
+        )
         .eq('store_id', storeId);
 
       if (productId) {
@@ -140,22 +148,27 @@ export const useProductCosts = (storeId?: string, productId?: string) => {
 /**
  * useMarginAnalysis - Récupère les analyses de marge
  */
-export const useMarginAnalysis = (storeId?: string, filters?: {
-  productId?: string;
-  startDate?: string;
-  endDate?: string;
-}) => {
+export const useMarginAnalysis = (
+  storeId?: string,
+  filters?: {
+    productId?: string;
+    startDate?: string;
+    endDate?: string;
+  }
+) => {
   return useQuery({
     queryKey: ['margin-analysis', storeId, filters],
     queryFn: async () => {
       if (!storeId) throw new Error('Store ID manquant');
 
-      let  query= supabase
+      let query = supabase
         .from('margin_analysis')
-        .select(`
+        .select(
+          `
           *,
           product:products (id, name, image_url)
-        `)
+        `
+        )
         .eq('store_id', storeId);
 
       if (filters?.productId) {
@@ -186,21 +199,26 @@ export const useMarginAnalysis = (storeId?: string, filters?: {
 /**
  * usePriceOptimizationRecommendations - Récupère les recommandations
  */
-export const usePriceOptimizationRecommendations = (storeId?: string, filters?: {
-  status?: PriceOptimizationRecommendation['status'];
-  priority?: PriceOptimizationRecommendation['priority'];
-}) => {
+export const usePriceOptimizationRecommendations = (
+  storeId?: string,
+  filters?: {
+    status?: PriceOptimizationRecommendation['status'];
+    priority?: PriceOptimizationRecommendation['priority'];
+  }
+) => {
   return useQuery({
     queryKey: ['price-optimization-recommendations', storeId, filters],
     queryFn: async () => {
       if (!storeId) throw new Error('Store ID manquant');
 
-      let  query= supabase
+      let query = supabase
         .from('price_optimization_recommendations')
-        .select(`
+        .select(
+          `
           *,
           product:products (id, name, image_url)
-        `)
+        `
+        )
         .eq('store_id', storeId);
 
       if (filters?.status) {
@@ -210,7 +228,8 @@ export const usePriceOptimizationRecommendations = (storeId?: string, filters?: 
         query = query.eq('priority', filters.priority);
       }
 
-      query = query.order('priority', { ascending: false })
+      query = query
+        .order('priority', { ascending: false })
         .order('created_at', { ascending: false });
 
       const { data, error } = await query;
@@ -241,11 +260,14 @@ export const useCreateOrUpdateProductCost = () => {
     mutationFn: async (costData: Partial<ProductCost>) => {
       const { data, error } = await supabase
         .from('product_costs')
-        .upsert({
-          ...costData,
-        }, {
-          onConflict: 'store_id,product_id,variant_id',
-        })
+        .upsert(
+          {
+            ...costData,
+          },
+          {
+            onConflict: 'store_id,product_id,variant_id',
+          }
+        )
         .select()
         .single();
 
@@ -256,7 +278,7 @@ export const useCreateOrUpdateProductCost = () => {
 
       return data as ProductCost;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['product-costs', data.store_id] });
       toast({
         title: '✅ Coûts sauvegardés',
@@ -299,7 +321,9 @@ export const useCalculateProductMargin = () => {
         p_store_id: storeId,
         p_product_id: productId,
         p_variant_id: variantId,
-        p_period_start: periodStart || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        p_period_start:
+          periodStart ||
+          new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
         p_period_end: periodEnd || new Date().toISOString().split('T')[0],
       });
 
@@ -317,7 +341,9 @@ export const useCalculateProductMargin = () => {
           store_id: storeId,
           product_id: productId,
           variant_id: variantId,
-          analysis_period_start: periodStart || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          analysis_period_start:
+            periodStart ||
+            new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
           analysis_period_end: periodEnd || new Date().toISOString().split('T')[0],
           average_selling_price: 0, // À calculer selon besoins
           total_revenue: margin.total_revenue,
@@ -375,7 +401,7 @@ export const useGeneratePriceOptimizationRecommendations = () => {
 
       return data as number; // Nombre de recommandations générées
     },
-    onSuccess: (count) => {
+    onSuccess: count => {
       queryClient.invalidateQueries({ queryKey: ['price-optimization-recommendations'] });
       toast({
         title: '✅ Recommandations générées',
@@ -408,13 +434,15 @@ export const useUpdateRecommendationStatus = () => {
       recommendationId: string;
       status: PriceOptimizationRecommendation['status'];
     }) => {
-      const  updateData: any = {
+      const updateData: any = {
         status,
         updated_at: new Date().toISOString(),
       };
 
       if (status === 'implemented') {
-        const { data: { user } } = await supabase.auth.getUser();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
         updateData.implemented_at = new Date().toISOString();
         updateData.implemented_by = user?.id;
       }
@@ -450,10 +478,3 @@ export const useUpdateRecommendationStatus = () => {
     },
   });
 };
-
-
-
-
-
-
-

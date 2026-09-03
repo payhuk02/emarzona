@@ -101,7 +101,7 @@ export interface CustomersReport {
  */
 const getPeriodDates = (period: ReportPeriod) => {
   const now = new Date();
-  let  startDate: Date;
+  let startDate: Date;
 
   switch (period) {
     case 'today':
@@ -131,7 +131,9 @@ export const useSalesReport = (period: ReportPeriod = 'month') => {
   return useQuery({
     queryKey: ['salesReport', period],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
       const { startDate, endDate } = getPeriodDates(period);
@@ -144,7 +146,7 @@ export const useSalesReport = (period: ReportPeriod = 'month') => {
 
       if (productsError) throw productsError;
 
-      const productIds = products.map((p) => p.id);
+      const productIds = products.map(p => p.id);
       if (productIds.length === 0) {
         return {
           period,
@@ -174,7 +176,7 @@ export const useSalesReport = (period: ReportPeriod = 'month') => {
 
       // Top produits
       const productSales = new Map();
-      sales.forEach((sale) => {
+      sales.forEach(sale => {
         const existing = productSales.get(sale.product_id) || {
           revenue: 0,
           orders: 0,
@@ -193,16 +195,12 @@ export const useSalesReport = (period: ReportPeriod = 'month') => {
         .slice(0, 5)
         .map(([productId]) => productId);
 
-      const { data: topProducts } = topProductIds.length > 0
-        ? await supabase
-            .from('digital_products')
-            .select('id, name')
-            .in('id', topProductIds)
-        : { data: [] };
+      const { data: topProducts } =
+        topProductIds.length > 0
+          ? await supabase.from('digital_products').select('id, name').in('id', topProductIds)
+          : { data: [] };
 
-      const productsMap = new Map(
-        (topProducts || []).map((p: any) => [p.id, p.name])
-      );
+      const productsMap = new Map((topProducts || []).map((p: any) => [p.id, p.name]));
 
       const topProductsData = Array.from(productSales.entries())
         .sort((a, b) => b[1].revenue - a[1].revenue)
@@ -214,10 +212,10 @@ export const useSalesReport = (period: ReportPeriod = 'month') => {
         }));
 
       // Revenue par jour
-      const  revenueByDay: Array<{ date: string; revenue: number; orders: number }> = [];
+      const revenueByDay: Array<{ date: string; revenue: number; orders: number }> = [];
       const dayGroups = new Map();
 
-      sales.forEach((sale) => {
+      sales.forEach(sale => {
         const date = new Date(sale.purchase_date).toISOString().split('T')[0];
         const existing = dayGroups.get(date) || { revenue: 0, orders: 0 };
         dayGroups.set(date, {
@@ -252,7 +250,9 @@ export const useDownloadsReport = (period: ReportPeriod = 'month') => {
   return useQuery({
     queryKey: ['downloadsReport', period],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
       const { startDate, endDate } = getPeriodDates(period);
@@ -265,7 +265,7 @@ export const useDownloadsReport = (period: ReportPeriod = 'month') => {
 
       if (productsError) throw productsError;
 
-      const productIds = products.map((p) => p.id);
+      const productIds = products.map(p => p.id);
       if (productIds.length === 0) {
         return {
           period,
@@ -289,13 +289,13 @@ export const useDownloadsReport = (period: ReportPeriod = 'month') => {
       if (logsError) throw logsError;
 
       const totalDownloads = logs.length;
-      const uniqueCustomers = new Set(logs.map((l) => l.customer_id)).size;
+      const uniqueCustomers = new Set(logs.map(l => l.customer_id)).size;
       const averageDownloadsPerCustomer =
         uniqueCustomers > 0 ? totalDownloads / uniqueCustomers : 0;
 
       // Top produits par téléchargements
       const productDownloads = new Map();
-      logs.forEach((log) => {
+      logs.forEach(log => {
         const existing = productDownloads.get(log.product_id) || {
           downloads: 0,
           customers: new Set(),
@@ -311,16 +311,12 @@ export const useDownloadsReport = (period: ReportPeriod = 'month') => {
         .slice(0, 5)
         .map(([productId]) => productId);
 
-      const { data: topProducts } = topProductIds.length > 0
-        ? await supabase
-            .from('digital_products')
-            .select('id, name')
-            .in('id', topProductIds)
-        : { data: [] };
+      const { data: topProducts } =
+        topProductIds.length > 0
+          ? await supabase.from('digital_products').select('id, name').in('id', topProductIds)
+          : { data: [] };
 
-      const productsMap = new Map(
-        (topProducts || []).map((p: any) => [p.id, p.name])
-      );
+      const productsMap = new Map((topProducts || []).map((p: any) => [p.id, p.name]));
 
       const topProductsData = Array.from(productDownloads.entries())
         .sort((a, b) => b[1].downloads - a[1].downloads)
@@ -333,10 +329,10 @@ export const useDownloadsReport = (period: ReportPeriod = 'month') => {
         }));
 
       // Téléchargements par jour
-      const  downloadsByDay: Array<{ date: string; downloads: number; customers: number }> = [];
+      const downloadsByDay: Array<{ date: string; downloads: number; customers: number }> = [];
       const dayGroups = new Map();
 
-      logs.forEach((log) => {
+      logs.forEach(log => {
         const date = new Date(log.created_at).toISOString().split('T')[0];
         const existing = dayGroups.get(date) || { downloads: 0, customers: new Set() };
         existing.downloads++;
@@ -356,7 +352,7 @@ export const useDownloadsReport = (period: ReportPeriod = 'month') => {
 
       // Téléchargements par localisation
       const locationGroups = new Map();
-      logs.forEach((log) => {
+      logs.forEach(log => {
         if (log.location) {
           const count = locationGroups.get(log.location) || 0;
           locationGroups.set(log.location, count + 1);
@@ -388,7 +384,9 @@ export const useLicensesReport = (period: ReportPeriod = 'month') => {
   return useQuery({
     queryKey: ['licensesReport', period],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
       const { startDate, endDate } = getPeriodDates(period);
@@ -413,7 +411,7 @@ export const useLicensesReport = (period: ReportPeriod = 'month') => {
         };
       }
 
-      const productIds = products.map((p) => p.id);
+      const productIds = products.map(p => p.id);
 
       // Récupérer les licences
       const { data: licenses, error: licensesError } = await supabase
@@ -426,9 +424,9 @@ export const useLicensesReport = (period: ReportPeriod = 'month') => {
       if (licensesError) throw licensesError;
 
       const totalLicensesIssued = licenses.length;
-      const activeLicenses = licenses.filter((l) => l.status === 'active').length;
-      const revokedLicenses = licenses.filter((l) => l.status === 'revoked').length;
-      const expiredLicenses = licenses.filter((l) => l.status === 'expired').length;
+      const activeLicenses = licenses.filter(l => l.status === 'active').length;
+      const revokedLicenses = licenses.filter(l => l.status === 'revoked').length;
+      const expiredLicenses = licenses.filter(l => l.status === 'expired').length;
 
       const totalMaxLicenses = products.reduce((sum, p) => sum + (p.max_licenses || 0), 0);
       const totalCurrentLicenses = products.reduce((sum, p) => sum + (p.current_licenses || 0), 0);
@@ -437,11 +435,11 @@ export const useLicensesReport = (period: ReportPeriod = 'month') => {
 
       // Top produits par licences
       const topProducts = products
-        .map((p) => ({
+        .map(p => ({
           id: p.id,
           name: '', // À remplir
-          issued: licenses.filter((l) => l.product_id === p.id).length,
-          active: licenses.filter((l) => l.product_id === p.id && l.status === 'active').length,
+          issued: licenses.filter(l => l.product_id === p.id).length,
+          active: licenses.filter(l => l.product_id === p.id && l.status === 'active').length,
           utilization:
             (p.max_licenses || 0) > 0
               ? ((p.current_licenses || 0) / (p.max_licenses || 1)) * 100
@@ -451,18 +449,16 @@ export const useLicensesReport = (period: ReportPeriod = 'month') => {
         .slice(0, 5);
 
       // OPTIMIZED: Fetch all product names in one query (N+1 fix)
-      const productIds = topProducts.map((p) => p.id);
+      const productIds = topProducts.map(p => p.id);
       if (productIds.length > 0) {
         const { data: products } = await supabase
           .from('digital_products')
           .select('id, name')
           .in('id', productIds);
 
-        const productsMap = new Map(
-          (products || []).map((p: any) => [p.id, p.name])
-        );
+        const productsMap = new Map((products || []).map((p: any) => [p.id, p.name]));
 
-        topProducts.forEach((product) => {
+        topProducts.forEach(product => {
           product.name = productsMap.get(product.id) || 'Inconnu';
         });
       }
@@ -487,7 +483,9 @@ export const useCustomersReport = (period: ReportPeriod = 'month') => {
   return useQuery({
     queryKey: ['customersReport', period],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
       const { startDate, endDate } = getPeriodDates(period);
@@ -500,7 +498,7 @@ export const useCustomersReport = (period: ReportPeriod = 'month') => {
 
       if (productsError) throw productsError;
 
-      const productIds = products.map((p) => p.id);
+      const productIds = products.map(p => p.id);
       if (productIds.length === 0) {
         return {
           period,
@@ -521,21 +519,20 @@ export const useCustomersReport = (period: ReportPeriod = 'month') => {
 
       if (purchasesError) throw purchasesError;
 
-      const allCustomers = new Set(purchases.map((p) => p.customer_id));
+      const allCustomers = new Set(purchases.map(p => p.customer_id));
       const totalCustomers = allCustomers.size;
 
       const newPurchases = purchases.filter(
-        (p) =>
-          new Date(p.purchase_date) >= startDate && new Date(p.purchase_date) <= endDate
+        p => new Date(p.purchase_date) >= startDate && new Date(p.purchase_date) <= endDate
       );
-      const newCustomers = new Set(newPurchases.map((p) => p.customer_id)).size;
+      const newCustomers = new Set(newPurchases.map(p => p.customer_id)).size;
 
       const totalSpent = purchases.reduce((sum, p) => sum + (p.amount_paid || 0), 0);
       const averageSpending = totalCustomers > 0 ? totalSpent / totalCustomers : 0;
 
       // Top clients
       const customerSpending = new Map();
-      purchases.forEach((p) => {
+      purchases.forEach(p => {
         const existing = customerSpending.get(p.customer_id) || {
           totalSpent: 0,
           totalPurchases: 0,
@@ -555,12 +552,10 @@ export const useCustomersReport = (period: ReportPeriod = 'month') => {
         .slice(0, 10)
         .map(([customerId]) => customerId);
 
-      const { data: topCustomers } = topCustomerIds.length > 0
-        ? await supabase
-            .from('customers')
-            .select('id, name, email')
-            .in('id', topCustomerIds)
-        : { data: [] };
+      const { data: topCustomers } =
+        topCustomerIds.length > 0
+          ? await supabase.from('customers').select('id, name, email').in('id', topCustomerIds)
+          : { data: [] };
 
       const customersMap = new Map(
         (topCustomers || []).map((c: any) => [c.id, { name: c.name, email: c.email }])
@@ -592,10 +587,3 @@ export const useCustomersReport = (period: ReportPeriod = 'month') => {
     },
   });
 };
-
-
-
-
-
-
-

@@ -8,8 +8,17 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useShippingCarriers, useCalculateCarrierRates } from '@/hooks/physical/useShippingCarriers';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  useShippingCarriers,
+  useCalculateCarrierRates,
+} from '@/hooks/physical/useShippingCarriers';
 import { Loader2, Calculator, Package } from 'lucide-react';
 import { useStore } from '@/hooks/useStore';
 
@@ -76,7 +85,7 @@ export const CarrierRateCalculator = ({
               <SelectValue placeholder="Sélectionner un transporteur" />
             </SelectTrigger>
             <SelectContent>
-              {carriers.map((carrier) => (
+              {carriers.map(carrier => (
                 <SelectItem key={carrier.id} value={carrier.id}>
                   {carrier.display_name}
                 </SelectItem>
@@ -92,7 +101,7 @@ export const CarrierRateCalculator = ({
             <Input
               id="from-country"
               value={fromCountry}
-              onChange={(e) => setFromCountry(e.target.value)}
+              onChange={e => setFromCountry(e.target.value)}
               placeholder="SN"
             />
           </div>
@@ -101,7 +110,7 @@ export const CarrierRateCalculator = ({
             <Input
               id="from-postal"
               value={fromPostalCode}
-              onChange={(e) => setFromPostalCode(e.target.value)}
+              onChange={e => setFromPostalCode(e.target.value)}
               placeholder="12345"
             />
           </div>
@@ -114,7 +123,7 @@ export const CarrierRateCalculator = ({
             <Input
               id="to-country"
               value={toCountry}
-              onChange={(e) => setToCountry(e.target.value)}
+              onChange={e => setToCountry(e.target.value)}
               placeholder="SN"
             />
           </div>
@@ -123,7 +132,7 @@ export const CarrierRateCalculator = ({
             <Input
               id="to-postal"
               value={toPostalCode}
-              onChange={(e) => setToPostalCode(e.target.value)}
+              onChange={e => setToPostalCode(e.target.value)}
               placeholder="12345"
             />
           </div>
@@ -138,7 +147,9 @@ export const CarrierRateCalculator = ({
           <div className="text-sm text-muted-foreground">
             <p>Poids: {weight} kg</p>
             {dimensions && (
-              <p>Dimensions: {dimensions.length} x {dimensions.width} x {dimensions.height} cm</p>
+              <p>
+                Dimensions: {dimensions.length} x {dimensions.width} x {dimensions.height} cm
+              </p>
             )}
           </div>
         </div>
@@ -172,7 +183,8 @@ export const CarrierRateCalculator = ({
                 <div>
                   <p className="font-medium">{rate.serviceName}</p>
                   <p className="text-sm text-muted-foreground">
-                    Livraison estimée: {rate.estimatedDeliveryDays} jour{rate.estimatedDeliveryDays > 1 ? 's' : ''}
+                    Livraison estimée: {rate.estimatedDeliveryDays} jour
+                    {rate.estimatedDeliveryDays > 1 ? 's' : ''}
                   </p>
                 </div>
                 <div className="text-right">
@@ -188,10 +200,3 @@ export const CarrierRateCalculator = ({
     </Card>
   );
 };
-
-
-
-
-
-
-

@@ -16,15 +16,18 @@ interface WarehousePerformanceChartProps {
   periodType: 'daily' | 'weekly' | 'monthly' | 'yearly';
 }
 
-export function WarehousePerformanceChart({ warehousePerformance, periodType }: WarehousePerformanceChartProps) {
+export function WarehousePerformanceChart({
+  warehousePerformance,
+  periodType,
+}: WarehousePerformanceChartProps) {
   // Get warehouse names
-  const warehouseIds = [...new Set(warehousePerformance.map((w) => w.warehouse_id))];
-  
+  const warehouseIds = [...new Set(warehousePerformance.map(w => w.warehouse_id))];
+
   const { data: warehouses } = useQuery({
     queryKey: ['warehouses-names', warehouseIds],
     queryFn: async () => {
       if (warehouseIds.length === 0) return [];
-      
+
       const { data, error } = await supabase
         .from('warehouses')
         .select('id, name')
@@ -38,10 +41,10 @@ export function WarehousePerformanceChart({ warehousePerformance, periodType }: 
 
   // Aggregate data by warehouse
   const warehouseData = warehousePerformance.reduce((acc: any[], item) => {
-    const warehouse = warehouses?.find((w) => w.id === item.warehouse_id);
+    const warehouse = warehouses?.find(w => w.id === item.warehouse_id);
     const warehouseName = warehouse?.name || `Entrepôt ${item.warehouse_id.slice(0, 8)}`;
 
-    const existing = acc.find((a) => a.warehouseId === item.warehouse_id);
+    const existing = acc.find(a => a.warehouseId === item.warehouse_id);
     if (existing) {
       existing.revenue += item.total_revenue || 0;
       existing.orders += item.total_orders_fulfilled || 0;
@@ -65,10 +68,20 @@ export function WarehousePerformanceChart({ warehousePerformance, periodType }: 
 
   // Time series data
   const timeSeriesData = warehousePerformance
-    .map((item) => {
-      const warehouse = warehouses?.find((w) => w.id === item.warehouse_id);
+    .map(item => {
+      const warehouse = warehouses?.find(w => w.id === item.warehouse_id);
       return {
-        period: format(new Date(item.period_start), periodType === 'daily' ? 'dd MMM' : periodType === 'weekly' ? 'w' : periodType === 'monthly' ? 'MMM' : 'yyyy', { locale: fr }),
+        period: format(
+          new Date(item.period_start),
+          periodType === 'daily'
+            ? 'dd MMM'
+            : periodType === 'weekly'
+              ? 'w'
+              : periodType === 'monthly'
+                ? 'MMM'
+                : 'yyyy',
+          { locale: fr }
+        ),
         warehouse: warehouse?.name || 'Entrepôt',
         revenue: item.total_revenue || 0,
         profit: item.net_profit || 0,
@@ -86,7 +99,7 @@ export function WarehousePerformanceChart({ warehousePerformance, periodType }: 
         </CardHeader>
         <CardContent>
           <LazyRechartsWrapper>
-            {(recharts) => (
+            {recharts => (
               <recharts.ResponsiveContainer width="100%" height={300}>
                 <recharts.BarChart data={warehouseData}>
                   <recharts.CartesianGrid strokeDasharray="3 3" />
@@ -125,7 +138,7 @@ export function WarehousePerformanceChart({ warehousePerformance, periodType }: 
         </CardHeader>
         <CardContent>
           <LazyRechartsWrapper>
-            {(recharts) => (
+            {recharts => (
               <recharts.ResponsiveContainer width="100%" height={300}>
                 <recharts.LineChart data={timeSeriesData}>
                   <recharts.CartesianGrid strokeDasharray="3 3" />
@@ -147,8 +160,20 @@ export function WarehousePerformanceChart({ warehousePerformance, periodType }: 
                     }}
                   />
                   <recharts.Legend />
-                  <recharts.Line type="monotone" dataKey="revenue" stroke="#8884d8" name="Revenus" strokeWidth={2} />
-                  <recharts.Line type="monotone" dataKey="profit" stroke="#82ca9d" name="Profit" strokeWidth={2} />
+                  <recharts.Line
+                    type="monotone"
+                    dataKey="revenue"
+                    stroke="#8884d8"
+                    name="Revenus"
+                    strokeWidth={2}
+                  />
+                  <recharts.Line
+                    type="monotone"
+                    dataKey="profit"
+                    stroke="#82ca9d"
+                    name="Profit"
+                    strokeWidth={2}
+                  />
                 </recharts.LineChart>
               </recharts.ResponsiveContainer>
             )}
@@ -158,11 +183,3 @@ export function WarehousePerformanceChart({ warehousePerformance, periodType }: 
     </div>
   );
 }
-
-
-
-
-
-
-
-

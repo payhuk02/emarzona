@@ -1,7 +1,7 @@
 /**
  * Digital Product Coupons Hooks
  * Date: 27 Janvier 2025
- * 
+ *
  * Hooks pour gérer les codes promo pour produits digitaux
  */
 
@@ -10,8 +10,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 
-const DIGITAL_COUPON_FIELDS = 'id, store_id, code, name, description, discount_type, discount_value, min_purchase_amount, max_discount_amount, applicable_product_ids, applicable_product_types, applicable_store_ids, usage_limit, usage_count, usage_limit_per_customer, valid_from, valid_until, is_active, is_archived, first_time_buyers_only, exclude_sale_items, exclude_bundles, total_discount_given, total_orders, metadata, created_by, created_at, updated_at';
-const COUPON_USAGE_FIELDS = 'id, coupon_id, order_id, customer_id, discount_amount, order_total_before_discount, order_total_after_discount, customer_email, customer_name, product_id, product_type, created_at';
+const DIGITAL_COUPON_FIELDS =
+  'id, store_id, code, name, description, discount_type, discount_value, min_purchase_amount, max_discount_amount, applicable_product_ids, applicable_product_types, applicable_store_ids, usage_limit, usage_count, usage_limit_per_customer, valid_from, valid_until, is_active, is_archived, first_time_buyers_only, exclude_sale_items, exclude_bundles, total_discount_given, total_orders, metadata, created_by, created_at, updated_at';
+const COUPON_USAGE_FIELDS =
+  'id, coupon_id, order_id, customer_id, discount_amount, order_total_before_discount, order_total_after_discount, customer_email, customer_name, product_id, product_type, created_at';
 
 // =====================================================
 // TYPES
@@ -111,13 +113,12 @@ export const useStoreCoupons = (storeId?: string) => {
     queryKey: ['storeCoupons', storeId],
     queryFn: async () => {
       if (!storeId) {
-        const { data: { user } } = await supabase.auth.getUser();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
         if (!user) throw new Error('Non authentifié');
 
-        const { data: stores } = await supabase
-          .from('stores')
-          .select('id')
-          .eq('user_id', user.id);
+        const { data: stores } = await supabase.from('stores').select('id').eq('user_id', user.id);
 
         if (!stores || stores.length === 0) {
           return [];
@@ -152,13 +153,12 @@ export const useActiveCoupons = (storeId?: string) => {
     queryKey: ['activeCoupons', storeId],
     queryFn: async () => {
       if (!storeId) {
-        const { data: { user } } = await supabase.auth.getUser();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
         if (!user) throw new Error('Non authentifié');
 
-        const { data: stores } = await supabase
-          .from('stores')
-          .select('id')
-          .eq('user_id', user.id);
+        const { data: stores } = await supabase.from('stores').select('id').eq('user_id', user.id);
 
         if (!stores || stores.length === 0) {
           return [];
@@ -279,7 +279,9 @@ export const useCreateCoupon = () => {
 
   return useMutation({
     mutationFn: async (couponData: CreateCouponData) => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
       // Vérifier que le store appartient à l'utilisateur
@@ -376,7 +378,7 @@ export const useUpdateCoupon = () => {
 
       return data as DigitalProductCoupon;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['storeCoupons', data.store_id] });
       queryClient.invalidateQueries({ queryKey: ['activeCoupons', data.store_id] });
       queryClient.invalidateQueries({ queryKey: ['coupon', data.id] });
@@ -471,11 +473,11 @@ export const useApplyCoupon = () => {
 
       if (error) {
         logger.error('Error applying coupon', { error, couponId, orderId });
-        throw new Error(error.message || 'Erreur lors de l\'application du coupon');
+        throw new Error(error.message || "Erreur lors de l'application du coupon");
       }
 
       if (!data || !data.success) {
-        throw new Error(data?.message || 'Erreur lors de l\'application du coupon');
+        throw new Error(data?.message || "Erreur lors de l'application du coupon");
       }
 
       return data;
@@ -492,16 +494,9 @@ export const useApplyCoupon = () => {
       logger.error('Error in useApplyCoupon', { error });
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible d\'appliquer le coupon',
+        description: error.message || "Impossible d'appliquer le coupon",
         variant: 'destructive',
       });
     },
   });
 };
-
-
-
-
-
-
-

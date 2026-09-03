@@ -87,41 +87,41 @@ export interface CategoryPerformance {
 export interface CoursesDashboardProps {
   /** Statistiques globales */
   stats: DashboardStats;
-  
+
   /** Cours populaires */
   popularCourses: PopularCourse[];
-  
+
   /** Activités récentes */
   recentActivities: RecentActivity[];
-  
+
   /** Performance par catégorie */
   categoryPerformance: CategoryPerformance[];
-  
+
   /** Callback de rafraîchissement */
   onRefresh?: () => void;
-  
+
   /** Callback d'export */
   onExport?: () => void;
-  
+
   /** Chargement en cours */
   isLoading?: boolean;
-  
+
   /** Classe CSS personnalisée */
   className?: string;
-  
+
   /** Période sélectionnée */
   period?: 'week' | 'month' | 'quarter' | 'year';
-  
+
   /** Callback de changement de période */
   onPeriodChange?: (period: 'week' | 'month' | 'quarter' | 'year') => void;
 }
 
 /**
  * CoursesDashboard - Dashboard principal de gestion des cours
- * 
+ *
  * @example
  * ```tsx
- * <CoursesDashboard 
+ * <CoursesDashboard
  *   stats={dashboardStats}
  *   popularCourses={topCourses}
  *   recentActivities={activities}
@@ -130,7 +130,7 @@ export interface CoursesDashboardProps {
  * />
  * ```
  */
-export const CoursesDashboard : React.FC<CoursesDashboardProps> = ({
+export const CoursesDashboard: React.FC<CoursesDashboardProps> = ({
   stats,
   popularCourses,
   recentActivities,
@@ -202,7 +202,13 @@ export const CoursesDashboard : React.FC<CoursesDashboardProps> = ({
               Exporter
             </Button>
           )}
-          <Button variant="outline" size="icon" onClick={onRefresh} disabled={isLoading} aria-label="Actualiser le tableau de bord">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={onRefresh}
+            disabled={isLoading}
+            aria-label="Actualiser le tableau de bord"
+          >
             <RefreshCw className={cn('h-4 w-4', isLoading && 'animate-spin')} />
           </Button>
         </div>
@@ -237,10 +243,12 @@ export const CoursesDashboard : React.FC<CoursesDashboardProps> = ({
               <div className="flex items-baseline gap-2">
                 <p className="text-2xl font-bold">{stats.totalStudents.toLocaleString()}</p>
                 {stats.monthlyGrowth !== 0 && (
-                  <div className={cn(
-                    'flex items-center text-xs',
-                    stats.monthlyGrowth > 0 ? 'text-green-600' : 'text-red-600'
-                  )}>
+                  <div
+                    className={cn(
+                      'flex items-center text-xs',
+                      stats.monthlyGrowth > 0 ? 'text-green-600' : 'text-red-600'
+                    )}
+                  >
                     {stats.monthlyGrowth > 0 ? (
                       <TrendingUp className="h-3 w-3 mr-1" />
                     ) : (
@@ -298,7 +306,7 @@ export const CoursesDashboard : React.FC<CoursesDashboardProps> = ({
               </h3>
               <ScrollArea className="h-[400px] pr-4">
                 <div className="space-y-3">
-                  {recentActivities.map((activity) => (
+                  {recentActivities.map(activity => (
                     <div
                       key={activity.id}
                       className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg"
@@ -338,7 +346,7 @@ export const CoursesDashboard : React.FC<CoursesDashboardProps> = ({
                 Performance Rapide
               </h3>
               <div className="space-y-4">
-                {categoryPerformance.slice(0, 5).map((category) => (
+                {categoryPerformance.slice(0, 5).map(category => (
                   <div key={category.category}>
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex-1">
@@ -367,13 +375,15 @@ export const CoursesDashboard : React.FC<CoursesDashboardProps> = ({
                   key={course.id}
                   className="flex items-center gap-4 p-4 border rounded-lg hover:bg-muted/50 transition-colors"
                 >
-                  <div className={cn(
-                    'flex items-center justify-center w-10 h-10 rounded-full font-bold text-lg',
-                    index === 0 && 'bg-yellow-100 text-yellow-700',
-                    index === 1 && 'bg-gray-100 text-gray-700',
-                    index === 2 && 'bg-orange-100 text-orange-700',
-                    index > 2 && 'bg-muted text-muted-foreground'
-                  )}>
+                  <div
+                    className={cn(
+                      'flex items-center justify-center w-10 h-10 rounded-full font-bold text-lg',
+                      index === 0 && 'bg-yellow-100 text-yellow-700',
+                      index === 1 && 'bg-gray-100 text-gray-700',
+                      index === 2 && 'bg-orange-100 text-orange-700',
+                      index > 2 && 'bg-muted text-muted-foreground'
+                    )}
+                  >
                     #{index + 1}
                   </div>
                   <div className="flex-1">
@@ -387,13 +397,13 @@ export const CoursesDashboard : React.FC<CoursesDashboardProps> = ({
                         <Target className="h-3 w-3" />
                         {course.completionRate}%
                       </span>
-                      <span className="flex items-center gap-1">
-                        ⭐ {course.rating.toFixed(1)}
-                      </span>
+                      <span className="flex items-center gap-1">⭐ {course.rating.toFixed(1)}</span>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="font-bold text-green-600">{course.revenue.toLocaleString()} EUR</p>
+                    <p className="font-bold text-green-600">
+                      {course.revenue.toLocaleString()} EUR
+                    </p>
                     <p className="text-xs text-muted-foreground">Revenue</p>
                   </div>
                 </div>
@@ -408,7 +418,7 @@ export const CoursesDashboard : React.FC<CoursesDashboardProps> = ({
             <Card className="p-6">
               <h3 className="font-semibold mb-4">Performance par Catégorie</h3>
               <div className="space-y-4">
-                {categoryPerformance.map((category) => (
+                {categoryPerformance.map(category => (
                   <div key={category.category}>
                     <div className="flex items-center justify-between mb-2">
                       <div>
@@ -439,9 +449,7 @@ export const CoursesDashboard : React.FC<CoursesDashboardProps> = ({
                     <span className="font-semibold text-blue-700">Cours Actifs</span>
                   </div>
                   <p className="text-3xl font-bold text-blue-900">{stats.activeCourses}</p>
-                  <p className="text-sm text-blue-600 mt-1">
-                    sur {stats.totalCourses} au total
-                  </p>
+                  <p className="text-sm text-blue-600 mt-1">sur {stats.totalCourses} au total</p>
                 </div>
 
                 <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
@@ -450,7 +458,8 @@ export const CoursesDashboard : React.FC<CoursesDashboardProps> = ({
                     <span className="font-semibold text-green-700">Croissance</span>
                   </div>
                   <p className="text-3xl font-bold text-green-900">
-                    {stats.monthlyGrowth > 0 ? '+' : ''}{stats.monthlyGrowth}%
+                    {stats.monthlyGrowth > 0 ? '+' : ''}
+                    {stats.monthlyGrowth}%
                   </p>
                   <p className="text-sm text-green-600 mt-1">ce mois-ci</p>
                 </div>
@@ -475,11 +484,3 @@ export const CoursesDashboard : React.FC<CoursesDashboardProps> = ({
 CoursesDashboard.displayName = 'CoursesDashboard';
 
 export default CoursesDashboard;
-
-
-
-
-
-
-
-

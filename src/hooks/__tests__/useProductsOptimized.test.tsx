@@ -36,9 +36,7 @@ const createWrapper = () => {
   });
 
   return ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>
-      {children}
-    </QueryClientProvider>
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
 };
 
@@ -116,12 +114,13 @@ describe('useProductsOptimized', () => {
     });
 
     const { result } = renderHook(
-      () => useProductsOptimized({ 
-        storeId: 'store-1', 
-        page: 1, 
-        limit: 10,
-        productType: 'digital'
-      }),
+      () =>
+        useProductsOptimized({
+          storeId: 'store-1',
+          page: 1,
+          limit: 10,
+          productType: 'digital',
+        }),
       { wrapper: createWrapper() }
     );
 
@@ -132,10 +131,3 @@ describe('useProductsOptimized', () => {
     expect(supabase.from).toHaveBeenCalled();
   });
 });
-
-
-
-
-
-
-

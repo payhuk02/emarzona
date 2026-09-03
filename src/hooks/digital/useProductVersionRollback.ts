@@ -1,7 +1,7 @@
 /**
  * Product Version Rollback Hooks
  * Date: 27 Janvier 2025
- * 
+ *
  * Hooks spécialisés pour le rollback de versions
  */
 
@@ -11,8 +11,10 @@ import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 import { versionKeys } from './useProductVersions';
 
-const ROLLBACK_LOG_FIELDS = 'id, version_id, rolled_back_to_version_id, rollback_type, rollback_reason, rollback_triggered_by, error_rate_percentage, total_downloads, total_errors, metrics_snapshot, rollback_status, error_message, rolled_back_at, created_at';
-const VERSION_DOWNLOAD_ERROR_FIELDS = 'id, version_id, user_id, error_type, error_message, error_code, error_stack, download_url, file_size_mb, user_agent, ip_address, country, metadata, created_at';
+const ROLLBACK_LOG_FIELDS =
+  'id, version_id, rolled_back_to_version_id, rollback_type, rollback_reason, rollback_triggered_by, error_rate_percentage, total_downloads, total_errors, metrics_snapshot, rollback_status, error_message, rolled_back_at, created_at';
+const VERSION_DOWNLOAD_ERROR_FIELDS =
+  'id, version_id, user_id, error_type, error_message, error_code, error_stack, download_url, file_size_mb, user_agent, ip_address, country, metadata, created_at';
 
 // =====================================================
 // TYPES
@@ -78,7 +80,7 @@ export function useCheckAndTriggerRollback() {
     onSuccess: (data, versionId) => {
       queryClient.invalidateQueries({ queryKey: versionKeys.detail(versionId) });
       queryClient.invalidateQueries({ queryKey: versionKeys.all });
-      
+
       if (data.success && data.action === 'rolled_back') {
         toast({
           title: '✅ Rollback effectué',
@@ -119,7 +121,9 @@ export function useManualRollback() {
       rollbackToVersionId: string;
       reason: string;
     }) => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
       const { data, error } = await supabase.rpc('manual_rollback_version', {
@@ -135,7 +139,7 @@ export function useManualRollback() {
       }
       return data;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: versionKeys.all });
       toast({
         title: '✅ Rollback manuel effectué',
@@ -147,7 +151,7 @@ export function useManualRollback() {
       toast({
         variant: 'destructive',
         title: '❌ Erreur',
-        description: error.message || 'Impossible d\'effectuer le rollback',
+        description: error.message || "Impossible d'effectuer le rollback",
       });
     },
   });
@@ -225,7 +229,9 @@ export function useReportVersionError() {
       errorCode?: string;
       metadata?: Record<string, any>;
     }) => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
       const { data, error } = await supabase
         .from('version_download_errors')
@@ -247,14 +253,14 @@ export function useReportVersionError() {
       return data;
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ 
-        queryKey: [...versionKeys.detail(variables.versionId), 'errors'] 
+      queryClient.invalidateQueries({
+        queryKey: [...versionKeys.detail(variables.versionId), 'errors'],
       });
       // Déclencher une vérification de rollback
-      queryClient.invalidateQueries({ 
-        queryKey: versionKeys.detail(variables.versionId) 
+      queryClient.invalidateQueries({
+        queryKey: versionKeys.detail(variables.versionId),
       });
-      
+
       toast({
         title: '✅ Erreur signalée',
         description: 'Votre rapport a été enregistré. Merci !',
@@ -265,7 +271,7 @@ export function useReportVersionError() {
       toast({
         variant: 'destructive',
         title: '❌ Erreur',
-        description: error.message || 'Impossible de signaler l\'erreur',
+        description: error.message || "Impossible de signaler l'erreur",
       });
     },
   });
@@ -294,10 +300,3 @@ export function useVersionErrorRate(versionId: string | undefined) {
     refetchInterval: 60000, // Refresh every minute for monitoring
   });
 }
-
-
-
-
-
-
-

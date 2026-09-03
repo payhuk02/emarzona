@@ -4,7 +4,14 @@
  */
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { GeographicSalesPerformance } from '@/hooks/physical/usePhysicalAnalytics';
 import { MapPin, TrendingUp } from 'lucide-react';
@@ -15,28 +22,30 @@ interface GeographicHeatmapProps {
 
 export function GeographicHeatmap({ geographicSales }: GeographicHeatmapProps) {
   // Aggregate by country
-  const countryData = geographicSales.reduce((acc: any[], item) => {
-    const existing = acc.find((a) => a.country === item.country);
-    if (existing) {
-      existing.revenue += item.total_revenue || 0;
-      existing.orders += item.total_orders || 0;
-      existing.customers += item.unique_customers || 0;
-    } else {
-      acc.push({
-        country: item.country,
-        region: item.region,
-        revenue: item.total_revenue || 0,
-        orders: item.total_orders || 0,
-        customers: item.unique_customers || 0,
-        avgOrderValue: item.average_order_value || 0,
-        repeatRate: item.repeat_customer_rate || 0,
-      });
-    }
-    return acc;
-  }, []).sort((a, b) => b.revenue - a.revenue);
+  const countryData = geographicSales
+    .reduce((acc: any[], item) => {
+      const existing = acc.find(a => a.country === item.country);
+      if (existing) {
+        existing.revenue += item.total_revenue || 0;
+        existing.orders += item.total_orders || 0;
+        existing.customers += item.unique_customers || 0;
+      } else {
+        acc.push({
+          country: item.country,
+          region: item.region,
+          revenue: item.total_revenue || 0,
+          orders: item.total_orders || 0,
+          customers: item.unique_customers || 0,
+          avgOrderValue: item.average_order_value || 0,
+          repeatRate: item.repeat_customer_rate || 0,
+        });
+      }
+      return acc;
+    }, [])
+    .sort((a, b) => b.revenue - a.revenue);
 
   // Get max revenue for color intensity
-  const maxRevenue = Math.max(...countryData.map((c) => c.revenue), 1);
+  const maxRevenue = Math.max(...countryData.map(c => c.revenue), 1);
 
   return (
     <Card>
@@ -45,9 +54,7 @@ export function GeographicHeatmap({ geographicSales }: GeographicHeatmapProps) {
           <MapPin className="h-5 w-5" />
           Performance Géographique
         </CardTitle>
-        <CardDescription>
-          Répartition des ventes par pays et région
-        </CardDescription>
+        <CardDescription>Répartition des ventes par pays et région</CardDescription>
       </CardHeader>
       <CardContent>
         <Table>
@@ -120,11 +127,3 @@ export function GeographicHeatmap({ geographicSales }: GeographicHeatmapProps) {
     </Card>
   );
 }
-
-
-
-
-
-
-
-

@@ -1,7 +1,7 @@
 /**
  * CreateVersionDialog - Dialog pour créer une nouvelle version avec upload de fichiers
  * Date: 1 Février 2025
- * 
+ *
  * Interface complète pour créer une version de produit digital avec :
  * - Upload de fichiers multiples
  * - Gestion des métadonnées de version
@@ -41,20 +41,11 @@ import {
   useCreateDigitalProductVersion,
   type CreateDigitalProductVersionInput,
 } from '@/hooks/digital/useDigitalProductVersions';
-import {
-  Upload,
-  X,
-  File,
-  Loader2,
-  CheckCircle2,
-  AlertCircle,
-} from 'lucide-react';
+import { Upload, X, File, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { logger } from '@/lib/logger';
 
 const versionFormSchema = z.object({
-  version_number: z
-    .string()
-    .regex(/^\d+\.\d+\.\d+$/, 'Format: major.minor.patch (ex: 1.2.3)'),
+  version_number: z.string().regex(/^\d+\.\d+\.\d+$/, 'Format: major.minor.patch (ex: 1.2.3)'),
   version_name: z.string().optional(),
   release_notes: z.string().optional(),
   is_current: z.boolean().default(false),
@@ -114,11 +105,11 @@ export function CreateVersionDialog({
   const handleFileSelect = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const files = Array.from(event.target.files || []);
-      
+
       if (files.length === 0) return;
 
       // Valider les fichiers
-      const  validFiles: UploadedFile[] = files.map((file) => ({
+      const validFiles: UploadedFile[] = files.map(file => ({
         file,
         progress: 0,
         status: 'pending' as const,
@@ -137,13 +128,13 @@ export function CreateVersionDialog({
         return;
       }
 
-      setSelectedFiles((prev) => [...prev, ...validFiles]);
+      setSelectedFiles(prev => [...prev, ...validFiles]);
     },
     [toast]
   );
 
   const removeFile = useCallback((index: number) => {
-    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
   }, []);
 
   const handleUploadFiles = useCallback(async () => {
@@ -151,23 +142,15 @@ export function CreateVersionDialog({
       return [];
     }
 
-    const filesToUpload = selectedFiles
-      .filter((f) => f.status === 'pending')
-      .map((f) => f.file);
+    const filesToUpload = selectedFiles.filter(f => f.status === 'pending').map(f => f.file);
 
     if (filesToUpload.length === 0) {
-      return selectedFiles
-        .filter((f) => f.uploadResult)
-        .map((f) => f.uploadResult!);
+      return selectedFiles.filter(f => f.uploadResult).map(f => f.uploadResult!);
     }
 
     // Mettre à jour le statut des fichiers
-    setSelectedFiles((prev) =>
-      prev.map((f) =>
-        filesToUpload.includes(f.file)
-          ? { ...f, status: 'uploading' as const }
-          : f
-      )
+    setSelectedFiles(prev =>
+      prev.map(f => (filesToUpload.includes(f.file) ? { ...f, status: 'uploading' as const } : f))
     );
 
     try {
@@ -176,25 +159,21 @@ export function CreateVersionDialog({
         folder: `digital/${digitalProductId}/versions`,
         maxSize: 500 * 1024 * 1024, // 500MB
         compressImages: false, // Ne pas compresser les fichiers de produits
-        onProgress: (progress) => {
+        onProgress: progress => {
           setUploadProgress(progress);
           // Mettre à jour la progression de chaque fichier
-          setSelectedFiles((prev) =>
-            prev.map((f) =>
-              f.status === 'uploading'
-                ? { ...f, progress }
-                : f
-            )
+          setSelectedFiles(prev =>
+            prev.map(f => (f.status === 'uploading' ? { ...f, progress } : f))
           );
         },
       });
 
       // Mettre à jour les fichiers avec les résultats
-      setSelectedFiles((prev) => {
+      setSelectedFiles(prev => {
         const updated = [...prev];
-        let  resultIndex= 0;
+        let resultIndex = 0;
 
-        for (let  i= 0; i < updated.length; i++) {
+        for (let i = 0; i < updated.length; i++) {
           if (updated[i].status === 'uploading') {
             if (resultIndex < uploadResults.length) {
               updated[i] = {
@@ -208,7 +187,7 @@ export function CreateVersionDialog({
               updated[i] = {
                 ...updated[i],
                 status: 'error' as const,
-                error: 'Erreur lors de l\'upload',
+                error: "Erreur lors de l'upload",
               };
             }
           }
@@ -218,18 +197,18 @@ export function CreateVersionDialog({
       });
 
       return uploadResults;
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error uploading files', { error: errorMessage });
 
       // Mettre à jour les fichiers en erreur
-      setSelectedFiles((prev) =>
-        prev.map((f) =>
+      setSelectedFiles(prev =>
+        prev.map(f =>
           f.status === 'uploading'
             ? {
                 ...f,
                 status: 'error' as const,
-                error: error.message || 'Erreur lors de l\'upload',
+                error: error.message || "Erreur lors de l'upload",
               }
             : f
         )
@@ -247,10 +226,10 @@ export function CreateVersionDialog({
       }
 
       // Vérifier que tous les fichiers sont uploadés
-      const failedFiles = selectedFiles.filter((f) => f.status === 'error');
+      const failedFiles = selectedFiles.filter(f => f.status === 'error');
       if (failedFiles.length > 0) {
         toast({
-          title: 'Erreur d\'upload',
+          title: "Erreur d'upload",
           description: `${failedFiles.length} fichier(s) n'ont pas pu être uploadés`,
           variant: 'destructive',
         });
@@ -259,8 +238,8 @@ export function CreateVersionDialog({
 
       // Préparer les fichiers pour la version
       const files = selectedFiles
-        .filter((f) => f.uploadResult)
-        .map((f) => ({
+        .filter(f => f.uploadResult)
+        .map(f => ({
           url: f.uploadResult!.publicUrl,
           name: f.uploadResult!.fileName,
           size: f.uploadResult!.size,
@@ -270,12 +249,10 @@ export function CreateVersionDialog({
       const fileSizeBytes = files.reduce((sum, f) => sum + f.size, 0);
 
       // Parser le numéro de version
-      const [major, minor, patch] = data.version_number
-        .split('.')
-        .map(Number);
+      const [major, minor, patch] = data.version_number.split('.').map(Number);
 
       // Créer la version
-      const  versionInput: CreateDigitalProductVersionInput = {
+      const versionInput: CreateDigitalProductVersionInput = {
         digital_product_id: digitalProductId,
         product_id: productId,
         version_number: data.version_number,
@@ -303,7 +280,7 @@ export function CreateVersionDialog({
       setUploadProgress(0);
       onOpenChange(false);
       onSuccess?.();
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error creating version', { error: errorMessage });
       toast({
@@ -343,9 +320,7 @@ export function CreateVersionDialog({
                     <FormControl>
                       <Input placeholder="1.2.3" {...field} />
                     </FormControl>
-                    <FormDescription>
-                      Format: major.minor.patch (ex: 1.2.3)
-                    </FormDescription>
+                    <FormDescription>Format: major.minor.patch (ex: 1.2.3)</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -358,10 +333,7 @@ export function CreateVersionDialog({
                   <FormItem>
                     <FormLabel>Nom de la version</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="Version 2.0 - Nouveau Design"
-                        {...field}
-                      />
+                      <Input placeholder="Version 2.0 - Nouveau Design" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -393,9 +365,7 @@ export function CreateVersionDialog({
                   render={({ field }) => (
                     <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                       <div className="space-y-0.5">
-                        <FormLabel className="text-base">
-                          Version courante
-                        </FormLabel>
+                        <FormLabel className="text-base">Version courante</FormLabel>
                         <FormDescription>
                           Marquer cette version comme la version actuelle
                         </FormDescription>
@@ -419,9 +389,7 @@ export function CreateVersionDialog({
                     <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                       <div className="space-y-0.5">
                         <FormLabel className="text-base">Version beta</FormLabel>
-                        <FormDescription>
-                          Marquer cette version comme beta
-                        </FormDescription>
+                        <FormDescription>Marquer cette version comme beta</FormDescription>
                       </div>
                       <FormControl>
                         <input
@@ -465,9 +433,7 @@ export function CreateVersionDialog({
                       <div className="flex items-center gap-3 flex-1">
                         <File className="h-5 w-5 text-muted-foreground" />
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate">
-                            {uploadedFile.file.name}
-                          </p>
+                          <p className="text-sm font-medium truncate">{uploadedFile.file.name}</p>
                           <p className="text-xs text-muted-foreground">
                             {formatFileSize(uploadedFile.file.size)}
                           </p>
@@ -536,9 +502,7 @@ export function CreateVersionDialog({
               <Button
                 type="submit"
                 disabled={
-                  createVersion.isPending ||
-                  uploadState.uploading ||
-                  selectedFiles.length === 0
+                  createVersion.isPending || uploadState.uploading || selectedFiles.length === 0
                 }
               >
                 {createVersion.isPending || uploadState.uploading ? (
@@ -557,10 +521,3 @@ export function CreateVersionDialog({
     </Dialog>
   );
 }
-
-
-
-
-
-
-

@@ -21,7 +21,7 @@ export const MobileResponsiveTest = () => {
         width: window.innerWidth,
         height: window.innerHeight,
       });
-      
+
       // Déterminer le type d'appareil
       if (window.innerWidth < 640) {
         setDeviceType('mobile');
@@ -42,7 +42,7 @@ export const MobileResponsiveTest = () => {
       case 'mobile':
         return <Smartphone className="h-5 w-5" />;
       case 'tablet':
-        return <Tablet  className ="h-5 w-5" />;
+        return <Tablet className="h-5 w-5" />;
       default:
         return <Monitor className="h-5 w-5" />;
     }
@@ -65,29 +65,34 @@ export const MobileResponsiveTest = () => {
         visible: true,
         responsive: true,
         size: deviceType === 'mobile' ? 'h-8 w-8' : 'h-10 w-10',
-        issues: []
+        issues: [],
       },
       marketplace: {
         visible: true,
         responsive: true,
         size: deviceType === 'mobile' ? 'h-7 w-7' : 'h-8 w-8',
-        issues: []
-      }
+        issues: [],
+      },
     },
     avatars: {
       profile: {
         visible: true,
         responsive: true,
         size: deviceType === 'mobile' ? 'h-20 w-20' : 'h-24 w-24',
-        issues: []
+        issues: [],
       },
       store: {
         visible: true,
         responsive: true,
-        size: deviceType === 'mobile' ? 'h-20 w-20' : deviceType === 'tablet' ? 'h-24 w-24' : 'h-28 w-28',
-        issues: []
-      }
-    }
+        size:
+          deviceType === 'mobile'
+            ? 'h-20 w-20'
+            : deviceType === 'tablet'
+              ? 'h-24 w-24'
+              : 'h-28 w-28',
+        issues: [],
+      },
+    },
   };
 
   return (
@@ -112,17 +117,16 @@ export const MobileResponsiveTest = () => {
               {screenSize.width} × {screenSize.height}px
             </Badge>
           </div>
-          
+
           <Alert className={getDeviceColor()}>
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              <strong>Mode {deviceType}:</strong> {
-                deviceType === 'mobile' 
-                  ? 'Affichage optimisé pour les smartphones (< 640px)'
-                  : deviceType === 'tablet'
+              <strong>Mode {deviceType}:</strong>{' '}
+              {deviceType === 'mobile'
+                ? 'Affichage optimisé pour les smartphones (< 640px)'
+                : deviceType === 'tablet'
                   ? 'Affichage optimisé pour les tablettes (640px - 1024px)'
-                  : 'Affichage optimisé pour les ordinateurs (> 1024px)'
-              }
+                  : 'Affichage optimisé pour les ordinateurs (> 1024px)'}
             </AlertDescription>
           </Alert>
         </CardContent>
@@ -144,10 +148,10 @@ export const MobileResponsiveTest = () => {
             <div className="space-y-2">
               <h4 className="font-medium">Logo Sidebar</h4>
               <div className="flex items-center gap-2 p-3 border rounded-lg bg-muted/50">
-                <img 
-                  src={platformLogo} 
-                  alt="Emarzona" 
-                  className="h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0 object-contain" 
+                <img
+                  src={platformLogo}
+                  alt="Emarzona"
+                  className="h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0 object-contain"
                 />
                 <span className="text-sm font-medium">Emarzona</span>
               </div>
@@ -164,10 +168,10 @@ export const MobileResponsiveTest = () => {
               <h4 className="font-medium">Logo Marketplace</h4>
               <div className="flex items-center gap-2 p-3 border rounded-lg bg-muted/50">
                 {platformLogo ? (
-                  <img 
-                    src={platformLogo} 
-                    alt="Emarzona" 
-                    className="h-7 w-7 sm:h-8 sm:w-8 flex-shrink-0 object-contain" 
+                  <img
+                    src={platformLogo}
+                    alt="Emarzona"
+                    className="h-7 w-7 sm:h-8 sm:w-8 flex-shrink-0 object-contain"
                   />
                 ) : (
                   <div className="h-7 w-7 sm:h-8 sm:w-8 flex-shrink-0 bg-muted rounded flex items-center justify-center">
@@ -250,9 +254,7 @@ export const MobileResponsiveTest = () => {
           <CardTitle className="text-lg flex items-center gap-2">
             <AlertCircle className="h-5 w-5 text-blue-500" /> Recommandations
           </CardTitle>
-          <CardDescription>
-            Suggestions pour améliorer l'affichage mobile
-          </CardDescription>
+          <CardDescription>Suggestions pour améliorer l'affichage mobile</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="space-y-2">
@@ -265,7 +267,7 @@ export const MobileResponsiveTest = () => {
                 </p>
               </div>
             </div>
-            
+
             <div className="flex items-start gap-2">
               <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5" />
               <div>
@@ -275,7 +277,7 @@ export const MobileResponsiveTest = () => {
                 </p>
               </div>
             </div>
-            
+
             <div className="flex items-start gap-2">
               <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5" />
               <div>
@@ -291,9 +293,3 @@ export const MobileResponsiveTest = () => {
     </div>
   );
 };
-
-
-
-
-
-

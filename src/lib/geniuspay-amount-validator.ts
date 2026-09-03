@@ -11,19 +11,19 @@ import { logger } from './logger';
  * Limites de montants par devise selon GeniusPay
  * Source: Documentation GeniusPay (à vérifier avec la documentation officielle)
  */
-const  AMOUNT_LIMITS: Record<Currency, { min: number; max: number }> = {
-  XOF: { min: 100, max: 10000000 },      // 100 XOF à 10,000,000 XOF (10M)
-  NGN: { min: 100, max: 10000000 },      // 100 NGN à 10,000,000 NGN
-  GHS: { min: 1, max: 100000 },          // 1 GHS à 100,000 GHS
-  KES: { min: 10, max: 1000000 },        // 10 KES à 1,000,000 KES
-  ZAR: { min: 10, max: 1000000 },        // 10 ZAR à 1,000,000 ZAR
-  UGX: { min: 1000, max: 50000000 },      // 1,000 UGX à 50,000,000 UGX
-  TZS: { min: 1000, max: 50000000 },      // 1,000 TZS à 50,000,000 TZS
-  RWF: { min: 100, max: 10000000 },       // 100 RWF à 10,000,000 RWF
-  ETB: { min: 10, max: 1000000 },        // 10 ETB à 1,000,000 ETB
-  USD: { min: 1, max: 10000 },           // 1 USD à 10,000 USD
-  EUR: { min: 1, max: 10000 },           // 1 EUR à 10,000 EUR
-  GBP: { min: 1, max: 10000 },           // 1 GBP à 10,000 GBP
+const AMOUNT_LIMITS: Record<Currency, { min: number; max: number }> = {
+  XOF: { min: 100, max: 10000000 }, // 100 XOF à 10,000,000 XOF (10M)
+  NGN: { min: 100, max: 10000000 }, // 100 NGN à 10,000,000 NGN
+  GHS: { min: 1, max: 100000 }, // 1 GHS à 100,000 GHS
+  KES: { min: 10, max: 1000000 }, // 10 KES à 1,000,000 KES
+  ZAR: { min: 10, max: 1000000 }, // 10 ZAR à 1,000,000 ZAR
+  UGX: { min: 1000, max: 50000000 }, // 1,000 UGX à 50,000,000 UGX
+  TZS: { min: 1000, max: 50000000 }, // 1,000 TZS à 50,000,000 TZS
+  RWF: { min: 100, max: 10000000 }, // 100 RWF à 10,000,000 RWF
+  ETB: { min: 10, max: 1000000 }, // 10 ETB à 1,000,000 ETB
+  USD: { min: 1, max: 10000 }, // 1 USD à 10,000 USD
+  EUR: { min: 1, max: 10000 }, // 1 EUR à 10,000 EUR
+  GBP: { min: 1, max: 10000 }, // 1 GBP à 10,000 GBP
 };
 
 /**
@@ -106,18 +106,18 @@ export function validateAmount(amount: number, currency: Currency = 'XOF'): void
 export function normalizeAmount(amount: number, currency: Currency = 'XOF'): number {
   // Arrondir à l'entier le plus proche
   const rounded = Math.round(amount);
-  
+
   // Vérifier les limites après arrondi
   const limits = getAmountLimits(currency);
-  
+
   if (rounded < limits.min) {
     return limits.min;
   }
-  
+
   if (rounded > limits.max) {
     return limits.max;
   }
-  
+
   return rounded;
 }
 
@@ -144,11 +144,3 @@ export function isAmountValid(amount: number, currency: Currency = 'XOF'): boole
     return false;
   }
 }
-
-
-
-
-
-
-
-

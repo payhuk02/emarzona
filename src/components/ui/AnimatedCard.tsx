@@ -14,27 +14,23 @@ interface AnimatedCardProps {
   onClick?: () => void;
 }
 
-const  AnimatedCardComponent: React.FC<AnimatedCardProps> = ({
+const AnimatedCardComponent: React.FC<AnimatedCardProps> = ({
   children,
   className,
   hoverEffect = 'lift',
   delay = 0,
-  onClick
+  onClick,
 }) => {
   const hoverClasses = {
     lift: 'hover-lift',
     scale: 'hover-scale',
     glow: 'hover-glow',
-    none: ''
+    none: '',
   };
 
   return (
     <div
-      className={cn(
-        'animate-slide-in-up',
-        hoverClasses[hoverEffect],
-        className
-      )}
+      className={cn('animate-slide-in-up', hoverClasses[hoverEffect], className)}
       style={{ animationDelay: `${delay}ms`, willChange: 'transform' }}
       onClick={onClick}
     >
@@ -65,18 +61,18 @@ interface AnimatedButtonProps {
   type?: 'button' | 'submit' | 'reset';
 }
 
-export const AnimatedButton : React.FC<AnimatedButtonProps> = ({
+export const AnimatedButton: React.FC<AnimatedButtonProps> = ({
   children,
   className,
   variant = 'primary',
   onClick,
   disabled = false,
-  type = 'button'
+  type = 'button',
 }) => {
   const variantClasses = {
     primary: 'bg-primary text-white hover:bg-primary/90',
     secondary: 'bg-secondary text-white hover:bg-secondary/90',
-    outline: 'border-2 border-primary text-primary hover:bg-primary hover:text-white'
+    outline: 'border-2 border-primary text-primary hover:bg-primary hover:text-white',
   };
 
   return (
@@ -106,11 +102,11 @@ interface AnimatedImageProps {
   zoom?: boolean;
 }
 
-export const AnimatedImage : React.FC<AnimatedImageProps> = ({
+export const AnimatedImage: React.FC<AnimatedImageProps> = ({
   src,
   alt,
   className,
-  zoom = true
+  zoom = true,
 }) => {
   return (
     <div className={cn(zoom && 'image-zoom', className)}>
@@ -129,10 +125,8 @@ interface SkeletonProps {
   dark?: boolean;
 }
 
-export const Skeleton : React.FC<SkeletonProps> = ({ className, dark = false }) => {
-  return (
-    <div className={cn(dark ? 'skeleton-dark' : 'skeleton', className)} />
-  );
+export const Skeleton: React.FC<SkeletonProps> = ({ className, dark = false }) => {
+  return <div className={cn(dark ? 'skeleton-dark' : 'skeleton', className)} />;
 };
 
 interface FadeInProps {
@@ -141,12 +135,9 @@ interface FadeInProps {
   delay?: number;
 }
 
-export const FadeIn : React.FC<FadeInProps> = ({ children, className, delay = 0 }) => {
+export const FadeIn: React.FC<FadeInProps> = ({ children, className, delay = 0 }) => {
   return (
-    <div
-      className={cn('animate-fade-in', className)}
-      style={{ animationDelay: `${delay}ms` }}
-    >
+    <div className={cn('animate-fade-in', className)} style={{ animationDelay: `${delay}ms` }}>
       {children}
     </div>
   );
@@ -159,17 +150,17 @@ interface SlideInProps {
   delay?: number;
 }
 
-export const SlideIn : React.FC<SlideInProps> = ({
+export const SlideIn: React.FC<SlideInProps> = ({
   children,
   className,
   direction = 'up',
-  delay = 0
+  delay = 0,
 }) => {
   const directionClasses = {
     up: 'animate-slide-in-up',
     down: 'animate-slide-in-down',
     left: 'animate-slide-in-left',
-    right: 'animate-slide-in-right'
+    right: 'animate-slide-in-right',
   };
 
   return (
@@ -188,21 +179,10 @@ interface ScaleInProps {
   delay?: number;
 }
 
-export const ScaleIn : React.FC<ScaleInProps> = ({ children, className, delay = 0 }) => {
+export const ScaleIn: React.FC<ScaleInProps> = ({ children, className, delay = 0 }) => {
   return (
-    <div
-      className={cn('animate-scale-in', className)}
-      style={{ animationDelay: `${delay}ms` }}
-    >
+    <div className={cn('animate-scale-in', className)} style={{ animationDelay: `${delay}ms` }}>
       {children}
     </div>
   );
 };
-
-
-
-
-
-
-
-

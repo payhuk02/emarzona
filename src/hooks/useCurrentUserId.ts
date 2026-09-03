@@ -28,9 +28,3 @@ export function useCurrentUserId() {
     isError: query.isError,
   };
 }
-
-
-
-
-
-

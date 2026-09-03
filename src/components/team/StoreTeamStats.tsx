@@ -1,7 +1,7 @@
 /**
  * Store Team Stats Component
  * Date: 2 Février 2025
- * 
+ *
  * Affiche les statistiques de l'équipe
  */
 
@@ -23,7 +23,7 @@ export const StoreTeamStats = ({ storeId }: StoreTeamStatsProps) => {
   if (membersLoading || tasksLoading) {
     return (
       <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-        {[1, 2, 3, 4].map((i) => (
+        {[1, 2, 3, 4].map(i => (
           <Card key={i}>
             <CardContent className="p-4">
               <Skeleton className="h-8 w-16 mb-2" />
@@ -35,12 +35,12 @@ export const StoreTeamStats = ({ storeId }: StoreTeamStatsProps) => {
     );
   }
 
-  const activeMembers = members?.filter((m) => m.status === 'active').length || 0;
-  const pendingInvitations = members?.filter((m) => m.status === 'pending').length || 0;
+  const activeMembers = members?.filter(m => m.status === 'active').length || 0;
+  const pendingInvitations = members?.filter(m => m.status === 'pending').length || 0;
   const totalTasks = tasks?.length || 0;
-  const completedTasks = tasks?.filter((t) => t.status === 'completed').length || 0;
-  const pendingTasks = tasks?.filter((t) => t.status === 'pending').length || 0;
-  const inProgressTasks = tasks?.filter((t) => t.status === 'in_progress').length || 0;
+  const completedTasks = tasks?.filter(t => t.status === 'completed').length || 0;
+  const pendingTasks = tasks?.filter(t => t.status === 'pending').length || 0;
+  const inProgressTasks = tasks?.filter(t => t.status === 'in_progress').length || 0;
 
   const stats = [
     {
@@ -107,10 +107,3 @@ export const StoreTeamStats = ({ storeId }: StoreTeamStatsProps) => {
     </div>
   );
 };
-
-
-
-
-
-
-

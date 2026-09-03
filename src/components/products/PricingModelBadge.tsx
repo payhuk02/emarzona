@@ -144,9 +144,3 @@ export function PricingModelBadge({
 
   return null;
 }
-
-
-
-
-
-

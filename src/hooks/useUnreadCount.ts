@@ -1,7 +1,7 @@
 /**
  * Hook useUnreadCount
  * Date: 28 octobre 2025
- * 
+ *
  * Compte les messages non lus pour une commande
  * Utilise la fonction SQL get_unread_message_count
  */
@@ -29,11 +29,10 @@ export const useUnreadCount = (orderId: string) => {
       if (convError || !conversation) return 0;
 
       // Utiliser la fonction SQL pour compter les messages non lus
-      const { data, error } = await supabase
-        .rpc('get_unread_message_count', {
-          conversation_id_param: conversation.id,
-          user_id_param: user.id,
-        });
+      const { data, error } = await supabase.rpc('get_unread_message_count', {
+        conversation_id_param: conversation.id,
+        user_id_param: user.id,
+      });
 
       if (error) {
         logger.error('Error fetching unread count', { error, orderId, userId: user.id });
@@ -68,14 +67,13 @@ export const useUnreadCounts = (orderIds: string[]) => {
       if (convError || !conversations) return {};
 
       // Compter les messages non lus pour chaque conversation
-      const  counts: Record<string, number> = {};
+      const counts: Record<string, number> = {};
 
       for (const conv of conversations) {
-        const { data } = await supabase
-          .rpc('get_unread_message_count', {
-            conversation_id_param: conv.id,
-            user_id_param: user.id,
-          });
+        const { data } = await supabase.rpc('get_unread_message_count', {
+          conversation_id_param: conv.id,
+          user_id_param: user.id,
+        });
 
         counts[conv.order_id] = data || 0;
       }
@@ -87,10 +85,3 @@ export const useUnreadCounts = (orderIds: string[]) => {
     staleTime: 5000,
   });
 };
-
-
-
-
-
-
-

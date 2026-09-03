@@ -98,7 +98,13 @@ class SyncService {
       const pendingActions = await localQueue.getPendingActions(20); // Limiter à 20 actions par batch
 
       if (pendingActions.length === 0) {
-        return { success: true, synced: 0, failed: 0, errors: [], duration: Date.now() - startTime };
+        return {
+          success: true,
+          synced: 0,
+          failed: 0,
+          errors: [],
+          duration: Date.now() - startTime,
+        };
       }
 
       logger.info(`Synchronisation de ${pendingActions.length} actions`);
@@ -109,21 +115,24 @@ class SyncService {
         action_type: action.action_type,
         payload: action.payload,
         idempotency_key: action.idempotency_key,
-        store_id: action.store_id
+        store_id: action.store_id,
       }));
 
       // Envoyer au backend
       const response = await this.sendToBackend(syncPayload);
 
       // Traiter la réponse
-      const { synced, failed, errors } = await this.processBackendResponse(pendingActions, response);
+      const { synced, failed, errors } = await this.processBackendResponse(
+        pendingActions,
+        response
+      );
 
       const result: SyncResult = {
         success: failed === 0,
         synced,
         failed,
         errors,
-        duration: Date.now() - startTime
+        duration: Date.now() - startTime,
       };
 
       logger.info(`Sync terminé: ${synced} réussis, ${failed} échoués`);
@@ -132,7 +141,6 @@ class SyncService {
       await localQueue.cleanupFailedActions();
 
       return result;
-
     } catch (error) {
       logger.error('Erreur sync queue locale:', error);
 
@@ -141,7 +149,7 @@ class SyncService {
         synced: 0,
         failed: 0,
         errors: [{ actionId: 'global', error: error.message }],
-        duration: Date.now() - startTime
+        duration: Date.now() - startTime,
       };
     } finally {
       this.syncInProgress = false;
@@ -159,7 +167,7 @@ class SyncService {
         // Le JWT sera automatiquement ajouté par un interceptor ou le contexte auth
       },
       body: JSON.stringify({ actions }),
-      credentials: 'include' // Pour envoyer les cookies si nécessaire
+      credentials: 'include', // Pour envoyer les cookies si nécessaire
     });
 
     if (!response.ok) {
@@ -176,8 +184,11 @@ class SyncService {
   private async processBackendResponse(
     localActions: LocalAction[],
     backendResponse: any
-  ): Promise<{ synced: number; failed: number; errors: Array<{ actionId: string; error: string }> }> {
-
+  ): Promise<{
+    synced: number;
+    failed: number;
+    errors: Array<{ actionId: string; error: string }>;
+  }> {
     let synced = 0;
     let failed = 0;
     const errors: Array<{ actionId: string; error: string }> = [];
@@ -233,7 +244,6 @@ class SyncService {
 
       // Relancer la synchronisation
       return await this.syncLocalQueue();
-
     } catch (error) {
       logger.error('Erreur retry actions échouées:', error);
       return {
@@ -241,7 +251,7 @@ class SyncService {
         synced: 0,
         failed: 0,
         errors: [{ actionId: 'retry', error: error.message }],
-        duration: 0
+        duration: 0,
       };
     }
   }
@@ -288,7 +298,7 @@ class SyncService {
       syncInProgress: this.syncInProgress,
       pendingActions: queueStats.pending,
       lastSyncAttempt: null, // TODO: stocker la dernière tentative
-      queueStats
+      queueStats,
     };
   }
 
@@ -326,7 +336,7 @@ export const useSyncService = () => {
     forceSync,
     retryFailed,
     getStatus,
-    isOnline: navigator.onLine
+    isOnline: navigator.onLine,
   };
 };
 

@@ -1,11 +1,14 @@
 /**
  * Product Version History Component
  * Date: 1 Février 2025
- * 
+ *
  * Composant pour afficher l'historique des versions d'un produit digital
  */
 
-import { useDigitalProductVersionHistory, useCurrentDigitalProductVersion } from '@/hooks/digital/useDigitalProductVersions';
+import {
+  useDigitalProductVersionHistory,
+  useCurrentDigitalProductVersion,
+} from '@/hooks/digital/useDigitalProductVersions';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -28,8 +31,12 @@ export const ProductVersionHistory = ({
   productName,
   onVersionSelect,
 }: ProductVersionHistoryProps) => {
-  const { data: currentVersion, isLoading: isLoadingCurrent } = useCurrentDigitalProductVersion(productId);
-  const { data: versionHistory, isLoading: isLoadingHistory } = useDigitalProductVersionHistory(productId, 20);
+  const { data: currentVersion, isLoading: isLoadingCurrent } =
+    useCurrentDigitalProductVersion(productId);
+  const { data: versionHistory, isLoading: isLoadingHistory } = useDigitalProductVersionHistory(
+    productId,
+    20
+  );
 
   if (isLoadingCurrent || isLoadingHistory) {
     return (
@@ -40,7 +47,7 @@ export const ProductVersionHistory = ({
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {[1, 2, 3].map((i) => (
+            {[1, 2, 3].map(i => (
               <Skeleton key={i} className="h-20 w-full" />
             ))}
           </div>
@@ -55,9 +62,7 @@ export const ProductVersionHistory = ({
         <CardContent className="py-8">
           <Alert>
             <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              Aucune version disponible pour ce produit.
-            </AlertDescription>
+            <AlertDescription>Aucune version disponible pour ce produit.</AlertDescription>
           </Alert>
         </CardContent>
       </Card>
@@ -85,17 +90,11 @@ export const ProductVersionHistory = ({
           {/* Version Actuelle */}
           <TabsContent value="current" className="mt-4">
             {currentVersion ? (
-              <VersionCard
-                version={currentVersion}
-                isCurrent={true}
-                onSelect={onVersionSelect}
-              />
+              <VersionCard version={currentVersion} isCurrent={true} onSelect={onVersionSelect} />
             ) : (
               <Alert>
                 <AlertCircle className="h-4 w-4" />
-                <AlertDescription>
-                  Aucune version courante disponible.
-                </AlertDescription>
+                <AlertDescription>Aucune version courante disponible.</AlertDescription>
               </Alert>
             )}
           </TabsContent>
@@ -105,7 +104,7 @@ export const ProductVersionHistory = ({
             <ScrollArea className="h-[600px]">
               <div className="space-y-4">
                 {versionHistory && versionHistory.length > 0 ? (
-                  versionHistory.map((version) => (
+                  versionHistory.map(version => (
                     <VersionCard
                       key={version.id}
                       version={version}
@@ -116,9 +115,7 @@ export const ProductVersionHistory = ({
                 ) : (
                   <Alert>
                     <AlertCircle className="h-4 w-4" />
-                    <AlertDescription>
-                      Aucune version dans l'historique.
-                    </AlertDescription>
+                    <AlertDescription>Aucune version dans l'historique.</AlertDescription>
                   </Alert>
                 )}
               </div>
@@ -178,12 +175,8 @@ const VersionCard = ({ version, isCurrent, onSelect }: VersionCardProps) => {
                   Actuelle
                 </Badge>
               )}
-              {version.is_beta && (
-                <Badge variant="secondary">Beta</Badge>
-              )}
-              {version.is_deprecated && (
-                <Badge variant="destructive">Dépréciée</Badge>
-              )}
+              {version.is_beta && <Badge variant="secondary">Beta</Badge>}
+              {version.is_deprecated && <Badge variant="destructive">Dépréciée</Badge>}
             </div>
             <CardDescription>
               Version {version.version_number} • Publiée le{' '}
@@ -191,11 +184,7 @@ const VersionCard = ({ version, isCurrent, onSelect }: VersionCardProps) => {
             </CardDescription>
           </div>
           {onSelect && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onSelect(version.id)}
-            >
+            <Button variant="outline" size="sm" onClick={() => onSelect(version.id)}>
               <Download className="h-4 w-4 mr-2" />
               Télécharger
             </Button>
@@ -220,10 +209,7 @@ const VersionCard = ({ version, isCurrent, onSelect }: VersionCardProps) => {
             <ul className="space-y-1">
               {version.changelog.map((change, index) => (
                 <li key={index} className="flex items-start gap-2 text-sm">
-                  <Badge
-                    variant="outline"
-                    className={getChangelogTypeColor(change.type)}
-                  >
+                  <Badge variant="outline" className={getChangelogTypeColor(change.type)}>
                     {change.type}
                   </Badge>
                   <span className="text-muted-foreground">{change.description}</span>
@@ -241,19 +227,10 @@ const VersionCard = ({ version, isCurrent, onSelect }: VersionCardProps) => {
           </div>
           <div className="flex items-center gap-1">
             <Clock className="h-4 w-4" />
-            <span>
-              {format(new Date(version.released_at), 'HH:mm', { locale: fr })}
-            </span>
+            <span>{format(new Date(version.released_at), 'HH:mm', { locale: fr })}</span>
           </div>
         </div>
       </CardContent>
     </Card>
   );
 };
-
-
-
-
-
-
-

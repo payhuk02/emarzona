@@ -62,10 +62,3 @@ export function useResponsiveModal({
     useDialog,
   };
 }
-
-
-
-
-
-
-

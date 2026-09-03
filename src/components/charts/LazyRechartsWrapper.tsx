@@ -43,7 +43,7 @@ export const LazyRechartsWrapper = ({ children }: LazyRechartsWrapperProps) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    import('recharts').then((module) => {
+    import('recharts').then(module => {
       setRecharts(module);
       setLoading(false);
     });
@@ -55,10 +55,3 @@ export const LazyRechartsWrapper = ({ children }: LazyRechartsWrapperProps) => {
 
   return <>{children(recharts)}</>;
 };
-
-
-
-
-
-
-

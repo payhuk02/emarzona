@@ -1,6 +1,6 @@
 /**
  * Tests unitaires pour useDigitalProducts
- * 
+ *
  * Couverture des fonctionnalités principales :
  * - Récupération des produits digitaux
  * - Pagination
@@ -42,8 +42,8 @@ vi.mock('@/lib/logger', () => ({
 }));
 
 describe('useDigitalProducts', () => {
-  let  queryClient: QueryClient;
-  let  mockQuery: ReturnType<typeof vi.fn>;
+  let queryClient: QueryClient;
+  let mockQuery: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     queryClient = new QueryClient({
@@ -112,10 +112,7 @@ describe('useDigitalProducts', () => {
       error: { message: 'Not authenticated' },
     });
 
-    const { result } = renderHook(
-      () => useDigitalProducts('store-1'),
-      { wrapper }
-    );
+    const { result } = renderHook(() => useDigitalProducts('store-1'), { wrapper });
 
     await waitFor(() => {
       expect(result.current.isError).toBe(true);
@@ -133,10 +130,7 @@ describe('useDigitalProducts', () => {
       error: null,
     });
 
-    const { result } = renderHook(
-      () => useDigitalProducts('store-1'),
-      { wrapper }
-    );
+    const { result } = renderHook(() => useDigitalProducts('store-1'), { wrapper });
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
@@ -170,10 +164,3 @@ describe('useDigitalProducts', () => {
     expect(mockQuery.range).toHaveBeenCalledWith(20, 39); // (page-1) * itemsPerPage, from + itemsPerPage - 1
   });
 });
-
-
-
-
-
-
-

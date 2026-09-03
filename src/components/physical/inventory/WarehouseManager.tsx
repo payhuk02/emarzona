@@ -1,7 +1,7 @@
 /**
  * Warehouse Manager Component
  * Date: 2025-01-28
- * 
+ *
  * Component for managing warehouses
  * Design responsive avec le même style que Mes Templates
  */
@@ -25,7 +25,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -42,8 +42,26 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Plus, MoreVertical, Edit, Trash2, MapPin, Check, Search, X, RefreshCw, Warehouse as WarehouseIcon, Star, Package } from 'lucide-react';
-import { useWarehouses, useCreateWarehouse, useUpdateWarehouse, useDeleteWarehouse } from '@/hooks/physical/useAdvancedInventory';
+import {
+  Plus,
+  MoreVertical,
+  Edit,
+  Trash2,
+  MapPin,
+  Check,
+  Search,
+  X,
+  RefreshCw,
+  Warehouse as WarehouseIcon,
+  Star,
+  Package,
+} from 'lucide-react';
+import {
+  useWarehouses,
+  useCreateWarehouse,
+  useUpdateWarehouse,
+  useDeleteWarehouse,
+} from '@/hooks/physical/useAdvancedInventory';
 import { useStore } from '@/hooks/useStore';
 import { Warehouse } from '@/hooks/physical/useAdvancedInventory';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
@@ -52,7 +70,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { cn } from '@/lib/utils';
 
-export const WarehouseManager : React.FC = () => {
+export const WarehouseManager: React.FC = () => {
   const { store } = useStore();
   const { data: warehouses = [], isLoading } = useWarehouses(store?.id);
   const createMutation = useCreateWarehouse();
@@ -217,7 +235,7 @@ export const WarehouseManager : React.FC = () => {
             Gérez vos entrepôts et emplacements de stockage
           </p>
         </div>
-        <Button 
+        <Button
           onSelect={() => handleOpenDialog()}
           className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
           size="sm"
@@ -230,15 +248,35 @@ export const WarehouseManager : React.FC = () => {
 
       {/* Stats Cards - Responsive */}
       {warehouses.length > 0 && (
-        <div 
+        <div
           ref={statsRef}
           className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-4 animate-in fade-in slide-in-from-bottom-4 duration-700"
         >
           {[
-            { label: 'Total Entrepôts', value: stats.total, icon: WarehouseIcon, color: 'from-purple-600 to-pink-600' },
-            { label: 'Actifs', value: stats.active, icon: Package, color: 'from-green-600 to-emerald-600' },
-            { label: 'Par défaut', value: stats.defaultWarehouses, icon: Star, color: 'from-yellow-600 to-orange-600' },
-            { label: 'Inactifs', value: stats.inactive, icon: MapPin, color: 'from-gray-600 to-slate-600' },
+            {
+              label: 'Total Entrepôts',
+              value: stats.total,
+              icon: WarehouseIcon,
+              color: 'from-purple-600 to-pink-600',
+            },
+            {
+              label: 'Actifs',
+              value: stats.active,
+              icon: Package,
+              color: 'from-green-600 to-emerald-600',
+            },
+            {
+              label: 'Par défaut',
+              value: stats.defaultWarehouses,
+              icon: Star,
+              color: 'from-yellow-600 to-orange-600',
+            },
+            {
+              label: 'Inactifs',
+              value: stats.inactive,
+              icon: MapPin,
+              color: 'from-gray-600 to-slate-600',
+            },
           ].map((stat, index) => {
             const Icon = stat.icon;
             return (
@@ -254,7 +292,9 @@ export const WarehouseManager : React.FC = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-3 sm:p-4 pt-0">
-                  <div className={`text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
+                  <div
+                    className={`text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}
+                  >
                     {stat.value}
                   </div>
                 </CardContent>
@@ -275,7 +315,7 @@ export const WarehouseManager : React.FC = () => {
                 <Input
                   placeholder="Rechercher un entrepôt..."
                   value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value)}
+                  onChange={e => setSearchInput(e.target.value)}
                   className="pl-8 sm:pl-10 h-9 sm:h-10 text-xs sm:text-sm"
                   aria-label="Rechercher"
                 />
@@ -322,11 +362,7 @@ export const WarehouseManager : React.FC = () => {
               <p className="text-sm sm:text-base text-muted-foreground mb-4">
                 Aucun entrepôt configuré. Créez votre premier entrepôt pour commencer.
               </p>
-              <Button
-                onSelect={() => handleOpenDialog()}
-                variant="outline"
-                className="mt-4"
-              >
+              <Button onSelect={() => handleOpenDialog()} variant="outline" className="mt-4">
                 Créer un entrepôt
               </Button>
             </div>
@@ -366,7 +402,7 @@ export const WarehouseManager : React.FC = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredWarehouses.map((warehouse) => (
+                    {filteredWarehouses.map(warehouse => (
                       <TableRow key={warehouse.id}>
                         <TableCell className="font-medium">{warehouse.name}</TableCell>
                         <TableCell>
@@ -405,17 +441,17 @@ export const WarehouseManager : React.FC = () => {
                         <TableCell className="text-right">
                           <Select>
                             <SelectTrigger className="h-8 w-8 p-0">
-
-                                <MoreVertical className="h-4 w-4" />
-                              
-</SelectTrigger>
+                              <MoreVertical className="h-4 w-4" />
+                            </SelectTrigger>
                             <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                               <SelectItem value="edit" onSelect={() => handleOpenDialog(warehouse)}>
                                 <Edit className="mr-2 h-4 w-4" />
                                 Modifier
                               </SelectItem>
                               <DropdownMenuSeparator />
-                              <SelectItem value="delete" onSelect={() => setDeleteWarehouseId(warehouse.id)}
+                              <SelectItem
+                                value="delete"
+                                onSelect={() => setDeleteWarehouseId(warehouse.id)}
                                 className="text-destructive"
                               >
                                 <Trash2 className="mr-2 h-4 w-4" />
@@ -439,11 +475,9 @@ export const WarehouseManager : React.FC = () => {
         <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              {editingWarehouse ? 'Modifier l\'entrepôt' : 'Nouvel entrepôt'}
+              {editingWarehouse ? "Modifier l'entrepôt" : 'Nouvel entrepôt'}
             </DialogTitle>
-            <DialogDescription>
-              Remplissez les informations de l'entrepôt
-            </DialogDescription>
+            <DialogDescription>Remplissez les informations de l'entrepôt</DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -452,7 +486,7 @@ export const WarehouseManager : React.FC = () => {
                 <Input
                   id="name"
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={e => setFormData({ ...formData, name: e.target.value })}
                   required
                 />
               </div>
@@ -461,7 +495,7 @@ export const WarehouseManager : React.FC = () => {
                 <Input
                   id="code"
                   value={formData.code}
-                  onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
+                  onChange={e => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
                   required
                 />
               </div>
@@ -472,7 +506,7 @@ export const WarehouseManager : React.FC = () => {
               <Textarea
                 id="description"
                 value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                onChange={e => setFormData({ ...formData, description: e.target.value })}
                 rows={3}
               />
             </div>
@@ -482,7 +516,7 @@ export const WarehouseManager : React.FC = () => {
               <Input
                 id="address_line1"
                 value={formData.address_line1}
-                onChange={(e) => setFormData({ ...formData, address_line1: e.target.value })}
+                onChange={e => setFormData({ ...formData, address_line1: e.target.value })}
                 required
               />
             </div>
@@ -492,7 +526,7 @@ export const WarehouseManager : React.FC = () => {
               <Input
                 id="address_line2"
                 value={formData.address_line2}
-                onChange={(e) => setFormData({ ...formData, address_line2: e.target.value })}
+                onChange={e => setFormData({ ...formData, address_line2: e.target.value })}
               />
             </div>
 
@@ -502,7 +536,7 @@ export const WarehouseManager : React.FC = () => {
                 <Input
                   id="city"
                   value={formData.city}
-                  onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                  onChange={e => setFormData({ ...formData, city: e.target.value })}
                   required
                 />
               </div>
@@ -511,7 +545,7 @@ export const WarehouseManager : React.FC = () => {
                 <Input
                   id="state"
                   value={formData.state}
-                  onChange={(e) => setFormData({ ...formData, state: e.target.value })}
+                  onChange={e => setFormData({ ...formData, state: e.target.value })}
                 />
               </div>
               <div className="space-y-2">
@@ -519,7 +553,7 @@ export const WarehouseManager : React.FC = () => {
                 <Input
                   id="postal_code"
                   value={formData.postal_code}
-                  onChange={(e) => setFormData({ ...formData, postal_code: e.target.value })}
+                  onChange={e => setFormData({ ...formData, postal_code: e.target.value })}
                 />
               </div>
             </div>
@@ -530,7 +564,7 @@ export const WarehouseManager : React.FC = () => {
                 <Input
                   id="country"
                   value={formData.country}
-                  onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+                  onChange={e => setFormData({ ...formData, country: e.target.value })}
                   required
                 />
               </div>
@@ -539,7 +573,7 @@ export const WarehouseManager : React.FC = () => {
                 <Input
                   id="phone"
                   value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  onChange={e => setFormData({ ...formData, phone: e.target.value })}
                 />
               </div>
             </div>
@@ -550,7 +584,7 @@ export const WarehouseManager : React.FC = () => {
                 id="email"
                 type="email"
                 value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                onChange={e => setFormData({ ...formData, email: e.target.value })}
               />
             </div>
 
@@ -559,7 +593,7 @@ export const WarehouseManager : React.FC = () => {
                 <Checkbox
                   id="is_active"
                   checked={formData.is_active}
-                  onCheckedChange={(checked) =>
+                  onCheckedChange={checked =>
                     setFormData({ ...formData, is_active: checked as boolean })
                   }
                 />
@@ -571,7 +605,7 @@ export const WarehouseManager : React.FC = () => {
                 <Checkbox
                   id="is_default"
                   checked={formData.is_default}
-                  onCheckedChange={(checked) =>
+                  onCheckedChange={checked =>
                     setFormData({ ...formData, is_default: checked as boolean })
                   }
                 />
@@ -585,17 +619,15 @@ export const WarehouseManager : React.FC = () => {
                   id="priority"
                   type="number"
                   value={formData.priority}
-                  onChange={(e) => setFormData({ ...formData, priority: parseInt(e.target.value) || 0 })}
+                  onChange={e =>
+                    setFormData({ ...formData, priority: parseInt(e.target.value) || 0 })
+                  }
                 />
               </div>
             </div>
 
             <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onSelect={() => setIsDialogOpen(false)}
-              >
+              <Button type="button" variant="outline" onSelect={() => setIsDialogOpen(false)}>
                 Annuler
               </Button>
               <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
@@ -609,7 +641,7 @@ export const WarehouseManager : React.FC = () => {
       {/* Delete Confirmation */}
       <AlertDialog
         open={!!deleteWarehouseId}
-        onOpenChange={(open) => !open && setDeleteWarehouseId(null)}
+        onOpenChange={open => !open && setDeleteWarehouseId(null)}
       >
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -694,21 +726,11 @@ function WarehouseCard({ warehouse, onEdit, onDelete, animationDelay = 0 }: Ware
           </div>
         </div>
         <div className="flex gap-2 pt-2">
-          <Button
-            onSelect={onEdit}
-            size="sm"
-            variant="outline"
-            className="flex-1"
-          >
+          <Button onSelect={onEdit} size="sm" variant="outline" className="flex-1">
             <Edit className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
             <span className="text-xs sm:text-sm">Modifier</span>
           </Button>
-          <Button
-            onSelect={onDelete}
-            size="sm"
-            variant="destructive"
-            className="flex-1"
-          >
+          <Button onSelect={onDelete} size="sm" variant="destructive" className="flex-1">
             <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
             <span className="text-xs sm:text-sm">Supprimer</span>
           </Button>
@@ -717,10 +739,3 @@ function WarehouseCard({ warehouse, onEdit, onDelete, animationDelay = 0 }: Ware
     </Card>
   );
 }
-
-
-
-
-
-
-

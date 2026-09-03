@@ -37,10 +37,3 @@ describe('OptimizedImg', () => {
     expect(img).toHaveClass('custom-class');
   });
 });
-
-
-
-
-
-
-

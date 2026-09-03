@@ -30,7 +30,7 @@ export function useBarcodeScanner(options: UseBarcodeScannerOptions = {}) {
     (result: BarcodeScanResult) => {
       setLastScan(result);
       options.onScanSuccess?.(result);
-      
+
       if (options.autoStop) {
         setIsScanning(false);
       }
@@ -76,7 +76,8 @@ export function useProductByBarcode(barcode: string | null) {
       // Recherche dans serial_numbers
       const { data: serial, error: serialError } = await supabase
         .from('serial_numbers')
-        .select(`
+        .select(
+          `
           *,
           physical_product:physical_products!inner(
             id,
@@ -86,7 +87,8 @@ export function useProductByBarcode(barcode: string | null) {
               store_id
             )
           )
-        `)
+        `
+        )
         .eq('barcode', barcode)
         .maybeSingle();
 
@@ -100,7 +102,8 @@ export function useProductByBarcode(barcode: string | null) {
       // Recherche dans inventory_items (si barcode stocké)
       const { data: inventory, error: inventoryError } = await supabase
         .from('inventory_items')
-        .select(`
+        .select(
+          `
           *,
           physical_product:physical_products!inner(
             id,
@@ -110,7 +113,8 @@ export function useProductByBarcode(barcode: string | null) {
               store_id
             )
           )
-        `)
+        `
+        )
         .eq('barcode', barcode)
         .maybeSingle();
 
@@ -158,7 +162,7 @@ export function useUpdateStockByBarcode() {
       }
 
       // Calculer la nouvelle quantité
-      let  newQuantity= inventory.quantity_available;
+      let newQuantity = inventory.quantity_available;
       if (movementType === 'receipt') {
         newQuantity += quantity;
       } else if (movementType === 'sale') {
@@ -179,14 +183,12 @@ export function useUpdateStockByBarcode() {
       if (updateError) throw updateError;
 
       // Enregistrer le mouvement
-      const { error: movementError } = await supabase
-        .from('stock_movements')
-        .insert({
-          inventory_item_id: inventory.id,
-          movement_type: movementType,
-          quantity: quantity,
-          notes: notes || `Mise à jour via scan code-barres: ${barcode}`,
-        });
+      const { error: movementError } = await supabase.from('stock_movements').insert({
+        inventory_item_id: inventory.id,
+        movement_type: movementType,
+        quantity: quantity,
+        notes: notes || `Mise à jour via scan code-barres: ${barcode}`,
+      });
 
       if (movementError) throw movementError;
 
@@ -209,11 +211,3 @@ export function useUpdateStockByBarcode() {
     },
   });
 }
-
-
-
-
-
-
-
-

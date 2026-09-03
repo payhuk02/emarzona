@@ -105,7 +105,7 @@ export const PriceAlertForm = ({
           : undefined,
       });
       onSuccess();
-    } catch ( _error: any) {
+    } catch (_error: any) {
       // L'erreur est déjà gérée par le hook
     }
   };
@@ -116,14 +116,14 @@ export const PriceAlertForm = ({
         <Label htmlFor="product_id">Produit *</Label>
         <Select
           value={formData.product_id}
-          onValueChange={(value) => setFormData({ ...formData, product_id: value, variant_id: '' })}
+          onValueChange={value => setFormData({ ...formData, product_id: value, variant_id: '' })}
           required
         >
           <SelectTrigger id="product_id">
             <SelectValue placeholder="Sélectionner un produit" />
           </SelectTrigger>
           <SelectContent>
-            {products?.map((product) => (
+            {products?.map(product => (
               <SelectItem key={product.id} value={product.id}>
                 {product.name}
               </SelectItem>
@@ -137,14 +137,16 @@ export const PriceAlertForm = ({
           <Label htmlFor="variant_id">Variante (optionnel)</Label>
           <Select
             value={formData.variant_id || '__none__'}
-            onValueChange={(value) => setFormData({ ...formData, variant_id: value === '__none__' ? '' : value })}
+            onValueChange={value =>
+              setFormData({ ...formData, variant_id: value === '__none__' ? '' : value })
+            }
           >
             <SelectTrigger id="variant_id">
               <SelectValue placeholder="Toutes les variantes" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="__none__">Toutes les variantes</SelectItem>
-              {variants.map((variant) => (
+              {variants.map(variant => (
                 <SelectItem key={variant.id} value={variant.id}>
                   {variant.name}
                 </SelectItem>
@@ -163,7 +165,7 @@ export const PriceAlertForm = ({
             step="0.01"
             min="0"
             value={formData.target_price}
-            onChange={(e) => setFormData({ ...formData, target_price: e.target.value })}
+            onChange={e => setFormData({ ...formData, target_price: e.target.value })}
             placeholder="Ex: 5000"
           />
           <p className="text-xs text-muted-foreground">
@@ -179,7 +181,7 @@ export const PriceAlertForm = ({
             min="0"
             max="100"
             value={formData.price_drop_threshold}
-            onChange={(e) => setFormData({ ...formData, price_drop_threshold: e.target.value })}
+            onChange={e => setFormData({ ...formData, price_drop_threshold: e.target.value })}
             placeholder="Ex: 10"
           />
           <p className="text-xs text-muted-foreground">
@@ -193,19 +195,10 @@ export const PriceAlertForm = ({
           Annuler
         </Button>
         <Button type="submit" disabled={createAlert.isPending}>
-          {createAlert.isPending && (
-            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-          )}
+          {createAlert.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
           Créer l'alerte
         </Button>
       </div>
     </form>
   );
 };
-
-
-
-
-
-
-

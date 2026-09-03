@@ -1,7 +1,7 @@
 /**
  * Optimisations de Performance
  * Date: 1 Février 2025
- * 
+ *
  * Utilitaires pour améliorer les performances de l'application
  */
 
@@ -32,10 +32,10 @@ export function debounce<T extends (...args: any[]) => any>(
   wait: number,
   options?: { leading?: boolean; trailing?: boolean; maxWait?: number }
 ): (...args: Parameters<T>) => void {
-  let  timeoutId: NodeJS.Timeout | null = null;
-  let  maxTimeoutId: NodeJS.Timeout | null = null;
-  let  lastCallTime: number | null = null;
-  let  lastInvokeTime= 0;
+  let timeoutId: NodeJS.Timeout | null = null;
+  let maxTimeoutId: NodeJS.Timeout | null = null;
+  let lastCallTime: number | null = null;
+  let lastInvokeTime = 0;
   const leading = options?.leading ?? false;
   const trailing = options?.trailing ?? true;
   const maxWait = options?.maxWait;
@@ -147,8 +147,8 @@ export function throttle<T extends (...args: any[]) => any>(
   wait: number,
   options?: { leading?: boolean; trailing?: boolean }
 ): (...args: Parameters<T>) => void {
-  let  timeoutId: NodeJS.Timeout | null = null;
-  let  lastCallTime= 0;
+  let timeoutId: NodeJS.Timeout | null = null;
+  let lastCallTime = 0;
   const leading = options?.leading ?? true;
   const trailing = options?.trailing ?? true;
 
@@ -265,13 +265,10 @@ export class LRUCache<K, V> {
 /**
  * Image lazy loading avec placeholder
  */
-export function createImageLoader(
-  src: string,
-  placeholder?: string
-): Promise<string> {
+export function createImageLoader(src: string, placeholder?: string): Promise<string> {
   return new Promise((resolve, reject) => {
     const img = new Image();
-    
+
     if (placeholder) {
       img.src = placeholder;
     }
@@ -285,11 +282,14 @@ export function createImageLoader(
 /**
  * Prefetch resources
  */
-export function prefetchResource(url: string, type: 'script' | 'style' | 'image' | 'font' = 'script'): void {
+export function prefetchResource(
+  url: string,
+  type: 'script' | 'style' | 'image' | 'font' = 'script'
+): void {
   const link = document.createElement('link');
   link.rel = type === 'script' ? 'prefetch' : 'preload';
   link.href = url;
-  
+
   if (type === 'style') {
     link.as = 'style';
   } else if (type === 'image') {
@@ -306,13 +306,13 @@ export function prefetchResource(url: string, type: 'script' | 'style' | 'image'
  * Batch updates pour React
  */
 export function batchUpdates<T>(updates: (() => T)[], batchSize: number = 10): Promise<T[]> {
-  return new Promise((resolve) => {
-    const  results: T[] = [];
-    let  index= 0;
+  return new Promise(resolve => {
+    const results: T[] = [];
+    let index = 0;
 
     const processBatch = () => {
       const batch = updates.slice(index, index + batchSize);
-      batch.forEach((update) => {
+      batch.forEach(update => {
         results.push(update());
       });
       index += batchSize;
@@ -380,10 +380,3 @@ export class PerformanceMonitor {
 }
 
 export const performanceMonitor = new PerformanceMonitor();
-
-
-
-
-
-
-

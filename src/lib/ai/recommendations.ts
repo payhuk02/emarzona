@@ -54,7 +54,7 @@ export class RecommendationEngine {
       }
 
       const limit = request.limit || 10;
-      let  recommendations: ProductRecommendation[] = [];
+      let recommendations: ProductRecommendation[] = [];
 
       // Stratégie de recommandation basée sur le contexte
       switch (request.context) {
@@ -79,7 +79,7 @@ export class RecommendationEngine {
       // Mélanger et trier par score
       recommendations = this.shuffleAndSort(recommendations);
 
-      const  result: RecommendationResult = {
+      const result: RecommendationResult = {
         recommendations: recommendations.slice(0, limit),
         total: recommendations.length,
         context: request.context || 'home',
@@ -134,7 +134,7 @@ export class RecommendationEngine {
       }
 
       // 3. Calculer les scores de similarité
-      const  recommendations: ProductRecommendation[] = similarProducts.map((p) => {
+      const recommendations: ProductRecommendation[] = similarProducts.map(p => {
         const score = this.calculateSimilarityScore(product, p);
         return {
           productId: p.id,
@@ -181,7 +181,7 @@ export class RecommendationEngine {
         return [];
       }
 
-      const  recommendations: ProductRecommendation[] = products.map((p) => {
+      const recommendations: ProductRecommendation[] = products.map(p => {
         const score = this.calculatePopularityScore(p);
         return {
           productId: p.id,
@@ -197,7 +197,10 @@ export class RecommendationEngine {
 
       return recommendations;
     } catch (error) {
-      logger.error('RecommendationEngine.getCategoryBasedRecommendations error', { error, request });
+      logger.error('RecommendationEngine.getCategoryBasedRecommendations error', {
+        error,
+        request,
+      });
       return [];
     }
   }
@@ -224,7 +227,7 @@ export class RecommendationEngine {
         return [];
       }
 
-      const productIds = cartItems.map((item) => item.product_id);
+      const productIds = cartItems.map(item => item.product_id);
 
       // Trouver des produits fréquemment achetés ensemble
       const { data: complementaryProducts, error: compError } = await supabase
@@ -239,7 +242,7 @@ export class RecommendationEngine {
 
       // Analyser les produits fréquemment achetés ensemble
       const complementaryMap = new Map<string, number>();
-      complementaryProducts.forEach((item) => {
+      complementaryProducts.forEach(item => {
         const count = complementaryMap.get(item.product_id) || 0;
         complementaryMap.set(item.product_id, count + 1);
       });
@@ -265,7 +268,7 @@ export class RecommendationEngine {
         return [];
       }
 
-      const  recommendations: ProductRecommendation[] = products.map((p) => ({
+      const recommendations: ProductRecommendation[] = products.map(p => ({
         productId: p.id,
         productName: p.name,
         productImage: Array.isArray(p.images) ? p.images[0] : p.images,
@@ -291,7 +294,7 @@ export class RecommendationEngine {
     limit: number
   ): Promise<ProductRecommendation[]> {
     try {
-      const  recommendations: ProductRecommendation[] = [];
+      const recommendations: ProductRecommendation[] = [];
 
       // 1. Produits tendance (basés sur les vues et ventes récentes)
       const { data: trendingProducts, error: trendingError } = await supabase
@@ -303,7 +306,7 @@ export class RecommendationEngine {
         .limit(Math.ceil(limit * 0.4));
 
       if (!trendingError && trendingProducts) {
-        trendingProducts.forEach((p) => {
+        trendingProducts.forEach(p => {
           recommendations.push({
             productId: p.id,
             productName: p.name,
@@ -327,7 +330,7 @@ export class RecommendationEngine {
         .limit(Math.ceil(limit * 0.4));
 
       if (!popularError && popularProducts) {
-        popularProducts.forEach((p) => {
+        popularProducts.forEach(p => {
           recommendations.push({
             productId: p.id,
             productName: p.name,
@@ -343,7 +346,10 @@ export class RecommendationEngine {
 
       // 3. Produits personnalisés (si utilisateur connecté)
       if (request.userId) {
-        const personalizedProducts = await this.getPersonalizedRecommendations(request.userId, Math.ceil(limit * 0.2));
+        const personalizedProducts = await this.getPersonalizedRecommendations(
+          request.userId,
+          Math.ceil(limit * 0.2)
+        );
         recommendations.push(...personalizedProducts);
       }
 
@@ -374,7 +380,7 @@ export class RecommendationEngine {
         return [];
       }
 
-      const orderIds = orders.map((o) => o.id);
+      const orderIds = orders.map(o => o.id);
 
       // Récupérer les produits achetés
       const { data: orderItems, error: itemsError } = await supabase
@@ -386,7 +392,7 @@ export class RecommendationEngine {
         return [];
       }
 
-      const purchasedProductIds = [...new Set(orderItems.map((item) => item.product_id))];
+      const purchasedProductIds = [...new Set(orderItems.map(item => item.product_id))];
 
       // Trouver des produits similaires aux produits achetés
       const { data: products, error: productsError } = await supabase
@@ -401,7 +407,7 @@ export class RecommendationEngine {
         return [];
       }
 
-      return products.map((p) => ({
+      return products.map(p => ({
         productId: p.id,
         productName: p.name,
         productImage: Array.isArray(p.images) ? p.images[0] : p.images,
@@ -432,7 +438,7 @@ export class RecommendationEngine {
    * Calculer le score de similarité entre deux produits
    */
   private calculateSimilarityScore(product1: any, product2: any): number {
-    let  score= 0;
+    let score = 0;
 
     // Même catégorie = +0.5
     if (product1.category_id === product2.category_id) {
@@ -519,7 +525,7 @@ export class RecommendationEngine {
       return [];
     }
 
-    return [...new Set(products.map((p) => p.category_id).filter(Boolean))];
+    return [...new Set(products.map(p => p.category_id).filter(Boolean))];
   }
 
   /**
@@ -533,7 +539,7 @@ export class RecommendationEngine {
    * Obtenir le nom de l'algorithme utilisé
    */
   private getAlgorithmName(context: string): string {
-    const  algorithms: Record<string, string> = {
+    const algorithms: Record<string, string> = {
       product: 'content-based-filtering',
       category: 'category-popularity',
       cart: 'association-rules',
@@ -547,11 +553,3 @@ export class RecommendationEngine {
 
 // Instance singleton
 export const recommendationEngine = new RecommendationEngine();
-
-
-
-
-
-
-
-

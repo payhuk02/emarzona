@@ -85,7 +85,9 @@ export const cancelGeniusPayPayment = async (
 
       // Vérifier à nouveau le statut auprès de GeniusPay
       try {
-        const paymentStatus = await geniuspayClient.verifyPayment(transaction.geniuspay_transaction_id);
+        const paymentStatus = await geniuspayClient.verifyPayment(
+          transaction.geniuspay_transaction_id
+        );
 
         // Si le paiement est déjà complété, on ne peut pas l'annuler
         if (paymentStatus.status === 'completed' || paymentStatus.status === 'success') {

@@ -1,12 +1,15 @@
 /**
  * Version Selector Component
  * Date: 1 Février 2025
- * 
+ *
  * Sélecteur de version pour télécharger une version spécifique
  */
 
 import { useState } from 'react';
-import { useDigitalProductVersionHistory, useCurrentDigitalProductVersion } from '@/hooks/digital/useDigitalProductVersions';
+import {
+  useDigitalProductVersionHistory,
+  useCurrentDigitalProductVersion,
+} from '@/hooks/digital/useDigitalProductVersions';
 import {
   Select,
   SelectContent,
@@ -45,7 +48,7 @@ export const VersionSelector = ({
 
   const handleDownload = () => {
     if (selectedVersionId && onVersionDownload) {
-      const version = sortedVersions.find((v) => v.id === selectedVersionId);
+      const version = sortedVersions.find(v => v.id === selectedVersionId);
       if (version) {
         onVersionDownload(version.id, version.version_number);
       }
@@ -56,9 +59,7 @@ export const VersionSelector = ({
     return (
       <Alert className={className}>
         <AlertCircle className="h-4 w-4" />
-        <AlertDescription>
-          Aucune version disponible pour ce produit.
-        </AlertDescription>
+        <AlertDescription>Aucune version disponible pour ce produit.</AlertDescription>
       </Alert>
     );
   }
@@ -71,7 +72,7 @@ export const VersionSelector = ({
             <SelectValue placeholder="Sélectionner une version" />
           </SelectTrigger>
           <SelectContent>
-            {sortedVersions.map((version) => (
+            {sortedVersions.map(version => (
               <SelectItem key={version.id} value={version.id}>
                 <div className="flex items-center gap-2">
                   <span>Version {version.version_number}</span>
@@ -82,24 +83,16 @@ export const VersionSelector = ({
                     </Badge>
                   )}
                   {version.is_beta && <Badge variant="secondary">Beta</Badge>}
-                  {version.is_deprecated && (
-                    <Badge variant="destructive">Dépréciée</Badge>
-                  )}
+                  {version.is_deprecated && <Badge variant="destructive">Dépréciée</Badge>}
                   {version.version_name && (
-                    <span className="text-muted-foreground text-xs">
-                      - {version.version_name}
-                    </span>
+                    <span className="text-muted-foreground text-xs">- {version.version_name}</span>
                   )}
                 </div>
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
-        <Button
-          onClick={handleDownload}
-          disabled={!selectedVersionId}
-          className="gap-2"
-        >
+        <Button onClick={handleDownload} disabled={!selectedVersionId} className="gap-2">
           <Download className="h-4 w-4" />
           Télécharger
         </Button>
@@ -110,8 +103,7 @@ export const VersionSelector = ({
         <Alert>
           <CheckCircle2 className="h-4 w-4" />
           <AlertDescription>
-            Version courante recommandée :{' '}
-            <strong>Version {currentVersion.version_number}</strong>
+            Version courante recommandée : <strong>Version {currentVersion.version_number}</strong>
             {currentVersion.version_name && ` - ${currentVersion.version_name}`}
           </AlertDescription>
         </Alert>
@@ -119,10 +111,3 @@ export const VersionSelector = ({
     </div>
   );
 };
-
-
-
-
-
-
-

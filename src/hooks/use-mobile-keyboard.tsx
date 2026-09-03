@@ -1,13 +1,13 @@
 /**
  * Hook pour gérer le clavier mobile virtuel
- * 
+ *
  * Détecte l'ouverture/fermeture du clavier virtuel et ajuste le positionnement
  * des éléments (Select, Dropdown, etc.) pour éviter qu'ils soient masqués.
- * 
+ *
  * @example
  * ```tsx
  * const { isKeyboardOpen, keyboardHeight } = useMobileKeyboard();
- * 
+ *
  * // Ajuster le positionnement
  * <SelectContent
  *   style={{
@@ -58,7 +58,7 @@ export function useMobileKeyboard(): UseMobileKeyboardReturn {
       const handleResize = () => {
         const heightDiff = window.outerHeight - window.innerHeight;
         const threshold = 150; // Seuil pour considérer que le clavier est ouvert
-        
+
         if (heightDiff > threshold) {
           setIsKeyboardOpen(true);
           setKeyboardHeight(heightDiff);
@@ -117,10 +117,3 @@ export function useMobileKeyboard(): UseMobileKeyboardReturn {
     isVisualViewportSupported,
   };
 }
-
-
-
-
-
-
-

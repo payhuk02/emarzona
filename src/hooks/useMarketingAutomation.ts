@@ -5,9 +5,11 @@ import { logger } from '@/lib/logger';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 
-const MARKETING_CAMPAIGN_FIELDS = 'id, name, type, status, target_audience, content, schedule_date, created_at, updated_at, metrics';
+const MARKETING_CAMPAIGN_FIELDS =
+  'id, name, type, status, target_audience, content, schedule_date, created_at, updated_at, metrics';
 const BEHAVIORAL_TRIGGER_FIELDS = 'id, name, event_type, conditions, actions, is_active';
-const ABANDONED_CART_FIELDS = 'id, user_id, session_id, items, total_amount, currency, last_activity, recovery_status, recovery_attempts';
+const ABANDONED_CART_FIELDS =
+  'id, user_id, session_id, items, total_amount, currency, last_activity, recovery_status, recovery_attempts';
 
 export interface MarketingCampaign {
   id: string;
@@ -137,7 +139,9 @@ export const useMarketingAutomation = () => {
 
   // Create campaign mutation
   const createCampaign = useMutation({
-    mutationFn: async (campaign: Omit<MarketingCampaign, 'id' | 'created_at' | 'updated_at' | 'metrics'>) => {
+    mutationFn: async (
+      campaign: Omit<MarketingCampaign, 'id' | 'created_at' | 'updated_at' | 'metrics'>
+    ) => {
       if (!user?.id) throw new Error('User not authenticated');
 
       const { data, error } = await supabase
@@ -195,29 +199,29 @@ export const useMarketingAutomation = () => {
     onError: (error: unknown) => {
       toast({
         title: 'Erreur',
-        description: 'Impossible d\'envoyer l\'email de récupération.',
+        description: "Impossible d'envoyer l'email de récupération.",
         variant: 'destructive',
       });
     },
   });
 
   // Track user behavior for triggers
-  const trackBehavior = useCallback(async (
-    eventType: BehavioralTrigger['event_type'],
-    eventData: Record<string, unknown>
-  ) => {
-    if (!user?.id) return;
+  const trackBehavior = useCallback(
+    async (eventType: BehavioralTrigger['event_type'], eventData: Record<string, unknown>) => {
+      if (!user?.id) return;
 
-    try {
-      await supabase.rpc('track_user_behavior', {
-        user_id: user.id,
-        event_type: eventType,
-        event_data: eventData,
-      });
-    } catch (error) {
-      logger.error('Error tracking user behavior', { error });
-    }
-  }, [user?.id]);
+      try {
+        await supabase.rpc('track_user_behavior', {
+          user_id: user.id,
+          event_type: eventType,
+          event_data: eventData,
+        });
+      } catch (error) {
+        logger.error('Error tracking user behavior', { error });
+      }
+    },
+    [user?.id]
+  );
 
   // Process behavioral triggers
   const processTriggers = useCallback(async () => {
@@ -245,9 +249,10 @@ export const useMarketingAutomation = () => {
     if (!abandonedCarts || abandonedCarts.length === 0) return;
 
     // Process carts that haven't been contacted recently
-    const processableCarts = abandonedCarts.filter(cart =>
-      cart.recovery_attempts < 3 &&
-      new Date(cart.last_activity).getTime() > Date.now() - (24 * 60 * 60 * 1000) // Within 24 hours
+    const processableCarts = abandonedCarts.filter(
+      cart =>
+        cart.recovery_attempts < 3 &&
+        new Date(cart.last_activity).getTime() > Date.now() - 24 * 60 * 60 * 1000 // Within 24 hours
     );
 
     processableCarts.forEach(cart => {

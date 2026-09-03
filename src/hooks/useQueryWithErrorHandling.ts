@@ -1,18 +1,26 @@
 /**
  * useQueryWithErrorHandling Hook
  * Date: 28 Janvier 2025
- * 
+ *
  * Wrapper pour useQuery avec gestion d'erreurs améliorée
  */
 
 import { useEffect } from 'react';
 import { useQuery, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
-import { normalizeError, shouldRetryError, getRetryDelay, ErrorSeverity, logError } from '@/lib/error-handling';
+import {
+  normalizeError,
+  shouldRetryError,
+  getRetryDelay,
+  ErrorSeverity,
+  logError,
+} from '@/lib/error-handling';
 import { getUserFriendlyError } from '@/lib/user-friendly-errors';
 
-interface QueryWithErrorHandlingOptions<TData, TError = Error> 
-  extends Omit<UseQueryOptions<TData, TError>, 'retry' | 'retryDelay'> {
+interface QueryWithErrorHandlingOptions<TData, TError = Error> extends Omit<
+  UseQueryOptions<TData, TError>,
+  'retry' | 'retryDelay'
+> {
   showErrorToast?: boolean;
   errorToastTitle?: string;
   onErrorCallback?: (error: TError, normalizedError: ReturnType<typeof normalizeError>) => void;
@@ -25,19 +33,14 @@ export function useQueryWithErrorHandling<TData = unknown, TError = Error>(
   options: QueryWithErrorHandlingOptions<TData, TError>
 ): UseQueryResult<TData, TError> {
   const { toast } = useToast();
-  const {
-    showErrorToast = true,
-    errorToastTitle,
-    onErrorCallback,
-    ...queryOptions
-  } = options;
+  const { showErrorToast = true, errorToastTitle, onErrorCallback, ...queryOptions } = options;
 
   const result = useQuery<TData, TError>({
     ...queryOptions,
     retry: (failureCount, error) => {
       return shouldRetryError(error, failureCount);
     },
-    retryDelay: (attemptIndex) => {
+    retryDelay: attemptIndex => {
       return getRetryDelay(attemptIndex);
     },
   });
@@ -57,12 +60,14 @@ export function useQueryWithErrorHandling<TData = unknown, TError = Error>(
         const friendlyError = getUserFriendlyError(normalized, {
           operation: queryOptions.queryKey?.[0] as string,
         });
-        
+
         toast({
           title: errorToastTitle || friendlyError.title,
           description: friendlyError.description,
           variant: normalized.severity === ErrorSeverity.CRITICAL ? 'destructive' : 'default',
-          duration: friendlyError.duration || (normalized.severity === ErrorSeverity.CRITICAL ? 10000 : 5000),
+          duration:
+            friendlyError.duration ||
+            (normalized.severity === ErrorSeverity.CRITICAL ? 10000 : 5000),
         });
       }
 

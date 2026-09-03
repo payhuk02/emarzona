@@ -1,7 +1,7 @@
 /**
  * Zoom Integration Hook
  * Date: 30 Janvier 2025
- * 
+ *
  * Hook pour gérer les réunions Zoom pour les services
  */
 
@@ -12,7 +12,7 @@ import { logger } from '@/lib/logger';
 import { supabase } from '@/integrations/supabase/client';
 
 // Instance du service Zoom (sera initialisé avec les credentials du store)
-let  zoomServiceInstance: ZoomService | null = null;
+let zoomServiceInstance: ZoomService | null = null;
 
 /**
  * Initialise le service Zoom avec les credentials du store
@@ -41,14 +41,12 @@ const getZoomService = async (storeId: string): Promise<ZoomService> => {
   }
 
   // Créer une nouvelle instance si nécessaire
-  if (!zoomServiceInstance || 
-      zoomServiceInstance['apiKey'] !== config.api_key ||
-      zoomServiceInstance['apiSecret'] !== config.api_secret) {
-    zoomServiceInstance = new ZoomService(
-      config.api_key,
-      config.api_secret,
-      config.account_id
-    );
+  if (
+    !zoomServiceInstance ||
+    zoomServiceInstance['apiKey'] !== config.api_key ||
+    zoomServiceInstance['apiSecret'] !== config.api_secret
+  ) {
+    zoomServiceInstance = new ZoomService(config.api_key, config.api_secret, config.account_id);
   }
 
   return zoomServiceInstance;
@@ -93,7 +91,7 @@ export const useCreateZoomMeeting = (storeId?: string) => {
 
       return meeting;
     },
-    onSuccess: (meeting) => {
+    onSuccess: meeting => {
       queryClient.invalidateQueries({ queryKey: ['zoom-meetings'] });
       queryClient.invalidateQueries({ queryKey: ['service-bookings'] });
       toast({
@@ -211,10 +209,3 @@ export const useZoomMeetingRecordings = (meetingId: string, storeId?: string) =>
     enabled: !!meetingId && !!storeId,
   });
 };
-
-
-
-
-
-
-

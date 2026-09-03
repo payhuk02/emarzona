@@ -4,7 +4,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 
-const USER_PIXEL_FIELDS = 'id, user_id, pixel_type, pixel_id, pixel_name, pixel_code, is_active, created_at, updated_at';
+const USER_PIXEL_FIELDS =
+  'id, user_id, pixel_type, pixel_id, pixel_name, pixel_code, is_active, created_at, updated_at';
 
 export interface Pixel {
   id: string;
@@ -56,7 +57,7 @@ export const usePixels = () => {
 
       if (error) throw error;
       setPixels((data || []) as Pixel[]);
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error fetching pixels', { error, userId: user.id });
       toast({
@@ -79,12 +80,12 @@ export const usePixels = () => {
     if (!user) return false;
 
     try {
-      const { error } = await supabase
-        .from('user_pixels')
-        .insert([{
+      const { error } = await supabase.from('user_pixels').insert([
+        {
           user_id: user.id,
           ...pixelData,
-        }]);
+        },
+      ]);
 
       if (error) throw error;
 
@@ -95,7 +96,7 @@ export const usePixels = () => {
 
       await fetchPixels();
       return true;
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error creating pixel', { error, pixelData });
       toast({
@@ -126,7 +127,7 @@ export const usePixels = () => {
 
       await fetchPixels();
       return true;
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error updating pixel', { error, pixelId, updates });
       toast({
@@ -157,7 +158,7 @@ export const usePixels = () => {
 
       await fetchPixels();
       return true;
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error deleting pixel', { error, pixelId });
       toast({
@@ -187,20 +188,20 @@ export const usePixels = () => {
     if (!user) return false;
 
     try {
-      const { error } = await supabase
-        .from('pixel_events')
-        .insert([{
+      const { error } = await supabase.from('pixel_events').insert([
+        {
           pixel_id: pixelId,
           user_id: user.id,
           event_type: eventType,
           product_id: eventData?.product_id || null,
           order_id: eventData?.order_id || null,
           event_data: eventData || {},
-        }]);
+        },
+      ]);
 
       if (error) throw error;
       return true;
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error tracking pixel event', { error, pixelId, eventType });
       return false;
@@ -218,9 +219,3 @@ export const usePixels = () => {
     refetch: fetchPixels,
   };
 };
-
-
-
-
-
-

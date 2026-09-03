@@ -7,8 +7,10 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 
-const SERVICE_PACKAGE_FIELDS = 'id, service_id, product_id, store_id, name, description, slug, sessions_count, price, compare_at_price, credits_per_session, total_credits, expires_in_days, expires_at, is_active, is_featured, image_url, terms_and_conditions, created_at, updated_at';
-const SERVICE_PACKAGE_PURCHASE_FIELDS = 'id, user_id, package_id, order_id, total_credits, remaining_credits, used_credits, purchased_at, expires_at, is_expired, status';
+const SERVICE_PACKAGE_FIELDS =
+  'id, service_id, product_id, store_id, name, description, slug, sessions_count, price, compare_at_price, credits_per_session, total_credits, expires_in_days, expires_at, is_active, is_featured, image_url, terms_and_conditions, created_at, updated_at';
+const SERVICE_PACKAGE_PURCHASE_FIELDS =
+  'id, user_id, package_id, order_id, total_credits, remaining_credits, used_credits, purchased_at, expires_at, is_expired, status';
 
 export interface ServicePackage {
   id: string;
@@ -98,7 +100,9 @@ export const useUserServicePackages = () => {
   const { data: user } = useQuery({
     queryKey: ['current-user'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       return user;
     },
   });
@@ -110,10 +114,12 @@ export const useUserServicePackages = () => {
 
       const { data, error } = await supabase
         .from('service_package_purchases')
-        .select(`
+        .select(
+          `
           ${SERVICE_PACKAGE_PURCHASE_FIELDS},
           package:service_packages(${SERVICE_PACKAGE_FIELDS})
-        `)
+        `
+        )
         .eq('user_id', user.id)
         .eq('status', 'active')
         .order('purchased_at', { ascending: false });
@@ -178,15 +184,8 @@ export const useUpdateServicePackage = () => {
 
       return data as ServicePackage;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['service-packages', data.service_id] });
     },
   });
 };
-
-
-
-
-
-
-

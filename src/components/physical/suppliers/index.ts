@@ -7,10 +7,3 @@ export { default as SuppliersManagement } from './SuppliersManagement';
 export { default as SupplierProducts } from './SupplierProducts';
 export { default as SupplierOrders } from './SupplierOrders';
 export { default as AutoReorderRules } from './AutoReorderRules';
-
-
-
-
-
-
-

@@ -431,9 +431,3 @@ export const CourseAffiliateSettings = ({
     </div>
   );
 };
-
-
-
-
-
-

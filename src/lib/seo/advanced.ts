@@ -39,7 +39,7 @@ export class AdvancedSEO {
    */
   async generateSitemap(baseUrl: string = window.location.origin): Promise<string> {
     try {
-      const  urls: SitemapUrl[] = [];
+      const urls: SitemapUrl[] = [];
 
       // Page d'accueil
       urls.push({
@@ -242,9 +242,3 @@ ${urls
 
 // Instance singleton
 export const advancedSEO = new AdvancedSEO();
-
-
-
-
-
-

@@ -5,10 +5,3 @@
 
 export { default as WarrantiesManagement } from './WarrantiesManagement';
 export { default as MyWarranties } from './MyWarranties';
-
-
-
-
-
-
-

@@ -1,6 +1,6 @@
 /**
  * Tests unitaires pour useStore
- * 
+ *
  * Couverture :
  * - Récupération d'une boutique via contexte
  * - Gestion des états de chargement

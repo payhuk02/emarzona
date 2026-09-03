@@ -37,8 +37,8 @@ vi.mock('@/lib/logger', () => ({
 }));
 
 describe('useAffiliates - Pagination', () => {
-  let  queryClient: QueryClient;
-  let  wrapper: React.FC<{ children: React.ReactNode }>;
+  let queryClient: QueryClient;
+  let wrapper: React.FC<{ children: React.ReactNode }>;
 
   beforeEach(() => {
     queryClient = new QueryClient({
@@ -48,9 +48,7 @@ describe('useAffiliates - Pagination', () => {
       },
     });
     wrapper = ({ children }) => (
-      <QueryClientProvider client={queryClient}>
-        {children}
-      </QueryClientProvider>
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     );
     vi.clearAllMocks();
   });
@@ -92,10 +90,9 @@ describe('useAffiliates - Pagination', () => {
       error: null,
     });
 
-    const { result } = renderHook(
-      () => useAffiliates(undefined, { page: 1, pageSize: 20 }),
-      { wrapper }
-    );
+    const { result } = renderHook(() => useAffiliates(undefined, { page: 1, pageSize: 20 }), {
+      wrapper,
+    });
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
@@ -141,10 +138,9 @@ describe('useAffiliates - Pagination', () => {
       error: null,
     });
 
-    const { result } = renderHook(
-      () => useAffiliates(undefined, { page: 2, pageSize: 20 }),
-      { wrapper }
-    );
+    const { result } = renderHook(() => useAffiliates(undefined, { page: 2, pageSize: 20 }), {
+      wrapper,
+    });
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
@@ -186,10 +182,9 @@ describe('useAffiliates - Pagination', () => {
       error: null,
     });
 
-    const { result } = renderHook(
-      () => useAffiliates(undefined, { page: 1, pageSize: 50 }),
-      { wrapper }
-    );
+    const { result } = renderHook(() => useAffiliates(undefined, { page: 1, pageSize: 50 }), {
+      wrapper,
+    });
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
@@ -231,10 +226,9 @@ describe('useAffiliates - Pagination', () => {
       error: null,
     });
 
-    const { result } = renderHook(
-      () => useAffiliates(undefined, { page: 5, pageSize: 20 }),
-      { wrapper }
-    );
+    const { result } = renderHook(() => useAffiliates(undefined, { page: 5, pageSize: 20 }), {
+      wrapper,
+    });
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
@@ -270,10 +264,9 @@ describe('useAffiliates - Pagination', () => {
       error: null,
     });
 
-    const { result } = renderHook(
-      () => useAffiliates(undefined, { page: 1, pageSize: 20 }),
-      { wrapper }
-    );
+    const { result } = renderHook(() => useAffiliates(undefined, { page: 1, pageSize: 20 }), {
+      wrapper,
+    });
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
@@ -286,10 +279,3 @@ describe('useAffiliates - Pagination', () => {
     expect(result.current.pagination.hasPreviousPage).toBe(false);
   });
 });
-
-
-
-
-
-
-

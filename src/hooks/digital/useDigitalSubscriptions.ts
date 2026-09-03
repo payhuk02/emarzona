@@ -1,7 +1,7 @@
 /**
  * Digital Product Subscriptions Hooks
  * Date: 27 Janvier 2025
- * 
+ *
  * Hooks pour gérer les abonnements de produits digitaux
  */
 
@@ -10,7 +10,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 
-const SUBSCRIPTION_PAYMENT_FIELDS = 'id, subscription_id, order_id, payment_id, amount, currency, payment_status, payment_method, payment_provider, billing_period_start, billing_period_end, paid_at, failed_at, failure_reason, metadata, created_at';
+const SUBSCRIPTION_PAYMENT_FIELDS =
+  'id, subscription_id, order_id, payment_id, amount, currency, payment_status, payment_method, payment_provider, billing_period_start, billing_period_end, paid_at, failed_at, failure_reason, metadata, created_at';
 
 // =====================================================
 // TYPES
@@ -89,26 +90,29 @@ export const useCustomerSubscriptions = (customerId?: string) => {
     queryKey: ['customerSubscriptions', customerId],
     queryFn: async () => {
       if (!customerId) {
-        const { data: { user } } = await supabase.auth.getUser();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
         if (!user) throw new Error('Non authentifié');
-        
+
         // Récupérer le customer_id depuis l'email
         const { data: customer } = await supabase
           .from('customers')
           .select('id')
           .eq('email', user.email)
           .limit(1);
-        
+
         if (!customer || customer.length === 0) {
           return [];
         }
-        
+
         customerId = customer[0].id;
       }
 
       const { data, error } = await supabase
         .from('digital_product_subscriptions')
-        .select(`
+        .select(
+          `
           *,
           digital_product:digital_products!inner (
             id,
@@ -118,7 +122,8 @@ export const useCustomerSubscriptions = (customerId?: string) => {
               image_url
             )
           )
-        `)
+        `
+        )
         .eq('customer_id', customerId)
         .order('created_at', { ascending: false });
 
@@ -144,7 +149,8 @@ export const useStoreSubscriptions = (storeId?: string) => {
 
       const { data, error } = await supabase
         .from('digital_product_subscriptions')
-        .select(`
+        .select(
+          `
           *,
           customer:customers!inner (
             id,
@@ -159,7 +165,8 @@ export const useStoreSubscriptions = (storeId?: string) => {
               image_url
             )
           )
-        `)
+        `
+        )
         .eq('store_id', storeId)
         .order('created_at', { ascending: false });
 
@@ -185,7 +192,8 @@ export const useSubscription = (subscriptionId: string | undefined) => {
 
       const { data, error } = await supabase
         .from('digital_product_subscriptions')
-        .select(`
+        .select(
+          `
           *,
           customer:customers!inner (
             id,
@@ -200,7 +208,8 @@ export const useSubscription = (subscriptionId: string | undefined) => {
               image_url
             )
           )
-        `)
+        `
+        )
         .eq('id', subscriptionId)
         .single();
 
@@ -248,7 +257,7 @@ export const useSubscriptionStats = (storeId?: string) => {
   return useQuery({
     queryKey: ['subscriptionStats', storeId],
     queryFn: async () => {
-      let  query= supabase
+      let query = supabase
         .from('digital_product_subscriptions')
         .select('status, subscription_price, total_amount_paid');
 
@@ -264,25 +273,26 @@ export const useSubscriptionStats = (storeId?: string) => {
       }
 
       const subscriptions = data || [];
-      
+
       return {
         total: subscriptions.length,
-        active: subscriptions.filter((s) => s.status === 'active').length,
-        cancelled: subscriptions.filter((s) => s.status === 'cancelled').length,
-        expired: subscriptions.filter((s) => s.status === 'expired').length,
-        trialing: subscriptions.filter((s) => s.status === 'trialing').length,
-        pastDue: subscriptions.filter((s) => s.status === 'past_due').length,
+        active: subscriptions.filter(s => s.status === 'active').length,
+        cancelled: subscriptions.filter(s => s.status === 'cancelled').length,
+        expired: subscriptions.filter(s => s.status === 'expired').length,
+        trialing: subscriptions.filter(s => s.status === 'trialing').length,
+        pastDue: subscriptions.filter(s => s.status === 'past_due').length,
         totalRevenue: subscriptions.reduce((sum, s) => sum + (s.total_amount_paid || 0), 0),
         mrr: subscriptions
-          .filter((s) => s.status === 'active')
+          .filter(s => s.status === 'active')
           .reduce((sum, s) => {
-            const monthly = s.subscription_interval === 'monthly' 
-              ? s.subscription_price 
-              : s.subscription_interval === 'yearly' 
-                ? s.subscription_price / 12 
-                : s.subscription_interval === 'quarterly'
-                  ? s.subscription_price / 3
-                  : 0;
+            const monthly =
+              s.subscription_interval === 'monthly'
+                ? s.subscription_price
+                : s.subscription_interval === 'yearly'
+                  ? s.subscription_price / 12
+                  : s.subscription_interval === 'quarterly'
+                    ? s.subscription_price / 3
+                    : 0;
             return sum + monthly;
           }, 0),
       };
@@ -323,11 +333,11 @@ export const useCreateSubscription = () => {
 
       if (error) {
         logger.error('Error creating subscription', { error, digitalProductId });
-        throw new Error(error.message || 'Erreur lors de la création de l\'abonnement');
+        throw new Error(error.message || "Erreur lors de la création de l'abonnement");
       }
 
       if (!data || !data.success) {
-        throw new Error(data?.message || 'Erreur lors de la création de l\'abonnement');
+        throw new Error(data?.message || "Erreur lors de la création de l'abonnement");
       }
 
       return data;
@@ -338,14 +348,14 @@ export const useCreateSubscription = () => {
       queryClient.invalidateQueries({ queryKey: ['subscriptionStats'] });
       toast({
         title: '✅ Abonnement créé',
-        description: 'L\'abonnement a été créé avec succès',
+        description: "L'abonnement a été créé avec succès",
       });
     },
     onError: (error: Error) => {
       logger.error('Error in useCreateSubscription', { error });
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de créer l\'abonnement',
+        description: error.message || "Impossible de créer l'abonnement",
         variant: 'destructive',
       });
     },
@@ -369,7 +379,7 @@ export const useCancelSubscription = () => {
       cancelAtPeriodEnd?: boolean;
       reason?: string;
     }) => {
-      const  updateData: any = {
+      const updateData: any = {
         cancel_at_period_end: cancelAtPeriodEnd,
         cancelled_at: cancelAtPeriodEnd ? null : new Date().toISOString(),
         cancellation_reason: reason || null,
@@ -400,16 +410,16 @@ export const useCancelSubscription = () => {
       queryClient.invalidateQueries({ queryKey: ['subscriptionStats'] });
       toast({
         title: '✅ Abonnement annulé',
-        description: variables.cancelAtPeriodEnd 
-          ? 'L\'abonnement sera annulé à la fin de la période'
-          : 'L\'abonnement a été annulé',
+        description: variables.cancelAtPeriodEnd
+          ? "L'abonnement sera annulé à la fin de la période"
+          : "L'abonnement a été annulé",
       });
     },
     onError: (error: Error) => {
       logger.error('Error in useCancelSubscription', { error });
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible d\'annuler l\'abonnement',
+        description: error.message || "Impossible d'annuler l'abonnement",
         variant: 'destructive',
       });
     },
@@ -447,14 +457,14 @@ export const useRenewSubscription = () => {
       queryClient.invalidateQueries({ queryKey: ['subscriptionStats'] });
       toast({
         title: '✅ Abonnement renouvelé',
-        description: 'L\'abonnement a été renouvelé avec succès',
+        description: "L'abonnement a été renouvelé avec succès",
       });
     },
     onError: (error: Error) => {
       logger.error('Error in useRenewSubscription', { error });
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de renouveler l\'abonnement',
+        description: error.message || "Impossible de renouveler l'abonnement",
         variant: 'destructive',
       });
     },
@@ -495,23 +505,16 @@ export const useReactivateSubscription = () => {
       queryClient.invalidateQueries({ queryKey: ['subscriptionStats'] });
       toast({
         title: '✅ Abonnement réactivé',
-        description: 'L\'abonnement a été réactivé avec succès',
+        description: "L'abonnement a été réactivé avec succès",
       });
     },
     onError: (error: Error) => {
       logger.error('Error in useReactivateSubscription', { error });
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de réactiver l\'abonnement',
+        description: error.message || "Impossible de réactiver l'abonnement",
         variant: 'destructive',
       });
     },
   });
 };
-
-
-
-
-
-
-

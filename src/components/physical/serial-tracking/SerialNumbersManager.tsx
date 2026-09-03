@@ -7,11 +7,30 @@
 import { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   Hash,
@@ -54,15 +73,12 @@ export function SerialNumbersManager({ physicalProductId, variantId }: SerialNum
 
   const { data: serials, isLoading } = useProductSerialNumbers(physicalProductId, {
     variantId,
-    status: statusFilter !== 'all' ? statusFilter as any : undefined,
+    status: statusFilter !== 'all' ? (statusFilter as any) : undefined,
   });
 
   const deleteSerial = useMutation({
     mutationFn: async (serialNumberId: string) => {
-      const { error } = await supabase
-        .from('serial_numbers')
-        .delete()
-        .eq('id', serialNumberId);
+      const { error } = await supabase.from('serial_numbers').delete().eq('id', serialNumberId);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -76,7 +92,7 @@ export function SerialNumbersManager({ physicalProductId, variantId }: SerialNum
 
   const filteredSerials = useMemo(() => {
     if (!serials) return [];
-    return serials.filter((serial) => {
+    return serials.filter(serial => {
       const searchLower = debouncedSearch.toLowerCase();
       return (
         serial.serial_number.toLowerCase().includes(searchLower) ||
@@ -97,7 +113,14 @@ export function SerialNumbersManager({ physicalProductId, variantId }: SerialNum
   }, [serials]);
 
   const getStatusBadge = (status: string) => {
-    const  badges: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; className?: string }> = {
+    const badges: Record<
+      string,
+      {
+        label: string;
+        variant: 'default' | 'secondary' | 'destructive' | 'outline';
+        className?: string;
+      }
+    > = {
       manufactured: { label: 'Fabriqué', variant: 'secondary' },
       in_stock: { label: 'En Stock', variant: 'default', className: 'bg-green-500' },
       reserved: { label: 'Réservé', variant: 'default', className: 'bg-yellow-500' },
@@ -106,7 +129,11 @@ export function SerialNumbersManager({ physicalProductId, variantId }: SerialNum
       delivered: { label: 'Livré', variant: 'default', className: 'bg-indigo-500' },
       returned: { label: 'Retourné', variant: 'secondary' },
       refurbished: { label: 'Reconditionné', variant: 'secondary' },
-      warranty_repair: { label: 'Réparation Garantie', variant: 'default', className: 'bg-orange-500' },
+      warranty_repair: {
+        label: 'Réparation Garantie',
+        variant: 'default',
+        className: 'bg-orange-500',
+      },
       damaged: { label: 'Endommagé', variant: 'destructive' },
       scrapped: { label: 'Mis au Rebut', variant: 'destructive' },
     };
@@ -144,7 +171,7 @@ export function SerialNumbersManager({ physicalProductId, variantId }: SerialNum
         </div>
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
-            <Button 
+            <Button
               className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
               size="sm"
             >
@@ -168,15 +195,35 @@ export function SerialNumbersManager({ physicalProductId, variantId }: SerialNum
 
       {/* Stats Cards - Responsive */}
       {serials && serials.length > 0 && (
-        <div 
+        <div
           ref={statsRef}
           className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-4 animate-in fade-in slide-in-from-bottom-4 duration-700"
         >
           {[
-            { label: 'Total', value: stats.total, icon: Hash, color: 'from-purple-600 to-pink-600' },
-            { label: 'En Stock', value: stats.inStock, icon: Package, color: 'from-green-600 to-emerald-600' },
-            { label: 'Vendu', value: stats.sold, icon: ShoppingCart, color: 'from-blue-600 to-cyan-600' },
-            { label: 'En Réparation', value: stats.inRepair, icon: AlertCircle, color: 'from-orange-600 to-red-600' },
+            {
+              label: 'Total',
+              value: stats.total,
+              icon: Hash,
+              color: 'from-purple-600 to-pink-600',
+            },
+            {
+              label: 'En Stock',
+              value: stats.inStock,
+              icon: Package,
+              color: 'from-green-600 to-emerald-600',
+            },
+            {
+              label: 'Vendu',
+              value: stats.sold,
+              icon: ShoppingCart,
+              color: 'from-blue-600 to-cyan-600',
+            },
+            {
+              label: 'En Réparation',
+              value: stats.inRepair,
+              icon: AlertCircle,
+              color: 'from-orange-600 to-red-600',
+            },
           ].map((stat, index) => {
             const Icon = stat.icon;
             return (
@@ -192,7 +239,9 @@ export function SerialNumbersManager({ physicalProductId, variantId }: SerialNum
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-3 sm:p-4 pt-0">
-                  <div className={`text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
+                  <div
+                    className={`text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}
+                  >
                     {stat.value}
                   </div>
                 </CardContent>
@@ -213,7 +262,7 @@ export function SerialNumbersManager({ physicalProductId, variantId }: SerialNum
                 <Input
                   placeholder="Rechercher par numéro de série, IMEI, MAC..."
                   value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value)}
+                  onChange={e => setSearchInput(e.target.value)}
                   className="pl-8 sm:pl-10 h-9 sm:h-10 text-xs sm:text-sm"
                   aria-label="Rechercher"
                 />
@@ -262,7 +311,9 @@ export function SerialNumbersManager({ physicalProductId, variantId }: SerialNum
             <div className="flex flex-col items-center justify-center h-64 text-center py-8 sm:py-12">
               <Hash className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground mb-4 animate-in zoom-in-95 duration-500" />
               <p className="text-sm sm:text-base text-muted-foreground">
-                {searchInput || statusFilter !== 'all' ? 'Aucun numéro de série trouvé' : 'Aucun numéro de série enregistré'}
+                {searchInput || statusFilter !== 'all'
+                  ? 'Aucun numéro de série trouvé'
+                  : 'Aucun numéro de série enregistré'}
               </p>
             </div>
           ) : (
@@ -295,20 +346,26 @@ export function SerialNumbersManager({ physicalProductId, variantId }: SerialNum
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredSerials.map((serial) => (
+                    {filteredSerials.map(serial => (
                       <TableRow key={serial.id}>
-                        <TableCell className="font-medium font-mono">{serial.serial_number}</TableCell>
+                        <TableCell className="font-medium font-mono">
+                          {serial.serial_number}
+                        </TableCell>
                         <TableCell>
                           <div className="text-sm space-y-1">
                             {serial.imei && <div>IMEI: {serial.imei}</div>}
                             {serial.mac_address && <div>MAC: {serial.mac_address}</div>}
-                            {!serial.imei && !serial.mac_address && <span className="text-muted-foreground">-</span>}
+                            {!serial.imei && !serial.mac_address && (
+                              <span className="text-muted-foreground">-</span>
+                            )}
                           </div>
                         </TableCell>
                         <TableCell>{getStatusBadge(serial.status)}</TableCell>
                         <TableCell>
                           {serial.customer_id ? (
-                            <span className="text-sm truncate block">Client #{serial.customer_id.slice(0, 8)}</span>
+                            <span className="text-sm truncate block">
+                              Client #{serial.customer_id.slice(0, 8)}
+                            </span>
                           ) : (
                             <span className="text-muted-foreground text-sm">-</span>
                           )}
@@ -316,7 +373,8 @@ export function SerialNumbersManager({ physicalProductId, variantId }: SerialNum
                         <TableCell>
                           {serial.warranty_end_date ? (
                             <div className="text-sm truncate">
-                              Jusqu'au {new Date(serial.warranty_end_date).toLocaleDateString('fr-FR')}
+                              Jusqu'au{' '}
+                              {new Date(serial.warranty_end_date).toLocaleDateString('fr-FR')}
                             </div>
                           ) : (
                             <span className="text-muted-foreground text-sm">-</span>
@@ -393,7 +451,13 @@ interface SerialCardProps {
   animationDelay?: number;
 }
 
-function SerialCard({ serial, getStatusBadge, onViewTraceability, onEdit, animationDelay = 0 }: SerialCardProps) {
+function SerialCard({
+  serial,
+  getStatusBadge,
+  onViewTraceability,
+  onEdit,
+  animationDelay = 0,
+}: SerialCardProps) {
   return (
     <Card
       className="hover:shadow-lg transition-all duration-300 group overflow-hidden animate-in fade-in slide-in-from-bottom-4 touch-manipulation"
@@ -427,26 +491,18 @@ function SerialCard({ serial, getStatusBadge, onViewTraceability, onEdit, animat
           )}
           {serial.warranty_end_date && (
             <div className="flex items-center gap-2 text-muted-foreground">
-              <span>Garantie jusqu'au: {new Date(serial.warranty_end_date).toLocaleDateString('fr-FR')}</span>
+              <span>
+                Garantie jusqu'au: {new Date(serial.warranty_end_date).toLocaleDateString('fr-FR')}
+              </span>
             </div>
           )}
         </div>
         <div className="flex gap-2 pt-2">
-          <Button
-            onClick={onViewTraceability}
-            size="sm"
-            variant="outline"
-            className="flex-1"
-          >
+          <Button onClick={onViewTraceability} size="sm" variant="outline" className="flex-1">
             <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
             <span className="text-xs sm:text-sm">Traçabilité</span>
           </Button>
-          <Button
-            onClick={onEdit}
-            size="sm"
-            variant="outline"
-            className="flex-1"
-          >
+          <Button onClick={onEdit} size="sm" variant="outline" className="flex-1">
             <Edit className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
             <span className="text-xs sm:text-sm">Modifier</span>
           </Button>
@@ -461,10 +517,7 @@ function useDeleteSerialNumber() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (serialNumberId: string) => {
-      const { error } = await supabase
-        .from('serial_numbers')
-        .delete()
-        .eq('id', serialNumberId);
+      const { error } = await supabase.from('serial_numbers').delete().eq('id', serialNumberId);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -472,9 +525,3 @@ function useDeleteSerialNumber() {
     },
   });
 }
-
-
-
-
-
-

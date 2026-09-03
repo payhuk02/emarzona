@@ -2,7 +2,7 @@
  * VirtualizedList - Liste verticale avec virtual scrolling
  * Optimisé pour grandes listes (20+ éléments)
  * Utilise @tanstack/react-virtual pour améliorer les performances
- * 
+ *
  * Date: 30 Janvier 2025
  */
 
@@ -66,7 +66,7 @@ interface VirtualizedListProps {
  * Composant de liste virtualisée
  * Active automatiquement le virtual scrolling pour les listes de 20+ éléments
  */
-const  VirtualizedListComponent: React.FC<VirtualizedListProps> = ({
+const VirtualizedListComponent: React.FC<VirtualizedListProps> = ({
   count,
   renderItem,
   estimateSize,
@@ -84,7 +84,10 @@ const  VirtualizedListComponent: React.FC<VirtualizedListProps> = ({
   const containerRef = externalContainerRef || internalContainerRef;
 
   // Mémoriser les valeurs par défaut selon le device
-  const defaultEstimateSize = useMemo(() => estimateSize ?? (isMobile ? 100 : 120), [estimateSize, isMobile]);
+  const defaultEstimateSize = useMemo(
+    () => estimateSize ?? (isMobile ? 100 : 120),
+    [estimateSize, isMobile]
+  );
   const defaultOverscan = useMemo(() => overscan ?? (isMobile ? 3 : 5), [overscan, isMobile]);
 
   // Virtualizer pour le virtual scrolling
@@ -94,7 +97,7 @@ const  VirtualizedListComponent: React.FC<VirtualizedListProps> = ({
     estimateSize: () => defaultEstimateSize,
     overscan: defaultOverscan,
     // Mesure dynamique pour s'adapter aux différentes tailles d'éléments
-    measureElement: (element) => element?.getBoundingClientRect().height ?? defaultEstimateSize,
+    measureElement: element => element?.getBoundingClientRect().height ?? defaultEstimateSize,
   });
 
   // État de chargement
@@ -156,7 +159,7 @@ const  VirtualizedListComponent: React.FC<VirtualizedListProps> = ({
           position: 'relative',
         }}
       >
-        {virtualItems.map((virtualItem) => (
+        {virtualItems.map(virtualItem => (
           <div
             key={virtualItem.key}
             data-index={virtualItem.index}
@@ -199,10 +202,3 @@ export const VirtualizedList = React.memo(VirtualizedListComponent, (prevProps, 
 });
 
 VirtualizedList.displayName = 'VirtualizedList';
-
-
-
-
-
-
-

@@ -28,7 +28,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Truck, Search, Package, Clock, CheckCircle, MapPin, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import {
+  Truck,
+  Search,
+  Package,
+  Clock,
+  CheckCircle,
+  MapPin,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+} from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
@@ -54,20 +65,22 @@ export default function AdminShipping() {
   const [pageSize, setPageSize] = useState(20);
   const debouncedSearch = useDebounce(searchQuery, 300);
 
-  const { shipments: filteredShipments, totalCount, loading: isLoading } = useAdminShipmentsList({
+  const {
+    shipments: filteredShipments,
+    totalCount,
+    loading: isLoading,
+  } = useAdminShipmentsList({
     page,
     pageSize,
     search: debouncedSearch,
-    status: activeTab
+    status: activeTab,
   });
 
   // Fetch only stats (fast query)
   const { data: statsData } = useQuery({
     queryKey: ['admin-shipments-stats'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('shipments')
-        .select('status');
+      const { data, error } = await supabase.from('shipments').select('status');
       if (error) throw error;
       return data || [];
     },
@@ -368,11 +381,12 @@ export default function AdminShipping() {
                 <p className="text-muted-foreground">Aucune expédition trouvée.</p>
               </div>
             )}
-            
+
             {totalCount > 0 && (
               <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 pt-4 border-t">
                 <p className="text-sm text-muted-foreground">
-                  {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, totalCount)} sur {totalCount} expéditions
+                  {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, totalCount)} sur{' '}
+                  {totalCount} expéditions
                 </p>
                 <div className="flex items-center gap-2">
                   <Select

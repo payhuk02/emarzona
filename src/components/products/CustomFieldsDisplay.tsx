@@ -1,5 +1,5 @@
-import { ListTodo, Link as LinkIcon, CheckCircle2, Calendar, Tag } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { ListTodo, Link as LinkIcon, CheckCircle2, Calendar, Tag } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 interface CustomField {
   id?: string;
@@ -24,15 +24,15 @@ export const CustomFieldsDisplay = ({ fields }: CustomFieldsDisplayProps) => {
 
     // Gestion selon le type de champ
     switch (field.type) {
-      case "text":
-      case "textarea":
+      case 'text':
+      case 'textarea':
         return <span className="text-sm">{value}</span>;
 
-      case "number":
+      case 'number':
         return <span className="text-sm font-medium">{value}</span>;
 
-      case "url":
-      case "link":
+      case 'url':
+      case 'link':
         return (
           <a
             href={value}
@@ -45,35 +45,35 @@ export const CustomFieldsDisplay = ({ fields }: CustomFieldsDisplayProps) => {
           </a>
         );
 
-      case "email":
+      case 'email':
         return (
           <a href={`mailto:${value}`} className="text-sm text-primary hover:underline">
             {value}
           </a>
         );
 
-      case "phone":
+      case 'phone':
         return (
           <a href={`tel:${value}`} className="text-sm text-primary hover:underline">
             {value}
           </a>
         );
 
-      case "date":
+      case 'date':
         try {
           const date = new Date(value);
           return (
             <span className="text-sm flex items-center gap-1">
               <Calendar className="h-3 w-3" />
-              {date.toLocaleDateString("fr-FR")}
+              {date.toLocaleDateString('fr-FR')}
             </span>
           );
         } catch {
           return <span className="text-sm">{value}</span>;
         }
 
-      case "boolean":
-      case "checkbox":
+      case 'boolean':
+      case 'checkbox':
         return value ? (
           <div className="flex items-center gap-1 text-green-600">
             <CheckCircle2 className="h-4 w-4" />
@@ -83,16 +83,16 @@ export const CustomFieldsDisplay = ({ fields }: CustomFieldsDisplayProps) => {
           <span className="text-sm text-muted-foreground">Non</span>
         );
 
-      case "select":
-      case "dropdown":
+      case 'select':
+      case 'dropdown':
         return (
           <Badge variant="secondary" className="text-xs">
             {value}
           </Badge>
         );
 
-      case "multiselect":
-      case "tags":
+      case 'multiselect':
+      case 'tags':
         if (Array.isArray(value)) {
           return (
             <div className="flex flex-wrap gap-1">
@@ -107,7 +107,7 @@ export const CustomFieldsDisplay = ({ fields }: CustomFieldsDisplayProps) => {
         }
         return <span className="text-sm">{value}</span>;
 
-      case "color":
+      case 'color':
         return (
           <div className="flex items-center gap-2">
             <div
@@ -118,9 +118,9 @@ export const CustomFieldsDisplay = ({ fields }: CustomFieldsDisplayProps) => {
           </div>
         );
 
-      case "file":
-      case "image":
-        if (typeof value === "string" && value.startsWith("http")) {
+      case 'file':
+      case 'image':
+        if (typeof value === 'string' && value.startsWith('http')) {
           return (
             <a
               href={value}
@@ -136,7 +136,7 @@ export const CustomFieldsDisplay = ({ fields }: CustomFieldsDisplayProps) => {
 
       default:
         // Fallback pour types non reconnus
-        if (typeof value === "object") {
+        if (typeof value === 'object') {
           return <span className="text-sm">{JSON.stringify(value)}</span>;
         }
         return <span className="text-sm">{value}</span>;
@@ -170,10 +170,3 @@ export const CustomFieldsDisplay = ({ fields }: CustomFieldsDisplayProps) => {
     </div>
   );
 };
-
-
-
-
-
-
-

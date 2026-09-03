@@ -20,51 +20,22 @@ export {
 } from 'lucide-react';
 
 // Icônes de commerce
-export {
-  CreditCard,
-  DollarSign,
-  Tag,
-  Percent,
-  Gift,
-  ShoppingBag,
-} from 'lucide-react';
+export { CreditCard, DollarSign, Tag, Percent, Gift, ShoppingBag } from 'lucide-react';
 
 // Icônes d'analytics
-export {
-  BarChart3,
-  TrendingUp,
-  Target,
-} from 'lucide-react';
+export { BarChart3, TrendingUp, Target } from 'lucide-react';
 
 // Icônes de sécurité
-export {
-  Shield,
-  ShieldCheck,
-  Key,
-} from 'lucide-react';
+export { Shield, ShieldCheck, Key } from 'lucide-react';
 
 // Icônes de communication
-export {
-  MessageSquare,
-  Search,
-  Mail,
-} from 'lucide-react';
+export { MessageSquare, Search, Mail } from 'lucide-react';
 
 // Icônes de contenu
-export {
-  BookOpen,
-  GraduationCap,
-  FileText,
-} from 'lucide-react';
+export { BookOpen, GraduationCap, FileText } from 'lucide-react';
 
 // Icônes de logistique
-export {
-  Truck,
-  Warehouse,
-  Calendar,
-  Lightbulb,
-  MapPin,
-} from 'lucide-react';
+export { Truck, Warehouse, Calendar, Lightbulb, MapPin } from 'lucide-react';
 
 // Icônes utilitaires
 export {
@@ -144,9 +115,3 @@ export {
   Pause,
   Gavel,
 } from 'lucide-react';
-
-
-
-
-
-

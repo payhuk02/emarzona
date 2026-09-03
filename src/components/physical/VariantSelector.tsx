@@ -1,7 +1,7 @@
 /**
  * Variant Selector Component
  * Date: 28 octobre 2025
- * 
+ *
  * Sélecteur de variantes pour produits physiques
  */
 
@@ -37,34 +37,29 @@ export const VariantSelector = ({
   }>({});
 
   // Extract unique option values
-  const option1Values = [...new Set(variants.map((v) => v.option1_value))];
+  const option1Values = [...new Set(variants.map(v => v.option1_value))];
   const option2Values = option2Name
-    ? [...new Set(variants.map((v) => v.option2_value).filter(Boolean))]
+    ? [...new Set(variants.map(v => v.option2_value).filter(Boolean))]
     : [];
   const option3Values = option3Name
-    ? [...new Set(variants.map((v) => v.option3_value).filter(Boolean))]
+    ? [...new Set(variants.map(v => v.option3_value).filter(Boolean))]
     : [];
 
   // Find matching variant
   const selectedVariant = variants.find(
-    (v) =>
+    v =>
       v.option1_value === selectedOptions.option1 &&
       (!option2Name || v.option2_value === selectedOptions.option2) &&
       (!option3Name || v.option3_value === selectedOptions.option3)
   );
 
   // Check if an option is available
-  const isOptionAvailable = (
-    optionLevel: 'option1' | 'option2' | 'option3',
-    value: string
-  ) => {
-    const matchingVariants = variants.filter((v) => {
+  const isOptionAvailable = (optionLevel: 'option1' | 'option2' | 'option3', value: string) => {
+    const matchingVariants = variants.filter(v => {
       if (optionLevel === 'option1') {
         return v.option1_value === value;
       } else if (optionLevel === 'option2') {
-        return (
-          v.option1_value === selectedOptions.option1 && v.option2_value === value
-        );
+        return v.option1_value === selectedOptions.option1 && v.option2_value === value;
       } else {
         return (
           v.option1_value === selectedOptions.option1 &&
@@ -74,13 +69,10 @@ export const VariantSelector = ({
       }
     });
 
-    return matchingVariants.some((v) => v.is_available && v.quantity > 0);
+    return matchingVariants.some(v => v.is_available && v.quantity > 0);
   };
 
-  const handleOptionChange = (
-    optionLevel: 'option1' | 'option2' | 'option3',
-    value: string
-  ) => {
+  const handleOptionChange = (optionLevel: 'option1' | 'option2' | 'option3', value: string) => {
     const newSelection = { ...selectedOptions, [optionLevel]: value };
 
     // Reset subsequent options
@@ -95,7 +87,7 @@ export const VariantSelector = ({
 
     // Find and emit the complete variant
     const variant = variants.find(
-      (v) =>
+      v =>
         v.option1_value === newSelection.option1 &&
         (!option2Name || v.option2_value === newSelection.option2) &&
         (!option3Name || v.option3_value === newSelection.option3)
@@ -138,10 +130,10 @@ export const VariantSelector = ({
         <Label className="text-base font-semibold">{option1Name}</Label>
         <RadioGroup
           value={selectedOptions.option1}
-          onValueChange={(value) => handleOptionChange('option1', value)}
+          onValueChange={value => handleOptionChange('option1', value)}
         >
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {option1Values.map((value) => {
+            {option1Values.map(value => {
               const available = isOptionAvailable('option1', value);
               return (
                 <label
@@ -152,11 +144,7 @@ export const VariantSelector = ({
                     ${!available ? 'opacity-50 cursor-not-allowed' : 'hover:border-primary/50'}
                   `}
                 >
-                  <RadioGroupItem
-                    value={value}
-                    disabled={!available}
-                    className="sr-only"
-                  />
+                  <RadioGroupItem value={value} disabled={!available} className="sr-only" />
                   <span className="font-medium">{value}</span>
                   {!available && (
                     <div className="absolute inset-0 flex items-center justify-center">
@@ -176,10 +164,10 @@ export const VariantSelector = ({
           <Label className="text-base font-semibold">{option2Name}</Label>
           <RadioGroup
             value={selectedOptions.option2}
-            onValueChange={(value) => handleOptionChange('option2', value)}
+            onValueChange={value => handleOptionChange('option2', value)}
           >
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {option2Values.map((value) => {
+              {option2Values.map(value => {
                 const available = isOptionAvailable('option2', value as string);
                 return (
                   <label
@@ -215,10 +203,10 @@ export const VariantSelector = ({
           <Label className="text-base font-semibold">{option3Name}</Label>
           <RadioGroup
             value={selectedOptions.option3}
-            onValueChange={(value) => handleOptionChange('option3', value)}
+            onValueChange={value => handleOptionChange('option3', value)}
           >
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {option3Values.map((value) => {
+              {option3Values.map(value => {
                 const available = isOptionAvailable('option3', value as string);
                 return (
                   <label
@@ -276,10 +264,3 @@ export const VariantSelector = ({
     </div>
   );
 };
-
-
-
-
-
-
-

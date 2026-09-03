@@ -56,14 +56,8 @@ interface StoreAffiliateDashboardProps {
 }
 
 export function StoreAffiliateDashboard({ storeId }: StoreAffiliateDashboardProps) {
-  const {
-    affiliates,
-    stats,
-    isLoading,
-    approveAffiliate,
-    rejectAffiliate,
-    suspendAffiliate,
-  } = useStoreAffiliates(storeId);
+  const { affiliates, stats, isLoading, approveAffiliate, rejectAffiliate, suspendAffiliate } =
+    useStoreAffiliates(storeId);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -72,7 +66,7 @@ export function StoreAffiliateDashboard({ storeId }: StoreAffiliateDashboardProp
   const [actionType, setActionType] = useState<'approve' | 'reject' | 'suspend'>('approve');
 
   // Filtrer les affiliés
-  const filteredAffiliates = affiliates.filter((affiliate) => {
+  const filteredAffiliates = affiliates.filter(affiliate => {
     const matchesSearch =
       affiliate.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
       affiliate.display_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -107,7 +101,14 @@ export function StoreAffiliateDashboard({ storeId }: StoreAffiliateDashboardProp
   };
 
   const getStatusBadge = (status: string) => {
-    const  variants: Record<string, { variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: typeof CheckCircle; label: string }> = {
+    const variants: Record<
+      string,
+      {
+        variant: 'default' | 'secondary' | 'destructive' | 'outline';
+        icon: typeof CheckCircle;
+        label: string;
+      }
+    > = {
       pending: { variant: 'outline', icon: Clock, label: 'En attente' },
       active: { variant: 'default', icon: CheckCircle, label: 'Actif' },
       suspended: { variant: 'destructive', icon: XCircle, label: 'Suspendu' },
@@ -220,9 +221,7 @@ export function StoreAffiliateDashboard({ storeId }: StoreAffiliateDashboardProp
       <Card>
         <CardHeader>
           <CardTitle>Liste des Affiliés</CardTitle>
-          <CardDescription>
-            {filteredAffiliates.length} affilié(s) au total
-          </CardDescription>
+          <CardDescription>{filteredAffiliates.length} affilié(s) au total</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center gap-4 mb-4">
@@ -231,7 +230,7 @@ export function StoreAffiliateDashboard({ storeId }: StoreAffiliateDashboardProp
               <Input
                 placeholder="Rechercher par email, nom ou code..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={e => setSearchQuery(e.target.value)}
                 className="pl-10"
               />
             </div>
@@ -280,7 +279,7 @@ export function StoreAffiliateDashboard({ storeId }: StoreAffiliateDashboardProp
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredAffiliates.map((affiliate) => (
+                  {filteredAffiliates.map(affiliate => (
                     <TableRow key={affiliate.id}>
                       <TableCell>
                         <div>
@@ -357,14 +356,17 @@ export function StoreAffiliateDashboard({ storeId }: StoreAffiliateDashboardProp
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {actionType === 'approve' && 'Approuver l\'affilié'}
-              {actionType === 'reject' && 'Rejeter l\'affilié'}
-              {actionType === 'suspend' && 'Suspendre l\'affilié'}
+              {actionType === 'approve' && "Approuver l'affilié"}
+              {actionType === 'reject' && "Rejeter l'affilié"}
+              {actionType === 'suspend' && "Suspendre l'affilié"}
             </DialogTitle>
             <DialogDescription>
-              {actionType === 'approve' && 'Êtes-vous sûr de vouloir approuver cet affilié ? Il pourra commencer à promouvoir vos produits.'}
-              {actionType === 'reject' && 'Êtes-vous sûr de vouloir rejeter cet affilié ? Cette action est irréversible.'}
-              {actionType === 'suspend' && 'Êtes-vous sûr de vouloir suspendre cet affilié ? Il ne pourra plus promouvoir vos produits jusqu\'à réactivation.'}
+              {actionType === 'approve' &&
+                'Êtes-vous sûr de vouloir approuver cet affilié ? Il pourra commencer à promouvoir vos produits.'}
+              {actionType === 'reject' &&
+                'Êtes-vous sûr de vouloir rejeter cet affilié ? Cette action est irréversible.'}
+              {actionType === 'suspend' &&
+                "Êtes-vous sûr de vouloir suspendre cet affilié ? Il ne pourra plus promouvoir vos produits jusqu'à réactivation."}
             </DialogDescription>
           </DialogHeader>
           {selectedAffiliate && (
@@ -391,7 +393,9 @@ export function StoreAffiliateDashboard({ storeId }: StoreAffiliateDashboardProp
                 suspendAffiliate.isPending
               }
             >
-              {(approveAffiliate.isPending || rejectAffiliate.isPending || suspendAffiliate.isPending) ? (
+              {approveAffiliate.isPending ||
+              rejectAffiliate.isPending ||
+              suspendAffiliate.isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
               ) : null}
               Confirmer
@@ -402,16 +406,3 @@ export function StoreAffiliateDashboard({ storeId }: StoreAffiliateDashboardProp
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

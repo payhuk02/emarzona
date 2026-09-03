@@ -1,14 +1,14 @@
 /**
  * Hook pour gérer les opérations asynchrones avec états de chargement et erreurs
  * Simplifie la gestion des états async dans les composants
- * 
+ *
  * @example
  * ```tsx
  * const { execute, loading, error, data } = useAsyncOperation(async () => {
  *   const result = await fetchData();
  *   return result;
  * });
- * 
+ *
  * <button onClick={() => execute()}>Charger</button>
  * {loading && <Spinner />}
  * {error && <Error message={error} />}
@@ -67,12 +67,7 @@ export interface UseAsyncOperationReturn<T> {
 export function useAsyncOperation<T>(
   options: UseAsyncOperationOptions<T>
 ): UseAsyncOperationReturn<T> {
-  const {
-    operation,
-    onSuccess,
-    onError,
-    resetErrorOnExecute = true,
-  } = options;
+  const { operation, onSuccess, onError, resetErrorOnExecute = true } = options;
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
@@ -98,7 +93,7 @@ export function useAsyncOperation<T>(
 
     try {
       const result = await operation();
-      
+
       // Vérifier si l'opération a été annulée
       if (abortControllerRef.current?.signal.aborted) {
         return undefined;
@@ -107,7 +102,7 @@ export function useAsyncOperation<T>(
       setData(result);
       setError(null);
       onSuccess?.(result);
-      
+
       return result;
     } catch (err) {
       // Ignorer les erreurs d'annulation
@@ -119,7 +114,7 @@ export function useAsyncOperation<T>(
       setError(error);
       setData(null);
       onError?.(error);
-      
+
       throw error;
     } finally {
       // Ne mettre à jour le loading que si l'opération n'a pas été annulée
@@ -160,19 +155,15 @@ export function useAsyncOperationWithRetry<T>(
 ): UseAsyncOperationReturn<T> & {
   retryCount: number;
 } {
-  const {
-    maxRetries = 3,
-    retryDelay = 1000,
-    ...baseOptions
-  } = options;
+  const { maxRetries = 3, retryDelay = 1000, ...baseOptions } = options;
 
   const [retryCount, setRetryCount] = useState(0);
   const baseOperation = useAsyncOperation<T>({
     ...baseOptions,
     operation: async () => {
-      let  lastError: Error;
-      
-      for (let  attempt= 0; attempt < maxRetries; attempt++) {
+      let lastError: Error;
+
+      for (let attempt = 0; attempt < maxRetries; attempt++) {
         try {
           setRetryCount(attempt);
           const result = await baseOptions.operation();
@@ -180,16 +171,14 @@ export function useAsyncOperationWithRetry<T>(
           return result;
         } catch (error) {
           lastError = error instanceof Error ? error : new Error(String(error));
-          
+
           if (attempt < maxRetries - 1) {
             // Attendre avant de réessayer (exponential backoff)
-            await new Promise(resolve => 
-              setTimeout(resolve, retryDelay * Math.pow(2, attempt))
-            );
+            await new Promise(resolve => setTimeout(resolve, retryDelay * Math.pow(2, attempt)));
           }
         }
       }
-      
+
       setRetryCount(0);
       throw lastError!;
     },
@@ -200,10 +189,3 @@ export function useAsyncOperationWithRetry<T>(
     retryCount,
   };
 }
-
-
-
-
-
-
-

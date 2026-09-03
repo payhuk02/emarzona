@@ -1,7 +1,7 @@
 /**
  * Générateur de Certificat d'Authenticité pour Produits Artistes
  * Date: 28 Janvier 2025
- * 
+ *
  * Composant pour générer, afficher et télécharger les certificats d'authenticité
  */
 
@@ -10,16 +10,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Download, 
-  Shield, 
-  CheckCircle2,
-  Loader2,
-  Eye,
-  Copy,
-  ExternalLink,
-} from 'lucide-react';
-import { useArtistCertificate, useUpdateCertificateDownload } from '@/hooks/artist/useArtistCertificates';
+import { Download, Shield, CheckCircle2, Loader2, Eye, Copy, ExternalLink } from 'lucide-react';
+import {
+  useArtistCertificate,
+  useUpdateCertificateDownload,
+} from '@/hooks/artist/useArtistCertificates';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 import { format } from 'date-fns';
@@ -48,7 +43,7 @@ export const ArtistCertificateGenerator = ({
     if (!certificate?.certificate_pdf_url) {
       toast({
         title: 'Erreur',
-        description: 'Le certificat PDF n\'est pas disponible.',
+        description: "Le certificat PDF n'est pas disponible.",
         variant: 'destructive',
       });
       return;
@@ -121,9 +116,7 @@ export const ArtistCertificateGenerator = ({
         </CardHeader>
         <CardContent>
           <Alert>
-            <AlertDescription>
-              Aucun certificat trouvé pour cette commande.
-            </AlertDescription>
+            <AlertDescription>Aucun certificat trouvé pour cette commande.</AlertDescription>
           </Alert>
         </CardContent>
       </Card>
@@ -138,9 +131,7 @@ export const ArtistCertificateGenerator = ({
             <CardTitle className="flex items-center gap-2">
               <Shield className="w-6 h-6 text-purple-600" />
               Certificat d'Authenticité
-              {certificate.is_generated && (
-                <Badge className="ml-2 bg-green-600">Généré</Badge>
-              )}
+              {certificate.is_generated && <Badge className="ml-2 bg-green-600">Généré</Badge>}
             </CardTitle>
           </div>
         </CardHeader>
@@ -206,13 +197,22 @@ export const ArtistCertificateGenerator = ({
           <div className="border-t pt-4">
             <h4 className="font-semibold mb-2">Informations sur l'œuvre</h4>
             <div className="space-y-1 text-sm">
-              <p><span className="text-muted-foreground">Titre:</span> {certificate.artwork_title}</p>
-              <p><span className="text-muted-foreground">Artiste:</span> {certificate.artist_name}</p>
+              <p>
+                <span className="text-muted-foreground">Titre:</span> {certificate.artwork_title}
+              </p>
+              <p>
+                <span className="text-muted-foreground">Artiste:</span> {certificate.artist_name}
+              </p>
               {certificate.artwork_medium && (
-                <p><span className="text-muted-foreground">Médium:</span> {certificate.artwork_medium}</p>
+                <p>
+                  <span className="text-muted-foreground">Médium:</span>{' '}
+                  {certificate.artwork_medium}
+                </p>
               )}
               {certificate.artwork_year && (
-                <p><span className="text-muted-foreground">Année:</span> {certificate.artwork_year}</p>
+                <p>
+                  <span className="text-muted-foreground">Année:</span> {certificate.artwork_year}
+                </p>
               )}
             </div>
           </div>
@@ -261,18 +261,13 @@ export const ArtistCertificateGenerator = ({
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            Ce certificat a été révoqué le {certificate.revoked_at && format(new Date(certificate.revoked_at), 'dd MMMM yyyy', { locale: fr })}.
-            {certificate.revoked_reason && ` Raison: ${certificate.revoked_reason}`}
+            Ce certificat a été révoqué le{' '}
+            {certificate.revoked_at &&
+              format(new Date(certificate.revoked_at), 'dd MMMM yyyy', { locale: fr })}
+            .{certificate.revoked_reason && ` Raison: ${certificate.revoked_reason}`}
           </AlertDescription>
         </Alert>
       )}
     </div>
   );
 };
-
-
-
-
-
-
-

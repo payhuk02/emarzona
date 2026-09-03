@@ -161,10 +161,3 @@ export const centralizedErrorHandling = {
   queryConfig: centralizedQueryConfig,
   mutationConfig: centralizedMutationConfig,
 };
-
-
-
-
-
-
-

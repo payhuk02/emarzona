@@ -1,11 +1,11 @@
 /**
  * Hook usePermissions - Gestion simplifiée des permissions
  * Fournit une API simple pour vérifier les permissions
- * 
+ *
  * @example
  * ```tsx
  * const { can, hasAny, hasAll } = usePermissions(permissions);
- * 
+ *
  * {can('products.manage') && <Button>Create Product</Button>}
  * ```
  */
@@ -47,10 +47,13 @@ export interface UsePermissionsReturn {
  */
 function normalizePermissions(permissions: Permissions): Record<Permission, boolean> {
   if (Array.isArray(permissions)) {
-    return permissions.reduce((acc, perm) => {
-      acc[perm] = true;
-      return acc;
-    }, {} as Record<Permission, boolean>);
+    return permissions.reduce(
+      (acc, perm) => {
+        acc[perm] = true;
+        return acc;
+      },
+      {} as Record<Permission, boolean>
+    );
   }
   return permissions;
 }
@@ -77,7 +80,7 @@ export function usePermissions(
   const hasAny = useCallback(
     (permissionList: Permission[]): boolean => {
       if (isSuperAdmin) return true;
-      return permissionList.some((perm) => normalizedPermissions[perm]);
+      return permissionList.some(perm => normalizedPermissions[perm]);
     },
     [normalizedPermissions, isSuperAdmin]
   );
@@ -85,7 +88,7 @@ export function usePermissions(
   const hasAll = useCallback(
     (permissionList: Permission[]): boolean => {
       if (isSuperAdmin) return true;
-      return permissionList.every((perm) => normalizedPermissions[perm]);
+      return permissionList.every(perm => normalizedPermissions[perm]);
     },
     [normalizedPermissions, isSuperAdmin]
   );
@@ -93,7 +96,7 @@ export function usePermissions(
   const hasNone = useCallback(
     (permissionList: Permission[]): boolean => {
       if (isSuperAdmin) return false;
-      return !permissionList.some((perm) => normalizedPermissions[perm]);
+      return !permissionList.some(perm => normalizedPermissions[perm]);
     },
     [normalizedPermissions, isSuperAdmin]
   );
@@ -109,14 +112,11 @@ export function usePermissions(
 /**
  * Hook pour vérifier une permission spécifique
  */
-export function usePermission(permission: Permission, permissions: Permissions, isSuperAdmin: boolean = false): boolean {
+export function usePermission(
+  permission: Permission,
+  permissions: Permissions,
+  isSuperAdmin: boolean = false
+): boolean {
   const { can } = usePermissions(permissions, { isSuperAdmin });
   return can(permission);
 }
-
-
-
-
-
-
-

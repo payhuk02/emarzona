@@ -8,16 +8,23 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { 
-  getRecentMetrics, 
-  getActiveAlerts, 
-  getAllAlerts, 
+import {
+  getRecentMetrics,
+  getActiveAlerts,
+  getAllAlerts,
   getStatistics,
   acknowledgeAlert,
   type Metric,
   type Alert as AlertType,
 } from '@/lib/monitoring-enhanced';
-import { AlertTriangle, CheckCircle, XCircle, Activity, TrendingUp, TrendingDown } from 'lucide-react';
+import {
+  AlertTriangle,
+  CheckCircle,
+  XCircle,
+  Activity,
+  TrendingUp,
+  TrendingDown,
+} from 'lucide-react';
 
 export function MonitoringDashboard() {
   const [metrics, setMetrics] = useState<Metric[]>([]);
@@ -132,9 +139,7 @@ export function MonitoringDashboard() {
                 ? `${statistics.averageValues.page_load.toFixed(0)}ms`
                 : 'N/A'}
             </div>
-            <p className="text-xs text-muted-foreground">
-              Page load time
-            </p>
+            <p className="text-xs text-muted-foreground">Page load time</p>
           </CardContent>
         </Card>
 
@@ -149,9 +154,7 @@ export function MonitoringDashboard() {
                 ? `${(statistics.averageValues.error_rate * 100).toFixed(2)}%`
                 : '0%'}
             </div>
-            <p className="text-xs text-muted-foreground">
-              Erreurs / Requêtes
-            </p>
+            <p className="text-xs text-muted-foreground">Erreurs / Requêtes</p>
           </CardContent>
         </Card>
       </div>
@@ -161,12 +164,10 @@ export function MonitoringDashboard() {
         <Card>
           <CardHeader>
             <CardTitle>Alertes Actives</CardTitle>
-            <CardDescription>
-              {alerts.length} alerte(s) nécessitant une attention
-            </CardDescription>
+            <CardDescription>{alerts.length} alerte(s) nécessitant une attention</CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
-            {alerts.map((alert) => (
+            {alerts.map(alert => (
               <Alert
                 key={alert.id}
                 variant={alert.severity === 'critical' ? 'destructive' : 'default'}
@@ -174,7 +175,8 @@ export function MonitoringDashboard() {
                 <AlertTriangle className="h-4 w-4" />
                 <AlertTitle className="flex items-center justify-between">
                   <span>
-                    {alert.severity === 'critical' ? 'Critique' : 'Avertissement'}: {alert.metricName}
+                    {alert.severity === 'critical' ? 'Critique' : 'Avertissement'}:{' '}
+                    {alert.metricName}
                   </span>
                   <Button
                     variant="ghost"
@@ -188,7 +190,8 @@ export function MonitoringDashboard() {
                 <AlertDescription>
                   {alert.message}
                   <div className="mt-2 text-xs text-muted-foreground">
-                    Valeur: {formatValue(alert.value, 'ms')} | Seuil: {formatValue(alert.threshold, 'ms')}
+                    Valeur: {formatValue(alert.value, 'ms')} | Seuil:{' '}
+                    {formatValue(alert.threshold, 'ms')}
                   </div>
                 </AlertDescription>
               </Alert>
@@ -201,9 +204,7 @@ export function MonitoringDashboard() {
       <Card>
         <CardHeader>
           <CardTitle>Métriques Récentes</CardTitle>
-          <CardDescription>
-            Dernières 50 métriques enregistrées
-          </CardDescription>
+          <CardDescription>Dernières 50 métriques enregistrées</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
@@ -212,28 +213,31 @@ export function MonitoringDashboard() {
                 Aucune métrique enregistrée
               </p>
             ) : (
-              metrics.slice().reverse().map((metric) => (
-                <div
-                  key={metric.id}
-                  className="flex items-center justify-between p-3 border rounded-lg"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className={`w-3 h-3 rounded-full ${getMetricColor(metric.type)}`} />
-                    <div>
-                      <div className="font-medium">{metric.name}</div>
-                      <div className="text-sm text-muted-foreground">
-                        {new Date(metric.timestamp).toLocaleTimeString()}
+              metrics
+                .slice()
+                .reverse()
+                .map(metric => (
+                  <div
+                    key={metric.id}
+                    className="flex items-center justify-between p-3 border rounded-lg"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`w-3 h-3 rounded-full ${getMetricColor(metric.type)}`} />
+                      <div>
+                        <div className="font-medium">{metric.name}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {new Date(metric.timestamp).toLocaleTimeString()}
+                        </div>
                       </div>
                     </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline">{metric.type}</Badge>
+                      <span className="font-mono text-sm">
+                        {formatValue(metric.value, metric.unit)}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline">{metric.type}</Badge>
-                    <span className="font-mono text-sm">
-                      {formatValue(metric.value, metric.unit)}
-                    </span>
-                  </div>
-                </div>
-              ))
+                ))
             )}
           </div>
         </CardContent>
@@ -243,9 +247,7 @@ export function MonitoringDashboard() {
       <Card>
         <CardHeader>
           <CardTitle>Statistiques par Type</CardTitle>
-          <CardDescription>
-            Vue d'ensemble des métriques par catégorie
-          </CardDescription>
+          <CardDescription>Vue d'ensemble des métriques par catégorie</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -257,7 +259,8 @@ export function MonitoringDashboard() {
                 </div>
                 {statistics.averageValues[type as keyof typeof statistics.averageValues] && (
                   <div className="text-sm text-muted-foreground">
-                    Moyenne: {formatValue(
+                    Moyenne:{' '}
+                    {formatValue(
                       statistics.averageValues[type as keyof typeof statistics.averageValues],
                       type === 'error_rate' ? 'ratio' : 'ms'
                     )}
@@ -271,10 +274,3 @@ export function MonitoringDashboard() {
     </div>
   );
 }
-
-
-
-
-
-
-

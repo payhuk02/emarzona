@@ -45,7 +45,7 @@ vi.mock('@/lib/logger', () => ({
 
 // Mock affiliate-errors
 vi.mock('@/lib/affiliate-errors', () => ({
-  handleSupabaseError: vi.fn((error) => error),
+  handleSupabaseError: vi.fn(error => error),
   AffiliateErrors: {
     linkNotFound: vi.fn(() => new Error('Link not found')),
     databaseError: vi.fn(() => new Error('Database error')),
@@ -70,9 +70,7 @@ describe('useAffiliateShortLinks', () => {
       },
     });
     wrapper = ({ children }) => (
-      <QueryClientProvider client={queryClient}>
-        {children}
-      </QueryClientProvider>
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     );
 
     vi.clearAllMocks();
@@ -133,7 +131,9 @@ describe('useAffiliateShortLinks', () => {
 
       (supabase.from as unknown as jest.Mock).mockReturnValue(mockFrom);
 
-      const { result } = renderHook(() => useAffiliateShortLinks('affiliate-link-123'), { wrapper });
+      const { result } = renderHook(() => useAffiliateShortLinks('affiliate-link-123'), {
+        wrapper,
+      });
 
       await waitFor(() => {
         expect(result.current.loading).toBe(false);
@@ -156,7 +156,9 @@ describe('useAffiliateShortLinks', () => {
 
       (supabase.from as unknown as jest.Mock).mockReturnValue(mockFrom);
 
-      const { result } = renderHook(() => useAffiliateShortLinks('affiliate-link-123'), { wrapper });
+      const { result } = renderHook(() => useAffiliateShortLinks('affiliate-link-123'), {
+        wrapper,
+      });
 
       await waitFor(() => {
         expect(result.current.shortLinks).toEqual([]);
@@ -218,7 +220,9 @@ describe('useAffiliateShortLinks', () => {
         .mockReturnValueOnce(mockAliasCheckFrom) // Second call for alias check
         .mockReturnValueOnce(mockCreateFrom); // Third call for creation
 
-      const { result } = renderHook(() => useAffiliateShortLinks('affiliate-link-123'), { wrapper });
+      const { result } = renderHook(() => useAffiliateShortLinks('affiliate-link-123'), {
+        wrapper,
+      });
 
       let createdLink: unknown = null;
       await act(async () => {
@@ -264,7 +268,9 @@ describe('useAffiliateShortLinks', () => {
         .mockReturnValueOnce(mockAffiliateLinkFrom)
         .mockReturnValueOnce(mockAliasCheckFrom);
 
-      const { result } = renderHook(() => useAffiliateShortLinks('affiliate-link-123'), { wrapper });
+      const { result } = renderHook(() => useAffiliateShortLinks('affiliate-link-123'), {
+        wrapper,
+      });
 
       let resultValue: unknown = null;
       await act(async () => {
@@ -324,7 +330,9 @@ describe('useAffiliateShortLinks', () => {
         .mockReturnValueOnce(mockAffiliateLinkFrom)
         .mockReturnValueOnce(mockCreateFrom);
 
-      const { result } = renderHook(() => useAffiliateShortLinks('affiliate-link-123'), { wrapper });
+      const { result } = renderHook(() => useAffiliateShortLinks('affiliate-link-123'), {
+        wrapper,
+      });
 
       let createdLink: unknown = null;
       await act(async () => {
@@ -386,7 +394,9 @@ describe('useAffiliateShortLinks', () => {
         .mockReturnValueOnce(mockAffiliateLinkFrom)
         .mockReturnValueOnce(mockCreateFrom);
 
-      const { result } = renderHook(() => useAffiliateShortLinks('affiliate-link-123'), { wrapper });
+      const { result } = renderHook(() => useAffiliateShortLinks('affiliate-link-123'), {
+        wrapper,
+      });
 
       let createdLink: unknown = null;
       await act(async () => {
@@ -442,7 +452,9 @@ describe('useAffiliateShortLinks', () => {
         .mockReturnValueOnce(mockAliasCheckFrom)
         .mockReturnValueOnce(mockCreateFrom);
 
-      const { result } = renderHook(() => useAffiliateShortLinks('affiliate-link-123'), { wrapper });
+      const { result } = renderHook(() => useAffiliateShortLinks('affiliate-link-123'), {
+        wrapper,
+      });
 
       let createdLink: unknown = null;
       await act(async () => {
@@ -467,7 +479,9 @@ describe('useAffiliateShortLinks', () => {
 
       (supabase.from as unknown as jest.Mock).mockReturnValue(mockDeleteFrom);
 
-      const { result } = renderHook(() => useAffiliateShortLinks('affiliate-link-123'), { wrapper });
+      const { result } = renderHook(() => useAffiliateShortLinks('affiliate-link-123'), {
+        wrapper,
+      });
 
       let success: boolean = false;
       await act(async () => {
@@ -486,7 +500,9 @@ describe('useAffiliateShortLinks', () => {
 
       (supabase.from as unknown as jest.Mock).mockReturnValue(mockDeleteFrom);
 
-      const { result } = renderHook(() => useAffiliateShortLinks('affiliate-link-123'), { wrapper });
+      const { result } = renderHook(() => useAffiliateShortLinks('affiliate-link-123'), {
+        wrapper,
+      });
 
       let success: boolean = true;
       await act(async () => {
@@ -508,7 +524,9 @@ describe('useAffiliateShortLinks', () => {
 
       (supabase.from as unknown as jest.Mock).mockReturnValue(mockUpdateFrom);
 
-      const { result } = renderHook(() => useAffiliateShortLinks('affiliate-link-123'), { wrapper });
+      const { result } = renderHook(() => useAffiliateShortLinks('affiliate-link-123'), {
+        wrapper,
+      });
 
       let success: boolean = false;
       await act(async () => {
@@ -527,7 +545,9 @@ describe('useAffiliateShortLinks', () => {
 
       (supabase.from as unknown as jest.Mock).mockReturnValue(mockUpdateFrom);
 
-      const { result } = renderHook(() => useAffiliateShortLinks('affiliate-link-123'), { wrapper });
+      const { result } = renderHook(() => useAffiliateShortLinks('affiliate-link-123'), {
+        wrapper,
+      });
 
       let success: boolean = true;
       await act(async () => {

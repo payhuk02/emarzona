@@ -8,7 +8,11 @@ import { FileText, Calendar, Clock, CheckCircle2, XCircle, AlertCircle } from 'l
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { useCourseAssignments, type CourseAssignment, type AssignmentSubmission } from '@/hooks/courses/useAssignments';
+import {
+  useCourseAssignments,
+  type CourseAssignment,
+  type AssignmentSubmission,
+} from '@/hooks/courses/useAssignments';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -30,7 +34,8 @@ const AssignmentCardComponent = ({
   onSubmit,
   className,
 }: AssignmentCardProps) => {
-  const isOverdue = assignment.due_date && new Date(assignment.due_date) < new Date() && !submission;
+  const isOverdue =
+    assignment.due_date && new Date(assignment.due_date) < new Date() && !submission;
   const isSubmitted = submission && submission.status !== 'draft';
   const isGraded = submission?.status === 'graded';
   const isLate = submission?.is_late || false;
@@ -54,7 +59,9 @@ const AssignmentCardComponent = ({
           </div>
           <div className="flex flex-col gap-2 items-end">
             {assignment.is_required && (
-              <Badge variant="destructive" className="text-xs">Requis</Badge>
+              <Badge variant="destructive" className="text-xs">
+                Requis
+              </Badge>
             )}
             {isGraded && (
               <Badge variant="default" className="bg-green-600">
@@ -62,9 +69,7 @@ const AssignmentCardComponent = ({
                 Noté
               </Badge>
             )}
-            {isSubmitted && !isGraded && (
-              <Badge variant="secondary">Soumis</Badge>
-            )}
+            {isSubmitted && !isGraded && <Badge variant="secondary">Soumis</Badge>}
             {isOverdue && (
               <Badge variant="destructive">
                 <AlertCircle className="h-3 w-3 mr-1" />
@@ -88,14 +93,14 @@ const AssignmentCardComponent = ({
               <span>{assignment.points_possible} points</span>
             </div>
             {assignment.due_date && (
-              <div className={cn(
-                'flex items-center gap-1',
-                isOverdue && 'text-destructive font-medium'
-              )}>
+              <div
+                className={cn(
+                  'flex items-center gap-1',
+                  isOverdue && 'text-destructive font-medium'
+                )}
+              >
                 <Calendar className="h-4 w-4" />
-                <span>
-                  {format(new Date(assignment.due_date), 'dd MMM yyyy', { locale: fr })}
-                </span>
+                <span>{format(new Date(assignment.due_date), 'dd MMM yyyy', { locale: fr })}</span>
               </div>
             )}
             <div className="flex items-center gap-1">
@@ -133,12 +138,7 @@ const AssignmentCardComponent = ({
 
           {/* Actions */}
           <div className="flex items-center gap-2 pt-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onView}
-              className="flex-1"
-            >
+            <Button variant="outline" size="sm" onClick={onView} className="flex-1">
               {isGraded ? 'Voir la note' : isSubmitted ? 'Voir soumission' : 'Voir détails'}
             </Button>
             {!isSubmitted && enrollmentId && (
@@ -176,10 +176,3 @@ export const AssignmentCard = React.memo(AssignmentCardComponent, (prevProps, ne
 });
 
 AssignmentCard.displayName = 'AssignmentCard';
-
-
-
-
-
-
-

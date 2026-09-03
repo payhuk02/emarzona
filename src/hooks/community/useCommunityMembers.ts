@@ -5,18 +5,23 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import type { CommunityMember, CommunityMemberFormData, CommunityMembersFilter } from '@/types/community';
+import type {
+  CommunityMember,
+  CommunityMemberFormData,
+  CommunityMembersFilter,
+} from '@/types/community';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 
-const COMMUNITY_MEMBER_FIELDS = 'id, user_id, first_name, last_name, email, phone, profession, company, bio, profile_image_url, country, city, website, linkedin_url, twitter_url, github_url, status, role, badges, join_date, last_active, created_at, updated_at';
+const COMMUNITY_MEMBER_FIELDS =
+  'id, user_id, first_name, last_name, email, phone, profession, company, bio, profile_image_url, country, city, website, linkedin_url, twitter_url, github_url, status, role, badges, join_date, last_active, created_at, updated_at';
 
 // Fetch all community members with filters
 export function useCommunityMembers(filter?: CommunityMembersFilter) {
   return useQuery({
     queryKey: ['community-members', filter],
     queryFn: async () => {
-      let  query= supabase
+      let query = supabase
         .from('community_members')
         .select(COMMUNITY_MEMBER_FIELDS)
         .order('created_at', { ascending: false });
@@ -34,7 +39,9 @@ export function useCommunityMembers(filter?: CommunityMembersFilter) {
       }
 
       if (filter?.search) {
-        query = query.or(`first_name.ilike.%${filter.search}%,last_name.ilike.%${filter.search}%,email.ilike.%${filter.search}%,profession.ilike.%${filter.search}%`);
+        query = query.or(
+          `first_name.ilike.%${filter.search}%,last_name.ilike.%${filter.search}%,email.ilike.%${filter.search}%,profession.ilike.%${filter.search}%`
+        );
       }
 
       const { data, error } = await query;
@@ -76,7 +83,9 @@ export function useCurrentCommunityMember() {
   return useQuery({
     queryKey: ['current-community-member'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return null;
 
       const { data, error } = await supabase
@@ -109,7 +118,9 @@ export function useCreateCommunityMember() {
 
   return useMutation({
     mutationFn: async (formData: CommunityMemberFormData) => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
       const { data, error } = await supabase
@@ -134,7 +145,7 @@ export function useCreateCommunityMember() {
       queryClient.invalidateQueries({ queryKey: ['current-community-member'] });
       toast({
         title: 'Demande envoyée',
-        description: 'Votre demande d\'adhésion à la communauté a été envoyée avec succès.',
+        description: "Votre demande d'adhésion à la communauté a été envoyée avec succès.",
       });
     },
     onError: (error: unknown) => {
@@ -154,7 +165,13 @@ export function useUpdateCommunityMember() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({ memberId, formData }: { memberId: string; formData: Partial<CommunityMemberFormData> }) => {
+    mutationFn: async ({
+      memberId,
+      formData,
+    }: {
+      memberId: string;
+      formData: Partial<CommunityMemberFormData>;
+    }) => {
       const { data, error } = await supabase
         .from('community_members')
         .update(formData)
@@ -169,7 +186,7 @@ export function useUpdateCommunityMember() {
 
       return data as CommunityMember;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['community-members'] });
       queryClient.invalidateQueries({ queryKey: ['community-member', data.id] });
       queryClient.invalidateQueries({ queryKey: ['current-community-member'] });
@@ -195,7 +212,13 @@ export function useUpdateMemberStatus() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({ memberId, status }: { memberId: string; status: CommunityMember['status'] }) => {
+    mutationFn: async ({
+      memberId,
+      status,
+    }: {
+      memberId: string;
+      status: CommunityMember['status'];
+    }) => {
       const { data, error } = await supabase
         .from('community_members')
         .update({ status })
@@ -235,10 +258,7 @@ export function useDeleteCommunityMember() {
 
   return useMutation({
     mutationFn: async (memberId: string) => {
-      const { error } = await supabase
-        .from('community_members')
-        .delete()
-        .eq('id', memberId);
+      const { error } = await supabase.from('community_members').delete().eq('id', memberId);
 
       if (error) {
         logger.error('Error deleting community member', { error });
@@ -262,10 +282,3 @@ export function useDeleteCommunityMember() {
     },
   });
 }
-
-
-
-
-
-
-

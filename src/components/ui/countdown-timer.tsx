@@ -1,7 +1,7 @@
 /**
  * Countdown Timer Component
  * Date: 28 octobre 2025
- * 
+ *
  * Affiche un compte à rebours jusqu'à une date cible
  * Utile pour auto-release escrow, deadlines, etc.
  */
@@ -52,7 +52,7 @@ export const CountdownTimer = ({
           seconds: 0,
           total: 0,
         });
-        
+
         if (onComplete) {
           onComplete();
         }
@@ -89,7 +89,7 @@ export const CountdownTimer = ({
 
   const getFormattedTime = () => {
     const parts = [];
-    
+
     if (timeRemaining.days > 0) {
       parts.push(formatUnit(timeRemaining.days, 'jour'));
     }
@@ -108,16 +108,15 @@ export const CountdownTimer = ({
 
   const getUrgencyClass = () => {
     if (timeRemaining.total === 0) return 'text-red-600 dark:text-red-400';
-    if (timeRemaining.days === 0 && timeRemaining.hours < 24) return 'text-orange-600 dark:text-orange-400';
+    if (timeRemaining.days === 0 && timeRemaining.hours < 24)
+      return 'text-orange-600 dark:text-orange-400';
     return 'text-gray-700 dark:text-gray-300';
   };
 
   return (
     <div className={`flex items-center gap-2 ${className}`}>
       {showIcon && <Clock className={`h-4 w-4 ${getUrgencyClass()}`} />}
-      <span className={`font-medium ${getUrgencyClass()}`}>
-        {getFormattedTime()}
-      </span>
+      <span className={`font-medium ${getUrgencyClass()}`}>{getFormattedTime()}</span>
     </div>
   );
 };
@@ -154,7 +153,7 @@ export const CountdownBadge = ({
           seconds: 0,
           total: 0,
         });
-        
+
         if (onComplete) {
           onComplete();
         }
@@ -189,21 +188,19 @@ export const CountdownBadge = ({
   };
 
   const getBadgeColor = () => {
-    if (timeRemaining.total === 0) return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
-    if (timeRemaining.days === 0 && timeRemaining.hours < 24) return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200';
+    if (timeRemaining.total === 0)
+      return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+    if (timeRemaining.days === 0 && timeRemaining.hours < 24)
+      return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200';
     return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
   };
 
   return (
-    <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getBadgeColor()}`}>
+    <span
+      className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getBadgeColor()}`}
+    >
       <Clock className="h-3 w-3" />
       {getCompactFormat()}
     </span>
   );
 };
-
-
-
-
-
-

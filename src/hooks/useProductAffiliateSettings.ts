@@ -7,10 +7,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { 
-  ProductAffiliateSettings, 
-  ProductAffiliateSettingsForm 
-} from '@/types/affiliate';
+import { ProductAffiliateSettings, ProductAffiliateSettingsForm } from '@/types/affiliate';
 import { logger } from '@/lib/logger';
 
 export const useProductAffiliateSettings = (productId?: string) => {
@@ -29,17 +26,19 @@ export const useProductAffiliateSettings = (productId?: string) => {
 
       const { data, error } = await supabase
         .from('product_affiliate_settings')
-        .select(`
+        .select(
+          `
           *,
           product:products!inner(id, name, slug, price, image_url)
-        `)
+        `
+        )
         .eq('product_id', productId)
         .single();
 
       if (error && error.code !== 'PGRST116') throw error;
 
       setSettings(data || null);
-    } catch ( _error: any) {
+    } catch (_error: any) {
       logger.error('Error fetching product affiliate settings:', error);
       toast({
         title: 'Erreur',
@@ -57,27 +56,27 @@ export const useProductAffiliateSettings = (productId?: string) => {
     formData: ProductAffiliateSettingsForm
   ): Promise<boolean> => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-      const { error } = await supabase
-        .from('product_affiliate_settings')
-        .upsert({
-          product_id: productId,
-          store_id: storeId,
-          ...formData,
-          created_by: user?.id,
-        });
+      const { error } = await supabase.from('product_affiliate_settings').upsert({
+        product_id: productId,
+        store_id: storeId,
+        ...formData,
+        created_by: user?.id,
+      });
 
       if (error) throw error;
 
       toast({
         title: 'Succès',
-        description: 'Paramètres d\'affiliation enregistrés',
+        description: "Paramètres d'affiliation enregistrés",
       });
 
       await fetchSettings();
       return true;
-    } catch ( _error: any) {
+    } catch (_error: any) {
       logger.error('Error creating/updating affiliate settings:', error);
       toast({
         title: 'Erreur',
@@ -99,14 +98,14 @@ export const useProductAffiliateSettings = (productId?: string) => {
 
       toast({
         title: enabled ? 'Affiliation activée ✅' : 'Affiliation désactivée',
-        description: enabled 
-          ? 'Les affiliés peuvent maintenant promouvoir ce produit' 
-          : 'Le programme d\'affiliation est désactivé pour ce produit',
+        description: enabled
+          ? 'Les affiliés peuvent maintenant promouvoir ce produit'
+          : "Le programme d'affiliation est désactivé pour ce produit",
       });
 
       await fetchSettings();
       return true;
-    } catch ( _error: any) {
+    } catch (_error: any) {
       logger.error('Error toggling affiliate enabled:', error);
       toast({
         title: 'Erreur',
@@ -128,12 +127,12 @@ export const useProductAffiliateSettings = (productId?: string) => {
 
       toast({
         title: 'Succès',
-        description: 'Paramètres d\'affiliation supprimés',
+        description: "Paramètres d'affiliation supprimés",
       });
 
       await fetchSettings();
       return true;
-    } catch ( _error: any) {
+    } catch (_error: any) {
       logger.error('Error deleting affiliate settings:', error);
       toast({
         title: 'Erreur',
@@ -180,10 +179,12 @@ export const useStoreAffiliateProducts = (storeId?: string) => {
 
       const { data, error } = await supabase
         .from('product_affiliate_settings')
-        .select(`
+        .select(
+          `
           *,
           product:products!inner(id, name, slug, price, image_url, is_active)
-        `)
+        `
+        )
         .eq('store_id', storeId)
         .eq('affiliate_enabled', true)
         .order('created_at', { ascending: false });
@@ -191,7 +192,7 @@ export const useStoreAffiliateProducts = (storeId?: string) => {
       if (error) throw error;
 
       setProducts(data || []);
-    } catch ( _error: any) {
+    } catch (_error: any) {
       logger.error('Error fetching store affiliate products:', error);
       toast({
         title: 'Erreur',
@@ -213,10 +214,3 @@ export const useStoreAffiliateProducts = (storeId?: string) => {
     refetch: fetchProducts,
   };
 };
-
-
-
-
-
-
-

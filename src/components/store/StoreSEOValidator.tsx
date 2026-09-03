@@ -74,16 +74,14 @@ export const StoreSEOValidator = ({ store }: StoreSEOValidatorProps) => {
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <span>Validation SEO</span>
-          <Badge 
-            variant="outline" 
+          <Badge
+            variant="outline"
             className={`text-lg font-bold ${getScoreColor(validation.score)}`}
           >
             {validation.score}/100
           </Badge>
         </CardTitle>
-        <CardDescription>
-          Analyse de l'optimisation SEO de votre boutique
-        </CardDescription>
+        <CardDescription>Analyse de l'optimisation SEO de votre boutique</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Score et barre de progression */}
@@ -94,12 +92,11 @@ export const StoreSEOValidator = ({ store }: StoreSEOValidatorProps) => {
               {validation.score}%
             </span>
           </div>
-          <Progress 
-            value={validation.score} 
-            className="h-3"
+          <Progress value={validation.score} className="h-3" />
+          <div
+            className={`h-3 rounded-full ${getScoreBgColor(validation.score)} opacity-20`}
+            style={{ width: `${validation.score}%`, marginTop: '-0.75rem' }}
           />
-          <div className={`h-3 rounded-full ${getScoreBgColor(validation.score)} opacity-20`} 
-               style={{ width: `${validation.score}%`, marginTop: '-0.75rem' }} />
         </div>
 
         {/* Points forts */}
@@ -111,7 +108,11 @@ export const StoreSEOValidator = ({ store }: StoreSEOValidatorProps) => {
             </h4>
             <div className="flex flex-wrap gap-2">
               {validation.strengths.map((strength, index) => (
-                <Badge key={index} variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                <Badge
+                  key={index}
+                  variant="outline"
+                  className="bg-green-50 text-green-700 border-green-200"
+                >
                   {strength}
                 </Badge>
               ))}
@@ -168,11 +169,15 @@ export const StoreSEOValidator = ({ store }: StoreSEOValidatorProps) => {
           <div className="grid grid-cols-2 gap-2">
             <div>
               <span className="font-medium">Titre SEO:</span>{' '}
-              {validation.metaTitleLength ? `${validation.metaTitleLength} caractères` : 'Non défini'}
+              {validation.metaTitleLength
+                ? `${validation.metaTitleLength} caractères`
+                : 'Non défini'}
             </div>
             <div>
               <span className="font-medium">Description SEO:</span>{' '}
-              {validation.metaDescriptionLength ? `${validation.metaDescriptionLength} caractères` : 'Non définie'}
+              {validation.metaDescriptionLength
+                ? `${validation.metaDescriptionLength} caractères`
+                : 'Non définie'}
             </div>
           </div>
           <div className="grid grid-cols-2 gap-2">
@@ -200,10 +205,3 @@ export const StoreSEOValidator = ({ store }: StoreSEOValidatorProps) => {
     </Card>
   );
 };
-
-
-
-
-
-
-

@@ -34,9 +34,7 @@ const CohortsListComponent = ({ courseId, onCohortClick, className }: CohortsLis
     return (
       <Card className={className}>
         <CardContent className="p-6">
-          <div className="text-center text-muted-foreground">
-            Aucun cohort créé pour ce cours
-          </div>
+          <div className="text-center text-muted-foreground">Aucun cohort créé pour ce cours</div>
         </CardContent>
       </Card>
     );
@@ -44,7 +42,7 @@ const CohortsListComponent = ({ courseId, onCohortClick, className }: CohortsLis
 
   return (
     <div className={cn('space-y-3', className)}>
-      {cohorts.map((cohort) => (
+      {cohorts.map(cohort => (
         <Card
           key={cohort.id}
           className="hover:shadow-md transition-shadow cursor-pointer"
@@ -59,14 +57,10 @@ const CohortsListComponent = ({ courseId, onCohortClick, className }: CohortsLis
                 <div className="flex-1">
                   <CardTitle className="text-lg flex items-center gap-2">
                     {cohort.name}
-                    {cohort.is_private && (
-                      <Lock className="h-4 w-4 text-muted-foreground" />
-                    )}
+                    {cohort.is_private && <Lock className="h-4 w-4 text-muted-foreground" />}
                   </CardTitle>
                   {cohort.description && (
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {cohort.description}
-                    </p>
+                    <p className="text-sm text-muted-foreground mt-1">{cohort.description}</p>
                   )}
                 </div>
               </div>
@@ -80,9 +74,7 @@ const CohortsListComponent = ({ courseId, onCohortClick, className }: CohortsLis
               <div className="flex items-center gap-1">
                 <Users className="h-4 w-4" />
                 <span>{cohort.member_count || 0} membres</span>
-                {cohort.max_students && (
-                  <span> / {cohort.max_students}</span>
-                )}
+                {cohort.max_students && <span> / {cohort.max_students}</span>}
               </div>
               {cohort.start_date && (
                 <div className="flex items-center gap-1">
@@ -110,10 +102,3 @@ export const CohortsList = React.memo(CohortsListComponent, (prevProps, nextProp
 });
 
 CohortsList.displayName = 'CohortsList';
-
-
-
-
-
-
-

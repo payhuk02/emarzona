@@ -53,17 +53,25 @@ export function InventoryTable({ items, onAdjust }: InventoryTableProps) {
             <TableRow>
               <TableHead className="text-xs sm:text-sm">SKU</TableHead>
               <TableHead className="text-xs sm:text-sm">Produit</TableHead>
-              <TableHead className="text-center text-xs sm:text-sm hidden md:table-cell">Disponible</TableHead>
-              <TableHead className="text-center text-xs sm:text-sm hidden lg:table-cell">Réservé</TableHead>
-              <TableHead className="text-center text-xs sm:text-sm hidden lg:table-cell">Point de Réappro.</TableHead>
+              <TableHead className="text-center text-xs sm:text-sm hidden md:table-cell">
+                Disponible
+              </TableHead>
+              <TableHead className="text-center text-xs sm:text-sm hidden lg:table-cell">
+                Réservé
+              </TableHead>
+              <TableHead className="text-center text-xs sm:text-sm hidden lg:table-cell">
+                Point de Réappro.
+              </TableHead>
               <TableHead className="text-xs sm:text-sm hidden xl:table-cell">Emplacement</TableHead>
-              <TableHead className="text-right text-xs sm:text-sm hidden md:table-cell">Valeur</TableHead>
+              <TableHead className="text-right text-xs sm:text-sm hidden md:table-cell">
+                Valeur
+              </TableHead>
               <TableHead className="text-xs sm:text-sm hidden sm:table-cell">Statut</TableHead>
               <TableHead className="text-right text-xs sm:text-sm">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {items.map((item) => {
+            {items.map(item => {
               const productName =
                 item.physical_product?.product?.name ||
                 item.variant?.physical_product?.product?.name ||
@@ -87,7 +95,10 @@ export function InventoryTable({ items, onAdjust }: InventoryTableProps) {
                       {/* Mobile: Afficher infos supplémentaires */}
                       <div className="flex flex-wrap gap-2 mt-1 md:hidden">
                         <span className="text-xs text-muted-foreground">
-                          Disp: <span className="font-semibold text-foreground">{item.quantity_available}</span>
+                          Disp:{' '}
+                          <span className="font-semibold text-foreground">
+                            {item.quantity_available}
+                          </span>
                         </span>
                         {getStockBadge(item)}
                       </div>
@@ -128,10 +139,3 @@ export function InventoryTable({ items, onAdjust }: InventoryTableProps) {
     </div>
   );
 }
-
-
-
-
-
-
-

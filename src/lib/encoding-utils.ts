@@ -53,7 +53,7 @@ export function decodeURI(encoded: string): string {
  * Encode un objet en query string
  */
 export function encodeQueryString(params: Record<string, any>): string {
-  const  pairs: string[] = [];
+  const pairs: string[] = [];
   for (const [key, value] of Object.entries(params)) {
     if (value !== null && value !== undefined) {
       const encodedKey = encodeURIComponent(key);
@@ -68,7 +68,7 @@ export function encodeQueryString(params: Record<string, any>): string {
  * Décode une query string en objet
  */
 export function decodeQueryString(queryString: string): Record<string, string> {
-  const  params: Record<string, string> = {};
+  const params: Record<string, string> = {};
   const pairs = queryString.split('&');
 
   for (const pair of pairs) {
@@ -85,7 +85,7 @@ export function decodeQueryString(queryString: string): Record<string, string> {
  * Encode une chaîne en HTML entities
  */
 export function encodeHTMLEntities(str: string): string {
-  const  entityMap: Record<string, string> = {
+  const entityMap: Record<string, string> = {
     '&': '&amp;',
     '<': '&lt;',
     '>': '&gt;',
@@ -94,7 +94,7 @@ export function encodeHTMLEntities(str: string): string {
     '/': '&#x2F;',
   };
 
-  return str.replace(/[&<>"'/]/g, (char) => entityMap[char] || char);
+  return str.replace(/[&<>"'/]/g, char => entityMap[char] || char);
 }
 
 /**
@@ -108,7 +108,7 @@ export function decodeHTMLEntities(str: string): string {
   }
 
   // Fallback pour Node.js
-  const  entityMap: Record<string, string> = {
+  const entityMap: Record<string, string> = {
     '&amp;': '&',
     '&lt;': '<',
     '&gt;': '>',
@@ -117,7 +117,7 @@ export function decodeHTMLEntities(str: string): string {
     '&#x2F;': '/',
   };
 
-  return str.replace(/&[#\w]+;/g, (entity) => {
+  return str.replace(/&[#\w]+;/g, entity => {
     return entityMap[entity] || entity;
   });
 }
@@ -126,8 +126,8 @@ export function decodeHTMLEntities(str: string): string {
  * Encode une chaîne en hexadécimal
  */
 export function encodeHex(str: string): string {
-  let  hex= '';
-  for (let  i= 0; i < str.length; i++) {
+  let hex = '';
+  for (let i = 0; i < str.length; i++) {
     const charCode = str.charCodeAt(i);
     hex += charCode.toString(16).padStart(2, '0');
   }
@@ -138,8 +138,8 @@ export function encodeHex(str: string): string {
  * Décode une chaîne hexadécimale
  */
 export function decodeHex(hex: string): string {
-  let  str= '';
-  for (let  i= 0; i < hex.length; i += 2) {
+  let str = '';
+  for (let i = 0; i < hex.length; i += 2) {
     const charCode = parseInt(hex.substr(i, 2), 16);
     str += String.fromCharCode(charCode);
   }
@@ -174,15 +174,15 @@ export async function hashSHA256(str: string): Promise<string> {
   const data = encoder.encode(str);
   const hashBuffer = await crypto.subtle.digest('SHA-256', data);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
 /**
  * Hash une chaîne avec SHA-256 (sync - simple hash)
  */
 export function hashSHA256Simple(str: string): string {
-  let  hash= 0;
-  for (let  i= 0; i < str.length; i++) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
     const char = str.charCodeAt(i);
     hash = (hash << 5) - hash + char;
     hash = hash & hash; // Convert to 32-bit integer
@@ -202,7 +202,7 @@ export function hashObject(obj: any): string {
  * Encode une chaîne avec ROT13
  */
 export function encodeROT13(str: string): string {
-  return str.replace(/[a-zA-Z]/g, (char) => {
+  return str.replace(/[a-zA-Z]/g, char => {
     const charCode = char.charCodeAt(0);
     const base = charCode >= 97 ? 97 : 65; // lowercase or uppercase
     return String.fromCharCode(((charCode - base + 13) % 26) + base);
@@ -247,10 +247,3 @@ export function isBase64(str: string): boolean {
 export function isHex(str: string): boolean {
   return /^[0-9a-fA-F]+$/.test(str);
 }
-
-
-
-
-
-
-

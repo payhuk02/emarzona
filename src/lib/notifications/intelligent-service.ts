@@ -296,7 +296,7 @@ export class IntelligentNotificationService {
    * Obtenir l'intervalle minimum selon la priorité
    */
   private getMinInterval(priority: string): number {
-    const  intervals: Record<string, number> = {
+    const intervals: Record<string, number> = {
       low: 60 * 60 * 1000, // 1 heure
       medium: 30 * 60 * 1000, // 30 minutes
       high: 5 * 60 * 1000, // 5 minutes
@@ -355,9 +355,3 @@ export class IntelligentNotificationService {
 
 // Instance singleton
 export const intelligentNotificationService = new IntelligentNotificationService();
-
-
-
-
-
-

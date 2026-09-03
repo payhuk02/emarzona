@@ -68,7 +68,7 @@ export function formatDuration(
       return `${secs}s`;
 
     case 'long': {
-      const  parts: string[] = [];
+      const parts: string[] = [];
       if (hours > 0) {
         parts.push(`${hours} heure${hours > 1 ? 's' : ''}`);
       }
@@ -101,10 +101,7 @@ export function formatDuration(
 /**
  * Formate une durée en minutes
  */
-export function formatDurationMinutes(
-  minutes: number,
-  format: 'short' | 'long' = 'short'
-): string {
+export function formatDurationMinutes(minutes: number, format: 'short' | 'long' = 'short'): string {
   if (!minutes || minutes === 0) {
     return format === 'short' ? '0m' : '0 minute';
   }
@@ -119,7 +116,7 @@ export function formatDurationMinutes(
     return `${mins}m`;
   }
 
-  const  parts: string[] = [];
+  const parts: string[] = [];
   if (hours > 0) {
     parts.push(`${hours} heure${hours > 1 ? 's' : ''}`);
   }
@@ -132,10 +129,7 @@ export function formatDurationMinutes(
 /**
  * Formate une durée en millisecondes
  */
-export function formatDurationMs(
-  milliseconds: number,
-  format: 'short' | 'long' = 'short'
-): string {
+export function formatDurationMs(milliseconds: number, format: 'short' | 'long' = 'short'): string {
   return formatDuration(Math.floor(milliseconds / 1000), format);
 }
 
@@ -152,8 +146,8 @@ export function parseDuration(duration: string): number {
 
   const partsMatch = duration.match(/(\d+)([hms])/g);
   if (partsMatch) {
-    let  totalSeconds= 0;
-    partsMatch.forEach((part) => {
+    let totalSeconds = 0;
+    partsMatch.forEach(part => {
       const match = part.match(/(\d+)([hms])/);
       if (match) {
         const value = Number(match[1]);
@@ -174,10 +168,7 @@ export function parseDuration(duration: string): number {
 /**
  * Calcule la différence entre deux dates en secondes
  */
-export function timeDifference(
-  start: Date | number,
-  end: Date | number
-): number {
+export function timeDifference(start: Date | number, end: Date | number): number {
   const startTime = typeof start === 'number' ? start : start.getTime();
   const endTime = typeof end === 'number' ? end : end.getTime();
   return Math.floor((endTime - startTime) / 1000);
@@ -207,10 +198,7 @@ export function formatTimeRemaining(
 /**
  * Ajoute du temps à une date
  */
-export function addTime(
-  date: Date,
-  time: Partial<TimeComponents>
-): Date {
+export function addTime(date: Date, time: Partial<TimeComponents>): Date {
   const seconds = timeToSeconds(time);
   return new Date(date.getTime() + seconds * 1000);
 }
@@ -218,10 +206,7 @@ export function addTime(
 /**
  * Soustrait du temps d'une date
  */
-export function subtractTime(
-  date: Date,
-  time: Partial<TimeComponents>
-): Date {
+export function subtractTime(date: Date, time: Partial<TimeComponents>): Date {
   const seconds = timeToSeconds(time);
   return new Date(date.getTime() - seconds * 1000);
 }
@@ -236,10 +221,7 @@ export function formatTime(seconds: number): string {
 /**
  * Formate un temps depuis une date
  */
-export function formatTimeFromDate(
-  date: Date,
-  includeSeconds: boolean = false
-): string {
+export function formatTimeFromDate(date: Date, includeSeconds: boolean = false): string {
   const hours = date.getHours().toString().padStart(2, '0');
   const minutes = date.getMinutes().toString().padStart(2, '0');
   const seconds = date.getSeconds().toString().padStart(2, '0');
@@ -263,10 +245,3 @@ export function parseTime(time: string): number {
   }
   return 0;
 }
-
-
-
-
-
-
-

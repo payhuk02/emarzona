@@ -41,15 +41,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
-} from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 
 const ADMIN_STORE_PAGE_SIZES = [10, 20, 50, 100];
-
 
 const AdminStores = () => {
   const [page, setPage] = useState(1);
@@ -57,13 +51,18 @@ const AdminStores = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStore, setSelectedStore] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  
+
   const debouncedSearch = useDebounce(searchTerm, 300);
   const { headerRef } = useScrollAnimation();
   const isMobile = useIsMobile();
   const { deleteStore } = useAdminActions();
 
-  const { stores, totalCount, loading, refetch: fetchStores } = useAdminStores({
+  const {
+    stores,
+    totalCount,
+    loading,
+    refetch: fetchStores,
+  } = useAdminStores({
     page,
     pageSize,
     search: debouncedSearch,
@@ -213,7 +212,9 @@ const AdminStores = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => window.open(generateStoreUrl(store.slug, store.slug), '_blank')}
+                            onClick={() =>
+                              window.open(generateStoreUrl(store.slug, store.slug), '_blank')
+                            }
                             className="min-h-[44px] min-w-[44px] sm:min-w-auto"
                             aria-label="Voir la boutique"
                           >

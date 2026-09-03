@@ -52,10 +52,10 @@ export interface StoreSEOData {
  * Valide les données SEO d'une boutique et calcule un score
  */
 export function validateStoreSEO(store: StoreSEOData): SEOValidationResult {
-  const  issues: SEOIssue[] = [];
-  const  strengths: string[] = [];
-  const  recommendations: string[] = [];
-  let  score= 100;
+  const issues: SEOIssue[] = [];
+  const strengths: string[] = [];
+  const recommendations: string[] = [];
+  let score = 100;
 
   // 1. Vérifier le nom de la boutique
   if (!store.name || store.name.trim().length === 0) {
@@ -64,7 +64,7 @@ export function validateStoreSEO(store: StoreSEOData): SEOValidationResult {
       field: 'name',
       message: 'Le nom de la boutique est requis',
       suggestion: 'Ajoutez un nom de boutique clair et descriptif',
-      priority: 10
+      priority: 10,
     });
     score -= 10;
   } else if (store.name.length > 60) {
@@ -73,7 +73,7 @@ export function validateStoreSEO(store: StoreSEOData): SEOValidationResult {
       field: 'name',
       message: 'Le nom de la boutique est trop long',
       suggestion: `Réduisez le nom à moins de 60 caractères (actuellement: ${store.name.length})`,
-      priority: 5
+      priority: 5,
     });
     score -= 3;
   } else {
@@ -86,8 +86,9 @@ export function validateStoreSEO(store: StoreSEOData): SEOValidationResult {
       type: 'error',
       field: 'description',
       message: 'La description de la boutique est requise',
-      suggestion: 'Ajoutez une description claire de votre boutique (150-300 caractères recommandés)',
-      priority: 9
+      suggestion:
+        'Ajoutez une description claire de votre boutique (150-300 caractères recommandés)',
+      priority: 9,
     });
     score -= 10;
   } else if (store.description.length < 50) {
@@ -96,7 +97,7 @@ export function validateStoreSEO(store: StoreSEOData): SEOValidationResult {
       field: 'description',
       message: 'La description est trop courte',
       suggestion: 'Étendez la description à au moins 50 caractères pour une meilleure visibilité',
-      priority: 6
+      priority: 6,
     });
     score -= 5;
   } else if (store.description.length > 300) {
@@ -105,7 +106,7 @@ export function validateStoreSEO(store: StoreSEOData): SEOValidationResult {
       field: 'description',
       message: 'La description est trop longue',
       suggestion: 'Réduisez la description à moins de 300 caractères',
-      priority: 4
+      priority: 4,
     });
     score -= 2;
   } else {
@@ -115,14 +116,14 @@ export function validateStoreSEO(store: StoreSEOData): SEOValidationResult {
   // 3. Vérifier le meta title
   const metaTitle = store.meta_title || store.name || '';
   const metaTitleLength = metaTitle.length;
-  
+
   if (!store.meta_title) {
     issues.push({
       type: 'warning',
       field: 'meta_title',
-      message: 'Le titre SEO personnalisé n\'est pas défini',
+      message: "Le titre SEO personnalisé n'est pas défini",
       suggestion: 'Ajoutez un titre SEO personnalisé optimisé pour les moteurs de recherche',
-      priority: 8
+      priority: 8,
     });
     score -= 5;
   } else {
@@ -135,7 +136,7 @@ export function validateStoreSEO(store: StoreSEOData): SEOValidationResult {
       field: 'meta_title',
       message: 'Le titre SEO est trop court',
       suggestion: `Étendez le titre à 30-60 caractères (actuellement: ${metaTitleLength})`,
-      priority: 7
+      priority: 7,
     });
     score -= 3;
   } else if (metaTitleLength > 60) {
@@ -144,7 +145,7 @@ export function validateStoreSEO(store: StoreSEOData): SEOValidationResult {
       field: 'meta_title',
       message: 'Le titre SEO est trop long et sera tronqué dans les résultats',
       suggestion: `Réduisez le titre à 60 caractères maximum (actuellement: ${metaTitleLength})`,
-      priority: 7
+      priority: 7,
     });
     score -= 4;
   }
@@ -157,9 +158,9 @@ export function validateStoreSEO(store: StoreSEOData): SEOValidationResult {
     issues.push({
       type: 'error',
       field: 'meta_description',
-      message: 'La description SEO n\'est pas définie',
+      message: "La description SEO n'est pas définie",
       suggestion: 'Ajoutez une description SEO de 150-160 caractères',
-      priority: 9
+      priority: 9,
     });
     score -= 8;
   } else {
@@ -169,7 +170,7 @@ export function validateStoreSEO(store: StoreSEOData): SEOValidationResult {
         field: 'meta_description',
         message: 'Utilisation de la description générale comme meta description',
         suggestion: 'Créez une description SEO optimisée séparée (150-160 caractères)',
-        priority: 5
+        priority: 5,
       });
       score -= 2;
     } else {
@@ -182,7 +183,7 @@ export function validateStoreSEO(store: StoreSEOData): SEOValidationResult {
         field: 'meta_description',
         message: 'La description SEO est trop courte',
         suggestion: `Étendez la description à 120-160 caractères (actuellement: ${metaDescriptionLength})`,
-        priority: 6
+        priority: 6,
       });
       score -= 3;
     } else if (metaDescriptionLength > 160) {
@@ -191,7 +192,7 @@ export function validateStoreSEO(store: StoreSEOData): SEOValidationResult {
         field: 'meta_description',
         message: 'La description SEO est trop longue et sera tronquée',
         suggestion: `Réduisez la description à 160 caractères maximum (actuellement: ${metaDescriptionLength})`,
-        priority: 6
+        priority: 6,
       });
       score -= 4;
     }
@@ -203,8 +204,9 @@ export function validateStoreSEO(store: StoreSEOData): SEOValidationResult {
       type: 'info',
       field: 'meta_keywords',
       message: 'Les mots-clés SEO ne sont pas définis',
-      suggestion: 'Ajoutez des mots-clés pertinents séparés par des virgules (optionnel mais recommandé)',
-      priority: 3
+      suggestion:
+        'Ajoutez des mots-clés pertinents séparés par des virgules (optionnel mais recommandé)',
+      priority: 3,
     });
     score -= 2;
   } else {
@@ -220,9 +222,9 @@ export function validateStoreSEO(store: StoreSEOData): SEOValidationResult {
     issues.push({
       type: 'warning',
       field: 'logo_url',
-      message: 'Le logo de la boutique n\'est pas défini',
-      suggestion: 'Ajoutez un logo pour améliorer l\'image de marque',
-      priority: 6
+      message: "Le logo de la boutique n'est pas défini",
+      suggestion: "Ajoutez un logo pour améliorer l'image de marque",
+      priority: 6,
     });
     score -= 5;
   } else {
@@ -233,9 +235,9 @@ export function validateStoreSEO(store: StoreSEOData): SEOValidationResult {
     issues.push({
       type: 'info',
       field: 'banner_url',
-      message: 'La bannière de la boutique n\'est pas définie',
+      message: "La bannière de la boutique n'est pas définie",
       suggestion: 'Ajoutez une bannière pour personnaliser votre boutique',
-      priority: 4
+      priority: 4,
     });
     score -= 2;
   } else {
@@ -246,9 +248,9 @@ export function validateStoreSEO(store: StoreSEOData): SEOValidationResult {
     issues.push({
       type: 'warning',
       field: 'og_image',
-      message: 'L\'image Open Graph n\'est pas définie',
+      message: "L'image Open Graph n'est pas définie",
       suggestion: 'Ajoutez une image Open Graph pour un meilleur partage sur les réseaux sociaux',
-      priority: 7
+      priority: 7,
     });
     score -= 5;
   } else {
@@ -267,9 +269,10 @@ export function validateStoreSEO(store: StoreSEOData): SEOValidationResult {
     issues.push({
       type: 'warning',
       field: 'contact',
-      message: 'Aucune information de contact n\'est définie',
-      suggestion: 'Ajoutez au moins un email, un téléphone ou une adresse pour la confiance des clients',
-      priority: 7
+      message: "Aucune information de contact n'est définie",
+      suggestion:
+        'Ajoutez au moins un email, un téléphone ou une adresse pour la confiance des clients',
+      priority: 7,
     });
     score -= 8;
   } else {
@@ -280,15 +283,20 @@ export function validateStoreSEO(store: StoreSEOData): SEOValidationResult {
   }
 
   // 8. Vérifier les réseaux sociaux
-  const hasSocialLinks = !!(store.facebook_url || store.instagram_url || store.twitter_url || store.linkedin_url);
-  
+  const hasSocialLinks = !!(
+    store.facebook_url ||
+    store.instagram_url ||
+    store.twitter_url ||
+    store.linkedin_url
+  );
+
   if (!hasSocialLinks) {
     issues.push({
       type: 'info',
       field: 'social',
-      message: 'Aucun lien vers les réseaux sociaux n\'est défini',
+      message: "Aucun lien vers les réseaux sociaux n'est défini",
       suggestion: 'Ajoutez vos liens de réseaux sociaux pour améliorer votre présence en ligne',
-      priority: 4
+      priority: 4,
     });
     score -= 3;
   } else {
@@ -302,7 +310,7 @@ export function validateStoreSEO(store: StoreSEOData): SEOValidationResult {
       field: 'slug',
       message: 'Le slug de la boutique est requis',
       suggestion: 'Le slug est généré automatiquement à partir du nom',
-      priority: 10
+      priority: 10,
     });
     score -= 10;
   } else {
@@ -311,30 +319,44 @@ export function validateStoreSEO(store: StoreSEOData): SEOValidationResult {
 
   // 10. Générer des recommandations basées sur les problèmes
   if (score < 50) {
-    recommendations.push('⚠️ Votre boutique nécessite des améliorations SEO importantes pour être bien référencée.');
+    recommendations.push(
+      '⚠️ Votre boutique nécessite des améliorations SEO importantes pour être bien référencée.'
+    );
   } else if (score < 70) {
     recommendations.push('✅ Votre boutique a une bonne base SEO mais peut être améliorée.');
   } else if (score < 85) {
-    recommendations.push('🎉 Votre boutique est bien optimisée SEO ! Quelques améliorations mineures sont possibles.');
+    recommendations.push(
+      '🎉 Votre boutique est bien optimisée SEO ! Quelques améliorations mineures sont possibles.'
+    );
   } else {
-    recommendations.push('🌟 Excellent ! Votre boutique est très bien optimisée pour les moteurs de recherche.');
+    recommendations.push(
+      '🌟 Excellent ! Votre boutique est très bien optimisée pour les moteurs de recherche.'
+    );
   }
 
   // Recommandations spécifiques
   if (!hasContactInfo) {
-    recommendations.push('Ajoutez des informations de contact pour améliorer la confiance et le référencement local.');
+    recommendations.push(
+      'Ajoutez des informations de contact pour améliorer la confiance et le référencement local.'
+    );
   }
 
   if (!hasOGImage) {
-    recommendations.push('Ajoutez une image Open Graph pour améliorer le partage sur les réseaux sociaux.');
+    recommendations.push(
+      'Ajoutez une image Open Graph pour améliorer le partage sur les réseaux sociaux.'
+    );
   }
 
   if (metaDescriptionLength < 120 || metaDescriptionLength > 160) {
-    recommendations.push('Optimisez votre description SEO pour qu\'elle fasse entre 120 et 160 caractères.');
+    recommendations.push(
+      "Optimisez votre description SEO pour qu'elle fasse entre 120 et 160 caractères."
+    );
   }
 
   if (!hasSocialLinks) {
-    recommendations.push('Ajoutez vos liens de réseaux sociaux pour renforcer votre présence en ligne.');
+    recommendations.push(
+      'Ajoutez vos liens de réseaux sociaux pour renforcer votre présence en ligne.'
+    );
   }
 
   // S'assurer que le score reste entre 0 et 100
@@ -353,13 +375,6 @@ export function validateStoreSEO(store: StoreSEOData): SEOValidationResult {
     hasValidImages,
     hasContactInfo,
     hasSocialLinks,
-    hasStructuredData: true // Toujours true car on génère du JSON-LD
+    hasStructuredData: true, // Toujours true car on génère du JSON-LD
   };
 }
-
-
-
-
-
-
-

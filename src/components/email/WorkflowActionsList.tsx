@@ -24,12 +24,16 @@ interface WorkflowActionsListProps {
   onActionsChange: (actions: WorkflowAction[]) => void;
 }
 
-const  ACTION_OPTIONS: { value: WorkflowActionType; label: string; icon: React.ReactNode }[] = [
+const ACTION_OPTIONS: { value: WorkflowActionType; label: string; icon: React.ReactNode }[] = [
   { value: 'send_email', label: 'Envoyer un email', icon: <Mail className="h-4 w-4" /> },
   { value: 'wait', label: 'Attendre', icon: <Clock className="h-4 w-4" /> },
   { value: 'add_tag', label: 'Ajouter un tag', icon: <Tag className="h-4 w-4" /> },
   { value: 'remove_tag', label: 'Retirer un tag', icon: <Tag className="h-4 w-4" /> },
-  { value: 'update_segment', label: 'Mettre à jour un segment', icon: <Users className="h-4 w-4" /> },
+  {
+    value: 'update_segment',
+    label: 'Mettre à jour un segment',
+    icon: <Users className="h-4 w-4" />,
+  },
 ];
 
 export const WorkflowActionsList = ({ actions, onActionsChange }: WorkflowActionsListProps) => {
@@ -37,7 +41,7 @@ export const WorkflowActionsList = ({ actions, onActionsChange }: WorkflowAction
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
   const handleAddAction = (type?: WorkflowActionType) => {
-    const  newAction: WorkflowAction = {
+    const newAction: WorkflowAction = {
       type: type || 'send_email',
       config: {},
       order: actions.length + 1,
@@ -67,11 +71,11 @@ export const WorkflowActionsList = ({ actions, onActionsChange }: WorkflowAction
 
   const handleMoveAction = (fromIndex: number, toIndex: number) => {
     if (fromIndex === toIndex) return;
-    
+
     const newActions = [...actions];
     const [moved] = newActions.splice(fromIndex, 1);
     newActions.splice(toIndex, 0, moved);
-    
+
     // Réordonner
     const reorderedActions = newActions.map((action, i) => ({ ...action, order: i + 1 }));
     onActionsChange(reorderedActions);
@@ -98,16 +102,17 @@ export const WorkflowActionsList = ({ actions, onActionsChange }: WorkflowAction
         <div>
           <h3 className="text-sm font-medium">Actions du workflow</h3>
           <p className="text-xs text-muted-foreground mt-1">
-            {actions.length} action{actions.length !== 1 ? 's' : ''} configurée{actions.length !== 1 ? 's' : ''}
+            {actions.length} action{actions.length !== 1 ? 's' : ''} configurée
+            {actions.length !== 1 ? 's' : ''}
           </p>
         </div>
         <div className="flex gap-2">
-          <Select onValueChange={(value) => handleAddAction(value as WorkflowActionType)}>
+          <Select onValueChange={value => handleAddAction(value as WorkflowActionType)}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Ajouter une action" />
             </SelectTrigger>
             <SelectContent>
-              {ACTION_OPTIONS.map((option) => (
+              {ACTION_OPTIONS.map(option => (
                 <SelectItem key={option.value} value={option.value}>
                   <div className="flex items-center gap-2">
                     {option.icon}
@@ -138,12 +143,7 @@ export const WorkflowActionsList = ({ actions, onActionsChange }: WorkflowAction
             <p className="text-xs text-muted-foreground text-center mb-4">
               Ajoutez des actions pour créer votre workflow automatisé
             </p>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => handleAddAction()}
-            >
+            <Button type="button" variant="outline" size="sm" onClick={() => handleAddAction()}>
               <Plus className="h-4 w-4 mr-2" />
               Ajouter votre première action
             </Button>
@@ -167,7 +167,7 @@ export const WorkflowActionsList = ({ actions, onActionsChange }: WorkflowAction
                   )}
                   draggable
                   onDragStart={() => handleDragStart(index)}
-                  onDragOver={(e) => handleDragOver(e, index)}
+                  onDragOver={e => handleDragOver(e, index)}
                   onDragEnd={handleDragEnd}
                 >
                   <CardContent className="p-0">
@@ -184,7 +184,8 @@ export const WorkflowActionsList = ({ actions, onActionsChange }: WorkflowAction
                           <div className="flex items-center gap-2">
                             {ACTION_OPTIONS.find(opt => opt.value === action.type)?.icon}
                             <span className="text-sm font-medium">
-                              {ACTION_OPTIONS.find(opt => opt.value === action.type)?.label || action.type}
+                              {ACTION_OPTIONS.find(opt => opt.value === action.type)?.label ||
+                                action.type}
                             </span>
                           </div>
                           {!isExpanded && (
@@ -195,9 +196,8 @@ export const WorkflowActionsList = ({ actions, onActionsChange }: WorkflowAction
                               {action.type === 'wait' && action.config?.duration && (
                                 <>{action.config.duration} minutes</>
                               )}
-                              {(action.type === 'add_tag' || action.type === 'remove_tag') && action.config?.tag && (
-                                <>Tag: {action.config.tag}</>
-                              )}
+                              {(action.type === 'add_tag' || action.type === 'remove_tag') &&
+                                action.config?.tag && <>Tag: {action.config.tag}</>}
                             </div>
                           )}
                         </div>
@@ -205,7 +205,7 @@ export const WorkflowActionsList = ({ actions, onActionsChange }: WorkflowAction
                           type="button"
                           variant="ghost"
                           size="icon"
-                          onClick={(e) => {
+                          onClick={e => {
                             e.stopPropagation();
                             handleRemoveAction(index);
                           }}
@@ -220,7 +220,7 @@ export const WorkflowActionsList = ({ actions, onActionsChange }: WorkflowAction
                         <WorkflowActionEditor
                           action={action}
                           index={index}
-                          onUpdate={(updatedAction) => handleUpdateAction(index, updatedAction)}
+                          onUpdate={updatedAction => handleUpdateAction(index, updatedAction)}
                           onRemove={() => handleRemoveAction(index)}
                         />
                       </div>
@@ -234,10 +234,3 @@ export const WorkflowActionsList = ({ actions, onActionsChange }: WorkflowAction
     </div>
   );
 };
-
-
-
-
-
-
-

@@ -1,12 +1,19 @@
 /**
  * Digital Subscription Card Component
  * Date: 27 Janvier 2025
- * 
+ *
  * Composant pour afficher une carte d'abonnement de produit digital
  */
 
 import React from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -105,10 +112,7 @@ const DigitalSubscriptionCardComponent = ({
   const periodEnd = new Date(subscription.current_period_end);
   const totalPeriod = periodEnd.getTime() - periodStart.getTime();
   const elapsed = now.getTime() - periodStart.getTime();
-  const progressPercentage = Math.min(
-    Math.max((elapsed / totalPeriod) * 100, 0),
-    100
-  );
+  const progressPercentage = Math.min(Math.max((elapsed / totalPeriod) * 100, 0), 100);
 
   // Vérifier si en période d'essai
   const isTrialing = subscription.status === 'trialing' && subscription.trial_end;
@@ -120,9 +124,9 @@ const DigitalSubscriptionCardComponent = ({
   return (
     <Card
       className={cn(
-        "group hover:shadow-lg transition-all duration-300",
-        subscription.status === 'active' && "border-green-500",
-        subscription.status === 'past_due' && "border-yellow-500",
+        'group hover:shadow-lg transition-all duration-300',
+        subscription.status === 'active' && 'border-green-500',
+        subscription.status === 'past_due' && 'border-yellow-500',
         className
       )}
       style={{ willChange: 'transform' }}
@@ -179,7 +183,8 @@ const DigitalSubscriptionCardComponent = ({
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">Période actuelle</span>
             <span className="font-medium">
-              {format(periodStart, 'dd MMM yyyy', { locale: fr })} - {format(periodEnd, 'dd MMM yyyy', { locale: fr })}
+              {format(periodStart, 'dd MMM yyyy', { locale: fr })} -{' '}
+              {format(periodEnd, 'dd MMM yyyy', { locale: fr })}
             </span>
           </div>
           {subscription.status === 'active' && (
@@ -225,7 +230,9 @@ const DigitalSubscriptionCardComponent = ({
             <div className="text-xs text-muted-foreground">Total payé</div>
           </div>
           <div className="text-center">
-            <div className="text-lg font-bold text-red-600">{subscription.failed_payment_attempts}</div>
+            <div className="text-lg font-bold text-red-600">
+              {subscription.failed_payment_attempts}
+            </div>
             <div className="text-xs text-muted-foreground">Échecs</div>
           </div>
         </div>
@@ -290,19 +297,22 @@ const DigitalSubscriptionCardComponent = ({
 };
 
 // Optimisation avec React.memo pour éviter les re-renders inutiles
-export const DigitalSubscriptionCard = React.memo(DigitalSubscriptionCardComponent, (prevProps, nextProps) => {
-  return (
-    prevProps.subscription.id === nextProps.subscription.id &&
-    prevProps.subscription.status === nextProps.subscription.status &&
-    prevProps.subscription.current_period_end === nextProps.subscription.current_period_end &&
-    prevProps.subscription.amount === nextProps.subscription.amount &&
-    prevProps.showActions === nextProps.showActions &&
-    prevProps.onCancel === nextProps.onCancel &&
-    prevProps.onReactivate === nextProps.onReactivate &&
-    prevProps.onViewPayments === nextProps.onViewPayments &&
-    prevProps.className === nextProps.className
-  );
-});
+export const DigitalSubscriptionCard = React.memo(
+  DigitalSubscriptionCardComponent,
+  (prevProps, nextProps) => {
+    return (
+      prevProps.subscription.id === nextProps.subscription.id &&
+      prevProps.subscription.status === nextProps.subscription.status &&
+      prevProps.subscription.current_period_end === nextProps.subscription.current_period_end &&
+      prevProps.subscription.amount === nextProps.subscription.amount &&
+      prevProps.showActions === nextProps.showActions &&
+      prevProps.onCancel === nextProps.onCancel &&
+      prevProps.onReactivate === nextProps.onReactivate &&
+      prevProps.onViewPayments === nextProps.onViewPayments &&
+      prevProps.className === nextProps.className
+    );
+  }
+);
 
 DigitalSubscriptionCard.displayName = 'DigitalSubscriptionCard';
 
@@ -325,7 +335,7 @@ export const DigitalSubscriptionsGrid = ({
   if (loading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {[1, 2, 3].map((i) => (
+        {[1, 2, 3].map(i => (
           <Card key={i} className="animate-pulse">
             <CardHeader>
               <div className="h-6 bg-muted rounded w-3/4" />
@@ -356,7 +366,7 @@ export const DigitalSubscriptionsGrid = ({
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {subscriptions.map((subscription) => (
+      {subscriptions.map(subscription => (
         <DigitalSubscriptionCard
           key={subscription.id}
           subscription={subscription}
@@ -368,10 +378,3 @@ export const DigitalSubscriptionsGrid = ({
     </div>
   );
 };
-
-
-
-
-
-
-

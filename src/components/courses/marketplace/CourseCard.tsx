@@ -1,14 +1,21 @@
-import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Star, Clock, Users, BookOpen, Play, GraduationCap } from "lucide-react";
-import { Link } from "react-router-dom";
-import type { Course } from "@/types/courses";
-import { PriceStockAlertButton } from "@/components/marketplace/PriceStockAlertButton";
-import { supabase } from "@/integrations/supabase/client";
-import { LazyImage } from "@/components/ui/LazyImage";
-import { getImageAttributesForPreset } from "@/lib/image-transform";
+import React, { useState, useEffect } from 'react';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Star, Clock, Users, BookOpen, Play, GraduationCap } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import type { Course } from '@/types/courses';
+import { PriceStockAlertButton } from '@/components/marketplace/PriceStockAlertButton';
+import { supabase } from '@/integrations/supabase/client';
+import { LazyImage } from '@/components/ui/LazyImage';
+import { getImageAttributesForPreset } from '@/lib/image-transform';
 
 interface CourseCardProps {
   course: Course;
@@ -21,7 +28,9 @@ const CourseCardComponent = ({ course }: CourseCardProps) => {
   // Récupérer l'utilisateur pour les alertes
   useEffect(() => {
     const fetchUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       setUserId(user?.id || null);
     };
     fetchUser();
@@ -51,7 +60,10 @@ const CourseCardComponent = ({ course }: CourseCardProps) => {
   const levelBadge = getLevelBadge(course.level);
 
   return (
-    <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 group" style={{ willChange: 'transform' }}>
+    <Card
+      className="overflow-hidden hover:shadow-lg transition-shadow duration-300 group"
+      style={{ willChange: 'transform' }}
+    >
       {/* Image du cours */}
       <div className="relative aspect-video overflow-hidden bg-muted">
         {product?.image_url ? (
@@ -84,7 +96,7 @@ const CourseCardComponent = ({ course }: CourseCardProps) => {
             <GraduationCap className="w-16 h-16 text-orange-400" />
           </div>
         )}
-        
+
         {/* Preview badge */}
         <div className="absolute top-3 right-3">
           <Badge variant="secondary" className="gap-1 bg-white/90 backdrop-blur-sm">
@@ -92,7 +104,7 @@ const CourseCardComponent = ({ course }: CourseCardProps) => {
             Preview
           </Badge>
         </div>
-        
+
         {/* Level badge */}
         <div className="absolute top-3 left-3">
           <Badge variant={levelBadge.variant} className="bg-white/90 backdrop-blur-sm">
@@ -176,7 +188,11 @@ const CourseCardComponent = ({ course }: CourseCardProps) => {
             <PriceStockAlertButton
               productId={product.id}
               productName={product.name}
-              currentPrice={product.promotional_price && product.promotional_price < product.price ? product.promotional_price : (product.price || 0)}
+              currentPrice={
+                product.promotional_price && product.promotional_price < product.price
+                  ? product.promotional_price
+                  : product.price || 0
+              }
               currency={product.currency || 'XOF'}
               productType="course"
               variant="outline"
@@ -188,9 +204,7 @@ const CourseCardComponent = ({ course }: CourseCardProps) => {
 
         {/* Bouton */}
         <Button asChild className="bg-orange-600 hover:bg-orange-700">
-          <Link to={`/courses/${product?.slug}`}>
-            Voir le cours
-          </Link>
+          <Link to={`/courses/${product?.slug}`}>Voir le cours</Link>
         </Button>
       </CardFooter>
     </Card>
@@ -212,10 +226,3 @@ export const CourseCard = React.memo(CourseCardComponent, (prevProps, nextProps)
 });
 
 CourseCard.displayName = 'CourseCard';
-
-
-
-
-
-
-

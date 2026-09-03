@@ -106,9 +106,7 @@ export function logNetworkError(
   statusText?: string,
   context: ErrorLogContext = {}
 ): void {
-  const error = new Error(
-    `Network Error: ${status || 'Unknown'} ${statusText || ''} - ${url}`
-  );
+  const error = new Error(`Network Error: ${status || 'Unknown'} ${statusText || ''} - ${url}`);
   error.name = 'NetworkError';
 
   logError(error, {
@@ -166,9 +164,7 @@ function saveErrorToLocalStorage(errorLog: ErrorLog): void {
 
     // Récupérer les logs existants
     const existingLogsStr = localStorage.getItem(storageKey);
-    const  existingLogs: ErrorLog[] = existingLogsStr
-      ? JSON.parse(existingLogsStr)
-      : [];
+    const existingLogs: ErrorLog[] = existingLogsStr ? JSON.parse(existingLogsStr) : [];
 
     // Ajouter le nouveau log
     existingLogs.unshift(errorLog);
@@ -215,7 +211,7 @@ export function clearErrorLogs(): void {
  */
 export function setupGlobalErrorHandlers(): void {
   // Erreurs non capturées
-  window.addEventListener('error', (event) => {
+  window.addEventListener('error', event => {
     logError(event.error || new Error(event.message), {
       level: 'app',
       extra: {
@@ -227,7 +223,7 @@ export function setupGlobalErrorHandlers(): void {
   });
 
   // Promesses rejetées non gérées
-  window.addEventListener('unhandledrejection', (event) => {
+  window.addEventListener('unhandledrejection', event => {
     let error: Error;
 
     if (event.reason instanceof Error) {
@@ -237,7 +233,8 @@ export function setupGlobalErrorHandlers(): void {
     } else if (event.reason && typeof event.reason === 'object') {
       // Pour les objets complexes, essayer de les sérialiser en JSON
       try {
-        const message = event.reason.message || event.reason.toString?.() || JSON.stringify(event.reason);
+        const message =
+          event.reason.message || event.reason.toString?.() || JSON.stringify(event.reason);
         error = new Error(String(message));
       } catch (e) {
         // Si la sérialisation échoue, utiliser un message générique
@@ -253,30 +250,36 @@ export function setupGlobalErrorHandlers(): void {
       extra: {
         type: 'unhandledrejection',
         reasonType: typeof event.reason,
-        reasonValue: event.reason && typeof event.reason === 'object' 
-          ? (event.reason.message || 'object') 
-          : event.reason,
+        reasonValue:
+          event.reason && typeof event.reason === 'object'
+            ? event.reason.message || 'object'
+            : event.reason,
       },
     });
   });
 
   // Erreurs de chargement de ressources
-  window.addEventListener('error', (event) => {
-    if (event.target && event.target !== window) {
-      const target = event.target as HTMLElement;
-      const resourceUrl = (target as HTMLImageElement | HTMLScriptElement | HTMLLinkElement).src || 
-                          (target as HTMLLinkElement | HTMLAnchorElement).href;
+  window.addEventListener(
+    'error',
+    event => {
+      if (event.target && event.target !== window) {
+        const target = event.target as HTMLElement;
+        const resourceUrl =
+          (target as HTMLImageElement | HTMLScriptElement | HTMLLinkElement).src ||
+          (target as HTMLLinkElement | HTMLAnchorElement).href;
 
-      if (resourceUrl) {
-        logWarning(`Failed to load resource: ${resourceUrl}`, {
-          extra: {
-            tagName: target.tagName,
-            resourceUrl,
-          },
-        });
+        if (resourceUrl) {
+          logWarning(`Failed to load resource: ${resourceUrl}`, {
+            extra: {
+              tagName: target.tagName,
+              resourceUrl,
+            },
+          });
+        }
       }
-    }
-  }, true);
+    },
+    true
+  );
 }
 
 /**
@@ -312,10 +315,3 @@ export function withErrorHandlingSync<T extends (...args: unknown[]) => unknown>
     }
   }) as T;
 }
-
-
-
-
-
-
-

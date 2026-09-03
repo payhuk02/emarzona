@@ -118,16 +118,3 @@ export function useConvertToUserCurrency(amount: number, fromCurrency: Currency)
   const userCurrency = useUserCurrency();
   return convertCurrency(amount, fromCurrency, userCurrency);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

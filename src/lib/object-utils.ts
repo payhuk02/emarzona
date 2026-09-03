@@ -16,7 +16,7 @@ export function deepClone<T>(obj: T): T {
   }
 
   if (obj instanceof Array) {
-    return obj.map((item) => deepClone(item)) as unknown as T;
+    return obj.map(item => deepClone(item)) as unknown as T;
   }
 
   if (typeof obj === 'object') {
@@ -35,14 +35,11 @@ export function deepClone<T>(obj: T): T {
 /**
  * Fusionne deux objets de manière récursive
  */
-export function deepMerge<T extends object, U extends object>(
-  target: T,
-  source: U
-): T & U {
+export function deepMerge<T extends object, U extends object>(target: T, source: U): T & U {
   const output = { ...target } as T & U;
 
   if (target && typeof target === 'object' && source && typeof source === 'object') {
-    Object.keys(source).forEach((key) => {
+    Object.keys(source).forEach(key => {
       const sourceKey = key as keyof U;
       const targetKey = key as keyof T;
 
@@ -71,12 +68,9 @@ export function deepMerge<T extends object, U extends object>(
 /**
  * Sélectionne certaines propriétés d'un objet
  */
-export function pick<T extends object, K extends keyof T>(
-  obj: T,
-  keys: K[]
-): Pick<T, K> {
+export function pick<T extends object, K extends keyof T>(obj: T, keys: K[]): Pick<T, K> {
   const result = {} as Pick<T, K>;
-  keys.forEach((key) => {
+  keys.forEach(key => {
     if (key in obj) {
       result[key] = obj[key];
     }
@@ -87,12 +81,9 @@ export function pick<T extends object, K extends keyof T>(
 /**
  * Omet certaines propriétés d'un objet
  */
-export function omit<T extends object, K extends keyof T>(
-  obj: T,
-  keys: K[]
-): Omit<T, K> {
+export function omit<T extends object, K extends keyof T>(obj: T, keys: K[]): Omit<T, K> {
   const result = { ...obj };
-  keys.forEach((key) => {
+  keys.forEach(key => {
     delete result[key];
   });
   return result as Omit<T, K>;
@@ -123,18 +114,14 @@ export function values<T extends object>(obj: T): Array<T[keyof T]> {
 /**
  * Obtient les paires clé-valeur d'un objet
  */
-export function entries<T extends object>(
-  obj: T
-): Array<[keyof T, T[keyof T]]> {
+export function entries<T extends object>(obj: T): Array<[keyof T, T[keyof T]]> {
   return Object.entries(obj) as Array<[keyof T, T[keyof T]]>;
 }
 
 /**
  * Crée un objet à partir de paires clé-valeur
  */
-export function fromEntries<T>(
-  entries: Array<[string, T]>
-): Record<string, T> {
+export function fromEntries<T>(entries: Array<[string, T]>): Record<string, T> {
   return Object.fromEntries(entries) as Record<string, T>;
 }
 
@@ -145,8 +132,8 @@ export function mapValues<T, U>(
   obj: Record<string, T>,
   fn: (value: T, key: string) => U
 ): Record<string, U> {
-  const  result: Record<string, U> = {};
-  Object.keys(obj).forEach((key) => {
+  const result: Record<string, U> = {};
+  Object.keys(obj).forEach(key => {
     result[key] = fn(obj[key], key);
   });
   return result;
@@ -159,8 +146,8 @@ export function mapKeys<T>(
   obj: Record<string, T>,
   fn: (key: string, value: T) => string
 ): Record<string, T> {
-  const  result: Record<string, T> = {};
-  Object.keys(obj).forEach((key) => {
+  const result: Record<string, T> = {};
+  Object.keys(obj).forEach(key => {
     result[fn(key, obj[key])] = obj[key];
   });
   return result;
@@ -173,8 +160,8 @@ export function filterObject<T extends Record<string, any>>(
   obj: T,
   predicate: (value: T[keyof T], key: keyof T) => boolean
 ): Partial<T> {
-  const  result: Partial<T> = {};
-  Object.keys(obj).forEach((key) => {
+  const result: Partial<T> = {};
+  Object.keys(obj).forEach(key => {
     const typedKey = key as keyof T;
     if (predicate(obj[typedKey], typedKey)) {
       result[typedKey] = obj[typedKey];
@@ -186,11 +173,9 @@ export function filterObject<T extends Record<string, any>>(
 /**
  * Inverse les clés et valeurs d'un objet
  */
-export function invert<T extends Record<string, string | number>>(
-  obj: T
-): Record<string, keyof T> {
-  const  result: Record<string, keyof T> = {};
-  Object.keys(obj).forEach((key) => {
+export function invert<T extends Record<string, string | number>>(obj: T): Record<string, keyof T> {
+  const result: Record<string, keyof T> = {};
+  Object.keys(obj).forEach(key => {
     result[String(obj[key])] = key as keyof T;
   });
   return result;
@@ -199,13 +184,9 @@ export function invert<T extends Record<string, string | number>>(
 /**
  * Obtient une valeur imbriquée d'un objet par un chemin
  */
-export function get<T>(
-  obj: any,
-  path: string | string[],
-  defaultValue?: T
-): T | undefined {
+export function get<T>(obj: any, path: string | string[], defaultValue?: T): T | undefined {
   const keys = Array.isArray(path) ? path : path.split('.');
-  let  result: any = obj;
+  let result: any = obj;
 
   for (const key of keys) {
     if (result == null || !(key in result)) {
@@ -220,16 +201,12 @@ export function get<T>(
 /**
  * Définit une valeur imbriquée dans un objet par un chemin
  */
-export function set<T extends object>(
-  obj: T,
-  path: string | string[],
-  value: any
-): T {
+export function set<T extends object>(obj: T, path: string | string[], value: any): T {
   const keys = Array.isArray(path) ? path : path.split('.');
   const cloned = deepClone(obj);
-  let  current: any = cloned;
+  let current: any = cloned;
 
-  for (let  i= 0; i < keys.length - 1; i++) {
+  for (let i = 0; i < keys.length - 1; i++) {
     const key = keys[i];
     if (!(key in current) || typeof current[key] !== 'object' || current[key] === null) {
       current[key] = {};
@@ -246,7 +223,7 @@ export function set<T extends object>(
  */
 export function has(obj: any, path: string | string[]): boolean {
   const keys = Array.isArray(path) ? path : path.split('.');
-  let  current= obj;
+  let current = obj;
 
   for (const key of keys) {
     if (current == null || !(key in current)) {
@@ -262,12 +239,5 @@ export function has(obj: any, path: string | string[]): boolean {
  * Omet les propriétés avec des valeurs null/undefined
  */
 export function compactObject<T extends Record<string, any>>(obj: T): Partial<T> {
-  return filterObject(obj, (value) => value != null);
+  return filterObject(obj, value => value != null);
 }
-
-
-
-
-
-
-

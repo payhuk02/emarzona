@@ -8,7 +8,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-const AFFILIATE_LINK_FIELDS = 'id, affiliate_code, product_id, user_id, status, clicks_count, conversions_count, total_commission, custom_name, created_at, updated_at';
+const AFFILIATE_LINK_FIELDS =
+  'id, affiliate_code, product_id, user_id, status, clicks_count, conversions_count, total_commission, custom_name, created_at, updated_at';
 
 interface AffiliateLink {
   id: string;
@@ -40,7 +41,9 @@ export const useMyAffiliateLinks = (productId: string) => {
   return useQuery({
     queryKey: ['my-affiliate-links', productId],
     queryFn: async (): Promise<AffiliateLink[]> => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) {
         throw new Error('Non connecté');
       }
@@ -70,14 +73,10 @@ export const useCreateAffiliateLink = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({
-      productId,
-      customName,
-    }: {
-      productId: string;
-      customName?: string;
-    }) => {
-      const { data: { user } } = await supabase.auth.getUser();
+    mutationFn: async ({ productId, customName }: { productId: string; customName?: string }) => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) {
         throw new Error('Non connecté');
       }
@@ -90,7 +89,7 @@ export const useCreateAffiliateLink = () => {
         .single();
 
       if (!settings || !settings.affiliate_enabled) {
-        throw new Error('Le programme d\'affiliation n\'est pas activé pour ce cours');
+        throw new Error("Le programme d'affiliation n'est pas activé pour ce cours");
       }
 
       // Générer un code affilié unique
@@ -118,9 +117,10 @@ export const useCreateAffiliateLink = () => {
     onSuccess: (data, variables) => {
       toast({
         title: '✅ Lien créé avec succès !',
-        description: data.status === 'pending' 
-          ? 'Votre lien est en attente d\'approbation'
-          : 'Votre lien est maintenant actif',
+        description:
+          data.status === 'pending'
+            ? "Votre lien est en attente d'approbation"
+            : 'Votre lien est maintenant actif',
       });
       queryClient.invalidateQueries({ queryKey: ['my-affiliate-links', variables.productId] });
     },
@@ -165,14 +165,12 @@ export const useAffiliateLinkStats = (linkId: string) => {
         .eq('affiliate_link_id', linkId);
 
       const totalCommission = commissions?.reduce((sum, c) => sum + c.amount, 0) || 0;
-      const paidCommission = commissions
-        ?.filter(c => c.status === 'paid')
-        .reduce((sum, c) => sum + c.amount, 0) || 0;
+      const paidCommission =
+        commissions?.filter(c => c.status === 'paid').reduce((sum, c) => sum + c.amount, 0) || 0;
       const pendingCommission = totalCommission - paidCommission;
 
-      const conversionRate = clicksCount && link.conversions_count
-        ? (link.conversions_count / clicksCount) * 100
-        : 0;
+      const conversionRate =
+        clicksCount && link.conversions_count ? (link.conversions_count / clicksCount) * 100 : 0;
 
       return {
         total_clicks: clicksCount || 0,
@@ -194,7 +192,9 @@ export const useMyAffiliateCourseStats = (productId: string) => {
   return useQuery({
     queryKey: ['my-affiliate-course-stats', productId],
     queryFn: async (): Promise<AffiliateLinkStats> => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) {
         throw new Error('Non connecté');
       }
@@ -233,14 +233,12 @@ export const useMyAffiliateCourseStats = (productId: string) => {
 
       const totalConversions = links.reduce((sum, l) => sum + (l.conversions_count || 0), 0);
       const totalCommission = commissions?.reduce((sum, c) => sum + c.amount, 0) || 0;
-      const paidCommission = commissions
-        ?.filter(c => c.status === 'paid')
-        .reduce((sum, c) => sum + c.amount, 0) || 0;
+      const paidCommission =
+        commissions?.filter(c => c.status === 'paid').reduce((sum, c) => sum + c.amount, 0) || 0;
       const pendingCommission = totalCommission - paidCommission;
 
-      const conversionRate = clicksCount && totalConversions
-        ? (totalConversions / clicksCount) * 100
-        : 0;
+      const conversionRate =
+        clicksCount && totalConversions ? (totalConversions / clicksCount) * 100 : 0;
 
       return {
         total_clicks: clicksCount || 0,
@@ -262,10 +260,3 @@ export const generateAffiliateUrl = (productSlug: string, affiliateCode: string)
   const baseUrl = window.location.origin;
   return `${baseUrl}/courses/${productSlug}?ref=${affiliateCode}`;
 };
-
-
-
-
-
-
-

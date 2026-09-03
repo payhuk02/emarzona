@@ -27,9 +27,7 @@ export const CourseProgressBar = ({ enrollmentId, totalLessons }: CourseProgress
             <Trophy className="w-5 h-5 text-orange-600" />
             <h3 className="font-semibold text-gray-900">Votre progression</h3>
           </div>
-          <div className="text-2xl font-bold text-orange-600">
-            {percentage}%
-          </div>
+          <div className="text-2xl font-bold text-orange-600">{percentage}%</div>
         </div>
 
         {/* Barre de progression */}
@@ -55,20 +53,13 @@ export const CourseProgressBar = ({ enrollmentId, totalLessons }: CourseProgress
         {/* Message d'encouragement */}
         {percentage > 0 && percentage < 100 && (
           <p className="text-xs text-gray-500 italic">
-            {percentage < 25 && "Vous venez de commencer, continuez comme ça !"}
-            {percentage >= 25 && percentage < 50 && "Bon début ! Vous êtes sur la bonne voie."}
-            {percentage >= 50 && percentage < 75 && "Plus de la moitié ! Vous y êtes presque."}
-            {percentage >= 75 && percentage < 100 && "Dernière ligne droite ! Ne lâchez rien."}
+            {percentage < 25 && 'Vous venez de commencer, continuez comme ça !'}
+            {percentage >= 25 && percentage < 50 && 'Bon début ! Vous êtes sur la bonne voie.'}
+            {percentage >= 50 && percentage < 75 && 'Plus de la moitié ! Vous y êtes presque.'}
+            {percentage >= 75 && percentage < 100 && 'Dernière ligne droite ! Ne lâchez rien.'}
           </p>
         )}
       </div>
     </Card>
   );
 };
-
-
-
-
-
-
-

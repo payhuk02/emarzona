@@ -30,7 +30,7 @@ export interface RetryResult<T> {
 // CONFIGURATION PAR DÉFAUT
 // ============================================================
 
-const  DEFAULT_CONFIG: Required<RetryConfig> = {
+const DEFAULT_CONFIG: Required<RetryConfig> = {
   maxRetries: 3,
   initialDelay: 1000, // 1 seconde
   maxDelay: 30000, // 30 secondes
@@ -52,10 +52,10 @@ export class EmailRetryService {
   ): Promise<RetryResult<T>> {
     const finalConfig = { ...DEFAULT_CONFIG, ...config };
     const startTime = Date.now();
-    let  lastError: Error | undefined;
-    let  attempts= 0;
+    let lastError: Error | undefined;
+    let attempts = 0;
 
-    for (let  attempt= 0; attempt <= finalConfig.maxRetries; attempt++) {
+    for (let attempt = 0; attempt <= finalConfig.maxRetries; attempt++) {
       attempts = attempt + 1;
 
       try {
@@ -76,7 +76,7 @@ export class EmailRetryService {
           attempts,
           totalTime,
         };
-      } catch ( _error: any) {
+      } catch (_error: any) {
         lastError = error instanceof Error ? error : new Error(String(error));
 
         // Vérifier si l'erreur est récupérable
@@ -125,13 +125,9 @@ export class EmailRetryService {
   /**
    * Calculer le délai avec backoff exponentiel
    */
-  private static calculateDelay(
-    attempt: number,
-    config: Required<RetryConfig>
-  ): number {
+  private static calculateDelay(attempt: number, config: Required<RetryConfig>): number {
     // Calculer le délai de base (backoff exponentiel)
-    let  delay=
-      config.initialDelay * Math.pow(config.multiplier, attempt);
+    let delay = config.initialDelay * Math.pow(config.multiplier, attempt);
 
     // Appliquer le délai maximum
     delay = Math.min(delay, config.maxDelay);
@@ -164,11 +160,7 @@ export class EmailRetryService {
       'unauthorized',
     ];
 
-    if (
-      nonRecoverableErrors.some(
-        (msg) => errorMessage.includes(msg) || errorName.includes(msg)
-      )
-    ) {
+    if (nonRecoverableErrors.some(msg => errorMessage.includes(msg) || errorName.includes(msg))) {
       return false;
     }
 
@@ -188,16 +180,14 @@ export class EmailRetryService {
       'econnrefused',
     ];
 
-    return recoverableErrors.some(
-      (msg) => errorMessage.includes(msg) || errorName.includes(msg)
-    );
+    return recoverableErrors.some(msg => errorMessage.includes(msg) || errorName.includes(msg));
   }
 
   /**
    * Sleep helper
    */
   private static sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   /**
@@ -225,10 +215,3 @@ export class EmailRetryService {
 
 // Export instance singleton
 export const emailRetryService = EmailRetryService;
-
-
-
-
-
-
-

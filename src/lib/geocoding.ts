@@ -38,7 +38,8 @@ export async function geocodeAddress(
       success: false,
       error: {
         error: 'API_KEY_MISSING',
-        message: 'Clé API Google Maps non configurée. Configurez VITE_GOOGLE_MAPS_API_KEY dans votre fichier .env',
+        message:
+          'Clé API Google Maps non configurée. Configurez VITE_GOOGLE_MAPS_API_KEY dans votre fichier .env',
       },
     };
   }
@@ -119,7 +120,7 @@ export async function geocodeAddress(
         place_id: result.place_id,
       },
     };
-  } catch ( _error: unknown) {
+  } catch (_error: unknown) {
     logger.error('Geocoding error', { error, address });
     return {
       success: false,
@@ -142,7 +143,7 @@ export function buildFullAddress(
   postalCode: string,
   country: string
 ): string {
-  const  parts: string[] = [];
+  const parts: string[] = [];
 
   if (addressLine1) parts.push(addressLine1);
   if (addressLine2) parts.push(addressLine2);
@@ -153,10 +154,3 @@ export function buildFullAddress(
 
   return parts.join(', ');
 }
-
-
-
-
-
-
-

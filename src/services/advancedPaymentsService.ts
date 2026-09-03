@@ -34,7 +34,11 @@ interface RawTransaction {
 }
 
 function resolvePaymentType(metadata: Record<string, unknown> | null | undefined): PaymentType {
-  if (metadata && typeof metadata === 'object' && (metadata as Record<string, unknown>).payment_type) {
+  if (
+    metadata &&
+    typeof metadata === 'object' &&
+    (metadata as Record<string, unknown>).payment_type
+  ) {
     return (metadata as Record<string, unknown>).payment_type as PaymentType;
   }
   return 'full';
@@ -47,7 +51,12 @@ function resolvePaymentStatus(rawStatus: string | null | undefined): PaymentStat
   return 'pending';
 }
 
-async function fetchCustomerData(customerId: string, storeId: string, fallbackName?: string | null, fallbackEmail?: string | null) {
+async function fetchCustomerData(
+  customerId: string,
+  storeId: string,
+  fallbackName?: string | null,
+  fallbackEmail?: string | null
+) {
   try {
     const { data } = await supabase
       .from('customers')
@@ -79,9 +88,12 @@ async function fetchOrderNumber(orderId: string, storeId: string, transactionId:
     if (error) {
       const code = error.code;
       const msg = error.message || '';
-      const isNonCritical = ['42P01', 'PGRST116', '400', '42501', '403'].includes(code) ||
-        msg.includes('does not exist') || msg.includes('Bad Request') ||
-        msg.includes('permission denied') || msg.includes('RLS');
+      const isNonCritical =
+        ['42P01', 'PGRST116', '400', '42501', '403'].includes(code) ||
+        msg.includes('does not exist') ||
+        msg.includes('Bad Request') ||
+        msg.includes('permission denied') ||
+        msg.includes('RLS');
       if (!isNonCritical) {
         logger.warn('Error fetching order for transaction', { transactionId, orderId, error });
       }
@@ -93,12 +105,20 @@ async function fetchOrderNumber(orderId: string, storeId: string, transactionId:
   }
 }
 
-export async function normalizeTransaction(transaction: RawTransaction, storeId: string): Promise<AdvancedPayment> {
+export async function normalizeTransaction(
+  transaction: RawTransaction,
+  storeId: string
+): Promise<AdvancedPayment> {
   const paymentType = resolvePaymentType(transaction.metadata);
   const status = resolvePaymentStatus(transaction.status);
 
   let customerData = transaction.customer_id
-    ? await fetchCustomerData(transaction.customer_id, storeId, transaction.customer_name, transaction.customer_email)
+    ? await fetchCustomerData(
+        transaction.customer_id,
+        storeId,
+        transaction.customer_name,
+        transaction.customer_email
+      )
     : null;
 
   if (!customerData) {
@@ -158,12 +178,15 @@ export async function fetchAndMergePayments(
 
   if (filters?.status) paymentsQuery = paymentsQuery.eq('status', filters.status);
   if (filters?.payment_type) paymentsQuery = paymentsQuery.eq('payment_type', filters.payment_type);
-  if (filters?.payment_method) paymentsQuery = paymentsQuery.eq('payment_method', filters.payment_method);
+  if (filters?.payment_method)
+    paymentsQuery = paymentsQuery.eq('payment_method', filters.payment_method);
   if (filters?.is_held !== undefined) paymentsQuery = paymentsQuery.eq('is_held', filters.is_held);
   if (filters?.date_from) paymentsQuery = paymentsQuery.gte('created_at', filters.date_from);
   if (filters?.date_to) paymentsQuery = paymentsQuery.lte('created_at', filters.date_to);
   if (filters?.search) {
-    paymentsQuery = paymentsQuery.or(`transaction_id.ilike.%${filters.search}%,notes.ilike.%${filters.search}%`);
+    paymentsQuery = paymentsQuery.or(
+      `transaction_id.ilike.%${filters.search}%,notes.ilike.%${filters.search}%`
+    );
   }
 
   // 2. Build transactions query
@@ -179,7 +202,8 @@ export async function fetchAndMergePayments(
     const statuses = STATUS_MAP[filters.status] || [filters.status];
     transactionsQuery = transactionsQuery.in('status', statuses);
   }
-  if (filters?.date_from) transactionsQuery = transactionsQuery.gte('created_at', filters.date_from);
+  if (filters?.date_from)
+    transactionsQuery = transactionsQuery.gte('created_at', filters.date_from);
   if (filters?.date_to) transactionsQuery = transactionsQuery.lte('created_at', filters.date_to);
   if (filters?.search) {
     transactionsQuery = transactionsQuery.or(
@@ -240,7 +264,9 @@ function extractCount(result: PromiseSettledResult<{ count: number | null }>): n
   return result.status === 'fulfilled' && result.value.count !== null ? result.value.count : 0;
 }
 
-function extractAmounts(result: PromiseSettledResult<{ data: Array<{ amount: number | null }> | null }>): number[] {
+function extractAmounts(
+  result: PromiseSettledResult<{ data: Array<{ amount: number | null }> | null }>
+): number[] {
   if (result.status !== 'fulfilled' || !result.value.data) return [];
   return result.value.data
     .map(r => r.amount)
@@ -250,23 +276,80 @@ function extractAmounts(result: PromiseSettledResult<{ data: Array<{ amount: num
 export async function fetchPaymentStats(storeId: string): Promise<PaymentStats> {
   const results = await Promise.allSettled([
     supabase.from('payments').select('id', { count: 'exact', head: true }).eq('store_id', storeId),
-    supabase.from('payments').select('id', { count: 'exact', head: true }).eq('store_id', storeId).eq('status', 'completed'),
-    supabase.from('payments').select('id', { count: 'exact', head: true }).eq('store_id', storeId).eq('status', 'pending'),
-    supabase.from('payments').select('id', { count: 'exact', head: true }).eq('store_id', storeId).eq('status', 'failed'),
-    supabase.from('payments').select('id', { count: 'exact', head: true }).eq('store_id', storeId).eq('is_held', true),
+    supabase
+      .from('payments')
+      .select('id', { count: 'exact', head: true })
+      .eq('store_id', storeId)
+      .eq('status', 'completed'),
+    supabase
+      .from('payments')
+      .select('id', { count: 'exact', head: true })
+      .eq('store_id', storeId)
+      .eq('status', 'pending'),
+    supabase
+      .from('payments')
+      .select('id', { count: 'exact', head: true })
+      .eq('store_id', storeId)
+      .eq('status', 'failed'),
+    supabase
+      .from('payments')
+      .select('id', { count: 'exact', head: true })
+      .eq('store_id', storeId)
+      .eq('is_held', true),
     supabase.from('payments').select('amount').eq('store_id', storeId).eq('status', 'completed'),
     supabase.from('payments').select('amount').eq('store_id', storeId).eq('is_held', true),
-    supabase.from('payments').select('id', { count: 'exact', head: true }).eq('store_id', storeId).eq('payment_type', 'percentage'),
-    supabase.from('payments').select('id', { count: 'exact', head: true }).eq('store_id', storeId).eq('payment_type', 'delivery_secured'),
-    supabase.from('transactions').select('id', { count: 'exact', head: true }).eq('store_id', storeId),
-    supabase.from('transactions').select('id', { count: 'exact', head: true }).eq('store_id', storeId).in('status', ['completed', 'success']),
-    supabase.from('transactions').select('id', { count: 'exact', head: true }).eq('store_id', storeId).in('status', ['pending', 'processing']),
-    supabase.from('transactions').select('id', { count: 'exact', head: true }).eq('store_id', storeId).in('status', ['failed', 'error']),
-    supabase.from('transactions').select('amount').eq('store_id', storeId).in('status', ['completed', 'success']),
+    supabase
+      .from('payments')
+      .select('id', { count: 'exact', head: true })
+      .eq('store_id', storeId)
+      .eq('payment_type', 'percentage'),
+    supabase
+      .from('payments')
+      .select('id', { count: 'exact', head: true })
+      .eq('store_id', storeId)
+      .eq('payment_type', 'delivery_secured'),
+    supabase
+      .from('transactions')
+      .select('id', { count: 'exact', head: true })
+      .eq('store_id', storeId),
+    supabase
+      .from('transactions')
+      .select('id', { count: 'exact', head: true })
+      .eq('store_id', storeId)
+      .in('status', ['completed', 'success']),
+    supabase
+      .from('transactions')
+      .select('id', { count: 'exact', head: true })
+      .eq('store_id', storeId)
+      .in('status', ['pending', 'processing']),
+    supabase
+      .from('transactions')
+      .select('id', { count: 'exact', head: true })
+      .eq('store_id', storeId)
+      .in('status', ['failed', 'error']),
+    supabase
+      .from('transactions')
+      .select('amount')
+      .eq('store_id', storeId)
+      .in('status', ['completed', 'success']),
   ]);
 
-  const [pTotal, pCompleted, pPending, pFailed, pHeld, pAmounts, pHeldAmounts, pPercentage, pSecured,
-    tTotal, tCompleted, tPending, tFailed, tAmounts] = results;
+  const [
+    pTotal,
+    pCompleted,
+    pPending,
+    pFailed,
+    pHeld,
+    pAmounts,
+    pHeldAmounts,
+    pPercentage,
+    pSecured,
+    tTotal,
+    tCompleted,
+    tPending,
+    tFailed,
+    tAmounts,
+  ] = results;
 
   const totalPayments = extractCount(pTotal as any) + extractCount(tTotal as any);
   const completedPayments = extractCount(pCompleted as any) + extractCount(tCompleted as any);

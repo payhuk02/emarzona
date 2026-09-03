@@ -1,13 +1,19 @@
 /**
  * Digital File Preview Component
  * Date: 27 Janvier 2025
- * 
+ *
  * Composant pour prévisualiser les fichiers digitaux (images, vidéos, audio)
  * avant achat - Améliore l'UX et la confiance des clients
  */
 
 import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -182,17 +188,8 @@ export const DigitalFilePreview = ({
                 <p className="text-sm text-muted-foreground">{formatSize(file.file_size_mb)}</p>
               </div>
               <div className="flex items-center gap-4 justify-center">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  onClick={toggleAudio}
-                  className="rounded-full"
-                >
-                  {audioPlaying ? (
-                    <Pause className="h-6 w-6" />
-                  ) : (
-                    <Play className="h-6 w-6" />
-                  )}
+                <Button variant="outline" size="lg" onClick={toggleAudio} className="rounded-full">
+                  {audioPlaying ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6" />}
                 </Button>
               </div>
               {audioPlaying && (
@@ -200,7 +197,7 @@ export const DigitalFilePreview = ({
                   src={displayUrl}
                   autoPlay
                   onEnded={() => setAudioPlaying(false)}
-                  onTimeUpdate={(e) => {
+                  onTimeUpdate={e => {
                     const audio = e.currentTarget;
                     setAudioProgress((audio.currentTime / audio.duration) * 100);
                   }}
@@ -246,7 +243,7 @@ export const DigitalFilePreview = ({
 
   return (
     <>
-      <Card className={cn("group hover:shadow-md transition-shadow", className)}>
+      <Card className={cn('group hover:shadow-md transition-shadow', className)}>
         <CardContent className="p-4">
           <div className="flex items-center gap-4">
             {/* Preview thumbnail/icon */}
@@ -267,11 +264,7 @@ export const DigitalFilePreview = ({
                 </div>
               ) : (
                 <div className="w-16 h-16 rounded-lg bg-muted flex items-center justify-center">
-                  {isLocked ? (
-                    <Lock className="h-6 w-6 text-muted-foreground" />
-                  ) : (
-                    getFileIcon()
-                  )}
+                  {isLocked ? <Lock className="h-6 w-6 text-muted-foreground" /> : getFileIcon()}
                 </div>
               )}
             </div>
@@ -319,20 +312,13 @@ export const DigitalFilePreview = ({
                       <span className="truncate">{file.name}</span>
                     </DialogTitle>
                   </DialogHeader>
-                  <div className="mt-4">
-                    {renderPreviewContent()}
-                  </div>
+                  <div className="mt-4">{renderPreviewContent()}</div>
                 </DialogContent>
               </Dialog>
             )}
 
             {isLocked && (
-              <Button
-                variant="outline"
-                size="sm"
-                disabled
-                className="flex-shrink-0"
-              >
+              <Button variant="outline" size="sm" disabled className="flex-shrink-0">
                 <Lock className="h-4 w-4 mr-2" />
                 Verrouillé
               </Button>
@@ -364,7 +350,9 @@ export const DigitalFilePreviewCompact = ({
           size="sm"
           disabled={isLocked}
           className="h-8 w-8 p-0"
-          aria-label={isLocked ? `Fichier ${file.name} verrouillé` : `Aperçu du fichier ${file.name}`}
+          aria-label={
+            isLocked ? `Fichier ${file.name} verrouillé` : `Aperçu du fichier ${file.name}`
+          }
         >
           <Eye className="h-4 w-4" />
         </Button>
@@ -375,11 +363,7 @@ export const DigitalFilePreviewCompact = ({
         </DialogHeader>
         <div className="mt-4">
           {category === 'image' && (
-            <img
-              src={displayUrl}
-              alt={file.name}
-              className="max-w-full h-auto"
-            />
+            <img src={displayUrl} alt={file.name} className="max-w-full h-auto" />
           )}
           {category === 'video' && (
             <video src={displayUrl} controls className="w-full max-h-[600px]" />
@@ -395,10 +379,3 @@ export const DigitalFilePreviewCompact = ({
     </Dialog>
   );
 };
-
-
-
-
-
-
-

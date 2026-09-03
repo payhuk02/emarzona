@@ -44,7 +44,7 @@ export function addEventListeners(
   );
 
   return () => {
-    removers.forEach((remove) => remove());
+    removers.forEach(remove => remove());
   };
 }
 
@@ -111,7 +111,7 @@ export function delegateEvents(
   );
 
   return () => {
-    removers.forEach((remove) => remove());
+    removers.forEach(remove => remove());
   };
 }
 
@@ -213,12 +213,9 @@ export function getKeyboardKeys(event: KeyboardEvent): {
 /**
  * Vérifie si une touche spécifique est pressée
  */
-export function isKeyPressed(
-  event: KeyboardEvent,
-  key: string | string[]
-): boolean {
+export function isKeyPressed(event: KeyboardEvent, key: string | string[]): boolean {
   const keys = Array.isArray(key) ? key : [key];
-  return keys.some((k) => event.key === k || event.code === k);
+  return keys.some(k => event.key === k || event.code === k);
 }
 
 /**
@@ -231,10 +228,7 @@ export function isCtrlOrCmdPressed(event: KeyboardEvent): boolean {
 /**
  * Obtient les données de transfert depuis un événement drag
  */
-export function getDragData(
-  event: DragEvent,
-  format?: string
-): string | null {
+export function getDragData(event: DragEvent, format?: string): string | null {
   if (format) {
     return event.dataTransfer?.getData(format) || null;
   }
@@ -244,11 +238,7 @@ export function getDragData(
 /**
  * Définit les données de transfert pour un événement drag
  */
-export function setDragData(
-  event: DragEvent,
-  format: string,
-  data: string
-): void {
+export function setDragData(event: DragEvent, format: string, data: string): void {
   event.dataTransfer?.setData(format, data);
 }
 
@@ -262,29 +252,17 @@ export function getDragFiles(event: DragEvent): FileList | null {
 /**
  * Crée un événement synthétique
  */
-export function createSyntheticEvent<T extends Event>(
-  type: string,
-  init?: EventInit
-): T {
+export function createSyntheticEvent<T extends Event>(type: string, init?: EventInit): T {
   return new Event(type, init) as T;
 }
 
 /**
  * Crée un événement de clic synthétique
  */
-export function createSyntheticClickEvent(
-  init?: MouseEventInit
-): MouseEvent {
+export function createSyntheticClickEvent(init?: MouseEventInit): MouseEvent {
   return new MouseEvent('click', {
     bubbles: true,
     cancelable: true,
     ...init,
   });
 }
-
-
-
-
-
-
-

@@ -1,7 +1,7 @@
 /**
  * ErrorBoundaryWrapper Component
  * Date: 28 Janvier 2025
- * 
+ *
  * Wrapper pour ajouter facilement des error boundaries aux composants
  * Améliore la résilience de l'application
  */
@@ -29,10 +29,7 @@ interface ErrorBoundaryWrapperState {
 /**
  * Error Boundary simple pour wrapper des composants
  */
-class SimpleErrorBoundary extends Component<
-  ErrorBoundaryWrapperProps,
-  ErrorBoundaryWrapperState
-> {
+class SimpleErrorBoundary extends Component<ErrorBoundaryWrapperProps, ErrorBoundaryWrapperState> {
   constructor(props: ErrorBoundaryWrapperProps) {
     super(props);
     this.state = {
@@ -48,7 +45,7 @@ class SimpleErrorBoundary extends Component<
     };
   }
 
-  componentDidCatch( _error: Error, errorInfo: ErrorInfo) {
+  componentDidCatch(_error: Error, errorInfo: ErrorInfo) {
     logger.error(`Error in ${this.props.componentName || 'component'}`, {
       error: error.message,
       stack: error.stack,
@@ -117,11 +114,7 @@ export function ErrorBoundaryWrapper({
 }: ErrorBoundaryWrapperProps) {
   // Utiliser l'ErrorBoundary avancée si disponible, sinon utiliser la simple
   return (
-    <ErrorBoundary
-      level={level}
-      fallback={fallback}
-      onError={onError}
-    >
+    <ErrorBoundary level={level} fallback={fallback} onError={onError}>
       {children}
     </ErrorBoundary>
   );
@@ -154,10 +147,3 @@ export function withErrorBoundary<P extends object>(
 
   return WrappedComponent;
 }
-
-
-
-
-
-
-

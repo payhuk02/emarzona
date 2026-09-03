@@ -9,7 +9,14 @@ export type PostStatus = 'draft' | 'published' | 'archived' | 'deleted' | 'moder
 export type PostContentType = 'text' | 'markdown' | 'html';
 export type CommentStatus = 'published' | 'deleted' | 'moderated';
 export type ReactionType = 'like' | 'love' | 'laugh' | 'wow' | 'sad' | 'angry' | 'support';
-export type NotificationType = 'post_like' | 'post_comment' | 'comment_reply' | 'new_follower' | 'post_mention' | 'post_approved' | 'post_rejected';
+export type NotificationType =
+  | 'post_like'
+  | 'post_comment'
+  | 'comment_reply'
+  | 'new_follower'
+  | 'post_mention'
+  | 'post_approved'
+  | 'post_rejected';
 
 export interface CommunityMember {
   id: string;
@@ -179,10 +186,3 @@ export interface CommunityStatistics {
     created_at: string;
   }>;
 }
-
-
-
-
-
-
-

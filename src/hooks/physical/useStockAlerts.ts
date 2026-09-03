@@ -1,8 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
-const STOCK_ALERT_FIELDS = 'id, store_id, product_id, product_name, product_image_url, variant_id, variant_label, sku, alert_type, severity, current_quantity, threshold_quantity, message, is_read, is_resolved, resolved_at, resolved_by, created_at, updated_at';
-const PHYSICAL_PRODUCT_ALERT_SOURCE_FIELDS = 'id, store_id, name, total_quantity, low_stock_threshold, track_inventory';
+const STOCK_ALERT_FIELDS =
+  'id, store_id, product_id, product_name, product_image_url, variant_id, variant_label, sku, alert_type, severity, current_quantity, threshold_quantity, message, is_read, is_resolved, resolved_at, resolved_by, created_at, updated_at';
+const PHYSICAL_PRODUCT_ALERT_SOURCE_FIELDS =
+  'id, store_id, name, total_quantity, low_stock_threshold, track_inventory';
 
 // ============================================================================
 // TYPES
@@ -64,16 +66,19 @@ export interface CreateAlertInput {
 // FETCH ALERTS
 // ============================================================================
 
-export function useStockAlerts(storeId: string, filters?: {
-  severity?: AlertSeverity;
-  alert_type?: AlertType;
-  is_read?: boolean;
-  is_resolved?: boolean;
-}) {
+export function useStockAlerts(
+  storeId: string,
+  filters?: {
+    severity?: AlertSeverity;
+    alert_type?: AlertType;
+    is_read?: boolean;
+    is_resolved?: boolean;
+  }
+) {
   return useQuery({
     queryKey: ['stock-alerts', storeId, filters],
     queryFn: async () => {
-      let  query= supabase
+      let query = supabase
         .from('stock_alerts')
         .select(STOCK_ALERT_FIELDS)
         .eq('store_id', storeId)
@@ -120,19 +125,19 @@ export function useAlertStats(storeId: string) {
 
       const alerts = (data || []) as StockAlert[];
 
-      const  stats: AlertStats = {
+      const stats: AlertStats = {
         total: alerts.length,
-        unread: alerts.filter((a) => !a.is_read).length,
-        critical: alerts.filter((a) => a.severity === 'critical').length,
-        warning: alerts.filter((a) => a.severity === 'warning').length,
-        info: alerts.filter((a) => a.severity === 'info').length,
+        unread: alerts.filter(a => !a.is_read).length,
+        critical: alerts.filter(a => a.severity === 'critical').length,
+        warning: alerts.filter(a => a.severity === 'warning').length,
+        info: alerts.filter(a => a.severity === 'info').length,
         by_type: {
-          low_stock: alerts.filter((a) => a.alert_type === 'low_stock').length,
-          out_of_stock: alerts.filter((a) => a.alert_type === 'out_of_stock').length,
-          overstock: alerts.filter((a) => a.alert_type === 'overstock').length,
-          expiring_soon: alerts.filter((a) => a.alert_type === 'expiring_soon').length,
-          damaged: alerts.filter((a) => a.alert_type === 'damaged').length,
-          threshold_reached: alerts.filter((a) => a.alert_type === 'threshold_reached').length,
+          low_stock: alerts.filter(a => a.alert_type === 'low_stock').length,
+          out_of_stock: alerts.filter(a => a.alert_type === 'out_of_stock').length,
+          overstock: alerts.filter(a => a.alert_type === 'overstock').length,
+          expiring_soon: alerts.filter(a => a.alert_type === 'expiring_soon').length,
+          damaged: alerts.filter(a => a.alert_type === 'damaged').length,
+          threshold_reached: alerts.filter(a => a.alert_type === 'threshold_reached').length,
         },
       };
 
@@ -168,7 +173,7 @@ export function useCreateAlert() {
       if (error) throw error;
       return data as StockAlert;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['stock-alerts'] });
       queryClient.invalidateQueries({ queryKey: ['alert-stats'] });
     },
@@ -240,13 +245,7 @@ export function useResolveAlert() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({
-      alertId,
-      userId,
-    }: {
-      alertId: string;
-      userId?: string;
-    }) => {
+    mutationFn: async ({ alertId, userId }: { alertId: string; userId?: string }) => {
       const { data, error } = await supabase
         .from('stock_alerts')
         .update({
@@ -278,13 +277,7 @@ export function useResolveMultipleAlerts() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({
-      alertIds,
-      userId,
-    }: {
-      alertIds: string[];
-      userId?: string;
-    }) => {
+    mutationFn: async ({ alertIds, userId }: { alertIds: string[]; userId?: string }) => {
       const { data, error } = await supabase
         .from('stock_alerts')
         .update({
@@ -345,7 +338,7 @@ export function useGenerateProductAlerts() {
 
       if (productsError) throw productsError;
 
-      const  alerts: CreateAlertInput[] = [];
+      const alerts: CreateAlertInput[] = [];
 
       for (const product of products || []) {
         const qty = product.total_quantity || 0;
@@ -384,7 +377,7 @@ export function useGenerateProductAlerts() {
         const { data, error } = await supabase
           .from('stock_alerts')
           .insert(
-            alerts.map((a) => ({
+            alerts.map(a => ({
               ...a,
               is_read: false,
               is_resolved: false,
@@ -406,10 +399,3 @@ export function useGenerateProductAlerts() {
     },
   });
 }
-
-
-
-
-
-
-

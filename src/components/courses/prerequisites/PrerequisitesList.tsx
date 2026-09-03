@@ -7,7 +7,12 @@ import { CheckCircle2, XCircle, Clock, BookOpen, FileText, Target } from 'lucide
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useCoursePrerequisites, usePrerequisiteValidations, type CoursePrerequisite, type PrerequisiteValidation } from '@/hooks/courses/usePrerequisites';
+import {
+  useCoursePrerequisites,
+  usePrerequisiteValidations,
+  type CoursePrerequisite,
+  type PrerequisiteValidation,
+} from '@/hooks/courses/usePrerequisites';
 import { cn } from '@/lib/utils';
 import { Link } from 'react-router-dom';
 
@@ -17,7 +22,11 @@ interface PrerequisitesListProps {
   className?: string;
 }
 
-export const PrerequisitesList = ({ courseId, enrollmentId, className }: PrerequisitesListProps) => {
+export const PrerequisitesList = ({
+  courseId,
+  enrollmentId,
+  className,
+}: PrerequisitesListProps) => {
   const { data: prerequisites = [], isLoading } = useCoursePrerequisites(courseId);
   const { data: validations = [] } = usePrerequisiteValidations(courseId, enrollmentId);
 
@@ -50,7 +59,7 @@ export const PrerequisitesList = ({ courseId, enrollmentId, className }: Prerequ
 
   const getValidationStatus = (prerequisite: CoursePrerequisite) => {
     if (!enrollmentId) return null;
-    
+
     const validation = validations.find(v => v.prerequisite_id === prerequisite.id);
     return validation?.is_validated || false;
   };
@@ -76,7 +85,7 @@ export const PrerequisitesList = ({ courseId, enrollmentId, className }: Prerequ
         )}
 
         <div className="space-y-3">
-          {prerequisites.map((prerequisite) => {
+          {prerequisites.map(prerequisite => {
             const Icon = getPrerequisiteIcon(prerequisite.prerequisite_type);
             const isValidated = getValidationStatus(prerequisite);
             const validation = validations.find(v => v.prerequisite_id === prerequisite.id);
@@ -100,19 +109,24 @@ export const PrerequisitesList = ({ courseId, enrollmentId, className }: Prerequ
                   <div className="flex items-center gap-2 mb-1">
                     <Icon className="h-4 w-4 text-muted-foreground" />
                     <span className="font-medium">
-                      {prerequisite.prerequisite_type === 'course' && prerequisite.required_course?.product?.name
+                      {prerequisite.prerequisite_type === 'course' &&
+                      prerequisite.required_course?.product?.name
                         ? prerequisite.required_course.product.name
                         : `Prérequis: ${prerequisite.prerequisite_type}`}
                     </span>
                     {prerequisite.is_required && (
-                      <Badge variant="destructive" className="text-xs">Requis</Badge>
+                      <Badge variant="destructive" className="text-xs">
+                        Requis
+                      </Badge>
                     )}
                   </div>
-                  
+
                   {prerequisite.prerequisite_type === 'course' && (
                     <div className="text-sm text-muted-foreground">
                       {prerequisite.require_completion && (
-                        <span>Doit être complété à {prerequisite.minimum_progress_percentage}%</span>
+                        <span>
+                          Doit être complété à {prerequisite.minimum_progress_percentage}%
+                        </span>
                       )}
                       {prerequisite.required_course?.product?.slug && (
                         <Link
@@ -131,7 +145,10 @@ export const PrerequisitesList = ({ courseId, enrollmentId, className }: Prerequ
                         <span>Progression: {validation.validation_details.progress}%</span>
                       )}
                       {validation.validation_details.score !== undefined && (
-                        <span>Score: {validation.validation_details.score}/{validation.validation_details.required_score}</span>
+                        <span>
+                          Score: {validation.validation_details.score}/
+                          {validation.validation_details.required_score}
+                        </span>
                       )}
                     </div>
                   )}
@@ -144,10 +161,3 @@ export const PrerequisitesList = ({ courseId, enrollmentId, className }: Prerequ
     </Card>
   );
 };
-
-
-
-
-
-
-

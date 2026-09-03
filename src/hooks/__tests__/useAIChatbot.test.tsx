@@ -7,8 +7,14 @@ import { CHATBOT_RESPONSES } from '@/lib/ai/chatbotResponses';
 import { logger } from '@/lib/logger';
 import { AuthContext } from '@/contexts/AuthContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { AIChatbot, ChatMessage, ChatSession, ChatbotResponse, IntentAnalysisResult, ChatSessionContext } from '@/lib/ai/chatbot';
-
+import {
+  AIChatbot,
+  ChatMessage,
+  ChatSession,
+  ChatbotResponse,
+  IntentAnalysisResult,
+  ChatSessionContext,
+} from '@/lib/ai/chatbot';
 
 // Mocks
 vi.mock('@/integrations/supabase/client', () => ({
@@ -28,7 +34,7 @@ vi.mock('@/lib/ai/chatbot', () => ({
     createNewSession: vi.fn(),
   })),
   // Exportez les types réels pour qu'ils soient disponibles pour les mocks
-  ChatMessage: {} as ChatMessage, 
+  ChatMessage: {} as ChatMessage,
   ChatSession: {} as ChatSession,
   ChatbotResponse: {} as ChatbotResponse,
   IntentAnalysisResult: {} as IntentAnalysisResult,
@@ -70,13 +76,14 @@ const mockChatbotProcessMessage = vi.mocked(AIChatbot.prototype.processMessage);
 const mockChatbotCreateNewSession = vi.mocked(AIChatbot.prototype.createNewSession);
 const mockSanitizeString = vi.mocked(securityUtils.sanitizeString);
 
-
 const createWrapper = (user = { id: 'test-user' }) => {
   const queryClient = new QueryClient();
   return function Wrapper({ children }: { children: React.ReactNode }) {
     return (
       <QueryClientProvider client={queryClient}>
-        <AuthContext.Provider value={{ user, signOut: vi.fn() } as any}> {/* eslint-disable-line @typescript-eslint/no-explicit-any */}
+        <AuthContext.Provider value={{ user, signOut: vi.fn() } as any}>
+          {' '}
+          {/* eslint-disable-line @typescript-eslint/no-explicit-any */}
           {children}
         </AuthContext.Provider>
       </QueryClientProvider>
@@ -91,7 +98,10 @@ describe('useAIChatbot', () => {
     // Reset mocks for chatbot instance
     mockChatbotProcessMessage.mockReset();
     mockChatbotCreateNewSession.mockReset();
-    mockChatbotCreateNewSession.mockResolvedValue({ id: 'new-session-id', messages: [] } as ChatSession);
+    mockChatbotCreateNewSession.mockResolvedValue({
+      id: 'new-session-id',
+      messages: [],
+    } as ChatSession);
     mockChatbotProcessMessage.mockResolvedValue({ message: 'Mock response' } as ChatbotResponse);
 
     mockSupabaseFrom.mockReturnValue({
@@ -188,22 +198,27 @@ describe('useAIChatbot', () => {
   });
 
   it('should not show welcome message on subsequent opens', async () => {
-    localStorageMock.setItem('emarzona_ai_chat_session_state', JSON.stringify({
-      sessionId: 'existing-session',
-      messages: [{
-        id: '1',
-        content: 'Hi',
-        role: 'user',
-        timestamp: new Date().toISOString()
-      }],
-      context: {},
-      metadata: {
-        startedAt: new Date().toISOString(),
-        lastActivity: new Date().toISOString(),
-        platform: 'web',
-        language: 'fr'
-      }
-    }));
+    localStorageMock.setItem(
+      'emarzona_ai_chat_session_state',
+      JSON.stringify({
+        sessionId: 'existing-session',
+        messages: [
+          {
+            id: '1',
+            content: 'Hi',
+            role: 'user',
+            timestamp: new Date().toISOString(),
+          },
+        ],
+        context: {},
+        metadata: {
+          startedAt: new Date().toISOString(),
+          lastActivity: new Date().toISOString(),
+          platform: 'web',
+          language: 'fr',
+        },
+      })
+    );
     localStorageMock.setItem('emarzona_ai_chat_welcome_shown', 'true');
 
     const { result } = renderHook(() => useAIChatbot(), { wrapper: createWrapper() });
@@ -222,17 +237,20 @@ describe('useAIChatbot', () => {
     vi.useFakeTimers();
     const oldDate = new Date();
     oldDate.setDate(oldDate.getDate() - 8); // 8 days ago
-    localStorageMock.setItem('emarzona_ai_chat_session_state', JSON.stringify({
-      sessionId: 'old-session',
-      messages: [],
-      context: {},
-      metadata: {
-        startedAt: oldDate.toISOString(),
-        lastActivity: oldDate.toISOString(),
-        platform: 'web',
-        language: 'fr'
-      }
-    }));
+    localStorageMock.setItem(
+      'emarzona_ai_chat_session_state',
+      JSON.stringify({
+        sessionId: 'old-session',
+        messages: [],
+        context: {},
+        metadata: {
+          startedAt: oldDate.toISOString(),
+          lastActivity: oldDate.toISOString(),
+          platform: 'web',
+          language: 'fr',
+        },
+      })
+    );
     localStorageMock.setItem('emarzona_ai_chat_welcome_shown', 'true');
 
     const { result } = renderHook(() => useAIChatbot(), { wrapper: createWrapper() });
@@ -240,7 +258,7 @@ describe('useAIChatbot', () => {
     act(() => {
       result.current.toggleChatbot(); // Trigger useEffect
     });
-    
+
     vi.runAllTimers(); // Advance timers to trigger cleanup
 
     await waitFor(() => {
@@ -277,7 +295,12 @@ describe('useAIChatbot', () => {
       await result.current.sendMessage('Error message');
     });
 
-    expect(logger.error).toHaveBeenCalledWith('Erreur lors de l\'envoi du message au chatbot', expect.any(Error));
-    expect(result.current.messages[result.current.messages.length - 1].content).toContain(CHATBOT_RESPONSES.TECHNICAL_ERROR);
+    expect(logger.error).toHaveBeenCalledWith(
+      "Erreur lors de l'envoi du message au chatbot",
+      expect.any(Error)
+    );
+    expect(result.current.messages[result.current.messages.length - 1].content).toContain(
+      CHATBOT_RESPONSES.TECHNICAL_ERROR
+    );
   });
 });

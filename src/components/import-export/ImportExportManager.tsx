@@ -1,14 +1,20 @@
 /**
  * Import/Export Manager Component
  * Date: 28 Janvier 2025
- * 
+ *
  * Composant UI pour gérer l'import/export de données
  */
 
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -61,7 +67,7 @@ export const ImportExportManager = () => {
 
     setExporting(true);
     try {
-      let  _result;
+      let _result;
       if (format === 'csv') {
         result = await exportToCSV(store.id, type, startDate || undefined, endDate || undefined);
       } else {
@@ -70,10 +76,11 @@ export const ImportExportManager = () => {
 
       if (result.success && result.data) {
         // Télécharger le fichier
-        const blob = format === 'csv'
-          ? new Blob([result.data], { type: 'text/csv' })
-          : new Blob([JSON.stringify(result.data, null, 2)], { type: 'application/json' });
-        
+        const blob =
+          format === 'csv'
+            ? new Blob([result.data], { type: 'text/csv' })
+            : new Blob([JSON.stringify(result.data, null, 2)], { type: 'application/json' });
+
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -88,13 +95,13 @@ export const ImportExportManager = () => {
           description: `Les données ont été exportées avec succès`,
         });
       } else {
-        throw new Error(result.error || 'Erreur lors de l\'export');
+        throw new Error(result.error || "Erreur lors de l'export");
       }
-    } catch ( _error: any) {
+    } catch (_error: any) {
       logger.error('Error exporting data', { error: error.message });
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Une erreur est survenue lors de l\'export',
+        description: error.message || "Une erreur est survenue lors de l'export",
         variant: 'destructive',
       });
     } finally {
@@ -126,7 +133,7 @@ export const ImportExportManager = () => {
 
     try {
       const fileContent = await importFile.text();
-      let  _result;
+      let _result;
 
       if (format === 'csv') {
         result = await importFromCSV(store.id, type, fileContent);
@@ -149,11 +156,11 @@ export const ImportExportManager = () => {
           variant: 'default',
         });
       }
-    } catch ( _error: any) {
+    } catch (_error: any) {
       logger.error('Error importing data', { error: error.message });
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Une erreur est survenue lors de l\'import',
+        description: error.message || "Une erreur est survenue lors de l'import",
         variant: 'destructive',
       });
     } finally {
@@ -208,15 +215,13 @@ export const ImportExportManager = () => {
                 <Download className="h-5 w-5" />
                 Exporter des données
               </CardTitle>
-              <CardDescription>
-                Téléchargez vos données au format CSV ou JSON
-              </CardDescription>
+              <CardDescription>Téléchargez vos données au format CSV ou JSON</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="export-type">Type de données</Label>
-                  <Select value={type} onValueChange={(v) => setType(v as ImportExportType)}>
+                  <Select value={type} onValueChange={v => setType(v as ImportExportType)}>
                     <SelectTrigger id="export-type">
                       <SelectValue />
                     </SelectTrigger>
@@ -230,7 +235,7 @@ export const ImportExportManager = () => {
 
                 <div className="space-y-2">
                   <Label htmlFor="export-format">Format</Label>
-                  <Select value={format} onValueChange={(v) => setFormat(v as ImportExportFormat)}>
+                  <Select value={format} onValueChange={v => setFormat(v as ImportExportFormat)}>
                     <SelectTrigger id="export-format">
                       <SelectValue />
                     </SelectTrigger>
@@ -259,7 +264,7 @@ export const ImportExportManager = () => {
                     id="start-date"
                     type="date"
                     value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
+                    onChange={e => setStartDate(e.target.value)}
                   />
                 </div>
 
@@ -269,16 +274,12 @@ export const ImportExportManager = () => {
                     id="end-date"
                     type="date"
                     value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
+                    onChange={e => setEndDate(e.target.value)}
                   />
                 </div>
               </div>
 
-              <Button
-                onClick={handleExport}
-                disabled={exporting}
-                className="w-full"
-              >
+              <Button onClick={handleExport} disabled={exporting} className="w-full">
                 {exporting ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -303,14 +304,12 @@ export const ImportExportManager = () => {
                 <Upload className="h-5 w-5" />
                 Importer des données
               </CardTitle>
-              <CardDescription>
-                Importez vos données depuis un fichier CSV ou JSON
-              </CardDescription>
+              <CardDescription>Importez vos données depuis un fichier CSV ou JSON</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="import-type">Type de données</Label>
-                <Select value={type} onValueChange={(v) => setType(v as ImportExportType)}>
+                <Select value={type} onValueChange={v => setType(v as ImportExportType)}>
                   <SelectTrigger id="import-type">
                     <SelectValue />
                   </SelectTrigger>
@@ -343,11 +342,7 @@ export const ImportExportManager = () => {
                 </div>
               </div>
 
-              <Button
-                onClick={handleImport}
-                disabled={!importFile || importing}
-                className="w-full"
-              >
+              <Button onClick={handleImport} disabled={!importFile || importing} className="w-full">
                 {importing ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -412,10 +407,3 @@ export const ImportExportManager = () => {
     </div>
   );
 };
-
-
-
-
-
-
-

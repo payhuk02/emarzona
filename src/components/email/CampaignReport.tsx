@@ -54,9 +54,7 @@ export const CampaignReport = ({ campaign }: CampaignReportProps) => {
           <div className="flex items-start justify-between">
             <div>
               <CardTitle>{campaign.name}</CardTitle>
-              <CardDescription className="mt-1">
-                Rapport analytique de la campagne
-              </CardDescription>
+              <CardDescription className="mt-1">Rapport analytique de la campagne</CardDescription>
             </div>
             <Badge variant="outline">{campaign.status}</Badge>
           </div>
@@ -65,7 +63,7 @@ export const CampaignReport = ({ campaign }: CampaignReportProps) => {
           {campaign.description && (
             <p className="text-sm text-muted-foreground mb-4">{campaign.description}</p>
           )}
-          
+
           {/* Statistiques clés */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div>
@@ -114,10 +112,3 @@ export const CampaignReport = ({ campaign }: CampaignReportProps) => {
     </div>
   );
 };
-
-
-
-
-
-
-

@@ -68,10 +68,3 @@ export const QuickNoteButton = ({
     </Button>
   );
 };
-
-
-
-
-
-
-

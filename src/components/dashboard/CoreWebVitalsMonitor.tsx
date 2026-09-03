@@ -76,24 +76,27 @@ export const CoreWebVitalsMonitor = () => {
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
 
   // Fonction pour obtenir la notation d'une métrique
-  const getRating = useCallback((name: string, value: number): 'good' | 'needs-improvement' | 'poor' => {
-    switch (name) {
-      case 'lcp':
-        return value <= 2500 ? 'good' : value <= 4000 ? 'needs-improvement' : 'poor';
-      case 'fid':
-        return value <= 100 ? 'good' : value <= 300 ? 'needs-improvement' : 'poor';
-      case 'cls':
-        return value <= 0.1 ? 'good' : value <= 0.25 ? 'needs-improvement' : 'poor';
-      case 'fcp':
-        return value <= 1800 ? 'good' : value <= 3000 ? 'needs-improvement' : 'poor';
-      default:
-        return 'good';
-    }
-  }, []);
+  const getRating = useCallback(
+    (name: string, value: number): 'good' | 'needs-improvement' | 'poor' => {
+      switch (name) {
+        case 'lcp':
+          return value <= 2500 ? 'good' : value <= 4000 ? 'needs-improvement' : 'poor';
+        case 'fid':
+          return value <= 100 ? 'good' : value <= 300 ? 'needs-improvement' : 'poor';
+        case 'cls':
+          return value <= 0.1 ? 'good' : value <= 0.25 ? 'needs-improvement' : 'poor';
+        case 'fcp':
+          return value <= 1800 ? 'good' : value <= 3000 ? 'needs-improvement' : 'poor';
+        default:
+          return 'good';
+      }
+    },
+    []
+  );
 
   // Fonction pour obtenir l'icône de notation
   const getRatingIcon = (rating: 'good' | 'needs-improvement' | 'poor') => {
-    const iconClass = "h-4 w-4 inline";
+    const iconClass = 'h-4 w-4 inline';
     switch (rating) {
       case 'good':
         return <CheckCircle className={`${iconClass} text-green-500`} />;
@@ -145,80 +148,82 @@ export const CoreWebVitalsMonitor = () => {
     logger.info('🎯 Démarrage monitoring Core Web Vitals');
 
     // Importer web-vitals dynamiquement
-    import('web-vitals').then(({ getLCP, getFID, getCLS, getFCP, getTTFB }) => {
-      // Largest Contentful Paint
-      getLCP((metric) => {
-        const rating = getRating('lcp', metric.value);
-        setMetrics(prev => ({
-          ...prev,
-          lcp: {
-            value: metric.value,
-            rating,
-            timestamp: Date.now(),
-          },
-        }));
-        logger.info(`📏 LCP: ${metric.value}ms (${rating})`);
-      });
+    import('web-vitals')
+      .then(({ getLCP, getFID, getCLS, getFCP, getTTFB }) => {
+        // Largest Contentful Paint
+        getLCP(metric => {
+          const rating = getRating('lcp', metric.value);
+          setMetrics(prev => ({
+            ...prev,
+            lcp: {
+              value: metric.value,
+              rating,
+              timestamp: Date.now(),
+            },
+          }));
+          logger.info(`📏 LCP: ${metric.value}ms (${rating})`);
+        });
 
-      // First Input Delay
-      getFID((metric) => {
-        const rating = getRating('fid', metric.value);
-        setMetrics(prev => ({
-          ...prev,
-          fid: {
-            value: metric.value,
-            rating,
-            timestamp: Date.now(),
-          },
-        }));
-        logger.info(`👆 FID: ${metric.value}ms (${rating})`);
-      });
+        // First Input Delay
+        getFID(metric => {
+          const rating = getRating('fid', metric.value);
+          setMetrics(prev => ({
+            ...prev,
+            fid: {
+              value: metric.value,
+              rating,
+              timestamp: Date.now(),
+            },
+          }));
+          logger.info(`👆 FID: ${metric.value}ms (${rating})`);
+        });
 
-      // Cumulative Layout Shift
-      getCLS((metric) => {
-        const rating = getRating('cls', metric.value);
-        setMetrics(prev => ({
-          ...prev,
-          cls: {
-            value: metric.value,
-            rating,
-            timestamp: Date.now(),
-          },
-        }));
-        logger.info(`📐 CLS: ${metric.value} (${rating})`);
-      });
+        // Cumulative Layout Shift
+        getCLS(metric => {
+          const rating = getRating('cls', metric.value);
+          setMetrics(prev => ({
+            ...prev,
+            cls: {
+              value: metric.value,
+              rating,
+              timestamp: Date.now(),
+            },
+          }));
+          logger.info(`📐 CLS: ${metric.value} (${rating})`);
+        });
 
-      // First Contentful Paint (bonus)
-      getFCP((metric) => {
-        const rating = getRating('fcp', metric.value);
-        setMetrics(prev => ({
-          ...prev,
-          fcp: {
-            value: metric.value,
-            rating,
-            timestamp: Date.now(),
-          },
-        }));
-        logger.info(`🎨 FCP: ${metric.value}ms (${rating})`);
-      });
+        // First Contentful Paint (bonus)
+        getFCP(metric => {
+          const rating = getRating('fcp', metric.value);
+          setMetrics(prev => ({
+            ...prev,
+            fcp: {
+              value: metric.value,
+              rating,
+              timestamp: Date.now(),
+            },
+          }));
+          logger.info(`🎨 FCP: ${metric.value}ms (${rating})`);
+        });
 
-      // Time to First Byte (bonus)
-      getTTFB((metric) => {
-        setMetrics(prev => ({
-          ...prev,
-          ttfb: {
-            value: metric.value,
-            timestamp: Date.now(),
-          },
-        }));
-        logger.info(`🌐 TTFB: ${metric.value}ms`);
-      });
+        // Time to First Byte (bonus)
+        getTTFB(metric => {
+          setMetrics(prev => ({
+            ...prev,
+            ttfb: {
+              value: metric.value,
+              timestamp: Date.now(),
+            },
+          }));
+          logger.info(`🌐 TTFB: ${metric.value}ms`);
+        });
 
-      setLastUpdate(new Date());
-    }).catch((error) => {
-      logger.error('Erreur chargement web-vitals:', error);
-      setIsMonitoring(false);
-    });
+        setLastUpdate(new Date());
+      })
+      .catch(error => {
+        logger.error('Erreur chargement web-vitals:', error);
+        setIsMonitoring(false);
+      });
   }, [getRating]);
 
   // Arrêter le monitoring
@@ -253,12 +258,16 @@ export const CoreWebVitalsMonitor = () => {
     // Poids: LCP (25%), FID (25%), CLS (25%), FCP (25%)
     const weights = { lcp: 0.3, fid: 0.3, cls: 0.2, fcp: 0.2 };
 
-    const score = (
+    const score =
       (lcp.rating === 'good' ? 100 : lcp.rating === 'needs-improvement' ? 50 : 0) * weights.lcp +
       (fid.rating === 'good' ? 100 : fid.rating === 'needs-improvement' ? 50 : 0) * weights.fid +
       (cls.rating === 'good' ? 100 : cls.rating === 'needs-improvement' ? 50 : 0) * weights.cls +
-      (metrics.fcp?.rating === 'good' ? 100 : metrics.fcp?.rating === 'needs-improvement' ? 50 : 0) * weights.fcp
-    );
+      (metrics.fcp?.rating === 'good'
+        ? 100
+        : metrics.fcp?.rating === 'needs-improvement'
+          ? 50
+          : 0) *
+        weights.fcp;
 
     return Math.round(score);
   }, [metrics]);
@@ -274,12 +283,14 @@ export const CoreWebVitalsMonitor = () => {
   return (
     <Card className="w-full">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">
-          Core Web Vitals Monitor
-        </CardTitle>
+        <CardTitle className="text-sm font-medium">Core Web Vitals Monitor</CardTitle>
         <div className="flex items-center space-x-2">
           {overallScore !== null && (
-            <Badge variant={overallScore >= 80 ? "default" : overallScore >= 50 ? "secondary" : "destructive"}>
+            <Badge
+              variant={
+                overallScore >= 80 ? 'default' : overallScore >= 50 ? 'secondary' : 'destructive'
+              }
+            >
               Score: {overallScore}/100
             </Badge>
           )}
@@ -310,9 +321,7 @@ export const CoreWebVitalsMonitor = () => {
         {/* Status du monitoring */}
         <div className="flex items-center justify-between text-sm text-muted-foreground">
           <span>Status: {isMonitoring ? '🟢 Monitoring actif' : '🔴 Monitoring inactif'}</span>
-          {lastUpdate && (
-            <span>Dernière mise à jour: {lastUpdate.toLocaleTimeString()}</span>
-          )}
+          {lastUpdate && <span>Dernière mise à jour: {lastUpdate.toLocaleTimeString()}</span>}
         </div>
 
         {/* Métriques individuelles */}
@@ -325,16 +334,9 @@ export const CoreWebVitalsMonitor = () => {
             </div>
             {metrics.lcp ? (
               <>
-                <div className="text-2xl font-bold">
-                  {formatValue('lcp', metrics.lcp.value)}
-                </div>
-                <Progress
-                  value={Math.min((metrics.lcp.value / 4000) * 100, 100)}
-                  className="h-2"
-                />
-                <div className="text-xs text-muted-foreground">
-                  Cible: ≤ 2.5s
-                </div>
+                <div className="text-2xl font-bold">{formatValue('lcp', metrics.lcp.value)}</div>
+                <Progress value={Math.min((metrics.lcp.value / 4000) * 100, 100)} className="h-2" />
+                <div className="text-xs text-muted-foreground">Cible: ≤ 2.5s</div>
               </>
             ) : (
               <div className="text-muted-foreground">En attente...</div>
@@ -349,16 +351,9 @@ export const CoreWebVitalsMonitor = () => {
             </div>
             {metrics.fid ? (
               <>
-                <div className="text-2xl font-bold">
-                  {formatValue('fid', metrics.fid.value)}
-                </div>
-                <Progress
-                  value={Math.min((metrics.fid.value / 300) * 100, 100)}
-                  className="h-2"
-                />
-                <div className="text-xs text-muted-foreground">
-                  Cible: ≤ 100ms
-                </div>
+                <div className="text-2xl font-bold">{formatValue('fid', metrics.fid.value)}</div>
+                <Progress value={Math.min((metrics.fid.value / 300) * 100, 100)} className="h-2" />
+                <div className="text-xs text-muted-foreground">Cible: ≤ 100ms</div>
               </>
             ) : (
               <div className="text-muted-foreground">En attente...</div>
@@ -373,16 +368,9 @@ export const CoreWebVitalsMonitor = () => {
             </div>
             {metrics.cls ? (
               <>
-                <div className="text-2xl font-bold">
-                  {formatValue('cls', metrics.cls.value)}
-                </div>
-                <Progress
-                  value={Math.min(metrics.cls.value * 400, 100)}
-                  className="h-2"
-                />
-                <div className="text-xs text-muted-foreground">
-                  Cible: ≤ 0.1
-                </div>
+                <div className="text-2xl font-bold">{formatValue('cls', metrics.cls.value)}</div>
+                <Progress value={Math.min(metrics.cls.value * 400, 100)} className="h-2" />
+                <div className="text-xs text-muted-foreground">Cible: ≤ 0.1</div>
               </>
             ) : (
               <div className="text-muted-foreground">En attente...</div>
@@ -397,16 +385,9 @@ export const CoreWebVitalsMonitor = () => {
             </div>
             {metrics.fcp ? (
               <>
-                <div className="text-2xl font-bold">
-                  {formatValue('fcp', metrics.fcp.value)}
-                </div>
-                <Progress
-                  value={Math.min((metrics.fcp.value / 3000) * 100, 100)}
-                  className="h-2"
-                />
-                <div className="text-xs text-muted-foreground">
-                  Cible: ≤ 1.8s
-                </div>
+                <div className="text-2xl font-bold">{formatValue('fcp', metrics.fcp.value)}</div>
+                <Progress value={Math.min((metrics.fcp.value / 3000) * 100, 100)} className="h-2" />
+                <div className="text-xs text-muted-foreground">Cible: ≤ 1.8s</div>
               </>
             ) : (
               <div className="text-muted-foreground">En attente...</div>
@@ -421,16 +402,9 @@ export const CoreWebVitalsMonitor = () => {
             </div>
             {metrics.ttfb ? (
               <>
-                <div className="text-2xl font-bold">
-                  {formatValue('ttfb', metrics.ttfb.value)}
-                </div>
-                <Progress
-                  value={Math.min((metrics.ttfb.value / 600) * 100, 100)}
-                  className="h-2"
-                />
-                <div className="text-xs text-muted-foreground">
-                  Cible: ≤ 600ms
-                </div>
+                <div className="text-2xl font-bold">{formatValue('ttfb', metrics.ttfb.value)}</div>
+                <Progress value={Math.min((metrics.ttfb.value / 600) * 100, 100)} className="h-2" />
+                <div className="text-xs text-muted-foreground">Cible: ≤ 600ms</div>
               </>
             ) : (
               <div className="text-muted-foreground">En attente...</div>
@@ -445,9 +419,7 @@ export const CoreWebVitalsMonitor = () => {
             </div>
             {overallScore !== null ? (
               <>
-                <div className="text-2xl font-bold">
-                  {overallScore}/100
-                </div>
+                <div className="text-2xl font-bold">{overallScore}/100</div>
                 <Progress value={overallScore} className="h-2" />
                 <div className="text-xs text-muted-foreground">
                   {overallScore >= 80 ? 'Excellent' : overallScore >= 50 ? 'Bon' : 'À améliorer'}
@@ -466,16 +438,16 @@ export const CoreWebVitalsMonitor = () => {
           <Alert>
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
-              Certaines métriques Core Web Vitals nécessitent une attention.
-              Vérifiez les optimisations de performance.
+              Certaines métriques Core Web Vitals nécessitent une attention. Vérifiez les
+              optimisations de performance.
             </AlertDescription>
           </Alert>
         )}
 
         {/* Recommandations */}
         <div className="text-xs text-muted-foreground">
-          💡 Conseil: Les métriques se mettent à jour automatiquement lors des interactions utilisateur.
-          Utilisez le bouton "Test" pour simuler des métriques en développement.
+          💡 Conseil: Les métriques se mettent à jour automatiquement lors des interactions
+          utilisateur. Utilisez le bouton "Test" pour simuler des métriques en développement.
         </div>
       </CardContent>
     </Card>

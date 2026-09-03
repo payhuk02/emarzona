@@ -4,10 +4,3 @@
  */
 
 export { PreOrdersManager } from './PreOrdersManager';
-
-
-
-
-
-
-

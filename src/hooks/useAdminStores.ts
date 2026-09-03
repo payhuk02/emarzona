@@ -30,7 +30,7 @@ export const useAdminStores = (options: UseAdminStoresOptions = {}) => {
   const fetchStores = async () => {
     try {
       setLoading(true);
-      
+
       let query = supabase
         .from('stores')
         .select('id,name,slug,user_id,created_at', { count: 'exact' });
@@ -74,7 +74,7 @@ export const useAdminStores = (options: UseAdminStoresOptions = {}) => {
       const productCountMap = new Map<string, number>();
       if (storeIds.length > 0) {
         await Promise.all(
-          storeIds.map(async (storeId) => {
+          storeIds.map(async storeId => {
             const { count } = await supabase
               .from('products')
               .select('id', { count: 'exact', head: true })

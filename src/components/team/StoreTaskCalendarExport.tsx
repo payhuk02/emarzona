@@ -1,14 +1,14 @@
 /**
  * Store Task Calendar Export Component
  * Date: 2 Février 2025
- * 
+ *
  * Composant pour exporter les tâches vers des calendriers
  */
 
 import { useState } from 'react';
 import { useStoreTasks, type StoreTask } from '@/hooks/useStoreTasks';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import {
   Dialog,
   DialogContent,
@@ -61,11 +61,9 @@ export const StoreTaskCalendarExport = ({ storeId, task }: StoreTaskCalendarExpo
     return (
       <Select>
         <SelectTrigger>
-
-            <Calendar className="h-4 w-4 mr-2" />
-            Ajouter au calendrier
-          
-</SelectTrigger>
+          <Calendar className="h-4 w-4 mr-2" />
+          Ajouter au calendrier
+        </SelectTrigger>
         <SelectContent mobileVariant="sheet" className="min-w-[200px]">
           <SelectItem value="edit" onSelect={() => handleExportICal(task)}>
             <Download className="h-4 w-4 mr-2" />
@@ -127,10 +125,3 @@ export const StoreTaskCalendarExport = ({ storeId, task }: StoreTaskCalendarExpo
     </>
   );
 };
-
-
-
-
-
-
-

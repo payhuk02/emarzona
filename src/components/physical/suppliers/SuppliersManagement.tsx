@@ -1,7 +1,7 @@
 /**
  * Suppliers Management Component
  * Date: 27 Janvier 2025
- * 
+ *
  * Gestion complète des fournisseurs (liste, création, édition, suppression)
  */
 
@@ -12,7 +12,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import {
   Dialog,
   DialogContent,
@@ -44,7 +51,20 @@ import { useSuppliers, useCreateSupplier, Supplier } from '@/hooks/physical/useS
 import { useStore } from '@/hooks/useStore';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
-import { Plus, Edit, Trash2, Building2, Star, Mail, Phone, Globe, MapPin, Search, X, MoreVertical } from 'lucide-react';
+import {
+  Plus,
+  Edit,
+  Trash2,
+  Building2,
+  Star,
+  Mail,
+  Phone,
+  Globe,
+  MapPin,
+  Search,
+  X,
+  MoreVertical,
+} from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
@@ -99,12 +119,13 @@ export default function SuppliersManagement() {
     if (!debouncedSearch) return suppliers;
 
     const query = debouncedSearch.toLowerCase();
-    return suppliers.filter(supplier =>
-      supplier.name.toLowerCase().includes(query) ||
-      supplier.company_name?.toLowerCase().includes(query) ||
-      supplier.email?.toLowerCase().includes(query) ||
-      supplier.phone?.toLowerCase().includes(query) ||
-      supplier.city?.toLowerCase().includes(query)
+    return suppliers.filter(
+      supplier =>
+        supplier.name.toLowerCase().includes(query) ||
+        supplier.company_name?.toLowerCase().includes(query) ||
+        supplier.email?.toLowerCase().includes(query) ||
+        supplier.phone?.toLowerCase().includes(query) ||
+        supplier.city?.toLowerCase().includes(query)
     );
   }, [suppliers, debouncedSearch]);
 
@@ -155,45 +176,48 @@ export default function SuppliersManagement() {
     setEditingSupplier(null);
   }, []);
 
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!store?.id) return;
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!store?.id) return;
 
-    try {
-      if (editingSupplier) {
-        // Update
-        const { error } = await supabase
-          .from('suppliers')
-          .update({
+      try {
+        if (editingSupplier) {
+          // Update
+          const { error } = await supabase
+            .from('suppliers')
+            .update({
+              ...formData,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', editingSupplier.id);
+
+          if (error) throw error;
+
+          queryClient.invalidateQueries({ queryKey: ['suppliers', store.id] });
+          toast({
+            title: '✅ Fournisseur mis à jour',
+            description: 'Le fournisseur a été mis à jour avec succès',
+          });
+        } else {
+          // Create
+          await createSupplier.mutateAsync({
             ...formData,
-            updated_at: new Date().toISOString(),
-          })
-          .eq('id', editingSupplier.id);
-
-        if (error) throw error;
-
-        queryClient.invalidateQueries({ queryKey: ['suppliers', store.id] });
+            store_id: store.id,
+          });
+        }
+        handleCloseDialog();
+      } catch (_error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
         toast({
-          title: '✅ Fournisseur mis à jour',
-          description: 'Le fournisseur a été mis à jour avec succès',
-        });
-      } else {
-        // Create
-        await createSupplier.mutateAsync({
-          ...formData,
-          store_id: store.id,
+          title: '❌ Erreur',
+          description: errorMessage || 'Une erreur est survenue',
+          variant: 'destructive',
         });
       }
-      handleCloseDialog();
-    } catch ( _error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      toast({
-        title: '❌ Erreur',
-        description: errorMessage || 'Une erreur est survenue',
-        variant: 'destructive',
-      });
-    }
-  }, [store?.id, editingSupplier, formData, createSupplier, queryClient, toast, handleCloseDialog]);
+    },
+    [store?.id, editingSupplier, formData, createSupplier, queryClient, toast, handleCloseDialog]
+  );
 
   const handleDeleteClick = useCallback((supplier: Supplier) => {
     setSupplierToDelete(supplier);
@@ -204,10 +228,7 @@ export default function SuppliersManagement() {
     if (!supplierToDelete || !store?.id) return;
 
     try {
-      const { error } = await supabase
-        .from('suppliers')
-        .delete()
-        .eq('id', supplierToDelete.id);
+      const { error } = await supabase.from('suppliers').delete().eq('id', supplierToDelete.id);
 
       if (error) throw error;
 
@@ -218,7 +239,7 @@ export default function SuppliersManagement() {
       });
       setDeleteDialogOpen(false);
       setSupplierToDelete(null);
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
@@ -254,7 +275,7 @@ export default function SuppliersManagement() {
             type="text"
             placeholder="Rechercher par nom, entreprise, email, téléphone ou ville..."
             value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
+            onChange={e => setSearchInput(e.target.value)}
             onKeyDown={handleKeyDown}
             className="pl-9 pr-9 h-10 sm:h-11 text-sm"
           />
@@ -275,7 +296,7 @@ export default function SuppliersManagement() {
             </Badge>
           </div>
         </div>
-        <Button 
+        <Button
           onClick={() => handleOpenDialog()}
           className="h-10 sm:h-11 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
         >
@@ -286,10 +307,7 @@ export default function SuppliersManagement() {
       </div>
 
       {/* Suppliers List */}
-      <div
-        ref={suppliersRef}
-        className="animate-in fade-in slide-in-from-bottom-4 duration-700"
-      >
+      <div ref={suppliersRef} className="animate-in fade-in slide-in-from-bottom-4 duration-700">
         {filteredSuppliers.length === 0 ? (
           <Card className="border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in zoom-in-95 duration-500">
             <CardContent className="pt-8 sm:pt-12 pb-8 sm:pb-12 text-center">
@@ -320,7 +338,7 @@ export default function SuppliersManagement() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredSuppliers.map((supplier) => (
+                  {filteredSuppliers.map(supplier => (
                     <TableRow key={supplier.id}>
                       <TableCell className="text-xs sm:text-sm">
                         <div className="flex items-center gap-2">
@@ -367,7 +385,9 @@ export default function SuppliersManagement() {
                       </TableCell>
                       <TableCell className="text-xs sm:text-sm">
                         <div className="space-y-1">
-                          <div>{supplier.total_orders} commande{supplier.total_orders > 1 ? 's' : ''}</div>
+                          <div>
+                            {supplier.total_orders} commande{supplier.total_orders > 1 ? 's' : ''}
+                          </div>
                           <div className="text-muted-foreground">
                             {new Intl.NumberFormat('fr-FR', {
                               style: 'currency',
@@ -383,23 +403,26 @@ export default function SuppliersManagement() {
                         </div>
                       </TableCell>
                       <TableCell className="text-xs sm:text-sm">
-                        <Badge variant={supplier.is_active ? 'default' : 'secondary'} className="text-xs">
+                        <Badge
+                          variant={supplier.is_active ? 'default' : 'secondary'}
+                          className="text-xs"
+                        >
                           {supplier.is_active ? 'Actif' : 'Inactif'}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
                         <Select>
                           <SelectTrigger className="h-8 w-8 p-0">
-
-                              <MoreVertical className="h-4 w-4" />
-                            
-</SelectTrigger>
+                            <MoreVertical className="h-4 w-4" />
+                          </SelectTrigger>
                           <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                             <SelectItem value="edit" onSelect={() => handleOpenDialog(supplier)}>
                               <Edit className="mr-2 h-4 w-4" />
                               Modifier
                             </SelectItem>
-                            <SelectItem value="delete" onSelect={() => handleDeleteClick(supplier)}
+                            <SelectItem
+                              value="delete"
+                              onSelect={() => handleDeleteClick(supplier)}
                               className="text-destructive"
                             >
                               <Trash2 className="mr-2 h-4 w-4" />
@@ -416,7 +439,7 @@ export default function SuppliersManagement() {
 
             {/* Mobile Cards */}
             <div className="md:hidden space-y-4">
-              {filteredSuppliers.map((supplier) => (
+              {filteredSuppliers.map(supplier => (
                 <Card
                   key={supplier.id}
                   className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-md transition-all duration-300"
@@ -442,16 +465,16 @@ export default function SuppliersManagement() {
                         </div>
                         <Select>
                           <SelectTrigger className="h-8 w-8 p-0">
-
-                              <MoreVertical className="h-4 w-4" />
-                            
-</SelectTrigger>
+                            <MoreVertical className="h-4 w-4" />
+                          </SelectTrigger>
                           <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                             <SelectItem value="copy" onSelect={() => handleOpenDialog(supplier)}>
                               <Edit className="mr-2 h-4 w-4" />
                               Modifier
                             </SelectItem>
-                            <SelectItem value="view" onSelect={() => handleDeleteClick(supplier)}
+                            <SelectItem
+                              value="view"
+                              onSelect={() => handleDeleteClick(supplier)}
                               className="text-destructive"
                             >
                               <Trash2 className="mr-2 h-4 w-4" />
@@ -508,7 +531,10 @@ export default function SuppliersManagement() {
                             <span className="text-xs">{supplier.rating.toFixed(1)}/5</span>
                           </div>
                         )}
-                        <Badge variant={supplier.is_active ? 'default' : 'secondary'} className="text-xs ml-auto">
+                        <Badge
+                          variant={supplier.is_active ? 'default' : 'secondary'}
+                          className="text-xs ml-auto"
+                        >
                           {supplier.is_active ? 'Actif' : 'Inactif'}
                         </Badge>
                       </div>
@@ -538,21 +564,25 @@ export default function SuppliersManagement() {
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name" className="text-xs sm:text-sm">Nom *</Label>
+                  <Label htmlFor="name" className="text-xs sm:text-sm">
+                    Nom *
+                  </Label>
                   <Input
                     id="name"
                     value={formData.name || ''}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    onChange={e => setFormData({ ...formData, name: e.target.value })}
                     required
                     className="text-sm"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="company_name" className="text-xs sm:text-sm">Nom de l'entreprise</Label>
+                  <Label htmlFor="company_name" className="text-xs sm:text-sm">
+                    Nom de l'entreprise
+                  </Label>
                   <Input
                     id="company_name"
                     value={formData.company_name || ''}
-                    onChange={(e) => setFormData({ ...formData, company_name: e.target.value })}
+                    onChange={e => setFormData({ ...formData, company_name: e.target.value })}
                     className="text-sm"
                   />
                 </div>
@@ -560,21 +590,25 @@ export default function SuppliersManagement() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="contact_person" className="text-xs sm:text-sm">Personne de contact</Label>
+                  <Label htmlFor="contact_person" className="text-xs sm:text-sm">
+                    Personne de contact
+                  </Label>
                   <Input
                     id="contact_person"
                     value={formData.contact_person || ''}
-                    onChange={(e) => setFormData({ ...formData, contact_person: e.target.value })}
+                    onChange={e => setFormData({ ...formData, contact_person: e.target.value })}
                     className="text-sm"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-xs sm:text-sm">Email</Label>
+                  <Label htmlFor="email" className="text-xs sm:text-sm">
+                    Email
+                  </Label>
                   <Input
                     id="email"
                     type="email"
                     value={formData.email || ''}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    onChange={e => setFormData({ ...formData, email: e.target.value })}
                     className="text-sm"
                   />
                 </div>
@@ -582,71 +616,85 @@ export default function SuppliersManagement() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="phone" className="text-xs sm:text-sm">Téléphone</Label>
+                  <Label htmlFor="phone" className="text-xs sm:text-sm">
+                    Téléphone
+                  </Label>
                   <Input
                     id="phone"
                     value={formData.phone || ''}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    onChange={e => setFormData({ ...formData, phone: e.target.value })}
                     className="text-sm"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="website" className="text-xs sm:text-sm">Site web</Label>
+                  <Label htmlFor="website" className="text-xs sm:text-sm">
+                    Site web
+                  </Label>
                   <Input
                     id="website"
                     type="url"
                     value={formData.website || ''}
-                    onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+                    onChange={e => setFormData({ ...formData, website: e.target.value })}
                     className="text-sm"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="address_line1" className="text-xs sm:text-sm">Adresse ligne 1</Label>
+                <Label htmlFor="address_line1" className="text-xs sm:text-sm">
+                  Adresse ligne 1
+                </Label>
                 <Input
                   id="address_line1"
                   value={formData.address_line1 || ''}
-                  onChange={(e) => setFormData({ ...formData, address_line1: e.target.value })}
+                  onChange={e => setFormData({ ...formData, address_line1: e.target.value })}
                   className="text-sm"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="address_line2" className="text-xs sm:text-sm">Adresse ligne 2</Label>
+                <Label htmlFor="address_line2" className="text-xs sm:text-sm">
+                  Adresse ligne 2
+                </Label>
                 <Input
                   id="address_line2"
                   value={formData.address_line2 || ''}
-                  onChange={(e) => setFormData({ ...formData, address_line2: e.target.value })}
+                  onChange={e => setFormData({ ...formData, address_line2: e.target.value })}
                   className="text-sm"
                 />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="city" className="text-xs sm:text-sm">Ville</Label>
+                  <Label htmlFor="city" className="text-xs sm:text-sm">
+                    Ville
+                  </Label>
                   <Input
                     id="city"
                     value={formData.city || ''}
-                    onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                    onChange={e => setFormData({ ...formData, city: e.target.value })}
                     className="text-sm"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="state" className="text-xs sm:text-sm">État/Région</Label>
+                  <Label htmlFor="state" className="text-xs sm:text-sm">
+                    État/Région
+                  </Label>
                   <Input
                     id="state"
                     value={formData.state || ''}
-                    onChange={(e) => setFormData({ ...formData, state: e.target.value })}
+                    onChange={e => setFormData({ ...formData, state: e.target.value })}
                     className="text-sm"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="postal_code" className="text-xs sm:text-sm">Code postal</Label>
+                  <Label htmlFor="postal_code" className="text-xs sm:text-sm">
+                    Code postal
+                  </Label>
                   <Input
                     id="postal_code"
                     value={formData.postal_code || ''}
-                    onChange={(e) => setFormData({ ...formData, postal_code: e.target.value })}
+                    onChange={e => setFormData({ ...formData, postal_code: e.target.value })}
                     className="text-sm"
                   />
                 </div>
@@ -654,19 +702,23 @@ export default function SuppliersManagement() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="country" className="text-xs sm:text-sm">Pays</Label>
+                  <Label htmlFor="country" className="text-xs sm:text-sm">
+                    Pays
+                  </Label>
                   <Input
                     id="country"
                     value={formData.country || 'SN'}
-                    onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+                    onChange={e => setFormData({ ...formData, country: e.target.value })}
                     className="text-sm"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="currency" className="text-xs sm:text-sm">Devise</Label>
+                  <Label htmlFor="currency" className="text-xs sm:text-sm">
+                    Devise
+                  </Label>
                   <Select
                     value={formData.currency || 'XOF'}
-                    onValueChange={(value) => setFormData({ ...formData, currency: value })}
+                    onValueChange={value => setFormData({ ...formData, currency: value })}
                   >
                     <SelectTrigger className="text-sm">
                       <SelectValue />
@@ -682,10 +734,12 @@ export default function SuppliersManagement() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="payment_terms" className="text-xs sm:text-sm">Conditions de paiement</Label>
+                  <Label htmlFor="payment_terms" className="text-xs sm:text-sm">
+                    Conditions de paiement
+                  </Label>
                   <Select
                     value={formData.payment_terms || ''}
-                    onValueChange={(value) => setFormData({ ...formData, payment_terms: value })}
+                    onValueChange={value => setFormData({ ...formData, payment_terms: value })}
                   >
                     <SelectTrigger className="text-sm">
                       <SelectValue placeholder="Sélectionner" />
@@ -700,22 +754,26 @@ export default function SuppliersManagement() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="tax_id" className="text-xs sm:text-sm">Numéro d'identification fiscale</Label>
+                  <Label htmlFor="tax_id" className="text-xs sm:text-sm">
+                    Numéro d'identification fiscale
+                  </Label>
                   <Input
                     id="tax_id"
                     value={formData.tax_id || ''}
-                    onChange={(e) => setFormData({ ...formData, tax_id: e.target.value })}
+                    onChange={e => setFormData({ ...formData, tax_id: e.target.value })}
                     className="text-sm"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="notes" className="text-xs sm:text-sm">Notes</Label>
+                <Label htmlFor="notes" className="text-xs sm:text-sm">
+                  Notes
+                </Label>
                 <Textarea
                   id="notes"
                   value={formData.notes || ''}
-                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                  onChange={e => setFormData({ ...formData, notes: e.target.value })}
                   rows={3}
                   className="text-sm"
                 />
@@ -726,25 +784,38 @@ export default function SuppliersManagement() {
                   <Switch
                     id="is_active"
                     checked={formData.is_active ?? true}
-                    onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
+                    onCheckedChange={checked => setFormData({ ...formData, is_active: checked })}
                   />
-                  <Label htmlFor="is_active" className="text-xs sm:text-sm">Actif</Label>
+                  <Label htmlFor="is_active" className="text-xs sm:text-sm">
+                    Actif
+                  </Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Switch
                     id="is_preferred"
                     checked={formData.is_preferred ?? false}
-                    onCheckedChange={(checked) => setFormData({ ...formData, is_preferred: checked })}
+                    onCheckedChange={checked => setFormData({ ...formData, is_preferred: checked })}
                   />
-                  <Label htmlFor="is_preferred" className="text-xs sm:text-sm">Fournisseur préféré</Label>
+                  <Label htmlFor="is_preferred" className="text-xs sm:text-sm">
+                    Fournisseur préféré
+                  </Label>
                 </div>
               </div>
             </div>
             <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
-              <Button type="button" variant="outline" onClick={handleCloseDialog} className="w-full sm:w-auto text-sm">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleCloseDialog}
+                className="w-full sm:w-auto text-sm"
+              >
                 Annuler
               </Button>
-              <Button type="submit" disabled={createSupplier.isPending} className="w-full sm:w-auto text-sm">
+              <Button
+                type="submit"
+                disabled={createSupplier.isPending}
+                className="w-full sm:w-auto text-sm"
+              >
                 {editingSupplier ? 'Mettre à jour' : 'Créer'}
               </Button>
             </DialogFooter>
@@ -756,9 +827,12 @@ export default function SuppliersManagement() {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent className="max-w-[95vw] sm:max-w-md">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-base sm:text-lg">Supprimer le fournisseur</AlertDialogTitle>
+            <AlertDialogTitle className="text-base sm:text-lg">
+              Supprimer le fournisseur
+            </AlertDialogTitle>
             <AlertDialogDescription className="text-xs sm:text-sm">
-              Êtes-vous sûr de vouloir supprimer le fournisseur "{supplierToDelete?.name}" ? Cette action est irréversible.
+              Êtes-vous sûr de vouloir supprimer le fournisseur "{supplierToDelete?.name}" ? Cette
+              action est irréversible.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
@@ -775,9 +849,3 @@ export default function SuppliersManagement() {
     </div>
   );
 }
-
-
-
-
-
-

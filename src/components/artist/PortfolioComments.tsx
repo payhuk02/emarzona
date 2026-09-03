@@ -27,7 +27,7 @@ import { Heart, Reply, Flag, Edit, Trash2, MoreVertical, Send, Pin } from 'lucid
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -287,10 +287,8 @@ export function PortfolioComments({ portfolioId, className }: PortfolioCommentsP
 
                         <Select>
                           <SelectTrigger className="h-8 w-8">
-
-                              <MoreVertical className="h-4 w-4" />
-                            
-</SelectTrigger>
+                            <MoreVertical className="h-4 w-4" />
+                          </SelectTrigger>
                           <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                             {user?.id === comment.user_id && (
                               <>
@@ -298,7 +296,9 @@ export function PortfolioComments({ portfolioId, className }: PortfolioCommentsP
                                   <Edit className="h-4 w-4 mr-2" />
                                   Modifier
                                 </SelectItem>
-                                <SelectItem value="delete" onSelect={() => setDeletingComment(comment.id)}
+                                <SelectItem
+                                  value="delete"
+                                  onSelect={() => setDeletingComment(comment.id)}
                                   className="text-destructive"
                                 >
                                   <Trash2 className="h-4 w-4 mr-2" />
@@ -307,7 +307,10 @@ export function PortfolioComments({ portfolioId, className }: PortfolioCommentsP
                               </>
                             )}
                             {user?.id !== comment.user_id && (
-                              <SelectItem value="copy" onSelect={() => setReportingComment(comment.id)}>
+                              <SelectItem
+                                value="copy"
+                                onSelect={() => setReportingComment(comment.id)}
+                              >
                                 <Flag className="h-4 w-4 mr-2" />
                                 Signaler
                               </SelectItem>
@@ -527,9 +530,3 @@ export function PortfolioComments({ portfolioId, className }: PortfolioCommentsP
     </div>
   );
 }
-
-
-
-
-
-

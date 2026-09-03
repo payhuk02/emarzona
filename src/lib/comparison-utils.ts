@@ -17,7 +17,7 @@ export function deepEqual(a: any, b: any): boolean {
   // Comparer les tableaux
   if (Array.isArray(a) && Array.isArray(b)) {
     if (a.length !== b.length) return false;
-    for (let  i= 0; i < a.length; i++) {
+    for (let i = 0; i < a.length; i++) {
       if (!deepEqual(a[i], b[i])) return false;
     }
     return true;
@@ -63,11 +63,7 @@ export function shallowEqual(a: any, b: any): boolean {
 /**
  * Compare deux objets en ignorant certaines clés
  */
-export function deepEqualIgnoreKeys(
-  a: any,
-  b: any,
-  ignoreKeys: string[]
-): boolean {
+export function deepEqualIgnoreKeys(a: any, b: any, ignoreKeys: string[]): boolean {
   if (a === b) return true;
 
   if (a == null || b == null) return false;
@@ -75,8 +71,8 @@ export function deepEqualIgnoreKeys(
 
   if (typeof a !== 'object') return false;
 
-  const keysA = Object.keys(a).filter((key) => !ignoreKeys.includes(key));
-  const keysB = Object.keys(b).filter((key) => !ignoreKeys.includes(key));
+  const keysA = Object.keys(a).filter(key => !ignoreKeys.includes(key));
+  const keysB = Object.keys(b).filter(key => !ignoreKeys.includes(key));
 
   if (keysA.length !== keysB.length) return false;
 
@@ -91,11 +87,7 @@ export function deepEqualIgnoreKeys(
 /**
  * Compare deux objets en comparant seulement certaines clés
  */
-export function deepEqualOnlyKeys(
-  a: any,
-  b: any,
-  onlyKeys: string[]
-): boolean {
+export function deepEqualOnlyKeys(a: any, b: any, onlyKeys: string[]): boolean {
   if (a === b) return true;
 
   if (a == null || b == null) return false;
@@ -114,7 +106,7 @@ export function deepEqualOnlyKeys(
  * Trouve les différences entre deux objets
  */
 export function getObjectDiff(a: any, b: any): Record<string, { old: any; new: any }> {
-  const  diff: Record<string, { old: any; new: any }> = {};
+  const diff: Record<string, { old: any; new: any }> = {};
 
   if (a == null || b == null) return diff;
   if (typeof a !== 'object' || typeof b !== 'object') return diff;
@@ -175,16 +167,9 @@ export function arrayOfObjectsEqualIgnoreOrder(
   const compare = compareFn || deepEqual;
 
   for (const itemA of a) {
-    const found = b.find((itemB) => compare(itemA, itemB));
+    const found = b.find(itemB => compare(itemA, itemB));
     if (!found) return false;
   }
 
   return true;
 }
-
-
-
-
-
-
-

@@ -1,7 +1,7 @@
 /**
  * Coupon Input Component
  * Date: 27 Janvier 2025
- * 
+ *
  * Composant pour saisir et valider un code promo dans le checkout
  */
 
@@ -122,7 +122,7 @@ export const CouponInput = ({
     if (!validation || !validation.valid) {
       toast({
         title: 'Code invalide',
-        description: validation?.message || validation?.error || 'Ce code promo n\'est pas valide',
+        description: validation?.message || validation?.error || "Ce code promo n'est pas valide",
         variant: 'destructive',
       });
       return;
@@ -131,7 +131,7 @@ export const CouponInput = ({
     if (!validation.promotion_id || !validation.discount_amount) {
       toast({
         title: 'Erreur',
-        description: 'Impossible d\'appliquer ce code promo',
+        description: "Impossible d'appliquer ce code promo",
         variant: 'destructive',
       });
       return;
@@ -195,38 +195,57 @@ export const CouponInput = ({
 
   return (
     <div className="space-y-2" role="region" aria-labelledby="coupon-label">
-      <Label htmlFor="coupon-code" id="coupon-label">Code promo</Label>
+      <Label htmlFor="coupon-code" id="coupon-label">
+        Code promo
+      </Label>
       <div className="flex gap-2">
         <div className="relative flex-1">
-          <Tag className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
+          <Tag
+            className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"
+            aria-hidden="true"
+          />
           <Input
             id="coupon-code"
             placeholder="Entrez votre code promo"
             value={couponCode}
-            onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+            onChange={e => setCouponCode(e.target.value.toUpperCase())}
             className={cn(
-              "pl-10 pr-10 min-h-[44px] text-base",
-              validation && !validation.valid && couponCode && "border-red-500",
-              validation && validation.valid && "border-green-500"
+              'pl-10 pr-10 min-h-[44px] text-base',
+              validation && !validation.valid && couponCode && 'border-red-500',
+              validation && validation.valid && 'border-green-500'
             )}
-            onKeyDown={(e) => {
+            onKeyDown={e => {
               if (e.key === 'Enter' && validation?.valid) {
                 handleApply();
               }
             }}
             aria-label="Code promo"
-            aria-describedby={validation ? (validation.valid ? "coupon-valid" : "coupon-invalid") : undefined}
+            aria-describedby={
+              validation ? (validation.valid ? 'coupon-valid' : 'coupon-invalid') : undefined
+            }
             aria-invalid={validation && !validation.valid && couponCode ? true : false}
             autoComplete="off"
           />
           {isValidating && (
-            <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" aria-label="Validation du code en cours" aria-live="polite" />
+            <Loader2
+              className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground"
+              aria-label="Validation du code en cours"
+              aria-live="polite"
+            />
           )}
           {!isValidating && validation && validation.valid && (
-            <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-green-600" aria-label="Code promo valide" aria-hidden="true" />
+            <CheckCircle2
+              className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-green-600"
+              aria-label="Code promo valide"
+              aria-hidden="true"
+            />
           )}
           {!isValidating && validation && !validation.valid && couponCode && (
-            <XCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-red-500" aria-label="Code promo invalide" aria-hidden="true" />
+            <XCircle
+              className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-red-500"
+              aria-label="Code promo invalide"
+              aria-hidden="true"
+            />
           )}
         </div>
         <Button
@@ -235,7 +254,7 @@ export const CouponInput = ({
           variant="outline"
           className="min-h-[44px]"
           aria-label="Appliquer le code promo"
-          aria-describedby={validation?.valid ? "coupon-valid" : undefined}
+          aria-describedby={validation?.valid ? 'coupon-valid' : undefined}
         >
           {isValidating ? (
             <>
@@ -257,7 +276,12 @@ export const CouponInput = ({
       )}
 
       {validation && validation.valid && (
-        <Alert className="border-green-200 bg-green-50 dark:bg-green-950" id="coupon-valid" role="alert" aria-live="polite">
+        <Alert
+          className="border-green-200 bg-green-50 dark:bg-green-950"
+          id="coupon-valid"
+          role="alert"
+          aria-live="polite"
+        >
           <CheckCircle2 className="h-4 w-4 text-green-600" aria-hidden="true" />
           <AlertDescription className="text-green-900 dark:text-green-100">
             <div className="font-medium mb-1">Code promo valide !</div>
@@ -274,7 +298,8 @@ export const CouponInput = ({
       {/* Aperçu du montant après réduction */}
       {validation && validation.valid && validation.order_total_after && (
         <div className="text-sm text-muted-foreground">
-          Total après réduction: <span className="font-semibold text-foreground">
+          Total après réduction:{' '}
+          <span className="font-semibold text-foreground">
             {validation.order_total_after.toLocaleString()} XOF
           </span>
         </div>
@@ -284,10 +309,3 @@ export const CouponInput = ({
 };
 
 export default CouponInput;
-
-
-
-
-
-
-

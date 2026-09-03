@@ -35,7 +35,7 @@ const ArtistShippingConfigComponent = ({ data, onUpdate }: ArtistShippingConfigP
             </div>
             <Switch
               checked={data.requires_shipping ?? true}
-              onCheckedChange={(checked) => onUpdate({ requires_shipping: checked })}
+              onCheckedChange={checked => onUpdate({ requires_shipping: checked })}
             />
           </div>
         </CardHeader>
@@ -64,7 +64,9 @@ const ArtistShippingConfigComponent = ({ data, onUpdate }: ArtistShippingConfigP
                   max="30"
                   placeholder="7"
                   value={data.shipping_handling_time || 7}
-                  onChange={(e) => onUpdate({ shipping_handling_time: parseInt(e.target.value) || 7 })}
+                  onChange={e =>
+                    onUpdate({ shipping_handling_time: parseInt(e.target.value) || 7 })
+                  }
                 />
                 <p className="text-xs text-muted-foreground">
                   Temps nécessaire pour emballer et préparer l'œuvre
@@ -88,7 +90,7 @@ const ArtistShippingConfigComponent = ({ data, onUpdate }: ArtistShippingConfigP
                 </div>
                 <Switch
                   checked={data.shipping_fragile ?? false}
-                  onCheckedChange={(checked) => {
+                  onCheckedChange={checked => {
                     onUpdate({ shipping_fragile: checked });
                     // Si fragile, suggérer l'assurance
                     if (checked && !data.shipping_insurance_required) {
@@ -103,7 +105,8 @@ const ArtistShippingConfigComponent = ({ data, onUpdate }: ArtistShippingConfigP
                 <Alert>
                   <Info className="h-4 w-4" />
                   <AlertDescription>
-                    Les œuvres fragiles nécessitent un emballage renforcé et peuvent avoir des frais d'expédition supplémentaires.
+                    Les œuvres fragiles nécessitent un emballage renforcé et peuvent avoir des frais
+                    d'expédition supplémentaires.
                   </AlertDescription>
                 </Alert>
               </CardContent>
@@ -125,7 +128,7 @@ const ArtistShippingConfigComponent = ({ data, onUpdate }: ArtistShippingConfigP
                 </div>
                 <Switch
                   checked={data.shipping_insurance_required ?? false}
-                  onCheckedChange={(checked) => onUpdate({ shipping_insurance_required: checked })}
+                  onCheckedChange={checked => onUpdate({ shipping_insurance_required: checked })}
                 />
               </div>
             </CardHeader>
@@ -140,9 +143,13 @@ const ArtistShippingConfigComponent = ({ data, onUpdate }: ArtistShippingConfigP
                     step="1"
                     placeholder={data.price?.toString() || '0'}
                     value={data.shipping_insurance_amount || ''}
-                    onChange={(e) => onUpdate({ 
-                      shipping_insurance_amount: e.target.value ? parseFloat(e.target.value) : null 
-                    })}
+                    onChange={e =>
+                      onUpdate({
+                        shipping_insurance_amount: e.target.value
+                          ? parseFloat(e.target.value)
+                          : null,
+                      })
+                    }
                   />
                   <p className="text-xs text-muted-foreground">
                     Montant à assurer (par défaut: prix de l'œuvre)
@@ -151,8 +158,8 @@ const ArtistShippingConfigComponent = ({ data, onUpdate }: ArtistShippingConfigP
                 <Alert>
                   <Info className="h-4 w-4" />
                   <AlertDescription>
-                    L'assurance protège contre les dommages et pertes pendant le transport. 
-                    Le coût est généralement calculé en fonction de la valeur assurée.
+                    L'assurance protège contre les dommages et pertes pendant le transport. Le coût
+                    est généralement calculé en fonction de la valeur assurée.
                   </AlertDescription>
                 </Alert>
               </CardContent>
@@ -163,8 +170,8 @@ const ArtistShippingConfigComponent = ({ data, onUpdate }: ArtistShippingConfigP
           <Alert>
             <Truck className="h-4 w-4" />
             <AlertDescription>
-              <strong>Conseil :</strong> Pour les œuvres d'art de grande valeur, nous recommandons fortement 
-              d'activer l'assurance d'expédition et de marquer l'œuvre comme fragile.
+              <strong>Conseil :</strong> Pour les œuvres d'art de grande valeur, nous recommandons
+              fortement d'activer l'assurance d'expédition et de marquer l'œuvre comme fragile.
             </AlertDescription>
           </Alert>
         </>
@@ -174,7 +181,7 @@ const ArtistShippingConfigComponent = ({ data, onUpdate }: ArtistShippingConfigP
         <Alert>
           <Info className="h-4 w-4" />
           <AlertDescription>
-            Si cette œuvre est un produit numérique (ebook, musique téléchargeable, etc.), 
+            Si cette œuvre est un produit numérique (ebook, musique téléchargeable, etc.),
             l'expédition physique n'est pas nécessaire.
           </AlertDescription>
         </Alert>
@@ -185,10 +192,3 @@ const ArtistShippingConfigComponent = ({ data, onUpdate }: ArtistShippingConfigP
 
 // Optimisation avec React.memo
 export const ArtistShippingConfig = React.memo(ArtistShippingConfigComponent);
-
-
-
-
-
-
-

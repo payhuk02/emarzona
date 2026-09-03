@@ -1,7 +1,7 @@
 /**
  * Fonctions d'export pour Analytics Inventaire
  * Date: 31 Janvier 2025
- * 
+ *
  * Export CSV des données d'analytics inventaire
  */
 
@@ -47,7 +47,7 @@ export function exportInventoryAnalyticsToCSV(
     ];
 
     // Lignes de données
-    const rows = data.map((item) => [
+    const rows = data.map(item => [
       item.product_name || 'N/A',
       item.current_stock.toString(),
       item.total_sold.toString(),
@@ -62,9 +62,7 @@ export function exportInventoryAnalyticsToCSV(
     // Créer le contenu CSV
     const csvContent = [
       headers.join(','),
-      ...rows.map((row) =>
-        row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(',')
-      ),
+      ...rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')),
     ].join('\n');
 
     // Ajouter BOM UTF-8 pour Excel
@@ -128,7 +126,7 @@ export function exportReorderSuggestionsToCSV(
       'Statut',
     ];
 
-    const rows = data.map((item) => [
+    const rows = data.map(item => [
       item.product_name || 'N/A',
       item.current_stock.toString(),
       item.forecasted_demand.toString(),
@@ -143,9 +141,7 @@ export function exportReorderSuggestionsToCSV(
 
     const csvContent = [
       headers.join(','),
-      ...rows.map((row) =>
-        row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(',')
-      ),
+      ...rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')),
     ].join('\n');
 
     const BOM = '\uFEFF';
@@ -209,7 +205,7 @@ export function exportDemandForecastsToCSV(
       'MAPE (%)',
     ];
 
-    const rows = data.map((item) => [
+    const rows = data.map(item => [
       item.product_name || 'N/A',
       item.forecast_period_start,
       item.forecast_period_end,
@@ -225,9 +221,7 @@ export function exportDemandForecastsToCSV(
 
     const csvContent = [
       headers.join(','),
-      ...rows.map((row) =>
-        row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(',')
-      ),
+      ...rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')),
     ].join('\n');
 
     const BOM = '\uFEFF';
@@ -251,10 +245,3 @@ export function exportDemandForecastsToCSV(
     throw error;
   }
 }
-
-
-
-
-
-
-

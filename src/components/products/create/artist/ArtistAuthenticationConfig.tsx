@@ -176,9 +176,3 @@ const ArtistAuthenticationConfigComponent = ({
 
 // Optimisation avec React.memo
 export const ArtistAuthenticationConfig = React.memo(ArtistAuthenticationConfigComponent);
-
-
-
-
-
-

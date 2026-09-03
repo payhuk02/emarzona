@@ -1,5 +1,5 @@
-import { useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 
 const scrollPositions = new Map<string, number>();
 
@@ -19,7 +19,7 @@ export const useScrollRestoration = () => {
       setTimeout(() => {
         window.scrollTo({
           top: savedPosition,
-          behavior: "instant" as ScrollBehavior,
+          behavior: 'instant' as ScrollBehavior,
         });
       }, 0);
     } else {
@@ -28,16 +28,10 @@ export const useScrollRestoration = () => {
     }
 
     // Listen for scroll events to save position
-    window.addEventListener("scroll", saveScrollPosition);
+    window.addEventListener('scroll', saveScrollPosition);
 
     return () => {
-      window.removeEventListener("scroll", saveScrollPosition);
+      window.removeEventListener('scroll', saveScrollPosition);
     };
   }, [location.pathname]);
 };
-
-
-
-
-
-

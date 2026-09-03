@@ -1,7 +1,7 @@
 /**
  * My Warranties Component
  * Date: 27 Janvier 2025
- * 
+ *
  * Composant client pour voir et gérer ses garanties enregistrées
  */
 
@@ -10,7 +10,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { useWarrantyRegistrations, useCreateWarrantyClaim } from '@/hooks/physical/useWarranties';
 import { useAuth } from '@/contexts/AuthContext';
 import { Shield, AlertTriangle, Calendar, Plus } from '@/components/icons';
@@ -48,7 +55,8 @@ export default function MyWarranties() {
         <CardHeader>
           <CardTitle>Garanties enregistrées</CardTitle>
           <CardDescription>
-            {registrations?.length || 0} garantie{(registrations?.length || 0) > 1 ? 's' : ''} active{(registrations?.length || 0) > 1 ? 's' : ''}
+            {registrations?.length || 0} garantie{(registrations?.length || 0) > 1 ? 's' : ''}{' '}
+            active{(registrations?.length || 0) > 1 ? 's' : ''}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -72,7 +80,7 @@ export default function MyWarranties() {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  registrations.map((registration) => (
+                  registrations.map(registration => (
                     <TableRow key={registration.id}>
                       <TableCell>
                         <div className="flex items-center gap-2">
@@ -102,8 +110,13 @@ export default function MyWarranties() {
                       <TableCell>
                         <div className="flex items-center gap-1 text-sm">
                           <Calendar className="h-3 w-3" />
-                          {format(new Date(registration.warranty_start_date), 'dd MMM yyyy', { locale: fr })} - {' '}
-                          {format(new Date(registration.warranty_end_date), 'dd MMM yyyy', { locale: fr })}
+                          {format(new Date(registration.warranty_start_date), 'dd MMM yyyy', {
+                            locale: fr,
+                          })}{' '}
+                          -{' '}
+                          {format(new Date(registration.warranty_end_date), 'dd MMM yyyy', {
+                            locale: fr,
+                          })}
                         </div>
                       </TableCell>
                       <TableCell>
@@ -134,10 +147,3 @@ export default function MyWarranties() {
     </div>
   );
 }
-
-
-
-
-
-
-

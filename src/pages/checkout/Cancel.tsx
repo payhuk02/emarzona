@@ -1,20 +1,24 @@
-import { useEffect, useState } from "react";
-import { useSearchParams, Link, useNavigate } from "react-router-dom";
-import { XCircle, RotateCcw, Loader2, Shield } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { supabase } from "@/integrations/supabase/client";
-import { logger } from "@/lib/logger";
-import type { Database } from "@/integrations/supabase/types";
+import { useEffect, useState } from 'react';
+import { useSearchParams, Link, useNavigate } from 'react-router-dom';
+import { XCircle, RotateCcw, Loader2, Shield } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/lib/logger';
+import type { Database } from '@/integrations/supabase/types';
 
 const CheckoutCancel = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  const [transaction, setTransaction] = useState<Database['public']['Tables']['transactions']['Row'] | null>(null);
-  const [product, setProduct] = useState<Database['public']['Tables']['products']['Row'] | null>(null);
+  const [transaction, setTransaction] = useState<
+    Database['public']['Tables']['transactions']['Row'] | null
+  >(null);
+  const [product, setProduct] = useState<Database['public']['Tables']['products']['Row'] | null>(
+    null
+  );
 
-  const transactionId = searchParams.get("transaction_id");
+  const transactionId = searchParams.get('transaction_id');
 
   useEffect(() => {
     const updateTransaction = async () => {
@@ -25,32 +29,34 @@ const CheckoutCancel = () => {
 
       try {
         const { data, error } = await supabase
-          .from("transactions")
+          .from('transactions')
           .update({
-            status: "cancelled",
+            status: 'cancelled',
           })
-          .eq("id", transactionId)
+          .eq('id', transactionId)
           .select()
           .single();
 
         if (!error && data) {
           setTransaction(data);
 
-          await supabase.from("transaction_logs").insert([{
-            transaction_id: transactionId,
-            event_type: "cancelled",
-            status: "cancelled",
-          }]);
+          await supabase.from('transaction_logs').insert([
+            {
+              transaction_id: transactionId,
+              event_type: 'cancelled',
+              status: 'cancelled',
+            },
+          ]);
 
           if (data.order_id) {
             await supabase
-              .from("orders")
+              .from('orders')
               .update({
-                payment_status: "cancelled",
-                status: "cancelled",
+                payment_status: 'cancelled',
+                status: 'cancelled',
                 updated_at: new Date().toISOString(),
               })
-              .eq("id", data.order_id);
+              .eq('id', data.order_id);
           }
 
           if (data.product_id) {
@@ -63,7 +69,7 @@ const CheckoutCancel = () => {
           }
         }
       } catch (err) {
-        logger.error("Error updating transaction", { error: err });
+        logger.error('Error updating transaction', { error: err });
       } finally {
         setLoading(false);
       }
@@ -73,7 +79,7 @@ const CheckoutCancel = () => {
   }, [transactionId]);
 
   const handleRetry = () => {
-    navigate("/marketplace");
+    navigate('/marketplace');
   };
 
   if (loading) {
@@ -89,9 +95,7 @@ const CheckoutCancel = () => {
     <div className="min-h-screen flex flex-col items-center justify-center text-center bg-gradient-to-b from-red-50 to-white dark:from-red-950/20 dark:to-background px-4">
       <XCircle className="h-20 w-20 text-red-500 mb-6 animate-in zoom-in duration-300" />
 
-      <h1 className="text-3xl font-bold text-foreground mb-2">
-        Paiement annulé ❌
-      </h1>
+      <h1 className="text-3xl font-bold text-foreground mb-2">Paiement annulé ❌</h1>
 
       {transaction && (
         <Card className="max-w-md w-full my-6">
@@ -125,17 +129,29 @@ const CheckoutCancel = () => {
         <Card className="max-w-md w-full my-2">
           <CardContent className="pt-6">
             <div className="flex items-start gap-3 text-left">
-              <div className={`h-8 w-8 rounded-full flex items-center justify-center ${product.licensing_type === 'plr' ? 'bg-emerald-100' : product.licensing_type === 'copyrighted' ? 'bg-red-100' : 'bg-gray-100'}`}>
-                <Shield className={`h-4 w-4 ${product.licensing_type === 'plr' ? 'text-emerald-700' : product.licensing_type === 'copyrighted' ? 'text-red-700' : 'text-gray-700'}`} />
+              <div
+                className={`h-8 w-8 rounded-full flex items-center justify-center ${product.licensing_type === 'plr' ? 'bg-emerald-100' : product.licensing_type === 'copyrighted' ? 'bg-red-100' : 'bg-gray-100'}`}
+              >
+                <Shield
+                  className={`h-4 w-4 ${product.licensing_type === 'plr' ? 'text-emerald-700' : product.licensing_type === 'copyrighted' ? 'text-red-700' : 'text-gray-700'}`}
+                />
               </div>
               <div className="text-sm">
                 <p className="font-semibold">
-                  {product.licensing_type === 'plr' ? 'Licence PLR (droits de label privé)' : product.licensing_type === 'copyrighted' ? "Protégé par droit d'auteur" : 'Licence standard'}
+                  {product.licensing_type === 'plr'
+                    ? 'Licence PLR (droits de label privé)'
+                    : product.licensing_type === 'copyrighted'
+                      ? "Protégé par droit d'auteur"
+                      : 'Licence standard'}
                 </p>
                 {product.license_terms ? (
-                  <p className="text-muted-foreground mt-1 whitespace-pre-wrap">{product.license_terms}</p>
+                  <p className="text-muted-foreground mt-1 whitespace-pre-wrap">
+                    {product.license_terms}
+                  </p>
                 ) : (
-                  <p className="text-muted-foreground mt-1">Si vous réessayez l'achat, veuillez respecter les conditions d'utilisation.</p>
+                  <p className="text-muted-foreground mt-1">
+                    Si vous réessayez l'achat, veuillez respecter les conditions d'utilisation.
+                  </p>
                 )}
               </div>
             </div>
@@ -159,9 +175,3 @@ const CheckoutCancel = () => {
 };
 
 export default CheckoutCancel;
-
-
-
-
-
-

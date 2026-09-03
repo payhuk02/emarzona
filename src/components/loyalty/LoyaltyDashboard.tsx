@@ -8,17 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  Trophy,
-  Star,
-  Gift,
-  Users,
-  TrendingUp,
-  Calendar,
-  Award,
-  Coins,
-  Zap
-} from 'lucide-react';
+import { Trophy, Star, Gift, Users, TrendingUp, Calendar, Award, Coins, Zap } from 'lucide-react';
 import { useLoyaltyProfile, useLoyaltyTransactions } from '@/hooks/useAdvancedLoyalty';
 import { useAuth } from '@/contexts/AuthContext';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -41,7 +31,7 @@ export const LoyaltyDashboard: React.FC<LoyaltyDashboardProps> = ({ className })
 
   if (!profile) {
     return (
-      <Card className={cn("w-full", className)}>
+      <Card className={cn('w-full', className)}>
         <CardContent className="p-6 text-center">
           <Trophy className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
           <p className="text-muted-foreground">Programme de fidélité non disponible</p>
@@ -51,7 +41,7 @@ export const LoyaltyDashboard: React.FC<LoyaltyDashboardProps> = ({ className })
   }
 
   return (
-    <div className={cn("w-full space-y-6", className)}>
+    <div className={cn('w-full space-y-6', className)}>
       {/* Header avec niveau actuel */}
       <Card className="bg-gradient-to-r from-primary/5 to-secondary/5 border-primary/20">
         <CardContent className="p-6">
@@ -66,7 +56,9 @@ export const LoyaltyDashboard: React.FC<LoyaltyDashboardProps> = ({ className })
               </div>
             </div>
             <div className="text-right">
-              <div className="text-3xl font-bold text-primary">{profile.availablePoints.toLocaleString()}</div>
+              <div className="text-3xl font-bold text-primary">
+                {profile.availablePoints.toLocaleString()}
+              </div>
               <p className="text-sm text-muted-foreground">Points disponibles</p>
             </div>
           </div>
@@ -79,7 +71,12 @@ export const LoyaltyDashboard: React.FC<LoyaltyDashboardProps> = ({ className })
                 <span>{profile.pointsToNextTier} points restants</span>
               </div>
               <Progress
-                value={(profile.totalPoints / (profile.currentTier.maxPoints || profile.totalPoints + profile.pointsToNextTier)) * 100}
+                value={
+                  (profile.totalPoints /
+                    (profile.currentTier.maxPoints ||
+                      profile.totalPoints + profile.pointsToNextTier)) *
+                  100
+                }
                 className="h-3"
               />
             </div>
@@ -143,7 +140,7 @@ export const LoyaltyDashboard: React.FC<LoyaltyDashboardProps> = ({ className })
             <CardContent>
               {profile.badges.length > 0 ? (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {profile.badges.map((badge) => (
+                  {profile.badges.map(badge => (
                     <div key={badge.id} className="text-center">
                       <div
                         className="w-16 h-16 mx-auto mb-2 rounded-full flex items-center justify-center text-white text-2xl"
@@ -174,18 +171,26 @@ export const LoyaltyDashboard: React.FC<LoyaltyDashboardProps> = ({ className })
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {transactions?.transactions.slice(0, 5).map((transaction) => (
+                {transactions?.transactions.slice(0, 5).map(transaction => (
                   <div key={transaction.id} className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className={cn(
-                        "w-8 h-8 rounded-full flex items-center justify-center",
-                        transaction.type === 'earned' ? "bg-green-100 text-green-600" :
-                        transaction.type === 'spent' ? "bg-red-100 text-red-600" :
-                        "bg-blue-100 text-blue-600"
-                      )}>
-                        {transaction.type === 'earned' ? <TrendingUp className="h-4 w-4" /> :
-                         transaction.type === 'spent' ? <Gift className="h-4 w-4" /> :
-                         <Star className="h-4 w-4" />}
+                      <div
+                        className={cn(
+                          'w-8 h-8 rounded-full flex items-center justify-center',
+                          transaction.type === 'earned'
+                            ? 'bg-green-100 text-green-600'
+                            : transaction.type === 'spent'
+                              ? 'bg-red-100 text-red-600'
+                              : 'bg-blue-100 text-blue-600'
+                        )}
+                      >
+                        {transaction.type === 'earned' ? (
+                          <TrendingUp className="h-4 w-4" />
+                        ) : transaction.type === 'spent' ? (
+                          <Gift className="h-4 w-4" />
+                        ) : (
+                          <Star className="h-4 w-4" />
+                        )}
                       </div>
                       <div>
                         <p className="font-medium">{transaction.reason}</p>
@@ -194,17 +199,18 @@ export const LoyaltyDashboard: React.FC<LoyaltyDashboardProps> = ({ className })
                         </p>
                       </div>
                     </div>
-                    <div className={cn(
-                      "font-bold",
-                      transaction.points > 0 ? "text-green-600" : "text-red-600"
-                    )}>
-                      {transaction.points > 0 ? '+' : ''}{transaction.points}
+                    <div
+                      className={cn(
+                        'font-bold',
+                        transaction.points > 0 ? 'text-green-600' : 'text-red-600'
+                      )}
+                    >
+                      {transaction.points > 0 ? '+' : ''}
+                      {transaction.points}
                     </div>
                   </div>
                 )) || (
-                  <p className="text-center text-muted-foreground py-8">
-                    Aucune activité récente
-                  </p>
+                  <p className="text-center text-muted-foreground py-8">Aucune activité récente</p>
                 )}
               </div>
             </CardContent>
@@ -227,13 +233,15 @@ export const LoyaltyDashboard: React.FC<LoyaltyDashboardProps> = ({ className })
                       <div className="flex-1">
                         <h4 className="font-medium">{benefit.description}</h4>
                         <p className="text-sm text-muted-foreground">
-                          {benefit.type === 'discount_percentage' && `${benefit.value}% de réduction`}
+                          {benefit.type === 'discount_percentage' &&
+                            `${benefit.value}% de réduction`}
                           {benefit.type === 'discount_fixed' && `${benefit.value}€ de réduction`}
                           {benefit.type === 'free_shipping' && 'Livraison gratuite'}
                           {benefit.type === 'priority_support' && 'Support prioritaire'}
                           {benefit.type === 'early_access' && 'Accès anticipé'}
                           {benefit.type === 'exclusive_content' && 'Contenu exclusif'}
-                          {benefit.type === 'bonus_points_multiplier' && `${benefit.value}x points bonus`}
+                          {benefit.type === 'bonus_points_multiplier' &&
+                            `${benefit.value}x points bonus`}
                         </p>
                       </div>
                     </div>
@@ -255,20 +263,33 @@ export const LoyaltyDashboard: React.FC<LoyaltyDashboardProps> = ({ className })
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {transactions?.transactions.map((transaction) => (
-                  <div key={transaction.id} className="flex items-center justify-between p-4 border rounded-lg">
+                {transactions?.transactions.map(transaction => (
+                  <div
+                    key={transaction.id}
+                    className="flex items-center justify-between p-4 border rounded-lg"
+                  >
                     <div className="flex items-center gap-3">
-                      <div className={cn(
-                        "w-10 h-10 rounded-full flex items-center justify-center",
-                        transaction.type === 'earned' ? "bg-green-100 text-green-600" :
-                        transaction.type === 'spent' ? "bg-red-100 text-red-600" :
-                        transaction.type === 'expired' ? "bg-yellow-100 text-yellow-600" :
-                        "bg-blue-100 text-blue-600"
-                      )}>
-                        {transaction.type === 'earned' ? <TrendingUp className="h-5 w-5" /> :
-                         transaction.type === 'spent' ? <Gift className="h-5 w-5" /> :
-                         transaction.type === 'expired' ? <Calendar className="h-5 w-5" /> :
-                         <Star className="h-5 w-5" />}
+                      <div
+                        className={cn(
+                          'w-10 h-10 rounded-full flex items-center justify-center',
+                          transaction.type === 'earned'
+                            ? 'bg-green-100 text-green-600'
+                            : transaction.type === 'spent'
+                              ? 'bg-red-100 text-red-600'
+                              : transaction.type === 'expired'
+                                ? 'bg-yellow-100 text-yellow-600'
+                                : 'bg-blue-100 text-blue-600'
+                        )}
+                      >
+                        {transaction.type === 'earned' ? (
+                          <TrendingUp className="h-5 w-5" />
+                        ) : transaction.type === 'spent' ? (
+                          <Gift className="h-5 w-5" />
+                        ) : transaction.type === 'expired' ? (
+                          <Calendar className="h-5 w-5" />
+                        ) : (
+                          <Star className="h-5 w-5" />
+                        )}
                       </div>
                       <div>
                         <p className="font-medium">{transaction.reason}</p>
@@ -278,7 +299,7 @@ export const LoyaltyDashboard: React.FC<LoyaltyDashboardProps> = ({ className })
                             month: 'long',
                             day: 'numeric',
                             hour: '2-digit',
-                            minute: '2-digit'
+                            minute: '2-digit',
                           })}
                         </p>
                         {transaction.expiresAt && (
@@ -288,11 +309,14 @@ export const LoyaltyDashboard: React.FC<LoyaltyDashboardProps> = ({ className })
                         )}
                       </div>
                     </div>
-                    <div className={cn(
-                      "text-lg font-bold",
-                      transaction.points > 0 ? "text-green-600" : "text-red-600"
-                    )}>
-                      {transaction.points > 0 ? '+' : ''}{transaction.points}
+                    <div
+                      className={cn(
+                        'text-lg font-bold',
+                        transaction.points > 0 ? 'text-green-600' : 'text-red-600'
+                      )}
+                    >
+                      {transaction.points > 0 ? '+' : ''}
+                      {transaction.points}
                     </div>
                   </div>
                 )) || (
@@ -347,7 +371,12 @@ export const LoyaltyDashboard: React.FC<LoyaltyDashboardProps> = ({ className })
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-purple-600">
-                    {Math.round((profile.referralStats.successfulReferrals / Math.max(profile.referralStats.totalReferrals, 1)) * 100)}%
+                    {Math.round(
+                      (profile.referralStats.successfulReferrals /
+                        Math.max(profile.referralStats.totalReferrals, 1)) *
+                        100
+                    )}
+                    %
                   </div>
                   <p className="text-sm text-muted-foreground">Taux de succès</p>
                 </div>

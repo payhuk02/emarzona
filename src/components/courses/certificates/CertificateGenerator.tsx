@@ -9,15 +9,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Download, 
-  Award, 
-  CheckCircle2,
-  Loader2,
-  Eye
-} from 'lucide-react';
+import { Download, Award, CheckCircle2, Loader2, Eye } from 'lucide-react';
 import { CertificateTemplate } from './CertificateTemplate';
-import { useCertificate, useCreateCertificate, useCanGetCertificate } from '@/hooks/courses/useCertificates';
+import {
+  useCertificate,
+  useCreateCertificate,
+  useCanGetCertificate,
+} from '@/hooks/courses/useCertificates';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface CertificateGeneratorProps {
@@ -83,7 +81,8 @@ export const CertificateGenerator = ({
               <Alert className="bg-green-50 border-green-200">
                 <CheckCircle2 className="h-4 w-4 text-green-600" />
                 <AlertDescription className="text-green-800">
-                  Félicitations ! Vous avez complété ce cours. Vous pouvez maintenant générer votre certificat.
+                  Félicitations ! Vous avez complété ce cours. Vous pouvez maintenant générer votre
+                  certificat.
                 </AlertDescription>
               </Alert>
 
@@ -138,7 +137,9 @@ export const CertificateGenerator = ({
             <div>
               <p className="text-muted-foreground">Date d'émission :</p>
               <p className="font-semibold">
-                {new Date(certificate.completion_date || certificate.created_at).toLocaleDateString('fr-FR')}
+                {new Date(certificate.completion_date || certificate.created_at).toLocaleDateString(
+                  'fr-FR'
+                )}
               </p>
             </div>
           </div>
@@ -160,7 +161,12 @@ export const CertificateGenerator = ({
       {showPreview && (
         <div className="print:block">
           <CertificateTemplate
-            studentName={certificate.student_name || user?.user_metadata?.full_name || user?.email || 'Étudiant'}
+            studentName={
+              certificate.student_name ||
+              user?.user_metadata?.full_name ||
+              user?.email ||
+              'Étudiant'
+            }
             courseName={certificate.course_title || courseName}
             completionDate={certificate.completion_date || certificate.created_at}
             certificateNumber={certificate.certificate_number}
@@ -200,10 +206,3 @@ export const CertificateGenerator = ({
     </div>
   );
 };
-
-
-
-
-
-
-

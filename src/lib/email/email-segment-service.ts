@@ -70,7 +70,7 @@ export class EmailSegmentService {
       }
 
       return data as EmailSegment;
-    } catch ( _error: any) {
+    } catch (_error: any) {
       logger.error('EmailSegmentService.createSegment error', { error, payload });
       throw error;
     }
@@ -96,7 +96,7 @@ export class EmailSegmentService {
       }
 
       return data as EmailSegment;
-    } catch ( _error: any) {
+    } catch (_error: any) {
       logger.error('EmailSegmentService.getSegment error', { error, segmentId });
       throw error;
     }
@@ -114,7 +114,7 @@ export class EmailSegmentService {
     }
   ): Promise<EmailSegment[]> {
     try {
-      let  query= supabase
+      let query = supabase
         .from('email_segments')
         .select(EMAIL_SEGMENT_FIELDS)
         .eq('store_id', storeId)
@@ -129,10 +129,7 @@ export class EmailSegmentService {
       }
 
       if (filters?.offset) {
-        query = query.range(
-          filters.offset,
-          (filters.offset || 0) + (filters.limit || 10) - 1
-        );
+        query = query.range(filters.offset, (filters.offset || 0) + (filters.limit || 10) - 1);
       }
 
       const { data, error } = await query;
@@ -143,7 +140,7 @@ export class EmailSegmentService {
       }
 
       return (data || []) as EmailSegment[];
-    } catch ( _error: any) {
+    } catch (_error: any) {
       logger.error('EmailSegmentService.getSegments error', { error, storeId, filters });
       throw error;
     }
@@ -170,7 +167,7 @@ export class EmailSegmentService {
       }
 
       return data as EmailSegment;
-    } catch ( _error: any) {
+    } catch (_error: any) {
       logger.error('EmailSegmentService.updateSegment error', { error, segmentId, payload });
       throw error;
     }
@@ -181,10 +178,7 @@ export class EmailSegmentService {
    */
   static async deleteSegment(segmentId: string): Promise<boolean> {
     try {
-      const { error } = await supabase
-        .from('email_segments')
-        .delete()
-        .eq('id', segmentId);
+      const { error } = await supabase.from('email_segments').delete().eq('id', segmentId);
 
       if (error) {
         logger.error('Error deleting segment', { error, segmentId });
@@ -192,7 +186,7 @@ export class EmailSegmentService {
       }
 
       return true;
-    } catch ( _error: any) {
+    } catch (_error: any) {
       logger.error('EmailSegmentService.deleteSegment error', { error, segmentId });
       throw error;
     }
@@ -213,7 +207,7 @@ export class EmailSegmentService {
       }
 
       return (data || []) as SegmentMember[];
-    } catch ( _error: any) {
+    } catch (_error: any) {
       logger.error('EmailSegmentService.calculateSegmentMembers error', { error, segmentId });
       throw error;
     }
@@ -234,7 +228,7 @@ export class EmailSegmentService {
       }
 
       return data as number;
-    } catch ( _error: any) {
+    } catch (_error: any) {
       logger.error('EmailSegmentService.updateMemberCount error', { error, segmentId });
       throw error;
     }
@@ -243,10 +237,3 @@ export class EmailSegmentService {
 
 // Export instance singleton
 export const emailSegmentService = EmailSegmentService;
-
-
-
-
-
-
-

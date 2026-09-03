@@ -47,7 +47,7 @@ import { CourseStatusIndicator, type CourseStatus } from './CourseStatusIndicato
 /**
  * Catégories de cours
  */
-export type CourseCategory = 
+export type CourseCategory =
   | 'development'
   | 'design'
   | 'business'
@@ -59,7 +59,7 @@ export type CourseCategory =
 /**
  * Tri disponible
  */
-export type CourseSortField = 
+export type CourseSortField =
   | 'name'
   | 'created_at'
   | 'enrolled_students'
@@ -97,40 +97,40 @@ export interface CourseListItem {
 export interface CoursesListProps {
   /** Liste des cours */
   courses: CourseListItem[];
-  
+
   /** Callback de sélection de cours */
   onCourseSelect?: (courseId: string) => void;
-  
+
   /** Callback d'édition */
   onEdit?: (courseId: string) => void;
-  
+
   /** Callback de suppression */
   onDelete?: (courseId: string) => void;
-  
+
   /** Callback de duplication */
   onDuplicate?: (courseId: string) => void;
-  
+
   /** Callback d'archivage */
   onArchive?: (courseId: string) => void;
-  
+
   /** Callback de publication/dépublication */
   onTogglePublish?: (courseId: string, newStatus: CourseStatus) => void;
-  
+
   /** Callback d'actions groupées */
   onBulkAction?: (action: string, courseIds: string[]) => void;
-  
+
   /** Chargement en cours */
   isLoading?: boolean;
-  
+
   /** Classe CSS personnalisée */
   className?: string;
-  
+
   /** Afficher les filtres */
   showFilters?: boolean;
-  
+
   /** Afficher la pagination */
   showPagination?: boolean;
-  
+
   /** Items par page */
   itemsPerPage?: number;
 }
@@ -138,7 +138,7 @@ export interface CoursesListProps {
 /**
  * Mapping des catégories
  */
-const  CATEGORY_LABELS: Record<CourseCategory, string> = {
+const CATEGORY_LABELS: Record<CourseCategory, string> = {
   development: 'Développement',
   design: 'Design',
   business: 'Business',
@@ -150,10 +150,10 @@ const  CATEGORY_LABELS: Record<CourseCategory, string> = {
 
 /**
  * CoursesList - Liste complète des cours avec filtres et actions
- * 
+ *
  * @example
  * ```tsx
- * <CoursesList 
+ * <CoursesList
  *   courses={myCourses}
  *   onEdit={(id) => navigate(`/courses/edit/${id}`)}
  *   onDelete={(id) => deleteCourse(id)}
@@ -161,7 +161,7 @@ const  CATEGORY_LABELS: Record<CourseCategory, string> = {
  * />
  * ```
  */
-export const CoursesList : React.FC<CoursesListProps> = ({
+export const CoursesList: React.FC<CoursesListProps> = ({
   courses,
   onCourseSelect,
   onEdit,
@@ -188,13 +188,13 @@ export const CoursesList : React.FC<CoursesListProps> = ({
 
   // Filtrer et trier les cours
   const filteredAndSortedCourses = useMemo(() => {
-    let  result= [...courses];
+    let result = [...courses];
 
     // Recherche
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       result = result.filter(
-        (course) =>
+        course =>
           course.name.toLowerCase().includes(query) ||
           course.instructor.toLowerCase().includes(query)
       );
@@ -202,18 +202,18 @@ export const CoursesList : React.FC<CoursesListProps> = ({
 
     // Filtrer par statut
     if (selectedStatus !== 'all') {
-      result = result.filter((course) => course.status === selectedStatus);
+      result = result.filter(course => course.status === selectedStatus);
     }
 
     // Filtrer par catégorie
     if (selectedCategory !== 'all') {
-      result = result.filter((course) => course.category === selectedCategory);
+      result = result.filter(course => course.category === selectedCategory);
     }
 
     // Trier
     result.sort((a, b) => {
-      let  aValue: any = a[sortField];
-      let  bValue: any = b[sortField];
+      let aValue: any = a[sortField];
+      let bValue: any = b[sortField];
 
       // Conversion dates
       if (sortField === 'created_at') {
@@ -262,7 +262,7 @@ export const CoursesList : React.FC<CoursesListProps> = ({
     if (selectedCourses.size === paginatedCourses.length) {
       setSelectedCourses(new Set());
     } else {
-      setSelectedCourses(new Set(paginatedCourses.map((c) => c.id)));
+      setSelectedCourses(new Set(paginatedCourses.map(c => c.id)));
     }
   };
 
@@ -287,8 +287,18 @@ export const CoursesList : React.FC<CoursesListProps> = ({
   // Export CSV
   const handleExportCSV = () => {
     const csvContent = [
-      ['ID', 'Nom', 'Instructeur', 'Statut', 'Catégorie', 'Prix', 'Étudiants', 'Taux complétion', 'Revenue'],
-      ...filteredAndSortedCourses.map((course) => [
+      [
+        'ID',
+        'Nom',
+        'Instructeur',
+        'Statut',
+        'Catégorie',
+        'Prix',
+        'Étudiants',
+        'Taux complétion',
+        'Revenue',
+      ],
+      ...filteredAndSortedCourses.map(course => [
         course.id,
         course.name,
         course.instructor,
@@ -300,7 +310,7 @@ export const CoursesList : React.FC<CoursesListProps> = ({
         course.revenue,
       ]),
     ]
-      .map((row) => row.join(','))
+      .map(row => row.join(','))
       .join('\n');
 
     const blob = new Blob([csvContent], { type: 'text/csv' });
@@ -330,7 +340,7 @@ export const CoursesList : React.FC<CoursesListProps> = ({
               <Input
                 placeholder="Rechercher par nom ou instructeur..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={e => setSearchQuery(e.target.value)}
                 className="pl-10"
               />
             </div>
@@ -364,7 +374,7 @@ export const CoursesList : React.FC<CoursesListProps> = ({
                   <label className="text-sm font-medium mb-2 block">Statut</label>
                   <Select
                     value={selectedStatus}
-                    onValueChange={(value) => setSelectedStatus(value as CourseStatus | 'all')}
+                    onValueChange={value => setSelectedStatus(value as CourseStatus | 'all')}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -384,7 +394,7 @@ export const CoursesList : React.FC<CoursesListProps> = ({
                   <label className="text-sm font-medium mb-2 block">Catégorie</label>
                   <Select
                     value={selectedCategory}
-                    onValueChange={(value) => setSelectedCategory(value as CourseCategory | 'all')}
+                    onValueChange={value => setSelectedCategory(value as CourseCategory | 'all')}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -404,7 +414,7 @@ export const CoursesList : React.FC<CoursesListProps> = ({
                   <label className="text-sm font-medium mb-2 block">Trier par</label>
                   <Select
                     value={sortField}
-                    onValueChange={(value) => setSortField(value as CourseSortField)}
+                    onValueChange={value => setSortField(value as CourseSortField)}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -529,18 +539,29 @@ export const CoursesList : React.FC<CoursesListProps> = ({
             <TableHeader>
               <TableRow>
                 <TableHead className="w-12">
-                  <Checkbox checked={selectedCourses.size === paginatedCourses.length} onCheckedChange={toggleSelectAll} />
+                  <Checkbox
+                    checked={selectedCourses.size === paginatedCourses.length}
+                    onCheckedChange={toggleSelectAll}
+                  />
                 </TableHead>
                 <TableHead className="cursor-pointer" onSelect={() => handleSort('name')}>
                   Cours {sortField === 'name' && (sortDirection === 'asc' ? '↑' : '↓')}
                 </TableHead>
                 <TableHead>Statut</TableHead>
                 <TableHead>Catégorie</TableHead>
-                <TableHead className="cursor-pointer" onSelect={() => handleSort('enrolled_students')}>
-                  Étudiants {sortField === 'enrolled_students' && (sortDirection === 'asc' ? '↑' : '↓')}
+                <TableHead
+                  className="cursor-pointer"
+                  onSelect={() => handleSort('enrolled_students')}
+                >
+                  Étudiants{' '}
+                  {sortField === 'enrolled_students' && (sortDirection === 'asc' ? '↑' : '↓')}
                 </TableHead>
-                <TableHead className="cursor-pointer" onSelect={() => handleSort('completion_rate')}>
-                  Complétion {sortField === 'completion_rate' && (sortDirection === 'asc' ? '↑' : '↓')}
+                <TableHead
+                  className="cursor-pointer"
+                  onSelect={() => handleSort('completion_rate')}
+                >
+                  Complétion{' '}
+                  {sortField === 'completion_rate' && (sortDirection === 'asc' ? '↑' : '↓')}
                 </TableHead>
                 <TableHead className="cursor-pointer" onSelect={() => handleSort('revenue')}>
                   Revenue {sortField === 'revenue' && (sortDirection === 'asc' ? '↑' : '↓')}
@@ -565,9 +586,9 @@ export const CoursesList : React.FC<CoursesListProps> = ({
                   </TableCell>
                 </TableRow>
               ) : (
-                paginatedCourses.map((course) => (
+                paginatedCourses.map(course => (
                   <TableRow key={course.id} className="cursor-pointer hover:bg-muted/50">
-                    <TableCell onSelect={(e) => e.stopPropagation()}>
+                    <TableCell onSelect={e => e.stopPropagation()}>
                       <Checkbox
                         checked={selectedCourses.has(course.id)}
                         onCheckedChange={() => toggleCourseSelection(course.id)}
@@ -597,7 +618,9 @@ export const CoursesList : React.FC<CoursesListProps> = ({
                     <TableCell>
                       <div className="flex items-center gap-1">
                         <Users className="h-3 w-3 text-muted-foreground" />
-                        <span>{course.enrolledStudents}/{course.maxStudents}</span>
+                        <span>
+                          {course.enrolledStudents}/{course.maxStudents}
+                        </span>
                       </div>
                     </TableCell>
                     <TableCell>
@@ -620,10 +643,8 @@ export const CoursesList : React.FC<CoursesListProps> = ({
                     <TableCell className="text-right">
                       <Select>
                         <SelectTrigger>
-
-                            <MoreVertical className="h-4 w-4" />
-                          
-</SelectTrigger>
+                          <MoreVertical className="h-4 w-4" />
+                        </SelectTrigger>
                         <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                           <SelectItem value="edit" onSelect={() => onCourseSelect?.(course.id)}>
                             <Eye className="h-4 w-4 mr-2" />
@@ -639,13 +660,19 @@ export const CoursesList : React.FC<CoursesListProps> = ({
                           </SelectItem>
                           <DropdownMenuSeparator />
                           {course.status === 'draft' && onTogglePublish && (
-                            <SelectItem value="view" onSelect={() => onTogglePublish(course.id, 'published')}>
+                            <SelectItem
+                              value="view"
+                              onSelect={() => onTogglePublish(course.id, 'published')}
+                            >
                               <CheckCircle2 className="h-4 w-4 mr-2" />
                               Publier
                             </SelectItem>
                           )}
                           {course.status === 'published' && onTogglePublish && (
-                            <SelectItem value="export" onSelect={() => onTogglePublish(course.id, 'draft')}>
+                            <SelectItem
+                              value="export"
+                              onSelect={() => onTogglePublish(course.id, 'draft')}
+                            >
                               <XCircle className="h-4 w-4 mr-2" />
                               Dépublier
                             </SelectItem>
@@ -655,7 +682,9 @@ export const CoursesList : React.FC<CoursesListProps> = ({
                             Archiver
                           </SelectItem>
                           <DropdownMenuSeparator />
-                          <SelectItem value="toggle" onSelect={() => onDelete?.(course.id)}
+                          <SelectItem
+                            value="toggle"
+                            onSelect={() => onDelete?.(course.id)}
                             className="text-destructive"
                           >
                             <Trash2 className="h-4 w-4 mr-2" />
@@ -683,7 +712,7 @@ export const CoursesList : React.FC<CoursesListProps> = ({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
               >
                 Précédent
@@ -691,7 +720,7 @@ export const CoursesList : React.FC<CoursesListProps> = ({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
               >
                 Suivant
@@ -707,11 +736,3 @@ export const CoursesList : React.FC<CoursesListProps> = ({
 CoursesList.displayName = 'CoursesList';
 
 export default CoursesList;
-
-
-
-
-
-
-
-

@@ -100,7 +100,9 @@ export const useDigitalProductUpdateNotifications = () => {
   const { data: user } = useQuery({
     queryKey: ['current-user'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       return user;
     },
   });
@@ -112,11 +114,13 @@ export const useDigitalProductUpdateNotifications = () => {
 
       const { data, error } = await supabase
         .from('digital_product_update_notifications')
-        .select(`
+        .select(
+          `
           *,
           version:digital_product_versions(*),
           product:digital_products(*, product:products(*))
-        `)
+        `
+        )
         .eq('user_id', user.id)
         .eq('is_read', false)
         .order('created_at', { ascending: false });
@@ -163,8 +167,12 @@ export const useCreateDigitalProductVersion = () => {
       return data as DigitalProductVersion;
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['digital-product-version-current', variables.product_id] });
-      queryClient.invalidateQueries({ queryKey: ['digital-product-version-history', variables.product_id] });
+      queryClient.invalidateQueries({
+        queryKey: ['digital-product-version-current', variables.product_id],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['digital-product-version-history', variables.product_id],
+      });
     },
   });
 };
@@ -209,9 +217,13 @@ export const useUpdateDigitalProductVersion = () => {
 
       return data as DigitalProductVersion;
     },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['digital-product-version-current', data.product_id] });
-      queryClient.invalidateQueries({ queryKey: ['digital-product-version-history', data.product_id] });
+    onSuccess: data => {
+      queryClient.invalidateQueries({
+        queryKey: ['digital-product-version-current', data.product_id],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['digital-product-version-history', data.product_id],
+      });
     },
   });
 };
@@ -224,10 +236,7 @@ export const useDeleteDigitalProductVersion = () => {
 
   return useMutation({
     mutationFn: async ({ id, productId }: { id: string; productId: string }) => {
-      const { error } = await supabase
-        .from('digital_product_versions')
-        .delete()
-        .eq('id', id);
+      const { error } = await supabase.from('digital_product_versions').delete().eq('id', id);
 
       if (error) {
         logger.error('Error deleting digital product version', { error, id });
@@ -235,8 +244,12 @@ export const useDeleteDigitalProductVersion = () => {
       }
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['digital-product-version-current', variables.productId] });
-      queryClient.invalidateQueries({ queryKey: ['digital-product-version-history', variables.productId] });
+      queryClient.invalidateQueries({
+        queryKey: ['digital-product-version-current', variables.productId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['digital-product-version-history', variables.productId],
+      });
     },
   });
 };
@@ -264,10 +277,3 @@ export const useMarkUpdateNotificationRead = () => {
     },
   });
 };
-
-
-
-
-
-
-

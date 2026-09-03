@@ -6,7 +6,14 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useEmailWorkflows } from '@/hooks/email/useEmailWorkflows';
-import { TrendingUp, TrendingDown, Activity, AlertCircle, CheckCircle2, XCircle } from 'lucide-react';
+import {
+  TrendingUp,
+  TrendingDown,
+  Activity,
+  AlertCircle,
+  CheckCircle2,
+  XCircle,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface WorkflowDashboardProps {
@@ -99,12 +106,14 @@ export const WorkflowDashboard = ({ storeId }: WorkflowDashboardProps) => {
               ) : (
                 <TrendingDown className="h-3 w-3 text-red-600" />
               )}
-              <span className={cn(
-                "text-xs",
-                successRate >= 90 && "text-green-600",
-                successRate >= 70 && successRate < 90 && "text-yellow-600",
-                successRate < 70 && "text-red-600"
-              )}>
+              <span
+                className={cn(
+                  'text-xs',
+                  successRate >= 90 && 'text-green-600',
+                  successRate >= 70 && successRate < 90 && 'text-yellow-600',
+                  successRate < 70 && 'text-red-600'
+                )}
+              >
                 {totalSuccess} réussies / {totalExecutions} totales
               </span>
             </div>
@@ -123,11 +132,12 @@ export const WorkflowDashboard = ({ storeId }: WorkflowDashboardProps) => {
               ) : (
                 <AlertCircle className="h-3 w-3 text-red-600" />
               )}
-              <span className={cn(
-                "text-xs",
-                totalErrors === 0 ? "text-green-600" : "text-red-600"
-              )}>
-                {totalErrors === 0 ? 'Aucune erreur' : `${totalErrors} erreur${totalErrors > 1 ? 's' : ''}`}
+              <span
+                className={cn('text-xs', totalErrors === 0 ? 'text-green-600' : 'text-red-600')}
+              >
+                {totalErrors === 0
+                  ? 'Aucune erreur'
+                  : `${totalErrors} erreur${totalErrors > 1 ? 's' : ''}`}
               </span>
             </div>
           </CardContent>
@@ -143,10 +153,11 @@ export const WorkflowDashboard = ({ storeId }: WorkflowDashboardProps) => {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {recentWorkflows.map((workflow) => {
-                const successRate = workflow.execution_count > 0
-                  ? (workflow.success_count / workflow.execution_count) * 100
-                  : 0;
+              {recentWorkflows.map(workflow => {
+                const successRate =
+                  workflow.execution_count > 0
+                    ? (workflow.success_count / workflow.execution_count) * 100
+                    : 0;
 
                 return (
                   <div
@@ -156,8 +167,9 @@ export const WorkflowDashboard = ({ storeId }: WorkflowDashboardProps) => {
                     <div className="flex-1">
                       <div className="font-medium text-sm">{workflow.name}</div>
                       <div className="text-xs text-muted-foreground mt-1">
-                        {workflow.execution_count} exécution{workflow.execution_count !== 1 ? 's' : ''} • 
-                        Dernière exécution: {new Date(workflow.last_executed_at!).toLocaleDateString('fr-FR', {
+                        {workflow.execution_count} exécution
+                        {workflow.execution_count !== 1 ? 's' : ''} • Dernière exécution:{' '}
+                        {new Date(workflow.last_executed_at!).toLocaleDateString('fr-FR', {
                           day: 'numeric',
                           month: 'short',
                           hour: '2-digit',
@@ -167,19 +179,17 @@ export const WorkflowDashboard = ({ storeId }: WorkflowDashboardProps) => {
                     </div>
                     <div className="flex items-center gap-3">
                       <div className="text-right">
-                        <div className="text-sm font-medium">
-                          {successRate.toFixed(0)}%
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          réussite
-                        </div>
+                        <div className="text-sm font-medium">{successRate.toFixed(0)}%</div>
+                        <div className="text-xs text-muted-foreground">réussite</div>
                       </div>
-                      <div className={cn(
-                        "h-2 w-2 rounded-full",
-                        successRate >= 90 && "bg-green-500",
-                        successRate >= 70 && successRate < 90 && "bg-yellow-500",
-                        successRate < 70 && "bg-red-500"
-                      )} />
+                      <div
+                        className={cn(
+                          'h-2 w-2 rounded-full',
+                          successRate >= 90 && 'bg-green-500',
+                          successRate >= 70 && successRate < 90 && 'bg-yellow-500',
+                          successRate < 70 && 'bg-red-500'
+                        )}
+                      />
                     </div>
                   </div>
                 );
@@ -191,10 +201,3 @@ export const WorkflowDashboard = ({ storeId }: WorkflowDashboardProps) => {
     </div>
   );
 };
-
-
-
-
-
-
-

@@ -1,7 +1,7 @@
 /**
  * Hook pour précharger les ressources critiques (images, fonts, etc.)
  * Améliore les Web Vitals (LCP) en préchargeant les ressources above-the-fold
- * 
+ *
  * @example
  * ```tsx
  * useResourcePreload({
@@ -50,10 +50,13 @@ function isFastConnection(): boolean {
   if (typeof navigator === 'undefined' || !('connection' in navigator)) {
     return true; // Par défaut, considérer comme rapide
   }
-  
-  const connection = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection;
+
+  const connection =
+    (navigator as any).connection ||
+    (navigator as any).mozConnection ||
+    (navigator as any).webkitConnection;
   if (!connection) return true;
-  
+
   // Considérer comme rapide si 4G ou mieux
   const effectiveType = connection.effectiveType;
   return effectiveType === '4g' || effectiveType === '5g';
@@ -74,12 +77,12 @@ function createPreloadLink(
   if (type) {
     link.type = type;
   }
-  
+
   // Ajouter crossorigin pour les fonts
   if (as === 'font') {
     link.crossOrigin = 'anonymous';
   }
-  
+
   return link;
 }
 
@@ -102,9 +105,12 @@ export function useResourcePreload(options: ResourcePreloadOptions = {}) {
       return; // Ne pas preload sur connexion lente
     }
 
-    const timeoutId = delay > 0 ? setTimeout(() => {
-      preloadResources();
-    }, delay) : null;
+    const timeoutId =
+      delay > 0
+        ? setTimeout(() => {
+            preloadResources();
+          }, delay)
+        : null;
 
     if (delay === 0) {
       preloadResources();
@@ -167,10 +173,3 @@ export function useResourcePreload(options: ResourcePreloadOptions = {}) {
     };
   }, [images, fonts, scripts, styles, delay, onlyOnFastConnection]);
 }
-
-
-
-
-
-
-

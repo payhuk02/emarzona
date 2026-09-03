@@ -1,8 +1,8 @@
-import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { ProductGrid } from "@/components/ui/ProductGrid";
-import { BundleCard } from "./BundleCard";
-import { Package, ArrowRight } from "lucide-react";
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { ProductGrid } from '@/components/ui/ProductGrid';
+import { BundleCard } from './BundleCard';
+import { Package, ArrowRight } from 'lucide-react';
 
 interface Bundle {
   id: string;
@@ -18,12 +18,12 @@ interface BundlesSectionProps {
   bundles: Bundle[];
 }
 
-export const BundlesSection : React.FC<BundlesSectionProps> = ({ bundles }) => {
+export const BundlesSection: React.FC<BundlesSectionProps> = ({ bundles }) => {
   if (!bundles || bundles.length === 0) {
     return null;
   }
 
-  const savingsPercentages = bundles.map((b) => {
+  const savingsPercentages = bundles.map(b => {
     // Support à la fois savings_percentage et discount_percentage
     return (b.savings_percentage || b.discount_percentage || 0) as number;
   });
@@ -50,7 +50,7 @@ export const BundlesSection : React.FC<BundlesSectionProps> = ({ bundles }) => {
           </Link>
         </div>
         <ProductGrid>
-          {bundles.slice(0, 6).map((bundle) => (
+          {bundles.slice(0, 6).map(bundle => (
             <BundleCard
               key={bundle.id}
               bundle={bundle}
@@ -62,11 +62,3 @@ export const BundlesSection : React.FC<BundlesSectionProps> = ({ bundles }) => {
     </section>
   );
 };
-
-
-
-
-
-
-
-

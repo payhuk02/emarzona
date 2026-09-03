@@ -1,7 +1,7 @@
 /**
  * Combined Coupon Input Component
  * Date: 2025-01-27
- * 
+ *
  * Composant pour appliquer plusieurs coupons combinés
  */
 
@@ -22,7 +22,10 @@ import {
   Percent,
   DollarSign,
 } from 'lucide-react';
-import { useValidateCombinedCoupons, useRecordCouponUsage } from '@/hooks/digital/useCouponEnhancements';
+import {
+  useValidateCombinedCoupons,
+  useRecordCouponUsage,
+} from '@/hooks/digital/useCouponEnhancements';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 import { supabase } from '@/integrations/supabase/client';
@@ -42,12 +45,14 @@ export const CombinedCouponInput = ({
 }: CombinedCouponInputProps) => {
   const { toast } = useToast();
   const [couponCodes, setCouponCodes] = useState<string[]>(['']);
-  const [appliedCoupons, setAppliedCoupons] = useState<Array<{
-    id: string;
-    code: string;
-    discount: number;
-  }>>([]);
-  
+  const [appliedCoupons, setAppliedCoupons] = useState<
+    Array<{
+      id: string;
+      code: string;
+      discount: number;
+    }>
+  >([]);
+
   const validateCoupons = useValidateCombinedCoupons();
   const recordUsage = useRecordCouponUsage();
 
@@ -70,7 +75,10 @@ export const CombinedCouponInput = ({
     const { data: coupons } = await supabase
       .from('digital_product_coupons')
       .select('id, code')
-      .in('code', couponCodes.filter(c => c.trim() !== ''));
+      .in(
+        'code',
+        couponCodes.filter(c => c.trim() !== '')
+      );
 
     if (!coupons || coupons.length === 0) {
       toast({
@@ -104,7 +112,7 @@ export const CombinedCouponInput = ({
           variant: 'destructive',
         });
       }
-    } catch ( _error: any) {
+    } catch (_error: any) {
       logger.error('Error validating coupons', { error });
       toast({
         title: 'Erreur',
@@ -129,7 +137,7 @@ export const CombinedCouponInput = ({
     <Card className={className}>
       <CardContent className="p-4 space-y-4">
         <Label className="text-base font-semibold">Codes promo</Label>
-        
+
         {/* Champs de saisie des coupons */}
         <div className="space-y-2">
           {couponCodes.map((code, index) => (
@@ -137,7 +145,7 @@ export const CombinedCouponInput = ({
               <Input
                 placeholder="Code promo"
                 value={code}
-                onChange={(e) => handleCouponCodeChange(index, e.target.value)}
+                onChange={e => handleCouponCodeChange(index, e.target.value)}
                 className="flex-1"
               />
               {couponCodes.length > 1 && (
@@ -152,13 +160,8 @@ export const CombinedCouponInput = ({
               )}
             </div>
           ))}
-          
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleAddCouponField}
-            className="w-full"
-          >
+
+          <Button variant="outline" size="sm" onClick={handleAddCouponField} className="w-full">
             <Plus className="h-4 w-4 mr-2" />
             Ajouter un autre code
           </Button>
@@ -178,7 +181,7 @@ export const CombinedCouponInput = ({
         {appliedCoupons.length > 0 && (
           <div className="space-y-2">
             <Label className="text-sm text-muted-foreground">Coupons appliqués</Label>
-            {appliedCoupons.map((coupon) => (
+            {appliedCoupons.map(coupon => (
               <div
                 key={coupon.id}
                 className="flex items-center justify-between p-2 bg-green-50 dark:bg-green-950 rounded-lg"
@@ -226,7 +229,8 @@ export const CombinedCouponInput = ({
           <Alert>
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              {appliedCoupons.length} coupons combinés appliqués. La réduction totale est limitée à 50% par défaut.
+              {appliedCoupons.length} coupons combinés appliqués. La réduction totale est limitée à
+              50% par défaut.
             </AlertDescription>
           </Alert>
         )}
@@ -234,10 +238,3 @@ export const CombinedCouponInput = ({
     </Card>
   );
 };
-
-
-
-
-
-
-

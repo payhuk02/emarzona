@@ -20,10 +20,7 @@ import {
 /**
  * Hook pour récupérer tous les workflows d'un store
  */
-export const useEmailWorkflows = (
-  storeId: string,
-  filters?: { status?: WorkflowStatus }
-) => {
+export const useEmailWorkflows = (storeId: string, filters?: { status?: WorkflowStatus }) => {
   return useQuery({
     queryKey: ['emailWorkflows', storeId, filters],
     queryFn: () => EmailWorkflowService.getWorkflows(storeId, filters),
@@ -139,13 +136,8 @@ export const useExecuteEmailWorkflow = () => {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: ({
-      workflowId,
-      context,
-    }: {
-      workflowId: string;
-      context?: Record<string, any>;
-    }) => EmailWorkflowService.executeWorkflow(workflowId, context),
+    mutationFn: ({ workflowId, context }: { workflowId: string; context?: Record<string, any> }) =>
+      EmailWorkflowService.executeWorkflow(workflowId, context),
     onSuccess: (_, { workflowId }) => {
       queryClient.invalidateQueries({ queryKey: ['emailWorkflow', workflowId] });
       queryClient.invalidateQueries({ queryKey: ['emailWorkflows'] });
@@ -163,10 +155,3 @@ export const useExecuteEmailWorkflow = () => {
     },
   });
 };
-
-
-
-
-
-
-

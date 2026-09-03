@@ -1,7 +1,7 @@
 /**
  * Warehouse Inventory Component
  * Date: 27 Janvier 2025
- * 
+ *
  * Gestion de l'inventaire par entrepôt
  * Design responsive avec le même style que Mes Templates
  */
@@ -12,7 +12,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import {
   Select,
   SelectContent,
@@ -20,9 +27,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useWarehouses, useWarehouseInventory, WarehouseInventory as WarehouseInventoryType } from '@/hooks/physical/useWarehouses';
+import {
+  useWarehouses,
+  useWarehouseInventory,
+  WarehouseInventory as WarehouseInventoryType,
+} from '@/hooks/physical/useWarehouses';
 import { useStore } from '@/hooks/useStore';
-import { Package, Search, AlertTriangle, MapPin, X, RefreshCw, Warehouse as WarehouseIcon, DollarSign, TrendingUp } from 'lucide-react';
+import {
+  Package,
+  Search,
+  AlertTriangle,
+  MapPin,
+  X,
+  RefreshCw,
+  Warehouse as WarehouseIcon,
+  DollarSign,
+  TrendingUp,
+} from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
@@ -76,7 +97,7 @@ export default function WarehouseInventory() {
     queryClient.invalidateQueries({ queryKey: ['warehouse-inventory', selectedWarehouse] });
     toast({
       title: 'Actualisé',
-      description: 'L\'inventaire a été actualisé',
+      description: "L'inventaire a été actualisé",
     });
   };
 
@@ -107,7 +128,7 @@ export default function WarehouseInventory() {
               <SelectValue placeholder="Sélectionner un entrepôt" />
             </SelectTrigger>
             <SelectContent>
-              {warehouses?.map((warehouse) => (
+              {warehouses?.map(warehouse => (
                 <SelectItem key={warehouse.id} value={warehouse.id}>
                   {warehouse.name} ({warehouse.code})
                 </SelectItem>
@@ -129,15 +150,39 @@ export default function WarehouseInventory() {
       ) : (
         <>
           {/* Stats Cards - Responsive */}
-          <div 
+          <div
             ref={statsRef}
             className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-4 animate-in fade-in slide-in-from-bottom-4 duration-700"
           >
             {[
-              { label: 'Total Produits', value: stats.total, icon: Package, color: 'from-purple-600 to-pink-600' },
-              { label: 'Disponible', value: stats.available, icon: TrendingUp, color: 'from-green-600 to-emerald-600' },
-              { label: 'Réservé', value: stats.reserved, icon: AlertTriangle, color: 'from-yellow-600 to-orange-600' },
-              { label: 'Valeur Totale', value: new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF' }).format(stats.totalValue), icon: DollarSign, color: 'from-blue-600 to-cyan-600', isCurrency: true },
+              {
+                label: 'Total Produits',
+                value: stats.total,
+                icon: Package,
+                color: 'from-purple-600 to-pink-600',
+              },
+              {
+                label: 'Disponible',
+                value: stats.available,
+                icon: TrendingUp,
+                color: 'from-green-600 to-emerald-600',
+              },
+              {
+                label: 'Réservé',
+                value: stats.reserved,
+                icon: AlertTriangle,
+                color: 'from-yellow-600 to-orange-600',
+              },
+              {
+                label: 'Valeur Totale',
+                value: new Intl.NumberFormat('fr-FR', {
+                  style: 'currency',
+                  currency: 'XOF',
+                }).format(stats.totalValue),
+                icon: DollarSign,
+                color: 'from-blue-600 to-cyan-600',
+                isCurrency: true,
+              },
             ].map((stat, index) => {
               const Icon = stat.icon;
               return (
@@ -154,11 +199,15 @@ export default function WarehouseInventory() {
                   </CardHeader>
                   <CardContent className="p-3 sm:p-4 pt-0">
                     {stat.isCurrency ? (
-                      <div className={`text-lg sm:text-xl lg:text-2xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
+                      <div
+                        className={`text-lg sm:text-xl lg:text-2xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}
+                      >
                         {stat.value}
                       </div>
                     ) : (
-                      <div className={`text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
+                      <div
+                        className={`text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}
+                      >
                         {stat.value}
                       </div>
                     )}
@@ -178,7 +227,7 @@ export default function WarehouseInventory() {
                   <Input
                     placeholder="Rechercher un produit..."
                     value={searchInput}
-                    onChange={(e) => setSearchInput(e.target.value)}
+                    onChange={e => setSearchInput(e.target.value)}
                     className="pl-8 sm:pl-10 h-9 sm:h-10 text-xs sm:text-sm"
                     aria-label="Rechercher"
                   />
@@ -214,7 +263,8 @@ export default function WarehouseInventory() {
             <CardHeader>
               <CardTitle className="text-base sm:text-lg">Inventaire</CardTitle>
               <CardDescription className="text-xs sm:text-sm">
-                {selectedWarehouseData?.name} • {filteredInventory.length} produit{filteredInventory.length > 1 ? 's' : ''} en stock
+                {selectedWarehouseData?.name} • {filteredInventory.length} produit
+                {filteredInventory.length > 1 ? 's' : ''} en stock
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -222,7 +272,9 @@ export default function WarehouseInventory() {
                 <div className="text-center py-8 sm:py-12">
                   <Package className="h-12 w-12 sm:h-16 sm:w-16 mx-auto text-muted-foreground mb-4 animate-in zoom-in-95 duration-500" />
                   <p className="text-sm sm:text-base text-muted-foreground mb-4">
-                    {searchInput ? 'Aucun produit trouvé' : 'Aucun produit en stock dans cet entrepôt'}
+                    {searchInput
+                      ? 'Aucun produit trouvé'
+                      : 'Aucun produit en stock dans cet entrepôt'}
                   </p>
                 </div>
               ) : (
@@ -258,7 +310,7 @@ export default function WarehouseInventory() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {filteredInventory.map((item) => {
+                        {filteredInventory.map(item => {
                           const isLowStock = item.quantity_available <= item.reorder_point;
                           return (
                             <TableRow key={item.id}>
@@ -281,7 +333,9 @@ export default function WarehouseInventory() {
                                 {(item.location as any)?.location_code ? (
                                   <div className="flex items-center gap-1 text-sm">
                                     <MapPin className="h-3 w-3 flex-shrink-0" />
-                                    <span className="truncate">{(item.location as any)?.location_code}</span>
+                                    <span className="truncate">
+                                      {(item.location as any)?.location_code}
+                                    </span>
                                   </div>
                                 ) : (
                                   <span className="text-muted-foreground text-sm">Non assigné</span>
@@ -316,7 +370,9 @@ export default function WarehouseInventory() {
                                     <span className="text-xs">{item.reorder_point}</span>
                                   </div>
                                 ) : (
-                                  <span className="text-muted-foreground text-xs">{item.reorder_point}</span>
+                                  <span className="text-muted-foreground text-xs">
+                                    {item.reorder_point}
+                                  </span>
                                 )}
                               </TableCell>
                             </TableRow>
@@ -346,8 +402,8 @@ function InventoryCard({ item, isLowStock, animationDelay = 0 }: InventoryCardPr
   return (
     <Card
       className={cn(
-        "hover:shadow-lg transition-all duration-300 group overflow-hidden animate-in fade-in slide-in-from-bottom-4 touch-manipulation",
-        isLowStock && "border-destructive/50"
+        'hover:shadow-lg transition-all duration-300 group overflow-hidden animate-in fade-in slide-in-from-bottom-4 touch-manipulation',
+        isLowStock && 'border-destructive/50'
       )}
       style={{ animationDelay: `${animationDelay}ms` }}
     >
@@ -401,9 +457,7 @@ function InventoryCard({ item, isLowStock, animationDelay = 0 }: InventoryCardPr
               </Badge>
             </div>
             <div className="flex items-center gap-2">
-              <span className="font-medium text-xs sm:text-sm">
-                Total: {item.quantity_on_hand}
-              </span>
+              <span className="font-medium text-xs sm:text-sm">Total: {item.quantity_on_hand}</span>
             </div>
           </div>
           <div className="flex items-center justify-between pt-2 border-t">
@@ -428,9 +482,3 @@ function InventoryCard({ item, isLowStock, animationDelay = 0 }: InventoryCardPr
     </Card>
   );
 }
-
-
-
-
-
-

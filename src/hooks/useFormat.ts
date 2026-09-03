@@ -1,11 +1,11 @@
 /**
  * Hook useFormat - Gestion simplifiée du formatage
  * Fournit une API simple pour formater différents types de données
- * 
+ *
  * @example
  * ```tsx
  * const { formatNumber, formatCurrency, formatPercentage } = useFormat();
- * 
+ *
  * <div>{formatCurrency(1000, 'XOF')}</div>
  * <div>{formatPercentage(25)}</div>
  * ```
@@ -38,11 +38,18 @@ export interface UseFormatReturn {
   /**
    * Formate un pourcentage
    */
-  formatPercentage: (value: number | null | undefined, options?: { minimumFractionDigits?: number; maximumFractionDigits?: number }) => string;
+  formatPercentage: (
+    value: number | null | undefined,
+    options?: { minimumFractionDigits?: number; maximumFractionDigits?: number }
+  ) => string;
   /**
    * Formate une devise
    */
-  formatCurrency: (amount: number | null | undefined, currency?: string, options?: { minimumFractionDigits?: number; maximumFractionDigits?: number }) => string;
+  formatCurrency: (
+    amount: number | null | undefined,
+    currency?: string,
+    options?: { minimumFractionDigits?: number; maximumFractionDigits?: number }
+  ) => string;
   /**
    * Formate une taille de fichier
    */
@@ -50,7 +57,10 @@ export interface UseFormatReturn {
   /**
    * Formate une durée
    */
-  formatDuration: (seconds: number | null | undefined, options?: { showHours?: boolean; showSeconds?: boolean }) => string;
+  formatDuration: (
+    seconds: number | null | undefined,
+    options?: { showHours?: boolean; showSeconds?: boolean }
+  ) => string;
   /**
    * Formate avec séparateurs de milliers
    */
@@ -58,11 +68,18 @@ export interface UseFormatReturn {
   /**
    * Formate en format abrégé
    */
-  formatAbbreviated: (value: number | null | undefined, units?: { [key: string]: number }) => string;
+  formatAbbreviated: (
+    value: number | null | undefined,
+    units?: { [key: string]: number }
+  ) => string;
   /**
    * Formate avec padding
    */
-  formatWithPadding: (value: number | null | undefined, length?: number, padChar?: string) => string;
+  formatWithPadding: (
+    value: number | null | undefined,
+    length?: number,
+    padChar?: string
+  ) => string;
   /**
    * Formate en format ordinal
    */
@@ -91,14 +108,21 @@ export function useFormat(): UseFormatReturn {
   );
 
   const formatPercentage = useCallback(
-    (value: number | null | undefined, options?: { minimumFractionDigits?: number; maximumFractionDigits?: number }) => {
+    (
+      value: number | null | undefined,
+      options?: { minimumFractionDigits?: number; maximumFractionDigits?: number }
+    ) => {
       return formatPercentageUtil(value, { locale, ...options });
     },
     [locale]
   );
 
   const formatCurrency = useCallback(
-    (amount: number | null | undefined, currency: string = 'XOF', options?: { minimumFractionDigits?: number; maximumFractionDigits?: number }) => {
+    (
+      amount: number | null | undefined,
+      currency: string = 'XOF',
+      options?: { minimumFractionDigits?: number; maximumFractionDigits?: number }
+    ) => {
       return formatCurrencyUtil(amount, currency, { locale, ...options });
     },
     [locale]
@@ -112,7 +136,10 @@ export function useFormat(): UseFormatReturn {
   );
 
   const formatDuration = useCallback(
-    (seconds: number | null | undefined, options?: { showHours?: boolean; showSeconds?: boolean }) => {
+    (
+      seconds: number | null | undefined,
+      options?: { showHours?: boolean; showSeconds?: boolean }
+    ) => {
       return formatDurationUtil(seconds, options);
     },
     []
@@ -159,10 +186,3 @@ export function useFormat(): UseFormatReturn {
     formatOrdinal: formatOrdinalHook,
   };
 }
-
-
-
-
-
-
-

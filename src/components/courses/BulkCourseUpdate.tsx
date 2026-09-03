@@ -55,12 +55,7 @@ import { CourseCategory } from './CoursesList';
 /**
  * Champ modifiable pour les mises à jour groupées
  */
-export type BulkUpdateField = 
-  | 'price'
-  | 'maxStudents'
-  | 'status'
-  | 'category'
-  | 'isActive';
+export type BulkUpdateField = 'price' | 'maxStudents' | 'status' | 'category' | 'isActive';
 
 /**
  * Mode de mise à jour
@@ -96,16 +91,16 @@ export interface BulkUpdateChange {
 export interface BulkCourseUpdateProps {
   /** Cours disponibles pour mise à jour */
   courses: BulkUpdateCourse[];
-  
+
   /** Callback de mise à jour groupée */
   onBulkUpdate?: (courseIds: string[], changes: BulkUpdateChange) => void;
-  
+
   /** Chargement en cours */
   isLoading?: boolean;
-  
+
   /** Classe CSS personnalisée */
   className?: string;
-  
+
   /** Afficher l'import/export CSV */
   showCsvFeatures?: boolean;
 }
@@ -113,7 +108,7 @@ export interface BulkCourseUpdateProps {
 /**
  * Configuration des champs modifiables
  */
-const  FIELD_CONFIG: Record<
+const FIELD_CONFIG: Record<
   BulkUpdateField,
   {
     label: string;
@@ -154,7 +149,7 @@ const  FIELD_CONFIG: Record<
 /**
  * Catégories de cours
  */
-const  CATEGORY_LABELS: Record<CourseCategory, string> = {
+const CATEGORY_LABELS: Record<CourseCategory, string> = {
   development: 'Développement',
   design: 'Design',
   business: 'Business',
@@ -166,17 +161,17 @@ const  CATEGORY_LABELS: Record<CourseCategory, string> = {
 
 /**
  * BulkCourseUpdate - Mise à jour groupée de cours
- * 
+ *
  * @example
  * ```tsx
- * <BulkCourseUpdate 
+ * <BulkCourseUpdate
  *   courses={myCourses}
  *   onBulkUpdate={(ids, changes) => updateCourses(ids, changes)}
  *   showCsvFeatures={true}
  * />
  * ```
  */
-export const BulkCourseUpdate : React.FC<BulkCourseUpdateProps> = ({
+export const BulkCourseUpdate: React.FC<BulkCourseUpdateProps> = ({
   courses,
   onBulkUpdate,
   isLoading = false,
@@ -204,7 +199,7 @@ export const BulkCourseUpdate : React.FC<BulkCourseUpdateProps> = ({
     if (selectedCourses.size === courses.length) {
       setSelectedCourses(new Set());
     } else {
-      setSelectedCourses(new Set(courses.map((c) => c.id)));
+      setSelectedCourses(new Set(courses.map(c => c.id)));
     }
   };
 
@@ -213,9 +208,9 @@ export const BulkCourseUpdate : React.FC<BulkCourseUpdateProps> = ({
     if (!updateValue) return [];
 
     return courses
-      .filter((course) => selectedCourses.has(course.id))
-      .map((course) => {
-        let  newValue: any;
+      .filter(course => selectedCourses.has(course.id))
+      .map(course => {
+        let newValue: any;
 
         switch (updateField) {
           case 'price':
@@ -253,7 +248,10 @@ export const BulkCourseUpdate : React.FC<BulkCourseUpdateProps> = ({
         return {
           courseId: course.id,
           courseName: course.name,
-          currentValue: course[`current${updateField.charAt(0).toUpperCase() + updateField.slice(1)}` as keyof BulkUpdateCourse] || course.isActive,
+          currentValue:
+            course[
+              `current${updateField.charAt(0).toUpperCase() + updateField.slice(1)}` as keyof BulkUpdateCourse
+            ] || course.isActive,
           newValue,
         };
       });
@@ -265,10 +263,16 @@ export const BulkCourseUpdate : React.FC<BulkCourseUpdateProps> = ({
       return;
     }
 
-    const  change: BulkUpdateChange = {
+    const change: BulkUpdateChange = {
       field: updateField,
       mode: updateMode,
-      value: updateValue.includes('%') ? updateValue : (updateField === 'isActive' ? updateValue === 'true' : updateField === 'price' || updateField === 'maxStudents' ? parseFloat(updateValue) : updateValue),
+      value: updateValue.includes('%')
+        ? updateValue
+        : updateField === 'isActive'
+          ? updateValue === 'true'
+          : updateField === 'price' || updateField === 'maxStudents'
+            ? parseFloat(updateValue)
+            : updateValue,
     };
 
     onBulkUpdate?.(Array.from(selectedCourses), change);
@@ -281,7 +285,7 @@ export const BulkCourseUpdate : React.FC<BulkCourseUpdateProps> = ({
   const handleExportTemplate = () => {
     const csvContent = [
       ['ID Cours', 'Nom', 'Prix', 'Capacité Max', 'Statut', 'Catégorie', 'Actif'],
-      ...courses.map((course) => [
+      ...courses.map(course => [
         course.id,
         course.name,
         course.currentPrice,
@@ -291,7 +295,7 @@ export const BulkCourseUpdate : React.FC<BulkCourseUpdateProps> = ({
         course.isActive ? 'true' : 'false',
       ]),
     ]
-      .map((row) => row.join(','))
+      .map(row => row.join(','))
       .join('\n');
 
     const blob = new Blob([csvContent], { type: 'text/csv' });
@@ -305,7 +309,7 @@ export const BulkCourseUpdate : React.FC<BulkCourseUpdateProps> = ({
 
   // Import CSV (simplified)
   const handleImportCSV = () => {
-    alert('Fonctionnalité d\'import CSV - À implémenter avec votre backend');
+    alert("Fonctionnalité d'import CSV - À implémenter avec votre backend");
   };
 
   // Obtenir l'icône de changement
@@ -329,9 +333,7 @@ export const BulkCourseUpdate : React.FC<BulkCourseUpdateProps> = ({
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold">Mise à Jour Groupée de Cours</h2>
-          <p className="text-muted-foreground">
-            Modifiez plusieurs cours en une seule fois
-          </p>
+          <p className="text-muted-foreground">Modifiez plusieurs cours en une seule fois</p>
         </div>
         {showCsvFeatures && (
           <div className="flex gap-2">
@@ -384,7 +386,10 @@ export const BulkCourseUpdate : React.FC<BulkCourseUpdateProps> = ({
               {fieldConfig.supportsModes.length > 1 && (
                 <div className="space-y-2">
                   <Label>Mode</Label>
-                  <Select value={updateMode} onValueChange={(value: UpdateMode) => setUpdateMode(value)}>
+                  <Select
+                    value={updateMode}
+                    onValueChange={(value: UpdateMode) => setUpdateMode(value)}
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -442,12 +447,8 @@ export const BulkCourseUpdate : React.FC<BulkCourseUpdateProps> = ({
                   <Input
                     type="text"
                     value={updateValue}
-                    onChange={(e) => setUpdateValue(e.target.value)}
-                    placeholder={
-                      updateMode === 'adjust'
-                        ? 'Ex: +10, -5, +15%'
-                        : 'Ex: 99'
-                    }
+                    onChange={e => setUpdateValue(e.target.value)}
+                    placeholder={updateMode === 'adjust' ? 'Ex: +10, -5, +15%' : 'Ex: 99'}
                   />
                 )}
               </div>
@@ -455,20 +456,21 @@ export const BulkCourseUpdate : React.FC<BulkCourseUpdateProps> = ({
           </div>
 
           {/* Aide contextuelle */}
-          {updateMode === 'adjust' && (updateField === 'price' || updateField === 'maxStudents') && (
-            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-              <div className="flex items-start gap-2">
-                <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5" />
-                <div className="text-sm">
-                  <p className="font-medium text-blue-700">Mode Ajustement</p>
-                  <p className="text-blue-600 mt-1">
-                    Utilisez <strong>+10</strong> pour augmenter, <strong>-5</strong> pour diminuer,
-                    ou <strong>+15%</strong> pour un pourcentage
-                  </p>
+          {updateMode === 'adjust' &&
+            (updateField === 'price' || updateField === 'maxStudents') && (
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="flex items-start gap-2">
+                  <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5" />
+                  <div className="text-sm">
+                    <p className="font-medium text-blue-700">Mode Ajustement</p>
+                    <p className="text-blue-600 mt-1">
+                      Utilisez <strong>+10</strong> pour augmenter, <strong>-5</strong> pour
+                      diminuer, ou <strong>+15%</strong> pour un pourcentage
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
           {/* Aperçu */}
           {previewChanges.length > 0 && (
@@ -479,26 +481,39 @@ export const BulkCourseUpdate : React.FC<BulkCourseUpdateProps> = ({
                   Aperçu des modifications ({previewChanges.length})
                 </h4>
                 <div className="space-y-2 max-h-[200px] overflow-y-auto">
-                  {previewChanges.map((preview) => (
+                  {previewChanges.map(preview => (
                     <div
                       key={preview.courseId}
                       className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
                     >
                       <span className="text-sm font-medium">{preview.courseName}</span>
                       <div className="flex items-center gap-2">
-                        <Badge variant="outline">
-                          {String(preview.currentValue)}
-                        </Badge>
+                        <Badge variant="outline">{String(preview.currentValue)}</Badge>
                         {getChangeIcon(preview.currentValue, preview.newValue)}
                         <Badge variant="default">
                           {String(preview.newValue)}
                           {updateField === 'price' && <span> → {preview.newValue} EUR</span>}
-                          {updateField === 'price' && updateMode === 'set' && <span> → {updateValue} EUR</span>}
-                          {updateField === 'price' && updateMode === 'adjust' && <span> → {updateValue.includes('%') ? updateValue : updateValue + ' EUR'}</span>}
-                          {updateField === 'maxStudents' && updateMode === 'set' && <span> → {updateValue} étudiants</span>}
-                          {updateField === 'maxStudents' && updateMode === 'adjust' && <span> → {updateValue} étudiants</span>}
-                          {updateField === 'isActive' && <span> → {updateValue === 'true' ? 'Actif' : 'Inactif'}</span>}
-                          {updateField === 'category' && <span> → {CATEGORY_LABELS[updateValue as CourseCategory]}</span>}
+                          {updateField === 'price' && updateMode === 'set' && (
+                            <span> → {updateValue} EUR</span>
+                          )}
+                          {updateField === 'price' && updateMode === 'adjust' && (
+                            <span>
+                              {' '}
+                              → {updateValue.includes('%') ? updateValue : updateValue + ' EUR'}
+                            </span>
+                          )}
+                          {updateField === 'maxStudents' && updateMode === 'set' && (
+                            <span> → {updateValue} étudiants</span>
+                          )}
+                          {updateField === 'maxStudents' && updateMode === 'adjust' && (
+                            <span> → {updateValue} étudiants</span>
+                          )}
+                          {updateField === 'isActive' && (
+                            <span> → {updateValue === 'true' ? 'Actif' : 'Inactif'}</span>
+                          )}
+                          {updateField === 'category' && (
+                            <span> → {CATEGORY_LABELS[updateValue as CourseCategory]}</span>
+                          )}
                           {updateField === 'status' && <span> → {updateValue}</span>}
                         </Badge>
                       </div>
@@ -540,7 +555,9 @@ export const BulkCourseUpdate : React.FC<BulkCourseUpdateProps> = ({
               Sélectionner les cours ({selectedCourses.size}/{courses.length})
             </h3>
             <Button variant="outline" size="sm" onClick={toggleSelectAll}>
-              {selectedCourses.size === courses.length ? 'Tout désélectionner' : 'Tout sélectionner'}
+              {selectedCourses.size === courses.length
+                ? 'Tout désélectionner'
+                : 'Tout sélectionner'}
             </Button>
           </div>
         </div>
@@ -549,7 +566,10 @@ export const BulkCourseUpdate : React.FC<BulkCourseUpdateProps> = ({
             <TableHeader>
               <TableRow>
                 <TableHead className="w-12">
-                  <Checkbox checked={selectedCourses.size === courses.length} onCheckedChange={toggleSelectAll} />
+                  <Checkbox
+                    checked={selectedCourses.size === courses.length}
+                    onCheckedChange={toggleSelectAll}
+                  />
                 </TableHead>
                 <TableHead>Cours</TableHead>
                 <TableHead>Prix</TableHead>
@@ -560,16 +580,13 @@ export const BulkCourseUpdate : React.FC<BulkCourseUpdateProps> = ({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {courses.map((course) => (
+              {courses.map(course => (
                 <TableRow
                   key={course.id}
-                  className={cn(
-                    'cursor-pointer',
-                    selectedCourses.has(course.id) && 'bg-muted/50'
-                  )}
+                  className={cn('cursor-pointer', selectedCourses.has(course.id) && 'bg-muted/50')}
                   onClick={() => toggleCourseSelection(course.id)}
                 >
-                  <TableCell onClick={(e) => e.stopPropagation()}>
+                  <TableCell onClick={e => e.stopPropagation()}>
                     <Checkbox
                       checked={selectedCourses.has(course.id)}
                       onCheckedChange={() => toggleCourseSelection(course.id)}
@@ -619,10 +636,18 @@ export const BulkCourseUpdate : React.FC<BulkCourseUpdateProps> = ({
           <div className="my-4 p-4 bg-muted rounded-lg">
             <p className="text-sm font-medium mb-2">Résumé des modifications :</p>
             <ul className="text-sm space-y-1">
-              <li>• Champ : <strong>{fieldConfig.label}</strong></li>
-              <li>• Mode : <strong>{updateMode === 'set' ? 'Définir' : 'Ajuster'}</strong></li>
-              <li>• Valeur : <strong>{updateValue}</strong></li>
-              <li>• Cours affectés : <strong>{selectedCourses.size}</strong></li>
+              <li>
+                • Champ : <strong>{fieldConfig.label}</strong>
+              </li>
+              <li>
+                • Mode : <strong>{updateMode === 'set' ? 'Définir' : 'Ajuster'}</strong>
+              </li>
+              <li>
+                • Valeur : <strong>{updateValue}</strong>
+              </li>
+              <li>
+                • Cours affectés : <strong>{selectedCourses.size}</strong>
+              </li>
             </ul>
           </div>
           <AlertDialogFooter>
@@ -640,11 +665,3 @@ export const BulkCourseUpdate : React.FC<BulkCourseUpdateProps> = ({
 BulkCourseUpdate.displayName = 'BulkCourseUpdate';
 
 export default BulkCourseUpdate;
-
-
-
-
-
-
-
-

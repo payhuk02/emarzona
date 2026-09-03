@@ -70,7 +70,7 @@ export class DigestNotificationService {
       }
 
       // Grouper par type
-      const  byType: Record<string, number> = {};
+      const byType: Record<string, number> = {};
       for (const notif of notifications) {
         byType[notif.type] = (byType[notif.type] || 0) + 1;
       }
@@ -152,9 +152,9 @@ export class DigestNotificationService {
     sent: number;
     failed: number;
   }> {
-    let  processed= 0;
-    let  sent= 0;
-    let  failed= 0;
+    let processed = 0;
+    let sent = 0;
+    let failed = 0;
 
     try {
       // Récupérer les utilisateurs avec préférences de digest
@@ -231,7 +231,7 @@ export class DigestNotificationService {
    */
   private buildDigestMessage(digest: DigestContent): string {
     const periodText = digest.period === 'daily' ? "aujourd'hui" : 'cette semaine';
-    let  message= `Vous avez ${digest.summary.total} notification${digest.summary.total > 1 ? 's' : ''} ${periodText}.\n\n`;
+    let message = `Vous avez ${digest.summary.total} notification${digest.summary.total > 1 ? 's' : ''} ${periodText}.\n\n`;
 
     // Lister par type
     for (const [type, count] of Object.entries(digest.summary.byType)) {
@@ -248,7 +248,7 @@ export class DigestNotificationService {
    * Obtenir le label d'un type de notification
    */
   private getTypeLabel(type: string): string {
-    const  labels: Record<string, string> = {
+    const labels: Record<string, string> = {
       order_payment_received: 'Paiements reçus',
       order_payment_failed: 'Paiements échoués',
       product_review_received: 'Avis produits',
@@ -263,9 +263,3 @@ export class DigestNotificationService {
 
 // Instance singleton
 export const digestNotificationService = new DigestNotificationService();
-
-
-
-
-
-

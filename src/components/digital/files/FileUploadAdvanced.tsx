@@ -18,15 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Upload,
-  X,
-  FileText,
-  CheckCircle2,
-  AlertCircle,
-  Loader2,
-  Compress,
-} from 'lucide-react';
+import { Upload, X, FileText, CheckCircle2, AlertCircle, Loader2, Compress } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { uploadToSupabaseStorage } from '@/utils/uploadToSupabase';
 import { logger } from '@/lib/logger';
@@ -89,7 +81,7 @@ export const FileUploadAdvanced = ({
     const buffer = await file.arrayBuffer();
     const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
   };
 
   const handleUpload = async () => {
@@ -117,7 +109,7 @@ export const FileUploadAdvanced = ({
     try {
       // 🆕 Traitement avancé du fichier : validation, compression, scan antivirus
       const { processDigitalFile } = await import('@/lib/files/digital-file-processing');
-      
+
       setUploadProgress(10);
       const processingResult = await processDigitalFile(selectedFile, {
         compress: true,
@@ -136,7 +128,7 @@ export const FileUploadAdvanced = ({
 
       // Utiliser le fichier traité (compressé si applicable)
       const fileToUpload = processingResult.processedFile;
-      
+
       // Afficher les informations de compression si applicable
       if (processingResult.compressionRatio && processingResult.compressionRatio > 0) {
         toast({
@@ -156,15 +148,15 @@ export const FileUploadAdvanced = ({
       const uploadResult = await uploadToSupabaseStorage(fileToUpload, {
         bucket: 'digital-products',
         path: digitalProductId,
-        onProgress: (progress) => {
+        onProgress: progress => {
           // Ajuster la progression (40% à 90%)
-          setUploadProgress(40 + (progress * 0.5));
+          setUploadProgress(40 + progress * 0.5);
         },
         maxSizeBytes: 500 * 1024 * 1024, // 500 MB
       });
 
       if (!uploadResult.success || !uploadResult.url) {
-        throw new Error(uploadResult.error || 'Erreur lors de l\'upload');
+        throw new Error(uploadResult.error || "Erreur lors de l'upload");
       }
 
       // Créer l'entrée dans digital_product_files
@@ -227,11 +219,11 @@ export const FileUploadAdvanced = ({
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
-    } catch ( _error: any) {
+    } catch (_error: any) {
       logger.error('Error uploading file', { error });
       toast({
-        title: 'Erreur d\'upload',
-        description: error.message || 'Impossible d\'uploader le fichier',
+        title: "Erreur d'upload",
+        description: error.message || "Impossible d'uploader le fichier",
         variant: 'destructive',
       });
     } finally {
@@ -247,9 +239,7 @@ export const FileUploadAdvanced = ({
           <Upload className="h-5 w-5" />
           Upload de fichier avancé
         </CardTitle>
-        <CardDescription>
-          Uploadez un fichier avec compression et métadonnées
-        </CardDescription>
+        <CardDescription>Uploadez un fichier avec compression et métadonnées</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Sélection de fichier */}
@@ -301,7 +291,7 @@ export const FileUploadAdvanced = ({
           <Input
             id="name"
             value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            onChange={e => setFormData({ ...formData, name: e.target.value })}
             placeholder="Nom du fichier"
             required
             disabled={isUploading}
@@ -313,7 +303,7 @@ export const FileUploadAdvanced = ({
             <Label htmlFor="category">Catégorie</Label>
             <Select
               value={formData.category}
-              onValueChange={(value) => setFormData({ ...formData, category: value })}
+              onValueChange={value => setFormData({ ...formData, category: value })}
               disabled={isUploading}
             >
               <SelectTrigger id="category">
@@ -338,7 +328,7 @@ export const FileUploadAdvanced = ({
           <Textarea
             id="description"
             value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            onChange={e => setFormData({ ...formData, description: e.target.value })}
             placeholder="Description du fichier"
             rows={3}
             disabled={isUploading}
@@ -356,9 +346,7 @@ export const FileUploadAdvanced = ({
             </div>
             <Switch
               checked={formData.is_main}
-              onCheckedChange={(checked) =>
-                setFormData({ ...formData, is_main: checked })
-              }
+              onCheckedChange={checked => setFormData({ ...formData, is_main: checked })}
               disabled={isUploading}
             />
           </div>
@@ -366,15 +354,11 @@ export const FileUploadAdvanced = ({
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
               <Label>Fichier de prévisualisation</Label>
-              <div className="text-sm text-muted-foreground">
-                Accessible sans achat
-              </div>
+              <div className="text-sm text-muted-foreground">Accessible sans achat</div>
             </div>
             <Switch
               checked={formData.is_preview}
-              onCheckedChange={(checked) =>
-                setFormData({ ...formData, is_preview: checked })
-              }
+              onCheckedChange={checked => setFormData({ ...formData, is_preview: checked })}
               disabled={isUploading}
             />
           </div>
@@ -388,7 +372,7 @@ export const FileUploadAdvanced = ({
             </div>
             <Switch
               checked={formData.compression_enabled}
-              onCheckedChange={(checked) =>
+              onCheckedChange={checked =>
                 setFormData({ ...formData, compression_enabled: checked })
               }
               disabled={isUploading}
@@ -432,10 +416,3 @@ export const FileUploadAdvanced = ({
     </Card>
   );
 };
-
-
-
-
-
-
-

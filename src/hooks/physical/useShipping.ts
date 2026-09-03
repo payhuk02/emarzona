@@ -1,15 +1,17 @@
 /**
  * Shipping Management Hooks
  * Date: 28 octobre 2025
- * 
+ *
  * Hooks pour zones et tarifs de livraison
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
-const SHIPPING_ZONE_FIELDS = 'id, store_id, name, countries, states, zip_codes, is_active, priority, created_at, updated_at';
-const SHIPPING_RATE_FIELDS = 'id, shipping_zone_id, name, description, rate_type, base_price, price_per_kg, min_weight, max_weight, min_order_amount, max_order_amount, estimated_days_min, estimated_days_max, is_active, priority, created_at, updated_at';
+const SHIPPING_ZONE_FIELDS =
+  'id, store_id, name, countries, states, zip_codes, is_active, priority, created_at, updated_at';
+const SHIPPING_RATE_FIELDS =
+  'id, shipping_zone_id, name, description, rate_type, base_price, price_per_kg, min_weight, max_weight, min_order_amount, max_order_amount, estimated_days_min, estimated_days_max, is_active, priority, created_at, updated_at';
 
 // =====================================================
 // TYPES
@@ -91,10 +93,12 @@ export const useShippingZone = (zoneId: string) => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('shipping_zones')
-        .select(`
+        .select(
+          `
           ${SHIPPING_ZONE_FIELDS},
           rates:shipping_rates (${SHIPPING_RATE_FIELDS})
-        `)
+        `
+        )
         .eq('id', zoneId)
         .single();
 
@@ -164,7 +168,7 @@ export const useCalculateShipping = (storeId: string) => {
           return false;
         }
         if (zipCode && zone.zip_codes.length > 0) {
-          const matches = zone.zip_codes.some((pattern) => {
+          const matches = zone.zip_codes.some(pattern => {
             // Simple pattern matching (can be enhanced)
             return zipCode.startsWith(pattern);
           });
@@ -190,10 +194,10 @@ export const useCalculateShipping = (storeId: string) => {
       }
 
       // 3. Calculate shipping cost for each rate
-      const  calculations: ShippingCalculation[] = rates
+      const calculations: ShippingCalculation[] = rates
         .map((rate: ShippingRate) => {
-          let  calculatedPrice= rate.base_price;
-          let  isEligible= true;
+          let calculatedPrice = rate.base_price;
+          let isEligible = true;
 
           switch (rate.rate_type) {
             case 'free':
@@ -213,10 +217,8 @@ export const useCalculateShipping = (storeId: string) => {
               break;
 
             case 'price_based':
-              if (rate.min_order_amount && orderAmount < rate.min_order_amount)
-                isEligible = false;
-              if (rate.max_order_amount && orderAmount > rate.max_order_amount)
-                isEligible = false;
+              if (rate.min_order_amount && orderAmount < rate.min_order_amount) isEligible = false;
+              if (rate.max_order_amount && orderAmount > rate.max_order_amount) isEligible = false;
               break;
           }
 
@@ -251,11 +253,7 @@ export const useCreateShippingZone = () => {
 
   return useMutation({
     mutationFn: async (zone: Omit<ShippingZone, 'id' | 'created_at' | 'updated_at'>) => {
-      const { data, error } = await supabase
-        .from('shipping_zones')
-        .insert(zone)
-        .select()
-        .single();
+      const { data, error } = await supabase.from('shipping_zones').insert(zone).select().single();
 
       if (error) throw error;
       return data;
@@ -273,13 +271,7 @@ export const useUpdateShippingZone = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({
-      id,
-      data,
-    }: {
-      id: string;
-      data: Partial<ShippingZone>;
-    }) => {
+    mutationFn: async ({ id, data }: { id: string; data: Partial<ShippingZone> }) => {
       const { data: updated, error } = await supabase
         .from('shipping_zones')
         .update(data)
@@ -290,7 +282,7 @@ export const useUpdateShippingZone = () => {
       if (error) throw error;
       return updated;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['shipping-zone', data.id] });
       queryClient.invalidateQueries({ queryKey: ['shipping-zones', data.store_id] });
     },
@@ -323,11 +315,7 @@ export const useCreateShippingRate = () => {
 
   return useMutation({
     mutationFn: async (rate: Omit<ShippingRate, 'id' | 'created_at' | 'updated_at'>) => {
-      const { data, error } = await supabase
-        .from('shipping_rates')
-        .insert(rate)
-        .select()
-        .single();
+      const { data, error } = await supabase.from('shipping_rates').insert(rate).select().single();
 
       if (error) throw error;
       return data;
@@ -347,13 +335,7 @@ export const useUpdateShippingRate = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({
-      id,
-      data,
-    }: {
-      id: string;
-      data: Partial<ShippingRate>;
-    }) => {
+    mutationFn: async ({ id, data }: { id: string; data: Partial<ShippingRate> }) => {
       const { data: updated, error } = await supabase
         .from('shipping_rates')
         .update(data)
@@ -364,7 +346,7 @@ export const useUpdateShippingRate = () => {
       if (error) throw error;
       return updated;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({
         queryKey: ['shipping-rates', data.shipping_zone_id],
       });
@@ -408,7 +390,7 @@ export const useToggleShippingZoneStatus = () => {
       if (error) throw error;
       return data;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['shipping-zones', data.store_id] });
     },
   });
@@ -432,17 +414,10 @@ export const useToggleShippingRateStatus = () => {
       if (error) throw error;
       return data;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({
         queryKey: ['shipping-rates', data.shipping_zone_id],
       });
     },
   });
 };
-
-
-
-
-
-
-

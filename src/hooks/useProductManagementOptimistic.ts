@@ -1,7 +1,7 @@
 /**
  * useProductManagementOptimistic Hook
  * Date: 28 Janvier 2025
- * 
+ *
  * Hook gestion produits avec optimistic updates
  */
 
@@ -56,15 +56,15 @@ export function useUpdateProductOptimistic(storeId: string) {
       const previousProducts = queryClient.getQueryData<Product[]>(['products', storeId]);
 
       // Optimistic update pour le produit individuel
-      queryClient.setQueryData<Product>(['product', productId], (oldData) => {
+      queryClient.setQueryData<Product>(['product', productId], oldData => {
         if (!oldData) return oldData;
         return { ...oldData, ...updates };
       });
 
       // Optimistic update pour la liste
-      queryClient.setQueryData<Product[]>(['products', storeId], (oldData) => {
+      queryClient.setQueryData<Product[]>(['products', storeId], oldData => {
         if (!oldData) return oldData;
-        return oldData.map((product) =>
+        return oldData.map(product =>
           product.id === productId ? { ...product, ...updates } : product
         );
       });
@@ -90,11 +90,9 @@ export function useUpdateProductOptimistic(storeId: string) {
     onSuccess: (data, variables) => {
       // Mettre à jour avec les vraies données
       queryClient.setQueryData(['product', variables.productId], data);
-      queryClient.setQueryData<Product[]>(['products', storeId], (oldData) => {
+      queryClient.setQueryData<Product[]>(['products', storeId], oldData => {
         if (!oldData) return [data];
-        return oldData.map((product) =>
-          product.id === variables.productId ? data : product
-        );
+        return oldData.map(product => (product.id === variables.productId ? data : product));
       });
 
       toast({
@@ -107,7 +105,9 @@ export function useUpdateProductOptimistic(storeId: string) {
       if (!error && data) {
         invalidateProductCache(queryClient, variables.productId, EntityAction.UPDATE, storeId);
         // Précharger les données liées
-        await prefetchRelatedData(queryClient, EntityType.PRODUCT, variables.productId, { storeId });
+        await prefetchRelatedData(queryClient, EntityType.PRODUCT, variables.productId, {
+          storeId,
+        });
       }
     },
   });
@@ -134,7 +134,7 @@ export function useDeleteProductOptimistic(storeId: string) {
       if (error) throw error;
       return productId;
     },
-    onMutate: async (productId) => {
+    onMutate: async productId => {
       // Annuler les requêtes en cours
       await queryClient.cancelQueries({ queryKey: ['products', storeId] });
       await queryClient.cancelQueries({ queryKey: ['product', productId] });
@@ -144,9 +144,9 @@ export function useDeleteProductOptimistic(storeId: string) {
       const previousProducts = queryClient.getQueryData<Product[]>(['products', storeId]);
 
       // Optimistic update : supprimer de la liste
-      queryClient.setQueryData<Product[]>(['products', storeId], (oldData) => {
+      queryClient.setQueryData<Product[]>(['products', storeId], oldData => {
         if (!oldData) return [];
-        return oldData.filter((product) => product.id !== productId);
+        return oldData.filter(product => product.id !== productId);
       });
 
       // Supprimer le produit individuel
@@ -186,10 +186,3 @@ export function useDeleteProductOptimistic(storeId: string) {
     },
   });
 }
-
-
-
-
-
-
-

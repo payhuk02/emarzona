@@ -27,9 +27,9 @@ interface VideoPlayerProps {
   currentTime?: number; // Temps actuel pour synchronisation externe
 }
 
-export const VideoPlayer = ({ 
-  videoType, 
-  videoUrl, 
+export const VideoPlayer = ({
+  videoType,
+  videoUrl,
   title,
   productId,
   enrollmentId,
@@ -37,7 +37,7 @@ export const VideoPlayer = ({
   onEnded,
   onTimeUpdate,
   onSeekTo,
-  currentTime
+  currentTime,
 }: VideoPlayerProps) => {
   // Si on veut utiliser le player avancé, on peut l'importer ici
   // Pour l'instant, on garde le player de base
@@ -46,11 +46,11 @@ export const VideoPlayer = ({
   const saveIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const startTimeRef = useRef<number>(Date.now());
   const { user } = useAuth();
-  
+
   // Hooks pour la progression
   const { data: progress } = useLessonProgress(enrollmentId, lessonId);
   const updatePosition = useUpdateVideoPosition();
-  
+
   // Hooks pour le tracking avancé (toujours appelé, désactivé si pas de productId)
   const videoTracking = useVideoTracking({
     productId: productId || '',
@@ -59,7 +59,7 @@ export const VideoPlayer = ({
     sessionId: getSessionId(),
     enabled: !!productId,
   });
-  
+
   const watchTime = useWatchTime(enrollmentId, lessonId);
 
   // Restaurer la position sauvegardée au chargement
@@ -87,7 +87,7 @@ export const VideoPlayer = ({
       if (videoRef.current && !videoRef.current.paused) {
         const currentTime = videoRef.current.currentTime;
         const watchTime = Math.floor((Date.now() - startTimeRef.current) / 1000);
-        
+
         updatePosition.mutate({
           enrollmentId,
           lessonId,
@@ -112,12 +112,12 @@ export const VideoPlayer = ({
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
     const match = url.match(regExp);
     const videoId = match && match[2].length === 11 ? match[2] : null;
-    
+
     if (!videoId) {
       setError('URL YouTube invalide');
       return '';
     }
-    
+
     return `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`;
   };
 
@@ -126,12 +126,12 @@ export const VideoPlayer = ({
     const regExp = /vimeo\.com\/(\d+)/;
     const match = url.match(regExp);
     const videoId = match ? match[1] : null;
-    
+
     if (!videoId) {
       setError('URL Vimeo invalide');
       return '';
     }
-    
+
     return `https://player.vimeo.com/video/${videoId}`;
   };
 
@@ -139,37 +139,37 @@ export const VideoPlayer = ({
   const handleVideoPlay = () => {
     const video = videoRef.current;
     if (!video) return;
-    
+
     // Tracker l'événement play
     if (videoTracking) {
       videoTracking.handlePlay(video.currentTime, video.duration);
     }
-    
+
     // Démarrer le chrono de temps de visionnage
     watchTime.startWatching();
   };
-  
+
   const handleVideoPause = () => {
     const video = videoRef.current;
     if (!video) return;
-    
+
     // Tracker l'événement pause
     if (videoTracking) {
       videoTracking.handlePause(video.currentTime, video.duration);
     }
-    
+
     // Arrêter le chrono
     watchTime.stopWatching();
   };
 
   const handleVideoTimeUpdate = (e: React.SyntheticEvent<HTMLVideoElement>) => {
     const video = e.currentTarget;
-    
+
     // Callback externe
     if (onTimeUpdate) {
       onTimeUpdate(video.currentTime);
     }
-    
+
     // Tracker les milestones (25%, 50%, 75%, 100%)
     if (videoTracking) {
       videoTracking.handleProgress(video.currentTime, video.duration);
@@ -195,7 +195,9 @@ export const VideoPlayer = ({
 
   return (
     <Card className="overflow-hidden bg-black">
-      <div className="relative w-full" style={{ paddingTop: '56.25%' }}> {/* Ratio 16:9 */}
+      <div className="relative w-full" style={{ paddingTop: '56.25%' }}>
+        {' '}
+        {/* Ratio 16:9 */}
         <div className="absolute inset-0">
           {error ? (
             <Alert variant="destructive" className="m-4">
@@ -275,10 +277,3 @@ export const VideoPlayer = ({
     </Card>
   );
 };
-
-
-
-
-
-
-

@@ -13,7 +13,7 @@ interface StoreLocationSectionProps {
   store: Store | null;
 }
 
-const  DAYS_LABELS: Record<string, string> = {
+const DAYS_LABELS: Record<string, string> = {
   monday: 'Lundi',
   tuesday: 'Mardi',
   wednesday: 'Mercredi',
@@ -23,9 +23,17 @@ const  DAYS_LABELS: Record<string, string> = {
   sunday: 'Dimanche',
 };
 
-const DAYS_ORDER = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as const;
+const DAYS_ORDER = [
+  'monday',
+  'tuesday',
+  'wednesday',
+  'thursday',
+  'friday',
+  'saturday',
+  'sunday',
+] as const;
 
-export const StoreLocationSection : React.FC<StoreLocationSectionProps> = ({ store }) => {
+export const StoreLocationSection: React.FC<StoreLocationSectionProps> = ({ store }) => {
   const theme = useStoreTheme(store);
 
   if (!store) return null;
@@ -37,17 +45,16 @@ export const StoreLocationSection : React.FC<StoreLocationSectionProps> = ({ sto
   // Vérifier s'il y a des horaires spéciaux aujourd'hui ou à venir
   const today = new Date();
   const todayStr = today.toISOString().split('T')[0];
-  const specialHoursToday = openingHours?.special_hours?.find(
-    (sh) => sh.date === todayStr
-  );
-  const upcomingSpecialHours = openingHours?.special_hours
-    ?.filter((sh) => sh.date >= todayStr && sh.date !== todayStr)
-    .sort((a, b) => a.date.localeCompare(b.date))
-    .slice(0, 3) || [];
+  const specialHoursToday = openingHours?.special_hours?.find(sh => sh.date === todayStr);
+  const upcomingSpecialHours =
+    openingHours?.special_hours
+      ?.filter(sh => sh.date >= todayStr && sh.date !== todayStr)
+      .sort((a, b) => a.date.localeCompare(b.date))
+      .slice(0, 3) || [];
 
   // Formater l'adresse complète
   const formatAddress = () => {
-    const  parts: string[] = [];
+    const parts: string[] = [];
     if (store.address_line1) parts.push(store.address_line1);
     if (store.address_line2) parts.push(store.address_line2);
     if (store.city) parts.push(store.city);
@@ -79,7 +86,7 @@ export const StoreLocationSection : React.FC<StoreLocationSectionProps> = ({ sto
     // Vérifier les horaires réguliers
     const dayHours = openingHours[currentDay];
     if (dayHours.closed) {
-      return { isOpen: false, reason: 'Fermé aujourd\'hui' };
+      return { isOpen: false, reason: "Fermé aujourd'hui" };
     }
     if (currentTime >= dayHours.open && currentTime <= dayHours.close) {
       return { isOpen: true, reason: `Ouvert jusqu'à ${dayHours.close}` };
@@ -119,8 +126,12 @@ export const StoreLocationSection : React.FC<StoreLocationSectionProps> = ({ sto
                   rel="noopener noreferrer"
                   className="text-xs sm:text-sm inline-flex items-center gap-1 hover:underline"
                   style={{ color: theme.linkColor }}
-                  onMouseEnter={(e) => { e.currentTarget.style.color = theme.linkHoverColor; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.color = theme.linkColor; }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.color = theme.linkHoverColor;
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.color = theme.linkColor;
+                  }}
                 >
                   <MapPin className="h-3 w-3" />
                   Voir sur Google Maps
@@ -164,7 +175,9 @@ export const StoreLocationSection : React.FC<StoreLocationSectionProps> = ({ sto
                   <div
                     className="h-2 w-2 rounded-full"
                     style={{
-                      backgroundColor: currentStatus.isOpen ? theme.primaryColor : theme.textSecondaryColor,
+                      backgroundColor: currentStatus.isOpen
+                        ? theme.primaryColor
+                        : theme.textSecondaryColor,
                     }}
                   />
                   <span className="text-sm font-medium" style={{ color: theme.textColor }}>
@@ -185,7 +198,7 @@ export const StoreLocationSection : React.FC<StoreLocationSectionProps> = ({ sto
                 Horaires réguliers
               </h4>
               <div className="space-y-1">
-                {DAYS_ORDER.map((day) => {
+                {DAYS_ORDER.map(day => {
                   const dayHours = openingHours[day];
                   return (
                     <div
@@ -268,9 +281,7 @@ export const StoreLocationSection : React.FC<StoreLocationSectionProps> = ({ sto
                           {sh.open} - {sh.close}
                         </p>
                       )}
-                      {sh.closed && (
-                        <p className="text-sm mt-2 text-muted-foreground">Fermé</p>
-                      )}
+                      {sh.closed && <p className="text-sm mt-2 text-muted-foreground">Fermé</p>}
                     </div>
                   ))}
                 </div>
@@ -282,12 +293,3 @@ export const StoreLocationSection : React.FC<StoreLocationSectionProps> = ({ sto
     </div>
   );
 };
-
-
-
-
-
-
-
-
-

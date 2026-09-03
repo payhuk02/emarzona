@@ -1,7 +1,7 @@
 /**
  * Service Subscriptions Hook
  * Date: 30 Janvier 2025
- * 
+ *
  * Hook pour gérer les abonnements de services
  */
 
@@ -62,7 +62,8 @@ export const useCustomerServiceSubscriptions = (customerId?: string) => {
 
       const { data, error } = await supabase
         .from('service_subscriptions')
-        .select(`
+        .select(
+          `
           *,
           service_product:service_products!inner (
             id,
@@ -72,7 +73,8 @@ export const useCustomerServiceSubscriptions = (customerId?: string) => {
               image_url
             )
           )
-        `)
+        `
+        )
         .eq('customer_id', customerId)
         .order('created_at', { ascending: false });
 
@@ -98,14 +100,16 @@ export const useStoreServiceSubscriptions = (storeId?: string) => {
 
       const { data, error } = await supabase
         .from('service_subscriptions')
-        .select(`
+        .select(
+          `
           *,
           customer:customers!inner (
             id,
             name,
             email
           )
-        `)
+        `
+        )
         .eq('store_id', storeId)
         .order('created_at', { ascending: false });
 
@@ -146,19 +150,19 @@ export const useCreateServiceSubscription = () => {
 
       return data as ServiceSubscription;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['customer-service-subscriptions'] });
       queryClient.invalidateQueries({ queryKey: ['store-service-subscriptions'] });
       toast({
         title: '✅ Abonnement créé',
-        description: 'L\'abonnement a été créé avec succès',
+        description: "L'abonnement a été créé avec succès",
       });
     },
     onError: (error: any) => {
       logger.error('Error in useCreateServiceSubscription', { error });
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de créer l\'abonnement',
+        description: error.message || "Impossible de créer l'abonnement",
         variant: 'destructive',
       });
     },
@@ -206,23 +210,16 @@ export const useCancelServiceSubscription = () => {
       queryClient.invalidateQueries({ queryKey: ['store-service-subscriptions'] });
       toast({
         title: '✅ Abonnement annulé',
-        description: 'L\'abonnement a été annulé avec succès',
+        description: "L'abonnement a été annulé avec succès",
       });
     },
     onError: (error: any) => {
       logger.error('Error in useCancelServiceSubscription', { error });
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible d\'annuler l\'abonnement',
+        description: error.message || "Impossible d'annuler l'abonnement",
         variant: 'destructive',
       });
     },
   });
 };
-
-
-
-
-
-
-

@@ -12,12 +12,8 @@ export const FOCUSABLE_SELECTOR =
 /**
  * Obtient tous les éléments focusables dans un conteneur
  */
-export function getFocusableElements(
-  container: HTMLElement | Document = document
-): HTMLElement[] {
-  return Array.from(
-    container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)
-  ).filter((el) => {
+export function getFocusableElements(container: HTMLElement | Document = document): HTMLElement[] {
+  return Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(el => {
     // Filtrer les éléments cachés
     const style = window.getComputedStyle(el);
     return (
@@ -43,9 +39,7 @@ export function getFirstFocusable(
 /**
  * Obtient le dernier élément focusable
  */
-export function getLastFocusable(
-  container: HTMLElement | Document = document
-): HTMLElement | null {
+export function getLastFocusable(container: HTMLElement | Document = document): HTMLElement | null {
   const elements = getFocusableElements(container);
   return elements[elements.length - 1] || null;
 }
@@ -53,9 +47,7 @@ export function getLastFocusable(
 /**
  * Focus le premier élément focusable
  */
-export function focusFirst(
-  container: HTMLElement | Document = document
-): boolean {
+export function focusFirst(container: HTMLElement | Document = document): boolean {
   const first = getFirstFocusable(container);
   if (first) {
     first.focus();
@@ -67,9 +59,7 @@ export function focusFirst(
 /**
  * Focus le dernier élément focusable
  */
-export function focusLast(
-  container: HTMLElement | Document = document
-): boolean {
+export function focusLast(container: HTMLElement | Document = document): boolean {
   const last = getLastFocusable(container);
   if (last) {
     last.focus();
@@ -81,13 +71,9 @@ export function focusLast(
 /**
  * Focus un élément par son sélecteur ou référence
  */
-export function focusElement(
-  element: HTMLElement | string
-): boolean {
+export function focusElement(element: HTMLElement | string): boolean {
   const targetElement =
-    typeof element === 'string'
-      ? document.querySelector<HTMLElement>(element)
-      : element;
+    typeof element === 'string' ? document.querySelector<HTMLElement>(element) : element;
 
   if (targetElement) {
     targetElement.focus();
@@ -114,11 +100,7 @@ export function isFocusable(element: HTMLElement): boolean {
   }
 
   const style = window.getComputedStyle(element);
-  if (
-    style.display === 'none' ||
-    style.visibility === 'hidden' ||
-    style.opacity === '0'
-  ) {
+  if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') {
     return false;
   }
 
@@ -175,9 +157,7 @@ export function restoreFocus(element: HTMLElement | null): void {
  * Sauvegarde l'élément actuellement focusé
  */
 export function saveActiveElement(): HTMLElement | null {
-  return document.activeElement instanceof HTMLElement
-    ? document.activeElement
-    : null;
+  return document.activeElement instanceof HTMLElement ? document.activeElement : null;
 }
 
 /**
@@ -247,10 +227,3 @@ export function announceToScreenReader(
     document.body.removeChild(announcement);
   }, 1000);
 }
-
-
-
-
-
-
-

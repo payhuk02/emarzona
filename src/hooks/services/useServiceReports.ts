@@ -1,6 +1,6 @@
 /**
  * useServiceReports Hook
- * 
+ *
  * Generate various reports: bookings, revenue, staff performance, capacity
  * Date: 29 Octobre 2025
  */
@@ -90,35 +90,42 @@ export const useBookingReport = (storeId: string, dateRange: ReportDateRange) =>
 
       // Calculate metrics
       const totalBookings = bookings?.length || 0;
-      const confirmedBookings = bookings?.filter((b) => b.status === 'confirmed').length || 0;
-      const completedBookings = bookings?.filter((b) => b.status === 'completed').length || 0;
-      const cancelledBookings = bookings?.filter((b) => b.status === 'cancelled').length || 0;
-      const noShowBookings = bookings?.filter((b) => b.status === 'no_show').length || 0;
+      const confirmedBookings = bookings?.filter(b => b.status === 'confirmed').length || 0;
+      const completedBookings = bookings?.filter(b => b.status === 'completed').length || 0;
+      const cancelledBookings = bookings?.filter(b => b.status === 'cancelled').length || 0;
+      const noShowBookings = bookings?.filter(b => b.status === 'no_show').length || 0;
 
       // Bookings by status
-      const bookingsByStatus = (bookings || []).reduce((acc, booking) => {
-        acc[booking.status] = (acc[booking.status] || 0) + 1;
-        return acc;
-      }, {} as Record<string, number>);
+      const bookingsByStatus = (bookings || []).reduce(
+        (acc, booking) => {
+          acc[booking.status] = (acc[booking.status] || 0) + 1;
+          return acc;
+        },
+        {} as Record<string, number>
+      );
 
       // Bookings by day
-      const bookingsByDay = (bookings || []).reduce((acc, booking) => {
-        const date = new Date(booking.scheduled_date).toISOString().split('T')[0];
-        const existing = acc.find((item) => item.date === date);
-        if (existing) {
-          existing.count++;
-        } else {
-          acc.push({ date, count: 1 });
-        }
-        return acc;
-      }, [] as { date: string; count: number }[]);
+      const bookingsByDay = (bookings || []).reduce(
+        (acc, booking) => {
+          const date = new Date(booking.scheduled_date).toISOString().split('T')[0];
+          const existing = acc.find(item => item.date === date);
+          if (existing) {
+            existing.count++;
+          } else {
+            acc.push({ date, count: 1 });
+          }
+          return acc;
+        },
+        [] as { date: string; count: number }[]
+      );
 
       bookingsByDay.sort((a, b) => a.date.localeCompare(b.date));
 
       // Peak day
-      const peakDay = bookingsByDay.length > 0
-        ? bookingsByDay.reduce((max, day) => (day.count > max.count ? day : max))
-        : null;
+      const peakDay =
+        bookingsByDay.length > 0
+          ? bookingsByDay.reduce((max, day) => (day.count > max.count ? day : max))
+          : null;
 
       // Average bookings per day
       const days = Math.ceil(
@@ -160,66 +167,73 @@ export const useRevenueReport = (storeId: string, dateRange: ReportDateRange) =>
       if (error) throw error;
 
       // Calculate total revenue
-      const totalRevenue = (bookings || []).reduce(
-        (sum, b) => sum + (b.service?.price || 0),
-        0
-      );
+      const totalRevenue = (bookings || []).reduce((sum, b) => sum + (b.service?.price || 0), 0);
 
       const paidRevenue = (bookings || [])
-        .filter((b) => b.status === 'completed')
+        .filter(b => b.status === 'completed')
         .reduce((sum, b) => sum + (b.amount_paid || b.service?.price || 0), 0);
 
       const pendingRevenue = (bookings || [])
-        .filter((b) => ['pending', 'confirmed', 'in_progress'].includes(b.status))
+        .filter(b => ['pending', 'confirmed', 'in_progress'].includes(b.status))
         .reduce((sum, b) => sum + (b.service?.price || 0), 0);
 
       const refundedRevenue = (bookings || [])
-        .filter((b) => b.status === 'refunded')
+        .filter(b => b.status === 'refunded')
         .reduce((sum, b) => sum + (b.amount_paid || b.service?.price || 0), 0);
 
       // Revenue by day
-      const revenueByDay = (bookings || []).reduce((acc, booking) => {
-        const date = new Date(booking.scheduled_date).toISOString().split('T')[0];
-        const amount = booking.service?.price || 0;
-        const existing = acc.find((item) => item.date === date);
-        if (existing) {
-          existing.amount += amount;
-        } else {
-          acc.push({ date, amount });
-        }
-        return acc;
-      }, [] as { date: string; amount: number }[]);
+      const revenueByDay = (bookings || []).reduce(
+        (acc, booking) => {
+          const date = new Date(booking.scheduled_date).toISOString().split('T')[0];
+          const amount = booking.service?.price || 0;
+          const existing = acc.find(item => item.date === date);
+          if (existing) {
+            existing.amount += amount;
+          } else {
+            acc.push({ date, amount });
+          }
+          return acc;
+        },
+        [] as { date: string; amount: number }[]
+      );
 
       revenueByDay.sort((a, b) => a.date.localeCompare(b.date));
 
       // Revenue by service
-      const revenueByService = (bookings || []).reduce((acc, booking) => {
-        if (!booking.service) return acc;
-        
-        const existing = acc.find((item) => item.serviceId === booking.service_id);
-        if (existing) {
-          existing.amount += booking.service.price || 0;
-        } else {
-          acc.push({
-            serviceId: booking.service_id,
-            serviceName: booking.service.name,
-            amount: booking.service.price || 0,
-          });
-        }
-        return acc;
-      }, [] as { serviceId: string; serviceName: string; amount: number }[]);
+      const revenueByService = (bookings || []).reduce(
+        (acc, booking) => {
+          if (!booking.service) return acc;
+
+          const existing = acc.find(item => item.serviceId === booking.service_id);
+          if (existing) {
+            existing.amount += booking.service.price || 0;
+          } else {
+            acc.push({
+              serviceId: booking.service_id,
+              serviceName: booking.service.name,
+              amount: booking.service.price || 0,
+            });
+          }
+          return acc;
+        },
+        [] as { serviceId: string; serviceName: string; amount: number }[]
+      );
 
       revenueByService.sort((a, b) => b.amount - a.amount);
 
       // Top service
-      const topService = revenueByService.length > 0
-        ? { id: revenueByService[0].serviceId, name: revenueByService[0].serviceName, revenue: revenueByService[0].amount }
-        : null;
+      const topService =
+        revenueByService.length > 0
+          ? {
+              id: revenueByService[0].serviceId,
+              name: revenueByService[0].serviceName,
+              revenue: revenueByService[0].amount,
+            }
+          : null;
 
       // Average revenue per booking
-      const averageRevenuePerBooking = bookings && bookings.length > 0
-        ? totalRevenue / bookings.length
-        : 0;
+      const averageRevenuePerBooking =
+        bookings && bookings.length > 0 ? totalRevenue / bookings.length : 0;
 
       return {
         totalRevenue,
@@ -255,9 +269,9 @@ export const useStaffReport = (storeId: string, dateRange: ReportDateRange) => {
       // Group by staff
       const staffMap = new Map<string, StaffReport>();
 
-      (bookings || []).forEach((booking) => {
+      (bookings || []).forEach(booking => {
         const staffMembers = booking.service?.assigned_staff || [];
-        
+
         staffMembers.forEach((staffName: string) => {
           if (!staffMap.has(staffName)) {
             staffMap.set(staffName, {
@@ -273,7 +287,7 @@ export const useStaffReport = (storeId: string, dateRange: ReportDateRange) => {
 
           const staff = staffMap.get(staffName)!;
           staff.totalBookings++;
-          
+
           if (booking.status === 'completed') {
             staff.completedBookings++;
             staff.totalRevenue += booking.service?.price || 0;
@@ -284,10 +298,9 @@ export const useStaffReport = (storeId: string, dateRange: ReportDateRange) => {
       });
 
       // Calculate utilization rates
-      const staffReports = Array.from(staffMap.values()).map((staff) => {
-        const utilizationRate = staff.totalBookings > 0
-          ? (staff.completedBookings / staff.totalBookings) * 100
-          : 0;
+      const staffReports = Array.from(staffMap.values()).map(staff => {
+        const utilizationRate =
+          staff.totalBookings > 0 ? (staff.completedBookings / staff.totalBookings) * 100 : 0;
 
         return {
           ...staff,
@@ -318,7 +331,7 @@ export const useCapacityReport = (storeId: string, dateRange: ReportDateRange) =
 
       if (servicesError) throw servicesError;
 
-      const  capacityReports: CapacityReport[] = [];
+      const capacityReports: CapacityReport[] = [];
 
       for (const service of services || []) {
         // Count bookings for this service in the date range
@@ -387,10 +400,3 @@ export const useCompleteReport = (storeId: string, dateRange: ReportDateRange) =
 };
 
 export default useBookingReport;
-
-
-
-
-
-
-

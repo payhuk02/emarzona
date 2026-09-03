@@ -79,7 +79,7 @@ export const MarketingAutomationDashboard: React.FC = () => {
   const [isSegmentDialogOpen, setIsSegmentDialogOpen] = useState(false);
   const [isSettingsDialogOpen, setIsSettingsDialogOpen] = useState(false);
   const [selectedCampaign, setSelectedCampaign] = useState<CampaignPerformance | null>(null);
-  
+
   // States for forms
   const [settings, setSettings] = useState({
     defaultSenderName: 'Emarzona',
@@ -94,13 +94,13 @@ export const MarketingAutomationDashboard: React.FC = () => {
     trigger: 'behavioral' as const,
     is_active: true,
   });
-  
-  const [newSegment, setNewSegment] = useState<{name: string, rules: RuleGroup}>({
+
+  const [newSegment, setNewSegment] = useState<{ name: string; rules: RuleGroup }>({
     name: '',
     rules: {
       id: 'root',
       condition: 'AND',
-      rules: []
+      rules: [],
     },
   });
 
@@ -108,16 +108,17 @@ export const MarketingAutomationDashboard: React.FC = () => {
   const { data: stats, isLoading: statsLoading } = useQuery<CampaignStats>({
     queryKey: ['marketing-stats', selectedTimeframe],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .rpc('get_marketing_campaign_stats', { timeframe: selectedTimeframe });
-      
+      const { data, error } = await supabase.rpc('get_marketing_campaign_stats', {
+        timeframe: selectedTimeframe,
+      });
+
       if (error) {
         console.error('Error fetching marketing stats:', error);
         throw error;
       }
-      
+
       const res = data?.[0] || {};
-      
+
       return {
         totalCampaigns: Number(res.total_campaigns || 0),
         activeCampaigns: Number(res.active_campaigns || 0),
@@ -139,7 +140,8 @@ export const MarketingAutomationDashboard: React.FC = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('marketing_campaigns')
-        .select(`
+        .select(
+          `
           id,
           name,
           type,
@@ -152,7 +154,8 @@ export const MarketingAutomationDashboard: React.FC = () => {
             conversion_count,
             revenue_generated
           )
-        `)
+        `
+        )
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -182,14 +185,15 @@ export const MarketingAutomationDashboard: React.FC = () => {
   const { data: behavioralData, isLoading: behavioralLoading } = useQuery({
     queryKey: ['behavioral-analytics', selectedTimeframe],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .rpc('get_behavioral_analytics_summary', { timeframe: selectedTimeframe });
-        
+      const { data, error } = await supabase.rpc('get_behavioral_analytics_summary', {
+        timeframe: selectedTimeframe,
+      });
+
       if (error) {
         console.error('Error fetching behavioral data:', error);
         throw error;
       }
-      
+
       return data || [];
     },
   });
@@ -230,9 +234,13 @@ export const MarketingAutomationDashboard: React.FC = () => {
       setIsCampaignDialogOpen(false);
       setNewCampaign({ name: '', type: 'email', trigger: 'behavioral', is_active: true });
     },
-    onError: (error) => {
-      toast({ title: 'Erreur lors de la création', description: error.message, variant: 'destructive' });
-    }
+    onError: error => {
+      toast({
+        title: 'Erreur lors de la création',
+        description: error.message,
+        variant: 'destructive',
+      });
+    },
   });
 
   const toggleCampaignStatus = useMutation({
@@ -251,13 +259,13 @@ export const MarketingAutomationDashboard: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['marketing-stats'] });
       toast({ title: 'Statut mis à jour' });
     },
-    onError: (error) => {
+    onError: error => {
       toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
-    }
+    },
   });
 
   const createSegment = useMutation({
-    mutationFn: async (segment: {name: string, rules: RuleGroup}) => {
+    mutationFn: async (segment: { name: string; rules: RuleGroup }) => {
       const { data, error } = await supabase
         .from('user_segments')
         .insert([{ name: segment.name, criteria: segment.rules, user_count: 0 }])
@@ -272,9 +280,9 @@ export const MarketingAutomationDashboard: React.FC = () => {
       setIsSegmentDialogOpen(false);
       setNewSegment({ name: '', rules: { id: 'root', condition: 'AND', rules: [] } });
     },
-    onError: (error) => {
+    onError: error => {
       toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
-    }
+    },
   });
 
   const getChannelIcon = (channel: string) => {
@@ -308,15 +316,17 @@ export const MarketingAutomationDashboard: React.FC = () => {
   const performanceData = useMemo(() => {
     if (!behavioralData || !Array.isArray(behavioralData)) return [];
 
-    return behavioralData.map((data: any) => {
-      return {
-        date: data.date,
-        pageViews: Number(data.page_views || 0),
-        productViews: Number(data.product_views || 0),
-        cartAdds: Number(data.cart_adds || 0),
-        purchases: Number(data.purchases || 0),
-      };
-    }).reverse();
+    return behavioralData
+      .map((data: any) => {
+        return {
+          date: data.date,
+          pageViews: Number(data.page_views || 0),
+          productViews: Number(data.product_views || 0),
+          cartAdds: Number(data.cart_adds || 0),
+          purchases: Number(data.purchases || 0),
+        };
+      })
+      .reverse();
   }, [behavioralData]);
 
   const channelDistribution = useMemo(() => {
@@ -599,22 +609,31 @@ export const MarketingAutomationDashboard: React.FC = () => {
                         </p>
                       </div>
                       <div className="flex gap-2">
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
+                        <Button
+                          variant="outline"
+                          size="sm"
                           title="Voir les détails"
                           onClick={() => setSelectedCampaign(campaign)}
                         >
                           <Eye className="h-4 w-4" />
                         </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          title={campaign.status === 'active' ? "Mettre en pause" : "Activer"}
-                          onClick={() => toggleCampaignStatus.mutate({ id: campaign.id, is_active: campaign.status !== 'active' })}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          title={campaign.status === 'active' ? 'Mettre en pause' : 'Activer'}
+                          onClick={() =>
+                            toggleCampaignStatus.mutate({
+                              id: campaign.id,
+                              is_active: campaign.status !== 'active',
+                            })
+                          }
                           disabled={toggleCampaignStatus.isPending}
                         >
-                          {campaign.status === 'active' ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                          {campaign.status === 'active' ? (
+                            <Pause className="h-4 w-4" />
+                          ) : (
+                            <Play className="h-4 w-4" />
+                          )}
                         </Button>
                       </div>
                     </div>
@@ -649,10 +668,16 @@ export const MarketingAutomationDashboard: React.FC = () => {
               <CardContent>
                 <div className="space-y-3">
                   {segmentsLoading ? (
-                    <div className="text-center py-4 text-muted-foreground">Chargement des segments...</div>
+                    <div className="text-center py-4 text-muted-foreground">
+                      Chargement des segments...
+                    </div>
                   ) : userSegments && userSegments.length > 0 ? (
                     userSegments.map((segment: any) => {
-                      const totalUsers = userSegments.reduce((sum: number, s: any) => sum + (s.user_count || 0), 0) || 1;
+                      const totalUsers =
+                        userSegments.reduce(
+                          (sum: number, s: any) => sum + (s.user_count || 0),
+                          0
+                        ) || 1;
                       const percentage = Math.round(((segment.user_count || 0) / totalUsers) * 100);
                       return (
                         <div key={segment.id} className="flex items-center justify-between">
@@ -669,7 +694,9 @@ export const MarketingAutomationDashboard: React.FC = () => {
                       );
                     })
                   ) : (
-                    <div className="text-center py-4 text-muted-foreground">Aucun segment trouvé</div>
+                    <div className="text-center py-4 text-muted-foreground">
+                      Aucun segment trouvé
+                    </div>
                   )}
                 </div>
               </CardContent>
@@ -697,7 +724,7 @@ export const MarketingAutomationDashboard: React.FC = () => {
               <Input
                 placeholder="Ex: Promo Hiver 2026"
                 value={newCampaign.name}
-                onChange={(e) => setNewCampaign({ ...newCampaign, name: e.target.value })}
+                onChange={e => setNewCampaign({ ...newCampaign, name: e.target.value })}
               />
             </div>
             <div className="space-y-2">
@@ -738,13 +765,15 @@ export const MarketingAutomationDashboard: React.FC = () => {
               <Label>Activer immédiatement</Label>
               <Switch
                 checked={newCampaign.is_active}
-                onCheckedChange={(checked) => setNewCampaign({ ...newCampaign, is_active: checked })}
+                onCheckedChange={checked => setNewCampaign({ ...newCampaign, is_active: checked })}
               />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsCampaignDialogOpen(false)}>Annuler</Button>
-            <Button 
+            <Button variant="outline" onClick={() => setIsCampaignDialogOpen(false)}>
+              Annuler
+            </Button>
+            <Button
               onClick={() => createCampaign.mutate(newCampaign)}
               disabled={createCampaign.isPending || !newCampaign.name}
             >
@@ -769,7 +798,7 @@ export const MarketingAutomationDashboard: React.FC = () => {
               <Input
                 placeholder="Ex: Utilisateurs inactifs depuis 30 jours"
                 value={newSegment.name}
-                onChange={(e) => setNewSegment({ ...newSegment, name: e.target.value })}
+                onChange={e => setNewSegment({ ...newSegment, name: e.target.value })}
               />
             </div>
             <div className="space-y-2">
@@ -777,14 +806,16 @@ export const MarketingAutomationDashboard: React.FC = () => {
               <div className="pt-2">
                 <SegmentBuilder
                   value={newSegment.rules}
-                  onChange={(rules) => setNewSegment({ ...newSegment, rules })}
+                  onChange={rules => setNewSegment({ ...newSegment, rules })}
                 />
               </div>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsSegmentDialogOpen(false)}>Annuler</Button>
-            <Button 
+            <Button variant="outline" onClick={() => setIsSegmentDialogOpen(false)}>
+              Annuler
+            </Button>
+            <Button
               onClick={() => createSegment.mutate(newSegment)}
               disabled={createSegment.isPending || !newSegment.name}
             >
@@ -795,7 +826,7 @@ export const MarketingAutomationDashboard: React.FC = () => {
       </Dialog>
 
       {/* Campaign Details Dialog */}
-      <Dialog open={!!selectedCampaign} onOpenChange={(open) => !open && setSelectedCampaign(null)}>
+      <Dialog open={!!selectedCampaign} onOpenChange={open => !open && setSelectedCampaign(null)}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Détails de la campagne : {selectedCampaign?.name}</DialogTitle>
@@ -808,7 +839,9 @@ export const MarketingAutomationDashboard: React.FC = () => {
               <div className="flex justify-between items-center bg-gray-50 p-4 rounded-lg border">
                 <div>
                   <p className="text-sm text-muted-foreground">Type</p>
-                  <p className="font-medium capitalize">{selectedCampaign.type.replace('_', ' ')}</p>
+                  <p className="font-medium capitalize">
+                    {selectedCampaign.type.replace('_', ' ')}
+                  </p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Statut</p>
@@ -819,33 +852,48 @@ export const MarketingAutomationDashboard: React.FC = () => {
                   <p className="font-medium text-lg">{selectedCampaign.sent.toLocaleString()}</p>
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-3 gap-4">
                 <Card>
                   <CardContent className="pt-6 text-center">
                     <p className="text-2xl font-bold text-blue-600">
-                      {selectedCampaign.sent > 0 ? ((selectedCampaign.opens / selectedCampaign.sent) * 100).toFixed(1) : 0}%
+                      {selectedCampaign.sent > 0
+                        ? ((selectedCampaign.opens / selectedCampaign.sent) * 100).toFixed(1)
+                        : 0}
+                      %
                     </p>
                     <p className="text-sm text-muted-foreground">Taux d'ouverture</p>
-                    <p className="text-xs text-muted-foreground mt-1">{selectedCampaign.opens.toLocaleString()} vues</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {selectedCampaign.opens.toLocaleString()} vues
+                    </p>
                   </CardContent>
                 </Card>
                 <Card>
                   <CardContent className="pt-6 text-center">
                     <p className="text-2xl font-bold text-orange-500">
-                      {selectedCampaign.opens > 0 ? ((selectedCampaign.clicks / selectedCampaign.opens) * 100).toFixed(1) : 0}%
+                      {selectedCampaign.opens > 0
+                        ? ((selectedCampaign.clicks / selectedCampaign.opens) * 100).toFixed(1)
+                        : 0}
+                      %
                     </p>
                     <p className="text-sm text-muted-foreground">Taux de clic</p>
-                    <p className="text-xs text-muted-foreground mt-1">{selectedCampaign.clicks.toLocaleString()} clics</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {selectedCampaign.clicks.toLocaleString()} clics
+                    </p>
                   </CardContent>
                 </Card>
                 <Card>
                   <CardContent className="pt-6 text-center">
                     <p className="text-2xl font-bold text-green-600">
-                      {selectedCampaign.sent > 0 ? ((selectedCampaign.conversions / selectedCampaign.sent) * 100).toFixed(1) : 0}%
+                      {selectedCampaign.sent > 0
+                        ? ((selectedCampaign.conversions / selectedCampaign.sent) * 100).toFixed(1)
+                        : 0}
+                      %
                     </p>
                     <p className="text-sm text-muted-foreground">Taux de conversion</p>
-                    <p className="text-xs text-muted-foreground mt-1">{selectedCampaign.conversions.toLocaleString()} achats</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {selectedCampaign.conversions.toLocaleString()} achats
+                    </p>
                   </CardContent>
                 </Card>
               </div>
@@ -871,7 +919,7 @@ export const MarketingAutomationDashboard: React.FC = () => {
               <Label>Nom d'expéditeur par défaut</Label>
               <Input
                 value={settings.defaultSenderName}
-                onChange={(e) => setSettings({ ...settings, defaultSenderName: e.target.value })}
+                onChange={e => setSettings({ ...settings, defaultSenderName: e.target.value })}
               />
             </div>
             <div className="space-y-2">
@@ -879,7 +927,7 @@ export const MarketingAutomationDashboard: React.FC = () => {
               <Input
                 type="email"
                 value={settings.defaultSenderEmail}
-                onChange={(e) => setSettings({ ...settings, defaultSenderEmail: e.target.value })}
+                onChange={e => setSettings({ ...settings, defaultSenderEmail: e.target.value })}
               />
             </div>
             <div className="space-y-2">
@@ -889,33 +937,41 @@ export const MarketingAutomationDashboard: React.FC = () => {
                 min={1}
                 max={10}
                 value={settings.maxEmailsPerDay}
-                onChange={(e) => setSettings({ ...settings, maxEmailsPerDay: parseInt(e.target.value) || 1 })}
+                onChange={e =>
+                  setSettings({ ...settings, maxEmailsPerDay: parseInt(e.target.value) || 1 })
+                }
               />
             </div>
             <div className="flex items-center justify-between pt-2">
               <div>
                 <Label>Activer l'envoi de SMS</Label>
-                <p className="text-xs text-muted-foreground">Nécessite une API configurée (ex: Twilio)</p>
+                <p className="text-xs text-muted-foreground">
+                  Nécessite une API configurée (ex: Twilio)
+                </p>
               </div>
               <Switch
                 checked={settings.enableSms}
-                onCheckedChange={(checked) => setSettings({ ...settings, enableSms: checked })}
+                onCheckedChange={checked => setSettings({ ...settings, enableSms: checked })}
               />
             </div>
             <div className="flex items-center justify-between pt-2">
               <div>
                 <Label>Activer les Notifications Push</Label>
-                <p className="text-xs text-muted-foreground">Pour les utilisateurs avec l'app web installée (PWA)</p>
+                <p className="text-xs text-muted-foreground">
+                  Pour les utilisateurs avec l'app web installée (PWA)
+                </p>
               </div>
               <Switch
                 checked={settings.enablePush}
-                onCheckedChange={(checked) => setSettings({ ...settings, enablePush: checked })}
+                onCheckedChange={checked => setSettings({ ...settings, enablePush: checked })}
               />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsSettingsDialogOpen(false)}>Annuler</Button>
-            <Button 
+            <Button variant="outline" onClick={() => setIsSettingsDialogOpen(false)}>
+              Annuler
+            </Button>
+            <Button
               onClick={() => {
                 toast({ title: 'Paramètres sauvegardés' });
                 setIsSettingsDialogOpen(false);

@@ -77,15 +77,10 @@ export class ReviewsErrorBoundary extends Component<Props, State> {
           <AlertTitle>Erreur d'affichage des avis</AlertTitle>
           <AlertDescription className="mt-2 space-y-3">
             <p>
-              Une erreur s'est produite lors du chargement des avis clients.
-              Nous avons été notifiés du problème.
+              Une erreur s'est produite lors du chargement des avis clients. Nous avons été notifiés
+              du problème.
             </p>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={this.handleReset}
-              className="gap-2"
-            >
+            <Button variant="outline" size="sm" onClick={this.handleReset} className="gap-2">
               <RefreshCw className="h-3 w-3" />
               Réessayer
             </Button>
@@ -117,10 +112,3 @@ export const ReviewsPlaceholder = () => (
     </div>
   </div>
 );
-
-
-
-
-
-
-

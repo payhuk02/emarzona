@@ -1,7 +1,7 @@
 /**
  * Digital Product Updates Hooks
  * Date: 27 Janvier 2025
- * 
+ *
  * Hooks pour gérer les mises à jour de produits digitaux
  */
 
@@ -9,10 +9,15 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
-import { invalidateUpdateCache, invalidateDigitalProductCache, EntityAction } from '@/lib/cache-invalidation';
+import {
+  invalidateUpdateCache,
+  invalidateDigitalProductCache,
+  EntityAction,
+} from '@/lib/cache-invalidation';
 import { useMutationWithRetry } from '@/hooks/useMutationWithRetry';
 
-const DIGITAL_PRODUCT_UPDATE_FIELDS = 'id, digital_product_id, version, previous_version, release_type, title, description, changelog, file_url, file_size_mb, file_hash, is_published, is_forced, release_date, download_count, created_at';
+const DIGITAL_PRODUCT_UPDATE_FIELDS =
+  'id, digital_product_id, version, previous_version, release_type, title, description, changelog, file_url, file_size_mb, file_hash, is_published, is_forced, release_date, download_count, created_at';
 
 // =====================================================
 // TYPES
@@ -90,18 +95,22 @@ export const useCustomerProductUpdates = () => {
   return useQuery({
     queryKey: ['customerProductUpdates'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
       // Récupérer les produits digitaux achetés par le client
       const { data: orders } = await supabase
         .from('orders')
-        .select(`
+        .select(
+          `
           id,
           order_items!inner (
             product_id
           )
-        `)
+        `
+        )
         .eq('customer_id', user.id)
         .eq('payment_status', 'paid')
         .eq('status', 'completed');
@@ -129,12 +138,13 @@ export const useCustomerProductUpdates = () => {
         return [];
       }
 
-      const digitalProductIds = digitalProducts.map((dp) => dp.id);
+      const digitalProductIds = digitalProducts.map(dp => dp.id);
 
       // Récupérer les mises à jour publiées
       const { data: updates, error } = await supabase
         .from('digital_product_updates')
-        .select(`
+        .select(
+          `
           *,
           digital_product:digital_products!inner (
             id,
@@ -144,7 +154,8 @@ export const useCustomerProductUpdates = () => {
               image_url
             )
           )
-        `)
+        `
+        )
         .in('digital_product_id', digitalProductIds)
         .eq('is_published', true)
         .order('release_date', { ascending: false });
@@ -166,18 +177,22 @@ export const useCustomerProductVersions = () => {
   return useQuery({
     queryKey: ['customerProductVersions'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
       // Récupérer les produits achetés par le client
       const { data: orders } = await supabase
         .from('orders')
-        .select(`
+        .select(
+          `
           id,
           order_items!inner (
             product_id
           )
-        `)
+        `
+        )
         .eq('customer_id', user.id)
         .eq('payment_status', 'paid')
         .eq('status', 'completed');
@@ -198,14 +213,16 @@ export const useCustomerProductVersions = () => {
       // Récupérer les versions publiées (stable ou beta)
       const { data: versions, error } = await supabase
         .from('product_versions')
-        .select(`
+        .select(
+          `
           *,
           product:products!inner (
             id,
             name,
             image_url
           )
-        `)
+        `
+        )
         .in('product_id', productIds)
         .in('status', ['stable', 'beta'])
         .order('release_date', { ascending: false });
@@ -231,7 +248,8 @@ export const useProductUpdate = (updateId: string | undefined) => {
 
       const { data, error } = await supabase
         .from('digital_product_updates')
-        .select(`
+        .select(
+          `
           *,
           digital_product:digital_products!inner (
             id,
@@ -241,7 +259,8 @@ export const useProductUpdate = (updateId: string | undefined) => {
               image_url
             )
           )
-        `)
+        `
+        )
         .eq('id', updateId)
         .single();
 
@@ -267,14 +286,16 @@ export const useProductVersion = (versionId: string | undefined) => {
 
       const { data, error } = await supabase
         .from('product_versions')
-        .select(`
+        .select(
+          `
           *,
           product:products!inner (
             id,
             name,
             image_url
           )
-        `)
+        `
+        )
         .eq('id', versionId)
         .single();
 
@@ -304,17 +325,17 @@ export const useTrackVersionDownload = () => {
     baseDelay: 1000,
     errorToastTitle: 'Erreur mise à jour',
     mutationFn: async (versionId: string) => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
       // Enregistrer dans version_download_logs si la table existe
-      const { error } = await supabase
-        .from('version_download_logs')
-        .insert({
-          version_id: versionId,
-          user_id: user.id,
-          downloaded_at: new Date().toISOString(),
-        });
+      const { error } = await supabase.from('version_download_logs').insert({
+        version_id: versionId,
+        user_id: user.id,
+        downloaded_at: new Date().toISOString(),
+      });
 
       if (error) {
         // Si la table n'existe pas, on ignore l'erreur
@@ -401,7 +422,7 @@ export const useCreateProductUpdate = () => {
       if (error) throw error;
       return data as DigitalProductUpdate;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       // Invalidation intelligente du cache
       invalidateUpdateCache(queryClient, data.id, EntityAction.CREATE, data.digital_product_id);
       invalidateDigitalProductCache(queryClient, data.digital_product_id, EntityAction.UPDATE);
@@ -449,7 +470,7 @@ export const useUpdateProductUpdate = () => {
       if (error) throw error;
       return data as DigitalProductUpdate;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       // Invalidation intelligente du cache
       invalidateUpdateCache(queryClient, data.id, EntityAction.UPDATE, data.digital_product_id);
       invalidateDigitalProductCache(queryClient, data.digital_product_id, EntityAction.UPDATE);
@@ -488,10 +509,7 @@ export const useDeleteProductUpdate = () => {
         .eq('id', updateId)
         .single();
 
-      const { error } = await supabase
-        .from('digital_product_updates')
-        .delete()
-        .eq('id', updateId);
+      const { error } = await supabase.from('digital_product_updates').delete().eq('id', updateId);
 
       if (error) throw error;
       return { updateId, digital_product_id: update?.digital_product_id };
@@ -517,10 +535,3 @@ export const useDeleteProductUpdate = () => {
     },
   });
 };
-
-
-
-
-
-
-

@@ -7,14 +7,14 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { 
-  AffiliateCommission, 
-  CommissionFilters, 
+import {
+  AffiliateCommission,
+  CommissionFilters,
   AffiliateStats,
   ApproveCommissionForm,
   RejectCommissionForm,
   PayCommissionForm,
-  PaginationParams
+  PaginationParams,
 } from '@/types/affiliate';
 import { logger } from '@/lib/logger';
 import { handleSupabaseError, AffiliateErrors } from '@/lib/affiliate-errors';
@@ -36,7 +36,7 @@ export const useAffiliateCommissions = (
       setLoading(true);
 
       // Compter le total
-      let  countQuery= supabase
+      let countQuery = supabase
         .from('affiliate_commissions')
         .select('id', { count: 'exact', head: true });
 
@@ -80,14 +80,16 @@ export const useAffiliateCommissions = (
       const from = (currentPage - 1) * pageSize;
       const to = from + pageSize - 1;
 
-      let  query= supabase
+      let query = supabase
         .from('affiliate_commissions')
-        .select(`
+        .select(
+          `
           *,
           product:products(name, image_url),
           affiliate:affiliates(display_name, email, affiliate_code),
           order:orders(order_number)
-        `)
+        `
+        )
         .order('created_at', { ascending: false })
         .range(from, to);
 
@@ -173,7 +175,7 @@ export const useAffiliateCommissions = (
           average_commission_per_sale: 0,
         });
       }
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const affiliateError = handleSupabaseError(error);
       logger.error('Error fetching commissions:', affiliateError);
       toast({
@@ -192,7 +194,9 @@ export const useAffiliateCommissions = (
         throw AffiliateErrors.commissionNotFound();
       }
 
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
       const { error } = await supabase
         .from('affiliate_commissions')
@@ -208,14 +212,14 @@ export const useAffiliateCommissions = (
         throw handleSupabaseError(error);
       }
 
-      toast({ 
+      toast({
         title: 'Commission approuvée ✅',
-        description: 'La commission peut maintenant être payée' 
+        description: 'La commission peut maintenant être payée',
       });
-      
+
       await fetchCommissions(page);
       return true;
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const affiliateError = handleSupabaseError(error);
       logger.error('Error approving commission:', affiliateError);
       toast({
@@ -250,14 +254,14 @@ export const useAffiliateCommissions = (
         throw handleSupabaseError(error);
       }
 
-      toast({ 
+      toast({
         title: 'Commission rejetée',
-        description: 'La commission a été refusée' 
+        description: 'La commission a été refusée',
       });
-      
+
       await fetchCommissions(page);
       return true;
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const affiliateError = handleSupabaseError(error);
       logger.error('Error rejecting commission:', affiliateError);
       toast({
@@ -271,7 +275,9 @@ export const useAffiliateCommissions = (
 
   const markAsPaid = async (formData: PayCommissionForm): Promise<boolean> => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
       // Récupérer la commission
       const { data: commission, error: commissionError } = await supabase
@@ -304,27 +310,27 @@ export const useAffiliateCommissions = (
       const { error: updateError } = await supabase
         .from('affiliates')
         .update({
-          total_commission_paid: supabase.rpc('increment', { 
-            row_id: commission.affiliate_id, 
-            increment_value: commission.commission_amount 
+          total_commission_paid: supabase.rpc('increment', {
+            row_id: commission.affiliate_id,
+            increment_value: commission.commission_amount,
           }),
-          pending_commission: supabase.rpc('decrement', { 
-            row_id: commission.affiliate_id, 
-            decrement_value: commission.commission_amount 
+          pending_commission: supabase.rpc('decrement', {
+            row_id: commission.affiliate_id,
+            decrement_value: commission.commission_amount,
           }),
         })
         .eq('id', commission.affiliate_id);
 
       if (updateError) logger.warn('Error updating affiliate stats:', updateError);
 
-      toast({ 
+      toast({
         title: 'Commission payée 💰',
-        description: `${commission.commission_amount} XOF versés` 
+        description: `${commission.commission_amount} XOF versés`,
       });
-      
+
       await fetchCommissions(page);
       return true;
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const affiliateError = handleSupabaseError(error);
       logger.error('Error marking commission as paid:', affiliateError);
       toast({
@@ -354,14 +360,14 @@ export const useAffiliateCommissions = (
         throw handleSupabaseError(error);
       }
 
-      toast({ 
+      toast({
         title: 'Commission annulée',
-        description: 'La commission a été annulée' 
+        description: 'La commission a été annulée',
       });
-      
+
       await fetchCommissions(page);
       return true;
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const affiliateError = handleSupabaseError(error);
       logger.error('Error cancelling commission:', affiliateError);
       toast({
@@ -437,14 +443,16 @@ export const usePendingCommissions = (storeId?: string) => {
   useEffect(() => {
     const fetchPending = async () => {
       try {
-        let  query= supabase
+        let query = supabase
           .from('affiliate_commissions')
-          .select(`
+          .select(
+            `
             *,
             product:products(name, image_url),
             affiliate:affiliates(display_name, email, affiliate_code),
             order:orders(order_number)
-          `)
+          `
+          )
           .in('status', ['pending', 'approved'])
           .order('created_at', { ascending: true });
 
@@ -469,10 +477,3 @@ export const usePendingCommissions = (storeId?: string) => {
 
   return { pending, loading };
 };
-
-
-
-
-
-
-

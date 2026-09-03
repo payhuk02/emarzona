@@ -3,9 +3,9 @@
  * Version améliorée du Card avec animations subtiles au hover
  */
 
-import * as React from "react";
-import { Card, CardProps } from "./card";
-import { cn } from "@/lib/utils";
+import * as React from 'react';
+import { Card, CardProps } from './card';
+import { cn } from '@/lib/utils';
 
 interface CardWithMicroInteractionProps extends CardProps {
   /**
@@ -22,7 +22,7 @@ interface CardWithMicroInteractionProps extends CardProps {
 
 /**
  * Card avec micro-interactions améliorées
- * 
+ *
  * @example
  * ```tsx
  * <CardWithMicroInteraction hoverAnimation="lift">
@@ -33,32 +33,14 @@ interface CardWithMicroInteractionProps extends CardProps {
 export const CardWithMicroInteraction = React.forwardRef<
   HTMLDivElement,
   CardWithMicroInteractionProps
->(({ 
-  className,
-  enableHover = true,
-  hoverAnimation = 'lift',
-  ...props 
-}, ref) => {
+>(({ className, enableHover = true, hoverAnimation = 'lift', ...props }, ref) => {
   const hoverClasses = {
     lift: enableHover ? 'hover-lift transition-all duration-300' : '',
     scale: enableHover ? 'hover-scale transition-all duration-300' : '',
     glow: enableHover ? 'hover-glow transition-all duration-300' : '',
   }[hoverAnimation];
 
-  return (
-    <Card
-      ref={ref}
-      className={cn(hoverClasses, className)}
-      {...props}
-    />
-  );
+  return <Card ref={ref} className={cn(hoverClasses, className)} {...props} />;
 });
 
-CardWithMicroInteraction.displayName = "CardWithMicroInteraction";
-
-
-
-
-
-
-
+CardWithMicroInteraction.displayName = 'CardWithMicroInteraction';

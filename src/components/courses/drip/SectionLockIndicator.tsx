@@ -72,10 +72,3 @@ export const SectionLockIndicator = ({
     </Badge>
   );
 };
-
-
-
-
-
-
-

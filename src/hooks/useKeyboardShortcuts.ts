@@ -1,7 +1,7 @@
 /**
  * Hook useKeyboardShortcuts - Gestion réutilisable des raccourcis clavier
  * Simplifie l'ajout de raccourcis clavier dans les composants
- * 
+ *
  * @example
  * ```tsx
  * useKeyboardShortcuts({
@@ -69,7 +69,7 @@ function shouldIgnoreElement(
   }
 
   if (ignoreSelectors.length > 0) {
-    return ignoreSelectors.some((selector) => element.matches(selector));
+    return ignoreSelectors.some(selector => element.matches(selector));
   }
 
   return false;
@@ -79,7 +79,7 @@ function shouldIgnoreElement(
  * Vérifie si un raccourci correspond à l'événement
  */
 function matchesShortcut(shortcut: string, event: KeyboardEvent): boolean {
-  const parts = shortcut.split('+').map((p) => normalizeKey(p.trim()));
+  const parts = shortcut.split('+').map(p => normalizeKey(p.trim()));
   const key = normalizeKey(event.key);
 
   // Vérifier les modificateurs
@@ -94,7 +94,7 @@ function matchesShortcut(shortcut: string, event: KeyboardEvent): boolean {
   if (hasShift && !event.shiftKey) return false;
 
   // Vérifier la touche principale
-  const mainKey = parts.find((p) => !['meta', 'control', 'ctrl', 'alt', 'shift'].includes(p));
+  const mainKey = parts.find(p => !['meta', 'control', 'ctrl', 'alt', 'shift'].includes(p));
   if (mainKey && mainKey !== key) return false;
 
   return true;
@@ -104,12 +104,7 @@ function matchesShortcut(shortcut: string, event: KeyboardEvent): boolean {
  * Hook pour gérer les raccourcis clavier
  */
 export function useKeyboardShortcuts(options: KeyboardShortcutOptions) {
-  const {
-    shortcuts,
-    ignoreInputs = true,
-    ignoreSelectors = [],
-    enabled = true,
-  } = options;
+  const { shortcuts, ignoreInputs = true, ignoreSelectors = [], enabled = true } = options;
 
   const shortcutsRef = useRef(shortcuts);
   const enabledRef = useRef(enabled);
@@ -163,38 +158,38 @@ export function useCommonKeyboardShortcuts(options: {
 
   useKeyboardShortcuts({
     shortcuts: {
-      'Ctrl+K': (e) => {
+      'Ctrl+K': e => {
         e.preventDefault();
         onSearch?.();
       },
-      'Meta+K': (e) => {
+      'Meta+K': e => {
         e.preventDefault();
         onSearch?.();
       },
-      'Ctrl+N': (e) => {
+      'Ctrl+N': e => {
         e.preventDefault();
         onNew?.();
       },
-      'Meta+N': (e) => {
+      'Meta+N': e => {
         e.preventDefault();
         onNew?.();
       },
-      'Escape': () => {
+      Escape: () => {
         onClose?.();
       },
-      'Ctrl+R': (e) => {
+      'Ctrl+R': e => {
         e.preventDefault();
         onRefresh?.();
       },
-      'Meta+R': (e) => {
+      'Meta+R': e => {
         e.preventDefault();
         onRefresh?.();
       },
-      'Ctrl+A': (e) => {
+      'Ctrl+A': e => {
         e.preventDefault();
         onSelectAll?.();
       },
-      'Meta+A': (e) => {
+      'Meta+A': e => {
         e.preventDefault();
         onSelectAll?.();
       },
@@ -202,10 +197,3 @@ export function useCommonKeyboardShortcuts(options: {
     enabled,
   });
 }
-
-
-
-
-
-
-

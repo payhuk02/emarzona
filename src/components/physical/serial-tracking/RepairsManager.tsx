@@ -5,7 +5,14 @@
  */
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -29,7 +36,14 @@ export function RepairsManager({ storeId }: RepairsManagerProps) {
   const repairsRef = useScrollAnimation<HTMLDivElement>();
 
   const getStatusBadge = (status: string) => {
-    const  badges: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; className?: string }> = {
+    const badges: Record<
+      string,
+      {
+        label: string;
+        variant: 'default' | 'secondary' | 'destructive' | 'outline';
+        className?: string;
+      }
+    > = {
       received: { label: 'Reçu', variant: 'secondary' },
       diagnosed: { label: 'Diagnostiqué', variant: 'default', className: 'bg-blue-500' },
       in_progress: { label: 'En Cours', variant: 'default', className: 'bg-yellow-500' },
@@ -51,7 +65,9 @@ export function RepairsManager({ storeId }: RepairsManagerProps) {
   const stats = useMemo(() => {
     if (!repairs) return { total: 0, inProgress: 0, completed: 0, totalCost: 0 };
     const total = repairs.length;
-    const inProgress = repairs.filter(r => ['received', 'diagnosed', 'in_progress', 'waiting_parts'].includes(r.status)).length;
+    const inProgress = repairs.filter(r =>
+      ['received', 'diagnosed', 'in_progress', 'waiting_parts'].includes(r.status)
+    ).length;
     const completed = repairs.filter(r => ['completed', 'returned'].includes(r.status)).length;
     const totalCost = repairs.reduce((sum, r) => sum + r.total_cost, 0);
     return { total, inProgress, completed, totalCost };
@@ -70,15 +86,38 @@ export function RepairsManager({ storeId }: RepairsManagerProps) {
     <div className="space-y-4 sm:space-y-6">
       {/* Stats Cards - Responsive */}
       {repairs && repairs.length > 0 && (
-        <div 
+        <div
           ref={statsRef}
           className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-4 animate-in fade-in slide-in-from-bottom-4 duration-700"
         >
           {[
-            { label: 'Total Réparations', value: stats.total, icon: Wrench, color: 'from-purple-600 to-pink-600' },
-            { label: 'En Cours', value: stats.inProgress, icon: Clock, color: 'from-yellow-600 to-orange-600' },
-            { label: 'Terminées', value: stats.completed, icon: CheckCircle2, color: 'from-green-600 to-emerald-600' },
-            { label: 'Coût Total', value: new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF' }).format(stats.totalCost), icon: DollarSign, color: 'from-blue-600 to-cyan-600', isCurrency: true },
+            {
+              label: 'Total Réparations',
+              value: stats.total,
+              icon: Wrench,
+              color: 'from-purple-600 to-pink-600',
+            },
+            {
+              label: 'En Cours',
+              value: stats.inProgress,
+              icon: Clock,
+              color: 'from-yellow-600 to-orange-600',
+            },
+            {
+              label: 'Terminées',
+              value: stats.completed,
+              icon: CheckCircle2,
+              color: 'from-green-600 to-emerald-600',
+            },
+            {
+              label: 'Coût Total',
+              value: new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF' }).format(
+                stats.totalCost
+              ),
+              icon: DollarSign,
+              color: 'from-blue-600 to-cyan-600',
+              isCurrency: true,
+            },
           ].map((stat, index) => {
             const Icon = stat.icon;
             return (
@@ -95,11 +134,15 @@ export function RepairsManager({ storeId }: RepairsManagerProps) {
                 </CardHeader>
                 <CardContent className="p-3 sm:p-4 pt-0">
                   {stat.isCurrency ? (
-                    <div className={`text-lg sm:text-xl lg:text-2xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
+                    <div
+                      className={`text-lg sm:text-xl lg:text-2xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}
+                    >
                       {stat.value}
                     </div>
                   ) : (
-                    <div className={`text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
+                    <div
+                      className={`text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}
+                    >
                       {stat.value}
                     </div>
                   )}
@@ -156,9 +199,11 @@ export function RepairsManager({ storeId }: RepairsManagerProps) {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {repairs.map((repair) => (
+                    {repairs.map(repair => (
                       <TableRow key={repair.id}>
-                        <TableCell className="font-medium font-mono">{repair.repair_number}</TableCell>
+                        <TableCell className="font-medium font-mono">
+                          {repair.repair_number}
+                        </TableCell>
                         <TableCell>
                           <span className="text-sm truncate block">
                             {format(new Date(repair.received_date), 'dd MMM yyyy', { locale: fr })}
@@ -166,13 +211,17 @@ export function RepairsManager({ storeId }: RepairsManagerProps) {
                         </TableCell>
                         <TableCell>
                           <span className="text-sm truncate block">
-                            {repair.repair_type === 'warranty' ? 'Garantie' : 
-                             repair.repair_type === 'out_of_warranty' ? 'Hors Garantie' : 
-                             'Payé par Client'}
+                            {repair.repair_type === 'warranty'
+                              ? 'Garantie'
+                              : repair.repair_type === 'out_of_warranty'
+                                ? 'Hors Garantie'
+                                : 'Payé par Client'}
                           </span>
                         </TableCell>
                         <TableCell>
-                          <span className="text-sm truncate block max-w-xs">{repair.issue_description}</span>
+                          <span className="text-sm truncate block max-w-xs">
+                            {repair.issue_description}
+                          </span>
                         </TableCell>
                         <TableCell>{getStatusBadge(repair.status)}</TableCell>
                         <TableCell>
@@ -185,7 +234,12 @@ export function RepairsManager({ storeId }: RepairsManagerProps) {
                           </span>
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0" aria-label={`Voir les détails de la réparation ${repair.id || ''}`}>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0"
+                            aria-label={`Voir les détails de la réparation ${repair.id || ''}`}
+                          >
                             <Eye className="h-4 w-4" />
                           </Button>
                         </TableCell>
@@ -238,9 +292,11 @@ function RepairCard({ repair, getStatusBadge, animationDelay = 0 }: RepairCardPr
           <div className="flex items-center gap-2 text-muted-foreground">
             <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
             <span>
-              {repair.repair_type === 'warranty' ? 'Garantie' : 
-               repair.repair_type === 'out_of_warranty' ? 'Hors Garantie' : 
-               'Payé par Client'}
+              {repair.repair_type === 'warranty'
+                ? 'Garantie'
+                : repair.repair_type === 'out_of_warranty'
+                  ? 'Hors Garantie'
+                  : 'Payé par Client'}
             </span>
           </div>
           <p className="text-muted-foreground line-clamp-2">{repair.issue_description}</p>
@@ -265,9 +321,3 @@ function RepairCard({ repair, getStatusBadge, animationDelay = 0 }: RepairCardPr
     </Card>
   );
 }
-
-
-
-
-
-

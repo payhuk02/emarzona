@@ -1,24 +1,15 @@
-import { useState, useRef } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  Upload, 
-  Youtube, 
-  Video, 
-  X, 
-  CheckCircle2, 
-  AlertCircle,
-  Loader2,
-  Cloud
-} from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { logger } from "@/lib/logger";
+import { useState, useRef } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Upload, Youtube, Video, X, CheckCircle2, AlertCircle, Loader2, Cloud } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/lib/logger';
 
 interface VideoUploaderProps {
   onVideoUploaded: (videoData: {
@@ -40,15 +31,19 @@ const MAX_FILE_SIZE = 500 * 1024 * 1024; // 500 MB
 export const VideoUploader = ({ onVideoUploaded, onCancel, currentVideo }: VideoUploaderProps) => {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   const [uploadType, setUploadType] = useState<'upload' | 'youtube' | 'vimeo' | 'google-drive'>(
     currentVideo?.type || 'upload'
   );
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [youtubeUrl, setYoutubeUrl] = useState(currentVideo?.type === 'youtube' ? currentVideo.url : '');
+  const [youtubeUrl, setYoutubeUrl] = useState(
+    currentVideo?.type === 'youtube' ? currentVideo.url : ''
+  );
   const [vimeoUrl, setVimeoUrl] = useState(currentVideo?.type === 'vimeo' ? currentVideo.url : '');
-  const [googleDriveUrl, setGoogleDriveUrl] = useState(currentVideo?.type === 'google-drive' ? currentVideo.url : '');
+  const [googleDriveUrl, setGoogleDriveUrl] = useState(
+    currentVideo?.type === 'google-drive' ? currentVideo.url : ''
+  );
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [uploadedUrl, setUploadedUrl] = useState<string | null>(
@@ -76,17 +71,17 @@ export const VideoUploader = ({ onVideoUploaded, onCancel, currentVideo }: Video
   // Extraire l'ID Google Drive et convertir en URL embed
   const convertGoogleDriveUrl = (url: string): string => {
     // Format 1: https://drive.google.com/file/d/{FILE_ID}/view
-    let  match= url.match(/\/file\/d\/([^/]+)/);
+    let match = url.match(/\/file\/d\/([^/]+)/);
     if (match) {
       return `https://drive.google.com/file/d/${match[1]}/preview`;
     }
-    
+
     // Format 2: https://drive.google.com/open?id={FILE_ID}
     match = url.match(/[?&]id=([^&]+)/);
     if (match) {
       return `https://drive.google.com/file/d/${match[1]}/preview`;
     }
-    
+
     return url;
   };
 
@@ -139,7 +134,7 @@ export const VideoUploader = ({ onVideoUploaded, onCancel, currentVideo }: Video
         .upload(filePath, selectedFile, {
           cacheControl: '3600',
           upsert: false,
-          onUploadProgress: (progress) => {
+          onUploadProgress: progress => {
             const percent = (progress.loaded / progress.total) * 100;
             setUploadProgress(Math.round(percent));
           },
@@ -150,9 +145,9 @@ export const VideoUploader = ({ onVideoUploaded, onCancel, currentVideo }: Video
       }
 
       // Récupérer l'URL publique
-      const { data: { publicUrl } } = supabase.storage
-        .from('videos')
-        .getPublicUrl(filePath);
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from('videos').getPublicUrl(filePath);
 
       setUploadedUrl(publicUrl);
 
@@ -169,12 +164,11 @@ export const VideoUploader = ({ onVideoUploaded, onCancel, currentVideo }: Video
         url: publicUrl,
         duration,
       });
-
-    } catch ( _error: any) {
+    } catch (_error: any) {
       logger.error('Erreur upload', { error, fileName: selectedFile?.name });
-      setError(error.message || 'Erreur lors de l\'upload de la vidéo');
+      setError(error.message || "Erreur lors de l'upload de la vidéo");
       toast({
-        title: '❌ Erreur d\'upload',
+        title: "❌ Erreur d'upload",
         description: error.message,
         variant: 'destructive',
       });
@@ -185,7 +179,7 @@ export const VideoUploader = ({ onVideoUploaded, onCancel, currentVideo }: Video
 
   // Obtenir la durée de la vidéo
   const getVideoDuration = (file: File): Promise<number> => {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       const video = document.createElement('video');
       video.preload = 'metadata';
       video.onloadedmetadata = () => {
@@ -208,7 +202,7 @@ export const VideoUploader = ({ onVideoUploaded, onCancel, currentVideo }: Video
 
     const videoId = extractYoutubeId(youtubeUrl);
     if (!videoId) {
-      setError('Impossible d\'extraire l\'ID de la vidéo YouTube');
+      setError("Impossible d'extraire l'ID de la vidéo YouTube");
       return;
     }
 
@@ -264,7 +258,7 @@ export const VideoUploader = ({ onVideoUploaded, onCancel, currentVideo }: Video
 
   return (
     <div className="space-y-4">
-      <Tabs value={uploadType} onValueChange={(v) => setUploadType(v as any)}>
+      <Tabs value={uploadType} onValueChange={v => setUploadType(v as any)}>
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="upload" className="flex items-center gap-2">
             <Upload className="w-4 h-4" />
@@ -290,12 +284,8 @@ export const VideoUploader = ({ onVideoUploaded, onCancel, currentVideo }: Video
             {!selectedFile && !uploadedUrl ? (
               <div className="text-center">
                 <Upload className="w-12 h-12 mx-auto text-gray-400 mb-4" />
-                <p className="text-sm text-gray-600 mb-2">
-                  Cliquez pour sélectionner une vidéo
-                </p>
-                <p className="text-xs text-gray-500 mb-4">
-                  MP4, WebM, OGG ou MOV (max. 500 MB)
-                </p>
+                <p className="text-sm text-gray-600 mb-2">Cliquez pour sélectionner une vidéo</p>
+                <p className="text-xs text-gray-500 mb-4">MP4, WebM, OGG ou MOV (max. 500 MB)</p>
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -318,11 +308,7 @@ export const VideoUploader = ({ onVideoUploaded, onCancel, currentVideo }: Video
                   <CheckCircle2 className="w-5 h-5" />
                   <span className="font-medium">Vidéo uploadée avec succès</span>
                 </div>
-                <video
-                  src={uploadedUrl}
-                  controls
-                  className="w-full max-h-64 rounded-lg"
-                />
+                <video src={uploadedUrl} controls className="w-full max-h-64 rounded-lg" />
                 <Button
                   type="button"
                   variant="outline"
@@ -341,9 +327,7 @@ export const VideoUploader = ({ onVideoUploaded, onCancel, currentVideo }: Video
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Video className="w-5 h-5 text-blue-600" />
-                    <span className="text-sm font-medium truncate">
-                      {selectedFile.name}
-                    </span>
+                    <span className="text-sm font-medium truncate">{selectedFile.name}</span>
                   </div>
                   <Badge variant="secondary">
                     {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB
@@ -401,7 +385,7 @@ export const VideoUploader = ({ onVideoUploaded, onCancel, currentVideo }: Video
               type="url"
               placeholder="https://www.youtube.com/watch?v=..."
               value={youtubeUrl}
-              onChange={(e) => {
+              onChange={e => {
                 setYoutubeUrl(e.target.value);
                 setError(null);
               }}
@@ -429,21 +413,14 @@ export const VideoUploader = ({ onVideoUploaded, onCancel, currentVideo }: Video
               type="url"
               placeholder="https://vimeo.com/..."
               value={vimeoUrl}
-              onChange={(e) => {
+              onChange={e => {
                 setVimeoUrl(e.target.value);
                 setError(null);
               }}
             />
-            <p className="text-xs text-gray-500">
-              Exemple : https://vimeo.com/123456789
-            </p>
+            <p className="text-xs text-gray-500">Exemple : https://vimeo.com/123456789</p>
           </div>
-          <Button
-            type="button"
-            onClick={handleVimeoSubmit}
-            disabled={!vimeoUrl}
-            className="w-full"
-          >
+          <Button type="button" onClick={handleVimeoSubmit} disabled={!vimeoUrl} className="w-full">
             <Video className="w-4 h-4 mr-2" />
             Ajouter la vidéo Vimeo
           </Button>
@@ -457,7 +434,7 @@ export const VideoUploader = ({ onVideoUploaded, onCancel, currentVideo }: Video
               type="url"
               placeholder="https://drive.google.com/file/d/..."
               value={googleDriveUrl}
-              onChange={(e) => {
+              onChange={e => {
                 setGoogleDriveUrl(e.target.value);
                 setError(null);
               }}
@@ -504,10 +481,3 @@ export const VideoUploader = ({ onVideoUploaded, onCancel, currentVideo }: Video
     </div>
   );
 };
-
-
-
-
-
-
-

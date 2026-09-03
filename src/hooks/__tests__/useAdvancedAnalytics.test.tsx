@@ -7,7 +7,11 @@ import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useAdvancedDashboards, useAnalyticsMetrics, useCreateAdvancedDashboard } from '@/hooks/analytics/useAdvancedAnalytics';
+import {
+  useAdvancedDashboards,
+  useAnalyticsMetrics,
+  useCreateAdvancedDashboard,
+} from '@/hooks/analytics/useAdvancedAnalytics';
 import { supabase } from '@/integrations/supabase/client';
 
 // Mock Supabase
@@ -32,7 +36,7 @@ vi.mock('@/hooks/use-toast', () => ({
 }));
 
 describe('useAdvancedAnalytics', () => {
-  let  queryClient: QueryClient;
+  let queryClient: QueryClient;
 
   beforeEach(() => {
     queryClient = new QueryClient({
@@ -166,10 +170,3 @@ describe('useAdvancedAnalytics', () => {
     });
   });
 });
-
-
-
-
-
-
-

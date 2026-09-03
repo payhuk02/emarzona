@@ -1,7 +1,7 @@
 /**
  * Physical Product - Affiliate Settings
  * Date: 28 octobre 2025
- * 
+ *
  * Composant réutilisant DigitalAffiliateSettings pour produits physiques
  */
 
@@ -29,9 +29,3 @@ export const PhysicalAffiliateSettings = ({
     />
   );
 };
-
-
-
-
-
-

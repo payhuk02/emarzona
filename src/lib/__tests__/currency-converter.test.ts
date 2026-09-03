@@ -20,14 +20,14 @@ describe('currency-converter', () => {
   describe('convertCurrency', () => {
     it('devrait convertir XOF vers EUR avec le taux de fallback', () => {
       const result = convertCurrency(1000, 'XOF', 'EUR');
-      
+
       // 1000 XOF * 0.00152 = 1.52 EUR
       expect(result).toBeCloseTo(1.52, 2);
     });
 
     it('devrait convertir EUR vers XOF avec le taux de fallback', () => {
       const result = convertCurrency(1, 'EUR', 'XOF');
-      
+
       // 1 EUR * 655.957 = 655.957 XOF
       expect(result).toBeCloseTo(655.957, 2);
     });
@@ -39,7 +39,7 @@ describe('currency-converter', () => {
 
     it('devrait gérer les conversions USD vers EUR', () => {
       const result = convertCurrency(100, 'USD', 'EUR');
-      
+
       // Via XOF: 100 USD -> XOF -> EUR
       // 100 USD * 599.04 = 59904 XOF
       // 59904 XOF * 0.00152 = 91.05 EUR
@@ -69,12 +69,12 @@ describe('currency-converter', () => {
   describe('updateExchangeRates', () => {
     it('devrait mettre à jour les taux de change', async () => {
       const result = await updateExchangeRates();
-      
+
       // Devrait appeler l'API de mise à jour
       expect(result).toBeDefined();
     });
 
-    it('devrait gérer les erreurs de l\'API', async () => {
+    it("devrait gérer les erreurs de l'API", async () => {
       const { updateExchangeRates: mockUpdate } = await import('../currency-exchange-api');
       vi.mocked(mockUpdate).mockRejectedValueOnce(new Error('API Error'));
 

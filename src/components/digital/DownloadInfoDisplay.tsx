@@ -29,12 +29,12 @@ import { cn } from '@/lib/utils';
  * Statuts possibles pour un téléchargement
  */
 export type DownloadStatus =
-  | 'pending'        // En attente (paiement non confirmé)
-  | 'active'         // Actif (accès autorisé)
-  | 'completed'      // Téléchargement effectué
-  | 'expired'        // Expiré (délai dépassé)
-  | 'revoked'        // Révoqué (accès retiré)
-  | 'suspended';     // Suspendu (activité suspecte)
+  | 'pending' // En attente (paiement non confirmé)
+  | 'active' // Actif (accès autorisé)
+  | 'completed' // Téléchargement effectué
+  | 'expired' // Expiré (délai dépassé)
+  | 'revoked' // Révoqué (accès retiré)
+  | 'suspended'; // Suspendu (activité suspecte)
 
 /**
  * Variantes d'affichage du composant
@@ -72,52 +72,52 @@ export interface DownloadProduct {
 export interface DownloadInfoDisplayProps {
   /** ID unique du téléchargement */
   downloadId: string;
-  
+
   /** Statut du téléchargement */
   status: DownloadStatus;
-  
+
   /** Date d'achat/activation */
   purchaseDate: Date | string;
-  
+
   /** Informations client */
   customer: DownloadCustomer;
-  
+
   /** Informations produit */
   product: DownloadProduct;
-  
+
   /** Nombre de téléchargements effectués */
   downloadCount?: number;
-  
+
   /** Limite de téléchargements */
   downloadLimit?: number;
-  
+
   /** Clé de licence (si applicable) */
   licenseKey?: string;
-  
+
   /** Variante d'affichage */
   variant?: DownloadInfoVariant;
-  
+
   /** Classe CSS personnalisée */
   className?: string;
-  
+
   /** Date de dernière activité */
   lastActivity?: Date | string;
-  
+
   /** Date d'expiration */
   expiryDate?: Date | string;
-  
+
   /** Montant payé */
   amountPaid?: number;
-  
+
   /** Méthode de paiement */
   paymentMethod?: string;
-  
+
   /** Niveau de protection */
   protectionLevel?: 'basic' | 'standard' | 'advanced';
-  
+
   /** Callback pour actions */
   onAction?: (action: string) => void;
-  
+
   /** Afficher les boutons d'action */
   showActions?: boolean;
 }
@@ -125,7 +125,7 @@ export interface DownloadInfoDisplayProps {
 /**
  * Configuration des statuts
  */
-const  STATUS_CONFIG: Record<
+const STATUS_CONFIG: Record<
   DownloadStatus,
   {
     label: string;
@@ -181,10 +181,10 @@ const  STATUS_CONFIG: Record<
 
 /**
  * DownloadInfoDisplay - Composant d'affichage des informations de téléchargement
- * 
+ *
  * @example
  * ```tsx
- * <DownloadInfoDisplay 
+ * <DownloadInfoDisplay
  *   downloadId="DL-12345"
  *   status="active"
  *   purchaseDate={new Date()}
@@ -196,7 +196,7 @@ const  STATUS_CONFIG: Record<
  * />
  * ```
  */
-export const DownloadInfoDisplay : React.FC<DownloadInfoDisplayProps> = ({
+export const DownloadInfoDisplay: React.FC<DownloadInfoDisplayProps> = ({
   downloadId,
   status,
   purchaseDate,
@@ -240,9 +240,8 @@ export const DownloadInfoDisplay : React.FC<DownloadInfoDisplayProps> = ({
   };
 
   // Calculer le pourcentage de téléchargements utilisés
-  const downloadPercentage = downloadCount !== undefined && downloadLimit
-    ? (downloadCount / downloadLimit) * 100
-    : 0;
+  const downloadPercentage =
+    downloadCount !== undefined && downloadLimit ? (downloadCount / downloadLimit) * 100 : 0;
 
   // VARIANT: COMPACT
   if (variant === 'compact') {
@@ -261,7 +260,9 @@ export const DownloadInfoDisplay : React.FC<DownloadInfoDisplayProps> = ({
 
           <div className="text-right">
             {downloadCount !== undefined && downloadLimit && (
-              <p className="text-sm font-medium">{downloadCount}/{downloadLimit}</p>
+              <p className="text-sm font-medium">
+                {downloadCount}/{downloadLimit}
+              </p>
             )}
             <p className="text-xs text-muted-foreground">#{downloadId}</p>
           </div>
@@ -282,9 +283,7 @@ export const DownloadInfoDisplay : React.FC<DownloadInfoDisplayProps> = ({
                 <Icon className={cn('h-5 w-5', config.color)} />
               </div>
               <div>
-                <p className={cn('font-semibold', config.textColor)}>
-                  {config.label}
-                </p>
+                <p className={cn('font-semibold', config.textColor)}>{config.label}</p>
                 <p className="text-sm text-muted-foreground">#{downloadId}</p>
               </div>
             </div>
@@ -338,7 +337,9 @@ export const DownloadInfoDisplay : React.FC<DownloadInfoDisplayProps> = ({
             <div className="space-y-2">
               <div className="flex justify-between text-xs">
                 <span className="text-muted-foreground">Téléchargements</span>
-                <span className="font-medium">{downloadCount}/{downloadLimit}</span>
+                <span className="font-medium">
+                  {downloadCount}/{downloadLimit}
+                </span>
               </div>
               <Progress value={downloadPercentage} className="h-2" />
             </div>
@@ -363,11 +364,7 @@ export const DownloadInfoDisplay : React.FC<DownloadInfoDisplayProps> = ({
           {/* Actions */}
           {showActions && onAction && status === 'active' && (
             <div className="flex gap-2 pt-2">
-              <Button
-                size="sm"
-                onClick={() => onAction('download')}
-                className="flex-1"
-              >
+              <Button size="sm" onClick={() => onAction('download')} className="flex-1">
                 <Download className="h-4 w-4 mr-2" />
                 Télécharger
               </Button>
@@ -389,12 +386,8 @@ export const DownloadInfoDisplay : React.FC<DownloadInfoDisplayProps> = ({
               <Icon className={cn('h-6 w-6', config.color)} />
             </div>
             <div>
-              <h3 className={cn('text-lg font-bold', config.textColor)}>
-                {config.label}
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                Téléchargement #{downloadId}
-              </p>
+              <h3 className={cn('text-lg font-bold', config.textColor)}>{config.label}</h3>
+              <p className="text-sm text-muted-foreground">Téléchargement #{downloadId}</p>
             </div>
           </div>
           <div className="flex gap-2">
@@ -422,22 +415,18 @@ export const DownloadInfoDisplay : React.FC<DownloadInfoDisplayProps> = ({
               <Calendar className="h-5 w-5 text-muted-foreground" />
               <div>
                 <p className="text-xs text-muted-foreground font-medium">Date d'achat</p>
-                <p className="text-base font-semibold mt-1">
-                  {formatDate(purchaseDate)}
-                </p>
+                <p className="text-base font-semibold mt-1">{formatDate(purchaseDate)}</p>
               </div>
             </div>
           </Card>
-          
+
           {lastActivity && (
             <Card className="p-4 bg-muted/30">
               <div className="flex items-center gap-3">
                 <Clock className="h-5 w-5 text-muted-foreground" />
                 <div>
                   <p className="text-xs text-muted-foreground font-medium">Dernière activité</p>
-                  <p className="text-base font-semibold mt-1">
-                    {formatDate(lastActivity)}
-                  </p>
+                  <p className="text-base font-semibold mt-1">{formatDate(lastActivity)}</p>
                 </div>
               </div>
             </Card>
@@ -505,9 +494,7 @@ export const DownloadInfoDisplay : React.FC<DownloadInfoDisplayProps> = ({
               <div>
                 <p className="font-semibold">{product.name}</p>
                 {product.version && (
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Version {product.version}
-                  </p>
+                  <p className="text-sm text-muted-foreground mt-1">Version {product.version}</p>
                 )}
               </div>
               <div className="text-right">
@@ -554,7 +541,9 @@ export const DownloadInfoDisplay : React.FC<DownloadInfoDisplayProps> = ({
               </div>
               <Progress value={downloadPercentage} className="h-3" />
               <p className="text-xs text-muted-foreground">
-                {downloadLimit - downloadCount} téléchargement{downloadLimit - downloadCount > 1 ? 's' : ''} restant{downloadLimit - downloadCount > 1 ? 's' : ''}
+                {downloadLimit - downloadCount} téléchargement
+                {downloadLimit - downloadCount > 1 ? 's' : ''} restant
+                {downloadLimit - downloadCount > 1 ? 's' : ''}
               </p>
             </Card>
           </div>
@@ -568,14 +557,8 @@ export const DownloadInfoDisplay : React.FC<DownloadInfoDisplayProps> = ({
               <span className="font-semibold text-blue-700">Clé de licence</span>
             </div>
             <div className="flex items-center gap-2">
-              <code className="flex-1 p-2 bg-white rounded font-mono text-sm">
-                {licenseKey}
-              </code>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => copyToClipboard(licenseKey)}
-              >
+              <code className="flex-1 p-2 bg-white rounded font-mono text-sm">{licenseKey}</code>
+              <Button variant="outline" size="sm" onClick={() => copyToClipboard(licenseKey)}>
                 <Copy className="h-4 w-4" />
               </Button>
             </div>
@@ -602,19 +585,11 @@ export const DownloadInfoDisplay : React.FC<DownloadInfoDisplayProps> = ({
           <div className="flex gap-3 pt-4">
             {status === 'active' && (
               <>
-                <Button
-                  size="default"
-                  onClick={() => onAction('download')}
-                  className="flex-1"
-                >
+                <Button size="default" onClick={() => onAction('download')} className="flex-1">
                   <Download className="h-4 w-4 mr-2" />
                   Télécharger le fichier
                 </Button>
-                <Button
-                  size="default"
-                  variant="outline"
-                  onClick={() => onAction('view_details')}
-                >
+                <Button size="default" variant="outline" onClick={() => onAction('view_details')}>
                   <Eye className="h-4 w-4 mr-2" />
                   Détails
                 </Button>
@@ -650,11 +625,3 @@ export const DownloadInfoDisplay : React.FC<DownloadInfoDisplayProps> = ({
 DownloadInfoDisplay.displayName = 'DownloadInfoDisplay';
 
 export default DownloadInfoDisplay;
-
-
-
-
-
-
-
-

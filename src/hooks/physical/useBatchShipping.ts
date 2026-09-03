@@ -1,7 +1,7 @@
 /**
  * Batch Shipping Management Hooks
  * Date: 27 Janvier 2025
- * 
+ *
  * Hooks pour gérer les expéditions par lots et génération d'étiquettes multiples
  */
 
@@ -10,10 +10,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 
-const BATCH_LABEL_TEMPLATE_FIELDS = 'id, store_id, template_name, template_type, layout_config, include_tracking, include_barcode, include_instructions, is_default, is_active, created_at, updated_at';
-const BATCH_SHIPMENT_ORDER_FIELDS = 'id, batch_shipment_id, order_id, order_in_batch, status, shipping_label_id, tracking_number, error_message, error_details, processed_at, created_at, updated_at';
-const BATCH_ORDER_FIELDS = 'id, order_number, customer_id, customer_email, customer_name, customer_phone, status, payment_status, total_amount, currency, shipping_address, created_at, updated_at';
-const BATCH_SHIPPING_LABEL_FIELDS = 'id, order_id, tracking_number, label_url, service_name, service_type, status, created_at, updated_at';
+const BATCH_LABEL_TEMPLATE_FIELDS =
+  'id, store_id, template_name, template_type, layout_config, include_tracking, include_barcode, include_instructions, is_default, is_active, created_at, updated_at';
+const BATCH_SHIPMENT_ORDER_FIELDS =
+  'id, batch_shipment_id, order_id, order_in_batch, status, shipping_label_id, tracking_number, error_message, error_details, processed_at, created_at, updated_at';
+const BATCH_ORDER_FIELDS =
+  'id, order_number, customer_id, customer_email, customer_name, customer_phone, status, payment_status, total_amount, currency, shipping_address, created_at, updated_at';
+const BATCH_SHIPPING_LABEL_FIELDS =
+  'id, order_id, tracking_number, label_url, service_name, service_type, status, created_at, updated_at';
 
 // =====================================================
 // TYPES
@@ -77,20 +81,25 @@ export interface BatchLabelTemplate {
 /**
  * useBatchShipments - Récupère les lots d'expédition
  */
-export const useBatchShipments = (storeId?: string, filters?: {
-  status?: BatchShipment['status'];
-}) => {
+export const useBatchShipments = (
+  storeId?: string,
+  filters?: {
+    status?: BatchShipment['status'];
+  }
+) => {
   return useQuery({
     queryKey: ['batch-shipments', storeId, filters],
     queryFn: async () => {
       if (!storeId) throw new Error('Store ID manquant');
 
-      let  query= supabase
+      let query = supabase
         .from('batch_shipments')
-        .select(`
+        .select(
+          `
           *,
           carrier:shipping_carriers (id, name)
-        `)
+        `
+        )
         .eq('store_id', storeId);
 
       if (filters?.status) {
@@ -123,7 +132,8 @@ export const useBatchShipmentOrders = (batchId?: string) => {
 
       const { data, error } = await supabase
         .from('batch_shipment_orders')
-        .select(`
+        .select(
+          `
           *,
           order:orders (
             id,
@@ -138,7 +148,8 @@ export const useBatchShipmentOrders = (batchId?: string) => {
             tracking_number,
             label_url
           )
-        `)
+        `
+        )
         .eq('batch_shipment_id', batchId)
         .order('order_in_batch', { ascending: true });
 
@@ -205,10 +216,14 @@ export const useCreateBatchShipment = () => {
       carrierId?: string;
     }) => {
       // Générer numéro de lot
-      const { data: batchNumber, error: batchNumberError } = await supabase.rpc('generate_batch_shipment_number');
+      const { data: batchNumber, error: batchNumberError } = await supabase.rpc(
+        'generate_batch_shipment_number'
+      );
       if (batchNumberError) throw batchNumberError;
 
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
       // Créer le lot
       const { data: batch, error: batchError } = await supabase
@@ -249,7 +264,7 @@ export const useCreateBatchShipment = () => {
 
       return batch as BatchShipment;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['batch-shipments', data.store_id] });
       toast({
         title: '✅ Lot créé',
@@ -275,16 +290,12 @@ export const useProcessBatchShipment = () => {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({
-      batchId,
-      carrierId,
-    }: {
-      batchId: string;
-      carrierId?: string;
-    }) => {
+    mutationFn: async ({ batchId, carrierId }: { batchId: string; carrierId?: string }) => {
       // Mettre à jour le statut du lot
-      const { data: { user } } = await supabase.auth.getUser();
-      
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
       const { data: batch, error: batchError } = await supabase
         .from('batch_shipments')
         .update({
@@ -302,10 +313,12 @@ export const useProcessBatchShipment = () => {
       // Récupérer les commandes du lot
       const { data: batchOrders, error: ordersError } = await supabase
         .from('batch_shipment_orders')
-        .select(`
+        .select(
+          `
           ${BATCH_SHIPMENT_ORDER_FIELDS},
           order:orders(${BATCH_ORDER_FIELDS})
-        `)
+        `
+        )
         .eq('batch_shipment_id', batchId)
         .eq('status', 'pending')
         .order('order_in_batch');
@@ -313,8 +326,8 @@ export const useProcessBatchShipment = () => {
       if (ordersError) throw ordersError;
 
       // Traiter chaque commande (simplifié - à adapter selon votre système de génération d'étiquettes)
-      const  errors: Array<{ order_id: string; error: string; timestamp: string }> = [];
-      
+      const errors: Array<{ order_id: string; error: string; timestamp: string }> = [];
+
       for (const batchOrder of batchOrders || []) {
         try {
           // Mettre à jour le statut
@@ -327,7 +340,7 @@ export const useProcessBatchShipment = () => {
 
           // Ici, vous appelleriez votre fonction de génération d'étiquette
           // Pour l'instant, on simule juste le traitement
-          
+
           // Simuler génération d'étiquette (à remplacer par votre logique)
           await supabase
             .from('batch_shipment_orders')
@@ -336,7 +349,7 @@ export const useProcessBatchShipment = () => {
               processed_at: new Date().toISOString(),
             })
             .eq('id', batchOrder.id);
-        } catch ( _error: any) {
+        } catch (_error: any) {
           errors.push({
             order_id: batchOrder.order_id,
             error: error.message || 'Erreur inconnue',
@@ -370,7 +383,7 @@ export const useProcessBatchShipment = () => {
 
       return batch as BatchShipment;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['batch-shipments'] });
       queryClient.invalidateQueries({ queryKey: ['batch-shipment-orders'] });
       toast({
@@ -397,20 +410,16 @@ export const useGenerateBatchLabels = () => {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({
-      batchId,
-      templateId,
-    }: {
-      batchId: string;
-      templateId?: string;
-    }) => {
+    mutationFn: async ({ batchId, templateId }: { batchId: string; templateId?: string }) => {
       // Récupérer les commandes avec étiquettes générées
       const { data: batchOrders, error: ordersError } = await supabase
         .from('batch_shipment_orders')
-        .select(`
+        .select(
+          `
           ${BATCH_SHIPMENT_ORDER_FIELDS},
           shipping_label:shipping_labels(${BATCH_SHIPPING_LABEL_FIELDS})
-        `)
+        `
+        )
         .eq('batch_shipment_id', batchId)
         .eq('status', 'label_generated');
 
@@ -418,14 +427,14 @@ export const useGenerateBatchLabels = () => {
 
       // Générer PDF/étiquettes (simplifié - à adapter)
       // Ici vous appelleriez votre service de génération d'étiquettes
-      
+
       return {
         batchId,
         labelsGenerated: batchOrders?.length || 0,
         pdfUrl: '#', // URL du PDF généré
       };
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       toast({
         title: '✅ Étiquettes générées',
         description: `${data.labelsGenerated} étiquette${data.labelsGenerated > 1 ? 's' : ''} générée${data.labelsGenerated > 1 ? 's' : ''}`,
@@ -457,7 +466,7 @@ export const useUpdateBatchStatus = () => {
       batchId: string;
       status: BatchShipment['status'];
     }) => {
-      const  updateData: any = {
+      const updateData: any = {
         status,
         updated_at: new Date().toISOString(),
       };
@@ -497,10 +506,3 @@ export const useUpdateBatchStatus = () => {
     },
   });
 };
-
-
-
-
-
-
-

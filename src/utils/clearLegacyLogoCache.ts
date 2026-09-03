@@ -38,7 +38,12 @@ export const clearLegacyLogoCache = (): void => {
  */
 export const clearAllLegacyLogoReferences = (): void => {
   try {
-    const cacheKeys = ['platform-logo-cache', 'platform_logo_cache', 'logo_cache', 'customization_cache'];
+    const cacheKeys = [
+      'platform-logo-cache',
+      'platform_logo_cache',
+      'logo_cache',
+      'customization_cache',
+    ];
 
     cacheKeys.forEach(key => {
       try {

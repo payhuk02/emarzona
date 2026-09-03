@@ -9,7 +9,7 @@ import { logger } from './logger';
 /**
  * Types de métriques
  */
-export type MetricType = 
+export type MetricType =
   | 'page_load'
   | 'api_response'
   | 'database_query'
@@ -103,7 +103,7 @@ class MetricsStore {
    */
   addMetric(metric: Metric): void {
     this.metrics.push(metric);
-    
+
     // Limiter la taille
     if (this.metrics.length > this.maxMetrics) {
       this.metrics.shift();
@@ -120,8 +120,8 @@ class MetricsStore {
     const threshold = this.thresholds.get(metric.type);
     if (!threshold || !threshold.enabled) return;
 
-    let  severity: 'warning' | 'critical' | null = null;
-    let  thresholdValue= 0;
+    let severity: 'warning' | 'critical' | null = null;
+    let thresholdValue = 0;
 
     if (metric.value >= threshold.critical) {
       severity = 'critical';
@@ -132,7 +132,7 @@ class MetricsStore {
     }
 
     if (severity) {
-      const  alert: Alert = {
+      const alert: Alert = {
         id: `alert-${Date.now()}-${Math.random()}`,
         metricId: metric.id,
         metricName: metric.name,
@@ -190,9 +190,7 @@ class MetricsStore {
    * Obtenir les métriques par type
    */
   getMetricsByType(type: MetricType, limit: number = 100): Metric[] {
-    return this.metrics
-      .filter(m => m.type === type)
-      .slice(-limit);
+    return this.metrics.filter(m => m.type === type).slice(-limit);
   }
 
   /**
@@ -229,9 +227,9 @@ class MetricsStore {
     metricsByType: Partial<Record<MetricType, number>>;
     averageValues: Partial<Record<MetricType, number>>;
   } {
-    const  metricsByType: Partial<Record<MetricType, number>> = {};
-    const  sumByType: Partial<Record<MetricType, number>> = {};
-    const  countByType: Partial<Record<MetricType, number>> = {};
+    const metricsByType: Partial<Record<MetricType, number>> = {};
+    const sumByType: Partial<Record<MetricType, number>> = {};
+    const countByType: Partial<Record<MetricType, number>> = {};
 
     this.metrics.forEach(metric => {
       metricsByType[metric.type] = (metricsByType[metric.type] || 0) + 1;
@@ -239,7 +237,7 @@ class MetricsStore {
       countByType[metric.type] = (countByType[metric.type] || 0) + 1;
     });
 
-    const  averageValues: Partial<Record<MetricType, number>> = {};
+    const averageValues: Partial<Record<MetricType, number>> = {};
     (Object.keys(metricsByType) as MetricType[]).forEach(type => {
       const count = countByType[type] || 1;
       averageValues[type] = (sumByType[type] || 0) / count;
@@ -276,7 +274,7 @@ const metricsStore = new MetricsStore();
  * Enregistrer une métrique
  */
 export function recordMetric(metric: Omit<Metric, 'id' | 'timestamp'>): void {
-  const  fullMetric: Metric = {
+  const fullMetric: Metric = {
     ...metric,
     id: `metric-${Date.now()}-${Math.random()}`,
     timestamp: Date.now(),
@@ -402,7 +400,7 @@ interface PerformanceWithMemory extends Performance {
  */
 export function startMemoryMonitoring(interval: number = 60000): () => void {
   const perfWithMemory = performance as PerformanceWithMemory;
-  
+
   if (typeof performance === 'undefined' || !perfWithMemory.memory) {
     return () => {}; // Performance API non disponible
   }
@@ -410,7 +408,7 @@ export function startMemoryMonitoring(interval: number = 60000): () => void {
   const intervalId = setInterval(() => {
     const memory = perfWithMemory.memory;
     if (!memory) return;
-    
+
     recordMetric({
       name: 'Memory Usage',
       type: 'memory_usage',
@@ -430,8 +428,8 @@ export function startMemoryMonitoring(interval: number = 60000): () => void {
  * Surveiller le taux d'erreur
  */
 export function startErrorRateMonitoring(): () => void {
-  let  errorCount= 0;
-  let  totalRequests= 0;
+  let errorCount = 0;
+  let totalRequests = 0;
   const windowSize = 100; // Dernières 100 requêtes
 
   const originalFetch = window.fetch;
@@ -464,10 +462,3 @@ export function startErrorRateMonitoring(): () => void {
     window.fetch = originalFetch;
   };
 }
-
-
-
-
-
-
-

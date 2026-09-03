@@ -32,9 +32,7 @@ export function useRequireTermsConsent(): TermsConsentStatus & {
 
   // Trouver le consentement aux CGV (terms) le plus récent et non révoqué
   const termsConsent = consents?.find(
-    consent => 
-      consent.document_type === 'terms' && 
-      !consent.is_revoked
+    consent => consent.document_type === 'terms' && !consent.is_revoked
   );
 
   const hasConsented = !!termsConsent;
@@ -59,7 +57,7 @@ export function useRequireTermsConsent(): TermsConsentStatus & {
         documentVersion: termsDoc.version,
         ipAddress: ipAddress || undefined,
         userAgent: navigator.userAgent,
-        consentMethod: 'settings'
+        consentMethod: 'settings',
       });
     } catch (error) {
       logger.error('Error recording terms consent', { error });
@@ -74,7 +72,7 @@ export function useRequireTermsConsent(): TermsConsentStatus & {
     needsUpdate,
     isLoading,
     recordConsent,
-    currentTermsDoc: termsDoc
+    currentTermsDoc: termsDoc,
   };
 }
 
@@ -102,10 +100,3 @@ export async function checkTermsConsent(userId: string): Promise<boolean> {
     return false;
   }
 }
-
-
-
-
-
-
-

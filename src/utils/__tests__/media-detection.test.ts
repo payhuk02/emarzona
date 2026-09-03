@@ -80,10 +80,10 @@ describe('media-detection', () => {
       it('should prioritize extension over MIME type', () => {
         // Extension image, MIME video → should be image
         expect(detectMediaType('photo.jpg', 'video/mp4')).toBe('image');
-        
+
         // Extension video, MIME image → should be video
         expect(detectMediaType('video.mp4', 'image/jpeg')).toBe('video');
-        
+
         // Extension file, MIME image → should be file (extension prioritaire, mais PDF n'est pas une image)
         // Note: Si l'extension n'est pas reconnue comme image/video, on utilise le MIME type
         expect(detectMediaType('document.pdf', 'image/jpeg')).toBe('image'); // MIME type utilisé car extension non reconnue
@@ -181,10 +181,3 @@ describe('media-detection', () => {
     });
   });
 });
-
-
-
-
-
-
-

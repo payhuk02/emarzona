@@ -23,13 +23,8 @@ export const AbandonedCartRecovery: React.FC<AbandonedCartRecoveryProps> = ({
   autoProcessEmails = false,
 }) => {
   const { toast } = useToast();
-  const {
-    abandonedCarts,
-    isLoading,
-    sendRecoveryEmail,
-    markAsRecovered,
-    processRecoveryEmails,
-  } = useAbandonedCartRecovery();
+  const { abandonedCarts, isLoading, sendRecoveryEmail, markAsRecovered, processRecoveryEmails } =
+    useAbandonedCartRecovery();
 
   const [processingBatch, setProcessingBatch] = useState(false);
 
@@ -91,7 +86,7 @@ export const AbandonedCartRecovery: React.FC<AbandonedCartRecoveryProps> = ({
 
   if (isLoading) {
     return (
-      <Card className={cn("w-full", className)}>
+      <Card className={cn('w-full', className)}>
         <CardContent className="p-6">
           <div className="animate-pulse space-y-4">
             <div className="h-4 bg-gray-200 rounded w-1/4"></div>
@@ -106,7 +101,7 @@ export const AbandonedCartRecovery: React.FC<AbandonedCartRecoveryProps> = ({
   }
 
   return (
-    <div className={cn("space-y-6", className)}>
+    <div className={cn('space-y-6', className)}>
       {showAdminControls && (
         <Card>
           <CardHeader>
@@ -121,13 +116,17 @@ export const AbandonedCartRecovery: React.FC<AbandonedCartRecoveryProps> = ({
                 <div className="flex items-center gap-2">
                   <ShoppingCart className="h-4 w-4 text-muted-foreground" />
                   <span className="text-sm text-muted-foreground">
-                    {abandonedCarts.length} panier{abandonedCarts.length !== 1 ? 's' : ''} abandonné{abandonedCarts.length !== 1 ? 's' : ''}
+                    {abandonedCarts.length} panier{abandonedCarts.length !== 1 ? 's' : ''} abandonné
+                    {abandonedCarts.length !== 1 ? 's' : ''}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Users className="h-4 w-4 text-muted-foreground" />
                   <span className="text-sm text-muted-foreground">
-                    {abandonedCarts.filter(cart => cart.recovery_sent).length} email{abandonedCarts.filter(cart => cart.recovery_sent).length !== 1 ? 's' : ''} envoyé{abandonedCarts.filter(cart => cart.recovery_sent).length !== 1 ? 's' : ''}
+                    {abandonedCarts.filter(cart => cart.recovery_sent).length} email
+                    {abandonedCarts.filter(cart => cart.recovery_sent).length !== 1 ? 's' : ''}{' '}
+                    envoyé
+                    {abandonedCarts.filter(cart => cart.recovery_sent).length !== 1 ? 's' : ''}
                   </span>
                 </div>
               </div>
@@ -152,26 +151,24 @@ export const AbandonedCartRecovery: React.FC<AbandonedCartRecoveryProps> = ({
               <p className="text-muted-foreground">
                 {showAdminControls
                   ? 'Aucun panier abandonné à traiter.'
-                  : 'Vous n\'avez pas de paniers abandonnés.'}
+                  : "Vous n'avez pas de paniers abandonnés."}
               </p>
             </CardContent>
           </Card>
         ) : (
-          abandonedCarts.map((cart) => {
+          abandonedCarts.map(cart => {
             const status = getRecoveryStatus(cart);
             return (
               <Card key={cart.id} className="overflow-hidden">
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <Badge variant={status.variant}>
-                        {status.label}
-                      </Badge>
+                      <Badge variant={status.variant}>{status.label}</Badge>
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Clock className="h-4 w-4" />
                         {formatDistanceToNow(new Date(cart.abandoned_at), {
                           addSuffix: true,
-                          locale: fr
+                          locale: fr,
                         })}
                       </div>
                     </div>
@@ -200,9 +197,7 @@ export const AbandonedCartRecovery: React.FC<AbandonedCartRecoveryProps> = ({
                             )}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="font-medium text-sm truncate">
-                              {item.product_name}
-                            </p>
+                            <p className="font-medium text-sm truncate">{item.product_name}</p>
                             <p className="text-sm text-muted-foreground">
                               Qty: {item.quantity} × {item.price.toLocaleString()} {cart.currency}
                             </p>
@@ -211,7 +206,8 @@ export const AbandonedCartRecovery: React.FC<AbandonedCartRecoveryProps> = ({
                       ))}
                       {cart.items.length > 3 && (
                         <p className="text-sm text-muted-foreground text-center">
-                          +{cart.items.length - 3} autres article{cart.items.length - 3 !== 1 ? 's' : ''}
+                          +{cart.items.length - 3} autres article
+                          {cart.items.length - 3 !== 1 ? 's' : ''}
                         </p>
                       )}
                     </div>

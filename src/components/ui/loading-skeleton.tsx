@@ -3,8 +3,8 @@
  * Optimisés avec React.memo pour éviter les re-renders inutiles
  */
 
-import { memo } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
+import { memo } from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export const LoadingSkeleton = memo(() => {
   return (
@@ -43,9 +43,3 @@ export const TableSkeleton = memo(({ rows = 5 }: { rows?: number }) => {
 });
 
 TableSkeleton.displayName = 'TableSkeleton';
-
-
-
-
-
-

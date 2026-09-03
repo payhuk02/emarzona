@@ -1,7 +1,7 @@
 /**
  * Warehouses Management Component
  * Date: 27 Janvier 2025
- * 
+ *
  * Gestion complète des entrepôts (liste, création, édition, suppression)
  * Design responsive avec le même style que Mes Templates
  */
@@ -13,7 +13,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import {
   Dialog,
   DialogContent,
@@ -26,7 +33,19 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { useWarehouses, useCreateWarehouse, Warehouse } from '@/hooks/physical/useWarehouses';
 import { useStore } from '@/hooks/useStore';
-import { Plus, Edit, Trash2, Warehouse as WarehouseIcon, MapPin, Package, DollarSign, Star, Search, X, RefreshCw } from 'lucide-react';
+import {
+  Plus,
+  Edit,
+  Trash2,
+  Warehouse as WarehouseIcon,
+  MapPin,
+  Package,
+  DollarSign,
+  Star,
+  Search,
+  X,
+  RefreshCw,
+} from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
@@ -147,7 +166,7 @@ export default function WarehousesManagement() {
         queryClient.invalidateQueries({ queryKey: ['warehouses', store.id] });
         toast({
           title: '✅ Entrepôt mis à jour',
-          description: 'L\'entrepôt a été mis à jour avec succès',
+          description: "L'entrepôt a été mis à jour avec succès",
         });
       } else {
         // Create
@@ -157,7 +176,7 @@ export default function WarehousesManagement() {
         });
       }
       handleCloseDialog();
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
@@ -171,23 +190,20 @@ export default function WarehousesManagement() {
     if (!confirm('Êtes-vous sûr de vouloir supprimer cet entrepôt ?')) return;
 
     try {
-      const { error } = await supabase
-        .from('warehouses')
-        .delete()
-        .eq('id', warehouseId);
+      const { error } = await supabase.from('warehouses').delete().eq('id', warehouseId);
 
       if (error) throw error;
 
       queryClient.invalidateQueries({ queryKey: ['warehouses', store?.id] });
       toast({
         title: '✅ Entrepôt supprimé',
-        description: 'L\'entrepôt a été supprimé avec succès',
+        description: "L'entrepôt a été supprimé avec succès",
       });
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
-        description: errorMessage || 'Impossible de supprimer l\'entrepôt',
+        description: errorMessage || "Impossible de supprimer l'entrepôt",
         variant: 'destructive',
       });
     }
@@ -236,7 +252,7 @@ export default function WarehousesManagement() {
             Gérez vos entrepôts et leurs configurations
           </p>
         </div>
-        <Button 
+        <Button
           onClick={() => handleOpenDialog()}
           className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
           size="sm"
@@ -248,15 +264,35 @@ export default function WarehousesManagement() {
       </div>
 
       {/* Stats Cards - Responsive */}
-      <div 
+      <div
         ref={statsRef}
         className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-4 animate-in fade-in slide-in-from-bottom-4 duration-700"
       >
         {[
-          { label: 'Total Entrepôts', value: stats.total, icon: WarehouseIcon, color: 'from-purple-600 to-pink-600' },
-          { label: 'Actifs', value: stats.active, icon: Package, color: 'from-green-600 to-emerald-600' },
-          { label: 'Principaux', value: stats.primary, icon: Star, color: 'from-yellow-600 to-orange-600' },
-          { label: 'Total Produits', value: stats.totalProducts, icon: DollarSign, color: 'from-blue-600 to-cyan-600' },
+          {
+            label: 'Total Entrepôts',
+            value: stats.total,
+            icon: WarehouseIcon,
+            color: 'from-purple-600 to-pink-600',
+          },
+          {
+            label: 'Actifs',
+            value: stats.active,
+            icon: Package,
+            color: 'from-green-600 to-emerald-600',
+          },
+          {
+            label: 'Principaux',
+            value: stats.primary,
+            icon: Star,
+            color: 'from-yellow-600 to-orange-600',
+          },
+          {
+            label: 'Total Produits',
+            value: stats.totalProducts,
+            icon: DollarSign,
+            color: 'from-blue-600 to-cyan-600',
+          },
         ].map((stat, index) => {
           const Icon = stat.icon;
           return (
@@ -272,7 +308,9 @@ export default function WarehousesManagement() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-3 sm:p-4 pt-0">
-                <div className={`text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
+                <div
+                  className={`text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}
+                >
                   {stat.value}
                 </div>
               </CardContent>
@@ -291,7 +329,7 @@ export default function WarehousesManagement() {
               <Input
                 placeholder="Rechercher un entrepôt..."
                 value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
+                onChange={e => setSearchInput(e.target.value)}
                 className="pl-8 sm:pl-10 h-9 sm:h-10 text-xs sm:text-sm"
                 aria-label="Rechercher"
               />
@@ -335,14 +373,12 @@ export default function WarehousesManagement() {
             <div className="text-center py-8 sm:py-12">
               <WarehouseIcon className="h-12 w-12 sm:h-16 sm:w-16 mx-auto text-muted-foreground mb-4 animate-in zoom-in-95 duration-500" />
               <p className="text-sm sm:text-base text-muted-foreground mb-4">
-                {searchInput ? 'Aucun entrepôt trouvé' : 'Aucun entrepôt configuré. Créez votre premier entrepôt pour commencer.'}
+                {searchInput
+                  ? 'Aucun entrepôt trouvé'
+                  : 'Aucun entrepôt configuré. Créez votre premier entrepôt pour commencer.'}
               </p>
               {!searchInput && (
-                <Button
-                  onClick={() => handleOpenDialog()}
-                  variant="outline"
-                  className="mt-4"
-                >
+                <Button onClick={() => handleOpenDialog()} variant="outline" className="mt-4">
                   Créer un entrepôt
                 </Button>
               )}
@@ -377,7 +413,7 @@ export default function WarehousesManagement() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredWarehouses.map((warehouse) => (
+                    {filteredWarehouses.map(warehouse => (
                       <TableRow key={warehouse.id}>
                         <TableCell>
                           <div className="flex items-center gap-2">
@@ -414,7 +450,10 @@ export default function WarehousesManagement() {
                           <div className="space-y-1 text-sm">
                             <div className="flex items-center gap-1">
                               <Package className="h-3 w-3 flex-shrink-0" />
-                              <span>{warehouse.total_products} produit{warehouse.total_products > 1 ? 's' : ''}</span>
+                              <span>
+                                {warehouse.total_products} produit
+                                {warehouse.total_products > 1 ? 's' : ''}
+                              </span>
                             </div>
                             <div className="flex items-center gap-1 text-muted-foreground">
                               <DollarSign className="h-3 w-3 flex-shrink-0" />
@@ -430,10 +469,14 @@ export default function WarehousesManagement() {
                         <TableCell>
                           <div className="flex flex-col gap-1">
                             {warehouse.is_fulfillment_center && (
-                              <Badge variant="outline" className="w-fit text-xs">Expédition</Badge>
+                              <Badge variant="outline" className="w-fit text-xs">
+                                Expédition
+                              </Badge>
                             )}
                             {warehouse.is_receiving_center && (
-                              <Badge variant="outline" className="w-fit text-xs">Réception</Badge>
+                              <Badge variant="outline" className="w-fit text-xs">
+                                Réception
+                              </Badge>
                             )}
                           </div>
                         </TableCell>
@@ -477,11 +520,11 @@ export default function WarehousesManagement() {
         <DialogContent className="max-w-[95vw] sm:max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              {editingWarehouse ? 'Modifier l\'entrepôt' : 'Nouvel entrepôt'}
+              {editingWarehouse ? "Modifier l'entrepôt" : 'Nouvel entrepôt'}
             </DialogTitle>
             <DialogDescription>
               {editingWarehouse
-                ? 'Modifiez les informations de l\'entrepôt'
+                ? "Modifiez les informations de l'entrepôt"
                 : 'Ajoutez un nouvel entrepôt à votre système'}
             </DialogDescription>
           </DialogHeader>
@@ -493,7 +536,7 @@ export default function WarehousesManagement() {
                   <Input
                     id="name"
                     value={formData.name || ''}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    onChange={e => setFormData({ ...formData, name: e.target.value })}
                     required
                   />
                 </div>
@@ -502,7 +545,7 @@ export default function WarehousesManagement() {
                   <Input
                     id="code"
                     value={formData.code || ''}
-                    onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
+                    onChange={e => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
                     placeholder="WH-001"
                     required
                   />
@@ -514,7 +557,7 @@ export default function WarehousesManagement() {
                 <Textarea
                   id="description"
                   value={formData.description || ''}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  onChange={e => setFormData({ ...formData, description: e.target.value })}
                   rows={2}
                 />
               </div>
@@ -525,7 +568,7 @@ export default function WarehousesManagement() {
                   <Input
                     id="contact_person"
                     value={formData.contact_person || ''}
-                    onChange={(e) => setFormData({ ...formData, contact_person: e.target.value })}
+                    onChange={e => setFormData({ ...formData, contact_person: e.target.value })}
                   />
                 </div>
                 <div className="space-y-2">
@@ -534,7 +577,7 @@ export default function WarehousesManagement() {
                     id="email"
                     type="email"
                     value={formData.email || ''}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    onChange={e => setFormData({ ...formData, email: e.target.value })}
                   />
                 </div>
               </div>
@@ -544,7 +587,7 @@ export default function WarehousesManagement() {
                 <Input
                   id="phone"
                   value={formData.phone || ''}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  onChange={e => setFormData({ ...formData, phone: e.target.value })}
                 />
               </div>
 
@@ -553,7 +596,7 @@ export default function WarehousesManagement() {
                 <Input
                   id="address_line1"
                   value={formData.address_line1 || ''}
-                  onChange={(e) => setFormData({ ...formData, address_line1: e.target.value })}
+                  onChange={e => setFormData({ ...formData, address_line1: e.target.value })}
                   required
                 />
               </div>
@@ -563,7 +606,7 @@ export default function WarehousesManagement() {
                 <Input
                   id="address_line2"
                   value={formData.address_line2 || ''}
-                  onChange={(e) => setFormData({ ...formData, address_line2: e.target.value })}
+                  onChange={e => setFormData({ ...formData, address_line2: e.target.value })}
                 />
               </div>
 
@@ -573,7 +616,7 @@ export default function WarehousesManagement() {
                   <Input
                     id="city"
                     value={formData.city || ''}
-                    onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                    onChange={e => setFormData({ ...formData, city: e.target.value })}
                     required
                   />
                 </div>
@@ -582,7 +625,7 @@ export default function WarehousesManagement() {
                   <Input
                     id="state"
                     value={formData.state || ''}
-                    onChange={(e) => setFormData({ ...formData, state: e.target.value })}
+                    onChange={e => setFormData({ ...formData, state: e.target.value })}
                   />
                 </div>
                 <div className="space-y-2">
@@ -590,7 +633,7 @@ export default function WarehousesManagement() {
                   <Input
                     id="postal_code"
                     value={formData.postal_code || ''}
-                    onChange={(e) => setFormData({ ...formData, postal_code: e.target.value })}
+                    onChange={e => setFormData({ ...formData, postal_code: e.target.value })}
                   />
                 </div>
               </div>
@@ -601,7 +644,7 @@ export default function WarehousesManagement() {
                   <Input
                     id="country"
                     value={formData.country || 'SN'}
-                    onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+                    onChange={e => setFormData({ ...formData, country: e.target.value })}
                   />
                 </div>
                 <div className="space-y-2">
@@ -611,7 +654,12 @@ export default function WarehousesManagement() {
                     type="number"
                     min="0"
                     value={formData.max_capacity || ''}
-                    onChange={(e) => setFormData({ ...formData, max_capacity: parseInt(e.target.value) || undefined })}
+                    onChange={e =>
+                      setFormData({
+                        ...formData,
+                        max_capacity: parseInt(e.target.value) || undefined,
+                      })
+                    }
                   />
                 </div>
               </div>
@@ -621,7 +669,7 @@ export default function WarehousesManagement() {
                 <Textarea
                   id="notes"
                   value={formData.notes || ''}
-                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                  onChange={e => setFormData({ ...formData, notes: e.target.value })}
                   rows={3}
                 />
               </div>
@@ -631,7 +679,7 @@ export default function WarehousesManagement() {
                   <Switch
                     id="is_active"
                     checked={formData.is_active ?? true}
-                    onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
+                    onCheckedChange={checked => setFormData({ ...formData, is_active: checked })}
                   />
                   <Label htmlFor="is_active">Actif</Label>
                 </div>
@@ -639,7 +687,7 @@ export default function WarehousesManagement() {
                   <Switch
                     id="is_primary"
                     checked={formData.is_primary ?? false}
-                    onCheckedChange={(checked) => setFormData({ ...formData, is_primary: checked })}
+                    onCheckedChange={checked => setFormData({ ...formData, is_primary: checked })}
                   />
                   <Label htmlFor="is_primary">Entrepôt principal</Label>
                 </div>
@@ -647,7 +695,9 @@ export default function WarehousesManagement() {
                   <Switch
                     id="is_fulfillment_center"
                     checked={formData.is_fulfillment_center ?? true}
-                    onCheckedChange={(checked) => setFormData({ ...formData, is_fulfillment_center: checked })}
+                    onCheckedChange={checked =>
+                      setFormData({ ...formData, is_fulfillment_center: checked })
+                    }
                   />
                   <Label htmlFor="is_fulfillment_center">Centre d'expédition</Label>
                 </div>
@@ -655,7 +705,9 @@ export default function WarehousesManagement() {
                   <Switch
                     id="is_receiving_center"
                     checked={formData.is_receiving_center ?? true}
-                    onCheckedChange={(checked) => setFormData({ ...formData, is_receiving_center: checked })}
+                    onCheckedChange={checked =>
+                      setFormData({ ...formData, is_receiving_center: checked })
+                    }
                   />
                   <Label htmlFor="is_receiving_center">Centre de réception</Label>
                 </div>
@@ -723,13 +775,15 @@ function WarehouseCard({ warehouse, onEdit, onDelete, animationDelay = 0 }: Ware
           <div className="flex items-center gap-2 text-muted-foreground">
             <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
             <span>
-              Capacité: {warehouse.current_capacity} / {warehouse.max_capacity || '∞'} {warehouse.capacity_unit}
+              Capacité: {warehouse.current_capacity} / {warehouse.max_capacity || '∞'}{' '}
+              {warehouse.capacity_unit}
             </span>
           </div>
           <div className="flex items-center gap-2 text-muted-foreground">
             <DollarSign className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
             <span>
-              {warehouse.total_products} produit{warehouse.total_products > 1 ? 's' : ''} • {new Intl.NumberFormat('fr-FR', {
+              {warehouse.total_products} produit{warehouse.total_products > 1 ? 's' : ''} •{' '}
+              {new Intl.NumberFormat('fr-FR', {
                 style: 'currency',
                 currency: 'XOF',
               }).format(warehouse.total_value)}
@@ -738,28 +792,22 @@ function WarehouseCard({ warehouse, onEdit, onDelete, animationDelay = 0 }: Ware
         </div>
         <div className="flex flex-wrap gap-2">
           {warehouse.is_fulfillment_center && (
-            <Badge variant="outline" className="text-xs">Expédition</Badge>
+            <Badge variant="outline" className="text-xs">
+              Expédition
+            </Badge>
           )}
           {warehouse.is_receiving_center && (
-            <Badge variant="outline" className="text-xs">Réception</Badge>
+            <Badge variant="outline" className="text-xs">
+              Réception
+            </Badge>
           )}
         </div>
         <div className="flex gap-2 pt-2">
-          <Button
-            onClick={onEdit}
-            size="sm"
-            variant="outline"
-            className="flex-1"
-          >
+          <Button onClick={onEdit} size="sm" variant="outline" className="flex-1">
             <Edit className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
             <span className="text-xs sm:text-sm">Modifier</span>
           </Button>
-          <Button
-            onClick={onDelete}
-            size="sm"
-            variant="destructive"
-            className="flex-1"
-          >
+          <Button onClick={onDelete} size="sm" variant="destructive" className="flex-1">
             <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
             <span className="text-xs sm:text-sm">Supprimer</span>
           </Button>
@@ -768,9 +816,3 @@ function WarehouseCard({ warehouse, onEdit, onDelete, animationDelay = 0 }: Ware
     </Card>
   );
 }
-
-
-
-
-
-

@@ -172,20 +172,18 @@ describe('AIChatbot', () => {
         select: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnThis(),
         order: vi.fn().mockReturnThis(),
-        limit: vi
-          .fn()
-          .mockResolvedValueOnce({
-            data: [
-              {
-                id: 'order-1',
-                status: 'processing',
-                created_at: new Date(),
-                total_amount: 100,
-                currency: 'EUR',
-              },
-            ],
-            error: null,
-          }),
+        limit: vi.fn().mockResolvedValueOnce({
+          data: [
+            {
+              id: 'order-1',
+              status: 'processing',
+              created_at: new Date(),
+              total_amount: 100,
+              currency: 'EUR',
+            },
+          ],
+          error: null,
+        }),
       } as unknown as {
         select: () => {
           eq: () => { order: () => { limit: () => Promise<{ data: unknown[]; error: unknown }> } };
@@ -273,12 +271,10 @@ describe('AIChatbot', () => {
       mockSupabaseFrom.mockReturnValueOnce({
         select: vi.fn().mockReturnThis(),
         ilike: vi.fn().mockReturnThis(),
-        limit: vi
-          .fn()
-          .mockResolvedValueOnce({
-            data: [{ id: 'p1', name: 'Produit Test 1', category: 'Digital' }],
-            error: null,
-          }),
+        limit: vi.fn().mockResolvedValueOnce({
+          data: [{ id: 'p1', name: 'Produit Test 1', category: 'Digital' }],
+          error: null,
+        }),
       } as unknown as {
         select: () => {
           ilike: () => { limit: () => Promise<{ data: unknown[]; error: unknown }> };
@@ -504,13 +500,13 @@ describe('AIChatbot', () => {
   describe('processMessage', () => {
     it('should create new session if not exists', async () => {
       // @ts-expect-error - Mocking internal method
-      vi.spyOn(chatbot, 'generateResponse').mockResolvedValueOnce({ message: 'New session response' });
+      vi.spyOn(chatbot, 'generateResponse').mockResolvedValueOnce({
+        message: 'New session response',
+      });
 
       const response = await chatbot.processMessage('new-session-id', 'Hello', 'user-new');
       expect(response.message).toBe('New session response');
-      expect(
-        (chatbot as unknown as { sessions: Map<string, ChatSession> }).sessions.size
-      ).toBe(2);
+      expect((chatbot as unknown as { sessions: Map<string, ChatSession> }).sessions.size).toBe(2);
     });
 
     it('should add user and assistant messages to session history', async () => {
@@ -605,7 +601,7 @@ describe('AIChatbot', () => {
       await (
         chatbot as unknown as { _saveSession: (session: ChatSession) => Promise<void> }
       )._saveSession(mockSession as unknown as ChatSession);
-      
+
       expect(mockUpsert).toHaveBeenCalledWith(
         expect.objectContaining({
           id: 'test-session-id',
@@ -617,7 +613,9 @@ describe('AIChatbot', () => {
     });
 
     it('should log warning if save fails', async () => {
-      const mockUpsert = vi.fn().mockResolvedValue({ data: null, error: { message: 'Save Error' } });
+      const mockUpsert = vi
+        .fn()
+        .mockResolvedValue({ data: null, error: { message: 'Save Error' } });
       mockSupabaseFrom.mockReturnValueOnce({
         upsert: mockUpsert,
       } as unknown as { upsert: () => Promise<{ data: unknown; error: unknown }> });

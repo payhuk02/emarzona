@@ -30,7 +30,7 @@ interface SequenceStepsListProps {
   onEditStep?: (step: EmailSequenceStep) => void;
 }
 
-const  DELAY_LABELS: Record<SequenceStepDelayType, string> = {
+const DELAY_LABELS: Record<SequenceStepDelayType, string> = {
   immediate: 'Immédiat',
   minutes: 'Minutes',
   hours: 'Heures',
@@ -41,14 +41,14 @@ function formatDelay(delayType: SequenceStepDelayType, delayValue: number): stri
   if (delayType === 'immediate') {
     return 'Immédiatement';
   }
-  
+
   const value = delayValue || 0;
   const type = DELAY_LABELS[delayType];
-  
+
   if (value === 1) {
     return `1 ${type.slice(0, -1)}`;
   }
-  
+
   return `${value} ${type}`;
 }
 
@@ -65,9 +65,9 @@ export const SequenceStepsList = ({
 
   const handleDelete = async () => {
     if (!stepToDelete) return;
-    
+
     // Trouver le step pour obtenir le sequenceId
-    const step = steps?.find((s) => s.id === stepToDelete);
+    const step = steps?.find(s => s.id === stepToDelete);
     if (!step) return;
 
     await deleteStep.mutateAsync({
@@ -97,7 +97,8 @@ export const SequenceStepsList = ({
             <div>
               <CardTitle>Étapes de la séquence</CardTitle>
               <CardDescription>
-                Configurez les emails qui seront envoyés dans cette séquence ({steps?.length || 0} étape{steps?.length !== 1 ? 's' : ''})
+                Configurez les emails qui seront envoyés dans cette séquence ({steps?.length || 0}{' '}
+                étape{steps?.length !== 1 ? 's' : ''})
               </CardDescription>
             </div>
             {onAddStep && (
@@ -134,9 +135,7 @@ export const SequenceStepsList = ({
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <h4 className="font-medium">
-                            Étape {step.step_order}
-                          </h4>
+                          <h4 className="font-medium">Étape {step.step_order}</h4>
                           <Badge variant="outline" className="flex items-center gap-1">
                             <Clock className="h-3 w-3" />
                             {formatDelay(step.delay_type, step.delay_value)}
@@ -146,9 +145,7 @@ export const SequenceStepsList = ({
                           )}
                         </div>
                         {step.conditions && Object.keys(step.conditions).length > 0 && (
-                          <p className="text-xs text-muted-foreground mt-1">
-                            Conditions définies
-                          </p>
+                          <p className="text-xs text-muted-foreground mt-1">Conditions définies</p>
                         )}
                       </div>
                     </div>
@@ -207,10 +204,3 @@ export const SequenceStepsList = ({
     </>
   );
 };
-
-
-
-
-
-
-

@@ -1,7 +1,7 @@
 /**
  * Kit Components Component
  * Date: 27 Janvier 2025
- * 
+ *
  * Gestion des composants d'un kit
  */
 
@@ -12,7 +12,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import {
   Dialog,
   DialogContent,
@@ -126,7 +133,7 @@ export default function KitComponents() {
         });
       }
       handleCloseDialog();
-    } catch ( _error: any) {
+    } catch (_error: any) {
       toast({
         title: '❌ Erreur',
         description: error.message || 'Une erreur est survenue',
@@ -139,10 +146,7 @@ export default function KitComponents() {
     if (!confirm('Êtes-vous sûr de vouloir supprimer ce composant ?')) return;
 
     try {
-      const { error } = await supabase
-        .from('kit_components')
-        .delete()
-        .eq('id', componentId);
+      const { error } = await supabase.from('kit_components').delete().eq('id', componentId);
 
       if (error) throw error;
 
@@ -151,7 +155,7 @@ export default function KitComponents() {
         title: '✅ Composant supprimé',
         description: 'Le composant a été supprimé',
       });
-    } catch ( _error: any) {
+    } catch (_error: any) {
       toast({
         title: '❌ Erreur',
         description: error.message || 'Impossible de supprimer le composant',
@@ -174,15 +178,13 @@ export default function KitComponents() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Composants de Kit</h2>
-          <p className="text-muted-foreground">
-            Gérez les produits composants d'un kit
-          </p>
+          <p className="text-muted-foreground">Gérez les produits composants d'un kit</p>
         </div>
         <div className="flex items-center gap-4">
           <Input
             placeholder="ID du kit"
             value={selectedKitId}
-            onChange={(e) => setSelectedKitId(e.target.value)}
+            onChange={e => setSelectedKitId(e.target.value)}
             className="w-64"
           />
           {selectedKitId && (
@@ -198,9 +200,7 @@ export default function KitComponents() {
         <Card>
           <CardContent className="py-12 text-center">
             <Package className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-            <p className="text-muted-foreground">
-              Entrez l'ID d'un kit pour voir ses composants
-            </p>
+            <p className="text-muted-foreground">Entrez l'ID d'un kit pour voir ses composants</p>
           </CardContent>
         </Card>
       ) : (
@@ -231,7 +231,7 @@ export default function KitComponents() {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    components.map((component) => (
+                    components.map(component => (
                       <TableRow key={component.id}>
                         <TableCell>
                           <div className="flex items-center gap-2">
@@ -242,7 +242,8 @@ export default function KitComponents() {
                               </div>
                               {component.component_variant_id && (
                                 <div className="text-sm text-muted-foreground">
-                                  {(component.component_variant as any)?.option1_value || 'Variante'}
+                                  {(component.component_variant as any)?.option1_value ||
+                                    'Variante'}
                                 </div>
                               )}
                             </div>
@@ -266,10 +267,14 @@ export default function KitComponents() {
                         <TableCell>
                           <div className="flex flex-col gap-1">
                             {component.is_required && (
-                              <Badge variant="default" className="w-fit text-xs">Obligatoire</Badge>
+                              <Badge variant="default" className="w-fit text-xs">
+                                Obligatoire
+                              </Badge>
                             )}
                             {component.is_option && (
-                              <Badge variant="outline" className="w-fit text-xs">Option</Badge>
+                              <Badge variant="outline" className="w-fit text-xs">
+                                Option
+                              </Badge>
                             )}
                           </div>
                         </TableCell>
@@ -322,7 +327,9 @@ export default function KitComponents() {
                   <Input
                     id="component_product_id"
                     value={formData.component_product_id || ''}
-                    onChange={(e) => setFormData({ ...formData, component_product_id: e.target.value })}
+                    onChange={e =>
+                      setFormData({ ...formData, component_product_id: e.target.value })
+                    }
                     placeholder="UUID du produit"
                     required
                   />
@@ -332,7 +339,12 @@ export default function KitComponents() {
                   <Input
                     id="component_variant_id"
                     value={formData.component_variant_id || ''}
-                    onChange={(e) => setFormData({ ...formData, component_variant_id: e.target.value || undefined })}
+                    onChange={e =>
+                      setFormData({
+                        ...formData,
+                        component_variant_id: e.target.value || undefined,
+                      })
+                    }
                     placeholder="UUID de la variante"
                   />
                 </div>
@@ -346,7 +358,9 @@ export default function KitComponents() {
                     type="number"
                     min="1"
                     value={formData.quantity || 1}
-                    onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) || 1 })}
+                    onChange={e =>
+                      setFormData({ ...formData, quantity: parseInt(e.target.value) || 1 })
+                    }
                     required
                   />
                 </div>
@@ -358,7 +372,12 @@ export default function KitComponents() {
                     step="0.01"
                     min="0"
                     value={formData.price_override || ''}
-                    onChange={(e) => setFormData({ ...formData, price_override: parseFloat(e.target.value) || undefined })}
+                    onChange={e =>
+                      setFormData({
+                        ...formData,
+                        price_override: parseFloat(e.target.value) || undefined,
+                      })
+                    }
                   />
                 </div>
               </div>
@@ -368,7 +387,7 @@ export default function KitComponents() {
                   <Switch
                     id="is_required"
                     checked={formData.is_required ?? true}
-                    onCheckedChange={(checked) => setFormData({ ...formData, is_required: checked })}
+                    onCheckedChange={checked => setFormData({ ...formData, is_required: checked })}
                   />
                   <Label htmlFor="is_required">Obligatoire</Label>
                 </div>
@@ -376,7 +395,7 @@ export default function KitComponents() {
                   <Switch
                     id="is_option"
                     checked={formData.is_option ?? false}
-                    onCheckedChange={(checked) => setFormData({ ...formData, is_option: checked })}
+                    onCheckedChange={checked => setFormData({ ...formData, is_option: checked })}
                   />
                   <Label htmlFor="is_option">Option</Label>
                 </div>
@@ -387,7 +406,7 @@ export default function KitComponents() {
                 <Textarea
                   id="notes"
                   value={formData.notes || ''}
-                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                  onChange={e => setFormData({ ...formData, notes: e.target.value })}
                   rows={2}
                 />
               </div>
@@ -396,9 +415,7 @@ export default function KitComponents() {
               <Button type="button" variant="outline" onClick={handleCloseDialog}>
                 Annuler
               </Button>
-              <Button type="submit">
-                {editingComponent ? 'Mettre à jour' : 'Ajouter'}
-              </Button>
+              <Button type="submit">{editingComponent ? 'Mettre à jour' : 'Ajouter'}</Button>
             </DialogFooter>
           </form>
         </DialogContent>
@@ -406,10 +423,3 @@ export default function KitComponents() {
     </div>
   );
 }
-
-
-
-
-
-
-

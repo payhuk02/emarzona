@@ -7,16 +7,12 @@ interface ProtectedActionProps {
   fallback?: ReactNode;
 }
 
-export const ProtectedAction = ({ permission, children, fallback = null }: ProtectedActionProps) => {
+export const ProtectedAction = ({
+  permission,
+  children,
+  fallback = null,
+}: ProtectedActionProps) => {
   const { can } = useCurrentAdminPermissions();
   if (!can(permission)) return <>{fallback}</>;
   return <>{children}</>;
 };
-
-
-
-
-
-
-
-

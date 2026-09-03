@@ -24,48 +24,48 @@ describe('url-validator', () => {
   describe('validateRedirectUrl', () => {
     it('devrait valider une URL GeniusPay valide', () => {
       const result = validateRedirectUrl('https://geniuspay.io/checkout/123');
-      
+
       expect(result.isValid).toBe(true);
       expect(result.url).toBeDefined();
     });
 
     it('devrait valider une URL emarzona.com valide', () => {
       const result = validateRedirectUrl('https://www.emarzona.com/dashboard');
-      
+
       expect(result.isValid).toBe(true);
     });
 
     it('devrait rejeter une URL avec un domaine non autorisé', () => {
       const result = validateRedirectUrl('https://evil.com/steal');
-      
+
       expect(result.isValid).toBe(false);
       expect(result.error).toContain('non autorisé');
     });
 
     it('devrait rejeter une URL vide', () => {
       const result = validateRedirectUrl('');
-      
+
       expect(result.isValid).toBe(false);
       expect(result.error).toContain('vide');
     });
 
     it('devrait rejeter une URL avec un format invalide', () => {
       const result = validateRedirectUrl('not-a-valid-url');
-      
+
       expect(result.isValid).toBe(false);
-      expect(result.error).toContain('Format d\'URL invalide');
+      expect(result.error).toContain("Format d'URL invalide");
     });
 
     it('devrait rejeter une URL avec un protocole non autorisé (ftp)', () => {
       const result = validateRedirectUrl('ftp://geniuspay.io/checkout');
-      
+
       expect(result.isValid).toBe(false);
       expect(result.error).toContain('Protocole non autorisé');
     });
 
     it('devrait accepter localhost en développement', () => {
       const result = validateRedirectUrl('http://localhost:3000/checkout');
-      
+
       expect(result.isValid).toBe(true);
     });
   });
@@ -88,9 +88,9 @@ describe('url-validator', () => {
       window.location = { href: '' } as any;
 
       safeRedirect('https://geniuspay.io/checkout/123');
-      
+
       expect(window.location.href).toBe('https://geniuspay.io/checkout/123');
-      
+
       window.location = originalLocation;
     });
 
@@ -100,22 +100,22 @@ describe('url-validator', () => {
       window.location = { href: '' } as any;
 
       safeRedirect('https://evil.com/steal', onError);
-      
+
       expect(onError).toHaveBeenCalled();
       expect(onError).toHaveBeenCalledWith(expect.stringContaining('non autorisé'));
-      
+
       window.location = originalLocation;
     });
 
-    it('devrait rediriger vers /dashboard si pas de callback d\'erreur', () => {
+    it("devrait rediriger vers /dashboard si pas de callback d'erreur", () => {
       const originalLocation = window.location;
       window.location = { href: '' } as any;
 
       safeRedirect('https://evil.com/steal');
-      
+
       // Devrait rediriger vers /dashboard en fallback
       expect(window.location.href).toBe('/dashboard');
-      
+
       window.location = originalLocation;
     });
   });
@@ -125,27 +125,27 @@ describe('url-validator', () => {
       const response = {
         checkout_url: 'https://geniuspay.io/checkout/123',
       };
-      
+
       const url = extractAndValidateUrl(response);
-      
+
       expect(url).toBe('https://geniuspay.io/checkout/123');
     });
 
-    it('devrait retourner null si l\'URL est invalide', () => {
+    it("devrait retourner null si l'URL est invalide", () => {
       const response = {
         checkout_url: 'https://evil.com/steal',
       };
-      
+
       const url = extractAndValidateUrl(response);
-      
+
       expect(url).toBeNull();
     });
 
-    it('devrait retourner null si le champ n\'existe pas', () => {
+    it("devrait retourner null si le champ n'existe pas", () => {
       const response = {};
-      
+
       const url = extractAndValidateUrl(response);
-      
+
       expect(url).toBeNull();
     });
 
@@ -153,9 +153,9 @@ describe('url-validator', () => {
       const response = {
         redirect_url: 'https://geniuspay.io/checkout/123',
       };
-      
+
       const url = extractAndValidateUrl(response, 'redirect_url');
-      
+
       expect(url).toBe('https://geniuspay.io/checkout/123');
     });
   });
@@ -163,7 +163,7 @@ describe('url-validator', () => {
   describe('getAllowedDomains', () => {
     it('devrait retourner la liste des domaines autorisés', () => {
       const domains = getAllowedDomains();
-      
+
       expect(domains).toContain('geniuspay.io');
       expect(domains).toContain('emarzona.com');
       expect(domains.length).toBeGreaterThan(0);

@@ -11,7 +11,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useLessonNotes, useAddNote, useUpdateNote, useDeleteNote, type CourseNote } from '@/hooks/courses/useCourseNotes';
+import {
+  useLessonNotes,
+  useAddNote,
+  useUpdateNote,
+  useDeleteNote,
+  type CourseNote,
+} from '@/hooks/courses/useCourseNotes';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatTime } from '@/lib/utils';
 import { cn } from '@/lib/utils';
@@ -101,7 +107,7 @@ export const NotesPanel = ({
     const hours = Math.floor(seconds / 3600);
     const mins = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
-    
+
     if (hours > 0) {
       return `${hours}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     }
@@ -116,12 +122,7 @@ export const NotesPanel = ({
             <FileText className="h-5 w-5" />
             Notes
           </CardTitle>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => setIsAdding(true)}
-            disabled={isAdding}
-          >
+          <Button size="sm" variant="outline" onClick={() => setIsAdding(true)} disabled={isAdding}>
             <Plus className="h-4 w-4 mr-1" />
             Ajouter
           </Button>
@@ -140,7 +141,7 @@ export const NotesPanel = ({
                 </div>
                 <Textarea
                   value={newNoteContent}
-                  onChange={(e) => setNewNoteContent(e.target.value)}
+                  onChange={e => setNewNoteContent(e.target.value)}
                   placeholder="Saisissez votre note..."
                   rows={3}
                   className="resize-none"
@@ -169,15 +170,13 @@ export const NotesPanel = ({
 
             {/* Liste des notes */}
             {isLoading ? (
-              <div className="text-center text-sm text-muted-foreground py-8">
-                Chargement...
-              </div>
+              <div className="text-center text-sm text-muted-foreground py-8">Chargement...</div>
             ) : notes.length === 0 ? (
               <div className="text-center text-sm text-muted-foreground py-8">
                 Aucune note. Cliquez sur "Ajouter" pour créer votre première note.
               </div>
             ) : (
-              notes.map((note) => (
+              notes.map(note => (
                 <div
                   key={note.id}
                   className={cn(
@@ -193,7 +192,7 @@ export const NotesPanel = ({
                       </div>
                       <Textarea
                         value={editingContent}
-                        onChange={(e) => setEditingContent(e.target.value)}
+                        onChange={e => setEditingContent(e.target.value)}
                         rows={3}
                         className="resize-none"
                       />
@@ -270,10 +269,3 @@ export const NotesPanel = ({
     </Card>
   );
 };
-
-
-
-
-
-
-

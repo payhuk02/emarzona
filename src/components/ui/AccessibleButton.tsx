@@ -1,14 +1,14 @@
 /**
  * AccessibleButton Component
  * Date: 28 Janvier 2025
- * 
+ *
  * Version améliorée du Button avec meilleure accessibilité
  * Navigation clavier, ARIA labels, focus management
  */
 
-import * as React from "react";
-import { Button, ButtonProps } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import * as React from 'react';
+import { Button, ButtonProps } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 export interface AccessibleButtonProps extends ButtonProps {
   /**
@@ -31,7 +31,7 @@ export interface AccessibleButtonProps extends ButtonProps {
   /**
    * Indique l'état actuel du bouton (pressed, etc.)
    */
-  ariaPressed?: boolean | "mixed";
+  ariaPressed?: boolean | 'mixed';
   /**
    * Gestion personnalisée du focus
    */
@@ -77,7 +77,7 @@ export const AccessibleButton = React.forwardRef<HTMLButtonElement, AccessibleBu
     const combinedRef = React.useCallback(
       (node: HTMLButtonElement) => {
         buttonRef.current = node;
-        if (typeof ref === "function") {
+        if (typeof ref === 'function') {
           ref(node);
         } else if (ref) {
           ref.current = node;
@@ -88,20 +88,18 @@ export const AccessibleButton = React.forwardRef<HTMLButtonElement, AccessibleBu
 
     // Générer aria-label automatiquement si non fourni
     const computedAriaLabel =
-      ariaLabel ||
-      (typeof children === "string" ? children : undefined) ||
-      props["aria-label"];
+      ariaLabel || (typeof children === 'string' ? children : undefined) || props['aria-label'];
 
     // Gestion des touches clavier
     const handleKeyDown = React.useCallback(
       (e: React.KeyboardEvent<HTMLButtonElement>) => {
-        if (e.key === "Enter" && onEnter) {
+        if (e.key === 'Enter' && onEnter) {
           e.preventDefault();
           onEnter();
-        } else if (e.key === "Escape" && onEscape) {
+        } else if (e.key === 'Escape' && onEscape) {
           e.preventDefault();
           onEscape();
-        } else if (e.key === " " && props.type !== "submit") {
+        } else if (e.key === ' ' && props.type !== 'submit') {
           // Empêcher le scroll avec la barre d'espace sur les boutons
           e.preventDefault();
           if (!props.disabled) {
@@ -119,7 +117,7 @@ export const AccessibleButton = React.forwardRef<HTMLButtonElement, AccessibleBu
     const handleFocus = React.useCallback(
       (e: React.FocusEvent<HTMLButtonElement>) => {
         if (showFocusIndicator) {
-          e.currentTarget.classList.add("ring-2", "ring-offset-2");
+          e.currentTarget.classList.add('ring-2', 'ring-offset-2');
         }
         onFocus?.(e);
         props.onFocus?.(e);
@@ -130,7 +128,7 @@ export const AccessibleButton = React.forwardRef<HTMLButtonElement, AccessibleBu
     const handleBlur = React.useCallback(
       (e: React.FocusEvent<HTMLButtonElement>) => {
         if (showFocusIndicator) {
-          e.currentTarget.classList.remove("ring-2", "ring-offset-2");
+          e.currentTarget.classList.remove('ring-2', 'ring-offset-2');
         }
         onBlur?.(e);
         props.onBlur?.(e);
@@ -143,12 +141,12 @@ export const AccessibleButton = React.forwardRef<HTMLButtonElement, AccessibleBu
         <Button
           ref={combinedRef}
           className={cn(
-            "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-            "transition-all duration-200",
+            'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+            'transition-all duration-200',
             className
           )}
           aria-label={computedAriaLabel}
-          aria-describedby={ariaDescription ? `${props.id || "button"}-description` : undefined}
+          aria-describedby={ariaDescription ? `${props.id || 'button'}-description` : undefined}
           aria-expanded={ariaExpanded}
           aria-controls={ariaControls}
           aria-pressed={ariaPressed}
@@ -160,10 +158,7 @@ export const AccessibleButton = React.forwardRef<HTMLButtonElement, AccessibleBu
           {children}
         </Button>
         {ariaDescription && (
-          <span
-            id={`${props.id || "button"}-description`}
-            className="sr-only"
-          >
+          <span id={`${props.id || 'button'}-description`} className="sr-only">
             {ariaDescription}
           </span>
         )}
@@ -172,11 +167,4 @@ export const AccessibleButton = React.forwardRef<HTMLButtonElement, AccessibleBu
   }
 );
 
-AccessibleButton.displayName = "AccessibleButton";
-
-
-
-
-
-
-
+AccessibleButton.displayName = 'AccessibleButton';

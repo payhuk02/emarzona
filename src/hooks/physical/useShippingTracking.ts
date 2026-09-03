@@ -2,8 +2,10 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 
-const SHIPMENT_FIELDS = 'id, store_id, order_id, order_number, customer_name, customer_email, status, carrier, carrier_name, tracking_number, tracking_url, shipping_method, shipping_cost, currency, weight, dimensions, shipping_address, origin_address, notes, shipped_date, estimated_delivery_date, actual_delivery_date, created_at, updated_at';
-const TRACKING_EVENT_FIELDS = 'id, shipping_id, status, location, description, timestamp, created_at';
+const SHIPMENT_FIELDS =
+  'id, store_id, order_id, order_number, customer_name, customer_email, status, carrier, carrier_name, tracking_number, tracking_url, shipping_method, shipping_cost, currency, weight, dimensions, shipping_address, origin_address, notes, shipped_date, estimated_delivery_date, actual_delivery_date, created_at, updated_at';
+const TRACKING_EVENT_FIELDS =
+  'id, shipping_id, status, location, description, timestamp, created_at';
 
 // ============================================================================
 // TYPES
@@ -102,16 +104,19 @@ export interface ShippingStats {
 // FETCH SHIPMENTS
 // ============================================================================
 
-export function useShipments(storeId: string, filters?: {
-  status?: ShippingStatus;
-  carrier?: ShippingCarrier;
-  date_from?: string;
-  date_to?: string;
-}) {
+export function useShipments(
+  storeId: string,
+  filters?: {
+    status?: ShippingStatus;
+    carrier?: ShippingCarrier;
+    date_from?: string;
+    date_to?: string;
+  }
+) {
   return useQuery({
     queryKey: ['shipments', storeId, filters],
     queryFn: async () => {
-      let  query= supabase
+      let query = supabase
         .from('shipments')
         .select(SHIPMENT_FIELDS)
         .eq('store_id', storeId)
@@ -185,17 +190,17 @@ export function useTrackingEvents(shipmentId: string) {
 // GET SHIPPING STATS
 // ============================================================================
 
-export function useShippingStats(storeId: string, dateRange?: {
-  start: string;
-  end: string;
-}) {
+export function useShippingStats(
+  storeId: string,
+  dateRange?: {
+    start: string;
+    end: string;
+  }
+) {
   return useQuery({
     queryKey: ['shipping-stats', storeId, dateRange],
     queryFn: async () => {
-      let  query= supabase
-        .from('shipments')
-        .select(SHIPMENT_FIELDS)
-        .eq('store_id', storeId);
+      let query = supabase.from('shipments').select(SHIPMENT_FIELDS).eq('store_id', storeId);
 
       if (dateRange?.start) {
         query = query.gte('created_at', dateRange.start);
@@ -210,19 +215,19 @@ export function useShippingStats(storeId: string, dateRange?: {
 
       const shipments = (data || []) as ShippingInfo[];
 
-      const  stats: ShippingStats = {
+      const stats: ShippingStats = {
         total: shipments.length,
-        pending: shipments.filter((s) => s.status === 'pending').length,
-        processing: shipments.filter((s) => s.status === 'processing').length,
-        shipped: shipments.filter((s) => s.status === 'shipped' || s.status === 'in_transit').length,
-        in_transit: shipments.filter((s) => s.status === 'in_transit').length,
-        delivered: shipments.filter((s) => s.status === 'delivered').length,
-        failed: shipments.filter((s) => s.status === 'failed').length,
+        pending: shipments.filter(s => s.status === 'pending').length,
+        processing: shipments.filter(s => s.status === 'processing').length,
+        shipped: shipments.filter(s => s.status === 'shipped' || s.status === 'in_transit').length,
+        in_transit: shipments.filter(s => s.status === 'in_transit').length,
+        delivered: shipments.filter(s => s.status === 'delivered').length,
+        failed: shipments.filter(s => s.status === 'failed').length,
       };
 
       // Calculate avg delivery time
       const deliveredShipments = shipments.filter(
-        (s) => s.status === 'delivered' && s.shipped_date && s.actual_delivery_date
+        s => s.status === 'delivered' && s.shipped_date && s.actual_delivery_date
       );
       if (deliveredShipments.length > 0) {
         const totalDays = deliveredShipments.reduce((sum, s) => {
@@ -236,13 +241,10 @@ export function useShippingStats(storeId: string, dateRange?: {
 
       // Calculate on-time delivery rate
       const shipmentsWithEstimates = shipments.filter(
-        (s) =>
-          s.status === 'delivered' &&
-          s.estimated_delivery_date &&
-          s.actual_delivery_date
+        s => s.status === 'delivered' && s.estimated_delivery_date && s.actual_delivery_date
       );
       if (shipmentsWithEstimates.length > 0) {
-        const onTime = shipmentsWithEstimates.filter((s) => {
+        const onTime = shipmentsWithEstimates.filter(s => {
           const estimated = new Date(s.estimated_delivery_date!).getTime();
           const actual = new Date(s.actual_delivery_date!).getTime();
           return actual <= estimated;
@@ -305,7 +307,7 @@ export function useUpdateShipmentStatus() {
       status: ShippingStatus;
       notes?: string;
     }) => {
-      const  updates: Partial<ShippingInfo> = {
+      const updates: Partial<ShippingInfo> = {
         status,
         updated_at: new Date().toISOString(),
       };
@@ -352,27 +354,36 @@ export function useUpdateShipmentStatus() {
           .then(({ triggerShipmentNotification }) => {
             triggerShipmentNotification(
               data.order_id,
-              variables.status as 'preparing' | 'shipped' | 'in_transit' | 'out_for_delivery' | 'delivered' | 'exception' | 'returned',
+              variables.status as
+                | 'preparing'
+                | 'shipped'
+                | 'in_transit'
+                | 'out_for_delivery'
+                | 'delivered'
+                | 'exception'
+                | 'returned',
               data.tracking_number || undefined,
               undefined, // carrierName - à récupérer depuis carrier_id si nécessaire
-              data.estimated_delivery ? new Date(data.estimated_delivery).toISOString().split('T')[0] : undefined
-            ).catch((error) => {
+              data.estimated_delivery
+                ? new Date(data.estimated_delivery).toISOString().split('T')[0]
+                : undefined
+            ).catch(error => {
               logger.error('Error triggering shipment notification', { error });
             });
           })
-          .catch((error) => {
+          .catch(error => {
             logger.error('Error loading notification triggers', { error });
           });
       }
 
       // Déclencher webhook pour expédition
       if (data.order_id && data.store_id) {
-        const  eventTypeMap: Record<string, string> = {
-          'label_created': 'shipment_created',
-          'picked_up': 'shipment_updated',
-          'in_transit': 'shipment_updated',
-          'out_for_delivery': 'shipment_updated',
-          'delivered': 'shipment_delivered',
+        const eventTypeMap: Record<string, string> = {
+          label_created: 'shipment_created',
+          picked_up: 'shipment_updated',
+          in_transit: 'shipment_updated',
+          out_for_delivery: 'shipment_updated',
+          delivered: 'shipment_delivered',
         };
 
         const webhookEventType = eventTypeMap[variables.status] || 'shipment.updated';
@@ -390,11 +401,11 @@ export function useUpdateShipmentStatus() {
                   estimated_delivery: data.estimated_delivery,
                 },
                 variables.shipmentId
-              ).catch((error) => {
+              ).catch(error => {
                 logger.error('Error triggering shipment webhook', { error });
               });
             })
-            .catch((error) => {
+            .catch(error => {
               logger.error('Error loading unified webhook service', { error });
             });
         }
@@ -412,10 +423,10 @@ export function useUpdateShipmentStatus() {
             if (order) {
               import('@/lib/webhooks/unified-webhook-service')
                 .then(({ triggerUnifiedWebhook }) => {
-                  const  eventTypeMap: Record<string, string> = {
-                    'shipped': 'shipment.created',
-                    'in_transit': 'shipment.updated',
-                    'delivered': 'shipment.delivered',
+                  const eventTypeMap: Record<string, string> = {
+                    shipped: 'shipment.created',
+                    in_transit: 'shipment.updated',
+                    delivered: 'shipment.delivered',
                   };
 
                   const eventType = eventTypeMap[variables.status] || 'shipment.updated';
@@ -432,16 +443,16 @@ export function useUpdateShipmentStatus() {
                       estimated_delivery: data.estimated_delivery,
                     },
                     data.id
-                  ).catch((error) => {
+                  ).catch(error => {
                     logger.error('Error triggering shipment webhook', { error });
                   });
                 })
-                .catch((error) => {
+                .catch(error => {
                   logger.error('Error loading webhook service', { error });
                 });
             }
           })
-          .catch((error) => {
+          .catch(error => {
             logger.error('Error fetching order for webhook', { error });
           });
       }
@@ -513,7 +524,7 @@ export function useAddTrackingEvent() {
       if (error) throw error;
       return data as TrackingEvent;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['tracking-events', data.shipping_id] });
     },
   });
@@ -548,7 +559,7 @@ export function useDeleteShipment() {
 // ============================================================================
 
 export function generateTrackingUrl(carrier: ShippingCarrier, trackingNumber: string): string {
-  const  urls: Record<ShippingCarrier, string> = {
+  const urls: Record<ShippingCarrier, string> = {
     dhl: `https://www.dhl.com/en/express/tracking.html?AWB=${trackingNumber}`,
     fedex: `https://www.fedex.com/fedextrack/?trknbr=${trackingNumber}`,
     ups: `https://www.ups.com/track?tracknum=${trackingNumber}`,
@@ -561,10 +572,3 @@ export function generateTrackingUrl(carrier: ShippingCarrier, trackingNumber: st
 
   return urls[carrier] || '';
 }
-
-
-
-
-
-
-

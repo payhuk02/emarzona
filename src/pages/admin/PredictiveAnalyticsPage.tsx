@@ -98,7 +98,8 @@ const PredictiveAnalyticsPage = () => {
                     <Badge>Premium</Badge>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    24 clients identifiés comme ayant un potentiel de valeur vie client supérieur à 500€
+                    24 clients identifiés comme ayant un potentiel de valeur vie client supérieur à
+                    500€
                   </p>
                   <div className="mt-3 flex justify-between text-xs text-muted-foreground">
                     <span>Taux de conversion: 78%</span>
@@ -177,7 +178,8 @@ const PredictiveAnalyticsPage = () => {
                     <h4 className="font-medium">Croissance Produits</h4>
                   </div>
                   <p className="text-sm text-muted-foreground mb-3">
-                    Augmentez les stocks et le marketing pour vos produits en croissance (+35% en moyenne).
+                    Augmentez les stocks et le marketing pour vos produits en croissance (+35% en
+                    moyenne).
                   </p>
                   <div className="text-xs text-blue-600 font-medium">
                     Impact potentiel: +€2,450/mois
@@ -192,7 +194,8 @@ const PredictiveAnalyticsPage = () => {
                     <h4 className="font-medium">Rétention Clients</h4>
                   </div>
                   <p className="text-sm text-muted-foreground mb-3">
-                    Lancez une campagne de réactivation pour vos 12 clients à risque de désabonnement.
+                    Lancez une campagne de réactivation pour vos 12 clients à risque de
+                    désabonnement.
                   </p>
                   <div className="text-xs text-green-600 font-medium">
                     Taux de succès estimé: 34%

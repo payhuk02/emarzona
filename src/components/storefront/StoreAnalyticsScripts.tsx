@@ -61,17 +61,8 @@ export const StoreAnalyticsScripts = ({ store }: StoreAnalyticsScriptsProps) => 
           : undefined
       }
       tiktokPixelId={
-        store.tiktok_pixel_enabled && store.tiktok_pixel_id
-          ? store.tiktok_pixel_id
-          : undefined
+        store.tiktok_pixel_enabled && store.tiktok_pixel_id ? store.tiktok_pixel_id : undefined
       }
     />
   );
 };
-
-
-
-
-
-
-

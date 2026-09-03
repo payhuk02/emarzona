@@ -82,7 +82,7 @@ describe('promotionValidation', () => {
       const start = new Date();
       const end = new Date();
       end.setDate(end.getDate() + 7);
-      
+
       const result = validateDates(start.toISOString(), end.toISOString());
       expect(result.valid).toBe(true);
     });
@@ -91,7 +91,7 @@ describe('promotionValidation', () => {
       const start = new Date();
       const end = new Date();
       end.setDate(end.getDate() - 7);
-      
+
       const result = validateDates(start.toISOString(), end.toISOString());
       expect(result.valid).toBe(false);
       expect(result.errors).toContain('La date de fin doit être après la date de début');
@@ -114,7 +114,7 @@ describe('promotionValidation', () => {
         min_purchase_amount: 1000,
         max_uses: 100,
       };
-      
+
       const result = validatePromotionData(data);
       expect(result.valid).toBe(true);
     });
@@ -127,7 +127,7 @@ describe('promotionValidation', () => {
         start_date: new Date().toISOString(),
         end_date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), // Dans le passé
       };
-      
+
       const result = validatePromotionData(data);
       expect(result.valid).toBe(false);
       expect(result.errors.length).toBeGreaterThan(0);
@@ -154,10 +154,3 @@ describe('promotionValidation', () => {
     });
   });
 });
-
-
-
-
-
-
-

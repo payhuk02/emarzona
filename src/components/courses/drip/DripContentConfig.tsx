@@ -9,7 +9,13 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -48,7 +54,7 @@ export const DripContentConfig = ({ courseId, onSuccess }: DripContentConfigProp
       return [];
     }
 
-    const  schedule: Array<{
+    const schedule: Array<{
       sectionId: string;
       sectionTitle: string;
       orderIndex: number;
@@ -58,8 +64,8 @@ export const DripContentConfig = ({ courseId, onSuccess }: DripContentConfigProp
     }> = [];
 
     sections.forEach((section, index) => {
-      let  unlockAfterDays= 0;
-      
+      let unlockAfterDays = 0;
+
       if (dripType === 'daily') {
         unlockAfterDays = dripInterval * (index + 1);
       } else if (dripType === 'weekly') {
@@ -71,7 +77,9 @@ export const DripContentConfig = ({ courseId, onSuccess }: DripContentConfigProp
         sectionTitle: section.title,
         orderIndex: section.order_index,
         unlockAfterDays,
-        unlockDate: dripEnabled ? new Date(Date.now() + unlockAfterDays * 24 * 60 * 60 * 1000) : null,
+        unlockDate: dripEnabled
+          ? new Date(Date.now() + unlockAfterDays * 24 * 60 * 60 * 1000)
+          : null,
         isLocked: section.is_locked,
       });
     });
@@ -109,7 +117,10 @@ export const DripContentConfig = ({ courseId, onSuccess }: DripContentConfigProp
             .eq('id', item.sectionId);
 
           if (sectionError) {
-            logger.error('Error updating section', { error: sectionError, sectionId: item.sectionId });
+            logger.error('Error updating section', {
+              error: sectionError,
+              sectionId: item.sectionId,
+            });
           }
         }
       } else {
@@ -134,9 +145,10 @@ export const DripContentConfig = ({ courseId, onSuccess }: DripContentConfigProp
       });
 
       onSuccess?.();
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       logger.error('Error saving drip content config', { error, courseId });
-      const errorMessage = error instanceof Error ? error.message : 'Impossible de sauvegarder la configuration';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Impossible de sauvegarder la configuration';
       toast({
         title: '❌ Erreur',
         description: errorMessage,
@@ -167,11 +179,7 @@ export const DripContentConfig = ({ courseId, onSuccess }: DripContentConfigProp
               Libérer le contenu progressivement au fil du temps
             </p>
           </div>
-          <Switch
-            id="drip-enabled"
-            checked={dripEnabled}
-            onCheckedChange={setDripEnabled}
-          />
+          <Switch id="drip-enabled" checked={dripEnabled} onCheckedChange={setDripEnabled} />
         </div>
 
         {dripEnabled && (
@@ -179,7 +187,10 @@ export const DripContentConfig = ({ courseId, onSuccess }: DripContentConfigProp
             {/* Drip Type */}
             <div className="space-y-2">
               <Label htmlFor="drip-type">Type de déverrouillage</Label>
-              <Select value={dripType} onValueChange={(value: 'daily' | 'weekly' | 'none') => setDripType(value)}>
+              <Select
+                value={dripType}
+                onValueChange={(value: 'daily' | 'weekly' | 'none') => setDripType(value)}
+              >
                 <SelectTrigger id="drip-type">
                   <SelectValue />
                 </SelectTrigger>
@@ -202,7 +213,7 @@ export const DripContentConfig = ({ courseId, onSuccess }: DripContentConfigProp
                   type="number"
                   min={1}
                   value={dripInterval}
-                  onChange={(e) => setDripInterval(parseInt(e.target.value) || 1)}
+                  onChange={e => setDripInterval(parseInt(e.target.value) || 1)}
                 />
                 <p className="text-xs text-muted-foreground">
                   {dripType === 'daily'
@@ -222,7 +233,9 @@ export const DripContentConfig = ({ courseId, onSuccess }: DripContentConfigProp
                       key={item.sectionId}
                       className={cn(
                         'flex items-center justify-between p-3 rounded-lg border',
-                        item.isLocked ? 'bg-muted/50' : 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
+                        item.isLocked
+                          ? 'bg-muted/50'
+                          : 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
                       )}
                     >
                       <div className="flex items-center gap-3 flex-1">
@@ -243,9 +256,7 @@ export const DripContentConfig = ({ courseId, onSuccess }: DripContentConfigProp
                           <div className="text-right">
                             <div className="flex items-center gap-1 text-sm">
                               <Calendar className="h-4 w-4 text-muted-foreground" />
-                              <span>
-                                {format(item.unlockDate, 'dd MMM yyyy', { locale: fr })}
-                              </span>
+                              <span>{format(item.unlockDate, 'dd MMM yyyy', { locale: fr })}</span>
                             </div>
                             <p className="text-xs text-muted-foreground">
                               J+{item.unlockAfterDays}
@@ -266,8 +277,8 @@ export const DripContentConfig = ({ courseId, onSuccess }: DripContentConfigProp
             <Alert>
               <Clock className="h-4 w-4" />
               <AlertDescription>
-                Le contenu sera déverrouillé automatiquement selon le calendrier ci-dessus.
-                La première section sera toujours disponible immédiatement après l'inscription.
+                Le contenu sera déverrouillé automatiquement selon le calendrier ci-dessus. La
+                première section sera toujours disponible immédiatement après l'inscription.
               </AlertDescription>
             </Alert>
           </>
@@ -275,11 +286,7 @@ export const DripContentConfig = ({ courseId, onSuccess }: DripContentConfigProp
 
         {/* Actions */}
         <div className="flex items-center gap-2 pt-4">
-          <Button
-            onClick={handleSave}
-            disabled={isUpdating}
-            className="flex-1"
-          >
+          <Button onClick={handleSave} disabled={isUpdating} className="flex-1">
             {isUpdating ? 'Enregistrement...' : 'Enregistrer'}
           </Button>
         </div>
@@ -287,10 +294,3 @@ export const DripContentConfig = ({ courseId, onSuccess }: DripContentConfigProp
     </Card>
   );
 };
-
-
-
-
-
-
-

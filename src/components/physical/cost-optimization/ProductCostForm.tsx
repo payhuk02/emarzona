@@ -1,7 +1,7 @@
 /**
  * Product Cost Form Component
  * Date: 27 Janvier 2025
- * 
+ *
  * Formulaire pour saisir/modifier les coûts d'un produit
  */
 
@@ -31,7 +31,12 @@ interface ProductCostFormProps {
   onClose?: () => void;
 }
 
-export default function ProductCostForm({ productId, variantId, existingCost, onClose }: ProductCostFormProps) {
+export default function ProductCostForm({
+  productId,
+  variantId,
+  existingCost,
+  onClose,
+}: ProductCostFormProps) {
   const { store } = useStore();
   const createOrUpdateCost = useCreateOrUpdateProductCost();
   const { toast } = useToast();
@@ -66,7 +71,7 @@ export default function ProductCostForm({ productId, variantId, existingCost, on
         variant_id: variantId,
       });
       onClose?.();
-    } catch ( _error: any) {
+    } catch (_error: any) {
       toast({
         title: '❌ Erreur',
         description: error.message || 'Une erreur est survenue',
@@ -75,7 +80,7 @@ export default function ProductCostForm({ productId, variantId, existingCost, on
     }
   };
 
-  const totalCost = 
+  const totalCost =
     (formData.cost_of_goods_sold || 0) +
     (formData.manufacturing_cost || 0) +
     (formData.material_cost || 0) +
@@ -98,7 +103,9 @@ export default function ProductCostForm({ productId, variantId, existingCost, on
               step="0.01"
               min="0"
               value={formData.cost_of_goods_sold || 0}
-              onChange={(e) => setFormData({ ...formData, cost_of_goods_sold: parseFloat(e.target.value) || 0 })}
+              onChange={e =>
+                setFormData({ ...formData, cost_of_goods_sold: parseFloat(e.target.value) || 0 })
+              }
               required
             />
           </div>
@@ -110,7 +117,9 @@ export default function ProductCostForm({ productId, variantId, existingCost, on
               step="0.01"
               min="0"
               value={formData.manufacturing_cost || 0}
-              onChange={(e) => setFormData({ ...formData, manufacturing_cost: parseFloat(e.target.value) || 0 })}
+              onChange={e =>
+                setFormData({ ...formData, manufacturing_cost: parseFloat(e.target.value) || 0 })
+              }
             />
           </div>
         </div>
@@ -124,7 +133,9 @@ export default function ProductCostForm({ productId, variantId, existingCost, on
               step="0.01"
               min="0"
               value={formData.material_cost || 0}
-              onChange={(e) => setFormData({ ...formData, material_cost: parseFloat(e.target.value) || 0 })}
+              onChange={e =>
+                setFormData({ ...formData, material_cost: parseFloat(e.target.value) || 0 })
+              }
             />
           </div>
           <div className="space-y-2">
@@ -135,7 +146,9 @@ export default function ProductCostForm({ productId, variantId, existingCost, on
               step="0.01"
               min="0"
               value={formData.labor_cost || 0}
-              onChange={(e) => setFormData({ ...formData, labor_cost: parseFloat(e.target.value) || 0 })}
+              onChange={e =>
+                setFormData({ ...formData, labor_cost: parseFloat(e.target.value) || 0 })
+              }
             />
           </div>
         </div>
@@ -149,7 +162,9 @@ export default function ProductCostForm({ productId, variantId, existingCost, on
               step="0.01"
               min="0"
               value={formData.packaging_cost || 0}
-              onChange={(e) => setFormData({ ...formData, packaging_cost: parseFloat(e.target.value) || 0 })}
+              onChange={e =>
+                setFormData({ ...formData, packaging_cost: parseFloat(e.target.value) || 0 })
+              }
             />
           </div>
           <div className="space-y-2">
@@ -160,7 +175,12 @@ export default function ProductCostForm({ productId, variantId, existingCost, on
               step="0.01"
               min="0"
               value={formData.shipping_cost_per_unit || 0}
-              onChange={(e) => setFormData({ ...formData, shipping_cost_per_unit: parseFloat(e.target.value) || 0 })}
+              onChange={e =>
+                setFormData({
+                  ...formData,
+                  shipping_cost_per_unit: parseFloat(e.target.value) || 0,
+                })
+              }
             />
           </div>
           <div className="space-y-2">
@@ -171,7 +191,9 @@ export default function ProductCostForm({ productId, variantId, existingCost, on
               step="0.01"
               min="0"
               value={formData.storage_cost_per_unit || 0}
-              onChange={(e) => setFormData({ ...formData, storage_cost_per_unit: parseFloat(e.target.value) || 0 })}
+              onChange={e =>
+                setFormData({ ...formData, storage_cost_per_unit: parseFloat(e.target.value) || 0 })
+              }
             />
           </div>
         </div>
@@ -185,7 +207,12 @@ export default function ProductCostForm({ productId, variantId, existingCost, on
               step="0.01"
               min="0"
               value={formData.marketing_cost_per_unit || 0}
-              onChange={(e) => setFormData({ ...formData, marketing_cost_per_unit: parseFloat(e.target.value) || 0 })}
+              onChange={e =>
+                setFormData({
+                  ...formData,
+                  marketing_cost_per_unit: parseFloat(e.target.value) || 0,
+                })
+              }
             />
           </div>
           <div className="space-y-2">
@@ -196,7 +223,9 @@ export default function ProductCostForm({ productId, variantId, existingCost, on
               step="0.01"
               min="0"
               value={formData.overhead_cost || 0}
-              onChange={(e) => setFormData({ ...formData, overhead_cost: parseFloat(e.target.value) || 0 })}
+              onChange={e =>
+                setFormData({ ...formData, overhead_cost: parseFloat(e.target.value) || 0 })
+              }
             />
           </div>
           <div className="space-y-2">
@@ -205,7 +234,7 @@ export default function ProductCostForm({ productId, variantId, existingCost, on
               id="cost_basis_date"
               type="date"
               value={formData.cost_basis_date || ''}
-              onChange={(e) => setFormData({ ...formData, cost_basis_date: e.target.value })}
+              onChange={e => setFormData({ ...formData, cost_basis_date: e.target.value })}
               required
             />
           </div>
@@ -221,7 +250,12 @@ export default function ProductCostForm({ productId, variantId, existingCost, on
               min="0"
               max="100"
               value={formData.platform_fees_percentage || 0}
-              onChange={(e) => setFormData({ ...formData, platform_fees_percentage: parseFloat(e.target.value) || 0 })}
+              onChange={e =>
+                setFormData({
+                  ...formData,
+                  platform_fees_percentage: parseFloat(e.target.value) || 0,
+                })
+              }
             />
           </div>
           <div className="space-y-2">
@@ -233,7 +267,12 @@ export default function ProductCostForm({ productId, variantId, existingCost, on
               min="0"
               max="100"
               value={formData.payment_processing_fees_percentage || 0}
-              onChange={(e) => setFormData({ ...formData, payment_processing_fees_percentage: parseFloat(e.target.value) || 0 })}
+              onChange={e =>
+                setFormData({
+                  ...formData,
+                  payment_processing_fees_percentage: parseFloat(e.target.value) || 0,
+                })
+              }
             />
           </div>
           <div className="space-y-2">
@@ -245,7 +284,9 @@ export default function ProductCostForm({ productId, variantId, existingCost, on
               min="0"
               max="100"
               value={formData.tax_rate || 0}
-              onChange={(e) => setFormData({ ...formData, tax_rate: parseFloat(e.target.value) || 0 })}
+              onChange={e =>
+                setFormData({ ...formData, tax_rate: parseFloat(e.target.value) || 0 })
+              }
             />
           </div>
         </div>
@@ -255,7 +296,7 @@ export default function ProductCostForm({ productId, variantId, existingCost, on
           <Textarea
             id="notes"
             value={formData.notes || ''}
-            onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+            onChange={e => setFormData({ ...formData, notes: e.target.value })}
             rows={3}
           />
         </div>
@@ -291,9 +332,3 @@ export default function ProductCostForm({ productId, variantId, existingCost, on
     </form>
   );
 }
-
-
-
-
-
-

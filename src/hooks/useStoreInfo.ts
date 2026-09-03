@@ -26,9 +26,3 @@ export function useStoreInfo(storeId?: string | null) {
     refetchOnWindowFocus: false,
   });
 }
-
-
-
-
-
-

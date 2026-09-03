@@ -9,21 +9,27 @@ export interface WorkflowTemplate {
   id: string;
   name: string;
   description: string;
-  category: 'welcome' | 'abandoned_cart' | 'post_purchase' | 're_engagement' | 'seasonal' | 'custom';
+  category:
+    | 'welcome'
+    | 'abandoned_cart'
+    | 'post_purchase'
+    | 're_engagement'
+    | 'seasonal'
+    | 'custom';
   icon: string;
   workflow: Omit<CreateWorkflowPayload, 'store_id'>;
 }
 
-export const WORKFLOW_TEMPLATES : WorkflowTemplate[] = [
+export const WORKFLOW_TEMPLATES: WorkflowTemplate[] = [
   {
     id: 'welcome-series',
     name: 'Série de bienvenue',
-    description: 'Envoie une série d\'emails de bienvenue aux nouveaux utilisateurs',
+    description: "Envoie une série d'emails de bienvenue aux nouveaux utilisateurs",
     category: 'welcome',
     icon: '👋',
     workflow: {
       name: 'Série de bienvenue',
-      description: 'Accueillez vos nouveaux utilisateurs avec une série d\'emails personnalisés',
+      description: "Accueillez vos nouveaux utilisateurs avec une série d'emails personnalisés",
       trigger_type: 'event',
       trigger_config: {
         event_name: 'user.registered',
@@ -139,7 +145,7 @@ export const WORKFLOW_TEMPLATES : WorkflowTemplate[] = [
     icon: '📦',
     workflow: {
       name: 'Suivi post-achat',
-      description: 'Maintenez l\'engagement après un achat avec des emails de suivi',
+      description: "Maintenez l'engagement après un achat avec des emails de suivi",
       trigger_type: 'event',
       trigger_config: {
         event_name: 'order.completed',
@@ -203,7 +209,7 @@ export const WORKFLOW_TEMPLATES : WorkflowTemplate[] = [
     icon: '🔄',
     workflow: {
       name: 'Réengagement utilisateurs inactifs',
-      description: 'Récupérez les utilisateurs qui n\'ont pas été actifs récemment',
+      description: "Récupérez les utilisateurs qui n'ont pas été actifs récemment",
       trigger_type: 'condition',
       trigger_config: {
         condition: {
@@ -306,14 +312,8 @@ export const getTemplateById = (id: string): WorkflowTemplate | undefined => {
   return WORKFLOW_TEMPLATES.find(template => template.id === id);
 };
 
-export const getTemplatesByCategory = (category: WorkflowTemplate['category']): WorkflowTemplate[] => {
+export const getTemplatesByCategory = (
+  category: WorkflowTemplate['category']
+): WorkflowTemplate[] => {
   return WORKFLOW_TEMPLATES.filter(template => template.category === category);
 };
-
-
-
-
-
-
-
-

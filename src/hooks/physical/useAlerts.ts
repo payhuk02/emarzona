@@ -1,7 +1,7 @@
 /**
  * Physical Product Alerts Hooks
  * Date: 27 Janvier 2025
- * 
+ *
  * Hooks pour gérer les alertes produits physiques
  */
 
@@ -11,7 +11,8 @@ import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 import { useAuth } from '@/contexts/AuthContext';
 
-const NOTIFICATION_PREFERENCES_FIELDS = 'id, store_id, user_id, email_low_stock, email_out_of_stock, email_new_order, email_order_shipped, email_order_delivered, email_return_request, email_refund_processed, push_low_stock, push_new_order, push_return_request, notification_frequency, low_stock_threshold_override, created_at, updated_at';
+const NOTIFICATION_PREFERENCES_FIELDS =
+  'id, store_id, user_id, email_low_stock, email_out_of_stock, email_new_order, email_order_shipped, email_order_delivered, email_return_request, email_refund_processed, push_low_stock, push_new_order, push_return_request, notification_frequency, low_stock_threshold_override, created_at, updated_at';
 
 // =====================================================
 // TYPES
@@ -20,7 +21,15 @@ const NOTIFICATION_PREFERENCES_FIELDS = 'id, store_id, user_id, email_low_stock,
 export interface PhysicalProductAlert {
   id: string;
   store_id: string;
-  alert_type: 'low_stock' | 'out_of_stock' | 'reorder_needed' | 'high_return_rate' | 'slow_moving' | 'overstock' | 'expiring_soon' | 'price_competition';
+  alert_type:
+    | 'low_stock'
+    | 'out_of_stock'
+    | 'reorder_needed'
+    | 'high_return_rate'
+    | 'slow_moving'
+    | 'overstock'
+    | 'expiring_soon'
+    | 'price_competition';
   product_id?: string;
   variant_id?: string;
   severity: 'low' | 'medium' | 'high' | 'critical';
@@ -71,26 +80,31 @@ export interface NotificationPreferences {
 /**
  * useAlerts - Récupère les alertes d'un store
  */
-export const useAlerts = (storeId?: string, filters?: {
-  status?: PhysicalProductAlert['status'];
-  alert_type?: PhysicalProductAlert['alert_type'];
-  severity?: PhysicalProductAlert['severity'];
-}) => {
+export const useAlerts = (
+  storeId?: string,
+  filters?: {
+    status?: PhysicalProductAlert['status'];
+    alert_type?: PhysicalProductAlert['alert_type'];
+    severity?: PhysicalProductAlert['severity'];
+  }
+) => {
   return useQuery({
     queryKey: ['alerts', storeId, filters],
     queryFn: async () => {
       if (!storeId) throw new Error('Store ID manquant');
 
-      let  query= supabase
+      let query = supabase
         .from('physical_product_alerts')
-        .select(`
+        .select(
+          `
           *,
           product:products (
             id,
             name,
             image_url
           )
-        `)
+        `
+        )
         .eq('store_id', storeId);
 
       if (filters?.status) {
@@ -194,14 +208,14 @@ export const useAcknowledgeAlert = () => {
       queryClient.invalidateQueries({ queryKey: ['alerts'] });
       toast({
         title: '✅ Alerte reconnue',
-        description: 'L\'alerte a été marquée comme reconnue',
+        description: "L'alerte a été marquée comme reconnue",
       });
     },
     onError: (error: any) => {
       logger.error('Error in useAcknowledgeAlert', { error });
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de reconnaître l\'alerte',
+        description: error.message || "Impossible de reconnaître l'alerte",
         variant: 'destructive',
       });
     },
@@ -238,14 +252,14 @@ export const useResolveAlert = () => {
       queryClient.invalidateQueries({ queryKey: ['alerts'] });
       toast({
         title: '✅ Alerte résolue',
-        description: 'L\'alerte a été marquée comme résolue',
+        description: "L'alerte a été marquée comme résolue",
       });
     },
     onError: (error: any) => {
       logger.error('Error in useResolveAlert', { error });
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de résoudre l\'alerte',
+        description: error.message || "Impossible de résoudre l'alerte",
         variant: 'destructive',
       });
     },
@@ -282,14 +296,14 @@ export const useDismissAlert = () => {
       queryClient.invalidateQueries({ queryKey: ['alerts'] });
       toast({
         title: '✅ Alerte ignorée',
-        description: 'L\'alerte a été ignorée',
+        description: "L'alerte a été ignorée",
       });
     },
     onError: (error: any) => {
       logger.error('Error in useDismissAlert', { error });
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible d\'ignorer l\'alerte',
+        description: error.message || "Impossible d'ignorer l'alerte",
         variant: 'destructive',
       });
     },
@@ -348,10 +362,3 @@ export const useUpdateNotificationPreferences = () => {
     },
   });
 };
-
-
-
-
-
-
-

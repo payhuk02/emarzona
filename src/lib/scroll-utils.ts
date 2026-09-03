@@ -24,11 +24,7 @@ export interface ScrollOptions {
 /**
  * Scroll vers une position spécifique
  */
-export function scrollToPosition(
-  x: number,
-  y: number,
-  options: ScrollOptions = {}
-): void {
+export function scrollToPosition(x: number, y: number, options: ScrollOptions = {}): void {
   const { behavior = 'smooth' } = options;
   window.scrollTo({ left: x, top: y, behavior });
 }
@@ -57,15 +53,10 @@ export function scrollToBottom(options: ScrollOptions = {}): void {
 /**
  * Scroll vers un élément spécifique
  */
-export function scrollToElement(
-  element: HTMLElement | string,
-  options: ScrollOptions = {}
-): void {
+export function scrollToElement(element: HTMLElement | string, options: ScrollOptions = {}): void {
   const { behavior = 'smooth', offset = 0 } = options;
   const targetElement =
-    typeof element === 'string'
-      ? document.querySelector<HTMLElement>(element)
-      : element;
+    typeof element === 'string' ? document.querySelector<HTMLElement>(element) : element;
 
   if (!targetElement) return;
 
@@ -93,20 +84,14 @@ export function scrollToHorizontalPosition(
 /**
  * Scroll horizontal vers le début
  */
-export function scrollToHorizontalStart(
-  element: HTMLElement,
-  options: ScrollOptions = {}
-): void {
+export function scrollToHorizontalStart(element: HTMLElement, options: ScrollOptions = {}): void {
   scrollToHorizontalPosition(element, 0, options);
 }
 
 /**
  * Scroll horizontal vers la fin
  */
-export function scrollToHorizontalEnd(
-  element: HTMLElement,
-  options: ScrollOptions = {}
-): void {
+export function scrollToHorizontalEnd(element: HTMLElement, options: ScrollOptions = {}): void {
   const { behavior = 'smooth' } = options;
   element.scrollTo({ left: element.scrollWidth, behavior });
 }
@@ -164,12 +149,7 @@ export function isElementPartiallyVisible(element: HTMLElement): boolean {
   const windowHeight = window.innerHeight || document.documentElement.clientHeight;
   const windowWidth = window.innerWidth || document.documentElement.clientWidth;
 
-  return (
-    rect.top < windowHeight &&
-    rect.bottom > 0 &&
-    rect.left < windowWidth &&
-    rect.right > 0
-  );
+  return rect.top < windowHeight && rect.bottom > 0 && rect.left < windowWidth && rect.right > 0;
 }
 
 /**
@@ -208,9 +188,7 @@ export function scrollIntoViewIfNeeded(
 ): void {
   const { behavior = 'smooth', offset = 0 } = options;
   const targetElement =
-    typeof element === 'string'
-      ? document.querySelector<HTMLElement>(element)
-      : element;
+    typeof element === 'string' ? document.querySelector<HTMLElement>(element) : element;
 
   if (!targetElement) return;
 
@@ -218,10 +196,3 @@ export function scrollIntoViewIfNeeded(
     scrollToElement(targetElement, { behavior, offset });
   }
 }
-
-
-
-
-
-
-

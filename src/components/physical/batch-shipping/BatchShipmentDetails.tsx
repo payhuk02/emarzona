@@ -1,14 +1,21 @@
 /**
  * Batch Shipment Details Component
  * Date: 27 Janvier 2025
- * 
+ *
  * Détails d'un lot d'expédition avec liste des commandes
  */
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { useBatchShipmentOrders } from '@/hooks/physical/useBatchShipping';
 import { Package, CheckCircle, XCircle, Clock, AlertTriangle } from 'lucide-react';
 import { format } from 'date-fns';
@@ -59,7 +66,9 @@ export default function BatchShipmentDetails({ batchId }: BatchShipmentDetailsPr
               <div className="text-sm text-muted-foreground">En traitement</div>
             </div>
             <div className="text-center p-4 border rounded-lg">
-              <div className="text-2xl font-bold text-purple-600">{statusCounts.label_generated}</div>
+              <div className="text-2xl font-bold text-purple-600">
+                {statusCounts.label_generated}
+              </div>
               <div className="text-sm text-muted-foreground">Étiquette générée</div>
             </div>
             <div className="text-center p-4 border rounded-lg">
@@ -93,32 +102,35 @@ export default function BatchShipmentDetails({ batchId }: BatchShipmentDetailsPr
                     </TableCell>
                   </TableRow>
                 ) : (
-                  orders.map((order) => (
+                  orders.map(order => (
                     <TableRow key={order.id}>
                       <TableCell>{order.order_in_batch}</TableCell>
+                      <TableCell>{(order.order as any)?.order_number || 'N/A'}</TableCell>
+                      <TableCell>{(order.order as any)?.customer_email || 'N/A'}</TableCell>
                       <TableCell>
-                        {(order.order as any)?.order_number || 'N/A'}
-                      </TableCell>
-                      <TableCell>
-                        {(order.order as any)?.customer_email || 'N/A'}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={
-                          order.status === 'shipped' ? 'default' :
-                          order.status === 'label_generated' ? 'secondary' :
-                          order.status === 'failed' ? 'destructive' :
-                          'outline'
-                        }>
+                        <Badge
+                          variant={
+                            order.status === 'shipped'
+                              ? 'default'
+                              : order.status === 'label_generated'
+                                ? 'secondary'
+                                : order.status === 'failed'
+                                  ? 'destructive'
+                                  : 'outline'
+                          }
+                        >
                           {order.status === 'pending' && <Clock className="h-3 w-3 mr-1" />}
-                          {order.status === 'label_generated' && <CheckCircle className="h-3 w-3 mr-1" />}
+                          {order.status === 'label_generated' && (
+                            <CheckCircle className="h-3 w-3 mr-1" />
+                          )}
                           {order.status === 'failed' && <XCircle className="h-3 w-3 mr-1" />}
                           {order.status}
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        {order.tracking_number || (
-                          (order.shipping_label as any)?.tracking_number || '-'
-                        )}
+                        {order.tracking_number ||
+                          (order.shipping_label as any)?.tracking_number ||
+                          '-'}
                       </TableCell>
                       <TableCell>
                         {order.error_message ? (
@@ -141,9 +153,3 @@ export default function BatchShipmentDetails({ batchId }: BatchShipmentDetailsPr
     </div>
   );
 }
-
-
-
-
-
-

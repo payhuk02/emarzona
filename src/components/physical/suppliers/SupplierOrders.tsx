@@ -66,7 +66,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 
-const  ORDER_STATUSES: {
+const ORDER_STATUSES: {
   value: SupplierOrder['status'] | 'all';
   label: string;
   shortLabel: string;
@@ -204,7 +204,7 @@ export default function SupplierOrders() {
   const filteredOrders = useMemo(() => {
     if (!orders) return [];
 
-    let  filtered= orders;
+    let filtered = orders;
 
     // Filtrer par statut
     if (statusFilter !== 'all') {
@@ -356,7 +356,7 @@ export default function SupplierOrders() {
         setOrderItems([{ quantity: 1, unit_cost: 0 }]);
         setNotes('');
         setSelectedSupplier('');
-      } catch ( _error: unknown) {
+      } catch (_error: unknown) {
         const errorMessage =
           error instanceof Error ? error.message : 'Impossible de créer la commande';
         toast({
@@ -387,7 +387,7 @@ export default function SupplierOrders() {
           title: '✅ Statut mis à jour',
           description: 'Le statut de la commande a été mis à jour',
         });
-      } catch ( _error: unknown) {
+      } catch (_error: unknown) {
         const errorMessage =
           error instanceof Error ? error.message : 'Impossible de mettre à jour le statut';
         toast({
@@ -736,16 +736,20 @@ export default function SupplierOrders() {
                             <TableCell className="text-right whitespace-nowrap min-w-[80px] lg:min-w-[100px] px-2.5 lg:px-3 xl:px-4 2xl:px-6">
                               <Select>
                                 <SelectTrigger className="min-h-[44px] min-w-[44px] h-11 w-11 lg:h-12 lg:w-12 xl:h-12 xl:w-12 p-0 touch-manipulation">
-
-                                    <MoreVertical className="h-3.5 w-3.5 lg:h-4 lg:w-4 xl:h-5 xl:w-5" />
-                                  
-</SelectTrigger>
+                                  <MoreVertical className="h-3.5 w-3.5 lg:h-4 lg:w-4 xl:h-5 xl:w-5" />
+                                </SelectTrigger>
                                 <SelectContent mobileVariant="sheet" className="min-w-[200px]">
-                                  <SelectItem value="edit" onSelect className="text-xs lg:text-sm cursor-pointer">
+                                  <SelectItem
+                                    value="edit"
+                                    onSelect
+                                    className="text-xs lg:text-sm cursor-pointer"
+                                  >
                                     <Eye className="mr-2 h-3.5 w-3.5 lg:h-4 lg:w-4" />
                                     Voir détails
                                   </SelectItem>
-                                  <SelectItem value="delete" onSelect={() => handleStatusUpdate(order.id, 'completed')}
+                                  <SelectItem
+                                    value="delete"
+                                    onSelect={() => handleStatusUpdate(order.id, 'completed')}
                                     className="text-xs lg:text-sm cursor-pointer"
                                     disabled={order.status === 'completed'}
                                   >
@@ -799,16 +803,20 @@ export default function SupplierOrders() {
                         </div>
                         <Select>
                           <SelectTrigger className="min-h-[44px] min-w-[44px] h-11 w-11 xs:h-12 xs:w-12 sm:h-12 sm:w-12 p-0 shrink-0 touch-manipulation">
-
-                              <MoreVertical className="h-3.5 w-3.5 xs:h-4 xs:w-4 sm:h-5 sm:w-5" />
-                            
-</SelectTrigger>
+                            <MoreVertical className="h-3.5 w-3.5 xs:h-4 xs:w-4 sm:h-5 sm:w-5" />
+                          </SelectTrigger>
                           <SelectContent mobileVariant="sheet" className="min-w-[200px]">
-                            <SelectItem value="copy" onSelect className="text-xs sm:text-sm md:text-base cursor-pointer touch-manipulation">
+                            <SelectItem
+                              value="copy"
+                              onSelect
+                              className="text-xs sm:text-sm md:text-base cursor-pointer touch-manipulation"
+                            >
                               <Eye className="mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
                               Voir détails
                             </SelectItem>
-                            <SelectItem value="view" onSelect={() => handleStatusUpdate(order.id, 'completed')}
+                            <SelectItem
+                              value="view"
+                              onSelect={() => handleStatusUpdate(order.id, 'completed')}
                               className="text-xs sm:text-sm md:text-base cursor-pointer touch-manipulation"
                               disabled={order.status === 'completed'}
                             >
@@ -1128,9 +1136,3 @@ export default function SupplierOrders() {
     </div>
   );
 }
-
-
-
-
-
-

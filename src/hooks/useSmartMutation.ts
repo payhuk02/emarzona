@@ -1,7 +1,7 @@
 /**
  * Hook useSmartMutation - Wrapper intelligent pour les mutations React Query
  * Combine les meilleures pratiques : error handling, optimistic updates, toast notifications
- * 
+ *
  * @example
  * ```tsx
  * const { mutate, isLoading } = useSmartMutation({
@@ -14,13 +14,22 @@
  * ```
  */
 
-import { useMutation, UseMutationOptions, UseMutationResult, QueryKey } from '@tanstack/react-query';
+import {
+  useMutation,
+  UseMutationOptions,
+  UseMutationResult,
+  QueryKey,
+} from '@tanstack/react-query';
 import { useQueryClient } from '@tanstack/react-query';
 import { useErrorHandler } from './useErrorHandler';
 import { useToastHelpers } from './useToastHelpers';
 
-export interface SmartMutationOptions<TData, TError = Error, TVariables = void, TContext = unknown>
-  extends Omit<UseMutationOptions<TData, TError, TVariables, TContext>, 'mutationFn'> {
+export interface SmartMutationOptions<
+  TData,
+  TError = Error,
+  TVariables = void,
+  TContext = unknown,
+> extends Omit<UseMutationOptions<TData, TError, TVariables, TContext>, 'mutationFn'> {
   /**
    * Fonction de mutation
    */
@@ -70,7 +79,12 @@ export interface SmartMutationOptions<TData, TError = Error, TVariables = void, 
 /**
  * Hook intelligent pour les mutations React Query
  */
-export function useSmartMutation<TData = unknown, TError = Error, TVariables = void, TContext = unknown>(
+export function useSmartMutation<
+  TData = unknown,
+  TError = Error,
+  TVariables = void,
+  TContext = unknown,
+>(
   options: SmartMutationOptions<TData, TError, TVariables, TContext>
 ): UseMutationResult<TData, TError, TVariables, TContext> {
   const {
@@ -94,7 +108,7 @@ export function useSmartMutation<TData = unknown, TError = Error, TVariables = v
   const mutation = useMutation<TData, TError, TVariables, TContext>({
     mutationFn,
     ...mutationOptions,
-    onMutate: async (variables) => {
+    onMutate: async variables => {
       // Optimistic update
       if (optimisticUpdate) {
         // Annuler les requêtes en cours pour éviter les conflits
@@ -104,9 +118,8 @@ export function useSmartMutation<TData = unknown, TError = Error, TVariables = v
         const previousData = queryClient.getQueryData(optimisticUpdate.queryKey);
 
         // Mettre à jour de manière optimiste
-        queryClient.setQueryData(
-          optimisticUpdate.queryKey,
-          (old: unknown) => optimisticUpdate.updater(old, variables)
+        queryClient.setQueryData(optimisticUpdate.queryKey, (old: unknown) =>
+          optimisticUpdate.updater(old, variables)
         );
 
         // Retourner le contexte pour rollback
@@ -119,7 +132,7 @@ export function useSmartMutation<TData = unknown, TError = Error, TVariables = v
     onSuccess: (data, variables, context) => {
       // Invalider les requêtes si spécifiées
       if (invalidateQueries) {
-        invalidateQueries.forEach((queryKey) => {
+        invalidateQueries.forEach(queryKey => {
           queryClient.invalidateQueries({ queryKey });
         });
       }
@@ -215,10 +228,3 @@ export function useSmartDeleteMutation<TData = unknown, TVariables = void>(
     successMessage: successMessage || `${entityName} supprimé avec succès`,
   });
 }
-
-
-
-
-
-
-

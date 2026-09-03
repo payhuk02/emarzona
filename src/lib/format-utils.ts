@@ -20,7 +20,7 @@ export function formatNumber(
   if (value === null || value === undefined || isNaN(value)) return '—';
 
   const { locale = 'fr-FR', ...formatOptions } = options || {};
-  
+
   return new Intl.NumberFormat(locale, formatOptions).format(value);
 }
 
@@ -119,7 +119,7 @@ export function formatDuration(
   const minutes = Math.floor((seconds % 3600) / 60);
   const secs = seconds % 60;
 
-  const  parts: string[] = [];
+  const parts: string[] = [];
 
   if (showHours && hours > 0) {
     parts.push(`${hours}h`);
@@ -192,16 +192,13 @@ export function formatWithPadding(
 /**
  * Formate un nombre en format ordinal (1er, 2ème, 3ème)
  */
-export function formatOrdinal(
-  value: number | null | undefined,
-  locale: string = 'fr-FR'
-): string {
+export function formatOrdinal(value: number | null | undefined, locale: string = 'fr-FR'): string {
   if (value === null || value === undefined || isNaN(value)) return '—';
 
   const formatter = new Intl.PluralRules(locale, { type: 'ordinal' });
   const rule = formatter.select(value);
 
-  const  suffixes: Record<string, Record<string, string>> = {
+  const suffixes: Record<string, Record<string, string>> = {
     'fr-FR': {
       one: 'er',
       two: 'ème',
@@ -221,10 +218,3 @@ export function formatOrdinal(
   const suffix = suffixes[locale]?.[rule] || suffixes['en-US'][rule] || '';
   return `${value}${suffix}`;
 }
-
-
-
-
-
-
-

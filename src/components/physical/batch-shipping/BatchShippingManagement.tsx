@@ -1,7 +1,7 @@
 /**
  * Batch Shipping Management Component
  * Date: 27 Janvier 2025
- * 
+ *
  * Gestion complète des expéditions par lots
  * Design responsive avec cards sur mobile et table sur desktop
  */
@@ -11,7 +11,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Dialog,
@@ -23,7 +30,12 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useBatchShipments, useCreateBatchShipment, useProcessBatchShipment, BatchShipment } from '@/hooks/physical/useBatchShipping';
+import {
+  useBatchShipments,
+  useCreateBatchShipment,
+  useProcessBatchShipment,
+  BatchShipment,
+} from '@/hooks/physical/useBatchShipping';
 import { useStore } from '@/hooks/useStore';
 import { Package, Plus, RefreshCw, Download, Search, X } from '@/components/icons';
 import { format } from 'date-fns';
@@ -32,7 +44,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useDebounce } from '@/hooks/useDebounce';
 import BatchShipmentDetails from './BatchShipmentDetails';
 
-const  BATCH_STATUSES: { value: BatchShipment['status']; label: string; color: string }[] = [
+const BATCH_STATUSES: { value: BatchShipment['status']; label: string; color: string }[] = [
   { value: 'pending', label: 'En attente', color: 'bg-yellow-500' },
   { value: 'processing', label: 'En traitement', color: 'bg-blue-500' },
   { value: 'label_generated', label: 'Étiquettes générées', color: 'bg-purple-500' },
@@ -70,7 +82,7 @@ export default function BatchShippingManagement() {
       setIsCreateDialogOpen(false);
       setSelectedOrderIds([]);
       setBatchName('');
-    } catch ( _error: any) {
+    } catch (_error: any) {
       toast({
         title: '❌ Erreur',
         description: error.message || 'Une erreur est survenue',
@@ -84,7 +96,7 @@ export default function BatchShippingManagement() {
       await processBatch.mutateAsync({
         batchId,
       });
-    } catch ( _error: any) {
+    } catch (_error: any) {
       toast({
         title: '❌ Erreur',
         description: error.message || 'Impossible de traiter le lot',
@@ -95,9 +107,10 @@ export default function BatchShippingManagement() {
 
   // Filtrer les batches par statut et recherche
   const filteredBatches = useMemo(() => {
-    return batches.filter((batch) => {
+    return batches.filter(batch => {
       const matchesStatus = statusFilter === 'all' || batch.status === statusFilter;
-      const matchesSearch = !debouncedSearch || 
+      const matchesSearch =
+        !debouncedSearch ||
         batch.batch_number?.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
         batch.batch_name?.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
         batch.carrier_name?.toLowerCase().includes(debouncedSearch.toLowerCase());
@@ -145,7 +158,7 @@ export default function BatchShippingManagement() {
             type="text"
             placeholder="Rechercher par numéro, nom ou transporteur..."
             value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
+            onChange={e => setSearchInput(e.target.value)}
             className="pl-9 pr-9 min-h-[44px] h-11 sm:h-12 text-sm"
             aria-label="Rechercher par numéro, nom ou transporteur"
           />
@@ -166,7 +179,7 @@ export default function BatchShippingManagement() {
             </Badge>
           </div>
         </div>
-        <Button 
+        <Button
           onClick={() => setIsCreateDialogOpen(true)}
           className="min-h-[44px] h-11 sm:h-12 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
           aria-label="Créer un nouveau lot d'expédition"
@@ -213,7 +226,8 @@ export default function BatchShippingManagement() {
           <CardTitle className="text-lg sm:text-xl">Lots d'expédition</CardTitle>
           <CardDescription className="text-xs sm:text-sm">
             {filteredBatches.length} lot{filteredBatches.length > 1 ? 's' : ''}
-            {debouncedSearch && ` trouvé${filteredBatches.length > 1 ? 's' : ''} pour "${debouncedSearch}"`}
+            {debouncedSearch &&
+              ` trouvé${filteredBatches.length > 1 ? 's' : ''} pour "${debouncedSearch}"`}
           </CardDescription>
         </CardHeader>
         <CardContent className="p-4 sm:p-6 pt-0">
@@ -226,7 +240,7 @@ export default function BatchShippingManagement() {
               <p className="text-xs sm:text-sm text-muted-foreground">
                 {debouncedSearch
                   ? `Aucun résultat pour "${debouncedSearch}". Essayez un autre terme de recherche.`
-                  : 'Créez votre premier lot d\'expédition pour commencer'}
+                  : "Créez votre premier lot d'expédition pour commencer"}
               </p>
             </div>
           ) : (
@@ -246,7 +260,7 @@ export default function BatchShippingManagement() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredBatches.map((batch) => {
+                    {filteredBatches.map(batch => {
                       const status = BATCH_STATUSES.find(s => s.value === batch.status);
                       return (
                         <TableRow key={batch.id}>
@@ -255,7 +269,9 @@ export default function BatchShippingManagement() {
                           <TableCell>
                             <div className="flex items-center gap-2">
                               <Package className="h-4 w-4 text-muted-foreground" />
-                              <span>{batch.processed_orders}/{batch.total_orders}</span>
+                              <span>
+                                {batch.processed_orders}/{batch.total_orders}
+                              </span>
                               {batch.failed_orders > 0 && (
                                 <Badge variant="destructive" className="text-xs">
                                   {batch.failed_orders} erreur{batch.failed_orders > 1 ? 's' : ''}
@@ -264,21 +280,27 @@ export default function BatchShippingManagement() {
                             </div>
                           </TableCell>
                           <TableCell>
-                            <Badge variant={
-                              batch.status === 'completed' ? 'default' :
-                              batch.status === 'shipped' ? 'default' :
-                              batch.status === 'label_generated' ? 'secondary' :
-                              batch.status === 'processing' ? 'secondary' :
-                              'outline'
-                            }>
+                            <Badge
+                              variant={
+                                batch.status === 'completed'
+                                  ? 'default'
+                                  : batch.status === 'shipped'
+                                    ? 'default'
+                                    : batch.status === 'label_generated'
+                                      ? 'secondary'
+                                      : batch.status === 'processing'
+                                        ? 'secondary'
+                                        : 'outline'
+                              }
+                            >
                               {status?.label || batch.status}
                             </Badge>
                           </TableCell>
+                          <TableCell>{batch.carrier_name || '-'}</TableCell>
                           <TableCell>
-                            {batch.carrier_name || '-'}
-                          </TableCell>
-                          <TableCell>
-                            {format(new Date(batch.created_at), 'dd MMM yyyy HH:mm', { locale: fr })}
+                            {format(new Date(batch.created_at), 'dd MMM yyyy HH:mm', {
+                              locale: fr,
+                            })}
                           </TableCell>
                           <TableCell className="text-right">
                             <div className="flex justify-end gap-2">
@@ -289,15 +311,14 @@ export default function BatchShippingManagement() {
                                   onClick={() => handleProcessBatch(batch.id)}
                                   disabled={processBatch.isPending}
                                 >
-                                  <RefreshCw className={`h-4 w-4 mr-1 ${processBatch.isPending ? 'animate-spin' : ''}`} />
+                                  <RefreshCw
+                                    className={`h-4 w-4 mr-1 ${processBatch.isPending ? 'animate-spin' : ''}`}
+                                  />
                                   Traiter
                                 </Button>
                               )}
                               {batch.status === 'label_generated' && (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                >
+                                <Button variant="outline" size="sm">
                                   <Download className="h-4 w-4 mr-1" />
                                   Télécharger
                                 </Button>
@@ -320,7 +341,7 @@ export default function BatchShippingManagement() {
 
               {/* Mobile Card View */}
               <div className="md:hidden space-y-4">
-                {filteredBatches.map((batch) => {
+                {filteredBatches.map(batch => {
                   const status = BATCH_STATUSES.find(s => s.value === batch.status);
                   return (
                     <Card
@@ -338,13 +359,20 @@ export default function BatchShippingManagement() {
                                 {batch.batch_name || 'Sans nom'}
                               </p>
                             </div>
-                            <Badge variant={
-                              batch.status === 'completed' ? 'default' :
-                              batch.status === 'shipped' ? 'default' :
-                              batch.status === 'label_generated' ? 'secondary' :
-                              batch.status === 'processing' ? 'secondary' :
-                              'outline'
-                            } className="text-xs">
+                            <Badge
+                              variant={
+                                batch.status === 'completed'
+                                  ? 'default'
+                                  : batch.status === 'shipped'
+                                    ? 'default'
+                                    : batch.status === 'label_generated'
+                                      ? 'secondary'
+                                      : batch.status === 'processing'
+                                        ? 'secondary'
+                                        : 'outline'
+                              }
+                              className="text-xs"
+                            >
                               {status?.label || batch.status}
                             </Badge>
                           </div>
@@ -368,7 +396,9 @@ export default function BatchShippingManagement() {
                           )}
 
                           <div className="text-xs text-muted-foreground">
-                            {format(new Date(batch.created_at), 'dd MMM yyyy HH:mm', { locale: fr })}
+                            {format(new Date(batch.created_at), 'dd MMM yyyy HH:mm', {
+                              locale: fr,
+                            })}
                           </div>
 
                           <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-border/50">
@@ -380,7 +410,9 @@ export default function BatchShippingManagement() {
                                 disabled={processBatch.isPending}
                                 className="text-xs min-h-[44px] h-11"
                               >
-                                <RefreshCw className={`h-3.5 w-3.5 mr-1 ${processBatch.isPending ? 'animate-spin' : ''}`} />
+                                <RefreshCw
+                                  className={`h-3.5 w-3.5 mr-1 ${processBatch.isPending ? 'animate-spin' : ''}`}
+                                />
                                 Traiter
                               </Button>
                             )}
@@ -449,17 +481,21 @@ export default function BatchShippingManagement() {
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="batch_name" className="text-xs sm:text-sm">Nom du lot (optionnel)</Label>
+              <Label htmlFor="batch_name" className="text-xs sm:text-sm">
+                Nom du lot (optionnel)
+              </Label>
               <Input
                 id="batch_name"
                 value={batchName}
-                onChange={(e) => setBatchName(e.target.value)}
+                onChange={e => setBatchName(e.target.value)}
                 placeholder="Ex: Expédition du 27 janvier"
                 className="text-sm min-h-[44px] h-11 sm:h-12"
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-xs sm:text-sm">Commandes sélectionnées: {selectedOrderIds.length}</Label>
+              <Label className="text-xs sm:text-sm">
+                Commandes sélectionnées: {selectedOrderIds.length}
+              </Label>
               <div className="h-48 sm:h-64 border rounded-md p-3 sm:p-4 overflow-y-auto">
                 <p className="text-xs sm:text-sm text-muted-foreground">
                   Fonctionnalité de sélection des commandes à implémenter
@@ -468,16 +504,16 @@ export default function BatchShippingManagement() {
             </div>
           </div>
           <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
-            <Button 
-              type="button" 
-              variant="outline" 
+            <Button
+              type="button"
+              variant="outline"
               onClick={() => setIsCreateDialogOpen(false)}
               className="w-full sm:w-auto min-h-[44px] h-11 sm:h-12 text-sm"
             >
               Annuler
             </Button>
-            <Button 
-              onClick={handleCreateBatch} 
+            <Button
+              onClick={handleCreateBatch}
               disabled={selectedOrderIds.length === 0 || createBatch.isPending}
               className="w-full sm:w-auto min-h-[44px] h-11 sm:h-12 text-sm bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
             >
@@ -489,9 +525,3 @@ export default function BatchShippingManagement() {
     </div>
   );
 }
-
-
-
-
-
-

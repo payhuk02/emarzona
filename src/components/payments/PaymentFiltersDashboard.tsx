@@ -1,22 +1,27 @@
-import { Search, SlidersHorizontal, Filter, X, Grid3X3, List, BarChart3, Calendar } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import {
+  Search,
+  SlidersHorizontal,
+  Filter,
+  X,
+  Grid3X3,
+  List,
+  BarChart3,
+  Calendar,
+} from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { useState } from "react";
+} from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
+import { useState } from 'react';
 
 interface PaymentFiltersDashboardProps {
   searchQuery: string;
@@ -31,8 +36,8 @@ interface PaymentFiltersDashboardProps {
   onSortByChange: (value: string) => void;
   paymentMethods: string[];
   paymentStatuses: string[];
-  viewMode?: "grid" | "list";
-  onViewModeChange?: (mode: "grid" | "list") => void;
+  viewMode?: 'grid' | 'list';
+  onViewModeChange?: (mode: 'grid' | 'list') => void;
   totalPayments?: number;
   completedPayments?: number;
 }
@@ -50,57 +55,58 @@ const PaymentFiltersDashboard = ({
   onSortByChange,
   paymentMethods,
   paymentStatuses,
-  viewMode = "list",
+  viewMode = 'list',
   onViewModeChange,
   totalPayments = 0,
   completedPayments = 0,
 }: PaymentFiltersDashboardProps) => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  
-  const hasFilters = statusFilter !== "all" || methodFilter !== "all" || dateFilter !== "all" || searchQuery;
+
+  const hasFilters =
+    statusFilter !== 'all' || methodFilter !== 'all' || dateFilter !== 'all' || searchQuery;
 
   const clearFilters = () => {
-    onStatusChange("all");
-    onMethodChange("all");
-    onDateChange("all");
-    onSearchChange("");
+    onStatusChange('all');
+    onMethodChange('all');
+    onDateChange('all');
+    onSearchChange('');
   };
 
   const getActiveFiltersCount = () => {
-    let  count= 0;
-    if (statusFilter !== "all") count++;
-    if (methodFilter !== "all") count++;
-    if (dateFilter !== "all") count++;
+    let count = 0;
+    if (statusFilter !== 'all') count++;
+    if (methodFilter !== 'all') count++;
+    if (dateFilter !== 'all') count++;
     if (searchQuery) count++;
     return count;
   };
 
   const sortOptions = [
-    { value: "recent", label: "Plus récents" },
-    { value: "oldest", label: "Plus anciens" },
-    { value: "amount-asc", label: "Montant croissant" },
-    { value: "amount-desc", label: "Montant décroissant" },
-    { value: "status", label: "Par statut" },
+    { value: 'recent', label: 'Plus récents' },
+    { value: 'oldest', label: 'Plus anciens' },
+    { value: 'amount-asc', label: 'Montant croissant' },
+    { value: 'amount-desc', label: 'Montant décroissant' },
+    { value: 'status', label: 'Par statut' },
   ];
 
   const getMethodLabel = (method: string) => {
-    const  labels: Record<string, string> = {
-      cash: "Espèces",
-      card: "Carte bancaire",
-      mobile_money: "Mobile Money",
-      bank_transfer: "Virement bancaire",
-      check: "Chèque",
-      other: "Autre",
+    const labels: Record<string, string> = {
+      cash: 'Espèces',
+      card: 'Carte bancaire',
+      mobile_money: 'Mobile Money',
+      bank_transfer: 'Virement bancaire',
+      check: 'Chèque',
+      other: 'Autre',
     };
     return labels[method] || method;
   };
 
   const getStatusLabel = (status: string) => {
-    const  labels: Record<string, string> = {
-      pending: "En attente",
-      completed: "Complété",
-      failed: "Échoué",
-      refunded: "Remboursé",
+    const labels: Record<string, string> = {
+      pending: 'En attente',
+      completed: 'Complété',
+      failed: 'Échoué',
+      refunded: 'Remboursé',
     };
     return labels[status] || status;
   };
@@ -113,31 +119,31 @@ const PaymentFiltersDashboard = ({
           <div className="flex items-center gap-2">
             <BarChart3 className="h-4 w-4 text-muted-foreground" />
             <span className="text-sm text-muted-foreground">
-              {totalPayments} paiement{totalPayments > 1 ? "s" : ""} total
+              {totalPayments} paiement{totalPayments > 1 ? 's' : ''} total
             </span>
           </div>
           <div className="flex items-center gap-2">
             <div className="h-2 w-2 rounded-full bg-green-500"></div>
             <span className="text-sm text-muted-foreground">
-              {completedPayments} complété{completedPayments > 1 ? "s" : ""}
+              {completedPayments} complété{completedPayments > 1 ? 's' : ''}
             </span>
           </div>
         </div>
-        
+
         {onViewModeChange && (
           <div className="flex items-center gap-1 border rounded-lg p-1">
             <Button
-              variant={viewMode === "grid" ? "default" : "ghost"}
+              variant={viewMode === 'grid' ? 'default' : 'ghost'}
               size="sm"
-              onClick={() => onViewModeChange("grid")}
+              onClick={() => onViewModeChange('grid')}
               className="h-8 w-8 p-0"
             >
               <Grid3X3 className="h-4 w-4" />
             </Button>
             <Button
-              variant={viewMode === "list" ? "default" : "ghost"}
+              variant={viewMode === 'list' ? 'default' : 'ghost'}
               size="sm"
-              onClick={() => onViewModeChange("list")}
+              onClick={() => onViewModeChange('list')}
               className="h-8 w-8 p-0"
             >
               <List className="h-4 w-4" />
@@ -154,14 +160,14 @@ const PaymentFiltersDashboard = ({
             type="search"
             placeholder="Rechercher un paiement..."
             value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
+            onChange={e => onSearchChange(e.target.value)}
             className="pl-10"
           />
           {searchQuery && (
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => onSearchChange("")}
+              onClick={() => onSearchChange('')}
               className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 p-0"
             >
               <X className="h-3 w-3" />
@@ -175,7 +181,10 @@ const PaymentFiltersDashboard = ({
               <SlidersHorizontal className="h-4 w-4 mr-2" />
               Filtres
               {hasFilters && (
-                <Badge variant="secondary" className="ml-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs">
+                <Badge
+                  variant="secondary"
+                  className="ml-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
+                >
                   {getActiveFiltersCount()}
                 </Badge>
               )}
@@ -189,12 +198,7 @@ const PaymentFiltersDashboard = ({
                   Filtres
                 </h4>
                 {hasFilters && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={clearFilters}
-                    className="text-xs"
-                  >
+                  <Button variant="ghost" size="sm" onClick={clearFilters} className="text-xs">
                     Réinitialiser
                   </Button>
                 )}
@@ -211,7 +215,7 @@ const PaymentFiltersDashboard = ({
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">Tous les statuts</SelectItem>
-                      {paymentStatuses.map((status) => (
+                      {paymentStatuses.map(status => (
                         <SelectItem key={status} value={status}>
                           {getStatusLabel(status)}
                         </SelectItem>
@@ -228,7 +232,7 @@ const PaymentFiltersDashboard = ({
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">Toutes les méthodes</SelectItem>
-                      {paymentMethods.map((method) => (
+                      {paymentMethods.map(method => (
                         <SelectItem key={method} value={method}>
                           {getMethodLabel(method)}
                         </SelectItem>
@@ -266,49 +270,55 @@ const PaymentFiltersDashboard = ({
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => onSearchChange("")}
+                            onClick={() => onSearchChange('')}
                             className="ml-1 h-4 w-4 p-0"
                           >
                             <X className="h-3 w-3" />
                           </Button>
                         </Badge>
                       )}
-                      {statusFilter !== "all" && (
+                      {statusFilter !== 'all' && (
                         <Badge variant="secondary" className="text-xs">
                           Statut: {getStatusLabel(statusFilter)}
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => onStatusChange("all")}
+                            onClick={() => onStatusChange('all')}
                             className="ml-1 h-4 w-4 p-0"
                           >
                             <X className="h-3 w-3" />
                           </Button>
                         </Badge>
                       )}
-                      {methodFilter !== "all" && (
+                      {methodFilter !== 'all' && (
                         <Badge variant="secondary" className="text-xs">
                           Méthode: {getMethodLabel(methodFilter)}
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => onMethodChange("all")}
+                            onClick={() => onMethodChange('all')}
                             className="ml-1 h-4 w-4 p-0"
                           >
                             <X className="h-3 w-3" />
                           </Button>
                         </Badge>
                       )}
-                      {dateFilter !== "all" && (
+                      {dateFilter !== 'all' && (
                         <Badge variant="secondary" className="text-xs">
-                          Période: {dateFilter === "today" ? "Aujourd'hui" : 
-                                   dateFilter === "yesterday" ? "Hier" :
-                                   dateFilter === "week" ? "Cette semaine" :
-                                   dateFilter === "month" ? "Ce mois" : dateFilter}
+                          Période:{' '}
+                          {dateFilter === 'today'
+                            ? "Aujourd'hui"
+                            : dateFilter === 'yesterday'
+                              ? 'Hier'
+                              : dateFilter === 'week'
+                                ? 'Cette semaine'
+                                : dateFilter === 'month'
+                                  ? 'Ce mois'
+                                  : dateFilter}
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => onDateChange("all")}
+                            onClick={() => onDateChange('all')}
                             className="ml-1 h-4 w-4 p-0"
                           >
                             <X className="h-3 w-3" />
@@ -328,7 +338,7 @@ const PaymentFiltersDashboard = ({
             <SelectValue placeholder="Trier par" />
           </SelectTrigger>
           <SelectContent>
-            {sortOptions.map((option) => (
+            {sortOptions.map(option => (
               <SelectItem key={option.value} value={option.value}>
                 {option.label}
               </SelectItem>
@@ -341,9 +351,3 @@ const PaymentFiltersDashboard = ({
 };
 
 export default PaymentFiltersDashboard;
-
-
-
-
-
-

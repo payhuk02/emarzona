@@ -1,13 +1,17 @@
 /**
  * Hook pour le Tracking Automatique des Colis
  * Date: 31 Janvier 2025
- * 
+ *
  * Utilise le système de tracking automatique pour mettre à jour les statuts
  */
 
 import React from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { trackShipment, trackPendingShipments, sendTrackingNotifications } from '@/lib/shipping/automatic-tracking';
+import {
+  trackShipment,
+  trackPendingShipments,
+  sendTrackingNotifications,
+} from '@/lib/shipping/automatic-tracking';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 
@@ -25,7 +29,7 @@ export function useTrackShipment(shipmentId: string | null) {
       }
       return trackShipment(shipmentId);
     },
-    onSuccess: (success) => {
+    onSuccess: success => {
       if (success) {
         queryClient.invalidateQueries({ queryKey: ['shipment', shipmentId] });
         queryClient.invalidateQueries({ queryKey: ['shipments'] });
@@ -41,7 +45,7 @@ export function useTrackShipment(shipmentId: string | null) {
         });
       }
     },
-    onError: (error) => {
+    onError: error => {
       logger.error('Error tracking shipment', { error, shipmentId });
       toast({
         title: '❌ Erreur',
@@ -61,14 +65,14 @@ export function useTrackPendingShipments() {
 
   return useMutation({
     mutationFn: trackPendingShipments,
-    onSuccess: (result) => {
+    onSuccess: result => {
       queryClient.invalidateQueries({ queryKey: ['shipments'] });
       toast({
         title: '✅ Tracking mis à jour',
         description: `${result.success} colis mis à jour, ${result.failed} échecs.`,
       });
     },
-    onError: (error) => {
+    onError: error => {
       logger.error('Error tracking pending shipments', { error });
       toast({
         title: '❌ Erreur',
@@ -93,11 +97,11 @@ export function useSendTrackingNotifications() {
         description: 'Le client a été notifié de la mise à jour.',
       });
     },
-    onError: (error) => {
+    onError: error => {
       logger.error('Error sending tracking notifications', { error });
       toast({
         title: '⚠️ Erreur',
-        description: 'Impossible d\'envoyer la notification',
+        description: "Impossible d'envoyer la notification",
         variant: 'destructive',
       });
     },
@@ -124,10 +128,3 @@ export function useAutomaticTracking(intervalMs: number = 5 * 60 * 1000) {
     return () => clearInterval(interval);
   }, [trackPending, intervalMs]);
 }
-
-
-
-
-
-
-

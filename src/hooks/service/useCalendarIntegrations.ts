@@ -8,8 +8,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 
-const CALENDAR_EVENT_FIELDS = 'id, integration_id, booking_id, service_id, external_event_id, external_calendar_id, event_title, event_description, event_start_time, event_end_time, event_location, event_timezone, attendees, organizer_email, organizer_name, sync_status, sync_direction, last_synced_at, sync_error, metadata, created_at, updated_at';
-const SYNC_LOG_FIELDS = 'id, integration_id, sync_type, sync_direction, status, events_created, events_updated, events_deleted, events_failed, error_message, started_at, completed_at, duration_seconds, metadata, created_at';
+const CALENDAR_EVENT_FIELDS =
+  'id, integration_id, booking_id, service_id, external_event_id, external_calendar_id, event_title, event_description, event_start_time, event_end_time, event_location, event_timezone, attendees, organizer_email, organizer_name, sync_status, sync_direction, last_synced_at, sync_error, metadata, created_at, updated_at';
+const SYNC_LOG_FIELDS =
+  'id, integration_id, sync_type, sync_direction, status, events_created, events_updated, events_deleted, events_failed, error_message, started_at, completed_at, duration_seconds, metadata, created_at';
 
 export interface CalendarIntegration {
   id: string;
@@ -94,13 +96,15 @@ export function useCalendarIntegrations(storeId: string) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('service_calendar_integrations')
-        .select(`
+        .select(
+          `
           *,
           products (
             id,
             name
           )
-        `)
+        `
+        )
         .eq('store_id', storeId)
         .order('created_at', { ascending: false });
 
@@ -120,13 +124,15 @@ export function useCalendarIntegration(integrationId: string) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('service_calendar_integrations')
-        .select(`
+        .select(
+          `
           *,
           products (
             id,
             name
           )
-        `)
+        `
+        )
         .eq('id', integrationId)
         .single();
 
@@ -155,18 +161,18 @@ export function useCreateCalendarIntegration() {
       if (error) throw error;
       return data as CalendarIntegration;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['calendar-integrations'] });
       toast({
         title: 'Intégration créée',
-        description: 'L\'intégration calendrier a été créée avec succès.',
+        description: "L'intégration calendrier a été créée avec succès.",
       });
       logger.info('Calendar integration created', { integrationId: data.id });
     },
     onError: (error: Error) => {
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible de créer l\'intégration.',
+        description: error.message || "Impossible de créer l'intégration.",
         variant: 'destructive',
       });
       logger.error('Error creating calendar integration', { error });
@@ -193,18 +199,18 @@ export function useUpdateCalendarIntegration() {
       if (error) throw error;
       return data as CalendarIntegration;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['calendar-integrations'] });
       queryClient.invalidateQueries({ queryKey: ['calendar-integration', data.id] });
       toast({
         title: 'Intégration mise à jour',
-        description: 'L\'intégration calendrier a été mise à jour avec succès.',
+        description: "L'intégration calendrier a été mise à jour avec succès.",
       });
     },
     onError: (error: Error) => {
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible de mettre à jour l\'intégration.',
+        description: error.message || "Impossible de mettre à jour l'intégration.",
         variant: 'destructive',
       });
     },
@@ -231,13 +237,13 @@ export function useDeleteCalendarIntegration() {
       queryClient.invalidateQueries({ queryKey: ['calendar-integrations'] });
       toast({
         title: 'Intégration supprimée',
-        description: 'L\'intégration calendrier a été supprimée avec succès.',
+        description: "L'intégration calendrier a été supprimée avec succès.",
       });
     },
     onError: (error: Error) => {
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible de supprimer l\'intégration.',
+        description: error.message || "Impossible de supprimer l'intégration.",
         variant: 'destructive',
       });
     },
@@ -252,7 +258,13 @@ export function useSyncCalendar() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({ integrationId, syncType = 'manual' }: { integrationId: string; syncType?: 'full' | 'incremental' | 'manual' }) => {
+    mutationFn: async ({
+      integrationId,
+      syncType = 'manual',
+    }: {
+      integrationId: string;
+      syncType?: 'full' | 'incremental' | 'manual';
+    }) => {
       const { data, error } = await supabase.rpc('sync_calendar_events', {
         p_integration_id: integrationId,
         p_sync_type: syncType,
@@ -328,7 +340,12 @@ export function useDetectCalendarConflicts() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({ serviceId, startTime, endTime, excludeBookingId }: {
+    mutationFn: async ({
+      serviceId,
+      startTime,
+      endTime,
+      excludeBookingId,
+    }: {
       serviceId: string;
       startTime: string;
       endTime: string;
@@ -353,10 +370,3 @@ export function useDetectCalendarConflicts() {
     },
   });
 }
-
-
-
-
-
-
-

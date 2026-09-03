@@ -85,7 +85,7 @@ export class AdvancedAnalytics {
     period?: { start: string; end: string }
   ): Promise<AnalyticsMetric[]> {
     try {
-      const  metrics: AnalyticsMetric[] = [];
+      const metrics: AnalyticsMetric[] = [];
 
       // Revenue
       const revenue = await this.calculateRevenue(storeId, period);
@@ -104,7 +104,12 @@ export class AdvancedAnalytics {
         name: 'Conversion Rate',
         value: conversionRate.current,
         change: conversionRate.change,
-        changeType: conversionRate.change > 0 ? 'increase' : conversionRate.change < 0 ? 'decrease' : 'stable',
+        changeType:
+          conversionRate.change > 0
+            ? 'increase'
+            : conversionRate.change < 0
+              ? 'decrease'
+              : 'stable',
         trend: conversionRate.change > 0 ? 'up' : conversionRate.change < 0 ? 'down' : 'stable',
         period: '30 days',
       });
@@ -146,7 +151,7 @@ export class AdvancedAnalytics {
     period?: { start: string; end: string }
   ): Promise<AnalyticsInsight[]> {
     try {
-      const  insights: AnalyticsInsight[] = [];
+      const insights: AnalyticsInsight[] = [];
 
       // Analyser les tendances
       const revenueTrend = await this.analyzeRevenueTrend(storeId, period);
@@ -179,7 +184,7 @@ export class AdvancedAnalytics {
     period?: { start: string; end: string }
   ): Promise<AnalyticsPrediction[]> {
     try {
-      const  predictions: AnalyticsPrediction[] = [];
+      const predictions: AnalyticsPrediction[] = [];
 
       // Prédiction de revenue
       const revenuePrediction = await this.predictRevenue(storeId, period);
@@ -208,7 +213,7 @@ export class AdvancedAnalytics {
     period?: { start: string; end: string }
   ): Promise<{ current: number; previous: number; change: number }> {
     try {
-      let  query= supabase
+      let query = supabase
         .from('orders')
         .select('total_amount')
         .eq('status', 'completed')
@@ -233,12 +238,15 @@ export class AdvancedAnalytics {
       // Calculer le revenue de la période précédente
       const previousPeriod = {
         start: period
-          ? new Date(new Date(period.start).getTime() - (new Date(period.end).getTime() - new Date(period.start).getTime())).toISOString()
+          ? new Date(
+              new Date(period.start).getTime() -
+                (new Date(period.end).getTime() - new Date(period.start).getTime())
+            ).toISOString()
           : new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString(),
         end: period?.start || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
       };
 
-      let  previousQuery= supabase
+      let previousQuery = supabase
         .from('orders')
         .select('total_amount')
         .eq('status', 'completed')
@@ -251,7 +259,8 @@ export class AdvancedAnalytics {
       }
 
       const { data: previousOrders } = await previousQuery;
-      const previous = previousOrders?.reduce((sum, order) => sum + (order.total_amount || 0), 0) || 0;
+      const previous =
+        previousOrders?.reduce((sum, order) => sum + (order.total_amount || 0), 0) || 0;
 
       const change = previous > 0 ? ((current - previous) / previous) * 100 : 0;
 
@@ -271,11 +280,12 @@ export class AdvancedAnalytics {
     period?: { start: string; end: string }
   ): Promise<{ current: number; previous: number; change: number }> {
     try {
-      const periodStart = period?.start || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+      const periodStart =
+        period?.start || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
       const periodEnd = period?.end || new Date().toISOString();
 
       // Récupérer le nombre de commandes payées (conversions)
-      let  ordersQuery= supabase
+      let ordersQuery = supabase
         .from('orders')
         .select('id, customer_id, created_at')
         .eq('payment_status', 'paid')
@@ -296,9 +306,9 @@ export class AdvancedAnalytics {
       // 1. Nombre d'utilisateurs uniques ayant visité le store/marketplace
       // 2. Nombre de sessions uniques (si table analytics existe)
       // 3. Nombre d'utilisateurs ayant ajouté au panier (approximation)
-      
+
       // Approche 1: Utiliser le nombre d'utilisateurs uniques ayant créé une commande ou un panier
-      let  visitorsQuery= supabase
+      let visitorsQuery = supabase
         .from('orders')
         .select('customer_id')
         .gte('created_at', periodStart)
@@ -312,8 +322,8 @@ export class AdvancedAnalytics {
       const uniqueVisitors = new Set(allOrders?.map(o => o.customer_id).filter(Boolean) || []).size;
 
       // Si pas assez de données, utiliser une approximation basée sur les utilisateurs actifs
-      let  currentVisitors= uniqueVisitors;
-      
+      let currentVisitors = uniqueVisitors;
+
       if (currentVisitors === 0 && conversions > 0) {
         // Approximation: supposer qu'il y a au moins 10x plus de visiteurs que de conversions
         currentVisitors = conversions * 10;
@@ -325,7 +335,7 @@ export class AdvancedAnalytics {
           .gte('created_at', periodStart)
           .lte('created_at', periodEnd)
           .limit(1000);
-        
+
         currentVisitors = usersData?.length || 100; // Fallback à 100 visiteurs
       }
 
@@ -333,10 +343,13 @@ export class AdvancedAnalytics {
       const currentRate = currentVisitors > 0 ? (conversions / currentVisitors) * 100 : 0;
 
       // Calculer pour la période précédente
-      const previousPeriodStart = new Date(new Date(periodStart).getTime() - (new Date(periodEnd).getTime() - new Date(periodStart).getTime())).toISOString();
+      const previousPeriodStart = new Date(
+        new Date(periodStart).getTime() -
+          (new Date(periodEnd).getTime() - new Date(periodStart).getTime())
+      ).toISOString();
       const previousPeriodEnd = periodStart;
 
-      let  previousOrdersQuery= supabase
+      let previousOrdersQuery = supabase
         .from('orders')
         .select('id, customer_id')
         .eq('payment_status', 'paid')
@@ -351,7 +364,7 @@ export class AdvancedAnalytics {
       const { data: previousOrders } = await previousOrdersQuery;
       const previousConversions = previousOrders?.length || 0;
 
-      let  previousVisitorsQuery= supabase
+      let previousVisitorsQuery = supabase
         .from('orders')
         .select('customer_id')
         .gte('created_at', previousPeriodStart)
@@ -362,16 +375,19 @@ export class AdvancedAnalytics {
       }
 
       const { data: previousAllOrders } = await previousVisitorsQuery;
-      const previousUniqueVisitors = new Set(previousAllOrders?.map(o => o.customer_id).filter(Boolean) || []).size;
-      
-      let  previousVisitors= previousUniqueVisitors;
+      const previousUniqueVisitors = new Set(
+        previousAllOrders?.map(o => o.customer_id).filter(Boolean) || []
+      ).size;
+
+      let previousVisitors = previousUniqueVisitors;
       if (previousVisitors === 0 && previousConversions > 0) {
         previousVisitors = previousConversions * 10;
       } else if (previousVisitors === 0) {
         previousVisitors = 100; // Fallback
       }
 
-      const previousRate = previousVisitors > 0 ? (previousConversions / previousVisitors) * 100 : 0;
+      const previousRate =
+        previousVisitors > 0 ? (previousConversions / previousVisitors) * 100 : 0;
 
       // Calculer le changement en pourcentage
       const change = previousRate > 0 ? ((currentRate - previousRate) / previousRate) * 100 : 0;
@@ -396,12 +412,13 @@ export class AdvancedAnalytics {
     period?: { start: string; end: string }
   ): Promise<{ current: number; previous: number; change: number }> {
     try {
-      const periodStart = period?.start || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+      const periodStart =
+        period?.start || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
       const periodEnd = period?.end || new Date().toISOString();
 
       // Source 1: Nombre d'utilisateurs uniques ayant interagi avec le store/marketplace
       // (commandes, paniers, vues de produits)
-      let  ordersQuery= supabase
+      let ordersQuery = supabase
         .from('orders')
         .select('customer_id, created_at')
         .gte('created_at', periodStart)
@@ -427,7 +444,7 @@ export class AdvancedAnalytics {
       ).size;
 
       // Source 3: Nombre d'utilisateurs ayant visité des produits (si table product_views existe)
-      let  productViewsQuery= supabase
+      let productViewsQuery = supabase
         .from('product_views')
         .select('user_id, session_id, viewed_at')
         .gte('viewed_at', periodStart)
@@ -472,7 +489,7 @@ export class AdvancedAnalytics {
       const currentTraffic = Math.max(...trafficSources, 0);
 
       // Si aucune donnée, utiliser une estimation basée sur les commandes
-      let  estimatedTraffic= currentTraffic;
+      let estimatedTraffic = currentTraffic;
       if (estimatedTraffic === 0 && orders && orders.length > 0) {
         // Approximation: supposer qu'il y a 20 visiteurs pour chaque commande
         estimatedTraffic = orders.length * 20;
@@ -482,10 +499,13 @@ export class AdvancedAnalytics {
       }
 
       // Calculer pour la période précédente
-      const previousPeriodStart = new Date(new Date(periodStart).getTime() - (new Date(periodEnd).getTime() - new Date(periodStart).getTime())).toISOString();
+      const previousPeriodStart = new Date(
+        new Date(periodStart).getTime() -
+          (new Date(periodEnd).getTime() - new Date(periodStart).getTime())
+      ).toISOString();
       const previousPeriodEnd = periodStart;
 
-      let  previousOrdersQuery= supabase
+      let previousOrdersQuery = supabase
         .from('orders')
         .select('customer_id')
         .gte('created_at', previousPeriodStart)
@@ -496,7 +516,9 @@ export class AdvancedAnalytics {
       }
 
       const { data: previousOrders } = await previousOrdersQuery;
-      const previousUniqueOrderUsers = new Set(previousOrders?.map(o => o.customer_id).filter(Boolean) || []).size;
+      const previousUniqueOrderUsers = new Set(
+        previousOrders?.map(o => o.customer_id).filter(Boolean) || []
+      ).size;
 
       const previousCartQuery = supabase
         .from('cart_items')
@@ -525,8 +547,8 @@ export class AdvancedAnalytics {
       ];
 
       const previousTraffic = Math.max(...previousTrafficSources, 0);
-      let  previousEstimatedTraffic= previousTraffic;
-      
+      let previousEstimatedTraffic = previousTraffic;
+
       if (previousEstimatedTraffic === 0 && previousOrders && previousOrders.length > 0) {
         previousEstimatedTraffic = previousOrders.length * 20;
       } else if (previousEstimatedTraffic === 0) {
@@ -534,9 +556,10 @@ export class AdvancedAnalytics {
       }
 
       // Calculer le changement en pourcentage
-      const change = previousEstimatedTraffic > 0 
-        ? ((estimatedTraffic - previousEstimatedTraffic) / previousEstimatedTraffic) * 100 
-        : 0;
+      const change =
+        previousEstimatedTraffic > 0
+          ? ((estimatedTraffic - previousEstimatedTraffic) / previousEstimatedTraffic) * 100
+          : 0;
 
       return {
         current: estimatedTraffic,
@@ -560,7 +583,11 @@ export class AdvancedAnalytics {
     try {
       const revenue = await this.calculateRevenue(storeId, period);
 
-      let  query= supabase.from('orders').select('id').eq('status', 'completed').eq('payment_status', 'paid');
+      let query = supabase
+        .from('orders')
+        .select('id')
+        .eq('status', 'completed')
+        .eq('payment_status', 'paid');
 
       if (storeId) {
         query = query.eq('store_id', storeId);
@@ -600,7 +627,8 @@ export class AdvancedAnalytics {
           title: 'Revenue en forte hausse',
           description: `Le revenue a augmenté de ${revenue.change.toFixed(1)}% par rapport à la période précédente.`,
           impact: 'high',
-          recommendation: 'Continuez à maintenir cette croissance en optimisant vos campagnes marketing.',
+          recommendation:
+            'Continuez à maintenir cette croissance en optimisant vos campagnes marketing.',
           data: { change: revenue.change, current: revenue.current, previous: revenue.previous },
         };
       } else if (revenue.change < -10) {
@@ -637,7 +665,8 @@ export class AdvancedAnalytics {
           title: 'Taux de conversion en hausse',
           description: `Le taux de conversion a augmenté de ${conversionRate.change.toFixed(1)}%.`,
           impact: 'medium',
-          recommendation: 'Vos optimisations de conversion fonctionnent bien. Continuez à tester et améliorer.',
+          recommendation:
+            'Vos optimisations de conversion fonctionnent bien. Continuez à tester et améliorer.',
           data: { change: conversionRate.change, current: conversionRate.current },
         };
       }
@@ -665,7 +694,8 @@ export class AdvancedAnalytics {
           title: 'Traffic en hausse',
           description: `Le traffic a augmenté de ${traffic.change.toFixed(1)}% par rapport à la période précédente.`,
           impact: 'medium',
-          recommendation: 'Profitez de cette augmentation de traffic pour améliorer votre taux de conversion.',
+          recommendation:
+            'Profitez de cette augmentation de traffic pour améliorer votre taux de conversion.',
           data: { change: traffic.change, current: traffic.current },
         };
       }
@@ -735,11 +765,3 @@ export class AdvancedAnalytics {
 
 // Instance singleton
 export const advancedAnalytics = new AdvancedAnalytics();
-
-
-
-
-
-
-
-

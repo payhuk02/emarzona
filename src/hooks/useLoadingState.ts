@@ -1,11 +1,11 @@
 /**
  * Hook useLoadingState - Gestion simplifiée des états de chargement
  * Fournit une API simple pour gérer les états de chargement, erreur et succès
- * 
+ *
  * @example
  * ```tsx
  * const { loading, error, success, execute, reset } = useLoadingState();
- * 
+ *
  * const handleSubmit = async () => {
  *   await execute(async () => {
  *     await saveData();
@@ -59,7 +59,7 @@ export function useLoadingState(): UseLoadingStateReturn {
   const [error, setError] = useState<Error | null>(null);
   const [success, setSuccess] = useState(false);
 
-  const execute = useCallback(async <T,>(operation: () => Promise<T>): Promise<T | undefined> => {
+  const execute = useCallback(async <T>(operation: () => Promise<T>): Promise<T | undefined> => {
     setLoading(true);
     setError(null);
     setSuccess(false);
@@ -95,10 +95,3 @@ export function useLoadingState(): UseLoadingStateReturn {
     setSuccess,
   };
 }
-
-
-
-
-
-
-

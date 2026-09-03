@@ -1,7 +1,7 @@
 /**
  * Validation centralisée des fichiers pour le système de messaging
  * Date: 1 Février 2025
- * 
+ *
  * Centralise toute la logique de validation des fichiers (taille, type, sécurité)
  */
 
@@ -14,7 +14,7 @@ import { logger } from '@/lib/logger';
 export const FILE_VALIDATION_CONFIG = {
   /** Taille maximale par défaut (10MB) */
   MAX_FILE_SIZE: 10 * 1024 * 1024, // 10MB
-  
+
   /** Types MIME autorisés pour les messages */
   ALLOWED_MIME_TYPES: [
     // Images
@@ -36,23 +36,46 @@ export const FILE_VALIDATION_CONFIG = {
     'application/vnd.ms-excel',
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   ] as const,
-  
+
   /** Extensions autorisées (sécurité supplémentaire) */
   ALLOWED_EXTENSIONS: [
     // Images
-    '.jpg', '.jpeg', '.png', '.gif', '.webp',
+    '.jpg',
+    '.jpeg',
+    '.png',
+    '.gif',
+    '.webp',
     // Vidéos
-    '.mp4', '.webm', '.mov',
+    '.mp4',
+    '.webm',
+    '.mov',
     // Documents
-    '.pdf', '.txt',
+    '.pdf',
+    '.txt',
     // Documents Office
-    '.doc', '.docx', '.xls', '.xlsx',
+    '.doc',
+    '.docx',
+    '.xls',
+    '.xlsx',
   ] as const,
-  
+
   /** Extensions dangereuses interdites */
   DANGEROUS_EXTENSIONS: [
-    '.exe', '.bat', '.cmd', '.com', '.scr', '.vbs', '.js', '.jar',
-    '.sh', '.ps1', '.app', '.dmg', '.deb', '.rpm', '.msi',
+    '.exe',
+    '.bat',
+    '.cmd',
+    '.com',
+    '.scr',
+    '.vbs',
+    '.js',
+    '.jar',
+    '.sh',
+    '.ps1',
+    '.app',
+    '.dmg',
+    '.deb',
+    '.rpm',
+    '.msi',
   ] as const,
 } as const;
 
@@ -86,11 +109,11 @@ export interface FileValidationOptions {
 
 /**
  * Valide un fichier selon les règles configurées
- * 
+ *
  * @param file - Le fichier à valider
  * @param options - Options de validation personnalisées
  * @returns Résultat de la validation
- * 
+ *
  * @example
  * const result = validateFile(file);
  * if (!result.valid) {
@@ -118,7 +141,7 @@ export function validateFile(
 
   // 2. Vérifier l'extension du fichier
   const fileExtension = getFileExtension(file.name).toLowerCase();
-  
+
   // Vérifier les extensions dangereuses
   if (FILE_VALIDATION_CONFIG.DANGEROUS_EXTENSIONS.includes(fileExtension as string)) {
     return {
@@ -146,10 +169,14 @@ export function validateFile(
   }
 
   // 4. Vérifier le type MIME
-  let  detectedMimeType= file.type;
-  
+  let detectedMimeType = file.type;
+
   // Si le type MIME est vide ou incorrect, essayer de le détecter depuis l'extension
-  if (!detectedMimeType || detectedMimeType === 'application/octet-stream' || detectedMimeType === '') {
+  if (
+    !detectedMimeType ||
+    detectedMimeType === 'application/octet-stream' ||
+    detectedMimeType === ''
+  ) {
     detectedMimeType = detectMimeTypeFromExtension(fileExtension);
   }
 
@@ -191,7 +218,7 @@ export function validateFile(
 
 /**
  * Valide plusieurs fichiers en une fois
- * 
+ *
  * @param files - Tableau de fichiers à valider
  * @param options - Options de validation
  * @returns Résultats de validation pour chaque fichier
@@ -205,15 +232,12 @@ export function validateFiles(
 
 /**
  * Filtre les fichiers valides d'un tableau
- * 
+ *
  * @param files - Tableau de fichiers à filtrer
  * @param options - Options de validation
  * @returns Tableau des fichiers valides
  */
-export function filterValidFiles(
-  files: File[],
-  options: FileValidationOptions = {}
-): File[] {
+export function filterValidFiles(files: File[], options: FileValidationOptions = {}): File[] {
   return files.filter(file => validateFile(file, options).valid);
 }
 
@@ -231,8 +255,8 @@ export function getFileExtension(fileName: string): string {
  */
 function detectMimeTypeFromExtension(extension: string): string {
   const ext = extension.toLowerCase();
-  
-  const  mimeTypes: Record<string, string> = {
+
+  const mimeTypes: Record<string, string> = {
     // Images
     '.jpg': 'image/jpeg',
     '.jpeg': 'image/jpeg',
@@ -268,10 +292,3 @@ export function formatFileSize(bytes: number): string {
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
-
-
-
-
-
-
-

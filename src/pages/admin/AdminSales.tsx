@@ -21,7 +21,17 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
 import { formatCurrency } from '@/lib/utils';
-import { ShoppingCart, Download, Search, TrendingUp, DollarSign, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import {
+  ShoppingCart,
+  Download,
+  Search,
+  TrendingUp,
+  DollarSign,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+} from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   Select,
@@ -56,15 +66,23 @@ const AdminSales = () => {
   const [pageCommissions, setPageCommissions] = useState(1);
   const [pageSizeCommissions, setPageSizeCommissions] = useState(20);
 
-  const { sales: pagedSales, totalCount: totalSalesCount, loading: salesLoading } = useAdminSalesList({
+  const {
+    sales: pagedSales,
+    totalCount: totalSalesCount,
+    loading: salesLoading,
+  } = useAdminSalesList({
     page: pageSales,
     pageSize: pageSizeSales,
-    search: searchTerm
+    search: searchTerm,
   });
 
-  const { commissions: pagedCommissions, totalCount: totalCommissionsCount, loading: commissionsLoading } = useAdminCommissionsList({
+  const {
+    commissions: pagedCommissions,
+    totalCount: totalCommissionsCount,
+    loading: commissionsLoading,
+  } = useAdminCommissionsList({
     page: pageCommissions,
-    pageSize: pageSizeCommissions
+    pageSize: pageSizeCommissions,
   });
 
   // Fast fetch for stats only (no joins)
@@ -89,9 +107,7 @@ const AdminSales = () => {
 
   useEffect(() => {
     if (!isLoading) {
-      logger.info(
-        `Admin Sales Loaded`
-      );
+      logger.info(`Admin Sales Loaded`);
     }
   }, [isLoading]);
 
@@ -147,21 +163,21 @@ const AdminSales = () => {
     try {
       const table = type === 'sales' ? 'payments' : 'platform_commissions';
       const fields = type === 'sales' ? ADMIN_PAYMENT_FIELDS : PLATFORM_COMMISSION_FIELDS;
-      
+
       const { data, error } = await supabase
         .from(table)
         .select(fields)
         .order('created_at', { ascending: false })
         .limit(50000); // Allow exporting up to 50k records instead of default 1000
-        
+
       if (error) throw error;
-      
+
       exportToCSV(type, data);
     } catch (e) {
       toast({
-        title: 'Erreur d\'export',
-        description: 'Impossible d\'exporter les données',
-        variant: 'destructive'
+        title: "Erreur d'export",
+        description: "Impossible d'exporter les données",
+        variant: 'destructive',
       });
     }
   };
@@ -394,7 +410,8 @@ const AdminSales = () => {
                 {totalSalesCount > 0 && (
                   <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 pt-4 border-t">
                     <p className="text-sm text-muted-foreground">
-                      {(pageSales - 1) * pageSizeSales + 1}–{Math.min(pageSales * pageSizeSales, totalSalesCount)} sur {totalSalesCount}
+                      {(pageSales - 1) * pageSizeSales + 1}–
+                      {Math.min(pageSales * pageSizeSales, totalSalesCount)} sur {totalSalesCount}
                     </p>
                     <div className="flex items-center gap-2">
                       <Select
@@ -502,7 +519,9 @@ const AdminSales = () => {
                 {totalCommissionsCount > 0 && (
                   <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 pt-4 border-t">
                     <p className="text-sm text-muted-foreground">
-                      {(pageCommissions - 1) * pageSizeCommissions + 1}–{Math.min(pageCommissions * pageSizeCommissions, totalCommissionsCount)} sur {totalCommissionsCount}
+                      {(pageCommissions - 1) * pageSizeCommissions + 1}–
+                      {Math.min(pageCommissions * pageSizeCommissions, totalCommissionsCount)} sur{' '}
+                      {totalCommissionsCount}
                     </p>
                     <div className="flex items-center gap-2">
                       <Select
@@ -534,7 +553,9 @@ const AdminSales = () => {
                       <Button
                         variant="outline"
                         size="icon"
-                        disabled={pageCommissions >= Math.ceil(totalCommissionsCount / pageSizeCommissions)}
+                        disabled={
+                          pageCommissions >= Math.ceil(totalCommissionsCount / pageSizeCommissions)
+                        }
                         onClick={() => setPageCommissions(pageCommissions + 1)}
                       >
                         <ChevronRight className="h-4 w-4" />

@@ -5,14 +5,14 @@ import { supabase } from '@/integrations/supabase/client';
  * Type d'alerte
  */
 export type DigitalAlertType =
-  | 'low_licenses'           // Licences limitées
-  | 'license_expiring'       // Licence expirant bientôt
-  | 'suspicious_activity'    // Activité suspecte
-  | 'high_downloads'         // Téléchargements élevés
-  | 'revenue_milestone'      // Jalon de revenue atteint
-  | 'product_inactive'       // Produit inactif longtemps
-  | 'download_failed'        // Échecs de téléchargement
-  | 'storage_limit';         // Limite de stockage
+  | 'low_licenses' // Licences limitées
+  | 'license_expiring' // Licence expirant bientôt
+  | 'suspicious_activity' // Activité suspecte
+  | 'high_downloads' // Téléchargements élevés
+  | 'revenue_milestone' // Jalon de revenue atteint
+  | 'product_inactive' // Produit inactif longtemps
+  | 'download_failed' // Échecs de téléchargement
+  | 'storage_limit'; // Limite de stockage
 
 /**
  * Niveau de priorité d'alerte
@@ -47,16 +47,20 @@ export const useDigitalAlerts = () => {
   return useQuery({
     queryKey: ['digitalAlerts'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
       const { data, error } = await supabase
         .from('digital_alerts')
-        .select(`
+        .select(
+          `
           *,
           product:digital_products(name),
           customer:customers(name)
-        `)
+        `
+        )
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
@@ -90,16 +94,20 @@ export const useUnreadAlerts = () => {
   return useQuery({
     queryKey: ['digitalAlerts', 'unread'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
       const { data, error } = await supabase
         .from('digital_alerts')
-        .select(`
+        .select(
+          `
           *,
           product:digital_products(name),
           customer:customers(name)
-        `)
+        `
+        )
         .eq('user_id', user.id)
         .eq('is_read', false)
         .order('priority', { ascending: false })
@@ -135,16 +143,20 @@ export const useCriticalAlerts = () => {
   return useQuery({
     queryKey: ['digitalAlerts', 'critical'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
       const { data, error } = await supabase
         .from('digital_alerts')
-        .select(`
+        .select(
+          `
           *,
           product:digital_products(name),
           customer:customers(name)
-        `)
+        `
+        )
         .eq('user_id', user.id)
         .eq('priority', 'critical')
         .eq('is_resolved', false)
@@ -184,11 +196,13 @@ export const useAlertsByProduct = (productId: string | undefined) => {
 
       const { data, error } = await supabase
         .from('digital_alerts')
-        .select(`
+        .select(
+          `
           *,
           product:digital_products(name),
           customer:customers(name)
-        `)
+        `
+        )
         .eq('product_id', productId)
         .order('created_at', { ascending: false });
 
@@ -251,7 +265,9 @@ export const useMarkAllAlertsAsRead = () => {
 
   return useMutation({
     mutationFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
       const { error } = await supabase
@@ -306,10 +322,7 @@ export const useDeleteAlert = () => {
 
   return useMutation({
     mutationFn: async (alertId: string) => {
-      const { error } = await supabase
-        .from('digital_alerts')
-        .delete()
-        .eq('id', alertId);
+      const { error } = await supabase.from('digital_alerts').delete().eq('id', alertId);
 
       if (error) throw error;
     },
@@ -326,7 +339,9 @@ export const useAlertStats = () => {
   return useQuery({
     queryKey: ['digitalAlertStats'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
       const { data, error } = await supabase
@@ -377,7 +392,9 @@ export const useCreateAlert = () => {
       customerId?: string;
       metadata?: Record<string, any>;
     }) => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
       const { data, error } = await supabase
@@ -405,10 +422,3 @@ export const useCreateAlert = () => {
     },
   });
 };
-
-
-
-
-
-
-

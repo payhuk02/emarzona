@@ -8,18 +8,19 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import {
-  Package,
-  DollarSign,
-  ShoppingCart,
-  TrendingUp,
-} from '@/components/icons';
+import { Package, DollarSign, ShoppingCart, TrendingUp } from '@/components/icons';
 
 export const PhysicalProductStats = () => {
-  const { data: stats, isLoading, error } = useQuery({
+  const {
+    data: stats,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['customerPhysicalStats'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
       const { data: customer } = await supabase
@@ -36,7 +37,7 @@ export const PhysicalProductStats = () => {
         .select('order_id, products(product_type)')
         .eq('products.product_type', 'physical');
 
-      const orderIds = orderItems?.map((item) => item.order_id) || [];
+      const orderIds = orderItems?.map(item => item.order_id) || [];
 
       if (orderIds.length === 0) {
         return {
@@ -55,11 +56,14 @@ export const PhysicalProductStats = () => {
 
       if (ordersError) throw ordersError;
 
-      const completedOrders = orders?.filter((o) => o.status === 'completed' || o.status === 'delivered') || [];
+      const completedOrders =
+        orders?.filter(o => o.status === 'completed' || o.status === 'delivered') || [];
       const totalSpent = completedOrders.reduce((sum, o) => sum + (o.total_amount || 0), 0);
       const totalItems = completedOrders.reduce((sum, o) => {
         const items = o.order_items || [];
-        return sum + items.reduce((itemSum: number, item: any) => itemSum + (item.quantity || 0), 0);
+        return (
+          sum + items.reduce((itemSum: number, item: any) => itemSum + (item.quantity || 0), 0)
+        );
       }, 0);
 
       return {
@@ -74,7 +78,7 @@ export const PhysicalProductStats = () => {
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {[1, 2, 3, 4].map((i) => (
+        {[1, 2, 3, 4].map(i => (
           <Skeleton key={i} className="h-32 w-full" />
         ))}
       </div>
@@ -149,10 +153,3 @@ export const PhysicalProductStats = () => {
     </div>
   );
 };
-
-
-
-
-
-
-

@@ -1,7 +1,7 @@
 /**
  * Product 360° Viewer Component
  * Date: 1 Février 2025
- * 
+ *
  * Composant pour afficher une rotation 360° interactive d'un produit
  * Utilise une série d'images pour créer l'effet de rotation
  */
@@ -42,7 +42,7 @@ export const Product360Viewer = ({
     if (isAutoRotating && totalImages > 0) {
       const interval = 1000 / rotationSpeed; // ms entre chaque image
       animationRef.current = window.setInterval(() => {
-        setCurrentIndex((prev) => (prev + 1) % totalImages);
+        setCurrentIndex(prev => (prev + 1) % totalImages);
       }, interval);
 
       return () => {
@@ -110,21 +110,26 @@ export const Product360Viewer = ({
   // Navigation boutons
   const handlePrevious = () => {
     setIsAutoRotating(false);
-    setCurrentIndex((prev) => (prev - 1 + totalImages) % totalImages);
+    setCurrentIndex(prev => (prev - 1 + totalImages) % totalImages);
   };
 
   const handleNext = () => {
     setIsAutoRotating(false);
-    setCurrentIndex((prev) => (prev + 1) % totalImages);
+    setCurrentIndex(prev => (prev + 1) % totalImages);
   };
 
   const toggleAutoRotate = () => {
-    setIsAutoRotating((prev) => !prev);
+    setIsAutoRotating(prev => !prev);
   };
 
   if (totalImages === 0) {
     return (
-      <div className={cn('flex items-center justify-center bg-muted rounded-lg aspect-square', className)}>
+      <div
+        className={cn(
+          'flex items-center justify-center bg-muted rounded-lg aspect-square',
+          className
+        )}
+      >
         <p className="text-muted-foreground">Aucune image 360° disponible</p>
       </div>
     );
@@ -182,29 +187,13 @@ export const Product360Viewer = ({
           onClick={toggleAutoRotate}
           aria-label={isAutoRotating ? 'Arrêter rotation' : 'Démarrer rotation'}
         >
-          {isAutoRotating ? (
-            <Pause className="h-4 w-4" />
-          ) : (
-            <Play className="h-4 w-4" />
-          )}
+          {isAutoRotating ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
         </Button>
 
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleNext}
-          aria-label="Rotation suivante"
-        >
+        <Button variant="outline" size="sm" onClick={handleNext} aria-label="Rotation suivante">
           <RotateCw className="h-4 w-4" />
         </Button>
       </div>
     </div>
   );
 };
-
-
-
-
-
-
-

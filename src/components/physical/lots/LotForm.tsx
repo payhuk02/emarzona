@@ -58,7 +58,13 @@ interface LotFormProps {
   onSuccess: () => void;
 }
 
-export function LotForm({ lotId, physicalProductId, variantId, warehouseId, onSuccess }: LotFormProps) {
+export function LotForm({
+  lotId,
+  physicalProductId,
+  variantId,
+  warehouseId,
+  onSuccess,
+}: LotFormProps) {
   const { data: existingLot } = useLot(lotId || '');
   const createLot = useCreateLot();
   const updateLot = useUpdateLot();
@@ -111,7 +117,9 @@ export function LotForm({ lotId, physicalProductId, variantId, warehouseId, onSu
         best_before_date: values.best_before_date || null,
         received_date: values.received_date || new Date().toISOString().split('T')[0],
         initial_quantity: values.initial_quantity,
-        current_quantity: lotId ? existingLot?.current_quantity || values.initial_quantity : values.initial_quantity,
+        current_quantity: lotId
+          ? existingLot?.current_quantity || values.initial_quantity
+          : values.initial_quantity,
         unit_cost: values.unit_cost || null,
         rotation_method: values.rotation_method,
         quality_status: values.quality_status,
@@ -190,7 +198,7 @@ export function LotForm({ lotId, physicalProductId, variantId, warehouseId, onSu
                   <Input
                     type="number"
                     {...field}
-                    onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                    onChange={e => field.onChange(parseInt(e.target.value) || 0)}
                   />
                 </FormControl>
                 <FormMessage />
@@ -268,7 +276,7 @@ export function LotForm({ lotId, physicalProductId, variantId, warehouseId, onSu
                     type="number"
                     step="0.01"
                     {...field}
-                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                    onChange={e => field.onChange(parseFloat(e.target.value) || 0)}
                   />
                 </FormControl>
                 <FormMessage />
@@ -376,12 +384,3 @@ export function LotForm({ lotId, physicalProductId, variantId, warehouseId, onSu
     </Form>
   );
 }
-
-
-
-
-
-
-
-
-

@@ -7,7 +7,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
-const PRODUCT_ANALYTICS_FIELDS = 'id, product_id, store_id, total_views, total_clicks, total_conversions, views_today, views_yesterday, conversions_today, conversions_yesterday, created_at, updated_at';
+const PRODUCT_ANALYTICS_FIELDS =
+  'id, product_id, store_id, total_views, total_clicks, total_conversions, views_today, views_yesterday, conversions_today, conversions_yesterday, created_at, updated_at';
 
 // Types
 interface CourseAnalytics {
@@ -86,9 +87,7 @@ export const useCourseAnalytics = (productId: string) => {
 
       // Calculer les métriques
       const conversion_rate =
-        analytics.total_views > 0
-          ? (analytics.total_conversions / analytics.total_views) * 100
-          : 0;
+        analytics.total_views > 0 ? (analytics.total_conversions / analytics.total_views) * 100 : 0;
 
       const views_trend =
         analytics.views_yesterday > 0
@@ -197,15 +196,15 @@ export const useCourseViewsTimeline = (productId: string, days: number = 7) => {
       }
 
       // Grouper par jour
-      const  viewsByDay: Record<string, number> = {};
-      data.forEach((view) => {
+      const viewsByDay: Record<string, number> = {};
+      data.forEach(view => {
         const date = new Date(view.created_at).toISOString().split('T')[0];
         viewsByDay[date] = (viewsByDay[date] || 0) + 1;
       });
 
       // Créer un tableau avec tous les jours (même ceux à 0)
       const timeline = [];
-      for (let  i= days - 1; i >= 0; i--) {
+      for (let i = days - 1; i >= 0; i--) {
         const date = new Date();
         date.setDate(date.getDate() - i);
         const dateStr = date.toISOString().split('T')[0];
@@ -245,10 +244,7 @@ export const useTopLessons = (courseId: string) => {
       }
 
       // Grouper par leçon
-      const  lessonViews: Record<
-        string,
-        { title: string; views: number; watch_time: number }
-      > = {};
+      const lessonViews: Record<string, { title: string; views: number; watch_time: number }> = {};
 
       data.forEach((progress: any) => {
         const lessonId = progress.lesson_id;
@@ -277,17 +273,10 @@ export const useTopLessons = (courseId: string) => {
  * Helper pour générer un session_id unique
  */
 export const getSessionId = (): string => {
-  let  sessionId= sessionStorage.getItem('emarzona_session_id');
+  let sessionId = sessionStorage.getItem('emarzona_session_id');
   if (!sessionId) {
     sessionId = `session_${Date.now()}_${Math.random().toString(36).substring(7)}`;
     sessionStorage.setItem('emarzona_session_id', sessionId);
   }
   return sessionId;
 };
-
-
-
-
-
-
-

@@ -6,10 +6,3 @@
 export { default as WarehousesManagement } from './WarehousesManagement';
 export { default as WarehouseInventory } from './WarehouseInventory';
 export { default as WarehouseTransfers } from './WarehouseTransfers';
-
-
-
-
-
-
-

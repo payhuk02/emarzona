@@ -187,7 +187,7 @@ export const exportOrdersToCSV = (orders: Order[], filename?: string) => {
 };
 
 const getStatusLabel = (status: string): string => {
-  const  labels: Record<string, string> = {
+  const labels: Record<string, string> = {
     pending: 'En attente',
     processing: 'En cours',
     completed: 'Terminée',
@@ -197,7 +197,7 @@ const getStatusLabel = (status: string): string => {
 };
 
 const getPaymentStatusLabel = (status: string): string => {
-  const  labels: Record<string, string> = {
+  const labels: Record<string, string> = {
     pending: 'En attente',
     paid: 'Payée',
     failed: 'Échouée',
@@ -214,7 +214,7 @@ export const exportDisputesToCSV = (disputes: Record<string, unknown>[], filenam
   }
 
   // Labels pour les statuts
-  const  statusLabels: Record<string, string> = {
+  const statusLabels: Record<string, string> = {
     open: 'Ouvert',
     investigating: 'En investigation',
     waiting_customer: 'Attente client',
@@ -223,13 +223,13 @@ export const exportDisputesToCSV = (disputes: Record<string, unknown>[], filenam
     closed: 'Fermé',
   };
 
-  const  initiatorLabels: Record<string, string> = {
+  const initiatorLabels: Record<string, string> = {
     customer: 'Client',
     seller: 'Vendeur',
     admin: 'Admin',
   };
 
-  const  priorityLabels: Record<string, string> = {
+  const priorityLabels: Record<string, string> = {
     low: 'Basse',
     normal: 'Normale',
     high: 'Élevée',
@@ -283,7 +283,7 @@ export const exportAdvancedPaymentsToCSV = (payments: AdvancedPayment[], filenam
 
   // Labels pour les statuts
   const getStatusLabel = (status: string): string => {
-    const  labels: Record<string, string> = {
+    const labels: Record<string, string> = {
       pending: 'En attente',
       completed: 'Complété',
       failed: 'Échoué',
@@ -296,7 +296,7 @@ export const exportAdvancedPaymentsToCSV = (payments: AdvancedPayment[], filenam
   };
 
   const getPaymentTypeLabel = (type: string): string => {
-    const  labels: Record<string, string> = {
+    const labels: Record<string, string> = {
       full: 'Complet',
       percentage: 'Partiel',
       delivery_secured: 'Escrow',
@@ -392,9 +392,3 @@ export const exportAdvancedPaymentsToCSV = (payments: AdvancedPayment[], filenam
 
   downloadCSV(csv, finalFilename);
 };
-
-
-
-
-
-

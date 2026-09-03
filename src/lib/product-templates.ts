@@ -22,43 +22,43 @@ interface ProductFormData {
   pricing_model: string;
   category: string;
   currency: string;
-  
+
   // Description
   short_description: string;
   features: string[];
-  
+
   // Fichiers et téléchargements
   file_access_type: string;
   download_limit: number | null;
   download_expiry_days: number | null;
-  
+
   // Visibilité
   is_active: boolean;
   is_featured: boolean;
   hide_from_store: boolean;
   password_protected: boolean;
   access_control: string;
-  
+
   // Livraison
   shipping_required: boolean;
   collect_shipping_address: boolean;
-  
+
   // Support
   support_email: string;
-  
+
   // Analytics
   analytics_enabled: boolean;
   track_views: boolean;
   track_clicks: boolean;
   track_purchases: boolean;
-  
+
   [key: string]: unknown;
 }
 
 /**
  * Templates prédéfinis par catégorie
  */
-export const PRODUCT_TEMPLATES : ProductTemplate[] = [
+export const PRODUCT_TEMPLATES: ProductTemplate[] = [
   // ===== PRODUITS DIGITAUX =====
   {
     id: 'ebook-template',
@@ -186,7 +186,7 @@ export const PRODUCT_TEMPLATES : ProductTemplate[] = [
       track_purchases: true,
       features: [
         'Fichiers sources inclus',
-        'Documentation d\'installation',
+        "Documentation d'installation",
         'Compatible dernières versions',
         'Personnalisation facile',
         'Support gratuit 30 jours',
@@ -255,7 +255,7 @@ export const PRODUCT_TEMPLATES : ProductTemplate[] = [
         'Pièce unique ou série limitée',
         'Matériaux locaux et durables',
         'Emballage cadeau offert',
-        'Certificat d\'authenticité',
+        "Certificat d'authenticité",
       ],
     },
   },
@@ -286,7 +286,7 @@ export const PRODUCT_TEMPLATES : ProductTemplate[] = [
         'Session individuelle personnalisée',
         'Support par email inclus',
         'Suivi post-session',
-        'Plan d\'action détaillé',
+        "Plan d'action détaillé",
         'Garantie satisfaction',
       ],
     },
@@ -345,7 +345,7 @@ export const PRODUCT_TEMPLATES : ProductTemplate[] = [
       features: [
         'Design responsive inclus',
         'Optimisation SEO de base',
-        'Formation à l\'utilisation',
+        "Formation à l'utilisation",
         'Support technique 3 mois',
         'Maintenance incluse',
       ],
@@ -357,7 +357,9 @@ export const PRODUCT_TEMPLATES : ProductTemplate[] = [
  * Obtenir les templates par type
  */
 export const getTemplatesByType = (type: 'digital' | 'physical' | 'service'): ProductTemplate[] => {
-  return PRODUCT_TEMPLATES.filter(t => t.type === type).sort((a, b) => b.popularityScore - a.popularityScore);
+  return PRODUCT_TEMPLATES.filter(t => t.type === type).sort(
+    (a, b) => b.popularityScore - a.popularityScore
+  );
 };
 
 /**
@@ -413,7 +415,7 @@ export const importTemplate = (json: string): ProductTemplate => {
       throw new Error('Template invalide: structure manquante');
     }
     return template;
-  } catch ( _error: unknown) {
+  } catch (_error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
     throw new Error(`Erreur d'import: ${errorMessage}`);
   }
@@ -437,11 +439,3 @@ export const applyTemplate = (
     image_url: currentData.image_url || '',
   };
 };
-
-
-
-
-
-
-
-

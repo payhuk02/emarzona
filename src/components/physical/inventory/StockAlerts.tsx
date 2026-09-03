@@ -1,7 +1,7 @@
 /**
  * Stock Alerts Component
  * Date: 2025-01-28
- * 
+ *
  * Component for displaying and managing stock alerts
  * Design responsive avec le même style que Mes Templates
  */
@@ -37,7 +37,17 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
-import { AlertTriangle, CheckCircle2, Package, X, Search, RefreshCw, TrendingDown, AlertCircle, Clock } from '@/components/icons';
+import {
+  AlertTriangle,
+  CheckCircle2,
+  Package,
+  X,
+  Search,
+  RefreshCw,
+  TrendingDown,
+  AlertCircle,
+  Clock,
+} from '@/components/icons';
 import { useStockAlerts, useResolveStockAlert } from '@/hooks/physical/useAdvancedInventory';
 import { useStore } from '@/hooks/useStore';
 import { StockAlert } from '@/hooks/physical/useAdvancedInventory';
@@ -49,7 +59,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { cn } from '@/lib/utils';
 
-export const StockAlerts : React.FC = () => {
+export const StockAlerts: React.FC = () => {
   const { store } = useStore();
   const { data: alerts = [], isLoading } = useStockAlerts(store?.id, false);
   const { data: unresolvedAlerts = [] } = useStockAlerts(store?.id, false);
@@ -111,9 +121,11 @@ export const StockAlerts : React.FC = () => {
     return alerts.filter(alert => {
       const matchesSeverity = severityFilter === 'all' || alert.severity === severityFilter;
       const searchLower = debouncedSearch.toLowerCase();
-      const matchesSearch = 
+      const matchesSearch =
         getAlertTypeLabel(alert.alert_type).toLowerCase().includes(searchLower) ||
-        (alert.warehouse_inventory?.inventory_item?.sku || '').toLowerCase().includes(searchLower) ||
+        (alert.warehouse_inventory?.inventory_item?.sku || '')
+          .toLowerCase()
+          .includes(searchLower) ||
         (alert.warehouse_inventory?.warehouse?.name || '').toLowerCase().includes(searchLower);
       return matchesSeverity && matchesSearch;
     });
@@ -174,15 +186,35 @@ export const StockAlerts : React.FC = () => {
 
       {/* Stats Cards - Responsive */}
       {alerts.length > 0 && (
-        <div 
+        <div
           ref={statsRef}
           className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-4 animate-in fade-in slide-in-from-bottom-4 duration-700"
         >
           {[
-            { label: 'Total Alertes', value: stats.total, icon: Package, color: 'from-purple-600 to-pink-600' },
-            { label: 'Non résolues', value: stats.unresolved, icon: AlertTriangle, color: 'from-red-600 to-orange-600' },
-            { label: 'Critiques', value: stats.critical, icon: AlertCircle, color: 'from-red-600 to-pink-600' },
-            { label: 'Résolues', value: stats.resolved, icon: CheckCircle2, color: 'from-green-600 to-emerald-600' },
+            {
+              label: 'Total Alertes',
+              value: stats.total,
+              icon: Package,
+              color: 'from-purple-600 to-pink-600',
+            },
+            {
+              label: 'Non résolues',
+              value: stats.unresolved,
+              icon: AlertTriangle,
+              color: 'from-red-600 to-orange-600',
+            },
+            {
+              label: 'Critiques',
+              value: stats.critical,
+              icon: AlertCircle,
+              color: 'from-red-600 to-pink-600',
+            },
+            {
+              label: 'Résolues',
+              value: stats.resolved,
+              icon: CheckCircle2,
+              color: 'from-green-600 to-emerald-600',
+            },
           ].map((stat, index) => {
             const Icon = stat.icon;
             return (
@@ -198,7 +230,9 @@ export const StockAlerts : React.FC = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-3 sm:p-4 pt-0">
-                  <div className={`text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
+                  <div
+                    className={`text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}
+                  >
                     {stat.value}
                   </div>
                 </CardContent>
@@ -219,7 +253,7 @@ export const StockAlerts : React.FC = () => {
                 <Input
                   placeholder="Rechercher..."
                   value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value)}
+                  onChange={e => setSearchInput(e.target.value)}
                   className="pl-8 sm:pl-10 min-h-[44px] h-11 sm:h-12 text-xs sm:text-sm"
                   aria-label="Rechercher dans les alertes de stock"
                 />
@@ -238,7 +272,10 @@ export const StockAlerts : React.FC = () => {
 
               {/* Severity Filter */}
               <Select value={severityFilter} onValueChange={setSeverityFilter}>
-                <SelectTrigger className="w-full sm:w-48 min-h-[44px] h-11 sm:h-12 text-xs sm:text-sm" aria-label="Filtrer par sévérité">
+                <SelectTrigger
+                  className="w-full sm:w-48 min-h-[44px] h-11 sm:h-12 text-xs sm:text-sm"
+                  aria-label="Filtrer par sévérité"
+                >
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -320,7 +357,7 @@ export const StockAlerts : React.FC = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredAlerts.map((alert) => (
+                    {filteredAlerts.map(alert => (
                       <TableRow key={alert.id}>
                         <TableCell>
                           <div className="flex items-center gap-2">
@@ -394,7 +431,7 @@ export const StockAlerts : React.FC = () => {
       </Card>
 
       {/* Resolve Dialog */}
-      <Dialog open={!!selectedAlert} onOpenChange={(open) => !open && setSelectedAlert(null)}>
+      <Dialog open={!!selectedAlert} onOpenChange={open => !open && setSelectedAlert(null)}>
         <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Résoudre l'alerte</DialogTitle>
@@ -423,8 +460,7 @@ export const StockAlerts : React.FC = () => {
                     {selectedAlert.current_quantity}
                   </div>
                   <div>
-                    <span className="font-medium">Seuil:</span>{' '}
-                    {selectedAlert.threshold_quantity}
+                    <span className="font-medium">Seuil:</span> {selectedAlert.threshold_quantity}
                   </div>
                 </div>
               </div>
@@ -433,7 +469,7 @@ export const StockAlerts : React.FC = () => {
                 <Textarea
                   id="notes"
                   value={resolutionNotes}
-                  onChange={(e) => setResolutionNotes(e.target.value)}
+                  onChange={e => setResolutionNotes(e.target.value)}
                   placeholder="Ex: Stock réapprovisionné, commande passée au fournisseur..."
                   rows={4}
                 />
@@ -469,16 +505,22 @@ interface AlertCardProps {
   animationDelay?: number;
 }
 
-function AlertCard({ alert, getSeverityColor, getAlertTypeLabel, onResolve, animationDelay = 0 }: AlertCardProps) {
+function AlertCard({
+  alert,
+  getSeverityColor,
+  getAlertTypeLabel,
+  onResolve,
+  animationDelay = 0,
+}: AlertCardProps) {
   return (
     <Card
       className={cn(
-        "hover:shadow-lg transition-all duration-300 group overflow-hidden animate-in fade-in slide-in-from-bottom-4 touch-manipulation",
-        !alert.is_resolved && "border-l-4",
-        !alert.is_resolved && alert.severity === 'critical' && "border-l-red-500",
-        !alert.is_resolved && alert.severity === 'high' && "border-l-orange-500",
-        !alert.is_resolved && alert.severity === 'medium' && "border-l-yellow-500",
-        !alert.is_resolved && alert.severity === 'low' && "border-l-blue-500"
+        'hover:shadow-lg transition-all duration-300 group overflow-hidden animate-in fade-in slide-in-from-bottom-4 touch-manipulation',
+        !alert.is_resolved && 'border-l-4',
+        !alert.is_resolved && alert.severity === 'critical' && 'border-l-red-500',
+        !alert.is_resolved && alert.severity === 'high' && 'border-l-orange-500',
+        !alert.is_resolved && alert.severity === 'medium' && 'border-l-yellow-500',
+        !alert.is_resolved && alert.severity === 'low' && 'border-l-blue-500'
       )}
       style={{ animationDelay: `${animationDelay}ms` }}
     >
@@ -511,7 +553,9 @@ function AlertCard({ alert, getSeverityColor, getAlertTypeLabel, onResolve, anim
             <span>Entrepôt: {alert.warehouse_inventory?.warehouse?.name || 'N/A'}</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="font-medium">Quantité: {alert.current_quantity} / {alert.threshold_quantity}</span>
+            <span className="font-medium">
+              Quantité: {alert.current_quantity} / {alert.threshold_quantity}
+            </span>
           </div>
           <div className="flex items-center gap-2 text-muted-foreground">
             <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -530,12 +574,7 @@ function AlertCard({ alert, getSeverityColor, getAlertTypeLabel, onResolve, anim
           </div>
         </div>
         {!alert.is_resolved && (
-          <Button
-            onClick={onResolve}
-            size="sm"
-            variant="outline"
-            className="w-full"
-          >
+          <Button onClick={onResolve} size="sm" variant="outline" className="w-full">
             Résoudre
           </Button>
         )}
@@ -543,10 +582,3 @@ function AlertCard({ alert, getSeverityColor, getAlertTypeLabel, onResolve, anim
     </Card>
   );
 }
-
-
-
-
-
-
-

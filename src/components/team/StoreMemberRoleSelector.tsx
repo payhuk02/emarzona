@@ -1,7 +1,7 @@
 /**
  * Store Member Role Selector Component
  * Date: 2 Février 2025
- * 
+ *
  * Dialog pour modifier le rôle d'un membre
  */
 
@@ -34,7 +34,11 @@ interface StoreMemberRoleSelectorProps {
 }
 
 const ROLE_OPTIONS = [
-  { value: 'manager' as const, label: 'Gestionnaire', description: 'Accès complet sauf suppression' },
+  {
+    value: 'manager' as const,
+    label: 'Gestionnaire',
+    description: 'Accès complet sauf suppression',
+  },
   { value: 'staff' as const, label: 'Employé', description: 'Gestion produits et commandes' },
   { value: 'support' as const, label: 'Support', description: 'Commandes et clients uniquement' },
   { value: 'viewer' as const, label: 'Observateur', description: 'Lecture seule' },
@@ -83,9 +87,7 @@ export const StoreMemberRoleSelector = ({
               <Shield className="h-5 w-5" />
               Rôle du membre
             </DialogTitle>
-            <DialogDescription>
-              Le rôle de propriétaire ne peut pas être modifié.
-            </DialogDescription>
+            <DialogDescription>Le rôle de propriétaire ne peut pas être modifié.</DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button onClick={onClose} className="w-full sm:w-auto">
@@ -114,14 +116,14 @@ export const StoreMemberRoleSelector = ({
             <Label>Rôle</Label>
             <Select
               value={selectedRole}
-              onValueChange={(value) => setSelectedRole(value as StoreMember['role'])}
+              onValueChange={value => setSelectedRole(value as StoreMember['role'])}
               disabled={isSubmitting}
             >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {ROLE_OPTIONS.map((role) => (
+                {ROLE_OPTIONS.map(role => (
                   <SelectItem key={role.value} value={role.value}>
                     <div>
                       <div className="font-medium">{role.label}</div>
@@ -154,10 +156,3 @@ export const StoreMemberRoleSelector = ({
     </Dialog>
   );
 };
-
-
-
-
-
-
-

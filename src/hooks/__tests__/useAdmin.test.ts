@@ -46,7 +46,7 @@ describe('useAdmin', () => {
     expect(result.current.isAdmin).toBe(false);
   });
 
-  it('devrait retourner true pour l\'administrateur principal', async () => {
+  it("devrait retourner true pour l'administrateur principal", async () => {
     vi.mocked(supabase.auth.getUser).mockResolvedValue({
       data: {
         user: {
@@ -66,7 +66,7 @@ describe('useAdmin', () => {
     expect(result.current.isAdmin).toBe(true);
   });
 
-  it('devrait retourner true si l\'utilisateur a le rôle admin dans user_roles', async () => {
+  it("devrait retourner true si l'utilisateur a le rôle admin dans user_roles", async () => {
     vi.mocked(supabase.auth.getUser).mockResolvedValue({
       data: {
         user: {
@@ -81,10 +81,12 @@ describe('useAdmin', () => {
       select: vi.fn(() => ({
         eq: vi.fn(() => ({
           eq: vi.fn(() => ({
-            limit: vi.fn(() => Promise.resolve({
-              data: [{ role: 'admin' }],
-              error: null,
-            })),
+            limit: vi.fn(() =>
+              Promise.resolve({
+                data: [{ role: 'admin' }],
+                error: null,
+              })
+            ),
           })),
         })),
       })),
@@ -101,7 +103,7 @@ describe('useAdmin', () => {
     expect(result.current.isAdmin).toBe(true);
   });
 
-  it('devrait retourner false si l\'utilisateur n\'a pas le rôle admin', async () => {
+  it("devrait retourner false si l'utilisateur n'a pas le rôle admin", async () => {
     vi.mocked(supabase.auth.getUser).mockResolvedValue({
       data: {
         user: {
@@ -116,10 +118,12 @@ describe('useAdmin', () => {
       select: vi.fn(() => ({
         eq: vi.fn(() => ({
           eq: vi.fn(() => ({
-            limit: vi.fn(() => Promise.resolve({
-              data: [],
-              error: null,
-            })),
+            limit: vi.fn(() =>
+              Promise.resolve({
+                data: [],
+                error: null,
+              })
+            ),
           })),
         })),
       })),
@@ -151,10 +155,12 @@ describe('useAdmin', () => {
       select: vi.fn(() => ({
         eq: vi.fn(() => ({
           eq: vi.fn(() => ({
-            limit: vi.fn(() => Promise.resolve({
-              data: null,
-              error: new Error('Database error'),
-            })),
+            limit: vi.fn(() =>
+              Promise.resolve({
+                data: null,
+                error: new Error('Database error'),
+              })
+            ),
           })),
         })),
       })),

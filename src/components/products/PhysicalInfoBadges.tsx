@@ -69,10 +69,3 @@ export function PhysicalSizeChartBadge({
     </Badge>
   );
 }
-
-
-
-
-
-
-

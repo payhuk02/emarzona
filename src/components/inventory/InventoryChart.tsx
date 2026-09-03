@@ -1,7 +1,7 @@
 /**
  * Inventory Chart Component
  * Date: 28 octobre 2025
- * 
+ *
  * Graphique de visualisation des stocks
  */
 
@@ -19,9 +19,7 @@ export function InventoryChart({ items }: InventoryChartProps) {
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-muted-foreground">
-        Top 10 articles par quantité disponible
-      </p>
+      <p className="text-sm text-muted-foreground">Top 10 articles par quantité disponible</p>
 
       <div className="space-y-3">
         {sortedItems.map((item, index) => {
@@ -43,9 +41,7 @@ export function InventoryChart({ items }: InventoryChartProps) {
             <div key={item.id} className="space-y-1">
               <div className="flex items-center justify-between text-sm">
                 <span className="font-medium truncate flex-1">{productName}</span>
-                <span className="text-muted-foreground ml-2">
-                  {item.quantity_available} unités
-                </span>
+                <span className="text-muted-foreground ml-2">{item.quantity_available} unités</span>
               </div>
               <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
                 <div
@@ -76,10 +72,3 @@ export function InventoryChart({ items }: InventoryChartProps) {
     </div>
   );
 }
-
-
-
-
-
-
-

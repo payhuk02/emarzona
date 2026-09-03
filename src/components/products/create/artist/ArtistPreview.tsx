@@ -31,7 +31,7 @@ interface ArtistPreviewProps {
   data: Partial<ArtistProductFormData>;
 }
 
-const  ARTIST_TYPE_LABELS: Record<string, string> = {
+const ARTIST_TYPE_LABELS: Record<string, string> = {
   writer: 'Écrivain / Auteur',
   musician: 'Musicien / Compositeur',
   visual_artist: 'Artiste Visuel',
@@ -40,7 +40,7 @@ const  ARTIST_TYPE_LABELS: Record<string, string> = {
   other: 'Autre',
 };
 
-const  EDITION_TYPE_LABELS: Record<string, string> = {
+const EDITION_TYPE_LABELS: Record<string, string> = {
   original: 'Original',
   limited_edition: 'Édition Limitée',
   print: 'Tirage',
@@ -75,9 +75,7 @@ export const ArtistPreview = ({ data }: ArtistPreviewProps) => {
     <div className="space-y-6">
       <div>
         <h3 className="text-2xl font-bold mb-2">Aperçu de l'œuvre</h3>
-        <p className="text-muted-foreground">
-          Vérifiez toutes les informations avant de publier
-        </p>
+        <p className="text-muted-foreground">Vérifiez toutes les informations avant de publier</p>
       </div>
 
       {/* Images Preview */}
@@ -118,19 +116,21 @@ export const ArtistPreview = ({ data }: ArtistPreviewProps) => {
                   <div className="text-center">
                     <ImageIcon className="h-12 w-12 mx-auto mb-2 text-muted-foreground" />
                     <p className="text-sm text-muted-foreground">Image non disponible</p>
-                    <p className="text-xs text-muted-foreground mt-1">L'image n'a pas pu être chargée</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      L'image n'a pas pu être chargée
+                    </p>
                   </div>
                 </div>
               </div>
             )}
-            
+
             {/* Miniatures de la galerie */}
             {data.images.length > 1 && (
               <div className="grid grid-cols-4 md:grid-cols-6 gap-3">
-                {data.images.slice(1).map((image, index) => (
+                {data.images.slice(1).map((image, index) =>
                   isValidImage(image) ? (
-                    <div 
-                      key={index + 1} 
+                    <div
+                      key={index + 1}
                       className="relative aspect-square rounded-lg overflow-hidden border bg-muted cursor-pointer hover:border-primary transition-colors group"
                     >
                       <img
@@ -148,14 +148,14 @@ export const ArtistPreview = ({ data }: ArtistPreviewProps) => {
                       />
                     </div>
                   ) : (
-                    <div 
-                      key={index + 1} 
+                    <div
+                      key={index + 1}
                       className="relative aspect-square rounded-lg overflow-hidden border border-dashed border-muted-foreground/25 bg-muted flex items-center justify-center"
                     >
                       <ImageIcon className="h-6 w-6 text-muted-foreground" />
                     </div>
                   )
-                ))}
+                )}
               </div>
             )}
           </CardContent>
@@ -432,10 +432,7 @@ export const ArtistPreview = ({ data }: ArtistPreviewProps) => {
             <CardTitle>Description</CardTitle>
           </CardHeader>
           <CardContent>
-            <SafeHTML
-              html={data.description}
-              className="prose prose-sm max-w-none"
-            />
+            <SafeHTML html={data.description} className="prose prose-sm max-w-none" />
           </CardContent>
         </Card>
       )}
@@ -460,10 +457,3 @@ export const ArtistPreview = ({ data }: ArtistPreviewProps) => {
     </div>
   );
 };
-
-
-
-
-
-
-

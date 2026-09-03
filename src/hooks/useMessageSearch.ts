@@ -33,10 +33,10 @@ export interface MessageSearchResult {
 
 /**
  * Hook pour rechercher des messages dans une conversation
- * 
+ *
  * @example
  * const { searchMessages, results, isSearching } = useMessageSearch();
- * 
+ *
  * const handleSearch = async () => {
  *   await searchMessages({
  *     conversationId: 'conv-123',
@@ -52,92 +52,93 @@ export function useMessageSearch() {
   /**
    * Rechercher des messages
    */
-  const searchMessages = useCallback(async (options: MessageSearchOptions): Promise<MessageSearchResult | null> => {
-    const {
-      conversationId,
-      query,
-      limit = 50,
-      filters,
-    } = options;
+  const searchMessages = useCallback(
+    async (options: MessageSearchOptions): Promise<MessageSearchResult | null> => {
+      const { conversationId, query, limit = 50, filters } = options;
 
-    if (!query.trim()) {
-      setResults(null);
-      return null;
-    }
+      if (!query.trim()) {
+        setResults(null);
+        return null;
+      }
 
-    setIsSearching(true);
+      setIsSearching(true);
 
-    try {
-      let  searchQuery= supabase
-        .from('messages')
-        .select(`
+      try {
+        let searchQuery = supabase
+          .from('messages')
+          .select(
+            `
           *,
           sender:profiles!messages_sender_id_fkey (name, avatar_url),
           attachments:message_attachments (*)
-        `, { count: 'exact' })
-        .ilike('content', `%${query}%`)
-        .order('created_at', { ascending: false })
-        .limit(limit);
+        `,
+            { count: 'exact' }
+          )
+          .ilike('content', `%${query}%`)
+          .order('created_at', { ascending: false })
+          .limit(limit);
 
-      // Filtrer par conversation si spécifié
-      if (conversationId) {
-        searchQuery = searchQuery.eq('conversation_id', conversationId);
-      }
+        // Filtrer par conversation si spécifié
+        if (conversationId) {
+          searchQuery = searchQuery.eq('conversation_id', conversationId);
+        }
 
-      // Appliquer les filtres additionnels
-      if (filters?.sender_type) {
-        searchQuery = searchQuery.eq('sender_type', filters.sender_type);
-      }
-      if (filters?.message_type) {
-        searchQuery = searchQuery.eq('message_type', filters.message_type);
-      }
-      if (filters?.dateFrom) {
-        searchQuery = searchQuery.gte('created_at', filters.dateFrom.toISOString());
-      }
-      if (filters?.dateTo) {
-        searchQuery = searchQuery.lte('created_at', filters.dateTo.toISOString());
-      }
+        // Appliquer les filtres additionnels
+        if (filters?.sender_type) {
+          searchQuery = searchQuery.eq('sender_type', filters.sender_type);
+        }
+        if (filters?.message_type) {
+          searchQuery = searchQuery.eq('message_type', filters.message_type);
+        }
+        if (filters?.dateFrom) {
+          searchQuery = searchQuery.gte('created_at', filters.dateFrom.toISOString());
+        }
+        if (filters?.dateTo) {
+          searchQuery = searchQuery.lte('created_at', filters.dateTo.toISOString());
+        }
 
-      const { data, error, count } = await searchQuery;
+        const { data, error, count } = await searchQuery;
 
-      if (error) throw error;
+        if (error) throw error;
 
-      const  result: MessageSearchResult = {
-        messages: (data || []) as Message[],
-        total: count || 0,
-        query,
-      };
+        const result: MessageSearchResult = {
+          messages: (data || []) as Message[],
+          total: count || 0,
+          query,
+        };
 
-      setResults(result);
+        setResults(result);
 
-      if (import.meta.env.DEV) {
-        logger.info('Message search completed', {
+        if (import.meta.env.DEV) {
+          logger.info('Message search completed', {
+            query,
+            conversationId,
+            resultsCount: result.messages.length,
+            total: result.total,
+          });
+        }
+
+        return result;
+      } catch (_error: any) {
+        logger.error('Error searching messages', {
+          error: error.message,
           query,
           conversationId,
-          resultsCount: result.messages.length,
-          total: result.total,
         });
+
+        toast({
+          title: 'Erreur de recherche',
+          description: error.message || "Impossible d'effectuer la recherche",
+          variant: 'destructive',
+        });
+
+        return null;
+      } finally {
+        setIsSearching(false);
       }
-
-      return result;
-    } catch ( _error: any) {
-      logger.error('Error searching messages', {
-        error: error.message,
-        query,
-        conversationId,
-      });
-
-      toast({
-        title: 'Erreur de recherche',
-        description: error.message || 'Impossible d\'effectuer la recherche',
-        variant: 'destructive',
-      });
-
-      return null;
-    } finally {
-      setIsSearching(false);
-    }
-  }, [toast]);
+    },
+    [toast]
+  );
 
   /**
    * Réinitialiser les résultats de recherche
@@ -153,10 +154,3 @@ export function useMessageSearch() {
     clearSearch,
   };
 }
-
-
-
-
-
-
-

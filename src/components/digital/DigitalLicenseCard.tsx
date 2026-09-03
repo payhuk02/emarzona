@@ -1,12 +1,19 @@
 /**
  * Digital License Card - Professional
  * Date: 27 octobre 2025
- * 
+ *
  * Affichage et gestion des licenses
  */
 
 import React from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -94,7 +101,8 @@ const DigitalLicenseCardComponent = ({
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
 
-  const statusConfig = STATUS_CONFIG[license.status as keyof typeof STATUS_CONFIG] || STATUS_CONFIG.pending;
+  const statusConfig =
+    STATUS_CONFIG[license.status as keyof typeof STATUS_CONFIG] || STATUS_CONFIG.pending;
   const StatusIcon = statusConfig.icon;
 
   /**
@@ -143,9 +151,10 @@ const DigitalLicenseCardComponent = ({
   };
 
   const expiryStatus = getExpiryStatus();
-  const activationProgress = license.max_activations === -1 
-    ? 100
-    : (license.current_activations / license.max_activations) * 100;
+  const activationProgress =
+    license.max_activations === -1
+      ? 100
+      : (license.current_activations / license.max_activations) * 100;
 
   return (
     <Card className="overflow-hidden">
@@ -186,12 +195,7 @@ const DigitalLicenseCardComponent = ({
             <code className="flex-1 px-3 py-2 bg-muted rounded text-sm font-mono">
               {license.license_key}
             </code>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={copyLicenseKey}
-              className="flex-shrink-0"
-            >
+            <Button variant="outline" size="sm" onClick={copyLicenseKey} className="flex-shrink-0">
               {copied ? (
                 <CheckCircle2 className="h-4 w-4 text-green-600" />
               ) : (
@@ -209,7 +213,8 @@ const DigitalLicenseCardComponent = ({
               Activations
             </span>
             <span className="text-muted-foreground">
-              {license.current_activations} / {license.max_activations === -1 ? '∞' : license.max_activations}
+              {license.current_activations} /{' '}
+              {license.max_activations === -1 ? '∞' : license.max_activations}
             </span>
           </div>
           {license.max_activations !== -1 && (
@@ -248,11 +253,7 @@ const DigitalLicenseCardComponent = ({
 
       {showActions && (
         <CardFooter className="pt-3 border-t">
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={onManage}
-          >
+          <Button variant="outline" className="w-full" onClick={onManage}>
             Gérer les activations
           </Button>
         </CardFooter>
@@ -262,18 +263,21 @@ const DigitalLicenseCardComponent = ({
 };
 
 // Optimisation avec React.memo pour éviter les re-renders inutiles
-export const DigitalLicenseCard = React.memo(DigitalLicenseCardComponent, (prevProps, nextProps) => {
-  return (
-    prevProps.license.id === nextProps.license.id &&
-    prevProps.license.license_key === nextProps.license.license_key &&
-    prevProps.license.status === nextProps.license.status &&
-    prevProps.license.max_activations === nextProps.license.max_activations &&
-    prevProps.license.current_activations === nextProps.license.current_activations &&
-    prevProps.license.expires_at === nextProps.license.expires_at &&
-    prevProps.showActions === nextProps.showActions &&
-    prevProps.onManage === nextProps.onManage
-  );
-});
+export const DigitalLicenseCard = React.memo(
+  DigitalLicenseCardComponent,
+  (prevProps, nextProps) => {
+    return (
+      prevProps.license.id === nextProps.license.id &&
+      prevProps.license.license_key === nextProps.license.license_key &&
+      prevProps.license.status === nextProps.license.status &&
+      prevProps.license.max_activations === nextProps.license.max_activations &&
+      prevProps.license.current_activations === nextProps.license.current_activations &&
+      prevProps.license.expires_at === nextProps.license.expires_at &&
+      prevProps.showActions === nextProps.showActions &&
+      prevProps.onManage === nextProps.onManage
+    );
+  }
+);
 
 DigitalLicenseCard.displayName = 'DigitalLicenseCard';
 
@@ -319,7 +323,7 @@ export const DigitalLicensesGrid = ({
   if (loading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {[1, 2, 3].map((i) => (
+        {[1, 2, 3].map(i => (
           <DigitalLicenseCardSkeleton key={i} />
         ))}
       </div>
@@ -342,7 +346,7 @@ export const DigitalLicensesGrid = ({
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {licenses.map((license) => (
+      {licenses.map(license => (
         <DigitalLicenseCard
           key={license.id}
           license={license}
@@ -352,11 +356,3 @@ export const DigitalLicensesGrid = ({
     </div>
   );
 };
-
-
-
-
-
-
-
-

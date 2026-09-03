@@ -1,7 +1,7 @@
 /**
  * Hook pour Optimisation Automatique des Stocks
  * Date: 3 Février 2025
- * 
+ *
  * Recommandations automatiques pour optimiser les niveaux de stock
  */
 
@@ -10,7 +10,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 import { useDemandForecast, type DemandForecast } from './useDemandForecasting';
 
-const PHYSICAL_PRODUCT_INVENTORY_FIELDS = 'id, product_id, variant_id, sku, quantity_available, reorder_point, reorder_quantity, unit_cost, created_at, updated_at';
+const PHYSICAL_PRODUCT_INVENTORY_FIELDS =
+  'id, product_id, variant_id, sku, quantity_available, reorder_point, reorder_quantity, unit_cost, created_at, updated_at';
 
 // =====================================================
 // TYPES
@@ -21,30 +22,30 @@ export interface StockOptimization {
   product_name: string;
   variant_id?: string;
   sku: string;
-  
+
   // État actuel
   current_stock: number;
   current_stock_value: number;
   reorder_point: number;
   reorder_quantity: number;
-  
+
   // Analyse
   stock_status: 'optimal' | 'overstock' | 'understock' | 'critical';
   stock_turnover_rate: number; // Rotation des stocks
   days_of_inventory: number;
-  
+
   // Recommandations
   recommended_stock_level: number;
   recommended_reorder_point: number;
   recommended_reorder_quantity: number;
   recommended_action: 'increase' | 'decrease' | 'maintain' | 'urgent_reorder';
   action_priority: 'high' | 'medium' | 'low';
-  
+
   // Économies potentielles
   potential_savings: number; // Économies si optimisation appliquée
   overstock_cost: number; // Coût du surstock
   stockout_cost: number; // Coût estimé des ruptures
-  
+
   // Prévisions
   forecast?: DemandForecast;
 }
@@ -55,12 +56,12 @@ export interface StockOptimizationReport {
   overstock_count: number;
   understock_count: number;
   critical_count: number;
-  
+
   total_stock_value: number;
   potential_savings: number;
   total_overstock_cost: number;
   total_stockout_cost: number;
-  
+
   optimizations: StockOptimization[];
   urgent_actions: StockOptimization[];
 }
@@ -114,10 +115,7 @@ function calculateOptimalStockLevel(
 /**
  * Calcule le point de réapprovisionnement optimal
  */
-function calculateOptimalReorderPoint(
-  averageDailySales: number,
-  leadTime: number
-): number {
+function calculateOptimalReorderPoint(averageDailySales: number, leadTime: number): number {
   return Math.ceil(averageDailySales * leadTime * 1.2); // 20% de marge
 }
 
@@ -130,7 +128,7 @@ function calculateOptimalReorderQuantity(
   holdingCost: number = 0.2 // Coût de stockage (20% par an)
 ): number {
   if (annualDemand === 0 || holdingCost === 0) return 0;
-  
+
   // Formule EOQ simplifiée
   const eoq = Math.sqrt((2 * annualDemand * orderingCost) / holdingCost);
   return Math.ceil(eoq);
@@ -143,12 +141,9 @@ function calculateOptimalReorderQuantity(
 /**
  * Récupère l'optimisation pour un produit
  */
-export function useStockOptimization(
-  productId: string,
-  variantId?: string
-) {
+export function useStockOptimization(productId: string, variantId?: string) {
   const { data: forecast } = useDemandForecast(productId, variantId);
-  
+
   return useQuery({
     queryKey: ['stock-optimization', productId, variantId],
     queryFn: async (): Promise<StockOptimization | null> => {
@@ -158,47 +153,52 @@ export function useStockOptimization(
         .select(PHYSICAL_PRODUCT_INVENTORY_FIELDS)
         .eq('product_id', productId)
         .maybeSingle();
-      
+
       if (inventoryError) throw inventoryError;
       if (!inventory) return null;
-      
+
       // Récupérer les infos du produit
       const { data: product } = await supabase
         .from('products')
         .select('name')
         .eq('id', productId)
         .single();
-      
+
       const currentStock = inventory.quantity_available || 0;
       const reorderPoint = inventory.reorder_point || 10;
       const reorderQuantity = inventory.reorder_quantity || 50;
       const unitCost = inventory.unit_cost || 0;
       const currentStockValue = currentStock * unitCost;
-      
+
       // Utiliser la prévision si disponible
       const averageDailySales = forecast?.average_daily_sales || 0;
       const daysOfInventory = forecast?.days_of_inventory || 0;
       const leadTime = 7; // Jours de délai par défaut
-      
+
       // Calculer le taux de rotation
       const periodDays = 30;
       const totalSales = averageDailySales * periodDays;
       const averageStock = currentStock;
       const stockTurnoverRate = calculateTurnoverRate(totalSales, averageStock, periodDays);
-      
+
       // Déterminer le statut
-      const stockStatus = determineStockStatus(currentStock, reorderPoint, daysOfInventory, leadTime);
-      
+      const stockStatus = determineStockStatus(
+        currentStock,
+        reorderPoint,
+        daysOfInventory,
+        leadTime
+      );
+
       // Calculer les recommandations
       const recommendedStockLevel = calculateOptimalStockLevel(averageDailySales, leadTime);
       const recommendedReorderPoint = calculateOptimalReorderPoint(averageDailySales, leadTime);
       const annualDemand = averageDailySales * 365;
       const recommendedReorderQuantity = calculateOptimalReorderQuantity(annualDemand);
-      
+
       // Déterminer l'action recommandée
-      let  recommendedAction: 'increase' | 'decrease' | 'maintain' | 'urgent_reorder' = 'maintain';
-      let  actionPriority: 'high' | 'medium' | 'low' = 'low';
-      
+      let recommendedAction: 'increase' | 'decrease' | 'maintain' | 'urgent_reorder' = 'maintain';
+      let actionPriority: 'high' | 'medium' | 'low' = 'low';
+
       if (stockStatus === 'critical') {
         recommendedAction = 'urgent_reorder';
         actionPriority = 'high';
@@ -209,17 +209,18 @@ export function useStockOptimization(
         recommendedAction = 'decrease';
         actionPriority = 'low';
       }
-      
+
       // Calculer les coûts
       const overstockAmount = Math.max(0, currentStock - recommendedStockLevel);
       const overstockCost = overstockAmount * unitCost * 0.2; // 20% de coût de stockage
-      
-      const stockoutRisk = forecast?.stockout_risk === 'high' ? 1 : forecast?.stockout_risk === 'medium' ? 0.5 : 0.1;
+
+      const stockoutRisk =
+        forecast?.stockout_risk === 'high' ? 1 : forecast?.stockout_risk === 'medium' ? 0.5 : 0.1;
       const estimatedLostSales = averageDailySales * stockoutRisk * 30; // 30 jours
       const stockoutCost = estimatedLostSales * (unitCost * 2); // Coût estimé = 2x le coût unitaire
-      
+
       const potentialSavings = overstockCost + stockoutCost;
-      
+
       return {
         product_id: productId,
         product_name: product?.name || 'Produit inconnu',
@@ -260,59 +261,67 @@ export function useStoreStockOptimization(storeId: string) {
         .select('id, name')
         .eq('store_id', storeId)
         .eq('product_type', 'physical');
-      
+
       if (productsError) throw productsError;
-      
-      const  optimizations: StockOptimization[] = [];
-      
+
+      const optimizations: StockOptimization[] = [];
+
       // Calculer l'optimisation pour chaque produit
-      const calculateOptimization = async (productId: string, variantId?: string): Promise<StockOptimization | null> => {
+      const calculateOptimization = async (
+        productId: string,
+        variantId?: string
+      ): Promise<StockOptimization | null> => {
         // Récupérer l'inventaire
         const { data: inventory, error: inventoryError } = await supabase
           .from('physical_product_inventory')
           .select(PHYSICAL_PRODUCT_INVENTORY_FIELDS)
           .eq('product_id', productId)
           .maybeSingle();
-        
+
         if (inventoryError || !inventory) return null;
-        
+
         // Récupérer les infos du produit
         const { data: product } = await supabase
           .from('products')
           .select('name')
           .eq('id', productId)
           .single();
-        
+
         const currentStock = inventory.quantity_available || 0;
         const reorderPoint = inventory.reorder_point || 10;
         const reorderQuantity = inventory.reorder_quantity || 50;
         const unitCost = inventory.unit_cost || 0;
         const currentStockValue = currentStock * unitCost;
-        
+
         // Récupérer la prévision si disponible (simplifié - on pourrait utiliser useDemandForecast mais c'est complexe dans une fonction async)
         const averageDailySales = 0; // TODO: Calculer depuis l'historique des ventes
         const daysOfInventory = 0;
         const leadTime = 7;
-        
+
         // Calculer le taux de rotation
         const periodDays = 30;
         const totalSales = averageDailySales * periodDays;
         const averageStock = currentStock;
         const stockTurnoverRate = calculateTurnoverRate(totalSales, averageStock, periodDays);
-        
+
         // Déterminer le statut
-        const stockStatus = determineStockStatus(currentStock, reorderPoint, daysOfInventory, leadTime);
-        
+        const stockStatus = determineStockStatus(
+          currentStock,
+          reorderPoint,
+          daysOfInventory,
+          leadTime
+        );
+
         // Calculer les recommandations
         const recommendedStockLevel = calculateOptimalStockLevel(averageDailySales, leadTime);
         const recommendedReorderPoint = calculateOptimalReorderPoint(averageDailySales, leadTime);
         const annualDemand = averageDailySales * 365;
         const recommendedReorderQuantity = calculateOptimalReorderQuantity(annualDemand);
-        
+
         // Déterminer l'action recommandée
-        let  recommendedAction: 'increase' | 'decrease' | 'maintain' | 'urgent_reorder' = 'maintain';
-        let  actionPriority: 'high' | 'medium' | 'low' = 'low';
-        
+        let recommendedAction: 'increase' | 'decrease' | 'maintain' | 'urgent_reorder' = 'maintain';
+        let actionPriority: 'high' | 'medium' | 'low' = 'low';
+
         if (stockStatus === 'critical') {
           recommendedAction = 'urgent_reorder';
           actionPriority = 'high';
@@ -323,7 +332,7 @@ export function useStoreStockOptimization(storeId: string) {
           recommendedAction = 'decrease';
           actionPriority = 'low';
         }
-        
+
         // Calculer les coûts
         const overstockAmount = Math.max(0, currentStock - recommendedStockLevel);
         const overstockCost = overstockAmount * unitCost * 0.2;
@@ -331,7 +340,7 @@ export function useStoreStockOptimization(storeId: string) {
         const estimatedLostSales = averageDailySales * stockoutRisk * 30;
         const stockoutCost = estimatedLostSales * (unitCost * 2);
         const potentialSavings = overstockCost + stockoutCost;
-        
+
         return {
           product_id: productId,
           product_name: product?.name || 'Produit inconnu',
@@ -355,7 +364,7 @@ export function useStoreStockOptimization(storeId: string) {
           forecast: undefined, // TODO: Intégrer les prévisions
         };
       };
-      
+
       for (const product of products || []) {
         try {
           const optimization = await calculateOptimization(product.id);
@@ -366,22 +375,22 @@ export function useStoreStockOptimization(storeId: string) {
           logger.warn('Error optimizing stock for product', { productId: product.id, error });
         }
       }
-      
+
       // Agréger les statistiques
-      const optimalCount = optimizations.filter((o) => o.stock_status === 'optimal').length;
-      const overstockCount = optimizations.filter((o) => o.stock_status === 'overstock').length;
-      const understockCount = optimizations.filter((o) => o.stock_status === 'understock').length;
-      const criticalCount = optimizations.filter((o) => o.stock_status === 'critical').length;
-      
+      const optimalCount = optimizations.filter(o => o.stock_status === 'optimal').length;
+      const overstockCount = optimizations.filter(o => o.stock_status === 'overstock').length;
+      const understockCount = optimizations.filter(o => o.stock_status === 'understock').length;
+      const criticalCount = optimizations.filter(o => o.stock_status === 'critical').length;
+
       const totalStockValue = optimizations.reduce((sum, o) => sum + o.current_stock_value, 0);
       const potentialSavings = optimizations.reduce((sum, o) => sum + o.potential_savings, 0);
       const totalOverstockCost = optimizations.reduce((sum, o) => sum + o.overstock_cost, 0);
       const totalStockoutCost = optimizations.reduce((sum, o) => sum + o.stockout_cost, 0);
-      
+
       const urgentActions = optimizations
-        .filter((o) => o.action_priority === 'high')
+        .filter(o => o.action_priority === 'high')
         .sort((a, b) => b.potential_savings - a.potential_savings);
-      
+
       return {
         total_products: optimizations.length,
         optimal_count: optimalCount,
@@ -411,7 +420,7 @@ export function useStoreStockOptimization(storeId: string) {
  */
 export function useApplyStockOptimization() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async ({
       productId,
@@ -428,11 +437,11 @@ export function useApplyStockOptimization() {
         .select('id')
         .eq('product_id', productId)
         .maybeSingle();
-      
+
       if (!inventory) {
         throw new Error('Inventory item not found');
       }
-      
+
       const { error } = await supabase
         .from('physical_product_inventory')
         .update({
@@ -440,9 +449,9 @@ export function useApplyStockOptimization() {
           reorder_quantity: optimization.recommended_reorder_quantity,
         })
         .eq('id', inventory.id);
-      
+
       if (error) throw error;
-      
+
       return { success: true };
     },
     onSuccess: () => {
@@ -451,10 +460,3 @@ export function useApplyStockOptimization() {
     },
   });
 }
-
-
-
-
-
-
-

@@ -5,7 +5,11 @@
  */
 
 import { logger } from '@/lib/logger';
-import type { CarrierAdapter, CarrierTrackingResponse, TrackingUpdate } from '../automatic-tracking';
+import type {
+  CarrierAdapter,
+  CarrierTrackingResponse,
+  TrackingUpdate,
+} from '../automatic-tracking';
 
 export class FedExAdapter implements CarrierAdapter {
   name = 'FedEx';
@@ -20,7 +24,10 @@ export class FedExAdapter implements CarrierAdapter {
     this.accountNumber = config?.accountNumber as string;
   }
 
-  async track(trackingNumber: string, carrierConfig?: Record<string, unknown>): Promise<CarrierTrackingResponse> {
+  async track(
+    trackingNumber: string,
+    carrierConfig?: Record<string, unknown>
+  ): Promise<CarrierTrackingResponse> {
     try {
       // Si les credentials ne sont pas configurés, utiliser la simulation
       if (!this.apiKey || !this.apiSecret) {
@@ -89,7 +96,7 @@ export class FedExAdapter implements CarrierAdapter {
       headers: {
         'Content-Type': 'application/json',
         'X-locale': 'fr_FR',
-        'Authorization': `Bearer ${accessToken}`,
+        Authorization: `Bearer ${accessToken}`,
       },
       body: JSON.stringify({
         includeDetailedScans: true,
@@ -116,12 +123,12 @@ export class FedExAdapter implements CarrierAdapter {
   private transformResponse(trackingNumber: string, data: any): CarrierTrackingResponse {
     // Structure de réponse FedEx (à adapter selon la vraie structure)
     const output = data?.output?.completeTrackResults?.[0]?.trackResults?.[0];
-    
+
     if (!output) {
       return this.simulateTracking(trackingNumber);
     }
 
-    const  events: TrackingUpdate[] = [];
+    const events: TrackingUpdate[] = [];
     const scanEvents = output.scanEvents || [];
 
     for (const event of scanEvents) {
@@ -140,8 +147,8 @@ export class FedExAdapter implements CarrierAdapter {
     }
 
     const latestStatus = this.mapFedExStatus(output.latestStatusDetail?.code || '');
-    const estimatedDelivery = output.estimatedDeliveryTimeWindow?.begins || 
-                             output.estimatedDeliveryTimeWindow?.ends;
+    const estimatedDelivery =
+      output.estimatedDeliveryTimeWindow?.begins || output.estimatedDeliveryTimeWindow?.ends;
 
     return {
       success: true,
@@ -156,15 +163,15 @@ export class FedExAdapter implements CarrierAdapter {
    * Mappe les statuts FedEx vers nos statuts standard
    */
   private mapFedExStatus(fedExStatus: string): string {
-    const  statusMap: Record<string, string> = {
-      'OC': 'label_created', // Order Created
-      'PU': 'picked_up', // Picked Up
-      'IT': 'in_transit', // In Transit
-      'OD': 'out_for_delivery', // Out for Delivery
-      'DL': 'delivered', // Delivered
-      'DE': 'delivered', // Delivered Exception
-      'CA': 'cancelled', // Cancelled
-      'SE': 'failed', // Shipment Exception
+    const statusMap: Record<string, string> = {
+      OC: 'label_created', // Order Created
+      PU: 'picked_up', // Picked Up
+      IT: 'in_transit', // In Transit
+      OD: 'out_for_delivery', // Out for Delivery
+      DL: 'delivered', // Delivered
+      DE: 'delivered', // Delivered Exception
+      CA: 'cancelled', // Cancelled
+      SE: 'failed', // Shipment Exception
     };
 
     return statusMap[fedExStatus] || 'in_transit';
@@ -193,10 +200,3 @@ export class FedExAdapter implements CarrierAdapter {
     };
   }
 }
-
-
-
-
-
-
-

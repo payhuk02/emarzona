@@ -1,7 +1,7 @@
 /**
  * Optimiseur de Performance pour Requêtes Lourdes
  * Date: 1 Février 2025
- * 
+ *
  * Identifie et optimise les requêtes lourdes avec :
  * - Analyse de performance
  * - Suggestions d'optimisation
@@ -41,7 +41,7 @@ export class QueryPerformanceAnalyzer {
     cacheHit: boolean = false
   ): void {
     const key = JSON.stringify(queryKey);
-    const  metrics: QueryMetrics = {
+    const metrics: QueryMetrics = {
       queryKey,
       duration,
       dataSize,
@@ -136,7 +136,7 @@ export class QueryPerformanceAnalyzer {
     const stats = this.getQueryStats(queryKey);
     if (!stats) return [];
 
-    const  suggestions: string[] = [];
+    const suggestions: string[] = [];
 
     // Suggestion de cache si la requête est lente et appelée fréquemment
     if (stats.avgDuration > 500 && stats.totalCalls > 10) {
@@ -144,7 +144,8 @@ export class QueryPerformanceAnalyzer {
     }
 
     // Suggestion de pagination si les données sont volumineuses
-    if (stats.avgDataSize > 100000) { // 100KB
+    if (stats.avgDataSize > 100000) {
+      // 100KB
       suggestions.push('Implémenter la pagination pour réduire la taille des données');
     }
 
@@ -176,11 +177,11 @@ export async function measureQueryPerformance<T>(
   options: { cacheHit?: boolean } = {}
 ): Promise<T> {
   const startTime = performance.now();
-  let  dataSize= 0;
+  let dataSize = 0;
 
   try {
     const result = await queryFn();
-    
+
     // Estimer la taille des données
     try {
       dataSize = new Blob([JSON.stringify(result)]).size;
@@ -190,23 +191,13 @@ export async function measureQueryPerformance<T>(
 
     const duration = performance.now() - startTime;
 
-    queryPerformanceAnalyzer.recordQuery(
-      queryKey,
-      duration,
-      dataSize,
-      options.cacheHit || false
-    );
+    queryPerformanceAnalyzer.recordQuery(queryKey, duration, dataSize, options.cacheHit || false);
 
     return result;
   } catch (error) {
     const duration = performance.now() - startTime;
-    
-    queryPerformanceAnalyzer.recordQuery(
-      queryKey,
-      duration,
-      0,
-      false
-    );
+
+    queryPerformanceAnalyzer.recordQuery(queryKey, duration, 0, false);
 
     throw error;
   }
@@ -220,9 +211,8 @@ export function createPaginatedQuery<T>(
   pageSize: number = 20
 ) {
   return async (page: number = 1) => {
-    return measureQueryPerformance(
-      ['paginated-query', page.toString(), pageSize.toString()],
-      () => baseQueryFn(page, pageSize)
+    return measureQueryPerformance(['paginated-query', page.toString(), pageSize.toString()], () =>
+      baseQueryFn(page, pageSize)
     );
   };
 }
@@ -235,7 +225,7 @@ export function optimizeSelectColumns(
   columns: string[],
   includeRelations: Record<string, string[]> = {}
 ): string {
-  let  select= columns.join(', ');
+  let select = columns.join(', ');
 
   // Ajouter les relations si nécessaire
   Object.entries(includeRelations).forEach(([relation, relationColumns]) => {
@@ -248,26 +238,26 @@ export function optimizeSelectColumns(
 /**
  * Suggestions d'optimisation pour requêtes fréquentes
  */
-export const queryOptimizationSuggestions : Record<string, string[]> = {
-  'digitalProducts': [
+export const queryOptimizationSuggestions: Record<string, string[]> = {
+  digitalProducts: [
     'Utiliser pagination côté serveur',
     'Sélectionner uniquement les colonnes nécessaires',
     'Ajouter cache avec staleTime: 10 minutes',
     'Utiliser index sur store_id et is_active',
   ],
-  'orders': [
+  orders: [
     'Utiliser pagination',
     'Filtrer par date pour réduire les résultats',
     'Cache court (2 minutes) car données changeantes',
     'Index sur store_id, status, created_at',
   ],
-  'products': [
+  products: [
     'Cache agressif (10 minutes)',
     'Sélectionner uniquement les colonnes nécessaires',
     'Index sur store_id, product_type, is_active',
     'Utiliser views matérialisées pour requêtes complexes',
   ],
-  'auctions': [
+  auctions: [
     'Cache moyen (5 minutes)',
     'Filtrer par status et date',
     'Index sur status, end_date, store_id',
@@ -304,11 +294,3 @@ export function applyQueryOptimizations(
     });
   };
 }
-
-
-
-
-
-
-
-

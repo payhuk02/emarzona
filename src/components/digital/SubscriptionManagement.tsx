@@ -1,7 +1,7 @@
 /**
  * Subscription Management Component
  * Date: 2025-01-27
- * 
+ *
  * Composant pour gérer les subscriptions : essais gratuits, pauses, upgrades/downgrades
  */
 
@@ -28,16 +28,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Play, Pause, TrendingUp, TrendingDown, Gift, Calendar, Info } from 'lucide-react';
 import {
-  Play,
-  Pause,
-  TrendingUp,
-  TrendingDown,
-  Gift,
-  Calendar,
-  Info,
-} from 'lucide-react';
-import { usePauseSubscription, useResumeSubscription, useStartTrial, useSchedulePlanChange } from '@/hooks/digital/useSubscriptionEnhancements';
+  usePauseSubscription,
+  useResumeSubscription,
+  useStartTrial,
+  useSchedulePlanChange,
+} from '@/hooks/digital/useSubscriptionEnhancements';
 import { DigitalProductSubscription } from '@/hooks/digital/useDigitalSubscriptions';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -62,8 +59,10 @@ export const SubscriptionManagement = ({
   const [pauseUntil, setPauseUntil] = useState('');
   const [pauseReason, setPauseReason] = useState('');
   const [selectedPlanId, setSelectedPlanId] = useState('');
-  const [planChangeType, setPlanChangeType] = useState<'upgrade' | 'downgrade' | 'switch'>('upgrade');
-  
+  const [planChangeType, setPlanChangeType] = useState<'upgrade' | 'downgrade' | 'switch'>(
+    'upgrade'
+  );
+
   const startTrial = useStartTrial();
   const pauseSubscription = usePauseSubscription();
   const resumeSubscription = useResumeSubscription();
@@ -134,7 +133,8 @@ export const SubscriptionManagement = ({
             <div className="text-right">
               <p className="text-sm text-muted-foreground">Période actuelle</p>
               <p className="text-sm font-semibold">
-                {format(new Date(subscription.current_period_start), 'dd/MM/yyyy', { locale: fr })} - {format(new Date(subscription.current_period_end), 'dd/MM/yyyy', { locale: fr })}
+                {format(new Date(subscription.current_period_start), 'dd/MM/yyyy', { locale: fr })}{' '}
+                - {format(new Date(subscription.current_period_end), 'dd/MM/yyyy', { locale: fr })}
               </p>
             </div>
           </div>
@@ -156,7 +156,7 @@ export const SubscriptionManagement = ({
                     min="1"
                     max="30"
                     value={trialDays}
-                    onChange={(e) => setTrialDays(Number(e.target.value))}
+                    onChange={e => setTrialDays(Number(e.target.value))}
                     className="mt-2"
                   />
                 </div>
@@ -185,7 +185,10 @@ export const SubscriptionManagement = ({
                 <>
                   <div className="p-3 bg-muted rounded-lg">
                     <p className="text-sm">
-                      En pause jusqu'au: {subscription.paused_until ? format(new Date(subscription.paused_until), 'dd/MM/yyyy', { locale: fr }) : 'N/A'}
+                      En pause jusqu'au:{' '}
+                      {subscription.paused_until
+                        ? format(new Date(subscription.paused_until), 'dd/MM/yyyy', { locale: fr })
+                        : 'N/A'}
                     </p>
                     {subscription.pause_reason && (
                       <p className="text-sm text-muted-foreground mt-1">
@@ -209,7 +212,7 @@ export const SubscriptionManagement = ({
                     <Input
                       type="date"
                       value={pauseUntil}
-                      onChange={(e) => setPauseUntil(e.target.value)}
+                      onChange={e => setPauseUntil(e.target.value)}
                       className="mt-2"
                       min={new Date().toISOString().split('T')[0]}
                     />
@@ -218,7 +221,7 @@ export const SubscriptionManagement = ({
                     <Label>Raison (optionnel)</Label>
                     <Textarea
                       value={pauseReason}
-                      onChange={(e) => setPauseReason(e.target.value)}
+                      onChange={e => setPauseReason(e.target.value)}
                       className="mt-2"
                       placeholder="Ex: Voyage, pause temporaire..."
                     />
@@ -254,7 +257,9 @@ export const SubscriptionManagement = ({
                   <Label>Type de changement</Label>
                   <Select
                     value={planChangeType}
-                    onValueChange={(value: 'upgrade' | 'downgrade' | 'switch') => setPlanChangeType(value)}
+                    onValueChange={(value: 'upgrade' | 'downgrade' | 'switch') =>
+                      setPlanChangeType(value)
+                    }
                   >
                     <SelectTrigger className="mt-2">
                       <SelectValue />
@@ -268,17 +273,14 @@ export const SubscriptionManagement = ({
                 </div>
                 <div>
                   <Label>Nouveau plan</Label>
-                  <Select
-                    value={selectedPlanId}
-                    onValueChange={setSelectedPlanId}
-                  >
+                  <Select value={selectedPlanId} onValueChange={setSelectedPlanId}>
                     <SelectTrigger className="mt-2">
                       <SelectValue placeholder="Sélectionner un plan" />
                     </SelectTrigger>
                     <SelectContent>
                       {availablePlans
                         .filter(p => p.id !== subscription.id)
-                        .map((plan) => (
+                        .map(plan => (
                           <SelectItem key={plan.id} value={plan.id}>
                             {plan.name} - {plan.price.toLocaleString()} XOF / {plan.interval}
                           </SelectItem>
@@ -291,8 +293,8 @@ export const SubscriptionManagement = ({
                     <Info className="h-4 w-4 mt-0.5 text-blue-600 dark:text-blue-400" />
                     <div className="text-sm text-blue-900 dark:text-blue-100">
                       <p>
-                        Le changement de plan sera appliqué à la fin de la période actuelle.
-                        Un montant proraté sera calculé automatiquement.
+                        Le changement de plan sera appliqué à la fin de la période actuelle. Un
+                        montant proraté sera calculé automatiquement.
                       </p>
                     </div>
                   </div>
@@ -317,10 +319,3 @@ export const SubscriptionManagement = ({
     </div>
   );
 };
-
-
-
-
-
-
-

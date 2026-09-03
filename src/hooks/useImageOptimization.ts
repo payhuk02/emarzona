@@ -4,7 +4,13 @@
  */
 
 import { useState, useCallback, useEffect } from 'react';
-import { optimizeImage, validateImageDimensions, generateImageSEOAttributes, type ImageOptimizationOptions, type OptimizedImageResult } from '@/lib/image-optimization';
+import {
+  optimizeImage,
+  validateImageDimensions,
+  generateImageSEOAttributes,
+  type ImageOptimizationOptions,
+  type OptimizedImageResult,
+} from '@/lib/image-optimization';
 import { logger } from '@/lib/logger';
 
 interface UseImageOptimizationOptions extends ImageOptimizationOptions {
@@ -28,103 +34,107 @@ export function useImageOptimization(
   altText?: string,
   options: UseImageOptimizationOptions = {}
 ) {
-  const {
-    autoOptimize = false,
-    onOptimizationComplete,
-    onError,
-    ...optimizationOptions
-  } = options;
+  const { autoOptimize = false, onOptimizationComplete, onError, ...optimizationOptions } = options;
 
   const [state, setState] = useState<OptimizedImageState>({
-    isOptimizing: false
+    isOptimizing: false,
   });
 
   // Fonction d'optimisation manuelle
-  const optimizeImageFile = useCallback(async (
-    file: File,
-    customOptions?: Partial<ImageOptimizationOptions>
-  ): Promise<OptimizedImageResult> => {
-    setState(prev => ({ ...prev, isOptimizing: true, error: undefined }));
+  const optimizeImageFile = useCallback(
+    async (
+      file: File,
+      customOptions?: Partial<ImageOptimizationOptions>
+    ): Promise<OptimizedImageResult> => {
+      setState(prev => ({ ...prev, isOptimizing: true, error: undefined }));
 
-    try {
-      // Validation des dimensions
-      const img = new Image();
-      const dimensionsPromise = new Promise<{ width: number; height: number }>((resolve, reject) => {
-        img.onload = () => resolve({ width: img.naturalWidth, height: img.naturalHeight });
-        img.onerror = () => reject(new Error('Impossible de charger l\'image'));
-        img.src = URL.createObjectURL(file);
-      });
+      try {
+        // Validation des dimensions
+        const img = new Image();
+        const dimensionsPromise = new Promise<{ width: number; height: number }>(
+          (resolve, reject) => {
+            img.onload = () => resolve({ width: img.naturalWidth, height: img.naturalHeight });
+            img.onerror = () => reject(new Error("Impossible de charger l'image"));
+            img.src = URL.createObjectURL(file);
+          }
+        );
 
-      const dimensions = await dimensionsPromise;
-      const validation = validateImageDimensions(
-        dimensions.width,
-        dimensions.height,
-        100, 4000, 100, 4000
-      );
+        const dimensions = await dimensionsPromise;
+        const validation = validateImageDimensions(
+          dimensions.width,
+          dimensions.height,
+          100,
+          4000,
+          100,
+          4000
+        );
 
-      if (!validation.valid) {
-        throw new Error(validation.error);
+        if (!validation.valid) {
+          throw new Error(validation.error);
+        }
+
+        // Convertir le fichier en buffer
+        const arrayBuffer = await file.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+
+        // Optimiser l'image
+        const result = await optimizeImage(buffer, {
+          ...optimizationOptions,
+          ...customOptions,
+        });
+
+        // Générer les URLs des différentes tailles
+        const sizeUrls: { [key: string]: string } = {};
+        for (const [size, sizeBuffer] of Object.entries(result.sizes)) {
+          // Ici on simulerait l'upload vers un service de stockage
+          // Pour l'exemple, on utilise des data URLs
+          const blob = new Blob([sizeBuffer], { type: `image/${result.metadata.format}` });
+          sizeUrls[size] = URL.createObjectURL(blob);
+        }
+
+        const optimizedBlob = new Blob([result.optimized], {
+          type: `image/${result.metadata.format}`,
+        });
+        const optimizedUrl = URL.createObjectURL(optimizedBlob);
+
+        setState(prev => ({
+          ...prev,
+          optimizedUrl,
+          sizes: sizeUrls,
+          metadata: result.metadata,
+          seoAttributes: generateImageSEOAttributes(
+            file.name,
+            altText || file.name,
+            result.metadata.width,
+            result.metadata.height
+          ),
+          isOptimizing: false,
+        }));
+
+        onOptimizationComplete?.(result);
+        logger.info('Image optimisée avec succès', {
+          originalSize: result.metadata.originalSize,
+          optimizedSize: result.metadata.optimizedSize,
+          compressionRatio: result.metadata.compressionRatio,
+        });
+
+        return result;
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Erreur d'optimisation";
+        setState(prev => ({
+          ...prev,
+          error: errorMessage,
+          isOptimizing: false,
+        }));
+
+        onError?.(error instanceof Error ? error : new Error(errorMessage));
+        logger.error("Erreur lors de l'optimisation d'image", { error });
+
+        throw error;
       }
-
-      // Convertir le fichier en buffer
-      const arrayBuffer = await file.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
-
-      // Optimiser l'image
-      const result = await optimizeImage(buffer, {
-        ...optimizationOptions,
-        ...customOptions
-      });
-
-      // Générer les URLs des différentes tailles
-      const sizeUrls: { [key: string]: string } = {};
-      for (const [size, sizeBuffer] of Object.entries(result.sizes)) {
-        // Ici on simulerait l'upload vers un service de stockage
-        // Pour l'exemple, on utilise des data URLs
-        const blob = new Blob([sizeBuffer], { type: `image/${result.metadata.format}` });
-        sizeUrls[size] = URL.createObjectURL(blob);
-      }
-
-      const optimizedBlob = new Blob([result.optimized], { type: `image/${result.metadata.format}` });
-      const optimizedUrl = URL.createObjectURL(optimizedBlob);
-
-      setState(prev => ({
-        ...prev,
-        optimizedUrl,
-        sizes: sizeUrls,
-        metadata: result.metadata,
-        seoAttributes: generateImageSEOAttributes(
-          file.name,
-          altText || file.name,
-          result.metadata.width,
-          result.metadata.height
-        ),
-        isOptimizing: false
-      }));
-
-      onOptimizationComplete?.(result);
-      logger.info('Image optimisée avec succès', {
-        originalSize: result.metadata.originalSize,
-        optimizedSize: result.metadata.optimizedSize,
-        compressionRatio: result.metadata.compressionRatio
-      });
-
-      return result;
-
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Erreur d\'optimisation';
-      setState(prev => ({
-        ...prev,
-        error: errorMessage,
-        isOptimizing: false
-      }));
-
-      onError?.(error instanceof Error ? error : new Error(errorMessage));
-      logger.error('Erreur lors de l\'optimisation d\'image', { error });
-
-      throw error;
-    }
-  }, [optimizationOptions, altText, onOptimizationComplete, onError]);
+    },
+    [optimizationOptions, altText, onOptimizationComplete, onError]
+  );
 
   // Optimisation automatique si activée
   useEffect(() => {
@@ -137,7 +147,7 @@ export function useImageOptimization(
         seoAttributes: generateImageSEOAttributes(
           imageUrl.split('/').pop() || 'image',
           altText || 'Image optimisée'
-        )
+        ),
       }));
     }
   }, [autoOptimize, imageUrl, altText, state.isOptimizing, state.optimizedUrl]);
@@ -183,9 +193,9 @@ export function useImageOptimization(
       return {
         ratio: `${state.metadata.compressionRatio.toFixed(1)}%`,
         saved: `${((state.metadata.originalSize - state.metadata.optimizedSize) / 1024).toFixed(1)} KB`,
-        finalSize: `${(state.metadata.optimizedSize / 1024).toFixed(1)} KB`
+        finalSize: `${(state.metadata.optimizedSize / 1024).toFixed(1)} KB`,
       };
-    }
+    },
   };
 }
 
@@ -211,10 +221,7 @@ export function useBatchImageOptimization(
       const { file, altText } = images[i];
 
       try {
-        const result = await optimizeImage(
-          Buffer.from(await file.arrayBuffer()),
-          options
-        );
+        const result = await optimizeImage(Buffer.from(await file.arrayBuffer()), options);
 
         batchResults.push(result);
         setResults([...batchResults]);
@@ -226,10 +233,10 @@ export function useBatchImageOptimization(
     }
 
     setIsProcessing(false);
-    logger.info('Batch d\'optimisation terminé', {
+    logger.info("Batch d'optimisation terminé", {
       total: images.length,
       success: batchResults.length,
-      failed: images.length - batchResults.length
+      failed: images.length - batchResults.length,
     });
 
     return batchResults;
@@ -241,7 +248,7 @@ export function useBatchImageOptimization(
     results,
     isProcessing,
     successCount: results.length,
-    errorCount: images.length - results.length
+    errorCount: images.length - results.length,
   };
 }
 
@@ -252,39 +259,41 @@ export function useImageFormatSupport() {
   const [support, setSupport] = useState({
     webp: false,
     avif: false,
-    loading: true
+    loading: true,
   });
 
   useEffect(() => {
     const checkFormatSupport = async () => {
       try {
         // Test WebP support
-        const webpSupported = await new Promise<boolean>((resolve) => {
+        const webpSupported = await new Promise<boolean>(resolve => {
           const webp = new Image();
           webp.onload = webp.onerror = () => {
             resolve(webp.height === 2);
           };
-          webp.src = 'data:image/webp;base64,UklGRjoAAABXRUJQVlA4IC4AAACyAgCdASoCAAIALmk0mk0iIiIiIgBoSygABc6WWgAA/veff/0PP8bA//LwYAAA';
+          webp.src =
+            'data:image/webp;base64,UklGRjoAAABXRUJQVlA4IC4AAACyAgCdASoCAAIALmk0mk0iIiIiIgBoSygABc6WWgAA/veff/0PP8bA//LwYAAA';
         });
 
         // Test AVIF support
-        const avifSupported = await new Promise<boolean>((resolve) => {
+        const avifSupported = await new Promise<boolean>(resolve => {
           const avif = new Image();
           avif.onload = avif.onerror = () => {
             resolve(avif.height === 2);
           };
-          avif.src = 'data:image/avif;base64,AAAAIGZ0eXBhdmlmAAAAAGF2aWZtaWYxbWlhZk1BMUIAAADybWV0YQAAAAAAAAAoaGRscgAAAAAAAAAAcGljdAAAAAAAAAAAAAAAAGxpYmF2aWYAAAAADnBpdG0AAAAAAAEAAAAeaWxvYwAAAABEAAABAAEAAAABAAABGgAAAB0AAAAoaWluZgAAAAAAAQAAABppbmZlAgAAAAABAABhdjAxQ29sb3IAAAAAamlwcnAAAABLaXBjbwAAABRpc3BlAAAAAAAAAAIAAAABAAAAEHBpeGkAAAAAAwgICAAAAAxhdjFDgQ0MAAAAABNjb2xybmNseAACAAIAAYAAAAAXaXBtYQAAAAAAAAABAAEEAQKDBAAAACVtZGF0EgAKCBgABogQEAwgMg8f8D///8WfhwB8+ErK42A=';
+          avif.src =
+            'data:image/avif;base64,AAAAIGZ0eXBhdmlmAAAAAGF2aWZtaWYxbWlhZk1BMUIAAADybWV0YQAAAAAAAAAoaGRscgAAAAAAAAAAcGljdAAAAAAAAAAAAAAAAGxpYmF2aWYAAAAADnBpdG0AAAAAAAEAAAAeaWxvYwAAAABEAAABAAEAAAABAAABGgAAAB0AAAAoaWluZgAAAAAAAQAAABppbmZlAgAAAAABAABhdjAxQ29sb3IAAAAAamlwcnAAAABLaXBjbwAAABRpc3BlAAAAAAAAAAIAAAABAAAAEHBpeGkAAAAAAwgICAAAAAxhdjFDgQ0MAAAAABNjb2xybmNseAACAAIAAYAAAAAXaXBtYQAAAAAAAAABAAEEAQKDBAAAACVtZGF0EgAKCBgABogQEAwgMg8f8D///8WfhwB8+ErK42A=';
         });
 
         setSupport({
           webp: webpSupported,
           avif: avifSupported,
-          loading: false
+          loading: false,
         });
 
         logger.info('Format support détecté', {
           webp: webpSupported,
-          avif: avifSupported
+          avif: avifSupported,
         });
       } catch (error) {
         logger.error('Erreur lors de la détection du support des formats', { error });
@@ -309,13 +318,13 @@ export function useImagePerformanceMonitoring() {
   }>({
     lcp: [],
     cls: [],
-    fid: []
+    fid: [],
   });
 
   const recordMetric = useCallback((type: 'lcp' | 'cls' | 'fid', value: number) => {
     setMetrics(prev => ({
       ...prev,
-      [type]: [...prev[type], value].slice(-10) // Garder les 10 dernières mesures
+      [type]: [...prev[type], value].slice(-10), // Garder les 10 dernières mesures
     }));
 
     // Logger les métriques critiques
@@ -334,7 +343,7 @@ export function useImagePerformanceMonitoring() {
     return {
       lcp: metrics.lcp.length > 0 ? metrics.lcp.reduce((a, b) => a + b, 0) / metrics.lcp.length : 0,
       cls: metrics.cls.length > 0 ? metrics.cls.reduce((a, b) => a + b, 0) / metrics.cls.length : 0,
-      fid: metrics.fid.length > 0 ? metrics.fid.reduce((a, b) => a + b, 0) / metrics.fid.length : 0
+      fid: metrics.fid.length > 0 ? metrics.fid.reduce((a, b) => a + b, 0) / metrics.fid.length : 0,
     };
   }, [metrics]);
 
@@ -346,7 +355,7 @@ export function useImagePerformanceMonitoring() {
     thresholds: {
       lcp: { good: 2500, needsImprovement: 4000 },
       cls: { good: 0.1, needsImprovement: 0.25 },
-      fid: { good: 100, needsImprovement: 300 }
-    }
+      fid: { good: 100, needsImprovement: 300 },
+    },
   };
 }

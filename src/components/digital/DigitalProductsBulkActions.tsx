@@ -19,7 +19,7 @@ import {
   FileDown,
   MoreHorizontal,
 } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -240,11 +240,9 @@ export const DigitalProductsBulkActions = ({
           {onExport && (
             <Select>
               <SelectTrigger className="h-8" disabled={isProcessing}>
-
-                  <FileDown className="h-4 w-4 mr-2" />
-                  Exporter
-                
-</SelectTrigger>
+                <FileDown className="h-4 w-4 mr-2" />
+                Exporter
+              </SelectTrigger>
               <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                 <SelectItem value="edit" onSelect={() => handleExport('csv')}>
                   <FileDown className="h-4 w-4 mr-2" />
@@ -263,11 +261,9 @@ export const DigitalProductsBulkActions = ({
           )}
           <Select>
             <SelectTrigger className="h-8" disabled={isProcessing}>
-
-                <MoreHorizontal className="h-4 w-4 mr-2" />
-                Plus
-              
-</SelectTrigger>
+              <MoreHorizontal className="h-4 w-4 mr-2" />
+              Plus
+            </SelectTrigger>
             <SelectContent mobileVariant="sheet" className="min-w-[200px]">
               <SelectItem value="view" onSelect={handleSelectAll}>
                 {isAllSelected ? (
@@ -283,7 +279,9 @@ export const DigitalProductsBulkActions = ({
                 )}
               </SelectItem>
               <DropdownMenuSeparator />
-              <SelectItem value="export" onSelect={handleBulkDelete}
+              <SelectItem
+                value="export"
+                onSelect={handleBulkDelete}
                 className="text-destructive focus:text-destructive"
               >
                 <Trash2 className="h-4 w-4 mr-2" />

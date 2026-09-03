@@ -1,8 +1,13 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import type { MovementType, MovementDirection, StockMovement } from '@/components/physical/StockMovementHistory';
+import type {
+  MovementType,
+  MovementDirection,
+  StockMovement,
+} from '@/components/physical/StockMovementHistory';
 
-const STOCK_MOVEMENT_FIELDS = 'id, product_id, product_name, variant_id, variant_label, sku, type, direction, quantity, quantity_before, quantity_after, reason, reference_id, reference_type, user_id, user_name, location_from, location_to, created_at';
+const STOCK_MOVEMENT_FIELDS =
+  'id, product_id, product_name, variant_id, variant_label, sku, type, direction, quantity, quantity_before, quantity_after, reason, reference_id, reference_type, user_id, user_name, location_from, location_to, created_at';
 
 // ============================================================================
 // TYPES
@@ -53,7 +58,7 @@ export function useStockMovements(filters?: {
   return useQuery({
     queryKey: ['stock-movements', filters],
     queryFn: async () => {
-      let  query= supabase
+      let query = supabase
         .from('stock_movements')
         .select(STOCK_MOVEMENT_FIELDS)
         .order('created_at', { ascending: false });
@@ -92,14 +97,17 @@ export function useStockMovements(filters?: {
 // GET STOCK MOVEMENT STATS
 // ============================================================================
 
-export function useStockMovementStats(productId?: string, dateRange?: {
-  start: string;
-  end: string;
-}) {
+export function useStockMovementStats(
+  productId?: string,
+  dateRange?: {
+    start: string;
+    end: string;
+  }
+) {
   return useQuery({
     queryKey: ['stock-movement-stats', productId, dateRange],
     queryFn: async () => {
-      let  query= supabase.from('stock_movements').select(STOCK_MOVEMENT_FIELDS);
+      let query = supabase.from('stock_movements').select(STOCK_MOVEMENT_FIELDS);
 
       if (productId) {
         query = query.eq('product_id', productId);
@@ -119,14 +127,14 @@ export function useStockMovementStats(productId?: string, dateRange?: {
 
       // Calculate stats
       const total_in = movements
-        .filter((m) => m.direction === 'in')
+        .filter(m => m.direction === 'in')
         .reduce((sum, m) => sum + m.quantity, 0);
 
       const total_out = movements
-        .filter((m) => m.direction === 'out')
+        .filter(m => m.direction === 'out')
         .reduce((sum, m) => sum + m.quantity, 0);
 
-      const  by_type: Record<MovementType, number> = {
+      const by_type: Record<MovementType, number> = {
         purchase: 0,
         sale: 0,
         return: 0,
@@ -136,17 +144,15 @@ export function useStockMovementStats(productId?: string, dateRange?: {
         theft: 0,
       };
 
-      movements.forEach((m) => {
+      movements.forEach(m => {
         by_type[m.type] = (by_type[m.type] || 0) + 1;
       });
 
       // Recent activity (last 24h)
       const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-      const recent_activity = movements.filter(
-        (m) => m.created_at >= oneDayAgo
-      ).length;
+      const recent_activity = movements.filter(m => m.created_at >= oneDayAgo).length;
 
-      const  stats: StockMovementStats = {
+      const stats: StockMovementStats = {
         total_movements: movements.length,
         total_in,
         total_out,
@@ -192,7 +198,7 @@ export function useCreateStockMovement() {
 
       return data as StockMovement;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['stock-movements'] });
       queryClient.invalidateQueries({ queryKey: ['stock-movement-stats'] });
       queryClient.invalidateQueries({ queryKey: ['physical-products'] });
@@ -214,7 +220,7 @@ export function useCreateBulkStockMovements() {
       const { data, error } = await supabase
         .from('stock_movements')
         .insert(
-          movements.map((m) => ({
+          movements.map(m => ({
             ...m,
             created_at: new Date().toISOString(),
           }))
@@ -224,7 +230,7 @@ export function useCreateBulkStockMovements() {
       if (error) throw error;
 
       // Update all product quantities
-      const updates = movements.map((m) =>
+      const updates = movements.map(m =>
         supabase
           .from('physical_products')
           .update({ total_quantity: m.quantity_after })
@@ -277,9 +283,9 @@ export function useAdjustStock() {
       user_name?: string;
     }) => {
       const quantity = Math.abs(new_quantity - current_quantity);
-      const  direction: MovementDirection = new_quantity > current_quantity ? 'in' : 'out';
+      const direction: MovementDirection = new_quantity > current_quantity ? 'in' : 'out';
 
-      const  movement: CreateStockMovementInput = {
+      const movement: CreateStockMovementInput = {
         product_id,
         product_name,
         variant_id,
@@ -330,7 +336,7 @@ export function useProcessSale() {
       order_id: string;
       customer_name?: string;
     }) => {
-      const  movement: CreateStockMovementInput = {
+      const movement: CreateStockMovementInput = {
         product_id,
         product_name,
         variant_id,
@@ -381,7 +387,7 @@ export function useProcessReturn() {
       order_id: string;
       reason?: string;
     }) => {
-      const  movement: CreateStockMovementInput = {
+      const movement: CreateStockMovementInput = {
         product_id,
         product_name,
         variant_id,
@@ -433,7 +439,7 @@ export function useProcessPurchase() {
       supplier_name?: string;
       location?: string;
     }) => {
-      const  movement: CreateStockMovementInput = {
+      const movement: CreateStockMovementInput = {
         product_id,
         product_name,
         variant_id,
@@ -464,10 +470,7 @@ export function useDeleteStockMovement() {
 
   return useMutation({
     mutationFn: async (movementId: string) => {
-      const { error } = await supabase
-        .from('stock_movements')
-        .delete()
-        .eq('id', movementId);
+      const { error } = await supabase.from('stock_movements').delete().eq('id', movementId);
 
       if (error) throw error;
     },
@@ -477,10 +480,3 @@ export function useDeleteStockMovement() {
     },
   });
 }
-
-
-
-
-
-
-

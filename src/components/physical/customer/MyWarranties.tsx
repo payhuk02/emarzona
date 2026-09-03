@@ -342,9 +342,3 @@ export const MyWarranties = () => {
     </Card>
   );
 };
-
-
-
-
-
-

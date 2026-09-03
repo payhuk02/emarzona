@@ -23,9 +23,8 @@ export const useAdminReturnsList = (options: UseAdminReturnsOptions = {}) => {
     try {
       setLoading(true);
 
-      let query = supabase
-        .from('product_returns')
-        .select(`
+      let query = supabase.from('product_returns').select(
+        `
           *,
           orders (
             order_number,
@@ -36,12 +35,14 @@ export const useAdminReturnsList = (options: UseAdminReturnsOptions = {}) => {
             name,
             image_url
           )
-        `, { count: 'exact' });
+        `,
+        { count: 'exact' }
+      );
 
       if (status !== 'all') {
         query = query.eq('status', status);
       }
-      
+
       if (storeId) {
         query = query.eq('store_id', storeId);
       }
@@ -63,8 +64,10 @@ export const useAdminReturnsList = (options: UseAdminReturnsOptions = {}) => {
       if (search && search.trim()) {
         const queryText = search.toLowerCase();
         finalData = finalData.filter((r: any) => {
-          return r.return_number?.toLowerCase().includes(queryText) ||
-            r.products?.name?.toLowerCase().includes(queryText);
+          return (
+            r.return_number?.toLowerCase().includes(queryText) ||
+            r.products?.name?.toLowerCase().includes(queryText)
+          );
         });
       }
 

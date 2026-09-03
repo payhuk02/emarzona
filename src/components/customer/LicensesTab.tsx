@@ -1,7 +1,7 @@
 /**
  * Licenses Tab Component
  * Date: 27 Janvier 2025
- * 
+ *
  * Onglet pour afficher les licences du client
  */
 
@@ -68,7 +68,7 @@ export const LicensesTab = () => {
   if (isLoading) {
     return (
       <div className="space-y-3 sm:space-y-4">
-        {[1, 2, 3].map((i) => (
+        {[1, 2, 3].map(i => (
           <Card key={i} className="border shadow-sm">
             <CardHeader className="pb-3">
               <Skeleton className="h-5 sm:h-6 w-48 sm:w-64" />
@@ -102,11 +102,15 @@ export const LicensesTab = () => {
   return (
     <div className="space-y-3 sm:space-y-4">
       {licenses.map((license: any) => {
-        const statusConfig = STATUS_CONFIG[license.status as keyof typeof STATUS_CONFIG] || STATUS_CONFIG.pending;
+        const statusConfig =
+          STATUS_CONFIG[license.status as keyof typeof STATUS_CONFIG] || STATUS_CONFIG.pending;
         const StatusIcon = statusConfig.icon;
 
         return (
-          <Card key={license.id} className="border shadow-sm hover:shadow-md transition-shadow duration-200">
+          <Card
+            key={license.id}
+            className="border shadow-sm hover:shadow-md transition-shadow duration-200"
+          >
             <CardHeader className="pb-3">
               <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
                 <div className="flex items-start gap-3 sm:gap-4">
@@ -126,10 +130,13 @@ export const LicensesTab = () => {
                         <StatusIcon className="h-3 w-3 mr-1" />
                         {statusConfig.label}
                       </Badge>
-                      <Badge variant="outline" className="text-xs">{license.license_type}</Badge>
+                      <Badge variant="outline" className="text-xs">
+                        {license.license_type}
+                      </Badge>
                       {license.expires_at && (
                         <span className="text-xs text-gray-600 dark:text-gray-400">
-                          Expire le {format(new Date(license.expires_at), 'dd MMM yyyy', { locale: fr })}
+                          Expire le{' '}
+                          {format(new Date(license.expires_at), 'dd MMM yyyy', { locale: fr })}
                         </span>
                       )}
                     </CardDescription>
@@ -170,7 +177,8 @@ export const LicensesTab = () => {
                 <div>
                   <span className="text-muted-foreground block mb-1">Activations</span>
                   <div className="font-semibold text-gray-900 dark:text-gray-50">
-                    {license.current_activations} / {license.max_activations === -1 ? '∞' : license.max_activations}
+                    {license.current_activations} /{' '}
+                    {license.max_activations === -1 ? '∞' : license.max_activations}
                   </div>
                 </div>
                 <div>
@@ -195,10 +203,3 @@ export const LicensesTab = () => {
     </div>
   );
 };
-
-
-
-
-
-
-

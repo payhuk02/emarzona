@@ -22,23 +22,24 @@ export const useAdminShipmentsList = (options: UseAdminShipmentsOptions = {}) =>
     try {
       setLoading(true);
 
-      let query = supabase
-        .from('shipments')
-        .select(`
+      let query = supabase.from('shipments').select(
+        `
           *,
           order:orders(
             order_number,
             customers:fk_orders_customer(full_name, name, email)
           ),
           store:stores(name)
-        `, { count: 'exact' });
+        `,
+        { count: 'exact' }
+      );
 
       if (status !== 'all') {
         query = query.eq('status', status);
       }
-      
-      // Basic text search could be added via RPC, but for relations it is hard. 
-      // We will rely on simple pagination here and client side filter after fetching more rows if needed, 
+
+      // Basic text search could be added via RPC, but for relations it is hard.
+      // We will rely on simple pagination here and client side filter after fetching more rows if needed,
       // but standard approach is pagination on the primary table.
 
       query = query.order('created_at', { ascending: false });
@@ -58,9 +59,11 @@ export const useAdminShipmentsList = (options: UseAdminShipmentsOptions = {}) =>
       if (search && search.trim()) {
         const queryText = search.toLowerCase();
         finalData = finalData.filter((shipment: any) => {
-          return shipment.tracking_number?.toLowerCase().includes(queryText) ||
+          return (
+            shipment.tracking_number?.toLowerCase().includes(queryText) ||
             shipment.order?.order_number?.toLowerCase().includes(queryText) ||
-            shipment.store?.name?.toLowerCase().includes(queryText);
+            shipment.store?.name?.toLowerCase().includes(queryText)
+          );
         });
       }
 

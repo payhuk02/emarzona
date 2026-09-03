@@ -1,7 +1,7 @@
 /**
  * Hook useSEO - Simplifie la gestion des métadonnées SEO
  * Utilise react-helmet pour mettre à jour les meta tags
- * 
+ *
  * @example
  * ```tsx
  * useSEO({
@@ -181,7 +181,7 @@ export function useProductSEO(product: {
   category?: string;
 }) {
   const location = useLocation();
-  
+
   const canonicalUrl = product.storeSlug
     ? generateProductUrl(product.storeSlug, product.slug)
     : `${window.location.origin}/products/${product.slug}`;
@@ -191,10 +191,12 @@ export function useProductSEO(product: {
     product.image ||
     getDynamicOgImage({
       title: product.name,
-      subtitle: product.category ? `${product.category} · à partir de ${product.price} ${product.currency}` : undefined,
+      subtitle: product.category
+        ? `${product.category} · à partir de ${product.price} ${product.currency}`
+        : undefined,
       type: 'product',
     });
-  
+
   const breadcrumbs = [
     { name: 'Accueil', url: window.location.origin },
     ...(product.storeSlug ? [{ name: 'Boutique', url: generateStoreUrl(product.storeSlug) }] : []),
@@ -215,11 +217,12 @@ export function useProductSEO(product: {
       price: product.price,
       currency: product.currency,
       image: ogImage,
-      availability: product.availability === 'instock' 
-        ? 'https://schema.org/InStock'
-        : product.availability === 'outofstock'
-        ? 'https://schema.org/OutOfStock'
-        : 'https://schema.org/PreOrder',
+      availability:
+        product.availability === 'instock'
+          ? 'https://schema.org/InStock'
+          : product.availability === 'outofstock'
+            ? 'https://schema.org/OutOfStock'
+            : 'https://schema.org/PreOrder',
       sku: product.sku,
     },
   });
@@ -239,7 +242,11 @@ export function useStoreSEO(store: {
   const ogImage =
     store.banner ||
     store.logo ||
-    getDynamicOgImage({ title: store.name, subtitle: store.description.slice(0, 120), type: 'store' });
+    getDynamicOgImage({
+      title: store.name,
+      subtitle: store.description.slice(0, 120),
+      type: 'store',
+    });
 
   const breadcrumbs = [
     { name: 'Accueil', url: window.location.origin },
@@ -265,10 +272,3 @@ export function useStoreSEO(store: {
     },
   });
 }
-
-
-
-
-
-
-

@@ -15,16 +15,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Share2, Copy, Check, Link as LinkIcon, Calendar, Eye, X } from 'lucide-react';
 import {
-  Share2,
-  Copy,
-  Check,
-  Link as LinkIcon,
-  Calendar,
-  Eye,
-  X,
-} from 'lucide-react';
-import { useWishlistShare, useCreateWishlistShare, useDeactivateWishlistShare } from '@/hooks/wishlist/useWishlistShare';
+  useWishlistShare,
+  useCreateWishlistShare,
+  useDeactivateWishlistShare,
+} from '@/hooks/wishlist/useWishlistShare';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 
@@ -33,10 +29,7 @@ interface WishlistShareDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export const WishlistShareDialog = ({
-  open,
-  onOpenChange,
-}: WishlistShareDialogProps) => {
+export const WishlistShareDialog = ({ open, onOpenChange }: WishlistShareDialogProps) => {
   const { toast } = useToast();
   const { data: share, isLoading } = useWishlistShare();
   const createShare = useCreateWishlistShare();
@@ -44,9 +37,7 @@ export const WishlistShareDialog = ({
   const [copied, setCopied] = useState(false);
   const [expiresInDays, setExpiresInDays] = useState(30);
 
-  const shareUrl = share
-    ? `${window.location.origin}/wishlist/shared/${share.share_token}`
-    : null;
+  const shareUrl = share ? `${window.location.origin}/wishlist/shared/${share.share_token}` : null;
 
   const handleCopyLink = async () => {
     if (!shareUrl) return;
@@ -108,11 +99,7 @@ export const WishlistShareDialog = ({
               <div className="space-y-2">
                 <Label>Lien de partage</Label>
                 <div className="flex gap-2">
-                  <Input
-                    value={shareUrl}
-                    readOnly
-                    className="font-mono text-sm"
-                  />
+                  <Input value={shareUrl} readOnly className="font-mono text-sm" />
                   <Button
                     variant="outline"
                     size="icon"
@@ -131,31 +118,24 @@ export const WishlistShareDialog = ({
               <div className="flex items-center gap-4 text-sm text-muted-foreground">
                 <div className="flex items-center gap-1">
                   <Eye className="h-4 w-4" />
-                  <span>{share.view_count} vue{share.view_count > 1 ? 's' : ''}</span>
+                  <span>
+                    {share.view_count} vue{share.view_count > 1 ? 's' : ''}
+                  </span>
                 </div>
                 {share.expires_at && (
                   <div className="flex items-center gap-1">
                     <Calendar className="h-4 w-4" />
-                    <span>
-                      Expire le {new Date(share.expires_at).toLocaleDateString('fr-FR')}
-                    </span>
+                    <span>Expire le {new Date(share.expires_at).toLocaleDateString('fr-FR')}</span>
                   </div>
                 )}
               </div>
 
               <div className="flex gap-2">
-                <Button
-                  variant="destructive"
-                  onClick={handleDeactivate}
-                  className="flex-1"
-                >
+                <Button variant="destructive" onClick={handleDeactivate} className="flex-1">
                   <X className="h-4 w-4 mr-2" />
                   Désactiver le lien
                 </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => window.open(shareUrl, '_blank')}
-                >
+                <Button variant="outline" onClick={() => window.open(shareUrl, '_blank')}>
                   <LinkIcon className="h-4 w-4" />
                 </Button>
               </div>
@@ -169,10 +149,11 @@ export const WishlistShareDialog = ({
                   min="1"
                   max="365"
                   value={expiresInDays}
-                  onChange={(e) => setExpiresInDays(parseInt(e.target.value) || 30)}
+                  onChange={e => setExpiresInDays(parseInt(e.target.value) || 30)}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Le lien expirera automatiquement après {expiresInDays} jour{expiresInDays > 1 ? 's' : ''}
+                  Le lien expirera automatiquement après {expiresInDays} jour
+                  {expiresInDays > 1 ? 's' : ''}
                 </p>
               </div>
 
@@ -191,10 +172,3 @@ export const WishlistShareDialog = ({
     </Dialog>
   );
 };
-
-
-
-
-
-
-

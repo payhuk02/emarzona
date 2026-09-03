@@ -9,13 +9,14 @@ import {
   RecommendationService,
   type ProductRecommendation,
   type UserBehavior,
-  type RecommendationResult
+  type RecommendationResult,
 } from '@/lib/recommendations/ai-recommendation-engine';
 import { useStore } from './useStore';
 import { logger } from '@/lib/logger';
 import { supabase } from '@/integrations/supabase/client';
 
-const RECOMMENDATION_ANALYTICS_FIELDS = 'id, store_id, date, recommendation_type, impressions, clicks, conversions, ctr, conversion_rate, revenue_attributed, avg_order_value, created_at, updated_at';
+const RECOMMENDATION_ANALYTICS_FIELDS =
+  'id, store_id, date, recommendation_type, impressions, clicks, conversions, ctr, conversion_rate, revenue_attributed, avg_order_value, created_at, updated_at';
 
 interface UseProductRecommendationsOptions {
   productId: string;
@@ -40,7 +41,7 @@ interface UseTrendingRecommendationsOptions {
 export function useProductRecommendations({
   productId,
   limit = 6,
-  enabled = true
+  enabled = true,
 }: UseProductRecommendationsOptions) {
   const { store } = useStore();
 
@@ -63,7 +64,7 @@ export function useProductRecommendations({
  */
 export function useUserRecommendations({
   limit = 12,
-  enabled = true
+  enabled = true,
 }: UseUserRecommendationsOptions = {}) {
   const { store } = useStore();
 
@@ -88,9 +89,8 @@ export function useUserRecommendations({
 export function useTrendingRecommendations({
   limit = 8,
   enabled = true,
-  refreshInterval = 30 * 60 * 1000 // 30 minutes
+  refreshInterval = 30 * 60 * 1000, // 30 minutes
 }: UseTrendingRecommendationsOptions = {}) {
-
   return useQuery({
     queryKey: ['recommendations', 'trending', limit],
     queryFn: async (): Promise<ProductRecommendation[]> => {
@@ -108,11 +108,13 @@ export function useTrendingRecommendations({
 /**
  * Hook pour obtenir des recommandations contextuelles (combinées)
  */
-export function useContextualRecommendations(options: {
-  productId?: string;
-  limit?: number;
-  enabled?: boolean;
-} = {}) {
+export function useContextualRecommendations(
+  options: {
+    productId?: string;
+    limit?: number;
+    enabled?: boolean;
+  } = {}
+) {
   const { productId, limit = 10, enabled = true } = options;
   const { store } = useStore();
 
@@ -120,17 +122,17 @@ export function useContextualRecommendations(options: {
   const productRecs = useProductRecommendations({
     productId: productId!,
     limit: Math.floor(limit / 2),
-    enabled: enabled && !!productId
+    enabled: enabled && !!productId,
   });
 
   const userRecs = useUserRecommendations({
     limit: Math.floor(limit / 2),
-    enabled: enabled && !productId // Priorité aux recs produit si disponible
+    enabled: enabled && !productId, // Priorité aux recs produit si disponible
   });
 
   const trendingRecs = useTrendingRecommendations({
     limit: Math.floor(limit / 3),
-    enabled
+    enabled,
   });
 
   // Combiner et dédupliquer les recommandations
@@ -157,10 +159,7 @@ export function useContextualRecommendations(options: {
     }
 
     // Limiter et trier par score
-    return allRecs
-      .sort((a, b) => b.score - a.score)
-      .slice(0, limit);
-
+    return allRecs.sort((a, b) => b.score - a.score).slice(0, limit);
   }, [productRecs.data, userRecs.data, trendingRecs.data, limit]);
 
   const isLoading = productRecs.isLoading || userRecs.isLoading || trendingRecs.isLoading;
@@ -188,7 +187,7 @@ export function useRecommendationTracking() {
     mutationFn: async ({
       productId,
       action,
-      context
+      context,
     }: {
       productId: string;
       action: UserBehavior['action'];
@@ -204,31 +203,46 @@ export function useRecommendationTracking() {
       // Invalider les caches de recommandations pour rafraîchir
       queryClient.invalidateQueries({ queryKey: ['recommendations'] });
     },
-    onError: (error) => {
+    onError: error => {
       logger.error('Error tracking user action for recommendations', { error });
-    }
+    },
   });
 
   // Fonctions utilitaires pour différents types d'actions
-  const trackView = useCallback((productId: string, context?: Partial<UserBehavior['context']>) => {
-    trackMutation.mutate({ productId, action: 'view', context });
-  }, [trackMutation]);
+  const trackView = useCallback(
+    (productId: string, context?: Partial<UserBehavior['context']>) => {
+      trackMutation.mutate({ productId, action: 'view', context });
+    },
+    [trackMutation]
+  );
 
-  const trackCart = useCallback((productId: string, context?: Partial<UserBehavior['context']>) => {
-    trackMutation.mutate({ productId, action: 'cart', context });
-  }, [trackMutation]);
+  const trackCart = useCallback(
+    (productId: string, context?: Partial<UserBehavior['context']>) => {
+      trackMutation.mutate({ productId, action: 'cart', context });
+    },
+    [trackMutation]
+  );
 
-  const trackPurchase = useCallback((productId: string, context?: Partial<UserBehavior['context']>) => {
-    trackMutation.mutate({ productId, action: 'purchase', context });
-  }, [trackMutation]);
+  const trackPurchase = useCallback(
+    (productId: string, context?: Partial<UserBehavior['context']>) => {
+      trackMutation.mutate({ productId, action: 'purchase', context });
+    },
+    [trackMutation]
+  );
 
-  const trackFavorite = useCallback((productId: string, context?: Partial<UserBehavior['context']>) => {
-    trackMutation.mutate({ productId, action: 'favorite', context });
-  }, [trackMutation]);
+  const trackFavorite = useCallback(
+    (productId: string, context?: Partial<UserBehavior['context']>) => {
+      trackMutation.mutate({ productId, action: 'favorite', context });
+    },
+    [trackMutation]
+  );
 
-  const trackShare = useCallback((productId: string, context?: Partial<UserBehavior['context']>) => {
-    trackMutation.mutate({ productId, action: 'share', context });
-  }, [trackMutation]);
+  const trackShare = useCallback(
+    (productId: string, context?: Partial<UserBehavior['context']>) => {
+      trackMutation.mutate({ productId, action: 'share', context });
+    },
+    [trackMutation]
+  );
 
   return {
     // Actions de tracking
@@ -285,7 +299,7 @@ export function useRecommendationABTest() {
 
     // Simple hash-based group assignment pour la cohérence
     const hash = store.id.split('').reduce((a, b) => {
-      a = ((a << 5) - a) + b.charCodeAt(0);
+      a = (a << 5) - a + b.charCodeAt(0);
       return a & a;
     }, 0);
 

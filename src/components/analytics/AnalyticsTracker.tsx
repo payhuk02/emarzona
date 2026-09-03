@@ -11,14 +11,14 @@ interface AnalyticsTrackerProps {
   customEvents?: string[];
 }
 
-export const AnalyticsTracker : React.FC<AnalyticsTrackerProps> = ({
+export const AnalyticsTracker: React.FC<AnalyticsTrackerProps> = ({
   productId,
   enabled = true,
   trackViews = true,
   trackClicks = true,
   trackTimeSpent = true,
   trackErrors = true,
-  customEvents = []
+  customEvents = [],
 }) => {
   const { trackView, trackClick, trackCustomEvent } = useAnalyticsTracking();
   const sessionStartTime = useRef<number>(Date.now());
@@ -38,7 +38,7 @@ export const AnalyticsTracker : React.FC<AnalyticsTrackerProps> = ({
         screen_resolution: `${screen.width}x${screen.height}`,
         viewport_size: `${window.innerWidth}x${window.innerHeight}`,
         language: navigator.language,
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       });
     };
 
@@ -63,7 +63,7 @@ export const AnalyticsTracker : React.FC<AnalyticsTrackerProps> = ({
 
     const handleClick = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
-      
+
       // Ignorer les clics sur des éléments non interactifs
       if (!target || target.tagName === 'SCRIPT' || target.tagName === 'STYLE') {
         return;
@@ -73,9 +73,9 @@ export const AnalyticsTracker : React.FC<AnalyticsTrackerProps> = ({
       const elementId = target.id || target.className || target.tagName;
       const elementText = target.textContent?.slice(0, 100) || '';
       const elementType = target.tagName.toLowerCase();
-      
+
       // Déterminer si c'est un élément important
-      const isImportantElement = 
+      const isImportantElement =
         target.tagName === 'BUTTON' ||
         target.tagName === 'A' ||
         target.classList.contains('btn') ||
@@ -90,9 +90,9 @@ export const AnalyticsTracker : React.FC<AnalyticsTrackerProps> = ({
           element_href: target.getAttribute('href'),
           click_position: {
             x: event.clientX,
-            y: event.clientY
+            y: event.clientY,
           },
-          timestamp: Date.now()
+          timestamp: Date.now(),
         });
       }
     };
@@ -110,7 +110,7 @@ export const AnalyticsTracker : React.FC<AnalyticsTrackerProps> = ({
 
     const updateActivity = () => {
       lastActivityTime.current = Date.now();
-      
+
       // Clear existing timeout
       if (activityTimeout.current) {
         clearTimeout(activityTimeout.current);
@@ -119,12 +119,13 @@ export const AnalyticsTracker : React.FC<AnalyticsTrackerProps> = ({
       // Set new timeout for inactivity
       activityTimeout.current = setTimeout(() => {
         const timeSpent = Math.floor((lastActivityTime.current - sessionStartTime.current) / 1000);
-        
-        if (timeSpent > 5) { // Only track if user spent more than 5 seconds
+
+        if (timeSpent > 5) {
+          // Only track if user spent more than 5 seconds
           trackCustomEvent(productId, 'time_spent', {
             duration: timeSpent,
             page_url: window.location.href,
-            timestamp: Date.now()
+            timestamp: Date.now(),
           });
         }
       }, 30000); // 30 seconds of inactivity
@@ -136,7 +137,7 @@ export const AnalyticsTracker : React.FC<AnalyticsTrackerProps> = ({
 
     // Track various user activities
     const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'];
-    
+
     events.forEach(event => {
       document.addEventListener(event, handleActivity, { passive: true });
     });
@@ -149,7 +150,7 @@ export const AnalyticsTracker : React.FC<AnalyticsTrackerProps> = ({
           trackCustomEvent(productId, 'session_pause', {
             duration: timeSpent,
             page_url: window.location.href,
-            timestamp: Date.now()
+            timestamp: Date.now(),
           });
         }
       } else {
@@ -165,7 +166,7 @@ export const AnalyticsTracker : React.FC<AnalyticsTrackerProps> = ({
         document.removeEventListener(event, handleActivity);
       });
       document.removeEventListener('visibilitychange', handleVisibilityChange);
-      
+
       if (activityTimeout.current) {
         clearTimeout(activityTimeout.current);
       }
@@ -184,7 +185,7 @@ export const AnalyticsTracker : React.FC<AnalyticsTrackerProps> = ({
         colno: event.colno,
         stack: event.error?.stack,
         page_url: window.location.href,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
     };
 
@@ -192,7 +193,7 @@ export const AnalyticsTracker : React.FC<AnalyticsTrackerProps> = ({
       trackCustomEvent(productId, 'unhandled_promise_rejection', {
         reason: event.reason?.toString(),
         page_url: window.location.href,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
     };
 
@@ -211,12 +212,12 @@ export const AnalyticsTracker : React.FC<AnalyticsTrackerProps> = ({
 
     const handleCustomEvent = (event: CustomEvent) => {
       const eventName = event.detail?.name || event.type;
-      
+
       if (customEvents.includes(eventName)) {
         trackCustomEvent(productId, eventName, {
           ...event.detail,
           page_url: window.location.href,
-          timestamp: Date.now()
+          timestamp: Date.now(),
         });
       }
     };
@@ -234,18 +235,21 @@ export const AnalyticsTracker : React.FC<AnalyticsTrackerProps> = ({
   }, [enabled, customEvents, productId, trackCustomEvent]);
 
   // Tracker les conversions (achats)
-  const trackPurchase = useCallback((revenue: number, orderId?: string, additionalData?: Record<string, unknown>) => {
-    if (!enabled || !productId) return;
+  const trackPurchase = useCallback(
+    (revenue: number, orderId?: string, additionalData?: Record<string, unknown>) => {
+      if (!enabled || !productId) return;
 
-    trackCustomEvent(productId, 'purchase', {
-      revenue,
-      order_id: orderId,
-      currency: 'XOF',
-      page_url: window.location.href,
-      timestamp: Date.now(),
-      ...additionalData
-    });
-  }, [enabled, productId, trackCustomEvent]);
+      trackCustomEvent(productId, 'purchase', {
+        revenue,
+        order_id: orderId,
+        currency: 'XOF',
+        page_url: window.location.href,
+        timestamp: Date.now(),
+        ...additionalData,
+      });
+    },
+    [enabled, productId, trackCustomEvent]
+  );
 
   // Exposer la fonction de tracking des achats globalement
   useEffect(() => {
@@ -253,7 +257,11 @@ export const AnalyticsTracker : React.FC<AnalyticsTrackerProps> = ({
 
     // Exposer la fonction globalement pour qu'elle puisse être appelée depuis d'autres composants
     interface WindowWithTrackPurchase extends Window {
-      trackPurchase?: (revenue: number, orderId?: string, additionalData?: Record<string, unknown>) => void;
+      trackPurchase?: (
+        revenue: number,
+        orderId?: string,
+        additionalData?: Record<string, unknown>
+      ) => void;
     }
     (window as WindowWithTrackPurchase).trackPurchase = trackPurchase;
 
@@ -267,43 +275,50 @@ export const AnalyticsTracker : React.FC<AnalyticsTrackerProps> = ({
 
 // Hook pour utiliser le tracking depuis d'autres composants
 export const useAnalyticsTracker = () => {
-  const trackCustomEvent = useCallback((_productId: string, eventName: string, eventData?: Record<string, unknown>) => {
-    // Dispatcher un événement personnalisé
-    const event = new CustomEvent(`analytics_${eventName}`, {
-      detail: {
-        name: eventName,
-        ...eventData
-      }
-    });
-    
-    document.dispatchEvent(event);
-  }, []);
+  const trackCustomEvent = useCallback(
+    (_productId: string, eventName: string, eventData?: Record<string, unknown>) => {
+      // Dispatcher un événement personnalisé
+      const event = new CustomEvent(`analytics_${eventName}`, {
+        detail: {
+          name: eventName,
+          ...eventData,
+        },
+      });
 
-  const trackPurchase = useCallback((productId: string, revenue: number, orderId?: string, additionalData?: Record<string, unknown>) => {
-    trackCustomEvent(productId, 'purchase', {
-      revenue,
-      order_id: orderId,
-      ...additionalData
-    });
-  }, [trackCustomEvent]);
+      document.dispatchEvent(event);
+    },
+    []
+  );
 
-  const trackConversion = useCallback((productId: string, conversionType: string, additionalData?: Record<string, unknown>) => {
-    trackCustomEvent(productId, 'conversion', {
-      conversion_type: conversionType,
-      ...additionalData
-    });
-  }, [trackCustomEvent]);
+  const trackPurchase = useCallback(
+    (
+      productId: string,
+      revenue: number,
+      orderId?: string,
+      additionalData?: Record<string, unknown>
+    ) => {
+      trackCustomEvent(productId, 'purchase', {
+        revenue,
+        order_id: orderId,
+        ...additionalData,
+      });
+    },
+    [trackCustomEvent]
+  );
+
+  const trackConversion = useCallback(
+    (productId: string, conversionType: string, additionalData?: Record<string, unknown>) => {
+      trackCustomEvent(productId, 'conversion', {
+        conversion_type: conversionType,
+        ...additionalData,
+      });
+    },
+    [trackCustomEvent]
+  );
 
   return {
     trackCustomEvent,
     trackPurchase,
-    trackConversion
+    trackConversion,
   };
 };
-
-
-
-
-
-
-

@@ -1,7 +1,7 @@
 /**
  * Suppliers Management Hooks
  * Date: 27 Janvier 2025
- * 
+ *
  * Hooks pour gérer les fournisseurs et commandes automatiques
  */
 
@@ -10,7 +10,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 
-const SUPPLIER_FIELDS = 'id, store_id, name, company_name, contact_person, email, phone, website, address_line1, address_line2, city, state, postal_code, country, payment_terms, currency, tax_id, notes, tags, is_active, is_preferred, total_orders, total_spent, average_delivery_days, rating, created_at, updated_at';
+const SUPPLIER_FIELDS =
+  'id, store_id, name, company_name, contact_person, email, phone, website, address_line1, address_line2, city, state, postal_code, country, payment_terms, currency, tax_id, notes, tags, is_active, is_preferred, total_orders, total_spent, average_delivery_days, rating, created_at, updated_at';
 
 // =====================================================
 // TYPES
@@ -75,7 +76,17 @@ export interface SupplierOrder {
   supplier_id: string;
   order_number: string;
   supplier_order_number?: string;
-  status: 'draft' | 'pending' | 'sent' | 'confirmed' | 'processing' | 'shipped' | 'partially_received' | 'received' | 'cancelled' | 'completed';
+  status:
+    | 'draft'
+    | 'pending'
+    | 'sent'
+    | 'confirmed'
+    | 'processing'
+    | 'shipped'
+    | 'partially_received'
+    | 'received'
+    | 'cancelled'
+    | 'completed';
   subtotal: number;
   tax_amount: number;
   shipping_cost: number;
@@ -155,14 +166,16 @@ export const useSupplierProducts = (supplierId?: string) => {
 
       const { data, error } = await supabase
         .from('supplier_products')
-        .select(`
+        .select(
+          `
           *,
           product:products (
             id,
             name,
             image_url
           )
-        `)
+        `
+        )
         .eq('supplier_id', supplierId)
         .eq('is_active', true)
         .order('created_at', { ascending: false });
@@ -181,25 +194,30 @@ export const useSupplierProducts = (supplierId?: string) => {
 /**
  * useSupplierOrders - Récupère les commandes fournisseurs
  */
-export const useSupplierOrders = (storeId?: string, filters?: {
-  status?: SupplierOrder['status'];
-  supplierId?: string;
-}) => {
+export const useSupplierOrders = (
+  storeId?: string,
+  filters?: {
+    status?: SupplierOrder['status'];
+    supplierId?: string;
+  }
+) => {
   return useQuery({
     queryKey: ['supplier-orders', storeId, filters],
     queryFn: async () => {
       if (!storeId) throw new Error('Store ID manquant');
 
-      let  query= supabase
+      let query = supabase
         .from('supplier_orders')
-        .select(`
+        .select(
+          `
           *,
           supplier:suppliers (
             id,
             name,
             company_name
           )
-        `)
+        `
+        )
         .eq('store_id', storeId);
 
       if (filters?.status) {
@@ -235,7 +253,8 @@ export const useAutoReorderRules = (storeId?: string) => {
 
       const { data, error } = await supabase
         .from('auto_reorder_rules')
-        .select(`
+        .select(
+          `
           *,
           product:products (
             id,
@@ -245,7 +264,8 @@ export const useAutoReorderRules = (storeId?: string) => {
             id,
             name
           )
-        `)
+        `
+        )
         .eq('store_id', storeId)
         .order('created_at', { ascending: false });
 
@@ -288,7 +308,7 @@ export const useCreateSupplier = () => {
 
       return data as Supplier;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['suppliers', data.store_id] });
       toast({
         title: '✅ Fournisseur créé',
@@ -332,11 +352,13 @@ export const useCreateSupplierOrder = () => {
       notes?: string;
     }) => {
       // Générer numéro de commande
-      const { data: orderNumber, error: orderNumberError } = await supabase.rpc('generate_supplier_order_number');
+      const { data: orderNumber, error: orderNumberError } = await supabase.rpc(
+        'generate_supplier_order_number'
+      );
       if (orderNumberError) throw orderNumberError;
 
       // Calculer totaux
-      const subtotal = items.reduce((sum, item) => sum + (item.quantity * item.unit_cost), 0);
+      const subtotal = items.reduce((sum, item) => sum + item.quantity * item.unit_cost, 0);
       const totalAmount = subtotal;
 
       // Créer commande
@@ -369,9 +391,7 @@ export const useCreateSupplierOrder = () => {
         unit_cost: item.unit_cost,
       }));
 
-      const { error: itemsError } = await supabase
-        .from('supplier_order_items')
-        .insert(orderItems);
+      const { error: itemsError } = await supabase.from('supplier_order_items').insert(orderItems);
 
       if (itemsError) {
         logger.error('Error creating supplier order items', { error: itemsError });
@@ -380,7 +400,7 @@ export const useCreateSupplierOrder = () => {
 
       return order as SupplierOrder;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['supplier-orders'] });
       toast({
         title: '✅ Commande créée',
@@ -397,10 +417,3 @@ export const useCreateSupplierOrder = () => {
     },
   });
 };
-
-
-
-
-
-
-

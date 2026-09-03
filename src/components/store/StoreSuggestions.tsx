@@ -8,9 +8,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { 
-  suggestSlugAlternatives, 
-  suggestMetaTitle, 
+import {
+  suggestSlugAlternatives,
+  suggestMetaTitle,
   suggestMetaDescription,
   suggestColorPalette,
   suggestCustomDomain,
@@ -25,7 +25,13 @@ interface StoreSuggestionsProps {
   onSlugSuggestion?: (suggestion: string) => void;
   onMetaTitleSuggestion?: (suggestion: string) => void;
   onMetaDescriptionSuggestion?: (suggestion: string) => void;
-  onColorSuggestion?: (colors: { primary: string; secondary: string; accent: string; background: string; text: string }) => void;
+  onColorSuggestion?: (colors: {
+    primary: string;
+    secondary: string;
+    accent: string;
+    background: string;
+    text: string;
+  }) => void;
   onKeywordSuggestion?: (keywords: string[]) => void;
   className?: string;
 }
@@ -47,12 +53,18 @@ export const StoreSuggestions = ({
 
   if (!showSuggestions || !name) return null;
 
-  const  suggestions: Array<{
+  const suggestions: Array<{
     id: string;
     type: 'slug' | 'meta' | 'colors' | 'domain' | 'keywords';
     title: string;
     description: string;
-    actions: Array<{ label: string; value: string | { primary: string; secondary: string; accent: string; background: string; text: string }; onClick: () => void }>;
+    actions: Array<{
+      label: string;
+      value:
+        | string
+        | { primary: string; secondary: string; accent: string; background: string; text: string };
+      onClick: () => void;
+    }>;
   }> = [];
 
   // Suggestion de slug alternatif si indisponible
@@ -80,7 +92,7 @@ export const StoreSuggestions = ({
   if (name) {
     const suggestedTitle = suggestMetaTitle(name, description);
     const suggestedDescription = suggestMetaDescription(name, description);
-    
+
     if (suggestedTitle !== name || suggestedDescription !== description) {
       suggestions.push({
         id: 'meta-suggestions',
@@ -188,12 +200,7 @@ export const StoreSuggestions = ({
             <Sparkles className="h-5 w-5 text-primary" />
             <CardTitle className="text-base">Suggestions intelligentes</CardTitle>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleDismissAll}
-            className="h-6 w-6 p-0"
-          >
+          <Button variant="ghost" size="sm" onClick={handleDismissAll} className="h-6 w-6 p-0">
             <X className="h-4 w-4" />
           </Button>
         </div>
@@ -202,7 +209,7 @@ export const StoreSuggestions = ({
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
-        {visibleSuggestions.map((suggestion) => (
+        {visibleSuggestions.map(suggestion => (
           <Alert key={suggestion.id} className="relative">
             <div className="flex items-start justify-between gap-2">
               <div className="flex-1">
@@ -254,10 +261,3 @@ export const StoreSuggestions = ({
     </Card>
   );
 };
-
-
-
-
-
-
-

@@ -1,18 +1,23 @@
 /**
  * Hook useDateFormat - Gestion simplifiée du formatage de dates
  * Fournit une API simple pour formater les dates dans les composants
- * 
+ *
  * @example
  * ```tsx
  * const { formatDate, formatRelativeTime, formatDuration } = useDateFormat();
- * 
+ *
  * <div>{formatDate(new Date(), 'long')}</div>
  * <div>{formatRelativeTime(date)}</div>
  * ```
  */
 
 import { useCallback } from 'react';
-import { formatDate as formatDateUtil, formatRelativeTime, formatDuration, DateFormat } from '@/lib/date-utils';
+import {
+  formatDate as formatDateUtil,
+  formatRelativeTime,
+  formatDuration,
+  DateFormat,
+} from '@/lib/date-utils';
 import { useI18n } from './useI18n';
 
 export interface UseDateFormatReturn {
@@ -72,10 +77,3 @@ export function useDateFormat(): UseDateFormatReturn {
     formatDuration: formatDurationHook,
   };
 }
-
-
-
-
-
-
-

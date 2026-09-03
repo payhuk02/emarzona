@@ -11,7 +11,8 @@ import { LazyRechartsWrapper } from '@/components/charts/LazyRechartsWrapper';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
-const PHYSICAL_PRODUCT_ANALYTICS_FIELDS = 'id, physical_product_id, period_type, period_start, period_end, revenue, units_sold, gross_profit';
+const PHYSICAL_PRODUCT_ANALYTICS_FIELDS =
+  'id, physical_product_id, period_type, period_start, period_end, revenue, units_sold, gross_profit';
 
 interface SalesOverviewProps {
   storeId: string;
@@ -38,8 +39,8 @@ export function SalesOverview({ storeId, periodType, startDate, endDate }: Sales
   });
 
   // Get analytics for all products
-  const productIds = products?.map((p) => p.id) || [];
-  
+  const productIds = products?.map(p => p.id) || [];
+
   const { data: analyticsData } = useQuery({
     queryKey: ['sales-overview', storeId, periodType, startDate, endDate],
     queryFn: async () => {
@@ -61,46 +62,59 @@ export function SalesOverview({ storeId, periodType, startDate, endDate }: Sales
   });
 
   // Aggregate data by period
-  const chartData = analyticsData?.reduce((acc: any[], item: any) => {
-    const periodKey = format(new Date(item.period_start), periodType === 'daily' ? 'dd MMM' : periodType === 'weekly' ? 'w' : periodType === 'monthly' ? 'MMM' : 'yyyy', { locale: fr });
-    
-    const existing = acc.find((a) => a.period === periodKey);
-    if (existing) {
-      existing.revenue += item.revenue || 0;
-      existing.units += item.units_sold || 0;
-      existing.profit += item.gross_profit || 0;
-    } else {
-      acc.push({
-        period: periodKey,
-        revenue: item.revenue || 0,
-        units: item.units_sold || 0,
-        profit: item.gross_profit || 0,
-      });
-    }
-    return acc;
-  }, []) || [];
+  const chartData =
+    analyticsData?.reduce((acc: any[], item: any) => {
+      const periodKey = format(
+        new Date(item.period_start),
+        periodType === 'daily'
+          ? 'dd MMM'
+          : periodType === 'weekly'
+            ? 'w'
+            : periodType === 'monthly'
+              ? 'MMM'
+              : 'yyyy',
+        { locale: fr }
+      );
+
+      const existing = acc.find(a => a.period === periodKey);
+      if (existing) {
+        existing.revenue += item.revenue || 0;
+        existing.units += item.units_sold || 0;
+        existing.profit += item.gross_profit || 0;
+      } else {
+        acc.push({
+          period: periodKey,
+          revenue: item.revenue || 0,
+          units: item.units_sold || 0,
+          profit: item.gross_profit || 0,
+        });
+      }
+      return acc;
+    }, []) || [];
 
   // Top products
-  const topProducts = analyticsData?.reduce((acc: any[], item: any) => {
-    const product = products?.find((p) => p.id === item.physical_product_id);
-    if (!product) return acc;
+  const topProducts =
+    analyticsData
+      ?.reduce((acc: any[], item: any) => {
+        const product = products?.find(p => p.id === item.physical_product_id);
+        if (!product) return acc;
 
-    const existing = acc.find((a) => a.productId === item.physical_product_id);
-    if (existing) {
-      existing.revenue += item.revenue || 0;
-      existing.units += item.units_sold || 0;
-    } else {
-      acc.push({
-        productId: item.physical_product_id,
-        productName: (product as any).product?.name || 'Produit inconnu',
-        revenue: item.revenue || 0,
-        units: item.units_sold || 0,
-      });
-    }
-    return acc;
-  }, [])
-    .sort((a, b) => b.revenue - a.revenue)
-    .slice(0, 5) || [];
+        const existing = acc.find(a => a.productId === item.physical_product_id);
+        if (existing) {
+          existing.revenue += item.revenue || 0;
+          existing.units += item.units_sold || 0;
+        } else {
+          acc.push({
+            productId: item.physical_product_id,
+            productName: (product as any).product?.name || 'Produit inconnu',
+            revenue: item.revenue || 0,
+            units: item.units_sold || 0,
+          });
+        }
+        return acc;
+      }, [])
+      .sort((a, b) => b.revenue - a.revenue)
+      .slice(0, 5) || [];
 
   return (
     <div className="grid gap-4 md:grid-cols-2">
@@ -111,7 +125,7 @@ export function SalesOverview({ storeId, periodType, startDate, endDate }: Sales
         </CardHeader>
         <CardContent>
           <LazyRechartsWrapper>
-            {(recharts) => (
+            {recharts => (
               <recharts.ResponsiveContainer width="100%" height={300}>
                 <recharts.LineChart data={chartData}>
                   <recharts.CartesianGrid strokeDasharray="3 3" />
@@ -164,7 +178,7 @@ export function SalesOverview({ storeId, periodType, startDate, endDate }: Sales
         </CardHeader>
         <CardContent>
           <LazyRechartsWrapper>
-            {(recharts) => (
+            {recharts => (
               <recharts.ResponsiveContainer width="100%" height={300}>
                 <recharts.BarChart data={topProducts} layout="vertical">
                   <recharts.CartesianGrid strokeDasharray="3 3" />
@@ -189,11 +203,3 @@ export function SalesOverview({ storeId, periodType, startDate, endDate }: Sales
     </div>
   );
 }
-
-
-
-
-
-
-
-

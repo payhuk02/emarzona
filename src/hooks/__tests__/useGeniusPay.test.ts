@@ -88,9 +88,7 @@ describe('useGeniusPay', () => {
 
   it('should handle payment creation errors', async () => {
     const { geniuspayClient } = await import('@/lib/geniuspay-client');
-    vi.mocked(geniuspayClient.createPayment).mockRejectedValueOnce(
-      new Error('Payment failed')
-    );
+    vi.mocked(geniuspayClient.createPayment).mockRejectedValueOnce(new Error('Payment failed'));
 
     const { result } = renderHook(() => useGeniusPay());
 

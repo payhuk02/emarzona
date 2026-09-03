@@ -49,7 +49,7 @@ export class RecoveryService {
     maxRecoveryAttempts: 3,
     recoveryTimeout: 300, // 5 minutes
     notifyOnRecovery: true,
-    criticalCollections: ['admin_config', 'user_data', 'products', 'orders']
+    criticalCollections: ['admin_config', 'user_data', 'products', 'orders'],
   };
 
   private failureHistory: FailureEvent[] = [];
@@ -115,7 +115,7 @@ export class RecoveryService {
           type: 'supabase_down',
           severity: supabaseHealth.critical ? 'critical' : 'high',
           description: `Supabase indisponible: ${supabaseHealth.error}`,
-          affectedCollections: this.config.criticalCollections
+          affectedCollections: this.config.criticalCollections,
         });
       }
 
@@ -126,7 +126,7 @@ export class RecoveryService {
           type: 'indexeddb_corrupt',
           severity: indexeddbHealth.critical ? 'high' : 'medium',
           description: `IndexedDB corrompu: ${indexeddbHealth.error}`,
-          affectedCollections: indexeddbHealth.affectedCollections
+          affectedCollections: indexeddbHealth.affectedCollections,
         });
       }
 
@@ -137,13 +137,12 @@ export class RecoveryService {
           type: 'sync_failed',
           severity: 'medium',
           description: `Échec de synchronisation: ${syncHealth.error}`,
-          affectedCollections: syncHealth.affectedCollections
+          affectedCollections: syncHealth.affectedCollections,
         });
       }
 
       // Vérification d'intégrité des données
       await this.checkDataIntegrity();
-
     } catch (error) {
       logger.error('Erreur health check:', error);
     }
@@ -152,10 +151,17 @@ export class RecoveryService {
   /**
    * Vérifie la santé de Supabase
    */
-  private async checkSupabaseHealth(): Promise<{ healthy: boolean; critical: boolean; error?: string }> {
+  private async checkSupabaseHealth(): Promise<{
+    healthy: boolean;
+    critical: boolean;
+    error?: string;
+  }> {
     try {
       // Test de connectivité basique
-      const { error: connectionError } = await supabase.from('admin_config').select('count').limit(1);
+      const { error: connectionError } = await supabase
+        .from('admin_config')
+        .select('count')
+        .limit(1);
       if (connectionError) {
         return { healthy: false, critical: true, error: connectionError.message };
       }
@@ -183,7 +189,12 @@ export class RecoveryService {
   /**
    * Vérifie la santé d'IndexedDB
    */
-  private async checkIndexedDBHealth(): Promise<{ healthy: boolean; critical: boolean; error?: string; affectedCollections?: string[] }> {
+  private async checkIndexedDBHealth(): Promise<{
+    healthy: boolean;
+    critical: boolean;
+    error?: string;
+    affectedCollections?: string[];
+  }> {
     try {
       const stats = await hybridStorage.getStorageStats();
 
@@ -197,7 +208,7 @@ export class RecoveryService {
         return {
           healthy: false,
           critical: false,
-          error: `Taille IndexedDB excessive: ${sizeMB.toFixed(1)}MB`
+          error: `Taille IndexedDB excessive: ${sizeMB.toFixed(1)}MB`,
         };
       }
 
@@ -216,7 +227,11 @@ export class RecoveryService {
   /**
    * Vérifie la santé de la synchronisation
    */
-  private async checkSyncHealth(): Promise<{ healthy: boolean; error?: string; affectedCollections?: string[] }> {
+  private async checkSyncHealth(): Promise<{
+    healthy: boolean;
+    error?: string;
+    affectedCollections?: string[];
+  }> {
     try {
       const syncStats = await syncService.getSyncStats();
 
@@ -225,7 +240,7 @@ export class RecoveryService {
         return {
           healthy: false,
           error: `${syncStats.conflicts.unresolved} conflits non résolus`,
-          affectedCollections: this.config.criticalCollections
+          affectedCollections: this.config.criticalCollections,
         };
       }
 
@@ -234,7 +249,7 @@ export class RecoveryService {
         return {
           healthy: false,
           error: `${syncStats.queue.pending} éléments en file d'attente`,
-          affectedCollections: this.config.criticalCollections
+          affectedCollections: this.config.criticalCollections,
         };
       }
 
@@ -260,7 +275,7 @@ export class RecoveryService {
               type: 'data_corruption',
               severity: 'high',
               description: `Donnée corrompue détectée dans ${collection}:${item.id}`,
-              affectedCollections: [collection]
+              affectedCollections: [collection],
             });
             break; // Un seul rapport par collection
           }
@@ -296,13 +311,15 @@ export class RecoveryService {
   /**
    * Gère un événement de panne
    */
-  private async handleFailure(failure: Omit<FailureEvent, 'id' | 'detectedAt' | 'resolved' | 'recoveryAttempts'>): Promise<void> {
+  private async handleFailure(
+    failure: Omit<FailureEvent, 'id' | 'detectedAt' | 'resolved' | 'recoveryAttempts'>
+  ): Promise<void> {
     const failureEvent: FailureEvent = {
       id: `failure_${failure.type}_${Date.now()}`,
       ...failure,
       detectedAt: new Date().toISOString(),
       resolved: false,
-      recoveryAttempts: 0
+      recoveryAttempts: 0,
     };
 
     // Log l'événement
@@ -360,7 +377,6 @@ export class RecoveryService {
       }
 
       await this.saveFailureHistory();
-
     } finally {
       this.recoveryInProgress.delete(failure.id);
     }
@@ -369,7 +385,10 @@ export class RecoveryService {
   /**
    * Exécute une stratégie de récupération
    */
-  private async executeRecoveryStrategy(strategy: string, failure: FailureEvent): Promise<RecoveryResult> {
+  private async executeRecoveryStrategy(
+    strategy: string,
+    failure: FailureEvent
+  ): Promise<RecoveryResult> {
     const startTime = Date.now();
 
     switch (strategy) {
@@ -414,7 +433,7 @@ export class RecoveryService {
         duration: Date.now() - Date.now(),
         dataRecovered,
         errors,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     } catch (error) {
       return {
@@ -423,7 +442,7 @@ export class RecoveryService {
         duration: Date.now() - Date.now(),
         dataRecovered: 0,
         errors: 1,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     }
   }
@@ -450,7 +469,7 @@ export class RecoveryService {
         collections: failure.affectedCollections,
         overwrite: true,
         validateData: true,
-        dryRun: false
+        dryRun: false,
       });
 
       return {
@@ -459,7 +478,7 @@ export class RecoveryService {
         duration: Date.now() - startTime,
         dataRecovered: 1, // Sauvegarde complète
         errors: 0,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     } catch (error) {
       return {
@@ -468,7 +487,7 @@ export class RecoveryService {
         duration: Date.now() - startTime,
         dataRecovered: 0,
         errors: 1,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     }
   }
@@ -493,7 +512,7 @@ export class RecoveryService {
         duration: Date.now() - startTime,
         dataRecovered,
         errors,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     } catch (error) {
       return {
@@ -502,7 +521,7 @@ export class RecoveryService {
         duration: Date.now() - startTime,
         dataRecovered: 0,
         errors: 1,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     }
   }
@@ -522,7 +541,7 @@ export class RecoveryService {
       duration: 0,
       dataRecovered: 0,
       errors: 0,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 
@@ -532,10 +551,7 @@ export class RecoveryService {
   private async getCollectionSample(collection: string, limit: number): Promise<any[]> {
     try {
       // Essaie d'abord Supabase
-      const { data, error } = await supabase
-        .from(collection)
-        .select('id')
-        .limit(limit);
+      const { data, error } = await supabase.from(collection).select('id').limit(limit);
 
       if (!error && data) {
         return data;
@@ -592,7 +608,9 @@ export class RecoveryService {
   private async notifyRecovery(failure: FailureEvent, result: RecoveryResult): Promise<void> {
     if (!this.config.notifyOnRecovery) return;
 
-    logger.info(`RÉCUPÉRATION RÉUSSIE: ${failure.type} - ${result.dataRecovered} données récupérées`);
+    logger.info(
+      `RÉCUPÉRATION RÉUSSIE: ${failure.type} - ${result.dataRecovered} données récupérées`
+    );
   }
 
   /**
@@ -635,7 +653,7 @@ export class RecoveryService {
       sync: syncStats,
       backup: backupStats,
       activeFailures: this.failureHistory.filter(f => !f.resolved).length,
-      recentFailures: this.failureHistory.slice(0, 5)
+      recentFailures: this.failureHistory.slice(0, 5),
     };
   }
 
@@ -660,7 +678,7 @@ export class RecoveryService {
       detectedAt: new Date().toISOString(),
       resolved: false,
       recoveryAttempts: 0,
-      affectedCollections: ['test_collection']
+      affectedCollections: ['test_collection'],
     };
 
     return await this.executeRecoveryStrategy(this.config.recoveryStrategies[0], testFailure);

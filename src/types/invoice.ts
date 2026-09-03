@@ -116,10 +116,3 @@ export interface TaxCalculationResult {
   shipping_amount: number;
   total_with_tax: number;
 }
-
-
-
-
-
-
-

@@ -6,13 +6,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from '../select';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../select';
 
 // Mock du hook useIsMobile
 vi.mock('@/hooks/use-mobile', () => ({
@@ -46,7 +40,7 @@ describe('Select - Accessibilité', () => {
             <SelectValue placeholder="Sélectionner..." />
           </SelectTrigger>
           <SelectContent>
-            {options.map((option) => (
+            {options.map(option => (
               <SelectItem key={option.value} value={option.value}>
                 {option.label}
               </SelectItem>
@@ -56,11 +50,11 @@ describe('Select - Accessibilité', () => {
       );
 
       const trigger = screen.getByRole('combobox');
-      
+
       // Vérifier les attributs ARIA essentiels pour WCAG
       expect(trigger).toHaveAttribute('aria-label');
       expect(trigger).toHaveAttribute('aria-haspopup');
-      
+
       // Note: Pour des tests axe complets, installer vitest-axe:
       // npm install -D vitest-axe @axe-core/react
     });
@@ -102,7 +96,7 @@ describe('Select - Accessibilité', () => {
             <SelectValue placeholder="Sélectionner..." />
           </SelectTrigger>
           <SelectContent>
-            {options.map((option) => (
+            {options.map(option => (
               <SelectItem key={option.value} value={option.value}>
                 {option.label}
               </SelectItem>
@@ -118,7 +112,7 @@ describe('Select - Accessibilité', () => {
         async () => {
           const items = await screen.findAllByRole('option');
           expect(items.length).toBeGreaterThan(0);
-          items.forEach((item) => {
+          items.forEach(item => {
             expect(item).toHaveAttribute('role', 'option');
           });
         },
@@ -133,7 +127,7 @@ describe('Select - Accessibilité', () => {
             <SelectValue placeholder="Sélectionner..." />
           </SelectTrigger>
           <SelectContent>
-            {options.map((option) => (
+            {options.map(option => (
               <SelectItem key={option.value} value={option.value}>
                 {option.label}
               </SelectItem>
@@ -159,7 +153,7 @@ describe('Select - Accessibilité', () => {
             <SelectValue placeholder="Sélectionner..." />
           </SelectTrigger>
           <SelectContent>
-            {options.map((option) => (
+            {options.map(option => (
               <SelectItem key={option.value} value={option.value}>
                 {option.label}
               </SelectItem>
@@ -189,7 +183,7 @@ describe('Select - Accessibilité', () => {
             <SelectValue placeholder="Sélectionner..." />
           </SelectTrigger>
           <SelectContent>
-            {options.map((option) => (
+            {options.map(option => (
               <SelectItem key={option.value} value={option.value}>
                 {option.label}
               </SelectItem>
@@ -228,10 +222,3 @@ describe('Select - Accessibilité', () => {
     });
   });
 });
-
-
-
-
-
-
-

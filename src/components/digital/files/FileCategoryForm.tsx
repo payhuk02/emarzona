@@ -90,7 +90,9 @@ export const FileCategoryForm = ({ category, onSuccess, onCancel }: FileCategory
 
     try {
       // Récupérer le store_id
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
       const { data: stores } = await supabase
@@ -109,7 +111,7 @@ export const FileCategoryForm = ({ category, onSuccess, onCancel }: FileCategory
         parent_category_id: formData.parent_category_id || undefined,
       });
       onSuccess();
-    } catch ( _error: any) {
+    } catch (_error: any) {
       // L'erreur est déjà gérée par le hook
     }
   };
@@ -121,7 +123,7 @@ export const FileCategoryForm = ({ category, onSuccess, onCancel }: FileCategory
         <Input
           id="name"
           value={formData.name}
-          onChange={(e) => handleNameChange(e.target.value)}
+          onChange={e => handleNameChange(e.target.value)}
           placeholder="Ex: Documentation"
           required
         />
@@ -132,13 +134,11 @@ export const FileCategoryForm = ({ category, onSuccess, onCancel }: FileCategory
         <Input
           id="slug"
           value={formData.slug}
-          onChange={(e) => setFormData({ ...formData, slug: generateSlug(e.target.value) })}
+          onChange={e => setFormData({ ...formData, slug: generateSlug(e.target.value) })}
           placeholder="documentation"
           required
         />
-        <p className="text-sm text-muted-foreground">
-          Identifiant unique (généré automatiquement)
-        </p>
+        <p className="text-sm text-muted-foreground">Identifiant unique (généré automatiquement)</p>
       </div>
 
       <div className="space-y-2">
@@ -146,7 +146,7 @@ export const FileCategoryForm = ({ category, onSuccess, onCancel }: FileCategory
         <Textarea
           id="description"
           value={formData.description}
-          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+          onChange={e => setFormData({ ...formData, description: e.target.value })}
           placeholder="Description de la catégorie"
           rows={3}
         />
@@ -158,7 +158,7 @@ export const FileCategoryForm = ({ category, onSuccess, onCancel }: FileCategory
           <Input
             id="icon"
             value={formData.icon}
-            onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
+            onChange={e => setFormData({ ...formData, icon: e.target.value })}
             placeholder="📁"
             maxLength={2}
           />
@@ -169,7 +169,7 @@ export const FileCategoryForm = ({ category, onSuccess, onCancel }: FileCategory
             id="color"
             type="color"
             value={formData.color || '#000000'}
-            onChange={(e) => setFormData({ ...formData, color: e.target.value })}
+            onChange={e => setFormData({ ...formData, color: e.target.value })}
           />
         </div>
       </div>
@@ -178,7 +178,9 @@ export const FileCategoryForm = ({ category, onSuccess, onCancel }: FileCategory
         <Label htmlFor="parent_category_id">Catégorie parente</Label>
         <Select
           value={formData.parent_category_id || '__none__'}
-          onValueChange={(value) => setFormData({ ...formData, parent_category_id: value === '__none__' ? '' : value })}
+          onValueChange={value =>
+            setFormData({ ...formData, parent_category_id: value === '__none__' ? '' : value })
+          }
         >
           <SelectTrigger id="parent_category_id">
             <SelectValue placeholder="Aucune (catégorie racine)" />
@@ -187,7 +189,7 @@ export const FileCategoryForm = ({ category, onSuccess, onCancel }: FileCategory
             <SelectItem value="__none__">Aucune (catégorie racine)</SelectItem>
             {categories
               ?.filter(c => !c.parent_category_id && c.id !== category?.id)
-              .map((cat) => (
+              .map(cat => (
                 <SelectItem key={cat.id} value={cat.id}>
                   {cat.name}
                 </SelectItem>
@@ -203,9 +205,7 @@ export const FileCategoryForm = ({ category, onSuccess, onCancel }: FileCategory
           type="number"
           min="0"
           value={formData.order_index}
-          onChange={(e) =>
-            setFormData({ ...formData, order_index: parseInt(e.target.value) || 0 })
-          }
+          onChange={e => setFormData({ ...formData, order_index: parseInt(e.target.value) || 0 })}
         />
       </div>
 
@@ -214,19 +214,10 @@ export const FileCategoryForm = ({ category, onSuccess, onCancel }: FileCategory
           Annuler
         </Button>
         <Button type="submit" disabled={createCategory.isPending}>
-          {createCategory.isPending && (
-            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-          )}
+          {createCategory.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
           {category ? 'Mettre à jour' : 'Créer'}
         </Button>
       </div>
     </form>
   );
 };
-
-
-
-
-
-
-

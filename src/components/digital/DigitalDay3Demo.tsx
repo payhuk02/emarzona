@@ -8,7 +8,7 @@ import { logger } from '@/lib/logger';
 /**
  * Données de démonstration - Événements de téléchargement
  */
-const  mockEvents: DownloadEvent[] = [
+const mockEvents: DownloadEvent[] = [
   // Aujourd'hui
   {
     id: 'evt-001',
@@ -181,7 +181,7 @@ const  mockEvents: DownloadEvent[] = [
 /**
  * Données de démonstration - Produits pour mise à jour groupée
  */
-const  mockProducts: BulkUpdateDigitalProduct[] = [
+const mockProducts: BulkUpdateDigitalProduct[] = [
   {
     id: 'prod-001',
     name: 'Ebook React Avancé',
@@ -285,7 +285,7 @@ const  mockProducts: BulkUpdateDigitalProduct[] = [
  * - DownloadHistory
  * - BulkDigitalUpdate
  */
-export const DigitalDay3Demo : React.FC = () => {
+export const DigitalDay3Demo: React.FC = () => {
   return (
     <div className="container mx-auto py-8 space-y-8">
       <div className="space-y-2">
@@ -306,9 +306,11 @@ export const DigitalDay3Demo : React.FC = () => {
 
         <DownloadHistory
           events={mockEvents}
-          onEventClick={(event) => {
+          onEventClick={event => {
             logger.info('Event clicked', { eventId: event.id, eventType: event.type });
-            alert(`Événement: ${event.type}\nProduit: ${event.productName}\nClient: ${event.customerName}`);
+            alert(
+              `Événement: ${event.type}\nProduit: ${event.productName}\nClient: ${event.customerName}`
+            );
           }}
           showFilters={true}
           showSearch={true}
@@ -332,9 +334,9 @@ export const DigitalDay3Demo : React.FC = () => {
             logger.info('Bulk update', { productIds, changesCount: changes.length });
             alert(
               `Mise à jour groupée appliquée!\n\n` +
-              `Produits: ${productIds.length}\n` +
-              `Changements: ${changes.length}\n\n` +
-              `Détails: ${JSON.stringify(changes, null, 2)}`
+                `Produits: ${productIds.length}\n` +
+                `Changements: ${changes.length}\n\n` +
+                `Détails: ${JSON.stringify(changes, null, 2)}`
             );
           }}
           onCancel={() => logger.info('Bulk update cancelled')}
@@ -345,9 +347,7 @@ export const DigitalDay3Demo : React.FC = () => {
       <div className="space-y-4">
         <div>
           <h3 className="text-xl font-bold mb-2">Cas d'usage pratiques</h3>
-          <p className="text-muted-foreground">
-            Exemples concrets d'utilisation des composants
-          </p>
+          <p className="text-muted-foreground">Exemples concrets d'utilisation des composants</p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">
@@ -355,9 +355,7 @@ export const DigitalDay3Demo : React.FC = () => {
           <Card className="p-4">
             <div className="space-y-2">
               <h4 className="font-semibold">📊 Surveiller l'activité</h4>
-              <p className="text-sm text-muted-foreground">
-                Utilisez DownloadHistory pour :
-              </p>
+              <p className="text-sm text-muted-foreground">Utilisez DownloadHistory pour :</p>
               <ul className="text-sm space-y-1 text-muted-foreground">
                 <li>• Détecter les activités suspectes</li>
                 <li>• Analyser les téléchargements par période</li>
@@ -371,9 +369,7 @@ export const DigitalDay3Demo : React.FC = () => {
           <Card className="p-4">
             <div className="space-y-2">
               <h4 className="font-semibold">⚡ Mises à jour rapides</h4>
-              <p className="text-sm text-muted-foreground">
-                Utilisez BulkDigitalUpdate pour :
-              </p>
+              <p className="text-sm text-muted-foreground">Utilisez BulkDigitalUpdate pour :</p>
               <ul className="text-sm space-y-1 text-muted-foreground">
                 <li>• Ajuster les prix (promotions, augmentations)</li>
                 <li>• Changer le statut de plusieurs produits</li>
@@ -387,9 +383,7 @@ export const DigitalDay3Demo : React.FC = () => {
           <Card className="p-4">
             <div className="space-y-2">
               <h4 className="font-semibold">🔍 Filtrage avancé</h4>
-              <p className="text-sm text-muted-foreground">
-                DownloadHistory offre :
-              </p>
+              <p className="text-sm text-muted-foreground">DownloadHistory offre :</p>
               <ul className="text-sm space-y-1 text-muted-foreground">
                 <li>• Filtres par période (aujourd'hui, semaine, mois)</li>
                 <li>• Filtres par type d'événement</li>
@@ -403,9 +397,7 @@ export const DigitalDay3Demo : React.FC = () => {
           <Card className="p-4">
             <div className="space-y-2">
               <h4 className="font-semibold">💰 Gestion des prix</h4>
-              <p className="text-sm text-muted-foreground">
-                BulkDigitalUpdate permet :
-              </p>
+              <p className="text-sm text-muted-foreground">BulkDigitalUpdate permet :</p>
               <ul className="text-sm space-y-1 text-muted-foreground">
                 <li>• Augmentation : +10 EUR ou +15%</li>
                 <li>• Réduction : -5 EUR ou -20%</li>
@@ -434,11 +426,3 @@ export const DigitalDay3Demo : React.FC = () => {
 };
 
 export default DigitalDay3Demo;
-
-
-
-
-
-
-
-

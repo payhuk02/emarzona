@@ -10,7 +10,14 @@ export interface LoyaltyRule {
   id: string;
   name: string;
   description: string;
-  eventType: 'purchase' | 'review' | 'referral' | 'social_share' | 'login_streak' | 'birthday' | 'custom';
+  eventType:
+    | 'purchase'
+    | 'review'
+    | 'referral'
+    | 'social_share'
+    | 'login_streak'
+    | 'birthday'
+    | 'custom';
   points: number;
   multiplier?: number;
   conditions?: Record<string, unknown>;
@@ -35,7 +42,14 @@ export interface LoyaltyTier {
 }
 
 export interface LoyaltyBenefit {
-  type: 'discount_percentage' | 'discount_fixed' | 'free_shipping' | 'priority_support' | 'early_access' | 'exclusive_content' | 'bonus_points_multiplier';
+  type:
+    | 'discount_percentage'
+    | 'discount_fixed'
+    | 'free_shipping'
+    | 'priority_support'
+    | 'early_access'
+    | 'exclusive_content'
+    | 'bonus_points_multiplier';
   value: number;
   description: string;
   conditions?: Record<string, unknown>;
@@ -197,7 +211,7 @@ export class AdvancedLoyaltyEngine {
           reference_type: referenceType,
           metadata,
           expires_at: expiresAt.toISOString(),
-          store_id: storeId
+          store_id: storeId,
         })
         .select()
         .single();
@@ -246,7 +260,7 @@ export class AdvancedLoyaltyEngine {
           type: 'spent',
           reason,
           metadata,
-          store_id: storeId
+          store_id: storeId,
         })
         .select()
         .single();
@@ -284,8 +298,15 @@ export class AdvancedLoyaltyEngine {
           return await this.createDefaultProfile(userId);
         }
         // Handle RLS/permission errors gracefully
-        if (error.code === '42501' || error.code === 'PGRST301' || error.message?.includes('permission')) {
-          logger.warn('RLS permission error for user_loyalty_profiles, creating default profile', { userId, error: error.message });
+        if (
+          error.code === '42501' ||
+          error.code === 'PGRST301' ||
+          error.message?.includes('permission')
+        ) {
+          logger.warn('RLS permission error for user_loyalty_profiles, creating default profile', {
+            userId,
+            error: error.message,
+          });
           return await this.createDefaultProfile(userId);
         }
         throw error;
@@ -307,7 +328,9 @@ export class AdvancedLoyaltyEngine {
         ...stats,
         currentTier,
         nextTier: await this.getNextTier(currentTier),
-        pointsToNextTier: currentTier.maxPoints ? Math.max(0, currentTier.maxPoints - stats.totalPoints) : 0
+        pointsToNextTier: currentTier.maxPoints
+          ? Math.max(0, currentTier.maxPoints - stats.totalPoints)
+          : 0,
       };
     } catch (error) {
       logger.error('Error getting user profile', { userId, error });
@@ -330,7 +353,15 @@ export class AdvancedLoyaltyEngine {
 
       if (points > 0) {
         // Créditer les points
-        await this.awardPoints(userId, points, `Points for ${eventType}`, eventData.id, eventType, eventData, storeId);
+        await this.awardPoints(
+          userId,
+          points,
+          `Points for ${eventType}`,
+          eventData.id,
+          eventType,
+          eventData,
+          storeId
+        );
 
         // Récupérer le nouveau profil
         const updatedProfile = await this.getUserProfile(userId);
@@ -338,7 +369,7 @@ export class AdvancedLoyaltyEngine {
         return {
           pointsAwarded: points,
           newTotalPoints: updatedProfile.totalPoints,
-          newTier: updatedProfile.currentTier
+          newTier: updatedProfile.currentTier,
         };
       }
 
@@ -351,7 +382,10 @@ export class AdvancedLoyaltyEngine {
 
   // Méthodes privées
 
-  private async getApplicableRules(eventType: LoyaltyRule['eventType'], storeId?: string): Promise<LoyaltyRule[]> {
+  private async getApplicableRules(
+    eventType: LoyaltyRule['eventType'],
+    storeId?: string
+  ): Promise<LoyaltyRule[]> {
     const cacheKey = `rules_${eventType}_${storeId || 'global'}`;
 
     // Vérifier le cache
@@ -435,7 +469,7 @@ export class AdvancedLoyaltyEngine {
     return {
       totalPoints: totalEarned,
       availablePoints: totalEarned - totalSpent,
-      spentPoints: totalSpent
+      spentPoints: totalSpent,
     };
   }
 
@@ -462,16 +496,18 @@ export class AdvancedLoyaltyEngine {
     }
 
     // Retourner le niveau par défaut (premier)
-    return tiers[0] || {
-      id: 'default',
-      name: 'Bronze',
-      description: 'Niveau de départ',
-      level: 1,
-      minPoints: 0,
-      benefits: [],
-      badgeColor: '#CD7F32',
-      badgeIcon: 'star'
-    };
+    return (
+      tiers[0] || {
+        id: 'default',
+        name: 'Bronze',
+        description: 'Niveau de départ',
+        level: 1,
+        minPoints: 0,
+        benefits: [],
+        badgeColor: '#CD7F32',
+        badgeIcon: 'star',
+      }
+    );
   }
 
   private async getNextTier(currentTier: LoyaltyTier): Promise<LoyaltyTier | undefined> {
@@ -494,21 +530,21 @@ export class AdvancedLoyaltyEngine {
       streakData: {
         currentStreak: 0,
         longestStreak: 0,
-        lastActivityDate: new Date()
+        lastActivityDate: new Date(),
       },
       referralStats: {
         referralCode: this.generateReferralCode(),
         totalReferrals: 0,
         successfulReferrals: 0,
-        earnedFromReferrals: 0
+        earnedFromReferrals: 0,
       },
       preferences: {
         notificationsEnabled: true,
         emailUpdatesEnabled: true,
-        smsUpdatesEnabled: false
+        smsUpdatesEnabled: false,
       },
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     // Sauvegarder en base
@@ -519,7 +555,7 @@ export class AdvancedLoyaltyEngine {
       spent_points: 0,
       current_tier_id: defaultProfile.currentTier.id,
       referral_code: defaultProfile.referralStats.referralCode,
-      preferences: defaultProfile.preferences
+      preferences: defaultProfile.preferences,
     });
 
     return defaultProfile;
@@ -536,7 +572,7 @@ export class AdvancedLoyaltyEngine {
         available_points: stats.availablePoints,
         spent_points: stats.spentPoints,
         current_tier_id: currentTier.id,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       })
       .eq('user_id', userId);
   }

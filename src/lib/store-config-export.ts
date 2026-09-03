@@ -124,9 +124,18 @@ export function exportStoreConfig(store: Store): StoreConfigExport {
       og_title: store.og_title || null,
       og_description: store.og_description || null,
       og_image: store.og_image || null,
-      info_message: 'info_message' in store && typeof store.info_message === 'string' ? store.info_message : null,
-      info_message_color: 'info_message_color' in store && typeof store.info_message_color === 'string' ? store.info_message_color : null,
-      info_message_font: 'info_message_font' in store && typeof store.info_message_font === 'string' ? store.info_message_font : null,
+      info_message:
+        'info_message' in store && typeof store.info_message === 'string'
+          ? store.info_message
+          : null,
+      info_message_color:
+        'info_message_color' in store && typeof store.info_message_color === 'string'
+          ? store.info_message_color
+          : null,
+      info_message_font:
+        'info_message_font' in store && typeof store.info_message_font === 'string'
+          ? store.info_message_font
+          : null,
       marketing_content: store.marketing_content || null,
       legal_pages: store.legal_pages || null,
     },
@@ -143,7 +152,8 @@ export function downloadStoreConfig(store: Store, filename?: string): void {
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
-  link.download = filename || `store-config-${store.slug}-${new Date().toISOString().split('T')[0]}.json`;
+  link.download =
+    filename || `store-config-${store.slug}-${new Date().toISOString().split('T')[0]}.json`;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
@@ -153,7 +163,11 @@ export function downloadStoreConfig(store: Store, filename?: string): void {
 /**
  * Valide un fichier de configuration importé
  */
-export function validateStoreConfig(data: unknown): { valid: boolean; error?: string; config?: StoreConfigExport } {
+export function validateStoreConfig(data: unknown): {
+  valid: boolean;
+  error?: string;
+  config?: StoreConfigExport;
+} {
   try {
     if (!data || typeof data !== 'object') {
       return { valid: false, error: 'Format de fichier invalide' };
@@ -175,14 +189,19 @@ export function validateStoreConfig(data: unknown): { valid: boolean; error?: st
 
     return { valid: true, config };
   } catch (error) {
-    return { valid: false, error: `Erreur de validation: ${error instanceof Error ? error.message : 'Erreur inconnue'}` };
+    return {
+      valid: false,
+      error: `Erreur de validation: ${error instanceof Error ? error.message : 'Erreur inconnue'}`,
+    };
   }
 }
 
 /**
  * Importe une configuration depuis un fichier
  */
-export async function importStoreConfig(file: File): Promise<{ success: boolean; config?: StoreConfigExport; error?: string }> {
+export async function importStoreConfig(
+  file: File
+): Promise<{ success: boolean; config?: StoreConfigExport; error?: string }> {
   try {
     const text = await file.text();
     const data = JSON.parse(text);
@@ -209,11 +228,3 @@ export function applyImportedConfig(config: StoreConfigExport): Partial<Store> {
     ...config.store,
   };
 }
-
-
-
-
-
-
-
-

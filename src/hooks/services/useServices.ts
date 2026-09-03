@@ -1,6 +1,6 @@
 /**
  * useServices Hook
- * 
+ *
  * CRUD operations for services with Supabase and React Query
  * Date: 29 Octobre 2025
  */
@@ -9,7 +9,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Service } from '@/components/service/ServicesList';
 
-const SERVICE_FIELDS = 'id, store_id, name, category, status, duration, price, currency, available_slots, total_slots, bookings_count, revenue, average_rating, assigned_staff, created_at, updated_at, is_active, booking_trend';
+const SERVICE_FIELDS =
+  'id, store_id, name, category, status, duration, price, currency, available_slots, total_slots, bookings_count, revenue, average_rating, assigned_staff, created_at, updated_at, is_active, booking_trend';
 
 /**
  * Fetch all services for a store
@@ -68,7 +69,7 @@ export const useCreateService = () => {
       if (error) throw error;
       return data as Service;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['services', data.store_id] });
     },
   });
@@ -145,11 +146,11 @@ export const useBulkUpdateServices = () => {
       );
 
       const results = await Promise.all(promises);
-      const errors = results.filter((r) => r.error);
+      const errors = results.filter(r => r.error);
 
       if (errors.length > 0) throw errors[0].error;
 
-      return results.map((r) => r.data![0]) as Service[];
+      return results.map(r => r.data![0]) as Service[];
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['services', variables.storeId] });
@@ -158,10 +159,3 @@ export const useBulkUpdateServices = () => {
 };
 
 export default useServices;
-
-
-
-
-
-
-

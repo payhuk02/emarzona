@@ -20,7 +20,7 @@ export const DEFAULT_LOW_STOCK_THRESHOLD = 10;
 
 /**
  * Calcule le statut du stock en fonction de la quantité et du seuil
- * 
+ *
  * @param quantity - Quantité en stock (peut être null/undefined pour produits numériques)
  * @param threshold - Seuil de stock bas personnalisé
  * @param trackInventory - Si false, le stock n'est pas suivi (produits digitaux)
@@ -51,7 +51,7 @@ export function calculateStockStatus(
 
 /**
  * Obtient les informations de stock formatées pour l'affichage
- * 
+ *
  * @param quantity - Quantité en stock
  * @param threshold - Seuil de stock bas
  * @param trackInventory - Si le stock est suivi
@@ -111,7 +111,7 @@ export function getStockInfo(
 
 /**
  * Vérifie si un produit nécessite un réapprovisionnement
- * 
+ *
  * @param quantity - Quantité en stock
  * @param threshold - Seuil de stock bas
  * @param trackInventory - Si le stock est suivi
@@ -129,7 +129,7 @@ export function needsRestock(
 
 /**
  * Calcule le pourcentage de stock restant
- * 
+ *
  * @param currentQuantity - Quantité actuelle
  * @param maxQuantity - Quantité maximale (pour référence)
  * @returns Pourcentage entre 0 et 100
@@ -144,7 +144,7 @@ export function calculateStockPercentage(
 
 /**
  * Formatte la quantité en stock pour l'affichage
- * 
+ *
  * @param quantity - Quantité en stock
  * @param trackInventory - Si le stock est suivi
  * @returns Texte formaté
@@ -170,7 +170,7 @@ export function formatStockQuantity(
 
 /**
  * Obtient la couleur CSS pour un badge de stock
- * 
+ *
  * @param status - Statut du stock
  * @returns Classes Tailwind CSS
  */
@@ -185,10 +185,3 @@ export function getStockBadgeColor(status: StockStatus): string {
       return 'bg-green-500/20 text-green-400 border-green-500/30';
   }
 }
-
-
-
-
-
-
-

@@ -6,7 +6,20 @@ import { logger } from '@/lib/logger';
 interface UserBehaviorEvent {
   user_id?: string;
   session_id: string;
-  event_type: 'page_view' | 'product_view' | 'cart_add' | 'cart_remove' | 'purchase_start' | 'purchase_complete' | 'search' | 'filter' | 'share' | 'wishlist_add' | 'review_view' | 'contact_form' | 'newsletter_signup';
+  event_type:
+    | 'page_view'
+    | 'product_view'
+    | 'cart_add'
+    | 'cart_remove'
+    | 'purchase_start'
+    | 'purchase_complete'
+    | 'search'
+    | 'filter'
+    | 'share'
+    | 'wishlist_add'
+    | 'review_view'
+    | 'contact_form'
+    | 'newsletter_signup';
   event_data: Record<string, unknown>;
   page_url: string;
   referrer?: string;
@@ -35,10 +48,7 @@ interface BehavioralAnalyticsConfig {
   flushInterval?: number;
 }
 
-export const useBehavioralAnalytics = (
-  userId?: string,
-  config: BehavioralAnalyticsConfig = {}
-) => {
+export const useBehavioralAnalytics = (userId?: string, config: BehavioralAnalyticsConfig = {}) => {
   const {
     trackPageViews = false, // Disabled by default for performance
     trackProductViews = false,
@@ -106,7 +116,9 @@ export const useBehavioralAnalytics = (
 
   // Track behavior event
   const trackEvent = useMutation({
-    mutationFn: async (event: Omit<UserBehaviorEvent, 'session_id' | 'device_info' | 'timestamp'>) => {
+    mutationFn: async (
+      event: Omit<UserBehaviorEvent, 'session_id' | 'device_info' | 'timestamp'>
+    ) => {
       const fullEvent: UserBehaviorEvent = {
         ...event,
         session_id: getSessionId(),
@@ -116,9 +128,7 @@ export const useBehavioralAnalytics = (
 
       if (enableRealTimeTracking) {
         // Send immediately
-        const { error } = await supabase
-          .from('user_behavior_events')
-          .insert(fullEvent);
+        const { error } = await supabase.from('user_behavior_events').insert(fullEvent);
 
         if (error) {
           logger.error('Error tracking behavior event', { error, event: fullEvent });
@@ -148,7 +158,9 @@ export const useBehavioralAnalytics = (
     try {
       // Temporarily disable database flushing due to RLS policy issues
       // TODO: Re-enable once RLS policies are fixed for user_behavior_events
-      logger.info(`Would flush ${eventsToFlush.length} behavior events (temporarily disabled due to RLS policy)`);
+      logger.info(
+        `Would flush ${eventsToFlush.length} behavior events (temporarily disabled due to RLS policy)`
+      );
 
       // Keep events in localStorage for now instead of clearing them
       // localStorage.removeItem('behavior_events');
@@ -195,118 +207,152 @@ export const useBehavioralAnalytics = (
   }, [enableRealTimeTracking, flushInterval, flushEvents]);
 
   // Page view tracking
-  const trackPageView = useCallback((pageUrl: string, referrer?: string) => {
-    if (!trackPageViews) return;
+  const trackPageView = useCallback(
+    (pageUrl: string, referrer?: string) => {
+      if (!trackPageViews) return;
 
-    trackEvent.mutate({
-      user_id: userId,
-      event_type: 'page_view',
-      event_data: {},
-      page_url: pageUrl,
-      referrer,
-    });
-  }, [trackPageViews, userId, trackEvent]);
+      trackEvent.mutate({
+        user_id: userId,
+        event_type: 'page_view',
+        event_data: {},
+        page_url: pageUrl,
+        referrer,
+      });
+    },
+    [trackPageViews, userId, trackEvent]
+  );
 
   // Product view tracking
-  const trackProductView = useCallback((productId: string, productName: string, category?: string) => {
-    if (!trackProductViews) return;
+  const trackProductView = useCallback(
+    (productId: string, productName: string, category?: string) => {
+      if (!trackProductViews) return;
 
-    trackEvent.mutate({
-      user_id: userId,
-      event_type: 'product_view',
-      event_data: { productId, productName, category },
-      page_url: window.location.href,
-    });
-  }, [trackProductViews, userId, trackEvent]);
+      trackEvent.mutate({
+        user_id: userId,
+        event_type: 'product_view',
+        event_data: { productId, productName, category },
+        page_url: window.location.href,
+      });
+    },
+    [trackProductViews, userId, trackEvent]
+  );
 
   // Cart actions tracking
-  const trackCartAdd = useCallback((productId: string, quantity: number, price: number) => {
-    if (!trackCartActions) return;
+  const trackCartAdd = useCallback(
+    (productId: string, quantity: number, price: number) => {
+      if (!trackCartActions) return;
 
-    trackEvent.mutate({
-      user_id: userId,
-      event_type: 'cart_add',
-      event_data: { productId, quantity, price },
-      page_url: window.location.href,
-    });
-  }, [trackCartActions, userId, trackEvent]);
+      trackEvent.mutate({
+        user_id: userId,
+        event_type: 'cart_add',
+        event_data: { productId, quantity, price },
+        page_url: window.location.href,
+      });
+    },
+    [trackCartActions, userId, trackEvent]
+  );
 
-  const trackCartRemove = useCallback((productId: string, quantity: number) => {
-    if (!trackCartActions) return;
+  const trackCartRemove = useCallback(
+    (productId: string, quantity: number) => {
+      if (!trackCartActions) return;
 
-    trackEvent.mutate({
-      user_id: userId,
-      event_type: 'cart_remove',
-      event_data: { productId, quantity },
-      page_url: window.location.href,
-    });
-  }, [trackCartActions, userId, trackEvent]);
+      trackEvent.mutate({
+        user_id: userId,
+        event_type: 'cart_remove',
+        event_data: { productId, quantity },
+        page_url: window.location.href,
+      });
+    },
+    [trackCartActions, userId, trackEvent]
+  );
 
   // Search and filter tracking
-  const trackSearch = useCallback((query: string, resultsCount: number, filters?: Record<string, unknown>) => {
-    if (!trackSearchAndFilter) return;
+  const trackSearch = useCallback(
+    (query: string, resultsCount: number, filters?: Record<string, unknown>) => {
+      if (!trackSearchAndFilter) return;
 
-    trackEvent.mutate({
-      user_id: userId,
-      event_type: 'search',
-      event_data: { query, resultsCount, filters },
-      page_url: window.location.href,
-    });
-  }, [trackSearchAndFilter, userId, trackEvent]);
+      trackEvent.mutate({
+        user_id: userId,
+        event_type: 'search',
+        event_data: { query, resultsCount, filters },
+        page_url: window.location.href,
+      });
+    },
+    [trackSearchAndFilter, userId, trackEvent]
+  );
 
-  const trackFilter = useCallback((filterType: string, filterValue: unknown, resultsCount: number) => {
-    if (!trackSearchAndFilter) return;
+  const trackFilter = useCallback(
+    (filterType: string, filterValue: unknown, resultsCount: number) => {
+      if (!trackSearchAndFilter) return;
 
-    trackEvent.mutate({
-      user_id: userId,
-      event_type: 'filter',
-      event_data: { filterType, filterValue, resultsCount },
-      page_url: window.location.href,
-    });
-  }, [trackSearchAndFilter, userId, trackEvent]);
+      trackEvent.mutate({
+        user_id: userId,
+        event_type: 'filter',
+        event_data: { filterType, filterValue, resultsCount },
+        page_url: window.location.href,
+      });
+    },
+    [trackSearchAndFilter, userId, trackEvent]
+  );
 
   // Social interactions tracking
-  const trackShare = useCallback((platform: string, contentType: string, contentId: string) => {
-    if (!trackSocialInteractions) return;
+  const trackShare = useCallback(
+    (platform: string, contentType: string, contentId: string) => {
+      if (!trackSocialInteractions) return;
 
-    trackEvent.mutate({
-      user_id: userId,
-      event_type: 'share',
-      event_data: { platform, contentType, contentId },
-      page_url: window.location.href,
-    });
-  }, [trackSocialInteractions, userId, trackEvent]);
+      trackEvent.mutate({
+        user_id: userId,
+        event_type: 'share',
+        event_data: { platform, contentType, contentId },
+        page_url: window.location.href,
+      });
+    },
+    [trackSocialInteractions, userId, trackEvent]
+  );
 
   // Form interactions tracking
-  const trackFormInteraction = useCallback((formType: string, action: 'start' | 'submit' | 'abandon', formData?: Record<string, unknown>) => {
-    if (!trackFormInteractions) return;
+  const trackFormInteraction = useCallback(
+    (
+      formType: string,
+      action: 'start' | 'submit' | 'abandon',
+      formData?: Record<string, unknown>
+    ) => {
+      if (!trackFormInteractions) return;
 
-    trackEvent.mutate({
-      user_id: userId,
-      event_type: formType === 'newsletter' ? 'newsletter_signup' : 'contact_form',
-      event_data: { formType, action, ...formData },
-      page_url: window.location.href,
-    });
-  }, [trackFormInteractions, userId, trackEvent]);
+      trackEvent.mutate({
+        user_id: userId,
+        event_type: formType === 'newsletter' ? 'newsletter_signup' : 'contact_form',
+        event_data: { formType, action, ...formData },
+        page_url: window.location.href,
+      });
+    },
+    [trackFormInteractions, userId, trackEvent]
+  );
 
   // Purchase tracking
-  const trackPurchaseStart = useCallback((cartItems: unknown[], totalAmount: number) => {
-    trackEvent.mutate({
-      user_id: userId,
-      event_type: 'purchase_start',
-      event_data: { cartItems, totalAmount },
-      page_url: window.location.href,
-    });
-  }, [userId, trackEvent]);
+  const trackPurchaseStart = useCallback(
+    (cartItems: unknown[], totalAmount: number) => {
+      trackEvent.mutate({
+        user_id: userId,
+        event_type: 'purchase_start',
+        event_data: { cartItems, totalAmount },
+        page_url: window.location.href,
+      });
+    },
+    [userId, trackEvent]
+  );
 
-  const trackPurchaseComplete = useCallback((orderId: string, totalAmount: number, items: unknown[]) => {
-    trackEvent.mutate({
-      user_id: userId,
-      event_type: 'purchase_complete',
-      event_data: { orderId, totalAmount, items },
-      page_url: window.location.href,
-    });
-  }, [userId, trackEvent]);
+  const trackPurchaseComplete = useCallback(
+    (orderId: string, totalAmount: number, items: unknown[]) => {
+      trackEvent.mutate({
+        user_id: userId,
+        event_type: 'purchase_complete',
+        event_data: { orderId, totalAmount, items },
+        page_url: window.location.href,
+      });
+    },
+    [userId, trackEvent]
+  );
 
   // Auto-track page views
   useEffect(() => {

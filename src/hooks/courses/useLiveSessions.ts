@@ -1,7 +1,7 @@
 /**
  * Live Sessions Hooks
  * Date: 27 Janvier 2025
- * 
+ *
  * Hooks pour gérer les sessions en direct (webinaires)
  */
 
@@ -10,9 +10,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 
-const LIVE_SESSION_FIELDS = 'id, course_id, cohort_id, title, description, session_type, platform, meeting_url, meeting_id, meeting_password, streaming_url, scheduled_start, scheduled_end, actual_start, actual_end, duration_minutes, status, max_participants, is_public, recording_enabled, recording_url, recording_available_until, allow_questions, allow_chat, allow_screen_share, require_registration, metadata, created_at, updated_at';
-const SESSION_REGISTRATION_FIELDS = 'id, session_id, enrollment_id, user_id, registered_at, attended, joined_at, left_at, attendance_duration_minutes, feedback_rating, feedback_comment, created_at, updated_at';
-const SESSION_QUESTION_FIELDS = 'id, session_id, user_id, question, is_answered, answer, answered_by, answered_at, upvotes_count, created_at';
+const LIVE_SESSION_FIELDS =
+  'id, course_id, cohort_id, title, description, session_type, platform, meeting_url, meeting_id, meeting_password, streaming_url, scheduled_start, scheduled_end, actual_start, actual_end, duration_minutes, status, max_participants, is_public, recording_enabled, recording_url, recording_available_until, allow_questions, allow_chat, allow_screen_share, require_registration, metadata, created_at, updated_at';
+const SESSION_REGISTRATION_FIELDS =
+  'id, session_id, enrollment_id, user_id, registered_at, attended, joined_at, left_at, attendance_duration_minutes, feedback_rating, feedback_comment, created_at, updated_at';
+const SESSION_QUESTION_FIELDS =
+  'id, session_id, user_id, question, is_answered, answer, answered_by, answered_at, upvotes_count, created_at';
 
 // =====================================================
 // TYPES
@@ -250,7 +253,7 @@ export const useCreateLiveSession = () => {
 
       return data as LiveSession;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['course-live-sessions', data.course_id] });
       queryClient.invalidateQueries({ queryKey: ['upcoming-sessions'] });
       toast({
@@ -277,7 +280,13 @@ export const useUpdateLiveSession = () => {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({ sessionId, updates }: { sessionId: string; updates: UpdateLiveSessionData }) => {
+    mutationFn: async ({
+      sessionId,
+      updates,
+    }: {
+      sessionId: string;
+      updates: UpdateLiveSessionData;
+    }) => {
       const { data, error } = await supabase
         .from('course_live_sessions')
         .update({
@@ -295,7 +304,7 @@ export const useUpdateLiveSession = () => {
 
       return data as LiveSession;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['course-live-sessions', data.course_id] });
       queryClient.invalidateQueries({ queryKey: ['upcoming-sessions'] });
       toast({
@@ -329,10 +338,7 @@ export const useDeleteLiveSession = () => {
         .eq('id', sessionId)
         .single();
 
-      const { error } = await supabase
-        .from('course_live_sessions')
-        .delete()
-        .eq('id', sessionId);
+      const { error } = await supabase.from('course_live_sessions').delete().eq('id', sessionId);
 
       if (error) {
         logger.error('Error deleting live session', { error, sessionId });
@@ -341,7 +347,7 @@ export const useDeleteLiveSession = () => {
 
       return { courseId: session?.course_id };
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       if (data.courseId) {
         queryClient.invalidateQueries({ queryKey: ['course-live-sessions', data.courseId] });
       }
@@ -408,7 +414,7 @@ export const useRegisterForSession = () => {
       logger.error('Error in useRegisterForSession', { error });
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de s\'inscrire',
+        description: error.message || "Impossible de s'inscrire",
         variant: 'destructive',
       });
     },
@@ -434,7 +440,7 @@ export const useUpdateSessionStatus = () => {
       actualStart?: string;
       actualEnd?: string;
     }) => {
-      const  updates: any = {
+      const updates: any = {
         status,
         updated_at: new Date().toISOString(),
       };
@@ -456,7 +462,7 @@ export const useUpdateSessionStatus = () => {
 
       return data as LiveSession;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['course-live-sessions', data.course_id] });
       queryClient.invalidateQueries({ queryKey: ['upcoming-sessions'] });
       toast({
@@ -474,9 +480,3 @@ export const useUpdateSessionStatus = () => {
     },
   });
 };
-
-
-
-
-
-

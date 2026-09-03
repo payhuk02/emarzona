@@ -57,7 +57,7 @@ export const FileMetadataEditor = ({ fileId, fileType, fileName }: FileMetadataE
         fileId,
         data: formData,
       });
-    } catch ( _error: any) {
+    } catch (_error: any) {
       // L'erreur est déjà gérée par le hook
     }
   };
@@ -65,7 +65,8 @@ export const FileMetadataEditor = ({ fileId, fileType, fileName }: FileMetadataE
   const isImage = fileType.startsWith('image/');
   const isVideo = fileType.startsWith('video/');
   const isAudio = fileType.startsWith('audio/');
-  const isDocument = fileType.includes('pdf') || fileType.includes('document') || fileType.includes('text');
+  const isDocument =
+    fileType.includes('pdf') || fileType.includes('document') || fileType.includes('text');
   const isSoftware = fileType.includes('application') || fileType.includes('executable');
 
   if (isLoading) {
@@ -94,9 +95,7 @@ export const FileMetadataEditor = ({ fileId, fileType, fileName }: FileMetadataE
           <FileText className="h-5 w-5" />
           Métadonnées - {fileName}
         </CardTitle>
-        <CardDescription>
-          Modifiez les métadonnées techniques du fichier
-        </CardDescription>
+        <CardDescription>Modifiez les métadonnées techniques du fichier</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -117,7 +116,7 @@ export const FileMetadataEditor = ({ fileId, fileType, fileName }: FileMetadataE
                   <Input
                     id="language"
                     value={formData.language || ''}
-                    onChange={(e) => setFormData({ ...formData, language: e.target.value })}
+                    onChange={e => setFormData({ ...formData, language: e.target.value })}
                     placeholder="fr, en, es..."
                   />
                 </div>
@@ -126,7 +125,7 @@ export const FileMetadataEditor = ({ fileId, fileType, fileName }: FileMetadataE
                   <Input
                     id="codec"
                     value={formData.codec || ''}
-                    onChange={(e) => setFormData({ ...formData, codec: e.target.value })}
+                    onChange={e => setFormData({ ...formData, codec: e.target.value })}
                     placeholder="H.264, MP3, PNG..."
                   />
                 </div>
@@ -138,7 +137,7 @@ export const FileMetadataEditor = ({ fileId, fileType, fileName }: FileMetadataE
                   <Input
                     id="author"
                     value={formData.author || ''}
-                    onChange={(e) => setFormData({ ...formData, author: e.target.value })}
+                    onChange={e => setFormData({ ...formData, author: e.target.value })}
                   />
                 </div>
                 <div className="space-y-2">
@@ -146,7 +145,7 @@ export const FileMetadataEditor = ({ fileId, fileType, fileName }: FileMetadataE
                   <Input
                     id="publisher"
                     value={formData.publisher || ''}
-                    onChange={(e) => setFormData({ ...formData, publisher: e.target.value })}
+                    onChange={e => setFormData({ ...formData, publisher: e.target.value })}
                   />
                 </div>
               </div>
@@ -156,7 +155,7 @@ export const FileMetadataEditor = ({ fileId, fileType, fileName }: FileMetadataE
                 <Input
                   id="copyright"
                   value={formData.copyright || ''}
-                  onChange={(e) => setFormData({ ...formData, copyright: e.target.value })}
+                  onChange={e => setFormData({ ...formData, copyright: e.target.value })}
                   placeholder="© 2025..."
                 />
               </div>
@@ -172,7 +171,7 @@ export const FileMetadataEditor = ({ fileId, fileType, fileName }: FileMetadataE
                       type="number"
                       min="0"
                       value={formData.width || ''}
-                      onChange={(e) =>
+                      onChange={e =>
                         setFormData({ ...formData, width: parseInt(e.target.value) || undefined })
                       }
                     />
@@ -184,7 +183,7 @@ export const FileMetadataEditor = ({ fileId, fileType, fileName }: FileMetadataE
                       type="number"
                       min="0"
                       value={formData.height || ''}
-                      onChange={(e) =>
+                      onChange={e =>
                         setFormData({ ...formData, height: parseInt(e.target.value) || undefined })
                       }
                     />
@@ -195,9 +194,7 @@ export const FileMetadataEditor = ({ fileId, fileType, fileName }: FileMetadataE
                   <Input
                     id="format_version"
                     value={formData.format_version || ''}
-                    onChange={(e) =>
-                      setFormData({ ...formData, format_version: e.target.value })
-                    }
+                    onChange={e => setFormData({ ...formData, format_version: e.target.value })}
                     placeholder="PNG 1.2, JPEG 2000..."
                   />
                 </div>
@@ -214,7 +211,7 @@ export const FileMetadataEditor = ({ fileId, fileType, fileName }: FileMetadataE
                       type="number"
                       min="0"
                       value={formData.width || ''}
-                      onChange={(e) =>
+                      onChange={e =>
                         setFormData({ ...formData, width: parseInt(e.target.value) || undefined })
                       }
                     />
@@ -226,7 +223,7 @@ export const FileMetadataEditor = ({ fileId, fileType, fileName }: FileMetadataE
                       type="number"
                       min="0"
                       value={formData.height || ''}
-                      onChange={(e) =>
+                      onChange={e =>
                         setFormData({ ...formData, height: parseInt(e.target.value) || undefined })
                       }
                     />
@@ -240,7 +237,7 @@ export const FileMetadataEditor = ({ fileId, fileType, fileName }: FileMetadataE
                       type="number"
                       min="0"
                       value={formData.duration_seconds || ''}
-                      onChange={(e) =>
+                      onChange={e =>
                         setFormData({
                           ...formData,
                           duration_seconds: parseInt(e.target.value) || undefined,
@@ -255,7 +252,7 @@ export const FileMetadataEditor = ({ fileId, fileType, fileName }: FileMetadataE
                       type="number"
                       min="0"
                       value={formData.bitrate || ''}
-                      onChange={(e) =>
+                      onChange={e =>
                         setFormData({ ...formData, bitrate: parseInt(e.target.value) || undefined })
                       }
                     />
@@ -266,7 +263,7 @@ export const FileMetadataEditor = ({ fileId, fileType, fileName }: FileMetadataE
                   <Input
                     id="codec"
                     value={formData.codec || ''}
-                    onChange={(e) => setFormData({ ...formData, codec: e.target.value })}
+                    onChange={e => setFormData({ ...formData, codec: e.target.value })}
                     placeholder="H.264, H.265, VP9..."
                   />
                 </div>
@@ -283,7 +280,7 @@ export const FileMetadataEditor = ({ fileId, fileType, fileName }: FileMetadataE
                       type="number"
                       min="0"
                       value={formData.duration_seconds || ''}
-                      onChange={(e) =>
+                      onChange={e =>
                         setFormData({
                           ...formData,
                           duration_seconds: parseInt(e.target.value) || undefined,
@@ -298,7 +295,7 @@ export const FileMetadataEditor = ({ fileId, fileType, fileName }: FileMetadataE
                       type="number"
                       min="0"
                       value={formData.bitrate || ''}
-                      onChange={(e) =>
+                      onChange={e =>
                         setFormData({ ...formData, bitrate: parseInt(e.target.value) || undefined })
                       }
                     />
@@ -312,7 +309,7 @@ export const FileMetadataEditor = ({ fileId, fileType, fileName }: FileMetadataE
                       type="number"
                       min="0"
                       value={formData.sample_rate || ''}
-                      onChange={(e) =>
+                      onChange={e =>
                         setFormData({
                           ...formData,
                           sample_rate: parseInt(e.target.value) || undefined,
@@ -325,7 +322,7 @@ export const FileMetadataEditor = ({ fileId, fileType, fileName }: FileMetadataE
                     <Label htmlFor="channels">Canaux</Label>
                     <Select
                       value={formData.channels?.toString() || ''}
-                      onValueChange={(value) =>
+                      onValueChange={value =>
                         setFormData({ ...formData, channels: parseInt(value) || undefined })
                       }
                     >
@@ -346,7 +343,7 @@ export const FileMetadataEditor = ({ fileId, fileType, fileName }: FileMetadataE
                   <Input
                     id="codec"
                     value={formData.codec || ''}
-                    onChange={(e) => setFormData({ ...formData, codec: e.target.value })}
+                    onChange={e => setFormData({ ...formData, codec: e.target.value })}
                     placeholder="MP3, AAC, FLAC, WAV..."
                   />
                 </div>
@@ -363,7 +360,7 @@ export const FileMetadataEditor = ({ fileId, fileType, fileName }: FileMetadataE
                       type="number"
                       min="0"
                       value={formData.page_count || ''}
-                      onChange={(e) =>
+                      onChange={e =>
                         setFormData({
                           ...formData,
                           page_count: parseInt(e.target.value) || undefined,
@@ -378,7 +375,7 @@ export const FileMetadataEditor = ({ fileId, fileType, fileName }: FileMetadataE
                       type="number"
                       min="0"
                       value={formData.word_count || ''}
-                      onChange={(e) =>
+                      onChange={e =>
                         setFormData({
                           ...formData,
                           word_count: parseInt(e.target.value) || undefined,
@@ -392,9 +389,7 @@ export const FileMetadataEditor = ({ fileId, fileType, fileName }: FileMetadataE
                   <Input
                     id="format_version"
                     value={formData.format_version || ''}
-                    onChange={(e) =>
-                      setFormData({ ...formData, format_version: e.target.value })
-                    }
+                    onChange={e => setFormData({ ...formData, format_version: e.target.value })}
                     placeholder="PDF 1.7, DOCX..."
                   />
                 </div>
@@ -403,7 +398,7 @@ export const FileMetadataEditor = ({ fileId, fileType, fileName }: FileMetadataE
                   <Input
                     id="isbn"
                     value={formData.isbn || ''}
-                    onChange={(e) => setFormData({ ...formData, isbn: e.target.value })}
+                    onChange={e => setFormData({ ...formData, isbn: e.target.value })}
                     placeholder="978-0-123456-78-9"
                   />
                 </div>
@@ -415,20 +410,18 @@ export const FileMetadataEditor = ({ fileId, fileType, fileName }: FileMetadataE
                 <div className="space-y-2">
                   <Label>Plateformes supportées</Label>
                   <div className="flex flex-wrap gap-2">
-                    {['windows', 'mac', 'linux', 'android', 'ios'].map((platform) => (
+                    {['windows', 'mac', 'linux', 'android', 'ios'].map(platform => (
                       <Button
                         key={platform}
                         type="button"
-                        variant={
-                          formData.platform?.includes(platform) ? 'default' : 'outline'
-                        }
+                        variant={formData.platform?.includes(platform) ? 'default' : 'outline'}
                         size="sm"
                         onClick={() => {
                           const current = formData.platform || [];
                           setFormData({
                             ...formData,
                             platform: current.includes(platform)
-                              ? current.filter((p) => p !== platform)
+                              ? current.filter(p => p !== platform)
                               : [...current, platform],
                           });
                         }}
@@ -441,20 +434,18 @@ export const FileMetadataEditor = ({ fileId, fileType, fileName }: FileMetadataE
                 <div className="space-y-2">
                   <Label>Architectures supportées</Label>
                   <div className="flex flex-wrap gap-2">
-                    {['x86', 'x64', 'arm', 'arm64'].map((arch) => (
+                    {['x86', 'x64', 'arm', 'arm64'].map(arch => (
                       <Button
                         key={arch}
                         type="button"
-                        variant={
-                          formData.architecture?.includes(arch) ? 'default' : 'outline'
-                        }
+                        variant={formData.architecture?.includes(arch) ? 'default' : 'outline'}
                         size="sm"
                         onClick={() => {
                           const current = formData.architecture || [];
                           setFormData({
                             ...formData,
                             architecture: current.includes(arch)
-                              ? current.filter((a) => a !== arch)
+                              ? current.filter(a => a !== arch)
                               : [...current, arch],
                           });
                         }}
@@ -470,9 +461,7 @@ export const FileMetadataEditor = ({ fileId, fileType, fileName }: FileMetadataE
 
           <div className="flex justify-end pt-4 border-t">
             <Button type="submit" disabled={updateMetadata.isPending}>
-              {updateMetadata.isPending && (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              )}
+              {updateMetadata.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               <Save className="h-4 w-4 mr-2" />
               Enregistrer les métadonnées
             </Button>
@@ -482,10 +471,3 @@ export const FileMetadataEditor = ({ fileId, fileType, fileName }: FileMetadataE
     </Card>
   );
 };
-
-
-
-
-
-
-

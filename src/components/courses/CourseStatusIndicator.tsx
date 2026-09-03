@@ -21,12 +21,12 @@ import { cn } from '@/lib/utils';
 /**
  * Statuts possibles pour un cours
  */
-export type CourseStatus = 
-  | 'draft'         // Brouillon
-  | 'published'     // Publié
-  | 'in_progress'   // En cours (pour étudiants)
-  | 'completed'     // Terminé
-  | 'archived';     // Archivé
+export type CourseStatus =
+  | 'draft' // Brouillon
+  | 'published' // Publié
+  | 'in_progress' // En cours (pour étudiants)
+  | 'completed' // Terminé
+  | 'archived'; // Archivé
 
 /**
  * Variantes d'affichage du composant
@@ -39,40 +39,40 @@ export type CourseStatusVariant = 'compact' | 'default' | 'detailed';
 export interface CourseStatusIndicatorProps {
   /** Statut actuel du cours */
   status: CourseStatus;
-  
+
   /** Nombre d'étudiants inscrits */
   enrolledStudents?: number;
-  
+
   /** Capacité maximale */
   maxStudents?: number;
-  
+
   /** Seuil de capacité faible (par défaut: 20%) */
   lowCapacityThreshold?: number;
-  
+
   /** Afficher la barre de progression */
   showProgress?: boolean;
-  
+
   /** Variante d'affichage */
   variant?: CourseStatusVariant;
-  
+
   /** Nombre d'inscriptions récentes (7 derniers jours) */
   recentEnrollments?: number;
-  
+
   /** Tendance des inscriptions */
   enrollmentTrend?: 'up' | 'down' | 'stable';
-  
+
   /** Classe CSS personnalisée */
   className?: string;
-  
+
   /** Taux de complétion moyen (%) */
   averageCompletion?: number;
-  
+
   /** Revenue généré */
   revenue?: number;
-  
+
   /** Devise */
   currency?: string;
-  
+
   /** Instructeur assigné */
   instructor?: string;
 }
@@ -80,7 +80,7 @@ export interface CourseStatusIndicatorProps {
 /**
  * Configuration des statuts avec leurs propriétés visuelles
  */
-const  STATUS_CONFIG: Record<
+const STATUS_CONFIG: Record<
   CourseStatus,
   {
     label: string;
@@ -141,26 +141,26 @@ const  STATUS_CONFIG: Record<
 
 /**
  * CourseStatusIndicator - Composant d'affichage du statut de cours
- * 
+ *
  * @example
  * ```tsx
  * // Compact variant
- * <CourseStatusIndicator 
- *   status="published" 
+ * <CourseStatusIndicator
+ *   status="published"
  *   variant="compact"
  * />
- * 
+ *
  * // Default with enrollment
- * <CourseStatusIndicator 
- *   status="published" 
+ * <CourseStatusIndicator
+ *   status="published"
  *   enrolledStudents={45}
  *   maxStudents={100}
  *   showProgress={true}
  * />
- * 
+ *
  * // Detailed with trends
- * <CourseStatusIndicator 
- *   status="published" 
+ * <CourseStatusIndicator
+ *   status="published"
  *   variant="detailed"
  *   enrolledStudents={85}
  *   maxStudents={100}
@@ -172,7 +172,7 @@ const  STATUS_CONFIG: Record<
  * />
  * ```
  */
-export const CourseStatusIndicator : React.FC<CourseStatusIndicatorProps> = ({
+export const CourseStatusIndicator: React.FC<CourseStatusIndicatorProps> = ({
   status,
   enrolledStudents,
   maxStudents,
@@ -191,13 +191,13 @@ export const CourseStatusIndicator : React.FC<CourseStatusIndicatorProps> = ({
   const Icon = config.icon;
 
   // Calculer le pourcentage d'occupation
-  const enrollmentPercentage = maxStudents && enrolledStudents !== undefined
-    ? (enrolledStudents / maxStudents) * 100
-    : 0;
+  const enrollmentPercentage =
+    maxStudents && enrolledStudents !== undefined ? (enrolledStudents / maxStudents) * 100 : 0;
 
-  const isLowCapacity = enrolledStudents !== undefined && maxStudents
-    ? ((maxStudents - enrolledStudents) / maxStudents) * 100 <= lowCapacityThreshold
-    : false;
+  const isLowCapacity =
+    enrolledStudents !== undefined && maxStudents
+      ? ((maxStudents - enrolledStudents) / maxStudents) * 100 <= lowCapacityThreshold
+      : false;
 
   // Obtenir l'icône de tendance
   const getTrendIcon = () => {
@@ -261,12 +261,8 @@ export const CourseStatusIndicator : React.FC<CourseStatusIndicatorProps> = ({
                 <Icon className={cn('h-5 w-5', config.color)} />
               </div>
               <div>
-                <p className={cn('font-semibold text-sm', config.textColor)}>
-                  {config.label}
-                </p>
-                {instructor && (
-                  <p className="text-xs text-muted-foreground">{instructor}</p>
-                )}
+                <p className={cn('font-semibold text-sm', config.textColor)}>{config.label}</p>
+                {instructor && <p className="text-xs text-muted-foreground">{instructor}</p>}
               </div>
             </div>
 
@@ -284,12 +280,9 @@ export const CourseStatusIndicator : React.FC<CourseStatusIndicatorProps> = ({
           {/* Progress bar */}
           {showProgress && maxStudents && enrolledStudents !== undefined && (
             <div className="space-y-1">
-              <Progress 
-                value={enrollmentPercentage} 
-                className={cn(
-                  'h-2',
-                  isLowCapacity && 'bg-orange-100'
-                )}
+              <Progress
+                value={enrollmentPercentage}
+                className={cn('h-2', isLowCapacity && 'bg-orange-100')}
               />
               <p className="text-xs text-muted-foreground text-right">
                 {Math.round(enrollmentPercentage)}% inscrit
@@ -340,9 +333,7 @@ export const CourseStatusIndicator : React.FC<CourseStatusIndicatorProps> = ({
               <Icon className={cn('h-6 w-6', config.color)} />
             </div>
             <div>
-              <p className={cn('font-bold text-base', config.textColor)}>
-                {config.label}
-              </p>
+              <p className={cn('font-bold text-base', config.textColor)}>{config.label}</p>
               {instructor && (
                 <p className="text-sm text-muted-foreground flex items-center gap-1">
                   <Users className="h-3 w-3" />
@@ -361,9 +352,7 @@ export const CourseStatusIndicator : React.FC<CourseStatusIndicatorProps> = ({
               >
                 {enrolledStudents}/{maxStudents}
               </Badge>
-              <p className="text-xs text-muted-foreground mt-1">
-                étudiants
-              </p>
+              <p className="text-xs text-muted-foreground mt-1">étudiants</p>
             </div>
           )}
         </div>
@@ -375,12 +364,9 @@ export const CourseStatusIndicator : React.FC<CourseStatusIndicatorProps> = ({
               <span className="text-muted-foreground">Taux d'inscription</span>
               <span className="font-medium">{Math.round(enrollmentPercentage)}%</span>
             </div>
-            <Progress 
-              value={enrollmentPercentage} 
-              className={cn(
-                'h-3',
-                isLowCapacity ? 'bg-orange-100' : 'bg-green-100'
-              )}
+            <Progress
+              value={enrollmentPercentage}
+              className={cn('h-3', isLowCapacity ? 'bg-orange-100' : 'bg-green-100')}
             />
           </div>
         )}
@@ -454,9 +440,7 @@ export const CourseStatusIndicator : React.FC<CourseStatusIndicatorProps> = ({
           <div className="flex items-start gap-2 p-3 bg-gray-50 border border-gray-200 rounded-lg">
             <Eye className="h-5 w-5 text-gray-600 mt-0.5" />
             <div>
-              <p className="text-sm font-medium text-gray-700">
-                Cours en brouillon
-              </p>
+              <p className="text-sm font-medium text-gray-700">Cours en brouillon</p>
               <p className="text-xs text-gray-600 mt-1">
                 Publiez ce cours pour le rendre accessible aux étudiants
               </p>
@@ -471,11 +455,3 @@ export const CourseStatusIndicator : React.FC<CourseStatusIndicatorProps> = ({
 CourseStatusIndicator.displayName = 'CourseStatusIndicator';
 
 export default CourseStatusIndicator;
-
-
-
-
-
-
-
-

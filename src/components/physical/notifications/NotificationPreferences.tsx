@@ -15,14 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Bell,
-  Mail,
-  MessageSquare,
-  Smartphone,
-  Save,
-  Loader2,
-} from 'lucide-react';
+import { Bell, Mail, MessageSquare, Smartphone, Save, Loader2 } from 'lucide-react';
 import {
   useNotificationPreferences,
   useUpdateNotificationPreferences,
@@ -116,7 +109,7 @@ export const NotificationPreferences = () => {
                 </div>
                 <Switch
                   checked={formData.email_price_alerts}
-                  onCheckedChange={(checked) =>
+                  onCheckedChange={checked =>
                     setFormData({ ...formData, email_price_alerts: checked })
                   }
                 />
@@ -130,7 +123,7 @@ export const NotificationPreferences = () => {
                 </div>
                 <Switch
                   checked={formData.email_stock_alerts}
-                  onCheckedChange={(checked) =>
+                  onCheckedChange={checked =>
                     setFormData({ ...formData, email_stock_alerts: checked })
                   }
                 />
@@ -144,7 +137,7 @@ export const NotificationPreferences = () => {
                 </div>
                 <Switch
                   checked={formData.email_promotion_alerts}
-                  onCheckedChange={(checked) =>
+                  onCheckedChange={checked =>
                     setFormData({ ...formData, email_promotion_alerts: checked })
                   }
                 />
@@ -158,7 +151,7 @@ export const NotificationPreferences = () => {
                 </div>
                 <Switch
                   checked={formData.email_shipment_updates}
-                  onCheckedChange={(checked) =>
+                  onCheckedChange={checked =>
                     setFormData({ ...formData, email_shipment_updates: checked })
                   }
                 />
@@ -172,7 +165,7 @@ export const NotificationPreferences = () => {
                 </div>
                 <Switch
                   checked={formData.email_return_updates}
-                  onCheckedChange={(checked) =>
+                  onCheckedChange={checked =>
                     setFormData({ ...formData, email_return_updates: checked })
                   }
                 />
@@ -186,7 +179,7 @@ export const NotificationPreferences = () => {
                 </div>
                 <Switch
                   checked={formData.email_order_updates}
-                  onCheckedChange={(checked) =>
+                  onCheckedChange={checked =>
                     setFormData({ ...formData, email_order_updates: checked })
                   }
                 />
@@ -200,7 +193,7 @@ export const NotificationPreferences = () => {
                 </div>
                 <Switch
                   checked={formData.email_marketing}
-                  onCheckedChange={(checked) =>
+                  onCheckedChange={checked =>
                     setFormData({ ...formData, email_marketing: checked })
                   }
                 />
@@ -223,7 +216,7 @@ export const NotificationPreferences = () => {
                 </div>
                 <Switch
                   checked={formData.sms_price_alerts}
-                  onCheckedChange={(checked) =>
+                  onCheckedChange={checked =>
                     setFormData({ ...formData, sms_price_alerts: checked })
                   }
                 />
@@ -234,7 +227,7 @@ export const NotificationPreferences = () => {
                 </div>
                 <Switch
                   checked={formData.sms_stock_alerts}
-                  onCheckedChange={(checked) =>
+                  onCheckedChange={checked =>
                     setFormData({ ...formData, sms_stock_alerts: checked })
                   }
                 />
@@ -245,7 +238,7 @@ export const NotificationPreferences = () => {
                 </div>
                 <Switch
                   checked={formData.sms_shipment_updates}
-                  onCheckedChange={(checked) =>
+                  onCheckedChange={checked =>
                     setFormData({ ...formData, sms_shipment_updates: checked })
                   }
                 />
@@ -268,7 +261,7 @@ export const NotificationPreferences = () => {
                 </div>
                 <Switch
                   checked={formData.push_price_alerts}
-                  onCheckedChange={(checked) =>
+                  onCheckedChange={checked =>
                     setFormData({ ...formData, push_price_alerts: checked })
                   }
                 />
@@ -279,7 +272,7 @@ export const NotificationPreferences = () => {
                 </div>
                 <Switch
                   checked={formData.push_stock_alerts}
-                  onCheckedChange={(checked) =>
+                  onCheckedChange={checked =>
                     setFormData({ ...formData, push_stock_alerts: checked })
                   }
                 />
@@ -290,7 +283,7 @@ export const NotificationPreferences = () => {
                 </div>
                 <Switch
                   checked={formData.push_promotion_alerts}
-                  onCheckedChange={(checked) =>
+                  onCheckedChange={checked =>
                     setFormData({ ...formData, push_promotion_alerts: checked })
                   }
                 />
@@ -301,7 +294,7 @@ export const NotificationPreferences = () => {
                 </div>
                 <Switch
                   checked={formData.push_shipment_updates}
-                  onCheckedChange={(checked) =>
+                  onCheckedChange={checked =>
                     setFormData({ ...formData, push_shipment_updates: checked })
                   }
                 />
@@ -331,7 +324,7 @@ export const NotificationPreferences = () => {
             </Select>
             <p className="text-sm text-muted-foreground">
               {formData.notification_frequency === 'immediate' &&
-                'Recevez les notifications dès qu\'elles se produisent'}
+                "Recevez les notifications dès qu'elles se produisent"}
               {formData.notification_frequency === 'daily' &&
                 'Recevez un résumé quotidien de toutes vos notifications'}
               {formData.notification_frequency === 'weekly' &&
@@ -341,9 +334,7 @@ export const NotificationPreferences = () => {
 
           <div className="flex justify-end pt-4 border-t">
             <Button type="submit" disabled={updatePreferences.isPending}>
-              {updatePreferences.isPending && (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              )}
+              {updatePreferences.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               <Save className="h-4 w-4 mr-2" />
               Enregistrer les préférences
             </Button>
@@ -353,10 +344,3 @@ export const NotificationPreferences = () => {
     </Card>
   );
 };
-
-
-
-
-
-
-

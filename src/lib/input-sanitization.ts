@@ -1,7 +1,7 @@
 /**
  * Input Sanitization and Validation Utilities
  * Provides security-focused input validation and sanitization
- * 
+ *
  * Security Features:
  * - XSS prevention through HTML entity encoding
  * - SQL injection prevention
@@ -16,7 +16,7 @@
  */
 export function sanitizeHtml(input: string): string {
   if (!input) return '';
-  
+
   const map: Record<string, string> = {
     '&': '&amp;',
     '<': '&lt;',
@@ -27,9 +27,9 @@ export function sanitizeHtml(input: string): string {
     '`': '&#x60;',
     '=': '&#x3D;',
   };
-  
+
   const reg = /[&<>"'`=/]/g;
-  return input.replace(reg, (match) => map[match]);
+  return input.replace(reg, match => map[match]);
 }
 
 /**
@@ -37,16 +37,16 @@ export function sanitizeHtml(input: string): string {
  */
 export function sanitizeUrl(url: string): string {
   if (!url) return '';
-  
+
   try {
     const parsed = new URL(url);
-    
+
     // Only allow safe protocols
     const allowedProtocols = ['http:', 'https:', 'mailto:', 'tel:', 'sms:'];
     if (!allowedProtocols.includes(parsed.protocol)) {
       return '';
     }
-    
+
     return parsed.href;
   } catch {
     // Invalid URL, return empty
@@ -60,7 +60,7 @@ export function sanitizeUrl(url: string): string {
  */
 export function sanitizePhoneNumber(phone: string): string {
   if (!phone) return '';
-  
+
   // Remove all characters except digits, +, -, spaces, and parentheses
   return phone.replace(/[^\d+\-\s()]/g, '');
 }
@@ -71,7 +71,7 @@ export function sanitizePhoneNumber(phone: string): string {
  */
 export function sanitizeEmail(email: string): string {
   if (!email) return '';
-  
+
   // Remove whitespace and convert to lowercase
   return email.trim().toLowerCase();
 }
@@ -82,7 +82,7 @@ export function sanitizeEmail(email: string): string {
  */
 export function sanitizeSlug(slug: string): string {
   if (!slug) return '';
-  
+
   return slug
     .toLowerCase()
     .trim()
@@ -101,15 +101,15 @@ export function validateLength(
   max: number
 ): { valid: boolean; error?: string } {
   const length = input.length;
-  
+
   if (length < min) {
     return { valid: false, error: `Doit contenir au moins ${min} caractères` };
   }
-  
+
   if (length > max) {
     return { valid: false, error: `Ne peut pas dépasser ${max} caractères` };
   }
-  
+
   return { valid: true };
 }
 
@@ -123,7 +123,7 @@ export function validateCharacters(
   if (!allowedPattern.test(input)) {
     return { valid: false, error: 'Contient des caractères non autorisés' };
   }
-  
+
   return { valid: true };
 }
 
@@ -133,7 +133,7 @@ export function validateCharacters(
  */
 export function sanitizeSocialUrl(url: string, platform: string): string {
   if (!url) return '';
-  
+
   const platformDomains: Record<string, string[]> = {
     facebook: ['facebook.com', 'fb.com'],
     instagram: ['instagram.com'],
@@ -146,22 +146,22 @@ export function sanitizeSocialUrl(url: string, platform: string): string {
     discord: ['discord.gg', 'discord.com'],
     twitch: ['twitch.tv'],
   };
-  
+
   try {
     const parsed = new URL(url);
     const allowed = platformDomains[platform] || [];
-    
+
     if (allowed.length > 0) {
       const hostname = parsed.hostname.toLowerCase();
-      const isAllowed = allowed.some(domain => 
-        hostname === domain || hostname.endsWith(`.${domain}`)
+      const isAllowed = allowed.some(
+        domain => hostname === domain || hostname.endsWith(`.${domain}`)
       );
-      
+
       if (!isAllowed) {
         return '';
       }
     }
-    
+
     return parsed.href;
   } catch {
     return '';
@@ -174,15 +174,15 @@ export function sanitizeSocialUrl(url: string, platform: string): string {
  */
 export function sanitizeColor(color: string): string {
   if (!color) return '';
-  
+
   // Remove # if present
   const hex = color.replace('#', '');
-  
+
   // Validate hex format (3 or 6 characters)
   if (!/^[0-9A-Fa-f]{3}$|^[0-9A-Fa-f]{6}$/.test(hex)) {
     return '';
   }
-  
+
   // Return with # prefix
   return `#${hex}`;
 }
@@ -193,7 +193,7 @@ export function sanitizeColor(color: string): string {
  */
 export function sanitizeNumber(input: string): string {
   if (!input) return '';
-  
+
   return input.replace(/[^\d.-]/g, '');
 }
 
@@ -205,7 +205,7 @@ export function sanitizeFormField(
   fieldType: 'text' | 'email' | 'url' | 'tel' | 'number' | 'slug' | 'color' | 'html'
 ): string {
   if (!value) return '';
-  
+
   switch (fieldType) {
     case 'email':
       return sanitizeEmail(value);
@@ -233,7 +233,7 @@ export function sanitizeFormField(
  */
 export function detectInjection(input: string): boolean {
   if (!input) return false;
-  
+
   const injectionPatterns = [
     /<script[^>]*>/i,
     /javascript:/i,
@@ -254,7 +254,7 @@ export function detectInjection(input: string): boolean {
     /'/i, // SQL quote
     /"/i, // SQL quote
   ];
-  
+
   return injectionPatterns.some(pattern => pattern.test(input));
 }
 
@@ -263,10 +263,13 @@ export function detectInjection(input: string): boolean {
  */
 export function sanitizeFormPayload<T extends Record<string, unknown>>(
   payload: T,
-  fieldTypes: Record<keyof T, 'text' | 'email' | 'url' | 'tel' | 'number' | 'slug' | 'color' | 'html'>
+  fieldTypes: Record<
+    keyof T,
+    'text' | 'email' | 'url' | 'tel' | 'number' | 'slug' | 'color' | 'html'
+  >
 ): T {
   const sanitized: Partial<T> = {};
-  
+
   for (const [key, value] of Object.entries(payload)) {
     if (typeof value === 'string') {
       const fieldType = fieldTypes[key as keyof T] || 'text';
@@ -275,7 +278,7 @@ export function sanitizeFormPayload<T extends Record<string, unknown>>(
       sanitized[key as keyof T] = value;
     }
   }
-  
+
   return sanitized as T;
 }
 
@@ -284,7 +287,7 @@ export function sanitizeFormPayload<T extends Record<string, unknown>>(
  */
 export function truncateText(text: string, maxLength: number, ellipsis = '...'): string {
   if (!text || text.length <= maxLength) return text;
-  
+
   return text.substring(0, maxLength - ellipsis.length) + ellipsis;
 }
 
@@ -293,7 +296,7 @@ export function truncateText(text: string, maxLength: number, ellipsis = '...'):
  */
 export function normalizeWhitespace(text: string): string {
   if (!text) return '';
-  
+
   return text.trim().replace(/\s+/g, ' ');
 }
 
@@ -302,7 +305,7 @@ export function normalizeWhitespace(text: string): string {
  */
 export function stripHtmlTags(html: string): string {
   if (!html) return '';
-  
+
   return html.replace(/<[^>]*>/g, '');
 }
 
@@ -311,6 +314,6 @@ export function stripHtmlTags(html: string): string {
  */
 export function escapeRegex(string: string): string {
   if (!string) return '';
-  
+
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }

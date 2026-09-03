@@ -1,6 +1,4 @@
-import {
-  BarChart3, CreditCard, Layout, Package, Settings, Store, Tag, Users,
-} from 'lucide-react';
+import { BarChart3, CreditCard, Layout, Package, Settings, Store, Tag, Users } from 'lucide-react';
 import type { PageConfig } from './types';
 
 export const dashboardPagesConfig: PageConfig[] = [

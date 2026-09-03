@@ -3,7 +3,7 @@
  * Charge seulement quand nécessaire pour réduire le bundle initial
  */
 
-let  html2canvasModule: typeof import('html2canvas') | null = null;
+let html2canvasModule: typeof import('html2canvas') | null = null;
 
 /**
  * Charge html2canvas de manière asynchrone
@@ -14,10 +14,3 @@ export const loadHtml2Canvas = async () => {
   }
   return html2canvasModule;
 };
-
-
-
-
-
-
-

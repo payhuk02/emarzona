@@ -1,13 +1,13 @@
 /**
  * useCourseAlerts - Hook pour la gestion des alertes de cours
- * 
+ *
  * Fournit des alertes automatiques pour :
  * - Capacité faible (places limitées)
  * - Deadlines approchantes
  * - Étudiants inactifs
  * - Taux de complétion faible
  * - Paiements en attente
- * 
+ *
  * @author Emarzona Team
  * @date 29 Octobre 2025
  */
@@ -22,12 +22,12 @@ const COURSE_ALERT_SOURCE_FIELDS = 'id, name, status, max_students, enrolled_stu
  * Type d'alerte
  */
 export type AlertType =
-  | 'low_capacity'        // Capacité faible
+  | 'low_capacity' // Capacité faible
   | 'deadline_approaching' // Deadline proche
-  | 'student_inactive'     // Étudiant inactif
-  | 'low_completion'       // Taux de complétion faible
-  | 'pending_payment'      // Paiement en attente
-  | 'expiring_access';     // Accès expirant bientôt
+  | 'student_inactive' // Étudiant inactif
+  | 'low_completion' // Taux de complétion faible
+  | 'pending_payment' // Paiement en attente
+  | 'expiring_access'; // Accès expirant bientôt
 
 /**
  * Niveau de sévérité
@@ -83,7 +83,7 @@ export interface AlertFilters {
 /**
  * Configuration par défaut
  */
-const  DEFAULT_CONFIG: AlertConfig = {
+const DEFAULT_CONFIG: AlertConfig = {
   lowCapacityThreshold: 10, // 10% restant
   deadlineWarningDays: 7, // 7 jours
   inactivityDays: 14, // 14 jours
@@ -111,14 +111,14 @@ export const useCourseAlerts = (config: Partial<AlertConfig> = {}) => {
 
       if (error) throw error;
 
-      const  alerts: CourseAlert[] = [];
+      const alerts: CourseAlert[] = [];
 
-      data?.forEach((course) => {
+      data?.forEach(course => {
         const remainingSpots = course.max_students - course.enrolled_students;
         const capacityPercentage = (remainingSpots / course.max_students) * 100;
 
         if (capacityPercentage <= alertConfig.lowCapacityThreshold && capacityPercentage > 0) {
-          const  severity: AlertSeverity =
+          const severity: AlertSeverity =
             capacityPercentage <= 5 ? 'critical' : capacityPercentage <= 10 ? 'warning' : 'info';
 
           alerts.push({
@@ -153,25 +153,28 @@ export const useCourseAlerts = (config: Partial<AlertConfig> = {}) => {
 
       const { data, error } = await supabase
         .from('enrollments')
-        .select(`
+        .select(
+          `
           *,
           courses!inner(name),
           students:auth.users!inner(raw_user_meta_data)
-        `)
+        `
+        )
         .eq('status', 'active')
         .lt('last_activity_at', cutoffDate.toISOString());
 
       if (error) throw error;
 
-      const  alerts: CourseAlert[] = [];
+      const alerts: CourseAlert[] = [];
 
-      data?.forEach((enrollment) => {
+      data?.forEach(enrollment => {
         const daysSinceActivity = Math.floor(
-          (new Date().getTime() - new Date(enrollment.last_activity_at || enrollment.enrolled_at).getTime()) /
+          (new Date().getTime() -
+            new Date(enrollment.last_activity_at || enrollment.enrolled_at).getTime()) /
             (1000 * 60 * 60 * 24)
         );
 
-        const  severity: AlertSeverity = daysSinceActivity >= 30 ? 'critical' : 'warning';
+        const severity: AlertSeverity = daysSinceActivity >= 30 ? 'critical' : 'warning';
 
         alerts.push({
           id: `inactive-${enrollment.id}`,
@@ -203,19 +206,21 @@ export const useCourseAlerts = (config: Partial<AlertConfig> = {}) => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('enrollments')
-        .select(`
+        .select(
+          `
           *,
           courses!inner(name),
           students:auth.users!inner(raw_user_meta_data)
-        `)
+        `
+        )
         .eq('status', 'active')
         .lt('progress', alertConfig.lowCompletionThreshold);
 
       if (error) throw error;
 
-      const  alerts: CourseAlert[] = [];
+      const alerts: CourseAlert[] = [];
 
-      data?.forEach((enrollment) => {
+      data?.forEach(enrollment => {
         // Seulement alerter si inscrit depuis plus de 7 jours
         const enrolledDaysAgo = Math.floor(
           (new Date().getTime() - new Date(enrollment.enrolled_at).getTime()) /
@@ -223,7 +228,7 @@ export const useCourseAlerts = (config: Partial<AlertConfig> = {}) => {
         );
 
         if (enrolledDaysAgo >= 7) {
-          const  severity: AlertSeverity = enrollment.progress < 10 ? 'critical' : 'warning';
+          const severity: AlertSeverity = enrollment.progress < 10 ? 'critical' : 'warning';
 
           alerts.push({
             id: `low-completion-${enrollment.id}`,
@@ -256,19 +261,21 @@ export const useCourseAlerts = (config: Partial<AlertConfig> = {}) => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('enrollments')
-        .select(`
+        .select(
+          `
           *,
           courses!inner(name, price),
           students:auth.users!inner(raw_user_meta_data)
-        `)
+        `
+        )
         .eq('status', 'pending');
 
       if (error) throw error;
 
-      const  alerts: CourseAlert[] = [];
+      const alerts: CourseAlert[] = [];
 
-      data?.forEach((enrollment) => {
-        const  severity: AlertSeverity = 'warning';
+      data?.forEach(enrollment => {
+        const severity: AlertSeverity = 'warning';
 
         alerts.push({
           id: `pending-payment-${enrollment.id}`,
@@ -303,20 +310,22 @@ export const useCourseAlerts = (config: Partial<AlertConfig> = {}) => {
 
       const { data, error } = await supabase
         .from('enrollments')
-        .select(`
+        .select(
+          `
           *,
           courses!inner(name),
           students:auth.users!inner(raw_user_meta_data)
-        `)
+        `
+        )
         .eq('status', 'active')
         .not('expiry_date', 'is', null)
         .lt('expiry_date', warningDate.toISOString());
 
       if (error) throw error;
 
-      const  alerts: CourseAlert[] = [];
+      const alerts: CourseAlert[] = [];
 
-      data?.forEach((enrollment) => {
+      data?.forEach(enrollment => {
         if (!enrollment.expiry_date) return;
 
         const daysUntilExpiry = Math.ceil(
@@ -325,7 +334,7 @@ export const useCourseAlerts = (config: Partial<AlertConfig> = {}) => {
         );
 
         if (daysUntilExpiry >= 0) {
-          const  severity: AlertSeverity = daysUntilExpiry <= 2 ? 'critical' : 'warning';
+          const severity: AlertSeverity = daysUntilExpiry <= 2 ? 'critical' : 'warning';
 
           alerts.push({
             id: `expiring-access-${enrollment.id}`,
@@ -379,7 +388,7 @@ export const useCourseAlerts = (config: Partial<AlertConfig> = {}) => {
    * Filtrer les alertes
    */
   const filterAlerts = (filters: AlertFilters = {}) => {
-    return allAlerts.filter((alert) => {
+    return allAlerts.filter(alert => {
       if (filters.type && alert.type !== filters.type) return false;
       if (filters.severity && alert.severity !== filters.severity) return false;
       if (filters.acknowledged !== undefined && alert.acknowledged !== filters.acknowledged)
@@ -395,17 +404,17 @@ export const useCourseAlerts = (config: Partial<AlertConfig> = {}) => {
   const stats = useMemo(() => {
     return {
       total: allAlerts.length,
-      critical: allAlerts.filter((a) => a.severity === 'critical').length,
-      warning: allAlerts.filter((a) => a.severity === 'warning').length,
-      info: allAlerts.filter((a) => a.severity === 'info').length,
-      unacknowledged: allAlerts.filter((a) => !a.acknowledged).length,
+      critical: allAlerts.filter(a => a.severity === 'critical').length,
+      warning: allAlerts.filter(a => a.severity === 'warning').length,
+      info: allAlerts.filter(a => a.severity === 'info').length,
+      unacknowledged: allAlerts.filter(a => !a.acknowledged).length,
       by_type: {
-        low_capacity: allAlerts.filter((a) => a.type === 'low_capacity').length,
-        deadline_approaching: allAlerts.filter((a) => a.type === 'deadline_approaching').length,
-        student_inactive: allAlerts.filter((a) => a.type === 'student_inactive').length,
-        low_completion: allAlerts.filter((a) => a.type === 'low_completion').length,
-        pending_payment: allAlerts.filter((a) => a.type === 'pending_payment').length,
-        expiring_access: allAlerts.filter((a) => a.type === 'expiring_access').length,
+        low_capacity: allAlerts.filter(a => a.type === 'low_capacity').length,
+        deadline_approaching: allAlerts.filter(a => a.type === 'deadline_approaching').length,
+        student_inactive: allAlerts.filter(a => a.type === 'student_inactive').length,
+        low_completion: allAlerts.filter(a => a.type === 'low_completion').length,
+        pending_payment: allAlerts.filter(a => a.type === 'pending_payment').length,
+        expiring_access: allAlerts.filter(a => a.type === 'expiring_access').length,
       },
     };
   }, [allAlerts]);
@@ -413,7 +422,7 @@ export const useCourseAlerts = (config: Partial<AlertConfig> = {}) => {
   return {
     // Toutes les alertes
     alerts: allAlerts,
-    
+
     // Alertes par type
     lowCapacityAlerts,
     inactivityAlerts,
@@ -431,10 +440,3 @@ export const useCourseAlerts = (config: Partial<AlertConfig> = {}) => {
 };
 
 export default useCourseAlerts;
-
-
-
-
-
-
-

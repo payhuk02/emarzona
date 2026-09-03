@@ -1,7 +1,7 @@
 /**
  * Hook useNetworkStatus - Gestion améliorée du statut réseau
  * Fournit des informations détaillées sur la connexion réseau
- * 
+ *
  * @example
  * ```tsx
  * const { isOnline, isOffline, effectiveType, downlink } = useNetworkStatus();
@@ -73,7 +73,10 @@ export function useNetworkStatus(options: UseNetworkStatusOptions = {}): Network
       };
     }
 
-    const connection = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection;
+    const connection =
+      (navigator as any).connection ||
+      (navigator as any).mozConnection ||
+      (navigator as any).webkitConnection;
 
     return {
       isOnline: navigator.onLine,
@@ -99,7 +102,7 @@ export function useNetworkStatus(options: UseNetworkStatusOptions = {}): Network
         lastChanged: new Date(),
       };
 
-      setStatus((prev) => {
+      setStatus(prev => {
         // Vérifier si le statut a changé
         if (prev.isOnline !== newStatus.isOnline) {
           if (newStatus.isOnline) {
@@ -124,7 +127,10 @@ export function useNetworkStatus(options: UseNetworkStatusOptions = {}): Network
     window.addEventListener('offline', updateStatus);
 
     // Écouter les changements de connexion (si disponible)
-    const connection = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection;
+    const connection =
+      (navigator as any).connection ||
+      (navigator as any).mozConnection ||
+      (navigator as any).webkitConnection;
     if (connection) {
       connection.addEventListener('change', updateStatus);
     }
@@ -157,21 +163,14 @@ export function useIsOnline(): boolean {
  */
 export function useIsSlowConnection(): boolean {
   const { effectiveType, downlink } = useNetworkStatus({ showToasts: false });
-  
+
   if (effectiveType) {
     return effectiveType === 'slow-2g' || effectiveType === '2g';
   }
-  
+
   if (downlink !== undefined) {
     return downlink < 1.5; // Moins de 1.5 Mbps
   }
-  
+
   return false;
 }
-
-
-
-
-
-
-

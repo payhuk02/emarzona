@@ -1,4 +1,9 @@
-import type { Store, StoreOpeningHours, StoreLegalPages, StoreMarketingContent } from '@/hooks/useStores';
+import type {
+  Store,
+  StoreOpeningHours,
+  StoreLegalPages,
+  StoreMarketingContent,
+} from '@/hooks/useStores';
 
 export interface ExtendedStore extends Omit<
   Store,
@@ -213,7 +218,9 @@ export interface StoreFormState {
 }
 
 export type StoreFormSetters = {
-  [K in keyof StoreFormState as `set${Capitalize<string & K>}`]: React.Dispatch<React.SetStateAction<StoreFormState[K]>>;
+  [K in keyof StoreFormState as `set${Capitalize<string & K>}`]: React.Dispatch<
+    React.SetStateAction<StoreFormState[K]>
+  >;
 };
 
 /** Config object that can be imported/applied from templates or JSON */
