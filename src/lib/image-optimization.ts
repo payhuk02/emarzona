@@ -138,18 +138,17 @@ export async function optimizeImage(
 
     for (const size of sizes) {
       if (originalMetadata.width && originalMetadata.width > size) {
-        const resizedBuffer = await sharp(inputBuffer)
-          .resize(size, null, {
-            fit: 'inside',
-            withoutEnlargement: true,
-          })
-          [format]({
-            quality: Math.min(quality + 5, 95), // Qualité légèrement supérieure pour les petites tailles
-            ...(format === 'jpeg' && { progressive }),
-            ...(format === 'webp' && { effort: 4 }),
-            ...(format === 'avif' && { effort: 4 }),
-          })
-          .toBuffer();
+        const resized = sharp(inputBuffer).resize(size, null, {
+          fit: 'inside',
+          withoutEnlargement: true,
+        });
+        const formatOptions = {
+          quality: Math.min(quality + 5, 95),
+          ...(format === 'jpeg' && { progressive }),
+          ...(format === 'webp' && { effort: 4 }),
+          ...(format === 'avif' && { effort: 4 }),
+        };
+        const resizedBuffer = await resized[format](formatOptions).toBuffer();
 
         sizeBuffers[`${size}w`] = resizedBuffer;
       }
@@ -180,7 +179,7 @@ export async function optimizeImage(
  */
 export function generateSrcSet(sizes: { [key: string]: Buffer }): string {
   return Object.entries(sizes)
-    .map(([size, buffer]) => `/api/images/${size}.webp ${size}`)
+    .map(([size]) => `/api/images/${size}.webp ${size}`)
     .join(', ');
 }
 
@@ -196,126 +195,8 @@ export function getOptimalImageFormat(acceptHeader?: string): 'webp' | 'avif' | 
   return 'jpeg';
 }
 
-/**
- * Valide les dimensions d'une image
- */
-export function validateImageDimensions(
-  width: number,
-  height: number,
-  minWidth = 100,
-  maxWidth = 4000,
-  minHeight = 100,
-  maxHeight = 4000
-): { valid: boolean; error?: string } {
-  if (width < minWidth || height < minHeight) {
-    return {
-      valid: false,
-      error: `Image trop petite. Minimum: ${minWidth}x${minHeight}px`,
-    };
-  }
-
-  if (width > maxWidth || height > maxHeight) {
-    return {
-      valid: false,
-      error: `Image trop grande. Maximum: ${maxWidth}x${maxHeight}px`,
-    };
-  }
-
-  // Vérifier le ratio d'aspect (pas trop extrême)
-  const ratio = Math.max(width / height, height / width);
-  if (ratio > 10) {
-    return {
-      valid: false,
-      error: "Ratio d'aspect trop extrême (max 10:1)",
-    };
-  }
-
-  return { valid: true };
-}
-
-/**
- * Calcule le score SEO d'une image
- */
-export function calculateImageSEOScore(
-  filename: string,
-  alt?: string,
-  width?: number,
-  height?: number
-): {
-  score: number;
-  issues: string[];
-  recommendations: string[];
-} {
-  let score = 100;
-  const issues: string[] = [];
-  const recommendations: string[] = [];
-
-  // Vérifier le nom du fichier
-  if (!filename || filename.includes('image') || filename.includes('img')) {
-    score -= 20;
-    issues.push('Nom de fichier générique (image.jpg, img.png)');
-    recommendations.push('Utiliser un nom descriptif (ex: produit-electronique-bleu.jpg)');
-  }
-
-  // Vérifier l'alt text
-  if (!alt || alt.length < 10) {
-    score -= 30;
-    issues.push('Texte alternatif manquant ou trop court');
-    recommendations.push('Ajouter un texte alternatif descriptif de 10-125 caractères');
-  } else if (alt.length > 125) {
-    score -= 10;
-    issues.push('Texte alternatif trop long');
-    recommendations.push('Limiter le texte alternatif à 125 caractères');
-  }
-
-  // Vérifier les dimensions
-  if (!width || !height) {
-    score -= 15;
-    issues.push("Dimensions d'image non disponibles");
-  } else {
-    if (width < 400) {
-      score -= 10;
-      issues.push("Largeur d'image insuffisante pour mobile");
-      recommendations.push('Utiliser au moins 400px de largeur');
-    }
-    if (width > 2000) {
-      score -= 5;
-      issues.push('Image très large, considérer optimisation');
-    }
-  }
-
-  return {
-    score: Math.max(0, score),
-    issues,
-    recommendations,
-  };
-}
-
-/**
- * Génère des attributs HTML optimisés pour SEO
- */
-export function generateImageSEOAttributes(
-  filename: string,
-  alt: string,
-  width?: number,
-  height?: number,
-  loading: 'lazy' | 'eager' = 'lazy'
-) {
-  const seoScore = calculateImageSEOScore(filename, alt, width, height);
-
-  return {
-    alt,
-    loading,
-    decoding: 'async' as const,
-    width,
-    height,
-    // Attributs pour Core Web Vitals
-    fetchpriority: loading === 'eager' ? ('high' as const) : ('auto' as const),
-    // Métadonnées SEO
-    'data-seo-score': seoScore.score,
-    'data-seo-issues': seoScore.issues.length,
-    // Classes CSS pour optimisation
-    className:
-      `seo-image seo-score-${Math.floor(seoScore.score / 20) * 20} ${loading === 'lazy' ? 'lazy-loaded' : ''}`.trim(),
-  };
-}
+export {
+  validateImageDimensions,
+  calculateImageSEOScore,
+  generateImageSEOAttributes,
+} from '@/lib/image-seo';

@@ -6,12 +6,18 @@
 import { useState, useCallback, useEffect } from 'react';
 import {
   optimizeImage,
-  validateImageDimensions,
-  generateImageSEOAttributes,
   type ImageOptimizationOptions,
   type OptimizedImageResult,
 } from '@/lib/image-optimization';
+import { validateImageDimensions, generateImageSEOAttributes } from '@/lib/image-seo';
 import { logger } from '@/lib/logger';
+
+export { useImagePerformanceMonitoring } from '@/hooks/useImagePerformanceMonitoring';
+export {
+  validateImageDimensions,
+  generateImageSEOAttributes,
+  calculateImageSEOScore,
+} from '@/lib/image-seo';
 
 interface UseImageOptimizationOptions extends ImageOptimizationOptions {
   autoOptimize?: boolean;
@@ -218,7 +224,7 @@ export function useBatchImageOptimization(
     const batchResults: OptimizedImageResult[] = [];
 
     for (let i = 0; i < images.length; i++) {
-      const { file, altText } = images[i];
+      const { file } = images[i];
 
       try {
         const result = await optimizeImage(Buffer.from(await file.arrayBuffer()), options);
@@ -305,57 +311,4 @@ export function useImageFormatSupport() {
   }, []);
 
   return support;
-}
-
-/**
- * Hook pour le monitoring des performances d'images
- */
-export function useImagePerformanceMonitoring() {
-  const [metrics, setMetrics] = useState<{
-    lcp: number[];
-    cls: number[];
-    fid: number[];
-  }>({
-    lcp: [],
-    cls: [],
-    fid: [],
-  });
-
-  const recordMetric = useCallback((type: 'lcp' | 'cls' | 'fid', value: number) => {
-    setMetrics(prev => ({
-      ...prev,
-      [type]: [...prev[type], value].slice(-10), // Garder les 10 dernières mesures
-    }));
-
-    // Logger les métriques critiques
-    if (type === 'lcp' && value > 2500) {
-      logger.warn('LCP trop élevé', { value });
-    }
-    if (type === 'cls' && value > 0.1) {
-      logger.warn('CLS trop élevé', { value });
-    }
-    if (type === 'fid' && value > 100) {
-      logger.warn('FID trop élevé', { value });
-    }
-  }, []);
-
-  const getAverageMetrics = useCallback(() => {
-    return {
-      lcp: metrics.lcp.length > 0 ? metrics.lcp.reduce((a, b) => a + b, 0) / metrics.lcp.length : 0,
-      cls: metrics.cls.length > 0 ? metrics.cls.reduce((a, b) => a + b, 0) / metrics.cls.length : 0,
-      fid: metrics.fid.length > 0 ? metrics.fid.reduce((a, b) => a + b, 0) / metrics.fid.length : 0,
-    };
-  }, [metrics]);
-
-  return {
-    recordMetric,
-    metrics,
-    averages: getAverageMetrics(),
-    // Seuils Core Web Vitals
-    thresholds: {
-      lcp: { good: 2500, needsImprovement: 4000 },
-      cls: { good: 0.1, needsImprovement: 0.25 },
-      fid: { good: 100, needsImprovement: 300 },
-    },
-  };
 }

@@ -4,15 +4,15 @@
  */
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { useImageOptimization, useImagePerformanceMonitoring } from '@/hooks/useImageOptimization';
-import { generateImageSEOAttributes } from '@/lib/image-optimization';
+import { useImagePerformanceMonitoring } from '@/hooks/useImagePerformanceMonitoring';
+import { generateImageSEOAttributes } from '@/lib/image-seo';
 import { generateResponsiveSrcSet } from '@/lib/image-formats';
 import { useAdaptiveLoading } from '@/hooks/useAdaptiveLoading';
 import { cn } from '@/lib/utils';
 
 interface OptimizedImageProps extends Omit<
   React.ImgHTMLAttributes<HTMLImageElement>,
-  'src' | 'alt'
+  'src' | 'alt' | 'onError' | 'onLoad'
 > {
   src: string;
   alt: string;
@@ -24,7 +24,7 @@ interface OptimizedImageProps extends Omit<
   placeholder?: 'blur' | 'empty';
   blurDataURL?: string;
   onLoad?: () => void;
-  onError?: (error: Event) => void;
+  onError?: React.ReactEventHandler<HTMLImageElement>;
 
   // SEO spécifique
   seoScore?: boolean; // Afficher le score SEO dans les dev tools
@@ -100,10 +100,10 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   }, [onLoad, priority, recordMetric]);
 
   const handleError = useCallback(
-    (error: Event) => {
+    (event: React.SyntheticEvent<HTMLImageElement>) => {
       setHasError(true);
       setCurrentSrc('/images/fallback-image.jpg'); // Image de fallback
-      onError?.(error);
+      onError?.(event);
     },
     [onError]
   );
@@ -279,7 +279,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
       )}
 
       {/* Badge SEO (uniquement en développement) */}
-      {seoScore && process.env.NODE_ENV === 'development' && (
+      {seoScore && import.meta.env.DEV && (
         <div className="absolute top-2 right-2 bg-black/75 text-white text-xs px-2 py-1 rounded">
           SEO: {seoAttributes['data-seo-score']}
           {seoAttributes['data-seo-issues'] > 0 && (
