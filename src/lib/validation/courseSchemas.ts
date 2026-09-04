@@ -13,12 +13,12 @@ import {
 
 const courseProductDescriptionWordLimit = z
   .string()
+  .trim()
   .min(50, 'La description doit contenir au moins 50 caractères')
   .refine(
     val => countPlainTextWords(val) <= PRODUCT_DESCRIPTION_MAX_WORDS,
     PRODUCT_DESCRIPTION_WORD_LIMIT_MESSAGE
-  )
-  .trim();
+  );
 
 // Schéma pour une leçon
 export const courseLessonSchema = z.object({

@@ -191,7 +191,7 @@ test.describe('Marketplace — product visibility after wizard publish (E2E)', (
     const admin = createNodeSupabaseClient(supabaseUrl!, supabaseServiceKey!);
     const ctx = await createE2EVendor(admin, 'physical', 'e2e-mp-physical');
     const productName = `Physique marketplace E2E ${ctx.runId}`;
-    const sku = `E2E-MP-${ctx.runId}`;
+    const sku = `E2E-MP-${ctx.runId}`.toUpperCase();
 
     await loginE2EVendor(page, ctx.email, ctx.password, ctx.storeId);
     await openPhysicalCreateWizard(page);

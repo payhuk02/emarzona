@@ -47,7 +47,7 @@ test.describe('Physical wizard — publish (E2E)', () => {
     const admin = createNodeSupabaseClient(supabaseUrl!, supabaseServiceKey!);
     const ctx = await createE2EVendor(admin, 'physical', 'e2e-physical-pub');
     const productName = `Physique publié E2E ${ctx.runId}`;
-    const sku = `E2E-PHY-${ctx.runId}`;
+    const sku = `E2E-PHY-${ctx.runId}`.toUpperCase();
 
     await loginE2EVendor(page, ctx.email, ctx.password, ctx.storeId);
     await openPhysicalCreateWizard(page);

@@ -173,7 +173,7 @@ test.describe('Edit product wizards — smoke (E2E)', () => {
     const ctx = await createE2EVendor(admin, 'physical', 'e2e-edit-physical');
     const originalName = `Physique edit E2E ${ctx.runId}`;
     const updatedName = `${originalName} (modifié)`;
-    const sku = `E2E-EDIT-${ctx.runId}`;
+    const sku = `E2E-EDIT-${ctx.runId}`.toUpperCase();
 
     await loginE2EVendor(page, ctx.email, ctx.password, ctx.storeId);
     await openPhysicalCreateWizard(page);

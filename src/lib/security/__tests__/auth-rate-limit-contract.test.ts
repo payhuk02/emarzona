@@ -22,9 +22,14 @@ describe('auth rate limit security contract', () => {
   });
 
   it('Auth page uses checkAuthRateLimit before submit flows', () => {
-    const src = readFileSync(join(process.cwd(), 'src/pages/Auth.tsx'), 'utf8');
-    expect(src).toContain("checkAuthRateLimit('login'");
-    expect(src).toContain("checkAuthRateLimit('register'");
-    expect(src).toContain("checkAuthRateLimit('reset-password'");
+    const authSrc = readFileSync(join(process.cwd(), 'src/pages/Auth.tsx'), 'utf8');
+    expect(authSrc).toContain("checkAuthRateLimit('login'");
+    expect(authSrc).toContain("checkAuthRateLimit('register'");
+
+    const resetSrc = readFileSync(
+      join(process.cwd(), 'src/components/auth/AuthForgotPasswordDialog.tsx'),
+      'utf8'
+    );
+    expect(resetSrc).toContain("checkAuthRateLimit('reset-password'");
   });
 });
