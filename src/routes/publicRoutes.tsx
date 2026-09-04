@@ -4,6 +4,7 @@ import { Route, Navigate } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
 import { generateStoreUrl, generateProductUrl } from '@/lib/store-utils';
 import { Loader2 } from 'lucide-react';
+import { CommercePageErrorBoundary } from '@/components/errors/CommercePageErrorBoundary';
 
 // Pages publiques
 const Landing = lazyPage(() => import('@/pages/Landing'));
@@ -224,8 +225,22 @@ export const publicRoutes = (
     <Route path="/auth/login" element={<Navigate to="/login" replace />} />
     <Route path="/auth/signup" element={<Navigate to="/register" replace />} />
     <Route path="/auth/sso/:storeSlug" element={<StoreSsoLoginPage />} />
-    <Route path="/marketplace" element={<Marketplace />} />
-    <Route path="/marketplace/category/:categorySlug" element={<Marketplace />} />
+    <Route
+      path="/marketplace"
+      element={
+        <CommercePageErrorBoundary pageName="le marketplace">
+          <Marketplace />
+        </CommercePageErrorBoundary>
+      }
+    />
+    <Route
+      path="/marketplace/category/:categorySlug"
+      element={
+        <CommercePageErrorBoundary pageName="le marketplace">
+          <Marketplace />
+        </CommercePageErrorBoundary>
+      }
+    />
     <Route path="/recommendations" element={<Recommendations />} />
     <Route path="/recommendations/history-based" element={<HistoryBasedRecommendations />} />
     <Route path="/discover" element={<Discover />} />
@@ -235,8 +250,22 @@ export const publicRoutes = (
     <Route path="/community" element={<CommunityPage />} />
     <Route path="/cart" element={<Navigate to="/marketplace" replace />} />
     <Route path="/cart-old" element={<Navigate to="/marketplace" replace />} />
-    <Route path="/checkout" element={<Checkout />} />
-    <Route path="/pay/:storeSlug/:productSlug" element={<Checkout />} />
+    <Route
+      path="/checkout"
+      element={
+        <CommercePageErrorBoundary pageName="le checkout">
+          <Checkout />
+        </CommercePageErrorBoundary>
+      }
+    />
+    <Route
+      path="/pay/:storeSlug/:productSlug"
+      element={
+        <CommercePageErrorBoundary pageName="le checkout">
+          <Checkout />
+        </CommercePageErrorBoundary>
+      }
+    />
     <Route path="/checkout/cart" element={<Navigate to="/marketplace" replace />} />
     <Route path="/cart/checkout" element={<Navigate to="/marketplace" replace />} />
     <Route

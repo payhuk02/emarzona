@@ -61,6 +61,7 @@ const ReferralClaimOnAuth = lazy(() =>
 );
 import { DeferredCurrencyRatesInitializer } from '@/components/currency/DeferredCurrencyRatesInitializer';
 import { AuthenticatedRealtimeNotifications } from '@/components/notifications/AuthenticatedRealtimeNotifications';
+import { ResourceHints } from '@/components/optimization/ResourceHints';
 const PWAInstallPrompt = lazy(() =>
   import('@/components/mobile/PWAInstallPrompt').then(m => ({ default: m.PWAInstallPrompt }))
 );
@@ -271,6 +272,7 @@ const AppContent = () => {
         showDialog
       >
         <SkipLink />
+        <ResourceHints />
         <Suspense fallback={null}>
           <DynamicFavicon />
         </Suspense>

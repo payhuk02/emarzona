@@ -1467,6 +1467,7 @@ export default function Checkout() {
                   : 'XOF'
               }
               buyerCountry={formData.country || null}
+              isMultiStore={isMultiStore}
             />
           </div>
 

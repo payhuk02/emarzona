@@ -61,7 +61,7 @@ export function persistSidebarPersona(
   writeSidebarJsonPref(SIDEBAR_PREF_KEYS.persona, next, userId);
 }
 
-export function useSidebarPersona(isAdmin: boolean) {
+export function useSidebarPersona(isAdmin: boolean, isAdminLoading = false) {
   const { user } = useAuth();
   const userId = user?.id ?? null;
   const location = useLocation();
@@ -74,7 +74,12 @@ export function useSidebarPersona(isAdmin: boolean) {
     setManualPersona(readStoredPersona(userId));
   }, [userId]);
 
-  const persona = resolveNavPersona(location.pathname, isAdmin, manualPersona);
+  const resolved = resolveNavPersona(location.pathname, isAdmin, manualPersona);
+  // Hold admin chrome while the admin check loads to avoid seller/store-switcher flash.
+  const persona: SidebarPersona =
+    isAdminLoading && (manualPersona === 'admin' || location.pathname.startsWith('/admin'))
+      ? 'admin'
+      : resolved;
 
   const setPersona = useCallback(
     (next: SidebarPersona) => {

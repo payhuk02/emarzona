@@ -75,7 +75,19 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       return null;
     }
   });
-  const [loading, setLoading] = useState(true);
+  // Optimistic: guests / public first paint must not wait on Auth→Store waterfall.
+  // Only block when a persisted store id suggests a vendor session is likely.
+  const [loading, setLoading] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (!stored) return false;
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      return uuidRegex.test(stored);
+    } catch {
+      return false;
+    }
+  });
   const [error, setError] = useState<string | null>(null);
 
   // Ref to avoid stale closures in setTimeout and storage event handlers
@@ -273,19 +285,21 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [user?.id, getStoredStoreId, saveStoreIdToStorage]);
 
-  // ✅ FIX: Charger les boutiques de manière plus stable
+  // Charger les boutiques dès que l'auth est résolue (évite loading=true bloqué pendant authLoading)
   useEffect(() => {
-    if (!authLoading && user?.id) {
+    if (authLoading) return;
+
+    if (user?.id) {
       logger.info('🔄 [StoreContext] Chargement initial des boutiques pour user:', user.id);
-      fetchStores();
-    } else if (!authLoading && !user) {
-      // Utilisateur déconnecté
+      void fetchStores();
+    } else {
+      // Invité : ready immédiatement pour marketplace / checkout public
       setStores([]);
       setSelectedStoreIdState(null);
       setLoading(false);
       setError(null);
     }
-  }, [authLoading, user?.id, fetchStores]); // Added missing deps
+  }, [authLoading, user?.id, fetchStores]);
 
   // Calculer la boutique sélectionnée
   const selectedStore = selectedStoreId ? stores.find(s => s.id === selectedStoreId) || null : null;

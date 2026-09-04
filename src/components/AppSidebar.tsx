@@ -96,7 +96,7 @@ export function AppSidebar() {
   const { state, isMobile } = useSidebar();
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAdmin } = useAdmin();
+  const { isAdmin, isLoading: isAdminLoading } = useAdmin();
   const { selectedStoreId, selectedStore } = useStoreContext();
   const { store: detailStore } = useStore();
   const { planSlug } = useStorePhysicalAccess(selectedStoreId);
@@ -110,7 +110,10 @@ export function AppSidebar() {
   const handlePlanLockedNav = usePlanLockNavAction();
   /** Desktop rail only — mobile drawer always shows labels + icons */
   const isCollapsed = state === 'collapsed' && !isMobile;
-  const { persona, setPersona, needsPersonaOnboarding } = useSidebarPersona(isAdmin);
+  const { persona, setPersona, needsPersonaOnboarding } = useSidebarPersona(
+    isAdmin,
+    isAdminLoading
+  );
   const [commandOpen, setCommandOpen] = useState(false);
 
   const [collapsedSections, setCollapsedSections] = useState<string[]>([]);

@@ -1,8 +1,9 @@
-import { ReactNode, useEffect } from 'react';
+import { ReactNode, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { useStore } from '@/hooks/useStore';
 import { useStorePhysicalAccess } from '@/hooks/billing/useStorePhysicalAccess';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   canAccessSellerPath,
   requiredPlanLabelForPath,
@@ -25,10 +26,14 @@ type SellerRoutePermissionGuardProps = {
 function GuardLoadingFallback() {
   return (
     <div
-      className="flex min-h-[40vh] items-center justify-center"
+      className="flex min-h-[40vh] w-full flex-col gap-4 p-6"
       data-testid="seller-route-guard-loading"
+      aria-busy="true"
+      aria-live="polite"
     >
-      <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent" />
+      <Skeleton className="h-8 w-48" />
+      <Skeleton className="h-4 w-72 max-w-full" />
+      <Skeleton className="h-40 w-full rounded-lg" />
     </div>
   );
 }
@@ -45,6 +50,7 @@ export function SellerRoutePermissionGuard({ children }: SellerRoutePermissionGu
   const { store, loading: storeLoading } = useStore();
   const { planSlug, loading: accessLoading } = useStorePhysicalAccess(store?.id ?? null);
   const commerceType = store ? resolveStoreCommerceTypeFromStore(store) : 'physical';
+  const toastedPathRef = useRef<string | null>(null);
 
   const requiredFeature = requiredPhysicalFeatureForPath(location.pathname);
   const allowed = canAccessSellerPath(location.pathname, planSlug, commerceType);
@@ -56,33 +62,41 @@ export function SellerRoutePermissionGuard({ children }: SellerRoutePermissionGu
   const commerceTypeBlocked = !canAccessCommercePath(location.pathname, commerceType, {
     storeMetadata: store?.metadata ?? null,
   });
+  const planBlocked = Boolean(requiredFeature && !allowed);
+  const isRedirecting = physicalOnlyBlocked || commerceTypeBlocked || planBlocked;
+
+  useEffect(() => {
+    toastedPathRef.current = null;
+  }, [location.pathname]);
 
   useEffect(() => {
     if (accountSettingsRoute) return;
     if (storeLoading || accessLoading) return;
 
+    const toastOnce = (title: string, description: string) => {
+      if (toastedPathRef.current === location.pathname) return;
+      toastedPathRef.current = location.pathname;
+      toast({ title, description, variant: 'destructive' });
+    };
+
     if (physicalOnlyBlocked) {
-      toast({
-        title: 'Fonctionnalité non disponible',
-        description:
-          'Cette section concerne uniquement les boutiques produits physiques. Choisissez ce type à la création de boutique pour y accéder.',
-        variant: 'destructive',
-      });
+      toastOnce(
+        'Fonctionnalité non disponible',
+        'Cette section concerne uniquement les boutiques produits physiques. Choisissez ce type à la création de boutique pour y accéder.'
+      );
       navigate('/dashboard', { replace: true });
       return;
     }
 
     if (commerceTypeBlocked) {
-      toast({
-        title: 'Fonctionnalité non disponible',
-        description:
-          commerceRule != null
-            ? `Cette section est réservée au type de boutique correspondant (${commerceRule.label}).`
-            : isGenericProductCreateChooser(location.pathname)
-              ? 'Utilisez le wizard de création adapté à votre type de boutique.'
-              : 'Cette section n’est pas disponible pour le type de boutique sélectionné.',
-        variant: 'destructive',
-      });
+      toastOnce(
+        'Fonctionnalité non disponible',
+        commerceRule != null
+          ? `Cette section est réservée au type de boutique correspondant (${commerceRule.label}).`
+          : isGenericProductCreateChooser(location.pathname)
+            ? 'Utilisez le wizard de création adapté à votre type de boutique.'
+            : 'Cette section n’est pas disponible pour le type de boutique sélectionné.'
+      );
       const redirectTo = isGenericProductCreateChooser(location.pathname)
         ? getPrimaryProductCreatePath(commerceType)
         : '/dashboard';
@@ -93,11 +107,10 @@ export function SellerRoutePermissionGuard({ children }: SellerRoutePermissionGu
     if (!requiredFeature || allowed) return;
 
     const requiredPlan = requiredPlanLabelForPath(location.pathname);
-    toast({
-      title: 'Accès restreint par plan',
-      description: `Cette section requiert le plan ${requiredPlan ?? 'supérieur'}.`,
-      variant: 'destructive',
-    });
+    toastOnce(
+      'Accès restreint par plan',
+      `Cette section requiert le plan ${requiredPlan ?? 'supérieur'}.`
+    );
     navigate('/dashboard/billing/physical', {
       replace: true,
       state: {
@@ -118,16 +131,16 @@ export function SellerRoutePermissionGuard({ children }: SellerRoutePermissionGu
     navigate,
     location.pathname,
     accountSettingsRoute,
+    commerceType,
   ]);
 
   if (accountSettingsRoute) {
     return <>{children}</>;
   }
 
-  if (storeLoading || accessLoading) return <GuardLoadingFallback />;
-  if (physicalOnlyBlocked) return null;
-  if (commerceTypeBlocked) return null;
-  if (requiredFeature && !allowed) return null;
+  if (storeLoading || accessLoading || isRedirecting) {
+    return <GuardLoadingFallback />;
+  }
 
   return <>{children}</>;
 }

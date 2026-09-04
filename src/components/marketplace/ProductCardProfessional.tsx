@@ -23,6 +23,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { ResponsiveProductImage } from '@/components/ui/ResponsiveProductImage';
+import { OptimizedImage } from '@/components/ui/OptimizedImage';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 import { useMarketplaceFavoritesContext } from '@/contexts/MarketplaceFavoritesContext';
@@ -281,12 +282,14 @@ const ProductCardProfessionalComponent = ({
             aria-label="Informations du vendeur"
           >
             {product.stores.logo_url ? (
-              <img
+              <OptimizedImage
                 src={product.stores.logo_url}
                 alt={`Logo de ${product.stores.name}`}
+                width={28}
+                height={28}
                 className="w-6 h-6 sm:w-7 sm:h-7 rounded-full object-cover border border-gray-200 dark:border-gray-700 flex-shrink-0"
-                loading="lazy"
-                decoding="async"
+                lazy
+                sizes="28px"
               />
             ) : (
               <div className="w-6 h-6 sm:w-7 sm:h-7 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center flex-shrink-0">

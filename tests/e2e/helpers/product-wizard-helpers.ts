@@ -23,19 +23,39 @@ export async function waitForWizardMarker(
   marker: Locator,
   label: string
 ): Promise<void> {
-  try {
-    await expect(marker.first()).toBeVisible({ timeout: 90_000 });
-  } catch (error) {
-    const body = (
-      await page
-        .locator('body')
-        .innerText()
-        .catch(() => '')
-    ).slice(0, 2000);
-    throw new Error(`Wizard marker "${label}" not visible — url=${page.url()} body=${body}`, {
-      cause: error,
-    });
+  const formCrash = page.getByTestId('form-error-boundary');
+  const deadline = Date.now() + 90_000;
+
+  while (Date.now() < deadline) {
+    if (await formCrash.isVisible().catch(() => false)) {
+      const body = (
+        await page
+          .locator('body')
+          .innerText()
+          .catch(() => '')
+      ).slice(0, 2000);
+      throw new Error(
+        `Wizard crashed (FormErrorBoundary) before marker "${label}" — url=${page.url()} body=${body}`
+      );
+    }
+    if (
+      await marker
+        .first()
+        .isVisible()
+        .catch(() => false)
+    ) {
+      return;
+    }
+    await page.waitForTimeout(250);
   }
+
+  const body = (
+    await page
+      .locator('body')
+      .innerText()
+      .catch(() => '')
+  ).slice(0, 2000);
+  throw new Error(`Wizard marker "${label}" not visible — url=${page.url()} body=${body}`);
 }
 
 export async function openProductCreateWizard(

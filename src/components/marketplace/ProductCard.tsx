@@ -23,6 +23,7 @@ import { Badge } from '@/components/ui/badge';
 import { useMarketplaceFavoritesContext } from '@/contexts/MarketplaceFavoritesContext';
 import { PriceStockAlertButton } from './PriceStockAlertButton';
 import { ResponsiveProductImage } from '@/components/ui/ResponsiveProductImage';
+import { OptimizedImage } from '@/components/ui/OptimizedImage';
 import { PaymentOptionsBadge, getPaymentOptions } from '@/components/products/PaymentOptionsBadge';
 import { PricingModelBadge } from '@/components/products/PricingModelBadge';
 import {
@@ -265,14 +266,15 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
           {storeInfo && (
             <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
               {storeInfo.logo_url ? (
-                <img
+                <OptimizedImage
                   src={storeInfo.logo_url}
                   alt={`Logo de ${storeInfo.name}`}
+                  width={28}
+                  height={28}
                   className="w-6 h-6 sm:w-7 sm:h-7 rounded-full object-cover border border-gray-200 dark:border-gray-700 flex-shrink-0"
-                  loading="lazy"
-                  decoding="async"
+                  lazy
+                  sizes="28px"
                   onError={e => {
-                    // Fallback si l'image ne charge pas
                     const target = e.target as HTMLImageElement;
                     target.style.display = 'none';
                     const parent = target.parentElement;

@@ -12,7 +12,8 @@ import { Routes, Route } from 'react-router-dom';
 import { StoreSlugProvider } from '@/contexts/StoreSlugContext';
 import { RedirectToPlatformAuth } from '@/components/auth/RedirectToPlatformAuth';
 import { RedirectToPlatformVendorMessaging } from '@/components/auth/RedirectToPlatformVendorMessaging';
-
+import { CommercePageErrorBoundary } from '@/components/errors/CommercePageErrorBoundary';
+import { FeatureErrorBoundary } from '@/components/monitoring/FeatureErrorBoundary';
 const Storefront = lazyPage(() => import('@/pages/Storefront'));
 const ProductDetail = lazyPage(() => import('@/pages/ProductDetail'));
 const ServiceDetail = lazyPage(() => import('@/pages/service/ServiceDetail'));
@@ -75,10 +76,30 @@ export function StoreSubdomainRoutes({ storeSlug }: StoreSubdomainRoutesProps) {
           <Route path="/vendor/messaging/*" element={<RedirectToPlatformVendorMessaging />} />
 
           {/* Panier et checkout */}
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/checkout" element={<Checkout />} />
-          <Route path="/pay/:productSlug" element={<Checkout />} />
-
+          <Route
+            path="/cart"
+            element={
+              <FeatureErrorBoundary featureName="le panier">
+                <Cart />
+              </FeatureErrorBoundary>
+            }
+          />
+          <Route
+            path="/checkout"
+            element={
+              <CommercePageErrorBoundary pageName="le checkout" homeHref="/cart">
+                <Checkout />
+              </CommercePageErrorBoundary>
+            }
+          />
+          <Route
+            path="/pay/:productSlug"
+            element={
+              <CommercePageErrorBoundary pageName="le checkout" homeHref="/">
+                <Checkout />
+              </CommercePageErrorBoundary>
+            }
+          />
           {/* Paiements */}
           <Route path="/payment/success" element={<PaymentSuccess />} />
           <Route path="/payment/cancel" element={<PaymentCancel />} />

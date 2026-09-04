@@ -40,6 +40,12 @@ const steps = [
     args: ['run', 'check:shell-imports'],
   },
   {
+    id: 'zod-chains',
+    label: 'Zod schema chain gate',
+    cmd: 'npm',
+    args: ['run', 'check:zod-schema-chains'],
+  },
+  {
     id: 'i18n-parity',
     label: 'i18n parity (sidebar + checkout)',
     cmd: 'npm',

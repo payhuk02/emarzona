@@ -20,15 +20,15 @@ describe('validateMultiStorePaymentProvider', () => {
     });
     expect(result.allowed).toBe(false);
     if (!result.allowed) {
-      expect(result.message).toMatch(/GeniusPay/i);
+      expect(result.message).toMatch(/MoneyFusion/i);
     }
   });
 
-  it('allows GeniusPay multi-store', () => {
+  it('allows MoneyFusion multi-store', () => {
     expect(
       validateMultiStorePaymentProvider({
         storeCount: 3,
-        provider: 'geniuspay',
+        provider: 'moneyfusion',
         orchestrationEnabled: true,
       }).allowed
     ).toBe(true);

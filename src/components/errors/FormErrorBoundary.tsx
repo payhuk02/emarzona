@@ -91,7 +91,12 @@ export class FormErrorBoundary extends Component<Props, State> {
       // Si trop d'erreurs consécutives, afficher un message différent
       if (errorCount >= 3) {
         return (
-          <Alert variant="destructive" className="my-4">
+          <Alert
+            variant="destructive"
+            className="my-4"
+            data-testid="form-error-boundary"
+            role="alert"
+          >
             <XCircle className="h-4 w-4" />
             <AlertTitle>Erreurs répétées détectées</AlertTitle>
             <AlertDescription className="mt-2 space-y-3">
@@ -116,7 +121,12 @@ export class FormErrorBoundary extends Component<Props, State> {
       }
 
       return (
-        <Alert variant="destructive" className="my-4">
+        <Alert
+          variant="destructive"
+          className="my-4"
+          data-testid="form-error-boundary"
+          role="alert"
+        >
           <XCircle className="h-4 w-4" />
           <AlertTitle>Erreur du formulaire</AlertTitle>
           <AlertDescription className="mt-2 space-y-3">

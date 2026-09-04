@@ -24,6 +24,7 @@ import {
   isPaymentOrchestrationV2Enabled,
 } from '@/lib/payments/feature-flags';
 import { MONEYFUSION_CURRENCIES, normalizeCurrency } from '@/lib/payments/constants';
+import { isConnectCheckoutProvider } from '@/lib/payments/multi-store-checkout';
 
 export type PaymentProvider = CheckoutPaymentProvider;
 
@@ -79,6 +80,8 @@ interface PaymentProviderSelectorProps {
   amount?: number;
   currency?: string;
   buyerCountry?: string | null;
+  /** Panier multi-boutiques : Connect indisponible (MoneyFusion only). */
+  isMultiStore?: boolean;
 }
 
 export function PaymentProviderSelector({
@@ -88,6 +91,7 @@ export function PaymentProviderSelector({
   amount,
   currency = 'XOF',
   buyerCountry,
+  isMultiStore = false,
 }: PaymentProviderSelectorProps) {
   const { user } = useAuth();
   const orchestrationV2 = isPaymentOrchestrationV2Enabled();
@@ -142,8 +146,12 @@ export function PaymentProviderSelector({
       mapped.push(moneyfusionOption);
     }
 
-    return mapped.filter(p => p.value !== 'geniuspay');
-  }, [orchestrationV2, storeId, rpcOptions, currency]);
+    return mapped
+      .filter(p => p.value !== 'geniuspay')
+      .map(p =>
+        isMultiStore && isConnectCheckoutProvider(p.value) ? { ...p, available: false } : p
+      );
+  }, [orchestrationV2, storeId, rpcOptions, currency, isMultiStore]);
 
   useEffect(() => {
     const loadUserPreference = async () => {
@@ -205,6 +213,13 @@ export function PaymentProviderSelector({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- auto-select single option
   }, [availableProviders.length, availableProviders[0]?.value]);
 
+  useEffect(() => {
+    if (!isMultiStore || !value || !isConnectCheckoutProvider(value)) return;
+    const moneyfusion = availableProviders.find(p => p.value === 'moneyfusion');
+    if (moneyfusion) handleProviderChange('moneyfusion');
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- force MoneyFusion on multi-store
+  }, [isMultiStore, value, availableProviders]);
+
   if (isLoading && orchestrationV2 && storeId) {
     return (
       <Card>
@@ -244,6 +259,15 @@ export function PaymentProviderSelector({
         <CardDescription>Choisissez comment vous souhaitez payer</CardDescription>
       </CardHeader>
       <CardContent>
+        {isMultiStore && (
+          <Alert className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Panier multi-boutiques : seul le mobile money (MoneyFusion) permet de payer toutes les
+              boutiques en une fois. Carte et PayPal restent disponibles boutique par boutique.
+            </AlertDescription>
+          </Alert>
+        )}
         <RadioGroup
           value={value}
           onValueChange={v => handleProviderChange(v as CheckoutPaymentProvider)}
