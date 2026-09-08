@@ -4,6 +4,7 @@ import {
   isGeniusPayEnabled,
   isMoneyFusionEnabled,
   isMoneyFusionOnlyEnabled,
+  isPaiementProEnabled,
   isPaymentOrchestrationV2Enabled,
   isPaymentOrchestrationV2EnabledForStore,
 } from '../feature-flags';
@@ -143,13 +144,35 @@ describe('isMoneyFusionOnlyEnabled', () => {
     vi.unstubAllEnvs();
   });
 
-  it('is always enabled (GeniusPay retiré de la plateforme)', () => {
-    vi.stubEnv('VITE_MONEYFUSION_ONLY', '');
+  it('is enabled by default when Paiement Pro is off', () => {
+    vi.stubEnv('VITE_PAIEMENT_PRO_ENABLED', '');
     expect(isMoneyFusionOnlyEnabled()).toBe(true);
   });
 
-  it('stays enabled even when env tries to disable', () => {
+  it('stays enabled even when VITE_MONEYFUSION_ONLY tries to disable', () => {
+    vi.stubEnv('VITE_PAIEMENT_PRO_ENABLED', 'false');
     vi.stubEnv('VITE_MONEYFUSION_ONLY', 'false');
     expect(isMoneyFusionOnlyEnabled()).toBe(true);
+  });
+
+  it('is disabled when Paiement Pro is enabled', () => {
+    vi.stubEnv('VITE_PAIEMENT_PRO_ENABLED', 'true');
+    expect(isMoneyFusionOnlyEnabled()).toBe(false);
+  });
+});
+
+describe('isPaiementProEnabled', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it('defaults to false', () => {
+    vi.stubEnv('VITE_PAIEMENT_PRO_ENABLED', '');
+    expect(isPaiementProEnabled()).toBe(false);
+  });
+
+  it('can be enabled via env', () => {
+    vi.stubEnv('VITE_PAIEMENT_PRO_ENABLED', 'true');
+    expect(isPaiementProEnabled()).toBe(true);
   });
 });

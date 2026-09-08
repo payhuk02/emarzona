@@ -43,11 +43,15 @@ export const GENIUSPAY_PLATFORM_CURRENCIES = new Set(['XOF', 'XAF', 'EUR', 'USD'
 /** MoneyFusion (FusionPay) — Mobile Money Afrique de l'Ouest (XOF) */
 export const MONEYFUSION_CURRENCIES = new Set(['XOF']);
 
+/** Paiement Pro — XOF (Côte d'Ivoire / UEMOA) */
+export const PAIEMENT_PRO_CURRENCIES = new Set(['XOF']);
+
 /** Flutterwave retiré du routage actif — GeniusPay retiré (historique uniquement) */
 export const PROVIDER_PRIORITY: PaymentProviderCode[] = [
   'stripe_connect',
   'paypal_commerce',
   'moneyfusion',
+  'paiement_pro',
 ];
 
 export function normalizeCurrency(currency?: string | null): string {

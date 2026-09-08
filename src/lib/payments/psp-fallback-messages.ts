@@ -1,6 +1,7 @@
 import type { PaymentProviderCode } from '@/types/store-payment-connection';
 
 const PROVIDER_LABELS: Partial<Record<PaymentProviderCode, string>> = {
+  paiement_pro: 'Paiement Pro',
   stripe_connect: 'Stripe',
   paypal_commerce: 'PayPal',
   flutterwave_connect: 'Flutterwave',

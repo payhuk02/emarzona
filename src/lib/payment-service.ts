@@ -64,6 +64,9 @@ function toOrchestratorPreferred(provider?: PaymentProvider): PaymentProviderCod
   if (provider === 'moneyfusion') {
     return 'moneyfusion';
   }
+  if (provider === 'paiement_pro') {
+    return 'paiement_pro';
+  }
   return provider as PaymentProviderCode;
 }
 
@@ -152,6 +155,47 @@ async function initiateMoneyFusionOnly(options: PaymentOptions): Promise<Payment
   }
 }
 
+async function initiatePaiementProOnly(options: PaymentOptions): Promise<PaymentResult> {
+  try {
+    const { createPaiementProPayment } = await import('./payments/adapters/paiement-pro-adapter');
+    const result = await createPaiementProPayment({
+      storeId: options.storeId,
+      productId: options.productId,
+      orderId: options.orderId,
+      customerId: options.customerId,
+      amount: options.amount,
+      currency: options.currency,
+      description: options.description,
+      customerEmail: options.customerEmail,
+      customerName: options.customerName,
+      customerPhone: options.customerPhone,
+      metadata: options.metadata,
+      returnUrl: options.returnUrl,
+      cancelUrl: options.cancelUrl,
+    });
+
+    return {
+      success: result.success && !!result.checkout_url,
+      transaction_id: result.transaction_id,
+      checkout_url: result.checkout_url ?? '',
+      provider: 'paiement_pro',
+      provider_transaction_id: result.provider_transaction_id,
+      error: result.error,
+    };
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Impossible d'initialiser le paiement Paiement Pro";
+    logger.error('Paiement Pro initiation failed', { error });
+    return {
+      success: false,
+      transaction_id: '',
+      checkout_url: '',
+      provider: 'paiement_pro',
+      error: message,
+    };
+  }
+}
+
 export const initiatePayment = async (options: PaymentOptions): Promise<PaymentResult> => {
   const { supabase } = await import('@/integrations/supabase/client');
   const {
@@ -186,6 +230,11 @@ export const initiatePayment = async (options: PaymentOptions): Promise<PaymentR
   // Rail plateforme : MoneyFusion uniquement (GeniusPay retiré).
   if (isMoneyFusionOnlyEnabled()) {
     return initiateMoneyFusionOnly({ ...resolvedOptions, provider: 'moneyfusion' });
+  }
+
+  // Choix explicite Paiement Pro (hors / avant orchestrateur Connect)
+  if (resolvedOptions.provider === 'paiement_pro') {
+    return initiatePaiementProOnly({ ...resolvedOptions, provider: 'paiement_pro' });
   }
 
   if (isPaymentOrchestrationV2EnabledForStore(resolvedOptions.storeId)) {
@@ -285,8 +334,11 @@ export const verifyTransactionStatus = async (
   const isMoneyFusion =
     resolvedProvider === 'moneyfusion' ||
     resolvedProvider === 'geniuspay_platform' ||
-    resolvedProvider === 'geniuspay' ||
-    !transaction?.geniuspay_transaction_id;
+    resolvedProvider === 'geniuspay';
+
+  if (resolvedProvider === 'paiement_pro') {
+    return transaction ?? { id: transactionId, status: 'unknown' };
+  }
 
   // Invité : RLS bloque la lecture de transactions → appeler l'Edge avec transactionId seul
   if (isMoneyFusion) {

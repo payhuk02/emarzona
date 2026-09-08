@@ -2,6 +2,7 @@ import {
   getPaymentOrchestrationV2RolloutPercent,
   isMoneyFusionEnabled,
   isMoneyFusionOnlyEnabled,
+  isPaiementProEnabled,
   isPaymentOrchestrationV2Enabled,
   isPaymentOrchestrationV2EnabledForStore,
 } from './feature-flags';
@@ -30,6 +31,7 @@ export {
   isPaymentOrchestrationV2EnabledForStore,
   isMoneyFusionEnabled,
   isMoneyFusionOnlyEnabled,
+  isPaiementProEnabled,
   getPaymentOrchestrationV2RolloutPercent,
   createOrchestratedPayment,
   resolvePaymentProvider,

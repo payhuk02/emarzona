@@ -1,6 +1,7 @@
 import {
   FLUTTERWAVE_CONNECT_CURRENCIES,
   MONEYFUSION_CURRENCIES,
+  PAIEMENT_PRO_CURRENCIES,
   PAYPAL_COMMERCE_CURRENCIES,
   PROVIDER_PRIORITY,
   STRIPE_CONNECT_CURRENCIES,
@@ -10,6 +11,7 @@ import {
 } from '../constants';
 import type { PaymentProviderCode, StorePaymentConnection } from '../types';
 import type { ResolveProviderInput, ResolvedPaymentProvider } from '../types';
+import { isPaiementProEnabled } from '../feature-flags';
 
 function findConnection(
   connections: StorePaymentConnection[],
@@ -36,6 +38,8 @@ function isProviderCompatible(
       return FLUTTERWAVE_CONNECT_CURRENCIES.has(currency);
     case 'moneyfusion':
       return MONEYFUSION_CURRENCIES.has(currency);
+    case 'paiement_pro':
+      return isPaiementProEnabled() && PAIEMENT_PRO_CURRENCIES.has(currency);
     case 'geniuspay_platform':
       // GeniusPay retiré — ne plus router vers ce rail
       return false;
@@ -54,6 +58,18 @@ export function resolvePaymentProvider(input: ResolveProviderInput): ResolvedPay
   const activeConnections = input.connections.filter(isConnectionActive);
 
   if (input.forcePlatformPayments) {
+    if (
+      input.buyerPreferredProvider === 'paiement_pro' &&
+      isPaiementProEnabled() &&
+      PAIEMENT_PRO_CURRENCIES.has(currency)
+    ) {
+      const ppConn = findConnection(activeConnections, 'paiement_pro');
+      return {
+        provider: 'paiement_pro',
+        connectionId: ppConn?.id ?? null,
+        reason: 'store_force_platform_payments_buyer_preference',
+      };
+    }
     const moneyfusion = findConnection(activeConnections, 'moneyfusion');
     return {
       provider: 'moneyfusion',
@@ -82,6 +98,19 @@ export function resolvePaymentProvider(input: ResolveProviderInput): ResolvedPay
       };
     }
 
+    if (
+      input.buyerPreferredProvider === 'paiement_pro' &&
+      isPaiementProEnabled() &&
+      PAIEMENT_PRO_CURRENCIES.has(currency)
+    ) {
+      const ppConn = findConnection(activeConnections, 'paiement_pro');
+      return {
+        provider: 'paiement_pro',
+        connectionId: ppConn?.id ?? null,
+        reason: 'buyer_preference',
+      };
+    }
+
     const preferred = findConnection(activeConnections, input.buyerPreferredProvider);
     if (preferred && isProviderCompatible(input.buyerPreferredProvider, currency, preferred)) {
       return {
@@ -100,6 +129,11 @@ export function resolvePaymentProvider(input: ResolveProviderInput): ResolvedPay
         connectionId: mfConn?.id ?? null,
         reason: 'auto_routing_moneyfusion',
       };
+    }
+
+    if (provider === 'paiement_pro') {
+      // Ne pas auto-router vers PP (choix acheteur explicite) — MoneyFusion reste défaut
+      continue;
     }
 
     const connection = findConnection(activeConnections, provider);

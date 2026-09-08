@@ -6,6 +6,7 @@
 export type PaymentProviderCode =
   | 'geniuspay_platform'
   | 'moneyfusion'
+  | 'paiement_pro'
   | 'stripe_connect'
   | 'paypal_commerce'
   | 'flutterwave_connect';

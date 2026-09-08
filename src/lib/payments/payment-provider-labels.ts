@@ -10,6 +10,8 @@ export function getPaymentProviderLabel(provider: string | null | undefined): st
       return 'MoneyFusion';
     case 'moneyfusion':
       return 'MoneyFusion';
+    case 'paiement_pro':
+      return 'Paiement Pro';
     case 'flutterwave_connect':
       return 'Flutterwave';
     default:

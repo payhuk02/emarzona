@@ -28,7 +28,7 @@ export function validateMultiStorePaymentProvider(params: {
     return {
       allowed: false,
       message:
-        'Le panier contient plusieurs boutiques : seul le mobile money (MoneyFusion) est disponible pour payer en une fois. Choisissez MoneyFusion ou retirez des articles pour payer par carte/PayPal boutique par boutique.',
+        'Le panier contient plusieurs boutiques : seul un rail plateforme (MoneyFusion ou Paiement Pro) est disponible pour payer en une fois. Choisissez un rail plateforme ou retirez des articles pour payer par carte/PayPal boutique par boutique.',
     };
   }
 

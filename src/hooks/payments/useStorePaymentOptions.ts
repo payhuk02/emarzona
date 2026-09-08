@@ -11,11 +11,13 @@ import { logger } from '@/lib/logger';
 export type CheckoutPaymentProvider =
   | 'geniuspay'
   | 'moneyfusion'
-  | Exclude<PaymentProviderCode, 'geniuspay_platform' | 'moneyfusion'>;
+  | 'paiement_pro'
+  | Exclude<PaymentProviderCode, 'geniuspay_platform' | 'moneyfusion' | 'paiement_pro'>;
 
 export function rpcProviderToCheckout(provider: string): CheckoutPaymentProvider {
   if (provider === 'geniuspay_platform' || provider === 'geniuspay') return 'moneyfusion';
   if (provider === 'moneyfusion') return 'moneyfusion';
+  if (provider === 'paiement_pro') return 'paiement_pro';
   if (
     provider === 'stripe_connect' ||
     provider === 'paypal_commerce' ||

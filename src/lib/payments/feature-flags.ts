@@ -89,9 +89,22 @@ export function isMoneyFusionEnabled(): boolean {
 }
 
 /**
- * MoneyFusion uniquement pour le checkout plateforme (mobile money).
- * Masque GeniusPay et interdit tout fallback GeniusPay.
+ * Paiement Pro — second rail plateforme (cartes + mobile money CI).
+ * Opt-in via `VITE_PAIEMENT_PRO_ENABLED=true` (défaut off jusqu'aux secrets prod).
+ */
+export function isPaiementProEnabled(): boolean {
+  const env = viteEnv('VITE_PAIEMENT_PRO_ENABLED');
+  if (env !== undefined && env !== '') {
+    return TRUE_VALUES.has(String(env).toLowerCase());
+  }
+  return false;
+}
+
+/**
+ * MoneyFusion seul pour le checkout plateforme.
+ * Désactivé dès que Paiement Pro est activé (sélecteur multi-rails).
  */
 export function isMoneyFusionOnlyEnabled(): boolean {
+  if (isPaiementProEnabled()) return false;
   return true;
 }

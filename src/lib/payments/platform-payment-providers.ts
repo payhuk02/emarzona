@@ -2,7 +2,7 @@
  * Providers de checkout plateforme (rail live + historique).
  * MoneyFusion = live ; GeniusPay = legacy (stats/recon historiques).
  */
-export const PLATFORM_CHECKOUT_PROVIDERS = ['moneyfusion', 'geniuspay'] as const;
+export const PLATFORM_CHECKOUT_PROVIDERS = ['moneyfusion', 'paiement_pro', 'geniuspay'] as const;
 
 export type PlatformCheckoutProvider = (typeof PLATFORM_CHECKOUT_PROVIDERS)[number];
 
@@ -24,7 +24,7 @@ export function resolveExternalPaymentId(tx: {
   geniuspay_transaction_id?: string | null;
 }): string | null {
   const provider = (tx.payment_provider || '').toLowerCase();
-  if (provider === 'moneyfusion') {
+  if (provider === 'moneyfusion' || provider === 'paiement_pro') {
     return (tx.payment_id || tx.geniuspay_transaction_id || '').trim() || null;
   }
   if (provider === 'geniuspay') {

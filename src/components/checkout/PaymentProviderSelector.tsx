@@ -21,9 +21,14 @@ import {
 import {
   isMoneyFusionEnabled,
   isMoneyFusionOnlyEnabled,
+  isPaiementProEnabled,
   isPaymentOrchestrationV2Enabled,
 } from '@/lib/payments/feature-flags';
-import { MONEYFUSION_CURRENCIES, normalizeCurrency } from '@/lib/payments/constants';
+import {
+  MONEYFUSION_CURRENCIES,
+  PAIEMENT_PRO_CURRENCIES,
+  normalizeCurrency,
+} from '@/lib/payments/constants';
 import { isConnectCheckoutProvider } from '@/lib/payments/multi-store-checkout';
 
 export type PaymentProvider = CheckoutPaymentProvider;
@@ -52,6 +57,12 @@ const PROVIDER_META: Record<
     description: 'Paiement mobile money (XOF)',
     icon: <Wallet className="h-5 w-5" />,
     features: ['Mobile money', 'XOF'],
+  },
+  paiement_pro: {
+    label: 'Carte & mobile money',
+    description: 'Paiement Pro — carte bancaire, Orange, MTN, Moov, Wave (XOF)',
+    icon: <CreditCard className="h-5 w-5" />,
+    features: ['Carte', 'Mobile money', 'XOF'],
   },
   stripe_connect: {
     label: 'Carte bancaire (Stripe)',
@@ -110,16 +121,29 @@ export function PaymentProviderSelector({
   const providers = useMemo((): PaymentProviderOption[] => {
     const currencyNorm = normalizeCurrency(currency);
     const moneyfusionOk = isMoneyFusionEnabled() && MONEYFUSION_CURRENCIES.has(currencyNorm);
+    const paiementProOk = isPaiementProEnabled() && PAIEMENT_PRO_CURRENCIES.has(currencyNorm);
 
     const moneyfusionOption: PaymentProviderOption = {
       value: 'moneyfusion',
       ...PROVIDER_META.moneyfusion,
       available: true,
     };
+    const paiementProOption: PaymentProviderOption = {
+      value: 'paiement_pro',
+      ...PROVIDER_META.paiement_pro,
+      available: true,
+    };
 
-    // GeniusPay retiré — MoneyFusion est le rail plateforme.
+    // Rails plateforme uniquement (MoneyFusion ± Paiement Pro)
     if (isMoneyFusionOnlyEnabled()) {
       return moneyfusionOk ? [moneyfusionOption] : [];
+    }
+
+    if (paiementProOk && (!orchestrationV2 || !storeId)) {
+      const rails: PaymentProviderOption[] = [];
+      if (moneyfusionOk) rails.push(moneyfusionOption);
+      rails.push(paiementProOption);
+      return rails;
     }
 
     if (!orchestrationV2 || !storeId) {
@@ -144,6 +168,9 @@ export function PaymentProviderSelector({
 
     if (moneyfusionOk && !mapped.some(p => p.value === 'moneyfusion')) {
       mapped.push(moneyfusionOption);
+    }
+    if (paiementProOk && !mapped.some(p => p.value === 'paiement_pro')) {
+      mapped.push(paiementProOption);
     }
 
     return mapped
@@ -171,11 +198,13 @@ export function PaymentProviderSelector({
             ? 'moneyfusion'
             : pref === 'moneyfusion'
               ? 'moneyfusion'
-              : pref === 'stripe_connect' ||
-                  pref === 'paypal_commerce' ||
-                  pref === 'flutterwave_connect'
-                ? pref
-                : 'moneyfusion';
+              : pref === 'paiement_pro'
+                ? 'paiement_pro'
+                : pref === 'stripe_connect' ||
+                    pref === 'paypal_commerce' ||
+                    pref === 'flutterwave_connect'
+                  ? pref
+                  : 'moneyfusion';
 
         const match = providers.find(p => p.value === checkoutPref);
         if (match) onChange(match.value);
@@ -215,9 +244,11 @@ export function PaymentProviderSelector({
 
   useEffect(() => {
     if (!isMultiStore || !value || !isConnectCheckoutProvider(value)) return;
-    const moneyfusion = availableProviders.find(p => p.value === 'moneyfusion');
-    if (moneyfusion) handleProviderChange('moneyfusion');
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- force MoneyFusion on multi-store
+    const platform =
+      availableProviders.find(p => p.value === 'moneyfusion') ||
+      availableProviders.find(p => p.value === 'paiement_pro');
+    if (platform) handleProviderChange(platform.value);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- force platform rail on multi-store
   }, [isMultiStore, value, availableProviders]);
 
   if (isLoading && orchestrationV2 && storeId) {
@@ -263,8 +294,9 @@ export function PaymentProviderSelector({
           <Alert className="mb-4">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              Panier multi-boutiques : seul le mobile money (MoneyFusion) permet de payer toutes les
-              boutiques en une fois. Carte et PayPal restent disponibles boutique par boutique.
+              Panier multi-boutiques : seul un rail plateforme (MoneyFusion ou Paiement Pro) permet
+              de payer toutes les boutiques en une fois. Carte Stripe et PayPal restent disponibles
+              boutique par boutique.
             </AlertDescription>
           </Alert>
         )}

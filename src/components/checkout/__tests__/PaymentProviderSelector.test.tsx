@@ -11,6 +11,7 @@ vi.mock('@/lib/payments/feature-flags', () => ({
   isPaymentOrchestrationV2Enabled: vi.fn(() => false),
   isMoneyFusionEnabled: vi.fn(() => true),
   isMoneyFusionOnlyEnabled: vi.fn(() => true),
+  isPaiementProEnabled: vi.fn(() => false),
 }));
 
 vi.mock('@/hooks/payments/useStorePaymentOptions', () => ({

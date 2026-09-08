@@ -4,6 +4,7 @@
 
 import { logger } from '@/lib/logger';
 import { createMoneyFusionPayment } from '../adapters/moneyfusion-adapter';
+import { createPaiementProPayment } from '../adapters/paiement-pro-adapter';
 import { createStripeConnectPayment } from '../adapters/stripe-connect-adapter';
 import { createPayPalCommercePayment } from '../adapters/paypal-commerce-adapter';
 import type {
@@ -22,6 +23,9 @@ async function executeProviderPayment(
   switch (provider) {
     case 'moneyfusion':
       return createMoneyFusionPayment({ ...request, connections: request.connections });
+
+    case 'paiement_pro':
+      return createPaiementProPayment({ ...request, connections: request.connections });
 
     case 'stripe_connect':
       return createStripeConnectPayment(request);
