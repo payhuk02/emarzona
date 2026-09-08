@@ -53,11 +53,24 @@ function parseReturnContext(raw: unknown): Record<string, unknown> {
 
 /** True if payload looks like a Paiement Pro notification (not our create_checkout). */
 export function looksLikePaiementProWebhook(payload: Record<string, unknown>): boolean {
-  if (payload.action === 'create_checkout' || payload.action === 'ping') return false;
-  if (payload.data && typeof payload.data === 'object') return false;
+  if (payload.action === 'create_checkout' || payload.action === 'ping' || payload.action === 'verify_payment') {
+    return false;
+  }
+  // Nested create body from our client — never treat as webhook
+  if (
+    payload.data &&
+    typeof payload.data === 'object' &&
+    !Array.isArray(payload.data) &&
+    (payload.action === 'create_checkout' ||
+      ('customer_email' in (payload.data as object) && 'storeId' in (payload.data as object)))
+  ) {
+    return false;
+  }
+
   const hasRef = !!(payload.referenceNumber || payload.referencenumber || payload.reference);
   const hasHash = !!(payload.hashcode || payload.hashCode);
-  const hasCode = payload.responsecode != null || payload.responseCode != null || payload.code != null;
+  const hasCode =
+    payload.responsecode != null || payload.responseCode != null || payload.code != null;
   return hasRef && (hasHash || hasCode);
 }
 

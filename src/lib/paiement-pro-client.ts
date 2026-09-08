@@ -78,6 +78,38 @@ class PaiementProClient {
   async createCheckout(checkoutData: PaiementProCheckoutData): Promise<PaiementProCheckoutResult> {
     return (await this.callFunction('create_checkout', checkoutData)) as PaiementProCheckoutResult;
   }
+
+  async verifyPayment(params: {
+    transactionId?: string;
+    orderId?: string;
+    returnPayload?: Record<string, unknown>;
+  }): Promise<{
+    status?: string;
+    completed?: boolean;
+    alreadyCompleted?: boolean;
+    transactionId?: string;
+    orderId?: string | null;
+  }> {
+    return (await this.callFunction('verify_payment', {
+      transactionId: params.transactionId,
+      orderId: params.orderId,
+      return_payload: params.returnPayload,
+    })) as {
+      status?: string;
+      completed?: boolean;
+      alreadyCompleted?: boolean;
+      transactionId?: string;
+      orderId?: string | null;
+    };
+  }
+
+  async verifyPaymentByTransaction(transactionId: string): Promise<unknown> {
+    return this.verifyPayment({ transactionId });
+  }
+
+  async verifyPaymentByOrder(orderId: string): Promise<unknown> {
+    return this.verifyPayment({ orderId });
+  }
 }
 
 export const paiementProClient = new PaiementProClient();

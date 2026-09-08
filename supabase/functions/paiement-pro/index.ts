@@ -93,6 +93,88 @@ serve(async req => {
       });
     }
 
+    if (action === 'verify_payment') {
+      const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+      const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+      const supabase = createClient(supabaseUrl, serviceKey);
+
+      const transactionId = String(data.transactionId || data.transaction_id || '').trim();
+      const orderIdVerify = String(data.orderId || data.order_id || '').trim();
+      const returnPayload =
+        data.return_payload && typeof data.return_payload === 'object'
+          ? (data.return_payload as Record<string, unknown>)
+          : data;
+
+      // Si le retour navigateur contient responsecode/hashcode → traiter comme webhook
+      if (looksLikePaiementProWebhook(returnPayload)) {
+        const raw = JSON.stringify(returnPayload);
+        const webhookRes = await handlePaiementProWebhookRaw(raw, corsHeaders);
+        const webhookJson = (await webhookRes.json().catch(() => ({}))) as Record<string, unknown>;
+        if (webhookRes.ok && (webhookJson.status === 'completed' || webhookJson.success === true)) {
+          return new Response(
+            JSON.stringify({
+              success: true,
+              data: {
+                status: webhookJson.status === 'failed' ? 'failed' : 'completed',
+                completed: webhookJson.status !== 'failed',
+                transactionId: webhookJson.transactionId || transactionId || null,
+                orderId: webhookJson.orderId || orderIdVerify || null,
+              },
+            }),
+            { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+      }
+
+      let tx: Record<string, unknown> | null = null;
+      if (transactionId && isValidUUID(transactionId)) {
+        const { data: row } = await supabase
+          .from('transactions')
+          .select('id,status,order_id,payment_id,payment_provider')
+          .eq('id', transactionId)
+          .eq('payment_provider', 'paiement_pro')
+          .maybeSingle();
+        tx = row as Record<string, unknown> | null;
+      }
+      if (!tx && orderIdVerify && isValidUUID(orderIdVerify)) {
+        const { data: row } = await supabase
+          .from('transactions')
+          .select('id,status,order_id,payment_id,payment_provider')
+          .eq('order_id', orderIdVerify)
+          .eq('payment_provider', 'paiement_pro')
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        tx = row as Record<string, unknown> | null;
+      }
+
+      if (!tx) {
+        return new Response(
+          JSON.stringify({
+            success: true,
+            data: { status: 'processing', completed: false, message: 'transaction_not_found' },
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const status = String(tx.status || 'processing');
+      return new Response(
+        JSON.stringify({
+          success: true,
+          data: {
+            status,
+            completed: status === 'completed',
+            alreadyCompleted: status === 'completed',
+            transactionId: tx.id,
+            orderId: (tx.order_id as string | null) ?? (orderIdVerify || null),
+            payment_id: tx.payment_id ?? null,
+          },
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     if (action !== 'create_checkout') {
       return new Response(JSON.stringify({ error: 'Action non supportée', action }), {
         status: 400,
@@ -249,8 +331,8 @@ serve(async req => {
       /* keep */
     }
 
-    // Même fonction = create + webhook (limite plan Supabase)
-    const webhookUrl = `${supabaseUrl}/functions/v1/paiement-pro`;
+    // Même fonction = create + webhook (limite plan Supabase) — ?webhook=1 force le routage
+    const webhookUrl = `${supabaseUrl}/functions/v1/paiement-pro?webhook=1`;
     const { first, last } = splitName(
       data.customer_name ? String(data.customer_name) : customerEmail.split('@')[0]
     );

@@ -27,10 +27,11 @@ type GuestAccessState = 'idle' | 'loading' | 'redirecting' | 'failed';
 
 function mapUrlProviderToPaymentProvider(
   provider: string | null
-): 'moneyfusion' | 'geniuspay' | 'stripe_connect' | 'paypal_commerce' | undefined {
+): 'moneyfusion' | 'paiement_pro' | 'geniuspay' | 'stripe_connect' | 'paypal_commerce' | undefined {
   if (!provider) return undefined;
   if (provider === 'stripe' || provider === 'stripe_connect') return 'stripe_connect';
   if (provider === 'paypal' || provider === 'paypal_commerce') return 'paypal_commerce';
+  if (provider === 'paiement_pro' || provider === 'paiementpro') return 'paiement_pro';
   if (provider === 'moneyfusion' || provider === 'geniuspay' || provider === 'geniuspay_platform') {
     return 'moneyfusion';
   }
@@ -118,6 +119,7 @@ const PaymentSuccess = () => {
       try {
         let txId = transactionId;
         const mappedProvider = mapUrlProviderToPaymentProvider(providerParam);
+        const isPaiementPro = mappedProvider === 'paiement_pro' || providerParam === 'paiement_pro';
 
         // Retour MoneyFusion parfois sans transaction_id dans l'URL → lookup
         if (!txId && orderId) {
@@ -132,8 +134,53 @@ const PaymentSuccess = () => {
           txId = pendingTx?.id ?? null;
         }
 
-        // Invité / RLS : forcer verify Edge par order_id (service role)
-        if (orderId && (!txId || isGuestReturn)) {
+        // Paiement Pro : verify Edge (retour URL avec responsecode/hashcode ou statut DB)
+        if (isPaiementPro) {
+          try {
+            const { paiementProClient } = await import('@/lib/paiement-pro-client');
+            const returnPayload: Record<string, unknown> = {};
+            for (const key of [
+              'referenceNumber',
+              'referencenumber',
+              'reference',
+              'hashcode',
+              'hashCode',
+              'responsecode',
+              'responseCode',
+              'amount',
+              'merchantId',
+              'customerId',
+              'transactiondt',
+              'returnContext',
+            ]) {
+              const v = searchParams.get(key);
+              if (v != null) returnPayload[key] = v;
+            }
+            const byPp = await paiementProClient.verifyPayment({
+              transactionId: txId || undefined,
+              orderId: orderId || undefined,
+              returnPayload: Object.keys(returnPayload).length > 0 ? returnPayload : undefined,
+            });
+            const edgeStatus = String(byPp?.status || '').toLowerCase();
+            if (
+              edgeStatus === 'completed' ||
+              byPp?.completed === true ||
+              byPp?.alreadyCompleted === true
+            ) {
+              setConfirmationState('confirmed');
+              if (orderId) await loadOrderInfo(orderId);
+              return;
+            }
+            if (byPp?.transactionId) {
+              txId = byPp.transactionId;
+            }
+          } catch (err) {
+            logger.warn('Paiement Pro verify via Edge failed', { err, orderId, txId });
+          }
+        }
+
+        // Invité / RLS : forcer verify Edge MoneyFusion par order_id (service role)
+        if (!isPaiementPro && orderId && (!txId || isGuestReturn)) {
           try {
             const { moneyfusionClient } = await import('@/lib/moneyfusion-client');
             const byOrder = (await moneyfusionClient.verifyPaymentByOrder(orderId)) as {
@@ -193,30 +240,48 @@ const PaymentSuccess = () => {
               return;
             }
 
-            // Re-vérifier via Edge (order ou transaction) pendant le polling
+            // Re-vérifier via Edge pendant le polling
             if (attempt > 0 && attempt % 2 === 0) {
               try {
-                const { moneyfusionClient } = await import('@/lib/moneyfusion-client');
-                const again = txId
-                  ? ((await moneyfusionClient.verifyPaymentByTransaction(txId)) as {
-                      status?: string;
-                      completed?: boolean;
-                      alreadyCompleted?: boolean;
-                    } | null)
-                  : ((await moneyfusionClient.verifyPaymentByOrder(orderId)) as {
-                      status?: string;
-                      completed?: boolean;
-                      alreadyCompleted?: boolean;
-                    } | null);
-                const st = String(again?.status || '').toLowerCase();
-                if (
-                  st === 'completed' ||
-                  again?.completed === true ||
-                  again?.alreadyCompleted === true
-                ) {
-                  setConfirmationState('confirmed');
-                  await loadOrderInfo(orderId);
-                  return;
+                if (isPaiementPro) {
+                  const { paiementProClient } = await import('@/lib/paiement-pro-client');
+                  const again = await paiementProClient.verifyPayment({
+                    transactionId: txId || undefined,
+                    orderId,
+                  });
+                  const st = String(again?.status || '').toLowerCase();
+                  if (
+                    st === 'completed' ||
+                    again?.completed === true ||
+                    again?.alreadyCompleted === true
+                  ) {
+                    setConfirmationState('confirmed');
+                    await loadOrderInfo(orderId);
+                    return;
+                  }
+                } else {
+                  const { moneyfusionClient } = await import('@/lib/moneyfusion-client');
+                  const again = txId
+                    ? ((await moneyfusionClient.verifyPaymentByTransaction(txId)) as {
+                        status?: string;
+                        completed?: boolean;
+                        alreadyCompleted?: boolean;
+                      } | null)
+                    : ((await moneyfusionClient.verifyPaymentByOrder(orderId)) as {
+                        status?: string;
+                        completed?: boolean;
+                        alreadyCompleted?: boolean;
+                      } | null);
+                  const st = String(again?.status || '').toLowerCase();
+                  if (
+                    st === 'completed' ||
+                    again?.completed === true ||
+                    again?.alreadyCompleted === true
+                  ) {
+                    setConfirmationState('confirmed');
+                    await loadOrderInfo(orderId);
+                    return;
+                  }
                 }
               } catch {
                 /* keep polling */

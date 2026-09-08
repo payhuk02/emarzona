@@ -31,6 +31,9 @@ export async function verifyPaiementProHashcode(params: {
     ['amount+ref+secret', `${amount}${referenceNumber}${secret}`],
     ['ref+amount+secret', `${referenceNumber}${amount}${secret}`],
     ['merchant+amount+ref+secret', `${merchantId}${amount}${referenceNumber}${secret}`],
+    ['amount+merchant+ref+secret', `${amount}${merchantId}${referenceNumber}${secret}`],
+    ['secret+merchant+ref+amount', `${secret}${merchantId}${referenceNumber}${amount}`],
+    ['secret+amount+ref', `${secret}${amount}${referenceNumber}`],
     [
       'merchant+ref+amount+customer+secret',
       `${merchantId}${referenceNumber}${amount}${customerId}${secret}`,

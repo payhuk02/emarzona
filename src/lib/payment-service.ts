@@ -337,7 +337,37 @@ export const verifyTransactionStatus = async (
     resolvedProvider === 'geniuspay';
 
   if (resolvedProvider === 'paiement_pro') {
-    return transaction ?? { id: transactionId, status: 'unknown' };
+    try {
+      const { paiementProClient } = await import('./paiement-pro-client');
+      const verifyData = await paiementProClient.verifyPayment({ transactionId });
+      const edgeStatus = String(verifyData?.status || '').toLowerCase();
+      if (
+        edgeStatus === 'completed' ||
+        verifyData?.completed === true ||
+        verifyData?.alreadyCompleted === true
+      ) {
+        return {
+          ...(transaction ?? { id: transactionId }),
+          id: transactionId,
+          status: 'completed',
+        };
+      }
+      if (edgeStatus === 'failed' || edgeStatus === 'cancelled') {
+        return {
+          ...(transaction ?? { id: transactionId }),
+          id: transactionId,
+          status: edgeStatus,
+        };
+      }
+      return {
+        ...(transaction ?? { id: transactionId }),
+        id: transactionId,
+        status: edgeStatus || transaction?.status || 'processing',
+      };
+    } catch (error) {
+      logger.warn('Paiement Pro verify failed', { error, transactionId });
+      return transaction ?? { id: transactionId, status: 'unknown' };
+    }
   }
 
   // Invité : RLS bloque la lecture de transactions → appeler l'Edge avec transactionId seul
