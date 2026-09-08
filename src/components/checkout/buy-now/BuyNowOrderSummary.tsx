@@ -34,6 +34,11 @@ import {
   type ServicePaymentOptionsWithMilestones,
 } from '@/lib/service/service-project-milestones';
 import { useMemo } from 'react';
+import {
+  PaymentProviderSelector,
+  type PaymentProvider,
+} from '@/components/checkout/PaymentProviderSelector';
+import { isPaiementProEnabled } from '@/lib/payments/feature-flags';
 
 const PRODUCT_TYPE_LABELS: Record<string, string> = {
   digital: 'Produit digital',
@@ -63,6 +68,9 @@ export interface BuyNowOrderSummaryProps {
   addonLines?: Array<{ name: string; amount: number }>;
   onCouponApply: (couponId: string, discountAmount: number, code: string) => void;
   onCouponRemove: () => void;
+  selectedPaymentProvider?: PaymentProvider;
+  onPaymentProviderChange?: (provider: PaymentProvider) => void;
+  buyerCountry?: string | null;
 }
 
 export default function BuyNowOrderSummary({
@@ -85,6 +93,9 @@ export default function BuyNowOrderSummary({
   addonLines = [],
   onCouponApply,
   onCouponRemove,
+  selectedPaymentProvider,
+  onPaymentProviderChange,
+  buyerCountry,
 }: BuyNowOrderSummaryProps) {
   const basePrice = getBuyNowBasePrice(product, selectedVariant);
   const promoPrice = product?.promotional_price;
@@ -322,6 +333,17 @@ export default function BuyNowOrderSummary({
               {isGuarantee ? 'la garantie' : 'le prix du produit'} pour pouvoir payer en ligne.
             </p>
           </div>
+        )}
+
+        {!isCashOnDelivery && isPaiementProEnabled() && onPaymentProviderChange && (
+          <PaymentProviderSelector
+            value={selectedPaymentProvider}
+            onChange={onPaymentProviderChange}
+            storeId={storeId || undefined}
+            amount={amountDueNow}
+            currency={currency}
+            buyerCountry={buyerCountry}
+          />
         )}
 
         {/* CTA — sticky on mobile at bottom of card flow */}

@@ -180,6 +180,12 @@ export class CourseOrderStrategy implements OrderStrategy {
       customerPhone,
       returnUrl,
       cancelUrl,
+      provider: context.preferredProvider as
+        | 'moneyfusion'
+        | 'paiement_pro'
+        | 'stripe_connect'
+        | 'paypal_commerce'
+        | undefined,
       metadata: {
         product_type: 'course',
         order_item_id: orderItemId,

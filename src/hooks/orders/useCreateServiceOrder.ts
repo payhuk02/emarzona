@@ -157,6 +157,9 @@ export interface CreateServiceOrderOptions {
    * Active les jalons delivery_secured sur commande appointment-less.
    */
   buyNowWithoutAppointment?: boolean;
+
+  /** Provider checkout (moneyfusion | paiement_pro | …) */
+  preferredProvider?: string;
 }
 
 /**
@@ -250,6 +253,7 @@ export const useCreateServiceOrder = () => {
         couponCode,
         buyNowWithoutAppointment = false,
       } = options;
+      const preferredProvider = options.preferredProvider;
 
       if (checkoutMode === 'cart') {
         throw new Error(
@@ -911,6 +915,12 @@ export const useCreateServiceOrder = () => {
         customerEmail,
         customerName: customerName || customerEmail.split('@')[0],
         customerPhone,
+        provider: preferredProvider as
+          | 'moneyfusion'
+          | 'paiement_pro'
+          | 'stripe_connect'
+          | 'paypal_commerce'
+          | undefined,
         metadata: {
           product_type: 'service',
           service_product_id: serviceProductId,

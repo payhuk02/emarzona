@@ -35,6 +35,8 @@ export interface CreateOrderOptions {
   returnUrl?: string;
   cancelUrl?: string;
   guestCheckout?: boolean;
+  /** Provider checkout (moneyfusion | paiement_pro | …) */
+  preferredProvider?: string;
 }
 
 export const useCreateOrder = () => {
@@ -58,6 +60,8 @@ export const useCreateOrder = () => {
         cancelUrl,
         guestCheckout,
       } = options;
+
+      const preferredProvider = options.preferredProvider;
 
       const { data: product, error: productError } = await supabase
         .from('products')
@@ -112,6 +116,7 @@ export const useCreateOrder = () => {
         returnUrl,
         cancelUrl,
         guestCheckout,
+        preferredProvider,
       });
     },
 

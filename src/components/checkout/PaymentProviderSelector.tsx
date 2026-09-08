@@ -134,15 +134,41 @@ export function PaymentProviderSelector({
       available: true,
     };
 
-    // Rails plateforme uniquement (MoneyFusion ± Paiement Pro)
+    // GeniusPay retiré — MoneyFusion seul tant que Paiement Pro est off
     if (isMoneyFusionOnlyEnabled()) {
       return moneyfusionOk ? [moneyfusionOption] : [];
     }
 
-    if (paiementProOk && (!orchestrationV2 || !storeId)) {
+    // Paiement Pro on : toujours exposer les rails plateforme (MF + PP)
+    if (paiementProOk) {
       const rails: PaymentProviderOption[] = [];
       if (moneyfusionOk) rails.push(moneyfusionOption);
       rails.push(paiementProOption);
+
+      if (orchestrationV2 && storeId) {
+        const source = (rpcOptions ?? []).filter(
+          opt =>
+            opt.provider !== 'flutterwave_connect' &&
+            opt.provider !== 'geniuspay_platform' &&
+            opt.provider !== 'moneyfusion' &&
+            opt.provider !== 'paiement_pro'
+        );
+        for (const opt of source) {
+          const checkoutValue = rpcProviderToCheckout(opt.provider);
+          if (checkoutValue === 'geniuspay' || checkoutValue === 'moneyfusion') continue;
+          if (rails.some(p => p.value === checkoutValue)) continue;
+          const meta = PROVIDER_META[checkoutValue] ?? PROVIDER_META.moneyfusion;
+          rails.push({
+            value: checkoutValue,
+            label: opt.label || meta.label,
+            description: meta.description,
+            icon: meta.icon,
+            features: meta.features,
+            available: !(isMultiStore && isConnectCheckoutProvider(checkoutValue)),
+          });
+        }
+      }
+
       return rails;
     }
 
@@ -168,9 +194,6 @@ export function PaymentProviderSelector({
 
     if (moneyfusionOk && !mapped.some(p => p.value === 'moneyfusion')) {
       mapped.push(moneyfusionOption);
-    }
-    if (paiementProOk && !mapped.some(p => p.value === 'paiement_pro')) {
-      mapped.push(paiementProOption);
     }
 
     return mapped

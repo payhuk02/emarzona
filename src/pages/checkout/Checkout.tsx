@@ -63,6 +63,7 @@ import {
 import { StoreThemeProvider } from '@/components/storefront/StoreThemeProvider';
 import { STOREFRONT_STORE_PUBLIC_SELECT } from '@/lib/storefront/store-public-fields';
 import type { Store as ThemedStore } from '@/hooks/useStores';
+import type { PaymentProvider } from '@/components/checkout/PaymentProviderSelector';
 
 const BuyNowOrderSummary = lazy(() => import('@/components/checkout/buy-now/BuyNowOrderSummary'));
 const BuyNowCustomerForm = lazy(() => import('@/components/checkout/buy-now/BuyNowCustomerForm'));
@@ -150,6 +151,8 @@ const Checkout = () => {
 
   // State pour le code promo
   const [appliedCouponCode, setAppliedCouponCode] = useState<AppliedBuyNowCoupon | null>(null);
+  const [selectedPaymentProvider, setSelectedPaymentProvider] =
+    useState<PaymentProvider>('moneyfusion');
 
   // Formulaire
   const [formData, setFormData] = useState<CheckoutFormData>({
@@ -627,6 +630,7 @@ const Checkout = () => {
             variantId: selectedVariant?.id,
             guestCheckout: isGuestBuyer,
             checkoutMethod,
+            preferredProvider: selectedPaymentProvider,
             shippingAddress: {
               street: formData.address,
               city: formData.city,
@@ -785,6 +789,7 @@ const Checkout = () => {
               checkoutMode: 'immediate',
               addonProductIds: addonIds,
               couponCode: appliedCouponCode?.code || null,
+              preferredProvider: selectedPaymentProvider,
             });
 
             if (!serviceResult.checkoutUrl) {
@@ -841,6 +846,7 @@ const Checkout = () => {
               },
               checkoutMode: 'immediate',
               couponCode: appliedCouponCode?.code || null,
+              preferredProvider: selectedPaymentProvider,
             });
             sessionStorage.removeItem(projectKey);
             if (!serviceResult.checkoutUrl) {
@@ -874,6 +880,7 @@ const Checkout = () => {
             addonProductIds: addonIds,
             staffId,
             couponCode: appliedCouponCode?.code || null,
+            preferredProvider: selectedPaymentProvider,
           });
 
           if (!serviceResult.checkoutUrl) {
@@ -906,6 +913,7 @@ const Checkout = () => {
           customerPhone,
           guestCheckout: isGuestBuyer,
           quantity: checkoutQuantity,
+          preferredProvider: selectedPaymentProvider,
           digitalOptions: appliedCouponCode
             ? {
                 couponCode: appliedCouponCode.code,
@@ -1033,6 +1041,7 @@ const Checkout = () => {
       serviceParticipants,
       addonIds,
       staffId,
+      selectedPaymentProvider,
     ]
   );
 
@@ -1166,8 +1175,8 @@ const Checkout = () => {
                   appliedCouponCode={appliedCouponCode}
                   displayPrice={displayPrice}
                   currency={currency}
-                  storeId={storeId}
-                  productId={productId}
+                  storeId={store?.id || storeId}
+                  productId={productId || product?.id || null}
                   user={user}
                   submitting={submitting}
                   submitButtonLabel={submitButtonLabel}
@@ -1179,6 +1188,9 @@ const Checkout = () => {
                   addonLines={serviceCheckout?.addonLines}
                   onCouponApply={handleCouponApply}
                   onCouponRemove={handleCouponRemove}
+                  selectedPaymentProvider={selectedPaymentProvider}
+                  onPaymentProviderChange={setSelectedPaymentProvider}
+                  buyerCountry={formData.country || null}
                 />
               </Suspense>
             </aside>

@@ -203,6 +203,12 @@ export class PhysicalOrderStrategy implements OrderStrategy {
       customerPhone,
       returnUrl,
       cancelUrl,
+      provider: context.preferredProvider as
+        | 'moneyfusion'
+        | 'paiement_pro'
+        | 'stripe_connect'
+        | 'paypal_commerce'
+        | undefined,
       metadata: {
         product_type: 'physical',
         physical_product_id: resolvedPhysicalProductId,

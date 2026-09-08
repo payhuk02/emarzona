@@ -536,6 +536,12 @@ export class ServiceOrderStrategy implements OrderStrategy {
       customerPhone,
       returnUrl,
       cancelUrl,
+      provider: context.preferredProvider as
+        | 'moneyfusion'
+        | 'paiement_pro'
+        | 'stripe_connect'
+        | 'paypal_commerce'
+        | undefined,
       metadata: {
         product_type: 'service',
         service_product_id: resolvedServiceProductId,

@@ -205,6 +205,12 @@ export class ArtistOrderStrategy implements OrderStrategy {
           customerPhone,
           returnUrl,
           cancelUrl,
+          provider: context.preferredProvider as
+            | 'moneyfusion'
+            | 'paiement_pro'
+            | 'stripe_connect'
+            | 'paypal_commerce'
+            | undefined,
           metadata: {
             product_type: 'artist',
             order_item_id: orderItemId,

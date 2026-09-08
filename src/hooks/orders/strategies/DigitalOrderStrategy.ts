@@ -163,6 +163,12 @@ export class DigitalOrderStrategy implements OrderStrategy {
       customerPhone,
       returnUrl,
       cancelUrl,
+      provider: context.preferredProvider as
+        | 'moneyfusion'
+        | 'paiement_pro'
+        | 'stripe_connect'
+        | 'paypal_commerce'
+        | undefined,
       metadata: {
         product_type: 'digital',
         order_id: orderId,

@@ -84,6 +84,9 @@ export interface CreatePhysicalOrderOptions {
 
   /** Achat invité sans session auth */
   guestCheckout?: boolean;
+
+  /** Provider checkout (moneyfusion | paiement_pro | …) */
+  preferredProvider?: string;
 }
 
 /**
@@ -184,6 +187,8 @@ export const useCreatePhysicalOrder = () => {
         cancelUrl,
         guestCheckout,
       } = options;
+
+      const preferredProvider = options.preferredProvider;
 
       let resolvedPhysicalProductId = physicalProductId;
 
@@ -457,6 +462,12 @@ export const useCreatePhysicalOrder = () => {
           checkout_method: checkoutMethod,
           ...(isGuestCheckout ? { guest_checkout: true } : {}),
         },
+        provider: preferredProvider as
+          | 'moneyfusion'
+          | 'paiement_pro'
+          | 'stripe_connect'
+          | 'paypal_commerce'
+          | undefined,
       });
 
       if (!paymentResult.success || !paymentResult.checkout_url) {
