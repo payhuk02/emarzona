@@ -13,15 +13,8 @@ import {
 import {
   handlePaiementProWebhookRaw,
   looksLikePaiementProWebhook,
-  paiementProWebhookCors,
 } from '../_shared/handle-paiement-pro-webhook.ts';
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': Deno.env.get('SITE_URL') || 'https://www.emarzona.com',
-  'Access-Control-Allow-Headers':
-    'authorization, x-client-info, apikey, content-type, x-checkout-token',
-  'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
-};
+import { buildCorsHeaders } from '../_shared/cors.ts';
 
 function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -42,8 +35,10 @@ function splitName(full?: string): { first: string; last: string } {
 }
 
 serve(async req => {
+  const corsHeaders = buildCorsHeaders(req.headers.get('origin'));
+
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { status: 204, headers: corsHeaders });
   }
 
   // Health / ping GET (notificationURL may probe)
@@ -71,7 +66,7 @@ serve(async req => {
       new URL(req.url).searchParams.get('webhook') === '1'
     ) {
       try {
-        return await handlePaiementProWebhookRaw(rawText, paiementProWebhookCors);
+        return await handlePaiementProWebhookRaw(rawText, corsHeaders);
       } catch (err) {
         console.error('[PaiementPro webhook] unhandled', err);
         return new Response(
