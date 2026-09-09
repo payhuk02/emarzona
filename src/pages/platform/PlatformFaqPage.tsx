@@ -171,7 +171,7 @@ export default function PlatformFaqPage() {
       <div className="min-h-screen bg-[#060608] text-white">
         <PremiumNav />
 
-        <header className="border-b border-white/[0.06] bg-[#0a0a0c] pt-[4.75rem]">
+        <header className="border-b border-white/[0.06] bg-[#0a0a0c] pt-[4.25rem] sm:pt-[4.5rem] lg:pt-[4.75rem]">
           <div className="container mx-auto max-w-4xl px-4 py-10 sm:py-12">
             <Button
               variant="ghost"

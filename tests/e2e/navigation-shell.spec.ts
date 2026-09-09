@@ -91,6 +91,17 @@ test.describe('Navigation shell — drawer mobile', () => {
     await gotoApp(page, '/account');
   });
 
+  test('utility bar expose le SidebarTrigger mobile', async ({ page }) => {
+    const root = appLocator(page);
+    await expect(root.getByTestId('utility-bar-header')).toBeVisible({ timeout: 20_000 });
+    await expect(root.getByTestId('utility-sidebar-trigger')).toBeVisible({ timeout: 10_000 });
+  });
+
+  test('bottom-nav visible sur /account', async ({ page }) => {
+    const root = appLocator(page);
+    await expect(root.getByTestId('bottom-navigation')).toBeVisible({ timeout: 20_000 });
+  });
+
   test('ouvre le drawer vertical gauche depuis un domaine buyer', async ({ page }) => {
     const root = appLocator(page);
     const mobileNav = root.getByTestId('horizontal-context-nav-mobile');
@@ -102,5 +113,15 @@ test.describe('Navigation shell — drawer mobile', () => {
     const drawer = root.getByTestId('mobile-domain-drawer-decouvrir');
     await expect(drawer).toBeVisible({ timeout: 10_000 });
     await expect(drawer).toHaveAttribute('id', 'mobile-domain-drawer-decouvrir');
+  });
+});
+
+test.describe('Navigation shell — bottom-nav marketing', () => {
+  test.setTimeout(E2E_TEST_CONFIG.navigationTimeout);
+
+  test('pricing invité sans bottom-nav app', async ({ page }) => {
+    await page.setViewportSize({ width: 393, height: 851 });
+    await gotoApp(page, '/pricing');
+    await expect(appLocator(page).getByTestId('bottom-navigation')).toHaveCount(0);
   });
 });

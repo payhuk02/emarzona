@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useMemo, useState } from 'react';
+import { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { AdminRoute } from '@/components/AdminRoute';
 import { RequireAAL2 } from '@/components/admin/RequireAAL2';
 import { Button } from '@/components/ui/button';
@@ -26,6 +26,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const mainRef = useRef<HTMLElement>(null);
   const { user } = useAuth();
   const { isAAL2 } = useAdminMFA();
   const { can, isSuperAdmin, platformRole, loading: permLoading } = useCurrentAdminPermissions();
@@ -41,6 +42,14 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
   useEffect(() => {
     if (isMobile) setSidebarOpen(false);
   }, [isMobile]);
+
+  useEffect(() => {
+    const el = mainRef.current;
+    if (!el) return;
+    el.classList.remove('page-enter');
+    void el.offsetWidth;
+    el.classList.add('page-enter');
+  }, [location.pathname]);
 
   const activeLabel = useMemo(() => {
     const active = menuItems.find(item => item.path === location.pathname);
@@ -232,8 +241,12 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
 
         {/* Main Content */}
         <main
+          ref={mainRef}
+          id="main-content"
+          role="main"
+          tabIndex={-1}
           className={cn(
-            'transition-all',
+            'transition-all page-enter',
             // Sur mobile: pas de marge gauche; sur desktop: marge selon l'état.
             sidebarOpen ? 'md:ml-64' : 'md:ml-20'
           )}

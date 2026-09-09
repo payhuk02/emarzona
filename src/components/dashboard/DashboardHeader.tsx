@@ -3,8 +3,7 @@
  * Extrait de Dashboard.tsx pour améliorer la maintenabilité
  */
 
-import React, { useRef } from 'react';
-import { SidebarTrigger } from '@/components/ui/sidebar';
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { LayoutDashboard, Bell, Activity, Download, RefreshCw, MoreVertical } from 'lucide-react';
@@ -53,7 +52,6 @@ export const DashboardHeader = React.memo<DashboardHeaderProps>(
           className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700"
         >
           <div className="flex items-start sm:items-center gap-2 sm:gap-3 min-w-0 flex-1">
-            <SidebarTrigger className="mt-1 sm:mt-0 shrink-0" />
             <div className="flex-1 min-w-0">
               <h1 className="app-premium-page-title flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
                 <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">

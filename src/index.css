@@ -883,9 +883,14 @@ All colors MUST be HSL.
     animation: fadeInUp 0.8s ease-out forwards;
   }
 
-  /* Page transitions */
+  /* Page enter — fade-in non bloquant (shell main) */
+  .page-enter {
+    animation: fadeInPage 0.18s ease-out both;
+  }
+
+  /* Legacy helpers (éviter fadeOut bloquant sur les routes) */
   .page-transition {
-    animation-duration: 0.3s;
+    animation-duration: 0.18s;
     animation-fill-mode: both;
   }
 

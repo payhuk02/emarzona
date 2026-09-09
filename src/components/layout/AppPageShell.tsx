@@ -4,7 +4,7 @@
  * Ctrl+K : palette gated dans AppSidebar (SidebarNavCommandPalette) — pas de double palette.
  */
 
-import { lazy, ReactNode, Suspense, useEffect } from 'react';
+import { lazy, ReactNode, Suspense, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { SidebarProvider } from '@/components/ui/sidebar';
@@ -53,6 +53,7 @@ export function AppPageShell({
 }: AppPageShellProps) {
   const { t } = useTranslation();
   const location = useLocation();
+  const mainRef = useRef<HTMLElement>(null);
   void (layoutType ?? detectLayoutType(location.pathname));
   const showHorizontalNav = shouldShowHorizontalNav(location.pathname);
   const showDeferredHorizontalNav = useDeferHorizontalContextNav(location.pathname);
@@ -72,6 +73,15 @@ export function AppPageShell({
     return () => clearTimeout(timer);
   }, [showHorizontalNav]);
 
+  // Fade-in non bloquant à chaque navigation (sans remount des enfants)
+  useEffect(() => {
+    const el = mainRef.current;
+    if (!el) return;
+    el.classList.remove('page-enter');
+    void el.offsetWidth;
+    el.classList.add('page-enter');
+  }, [location.pathname]);
+
   return (
     <SidebarProvider>
       <div
@@ -90,13 +100,14 @@ export function AppPageShell({
               <HorizontalContextNavPlaceholder />
             ))}
           <main
+            ref={mainRef}
             id="main-content"
             role="main"
             tabIndex={-1}
             aria-label={t('sidebar.chrome.mainContentAriaLabel', {
               defaultValue: 'Contenu principal',
             })}
-            className={cn('flex-1 overflow-auto', mainClassName)}
+            className={cn('flex-1 overflow-auto page-enter', mainClassName)}
           >
             {children}
           </main>

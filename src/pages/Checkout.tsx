@@ -13,7 +13,7 @@
  */
 
 import { useState, useMemo, useEffect, useCallback, lazy, Suspense } from 'react';
-import { AppPageShell } from '@/components/layout/AppPageShell';
+import { CheckoutChrome } from '@/components/checkout/CheckoutChrome';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -59,7 +59,7 @@ import {
   releasePhysicalInventoryForOrder,
   reservePhysicalInventoryForOrder,
 } from '@/lib/physical-inventory';
-import { ShoppingBag, AlertCircle } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 
 const CheckoutShippingSection = lazy(
@@ -1365,8 +1365,8 @@ export default function Checkout() {
 
   if (cartLoading) {
     return (
-      <AppPageShell mainClassName="p-6">
-        <div className="max-w-6xl mx-auto space-y-6">
+      <CheckoutChrome showHeader={false}>
+        <div className="space-y-6">
           <Skeleton className="h-10 w-64" />
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-4">
@@ -1375,139 +1375,121 @@ export default function Checkout() {
             <Skeleton className="h-96" />
           </div>
         </div>
-      </AppPageShell>
+      </CheckoutChrome>
     );
   }
 
   if (items.length === 0) {
     return (
-      <AppPageShell mainClassName="p-6">
-        <div className="max-w-4xl mx-auto">
-          <Alert>
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              Votre panier est vide.{' '}
-              <Button variant="link" onClick={() => navigate('/marketplace')}>
-                Retour au panier
-              </Button>
-            </AlertDescription>
-          </Alert>
-        </div>
-      </AppPageShell>
+      <CheckoutChrome showHeader={false}>
+        <Alert>
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            Votre panier est vide.{' '}
+            <Button variant="link" onClick={() => navigate('/marketplace')}>
+              Retour au panier
+            </Button>
+          </AlertDescription>
+        </Alert>
+      </CheckoutChrome>
     );
   }
 
   return (
-    <AppPageShell shellClassName="bg-gray-50 dark:bg-gray-900" mainClassName="p-4 md:p-6 lg:p-8">
-      <div className="max-w-6xl mx-auto space-y-6">
-        {/* Header */}
-        <header>
-          <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold flex items-center gap-1.5 sm:gap-2">
-            <ShoppingBag className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8" aria-hidden="true" />
-            Finaliser la commande
-          </h1>
-          <p
-            className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground mt-0.5 sm:mt-1"
-            id="checkout-description"
-          >
-            Remplissez vos informations pour compléter votre achat
-          </p>
-        </header>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Formulaire (2/3) */}
-          <div className="lg:col-span-2 space-y-6">
-            <Suspense fallback={<CheckoutSectionFallback />}>
-              <CheckoutShippingSection
-                formData={formData}
-                setFormData={setFormData}
-                formErrors={formErrors}
-                setFormErrors={setFormErrors}
-                storeId={storeId}
-                appliedGiftCard={appliedGiftCard}
-                onGiftCardApply={handleGiftCardApply}
-                onGiftCardRemove={handleGiftCardRemove}
-              />
-            </Suspense>
-
-            {cartHasArtistDedications(items) && (
-              <Card>
-                <CardContent className="pt-6 space-y-3">
-                  <h2 className="font-semibold">Dédicaces personnalisées</h2>
-                  {items
-                    .filter(item => item.product_type === 'artist')
-                    .map(item => {
-                      const dedication = getCartDedicationPreview(item);
-                      if (!dedication) return null;
-                      return (
-                        <div
-                          key={item.id ?? item.product_id}
-                          className="rounded-lg border p-3 text-sm"
-                        >
-                          <p className="font-medium">{item.product_name}</p>
-                          <p className="text-muted-foreground mt-1">{dedication.dedication_text}</p>
-                          {dedication.recipient_name && (
-                            <p className="text-muted-foreground">
-                              Pour : {dedication.recipient_name}
-                            </p>
-                          )}
-                        </div>
-                      );
-                    })}
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Méthode de paiement */}
-            <PaymentProviderSelector
-              value={selectedPaymentProvider}
-              onChange={setSelectedPaymentProvider}
-              storeId={storeId || undefined}
-              amount={finalTotal}
-              currency={
-                items[0]?.currency && items[0].currency.length === 3
-                  ? items[0].currency.toUpperCase()
-                  : 'XOF'
-              }
-              buyerCountry={formData.country || null}
-              buyerPhone={formData.phone || null}
-              isMultiStore={isMultiStore}
-              paiementProChannel={paiementProChannel}
-              onPaiementProChannelChange={setPaiementProChannel}
+    <CheckoutChrome>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Formulaire (2/3) */}
+        <div className="lg:col-span-2 space-y-6">
+          <Suspense fallback={<CheckoutSectionFallback />}>
+            <CheckoutShippingSection
+              formData={formData}
+              setFormData={setFormData}
+              formErrors={formErrors}
+              setFormErrors={setFormErrors}
+              storeId={storeId}
+              appliedGiftCard={appliedGiftCard}
+              onGiftCardApply={handleGiftCardApply}
+              onGiftCardRemove={handleGiftCardRemove}
             />
-          </div>
+          </Suspense>
 
-          <aside className="lg:col-span-1" aria-label="Récapitulatif de la commande">
-            <Suspense fallback={<CheckoutSectionFallback />}>
-              <CheckoutOrderSummary
-                items={items}
-                summary={summary}
-                isCheckingStores={isCheckingStores}
-                isMultiStore={isMultiStore}
-                storeGroups={storeGroups}
-                appliedCouponCode={appliedCouponCode}
-                couponDiscount={couponDiscount}
-                giftCardAmount={giftCardAmount}
-                appliedGiftCard={appliedGiftCard}
-                taxLoading={taxLoading}
-                taxBreakdown={taxBreakdown}
-                taxAmount={taxAmount}
-                itemDiscounts={itemDiscounts}
-                shippingAmount={shippingAmount}
-                finalTotal={finalTotal}
-                storeId={storeId}
-                customerId={customerId}
-                isFirstOrder={isFirstOrder}
-                isProcessing={isProcessing}
-                checkoutBlocked={checkoutBlocked}
-                handleCheckout={handleCheckout}
-                onCouponApply={handleCouponApply}
-                onCouponRemove={handleCouponRemove}
-              />
-            </Suspense>
-          </aside>
+          {cartHasArtistDedications(items) && (
+            <Card>
+              <CardContent className="pt-6 space-y-3">
+                <h2 className="font-semibold">Dédicaces personnalisées</h2>
+                {items
+                  .filter(item => item.product_type === 'artist')
+                  .map(item => {
+                    const dedication = getCartDedicationPreview(item);
+                    if (!dedication) return null;
+                    return (
+                      <div
+                        key={item.id ?? item.product_id}
+                        className="rounded-lg border p-3 text-sm"
+                      >
+                        <p className="font-medium">{item.product_name}</p>
+                        <p className="text-muted-foreground mt-1">{dedication.dedication_text}</p>
+                        {dedication.recipient_name && (
+                          <p className="text-muted-foreground">
+                            Pour : {dedication.recipient_name}
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Méthode de paiement */}
+          <PaymentProviderSelector
+            value={selectedPaymentProvider}
+            onChange={setSelectedPaymentProvider}
+            storeId={storeId || undefined}
+            amount={finalTotal}
+            currency={
+              items[0]?.currency && items[0].currency.length === 3
+                ? items[0].currency.toUpperCase()
+                : 'XOF'
+            }
+            buyerCountry={formData.country || null}
+            buyerPhone={formData.phone || null}
+            isMultiStore={isMultiStore}
+            paiementProChannel={paiementProChannel}
+            onPaiementProChannelChange={setPaiementProChannel}
+          />
         </div>
+
+        <aside className="lg:col-span-1" aria-label="Récapitulatif de la commande">
+          <Suspense fallback={<CheckoutSectionFallback />}>
+            <CheckoutOrderSummary
+              items={items}
+              summary={summary}
+              isCheckingStores={isCheckingStores}
+              isMultiStore={isMultiStore}
+              storeGroups={storeGroups}
+              appliedCouponCode={appliedCouponCode}
+              couponDiscount={couponDiscount}
+              giftCardAmount={giftCardAmount}
+              appliedGiftCard={appliedGiftCard}
+              taxLoading={taxLoading}
+              taxBreakdown={taxBreakdown}
+              taxAmount={taxAmount}
+              itemDiscounts={itemDiscounts}
+              shippingAmount={shippingAmount}
+              finalTotal={finalTotal}
+              storeId={storeId}
+              customerId={customerId}
+              isFirstOrder={isFirstOrder}
+              isProcessing={isProcessing}
+              checkoutBlocked={checkoutBlocked}
+              handleCheckout={handleCheckout}
+              onCouponApply={handleCouponApply}
+              onCouponRemove={handleCouponRemove}
+            />
+          </Suspense>
+        </aside>
       </div>
-    </AppPageShell>
+    </CheckoutChrome>
   );
 }

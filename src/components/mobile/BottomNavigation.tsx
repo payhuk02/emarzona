@@ -43,6 +43,7 @@ export const BottomNavigation = React.memo<BottomNavigationProps>(({ position = 
         zIndex: 50,
       }}
       aria-label={t('sidebar.chrome.bottomNavMain')}
+      data-testid="bottom-navigation"
     >
       <div className={cn('flex items-center justify-around px-1 sm:px-2', isTop ? 'h-14' : 'h-16')}>
         {navItems.map(item => {

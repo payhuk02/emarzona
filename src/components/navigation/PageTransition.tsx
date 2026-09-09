@@ -1,3 +1,8 @@
+/**
+ * PageTransition — fade d’entrée non bloquant (le contenu est rendu immédiatement).
+ * Préférer le fade CSS `.page-enter` sur `#main-content` via AppPageShell.
+ */
+
 import { ReactNode, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 
@@ -7,25 +12,14 @@ interface PageTransitionProps {
 
 export const PageTransition = ({ children }: PageTransitionProps) => {
   const location = useLocation();
-  const [displayLocation, setDisplayLocation] = useState(location);
-  const [transitionStage, setTransitionStage] = useState('fadeIn');
+  const [enterKey, setEnterKey] = useState(0);
 
   useEffect(() => {
-    if (location !== displayLocation) {
-      setTransitionStage('fadeOut');
-    }
-  }, [location, displayLocation]);
+    setEnterKey(k => k + 1);
+  }, [location.pathname]);
 
   return (
-    <div
-      className={`page-transition ${transitionStage}`}
-      onAnimationEnd={() => {
-        if (transitionStage === 'fadeOut') {
-          setTransitionStage('fadeIn');
-          setDisplayLocation(location);
-        }
-      }}
-    >
+    <div key={enterKey} className="page-enter">
       {children}
     </div>
   );

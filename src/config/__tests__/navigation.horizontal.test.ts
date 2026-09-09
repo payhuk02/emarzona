@@ -31,14 +31,32 @@ describe('navigation.horizontal visibility', () => {
     expect(shouldShowBuyerHorizontalNav('/personalization/quiz')).toBe(true);
   });
 
-  it('hides bottom nav on checkout and admin routes', () => {
+  it('hides bottom nav on checkout, admin, auth and marketing', () => {
     expect(shouldShowBottomNavigation('/checkout')).toBe(false);
     expect(shouldShowBottomNavigation('/checkout/payment')).toBe(false);
+    expect(shouldShowBottomNavigation('/pay/store/product')).toBe(false);
     expect(shouldShowBottomNavigation('/admin')).toBe(false);
     expect(shouldShowBottomNavigation('/admin/users')).toBe(false);
-    expect(shouldShowBottomNavigation('/account')).toBe(true);
     expect(shouldShowBottomNavigation('/')).toBe(false);
     expect(shouldShowBottomNavigation('/login')).toBe(false);
+    expect(shouldShowBottomNavigation('/pricing')).toBe(false);
+    expect(shouldShowBottomNavigation('/blog')).toBe(false);
+    expect(shouldShowBottomNavigation('/solutions/creators')).toBe(false);
+    expect(shouldShowBottomNavigation('/features/payments')).toBe(false);
+    expect(shouldShowBottomNavigation('/legal/terms')).toBe(false);
+    expect(shouldShowBottomNavigation('/digital/abc')).toBe(false);
+    expect(shouldShowBottomNavigation('/courses')).toBe(false);
+  });
+
+  it('shows bottom nav on app surfaces only', () => {
+    expect(shouldShowBottomNavigation('/account')).toBe(true);
+    expect(shouldShowBottomNavigation('/account/orders')).toBe(true);
+    expect(shouldShowBottomNavigation('/dashboard')).toBe(true);
+    expect(shouldShowBottomNavigation('/dashboard/products')).toBe(true);
+    expect(shouldShowBottomNavigation('/marketplace')).toBe(true);
+    expect(shouldShowBottomNavigation('/notifications')).toBe(true);
+    expect(shouldShowBottomNavigation('/vendor/messaging')).toBe(true);
+    expect(shouldShowBottomNavigation('/disputes/create')).toBe(true);
   });
 
   it('combines seller and buyer visibility', () => {

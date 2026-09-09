@@ -22,6 +22,7 @@ import ProductComparison from '@/components/marketplace/ProductComparison';
 import FavoritesManager from '@/components/marketplace/FavoritesManager';
 import { ContextualFilters } from '@/components/marketplace/ContextualFilters';
 import { logger } from '@/lib/logger';
+import { cn } from '@/lib/utils';
 import { buildCheckoutUrl } from '@/lib/checkout/checkout-route';
 import { usePageCustomization } from '@/hooks/usePageCustomization';
 import { Product } from '@/types/marketplace';
@@ -602,7 +603,12 @@ const MarketplacePage = () => {
         {!useAuthenticatedShell && <PremiumNav />}
 
         {/* Breadcrumb Navigation */}
-        <div className="mp-breadcrumb container mx-auto max-w-7xl px-3 sm:px-4 lg:px-8 pb-2">
+        <div
+          className={cn(
+            'mp-breadcrumb container mx-auto max-w-7xl px-3 sm:px-4 lg:px-8 pb-2',
+            !useAuthenticatedShell && 'mp-breadcrumb--with-nav'
+          )}
+        >
           <Breadcrumb>
             <BreadcrumbList>
               {breadcrumbItems.map((item, index) => (

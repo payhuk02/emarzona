@@ -324,13 +324,25 @@ export function shouldShowBuyerHorizontalNav(pathname: string): boolean {
 
 const BOTTOM_NAV_AUTH_PATHS = new Set(['/login', '/register', '/auth']);
 
-/** Affiche la bottom-nav mobile globale (exclut checkout, admin, landing, auth). */
+/**
+ * Bottom-nav mobile : surfaces « app » uniquement
+ * (dashboard / account / discovery / notifications).
+ * Masquée sur marketing, legal, PDP publics, checkout, admin, auth.
+ */
 export function shouldShowBottomNavigation(pathname: string): boolean {
   if (pathname === '/') return false;
-  if (BOTTOM_NAV_AUTH_PATHS.has(pathname)) return false;
+  if (BOTTOM_NAV_AUTH_PATHS.has(pathname) || pathname.startsWith('/auth/')) return false;
   if (matchesNavPath(pathname, '/checkout')) return false;
+  if (matchesNavPath(pathname, '/pay')) return false;
   if (matchesNavPath(pathname, '/admin')) return false;
-  return true;
+
+  if (shouldShowSellerHorizontalNav(pathname)) return true;
+  if (matchesNavPath(pathname, '/account')) return true;
+  if (isBuyerDiscoveryPath(pathname)) return true;
+  if (matchesNavPath(pathname, '/settings/notifications')) return true;
+  if (matchesNavPath(pathname, '/disputes')) return true;
+
+  return false;
 }
 
 export function shouldShowHorizontalNav(pathname: string): boolean {

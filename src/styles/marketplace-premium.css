@@ -58,15 +58,19 @@
   font-weight: 600;
 }
 
-/* Fil d’Ariane */
+/* Fil d’Ariane — padding sous PremiumNav fixe uniquement en mode invité */
 .marketplace-premium .mp-breadcrumb {
-  padding-top: 5.25rem;
+  padding-top: 0.5rem;
   padding-bottom: 0.5rem;
   background: var(--lp-surface);
 }
 
+.marketplace-premium .mp-breadcrumb--with-nav {
+  padding-top: 5.25rem;
+}
+
 @media (min-width: 640px) {
-  .marketplace-premium .mp-breadcrumb {
+  .marketplace-premium .mp-breadcrumb--with-nav {
     padding-top: 5.5rem;
   }
 }
