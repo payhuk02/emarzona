@@ -14,23 +14,11 @@ import {
   parseLandingLangFromSearch,
   resolveLandingPageSEO,
 } from '@/lib/landing-seo';
-import heroCarouselWebp from '@/assets/landing/hero-carousel-entrepreneur.webp';
 
-const HERO_VISUAL_PRELOAD_ID = 'landing-hero-visual-preload';
-
+/** Critical CSS only — do not preload below-the-fold carousel (steals LCP bandwidth). */
 function useLandingAssets() {
   useEffect(() => {
     injectLandingCriticalCSS();
-
-    if (!document.getElementById(HERO_VISUAL_PRELOAD_ID)) {
-      const imgPreload = document.createElement('link');
-      imgPreload.id = HERO_VISUAL_PRELOAD_ID;
-      imgPreload.rel = 'preload';
-      imgPreload.as = 'image';
-      imgPreload.href = heroCarouselWebp;
-      imgPreload.type = 'image/webp';
-      document.head.appendChild(imgPreload);
-    }
   }, []);
 }
 

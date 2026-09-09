@@ -9,10 +9,6 @@ const PremiumHeroCarousel = lazy(() =>
   import('./PremiumHeroCarousel').then(m => ({ default: m.PremiumHeroCarousel }))
 );
 
-const PremiumHero3DScene = lazy(() =>
-  import('./PremiumHero3DScene').then(m => ({ default: m.PremiumHero3DScene }))
-);
-
 const trustIcons = [CreditCard, Zap, Headphones] as const;
 const trustKeys = ['noCard', 'instant', 'support'] as const;
 
@@ -60,10 +56,6 @@ export function PremiumHero() {
             linear-gradient(180deg, #08080a 0%, #0c0c10 100%)`,
         }}
       />
-
-      <Suspense fallback={null}>
-        <PremiumHero3DScene />
-      </Suspense>
 
       <div className="relative mx-auto flex max-w-7xl flex-col gap-12 px-4 py-12 sm:px-5 sm:py-14 lg:grid lg:grid-cols-[1fr_1.05fr] lg:items-start lg:gap-8 lg:px-8 lg:py-20 xl:py-24">
         <div className="flex flex-col text-center lg:text-left">

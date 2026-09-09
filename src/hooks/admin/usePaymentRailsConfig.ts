@@ -13,6 +13,7 @@ import {
   type PaymentRailAggregatorId,
   type PaymentRailsConfig,
 } from '@/lib/payments/payment-rails-catalog';
+import type { Json } from '@/integrations/supabase/types';
 
 const QUERY_KEY = ['payment-rails-config'] as const;
 const LOGO_BUCKET = 'platform-assets';
@@ -194,7 +195,7 @@ export function usePaymentRailsConfig(options?: { enabled?: boolean }) {
         const { error } = await supabase
           .from('platform_settings')
           .update({
-            settings: next,
+            settings: next as unknown as Json,
             updated_at: new Date().toISOString(),
             updated_by: user?.id ?? null,
           })
@@ -203,7 +204,7 @@ export function usePaymentRailsConfig(options?: { enabled?: boolean }) {
       } else {
         const { error } = await supabase.from('platform_settings').insert({
           key: PAYMENT_RAILS_SETTINGS_KEY,
-          settings: next,
+          settings: next as unknown as Json,
           updated_by: user?.id ?? null,
         });
         if (error) throw error;

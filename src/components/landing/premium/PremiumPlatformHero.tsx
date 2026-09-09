@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react';
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { Check } from 'lucide-react';
 import { StoreCreateCtaLink } from '@/components/store/StoreCreateCtaLink';
 import { useLandingPremiumT } from '@/hooks/useLandingPremiumT';
@@ -15,6 +15,40 @@ import { motion } from 'framer-motion';
 const PremiumHero3DScene = lazy(() =>
   import('./PremiumHero3DScene').then(m => ({ default: m.PremiumHero3DScene }))
 );
+
+/** Monte la scène 3D après le premier paint pour ne pas concurrencer le LCP. */
+function DeferredHero3D() {
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    const enable = () => {
+      if (!cancelled) setReady(true);
+    };
+
+    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+      const id = window.requestIdleCallback(enable, { timeout: 1800 });
+      return () => {
+        cancelled = true;
+        window.cancelIdleCallback(id);
+      };
+    }
+
+    const t = window.setTimeout(enable, 900);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(t);
+    };
+  }, []);
+
+  if (!ready) return null;
+
+  return (
+    <Suspense fallback={null}>
+      <PremiumHero3DScene />
+    </Suspense>
+  );
+}
 
 const CHECK_KEYS = ['physical', 'digital', 'service', 'courses', 'artist'] as const;
 
@@ -81,9 +115,7 @@ export function PremiumPlatformHero() {
         } as CSSProperties
       }
     >
-      <Suspense fallback={null}>
-        <PremiumHero3DScene />
-      </Suspense>
+      <DeferredHero3D />
 
       {leftBackgroundUrl ? (
         <div className="lp-platform-hero__left-bg pointer-events-none absolute inset-y-0 left-0 z-[1]">

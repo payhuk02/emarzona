@@ -203,11 +203,13 @@ export function PaymentProviderSelector({
     const source = (rpcOptions ?? []).filter(
       opt => opt.provider !== 'flutterwave_connect' && opt.provider !== 'geniuspay_platform'
     );
-    const mapped = source.map(opt => {
+    const mapped: PaymentProviderOption[] = source.map(opt => {
       const checkoutValue = rpcProviderToCheckout(opt.provider);
-      const meta = PROVIDER_META[checkoutValue] ?? PROVIDER_META.moneyfusion;
+      const resolvedValue: CheckoutPaymentProvider =
+        checkoutValue === 'geniuspay' ? 'moneyfusion' : checkoutValue;
+      const meta = PROVIDER_META[resolvedValue] ?? PROVIDER_META.moneyfusion;
       return {
-        value: checkoutValue === 'geniuspay' ? 'moneyfusion' : checkoutValue,
+        value: resolvedValue,
         label: checkoutValue === 'geniuspay' ? meta.label : opt.label || meta.label,
         description: meta.description,
         icon: meta.icon,
@@ -222,7 +224,6 @@ export function PaymentProviderSelector({
 
     return mapped
       .filter(p => {
-        if (p.value === 'geniuspay') return false;
         if (p.value === 'stripe_connect' && !stripeRailOk) return false;
         if (p.value === 'paypal_commerce' && !paypalRailOk) return false;
         if (p.value === 'moneyfusion' && !mfRailOk) return false;

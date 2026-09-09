@@ -285,7 +285,7 @@ export function mergePaymentRailsConfig(raw: unknown): PaymentRailsConfig {
         : {};
     const operators = { ...defaults[agg.id].operators };
     for (const op of agg.operators) {
-      if (typeof opsIn[op.id] === 'boolean') operators[op.id] = opsIn[op.id];
+      if (typeof opsIn[op.id] === 'boolean') operators[op.id] = opsIn[op.id] as boolean;
     }
 
     const logosIn =

@@ -2,10 +2,11 @@ import { lazy, Suspense } from 'react';
 import '@/styles/landing-premium.css';
 import { PremiumNav } from './PremiumNav';
 import { PremiumPlatformHero } from './PremiumPlatformHero';
-import { PremiumHero } from './PremiumHero';
 import { LandingDeferredSection } from './LandingDeferredSection';
 import { ErrorBoundary } from '@/components/error/ErrorBoundary';
 
+/** Second hero + footer : hors premier viewport — code-split + mount différé */
+const PremiumHero = lazy(() => import('./PremiumHero').then(m => ({ default: m.PremiumHero })));
 const SellWaysSection = lazy(() =>
   import('./SellWaysSection').then(m => ({ default: m.SellWaysSection }))
 );
@@ -28,15 +29,25 @@ const PricingSection = lazy(() =>
 const FinalCtaSection = lazy(() =>
   import('./FinalCtaSection').then(m => ({ default: m.FinalCtaSection }))
 );
-import { PremiumFooter } from './PremiumFooter';
+const PremiumFooter = lazy(() =>
+  import('./PremiumFooter').then(m => ({ default: m.PremiumFooter }))
+);
 
 export function PremiumLandingPage() {
   return (
     <div className="landing-premium min-h-screen overflow-x-clip">
       <PremiumNav />
       <main>
+        {/* Premier viewport uniquement : nav + platform hero */}
         <PremiumPlatformHero />
-        <PremiumHero />
+
+        <LandingDeferredSection minHeight="32rem" rootMargin="120px 0px">
+          <ErrorBoundary level="section">
+            <Suspense fallback={<div className="min-h-[28rem] bg-[#08080a]" aria-hidden />}>
+              <PremiumHero />
+            </Suspense>
+          </ErrorBoundary>
+        </LandingDeferredSection>
 
         <LandingDeferredSection minHeight="28rem">
           <ErrorBoundary level="section">
@@ -103,7 +114,13 @@ export function PremiumLandingPage() {
         </LandingDeferredSection>
       </main>
 
-      <PremiumFooter />
+      <LandingDeferredSection minHeight="16rem" rootMargin="200px 0px">
+        <ErrorBoundary level="section">
+          <Suspense fallback={null}>
+            <PremiumFooter />
+          </Suspense>
+        </ErrorBoundary>
+      </LandingDeferredSection>
     </div>
   );
 }
