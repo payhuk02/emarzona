@@ -26,7 +26,7 @@ jobs:
         run: npm ci
 
       - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
+        run: bash scripts/ci-playwright-install.sh
 
       - name: Setup environment variables
         run: |
@@ -78,6 +78,7 @@ jobs:
 
       - name: Apply E2E schema patches (idempotent)
         run: |
+          bash scripts/ci-sanitize-apt-sources.sh
           sudo apt-get update
           sudo apt-get install -y postgresql-client
           bash scripts/apply-e2e-post-bootstrap-patches-ci.sh
@@ -118,7 +119,7 @@ jobs:
 
       - name: Install Playwright Browsers
         if: steps.commerce_e2e_secrets.outputs.skipped != 'true'
-        run: npx playwright install --with-deps chromium
+        run: bash scripts/ci-playwright-install.sh chromium
 
       - name: Run commerce type gating E2E
         if: steps.commerce_e2e_secrets.outputs.skipped != 'true'
@@ -177,7 +178,7 @@ jobs:
 
       - name: Install Playwright Browsers
         if: steps.commerce_e2e_secrets.outputs.skipped != 'true'
-        run: npx playwright install --with-deps chromium
+        run: bash scripts/ci-playwright-install.sh chromium
 
       - name: Run store theme E2E
         if: steps.commerce_e2e_secrets.outputs.skipped != 'true'
@@ -231,7 +232,7 @@ jobs:
 
       - name: Install Playwright Browsers
         if: steps.commerce_e2e_secrets.outputs.skipped != 'true'
-        run: npx playwright install --with-deps chromium
+        run: bash scripts/ci-playwright-install.sh chromium
 
       - name: Run product wizards E2E
         if: steps.commerce_e2e_secrets.outputs.skipped != 'true'
@@ -284,7 +285,7 @@ jobs:
 
       - name: Install Playwright Browsers
         if: steps.commerce_e2e_secrets.outputs.skipped != 'true'
-        run: npx playwright install --with-deps chromium
+        run: bash scripts/ci-playwright-install.sh chromium
 
       - name: Run vertical paid E2E
         if: steps.commerce_e2e_secrets.outputs.skipped != 'true'
@@ -340,7 +341,7 @@ jobs:
           exit 1
 
       - name: Install Playwright Browsers
-        run: npx playwright install --with-deps chromium
+        run: bash scripts/ci-playwright-install.sh chromium
 
       - name: Run checkout multi-PSP E2E
         run: npm run test:e2e:checkout
@@ -378,7 +379,7 @@ jobs:
         run: npm ci
 
       - name: Install Playwright
-        run: npx playwright install --with-deps
+        run: bash scripts/ci-playwright-install.sh
 
       - name: Setup environment variables
         run: |
@@ -415,7 +416,7 @@ jobs:
         run: npm ci
 
       - name: Install Playwright
-        run: npx playwright install --with-deps
+        run: bash scripts/ci-playwright-install.sh
 
       - name: Setup environment variables
         run: |

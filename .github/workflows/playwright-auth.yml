@@ -23,7 +23,7 @@ jobs:
         run: npm ci
 
       - name: Install Playwright
-        run: npx playwright install --with-deps
+        run: bash scripts/ci-playwright-install.sh
 
       - name: Setup environment variables
         run: |

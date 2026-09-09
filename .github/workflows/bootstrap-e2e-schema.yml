@@ -26,6 +26,7 @@ jobs:
       - name: Install PostgreSQL 17 client
         if: inputs.mode == 'full'
         run: |
+          bash scripts/ci-sanitize-apt-sources.sh
           sudo apt-get update
           sudo apt-get install -y curl ca-certificates
           sudo install -d /usr/share/postgresql-common/pgdg
@@ -38,7 +39,10 @@ jobs:
 
       - name: Install PostgreSQL client (grants-only)
         if: inputs.mode == 'grants-only' || inputs.mode == 'patches-only'
-        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+        run: |
+          bash scripts/ci-sanitize-apt-sources.sh
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
 
       - name: Bootstrap schema (schema-only, no data)
         env:
