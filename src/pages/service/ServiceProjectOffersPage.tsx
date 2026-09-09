@@ -4,7 +4,6 @@
 
 import { useState, useEffect } from 'react';
 import { AppPageShell } from '@/components/layout/AppPageShell';
-import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Label } from '@/components/ui/label';
 import {
@@ -98,7 +97,6 @@ export default function ServiceProjectOffersPage() {
     <AppPageShell>
       <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4">
         <div className="flex items-center gap-2">
-          <SidebarTrigger />
           <div>
             <h1 className="text-xl font-semibold sm:text-2xl">Offres projet</h1>
             <p className="text-sm text-muted-foreground">

@@ -95,6 +95,8 @@ interface ProductCardModernProps {
   affiliateCommissionRate?: number;
   freeShipping?: boolean;
   shippingCost?: number;
+  /** Above-the-fold LCP: first cards only */
+  priority?: boolean;
 }
 
 const ProductCardModernComponent = ({
@@ -103,6 +105,7 @@ const ProductCardModernComponent = ({
   affiliateCommissionRate,
   freeShipping,
   shippingCost,
+  priority = false,
 }: ProductCardModernProps) => {
   const [isZoomOpen, setIsZoomOpen] = useState(false);
   const [_userId, setUserId] = useState<string | null>(null);
@@ -273,7 +276,7 @@ const ProductCardModernComponent = ({
             src={product.image_url || '/placeholder.svg'}
             alt={product.name}
             className="w-full h-full product-image transition-transform duration-300 group-hover:scale-110"
-            priority={false}
+            priority={priority}
             fit="contain"
             fill={true}
             context="grid"
@@ -669,7 +672,8 @@ const ProductCardModern = React.memo(ProductCardModernComponent, (prevProps, nex
     prevProps.storeSlug === nextProps.storeSlug &&
     prevProps.affiliateCommissionRate === nextProps.affiliateCommissionRate &&
     prevProps.freeShipping === nextProps.freeShipping &&
-    prevProps.shippingCost === nextProps.shippingCost
+    prevProps.shippingCost === nextProps.shippingCost &&
+    prevProps.priority === nextProps.priority
   );
 });
 

@@ -5,6 +5,7 @@
  */
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AppPageShell } from '@/components/layout/AppPageShell';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,6 +18,7 @@ import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
 const Discover = () => {
+  const navigate = useNavigate();
   const { selectedStoreId } = useStoreContext();
   const [activeTab, setActiveTab] = useState('cross-type');
 
@@ -280,7 +282,7 @@ const Discover = () => {
                 <p className="text-muted-foreground mb-4">
                   Cette fonctionnalité de découverte aléatoire intelligente arrive bientôt !
                 </p>
-                <Button onClick={() => (window.location.href = '/marketplace')}>
+                <Button onClick={() => navigate('/marketplace')}>
                   Explorer le Marketplace en attendant
                 </Button>
               </div>
@@ -299,14 +301,10 @@ const Discover = () => {
             deviennent précises et personnalisées. Laissez-vous guider par l'IA !
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button onClick={() => (window.location.href = '/marketplace')} size="lg">
+            <Button onClick={() => navigate('/marketplace')} size="lg">
               Explorer le Marketplace
             </Button>
-            <Button
-              variant="outline"
-              onClick={() => (window.location.href = '/recommendations')}
-              size="lg"
-            >
+            <Button variant="outline" onClick={() => navigate('/recommendations')} size="lg">
               Mes Recommandations
             </Button>
           </div>

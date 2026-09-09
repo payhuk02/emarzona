@@ -3,7 +3,6 @@
  * Description: Page complète pour gérer les affiliés d'un store
  * Date: 31 Janvier 2025
  */
-import { SidebarTrigger } from '@/components/ui/sidebar';
 import { AppPageShell } from '@/components/layout/AppPageShell';
 import { StoreAffiliateDashboard } from '@/components/affiliate/StoreAffiliateDashboard';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -151,7 +150,6 @@ export default function StoreAffiliateManagement() {
     <AppPageShell>
       <header className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-14 items-center">
-          <SidebarTrigger />
           <div className="mr-4 hidden md:flex">
             <h1 className="text-lg font-semibold">Gestion des Affiliés</h1>
           </div>

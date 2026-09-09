@@ -8,7 +8,6 @@
 
 import { useMemo } from 'react';
 import { AppPageShell } from '@/components/layout/AppPageShell';
-import { SidebarTrigger } from '@/components/ui/sidebar';
 import { AdvancedServiceCalendar } from '@/components/service';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar, CheckCircle2, Clock, XCircle, DollarSign } from 'lucide-react';
@@ -56,7 +55,6 @@ export default function AdvancedCalendarPage() {
           className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700"
         >
           <div className="flex items-start sm:items-center gap-2 sm:gap-3">
-            <SidebarTrigger className="mt-1 sm:mt-0 shrink-0" />
             <div className="flex-1 min-w-0">
               <h1 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
                 <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500 shrink-0">

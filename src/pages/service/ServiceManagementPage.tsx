@@ -8,7 +8,6 @@
 
 import { useMemo } from 'react';
 import { AppPageShell } from '@/components/layout/AppPageShell';
-import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   AdvancedServiceCalendar,
@@ -118,7 +117,6 @@ export default function ServiceManagementPage() {
           className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700"
         >
           <div className="flex items-start sm:items-center gap-2 sm:gap-3">
-            <SidebarTrigger className="mt-1 sm:mt-0 shrink-0" />
             <div className="flex-1 min-w-0">
               <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
                 <div className="flex items-center gap-1.5 sm:gap-2">

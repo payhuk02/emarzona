@@ -66,12 +66,12 @@
 }
 
 .marketplace-premium .mp-breadcrumb--with-nav {
-  padding-top: 5.25rem;
+  padding-top: var(--lp-nav-offset, 5.25rem);
 }
 
 @media (min-width: 640px) {
   .marketplace-premium .mp-breadcrumb--with-nav {
-    padding-top: 5.5rem;
+    padding-top: var(--lp-nav-offset, 5.5rem);
   }
 }
 

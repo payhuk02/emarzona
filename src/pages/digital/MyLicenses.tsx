@@ -12,7 +12,6 @@ import {
   useLicenseActivations,
   useDeactivateLicense,
 } from '@/hooks/digital/useLicenses';
-import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -131,7 +130,6 @@ export const MyLicenses = () => {
           className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700"
         >
           <div className="flex items-center gap-2 sm:gap-3">
-            <SidebarTrigger className="mr-1 sm:mr-2" />
             <div>
               <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
                 <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">

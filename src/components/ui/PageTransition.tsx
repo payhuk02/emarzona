@@ -1,21 +1,16 @@
 /**
- * Composant pour les transitions de page fluides
+ * @deprecated Prefer `.page-enter` on `#main-content` (AppPageShell) and
+ * `useScrollRestoration` for scroll. This helper remounts children and scrolls
+ * `window` (incorrect for shell `overflow-auto` mains).
  */
 
-import React, { useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import React from 'react';
 
 interface PageTransitionProps {
   children: React.ReactNode;
 }
 
+/** @deprecated */
 export const PageTransition: React.FC<PageTransitionProps> = ({ children }) => {
-  const location = useLocation();
-
-  useEffect(() => {
-    // Scroll to top on route change
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [location.pathname]);
-
-  return <div className="page-enter page-enter-active">{children}</div>;
+  return <div className="page-enter">{children}</div>;
 };

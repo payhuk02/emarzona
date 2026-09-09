@@ -1,4 +1,3 @@
-import { SidebarTrigger } from '@/components/ui/sidebar';
 import { AppPageShell } from '@/components/layout/AppPageShell';
 import {
   Package,
@@ -186,7 +185,6 @@ const AdvancedDashboard = () => {
       {/* Header */}
       <header className="sticky top-0 z-10 border-b bg-card shadow-soft">
         <div className="flex h-14 sm:h-16 items-center gap-2 sm:gap-4 px-3 sm:px-4 md:px-6">
-          <SidebarTrigger />
           <div className="flex-1 min-w-0">
             <h1 className="text-lg sm:text-xl md:text-2xl font-bold truncate">
               {t('dashboard.title')} - {store.name}

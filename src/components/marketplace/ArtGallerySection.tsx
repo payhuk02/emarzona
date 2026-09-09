@@ -16,11 +16,12 @@ import { transformToUnifiedProduct } from '@/lib/product-transform';
 import { CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Palette, Sparkles, ArrowRight, Loader2 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { logger } from '@/lib/logger';
 
 export function ArtGallerySection() {
   const { t: _t } = useTranslation();
+  const navigate = useNavigate();
   const [artworks, setArtworks] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -154,12 +155,14 @@ export function ArtGallerySection() {
                         artwork.stores?.subdomain
                       );
                     } else if (action === 'buy') {
-                      window.location.href = buildCheckoutUrl({
-                        productId: product.id,
-                        storeId: product.store_id,
-                        productSlug: product.slug,
-                        storeSlug: artwork.stores?.slug,
-                      });
+                      navigate(
+                        buildCheckoutUrl({
+                          productId: product.id,
+                          storeId: product.store_id,
+                          productSlug: product.slug,
+                          storeSlug: artwork.stores?.slug,
+                        })
+                      );
                     }
                   }}
                 />

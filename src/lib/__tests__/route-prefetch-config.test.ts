@@ -14,10 +14,12 @@ describe('getRoutePrefetchConfig', () => {
     expect(cfg.idleRoutes).not.toContain('/dashboard');
   });
 
-  it('prefetch public pour les anonymes', () => {
+  it('prefetch public pour les anonymes (délai long, sans /cart)', () => {
     const cfg = getRoutePrefetchConfig(false, false, null, 0);
     expect(cfg.enabled).toBe(true);
+    expect(cfg.idleDelayMs).toBe(8000);
     expect(cfg.idleRoutes).toContain('/marketplace');
+    expect(cfg.idleRoutes).not.toContain('/cart');
     expect(cfg.idleRoutes).not.toContain('/dashboard');
   });
 

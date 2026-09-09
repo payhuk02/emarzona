@@ -16,7 +16,7 @@ import { transformToUnifiedProduct } from '@/lib/product-transform';
 import { CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Loader2, TrendingUp, Sparkles, Award } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { logger } from '@/lib/logger';
 import { ProductType } from '@/types/unified-product';
 
@@ -40,6 +40,7 @@ export function TypeSpecificSection({
   className,
 }: TypeSpecificSectionProps) {
   const { t: _t } = useTranslation();
+  const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -215,12 +216,14 @@ export function TypeSpecificSection({
                         product.stores?.subdomain
                       );
                     } else if (action === 'buy') {
-                      window.location.href = buildCheckoutUrl({
-                        productId: prod.id,
-                        storeId: prod.store_id,
-                        productSlug: product.slug,
-                        storeSlug: product.stores?.slug,
-                      });
+                      navigate(
+                        buildCheckoutUrl({
+                          productId: prod.id,
+                          storeId: prod.store_id,
+                          productSlug: product.slug,
+                          storeSlug: product.stores?.slug,
+                        })
+                      );
                     }
                   }}
                 />

@@ -1,22 +1,19 @@
 import type { CSSProperties } from 'react';
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { Check } from 'lucide-react';
-import { StoreCreateCtaLink } from '@/components/store/StoreCreateCtaLink';
 import { useLandingPremiumT } from '@/hooks/useLandingPremiumT';
 import { usePageCustomization } from '@/hooks/usePageCustomization';
 import { usePlatformCustomizationContext } from '@/contexts/PlatformCustomizationContext';
 import { LANDING_PREMIUM_PAGE_ID } from '@/lib/admin/landingPremiumCustomization';
 import { getPageCustomizationValue } from '@/lib/admin/pageCustomizationKeys';
 import { PremiumPlatformHeroBackground } from './PremiumPlatformHeroBackground';
-import { PremiumPlatformHeroAmbient } from './platform-hero/PremiumPlatformHeroAmbient';
 import { PremiumPlatformHeroVisual } from './platform-hero/PremiumPlatformHeroVisual';
-import { motion } from 'framer-motion';
 
 const PremiumHero3DScene = lazy(() =>
   import('./PremiumHero3DScene').then(m => ({ default: m.PremiumHero3DScene }))
 );
 
-/** Monte la scène 3D après le premier paint pour ne pas concurrencer le LCP. */
+/** Monte la scène 3D après idle prolongé / interaction pour ne pas concurrencer le LCP. */
 function DeferredHero3D() {
   const [ready, setReady] = useState(false);
 
@@ -26,18 +23,26 @@ function DeferredHero3D() {
       if (!cancelled) setReady(true);
     };
 
+    const onInteract = () => enable();
+    window.addEventListener('pointerdown', onInteract, { once: true, passive: true });
+    window.addEventListener('keydown', onInteract, { once: true });
+
     if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
-      const id = window.requestIdleCallback(enable, { timeout: 1800 });
+      const id = window.requestIdleCallback(enable, { timeout: 4500 });
       return () => {
         cancelled = true;
         window.cancelIdleCallback(id);
+        window.removeEventListener('pointerdown', onInteract);
+        window.removeEventListener('keydown', onInteract);
       };
     }
 
-    const t = window.setTimeout(enable, 900);
+    const t = window.setTimeout(enable, 3200);
     return () => {
       cancelled = true;
       window.clearTimeout(t);
+      window.removeEventListener('pointerdown', onInteract);
+      window.removeEventListener('keydown', onInteract);
     };
   }, []);
 
@@ -56,19 +61,6 @@ const DEFAULT_TEXT = '#f4f3f0';
 const DEFAULT_CTA_BG = '#f97316';
 const DEFAULT_CTA_TEXT = '#ffffff';
 
-const fadeUpVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: (custom: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: {
-      delay: custom * 0.08,
-      duration: 0.75,
-      ease: [0.22, 1, 0.36, 1],
-    },
-  }),
-};
-
 export function PremiumPlatformHero() {
   const { t } = useLandingPremiumT();
   const { pageCustomization } = usePageCustomization(LANDING_PREMIUM_PAGE_ID);
@@ -83,12 +75,6 @@ export function PremiumPlatformHero() {
     getPageCustomizationValue(pageCustomization, 'platformHero.leftBackgroundAlt') ??
     t('platformHero.leftBackgroundAlt');
 
-  const customBackgroundColor = getPageCustomizationValue(
-    pageCustomization,
-    'platformHero.backgroundColor'
-  );
-  const hasBackgroundColor = Boolean(customBackgroundColor);
-  const backgroundColor = hasBackgroundColor ? customBackgroundColor! : undefined;
   const textColor =
     getPageCustomizationValue(pageCustomization, 'platformHero.textColor') ?? DEFAULT_TEXT;
   const ctaBackgroundColor =
@@ -104,7 +90,7 @@ export function PremiumPlatformHero() {
 
   return (
     <section
-      className={`lp-platform-hero lp-platform-hero--premium relative w-full overflow-hidden border-b border-white/[0.06] pt-16 sm:pt-[72px] bg-[#08080a]`}
+      className="lp-platform-hero lp-platform-hero--premium relative w-full overflow-hidden border-b border-white/[0.06] pt-16 sm:pt-[72px] bg-[#08080a]"
       aria-label={t('platformHero.ariaLabel')}
       style={
         {
@@ -130,36 +116,18 @@ export function PremiumPlatformHero() {
       <div className="lp-platform-hero__frame relative z-[2] mx-auto grid w-full max-w-[100rem] grid-cols-1 gap-8 px-4 sm:px-6 md:px-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-6 lg:px-14 xl:px-16 2xl:px-20">
         <div className="lp-platform-hero__col-content flex flex-col">
           <div className="lp-platform-hero__content text-center lg:text-left">
-            <motion.h1
-              custom={0}
-              initial="hidden"
-              animate="visible"
-              variants={fadeUpVariants}
-              className="lp-platform-hero__title lp-serif text-[2rem] leading-[1.08] sm:text-[2.65rem] md:text-[3rem] lg:text-[3.65rem] xl:text-[4.15rem]"
-            >
+            <h1 className="lp-platform-hero__title lp-serif lp-hero-enter text-[2rem] leading-[1.08] sm:text-[2.65rem] md:text-[3rem] lg:text-[3.65rem] xl:text-[4.15rem]">
               <span className="lp-platform-hero__title-line">{t('platformHero.titleLine1')}</span>
               <span className="lp-platform-hero__title-line">{t('platformHero.titleLine2')}</span>
-            </motion.h1>
+            </h1>
 
             {subtitle.trim() ? (
-              <motion.p
-                custom={1}
-                initial="hidden"
-                animate="visible"
-                variants={fadeUpVariants}
-                className="lp-platform-hero__subtitle mx-auto mt-5 max-w-xl text-[15px] leading-relaxed sm:text-base lg:mx-0 lg:max-w-lg"
-              >
+              <p className="lp-platform-hero__subtitle lp-hero-enter lp-hero-enter--d1 mx-auto mt-5 max-w-xl text-[15px] leading-relaxed sm:text-base lg:mx-0 lg:max-w-lg">
                 {subtitle}
-              </motion.p>
+              </p>
             ) : null}
 
-            <motion.ul
-              custom={2}
-              initial="hidden"
-              animate="visible"
-              variants={fadeUpVariants}
-              className="lp-platform-hero__checks mt-8 sm:mt-10"
-            >
+            <ul className="lp-platform-hero__checks lp-hero-enter lp-hero-enter--d2 mt-8 sm:mt-10">
               {CHECK_KEYS.map(key => (
                 <li
                   key={key}
@@ -171,17 +139,17 @@ export function PremiumPlatformHero() {
                   <span className="min-w-0">{t(`platformHero.checks.${key}`)}</span>
                 </li>
               ))}
-            </motion.ul>
+            </ul>
           </div>
         </div>
 
-        <motion.div custom={4} initial="hidden" animate="visible" variants={fadeUpVariants}>
+        <div className="lp-hero-enter lp-hero-enter--d3">
           <PremiumPlatformHeroVisual
             backgroundUrl={backgroundUrl}
             backgroundAlt={backgroundAlt}
             ctaLabel={ctaLabel}
           />
-        </motion.div>
+        </div>
       </div>
     </section>
   );

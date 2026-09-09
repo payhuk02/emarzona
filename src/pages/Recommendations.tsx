@@ -5,6 +5,7 @@
  */
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AppPageShell } from '@/components/layout/AppPageShell';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -18,6 +19,7 @@ import { AIProductRecommendations } from '@/components/recommendations/AIProduct
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
 const Recommendations = () => {
+  const navigate = useNavigate();
   const { selectedStoreId } = useStoreContext();
   const [refreshKey, setRefreshKey] = useState(0);
 
@@ -224,7 +226,7 @@ const Recommendations = () => {
                       Continuez à explorer et acheter pour recevoir des recommandations
                       personnalisées.
                     </p>
-                    <Button onClick={() => (window.location.href = '/marketplace')}>
+                    <Button onClick={() => navigate('/marketplace')}>
                       Explorer le Marketplace
                     </Button>
                   </div>

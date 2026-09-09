@@ -1,7 +1,6 @@
 import React from 'react';
 import { AppPageShell } from '@/components/layout/AppPageShell';
 import { useTranslation } from 'react-i18next';
-import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Package, Shield } from 'lucide-react';

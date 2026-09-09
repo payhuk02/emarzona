@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -16,10 +16,6 @@ import { Link } from 'react-router-dom';
 import { StoreCreateCtaLink } from '@/components/store/StoreCreateCtaLink';
 import { useToast } from '@/hooks/use-toast';
 import { PremiumNav } from '@/components/landing/premium/PremiumNav';
-import { PremiumFooter } from '@/components/landing/premium/PremiumFooter';
-import AdvancedFilters from '@/components/marketplace/AdvancedFilters';
-import ProductComparison from '@/components/marketplace/ProductComparison';
-import FavoritesManager from '@/components/marketplace/FavoritesManager';
 import { ContextualFilters } from '@/components/marketplace/ContextualFilters';
 import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
@@ -55,13 +51,28 @@ import {
 import { MarketplaceHeroSection } from '@/components/marketplace/MarketplaceHeroSection';
 import { MarketplaceControlsSection } from '@/components/marketplace/MarketplaceControlsSection';
 import { MarketplaceProductsSection } from '@/components/marketplace/MarketplaceProductsSection';
-import { AIProductRecommendations } from '@/components/recommendations/AIProductRecommendations';
 import { useLCPPreload } from '@/hooks/useLCPPreload';
 import { generateProductUrl } from '@/lib/store-utils';
 import { useMarketplaceFacets } from '@/hooks/useMarketplaceFacets';
 import { buildMarketplaceBreadcrumbs, buildMarketplaceSEO } from '@/lib/marketplace-seo';
 import { BuyerDiscoveryPageLayout } from '@/components/layout/BuyerDiscoveryPageLayout';
+import { Skeleton } from '@/components/ui/skeleton';
 
+const PremiumFooter = React.lazy(() =>
+  import('@/components/landing/premium/PremiumFooter').then(m => ({ default: m.PremiumFooter }))
+);
+const AdvancedFilters = React.lazy(() => import('@/components/marketplace/AdvancedFilters'));
+const ProductComparison = React.lazy(() => import('@/components/marketplace/ProductComparison'));
+const FavoritesManager = React.lazy(() => import('@/components/marketplace/FavoritesManager'));
+const AIProductRecommendations = React.lazy(() =>
+  import('@/components/recommendations/AIProductRecommendations').then(m => ({
+    default: m.AIProductRecommendations,
+  }))
+);
+
+function MarketplaceDeferredFallback({ className }: { className?: string }) {
+  return <Skeleton className={cn('h-24 w-full rounded-lg', className)} aria-hidden />;
+}
 const MarketplacePage = () => {
   const { t } = useTranslation();
   const { toast } = useToast();
@@ -962,14 +973,16 @@ const MarketplacePage = () => {
         {finalUserId && (
           <section className="mp-section-muted py-8 sm:py-12 lg:py-16 px-3 sm:px-4">
             <div className="container mx-auto max-w-7xl">
-              <AIProductRecommendations
-                userId={finalUserId}
-                title="Découvrez nos recommandations personnalisées"
-                limit={8}
-                showReasoning={true}
-                layout="grid"
-                className="border-none bg-transparent shadow-none"
-              />
+              <Suspense fallback={<MarketplaceDeferredFallback className="h-48" />}>
+                <AIProductRecommendations
+                  userId={finalUserId}
+                  title="Découvrez nos recommandations personnalisées"
+                  limit={8}
+                  showReasoning={true}
+                  layout="grid"
+                  className="border-none bg-transparent shadow-none"
+                />
+              </Suspense>
             </div>
           </section>
         )}
@@ -1007,34 +1020,40 @@ const MarketplacePage = () => {
           </div>
         </section>
 
-        {!useAuthenticatedShell && <PremiumFooter />}
+        {!useAuthenticatedShell && (
+          <Suspense fallback={null}>
+            <PremiumFooter />
+          </Suspense>
+        )}
 
-        {/* Modales */}
-        <AdvancedFilters
-          theme="premium"
-          isOpen={showAdvancedSearch}
-          onClose={() => setShowAdvancedSearch(false)}
-          filters={filters}
-          onFiltersChange={updateFilter}
-          categories={catalogCategories}
-          productTypes={catalogProductTypes}
-          priceRange={priceRange}
-          onPriceRangeChange={setPriceRange}
-        />
+        {/* Modales (chunks différés) */}
+        <Suspense fallback={null}>
+          <AdvancedFilters
+            theme="premium"
+            isOpen={showAdvancedSearch}
+            onClose={() => setShowAdvancedSearch(false)}
+            filters={filters}
+            onFiltersChange={updateFilter}
+            categories={catalogCategories}
+            productTypes={catalogProductTypes}
+            priceRange={priceRange}
+            onPriceRangeChange={setPriceRange}
+          />
 
-        <ProductComparison
-          products={comparisonProducts}
-          onRemoveProduct={removeFromComparison}
-          onClearAll={clearComparison}
-          onClose={() => setShowComparison(false)}
-        />
+          <ProductComparison
+            products={comparisonProducts}
+            onRemoveProduct={removeFromComparison}
+            onClearAll={clearComparison}
+            onClose={() => setShowComparison(false)}
+          />
 
-        <FavoritesManager
-          favorites={favoriteProducts}
-          onRemoveFavorite={productId => toggleFavorite(productId)}
-          onClearAll={clearAllFavorites}
-          onClose={() => {}}
-        />
+          <FavoritesManager
+            favorites={favoriteProducts}
+            onRemoveFavorite={productId => toggleFavorite(productId)}
+            onClearAll={clearAllFavorites}
+            onClose={() => {}}
+          />
+        </Suspense>
       </BuyerDiscoveryPageLayout>
     </>
   );

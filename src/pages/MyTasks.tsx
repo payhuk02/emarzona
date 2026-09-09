@@ -7,7 +7,6 @@
 
 import { useTranslation } from 'react-i18next';
 import { AppPageShell } from '@/components/layout/AppPageShell';
-import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckSquare } from 'lucide-react';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
@@ -42,7 +41,6 @@ const MyTasks = () => {
       {/* Header */}
       <header ref={headerRef} className="sticky top-0 z-10 border-b bg-card/95 backdrop-blur-sm">
         <div className="flex h-14 sm:h-16 items-center gap-2 sm:gap-4 px-3 sm:px-4 md:px-6">
-          <SidebarTrigger className="touch-manipulation min-h-[44px] min-w-[44px]" />
           <div className="flex-1 min-w-0 flex items-center gap-2 sm:gap-3">
             <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-gradient-to-br from-green-500/10 to-emerald-500/5 border border-green-500/20 flex items-center justify-center">
               <CheckSquare className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 dark:text-green-400" />

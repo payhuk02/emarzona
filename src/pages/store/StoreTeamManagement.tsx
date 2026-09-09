@@ -9,7 +9,6 @@ import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { AppPageShell } from '@/components/layout/AppPageShell';
-import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { StoreMembersList } from '@/components/team/StoreMembersList';
 import { Users, CheckSquare, BarChart3, Shield, ScrollText, Loader2 } from 'lucide-react';
@@ -120,7 +119,6 @@ const StoreTeamManagement = () => {
       {/* Header */}
       <header ref={headerRef} className="sticky top-0 z-10 border-b bg-card/95 backdrop-blur-sm">
         <div className="flex h-14 sm:h-16 items-center gap-2 sm:gap-4 px-3 sm:px-4 md:px-6">
-          <SidebarTrigger className="touch-manipulation min-h-[44px] min-w-[44px]" />
           <div className="flex-1 min-w-0 flex items-center gap-2 sm:gap-3">
             <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
               <Users

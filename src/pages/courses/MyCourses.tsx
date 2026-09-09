@@ -7,7 +7,6 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { AppPageShell } from '@/components/layout/AppPageShell';
 import { useNavigate } from 'react-router-dom';
-import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -465,10 +464,6 @@ const MyCourses = () => {
         role="banner"
       >
         <div className="flex h-14 sm:h-16 items-center gap-2 sm:gap-3 lg:gap-4 px-2 sm:px-3 lg:px-6 overflow-hidden">
-          <SidebarTrigger
-            aria-label={t('dashboard.sidebarToggle', 'Toggle sidebar')}
-            className="hover:bg-accent/50 transition-colors duration-200 flex-shrink-0 touch-manipulation min-h-[44px] min-w-[44px]"
-          />
           <div className="flex-1 min-w-0 overflow-hidden">
             <h1
               className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent truncate px-1"

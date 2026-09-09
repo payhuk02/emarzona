@@ -6,8 +6,8 @@ import type { StoreCommerceType } from '@/constants/store-commerce-types';
 import { getVendorProductListPath } from '@/lib/commerce/store-capability-map';
 import { getVendorWizardPrefetchRoutes } from '@/lib/wizard/prefetch-product-wizards';
 
-export const PUBLIC_IDLE_ROUTES = ['/marketplace', '/cart'] as const;
-export const PUBLIC_HOVER_ROUTES = ['/marketplace', '/cart', '/checkout'] as const;
+export const PUBLIC_IDLE_ROUTES = ['/marketplace'] as const;
+export const PUBLIC_HOVER_ROUTES = ['/marketplace', '/checkout'] as const;
 
 /** Chemins vendeur indépendants du commerce_type */
 export const VENDOR_CORE_IDLE_ROUTES = ['/dashboard', '/dashboard/orders'] as const;
@@ -60,7 +60,7 @@ export function getRoutePrefetchConfig(
       enabled: true,
       idleRoutes: PUBLIC_IDLE_ROUTES,
       hoverRoutes: PUBLIC_HOVER_ROUTES,
-      idleDelayMs: 3000,
+      idleDelayMs: 8000,
     };
   }
 

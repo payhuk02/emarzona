@@ -55,7 +55,6 @@ import { ProductListSkeleton } from '@/components/ui/skeleton-enhanced';
 import UnifiedProductCard from '@/components/products/UnifiedProductCard';
 import { transformToUnifiedProduct } from '@/lib/product-transform';
 import { Product } from '@/types/marketplace';
-import { useIsMobile } from '@/hooks/use-mobile';
 
 interface MarketplaceProductsSectionProps {
   products: Product[];
@@ -95,10 +94,9 @@ export const MarketplaceProductsSection = React.memo<MarketplaceProductsSectionP
     onRecommendationsRender,
   }) => {
     const { t } = useTranslation();
-    const isMobile = useIsMobile();
     /** Ref ancre pagination — pas d'animation scroll (contenu critique toujours visible). */
     const productsRef = useRef<HTMLDivElement>(null);
-    const eagerImageCount = isMobile ? 4 : 2;
+    const eagerImageCount = 4;
 
     // Calculer le nombre total de pages
     const totalPages = Math.ceil(pagination.totalItems / pagination.itemsPerPage);

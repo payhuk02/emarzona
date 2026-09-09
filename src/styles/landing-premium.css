@@ -4,6 +4,7 @@
 @import './landing-typography.css';
 
 .landing-premium {
+  --lp-nav-offset: 4.25rem;
   --lp-ink: #08080a;
   --lp-ink-soft: #121218;
   --lp-ink-muted: #1a1a22;
@@ -40,6 +41,55 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+}
+
+@media (min-width: 640px) {
+  .landing-premium {
+    --lp-nav-offset: 4.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .landing-premium {
+    --lp-nav-offset: 4.75rem;
+  }
+}
+
+/* Hero LCP enter — CSS only (no framer-motion on first paint) */
+@keyframes lp-hero-enter {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.landing-premium .lp-hero-enter {
+  animation: lp-hero-enter 0.7s var(--lp-ease) both;
+}
+
+.landing-premium .lp-hero-enter--d1 {
+  animation-delay: 0.08s;
+}
+
+.landing-premium .lp-hero-enter--d2 {
+  animation-delay: 0.16s;
+}
+
+.landing-premium .lp-hero-enter--d3 {
+  animation-delay: 0.24s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-premium .lp-hero-enter,
+  .landing-premium .lp-hero-enter--d1,
+  .landing-premium .lp-hero-enter--d2,
+  .landing-premium .lp-hero-enter--d3 {
+    animation: none;
+  }
 }
 
 /* Hero plateforme — bandeau haut (au-dessus du hero principal) */

@@ -124,4 +124,10 @@ test.describe('Navigation shell — bottom-nav marketing', () => {
     await gotoApp(page, '/pricing');
     await expect(appLocator(page).getByTestId('bottom-navigation')).toHaveCount(0);
   });
+
+  test('marketplace invité sans bottom-nav app', async ({ page }) => {
+    await page.setViewportSize({ width: 393, height: 851 });
+    await gotoApp(page, '/marketplace');
+    await expect(appLocator(page).getByTestId('bottom-navigation')).toHaveCount(0);
+  });
 });

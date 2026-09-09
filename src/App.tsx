@@ -226,7 +226,7 @@ const AppContent = () => {
   );
   const isMobile = useIsMobile();
   const location = useLocation();
-  const isBottomNavVisible = isMobile && shouldShowBottomNavigation(location.pathname);
+  const isBottomNavVisible = isMobile && !!user && shouldShowBottomNavigation(location.pathname);
   const usePremiumTheme = shouldUseAppPremiumTheme(location.pathname);
 
   useBehavioralAnalytics(undefined, {

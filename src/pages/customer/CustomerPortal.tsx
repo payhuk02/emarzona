@@ -301,7 +301,7 @@ export default function CustomerPortal() {
   if (statsLoading) {
     return (
       <AppPageShell shellClassName="bg-gray-50 dark:bg-gray-900">
-        {/* Mobile Header avec SidebarTrigger et Icône - Loading State */}
+        {/* Mobile Header avec icône — Loading State */}
         <header className="sticky top-0 z-50 border-b bg-white dark:bg-gray-900 shadow-sm lg:hidden">
           <div className="flex h-14 sm:h-16 items-center gap-2 sm:gap-3 px-3 sm:px-4">
             {/* Hamburger Menu Skeleton */}

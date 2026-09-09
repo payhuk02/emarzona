@@ -95,10 +95,10 @@ export default function PlatformBlogArticlePage() {
         </>
       ) : null}
 
-      <div className="min-h-screen bg-[#060608] text-white">
+      <div className="landing-premium min-h-screen bg-[#060608] text-white">
         <PremiumNav />
 
-        <article className="pt-[4.25rem] sm:pt-[4.5rem] lg:pt-[4.75rem]">
+        <article className="pt-[var(--lp-nav-offset)]">
           {isLoading ? (
             <div className="container mx-auto max-w-3xl px-4 py-10 space-y-4">
               <Skeleton className="h-10 w-3/4 bg-white/10" />

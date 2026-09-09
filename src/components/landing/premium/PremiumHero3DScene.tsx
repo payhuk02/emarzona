@@ -2,68 +2,68 @@ import { useEffect, useRef, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Icosahedron, Float } from '@react-three/drei';
 import * as THREE from 'three';
-import { useReducedMotion } from 'framer-motion';
 
 const DESKTOP_MQ = '(min-width: 768px)';
 
-function LuxuriousShape() {
+function LuxuriousShape({ reducedMotion }: { reducedMotion: boolean }) {
   const meshRef = useRef<THREE.Mesh>(null);
-  const prefersReducedMotion = useReducedMotion();
 
   useFrame(state => {
-    if (meshRef.current && !prefersReducedMotion) {
-      meshRef.current.rotation.x = state.clock.elapsedTime * 0.15;
-      meshRef.current.rotation.y = state.clock.elapsedTime * 0.2;
+    if (meshRef.current && !reducedMotion) {
+      meshRef.current.rotation.x = state.clock.elapsedTime * 0.12;
+      meshRef.current.rotation.y = state.clock.elapsedTime * 0.16;
     }
   });
 
   return (
     <Float
-      speed={prefersReducedMotion ? 0 : 2}
-      rotationIntensity={prefersReducedMotion ? 0 : 1.5}
-      floatIntensity={prefersReducedMotion ? 0 : 2}
+      speed={reducedMotion ? 0 : 1.2}
+      rotationIntensity={reducedMotion ? 0 : 0.8}
+      floatIntensity={reducedMotion ? 0 : 1.2}
     >
       <Icosahedron ref={meshRef} args={[1, 0]} scale={2.5}>
-        <meshPhysicalMaterial
+        <meshStandardMaterial
           color="#c9a227"
-          metalness={0.85}
-          roughness={0.15}
-          clearcoat={0.9}
-          clearcoatRoughness={0.15}
+          metalness={0.75}
+          roughness={0.25}
           emissive="#c9a227"
-          emissiveIntensity={0.12}
+          emissiveIntensity={0.1}
         />
       </Icosahedron>
 
       <Icosahedron args={[1, 0]} scale={2.52}>
-        <meshBasicMaterial color="#c9a227" wireframe transparent opacity={0.15} />
+        <meshBasicMaterial color="#c9a227" wireframe transparent opacity={0.12} />
       </Icosahedron>
     </Float>
   );
 }
 
 function useDesktopWebGL() {
-  const prefersReducedMotion = useReducedMotion();
   const [enabled, setEnabled] = useState(false);
+  const [reducedMotion, setReducedMotion] = useState(false);
 
   useEffect(() => {
-    if (prefersReducedMotion) {
-      setEnabled(false);
-      return;
-    }
+    const mqMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const mqDesktop = window.matchMedia(DESKTOP_MQ);
 
-    const mq = window.matchMedia(DESKTOP_MQ);
-    const update = () => setEnabled(mq.matches);
+    const update = () => {
+      setReducedMotion(mqMotion.matches);
+      setEnabled(mqDesktop.matches && !mqMotion.matches);
+    };
     update();
-    mq.addEventListener('change', update);
-    return () => mq.removeEventListener('change', update);
-  }, [prefersReducedMotion]);
+    mqMotion.addEventListener('change', update);
+    mqDesktop.addEventListener('change', update);
+    return () => {
+      mqMotion.removeEventListener('change', update);
+      mqDesktop.removeEventListener('change', update);
+    };
+  }, []);
 
-  return enabled;
+  return { enabled, reducedMotion };
 }
 
 export function PremiumHero3DScene() {
-  const enabled = useDesktopWebGL();
+  const { enabled, reducedMotion } = useDesktopWebGL();
 
   if (!enabled) return null;
 
@@ -74,8 +74,8 @@ export function PremiumHero3DScene() {
     >
       <Canvas
         camera={{ position: [0, 0, 5], fov: 45 }}
-        dpr={[1, 1.5]}
-        gl={{ antialias: true, powerPreference: 'high-performance', alpha: true }}
+        dpr={1}
+        gl={{ antialias: false, powerPreference: 'low-power', alpha: true }}
         onCreated={({ gl }) => {
           gl.domElement.addEventListener(
             'webglcontextlost',
@@ -87,10 +87,9 @@ export function PremiumHero3DScene() {
         }}
       >
         <ambientLight intensity={0.55} />
-        <directionalLight position={[10, 10, 5]} intensity={2} color="#c9a227" />
-        <directionalLight position={[-10, -10, -5]} intensity={0.8} color="#ffffff" />
-        <pointLight position={[0, 2, 4]} intensity={1.1} color="#e4c76a" />
-        <LuxuriousShape />
+        <directionalLight position={[10, 10, 5]} intensity={1.6} color="#c9a227" />
+        <directionalLight position={[-10, -10, -5]} intensity={0.6} color="#ffffff" />
+        <LuxuriousShape reducedMotion={reducedMotion} />
       </Canvas>
     </div>
   );

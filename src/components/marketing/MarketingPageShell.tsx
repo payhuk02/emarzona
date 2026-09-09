@@ -12,7 +12,7 @@ export function MarketingPageShell({ children }: Props) {
   return (
     <div className="landing-premium min-h-screen bg-[var(--lp-surface,#fafaf9)]">
       <PremiumNav />
-      <main className="pt-[4.25rem] sm:pt-[4.5rem] lg:pt-[4.75rem]">{children}</main>
+      <main className="pt-[var(--lp-nav-offset)]">{children}</main>
       <PremiumFooter />
     </div>
   );

@@ -6,6 +6,7 @@
  */
 
 import { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -37,6 +38,7 @@ interface TypeStats {
 }
 
 export function ProductTypeStats({ products, className }: ProductTypeStatsProps) {
+  const navigate = useNavigate();
   const stats = useMemo(() => {
     const typeStatsMap = new Map<
       string,
@@ -195,10 +197,9 @@ export function ProductTypeStats({ products, className }: ProductTypeStatsProps)
                   key={stat.type}
                   className="flex flex-col items-center p-4 bg-slate-700/50 rounded-lg border border-slate-600 hover:bg-slate-700 transition-colors cursor-pointer"
                   onClick={() => {
-                    // Navigation vers le filtre du type
-                    const url = new URL(window.location.href);
-                    url.searchParams.set('productType', stat.type);
-                    window.location.href = url.toString();
+                    const params = new URLSearchParams(window.location.search);
+                    params.set('productType', stat.type);
+                    navigate({ pathname: '/marketplace', search: params.toString() });
                   }}
                 >
                   <div

@@ -3,7 +3,6 @@
  */
 
 import { AppPageShell } from '@/components/layout/AppPageShell';
-import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ServiceProductAddonsManager } from '@/components/service/ServiceProductAddonsManager';
 import { useStore } from '@/hooks/useStore';
@@ -70,7 +69,6 @@ export default function ServiceAddonsPage() {
     <AppPageShell>
       <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4">
         <div className="flex items-center gap-2">
-          <SidebarTrigger />
           <h1 className="text-xl font-semibold sm:text-2xl">Compléments service</h1>
         </div>
         <ServiceProductAddonsManager storeId={store.id} services={services} />

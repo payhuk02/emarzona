@@ -51,6 +51,27 @@ describe('NAV audit verification (NAV-001 → NAV-010)', () => {
       expect(app).toContain("import { cn } from '@/lib/utils'");
       expect(app).not.toContain('hasContextSidebarForPath');
       expect(app).toContain('<BottomNavigation position="bottom" />');
+      expect(app).toContain('!!user');
+    });
+
+    it('keeps SidebarTrigger only in utility bar (not page locals)', () => {
+      const utility = readSrc('components/layout/UtilityBarHeader.tsx');
+      expect(utility).toContain('utility-sidebar-trigger');
+
+      const pageLocals = [
+        'pages/AdvancedDashboard.tsx',
+        'pages/Store.tsx',
+        'pages/MyTasks.tsx',
+        'pages/AIChatbotPage.tsx',
+        'pages/ImageStudioPage.tsx',
+        'pages/courses/MyCourses.tsx',
+        'pages/digital/DigitalProductsList.tsx',
+        'pages/digital/MyLicenses.tsx',
+        'pages/service/ServiceManagementPage.tsx',
+      ];
+      for (const file of pageLocals) {
+        expect(readSrc(file)).not.toContain('SidebarTrigger');
+      }
     });
   });
 

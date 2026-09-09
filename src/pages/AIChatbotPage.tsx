@@ -7,7 +7,6 @@ import React, { Suspense } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useAIChatbot } from '@/hooks/useAIChatbot';
 import { Sparkles } from 'lucide-react';
-import { SidebarTrigger } from '@/components/ui/sidebar';
 import { DashboardShellLayout } from '@/components/layout/DashboardShellLayout';
 
 const AIChatbot = React.lazy(() => import('@/components/ai/AIChatbot'));
@@ -40,7 +39,6 @@ const AIChatbotPage: React.FC = () => {
       </Helmet>
 
       <header className="mb-6 flex items-start gap-3">
-        <SidebarTrigger className="mt-1 shrink-0" />
         <div className="app-icon-plain flex shrink-0 items-center justify-center">
           <Sparkles className="h-7 w-7 text-black" aria-hidden />
         </div>

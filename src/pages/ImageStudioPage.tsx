@@ -8,7 +8,6 @@ import { Helmet } from 'react-helmet-async';
 import { Wand2, Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { SidebarTrigger } from '@/components/ui/sidebar';
 import { useToast } from '@/hooks/use-toast';
 import { ImageEnhancerStudio } from '@/components/images/ImageEnhancerStudio';
 import { SmartImage } from '@/components/images/SmartImage';
@@ -50,7 +49,6 @@ const ImageStudioPage: React.FC = () => {
       </Helmet>
 
       <header className="mb-6 sm:mb-8 flex items-start gap-3">
-        <SidebarTrigger className="mt-1 shrink-0" />
         <div className="app-icon-plain flex shrink-0 items-center justify-center">
           <Wand2 className="h-7 w-7 text-black" aria-hidden />
         </div>

@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Gavel, Search, _Clock, DollarSign, Users, Eye, Heart, TrendingUp } from 'lucide-react';
+import { Gavel, Search, DollarSign, Users, Eye, Heart, TrendingUp } from 'lucide-react';
 import {
   useActiveAuctions,
   useToggleWatchlist,
@@ -25,8 +25,9 @@ import { SEOMeta } from '@/components/seo/SEOMeta';
 import { useToast } from '@/hooks/use-toast';
 import { CountdownTimer } from '@/components/artist/AuctionCountdownTimer';
 import { isStoreSubdomainContext } from '@/lib/subdomain-store-context';
-import MarketplaceHeader from '@/components/marketplace/MarketplaceHeader';
+import { PremiumNav } from '@/components/landing/premium/PremiumNav';
 import { BuyerDiscoveryPageLayout } from '@/components/layout/BuyerDiscoveryPageLayout';
+import '@/styles/landing-premium.css';
 
 export default function AuctionsListPage() {
   const { t } = useTranslation();
@@ -265,9 +266,15 @@ export default function AuctionsListPage() {
         url="https://www.emarzona.com/auctions"
         canonical="https://www.emarzona.com/auctions"
       />
-      <BuyerDiscoveryPageLayout authenticated={useAuthenticatedShell} mainAriaLabel={mainAriaLabel}>
-        {showPlatformHeader && <MarketplaceHeader />}
-        {auctionsBody}
+      <BuyerDiscoveryPageLayout
+        authenticated={useAuthenticatedShell}
+        mainAriaLabel={mainAriaLabel}
+        guestClassName="landing-premium min-h-screen overflow-x-hidden bg-[var(--lp-surface,#fafaf9)]"
+      >
+        {showPlatformHeader && <PremiumNav />}
+        <div className={showPlatformHeader ? 'pt-[var(--lp-nav-offset,4.25rem)]' : undefined}>
+          {auctionsBody}
+        </div>
       </BuyerDiscoveryPageLayout>
     </>
   );
