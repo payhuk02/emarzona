@@ -22,6 +22,8 @@ const ALLOWED_PAYMENT_DOMAINS = [
   'moneyfusion.net',
   'pay.moneyfusion.net',
   'payin.moneyfusion.net',
+  'paiementpro.net',
+  'www.paiementpro.net',
   'emarzona.com',
   'myemarzona.shop', // Domaine dédié aux boutiques
   'emarzona.vercel.app',
@@ -83,7 +85,7 @@ export function validateRedirectUrl(url: string): ValidationResult {
   let parsedUrl: URL;
   try {
     parsedUrl = new URL(url);
-  } catch (error) {
+  } catch {
     return {
       isValid: false,
       error: `Format d'URL invalide: ${url}`,

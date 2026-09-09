@@ -219,6 +219,9 @@ export class ArtistOrderStrategy implements OrderStrategy {
             shipping_insurance_required: artistProduct.shipping_insurance_required,
             ...(shippingAddress ? { shipping_address: shippingAddress } : {}),
             ...(guestCheckout ? { guest_checkout: true } : {}),
+            ...(context.preferredProvider === 'paiement_pro' && context.preferredPaiementProChannel
+              ? { channel: context.preferredPaiementProChannel }
+              : {}),
           },
         });
       },

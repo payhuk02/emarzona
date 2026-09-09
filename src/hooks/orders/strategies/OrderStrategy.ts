@@ -43,8 +43,11 @@ export interface OrderStrategyContext {
   /** Achat invité sans session auth */
   guestCheckout?: boolean;
 
-  /** Provider de paiement préféré (ex. moneyfusion, geniuspay) */
+  /** Provider de paiement préféré (ex. moneyfusion, paiement_pro) */
   preferredProvider?: string;
+
+  /** Channel API Paiement Pro (OMCIV2, MOMOCI, FLOOZ, WAVECI, CARD) */
+  preferredPaiementProChannel?: string;
 }
 
 export interface OrderCreationResult {

@@ -224,6 +224,9 @@ export class PhysicalOrderStrategy implements OrderStrategy {
         remaining_amount: remainingAmount,
         checkout_method: checkoutMethod,
         ...(isGuest ? { guest_checkout: true } : {}),
+        ...(context.preferredProvider === 'paiement_pro' && context.preferredPaiementProChannel
+          ? { channel: context.preferredPaiementProChannel }
+          : {}),
       },
     });
 

@@ -203,7 +203,8 @@ serve(async req => {
       data.metadata && typeof data.metadata === 'object' && !Array.isArray(data.metadata)
         ? (data.metadata as Record<string, unknown>)
         : {};
-    const channel = String(metadata.channel || data.channel || 'CARD').toUpperCase();
+    // OMCIV2 par défaut : CARD souvent indisponible sur le compte marchand CI
+    const channel = String(metadata.channel || data.channel || 'OMCIV2').toUpperCase();
 
     if (!amount || amount <= 0) {
       return new Response(JSON.stringify({ error: 'Montant invalide' }), {

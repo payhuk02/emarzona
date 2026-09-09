@@ -87,6 +87,9 @@ export interface CreatePhysicalOrderOptions {
 
   /** Provider checkout (moneyfusion | paiement_pro | …) */
   preferredProvider?: string;
+
+  /** Channel Paiement Pro (OMCIV2, MOMOCI, …) */
+  preferredPaiementProChannel?: string;
 }
 
 /**
@@ -189,6 +192,7 @@ export const useCreatePhysicalOrder = () => {
       } = options;
 
       const preferredProvider = options.preferredProvider;
+      const preferredPaiementProChannel = options.preferredPaiementProChannel;
 
       let resolvedPhysicalProductId = physicalProductId;
 
@@ -461,6 +465,9 @@ export const useCreatePhysicalOrder = () => {
           remaining_amount: remainingAmount,
           checkout_method: checkoutMethod,
           ...(isGuestCheckout ? { guest_checkout: true } : {}),
+          ...(preferredProvider === 'paiement_pro' && preferredPaiementProChannel
+            ? { channel: preferredPaiementProChannel }
+            : {}),
         },
         provider: preferredProvider as
           | 'moneyfusion'

@@ -113,6 +113,7 @@ export default function Checkout() {
   // State pour le provider de paiement sélectionné
   const [selectedPaymentProvider, setSelectedPaymentProvider] =
     useState<PaymentProvider>('moneyfusion');
+  const [paiementProChannel, setPaiementProChannel] = useState<string>('OMCIV2');
 
   // State pour la gestion multi-stores
   const [isMultiStore, setIsMultiStore] = useState<boolean>(false);
@@ -808,6 +809,7 @@ export default function Checkout() {
             store_slug: store.slug,
             is_multi_store: true,
             total_stores: storeGroups.size,
+            ...(paymentProvider === 'paiement_pro' ? { channel: paiementProChannel } : {}),
             ...(hasAffiliate && {
               affiliate_link_id: affiliateInfo.affiliate_link_id,
               affiliate_id: affiliateInfo.affiliate_id,
@@ -1312,6 +1314,7 @@ export default function Checkout() {
           order_number: orderNumber,
           item_count: items.length,
           shipping_address: formData,
+          ...(paymentProvider === 'paiement_pro' ? { channel: paiementProChannel } : {}),
           // Inclure les infos d'affiliation dans les métadonnées
           ...(hasAffiliate && {
             affiliate_link_id: affiliateInfo.affiliate_link_id,
@@ -1467,7 +1470,10 @@ export default function Checkout() {
                   : 'XOF'
               }
               buyerCountry={formData.country || null}
+              buyerPhone={formData.phone || null}
               isMultiStore={isMultiStore}
+              paiementProChannel={paiementProChannel}
+              onPaiementProChannelChange={setPaiementProChannel}
             />
           </div>
 

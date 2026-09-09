@@ -556,6 +556,9 @@ export class ServiceOrderStrategy implements OrderStrategy {
         amount_paid: payable.amountToPay,
         remaining_amount: payable.remainingAmount,
         ...(guestCheckout ? { guest_checkout: true } : {}),
+        ...(context.preferredProvider === 'paiement_pro' && context.preferredPaiementProChannel
+          ? { channel: context.preferredPaiementProChannel }
+          : {}),
       },
     });
 

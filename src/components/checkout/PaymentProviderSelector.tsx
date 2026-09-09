@@ -30,6 +30,10 @@ import {
   normalizeCurrency,
 } from '@/lib/payments/constants';
 import { isConnectCheckoutProvider } from '@/lib/payments/multi-store-checkout';
+import { usePaymentRailsConfigPublic } from '@/hooks/admin/usePaymentRailsConfig';
+import { isAggregatorEnabled, mergePaymentRailsConfig } from '@/lib/payments/payment-rails-catalog';
+import { PaiementProChannelPicker } from '@/components/checkout/PaiementProChannelPicker';
+import { MoneyFusionCheckoutMethods } from '@/components/checkout/MoneyFusionCheckoutMethods';
 
 export type PaymentProvider = CheckoutPaymentProvider;
 
@@ -60,7 +64,7 @@ const PROVIDER_META: Record<
   },
   paiement_pro: {
     label: 'Carte & mobile money',
-    description: 'Paiement Pro — carte bancaire, Orange, MTN, Moov, Wave (XOF)',
+    description: 'Carte bancaire et mobile money multi-pays',
     icon: <CreditCard className="h-5 w-5" />,
     features: ['Carte', 'Mobile money', 'XOF'],
   },
@@ -91,8 +95,13 @@ interface PaymentProviderSelectorProps {
   amount?: number;
   currency?: string;
   buyerCountry?: string | null;
+  /** Téléphone acheteur (+226…) pour détecter le pays PP */
+  buyerPhone?: string | null;
   /** Panier multi-boutiques : Connect indisponible (MoneyFusion only). */
   isMultiStore?: boolean;
+  /** Channel API Paiement Pro (OMCIV2, MOMOCI, …) */
+  paiementProChannel?: string;
+  onPaiementProChannelChange?: (channel: string) => void;
 }
 
 export function PaymentProviderSelector({
@@ -102,7 +111,10 @@ export function PaymentProviderSelector({
   amount,
   currency = 'XOF',
   buyerCountry,
+  buyerPhone,
   isMultiStore = false,
+  paiementProChannel,
+  onPaiementProChannelChange,
 }: PaymentProviderSelectorProps) {
   const { user } = useAuth();
   const orchestrationV2 = isPaymentOrchestrationV2Enabled();
@@ -118,10 +130,20 @@ export function PaymentProviderSelector({
     enabled: orchestrationV2 && !!storeId,
   });
 
+  const { data: railsRaw } = usePaymentRailsConfigPublic();
+  const rails = railsRaw ?? mergePaymentRailsConfig(null);
+
   const providers = useMemo((): PaymentProviderOption[] => {
     const currencyNorm = normalizeCurrency(currency);
-    const moneyfusionOk = isMoneyFusionEnabled() && MONEYFUSION_CURRENCIES.has(currencyNorm);
-    const paiementProOk = isPaiementProEnabled() && PAIEMENT_PRO_CURRENCIES.has(currencyNorm);
+    const mfRailOk = isAggregatorEnabled(rails, 'moneyfusion');
+    const ppRailOk = isAggregatorEnabled(rails, 'paiement_pro');
+    const stripeRailOk = isAggregatorEnabled(rails, 'stripe_connect');
+    const paypalRailOk = isAggregatorEnabled(rails, 'paypal_commerce');
+
+    const moneyfusionOk =
+      isMoneyFusionEnabled() && MONEYFUSION_CURRENCIES.has(currencyNorm) && mfRailOk;
+    const paiementProOk =
+      isPaiementProEnabled() && PAIEMENT_PRO_CURRENCIES.has(currencyNorm) && ppRailOk;
 
     const moneyfusionOption: PaymentProviderOption = {
       value: 'moneyfusion',
@@ -134,16 +156,16 @@ export function PaymentProviderSelector({
       available: true,
     };
 
-    // GeniusPay retiré — MoneyFusion seul tant que Paiement Pro est off
+    // GeniusPay retiré — MoneyFusion seul tant que Paiement Pro est off (Vite)
     if (isMoneyFusionOnlyEnabled()) {
       return moneyfusionOk ? [moneyfusionOption] : [];
     }
 
-    // Paiement Pro on : toujours exposer les rails plateforme (MF + PP)
-    if (paiementProOk) {
-      const rails: PaymentProviderOption[] = [];
-      if (moneyfusionOk) rails.push(moneyfusionOption);
-      rails.push(paiementProOption);
+    // Paiement Pro on (Vite) : rails plateforme filtrés par config admin
+    if (isPaiementProEnabled() && PAIEMENT_PRO_CURRENCIES.has(currencyNorm)) {
+      const railsList: PaymentProviderOption[] = [];
+      if (moneyfusionOk) railsList.push(moneyfusionOption);
+      if (paiementProOk) railsList.push(paiementProOption);
 
       if (orchestrationV2 && storeId) {
         const source = (rpcOptions ?? []).filter(
@@ -156,9 +178,11 @@ export function PaymentProviderSelector({
         for (const opt of source) {
           const checkoutValue = rpcProviderToCheckout(opt.provider);
           if (checkoutValue === 'geniuspay' || checkoutValue === 'moneyfusion') continue;
-          if (rails.some(p => p.value === checkoutValue)) continue;
+          if (checkoutValue === 'stripe_connect' && !stripeRailOk) continue;
+          if (checkoutValue === 'paypal_commerce' && !paypalRailOk) continue;
+          if (railsList.some(p => p.value === checkoutValue)) continue;
           const meta = PROVIDER_META[checkoutValue] ?? PROVIDER_META.moneyfusion;
-          rails.push({
+          railsList.push({
             value: checkoutValue,
             label: opt.label || meta.label,
             description: meta.description,
@@ -169,7 +193,7 @@ export function PaymentProviderSelector({
         }
       }
 
-      return rails;
+      return railsList;
     }
 
     if (!orchestrationV2 || !storeId) {
@@ -197,11 +221,18 @@ export function PaymentProviderSelector({
     }
 
     return mapped
-      .filter(p => p.value !== 'geniuspay')
+      .filter(p => {
+        if (p.value === 'geniuspay') return false;
+        if (p.value === 'stripe_connect' && !stripeRailOk) return false;
+        if (p.value === 'paypal_commerce' && !paypalRailOk) return false;
+        if (p.value === 'moneyfusion' && !mfRailOk) return false;
+        if (p.value === 'paiement_pro' && !ppRailOk) return false;
+        return true;
+      })
       .map(p =>
         isMultiStore && isConnectCheckoutProvider(p.value) ? { ...p, available: false } : p
       );
-  }, [orchestrationV2, storeId, rpcOptions, currency, isMultiStore]);
+  }, [orchestrationV2, storeId, rpcOptions, currency, isMultiStore, rails]);
 
   useEffect(() => {
     const loadUserPreference = async () => {
@@ -265,6 +296,14 @@ export function PaymentProviderSelector({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- auto-select single option
   }, [availableProviders.length, availableProviders[0]?.value]);
 
+  // Si l’agrégateur sélectionné a été désactivé (admin), basculer vers un rail disponible
+  useEffect(() => {
+    if (!value) return;
+    if (availableProviders.some(p => p.value === value)) return;
+    if (availableProviders[0]) handleProviderChange(availableProviders[0].value);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- react when rails/provider list changes
+  }, [value, availableProviders.map(p => p.value).join(',')]);
+
   useEffect(() => {
     if (!isMultiStore || !value || !isConnectCheckoutProvider(value)) return;
     const platform =
@@ -303,6 +342,25 @@ export function PaymentProviderSelector({
   }
 
   if (availableProviders.length === 1) {
+    const sole = availableProviders[0];
+    if (sole.value === 'paiement_pro' && onPaiementProChannelChange) {
+      return (
+        <Card>
+          <CardHeader>
+            <CardTitle>Moyen de paiement</CardTitle>
+            <CardDescription>Paiement Pro — choisissez le réseau</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <PaiementProChannelPicker
+              value={paiementProChannel}
+              onChange={onPaiementProChannelChange}
+              buyerCountry={buyerCountry}
+              buyerPhone={buyerPhone}
+            />
+          </CardContent>
+        </Card>
+      );
+    }
     return null;
   }
 
@@ -332,13 +390,13 @@ export function PaymentProviderSelector({
               <div
                 key={provider.value}
                 className={`
-                  relative flex items-start space-x-3 rounded-lg border p-4
+                  relative flex items-start gap-3 rounded-lg border p-4 min-w-0 overflow-hidden
                   ${
                     provider.available
                       ? 'cursor-pointer hover:bg-accent'
                       : 'opacity-50 cursor-not-allowed'
                   }
-                  ${value === provider.value ? 'border-primary bg-accent' : ''}
+                  ${value === provider.value ? 'border-primary ring-1 ring-primary/30' : ''}
                 `}
                 onClick={() => provider.available && handleProviderChange(provider.value)}
               >
@@ -346,9 +404,9 @@ export function PaymentProviderSelector({
                   value={provider.value}
                   id={`payment-${provider.value}`}
                   disabled={!provider.available}
-                  className="mt-1"
+                  className="mt-1 shrink-0"
                 />
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <Label
                     htmlFor={`payment-${provider.value}`}
                     className="flex items-center gap-2 cursor-pointer"
@@ -373,6 +431,25 @@ export function PaymentProviderSelector({
                       ))}
                     </div>
                   )}
+                  {provider.value === 'moneyfusion' && value === 'moneyfusion' && (
+                    <MoneyFusionCheckoutMethods compact className="mt-3" />
+                  )}
+                  {provider.value === 'paiement_pro' &&
+                    value === 'paiement_pro' &&
+                    onPaiementProChannelChange && (
+                      <div
+                        className="mt-3 min-w-0 w-full"
+                        onClick={e => e.stopPropagation()}
+                        onKeyDown={e => e.stopPropagation()}
+                      >
+                        <PaiementProChannelPicker
+                          value={paiementProChannel}
+                          onChange={onPaiementProChannelChange}
+                          buyerCountry={buyerCountry}
+                          buyerPhone={buyerPhone}
+                        />
+                      </div>
+                    )}
                 </div>
               </div>
             ))}

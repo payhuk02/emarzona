@@ -3,7 +3,7 @@
  * Utilitaire critique pour la sécurité (prévention open redirect)
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import {
   validateRedirectUrl,
   isPaymentDomain,
@@ -12,13 +12,21 @@ import {
   getAllowedDomains,
 } from '../url-validator';
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+type LocationMock = { href: string };
+
+function mockLocation(href = ''): LocationMock {
+  const loc: LocationMock = { href };
+  Object.defineProperty(window, 'location', {
+    configurable: true,
+    writable: true,
+    value: loc,
+  });
+  return loc;
+}
 
 describe('url-validator', () => {
   beforeEach(() => {
-    // Reset window.location mock
-    delete (window as any).location;
-    window.location = { href: '' } as any;
+    mockLocation('');
   });
 
   describe('validateRedirectUrl', () => {
@@ -31,6 +39,14 @@ describe('url-validator', () => {
 
     it('devrait valider une URL emarzona.com valide', () => {
       const result = validateRedirectUrl('https://www.emarzona.com/dashboard');
+
+      expect(result.isValid).toBe(true);
+    });
+
+    it('devrait valider une URL Paiement Pro', () => {
+      const result = validateRedirectUrl(
+        'https://paiementpro.net/webservice/onlinepayment/processpaymentv2.php?sessionid=abc'
+      );
 
       expect(result.isValid).toBe(true);
     });
@@ -84,39 +100,29 @@ describe('url-validator', () => {
 
   describe('safeRedirect', () => {
     it('devrait rediriger vers une URL valide', () => {
-      const originalLocation = window.location;
-      window.location = { href: '' } as any;
+      const loc = mockLocation('');
 
       safeRedirect('https://geniuspay.io/checkout/123');
 
-      expect(window.location.href).toBe('https://geniuspay.io/checkout/123');
-
-      window.location = originalLocation;
+      expect(loc.href).toBe('https://geniuspay.io/checkout/123');
     });
 
     it('devrait appeler onError pour une URL invalide', () => {
       const onError = vi.fn();
-      const originalLocation = window.location;
-      window.location = { href: '' } as any;
+      mockLocation('');
 
       safeRedirect('https://evil.com/steal', onError);
 
       expect(onError).toHaveBeenCalled();
       expect(onError).toHaveBeenCalledWith(expect.stringContaining('non autorisé'));
-
-      window.location = originalLocation;
     });
 
     it("devrait rediriger vers /dashboard si pas de callback d'erreur", () => {
-      const originalLocation = window.location;
-      window.location = { href: '' } as any;
+      const loc = mockLocation('');
 
       safeRedirect('https://evil.com/steal');
 
-      // Devrait rediriger vers /dashboard en fallback
-      expect(window.location.href).toBe('/dashboard');
-
-      window.location = originalLocation;
+      expect(loc.href).toBe('/dashboard');
     });
   });
 

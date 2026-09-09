@@ -37,6 +37,8 @@ export interface CreateOrderOptions {
   guestCheckout?: boolean;
   /** Provider checkout (moneyfusion | paiement_pro | …) */
   preferredProvider?: string;
+  /** Channel Paiement Pro (OMCIV2, MOMOCI, …) */
+  preferredPaiementProChannel?: string;
 }
 
 export const useCreateOrder = () => {
@@ -62,6 +64,7 @@ export const useCreateOrder = () => {
       } = options;
 
       const preferredProvider = options.preferredProvider;
+      const preferredPaiementProChannel = options.preferredPaiementProChannel;
 
       const { data: product, error: productError } = await supabase
         .from('products')
@@ -117,6 +120,7 @@ export const useCreateOrder = () => {
         cancelUrl,
         guestCheckout,
         preferredProvider,
+        preferredPaiementProChannel,
       });
     },
 

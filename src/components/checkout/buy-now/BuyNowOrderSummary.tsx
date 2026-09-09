@@ -70,7 +70,10 @@ export interface BuyNowOrderSummaryProps {
   onCouponRemove: () => void;
   selectedPaymentProvider?: PaymentProvider;
   onPaymentProviderChange?: (provider: PaymentProvider) => void;
+  paiementProChannel?: string;
+  onPaiementProChannelChange?: (channel: string) => void;
   buyerCountry?: string | null;
+  buyerPhone?: string | null;
 }
 
 export default function BuyNowOrderSummary({
@@ -95,7 +98,10 @@ export default function BuyNowOrderSummary({
   onCouponRemove,
   selectedPaymentProvider,
   onPaymentProviderChange,
+  paiementProChannel,
+  onPaiementProChannelChange,
   buyerCountry,
+  buyerPhone,
 }: BuyNowOrderSummaryProps) {
   const basePrice = getBuyNowBasePrice(product, selectedVariant);
   const promoPrice = product?.promotional_price;
@@ -343,6 +349,9 @@ export default function BuyNowOrderSummary({
             amount={amountDueNow}
             currency={currency}
             buyerCountry={buyerCountry}
+            buyerPhone={buyerPhone}
+            paiementProChannel={paiementProChannel}
+            onPaiementProChannelChange={onPaiementProChannelChange}
           />
         )}
 

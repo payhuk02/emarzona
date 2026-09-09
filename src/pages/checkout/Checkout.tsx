@@ -153,6 +153,7 @@ const Checkout = () => {
   const [appliedCouponCode, setAppliedCouponCode] = useState<AppliedBuyNowCoupon | null>(null);
   const [selectedPaymentProvider, setSelectedPaymentProvider] =
     useState<PaymentProvider>('moneyfusion');
+  const [paiementProChannel, setPaiementProChannel] = useState<string>('OMCIV2');
 
   // Formulaire
   const [formData, setFormData] = useState<CheckoutFormData>({
@@ -631,6 +632,8 @@ const Checkout = () => {
             guestCheckout: isGuestBuyer,
             checkoutMethod,
             preferredProvider: selectedPaymentProvider,
+            preferredPaiementProChannel:
+              selectedPaymentProvider === 'paiement_pro' ? paiementProChannel : undefined,
             shippingAddress: {
               street: formData.address,
               city: formData.city,
@@ -790,6 +793,8 @@ const Checkout = () => {
               addonProductIds: addonIds,
               couponCode: appliedCouponCode?.code || null,
               preferredProvider: selectedPaymentProvider,
+              preferredPaiementProChannel:
+                selectedPaymentProvider === 'paiement_pro' ? paiementProChannel : undefined,
             });
 
             if (!serviceResult.checkoutUrl) {
@@ -847,6 +852,8 @@ const Checkout = () => {
               checkoutMode: 'immediate',
               couponCode: appliedCouponCode?.code || null,
               preferredProvider: selectedPaymentProvider,
+              preferredPaiementProChannel:
+                selectedPaymentProvider === 'paiement_pro' ? paiementProChannel : undefined,
             });
             sessionStorage.removeItem(projectKey);
             if (!serviceResult.checkoutUrl) {
@@ -881,6 +888,8 @@ const Checkout = () => {
             staffId,
             couponCode: appliedCouponCode?.code || null,
             preferredProvider: selectedPaymentProvider,
+            preferredPaiementProChannel:
+              selectedPaymentProvider === 'paiement_pro' ? paiementProChannel : undefined,
           });
 
           if (!serviceResult.checkoutUrl) {
@@ -914,6 +923,8 @@ const Checkout = () => {
           guestCheckout: isGuestBuyer,
           quantity: checkoutQuantity,
           preferredProvider: selectedPaymentProvider,
+          preferredPaiementProChannel:
+            selectedPaymentProvider === 'paiement_pro' ? paiementProChannel : undefined,
           digitalOptions: appliedCouponCode
             ? {
                 couponCode: appliedCouponCode.code,
@@ -1042,6 +1053,7 @@ const Checkout = () => {
       addonIds,
       staffId,
       selectedPaymentProvider,
+      paiementProChannel,
     ]
   );
 
@@ -1190,7 +1202,10 @@ const Checkout = () => {
                   onCouponRemove={handleCouponRemove}
                   selectedPaymentProvider={selectedPaymentProvider}
                   onPaymentProviderChange={setSelectedPaymentProvider}
+                  paiementProChannel={paiementProChannel}
+                  onPaiementProChannelChange={setPaiementProChannel}
                   buyerCountry={formData.country || null}
+                  buyerPhone={formData.phone || null}
                 />
               </Suspense>
             </aside>

@@ -139,6 +139,9 @@ export class GenericOrderStrategy implements OrderStrategy {
         product_type: productType,
         order_item_id: orderItem.id,
         ...(guestCheckout ? { guest_checkout: true } : {}),
+        ...(context.preferredProvider === 'paiement_pro' && context.preferredPaiementProChannel
+          ? { channel: context.preferredPaiementProChannel }
+          : {}),
       },
     });
 

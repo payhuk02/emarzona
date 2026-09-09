@@ -234,6 +234,12 @@ export const ADMIN_NAV_SECTIONS: AdminNavSection[] = [
         permissions: ['payments.manage'],
       },
       {
+        icon: Layers,
+        label: 'Agrégateurs & opérateurs',
+        path: '/admin/payment-rails',
+        permissions: ['payments.manage'],
+      },
+      {
         icon: Wallet,
         label: 'Retraits boutiques',
         path: '/admin/store-withdrawals',

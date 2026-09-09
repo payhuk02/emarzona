@@ -160,6 +160,9 @@ export interface CreateServiceOrderOptions {
 
   /** Provider checkout (moneyfusion | paiement_pro | …) */
   preferredProvider?: string;
+
+  /** Channel Paiement Pro (OMCIV2, MOMOCI, …) */
+  preferredPaiementProChannel?: string;
 }
 
 /**
@@ -254,6 +257,7 @@ export const useCreateServiceOrder = () => {
         buyNowWithoutAppointment = false,
       } = options;
       const preferredProvider = options.preferredProvider;
+      const preferredPaiementProChannel = options.preferredPaiementProChannel;
 
       if (checkoutMode === 'cart') {
         throw new Error(
@@ -934,6 +938,9 @@ export const useCreateServiceOrder = () => {
           total_price: calcTotalPrice,
           amount_paid: calcAmountToPay,
           remaining_amount: calcRemainingAmount,
+          ...(preferredProvider === 'paiement_pro' && preferredPaiementProChannel
+            ? { channel: preferredPaiementProChannel }
+            : {}),
         },
       });
 

@@ -192,9 +192,7 @@ export default function BuyNowCustomerForm({
                 required
                 onChange={v => onFieldChange('phone', v)}
                 onCountryNameChange={name => {
-                  if (!formData.country || formData.country === name) {
-                    onFieldChange('country', name);
-                  }
+                  onFieldChange('country', name);
                 }}
               />
               {formErrors.phone ? (

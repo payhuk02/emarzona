@@ -25,6 +25,7 @@ const AdminActivity = lazyPage(() => import('@/pages/admin/AdminActivity'));
 const AdminSettings = lazyPage(() => import('@/pages/admin/AdminSettings'));
 const AdminCommunity = lazyPage(() => import('@/pages/admin/AdminCommunity'));
 const AdminCommissionSettings = lazyPage(() => import('@/pages/admin/AdminCommissionSettings'));
+const AdminPaymentRails = lazyPage(() => import('@/pages/admin/AdminPaymentRails'));
 const AdminNewsletterSubscribers = lazyPage(
   () => import('@/pages/admin/AdminNewsletterSubscribers')
 );
@@ -164,6 +165,7 @@ export const adminRoutes = (
     {pr('/admin/ai-management', AIManagementPage)}
     {pr('/admin/marketing', MarketingAutomationDashboard)}
     {pr('/admin/payments', AdminPayments)}
+    {pr('/admin/payment-rails', AdminPaymentRails)}
     {pr('/admin/transaction-reconciliation', AdminTransactionReconciliation)}
     {pr('/admin/shipping', AdminShipping)}
     {pr('/admin/shipping-conversations', AdminShippingConversations)}

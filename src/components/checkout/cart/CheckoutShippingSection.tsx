@@ -124,7 +124,7 @@ export default function CheckoutShippingSection({
               }
             }}
             onCountryNameChange={name => {
-              setFormData(prev => (prev.country ? prev : { ...prev, country: name }));
+              setFormData(prev => ({ ...prev, country: name }));
             }}
           />
           {formErrors.phone && (

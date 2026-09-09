@@ -12,6 +12,26 @@ vi.mock('@/lib/paiement-pro-payment', () => ({
   })),
 }));
 
+vi.mock('@/integrations/supabase/client', () => ({
+  supabase: {
+    rpc: vi.fn(async () => ({
+      data: {
+        paiement_pro: {
+          enabled: true,
+          operators: {
+            CARD: false,
+            OMCIV2: true,
+            MOMOCI: false,
+            WAVECI: false,
+            FLOOZ: false,
+          },
+        },
+      },
+      error: null,
+    })),
+  },
+}));
+
 import { createPaiementProPayment } from '../adapters/paiement-pro-adapter';
 import { initiatePaiementProPayment } from '@/lib/paiement-pro-payment';
 
@@ -30,7 +50,9 @@ describe('createPaiementProPayment', () => {
       customerPhone: '+2250700000000',
     });
 
-    expect(initiatePaiementProPayment).toHaveBeenCalled();
+    expect(initiatePaiementProPayment).toHaveBeenCalledWith(
+      expect.objectContaining({ channel: 'OMCIV2' })
+    );
     expect(result).toMatchObject({
       success: true,
       provider: 'paiement_pro',

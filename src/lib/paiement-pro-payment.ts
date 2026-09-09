@@ -83,7 +83,7 @@ export async function initiatePaiementProPayment(options: PaiementProPaymentOpti
     productId,
     storeId,
     orderId,
-    channel: channel || (typeof metadata.channel === 'string' ? metadata.channel : 'CARD'),
+    channel: channel || (typeof metadata.channel === 'string' ? metadata.channel : 'OMCIV2'),
     metadata: {
       ...metadata,
       ...(currentUserId ? { userId: currentUserId } : {}),

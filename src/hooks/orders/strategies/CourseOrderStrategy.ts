@@ -192,6 +192,9 @@ export class CourseOrderStrategy implements OrderStrategy {
         course_id: resolvedCourseId,
         auto_enroll: true,
         ...(guestCheckout ? { guest_checkout: true } : {}),
+        ...(context.preferredProvider === 'paiement_pro' && context.preferredPaiementProChannel
+          ? { channel: context.preferredPaiementProChannel }
+          : {}),
       },
     });
 

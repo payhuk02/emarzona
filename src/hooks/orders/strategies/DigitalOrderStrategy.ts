@@ -177,6 +177,9 @@ export class DigitalOrderStrategy implements OrderStrategy {
         order_item_id: orderItemId,
         ...(checkoutToken ? { checkout_token: checkoutToken } : {}),
         ...(isGuest ? { guest_checkout: true } : {}),
+        ...(context.preferredProvider === 'paiement_pro' && context.preferredPaiementProChannel
+          ? { channel: context.preferredPaiementProChannel }
+          : {}),
       },
       checkoutToken,
     });
