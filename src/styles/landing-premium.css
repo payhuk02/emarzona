@@ -108,14 +108,14 @@
 
 .landing-premium .lp-platform-hero__photo {
   object-fit: cover;
-  /* Cadrage un peu plus à droite pour ne pas empiéter sur la colonne gauche */
-  object-position: 42% 58%;
+  /* Cadrage plein hero : femme + laptop visibles */
+  object-position: 58% 42%;
   opacity: 1;
 }
 
 .landing-premium .lp-platform-hero__left-photo {
   object-fit: cover;
-  object-position: 35% center;
+  object-position: 40% center;
   opacity: 1;
 }
 
@@ -124,8 +124,9 @@
 }
 
 .landing-premium .lp-platform-hero__left-bg {
-  /* Aligné sur la colonne contenu (~40–45%) — ne déborde plus sous la photo droite */
-  width: min(46%, 40rem);
+  /* Carte mondiale = arrière-plan plein hero derrière la photo */
+  inset: 0;
+  width: 100%;
   overflow: hidden;
 }
 
@@ -136,9 +137,8 @@
 .landing-premium .lp-platform-hero__left-bg-overlay {
   background: linear-gradient(
     90deg,
-    rgba(10, 22, 40, 0.82) 0%,
-    rgba(10, 22, 40, 0.5) 42%,
-    rgba(10, 22, 40, 0.12) 72%,
+    rgba(10, 22, 40, 0.55) 0%,
+    rgba(10, 22, 40, 0.25) 45%,
     transparent 100%
   );
 }
@@ -148,8 +148,8 @@
   .lp-platform-hero__left-bg-overlay {
   background: linear-gradient(
     90deg,
-    color-mix(in srgb, var(--lp-platform-hero-bg, #0a1628) 88%, transparent) 0%,
-    color-mix(in srgb, var(--lp-platform-hero-bg, #0a1628) 55%, transparent) 45%,
+    color-mix(in srgb, var(--lp-platform-hero-bg, #0a1628) 70%, transparent) 0%,
+    color-mix(in srgb, var(--lp-platform-hero-bg, #0a1628) 35%, transparent) 45%,
     transparent 100%
   );
 }
@@ -166,9 +166,9 @@
   .landing-premium .lp-platform-hero__left-bg-overlay {
     background: linear-gradient(
       180deg,
-      rgba(10, 22, 40, 0.55) 0%,
-      rgba(10, 22, 40, 0.75) 35%,
-      rgba(10, 22, 40, 0.85) 100%
+      rgba(10, 22, 40, 0.45) 0%,
+      rgba(10, 22, 40, 0.55) 40%,
+      rgba(10, 22, 40, 0.75) 100%
     );
   }
 }
@@ -177,6 +177,10 @@
   .landing-premium .lp-platform-hero__left-photo {
     will-change: auto;
   }
+}
+
+.landing-premium .lp-platform-hero--premium .lp-platform-hero__content {
+  text-shadow: 0 1px 18px rgba(0, 0, 0, 0.55);
 }
 
 .landing-premium .lp-platform-hero--premium .lp-platform-hero__visual {
@@ -206,7 +210,7 @@
 
 @media (min-width: 768px) {
   .landing-premium .lp-platform-hero__photo {
-    object-position: 42% 58%;
+    object-position: 58% 42%;
   }
 }
 
@@ -247,17 +251,19 @@
 .landing-premium .lp-platform-hero__frame {
   min-height: clamp(36rem, 65vh, 52rem);
   padding-top: clamp(1rem, 2.5vh, 2rem);
-  padding-bottom: 0.5rem;
+  padding-bottom: clamp(1.5rem, 4vh, 3rem);
+  justify-content: center;
 }
 
 @media (min-width: 1024px) {
   .landing-premium .lp-platform-hero__frame {
     min-height: clamp(40rem, 58vw, 64rem);
-    padding-top: clamp(1.25rem, 2vw, 2.5rem);
+    justify-content: flex-start;
+    padding-top: clamp(2rem, 4vw, 4rem);
   }
 
   .landing-premium .lp-platform-hero__col-content {
-    min-height: inherit;
+    min-height: auto;
   }
 }
 
@@ -274,12 +280,11 @@
   }
 
   .landing-premium .lp-platform-hero--premium .lp-platform-hero__content {
-    /* La grille borne déjà la colonne — ne pas re-contraindre à 58% */
     max-width: 100%;
   }
 
   .landing-premium .lp-platform-hero__col-content {
-    padding-right: 0.5rem;
+    padding-right: 0;
   }
 }
 

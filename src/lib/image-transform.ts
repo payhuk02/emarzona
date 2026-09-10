@@ -176,22 +176,22 @@ export const IMAGE_PRESETS = {
    * Hero plateforme — colonne visuelle (LCP, droite desktop)
    */
   platformHeroVisual: {
-    sizes: { mobile: 430, tablet: 640, desktop: 900, large: 1100 },
-    options: { quality: 70, format: 'webp' as const, resize: 'cover' as const },
+    sizes: { mobile: 640, tablet: 1024, desktop: 1440, large: 1920 },
+    options: { quality: 72, format: 'webp' as const, resize: 'cover' as const },
   },
 
   /**
-   * Hero plateforme — arrière-plan gauche (lazy, secondaire)
+   * Hero plateforme — carte mondiale (arrière-plan plein hero)
    */
   platformHeroLeft: {
-    sizes: { mobile: 540, tablet: 768, desktop: 900, large: 1100 },
+    sizes: { mobile: 640, tablet: 1024, desktop: 1440, large: 1920 },
     options: { quality: 68, format: 'webp' as const, resize: 'cover' as const },
   },
 
   /** @deprecated Utiliser platformHeroVisual ou platformHeroLeft */
   platformHero: {
-    sizes: { mobile: 430, tablet: 640, desktop: 900, large: 1100 },
-    options: { quality: 70, format: 'webp' as const, resize: 'cover' as const },
+    sizes: { mobile: 640, tablet: 1024, desktop: 1440, large: 1920 },
+    options: { quality: 72, format: 'webp' as const, resize: 'cover' as const },
   },
 
   /**
@@ -353,8 +353,8 @@ export interface PlatformHeroImageProps {
 export type PlatformHeroImageVariant = 'visual' | 'left';
 
 const PLATFORM_HERO_SIZES_ATTR: Record<PlatformHeroImageVariant, string> = {
-  visual: '(max-width: 767px) 100vw, (max-width: 1023px) 52vw, 78vw',
-  left: '(max-width: 1023px) 100vw, 28vw',
+  visual: '100vw',
+  left: '100vw',
 };
 
 /** Attributs responsive + formats modernes pour le hero plateforme. */

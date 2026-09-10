@@ -6,7 +6,6 @@ import { usePageCustomization } from '@/hooks/usePageCustomization';
 import { usePlatformCustomizationContext } from '@/contexts/PlatformCustomizationContext';
 import { LANDING_PREMIUM_PAGE_ID } from '@/lib/admin/landingPremiumCustomization';
 import { getPageCustomizationValue } from '@/lib/admin/pageCustomizationKeys';
-import { PremiumPlatformHeroBackground } from './PremiumPlatformHeroBackground';
 import { PremiumPlatformHeroVisual } from './platform-hero/PremiumPlatformHeroVisual';
 
 const PremiumHero3DScene = lazy(() =>
@@ -84,18 +83,19 @@ export function PremiumPlatformHero() {
     >
       <DeferredHero3D />
 
-      {leftBackgroundUrl ? (
-        <div className="lp-platform-hero__left-bg pointer-events-none absolute inset-y-0 left-0 z-[1]">
-          <PremiumPlatformHeroBackground
-            src={leftBackgroundUrl}
-            alt={leftBackgroundAlt}
-            variant="left"
-          />
-        </div>
-      ) : null}
+      {/* Photo femme plein hero + carte mondiale en arrière-plan */}
+      <div className="lp-platform-hero__visual-layer pointer-events-none absolute inset-0 z-[1]">
+        <PremiumPlatformHeroVisual
+          backgroundUrl={backgroundUrl}
+          backgroundAlt={backgroundAlt}
+          leftBackgroundUrl={leftBackgroundUrl}
+          leftBackgroundAlt={leftBackgroundAlt}
+          ctaLabel={ctaLabel}
+        />
+      </div>
 
-      <div className="lp-platform-hero__frame relative z-[2] mx-auto grid w-full max-w-[100rem] grid-cols-1 gap-8 px-4 sm:px-6 md:px-10 lg:grid-cols-[minmax(18rem,0.9fr)_minmax(0,1.1fr)] lg:items-stretch lg:gap-8 xl:grid-cols-[minmax(20rem,0.8fr)_minmax(0,1.2fr)] xl:gap-10 lg:px-8 xl:px-12 2xl:px-14">
-        <div className="lp-platform-hero__col-content relative z-[3] flex min-w-0 flex-col">
+      <div className="lp-platform-hero__frame relative z-[2] mx-auto flex w-full max-w-[100rem] flex-col px-4 sm:px-6 md:px-10 lg:px-8 xl:px-12 2xl:px-14">
+        <div className="lp-platform-hero__col-content relative z-[3] flex w-full max-w-xl flex-col lg:max-w-lg xl:max-w-xl">
           <div className="lp-platform-hero__content text-center lg:text-left">
             <h1 className="lp-platform-hero__title lp-serif lp-hero-enter text-[2rem] leading-[1.08] sm:text-[2.65rem] md:text-[3rem] lg:text-[3.25rem] xl:text-[3.75rem]">
               <span className="lp-platform-hero__title-line">{t('platformHero.titleLine1')}</span>
@@ -122,14 +122,6 @@ export function PremiumPlatformHero() {
               ))}
             </ul>
           </div>
-        </div>
-
-        <div className="lp-platform-hero__col-visual relative z-[1] min-w-0 overflow-hidden lp-hero-enter lp-hero-enter--d3">
-          <PremiumPlatformHeroVisual
-            backgroundUrl={backgroundUrl}
-            backgroundAlt={backgroundAlt}
-            ctaLabel={ctaLabel}
-          />
         </div>
       </div>
     </section>

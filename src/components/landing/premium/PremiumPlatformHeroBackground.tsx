@@ -6,7 +6,7 @@ import { toObjectPublicUrl } from '@/lib/images/supabaseTransform';
 interface PremiumPlatformHeroBackgroundProps {
   src: string;
   alt: string;
-  /** `visual` = colonne droite (LCP) ; `left` = arrière-plan colonne gauche */
+  /** `visual` = photo LCP plein hero ; `left` = carte mondiale en arrière-plan */
   variant?: 'visual' | 'left';
 }
 

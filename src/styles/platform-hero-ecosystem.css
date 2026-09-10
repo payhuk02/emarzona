@@ -143,23 +143,48 @@
   }
 }
 
-/* Layout visual */
+/* Layout visual — plein hero, carte derrière, photo devant */
+.landing-premium .lp-platform-hero__visual-layer {
+  min-height: inherit;
+}
+
 .landing-premium .lp-platform-hero__visual {
   isolation: isolate;
-  background: #0a1628;
+  background: transparent;
+}
+
+.landing-premium .lp-platform-hero__photo-layer {
+  /* Laisse la carte apparaître à gauche derrière le texte */
+  mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(0, 0, 0, 0.25) 12%,
+    rgba(0, 0, 0, 0.75) 28%,
+    black 42%,
+    black 100%
+  );
 }
 
 .landing-premium .lp-platform-hero__visual .lp-platform-hero__photo,
 .landing-premium .lp-platform-hero__visual picture {
   border-radius: 0;
-  /* Fondus doux à gauche pour laisser respirer la carte / checklist */
-  mask-image: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.55) 6%, black 14%, black 100%);
+  mask-image: none;
 }
 
 @media (max-width: 1023px) {
+  .landing-premium .lp-platform-hero__photo-layer {
+    mask-image: linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.35) 0%,
+      rgba(0, 0, 0, 0.7) 18%,
+      black 36%,
+      black 100%
+    );
+  }
+
   .landing-premium .lp-platform-hero__visual .lp-platform-hero__photo,
   .landing-premium .lp-platform-hero__visual picture {
-    mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.15) 0%, black 14%, black 100%);
+    mask-image: none;
   }
 
   .landing-premium .lp-platform-hero--premium .lp-platform-hero__photo-overlay {
@@ -173,7 +198,7 @@
 
   .landing-premium .lp-platform-hero__frame {
     gap: 0.75rem;
-    padding-bottom: 0;
+    padding-bottom: clamp(1.25rem, 3vh, 2rem);
   }
 
   .landing-premium .lp-platform-hero__col-content {
@@ -181,25 +206,25 @@
   }
 
   .landing-premium .lp-platform-hero__visual {
-    min-height: clamp(14rem, 42vw, 18rem);
+    min-height: 100%;
   }
 
   .landing-premium .lp-platform-hero__visual .lp-platform-hero__photo {
-    object-position: 72% 16%;
+    object-position: 62% 28%;
   }
 }
 
 .landing-premium .lp-platform-hero__visual .lp-platform-hero__photo {
-  object-position: 42% 58%;
+  object-position: 58% 42%;
 }
 
 .landing-premium .lp-platform-hero--premium .lp-platform-hero__photo-overlay {
   background: linear-gradient(
     90deg,
-    rgba(8, 8, 10, 0.72) 0%,
-    rgba(10, 22, 40, 0.35) 12%,
-    rgba(10, 22, 40, 0.1) 28%,
-    transparent 48%
+    rgba(8, 8, 10, 0.55) 0%,
+    rgba(10, 22, 40, 0.28) 18%,
+    rgba(10, 22, 40, 0.08) 36%,
+    transparent 55%
   );
 }
 
