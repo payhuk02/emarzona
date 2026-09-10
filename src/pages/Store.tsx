@@ -1,5 +1,4 @@
 import { useCallback, Component, type ReactNode } from 'react';
-import { AppPageShell } from '@/components/layout/AppPageShell';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -90,7 +89,7 @@ const Store = () => {
   }, [navigate]);
 
   return (
-    <AppPageShell>
+    <>
       {/* Header - Simple et fonctionnel */}
       <header ref={headerRef} className="sticky top-0 z-10 border-b bg-card/95 backdrop-blur-sm">
         <div className="flex h-14 sm:h-16 items-center gap-2 sm:gap-4 px-3 sm:px-4 md:px-6">
@@ -247,7 +246,7 @@ const Store = () => {
           </Card>
         )}
       </div>
-    </AppPageShell>
+    </>
   );
 };
 

@@ -12,7 +12,6 @@
  */
 
 import { useState, useMemo } from 'react';
-import { AppPageShell } from '@/components/layout/AppPageShell';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -475,7 +474,7 @@ export default function MyOrders() {
 
   if (isLoading) {
     return (
-      <AppPageShell layoutType="account">
+      <>
         <div className="container mx-auto p-6 space-y-6">
           <div className="hidden lg:block space-y-2">
             <Skeleton className="h-10 w-64" />
@@ -483,12 +482,12 @@ export default function MyOrders() {
           </div>
           <Skeleton className="h-96" />
         </div>
-      </AppPageShell>
+      </>
     );
   }
 
   return (
-    <AppPageShell layoutType="account">
+    <>
       <div className="container mx-auto p-6 space-y-6">
         {/* Header */}
         <div
@@ -966,6 +965,6 @@ export default function MyOrders() {
           </DialogContent>
         </Dialog>
       </div>
-    </AppPageShell>
+    </>
   );
 }

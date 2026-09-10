@@ -1,5 +1,9 @@
+/**
+ * Layout dashboard standard : zone contenu avec padding.
+ * Le chrome (sidebar / utility bar) est fourni par AuthenticatedAppLayout.
+ */
+
 import { ReactNode } from 'react';
-import { AppPageShell } from '@/components/layout/AppPageShell';
 import { cn } from '@/lib/utils';
 
 interface DashboardShellLayoutProps {
@@ -16,26 +20,20 @@ const maxWidthClass = {
   full: 'max-w-none',
 };
 
-/**
- * Layout dashboard standard : sidebar principale + zone #main-content.
- * À utiliser pour toute page /dashboard/* sans layout dédié (ex. Studio IA, Assistant IA).
- */
 export function DashboardShellLayout({
   children,
   className,
   maxWidth = 'default',
 }: DashboardShellLayoutProps) {
   return (
-    <AppPageShell>
-      <div
-        className={cn(
-          'container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6',
-          maxWidthClass[maxWidth],
-          className
-        )}
-      >
-        {children}
-      </div>
-    </AppPageShell>
+    <div
+      className={cn(
+        'container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6',
+        maxWidthClass[maxWidth],
+        className
+      )}
+    >
+      {children}
+    </div>
   );
 }

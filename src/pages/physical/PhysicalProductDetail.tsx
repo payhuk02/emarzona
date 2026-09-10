@@ -9,7 +9,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { formatLocaleNumber } from '@/lib/i18n/locale-format';
-import { AppPageShell } from '@/components/layout/AppPageShell';
+import { PublicPremiumChrome } from '@/components/layout/PublicPremiumChrome';
 import { SafeHTML } from '@/components/security/SafeHTML';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -259,40 +259,32 @@ export default function PhysicalProductDetail() {
 
   if (isLoading) {
     return (
-      <AppPageShell
-        mainClassName="p-8"
-        hideSidebar={true}
-        showUtilityBar={false}
-        hideHorizontalNav={true}
-      >
-        <div className="space-y-8">
+      <PublicPremiumChrome mainAriaLabel="Détail produit physique">
+        <div className="p-8 space-y-8">
           <Skeleton className="h-10 w-32" />
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <Skeleton className="h-96 w-full" />
             <Skeleton className="h-96 w-full" />
           </div>
         </div>
-      </AppPageShell>
+      </PublicPremiumChrome>
     );
   }
 
   if (!product) {
     return (
-      <AppPageShell
-        mainClassName="p-8"
-        hideSidebar={true}
-        showUtilityBar={false}
-        hideHorizontalNav={true}
-      >
-        <Card className="border-destructive">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-2 text-destructive">
-              <AlertCircle className="h-5 w-5" />
-              <p>Produit non trouvé</p>
-            </div>
-          </CardContent>
-        </Card>
-      </AppPageShell>
+      <PublicPremiumChrome mainAriaLabel="Détail produit physique">
+        <div className="p-8">
+          <Card className="border-destructive">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-2 text-destructive">
+                <AlertCircle className="h-5 w-5" />
+                <p>Produit non trouvé</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </PublicPremiumChrome>
     );
   }
 
@@ -321,448 +313,445 @@ export default function PhysicalProductDetail() {
   const productUrl = `${window.location.origin}/physical/${productId}`;
 
   return (
-    <AppPageShell
-      mainClassName="p-8"
-      hideSidebar={true}
-      showUtilityBar={false}
-      hideHorizontalNav={true}
-    >
-      {/* SEO Meta Tags */}
-      <SEOMeta
-        title={product.meta_title || product.name}
-        description={
-          product.meta_description ||
-          product.short_description ||
-          product.description ||
-          `${product.name} - Disponible sur Emarzona`
-        }
-        keywords={product.category}
-        url={productUrl}
-        image={product.og_image || images[0]}
-        imageAlt={product.name}
-        type="product"
-        price={displayPrice}
-        currency={product.currency}
-        availability={availability}
-      />
-      {faqs.length > 0 && <FAQSchema faqs={faqs} />}
-
-      {/* Product Schema.org */}
-      {product.store && (
-        <ProductSchema
-          product={{
-            id: product.id,
-            name: product.name,
-            slug: product.slug,
-            description: product.description || product.short_description || '',
-            price: displayPrice,
-            currency: product.currency,
-            image_url: images[0],
-            images: images.map((url: string) => ({ url })),
-            category: product.category,
-            is_active: product.is_active,
-            created_at: product.created_at,
-          }}
-          store={{
-            name: product.store.name,
-            slug: product.store.slug,
-            logo_url: product.store.logo_url,
-          }}
+    <PublicPremiumChrome mainAriaLabel="Détail produit physique">
+      <div className="p-4 sm:p-6 lg:p-8">
+        {/* SEO Meta Tags */}
+        <SEOMeta
+          title={product.meta_title || product.name}
+          description={
+            product.meta_description ||
+            product.short_description ||
+            product.description ||
+            `${product.name} - Disponible sur Emarzona`
+          }
+          keywords={product.category}
           url={productUrl}
+          image={product.og_image || images[0]}
+          imageAlt={product.name}
+          type="product"
+          price={displayPrice}
+          currency={product.currency}
+          availability={availability}
         />
-      )}
+        {faqs.length > 0 && <FAQSchema faqs={faqs} />}
 
-      {/* Back Button */}
-      <Button variant="ghost" className="mb-6" onClick={() => navigate(-1)}>
-        <ArrowLeft className="h-4 w-4 mr-2" />
-        Retour
-      </Button>
+        {/* Product Schema.org */}
+        {product.store && (
+          <ProductSchema
+            product={{
+              id: product.id,
+              name: product.name,
+              slug: product.slug,
+              description: product.description || product.short_description || '',
+              price: displayPrice,
+              currency: product.currency,
+              image_url: images[0],
+              images: images.map((url: string) => ({ url })),
+              category: product.category,
+              is_active: product.is_active,
+              created_at: product.created_at,
+            }}
+            store={{
+              name: product.store.name,
+              slug: product.store.slug,
+              logo_url: product.store.logo_url,
+            }}
+            url={productUrl}
+          />
+        )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-        {/* Left: Images */}
-        <AdvancedProductImages
-          productId={productId || ''}
-          productName={product?.name || 'Produit'}
-          standardImages={images}
-          selectedVariantId={selectedVariant?.id}
-          physicalProductId={product?.physical?.id}
-        />
+        {/* Back Button */}
+        <Button variant="ghost" className="mb-6" onClick={() => navigate(-1)}>
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Retour
+        </Button>
 
-        {/* Right: Product Info */}
-        <div className="space-y-6">
-          {/* Title & Category */}
-          <div>
-            <Badge className="mb-2">{product?.category}</Badge>
-            <h1 className="text-lg sm:text-2xl md:text-3xl font-bold mb-2">{product?.name}</h1>
-            {product?.short_description && (
-              <p className="text-sm sm:text-base md:text-lg text-muted-foreground">
-                {product.short_description}
-              </p>
-            )}
-            <ProductReviewsHeroSummary
-              productId={productId!}
-              onViewReviews={() => setActiveTab('reviews')}
-              className="mt-3"
-            />
-          </div>
-
-          {/* Price */}
-          <div className="flex items-baseline gap-3 flex-wrap">
-            <span className="text-2xl sm:text-3xl font-bold tracking-tight">
-              {formatLocaleNumber(displayPrice, i18n.language)} {product?.currency}
-            </span>
-            {compareAtPrice != null && (
-              <span className="text-lg text-muted-foreground line-through">
-                {formatLocaleNumber(compareAtPrice, i18n.language)} {product?.currency}
-              </span>
-            )}
-          </div>
-
-          {/* Stock Indicator */}
-          <InventoryStockIndicator
-            quantity={stockQuantity}
-            lowStockThreshold={10}
-            showProgress={true}
-            variant="default"
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+          {/* Left: Images */}
+          <AdvancedProductImages
+            productId={productId || ''}
+            productName={product?.name || 'Produit'}
+            standardImages={images}
+            selectedVariantId={selectedVariant?.id}
+            physicalProductId={product?.physical?.id}
           />
 
-          {/* Variants */}
-          {product?.variants && product.variants.length > 0 && (
+          {/* Right: Product Info */}
+          <div className="space-y-6">
+            {/* Title & Category */}
             <div>
-              <h3 className="font-semibold mb-3">Variantes</h3>
-              <VariantSelector
-                variants={product.variants}
-                onVariantChange={variant => setSelectedVariant(variant)}
+              <Badge className="mb-2">{product?.category}</Badge>
+              <h1 className="text-lg sm:text-2xl md:text-3xl font-bold mb-2">{product?.name}</h1>
+              {product?.short_description && (
+                <p className="text-sm sm:text-base md:text-lg text-muted-foreground">
+                  {product.short_description}
+                </p>
+              )}
+              <ProductReviewsHeroSummary
+                productId={productId!}
+                onViewReviews={() => setActiveTab('reviews')}
+                className="mt-3"
               />
             </div>
-          )}
 
-          {/* Quantity */}
-          <div>
-            <h3 className="font-semibold mb-3">Quantité</h3>
-            <div className="flex items-center gap-3">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                disabled={quantity <= 1}
-                aria-label="Diminuer la quantité"
-              >
-                -
-              </Button>
-              <span className="text-lg font-medium w-12 text-center">{quantity}</span>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => setQuantity(Math.min(stockQuantity, quantity + 1))}
-                disabled={quantity >= stockQuantity}
-                aria-label="Augmenter la quantité"
-              >
-                +
-              </Button>
-            </div>
-          </div>
-
-          <PhysicalProductPreOrderCard
-            productId={productId!}
-            variantId={selectedVariant?.id}
-            currency={product?.currency}
-          />
-
-          <PhysicalProductDeliveryEstimate productId={productId!} />
-
-          {product?.store_id && (
-            <PhysicalProductShippingDetails
-              storeId={product.store_id}
-              countryOfOrigin={product.physical?.country_of_origin}
-              currency={product.currency}
-            />
-          )}
-
-          <div className="grid grid-cols-3 gap-2 text-center">
-            <div className="rounded-lg border bg-muted/30 p-3">
-              <Truck className="h-4 w-4 mx-auto mb-1 text-primary" aria-hidden="true" />
-              <p className="text-[11px] font-medium leading-tight">Livraison suivie</p>
-            </div>
-            <div className="rounded-lg border bg-muted/30 p-3">
-              <Shield className="h-4 w-4 mx-auto mb-1 text-primary" aria-hidden="true" />
-              <p className="text-[11px] font-medium leading-tight">Paiement sécurisé</p>
-            </div>
-            <div className="rounded-lg border bg-muted/30 p-3">
-              <Package className="h-4 w-4 mx-auto mb-1 text-primary" aria-hidden="true" />
-              <p className="text-[11px] font-medium leading-tight">Stock vérifié</p>
-            </div>
-          </div>
-
-          {/* Actions */}
-          <div className="space-y-3">
-            <PhysicalProductWhatsAppButton
-              productName={product?.name || 'Produit'}
-              whatsappNumber={product?.physical?.whatsapp_number}
-              whatsappEnabled={product?.physical?.whatsapp_enabled}
-              paymentUrl={
-                product?.store?.slug && product?.slug
-                  ? generatePaymentUrl(product.store.slug, product.slug)
-                  : undefined
-              }
-              className="w-full"
-              label="Contacter sur WhatsApp"
-            />
-
-            <Button
-              onClick={handleBuyNow}
-              className="w-full"
-              size="lg"
-              disabled={stockQuantity === 0 || isBuying}
-            >
-              {isBuying ? (
-                <>
-                  <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                  Redirection…
-                </>
-              ) : (
-                <>
-                  <ShoppingCart className="h-5 w-5 mr-2" />
-                  {stockQuantity === 0 ? 'Rupture de stock' : buyLabel}
-                </>
+            {/* Price */}
+            <div className="flex items-baseline gap-3 flex-wrap">
+              <span className="text-2xl sm:text-3xl font-bold tracking-tight">
+                {formatLocaleNumber(displayPrice, i18n.language)} {product?.currency}
+              </span>
+              {compareAtPrice != null && (
+                <span className="text-lg text-muted-foreground line-through">
+                  {formatLocaleNumber(compareAtPrice, i18n.language)} {product?.currency}
+                </span>
               )}
-            </Button>
-            <p className="text-xs text-muted-foreground text-center">
-              {isCod
-                ? 'Paiement à la livraison — aucun paiement en ligne requis'
-                : isGuarantee
-                  ? 'Payez une garantie en ligne, le solde à la livraison'
-                  : 'Paiement en ligne à la commande'}
-            </p>
-
-            <div className="grid grid-cols-2 gap-2">
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={handleWishlistToggle}
-                disabled={isCheckingWishlist}
-              >
-                {isCheckingWishlist ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <Heart
-                    className={`h-4 w-4 mr-2 ${isInWishlist ? 'fill-red-500 text-red-500' : ''}`}
-                  />
-                )}
-                {isInWishlist ? 'Retiré' : 'Favori'}
-              </Button>
-              <Button variant="outline" className="w-full" onClick={handleShare}>
-                <Share2 className="h-4 w-4 mr-2" />
-                Partager
-              </Button>
             </div>
-          </div>
 
-          {product?.physical && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Caractéristiques</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                {physicalWeightLabel && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Poids</span>
-                    <span className="font-medium">{physicalWeightLabel}</span>
-                  </div>
-                )}
-                {physicalDimensionsLabel && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Dimensions</span>
-                    <span className="font-medium">{physicalDimensionsLabel}</span>
-                  </div>
-                )}
-                {product.physical.sku && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">SKU</span>
-                    <span className="font-medium">{product.physical.sku}</span>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
-        </div>
-      </div>
+            {/* Stock Indicator */}
+            <InventoryStockIndicator
+              quantity={stockQuantity}
+              lowStockThreshold={10}
+              showProgress={true}
+              variant="default"
+            />
 
-      {/* Content Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-12 space-y-6">
-        <TabsList className="w-full overflow-x-auto flex-nowrap justify-start">
-          <TabsTrigger value="description" className="min-h-[44px] shrink-0">
-            Description
-          </TabsTrigger>
-          <TabsTrigger value="specifications" className="min-h-[44px] shrink-0">
-            Spécifications
-          </TabsTrigger>
-          <TabsTrigger value="reviews" className="min-h-[44px] shrink-0">
-            Avis
-          </TabsTrigger>
-          {faqs.length > 0 && (
-            <TabsTrigger value="faqs" className="min-h-[44px] shrink-0">
-              FAQs
-            </TabsTrigger>
-          )}
-        </TabsList>
-
-        {/* Description Tab */}
-        <TabsContent value="description" className="space-y-6">
-          {product?.description && (
-            <Card>
-              <CardHeader>
-                <CardTitle>À propos de ce produit</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <SafeHTML
-                  html={product.description || ''}
-                  className="bg-white dark:bg-white text-black dark:text-black prose max-w-none prose-headings:text-black dark:prose-headings:text-black prose-p:text-black dark:prose-p:text-black prose-a:text-primary prose-strong:text-black dark:prose-strong:text-black p-4 sm:p-6 rounded-lg"
+            {/* Variants */}
+            {product?.variants && product.variants.length > 0 && (
+              <div>
+                <h3 className="font-semibold mb-3">Variantes</h3>
+                <VariantSelector
+                  variants={product.variants}
+                  onVariantChange={variant => setSelectedVariant(variant)}
                 />
-              </CardContent>
-            </Card>
-          )}
+              </div>
+            )}
 
-          {/* Size Chart */}
-          {product?.size_chart_id && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Guide des tailles</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <SizeChartDisplay sizeChartId={product.size_chart_id} />
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
+            {/* Quantity */}
+            <div>
+              <h3 className="font-semibold mb-3">Quantité</h3>
+              <div className="flex items-center gap-3">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  disabled={quantity <= 1}
+                  aria-label="Diminuer la quantité"
+                >
+                  -
+                </Button>
+                <span className="text-lg font-medium w-12 text-center">{quantity}</span>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setQuantity(Math.min(stockQuantity, quantity + 1))}
+                  disabled={quantity >= stockQuantity}
+                  aria-label="Augmenter la quantité"
+                >
+                  +
+                </Button>
+              </div>
+            </div>
 
-        {/* Specifications Tab */}
-        <TabsContent value="specifications" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Spécifications</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {product?.physical && (
-                <>
+            <PhysicalProductPreOrderCard
+              productId={productId!}
+              variantId={selectedVariant?.id}
+              currency={product?.currency}
+            />
+
+            <PhysicalProductDeliveryEstimate productId={productId!} />
+
+            {product?.store_id && (
+              <PhysicalProductShippingDetails
+                storeId={product.store_id}
+                countryOfOrigin={product.physical?.country_of_origin}
+                currency={product.currency}
+              />
+            )}
+
+            <div className="grid grid-cols-3 gap-2 text-center">
+              <div className="rounded-lg border bg-muted/30 p-3">
+                <Truck className="h-4 w-4 mx-auto mb-1 text-primary" aria-hidden="true" />
+                <p className="text-[11px] font-medium leading-tight">Livraison suivie</p>
+              </div>
+              <div className="rounded-lg border bg-muted/30 p-3">
+                <Shield className="h-4 w-4 mx-auto mb-1 text-primary" aria-hidden="true" />
+                <p className="text-[11px] font-medium leading-tight">Paiement sécurisé</p>
+              </div>
+              <div className="rounded-lg border bg-muted/30 p-3">
+                <Package className="h-4 w-4 mx-auto mb-1 text-primary" aria-hidden="true" />
+                <p className="text-[11px] font-medium leading-tight">Stock vérifié</p>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="space-y-3">
+              <PhysicalProductWhatsAppButton
+                productName={product?.name || 'Produit'}
+                whatsappNumber={product?.physical?.whatsapp_number}
+                whatsappEnabled={product?.physical?.whatsapp_enabled}
+                paymentUrl={
+                  product?.store?.slug && product?.slug
+                    ? generatePaymentUrl(product.store.slug, product.slug)
+                    : undefined
+                }
+                className="w-full"
+                label="Contacter sur WhatsApp"
+              />
+
+              <Button
+                onClick={handleBuyNow}
+                className="w-full"
+                size="lg"
+                disabled={stockQuantity === 0 || isBuying}
+              >
+                {isBuying ? (
+                  <>
+                    <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                    Redirection…
+                  </>
+                ) : (
+                  <>
+                    <ShoppingCart className="h-5 w-5 mr-2" />
+                    {stockQuantity === 0 ? 'Rupture de stock' : buyLabel}
+                  </>
+                )}
+              </Button>
+              <p className="text-xs text-muted-foreground text-center">
+                {isCod
+                  ? 'Paiement à la livraison — aucun paiement en ligne requis'
+                  : isGuarantee
+                    ? 'Payez une garantie en ligne, le solde à la livraison'
+                    : 'Paiement en ligne à la commande'}
+              </p>
+
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={handleWishlistToggle}
+                  disabled={isCheckingWishlist}
+                >
+                  {isCheckingWishlist ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Heart
+                      className={`h-4 w-4 mr-2 ${isInWishlist ? 'fill-red-500 text-red-500' : ''}`}
+                    />
+                  )}
+                  {isInWishlist ? 'Retiré' : 'Favori'}
+                </Button>
+                <Button variant="outline" className="w-full" onClick={handleShare}>
+                  <Share2 className="h-4 w-4 mr-2" />
+                  Partager
+                </Button>
+              </div>
+            </div>
+
+            {product?.physical && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Caractéristiques</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
                   {physicalWeightLabel && (
-                    <div className="flex justify-between py-2 border-b">
+                    <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Poids</span>
                       <span className="font-medium">{physicalWeightLabel}</span>
                     </div>
                   )}
                   {physicalDimensionsLabel && (
-                    <div className="flex justify-between py-2 border-b">
+                    <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Dimensions</span>
                       <span className="font-medium">{physicalDimensionsLabel}</span>
                     </div>
                   )}
                   {product.physical.sku && (
-                    <div className="flex justify-between py-2 border-b">
+                    <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">SKU</span>
                       <span className="font-medium">{product.physical.sku}</span>
                     </div>
                   )}
-                  {product.physical.manufacturer && (
-                    <div className="flex justify-between py-2 border-b">
-                      <span className="text-muted-foreground">Fabricant</span>
-                      <span className="font-medium">{product.physical.manufacturer}</span>
-                    </div>
-                  )}
-                  {product.physical.country_of_origin && (
-                    <div className="flex justify-between py-2 border-b">
-                      <span className="text-muted-foreground">Origine</span>
-                      <span className="font-medium">{product.physical.country_of_origin}</span>
-                    </div>
-                  )}
-                </>
-              )}
-            </CardContent>
-          </Card>
-          {product?.license_terms && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Conditions de licence</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <SafeHTML
-                  html={product.license_terms}
-                  className="prose max-w-none text-sm text-muted-foreground"
-                />
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </div>
 
-        {/* FAQs Tab */}
-        {faqs.length > 0 && (
-          <TabsContent value="faqs" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Questions fréquentes</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Accordion type="single" collapsible className="w-full">
-                  {faqs.map((faq: ProductFAQ, index: number) => (
-                    <AccordionItem key={index} value={`faq-${index}`}>
-                      <AccordionTrigger className="text-left">{faq.question}</AccordionTrigger>
-                      <AccordionContent className="text-muted-foreground">
-                        {faq.answer}
-                      </AccordionContent>
-                    </AccordionItem>
-                  ))}
-                </Accordion>
-              </CardContent>
-            </Card>
+        {/* Content Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-12 space-y-6">
+          <TabsList className="w-full overflow-x-auto flex-nowrap justify-start">
+            <TabsTrigger value="description" className="min-h-[44px] shrink-0">
+              Description
+            </TabsTrigger>
+            <TabsTrigger value="specifications" className="min-h-[44px] shrink-0">
+              Spécifications
+            </TabsTrigger>
+            <TabsTrigger value="reviews" className="min-h-[44px] shrink-0">
+              Avis
+            </TabsTrigger>
+            {faqs.length > 0 && (
+              <TabsTrigger value="faqs" className="min-h-[44px] shrink-0">
+                FAQs
+              </TabsTrigger>
+            )}
+          </TabsList>
+
+          {/* Description Tab */}
+          <TabsContent value="description" className="space-y-6">
+            {product?.description && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>À propos de ce produit</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <SafeHTML
+                    html={product.description || ''}
+                    className="bg-white dark:bg-white text-black dark:text-black prose max-w-none prose-headings:text-black dark:prose-headings:text-black prose-p:text-black dark:prose-p:text-black prose-a:text-primary prose-strong:text-black dark:prose-strong:text-black p-4 sm:p-6 rounded-lg"
+                  />
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Size Chart */}
+            {product?.size_chart_id && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Guide des tailles</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <SizeChartDisplay sizeChartId={product.size_chart_id} />
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
-        )}
 
-        {/* Reviews Tab */}
-        <TabsContent value="reviews" className="space-y-6">
-          <ProductReviewsSummary productId={productId!} productType="physical" />
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Avis des utilisateurs</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ReviewsList productId={productId!} productType="physical" />
-            </CardContent>
-          </Card>
-
-          {user && (
+          {/* Specifications Tab */}
+          <TabsContent value="specifications" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Donner votre avis</CardTitle>
+                <CardTitle>Spécifications</CardTitle>
               </CardHeader>
-              <CardContent>
-                <ReviewForm productId={productId!} productType="physical" />
+              <CardContent className="space-y-4">
+                {product?.physical && (
+                  <>
+                    {physicalWeightLabel && (
+                      <div className="flex justify-between py-2 border-b">
+                        <span className="text-muted-foreground">Poids</span>
+                        <span className="font-medium">{physicalWeightLabel}</span>
+                      </div>
+                    )}
+                    {physicalDimensionsLabel && (
+                      <div className="flex justify-between py-2 border-b">
+                        <span className="text-muted-foreground">Dimensions</span>
+                        <span className="font-medium">{physicalDimensionsLabel}</span>
+                      </div>
+                    )}
+                    {product.physical.sku && (
+                      <div className="flex justify-between py-2 border-b">
+                        <span className="text-muted-foreground">SKU</span>
+                        <span className="font-medium">{product.physical.sku}</span>
+                      </div>
+                    )}
+                    {product.physical.manufacturer && (
+                      <div className="flex justify-between py-2 border-b">
+                        <span className="text-muted-foreground">Fabricant</span>
+                        <span className="font-medium">{product.physical.manufacturer}</span>
+                      </div>
+                    )}
+                    {product.physical.country_of_origin && (
+                      <div className="flex justify-between py-2 border-b">
+                        <span className="text-muted-foreground">Origine</span>
+                        <span className="font-medium">{product.physical.country_of_origin}</span>
+                      </div>
+                    )}
+                  </>
+                )}
               </CardContent>
             </Card>
+            {product?.license_terms && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Conditions de licence</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <SafeHTML
+                    html={product.license_terms}
+                    className="prose max-w-none text-sm text-muted-foreground"
+                  />
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+
+          {/* FAQs Tab */}
+          {faqs.length > 0 && (
+            <TabsContent value="faqs" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Questions fréquentes</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Accordion type="single" collapsible className="w-full">
+                    {faqs.map((faq: ProductFAQ, index: number) => (
+                      <AccordionItem key={index} value={`faq-${index}`}>
+                        <AccordionTrigger className="text-left">{faq.question}</AccordionTrigger>
+                        <AccordionContent className="text-muted-foreground">
+                          {faq.answer}
+                        </AccordionContent>
+                      </AccordionItem>
+                    ))}
+                  </Accordion>
+                </CardContent>
+              </Card>
+            </TabsContent>
           )}
-        </TabsContent>
-      </Tabs>
 
-      {/* Recommendations Section */}
-      <Separator className="my-12" />
+          {/* Reviews Tab */}
+          <TabsContent value="reviews" className="space-y-6">
+            <ProductReviewsSummary productId={productId!} productType="physical" />
 
-      <PhysicalProductRecommendations
-        productId={productId!}
-        category={product?.category}
-        tags={product?.tags}
-        limit={6}
-        variant="grid"
-        title="Produits similaires"
-      />
+            <Card>
+              <CardHeader>
+                <CardTitle>Avis des utilisateurs</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ReviewsList productId={productId!} productType="physical" />
+              </CardContent>
+            </Card>
 
-      {product?.store_id && (
-        <BoughtTogetherPhysicalRecommendations
+            {user && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Donner votre avis</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ReviewForm productId={productId!} productType="physical" />
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+        </Tabs>
+
+        {/* Recommendations Section */}
+        <Separator className="my-12" />
+
+        <PhysicalProductRecommendations
           productId={productId!}
-          storeId={product.store_id}
-          storeName={product.store?.name}
-          limit={4}
+          category={product?.category}
+          tags={product?.tags}
+          limit={6}
+          variant="grid"
+          title="Produits similaires"
         />
-      )}
-    </AppPageShell>
+
+        {product?.store_id && (
+          <BoughtTogetherPhysicalRecommendations
+            productId={productId!}
+            storeId={product.store_id}
+            storeName={product.store?.name}
+            limit={4}
+          />
+        )}
+      </div>
+    </PublicPremiumChrome>
   );
 }

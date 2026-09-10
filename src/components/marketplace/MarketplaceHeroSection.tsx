@@ -13,9 +13,9 @@ import { CategoryNavigationBar } from './CategoryNavigationBar';
 import { MarketplaceProductTypeFacets } from './MarketplaceProductTypeFacets';
 import { SearchAutocomplete } from './SearchAutocomplete';
 import type { MarketplaceFacetBucket } from '@/types/marketplace-facets';
-import { usePageCustomization } from '@/hooks/usePageCustomization';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { cn } from '@/lib/utils';
+import { SmartImage } from '@/components/images/SmartImage';
 
 interface MarketplaceHeroSectionProps {
   filters: FilterState;
@@ -37,6 +37,8 @@ interface MarketplaceHeroSectionProps {
   comparisonCount: number;
   PRICE_RANGES: Array<{ value: string; label: string }>;
   getValue: (key: string) => string;
+  /** Image hero custom (optionnelle) — LCP / fond. */
+  heroImage?: string;
 }
 
 /**
@@ -63,6 +65,7 @@ export const MarketplaceHeroSection = React.memo<MarketplaceHeroSectionProps>(
     comparisonCount,
     PRICE_RANGES,
     getValue,
+    heroImage,
   }) => {
     const { t } = useTranslation();
     const heroRef = useScrollAnimation<HTMLDivElement>();
@@ -82,6 +85,23 @@ export const MarketplaceHeroSection = React.memo<MarketplaceHeroSectionProps>(
         aria-labelledby="hero-title"
         role="banner"
       >
+        {heroImage ? (
+          <SmartImage
+            src={heroImage}
+            alt=""
+            priority
+            width={1600}
+            height={900}
+            quality={72}
+            resize="cover"
+            sizes="100vw"
+            srcSetWidths={[640, 960, 1280, 1600]}
+            wrapperClassName="pointer-events-none absolute inset-0 z-0 h-full w-full"
+            className="h-full w-full object-cover opacity-35"
+            placeholder="none"
+            aria-hidden
+          />
+        ) : null}
         <div className="mp-hero__inner container mx-auto max-w-7xl lg:px-8 relative z-10">
           <div className="text-center mb-6 sm:mb-8 lg:mb-10 pt-2">
             <p className="lp-eyebrow mb-4 mx-auto">Marketplace</p>

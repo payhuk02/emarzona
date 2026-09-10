@@ -3,7 +3,6 @@
  */
 
 import { useParams, Link } from 'react-router-dom';
-import { AppPageShell } from '@/components/layout/AppPageShell';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -31,16 +30,24 @@ export default function StoreSsoLoginPage() {
 
   if (isLoading) {
     return (
-      <AppPageShell mainClassName="flex items-center justify-center min-h-[60vh] p-6">
+      <div
+        className="flex items-center justify-center min-h-[60vh] p-6"
+        role="main"
+        id="main-content"
+      >
         <Skeleton className="h-64 w-full max-w-md" />
-      </AppPageShell>
+      </div>
     );
   }
 
   if (error || !config?.enabled) {
     const isPlan = config?.reason === 'enterprise_plan_required';
     return (
-      <AppPageShell mainClassName="flex items-center justify-center min-h-[60vh] p-6">
+      <div
+        className="flex items-center justify-center min-h-[60vh] p-6"
+        role="main"
+        id="main-content"
+      >
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <Shield className="h-12 w-12 mx-auto text-muted-foreground mb-2" />
@@ -60,12 +67,16 @@ export default function StoreSsoLoginPage() {
             </Button>
           </CardContent>
         </Card>
-      </AppPageShell>
+      </div>
     );
   }
 
   return (
-    <AppPageShell mainClassName="flex items-center justify-center min-h-[70vh] p-4 sm:p-6 bg-gradient-to-b from-background to-muted/30">
+    <div
+      className="flex items-center justify-center min-h-[70vh] p-4 sm:p-6 bg-gradient-to-b from-background to-muted/30"
+      role="main"
+      id="main-content"
+    >
       <Card className="w-full max-w-lg border-border/60 shadow-lg">
         <CardHeader className="text-center space-y-3 pb-2">
           <div className="mx-auto h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center">
@@ -112,6 +123,6 @@ export default function StoreSsoLoginPage() {
           )}
         </CardContent>
       </Card>
-    </AppPageShell>
+    </div>
   );
 }

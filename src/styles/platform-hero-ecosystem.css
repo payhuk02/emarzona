@@ -152,7 +152,8 @@
 .landing-premium .lp-platform-hero__visual .lp-platform-hero__photo,
 .landing-premium .lp-platform-hero__visual picture {
   border-radius: 0;
-  mask-image: linear-gradient(90deg, transparent 0%, black 18%, black 100%);
+  /* Presque pas de fade — le PC reste net à gauche */
+  mask-image: linear-gradient(90deg, rgba(0, 0, 0, 0.35) 0%, black 4%, black 100%);
 }
 
 @media (max-width: 1023px) {
@@ -189,17 +190,17 @@
 }
 
 .landing-premium .lp-platform-hero__visual .lp-platform-hero__photo {
-  object-position: 78% 22%;
+  /* Cadrage bas/gauche pour le laptop entier */
+  object-position: 28% 62%;
 }
 
 .landing-premium .lp-platform-hero--premium .lp-platform-hero__photo-overlay {
   background: linear-gradient(
     90deg,
-    #0a1628 0%,
-    rgba(10, 22, 40, 0.88) 30%,
-    rgba(10, 22, 40, 0.35) 52%,
-    rgba(10, 22, 40, 0.12) 68%,
-    rgba(10, 22, 40, 0.04) 100%
+    rgba(10, 22, 40, 0.45) 0%,
+    rgba(10, 22, 40, 0.18) 10%,
+    rgba(10, 22, 40, 0.05) 22%,
+    transparent 40%
   );
 }
 

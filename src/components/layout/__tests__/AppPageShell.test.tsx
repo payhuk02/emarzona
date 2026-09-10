@@ -8,6 +8,14 @@ vi.mock('@/hooks/useDeferHorizontalContextNav', () => ({
   useDeferHorizontalContextNav: () => true,
 }));
 
+vi.mock('@/hooks/use-mobile', () => ({
+  useIsMobile: () => false,
+}));
+
+vi.mock('@/contexts/AuthContext', () => ({
+  useAuth: () => ({ user: { id: 'u1' }, loading: false }),
+}));
+
 vi.mock('@/components/AppSidebar', () => ({
   AppSidebar: () => <aside data-testid="app-sidebar">AppSidebar</aside>,
 }));
@@ -17,7 +25,7 @@ vi.mock('@/components/layout/HorizontalContextNav', () => ({
 }));
 
 vi.mock('@/components/layout/UtilityBarHeader', () => ({
-  UtilityBarHeader: () => <header data-testid="utility-bar">UtilityBar</header>,
+  UtilityBarHeader: () => <header data-testid="utility-bar-header">UtilityBar</header>,
 }));
 
 function renderShell(ui: ReactNode, { path = '/dashboard' }: { path?: string } = {}) {
@@ -33,7 +41,7 @@ describe('AppPageShell', () => {
     renderShell(<p>Page body</p>, { path: '/dashboard' });
 
     expect(screen.getByTestId('app-sidebar')).toBeInTheDocument();
-    expect(screen.getByTestId('utility-bar')).toBeInTheDocument();
+    expect(screen.getByTestId('utility-bar-header')).toBeInTheDocument();
     expect(await screen.findByTestId('horizontal-context-nav')).toBeInTheDocument();
     expect(screen.queryByTestId('context-sidebar')).not.toBeInTheDocument();
 
@@ -72,6 +80,37 @@ describe('AppPageShell', () => {
       </MemoryRouter>
     );
 
-    expect(screen.queryByTestId('utility-bar')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('utility-bar-header')).not.toBeInTheDocument();
+  });
+
+  it('pads #main-content when padForBottomNav is true', () => {
+    render(
+      <MemoryRouter initialEntries={['/dashboard']}>
+        <AppPageShell padForBottomNav>
+          <p>Padded</p>
+        </AppPageShell>
+      </MemoryRouter>
+    );
+
+    const main = screen.getByRole('main', { name: /contenu principal/i });
+    expect(main.className).toMatch(/pb-\[calc\(4rem/);
+    expect(document.querySelector('[data-bottom-nav="true"]')).toBeTruthy();
+  });
+
+  it('nested AppPageShell does not remount chrome', () => {
+    render(
+      <MemoryRouter initialEntries={['/dashboard']}>
+        <AppPageShell>
+          <AppPageShell shellClassName="nested-class">
+            <p>Nested body</p>
+          </AppPageShell>
+        </AppPageShell>
+      </MemoryRouter>
+    );
+
+    expect(screen.getAllByTestId('app-sidebar')).toHaveLength(1);
+    expect(screen.getAllByTestId('utility-bar-header')).toHaveLength(1);
+    expect(document.querySelector('[data-app-shell-nested]')).toBeTruthy();
+    expect(screen.getByText('Nested body')).toBeInTheDocument();
   });
 });

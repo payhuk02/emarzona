@@ -96,7 +96,7 @@ export const MarketplaceProductsSection = React.memo<MarketplaceProductsSectionP
     const { t } = useTranslation();
     /** Ref ancre pagination — pas d'animation scroll (contenu critique toujours visible). */
     const productsRef = useRef<HTMLDivElement>(null);
-    const eagerImageCount = 4;
+    const eagerImageCount = 2;
 
     // Calculer le nombre total de pages
     const totalPages = Math.ceil(pagination.totalItems / pagination.itemsPerPage);

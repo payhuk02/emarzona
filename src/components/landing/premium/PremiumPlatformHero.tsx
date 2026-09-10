@@ -13,36 +13,17 @@ const PremiumHero3DScene = lazy(() =>
   import('./PremiumHero3DScene').then(m => ({ default: m.PremiumHero3DScene }))
 );
 
-/** Monte la scène 3D après idle prolongé / interaction pour ne pas concurrencer le LCP. */
+/** Monte la scène 3D uniquement après interaction utilisateur (pas d'auto-arm idle). */
 function DeferredHero3D() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    let cancelled = false;
-    const enable = () => {
-      if (!cancelled) setReady(true);
-    };
-
-    const onInteract = () => enable();
-    window.addEventListener('pointerdown', onInteract, { once: true, passive: true });
-    window.addEventListener('keydown', onInteract, { once: true });
-
-    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
-      const id = window.requestIdleCallback(enable, { timeout: 4500 });
-      return () => {
-        cancelled = true;
-        window.cancelIdleCallback(id);
-        window.removeEventListener('pointerdown', onInteract);
-        window.removeEventListener('keydown', onInteract);
-      };
-    }
-
-    const t = window.setTimeout(enable, 3200);
+    const enable = () => setReady(true);
+    window.addEventListener('pointerdown', enable, { once: true, passive: true });
+    window.addEventListener('keydown', enable, { once: true });
     return () => {
-      cancelled = true;
-      window.clearTimeout(t);
-      window.removeEventListener('pointerdown', onInteract);
-      window.removeEventListener('keydown', onInteract);
+      window.removeEventListener('pointerdown', enable);
+      window.removeEventListener('keydown', enable);
     };
   }, []);
 
@@ -113,7 +94,7 @@ export function PremiumPlatformHero() {
         </div>
       ) : null}
 
-      <div className="lp-platform-hero__frame relative z-[2] mx-auto grid w-full max-w-[100rem] grid-cols-1 gap-8 px-4 sm:px-6 md:px-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-6 lg:px-14 xl:px-16 2xl:px-20">
+      <div className="lp-platform-hero__frame relative z-[2] mx-auto grid w-full max-w-[100rem] grid-cols-1 gap-8 px-4 sm:px-6 md:px-10 lg:grid-cols-[minmax(0,0.38fr)_minmax(0,1.72fr)] lg:gap-0 xl:grid-cols-[minmax(0,0.32fr)_minmax(0,1.78fr)] lg:px-8 xl:px-12 2xl:px-14">
         <div className="lp-platform-hero__col-content flex flex-col">
           <div className="lp-platform-hero__content text-center lg:text-left">
             <h1 className="lp-platform-hero__title lp-serif lp-hero-enter text-[2rem] leading-[1.08] sm:text-[2.65rem] md:text-[3rem] lg:text-[3.65rem] xl:text-[4.15rem]">

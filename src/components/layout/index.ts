@@ -11,6 +11,8 @@ export { ContextualNavBar } from './ContextualNavBar';
 export type { ContextualNavItem } from './ContextualNavBar';
 export { BuyerDiscoveryPageLayout } from './BuyerDiscoveryPageLayout';
 export type { BuyerDiscoveryPageLayoutProps } from './BuyerDiscoveryPageLayout';
+export { PublicPremiumChrome } from './PublicPremiumChrome';
+export { AuthenticatedAppLayout } from './AuthenticatedAppLayout';
 export { AppPageShell } from './AppPageShell';
 export type { AppPageShellProps } from './AppPageShell';
 export { HorizontalContextNav } from './HorizontalContextNav';

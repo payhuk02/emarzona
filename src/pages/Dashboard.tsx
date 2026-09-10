@@ -1,4 +1,3 @@
-import { AppPageShell } from '@/components/layout/AppPageShell';
 import { useDashboardStatsOptimized as useDashboardStats } from '@/hooks/useDashboardStats';
 import { useStore, type Store } from '@/hooks/useStore';
 import { useStoreContext } from '@/contexts/StoreContext';
@@ -301,7 +300,7 @@ const DashboardWithStore = ({ store, storeLoading }: DashboardWithStoreProps) =>
   );
 
   return (
-    <AppPageShell>
+    <>
       <div className="dashboard-premium container mx-auto max-w-[90rem] p-3 sm:p-5 lg:p-8 pb-10">
         <div className="mb-5 sm:mb-6">
           <DashboardHeader {...dashboardHeaderProps} />
@@ -361,7 +360,7 @@ const DashboardWithStore = ({ store, storeLoading }: DashboardWithStoreProps) =>
           </div>
         ) : null}
       </div>
-    </AppPageShell>
+    </>
   );
 };
 

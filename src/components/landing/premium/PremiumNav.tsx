@@ -6,14 +6,23 @@ import { EmarzonaBrandLogo } from './EmarzonaBrandLogo';
 import { PremiumLangSwitcher } from './PremiumLangSwitcher';
 import { PremiumNavDesktopMenu, PremiumNavMobileList } from './PremiumNavMega';
 import { useLandingPremiumT } from '@/hooks/useLandingPremiumT';
+import { useAuth } from '@/contexts/AuthContext';
+import { useStoreContext } from '@/contexts/StoreContext';
 import type { LandingPremiumMegaId } from '@/config/landing-premium-nav';
 import '@/styles/landing-premium.css';
 
 export function PremiumNav() {
   const { t } = useLandingPremiumT();
   const { pathname } = useLocation();
+  const { user, loading: authLoading } = useAuth();
+  const { stores, loading: storesLoading } = useStoreContext();
   const [open, setOpen] = useState(false);
   const [openMega, setOpenMega] = useState<LandingPremiumMegaId | null>(null);
+
+  const isAuthenticated = Boolean(user) && !authLoading;
+  const hasStores = isAuthenticated && !storesLoading && stores.length > 0;
+  const authHomeHref = hasStores ? '/dashboard' : '/account/hub';
+  const authHomeLabel = hasStores ? t('nav.dashboard') : t('nav.myAccount');
 
   useEffect(() => {
     document.body.style.overflow = open ? 'hidden' : '';
@@ -50,16 +59,27 @@ export function PremiumNav() {
           <div className="flex shrink-0 items-center justify-end gap-2 xl:gap-3">
             <div className="hidden items-center gap-2 lg:flex xl:gap-3">
               <PremiumLangSwitcher className="lp-nav-control" />
-              <Link
-                to="/login"
-                className="lp-nav-ghost inline-flex h-10 items-center whitespace-nowrap px-1"
-              >
-                {t('nav.login')}
-              </Link>
-              <StoreCreateCtaLink className="lp-btn-primary lp-nav-cta inline-flex h-10 items-center whitespace-nowrap rounded-full px-4 text-sm font-semibold xl:px-5">
-                <span className="hidden xl:inline">{t('nav.getStarted')}</span>
-                <span className="xl:hidden">{t('nav.getStartedShort')}</span>
-              </StoreCreateCtaLink>
+              {isAuthenticated ? (
+                <Link
+                  to={authHomeHref}
+                  className="lp-btn-primary lp-nav-cta inline-flex h-10 items-center whitespace-nowrap rounded-full px-4 text-sm font-semibold xl:px-5"
+                >
+                  {authHomeLabel}
+                </Link>
+              ) : (
+                <>
+                  <Link
+                    to="/login"
+                    className="lp-nav-ghost inline-flex h-10 items-center whitespace-nowrap px-1"
+                  >
+                    {t('nav.login')}
+                  </Link>
+                  <StoreCreateCtaLink className="lp-btn-primary lp-nav-cta inline-flex h-10 items-center whitespace-nowrap rounded-full px-4 text-sm font-semibold xl:px-5">
+                    <span className="hidden xl:inline">{t('nav.getStarted')}</span>
+                    <span className="xl:hidden">{t('nav.getStartedShort')}</span>
+                  </StoreCreateCtaLink>
+                </>
+              )}
             </div>
             <div className="flex items-center gap-2 lg:hidden">
               <PremiumLangSwitcher className="lp-nav-control" />
@@ -94,19 +114,31 @@ export function PremiumNav() {
               onNavigate={closeDrawer}
             />
             <div className="mt-6 flex flex-col gap-3 border-t border-white/10 pt-6">
-              <Link
-                to="/login"
-                className="lp-btn-outline rounded-full py-3 text-center text-sm"
-                onClick={closeDrawer}
-              >
-                {t('nav.login')}
-              </Link>
-              <StoreCreateCtaLink
-                className="lp-btn-primary rounded-full py-3.5 text-center text-sm font-semibold"
-                onClick={closeDrawer}
-              >
-                {t('nav.getStarted')}
-              </StoreCreateCtaLink>
+              {isAuthenticated ? (
+                <Link
+                  to={authHomeHref}
+                  className="lp-btn-primary rounded-full py-3.5 text-center text-sm font-semibold"
+                  onClick={closeDrawer}
+                >
+                  {authHomeLabel}
+                </Link>
+              ) : (
+                <>
+                  <Link
+                    to="/login"
+                    className="lp-btn-outline rounded-full py-3 text-center text-sm"
+                    onClick={closeDrawer}
+                  >
+                    {t('nav.login')}
+                  </Link>
+                  <StoreCreateCtaLink
+                    className="lp-btn-primary rounded-full py-3.5 text-center text-sm font-semibold"
+                    onClick={closeDrawer}
+                  >
+                    {t('nav.getStarted')}
+                  </StoreCreateCtaLink>
+                </>
+              )}
             </div>
           </div>
         </>

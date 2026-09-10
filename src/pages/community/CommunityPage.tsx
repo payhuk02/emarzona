@@ -25,11 +25,12 @@ import { CommunityPostForm } from '@/components/community/CommunityPostForm';
 import { Users, MessageSquare, Plus, Search, LogIn } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-import { AppPageShell } from '@/components/layout/AppPageShell';
+import { BuyerDiscoveryPageLayout } from '@/components/layout/BuyerDiscoveryPageLayout';
 import { EmarzonaInText } from '@/components/brand/EmarzonaInText';
 
 export default function CommunityPage() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+  const authenticated = Boolean(user) && !authLoading;
   const navigate = useNavigate();
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
@@ -81,7 +82,7 @@ export default function CommunityPage() {
         url="https://www.emarzona.com/community"
         canonical="https://www.emarzona.com/community"
       />
-      <AppPageShell>
+      <BuyerDiscoveryPageLayout authenticated={authenticated} mainAriaLabel="Communaute">
         <div className="container mx-auto space-y-4 sm:space-y-6">
           {/* Header */}
           <header className="border-b bg-card/95 backdrop-blur-sm rounded-lg">
@@ -280,7 +281,7 @@ export default function CommunityPage() {
             </DialogContent>
           </Dialog>
         </div>
-      </AppPageShell>
+      </BuyerDiscoveryPageLayout>
     </>
   );
 }

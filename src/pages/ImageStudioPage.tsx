@@ -3,15 +3,19 @@
  * Accessible depuis la sidebar via /dashboard/image-studio
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, lazy, Suspense } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Wand2, Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { ImageEnhancerStudio } from '@/components/images/ImageEnhancerStudio';
 import { SmartImage } from '@/components/images/SmartImage';
 import { DashboardShellLayout } from '@/components/layout/DashboardShellLayout';
+
+const ImageEnhancerStudio = lazy(() =>
+  import('@/components/images/ImageEnhancerStudio').then(m => ({ default: m.ImageEnhancerStudio }))
+);
 
 const STORAGE_KEY = 'emarzona:image-studio:saved';
 
@@ -63,12 +67,14 @@ const ImageStudioPage: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
-          <ImageEnhancerStudio
-            folder="studio"
-            onSaved={url =>
-              setSavedImages(prev => [url, ...prev.filter(u => u !== url)].slice(0, 24))
-            }
-          />
+          <Suspense fallback={<Skeleton className="h-[28rem] w-full rounded-xl" />}>
+            <ImageEnhancerStudio
+              folder="studio"
+              onSaved={url =>
+                setSavedImages(prev => [url, ...prev.filter(u => u !== url)].slice(0, 24))
+              }
+            />
+          </Suspense>
         </div>
 
         <aside className="space-y-4">

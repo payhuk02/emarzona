@@ -16,7 +16,8 @@ import { useStylePreferences } from '@/hooks/useStylePreferences';
 import { useProductRecommendations } from '@/hooks/useProductRecommendations';
 import { logger } from '@/lib/logger';
 import type { Database } from '@/integrations/supabase/types';
-import { AppPageShell } from '@/components/layout/AppPageShell';
+import { BuyerDiscoveryPageLayout } from '@/components/layout/BuyerDiscoveryPageLayout';
+import { useAuth } from '@/contexts/AuthContext';
 
 type Product = Database['public']['Tables']['products']['Row'] & {
   store?: Database['public']['Tables']['stores']['Row'];
@@ -25,6 +26,8 @@ type Product = Database['public']['Tables']['products']['Row'] & {
 };
 
 const StyleQuizPage: React.FC = () => {
+  const { user, loading: authLoading } = useAuth();
+  const authenticated = Boolean(user) && !authLoading;
   const navigate = useNavigate();
   const { toast } = useToast();
   const { hasCompletedQuiz, updateRecommendationsViewed } = useStylePreferences();
@@ -104,7 +107,7 @@ const StyleQuizPage: React.FC = () => {
 
   if (quizCompleted && showRecommendations) {
     return (
-      <AppPageShell>
+      <BuyerDiscoveryPageLayout authenticated={authenticated} mainAriaLabel="Quiz de style">
         <div className="bg-gradient-to-br from-background via-background to-accent/10">
           <div className="container mx-auto px-4 py-8">
             {/* Header avec profil de style */}
@@ -230,13 +233,13 @@ const StyleQuizPage: React.FC = () => {
             </div>
           </div>
         </div>
-      </AppPageShell>
+      </BuyerDiscoveryPageLayout>
     );
   }
 
   if (isLoadingRecommendations) {
     return (
-      <AppPageShell>
+      <BuyerDiscoveryPageLayout authenticated={authenticated} mainAriaLabel="Quiz de style">
         <div className="flex min-h-[50vh] items-center justify-center bg-gradient-to-br from-background via-background to-accent/10">
           <Card className="max-w-md w-full mx-4">
             <CardContent className="p-8 text-center">
@@ -248,12 +251,12 @@ const StyleQuizPage: React.FC = () => {
             </CardContent>
           </Card>
         </div>
-      </AppPageShell>
+      </BuyerDiscoveryPageLayout>
     );
   }
 
   return (
-    <AppPageShell>
+    <BuyerDiscoveryPageLayout authenticated={authenticated} mainAriaLabel="Quiz de style">
       <div className="bg-gradient-to-br from-background via-background to-accent/10 py-8">
         <div className="container mx-auto px-4">
           {/* Header */}
@@ -310,7 +313,7 @@ const StyleQuizPage: React.FC = () => {
           </div>
         </div>
       </div>
-    </AppPageShell>
+    </BuyerDiscoveryPageLayout>
   );
 };
 

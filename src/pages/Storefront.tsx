@@ -36,6 +36,7 @@ import { generateStoreUrl, generateProductUrl } from '@/lib/store-utils';
 import { buildCheckoutUrl } from '@/lib/checkout/checkout-route';
 import { detectSubdomain } from '@/lib/subdomain-detector';
 import { redirectToPlatformLogin } from '@/lib/auth-routes';
+import { buildProductImageUrl } from '@/lib/images/supabaseTransform';
 import {
   resolveStorefrontCommerceType,
   showStoreLocationInContact,
@@ -74,14 +75,20 @@ const StorefrontPage = ({ previewMode = false, storeOverride = null }: Storefron
   // ✅ PERFORMANCE: Preload image hero du store ou logo (potentielle LCP)
   const storeHeroImage = getValue('heroImage') as string | undefined;
   const storeLogo = store?.logo_url || undefined;
+  const storeLcpRaw = storeHeroImage || storeLogo || '';
+  const storeLcpSrc = storeLcpRaw
+    ? buildProductImageUrl(storeLcpRaw, storeHeroImage ? 'hero' : 'thumbnail', {
+        quality: storeHeroImage ? 72 : 85,
+      })
+    : '';
 
   useLCPPreload({
-    src: storeHeroImage || storeLogo || '',
+    src: storeLcpSrc,
     sizes:
       storeHeroImage || storeLogo
         ? '(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 1200px'
         : undefined,
-    priority: !!(storeHeroImage || storeLogo),
+    priority: !!storeLcpSrc,
   });
 
   // Utiliser un ID stable pour éviter les violations des règles des hooks

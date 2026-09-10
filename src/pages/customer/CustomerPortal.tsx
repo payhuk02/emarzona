@@ -10,7 +10,6 @@
  */
 
 import { useSidebar } from '@/components/ui/sidebar';
-import { AppPageShell } from '@/components/layout/AppPageShell';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -300,7 +299,7 @@ export default function CustomerPortal() {
 
   if (statsLoading) {
     return (
-      <AppPageShell shellClassName="bg-gray-50 dark:bg-gray-900">
+      <div className="bg-gray-50 dark:bg-gray-900">
         {/* Mobile Header avec icône — Loading State */}
         <header className="sticky top-0 z-50 border-b bg-white dark:bg-gray-900 shadow-sm lg:hidden">
           <div className="flex h-14 sm:h-16 items-center gap-2 sm:gap-3 px-3 sm:px-4">
@@ -328,12 +327,12 @@ export default function CustomerPortal() {
             </div>
           </div>
         </div>
-      </AppPageShell>
+      </div>
     );
   }
 
   return (
-    <AppPageShell shellClassName="bg-gray-50 dark:bg-gray-900">
+    <div className="bg-gray-50 dark:bg-gray-900">
       {/* Mobile Header avec Hamburger et Icône */}
       <MobileHeader />
 
@@ -823,6 +822,6 @@ export default function CustomerPortal() {
           </Tabs>
         </div>
       </div>
-    </AppPageShell>
+    </div>
   );
 }

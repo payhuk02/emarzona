@@ -5,6 +5,8 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from './logger';
+import { resizeToCatalogProduct } from '@/lib/images/resize-to-catalog';
+import { compressImage as compressImageCanvas, blobToFile } from '@/lib/images/compress';
 
 export type ImageType =
   | 'store-logo'
@@ -24,6 +26,7 @@ interface UploadImageOptions {
   storeId?: string;
   maxSizeMB?: number;
   acceptedFormats?: string[];
+  /** Compression / normalise avant upload (défaut: true pour produits). */
   compress?: boolean;
 }
 
@@ -101,21 +104,31 @@ const generateFileName = (
   return `${userId}/${type}/${timestamp}_${random}.${extension}`;
 };
 
-const compressImage = async (file: File): Promise<File> => {
+const PRODUCT_IMAGE_TYPES = new Set<ImageType>(['product-image', 'product-gallery']);
+
+const compressImage = async (file: File, type: ImageType): Promise<File> => {
+  // Catalogue produit : format 1536×1024 WebP (même pipeline que uploadCatalogImage)
+  if (PRODUCT_IMAGE_TYPES.has(type)) {
+    try {
+      return await resizeToCatalogProduct(file, file.name);
+    } catch (error) {
+      import('@/lib/logger').then(({ logger: log }) => {
+        log.warn('Erreur resize catalogue, fallback compression', { error });
+      });
+    }
+  }
+
   if (file.size < 500 * 1024) {
     return file;
   }
 
   try {
-    const imageCompression = (await import('browser-image-compression')).default;
-
-    const compressedFile = await imageCompression(file, {
-      maxSizeMB: 1,
-      maxWidthOrHeight: 1920,
-      useWebWorker: true,
-      fileType: file.type,
+    const { blob } = await compressImageCanvas(file, {
+      maxWidth: 1920,
+      maxHeight: 1920,
+      quality: 0.82,
     });
-    return compressedFile;
+    return blobToFile(blob, file.name);
   } catch (error) {
     import('@/lib/logger').then(({ logger: log }) => {
       log.warn("Erreur lors de la compression de l'image", { error });
@@ -147,7 +160,7 @@ export const uploadImage = async ({
   storeId,
   maxSizeMB = DEFAULT_MAX_SIZE_MB,
   acceptedFormats = DEFAULT_FORMATS,
-  compress = false,
+  compress,
 }: UploadImageOptions): Promise<UploadImageResult> => {
   let fileName = '';
 
@@ -160,9 +173,10 @@ export const uploadImage = async ({
       };
     }
 
+    const shouldCompress = compress ?? PRODUCT_IMAGE_TYPES.has(type);
     let fileToUpload = file;
-    if (compress) {
-      fileToUpload = await compressImage(file);
+    if (shouldCompress) {
+      fileToUpload = await compressImage(file, type);
     }
 
     const bucket = resolveImageBucket(type, storeId);

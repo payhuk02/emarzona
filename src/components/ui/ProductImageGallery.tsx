@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { ChevronLeft, ChevronRight, ZoomIn, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { buildProductImageUrl } from '@/lib/images/supabaseTransform';
 
 interface ProductImageGalleryProps {
   images: string[];
@@ -69,29 +70,12 @@ export const ProductImageGallery = ({
     setIsLoaded(false);
   };
 
-  // Optimisation de l'URL d'image pour les pages de détail
-  const getOptimizedImageUrl = (originalSrc: string, isThumbnail = false) => {
-    if (originalSrc.includes('?') || originalSrc.startsWith('http')) {
-      return originalSrc;
-    }
-
-    const params = new URLSearchParams({
-      format: 'webp',
-      quality: '90', // Qualité élevée pour les pages de détail
+  const getOptimizedImageUrl = (originalSrc: string, isThumbnail = false) =>
+    buildProductImageUrl(originalSrc, isThumbnail ? 'thumbnail' : 'detail', {
+      quality: isThumbnail ? 78 : 90,
       resize: fit === 'contain' ? 'contain' : 'cover',
+      ...(isThumbnail ? { width: 150, height: 150 } : {}),
     });
-
-    if (isThumbnail) {
-      params.set('width', '150');
-      params.set('height', '150');
-    } else {
-      // Pour les images principales, optimiser pour le format produit 3:2 (1536x1024)
-      params.set('width', '1536');
-      params.set('height', '1024');
-    }
-
-    return `${originalSrc}?${params.toString()}`;
-  };
 
   const nextImage = () => {
     setCurrentIndex(prev => (prev + 1) % images.length);

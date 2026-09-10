@@ -3,7 +3,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { createIDBPersister } from '@/lib/cache/persister';
-import { BrowserRouter, Routes, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { StoreProvider } from '@/contexts/StoreContext';
 import { PlatformCustomizationProvider } from '@/contexts/PlatformCustomizationContext';
@@ -81,7 +81,6 @@ import { initWebVitals } from '@/lib/web-vitals';
 import { ErrorBoundary as SentryErrorBoundary } from '@sentry/react';
 import { shouldUseAppPremiumTheme } from '@/lib/premium-theme';
 import { shouldShowBottomNavigation } from '@/config/navigation.horizontal';
-import { cn } from '@/lib/utils';
 import { AppPremiumShell } from '@/components/layout/AppPremiumShell';
 import { ErrorBoundary } from '@/components/errors/ErrorBoundary';
 import { startAlertMonitoring } from '@/lib/sentry-alerts';
@@ -96,8 +95,9 @@ import { updateSEOMetadata } from '@/lib/seo-enhancements';
 // Route modules
 import { publicRoutes } from '@/routes/publicRoutes';
 import { customerRoutes } from '@/routes/customerRoutes';
-import { dashboardRoutes } from '@/routes/dashboardRoutes';
+import { dashboardRoutes, dashboardRedirectRoutes } from '@/routes/dashboardRoutes';
 import { adminRoutes } from '@/routes/adminRoutes';
+import { AuthenticatedAppLayout } from '@/components/layout/AuthenticatedAppLayout';
 
 type ErrorFallbackProps = {
   error?: unknown;
@@ -294,18 +294,15 @@ const AppContent = () => {
         <Suspense fallback={<RouteChunkFallback />}>
           {(() => {
             const routes = (
-              <div
-                className={cn(
-                  isBottomNavVisible && 'pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0'
-                )}
-              >
-                <Routes>
-                  {publicRoutes}
+              <Routes>
+                {publicRoutes}
+                <Route element={<AuthenticatedAppLayout />}>
                   {customerRoutes}
                   {dashboardRoutes}
-                  {adminRoutes}
-                </Routes>
-              </div>
+                </Route>
+                {dashboardRedirectRoutes}
+                {adminRoutes}
+              </Routes>
             );
             return usePremiumTheme ? <AppPremiumShell>{routes}</AppPremiumShell> : routes;
           })()}

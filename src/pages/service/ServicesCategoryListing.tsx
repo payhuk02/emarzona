@@ -5,7 +5,7 @@
 
 import { useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { AppPageShell } from '@/components/layout/AppPageShell';
+import { PublicPremiumChrome } from '@/components/layout/PublicPremiumChrome';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -75,12 +75,7 @@ export default function ServicesCategoryListing() {
     child?.description || parent?.description || `Découvrez les services ${title} sur Emarzona`;
 
   return (
-    <AppPageShell
-      mainClassName="p-4 sm:p-6 lg:p-8"
-      hideSidebar
-      showUtilityBar={false}
-      hideHorizontalNav
-    >
+    <PublicPremiumChrome mainAriaLabel="Catalogue services">
       <SEOMeta
         title={`${title} | Services Emarzona`}
         description={description}
@@ -211,6 +206,6 @@ export default function ServicesCategoryListing() {
           </div>
         )}
       </div>
-    </AppPageShell>
+    </PublicPremiumChrome>
   );
 }

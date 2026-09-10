@@ -18,28 +18,65 @@ import {
 import { useDashboardStatsOptimized as useAdvancedDashboardStats } from '@/hooks/useDashboardStats';
 import { useStore } from '@/hooks/useStore';
 import { useNotifications, useMarkAsRead } from '@/hooks/useNotifications';
-import {
-  AdvancedStatsCard,
-  RevenueChart,
-  OrdersChart,
-  ActivityFeed,
-  PerformanceMetrics,
-} from '@/components/dashboard/AdvancedDashboardComponents';
-import {
-  QuickActions,
-  NotificationCard,
-  GoalProgress,
-  RecentActivity,
-  DashboardControls,
-} from '@/components/dashboard/InteractiveWidgets';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, lazy, Suspense } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { logger } from '@/lib/logger';
 import { STORE_CREATE_PATH } from '@/lib/store/store-create-path';
 import { useTranslation } from 'react-i18next';
+import { Skeleton } from '@/components/ui/skeleton';
+
+const AdvancedStatsCard = lazy(() =>
+  import('@/components/dashboard/AdvancedDashboardComponents').then(m => ({
+    default: m.AdvancedStatsCard,
+  }))
+);
+const RevenueChart = lazy(() =>
+  import('@/components/dashboard/AdvancedDashboardComponents').then(m => ({
+    default: m.RevenueChart,
+  }))
+);
+const OrdersChart = lazy(() =>
+  import('@/components/dashboard/AdvancedDashboardComponents').then(m => ({
+    default: m.OrdersChart,
+  }))
+);
+const ActivityFeed = lazy(() =>
+  import('@/components/dashboard/AdvancedDashboardComponents').then(m => ({
+    default: m.ActivityFeed,
+  }))
+);
+const PerformanceMetrics = lazy(() =>
+  import('@/components/dashboard/AdvancedDashboardComponents').then(m => ({
+    default: m.PerformanceMetrics,
+  }))
+);
+const QuickActions = lazy(() =>
+  import('@/components/dashboard/InteractiveWidgets').then(m => ({ default: m.QuickActions }))
+);
+const NotificationCard = lazy(() =>
+  import('@/components/dashboard/InteractiveWidgets').then(m => ({ default: m.NotificationCard }))
+);
+const GoalProgress = lazy(() =>
+  import('@/components/dashboard/InteractiveWidgets').then(m => ({ default: m.GoalProgress }))
+);
+const RecentActivity = lazy(() =>
+  import('@/components/dashboard/InteractiveWidgets').then(m => ({ default: m.RecentActivity }))
+);
+const DashboardControls = lazy(() =>
+  import('@/components/dashboard/InteractiveWidgets').then(m => ({ default: m.DashboardControls }))
+);
+
+function ChartsFallback() {
+  return (
+    <div className="grid gap-6 lg:grid-cols-2" aria-hidden>
+      <Skeleton className="h-64 w-full rounded-xl" />
+      <Skeleton className="h-64 w-full rounded-xl" />
+    </div>
+  );
+}
 
 const AdvancedDashboard = () => {
   const { t } = useTranslation();
@@ -204,109 +241,111 @@ const AdvancedDashboard = () => {
 
       {/* Main Content */}
       <div className="w-full max-w-7xl mx-auto space-y-6 animate-fade-in">
-        {/* Controls */}
-        <DashboardControls
-          onRefresh={handleRefresh}
-          onExport={handleExport}
-          onFilter={handleFilter}
-          onSettings={handleSettings}
-          lastUpdated={lastUpdated}
-        />
-
-        {/* Stats Grid */}
-        <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
-          <AdvancedStatsCard
-            title={t('dashboard.stats.products.title')}
-            value={stats.totalProducts}
-            description={t('dashboard.stats.products.active', {
-              count: stats.activeProducts,
-              defaultValue_one: '{{count}} actif',
-              defaultValue_other: '{{count}} actifs',
-            })}
-            icon={Package}
-            color="green"
-            trend={{
-              value: stats.trends.productGrowth,
-              label: t('dashboard.trends.vsLastMonth'),
-              period: '30j',
-            }}
+        <Suspense fallback={<ChartsFallback />}>
+          {/* Controls */}
+          <DashboardControls
+            onRefresh={handleRefresh}
+            onExport={handleExport}
+            onFilter={handleFilter}
+            onSettings={handleSettings}
+            lastUpdated={lastUpdated}
           />
-          <AdvancedStatsCard
-            title={t('dashboard.stats.orders.title')}
-            value={stats.totalOrders}
-            description={t('dashboard.stats.orders.pending', { count: stats.pendingOrders })}
-            icon={ShoppingCart}
-            color="blue"
-            trend={{
-              value: stats.trends.orderGrowth,
-              label: t('dashboard.trends.vsLastMonth'),
-              period: '30j',
-            }}
-          />
-          <AdvancedStatsCard
-            title={t('dashboard.stats.customers.title')}
-            value={stats.totalCustomers}
-            description={t('dashboard.stats.customers.registered')}
-            icon={Users}
-            color="purple"
-            trend={{
-              value: stats.trends.customerGrowth,
-              label: t('dashboard.trends.vsLastMonth'),
-              period: '30j',
-            }}
-          />
-          <AdvancedStatsCard
-            title={t('dashboard.stats.revenue.title')}
-            value={`${stats.totalRevenue.toLocaleString()} FCFA`}
-            description={t('dashboard.stats.revenue.total')}
-            icon={DollarSign}
-            color="yellow"
-            trend={{
-              value: stats.trends.revenueGrowth,
-              label: t('dashboard.trends.vsLastMonth'),
-              period: '30j',
-            }}
-          />
-        </div>
 
-        {/* Quick Actions */}
-        <QuickActions
-          onCreateProduct={handleCreateProduct}
-          onCreateOrder={handleCreateOrder}
-          onViewAnalytics={handleViewAnalytics}
-          onManageCustomers={handleManageCustomers}
-          onViewStore={handleViewStore}
-          onSettings={handleSettings}
-        />
-
-        {/* Charts Row */}
-        <div className="grid gap-6 lg:grid-cols-2">
-          <RevenueChart data={stats.revenueByMonth} />
-          <OrdersChart data={stats.ordersByStatus} />
-        </div>
-
-        {/* Performance Metrics */}
-        <PerformanceMetrics metrics={stats.performanceMetrics} trends={stats.trends} />
-
-        {/* Bottom Row */}
-        <div className="grid gap-6 lg:grid-cols-3">
-          <div className="lg:col-span-1">
-            <NotificationCard
-              notifications={notifications}
-              onMarkAsRead={handleMarkNotificationAsRead}
-              onViewAll={handleViewAllNotifications}
+          {/* Stats Grid */}
+          <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
+            <AdvancedStatsCard
+              title={t('dashboard.stats.products.title')}
+              value={stats.totalProducts}
+              description={t('dashboard.stats.products.active', {
+                count: stats.activeProducts,
+                defaultValue_one: '{{count}} actif',
+                defaultValue_other: '{{count}} actifs',
+              })}
+              icon={Package}
+              color="green"
+              trend={{
+                value: stats.trends.productGrowth,
+                label: t('dashboard.trends.vsLastMonth'),
+                period: '30j',
+              }}
+            />
+            <AdvancedStatsCard
+              title={t('dashboard.stats.orders.title')}
+              value={stats.totalOrders}
+              description={t('dashboard.stats.orders.pending', { count: stats.pendingOrders })}
+              icon={ShoppingCart}
+              color="blue"
+              trend={{
+                value: stats.trends.orderGrowth,
+                label: t('dashboard.trends.vsLastMonth'),
+                period: '30j',
+              }}
+            />
+            <AdvancedStatsCard
+              title={t('dashboard.stats.customers.title')}
+              value={stats.totalCustomers}
+              description={t('dashboard.stats.customers.registered')}
+              icon={Users}
+              color="purple"
+              trend={{
+                value: stats.trends.customerGrowth,
+                label: t('dashboard.trends.vsLastMonth'),
+                period: '30j',
+              }}
+            />
+            <AdvancedStatsCard
+              title={t('dashboard.stats.revenue.title')}
+              value={`${stats.totalRevenue.toLocaleString()} FCFA`}
+              description={t('dashboard.stats.revenue.total')}
+              icon={DollarSign}
+              color="yellow"
+              trend={{
+                value: stats.trends.revenueGrowth,
+                label: t('dashboard.trends.vsLastMonth'),
+                period: '30j',
+              }}
             />
           </div>
-          <div className="lg:col-span-1">
-            <GoalProgress goals={goals} />
-          </div>
-          <div className="lg:col-span-1">
-            <RecentActivity activities={stats.recentActivity} onViewAll={handleViewAllActivity} />
-          </div>
-        </div>
 
-        {/* Activity Feed */}
-        <ActivityFeed activities={stats.recentActivity} />
+          {/* Quick Actions */}
+          <QuickActions
+            onCreateProduct={handleCreateProduct}
+            onCreateOrder={handleCreateOrder}
+            onViewAnalytics={handleViewAnalytics}
+            onManageCustomers={handleManageCustomers}
+            onViewStore={handleViewStore}
+            onSettings={handleSettings}
+          />
+
+          {/* Charts Row */}
+          <div className="grid gap-6 lg:grid-cols-2">
+            <RevenueChart data={stats.revenueByMonth} />
+            <OrdersChart data={stats.ordersByStatus} />
+          </div>
+
+          {/* Performance Metrics */}
+          <PerformanceMetrics metrics={stats.performanceMetrics} trends={stats.trends} />
+
+          {/* Bottom Row */}
+          <div className="grid gap-6 lg:grid-cols-3">
+            <div className="lg:col-span-1">
+              <NotificationCard
+                notifications={notifications}
+                onMarkAsRead={handleMarkNotificationAsRead}
+                onViewAll={handleViewAllNotifications}
+              />
+            </div>
+            <div className="lg:col-span-1">
+              <GoalProgress goals={goals} />
+            </div>
+            <div className="lg:col-span-1">
+              <RecentActivity activities={stats.recentActivity} onViewAll={handleViewAllActivity} />
+            </div>
+          </div>
+
+          {/* Activity Feed */}
+          <ActivityFeed activities={stats.recentActivity} />
+        </Suspense>
       </div>
     </AppPageShell>
   );

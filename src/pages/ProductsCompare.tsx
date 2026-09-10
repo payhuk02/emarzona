@@ -10,7 +10,8 @@
  */
 
 import { useState, useEffect, useMemo } from 'react';
-import { AppPageShell } from '@/components/layout/AppPageShell';
+import { BuyerDiscoveryPageLayout } from '@/components/layout/BuyerDiscoveryPageLayout';
+import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -89,6 +90,8 @@ interface ComparisonProduct {
 }
 
 export default function ProductsCompare() {
+  const { user, loading: authLoading } = useAuth();
+  const authenticated = Boolean(user) && !authLoading;
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
@@ -408,18 +411,18 @@ export default function ProductsCompare() {
 
   if (isLoading) {
     return (
-      <AppPageShell>
+      <BuyerDiscoveryPageLayout authenticated={authenticated} mainAriaLabel="Comparateur produits">
         <div className="container mx-auto p-4 lg:p-6 space-y-6">
           <Skeleton className="h-12 w-full" />
           <Skeleton className="h-96 w-full" />
         </div>
-      </AppPageShell>
+      </BuyerDiscoveryPageLayout>
     );
   }
 
   if (productIds.length === 0) {
     return (
-      <AppPageShell>
+      <BuyerDiscoveryPageLayout authenticated={authenticated} mainAriaLabel="Comparateur produits">
         <div className="container mx-auto p-4 lg:p-6">
           <Card>
             <CardContent className="py-12 text-center">
@@ -435,7 +438,7 @@ export default function ProductsCompare() {
             </CardContent>
           </Card>
         </div>
-      </AppPageShell>
+      </BuyerDiscoveryPageLayout>
     );
   }
 
@@ -453,7 +456,7 @@ export default function ProductsCompare() {
         url="https://www.emarzona.com/products/compare"
         canonical="https://www.emarzona.com/products/compare"
       />
-      <AppPageShell>
+      <BuyerDiscoveryPageLayout authenticated={authenticated} mainAriaLabel="Comparateur produits">
         <div className="container mx-auto p-4 lg:p-6 space-y-6">
           {/* Header */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -705,7 +708,7 @@ export default function ProductsCompare() {
             </div>
           )}
         </div>
-      </AppPageShell>
+      </BuyerDiscoveryPageLayout>
     </>
   );
 }

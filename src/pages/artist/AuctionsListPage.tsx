@@ -270,6 +270,7 @@ export default function AuctionsListPage() {
         authenticated={useAuthenticatedShell}
         mainAriaLabel={mainAriaLabel}
         guestClassName="landing-premium min-h-screen overflow-x-hidden bg-[var(--lp-surface,#fafaf9)]"
+        guestPremiumNav={false}
       >
         {showPlatformHeader && <PremiumNav />}
         <div className={showPlatformHeader ? 'pt-[var(--lp-nav-offset,4.25rem)]' : undefined}>

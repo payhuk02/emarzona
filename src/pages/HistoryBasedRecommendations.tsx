@@ -5,7 +5,8 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { AppPageShell } from '@/components/layout/AppPageShell';
+import { BuyerDiscoveryPageLayout } from '@/components/layout/BuyerDiscoveryPageLayout';
+import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -32,6 +33,8 @@ import { useProductRecommendations } from '@/hooks/useProductRecommendations';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
 const HistoryBasedRecommendations = () => {
+  const { user, loading: authLoading } = useAuth();
+  const authenticated = Boolean(user) && !authLoading;
   const { selectedStoreId } = useStoreContext();
   const [refreshKey, setRefreshKey] = useState(0);
   const [activeTab, setActiveTab] = useState('personal');
@@ -70,7 +73,10 @@ const HistoryBasedRecommendations = () => {
   };
 
   return (
-    <AppPageShell>
+    <BuyerDiscoveryPageLayout
+      authenticated={authenticated}
+      mainAriaLabel="Recommandations historiques"
+    >
       <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
         {/* Header avec animation - Style MyTemplates */}
         <div
@@ -349,7 +355,7 @@ const HistoryBasedRecommendations = () => {
           </div>
         </div>
       </div>
-    </AppPageShell>
+    </BuyerDiscoveryPageLayout>
   );
 };
 

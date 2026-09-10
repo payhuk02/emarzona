@@ -3,7 +3,7 @@
  */
 
 import { Link } from 'react-router-dom';
-import { AppPageShell } from '@/components/layout/AppPageShell';
+import { PublicPremiumChrome } from '@/components/layout/PublicPremiumChrome';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ShieldCheck, Clock, Package, Scale } from 'lucide-react';
@@ -15,7 +15,7 @@ import { SEOMeta } from '@/components/seo';
 
 export default function EmarzonaProtectPage() {
   return (
-    <AppPageShell>
+    <PublicPremiumChrome mainAriaLabel="Emarzona Protect">
       <SEOMeta
         title="Emarzona Protect — Protection acheteur"
         description="Couverture acheteur v2 : digital, physique, services, cours et enchères — escrow et remboursement assisté."
@@ -83,6 +83,6 @@ export default function EmarzonaProtectPage() {
           </CardContent>
         </Card>
       </div>
-    </AppPageShell>
+    </PublicPremiumChrome>
   );
 }

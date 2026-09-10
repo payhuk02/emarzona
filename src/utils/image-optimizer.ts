@@ -3,6 +3,8 @@
  * Gère le chargement des versions optimisées (WebP/AVIF) avec fallback
  */
 
+import { buildTransformedUrl } from '@/lib/images/supabaseTransform';
+
 /**
  * Vérifie le support WebP du navigateur
  */
@@ -28,7 +30,7 @@ export function supportsAVIF(): boolean {
 }
 
 /**
- * Génère le srcset pour les images responsives
+ * Génère le srcset pour les images responsives (assets locaux pré-générés)
  */
 export function generateResponsiveSrcSet(
   baseName: string,
@@ -39,7 +41,6 @@ export function generateResponsiveSrcSet(
   const formatExt = format === 'avif' ? '.avif' : '.webp';
   return sizes
     .map(size => {
-      // Chercher dans le répertoire optimized
       const optimizedPath = basePath.replace('/assets/', '/assets/optimized/');
       const fileName = `${baseName}-${size}w${formatExt}`;
       return `${optimizedPath.replace(/\/[^/]+$/, '')}/${fileName} ${size}w`;
@@ -76,42 +77,36 @@ export function generateSizes(breakpoints: {
 export function getOptimizedImageUrl(
   originalPath: string,
   options: {
-    format?: 'webp' | 'avif' | 'auto';
+    format?: 'webp' | 'avif' | 'auto' | 'origin';
     width?: number;
     quality?: number;
   } = {}
 ): string {
   const { format = 'auto', width, quality = 85 } = options;
 
-  // Si c'est une URL externe, retourner telle quelle
+  // Supabase Storage → /render/image/public (y compris URLs https complètes)
+  if (
+    originalPath.includes('/storage/v1/object/public/') ||
+    originalPath.includes('/storage/v1/render/image/public/')
+  ) {
+    let resolvedFormat: 'webp' | 'avif' | 'origin' | undefined;
+    if (format === 'webp' || format === 'avif' || format === 'origin') {
+      resolvedFormat = format;
+    } else if (format === 'auto') {
+      resolvedFormat = undefined; // buildTransformedUrl choisit AVIF/WebP
+    }
+    return buildTransformedUrl(originalPath, {
+      width,
+      quality,
+      format: resolvedFormat,
+    });
+  }
+
+  // URL externe non-Supabase
   if (originalPath.startsWith('http://') || originalPath.startsWith('https://')) {
     return originalPath;
   }
 
-  // Si c'est Supabase Storage, utiliser les transformations
-  if (originalPath.includes('supabase.co/storage')) {
-    const params = new URLSearchParams();
-    if (width) params.set('width', width.toString());
-    params.set('quality', quality.toString());
-
-    if (format === 'webp' || (format === 'auto' && supportsWebP())) {
-      params.set('format', 'webp');
-    } else if (format === 'avif' && supportsAVIF()) {
-      params.set('format', 'avif');
-    }
-
-    return `${originalPath}?${params.toString()}`;
-  }
-
-  // Pour les images locales, chercher la version optimisée
-  const ext = originalPath.split('.').pop()?.toLowerCase();
-  const baseName =
-    originalPath
-      .split('/')
-      .pop()
-      ?.replace(/\.(jpg|jpeg|png)$/i, '') || '';
-
-  // Déterminer le format optimal
   let targetFormat = 'webp';
   if (format === 'avif' && supportsAVIF()) {
     targetFormat = 'avif';
@@ -121,18 +116,17 @@ export function getOptimizedImageUrl(
     } else if (supportsWebP()) {
       targetFormat = 'webp';
     } else {
-      return originalPath; // Fallback vers l'original
+      return originalPath;
     }
+  } else if (format === 'webp') {
+    targetFormat = 'webp';
   }
 
-  // Construire le chemin vers l'image optimisée
   const optimizedPath = originalPath
     .replace('/assets/', '/assets/optimized/')
     .replace(/\.(jpg|jpeg|png)$/i, `.${targetFormat}`);
 
-  // Si une largeur est spécifiée, utiliser la version responsive
   if (width) {
-    // Trouver la taille la plus proche
     const sizes = [320, 640, 768, 1024, 1280, 1920];
     const closestSize = sizes.reduce((prev, curr) =>
       Math.abs(curr - width) < Math.abs(prev - width) ? curr : prev
@@ -167,21 +161,16 @@ export function useOptimizedImage(
       ?.replace(/\.(jpg|jpeg|png)$/i, '') || '';
   const basePath = originalPath.replace(/\/[^/]+$/, '');
 
-  // URL principale optimisée
   const optimizedUrl = getOptimizedImageUrl(originalPath, { format });
 
-  // Srcset pour les versions responsives
   const srcSet = responsive
     ? generateResponsiveSrcSet(baseName, basePath, sizes, format === 'auto' ? 'webp' : format)
     : undefined;
 
-  // Fallback vers l'original si les formats modernes ne sont pas supportés
-  const fallbackUrl = originalPath;
-
   return {
     src: optimizedUrl,
     srcSet,
-    fallback: fallbackUrl,
+    fallback: originalPath,
     supportsWebP: supportsWebP(),
     supportsAVIF: supportsAVIF(),
   };

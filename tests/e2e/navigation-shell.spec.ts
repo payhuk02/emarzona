@@ -18,6 +18,15 @@ test.describe('Navigation shell — invité', () => {
     await expect(appLocator(page).locator('[data-sidebar="sidebar"]')).toHaveCount(0);
     await expect(appLocator(page).getByTestId('horizontal-context-nav')).toHaveCount(0);
   });
+
+  test('discover invité sans sidebar ni bottom-nav', async ({ page }) => {
+    await page.setViewportSize({ width: 393, height: 851 });
+    await gotoApp(page, '/discover');
+    const root = appLocator(page);
+    await expect(root.locator('[data-sidebar="sidebar"]')).toHaveCount(0);
+    await expect(root.getByTestId('bottom-navigation')).toHaveCount(0);
+    await expect(root.locator('.lp-premium-nav')).toBeVisible({ timeout: 20_000 });
+  });
 });
 
 test.describe('Navigation shell — acheteur authentifié', () => {
@@ -78,6 +87,37 @@ test.describe('Navigation shell — bascule persona', () => {
     await page.waitForURL(/\/account/, { timeout: 20_000 });
     await root.getByTestId('persona-tab-seller').click();
     await page.waitForURL(/\/dashboard/, { timeout: 20_000 });
+  });
+
+  test('shell persistant entre pages dashboard', async ({ page }) => {
+    const root = appLocator(page);
+    const utilityBar = root.getByTestId('utility-bar-header');
+    await expect(utilityBar).toBeVisible({ timeout: 20_000 });
+    const handle = await utilityBar.elementHandle();
+    expect(handle).toBeTruthy();
+
+    // Navigation SPA (pas page.goto) pour conserver AuthenticatedAppLayout monté
+    const ordersLink = root.locator('a[href="/dashboard/orders"]').first();
+    await expect(ordersLink).toBeVisible({ timeout: 20_000 });
+    await ordersLink.click();
+    await page.waitForURL(/\/dashboard\/orders/, { timeout: 20_000 });
+    await expect(root.getByTestId('utility-bar-header')).toBeVisible({ timeout: 20_000 });
+    const stillSame = await handle!.evaluate(el => document.contains(el));
+    expect(stillSame).toBe(true);
+  });
+
+  test('shell persistant vendeur → compte acheteur', async ({ page }) => {
+    const root = appLocator(page);
+    const utilityBar = root.getByTestId('utility-bar-header');
+    await expect(utilityBar).toBeVisible({ timeout: 20_000 });
+    const handle = await utilityBar.elementHandle();
+    expect(handle).toBeTruthy();
+
+    await root.getByTestId('persona-tab-buyer').click();
+    await page.waitForURL(/\/account/, { timeout: 20_000 });
+    await expect(root.getByTestId('utility-bar-header')).toBeVisible({ timeout: 20_000 });
+    const stillSame = await handle!.evaluate(el => document.contains(el));
+    expect(stillSame).toBe(true);
   });
 });
 

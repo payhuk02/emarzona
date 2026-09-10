@@ -6,30 +6,21 @@ import { SellerRoutePermissionGuard } from '@/components/billing/SellerRoutePerm
 import { SellerLegacyPathRedirect } from '@/routes/SellerLegacyPathRedirect';
 import { logger } from '@/lib/logger';
 
-// Helper pour route protégée
+/** Page seller sous AuthenticatedAppLayout (garde plan au niveau page). */
 const pr = (path: string, Component: React.LazyExoticComponent<React.ComponentType>) => (
   <Route
     path={path}
     element={
-      <ProtectedRoute>
-        <SellerRoutePermissionGuard>
-          <Component />
-        </SellerRoutePermissionGuard>
-      </ProtectedRoute>
+      <SellerRoutePermissionGuard>
+        <Component />
+      </SellerRoutePermissionGuard>
     }
   />
 );
 
-/** Route authentifiée sans garde vendeur (accessible aux acheteurs). */
+/** Page authentifiée sans garde vendeur. */
 const prAuth = (path: string, Component: React.LazyExoticComponent<React.ComponentType>) => (
-  <Route
-    path={path}
-    element={
-      <ProtectedRoute>
-        <Component />
-      </ProtectedRoute>
-    }
-  />
+  <Route path={path} element={<Component />} />
 );
 
 // Pages Dashboard
@@ -301,14 +292,6 @@ export const dashboardRoutes = (
     {pr('/dashboard/payment-methods', PaymentMethods)}
     {pr('/dashboard/payment-connections', PaymentConnectionsPage)}
     {pr('/dashboard/advanced-orders', AdvancedOrderManagement)}
-    <Route
-      path="/dashboard/advanced-orders-test"
-      element={
-        <ProtectedRoute>
-          <Navigate to="/dashboard/advanced-orders" replace />
-        </ProtectedRoute>
-      }
-    />
     {pr('/dashboard/customers', Customers)}
     {pr('/dashboard/marketing', Marketing)}
     {pr('/dashboard/promotions', PromotionsPage)}
@@ -347,22 +330,6 @@ export const dashboardRoutes = (
 
     {/* Webhooks */}
     {pr('/dashboard/webhooks', SellerWebhookManagement)}
-    <Route
-      path="/dashboard/digital-webhooks"
-      element={
-        <ProtectedRoute>
-          <Navigate to="/dashboard/webhooks" replace />
-        </ProtectedRoute>
-      }
-    />
-    <Route
-      path="/dashboard/physical-webhooks"
-      element={
-        <ProtectedRoute>
-          <Navigate to="/dashboard/webhooks" replace />
-        </ProtectedRoute>
-      }
-    />
 
     {/* Physical Products */}
     {pr('/dashboard/physical-products', PhysicalProductsList)}
@@ -409,30 +376,13 @@ export const dashboardRoutes = (
     {pr('/dashboard/courses/assignments', AssignmentsManagement)}
     {pr('/dashboard/reviews', ReviewsManagement)}
     {pr('/dashboard/courses/:courseId/gamification', CourseGamificationDashboard)}
-    <Route
-      path="/courses/:courseId/gamification"
-      element={
-        <ProtectedRoute>
-          <SellerLegacyPathRedirect to="/dashboard/courses/:courseId/gamification" />
-        </ProtectedRoute>
-      }
-    />
     {pr('/dashboard/cohorts', CohortsManagementPage)}
     {pr('/dashboard/cohorts/:cohortId', CohortDetailPage)}
     {pr('/dashboard/courses/:courseId/cohorts', CohortsManagementPage)}
     {pr('/dashboard/coupons', CouponsManagement)}
-    {pr('/dashboard/analytics/dashboards', AnalyticsDashboardsManagement)}
     {pr('/dashboard/abandoned-carts', AbandonedCartsManagement)}
     {pr('/dashboard/taxes', TaxManagement)}
     {pr('/dashboard/courses/:slug/analytics', CourseAnalytics)}
-    <Route
-      path="/courses/:slug/analytics"
-      element={
-        <ProtectedRoute>
-          <SellerLegacyPathRedirect to="/dashboard/courses/:slug/analytics" />
-        </ProtectedRoute>
-      }
-    />
 
     {/* Digital Products */}
     {pr('/dashboard/digital-products', DigitalProductsList)}
@@ -470,6 +420,72 @@ export const dashboardRoutes = (
     {pr('/payments/:orderId/manage', PaymentOrderManageRedirect)}
     {pr('/payments/:orderId/balance', PayBalance)}
     {pr('/disputes/:disputeId', DisputeDetail)}
+
+    {/* Dashboard Advanced */}
+    {pr('/dashboard/payment-management', PaymentManagementList)}
+    {pr('/dashboard/pay-balance', PayBalanceList)}
+    {pr('/dashboard/shipping', ShippingDashboard)}
+    {pr('/dashboard/shipping-services', ShippingServices)}
+    {pr('/dashboard/contact-shipping-service', ContactShippingService)}
+    {pr('/dashboard/shipping-service-messages/:conversationId', ShippingServiceMessages)}
+    {prAuth('/vendor/messaging/:storeId/:productId?', VendorMessaging)}
+    {prAuth('/vendor/messaging', VendorMessaging)}
+    {pr('/dashboard/inventory', InventoryDashboard)}
+    {pr('/dashboard/bookings', BookingsManagement)}
+    {pr('/dashboard/advanced-calendar', AdvancedCalendarPage)}
+    {pr('/dashboard/gamification', GamificationPage)}
+    {pr('/dashboard/portfolios', ArtistPortfoliosManagement)}
+    {pr('/dashboard/auctions', AuctionsManagementPage)}
+    {pr('/dashboard/auctions/watchlist', AuctionsWatchlistPage)}
+    {pr('/dashboard/integrations', SellerIntegrationsPage)}
+    {pr('/dashboard/ai-chatbot', AIChatbotPage)}
+    {pr('/dashboard/image-studio', ImageStudioPage)}
+  </>
+);
+
+/** Redirects auth-only (hors shell persistant). */
+export const dashboardRedirectRoutes = (
+  <>
+    <Route
+      path="/dashboard/advanced-orders-test"
+      element={
+        <ProtectedRoute>
+          <Navigate to="/dashboard/advanced-orders" replace />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/dashboard/digital-webhooks"
+      element={
+        <ProtectedRoute>
+          <Navigate to="/dashboard/webhooks" replace />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/dashboard/physical-webhooks"
+      element={
+        <ProtectedRoute>
+          <Navigate to="/dashboard/webhooks" replace />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/courses/:courseId/gamification"
+      element={
+        <ProtectedRoute>
+          <SellerLegacyPathRedirect to="/dashboard/courses/:courseId/gamification" />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/courses/:slug/analytics"
+      element={
+        <ProtectedRoute>
+          <SellerLegacyPathRedirect to="/dashboard/courses/:slug/analytics" />
+        </ProtectedRoute>
+      }
+    />
     <Route
       path="/shipping"
       element={
@@ -486,17 +502,6 @@ export const dashboardRoutes = (
         </ProtectedRoute>
       }
     />
-
-    {/* Dashboard Advanced */}
-    {pr('/dashboard/payment-management', PaymentManagementList)}
-    {pr('/dashboard/pay-balance', PayBalanceList)}
-    {pr('/dashboard/shipping', ShippingDashboard)}
-    {pr('/dashboard/shipping-services', ShippingServices)}
-    {pr('/dashboard/contact-shipping-service', ContactShippingService)}
-    {pr('/dashboard/shipping-service-messages/:conversationId', ShippingServiceMessages)}
-    {prAuth('/vendor/messaging/:storeId/:productId?', VendorMessaging)}
-    {prAuth('/vendor/messaging', VendorMessaging)}
-    {pr('/dashboard/inventory', InventoryDashboard)}
     <Route
       path="/dashboard/my-bookings"
       element={
@@ -513,7 +518,6 @@ export const dashboardRoutes = (
         </ProtectedRoute>
       }
     />
-    {pr('/dashboard/bookings', BookingsManagement)}
     <Route
       path="/dashboard/services/bookings"
       element={
@@ -522,7 +526,6 @@ export const dashboardRoutes = (
         </ProtectedRoute>
       }
     />
-    {pr('/dashboard/advanced-calendar', AdvancedCalendarPage)}
     <Route
       path="/dashboard/recurring-bookings"
       element={
@@ -539,12 +542,5 @@ export const dashboardRoutes = (
         </ProtectedRoute>
       }
     />
-    {pr('/dashboard/gamification', GamificationPage)}
-    {pr('/dashboard/portfolios', ArtistPortfoliosManagement)}
-    {pr('/dashboard/auctions', AuctionsManagementPage)}
-    {pr('/dashboard/auctions/watchlist', AuctionsWatchlistPage)}
-    {pr('/dashboard/integrations', SellerIntegrationsPage)}
-    {pr('/dashboard/ai-chatbot', AIChatbotPage)}
-    {pr('/dashboard/image-studio', ImageStudioPage)}
   </>
 );

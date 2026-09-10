@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { PLATFORM_HERO_IMAGES_QUERY_KEY } from '@/hooks/usePlatformHeroImage';
 import { logger } from '@/lib/logger';
+import { compressImage, blobToFile } from '@/lib/images/compress';
 
 const HERO_BUCKET = 'platform-assets';
 const MAX_BYTES = 4 * 1024 * 1024;
@@ -19,14 +20,28 @@ export async function uploadMarketingHeroImage(slug: string, file: File): Promis
     throw new Error("L'image ne doit pas dépasser 4 Mo.");
   }
 
-  const ext = file.name.split('.').pop()?.toLowerCase() || 'webp';
-  const path = `page-heroes/${slug.replace('.', '-')}-${Date.now()}.${ext}`;
+  let fileToUpload = file;
+  try {
+    const { blob } = await compressImage(file, {
+      maxWidth: 1920,
+      maxHeight: 1440,
+      quality: 0.8,
+      mimeType: 'image/webp',
+    });
+    fileToUpload = blobToFile(blob, file.name);
+  } catch (err) {
+    logger.warn('Compression hero marketing échouée, upload original', { error: err });
+  }
 
-  const { error: uploadError } = await supabase.storage.from(HERO_BUCKET).upload(path, file, {
-    upsert: false,
-    contentType: file.type,
-    cacheControl: '3600',
-  });
+  const path = `page-heroes/${slug.replace('.', '-')}-${Date.now()}.webp`;
+
+  const { error: uploadError } = await supabase.storage
+    .from(HERO_BUCKET)
+    .upload(path, fileToUpload, {
+      upsert: false,
+      contentType: fileToUpload.type || 'image/webp',
+      cacheControl: '3600',
+    });
   if (uploadError) throw uploadError;
 
   const {

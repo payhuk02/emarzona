@@ -57,6 +57,7 @@ import { useMarketplaceFacets } from '@/hooks/useMarketplaceFacets';
 import { buildMarketplaceBreadcrumbs, buildMarketplaceSEO } from '@/lib/marketplace-seo';
 import { BuyerDiscoveryPageLayout } from '@/components/layout/BuyerDiscoveryPageLayout';
 import { Skeleton } from '@/components/ui/skeleton';
+import { buildProductImageUrl } from '@/lib/images/supabaseTransform';
 
 const PremiumFooter = React.lazy(() =>
   import('@/components/landing/premium/PremiumFooter').then(m => ({ default: m.PremiumFooter }))
@@ -82,16 +83,9 @@ const MarketplacePage = () => {
 
   // ✅ PERFORMANCE: Preload images LCP pour améliorer Core Web Vitals
   // Preload la première image de produit si disponible (potentielle LCP)
-  // Note: Les images de produits seront preloadées dynamiquement par ProductCardModern
+  // Un seul LCP : hero si présent, sinon première image produit
   const { getValue: getMarketplaceValue } = usePageCustomization('marketplace');
   const heroImage = getMarketplaceValue('heroImage') as string | undefined;
-
-  // Preload hero image si disponible
-  useLCPPreload({
-    src: heroImage || '', // Fallback vide si pas d'image
-    sizes: heroImage ? '(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 1200px' : undefined,
-    priority: !!heroImage, // Seulement si image présente
-  });
 
   // Favoris via contexte partagé (une seule requête Supabase)
   const favoritesState = useMarketplaceFavoritesContext();
@@ -345,10 +339,16 @@ const MarketplacePage = () => {
   }, [hasSearchQuery, searchResults, catalogProducts, filters.tags]);
 
   const firstProductImage = displayProducts[0]?.image_url;
+  const lcpSrc = heroImage || firstProductImage || '';
+  const lcpOptimized = lcpSrc
+    ? buildProductImageUrl(lcpSrc, heroImage ? 'hero' : 'grid', { quality: heroImage ? 72 : 82 })
+    : '';
   useLCPPreload({
-    src: firstProductImage || '',
-    sizes: '(max-width: 640px) 50vw, 33vw',
-    priority: !!firstProductImage && hasLoadedOnce,
+    src: lcpOptimized,
+    sizes: heroImage
+      ? '(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 1200px'
+      : '(max-width: 640px) 50vw, 33vw',
+    priority: !!lcpOptimized && (!!heroImage || hasLoadedOnce),
   });
 
   const isLoadingProducts = catalogLoading && hasLoadedOnce;
@@ -599,6 +599,7 @@ const MarketplacePage = () => {
         mainAriaLabel={mainAriaLabel}
         guestClassName="landing-premium marketplace-premium min-h-screen overflow-x-hidden"
         shellMainClassName="landing-premium marketplace-premium overflow-x-hidden"
+        guestPremiumNav={false}
       >
         {/* Skip to main content link for keyboard navigation (invités) */}
         {!useAuthenticatedShell && (
@@ -685,6 +686,7 @@ const MarketplacePage = () => {
           comparisonCount={comparisonProducts.length}
           PRICE_RANGES={PRICE_RANGES}
           getValue={getValue}
+          heroImage={heroImage}
         />
 
         {/* Section de personnalisation - Quiz de style */}

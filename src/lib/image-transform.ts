@@ -1,12 +1,9 @@
 /**
- * Utilitaire pour optimiser et transformer les images avec Supabase Transform API
- *
- * Features:
- * - Génération d'URLs optimisées (width, quality, format)
- * - Support srcSet responsive
- * - Conversion WebP automatique
- * - BlurHash placeholders (future)
+ * Utilitaire pour optimiser et transformer les images avec Supabase Transform API.
+ * Délègue à `buildTransformedUrl` (/render/image/public) — point unique delivery.
  */
+
+import { buildTransformedUrl, type ImageFormat } from '@/lib/images/supabaseTransform';
 
 export interface ImageTransformOptions {
   width?: number;
@@ -29,114 +26,41 @@ export interface ResponsiveImageSizes {
 }
 
 /**
- * Vérifie si une URL est une URL Supabase Storage
+ * Vérifie si une URL est une URL Supabase Storage (object ou render)
  */
 export const isSupabaseStorageUrl = (url: string | undefined | null): boolean => {
   if (!url) return false;
-  return url.includes('.supabase.co/storage/v1/object/public/');
+  return (
+    url.includes('/storage/v1/object/public/') || url.includes('/storage/v1/render/image/public/')
+  );
 };
 
+/** Mappe les formats legacy (jpg/png) vers le contrat Transform. */
+function resolveTransformFormat(options: ImageTransformOptions): ImageFormat | undefined {
+  if (options.format === 'jpg' || options.format === 'png') return 'origin';
+  if (options.format) return options.format;
+  if (options.autoFormat === false) return 'origin';
+  // Laisser buildTransformedUrl choisir via getPreferredDeliveryFormat
+  return undefined;
+}
+
 /**
- * Génère une URL Supabase Storage optimisée avec paramètres de transformation
- *
- * Supabase Transform API: https://supabase.com/docs/guides/storage/image-transformations
- *
- * @param imageUrl - URL originale de l'image Supabase
- * @param options - Options de transformation
- * @returns URL transformée avec paramètres
- *
- * @example
- * const optimizedUrl = getOptimizedImageUrl(
- *   'https://project.supabase.co/storage/v1/object/public/bucket/image.jpg',
- *   { width: 600, quality: 80, format: 'webp' }
- * );
- * // => 'https://project.supabase.co/storage/v1/object/public/bucket/image.jpg?width=600&quality=80&format=webp'
+ * Génère une URL Supabase Storage optimisée via /render/image/public
  */
-/**
- * Détecte le meilleur format d'image supporté par le navigateur
- * Priorité: AVIF > WebP > Original
- *
- * AVIF offre ~50% de compression en plus que WebP
- * WebP offre ~30% de compression en plus que JPEG/PNG
- */
-const getBestSupportedFormat = (): 'avif' | 'webp' | 'origin' => {
-  if (typeof document === 'undefined') return 'webp'; // SSR fallback
-
-  // Vérifier le support AVIF (format le plus moderne et efficace)
-  // AVIF est supporté par Chrome 85+, Firefox 93+, Safari 16+
-  try {
-    const canvas = document.createElement('canvas');
-    canvas.width = 1;
-    canvas.height = 1;
-    const avifSupported = canvas.toDataURL('image/avif').indexOf('data:image/avif') === 0;
-
-    if (avifSupported) {
-      return 'avif';
-    }
-  } catch (e) {
-    // AVIF non supporté, continuer avec WebP
-  }
-
-  // Vérifier le support WebP (fallback universel)
-  // WebP est supporté par tous les navigateurs modernes
-  try {
-    const canvas = document.createElement('canvas');
-    canvas.width = 1;
-    canvas.height = 1;
-    const webpSupported = canvas.toDataURL('image/webp').indexOf('data:image/webp') === 0;
-
-    if (webpSupported) {
-      return 'webp';
-    }
-  } catch (e) {
-    // WebP non supporté, utiliser format original
-  }
-
-  return 'origin';
-};
-
 export const getOptimizedImageUrl = (
   imageUrl: string | undefined | null,
   options: ImageTransformOptions = {}
 ): string | undefined => {
   if (!imageUrl) return undefined;
+  if (!isSupabaseStorageUrl(imageUrl)) return imageUrl;
 
-  // Si ce n'est pas une URL Supabase Storage, retourner tel quel
-  if (!isSupabaseStorageUrl(imageUrl)) {
-    return imageUrl;
-  }
-
-  // Détecter le meilleur format si autoFormat est activé
-  const format =
-    options.autoFormat !== false && !options.format ? getBestSupportedFormat() : options.format;
-
-  // Construire les paramètres de transformation
-  const params = new URLSearchParams();
-
-  if (options.width) {
-    params.append('width', options.width.toString());
-  }
-
-  if (options.height) {
-    params.append('height', options.height.toString());
-  }
-
-  if (options.quality) {
-    params.append('quality', Math.min(100, Math.max(1, options.quality)).toString());
-  }
-
-  if (format && format !== 'origin') {
-    params.append('format', format);
-  }
-
-  if (options.resize) {
-    params.append('resize', options.resize);
-  }
-
-  const queryString = params.toString();
-
-  // Ajouter les paramètres à l'URL
-  return queryString ? `${imageUrl}?${queryString}` : imageUrl;
+  return buildTransformedUrl(imageUrl, {
+    width: options.width,
+    height: options.height,
+    quality: options.quality,
+    resize: options.resize,
+    format: resolveTransformFormat(options),
+  });
 };
 
 /**
@@ -419,8 +343,8 @@ export interface PlatformHeroImageProps {
 export type PlatformHeroImageVariant = 'visual' | 'left';
 
 const PLATFORM_HERO_SIZES_ATTR: Record<PlatformHeroImageVariant, string> = {
-  visual: '(max-width: 767px) 100vw, (max-width: 1023px) 52vw, 42vw',
-  left: '(max-width: 1023px) 100vw, 58vw',
+  visual: '(max-width: 767px) 100vw, (max-width: 1023px) 52vw, 78vw',
+  left: '(max-width: 1023px) 100vw, 28vw',
 };
 
 /** Attributs responsive + formats modernes pour le hero plateforme. */

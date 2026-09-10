@@ -11,7 +11,6 @@
  */
 
 import { useState, useMemo, useEffect } from 'react';
-import { AppPageShell } from '@/components/layout/AppPageShell';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -481,7 +480,7 @@ export default function NotificationsManagement() {
 
   if (isLoading) {
     return (
-      <AppPageShell>
+      <>
         <div className="container mx-auto p-4 lg:p-6 space-y-6">
           <Skeleton className="h-12 w-full" />
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -491,12 +490,12 @@ export default function NotificationsManagement() {
           </div>
           <Skeleton className="h-96 w-full" />
         </div>
-      </AppPageShell>
+      </>
     );
   }
 
   return (
-    <AppPageShell>
+    <>
       <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
         {/* Header */}
         <div
@@ -917,6 +916,6 @@ export default function NotificationsManagement() {
           </DialogContent>
         </Dialog>
       </div>
-    </AppPageShell>
+    </>
   );
 }

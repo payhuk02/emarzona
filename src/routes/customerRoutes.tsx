@@ -1,7 +1,10 @@
+/**
+ * Routes compte acheteur — enfants de AuthenticatedAppLayout (shell persistant).
+ */
+
 import React from 'react';
 import { lazyPage } from '@/routes/lazyPage';
 import { Route } from 'react-router-dom';
-import { ProtectedRoute } from '@/components/ProtectedRoute';
 
 const CustomerPortal = lazyPage(() => import('@/pages/customer/CustomerPortal'));
 const CustomerMyOrders = lazyPage(() => import('@/pages/customer/MyOrders'));
@@ -21,39 +24,29 @@ const CustomerMyBookings = lazyPage(() => import('@/pages/customer/CustomerMyBoo
 const CustomerArtistPortal = lazyPage(() => import('@/pages/customer/CustomerArtistPortal'));
 const CreateProtectClaimPage = lazyPage(() => import('@/pages/disputes/CreateProtectClaimPage'));
 
-const protectedRoute = (
-  path: string,
-  Component: React.LazyExoticComponent<React.ComponentType>
-) => (
-  <Route
-    path={path}
-    element={
-      <ProtectedRoute>
-        <Component />
-      </ProtectedRoute>
-    }
-  />
+const accountPage = (path: string, Component: React.LazyExoticComponent<React.ComponentType>) => (
+  <Route path={path} element={<Component />} />
 );
 
 export const customerRoutes = (
   <>
-    {protectedRoute('/account', CustomerPortal)}
-    {protectedRoute('/account/hub', CustomerPortal)}
-    {protectedRoute('/account/orders', CustomerMyOrders)}
-    {protectedRoute('/account/downloads', CustomerMyDownloads)}
-    {protectedRoute('/account/warranties', CustomerWarranties)}
-    {protectedRoute('/account/digital', CustomerDigitalPortal)}
-    {protectedRoute('/account/physical', CustomerPhysicalPortal)}
-    {protectedRoute('/account/courses', CustomerMyCourses)}
-    {protectedRoute('/account/bookings', CustomerMyBookings)}
-    {protectedRoute('/account/artist', CustomerArtistPortal)}
-    {protectedRoute('/account/profile', CustomerMyProfile)}
-    {protectedRoute('/account/wishlist', CustomerMyWishlist)}
-    {protectedRoute('/account/alerts', PriceStockAlerts)}
-    {protectedRoute('/account/invoices', CustomerMyInvoices)}
-    {protectedRoute('/account/returns', CustomerMyReturns)}
-    {protectedRoute('/account/loyalty', CustomerLoyaltyPage)}
-    {protectedRoute('/account/gift-cards', CustomerMyGiftCardsPage)}
-    {protectedRoute('/disputes/create', CreateProtectClaimPage)}
+    {accountPage('/account', CustomerPortal)}
+    {accountPage('/account/hub', CustomerPortal)}
+    {accountPage('/account/orders', CustomerMyOrders)}
+    {accountPage('/account/downloads', CustomerMyDownloads)}
+    {accountPage('/account/warranties', CustomerWarranties)}
+    {accountPage('/account/digital', CustomerDigitalPortal)}
+    {accountPage('/account/physical', CustomerPhysicalPortal)}
+    {accountPage('/account/courses', CustomerMyCourses)}
+    {accountPage('/account/bookings', CustomerMyBookings)}
+    {accountPage('/account/artist', CustomerArtistPortal)}
+    {accountPage('/account/profile', CustomerMyProfile)}
+    {accountPage('/account/wishlist', CustomerMyWishlist)}
+    {accountPage('/account/alerts', PriceStockAlerts)}
+    {accountPage('/account/invoices', CustomerMyInvoices)}
+    {accountPage('/account/returns', CustomerMyReturns)}
+    {accountPage('/account/loyalty', CustomerLoyaltyPage)}
+    {accountPage('/account/gift-cards', CustomerMyGiftCardsPage)}
+    {accountPage('/disputes/create', CreateProtectClaimPage)}
   </>
 );

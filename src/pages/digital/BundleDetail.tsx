@@ -4,7 +4,7 @@
  */
 
 import { useParams, useNavigate } from 'react-router-dom';
-import { AppPageShell } from '@/components/layout/AppPageShell';
+import { PublicPremiumChrome } from '@/components/layout/PublicPremiumChrome';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -47,196 +47,203 @@ export default function BundleDetail() {
 
   if (isLoading) {
     return (
-      <AppPageShell mainClassName="p-6">
-        <div className="max-w-6xl mx-auto space-y-6">
+      <PublicPremiumChrome mainAriaLabel="Detail bundle">
+        <div className="p-6 max-w-6xl mx-auto space-y-6">
           <Skeleton className="h-10 w-64" />
           <Skeleton className="h-96" />
         </div>
-      </AppPageShell>
+      </PublicPremiumChrome>
     );
   }
 
   if (!bundle) {
     return (
-      <AppPageShell mainClassName="p-6">
-        <Card>
-          <CardContent className="pt-6">
-            <p className="text-muted-foreground">Bundle non trouvé</p>
-            <Button onClick={() => navigate(-1)} className="mt-4">
-              Retour
-            </Button>
-          </CardContent>
-        </Card>
-      </AppPageShell>
+      <PublicPremiumChrome mainAriaLabel="Detail bundle">
+        <div className="p-6">
+          <Card>
+            <CardContent className="pt-6">
+              <p className="text-muted-foreground">Bundle non trouvé</p>
+              <Button onClick={() => navigate(-1)} className="mt-4">
+                Retour
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </PublicPremiumChrome>
     );
   }
 
   return (
-    <AppPageShell shellClassName="bg-gray-50 dark:bg-gray-900" mainClassName="p-4 md:p-6 lg:p-8">
-      <div className="max-w-6xl mx-auto space-y-6">
-        {/* Bouton retour */}
-        <Button variant="ghost" onClick={() => navigate(-1)}>
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Retour
-        </Button>
+    <PublicPremiumChrome mainAriaLabel="Detail bundle">
+      <div className="bg-gray-50 dark:bg-gray-900 p-4 md:p-6 lg:p-8">
+        <div className="max-w-6xl mx-auto space-y-6">
+          {/* Bouton retour */}
+          <Button variant="ghost" onClick={() => navigate(-1)}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Retour
+          </Button>
 
-        {/* Image et header */}
-        <Card>
-          <div className="relative">
-            {bundle.image_url ? (
-              <img
-                src={bundle.image_url}
-                alt={bundle.name}
-                className="w-full h-64 md:h-96 object-cover rounded-t-lg"
-              />
-            ) : (
-              <div className="w-full h-64 md:h-96 bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900 dark:to-pink-900 flex items-center justify-center">
-                <Package className="h-24 w-24 text-purple-400" />
-              </div>
-            )}
-            <div className="absolute top-4 left-4">
-              <Badge className="bg-gradient-to-r from-purple-600 to-pink-600 text-white border-0 text-lg px-4 py-2">
-                <Package className="h-4 w-4 mr-2" />
-                Bundle
-              </Badge>
-            </div>
-            {bundle.savings_percentage > 0 && (
-              <div className="absolute top-4 right-4">
-                <Badge variant="destructive" className="text-lg px-4 py-2">
-                  <TrendingDown className="h-4 w-4 mr-2" />-{bundle.savings_percentage.toFixed(0)}%
-                </Badge>
-              </div>
-            )}
-          </div>
-
-          <CardHeader>
-            <CardTitle className="text-lg sm:text-2xl md:text-3xl">{bundle.name}</CardTitle>
-            {bundle.short_description && (
-              <CardDescription className="text-base">{bundle.short_description}</CardDescription>
-            )}
-          </CardHeader>
-
-          <CardContent className="space-y-6">
-            {/* Description */}
-            {bundle.description && (
-              <div>
-                <h3 className="font-semibold mb-2">Description</h3>
-                <p className="text-muted-foreground whitespace-pre-wrap">{bundle.description}</p>
-              </div>
-            )}
-
-            <Separator />
-
-            {/* Produits inclus */}
-            <div>
-              <h3 className="font-semibold mb-4 flex items-center gap-2">
-                <Package className="h-5 w-5" />
-                Produits inclus ({bundle.bundle_items?.length || 0})
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {bundle.bundle_items?.map((item, index) => (
-                  <Card key={item.id} className="p-4">
-                    <div className="flex items-start gap-4">
-                      {item.product?.image_url ? (
-                        <img
-                          src={item.product.image_url}
-                          alt={item.product.name}
-                          className="w-16 h-16 object-cover rounded"
-                        />
-                      ) : (
-                        <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded flex items-center justify-center">
-                          <Package className="h-8 w-8 text-gray-400" />
-                        </div>
-                      )}
-                      <div className="flex-1">
-                        <h4 className="font-medium">{item.product?.name || 'Produit'}</h4>
-                        {item.product?.description && (
-                          <p className="text-sm text-muted-foreground line-clamp-2">
-                            {item.product.description}
-                          </p>
-                        )}
-                        <div className="flex items-center justify-between mt-2">
-                          <span className="text-sm font-semibold">
-                            {formatPrice(item.product_price)} XOF
-                          </span>
-                          {item.product && (
-                            <Link
-                              to={`/digital/${item.product.id}`}
-                              className="text-xs text-primary hover:underline"
-                            >
-                              Voir produit
-                            </Link>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-semibold">
-                        {index + 1}
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            </div>
-
-            <Separator />
-
-            {/* Prix et actions */}
-            <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 p-6 rounded-lg space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-lg font-medium">Prix total des produits séparés:</span>
-                <span className="text-xl line-through text-muted-foreground">
-                  {formatPrice(bundle.original_price)} XOF
-                </span>
-              </div>
-              {bundle.savings > 0 && (
-                <div className="flex items-center justify-between text-green-600">
-                  <span className="font-medium">Économie:</span>
-                  <span className="text-xl font-bold">
-                    -{formatPrice(bundle.savings)} XOF ({bundle.savings_percentage.toFixed(0)}%)
-                  </span>
+          {/* Image et header */}
+          <Card>
+            <div className="relative">
+              {bundle.image_url ? (
+                <img
+                  src={bundle.image_url}
+                  alt={bundle.name}
+                  className="w-full h-64 md:h-96 object-cover rounded-t-lg"
+                />
+              ) : (
+                <div className="w-full h-64 md:h-96 bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900 dark:to-pink-900 flex items-center justify-center">
+                  <Package className="h-24 w-24 text-purple-400" />
                 </div>
               )}
-              <Separator />
-              <div className="flex items-center justify-between">
-                <span className="text-base sm:text-xl md:text-2xl font-bold">Prix du bundle:</span>
-                <span className="text-lg sm:text-2xl md:text-3xl font-bold text-primary">
-                  {formatPrice(bundle.bundle_price)} XOF
-                </span>
+              <div className="absolute top-4 left-4">
+                <Badge className="bg-gradient-to-r from-purple-600 to-pink-600 text-white border-0 text-lg px-4 py-2">
+                  <Package className="h-4 w-4 mr-2" />
+                  Bundle
+                </Badge>
               </div>
-
-              <Button
-                size="lg"
-                className="w-full mt-4"
-                onClick={handleBuyNow}
-                disabled={!bundle.is_available}
-              >
-                <>
-                  <ShoppingBag className="h-5 w-5 mr-2" />
-                  Acheter maintenant
-                </>
-              </Button>
+              {bundle.savings_percentage > 0 && (
+                <div className="absolute top-4 right-4">
+                  <Badge variant="destructive" className="text-lg px-4 py-2">
+                    <TrendingDown className="h-4 w-4 mr-2" />-{bundle.savings_percentage.toFixed(0)}
+                    %
+                  </Badge>
+                </div>
+              )}
             </div>
 
-            {/* Features (si disponible) */}
-            {bundle.features && Array.isArray(bundle.features) && bundle.features.length > 0 && (
-              <>
-                <Separator />
+            <CardHeader>
+              <CardTitle className="text-lg sm:text-2xl md:text-3xl">{bundle.name}</CardTitle>
+              {bundle.short_description && (
+                <CardDescription className="text-base">{bundle.short_description}</CardDescription>
+              )}
+            </CardHeader>
+
+            <CardContent className="space-y-6">
+              {/* Description */}
+              {bundle.description && (
                 <div>
-                  <h3 className="font-semibold mb-4">Caractéristiques</h3>
-                  <ul className="space-y-2">
-                    {bundle.features.map((feature: string, index: number) => (
-                      <li key={index} className="flex items-start gap-2">
-                        <Check className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
-                        <span>{feature.title || feature}</span>
-                      </li>
-                    ))}
-                  </ul>
+                  <h3 className="font-semibold mb-2">Description</h3>
+                  <p className="text-muted-foreground whitespace-pre-wrap">{bundle.description}</p>
                 </div>
-              </>
-            )}
-          </CardContent>
-        </Card>
+              )}
+
+              <Separator />
+
+              {/* Produits inclus */}
+              <div>
+                <h3 className="font-semibold mb-4 flex items-center gap-2">
+                  <Package className="h-5 w-5" />
+                  Produits inclus ({bundle.bundle_items?.length || 0})
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {bundle.bundle_items?.map((item, index) => (
+                    <Card key={item.id} className="p-4">
+                      <div className="flex items-start gap-4">
+                        {item.product?.image_url ? (
+                          <img
+                            src={item.product.image_url}
+                            alt={item.product.name}
+                            className="w-16 h-16 object-cover rounded"
+                          />
+                        ) : (
+                          <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded flex items-center justify-center">
+                            <Package className="h-8 w-8 text-gray-400" />
+                          </div>
+                        )}
+                        <div className="flex-1">
+                          <h4 className="font-medium">{item.product?.name || 'Produit'}</h4>
+                          {item.product?.description && (
+                            <p className="text-sm text-muted-foreground line-clamp-2">
+                              {item.product.description}
+                            </p>
+                          )}
+                          <div className="flex items-center justify-between mt-2">
+                            <span className="text-sm font-semibold">
+                              {formatPrice(item.product_price)} XOF
+                            </span>
+                            {item.product && (
+                              <Link
+                                to={`/digital/${item.product.id}`}
+                                className="text-xs text-primary hover:underline"
+                              >
+                                Voir produit
+                              </Link>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-semibold">
+                          {index + 1}
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Prix et actions */}
+              <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 p-6 rounded-lg space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-lg font-medium">Prix total des produits séparés:</span>
+                  <span className="text-xl line-through text-muted-foreground">
+                    {formatPrice(bundle.original_price)} XOF
+                  </span>
+                </div>
+                {bundle.savings > 0 && (
+                  <div className="flex items-center justify-between text-green-600">
+                    <span className="font-medium">Économie:</span>
+                    <span className="text-xl font-bold">
+                      -{formatPrice(bundle.savings)} XOF ({bundle.savings_percentage.toFixed(0)}%)
+                    </span>
+                  </div>
+                )}
+                <Separator />
+                <div className="flex items-center justify-between">
+                  <span className="text-base sm:text-xl md:text-2xl font-bold">
+                    Prix du bundle:
+                  </span>
+                  <span className="text-lg sm:text-2xl md:text-3xl font-bold text-primary">
+                    {formatPrice(bundle.bundle_price)} XOF
+                  </span>
+                </div>
+
+                <Button
+                  size="lg"
+                  className="w-full mt-4"
+                  onClick={handleBuyNow}
+                  disabled={!bundle.is_available}
+                >
+                  <>
+                    <ShoppingBag className="h-5 w-5 mr-2" />
+                    Acheter maintenant
+                  </>
+                </Button>
+              </div>
+
+              {/* Features (si disponible) */}
+              {bundle.features && Array.isArray(bundle.features) && bundle.features.length > 0 && (
+                <>
+                  <Separator />
+                  <div>
+                    <h3 className="font-semibold mb-4">Caractéristiques</h3>
+                    <ul className="space-y-2">
+                      {bundle.features.map((feature: string, index: number) => (
+                        <li key={index} className="flex items-start gap-2">
+                          <Check className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                          <span>{feature.title || feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
-    </AppPageShell>
+    </PublicPremiumChrome>
   );
 }

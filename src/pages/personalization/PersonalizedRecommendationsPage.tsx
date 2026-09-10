@@ -4,7 +4,8 @@
  */
 
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import { AppPageShell } from '@/components/layout/AppPageShell';
+import { BuyerDiscoveryPageLayout } from '@/components/layout/BuyerDiscoveryPageLayout';
+import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -59,6 +60,8 @@ type StyleProfile = {
 };
 
 const PersonalizedRecommendationsPage: React.FC = () => {
+  const { user, loading: authLoading } = useAuth();
+  const authenticated = Boolean(user) && !authLoading;
   const navigate = useNavigate();
   const { toast } = useToast();
   const { styleProfile, hasCompletedQuiz, updateRecommendationsViewed, refreshRecommendations } =
@@ -233,20 +236,26 @@ const PersonalizedRecommendationsPage: React.FC = () => {
 
   if (!hasCompletedQuiz) {
     return (
-      <AppPageShell mainClassName="p-4 md:p-6 space-y-6">
+      <BuyerDiscoveryPageLayout
+        authenticated={authenticated}
+        mainAriaLabel="Recommandations personnalisees"
+      >
         <div className="flex items-center justify-center h-[60vh]">
           <div className="text-center space-y-4">
             <Loader2 className="h-12 w-12 animate-spin mx-auto text-primary" />
             <p className="text-muted-foreground">Vérification de votre profil de style...</p>
           </div>
         </div>
-      </AppPageShell>
+      </BuyerDiscoveryPageLayout>
     );
   }
 
   if (isLoading) {
     return (
-      <AppPageShell mainClassName="p-4 md:p-6 space-y-6">
+      <BuyerDiscoveryPageLayout
+        authenticated={authenticated}
+        mainAriaLabel="Recommandations personnalisees"
+      >
         <div className="flex items-center justify-center h-[60vh]">
           <div className="text-center space-y-4">
             <Loader2 className="h-12 w-12 animate-spin mx-auto text-primary" />
@@ -255,13 +264,16 @@ const PersonalizedRecommendationsPage: React.FC = () => {
             </p>
           </div>
         </div>
-      </AppPageShell>
+      </BuyerDiscoveryPageLayout>
     );
   }
 
   if (error) {
     return (
-      <AppPageShell mainClassName="p-4 md:p-6">
+      <BuyerDiscoveryPageLayout
+        authenticated={authenticated}
+        mainAriaLabel="Recommandations personnalisees"
+      >
         <Card className="border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in slide-in-from-top-4">
           <CardContent className="p-6 sm:p-8 md:p-12 text-center">
             <AlertTriangle className="h-12 w-12 sm:h-16 sm:w-16 text-red-500 mx-auto mb-3 sm:mb-4" />
@@ -277,12 +289,15 @@ const PersonalizedRecommendationsPage: React.FC = () => {
             </Button>
           </CardContent>
         </Card>
-      </AppPageShell>
+      </BuyerDiscoveryPageLayout>
     );
   }
 
   return (
-    <AppPageShell>
+    <BuyerDiscoveryPageLayout
+      authenticated={authenticated}
+      mainAriaLabel="Recommandations personnalisees"
+    >
       <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
         {/* Header avec animation - Style MyTemplates */}
         <div
@@ -598,7 +613,7 @@ const PersonalizedRecommendationsPage: React.FC = () => {
           </div>
         )}
       </div>
-    </AppPageShell>
+    </BuyerDiscoveryPageLayout>
   );
 };
 

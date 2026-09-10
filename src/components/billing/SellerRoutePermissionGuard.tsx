@@ -1,5 +1,5 @@
 import { ReactNode, useEffect, useRef } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { useStore } from '@/hooks/useStore';
 import { useStorePhysicalAccess } from '@/hooks/billing/useStorePhysicalAccess';
@@ -20,7 +20,8 @@ import {
 import { isAccountSettingsPath } from '@/lib/billing/account-settings-paths';
 
 type SellerRoutePermissionGuardProps = {
-  children: ReactNode;
+  /** When omitted (layout route), renders `<Outlet />`. */
+  children?: ReactNode;
 };
 
 function GuardLoadingFallback() {
@@ -142,5 +143,5 @@ export function SellerRoutePermissionGuard({ children }: SellerRoutePermissionGu
     return <GuardLoadingFallback />;
   }
 
-  return <>{children}</>;
+  return <>{children ?? <Outlet />}</>;
 }

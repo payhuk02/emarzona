@@ -5,7 +5,7 @@
  */
 
 import React, { useState } from 'react';
-import { AppPageShell } from '@/components/layout/AppPageShell';
+import { BuyerDiscoveryPageLayout } from '@/components/layout/BuyerDiscoveryPageLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -32,10 +32,13 @@ import {
 } from 'lucide-react';
 import { useTrendingRecommendations } from '@/hooks/useAIRecommendations';
 import { useStoreContext } from '@/contexts/StoreContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
 const Trending = () => {
+  const { user, loading: authLoading } = useAuth();
+  const authenticated = Boolean(user) && !authLoading;
   const { selectedStoreId } = useStoreContext();
   const [timeRange, setTimeRange] = useState('7d');
   const [activeTab, setActiveTab] = useState('all');
@@ -73,7 +76,7 @@ const Trending = () => {
   };
 
   return (
-    <AppPageShell>
+    <BuyerDiscoveryPageLayout authenticated={authenticated} mainAriaLabel="Tendances produits">
       <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
         {/* Header avec animation - Style MyTemplates */}
         <div
@@ -470,7 +473,7 @@ const Trending = () => {
           </CardContent>
         </Card>
       </div>
-    </AppPageShell>
+    </BuyerDiscoveryPageLayout>
   );
 };
 
