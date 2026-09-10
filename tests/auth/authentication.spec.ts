@@ -17,12 +17,13 @@ test.describe('Authentication', () => {
 
     await expect(page).toHaveTitle(/Emarzona/);
 
-    // Title is set on the loading shell before premium content mounts.
-    await expect(page.locator('.lp-hero h1')).toBeVisible({ timeout: 15_000 });
+    // First-viewport hero (PremiumPlatformHero). Second .lp-hero is deferred below.
+    await expect(page.locator('.lp-platform-hero h1')).toBeVisible({ timeout: 15_000 });
 
+    // Footer is behind LandingDeferredSection — scroll to mount it.
+    await page.locator('.lp-deferred-section').last().scrollIntoViewIfNeeded();
     const footer = page.locator('footer#apropos');
-    await footer.scrollIntoViewIfNeeded();
-    await expect(footer).toBeVisible({ timeout: 15_000 });
+    await expect(footer).toBeVisible({ timeout: 20_000 });
     await expect(footer).toContainText(/Emarzona/i);
   });
 

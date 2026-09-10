@@ -73,7 +73,8 @@ export async function advancePhysicalWizardToPublishStep(page: Page): Promise<vo
 
 export async function publishPhysicalWizard(page: Page): Promise<void> {
   await page.getByRole('button', { name: /Publier le produit|Publier$/i }).click();
-  await expect(page.getByText(/publié|succès/i).first()).toBeVisible({ timeout: 60_000 });
+  // App navigates to the list after publish; toast can unmount during transition.
+  await expect(page).toHaveURL(/\/dashboard\/physical-products/, { timeout: 60_000 });
 }
 
 export { clickWizardNext, goToWizardStep };
