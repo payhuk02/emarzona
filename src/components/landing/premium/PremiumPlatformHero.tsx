@@ -94,10 +94,10 @@ export function PremiumPlatformHero() {
         </div>
       ) : null}
 
-      <div className="lp-platform-hero__frame relative z-[2] mx-auto grid w-full max-w-[100rem] grid-cols-1 gap-8 px-4 sm:px-6 md:px-10 lg:grid-cols-[minmax(0,0.38fr)_minmax(0,1.72fr)] lg:gap-0 xl:grid-cols-[minmax(0,0.32fr)_minmax(0,1.78fr)] lg:px-8 xl:px-12 2xl:px-14">
-        <div className="lp-platform-hero__col-content flex flex-col">
+      <div className="lp-platform-hero__frame relative z-[2] mx-auto grid w-full max-w-[100rem] grid-cols-1 gap-8 px-4 sm:px-6 md:px-10 lg:grid-cols-[minmax(18rem,0.9fr)_minmax(0,1.1fr)] lg:items-stretch lg:gap-8 xl:grid-cols-[minmax(20rem,0.8fr)_minmax(0,1.2fr)] xl:gap-10 lg:px-8 xl:px-12 2xl:px-14">
+        <div className="lp-platform-hero__col-content relative z-[3] flex min-w-0 flex-col">
           <div className="lp-platform-hero__content text-center lg:text-left">
-            <h1 className="lp-platform-hero__title lp-serif lp-hero-enter text-[2rem] leading-[1.08] sm:text-[2.65rem] md:text-[3rem] lg:text-[3.65rem] xl:text-[4.15rem]">
+            <h1 className="lp-platform-hero__title lp-serif lp-hero-enter text-[2rem] leading-[1.08] sm:text-[2.65rem] md:text-[3rem] lg:text-[3.25rem] xl:text-[3.75rem]">
               <span className="lp-platform-hero__title-line">{t('platformHero.titleLine1')}</span>
               <span className="lp-platform-hero__title-line">{t('platformHero.titleLine2')}</span>
             </h1>
@@ -124,7 +124,7 @@ export function PremiumPlatformHero() {
           </div>
         </div>
 
-        <div className="lp-hero-enter lp-hero-enter--d3">
+        <div className="lp-platform-hero__col-visual relative z-[1] min-w-0 overflow-hidden lp-hero-enter lp-hero-enter--d3">
           <PremiumPlatformHeroVisual
             backgroundUrl={backgroundUrl}
             backgroundAlt={backgroundAlt}

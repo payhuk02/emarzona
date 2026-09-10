@@ -108,13 +108,14 @@
 
 .landing-premium .lp-platform-hero__photo {
   object-fit: cover;
-  object-position: 28% 62%;
+  /* Cadrage un peu plus à droite pour ne pas empiéter sur la colonne gauche */
+  object-position: 42% 58%;
   opacity: 1;
 }
 
 .landing-premium .lp-platform-hero__left-photo {
   object-fit: cover;
-  object-position: 28% center;
+  object-position: 35% center;
   opacity: 1;
 }
 
@@ -123,8 +124,8 @@
 }
 
 .landing-premium .lp-platform-hero__left-bg {
-  /* Colonne contenu ~18–26% — photo dominante pour montrer le PC */
-  width: min(28%, 28rem);
+  /* Aligné sur la colonne contenu (~40–45%) — ne déborde plus sous la photo droite */
+  width: min(46%, 40rem);
   overflow: hidden;
 }
 
@@ -205,8 +206,7 @@
 
 @media (min-width: 768px) {
   .landing-premium .lp-platform-hero__photo {
-    /* Bas/gauche : laptop entièrement dans le cadre */
-    object-position: 28% 62%;
+    object-position: 42% 58%;
   }
 }
 
@@ -272,6 +272,15 @@
   .landing-premium .lp-platform-hero__content {
     max-width: 100%;
   }
+
+  .landing-premium .lp-platform-hero--premium .lp-platform-hero__content {
+    /* La grille borne déjà la colonne — ne pas re-contraindre à 58% */
+    max-width: 100%;
+  }
+
+  .landing-premium .lp-platform-hero__col-content {
+    padding-right: 0.5rem;
+  }
 }
 
 .landing-premium .lp-platform-hero__cta {
@@ -316,7 +325,15 @@
 
 .landing-premium .lp-platform-hero__title-line {
   display: block;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+@media (min-width: 1280px) {
+  .landing-premium .lp-platform-hero__title-line {
+    white-space: nowrap;
+    overflow-wrap: normal;
+  }
 }
 
 .landing-premium .lp-platform-hero__checks {
