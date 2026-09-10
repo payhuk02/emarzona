@@ -97,7 +97,13 @@ import { publicRoutes } from '@/routes/publicRoutes';
 import { customerRoutes } from '@/routes/customerRoutes';
 import { dashboardRoutes, dashboardRedirectRoutes } from '@/routes/dashboardRoutes';
 import { adminRoutes } from '@/routes/adminRoutes';
-import { AuthenticatedAppLayout } from '@/components/layout/AuthenticatedAppLayout';
+
+/** Shell auth hors du chunk index — évite AppSidebar dans app-core (budget 340 KB). */
+const AuthenticatedAppLayout = lazy(() =>
+  import('@/components/layout/AuthenticatedAppLayout').then(m => ({
+    default: m.AuthenticatedAppLayout,
+  }))
+);
 
 type ErrorFallbackProps = {
   error?: unknown;

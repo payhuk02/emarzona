@@ -22,7 +22,7 @@ vi.mock('@/contexts/StoreContext', () => ({
 }));
 
 describe('BuyerDiscoveryPageLayout', () => {
-  it('uses AppPageShell when authenticated', () => {
+  it('uses AppPageShell when authenticated', async () => {
     render(
       <MemoryRouter>
         <BuyerDiscoveryPageLayout authenticated mainAriaLabel="Discover">
@@ -31,7 +31,7 @@ describe('BuyerDiscoveryPageLayout', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByTestId('app-page-shell')).toBeInTheDocument();
+    expect(await screen.findByTestId('app-page-shell')).toBeInTheDocument();
     expect(screen.queryByTestId('premium-nav')).not.toBeInTheDocument();
     expect(screen.getByText('Auth content')).toBeInTheDocument();
   });
