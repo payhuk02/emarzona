@@ -30,14 +30,12 @@ export const DashboardStats = React.memo<DashboardStatsProps>(({ stats }) => {
     {
       label: t('dashboard.stats.revenue.title', 'Revenus totaux'),
       value: formatFcfa(stats.totalRevenue),
-      trend: stats.trends.revenueGrowth,
       icon: DollarSign,
       theme: 'orange' as const,
     },
     {
       label: t('dashboard.stats.orders.title', 'Commandes'),
       value: formatLocaleNumber(stats.totalOrders, locale),
-      trend: stats.trends.orderGrowth,
       icon: ShoppingCart,
       theme: 'blue' as const,
     },
@@ -47,14 +45,12 @@ export const DashboardStats = React.memo<DashboardStatsProps>(({ stats }) => {
     {
       label: t('dashboard.stats.customers.title', 'Clients'),
       value: formatLocaleNumber(stats.totalCustomers, locale),
-      trend: stats.trends.customerGrowth,
       icon: Users,
       theme: 'slate' as const,
     },
     {
       label: t('dashboard.stats.avgBasket', 'Panier moyen'),
       value: formatFcfa(avgBasket),
-      trend: stats.trends.revenueGrowth,
       icon: Wallet,
       theme: 'amber' as const,
     },
@@ -67,7 +63,6 @@ export const DashboardStats = React.memo<DashboardStatsProps>(({ stats }) => {
       key={card.label}
       label={card.label}
       value={card.value}
-      trendPercent={card.trend}
       icon={card.icon}
       theme={card.theme}
     />

@@ -100,9 +100,13 @@
   color: var(--sidebar-text-color-active) !important;
 }
 
+[data-sidebar='sidebar'] [data-sidebar='menu-button'] {
+  font-weight: 700;
+}
+
 [data-sidebar='sidebar'] [data-sidebar='menu-button'][data-active='true'] {
   background: hsl(var(--sidebar-accent)) !important;
-  font-weight: 600;
+  font-weight: 700;
   border-left: 2px solid hsl(var(--sidebar-primary));
 }
 

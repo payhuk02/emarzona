@@ -400,7 +400,7 @@ export function AppSidebar() {
                                   aria-hidden="true"
                                 />
                                 {!isCollapsed && (
-                                  <span className="flex-1 font-medium">{item.title}</span>
+                                  <span className="flex-1 font-bold">{item.title}</span>
                                 )}
                               </NavLink>
                             </SidebarMenuButton>
@@ -426,7 +426,7 @@ export function AppSidebar() {
                               />
                               {!isCollapsed ? (
                                 <>
-                                  <span className="flex-1 font-medium">{item.title}</span>
+                                  <span className="flex-1 font-bold">{item.title}</span>
                                   <Lock
                                     className="h-3 w-3 flex-shrink-0 opacity-80"
                                     aria-hidden="true"
@@ -461,7 +461,7 @@ export function AppSidebar() {
                                 aria-hidden="true"
                               />
                               {!isCollapsed ? (
-                                <span className="flex-1 font-medium">{item.title}</span>
+                                <span className="flex-1 font-bold">{item.title}</span>
                               ) : (
                                 <span className="sr-only">{item.title}</span>
                               )}
@@ -547,7 +547,7 @@ export function AppSidebar() {
                                 aria-hidden="true"
                               />
                               {!isCollapsed ? (
-                                <span>{item.title}</span>
+                                <span className="font-bold">{item.title}</span>
                               ) : (
                                 <span className="sr-only">{item.title}</span>
                               )}
