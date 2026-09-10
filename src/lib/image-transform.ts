@@ -3,7 +3,12 @@
  * Délègue à `buildTransformedUrl` (/render/image/public) — point unique delivery.
  */
 
-import { buildTransformedUrl, type ImageFormat } from '@/lib/images/supabaseTransform';
+import {
+  buildTransformedUrl,
+  type ImageFormat,
+  isImageTransformationsEnabled,
+  toObjectPublicUrl,
+} from '@/lib/images/supabaseTransform';
 
 export interface ImageTransformOptions {
   width?: number;
@@ -86,6 +91,11 @@ export const getResponsiveSrcSet = (
 ): string | undefined => {
   if (!imageUrl || !isSupabaseStorageUrl(imageUrl)) {
     return imageUrl || undefined;
+  }
+
+  // Sans transforms CDN, un srcSet multi-largeur est inutile (même fichier)
+  if (!isImageTransformationsEnabled()) {
+    return undefined;
   }
 
   const srcSetParts: string[] = [];
@@ -355,13 +365,15 @@ export function getPlatformHeroImageProps(
   if (!imageUrl) return null;
 
   const sizesAttr = PLATFORM_HERO_SIZES_ATTR[variant];
-  const preset =
-    variant === 'left' ? IMAGE_PRESETS.platformHeroLeft : IMAGE_PRESETS.platformHeroVisual;
+  const safeSrc = toObjectPublicUrl(imageUrl);
 
-  if (!isSupabaseStorageUrl(imageUrl)) {
-    return { src: imageUrl, sizes: sizesAttr };
+  // Sans Image Transformations : URL object/public seule (évite picture AVIF/WebP cassés)
+  if (!isImageTransformationsEnabled() || !isSupabaseStorageUrl(imageUrl)) {
+    return { src: safeSrc || imageUrl, sizes: sizesAttr };
   }
 
+  const preset =
+    variant === 'left' ? IMAGE_PRESETS.platformHeroLeft : IMAGE_PRESETS.platformHeroVisual;
   const baseOptions = preset.options;
   const sizeConfig = preset.sizes;
 
@@ -371,7 +383,7 @@ export function getPlatformHeroImageProps(
         ...baseOptions,
         width: sizeConfig.mobile,
         format: 'webp',
-      }) ?? imageUrl,
+      }) ?? safeSrc,
     sizes: sizesAttr,
     avifSrcSet: getResponsiveSrcSet(imageUrl, sizeConfig, { ...baseOptions, format: 'avif' }),
     webpSrcSet: getResponsiveSrcSet(imageUrl, sizeConfig, { ...baseOptions, format: 'webp' }),

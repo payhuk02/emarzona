@@ -54,6 +54,7 @@ export const ResponsiveProductImage = ({
 }: ResponsiveProductImageProps) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
+  const [useOriginal, setUseOriginal] = useState(false);
   const [isInView, setIsInView] = useState(priority);
   const elementRef = useRef<HTMLDivElement>(null);
 
@@ -62,29 +63,31 @@ export const ResponsiveProductImage = ({
     [context, propWidth, propHeight]
   );
 
-  const optimizedSrc = useMemo(
-    () =>
-      src
-        ? buildProductImageUrl(src, context, {
-            width: dims.width,
-            height: dims.height,
-            quality,
-            resize: fit === 'contain' ? 'contain' : 'cover',
-          })
-        : undefined,
-    [src, context, dims.width, dims.height, quality, fit]
-  );
+  const optimizedSrc = useMemo(() => {
+    if (!src) return undefined;
+    if (useOriginal) return src;
+    return buildProductImageUrl(src, context, {
+      width: dims.width,
+      height: dims.height,
+      quality,
+      resize: fit === 'contain' ? 'contain' : 'cover',
+    });
+  }, [src, context, dims.width, dims.height, quality, fit, useOriginal]);
 
-  const srcSet = useMemo(
-    () =>
-      src
-        ? buildProductSrcSet(src, context, {
-            quality,
-            resize: fit === 'contain' ? 'contain' : 'cover',
-          })
-        : undefined,
-    [src, context, quality, fit]
-  );
+  const srcSet = useMemo(() => {
+    if (!src || useOriginal) return undefined;
+    const set = buildProductSrcSet(src, context, {
+      quality,
+      resize: fit === 'contain' ? 'contain' : 'cover',
+    });
+    return set || undefined;
+  }, [src, context, quality, fit, useOriginal]);
+
+  useEffect(() => {
+    setHasError(false);
+    setUseOriginal(false);
+    setIsLoaded(false);
+  }, [src]);
 
   useEffect(() => {
     if (priority || !elementRef.current) return;
@@ -132,6 +135,12 @@ export const ResponsiveProductImage = ({
   };
 
   const handleError = () => {
+    // /render/image peut échouer → retenter l'URL object/public originale une fois
+    if (src && !useOriginal && optimizedSrc && optimizedSrc !== src) {
+      setUseOriginal(true);
+      setIsLoaded(false);
+      return;
+    }
     setHasError(true);
     setIsLoaded(false);
   };

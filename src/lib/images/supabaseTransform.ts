@@ -2,7 +2,8 @@
  * Helpers pour les transformations d'images Supabase Storage.
  * Doc: https://supabase.com/docs/guides/storage/serving/image-transformations
  *
- * Point unique pour resize / qualité / format (AVIF|WebP) côté delivery.
+ * Par défaut : URL object/public inchangée (compatible Free / transforms désactivés).
+ * Opt-in : VITE_SUPABASE_IMAGE_TRANSFORMATIONS=true → /render/image/public
  */
 
 export type ImageFormat = 'origin' | 'webp' | 'avif';
@@ -13,6 +14,8 @@ export interface TransformOptions {
   quality?: number; // 1-100
   resize?: 'cover' | 'contain' | 'fill';
   format?: ImageFormat;
+  /** Force /render/image même si l'env est off (tests). */
+  forceTransform?: boolean;
 }
 
 export type ProductImageContext = 'grid' | 'detail' | 'thumbnail' | 'hero';
@@ -22,6 +25,15 @@ const SUPABASE_RENDER_REGEX = /\/storage\/v1\/render\/image\/public\/([^/]+)\/(.
 
 /** Cache navigateur : détection AVIF/WebP une seule fois. */
 let cachedPreferredFormat: 'avif' | 'webp' | null | undefined;
+
+/** Image Transformations Supabase (Pro+) — désactivé par défaut pour ne pas casser l'affichage. */
+export function isImageTransformationsEnabled(): boolean {
+  try {
+    return import.meta.env.VITE_SUPABASE_IMAGE_TRANSFORMATIONS === 'true';
+  } catch {
+    return false;
+  }
+}
 
 export function getPreferredDeliveryFormat(): 'avif' | 'webp' | null {
   if (cachedPreferredFormat !== undefined) return cachedPreferredFormat;
@@ -33,9 +45,8 @@ export function getPreferredDeliveryFormat(): 'avif' | 'webp' | null {
     const canvas = document.createElement('canvas');
     canvas.width = 1;
     canvas.height = 1;
-    if (canvas.toDataURL('image/avif').indexOf('data:image/avif') === 0) {
-      cachedPreferredFormat = 'avif';
-    } else if (canvas.toDataURL('image/webp').indexOf('data:image/webp') === 0) {
+    // AVIF via canvas est peu fiable → WebP uniquement
+    if (canvas.toDataURL('image/webp').indexOf('data:image/webp') === 0) {
       cachedPreferredFormat = 'webp';
     } else {
       cachedPreferredFormat = null;
@@ -66,11 +77,21 @@ export function getProductImageDimensions(
   }
 }
 
+/** Réécrit une URL render → object/public (fallback sûr). */
+export function toObjectPublicUrl(url: string): string {
+  if (!url || url.startsWith('data:') || url.startsWith('blob:')) return url;
+  const cleanUrl = url.split('?')[0];
+  const renderMatch = cleanUrl.match(SUPABASE_RENDER_REGEX);
+  if (!renderMatch) return url;
+  const bucket = renderMatch[1];
+  const path = renderMatch[2];
+  const base = cleanUrl.replace(SUPABASE_RENDER_REGEX, '');
+  return `${base}/storage/v1/object/public/${bucket}/${path}`;
+}
+
 /**
  * Transforme une URL Supabase Storage en URL CDN avec resize/qualité.
- * - data:/blob:/non-Supabase → URL inchangée
- * - object/public → /render/image/public + query params
- * - render/image déjà présent → réécrit les params
+ * Sans opt-in env : laisse object/public tel quel (ou convertit render → object).
  */
 export function buildTransformedUrl(
   url: string | null | undefined,
@@ -79,7 +100,6 @@ export function buildTransformedUrl(
   if (!url) return '';
   if (url.startsWith('data:') || url.startsWith('blob:')) return url;
 
-  // Strip query first so rewrites of existing /render/image URLs don't glue params to the origin
   const cleanUrl = url.split('?')[0];
   const objectMatch = cleanUrl.match(SUPABASE_PUBLIC_REGEX);
   const renderMatch = !objectMatch ? cleanUrl.match(SUPABASE_RENDER_REGEX) : null;
@@ -88,6 +108,12 @@ export function buildTransformedUrl(
   const bucket = objectMatch ? objectMatch[1] : renderMatch![1];
   const path = objectMatch ? objectMatch[2] : renderMatch![2];
   const base = cleanUrl.replace(objectMatch ? SUPABASE_PUBLIC_REGEX : SUPABASE_RENDER_REGEX, '');
+  const objectUrl = `${base}/storage/v1/object/public/${bucket}/${path}`;
+
+  const useTransform = opts.forceTransform === true || isImageTransformationsEnabled();
+  if (!useTransform) {
+    return objectUrl;
+  }
 
   const renderUrl = `${base}/storage/v1/render/image/public/${bucket}/${path}`;
 
@@ -123,6 +149,7 @@ export function buildProductImageUrl(
     quality: opts.quality ?? (context === 'hero' ? 78 : 82),
     resize: opts.resize ?? 'cover',
     format: opts.format,
+    forceTransform: opts.forceTransform,
   });
 }
 
@@ -134,6 +161,9 @@ export function buildSrcSet(
   widths: number[] = [320, 640, 960, 1280, 1920],
   opts: Omit<TransformOptions, 'width'> = {}
 ): string {
+  if (!isImageTransformationsEnabled() && !opts.forceTransform) {
+    return '';
+  }
   return widths.map(w => `${buildTransformedUrl(url, { ...opts, width: w })} ${w}w`).join(', ');
 }
 
@@ -143,6 +173,9 @@ export function buildProductSrcSet(
   context: ProductImageContext = 'grid',
   opts: Omit<TransformOptions, 'width' | 'height'> = {}
 ): string {
+  if (!isImageTransformationsEnabled() && !opts.forceTransform) {
+    return '';
+  }
   const widths =
     context === 'thumbnail'
       ? [192, 384, 576]
@@ -153,5 +186,6 @@ export function buildProductSrcSet(
     quality: opts.quality ?? 82,
     resize: opts.resize ?? 'cover',
     format: opts.format,
+    forceTransform: opts.forceTransform,
   });
 }

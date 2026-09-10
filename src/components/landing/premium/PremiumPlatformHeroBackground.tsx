@@ -1,6 +1,7 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useLCPImagePreload } from '@/components/ui/OptimizedImage';
 import { getPlatformHeroImageProps } from '@/lib/image-transform';
+import { toObjectPublicUrl } from '@/lib/images/supabaseTransform';
 
 interface PremiumPlatformHeroBackgroundProps {
   src: string;
@@ -14,13 +15,17 @@ export function PremiumPlatformHeroBackground({
   alt,
   variant = 'visual',
 }: PremiumPlatformHeroBackgroundProps) {
+  const [useOriginal, setUseOriginal] = useState(false);
   const imageProps = useMemo(() => getPlatformHeroImageProps(src, variant), [src, variant]);
   const isLcp = variant === 'visual';
+  const originalSrc = toObjectPublicUrl(src);
 
-  const preloadSrc = imageProps?.webpSrcSet?.split(',')[0]?.split(' ')[0] ?? imageProps?.src ?? src;
+  const preloadSrc = useOriginal
+    ? originalSrc
+    : (imageProps?.webpSrcSet?.split(',')[0]?.split(' ')[0] ?? imageProps?.src ?? src);
   useLCPImagePreload(
     isLcp ? preloadSrc : '',
-    isLcp ? (imageProps?.webpSrcSet ?? imageProps?.srcSet) : undefined,
+    isLcp && !useOriginal ? (imageProps?.webpSrcSet ?? imageProps?.srcSet) : undefined,
     isLcp ? imageProps?.sizes : undefined
   );
 
@@ -29,6 +34,23 @@ export function PremiumPlatformHeroBackground({
   const photoClass =
     variant === 'left' ? 'lp-platform-hero__left-photo' : 'lp-platform-hero__photo';
   const imgClassName = `${photoClass} pointer-events-none absolute inset-0 h-full w-full object-cover`;
+
+  const handleError = () => {
+    if (!useOriginal) setUseOriginal(true);
+  };
+
+  if (useOriginal) {
+    return (
+      <img
+        src={originalSrc}
+        alt={alt}
+        className={imgClassName}
+        loading={isLcp ? 'eager' : 'lazy'}
+        fetchPriority={isLcp ? 'high' : 'auto'}
+        decoding="async"
+      />
+    );
+  }
 
   if (imageProps.webpSrcSet || imageProps.avifSrcSet) {
     return (
@@ -48,6 +70,7 @@ export function PremiumPlatformHeroBackground({
           loading={isLcp ? 'eager' : 'lazy'}
           fetchPriority={isLcp ? 'high' : 'auto'}
           decoding="async"
+          onError={handleError}
         />
       </picture>
     );
@@ -63,6 +86,7 @@ export function PremiumPlatformHeroBackground({
       loading={isLcp ? 'eager' : 'lazy'}
       fetchPriority={isLcp ? 'high' : 'auto'}
       decoding="async"
+      onError={handleError}
     />
   );
 }

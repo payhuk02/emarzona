@@ -4,16 +4,17 @@
  * Avantages :
  * - Lazy loading par défaut + decoding async
  * - Skeleton/blur placeholder pendant le chargement
- * - srcSet responsive automatique pour les images Supabase
- * - Fallback transparent en cas d'erreur
+ * - srcSet responsive automatique pour les images Supabase (si transforms activés)
+ * - Fallback vers l'URL originale si /render/image échoue
  * - Accessibilité: alt obligatoire (warning si manquant)
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { cn } from '@/lib/utils';
 import {
   buildTransformedUrl,
   buildSrcSet,
+  toObjectPublicUrl,
   type TransformOptions,
 } from '@/lib/images/supabaseTransform';
 
@@ -66,32 +67,42 @@ export const SmartImage: React.FC<SmartImageProps> = ({
   ...rest
 }) => {
   const [loaded, setLoaded] = useState(false);
-  const [errored, setErrored] = useState(false);
+  const [useOriginal, setUseOriginal] = useState(false);
+  const [failed, setFailed] = useState(false);
 
-  const finalSrc = errored && fallbackSrc ? fallbackSrc : (src ?? '');
+  useEffect(() => {
+    setLoaded(false);
+    setUseOriginal(false);
+    setFailed(false);
+  }, [src]);
 
-  const optimizedSrc = useMemo(
-    () =>
-      buildTransformedUrl(finalSrc, {
-        width,
-        height,
-        quality,
-        resize,
-      }),
-    [finalSrc, width, height, quality, resize]
-  );
+  const baseSrc = src ?? '';
+  const safeOriginal = baseSrc ? toObjectPublicUrl(baseSrc) : '';
+  const displaySrc =
+    failed && fallbackSrc ? fallbackSrc : useOriginal ? safeOriginal || baseSrc : baseSrc;
 
-  const srcSet = useMemo(() => {
-    if (!finalSrc) return undefined;
-    // Pour les data: / blob:, pas de srcset
-    if (finalSrc.startsWith('data:') || finalSrc.startsWith('blob:')) return undefined;
-    return buildSrcSet(finalSrc, srcSetWidths ?? DEFAULT_WIDTHS, {
+  const optimizedSrc = useMemo(() => {
+    if (!displaySrc) return '';
+    if (useOriginal || failed) return displaySrc;
+    return buildTransformedUrl(displaySrc, {
+      width,
+      height,
       quality,
       resize,
     });
-  }, [finalSrc, srcSetWidths, quality, resize]);
+  }, [displaySrc, width, height, quality, resize, useOriginal, failed]);
 
-  if (!finalSrc) {
+  const srcSet = useMemo(() => {
+    if (!displaySrc || useOriginal || failed) return undefined;
+    if (displaySrc.startsWith('data:') || displaySrc.startsWith('blob:')) return undefined;
+    const set = buildSrcSet(displaySrc, srcSetWidths ?? DEFAULT_WIDTHS, {
+      quality,
+      resize,
+    });
+    return set || undefined;
+  }, [displaySrc, srcSetWidths, quality, resize, useOriginal, failed]);
+
+  if (!baseSrc || (failed && !fallbackSrc && !safeOriginal)) {
     return (
       <div
         className={cn(
@@ -133,7 +144,17 @@ export const SmartImage: React.FC<SmartImageProps> = ({
           onLoad?.(e);
         }}
         onError={e => {
-          setErrored(true);
+          if (!useOriginal && optimizedSrc !== safeOriginal && safeOriginal) {
+            setUseOriginal(true);
+            setLoaded(false);
+            return;
+          }
+          if (fallbackSrc && !failed) {
+            setFailed(true);
+            setLoaded(false);
+            return;
+          }
+          setFailed(true);
           onError?.(e);
         }}
         className={cn(

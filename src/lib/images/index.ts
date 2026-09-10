@@ -9,6 +9,8 @@ export {
   buildProductSrcSet,
   getPreferredDeliveryFormat,
   getProductImageDimensions,
+  isImageTransformationsEnabled,
+  toObjectPublicUrl,
   type TransformOptions,
   type ImageFormat,
   type ProductImageContext,
