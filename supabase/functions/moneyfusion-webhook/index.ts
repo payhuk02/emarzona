@@ -21,6 +21,7 @@ import {
   activatePhysicalSubscriptionFromWebhook,
   billingCustomerFromTransaction,
 } from '../_shared/physical-subscription-webhook.ts';
+import { activateMarketplaceSponsorshipFromWebhook } from '../_shared/marketplace-sponsorship-webhook.ts';
 import { applyPaymentRefund } from '../_shared/apply-payment-refund.ts';
 import { moneyFusionFetch, moneyFusionPaidAmount } from '../_shared/moneyfusion-http.ts';
 
@@ -703,12 +704,12 @@ serve(async req => {
         } else if (purpose === 'marketplace_sponsorship') {
           const sponsorshipId = meta.sponsorship_id as string | undefined;
           if (sponsorshipId) {
-            const { activateMarketplaceSponsorshipFromWebhook } = await import(
-              '../_shared/marketplace-sponsorship-webhook.ts'
-            );
             await activateMarketplaceSponsorshipFromWebhook(supabase, {
               sponsorshipId: String(sponsorshipId),
               paymentRef: String(transactionId),
+              paidAmount: Number(transaction.amount),
+              paidCurrency: (transaction.currency as string | null) ?? null,
+              storeId: transaction.store_id ? String(transaction.store_id) : null,
             });
           }
         }

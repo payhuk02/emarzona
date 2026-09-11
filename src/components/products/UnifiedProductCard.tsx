@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
-import React, { useMemo, useCallback, useState } from 'react';
+import React, { useMemo, useCallback, useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { generateProductUrl, generatePaymentUrl } from '@/lib/store-utils';
 import {
@@ -45,6 +45,7 @@ import {
 import { OptimizedImage } from '@/components/ui/OptimizedImage';
 import { ResponsiveProductImage } from '@/components/ui/ResponsiveProductImage';
 import { UnifiedProductCardProps } from '@/types/unified-product';
+import { recordSponsorshipEvent } from '@/lib/sponsorship/marketplace-sponsorship';
 import { ServiceListingAttributeBadges } from '@/components/service/ServiceListingAttributeBadges';
 import {
   resolveServiceDisplayPrice,
@@ -128,6 +129,23 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
   const favoritesCtx = useMarketplaceFavoritesContext();
   const isFavorite = favoritesCtx?.isFavorite(product.id) ?? false;
   const [isZoomOpen, setIsZoomOpen] = useState(false);
+  const impressionSentRef = useRef(false);
+
+  useEffect(() => {
+    if (!product.is_sponsored || !product.active_sponsorship_id) return;
+    if (impressionSentRef.current) return;
+    impressionSentRef.current = true;
+    void recordSponsorshipEvent(product.active_sponsorship_id, 'impression', {
+      product_id: product.id,
+    });
+  }, [product.is_sponsored, product.active_sponsorship_id, product.id]);
+
+  const trackSponsoredClick = useCallback(() => {
+    if (!product.is_sponsored || !product.active_sponsorship_id) return;
+    void recordSponsorshipEvent(product.active_sponsorship_id, 'click', {
+      product_id: product.id,
+    });
+  }, [product.is_sponsored, product.active_sponsorship_id, product.id]);
 
   const isDigital = product.type === 'digital';
   const isArtist = product.type === 'artist';
@@ -361,7 +379,7 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
         'rounded-xl overflow-hidden',
         'min-h-[480px] sm:min-h-[520px] lg:min-h-[560px]',
         'hover:shadow-xl hover:scale-[1.02] transition-all duration-300 cursor-pointer',
-        (product as any).is_featured && 'border-primary border-2',
+        (product.is_sponsored || product.is_featured) && 'border-primary border-2',
         className
       )}
       role="article"
@@ -376,7 +394,7 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
           isPremiumCard ? 'mp-product-card__image' : 'bg-muted/30'
         )}
       >
-        <Link to={productUrl} className="block w-full h-full">
+        <Link to={productUrl} className="block w-full h-full" onClick={trackSponsoredClick}>
           {product.type === 'artist' && allArtistImages.length > 1 ? (
             <ArtistImageCarousel
               images={allArtistImages}
@@ -458,7 +476,7 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2">
           {(isDigital || isArtist || isCourse) && (
             <Button size="sm" asChild>
-              <Link to={productUrl}>
+              <Link to={productUrl} onClick={trackSponsoredClick}>
                 {isArtist ? (
                   <Palette className="h-4 w-4 mr-2" />
                 ) : (
@@ -515,7 +533,13 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
 
           {product.type !== 'service' && (
             <Button size="sm" variant="secondary" asChild>
-              <Link to={productUrl} onClick={() => handleAction('view')}>
+              <Link
+                to={productUrl}
+                onClick={() => {
+                  trackSponsoredClick();
+                  handleAction('view');
+                }}
+              >
                 <Eye className="h-4 w-4 mr-2" />
                 Voir
               </Link>
@@ -612,7 +636,7 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
         )}
 
         {/* Title */}
-        <Link to={productUrl}>
+        <Link to={productUrl} onClick={trackSponsoredClick}>
           <h3
             id={`product-title-${product.id}`}
             className={cn(
@@ -638,11 +662,15 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
               <Sparkles className="h-3 w-3 mr-1" /> Nouveau
             </Badge>
           )}
-          {(product as any).is_featured && (
+          {product.is_sponsored ? (
+            <Badge className="bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white border-0 text-[10px] sm:text-xs px-2 py-0.5">
+              <Sparkles className="h-3 w-3 mr-1" /> Sponsorisé
+            </Badge>
+          ) : product.is_featured ? (
             <Badge className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white border-0 text-[10px] sm:text-xs px-2 py-0.5">
               <Star className="h-3 w-3 mr-1 fill-white" /> Vedette
             </Badge>
-          )}
+          ) : null}
 
           {/* Type Badges */}
           {product.type === 'artist' ? (

@@ -54,6 +54,11 @@ export interface BaseProduct {
 
   whatsapp_number?: string | null;
   whatsapp_enabled?: boolean | null;
+
+  /** Mise en avant / sponsorisation marketplace */
+  is_featured?: boolean;
+  is_sponsored?: boolean;
+  active_sponsorship_id?: string | null;
 }
 
 /**
@@ -174,11 +179,6 @@ export interface ArtistProduct extends BaseProduct {
   shipping_handling_time?: number;
   certificate_of_authenticity?: boolean;
   signature_authenticated?: boolean;
-  // Propriétés partagées avec d'autres types de produits
-  is_featured?: boolean;
-  /** Sponsorisation marketplace active (feed boost) */
-  is_sponsored?: boolean;
-  active_sponsorship_id?: string | null;
   pricing_model?: string | null;
   payment_options?: {
     payment_type?: 'full' | 'percentage' | 'delivery_secured';

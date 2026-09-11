@@ -13,6 +13,7 @@ import {
   activatePhysicalSubscriptionFromWebhook,
   billingCustomerFromTransaction,
 } from '../_shared/physical-subscription-webhook.ts';
+import { activateMarketplaceSponsorshipFromWebhook } from '../_shared/marketplace-sponsorship-webhook.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': Deno.env.get('SITE_URL') || 'https://www.emarzona.com',
@@ -512,12 +513,12 @@ serve(async req => {
         } else if (!transaction.order_id && purpose === 'marketplace_sponsorship') {
           const sponsorshipId = meta.sponsorship_id as string | undefined;
           if (sponsorshipId) {
-            const { activateMarketplaceSponsorshipFromWebhook } = await import(
-              '../_shared/marketplace-sponsorship-webhook.ts'
-            );
             await activateMarketplaceSponsorshipFromWebhook(supabase, {
               sponsorshipId: String(sponsorshipId),
               paymentRef: String(transaction.id),
+              paidAmount: Number(transaction.amount),
+              paidCurrency: transaction.currency ?? null,
+              storeId: transaction.store_id ?? null,
             });
             console.log('Activated marketplace sponsorship', {
               sponsorship_id: sponsorshipId,

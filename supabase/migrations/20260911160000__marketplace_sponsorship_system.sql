@@ -544,16 +544,22 @@ BEGIN
     RAISE EXCEPTION 'Cannot activate sponsorship in status %', v_row.status;
   END IF;
 
-  SELECT COALESCE(sku.duration_days, (v_row.metadata->>'duration_days')::integer, 7)
-  INTO v_days
-  FROM public.marketplace_sponsorship_products sku
-  WHERE sku.id = v_row.sku_id;
+  IF v_row.sku_id IS NOT NULL THEN
+    SELECT COALESCE(sku.duration_days, 7)
+    INTO v_days
+    FROM public.marketplace_sponsorship_products sku
+    WHERE sku.id = v_row.sku_id;
+  ELSE
+    v_days := COALESCE((v_row.metadata->>'duration_days')::integer, 7);
+  END IF;
+
+  v_days := GREATEST(COALESCE(v_days, 7), 1);
 
   UPDATE public.marketplace_sponsorships
   SET
     status = 'active',
     starts_at = now(),
-    ends_at = now() + make_interval(days => GREATEST(v_days, 1)),
+    ends_at = now() + make_interval(days => v_days),
     payment_ref = COALESCE(p_payment_ref, payment_ref),
     updated_at = now()
   WHERE id = p_sponsorship_id
@@ -737,25 +743,14 @@ CREATE POLICY msp_sponsorships_select ON public.marketplace_sponsorships
     OR public.is_store_member(store_id, auth.uid())
   );
 
+-- Mutations only via SECURITY DEFINER RPCs (or platform admin support tools).
 DROP POLICY IF EXISTS msp_sponsorships_insert ON public.marketplace_sponsorships;
-CREATE POLICY msp_sponsorships_insert ON public.marketplace_sponsorships
-  FOR INSERT TO authenticated
-  WITH CHECK (
-    public.is_platform_admin()
-    OR public.is_store_member(store_id, auth.uid())
-  );
-
 DROP POLICY IF EXISTS msp_sponsorships_update ON public.marketplace_sponsorships;
-CREATE POLICY msp_sponsorships_update ON public.marketplace_sponsorships
-  FOR UPDATE TO authenticated
-  USING (
-    public.is_platform_admin()
-    OR public.is_store_member(store_id, auth.uid())
-  )
-  WITH CHECK (
-    public.is_platform_admin()
-    OR public.is_store_member(store_id, auth.uid())
-  );
+DROP POLICY IF EXISTS msp_sponsorships_admin_write ON public.marketplace_sponsorships;
+CREATE POLICY msp_sponsorships_admin_write ON public.marketplace_sponsorships
+  FOR ALL TO authenticated
+  USING (public.is_platform_admin())
+  WITH CHECK (public.is_platform_admin());
 
 DROP POLICY IF EXISTS msp_events_select ON public.marketplace_sponsorship_events;
 CREATE POLICY msp_events_select ON public.marketplace_sponsorship_events
@@ -769,10 +764,8 @@ CREATE POLICY msp_events_select ON public.marketplace_sponsorship_events
     )
   );
 
+-- Event inserts go through record_sponsorship_event (SECURITY DEFINER) only.
 DROP POLICY IF EXISTS msp_events_insert ON public.marketplace_sponsorship_events;
-CREATE POLICY msp_events_insert ON public.marketplace_sponsorship_events
-  FOR INSERT TO anon, authenticated
-  WITH CHECK (true);
 
 -- ---------------------------------------------------------------------------
 -- 10. Marketplace view + ranking RPC (sponsored-first + diversity + cap)
