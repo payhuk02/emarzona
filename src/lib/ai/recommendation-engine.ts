@@ -11,7 +11,7 @@ import { useQuery } from '@tanstack/react-query';
 export interface RecommendationResult {
   productId: string;
   score: number;
-  reason: 'collaborative' | 'content' | 'trending' | 'personal' | 'complementary';
+  reason: 'collaborative' | 'content' | 'trending' | 'personal' | 'complementary' | 'sponsored';
   confidence: number;
   metadata?: Record<string, unknown>;
 }
@@ -89,10 +89,15 @@ export class RecommendationEngine {
         );
       }
 
+      // Boost des produits sponsorisés (Marketplace + Recommandation IA)
+      const boosted = await this.applySponsorshipBoost(filteredRecommendations, {
+        productType: context.productType,
+        excludeProductId: context.productId,
+        userHistory,
+      });
+
       // Limiter et retourner
-      const finalRecommendations = filteredRecommendations
-        .sort((a, b) => b.score - a.score)
-        .slice(0, limit);
+      const finalRecommendations = boosted.sort((a, b) => b.score - a.score).slice(0, limit);
 
       if (includeReasoning) {
         await this.addReasoningToRecommendations(finalRecommendations, userId);
@@ -101,7 +106,7 @@ export class RecommendationEngine {
       logger.info('Recommendations generated', {
         userId,
         count: finalRecommendations.length,
-        algorithms: ['collaborative', 'content', 'complementary', 'trending'],
+        algorithms: ['collaborative', 'content', 'complementary', 'trending', 'sponsored'],
       });
 
       return finalRecommendations;
@@ -416,16 +421,102 @@ export class RecommendationEngine {
         id: string;
         trend_score?: number;
       }
-      return (trendingProducts as TrendingProduct[]).map((product: TrendingProduct) => ({
+      const base = (trendingProducts as TrendingProduct[]).map((product: TrendingProduct) => ({
         productId: product.id,
         score: Math.min(product.trend_score || 0.5, 1) * 0.5,
         reason: 'trending' as const,
         confidence: 0.6,
         metadata: { trendScore: product.trend_score },
       }));
+
+      return this.applySponsorshipBoost(base, {});
     } catch (error) {
       logger.error('Error getting trending recommendations', { error });
       return [];
+    }
+  }
+
+  /**
+   * Remonte les produits avec campagne de sponsorisation active dans le scoring IA.
+   */
+  private async applySponsorshipBoost(
+    recommendations: RecommendationResult[],
+    options: {
+      productType?: RecommendationContext['productType'];
+      excludeProductId?: string;
+      userHistory?: string[];
+    }
+  ): Promise<RecommendationResult[]> {
+    try {
+      let query = supabase
+        .from('products')
+        .select('id, product_type, is_featured, sponsored_until')
+        .eq('is_active', true)
+        .eq('is_draft', false)
+        .eq('is_featured', true)
+        .limit(40);
+
+      if (options.productType) {
+        query = query.eq('product_type', options.productType);
+      }
+
+      const { data: sponsoredRows, error } = await query;
+      if (error || !sponsoredRows?.length) {
+        return recommendations;
+      }
+
+      const sponsoredIds = new Set(
+        sponsoredRows
+          .map(row => row.id as string)
+          .filter(id => id && id !== options.excludeProductId)
+          .filter(id => !(options.userHistory || []).includes(id))
+      );
+
+      if (sponsoredIds.size === 0) {
+        return recommendations;
+      }
+
+      const SPONSOR_BOOST = 0.35;
+      const byId = new Map<string, RecommendationResult>();
+
+      for (const rec of recommendations) {
+        if (sponsoredIds.has(rec.productId)) {
+          byId.set(rec.productId, {
+            ...rec,
+            score: Math.min(rec.score + SPONSOR_BOOST, 1),
+            confidence: Math.max(rec.confidence, 0.75),
+            metadata: {
+              ...rec.metadata,
+              sponsored: true,
+              reasoning: 'Produit sponsorisé — priorisé dans les Recommandations IA',
+            },
+          });
+        } else {
+          byId.set(rec.productId, rec);
+        }
+      }
+
+      // Injecter quelques produits sponsorisés absents du pool de reco
+      let injected = 0;
+      for (const id of sponsoredIds) {
+        if (byId.has(id) || injected >= 3) continue;
+        byId.set(id, {
+          productId: id,
+          score: 0.72,
+          reason: 'sponsored',
+          confidence: 0.8,
+          metadata: {
+            sponsored: true,
+            reasoning: 'Produit sponsorisé — priorisé dans les Recommandations IA',
+          },
+        });
+        injected += 1;
+      }
+
+      return Array.from(byId.values());
+    } catch (error) {
+      logger.debug('Sponsorship boost skipped', { error });
+      return recommendations;
     }
   }
 
@@ -498,6 +589,12 @@ export class RecommendationEngine {
           rec.metadata = {
             ...rec.metadata,
             reasoning: 'Tendance populaire dans vos catégories préférées',
+          };
+          break;
+        case 'sponsored':
+          rec.metadata = {
+            ...rec.metadata,
+            reasoning: 'Produit sponsorisé — priorisé dans les Recommandations IA',
           };
           break;
       }

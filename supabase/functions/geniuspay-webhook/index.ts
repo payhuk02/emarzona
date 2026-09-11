@@ -509,6 +509,21 @@ serve(async req => {
               created: activation.created,
             });
           }
+        } else if (!transaction.order_id && purpose === 'marketplace_sponsorship') {
+          const sponsorshipId = meta.sponsorship_id as string | undefined;
+          if (sponsorshipId) {
+            const { activateMarketplaceSponsorshipFromWebhook } = await import(
+              '../_shared/marketplace-sponsorship-webhook.ts'
+            );
+            await activateMarketplaceSponsorshipFromWebhook(supabase, {
+              sponsorshipId: String(sponsorshipId),
+              paymentRef: String(transaction.id),
+            });
+            console.log('Activated marketplace sponsorship', {
+              sponsorship_id: sponsorshipId,
+              transaction_id: transaction.id,
+            });
+          }
         }
       } catch (subErr: unknown) {
         console.error('Error activating physical subscription:', subErr);

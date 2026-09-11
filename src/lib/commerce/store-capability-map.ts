@@ -80,6 +80,7 @@ const COMMON_SELLER_PATHS = [
   '/dashboard/seo/inspector',
   '/dashboard/settings',
   '/dashboard/shipping',
+  '/dashboard/sponsorships',
   '/dashboard/store',
   '/dashboard/store/team',
   '/dashboard/tasks',

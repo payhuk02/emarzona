@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { SponsorAfterPublishDialog } from '@/components/sponsorship/SponsorAfterPublishDialog';
 import {
   Package,
   Info,
@@ -172,6 +173,11 @@ export const CreatePhysicalProductWizard = ({
   const { store: hookStore, loading: storeLoading } = useStore();
   const store = hookStore || (propsStoreId ? { id: propsStoreId } : null);
   const [currentStep, setCurrentStep] = useState(1);
+  const [sponsorPrompt, setSponsorPrompt] = useState<{
+    open: boolean;
+    productId: string;
+    productName: string;
+  }>({ open: false, productId: '', productName: '' });
 
   // Auto-save
   const [isAutoSaving, setIsAutoSaving] = useState(false);
@@ -978,11 +984,11 @@ export const CreatePhysicalProductWizard = ({
 
       invalidateCatalog();
 
-      if (onSuccess) {
-        onSuccess();
-      } else {
-        navigate('/dashboard/physical-products', { replace: true });
-      }
+      setSponsorPrompt({
+        open: true,
+        productId: product.id,
+        productName: product.name,
+      });
     } catch (error) {
       logger.error('Erreur lors de la publication', error);
       toast({
@@ -1002,8 +1008,6 @@ export const CreatePhysicalProductWizard = ({
     savePhysicalProduct,
     formData.affiliate?.enabled,
     toast,
-    onSuccess,
-    navigate,
     t,
     invalidateCatalog,
   ]);
@@ -1446,6 +1450,20 @@ export const CreatePhysicalProductWizard = ({
           </div>
         </div>
       </div>
+
+      <SponsorAfterPublishDialog
+        open={sponsorPrompt.open}
+        productId={sponsorPrompt.productId}
+        productName={sponsorPrompt.productName}
+        onOpenChange={open => setSponsorPrompt(prev => ({ ...prev, open }))}
+        onSkip={() => {
+          if (onSuccess) {
+            onSuccess();
+          } else {
+            navigate('/dashboard/physical-products', { replace: true });
+          }
+        }}
+      />
     </div>
   );
 };

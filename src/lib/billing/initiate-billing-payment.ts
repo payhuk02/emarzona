@@ -16,7 +16,8 @@ import {
 export type BillingCheckoutPurpose =
   | 'physical_subscription'
   | 'physical_subscription_renewal'
-  | 'physical_plan_change';
+  | 'physical_plan_change'
+  | 'marketplace_sponsorship';
 
 export interface BillingCheckoutOptions {
   storeId: string;
@@ -30,6 +31,8 @@ export interface BillingCheckoutOptions {
   purpose: BillingCheckoutPurpose;
   planSlug: string;
   invoiceId?: string;
+  /** Sponsorship campaign id (purpose marketplace_sponsorship) */
+  sponsorshipId?: string;
   /** Chemin de retour après paiement (défaut : facturation physique) */
   returnPath?: string;
   /** Paramètres query additionnels sur l'URL de succès */
@@ -108,6 +111,7 @@ export async function initiateBillingCheckout(options: BillingCheckoutOptions): 
       plan_slug: options.planSlug,
       product_type: 'physical',
       ...(options.invoiceId ? { invoice_id: options.invoiceId } : {}),
+      ...(options.sponsorshipId ? { sponsorship_id: options.sponsorshipId } : {}),
     },
   });
 

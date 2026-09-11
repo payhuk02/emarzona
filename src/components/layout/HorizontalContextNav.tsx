@@ -274,12 +274,12 @@ export function HorizontalContextNav() {
       className="z-20 shrink-0 border-b border-border/50 bg-background/95 backdrop-blur-md shadow-[0_1px_0_0_hsl(var(--border)/0.4)] md:sticky md:top-12"
       data-testid="horizontal-context-nav"
     >
-      <div className="hidden md:block px-3 lg:px-6">
+      <div className="hidden md:block px-3 lg:px-6 overflow-x-auto scrollbar-hide">
         <NavigationMenu
-          className="horizontal-context-nav-menu max-w-none w-full justify-start [&>div.absolute]:left-0 [&>div.absolute]:justify-start"
+          className="horizontal-context-nav-menu max-w-none w-max min-w-full justify-start [&>div.absolute]:left-0 [&>div.absolute]:justify-start"
           aria-label={navAriaLabel}
         >
-          <NavigationMenuList className="flex flex-wrap justify-start gap-0.5 py-1.5">
+          <NavigationMenuList className="flex flex-nowrap justify-start gap-0.5 py-1.5">
             {domains.map((domain, index) => {
               // Positionnement intelligent pour éviter de déborder sur la sidebar ou hors de l'écran
               let positionClass = '';
@@ -293,14 +293,14 @@ export function HorizontalContextNav() {
               }
 
               return (
-                <NavigationMenuItem key={domain.domainKey}>
+                <NavigationMenuItem key={domain.domainKey} className="shrink-0">
                   {domain.items.length <= 1 && domain.rootPath ? (
                     <NavigationMenuLink asChild>
                       <NavLink
                         to={domain.rootPath}
                         className={cn(
                           navigationMenuTriggerStyle(),
-                          'h-9 px-3 text-base font-medium',
+                          'h-9 px-2.5 xl:px-3 text-sm xl:text-base font-medium whitespace-nowrap',
                           domain.isActive && 'bg-primary/10 text-primary shadow-none'
                         )}
                       >
@@ -311,7 +311,7 @@ export function HorizontalContextNav() {
                     <>
                       <NavigationMenuTrigger
                         className={cn(
-                          'h-9 bg-transparent px-3 text-base font-medium data-[state=open]:bg-accent/50',
+                          'h-9 bg-transparent px-2.5 xl:px-3 text-sm xl:text-base font-medium whitespace-nowrap data-[state=open]:bg-accent/50',
                           domain.isActive && 'text-primary bg-primary/5'
                         )}
                       >

@@ -79,6 +79,9 @@ const Marketing = lazyPage(() => import('@/pages/Marketing').then(m => ({ defaul
 const PromotionsPage = lazyPage(() =>
   import('@/pages/Promotions').then(m => ({ default: m.default }))
 );
+const SponsorshipsPage = lazyPage(() =>
+  import('@/pages/dashboard/SponsorshipsPage').then(m => ({ default: m.default }))
+);
 const PromotionsStatsPage = lazyPage(() =>
   import('@/pages/promotions/PromotionsStatsPage').then(m => ({ default: m.PromotionsStatsPage }))
 );
@@ -295,6 +298,7 @@ export const dashboardRoutes = (
     {pr('/dashboard/customers', Customers)}
     {pr('/dashboard/marketing', Marketing)}
     {pr('/dashboard/promotions', PromotionsPage)}
+    {pr('/dashboard/sponsorships', SponsorshipsPage)}
     {pr('/dashboard/promotions/stats', PromotionsStatsPage)}
 
     {/* Emails */}

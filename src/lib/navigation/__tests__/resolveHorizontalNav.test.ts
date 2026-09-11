@@ -43,6 +43,7 @@ describe('resolveHorizontalNavDomains', () => {
       'Analytics',
       'IA',
       'Systèmes',
+      'Sponsorisation',
       'Paramètres',
     ]);
   });

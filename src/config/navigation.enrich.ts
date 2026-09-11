@@ -65,6 +65,7 @@ export const SELLER_PRIMARY_PATHS = new Set([
   '/dashboard/marketing',
   '/dashboard/customers',
   '/dashboard/promotions',
+  '/dashboard/sponsorships',
   '/dashboard/emails/campaigns',
   '/dashboard/coupons',
   '/dashboard/referrals',
@@ -260,7 +261,12 @@ export function flattenNavSections(sections: NavSection[]): FlatNavEntry[] {
   );
 }
 
-export const DEFAULT_OPEN_SECTION_KEYS = new Set(['principal', 'administration', 'creer']);
+export const DEFAULT_OPEN_SECTION_KEYS = new Set([
+  'principal',
+  'administration',
+  'creer',
+  'sponsorisation',
+]);
 
 export function sectionContainsPath(
   section: { items: { url: string }[] },

@@ -48,6 +48,7 @@ import {
 } from '@/components/ui/dialog';
 import { generatePaymentUrl } from '@/lib/store-utils';
 import { resolveMarketplaceProductCardUrl } from '@/lib/seo/product-public-url';
+import { recordSponsorshipEvent } from '@/lib/sponsorship/marketplace-sponsorship';
 
 interface ProductCardModernProps {
   product: {
@@ -86,6 +87,8 @@ interface ProductCardModernProps {
     downloadable_files?: string[];
     collect_shipping_address?: boolean | null;
     is_featured?: boolean;
+    is_sponsored?: boolean;
+    active_sponsorship_id?: string | null;
     product_affiliate_settings?: Array<{
       commission_rate: number;
       affiliate_enabled: boolean;
@@ -127,6 +130,20 @@ const ProductCardModernComponent = ({
     };
     fetchUser();
   }, []);
+
+  useEffect(() => {
+    if (!product.is_sponsored || !product.active_sponsorship_id) return;
+    void recordSponsorshipEvent(product.active_sponsorship_id, 'impression', {
+      product_id: product.id,
+    });
+  }, [product.is_sponsored, product.active_sponsorship_id, product.id]);
+
+  const trackSponsoredClick = useCallback(() => {
+    if (!product.is_sponsored || !product.active_sponsorship_id) return;
+    void recordSponsorshipEvent(product.active_sponsorship_id, 'click', {
+      product_id: product.id,
+    });
+  }, [product.is_sponsored, product.active_sponsorship_id, product.id]);
 
   // Mémoriser les calculs de prix pour éviter les recalculs
   const { price, hasPromo, discountPercent } = useMemo(() => {
@@ -399,7 +416,7 @@ const ProductCardModernComponent = ({
         )}
 
         {/* Titre du produit */}
-        <Link to={productUrl}>
+        <Link to={productUrl} onClick={trackSponsoredClick}>
           <h3
             className="font-semibold text-sm text-white mb-3 line-clamp-2 leading-tight"
             id={`product-title-${product.id}`}
@@ -423,12 +440,17 @@ const ProductCardModernComponent = ({
             </Badge>
           )}
 
-          {product.is_featured && (
+          {product.is_sponsored ? (
+            <Badge className="bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white border-0 text-[10px] sm:text-xs px-2 py-0.5 shadow-sm">
+              <Sparkles className="h-3 w-3 mr-1" />
+              Sponsorisé
+            </Badge>
+          ) : product.is_featured ? (
             <Badge className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white border-0 text-[10px] sm:text-xs px-2 py-0.5 shadow-sm">
               <Star className="h-3 w-3 mr-1 fill-white" />
               Vedette
             </Badge>
-          )}
+          ) : null}
 
           {getLicensingBadge()}
         </div>
@@ -667,6 +689,7 @@ const ProductCardModern = React.memo(ProductCardModernComponent, (prevProps, nex
     prevProps.product.rating === nextProps.product.rating &&
     prevProps.product.reviews_count === nextProps.product.reviews_count &&
     prevProps.product.is_featured === nextProps.product.is_featured &&
+    prevProps.product.is_sponsored === nextProps.product.is_sponsored &&
     prevProps.product.whatsapp_number === nextProps.product.whatsapp_number &&
     prevProps.product.whatsapp_enabled === nextProps.product.whatsapp_enabled &&
     prevProps.storeSlug === nextProps.storeSlug &&

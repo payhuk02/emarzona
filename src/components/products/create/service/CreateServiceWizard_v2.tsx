@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { SponsorAfterPublishDialog } from '@/components/sponsorship/SponsorAfterPublishDialog';
 import {
   Calendar,
   ArrowLeft,
@@ -146,6 +147,11 @@ export const CreateServiceWizard = ({
   const store = hookStore || (propsStoreId ? { id: propsStoreId } : null);
   const { tree: categoryTree } = useServiceCategoryTree();
   const [currentStep, setCurrentStep] = useState(1);
+  const [sponsorPrompt, setSponsorPrompt] = useState<{
+    open: boolean;
+    productId: string;
+    productName: string;
+  }>({ open: false, productId: '', productName: '' });
 
   // Auto-save
   const [isAutoSaving, setIsAutoSaving] = useState(false);
@@ -1020,34 +1026,11 @@ export const CreateServiceWizard = ({
 
       invalidateCatalog();
 
-      // Navigation/callback dans un try-catch séparé pour ne pas masquer le succès
-      // Utiliser setTimeout pour s'assurer que le toast de succès est affiché en premier
-      setTimeout(() => {
-        try {
-          if (onSuccess) {
-            onSuccess();
-          } else {
-            navigate('/dashboard/services', {
-              replace: true,
-            });
-          }
-        } catch (navigationError) {
-          // Logger l'erreur de navigation mais ne PAS afficher d'erreur à l'utilisateur
-          // car la publication a réussi
-          logger.warn('Erreur lors de la navigation après publication', {
-            error: navigationError,
-            productId: publishedProductId,
-          });
-          // Navigation de fallback silencieuse après un court délai
-          setTimeout(() => {
-            try {
-              navigate('/dashboard/services', { replace: true });
-            } catch {
-              // Ignorer complètement si la navigation échoue encore
-            }
-          }, 200);
-        }
-      }, 100);
+      setSponsorPrompt({
+        open: true,
+        productId: product.id,
+        productName: product.name || 'Service',
+      });
     } catch (error) {
       // Ne PAS afficher d'erreur si la publication a réussi
       if (publicationSuccess) {
@@ -1102,8 +1085,6 @@ export const CreateServiceWizard = ({
     saveServiceProduct,
     formData.affiliate?.enabled,
     toast,
-    onSuccess,
-    navigate,
     t,
     invalidateCatalog,
     categoryTree,
@@ -1525,6 +1506,20 @@ export const CreateServiceWizard = ({
           </div>
         </div>
       </div>
+
+      <SponsorAfterPublishDialog
+        open={sponsorPrompt.open}
+        productId={sponsorPrompt.productId}
+        productName={sponsorPrompt.productName}
+        onOpenChange={open => setSponsorPrompt(prev => ({ ...prev, open }))}
+        onSkip={() => {
+          if (onSuccess) {
+            onSuccess();
+          } else {
+            navigate('/dashboard/services', { replace: true });
+          }
+        }}
+      />
     </div>
   );
 };

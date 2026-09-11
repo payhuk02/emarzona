@@ -34,7 +34,7 @@ interface AIProductRecommendationsProps {
 const AI_RECOMMENDATION_PRODUCT_SELECT = `
   id, store_id, name, slug, description, short_description, image_url, images, price, promotional_price, currency,
   rating, reviews_count, category, product_type, licensing_type, payment_options, whatsapp_number, whatsapp_enabled,
-  created_at, updated_at, tags, stock_quantity,
+  created_at, updated_at, tags, stock_quantity, is_featured, sponsored_until,
   stores:store_id(id, name, slug),
   product_affiliate_settings(commission_rate, affiliate_enabled),
   service_products(service_type, location_type, pricing_type, fulfillment_mode, duration_minutes, requires_staff, category_attributes, service_packages(price, package_price, package_kind, is_active, delivery_days, revisions))
@@ -168,6 +168,8 @@ const AIProductRecommendations: React.FC<AIProductRecommendationsProps> = ({
         return 'Complète vos achats';
       case 'personal':
         return 'Personnalisé pour vous';
+      case 'sponsored':
+        return 'Sponsorisé';
       default:
         return 'Recommandé pour vous';
     }

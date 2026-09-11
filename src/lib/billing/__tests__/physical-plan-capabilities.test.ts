@@ -55,4 +55,10 @@ describe('physical-plan-capabilities (Epic 3.2.7)', () => {
     expect(hasPhysicalFeatureAccess('physical_standard', 'api.public')).toBe(true);
     expect(hasPhysicalFeatureAccess('physical_basic', 'api.public')).toBe(false);
   });
+
+  it('marketplace.sponsor available from physical_standard', () => {
+    expect(hasPhysicalFeatureAccess('physical_standard', 'marketplace.sponsor')).toBe(true);
+    expect(hasPhysicalFeatureAccess('physical_basic', 'marketplace.sponsor')).toBe(false);
+    expect(requiredPlanForFeature('marketplace.sponsor')).toBe('physical_standard');
+  });
 });

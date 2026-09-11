@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { SponsorAfterPublishDialog } from '@/components/sponsorship/SponsorAfterPublishDialog';
 import {
   Palette,
   Info,
@@ -136,6 +137,11 @@ const CreateArtistProductWizardComponent = ({
   const [currentStep, setCurrentStep] = useState(1);
   const [isSaving, setIsSaving] = useState(false);
   const [isAutoSaving, setIsAutoSaving] = useState(false);
+  const [sponsorPrompt, setSponsorPrompt] = useState<{
+    open: boolean;
+    productId: string;
+    productName: string;
+  }>({ open: false, productId: '', productName: '' });
   // État pour stocker les erreurs de validation par étape (utilisé dans la grille d'étapes)
   const [validationErrors] = useState<Record<number, string[]>>({});
 
@@ -516,6 +522,12 @@ const CreateArtistProductWizardComponent = ({
 
       if (!isDraft) {
         invalidateCatalog();
+        setSponsorPrompt({
+          open: true,
+          productId: product.id,
+          productName: sanitizedData.artwork_title || sanitizedData.name || 'Produit',
+        });
+        return;
       }
 
       if (onSuccess) {
@@ -902,6 +914,20 @@ const CreateArtistProductWizardComponent = ({
           </div>
         </div>
       </div>
+
+      <SponsorAfterPublishDialog
+        open={sponsorPrompt.open}
+        productId={sponsorPrompt.productId}
+        productName={sponsorPrompt.productName}
+        onOpenChange={open => setSponsorPrompt(prev => ({ ...prev, open }))}
+        onSkip={() => {
+          if (onSuccess) {
+            onSuccess();
+          } else {
+            navigate('/dashboard/artist-products');
+          }
+        }}
+      />
     </div>
   );
 };

@@ -20,7 +20,8 @@ export type PhysicalFeatureKey =
   | 'cost_optimization.manage'
   | 'team.sso'
   | 'audit.export'
-  | 'api.public';
+  | 'api.public'
+  | 'marketplace.sponsor';
 
 const PLAN_RANK: Record<Exclude<PhysicalPlanSlug, null>, number> = {
   physical_basic: 1,
@@ -49,6 +50,7 @@ const MIN_PLAN_BY_FEATURE: Record<PhysicalFeatureKey, Exclude<PhysicalPlanSlug, 
   'team.sso': 'physical_premium',
   'audit.export': 'physical_premium',
   'api.public': 'physical_standard',
+  'marketplace.sponsor': 'physical_standard',
 };
 
 export function hasPhysicalFeatureAccess(

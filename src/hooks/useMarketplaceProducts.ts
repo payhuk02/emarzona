@@ -174,6 +174,7 @@ export async function fetchMarketplaceProducts({
           return hasSearchQuery && q ? q : null;
         })(),
         p_featured_only: filters.category === 'featured' || filters.featuredOnly === true,
+        p_sponsored_only: false,
       });
 
       if (error) {
@@ -221,6 +222,8 @@ export async function fetchMarketplaceProducts({
             licensing_type: product.licensing_type as string,
             license_terms: product.license_terms as string,
             is_featured: product.is_featured as boolean,
+            is_sponsored: Boolean(product.is_sponsored),
+            active_sponsorship_id: (product.active_sponsorship_id as string | null) ?? null,
             payment_options: (product.payment_options as Product['payment_options']) ?? null,
             whatsapp_number: (product.whatsapp_number as string | null) ?? null,
             whatsapp_enabled: Boolean(product.whatsapp_enabled),

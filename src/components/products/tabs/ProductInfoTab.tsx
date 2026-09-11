@@ -830,22 +830,29 @@ export const ProductInfoTab = ({
               <div className="flex items-center justify-between p-4 bg-gray-700/30 rounded-lg border border-gray-600">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <Label className="text-sm font-medium text-white">Mettre en avant</Label>
+                    <Label className="text-sm font-medium text-white">
+                      Sponsorisation Marketplace
+                    </Label>
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <HelpCircle className="h-3 w-3 text-gray-400" />
                       </TooltipTrigger>
                       <TooltipContent>
-                        <p>Afficher ce produit sur la page d'accueil</p>
+                        <p>
+                          La mise en avant est gérée via une campagne (quota plan ou boost payant).
+                        </p>
                       </TooltipContent>
                     </Tooltip>
                   </div>
-                  <p className="text-xs text-gray-400">Afficher ce produit sur la page d'accueil</p>
+                  <p className="text-xs text-gray-400">
+                    {formData.is_featured
+                      ? 'Ce produit est actuellement sponsorisé.'
+                      : 'Boostez ce produit dans le feed Marketplace.'}
+                  </p>
                 </div>
-                <Switch
-                  checked={formData.is_featured || false}
-                  onCheckedChange={checked => updateFormData('is_featured', checked)}
-                />
+                <Button type="button" variant="secondary" size="sm" asChild>
+                  <a href="/dashboard/sponsorships">Sponsoriser</a>
+                </Button>
               </div>
 
               <div className="flex items-center justify-between p-4 bg-gray-700/30 rounded-lg border border-gray-600">
@@ -1410,9 +1417,3 @@ export const ProductInfoTab = ({
     </TooltipProvider>
   );
 };
-
-
-
-
-
-

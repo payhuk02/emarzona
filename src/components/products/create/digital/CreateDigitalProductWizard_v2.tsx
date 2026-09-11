@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { SponsorAfterPublishDialog } from '@/components/sponsorship/SponsorAfterPublishDialog';
 import {
   ArrowLeft,
   Check,
@@ -229,6 +230,11 @@ export const CreateDigitalProductWizard = ({
   const { store, loading: storeLoading } = useStore();
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [sponsorPrompt, setSponsorPrompt] = useState<{
+    open: boolean;
+    productId: string;
+    productName: string;
+  }>({ open: false, productId: '', productName: '' });
 
   // Auto-save
   const [isAutoSaving, setIsAutoSaving] = useState(false);
@@ -1064,11 +1070,11 @@ export const CreateDigitalProductWizard = ({
 
       invalidateCatalog();
 
-      if (onSuccess) {
-        onSuccess();
-      } else {
-        navigate('/dashboard/digital-products', { replace: true });
-      }
+      setSponsorPrompt({
+        open: true,
+        productId: product.id,
+        productName: product.name,
+      });
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Erreur lors de la publication', { error: errorMessage });
@@ -1086,9 +1092,6 @@ export const CreateDigitalProductWizard = ({
     saveProduct,
     formData.affiliate?.enabled,
     toast,
-    onSuccess,
-    navigate,
-    storeSlug,
     t,
     invalidateCatalog,
   ]);
@@ -1518,6 +1521,20 @@ export const CreateDigitalProductWizard = ({
           </div>
         </div>
       </div>
+
+      <SponsorAfterPublishDialog
+        open={sponsorPrompt.open}
+        productId={sponsorPrompt.productId}
+        productName={sponsorPrompt.productName}
+        onOpenChange={open => setSponsorPrompt(prev => ({ ...prev, open }))}
+        onSkip={() => {
+          if (onSuccess) {
+            onSuccess();
+          } else {
+            navigate('/dashboard/digital-products', { replace: true });
+          }
+        }}
+      />
     </div>
   );
 };

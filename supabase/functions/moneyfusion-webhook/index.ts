@@ -700,6 +700,17 @@ serve(async req => {
               }),
             });
           }
+        } else if (purpose === 'marketplace_sponsorship') {
+          const sponsorshipId = meta.sponsorship_id as string | undefined;
+          if (sponsorshipId) {
+            const { activateMarketplaceSponsorshipFromWebhook } = await import(
+              '../_shared/marketplace-sponsorship-webhook.ts'
+            );
+            await activateMarketplaceSponsorshipFromWebhook(supabase, {
+              sponsorshipId: String(sponsorshipId),
+              paymentRef: String(transactionId),
+            });
+          }
         }
       } catch (subErr) {
         console.error('[MoneyFusion webhook] physical subscription error', subErr);

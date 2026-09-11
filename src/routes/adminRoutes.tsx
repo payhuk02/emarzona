@@ -101,6 +101,7 @@ const AdminMonitoring = lazyPage(() => import('@/pages/admin/AdminMonitoring'));
 const AdminFulfillmentAlerts = lazyPage(() => import('@/pages/admin/AdminFulfillmentAlerts'));
 const AdminPlatformFaq = lazyPage(() => import('@/pages/admin/AdminPlatformFaq'));
 const AdminPlatformBlog = lazyPage(() => import('@/pages/admin/AdminPlatformBlog'));
+const AdminSponsorships = lazyPage(() => import('@/pages/admin/AdminSponsorships'));
 const AdminArticleComments = lazyPage(() => import('@/pages/admin/AdminArticleComments'));
 const AdminAccessibilityReport = lazyPage(() => import('@/pages/admin/AdminAccessibilityReport'));
 const AdminDataStorage = lazyPage(() => import('@/pages/admin/AdminDataStorage'));
@@ -140,6 +141,7 @@ export const adminRoutes = (
     {pr('/admin/platform-customization', PlatformCustomization)}
     {pr('/admin/platform-faq', AdminPlatformFaq)}
     {pr('/admin/platform-blog', AdminPlatformBlog)}
+    {pr('/admin/sponsorships', AdminSponsorships)}
     {pr('/admin/article-comments', AdminArticleComments)}
     {pr('/admin/newsletter-subscribers', AdminNewsletterSubscribers)}
     {pr('/admin/geniuspay-analytics', GeniusPayAnalytics)}

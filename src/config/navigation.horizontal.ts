@@ -90,6 +90,13 @@ export const SELLER_HORIZONTAL_NAV_SECTIONS: HorizontalNavSectionSpec[] = [
     rootPath: '/dashboard/integrations',
   },
   {
+    domainKey: 'sponsorisation',
+    sectionKey: 'sponsorisation',
+    shortLabelKey: 'sidebar.chrome.sellerNavSponsorisation',
+    shortLabel: 'Sponsorisation',
+    rootPath: '/dashboard/sponsorships',
+  },
+  {
     domainKey: 'configuration',
     sectionKey: 'configuration',
     shortLabelKey: 'sidebar.chrome.sellerNavParametres',
@@ -245,6 +252,23 @@ export const HORIZONTAL_MEGA_SUBGROUPS: Partial<
         '/dashboard/store-affiliates',
         '/dashboard/gamification',
         '/dashboard/promotions/stats',
+      ],
+    },
+  ],
+  sponsorisation: [
+    {
+      groupKey: 'boost_marketplace',
+      defaultLabel: 'Boost Marketplace',
+      paths: ['/dashboard/sponsorships'],
+    },
+    {
+      groupKey: 'sponsor_catalogue',
+      defaultLabel: 'Catalogue & paiement',
+      paths: [
+        '/dashboard/products',
+        '/dashboard/products/new',
+        '/dashboard/promotions',
+        '/dashboard/payment-methods',
       ],
     },
   ],

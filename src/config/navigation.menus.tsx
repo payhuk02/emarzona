@@ -685,6 +685,41 @@ export const userMenuSections = [
     ],
   },
   {
+    label: 'Sponsorisation',
+    items: [
+      {
+        title: 'Boost Marketplace',
+        url: '/dashboard/sponsorships',
+        icon: Megaphone,
+      },
+      {
+        title: 'Mes campagnes',
+        url: '/dashboard/sponsorships?view=campaigns',
+        icon: BarChart3,
+      },
+      {
+        title: 'Mes produits',
+        url: '/dashboard/products',
+        icon: Package,
+      },
+      {
+        title: 'Créer un produit',
+        url: '/dashboard/products/new',
+        icon: Sparkles,
+      },
+      {
+        title: 'Promotions',
+        url: '/dashboard/promotions',
+        icon: Tag,
+      },
+      {
+        title: 'Méthodes de paiement',
+        url: '/dashboard/payment-methods',
+        icon: Wallet,
+      },
+    ],
+  },
+  {
     label: 'Analytics & SEO',
     items: [
       {
@@ -1062,6 +1097,11 @@ export const adminMenuSections = [
       {
         title: 'Marketing Automation',
         url: '/admin/marketing',
+        icon: Megaphone,
+      },
+      {
+        title: 'Sponsorisations',
+        url: '/admin/sponsorships',
         icon: Megaphone,
       },
       {

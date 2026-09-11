@@ -13,6 +13,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
+import { SponsorAfterPublishDialog } from '@/components/sponsorship/SponsorAfterPublishDialog';
 import {
   Check,
   ChevronLeft,
@@ -134,6 +135,12 @@ export const CreateCourseWizard = ({
   const createFullCourse = useCreateFullCourse();
 
   const [currentStep, setCurrentStep] = useState(1);
+  const [sponsorPrompt, setSponsorPrompt] = useState<{
+    open: boolean;
+    productId: string;
+    productName: string;
+  }>({ open: false, productId: '', productName: '' });
+  const publishHandledRef = useRef(false);
 
   // Auto-save
   const [isAutoSaving, setIsAutoSaving] = useState(false);
@@ -601,28 +608,44 @@ export const CreateCourseWizard = ({
    * Handle successful course creation
    */
   useEffect(() => {
-    if (createFullCourse.isSuccess && createFullCourse.data) {
-      logger.info('Cours publié avec succès', { courseId: createFullCourse.data.id });
+    if (!createFullCourse.isSuccess || !createFullCourse.data || publishHandledRef.current) {
+      return;
+    }
+    publishHandledRef.current = true;
 
-      // Clear draft from localStorage on success
-      try {
-        localStorage.removeItem('course-draft');
-      } catch {
-        // ignore
-      }
+    const product = createFullCourse.data.product;
+    logger.info('Cours publié avec succès', {
+      courseId: createFullCourse.data.course?.id,
+      productId: product?.id,
+    });
 
-      toast({
-        title: '🎉 Cours publié !',
-        description: `"${formData.title}" est maintenant en ligne`,
+    // Clear draft from localStorage on success
+    try {
+      localStorage.removeItem('course-draft');
+    } catch {
+      // ignore
+    }
+
+    toast({
+      title: '🎉 Cours publié !',
+      description: `"${formData.title}" est maintenant en ligne`,
+    });
+
+    invalidateCatalog();
+
+    if (product?.id) {
+      setSponsorPrompt({
+        open: true,
+        productId: product.id,
+        productName: product.name || formData.title,
       });
+      return;
+    }
 
-      invalidateCatalog();
-
-      if (onSuccess) {
-        onSuccess();
-      } else {
-        navigate('/dashboard/courses');
-      }
+    if (onSuccess) {
+      onSuccess();
+    } else {
+      navigate('/dashboard/courses');
     }
   }, [
     createFullCourse.isSuccess,
@@ -1182,6 +1205,20 @@ export const CreateCourseWizard = ({
           <span className="text-muted-foreground">{t('courses.shortcuts.prev', 'Précédent')}</span>
         </div>
       </div>
+
+      <SponsorAfterPublishDialog
+        open={sponsorPrompt.open}
+        productId={sponsorPrompt.productId}
+        productName={sponsorPrompt.productName}
+        onOpenChange={open => setSponsorPrompt(prev => ({ ...prev, open }))}
+        onSkip={() => {
+          if (onSuccess) {
+            onSuccess();
+          } else {
+            navigate('/dashboard/courses');
+          }
+        }}
+      />
     </div>
   );
 };

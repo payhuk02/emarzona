@@ -176,6 +176,9 @@ export interface ArtistProduct extends BaseProduct {
   signature_authenticated?: boolean;
   // Propriétés partagées avec d'autres types de produits
   is_featured?: boolean;
+  /** Sponsorisation marketplace active (feed boost) */
+  is_sponsored?: boolean;
+  active_sponsorship_id?: string | null;
   pricing_model?: string | null;
   payment_options?: {
     payment_type?: 'full' | 'percentage' | 'delivery_secured';

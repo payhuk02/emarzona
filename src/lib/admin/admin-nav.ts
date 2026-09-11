@@ -520,6 +520,12 @@ export const ADMIN_NAV_SECTIONS: AdminNavSection[] = [
         permissions: ['settings.manage'],
       },
       {
+        icon: Megaphone,
+        label: 'Sponsorisations',
+        path: '/admin/sponsorships',
+        permissions: ['products.manage'],
+      },
+      {
         icon: MessageSquare,
         label: 'Commentaires & Avis',
         path: '/admin/article-comments',
