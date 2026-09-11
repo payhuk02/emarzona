@@ -8,27 +8,45 @@ import {
   isLandingPremiumLocaleLoaded,
 } from '@/i18n/landing-premium-loader';
 
-function applyArrayOverrides<T>(
+/** Lit une surcharge admin (clé nue ou préfixée landingPremium.*). */
+function readOverride(customization: Record<string, unknown>, key: string): string | undefined {
+  return getPageCustomizationValue(customization, key);
+}
+
+/**
+ * Applique les overrides admin sur un tableau i18n (objets ou strings).
+ * Gère aussi les champs imbriqués (ex. sellWays.items.0.bullets.1).
+ */
+export function applyArrayOverrides<T>(
   base: T[],
   prefix: string,
   customization: Record<string, unknown>
 ): T[] {
   return base.map((item, index) => {
     if (typeof item === 'string') {
-      const override = customization[`${prefix}.${index}`];
-      return (typeof override === 'string' && override.length > 0 ? override : item) as T;
+      const override = readOverride(customization, `${prefix}.${index}`);
+      return (override && override.length > 0 ? override : item) as T;
     }
 
     if (item && typeof item === 'object' && !Array.isArray(item)) {
       const obj = item as Record<string, unknown>;
-      const result = { ...obj };
+      const result: Record<string, unknown> = { ...obj };
+
       for (const field of Object.keys(obj)) {
-        const key = `${prefix}.${index}.${field}`;
-        const override = customization[key];
+        const fieldKey = `${prefix}.${index}.${field}`;
+        const value = obj[field];
+
+        if (Array.isArray(value)) {
+          result[field] = applyArrayOverrides(value, fieldKey, customization);
+          continue;
+        }
+
+        const override = readOverride(customization, fieldKey);
         if (typeof override === 'string' && override.length > 0) {
           result[field] = override;
         }
       }
+
       return result as T;
     }
 

@@ -86,14 +86,35 @@ export const useProfile = () => {
       // Créer le profil s'il n'existe pas
       if (!data || data.length === 0) {
         logger.info('No profile found, creating new one');
+        const meta = (user.user_metadata || {}) as Record<string, unknown>;
+        const metaFullName =
+          (typeof meta.display_name === 'string' && meta.display_name.trim()) ||
+          (typeof meta.full_name === 'string' && meta.full_name.trim()) ||
+          (typeof meta.name === 'string' && meta.name.trim()) ||
+          '';
+        const metaFirst = (typeof meta.first_name === 'string' && meta.first_name.trim()) || null;
+        const metaLast = (typeof meta.last_name === 'string' && meta.last_name.trim()) || null;
+        const emailLower = (user.email || '').toLowerCase();
+        const safeDisplayName =
+          metaFullName && metaFullName.toLowerCase() !== emailLower && !metaFullName.includes('@')
+            ? metaFullName
+            : null;
+        let firstName = metaFirst;
+        let lastName = metaLast;
+        if (!firstName && safeDisplayName) {
+          const parts = safeDisplayName.split(/\s+/).filter(Boolean);
+          firstName = parts[0] || null;
+          lastName = parts.length > 1 ? parts.slice(1).join(' ') : null;
+        }
+
         const { data: newProfile, error: createError } = await supabase
           .from('profiles')
           .insert([
             {
               user_id: user.id,
-              display_name: user.email,
-              first_name: null,
-              last_name: null,
+              display_name: safeDisplayName,
+              first_name: firstName,
+              last_name: lastName,
               bio: null,
               phone: null,
               location: null,

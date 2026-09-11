@@ -202,6 +202,15 @@ export const mediaSchema = z
         landingCarousel: z.record(z.string(), urlSchema).optional(),
         landingAdapt: urlSchema,
         landingGlobe: urlSchema,
+        landingSellWays: z
+          .object({
+            physical: urlSchema.optional(),
+            digital: urlSchema.optional(),
+            service: urlSchema.optional(),
+            courses: urlSchema.optional(),
+            artist: urlSchema.optional(),
+          })
+          .optional(),
       })
       .optional(),
     documents: z.record(z.string(), urlSchema).optional(),

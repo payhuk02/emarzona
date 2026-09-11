@@ -11,13 +11,18 @@ import { PageHeroImagesMediaSection } from '@/components/admin/customization/Pag
 
 // Default images imports (auth hero: admin upload only, no bundled fallback)
 import adaptPremiumPng from '@/assets/landing/adapt-entrepreneur.png';
-import ctaGlobePng from '@/assets/landing/cta-globe.png';
+import ctaVisualPremium from '@/assets/landing/cta-visual-premium.png';
 import heroEntrepreneur from '@/assets/landing/hero-carousel-entrepreneur.webp';
 import heroPhysical from '@/assets/landing/hero-carousel-physical.webp';
 import heroDigital from '@/assets/landing/hero-carousel-digital.webp';
 import heroService from '@/assets/landing/hero-carousel-service.webp';
 import heroCourses from '@/assets/landing/hero-carousel-courses.webp';
 import heroArtist from '@/assets/landing/hero-carousel-artist.webp';
+import sellWayPhysical from '@/assets/landing/sell-way-physical.webp';
+import sellWayDigital from '@/assets/landing/sell-way-digital.webp';
+import sellWayService from '@/assets/landing/sell-way-service.webp';
+import sellWayCourses from '@/assets/landing/sell-way-courses.webp';
+import sellWayArtist from '@/assets/landing/sell-way-artist.webp';
 
 interface MediaSectionProps {
   onChange: () => void;
@@ -30,6 +35,11 @@ export function MediaSection({ onChange }: MediaSectionProps) {
   const media = customizationData?.media?.images || {};
 
   const [isUploading, setIsUploading] = useState<string | null>(null);
+
+  const applyMediaImages = async (updatedMedia: Record<string, unknown>) => {
+    await save('media', { images: updatedMedia });
+    onChange();
+  };
 
   const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>, keyPath: string[]) => {
     const file = event.target.files?.[0];
@@ -61,14 +71,17 @@ export function MediaSection({ onChange }: MediaSectionProps) {
 
       if (keyPath.length === 1) {
         updatedMedia = { ...updatedMedia, [keyPath[0]]: publicUrl };
-      } else if (keyPath.length === 2 && keyPath[0] === 'landingCarousel') {
-        const carousel = { ...((updatedMedia.landingCarousel as Record<string, string>) || {}) };
-        carousel[keyPath[1]] = publicUrl;
-        updatedMedia = { ...updatedMedia, landingCarousel: carousel };
+      } else if (
+        keyPath.length === 2 &&
+        (keyPath[0] === 'landingCarousel' || keyPath[0] === 'landingSellWays')
+      ) {
+        const nestedKey = keyPath[0];
+        const nested = { ...((updatedMedia[nestedKey] as Record<string, string>) || {}) };
+        nested[keyPath[1]] = publicUrl;
+        updatedMedia = { ...updatedMedia, [nestedKey]: nested };
       }
 
-      await save('media', { images: updatedMedia });
-      onChange();
+      await applyMediaImages(updatedMedia);
 
       toast({
         title: 'Image uploadée avec succès',
@@ -84,6 +97,49 @@ export function MediaSection({ onChange }: MediaSectionProps) {
     } finally {
       setIsUploading(null);
       event.target.value = '';
+    }
+  };
+
+  const handleReset = async (keyPath: string[]) => {
+    try {
+      const uploadKey = keyPath.join('.');
+      setIsUploading(uploadKey);
+
+      let updatedMedia = { ...media };
+
+      if (keyPath.length === 1) {
+        const { [keyPath[0]]: _removed, ...rest } = updatedMedia as Record<string, unknown>;
+        updatedMedia = rest;
+      } else if (
+        keyPath.length === 2 &&
+        (keyPath[0] === 'landingCarousel' || keyPath[0] === 'landingSellWays')
+      ) {
+        const nestedKey = keyPath[0];
+        const nested = { ...((updatedMedia[nestedKey] as Record<string, string>) || {}) };
+        delete nested[keyPath[1]];
+        if (Object.keys(nested).length > 0) {
+          updatedMedia = { ...updatedMedia, [nestedKey]: nested };
+        } else {
+          const { [nestedKey]: _removedNested, ...rest } = updatedMedia as Record<string, unknown>;
+          updatedMedia = rest;
+        }
+      }
+
+      await applyMediaImages(updatedMedia);
+
+      toast({
+        title: 'Image réinitialisée',
+        description: "L'image par défaut de la plateforme est de nouveau utilisée.",
+      });
+    } catch (error) {
+      logger.error('Error resetting image', { error });
+      toast({
+        title: 'Erreur',
+        description: error instanceof Error ? error.message : "Impossible de réinitialiser l'image",
+        variant: 'destructive',
+      });
+    } finally {
+      setIsUploading(null);
     }
   };
 
@@ -152,6 +208,16 @@ export function MediaSection({ onChange }: MediaSectionProps) {
               )}
               {isCustom ? 'Remplacer' : 'Uploader une image'}
             </Button>
+            {isCustom ? (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => void handleReset(keyPath)}
+                disabled={loading}
+              >
+                Réinitialiser
+              </Button>
+            ) : null}
             {!isCustom && defaultUrl && (
               <p className="text-xs font-medium text-foreground">
                 L'image par défaut est actuellement utilisée.
@@ -210,7 +276,7 @@ export function MediaSection({ onChange }: MediaSectionProps) {
           />
           <ImageUploader
             title="Arrière-plan droit Hero plateforme (visuel)"
-            description="Image optionnelle dans la colonne visuelle à droite (avec animation écosystème sur desktop). Les couleurs se règlent dans Textes → Hero plateforme."
+            description="Image optionnelle dans la colonne visuelle à droite du hero. Les couleurs se règlent dans Textes → Hero plateforme."
             keyPath={['landingPlatformHero']}
             currentUrl={media.landingPlatformHero as string | undefined}
             optional
@@ -223,11 +289,58 @@ export function MediaSection({ onChange }: MediaSectionProps) {
             defaultUrl={adaptPremiumPng}
           />
           <ImageUploader
-            title="Globe 3D (Call to Action)"
-            description="Visuel du globe dans le bas de la page d'accueil."
+            title="Visuel CTA final"
+            description="Image premium statique à droite du bloc « Prêt à tout vendre ». Format carré recommandé (PNG/WebP)."
             keyPath={['landingGlobe']}
             currentUrl={media.landingGlobe as string}
-            defaultUrl={ctaGlobePng}
+            defaultUrl={ctaVisualPremium}
+          />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Modèles de vente (page d'accueil)</CardTitle>
+          <CardDescription>
+            Images des sections dédiées Produits physiques, digitaux, Services, Cours et Œuvres —
+            affichées sous l'intro « Cinq façons de vendre ».
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <ImageUploader
+            title="Produits physiques"
+            description="Section modèles de vente — visuel produits physiques."
+            keyPath={['landingSellWays', 'physical']}
+            currentUrl={(media.landingSellWays as Record<string, string> | undefined)?.physical}
+            defaultUrl={sellWayPhysical}
+          />
+          <ImageUploader
+            title="Produits digitaux"
+            description="Section modèles de vente — visuel produits digitaux."
+            keyPath={['landingSellWays', 'digital']}
+            currentUrl={(media.landingSellWays as Record<string, string> | undefined)?.digital}
+            defaultUrl={sellWayDigital}
+          />
+          <ImageUploader
+            title="Services"
+            description="Section modèles de vente — visuel services."
+            keyPath={['landingSellWays', 'service']}
+            currentUrl={(media.landingSellWays as Record<string, string> | undefined)?.service}
+            defaultUrl={sellWayService}
+          />
+          <ImageUploader
+            title="Cours en ligne"
+            description="Section modèles de vente — visuel cours / formations."
+            keyPath={['landingSellWays', 'courses']}
+            currentUrl={(media.landingSellWays as Record<string, string> | undefined)?.courses}
+            defaultUrl={sellWayCourses}
+          />
+          <ImageUploader
+            title="Œuvres d'artiste"
+            description="Section modèles de vente — visuel œuvres / créateurs."
+            keyPath={['landingSellWays', 'artist']}
+            currentUrl={(media.landingSellWays as Record<string, string> | undefined)?.artist}
+            defaultUrl={sellWayArtist}
           />
         </CardContent>
       </Card>

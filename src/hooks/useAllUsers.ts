@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
+import { resolveUserFullName, sanitizeDisplayName } from '@/lib/userDisplayName';
 
 export interface UserProfile {
   id: string;
@@ -10,6 +11,8 @@ export interface UserProfile {
   display_name: string | null;
   first_name: string | null;
   last_name: string | null;
+  /** Nom complet résolu pour l'UI (jamais l'email). */
+  full_name: string;
   avatar_url: string | null;
   created_at: string;
   role: string;
@@ -35,6 +38,8 @@ interface UseAllUsersOptions {
   sortDirection?: SortDirection;
   filters?: UserFilters;
 }
+
+type EmailsRpcRow = { user_id: string; email: string; full_name?: string | null };
 
 export const useAllUsers = (options: UseAllUsersOptions = {}) => {
   const {
@@ -65,7 +70,7 @@ export const useAllUsers = (options: UseAllUsersOptions = {}) => {
       let query = supabase
         .from('profiles')
         .select(
-          'id,user_id,display_name,first_name,last_name,role,is_suspended,suspended_at,created_at,updated_at',
+          'id,user_id,display_name,first_name,last_name,avatar_url,role,is_suspended,suspension_reason,suspended_at,created_at,updated_at',
           { count: 'exact' }
         );
 
@@ -109,7 +114,7 @@ export const useAllUsers = (options: UseAllUsersOptions = {}) => {
         return;
       }
 
-      // Récupérer les emails pour tous les utilisateurs en une seule requête RPC
+      // Récupérer emails + noms (métadonnées auth) en une seule requête RPC
       const userIds = profilesData.map(p => p.user_id);
       const { data: emailsData, error: emailsError } = await supabase.rpc('get_users_emails', {
         p_user_ids: userIds,
@@ -119,11 +124,13 @@ export const useAllUsers = (options: UseAllUsersOptions = {}) => {
         logger.error('Error fetching emails:', emailsError);
       }
 
-      // Créer une map user_id => email pour un accès rapide
       const emailMap = new Map<string, string>();
+      const metaNameMap = new Map<string, string>();
       if (emailsData) {
-        emailsData.forEach((item: { user_id: string; email: string }) => {
-          emailMap.set(item.user_id, item.email);
+        (emailsData as EmailsRpcRow[]).forEach(item => {
+          if (item.email) emailMap.set(item.user_id, item.email);
+          const metaName = sanitizeDisplayName(item.full_name, item.email);
+          if (metaName) metaNameMap.set(item.user_id, metaName);
         });
       }
 
@@ -140,19 +147,28 @@ export const useAllUsers = (options: UseAllUsersOptions = {}) => {
       }
 
       const usersWithDetails = profilesData.map(profile => {
-        const email = emailMap.get(profile.user_id) || profile.display_name || 'Utilisateur';
+        const email = emailMap.get(profile.user_id) || 'Utilisateur';
         const userRole =
           roleByUserId.get(profile.user_id) ||
           (typeof profile.role === 'string' ? profile.role : null) ||
           'user';
+        const display_name = sanitizeDisplayName(profile.display_name, email);
+        const full_name = resolveUserFullName({
+          firstName: profile.first_name,
+          lastName: profile.last_name,
+          displayName: display_name,
+          metaFullName: metaNameMap.get(profile.user_id),
+          email,
+        });
 
         return {
           id: profile.id,
           user_id: profile.user_id,
           email,
-          display_name: profile.display_name,
+          display_name,
           first_name: profile.first_name,
           last_name: profile.last_name,
+          full_name,
           avatar_url: profile.avatar_url,
           created_at: profile.created_at,
           role: userRole,

@@ -220,7 +220,17 @@ export const LANDING_PREMIUM_SECTIONS: LandingPremiumSection[] = [
       text('sellWays.titleLine1', 'Titre — ligne 1', lp.sellWays.titleLine1),
       text('sellWays.titleLine2', 'Titre — ligne 2', lp.sellWays.titleLine2),
       area('sellWays.subtitle', 'Sous-titre', lp.sellWays.subtitle),
-      ...itemFields('sellWays.items', lp.sellWays.items, 'Carte'),
+      ...lp.sellWays.items.flatMap((item, i) => [
+        text(`sellWays.items.${i}.title`, `Section ${i + 1} — Titre`, item.title),
+        area(`sellWays.items.${i}.desc`, `Section ${i + 1} — Description`, item.desc),
+        ...stringListFields(
+          `sellWays.items.${i}.bullets`,
+          item.bullets,
+          `Section ${i + 1} — Point`
+        ),
+        text(`sellWays.items.${i}.cta`, `Section ${i + 1} — CTA`, item.cta),
+        text(`sellWays.items.${i}.imageAlt`, `Section ${i + 1} — Alt image`, item.imageAlt),
+      ]),
     ],
   },
   {
@@ -420,7 +430,7 @@ export const LANDING_PREMIUM_SECTIONS: LandingPremiumSection[] = [
       area('cta.subtitle', 'Sous-titre', lp.cta.subtitle),
       text('cta.ctaPrimary', 'CTA principal', lp.cta.ctaPrimary),
       text('cta.ctaSecondary', 'CTA secondaire', lp.cta.ctaSecondary),
-      text('cta.globeAria', 'Aria-label globe', lp.cta.globeAria),
+      text('cta.globeAria', 'Aria-label visuel CTA', lp.cta.globeAria),
     ],
   },
   {

@@ -253,7 +253,10 @@ const Auth = () => {
         options: {
           emailRedirectTo: redirectUrl,
           data: {
-            full_name: name,
+            full_name: name.trim(),
+            display_name: name.trim(),
+            first_name: name.trim().split(/\s+/).filter(Boolean)[0] || name.trim(),
+            last_name: name.trim().split(/\s+/).filter(Boolean).slice(1).join(' ') || undefined,
           },
         },
       });

@@ -258,21 +258,64 @@
     "subtitle": "Each business model has dedicated tools — no fragile plugins or integrations.",
     "items": [
       {
+        "id": "physical",
         "title": "Physical products",
-        "desc": "Stock, variants, shipping and integrated logistics tracking."
+        "desc": "Manage stock, variants and shipping on one platform — from catalog to delivery, with built-in logistics tracking.",
+        "bullets": [
+          "Synced stock, variants and inventory",
+          "Shipping and logistics tracking included",
+          "Cash on delivery and guarantees"
+        ],
+        "cta": "Learn more",
+        "imageAlt": "Physical products storefront on the Emarzona platform"
       },
       {
+        "id": "digital",
         "title": "Digital products",
-        "desc": "Ebooks, software, templates — secure instant delivery."
+        "desc": "Sell ebooks, software and templates with secure instant delivery — licenses and downloads under control.",
+        "bullets": [
+          "Instant delivery and secure links",
+          "Licenses and anti-sharing protection",
+          "Ebooks, software, templates and more"
+        ],
+        "cta": "Learn more",
+        "imageAlt": "Digital products selling on the Emarzona platform"
       },
-      { "title": "Services", "desc": "Bookings, quotes and services with connected calendar." },
       {
+        "id": "service",
+        "title": "Services",
+        "desc": "Offer consulting, coaching or client work with bookings, quotes and a connected calendar — no extra tools.",
+        "bullets": [
+          "Bookings and connected calendar",
+          "Structured quotes and services",
+          "Online payment before or after the session"
+        ],
+        "cta": "Learn more",
+        "imageAlt": "Services and bookings management on Emarzona"
+      },
+      {
+        "id": "courses",
         "title": "Online courses",
-        "desc": "Training, drip content, certifications and community."
+        "desc": "Build courses with videos, drip content, certifications and community — your brand, your platform.",
+        "bullets": [
+          "Learning paths, drip content and quizzes",
+          "Certificates and learner progress",
+          "Community and monetization built in"
+        ],
+        "cta": "Learn more",
+        "imageAlt": "Online courses platform on Emarzona"
       },
       {
+        "id": "artist",
         "title": "Artist works",
-        "desc": "Portfolio, limited editions and certificates of authenticity."
+        "desc": "Showcase your portfolio, sell limited editions and issue certificates of authenticity — a premium gallery for creators.",
+        "bullets": [
+          "Polished portfolio and collections",
+          "Limited editions and authentication",
+          "Premium showcase for artists and creators"
+        ],
+        "cta": "Learn more",
+        "imageAlt": "Artist gallery on Emarzona"
       }
     ]
   },
@@ -468,7 +511,7 @@
     "subtitle": "Join creators and brands centralizing sales on infrastructure built for Africa and the world.",
     "ctaPrimary": "Start for free",
     "ctaSecondary": "Book a call",
-    "globeAria": "Animated globe — international selling"
+    "globeAria": "Premium visual — international selling"
   },
   "footer": {
     "tagline": "The all-in-one e-commerce platform to sell, manage and grow your business online.",

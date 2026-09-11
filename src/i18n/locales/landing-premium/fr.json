@@ -260,24 +260,64 @@
     "subtitle": "Chaque modèle économique dispose d'outils dédiés, sans plugin ni intégration fragile.",
     "items": [
       {
+        "id": "physical",
         "title": "Produits physiques",
-        "desc": "Stock, variantes, expédition et suivi logistique intégrés."
+        "desc": "Gérez stock, variantes et expédition sur une seule plateforme — du catalogue à la livraison, avec suivi logistique intégré.",
+        "bullets": [
+          "Stock, variantes et inventaire synchronisés",
+          "Expédition et suivi logistique intégrés",
+          "Paiement à la livraison et garanties"
+        ],
+        "cta": "En savoir plus",
+        "imageAlt": "Boutique de produits physiques sur la plateforme Emarzona"
       },
       {
+        "id": "digital",
         "title": "Produits digitaux",
-        "desc": "Ebooks, logiciels, templates — livraison instantanée sécurisée."
+        "desc": "Vendez ebooks, logiciels et templates avec livraison instantanée sécurisée — licences et téléchargements sous contrôle.",
+        "bullets": [
+          "Livraison instantanée et liens sécurisés",
+          "Licences et protection anti-partage",
+          "Ebooks, logiciels, templates et plus"
+        ],
+        "cta": "En savoir plus",
+        "imageAlt": "Vente de produits digitaux sur la plateforme Emarzona"
       },
       {
+        "id": "service",
         "title": "Services",
-        "desc": "Réservations, devis et prestations avec calendrier connecté."
+        "desc": "Proposez consultations, coaching ou prestations avec réservations, devis et calendrier connecté — sans outil externe.",
+        "bullets": [
+          "Réservations et calendrier connecté",
+          "Devis et prestations structurés",
+          "Paiement en ligne avant ou après la séance"
+        ],
+        "cta": "En savoir plus",
+        "imageAlt": "Gestion de services et réservations sur Emarzona"
       },
       {
+        "id": "courses",
         "title": "Cours en ligne",
-        "desc": "Formations, drip content, certifications et communauté."
+        "desc": "Créez des formations avec vidéos, drip content, certifications et communauté — votre marque, votre plateforme.",
+        "bullets": [
+          "Parcours, drip content et quiz",
+          "Certifications et progression élèves",
+          "Communauté et monétisation intégrées"
+        ],
+        "cta": "En savoir plus",
+        "imageAlt": "Plateforme de cours en ligne Emarzona"
       },
       {
+        "id": "artist",
         "title": "Œuvres d'artiste",
-        "desc": "Portfolio, éditions limitées et certificats d'authenticité."
+        "desc": "Exposez votre portfolio, vendez des éditions limitées et délivrez des certificats d'authenticité — une vitrine premium pour créateurs.",
+        "bullets": [
+          "Portfolio et collections soignés",
+          "Éditions limitées et authentification",
+          "Vitrine premium pour artistes et créateurs"
+        ],
+        "cta": "En savoir plus",
+        "imageAlt": "Galerie d'œuvres d'artiste sur Emarzona"
       }
     ]
   },
@@ -479,7 +519,7 @@
     "subtitle": "Rejoignez les créateurs et marques qui centralisent leurs ventes sur une infrastructure pensée pour l'Afrique et le monde.",
     "ctaPrimary": "Démarrer gratuitement",
     "ctaSecondary": "Prendre rendez-vous",
-    "globeAria": "Globe terrestre animé — vente internationale"
+    "globeAria": "Visuel premium — vente internationale"
   },
   "footer": {
     "tagline": "La plateforme e-commerce tout-en-un pour vendre, gérer et développer votre activité en ligne.",

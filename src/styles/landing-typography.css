@@ -57,9 +57,7 @@
 }
 
 .landing-premium:not(.app-premium) [class*='text-xs'],
-.landing-premium:not(.app-premium) .lp-hero-caption,
-.landing-premium:not(.app-premium) .lp-eco-scene__disclaimer,
-.landing-premium:not(.app-premium) .lp-eco-node {
+.landing-premium:not(.app-premium) .lp-hero-caption {
   font-size: var(--lp-font-caption) !important;
   line-height: 1.4 !important;
 }

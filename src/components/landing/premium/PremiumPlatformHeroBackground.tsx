@@ -33,7 +33,9 @@ export function PremiumPlatformHeroBackground({
 
   const photoClass =
     variant === 'left' ? 'lp-platform-hero__left-photo' : 'lp-platform-hero__photo';
-  const imgClassName = `${photoClass} pointer-events-none absolute inset-0 h-full w-full object-cover`;
+  /* visual: contain pour ne jamais couper la femme ; left: cover en arrière-plan */
+  const fitClass = variant === 'left' ? 'object-cover' : 'object-contain';
+  const imgClassName = `${photoClass} pointer-events-none absolute inset-0 h-full w-full ${fitClass}`;
 
   const handleError = () => {
     if (!useOriginal) setUseOriginal(true);

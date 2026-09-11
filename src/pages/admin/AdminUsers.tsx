@@ -149,7 +149,7 @@ const AdminUsers = () => {
       ...users.map(user =>
         [
           user.email,
-          user.display_name || '',
+          user.full_name === 'N/A' ? '' : user.full_name,
           user.first_name || '',
           user.last_name || '',
           user.role,
@@ -220,7 +220,7 @@ const AdminUsers = () => {
                   user => `
                 <tr>
                   <td>${user.email}</td>
-                  <td>${user.first_name || user.last_name ? `${user.first_name || ''} ${user.last_name || ''}`.trim() : user.display_name || 'N/A'}</td>
+                  <td>${user.full_name}</td>
                   <td>
                     <span class="badge ${user.role === 'admin' ? 'badge-admin' : 'badge-user'}">
                       ${user.role}
@@ -450,13 +450,10 @@ const AdminUsers = () => {
                     className: 'font-medium',
                   },
                   {
-                    key: 'display_name',
+                    key: 'full_name',
                     header: 'Nom complet',
                     priority: 'high',
-                    render: (value, row) =>
-                      row.first_name || row.last_name
-                        ? `${row.first_name || ''} ${row.last_name || ''}`.trim()
-                        : row.display_name || 'N/A',
+                    render: (_value, row) => row.full_name,
                   },
                   {
                     key: 'role',
@@ -670,11 +667,7 @@ const AdminUsers = () => {
                     {users.map(user => (
                       <TableRow key={user.user_id}>
                         <TableCell className="font-medium">{user.email}</TableCell>
-                        <TableCell>
-                          {user.first_name || user.last_name
-                            ? `${user.first_name || ''} ${user.last_name || ''}`.trim()
-                            : user.display_name || 'N/A'}
-                        </TableCell>
+                        <TableCell>{user.full_name}</TableCell>
                         <TableCell>
                           <Badge
                             variant={user.role === 'admin' ? 'default' : 'secondary'}

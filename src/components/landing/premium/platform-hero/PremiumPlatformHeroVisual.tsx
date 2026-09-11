@@ -1,5 +1,4 @@
 import { PremiumPlatformHeroBackground } from '../PremiumPlatformHeroBackground';
-import { PremiumPlatformHeroEcosystem } from './PremiumPlatformHeroEcosystem';
 
 interface PremiumPlatformHeroVisualProps {
   backgroundUrl?: string;
@@ -18,6 +17,7 @@ export function PremiumPlatformHeroVisual({
 }: PremiumPlatformHeroVisualProps) {
   return (
     <div className="lp-platform-hero__visual absolute inset-0 h-full w-full">
+      {/* Fond bleu : couvre tout le hero (y compris sous la nav) */}
       {leftBackgroundUrl ? (
         <div className="lp-platform-hero__left-bg pointer-events-none absolute inset-0 z-0">
           <PremiumPlatformHeroBackground
@@ -28,8 +28,9 @@ export function PremiumPlatformHeroVisual({
         </div>
       ) : null}
 
+      {/* Photo femme : zone sous la nav, entière via object-contain */}
       {backgroundUrl ? (
-        <div className="lp-platform-hero__photo-layer pointer-events-none absolute inset-0 z-[1]">
+        <div className="lp-platform-hero__photo-layer pointer-events-none absolute inset-x-0 bottom-0 z-[1] top-[var(--lp-nav-offset,4.25rem)]">
           <PremiumPlatformHeroBackground src={backgroundUrl} alt={backgroundAlt} />
         </div>
       ) : (
@@ -38,8 +39,6 @@ export function PremiumPlatformHeroVisual({
           aria-hidden
         />
       )}
-
-      <PremiumPlatformHeroEcosystem />
     </div>
   );
 }
