@@ -1,4 +1,4 @@
-{
+﻿{
   "physical": [
     "/dashboard",
     "/dashboard/analytics",
@@ -24,6 +24,7 @@
     "/dashboard/seo",
     "/dashboard/settings",
     "/dashboard/shipping",
+    "/dashboard/sponsorships",
     "/dashboard/store",
     "/dashboard/store-affiliates",
     "/dashboard/store/team",
@@ -57,6 +58,7 @@
     "/dashboard/reviews",
     "/dashboard/seo",
     "/dashboard/settings",
+    "/dashboard/sponsorships",
     "/dashboard/store",
     "/dashboard/store-affiliates",
     "/dashboard/store/team",
@@ -89,6 +91,7 @@
     "/dashboard/seo",
     "/dashboard/services",
     "/dashboard/settings",
+    "/dashboard/sponsorships",
     "/dashboard/store",
     "/dashboard/store-affiliates",
     "/dashboard/store/team",
@@ -121,6 +124,7 @@
     "/dashboard/reviews",
     "/dashboard/seo",
     "/dashboard/settings",
+    "/dashboard/sponsorships",
     "/dashboard/store",
     "/dashboard/store-affiliates",
     "/dashboard/store/team",
@@ -155,6 +159,7 @@
     "/dashboard/reviews",
     "/dashboard/seo",
     "/dashboard/settings",
+    "/dashboard/sponsorships",
     "/dashboard/store",
     "/dashboard/store-affiliates",
     "/dashboard/store/team",

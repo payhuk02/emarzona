@@ -74,6 +74,6 @@ describe('sidebar navigation routes', () => {
     const compact = filterNavSections(enriched, 'seller', { sidebarOnly: true });
     const linkCount = compact.reduce((sum, s) => sum + s.items.length, 0);
     expect(linkCount).toBeGreaterThanOrEqual(25);
-    expect(linkCount).toBeLessThanOrEqual(45);
+    expect(linkCount).toBeLessThanOrEqual(52);
   });
 });

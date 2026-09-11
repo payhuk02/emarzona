@@ -36,8 +36,15 @@ export type MarketplaceSponsorship = {
   updated_at: string;
 };
 
+/**
+ * Sponsorship tables/RPCs are not yet in generated Database types.
+ * Cast at the boundary until `npm run supabase:types` is regenerated.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const db = supabase as any;
+
 export async function fetchSponsorshipSkus(): Promise<SponsorshipSku[]> {
-  const { data, error } = await supabase
+  const { data, error } = await db
     .from('marketplace_sponsorship_products')
     .select('*')
     .eq('is_active', true)
@@ -48,7 +55,7 @@ export async function fetchSponsorshipSkus(): Promise<SponsorshipSku[]> {
 }
 
 export async function fetchStoreSponsorships(storeId: string): Promise<MarketplaceSponsorship[]> {
-  const { data, error } = await supabase
+  const { data, error } = await db
     .from('marketplace_sponsorships')
     .select('*')
     .eq('store_id', storeId)
@@ -59,7 +66,7 @@ export async function fetchStoreSponsorships(storeId: string): Promise<Marketpla
 }
 
 export async function fetchPlanSponsorQuota(storeId: string): Promise<number> {
-  const { data, error } = await supabase.rpc('marketplace_sponsor_plan_quota', {
+  const { data, error } = await db.rpc('marketplace_sponsor_plan_quota', {
     p_store_id: storeId,
   });
   if (error) {
@@ -70,7 +77,7 @@ export async function fetchPlanSponsorQuota(storeId: string): Promise<number> {
 }
 
 export async function createPlanSponsorship(productId: string): Promise<MarketplaceSponsorship> {
-  const { data, error } = await supabase.rpc('create_plan_sponsorship', {
+  const { data, error } = await db.rpc('create_plan_sponsorship', {
     p_product_id: productId,
   });
   if (error) throw error;
@@ -81,7 +88,7 @@ export async function createPaidSponsorship(
   productId: string,
   skuSlug: string
 ): Promise<MarketplaceSponsorship> {
-  const { data, error } = await supabase.rpc('create_paid_sponsorship', {
+  const { data, error } = await db.rpc('create_paid_sponsorship', {
     p_product_id: productId,
     p_sku_slug: skuSlug,
   });
@@ -94,7 +101,7 @@ export async function adminGrantSponsorship(
   productId: string,
   skuSlug: string
 ): Promise<MarketplaceSponsorship> {
-  const { data, error } = await supabase.rpc('admin_grant_marketplace_sponsorship', {
+  const { data, error } = await db.rpc('admin_grant_marketplace_sponsorship', {
     p_product_id: productId,
     p_sku_slug: skuSlug,
   });
@@ -103,7 +110,7 @@ export async function adminGrantSponsorship(
 }
 
 export async function cancelSponsorship(sponsorshipId: string): Promise<MarketplaceSponsorship> {
-  const { data, error } = await supabase.rpc('cancel_marketplace_sponsorship', {
+  const { data, error } = await db.rpc('cancel_marketplace_sponsorship', {
     p_sponsorship_id: sponsorshipId,
   });
   if (error) throw error;
@@ -115,7 +122,7 @@ export async function recordSponsorshipEvent(
   eventType: 'impression' | 'click' | 'purchase',
   meta: Record<string, unknown> = {}
 ): Promise<void> {
-  const { error } = await supabase.rpc('record_sponsorship_event', {
+  const { error } = await db.rpc('record_sponsorship_event', {
     p_sponsorship_id: sponsorshipId,
     p_event_type: eventType,
     p_meta: meta,
