@@ -97,12 +97,12 @@
   background: var(--lp-platform-hero-bg, #ffffff);
   color: var(--lp-platform-hero-text, #0f0f12);
   width: 100%;
-  min-height: clamp(36rem, 65vh, 52rem);
+  min-height: clamp(42rem, 78vh, 60rem);
 }
 
 @media (min-width: 1024px) {
   .landing-premium .lp-platform-hero {
-    min-height: clamp(40rem, 58vw, 64rem);
+    min-height: clamp(48rem, 72vh, 76rem);
   }
 }
 
@@ -249,17 +249,18 @@
 }
 
 .landing-premium .lp-platform-hero__frame {
-  min-height: clamp(36rem, 65vh, 52rem);
-  padding-top: clamp(1rem, 2.5vh, 2rem);
-  padding-bottom: clamp(1.5rem, 4vh, 3rem);
+  min-height: clamp(42rem, 78vh, 60rem);
+  padding-top: clamp(2.5rem, 5vh, 4.5rem);
+  padding-bottom: clamp(3rem, 7vh, 5.5rem);
   justify-content: center;
 }
 
 @media (min-width: 1024px) {
   .landing-premium .lp-platform-hero__frame {
-    min-height: clamp(40rem, 58vw, 64rem);
+    min-height: clamp(48rem, 72vh, 76rem);
     justify-content: flex-start;
-    padding-top: clamp(2rem, 4vw, 4rem);
+    padding-top: clamp(3.5rem, 6vw, 6rem);
+    padding-bottom: clamp(4rem, 8vh, 7rem);
   }
 
   .landing-premium .lp-platform-hero__col-content {
