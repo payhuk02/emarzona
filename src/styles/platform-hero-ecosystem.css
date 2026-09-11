@@ -26,7 +26,7 @@
 }
 
 .landing-premium .lp-platform-hero__photo-layer {
-  /* Fondus horizontaux uniquement — la femme reste entière dans sa zone */
+  /* Fondus horizontaux — desktop : femme à droite */
   mask-image: linear-gradient(
     90deg,
     transparent 0%,
@@ -41,50 +41,6 @@
 .landing-premium .lp-platform-hero__visual picture {
   border-radius: 0;
   mask-image: none;
-}
-
-@media (max-width: 1023px) {
-  .landing-premium .lp-platform-hero__photo-layer {
-    mask-image: linear-gradient(
-      180deg,
-      rgba(0, 0, 0, 0.35) 0%,
-      rgba(0, 0, 0, 0.7) 18%,
-      black 36%,
-      black 100%
-    );
-  }
-
-  .landing-premium .lp-platform-hero__visual .lp-platform-hero__photo,
-  .landing-premium .lp-platform-hero__visual picture {
-    mask-image: none;
-  }
-
-  .landing-premium .lp-platform-hero--premium .lp-platform-hero__photo-overlay {
-    background: linear-gradient(
-      180deg,
-      rgba(10, 22, 40, 0.55) 0%,
-      rgba(10, 22, 40, 0.15) 30%,
-      rgba(10, 22, 40, 0.04) 100%
-    );
-  }
-
-  .landing-premium .lp-platform-hero__frame {
-    gap: 0.75rem;
-    padding-bottom: clamp(3.5rem, 8vh, 6rem);
-  }
-
-  .landing-premium .lp-platform-hero__col-content {
-    padding-bottom: 0;
-  }
-
-  .landing-premium .lp-platform-hero__visual {
-    min-height: 100%;
-  }
-
-  .landing-premium .lp-platform-hero__visual .lp-platform-hero__photo {
-    object-fit: contain !important;
-    object-position: center center !important;
-  }
 }
 
 .landing-premium .lp-platform-hero__visual .lp-platform-hero__photo {
@@ -118,6 +74,59 @@
   color: var(--lp-platform-hero-text, #f4f3f0);
   background: rgba(255, 255, 255, 0.08);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+
+@media (max-width: 1023px) {
+  .landing-premium .lp-platform-hero__photo-layer {
+    /* Titre en haut + marge basse pour ne pas couper la dame */
+    top: 5rem;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    mask-image: linear-gradient(
+      180deg,
+      transparent 0%,
+      rgba(0, 0, 0, 0.4) 6%,
+      black 14%,
+      black 100%
+    );
+  }
+
+  .landing-premium .lp-platform-hero__visual .lp-platform-hero__photo,
+  .landing-premium .lp-platform-hero__visual picture {
+    mask-image: none;
+  }
+
+  .landing-premium .lp-platform-hero--premium .lp-platform-hero__photo-overlay {
+    background: linear-gradient(
+      180deg,
+      rgba(10, 22, 40, 0.5) 0%,
+      rgba(10, 22, 40, 0.18) 16%,
+      transparent 40%
+    );
+  }
+
+  .landing-premium .lp-platform-hero__frame {
+    gap: 0.5rem;
+    padding-bottom: clamp(2.5rem, 8vh, 4.5rem);
+  }
+
+  .landing-premium .lp-platform-hero__col-content {
+    padding-bottom: 0;
+  }
+
+  .landing-premium .lp-platform-hero__visual {
+    min-height: 100%;
+  }
+
+  .landing-premium .lp-platform-hero__visual .lp-platform-hero__photo {
+    object-fit: cover !important;
+    object-position: center 18% !important;
+  }
+
+  .landing-premium .lp-platform-hero__checks {
+    display: none !important;
+  }
 }
 
 @media (min-width: 1024px) {

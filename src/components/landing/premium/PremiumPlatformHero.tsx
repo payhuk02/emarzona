@@ -52,7 +52,7 @@ export function PremiumPlatformHero() {
 
   return (
     <section
-      className="lp-platform-hero lp-platform-hero--premium relative w-full overflow-hidden border-b border-white/[0.06] pt-16 sm:pt-[72px] bg-[#08080a] min-h-[100svh]"
+      className="lp-platform-hero lp-platform-hero--premium relative w-full overflow-hidden border-b border-white/[0.06] pt-16 sm:pt-[72px] bg-[#08080a] min-h-[92svh] lg:min-h-[100svh]"
       aria-label={t('platformHero.ariaLabel')}
       style={
         {
@@ -60,7 +60,6 @@ export function PremiumPlatformHero() {
           '--lp-platform-hero-cta-bg': ctaBackgroundColor,
           '--lp-platform-hero-cta-text': ctaTextColor,
           backgroundColor: '#08080a',
-          minHeight: '100svh',
         } as CSSProperties
       }
     >
@@ -76,20 +75,20 @@ export function PremiumPlatformHero() {
       </div>
 
       <div className="lp-platform-hero__frame relative z-[2] mx-auto flex w-full max-w-[100rem] flex-col px-4 sm:px-6 md:px-10 lg:px-8 xl:px-12 2xl:px-14">
-        <div className="lp-platform-hero__col-content relative z-[3] flex w-full max-w-xl flex-col lg:max-w-2xl xl:max-w-2xl">
+        <div className="lp-platform-hero__col-content relative z-[3] mx-auto flex w-full max-w-xl flex-col lg:mx-0 lg:max-w-2xl xl:max-w-2xl">
           <div className="lp-platform-hero__content text-center lg:text-left">
-            <h1 className="lp-platform-hero__title lp-serif lp-hero-enter text-[2rem] leading-[1.08] sm:text-[2.65rem] md:text-[3rem] lg:text-[3.75rem] xl:text-[4.35rem]">
+            <h1 className="lp-platform-hero__title lp-serif lp-hero-enter text-[1.75rem] leading-[1.08] sm:text-[2.65rem] md:text-[3rem] lg:text-[3.75rem] xl:text-[4.35rem]">
               <span className="lp-platform-hero__title-line">{t('platformHero.titleLine1')}</span>
               <span className="lp-platform-hero__title-line">{t('platformHero.titleLine2')}</span>
             </h1>
 
             {subtitle.trim() ? (
-              <p className="lp-platform-hero__subtitle lp-hero-enter lp-hero-enter--d1 mx-auto mt-5 max-w-xl text-[15px] leading-relaxed sm:text-base lg:mx-0 lg:max-w-lg lg:text-lg">
+              <p className="lp-platform-hero__subtitle lp-hero-enter lp-hero-enter--d1 mx-auto mt-3 max-w-xl text-[15px] leading-relaxed sm:mt-5 sm:text-base lg:mx-0 lg:max-w-lg lg:text-lg">
                 {subtitle}
               </p>
             ) : null}
 
-            <ul className="lp-platform-hero__checks lp-hero-enter lp-hero-enter--d2 mt-8 sm:mt-10 lg:mt-12">
+            <ul className="lp-platform-hero__checks lp-hero-enter lp-hero-enter--d2 mx-auto mt-5 hidden w-fit max-w-full flex-col items-start sm:mt-8 lg:mx-0 lg:mt-12 lg:flex">
               {CHECK_ITEMS.map(({ key, icon: Icon }) => (
                 <li
                   key={key}

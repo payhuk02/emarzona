@@ -95,7 +95,7 @@ function SellWayBlock({
   const visual = (
     <div
       ref={visualRef}
-      className={`lp-sell-way-visual relative mx-auto w-full lg:mx-0 lp-reveal lp-reveal--soft-scale ${visualFrom} ${visualReveal}`}
+      className={`lp-sell-way-visual relative mx-auto w-full max-w-full lg:mx-0 lp-reveal lp-reveal--soft-scale ${visualFrom} ${visualReveal}`}
     >
       <div className="lp-sell-way-photo relative h-full w-full overflow-hidden rounded-2xl shadow-[0_32px_64px_-32px_rgba(0,0,0,0.25)]">
         <picture>
@@ -126,7 +126,7 @@ function SellWayBlock({
   const content = (
     <div
       ref={textRef}
-      className={`lp-sell-way-copy min-w-0 lp-reveal lp-reveal--delay ${copyFrom} ${textReveal} flex flex-col items-center justify-center text-center`}
+      className={`lp-sell-way-copy min-w-0 w-full max-w-full lp-reveal lp-reveal--delay ${copyFrom} ${textReveal} flex flex-col items-center justify-center text-center`}
     >
       <div className="lp-sell-way-icon mb-5 inline-flex h-14 w-14 items-center justify-center sm:h-16 sm:w-16">
         <Icon
