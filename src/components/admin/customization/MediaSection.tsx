@@ -8,9 +8,20 @@ import { useToast } from '@/hooks/use-toast';
 import { RefreshCw, UploadCloud, Info } from 'lucide-react';
 import { logger } from '@/lib/logger';
 import { PageHeroImagesMediaSection } from '@/components/admin/customization/PageHeroImagesMediaSection';
+import {
+  AUTH_HERO_FORMAT,
+  LANDING_ADAPT_FORMAT,
+  LANDING_CAROUSEL_FORMAT,
+  LANDING_CTA_FORMAT,
+  LANDING_SELL_WAY_FORMAT,
+  PLATFORM_HERO_LEFT_FORMAT,
+  PLATFORM_HERO_VISUAL_FORMAT,
+  formatMediaPixelSize,
+  type MediaPixelFormat,
+} from '@/lib/admin/mediaImageFormats';
 
 // Default images imports (auth hero: admin upload only, no bundled fallback)
-import adaptPremiumPng from '@/assets/landing/adapt-entrepreneur.png';
+import adaptPremiumWebp from '@/assets/landing/adapt-entrepreneur.webp';
 import ctaVisualPremium from '@/assets/landing/cta-visual-premium.png';
 import heroEntrepreneur from '@/assets/landing/hero-carousel-entrepreneur.webp';
 import heroPhysical from '@/assets/landing/hero-carousel-physical.webp';
@@ -149,6 +160,7 @@ export function MediaSection({ onChange }: MediaSectionProps) {
     keyPath,
     currentUrl,
     defaultUrl,
+    pixelFormat,
   }: {
     title: string;
     description: string;
@@ -156,6 +168,7 @@ export function MediaSection({ onChange }: MediaSectionProps) {
     currentUrl?: string;
     defaultUrl?: string;
     optional?: boolean;
+    pixelFormat: MediaPixelFormat;
   }) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const uploadKey = keyPath.join('.');
@@ -163,6 +176,7 @@ export function MediaSection({ onChange }: MediaSectionProps) {
     const isCustom = !!currentUrl;
     const hasPreview = !!(currentUrl || defaultUrl);
     const displayUrl = currentUrl || defaultUrl;
+    const formatLabel = formatMediaPixelSize(pixelFormat);
 
     return (
       <div className="flex flex-col gap-3 p-4 border rounded-lg bg-card">
@@ -236,6 +250,10 @@ export function MediaSection({ onChange }: MediaSectionProps) {
             onChange={e => handleUpload(e, keyPath)}
           />
         </div>
+
+        <p className="text-center text-xs font-medium tabular-nums text-muted-foreground">
+          Format : {formatLabel}
+        </p>
       </div>
     );
   };
@@ -256,6 +274,7 @@ export function MediaSection({ onChange }: MediaSectionProps) {
             description="Format recommandé: WebP ou PNG optimisé. Orienté portrait. Affichée sur la page de connexion/inscription."
             keyPath={['authHero']}
             currentUrl={media.authHero as string}
+            pixelFormat={AUTH_HERO_FORMAT}
             optional
           />
         </CardContent>
@@ -272,6 +291,7 @@ export function MediaSection({ onChange }: MediaSectionProps) {
             description="Image optionnelle derrière la colonne texte (partie gauche). Alt configurable dans Textes → Hero plateforme."
             keyPath={['landingPlatformHeroLeft']}
             currentUrl={media.landingPlatformHeroLeft as string | undefined}
+            pixelFormat={PLATFORM_HERO_LEFT_FORMAT}
             optional
           />
           <ImageUploader
@@ -279,6 +299,7 @@ export function MediaSection({ onChange }: MediaSectionProps) {
             description="Image optionnelle dans la colonne visuelle à droite du hero. Les couleurs se règlent dans Textes → Hero plateforme."
             keyPath={['landingPlatformHero']}
             currentUrl={media.landingPlatformHero as string | undefined}
+            pixelFormat={PLATFORM_HERO_VISUAL_FORMAT}
             optional
           />
           <ImageUploader
@@ -286,7 +307,8 @@ export function MediaSection({ onChange }: MediaSectionProps) {
             description="Image de la section 'S'adapte à vous'. Recommandé avec fond transparent."
             keyPath={['landingAdapt']}
             currentUrl={media.landingAdapt as string}
-            defaultUrl={adaptPremiumPng}
+            defaultUrl={adaptPremiumWebp}
+            pixelFormat={LANDING_ADAPT_FORMAT}
           />
           <ImageUploader
             title="Visuel CTA final"
@@ -294,6 +316,7 @@ export function MediaSection({ onChange }: MediaSectionProps) {
             keyPath={['landingGlobe']}
             currentUrl={media.landingGlobe as string}
             defaultUrl={ctaVisualPremium}
+            pixelFormat={LANDING_CTA_FORMAT}
           />
         </CardContent>
       </Card>
@@ -313,6 +336,7 @@ export function MediaSection({ onChange }: MediaSectionProps) {
             keyPath={['landingSellWays', 'physical']}
             currentUrl={(media.landingSellWays as Record<string, string> | undefined)?.physical}
             defaultUrl={sellWayPhysical}
+            pixelFormat={LANDING_SELL_WAY_FORMAT}
           />
           <ImageUploader
             title="Produits digitaux"
@@ -320,6 +344,7 @@ export function MediaSection({ onChange }: MediaSectionProps) {
             keyPath={['landingSellWays', 'digital']}
             currentUrl={(media.landingSellWays as Record<string, string> | undefined)?.digital}
             defaultUrl={sellWayDigital}
+            pixelFormat={LANDING_SELL_WAY_FORMAT}
           />
           <ImageUploader
             title="Services"
@@ -327,6 +352,7 @@ export function MediaSection({ onChange }: MediaSectionProps) {
             keyPath={['landingSellWays', 'service']}
             currentUrl={(media.landingSellWays as Record<string, string> | undefined)?.service}
             defaultUrl={sellWayService}
+            pixelFormat={LANDING_SELL_WAY_FORMAT}
           />
           <ImageUploader
             title="Cours en ligne"
@@ -334,6 +360,7 @@ export function MediaSection({ onChange }: MediaSectionProps) {
             keyPath={['landingSellWays', 'courses']}
             currentUrl={(media.landingSellWays as Record<string, string> | undefined)?.courses}
             defaultUrl={sellWayCourses}
+            pixelFormat={LANDING_SELL_WAY_FORMAT}
           />
           <ImageUploader
             title="Œuvres d'artiste"
@@ -341,6 +368,7 @@ export function MediaSection({ onChange }: MediaSectionProps) {
             keyPath={['landingSellWays', 'artist']}
             currentUrl={(media.landingSellWays as Record<string, string> | undefined)?.artist}
             defaultUrl={sellWayArtist}
+            pixelFormat={LANDING_SELL_WAY_FORMAT}
           />
         </CardContent>
       </Card>
@@ -360,6 +388,7 @@ export function MediaSection({ onChange }: MediaSectionProps) {
             keyPath={['landingCarousel', 'entrepreneur']}
             currentUrl={media.landingCarousel?.entrepreneur}
             defaultUrl={heroEntrepreneur}
+            pixelFormat={LANDING_CAROUSEL_FORMAT}
           />
           <ImageUploader
             title="Image 2: Vendeur Physique"
@@ -367,6 +396,7 @@ export function MediaSection({ onChange }: MediaSectionProps) {
             keyPath={['landingCarousel', 'physical']}
             currentUrl={media.landingCarousel?.physical}
             defaultUrl={heroPhysical}
+            pixelFormat={LANDING_CAROUSEL_FORMAT}
           />
           <ImageUploader
             title="Image 3: Produits Digitaux"
@@ -374,6 +404,7 @@ export function MediaSection({ onChange }: MediaSectionProps) {
             keyPath={['landingCarousel', 'digital']}
             currentUrl={media.landingCarousel?.digital}
             defaultUrl={heroDigital}
+            pixelFormat={LANDING_CAROUSEL_FORMAT}
           />
           <ImageUploader
             title="Image 4: Services"
@@ -381,6 +412,7 @@ export function MediaSection({ onChange }: MediaSectionProps) {
             keyPath={['landingCarousel', 'service']}
             currentUrl={media.landingCarousel?.service}
             defaultUrl={heroService}
+            pixelFormat={LANDING_CAROUSEL_FORMAT}
           />
           <ImageUploader
             title="Image 5: Formations / Cours"
@@ -388,6 +420,7 @@ export function MediaSection({ onChange }: MediaSectionProps) {
             keyPath={['landingCarousel', 'courses']}
             currentUrl={media.landingCarousel?.courses}
             defaultUrl={heroCourses}
+            pixelFormat={LANDING_CAROUSEL_FORMAT}
           />
           <ImageUploader
             title="Image 6: Artiste / Créateur"
@@ -395,6 +428,7 @@ export function MediaSection({ onChange }: MediaSectionProps) {
             keyPath={['landingCarousel', 'artist']}
             currentUrl={media.landingCarousel?.artist}
             defaultUrl={heroArtist}
+            pixelFormat={LANDING_CAROUSEL_FORMAT}
           />
         </CardContent>
       </Card>

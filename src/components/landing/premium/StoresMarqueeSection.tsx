@@ -1,6 +1,7 @@
 import type { CSSProperties } from 'react';
 import { useLandingPremiumT } from '@/hooks/useLandingPremiumT';
 import { usePremiumReveal } from './usePremiumReveal';
+import { useMarqueeInViewPause } from './useMarqueeInViewPause';
 import { useLandingMarqueeDuration } from '@/hooks/useLandingMarqueeDuration';
 import { useLandingPlatformStores } from '@/hooks/useLandingPlatformStores';
 import { generateStoreUrl } from '@/lib/store-utils';
@@ -58,7 +59,7 @@ function StoreChip({
           className="h-10 w-10 shrink-0 rounded-xl object-cover"
           width={40}
           height={40}
-          loading="eager"
+          loading="lazy"
           decoding="async"
           data-no-mobile-opt
         />
@@ -95,6 +96,7 @@ function MarqueeSkeleton() {
 export function StoresMarqueeSection() {
   const { t } = useLandingPremiumT();
   const { ref, className } = usePremiumReveal();
+  const { ref: pauseRef, pauseClass } = useMarqueeInViewPause();
   const { data: stores = [], isLoading, isError } = useLandingPlatformStores();
   const { storesSec } = useLandingMarqueeDuration(stores.length);
 
@@ -105,7 +107,10 @@ export function StoresMarqueeSection() {
   const track = stores.length > 0 ? [...stores, ...stores] : [];
 
   return (
-    <section className="overflow-hidden border-y border-[var(--lp-border-light)] bg-[var(--lp-surface)] py-12 sm:py-16">
+    <section
+      ref={pauseRef}
+      className={`overflow-hidden border-y border-[var(--lp-border-light)] bg-[var(--lp-surface)] py-12 sm:py-16 ${pauseClass}`}
+    >
       <div ref={ref} className={`lp-reveal ${className}`}>
         <p className="mb-8 text-center text-xs font-medium uppercase tracking-[0.22em] text-[var(--lp-text-muted)]">
           {t('storesMarquee.title')}

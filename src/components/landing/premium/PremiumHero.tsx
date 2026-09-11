@@ -3,7 +3,7 @@ import { StoreCreateCtaLink } from '@/components/store/StoreCreateCtaLink';
 import { CreditCard, Zap, Headphones } from 'lucide-react';
 import { useLandingPremiumT } from '@/hooks/useLandingPremiumT';
 import { PremiumHeroTypewriterBadge } from './PremiumHeroTypewriterBadge';
-import { motion } from 'framer-motion';
+import { usePremiumReveal } from './usePremiumReveal';
 
 const PremiumHeroCarousel = lazy(() =>
   import('./PremiumHeroCarousel').then(m => ({ default: m.PremiumHeroCarousel }))
@@ -16,34 +16,10 @@ function HeroVisualFallback() {
   return <div className="lp-hero-carousel-fallback mx-auto aspect-[1024/561] w-full" aria-hidden />;
 }
 
-const fadeUpVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: (custom: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: {
-      delay: custom * 0.08,
-      duration: 0.75,
-      ease: [0.22, 1, 0.36, 1],
-    },
-  }),
-};
-
-const scaleInVariants = {
-  hidden: { opacity: 0, scale: 0.96 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    transition: {
-      delay: 0.2,
-      duration: 1,
-      ease: [0.22, 1, 0.36, 1],
-    },
-  },
-};
-
 export function PremiumHero() {
   const { t } = useLandingPremiumT();
+  const { ref: textRef, className: textReveal } = usePremiumReveal(0.06);
+  const { ref: visualRef, className: visualReveal } = usePremiumReveal(0.08);
 
   return (
     <section className="lp-hero relative overflow-hidden bg-[#08080a] text-[var(--lp-text-on-dark)]">
@@ -58,48 +34,27 @@ export function PremiumHero() {
       />
 
       <div className="relative mx-auto flex max-w-7xl flex-col gap-12 px-4 py-12 sm:px-5 sm:py-14 lg:grid lg:grid-cols-[1fr_1.05fr] lg:items-start lg:gap-8 lg:px-8 lg:py-20 xl:py-24">
-        <div className="flex flex-col text-center lg:text-left">
-          <motion.p
-            custom={0}
-            initial="hidden"
-            animate="visible"
-            variants={fadeUpVariants}
-            className="lp-eyebrow mb-5 self-center lg:self-start"
-          >
+        <div
+          ref={textRef}
+          className={`lp-reveal-stagger flex flex-col text-center lg:text-left ${textReveal}`}
+        >
+          <p className="lp-eyebrow lp-reveal-stagger__item mb-5 self-center lg:self-start">
             {t('hero.eyebrow')}
-          </motion.p>
+          </p>
 
-          <motion.h1
-            custom={1}
-            initial="hidden"
-            animate="visible"
-            variants={fadeUpVariants}
-            className="lp-serif text-[2.5rem] leading-[1.08] text-white sm:text-[2.85rem] md:text-[3.35rem] lg:text-[4.5rem] xl:text-[5rem]"
-          >
+          <h1 className="lp-serif lp-reveal-stagger__item text-[2.5rem] leading-[1.08] text-white sm:text-[2.85rem] md:text-[3.35rem] lg:text-[4.5rem] xl:text-[5rem]">
             {t('hero.titleLine1')}
             <br />
             {t('hero.titleLine2')}
             <br />
             <span className="lp-gold-text italic">{t('hero.titleHighlight')}</span>
-          </motion.h1>
+          </h1>
 
-          <motion.p
-            custom={2}
-            initial="hidden"
-            animate="visible"
-            variants={fadeUpVariants}
-            className="mx-auto mt-5 max-w-lg text-[15px] leading-relaxed text-[var(--lp-text-dim)] sm:text-lg lg:mx-0"
-          >
+          <p className="lp-reveal-stagger__item mx-auto mt-5 max-w-lg text-[15px] leading-relaxed text-[var(--lp-text-dim)] sm:text-lg lg:mx-0">
             {t('hero.subtitle')}
-          </motion.p>
+          </p>
 
-          <motion.div
-            custom={3}
-            initial="hidden"
-            animate="visible"
-            variants={fadeUpVariants}
-            className="mt-8 flex flex-wrap items-center justify-center gap-3 sm:mt-10 sm:gap-4 lg:justify-start"
-          >
+          <div className="lp-reveal-stagger__item mt-8 flex flex-wrap items-center justify-center gap-3 sm:mt-10 sm:gap-4 lg:justify-start">
             <StoreCreateCtaLink className="lp-btn-primary inline-flex rounded-full px-6 py-3 text-sm font-semibold sm:px-7 sm:py-3.5">
               {t('hero.ctaPrimary')}
             </StoreCreateCtaLink>
@@ -109,15 +64,9 @@ export function PremiumHero() {
             >
               {t('hero.ctaSecondary')}
             </a>
-          </motion.div>
+          </div>
 
-          <motion.ul
-            custom={5}
-            initial="hidden"
-            animate="visible"
-            variants={fadeUpVariants}
-            className="mt-8 flex flex-col items-center gap-3 text-sm text-white/45 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-6 lg:items-start lg:justify-start"
-          >
+          <ul className="lp-reveal-stagger__item mt-8 flex flex-col items-center gap-3 text-sm text-white/45 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-6 lg:items-start lg:justify-start">
             {trustKeys.map((key, i) => {
               const Icon = trustIcons[i];
               return (
@@ -127,20 +76,18 @@ export function PremiumHero() {
                 </li>
               );
             })}
-          </motion.ul>
+          </ul>
         </div>
 
-        <motion.div
-          initial="hidden"
-          animate="visible"
-          variants={scaleInVariants}
-          className="flex w-full min-w-0 flex-col items-center lg:items-start"
+        <div
+          ref={visualRef}
+          className={`lp-reveal lp-reveal--soft-scale flex w-full min-w-0 flex-col items-center lg:items-start ${visualReveal}`}
         >
           <PremiumHeroTypewriterBadge />
           <Suspense fallback={<HeroVisualFallback />}>
             <PremiumHeroCarousel />
           </Suspense>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

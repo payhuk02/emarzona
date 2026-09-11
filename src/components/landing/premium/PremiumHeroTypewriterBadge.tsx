@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { useReducedMotion } from 'framer-motion';
 import { useLandingPremiumT } from '@/hooks/useLandingPremiumT';
 
 const TYPING_MS = 28;
@@ -7,9 +6,21 @@ const DELETING_MS = 16;
 const PAUSE_FULL_MS = 2600;
 const PAUSE_EMPTY_MS = 700;
 
+function usePrefersReducedMotion() {
+  const [reduced, setReduced] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setReduced(mq.matches);
+    const onChange = () => setReduced(mq.matches);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
+  return reduced;
+}
+
 export function PremiumHeroTypewriterBadge() {
   const { t } = useLandingPremiumT();
-  const reducedMotion = useReducedMotion();
+  const reducedMotion = usePrefersReducedMotion();
   const fullText = t('hero.typewriterBadge');
   const [displayed, setDisplayed] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);

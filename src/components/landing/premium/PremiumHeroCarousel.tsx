@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from 'react';
-import { motion, useReducedMotion } from 'framer-motion';
 import { useLandingPremiumT } from '@/hooks/useLandingPremiumT';
 
 import heroEntrepreneur from '@/assets/landing/hero-carousel-entrepreneur.webp';
@@ -30,10 +29,27 @@ const defaultSlides = [
   { key: 'artist', webp: heroArtist, webpSm: heroArtistSm, transparent: false },
 ] as const;
 
+function usePrefersReducedMotion() {
+  const [reduced, setReduced] = useState(() =>
+    typeof window !== 'undefined'
+      ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      : false
+  );
+
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const onChange = () => setReduced(mq.matches);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
+
+  return reduced;
+}
+
 export function PremiumHeroCarousel() {
   const { t } = useLandingPremiumT();
   const { customizationData } = usePlatformCustomizationContext();
-  const reducedMotion = useReducedMotion();
+  const reducedMotion = usePrefersReducedMotion();
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
 
@@ -44,7 +60,7 @@ export function PremiumHeroCarousel() {
     return {
       ...slide,
       webp: customUrl || slide.webp,
-      webpSm: customUrl || slide.webpSm, // if custom url, use it for both small and large
+      webpSm: customUrl || slide.webpSm,
     };
   });
 
@@ -83,14 +99,14 @@ export function PremiumHeroCarousel() {
           const isActive = index === active;
           const isCustom = !!customCarouselImages[slide.key];
           return (
-            <motion.div
+            <div
               key={slide.key}
-              className={`lp-hero-carousel__slide ${slide.transparent ? 'lp-hero-carousel__slide--transparent' : 'lp-hero-carousel__slide--card'}`}
+              className={`lp-hero-carousel__slide ${
+                slide.transparent
+                  ? 'lp-hero-carousel__slide--transparent'
+                  : 'lp-hero-carousel__slide--card'
+              } ${isActive ? 'is-active' : ''}`}
               aria-hidden={!isActive}
-              initial={false}
-              animate={{ opacity: isActive ? 1 : 0 }}
-              transition={{ duration: reducedMotion ? 0 : 0.55, ease: [0.22, 1, 0.36, 1] }}
-              style={{ pointerEvents: isActive ? 'auto' : 'none' }}
             >
               <picture className="lp-hero-carousel__picture">
                 {!isCustom && (
@@ -102,25 +118,23 @@ export function PremiumHeroCarousel() {
                   className="lp-hero-carousel__img"
                   width={SLIDE_WIDTH}
                   height={SLIDE_HEIGHT}
-                  loading={index === 0 ? 'eager' : 'lazy'}
-                  fetchPriority={index === 0 ? 'high' : 'auto'}
+                  loading="lazy"
+                  fetchPriority="auto"
                   decoding="async"
                   draggable={false}
                   data-no-mobile-opt
                 />
               </picture>
-            </motion.div>
+            </div>
           );
         })}
 
         {!reducedMotion && !paused && (
-          <motion.div
-            className="lp-hero-carousel__progress"
-            aria-hidden
+          <div
             key={`progress-${active}`}
-            initial={{ scaleX: 0 }}
-            animate={{ scaleX: 1 }}
-            transition={{ duration: SLIDE_INTERVAL_MS / 1000, ease: 'linear' }}
+            className="lp-hero-carousel__progress is-running"
+            style={{ animationDuration: `${SLIDE_INTERVAL_MS}ms` }}
+            aria-hidden
           />
         )}
       </div>

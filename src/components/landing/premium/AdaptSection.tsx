@@ -5,7 +5,6 @@ import { useLandingPremiumT } from '@/hooks/useLandingPremiumT';
 import { usePremiumReveal } from './usePremiumReveal';
 import { usePlatformCustomizationContext } from '@/contexts/PlatformCustomizationContext';
 import adaptPremiumWebp from '@/assets/landing/adapt-entrepreneur.webp';
-import adaptPremiumPng from '@/assets/landing/adapt-entrepreneur.png';
 
 export function AdaptSection() {
   const { t } = useLandingPremiumT();
@@ -14,28 +13,25 @@ export function AdaptSection() {
   const benefits = t('adapt.benefits', { returnObjects: true }) as string[];
 
   const customAdaptUrl = customizationData?.media?.images?.landingAdapt as string | undefined;
-  const imgSrc = customAdaptUrl || adaptPremiumPng;
+  const imgSrc = customAdaptUrl || adaptPremiumWebp;
 
   return (
     <section className="lp-section-pad lp-section-muted">
       <div className="mx-auto grid max-w-7xl items-center gap-10 px-4 sm:gap-12 sm:px-5 lg:grid-cols-2 lg:gap-16 lg:px-8">
         <div className="lp-adapt-visual relative mx-auto w-full lg:mx-0">
           <div className="lp-adapt-photo relative overflow-hidden rounded-2xl shadow-[0_32px_64px_-32px_rgba(0,0,0,0.25)]">
-            <picture>
-              {!customAdaptUrl && <source srcSet={adaptPremiumWebp} type="image/webp" />}
-              <img
-                src={imgSrc}
-                alt={t('adapt.photoAlt')}
-                loading="eager"
-                fetchPriority="high"
-                width={1024}
-                height={686}
-                sizes="(max-width: 1024px) 100vw, 50vw"
-                decoding="async"
-                data-no-mobile-opt
-                className="lp-adapt-photo__img object-cover w-full h-full"
-              />
-            </picture>
+            <img
+              src={imgSrc}
+              alt={t('adapt.photoAlt')}
+              loading="lazy"
+              fetchPriority="auto"
+              width={1024}
+              height={686}
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              decoding="async"
+              data-no-mobile-opt
+              className="lp-adapt-photo__img object-cover w-full h-full"
+            />
           </div>
         </div>
 

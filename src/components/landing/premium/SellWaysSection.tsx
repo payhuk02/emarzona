@@ -81,8 +81,7 @@ function SellWayBlock({
   index: number;
   customImageUrl?: string;
 }) {
-  const { ref: visualRef, className: visualReveal } = usePremiumReveal();
-  const { ref: textRef, className: textReveal } = usePremiumReveal(0.14);
+  const { ref: blockRef, className: blockReveal } = usePremiumReveal(0.08);
   const Icon = meta.icon;
   const imageLeft = index % 2 === 0;
   const hasCustom = Boolean(customImageUrl);
@@ -94,8 +93,7 @@ function SellWayBlock({
 
   const visual = (
     <div
-      ref={visualRef}
-      className={`lp-sell-way-visual relative mx-auto w-full max-w-full lg:mx-0 lp-reveal lp-reveal--soft-scale ${visualFrom} ${visualReveal}`}
+      className={`lp-sell-way-visual relative mx-auto w-full max-w-full lg:mx-0 lp-reveal lp-reveal--soft-scale ${visualFrom}`}
     >
       <div className="lp-sell-way-photo relative h-full w-full overflow-hidden rounded-2xl shadow-[0_32px_64px_-32px_rgba(0,0,0,0.25)]">
         <picture>
@@ -109,8 +107,8 @@ function SellWayBlock({
           <img
             src={imgSrc}
             alt={item.imageAlt || item.title}
-            loading={index === 0 ? 'eager' : 'lazy'}
-            fetchPriority={index === 0 ? 'high' : 'auto'}
+            loading="lazy"
+            fetchPriority="auto"
             width={1600}
             height={1200}
             sizes="(max-width: 1024px) 100vw, 50vw"
@@ -125,8 +123,7 @@ function SellWayBlock({
 
   const content = (
     <div
-      ref={textRef}
-      className={`lp-sell-way-copy min-w-0 w-full max-w-full lp-reveal lp-reveal--delay ${copyFrom} ${textReveal} flex flex-col items-center justify-center text-center`}
+      className={`lp-sell-way-copy min-w-0 w-full max-w-full lp-reveal lp-reveal--delay ${copyFrom} flex flex-col items-center justify-center text-center`}
     >
       <div className="lp-sell-way-icon mb-5 inline-flex h-14 w-14 items-center justify-center sm:h-16 sm:w-16">
         <Icon
@@ -169,7 +166,10 @@ function SellWayBlock({
   );
 
   return (
-    <div className={`lp-sell-way-block ${muted ? 'lp-section-muted' : 'bg-[var(--lp-surface)]'}`}>
+    <div
+      ref={blockRef}
+      className={`lp-sell-way-block ${muted ? 'lp-section-muted' : 'bg-[var(--lp-surface)]'} ${blockReveal}`}
+    >
       <div
         className={`lp-sell-way-pair mx-auto grid max-w-7xl gap-10 px-4 sm:gap-12 sm:px-5 lg:grid-cols-2 lg:items-stretch lg:gap-16 lg:px-8 ${
           imageLeft ? '' : 'lg:[&>*:first-child]:order-2'

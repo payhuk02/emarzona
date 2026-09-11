@@ -19,6 +19,10 @@ import {
 function useLandingAssets() {
   useEffect(() => {
     injectLandingCriticalCSS();
+    document.documentElement.classList.add('lp-smooth-scroll');
+    return () => {
+      document.documentElement.classList.remove('lp-smooth-scroll');
+    };
   }, []);
 }
 

@@ -569,6 +569,58 @@
   transform: translateY(0) translateX(0) scale(1);
 }
 
+/* Stagger enfants — un seul IntersectionObserver parent */
+.landing-premium .lp-reveal-stagger .lp-reveal-stagger__item {
+  opacity: 0;
+  transform: translate3d(0, 22px, 0);
+  transition:
+    opacity 0.75s var(--lp-ease),
+    transform 0.8s var(--lp-ease);
+}
+
+.landing-premium .lp-reveal-stagger.is-visible .lp-reveal-stagger__item {
+  opacity: 1;
+  transform: none;
+}
+
+.landing-premium .lp-reveal-stagger.is-visible .lp-reveal-stagger__item:nth-child(1) {
+  transition-delay: 0s;
+}
+.landing-premium .lp-reveal-stagger.is-visible .lp-reveal-stagger__item:nth-child(2) {
+  transition-delay: 0.06s;
+}
+.landing-premium .lp-reveal-stagger.is-visible .lp-reveal-stagger__item:nth-child(3) {
+  transition-delay: 0.12s;
+}
+.landing-premium .lp-reveal-stagger.is-visible .lp-reveal-stagger__item:nth-child(4) {
+  transition-delay: 0.16s;
+}
+.landing-premium .lp-reveal-stagger.is-visible .lp-reveal-stagger__item:nth-child(5) {
+  transition-delay: 0.2s;
+}
+.landing-premium .lp-reveal-stagger.is-visible .lp-reveal-stagger__item:nth-child(n + 6) {
+  transition-delay: 0.24s;
+}
+
+.landing-premium
+  .lp-reveal-stagger.is-visible
+  .lp-feature-grid
+  .lp-reveal-stagger__item:nth-child(3n + 1) {
+  transition-delay: 0s;
+}
+.landing-premium
+  .lp-reveal-stagger.is-visible
+  .lp-feature-grid
+  .lp-reveal-stagger__item:nth-child(3n + 2) {
+  transition-delay: 0.08s;
+}
+.landing-premium
+  .lp-reveal-stagger.is-visible
+  .lp-feature-grid
+  .lp-reveal-stagger__item:nth-child(3n) {
+  transition-delay: 0.14s;
+}
+
 .landing-premium .lp-reveal--from-left {
   transform: translate3d(-40px, 18px, 0);
 }
@@ -595,6 +647,12 @@
 
 .landing-premium .lp-reveal--delay-2 {
   transition-delay: 0.26s;
+}
+
+/* SellWays : un observer parent → enfants .lp-reveal */
+.landing-premium .lp-sell-way-block.is-visible .lp-reveal {
+  opacity: 1;
+  transform: translateY(0) translateX(0) scale(1);
 }
 
 /* Cartes premium */
@@ -936,7 +994,6 @@
 
 .landing-premium .lp-deferred-section {
   content-visibility: auto;
-  contain-intrinsic-size: auto 480px;
 }
 
 /* Marquee boutiques */
@@ -950,7 +1007,12 @@
   animation: lp-marquee-scroll var(--lp-marquee-duration) linear infinite;
   animation-duration: var(--lp-marquee-duration) !important;
   animation-iteration-count: infinite !important;
-  will-change: transform;
+}
+
+.landing-premium .is-paused .lp-marquee-track,
+.landing-premium .is-paused .lp-countries-marquee-track,
+.landing-premium .is-paused .lp-currencies-marquee-track {
+  animation-play-state: paused !important;
 }
 
 .landing-premium .lp-marquee-item {
@@ -988,7 +1050,6 @@
   animation: lp-countries-scroll var(--lp-countries-duration) linear infinite;
   animation-duration: var(--lp-countries-duration) !important;
   animation-iteration-count: infinite !important;
-  will-change: transform;
 }
 
 .landing-premium .lp-country-flag-wrap {
@@ -1091,7 +1152,6 @@
   animation: lp-countries-scroll var(--lp-currencies-duration) linear infinite;
   animation-duration: var(--lp-currencies-duration) !important;
   animation-iteration-count: infinite !important;
-  will-change: transform;
 }
 
 .landing-premium .lp-currencies-marquee-track--reverse {
@@ -1513,6 +1573,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.landing-premium .lp-hero-carousel__slide.is-active {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .landing-premium .lp-hero-carousel__slide--card {
@@ -1553,12 +1621,32 @@
   left: 0;
   right: 0;
   height: 2px;
+  transform: scaleX(0);
   transform-origin: left center;
   background: linear-gradient(90deg, var(--lp-gold) 0%, var(--lp-purple) 100%);
   opacity: 0.85;
 }
 
+.landing-premium .lp-hero-carousel__progress.is-running {
+  animation-name: lp-hero-carousel-progress;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+@keyframes lp-hero-carousel-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .landing-premium .lp-hero-carousel__slide {
+    transition: none;
+  }
+
   .landing-premium .lp-hero-carousel__progress {
     display: none;
   }
@@ -1582,7 +1670,8 @@
     transform: none;
   }
 
-  .landing-premium .lp-reveal {
+  .landing-premium .lp-reveal,
+  .landing-premium .lp-reveal-stagger .lp-reveal-stagger__item {
     opacity: 1;
     transform: none;
     transition: none;

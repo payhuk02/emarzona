@@ -157,9 +157,13 @@ All colors MUST be HSL.
   /* Les styles du sidebar sont maintenant dans ./styles/sidebar-optimized.css */
 
   html {
-    scroll-behavior: smooth;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Smooth scroll limité à la landing (évite nav “molle” app-wide) */
+  html.lp-smooth-scroll {
+    scroll-behavior: smooth;
   }
 
   body {

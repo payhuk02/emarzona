@@ -2,6 +2,7 @@ import { LANDING_COUNTRIES } from '@/lib/landing/countries';
 import { getCountryFlagUrl } from '@/lib/landing/country-flag';
 import { useLandingPremiumT } from '@/hooks/useLandingPremiumT';
 import { usePremiumReveal } from './usePremiumReveal';
+import { useMarqueeInViewPause } from './useMarqueeInViewPause';
 
 function CountryChip({ code, regionKey }: { code: string; regionKey: string }) {
   const { t } = useLandingPremiumT();
@@ -64,6 +65,7 @@ function CountryMarqueeRow({
 export function CountriesMarqueeSection() {
   const { t } = useLandingPremiumT();
   const { ref, className } = usePremiumReveal();
+  const { ref: pauseRef, pauseClass } = useMarqueeInViewPause();
   const count = LANDING_COUNTRIES.length;
 
   const rowA = LANDING_COUNTRIES;
@@ -72,7 +74,8 @@ export function CountriesMarqueeSection() {
   return (
     <section
       id="pays"
-      className="lp-countries-section relative overflow-hidden border-y border-white/[0.06] bg-[#08080a] py-14 sm:py-20"
+      ref={pauseRef}
+      className={`lp-countries-section relative overflow-hidden border-y border-white/[0.06] bg-[#08080a] py-14 sm:py-20 ${pauseClass}`}
     >
       <div
         className="pointer-events-none absolute inset-0 opacity-80"

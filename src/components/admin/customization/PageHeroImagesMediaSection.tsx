@@ -8,7 +8,10 @@ import { useToast } from '@/hooks/use-toast';
 import { usePlatformHeroImageMap } from '@/hooks/usePlatformHeroImage';
 import { useAdminPageHeroImages } from '@/hooks/admin/useAdminPageHeroImages';
 import { MARKETING_HERO_PAGES, type MarketingHeroGroup } from '@/config/marketing-hero-images';
+import { formatMediaPixelSize, MARKETING_HERO_FORMAT } from '@/lib/admin/mediaImageFormats';
 import { logger } from '@/lib/logger';
+
+const MARKETING_HERO_FORMAT_LABEL = formatMediaPixelSize(MARKETING_HERO_FORMAT);
 
 type Props = {
   onChange?: () => void;
@@ -88,6 +91,10 @@ function HeroCard({
           }}
         />
       </div>
+
+      <p className="text-center text-xs font-medium tabular-nums text-muted-foreground">
+        Format : {MARKETING_HERO_FORMAT_LABEL}
+      </p>
 
       <Link
         to={route}
@@ -192,7 +199,7 @@ export function PageHeroImagesMediaSection({ onChange }: Props) {
     <div className="space-y-6">
       <HeroGroup
         title="Pages Solutions — Hero droite"
-        description="Visuels 4:3 affiches a droite du hero. PNG / WebP / JPG, 4 Mo max. Sans override, l'image par defaut est utilisee."
+        description="Visuels 3:2 (1536 × 1024 px) affichés à droite du hero. PNG / WebP / JPG, 4 Mo max. Sans override, l'image par défaut est utilisée."
         group="solutions"
         onChange={onChange}
       />

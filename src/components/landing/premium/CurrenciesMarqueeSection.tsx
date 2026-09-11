@@ -2,6 +2,7 @@ import { LANDING_CURRENCIES, type LandingCurrency } from '@/lib/landing/currenci
 import { getCurrencyLogoUrl } from '@/lib/landing/currency-logo';
 import { useLandingPremiumT } from '@/hooks/useLandingPremiumT';
 import { usePremiumReveal } from './usePremiumReveal';
+import { useMarqueeInViewPause } from './useMarqueeInViewPause';
 
 function CurrencyChip({ currency }: { currency: LandingCurrency }) {
   const { t } = useLandingPremiumT();
@@ -63,6 +64,7 @@ function CurrencyMarqueeRow({
 export function CurrenciesMarqueeSection() {
   const { t } = useLandingPremiumT();
   const { ref, className } = usePremiumReveal();
+  const { ref: pauseRef, pauseClass } = useMarqueeInViewPause();
   const count = LANDING_CURRENCIES.length;
 
   const rowA = LANDING_CURRENCIES;
@@ -71,7 +73,8 @@ export function CurrenciesMarqueeSection() {
   return (
     <section
       id="devises"
-      className="lp-currencies-section relative overflow-hidden border-y border-[var(--lp-border-light)] bg-[var(--lp-surface-muted)] py-14 sm:py-20"
+      ref={pauseRef}
+      className={`lp-currencies-section relative overflow-hidden border-y border-[var(--lp-border-light)] bg-[var(--lp-surface-muted)] py-14 sm:py-20 ${pauseClass}`}
     >
       <div className="relative">
         <div ref={ref} className={`lp-reveal ${className}`}>

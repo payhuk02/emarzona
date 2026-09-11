@@ -45,7 +45,15 @@ export function LandingDeferredSection({
   }, [visible, rootMargin]);
 
   return (
-    <section ref={ref} className="lp-deferred-section" style={!visible ? { minHeight } : undefined}>
+    <section
+      ref={ref}
+      className="lp-deferred-section"
+      style={{
+        /* Garde la réserve pendant le lazy Suspense (évite collapse → CLS) */
+        minHeight,
+        containIntrinsicSize: `auto ${minHeight}`,
+      }}
+    >
       {visible ? children : null}
     </section>
   );

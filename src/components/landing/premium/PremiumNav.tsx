@@ -1,15 +1,25 @@
-import { useState, useEffect } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { StoreCreateCtaLink } from '@/components/store/StoreCreateCtaLink';
 import { Menu, X } from 'lucide-react';
 import { EmarzonaBrandLogo } from './EmarzonaBrandLogo';
 import { PremiumLangSwitcher } from './PremiumLangSwitcher';
-import { PremiumNavDesktopMenu, PremiumNavMobileList } from './PremiumNavMega';
+import { PremiumNavTopLinks } from './PremiumNavTopLinks';
 import { useLandingPremiumT } from '@/hooks/useLandingPremiumT';
 import { useAuth } from '@/contexts/AuthContext';
 import { useStoreContext } from '@/contexts/StoreContext';
 import type { LandingPremiumMegaId } from '@/config/landing-premium-nav';
-import '@/styles/landing-premium.css';
+
+const PremiumNavDesktopMenu = lazy(() =>
+  import('./PremiumNavMega').then(m => ({ default: m.PremiumNavDesktopMenu }))
+);
+const PremiumNavMobileList = lazy(() =>
+  import('./PremiumNavMega').then(m => ({ default: m.PremiumNavMobileList }))
+);
+
+function NavAuthCtaSkeleton() {
+  return <div className="h-10 w-[7.25rem] shrink-0 rounded-full bg-white/[0.08]" aria-hidden />;
+}
 
 export function PremiumNav() {
   const { t } = useLandingPremiumT();
@@ -18,11 +28,15 @@ export function PremiumNav() {
   const { stores, loading: storesLoading } = useStoreContext();
   const [open, setOpen] = useState(false);
   const [openMega, setOpenMega] = useState<LandingPremiumMegaId | null>(null);
+  const [megaReady, setMegaReady] = useState(false);
 
-  const isAuthenticated = Boolean(user) && !authLoading;
+  const authReady = !authLoading;
+  const isAuthenticated = authReady && Boolean(user);
   const hasStores = isAuthenticated && !storesLoading && stores.length > 0;
   const authHomeHref = hasStores ? '/dashboard' : '/account/hub';
   const authHomeLabel = hasStores ? t('nav.dashboard') : t('nav.myAccount');
+
+  const armMega = () => setMegaReady(true);
 
   useEffect(() => {
     document.body.style.overflow = open ? 'hidden' : '';
@@ -35,6 +49,23 @@ export function PremiumNav() {
     setOpen(false);
     setOpenMega(null);
   }, [pathname]);
+
+  useEffect(() => {
+    if (megaReady) return;
+
+    const win = window as Window & {
+      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+      cancelIdleCallback?: (id: number) => void;
+    };
+
+    if (typeof win.requestIdleCallback === 'function') {
+      const id = win.requestIdleCallback(() => setMegaReady(true), { timeout: 2800 });
+      return () => win.cancelIdleCallback?.(id);
+    }
+
+    const timer = window.setTimeout(() => setMegaReady(true), 1800);
+    return () => window.clearTimeout(timer);
+  }, [megaReady]);
 
   const closeDrawer = () => {
     setOpen(false);
@@ -52,14 +83,24 @@ export function PremiumNav() {
           <nav
             className="lp-nav-menu hidden min-w-0 justify-center lg:flex"
             aria-label="Navigation principale"
+            onPointerEnter={armMega}
+            onFocusCapture={armMega}
           >
-            <PremiumNavDesktopMenu t={t} pathname={pathname} />
+            {megaReady ? (
+              <Suspense fallback={<PremiumNavTopLinks t={t} pathname={pathname} />}>
+                <PremiumNavDesktopMenu t={t} pathname={pathname} />
+              </Suspense>
+            ) : (
+              <PremiumNavTopLinks t={t} pathname={pathname} />
+            )}
           </nav>
 
           <div className="flex shrink-0 items-center justify-end gap-2 xl:gap-3">
             <div className="hidden items-center gap-2 lg:flex xl:gap-3">
               <PremiumLangSwitcher className="lp-nav-control" />
-              {isAuthenticated ? (
+              {!authReady ? (
+                <NavAuthCtaSkeleton />
+              ) : isAuthenticated ? (
                 <Link
                   to={authHomeHref}
                   className="lp-btn-primary lp-nav-cta inline-flex h-10 items-center whitespace-nowrap rounded-full px-4 text-sm font-semibold xl:px-5"
@@ -86,7 +127,10 @@ export function PremiumNav() {
               <button
                 type="button"
                 className="lp-nav-icon-btn flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/12 bg-white/[0.04] text-white/90 transition-colors hover:border-white/22 hover:bg-white/[0.08]"
-                onClick={() => setOpen(!open)}
+                onClick={() => {
+                  armMega();
+                  setOpen(!open);
+                }}
                 aria-label={open ? t('nav.menuClose') : t('nav.menuOpen')}
                 aria-expanded={open}
               >
@@ -106,15 +150,27 @@ export function PremiumNav() {
             onClick={closeDrawer}
           />
           <div className="lp-premium-nav__drawer fixed inset-x-0 top-[4.25rem] z-50 max-h-[calc(100dvh-4.25rem)] overflow-y-auto border-t border-white/10 px-5 py-6 sm:top-[4.5rem] lg:hidden">
-            <PremiumNavMobileList
-              t={t}
-              pathname={pathname}
-              openMega={openMega}
-              onOpenMega={setOpenMega}
-              onNavigate={closeDrawer}
-            />
+            <Suspense
+              fallback={
+                <div className="space-y-2" aria-hidden>
+                  {[1, 2, 3, 4, 5].map(i => (
+                    <div key={i} className="h-11 rounded-xl bg-white/[0.06]" />
+                  ))}
+                </div>
+              }
+            >
+              <PremiumNavMobileList
+                t={t}
+                pathname={pathname}
+                openMega={openMega}
+                onOpenMega={setOpenMega}
+                onNavigate={closeDrawer}
+              />
+            </Suspense>
             <div className="mt-6 flex flex-col gap-3 border-t border-white/10 pt-6">
-              {isAuthenticated ? (
+              {!authReady ? (
+                <div className="h-11 w-full rounded-full bg-white/[0.08]" aria-hidden />
+              ) : isAuthenticated ? (
                 <Link
                   to={authHomeHref}
                   className="lp-btn-primary rounded-full py-3.5 text-center text-sm font-semibold"
