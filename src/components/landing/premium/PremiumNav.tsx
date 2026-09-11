@@ -10,11 +10,13 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useStoreContext } from '@/contexts/StoreContext';
 import type { LandingPremiumMegaId } from '@/config/landing-premium-nav';
 
+const megaModulePromise = () => import('./PremiumNavMega');
+
 const PremiumNavDesktopMenu = lazy(() =>
-  import('./PremiumNavMega').then(m => ({ default: m.PremiumNavDesktopMenu }))
+  megaModulePromise().then(m => ({ default: m.PremiumNavDesktopMenu }))
 );
 const PremiumNavMobileList = lazy(() =>
-  import('./PremiumNavMega').then(m => ({ default: m.PremiumNavMobileList }))
+  megaModulePromise().then(m => ({ default: m.PremiumNavMobileList }))
 );
 
 function NavAuthCtaSkeleton() {
@@ -36,7 +38,14 @@ export function PremiumNav() {
   const authHomeHref = hasStores ? '/dashboard' : '/account/hub';
   const authHomeLabel = hasStores ? t('nav.dashboard') : t('nav.myAccount');
 
-  const armMega = () => setMegaReady(true);
+  /** Monte le mega seulement après chargement du chunk (pas de remount Suspense mid-clic). */
+  const armMega = () => {
+    void megaModulePromise().then(() => setMegaReady(true));
+  };
+
+  const prefetchMega = () => {
+    void megaModulePromise();
+  };
 
   useEffect(() => {
     document.body.style.overflow = open ? 'hidden' : '';
@@ -51,7 +60,13 @@ export function PremiumNav() {
   }, [pathname]);
 
   useEffect(() => {
-    if (megaReady) return;
+    let cancelled = false;
+
+    const enableMega = () => {
+      void megaModulePromise().then(() => {
+        if (!cancelled) setMegaReady(true);
+      });
+    };
 
     const win = window as Window & {
       requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
@@ -59,13 +74,19 @@ export function PremiumNav() {
     };
 
     if (typeof win.requestIdleCallback === 'function') {
-      const id = win.requestIdleCallback(() => setMegaReady(true), { timeout: 2800 });
-      return () => win.cancelIdleCallback?.(id);
+      const id = win.requestIdleCallback(enableMega, { timeout: 2800 });
+      return () => {
+        cancelled = true;
+        win.cancelIdleCallback?.(id);
+      };
     }
 
-    const timer = window.setTimeout(() => setMegaReady(true), 1800);
-    return () => window.clearTimeout(timer);
-  }, [megaReady]);
+    const timer = window.setTimeout(enableMega, 1800);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, []);
 
   const closeDrawer = () => {
     setOpen(false);
@@ -83,13 +104,11 @@ export function PremiumNav() {
           <nav
             className="lp-nav-menu hidden min-w-0 justify-center lg:flex"
             aria-label="Navigation principale"
-            onPointerEnter={armMega}
-            onFocusCapture={armMega}
+            onPointerEnter={prefetchMega}
+            onFocusCapture={prefetchMega}
           >
             {megaReady ? (
-              <Suspense fallback={<PremiumNavTopLinks t={t} pathname={pathname} />}>
-                <PremiumNavDesktopMenu t={t} pathname={pathname} />
-              </Suspense>
+              <PremiumNavDesktopMenu t={t} pathname={pathname} />
             ) : (
               <PremiumNavTopLinks t={t} pathname={pathname} />
             )}
@@ -129,7 +148,7 @@ export function PremiumNav() {
                 className="lp-nav-icon-btn flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/12 bg-white/[0.04] text-white/90 transition-colors hover:border-white/22 hover:bg-white/[0.08]"
                 onClick={() => {
                   armMega();
-                  setOpen(!open);
+                  setOpen(prev => !prev);
                 }}
                 aria-label={open ? t('nav.menuClose') : t('nav.menuOpen')}
                 aria-expanded={open}
