@@ -155,7 +155,7 @@ export function PricingSection() {
                   </div>
 
                   <div>
-                    <h3 className="text-xl font-semibold sm:text-2xl">
+                    <h3 className="text-xl font-semibold text-white sm:text-2xl">
                       {t('pricing.commission.name')}
                     </h3>
                     <p className="mt-2 max-w-2xl text-sm leading-relaxed text-white/70">

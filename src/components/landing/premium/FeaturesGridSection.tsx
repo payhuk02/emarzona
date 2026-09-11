@@ -11,6 +11,7 @@ import {
   Repeat,
   Layers,
   Headphones,
+  type LucideIcon,
 } from 'lucide-react';
 import { useLandingPremiumT } from '@/hooks/useLandingPremiumT';
 import { usePremiumReveal } from './usePremiumReveal';
@@ -32,18 +33,58 @@ const featureIcons = [
 
 type FeatureItem = { title: string; desc: string };
 
+const DELAY_CLASS = ['', 'lp-reveal--delay', 'lp-reveal--delay-2'] as const;
+
+function FeatureCard({
+  item,
+  Icon,
+  index,
+}: {
+  item: FeatureItem;
+  Icon: LucideIcon;
+  index: number;
+}) {
+  const { ref, className: reveal } = usePremiumReveal(0.1);
+  const col = index % 3;
+  const fromClass =
+    col === 0
+      ? 'lp-reveal--from-left'
+      : col === 2
+        ? 'lp-reveal--from-right'
+        : 'lp-reveal--soft-scale';
+  const delayClass = DELAY_CLASS[col];
+
+  return (
+    <article
+      ref={ref}
+      className={`lp-feature-card group lp-reveal ${fromClass} ${delayClass} ${reveal}`}
+    >
+      <div
+        className="lp-feature-card__glow pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full opacity-30 blur-3xl"
+        aria-hidden
+      />
+      <div className="lp-feature-card__icon relative">
+        <Icon className="lp-feature-card__svg" strokeWidth={1.5} aria-hidden />
+      </div>
+      <h3 className="lp-feature-card__title relative">{item.title}</h3>
+      <p className="lp-feature-card__desc relative">{item.desc}</p>
+    </article>
+  );
+}
+
 export function FeaturesGridSection() {
   const { t } = useLandingPremiumT();
-  const { ref, className } = usePremiumReveal();
-  const items = t('features.items', { returnObjects: true }) as FeatureItem[];
+  const { ref: introRef, className: introReveal } = usePremiumReveal();
+  const itemsRaw = t('features.items', { returnObjects: true });
+  const items = Array.isArray(itemsRaw) ? (itemsRaw as FeatureItem[]) : [];
 
   return (
     <section
       id="fonctionnalites"
       className="lp-section-pad lp-section-light border-y border-[var(--lp-border-light)]"
     >
-      <div ref={ref} className={`mx-auto max-w-7xl px-4 sm:px-5 lg:px-8 lp-reveal ${className}`}>
-        <div className="mx-auto max-w-3xl text-center">
+      <div className="mx-auto max-w-7xl px-4 sm:px-5 lg:px-8">
+        <div ref={introRef} className={`mx-auto max-w-3xl text-center lp-reveal ${introReveal}`}>
           <p className="lp-eyebrow-light mx-auto mb-5">{t('features.eyebrow')}</p>
           <h2 className="lp-serif text-3xl text-[var(--lp-text)] sm:text-4xl lg:text-5xl">
             {t('features.title')}{' '}
@@ -54,22 +95,10 @@ export function FeaturesGridSection() {
           </p>
         </div>
 
-        <div className="mt-10 grid gap-2 sm:mt-14 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
-          {items.map((f, i) => {
-            const Icon = featureIcons[i];
-            return (
-              <div key={f.title} className="lp-feature-cell group flex gap-4">
-                <div className="lp-feature-icon h-11 w-11">
-                  <Icon className="h-[22px] w-[22px] text-[var(--lp-text)]" strokeWidth={1.5} />
-                </div>
-                <div className="min-w-0">
-                  <h3 className="font-semibold tracking-tight text-[var(--lp-text)]">{f.title}</h3>
-                  <p className="mt-1.5 text-sm leading-relaxed text-[var(--lp-text-muted)]">
-                    {f.desc}
-                  </p>
-                </div>
-              </div>
-            );
+        <div className="lp-feature-grid mt-10 sm:mt-14">
+          {items.map((item, i) => {
+            const Icon = featureIcons[i % featureIcons.length];
+            return <FeatureCard key={`${item.title}-${i}`} item={item} Icon={Icon} index={i} />;
           })}
         </div>
       </div>
