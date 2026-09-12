@@ -91,6 +91,20 @@ describe('HorizontalContextNav mobile', () => {
     vi.clearAllMocks();
   });
 
+  it('keeps desktop mega-menu ancestors overflow-visible (no overflow-x clip)', () => {
+    render(
+      <MemoryRouter initialEntries={['/dashboard/orders']}>
+        <HorizontalContextNav />
+      </MemoryRouter>
+    );
+
+    const root = screen.getByTestId('horizontal-context-nav');
+    expect(root.className).toMatch(/overflow-visible/);
+    expect(root.className).not.toMatch(/overflow-x-auto/);
+    const desktopWrap = root.querySelector('.hidden.md\\:block');
+    expect(desktopWrap?.className ?? '').not.toMatch(/overflow-x-auto/);
+  });
+
   it('renders mobile nav strip with domain triggers', () => {
     render(
       <MemoryRouter initialEntries={['/dashboard/orders']}>
