@@ -26,6 +26,9 @@ const CurrenciesMarqueeSection = lazy(() =>
 const PricingSection = lazy(() =>
   import('./PricingSection').then(m => ({ default: m.PricingSection }))
 );
+const SponsoredProductsSection = lazy(() =>
+  import('./SponsoredProductsSection').then(m => ({ default: m.SponsoredProductsSection }))
+);
 const FinalCtaSection = lazy(() =>
   import('./FinalCtaSection').then(m => ({ default: m.FinalCtaSection }))
 );
@@ -111,6 +114,14 @@ export function PremiumLandingPage() {
           <ErrorBoundary level="section">
             <Suspense fallback={<DeferredFallback minHeight="32rem" />}>
               <PricingSection />
+            </Suspense>
+          </ErrorBoundary>
+        </LandingDeferredSection>
+
+        <LandingDeferredSection minHeight="36rem">
+          <ErrorBoundary level="section">
+            <Suspense fallback={<DeferredFallback minHeight="36rem" />}>
+              <SponsoredProductsSection />
             </Suspense>
           </ErrorBoundary>
         </LandingDeferredSection>

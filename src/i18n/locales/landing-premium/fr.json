@@ -513,6 +513,16 @@
       "cta": "Commencer"
     }
   },
+  "sponsored": {
+    "eyebrow": "Marketplace en vedette",
+    "title": "Produits sponsorisés,",
+    "titleHighlight": "mis en avant",
+    "subtitle": "Sélection de boutiques boostées sur Emarzona — découvrez les offres mises en avant sur le marketplace.",
+    "cta": "Voir",
+    "badgeSponsored": "Sponsorisé",
+    "badgeFeatured": "Vedette",
+    "viewMarketplace": "Explorer le marketplace"
+  },
   "cta": {
     "titleLine1": "Prêt à tout vendre.",
     "titleLine2": "Partout. Avec Emarzona.",

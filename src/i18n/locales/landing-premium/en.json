@@ -505,6 +505,16 @@
       "cta": "Get started"
     }
   },
+  "sponsored": {
+    "eyebrow": "Featured marketplace",
+    "title": "Sponsored products,",
+    "titleHighlight": "front and center",
+    "subtitle": "A rotating selection of boosted storefronts on Emarzona — discover offers highlighted on the marketplace.",
+    "cta": "View",
+    "badgeSponsored": "Sponsored",
+    "badgeFeatured": "Featured",
+    "viewMarketplace": "Browse the marketplace"
+  },
   "cta": {
     "titleLine1": "Ready to sell everything.",
     "titleLine2": "Everywhere. With Emarzona.",
