@@ -81,6 +81,23 @@ export async function openProductCreateWizard(
   await waitForWizardMarker(page, marker, label);
 }
 
+/**
+ * Après Publier, le wizard ouvre SponsorAfterPublishDialog et ne navigue
+ * vers la liste qu'au skip (« Plus tard »). Les helpers publish doivent
+ * fermer ce dialogue avant d'asserter l'URL dashboard.
+ */
+export async function dismissSponsorAfterPublishIfVisible(page: Page): Promise<void> {
+  const dialog = page.getByRole('dialog').filter({ hasText: /Sponsoriser votre produit/i });
+  const appeared = await dialog
+    .waitFor({ state: 'visible', timeout: 20_000 })
+    .then(() => true)
+    .catch(() => false);
+  if (!appeared) return;
+
+  await page.getByRole('button', { name: /^Plus tard$/i }).click();
+  await dialog.waitFor({ state: 'hidden', timeout: 15_000 }).catch(() => undefined);
+}
+
 /** Ouvre un SelectField (combobox) par son label et choisit une option. */
 export async function selectWizardComboboxOption(
   page: Page,

@@ -8,7 +8,10 @@ import {
 } from './store-theme-helpers';
 import { waitForReactApp, waitForVendorStoreReady } from '../shared/e2e-test-config';
 import { retryOnTransientPostgrest } from './supabase-schema-cache-retry';
-import { openProductCreateWizard } from './product-wizard-helpers';
+import {
+  dismissSponsorAfterPublishIfVisible,
+  openProductCreateWizard,
+} from './product-wizard-helpers';
 import { prepareSellerDashboardChrome, waitForStoresLoaded } from './seller-dashboard-setup';
 
 /** 1×1 PNG valide pour upload catalogue. */
@@ -284,6 +287,8 @@ export async function publishArtistWizard(page: Page): Promise<void> {
     const copy = (await errorToast.innerText().catch(() => '')).slice(0, 400);
     throw new Error(`Artist publish failed in UI: ${copy}`);
   }
+
+  await dismissSponsorAfterPublishIfVisible(page);
 
   // Prefer redirect; toast is soft because portals can be flaky in CI.
   if (!(await page.url().includes('/dashboard/artist-products'))) {

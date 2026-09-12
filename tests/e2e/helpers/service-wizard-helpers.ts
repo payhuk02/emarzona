@@ -1,6 +1,7 @@
 import { expect, type Page } from '@playwright/test';
 import { clickWizardNext, goToWizardStep } from './vendor-e2e-helpers';
 import {
+  dismissSponsorAfterPublishIfVisible,
   openProductCreateWizard,
   selectWizardComboboxOption,
   waitForProductCreatePageReady,
@@ -238,6 +239,7 @@ export async function publishServiceWizard(page: Page): Promise<void> {
     throw new Error(`Service publish failed in UI: ${copy}`);
   }
 
+  await dismissSponsorAfterPublishIfVisible(page);
   await expect(page).toHaveURL(SERVICE_DASHBOARD_LIST_URL, { timeout: 90_000 });
 }
 

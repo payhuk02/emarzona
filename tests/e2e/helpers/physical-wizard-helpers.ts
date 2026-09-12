@@ -1,7 +1,10 @@
 import { expect, type Page } from '@playwright/test';
 import { E2E_ARTWORK_PNG } from './artist-wizard-helpers';
 import { clickWizardNext, goToWizardStep } from './vendor-e2e-helpers';
-import { openProductCreateWizard } from './product-wizard-helpers';
+import {
+  dismissSponsorAfterPublishIfVisible,
+  openProductCreateWizard,
+} from './product-wizard-helpers';
 
 export const PHYSICAL_WIZARD_TOTAL_STEPS = 9;
 
@@ -73,6 +76,7 @@ export async function advancePhysicalWizardToPublishStep(page: Page): Promise<vo
 
 export async function publishPhysicalWizard(page: Page): Promise<void> {
   await page.getByRole('button', { name: /Publier le produit|Publier$/i }).click();
+  await dismissSponsorAfterPublishIfVisible(page);
   // App navigates to the list after publish; toast can unmount during transition.
   await expect(page).toHaveURL(/\/dashboard\/physical-products/, { timeout: 60_000 });
 }

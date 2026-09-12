@@ -1,6 +1,10 @@
 import { expect, type Page } from '@playwright/test';
 import { clickWizardNext, goToWizardStep } from './vendor-e2e-helpers';
-import { openProductCreateWizard, selectWizardComboboxOption } from './product-wizard-helpers';
+import {
+  dismissSponsorAfterPublishIfVisible,
+  openProductCreateWizard,
+  selectWizardComboboxOption,
+} from './product-wizard-helpers';
 
 export type FillCourseBasicInfoOptions = {
   title: string;
@@ -129,6 +133,7 @@ export async function publishCourseWizard(page: Page): Promise<void> {
     throw new Error(`Course publish failed in UI: ${copy}`);
   }
 
+  await dismissSponsorAfterPublishIfVisible(page);
   await expect(page).toHaveURL(COURSE_DASHBOARD_LIST_URL, { timeout: 90_000 });
 }
 
