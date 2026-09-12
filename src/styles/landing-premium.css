@@ -1041,81 +1041,73 @@
 .landing-premium .lp-sponsored-card {
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  border-radius: 1.15rem;
-  border: 1px solid var(--lp-border-light);
-  background: var(--lp-surface);
-  box-shadow: 0 18px 40px -32px rgba(15, 15, 18, 0.35);
-  transition:
-    transform 0.4s var(--lp-ease),
-    box-shadow 0.4s var(--lp-ease),
-    border-color 0.4s var(--lp-ease);
+  overflow: visible;
+  border-radius: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  transition: transform 0.4s var(--lp-ease);
 }
 
 .landing-premium .lp-sponsored-card:hover {
   transform: translateY(-3px);
-  border-color: rgba(37, 99, 235, 0.22);
-  box-shadow: 0 26px 48px -28px rgba(15, 15, 18, 0.4);
+  border-color: transparent;
+  box-shadow: none;
 }
 
 .landing-premium .lp-sponsored-card__media {
   position: relative;
   display: block;
-  aspect-ratio: 4 / 3;
   overflow: hidden;
-  background: linear-gradient(145deg, #eef2f7 0%, #e2e8f0 100%);
+  margin: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  line-height: 0;
 }
 
 .landing-premium .lp-sponsored-card__image {
-  height: 100%;
+  display: block;
   width: 100%;
-  object-fit: cover;
+  height: auto;
+  object-fit: contain;
+  object-position: center bottom;
   transition: transform 0.55s var(--lp-ease);
 }
 
 .landing-premium .lp-sponsored-card:hover .lp-sponsored-card__image {
-  transform: scale(1.04);
+  transform: scale(1.01);
 }
 
 .landing-premium .lp-sponsored-card__image-fallback {
-  height: 100%;
+  aspect-ratio: 4 / 3;
   width: 100%;
   background:
     radial-gradient(circle at 30% 20%, rgba(37, 99, 235, 0.12), transparent 55%),
     linear-gradient(145deg, #edf1f6, #dde4ee);
 }
 
-.landing-premium .lp-sponsored-card__badges {
-  position: absolute;
-  left: 0.75rem;
-  top: 0.75rem;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  max-width: calc(100% - 1.5rem);
-}
-
 .landing-premium .lp-sponsored-card__badge {
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
+  flex-shrink: 0;
   border-radius: 999px;
   padding: 0.28rem 0.55rem;
   font-size: 0.65rem;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  backdrop-filter: blur(8px);
 }
 
 .landing-premium .lp-sponsored-card__badge--sponsored {
-  background: rgba(15, 15, 18, 0.78);
+  background: rgba(15, 15, 18, 0.9);
   color: #fff;
 }
 
 .landing-premium .lp-sponsored-card__badge--featured {
-  background: rgba(201, 162, 39, 0.95);
-  color: #0a0a0c;
+  background: #16a34a;
+  color: #fff;
 }
 
 .landing-premium .lp-sponsored-card__body {
@@ -1123,7 +1115,28 @@
   flex: 1;
   flex-direction: column;
   gap: 0.65rem;
+  margin: 0;
   padding: 1rem 1.05rem 1.1rem;
+  border: 1px solid var(--lp-border-light);
+  border-radius: 0 0 1.15rem 1.15rem;
+  background: var(--lp-surface);
+  box-shadow: 0 18px 40px -32px rgba(15, 15, 18, 0.35);
+  transition:
+    box-shadow 0.4s var(--lp-ease),
+    border-color 0.4s var(--lp-ease);
+}
+
+.landing-premium .lp-sponsored-card:hover .lp-sponsored-card__body {
+  border-color: rgba(37, 99, 235, 0.22);
+  box-shadow: 0 26px 48px -28px rgba(15, 15, 18, 0.4);
+}
+
+.landing-premium .lp-sponsored-card__store-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  min-width: 0;
 }
 
 .landing-premium .lp-sponsored-card__store {
@@ -1131,6 +1144,7 @@
   align-items: center;
   gap: 0.5rem;
   min-width: 0;
+  flex: 1;
 }
 
 .landing-premium .lp-sponsored-card__store-logo,
@@ -1184,18 +1198,20 @@
 
 .landing-premium .lp-sponsored-card__footer {
   margin-top: auto;
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 0.75rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.5rem;
   padding-top: 0.35rem;
 }
 
 .landing-premium .lp-sponsored-card__price {
-  display: flex;
-  flex-direction: column;
-  gap: 0.1rem;
   min-width: 0;
+  justify-self: start;
+}
+
+.landing-premium .lp-sponsored-card__footer .lp-sponsored-card__badge--featured {
+  justify-self: center;
 }
 
 .landing-premium .lp-sponsored-card__price-now {
@@ -1205,24 +1221,20 @@
   letter-spacing: -0.01em;
 }
 
-.landing-premium .lp-sponsored-card__price-was {
-  font-size: 0.72rem;
-  color: var(--lp-text-muted);
-  text-decoration: line-through;
-}
-
 .landing-premium .lp-sponsored-card__cta {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.3rem;
+  justify-self: end;
   flex-shrink: 0;
   border-radius: 999px;
-  border: 1px solid rgba(37, 99, 235, 0.28);
-  background: rgba(37, 99, 235, 0.06);
+  border: 1px solid var(--lp-orange-deep);
+  background: var(--lp-orange);
   padding: 0.45rem 0.75rem;
   font-size: 0.72rem;
   font-weight: 600;
-  color: var(--lp-blue);
+  color: #fff;
   text-decoration: none;
   transition:
     background 0.25s var(--lp-ease),
@@ -1230,8 +1242,28 @@
 }
 
 .landing-premium .lp-sponsored-card__cta:hover {
-  background: rgba(37, 99, 235, 0.12);
-  border-color: rgba(37, 99, 235, 0.45);
+  background: var(--lp-orange-deep);
+  border-color: var(--lp-orange-deep);
+  color: #fff;
+}
+
+.landing-premium .lp-sponsored-marketplace-btn {
+  border: 1px solid var(--lp-orange-deep);
+  background: var(--lp-orange);
+  color: #fff;
+  text-decoration: none;
+  box-shadow: 0 12px 28px -16px rgba(249, 115, 22, 0.7);
+  transition:
+    background 0.25s var(--lp-ease),
+    border-color 0.25s var(--lp-ease),
+    transform 0.25s var(--lp-ease);
+}
+
+.landing-premium .lp-sponsored-marketplace-btn:hover {
+  background: var(--lp-orange-deep);
+  border-color: var(--lp-orange-deep);
+  color: #fff;
+  transform: translateY(-1px);
 }
 
 .landing-premium .lp-deferred-section {

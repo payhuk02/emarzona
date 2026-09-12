@@ -10,19 +10,17 @@ const FETCH_LIMIT = 36;
  * Types générés encore sans p_sponsored_only — cast volontaire au boundary.
  */
 export async function fetchLandingSponsoredProducts(): Promise<LandingSponsoredProduct[]> {
+  // POST (pas get:true) : la RPC plpgsql SECURITY DEFINER échoue en GET
+  // avec 25006 « cannot execute SELECT in a read-only transaction ».
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabaseRead as any).rpc(
-    'get_marketplace_products_filtered',
-    {
-      p_limit: FETCH_LIMIT,
-      p_offset: 0,
-      p_sponsored_only: true,
-      p_featured_only: false,
-      p_sort_by: 'created_at',
-      p_sort_order: 'desc',
-    },
-    { get: true }
-  );
+  const { data, error } = await (supabaseRead as any).rpc('get_marketplace_products_filtered', {
+    p_limit: FETCH_LIMIT,
+    p_offset: 0,
+    p_sponsored_only: true,
+    p_featured_only: false,
+    p_sort_by: 'created_at',
+    p_sort_order: 'desc',
+  });
 
   if (error) {
     logger.warn('fetchLandingSponsoredProducts RPC failed', { error });

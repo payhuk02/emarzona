@@ -1,5 +1,6 @@
 export const LANDING_SPONSORED_SLOT_COUNT = 9;
-export const LANDING_SPONSORED_ROTATE_MS = 5500;
+/** Rotation de la fenêtre uniquement si le pool dépasse 9 produits. */
+export const LANDING_SPONSORED_ROTATE_MS = 30 * 60 * 1000;
 
 export type LandingSponsoredProduct = {
   id: string;
@@ -21,8 +22,8 @@ export type LandingSponsoredProduct = {
 };
 
 /**
- * Remplit toujours `slotCount` cartes en cyclant le pool (grille 3×3).
- * L’offset fait tourner les produits à intervalle régulier.
+ * ≤ `slotCount` : tous les produits, sans doublon ni rotation.
+ * > `slotCount` : fenêtre glissante de `slotCount` (offset pour la rotation).
  */
 export function pickSponsoredWindow<T>(
   pool: readonly T[],
@@ -30,6 +31,8 @@ export function pickSponsoredWindow<T>(
   slotCount: number = LANDING_SPONSORED_SLOT_COUNT
 ): T[] {
   if (pool.length === 0) return [];
+  if (pool.length <= slotCount) return [...pool];
+
   const start = ((offset % pool.length) + pool.length) % pool.length;
   return Array.from({ length: slotCount }, (_, i) => pool[(start + i) % pool.length]);
 }

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  LANDING_SPONSORED_ROTATE_MS,
   LANDING_SPONSORED_SLOT_COUNT,
   landingSponsoredProductHref,
   pickSponsoredWindow,
@@ -10,10 +11,15 @@ describe('pickSponsoredWindow', () => {
     expect(pickSponsoredWindow([], 0)).toEqual([]);
   });
 
-  it('fills 9 slots by cycling a smaller pool', () => {
+  it('returns the pool as-is without duplicates when ≤ 9', () => {
     const pool = ['a', 'b', 'c'];
-    expect(pickSponsoredWindow(pool, 0)).toEqual(['a', 'b', 'c', 'a', 'b', 'c', 'a', 'b', 'c']);
-    expect(pickSponsoredWindow(pool, 1)).toEqual(['b', 'c', 'a', 'b', 'c', 'a', 'b', 'c', 'a']);
+    expect(pickSponsoredWindow(pool, 0)).toEqual(['a', 'b', 'c']);
+    expect(pickSponsoredWindow(pool, 99)).toEqual(['a', 'b', 'c']);
+  });
+
+  it('returns all nine without cycling when pool has exactly 9', () => {
+    const pool = Array.from({ length: 9 }, (_, i) => `p${i}`);
+    expect(pickSponsoredWindow(pool, 3)).toEqual(pool);
   });
 
   it('returns a sliding window of 9 when pool is larger', () => {
@@ -33,6 +39,12 @@ describe('pickSponsoredWindow', () => {
     expect(pickSponsoredWindow(pool, 11)).toHaveLength(LANDING_SPONSORED_SLOT_COUNT);
     expect(pickSponsoredWindow(pool, 11)[0]).toBe('p11');
     expect(pickSponsoredWindow(pool, 11)[1]).toBe('p0');
+  });
+});
+
+describe('LANDING_SPONSORED_ROTATE_MS', () => {
+  it('is 30 minutes', () => {
+    expect(LANDING_SPONSORED_ROTATE_MS).toBe(30 * 60 * 1000);
   });
 });
 

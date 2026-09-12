@@ -77,7 +77,6 @@ function SponsoredProductCard({
     product.promotional_price != null && product.promotional_price < product.price
       ? product.promotional_price
       : product.price;
-  const showStrike = product.promotional_price != null && product.promotional_price < product.price;
 
   useEffect(() => {
     if (!product.is_sponsored || !product.active_sponsorship_id) return;
@@ -114,25 +113,23 @@ function SponsoredProductCard({
         ) : (
           <div className="lp-sponsored-card__image-fallback" aria-hidden />
         )}
-        <div className="lp-sponsored-card__badges">
+      </ProductLink>
+
+      <div className="lp-sponsored-card__body">
+        <div className="lp-sponsored-card__store-row">
+          {product.store ? (
+            <div className="lp-sponsored-card__store">
+              <StoreMark name={product.store.name} logoUrl={product.store.logo_url} />
+              <span className="lp-sponsored-card__store-name">{product.store.name}</span>
+            </div>
+          ) : (
+            <span />
+          )}
           <span className="lp-sponsored-card__badge lp-sponsored-card__badge--sponsored">
             <Sparkles className="h-3 w-3" aria-hidden />
             {sponsoredLabel}
           </span>
-          <span className="lp-sponsored-card__badge lp-sponsored-card__badge--featured">
-            <Star className="h-3 w-3" aria-hidden />
-            {featuredLabel}
-          </span>
         </div>
-      </ProductLink>
-
-      <div className="lp-sponsored-card__body">
-        {product.store ? (
-          <div className="lp-sponsored-card__store">
-            <StoreMark name={product.store.name} logoUrl={product.store.logo_url} />
-            <span className="lp-sponsored-card__store-name">{product.store.name}</span>
-          </div>
-        ) : null}
 
         <h3 className="lp-sponsored-card__title">
           <ProductLink href={href} onClick={handleCtaClick}>
@@ -145,12 +142,11 @@ function SponsoredProductCard({
             <span className="lp-sponsored-card__price-now">
               {formatCurrencyCode(price, product.currency || 'XOF')}
             </span>
-            {showStrike ? (
-              <span className="lp-sponsored-card__price-was">
-                {formatCurrencyCode(product.price, product.currency || 'XOF')}
-              </span>
-            ) : null}
           </div>
+          <span className="lp-sponsored-card__badge lp-sponsored-card__badge--featured">
+            <Star className="h-3 w-3" aria-hidden />
+            {featuredLabel}
+          </span>
           <ProductLink href={href} className="lp-sponsored-card__cta" onClick={handleCtaClick}>
             {ctaLabel}
             <ArrowRight className="h-3.5 w-3.5" aria-hidden />
@@ -168,10 +164,13 @@ export function SponsoredProductsSection() {
   const [offset, setOffset] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
 
-  const shouldRotate = pool.length > 1;
+  const shouldRotate = pool.length > LANDING_SPONSORED_SLOT_COUNT;
 
   useEffect(() => {
-    if (!shouldRotate) return;
+    if (!shouldRotate) {
+      setOffset(0);
+      return;
+    }
     if (typeof window === 'undefined') return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
@@ -224,11 +223,11 @@ export function SponsoredProductsSection() {
       aria-labelledby="lp-sponsored-heading"
     >
       <div ref={ref} className={`mx-auto max-w-7xl px-4 sm:px-5 lg:px-8 lp-reveal ${className}`}>
-        <div className="mx-auto max-w-2xl text-center">
+        <div className="mx-auto max-w-3xl text-center">
           <p className="lp-eyebrow-light mx-auto mb-5">{t('sponsored.eyebrow')}</p>
           <h2
             id="lp-sponsored-heading"
-            className="lp-serif mt-3 text-3xl text-[var(--lp-text)] sm:text-4xl lg:text-5xl"
+            className="lp-serif mt-3 text-3xl text-[var(--lp-text)] sm:text-4xl lg:text-[2.65rem] lg:leading-tight"
           >
             {t('sponsored.title')}{' '}
             <span className="lp-gold-text italic">{t('sponsored.titleHighlight')}</span>
@@ -242,9 +241,9 @@ export function SponsoredProductsSection() {
           className={`lp-sponsored-grid mt-10 sm:mt-12${isAnimating ? ' lp-sponsored-grid--swap' : ''}`}
           aria-live="polite"
         >
-          {visible.map((product, index) => (
+          {visible.map(product => (
             <SponsoredProductCard
-              key={`${product.id}-${index}`}
+              key={product.id}
               product={product}
               ctaLabel={t('sponsored.cta')}
               sponsoredLabel={t('sponsored.badgeSponsored')}
@@ -256,7 +255,7 @@ export function SponsoredProductsSection() {
         <div className="mt-10 flex justify-center">
           <Link
             to="/marketplace"
-            className="lp-btn-outline inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold"
+            className="lp-sponsored-marketplace-btn inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold"
           >
             {t('sponsored.viewMarketplace')}
             <ArrowRight className="h-4 w-4" aria-hidden />
