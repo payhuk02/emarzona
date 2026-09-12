@@ -1175,6 +1175,11 @@ export const UnifiedProductCard = React.memo(
     return (
       prevProps.product.id === nextProps.product.id &&
       prevProps.product.updated_at === nextProps.product.updated_at &&
+      prevProps.product.image_url === nextProps.product.image_url &&
+      prevProps.product.is_sponsored === nextProps.product.is_sponsored &&
+      prevProps.product.is_featured === nextProps.product.is_featured &&
+      prevProps.product.store?.logo_url === nextProps.product.store?.logo_url &&
+      prevProps.product.store?.name === nextProps.product.store?.name &&
       prevProps.variant === nextProps.variant &&
       prevProps.showAffiliate === nextProps.showAffiliate
     );

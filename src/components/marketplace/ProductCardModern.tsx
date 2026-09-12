@@ -698,6 +698,8 @@ const ProductCardModern = React.memo(ProductCardModernComponent, (prevProps, nex
     prevProps.product.reviews_count === nextProps.product.reviews_count &&
     prevProps.product.is_featured === nextProps.product.is_featured &&
     prevProps.product.is_sponsored === nextProps.product.is_sponsored &&
+    prevProps.product.stores?.logo_url === nextProps.product.stores?.logo_url &&
+    prevProps.product.stores?.name === nextProps.product.stores?.name &&
     prevProps.product.whatsapp_number === nextProps.product.whatsapp_number &&
     prevProps.product.whatsapp_enabled === nextProps.product.whatsapp_enabled &&
     prevProps.storeSlug === nextProps.storeSlug &&
