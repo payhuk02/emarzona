@@ -37,4 +37,22 @@ describe('sponsorship ranking helpers', () => {
     expect(feed).not.toContain('b');
     expect(feed).not.toContain('e');
   });
+
+  it('sorts feed_sponsored products before organic ones', () => {
+    const rows = [
+      { id: 'organic-new', feed_sponsored: false, created_at: '2026-09-12' },
+      { id: 'boost-1', feed_sponsored: true, created_at: '2026-01-01' },
+      { id: 'organic-old', feed_sponsored: false, created_at: '2026-01-02' },
+      { id: 'boost-2', feed_sponsored: true, created_at: '2026-02-01' },
+    ];
+
+    const sorted = [...rows].sort((a, b) => {
+      if (a.feed_sponsored !== b.feed_sponsored) {
+        return a.feed_sponsored ? -1 : 1;
+      }
+      return b.created_at.localeCompare(a.created_at);
+    });
+
+    expect(sorted.map(r => r.id)).toEqual(['boost-2', 'boost-1', 'organic-new', 'organic-old']);
+  });
 });

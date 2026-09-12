@@ -830,9 +830,7 @@ export const ProductInfoTab = ({
               <div className="flex items-center justify-between p-4 bg-gray-700/30 rounded-lg border border-gray-600">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <Label className="text-sm font-medium text-white">
-                      Sponsorisation Marketplace
-                    </Label>
+                    <Label className="text-sm font-medium text-white">Boost Emarzona</Label>
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <HelpCircle className="h-3 w-3 text-gray-400" />

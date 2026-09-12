@@ -80,6 +80,7 @@ import {
   MessageSquare as LucideMessageSquare,
   CircleHelp,
   Newspaper,
+  ListOrdered,
 } from 'lucide-react';
 import type { RawNavSection } from '@/config/navigation.enrich';
 
@@ -688,9 +689,19 @@ export const userMenuSections = [
     label: 'Sponsorisation',
     items: [
       {
-        title: 'Boost Marketplace',
+        title: 'Boost Emarzona',
         url: '/dashboard/sponsorships',
         icon: Megaphone,
+      },
+      {
+        title: 'Analytics Boost',
+        url: '/dashboard/sponsorships/analytics',
+        icon: BarChart3,
+      },
+      {
+        title: 'Campagnes Boost',
+        url: '/dashboard/sponsorships/campaigns',
+        icon: ListOrdered,
       },
     ],
   },

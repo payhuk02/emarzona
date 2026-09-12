@@ -282,7 +282,9 @@ const SelectContentComponent = React.forwardRef<
               isMobile && 'scroll-smooth',
               position === 'popper' &&
                 !isMobileSheet &&
-                'h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]'
+                // Match trigger width only — do NOT lock viewport height to trigger height
+                // (that made dropdowns ~40px tall so options looked "missing").
+                'w-full min-w-[var(--radix-select-trigger-width)] max-h-[min(24rem,var(--radix-select-content-available-height,24rem))]'
             )}
           >
             {children}

@@ -4,7 +4,6 @@ import { Megaphone, Sparkles, CreditCard, XCircle } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
   Select,
@@ -22,8 +21,8 @@ import {
   useStoreSponsorships,
 } from '@/hooks/useMarketplaceSponsorships';
 import { useStoreContext } from '@/contexts/StoreContext';
-import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
+import { fetchStoreProductsForSponsor } from '@/lib/sponsorship/marketplace-sponsorship';
 
 function statusBadge(status: string) {
   const map: Record<string, string> = {
@@ -36,12 +35,26 @@ function statusBadge(status: string) {
   return map[status] ?? 'bg-muted text-muted-foreground';
 }
 
+function productOptionLabel(p: {
+  name: string;
+  is_active: boolean;
+  is_featured: boolean | null;
+  is_draft: boolean | null;
+}): string {
+  const tags: string[] = [];
+  if (p.is_featured) tags.push('sponsorisé');
+  if (p.is_draft) tags.push('brouillon');
+  else if (!p.is_active) tags.push('inactif');
+  return tags.length ? `${p.name} (${tags.join(', ')})` : p.name;
+}
+
 export default function SponsorshipsPage() {
   const [searchParams] = useSearchParams();
   const success = searchParams.get('success') === '1';
   const productIdFromQuery = searchParams.get('productId') ?? '';
   const viewCampaigns = searchParams.get('view') === 'campaigns';
-  const { currentStore } = useStoreContext();
+  const { selectedStore, loading: storeLoading } = useStoreContext();
+  const storeId = selectedStore?.id;
   const { data: sponsorships = [], isLoading } = useStoreSponsorships();
   const { data: skus = [] } = useSponsorshipSkus();
   const { data: quota = 0 } = usePlanSponsorQuota();
@@ -64,20 +77,21 @@ export default function SponsorshipsPage() {
     el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, [viewCampaigns]);
 
-  const { data: products = [] } = useQuery({
-    queryKey: ['store-products-for-sponsor', currentStore?.id],
-    enabled: Boolean(currentStore?.id),
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('products')
-        .select('id, name, is_featured, sponsored_until')
-        .eq('store_id', currentStore!.id)
-        .eq('is_active', true)
-        .order('name');
-      if (error) throw error;
-      return data ?? [];
-    },
+  const {
+    data: products = [],
+    isLoading: productsLoading,
+    isError: productsError,
+    error: productsQueryError,
+  } = useQuery({
+    queryKey: ['store-products-for-sponsor', storeId],
+    enabled: Boolean(storeId),
+    queryFn: () => fetchStoreProductsForSponsor(storeId!),
   });
+
+  const activeProducts = useMemo(
+    () => products.filter(p => p.is_active && !p.is_draft),
+    [products]
+  );
 
   const activeEntitlementCount = useMemo(
     () =>
@@ -92,6 +106,21 @@ export default function SponsorshipsPage() {
   );
 
   const selectedSku = skus.find(s => s.slug === skuSlug) ?? skus[0];
+  const productSelectValue = productId || undefined;
+  const productPlaceholder = storeLoading
+    ? 'Chargement de la boutique…'
+    : !storeId
+      ? 'Boutique non chargée'
+      : productsLoading
+        ? 'Chargement des produits…'
+        : productsError
+          ? 'Erreur de chargement'
+          : products.length === 0
+            ? 'Aucun produit dans cette boutique'
+            : 'Choisir un produit';
+
+  const productSelectDisabled =
+    storeLoading || !storeId || productsLoading || products.length === 0;
 
   return (
     <div className="mx-auto max-w-5xl space-y-6 p-4 sm:p-6">
@@ -100,11 +129,25 @@ export default function SponsorshipsPage() {
           <Megaphone className="h-6 w-6 text-primary" />
         </div>
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Sponsorisation Marketplace</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Boost Emarzona</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Boostez vos produits dans le feed Marketplace et les Recommandations IA (badge
             Sponsorisé + priorité de classement). Semaine 500 FCFA · Mois 1000 FCFA.
           </p>
+          <div className="mt-2 flex flex-wrap gap-3 text-sm">
+            <Link
+              to="/dashboard/sponsorships/analytics"
+              className="text-primary underline-offset-2 hover:underline"
+            >
+              Analytics Boost
+            </Link>
+            <Link
+              to="/dashboard/sponsorships/campaigns"
+              className="text-primary underline-offset-2 hover:underline"
+            >
+              Campagnes
+            </Link>
+          </div>
         </div>
       </div>
 
@@ -130,19 +173,51 @@ export default function SponsorshipsPage() {
           <CardContent className="space-y-3">
             <div className="space-y-2">
               <Label>Produit</Label>
-              <Select value={productId} onValueChange={setProductId}>
+              <Select
+                value={productSelectValue}
+                onValueChange={setProductId}
+                disabled={productSelectDisabled}
+              >
                 <SelectTrigger>
-                  <SelectValue placeholder="Choisir un produit" />
+                  <SelectValue placeholder={productPlaceholder} />
                 </SelectTrigger>
-                <SelectContent>
-                  {products.map(p => (
-                    <SelectItem key={p.id} value={p.id}>
-                      {p.name}
-                      {p.is_featured ? ' (actif)' : ''}
+                <SelectContent position="popper" className="z-[1100]" mobileVariant="default">
+                  {activeProducts.length > 0 ? (
+                    activeProducts.map(p => (
+                      <SelectItem key={p.id} value={p.id}>
+                        {productOptionLabel(p)}
+                      </SelectItem>
+                    ))
+                  ) : products.length > 0 ? (
+                    products.map(p => (
+                      <SelectItem key={p.id} value={p.id}>
+                        {productOptionLabel(p)}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value="__none__" disabled>
+                      Aucun produit disponible
                     </SelectItem>
-                  ))}
+                  )}
                 </SelectContent>
               </Select>
+              {productsError ? (
+                <p className="text-xs text-destructive">
+                  Impossible de charger les produits
+                  {productsQueryError instanceof Error ? ` : ${productsQueryError.message}` : '.'}
+                </p>
+              ) : null}
+              {!productsLoading && !productsError && products.length === 0 && storeId ? (
+                <p className="text-xs text-muted-foreground">
+                  Créez un produit actif puis revenez ici.{' '}
+                  <Link
+                    to="/dashboard/products"
+                    className="text-primary underline-offset-2 hover:underline"
+                  >
+                    Voir mes produits
+                  </Link>
+                </p>
+              ) : null}
             </div>
             <Button
               disabled={!productId || quota < 1 || createPlan.isPending}
@@ -167,11 +242,27 @@ export default function SponsorshipsPage() {
           <CardContent className="space-y-3">
             <div className="space-y-2">
               <Label>Produit</Label>
-              <Input
-                placeholder="Coller l’ID produit ou sélectionner à gauche"
-                value={productId}
-                onChange={e => setProductId(e.target.value)}
-              />
+              <Select
+                value={productSelectValue}
+                onValueChange={setProductId}
+                disabled={productSelectDisabled}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={productPlaceholder} />
+                </SelectTrigger>
+                <SelectContent position="popper" className="z-[1100]" mobileVariant="default">
+                  {(activeProducts.length > 0 ? activeProducts : products).map(p => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {productOptionLabel(p)}
+                    </SelectItem>
+                  ))}
+                  {products.length === 0 ? (
+                    <SelectItem value="__none__" disabled>
+                      Aucun produit disponible
+                    </SelectItem>
+                  ) : null}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-2">
               <Label>Offre</Label>
@@ -179,7 +270,7 @@ export default function SponsorshipsPage() {
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent position="popper" className="z-[1100]" mobileVariant="default">
                   {skus.map(sku => (
                     <SelectItem key={sku.id} value={sku.slug}>
                       {sku.name} — {(sku.price_cents / 100).toLocaleString()} {sku.currency}
@@ -201,8 +292,15 @@ export default function SponsorshipsPage() {
 
       <Card id="sponsorship-campaigns">
         <CardHeader>
-          <CardTitle className="text-base">Campagnes</CardTitle>
+          <CardTitle className="text-base">Campagnes récentes</CardTitle>
           <CardDescription>
+            <Link
+              to="/dashboard/sponsorships/campaigns"
+              className="text-primary underline-offset-2 hover:underline"
+            >
+              Voir toutes les campagnes
+            </Link>
+            {' · '}
             <Link
               to="/dashboard/products"
               className="text-primary underline-offset-2 hover:underline"
@@ -218,7 +316,7 @@ export default function SponsorshipsPage() {
             <p className="text-sm text-muted-foreground">Aucune campagne pour l’instant.</p>
           ) : (
             <ul className="divide-y rounded-lg border">
-              {sponsorships.map(s => (
+              {sponsorships.slice(0, 5).map(s => (
                 <li
                   key={s.id}
                   className="flex flex-col gap-2 p-3 sm:flex-row sm:items-center sm:justify-between"

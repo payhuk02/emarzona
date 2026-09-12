@@ -82,6 +82,12 @@ const PromotionsPage = lazyPage(() =>
 const SponsorshipsPage = lazyPage(() =>
   import('@/pages/dashboard/SponsorshipsPage').then(m => ({ default: m.default }))
 );
+const SponsorshipAnalyticsPage = lazyPage(() =>
+  import('@/pages/dashboard/SponsorshipAnalyticsPage').then(m => ({ default: m.default }))
+);
+const SponsorshipCampaignsPage = lazyPage(() =>
+  import('@/pages/dashboard/SponsorshipCampaignsPage').then(m => ({ default: m.default }))
+);
 const PromotionsStatsPage = lazyPage(() =>
   import('@/pages/promotions/PromotionsStatsPage').then(m => ({ default: m.PromotionsStatsPage }))
 );
@@ -299,6 +305,8 @@ export const dashboardRoutes = (
     {pr('/dashboard/marketing', Marketing)}
     {pr('/dashboard/promotions', PromotionsPage)}
     {pr('/dashboard/sponsorships', SponsorshipsPage)}
+    {pr('/dashboard/sponsorships/analytics', SponsorshipAnalyticsPage)}
+    {pr('/dashboard/sponsorships/campaigns', SponsorshipCampaignsPage)}
     {pr('/dashboard/promotions/stats', PromotionsStatsPage)}
 
     {/* Emails */}

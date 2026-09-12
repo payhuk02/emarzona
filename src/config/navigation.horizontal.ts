@@ -257,9 +257,19 @@ export const HORIZONTAL_MEGA_SUBGROUPS: Partial<
   ],
   sponsorisation: [
     {
-      groupKey: 'boost_marketplace',
-      defaultLabel: 'Boost Marketplace',
+      groupKey: 'boost_emarzona',
+      defaultLabel: 'Boost Emarzona',
       paths: ['/dashboard/sponsorships'],
+    },
+    {
+      groupKey: 'analytics_boost',
+      defaultLabel: 'Analytics Boost',
+      paths: ['/dashboard/sponsorships/analytics'],
+    },
+    {
+      groupKey: 'sponsor_campaigns',
+      defaultLabel: 'Campagnes Boost',
+      paths: ['/dashboard/sponsorships/campaigns'],
     },
     {
       groupKey: 'sponsor_catalogue',

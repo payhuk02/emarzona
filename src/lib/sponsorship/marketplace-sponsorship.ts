@@ -132,6 +132,24 @@ export async function recordSponsorshipEvent(
   }
 }
 
+export type SponsorshipEventRow = {
+  sponsorship_id: string;
+  event_type: 'impression' | 'click' | 'purchase' | string;
+};
+
+/** Raw event rows for store campaigns (seller RLS). Aggregate client-side. */
+export async function fetchSponsorshipEventStats(
+  sponsorshipIds: string[]
+): Promise<SponsorshipEventRow[]> {
+  if (sponsorshipIds.length === 0) return [];
+  const { data, error } = await db
+    .from('marketplace_sponsorship_events')
+    .select('sponsorship_id, event_type')
+    .in('sponsorship_id', sponsorshipIds);
+  if (error) throw error;
+  return (data ?? []) as SponsorshipEventRow[];
+}
+
 export async function checkoutPaidSponsorship(options: {
   storeId: string;
   sponsorship: MarketplaceSponsorship;
@@ -144,7 +162,7 @@ export async function checkoutPaidSponsorship(options: {
     storeId: options.storeId,
     amount,
     currency: options.sku.currency,
-    description: `Sponsorisation Marketplace — ${options.sku.name}`,
+    description: `Boost Emarzona — ${options.sku.name}`,
     customerEmail: options.customerEmail,
     customerName: options.customerName,
     purpose: 'marketplace_sponsorship',
@@ -153,4 +171,29 @@ export async function checkoutPaidSponsorship(options: {
     returnPath: '/dashboard/sponsorships',
     successQuery: { sponsorship_id: options.sponsorship.id },
   });
+}
+
+export type StoreProductForSponsor = {
+  id: string;
+  name: string;
+  is_active: boolean;
+  is_featured: boolean | null;
+  is_draft: boolean | null;
+  product_type: string | null;
+};
+
+/** Seller product list for Boost Emarzona pickers (typed columns only). */
+export async function fetchStoreProductsForSponsor(
+  storeId: string
+): Promise<StoreProductForSponsor[]> {
+  const { data, error } = await supabase
+    .from('products')
+    .select('id, name, is_active, is_featured, is_draft, product_type')
+    .eq('store_id', storeId)
+    .order('is_active', { ascending: false })
+    .order('name', { ascending: true })
+    .limit(200);
+
+  if (error) throw error;
+  return (data ?? []) as StoreProductForSponsor[];
 }

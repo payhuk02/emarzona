@@ -421,7 +421,9 @@ export async function fetchMarketplaceProducts({
               ? 'name'
               : 'created_at';
 
-  query = query.order(sortByColumn, { ascending: filters.sortOrder === 'asc' });
+  query = query
+    .order('is_featured', { ascending: false })
+    .order(sortByColumn, { ascending: filters.sortOrder === 'asc' });
 
   // Appliquer la pagination côté serveur
   query = query.range(startIndex, endIndex);

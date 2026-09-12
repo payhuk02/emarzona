@@ -75,8 +75,8 @@ export function SponsorAfterPublishDialog({
           <DialogDescription className="space-y-2 text-left">
             <span className="block">
               {productName
-                ? `« ${productName} » est en ligne. Boostez-le dans le Marketplace et les Recommandations IA.`
-                : 'Votre produit est en ligne. Boostez-le dans le Marketplace et les Recommandations IA.'}
+                ? `« ${productName} » est en ligne. Boostez-le avec Boost Emarzona (Marketplace + Recommandations IA).`
+                : 'Votre produit est en ligne. Boostez-le avec Boost Emarzona (Marketplace + Recommandations IA).'}
             </span>
             <span className="flex items-start gap-2 text-foreground">
               <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-primary" />

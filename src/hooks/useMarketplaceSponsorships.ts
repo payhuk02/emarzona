@@ -25,8 +25,8 @@ export function useSponsorshipSkus() {
 }
 
 export function useStoreSponsorships() {
-  const { currentStore } = useStoreContext();
-  const storeId = currentStore?.id;
+  const { selectedStore } = useStoreContext();
+  const storeId = selectedStore?.id;
 
   return useQuery({
     queryKey: ['marketplace-sponsorships', storeId],
@@ -36,8 +36,8 @@ export function useStoreSponsorships() {
 }
 
 export function usePlanSponsorQuota() {
-  const { currentStore } = useStoreContext();
-  const storeId = currentStore?.id;
+  const { selectedStore } = useStoreContext();
+  const storeId = selectedStore?.id;
 
   return useQuery({
     queryKey: ['marketplace-sponsor-quota', storeId],
@@ -49,12 +49,12 @@ export function usePlanSponsorQuota() {
 export function useCreatePlanSponsorship() {
   const qc = useQueryClient();
   const { toast } = useToast();
-  const { currentStore } = useStoreContext();
+  const { selectedStore } = useStoreContext();
 
   return useMutation({
     mutationFn: (productId: string) => createPlanSponsorship(productId),
     onSuccess: () => {
-      void qc.invalidateQueries({ queryKey: ['marketplace-sponsorships', currentStore?.id] });
+      void qc.invalidateQueries({ queryKey: ['marketplace-sponsorships', selectedStore?.id] });
       toast({ title: 'Produit sponsorisé', description: 'Quota plan utilisé avec succès.' });
     },
     onError: (error: Error) => {
@@ -72,16 +72,16 @@ export function useCheckoutPaidSponsorship() {
   const qc = useQueryClient();
   const { toast } = useToast();
   const { user } = useAuth();
-  const { currentStore } = useStoreContext();
+  const { selectedStore } = useStoreContext();
 
   return useMutation({
     mutationFn: async ({ productId, sku }: { productId: string; sku: SponsorshipSku }) => {
-      if (!currentStore?.id) throw new Error('Boutique introuvable');
+      if (!selectedStore?.id) throw new Error('Boutique introuvable');
       if (!user?.email) throw new Error('Email utilisateur requis pour le paiement');
 
       const sponsorship = await createPaidSponsorship(productId, sku.slug);
       const checkoutUrl = await checkoutPaidSponsorship({
-        storeId: currentStore.id,
+        storeId: selectedStore.id,
         sponsorship,
         sku,
         customerEmail: user.email,
@@ -90,7 +90,7 @@ export function useCheckoutPaidSponsorship() {
       return checkoutUrl;
     },
     onSuccess: checkoutUrl => {
-      void qc.invalidateQueries({ queryKey: ['marketplace-sponsorships', currentStore?.id] });
+      void qc.invalidateQueries({ queryKey: ['marketplace-sponsorships', selectedStore?.id] });
       window.location.href = checkoutUrl;
     },
     onError: (error: Error) => {
@@ -107,12 +107,12 @@ export function useCheckoutPaidSponsorship() {
 export function useCancelSponsorship() {
   const qc = useQueryClient();
   const { toast } = useToast();
-  const { currentStore } = useStoreContext();
+  const { selectedStore } = useStoreContext();
 
   return useMutation({
     mutationFn: (sponsorshipId: string) => cancelSponsorship(sponsorshipId),
     onSuccess: () => {
-      void qc.invalidateQueries({ queryKey: ['marketplace-sponsorships', currentStore?.id] });
+      void qc.invalidateQueries({ queryKey: ['marketplace-sponsorships', selectedStore?.id] });
       toast({ title: 'Campagne annulée' });
     },
     onError: (error: Error) => {

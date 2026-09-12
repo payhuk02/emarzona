@@ -168,7 +168,11 @@
       "email_automation": "Email e automação",
       "boutique": "Marketplace",
       "recommandations_ia": "Para você",
-      "facturation": "Faturação"
+      "facturation": "Faturação",
+      "boost_emarzona": "Boost Emarzona",
+      "analytics_boost": "Analytics Boost",
+      "sponsor_campaigns": "Campanhas Boost",
+      "sponsor_catalogue": "Catálogo e pagamentos"
     },
     "items": {
       "dashboard": "Dashboard",
@@ -269,7 +273,9 @@
       "dashboard_payment_connections": "Payment connections",
       "dashboard_marketing": "Marketing",
       "dashboard_customers": "Customers",
-      "dashboard_sponsorships": "Impulso Marketplace",
+      "dashboard_sponsorships": "Boost Emarzona",
+      "dashboard_sponsorships_analytics": "Analytics Boost",
+      "dashboard_sponsorships_campaigns": "Campanhas Boost",
       "dashboard_promotions": "Promotions",
       "dashboard_promotions_stats": "Statistiques Promotions",
       "dashboard_coupons": "Coupons",
