@@ -271,15 +271,22 @@ export function HorizontalContextNav() {
 
   return (
     <div
-      className="z-20 shrink-0 border-b border-border/50 bg-background/95 backdrop-blur-md shadow-[0_1px_0_0_hsl(var(--border)/0.4)] md:sticky md:top-12"
+      className="relative z-40 shrink-0 border-b border-border/50 bg-background/95 backdrop-blur-md shadow-[0_1px_0_0_hsl(var(--border)/0.4)] md:sticky md:top-12 overflow-visible"
       data-testid="horizontal-context-nav"
     >
-      <div className="hidden md:block px-3 lg:px-6 overflow-x-auto scrollbar-hide">
+      {/*
+        Ne pas mettre overflow-x-auto sur un ancêtre de NavigationMenuContent :
+        overflow-x ≠ visible force overflow-y en auto et clippe les mega-menus (hover « mort »).
+        Le scroll horizontal desktop se fait via min-w-max sur la liste si besoin.
+      */}
+      <div className="hidden md:block px-3 lg:px-6 overflow-visible">
         <NavigationMenu
-          className="horizontal-context-nav-menu max-w-none w-max min-w-full justify-start [&>div.absolute]:left-0 [&>div.absolute]:justify-start"
+          delayDuration={80}
+          skipDelayDuration={200}
+          className="horizontal-context-nav-menu relative z-40 max-w-none w-full justify-start overflow-visible"
           aria-label={navAriaLabel}
         >
-          <NavigationMenuList className="flex flex-nowrap justify-start gap-0.5 py-1.5">
+          <NavigationMenuList className="flex w-max min-w-full flex-nowrap justify-start gap-0.5 py-1.5">
             {domains.map((domain, index) => {
               // Positionnement intelligent pour éviter de déborder sur la sidebar ou hors de l'écran
               let positionClass = '';
@@ -293,7 +300,7 @@ export function HorizontalContextNav() {
               }
 
               return (
-                <NavigationMenuItem key={domain.domainKey} className="shrink-0">
+                <NavigationMenuItem key={domain.domainKey} className="relative shrink-0">
                   {domain.items.length <= 1 && domain.rootPath ? (
                     <NavigationMenuLink asChild>
                       <NavLink
@@ -317,7 +324,7 @@ export function HorizontalContextNav() {
                       >
                         {domain.shortLabel}
                       </NavigationMenuTrigger>
-                      <NavigationMenuContent className={positionClass}>
+                      <NavigationMenuContent className={cn('z-50', positionClass)}>
                         <MegaMenuPanel domain={domain} onNavigate={handleNavigate} />
                       </NavigationMenuContent>
                     </>

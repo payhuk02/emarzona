@@ -115,7 +115,7 @@ export function AppPageShell({
     <AppPageShellNestContext.Provider value={true}>
       <SidebarProvider>
         <div
-          className={cn('flex min-h-screen w-full bg-background overflow-x-hidden', shellClassName)}
+          className={cn('flex min-h-screen w-full bg-background', shellClassName)}
           data-bottom-nav={shouldPadBottomNav ? 'true' : undefined}
         >
           {!hideSidebar && <AppSidebar />}
