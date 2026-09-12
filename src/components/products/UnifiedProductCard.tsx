@@ -114,6 +114,31 @@ function isPremiumProductCardVariant(variant: UnifiedProductCardProps['variant']
   return variant === 'marketplace' || variant === 'store';
 }
 
+/** Petit avatar boutique — img simple (évite srcset AVIF cassés sur Storage). */
+function StoreLogoAvatar({ url, name }: { url?: string | null; name?: string }) {
+  const [failed, setFailed] = useState(false);
+  const src = typeof url === 'string' ? url.trim() : '';
+  if (!src || failed) {
+    return (
+      <div className="w-6 h-6 sm:w-7 sm:h-7 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center flex-shrink-0">
+        <Store className="h-3.5 w-3.5 text-gray-500" aria-hidden />
+      </div>
+    );
+  }
+  return (
+    <img
+      src={src}
+      alt={name ? `Logo ${name}` : 'Logo boutique'}
+      width={28}
+      height={28}
+      loading="lazy"
+      decoding="async"
+      className="w-6 h-6 sm:w-7 sm:h-7 rounded-full object-cover border border-gray-200 dark:border-gray-700 flex-shrink-0 bg-gray-100"
+      onError={() => setFailed(true)}
+    />
+  );
+}
+
 const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
   product,
   variant = 'marketplace',
@@ -601,20 +626,7 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
         {/* Store row: logo + name + Sponsorisé (right) */}
         {product.store && (
           <div className="flex items-center gap-1.5 sm:gap-2 mb-1 min-w-0">
-            {product.store.logo_url ? (
-              <OptimizedImage
-                src={product.store.logo_url}
-                alt={product.store.name}
-                width={28}
-                height={28}
-                className="w-6 h-6 sm:w-7 sm:h-7 rounded-full object-cover border border-gray-200 dark:border-gray-700 flex-shrink-0"
-                placeholder="empty"
-              />
-            ) : (
-              <div className="w-6 h-6 sm:w-7 sm:h-7 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center flex-shrink-0">
-                <Store className="h-3.5 w-3.5 text-gray-500" />
-              </div>
-            )}
+            <StoreLogoAvatar url={product.store.logo_url} name={product.store.name} />
             <span className="text-xs sm:text-sm font-semibold text-white truncate min-w-0">
               {product.store.name}
             </span>

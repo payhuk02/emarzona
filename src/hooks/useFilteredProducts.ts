@@ -8,6 +8,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 import { FilterState, Product } from '@/types/marketplace';
+import { nestMarketplaceStoreFieldsList } from '@/lib/marketplace/nest-store-fields';
 
 interface FilteredProductsOptions {
   filters: FilterState;
@@ -69,7 +70,7 @@ export function useFilteredDigitalProducts(options: FilteredProductsOptions) {
           throw error;
         }
 
-        return (data || []) as Product[];
+        return nestMarketplaceStoreFieldsList((data || []) as Product[]) as Product[];
       } catch (error) {
         logger.error('Error in useFilteredDigitalProducts:', error);
         return [];
@@ -134,7 +135,7 @@ export function useFilteredPhysicalProducts(options: FilteredProductsOptions) {
           throw error;
         }
 
-        return (data || []) as Product[];
+        return nestMarketplaceStoreFieldsList((data || []) as Product[]) as Product[];
       } catch (error) {
         logger.error('Error in useFilteredPhysicalProducts:', error);
         return [];
@@ -204,7 +205,7 @@ export function useFilteredServiceProducts(options: FilteredProductsOptions) {
           throw error;
         }
 
-        return (data || []) as Product[];
+        return nestMarketplaceStoreFieldsList((data || []) as Product[]) as Product[];
       } catch (error) {
         logger.error('Error in useFilteredServiceProducts:', error);
         return [];
@@ -270,7 +271,7 @@ export function useFilteredCourseProducts(options: FilteredProductsOptions) {
           throw error;
         }
 
-        return (data || []) as Product[];
+        return nestMarketplaceStoreFieldsList((data || []) as Product[]) as Product[];
       } catch (error) {
         logger.error('Error in useFilteredCourseProducts:', error);
         return [];
@@ -337,7 +338,7 @@ export function useFilteredArtistProducts(options: FilteredProductsOptions) {
           throw error;
         }
 
-        return (data || []) as Product[];
+        return nestMarketplaceStoreFieldsList((data || []) as Product[]) as Product[];
       } catch (error) {
         logger.error('Error in useFilteredArtistProducts:', error);
         return [];

@@ -6,4 +6,5 @@ export interface Store {
   name?: string;
   slug?: string;
   subdomain?: string | null;
+  logo_url?: string | null;
 }

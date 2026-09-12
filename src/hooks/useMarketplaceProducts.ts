@@ -51,6 +51,7 @@ import {
   summarizeServicePackageListingMetrics,
 } from '@/lib/service/service-pricing';
 import { inferServiceCalendarAvailable } from '@/lib/product-transform';
+import { nestMarketplaceStoreFields } from '@/lib/marketplace/nest-store-fields';
 import {
   cacheMarketplaceProducts,
   getCachedMarketplaceProductsSync,
@@ -189,7 +190,7 @@ export async function fetchMarketplaceProducts({
 
         // Transformer les données RPC en format Product
         const products = data.map((item: unknown) => {
-          const product = item as Record<string, unknown>;
+          const product = nestMarketplaceStoreFields(item as Record<string, unknown>);
           return {
             id: product.id as string,
             store_id: product.store_id as string,
@@ -230,15 +231,7 @@ export async function fetchMarketplaceProducts({
             created_at: product.created_at as string,
             updated_at: product.updated_at as string,
             tags: product.tags as string[],
-            stores: product.store_name
-              ? {
-                  id: product.store_id as string,
-                  name: product.store_name as string,
-                  slug: product.store_slug as string,
-                  logo_url: product.store_logo_url as string | null,
-                  created_at: product.created_at as string,
-                }
-              : null,
+            stores: product.stores ?? null,
             product_affiliate_settings: product.commission_rate
               ? {
                   commission_rate: Number(product.commission_rate),

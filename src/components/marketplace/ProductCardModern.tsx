@@ -32,7 +32,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { ResponsiveProductImage } from '@/components/ui/ResponsiveProductImage';
-import { OptimizedImage } from '@/components/ui/OptimizedImage';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 import { useMarketplaceFavoritesContext } from '@/contexts/MarketplaceFavoritesContext';
@@ -111,10 +110,15 @@ const ProductCardModernComponent = ({
   priority = false,
 }: ProductCardModernProps) => {
   const [isZoomOpen, setIsZoomOpen] = useState(false);
+  const [storeLogoFailed, setStoreLogoFailed] = useState(false);
   const [_userId, setUserId] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
   const isDigital = product.product_type === 'digital';
+
+  useEffect(() => {
+    setStoreLogoFailed(false);
+  }, [product.id, product.stores?.logo_url]);
 
   // Favoris via contexte partagé (évite N+1 requêtes)
   const favoritesCtx = useMarketplaceFavoritesContext();
@@ -390,15 +394,16 @@ const ProductCardModernComponent = ({
         {/* Logo + nom boutique + Sponsorisé (aligné à droite) */}
         {product.stores && (
           <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3 min-w-0">
-            {product.stores.logo_url ? (
-              <OptimizedImage
+            {product.stores.logo_url && !storeLogoFailed ? (
+              <img
                 src={product.stores.logo_url}
                 alt={`Logo de ${product.stores.name}`}
                 width={28}
                 height={28}
-                className="w-6 h-6 sm:w-7 sm:h-7 rounded-full object-cover border border-gray-200 dark:border-gray-700 flex-shrink-0"
-                lazy
-                sizes="28px"
+                loading="lazy"
+                decoding="async"
+                className="w-6 h-6 sm:w-7 sm:h-7 rounded-full object-cover border border-gray-200 dark:border-gray-700 flex-shrink-0 bg-gray-100"
+                onError={() => setStoreLogoFailed(true)}
               />
             ) : (
               <div className="w-6 h-6 sm:w-7 sm:h-7 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center flex-shrink-0">

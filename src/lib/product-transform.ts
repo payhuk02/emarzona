@@ -71,6 +71,27 @@ type DatabaseProduct = {
  * Transforme un produit de la base de données vers UnifiedProduct
  */
 export function transformToUnifiedProduct(product: DatabaseProduct): UnifiedProduct {
+  const flat = product as DatabaseProduct & {
+    store_name?: string;
+    store_slug?: string;
+    store_logo_url?: string | null;
+  };
+  const nestedStores =
+    product.stores ??
+    (flat.store_name
+      ? {
+          id: product.store_id || '',
+          name: flat.store_name,
+          slug: flat.store_slug || '',
+          logo_url: flat.store_logo_url ?? undefined,
+        }
+      : undefined);
+  const logoUrl =
+    (typeof nestedStores?.logo_url === 'string' && nestedStores.logo_url.trim()) ||
+    nestedStores?.store_appearance?.logo_url ||
+    (typeof flat.store_logo_url === 'string' && flat.store_logo_url.trim()) ||
+    undefined;
+
   const base: Partial<BaseProduct> = {
     id: product.id,
     name: product.name,
@@ -81,14 +102,13 @@ export function transformToUnifiedProduct(product: DatabaseProduct): UnifiedProd
     currency: product.currency || 'FCFA',
     image_url: product.image_url,
     images: product.images || (product.image_url ? [product.image_url] : []),
-    store_id: product.store_id || product.stores?.id,
-    store: product.stores
+    store_id: product.store_id || nestedStores?.id || '',
+    store: nestedStores
       ? {
-          id: product.stores.id,
-          name: product.stores.name,
-          slug: product.stores.slug,
-          logo_url:
-            product.stores.logo_url ?? product.stores.store_appearance?.logo_url ?? undefined,
+          id: nestedStores.id,
+          name: nestedStores.name,
+          slug: nestedStores.slug,
+          logo_url: logoUrl || null,
         }
       : undefined,
     type: product.product_type || 'digital',
