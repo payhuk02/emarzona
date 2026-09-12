@@ -598,9 +598,9 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
 
       {/* Content Section */}
       <div className="flex-1 flex flex-col p-3 sm:p-4 lg:p-6 gap-2">
-        {/* Store Logo */}
+        {/* Store row: logo + name + Sponsorisé (right) */}
         {product.store && (
-          <div className="flex items-center gap-1.5 sm:gap-2 mb-1">
+          <div className="flex items-center gap-1.5 sm:gap-2 mb-1 min-w-0">
             {product.store.logo_url ? (
               <OptimizedImage
                 src={product.store.logo_url}
@@ -615,10 +615,18 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
                 <Store className="h-3.5 w-3.5 text-gray-500" />
               </div>
             )}
-            <span className="text-xs sm:text-sm font-semibold text-white truncate">
+            <span className="text-xs sm:text-sm font-semibold text-white truncate min-w-0">
               {product.store.name}
             </span>
-            <CheckCircle className="h-3.5 w-3.5 text-green-500 flex-shrink-0 -ml-2" />
+            <CheckCircle className="h-3.5 w-3.5 text-green-500 flex-shrink-0" />
+            {product.is_sponsored ? (
+              <span
+                className="ml-auto flex-shrink-0 text-[10px] sm:text-xs font-semibold text-violet-300"
+                aria-label="Produit sponsorisé"
+              >
+                Sponsorisé
+              </span>
+            ) : null}
           </div>
         )}
 
@@ -662,11 +670,7 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
               <Sparkles className="h-3 w-3 mr-1" /> Nouveau
             </Badge>
           )}
-          {product.is_sponsored ? (
-            <Badge className="bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white border-0 text-[10px] sm:text-xs px-2 py-0.5">
-              <Sparkles className="h-3 w-3 mr-1" /> Sponsorisé
-            </Badge>
-          ) : product.is_featured ? (
+          {product.is_featured ? (
             <Badge className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white border-0 text-[10px] sm:text-xs px-2 py-0.5">
               <Star className="h-3 w-3 mr-1 fill-white" /> Vedette
             </Badge>

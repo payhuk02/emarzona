@@ -46,6 +46,7 @@ type DatabaseProduct = {
     name: string;
     slug: string;
     logo_url?: string;
+    store_appearance?: { logo_url?: string | null } | null;
   };
   product_type?: 'digital' | 'physical' | 'service' | 'course' | 'artist';
   rating?: number;
@@ -86,7 +87,8 @@ export function transformToUnifiedProduct(product: DatabaseProduct): UnifiedProd
           id: product.stores.id,
           name: product.stores.name,
           slug: product.stores.slug,
-          logo_url: product.stores.logo_url,
+          logo_url:
+            product.stores.logo_url ?? product.stores.store_appearance?.logo_url ?? undefined,
         }
       : undefined,
     type: product.product_type || 'digital',

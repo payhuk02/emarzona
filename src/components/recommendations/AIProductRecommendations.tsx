@@ -35,7 +35,7 @@ const AI_RECOMMENDATION_PRODUCT_SELECT = `
   id, store_id, name, slug, description, short_description, image_url, images, price, promotional_price, currency,
   rating, reviews_count, category, product_type, licensing_type, payment_options, whatsapp_number, whatsapp_enabled,
   created_at, updated_at, tags, stock_quantity, is_featured, sponsored_until,
-  stores:store_id(id, name, slug),
+  stores:store_id(id, name, slug, store_appearance(logo_url)),
   product_affiliate_settings(commission_rate, affiliate_enabled),
   service_products(service_type, location_type, pricing_type, fulfillment_mode, duration_minutes, requires_staff, category_attributes, service_packages(price, package_price, package_kind, is_active, delivery_days, revisions))
 `;
