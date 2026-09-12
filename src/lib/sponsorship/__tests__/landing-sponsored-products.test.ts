@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   LANDING_SPONSORED_SLOT_COUNT,
+  landingSponsoredProductHref,
   pickSponsoredWindow,
 } from '@/lib/sponsorship/landing-sponsored-products';
 
@@ -9,9 +10,10 @@ describe('pickSponsoredWindow', () => {
     expect(pickSponsoredWindow([], 0)).toEqual([]);
   });
 
-  it('returns full pool when fewer than slot count', () => {
+  it('fills 9 slots by cycling a smaller pool', () => {
     const pool = ['a', 'b', 'c'];
-    expect(pickSponsoredWindow(pool, 5)).toEqual(['a', 'b', 'c']);
+    expect(pickSponsoredWindow(pool, 0)).toEqual(['a', 'b', 'c', 'a', 'b', 'c', 'a', 'b', 'c']);
+    expect(pickSponsoredWindow(pool, 1)).toEqual(['b', 'c', 'a', 'b', 'c', 'a', 'b', 'c', 'a']);
   });
 
   it('returns a sliding window of 9 when pool is larger', () => {
@@ -28,8 +30,28 @@ describe('pickSponsoredWindow', () => {
       'p8',
       'p9',
     ]);
-    expect(pickSponsoredWindow(pool, 11).map(x => x)).toHaveLength(LANDING_SPONSORED_SLOT_COUNT);
+    expect(pickSponsoredWindow(pool, 11)).toHaveLength(LANDING_SPONSORED_SLOT_COUNT);
     expect(pickSponsoredWindow(pool, 11)[0]).toBe('p11');
     expect(pickSponsoredWindow(pool, 11)[1]).toBe('p0');
+  });
+});
+
+describe('landingSponsoredProductHref', () => {
+  it('builds an in-app store product path', () => {
+    expect(
+      landingSponsoredProductHref({
+        id: '1',
+        name: 'Identité visuelle',
+        slug: 'identit-visuelle',
+        image_url: null,
+        price: 1,
+        promotional_price: null,
+        currency: 'XOF',
+        is_featured: true,
+        is_sponsored: true,
+        active_sponsorship_id: null,
+        store: { id: 's', name: 'Ecom Web', slug: 'ecom-web', logo_url: null },
+      })
+    ).toBe('/stores/ecom-web/products/identit-visuelle');
   });
 });

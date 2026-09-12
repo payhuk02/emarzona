@@ -52,7 +52,12 @@ export function PremiumLandingPage() {
       <PremiumNav />
       <main>
         {/* Premier viewport uniquement : nav + platform hero */}
-        <PremiumPlatformHero />
+        <ErrorBoundary
+          level="section"
+          fallback={<DeferredFallback minHeight="100dvh" className="bg-[#08080a]" />}
+        >
+          <PremiumPlatformHero />
+        </ErrorBoundary>
 
         <LandingDeferredSection minHeight="32rem" rootMargin="80px 0px">
           <ErrorBoundary level="section">

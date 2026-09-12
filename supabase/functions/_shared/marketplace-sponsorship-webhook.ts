@@ -1,6 +1,7 @@
 /**
  * Active une campagne marketplace_sponsorship après paiement webhook réussi.
  * Vérifie montant (centimes) + store_id avant activation.
+ * Idempotent : déjà active → no-op. Relançable après échec partiel (pending_payment).
  */
 
 type SponsorshipActivationRow = {
@@ -9,6 +10,12 @@ type SponsorshipActivationRow = {
   status: string;
   amount_paid_cents: number | null;
   currency: string | null;
+};
+
+export type SponsorshipWebhookActivationResult = {
+  sponsorshipId: string;
+  status: string;
+  alreadyActive: boolean;
 };
 
 function toAmountCents(amountMajor: number): number {
@@ -26,7 +33,7 @@ export async function activateMarketplaceSponsorshipFromWebhook(
     paidCurrency?: string | null;
     storeId?: string | null;
   }
-): Promise<void> {
+): Promise<SponsorshipWebhookActivationResult> {
   const { data: sponsorship, error: fetchError } = await supabase
     .from('marketplace_sponsorships')
     .select('id, store_id, status, amount_paid_cents, currency')
@@ -45,7 +52,17 @@ export async function activateMarketplaceSponsorshipFromWebhook(
   }
 
   if (row.status === 'active') {
-    return;
+    return {
+      sponsorshipId: row.id,
+      status: 'active',
+      alreadyActive: true,
+    };
+  }
+
+  if (row.status !== 'pending_payment') {
+    throw new Error(
+      `Sponsorship ${options.sponsorshipId} cannot be activated from status ${row.status}`
+    );
   }
 
   if (options.storeId && String(options.storeId) !== String(row.store_id)) {
@@ -94,4 +111,17 @@ export async function activateMarketplaceSponsorshipFromWebhook(
   if (!data) {
     throw new Error('activate_marketplace_sponsorship returned empty result');
   }
+
+  const activated = data as { id?: string; status?: string };
+  if (activated.status !== 'active') {
+    throw new Error(
+      `Sponsorship ${options.sponsorshipId} still ${activated.status ?? 'unknown'} after activate RPC`
+    );
+  }
+
+  return {
+    sponsorshipId: String(activated.id ?? options.sponsorshipId),
+    status: 'active',
+    alreadyActive: false,
+  };
 }

@@ -643,20 +643,67 @@ serve(async req => {
         console.error('[MoneyFusion webhook] post-order fulfillment failed', err)
       );
     } else if (alreadyCompleted) {
-      console.log('[MoneyFusion webhook] replay ignored (no order_id)', {
+      console.log('[MoneyFusion webhook] replay (no order_id)', {
         transactionId,
         externalEventId,
       });
     }
 
-    // Abonnements physiques (sans order_id) — même pattern que GeniusPay
+    const meta = (transaction.metadata || {}) as Record<string, unknown>;
+    const purpose = meta.purpose as string | undefined;
+    const planSlug = meta.plan_slug as string | undefined;
+    const invoiceId = meta.invoice_id as string | undefined;
+
+    // Sponsorship: always attempt (idempotent). Replays must recover pending_payment
+    // after a prior completeTransactionAndOrder that failed mid-activation.
+    if (!orderId && purpose === 'marketplace_sponsorship') {
+      const sponsorshipId = meta.sponsorship_id as string | undefined;
+      if (!sponsorshipId) {
+        console.error('[MoneyFusion webhook] marketplace_sponsorship missing sponsorship_id', {
+          transactionId,
+        });
+      } else {
+        try {
+          const result = await activateMarketplaceSponsorshipFromWebhook(supabase, {
+            sponsorshipId: String(sponsorshipId),
+            paymentRef: String(transactionId),
+            paidAmount: Number(transaction.amount),
+            paidCurrency: (transaction.currency as string | null) ?? null,
+            storeId: transaction.store_id ? String(transaction.store_id) : null,
+          });
+          console.log('[MoneyFusion webhook] marketplace sponsorship activation', {
+            sponsorship_id: sponsorshipId,
+            transactionId,
+            alreadyActive: result.alreadyActive,
+            status: result.status,
+            replay: alreadyCompleted,
+          });
+        } catch (sponsorErr) {
+          console.error('[MoneyFusion webhook] marketplace sponsorship activation failed', {
+            sponsorship_id: sponsorshipId,
+            transactionId,
+            error: sponsorErr instanceof Error ? sponsorErr.message : String(sponsorErr),
+          });
+          // Ask PSP to retry so a paid pending campaign can still activate.
+          return new Response(
+            JSON.stringify({
+              error: 'Sponsorship activation failed',
+              message: sponsorErr instanceof Error ? sponsorErr.message : String(sponsorErr),
+              transactionId,
+              sponsorship_id: sponsorshipId,
+            }),
+            {
+              status: 500,
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            }
+          );
+        }
+      }
+    }
+
+    // Abonnements physiques (sans order_id) — skip pure replays once completed
     if (!alreadyCompleted && !orderId) {
       try {
-        const meta = (transaction.metadata || {}) as Record<string, unknown>;
-        const purpose = meta.purpose as string | undefined;
-        const planSlug = meta.plan_slug as string | undefined;
-        const invoiceId = meta.invoice_id as string | undefined;
-
         if (purpose === 'physical_plan_change' && invoiceId) {
           const { applyPhysicalPlanChangeFromWebhook } = await import(
             '../_shared/physical-subscription-webhook.ts'
@@ -699,17 +746,6 @@ serve(async req => {
                 customer_name: transaction.customer_name as string | null,
                 metadata: meta,
               }),
-            });
-          }
-        } else if (purpose === 'marketplace_sponsorship') {
-          const sponsorshipId = meta.sponsorship_id as string | undefined;
-          if (sponsorshipId) {
-            await activateMarketplaceSponsorshipFromWebhook(supabase, {
-              sponsorshipId: String(sponsorshipId),
-              paymentRef: String(transactionId),
-              paidAmount: Number(transaction.amount),
-              paidCurrency: (transaction.currency as string | null) ?? null,
-              storeId: transaction.store_id ? String(transaction.store_id) : null,
             });
           }
         }

@@ -1,22 +1,22 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Sparkles, Star } from 'lucide-react';
 import { useLandingPremiumT } from '@/hooks/useLandingPremiumT';
 import { useLandingSponsoredProducts } from '@/hooks/useLandingSponsoredProducts';
 import { usePremiumReveal } from './usePremiumReveal';
 import { formatCurrencyCode } from '@/lib/currency-converter';
-import { generateProductUrl } from '@/lib/store-utils';
 import { recordSponsorshipEvent } from '@/lib/sponsorship/marketplace-sponsorship';
 import {
   LANDING_SPONSORED_ROTATE_MS,
   LANDING_SPONSORED_SLOT_COUNT,
+  landingSponsoredProductHref,
   pickSponsoredWindow,
   type LandingSponsoredProduct,
 } from '@/lib/sponsorship/landing-sponsored-products';
 
 function StoreMark({ name, logoUrl }: { name: string; logoUrl: string | null }) {
   const [failed, setFailed] = useState(false);
-  const initial = name.trim().charAt(0).toUpperCase() || 'B';
+  const initial = (name.trim().charAt(0) || 'B').toUpperCase();
 
   if (!logoUrl || failed) {
     return (
@@ -40,6 +40,26 @@ function StoreMark({ name, logoUrl }: { name: string; logoUrl: string | null }) 
   );
 }
 
+function ProductLink({
+  href,
+  className,
+  onClick,
+  children,
+  ariaLabel,
+}: {
+  href: string;
+  className?: string;
+  onClick?: () => void;
+  children: ReactNode;
+  ariaLabel?: string;
+}) {
+  return (
+    <Link to={href} className={className} onClick={onClick} aria-label={ariaLabel}>
+      {children}
+    </Link>
+  );
+}
+
 function SponsoredProductCard({
   product,
   ctaLabel,
@@ -51,9 +71,7 @@ function SponsoredProductCard({
   sponsoredLabel: string;
   featuredLabel: string;
 }) {
-  const href = product.store?.slug
-    ? generateProductUrl(product.store.slug, product.slug)
-    : `/marketplace?q=${encodeURIComponent(product.name)}`;
+  const href = landingSponsoredProductHref(product);
 
   const price =
     product.promotional_price != null && product.promotional_price < product.price
@@ -79,11 +97,11 @@ function SponsoredProductCard({
 
   return (
     <article className="lp-sponsored-card">
-      <Link
-        to={href}
+      <ProductLink
+        href={href}
         className="lp-sponsored-card__media"
         onClick={handleCtaClick}
-        aria-label={product.name}
+        ariaLabel={product.name}
       >
         {product.image_url ? (
           <img
@@ -106,7 +124,7 @@ function SponsoredProductCard({
             {featuredLabel}
           </span>
         </div>
-      </Link>
+      </ProductLink>
 
       <div className="lp-sponsored-card__body">
         {product.store ? (
@@ -117,9 +135,9 @@ function SponsoredProductCard({
         ) : null}
 
         <h3 className="lp-sponsored-card__title">
-          <Link to={href} onClick={handleCtaClick}>
+          <ProductLink href={href} onClick={handleCtaClick}>
             {product.name}
-          </Link>
+          </ProductLink>
         </h3>
 
         <div className="lp-sponsored-card__footer">
@@ -133,10 +151,10 @@ function SponsoredProductCard({
               </span>
             ) : null}
           </div>
-          <Link to={href} className="lp-sponsored-card__cta" onClick={handleCtaClick}>
+          <ProductLink href={href} className="lp-sponsored-card__cta" onClick={handleCtaClick}>
             {ctaLabel}
             <ArrowRight className="h-3.5 w-3.5" aria-hidden />
-          </Link>
+          </ProductLink>
         </div>
       </div>
     </article>
@@ -150,7 +168,7 @@ export function SponsoredProductsSection() {
   const [offset, setOffset] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
 
-  const shouldRotate = pool.length > LANDING_SPONSORED_SLOT_COUNT;
+  const shouldRotate = pool.length > 1;
 
   useEffect(() => {
     if (!shouldRotate) return;
@@ -173,7 +191,29 @@ export function SponsoredProductsSection() {
     [pool, offset]
   );
 
-  if (isLoading || isError || visible.length === 0) {
+  if (isLoading) {
+    return (
+      <section
+        id="produits-sponsorises"
+        className="lp-section-pad lp-section-muted lp-sponsored-section"
+        aria-busy="true"
+      >
+        <div className="mx-auto max-w-7xl px-4 sm:px-5 lg:px-8">
+          <div className="mx-auto h-24 max-w-xl animate-pulse rounded-xl bg-black/5" />
+          <div className="lp-sponsored-grid mt-10 sm:mt-12">
+            {Array.from({ length: 9 }, (_, i) => (
+              <div
+                key={i}
+                className="lp-sponsored-card min-h-[16rem] animate-pulse bg-black/[0.03]"
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (isError || visible.length === 0) {
     return null;
   }
 

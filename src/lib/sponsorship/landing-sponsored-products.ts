@@ -20,15 +20,24 @@ export type LandingSponsoredProduct = {
   } | null;
 };
 
-/** Fenêtre de 9 cartes ; avance d’un cran à chaque tick pour une rotation fluide. */
+/**
+ * Remplit toujours `slotCount` cartes en cyclant le pool (grille 3×3).
+ * L’offset fait tourner les produits à intervalle régulier.
+ */
 export function pickSponsoredWindow<T>(
   pool: readonly T[],
   offset: number,
   slotCount: number = LANDING_SPONSORED_SLOT_COUNT
 ): T[] {
   if (pool.length === 0) return [];
-  if (pool.length <= slotCount) return [...pool];
-
   const start = ((offset % pool.length) + pool.length) % pool.length;
   return Array.from({ length: slotCount }, (_, i) => pool[(start + i) % pool.length]);
+}
+
+/** Lien produit pour la landing (évite les URLs absolues dans react-router Link). */
+export function landingSponsoredProductHref(product: LandingSponsoredProduct): string {
+  if (product.store?.slug && product.slug) {
+    return `/stores/${encodeURIComponent(product.store.slug)}/products/${encodeURIComponent(product.slug)}`;
+  }
+  return `/marketplace?q=${encodeURIComponent(product.name)}`;
 }

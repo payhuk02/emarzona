@@ -431,8 +431,9 @@ serve(async req => {
       }
 
       // -------------------------------------------------------------------
-      // 🧾 Abonnement produits physiques (pas de order_id)
+      // Billing purposes without order_id (subscriptions + sponsorship)
       // -------------------------------------------------------------------
+      let sponsorshipActivationError: unknown = null;
       try {
         const purpose =
           (transaction?.metadata as Record<string, unknown> | null | undefined)?.purpose ||
@@ -511,9 +512,17 @@ serve(async req => {
             });
           }
         } else if (!transaction.order_id && purpose === 'marketplace_sponsorship') {
-          const sponsorshipId = meta.sponsorship_id as string | undefined;
-          if (sponsorshipId) {
-            await activateMarketplaceSponsorshipFromWebhook(supabase, {
+          const sponsorshipId = (
+            (transaction?.metadata as Record<string, unknown> | null | undefined)
+              ?.sponsorship_id ||
+            (metadata as Record<string, unknown> | null | undefined)?.sponsorship_id
+          ) as string | undefined;
+          if (!sponsorshipId) {
+            console.error('marketplace_sponsorship missing sponsorship_id', {
+              transaction_id: transaction.id,
+            });
+          } else {
+            const result = await activateMarketplaceSponsorshipFromWebhook(supabase, {
               sponsorshipId: String(sponsorshipId),
               paymentRef: String(transaction.id),
               paidAmount: Number(transaction.amount),
@@ -523,11 +532,39 @@ serve(async req => {
             console.log('Activated marketplace sponsorship', {
               sponsorship_id: sponsorshipId,
               transaction_id: transaction.id,
+              alreadyActive: result.alreadyActive,
+              status: result.status,
             });
           }
         }
       } catch (subErr: unknown) {
-        console.error('Error activating physical subscription:', subErr);
+        const purpose =
+          (transaction?.metadata as Record<string, unknown> | null | undefined)?.purpose ||
+          (metadata as Record<string, unknown> | null | undefined)?.purpose;
+        if (purpose === 'marketplace_sponsorship') {
+          sponsorshipActivationError = subErr;
+          console.error('marketplace sponsorship activation failed', subErr);
+        } else {
+          console.error('Error activating physical subscription:', subErr);
+        }
+      }
+
+      if (sponsorshipActivationError) {
+        const message =
+          sponsorshipActivationError instanceof Error
+            ? sponsorshipActivationError.message
+            : String(sponsorshipActivationError);
+        return new Response(
+          JSON.stringify({
+            error: 'Sponsorship activation failed',
+            message,
+            transaction_id: transaction.id,
+          }),
+          {
+            status: 500,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          }
+        );
       }
 
       // ✅ Créer une notification de paiement réussi

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Megaphone, Sparkles, CreditCard, XCircle } from 'lucide-react';
+import { Megaphone, Sparkles, CreditCard, XCircle, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -21,7 +21,7 @@ import {
   useStoreSponsorships,
 } from '@/hooks/useMarketplaceSponsorships';
 import { useStoreContext } from '@/contexts/StoreContext';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetchStoreProductsForSponsor } from '@/lib/sponsorship/marketplace-sponsorship';
 
 function statusBadge(status: string) {
@@ -50,7 +50,9 @@ function productOptionLabel(p: {
 
 export default function SponsorshipsPage() {
   const [searchParams] = useSearchParams();
+  const queryClient = useQueryClient();
   const success = searchParams.get('success') === '1';
+  const sponsorshipIdFromQuery = searchParams.get('sponsorship_id') ?? '';
   const productIdFromQuery = searchParams.get('productId') ?? '';
   const viewCampaigns = searchParams.get('view') === 'campaigns';
   const { selectedStore, loading: storeLoading } = useStoreContext();
@@ -64,6 +66,33 @@ export default function SponsorshipsPage() {
 
   const [productId, setProductId] = useState(productIdFromQuery);
   const [skuSlug, setSkuSlug] = useState('boost_7d');
+
+  const paidCampaign = useMemo(() => {
+    if (!sponsorshipIdFromQuery) return null;
+    return sponsorships.find(s => s.id === sponsorshipIdFromQuery) ?? null;
+  }, [sponsorships, sponsorshipIdFromQuery]);
+
+  const paymentActivationStatus = useMemo(() => {
+    if (!success) return null;
+    if (paidCampaign?.status === 'active') return 'active' as const;
+    if (paidCampaign?.status === 'pending_payment') return 'pending' as const;
+    if (paidCampaign) return 'other' as const;
+    return 'pending' as const;
+  }, [success, paidCampaign]);
+
+  useEffect(() => {
+    if (!success || !storeId) return;
+    if (paidCampaign?.status === 'active') return;
+
+    let ticks = 0;
+    const id = window.setInterval(() => {
+      ticks += 1;
+      void queryClient.invalidateQueries({ queryKey: ['marketplace-sponsorships', storeId] });
+      if (ticks >= 20) window.clearInterval(id);
+    }, 2500);
+
+    return () => window.clearInterval(id);
+  }, [success, storeId, paidCampaign?.status, queryClient]);
 
   useEffect(() => {
     if (productIdFromQuery) {
@@ -152,9 +181,28 @@ export default function SponsorshipsPage() {
       </div>
 
       {success ? (
-        <Card className="border-emerald-500/30 bg-emerald-500/5">
-          <CardContent className="py-4 text-sm text-emerald-800 dark:text-emerald-200">
-            Paiement reçu — votre campagne sera activée sous peu.
+        <Card
+          className={
+            paymentActivationStatus === 'active'
+              ? 'border-emerald-500/30 bg-emerald-500/5'
+              : 'border-amber-500/30 bg-amber-500/5'
+          }
+        >
+          <CardContent className="flex items-start gap-3 py-4 text-sm">
+            {paymentActivationStatus === 'active' ? (
+              <p className="text-emerald-800 dark:text-emerald-200">
+                Paiement confirmé — votre campagne est active et le produit est sponsorisé sur le
+                marketplace.
+              </p>
+            ) : (
+              <p className="flex items-start gap-2 text-amber-900 dark:text-amber-100">
+                <Loader2 className="mt-0.5 h-4 w-4 shrink-0 animate-spin" aria-hidden />
+                <span>
+                  Paiement en cours de confirmation… la campagne passera en actif dès validation du
+                  paiement (quelques secondes).
+                </span>
+              </p>
+            )}
           </CardContent>
         </Card>
       ) : null}
