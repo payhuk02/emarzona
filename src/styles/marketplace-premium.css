@@ -280,6 +280,7 @@
 .mp-product-cards-band [aria-label='Grille de produits'] > * {
   min-width: 0;
   width: 100%;
+  height: 100%;
 }
 
 /* Cartes produit — fond bleu sombre (marketplace + détail produit « Autres produits ») */
@@ -381,11 +382,17 @@
   color: var(--lp-text-on-dark) !important;
 }
 
-.marketplace-premium .mp-product-card .bg-gray-200,
-.marketplace-premium .mp-product-card .dark\:bg-gray-700,
-.mp-product-cards-band.landing-premium .mp-product-card .bg-gray-200,
-.mp-product-cards-band.landing-premium .mp-product-card .dark\:bg-gray-700 {
-  background: rgba(255, 255, 255, 0.08) !important;
+.marketplace-premium .mp-product-card .mp-store-logo,
+.mp-product-cards-band.landing-premium .mp-product-card .mp-store-logo {
+  border-color: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.marketplace-premium .mp-product-card .mp-store-logo--fallback,
+.mp-product-cards-band.landing-premium .mp-product-card .mp-store-logo--fallback {
+  background: rgba(59, 130, 246, 0.35) !important;
+  color: #fff;
+  border: 1px solid rgba(147, 197, 253, 0.45);
 }
 
 .marketplace-premium .mp-product-card .mp-product-title,

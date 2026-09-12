@@ -602,7 +602,9 @@ All colors MUST be HSL.
     z-index: 10;
   }
 
-  /* 10. Indicateurs de chargement accessibles */
+  /* 10. Indicateurs de chargement accessibles (inline / petits blocs uniquement).
+     Les sections avec skeleton dédié utilisent .aria-busy-skeleton pour éviter
+     un spinner ::before collé à gauche du conteneur pleine largeur. */
   @keyframes spin-accessible {
     from {
       transform: rotate(0deg);
@@ -622,6 +624,14 @@ All colors MUST be HSL.
     border-top-color: transparent;
     border-radius: 50%;
     animation: spin-accessible 0.8s linear infinite;
+    vertical-align: middle;
+  }
+
+  [aria-busy='true'].aria-busy-skeleton::before,
+  [aria-busy='true'][data-busy-quiet]::before {
+    content: none;
+    display: none;
+    animation: none;
   }
 
   /* 11. Amélioration du contraste pour les placeholders */

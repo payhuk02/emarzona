@@ -18,11 +18,14 @@ type RpcStoreRow = {
  */
 export function nestMarketplaceStoreFields<T extends RpcStoreRow>(row: T): T & Partial<Product> {
   const existing = row.stores;
-  const logoFromNested =
-    existing?.logo_url ??
-    (existing as { store_appearance?: { logo_url?: string | null } } | null | undefined)
-      ?.store_appearance?.logo_url ??
-    null;
+  const appearanceRaw = (
+    existing as
+      | { store_appearance?: { logo_url?: string | null } | { logo_url?: string | null }[] }
+      | null
+      | undefined
+  )?.store_appearance;
+  const appearance = Array.isArray(appearanceRaw) ? appearanceRaw[0] : appearanceRaw;
+  const logoFromNested = existing?.logo_url ?? appearance?.logo_url ?? null;
   const logoUrl = (logoFromNested || row.store_logo_url || null) as string | null;
   const name = existing?.name || row.store_name || null;
   const slug = existing?.slug || row.store_slug || null;
@@ -34,7 +37,7 @@ export function nestMarketplaceStoreFields<T extends RpcStoreRow>(row: T): T & P
           id,
           name,
           slug: slug || '',
-          logo_url: logoUrl,
+          logo_url: typeof logoUrl === 'string' && logoUrl.trim() ? logoUrl.trim() : null,
           created_at: existing?.created_at || row.created_at || new Date().toISOString(),
         }
       : (existing ?? null);

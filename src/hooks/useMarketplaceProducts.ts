@@ -41,7 +41,7 @@
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
-import { supabaseRead, supabaseReadRpc } from '@/integrations/supabase/read-client';
+import { supabaseRead, supabaseReadRpcPost } from '@/integrations/supabase/read-client';
 import { logger } from '@/lib/logger';
 import { Product, FilterState, PaginationState } from '@/types/marketplace';
 import { cacheStrategies } from '@/lib/cache-optimization';
@@ -107,7 +107,9 @@ function mapStockToProductFields<T extends Record<string, unknown>>(product: T):
       : product.stock_quantity != null
         ? Number(product.stock_quantity)
         : null;
-  return { ...product, stock_quantity: stock } as Product;
+  const withStock = { ...product, stock_quantity: stock };
+  // Normalise store_appearance.logo_url → stores.logo_url (colonne absente sur stores)
+  return nestMarketplaceStoreFields(withStock as Record<string, unknown>) as Product;
 }
 
 export function buildMarketplaceProductsQueryKey(
@@ -147,7 +149,8 @@ export async function fetchMarketplaceProducts({
     try {
       logger.info('🔄 [useMarketplaceProducts] Utilisation de la fonction RPC optimisée');
 
-      const { data, error } = await supabaseReadRpc('get_marketplace_products_filtered', {
+      // POST: GET (supabaseReadRpc) échoue en 25006 sur cette RPC plpgsql → logos absents
+      const { data, error } = await supabaseReadRpcPost('get_marketplace_products_filtered', {
         p_limit: pagination.itemsPerPage,
         p_offset: startIndex,
         p_category:
@@ -176,7 +179,7 @@ export async function fetchMarketplaceProducts({
         })(),
         p_featured_only: filters.category === 'featured' || filters.featuredOnly === true,
         p_sponsored_only: false,
-      });
+      } as never);
 
       if (error) {
         // PGRST202 = fonction RPC absente (migrations non appliquées) — fallback silencieux
@@ -231,6 +234,7 @@ export async function fetchMarketplaceProducts({
             created_at: product.created_at as string,
             updated_at: product.updated_at as string,
             tags: product.tags as string[],
+            store_logo_url: (product.store_logo_url as string | null) ?? null,
             stores: product.stores ?? null,
             product_affiliate_settings: product.commission_rate
               ? {

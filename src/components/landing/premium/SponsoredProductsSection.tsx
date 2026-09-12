@@ -18,6 +18,10 @@ function StoreMark({ name, logoUrl }: { name: string; logoUrl: string | null }) 
   const [failed, setFailed] = useState(false);
   const initial = (name.trim().charAt(0) || 'B').toUpperCase();
 
+  useEffect(() => {
+    setFailed(false);
+  }, [logoUrl]);
+
   if (!logoUrl || failed) {
     return (
       <span className="lp-sponsored-card__store-fallback" aria-hidden>
@@ -34,6 +38,7 @@ function StoreMark({ name, logoUrl }: { name: string; logoUrl: string | null }) 
       height={28}
       loading="lazy"
       decoding="async"
+      referrerPolicy="no-referrer"
       className="lp-sponsored-card__store-logo"
       onError={() => setFailed(true)}
     />
@@ -95,7 +100,11 @@ function SponsoredProductCard({
   };
 
   return (
-    <article className="lp-sponsored-card">
+    <article className="lp-sponsored-card lp-reveal-stagger__item">
+      <div
+        className="lp-sponsored-card__glow pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full opacity-40 blur-3xl"
+        aria-hidden
+      />
       <ProductLink
         href={href}
         className="lp-sponsored-card__media"
@@ -106,8 +115,9 @@ function SponsoredProductCard({
           <img
             src={product.image_url}
             alt=""
-            loading="lazy"
+            loading="eager"
             decoding="async"
+            fetchPriority="low"
             className="lp-sponsored-card__image"
           />
         ) : (
@@ -159,12 +169,13 @@ function SponsoredProductCard({
 
 export function SponsoredProductsSection() {
   const { t } = useLandingPremiumT();
-  const { ref, className } = usePremiumReveal();
-  const { data: pool = [], isLoading, isError } = useLandingSponsoredProducts();
+  const { ref, className } = usePremiumReveal(0.06);
+  const { data: pool = [], isLoading, isFetching, isError } = useLandingSponsoredProducts();
   const [offset, setOffset] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
 
   const shouldRotate = pool.length > LANDING_SPONSORED_SLOT_COUNT;
+  const showSkeleton = isLoading || (isFetching && pool.length === 0);
 
   useEffect(() => {
     if (!shouldRotate) {
@@ -179,7 +190,7 @@ export function SponsoredProductsSection() {
       window.setTimeout(() => {
         setOffset(prev => prev + 1);
         setIsAnimating(false);
-      }, 220);
+      }, 280);
     }, LANDING_SPONSORED_ROTATE_MS);
 
     return () => window.clearInterval(id);
@@ -190,21 +201,33 @@ export function SponsoredProductsSection() {
     [pool, offset]
   );
 
-  if (isLoading) {
+  if (showSkeleton) {
     return (
       <section
         id="produits-sponsorises"
-        className="lp-section-pad lp-section-muted lp-sponsored-section"
+        className="lp-section-pad lp-section-muted lp-sponsored-section border-y border-[var(--lp-border-light)] aria-busy-skeleton"
         aria-busy="true"
+        data-busy-quiet
       >
+        <span className="sr-only" role="status">
+          Chargement des produits sponsorisés…
+        </span>
         <div className="mx-auto max-w-7xl px-4 sm:px-5 lg:px-8">
-          <div className="mx-auto h-24 max-w-xl animate-pulse rounded-xl bg-black/5" />
-          <div className="lp-sponsored-grid mt-10 sm:mt-12">
-            {Array.from({ length: 9 }, (_, i) => (
-              <div
-                key={i}
-                className="lp-sponsored-card min-h-[16rem] animate-pulse bg-black/[0.03]"
-              />
+          <div className="mx-auto max-w-3xl space-y-4 text-center">
+            <div className="mx-auto h-3 w-40 animate-pulse rounded-full bg-black/[0.06]" />
+            <div className="mx-auto h-10 max-w-lg animate-pulse rounded-xl bg-black/[0.06]" />
+            <div className="mx-auto h-4 max-w-md animate-pulse rounded-lg bg-black/[0.05]" />
+          </div>
+          <div className="lp-sponsored-grid mt-10 sm:mt-14">
+            {Array.from({ length: 2 }, (_, i) => (
+              <div key={i} className="lp-sponsored-card lp-sponsored-card--skeleton" aria-hidden>
+                <div className="lp-sponsored-card__media aspect-[4/3] animate-pulse bg-black/[0.04]" />
+                <div className="lp-sponsored-card__body space-y-3">
+                  <div className="h-4 w-1/2 animate-pulse rounded bg-black/[0.06]" />
+                  <div className="h-5 w-4/5 animate-pulse rounded bg-black/[0.07]" />
+                  <div className="h-8 w-full animate-pulse rounded-lg bg-black/[0.05]" />
+                </div>
+              </div>
             ))}
           </div>
         </div>
@@ -219,26 +242,29 @@ export function SponsoredProductsSection() {
   return (
     <section
       id="produits-sponsorises"
-      className="lp-section-pad lp-section-muted lp-sponsored-section"
+      className="lp-section-pad lp-section-muted lp-sponsored-section border-y border-[var(--lp-border-light)]"
       aria-labelledby="lp-sponsored-heading"
     >
-      <div ref={ref} className={`mx-auto max-w-7xl px-4 sm:px-5 lg:px-8 lp-reveal ${className}`}>
-        <div className="mx-auto max-w-3xl text-center">
+      <div
+        ref={ref}
+        className={`lp-reveal-stagger mx-auto max-w-7xl px-4 sm:px-5 lg:px-8 ${className}`}
+      >
+        <div className="lp-reveal-stagger__item mx-auto max-w-3xl text-center">
           <p className="lp-eyebrow-light mx-auto mb-5">{t('sponsored.eyebrow')}</p>
           <h2
             id="lp-sponsored-heading"
-            className="lp-serif mt-3 text-3xl text-[var(--lp-text)] sm:text-4xl lg:text-[2.65rem] lg:leading-tight"
+            className="lp-serif text-3xl text-[var(--lp-text)] sm:text-4xl lg:text-5xl"
           >
             {t('sponsored.title')}{' '}
             <span className="lp-gold-text italic">{t('sponsored.titleHighlight')}</span>
           </h2>
-          <p className="mt-4 text-[15px] leading-relaxed text-[var(--lp-text-muted)] sm:text-base">
+          <p className="mx-auto mt-4 max-w-2xl text-[15px] leading-relaxed text-[var(--lp-text-muted)] sm:text-base">
             {t('sponsored.subtitle')}
           </p>
         </div>
 
         <div
-          className={`lp-sponsored-grid mt-10 sm:mt-12${isAnimating ? ' lp-sponsored-grid--swap' : ''}`}
+          className={`lp-sponsored-grid mt-10 sm:mt-14${isAnimating ? ' lp-sponsored-grid--swap' : ''}`}
           aria-live="polite"
         >
           {visible.map(product => (
@@ -252,10 +278,10 @@ export function SponsoredProductsSection() {
           ))}
         </div>
 
-        <div className="mt-10 flex justify-center">
+        <div className="lp-reveal-stagger__item mt-10 flex justify-center sm:mt-12">
           <Link
             to="/marketplace"
-            className="lp-sponsored-marketplace-btn inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold"
+            className="lp-sponsored-marketplace-btn inline-flex items-center gap-2 rounded-full px-7 py-3.5 text-sm font-semibold transition-transform active:scale-[0.98]"
           >
             {t('sponsored.viewMarketplace')}
             <ArrowRight className="h-4 w-4" aria-hidden />

@@ -46,7 +46,7 @@ type DatabaseProduct = {
     name: string;
     slug: string;
     logo_url?: string;
-    store_appearance?: { logo_url?: string | null } | null;
+    store_appearance?: { logo_url?: string | null } | Array<{ logo_url?: string | null }> | null;
   };
   product_type?: 'digital' | 'physical' | 'service' | 'course' | 'artist';
   rating?: number;
@@ -86,9 +86,11 @@ export function transformToUnifiedProduct(product: DatabaseProduct): UnifiedProd
           logo_url: flat.store_logo_url ?? undefined,
         }
       : undefined);
+  const appearanceRaw = nestedStores?.store_appearance;
+  const appearance = Array.isArray(appearanceRaw) ? appearanceRaw[0] : appearanceRaw;
   const logoUrl =
     (typeof nestedStores?.logo_url === 'string' && nestedStores.logo_url.trim()) ||
-    nestedStores?.store_appearance?.logo_url ||
+    (typeof appearance?.logo_url === 'string' && appearance.logo_url.trim()) ||
     (typeof flat.store_logo_url === 'string' && flat.store_logo_url.trim()) ||
     undefined;
 

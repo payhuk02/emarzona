@@ -1,6 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 
-export function usePremiumReveal<T extends HTMLElement = HTMLDivElement>(threshold = 0.12) {
+/**
+ * Reveal premium au scroll.
+ * Robuste pour sections différées (IntersectionObserver + check immédiat + filet 600ms).
+ */
+export function usePremiumReveal<T extends HTMLElement = HTMLDivElement>(threshold = 0.08) {
   const ref = useRef<T>(null);
   const [visible, setVisible] = useState(false);
 
@@ -17,18 +21,38 @@ export function usePremiumReveal<T extends HTMLElement = HTMLDivElement>(thresho
       return;
     }
 
+    let done = false;
+    const reveal = () => {
+      if (done) return;
+      done = true;
+      setVisible(true);
+    };
+
+    // Déjà proche du viewport (ex. section montée via LandingDeferredSection)
+    const rect = el.getBoundingClientRect();
+    const vh = window.innerHeight || 0;
+    if (rect.top < vh * 0.92 && rect.bottom > 0) {
+      reveal();
+      return;
+    }
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          setVisible(true);
+          reveal();
           observer.disconnect();
         }
       },
-      { threshold, rootMargin: '0px 0px -8% 0px' }
+      { threshold, rootMargin: '100px 0px 40px 0px' }
     );
 
     observer.observe(el);
-    return () => observer.disconnect();
+    const fallback = window.setTimeout(reveal, 600);
+
+    return () => {
+      observer.disconnect();
+      window.clearTimeout(fallback);
+    };
   }, [threshold]);
 
   return { ref, visible, className: visible ? 'is-visible' : '' };

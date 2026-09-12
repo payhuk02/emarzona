@@ -992,37 +992,37 @@
   box-shadow: 0 28px 56px -32px rgba(15, 15, 18, 0.45);
 }
 
-/* Produits sponsorisés (après tarifs) */
+/* Produits sponsorisés (après tarifs) — aligné Features / Pricing */
 .landing-premium .lp-sponsored-section {
-  content-visibility: auto;
-  contain-intrinsic-size: auto 1100px;
+  content-visibility: visible;
+  position: relative;
 }
 
 .landing-premium .lp-sponsored-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 1rem;
+  gap: 1.15rem;
   transition:
-    opacity 0.22s var(--lp-ease),
-    transform 0.22s var(--lp-ease);
+    opacity 0.35s var(--lp-ease),
+    transform 0.4s var(--lp-ease);
 }
 
 .landing-premium .lp-sponsored-grid--swap {
-  opacity: 0.35;
-  transform: translateY(6px);
+  opacity: 0.4;
+  transform: translateY(8px);
 }
 
 @media (min-width: 640px) {
   .landing-premium .lp-sponsored-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1.15rem;
+    gap: 1.25rem;
   }
 }
 
 @media (min-width: 1024px) {
   .landing-premium .lp-sponsored-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 1.25rem;
+    gap: 1.5rem;
   }
 }
 
@@ -1039,6 +1039,7 @@
 }
 
 .landing-premium .lp-sponsored-card {
+  position: relative;
   display: flex;
   flex-direction: column;
   overflow: visible;
@@ -1046,23 +1047,35 @@
   border: none;
   background: transparent;
   box-shadow: none;
-  transition: transform 0.4s var(--lp-ease);
+  transition: transform 0.5s var(--lp-ease);
+}
+
+.landing-premium .lp-sponsored-card__glow {
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.22) 0%, transparent 70%);
+  transition: opacity 0.5s var(--lp-ease);
 }
 
 .landing-premium .lp-sponsored-card:hover {
-  transform: translateY(-3px);
-  border-color: transparent;
-  box-shadow: none;
+  transform: translateY(-4px);
+}
+
+.landing-premium .lp-sponsored-card:hover .lp-sponsored-card__glow {
+  opacity: 0.7;
+}
+
+.landing-premium .lp-sponsored-card--skeleton {
+  pointer-events: none;
 }
 
 .landing-premium .lp-sponsored-card__media {
   position: relative;
+  z-index: 1;
   display: block;
   overflow: hidden;
   margin: 0;
   border: none;
-  border-radius: 0;
-  background: transparent;
+  border-radius: 1.15rem 1.15rem 0 0;
+  background: linear-gradient(160deg, #eef2f7 0%, #e4e9f0 100%);
   line-height: 0;
 }
 
@@ -1072,11 +1085,11 @@
   height: auto;
   object-fit: contain;
   object-position: center bottom;
-  transition: transform 0.55s var(--lp-ease);
+  transition: transform 0.65s var(--lp-ease);
 }
 
 .landing-premium .lp-sponsored-card:hover .lp-sponsored-card__image {
-  transform: scale(1.01);
+  transform: scale(1.03);
 }
 
 .landing-premium .lp-sponsored-card__image-fallback {
@@ -1101,34 +1114,39 @@
 }
 
 .landing-premium .lp-sponsored-card__badge--sponsored {
-  background: rgba(15, 15, 18, 0.9);
+  background: rgba(15, 15, 18, 0.92);
   color: #fff;
+  box-shadow: 0 6px 16px -8px rgba(15, 15, 18, 0.45);
 }
 
 .landing-premium .lp-sponsored-card__badge--featured {
   background: #16a34a;
   color: #fff;
+  box-shadow: 0 6px 16px -8px rgba(22, 163, 74, 0.45);
 }
 
 .landing-premium .lp-sponsored-card__body {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex: 1;
   flex-direction: column;
-  gap: 0.65rem;
+  gap: 0.7rem;
   margin: 0;
-  padding: 1rem 1.05rem 1.1rem;
+  padding: 1.05rem 1.1rem 1.15rem;
   border: 1px solid var(--lp-border-light);
+  border-top: none;
   border-radius: 0 0 1.15rem 1.15rem;
-  background: var(--lp-surface);
-  box-shadow: 0 18px 40px -32px rgba(15, 15, 18, 0.35);
+  background: var(--lp-surface-elevated);
+  box-shadow: 0 20px 44px -34px rgba(15, 15, 18, 0.4);
   transition:
-    box-shadow 0.4s var(--lp-ease),
-    border-color 0.4s var(--lp-ease);
+    box-shadow 0.45s var(--lp-ease),
+    border-color 0.45s var(--lp-ease);
 }
 
 .landing-premium .lp-sponsored-card:hover .lp-sponsored-card__body {
-  border-color: rgba(37, 99, 235, 0.22);
-  box-shadow: 0 26px 48px -28px rgba(15, 15, 18, 0.4);
+  border-color: rgba(37, 99, 235, 0.2);
+  box-shadow: 0 28px 52px -30px rgba(15, 15, 18, 0.48);
 }
 
 .landing-premium .lp-sponsored-card__store-row {

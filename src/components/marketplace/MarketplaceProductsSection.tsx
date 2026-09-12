@@ -126,6 +126,7 @@ export const MarketplaceProductsSection = React.memo<MarketplaceProductsSectionP
             variant="marketplace"
             showAffiliate={true}
             showActions={true}
+            className="h-full"
             imagePriority={index < eagerImageCount}
             onAction={(action, prod) => {
               if (action === 'view') {

@@ -18,7 +18,7 @@ export interface MarketplaceProductsCachePayload {
 }
 
 const CACHE_PREFIX = 'marketplace_';
-const CACHE_VERSION = '1.1.0';
+const CACHE_VERSION = '1.2.1';
 /** TTL max en localStorage (données encore affichables). */
 export const MARKETPLACE_CACHE_HARD_TTL_MS = 10 * 60 * 1000;
 /** Au-delà de ce délai, React Query refetch en arrière-plan (SWR). */

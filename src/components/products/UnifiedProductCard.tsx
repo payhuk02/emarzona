@@ -14,7 +14,6 @@ import {
   ShoppingCart,
   Percent,
   MessageSquare,
-  Store,
   CheckCircle,
   CheckCircle2,
   TrendingUp,
@@ -118,10 +117,19 @@ function isPremiumProductCardVariant(variant: UnifiedProductCardProps['variant']
 function StoreLogoAvatar({ url, name }: { url?: string | null; name?: string }) {
   const [failed, setFailed] = useState(false);
   const src = typeof url === 'string' ? url.trim() : '';
+
+  useEffect(() => {
+    setFailed(false);
+  }, [src]);
+
   if (!src || failed) {
+    const initial = (name?.trim().charAt(0) || 'B').toUpperCase();
     return (
-      <div className="w-6 h-6 sm:w-7 sm:h-7 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center flex-shrink-0">
-        <Store className="h-3.5 w-3.5 text-gray-500" aria-hidden />
+      <div
+        className="mp-store-logo mp-store-logo--fallback w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center flex-shrink-0"
+        aria-hidden
+      >
+        <span className="text-[10px] sm:text-xs font-bold leading-none">{initial}</span>
       </div>
     );
   }
@@ -133,7 +141,8 @@ function StoreLogoAvatar({ url, name }: { url?: string | null; name?: string }) 
       height={28}
       loading="lazy"
       decoding="async"
-      className="w-6 h-6 sm:w-7 sm:h-7 rounded-full object-cover border border-gray-200 dark:border-gray-700 flex-shrink-0 bg-gray-100"
+      referrerPolicy="no-referrer"
+      className="mp-store-logo w-6 h-6 sm:w-7 sm:h-7 rounded-full object-cover border border-white/20 flex-shrink-0 bg-white/10"
       onError={() => setFailed(true)}
     />
   );

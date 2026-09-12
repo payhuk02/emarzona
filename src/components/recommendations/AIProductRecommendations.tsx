@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Sparkles, TrendingUp, Users, Package, Target } from 'lucide-react';
 import UnifiedProductCard from '@/components/products/UnifiedProductCard';
 import { transformToUnifiedProduct } from '@/lib/product-transform';
+import { nestMarketplaceStoreFields } from '@/lib/marketplace/nest-store-fields';
 import { cn } from '@/lib/utils';
 import { logger } from '@/lib/logger';
 
@@ -90,7 +91,10 @@ const AIProductRecommendations: React.FC<AIProductRecommendationsProps> = ({
       if (error) throw error;
 
       const byId = new Map((data ?? []).map(row => [row.id as string, row]));
-      return productIds.map(id => byId.get(id)).filter(Boolean);
+      return productIds
+        .map(id => byId.get(id))
+        .filter(Boolean)
+        .map(row => nestMarketplaceStoreFields(row as Record<string, unknown>));
     },
     staleTime: 2 * 60 * 1000,
   });
@@ -261,14 +265,17 @@ const AIProductRecommendations: React.FC<AIProductRecommendationsProps> = ({
       <CardContent>
         <div
           className={cn(
-            'grid gap-4',
+            'grid gap-4 items-stretch',
             layout === 'grid' && 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3',
             layout === 'horizontal' && 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3',
             layout === 'compact' && 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-6'
           )}
         >
           {enrichedRecommendations.map((recommendation, index) => (
-            <div key={recommendation.productId} className="relative group">
+            <div
+              key={recommendation.productId}
+              className="relative group h-full min-h-0 flex flex-col"
+            >
               {/* Badge de raison */}
               {showReasoning && (
                 <div className="absolute top-2 left-2 z-10">
@@ -292,7 +299,10 @@ const AIProductRecommendations: React.FC<AIProductRecommendationsProps> = ({
               )}
 
               {/* Carte produit — même composant que le catalogue marketplace */}
-              <div onClick={() => handleRecommendationClick(recommendation, index + 1)}>
+              <div
+                className="flex-1 min-h-0 h-full"
+                onClick={() => handleRecommendationClick(recommendation, index + 1)}
+              >
                 <UnifiedProductCard
                   product={recommendation.unifiedProduct}
                   variant="marketplace"
@@ -302,12 +312,12 @@ const AIProductRecommendations: React.FC<AIProductRecommendationsProps> = ({
                 />
               </div>
 
-              {/* Explication détaillée (si activée) */}
-              {showReasoning && recommendation.metadata?.reasoning && (
-                <div className="mt-2 text-xs text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
+              {/* Explication hors flux pour ne pas casser l'égalité de hauteur */}
+              {showReasoning && recommendation.metadata?.reasoning ? (
+                <p className="pointer-events-none absolute -bottom-6 left-0 right-0 text-xs text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity line-clamp-2">
                   {recommendation.metadata.reasoning}
-                </div>
-              )}
+                </p>
+              ) : null}
             </div>
           ))}
         </div>

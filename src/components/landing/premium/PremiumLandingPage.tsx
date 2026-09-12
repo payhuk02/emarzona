@@ -4,6 +4,7 @@ import { PremiumNav } from './PremiumNav';
 import { PremiumPlatformHero } from './PremiumPlatformHero';
 import { LandingDeferredSection } from './LandingDeferredSection';
 import { ErrorBoundary } from '@/components/error/ErrorBoundary';
+import { usePrefetchLandingSponsoredProducts } from '@/hooks/useLandingSponsoredProducts';
 
 /** Second hero + footer : hors premier viewport — code-split + mount différé */
 const PremiumHero = lazy(() => import('./PremiumHero').then(m => ({ default: m.PremiumHero })));
@@ -47,6 +48,9 @@ function DeferredFallback({
 }
 
 export function PremiumLandingPage() {
+  // Prefetch avant le scroll : données prêtes quand la section différée monte
+  usePrefetchLandingSponsoredProducts();
+
   return (
     <div className="landing-premium min-h-screen overflow-x-clip">
       <PremiumNav />
@@ -123,7 +127,7 @@ export function PremiumLandingPage() {
           </ErrorBoundary>
         </LandingDeferredSection>
 
-        <LandingDeferredSection minHeight="36rem">
+        <LandingDeferredSection minHeight="36rem" rootMargin="480px 0px">
           <ErrorBoundary level="section">
             <Suspense fallback={<DeferredFallback minHeight="36rem" />}>
               <SponsoredProductsSection />

@@ -44,5 +44,5 @@ interface LazyProductCardProps {
 
 export const LazyProductCard = ({ children, className }: LazyProductCardProps) => {
   // Affichage statique et professionnel - pas de lazy loading, pas de skeletons
-  return <div className={className}>{children}</div>;
+  return <div className={cn('h-full min-w-0', className)}>{children}</div>;
 };

@@ -48,6 +48,10 @@ export const supabaseRead = createClient<Database>(READ_URL, SUPABASE_PUBLISHABL
 /**
  * Appel RPC en mode lecture (GET) — requis pour router vers read replicas Supabase.
  * @see https://supabase.com/docs/guides/platform/read-replicas
+ *
+ * Attention: les fonctions plpgsql VOLATILE / SECURITY DEFINER (ex.
+ * get_marketplace_products_filtered) échouent en GET (25006 read-only).
+ * Utiliser {@link supabaseReadRpcPost} pour celles-ci.
  */
 export function supabaseReadRpc<Fn extends keyof Database['public']['Functions']>(
   fn: Fn,
@@ -61,4 +65,19 @@ export function supabaseReadRpc<Fn extends keyof Database['public']['Functions']
   return supabaseRead.rpc(fn, cleanedArgs as Record<string, unknown> | undefined, {
     get: true,
   });
+}
+
+/**
+ * RPC en POST (transaction lecture/écriture autorisée) — pour fonctions plpgsql
+ * qui échouent en GET read-only (code 25006).
+ */
+export function supabaseReadRpcPost<Fn extends keyof Database['public']['Functions']>(
+  fn: Fn,
+  args?: Database['public']['Functions'][Fn]['Args']
+) {
+  const cleanedArgs = args
+    ? Object.fromEntries(Object.entries(args).filter(([_, v]) => v !== null && v !== undefined))
+    : undefined;
+
+  return supabaseRead.rpc(fn, cleanedArgs as Record<string, unknown> | undefined);
 }

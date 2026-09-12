@@ -1,4 +1,4 @@
-import { supabaseRead } from '@/integrations/supabase/read-client';
+import { supabaseReadRpcPost } from '@/integrations/supabase/read-client';
 import { nestMarketplaceStoreFields } from '@/lib/marketplace/nest-store-fields';
 import { logger } from '@/lib/logger';
 import type { LandingSponsoredProduct } from '@/lib/sponsorship/landing-sponsored-products';
@@ -10,21 +10,19 @@ const FETCH_LIMIT = 36;
  * Types générés encore sans p_sponsored_only — cast volontaire au boundary.
  */
 export async function fetchLandingSponsoredProducts(): Promise<LandingSponsoredProduct[]> {
-  // POST (pas get:true) : la RPC plpgsql SECURITY DEFINER échoue en GET
-  // avec 25006 « cannot execute SELECT in a read-only transaction ».
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabaseRead as any).rpc('get_marketplace_products_filtered', {
+  // POST: GET échoue en 25006 sur cette RPC plpgsql SECURITY DEFINER.
+  const { data, error } = await supabaseReadRpcPost('get_marketplace_products_filtered', {
     p_limit: FETCH_LIMIT,
     p_offset: 0,
     p_sponsored_only: true,
     p_featured_only: false,
     p_sort_by: 'created_at',
     p_sort_order: 'desc',
-  });
+  } as never);
 
   if (error) {
     logger.warn('fetchLandingSponsoredProducts RPC failed', { error });
-    return [];
+    throw error;
   }
 
   if (!Array.isArray(data)) return [];
@@ -66,6 +64,6 @@ export async function fetchLandingSponsoredProducts(): Promise<LandingSponsoredP
     return products;
   } catch (err) {
     logger.warn('fetchLandingSponsoredProducts map failed', { err });
-    return [];
+    throw err;
   }
 }

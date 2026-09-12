@@ -12,7 +12,6 @@ import {
   Truck,
   Percent,
   Package,
-  Store,
   Sparkles,
   MessageSquare,
   Play,
@@ -402,12 +401,18 @@ const ProductCardModernComponent = ({
                 height={28}
                 loading="lazy"
                 decoding="async"
-                className="w-6 h-6 sm:w-7 sm:h-7 rounded-full object-cover border border-gray-200 dark:border-gray-700 flex-shrink-0 bg-gray-100"
+                referrerPolicy="no-referrer"
+                className="mp-store-logo w-6 h-6 sm:w-7 sm:h-7 rounded-full object-cover border border-white/20 flex-shrink-0 bg-white/10"
                 onError={() => setStoreLogoFailed(true)}
               />
             ) : (
-              <div className="w-6 h-6 sm:w-7 sm:h-7 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center flex-shrink-0">
-                <Store className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-500 dark:text-gray-400" />
+              <div
+                className="mp-store-logo mp-store-logo--fallback w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center flex-shrink-0"
+                aria-hidden
+              >
+                <span className="text-[10px] sm:text-xs font-bold leading-none text-white">
+                  {(product.stores.name?.trim().charAt(0) || 'B').toUpperCase()}
+                </span>
               </div>
             )}
             <span className="text-xs sm:text-sm font-semibold text-white truncate min-w-0">

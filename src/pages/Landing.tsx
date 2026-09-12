@@ -29,8 +29,9 @@ function useLandingAssets() {
 function LandingShell() {
   return (
     <div
-      className="landing-premium min-h-screen bg-[#08080a]"
+      className="landing-premium min-h-screen bg-[#08080a] aria-busy-skeleton"
       aria-busy="true"
+      data-busy-quiet
       aria-label="Chargement de la page d'accueil"
     />
   );
