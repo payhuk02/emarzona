@@ -11,6 +11,7 @@ import { assertSafeE2ESupabaseUrl, resolveE2ESupabaseUrl } from './helpers/e2e-s
 import {
   assertCourseEnrollment,
   cleanupPaidFixture,
+  createE2EUser,
   seedPaidCourseFixture,
 } from './helpers/paid-vertical-seed';
 import { gotoApp, loginAsSeededUser, E2E_TEST_CONFIG } from './shared/e2e-test-config';
@@ -98,24 +99,13 @@ test.describe('Course paid enrollment (E2E)', () => {
 
     const fixture = await seedPaidCourseFixture(admin, runId);
     try {
-      const unpaidBuyer = await (async () => {
-        const email = `e2e-course-cta-${runId}@example.com`;
-        const { data, error } = await admin.auth.admin.createUser({
-          email,
-          password: E2E_TEST_CONFIG.seededUserPassword,
-          email_confirm: true,
-        });
-        if (error || !data.user?.id) throw error ?? new Error('buyer create failed');
-        return { email, id: data.user.id };
-      })();
-
-      await loginAsSeededUser(
-        page,
+      const unpaidBuyer = await createE2EUser(
         admin,
-        unpaidBuyer.email,
-        '/dashboard',
+        `e2e-course-cta-${runId}@example.com`,
         E2E_TEST_CONFIG.seededUserPassword
       );
+
+      await loginAsSeededUser(page, admin, unpaidBuyer.email, '/dashboard', unpaidBuyer.password);
       await gotoApp(page, `/courses/${fixture.product.slug}`);
 
       await expect(page.getByText(/Cours non trouvé/i)).toHaveCount(0, { timeout: 5_000 });
