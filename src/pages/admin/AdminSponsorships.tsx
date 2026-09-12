@@ -166,7 +166,7 @@ export default function AdminSponsorships() {
 
   const expireNow = useMutation({
     mutationFn: async () => {
-      const { data, error } = await supabase.rpc('expire_marketplace_sponsorships');
+      const { data, error } = await supabase.rpc('admin_expire_marketplace_sponsorships');
       if (error) throw error;
       return data as number;
     },

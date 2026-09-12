@@ -299,6 +299,7 @@ export async function fetchMarketplaceProducts({
     'licensing_type',
     'license_terms',
     'is_featured',
+    'sponsored_until',
     'payment_options',
     'whatsapp_number',
     'whatsapp_enabled',
@@ -309,7 +310,7 @@ export async function fetchMarketplaceProducts({
 
   // Construire la requête avec les jointures nécessaires selon le type
   // logo_url lives on store_appearance / stores_public (dropped from stores in Sprint 3)
-  let selectQuery = `${baseColumns},stores!inner(id,name,slug,created_at),product_affiliate_settings!left(commission_rate,affiliate_enabled)`;
+  let selectQuery = `${baseColumns},stores!inner(id,name,slug,created_at,store_appearance(logo_url)),product_affiliate_settings!left(commission_rate,affiliate_enabled)`;
 
   // Ajouter les jointures selon le type de produit et les filtres
   if (filters.productType === 'digital' && filters.digitalSubType) {
