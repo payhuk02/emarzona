@@ -94,8 +94,16 @@ export async function dismissSponsorAfterPublishIfVisible(page: Page): Promise<v
     .catch(() => false);
   if (!appeared) return;
 
-  await page.getByRole('button', { name: /^Plus tard$/i }).click();
+  const later = page.getByRole('button', { name: /^Plus tard$/i });
+  await expect(later).toBeVisible({ timeout: 5_000 });
+  await later.click();
   await dialog.waitFor({ state: 'hidden', timeout: 15_000 }).catch(() => undefined);
+
+  // Escape if still visible (focus trap / double dialog)
+  if (await dialog.isVisible().catch(() => false)) {
+    await page.keyboard.press('Escape');
+    await dialog.waitFor({ state: 'hidden', timeout: 10_000 }).catch(() => undefined);
+  }
 }
 
 /** Ouvre un SelectField (combobox) par son label et choisit une option. */

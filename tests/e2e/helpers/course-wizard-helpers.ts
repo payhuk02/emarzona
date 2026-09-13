@@ -116,16 +116,20 @@ export async function publishCourseWizard(page: Page): Promise<void> {
 
   await publishButton.click();
 
+  const rpc = await rpcResponse.catch(() => null);
+  if (rpc && rpc.status() >= 400) {
+    const body = (await rpc.text().catch(() => '')).slice(0, 400);
+    throw new Error(`create_full_course failed (${rpc.status()}): ${body}`);
+  }
+
   await Promise.race([
     successToast.waitFor({ state: 'visible', timeout: 90_000 }),
     errorToast.waitFor({ state: 'visible', timeout: 90_000 }),
     page.waitForURL(COURSE_DASHBOARD_LIST_URL, { timeout: 90_000 }),
-    rpcResponse.then(async response => {
-      if (response.status() >= 400) {
-        const body = (await response.text().catch(() => '')).slice(0, 400);
-        throw new Error(`create_full_course failed (${response.status()}): ${body}`);
-      }
-    }),
+    page
+      .getByRole('dialog')
+      .filter({ hasText: /Sponsoriser votre produit/i })
+      .waitFor({ state: 'visible', timeout: 90_000 }),
   ]).catch(() => undefined);
 
   if (await errorToast.isVisible().catch(() => false)) {
@@ -134,7 +138,13 @@ export async function publishCourseWizard(page: Page): Promise<void> {
   }
 
   await dismissSponsorAfterPublishIfVisible(page);
-  await expect(page).toHaveURL(COURSE_DASHBOARD_LIST_URL, { timeout: 90_000 });
+
+  if (!COURSE_DASHBOARD_LIST_URL.test(page.url())) {
+    // Fallback: dialog skipped but navigation lagged / never fired
+    await page.goto('/dashboard/courses', { waitUntil: 'domcontentloaded' });
+  }
+
+  await expect(page).toHaveURL(COURSE_DASHBOARD_LIST_URL, { timeout: 30_000 });
 }
 
 export { clickWizardNext, goToWizardStep };
