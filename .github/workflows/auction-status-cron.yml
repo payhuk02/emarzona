@@ -1,9 +1,8 @@
-# Secours si pg_cron n'est pas configuré : clôture enchères + emails gagnants
+# Backup only — pg_cron `process-auction-statuses` runs */5.
+# Schedule disabled to stop Disk IO Budget burn from duplicate auction processors.
 name: Auction status cron
 
 on:
-  schedule:
-    - cron: '*/5 * * * *'
   workflow_dispatch:
 
 jobs:

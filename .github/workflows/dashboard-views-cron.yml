@@ -1,9 +1,8 @@
-# Secours si pg_cron indisponible — refresh vues matérialisées dashboard (horaire)
+# Backup only — pg_cron `refresh-dashboard-materialized-views` runs hourly.
+# Schedule disabled to stop Disk IO Budget burn from duplicate refreshes.
 name: Dashboard views refresh cron
 
 on:
-  schedule:
-    - cron: '15 * * * *'
   workflow_dispatch:
 
 jobs:

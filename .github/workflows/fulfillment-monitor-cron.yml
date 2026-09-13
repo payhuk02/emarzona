@@ -1,9 +1,8 @@
-# Secours si pg_cron indisponible — monitoring fulfillment post-paiement (SLA 5 min)
+# Backup only — pg_cron `order-fulfillment-monitor` runs */5.
+# Schedule disabled to stop Disk IO Budget burn from duplicate monitors.
 name: Fulfillment monitor cron
 
 on:
-  schedule:
-    - cron: '*/5 * * * *'
   workflow_dispatch:
 
 jobs:
