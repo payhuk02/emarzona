@@ -94,18 +94,20 @@ async function createCustomer(
   storeId: string,
   buyer: SeededUser
 ): Promise<string> {
-  const { data, error } = await admin
-    .from('customers')
-    .insert({
-      id: buyer.id,
-      store_id: storeId,
-      email: buyer.email,
-      name: 'E2E Buyer',
-      full_name: 'E2E Buyer',
-      metadata: { e2e: true, user_id: buyer.id },
-    })
-    .select('id')
-    .single();
+  const { data, error } = await retryOnTransientPostgrest(() =>
+    admin
+      .from('customers')
+      .insert({
+        id: buyer.id,
+        store_id: storeId,
+        email: buyer.email,
+        name: 'E2E Buyer',
+        full_name: 'E2E Buyer',
+        metadata: { e2e: true, user_id: buyer.id },
+      })
+      .select('id')
+      .single()
+  );
 
   if (error || !data) throw error ?? new Error('customer insert failed');
   return data.id;

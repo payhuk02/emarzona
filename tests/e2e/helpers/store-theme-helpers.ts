@@ -494,17 +494,26 @@ export async function submitStoreExpressCreate(page: Page): Promise<void> {
     timeout: 90_000,
   });
 
-  const createResponsePromise = page.waitForResponse(
-    response =>
-      response.url().includes('/rest/v1/stores') && response.request().method() === 'POST',
-    { timeout: 90_000 }
-  );
-
   const createButton = page.getByTestId('store-express-create-submit');
   await expect(createButton).toBeEnabled({ timeout: 30_000 });
-  await createButton.click();
 
-  const response = await createResponsePromise.catch(() => null);
+  // Shared E2E / UI flake: first click sometimes does not fire POST — retry once.
+  let response: Awaited<ReturnType<Page['waitForResponse']>> | null = null;
+  for (let attempt = 1; attempt <= 2; attempt += 1) {
+    const createResponsePromise = page.waitForResponse(
+      res => res.url().includes('/rest/v1/stores') && res.request().method() === 'POST',
+      { timeout: 45_000 }
+    );
+    await createButton.click();
+    response = await createResponsePromise.catch(() => null);
+    if (response) break;
+    if (attempt < 2) {
+      await page.waitForTimeout(750);
+      await acceptTermsDialogIfVisible(page);
+      await expect(createButton).toBeEnabled({ timeout: 10_000 });
+    }
+  }
+
   if (!response) {
     throw new Error(`Express store create POST never fired — url=${page.url()}`);
   }

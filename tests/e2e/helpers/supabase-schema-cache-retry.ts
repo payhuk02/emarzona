@@ -5,8 +5,11 @@ const TRANSIENT_POSTGREST_CODES = new Set(['PGRST000', 'PGRST001', 'PGRST002']);
 export function isTransientPostgrestError(error: PostgrestError | null): boolean {
   if (!error) return false;
   if (TRANSIENT_POSTGREST_CODES.has(error.code)) return true;
-  if (error.code === '57014') return true;
-  return /statement timeout|canceling statement/i.test(error.message || '');
+  // Aborted transaction / connection issues on shared E2E pooler
+  if (error.code === '57014' || error.code === '25P02' || error.code === '08006') return true;
+  return /statement timeout|canceling statement|aborted|connection refused|delayed connect|ECONNREFUSED|upstream connect/i.test(
+    error.message || ''
+  );
 }
 
 export async function retryOnTransientPostgrest<T>(

@@ -37,9 +37,16 @@ export function isTransientAuthAdminError(error: unknown): boolean {
   ) {
     return true;
   }
-  if (/fetch failed|network|ECONNRESET|ETIMEDOUT|socket hang up|429|502|503|504/i.test(message)) {
+  if (
+    /fetch failed|network|ECONNRESET|ETIMEDOUT|socket hang up|429|502|503|504|connection refused|ECONNREFUSED|upstream connect|delayed connect|aborted/i.test(
+      message
+    )
+  ) {
     return true;
   }
+
+  // Postgres aborted transaction / pooler blips bubbled through GoTrue
+  if (/25P02|08006|PGRST002/i.test(message)) return true;
 
   const status = errorStatus(error);
   if (status === 429 || status === 502 || status === 503 || status === 504) return true;
