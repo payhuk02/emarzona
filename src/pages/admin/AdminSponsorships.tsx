@@ -18,6 +18,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import {
   adminGrantSponsorship,
+  adminPauseSponsorship,
+  adminResumeSponsorship,
   cancelSponsorship,
 } from '@/lib/sponsorship/marketplace-sponsorship';
 
@@ -158,7 +160,40 @@ export default function AdminSponsorships() {
     mutationFn: (id: string) => cancelSponsorship(id),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['admin-sponsorships'] });
-      toast({ title: 'Campagne annulée' });
+      void qc.invalidateQueries({ queryKey: ['landing-sponsored-products'] });
+      toast({ title: 'Campagne annulée', description: 'Elle n’apparaît plus en sponsorisé.' });
+    },
+    onError: (e: Error) =>
+      toast({ title: 'Erreur', description: e.message, variant: 'destructive' }),
+  });
+
+  const pauseMut = useMutation({
+    mutationFn: (id: string) => adminPauseSponsorship(id),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['admin-sponsorships'] });
+      void qc.invalidateQueries({ queryKey: ['landing-sponsored-products'] });
+      toast({
+        title: 'Campagne désactivée',
+        description: 'Produit retiré de l’affichage sponsorisé (réversible).',
+      });
+    },
+    onError: (e: Error) =>
+      toast({ title: 'Erreur', description: e.message, variant: 'destructive' }),
+  });
+
+  const resumeMut = useMutation({
+    mutationFn: (id: string) => adminResumeSponsorship(id),
+    onSuccess: row => {
+      void qc.invalidateQueries({ queryKey: ['admin-sponsorships'] });
+      void qc.invalidateQueries({ queryKey: ['landing-sponsored-products'] });
+      if (row.status === 'expired') {
+        toast({
+          title: 'Fenêtre expirée',
+          description: 'La campagne a été marquée expirée (ends_at dépassé).',
+        });
+        return;
+      }
+      toast({ title: 'Campagne réactivée' });
     },
     onError: (e: Error) =>
       toast({ title: 'Erreur', description: e.message, variant: 'destructive' }),
@@ -172,6 +207,7 @@ export default function AdminSponsorships() {
     },
     onSuccess: count => {
       void qc.invalidateQueries({ queryKey: ['admin-sponsorships'] });
+      void qc.invalidateQueries({ queryKey: ['landing-sponsored-products'] });
       toast({ title: 'Expiration exécutée', description: `${count} campagne(s) expirée(s).` });
     },
   });
@@ -179,7 +215,8 @@ export default function AdminSponsorships() {
   const stats = useMemo(() => {
     const active = campaigns.filter(c => c.status === 'active').length;
     const pending = campaigns.filter(c => c.status === 'pending_payment').length;
-    return { active, pending, total: campaigns.length };
+    const paused = campaigns.filter(c => c.status === 'paused').length;
+    return { active, pending, paused, total: campaigns.length };
   }, [campaigns]);
 
   const selectedProduct =
@@ -213,11 +250,17 @@ export default function AdminSponsorships() {
         </Button>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>Actives (échantillon)</CardDescription>
             <CardTitle>{stats.active}</CardTitle>
+          </CardHeader>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardDescription>Désactivées</CardDescription>
+            <CardTitle>{stats.paused}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
@@ -404,6 +447,7 @@ export default function AdminSponsorships() {
           >
             <option value="all">Tous</option>
             <option value="active">active</option>
+            <option value="paused">paused</option>
             <option value="pending_payment">pending_payment</option>
             <option value="expired">expired</option>
             <option value="cancelled">cancelled</option>
@@ -433,16 +477,40 @@ export default function AdminSponsorships() {
                         : ''}
                     </p>
                   </div>
-                  {(c.status === 'active' || c.status === 'pending_payment') && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      disabled={cancelMut.isPending}
-                      onClick={() => cancelMut.mutate(c.id)}
-                    >
-                      Annuler
-                    </Button>
-                  )}
+                  <div className="flex flex-wrap gap-2">
+                    {c.status === 'active' && (
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        disabled={pauseMut.isPending}
+                        onClick={() => pauseMut.mutate(c.id)}
+                      >
+                        Désactiver
+                      </Button>
+                    )}
+                    {c.status === 'paused' && (
+                      <Button
+                        size="sm"
+                        variant="default"
+                        disabled={resumeMut.isPending}
+                        onClick={() => resumeMut.mutate(c.id)}
+                      >
+                        Réactiver
+                      </Button>
+                    )}
+                    {(c.status === 'active' ||
+                      c.status === 'pending_payment' ||
+                      c.status === 'paused') && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={cancelMut.isPending}
+                        onClick={() => cancelMut.mutate(c.id)}
+                      >
+                        Annuler
+                      </Button>
+                    )}
+                  </div>
                 </li>
               ))}
             </ul>

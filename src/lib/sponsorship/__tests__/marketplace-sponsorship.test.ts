@@ -3,6 +3,7 @@ import {
   hasPhysicalFeatureAccess,
   requiredPlanForFeature,
 } from '@/lib/billing/physical-plan-capabilities';
+import { isSponsorshipVisibleInFeed } from '@/lib/sponsorship/marketplace-sponsorship';
 
 describe('marketplace.sponsor capability', () => {
   it('requires physical_standard or higher', () => {
@@ -11,6 +12,18 @@ describe('marketplace.sponsor capability', () => {
     expect(hasPhysicalFeatureAccess('physical_basic', 'marketplace.sponsor')).toBe(false);
     expect(hasPhysicalFeatureAccess('physical_standard', 'marketplace.sponsor')).toBe(true);
     expect(hasPhysicalFeatureAccess('physical_premium', 'marketplace.sponsor')).toBe(true);
+  });
+});
+
+describe('sponsorship display visibility', () => {
+  it('shows only active campaigns in public feed', () => {
+    expect(isSponsorshipVisibleInFeed('active')).toBe(true);
+    expect(isSponsorshipVisibleInFeed('paused')).toBe(false);
+    expect(isSponsorshipVisibleInFeed('cancelled')).toBe(false);
+    expect(isSponsorshipVisibleInFeed('expired')).toBe(false);
+    expect(isSponsorshipVisibleInFeed('pending_payment')).toBe(false);
+    expect(isSponsorshipVisibleInFeed('rejected')).toBe(false);
+    expect(isSponsorshipVisibleInFeed(null)).toBe(false);
   });
 });
 

@@ -48,7 +48,7 @@ export async function fetchLandingSponsoredProducts(): Promise<LandingSponsoredP
         promotional_price: row.promotional_price != null ? Number(row.promotional_price) : null,
         currency: String(row.currency ?? 'XOF'),
         is_featured: Boolean(row.is_featured),
-        is_sponsored: Boolean(row.is_sponsored ?? true),
+        is_sponsored: Boolean(row.is_sponsored ?? Boolean(row.active_sponsorship_id)),
         active_sponsorship_id: (row.active_sponsorship_id as string | null) ?? null,
         store: row.stores
           ? {

@@ -3,7 +3,18 @@ import { initiateBillingCheckout } from '@/lib/billing/initiate-billing-payment'
 import { logger } from '@/lib/logger';
 
 export type SponsorshipSource = 'plan_entitlement' | 'paid_boost' | 'admin_grant';
-export type SponsorshipStatus = 'pending_payment' | 'active' | 'expired' | 'cancelled' | 'rejected';
+export type SponsorshipStatus =
+  | 'pending_payment'
+  | 'active'
+  | 'paused'
+  | 'expired'
+  | 'cancelled'
+  | 'rejected';
+
+/** Affichage public (landing / marketplace) : uniquement les campagnes actives. */
+export function isSponsorshipVisibleInFeed(status: string | null | undefined): boolean {
+  return status === 'active';
+}
 
 export type SponsorshipSku = {
   id: string;
@@ -111,6 +122,28 @@ export async function adminGrantSponsorship(
 
 export async function cancelSponsorship(sponsorshipId: string): Promise<MarketplaceSponsorship> {
   const { data, error } = await db.rpc('cancel_marketplace_sponsorship', {
+    p_sponsorship_id: sponsorshipId,
+  });
+  if (error) throw error;
+  return data as MarketplaceSponsorship;
+}
+
+/** Platform admin: désactiver (pause) une campagne active. */
+export async function adminPauseSponsorship(
+  sponsorshipId: string
+): Promise<MarketplaceSponsorship> {
+  const { data, error } = await db.rpc('admin_pause_marketplace_sponsorship', {
+    p_sponsorship_id: sponsorshipId,
+  });
+  if (error) throw error;
+  return data as MarketplaceSponsorship;
+}
+
+/** Platform admin: réactiver une campagne en pause (ou expire si hors fenêtre). */
+export async function adminResumeSponsorship(
+  sponsorshipId: string
+): Promise<MarketplaceSponsorship> {
+  const { data, error } = await db.rpc('admin_resume_marketplace_sponsorship', {
     p_sponsorship_id: sponsorshipId,
   });
   if (error) throw error;
