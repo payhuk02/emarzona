@@ -17,12 +17,13 @@ import {
 function StoreMark({ name, logoUrl }: { name: string; logoUrl: string | null }) {
   const [failed, setFailed] = useState(false);
   const initial = (name.trim().charAt(0) || 'B').toUpperCase();
+  const src = logoUrl?.trim() || '';
 
   useEffect(() => {
     setFailed(false);
-  }, [logoUrl]);
+  }, [src]);
 
-  if (!logoUrl || failed) {
+  if (!src || failed) {
     return (
       <span className="lp-sponsored-card__store-fallback" aria-hidden>
         {initial}
@@ -32,13 +33,12 @@ function StoreMark({ name, logoUrl }: { name: string; logoUrl: string | null }) 
 
   return (
     <img
-      src={logoUrl}
+      src={src}
       alt=""
-      width={28}
-      height={28}
-      loading="lazy"
+      width={40}
+      height={40}
+      loading="eager"
       decoding="async"
-      referrerPolicy="no-referrer"
       className="lp-sponsored-card__store-logo"
       onError={() => setFailed(true)}
     />
@@ -70,11 +70,13 @@ function SponsoredProductCard({
   ctaLabel,
   sponsoredLabel,
   featuredLabel,
+  imagePriority = false,
 }: {
   product: LandingSponsoredProduct;
   ctaLabel: string;
   sponsoredLabel: string;
   featuredLabel: string;
+  imagePriority?: boolean;
 }) {
   const href = landingSponsoredProductHref(product);
 
@@ -115,9 +117,9 @@ function SponsoredProductCard({
           <img
             src={product.image_url}
             alt=""
-            loading="eager"
+            loading={imagePriority ? 'eager' : 'lazy'}
             decoding="async"
-            fetchPriority="low"
+            fetchPriority={imagePriority ? 'high' : 'low'}
             className="lp-sponsored-card__image"
           />
         ) : (
@@ -148,18 +150,20 @@ function SponsoredProductCard({
         </h3>
 
         <div className="lp-sponsored-card__footer">
-          <div className="lp-sponsored-card__price">
-            <span className="lp-sponsored-card__price-now">
-              {formatCurrencyCode(price, product.currency || 'XOF')}
+          <div className="lp-sponsored-card__footer-start">
+            <div className="lp-sponsored-card__price">
+              <span className="lp-sponsored-card__price-now">
+                {formatCurrencyCode(price, product.currency || 'XOF')}
+              </span>
+            </div>
+            <span className="lp-sponsored-card__badge lp-sponsored-card__badge--featured">
+              <Star className="h-3 w-3" aria-hidden />
+              {featuredLabel}
             </span>
           </div>
-          <span className="lp-sponsored-card__badge lp-sponsored-card__badge--featured">
-            <Star className="h-3 w-3" aria-hidden />
-            {featuredLabel}
-          </span>
           <ProductLink href={href} className="lp-sponsored-card__cta" onClick={handleCtaClick}>
             {ctaLabel}
-            <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+            <ArrowRight className="h-3 w-3" aria-hidden />
           </ProductLink>
         </div>
       </div>
@@ -167,15 +171,66 @@ function SponsoredProductCard({
   );
 }
 
+function SponsoredSectionHeader({
+  eyebrow,
+  title,
+  titleHighlight,
+  subtitle,
+}: {
+  eyebrow: string;
+  title: string;
+  titleHighlight: string;
+  subtitle: string;
+}) {
+  return (
+    <div className="lp-reveal-stagger__item mx-auto max-w-3xl text-center">
+      <p className="lp-eyebrow-light mx-auto mb-5">{eyebrow}</p>
+      <h2
+        id="lp-sponsored-heading"
+        className="lp-serif text-3xl text-[var(--lp-text)] sm:text-4xl lg:text-5xl"
+      >
+        {title} <span className="lp-gold-text italic">{titleHighlight}</span>
+      </h2>
+      <p className="mx-auto mt-4 max-w-2xl text-[15px] leading-relaxed text-[var(--lp-text-muted)] sm:text-base">
+        {subtitle}
+      </p>
+    </div>
+  );
+}
+
+function SponsoredGridSkeleton({ count }: { count: number }) {
+  return (
+    <div className="lp-sponsored-grid lp-sponsored-grid--skeleton mt-10 sm:mt-14" aria-hidden>
+      {Array.from({ length: count }, (_, i) => (
+        <div key={i} className="lp-sponsored-card lp-sponsored-card--skeleton">
+          <div className="lp-sponsored-card__media lp-sponsored-card__media--skeleton" />
+          <div className="lp-sponsored-card__body space-y-3">
+            <div className="h-4 w-1/2 animate-pulse rounded bg-black/[0.06]" />
+            <div className="h-5 w-4/5 animate-pulse rounded bg-black/[0.07]" />
+            <div className="h-8 w-full animate-pulse rounded-lg bg-black/[0.05]" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function SponsoredProductsSection() {
   const { t } = useLandingPremiumT();
   const { ref, className } = usePremiumReveal(0.06);
-  const { data: pool = [], isLoading, isFetching, isError } = useLandingSponsoredProducts();
+  const {
+    data: pool = [],
+    isLoading,
+    isFetching,
+    isError,
+    isFetched,
+  } = useLandingSponsoredProducts();
   const [offset, setOffset] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
 
   const shouldRotate = pool.length > LANDING_SPONSORED_SLOT_COUNT;
-  const showSkeleton = isLoading || (isFetching && pool.length === 0);
+  const waitingForFirstData = !isFetched && pool.length === 0;
+  const showGridSkeleton = isLoading || (isFetching && pool.length === 0) || waitingForFirstData;
 
   useEffect(() => {
     if (!shouldRotate) {
@@ -201,41 +256,10 @@ export function SponsoredProductsSection() {
     [pool, offset]
   );
 
-  if (showSkeleton) {
-    return (
-      <section
-        id="produits-sponsorises"
-        className="lp-section-pad lp-section-muted lp-sponsored-section border-y border-[var(--lp-border-light)] aria-busy-skeleton"
-        aria-busy="true"
-        data-busy-quiet
-      >
-        <span className="sr-only" role="status">
-          Chargement des produits sponsorisés…
-        </span>
-        <div className="mx-auto max-w-7xl px-4 sm:px-5 lg:px-8">
-          <div className="mx-auto max-w-3xl space-y-4 text-center">
-            <div className="mx-auto h-3 w-40 animate-pulse rounded-full bg-black/[0.06]" />
-            <div className="mx-auto h-10 max-w-lg animate-pulse rounded-xl bg-black/[0.06]" />
-            <div className="mx-auto h-4 max-w-md animate-pulse rounded-lg bg-black/[0.05]" />
-          </div>
-          <div className="lp-sponsored-grid mt-10 sm:mt-14">
-            {Array.from({ length: 2 }, (_, i) => (
-              <div key={i} className="lp-sponsored-card lp-sponsored-card--skeleton" aria-hidden>
-                <div className="lp-sponsored-card__media aspect-[4/3] animate-pulse bg-black/[0.04]" />
-                <div className="lp-sponsored-card__body space-y-3">
-                  <div className="h-4 w-1/2 animate-pulse rounded bg-black/[0.06]" />
-                  <div className="h-5 w-4/5 animate-pulse rounded bg-black/[0.07]" />
-                  <div className="h-8 w-full animate-pulse rounded-lg bg-black/[0.05]" />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-    );
-  }
+  const skeletonCount = LANDING_SPONSORED_SLOT_COUNT;
 
-  if (isError || visible.length === 0) {
+  // Erreur / vide après fetch : pas de section fantôme
+  if (isError || (isFetched && !showGridSkeleton && visible.length === 0)) {
     return null;
   }
 
@@ -244,41 +268,49 @@ export function SponsoredProductsSection() {
       id="produits-sponsorises"
       className="lp-section-pad lp-section-muted lp-sponsored-section border-y border-[var(--lp-border-light)]"
       aria-labelledby="lp-sponsored-heading"
+      aria-busy={showGridSkeleton || undefined}
+      data-busy-quiet={showGridSkeleton ? '' : undefined}
     >
+      {showGridSkeleton ? (
+        <span className="sr-only" role="status">
+          Chargement des produits sponsorisés…
+        </span>
+      ) : null}
+
       <div
         ref={ref}
-        className={`lp-reveal-stagger mx-auto max-w-7xl px-4 sm:px-5 lg:px-8 ${className}`}
+        className={`lp-reveal-stagger lp-sponsored-shell mx-auto max-w-7xl ${className}`}
       >
-        <div className="lp-reveal-stagger__item mx-auto max-w-3xl text-center">
-          <p className="lp-eyebrow-light mx-auto mb-5">{t('sponsored.eyebrow')}</p>
-          <h2
-            id="lp-sponsored-heading"
-            className="lp-serif text-3xl text-[var(--lp-text)] sm:text-4xl lg:text-5xl"
+        <div className="lp-sponsored-shell__pad">
+          <SponsoredSectionHeader
+            eyebrow={t('sponsored.eyebrow')}
+            title={t('sponsored.title')}
+            titleHighlight={t('sponsored.titleHighlight')}
+            subtitle={t('sponsored.subtitle')}
+          />
+        </div>
+
+        {showGridSkeleton ? (
+          <SponsoredGridSkeleton count={skeletonCount} />
+        ) : (
+          <div
+            className={`lp-sponsored-grid mt-10 sm:mt-14${isAnimating ? ' lp-sponsored-grid--swap' : ''}`}
+            aria-live="polite"
           >
-            {t('sponsored.title')}{' '}
-            <span className="lp-gold-text italic">{t('sponsored.titleHighlight')}</span>
-          </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-[15px] leading-relaxed text-[var(--lp-text-muted)] sm:text-base">
-            {t('sponsored.subtitle')}
-          </p>
-        </div>
+            {visible.map((product, index) => (
+              <SponsoredProductCard
+                key={product.id}
+                product={product}
+                ctaLabel={t('sponsored.cta')}
+                sponsoredLabel={t('sponsored.badgeSponsored')}
+                featuredLabel={t('sponsored.badgeFeatured')}
+                imagePriority={index < 3}
+              />
+            ))}
+          </div>
+        )}
 
-        <div
-          className={`lp-sponsored-grid mt-10 sm:mt-14${isAnimating ? ' lp-sponsored-grid--swap' : ''}`}
-          aria-live="polite"
-        >
-          {visible.map(product => (
-            <SponsoredProductCard
-              key={product.id}
-              product={product}
-              ctaLabel={t('sponsored.cta')}
-              sponsoredLabel={t('sponsored.badgeSponsored')}
-              featuredLabel={t('sponsored.badgeFeatured')}
-            />
-          ))}
-        </div>
-
-        <div className="lp-reveal-stagger__item mt-10 flex justify-center sm:mt-12">
+        <div className="lp-reveal-stagger__item lp-sponsored-shell__pad mt-10 flex justify-center sm:mt-12">
           <Link
             to="/marketplace"
             className="lp-sponsored-marketplace-btn inline-flex items-center gap-2 rounded-full px-7 py-3.5 text-sm font-semibold transition-transform active:scale-[0.98]"

@@ -67,3 +67,18 @@ export async function fetchLandingSponsoredProducts(): Promise<LandingSponsoredP
     throw err;
   }
 }
+
+/** Précharge les N premières images produit (decode navigateur). */
+export function preloadLandingSponsoredImages(
+  products: readonly LandingSponsoredProduct[],
+  limit = 9
+): void {
+  if (typeof window === 'undefined') return;
+  for (const product of products.slice(0, limit)) {
+    const url = product.image_url?.trim();
+    if (!url) continue;
+    const img = new Image();
+    img.decoding = 'async';
+    img.src = url;
+  }
+}

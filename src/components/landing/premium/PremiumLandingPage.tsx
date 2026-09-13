@@ -5,6 +5,7 @@ import { PremiumPlatformHero } from './PremiumPlatformHero';
 import { LandingDeferredSection } from './LandingDeferredSection';
 import { ErrorBoundary } from '@/components/error/ErrorBoundary';
 import { usePrefetchLandingSponsoredProducts } from '@/hooks/useLandingSponsoredProducts';
+import { SponsoredProductsSectionFallback } from './SponsoredProductsSectionFallback';
 
 /** Second hero + footer : hors premier viewport — code-split + mount différé */
 const PremiumHero = lazy(() => import('./PremiumHero').then(m => ({ default: m.PremiumHero })));
@@ -129,7 +130,7 @@ export function PremiumLandingPage() {
 
         <LandingDeferredSection minHeight="36rem" rootMargin="480px 0px">
           <ErrorBoundary level="section">
-            <Suspense fallback={<DeferredFallback minHeight="36rem" />}>
+            <Suspense fallback={<SponsoredProductsSectionFallback />}>
               <SponsoredProductsSection />
             </Suspense>
           </ErrorBoundary>
