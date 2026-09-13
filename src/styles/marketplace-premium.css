@@ -42,20 +42,23 @@
 }
 
 .marketplace-premium .mp-hero__title {
-  font-family: var(--lp-sans);
+  font-family: var(--lp-serif);
   font-weight: 700;
-  letter-spacing: -0.025em;
+  letter-spacing: -0.02em;
   color: #fff;
   line-height: 1.1;
 }
 
 .marketplace-premium .mp-hero__subtitle {
+  font-family: var(--lp-serif);
+  font-weight: 500;
   color: var(--lp-text-dim);
 }
 
 .marketplace-premium .mp-hero__tagline {
+  font-family: var(--lp-serif);
   color: var(--lp-orange, #f97316);
-  font-weight: 600;
+  font-weight: 500;
 }
 
 /* Fil d’Ariane — padding sous PremiumNav fixe uniquement en mode invité */

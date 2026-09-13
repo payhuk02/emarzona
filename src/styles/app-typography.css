@@ -175,7 +175,7 @@
 
 /* Classes sémantiques */
 .landing-premium.app-premium .app-text-display {
-  font-family: var(--lp-sans);
+  font-family: var(--lp-serif);
   font-size: var(--app-font-display);
   font-weight: 700;
   line-height: var(--app-line-tight);
@@ -192,6 +192,7 @@
 }
 
 .landing-premium.app-premium .app-text-section {
+  font-family: var(--lp-serif);
   font-size: var(--app-font-h2);
   font-weight: 600;
   line-height: var(--app-line-tight);

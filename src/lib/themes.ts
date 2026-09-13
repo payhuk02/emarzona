@@ -68,7 +68,7 @@ export interface ThemeConfig {
  * - Fond clair (#FFFFFF)
  * - Texte noir (#0A2540)
  * - Bleu professionnel (#635BFF)
- * - Police: Inter
+ * - Police: Montserrat
  */
 export const professionalTheme: ThemeConfig = {
   name: 'professional',
@@ -106,7 +106,7 @@ export const professionalTheme: ThemeConfig = {
     ring: '217 91% 60%', // Bleu moderne
   },
   typography: {
-    fontFamily: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+    fontFamily: ['Montserrat Variable', 'Montserrat', 'system-ui', '-apple-system', 'sans-serif'],
     fontSize: {
       base: '1rem', // 16px
     },
@@ -139,7 +139,7 @@ export const professionalTheme: ThemeConfig = {
  * - Fond clair (#FFFFFF)
  * - Texte gris foncé (#1D1D1F)
  * - Accents colorés subtils
- * - Police: Inter
+ * - Police: Montserrat
  */
 export const minimalTheme: ThemeConfig = {
   name: 'minimal',
@@ -177,7 +177,7 @@ export const minimalTheme: ThemeConfig = {
     ring: '217 91% 60%', // Bleu moderne
   },
   typography: {
-    fontFamily: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+    fontFamily: ['Montserrat Variable', 'Montserrat', 'system-ui', '-apple-system', 'sans-serif'],
     fontSize: {
       base: '1rem', // 16px
     },
@@ -210,7 +210,7 @@ export const minimalTheme: ThemeConfig = {
  * - Fond sombre élégant (#000000)
  * - Texte gris clair (#FAFAFA)
  * - Accents blancs
- * - Police: Inter
+ * - Police: Montserrat
  */
 export const darkTheme: ThemeConfig = {
   name: 'dark',
@@ -248,7 +248,7 @@ export const darkTheme: ThemeConfig = {
     ring: '0 0% 100%', // Blanc pur
   },
   typography: {
-    fontFamily: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+    fontFamily: ['Montserrat Variable', 'Montserrat', 'system-ui', '-apple-system', 'sans-serif'],
     fontSize: {
       base: '1rem', // 16px
     },
@@ -429,7 +429,7 @@ export const defaultTheme: ThemeConfig = {
     ring: '25 95% 53%', // Orange
   },
   typography: {
-    fontFamily: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+    fontFamily: ['Montserrat Variable', 'Montserrat', 'system-ui', '-apple-system', 'sans-serif'],
     fontSize: {
       base: '1rem', // 16px
     },

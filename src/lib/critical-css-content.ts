@@ -20,7 +20,7 @@ html {
 }
 
 body {
-  font-family: 'Inter Variable',Inter,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  font-family: 'Montserrat Variable',Montserrat,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
   font-size: 1rem;
   line-height: 1.625;
   margin: 0;

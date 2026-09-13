@@ -1,0 +1,121 @@
+/**
+ * Rôles typographiques marque Emarzona
+ * Cormorant Garamond → hero / sections / slogan
+ * Montserrat → nav / boutons / produits / prix / descriptions / labels
+ */
+
+.emz-font-hero {
+  font-family: var(--emz-font-serif);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.emz-font-section {
+  font-family: var(--emz-font-serif);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+.emz-font-slogan {
+  font-family: var(--emz-font-serif);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.emz-font-nav {
+  font-family: var(--emz-font-sans);
+  font-weight: 500;
+}
+
+.emz-font-btn {
+  font-family: var(--emz-font-sans);
+  font-weight: 600;
+}
+
+.emz-font-product {
+  font-family: var(--emz-font-sans);
+  font-weight: 600;
+}
+
+.emz-font-price {
+  font-family: var(--emz-font-sans);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.emz-font-desc {
+  font-family: var(--emz-font-sans);
+  font-weight: 400;
+}
+
+.emz-font-label {
+  font-family: var(--emz-font-sans);
+  font-weight: 600;
+}
+
+/* Mapping landing / marketplace → rôles marque */
+.landing-premium .lp-serif,
+.landing-premium .lp-platform-hero__title,
+.landing-premium .mp-hero__title {
+  font-family: var(--emz-font-serif);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.landing-premium section h2.lp-serif,
+.landing-premium .mp-controls__title,
+.landing-premium .mp-quiz-banner h2,
+.landing-premium .mp-empty-state h3 {
+  font-family: var(--emz-font-serif);
+  font-weight: 600;
+}
+
+.landing-premium .lp-platform-hero__subtitle,
+.landing-premium .mp-hero__subtitle,
+.landing-premium .mp-hero__tagline {
+  font-family: var(--emz-font-serif);
+  font-weight: 500;
+}
+
+.landing-premium .lp-nav-link,
+.landing-premium .topnav-main-link {
+  font-family: var(--emz-font-sans);
+  font-weight: 500;
+}
+
+.landing-premium .lp-btn-primary,
+.landing-premium .lp-btn-gold,
+.landing-premium .lp-btn-outline,
+.landing-premium .lp-btn-outline-dark,
+.landing-premium .lp-nav-cta,
+.landing-premium .lp-sponsored-card__cta {
+  font-family: var(--emz-font-sans);
+  font-weight: 600;
+}
+
+.landing-premium .lp-sponsored-card__title,
+.landing-premium .mp-product-title,
+.marketplace-premium .mp-product-title,
+.mp-product-cards-band .mp-product-title {
+  font-family: var(--emz-font-sans);
+  font-weight: 600;
+}
+
+.landing-premium .lp-sponsored-card__price-now,
+.landing-premium .mp-product-card__price,
+.marketplace-premium .mp-product-card__price,
+.mp-product-cards-band .mp-product-card__price {
+  font-family: var(--emz-font-sans);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.landing-premium .lp-eyebrow,
+.landing-premium .lp-eyebrow-light,
+.landing-premium .lp-sponsored-card__badge,
+.landing-premium .lp-sponsored-card__badge-boost,
+.landing-premium .mp-badge-filter,
+.landing-premium .mp-badge-count {
+  font-family: var(--emz-font-sans);
+  font-weight: 600;
+}

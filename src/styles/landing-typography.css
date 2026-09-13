@@ -1,5 +1,7 @@
 /**
  * Typographie landing + marketplace — alignée sur typography-tokens.css
+ * Display / sections / slogan : Cormorant Garamond
+ * UI : Montserrat
  */
 
 .landing-premium:not(.app-premium) {
@@ -15,6 +17,7 @@
   --lp-line-normal: var(--emz-line-normal);
   --lp-line-relaxed: var(--emz-line-relaxed);
 
+  font-family: var(--lp-sans);
   font-size: var(--lp-font-body);
   line-height: var(--lp-line-normal);
 }
@@ -28,9 +31,9 @@
 .landing-premium:not(.app-premium) .lp-serif,
 .landing-premium:not(.app-premium) .lp-platform-hero__title,
 .landing-premium:not(.app-premium) .mp-hero__title {
-  font-family: var(--lp-sans) !important;
+  font-family: var(--lp-serif) !important;
   font-weight: 700 !important;
-  letter-spacing: -0.025em;
+  letter-spacing: -0.02em;
   line-height: var(--lp-line-tight);
 }
 
@@ -44,14 +47,23 @@
 }
 
 .landing-premium:not(.app-premium) section h2.lp-serif {
+  font-family: var(--lp-serif) !important;
   font-size: var(--lp-font-h2) !important;
+  font-weight: 600 !important;
+}
+
+.landing-premium:not(.app-premium) .lp-platform-hero__subtitle,
+.landing-premium:not(.app-premium) .mp-hero__subtitle,
+.landing-premium:not(.app-premium) .mp-hero__tagline {
+  font-family: var(--lp-serif) !important;
+  font-weight: 500 !important;
 }
 
 .landing-premium:not(.app-premium) p,
 .landing-premium:not(.app-premium) li,
 .landing-premium:not(.app-premium) label,
-.landing-premium:not(.app-premium) .lp-footer-body,
-.landing-premium:not(.app-premium) .mp-hero__subtitle {
+.landing-premium:not(.app-premium) .lp-footer-body {
+  font-family: var(--lp-sans);
   font-weight: 400;
   line-height: var(--lp-line-normal);
 }
@@ -87,9 +99,9 @@
 .landing-premium.marketplace-premium .mp-controls__title,
 .landing-premium.marketplace-premium .mp-quiz-banner h2,
 .landing-premium.marketplace-premium .mp-empty-state h3 {
-  font-family: var(--lp-sans) !important;
+  font-family: var(--lp-serif) !important;
   font-weight: 600 !important;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.015em;
 }
 
 .landing-premium.marketplace-premium .mp-controls__title {

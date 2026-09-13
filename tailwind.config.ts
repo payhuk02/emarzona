@@ -25,7 +25,16 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Inter Variable', 'Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        sans: [
+          'Montserrat Variable',
+          'Montserrat',
+          'system-ui',
+          '-apple-system',
+          'BlinkMacSystemFont',
+          'Segoe UI',
+          'sans-serif',
+        ],
+        serif: ['Cormorant Garamond', 'Georgia', 'Times New Roman', 'serif'],
         mono: ['JetBrains Mono', 'Fira Code', 'Consolas', 'monospace'],
       },
       fontSize: {

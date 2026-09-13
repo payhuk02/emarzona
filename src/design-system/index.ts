@@ -119,8 +119,8 @@ export const colors = {
 
 export const typography = {
   fontFamily: {
-    sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
-    serif: ['Georgia', 'serif'],
+    sans: ['Montserrat Variable', 'Montserrat', 'system-ui', '-apple-system', 'sans-serif'],
+    serif: ['Cormorant Garamond', 'Georgia', 'Times New Roman', 'serif'],
     mono: ['JetBrains Mono', 'Fira Code', 'Consolas', 'monospace'],
   },
 

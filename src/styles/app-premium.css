@@ -33,9 +33,9 @@
   --sidebar-border: 240 6% 90%;
   --sidebar-ring: 217 91% 58%;
 
-  /* App : Inter partout (pas de serif hérité du landing) */
-  --lp-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --lp-serif: var(--lp-sans);
+  /* App : Montserrat UI ; Cormorant réservé aux display marketing */
+  --lp-sans: var(--emz-font-sans);
+  --lp-serif: var(--emz-font-serif);
   font-family: var(--lp-sans);
 }
 

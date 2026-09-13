@@ -1,7 +1,14 @@
 /* All @import statements must come first */
-/* Inter self-hosted (variable) — plus de Google Fonts render-blocking */
-@import '@fontsource-variable/inter/wght.css';
+/* Montserrat + Cormorant Garamond self-hosted — plus de Google Fonts render-blocking */
+@import '@fontsource-variable/montserrat/wght.css';
+@import '@fontsource/cormorant-garamond/latin-500.css';
+@import '@fontsource/cormorant-garamond/latin-600.css';
+@import '@fontsource/cormorant-garamond/latin-700.css';
+@import '@fontsource/cormorant-garamond/latin-ext-500.css';
+@import '@fontsource/cormorant-garamond/latin-ext-600.css';
+@import '@fontsource/cormorant-garamond/latin-ext-700.css';
 @import './styles/typography-tokens.css';
+@import './styles/brand-typography.css';
 @import './styles/animations.css';
 @import './styles/mobile-optimizations.css';
 @import './styles/mobile-first-system.css';
@@ -10,7 +17,7 @@
 @import './styles/app-typography.css';
 
 /**
- * Font optimization: font-display: swap (via @fontsource-variable/inter)
+ * Font optimization: font-display: swap (via @fontsource)
  * Améliore le FCP (First Contentful Paint)
  * Évite le FOIT (Flash of Invisible Text)
  *
@@ -141,7 +148,7 @@ All colors MUST be HSL.
     @apply border-border;
   }
 
-  /* Titres : même famille que le corps (Inter) — cohérence SaaS professionnelle */
+  /* Titres : héritent du corps (Montserrat) — display Cormorant via .lp-serif / .emz-font-* */
   h1,
   h2,
   h3,
@@ -168,12 +175,7 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    font-family:
-      'Inter Variable',
-      Inter,
-      system-ui,
-      -apple-system,
-      sans-serif;
+    font-family: var(--emz-font-sans);
     font-size: var(--emz-text-base);
     line-height: var(--emz-line-relaxed);
     letter-spacing: 0;
