@@ -662,6 +662,17 @@ serve(async req => {
         console.error('[MoneyFusion webhook] marketplace_sponsorship missing sponsorship_id', {
           transactionId,
         });
+        return new Response(
+          JSON.stringify({
+            error: 'Sponsorship activation failed',
+            message: 'marketplace_sponsorship missing sponsorship_id',
+            transactionId,
+          }),
+          {
+            status: 500,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          }
+        );
       } else {
         try {
           const result = await activateMarketplaceSponsorshipFromWebhook(supabase, {

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Sparkles, Star } from 'lucide-react';
 import { useLandingPremiumT } from '@/hooks/useLandingPremiumT';
@@ -80,13 +80,21 @@ function SponsoredProductCard({
 }) {
   const href = landingSponsoredProductHref(product);
 
+  const impressionSentRef = useRef(false);
+
   const price =
     product.promotional_price != null && product.promotional_price < product.price
       ? product.promotional_price
       : product.price;
 
   useEffect(() => {
+    impressionSentRef.current = false;
+  }, [product.active_sponsorship_id]);
+
+  useEffect(() => {
     if (!product.is_sponsored || !product.active_sponsorship_id) return;
+    if (impressionSentRef.current) return;
+    impressionSentRef.current = true;
     void recordSponsorshipEvent(product.active_sponsorship_id, 'impression', {
       product_id: product.id,
       source: 'landing_sponsored_grid',

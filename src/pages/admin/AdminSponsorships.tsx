@@ -145,6 +145,7 @@ export default function AdminSponsorships() {
     },
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['admin-sponsorships'] });
+      void qc.invalidateQueries({ queryKey: ['landing-sponsored-products'] });
       toast({
         title: 'Produit sponsorisé',
         description: 'Campagne admin activée immédiatement (sans paiement).',

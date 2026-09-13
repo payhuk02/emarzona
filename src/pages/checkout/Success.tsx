@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 import { useAdvancedLoyalty } from '@/hooks/useAdvancedLoyalty';
 import { useRecommendationTracking } from '@/hooks/useRecommendationTracking';
+import { recordSponsorshipEvent } from '@/lib/sponsorship/marketplace-sponsorship';
 import type { Database } from '@/integrations/supabase/types';
 
 const CheckoutSuccess = () => {
@@ -73,6 +74,35 @@ const CheckoutSuccess = () => {
             error: trackingError,
             orderId: result.id,
           });
+        }
+
+        // Attribution Boost Emarzona (si campagne active sur le produit)
+        if (result.product_id) {
+          try {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const db = supabase as any;
+            const { data: liveBoost } = await db
+              .from('marketplace_sponsorships')
+              .select('id')
+              .eq('product_id', result.product_id)
+              .eq('status', 'active')
+              .gt('ends_at', new Date().toISOString())
+              .order('starts_at', { ascending: true })
+              .limit(1)
+              .maybeSingle();
+            if (liveBoost?.id) {
+              await recordSponsorshipEvent(String(liveBoost.id), 'purchase', {
+                product_id: result.product_id,
+                order_id: result.id,
+                source: 'checkout_success',
+              });
+            }
+          } catch (sponsorTrackErr) {
+            logger.debug('Sponsorship purchase attribution skipped', {
+              error: sponsorTrackErr,
+              productId: result.product_id,
+            });
+          }
         }
       }
 

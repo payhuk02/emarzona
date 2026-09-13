@@ -133,9 +133,12 @@ export function transformToUnifiedProduct(product: DatabaseProduct): UnifiedProd
     whatsapp_enabled: Boolean(product.whatsapp_enabled),
     is_featured: Boolean(product.is_featured),
     is_sponsored: Boolean(
-      product.is_sponsored ??
-      (product.sponsored_until != null &&
-        new Date(String(product.sponsored_until)).getTime() > Date.now())
+      product.is_sponsored === true
+        ? true
+        : product.is_sponsored === false
+          ? false
+          : product.sponsored_until != null &&
+            new Date(String(product.sponsored_until)).getTime() > Date.now()
     ),
     active_sponsorship_id: (product.active_sponsorship_id as string | null | undefined) ?? null,
   };

@@ -453,7 +453,8 @@ export class RecommendationEngine {
         .select('id, product_type, is_featured, sponsored_until')
         .eq('is_active', true)
         .eq('is_draft', false)
-        .eq('is_featured', true)
+        .not('sponsored_until', 'is', null)
+        .gt('sponsored_until', new Date().toISOString())
         .limit(40);
 
       if (options.productType) {

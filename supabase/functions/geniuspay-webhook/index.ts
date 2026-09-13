@@ -521,6 +521,9 @@ serve(async req => {
             console.error('marketplace_sponsorship missing sponsorship_id', {
               transaction_id: transaction.id,
             });
+            sponsorshipActivationError = new Error(
+              'marketplace_sponsorship missing sponsorship_id'
+            );
           } else {
             const result = await activateMarketplaceSponsorshipFromWebhook(supabase, {
               sponsorshipId: String(sponsorshipId),

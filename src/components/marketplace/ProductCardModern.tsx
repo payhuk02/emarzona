@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   ShoppingCart,
@@ -111,6 +111,7 @@ const ProductCardModernComponent = ({
   const [isZoomOpen, setIsZoomOpen] = useState(false);
   const [storeLogoFailed, setStoreLogoFailed] = useState(false);
   const [_userId, setUserId] = useState<string | null>(null);
+  const impressionSentRef = useRef(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const isDigital = product.product_type === 'digital';
@@ -135,7 +136,13 @@ const ProductCardModernComponent = ({
   }, []);
 
   useEffect(() => {
+    impressionSentRef.current = false;
+  }, [product.active_sponsorship_id]);
+
+  useEffect(() => {
     if (!product.is_sponsored || !product.active_sponsorship_id) return;
+    if (impressionSentRef.current) return;
+    impressionSentRef.current = true;
     void recordSponsorshipEvent(product.active_sponsorship_id, 'impression', {
       product_id: product.id,
     });
@@ -291,7 +298,7 @@ const ProductCardModernComponent = ({
     >
       {/* Image Container - Prend plus d'espace, contenu repoussé en bas */}
       <div className="relative overflow-hidden bg-muted/30 flex-grow min-h-[250px] sm:min-h-[300px]">
-        <Link to={productUrl} className="block w-full h-full">
+        <Link to={productUrl} className="block w-full h-full" onClick={trackSponsoredClick}>
           <ResponsiveProductImage
             src={product.image_url || '/placeholder.svg'}
             alt={product.name}
@@ -307,7 +314,7 @@ const ProductCardModernComponent = ({
         {isDigital ? (
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2">
             <Button size="sm" asChild>
-              <Link to={productUrl}>
+              <Link to={productUrl} onClick={trackSponsoredClick}>
                 <Play className="h-4 w-4 mr-2" />
                 Découvrir
               </Link>
@@ -324,7 +331,7 @@ const ProductCardModernComponent = ({
               </Button>
             )}
             <Button size="sm" variant="secondary" asChild>
-              <Link to={productUrl}>
+              <Link to={productUrl} onClick={trackSponsoredClick}>
                 <Eye className="h-4 w-4 mr-2" />
                 Voir
               </Link>

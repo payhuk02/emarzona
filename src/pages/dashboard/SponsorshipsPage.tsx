@@ -28,6 +28,7 @@ function statusBadge(status: string) {
   const map: Record<string, string> = {
     active: 'bg-emerald-500/15 text-emerald-700',
     pending_payment: 'bg-amber-500/15 text-amber-700',
+    paused: 'bg-slate-500/15 text-slate-700',
     expired: 'bg-muted text-muted-foreground',
     cancelled: 'bg-muted text-muted-foreground',
     rejected: 'bg-destructive/15 text-destructive',
@@ -52,6 +53,7 @@ export default function SponsorshipsPage() {
   const [searchParams] = useSearchParams();
   const queryClient = useQueryClient();
   const success = searchParams.get('success') === '1';
+  const cancelledPay = searchParams.get('cancel') === '1';
   const sponsorshipIdFromQuery = searchParams.get('sponsorship_id') ?? '';
   const productIdFromQuery = searchParams.get('productId') ?? '';
   const viewCampaigns = searchParams.get('view') === 'campaigns';
@@ -207,6 +209,18 @@ export default function SponsorshipsPage() {
         </Card>
       ) : null}
 
+      {cancelledPay && !success ? (
+        <Card className="border-muted bg-muted/30">
+          <CardContent className="flex items-start gap-3 py-4 text-sm text-muted-foreground">
+            <XCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
+            <p>
+              Paiement annulé. Aucune campagne n’a été activée. Vous pouvez relancer un boost quand
+              vous voulez.
+            </p>
+          </CardContent>
+        </Card>
+      ) : null}
+
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader>
@@ -215,7 +229,7 @@ export default function SponsorshipsPage() {
               Quota plan
             </CardTitle>
             <CardDescription>
-              Inclus dans Physical Professional+ : {activeEntitlementCount} / {quota} slots actifs.
+              Inclus dans Physical Standard+ : {activeEntitlementCount} / {quota} slots actifs.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">

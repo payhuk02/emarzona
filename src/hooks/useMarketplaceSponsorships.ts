@@ -55,6 +55,7 @@ export function useCreatePlanSponsorship() {
     mutationFn: (productId: string) => createPlanSponsorship(productId),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['marketplace-sponsorships', selectedStore?.id] });
+      void qc.invalidateQueries({ queryKey: ['marketplace-sponsor-quota', selectedStore?.id] });
       toast({ title: 'Produit sponsorisé', description: 'Quota plan utilisé avec succès.' });
     },
     onError: (error: Error) => {
@@ -113,6 +114,8 @@ export function useCancelSponsorship() {
     mutationFn: (sponsorshipId: string) => cancelSponsorship(sponsorshipId),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['marketplace-sponsorships', selectedStore?.id] });
+      void qc.invalidateQueries({ queryKey: ['marketplace-sponsor-quota', selectedStore?.id] });
+      void qc.invalidateQueries({ queryKey: ['landing-sponsored-products'] });
       toast({ title: 'Campagne annulée' });
     },
     onError: (error: Error) => {

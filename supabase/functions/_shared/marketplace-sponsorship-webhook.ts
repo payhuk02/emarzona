@@ -2,12 +2,15 @@
  * Active une campagne marketplace_sponsorship après paiement webhook réussi.
  * Vérifie montant (centimes) + store_id avant activation.
  * Idempotent : déjà active → no-op. Relançable après échec partiel (pending_payment).
+ * Recovery : cancelled unpaid paid_boost (cancel/abandon avant paiement) → réactivation.
  */
 
 type SponsorshipActivationRow = {
   id: string;
   store_id: string;
   status: string;
+  source: string | null;
+  payment_ref: string | null;
   amount_paid_cents: number | null;
   currency: string | null;
 };
@@ -36,7 +39,7 @@ export async function activateMarketplaceSponsorshipFromWebhook(
 ): Promise<SponsorshipWebhookActivationResult> {
   const { data: sponsorship, error: fetchError } = await supabase
     .from('marketplace_sponsorships')
-    .select('id, store_id, status, amount_paid_cents, currency')
+    .select('id, store_id, status, source, payment_ref, amount_paid_cents, currency')
     .eq('id', options.sponsorshipId)
     .maybeSingle();
 
@@ -59,7 +62,12 @@ export async function activateMarketplaceSponsorshipFromWebhook(
     };
   }
 
-  if (row.status !== 'pending_payment') {
+  const recoverableCancelledUnpaid =
+    row.status === 'cancelled' &&
+    row.source === 'paid_boost' &&
+    (row.payment_ref == null || String(row.payment_ref).trim() === '');
+
+  if (row.status !== 'pending_payment' && !recoverableCancelledUnpaid) {
     throw new Error(
       `Sponsorship ${options.sponsorshipId} cannot be activated from status ${row.status}`
     );

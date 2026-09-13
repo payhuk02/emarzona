@@ -46,8 +46,12 @@ export function nestMarketplaceStoreFields<T extends RpcStoreRow>(row: T): T & P
     ...row,
     stores,
     is_sponsored: Boolean(
-      row.is_sponsored ??
-      (row.sponsored_until != null && new Date(String(row.sponsored_until)).getTime() > Date.now())
+      row.is_sponsored === true
+        ? true
+        : row.is_sponsored === false
+          ? false
+          : row.sponsored_until != null &&
+            new Date(String(row.sponsored_until)).getTime() > Date.now()
     ),
     active_sponsorship_id: row.active_sponsorship_id ?? null,
   };

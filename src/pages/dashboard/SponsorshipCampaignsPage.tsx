@@ -9,6 +9,7 @@ function statusBadge(status: string) {
   const map: Record<string, string> = {
     active: 'bg-emerald-500/15 text-emerald-700',
     pending_payment: 'bg-amber-500/15 text-amber-700',
+    paused: 'bg-slate-500/15 text-slate-700',
     expired: 'bg-muted text-muted-foreground',
     cancelled: 'bg-muted text-muted-foreground',
     rejected: 'bg-destructive/15 text-destructive',
