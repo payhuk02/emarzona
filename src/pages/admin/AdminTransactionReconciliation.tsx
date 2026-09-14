@@ -38,15 +38,12 @@ import {
   Download,
   AlertTriangle,
   Loader2,
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
 } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { AdminPaginationNav } from '@/components/admin/AdminPaginationNav';
 import { useToast } from '@/hooks/use-toast';
 import {
   ADMIN_TRANSACTION_PAGE_SIZES,
@@ -837,41 +834,11 @@ export default function AdminTransactionReconciliation() {
                               ))}
                             </SelectContent>
                           </Select>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            disabled={page <= 1}
-                            onClick={() => setPage(1)}
-                          >
-                            <ChevronsLeft className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            disabled={page <= 1}
-                            onClick={() => setPage(page - 1)}
-                          >
-                            <ChevronLeft className="h-4 w-4" />
-                          </Button>
-                          <span className="text-sm px-2">
-                            {page} / {totalPages}
-                          </span>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            disabled={page >= totalPages}
-                            onClick={() => setPage(page + 1)}
-                          >
-                            <ChevronRight className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            disabled={page >= totalPages}
-                            onClick={() => setPage(totalPages)}
-                          >
-                            <ChevronsRight className="h-4 w-4" />
-                          </Button>
+                          <AdminPaginationNav
+                            page={page}
+                            totalPages={totalPages}
+                            onPageChange={setPage}
+                          />
                         </div>
                       </div>
                     )}

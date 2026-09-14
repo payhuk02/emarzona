@@ -120,7 +120,7 @@ export const ProductTypeCharts = React.memo<ProductTypeChartsProps>(
             </CardHeader>
             <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
               <div className="h-64 sm:h-80 md:h-96">
-                <ChartSuspense height={384}>
+                <ChartSuspense height={384} ariaLabel="Revenus par type de produit">
                   <LazyResponsiveContainer width="100%" height="100%">
                     <LazyLineChart data={revenueChartData}>
                       <LazyCartesianGrid strokeDasharray="3 3" className="stroke-muted" />
@@ -213,7 +213,10 @@ export const ProductTypeCharts = React.memo<ProductTypeChartsProps>(
             </CardHeader>
             <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
               <div className="h-64 sm:h-80 md:h-96">
-                <ChartSuspense height={384}>
+                <ChartSuspense
+                  height={384}
+                  ariaLabel="Répartition des commandes par type de produit"
+                >
                   <LazyResponsiveContainer width="100%" height="100%">
                     <LazyBarChart data={ordersChartData}>
                       <LazyCartesianGrid strokeDasharray="3 3" className="stroke-muted" />

@@ -31,6 +31,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { ResponsiveProductImage } from '@/components/ui/ResponsiveProductImage';
+import { productImageAlt } from '@/lib/accessibility/productImageAlt';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 import { useMarketplaceFavoritesContext } from '@/contexts/MarketplaceFavoritesContext';
@@ -301,7 +302,7 @@ const ProductCardModernComponent = ({
         <Link to={productUrl} className="block w-full h-full" onClick={trackSponsoredClick}>
           <ResponsiveProductImage
             src={product.image_url || '/placeholder.svg'}
-            alt={product.name}
+            alt={productImageAlt(product.name)}
             className="w-full h-full product-image transition-transform duration-300 group-hover:scale-110"
             priority={priority}
             fit="contain"
@@ -312,7 +313,7 @@ const ProductCardModernComponent = ({
 
         {/* Overlay gradient au hover - Amélioré pour produits digitaux */}
         {isDigital ? (
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2">
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 [@media(hover:none)]:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2">
             <Button size="sm" asChild>
               <Link to={productUrl} onClick={trackSponsoredClick}>
                 <Play className="h-4 w-4 mr-2" />
@@ -338,13 +339,13 @@ const ProductCardModernComponent = ({
             </Button>
           </div>
         ) : (
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 [@media(hover:none)]:opacity-100" />
         )}
 
         {/* Badge promotion en haut à droite - Optimisé mobile */}
         {hasPromo && (
           <div className="absolute top-1.5 sm:top-2 right-1.5 sm:right-2 z-10">
-            <Badge className="bg-red-500 text-white border-0 text-[10px] sm:text-xs font-bold px-2 sm:px-2.5 py-0.5 sm:py-1 shadow-sm">
+            <Badge className="bg-red-500 text-white border-0 text-xs font-bold px-2 sm:px-2.5 py-0.5 sm:py-1 shadow-sm">
               <Percent className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-0.5 sm:mr-1" />-{discountPercent}%
             </Badge>
           </div>
@@ -382,7 +383,7 @@ const ProductCardModernComponent = ({
               <div className="relative w-full aspect-[3/2] bg-muted">
                 <ResponsiveProductImage
                   src={product.image_url}
-                  alt={product.name}
+                  alt={productImageAlt(product.name)}
                   sizes="100vw"
                   context="detail"
                   fit="contain"
@@ -403,7 +404,7 @@ const ProductCardModernComponent = ({
             {product.stores.logo_url && !storeLogoFailed ? (
               <img
                 src={product.stores.logo_url}
-                alt={`Logo de ${product.stores.name}`}
+                alt={productImageAlt(product.stores.name, 'store')}
                 width={28}
                 height={28}
                 loading="lazy"
@@ -417,7 +418,7 @@ const ProductCardModernComponent = ({
                 className="mp-store-logo mp-store-logo--fallback w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center flex-shrink-0"
                 aria-hidden
               >
-                <span className="text-[10px] sm:text-xs font-bold leading-none text-white">
+                <span className="text-xs font-bold leading-none text-white">
                   {(product.stores.name?.trim().charAt(0) || 'B').toUpperCase()}
                 </span>
               </div>
@@ -431,7 +432,7 @@ const ProductCardModernComponent = ({
             />
             {product.is_sponsored ? (
               <span
-                className="ml-auto flex-shrink-0 text-[10px] sm:text-xs font-semibold text-violet-300"
+                className="ml-auto flex-shrink-0 text-xs font-semibold text-violet-300"
                 aria-label="Produit sponsorisé"
               >
                 Sponsorisé
@@ -459,14 +460,14 @@ const ProductCardModernComponent = ({
         {/* Badges d'information - Placés après le titre de manière professionnelle */}
         <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-3">
           {isNew && (
-            <Badge className="bg-gradient-to-r from-blue-500 to-purple-500 text-white border-0 text-[10px] sm:text-xs px-2 py-0.5 shadow-sm">
+            <Badge className="bg-gradient-to-r from-blue-500 to-purple-500 text-white border-0 text-xs px-2 py-0.5 shadow-sm">
               <Sparkles className="h-3 w-3 mr-1" />
               Nouveau
             </Badge>
           )}
 
           {product.is_featured ? (
-            <Badge className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white border-0 text-[10px] sm:text-xs px-2 py-0.5 shadow-sm">
+            <Badge className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white border-0 text-xs px-2 py-0.5 shadow-sm">
               <Star className="h-3 w-3 mr-1 fill-white" />
               Vedette
             </Badge>

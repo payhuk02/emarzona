@@ -166,7 +166,15 @@ export const RevenueChart = ({ data }: RevenueChartProps) => {
       </CardHeader>
       <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
         <div className="h-80">
-          <ChartSuspense height={320}>
+          <ChartSuspense
+            height={320}
+            ariaLabel="Évolution des revenus"
+            summary={
+              chartData.length > 0
+                ? `Revenus de ${chartData[0].month} à ${chartData[chartData.length - 1].month} : de ${chartData[0].revenue.toLocaleString()} à ${chartData[chartData.length - 1].revenue.toLocaleString()} FCFA.`
+                : undefined
+            }
+          >
             <LazyResponsiveContainer width="100%" height="100%">
               <LazyLineChart data={chartData}>
                 <LazyCartesianGrid strokeDasharray="3 3" className="opacity-30" />
@@ -224,7 +232,15 @@ export const OrdersChart = ({ data }: OrdersChartProps) => {
       </CardHeader>
       <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
         <div className="h-80">
-          <ChartSuspense height={320}>
+          <ChartSuspense
+            height={320}
+            ariaLabel="Répartition des commandes"
+            summary={
+              data.length > 0
+                ? data.map(d => `${d.status} : ${d.count} (${d.percentage}%)`).join('. ')
+                : undefined
+            }
+          >
             <LazyResponsiveContainer width="100%" height="100%">
               <LazyPieChart>
                 <LazyPie
@@ -504,7 +520,15 @@ export const OrdersTrendChart = ({ data }: OrdersTrendChartProps) => {
       </CardHeader>
       <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
         <div className="h-80">
-          <ChartSuspense height={320}>
+          <ChartSuspense
+            height={320}
+            ariaLabel="Évolution des commandes"
+            summary={
+              chartData.length > 0
+                ? `Commandes de ${chartData[0].month} à ${chartData[chartData.length - 1].month} : de ${chartData[0].orders} à ${chartData[chartData.length - 1].orders}.`
+                : undefined
+            }
+          >
             <LazyResponsiveContainer width="100%" height="100%">
               <LazyLineChart data={chartData}>
                 <LazyCartesianGrid strokeDasharray="3 3" className="opacity-30" />
@@ -562,7 +586,7 @@ export const RevenueVsOrdersChart = ({ data }: RevenueVsOrdersChartProps) => {
       </CardHeader>
       <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
         <div className="h-80">
-          <ChartSuspense height={320}>
+          <ChartSuspense height={320} ariaLabel="Comparaison revenus et commandes">
             <LazyResponsiveContainer width="100%" height="100%">
               <LazyBarChart data={chartData}>
                 <LazyCartesianGrid strokeDasharray="3 3" className="opacity-30" />
@@ -629,7 +653,15 @@ export const CustomersTrendChart = ({ data }: CustomersTrendChartProps) => {
       </CardHeader>
       <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
         <div className="h-80">
-          <ChartSuspense height={320}>
+          <ChartSuspense
+            height={320}
+            ariaLabel="Évolution des clients"
+            summary={
+              chartData.length > 0
+                ? `Clients de ${chartData[0].month} à ${chartData[chartData.length - 1].month} : de ${chartData[0].customers} à ${chartData[chartData.length - 1].customers}.`
+                : undefined
+            }
+          >
             <LazyResponsiveContainer width="100%" height="100%">
               <LazyLineChart data={chartData}>
                 <LazyCartesianGrid strokeDasharray="3 3" className="opacity-30" />

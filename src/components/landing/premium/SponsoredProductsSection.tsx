@@ -35,6 +35,7 @@ function StoreMark({ name, logoUrl }: { name: string; logoUrl: string | null }) 
     <img
       src={src}
       alt=""
+      aria-hidden
       width={40}
       height={40}
       loading="eager"
@@ -125,6 +126,7 @@ function SponsoredProductCard({
           <img
             src={product.image_url}
             alt=""
+            aria-hidden
             loading={imagePriority ? 'eager' : 'lazy'}
             decoding="async"
             fetchPriority={imagePriority ? 'high' : 'low'}

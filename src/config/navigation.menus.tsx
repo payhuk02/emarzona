@@ -654,34 +654,9 @@ export const userMenuSections = [
         icon: FileText,
       },
       {
-        title: 'Parrainage',
-        url: '/dashboard/referrals',
-        icon: UserPlus,
-      },
-      {
-        title: 'Affiliation',
-        url: '/dashboard/affiliates',
-        icon: TrendingUp,
-      },
-      {
         title: 'Gamification',
         url: '/dashboard/gamification',
         icon: Trophy,
-      },
-      {
-        title: 'Affiliation Boutique',
-        url: '/dashboard/store-affiliates',
-        icon: TrendingUp,
-      },
-      {
-        title: 'Tableau de bord Affilié',
-        url: '/affiliate/dashboard',
-        icon: TrendingUp,
-      },
-      {
-        title: 'Cours Promus',
-        url: '/affiliate/courses',
-        icon: GraduationCap,
       },
     ],
   },
@@ -702,6 +677,36 @@ export const userMenuSections = [
         title: 'Campagnes Boost',
         url: '/dashboard/sponsorships/campaigns',
         icon: ListOrdered,
+      },
+    ],
+  },
+  {
+    label: 'Affiliation et Parrainage',
+    items: [
+      {
+        title: 'Parrainage',
+        url: '/dashboard/referrals',
+        icon: UserPlus,
+      },
+      {
+        title: 'Affiliation',
+        url: '/dashboard/affiliates',
+        icon: TrendingUp,
+      },
+      {
+        title: 'Affiliation Boutique',
+        url: '/dashboard/store-affiliates',
+        icon: TrendingUp,
+      },
+      {
+        title: 'Tableau de bord Affilié',
+        url: '/affiliate/dashboard',
+        icon: TrendingUp,
+      },
+      {
+        title: 'Cours Promus',
+        url: '/affiliate/courses',
+        icon: GraduationCap,
       },
     ],
   },

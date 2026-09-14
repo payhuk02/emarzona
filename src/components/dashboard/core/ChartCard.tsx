@@ -43,7 +43,13 @@ export function ChartCard({
           </div>
           {action && <div className="ml-4 shrink-0">{action}</div>}
         </CardHeader>
-        <CardContent className={cn('flex-1', contentClassName)}>{children}</CardContent>
+        <CardContent
+          className={cn('flex-1', contentClassName)}
+          role="img"
+          aria-label={description ? `${title}. ${description}` : title}
+        >
+          {children}
+        </CardContent>
       </Card>
     </motion.div>
   );

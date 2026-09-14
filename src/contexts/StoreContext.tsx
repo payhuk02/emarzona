@@ -7,10 +7,9 @@ import {
   useRef,
   ReactNode,
 } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './AuthContext';
 import { logger } from '@/lib/logger';
-import { resolveStoreCommerceTypeFromStore } from '@/lib/commerce/store-capability-map';
+import { fetchUserAccessibleStores } from '@/lib/store/fetch-user-accessible-stores';
 import {
   fallbackStoreQuota,
   fetchUserStoreQuota,
@@ -160,7 +159,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
-  // Charger toutes les boutiques de l'utilisateur
+  // Charger toutes les boutiques de l'utilisateur (owner + membres actifs)
   const fetchStores = useCallback(async () => {
     if (!user?.id) {
       setStores([]);
@@ -189,70 +188,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
         );
       };
 
-      // 1. Récupérer les IDs des boutiques où l'utilisateur est membre actif
-      const memberStoresQuery = supabase
-        .from('store_members')
-        .select('store_id')
-        .eq('user_id', user.id)
-        .eq('status', 'active');
-
-      const { data: memberStores } = await fetchWithTimeout(memberStoresQuery, 8000).catch(() => ({
-        data: [],
-      }));
-
-      const memberStoreIds = memberStores?.map(m => m.store_id) || [];
-
-      // 2. Filtre explicite (évite que les admins reçoivent toutes les boutiques).
-      // logo_url vit dans store_appearance (colonne droppée de stores) — ne pas le
-      // sélectionner sur stores sinon PostgREST échoue et le dashboard croit « 0 boutique ».
-      // Cast: embed store_appearance hors schéma types.ts → évite TS2589 (instantiation profonde).
-      type StoresListQuery = {
-        select: (columns: string) => StoresListQuery;
-        or: (filters: string) => StoresListQuery;
-        eq: (column: string, value: string) => StoresListQuery;
-        order: (
-          column: string,
-          opts: { ascending: boolean }
-        ) => PromiseLike<{ data: Record<string, unknown>[] | null; error: Error | null }>;
-      };
-      const storesTable = (
-        supabase as unknown as { from: (table: string) => StoresListQuery }
-      ).from('stores');
-      let query = storesTable.select(
-        'id,user_id,name,slug,created_at,updated_at,metadata,commerce_type,store_appearance(logo_url)'
-      );
-
-      if (memberStoreIds.length > 0) {
-        query = query.or(`user_id.eq.${user.id},id.in.(${memberStoreIds.join(',')})`);
-      } else {
-        query = query.eq('user_id', user.id);
-      }
-
-      const { data, error: fetchError } = await fetchWithTimeout(
-        query.order('created_at', { ascending: true }),
-        8000
-      );
-
-      if (fetchError) {
-        throw fetchError;
-      }
-
-      const storesData = (data || []).map(row => {
-        const appearanceRaw = (row as { store_appearance?: unknown }).store_appearance;
-        const appearance = Array.isArray(appearanceRaw)
-          ? (appearanceRaw[0] as { logo_url?: string | null } | undefined)
-          : (appearanceRaw as { logo_url?: string | null } | null | undefined);
-        const { store_appearance: _appearance, ...storeRow } = row as Record<string, unknown> & {
-          store_appearance?: unknown;
-        };
-        return {
-          ...storeRow,
-          logo_url: appearance?.logo_url ?? null,
-          commerce_type: resolveStoreCommerceTypeFromStore(
-            storeRow as { commerce_type?: unknown; metadata?: Record<string, unknown> | null }
-          ),
-        };
-      }) as Store[];
+      const storesData = await fetchWithTimeout(fetchUserAccessibleStores<Store>(user.id), 8000);
       setStores(storesData);
 
       if (storesData.length > 0) {

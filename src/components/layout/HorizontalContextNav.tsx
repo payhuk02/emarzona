@@ -1,21 +1,18 @@
 /**
  * Barre de navigation horizontale contextuelle — mega-menus style Systeme.io / enterprise.
- * Desktop : NavigationMenu Radix. Mobile : drawer latéral vertical (sidebar) par domaine.
+ * Desktop : DropdownMenu (portal) + scroll horizontal pour ne pas couper les libellés.
+ * Mobile : drawer latéral vertical (sidebar) par domaine.
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ChevronDown, Lock } from 'lucide-react';
 import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-  navigationMenuTriggerStyle,
-} from '@/components/ui/navigation-menu';
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -26,8 +23,18 @@ import { isNavItemActive } from '@/config/navigation.helpers';
 import { toCommerceNavPersona } from '@/config/navigation.persona';
 import { useSidebarPersona } from '@/hooks/useSidebarPersona';
 import { useAdmin } from '@/hooks/useAdmin';
+import { prefetchRouteChunk } from '@/lib/route-chunk-prefetch';
 
 type PanelVariant = 'mega' | 'sidebar';
+
+const domainTriggerClass = cn(
+  'inline-flex min-h-11 h-11 shrink-0 items-center justify-center gap-1 rounded-md',
+  'px-2.5 lg:px-3 text-sm font-medium whitespace-nowrap overflow-visible',
+  'bg-transparent transition-colors touch-manipulation',
+  'hover:bg-accent hover:text-accent-foreground',
+  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30',
+  'data-[state=open]:bg-accent/50'
+);
 
 function MegaMenuLink({
   item,
@@ -84,20 +91,10 @@ function MegaMenuLink({
     );
   }
 
-  if (variant === 'sidebar') {
-    return (
-      <NavLink to={item.url} onClick={() => onAfterNavigate?.()} className={linkClassName}>
-        {renderContent()}
-      </NavLink>
-    );
-  }
-
   return (
-    <NavigationMenuLink asChild>
-      <NavLink to={item.url} onClick={() => onAfterNavigate?.()} className={linkClassName}>
-        {renderContent()}
-      </NavLink>
-    </NavigationMenuLink>
+    <NavLink to={item.url} onClick={() => onAfterNavigate?.()} className={linkClassName}>
+      {renderContent()}
+    </NavLink>
   );
 }
 
@@ -127,7 +124,7 @@ function MegaMenuPanel({
         className={cn(
           isSidebar
             ? 'flex flex-col gap-3 px-1 py-1'
-            : `${gridClass} max-h-[min(74vh,560px)] overflow-y-auto bg-background/80 backdrop-blur-2xl border border-white/10 shadow-2xl rounded-xl`
+            : `${gridClass} max-h-[min(74vh,560px)] overflow-y-auto bg-background/95 backdrop-blur-2xl border border-border/40 shadow-2xl rounded-xl`
         )}
       >
         {domain.subgroups.map(group => (
@@ -162,7 +159,7 @@ function MegaMenuPanel({
       className={cn(
         isSidebar
           ? 'flex flex-col gap-0 px-1 py-1'
-          : 'grid gap-0.5 p-2 sm:grid-cols-2 md:w-[440px] lg:w-[520px] max-h-[min(74vh,520px)] overflow-y-auto bg-background/80 backdrop-blur-2xl border border-white/10 shadow-2xl rounded-xl'
+          : 'grid gap-0.5 p-2 sm:grid-cols-2 md:w-[440px] lg:w-[520px] max-h-[min(74vh,520px)] overflow-y-auto bg-background/95 backdrop-blur-2xl border border-border/40 shadow-2xl rounded-xl'
       )}
     >
       {domain.items.map(item => (
@@ -175,6 +172,101 @@ function MegaMenuPanel({
         />
       ))}
     </div>
+  );
+}
+
+function DesktopDomainItem({
+  domain,
+  onNavigate,
+}: {
+  domain: HorizontalNavDomain;
+  onNavigate: (item: HorizontalNavLink) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isDirectLink = domain.items.length <= 1 && domain.rootPath;
+
+  const clearCloseTimer = useCallback(() => {
+    if (closeTimerRef.current) {
+      clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+  }, []);
+
+  const openMenu = useCallback(() => {
+    clearCloseTimer();
+    setOpen(true);
+    if (domain.rootPath) prefetchRouteChunk(domain.rootPath);
+    domain.items.slice(0, 6).forEach(item => prefetchRouteChunk(item.url));
+  }, [clearCloseTimer, domain.rootPath, domain.items]);
+
+  const scheduleClose = useCallback(() => {
+    clearCloseTimer();
+    closeTimerRef.current = setTimeout(() => setOpen(false), 160);
+  }, [clearCloseTimer]);
+
+  useEffect(() => () => clearCloseTimer(), [clearCloseTimer]);
+
+  if (isDirectLink && domain.rootPath) {
+    return (
+      <NavLink
+        to={domain.rootPath}
+        className={cn(
+          domainTriggerClass,
+          domain.isActive && 'bg-primary/10 text-primary shadow-none'
+        )}
+        onMouseEnter={() => prefetchRouteChunk(domain.rootPath!)}
+        onFocus={() => prefetchRouteChunk(domain.rootPath!)}
+      >
+        <span className="overflow-visible">{domain.shortLabel}</span>
+      </NavLink>
+    );
+  }
+
+  return (
+    <DropdownMenu
+      modal={false}
+      open={open}
+      onOpenChange={next => {
+        clearCloseTimer();
+        setOpen(next);
+      }}
+    >
+      <DropdownMenuTrigger
+        className={cn(domainTriggerClass, domain.isActive && 'text-primary bg-primary/5')}
+        aria-label={domain.label}
+        onMouseEnter={openMenu}
+        onMouseLeave={scheduleClose}
+        onPointerDown={e => {
+          // Survol ouvre déjà ; éviter le toggle click qui ferme immédiatement
+          if (open) e.preventDefault();
+        }}
+      >
+        <span className="overflow-visible">{domain.shortLabel}</span>
+        <ChevronDown
+          className={cn(
+            'h-3 w-3 shrink-0 opacity-70 transition-transform duration-200',
+            open && 'rotate-180'
+          )}
+          aria-hidden
+        />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        align="start"
+        sideOffset={8}
+        className="z-50 w-auto max-w-[min(95vw,720px)] overflow-visible border-0 bg-transparent p-0 shadow-none"
+        onMouseEnter={openMenu}
+        onMouseLeave={scheduleClose}
+        onCloseAutoFocus={e => e.preventDefault()}
+      >
+        <MegaMenuPanel
+          domain={domain}
+          onNavigate={onNavigate}
+          onAfterNavigate={() => setOpen(false)}
+          variant="mega"
+        />
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 
@@ -193,7 +285,7 @@ function MobileDomainDrawer({
       <NavLink
         to={domain.rootPath}
         className={cn(
-          'inline-flex h-10 shrink-0 items-center rounded-full px-3 text-sm font-medium',
+          'inline-flex h-10 shrink-0 items-center rounded-full px-3 text-sm font-medium whitespace-nowrap',
           domain.isActive && 'bg-primary/10 text-primary'
         )}
       >
@@ -210,7 +302,7 @@ function MobileDomainDrawer({
           variant="ghost"
           size="sm"
           className={cn(
-            'h-10 shrink-0 rounded-full px-3 text-sm font-medium gap-1 touch-manipulation',
+            'h-10 shrink-0 rounded-full px-3 text-sm font-medium gap-1 touch-manipulation whitespace-nowrap',
             domain.isActive && 'bg-primary/10 text-primary'
           )}
           aria-expanded={open}
@@ -245,7 +337,6 @@ function MobileDomainDrawer({
 
 export function HorizontalContextNav() {
   const { t } = useTranslation();
-  const location = useLocation();
   const navigate = useNavigate();
   const { isAdmin } = useAdmin();
   const { persona: sidebarPersona } = useSidebarPersona(isAdmin);
@@ -271,69 +362,25 @@ export function HorizontalContextNav() {
 
   return (
     <div
-      className="relative z-40 shrink-0 border-b border-border/50 bg-background/95 backdrop-blur-md shadow-[0_1px_0_0_hsl(var(--border)/0.4)] md:sticky md:top-12 overflow-visible"
+      className="relative z-40 shrink-0 border-b border-border/50 bg-background/95 backdrop-blur-md shadow-[0_1px_0_0_hsl(var(--border)/0.4)] md:sticky md:top-12"
       data-testid="horizontal-context-nav"
     >
       {/*
-        Ne pas mettre overflow-x-auto sur un ancêtre de NavigationMenuContent :
-        overflow-x ≠ visible force overflow-y en auto et clippe les mega-menus (hover « mort »).
-        Le scroll horizontal desktop se fait via min-w-max sur la liste si besoin.
+        Scroll horizontal OK : les mega-menus sont en DropdownMenu (portal body),
+        donc plus de clip overflow-y forcé par overflow-x.
       */}
-      <div className="hidden md:block px-3 lg:px-6 overflow-visible">
-        <NavigationMenu
-          delayDuration={80}
-          skipDelayDuration={200}
-          className="horizontal-context-nav-menu relative z-40 max-w-none w-full justify-start overflow-visible"
+      <div
+        className="hidden md:block overflow-x-auto scrollbar-hide px-3 lg:px-6"
+        data-testid="horizontal-context-nav-desktop"
+      >
+        <nav
+          className="flex w-max min-w-full flex-nowrap items-center justify-start gap-0.5 py-1.5 pr-2"
           aria-label={navAriaLabel}
         >
-          <NavigationMenuList className="flex w-max min-w-full flex-nowrap justify-start gap-0.5 py-1.5">
-            {domains.map((domain, index) => {
-              // Positionnement intelligent pour éviter de déborder sur la sidebar ou hors de l'écran
-              let positionClass = '';
-              if (index === 0) {
-                positionClass = 'left-0 translate-x-0';
-              } else if (index === 1 || index === 2) {
-                // Ventes & Logistique : aligné à gauche avec un léger décalage ou juste au niveau du trigger
-                positionClass = 'left-0 translate-x-0 md:-ml-4';
-              } else if (index >= domains.length - 2) {
-                positionClass = 'right-0 left-auto translate-x-0';
-              }
-
-              return (
-                <NavigationMenuItem key={domain.domainKey} className="relative shrink-0">
-                  {domain.items.length <= 1 && domain.rootPath ? (
-                    <NavigationMenuLink asChild>
-                      <NavLink
-                        to={domain.rootPath}
-                        className={cn(
-                          navigationMenuTriggerStyle(),
-                          'h-9 px-2.5 xl:px-3 text-sm xl:text-base font-medium whitespace-nowrap',
-                          domain.isActive && 'bg-primary/10 text-primary shadow-none'
-                        )}
-                      >
-                        {domain.shortLabel}
-                      </NavLink>
-                    </NavigationMenuLink>
-                  ) : (
-                    <>
-                      <NavigationMenuTrigger
-                        className={cn(
-                          'h-9 bg-transparent px-2.5 xl:px-3 text-sm xl:text-base font-medium whitespace-nowrap data-[state=open]:bg-accent/50',
-                          domain.isActive && 'text-primary bg-primary/5'
-                        )}
-                      >
-                        {domain.shortLabel}
-                      </NavigationMenuTrigger>
-                      <NavigationMenuContent className={cn('z-50', positionClass)}>
-                        <MegaMenuPanel domain={domain} onNavigate={handleNavigate} />
-                      </NavigationMenuContent>
-                    </>
-                  )}
-                </NavigationMenuItem>
-              );
-            })}
-          </NavigationMenuList>
-        </NavigationMenu>
+          {domains.map(domain => (
+            <DesktopDomainItem key={domain.domainKey} domain={domain} onNavigate={handleNavigate} />
+          ))}
+        </nav>
       </div>
 
       <div

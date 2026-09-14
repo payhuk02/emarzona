@@ -1,10 +1,12 @@
 import type { CSSProperties } from 'react';
+import { useEffect } from 'react';
 import { useLandingPremiumT } from '@/hooks/useLandingPremiumT';
 import { usePremiumReveal } from './usePremiumReveal';
 import { useMarqueeInViewPause } from './useMarqueeInViewPause';
 import { useLandingMarqueeDuration } from '@/hooks/useLandingMarqueeDuration';
 import { useLandingPlatformStores } from '@/hooks/useLandingPlatformStores';
 import { generateStoreUrl } from '@/lib/store-utils';
+import { logger } from '@/lib/logger';
 
 const ACCENT_PALETTE = [
   '#c9a227',
@@ -56,6 +58,7 @@ function StoreChip({
         <img
           src={logoUrl}
           alt=""
+          aria-hidden
           className="h-10 w-10 shrink-0 rounded-xl object-cover"
           width={40}
           height={40}
@@ -74,7 +77,7 @@ function StoreChip({
       )}
       <div className="min-w-0">
         <p className="truncate text-sm font-semibold text-[var(--lp-text)]">{name}</p>
-        <p className="text-[11px] text-[var(--lp-text-muted)]">{storeLabel}</p>
+        <p className="text-xs text-[var(--lp-text-muted)]">{storeLabel}</p>
       </div>
     </a>
   );
@@ -97,9 +100,16 @@ export function StoresMarqueeSection() {
   const { t } = useLandingPremiumT();
   const { ref, className } = usePremiumReveal();
   const { ref: pauseRef, pauseClass } = useMarqueeInViewPause();
-  const { data: stores = [], isLoading, isError } = useLandingPlatformStores();
+  const { data: stores = [], isLoading, isError, error } = useLandingPlatformStores();
   const { storesSec } = useLandingMarqueeDuration(stores.length);
 
+  useEffect(() => {
+    if (isError) {
+      logger.warn('StoresMarquee: stores_public query failed', { error });
+    }
+  }, [isError, error]);
+
+  // Marketing : section optionnelle — empty = hide; error logged above (no silent prod mystery)
   if (!isLoading && (isError || stores.length === 0)) {
     return null;
   }

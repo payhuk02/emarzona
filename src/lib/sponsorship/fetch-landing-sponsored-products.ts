@@ -1,5 +1,6 @@
 import { supabaseReadRpcPost } from '@/integrations/supabase/read-client';
 import { nestMarketplaceStoreFields } from '@/lib/marketplace/nest-store-fields';
+import { getProductStore } from '@/lib/marketplace/get-product-store';
 import { logger } from '@/lib/logger';
 import type { LandingSponsoredProduct } from '@/lib/sponsorship/landing-sponsored-products';
 
@@ -39,6 +40,7 @@ export async function fetchLandingSponsoredProducts(): Promise<LandingSponsoredP
       if (!id || !name || !slug || seen.has(id)) continue;
       seen.add(id);
 
+      const store = getProductStore(row);
       products.push({
         id,
         name,
@@ -50,14 +52,7 @@ export async function fetchLandingSponsoredProducts(): Promise<LandingSponsoredP
         is_featured: Boolean(row.is_featured),
         is_sponsored: Boolean(row.is_sponsored ?? Boolean(row.active_sponsorship_id)),
         active_sponsorship_id: (row.active_sponsorship_id as string | null) ?? null,
-        store: row.stores
-          ? {
-              id: String(row.stores.id),
-              name: String(row.stores.name ?? ''),
-              slug: String(row.stores.slug ?? ''),
-              logo_url: (row.stores.logo_url as string | null) ?? null,
-            }
-          : null,
+        store,
       });
     }
 

@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { AppPageShell } from '@/components/layout/AppPageShell';
 import { useStore } from '@/hooks/useStore';
 import { useSellerArtistProducts } from '@/hooks/artist/useSellerArtistProducts';
+import { productImageAlt } from '@/lib/accessibility/productImageAlt';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -142,7 +143,12 @@ export default function SellerArtistProductsList() {
               return (
                 <Card key={item.id} className="overflow-hidden">
                   {image ? (
-                    <img src={image} alt="" className="h-36 w-full object-cover" loading="lazy" />
+                    <img
+                      src={image}
+                      alt={productImageAlt(title, 'artwork')}
+                      className="h-36 w-full object-cover"
+                      loading="lazy"
+                    />
                   ) : (
                     <div className="flex h-36 items-center justify-center bg-muted">
                       <Palette className="h-10 w-10 text-muted-foreground" />

@@ -1,4 +1,5 @@
 import { useState, useCallback, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -849,7 +850,7 @@ export const ProductInfoTab = ({
                   </p>
                 </div>
                 <Button type="button" variant="secondary" size="sm" asChild>
-                  <a href="/dashboard/sponsorships">Sponsoriser</a>
+                  <Link to="/dashboard/sponsorships">Sponsoriser</Link>
                 </Button>
               </div>
 

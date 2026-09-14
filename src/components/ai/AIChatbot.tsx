@@ -25,6 +25,8 @@ import {
 import { ChatMessage, ChatAction } from '@/lib/ai/chatbot';
 import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
+import { useNavigate } from 'react-router-dom';
+import { softNavigate } from '@/lib/navigation/soft-navigate';
 
 interface AIChatbotProps {
   isOpen: boolean;
@@ -51,6 +53,7 @@ const AIChatbot: React.FC<AIChatbotProps> = ({
   isMinimized, // Destructurer isMinimized
   minimizeChatbot, // Destructurer minimizeChatbot
 }) => {
+  const navigate = useNavigate();
   const [inputValue, setInputValue] = useState('');
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -86,13 +89,13 @@ const AIChatbot: React.FC<AIChatbotProps> = ({
           await handleSendMessage(action.payload.message);
           break;
         case 'navigation':
-          window.location.href = action.payload.path;
+          softNavigate(navigate, action.payload.path);
           break;
         case 'product_recommendation':
-          window.location.href = `/product/${action.payload.productId}`;
+          softNavigate(navigate, `/product/${action.payload.productId}`);
           break;
         case 'order_status':
-          window.location.href = '/orders';
+          softNavigate(navigate, '/orders');
           break;
         case 'support_ticket':
           // Implémentation future du système de tickets
@@ -102,7 +105,7 @@ const AIChatbot: React.FC<AIChatbotProps> = ({
           logger.warn('Unknown action type', { action });
       }
     },
-    [handleSendMessage]
+    [handleSendMessage, navigate]
   );
 
   const handleKeyPress = useCallback(

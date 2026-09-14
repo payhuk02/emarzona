@@ -38,9 +38,11 @@ const ChartContainer = React.forwardRef<
     config: ChartConfig;
     children: React.ComponentProps<typeof RechartsPrimitive.ResponsiveContainer>['children'];
   }
->(({ id, className, children, config, ...props }, ref) => {
+>(({ id, className, children, config, role, ...props }, ref) => {
   const uniqueId = React.useId();
   const chartId = `chart-${id || uniqueId.replace(/:/g, '')}`;
+  const accessibleName =
+    typeof props['aria-label'] === 'string' || typeof props['aria-labelledby'] === 'string';
 
   return (
     <ChartContext.Provider value={{ config }}>
@@ -52,6 +54,7 @@ const ChartContainer = React.forwardRef<
           className
         )}
         {...props}
+        role={accessibleName ? 'img' : role}
       >
         <ChartStyle id={chartId} config={config} />
         <RechartsPrimitive.ResponsiveContainer>{children}</RechartsPrimitive.ResponsiveContainer>

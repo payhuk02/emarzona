@@ -37,15 +37,14 @@ describe('resolveHorizontalNavDomains', () => {
     expect(domains.map(d => d.shortLabel)).toEqual([
       'Produits',
       'Ventes',
-      'Logistique',
       'Finance',
       'Marketing',
-      'Analytics',
-      'IA',
-      'Systèmes',
-      'Sponsorisation',
-      'Paramètres',
+      'Boost Emarzona',
+      'Affiliation et Parrainage',
+      'Insights',
+      'Outils',
     ]);
+    expect(domains).toHaveLength(8);
   });
 
   it('résout rootPath Produits vers la liste verticale (course)', () => {

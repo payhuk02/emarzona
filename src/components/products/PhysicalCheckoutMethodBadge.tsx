@@ -21,8 +21,7 @@ export function PhysicalCheckoutMethodBadge({
     paymentOptions as Parameters<typeof parsePhysicalCheckoutOptions>[0]
   );
 
-  const sizeClass =
-    size === 'sm' ? 'text-[10px] sm:text-xs px-2 py-0.5' : 'text-xs sm:text-sm px-2.5 py-1';
+  const sizeClass = size === 'sm' ? 'text-xs px-2 py-0.5' : 'text-xs sm:text-sm px-2.5 py-1';
 
   const toneClass =
     checkout_method === 'cash_on_delivery'

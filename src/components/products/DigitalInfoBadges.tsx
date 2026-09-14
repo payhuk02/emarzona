@@ -28,7 +28,7 @@ export function DigitalTypeBadge({
   if (!digitalType) return null;
 
   const sizeClasses = {
-    sm: 'text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5',
+    sm: 'text-xs px-1.5 sm:px-2 py-0.5',
     md: 'text-xs sm:text-sm px-2 sm:px-3 py-1',
   };
 
@@ -81,7 +81,7 @@ export function DigitalDownloadLimitBadge({
   if (!downloadLimit || downloadLimit === -1 || downloadLimit < 0) return null;
 
   const sizeClasses = {
-    sm: 'text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5',
+    sm: 'text-xs px-1.5 sm:px-2 py-0.5',
     md: 'text-xs sm:text-sm px-2 sm:px-3 py-1',
   };
 
@@ -122,7 +122,7 @@ export function DigitalVersionBadge({
   if (!version) return null;
 
   const sizeClasses = {
-    sm: 'text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5',
+    sm: 'text-xs px-1.5 sm:px-2 py-0.5',
     md: 'text-xs sm:text-sm px-2 sm:px-3 py-1',
   };
 

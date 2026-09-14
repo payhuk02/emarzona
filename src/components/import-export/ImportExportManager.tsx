@@ -20,7 +20,6 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import {
   Upload,
   Download,
@@ -29,7 +28,6 @@ import {
   AlertCircle,
   Loader2,
   FileSpreadsheet,
-  Database,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useStore } from '@/hooks/useStore';
@@ -40,6 +38,7 @@ import {
   importFromJSON,
   type ImportExportType,
   type ImportExportFormat,
+  type ImportResult,
 } from '@/lib/import-export/import-export';
 import { logger } from '@/lib/logger';
 
@@ -51,7 +50,7 @@ export const ImportExportManager = () => {
   const [importFile, setImportFile] = useState<File | null>(null);
   const [importing, setImporting] = useState(false);
   const [exporting, setExporting] = useState(false);
-  const [importResult, setImportResult] = useState<any>(null);
+  const [importResult, setImportResult] = useState<ImportResult | null>(null);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
 
@@ -67,12 +66,10 @@ export const ImportExportManager = () => {
 
     setExporting(true);
     try {
-      let _result;
-      if (format === 'csv') {
-        result = await exportToCSV(store.id, type, startDate || undefined, endDate || undefined);
-      } else {
-        result = await exportToJSON(store.id, type, startDate || undefined, endDate || undefined);
-      }
+      const result =
+        format === 'csv'
+          ? await exportToCSV(store.id, type, startDate || undefined, endDate || undefined)
+          : await exportToJSON(store.id, type, startDate || undefined, endDate || undefined);
 
       if (result.success && result.data) {
         // Télécharger le fichier
@@ -97,11 +94,13 @@ export const ImportExportManager = () => {
       } else {
         throw new Error(result.error || "Erreur lors de l'export");
       }
-    } catch (_error: any) {
-      logger.error('Error exporting data', { error: error.message });
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : "Une erreur est survenue lors de l'export";
+      logger.error('Error exporting data', { error: message });
       toast({
         title: '❌ Erreur',
-        description: error.message || "Une erreur est survenue lors de l'export",
+        description: message,
         variant: 'destructive',
       });
     } finally {
@@ -133,14 +132,11 @@ export const ImportExportManager = () => {
 
     try {
       const fileContent = await importFile.text();
-      let _result;
 
-      if (format === 'csv') {
-        result = await importFromCSV(store.id, type, fileContent);
-      } else {
-        const jsonData = JSON.parse(fileContent);
-        result = await importFromJSON(store.id, type, jsonData);
-      }
+      const result =
+        format === 'csv'
+          ? await importFromCSV(store.id, type, fileContent)
+          : await importFromJSON(store.id, type, JSON.parse(fileContent));
 
       setImportResult(result);
 
@@ -156,11 +152,13 @@ export const ImportExportManager = () => {
           variant: 'default',
         });
       }
-    } catch (_error: any) {
-      logger.error('Error importing data', { error: error.message });
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : "Une erreur est survenue lors de l'import";
+      logger.error('Error importing data', { error: message });
       toast({
         title: '❌ Erreur',
-        description: error.message || "Une erreur est survenue lors de l'import",
+        description: message,
         variant: 'destructive',
       });
     } finally {
@@ -388,7 +386,7 @@ export const ImportExportManager = () => {
                         <div className="mt-2">
                           <p className="text-sm font-medium mb-1">Erreurs :</p>
                           <ul className="text-xs space-y-1 max-h-32 overflow-y-auto">
-                            {importResult.errors.slice(0, 10).map((error: any, index: number) => (
+                            {importResult.errors.slice(0, 10).map((error, index) => (
                               <li key={index} className="text-muted-foreground">
                                 Ligne {error.row}: {error.error}
                               </li>

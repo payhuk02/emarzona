@@ -55,7 +55,15 @@ export const DashboardSalesEvolution = React.memo<DashboardSalesEvolutionProps>(
           </div>
         </div>
         <div className="h-[260px] sm:h-[300px] lg:h-[320px] flex-1 min-h-[220px]">
-          <ChartSuspense height={320}>
+          <ChartSuspense
+            height={320}
+            ariaLabel={t('dashboard.salesEvolution.title', 'Évolution des ventes')}
+            summary={
+              chartData.length > 0
+                ? `${t('dashboard.salesEvolution.revenue', 'Revenus')} de ${chartData[0].month} à ${chartData[chartData.length - 1].month} : de ${formatLocaleNumber(chartData[0].revenue, locale)} à ${formatLocaleNumber(chartData[chartData.length - 1].revenue, locale)}.`
+                : undefined
+            }
+          >
             <LazyResponsiveContainer width="100%" height="100%">
               <LazyLineChart data={chartData}>
                 <LazyCartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />

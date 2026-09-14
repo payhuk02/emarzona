@@ -86,23 +86,23 @@ vi.mock('@/hooks/usePlanLockNavAction', () => ({
   usePlanLockNavAction: vi.fn(() => vi.fn()),
 }));
 
-describe('HorizontalContextNav mobile', () => {
+describe('HorizontalContextNav', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('keeps desktop mega-menu ancestors overflow-visible (no overflow-x clip)', () => {
+  it('allows desktop horizontal scroll so trailing labels like Paramètres stay reachable', () => {
     render(
       <MemoryRouter initialEntries={['/dashboard/orders']}>
         <HorizontalContextNav />
       </MemoryRouter>
     );
 
-    const root = screen.getByTestId('horizontal-context-nav');
-    expect(root.className).toMatch(/overflow-visible/);
-    expect(root.className).not.toMatch(/overflow-x-auto/);
-    const desktopWrap = root.querySelector('.hidden.md\\:block');
-    expect(desktopWrap?.className ?? '').not.toMatch(/overflow-x-auto/);
+    const desktopWrap = screen.getByTestId('horizontal-context-nav-desktop');
+    expect(desktopWrap.className).toMatch(/overflow-x-auto/);
+    const paramsLink = within(desktopWrap).getByRole('link', { name: /^paramètres$/i });
+    expect(paramsLink).toBeInTheDocument();
+    expect(paramsLink.textContent).toBe('Paramètres');
   });
 
   it('renders mobile nav strip with domain triggers', () => {

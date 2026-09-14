@@ -23,6 +23,7 @@ import { Badge } from '@/components/ui/badge';
 import { useMarketplaceFavoritesContext } from '@/contexts/MarketplaceFavoritesContext';
 import { PriceStockAlertButton } from './PriceStockAlertButton';
 import { ResponsiveProductImage } from '@/components/ui/ResponsiveProductImage';
+import { productImageAlt } from '@/lib/accessibility/productImageAlt';
 import { OptimizedImage } from '@/components/ui/OptimizedImage';
 import { PaymentOptionsBadge, getPaymentOptions } from '@/components/products/PaymentOptionsBadge';
 import { PricingModelBadge } from '@/components/products/PricingModelBadge';
@@ -164,7 +165,7 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
           <Link to={generateProductUrl(storeSlug, product.slug)} className="block w-full h-full">
             <ResponsiveProductImage
               src={product.image_url}
-              alt={`Image du produit ${product.name}`}
+              alt={productImageAlt(product.name)}
               className="w-full h-full transition-transform duration-300 group-hover:scale-110"
               fit="contain"
               fill={true}
@@ -185,7 +186,7 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
 
           {/* Overlay gradient au hover pour produits digitaux - Style comme CourseProductCard */}
           {isDigital && (
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2">
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 [@media(hover:none)]:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2">
               <Button size="sm" variant="secondary" asChild>
                 <Link to={generateProductUrl(storeSlug, product.slug)}>
                   <Eye className="h-4 w-4 mr-2" />
@@ -247,7 +248,7 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
               <div className="relative w-full aspect-[3/2] bg-muted">
                 <ResponsiveProductImage
                   src={product.image_url}
-                  alt={product.name}
+                  alt={productImageAlt(product.name)}
                   sizes="100vw"
                   context="detail"
                   fit="contain"
@@ -268,7 +269,7 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
               {storeInfo.logo_url ? (
                 <OptimizedImage
                   src={storeInfo.logo_url}
-                  alt={`Logo de ${storeInfo.name}`}
+                  alt={productImageAlt(storeInfo.name, 'store')}
                   width={28}
                   height={28}
                   className="w-6 h-6 sm:w-7 sm:h-7 rounded-full object-cover border border-gray-200 dark:border-gray-700 flex-shrink-0"
@@ -386,18 +387,18 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
           {/* Badges d'information - Placés après le titre de manière professionnelle */}
           <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-3">
             {hasPromo && (
-              <Badge className="bg-red-500 text-white text-[10px] sm:text-xs font-bold px-2 py-0.5">
+              <Badge className="bg-red-500 text-white text-xs font-bold px-2 py-0.5">
                 <Percent className="h-3 w-3 mr-1" />-{discountPercent}%
               </Badge>
             )}
             {product.licensing_type === 'plr' && (
-              <Badge className="bg-emerald-500 text-white text-[10px] sm:text-xs px-2 py-0.5">
+              <Badge className="bg-emerald-500 text-white text-xs px-2 py-0.5">
                 <Shield className="h-3 w-3 mr-1" />
                 PLR
               </Badge>
             )}
             {product.licensing_type === 'copyrighted' && (
-              <Badge className="bg-red-600 text-white text-[10px] sm:text-xs px-2 py-0.5">
+              <Badge className="bg-red-600 text-white text-xs px-2 py-0.5">
                 <Shield className="h-3 w-3 mr-1" />
                 Droit d'auteur
               </Badge>

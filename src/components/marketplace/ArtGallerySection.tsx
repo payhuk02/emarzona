@@ -8,7 +8,8 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
-import { generateProductUrl } from '@/lib/store-utils';
+import { resolveMarketplaceProductCardUrl } from '@/lib/seo/product-public-url';
+import { softNavigate } from '@/lib/navigation/soft-navigate';
 import { buildCheckoutUrl } from '@/lib/checkout/checkout-route';
 import { Product } from '@/types/marketplace';
 import { UnifiedProductCard } from '@/components/products/UnifiedProductCard';
@@ -149,10 +150,16 @@ export function ArtGallerySection() {
                   variant="marketplace"
                   onAction={(action, product) => {
                     if (action === 'view') {
-                      window.location.href = generateProductUrl(
-                        artwork.stores?.slug || '',
-                        artwork.slug,
-                        artwork.stores?.subdomain
+                      softNavigate(
+                        navigate,
+                        resolveMarketplaceProductCardUrl(
+                          {
+                            id: artwork.id,
+                            slug: artwork.slug,
+                            product_type: artwork.product_type ?? 'artist',
+                          },
+                          artwork.stores
+                        )
                       );
                     } else if (action === 'buy') {
                       navigate(

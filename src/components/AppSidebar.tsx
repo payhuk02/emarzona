@@ -271,12 +271,44 @@ export function AppSidebar() {
         commerceType={commerceType}
       />
 
-      {/* En-tête compact : boutique active (vendeur) ou marque plateforme */}
+      {/* En-tête : marque plateforme (+ boutique vendeur) — Ctrl+K via utility bar / raccourci */}
       <div className={cn('shrink-0 border-b border-border', isCollapsed ? 'p-2' : 'px-3 py-2.5')}>
-        <div className="flex items-center gap-2 min-h-[2.75rem]">
-          {persona === 'seller' ? (
-            <SidebarStoreSwitcher isCollapsed={isCollapsed} />
-          ) : (
+        {persona === 'seller' ? (
+          <div className={cn('flex flex-col', isCollapsed ? 'items-center gap-2' : 'gap-2')}>
+            <Link
+              to={logoHome}
+              className={cn(
+                'flex items-center gap-1.5 group transition-opacity duration-200 hover:opacity-90 min-w-0',
+                isCollapsed ? 'justify-center' : 'w-full'
+              )}
+              aria-label={t(logoAriaKey)}
+            >
+              {platformLogo ? (
+                <LogoImageWithFallback
+                  src={platformLogo}
+                  className={cn('flex-shrink-0', isCollapsed ? 'h-7 w-7' : 'h-8 w-8 sm:h-9 sm:w-9')}
+                />
+              ) : (
+                <div
+                  className={cn(
+                    'flex-shrink-0 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center shadow-md',
+                    isCollapsed ? 'h-7 w-7' : 'h-8 w-8 sm:h-9 sm:w-9'
+                  )}
+                  aria-hidden="true"
+                >
+                  <span className="text-xs font-bold text-white">E</span>
+                </div>
+              )}
+              {!isCollapsed && (
+                <EmarzonaBrandName className="text-base tracking-tight sm:text-lg font-bold" />
+              )}
+            </Link>
+            <div className={cn('min-w-0', isCollapsed ? 'w-full flex justify-center' : 'w-full')}>
+              <SidebarStoreSwitcher isCollapsed={isCollapsed} />
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 min-h-[2.75rem]">
             <Link
               to={logoHome}
               className="flex items-center gap-1.5 group transition-opacity duration-200 hover:opacity-90 shrink-0"
@@ -305,42 +337,44 @@ export function AppSidebar() {
                 <EmarzonaBrandName className="hidden text-lg tracking-tight sm:inline" />
               )}
             </Link>
-          )}
-          {isCollapsed ? (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 text-muted-foreground hover:bg-accent hover:text-foreground shrink-0"
-              onClick={() => setCommandOpen(true)}
-              aria-label={t('sidebar.chrome.searchAriaLabelCollapsed')}
-            >
-              <Search className="h-4 w-4" />
-            </Button>
-          ) : (
-            <button
-              type="button"
-              onClick={() => setCommandOpen(true)}
-              className="app-sidebar-command-trigger flex flex-1 items-center gap-2 h-9 rounded-lg border border-border bg-muted/40 px-2.5 text-left text-sm text-muted-foreground hover:border-primary/40 hover:bg-accent hover:text-foreground transition-all duration-200 min-w-0"
-              aria-label={t('sidebar.chrome.searchAriaLabel')}
-            >
-              <Search className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
-              <span className="flex-1 truncate text-sm">
-                {t('sidebar.chrome.searchPlaceholder')}
-              </span>
-              <kbd className="hidden lg:inline-flex h-5 items-center rounded border border-border bg-muted px-1.5 text-[10px] font-medium text-muted-foreground">
-                Ctrl+K
-              </kbd>
-            </button>
-          )}
+            {isCollapsed ? (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-muted-foreground hover:bg-accent hover:text-foreground shrink-0"
+                onClick={() => setCommandOpen(true)}
+                aria-label={t('sidebar.chrome.searchAriaLabelCollapsed')}
+              >
+                <Search className="h-4 w-4" />
+              </Button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setCommandOpen(true)}
+                className="app-sidebar-command-trigger flex flex-1 items-center gap-2 h-9 rounded-lg border border-border bg-muted/40 px-2.5 text-left text-sm text-muted-foreground hover:border-primary/40 hover:bg-accent hover:text-foreground transition-all duration-200 min-w-0"
+                aria-label={t('sidebar.chrome.searchAriaLabel')}
+              >
+                <Search className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+                <span className="flex-1 truncate text-sm">
+                  {t('sidebar.chrome.searchPlaceholder')}
+                </span>
+                <kbd className="hidden lg:inline-flex h-5 items-center rounded border border-border bg-muted px-1.5 text-[10px] font-medium text-muted-foreground">
+                  Ctrl+K
+                </kbd>
+              </button>
+            )}
+          </div>
+        )}
+        <div className={cn(persona === 'seller' ? 'mt-2' : 'mt-0')}>
+          <PersonaOnboardingCoach isAdmin={isAdmin} enabled={!!userId && needsPersonaOnboarding}>
+            <SidebarPersonaSwitch
+              persona={persona === 'admin' && !isAdmin ? 'seller' : persona}
+              isAdmin={isAdmin}
+              isCollapsed={isCollapsed}
+              onPersonaChange={handlePersonaChange}
+            />
+          </PersonaOnboardingCoach>
         </div>
-        <PersonaOnboardingCoach isAdmin={isAdmin} enabled={!!userId && needsPersonaOnboarding}>
-          <SidebarPersonaSwitch
-            persona={persona === 'admin' && !isAdmin ? 'seller' : persona}
-            isAdmin={isAdmin}
-            isCollapsed={isCollapsed}
-            onPersonaChange={handlePersonaChange}
-          />
-        </PersonaOnboardingCoach>
       </div>
 
       <SidebarContent className="app-sidebar-scroll flex-1 min-h-0 overflow-y-auto scrollbar-thin">

@@ -367,7 +367,7 @@ const FavoritesManager = ({
                           variant="outline"
                           size="sm"
                           onClick={() => onRemoveFavorite(product.id)}
-                          className="absolute top-2 right-2 bg-slate-800/90 backdrop-blur-sm border-slate-600 text-white hover:bg-slate-700 h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="absolute top-2 right-2 bg-slate-800/90 backdrop-blur-sm border-slate-600 text-white hover:bg-slate-700 h-11 w-11 min-h-11 min-w-11 p-0 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 [@media(hover:none)]:opacity-100 transition-opacity"
                           aria-label={`Retirer ${product.name} des favoris`}
                         >
                           <X className="h-3 w-3" />

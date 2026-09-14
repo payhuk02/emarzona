@@ -21,9 +21,9 @@ const buttonVariants = cva(
       },
       size: {
         default: 'min-h-[44px] h-auto px-4 py-2 text-sm',
-        sm: 'min-h-[40px] h-auto rounded-md px-3 py-1.5 text-xs sm:text-sm',
+        sm: 'min-h-[44px] h-auto rounded-md px-3 py-1.5 text-sm',
         lg: 'min-h-[48px] h-auto rounded-md px-6 sm:px-8 py-2.5 text-sm sm:text-base',
-        icon: 'min-h-[44px] min-w-[44px] w-11 h-auto sm:h-12 sm:w-12 aspect-square',
+        icon: 'min-h-[44px] min-w-[44px] w-11 h-11 aspect-square',
       },
     },
     defaultVariants: {
@@ -38,19 +38,46 @@ export interface ButtonProps
   asChild?: boolean;
 }
 
+function hasAccessibleName(
+  props: Pick<ButtonProps, 'aria-label' | 'aria-labelledby' | 'title'>,
+  children: React.ReactNode
+): boolean {
+  if (props['aria-label']?.trim()) return true;
+  if (props['aria-labelledby']?.trim()) return true;
+  if (typeof props.title === 'string' && props.title.trim()) return true;
+  if (typeof children === 'string' && children.trim()) return true;
+  if (typeof children === 'number') return true;
+  return React.Children.toArray(children).some(child => {
+    if (typeof child === 'string' && child.trim()) return true;
+    if (typeof child === 'number') return true;
+    if (!React.isValidElement(child)) return false;
+    if (child.type === 'span' && child.props.className?.includes?.('sr-only')) return true;
+    if (typeof child.props?.children === 'string' && child.props.children.trim()) return true;
+    return false;
+  });
+}
+
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, children, onClick, ...props }, ref) => {
     const Comp = asChild ? Slot : 'button';
     const { triggerHaptic } = useHapticFeedback();
 
-    // Ajouter aria-label automatiquement si non fourni et children est une string
-    // Cela améliore l'accessibilité pour les lecteurs d'écran
     const ariaLabel = props['aria-label'] || (typeof children === 'string' ? children : undefined);
 
-    // Wrapper onClick avec feedback haptique sur mobile
+    if (
+      process.env.NODE_ENV !== 'production' &&
+      !asChild &&
+      size === 'icon' &&
+      !hasAccessibleName(props, children)
+    ) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        '[Button] size="icon" requires aria-label, aria-labelledby, title, or sr-only text.'
+      );
+    }
+
     const handleClick = React.useCallback(
       (e: React.MouseEvent<HTMLButtonElement>) => {
-        // Feedback haptique léger sur mobile
         if (onClick) {
           triggerHaptic('light');
           onClick(e);

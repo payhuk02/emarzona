@@ -16,11 +16,28 @@ export const ChartSkeleton = ({ height = 300 }: { height?: number }) => (
 export function ChartSuspense({
   children,
   height = 300,
+  ariaLabel,
+  summary,
 }: {
   children: React.ReactNode;
   height?: number;
+  /** Libellé pour lecteurs d’écran (role=img) */
+  ariaLabel?: string;
+  /** Résumé textuel sr-only (tendance, répartition…) */
+  summary?: string;
 }) {
-  return <Suspense fallback={<ChartSkeleton height={height} />}>{children}</Suspense>;
+  return (
+    <Suspense fallback={<ChartSkeleton height={height} />}>
+      {ariaLabel || summary ? (
+        <div role={ariaLabel ? 'img' : undefined} aria-label={ariaLabel} className="h-full w-full">
+          {summary ? <div className="sr-only">{summary}</div> : null}
+          {children}
+        </div>
+      ) : (
+        children
+      )}
+    </Suspense>
+  );
 }
 
 type RechartsComponents = typeof import('recharts');

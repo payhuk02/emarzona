@@ -9,6 +9,10 @@ import { Card, CardContent } from '@/components/ui/card';
 
 interface LazyRechartsWrapperProps {
   children: (recharts: typeof import('recharts')) => ReactNode;
+  /** Libellé pour lecteurs d’écran (role=img) */
+  ariaLabel?: string;
+  /** Résumé textuel sr-only */
+  summary?: string;
 }
 
 const ChartsLoadingFallback = () => (
@@ -38,7 +42,7 @@ const ChartsLoadingFallback = () => (
  *   )}
  * </LazyRechartsWrapper>
  */
-export const LazyRechartsWrapper = ({ children }: LazyRechartsWrapperProps) => {
+export const LazyRechartsWrapper = ({ children, ariaLabel, summary }: LazyRechartsWrapperProps) => {
   const [recharts, setRecharts] = useState<typeof import('recharts') | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -53,5 +57,15 @@ export const LazyRechartsWrapper = ({ children }: LazyRechartsWrapperProps) => {
     return <ChartsLoadingFallback />;
   }
 
-  return <>{children(recharts)}</>;
+  const chart = children(recharts);
+  if (!ariaLabel && !summary) {
+    return <>{chart}</>;
+  }
+
+  return (
+    <div role={ariaLabel ? 'img' : undefined} aria-label={ariaLabel} className="h-full w-full">
+      {summary ? <div className="sr-only">{summary}</div> : null}
+      {chart}
+    </div>
+  );
 };

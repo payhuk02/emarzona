@@ -29,6 +29,11 @@ export type HorizontalNavSectionSpec = {
   includePaths?: string[];
   /** Sections menu à parcourir avec includePaths */
   sourceSectionKeys?: string[];
+  /**
+   * Vendeur : fusionne les items de plusieurs sectionKey menu
+   * (barre horizontale multi-domaines).
+   */
+  mergeSectionKeys?: string[];
 };
 
 /** Ordre des domaines dans la barre horizontale vendeur */
@@ -41,18 +46,11 @@ export const SELLER_HORIZONTAL_NAV_SECTIONS: HorizontalNavSectionSpec[] = [
     rootPath: '/dashboard/products',
   },
   {
-    domainKey: 'ventes',
+    domainKey: 'ventes_logistique',
     sectionKey: 'ventes_logistique',
     shortLabelKey: 'sidebar.chrome.sellerNavVentes',
     shortLabel: 'Ventes',
     rootPath: '/dashboard/orders',
-  },
-  {
-    domainKey: 'logistique',
-    sectionKey: 'ventes_logistique',
-    shortLabelKey: 'sidebar.chrome.sellerNavLogistique',
-    shortLabel: 'Logistique',
-    rootPath: '/dashboard/inventory',
   },
   {
     domainKey: 'finance_paiements',
@@ -69,38 +67,33 @@ export const SELLER_HORIZONTAL_NAV_SECTIONS: HorizontalNavSectionSpec[] = [
     rootPath: '/dashboard/marketing',
   },
   {
-    domainKey: 'analytics_seo',
-    sectionKey: 'analytics_seo',
-    shortLabelKey: 'sidebar.chrome.sellerNavAnalytics',
-    shortLabel: 'Analytics',
-    rootPath: '/dashboard/analytics',
-  },
-  {
-    domainKey: 'recommandations_ia',
-    sectionKey: 'recommandations_ia',
-    shortLabelKey: 'sidebar.chrome.sellerNavIA',
-    shortLabel: 'IA',
-    rootPath: '/dashboard/ai-chatbot',
-  },
-  {
-    domainKey: 'systemes_integrations',
-    sectionKey: 'systemes_integrations',
-    shortLabelKey: 'sidebar.chrome.sellerNavSystemes',
-    shortLabel: 'Systèmes',
-    rootPath: '/dashboard/integrations',
-  },
-  {
-    domainKey: 'sponsorisation',
+    domainKey: 'boost_emarzona',
     sectionKey: 'sponsorisation',
-    shortLabelKey: 'sidebar.chrome.sellerNavSponsorisation',
-    shortLabel: 'Sponsorisation',
+    shortLabelKey: 'sidebar.chrome.sellerNavBoost',
+    shortLabel: 'Boost Emarzona',
     rootPath: '/dashboard/sponsorships',
   },
   {
-    domainKey: 'configuration',
+    domainKey: 'affiliation_parrainage',
+    sectionKey: 'affiliation_et_parrainage',
+    shortLabelKey: 'sidebar.chrome.sellerNavAffiliation',
+    shortLabel: 'Affiliation et Parrainage',
+    rootPath: '/dashboard/affiliates',
+  },
+  {
+    domainKey: 'insights',
+    sectionKey: 'analytics_seo',
+    mergeSectionKeys: ['analytics_seo', 'recommandations_ia'],
+    shortLabelKey: 'sidebar.chrome.sellerNavInsights',
+    shortLabel: 'Insights',
+    rootPath: '/dashboard/analytics',
+  },
+  {
+    domainKey: 'outils',
     sectionKey: 'configuration',
-    shortLabelKey: 'sidebar.chrome.sellerNavParametres',
-    shortLabel: 'Paramètres',
+    mergeSectionKeys: ['systemes_integrations', 'configuration'],
+    shortLabelKey: 'sidebar.chrome.sellerNavOutils',
+    shortLabel: 'Outils',
     rootPath: '/dashboard/settings',
   },
 ];
@@ -159,12 +152,14 @@ export const BUYER_HORIZONTAL_NAV_SECTIONS: HorizontalNavSectionSpec[] = [
 export const HORIZONTAL_MEGA_SUBGROUPS: Partial<
   Record<string, Pick<ContextSidebarGroupConfig, 'groupKey' | 'defaultLabel' | 'paths'>[]>
 > = {
-  ventes: PHASE6_CONTEXT_CONFIGS.sales.groups.filter(g =>
-    ['commandes_clients', 'services_reservations'].includes(g.groupKey)
-  ),
-  logistique: PHASE6_CONTEXT_CONFIGS.sales.groups.filter(g =>
-    ['logistique_inventaire', 'optimisation', 'produits_physiques'].includes(g.groupKey)
-  ),
+  ventes_logistique: [
+    ...PHASE6_CONTEXT_CONFIGS.sales.groups.filter(g =>
+      ['commandes_clients', 'services_reservations'].includes(g.groupKey)
+    ),
+    ...PHASE6_CONTEXT_CONFIGS.sales.groups.filter(g =>
+      ['logistique_inventaire', 'optimisation', 'produits_physiques'].includes(g.groupKey)
+    ),
+  ],
   finance_paiements: [
     {
       groupKey: 'encaissements',
@@ -245,40 +240,86 @@ export const HORIZONTAL_MEGA_SUBGROUPS: Partial<
     {
       groupKey: 'croissance',
       defaultLabel: 'Croissance',
+      paths: ['/dashboard/customers', '/dashboard/gamification', '/dashboard/promotions/stats'],
+    },
+  ],
+  boost_emarzona: [
+    {
+      groupKey: 'boost',
+      defaultLabel: 'Boost Emarzona',
       paths: [
-        '/dashboard/customers',
-        '/dashboard/referrals',
-        '/dashboard/affiliates',
-        '/dashboard/store-affiliates',
-        '/dashboard/gamification',
-        '/dashboard/promotions/stats',
+        '/dashboard/sponsorships',
+        '/dashboard/sponsorships/analytics',
+        '/dashboard/sponsorships/campaigns',
       ],
     },
   ],
-  sponsorisation: [
+  affiliation_parrainage: [
     {
-      groupKey: 'boost_emarzona',
-      defaultLabel: 'Boost Emarzona',
-      paths: ['/dashboard/sponsorships'],
+      groupKey: 'parrainage',
+      defaultLabel: 'Parrainage',
+      paths: ['/dashboard/referrals'],
     },
     {
-      groupKey: 'analytics_boost',
-      defaultLabel: 'Analytics Boost',
-      paths: ['/dashboard/sponsorships/analytics'],
-    },
-    {
-      groupKey: 'sponsor_campaigns',
-      defaultLabel: 'Campagnes Boost',
-      paths: ['/dashboard/sponsorships/campaigns'],
-    },
-    {
-      groupKey: 'sponsor_catalogue',
-      defaultLabel: 'Catalogue & paiement',
+      groupKey: 'affiliation',
+      defaultLabel: 'Affiliation',
       paths: [
-        '/dashboard/products',
-        '/dashboard/products/new',
-        '/dashboard/promotions',
-        '/dashboard/payment-methods',
+        '/dashboard/affiliates',
+        '/dashboard/store-affiliates',
+        '/affiliate/dashboard',
+        '/affiliate/courses',
+      ],
+    },
+  ],
+  insights: [
+    {
+      groupKey: 'analytics',
+      defaultLabel: 'Analytics & SEO',
+      paths: [
+        '/dashboard/analytics',
+        '/dashboard/analytics/dashboards',
+        '/dashboard/advanced',
+        '/dashboard/pixels',
+        '/dashboard/seo',
+        '/dashboard/seo/inspector',
+      ],
+    },
+    {
+      groupKey: 'ia',
+      defaultLabel: 'Intelligence artificielle',
+      paths: [
+        '/recommendations',
+        '/discover',
+        '/trending',
+        '/recommendations/history-based',
+        '/personalization/quiz',
+        '/personalization/recommendations',
+        '/dashboard/ai-chatbot',
+        '/dashboard/image-studio',
+      ],
+    },
+  ],
+  outils: [
+    {
+      groupKey: 'integrations',
+      defaultLabel: 'Intégrations & systèmes',
+      paths: [
+        '/dashboard/integrations',
+        '/dashboard/webhooks',
+        '/dashboard/loyalty',
+        '/dashboard/gift-cards',
+        '/notifications',
+      ],
+    },
+    {
+      groupKey: 'parametres',
+      defaultLabel: 'Paramètres',
+      paths: [
+        '/dashboard/kyc',
+        '/dashboard/domain',
+        '/dashboard/settings',
+        '/settings/notifications',
+        '/community',
       ],
     },
   ],

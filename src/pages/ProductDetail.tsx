@@ -37,6 +37,7 @@ import {
 import { SafeHTML } from '@/components/security/SafeHTML';
 import { OptimizedImage } from '@/components/ui/OptimizedImage';
 import { ResponsiveProductImage } from '@/components/ui/ResponsiveProductImage';
+import { productImageAlt } from '@/lib/accessibility/productImageAlt';
 import { CountdownTimer } from '@/components/ui/countdown-timer';
 import { PhysicalProductWhatsAppButton } from '@/components/physical/PhysicalProductWhatsAppButton';
 import { PhysicalProductDeliveryEstimate } from '@/components/physical/PhysicalProductDeliveryEstimate';
@@ -717,7 +718,7 @@ const ProductDetails = () => {
                               {currentImage && (
                                 <ResponsiveProductImage
                                   src={currentImage}
-                                  alt={product.name}
+                                  alt={productImageAlt(product.name)}
                                   className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                                   fit="cover"
                                   fill={true}

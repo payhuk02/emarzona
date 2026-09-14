@@ -117,10 +117,17 @@ export const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
 
   return (
     <div className={cn('relative w-full', className)}>
+      <label htmlFor="marketplace-search-input" className="sr-only">
+        Rechercher des produits
+      </label>
       {/* Input de recherche */}
       <div className="relative">
-        <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
+        <Search
+          className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5"
+          aria-hidden
+        />
         <Input
+          id="marketplace-search-input"
           ref={inputRef}
           type="search"
           value={value}
@@ -132,6 +139,9 @@ export const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
           }}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
+          aria-label="Rechercher des produits"
+          aria-autocomplete="list"
+          aria-expanded={shouldShowDropdown}
           className={cn('pl-12 pr-12 min-h-[44px]', isFocused && 'ring-2 ring-primary')}
           autoFocus={autoFocus}
         />
@@ -143,7 +153,7 @@ export const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
             onClick={clearSearch}
             aria-label="Effacer la recherche"
           >
-            <X className="h-4 w-4 sm:h-5 sm:w-5" />
+            <X className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden />
           </Button>
         )}
       </div>

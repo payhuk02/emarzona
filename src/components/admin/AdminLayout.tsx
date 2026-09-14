@@ -63,7 +63,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
 
   return (
     <AdminRoute>
-      <div className="min-h-screen bg-gradient-to-br from-background to-muted/20">
+      <div className="app-premium-admin min-h-screen bg-gradient-to-br from-background to-muted/20">
         {/* Header mobile (sticky) */}
         <div className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur md:hidden">
           <div className="flex h-14 items-center justify-between px-3">
@@ -137,7 +137,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
                         <Button
                           key={item.path}
                           variant={isActive ? 'default' : 'ghost'}
-                          className="w-full justify-start gap-3"
+                          className="w-full justify-start gap-3 min-h-11"
                           onClick={() => goTo(item.path)}
                         >
                           <Icon className="h-5 w-5" aria-hidden="true" />
@@ -222,7 +222,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
                           key={item.path}
                           variant={isActive ? 'default' : 'ghost'}
                           className={cn(
-                            'w-full justify-start gap-3',
+                            'w-full justify-start gap-3 min-h-11',
                             !sidebarOpen && 'justify-center'
                           )}
                           onClick={() => navigate(item.path)}

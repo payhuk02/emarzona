@@ -27,7 +27,7 @@ function CountryChip({ code, regionKey }: { code: string; regionKey: string }) {
         <p className="whitespace-nowrap text-sm font-medium tracking-tight text-white/95 sm:text-[15px]">
           {name}
         </p>
-        <p className="whitespace-nowrap text-[10px] uppercase tracking-[0.14em] text-white/40">
+        <p className="whitespace-nowrap text-xs uppercase tracking-[0.14em] text-white/40">
           {region}
         </p>
       </div>

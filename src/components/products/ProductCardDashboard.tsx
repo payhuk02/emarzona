@@ -177,7 +177,7 @@ const ProductCardDashboardComponent = ({
                 </Badge>
               )}
             </div>
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 [@media(hover:none)]:opacity-100 transition-opacity duration-300" />
           </div>
         ) : (
           <div className="h-full w-full rounded-t-lg bg-gradient-to-br from-muted via-muted/80 to-muted/50 flex items-center justify-center relative">

@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { AppPageShell } from '@/components/layout/AppPageShell';
 import { useStore } from '@/hooks/useStore';
 import { useSellerCourseProducts } from '@/hooks/courses/useSellerCourseProducts';
+import { productImageAlt } from '@/lib/accessibility/productImageAlt';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -142,7 +143,7 @@ export default function SellerCoursesList() {
                   {course.image_url ? (
                     <img
                       src={course.image_url}
-                      alt=""
+                      alt={productImageAlt(course.name, 'course')}
                       className="h-36 w-full object-cover"
                       loading="lazy"
                     />

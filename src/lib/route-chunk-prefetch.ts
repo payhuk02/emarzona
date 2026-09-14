@@ -15,6 +15,13 @@ const ROUTE_CHUNK_IMPORTS: Record<string, RouteChunkImporter> = {
   '/account': () => import('@/pages/customer/CustomerPortal'),
   '/dashboard': () => import('@/pages/Dashboard'),
   '/dashboard/orders': () => import('@/pages/Orders'),
+  '/dashboard/customers': () => import('@/pages/Customers'),
+  '/dashboard/analytics': () => import('@/pages/Analytics'),
+  '/dashboard/payments': () => import('@/pages/Payments'),
+  '/dashboard/marketing': () => import('@/pages/Marketing'),
+  '/dashboard/settings': () => import('@/pages/Settings'),
+  '/dashboard/sponsorships': () => import('@/pages/dashboard/SponsorshipsPage'),
+  '/dashboard/integrations': () => import('@/pages/dashboard/integrations/IntegrationsPage'),
   '/dashboard/digital-products': () => import('@/pages/digital/DigitalProductsList'),
   '/dashboard/physical-products': () => import('@/pages/physical/PhysicalProductsList'),
   '/dashboard/services': () => import('@/pages/service/ServicesList'),
@@ -26,6 +33,9 @@ const ROUTE_CHUNK_IMPORTS: Record<string, RouteChunkImporter> = {
   '/dashboard/products/new/service': () => import('@/pages/CreateProduct'),
   '/dashboard/products/new/artist': () => import('@/pages/CreateProduct'),
   '/dashboard/courses/new': () => import('@/pages/courses/CreateCourse'),
+  '/recommendations': () => import('@/pages/Recommendations'),
+  '/discover': () => import('@/pages/Discover'),
+  '/trending': () => import('@/pages/Trending'),
 };
 
 const prefetched = new Set<string>();

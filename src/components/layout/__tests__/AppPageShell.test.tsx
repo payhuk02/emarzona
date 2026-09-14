@@ -1,8 +1,9 @@
 import { describe, it, expect, vi } from 'vitest';
 import type { ReactNode } from 'react';
 import { render, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, Routes, Route, Outlet } from 'react-router-dom';
 import { AppPageShell } from '@/components/layout/AppPageShell';
+import { AUTH_APP_OUTLET_CONTEXT } from '@/components/layout/authenticated-app-outlet';
 
 vi.mock('@/hooks/useDeferHorizontalContextNav', () => ({
   useDeferHorizontalContextNav: () => true,
@@ -112,5 +113,34 @@ describe('AppPageShell', () => {
     expect(screen.getAllByTestId('utility-bar-header')).toHaveLength(1);
     expect(document.querySelector('[data-app-shell-nested]')).toBeTruthy();
     expect(screen.getByText('Nested body')).toBeInTheDocument();
+  });
+
+  it('détecte le nest via Outlet context (AuthenticatedAppLayout)', () => {
+    render(
+      <MemoryRouter initialEntries={['/dashboard/loyalty']}>
+        <Routes>
+          <Route
+            element={
+              <AppPageShell>
+                <Outlet context={AUTH_APP_OUTLET_CONTEXT} />
+              </AppPageShell>
+            }
+          >
+            <Route
+              path="/dashboard/loyalty"
+              element={
+                <AppPageShell>
+                  <p>Loyalty nested via outlet</p>
+                </AppPageShell>
+              }
+            />
+          </Route>
+        </Routes>
+      </MemoryRouter>
+    );
+
+    expect(screen.getAllByTestId('app-sidebar')).toHaveLength(1);
+    expect(document.querySelector('[data-app-shell-nested]')).toBeTruthy();
+    expect(screen.getByText('Loyalty nested via outlet')).toBeInTheDocument();
   });
 });

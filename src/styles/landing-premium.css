@@ -5,13 +5,13 @@
 
 .landing-premium {
   --lp-nav-offset: 4.25rem;
-  --lp-ink: #08080a;
+  --lp-ink: var(--emz-brand-ink, #08080a);
   --lp-ink-soft: #121218;
   --lp-ink-muted: #1a1a22;
-  --lp-surface: #fafaf9;
+  --lp-surface: var(--emz-brand-surface, #fafaf9);
   --lp-surface-muted: #f4f3f0;
   --lp-surface-elevated: #ffffff;
-  --lp-gold: #c9a227;
+  --lp-gold: var(--emz-brand-gold, #c9a227);
   --lp-gold-bright: #e4c76a;
   --lp-gold-deep: #9a7b1a;
   --lp-cream: #f5f0e6;
@@ -20,11 +20,11 @@
   --lp-text-on-dark: #e8e6e1;
   --lp-text-dim: #9a9890;
   --lp-purple: #7c5cff;
-  --lp-blue: #2563eb;
+  --lp-blue: var(--emz-brand-blue, #2563eb);
   --lp-blue-bright: #3b82f6;
   --lp-blue-deep: #1d4ed8;
-  --lp-orange: #f97316;
-  --lp-orange-deep: #ea580c;
+  --lp-orange: var(--emz-brand-orange, #f97316);
+  --lp-orange-deep: var(--emz-brand-orange-deep, #ea580c);
   --lp-blue-glow: rgba(37, 99, 235, 0.35);
   --lp-violet-glow: rgba(124, 92, 255, 0.35);
   --lp-gold-glow: rgba(201, 162, 39, 0.25);

@@ -27,7 +27,7 @@ export function ArtistHandlingTimeBadge({
   if (!handlingTimeDays || handlingTimeDays <= 0) return null;
 
   const sizeClasses = {
-    sm: 'text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5',
+    sm: 'text-xs px-1.5 sm:px-2 py-0.5',
     md: 'text-xs sm:text-sm px-2 sm:px-3 py-1',
   };
 
@@ -77,7 +77,7 @@ export function ArtistSignatureBadge({
   if (!signatureAuthenticated) return null;
 
   const sizeClasses = {
-    sm: 'text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5',
+    sm: 'text-xs px-1.5 sm:px-2 py-0.5',
     md: 'text-xs sm:text-sm px-2 sm:px-3 py-1',
   };
 

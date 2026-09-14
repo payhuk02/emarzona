@@ -28,7 +28,7 @@ function CurrencyChip({ currency }: { currency: LandingCurrency }) {
           {currency.code}
           <span className="ml-1.5 font-medium text-[var(--lp-text-muted)]">{currency.symbol}</span>
         </p>
-        <p className="whitespace-nowrap text-[10px] uppercase tracking-[0.14em] text-[var(--lp-text-muted)]">
+        <p className="whitespace-nowrap text-xs uppercase tracking-[0.14em] text-[var(--lp-text-muted)]">
           {name}
         </p>
       </div>

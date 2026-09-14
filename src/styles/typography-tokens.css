@@ -31,4 +31,12 @@
   --emz-public-h3: clamp(1.0625rem, 0.3vw + 0.9rem, 1.1875rem); /* 17–19px */
   --emz-public-body: 0.875rem; /* 14px */
   --emz-public-body-lg: 0.9375rem; /* 15px */
+
+  /* Pont marque landing ↔ tokens sémantiques (évite double système opaque) */
+  --emz-brand-orange: #f97316;
+  --emz-brand-orange-deep: #ea580c;
+  --emz-brand-blue: #2563eb;
+  --emz-brand-ink: #08080a;
+  --emz-brand-surface: #fafaf9;
+  --emz-brand-gold: #c9a227;
 }

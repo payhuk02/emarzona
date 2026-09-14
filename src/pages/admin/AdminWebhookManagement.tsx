@@ -11,7 +11,6 @@
  */
 
 import { useLocation } from 'react-router-dom';
-import { AppPageShell } from '@/components/layout/AppPageShell';
 import { useQuery } from '@tanstack/react-query';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { supabase } from '@/integrations/supabase/client';
@@ -178,10 +177,9 @@ function WebhookPageShell({ adminMode, children }: { adminMode: boolean; childre
     );
   }
 
+  // Chrome déjà fourni par AuthenticatedAppLayout — ne pas remonter AppPageShell.
   return (
-    <AppPageShell>
-      <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">{children}</div>
-    </AppPageShell>
+    <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">{children}</div>
   );
 }
 

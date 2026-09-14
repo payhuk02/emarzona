@@ -88,7 +88,10 @@ export function SidebarStoreSwitcher({ isCollapsed }: SidebarStoreSwitcherProps)
   if (loading && stores.length === 0) {
     return (
       <div
-        className={cn('flex items-center gap-2 min-w-0', isCollapsed ? 'justify-center' : 'flex-1')}
+        className={cn(
+          'flex items-center gap-2 min-w-0 rounded-xl border border-border bg-muted/30',
+          isCollapsed ? 'justify-center p-1' : 'w-full px-2 py-1.5'
+        )}
       >
         <div
           className={cn(
@@ -107,8 +110,8 @@ export function SidebarStoreSwitcher({ isCollapsed }: SidebarStoreSwitcherProps)
         type="button"
         onClick={() => navigate(STORE_CREATE_PATH)}
         className={cn(
-          'flex items-center gap-2 rounded-lg border border-dashed border-border px-2 py-1.5 text-left transition-colors hover:bg-accent hover:text-foreground min-w-0',
-          isCollapsed ? 'justify-center p-1.5' : 'flex-1'
+          'flex items-center gap-2 rounded-xl border border-dashed border-border bg-muted/20 px-2 py-1.5 text-left transition-colors hover:bg-accent hover:text-foreground min-w-0',
+          isCollapsed ? 'justify-center p-1.5' : 'w-full'
         )}
         aria-label={t('sidebar.chrome.createStore')}
       >
@@ -133,8 +136,9 @@ export function SidebarStoreSwitcher({ isCollapsed }: SidebarStoreSwitcherProps)
         <button
           type="button"
           className={cn(
-            'flex items-center gap-1.5 rounded-lg outline-none transition-colors hover:bg-accent/80 focus-visible:ring-2 focus-visible:ring-ring min-w-0',
-            isCollapsed ? 'justify-center p-0.5' : 'flex-1 px-1.5 py-1'
+            'flex items-center gap-1.5 rounded-xl border border-border bg-muted/30 outline-none transition-colors',
+            'hover:bg-accent/80 hover:border-border focus-visible:ring-2 focus-visible:ring-ring min-w-0',
+            isCollapsed ? 'justify-center p-1' : 'w-full px-2 py-1.5'
           )}
           aria-label={t('sidebar.chrome.storeSwitcherAria', {
             name: displayStore.name,

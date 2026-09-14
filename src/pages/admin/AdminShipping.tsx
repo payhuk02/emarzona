@@ -28,22 +28,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Truck,
-  Search,
-  Package,
-  Clock,
-  CheckCircle,
-  MapPin,
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
-} from 'lucide-react';
+import { Truck, Search, Package, Clock, CheckCircle, MapPin } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { AdminPaginationNav } from '@/components/admin/AdminPaginationNav';
 import { AutomaticTrackingButton } from '@/components/shipping/AutomaticTrackingButton';
 import { TrackingAutoRefresh } from '@/components/shipping/TrackingAutoRefresh';
 import { useAdminShipmentsList } from '@/hooks/useAdminShipments';
@@ -407,41 +397,11 @@ export default function AdminShipping() {
                       ))}
                     </SelectContent>
                   </Select>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    disabled={page <= 1}
-                    onClick={() => setPage(1)}
-                  >
-                    <ChevronsLeft className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    disabled={page <= 1}
-                    onClick={() => setPage(page - 1)}
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </Button>
-                  <span className="text-sm px-2">
-                    {page} / {Math.ceil(totalCount / pageSize)}
-                  </span>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    disabled={page >= Math.ceil(totalCount / pageSize)}
-                    onClick={() => setPage(page + 1)}
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    disabled={page >= Math.ceil(totalCount / pageSize)}
-                    onClick={() => setPage(Math.ceil(totalCount / pageSize))}
-                  >
-                    <ChevronsRight className="h-4 w-4" />
-                  </Button>
+                  <AdminPaginationNav
+                    page={page}
+                    totalPages={Math.max(1, Math.ceil(totalCount / pageSize))}
+                    onPageChange={setPage}
+                  />
                 </div>
               </div>
             )}

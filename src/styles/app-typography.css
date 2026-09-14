@@ -106,6 +106,19 @@
   font-weight: 400 !important;
 }
 
+/* Micro tailles illisibles — plancher 12px aussi hors app-premium (landing/marketplace) */
+.landing-premium [class*='text-[8px]'],
+.landing-premium [class*='text-[9px]'],
+.landing-premium [class*='text-[10px]'],
+.landing-premium [class*='text-[11px]'],
+.app-premium-admin [class*='text-[8px]'],
+.app-premium-admin [class*='text-[9px]'],
+.app-premium-admin [class*='text-[10px]'],
+.app-premium-admin [class*='text-[11px]'] {
+  font-size: var(--emz-text-caption) !important;
+  line-height: var(--emz-line-normal) !important;
+}
+
 /* Micro tailles illisibles */
 .landing-premium.app-premium #main-content [class*='text-[8px]'],
 .landing-premium.app-premium #main-content [class*='text-[9px]'],

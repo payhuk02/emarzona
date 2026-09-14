@@ -17,6 +17,10 @@ export const PUBLIC_CRITICAL_SMOKE_PATHS = [
   '/faq',
   '/about',
   '/contact',
+  '/recommendations',
+  '/discover',
+  '/trending',
+  '/community',
 ] as const;
 
 /** Redirections legacy — chemin final attendu (regex). */
@@ -57,6 +61,10 @@ export const VENDOR_CRITICAL_SMOKE_PATHS = [
   '/dashboard/settings',
   '/dashboard/integrations',
   '/dashboard/webhooks',
+  '/dashboard/sponsorships',
+  '/dashboard/sponsorships/analytics',
+  '/dashboard/sponsorships/campaigns',
+  '/dashboard/ai-chatbot',
   '/dashboard/physical-products',
   '/dashboard/digital-products',
   '/dashboard/courses',

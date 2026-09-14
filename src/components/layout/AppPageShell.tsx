@@ -9,7 +9,8 @@
 
 import { lazy, ReactNode, Suspense, useEffect, useRef, createContext, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useOutletContext } from 'react-router-dom';
+import type { AuthenticatedAppOutletContext } from '@/components/layout/authenticated-app-outlet';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { UtilityBarHeader } from '@/components/layout/UtilityBarHeader';
@@ -67,7 +68,10 @@ export function AppPageShell({
   hideHorizontalNav = false,
   padForBottomNav,
 }: AppPageShellProps) {
-  const nested = useContext(AppPageShellNestContext);
+  const nestedFromProvider = useContext(AppPageShellNestContext);
+  /** Fallback si createContext est dupliqué (HMR / chunks) — Outlet du layout auth. */
+  const outletCtx = useOutletContext<AuthenticatedAppOutletContext | undefined>();
+  const nested = nestedFromProvider || outletCtx?.appPageShellActive === true;
   const { t } = useTranslation();
   const location = useLocation();
   const mainRef = useRef<HTMLElement>(null);

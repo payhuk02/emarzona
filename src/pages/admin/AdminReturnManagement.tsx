@@ -74,13 +74,10 @@ import {
   CheckCircle2,
   Edit,
   MoreVertical,
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { AdminPaginationNav } from '@/components/admin/AdminPaginationNav';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { supabase } from '@/integrations/supabase/client';
@@ -723,38 +720,11 @@ export default function AdminReturnManagement() {
                       ))}
                     </SelectContent>
                   </Select>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    disabled={page <= 1}
-                    onClick={() => setPage(1)}
-                  >
-                    <ChevronsLeft className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    disabled={page <= 1}
-                    onClick={() => setPage(page - 1)}
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    disabled={page >= Math.ceil(totalCount / pageSize)}
-                    onClick={() => setPage(page + 1)}
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    disabled={page >= Math.ceil(totalCount / pageSize)}
-                    onClick={() => setPage(Math.ceil(totalCount / pageSize))}
-                  >
-                    <ChevronsRight className="h-4 w-4" />
-                  </Button>
+                  <AdminPaginationNav
+                    page={page}
+                    totalPages={Math.max(1, Math.ceil(totalCount / pageSize))}
+                    onPageChange={setPage}
+                  />
                 </div>
               </div>
             )}

@@ -1,7 +1,6 @@
 import { ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 import { AdminLayout } from '@/components/admin/AdminLayout';
-import { AppPageShell } from '@/components/layout/AppPageShell';
 
 /** Routes plateforme `/admin/*` — shell admin MFA ; routes vendeur `/dashboard/*` — AppPageShell. */
 export function isPlatformAdminRoute(pathname: string): boolean {
@@ -14,6 +13,9 @@ type Props = {
 
 /**
  * Shell dual-mode pour modules store-scoped montés sous `/admin/*` et `/dashboard/*`.
+ *
+ * Sous `/dashboard/*`, ne pas remonter AppPageShell : AuthenticatedAppLayout
+ * le fournit déjà (évite double sidebar / barre horizontale).
  */
 export function StoreScopedPageShell({ children }: Props) {
   const { pathname } = useLocation();
@@ -22,5 +24,5 @@ export function StoreScopedPageShell({ children }: Props) {
     return <AdminLayout>{children}</AdminLayout>;
   }
 
-  return <AppPageShell>{children}</AppPageShell>;
+  return <>{children}</>;
 }

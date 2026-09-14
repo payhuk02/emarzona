@@ -287,7 +287,7 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
 
         {/* Overlay gradient au hover pour produits digitaux - Style comme CourseProductCard */}
         {isDigital && (
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2">
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 [@media(hover:none)]:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2">
             <Button size="sm" variant="secondary" asChild>
               <Link to={generateProductUrl(storeSlug, product.slug || '')}>
                 <Eye className="h-4 w-4 mr-2" />

@@ -39,7 +39,7 @@ export function PaymentOptionsBadge({
   const percentageRate = paymentOptions?.percentage_rate || 30;
 
   const sizeClasses = {
-    sm: 'text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5',
+    sm: 'text-xs px-1.5 sm:px-2 py-0.5',
     md: 'text-xs sm:text-sm px-2 sm:px-3 py-1',
     lg: 'text-sm sm:text-base px-3 sm:px-4 py-1.5',
   };

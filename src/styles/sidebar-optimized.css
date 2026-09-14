@@ -70,13 +70,24 @@
   scroll-margin-top: 3rem;
 }
 
-[data-testid='horizontal-context-nav'] .scrollbar-hide {
+[data-testid='horizontal-context-nav'] .scrollbar-hide,
+[data-testid='horizontal-context-nav-desktop'] {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
 
-[data-testid='horizontal-context-nav'] .scrollbar-hide::-webkit-scrollbar {
+[data-testid='horizontal-context-nav'] .scrollbar-hide::-webkit-scrollbar,
+[data-testid='horizontal-context-nav-desktop']::-webkit-scrollbar {
   display: none;
+}
+
+/* Libellés domaine (ex. Paramètres) : jamais tronqués mid-word */
+[data-testid='horizontal-context-nav-desktop'] a,
+[data-testid='horizontal-context-nav-desktop'] button {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 [data-sidebar='sidebar'] [data-sidebar='group-label'] {

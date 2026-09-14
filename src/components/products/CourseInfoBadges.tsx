@@ -29,7 +29,7 @@ export function CourseDifficultyBadge({
   if (!difficulty) return null;
 
   const sizeClasses = {
-    sm: 'text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5',
+    sm: 'text-xs px-1.5 sm:px-2 py-0.5',
     md: 'text-xs sm:text-sm px-2 sm:px-3 py-1',
   };
 
@@ -84,7 +84,7 @@ export function CourseLanguageBadge({
   if (!language) return null;
 
   const sizeClasses = {
-    sm: 'text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5',
+    sm: 'text-xs px-1.5 sm:px-2 py-0.5',
     md: 'text-xs sm:text-sm px-2 sm:px-3 py-1',
   };
 
@@ -135,7 +135,7 @@ export function CourseDurationBadge({
   if (!totalDuration || totalDuration <= 0) return null;
 
   const sizeClasses = {
-    sm: 'text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5',
+    sm: 'text-xs px-1.5 sm:px-2 py-0.5',
     md: 'text-xs sm:text-sm px-2 sm:px-3 py-1',
   };
 
@@ -191,7 +191,7 @@ export function CourseModulesBadge({
   if (!count || count <= 0) return null;
 
   const sizeClasses = {
-    sm: 'text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5',
+    sm: 'text-xs px-1.5 sm:px-2 py-0.5',
     md: 'text-xs sm:text-sm px-2 sm:px-3 py-1',
   };
 

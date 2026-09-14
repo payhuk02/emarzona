@@ -41,7 +41,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import { AdminPaginationNav } from '@/components/admin/AdminPaginationNav';
 
 const ADMIN_STORE_PAGE_SIZES = [10, 20, 50, 100];
 
@@ -265,41 +265,7 @@ const AdminStores = () => {
                       ))}
                     </SelectContent>
                   </Select>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    disabled={page <= 1}
-                    onClick={() => setPage(1)}
-                  >
-                    <ChevronsLeft className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    disabled={page <= 1}
-                    onClick={() => setPage(page - 1)}
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </Button>
-                  <span className="text-sm px-2">
-                    {page} / {totalPages}
-                  </span>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    disabled={page >= totalPages}
-                    onClick={() => setPage(page + 1)}
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    disabled={page >= totalPages}
-                    onClick={() => setPage(totalPages)}
-                  >
-                    <ChevronsRight className="h-4 w-4" />
-                  </Button>
+                  <AdminPaginationNav page={page} totalPages={totalPages} onPageChange={setPage} />
                 </div>
               </div>
             )}

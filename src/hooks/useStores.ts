@@ -6,18 +6,14 @@ import { logger } from '@/lib/logger';
 import type { Database } from '@/integrations/supabase/types';
 import type { StoreCommerceType } from '@/constants/store-commerce-types';
 import { STORE_COMMERCE_TYPES } from '@/constants/store-commerce-types';
-import { resolveStoreCommerceTypeFromStore } from '@/lib/commerce/store-capability-map';
 import {
   extractAppearancePayload,
   omitAppearanceFromStoreUpdates,
 } from '@/lib/storefront/store-appearance-fields';
-import {
-  flattenStoreWithAppearance,
-  STORE_APPEARANCE_EMBED_SELECT,
-} from '@/lib/storefront/flatten-store-appearance';
 import { fallbackStoreQuota, fetchUserStoreQuota } from '@/lib/billing/user-store-quota';
 import { sanitizeStorePayload } from '@/lib/store-payload-utils';
 import { assertReadyToCreateStore } from '@/lib/store/create-store-service';
+import { fetchUserAccessibleStores } from '@/lib/store/fetch-user-accessible-stores';
 import {
   buildCreateStoreInsertPayload,
   CREATE_STORE_ALLOWED_CLIENT_KEYS,
@@ -284,39 +280,8 @@ export const useStores = () => {
         return [];
       }
 
-      // Embed store_appearance hors schéma types.ts → cast pour éviter TS2589
-      const { data, error } = await (
-        supabase.from('stores') as unknown as {
-          select: (columns: string) => {
-            eq: (
-              column: string,
-              value: string
-            ) => {
-              order: (
-                column: string,
-                opts: { ascending: boolean }
-              ) => Promise<{ data: Record<string, unknown>[] | null; error: Error | null }>;
-            };
-          };
-        }
-      )
-        .select(
-          `id, user_id, name, slug, subdomain, description, is_active, created_at, updated_at, custom_domain, domain_status, metadata, commerce_type, ${STORE_APPEARANCE_EMBED_SELECT}`
-        )
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: true });
-
-      if (error) {
-        throw error;
-      }
-
-      return ((data ?? []) as Record<string, unknown>[]).map(row => {
-        const flattened = flattenStoreWithAppearance(row);
-        return {
-          ...flattened,
-          commerce_type: resolveStoreCommerceTypeFromStore(flattened),
-        } as Store;
-      });
+      // Owner + membres actifs (même règle que StoreContext)
+      return fetchUserAccessibleStores<Store>(user.id);
     },
     staleTime: 2 * 60 * 1000, // 2 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes

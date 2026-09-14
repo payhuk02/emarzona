@@ -177,17 +177,18 @@ function resolveSellerHorizontalNavDomains(
   const domains: HorizontalNavDomain[] = [];
 
   for (const spec of SELLER_HORIZONTAL_NAV_SECTIONS) {
-    const section = byKey.get(spec.sectionKey);
-    if (!section || section.items.length === 0) continue;
+    const sectionKeys = spec.mergeSectionKeys?.length ? spec.mergeSectionKeys : [spec.sectionKey];
+
+    const rawItems = sectionKeys.flatMap(key => byKey.get(key)?.items ?? []);
+    if (rawItems.length === 0) continue;
 
     let items = deduplicateNavLinks(
-      section.items.map(item => toLink(item, input.physicalPlanSlug, input.commerceType))
+      rawItems.map(item => toLink(item, input.physicalPlanSlug, input.commerceType))
     );
 
-    // Si le domaine est partagé (comme ventes et logistique qui pointent vers ventes_logistique),
-    // on filtre les items pour ne garder que ceux déclarés dans leurs sous-groupes respectifs.
+    // Domaine unifié Ventes+Logistique : ne garder que les paths déclarés en sous-groupes
     const subgroupDefs = HORIZONTAL_MEGA_SUBGROUPS[spec.domainKey];
-    if (subgroupDefs && spec.sectionKey === 'ventes_logistique') {
+    if (subgroupDefs && spec.domainKey === 'ventes_logistique') {
       items = items.filter(item =>
         subgroupDefs.some(
           def => def.paths.includes(item.path) || def.paths.some(p => item.path.startsWith(`${p}/`))
@@ -214,6 +215,12 @@ function resolveSellerHorizontalNavDomains(
       ? input.t(spec.shortLabelKey, { defaultValue: spec.shortLabel })
       : spec.shortLabel;
 
+    const primarySection = byKey.get(spec.sectionKey);
+    const label =
+      spec.mergeSectionKeys && spec.mergeSectionKeys.length > 1
+        ? shortLabel
+        : (primarySection?.label ?? shortLabel);
+
     domains.push({
       ...spec,
       rootPath:
@@ -221,7 +228,7 @@ function resolveSellerHorizontalNavDomains(
           ? resolveSellerNavPath(VENDOR_PRODUCTS_HUB_PATH, input.commerceType)
           : spec.rootPath,
       shortLabel,
-      label: section.label,
+      label,
       items,
       subgroups: buildSubgroups(spec.domainKey, items, input.t, HORIZONTAL_MEGA_SUBGROUPS),
       isActive,

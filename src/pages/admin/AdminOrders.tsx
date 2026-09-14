@@ -31,12 +31,9 @@ import {
   XCircle,
   Clock,
   CheckCircle,
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
 } from 'lucide-react';
 import { Admin2FABanner } from '@/components/admin/Admin2FABanner';
+import { AdminPaginationNav } from '@/components/admin/AdminPaginationNav';
 import { ProtectedAction } from '@/components/admin/ProtectedAction';
 import { useAdminActions } from '@/hooks/useAdminActions';
 import { useAdminMFA } from '@/hooks/useAdminMFA';
@@ -422,41 +419,11 @@ export default function AdminOrders() {
                         ))}
                       </SelectContent>
                     </Select>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      disabled={page <= 1}
-                      onClick={() => setPage(1)}
-                    >
-                      <ChevronsLeft className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      disabled={page <= 1}
-                      onClick={() => setPage(page - 1)}
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
-                    <span className="text-sm px-2">
-                      {page} / {totalPages}
-                    </span>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      disabled={page >= totalPages}
-                      onClick={() => setPage(page + 1)}
-                    >
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      disabled={page >= totalPages}
-                      onClick={() => setPage(totalPages)}
-                    >
-                      <ChevronsRight className="h-4 w-4" />
-                    </Button>
+                    <AdminPaginationNav
+                      page={page}
+                      totalPages={totalPages}
+                      onPageChange={setPage}
+                    />
                   </div>
                 </div>
               )}

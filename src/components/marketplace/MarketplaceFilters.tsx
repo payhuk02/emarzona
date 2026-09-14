@@ -46,48 +46,75 @@ const MarketplaceFilters = ({
     <>
       {/* Desktop Filters */}
       <div className="hidden sm:flex flex-wrap gap-3">
-        <Select value={categoryFilter} onValueChange={onCategoryChange}>
-          <SelectTrigger className="w-full sm:w-[180px] md:w-[200px] bg-card border-border">
-            <SelectValue placeholder="Catégorie" />
-          </SelectTrigger>
-          <SelectContent className="z-50 bg-background">
-            <SelectItem value="all">Toutes les catégories</SelectItem>
-            {categories.map(cat => (
-              <SelectItem key={cat} value={cat}>
-                {cat}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="space-y-1.5">
+          <Label htmlFor="mp-filter-category" className="sr-only">
+            Catégorie
+          </Label>
+          <Select value={categoryFilter} onValueChange={onCategoryChange}>
+            <SelectTrigger
+              id="mp-filter-category"
+              aria-label="Catégorie"
+              className="w-full sm:w-[180px] md:w-[200px] bg-card border-border min-h-11"
+            >
+              <SelectValue placeholder="Catégorie" />
+            </SelectTrigger>
+            <SelectContent className="z-50 bg-background">
+              <SelectItem value="all">Toutes les catégories</SelectItem>
+              {categories.map(cat => (
+                <SelectItem key={cat} value={cat}>
+                  {cat}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-        <Select value={priceRange} onValueChange={onPriceChange}>
-          <SelectTrigger className="w-full sm:w-[180px] md:w-[200px] bg-card border-border">
-            <SelectValue placeholder="Prix" />
-          </SelectTrigger>
-          <SelectContent className="z-50 bg-background">
-            <SelectItem value="all">Tous les prix</SelectItem>
-            <SelectItem value="0-5000">0 - 5,000 XOF</SelectItem>
-            <SelectItem value="5000-15000">5,000 - 15,000 XOF</SelectItem>
-            <SelectItem value="15000+">15,000+ XOF</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="space-y-1.5">
+          <Label htmlFor="mp-filter-price" className="sr-only">
+            Prix
+          </Label>
+          <Select value={priceRange} onValueChange={onPriceChange}>
+            <SelectTrigger
+              id="mp-filter-price"
+              aria-label="Prix"
+              className="w-full sm:w-[180px] md:w-[200px] bg-card border-border min-h-11"
+            >
+              <SelectValue placeholder="Prix" />
+            </SelectTrigger>
+            <SelectContent className="z-50 bg-background">
+              <SelectItem value="all">Tous les prix</SelectItem>
+              <SelectItem value="0-5000">0 - 5,000 XOF</SelectItem>
+              <SelectItem value="5000-15000">5,000 - 15,000 XOF</SelectItem>
+              <SelectItem value="15000+">15,000+ XOF</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
-        <Select value={sortBy} onValueChange={onSortChange}>
-          <SelectTrigger className="w-full sm:w-[180px] md:w-[200px] bg-card border-border">
-            <SlidersHorizontal className="h-4 w-4 mr-2" />
-            <SelectValue placeholder="Trier par" />
-          </SelectTrigger>
-          <SelectContent className="z-50 bg-background">
-            <SelectItem value="recent">Plus récents</SelectItem>
-            <SelectItem value="popular">Plus populaires</SelectItem>
-            <SelectItem value="price-asc">Prix croissant</SelectItem>
-            <SelectItem value="price-desc">Prix décroissant</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="space-y-1.5">
+          <Label htmlFor="mp-filter-sort" className="sr-only">
+            Trier par
+          </Label>
+          <Select value={sortBy} onValueChange={onSortChange}>
+            <SelectTrigger
+              id="mp-filter-sort"
+              aria-label="Trier par"
+              className="w-full sm:w-[180px] md:w-[200px] bg-card border-border min-h-11"
+            >
+              <SlidersHorizontal className="h-4 w-4 mr-2" aria-hidden />
+              <SelectValue placeholder="Trier par" />
+            </SelectTrigger>
+            <SelectContent className="z-50 bg-background">
+              <SelectItem value="recent">Plus récents</SelectItem>
+              <SelectItem value="popular">Plus populaires</SelectItem>
+              <SelectItem value="price-asc">Prix croissant</SelectItem>
+              <SelectItem value="price-desc">Prix décroissant</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
         {hasActiveFilters && (
           <Button variant="ghost" size="sm" onClick={clearFilters} className="gap-2">
-            <X className="h-4 w-4" />
+            <X className="h-4 w-4" aria-hidden />
             Réinitialiser
           </Button>
         )}

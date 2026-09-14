@@ -54,7 +54,7 @@ export function ServicePricingTypeBadge({
   if (type === 'fixed') return null;
 
   const sizeClasses = {
-    sm: 'text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5',
+    sm: 'text-xs px-1.5 sm:px-2 py-0.5',
     md: 'text-xs sm:text-sm px-2 sm:px-3 py-1',
   };
 
@@ -123,7 +123,7 @@ export function ServiceDepositBadge({
   if (!depositRequired || !depositAmount) return null;
 
   const sizeClasses = {
-    sm: 'text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5',
+    sm: 'text-xs px-1.5 sm:px-2 py-0.5',
     md: 'text-xs sm:text-sm px-2 sm:px-3 py-1',
   };
 
@@ -171,7 +171,7 @@ export function ServiceCancellationBadge({
   if (allowCancellation === undefined || allowCancellation === null) return null;
 
   const sizeClasses = {
-    sm: 'text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5',
+    sm: 'text-xs px-1.5 sm:px-2 py-0.5',
     md: 'text-xs sm:text-sm px-2 sm:px-3 py-1',
   };
 
@@ -236,7 +236,7 @@ export function ServiceMaxParticipantsBadge({
   if (!maxParticipants || maxParticipants <= 1) return null;
 
   const sizeClasses = {
-    sm: 'text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5',
+    sm: 'text-xs px-1.5 sm:px-2 py-0.5',
     md: 'text-xs sm:text-sm px-2 sm:px-3 py-1',
   };
 
@@ -289,7 +289,7 @@ export function ServiceGigPackageMetricsBadge({
     maxDeliveryDays ?? null
   );
   const sizeClasses = {
-    sm: 'text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5',
+    sm: 'text-xs px-1.5 sm:px-2 py-0.5',
     md: 'text-xs sm:text-sm px-2 sm:px-3 py-1',
   };
   const iconSizes = {

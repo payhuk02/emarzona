@@ -43,6 +43,7 @@ import {
 } from 'lucide-react';
 import { OptimizedImage } from '@/components/ui/OptimizedImage';
 import { ResponsiveProductImage } from '@/components/ui/ResponsiveProductImage';
+import { productImageAlt } from '@/lib/accessibility/productImageAlt';
 import { UnifiedProductCardProps } from '@/types/unified-product';
 import { recordSponsorshipEvent } from '@/lib/sponsorship/marketplace-sponsorship';
 import { ServiceListingAttributeBadges } from '@/components/service/ServiceListingAttributeBadges';
@@ -129,14 +130,14 @@ function StoreLogoAvatar({ url, name }: { url?: string | null; name?: string }) 
         className="mp-store-logo mp-store-logo--fallback w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center flex-shrink-0"
         aria-hidden
       >
-        <span className="text-[10px] sm:text-xs font-bold leading-none">{initial}</span>
+        <span className="text-xs font-bold leading-none">{initial}</span>
       </div>
     );
   }
   return (
     <img
       src={src}
-      alt={name ? `Logo ${name}` : 'Logo boutique'}
+      alt={productImageAlt(name, 'store')}
       width={28}
       height={28}
       loading="lazy"
@@ -256,6 +257,10 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
 
   const productName =
     product.type === 'artist' ? product.artwork_title || product.name : product.name;
+  const imageAlt = productImageAlt(
+    productName,
+    product.type === 'artist' ? 'artwork' : product.type === 'course' ? 'course' : 'product'
+  );
 
   const marketplaceBuy = useMarketplaceGuestBuy({
     product: {
@@ -432,7 +437,7 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
           {product.type === 'artist' && allArtistImages.length > 1 ? (
             <ArtistImageCarousel
               images={allArtistImages}
-              alt={productName}
+              alt={imageAlt}
               className="w-full h-full product-image group-hover:scale-110 transition-transform duration-300"
               priority={false}
             />
@@ -440,7 +445,7 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
             <div className="relative w-full h-full">
               <ResponsiveProductImage
                 src={productImage}
-                alt={productName}
+                alt={imageAlt}
                 sizes={imageSizes}
                 context="grid"
                 priority={imagePriority}
@@ -586,7 +591,7 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
           <div className="absolute top-1.5 sm:top-2 right-1.5 sm:right-2 z-10">
             <Badge
               variant="destructive"
-              className="shadow-lg text-[10px] sm:text-xs font-bold px-2 sm:px-2.5 py-0.5 sm:py-1"
+              className="shadow-lg text-xs font-bold px-2 sm:px-2.5 py-0.5 sm:py-1"
             >
               -{priceInfo.discount}%
             </Badge>
@@ -618,7 +623,7 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
               <div className="relative w-full aspect-[3/2] bg-muted">
                 <ResponsiveProductImage
                   src={productImage}
-                  alt={productName}
+                  alt={imageAlt}
                   sizes="100vw"
                   context="detail"
                   fit="contain"
@@ -642,7 +647,7 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
             <CheckCircle className="h-3.5 w-3.5 text-green-500 flex-shrink-0" />
             {product.is_sponsored ? (
               <span
-                className="ml-auto flex-shrink-0 text-[10px] sm:text-xs font-semibold text-violet-300"
+                className="ml-auto flex-shrink-0 text-xs font-semibold text-violet-300"
                 aria-label="Produit sponsorisé"
               >
                 Sponsorisé
@@ -687,12 +692,12 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
         {/* Badges d'information */}
         <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-2">
           {isNew && (
-            <Badge className="bg-gradient-to-r from-blue-500 to-purple-500 text-white border-0 text-[10px] sm:text-xs px-2 py-0.5">
+            <Badge className="bg-gradient-to-r from-blue-500 to-purple-500 text-white border-0 text-xs px-2 py-0.5">
               <Sparkles className="h-3 w-3 mr-1" /> Nouveau
             </Badge>
           )}
           {product.is_featured ? (
-            <Badge className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white border-0 text-[10px] sm:text-xs px-2 py-0.5">
+            <Badge className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white border-0 text-xs px-2 py-0.5">
               <Star className="h-3 w-3 mr-1 fill-white" /> Vedette
             </Badge>
           ) : null}
@@ -700,48 +705,43 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
           {/* Type Badges */}
           {product.type === 'artist' ? (
             <>
-              <Badge className="bg-pink-600 text-white text-[10px] sm:text-xs px-2 py-0.5">
+              <Badge className="bg-pink-600 text-white text-xs px-2 py-0.5">
                 {product.artist_type || 'Artiste'}
               </Badge>
               {product.edition_type && (
-                <Badge
-                  variant="secondary"
-                  className="bg-purple-600 text-white text-[10px] sm:text-xs px-2 py-0.5"
-                >
+                <Badge variant="secondary" className="bg-purple-600 text-white text-xs px-2 py-0.5">
                   {product.edition_type}
                 </Badge>
               )}
               {product.certificate_of_authenticity && (
-                <Badge className="bg-green-600 text-white flex items-center text-[10px] sm:text-xs px-2 py-0.5">
+                <Badge className="bg-green-600 text-white flex items-center text-xs px-2 py-0.5">
                   <Shield className="h-3 w-3 mr-1" /> Certifié
                 </Badge>
               )}
               {product.artist_type === 'multimedia' && product.video_url && (
-                <Badge className="bg-blue-600 text-white flex items-center text-[10px] sm:text-xs px-2 py-0.5">
+                <Badge className="bg-blue-600 text-white flex items-center text-xs px-2 py-0.5">
                   <Video className="h-3 w-3 mr-1" /> Preview vidéo
                 </Badge>
               )}
             </>
           ) : product.type === 'physical' ? (
             <>
-              <Badge className="bg-green-600 text-white text-[10px] sm:text-xs px-2 py-0.5">
-                Physique
-              </Badge>
+              <Badge className="bg-green-600 text-white text-xs px-2 py-0.5">Physique</Badge>
               {stockStatus?.badge === 'destructive' && (
-                <Badge variant="destructive" className="text-[10px] sm:text-xs px-2 py-0.5">
+                <Badge variant="destructive" className="text-xs px-2 py-0.5">
                   Rupture
                 </Badge>
               )}
               {stockStatus?.badge === 'warning' && (product.stock || 0) > 0 && (
                 <Badge
                   variant="outline"
-                  className="bg-orange-500 text-white border-orange-600 text-[10px] sm:text-xs px-2 py-0.5"
+                  className="bg-orange-500 text-white border-orange-600 text-xs px-2 py-0.5"
                 >
                   Stock faible
                 </Badge>
               )}
               {(product as any).free_shipping && (
-                <Badge className="bg-blue-600 text-white flex items-center text-[10px] sm:text-xs px-2 py-0.5">
+                <Badge className="bg-blue-600 text-white flex items-center text-xs px-2 py-0.5">
                   <Truck className="h-3 w-3 mr-1" /> Livraison gratuite
                 </Badge>
               )}
@@ -758,36 +758,31 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
             </>
           ) : product.type === 'service' ? (
             <>
-              <Badge className="bg-purple-600 text-white text-[10px] sm:text-xs px-2 py-0.5">
+              <Badge className="bg-purple-600 text-white text-xs px-2 py-0.5">
                 {product.service_type || 'Service'}
               </Badge>
               {product.calendar_available && (
-                <Badge className="bg-green-600 text-white flex items-center text-[10px] sm:text-xs px-2 py-0.5">
+                <Badge className="bg-green-600 text-white flex items-center text-xs px-2 py-0.5">
                   <Calendar className="h-3 w-3 mr-1" /> Calendrier
                 </Badge>
               )}
               {product.booking_required && !product.calendar_available && (
-                <Badge
-                  variant="secondary"
-                  className="bg-blue-600 text-white text-[10px] sm:text-xs px-2 py-0.5"
-                >
+                <Badge variant="secondary" className="bg-blue-600 text-white text-xs px-2 py-0.5">
                   Réservation requise
                 </Badge>
               )}
             </>
           ) : product.type === 'course' ? (
             <>
-              <Badge className="bg-orange-600 text-white text-[10px] sm:text-xs px-2 py-0.5">
-                Cours en ligne
-              </Badge>
+              <Badge className="bg-orange-600 text-white text-xs px-2 py-0.5">Cours en ligne</Badge>
               {product.access_type && (
-                <Badge className="bg-green-600 text-white flex items-center text-[10px] sm:text-xs px-2 py-0.5">
+                <Badge className="bg-green-600 text-white flex items-center text-xs px-2 py-0.5">
                   <Award className="h-3 w-3 mr-1" /> {product.access_type}
                 </Badge>
               )}
             </>
           ) : (
-            <Badge className={cn('text-white text-[10px] sm:text-xs px-2 py-0.5', typeBadge.color)}>
+            <Badge className={cn('text-white text-xs px-2 py-0.5', typeBadge.color)}>
               {typeBadge.label}
             </Badge>
           )}
@@ -1112,7 +1107,7 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
             }
           >
             {priceInfo.showStartingFrom && (
-              <span className="text-[10px] sm:text-xs text-gray-400 w-full">À partir de</span>
+              <span className="text-xs text-gray-400 w-full">À partir de</span>
             )}
             {priceInfo.originalPrice && (
               <span className="text-xs sm:text-sm text-gray-400 line-through">

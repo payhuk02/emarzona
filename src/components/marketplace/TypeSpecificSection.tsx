@@ -8,7 +8,8 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
-import { generateProductUrl } from '@/lib/store-utils';
+import { resolveMarketplaceProductCardUrl } from '@/lib/seo/product-public-url';
+import { softNavigate } from '@/lib/navigation/soft-navigate';
 import { buildCheckoutUrl } from '@/lib/checkout/checkout-route';
 import { Product } from '@/types/marketplace';
 import { UnifiedProductCard } from '@/components/products/UnifiedProductCard';
@@ -210,10 +211,16 @@ export function TypeSpecificSection({
                   showActions={true}
                   onAction={(action, prod) => {
                     if (action === 'view') {
-                      window.location.href = generateProductUrl(
-                        product.stores?.slug || '',
-                        product.slug,
-                        product.stores?.subdomain
+                      softNavigate(
+                        navigate,
+                        resolveMarketplaceProductCardUrl(
+                          {
+                            id: product.id,
+                            slug: product.slug,
+                            product_type: product.product_type,
+                          },
+                          product.stores
+                        )
                       );
                     } else if (action === 'buy') {
                       navigate(

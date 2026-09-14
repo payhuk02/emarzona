@@ -9,10 +9,20 @@ import { getVendorWizardPrefetchRoutes } from '@/lib/wizard/prefetch-product-wiz
 export const PUBLIC_IDLE_ROUTES = ['/marketplace'] as const;
 export const PUBLIC_HOVER_ROUTES = ['/marketplace', '/checkout'] as const;
 
-/** Chemins vendeur indépendants du commerce_type */
-export const VENDOR_CORE_IDLE_ROUTES = ['/dashboard', '/dashboard/orders'] as const;
+/** Chemins vendeur indépendants du commerce_type (hubs 6 domaines + commandes) */
+export const VENDOR_CORE_IDLE_ROUTES = [
+  '/dashboard',
+  '/dashboard/orders',
+  '/dashboard/analytics',
+  '/dashboard/payments',
+  '/dashboard/marketing',
+  '/dashboard/settings',
+  '/dashboard/customers',
+] as const;
 export const VENDOR_CORE_HOVER_ROUTES = [
   ...VENDOR_CORE_IDLE_ROUTES,
+  '/dashboard/sponsorships',
+  '/dashboard/integrations',
   '/marketplace',
   '/cart',
 ] as const;
@@ -32,7 +42,14 @@ export function getVendorIdleRoutes(commerceType?: StoreCommerceType | null): re
 }
 
 export function getVendorHoverRoutes(commerceType?: StoreCommerceType | null): readonly string[] {
-  return [...new Set([...getVendorIdleRoutes(commerceType), '/marketplace', '/cart'])];
+  return [
+    ...new Set([
+      ...getVendorIdleRoutes(commerceType),
+      ...VENDOR_CORE_HOVER_ROUTES,
+      '/marketplace',
+      '/cart',
+    ]),
+  ];
 }
 
 export interface RoutePrefetchConfig {

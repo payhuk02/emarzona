@@ -48,7 +48,7 @@ function PricingCard({
   return (
     <div className="relative h-full pt-5">
       <span
-        className={`absolute top-0 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider ${
+        className={`absolute top-0 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider ${
           highlight
             ? 'bg-[var(--lp-gold)] text-[#0a0a0c]'
             : 'border border-white/15 bg-[#15151c] text-[var(--lp-gold-bright)]'
@@ -139,7 +139,7 @@ export function PricingSection() {
 
           <div className="relative overflow-visible pt-1">
             <div className="relative pt-5">
-              <span className="absolute top-0 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded-full border border-white/15 bg-[#15151c] px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[var(--lp-gold-bright)]">
+              <span className="absolute top-0 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded-full border border-white/15 bg-[#15151c] px-3 py-1 text-xs font-bold uppercase tracking-wider text-[var(--lp-gold-bright)]">
                 {t('pricing.commission.badge')}
               </span>
 

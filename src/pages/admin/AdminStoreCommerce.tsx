@@ -12,6 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { AdminPaginationNav } from '@/components/admin/AdminPaginationNav';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Select,
@@ -62,10 +63,6 @@ import {
   CheckCircle,
   Clock,
   XCircle,
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
   Loader2,
   Store,
 } from 'lucide-react';
@@ -102,36 +99,7 @@ function PaginationBar(props: {
             ))}
           </SelectContent>
         </Select>
-        <Button variant="outline" size="icon" disabled={page <= 1} onClick={() => onPageChange(1)}>
-          <ChevronsLeft className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="outline"
-          size="icon"
-          disabled={page <= 1}
-          onClick={() => onPageChange(page - 1)}
-        >
-          <ChevronLeft className="h-4 w-4" />
-        </Button>
-        <span className="text-sm px-2">
-          {page} / {totalPages}
-        </span>
-        <Button
-          variant="outline"
-          size="icon"
-          disabled={page >= totalPages}
-          onClick={() => onPageChange(page + 1)}
-        >
-          <ChevronRight className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="outline"
-          size="icon"
-          disabled={page >= totalPages}
-          onClick={() => onPageChange(totalPages)}
-        >
-          <ChevronsRight className="h-4 w-4" />
-        </Button>
+        <AdminPaginationNav page={page} totalPages={totalPages} onPageChange={onPageChange} />
       </div>
     </div>
   );
