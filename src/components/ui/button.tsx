@@ -64,12 +64,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     const ariaLabel = props['aria-label'] || (typeof children === 'string' ? children : undefined);
 
-    if (
-      process.env.NODE_ENV !== 'production' &&
-      !asChild &&
-      size === 'icon' &&
-      !hasAccessibleName(props, children)
-    ) {
+    if (import.meta.env.DEV && !asChild && size === 'icon' && !hasAccessibleName(props, children)) {
       // eslint-disable-next-line no-console
       console.warn(
         '[Button] size="icon" requires aria-label, aria-labelledby, title, or sr-only text.'
