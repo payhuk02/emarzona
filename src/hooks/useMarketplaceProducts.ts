@@ -209,6 +209,7 @@ export async function fetchMarketplaceProducts({
             reviews_count: product.reviews_count ? Number(product.reviews_count) : 0,
             category: product.category as string,
             product_type: product.product_type as string,
+            country_of_origin: (product.country_of_origin as string) || null,
             pricing_type: product.pricing_type as string | undefined,
             fulfillment_mode: product.fulfillment_mode as string | undefined,
             duration:
@@ -293,6 +294,7 @@ export async function fetchMarketplaceProducts({
     'reviews_count',
     'category',
     'product_type',
+    'country_of_origin',
     'licensing_type',
     'license_terms',
     'is_featured',

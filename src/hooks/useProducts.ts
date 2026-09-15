@@ -20,6 +20,7 @@ export interface Product {
   image_url: string | null;
   category: string | null;
   product_type: string | null;
+  country_of_origin?: string | null;
   rating: number;
   reviews_count: number;
   is_active: boolean;
@@ -316,7 +317,7 @@ export const useProducts = useProductsOptimized;
  * côté React dans `Storefront.tsx`.
  */
 const STOREFRONT_PRODUCT_SELECT_BASE =
-  'id, store_id, name, slug, description, price, promotional_price, currency, image_url, category, product_type, rating, reviews_count, is_active, created_at, updated_at, whatsapp_number, whatsapp_enabled, payment_options';
+  'id, store_id, name, slug, description, price, promotional_price, currency, image_url, category, product_type, country_of_origin, rating, reviews_count, is_active, created_at, updated_at, whatsapp_number, whatsapp_enabled, payment_options';
 
 /** Colonnes service_products valides (calendar_available est calculé côté RPC, pas une colonne table). */
 const STOREFRONT_PRODUCT_SELECT_WITH_SERVICE = `${STOREFRONT_PRODUCT_SELECT_BASE}, service_products!left(service_type,location_type,pricing_type,fulfillment_mode,duration_minutes,requires_staff,service_packages(price,package_price,package_kind,is_active,delivery_days,revisions))`;

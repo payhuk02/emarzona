@@ -55,6 +55,7 @@ export const SELLER_PRIMARY_PATHS = new Set([
   '/dashboard/license-management',
   '/dashboard/auctions',
   '/dashboard/portfolios',
+  '/dashboard/collections',
   '/dashboard/orders',
   '/dashboard/store/team',
   '/dashboard/bookings',

@@ -70,6 +70,7 @@ import { saveDraftHybrid, loadDraftHybrid, clearDraft } from '@/lib/artist-produ
 import { validateAndSanitizeArtistProduct } from '@/lib/artist-product-sanitizer';
 import { validateArtistPublishFormData } from '@/lib/artist-product-publish-validation';
 import { validateArtistProduct } from '@/lib/validation/centralized-validation';
+import { getArtistCategoriesForType } from '@/constants/product-categories';
 import { createArtistProductTx } from '@/lib/products/product-create-rpc';
 import { persistProductWhatsApp } from '@/lib/products/persist-product-whatsapp';
 import { ProductWhatsAppContactConfig } from '@/components/products/shared/ProductWhatsAppContactConfig';
@@ -166,6 +167,7 @@ const CreateArtistProductWizardComponent = ({
     images: [],
     category: 'peinture',
     category_id: null,
+    country_of_origin: '',
     tags: [],
     artist_type: null as ArtistType | null,
     artist_name: '',
@@ -337,6 +339,14 @@ const CreateArtistProductWizardComponent = ({
             });
             return false;
           }
+          if (!formData.country_of_origin?.trim()) {
+            toast({
+              title: 'Pays d’origine requis',
+              description: 'Sélectionnez le pays d’origine de l’œuvre',
+              variant: 'destructive',
+            });
+            return false;
+          }
           // Validation cohérence requires_shipping / artwork_link_url
           if (!formData.requires_shipping && !formData.artwork_link_url) {
             const errorData = getNonPhysicalArtworkError();
@@ -453,6 +463,7 @@ const CreateArtistProductWizardComponent = ({
         currency: 'XOF',
         category: sanitizedData.category,
         category_id: sanitizedData.category_id || null,
+        country_of_origin: sanitizedData.country_of_origin || null,
         image_url: sanitizedData.images?.[0] || null,
         images: sanitizedData.images || [],
         tags: sanitizedData.tags || [],
@@ -530,6 +541,38 @@ const CreateArtistProductWizardComponent = ({
         if (affiliateError) {
           logger.error('Affiliate settings error', {
             error: affiliateError.message,
+            productId: rpcResult.product_id,
+          });
+          toast({
+            title: 'Produit créé, affiliation non enregistrée',
+            description:
+              affiliateError.message ||
+              "L'œuvre a été publiée mais les paramètres d'affiliation n'ont pas pu être sauvegardés. Modifiez le produit pour réessayer.",
+            variant: 'destructive',
+          });
+        }
+      }
+
+      // Seed provenance "création" (non bloquant — editable ensuite dans le wizard d'édition)
+      {
+        const eventDate =
+          sanitizedData.artwork_year != null
+            ? `${sanitizedData.artwork_year}-01-01`
+            : new Date().toISOString().slice(0, 10);
+        const { error: provenanceError } = await supabase.from('artwork_provenance').insert({
+          product_id: rpcResult.product_id,
+          store_id: store.id,
+          provenance_type: 'creation',
+          event_date: eventDate,
+          current_owner_name: sanitizedData.artist_name || null,
+          description: sanitizedData.artwork_title
+            ? `Création de « ${sanitizedData.artwork_title} »`
+            : 'Création de l’œuvre',
+          is_verified: false,
+        });
+        if (provenanceError) {
+          logger.warn('Provenance seed skipped', {
+            error: provenanceError.message,
             productId: rpcResult.product_id,
           });
         }
@@ -799,7 +842,14 @@ const CreateArtistProductWizardComponent = ({
             {currentStep === 1 && (
               <ArtistTypeSelector
                 selectedType={formData.artist_type || null}
-                onSelect={type => handleUpdateFormData({ artist_type: type })}
+                onSelect={type => {
+                  const cats = getArtistCategoriesForType(type);
+                  const nextCategory =
+                    cats.find(c => c.value === formData.category)?.value ||
+                    cats[0]?.value ||
+                    'autre';
+                  handleUpdateFormData({ artist_type: type, category: nextCategory });
+                }}
               />
             )}
 

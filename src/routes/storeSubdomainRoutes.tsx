@@ -17,6 +17,7 @@ import { FeatureErrorBoundary } from '@/components/monitoring/FeatureErrorBounda
 const Storefront = lazyPage(() => import('@/pages/Storefront'));
 const ProductDetail = lazyPage(() => import('@/pages/ProductDetail'));
 const ServiceDetail = lazyPage(() => import('@/pages/service/ServiceDetail'));
+const ArtistProductDetail = lazyPage(() => import('@/pages/artist/ArtistProductDetail'));
 const StoreLegalPage = lazyPage(() => import('@/pages/StoreLegalPage'));
 const Cart = lazyPage(() => import('@/pages/CartEnhanced'));
 const Checkout = lazyPage(() => import('@/pages/checkout/CheckoutPage'));
@@ -57,6 +58,7 @@ export function StoreSubdomainRoutes({ storeSlug }: StoreSubdomainRoutesProps) {
           {/* Produits */}
           <Route path="/products/:productSlug" element={<ProductDetail />} />
           <Route path="/service/:serviceId" element={<ServiceDetail />} />
+          <Route path="/artist/:productId" element={<ArtistProductDetail />} />
 
           {/* Pages légales */}
           <Route path="/legal/:page" element={<StoreLegalPage />} />

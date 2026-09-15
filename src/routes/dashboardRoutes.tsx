@@ -279,6 +279,9 @@ const GamificationPage = lazyPage(() => import('@/pages/gamification/Gamificatio
 const ArtistPortfoliosManagement = lazyPage(
   () => import('@/pages/dashboard/ArtistPortfoliosManagement')
 );
+const ArtistCollectionsManagement = lazyPage(
+  () => import('@/pages/dashboard/ArtistCollectionsManagement')
+);
 const AuctionsManagementPage = lazyPage(() => import('@/pages/artist/AuctionsManagementPage'));
 const AuctionsWatchlistPage = lazyPage(() => import('@/pages/artist/AuctionsWatchlistPage'));
 const SellerIntegrationsPage = lazyPage(
@@ -447,6 +450,7 @@ export const dashboardRoutes = (
     {pr('/dashboard/advanced-calendar', AdvancedCalendarPage)}
     {pr('/dashboard/gamification', GamificationPage)}
     {pr('/dashboard/portfolios', ArtistPortfoliosManagement)}
+    {pr('/dashboard/collections', ArtistCollectionsManagement)}
     {pr('/dashboard/auctions', AuctionsManagementPage)}
     {pr('/dashboard/auctions/watchlist', AuctionsWatchlistPage)}
     {pr('/dashboard/integrations', SellerIntegrationsPage)}

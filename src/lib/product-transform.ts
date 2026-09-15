@@ -119,6 +119,7 @@ export function transformToUnifiedProduct(product: DatabaseProduct): UnifiedProd
     purchases_count: product.purchases_count || 0,
     tags: product.tags || [],
     category: product.category,
+    country_of_origin: (product as { country_of_origin?: string | null }).country_of_origin ?? null,
     status: product.is_active === false ? 'archived' : product.is_draft ? 'draft' : 'active',
     created_at: product.created_at,
     updated_at: product.updated_at || product.created_at,

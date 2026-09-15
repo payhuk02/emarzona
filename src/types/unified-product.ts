@@ -30,6 +30,8 @@ export interface BaseProduct {
   purchases_count?: number;
   tags?: string[];
   category?: string;
+  /** ISO 3166-1 alpha-2 — shown on physical & artist cards */
+  country_of_origin?: string | null;
   status: ProductStatus;
   created_at: string;
   updated_at: string;

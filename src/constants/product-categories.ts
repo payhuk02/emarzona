@@ -233,6 +233,48 @@ export function getCategoriesForProductType(productType: string): CategoryOption
   }
 }
 
+/** Médiums artist filtrés selon le rôle créateur (artist_type). */
+export function getArtistCategoriesForType(artistType?: string | null): CategoryOption[] {
+  const all = ARTIST_CATEGORIES;
+  switch (artistType) {
+    case 'writer':
+      return all.filter(c => ['livre-artiste', 'autre'].includes(c.value));
+    case 'musician':
+      return all.filter(c => ['digital-art', 'autre'].includes(c.value));
+    case 'visual_artist':
+      return all.filter(c =>
+        [
+          'peinture',
+          'dessin',
+          'sculpture',
+          'photographie-art',
+          'illustration',
+          'gravure',
+          'collage',
+          'mural',
+          'mixed-media',
+          'ceramique',
+          'verre',
+          'textile',
+          'estampe',
+          'autre',
+        ].includes(c.value)
+      );
+    case 'designer':
+      return all.filter(c => ['illustration', 'digital-art', 'autre'].includes(c.value));
+    case 'multimedia':
+      return all.filter(c => ['digital-art', 'mixed-media', 'autre'].includes(c.value));
+    case 'other':
+    default:
+      return all;
+  }
+}
+
+export function getArtistCategoryLabel(slug?: string | null): string {
+  if (!slug) return '';
+  return ARTIST_CATEGORIES.find(c => c.value === slug)?.label || slug;
+}
+
 /**
  * Obtenir toutes les catégories pour la marketplace (tous types confondus)
  */

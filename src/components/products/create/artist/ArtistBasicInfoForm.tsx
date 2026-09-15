@@ -18,7 +18,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { getCategoriesForProductType } from '@/constants/product-categories';
+import { getArtistCategoriesForType } from '@/constants/product-categories';
+import { ProductCountryOfOriginField } from '@/components/products/shared/ProductCountryOfOriginField';
 import {
   ImagePlus,
   X,
@@ -63,9 +64,8 @@ interface ArtistBasicInfoFormProps {
   storeSlug?: string;
 }
 
-const ARTIST_CATEGORIES = getCategoriesForProductType('artist');
-
 const ArtistBasicInfoFormComponent = ({ data, onUpdate, storeSlug }: ArtistBasicInfoFormProps) => {
+  const ARTIST_CATEGORIES = getArtistCategoriesForType(data.artist_type);
   const { toast } = useToast();
   const {
     uploadMany,
@@ -78,6 +78,15 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate, storeSlug }: ArtistBasic
   const { handleKeyDown: handleSpaceKeyDown } = useSpaceInputFix();
   const [artworkLinkUrl, setArtworkLinkUrl] = useState(data.artwork_link_url || '');
   const [isManuallyEdited, setIsManuallyEdited] = useState(false);
+
+  // Keep category in the filtered list when artist_type changes
+  React.useEffect(() => {
+    if (!ARTIST_CATEGORIES.length) return;
+    const current = data.category || '';
+    if (!ARTIST_CATEGORIES.some(c => c.value === current)) {
+      onUpdate({ category: ARTIST_CATEGORIES[0].value });
+    }
+  }, [data.artist_type]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Synchroniser l'état local avec les props
   React.useEffect(() => {
@@ -277,7 +286,11 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate, storeSlug }: ArtistBasic
           label="Catégorie *"
           contentVariant="sheet"
           useMobileSelectRoot
-          value={data.category || 'peinture'}
+          value={
+            ARTIST_CATEGORIES.some(c => c.value === data.category)
+              ? data.category!
+              : ARTIST_CATEGORIES[0]?.value || 'autre'
+          }
           onValueChange={value => {
             onUpdate({ category: value });
           }}
@@ -290,6 +303,14 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate, storeSlug }: ArtistBasic
             </SelectItem>
           ))}
         </SelectField>
+      </div>
+
+      <div className="space-y-2">
+        <ProductCountryOfOriginField
+          required
+          value={data.country_of_origin}
+          onChange={code => onUpdate({ country_of_origin: code })}
+        />
       </div>
 
       {/* Artist Photo */}
@@ -1043,6 +1064,8 @@ export const ArtistBasicInfoForm = React.memo(
     // Comparaison personnalisée pour éviter les re-renders inutiles
     return (
       prevProps.data.artist_type === nextProps.data.artist_type &&
+      prevProps.data.category === nextProps.data.category &&
+      prevProps.data.country_of_origin === nextProps.data.country_of_origin &&
       prevProps.data.artist_name === nextProps.data.artist_name &&
       prevProps.data.artwork_title === nextProps.data.artwork_title &&
       prevProps.data.artist_photo_url === nextProps.data.artist_photo_url &&

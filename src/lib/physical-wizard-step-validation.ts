@@ -17,6 +17,7 @@ export type PhysicalWizardFormFields = {
   description?: string;
   price?: number;
   images?: unknown[];
+  country_of_origin?: string;
   has_variants?: boolean;
   options?: unknown[];
   variants?: Array<{ quantity?: number }>;
@@ -60,6 +61,10 @@ export function validatePhysicalWizardStep(
 
     if (!formData.images || formData.images.length === 0) {
       errors.push('Au moins une image est requise');
+    }
+
+    if (!formData.country_of_origin?.trim()) {
+      errors.push('Le pays d’origine est obligatoire');
     }
   }
 

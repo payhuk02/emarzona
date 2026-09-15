@@ -30,7 +30,7 @@ import {
   Shield,
   TrendingUp,
 } from 'lucide-react';
-import { ArtistTypeSelector } from '../create/artist/ArtistTypeSelector';
+import { getArtistCategoriesForType } from '@/constants/product-categories';
 import { ArtistBasicInfoForm } from '../create/artist/ArtistBasicInfoForm';
 import { ArtistSpecificForms } from '../create/artist/ArtistSpecificForms';
 import { ArtistShippingConfig } from '../create/artist/ArtistShippingConfig';
@@ -96,6 +96,7 @@ const convertToFormData = (
     images: product?.images || [],
     category: (product?.category as string) || 'peinture',
     category_id: (product?.category_id as string) || null,
+    country_of_origin: (product?.country_of_origin as string) || '',
     tags: product?.tags || [],
     artist_type: artistProduct?.artist_type as ArtistType,
     artist_name: artistProduct?.artist_name || '',
@@ -194,6 +195,7 @@ export const EditArtistProductWizard = ({
     images: [],
     category: 'peinture',
     category_id: null,
+    country_of_origin: '',
     tags: [],
     artist_type: null as ArtistType | null,
     artist_name: '',
@@ -376,6 +378,16 @@ export const EditArtistProductWizard = ({
             });
             return { valid: false, errors };
           }
+          if (!formData.country_of_origin?.trim()) {
+            const errorMsg = 'Sélectionnez le pays d’origine de l’œuvre';
+            errors.push(errorMsg);
+            toast({
+              title: 'Pays d’origine requis',
+              description: errorMsg,
+              variant: 'destructive',
+            });
+            return { valid: false, errors };
+          }
           if (!formData.requires_shipping && !formData.artwork_link_url) {
             const errorMsg = "Pour une œuvre non physique, un lien vers l'œuvre est requis";
             errors.push(errorMsg);
@@ -492,6 +504,7 @@ export const EditArtistProductWizard = ({
         price: sanitizedData.price || 0,
         category: sanitizedData.category,
         category_id: sanitizedData.category_id || null,
+        country_of_origin: sanitizedData.country_of_origin || null,
         image_url: sanitizedData.images?.[0] || null,
         images: sanitizedData.images || [],
         tags: sanitizedData.tags || [],
@@ -688,7 +701,14 @@ export const EditArtistProductWizard = ({
             {currentStep === 1 && (
               <ArtistTypeSelector
                 selectedType={formData.artist_type}
-                onSelect={type => handleUpdateFormData({ artist_type: type })}
+                onSelect={type => {
+                  const cats = getArtistCategoriesForType(type);
+                  const nextCategory =
+                    cats.find(c => c.value === formData.category)?.value ||
+                    cats[0]?.value ||
+                    'autre';
+                  handleUpdateFormData({ artist_type: type, category: nextCategory });
+                }}
               />
             )}
 

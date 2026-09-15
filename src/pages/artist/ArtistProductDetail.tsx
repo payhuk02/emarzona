@@ -29,6 +29,9 @@ import {
 } from 'lucide-react';
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { PhysicalProductWhatsAppButton } from '@/components/physical/PhysicalProductWhatsAppButton';
+import { getArtistCategoryLabel } from '@/constants/product-categories';
+import { formatProductCountryLabel } from '@/components/products/shared/ProductCountryOfOriginField';
 // Lazy load composants lourds pour optimiser le bundle
 const ProductReviewsSummary = lazy(() =>
   import('@/components/reviews/ProductReviewsSummary').then(m => ({
@@ -446,7 +449,19 @@ const ArtistProductDetail = () => {
               role="group"
               aria-label="Catégories du produit"
             >
-              <Badge aria-label={`Catégorie: ${product?.category}`}>{product?.category}</Badge>
+              <Badge
+                aria-label={`Catégorie: ${getArtistCategoryLabel(product?.category) || product?.category}`}
+              >
+                {getArtistCategoryLabel(product?.category) || product?.category}
+              </Badge>
+              {product?.country_of_origin && (
+                <Badge
+                  variant="outline"
+                  aria-label={`Pays: ${formatProductCountryLabel(product.country_of_origin)}`}
+                >
+                  {formatProductCountryLabel(product.country_of_origin)}
+                </Badge>
+              )}
               {product?.artist?.artist_type && (
                 <Badge
                   variant="outline"
@@ -642,6 +657,15 @@ const ArtistProductDetail = () => {
 
           {/* Actions */}
           <div className="space-y-3">
+            {product.whatsapp_enabled && product.whatsapp_number && (
+              <PhysicalProductWhatsAppButton
+                productName={product.name || product.artist?.artwork_title || "Œuvre d'artiste"}
+                whatsappNumber={product.whatsapp_number}
+                whatsappEnabled={product.whatsapp_enabled}
+                className="w-full"
+                label="Contacter sur WhatsApp"
+              />
+            )}
             <Button
               data-testid="artist-buy-now"
               onClick={handleBuyNow}

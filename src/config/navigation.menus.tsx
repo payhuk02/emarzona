@@ -325,7 +325,7 @@ export const userMenuSections = [
       },
       {
         title: "Collections d'Œuvres",
-        url: '/collections',
+        url: '/dashboard/collections',
         icon: Boxes,
       },
       {

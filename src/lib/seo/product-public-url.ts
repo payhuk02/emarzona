@@ -74,5 +74,8 @@ export function resolveStoreProductCardUrl(product: MarketplaceProductRef): stri
   if (product.product_type === 'course' && product.slug) {
     return `/courses/${product.slug}`;
   }
+  if (product.product_type === 'artist') {
+    return `/artist/${product.id}`;
+  }
   return product.slug ? `/products/${product.slug}` : `/products/${product.id}`;
 }

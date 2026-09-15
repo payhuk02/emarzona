@@ -155,6 +155,7 @@
     "/dashboard/analytics",
     "/dashboard/artist-products",
     "/dashboard/auctions",
+    "/dashboard/collections",
     "/dashboard/coupons",
     "/dashboard/customers",
     "/dashboard/domain",

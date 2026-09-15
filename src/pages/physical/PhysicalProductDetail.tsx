@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next';
 import { formatLocaleNumber } from '@/lib/i18n/locale-format';
 import { PublicPremiumChrome } from '@/components/layout/PublicPremiumChrome';
 import { SafeHTML } from '@/components/security/SafeHTML';
+import { formatProductCountryLabel } from '@/components/products/shared/ProductCountryOfOriginField';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -660,7 +661,9 @@ export default function PhysicalProductDetail() {
                     {product.physical.country_of_origin && (
                       <div className="flex justify-between py-2 border-b">
                         <span className="text-muted-foreground">Origine</span>
-                        <span className="font-medium">{product.physical.country_of_origin}</span>
+                        <span className="font-medium">
+                          {formatProductCountryLabel(product.physical.country_of_origin)}
+                        </span>
                       </div>
                     )}
                   </>

@@ -122,7 +122,9 @@ describe('store-capability-map', () => {
 
   it('gates artist public discovery and course affiliate paths', () => {
     expect(canAccessCommercePath('/collections', 'artist')).toBe(true);
+    expect(canAccessCommercePath('/dashboard/collections', 'artist')).toBe(true);
     expect(canAccessCommercePath('/collections', 'course')).toBe(false);
+    expect(canAccessCommercePath('/dashboard/collections', 'course')).toBe(false);
     expect(canAccessCommercePath('/auctions', 'artist')).toBe(true);
     expect(canAccessCommercePath('/auctions', 'physical')).toBe(false);
     expect(canAccessCommercePath('/affiliate/courses', 'course')).toBe(true);

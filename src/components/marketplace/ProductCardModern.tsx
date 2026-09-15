@@ -18,6 +18,7 @@ import {
   ZoomIn,
   Calendar,
   Eye,
+  MapPin,
 } from 'lucide-react';
 import { useMarketplaceGuestBuy } from '@/hooks/marketplace/useMarketplaceGuestBuy';
 import { MarketplaceGuestBuyDialogs } from '@/components/marketplace/MarketplaceGuestBuyDialogs';
@@ -48,6 +49,7 @@ import {
 import { generatePaymentUrl } from '@/lib/store-utils';
 import { resolveMarketplaceProductCardUrl } from '@/lib/seo/product-public-url';
 import { recordSponsorshipEvent } from '@/lib/sponsorship/marketplace-sponsorship';
+import { formatProductCountryLabel } from '@/components/products/shared/ProductCountryOfOriginField';
 
 interface ProductCardModernProps {
   product: {
@@ -68,6 +70,7 @@ interface ProductCardModernProps {
     hide_reviews_count?: boolean | null;
     category?: string | null;
     product_type?: string | null;
+    country_of_origin?: string | null;
     store_id?: string;
     payment_options?: PhysicalProductPaymentOptions | string | null;
     whatsapp_number?: string | null;
@@ -618,9 +621,21 @@ const ProductCardModernComponent = ({
                 ? 'Numérique'
                 : product.product_type === 'physical'
                   ? 'Physique'
-                  : 'Service'}
+                  : product.product_type === 'artist'
+                    ? 'Œuvre'
+                    : product.product_type === 'course'
+                      ? 'Cours'
+                      : 'Service'}
             </Badge>
           )}
+
+          {product.country_of_origin &&
+            (product.product_type === 'physical' || product.product_type === 'artist') && (
+              <Badge variant="outline" className="text-xs border-0 bg-muted/60">
+                <MapPin className="h-3 w-3 mr-1" />
+                {formatProductCountryLabel(product.country_of_origin)}
+              </Badge>
+            )}
         </div>
 
         <MarketplaceProductCardPriceRow

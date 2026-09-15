@@ -12,9 +12,9 @@ import type { ArtistProduct } from '@/types/artist-product';
 import { logger } from '@/lib/logger';
 
 const ARTIST_PRODUCT_FIELDS =
-  'id, product_id, store_id, artist_type, artist_name, artist_bio, artist_website, artist_social_links, artwork_title, artwork_year, artwork_medium, artwork_dimensions, artwork_weight, artwork_style, artwork_subject, artwork_dominant_colors, artwork_techniques, artwork_materials, artwork_framed, artwork_signature, artwork_condition, artwork_certificate_of_authenticity, artwork_provenance, artwork_location, artwork_shipping_info, artwork_returns_policy, artwork_tags, artwork_meta_title, artwork_meta_description, artwork_slug, created_at, updated_at';
+  'id, product_id, store_id, artist_type, artist_name, artist_bio, artist_website, artist_photo_url, artist_social_links, artwork_title, artwork_year, artwork_medium, artwork_dimensions, artwork_link_url, artwork_edition_type, edition_number, total_editions, writer_specific, musician_specific, visual_artist_specific, designer_specific, multimedia_specific, requires_shipping, shipping_handling_time, shipping_fragile, shipping_insurance_required, shipping_insurance_amount, certificate_of_authenticity, certificate_file_url, signature_authenticated, signature_location, version, created_at, updated_at';
 const PRODUCT_CORE_FIELDS =
-  'id, name, slug, description, short_description, price, compare_at_price, currency, category, category_id, image_url, images, is_active, is_draft, created_at, updated_at, payment_options, whatsapp_number, whatsapp_enabled';
+  'id, name, slug, description, short_description, price, compare_at_price, cost_per_item, currency, category, category_id, country_of_origin, image_url, images, tags, is_active, is_draft, created_at, updated_at, payment_options, whatsapp_number, whatsapp_enabled, faqs, meta_title, meta_description, og_image';
 
 // ✅ SÉCURITÉ: Fonction de validation de propriété du produit artiste
 const validateArtistProductOwnership = async (

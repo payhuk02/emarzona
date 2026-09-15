@@ -91,6 +91,8 @@ export interface ArtistProductFormData {
   category_id: string | null;
   tags: string[];
   slug?: string;
+  /** ISO 3166-1 alpha-2 — obligatoire pour œuvres d'artiste */
+  country_of_origin?: string;
 
   // Type d'artiste
   artist_type: ArtistType;

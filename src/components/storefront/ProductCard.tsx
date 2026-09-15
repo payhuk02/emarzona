@@ -20,6 +20,7 @@ interface ExtendedProduct extends Product {
   hide_purchase_count?: boolean | null;
   hide_rating?: boolean | null;
   hide_reviews_count?: boolean | null;
+  country_of_origin?: string | null;
 }
 import {
   ShoppingCart,
@@ -39,6 +40,7 @@ import {
   MessageSquare,
   Play,
   ZoomIn,
+  MapPin,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { VendorMessagingLink } from '@/components/vendor/VendorMessagingLink';
@@ -51,6 +53,7 @@ import { safeRedirect } from '@/lib/url-validator';
 import { PriceStockAlertButton } from '@/components/marketplace/PriceStockAlertButton';
 import { PaymentOptionsBadge, getPaymentOptions } from '@/components/products/PaymentOptionsBadge';
 import { PricingModelBadge } from '@/components/products/PricingModelBadge';
+import { formatProductCountryLabel } from '@/components/products/shared/ProductCountryOfOriginField';
 import {
   Dialog,
   DialogContent,
@@ -460,7 +463,11 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
                   ? 'bg-blue-100 text-blue-800'
                   : product.product_type === 'physical'
                     ? 'bg-green-100 text-green-800'
-                    : 'bg-purple-100 text-purple-800'
+                    : product.product_type === 'artist'
+                      ? 'bg-amber-100 text-amber-900'
+                      : product.product_type === 'course'
+                        ? 'bg-indigo-100 text-indigo-800'
+                        : 'bg-purple-100 text-purple-800'
               }`}
             >
               <Zap className="h-3 w-3 mr-1" />
@@ -468,9 +475,21 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
                 ? 'Numérique'
                 : product.product_type === 'physical'
                   ? 'Physique'
-                  : 'Service'}
+                  : product.product_type === 'artist'
+                    ? 'Œuvre'
+                    : product.product_type === 'course'
+                      ? 'Cours'
+                      : 'Service'}
             </Badge>
           )}
+
+          {extendedProduct.country_of_origin &&
+            (product.product_type === 'physical' || product.product_type === 'artist') && (
+              <Badge variant="outline" className="text-xs">
+                <MapPin className="h-3 w-3 mr-1" />
+                {formatProductCountryLabel(extendedProduct.country_of_origin)}
+              </Badge>
+            )}
 
           {/* Badges Type de licence et Commission */}
           <div className="flex items-center gap-2 flex-wrap">

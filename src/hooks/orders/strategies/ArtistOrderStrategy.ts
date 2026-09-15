@@ -7,6 +7,7 @@ import { reserveArtistLimitedEdition } from '@/lib/artist-edition-reservation';
 import {
   asOptionalString,
   asOrderProduct,
+  parsePaymentOptions,
   parseStrategyOptions,
 } from '@/lib/orders/order-strategy-utils';
 import { OrderStrategy, OrderStrategyContext, OrderCreationResult } from './OrderStrategy';
@@ -32,7 +33,8 @@ export class ArtistOrderStrategy implements OrderStrategy {
     } = context;
 
     let product = productRecord ? asOrderProduct(productRecord) : undefined;
-    if (!product) {
+    // Ensure payment_options are present (useCreateOrder may omit them on older clients)
+    if (!product || product.payment_options == null) {
       product = asOrderProduct(
         await retryWithExponentialBackoff(
           async () => {
@@ -62,6 +64,9 @@ export class ArtistOrderStrategy implements OrderStrategy {
 
     const opts = parseStrategyOptions(options);
     const { shippingAddress, giftCardId, giftCardAmount = 0, couponCode } = opts;
+    const { payment_type: paymentType, percentage_rate: percentageRate } = parsePaymentOptions(
+      product.payment_options
+    );
 
     let resolvedArtistProductId = asOptionalString(opts.artistProductId);
     if (!resolvedArtistProductId) {
@@ -123,8 +128,6 @@ export class ArtistOrderStrategy implements OrderStrategy {
       finalUserId = provisionData?.user_id;
     }
 
-    // Création commande via RPC SECURITY DEFINER : les acheteurs n'ont pas le
-    // droit d'INSERT direct sur orders (RLS).
     const affiliateTrackingCookie = getAffiliateTrackingCookie();
 
     const { data: rpcResult, error: orderError } = await supabase.rpc(
@@ -157,12 +160,38 @@ export class ArtistOrderStrategy implements OrderStrategy {
       order_number: string;
       customer_id: string;
       total_amount: number;
+      amount_due_now?: number;
+      remaining_amount?: number;
+      payment_type?: string;
     };
 
     const orderId = orderData.order_id;
     const orderItemId = orderData.order_item_id;
     const customerId = orderData.customer_id;
-    const finalAmountToPay = Number(orderData.total_amount) || 0;
+    const totalPrice = Number(orderData.total_amount) || 0;
+
+    let amountToPay =
+      orderData.amount_due_now != null ? Number(orderData.amount_due_now) : totalPrice;
+    let remainingAmount =
+      orderData.remaining_amount != null ? Number(orderData.remaining_amount) : 0;
+
+    // Client-side honor of payment_options (works even before RPC migration is deployed)
+    if (orderData.amount_due_now == null && paymentType === 'percentage') {
+      amountToPay = Math.round((totalPrice * percentageRate) / 100);
+      remainingAmount = totalPrice - amountToPay;
+      await supabase
+        .from('orders')
+        .update({
+          payment_type: 'percentage',
+          percentage_paid: amountToPay,
+          remaining_amount: remainingAmount,
+        })
+        .eq('id', orderId);
+    } else if (orderData.amount_due_now == null && paymentType === 'delivery_secured') {
+      await supabase.from('orders').update({ payment_type: 'delivery_secured' }).eq('id', orderId);
+    }
+
+    const finalAmountToPay = Math.max(0, amountToPay - (giftCardAmount || 0));
 
     const { error: invoiceError } = await supabase.rpc('create_invoice_from_order', {
       p_order_id: orderId,
@@ -177,18 +206,40 @@ export class ArtistOrderStrategy implements OrderStrategy {
         customer_id: customerId,
         order_number: orderData.order_number,
         status: 'pending',
-        total_amount: finalAmountToPay,
+        total_amount: totalPrice - (giftCardAmount || 0),
         currency: product.currency,
         payment_status: 'pending',
         created_at: new Date().toISOString(),
       }).catch(() => {});
     });
 
+    if (paymentType === 'delivery_secured') {
+      await supabase.from('secured_payments').insert({
+        order_id: orderId,
+        total_amount: totalPrice,
+        held_amount: amountToPay,
+        status: 'held',
+        hold_reason: 'delivery_confirmation',
+        release_conditions: {
+          requires_delivery_confirmation: true,
+          auto_release_days: 7,
+        },
+      });
+    }
+
     const { isSupportedCurrency } = await import('@/lib/currency-converter');
     type Currency = 'XOF' | 'EUR' | 'USD' | 'GBP' | 'NGN' | 'GHS' | 'KES' | 'ZAR';
     const paymentCurrency: Currency = isSupportedCurrency(product.currency)
       ? (product.currency as Currency)
       : 'XOF';
+
+    const titleSuffix = artistProduct.artwork_title ? ` - ${artistProduct.artwork_title}` : '';
+    const paymentDescription =
+      paymentType === 'percentage'
+        ? `Acompte ${percentageRate}%: ${product.name}${titleSuffix}`
+        : paymentType === 'delivery_secured'
+          ? `Paiement sécurisé: ${product.name}${titleSuffix}`
+          : `Achat: ${product.name}${titleSuffix}`;
 
     const paymentResult = await retryWithExponentialBackoff(
       async () => {
@@ -199,7 +250,7 @@ export class ArtistOrderStrategy implements OrderStrategy {
           customerId,
           amount: finalAmountToPay,
           currency: paymentCurrency,
-          description: `Achat: ${product.name}${artistProduct.artwork_title ? ` - ${artistProduct.artwork_title}` : ''}`,
+          description: paymentDescription,
           customerEmail,
           customerName: customerName || customerEmail.split('@')[0],
           customerPhone,
@@ -217,6 +268,11 @@ export class ArtistOrderStrategy implements OrderStrategy {
             artist_product_id: resolvedArtistProductId,
             shipping_fragile: artistProduct.shipping_fragile,
             shipping_insurance_required: artistProduct.shipping_insurance_required,
+            payment_type: paymentType,
+            percentage_rate: paymentType === 'percentage' ? percentageRate : null,
+            total_price: totalPrice,
+            amount_paid: amountToPay,
+            remaining_amount: remainingAmount,
             ...(shippingAddress ? { shipping_address: shippingAddress } : {}),
             ...(guestCheckout ? { guest_checkout: true } : {}),
             ...(context.preferredProvider === 'paiement_pro' && context.preferredPaiementProChannel

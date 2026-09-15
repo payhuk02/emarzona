@@ -52,6 +52,15 @@ export function validateArtistPublishFormData(
     };
   }
 
+  if (!formData.country_of_origin?.trim()) {
+    return {
+      valid: false,
+      failedStep: 2,
+      title: 'Pays d’origine requis',
+      description: 'Sélectionnez le pays d’origine de l’œuvre',
+    };
+  }
+
   if (!formData.description || formData.description.trim().length < 10) {
     return {
       valid: false,

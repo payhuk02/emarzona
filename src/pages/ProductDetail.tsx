@@ -257,6 +257,12 @@ const ProductDetails = () => {
       } else {
         const product = productData[0];
 
+        // Legacy /products/:slug links for artist works → rich PDP
+        if (product.product_type === 'artist') {
+          navigate(`/artist/${product.id}`, { replace: true });
+          return;
+        }
+
         // Fetch related preview/paid products if they exist (parallélisé)
         // Objectif: réduire la latence réseau (surtout mobile) en évitant des requêtes séquentielles.
         const [freeResult, paidResult] = await Promise.all([

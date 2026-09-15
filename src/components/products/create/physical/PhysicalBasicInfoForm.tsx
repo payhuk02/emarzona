@@ -26,6 +26,7 @@ import { PRODUCT_DESCRIPTION_MAX_WORDS } from '@/constants/product-description';
 
 import { getCategoriesForProductType } from '@/constants/product-categories';
 import { SelectField, SelectItem } from '@/components/ui/select';
+import { ProductCountryOfOriginField } from '@/components/products/shared/ProductCountryOfOriginField';
 
 interface PhysicalBasicInfoFormProps {
   data: Partial<PhysicalProductFormData>;
@@ -219,6 +220,14 @@ export const PhysicalBasicInfoForm = ({
             </SelectItem>
           ))}
         </SelectField>
+      </div>
+
+      <div className="space-y-2">
+        <ProductCountryOfOriginField
+          required
+          value={data.country_of_origin}
+          onChange={code => onUpdate({ country_of_origin: code })}
+        />
       </div>
 
       {/* Short Description */}

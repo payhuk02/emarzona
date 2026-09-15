@@ -48,8 +48,8 @@ test.describe('Artist product workflow', () => {
     expect(opened || page.url().includes('/marketplace')).toBeTruthy();
   });
 
-  test('artist listing /artists responds without server error', async ({ page }) => {
-    const response = await gotoApp(page, '/artists');
+  test('artist listing /art responds without server error', async ({ page }) => {
+    const response = await gotoApp(page, '/art');
     expect(response?.status()).toBeLessThan(500);
     const html = (await page.content()).toLowerCase();
     expect(html).not.toContain('internal server error');

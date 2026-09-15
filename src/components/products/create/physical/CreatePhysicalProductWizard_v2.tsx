@@ -60,6 +60,7 @@ import { useCatalogCacheInvalidation } from '@/hooks/useCatalogCacheInvalidation
 import { useWizardServerValidation } from '@/hooks/useWizardServerValidation';
 import { createPhysicalProductTx } from '@/lib/products/product-create-rpc';
 import { persistProductWhatsApp } from '@/lib/products/persist-product-whatsapp';
+import { persistProductCountryOfOrigin } from '@/lib/products/persist-product-country';
 import { useStorePhysicalAccess } from '@/hooks/billing/useStorePhysicalAccess';
 import { useStorePhysicalPlanLimits } from '@/hooks/billing/useStorePhysicalPlanLimits';
 import { isWithinProductLimit, productLimitMessage } from '@/lib/billing/physical-plan-limits';
@@ -219,6 +220,7 @@ export const CreatePhysicalProductWizard = ({
     images: [],
     category: 'vetements',
     category_id: null,
+    country_of_origin: '',
     tags: [],
 
     // Variants (Step 2)
@@ -456,6 +458,10 @@ export const CreatePhysicalProductWizard = ({
           // 3. Validation images
           if (!formData.images || formData.images.length === 0) {
             errors.push(t('products.errors.imageRequired', 'Au moins une image est requise'));
+          }
+
+          if (!formData.country_of_origin?.trim()) {
+            errors.push('Le pays d’origine est obligatoire');
           }
 
           // Si erreurs client, arrêter ici
@@ -770,7 +776,7 @@ export const CreatePhysicalProductWizard = ({
         free_shipping: formData.free_shipping ?? false,
         inventory_policy: formData.inventory_policy || 'deny',
         continue_selling_when_out_of_stock: formData.continue_selling_when_out_of_stock ?? false,
-        country_of_origin: formData.country_of_origin || 'CI',
+        country_of_origin: formData.country_of_origin || null,
         shipping_class: formData.shipping_class,
         whatsapp_number: formData.whatsapp_number?.trim() || null,
         whatsapp_enabled: Boolean(formData.whatsapp_enabled && formData.whatsapp_number?.trim()),
@@ -850,6 +856,10 @@ export const CreatePhysicalProductWizard = ({
         formData.whatsapp_number,
         formData.whatsapp_enabled
       );
+
+      await persistProductCountryOfOrigin(rpcResult.product_id, formData.country_of_origin, {
+        syncPhysical: true,
+      });
 
       const product = {
         id: rpcResult.product_id,

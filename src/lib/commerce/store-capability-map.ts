@@ -165,6 +165,7 @@ const ROUTE_CAPABILITY_RULES: readonly RouteRule[] = [
       '/dashboard/artist-products',
       '/dashboard/portfolios',
       '/dashboard/auctions',
+      '/dashboard/collections',
       '/collections',
       '/auctions',
     ],

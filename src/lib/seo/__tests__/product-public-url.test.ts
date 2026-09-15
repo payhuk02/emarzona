@@ -56,13 +56,16 @@ describe('product-public-url', () => {
     ).toBe('https://ecom-web.myemarzona.shop/products/misc');
   });
 
-  it('resolveStoreProductCardUrl routes services and courses correctly', () => {
+  it('resolveStoreProductCardUrl routes services, courses and artist correctly', () => {
     expect(
       resolveStoreProductCardUrl({ id: 's1', slug: 'identite-visuelle', product_type: 'service' })
     ).toBe('/service/identite-visuelle');
     expect(
       resolveStoreProductCardUrl({ id: 'c1', slug: 'mon-cours', product_type: 'course' })
     ).toBe('/courses/mon-cours');
+    expect(resolveStoreProductCardUrl({ id: 'a1', slug: 'oeuvre', product_type: 'artist' })).toBe(
+      '/artist/a1'
+    );
     expect(resolveStoreProductCardUrl({ id: 'd1', slug: 'ebook', product_type: 'digital' })).toBe(
       '/products/ebook'
     );

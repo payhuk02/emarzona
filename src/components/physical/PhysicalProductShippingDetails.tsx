@@ -11,6 +11,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { Globe, MapPin, Truck, Plane, Package } from 'lucide-react';
 import type { ShippingZone, ShippingRate } from '@/hooks/physical/useShipping';
+import { formatProductCountryLabel } from '@/components/products/shared/ProductCountryOfOriginField';
 
 interface ZoneWithRates extends ShippingZone {
   rates: ShippingRate[];
@@ -93,7 +94,7 @@ export function PhysicalProductShippingDetails({
             <p className="text-sm font-medium">Lieu d'expédition</p>
             <p className="text-sm text-muted-foreground">
               {countryOfOrigin
-                ? `Expédié depuis : ${countryOfOrigin}`
+                ? `Expédié depuis : ${formatProductCountryLabel(countryOfOrigin)}`
                 : 'Expédié par le vendeur local'}
             </p>
           </div>

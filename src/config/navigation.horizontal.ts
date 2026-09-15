@@ -188,6 +188,7 @@ export const HORIZONTAL_MEGA_SUBGROUPS: Partial<
         '/dashboard/artist-products',
         '/dashboard/auctions',
         '/dashboard/portfolios',
+        '/dashboard/collections',
       ],
     },
     {

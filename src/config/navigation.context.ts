@@ -232,6 +232,7 @@ export const CONTEXT_SIDEBAR_CONFIGS = {
           '/dashboard/auctions',
           '/dashboard/auctions/watchlist',
           '/dashboard/portfolios',
+          '/dashboard/collections',
         ],
       },
       {

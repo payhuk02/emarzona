@@ -22,8 +22,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
 import { Plus, X } from 'lucide-react';
-import type { ArtistProductFormData } from '@/types/artist-product';
+import type { ArtistProductFormData, MediaType } from '@/types/artist-product';
 import { useSpaceInputFix } from '@/hooks/useSpaceInputFix';
 
 interface ArtistSpecificFormsProps {
@@ -476,6 +477,24 @@ const ArtistSpecificFormsComponent = ({ artistType, data, onUpdate }: ArtistSpec
             />
           </div>
         </div>
+
+        <div className="flex items-center justify-between gap-4 rounded-md border p-3">
+          <div>
+            <Label htmlFor="artwork_framed">Œuvre encadrée</Label>
+            <p className="text-xs text-muted-foreground">
+              Indique si l&apos;œuvre est livrée avec cadre
+            </p>
+          </div>
+          <Switch
+            id="artwork_framed"
+            checked={Boolean(visualData.artwork_framed)}
+            onCheckedChange={checked =>
+              onUpdate({
+                visual_artist_specific: { ...visualData, artwork_framed: checked },
+              })
+            }
+          />
+        </div>
       </div>
     );
   }
@@ -483,6 +502,7 @@ const ArtistSpecificFormsComponent = ({ artistType, data, onUpdate }: ArtistSpec
   // Designer
   if (artistType === 'designer') {
     const designerData = data.designer_specific || {};
+    const formats = designerData.design_format || [];
 
     return (
       <div className="space-y-4 p-4 border rounded-lg">
@@ -537,6 +557,162 @@ const ArtistSpecificFormsComponent = ({ artistType, data, onUpdate }: ArtistSpec
             </Select>
           </div>
         </div>
+
+        <div className="space-y-2">
+          <Label>Formats de fichiers</Label>
+          <div className="flex flex-wrap gap-2">
+            {['PSD', 'AI', 'PNG', 'SVG', 'PDF', 'FIG'].map(fmt => {
+              const selected = formats.includes(fmt);
+              return (
+                <Button
+                  key={fmt}
+                  type="button"
+                  size="sm"
+                  variant={selected ? 'default' : 'outline'}
+                  onClick={() => {
+                    const next = selected ? formats.filter(f => f !== fmt) : [...formats, fmt];
+                    onUpdate({
+                      designer_specific: { ...designerData, design_format: next },
+                    });
+                  }}
+                >
+                  {fmt}
+                </Button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between gap-4 rounded-md border p-3">
+          <div>
+            <Label htmlFor="design_commercial_use">Usage commercial autorisé</Label>
+            <p className="text-xs text-muted-foreground">
+              L&apos;acheteur peut utiliser le design à des fins commerciales
+            </p>
+          </div>
+          <Switch
+            id="design_commercial_use"
+            checked={Boolean(designerData.design_commercial_use)}
+            onCheckedChange={checked =>
+              onUpdate({
+                designer_specific: { ...designerData, design_commercial_use: checked },
+              })
+            }
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // Multimédia
+  if (artistType === 'multimedia') {
+    const mediaData = data.multimedia_specific || {};
+    const formats = mediaData.media_format || [];
+
+    return (
+      <div className="space-y-4 p-4 border rounded-lg">
+        <h3 className="text-lg font-semibold">Informations Multimédia</h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="media_type">Type de média</Label>
+            <Select
+              value={mediaData.media_type || 'video'}
+              onValueChange={value =>
+                onUpdate({
+                  multimedia_specific: {
+                    ...mediaData,
+                    media_type: value as MediaType,
+                  },
+                })
+              }
+            >
+              <SelectTrigger id="media_type">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent mobileVariant="sheet">
+                <SelectItem value="video">Vidéo</SelectItem>
+                <SelectItem value="interactive">Interactif</SelectItem>
+                <SelectItem value="installation">Installation</SelectItem>
+                <SelectItem value="nft">NFT</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="media_duration">Durée (secondes)</Label>
+            <Input
+              id="media_duration"
+              type="number"
+              min={0}
+              value={mediaData.media_duration ?? ''}
+              onChange={e =>
+                onUpdate({
+                  multimedia_specific: {
+                    ...mediaData,
+                    media_duration: e.target.value === '' ? null : Number(e.target.value),
+                  },
+                })
+              }
+              placeholder="Ex. 180"
+            />
+          </div>
+
+          <div className="space-y-2 md:col-span-2">
+            <ArtistFormField
+              id="media_resolution"
+              label="Résolution"
+              value={mediaData.media_resolution || ''}
+              onChange={value =>
+                onUpdate({
+                  multimedia_specific: { ...mediaData, media_resolution: value as string },
+                })
+              }
+              placeholder="Ex. 1920x1080, 4K, 1080p"
+              maxLength={80}
+              showCharCount
+              onKeyDown={handleSpaceKeyDown}
+            />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label>Formats</Label>
+          <div className="flex flex-wrap gap-2">
+            {['MP4', 'MOV', 'WebM', 'GLB', 'HTML', 'ZIP'].map(fmt => {
+              const selected = formats.includes(fmt);
+              return (
+                <Button
+                  key={fmt}
+                  type="button"
+                  size="sm"
+                  variant={selected ? 'default' : 'outline'}
+                  onClick={() => {
+                    const next = selected ? formats.filter(f => f !== fmt) : [...formats, fmt];
+                    onUpdate({
+                      multimedia_specific: { ...mediaData, media_format: next },
+                    });
+                  }}
+                >
+                  {fmt}
+                </Button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Autre — message guidé (pas de champs spécifiques)
+  if (artistType === 'other') {
+    return (
+      <div className="space-y-2 p-4 border rounded-lg bg-muted/30">
+        <h3 className="text-lg font-semibold">Spécificités</h3>
+        <p className="text-sm text-muted-foreground">
+          Aucun champ spécifique pour ce type. Décrivez l&apos;œuvre dans les informations de base
+          (description, tags, images) et l&apos;étape Authentification si besoin.
+        </p>
       </div>
     );
   }

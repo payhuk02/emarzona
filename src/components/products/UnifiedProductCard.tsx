@@ -67,6 +67,7 @@ import { cn } from '@/lib/utils';
 import { PriceStockAlertButton } from '@/components/marketplace/PriceStockAlertButton';
 import { PaymentOptionsBadge, getPaymentOptions } from '@/components/products/PaymentOptionsBadge';
 import { PricingModelBadge } from '@/components/products/PricingModelBadge';
+import { formatProductCountryLabel } from '@/components/products/shared/ProductCountryOfOriginField';
 import { useMarketplaceFavoritesContext } from '@/contexts/MarketplaceFavoritesContext';
 import {
   Dialog,
@@ -789,6 +790,17 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
 
           <PricingModelBadge pricingModel={(product as any).pricing_model} size="sm" />
           <PaymentOptionsBadge paymentOptions={getPaymentOptions(product as any)} size="sm" />
+
+          {product.country_of_origin &&
+            (product.type === 'physical' || product.type === 'artist') && (
+              <Badge
+                variant="outline"
+                className="text-xs px-2 py-0.5 border-white/20 text-gray-200"
+              >
+                <MapPin className="h-3 w-3 mr-1" />
+                {formatProductCountryLabel(product.country_of_origin)}
+              </Badge>
+            )}
         </div>
 
         {/* Rating */}

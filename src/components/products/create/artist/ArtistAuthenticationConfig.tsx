@@ -170,6 +170,15 @@ const ArtistAuthenticationConfigComponent = ({
           élevé pour l'œuvre.
         </AlertDescription>
       </Alert>
+
+      <Alert>
+        <Info className="h-4 w-4" />
+        <AlertDescription>
+          Un événement de provenance « création » sera enregistré automatiquement à la publication.
+          Vous pourrez compléter l&apos;historique (expositions, propriétaires, etc.) depuis
+          l&apos;édition de l&apos;œuvre.
+        </AlertDescription>
+      </Alert>
     </div>
   );
 };

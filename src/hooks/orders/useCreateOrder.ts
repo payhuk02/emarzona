@@ -16,7 +16,8 @@ import { type CreateArtistOrderOptions } from './useCreateArtistOrder';
 import { orderStrategyRegistry } from './strategies/registry';
 import { logger } from '@/lib/logger';
 
-const GENERIC_PRODUCT_FIELDS = 'id, name, price, promotional_price, currency, product_type';
+const GENERIC_PRODUCT_FIELDS =
+  'id, name, price, promotional_price, currency, product_type, payment_options';
 
 export interface CreateOrderOptions {
   productId: string;

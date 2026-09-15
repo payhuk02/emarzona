@@ -67,6 +67,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useWizardServerValidation } from '@/hooks/useWizardServerValidation';
 import { updatePhysicalProductTx } from '@/lib/products/product-update-rpc';
 import { persistProductWhatsApp } from '@/lib/products/persist-product-whatsapp';
+import { persistProductCountryOfOrigin } from '@/lib/products/persist-product-country';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
@@ -84,9 +85,9 @@ import { useCatalogCacheInvalidation } from '@/hooks/useCatalogCacheInvalidation
 import { useQuery } from '@tanstack/react-query';
 
 const PRODUCT_FIELDS =
-  'id, store_id, name, slug, description, short_description, price, compare_at_price, cost_per_item, images, image_url, category, category_id, tags, meta_title, meta_description, og_image, faqs, payment_options, hide_purchase_count, hide_likes_count, hide_recommendations_count, hide_downloads_count, hide_reviews_count, hide_rating, is_active';
+  'id, store_id, name, slug, description, short_description, price, compare_at_price, cost_per_item, images, image_url, category, category_id, country_of_origin, tags, meta_title, meta_description, og_image, faqs, payment_options, hide_purchase_count, hide_likes_count, hide_recommendations_count, hide_downloads_count, hide_reviews_count, hide_rating, is_active';
 const PHYSICAL_PRODUCT_FIELDS =
-  'id, product_id, track_inventory, continue_selling_when_out_of_stock, inventory_policy, sku, barcode, requires_shipping, weight, weight_unit, length, width, height, dimensions_unit, shipping_class, free_shipping, whatsapp_number, whatsapp_enabled, has_variants, option1_name, option2_name, option3_name, low_stock_threshold';
+  'id, product_id, track_inventory, continue_selling_when_out_of_stock, inventory_policy, sku, barcode, requires_shipping, weight, weight_unit, length, width, height, dimensions_unit, shipping_class, free_shipping, country_of_origin, whatsapp_number, whatsapp_enabled, has_variants, option1_name, option2_name, option3_name, low_stock_threshold';
 const PRODUCT_VARIANT_FIELDS =
   'id, physical_product_id, option1_value, option2_value, option3_value, price, compare_at_price, cost_per_item, sku, barcode, quantity, weight, image_url';
 const PHYSICAL_PRODUCT_INVENTORY_FIELDS =
@@ -317,6 +318,7 @@ const convertToFormData = async (
     images: product.images || (product.image_url ? [product.image_url] : []),
     category: product.category || 'vetements',
     category_id: product.category_id || null,
+    country_of_origin: physicalProduct?.country_of_origin || product.country_of_origin || '',
     tags: product.tags || [],
 
     // Variants
@@ -699,6 +701,7 @@ export const EditPhysicalProductWizard = ({
         currency: 'XOF',
         category: formData.category,
         category_id: formData.category_id,
+        country_of_origin: formData.country_of_origin || null,
         image_url: formData.images?.[0] || null,
         tags: formData.tags || [],
         meta_title: formData.seo?.meta_title,
@@ -730,6 +733,7 @@ export const EditPhysicalProductWizard = ({
         dimensions_unit: formData.dimensions?.unit || 'cm',
         shipping_class: formData.shipping_class,
         free_shipping: formData.free_shipping || false,
+        country_of_origin: formData.country_of_origin || null,
         whatsapp_number: formData.whatsapp_number?.trim() || null,
         whatsapp_enabled: Boolean(formData.whatsapp_enabled && formData.whatsapp_number?.trim()),
         has_variants: Boolean(formData.has_variants && formData.variants?.length),
@@ -806,6 +810,10 @@ export const EditPhysicalProductWizard = ({
       );
 
       await persistProductWhatsApp(productId, formData.whatsapp_number, formData.whatsapp_enabled);
+
+      await persistProductCountryOfOrigin(productId, formData.country_of_origin, {
+        syncPhysical: true,
+      });
 
       const physicalProductId = rpcResult.physical_product_id;
       if (!physicalProductId) {
