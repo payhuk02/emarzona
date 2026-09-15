@@ -26,8 +26,8 @@ describe('getRoutePrefetchConfig', () => {
   it('prefetch vendeur aligné sur liste verticale (pas /dashboard/products générique)', () => {
     const cfg = getRoutePrefetchConfig(false, false, 'u1', 2, 'digital');
     expect(cfg.idleRoutes).toContain('/dashboard/digital-products');
+    expect(cfg.idleRoutes).toContain('/dashboard/analytics');
     expect(cfg.idleRoutes).not.toContain('/dashboard/products');
-    expect(cfg.idleRoutes).not.toContain('/dashboard/analytics');
   });
 
   it('prefetch routes wizard selon commerce_type digital', () => {
