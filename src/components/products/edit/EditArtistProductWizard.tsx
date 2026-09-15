@@ -28,6 +28,7 @@ import {
   Loader2,
   CreditCard,
   Shield,
+  TrendingUp,
 } from 'lucide-react';
 import { ArtistTypeSelector } from '../create/artist/ArtistTypeSelector';
 import { ArtistBasicInfoForm } from '../create/artist/ArtistBasicInfoForm';
@@ -36,6 +37,7 @@ import { ArtistShippingConfig } from '../create/artist/ArtistShippingConfig';
 import { ArtistAuthenticationConfig } from '../create/artist/ArtistAuthenticationConfig';
 import { ArtworkProvenanceManager } from '@/components/artist/ArtworkProvenanceManager';
 import { ArtistPreview } from '../create/artist/ArtistPreview';
+import { ArtistAffiliateSettings } from '../create/artist/ArtistAffiliateSettings';
 import { ProductSEOForm } from '../create/shared/ProductSEOForm';
 import { ProductFAQForm } from '../create/shared/ProductFAQForm';
 import { PaymentOptionsForm } from '../create/shared/PaymentOptionsForm';
@@ -65,7 +67,8 @@ const STEPS = [
   { id: 5, title: 'Authentification', description: 'Certificats', icon: Shield },
   { id: 6, title: 'SEO & FAQs', description: 'Référencement', icon: Search },
   { id: 7, title: 'Paiement', description: 'Options de paiement', icon: CreditCard },
-  { id: 8, title: 'Aperçu', description: 'Validation finale', icon: Eye },
+  { id: 8, title: 'Affiliation', description: 'Programme promoteurs', icon: TrendingUp },
+  { id: 9, title: 'Aperçu', description: 'Validation finale', icon: Eye },
 ];
 
 interface EditArtistProductWizardProps {
@@ -134,6 +137,17 @@ const convertToFormData = (
     },
     faqs: product?.faqs || [],
     payment: product?.payment_options || { payment_type: 'full', percentage_rate: 30 },
+    affiliate: {
+      enabled: false,
+      commission_rate: 10,
+      commission_type: 'percentage' as 'percentage' | 'fixed',
+      fixed_commission_amount: 0,
+      cookie_duration_days: 30,
+      min_order_amount: 0,
+      allow_self_referral: false,
+      require_approval: false,
+      terms_and_conditions: '',
+    },
     whatsapp_number:
       (product as { whatsapp_number?: string | null } | undefined)?.whatsapp_number || '',
     whatsapp_enabled: Boolean(
@@ -207,6 +221,17 @@ export const EditArtistProductWizard = ({
     seo: {},
     faqs: [],
     payment: { payment_type: 'full', percentage_rate: 30 },
+    affiliate: {
+      enabled: false,
+      commission_rate: 10,
+      commission_type: 'percentage',
+      fixed_commission_amount: 0,
+      cookie_duration_days: 30,
+      min_order_amount: 0,
+      allow_self_referral: false,
+      require_approval: false,
+      terms_and_conditions: '',
+    },
     whatsapp_number: '',
     whatsapp_enabled: false,
     is_active: true,
@@ -220,6 +245,40 @@ export const EditArtistProductWizard = ({
       logger.info('Product data loaded for editing', { productId });
     }
   }, [artistProductData, productId]);
+
+  // Load affiliate settings for this product
+  useEffect(() => {
+    let cancelled = false;
+    const loadAffiliate = async () => {
+      if (!productId) return;
+      const { data, error } = await supabase
+        .from('product_affiliate_settings')
+        .select(
+          'affiliate_enabled, commission_rate, commission_type, fixed_commission_amount, cookie_duration_days, min_order_amount, allow_self_referral, require_approval, terms_and_conditions'
+        )
+        .eq('product_id', productId)
+        .maybeSingle();
+      if (cancelled || error || !data) return;
+      setFormData(prev => ({
+        ...prev,
+        affiliate: {
+          enabled: data.affiliate_enabled || false,
+          commission_rate: data.commission_rate ?? 10,
+          commission_type: (data.commission_type as 'percentage' | 'fixed') || 'percentage',
+          fixed_commission_amount: data.fixed_commission_amount ?? 0,
+          cookie_duration_days: data.cookie_duration_days ?? 30,
+          min_order_amount: data.min_order_amount ?? 0,
+          allow_self_referral: data.allow_self_referral ?? false,
+          require_approval: data.require_approval ?? false,
+          terms_and_conditions: data.terms_and_conditions || '',
+        },
+      }));
+    };
+    void loadAffiliate();
+    return () => {
+      cancelled = true;
+    };
+  }, [productId]);
 
   const handleUpdateFormData = useCallback((data: Partial<ArtistProductFormData>) => {
     setFormData(prev => {
@@ -488,6 +547,39 @@ export const EditArtistProductWizard = ({
 
       await persistProductWhatsApp(productId, formData.whatsapp_number, formData.whatsapp_enabled);
 
+      const { data: existingAffiliate } = await supabase
+        .from('product_affiliate_settings')
+        .select('id')
+        .eq('product_id', productId)
+        .maybeSingle();
+
+      const affiliateData = {
+        product_id: productId,
+        store_id: store.id,
+        affiliate_enabled: formData.affiliate?.enabled ?? false,
+        commission_rate: formData.affiliate?.commission_rate ?? 10,
+        commission_type: formData.affiliate?.commission_type ?? 'percentage',
+        fixed_commission_amount: formData.affiliate?.fixed_commission_amount ?? 0,
+        cookie_duration_days: formData.affiliate?.cookie_duration_days ?? 30,
+        min_order_amount: formData.affiliate?.min_order_amount ?? 0,
+        allow_self_referral: formData.affiliate?.allow_self_referral ?? false,
+        require_approval: formData.affiliate?.require_approval ?? false,
+        terms_and_conditions: formData.affiliate?.terms_and_conditions ?? '',
+      };
+
+      if (existingAffiliate) {
+        const { error: affiliateError } = await supabase
+          .from('product_affiliate_settings')
+          .update(affiliateData)
+          .eq('id', existingAffiliate.id);
+        if (affiliateError) throw affiliateError;
+      } else if (formData.affiliate?.enabled) {
+        const { error: affiliateError } = await supabase
+          .from('product_affiliate_settings')
+          .insert(affiliateData);
+        if (affiliateError) throw affiliateError;
+      }
+
       localStorage.removeItem('artist-product-draft');
 
       toast({
@@ -657,7 +749,31 @@ export const EditArtistProductWizard = ({
               </div>
             )}
 
-            {currentStep === 8 && <ArtistPreview data={formData} />}
+            {currentStep === 8 && (
+              <ArtistAffiliateSettings
+                productPrice={formData.price || 0}
+                productName={formData.artwork_title || formData.name || ''}
+                data={formData.affiliate || {}}
+                onUpdate={affiliateData =>
+                  handleUpdateFormData({
+                    affiliate: {
+                      enabled: Boolean(affiliateData.enabled),
+                      commission_rate: Number(affiliateData.commission_rate ?? 10),
+                      commission_type:
+                        (affiliateData.commission_type as 'percentage' | 'fixed') || 'percentage',
+                      fixed_commission_amount: Number(affiliateData.fixed_commission_amount ?? 0),
+                      cookie_duration_days: Number(affiliateData.cookie_duration_days ?? 30),
+                      min_order_amount: Number(affiliateData.min_order_amount ?? 0),
+                      allow_self_referral: Boolean(affiliateData.allow_self_referral),
+                      require_approval: Boolean(affiliateData.require_approval),
+                      terms_and_conditions: String(affiliateData.terms_and_conditions ?? ''),
+                    },
+                  })
+                }
+              />
+            )}
+
+            {currentStep === 9 && <ArtistPreview data={formData} />}
           </CardContent>
         </Card>
 

@@ -88,10 +88,11 @@ describe('horizontal nav commerce gating', () => {
     expect(autresPathsList).not.toContain('/dashboard/physical-inventory');
   });
 
-  it('hides gamification and affiliates from service stores in marketing mega-menu', () => {
+  it('hides gamification from service stores but keeps affiliates in affiliation mega-menu', () => {
     const paths = allSellerHorizontalPaths('service');
     expect(paths).not.toContain('/dashboard/gamification');
-    expect(paths).not.toContain('/dashboard/affiliates');
+    expect(paths).toContain('/dashboard/affiliates');
+    expect(paths).toContain('/affiliate/dashboard');
     expect(paths).toContain('/dashboard/integrations');
   });
 
@@ -99,10 +100,25 @@ describe('horizontal nav commerce gating', () => {
     const paths = allSellerHorizontalPaths('course');
     expect(paths).toContain('/dashboard/gamification');
     expect(paths).toContain('/dashboard/affiliates');
+    expect(paths).toContain('/affiliate/dashboard');
+    expect(paths).toContain('/affiliate/courses');
+  });
+
+  it('shows affiliation programme for digital and physical stores', () => {
+    for (const commerceType of ['digital', 'physical'] as const) {
+      const paths = allSellerHorizontalPaths(commerceType);
+      expect(paths).toContain('/dashboard/affiliates');
+      expect(paths).toContain('/affiliate/dashboard');
+      expect(paths).toContain('/dashboard/store-affiliates');
+      expect(paths).not.toContain('/affiliate/courses');
+    }
   });
 
   it('shows gamification and webhooks for artist and service stores', () => {
     expect(allSellerHorizontalPaths('artist')).toContain('/dashboard/gamification');
+    expect(allSellerHorizontalPaths('artist')).toContain('/dashboard/affiliates');
+    expect(allSellerHorizontalPaths('artist')).toContain('/affiliate/dashboard');
+    expect(allSellerHorizontalPaths('artist')).not.toContain('/affiliate/courses');
     expect(allSellerHorizontalPaths('service')).toContain('/dashboard/webhooks');
     expect(allSellerHorizontalPaths('service')).not.toContain('/dashboard/gamification');
   });

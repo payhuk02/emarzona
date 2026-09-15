@@ -1,6 +1,8 @@
 {
   "physical": [
+    "/affiliate/dashboard",
     "/dashboard",
+    "/dashboard/affiliates",
     "/dashboard/analytics",
     "/dashboard/coupons",
     "/dashboard/customers",
@@ -36,6 +38,7 @@
     "/vendor/messaging"
   ],
   "digital": [
+    "/affiliate/dashboard",
     "/dashboard",
     "/dashboard/affiliates",
     "/dashboard/analytics",
@@ -72,7 +75,9 @@
     "/vendor/messaging"
   ],
   "service": [
+    "/affiliate/dashboard",
     "/dashboard",
+    "/dashboard/affiliates",
     "/dashboard/analytics",
     "/dashboard/bookings",
     "/dashboard/coupons",
@@ -107,6 +112,8 @@
     "/vendor/messaging"
   ],
   "course": [
+    "/affiliate/courses",
+    "/affiliate/dashboard",
     "/dashboard",
     "/dashboard/affiliates",
     "/dashboard/analytics",
@@ -142,6 +149,7 @@
     "/vendor/messaging"
   ],
   "artist": [
+    "/affiliate/dashboard",
     "/dashboard",
     "/dashboard/affiliates",
     "/dashboard/analytics",

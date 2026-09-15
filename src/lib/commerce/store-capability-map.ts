@@ -183,7 +183,7 @@ const ROUTE_CAPABILITY_RULES: readonly RouteRule[] = [
   },
   {
     label: 'Programme affiliation promoteurs',
-    allowedTypes: ['digital', 'course', 'artist'],
+    allowedTypes: ALL_TYPES,
     pathPrefixes: ['/dashboard/affiliates', '/affiliate/dashboard'],
   },
   {

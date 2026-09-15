@@ -28,27 +28,34 @@ describe('sponsorship display visibility', () => {
 });
 
 describe('sponsorship ranking helpers', () => {
-  it('caps sponsored slots at 3 and one per store', () => {
-    type Row = { id: string; store_id: string; sponsored_at: string };
-    const sponsored: Row[] = [
-      { id: 'a', store_id: 's1', sponsored_at: '2026-01-01' },
-      { id: 'b', store_id: 's1', sponsored_at: '2026-01-02' },
-      { id: 'c', store_id: 's2', sponsored_at: '2026-01-03' },
-      { id: 'd', store_id: 's3', sponsored_at: '2026-01-04' },
-      { id: 'e', store_id: 's4', sponsored_at: '2026-01-05' },
+  it('promotes every active sponsored product before organic (no slot cap)', () => {
+    type Row = {
+      id: string;
+      store_id: string;
+      sponsored_at: string | null;
+      feed_sponsored: boolean;
+    };
+    const rows: Row[] = [
+      { id: 'organic-new', store_id: 's0', sponsored_at: null, feed_sponsored: false },
+      { id: 'a', store_id: 's1', sponsored_at: '2026-01-01', feed_sponsored: true },
+      { id: 'b', store_id: 's1', sponsored_at: '2026-01-02', feed_sponsored: true },
+      { id: 'c', store_id: 's2', sponsored_at: '2026-01-03', feed_sponsored: true },
+      { id: 'd', store_id: 's3', sponsored_at: '2026-01-04', feed_sponsored: true },
+      { id: 'e', store_id: 's4', sponsored_at: '2026-01-05', feed_sponsored: true },
+      { id: 'organic-old', store_id: 's9', sponsored_at: null, feed_sponsored: false },
     ];
 
-    const seenStores = new Set<string>();
-    const eligible = sponsored.filter(row => {
-      if (seenStores.has(row.store_id)) return false;
-      seenStores.add(row.store_id);
-      return true;
+    const sorted = [...rows].sort((a, b) => {
+      if (a.feed_sponsored !== b.feed_sponsored) {
+        return a.feed_sponsored ? -1 : 1;
+      }
+      if (a.feed_sponsored && b.feed_sponsored) {
+        return (a.sponsored_at ?? '').localeCompare(b.sponsored_at ?? '');
+      }
+      return a.id.localeCompare(b.id);
     });
 
-    const feed = eligible.slice(0, 3).map(r => r.id);
-    expect(feed).toEqual(['a', 'c', 'd']);
-    expect(feed).not.toContain('b');
-    expect(feed).not.toContain('e');
+    expect(sorted.map(r => r.id)).toEqual(['a', 'b', 'c', 'd', 'e', 'organic-new', 'organic-old']);
   });
 
   it('sorts feed_sponsored products before organic ones', () => {

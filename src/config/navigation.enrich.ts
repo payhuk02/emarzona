@@ -73,6 +73,8 @@ export const SELLER_PRIMARY_PATHS = new Set([
   '/dashboard/referrals',
   '/dashboard/affiliates',
   '/dashboard/store-affiliates',
+  '/affiliate/dashboard',
+  '/affiliate/courses',
   '/dashboard/payments',
   '/dashboard/payments-customers',
   '/dashboard/payment-management',
@@ -268,6 +270,8 @@ export const DEFAULT_OPEN_SECTION_KEYS = new Set([
   'administration',
   'creer',
   'sponsorisation',
+  'affiliation_et_parrainage',
+  'finance_paiements',
 ]);
 
 export function sectionContainsPath(

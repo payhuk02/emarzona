@@ -279,16 +279,18 @@ function MobileDomainDrawer({
 }) {
   const [open, setOpen] = useState(false);
   const isDirectLink = domain.items.length <= 1 && domain.rootPath;
+  const DomainIcon = domain.items[0]?.icon;
 
   if (isDirectLink && domain.rootPath) {
     return (
       <NavLink
         to={domain.rootPath}
         className={cn(
-          'inline-flex h-10 shrink-0 items-center rounded-full px-3 text-sm font-medium whitespace-nowrap',
+          'inline-flex h-10 shrink-0 items-center gap-1.5 rounded-full px-3 text-sm font-medium whitespace-nowrap',
           domain.isActive && 'bg-primary/10 text-primary'
         )}
       >
+        {DomainIcon ? <DomainIcon className="h-4 w-4 shrink-0" aria-hidden /> : null}
         {domain.shortLabel}
       </NavLink>
     );
@@ -302,12 +304,13 @@ function MobileDomainDrawer({
           variant="ghost"
           size="sm"
           className={cn(
-            'h-10 shrink-0 rounded-full px-3 text-sm font-medium gap-1 touch-manipulation whitespace-nowrap',
+            'h-10 shrink-0 rounded-full px-3 text-sm font-medium gap-1.5 touch-manipulation whitespace-nowrap',
             domain.isActive && 'bg-primary/10 text-primary'
           )}
           aria-expanded={open}
           aria-controls={`mobile-domain-drawer-${domain.domainKey}`}
         >
+          {DomainIcon ? <DomainIcon className="h-4 w-4 shrink-0" aria-hidden /> : null}
           {domain.shortLabel}
           <ChevronDown className="h-3 w-3 opacity-70" aria-hidden />
         </Button>

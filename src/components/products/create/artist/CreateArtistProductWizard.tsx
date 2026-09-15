@@ -29,9 +29,11 @@ import {
   CreditCard,
   Shield,
   AlertCircle,
+  TrendingUp,
 } from 'lucide-react';
 import { ArtistTypeSelector } from './ArtistTypeSelector';
 import { ArtistBasicInfoForm } from './ArtistBasicInfoForm';
+import { ArtistAffiliateSettings } from './ArtistAffiliateSettings';
 
 // Lazy loading des étapes pour optimiser le bundle size
 const ArtistSpecificForms = lazy(() =>
@@ -108,7 +110,13 @@ const STEPS = [
     description: 'Complet, partiel, escrow',
     icon: CreditCard,
   },
-  { id: 8, title: 'Aperçu & Validation', description: 'Vérifier et publier', icon: Eye },
+  {
+    id: 8,
+    title: 'Affiliation',
+    description: 'Programme promoteurs',
+    icon: TrendingUp,
+  },
+  { id: 9, title: 'Aperçu & Validation', description: 'Vérifier et publier', icon: Eye },
 ];
 
 interface CreateArtistProductWizardProps {
@@ -185,6 +193,17 @@ const CreateArtistProductWizardComponent = ({
     seo: {},
     faqs: [],
     payment: { payment_type: 'full', percentage_rate: 30 },
+    affiliate: {
+      enabled: false,
+      commission_rate: 10,
+      commission_type: 'percentage',
+      fixed_commission_amount: 0,
+      cookie_duration_days: 30,
+      min_order_amount: 0,
+      allow_self_referral: false,
+      require_approval: false,
+      terms_and_conditions: '',
+    },
     whatsapp_number: '',
     whatsapp_enabled: false,
     is_active: true,
@@ -493,6 +512,28 @@ const CreateArtistProductWizardComponent = ({
         formData.whatsapp_number,
         formData.whatsapp_enabled
       );
+
+      if (formData.affiliate?.enabled) {
+        const { error: affiliateError } = await supabase.from('product_affiliate_settings').insert({
+          product_id: rpcResult.product_id,
+          store_id: store.id,
+          affiliate_enabled: true,
+          commission_rate: formData.affiliate.commission_rate ?? 10,
+          commission_type: formData.affiliate.commission_type ?? 'percentage',
+          fixed_commission_amount: formData.affiliate.fixed_commission_amount ?? 0,
+          cookie_duration_days: formData.affiliate.cookie_duration_days ?? 30,
+          min_order_amount: formData.affiliate.min_order_amount ?? 0,
+          allow_self_referral: formData.affiliate.allow_self_referral ?? false,
+          require_approval: formData.affiliate.require_approval ?? false,
+          terms_and_conditions: formData.affiliate.terms_and_conditions ?? '',
+        });
+        if (affiliateError) {
+          logger.error('Affiliate settings error', {
+            error: affiliateError.message,
+            productId: rpcResult.product_id,
+          });
+        }
+      }
 
       // Déclencher webhook product.created (asynchrone)
       if (product && !isDraft) {
@@ -847,6 +888,32 @@ const CreateArtistProductWizardComponent = ({
             )}
 
             {currentStep === 8 && (
+              <Suspense fallback={<StepSkeleton />}>
+                <ArtistAffiliateSettings
+                  productPrice={formData.price || 0}
+                  productName={formData.artwork_title || formData.name || ''}
+                  data={formData.affiliate || {}}
+                  onUpdate={affiliateData =>
+                    handleUpdateFormData({
+                      affiliate: {
+                        enabled: Boolean(affiliateData.enabled),
+                        commission_rate: Number(affiliateData.commission_rate ?? 10),
+                        commission_type:
+                          (affiliateData.commission_type as 'percentage' | 'fixed') || 'percentage',
+                        fixed_commission_amount: Number(affiliateData.fixed_commission_amount ?? 0),
+                        cookie_duration_days: Number(affiliateData.cookie_duration_days ?? 30),
+                        min_order_amount: Number(affiliateData.min_order_amount ?? 0),
+                        allow_self_referral: Boolean(affiliateData.allow_self_referral),
+                        require_approval: Boolean(affiliateData.require_approval),
+                        terms_and_conditions: String(affiliateData.terms_and_conditions ?? ''),
+                      },
+                    })
+                  }
+                />
+              </Suspense>
+            )}
+
+            {currentStep === 9 && (
               <Suspense fallback={<StepSkeleton />}>
                 <ArtistPreview data={formData} />
               </Suspense>

@@ -148,10 +148,10 @@
     /* Effet de profondeur */
     transform: translateZ(0);
     will-change: transform;
-    /* Hauteur uniforme exacte */
-    height: 480px;
+    /* min-height only — fixed max-height clipped badges (Paiement, etc.) */
+    height: auto;
     min-height: 480px;
-    max-height: 480px;
+    max-height: none;
   }
 
   /* Contenu des cartes mobile */
@@ -196,10 +196,10 @@
     box-shadow: none;
     border-radius: var(--border-radius-tablet);
     background: transparent;
-    /* Hauteur uniforme exacte */
-    height: 520px;
+    /* Avoid clipping badges (Paiement, etc.) */
+    height: auto;
     min-height: 520px;
-    max-height: 520px;
+    max-height: none;
     transition: all var(--transition-duration) cubic-bezier(0.4, 0, 0.2, 1);
     /* Optimisation GPU */
     transform: translateZ(0);

@@ -39,25 +39,29 @@ export function PaymentOptionsBadge({
   const percentageRate = paymentOptions?.percentage_rate || 30;
 
   const sizeClasses = {
-    sm: 'text-xs px-1.5 sm:px-2 py-0.5',
-    md: 'text-xs sm:text-sm px-2 sm:px-3 py-1',
-    lg: 'text-sm sm:text-base px-3 sm:px-4 py-1.5',
+    sm: 'text-xs gap-1 px-2 py-0.5',
+    md: 'text-xs sm:text-sm gap-1.5 px-2.5 sm:px-3 py-1',
+    lg: 'text-sm sm:text-base gap-1.5 px-3 sm:px-4 py-1.5',
   };
 
   const iconSizes = {
-    sm: 'h-2.5 w-2.5 sm:h-3 sm:w-3',
-    md: 'h-3 w-3 sm:h-4 sm:w-4',
-    lg: 'h-4 w-4 sm:h-5 sm:w-5',
+    sm: 'h-3 w-3 shrink-0',
+    md: 'h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0',
+    lg: 'h-4 w-4 sm:h-5 sm:w-5 shrink-0',
   };
 
   // Badge Paiement complet
   if (paymentType === 'full') {
     return (
       <Badge
-        className={cn('bg-green-500 text-white border-0 shadow-sm', sizeClasses[size], className)}
+        className={cn(
+          'inline-flex items-center bg-green-500 text-white border-0 shadow-sm overflow-visible',
+          sizeClasses[size],
+          className
+        )}
         title="Paiement complet requis à la commande"
       >
-        <CheckCircle className={cn(iconSizes[size], 'mr-0.5 sm:mr-1')} />
+        <CheckCircle className={iconSizes[size]} aria-hidden />
         <span className="hidden sm:inline">Paiement complet</span>
         <span className="sm:hidden">Complet</span>
       </Badge>
@@ -68,10 +72,14 @@ export function PaymentOptionsBadge({
   if (paymentType === 'percentage') {
     return (
       <Badge
-        className={cn('bg-orange-500 text-white border-0 shadow-sm', sizeClasses[size], className)}
+        className={cn(
+          'inline-flex items-center bg-orange-500 text-white border-0 shadow-sm overflow-visible',
+          sizeClasses[size],
+          className
+        )}
         title={`Paiement partiel de ${percentageRate}% à la commande`}
       >
-        <CreditCard className={cn(iconSizes[size], 'mr-0.5 sm:mr-1')} />
+        <CreditCard className={iconSizes[size]} aria-hidden />
         <span className="hidden sm:inline">Paiement partiel {percentageRate}%</span>
         <span className="sm:hidden">{percentageRate}%</span>
       </Badge>
@@ -82,10 +90,14 @@ export function PaymentOptionsBadge({
   if (paymentType === 'delivery_secured') {
     return (
       <Badge
-        className={cn('bg-blue-500 text-white border-0 shadow-sm', sizeClasses[size], className)}
+        className={cn(
+          'inline-flex items-center bg-blue-500 text-white border-0 shadow-sm overflow-visible',
+          sizeClasses[size],
+          className
+        )}
         title="Paiement sécurisé : fonds bloqués jusqu'à confirmation de livraison"
       >
-        <Shield className={cn(iconSizes[size], 'mr-0.5 sm:mr-1')} />
+        <Shield className={iconSizes[size]} aria-hidden />
         <span className="hidden sm:inline">Paiement sécurisé</span>
         <span className="sm:hidden">Sécurisé</span>
       </Badge>

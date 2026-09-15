@@ -133,10 +133,12 @@ describe('store-capability-map', () => {
 
   it('gates affiliation, gamification and integrations by commerce type', () => {
     expect(canAccessCommercePath('/dashboard/affiliates', 'digital')).toBe(true);
-    expect(canAccessCommercePath('/dashboard/affiliates', 'service')).toBe(false);
+    expect(canAccessCommercePath('/dashboard/affiliates', 'physical')).toBe(true);
+    expect(canAccessCommercePath('/dashboard/affiliates', 'service')).toBe(true);
     expect(canAccessCommercePath('/dashboard/affiliates', 'course')).toBe(true);
     expect(canAccessCommercePath('/affiliate/dashboard', 'artist')).toBe(true);
-    expect(canAccessCommercePath('/affiliate/dashboard', 'physical')).toBe(false);
+    expect(canAccessCommercePath('/affiliate/dashboard', 'physical')).toBe(true);
+    expect(canAccessCommercePath('/affiliate/dashboard', 'digital')).toBe(true);
 
     expect(canAccessCommercePath('/dashboard/store-affiliates', 'physical')).toBe(true);
     expect(canAccessCommercePath('/dashboard/store-affiliates', 'service')).toBe(true);
