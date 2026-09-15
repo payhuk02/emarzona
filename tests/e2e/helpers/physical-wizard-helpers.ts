@@ -4,6 +4,7 @@ import { clickWizardNext, goToWizardStep } from './vendor-e2e-helpers';
 import {
   dismissSponsorAfterPublishIfVisible,
   openProductCreateWizard,
+  selectWizardComboboxOption,
 } from './product-wizard-helpers';
 
 export const PHYSICAL_WIZARD_TOTAL_STEPS = 9;
@@ -47,6 +48,8 @@ export async function fillPhysicalBasicInfoStep(
 
   await page.locator('#name').fill(name);
   await page.locator('#price').fill(price);
+
+  await selectWizardComboboxOption(page, /Pays d['’]origine/i, /^Sénégal$/i);
 
   const editor = page.locator('[contenteditable="true"]').first();
   if (await editor.isVisible({ timeout: 5_000 }).catch(() => false)) {

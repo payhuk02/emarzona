@@ -10,6 +10,7 @@ const baseValid: Partial<ArtistProductFormData> = {
   description: 'Description suffisamment longue pour publication.',
   price: 50000,
   images: ['https://example.com/a.jpg'],
+  country_of_origin: 'SN',
   requires_shipping: true,
   shipping_handling_time: 7,
   edition_type: 'original',
@@ -35,5 +36,11 @@ describe('validateArtistPublishFormData', () => {
   it('blocks publish without artist type', () => {
     const result = validateArtistPublishFormData({ ...baseValid, artist_type: undefined });
     expect(result.failedStep).toBe(1);
+  });
+
+  it('requires country of origin on basic info', () => {
+    const result = validateArtistPublishFormData({ ...baseValid, country_of_origin: '' });
+    expect(result.valid).toBe(false);
+    expect(result.failedStep).toBe(2);
   });
 });

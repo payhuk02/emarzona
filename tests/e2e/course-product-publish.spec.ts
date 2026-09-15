@@ -95,7 +95,11 @@ test.describe('Course wizard — publish (E2E)', () => {
       product_type: string;
       is_draft: boolean;
       is_active: boolean;
-      courses: Array<{ id: string; level: string; language: string }>;
+      // PostgREST returns an object for one-to-one embeds (courses.product_id UNIQUE).
+      courses:
+        | { id: string; level: string; language: string }
+        | Array<{ id: string; level: string; language: string }>
+        | null;
     };
 
     expect(product.is_draft).toBe(false);
@@ -103,9 +107,11 @@ test.describe('Course wizard — publish (E2E)', () => {
     expect(product.name).toBe(courseTitle);
     expect(product.slug).toBe(courseSlug);
     expect(product.category).toBe('Business');
-    expect(product.courses?.[0]?.id).toBeTruthy();
 
-    const courseId = product.courses[0].id;
+    const courseRow = Array.isArray(product.courses) ? product.courses[0] : product.courses;
+    expect(courseRow?.id).toBeTruthy();
+
+    const courseId = courseRow!.id;
 
     const { count: sectionCount } = await admin
       .from('course_sections')

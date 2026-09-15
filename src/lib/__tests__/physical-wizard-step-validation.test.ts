@@ -11,6 +11,7 @@ describe('validatePhysicalWizardStep', () => {
     description: 'Description complète du produit physique pour les tests automatisés.',
     price: 12000,
     images: ['https://example.com/image.png'],
+    country_of_origin: 'SN',
     track_inventory: true,
     sku: 'SKU-E2E-001',
     quantity: 10,
@@ -24,6 +25,11 @@ describe('validatePhysicalWizardStep', () => {
 
   it('rejects step 1 without images', () => {
     const result = validatePhysicalWizardStep(1, { ...baseForm, images: [] });
+    expect(result.valid).toBe(false);
+  });
+
+  it('rejects step 1 without country of origin', () => {
+    const result = validatePhysicalWizardStep(1, { ...baseForm, country_of_origin: '' });
     expect(result.valid).toBe(false);
   });
 

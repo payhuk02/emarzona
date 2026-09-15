@@ -11,8 +11,12 @@ import { retryOnTransientPostgrest } from './supabase-schema-cache-retry';
 import {
   dismissSponsorAfterPublishIfVisible,
   openProductCreateWizard,
+  selectWizardComboboxOption,
 } from './product-wizard-helpers';
 import { prepareSellerDashboardChrome, waitForStoresLoaded } from './seller-dashboard-setup';
+
+/** Affiliation step added → publish is step 9. */
+export const ARTIST_WIZARD_TOTAL_STEPS = 9;
 
 /** 1×1 PNG valide pour upload catalogue. */
 export const E2E_ARTWORK_PNG = Buffer.from(
@@ -200,6 +204,8 @@ export async function fillArtistBasicInfoStep(
     await yearInput.fill(String(new Date().getFullYear()));
   }
 
+  await selectWizardComboboxOption(page, /Pays d['’]origine/i, /^Sénégal$/i);
+
   if (editionType && editionType !== 'original') {
     await page.locator('#edition_type').click();
     const label =
@@ -248,26 +254,27 @@ export async function fillArtistEditionStep(
 }
 
 export async function goToArtistWizardStep(page: Page, targetStep: number): Promise<void> {
-  for (let guard = 0; guard < 12; guard += 1) {
-    const stepText = await page
-      .getByText(/Étape \d+ sur 8/i)
-      .first()
-      .textContent();
-    const match = stepText?.match(/Étape (\d+) sur 8/i);
+  const total = ARTIST_WIZARD_TOTAL_STEPS;
+  const stepPattern = new RegExp(`Étape \\d+ sur ${total}`, 'i');
+  for (let guard = 0; guard < total + 3; guard += 1) {
+    const stepText = await page.getByText(stepPattern).first().textContent();
+    const match = stepText?.match(new RegExp(`Étape (\\d+) sur ${total}`, 'i'));
     const current = match ? Number(match[1]) : 1;
     if (current >= targetStep) {
-      await expect(page.getByText(new RegExp(`Étape ${targetStep} sur 8`, 'i'))).toBeVisible({
-        timeout: 10_000,
-      });
+      await expect(page.getByText(new RegExp(`Étape ${targetStep} sur ${total}`, 'i'))).toBeVisible(
+        {
+          timeout: 10_000,
+        }
+      );
       return;
     }
     await clickArtistWizardNext(page, 1);
   }
-  throw new Error(`Could not reach artist wizard step ${targetStep}`);
+  throw new Error(`Could not reach artist wizard step ${targetStep}/${total}`);
 }
 
 export async function advanceArtistWizardToPublishStep(page: Page): Promise<void> {
-  await goToArtistWizardStep(page, 8);
+  await goToArtistWizardStep(page, ARTIST_WIZARD_TOTAL_STEPS);
 }
 
 export async function publishArtistWizard(page: Page): Promise<void> {

@@ -1,7 +1,7 @@
 /**
  * E2E — Publication œuvre artiste via wizard (Sprint 1 P0 / audit 2026)
  *
- * Couvre : wizard 8 étapes, upload image, RPC publish, redirect catalogue artiste.
+ * Couvre : wizard 9 étapes, upload image, RPC publish, redirect catalogue artiste.
  *
  * Prérequis : SUPABASE_SERVICE_ROLE_KEY + VITE_SUPABASE_URL (Supabase test migré).
  *

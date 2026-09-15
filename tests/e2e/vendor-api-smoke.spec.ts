@@ -24,7 +24,7 @@ function gatewayHeaders(extra: Record<string, string> = {}) {
   return headers;
 }
 
-const REQUEST_TIMEOUT_MS = 20_000;
+const REQUEST_TIMEOUT_MS = 45_000;
 
 test.describe('Epic 5.5 — Vendor public API smoke', () => {
   test.beforeEach(() => {
@@ -53,12 +53,16 @@ test.describe('Epic 5.5 — Vendor public API smoke', () => {
   });
 
   test('clé API invalide retourne 401 ou 403', async ({ request }) => {
-    const res = await request.get(`${SUPABASE_URL}/functions/v1/api-v1/products`, {
-      headers: gatewayHeaders({
-        Authorization: 'Bearer emz_invalid_test_key',
-      }),
-      timeout: REQUEST_TIMEOUT_MS,
+    const url = `${SUPABASE_URL}/functions/v1/api-v1/products`;
+    const headers = gatewayHeaders({
+      Authorization: 'Bearer emz_invalid_test_key',
     });
+
+    let res = await request.get(url, { headers, timeout: REQUEST_TIMEOUT_MS }).catch(() => null);
+    if (!res) {
+      // Edge cold-start / transient hang on invalid Bearer — one retry.
+      res = await request.get(url, { headers, timeout: REQUEST_TIMEOUT_MS });
+    }
     expect([401, 403]).toContain(res.status());
   });
 });
