@@ -332,7 +332,7 @@ export const PHASE6_CONTEXT_CONFIGS = {
   },
   affiliate: {
     id: 'affiliate',
-    sectionKey: 'marketing_croissance',
+    sectionKey: 'affiliation_et_parrainage',
     rootPath: '/affiliate/dashboard',
     breadcrumbSectionKey: 'affiliation',
     ariaLabel: 'Navigation affiliation',
