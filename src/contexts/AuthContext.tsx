@@ -7,16 +7,16 @@ import { setSentryUser, clearSentryUser } from '@/lib/sentry';
 import { logger } from '@/lib/logger';
 import { clearSessionBrowserCaches } from '@/lib/session-cache';
 
-function identifyPostHogLazy(userId: string, traits?: Record<string, unknown>) {
+function identifyPostHogLazy(userId: string, traits?: Record<string, unknown>): void {
   void import('@/lib/analytics/posthog')
     .then(({ identifyPostHogUser }) => identifyPostHogUser(userId, traits))
-    .catch(() => undefined);
+    .catch((): void => {});
 }
 
-function resetPostHogLazy() {
+function resetPostHogLazy(): void {
   void import('@/lib/analytics/posthog')
     .then(({ resetPostHogUser }) => resetPostHogUser())
-    .catch(() => undefined);
+    .catch((): void => {});
 }
 
 interface AuthContextType {
