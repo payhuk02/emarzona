@@ -29,6 +29,8 @@ const BUDGETS = [
   { label: 'vendor-react', test: name => name.startsWith('vendor-react-'), maxKb: 180 },
   { label: 'vendor-supabase', test: name => name.startsWith('vendor-supabase-'), maxKb: 220 },
   { label: 'vendor-radix', test: name => name.startsWith('vendor-radix-'), maxKb: 200 },
+  // Lazy PostHog SDK — hors app-core (index)
+  { label: 'vendor-posthog', test: name => name.startsWith('vendor-posthog-'), maxKb: 320 },
   // Chunk lazy — non chargé sur marketplace/checkout ; taille recharts ~490 KB minifié
   { label: 'charts (recharts, lazy)', test: name => name.startsWith('charts-'), maxKb: 520 },
   { label: 'pdf (jspdf)', test: name => name.startsWith('pdf-'), maxKb: 450 },

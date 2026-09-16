@@ -10,7 +10,7 @@
  *   - Prefer PostHog Query (Edge) quand PostHog est source de vérité (writes Postgres off)
  */
 
-import { isPostHogConfigured } from '@/lib/analytics/posthog';
+import { isPostHogConfigured } from '@/lib/analytics/posthog-config';
 
 function envFlag(name: string): string | undefined {
   const v = import.meta.env[name];

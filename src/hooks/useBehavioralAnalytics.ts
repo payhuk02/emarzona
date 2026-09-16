@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { capturePostHogEvent, isPostHogConfigured } from '@/lib/analytics/posthog';
+import { isPostHogConfigured } from '@/lib/analytics/posthog-config';
 
 interface UserBehaviorEvent {
   user_id?: string;
@@ -122,6 +122,7 @@ export const useBehavioralAnalytics = (userId?: string, config: BehavioralAnalyt
         timestamp: new Date().toISOString(),
       };
 
+      const { capturePostHogEvent } = await import('@/lib/analytics/posthog');
       capturePostHogEvent(`behavior_${fullEvent.event_type}`, {
         page_url: fullEvent.page_url,
         referrer: fullEvent.referrer ?? null,

@@ -9,14 +9,11 @@
 
 import posthog from 'posthog-js';
 import { logger } from '@/lib/logger';
+import { isPostHogConfigured } from '@/lib/analytics/posthog-config';
+
+export { isPostHogConfigured } from '@/lib/analytics/posthog-config';
 
 let initialized = false;
-
-export function isPostHogConfigured(): boolean {
-  if (import.meta.env.VITE_POSTHOG_ENABLED === 'false') return false;
-  const token = import.meta.env.VITE_POSTHOG_PROJECT_TOKEN;
-  return typeof token === 'string' && token.startsWith('phc_') && token.length > 10;
-}
 
 export function getPostHog(): typeof posthog | null {
   if (typeof window === 'undefined') return null;

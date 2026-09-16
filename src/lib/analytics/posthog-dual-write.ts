@@ -1,9 +1,17 @@
 /**
  * LOT A — dual-write helpers (PostHog + existing Supabase paths).
  * Does not replace Postgres writes.
+ * Dynamic import of posthog keeps posthog-js out of app-core.
  */
 
-import { capturePostHogEvent } from '@/lib/analytics/posthog';
+async function capture(event: string, properties?: Record<string, unknown>): Promise<void> {
+  try {
+    const { capturePostHogEvent } = await import('@/lib/analytics/posthog');
+    capturePostHogEvent(event, properties);
+  } catch {
+    // no-op: analytics must never break UX
+  }
+}
 
 export function dualWriteProductAnalytics(input: {
   eventType: string;
@@ -23,7 +31,7 @@ export function dualWriteProductAnalytics(input: {
             ? 'product_custom_event'
             : `product_${input.eventType}`;
 
-  capturePostHogEvent(eventName, {
+  void capture(eventName, {
     product_id: input.productId,
     store_id: input.storeId ?? null,
     revenue: input.revenue ?? null,
@@ -47,7 +55,7 @@ export function dualWriteCourseAnalytics(input: {
     quiz_attempt: 'course_quiz_attempted',
   };
 
-  capturePostHogEvent(map[input.eventType] || `course_${input.eventType}`, {
+  void capture(map[input.eventType] || `course_${input.eventType}`, {
     product_id: input.productId,
     product_type: 'course',
     source: 'useCourseAnalytics',
@@ -69,7 +77,7 @@ export function dualWriteVideoAnalytics(input: {
     video_complete: 'course_video_completed',
   };
 
-  capturePostHogEvent(map[input.eventType] || `course_${input.eventType}`, {
+  void capture(map[input.eventType] || `course_${input.eventType}`, {
     product_id: input.productId,
     lesson_id: input.lessonId ?? null,
     progress_percent: input.progressPercent ?? null,
@@ -85,7 +93,7 @@ export function dualWritePixelFire(input: {
   productId?: string | null;
   orderId?: string | null;
 }): void {
-  capturePostHogEvent('ad_pixel_fired', {
+  void capture('ad_pixel_fired', {
     pixel_event_type: input.eventType,
     pixel_id: input.pixelId,
     product_id: input.productId ?? null,
@@ -112,7 +120,7 @@ export function dualWritePlatformVisitor(input: {
           ? 'session_ended'
           : input.eventType;
 
-  capturePostHogEvent(eventName, {
+  void capture(eventName, {
     page_path: input.pagePath,
     duration_ms: input.durationMs ?? 0,
     country: input.country ?? null,
@@ -144,7 +152,7 @@ export function dualWriteStoreAnalytics(input: {
     store_create_completed: 'store_create_completed',
   };
 
-  capturePostHogEvent(map[input.eventType] || `store_${input.eventType}`, {
+  void capture(map[input.eventType] || `store_${input.eventType}`, {
     store_id: input.storeId,
     source: 'useAnalytics',
     ...(input.eventData || {}),

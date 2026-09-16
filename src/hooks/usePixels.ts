@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
-import { isPostHogConfigured } from '@/lib/analytics/posthog';
+import { isPostHogConfigured } from '@/lib/analytics/posthog-config';
 import { dualWritePixelFire } from '@/lib/analytics/posthog-dual-write';
 
 const USER_PIXEL_FIELDS =

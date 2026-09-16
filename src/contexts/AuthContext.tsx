@@ -6,7 +6,18 @@ import { useNavigate } from 'react-router-dom';
 import { setSentryUser, clearSentryUser } from '@/lib/sentry';
 import { logger } from '@/lib/logger';
 import { clearSessionBrowserCaches } from '@/lib/session-cache';
-import { identifyPostHogUser, resetPostHogUser } from '@/lib/analytics/posthog';
+
+function identifyPostHogLazy(userId: string, traits?: Record<string, unknown>) {
+  void import('@/lib/analytics/posthog')
+    .then(({ identifyPostHogUser }) => identifyPostHogUser(userId, traits))
+    .catch(() => undefined);
+}
+
+function resetPostHogLazy() {
+  void import('@/lib/analytics/posthog')
+    .then(({ resetPostHogUser }) => resetPostHogUser())
+    .catch(() => undefined);
+}
 
 interface AuthContextType {
   user: User | null;
@@ -51,7 +62,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           username: session.user.user_metadata?.username,
         });
         if (identifiedUserIdRef.current !== session.user.id) {
-          identifyPostHogUser(session.user.id, {
+          identifyPostHogLazy(session.user.id, {
             // Pas d'email en clair — id suffit pour funnels auth
             auth_provider: session.user.app_metadata?.provider ?? null,
           });
@@ -60,7 +71,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       } else {
         clearSentryUser();
         if (identifiedUserIdRef.current) {
-          resetPostHogUser();
+          resetPostHogLazy();
           identifiedUserIdRef.current = null;
         }
       }
@@ -97,7 +108,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             username: session.user.user_metadata?.username,
           });
           if (identifiedUserIdRef.current !== session.user.id) {
-            identifyPostHogUser(session.user.id, {
+            identifyPostHogLazy(session.user.id, {
               auth_provider: session.user.app_metadata?.provider ?? null,
             });
             identifiedUserIdRef.current = session.user.id;
@@ -121,7 +132,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signOut = async () => {
     clearSentryUser();
-    resetPostHogUser();
+    resetPostHogLazy();
     identifiedUserIdRef.current = null;
     queryClient.clear();
     await clearSessionBrowserCaches();

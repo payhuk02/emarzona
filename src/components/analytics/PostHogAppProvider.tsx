@@ -6,7 +6,8 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { PostHogProvider as PHProvider } from '@posthog/react';
 import posthog from 'posthog-js';
-import { initPostHog, isPostHogConfigured } from '@/lib/analytics/posthog';
+import { initPostHog } from '@/lib/analytics/posthog';
+import { isPostHogConfigured } from '@/lib/analytics/posthog-config';
 
 export function PostHogAppProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false);

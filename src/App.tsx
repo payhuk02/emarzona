@@ -20,14 +20,23 @@ import { getRoutePrefetchConfig } from '@/lib/route-prefetch-config';
 import { resolveStoreCommerceTypeFromStore } from '@/lib/commerce/store-capability-map';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useBehavioralAnalytics } from '@/hooks/useBehavioralAnalytics';
-import { PlatformVisitorTracker } from '@/components/analytics/PlatformVisitorTracker';
-import { PostHogAppProvider } from '@/components/analytics/PostHogAppProvider';
 
 import React, { Suspense, lazy, useEffect } from 'react';
 import { logger } from '@/lib/logger';
 import { canShowErrorDetails } from '@/lib/security/error-debug';
 import { SkipLink } from '@/components/accessibility/SkipLink';
 import { RouteChunkFallback } from '@/components/navigation/RouteChunkFallback';
+
+const PlatformVisitorTracker = lazy(() =>
+  import('@/components/analytics/PlatformVisitorTracker').then(m => ({
+    default: m.PlatformVisitorTracker,
+  }))
+);
+const PostHogAppProvider = lazy(() =>
+  import('@/components/analytics/PostHogAppProvider').then(m => ({
+    default: m.PostHogAppProvider,
+  }))
+);
 
 // Lazy-loaded non-critical components
 const PerformanceOptimizer = lazy(() =>
@@ -297,7 +306,9 @@ const AppContent = () => {
           <ReferralTracker />
           <ReferralClaimOnAuth />
         </Suspense>
-        <PlatformVisitorTracker />
+        <Suspense fallback={null}>
+          <PlatformVisitorTracker />
+        </Suspense>
         <Suspense fallback={<RouteChunkFallback />}>
           {(() => {
             const routes = (
@@ -345,18 +356,20 @@ const App = () => (
           }}
         >
           <AuthProvider>
-            <PostHogAppProvider>
-              <StoreProvider>
-                <PlatformCustomizationProvider>
-                  <ProgressiveUXProvider>
-                    <SubdomainMiddleware>
-                      <AppInitializer queryClient={queryClient} />
-                      <AppContent />
-                    </SubdomainMiddleware>
-                  </ProgressiveUXProvider>
-                </PlatformCustomizationProvider>
-              </StoreProvider>
-            </PostHogAppProvider>
+            <Suspense fallback={null}>
+              <PostHogAppProvider>
+                <StoreProvider>
+                  <PlatformCustomizationProvider>
+                    <ProgressiveUXProvider>
+                      <SubdomainMiddleware>
+                        <AppInitializer queryClient={queryClient} />
+                        <AppContent />
+                      </SubdomainMiddleware>
+                    </ProgressiveUXProvider>
+                  </PlatformCustomizationProvider>
+                </StoreProvider>
+              </PostHogAppProvider>
+            </Suspense>
           </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>

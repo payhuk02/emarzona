@@ -14,6 +14,14 @@ vi.mock('posthog-js', () => {
   return { default: posthog };
 });
 
+async function flushDualWrite() {
+  await vi.waitFor(() => {
+    // allow dynamic import() of posthog module to settle
+  });
+  await Promise.resolve();
+  await Promise.resolve();
+}
+
 describe('posthog dual-write helpers', () => {
   beforeEach(() => {
     vi.resetModules();
@@ -32,10 +40,13 @@ describe('posthog dual-write helpers', () => {
       productId: 'p1',
       storeId: 's1',
     });
-    expect(posthog.capture).toHaveBeenCalledWith(
-      'product_viewed',
-      expect.objectContaining({ product_id: 'p1', store_id: 's1' })
-    );
+    await flushDualWrite();
+    await vi.waitFor(() => {
+      expect(posthog.capture).toHaveBeenCalledWith(
+        'product_viewed',
+        expect.objectContaining({ product_id: 'p1', store_id: 's1' })
+      );
+    });
   });
 
   it('captures course_viewed via dualWriteCourseAnalytics', async () => {
@@ -44,10 +55,12 @@ describe('posthog dual-write helpers', () => {
     initPostHog();
     const { dualWriteCourseAnalytics } = await import('@/lib/analytics/posthog-dual-write');
     dualWriteCourseAnalytics({ eventType: 'view', productId: 'course-1' });
-    expect(posthog.capture).toHaveBeenCalledWith(
-      'course_viewed',
-      expect.objectContaining({ product_id: 'course-1', product_type: 'course' })
-    );
+    await vi.waitFor(() => {
+      expect(posthog.capture).toHaveBeenCalledWith(
+        'course_viewed',
+        expect.objectContaining({ product_id: 'course-1', product_type: 'course' })
+      );
+    });
   });
 
   it('captures ad_pixel_fired via dualWritePixelFire', async () => {
@@ -56,10 +69,12 @@ describe('posthog dual-write helpers', () => {
     initPostHog();
     const { dualWritePixelFire } = await import('@/lib/analytics/posthog-dual-write');
     dualWritePixelFire({ eventType: 'pageview', pixelId: 'px1', productId: 'p1' });
-    expect(posthog.capture).toHaveBeenCalledWith(
-      'ad_pixel_fired',
-      expect.objectContaining({ pixel_id: 'px1', product_id: 'p1' })
-    );
+    await vi.waitFor(() => {
+      expect(posthog.capture).toHaveBeenCalledWith(
+        'ad_pixel_fired',
+        expect.objectContaining({ pixel_id: 'px1', product_id: 'p1' })
+      );
+    });
   });
 
   it('skips blocked secret props', async () => {

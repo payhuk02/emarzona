@@ -113,6 +113,7 @@ export default defineConfig(({ mode }) => {
     icons: ['lucide-react'],
     seo: ['react-helmet'],
     theme: ['next-themes'],
+    'vendor-posthog': ['posthog-js', '@posthog/react'],
   };
 
   return {
