@@ -42,7 +42,7 @@ export interface ServiceAlert {
   service_id?: string;
   booking_id?: string;
   staff_id?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   is_read: boolean;
   created_at: Date | string;
   expires_at?: Date | string;
@@ -101,7 +101,9 @@ export const useUnreadAlertsCount = (userId: string) => {
       return count || 0;
     },
     enabled: !!userId,
-    refetchInterval: 10000, // Refetch every 10 seconds
+    refetchInterval: () =>
+      typeof document !== 'undefined' && document.visibilityState === 'visible' ? 30_000 : false,
+    staleTime: 25_000,
   });
 };
 
@@ -123,7 +125,7 @@ export const useMarkAlertAsRead = () => {
       if (error) throw error;
       return data as ServiceAlert;
     },
-    onSuccess: data => {
+    onSuccess: () => {
       // Invalider les queries pour forcer un refresh
       queryClient.invalidateQueries({ queryKey: ['service-alerts'] });
       queryClient.invalidateQueries({ queryKey: ['service-alerts-unread'] });

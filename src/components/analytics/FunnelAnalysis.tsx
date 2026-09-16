@@ -53,12 +53,14 @@ export const FunnelAnalysis = ({ storeId, timeRange = '30d' }: FunnelAnalysisPro
             .select('event_type')
             .eq('store_id', storeId)
             .in('event_type', ['view', 'click', 'conversion'])
-            .gte('created_at', start.toISOString()),
+            .gte('created_at', start.toISOString())
+            .limit(8000),
           supabase
             .from('orders')
             .select('status, payment_status')
             .eq('store_id', storeId)
-            .gte('created_at', start.toISOString()),
+            .gte('created_at', start.toISOString())
+            .limit(5000),
         ]);
 
       if (eventsError) throw eventsError;

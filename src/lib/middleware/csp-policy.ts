@@ -16,11 +16,11 @@ export function generateCspNonce(): string {
 export function buildCspHeader(nonce: string): string {
   const directives = [
     "default-src 'self'",
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://www.googletagmanager.com https://www.google-analytics.com https://connect.facebook.net https://analytics.tiktok.com https://s.pinimg.com https://static.cloudflareinsights.com`,
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://www.googletagmanager.com https://www.google-analytics.com https://connect.facebook.net https://analytics.tiktok.com https://s.pinimg.com https://static.cloudflareinsights.com https://*.i.posthog.com https://*.posthog.com`,
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "font-src 'self' https://fonts.gstatic.com data:",
     "img-src 'self' data: blob: https:",
-    "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://www.google-analytics.com https://www.googletagmanager.com https://api.geniuspay.com https://storage.googleapis.com https://api.exchangerate-api.com https://cloudflareinsights.com https://ipapi.co",
+    "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://www.google-analytics.com https://www.googletagmanager.com https://api.geniuspay.com https://storage.googleapis.com https://api.exchangerate-api.com https://cloudflareinsights.com https://ipapi.co https://*.i.posthog.com https://*.posthog.com",
     "frame-src 'self' https://*.supabase.co",
     "object-src 'none'",
     "base-uri 'self'",

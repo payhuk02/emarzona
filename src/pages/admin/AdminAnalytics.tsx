@@ -94,7 +94,7 @@ export default function AdminAnalytics() {
           .select('event_type')
           .in('event_type', [...eventTypes])
           .gte('created_at', since)
-          .limit(20000);
+          .limit(5000);
 
         if (loadError) throw loadError;
         if (!active) return;

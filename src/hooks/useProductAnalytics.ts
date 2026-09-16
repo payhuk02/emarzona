@@ -637,7 +637,8 @@ export const useAnalyticsHistory = (productId: string, days: number = 30) => {
         .select(ANALYTICS_EVENT_FIELDS)
         .eq('product_id', productId)
         .gte('created_at', startDate.toISOString())
-        .order('created_at', { ascending: true });
+        .order('created_at', { ascending: true })
+        .limit(5000);
 
       if (fetchError) throw fetchError;
 
@@ -732,7 +733,8 @@ export const useProductTrafficSources = (productId: string | undefined, days: nu
         .select('referrer')
         .eq('product_id', productId)
         .eq('event_type', 'view')
-        .gte('created_at', startDate.toISOString());
+        .gte('created_at', startDate.toISOString())
+        .limit(3000);
 
       if (eventsError) throw eventsError;
 

@@ -34,16 +34,31 @@ describe('analytics-write-policy (LOT B)', () => {
     expect(shouldWriteVisitorEventsToSupabase()).toBe(true);
   });
 
-  it('product/store writes default on and respect false kill-switch', async () => {
-    const mod = await import('@/lib/analytics/analytics-write-policy');
-    expect(mod.shouldWriteProductEventsToSupabase()).toBe(true);
-    expect(mod.shouldWriteStoreEventsToSupabase()).toBe(true);
+  it('skips product/store Postgres writes when PostHog is configured', async () => {
+    vi.stubEnv('VITE_POSTHOG_PROJECT_TOKEN', 'phc_test_token_for_unit_tests_xxxxx');
+    vi.stubEnv('VITE_POSTHOG_ENABLED', 'true');
+    const { shouldWriteProductEventsToSupabase, shouldWriteStoreEventsToSupabase } =
+      await import('@/lib/analytics/analytics-write-policy');
+    expect(shouldWriteProductEventsToSupabase()).toBe(false);
+    expect(shouldWriteStoreEventsToSupabase()).toBe(false);
+  });
 
-    vi.resetModules();
-    vi.stubEnv('VITE_SUPABASE_ANALYTICS_PRODUCT_WRITES', 'false');
-    vi.stubEnv('VITE_SUPABASE_ANALYTICS_STORE_WRITES', 'false');
-    const mod2 = await import('@/lib/analytics/analytics-write-policy');
-    expect(mod2.shouldWriteProductEventsToSupabase()).toBe(false);
-    expect(mod2.shouldWriteStoreEventsToSupabase()).toBe(false);
+  it('forces product/store Postgres writes when env is true', async () => {
+    vi.stubEnv('VITE_POSTHOG_PROJECT_TOKEN', 'phc_test_token_for_unit_tests_xxxxx');
+    vi.stubEnv('VITE_POSTHOG_ENABLED', 'true');
+    vi.stubEnv('VITE_SUPABASE_ANALYTICS_PRODUCT_WRITES', 'true');
+    vi.stubEnv('VITE_SUPABASE_ANALYTICS_STORE_WRITES', 'true');
+    const { shouldWriteProductEventsToSupabase, shouldWriteStoreEventsToSupabase } =
+      await import('@/lib/analytics/analytics-write-policy');
+    expect(shouldWriteProductEventsToSupabase()).toBe(true);
+    expect(shouldWriteStoreEventsToSupabase()).toBe(true);
+  });
+
+  it('keeps product/store Postgres writes when PostHog is off', async () => {
+    vi.stubEnv('VITE_POSTHOG_ENABLED', 'false');
+    const { shouldWriteProductEventsToSupabase, shouldWriteStoreEventsToSupabase } =
+      await import('@/lib/analytics/analytics-write-policy');
+    expect(shouldWriteProductEventsToSupabase()).toBe(true);
+    expect(shouldWriteStoreEventsToSupabase()).toBe(true);
   });
 });

@@ -14,5 +14,7 @@ describe('csp-policy', () => {
     const header = buildCspHeader('test-nonce-abc');
     expect(header).toContain("'nonce-test-nonce-abc'");
     expect(header).toContain("'strict-dynamic'");
+    expect(header).toContain('https://*.i.posthog.com');
+    expect(header).toContain('https://*.posthog.com');
   });
 });

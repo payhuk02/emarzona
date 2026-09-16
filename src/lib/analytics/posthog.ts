@@ -38,11 +38,13 @@ export function initPostHog(): typeof posthog | null {
   const apiKey = import.meta.env.VITE_POSTHOG_PROJECT_TOKEN as string;
   const apiHost =
     (import.meta.env.VITE_POSTHOG_HOST as string | undefined)?.replace(/\/$/, '') ||
-    'https://eu.i.posthog.com';
+    'https://us.i.posthog.com';
+  const uiHost = apiHost.includes('eu.') ? 'https://eu.posthog.com' : 'https://us.posthog.com';
 
   try {
     posthog.init(apiKey, {
       api_host: apiHost,
+      ui_host: uiHost,
       person_profiles: 'identified_only',
       capture_pageview: false, // SPA : on capture manuellement / via tracker
       capture_pageleave: true,

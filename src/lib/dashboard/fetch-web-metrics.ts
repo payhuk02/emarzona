@@ -90,14 +90,17 @@ export async function fetchWebMetricsFromTables(
       .select('event_type, session_id, duration, created_at')
       .eq('store_id', storeId)
       .gte('created_at', range.start.toISOString())
-      .lte('created_at', range.end.toISOString()),
+      .lte('created_at', range.end.toISOString())
+      .order('created_at', { ascending: false })
+      .limit(8000),
     supabase
       .from('analytics_events')
       .select('event_type, created_at')
       .eq('store_id', storeId)
       .eq('event_type', 'view')
       .gte('created_at', compareStart.toISOString())
-      .lt('created_at', range.start.toISOString()),
+      .lt('created_at', range.start.toISOString())
+      .limit(4000),
   ]);
 
   if (currentRes.error) {
