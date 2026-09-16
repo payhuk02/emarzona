@@ -2,10 +2,16 @@
  * Hooks pour les analytics de cours
  * Tracking des vues, clics, inscriptions, et métriques avancées
  * Date : 27 octobre 2025
+ *
+ * LOT analytics: PostHog = comportement ; Postgres detail/RPC gated
+ * (même politique que product analytics — dashboards restent sur product_analytics
+ * tant que VITE_SUPABASE_ANALYTICS_PRODUCT_WRITES n'est pas coupé).
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { dualWriteCourseAnalytics } from '@/lib/analytics/posthog-dual-write';
+import { shouldWriteProductEventsToSupabase } from '@/lib/analytics/analytics-write-policy';
 
 const PRODUCT_ANALYTICS_FIELDS =
   'id, product_id, store_id, total_views, total_clicks, total_conversions, views_today, views_yesterday, conversions_today, conversions_yesterday, created_at, updated_at';
@@ -27,7 +33,7 @@ interface AnalyticsEvent {
   event_type: 'view' | 'click' | 'enrollment' | 'lesson_view' | 'lesson_complete' | 'quiz_attempt';
   user_id?: string;
   session_id?: string;
-  metadata?: any;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -60,7 +66,7 @@ export const useCourseAnalytics = (productId: string) => {
           throw new Error('Produit non trouvé');
         }
 
-        const { data: newAnalytics, error: createError } = await supabase
+        const { error: createError } = await supabase
           .from('product_analytics')
           .insert({
             product_id: productId,
@@ -126,6 +132,21 @@ export const useTrackAnalyticsEvent = () => {
     mutationFn: async (event: AnalyticsEvent) => {
       const { product_id, event_type, user_id, session_id, metadata } = event;
 
+      // PostHog first (comportement / funnels cours)
+      dualWriteCourseAnalytics({
+        eventType: event_type,
+        productId: product_id,
+        extra: {
+          session_id: session_id ?? null,
+          user_id: user_id ?? null,
+        },
+      });
+
+      // Postgres (compteurs dashboard + lignes détail) — off si PostHog ON
+      if (!shouldWriteProductEventsToSupabase()) {
+        return { success: true, persisted: false as const };
+      }
+
       // 1. Incrémenter le compteur dans product_analytics
       if (event_type === 'view') {
         await supabase.rpc('increment_product_view', {
@@ -162,7 +183,7 @@ export const useTrackAnalyticsEvent = () => {
         });
       }
 
-      return { success: true };
+      return { success: true, persisted: true as const };
     },
     onSuccess: (_data, variables) => {
       // Invalider les analytics pour forcer un refresh
@@ -232,6 +253,7 @@ export const useTopLessons = (courseId: string) => {
         .select(
           `
           lesson_id,
+          total_watch_time_seconds,
           course_lessons!inner(title)
         `
         )
@@ -246,16 +268,23 @@ export const useTopLessons = (courseId: string) => {
       // Grouper par leçon
       const lessonViews: Record<string, { title: string; views: number; watch_time: number }> = {};
 
-      data.forEach((progress: any) => {
-        const lessonId = progress.lesson_id;
-        const title = progress.course_lessons.title;
+      data.forEach(
+        (progress: {
+          lesson_id: string;
+          total_watch_time_seconds?: number | null;
+          course_lessons: { title: string } | { title: string }[];
+        }) => {
+          const lessonId = progress.lesson_id;
+          const lessonRel = progress.course_lessons;
+          const title = Array.isArray(lessonRel) ? lessonRel[0]?.title : lessonRel?.title;
 
-        if (!lessonViews[lessonId]) {
-          lessonViews[lessonId] = { title, views: 0, watch_time: 0 };
+          if (!lessonViews[lessonId]) {
+            lessonViews[lessonId] = { title: title || 'Leçon', views: 0, watch_time: 0 };
+          }
+          lessonViews[lessonId].views += 1;
+          lessonViews[lessonId].watch_time += progress.total_watch_time_seconds || 0;
         }
-        lessonViews[lessonId].views += 1;
-        lessonViews[lessonId].watch_time += progress.total_watch_time_seconds || 0;
-      });
+      );
 
       return Object.entries(lessonViews)
         .map(([id, data]) => ({

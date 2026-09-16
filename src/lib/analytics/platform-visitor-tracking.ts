@@ -318,12 +318,18 @@ export async function trackPlatformVisitorEvent(payload: TrackPayload): Promise<
     event_data: payload.event_data ?? {},
   };
 
-  // LOT A PostHog (source analytics produit principale pour le comportement)
-  dualWritePlatformVisitor({
-    eventType: payload.event_type,
-    pagePath: row.page_path,
-    durationMs: row.duration_ms,
-  });
+  // LOT A PostHog — page_view / session_end only (heartbeat = bruit volume)
+  if (payload.event_type !== 'session_heartbeat') {
+    dualWritePlatformVisitor({
+      eventType: payload.event_type,
+      pagePath: row.page_path,
+      durationMs: row.duration_ms,
+      country: row.country,
+      deviceType: row.device_type,
+      browser: row.browser,
+      os: row.os,
+    });
+  }
 
   // LOT B: INSERT Postgres visitor optionnel (off par défaut si PostHog ON)
   if (shouldWriteVisitorEventsToSupabase()) {

@@ -28,6 +28,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAdminPlatformAnalytics } from '@/hooks/useAdminPlatformAnalytics';
 import { formatGrowthLabel, productTypeLabel } from '@/lib/admin/admin-platform-analytics';
 import { cn } from '@/lib/utils';
+import { shouldReadStoreAnalyticsFromPostHog } from '@/lib/analytics/analytics-write-policy';
+import { fetchPhysicalOnboardingFunnelFromPostHog } from '@/lib/analytics/posthog-dashboard-query';
 
 type PhysicalConversionSnapshot = {
   loading: boolean;
@@ -81,6 +83,19 @@ export default function AdminAnalytics() {
 
     const loadPhysicalConversionSnapshot = async () => {
       try {
+        if (shouldReadStoreAnalyticsFromPostHog()) {
+          const funnel = await fetchPhysicalOnboardingFunnelFromPostHog(30);
+          if (funnel && active) {
+            setPhysicalSnapshot({
+              loading: false,
+              onboardingViews: funnel.onboardingViews,
+              trialClicks: funnel.trialClicks,
+              billingClicks: funnel.billingClicks,
+            });
+            return;
+          }
+        }
+
         const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
         const eventTypes = [
           'physical_onboarding_seen',

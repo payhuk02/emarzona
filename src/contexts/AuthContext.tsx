@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useRef, useState, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -32,6 +32,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const identifiedUserIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -49,13 +50,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           email: session.user.email,
           username: session.user.user_metadata?.username,
         });
-        identifyPostHogUser(session.user.id, {
-          // Pas d'email en clair — id suffit pour funnels auth
-          auth_provider: session.user.app_metadata?.provider ?? null,
-        });
+        if (identifiedUserIdRef.current !== session.user.id) {
+          identifyPostHogUser(session.user.id, {
+            // Pas d'email en clair — id suffit pour funnels auth
+            auth_provider: session.user.app_metadata?.provider ?? null,
+          });
+          identifiedUserIdRef.current = session.user.id;
+        }
       } else {
         clearSentryUser();
-        resetPostHogUser();
+        if (identifiedUserIdRef.current) {
+          resetPostHogUser();
+          identifiedUserIdRef.current = null;
+        }
       }
     });
 
@@ -89,9 +96,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             email: session.user.email,
             username: session.user.user_metadata?.username,
           });
-          identifyPostHogUser(session.user.id, {
-            auth_provider: session.user.app_metadata?.provider ?? null,
-          });
+          if (identifiedUserIdRef.current !== session.user.id) {
+            identifyPostHogUser(session.user.id, {
+              auth_provider: session.user.app_metadata?.provider ?? null,
+            });
+            identifiedUserIdRef.current = session.user.id;
+          }
         }
       } catch (error) {
         logger.error('Exception lors de la vérification de session:', { error });
@@ -112,6 +122,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signOut = async () => {
     clearSentryUser();
     resetPostHogUser();
+    identifiedUserIdRef.current = null;
     queryClient.clear();
     await clearSessionBrowserCaches();
     await supabase.auth.signOut();

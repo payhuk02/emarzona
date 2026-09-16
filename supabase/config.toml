@@ -103,6 +103,10 @@ verify_jwt = false
 [functions.rate-limiter]
 verify_jwt = false
 
+# PostHog HogQL dashboards — JWT utilisateur (auth dans la fonction)
+[functions.posthog-analytics-query]
+verify_jwt = true
+
 # Vendor public API — auth via store API keys (emz_*), not Supabase JWT
 [functions.api-v1]
 verify_jwt = false

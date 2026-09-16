@@ -54,11 +54,32 @@ describe('analytics-write-policy (LOT B)', () => {
     expect(shouldWriteStoreEventsToSupabase()).toBe(true);
   });
 
-  it('keeps product/store Postgres writes when PostHog is off', async () => {
-    vi.stubEnv('VITE_POSTHOG_ENABLED', 'false');
-    const { shouldWriteProductEventsToSupabase, shouldWriteStoreEventsToSupabase } =
-      await import('@/lib/analytics/analytics-write-policy');
-    expect(shouldWriteProductEventsToSupabase()).toBe(true);
-    expect(shouldWriteStoreEventsToSupabase()).toBe(true);
+  it('prefers PostHog reads when PostHog is on and Postgres writes are off', async () => {
+    vi.stubEnv('VITE_POSTHOG_PROJECT_TOKEN', 'phc_test_token_for_unit_tests_xxxxx');
+    vi.stubEnv('VITE_POSTHOG_ENABLED', 'true');
+    const {
+      shouldReadProductAnalyticsFromPostHog,
+      shouldReadStoreAnalyticsFromPostHog,
+      shouldReadVisitorAnalyticsFromPostHog,
+    } = await import('@/lib/analytics/analytics-write-policy');
+    expect(shouldReadProductAnalyticsFromPostHog()).toBe(true);
+    expect(shouldReadStoreAnalyticsFromPostHog()).toBe(true);
+    expect(shouldReadVisitorAnalyticsFromPostHog()).toBe(true);
+  });
+
+  it('keeps Supabase reads when Postgres writes are forced', async () => {
+    vi.stubEnv('VITE_POSTHOG_PROJECT_TOKEN', 'phc_test_token_for_unit_tests_xxxxx');
+    vi.stubEnv('VITE_POSTHOG_ENABLED', 'true');
+    vi.stubEnv('VITE_SUPABASE_ANALYTICS_PRODUCT_WRITES', 'true');
+    vi.stubEnv('VITE_SUPABASE_ANALYTICS_STORE_WRITES', 'true');
+    vi.stubEnv('VITE_SUPABASE_ANALYTICS_VISITOR_WRITES', 'true');
+    const {
+      shouldReadProductAnalyticsFromPostHog,
+      shouldReadStoreAnalyticsFromPostHog,
+      shouldReadVisitorAnalyticsFromPostHog,
+    } = await import('@/lib/analytics/analytics-write-policy');
+    expect(shouldReadProductAnalyticsFromPostHog()).toBe(false);
+    expect(shouldReadStoreAnalyticsFromPostHog()).toBe(false);
+    expect(shouldReadVisitorAnalyticsFromPostHog()).toBe(false);
   });
 });

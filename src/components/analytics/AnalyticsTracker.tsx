@@ -9,6 +9,10 @@ interface AnalyticsTrackerProps {
   trackViews?: boolean;
   trackClicks?: boolean;
   trackTimeSpent?: boolean;
+  /**
+   * @deprecated JS errors go to Sentry — never PostHog/Postgres analytics.
+   * Kept for API compat; ignored.
+   */
   trackErrors?: boolean;
   customEvents?: string[];
 }
@@ -20,9 +24,10 @@ export const AnalyticsTracker: React.FC<AnalyticsTrackerProps> = ({
   trackViews = true,
   trackClicks = true,
   trackTimeSpent = true,
-  trackErrors = true,
+  trackErrors: _trackErrors = false,
   customEvents = [],
 }) => {
+  void _trackErrors;
   const { trackView, trackClick, trackCustomEvent } = useAnalyticsTracking();
   const sessionStartTime = useRef<number>(Date.now());
   const lastActivityTime = useRef<number>(Date.now());
@@ -68,48 +73,32 @@ export const AnalyticsTracker: React.FC<AnalyticsTrackerProps> = ({
     };
   }, [enabled, trackViews, productId, trackView, withStore]);
 
-  // Tracker les clics
+  // Tracker les clics interactifs utiles uniquement (pas tout le DOM)
   useEffect(() => {
     if (!enabled || !trackClicks || !productId) return;
 
     const handleClick = (event: MouseEvent) => {
-      const target = event.target as HTMLElement;
+      const target = event.target as HTMLElement | null;
+      if (!target) return;
 
-      // Ignorer les clics sur des éléments non interactifs
-      if (!target || target.tagName === 'SCRIPT' || target.tagName === 'STYLE') {
-        return;
-      }
+      const interactive = target.closest('button, a, [role="button"]') as HTMLElement | null;
+      if (!interactive) return;
 
-      // Identifier l'élément cliqué
-      const elementId = target.id || target.className || target.tagName;
-      const elementText = target.textContent?.slice(0, 100) || '';
-      const elementType = target.tagName.toLowerCase();
+      const elementId =
+        interactive.id ||
+        interactive.getAttribute('data-analytics-id') ||
+        interactive.getAttribute('aria-label') ||
+        interactive.tagName.toLowerCase();
 
-      // Déterminer si c'est un élément important
-      const isImportantElement =
-        target.tagName === 'BUTTON' ||
-        target.tagName === 'A' ||
-        target.classList.contains('btn') ||
-        target.classList.contains('button') ||
-        target.getAttribute('role') === 'button' ||
-        target.onclick !== null;
-
-      if (isImportantElement) {
-        trackClick(
-          productId,
-          elementId,
-          withStore({
-            element_type: elementType,
-            element_text: elementText,
-            element_href: target.getAttribute('href'),
-            click_position: {
-              x: event.clientX,
-              y: event.clientY,
-            },
-            timestamp: Date.now(),
-          })
-        );
-      }
+      trackClick(
+        productId,
+        elementId.slice(0, 120),
+        withStore({
+          element_type: interactive.tagName.toLowerCase(),
+          element_href: interactive.getAttribute('href')?.slice(0, 200) ?? null,
+          timestamp: Date.now(),
+        })
+      );
     };
 
     document.addEventListener('click', handleClick, true);
@@ -196,46 +185,7 @@ export const AnalyticsTracker: React.FC<AnalyticsTrackerProps> = ({
     };
   }, [enabled, trackTimeSpent, productId, trackCustomEvent, withStore]);
 
-  // Tracker les erreurs JavaScript
-  useEffect(() => {
-    if (!enabled || !trackErrors || !productId) return;
-
-    const handleError = (event: ErrorEvent) => {
-      trackCustomEvent(
-        productId,
-        'javascript_error',
-        withStore({
-          message: event.message,
-          filename: event.filename,
-          lineno: event.lineno,
-          colno: event.colno,
-          stack: event.error?.stack,
-          page_url: window.location.href,
-          timestamp: Date.now(),
-        })
-      );
-    };
-
-    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
-      trackCustomEvent(
-        productId,
-        'unhandled_promise_rejection',
-        withStore({
-          reason: event.reason?.toString(),
-          page_url: window.location.href,
-          timestamp: Date.now(),
-        })
-      );
-    };
-
-    window.addEventListener('error', handleError);
-    window.addEventListener('unhandledrejection', handleUnhandledRejection);
-
-    return () => {
-      window.removeEventListener('error', handleError);
-      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
-    };
-  }, [enabled, trackErrors, productId, trackCustomEvent, withStore]);
+  // JS errors → Sentry (APM), jamais analytics PostHog/Postgres
 
   // Tracker les événements personnalisés
   useEffect(() => {

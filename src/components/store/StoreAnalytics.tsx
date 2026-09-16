@@ -16,6 +16,8 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
+import { shouldReadStoreAnalyticsFromPostHog } from '@/lib/analytics/analytics-write-policy';
+import { fetchStoreViewsFromPostHog } from '@/lib/analytics/posthog-dashboard-query';
 
 interface StoreAnalyticsProps {
   storeId: string;
@@ -98,6 +100,8 @@ const StoreAnalytics = ({ storeId }: StoreAnalyticsProps) => {
       }
 
       // Utiliser Promise.allSettled pour éviter les erreurs de requêtes individuelles
+      const preferPostHogViews = shouldReadStoreAnalyticsFromPostHog();
+
       const [
         productsResult,
         ordersResult,
@@ -154,22 +158,26 @@ const StoreAnalytics = ({ storeId }: StoreAnalyticsProps) => {
           .order('created_at', { ascending: false })
           .limit(10),
 
-        // Compter les vues depuis store_analytics_events (si la table existe)
-        supabase
-          .from('store_analytics_events')
-          .select('id', { count: 'exact', head: true })
-          .eq('store_id', storeId)
-          .eq('event_type', 'store_view')
-          .gte('created_at', currentPeriodStart.toISOString())
-          .lte('created_at', currentPeriodEnd.toISOString()),
+        // Skip Postgres view COUNTs when PostHog is source of truth (Disk I/O)
+        preferPostHogViews
+          ? Promise.resolve({ count: 0, error: null, data: null })
+          : supabase
+              .from('store_analytics_events')
+              .select('id', { count: 'exact', head: true })
+              .eq('store_id', storeId)
+              .eq('event_type', 'store_view')
+              .gte('created_at', currentPeriodStart.toISOString())
+              .lte('created_at', currentPeriodEnd.toISOString()),
 
-        supabase
-          .from('store_analytics_events')
-          .select('id', { count: 'exact', head: true })
-          .eq('store_id', storeId)
-          .eq('event_type', 'store_view')
-          .gte('created_at', previousPeriodStart.toISOString())
-          .lt('created_at', previousPeriodEnd.toISOString()),
+        preferPostHogViews
+          ? Promise.resolve({ count: 0, error: null, data: null })
+          : supabase
+              .from('store_analytics_events')
+              .select('id', { count: 'exact', head: true })
+              .eq('store_id', storeId)
+              .eq('event_type', 'store_view')
+              .gte('created_at', previousPeriodStart.toISOString())
+              .lt('created_at', previousPeriodEnd.toISOString()),
       ]);
 
       const products =
@@ -199,14 +207,29 @@ const StoreAnalytics = ({ storeId }: StoreAnalyticsProps) => {
           : [];
 
       // Vues depuis store_analytics_events (0 si table n'existe pas ou pas de données)
-      const totalViews =
+      let totalViews =
         viewsResult.status === 'fulfilled' && viewsResult.value.count !== null
           ? viewsResult.value.count
           : 0;
-      const previousViews =
+      let previousViews =
         previousViewsResult.status === 'fulfilled' && previousViewsResult.value.count !== null
           ? previousViewsResult.value.count
           : 0;
+      let posthogMonthly: Array<{ month: string; views: number }> | null = null;
+
+      if (shouldReadStoreAnalyticsFromPostHog()) {
+        const phViews = await fetchStoreViewsFromPostHog({
+          storeId,
+          periodStart: currentPeriodStart.toISOString(),
+          periodEnd: currentPeriodEnd.toISOString(),
+          compareStart: previousPeriodStart.toISOString(),
+        });
+        if (phViews) {
+          totalViews = phViews.currentViews;
+          previousViews = phViews.previousViews;
+          posthogMonthly = phViews.monthlyViews;
+        }
+      }
 
       // Calculer les statistiques réelles
       const totalOrders = orders.length;
@@ -244,29 +267,33 @@ const StoreAnalytics = ({ storeId }: StoreAnalyticsProps) => {
       // LOT 1 Disk I/O: borné aux 12 derniers mois (plus de SELECT historique illimité)
       const twelveMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 11, 1);
 
-      const [{ data: allOrders }, { data: allViews }] = await Promise.all([
-        supabase
-          .from('orders')
-          .select('id, total_amount, created_at')
-          .eq('store_id', storeId)
-          .gte('created_at', twelveMonthsAgo.toISOString())
-          .order('created_at', { ascending: true })
-          .limit(10000),
-        supabase
+      const { data: allOrders } = await supabase
+        .from('orders')
+        .select('id, total_amount, created_at')
+        .eq('store_id', storeId)
+        .gte('created_at', twelveMonthsAgo.toISOString())
+        .order('created_at', { ascending: true })
+        .limit(10000);
+
+      let allViews: Array<{ created_at: string }> | null = null;
+      if (!posthogMonthly) {
+        const viewsRes = await supabase
           .from('store_analytics_events')
           .select('created_at')
           .eq('store_id', storeId)
           .eq('event_type', 'store_view')
           .gte('created_at', twelveMonthsAgo.toISOString())
           .order('created_at', { ascending: true })
-          .limit(10000),
-      ]);
+          .limit(10000);
+        allViews = viewsRes.data;
+      }
 
       // Statistiques mensuelles depuis les données réelles (12 derniers mois)
       const monthlyStats = Array.from({ length: 12 }, (_, i) => {
         const monthDate = new Date(now.getFullYear(), now.getMonth() - (11 - i), 1);
         const monthStart = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1);
         const monthEnd = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0, 23, 59, 59);
+        const monthKey = `${monthDate.getFullYear()}-${String(monthDate.getMonth() + 1).padStart(2, '0')}`;
 
         // Filtrer les commandes de ce mois depuis la fenêtre bornée
         const monthOrders = (allOrders || []).filter(order => {
@@ -279,11 +306,15 @@ const StoreAnalytics = ({ storeId }: StoreAnalyticsProps) => {
           0
         );
 
-        // Filtrer les vues de ce mois depuis la fenêtre bornée
-        const monthViews = (allViews || []).filter(view => {
-          const viewDate = new Date(view.created_at);
-          return viewDate >= monthStart && viewDate <= monthEnd;
-        }).length;
+        let monthViews = 0;
+        if (posthogMonthly) {
+          monthViews = posthogMonthly.find(m => m.month === monthKey)?.views ?? 0;
+        } else {
+          monthViews = (allViews || []).filter(view => {
+            const viewDate = new Date(view.created_at);
+            return viewDate >= monthStart && viewDate <= monthEnd;
+          }).length;
+        }
 
         return {
           month: monthDate.toLocaleDateString('fr-FR', { month: 'short' }),
@@ -306,7 +337,7 @@ const StoreAnalytics = ({ storeId }: StoreAnalyticsProps) => {
         topProducts,
         monthlyStats,
       });
-    } catch (_err: unknown) {
+    } catch (err: unknown) {
       const errorMessage =
         err instanceof Error ? err.message : 'Impossible de charger les statistiques';
       logger.error('Error fetching analytics', { error: err, storeId });

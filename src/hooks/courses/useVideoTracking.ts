@@ -8,6 +8,8 @@
 import { useRef, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
+import { dualWriteVideoAnalytics } from '@/lib/analytics/posthog-dual-write';
+import { shouldWriteProductEventsToSupabase } from '@/lib/analytics/analytics-write-policy';
 
 interface VideoTrackingOptions {
   productId: string;
@@ -43,14 +45,26 @@ export const useVideoTracking = (options: VideoTrackingOptions) => {
       if (!enabled) return;
 
       try {
-        // Incrémenter le compteur dans product_analytics si c'est un 'play'
+        // PostHog — milestones player (comportement)
+        dualWriteVideoAnalytics({
+          eventType: eventData.event_type,
+          productId,
+          lessonId: eventData.lesson_id ?? lessonId ?? null,
+          progressPercent: eventData.progress_percent ?? null,
+        });
+
+        // Postgres detail/compteurs — off si PostHog ON (même gate product)
+        // Note: course_lesson_progress / watch time restent métier (useVideoPosition / useWatchTime)
+        if (!shouldWriteProductEventsToSupabase()) {
+          return;
+        }
+
         if (eventData.event_type === 'video_play') {
           await supabase.rpc('increment_product_click', {
             p_product_id: productId,
           });
         }
 
-        // Enregistrer l'événement détaillé
         await supabase.from('product_clicks').insert({
           product_id: productId,
           user_id: userId,
@@ -72,7 +86,7 @@ export const useVideoTracking = (options: VideoTrackingOptions) => {
         logger.error('Error tracking video event', { error, eventData, productId, lessonId });
       }
     },
-    [productId, userId, sessionId, enabled]
+    [productId, userId, sessionId, enabled, lessonId]
   );
 
   /**

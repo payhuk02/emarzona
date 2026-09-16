@@ -9,6 +9,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { TrendingDown, Users, MousePointerClick, CheckCircle, ShoppingCart } from 'lucide-react';
 import type { TimeRange } from '@/hooks/useUnifiedAnalytics';
 import { isOrderEligibleForRevenue } from '@/lib/orders/order-revenue-eligibility';
+import { shouldReadProductAnalyticsFromPostHog } from '@/lib/analytics/analytics-write-policy';
+import { fetchStoreFunnelFromPostHog } from '@/lib/analytics/posthog-dashboard-query';
 
 interface FunnelStep {
   name: string;
@@ -46,29 +48,44 @@ export const FunnelAnalysis = ({ storeId, timeRange = '30d' }: FunnelAnalysisPro
     queryKey: ['funnel-analysis', storeId, timeRange],
     enabled: Boolean(storeId),
     queryFn: async () => {
-      const [{ data: events, error: eventsError }, { data: orders, error: ordersError }] =
-        await Promise.all([
-          supabase
-            .from('analytics_events')
-            .select('event_type')
-            .eq('store_id', storeId)
-            .in('event_type', ['view', 'click', 'conversion'])
-            .gte('created_at', start.toISOString())
-            .limit(8000),
-          supabase
-            .from('orders')
-            .select('status, payment_status')
-            .eq('store_id', storeId)
-            .gte('created_at', start.toISOString())
-            .limit(5000),
-        ]);
+      const startIso = start.toISOString();
+      let views = 0;
+      let clicks = 0;
+      let conversions = 0;
 
-      if (eventsError) throw eventsError;
+      if (shouldReadProductAnalyticsFromPostHog()) {
+        const funnel = await fetchStoreFunnelFromPostHog({
+          storeId,
+          periodStart: startIso,
+          periodEnd: new Date().toISOString(),
+        });
+        if (funnel) {
+          views = funnel.views;
+          clicks = funnel.clicks;
+          conversions = funnel.conversions;
+        }
+      } else {
+        const { data: events, error: eventsError } = await supabase
+          .from('analytics_events')
+          .select('event_type')
+          .eq('store_id', storeId)
+          .in('event_type', ['view', 'click', 'conversion'])
+          .gte('created_at', startIso)
+          .limit(8000);
+        if (eventsError) throw eventsError;
+        views = events?.filter(e => e.event_type === 'view').length ?? 0;
+        clicks = events?.filter(e => e.event_type === 'click').length ?? 0;
+        conversions = events?.filter(e => e.event_type === 'conversion').length ?? 0;
+      }
+
+      const { data: orders, error: ordersError } = await supabase
+        .from('orders')
+        .select('status, payment_status')
+        .eq('store_id', storeId)
+        .gte('created_at', startIso)
+        .limit(5000);
       if (ordersError) throw ordersError;
 
-      const views = events?.filter(e => e.event_type === 'view').length ?? 0;
-      const clicks = events?.filter(e => e.event_type === 'click').length ?? 0;
-      const conversions = events?.filter(e => e.event_type === 'conversion').length ?? 0;
       const purchases =
         orders?.filter(o => isOrderEligibleForRevenue(o.status, o.payment_status)).length ?? 0;
 

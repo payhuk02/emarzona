@@ -1,8 +1,11 @@
 /**
  * Analytics visiteurs plateforme — RPC get_platform_visitor_analytics
+ * (PostHog HogQL si writes visitor Postgres off)
  */
 
 import { supabase } from '@/integrations/supabase/client';
+import { shouldReadVisitorAnalyticsFromPostHog } from '@/lib/analytics/analytics-write-policy';
+import { fetchPlatformVisitorsRawFromPostHog } from '@/lib/analytics/posthog-dashboard-query';
 
 export type VisitorBreakdownRow = {
   label: string;
@@ -186,6 +189,11 @@ export function mapPlatformVisitorAnalyticsPayload(payload: unknown): PlatformVi
 export async function fetchPlatformVisitorAnalytics(
   periodDays = 30
 ): Promise<PlatformVisitorAnalytics> {
+  if (shouldReadVisitorAnalyticsFromPostHog()) {
+    const fromPh = await fetchPlatformVisitorsRawFromPostHog(periodDays);
+    if (fromPh) return mapPlatformVisitorAnalyticsPayload(fromPh);
+  }
+
   const { data, error } = await supabase.rpc('get_platform_visitor_analytics', {
     p_period_days: periodDays,
   });

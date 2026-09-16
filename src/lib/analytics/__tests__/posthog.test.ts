@@ -38,6 +38,30 @@ describe('posthog dual-write helpers', () => {
     );
   });
 
+  it('captures course_viewed via dualWriteCourseAnalytics', async () => {
+    const posthog = (await import('posthog-js')).default;
+    const { initPostHog } = await import('@/lib/analytics/posthog');
+    initPostHog();
+    const { dualWriteCourseAnalytics } = await import('@/lib/analytics/posthog-dual-write');
+    dualWriteCourseAnalytics({ eventType: 'view', productId: 'course-1' });
+    expect(posthog.capture).toHaveBeenCalledWith(
+      'course_viewed',
+      expect.objectContaining({ product_id: 'course-1', product_type: 'course' })
+    );
+  });
+
+  it('captures ad_pixel_fired via dualWritePixelFire', async () => {
+    const posthog = (await import('posthog-js')).default;
+    const { initPostHog } = await import('@/lib/analytics/posthog');
+    initPostHog();
+    const { dualWritePixelFire } = await import('@/lib/analytics/posthog-dual-write');
+    dualWritePixelFire({ eventType: 'pageview', pixelId: 'px1', productId: 'p1' });
+    expect(posthog.capture).toHaveBeenCalledWith(
+      'ad_pixel_fired',
+      expect.objectContaining({ pixel_id: 'px1', product_id: 'p1' })
+    );
+  });
+
   it('skips blocked secret props', async () => {
     const posthog = (await import('posthog-js')).default;
     const { initPostHog, capturePostHogEvent } = await import('@/lib/analytics/posthog');

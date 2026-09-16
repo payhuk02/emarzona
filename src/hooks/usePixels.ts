@@ -3,6 +3,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
+import { isPostHogConfigured } from '@/lib/analytics/posthog';
+import { dualWritePixelFire } from '@/lib/analytics/posthog-dual-write';
 
 const USER_PIXEL_FIELDS =
   'id, user_id, pixel_type, pixel_id, pixel_name, pixel_code, is_active, created_at, updated_at';
@@ -57,8 +59,7 @@ export const usePixels = () => {
 
       if (error) throw error;
       setPixels((data || []) as Pixel[]);
-    } catch (_error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+    } catch (error: unknown) {
       logger.error('Error fetching pixels', { error, userId: user.id });
       toast({
         title: 'Erreur',
@@ -187,6 +188,18 @@ export const usePixels = () => {
   ) => {
     if (!user) return false;
 
+    // PostHog porte le log analytique ; les pixels externes restent injectés côté PixelInjector.
+    // Évite INSERT pixel_events (Disk I/O) quand PostHog est configuré.
+    if (isPostHogConfigured()) {
+      dualWritePixelFire({
+        eventType,
+        pixelId,
+        productId: eventData?.product_id ?? null,
+        orderId: eventData?.order_id ?? null,
+      });
+      return true;
+    }
+
     try {
       const { error } = await supabase.from('pixel_events').insert([
         {
@@ -201,8 +214,7 @@ export const usePixels = () => {
 
       if (error) throw error;
       return true;
-    } catch (_error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+    } catch (error: unknown) {
       logger.error('Error tracking pixel event', { error, pixelId, eventType });
       return false;
     }

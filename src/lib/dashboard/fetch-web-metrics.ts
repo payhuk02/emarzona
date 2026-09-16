@@ -1,5 +1,6 @@
 /**
  * Web analytics metrics (pageViews, bounce, session duration) from analytics_events.
+ * When PostHog is source of truth, prefer Edge HogQL (fallback Supabase).
  * Note: auth `user_sessions` is unrelated (device sessions) — do not query it here.
  */
 
@@ -11,6 +12,8 @@ import {
   type SupabaseRpcError,
 } from '@/lib/dashboard/rpc-error-utils';
 import type { DashboardPeriodRange } from '@/lib/dashboard/fetch-dashboard-stats-rpc';
+import { shouldReadProductAnalyticsFromPostHog } from '@/lib/analytics/analytics-write-policy';
+import { fetchStoreWebMetricsFromPostHog } from '@/lib/analytics/posthog-dashboard-query';
 
 export interface DashboardWebMetrics {
   pageViews: number;
@@ -52,6 +55,18 @@ export async function fetchWebMetricsFromRpc(
   range: DashboardPeriodRange
 ): Promise<DashboardWebMetrics> {
   const compareStart = compareStartForRange(range);
+
+  if (shouldReadProductAnalyticsFromPostHog()) {
+    const fromPh = await fetchStoreWebMetricsFromPostHog({
+      storeId,
+      periodStart: range.start.toISOString(),
+      periodEnd: range.end.toISOString(),
+      compareStart: compareStart.toISOString(),
+    });
+    if (fromPh) return parseWebMetricsPayload(fromPh);
+    logger.warn('[Dashboard] PostHog web metrics unavailable — fallback Supabase', { storeId });
+  }
+
   const { data, error } = await supabase.rpc('get_store_web_metrics', {
     p_store_id: storeId,
     p_period_start: range.start.toISOString(),
@@ -150,12 +165,23 @@ export async function fetchWebMetricsForPeriod(
   end: Date = new Date()
 ): Promise<DashboardWebMetrics> {
   const days = Math.max(1, Math.ceil((end.getTime() - start.getTime()) / (24 * 60 * 60 * 1000)));
-  return fetchWebMetricsFromTables(storeId, {
+  const range = {
     start,
     end,
     days,
     label: `${days} derniers jours`,
-  });
+  };
+  if (shouldReadProductAnalyticsFromPostHog()) {
+    const compareStart = compareStartForRange(range);
+    const fromPh = await fetchStoreWebMetricsFromPostHog({
+      storeId,
+      periodStart: start.toISOString(),
+      periodEnd: end.toISOString(),
+      compareStart: compareStart.toISOString(),
+    });
+    if (fromPh) return parseWebMetricsPayload(fromPh);
+  }
+  return fetchWebMetricsFromTables(storeId, range);
 }
 
 export function calcPageViewGrowth(current: number, previous: number): number {
