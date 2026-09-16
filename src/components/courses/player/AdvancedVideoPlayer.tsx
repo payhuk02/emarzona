@@ -145,32 +145,37 @@ export const AdvancedVideoPlayer = ({
     }
   }, [currentTime, videoType]);
 
-  // Sauvegarder la position toutes les 10 secondes
+  // LOT 1 Disk I/O: sauvegarde périodique 10s → 45s + flush à la pause
+  const PROGRESS_SAVE_INTERVAL_MS = 45_000;
+
+  const flushVideoPosition = useCallback(() => {
+    if (!enrollmentId || !lessonId || !videoRef.current) return;
+    const currentTime = videoRef.current.currentTime;
+    const elapsedWatch = Math.floor((Date.now() - startTimeRef.current) / 1000);
+    updatePosition.mutate({
+      enrollmentId,
+      lessonId,
+      position: Math.floor(currentTime),
+      watchTime: elapsedWatch,
+    });
+    startTimeRef.current = Date.now();
+  }, [enrollmentId, lessonId, updatePosition]);
+
   useEffect(() => {
     if (!enrollmentId || !lessonId || videoType !== 'upload') return;
 
     saveIntervalRef.current = setInterval(() => {
       if (videoRef.current && !videoRef.current.paused) {
-        const currentTime = videoRef.current.currentTime;
-        const watchTime = Math.floor((Date.now() - startTimeRef.current) / 1000);
-
-        updatePosition.mutate({
-          enrollmentId,
-          lessonId,
-          position: Math.floor(currentTime),
-          watchTime,
-        });
-
-        startTimeRef.current = Date.now();
+        flushVideoPosition();
       }
-    }, 10000);
+    }, PROGRESS_SAVE_INTERVAL_MS);
 
     return () => {
       if (saveIntervalRef.current) {
         clearInterval(saveIntervalRef.current);
       }
     };
-  }, [enrollmentId, lessonId, videoType, updatePosition]);
+  }, [enrollmentId, lessonId, videoType, flushVideoPosition]);
 
   // Gérer les événements vidéo
   const handlePlay = useCallback(() => {
@@ -203,7 +208,8 @@ export const AdvancedVideoPlayer = ({
       videoTracking.handlePause(video.currentTime, video.duration);
     }
     watchTime.stopWatching();
-  }, [videoTracking, watchTime]);
+    flushVideoPosition();
+  }, [videoTracking, watchTime, flushVideoPosition]);
 
   const handleTimeUpdate = useCallback(() => {
     const video = videoRef.current;

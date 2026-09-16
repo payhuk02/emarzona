@@ -121,6 +121,7 @@ export default function PhysicalProductDetail() {
     if (productId && product) {
       trackView(productId, {
         product_type: 'physical',
+        store_id: product.store_id,
         timestamp: new Date().toISOString(),
       });
 

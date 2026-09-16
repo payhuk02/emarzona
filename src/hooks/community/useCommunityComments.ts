@@ -39,36 +39,48 @@ export function useCommunityPostComments(postId: string) {
         throw error;
       }
 
-      // Fetch replies for each comment
-      const commentsWithReplies = await Promise.all(
-        (data || []).map(async comment => {
-          const { data: replies } = await supabase
-            .from('community_comments')
-            .select(
-              `
-              *,
-              author:community_members!author_id (
-                id,
-                first_name,
-                last_name,
-                profile_image_url,
-                profession,
-                company
-              )
-            `
-            )
-            .eq('parent_comment_id', comment.id)
-            .eq('status', 'published')
-            .order('created_at', { ascending: true });
+      const parents = data || [];
+      if (parents.length === 0) return [];
 
-          return {
-            ...comment,
-            replies: replies || [],
-          } as CommunityComment;
-        })
-      );
+      const parentIds = parents.map(c => c.id);
 
-      return commentsWithReplies;
+      // LOT 2 Disk I/O: 1+N replies → 1 query .in(parent_comment_id)
+      const { data: allReplies, error: repliesError } = await supabase
+        .from('community_comments')
+        .select(
+          `
+          *,
+          author:community_members!author_id (
+            id,
+            first_name,
+            last_name,
+            profile_image_url,
+            profession,
+            company
+          )
+        `
+        )
+        .in('parent_comment_id', parentIds)
+        .eq('status', 'published')
+        .order('created_at', { ascending: true });
+
+      if (repliesError) {
+        logger.warn('Error batch-fetching comment replies', { error: repliesError });
+      }
+
+      const repliesByParent = new Map<string, CommunityComment[]>();
+      for (const reply of allReplies || []) {
+        const parentId = reply.parent_comment_id as string;
+        if (!parentId) continue;
+        const list = repliesByParent.get(parentId) || [];
+        list.push(reply as CommunityComment);
+        repliesByParent.set(parentId, list);
+      }
+
+      return parents.map(comment => ({
+        ...comment,
+        replies: repliesByParent.get(comment.id) || [],
+      })) as CommunityComment[];
     },
     enabled: !!postId,
   });

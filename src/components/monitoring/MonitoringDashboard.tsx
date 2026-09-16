@@ -42,7 +42,8 @@ export function MonitoringDashboard() {
     refresh();
 
     if (autoRefresh) {
-      const interval = setInterval(refresh, 5000); // Rafraîchir toutes les 5 secondes
+      // LOT 1 Disk I/O: 5s → 30s (mémoire locale, mais évite boucles agressives)
+      const interval = setInterval(refresh, 30_000);
       return () => clearInterval(interval);
     }
   }, [autoRefresh]);

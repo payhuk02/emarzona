@@ -70,7 +70,7 @@ export const useAdminStores = (options: UseAdminStoresOptions = {}) => {
         if (p.user_id && p.display_name) profileMap.set(p.user_id, p.display_name);
       });
 
-      // Fetch product counts using parallel count queries to avoid downloading all product rows
+      // Exact counts via parallel HEAD COUNT (index-only) — cheaper than downloading product rows
       const productCountMap = new Map<string, number>();
       if (storeIds.length > 0) {
         await Promise.all(

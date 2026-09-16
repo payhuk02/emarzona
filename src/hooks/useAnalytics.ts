@@ -6,6 +6,8 @@
 import { useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
+import { dualWriteStoreAnalytics } from '@/lib/analytics/posthog-dual-write';
+import { shouldWriteStoreEventsToSupabase } from '@/lib/analytics/analytics-write-policy';
 
 export type AnalyticsEventType =
   | 'page_view'
@@ -148,11 +150,24 @@ export const useAnalytics = (storeId?: string) => {
           created_at: new Date().toISOString(),
         };
 
-        // Envoyer l'événement à Supabase
-        const { error } = await supabase.from('store_analytics_events').insert(eventPayload);
+        // LOT A PostHog
+        dualWriteStoreAnalytics({
+          eventType,
+          storeId: eventStoreId,
+          eventData,
+        });
 
-        if (error) {
-          logger.error('Error tracking analytics event', { error, storeId, eventType, eventData });
+        // LOT B: Postgres store events (on par défaut — AdminAnalytics / store KPIs)
+        if (shouldWriteStoreEventsToSupabase()) {
+          const { error } = await supabase.from('store_analytics_events').insert(eventPayload);
+          if (error) {
+            logger.error('Error tracking analytics event', {
+              error,
+              storeId,
+              eventType,
+              eventData,
+            });
+          }
         }
       } catch (error) {
         // Ne pas bloquer l'application si le tracking échoue

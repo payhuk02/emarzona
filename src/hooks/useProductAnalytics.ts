@@ -5,6 +5,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useVisibilityAwarePolling } from '@/hooks/useVisibilityAwarePolling';
 import { logger } from '@/lib/logger';
 import { aggregateTrafficSources } from '@/lib/analytics/traffic-sources';
+import { enqueueAnalyticsEvent } from '@/lib/analytics/product-analytics-batch';
+import { dualWriteProductAnalytics } from '@/lib/analytics/posthog-dual-write';
+import { shouldWriteProductEventsToSupabase } from '@/lib/analytics/analytics-write-policy';
 
 const PRODUCT_ANALYTICS_FIELDS =
   'id, product_id, store_id, total_views, total_clicks, total_conversions, total_revenue, conversion_rate, bounce_rate, avg_session_duration, returning_visitors, views_today, clicks_today, conversions_today, revenue_today, views_yesterday, clicks_yesterday, conversions_yesterday, revenue_yesterday, tracking_enabled, track_views, track_clicks, track_conversions, track_time_spent, track_errors, advanced_tracking, custom_events, google_analytics_id, facebook_pixel_id, google_tag_manager_id, tiktok_pixel_id, pinterest_pixel_id, linkedin_insight_tag, goal_views, goal_revenue, goal_conversions, goal_conversion_rate, email_alerts, last_updated, created_at, updated_at';
@@ -284,10 +287,15 @@ export const useAnalyticsTracking = () => {
             ? 'tablet'
             : 'desktop';
 
+        // LOT 1 Disk I/O: prefer caller-provided store_id to avoid extra SELECT on products
         const storeIdFromEvent = typeof eventData.store_id === 'string' ? eventData.store_id : null;
 
         let storeId = storeIdFromEvent;
         if (!storeId) {
+          logger.debug('analytics trackEvent missing store_id — falling back to products lookup', {
+            productId,
+            eventType,
+          });
           const { data: productRow } = await supabase
             .from('products')
             .select('store_id')
@@ -307,7 +315,7 @@ export const useAnalyticsTracking = () => {
           user_id: user?.id || null,
           event_type: eventType,
           event_data: eventData,
-          session_id: sessionId,
+          session_id: String(sessionId),
           page_url: window.location.href,
           referrer: document.referrer || null,
           user_agent: userAgent,
@@ -316,11 +324,24 @@ export const useAnalyticsTracking = () => {
           created_at: new Date().toISOString(),
         };
 
-        const { error } = await supabase.from('analytics_events').insert(eventPayload);
+        // LOT A PostHog
+        dualWriteProductAnalytics({
+          eventType,
+          productId,
+          storeId,
+          revenue: revenue || null,
+          extra: {
+            device_type: deviceType,
+            session_id: String(sessionId),
+          },
+        });
 
-        if (error) throw error;
+        // LOT B: Postgres product events (on par défaut — dashboards vendeur)
+        if (shouldWriteProductEventsToSupabase()) {
+          enqueueAnalyticsEvent(eventPayload);
+        }
 
-        return sessionId;
+        return String(sessionId);
       } catch (err) {
         logger.error('Error tracking product analytics event', {
           error: err,

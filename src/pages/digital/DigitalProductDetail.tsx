@@ -128,11 +128,12 @@ export default function DigitalProductDetail() {
   // Hook pour ajouter à la comparaison
   const addToComparison = useAddToComparison();
 
-  // Track product view on mount
+  // Track product view on mount (attendre store_id pour éviter SELECT products)
   useEffect(() => {
-    if (productId) {
+    if (productId && digitalProduct?.product) {
       trackView(productId, {
         product_type: 'digital',
+        store_id: digitalProduct.product.store_id,
         timestamp: new Date().toISOString(),
       });
 

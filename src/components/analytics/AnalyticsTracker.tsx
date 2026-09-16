@@ -3,6 +3,8 @@ import { useAnalyticsTracking } from '@/hooks/useProductAnalytics';
 
 interface AnalyticsTrackerProps {
   productId: string;
+  /** Pass store_id when known to avoid a products SELECT on each event (Disk I/O LOT 1). */
+  storeId?: string;
   enabled?: boolean;
   trackViews?: boolean;
   trackClicks?: boolean;
@@ -13,6 +15,7 @@ interface AnalyticsTrackerProps {
 
 export const AnalyticsTracker: React.FC<AnalyticsTrackerProps> = ({
   productId,
+  storeId,
   enabled = true,
   trackViews = true,
   trackClicks = true,
@@ -25,21 +28,29 @@ export const AnalyticsTracker: React.FC<AnalyticsTrackerProps> = ({
   const lastActivityTime = useRef<number>(Date.now());
   const activityTimeout = useRef<NodeJS.Timeout | null>(null);
 
+  const withStore = useCallback(
+    (data: Record<string, unknown> = {}) => (storeId ? { ...data, store_id: storeId } : data),
+    [storeId]
+  );
+
   // Tracker les vues de page
   useEffect(() => {
     if (!enabled || !trackViews || !productId) return;
 
     const trackPageView = () => {
-      trackView(productId, {
-        page_url: window.location.href,
-        referrer: document.referrer,
-        timestamp: Date.now(),
-        user_agent: navigator.userAgent,
-        screen_resolution: `${screen.width}x${screen.height}`,
-        viewport_size: `${window.innerWidth}x${window.innerHeight}`,
-        language: navigator.language,
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-      });
+      trackView(
+        productId,
+        withStore({
+          page_url: window.location.href,
+          referrer: document.referrer,
+          timestamp: Date.now(),
+          user_agent: navigator.userAgent,
+          screen_resolution: `${screen.width}x${screen.height}`,
+          viewport_size: `${window.innerWidth}x${window.innerHeight}`,
+          language: navigator.language,
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        })
+      );
     };
 
     // Tracker la vue initiale
@@ -55,7 +66,7 @@ export const AnalyticsTracker: React.FC<AnalyticsTrackerProps> = ({
     return () => {
       window.removeEventListener('popstate', handlePopState);
     };
-  }, [enabled, trackViews, productId, trackView]);
+  }, [enabled, trackViews, productId, trackView, withStore]);
 
   // Tracker les clics
   useEffect(() => {
@@ -84,16 +95,20 @@ export const AnalyticsTracker: React.FC<AnalyticsTrackerProps> = ({
         target.onclick !== null;
 
       if (isImportantElement) {
-        trackClick(productId, elementId, {
-          element_type: elementType,
-          element_text: elementText,
-          element_href: target.getAttribute('href'),
-          click_position: {
-            x: event.clientX,
-            y: event.clientY,
-          },
-          timestamp: Date.now(),
-        });
+        trackClick(
+          productId,
+          elementId,
+          withStore({
+            element_type: elementType,
+            element_text: elementText,
+            element_href: target.getAttribute('href'),
+            click_position: {
+              x: event.clientX,
+              y: event.clientY,
+            },
+            timestamp: Date.now(),
+          })
+        );
       }
     };
 
@@ -102,7 +117,7 @@ export const AnalyticsTracker: React.FC<AnalyticsTrackerProps> = ({
     return () => {
       document.removeEventListener('click', handleClick, true);
     };
-  }, [enabled, trackClicks, productId, trackClick]);
+  }, [enabled, trackClicks, productId, trackClick, withStore]);
 
   // Tracker le temps passé sur la page
   useEffect(() => {
@@ -122,13 +137,17 @@ export const AnalyticsTracker: React.FC<AnalyticsTrackerProps> = ({
 
         if (timeSpent > 5) {
           // Only track if user spent more than 5 seconds
-          trackCustomEvent(productId, 'time_spent', {
-            duration: timeSpent,
-            page_url: window.location.href,
-            timestamp: Date.now(),
-          });
+          trackCustomEvent(
+            productId,
+            'time_spent',
+            withStore({
+              duration: timeSpent,
+              page_url: window.location.href,
+              timestamp: Date.now(),
+            })
+          );
         }
-      }, 30000); // 30 seconds of inactivity
+      }, 30_000); // 30 seconds of inactivity
     };
 
     const handleActivity = () => {
@@ -147,11 +166,15 @@ export const AnalyticsTracker: React.FC<AnalyticsTrackerProps> = ({
       if (document.hidden) {
         const timeSpent = Math.floor((Date.now() - sessionStartTime.current) / 1000);
         if (timeSpent > 5) {
-          trackCustomEvent(productId, 'session_pause', {
-            duration: timeSpent,
-            page_url: window.location.href,
-            timestamp: Date.now(),
-          });
+          trackCustomEvent(
+            productId,
+            'session_pause',
+            withStore({
+              duration: timeSpent,
+              page_url: window.location.href,
+              timestamp: Date.now(),
+            })
+          );
         }
       } else {
         sessionStartTime.current = Date.now();
@@ -171,30 +194,38 @@ export const AnalyticsTracker: React.FC<AnalyticsTrackerProps> = ({
         clearTimeout(activityTimeout.current);
       }
     };
-  }, [enabled, trackTimeSpent, productId, trackCustomEvent]);
+  }, [enabled, trackTimeSpent, productId, trackCustomEvent, withStore]);
 
   // Tracker les erreurs JavaScript
   useEffect(() => {
     if (!enabled || !trackErrors || !productId) return;
 
     const handleError = (event: ErrorEvent) => {
-      trackCustomEvent(productId, 'javascript_error', {
-        message: event.message,
-        filename: event.filename,
-        lineno: event.lineno,
-        colno: event.colno,
-        stack: event.error?.stack,
-        page_url: window.location.href,
-        timestamp: Date.now(),
-      });
+      trackCustomEvent(
+        productId,
+        'javascript_error',
+        withStore({
+          message: event.message,
+          filename: event.filename,
+          lineno: event.lineno,
+          colno: event.colno,
+          stack: event.error?.stack,
+          page_url: window.location.href,
+          timestamp: Date.now(),
+        })
+      );
     };
 
     const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
-      trackCustomEvent(productId, 'unhandled_promise_rejection', {
-        reason: event.reason?.toString(),
-        page_url: window.location.href,
-        timestamp: Date.now(),
-      });
+      trackCustomEvent(
+        productId,
+        'unhandled_promise_rejection',
+        withStore({
+          reason: event.reason?.toString(),
+          page_url: window.location.href,
+          timestamp: Date.now(),
+        })
+      );
     };
 
     window.addEventListener('error', handleError);
@@ -204,7 +235,7 @@ export const AnalyticsTracker: React.FC<AnalyticsTrackerProps> = ({
       window.removeEventListener('error', handleError);
       window.removeEventListener('unhandledrejection', handleUnhandledRejection);
     };
-  }, [enabled, trackErrors, productId, trackCustomEvent]);
+  }, [enabled, trackErrors, productId, trackCustomEvent, withStore]);
 
   // Tracker les événements personnalisés
   useEffect(() => {
@@ -214,11 +245,15 @@ export const AnalyticsTracker: React.FC<AnalyticsTrackerProps> = ({
       const eventName = event.detail?.name || event.type;
 
       if (customEvents.includes(eventName)) {
-        trackCustomEvent(productId, eventName, {
-          ...event.detail,
-          page_url: window.location.href,
-          timestamp: Date.now(),
-        });
+        trackCustomEvent(
+          productId,
+          eventName,
+          withStore({
+            ...event.detail,
+            page_url: window.location.href,
+            timestamp: Date.now(),
+          })
+        );
       }
     };
 
@@ -232,23 +267,27 @@ export const AnalyticsTracker: React.FC<AnalyticsTrackerProps> = ({
         document.removeEventListener(eventName, handleCustomEvent as EventListener);
       });
     };
-  }, [enabled, customEvents, productId, trackCustomEvent]);
+  }, [enabled, customEvents, productId, trackCustomEvent, withStore]);
 
   // Tracker les conversions (achats)
   const trackPurchase = useCallback(
     (revenue: number, orderId?: string, additionalData?: Record<string, unknown>) => {
       if (!enabled || !productId) return;
 
-      trackCustomEvent(productId, 'purchase', {
-        revenue,
-        order_id: orderId,
-        currency: 'XOF',
-        page_url: window.location.href,
-        timestamp: Date.now(),
-        ...additionalData,
-      });
+      trackCustomEvent(
+        productId,
+        'purchase',
+        withStore({
+          revenue,
+          order_id: orderId,
+          currency: 'XOF',
+          page_url: window.location.href,
+          timestamp: Date.now(),
+          ...additionalData,
+        })
+      );
     },
-    [enabled, productId, trackCustomEvent]
+    [enabled, productId, trackCustomEvent, withStore]
   );
 
   // Exposer la fonction de tracking des achats globalement

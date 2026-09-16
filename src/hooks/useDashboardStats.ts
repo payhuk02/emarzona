@@ -532,9 +532,25 @@ async function fetchDashboardStats(storeId: string, range: PeriodRange): Promise
       (err instanceof Error && err.message === 'DASHBOARD_RPC_UNAVAILABLE') ||
       isDashboardRpcUnavailableError(rpcErr)
     ) {
-      logger.info('[Dashboard] RPC agrégée indisponible — fallback requêtes client', {
-        storeId,
-      });
+      // LOT 5: en prod, fallback tables désactivé sauf opt-in explicite
+      // DEV: autorisé sauf VITE_DASHBOARD_ALLOW_TABLE_FALLBACK=false
+      const explicit = import.meta.env.VITE_DASHBOARD_ALLOW_TABLE_FALLBACK;
+      const allowTableFallback =
+        explicit === 'true' || (explicit !== 'false' && !import.meta.env.PROD);
+
+      if (!allowTableFallback) {
+        logger.warn(
+          '[Dashboard] RPC indisponible — fallback tables désactivé (prod default / VITE_DASHBOARD_ALLOW_TABLE_FALLBACK)',
+          { storeId, prod: import.meta.env.PROD, explicit }
+        );
+        throw err instanceof Error ? err : new Error('DASHBOARD_RPC_UNAVAILABLE');
+      }
+
+      logger.warn(
+        '[Dashboard] RPC agrégée indisponible — fallback requêtes client (I/O élevé). En prod définir VITE_DASHBOARD_ALLOW_TABLE_FALLBACK=true seulement en secours.',
+        { storeId }
+      );
+      logRpcFallback('get_store_dashboard_stats_aggregated', rpcErr);
       return fetchDashboardStatsFromTables(storeId, range);
     }
 

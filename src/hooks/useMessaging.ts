@@ -220,83 +220,47 @@ export const useMessaging = (
     await fetchMessages(currentConversation.id, nextPage, false);
   }, [currentConversation, hasMoreMessages, messagesLoading, messagesPage, fetchMessages]);
 
-  // Récupérer les statistiques
+  // LOT 2 Disk I/O: 7× COUNT exact → 1 select conversations + 2 COUNT messages max
   const fetchStats = useCallback(async () => {
     if (!orderId) return;
 
     try {
-      const [
-        totalResult,
-        activeResult,
-        closedResult,
-        disputedResult,
-        messagesResult,
-        unreadResult,
-        adminResult,
-      ] = await Promise.allSettled([
-        supabase
-          .from('conversations')
-          .select('id', { count: 'exact', head: true })
-          .eq('order_id', orderId),
-        supabase
-          .from('conversations')
-          .select('id', { count: 'exact', head: true })
-          .eq('order_id', orderId)
-          .eq('status', 'active'),
-        supabase
-          .from('conversations')
-          .select('id', { count: 'exact', head: true })
-          .eq('order_id', orderId)
-          .eq('status', 'closed'),
-        supabase
-          .from('conversations')
-          .select('id', { count: 'exact', head: true })
-          .eq('order_id', orderId)
-          .eq('status', 'disputed'),
-        supabase
-          .from('messages')
-          .select('id', { count: 'exact', head: true })
-          .eq('conversation_id', currentConversation?.id || ''),
-        supabase
-          .from('messages')
-          .select('id', { count: 'exact', head: true })
-          .eq('conversation_id', currentConversation?.id || '')
-          .eq('is_read', false),
-        supabase
-          .from('conversations')
-          .select('id', { count: 'exact', head: true })
-          .eq('order_id', orderId)
-          .eq('admin_intervention', true),
-      ]);
+      const { data: convRows, error: convError } = await supabase
+        .from('conversations')
+        .select('id, status, admin_intervention')
+        .eq('order_id', orderId)
+        .limit(100);
 
-      const totalConversations =
-        totalResult.status === 'fulfilled' && totalResult.value.count !== null
-          ? totalResult.value.count
-          : 0;
-      const activeConversations =
-        activeResult.status === 'fulfilled' && activeResult.value.count !== null
-          ? activeResult.value.count
-          : 0;
-      const closedConversations =
-        closedResult.status === 'fulfilled' && closedResult.value.count !== null
-          ? closedResult.value.count
-          : 0;
-      const disputedConversations =
-        disputedResult.status === 'fulfilled' && disputedResult.value.count !== null
-          ? disputedResult.value.count
-          : 0;
-      const totalMessages =
-        messagesResult.status === 'fulfilled' && messagesResult.value.count !== null
-          ? messagesResult.value.count
-          : 0;
-      const unreadMessages =
-        unreadResult.status === 'fulfilled' && unreadResult.value.count !== null
-          ? unreadResult.value.count
-          : 0;
-      const adminInterventions =
-        adminResult.status === 'fulfilled' && adminResult.value.count !== null
-          ? adminResult.value.count
-          : 0;
+      if (convError) {
+        logger.error('Error fetching conversation stats rows', { error: convError });
+      }
+
+      const rows = convRows || [];
+      const totalConversations = rows.length;
+      const activeConversations = rows.filter(c => c.status === 'active').length;
+      const closedConversations = rows.filter(c => c.status === 'closed').length;
+      const disputedConversations = rows.filter(c => c.status === 'disputed').length;
+      const adminInterventions = rows.filter(c => c.admin_intervention === true).length;
+
+      let totalMessages = 0;
+      let unreadMessages = 0;
+      const conversationId = currentConversation?.id;
+
+      if (conversationId) {
+        const [messagesResult, unreadResult] = await Promise.all([
+          supabase
+            .from('messages')
+            .select('id', { count: 'exact', head: true })
+            .eq('conversation_id', conversationId),
+          supabase
+            .from('messages')
+            .select('id', { count: 'exact', head: true })
+            .eq('conversation_id', conversationId)
+            .eq('is_read', false),
+        ]);
+        totalMessages = messagesResult.count ?? 0;
+        unreadMessages = unreadResult.count ?? 0;
+      }
 
       setStats({
         total_conversations: totalConversations,
@@ -307,9 +271,8 @@ export const useMessaging = (
         unread_messages: unreadMessages,
         admin_interventions: adminInterventions,
       });
-    } catch (_error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error('Error fetching conversation stats:', error);
+    } catch (err: unknown) {
+      logger.error('Error fetching conversation stats:', err);
     }
   }, [orderId, currentConversation?.id]);
 

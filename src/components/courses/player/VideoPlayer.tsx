@@ -79,32 +79,37 @@ export const VideoPlayer = ({
     }
   }, [currentTime, videoType]);
 
-  // Sauvegarder la position toutes les 10 secondes
+  // LOT 1 Disk I/O: sauvegarde périodique 10s → 45s + flush immédiat à la pause
+  const PROGRESS_SAVE_INTERVAL_MS = 45_000;
+
+  const flushVideoPosition = () => {
+    if (!enrollmentId || !lessonId || !videoRef.current) return;
+    const currentTime = videoRef.current.currentTime;
+    const watchTime = Math.floor((Date.now() - startTimeRef.current) / 1000);
+    updatePosition.mutate({
+      enrollmentId,
+      lessonId,
+      position: Math.floor(currentTime),
+      watchTime,
+    });
+    startTimeRef.current = Date.now();
+  };
+
   useEffect(() => {
     if (!enrollmentId || !lessonId || videoType !== 'upload') return;
 
     saveIntervalRef.current = setInterval(() => {
       if (videoRef.current && !videoRef.current.paused) {
-        const currentTime = videoRef.current.currentTime;
-        const watchTime = Math.floor((Date.now() - startTimeRef.current) / 1000);
-
-        updatePosition.mutate({
-          enrollmentId,
-          lessonId,
-          position: Math.floor(currentTime),
-          watchTime,
-        });
-
-        // Réinitialiser le chronomètre
-        startTimeRef.current = Date.now();
+        flushVideoPosition();
       }
-    }, 10000); // Toutes les 10 secondes
+    }, PROGRESS_SAVE_INTERVAL_MS);
 
     return () => {
       if (saveIntervalRef.current) {
         clearInterval(saveIntervalRef.current);
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- flush uses latest refs/mutate
   }, [enrollmentId, lessonId, videoType, updatePosition]);
 
   // Extraire l'ID YouTube
@@ -158,8 +163,9 @@ export const VideoPlayer = ({
       videoTracking.handlePause(video.currentTime, video.duration);
     }
 
-    // Arrêter le chrono
+    // Arrêter le chrono + flush position (évite perte + réduit UPDATEs périodiques)
     watchTime.stopWatching();
+    flushVideoPosition();
   };
 
   const handleVideoTimeUpdate = (e: React.SyntheticEvent<HTMLVideoElement>) => {

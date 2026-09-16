@@ -153,7 +153,8 @@ export default function AdminVisitors() {
               Visiteurs plateforme
             </h1>
             <p className="text-xs sm:text-sm text-muted-foreground">
-              Provenance, appareils, temps passé et pages consultées
+              Provenance, appareils, temps passé et pages consultées (historique Postgres ; nouveau
+              trafic → PostHog si configuré)
             </p>
           </div>
           <div className="flex items-center gap-2">

@@ -4,12 +4,21 @@
  *
  * Compte les messages non lus pour une commande
  * Utilise la fonction SQL get_unread_message_count
+ *
+ * LOT 1 Disk I/O: polling 5s/10s → 30s/45s (visible only) ;
+ * useUnreadCounts: 1+N RPC → 1 query batch (réversible).
  */
 
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { logger } from '@/lib/logger';
+
+/** Cap rows fetched for client-side unread aggregation (badge UX). */
+const UNREAD_BATCH_ROW_CAP = 2000;
+
+const visibleRefetchInterval = (ms: number) => () =>
+  typeof document !== 'undefined' && document.visibilityState === 'visible' ? ms : false;
 
 export const useUnreadCount = (orderId: string) => {
   const { user } = useAuth();
@@ -42,13 +51,14 @@ export const useUnreadCount = (orderId: string) => {
       return data || 0;
     },
     enabled: !!user?.id && !!orderId,
-    refetchInterval: 5000, // Refresh every 5 seconds
-    staleTime: 3000, // Consider stale after 3s
+    refetchInterval: visibleRefetchInterval(30_000),
+    staleTime: 25_000,
+    refetchOnWindowFocus: true,
   });
 };
 
 /**
- * Hook pour plusieurs commandes (optimisé)
+ * Hook pour plusieurs commandes (optimisé — batch SELECT, pas N RPC)
  */
 export const useUnreadCounts = (orderIds: string[]) => {
   const { user } = useAuth();
@@ -58,30 +68,53 @@ export const useUnreadCounts = (orderIds: string[]) => {
     queryFn: async () => {
       if (!user?.id || orderIds.length === 0) return {};
 
-      // Récupérer toutes les conversations pour ces commandes
       const { data: conversations, error: convError } = await supabase
         .from('conversations')
         .select('id, order_id')
         .in('order_id', orderIds);
 
-      if (convError || !conversations) return {};
+      if (convError || !conversations?.length) return {};
 
-      // Compter les messages non lus pour chaque conversation
+      const conversationIds = conversations.map(c => c.id);
+      const orderIdByConv = new Map(conversations.map(c => [c.id, c.order_id]));
+
       const counts: Record<string, number> = {};
+      for (const orderId of orderIds) {
+        counts[orderId] = 0;
+      }
 
-      for (const conv of conversations) {
-        const { data } = await supabase.rpc('get_unread_message_count', {
-          conversation_id_param: conv.id,
-          user_id_param: user.id,
+      const { data: unreadRows, error: unreadError } = await supabase
+        .from('messages')
+        .select('conversation_id')
+        .in('conversation_id', conversationIds)
+        .neq('sender_id', user.id)
+        .eq('is_read', false)
+        .limit(UNREAD_BATCH_ROW_CAP);
+
+      if (unreadError) {
+        logger.error('Error batch-fetching unread messages', { error: unreadError });
+        return counts;
+      }
+
+      for (const row of unreadRows || []) {
+        const orderId = orderIdByConv.get(row.conversation_id);
+        if (orderId) {
+          counts[orderId] = (counts[orderId] || 0) + 1;
+        }
+      }
+
+      if ((unreadRows?.length ?? 0) >= UNREAD_BATCH_ROW_CAP) {
+        logger.warn('Unread batch hit row cap — counts may be understated', {
+          cap: UNREAD_BATCH_ROW_CAP,
+          conversationCount: conversationIds.length,
         });
-
-        counts[conv.order_id] = data || 0;
       }
 
       return counts;
     },
     enabled: !!user?.id && orderIds.length > 0,
-    refetchInterval: 10000, // Refresh every 10 seconds for batch
-    staleTime: 5000,
+    refetchInterval: visibleRefetchInterval(45_000),
+    staleTime: 30_000,
+    refetchOnWindowFocus: true,
   });
 };

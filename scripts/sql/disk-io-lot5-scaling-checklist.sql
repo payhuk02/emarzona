@@ -1,0 +1,21 @@
+-- =============================================================================
+-- LOT 5 — SCALING CHECKLIST (commentaires opérationnels)
+-- Ne rien exécuter automatiquement. Cocher manuellement.
+-- scripts/sql/disk-io-lot5-scaling-checklist.sql
+-- =============================================================================
+
+-- [ ] 1. LOT1–4 déployés front (polling, N+1, batch analytics)
+-- [ ] 2. LOT3 indexes + RLS appliqués (migration repair OK)
+-- [ ] 3. LOT5 rollup/rétention appliqué ; cron rollup-analytics-events-daily actif
+-- [ ] 4. Exécuter disk-io-lot5-capacity-diagnostic.sql — noter tailles / cache hit
+-- [ ] 5. Prod front : VITE_DASHBOARD_ALLOW_TABLE_FALLBACK=false
+-- [ ] 6. Prod front : VITE_ANALYTICS_BATCH=true (défaut) ; kill-switch localStorage testé
+-- [ ] 7. VITE_SUPABASE_READ_URL pointe vers replica / load balancer (-all)
+-- [ ] 8. Si analytics_events > ~20M rows : envisager partition RANGE (created_at)
+--         → scripts/sql/disk-io-lot5-partition-candidate.sql (CANDIDATE ONLY)
+-- [ ] 9. Mesurer BEFORE/AFTER IOPS Dashboard Supabase (7 jours)
+-- [ ] 10. Upgrade plan Supabase UNIQUEMENT si cache_hit < 95% après optimisations code
+
+-- Partitioning note (ne pas lancer à l'aveugle) :
+--   ALTER TABLE ... ATTACH PARTITION est une migration majeure.
+--   Préférer d'abord : rétention 90j + rollup daily + batch client (déjà en place).

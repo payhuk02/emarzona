@@ -1,0 +1,21 @@
+-- =============================================================================
+-- LOT 5 — CANDIDATE ONLY : partition analytics_events by month
+-- NE PAS exécuter sans plan de maintenance + backup.
+-- Prérequis : table > ~20M rows ET rétention/rollup déjà en place.
+-- =============================================================================
+
+-- Exemple conceptuel (à adapter) :
+--
+-- CREATE TABLE public.analytics_events_partitioned (
+--   LIKE public.analytics_events INCLUDING ALL
+-- ) PARTITION BY RANGE (created_at);
+--
+-- CREATE TABLE public.analytics_events_y2026m09
+--   PARTITION OF public.analytics_events_partitioned
+--   FOR VALUES FROM ('2026-09-01') TO ('2026-10-01');
+--
+-- -- Puis backfill + swap (hors scope auto). Voir runbook ops.
+--
+-- Alternative plus simple tant que volume modéré :
+--   SELECT public.cleanup_analytics_events(90);
+--   SELECT public.rollup_analytics_events_daily(CURRENT_DATE - 1);

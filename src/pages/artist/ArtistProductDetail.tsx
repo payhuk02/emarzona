@@ -182,6 +182,7 @@ const ArtistProductDetail = () => {
     if (productId && product) {
       trackView(productId, {
         product_type: 'artist',
+        store_id: product.store_id,
         timestamp: new Date().toISOString(),
       });
 

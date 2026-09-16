@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { setSentryUser, clearSentryUser } from '@/lib/sentry';
 import { logger } from '@/lib/logger';
 import { clearSessionBrowserCaches } from '@/lib/session-cache';
+import { identifyPostHogUser, resetPostHogUser } from '@/lib/analytics/posthog';
 
 interface AuthContextType {
   user: User | null;
@@ -41,15 +42,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(session?.user ?? null);
       setLoading(false);
 
-      // Mettre à jour l'utilisateur dans Sentry
+      // Mettre à jour l'utilisateur dans Sentry + PostHog
       if (session?.user) {
         setSentryUser({
           id: session.user.id,
           email: session.user.email,
           username: session.user.user_metadata?.username,
         });
+        identifyPostHogUser(session.user.id, {
+          // Pas d'email en clair — id suffit pour funnels auth
+          auth_provider: session.user.app_metadata?.provider ?? null,
+        });
       } else {
         clearSentryUser();
+        resetPostHogUser();
       }
     });
 
@@ -83,6 +89,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             email: session.user.email,
             username: session.user.user_metadata?.username,
           });
+          identifyPostHogUser(session.user.id, {
+            auth_provider: session.user.app_metadata?.provider ?? null,
+          });
         }
       } catch (error) {
         logger.error('Exception lors de la vérification de session:', { error });
@@ -102,6 +111,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signOut = async () => {
     clearSentryUser();
+    resetPostHogUser();
     queryClient.clear();
     await clearSessionBrowserCaches();
     await supabase.auth.signOut();

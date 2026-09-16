@@ -21,6 +21,7 @@ import { resolveStoreCommerceTypeFromStore } from '@/lib/commerce/store-capabili
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useBehavioralAnalytics } from '@/hooks/useBehavioralAnalytics';
 import { PlatformVisitorTracker } from '@/components/analytics/PlatformVisitorTracker';
+import { PostHogAppProvider } from '@/components/analytics/PostHogAppProvider';
 
 import React, { Suspense, lazy, useEffect } from 'react';
 import { logger } from '@/lib/logger';
@@ -344,16 +345,18 @@ const App = () => (
           }}
         >
           <AuthProvider>
-            <StoreProvider>
-              <PlatformCustomizationProvider>
-                <ProgressiveUXProvider>
-                  <SubdomainMiddleware>
-                    <AppInitializer queryClient={queryClient} />
-                    <AppContent />
-                  </SubdomainMiddleware>
-                </ProgressiveUXProvider>
-              </PlatformCustomizationProvider>
-            </StoreProvider>
+            <PostHogAppProvider>
+              <StoreProvider>
+                <PlatformCustomizationProvider>
+                  <ProgressiveUXProvider>
+                    <SubdomainMiddleware>
+                      <AppInitializer queryClient={queryClient} />
+                      <AppContent />
+                    </SubdomainMiddleware>
+                  </ProgressiveUXProvider>
+                </PlatformCustomizationProvider>
+              </StoreProvider>
+            </PostHogAppProvider>
           </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>

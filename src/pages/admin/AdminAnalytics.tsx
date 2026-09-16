@@ -88,25 +88,26 @@ export default function AdminAnalytics() {
           'billing_cta_clicked',
         ] as const;
 
-        const results = await Promise.all(
-          eventTypes.map(async eventType => {
-            const { count, error: countError } = await supabase
-              .from('store_analytics_events')
-              .select('id', { count: 'exact', head: true })
-              .eq('event_type', eventType)
-              .gte('created_at', since);
+        // LOT 2 Disk I/O: 3× COUNT exact → 1 SELECT event_type (événements onboarding rares)
+        const { data: rows, error: loadError } = await supabase
+          .from('store_analytics_events')
+          .select('event_type')
+          .in('event_type', [...eventTypes])
+          .gte('created_at', since)
+          .limit(20000);
 
-            if (countError) throw countError;
-            return { eventType, count: count ?? 0 };
-          })
-        );
-
+        if (loadError) throw loadError;
         if (!active) return;
 
-        const byType = Object.fromEntries(results.map(r => [r.eventType, r.count])) as Record<
-          (typeof eventTypes)[number],
-          number
-        >;
+        const byType: Record<(typeof eventTypes)[number], number> = {
+          physical_onboarding_seen: 0,
+          trial_continue_clicked: 0,
+          billing_cta_clicked: 0,
+        };
+        for (const row of rows || []) {
+          const t = row.event_type as (typeof eventTypes)[number];
+          if (t in byType) byType[t] += 1;
+        }
 
         setPhysicalSnapshot({
           loading: false,

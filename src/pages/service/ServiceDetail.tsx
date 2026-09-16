@@ -333,6 +333,7 @@ export default function ServiceDetail() {
     if (productId && service) {
       trackView(productId, {
         product_type: 'service',
+        store_id: service.store_id,
         timestamp: new Date().toISOString(),
       });
 

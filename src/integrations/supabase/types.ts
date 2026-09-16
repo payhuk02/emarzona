@@ -38923,48 +38923,6 @@ export type Database = {
         };
         Relationships: [];
       };
-      user_behavior_events: {
-        Row: {
-          created_at: string;
-          device_info: Json;
-          event_data: Json | null;
-          event_type: string;
-          id: string;
-          page_url: string;
-          referrer: string | null;
-          session_id: string;
-          timestamp: string;
-          updated_at: string | null;
-          user_id: string | null;
-        };
-        Insert: {
-          created_at?: string;
-          device_info: Json;
-          event_data?: Json | null;
-          event_type: string;
-          id?: string;
-          page_url: string;
-          referrer?: string | null;
-          session_id: string;
-          timestamp?: string;
-          updated_at?: string | null;
-          user_id?: string | null;
-        };
-        Update: {
-          created_at?: string;
-          device_info?: Json;
-          event_data?: Json | null;
-          event_type?: string;
-          id?: string;
-          page_url?: string;
-          referrer?: string | null;
-          session_id?: string;
-          timestamp?: string;
-          updated_at?: string | null;
-          user_id?: string | null;
-        };
-        Relationships: [];
-      };
       user_behavior_tracking: {
         Row: {
           action: string;

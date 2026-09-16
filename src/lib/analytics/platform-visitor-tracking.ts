@@ -5,12 +5,15 @@
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 import { withTimeoutFallback } from '@/lib/promise-timeout';
+import { createEventBatchBuffer } from '@/lib/analytics/event-batch-buffer';
+import { dualWritePlatformVisitor } from '@/lib/analytics/posthog-dual-write';
+import { shouldWriteVisitorEventsToSupabase } from '@/lib/analytics/analytics-write-policy';
 
 const VISITOR_TRACK_TIMEOUT_MS = 5000;
 
 const SESSION_KEY = 'emarzona_platform_visitor_session';
 const SESSION_TTL_MS = 30 * 60 * 1000;
-const HEARTBEAT_INTERVAL_MS = 120_000;
+const HEARTBEAT_INTERVAL_MS = 300_000; // LOT 1: 2 min → 5 min (moins d'INSERT visitor)
 const EXCLUDED_PATH_PREFIXES = ['/admin', '/api', '/auth/callback'];
 const EXCLUDED_EXACT_PATHS = new Set([
   '/login',
@@ -294,7 +297,7 @@ export async function trackPlatformVisitorEvent(payload: TrackPayload): Promise<
   const device = detectDeviceInfo();
   const geo = await enrichGeo(device);
 
-  const row = {
+  const row: PlatformVisitorRow = {
     session_id: session.sessionId,
     user_id: payload.user_id ?? null,
     event_type: payload.event_type,
@@ -315,15 +318,65 @@ export async function trackPlatformVisitorEvent(payload: TrackPayload): Promise<
     event_data: payload.event_data ?? {},
   };
 
+  // LOT A PostHog (source analytics produit principale pour le comportement)
+  dualWritePlatformVisitor({
+    eventType: payload.event_type,
+    pagePath: row.page_path,
+    durationMs: row.duration_ms,
+  });
+
+  // LOT B: INSERT Postgres visitor optionnel (off par défaut si PostHog ON)
+  if (shouldWriteVisitorEventsToSupabase()) {
+    visitorEventBuffer.enqueue(row, { immediate: payload.event_type === 'session_end' });
+  }
+}
+
+type PlatformVisitorRow = {
+  session_id: string;
+  user_id: string | null;
+  event_type: PlatformVisitorEventType;
+  page_path: string;
+  page_url: string | null;
+  referrer: string | null;
+  country: string;
+  region: string | null;
+  city: string | null;
+  timezone: string;
+  language: string;
+  device_type: string;
+  browser: string;
+  os: string;
+  user_agent: string;
+  duration_ms: number;
+  event_data: Record<string, unknown>;
+};
+
+async function flushPlatformVisitorRows(rows: PlatformVisitorRow[]): Promise<void> {
+  if (rows.length === 0) return;
   const { error } = await withTimeoutFallback(
-    supabase.from('platform_visitor_events').insert(row),
+    supabase.from('platform_visitor_events').insert(rows),
     VISITOR_TRACK_TIMEOUT_MS,
     { error: { message: 'timeout' } },
-    'platform_visitor_events_insert'
+    'platform_visitor_events_insert_batch'
   );
   if (error) {
-    logger.warn('platform visitor track failed', { error: error.message });
+    logger.warn('platform visitor batch track failed', {
+      error: error.message,
+      count: rows.length,
+    });
+    throw error;
   }
+}
+
+const visitorEventBuffer = createEventBatchBuffer(flushPlatformVisitorRows, {
+  name: 'platform_visitor_events',
+  maxBatchSize: 15,
+  flushIntervalMs: 20_000,
+});
+
+/** Flush forcé (tests / logout). */
+export function flushPlatformVisitorBuffer(): Promise<void> {
+  return visitorEventBuffer.flush();
 }
 
 export function touchSessionActiveMs(deltaMs: number): SessionState {
