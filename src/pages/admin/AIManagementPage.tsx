@@ -42,7 +42,6 @@ import {
   Library,
   Newspaper,
 } from 'lucide-react';
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import { PlatformAiApiKeysPanel } from '@/components/admin/PlatformAiApiKeysPanel';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -652,18 +651,18 @@ const AIManagementPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <AdminLayout>
+      <>
         <div className="container mx-auto p-4 lg:p-6 space-y-4">
           <Skeleton className="h-12 w-96" />
           <Skeleton className="h-10 w-full" />
           <Skeleton className="h-96 w-full" />
         </div>
-      </AdminLayout>
+      </>
     );
   }
 
   return (
-    <AdminLayout>
+    <>
       <Helmet>
         <title>Centre de gestion AI — Admin Emarzona</title>
       </Helmet>
@@ -1621,7 +1620,7 @@ const AIManagementPage: React.FC = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </AdminLayout>
+    </>
   );
 };
 

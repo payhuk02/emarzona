@@ -5,7 +5,6 @@
 
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -396,7 +395,7 @@ export default function AdminShippingConversations() {
   };
 
   return (
-    <AdminLayout>
+    <>
       <div className="container mx-auto p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6">
         {/* Header */}
         <div className="flex flex-col gap-2 sm:gap-3">
@@ -721,7 +720,7 @@ export default function AdminShippingConversations() {
           )}
         </DialogContent>
       </Dialog>
-    </AdminLayout>
+    </>
   );
 }
 

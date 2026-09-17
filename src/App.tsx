@@ -3,7 +3,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { createIDBPersister } from '@/lib/cache/persister';
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { StoreProvider } from '@/contexts/StoreContext';
 import { PlatformCustomizationProvider } from '@/contexts/PlatformCustomizationContext';
@@ -20,6 +20,7 @@ import { getRoutePrefetchConfig } from '@/lib/route-prefetch-config';
 import { resolveStoreCommerceTypeFromStore } from '@/lib/commerce/store-capability-map';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useBehavioralAnalytics } from '@/hooks/useBehavioralAnalytics';
+import { registerSoftNavigate, softNavigateTo } from '@/lib/navigation/soft-navigate';
 
 import React, { Suspense, lazy, useEffect } from 'react';
 import { logger } from '@/lib/logger';
@@ -191,9 +192,7 @@ const ErrorFallbackComponent = ({ error, onRetry }: ErrorFallbackProps) => {
             Recharger la page
           </button>
           <button
-            onClick={() => {
-              window.location.href = '/';
-            }}
+            onClick={() => softNavigateTo('/')}
             className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
           >
             Retour à l'accueil
@@ -229,6 +228,7 @@ const AppInitializer = ({
 const AppContent = () => {
   useScrollRestoration();
   useDarkMode();
+  const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { stores, loading: storeLoading, selectedStore } = useStoreContext();
   const activeStore = selectedStore ?? stores[0] ?? null;
@@ -244,6 +244,11 @@ const AppContent = () => {
   const location = useLocation();
   const isBottomNavVisible = isMobile && !!user && shouldShowBottomNavigation(location.pathname);
   const usePremiumTheme = shouldUseAppPremiumTheme(location.pathname);
+
+  useEffect(() => {
+    registerSoftNavigate(navigate);
+    return () => registerSoftNavigate(null);
+  }, [navigate]);
 
   useBehavioralAnalytics(undefined, {
     trackPageViews: false,

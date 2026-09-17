@@ -5,7 +5,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -81,7 +80,7 @@ export default function AdminDomains() {
   };
 
   return (
-    <AdminLayout>
+    <>
       <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
@@ -243,6 +242,6 @@ export default function AdminDomains() {
           </CardContent>
         </Card>
       </div>
-    </AdminLayout>
+    </>
   );
 }

@@ -8,7 +8,6 @@
  */
 
 import { useState, useMemo } from 'react';
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -107,7 +106,7 @@ export default function StorageDiagnosticPage() {
   // Vérifier l'accès admin APRÈS tous les hooks
   if (!isAdmin) {
     return (
-      <AdminLayout>
+      <>
         <div className="container mx-auto p-6">
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
@@ -117,7 +116,7 @@ export default function StorageDiagnosticPage() {
             </AlertDescription>
           </Alert>
         </div>
-      </AdminLayout>
+      </>
     );
   }
 
@@ -196,7 +195,7 @@ export default function StorageDiagnosticPage() {
   };
 
   return (
-    <AdminLayout>
+    <>
       <div className="container mx-auto p-4 md:p-6 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -506,6 +505,6 @@ export default function StorageDiagnosticPage() {
           </AlertDialogContent>
         </AlertDialog>
       </div>
-    </AdminLayout>
+    </>
   );
 }

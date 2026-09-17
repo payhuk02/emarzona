@@ -6,6 +6,7 @@
  */
 
 import { logger } from './logger';
+import { softNavigateTo } from '@/lib/navigation/soft-navigate';
 
 // ============================================================================
 // CONFIGURATION
@@ -164,9 +165,9 @@ export function safeRedirect(url: string, onError?: (error: string) => void): vo
     if (onError) {
       onError(result.error || 'URL non autorisée');
     } else {
-      // Fallback : rediriger vers le dashboard
+      // Fallback : rediriger vers le dashboard (SPA si soft navigate enregistré)
       logger.warn('Fallback: redirection vers /dashboard');
-      window.location.href = '/dashboard';
+      softNavigateTo('/dashboard');
     }
   }
 }

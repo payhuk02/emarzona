@@ -3,6 +3,7 @@
  * Conserve des meta FR pour les crawlers avant redirection client.
  */
 import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { SEOMeta } from '@/components/seo/SEOMeta';
 import { LANDING_CANONICAL_URL } from '@/lib/landing-seo';
 import { PAGE_SEO_CONFIG } from '@/components/seo/PageSEOConfig';
@@ -10,10 +11,11 @@ import { PAGE_SEO_CONFIG } from '@/components/seo/PageSEOConfig';
 const pricingSeo = PAGE_SEO_CONFIG['/pricing'];
 
 export default function PricingRedirectPage() {
+  const navigate = useNavigate();
+
   useEffect(() => {
-    const target = `${window.location.origin}/#tarifs`;
-    window.location.replace(target);
-  }, []);
+    navigate('/#tarifs', { replace: true });
+  }, [navigate]);
 
   return (
     <SEOMeta

@@ -1,6 +1,5 @@
 import { useMemo, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import { useAdminStats } from '@/hooks/useAdminStats';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -180,7 +179,7 @@ const AdminDashboard = () => {
 
   if (loading) {
     return (
-      <AdminLayout>
+      <>
         <div className="container mx-auto p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6">
           <Skeleton className="h-12 w-64" />
           <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
@@ -189,12 +188,12 @@ const AdminDashboard = () => {
             ))}
           </div>
         </div>
-      </AdminLayout>
+      </>
     );
   }
 
   return (
-    <AdminLayout>
+    <>
       <div className="container mx-auto p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6 animate-fade-in">
         <div
           ref={headerRef}
@@ -394,7 +393,7 @@ const AdminDashboard = () => {
           </CardContent>
         </Card>
       </div>
-    </AdminLayout>
+    </>
   );
 };
 

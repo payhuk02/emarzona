@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useCurrentAdminPermissions } from '@/hooks/useCurrentAdminPermissions';
@@ -31,18 +30,18 @@ const AdminNotifications = () => {
 
   if (!can('emails.manage')) {
     return (
-      <AdminLayout>
+      <>
         <div className="container mx-auto p-6">
           <p className="text-muted-foreground">
             Vous n&apos;avez pas la permission d&apos;envoyer des messages.
           </p>
         </div>
-      </AdminLayout>
+      </>
     );
   }
 
   return (
-    <AdminLayout>
+    <>
       <div className="container mx-auto p-6 space-y-6 animate-fade-in">
         <div ref={headerRef} className="flex items-center justify-between" role="banner">
           <div>
@@ -102,7 +101,7 @@ const AdminNotifications = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </AdminLayout>
+    </>
   );
 };
 

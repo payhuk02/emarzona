@@ -12,7 +12,6 @@
 
 import { useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -171,9 +170,9 @@ type AdminStoreOption = { id: string; name: string; slug: string | null };
 function WebhookPageShell({ adminMode, children }: { adminMode: boolean; children: ReactNode }) {
   if (adminMode) {
     return (
-      <AdminLayout>
+      <>
         <div className="space-y-4 sm:space-y-6">{children}</div>
-      </AdminLayout>
+      </>
     );
   }
 

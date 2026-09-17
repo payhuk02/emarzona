@@ -1,5 +1,4 @@
 import { useMemo, useState, useCallback } from 'react';
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { MobileTableCard } from '@/components/ui/mobile-table-card';
@@ -102,7 +101,7 @@ export default function AdminAudit() {
   const exportJSON = useCallback(() => runExport('json'), [runExport]);
 
   return (
-    <AdminLayout>
+    <>
       <ProtectedAction
         permission="settings.manage"
         fallback={
@@ -413,6 +412,6 @@ export default function AdminAudit() {
           </Card>
         </div>
       </ProtectedAction>
-    </AdminLayout>
+    </>
   );
 }

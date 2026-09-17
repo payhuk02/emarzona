@@ -4,7 +4,6 @@
  */
 
 import { Link } from 'react-router-dom';
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import { IntegrationsSection } from '@/components/admin/customization/IntegrationsSection';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,7 +11,7 @@ import { Globe, KeyRound, Webhook, Sparkles } from 'lucide-react';
 
 export default function AdminPlatformIntegrations() {
   return (
-    <AdminLayout>
+    <>
       <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div>
@@ -65,6 +64,6 @@ export default function AdminPlatformIntegrations() {
 
         <IntegrationsSection />
       </div>
-    </AdminLayout>
+    </>
   );
 }

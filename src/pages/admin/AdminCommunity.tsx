@@ -4,7 +4,6 @@
  */
 
 import { useState } from 'react';
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -173,7 +172,7 @@ export default function AdminCommunity() {
   };
 
   return (
-    <AdminLayout>
+    <>
       <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
         <Admin2FABanner />
 
@@ -835,6 +834,6 @@ export default function AdminCommunity() {
           </AlertDialogContent>
         </AlertDialog>
       </div>
-    </AdminLayout>
+    </>
   );
 }

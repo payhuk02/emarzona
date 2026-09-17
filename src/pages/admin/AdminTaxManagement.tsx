@@ -10,7 +10,6 @@
  */
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -190,17 +189,17 @@ export default function AdminTaxManagement() {
 
   if (isLoading) {
     return (
-      <AdminLayout>
+      <>
         <div className="max-w-7xl mx-auto space-y-6">
           <Skeleton className="h-10 w-64" />
           <Skeleton className="h-96" />
         </div>
-      </AdminLayout>
+      </>
     );
   }
 
   return (
-    <AdminLayout>
+    <>
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -665,6 +664,6 @@ export default function AdminTaxManagement() {
           </CardContent>
         </Card>
       </div>
-    </AdminLayout>
+    </>
   );
 }

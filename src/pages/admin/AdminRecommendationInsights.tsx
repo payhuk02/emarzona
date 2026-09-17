@@ -3,7 +3,6 @@
  */
 
 import { useState } from 'react';
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import { AdminStorePicker } from '@/components/admin/AdminStorePicker';
 import { RecommendationAnalytics } from '@/components/analytics/RecommendationAnalytics';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,7 +16,7 @@ export default function AdminRecommendationInsights() {
   };
 
   return (
-    <AdminLayout>
+    <>
       <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-6">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
@@ -41,6 +40,6 @@ export default function AdminRecommendationInsights() {
 
         {storeId && <RecommendationAnalytics storeId={storeId} dateRange={dateRange} />}
       </div>
-    </AdminLayout>
+    </>
   );
 }

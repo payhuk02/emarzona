@@ -5,7 +5,6 @@
  */
 
 import { useState, useMemo, useCallback, useEffect } from 'react';
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -309,7 +308,7 @@ const AdminAffiliates = () => {
 
   if (affiliatesLoading) {
     return (
-      <AdminLayout>
+      <>
         <div className="space-y-4 sm:space-y-6">
           <Skeleton className="h-12 w-64" />
           <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
@@ -318,12 +317,12 @@ const AdminAffiliates = () => {
             ))}
           </div>
         </div>
-      </AdminLayout>
+      </>
     );
   }
 
   return (
-    <AdminLayout>
+    <>
       <div className="space-y-4 sm:space-y-6 animate-fade-in">
         {/* Header */}
         <div
@@ -1276,7 +1275,7 @@ const AdminAffiliates = () => {
           </DialogContent>
         </Dialog>
       </div>
-    </AdminLayout>
+    </>
   );
 };
 

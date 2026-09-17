@@ -6,7 +6,6 @@ import { useMemo, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -272,7 +271,7 @@ export default function AdminPlatformBlog() {
 
   if (editingId) {
     return (
-      <AdminLayout>
+      <>
         <div className="space-y-6 max-w-5xl">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <Button variant="ghost" onClick={closeEditor}>
@@ -604,12 +603,12 @@ export default function AdminPlatformBlog() {
           onGenerated={handleAiGenerated}
           onSaved={() => void refetch()}
         />
-      </AdminLayout>
+      </>
     );
   }
 
   return (
-    <AdminLayout>
+    <>
       <div className="space-y-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -756,6 +755,6 @@ export default function AdminPlatformBlog() {
         onGenerated={handleAiGenerated}
         onSaved={() => void refetch()}
       />
-    </AdminLayout>
+    </>
   );
 }

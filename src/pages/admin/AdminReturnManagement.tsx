@@ -4,7 +4,6 @@
  */
 
 import { useState, useEffect } from 'react';
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -262,17 +261,17 @@ export default function AdminReturnManagement() {
 
   if (isLoading) {
     return (
-      <AdminLayout>
+      <>
         <div className="max-w-7xl mx-auto space-y-6">
           <Skeleton className="h-10 w-64" />
           <Skeleton className="h-96" />
         </div>
-      </AdminLayout>
+      </>
     );
   }
 
   return (
-    <AdminLayout>
+    <>
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div>
@@ -817,7 +816,7 @@ export default function AdminReturnManagement() {
           </DialogContent>
         </Dialog>
       </div>
-    </AdminLayout>
+    </>
   );
 }
 

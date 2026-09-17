@@ -1,4 +1,3 @@
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import { useAdminActions } from '@/hooks/useAdminActions';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -93,17 +92,17 @@ const AdminProducts = () => {
 
   if (isLoading && !pageData) {
     return (
-      <AdminLayout>
+      <>
         <div className="container mx-auto p-6 space-y-6">
           <Skeleton className="h-12 w-64" />
           <Skeleton className="h-96" />
         </div>
-      </AdminLayout>
+      </>
     );
   }
 
   return (
-    <AdminLayout>
+    <>
       <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
         <Admin2FABanner />
         <div
@@ -425,7 +424,7 @@ const AdminProducts = () => {
           </AlertDialogContent>
         </AlertDialog>
       </div>
-    </AdminLayout>
+    </>
   );
 };
 

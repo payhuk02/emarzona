@@ -3,7 +3,6 @@
  */
 
 import { useMemo, useState } from 'react';
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
@@ -142,7 +141,7 @@ export default function AdminVisitors() {
   );
 
   return (
-    <AdminLayout>
+    <>
       <div className="container mx-auto p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6">
         <div
           ref={headerRef}
@@ -500,6 +499,6 @@ export default function AdminVisitors() {
           </CardContent>
         </Card>
       </div>
-    </AdminLayout>
+    </>
   );
 }

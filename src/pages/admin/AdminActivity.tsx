@@ -1,4 +1,3 @@
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import { useAdminActivity } from '@/hooks/useAdminActivity';
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
@@ -109,7 +108,7 @@ const AdminActivity = () => {
 
   if (loading) {
     return (
-      <AdminLayout>
+      <>
         <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
           <div className="flex items-center justify-center h-[60vh]">
             <div className="text-center space-y-4">
@@ -118,12 +117,12 @@ const AdminActivity = () => {
             </div>
           </div>
         </div>
-      </AdminLayout>
+      </>
     );
   }
 
   return (
-    <AdminLayout>
+    <>
       <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
         {/* Header avec animation - Style Inventory */}
         <div
@@ -232,7 +231,7 @@ const AdminActivity = () => {
           </Card>
         </div>
       </div>
-    </AdminLayout>
+    </>
   );
 };
 

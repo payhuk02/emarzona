@@ -3,7 +3,6 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -97,19 +96,19 @@ export default function AdminApiKeys() {
 
   if (!permLoading && !canManage) {
     return (
-      <AdminLayout>
+      <>
         <div className="container mx-auto p-6">
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>Permission settings.manage requise.</AlertDescription>
           </Alert>
         </div>
-      </AdminLayout>
+      </>
     );
   }
 
   return (
-    <AdminLayout>
+    <>
       <div className="container mx-auto p-3 sm:p-6 space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
@@ -270,6 +269,6 @@ export default function AdminApiKeys() {
           </CardContent>
         </Card>
       </div>
-    </AdminLayout>
+    </>
   );
 }

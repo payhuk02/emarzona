@@ -3,7 +3,6 @@
  */
 
 import { Link } from 'react-router-dom';
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import { ADMIN_ADVANCED_TOOL_CATEGORIES } from '@/lib/admin/admin-advanced-tools';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -12,7 +11,7 @@ import { LayoutGrid, ExternalLink } from 'lucide-react';
 
 export default function AdminAdvancedTools() {
   return (
-    <AdminLayout>
+    <>
       <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-6">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
@@ -65,6 +64,6 @@ export default function AdminAdvancedTools() {
           </Card>
         ))}
       </div>
-    </AdminLayout>
+    </>
   );
 }

@@ -4,7 +4,6 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import { AdminPermissionGate } from '@/components/admin/AdminPermissionGate';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -141,7 +140,7 @@ export default function AdminVendorBilling() {
   };
 
   return (
-    <AdminLayout>
+    <>
       <AdminPermissionGate permissions={['payments.manage', 'settings.manage']}>
         <div className="container mx-auto p-3 sm:p-6 space-y-6">
           <div>
@@ -314,6 +313,6 @@ export default function AdminVendorBilling() {
           </Card>
         </div>
       </AdminPermissionGate>
-    </AdminLayout>
+    </>
   );
 }

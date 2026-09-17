@@ -14,7 +14,6 @@ import {
   useGenerateReconciliationReport,
 } from '@/hooks/useGeniusPayReconciliation';
 import type { ReconciliationReport, ReconciliationResult } from '@/lib/geniuspay-reconciliation';
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Loader2, CheckCircle, XCircle, AlertCircle, RefreshCw, FileText } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -111,7 +110,7 @@ export default function GeniusPayReconciliation() {
   };
 
   return (
-    <AdminLayout>
+    <>
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold">Réconciliation paiements</h1>
@@ -287,6 +286,6 @@ export default function GeniusPayReconciliation() {
           </CardContent>
         </Card>
       </div>
-    </AdminLayout>
+    </>
   );
 }

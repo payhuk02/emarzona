@@ -4,7 +4,6 @@
  */
 
 import { useState, useMemo, useCallback, useEffect } from 'react';
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -115,7 +114,7 @@ export default function AdminInventory() {
   );
 
   return (
-    <AdminLayout>
+    <>
       <div className="container mx-auto p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6">
         {/* Header */}
         <div
@@ -421,6 +420,6 @@ export default function AdminInventory() {
           </CardContent>
         </Card>
       </div>
-    </AdminLayout>
+    </>
   );
 }

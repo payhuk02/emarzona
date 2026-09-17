@@ -3,7 +3,6 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -131,7 +130,7 @@ export default function AdminSubscriptions() {
 
   if (!permLoading && !can('payments.manage') && !can('analytics.view')) {
     return (
-      <AdminLayout>
+      <>
         <div className="container mx-auto p-6">
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
@@ -140,12 +139,12 @@ export default function AdminSubscriptions() {
             </AlertDescription>
           </Alert>
         </div>
-      </AdminLayout>
+      </>
     );
   }
 
   return (
-    <AdminLayout>
+    <>
       <div className="container mx-auto p-3 sm:p-6 space-y-6">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
@@ -256,6 +255,6 @@ export default function AdminSubscriptions() {
           </CardContent>
         </Card>
       </div>
-    </AdminLayout>
+    </>
   );
 }

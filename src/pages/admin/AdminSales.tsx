@@ -1,5 +1,4 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -186,7 +185,7 @@ const AdminSales = () => {
 
   if (isLoading) {
     return (
-      <AdminLayout>
+      <>
         <div className="container mx-auto p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6">
           <Skeleton className="h-12 w-64" />
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
@@ -195,12 +194,12 @@ const AdminSales = () => {
             ))}
           </div>
         </div>
-      </AdminLayout>
+      </>
     );
   }
 
   return (
-    <AdminLayout>
+    <>
       <div className="container mx-auto p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6 animate-fade-in">
         {/* Header */}
         <div
@@ -568,7 +567,7 @@ const AdminSales = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </AdminLayout>
+    </>
   );
 };
 

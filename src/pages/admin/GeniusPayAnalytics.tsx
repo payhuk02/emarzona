@@ -16,7 +16,6 @@ import {
   usePaymentMethodStats,
   useStatsByDate,
 } from '@/hooks/useGeniusPayStats';
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import {
   Loader2,
   TrendingUp,
@@ -76,17 +75,17 @@ export default function GeniusPayAnalytics() {
 
   if (isLoading) {
     return (
-      <AdminLayout>
+      <>
         <div className="flex items-center justify-center h-96">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
-      </AdminLayout>
+      </>
     );
   }
 
   if (error) {
     return (
-      <AdminLayout>
+      <>
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-2 text-destructive">
@@ -95,12 +94,12 @@ export default function GeniusPayAnalytics() {
             </div>
           </CardContent>
         </Card>
-      </AdminLayout>
+      </>
     );
   }
 
   return (
-    <AdminLayout>
+    <>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
@@ -352,6 +351,6 @@ export default function GeniusPayAnalytics() {
           </Card>
         )}
       </div>
-    </AdminLayout>
+    </>
   );
 }

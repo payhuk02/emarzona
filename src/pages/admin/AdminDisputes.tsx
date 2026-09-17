@@ -2,7 +2,6 @@ import { useState, useMemo, useCallback } from 'react';
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -395,19 +394,19 @@ const AdminDisputes = () => {
 
   if (loading) {
     return (
-      <AdminLayout>
+      <>
         <div className="space-y-6">
           <Skeleton className="h-8 w-64 mb-6" />
           <Skeleton className="h-96 w-full" />
         </div>
-      </AdminLayout>
+      </>
     );
   }
 
   if (error) {
     const showMigrationHelp = error.toLowerCase().includes("n'existe pas");
     return (
-      <AdminLayout>
+      <>
         <div className="space-y-6">
           <Card className="border-destructive">
             <CardHeader>
@@ -439,12 +438,12 @@ const AdminDisputes = () => {
             )}
           </Card>
         </div>
-      </AdminLayout>
+      </>
     );
   }
 
   return (
-    <AdminLayout>
+    <>
       <div className="space-y-6">
         <Admin2FABanner />
         {/* Header */}
@@ -1475,7 +1474,7 @@ const AdminDisputes = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </AdminLayout>
+    </>
   );
 };
 

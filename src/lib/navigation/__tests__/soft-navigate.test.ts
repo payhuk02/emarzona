@@ -38,4 +38,12 @@ describe('softNavigate', () => {
     expect(window.location.assign).toHaveBeenCalledWith('https://shop.myemarzona.shop/products/x');
     expect(navigate).not.toHaveBeenCalled();
   });
+
+  it('softNavigateTo utilise le navigate enregistré', async () => {
+    const { registerSoftNavigate, softNavigateTo } = await import('@/lib/navigation/soft-navigate');
+    registerSoftNavigate(navigate);
+    softNavigateTo('/account/orders');
+    expect(navigate).toHaveBeenCalledWith('/account/orders');
+    registerSoftNavigate(null);
+  });
 });

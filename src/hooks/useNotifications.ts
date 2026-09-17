@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useEffect, useState } from 'react';
 import { logger } from '@/lib/logger';
 import { isSafeInternalNavUrl } from '@/lib/navigation/keyboard-shortcuts';
+import { softNavigateTo } from '@/lib/navigation/soft-navigate';
 import { playInAppNotificationAlert } from '@/lib/notifications/in-app-notification-alert';
 import { isNotificationPaused } from '@/lib/notifications/notification-pause';
 import { getVibrationPattern } from '@/lib/notifications/vibration-patterns';
@@ -402,7 +403,7 @@ export const useRealtimeNotifications = (options?: { enabled?: boolean }) => {
                 const rawUrl = notif.action_url?.trim();
                 const target = rawUrl && isSafeInternalNavUrl(rawUrl) ? rawUrl : '/';
                 window.focus();
-                window.location.href = target;
+                softNavigateTo(target);
                 notification.close();
               };
 

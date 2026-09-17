@@ -12,6 +12,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertCircle, RefreshCw, Home, Bug } from 'lucide-react';
 import { logger } from '@/lib/logger';
 import { normalizeError, logError, ErrorSeverity } from '@/lib/error-handling';
+import { softNavigateTo } from '@/lib/navigation/soft-navigate';
 
 interface Props {
   children: ReactNode;
@@ -88,7 +89,7 @@ export class ErrorBoundary extends Component<Props, State> {
   };
 
   handleGoHome = () => {
-    window.location.href = '/';
+    softNavigateTo('/');
   };
 
   render() {

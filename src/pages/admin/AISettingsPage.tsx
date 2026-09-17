@@ -32,7 +32,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 import { useConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Skeleton } from '@/components/ui/skeleton';
-import { AdminLayout } from '@/components/admin/AdminLayout';
 
 interface RecommendationSettings {
   // Algorithmes actifs
@@ -331,7 +330,7 @@ const AISettingsPage = () => {
 
   if (isLoading) {
     return (
-      <AdminLayout>
+      <>
         <div className="space-y-4 sm:space-y-6">
           <div className="space-y-4">
             <Skeleton className="h-8 sm:h-10 w-full max-w-md" />
@@ -346,12 +345,12 @@ const AISettingsPage = () => {
             <Skeleton className="h-64 w-full" />
           </div>
         </div>
-      </AdminLayout>
+      </>
     );
   }
 
   return (
-    <AdminLayout>
+    <>
       {ConfirmDialog}
       <div className="space-y-4 sm:space-y-6">
         {/* Header */}
@@ -968,7 +967,7 @@ const AISettingsPage = () => {
           </CardContent>
         </Card>
       </div>
-    </AdminLayout>
+    </>
   );
 };
 

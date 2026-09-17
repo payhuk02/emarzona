@@ -4,7 +4,6 @@
  */
 
 import { useState, useMemo, useCallback, useEffect } from 'react';
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -165,7 +164,7 @@ export default function AdminCourses() {
   );
 
   return (
-    <AdminLayout>
+    <>
       <div className="container mx-auto p-6 space-y-6">
         <div ref={headerRef} role="banner">
           <h1
@@ -425,6 +424,6 @@ export default function AdminCourses() {
           </CardContent>
         </Card>
       </div>
-    </AdminLayout>
+    </>
   );
 }

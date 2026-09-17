@@ -5,7 +5,6 @@
  */
 
 import { useState, useCallback, useEffect } from 'react';
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
@@ -80,7 +79,7 @@ export const AdminReviews = () => {
   }, [refetch, refetchStats, toast]);
 
   return (
-    <AdminLayout>
+    <>
       <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
         {/* Header avec animation - Style Inventory */}
         <div
@@ -350,6 +349,6 @@ export const AdminReviews = () => {
           </Tabs>
         </div>
       </div>
-    </AdminLayout>
+    </>
   );
 };

@@ -6,7 +6,6 @@
  */
 
 import { useState, useEffect } from 'react';
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -79,7 +78,7 @@ export default function AdminCommissionSettings() {
   // Vérifier les permissions
   if (!can('settings.manage')) {
     return (
-      <AdminLayout>
+      <>
         <div className="container mx-auto p-6">
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
@@ -88,7 +87,7 @@ export default function AdminCommissionSettings() {
             </AlertDescription>
           </Alert>
         </div>
-      </AdminLayout>
+      </>
     );
   }
 
@@ -150,20 +149,20 @@ export default function AdminCommissionSettings() {
   // Loading state
   if (isLoading) {
     return (
-      <AdminLayout>
+      <>
         <div className="container mx-auto p-6 space-y-6">
           <Skeleton className="h-12 w-64" />
           <Skeleton className="h-96" />
           <Skeleton className="h-64" />
         </div>
-      </AdminLayout>
+      </>
     );
   }
 
   // Error state
   if (error) {
     return (
-      <AdminLayout>
+      <>
         <div className="container mx-auto p-6">
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
@@ -173,12 +172,12 @@ export default function AdminCommissionSettings() {
             </AlertDescription>
           </Alert>
         </div>
-      </AdminLayout>
+      </>
     );
   }
 
   return (
-    <AdminLayout>
+    <>
       <div className="container mx-auto p-6 space-y-6 animate-fade-in">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -631,7 +630,7 @@ export default function AdminCommissionSettings() {
           </CardContent>
         </Card>
       </div>
-    </AdminLayout>
+    </>
   );
 }
 

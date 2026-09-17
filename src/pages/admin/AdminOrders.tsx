@@ -1,5 +1,4 @@
 import { useState, useCallback, useEffect } from 'react';
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -154,7 +153,7 @@ export default function AdminOrders() {
 
   if (isLoading && !pageData) {
     return (
-      <AdminLayout>
+      <>
         <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
           <Skeleton className="h-12 w-64" />
           <div className="grid gap-4 grid-cols-2 sm:grid-cols-4">
@@ -164,12 +163,12 @@ export default function AdminOrders() {
           </div>
           <Skeleton className="h-96" />
         </div>
-      </AdminLayout>
+      </>
     );
   }
 
   return (
-    <AdminLayout>
+    <>
       <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
         <Admin2FABanner />
 
@@ -431,6 +430,6 @@ export default function AdminOrders() {
           </Card>
         </ProtectedAction>
       </div>
-    </AdminLayout>
+    </>
   );
 }

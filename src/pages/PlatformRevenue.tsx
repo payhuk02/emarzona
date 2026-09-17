@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Download, TrendingUp, DollarSign, ShoppingCart, Percent } from 'lucide-react';
@@ -29,7 +28,7 @@ const PlatformRevenue = () => {
 
   if (adminLoading) {
     return (
-      <AdminLayout>
+      <>
         <div className="container mx-auto p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6">
           <Skeleton className="h-8 w-64 mb-6" />
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -38,13 +37,13 @@ const PlatformRevenue = () => {
             ))}
           </div>
         </div>
-      </AdminLayout>
+      </>
     );
   }
 
   if (!isAdmin) {
     return (
-      <AdminLayout>
+      <>
         <div className="container mx-auto p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6">
           <Alert variant="destructive">
             <AlertDescription>
@@ -52,12 +51,12 @@ const PlatformRevenue = () => {
             </AlertDescription>
           </Alert>
         </div>
-      </AdminLayout>
+      </>
     );
   }
 
   return (
-    <AdminLayout>
+    <>
       <div className="max-w-7xl mx-auto space-y-4 sm:space-y-5 md:space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
@@ -276,7 +275,7 @@ const PlatformRevenue = () => {
           </CardContent>
         </Card>
       </div>
-    </AdminLayout>
+    </>
   );
 };
 

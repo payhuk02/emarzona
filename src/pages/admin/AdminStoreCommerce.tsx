@@ -4,7 +4,6 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import { AdminStorePicker } from '@/components/admin/AdminStorePicker';
 import { Admin2FABanner } from '@/components/admin/Admin2FABanner';
 import { ProtectedAction } from '@/components/admin/ProtectedAction';
@@ -281,7 +280,7 @@ export default function AdminStoreCommerce() {
   }) => row.full_name || row.name || row.email || '—';
 
   return (
-    <AdminLayout>
+    <>
       <div className="container mx-auto p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6">
         <Admin2FABanner />
 
@@ -807,6 +806,6 @@ export default function AdminStoreCommerce() {
           </>
         )}
       </div>
-    </AdminLayout>
+    </>
   );
 }

@@ -5,7 +5,6 @@
 
 import { useMemo, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import { useDisputes } from '@/hooks/useDisputes';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -98,7 +97,7 @@ export default function AdminSupport() {
   );
 
   return (
-    <AdminLayout>
+    <>
       <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
@@ -219,6 +218,6 @@ export default function AdminSupport() {
           </CardContent>
         </Card>
       </div>
-    </AdminLayout>
+    </>
   );
 }

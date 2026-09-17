@@ -64,11 +64,17 @@ export function SubdomainMiddleware({ children }: SubdomainMiddlewareProps) {
     }
   }, [subdomainInfo]);
 
-  // Bloquer les sous-domaines réservés
+  // Bloquer les sous-domaines réservés → plateforme (jamais pendant le render)
   const isReservedSubdomain =
     subdomainInfo.isStoreDomain && subdomainInfo.isSubdomain && subdomainInfo.subdomain
       ? RESERVED_SUBDOMAINS.includes(subdomainInfo.subdomain.toLowerCase())
       : false;
+
+  useEffect(() => {
+    if (isReservedSubdomain) {
+      window.location.replace('https://www.emarzona.com');
+    }
+  }, [isReservedSubdomain]);
 
   // Déterminer si on doit résoudre une boutique
   const shouldResolveStore =
@@ -77,10 +83,16 @@ export function SubdomainMiddleware({ children }: SubdomainMiddlewareProps) {
     ((subdomainInfo.isStoreDomain && subdomainInfo.isSubdomain && subdomainInfo.subdomain) ||
       (subdomainInfo.isCustomDomain && subdomainInfo.customDomain));
 
-  // Sous-domaine réservé → rediriger vers la plateforme
+  // Sous-domaine réservé : écran neutre pendant la redirection
   if (isReservedSubdomain) {
-    window.location.replace('https://www.emarzona.com');
-    return null;
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="flex flex-col items-center space-y-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-muted-foreground">Redirection...</p>
+        </div>
+      </div>
+    );
   }
 
   if (shouldResolveStore) {

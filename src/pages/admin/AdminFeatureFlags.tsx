@@ -3,7 +3,6 @@
  */
 
 import { Link } from 'react-router-dom';
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import { FeaturesSection } from '@/components/admin/customization/FeaturesSection';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,7 +14,7 @@ export default function AdminFeatureFlags() {
   const { loading } = usePlatformCustomization();
 
   return (
-    <AdminLayout>
+    <>
       <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div>
@@ -59,6 +58,6 @@ export default function AdminFeatureFlags() {
           <FeaturesSection />
         )}
       </div>
-    </AdminLayout>
+    </>
   );
 }

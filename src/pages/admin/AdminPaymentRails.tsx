@@ -2,7 +2,6 @@
  * Admin — Agrégateurs & opérateurs de paiement (+ logos)
  */
 import { useRef } from 'react';
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -38,17 +37,17 @@ export default function AdminPaymentRails() {
 
   if (!can('payments.manage')) {
     return (
-      <AdminLayout>
+      <>
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>Vous n’avez pas la permission de gérer les paiements.</AlertDescription>
         </Alert>
-      </AdminLayout>
+      </>
     );
   }
 
   return (
-    <AdminLayout>
+    <>
       <div className="space-y-6 max-w-4xl">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
@@ -241,6 +240,6 @@ export default function AdminPaymentRails() {
             );
           })}
       </div>
-    </AdminLayout>
+    </>
   );
 }

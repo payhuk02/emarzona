@@ -14,6 +14,7 @@ import { StoreMembersList } from '@/components/team/StoreMembersList';
 import { Users, CheckSquare, BarChart3, Shield, ScrollText, Loader2 } from 'lucide-react';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useStore } from '@/hooks/useStore';
+import { useStoreContext } from '@/contexts/StoreContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { StoreTasksList } from '@/components/team/StoreTasksList';
@@ -29,6 +30,7 @@ import { Button } from '@/components/ui/button';
 const StoreTeamManagement = () => {
   const { t } = useTranslation();
   const { store, loading } = useStore();
+  const { refreshStores, setSelectedStoreId } = useStoreContext();
   const headerRef = useScrollAnimation<HTMLDivElement>();
 
   const [searchParams] = useSearchParams();
@@ -49,14 +51,25 @@ const StoreTeamManagement = () => {
           }
 
           navigate('/dashboard/store/team', { replace: true });
-          window.location.reload(); // Reload to refresh stores list in the context
+          await refreshStores();
+          if (joinedStoreId && typeof joinedStoreId === 'string') {
+            setSelectedStoreId(joinedStoreId);
+          }
         })
         .catch(err => {
           setAcceptError(err.message || "Erreur lors de l'acceptation de l'invitation");
           setIsAccepting(false);
         });
     }
-  }, [invitationToken, acceptInvitation, navigate, isAccepting, acceptError]);
+  }, [
+    invitationToken,
+    acceptInvitation,
+    navigate,
+    isAccepting,
+    acceptError,
+    refreshStores,
+    setSelectedStoreId,
+  ]);
 
   if (isAccepting || (invitationToken && !acceptError)) {
     return (

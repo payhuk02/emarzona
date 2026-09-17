@@ -1,18 +1,11 @@
 import React from 'react';
 import { lazyPage } from '@/routes/lazyPage';
 import { Route } from 'react-router-dom';
-import { ProtectedAdminRoute } from '@/components/ProtectedAdminRoute';
+import { AdminAppLayout } from '@/components/layout/AdminAppLayout';
 import { logger } from '@/lib/logger';
 
-const pr = (path: string, Component: React.LazyExoticComponent<React.ComponentType>) => (
-  <Route
-    path={path}
-    element={
-      <ProtectedAdminRoute>
-        <Component />
-      </ProtectedAdminRoute>
-    }
-  />
+const page = (path: string, Component: React.LazyExoticComponent<React.ComponentType>) => (
+  <Route path={path} element={<Component />} />
 );
 
 const AdminDashboard = lazyPage(() => import('@/pages/admin/AdminDashboard'));
@@ -127,81 +120,81 @@ const MarketingAutomationDashboard = lazyPage(() =>
 );
 
 export const adminRoutes = (
-  <>
-    {pr('/admin', AdminDashboard)}
-    {pr('/admin/users', AdminUsers)}
-    {pr('/admin/stores', AdminStores)}
-    {pr('/admin/products', AdminProducts)}
-    {pr('/admin/sales', AdminSales)}
-    {pr('/admin/referrals', AdminReferrals)}
-    {pr('/admin/activity', AdminActivity)}
-    {pr('/admin/settings', AdminSettings)}
-    {pr('/admin/commission-settings', AdminCommissionSettings)}
-    {pr('/admin/commission-payments', AdminCommissionPayments)}
-    {pr('/admin/platform-customization', PlatformCustomization)}
-    {pr('/admin/platform-faq', AdminPlatformFaq)}
-    {pr('/admin/platform-blog', AdminPlatformBlog)}
-    {pr('/admin/sponsorships', AdminSponsorships)}
-    {pr('/admin/article-comments', AdminArticleComments)}
-    {pr('/admin/newsletter-subscribers', AdminNewsletterSubscribers)}
-    {pr('/admin/geniuspay-analytics', GeniusPayAnalytics)}
-    {pr('/admin/payment-analytics', GeniusPayAnalytics)}
-    {pr('/admin/geniuspay-reconciliation', GeniusPayReconciliation)}
-    {pr('/admin/payment-reconciliation', GeniusPayReconciliation)}
-    {pr('/admin/transaction-monitoring', TransactionMonitoring)}
-    {pr('/admin/notifications', AdminNotifications)}
-    {pr('/admin/revenue', PlatformRevenue)}
-    {pr('/admin/checkout-fees', AdminCheckoutFees)}
-    {pr('/admin/kyc', AdminKYC)}
-    {pr('/admin/disputes', AdminDisputes)}
-    {pr('/admin/affiliates', AdminAffiliates)}
-    {pr('/admin/store-withdrawals', AdminStoreWithdrawals)}
-    {pr('/admin/store-commerce', AdminStoreCommerce)}
-    {pr('/admin/service-categories', AdminServiceCategories)}
-    {pr('/admin/reviews', AdminReviews)}
-    {pr('/admin/inventory', AdminInventory)}
-    {pr('/admin/support', AdminSupport)}
-    {pr('/admin/analytics', AdminAnalytics)}
-    {pr('/admin/visitors', AdminVisitors)}
-    {pr('/admin/ai-settings', AISettingsPage)}
-    {pr('/admin/ai-management', AIManagementPage)}
-    {pr('/admin/marketing', MarketingAutomationDashboard)}
-    {pr('/admin/payments', AdminPayments)}
-    {pr('/admin/payment-rails', AdminPaymentRails)}
-    {pr('/admin/transaction-reconciliation', AdminTransactionReconciliation)}
-    {pr('/admin/shipping', AdminShipping)}
-    {pr('/admin/shipping-conversations', AdminShippingConversations)}
-    {pr('/admin/vendor-conversations', AdminVendorConversations)}
-    {pr('/admin/courses', AdminCourses)}
-    {pr('/admin/security', AdminSecurity)}
-    {pr('/admin/audit', AdminAudit)}
-    {pr('/admin/taxes', AdminTaxManagement)}
-    {pr('/admin/returns', AdminReturnManagement)}
-    {pr('/admin/integrations', AdminPlatformIntegrations)}
-    {pr('/admin/domains', AdminDomains)}
-    {pr('/admin/feature-flags', AdminFeatureFlags)}
-    {pr('/admin/advanced-tools', AdminAdvancedTools)}
-    {pr('/admin/recommendation-insights', AdminRecommendationInsights)}
-    {pr('/admin/webhooks', AdminWebhookManagement)}
-    {pr('/admin/api-keys', AdminApiKeys)}
-    {pr('/admin/subscriptions', AdminSubscriptions)}
-    {pr('/admin/vendor-billing', AdminVendorBilling)}
-    {pr('/admin/loyalty', AdminLoyaltyManagement)}
-    {pr('/admin/gift-cards', AdminGiftCardManagement)}
-    {pr('/admin/suppliers', AdminSuppliersManagement)}
-    {pr('/admin/warehouses', AdminWarehousesManagement)}
-    {pr('/admin/product-kits', AdminProductKitsManagement)}
-    {pr('/admin/demand-forecasting', AdminDemandForecasting)}
-    {pr('/admin/cost-optimization', AdminCostOptimization)}
-    {pr('/admin/batch-shipping', AdminBatchShipping)}
-    {pr('/admin/data-storage', AdminDataStorage)}
-    {pr('/admin/offline-queue', OfflineQueueManager)}
-    {pr('/admin/orders', AdminOrders)}
-    {pr('/admin/error-monitoring', AdminErrorMonitoring)}
-    {pr('/admin/fulfillment-alerts', AdminFulfillmentAlerts)}
-    {pr('/admin/monitoring', AdminMonitoring)}
-    {pr('/admin/accessibility', AdminAccessibilityReport)}
-    {pr('/admin/storage-diagnostic', StorageDiagnosticPage)}
-    {pr('/admin/community', AdminCommunity)}
-  </>
+  <Route element={<AdminAppLayout />}>
+    {page('/admin', AdminDashboard)}
+    {page('/admin/users', AdminUsers)}
+    {page('/admin/stores', AdminStores)}
+    {page('/admin/products', AdminProducts)}
+    {page('/admin/sales', AdminSales)}
+    {page('/admin/referrals', AdminReferrals)}
+    {page('/admin/activity', AdminActivity)}
+    {page('/admin/settings', AdminSettings)}
+    {page('/admin/commission-settings', AdminCommissionSettings)}
+    {page('/admin/commission-payments', AdminCommissionPayments)}
+    {page('/admin/platform-customization', PlatformCustomization)}
+    {page('/admin/platform-faq', AdminPlatformFaq)}
+    {page('/admin/platform-blog', AdminPlatformBlog)}
+    {page('/admin/sponsorships', AdminSponsorships)}
+    {page('/admin/article-comments', AdminArticleComments)}
+    {page('/admin/newsletter-subscribers', AdminNewsletterSubscribers)}
+    {page('/admin/geniuspay-analytics', GeniusPayAnalytics)}
+    {page('/admin/payment-analytics', GeniusPayAnalytics)}
+    {page('/admin/geniuspay-reconciliation', GeniusPayReconciliation)}
+    {page('/admin/payment-reconciliation', GeniusPayReconciliation)}
+    {page('/admin/transaction-monitoring', TransactionMonitoring)}
+    {page('/admin/notifications', AdminNotifications)}
+    {page('/admin/revenue', PlatformRevenue)}
+    {page('/admin/checkout-fees', AdminCheckoutFees)}
+    {page('/admin/kyc', AdminKYC)}
+    {page('/admin/disputes', AdminDisputes)}
+    {page('/admin/affiliates', AdminAffiliates)}
+    {page('/admin/store-withdrawals', AdminStoreWithdrawals)}
+    {page('/admin/store-commerce', AdminStoreCommerce)}
+    {page('/admin/service-categories', AdminServiceCategories)}
+    {page('/admin/reviews', AdminReviews)}
+    {page('/admin/inventory', AdminInventory)}
+    {page('/admin/support', AdminSupport)}
+    {page('/admin/analytics', AdminAnalytics)}
+    {page('/admin/visitors', AdminVisitors)}
+    {page('/admin/ai-settings', AISettingsPage)}
+    {page('/admin/ai-management', AIManagementPage)}
+    {page('/admin/marketing', MarketingAutomationDashboard)}
+    {page('/admin/payments', AdminPayments)}
+    {page('/admin/payment-rails', AdminPaymentRails)}
+    {page('/admin/transaction-reconciliation', AdminTransactionReconciliation)}
+    {page('/admin/shipping', AdminShipping)}
+    {page('/admin/shipping-conversations', AdminShippingConversations)}
+    {page('/admin/vendor-conversations', AdminVendorConversations)}
+    {page('/admin/courses', AdminCourses)}
+    {page('/admin/security', AdminSecurity)}
+    {page('/admin/audit', AdminAudit)}
+    {page('/admin/taxes', AdminTaxManagement)}
+    {page('/admin/returns', AdminReturnManagement)}
+    {page('/admin/integrations', AdminPlatformIntegrations)}
+    {page('/admin/domains', AdminDomains)}
+    {page('/admin/feature-flags', AdminFeatureFlags)}
+    {page('/admin/advanced-tools', AdminAdvancedTools)}
+    {page('/admin/recommendation-insights', AdminRecommendationInsights)}
+    {page('/admin/webhooks', AdminWebhookManagement)}
+    {page('/admin/api-keys', AdminApiKeys)}
+    {page('/admin/subscriptions', AdminSubscriptions)}
+    {page('/admin/vendor-billing', AdminVendorBilling)}
+    {page('/admin/loyalty', AdminLoyaltyManagement)}
+    {page('/admin/gift-cards', AdminGiftCardManagement)}
+    {page('/admin/suppliers', AdminSuppliersManagement)}
+    {page('/admin/warehouses', AdminWarehousesManagement)}
+    {page('/admin/product-kits', AdminProductKitsManagement)}
+    {page('/admin/demand-forecasting', AdminDemandForecasting)}
+    {page('/admin/cost-optimization', AdminCostOptimization)}
+    {page('/admin/batch-shipping', AdminBatchShipping)}
+    {page('/admin/data-storage', AdminDataStorage)}
+    {page('/admin/offline-queue', OfflineQueueManager)}
+    {page('/admin/orders', AdminOrders)}
+    {page('/admin/error-monitoring', AdminErrorMonitoring)}
+    {page('/admin/fulfillment-alerts', AdminFulfillmentAlerts)}
+    {page('/admin/monitoring', AdminMonitoring)}
+    {page('/admin/accessibility', AdminAccessibilityReport)}
+    {page('/admin/storage-diagnostic', StorageDiagnosticPage)}
+    {page('/admin/community', AdminCommunity)}
+  </Route>
 );

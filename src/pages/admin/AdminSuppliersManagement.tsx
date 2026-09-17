@@ -9,7 +9,6 @@
  */
 
 import { useMemo } from 'react';
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -62,7 +61,7 @@ export default function AdminSuppliersManagement() {
   // Loading state
   if (storeLoading || suppliersLoading || ordersLoading || rulesLoading) {
     return (
-      <AdminLayout>
+      <>
         <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-3 sm:space-y-4 lg:space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
             <Skeleton className="h-8 sm:h-10 w-48 sm:w-64 lg:w-80" />
@@ -75,14 +74,14 @@ export default function AdminSuppliersManagement() {
           </div>
           <Skeleton className="h-64 w-full" />
         </div>
-      </AdminLayout>
+      </>
     );
   }
 
   // Empty state - No store
   if (!store) {
     return (
-      <AdminLayout>
+      <>
         <div className="container mx-auto p-3 sm:p-4 lg:p-6">
           <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-3 sm:px-4">
             <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/10 border border-purple-500/30 flex items-center justify-center mb-4 animate-in fade-in slide-in-from-bottom-4">
@@ -96,12 +95,12 @@ export default function AdminSuppliersManagement() {
             </p>
           </div>
         </div>
-      </AdminLayout>
+      </>
     );
   }
 
   return (
-    <AdminLayout>
+    <>
       <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-3 sm:space-y-4 lg:space-y-6">
         {/* Header */}
         <div
@@ -290,6 +289,6 @@ export default function AdminSuppliersManagement() {
           </Tabs>
         </div>
       </div>
-    </AdminLayout>
+    </>
   );
 }

@@ -6,7 +6,6 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
@@ -366,7 +365,7 @@ export const PlatformCustomization = () => {
   const activeSectionConfig = sections.find(s => s.id === activeSection);
 
   return (
-    <AdminLayout>
+    <>
       <div className="-mx-3 sm:-mx-4 md:-mx-6">
         <div
           className={cn(
@@ -627,6 +626,6 @@ export const PlatformCustomization = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </AdminLayout>
+    </>
   );
 };

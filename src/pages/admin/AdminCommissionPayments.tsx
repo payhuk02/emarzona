@@ -7,7 +7,6 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -316,7 +315,7 @@ export default function AdminCommissionPayments() {
 
   if (!hasAccess) {
     return (
-      <AdminLayout>
+      <>
         <div className="container mx-auto p-6 space-y-6 animate-fade-in">
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
@@ -325,12 +324,12 @@ export default function AdminCommissionPayments() {
             </AlertDescription>
           </Alert>
         </div>
-      </AdminLayout>
+      </>
     );
   }
 
   return (
-    <AdminLayout>
+    <>
       <div className="container mx-auto p-6 space-y-6 animate-fade-in">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -758,6 +757,6 @@ export default function AdminCommissionPayments() {
           </DialogContent>
         </Dialog>
       </div>
-    </AdminLayout>
+    </>
   );
 }

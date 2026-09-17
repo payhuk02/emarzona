@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -85,21 +84,21 @@ const AdminSettings = () => {
   // Loading state
   if (loading || platformSettingsLoading) {
     return (
-      <AdminLayout>
+      <>
         <div className="container mx-auto p-6 space-y-6">
           <Skeleton className="h-12 w-64" />
           <Skeleton className="h-96" />
           <Skeleton className="h-64" />
           <Skeleton className="h-64" />
         </div>
-      </AdminLayout>
+      </>
     );
   }
 
   // Error state
   if (error) {
     return (
-      <AdminLayout>
+      <>
         <div className="container mx-auto p-6 space-y-6 animate-fade-in">
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
@@ -108,12 +107,12 @@ const AdminSettings = () => {
             </AlertDescription>
           </Alert>
         </div>
-      </AdminLayout>
+      </>
     );
   }
 
   return (
-    <AdminLayout>
+    <>
       <div className="container mx-auto p-6 space-y-6 animate-fade-in">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -515,7 +514,7 @@ const AdminSettings = () => {
           </Button>
         </div>
       </div>
-    </AdminLayout>
+    </>
   );
 };
 

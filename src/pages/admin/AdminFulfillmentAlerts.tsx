@@ -16,7 +16,6 @@ import {
   Search,
   XCircle,
 } from 'lucide-react';
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -134,7 +133,7 @@ export default function AdminFulfillmentAlerts() {
   };
 
   return (
-    <AdminLayout>
+    <>
       <div className="container mx-auto p-4 sm:p-6 space-y-6">
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div>
@@ -379,6 +378,6 @@ export default function AdminFulfillmentAlerts() {
           </CardContent>
         </Card>
       </div>
-    </AdminLayout>
+    </>
   );
 }

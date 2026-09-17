@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Admin2FABanner } from '@/components/admin/Admin2FABanner';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -131,29 +130,29 @@ const AdminKYC = () => {
 
   if (permLoading || isLoading) {
     return (
-      <AdminLayout>
+      <>
         <div className="container mx-auto p-6 space-y-6">
           <Skeleton className="h-12 w-64" />
           <Skeleton className="h-96" />
         </div>
-      </AdminLayout>
+      </>
     );
   }
 
   if (!can('users.manage')) {
     return (
-      <AdminLayout>
+      <>
         <div className="container mx-auto p-6">
           <p className="text-muted-foreground">
             Vous n&apos;avez pas la permission de gérer les vérifications KYC.
           </p>
         </div>
-      </AdminLayout>
+      </>
     );
   }
 
   return (
-    <AdminLayout>
+    <>
       <div className="container mx-auto p-4 sm:p-6 lg:p-8 space-y-6 animate-fade-in">
         <Admin2FABanner />
 
@@ -354,7 +353,7 @@ const AdminKYC = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </AdminLayout>
+    </>
   );
 };
 

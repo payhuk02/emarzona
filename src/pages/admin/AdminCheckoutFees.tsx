@@ -6,7 +6,6 @@ import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -138,7 +137,7 @@ export default function AdminCheckoutFees() {
   const refundedFees = Number(summary?.refunded_fees) || 0;
 
   return (
-    <AdminLayout>
+    <>
       <div className="space-y-6 p-4 sm:p-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
@@ -349,6 +348,6 @@ export default function AdminCheckoutFees() {
           </CardContent>
         </Card>
       </div>
-    </AdminLayout>
+    </>
   );
 }

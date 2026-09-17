@@ -1,6 +1,5 @@
 import { useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import {
   usePlatformNewsletterSubscribers,
   usePlatformNewsletterStats,
@@ -110,7 +109,7 @@ export default function AdminNewsletterSubscribers() {
   }, [data?.subscribers, toast]);
 
   return (
-    <AdminLayout>
+    <>
       <div className="space-y-6 p-4 sm:p-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -294,6 +293,6 @@ export default function AdminNewsletterSubscribers() {
           </CardContent>
         </Card>
       </div>
-    </AdminLayout>
+    </>
   );
 }

@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import {
   Loader2,
   AlertCircle,
@@ -52,7 +51,7 @@ export default function TransactionMonitoring() {
   const [stats, setStats] = useState<TransactionStats | null>(null);
   const [consistencyIssues, setConsistencyIssues] = useState<ConsistencyIssue[]>([]);
   const [generatingReport, setGeneratingReport] = useState(false);
-  const [report, setReport] = useState<Record<string, any> | null>(null);
+  const [report, setReport] = useState<Record<string, unknown> | null>(null);
 
   // Charger les statistiques
   useEffect(() => {
@@ -137,11 +136,11 @@ export default function TransactionMonitoring() {
 
   if (loading) {
     return (
-      <AdminLayout>
+      <>
         <div className="flex items-center justify-center h-96">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
-      </AdminLayout>
+      </>
     );
   }
 
@@ -150,7 +149,7 @@ export default function TransactionMonitoring() {
   const lowSeverityIssues = consistencyIssues.filter(i => i.severity === 'low').length;
 
   return (
-    <AdminLayout>
+    <>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
@@ -380,7 +379,7 @@ export default function TransactionMonitoring() {
                   <div className="space-y-2">
                     <h4 className="font-medium">Détails des incohérences</h4>
                     <div className="max-h-96 overflow-y-auto space-y-2">
-                      {report.issues.map((issue: Record<string, any>, index: number) => (
+                      {(report.issues as Record<string, unknown>[]).map((issue, index) => (
                         <div key={index} className="p-3 border rounded-lg text-sm">
                           <div className="flex items-center justify-between">
                             <div>
@@ -409,6 +408,6 @@ export default function TransactionMonitoring() {
           </Card>
         )}
       </div>
-    </AdminLayout>
+    </>
   );
 }

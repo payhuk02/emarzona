@@ -1,4 +1,3 @@
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import { useAllUsers, type UserFilters } from '@/hooks/useAllUsers';
 import { useAdminActions } from '@/hooks/useAdminActions';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -262,18 +261,18 @@ const AdminUsers = () => {
 
   if (loading) {
     return (
-      <AdminLayout>
+      <>
         <div className="container mx-auto p-6 space-y-6">
           <Admin2FABanner />
           <Skeleton className="h-12 w-64" />
           <Skeleton className="h-96" />
         </div>
-      </AdminLayout>
+      </>
     );
   }
 
   return (
-    <AdminLayout>
+    <>
       <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
         {/* Header avec animation - Style Inventory */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700">
@@ -1122,7 +1121,7 @@ const AdminUsers = () => {
           </AlertDialogContent>
         </AlertDialog>
       </div>
-    </AdminLayout>
+    </>
   );
 };
 

@@ -4,7 +4,6 @@
  */
 
 import { useState, useCallback, useEffect } from 'react';
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -287,7 +286,7 @@ export default function AdminTransactionReconciliation() {
   }, [isLoading, totalCount, activeTab]);
 
   return (
-    <AdminLayout>
+    <>
       <div className="container mx-auto p-6 space-y-6">
         {/* Header */}
         <div
@@ -849,6 +848,6 @@ export default function AdminTransactionReconciliation() {
           </>
         )}
       </div>
-    </AdminLayout>
+    </>
   );
 }

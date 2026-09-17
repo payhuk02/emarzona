@@ -6,6 +6,7 @@ import React from 'react';
 import { RefreshCw, Home, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { softNavigateTo } from '@/lib/navigation/soft-navigate';
 
 // Icône d'alerte simple en SVG pour éviter les problèmes de lazy loading
 const AlertIcon = ({ className }: { className?: string }) => (
@@ -64,11 +65,7 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({ error, resetError,
               <RefreshCw className="w-4 h-4 mr-2" />
               Réessayer
             </Button>
-            <Button
-              onClick={() => (window.location.href = '/')}
-              className="flex-1"
-              variant="outline"
-            >
+            <Button onClick={() => softNavigateTo('/')} className="flex-1" variant="outline">
               <Home className="w-4 h-4 mr-2" />
               Retour à l'accueil
             </Button>
@@ -200,7 +197,7 @@ export const NotFoundFallback: React.FC = () => {
             <ArrowLeft className="w-4 h-4 mr-2" />
             Retour
           </Button>
-          <Button onClick={() => (window.location.href = '/')} className="flex-1">
+          <Button onClick={() => softNavigateTo('/')} className="flex-1">
             <Home className="w-4 h-4 mr-2" />
             Accueil
           </Button>
