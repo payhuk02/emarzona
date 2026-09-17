@@ -45,6 +45,8 @@ export type FeaturePageConfig = {
   /** Default hero image. Overridable from admin. */
   heroImage: string;
   ctaHref: string;
+  /** Lien du bouton « Voir les tarifs » (défaut : /#tarifs). */
+  pricingHref?: string;
   statsItems: { value: string; label: string }[];
   featureBlocks: {
     icon: LucideIcon;
@@ -368,6 +370,7 @@ export const FEATURES_PAGES: Record<string, FeaturePageConfig> = {
     heroIcon: Megaphone,
     heroImage: '/images/hero/hero-boost.png',
     ctaHref: '/dashboard/sponsorships',
+    pricingHref: '/pricing/boost',
     statsItems: [
       { value: '×3', label: 'visibilité marketplace' },
       { value: '7j', label: 'campagnes flexibles' },

@@ -93,6 +93,7 @@ const PersonalizedRecommendationsPage = lazyPage(() =>
 const PlatformMarketingPage = lazyPage(() => import('@/pages/platform/PlatformMarketingPage'));
 const PlatformFaqPage = lazyPage(() => import('@/pages/platform/PlatformFaqPage'));
 const PricingRedirectPage = lazyPage(() => import('@/pages/PricingRedirectPage'));
+const BoostPricingPage = lazyPage(() => import('@/pages/pricing/BoostPricingPage'));
 const PlatformBlogPage = lazyPage(() => import('@/pages/platform/PlatformBlogPage'));
 const PlatformBlogArticlePage = lazyPage(() => import('@/pages/platform/PlatformBlogArticlePage'));
 
@@ -296,6 +297,7 @@ export const publicRoutes = (
     <Route path="/faq" element={<PlatformFaqPage />} />
     <Route path="/faqs" element={<Navigate to="/faq" replace />} />
     <Route path="/integrations" element={<PlatformMarketingPage />} />
+    <Route path="/pricing/boost" element={<BoostPricingPage />} />
     <Route path="/pricing" element={<PricingRedirectPage />} />
 
     {/* Légal */}

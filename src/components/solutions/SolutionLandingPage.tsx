@@ -47,17 +47,28 @@ export default function SolutionLandingPage({ config, defaultHeroSrc }: Props) {
         />
 
         <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-28">
-          {/* Breadcrumb */}
-          <nav className="mb-8 flex items-center gap-2 text-sm text-white/40">
-            <Link to="/" className="hover:text-white/70 transition-colors">
+          {/* Breadcrumb — items-center + leading-none pour alignement vertical stable */}
+          <nav
+            className="mb-8 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm leading-none text-white/40"
+            aria-label="Fil d'Ariane"
+          >
+            <Link
+              to="/"
+              className="inline-flex items-center leading-none hover:text-white/70 transition-colors"
+            >
               Accueil
             </Link>
-            <ChevronRight className="h-3.5 w-3.5" />
-            <Link to="/#solutions" className="hover:text-white/70 transition-colors">
+            <ChevronRight className="h-3.5 w-3.5 shrink-0 opacity-60" aria-hidden />
+            <Link
+              to="/#solutions"
+              className="inline-flex items-center leading-none hover:text-white/70 transition-colors"
+            >
               Solutions
             </Link>
-            <ChevronRight className="h-3.5 w-3.5" />
-            <span className="text-white/60">{config.heroTag}</span>
+            <ChevronRight className="h-3.5 w-3.5 shrink-0 opacity-60" aria-hidden />
+            <span className="inline-flex items-center leading-none text-white/60">
+              {config.heroTag}
+            </span>
           </nav>
 
           <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-16">
