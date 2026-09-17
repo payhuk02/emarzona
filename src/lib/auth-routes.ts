@@ -1,4 +1,5 @@
 import { detectSubdomain } from '@/lib/subdomain-detector';
+import { softNavigateTo } from '@/lib/navigation/soft-navigate';
 
 /** Chemins publics d'authentification (connexion / inscription séparés). */
 export const AUTH_LOGIN_PATH = '/login' as const;
@@ -87,7 +88,7 @@ export function redirectToPlatformLogin(navigate?: (path: string) => void): void
     navigate(AUTH_LOGIN_PATH);
     return;
   }
-  window.location.assign(getPlatformLoginUrl());
+  softNavigateTo(AUTH_LOGIN_PATH);
 }
 
 export function redirectToPlatformRegister(navigate?: (path: string) => void): void {
@@ -99,5 +100,5 @@ export function redirectToPlatformRegister(navigate?: (path: string) => void): v
     navigate(AUTH_REGISTER_PATH);
     return;
   }
-  window.location.assign(getPlatformRegisterUrl());
+  softNavigateTo(AUTH_REGISTER_PATH);
 }

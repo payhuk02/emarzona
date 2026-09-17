@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
+import { Link } from 'react-router-dom';
 
 const SEOAnalyzer = () => {
   const { toast } = useToast();
@@ -58,11 +59,11 @@ const SEOAnalyzer = () => {
           </div>
           <div className="flex items-center gap-2">
             <Button asChild variant="outline" className="gap-2 h-9 sm:h-10">
-              <a href="/dashboard/seo/inspector">
+              <Link to="/dashboard/seo/inspector">
                 <Search className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 <span className="hidden sm:inline text-xs sm:text-sm">Inspecter les balises</span>
                 <span className="sm:hidden text-xs">Inspecter</span>
-              </a>
+              </Link>
             </Button>
             <Button
               onClick={handleRefresh}

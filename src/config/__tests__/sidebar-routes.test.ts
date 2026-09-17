@@ -1,46 +1,11 @@
-import fs from 'fs';
-import path from 'path';
 import { describe, expect, it } from 'vitest';
 import { enrichNavSections, filterNavSections } from '@/config/navigation.enrich';
 import { adminMenuSections, userMenuSections } from '@/config/navigation.menus';
-
-const ROUTE_FILES = [
-  'src/routes/dashboardRoutes.tsx',
-  'src/routes/customerRoutes.tsx',
-  'src/routes/adminRoutes.tsx',
-  'src/routes/publicRoutes.tsx',
-  'src/routes/storeSubdomainRoutes.tsx',
-];
-
-function loadRegisteredRoutePatterns(): string[] {
-  const content = ROUTE_FILES.map(f => fs.readFileSync(path.join(process.cwd(), f), 'utf8')).join(
-    '\n'
-  );
-  const patterns: string[] = [];
-  for (const re of [
-    // Aligné sur platform-routes-audit : adminRoutes utilise page('/admin/...')
-    /\b(?:pr(?:Auth)?|page|protectedRoute|accountPage)\(\s*['`]([^'`]+)['`]/g,
-    /path=["']([^"']+)["']/g,
-  ]) {
-    let match: RegExpExecArray | null;
-    while ((match = re.exec(content))) {
-      patterns.push(match[1]);
-    }
-  }
-  return [...new Set(patterns)];
-}
-
-function routeExists(url: string, patterns: string[]): boolean {
-  const itemPath = url.split('?')[0];
-  for (const pattern of patterns) {
-    if (pattern === itemPath) return true;
-    // Skip empty or invalid patterns
-    if (!pattern || pattern === '*' || pattern === '') continue;
-    const regex = new RegExp(`^${pattern.replace(/:[^/]+/g, '[^/]+')}$`);
-    if (regex.test(itemPath)) return true;
-  }
-  return false;
-}
+import {
+  auditNavUrlsAgainstRoutes,
+  loadAllPlatformRoutePaths,
+  navUrlMatchesRegistered,
+} from '@/lib/routes/platform-routes-audit';
 
 function collectSidebarUrls(): { title: string; url: string; scope: string }[] {
   const entries: { title: string; url: string; scope: string }[] = [];
@@ -58,16 +23,20 @@ function collectSidebarUrls(): { title: string; url: string; scope: string }[] {
 }
 
 describe('sidebar navigation routes', () => {
-  const patterns = loadRegisteredRoutePatterns();
+  const registered = Object.values(loadAllPlatformRoutePaths()).flat();
   const sidebarUrls = collectSidebarUrls();
 
   it('registers route patterns from route modules', () => {
-    expect(patterns.length).toBeGreaterThan(50);
+    expect(registered.length).toBeGreaterThan(50);
   });
 
   it('resolves every sidebar URL to a registered route', () => {
-    const missing = sidebarUrls.filter(entry => !routeExists(entry.url, patterns));
+    const missing = sidebarUrls.filter(entry => !navUrlMatchesRegistered(entry.url, registered));
     expect(missing, missing.map(m => `${m.scope} → ${m.url} (${m.title})`).join('\n')).toEqual([]);
+  });
+
+  it('resolves all platform nav path literals to registered routes', () => {
+    expect(auditNavUrlsAgainstRoutes(registered)).toEqual([]);
   });
 
   it('keeps seller primary navigation within compact target', () => {

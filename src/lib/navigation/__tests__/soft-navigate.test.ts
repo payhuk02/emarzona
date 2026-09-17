@@ -1,11 +1,17 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
-import { softNavigate, isAbsoluteHttpUrl } from '@/lib/navigation/soft-navigate';
+import {
+  softNavigate,
+  softNavigateTo,
+  registerSoftNavigate,
+  isAbsoluteHttpUrl,
+} from '@/lib/navigation/soft-navigate';
 
 describe('softNavigate', () => {
   const navigate = vi.fn();
 
   beforeEach(() => {
     navigate.mockClear();
+    registerSoftNavigate(null);
     vi.stubGlobal('location', {
       ...window.location,
       origin: 'https://www.emarzona.com',
@@ -14,6 +20,7 @@ describe('softNavigate', () => {
   });
 
   afterEach(() => {
+    registerSoftNavigate(null);
     vi.unstubAllGlobals();
   });
 
@@ -39,11 +46,62 @@ describe('softNavigate', () => {
     expect(navigate).not.toHaveBeenCalled();
   });
 
-  it('softNavigateTo utilise le navigate enregistré', async () => {
-    const { registerSoftNavigate, softNavigateTo } = await import('@/lib/navigation/soft-navigate');
+  it('softNavigateTo utilise le navigate enregistré', () => {
     registerSoftNavigate(navigate);
     softNavigateTo('/account/orders');
     expect(navigate).toHaveBeenCalledWith('/account/orders');
+  });
+
+  it('softNavigateTo sans registrant hard-assigne un chemin relatif', () => {
+    softNavigateTo('/login');
+    expect(window.location.assign).toHaveBeenCalledWith('/login');
+    expect(navigate).not.toHaveBeenCalled();
+  });
+
+  it('registerSoftNavigate(null) désenregistre', () => {
+    registerSoftNavigate(navigate);
     registerSoftNavigate(null);
+    softNavigateTo('/dashboard');
+    expect(navigate).not.toHaveBeenCalled();
+    expect(window.location.assign).toHaveBeenCalledWith('/dashboard');
+  });
+});
+
+describe('redirectToPlatformLogin on-platform', () => {
+  const navigate = vi.fn();
+
+  beforeEach(() => {
+    navigate.mockClear();
+    registerSoftNavigate(null);
+    vi.resetModules();
+  });
+
+  afterEach(() => {
+    registerSoftNavigate(null);
+    vi.doUnmock('@/lib/subdomain-detector');
+    vi.unstubAllGlobals();
+  });
+
+  it('utilise softNavigateTo quand navigate est absent sur plateforme', async () => {
+    vi.doMock('@/lib/subdomain-detector', () => ({
+      detectSubdomain: () => ({ isPlatformDomain: true }),
+    }));
+    vi.stubGlobal('location', {
+      origin: 'https://www.emarzona.com',
+      assign: vi.fn(),
+    });
+
+    const { registerSoftNavigate: reg, softNavigateTo: softTo } =
+      await import('@/lib/navigation/soft-navigate');
+    const { redirectToPlatformLogin } = await import('@/lib/auth-routes');
+
+    reg(navigate);
+    redirectToPlatformLogin();
+    expect(navigate).toHaveBeenCalledWith('/login');
+    expect(window.location.assign).not.toHaveBeenCalled();
+
+    // also covers softTo path when used directly
+    softTo('/register');
+    expect(navigate).toHaveBeenCalledWith('/register');
   });
 });

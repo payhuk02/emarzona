@@ -353,7 +353,6 @@ export const dashboardRoutes = (
     {pr('/dashboard/physical-analytics', SellerPhysicalProductsAnalytics)}
     {pr('/dashboard/physical-lots', PhysicalProductsLotsManagement)}
     {pr('/dashboard/physical-lots/:productId', PhysicalProductsLotsManagement)}
-    {pr('/dashboard/physical-lots-old', PhysicalProductsLotsManagement)}
     {pr('/dashboard/physical-serial-tracking', SellerPhysicalSerialTracking)}
     {pr('/dashboard/suppliers', SuppliersManagement)}
     {pr('/dashboard/demand-forecasting', DemandForecasting)}
@@ -462,6 +461,14 @@ export const dashboardRoutes = (
 /** Redirects auth-only (hors shell persistant). */
 export const dashboardRedirectRoutes = (
   <>
+    <Route
+      path="/dashboard/physical-lots-old"
+      element={
+        <ProtectedRoute>
+          <Navigate to="/dashboard/physical-lots" replace />
+        </ProtectedRoute>
+      }
+    />
     <Route
       path="/dashboard/advanced-orders-test"
       element={

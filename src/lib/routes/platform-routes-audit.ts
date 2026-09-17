@@ -14,6 +14,8 @@ import {
 } from '@/lib/commerce/store-capability-map';
 import { isPhysicalOnlySellerPath } from '@/lib/billing/store-commerce-access';
 import { getVendorIdleRoutes } from '@/lib/route-prefetch-config';
+import { BUYER_DISCOVERY_PATHS } from '@/config/navigation.persona';
+import { BUYER_PRIMARY_PATHS, SELLER_PRIMARY_PATHS } from '@/config/navigation.enrich';
 
 const REPO_ROOT = join(import.meta.dirname, '../../..');
 
@@ -234,15 +236,14 @@ export const SELLER_PREFIX_INCONSISTENCIES: readonly {
   { path: '/inventory', suggestedPrefix: '/dashboard/inventory', status: 'redirect' },
 ];
 
-/** Patterns d'extraction — pr / prAuth / page, accountPage (customer), protectedRoute, Route path=. */
+/** Patterns d'extraction — pr / prAuth / page, accountPage (customer), Route path=. */
 export const ROUTE_PATH_EXTRACTION_PATTERNS: readonly RegExp[] = [
   /\b(?:pr(?:Auth)?|page)\(\s*['"]([^'"]+)['"]/g,
   /\baccountPage\(\s*['"]([^'"]+)['"]/g,
-  /\bprotectedRoute\(\s*['"]([^'"]+)['"]/g,
   /<Route\s+path=["']([^"']+)["']/g,
 ];
 
-/** Fichiers nav — chaque `url:` doit matcher une route enregistrée. */
+/** Fichiers nav — chaque url/rootPath/path littéral doit matcher une route enregistrée. */
 export const PLATFORM_NAV_SOURCE_FILES = [
   'src/config/navigation.menus.tsx',
   'src/config/navigation.create.ts',
@@ -251,10 +252,15 @@ export const PLATFORM_NAV_SOURCE_FILES = [
   'src/config/navigation.context.phase6.ts',
   'src/config/navigation.context.settings.ts',
   'src/config/navigation.progressive.ts',
+  'src/lib/admin/admin-nav.ts',
+  'src/lib/admin/admin-advanced-tools.ts',
+  'src/config/navigation.enrich.ts',
+  'src/config/navigation.persona.ts',
 ] as const;
 
 const LAZY_IMPORT_RE = /import\(\s*['"](@\/[^'"]+)['"]\s*\)/g;
-const NAV_URL_RE = /\burl:\s*['"]([^'"]+)['"]/g;
+/** Propriétés nav typées (évite `path: string` dans les interfaces). */
+const NAV_PROP_PATH_RE = /\b(?:url|rootPath|path):\s*['"](\/[^'"]*)['"]/g;
 
 function resolveSrcModule(spec: string): string | null {
   const rel = spec.replace(/^@\//, 'src/').replace(/\/$/, '');
@@ -300,12 +306,16 @@ export function collectPlatformNavUrls(
   const urls = new Set<string>();
   for (const file of navFiles) {
     const src = readFileSync(join(REPO_ROOT, file), 'utf8');
-    const re = new RegExp(NAV_URL_RE.source, NAV_URL_RE.flags);
+    const re = new RegExp(NAV_PROP_PATH_RE.source, NAV_PROP_PATH_RE.flags);
     let match: RegExpExecArray | null;
     while ((match = re.exec(src)) !== null) {
       urls.add(match[1]);
     }
   }
+  // Sets enrich / persona (pas des props url|path — destinations réelles)
+  for (const path of SELLER_PRIMARY_PATHS) urls.add(path);
+  for (const path of BUYER_PRIMARY_PATHS) urls.add(path);
+  for (const path of BUYER_DISCOVERY_PATHS) urls.add(path);
   return [...urls].sort();
 }
 
@@ -347,7 +357,7 @@ export const PLATFORM_ROUTE_MODULE_MIN_COUNTS: Record<(typeof ROUTE_FILES)[numbe
 };
 
 /** Legacy autorisés comme alias fonctionnel (pas redirect strict). */
-export const LEGACY_ALIAS_PATHS = new Set(['/dashboard/physical-lots-old']);
+export const LEGACY_ALIAS_PATHS = new Set<string>();
 
 function routeDeclarationRedirects(source: string, routePath: string): boolean {
   const idx =

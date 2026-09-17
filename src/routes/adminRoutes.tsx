@@ -1,6 +1,6 @@
 import React from 'react';
 import { lazyPage } from '@/routes/lazyPage';
-import { Route } from 'react-router-dom';
+import { Navigate, Route } from 'react-router-dom';
 import { AdminAppLayout } from '@/components/layout/AdminAppLayout';
 import { logger } from '@/lib/logger';
 
@@ -137,10 +137,16 @@ export const adminRoutes = (
     {page('/admin/sponsorships', AdminSponsorships)}
     {page('/admin/article-comments', AdminArticleComments)}
     {page('/admin/newsletter-subscribers', AdminNewsletterSubscribers)}
-    {page('/admin/geniuspay-analytics', GeniusPayAnalytics)}
     {page('/admin/payment-analytics', GeniusPayAnalytics)}
-    {page('/admin/geniuspay-reconciliation', GeniusPayReconciliation)}
+    <Route
+      path="/admin/geniuspay-analytics"
+      element={<Navigate to="/admin/payment-analytics" replace />}
+    />
     {page('/admin/payment-reconciliation', GeniusPayReconciliation)}
+    <Route
+      path="/admin/geniuspay-reconciliation"
+      element={<Navigate to="/admin/payment-reconciliation" replace />}
+    />
     {page('/admin/transaction-monitoring', TransactionMonitoring)}
     {page('/admin/notifications', AdminNotifications)}
     {page('/admin/revenue', PlatformRevenue)}

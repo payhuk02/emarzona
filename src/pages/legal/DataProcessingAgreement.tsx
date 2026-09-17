@@ -1,7 +1,7 @@
 /**
  * Epic 6.2 — Accord de traitement des données (DPA) B2B / Enterprise
  */
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SEOMeta } from '@/components/seo/SEOMeta';
@@ -35,13 +35,13 @@ export default function DataProcessingAgreementPage() {
           <div className="bg-white rounded-lg shadow-sm p-8 prose prose-blue max-w-none">
             <p>
               Le présent DPA complète les{' '}
-              <a href="/legal/terms" className="underline">
+              <Link to="/legal/terms" className="underline">
                 Conditions générales
-              </a>{' '}
+              </Link>{' '}
               et la{' '}
-              <a href="/legal/privacy" className="underline">
+              <Link to="/legal/privacy" className="underline">
                 Politique de confidentialité
-              </a>{' '}
+              </Link>{' '}
               pour les vendeurs utilisant Emarzona en qualité de responsable de traitement.
             </p>
             <h2>1. Objet</h2>
@@ -70,9 +70,9 @@ export default function DataProcessingAgreementPage() {
             <h2>5. Droits des personnes</h2>
             <p>
               Les acheteurs peuvent exercer leurs droits via votre boutique ou{' '}
-              <a href="/account/profile" className="underline">
+              <Link to="/account/profile" className="underline">
                 leur espace client
-              </a>
+              </Link>
               . Les vendeurs peuvent demander la suppression de leur compte depuis les paramètres de
               sécurité.
             </p>
