@@ -8,7 +8,7 @@ describe('marketing hero image catalog', () => {
   it('exposes unique slugs with solutions/features prefix', () => {
     const slugs = MARKETING_HERO_PAGES.map(p => p.slug);
     expect(new Set(slugs).size).toBe(slugs.length);
-    expect(slugs).toHaveLength(14);
+    expect(slugs).toHaveLength(15);
     for (const slug of slugs) {
       expect(slug).toMatch(/^(solutions|features)\.[a-z0-9-]+$/);
     }
@@ -43,6 +43,21 @@ describe('marketing hero image catalog', () => {
         href
       ).toBe(true);
     }
+  });
+
+  it('includes Boost Emarzona for admin hero sync (features.boost)', () => {
+    const boost = MARKETING_HERO_PAGES.find(p => p.slug === 'features.boost');
+    expect(boost).toEqual(
+      expect.objectContaining({
+        slug: 'features.boost',
+        group: 'features',
+        pageSlug: 'boost',
+        label: 'Boost Emarzona',
+        route: '/features/boost',
+        defaultUrl: '/images/hero/hero-boost.png',
+      })
+    );
+    expect(marketingHeroSlug('features', 'boost')).toBe('features.boost');
   });
 
   it('builds stable composite slugs', () => {

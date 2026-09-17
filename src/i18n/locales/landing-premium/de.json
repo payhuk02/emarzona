@@ -82,6 +82,10 @@
             "title": "Affiliate",
             "desc": "Getrackte Links für Promoter"
           },
+          "boost": {
+            "title": "Boost Emarzona",
+            "desc": "Produkt-Sponsoring auf dem Marktplatz"
+          },
           "marketplace": {
             "title": "Marktplatz",
             "desc": "Sichtbarkeit im Emarzona-Katalog"

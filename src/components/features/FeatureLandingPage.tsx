@@ -1,6 +1,6 @@
 /**
- * Template marketing réutilisable pour les 8 pages Fonctionnalités.
- * Inspiré des landing pages Stripe / Vercel / HubSpot.
+ * Template marketing réutilisable pour les pages Fonctionnalités.
+ * Hero sync admin : usePlatformHeroImage(marketingHeroSlug('features', slug)).
  */
 import { Link } from 'react-router-dom';
 import { ArrowRight, ChevronRight } from 'lucide-react';

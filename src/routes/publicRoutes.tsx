@@ -134,6 +134,7 @@ const CheckoutFeaturePage = lazyPage(() => import('@/pages/features/CheckoutFeat
 const WhatsappFeaturePage = lazyPage(() => import('@/pages/features/WhatsappFeaturePage'));
 const ReferralFeaturePage = lazyPage(() => import('@/pages/features/ReferralFeaturePage'));
 const AffiliateFeaturePage = lazyPage(() => import('@/pages/features/AffiliateFeaturePage'));
+const BoostFeaturePage = lazyPage(() => import('@/pages/features/BoostFeaturePage'));
 const EmailFeaturePage = lazyPage(() => import('@/pages/features/EmailFeaturePage'));
 const AnalyticsFeaturePage = lazyPage(() => import('@/pages/features/AnalyticsFeaturePage'));
 const MultiStoreFeaturePage = lazyPage(() => import('@/pages/features/MultiStoreFeaturePage'));
@@ -354,6 +355,7 @@ export const publicRoutes = (
     <Route path="/features/whatsapp" element={<WhatsappFeaturePage />} />
     <Route path="/features/referral" element={<ReferralFeaturePage />} />
     <Route path="/features/affiliate" element={<AffiliateFeaturePage />} />
+    <Route path="/features/boost" element={<BoostFeaturePage />} />
     <Route path="/features/email" element={<EmailFeaturePage />} />
     <Route path="/features/analytics" element={<AnalyticsFeaturePage />} />
     <Route path="/features/multi-store" element={<MultiStoreFeaturePage />} />

@@ -29,6 +29,7 @@ import {
   Users,
   UsersRound,
   Wallet,
+  Megaphone,
 } from 'lucide-react';
 
 export type LandingPremiumHrefKind = 'route' | 'hash';
@@ -145,6 +146,7 @@ const featuresMenu: LandingPremiumMegaMenu = {
       items: [
         { key: 'referral', href: '/features/referral', kind: 'route', icon: Users },
         { key: 'affiliate', href: '/features/affiliate', kind: 'route', icon: Link2 },
+        { key: 'boost', href: '/features/boost', kind: 'route', icon: Megaphone },
         { key: 'marketplace', href: '/marketplace', kind: 'route', icon: ShoppingBag },
         { key: 'email', href: '/features/email', kind: 'route', icon: Mail },
       ],

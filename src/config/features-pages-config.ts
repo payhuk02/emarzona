@@ -1,5 +1,5 @@
 /**
- * Configuration IA des 8 pages Fonctionnalites.
+ * Configuration IA des pages Fonctionnalites.
  */
 import type { LucideIcon } from 'lucide-react';
 import {
@@ -29,6 +29,8 @@ import {
   Search,
   Settings,
   Package,
+  Megaphone,
+  Sparkles,
 } from 'lucide-react';
 
 export type FeaturePageConfig = {
@@ -352,6 +354,66 @@ export const FEATURES_PAGES: Record<string, FeaturePageConfig> = {
     seoTitle: "Programme d'affiliation e-commerce | Emarzona",
     seoDescription:
       "Lancez votre programme d'affiliation avec Emarzona : commissions, portail affilié, tracking conversions et paiements automatiques.",
+  },
+
+  boost: {
+    slug: 'boost',
+    route: '/features/boost',
+    accentColor: '#f97316',
+    heroTag: 'Boost Emarzona',
+    heroTitle: 'Mettez vos produits',
+    heroTitleHighlight: 'sous les projecteurs.',
+    heroSubtitle:
+      'Boost Emarzona sponsorise vos produits sur la marketplace : plus de visibilité, plus de clics, plus de ventes — campagnes payantes ou inclus dans votre plan, avec suivi en temps réel.',
+    heroIcon: Megaphone,
+    heroImage: '/images/hero/hero-boost.png',
+    ctaHref: '/dashboard/sponsorships',
+    statsItems: [
+      { value: '×3', label: 'visibilité marketplace' },
+      { value: '7j', label: 'campagnes flexibles' },
+      { value: 'Live', label: 'suivi des performances' },
+    ],
+    featureBlocks: [
+      {
+        icon: Megaphone,
+        title: 'Sponsorship marketplace',
+        description:
+          'Placez vos produits en avant sur le catalogue Emarzona et attirez des acheteurs déjà en intention d’achat.',
+      },
+      {
+        icon: Sparkles,
+        title: 'Campagnes Boost',
+        description:
+          'Choisissez un produit, une durée (ex. 7 jours) et lancez une campagne — payante ou via le quota de votre plan.',
+      },
+      {
+        icon: TrendingUp,
+        title: 'Plus de portée, plus de ventes',
+        description:
+          'Vos offres apparaissent dans les emplacements sponsorisés : découverte accélérée et conversion marketplace.',
+      },
+      {
+        icon: BarChart3,
+        title: 'Analytics Boost',
+        description:
+          'Mesurez impressions, clics et résultats de vos campagnes depuis le dashboard vendeur.',
+      },
+      {
+        icon: Package,
+        title: 'Sélection produit ciblée',
+        description:
+          'Boostez exactement les références que vous voulez pousser — nouveautés, stocks ou best-sellers.',
+      },
+      {
+        icon: Zap,
+        title: 'Activation rapide',
+        description:
+          'Créez et pilotez vos boosts depuis /dashboard/sponsorships, sans outil externe ni configuration complexe.',
+      },
+    ],
+    seoTitle: 'Boost Emarzona | Sponsoring marketplace',
+    seoDescription:
+      'Boostez la visibilité de vos produits sur la marketplace Emarzona : campagnes de sponsoring, analytics et activation depuis le dashboard vendeur.',
   },
 
   email: {

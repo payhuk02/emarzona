@@ -82,6 +82,10 @@
             "title": "Afiliación",
             "desc": "Enlaces con seguimiento para promotores"
           },
+          "boost": {
+            "title": "Boost Emarzona",
+            "desc": "Patrocinio de productos en el marketplace"
+          },
           "marketplace": {
             "title": "Marketplace",
             "desc": "Visibilidad en el catálogo Emarzona"

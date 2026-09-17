@@ -77,8 +77,14 @@ describe('landing premium nav IA', () => {
     expect(LANDING_PREMIUM_MEGA_MENUS.solutions.featured?.key).toBe('protect');
     expect(LANDING_PREMIUM_MEGA_MENUS.solutions.featured?.href).toBe('/solutions/protect');
     expect(featureKeys).toContain('mobileMoney');
+    expect(featureKeys).toContain('boost');
     expect(featureKeys).not.toContain('geniusPay');
     expect(listLandingPremiumMegaLinks().some(link => link.key === 'mobileMoney')).toBe(true);
+    expect(
+      LANDING_PREMIUM_MEGA_MENUS.features.columns
+        .find(col => col.key === 'grow')
+        ?.items.some(item => item.key === 'boost' && item.href === '/features/boost')
+    ).toBe(true);
   });
 });
 
@@ -88,9 +94,23 @@ describe('landing premium nav copy', () => {
       const mega = (messages as { nav?: { mega?: unknown } }).nav?.mega;
       expect(mega, locale).toBeTruthy();
       const title = (
-        messages as { nav: { mega: { features: { items: { mobileMoney: { title: string } } } } } }
+        messages as {
+          nav: {
+            mega: {
+              features: { items: { mobileMoney: { title: string }; boost: { title: string } } };
+            };
+          };
+        }
       ).nav.mega.features.items.mobileMoney.title;
       expect(title.toLowerCase(), locale).toMatch(/mobile[\s-]?money/);
+      expect(
+        (
+          messages as {
+            nav: { mega: { features: { items: { boost: { title: string } } } } };
+          }
+        ).nav.mega.features.items.boost.title,
+        locale
+      ).toMatch(/Boost Emarzona/i);
     }
   });
 
