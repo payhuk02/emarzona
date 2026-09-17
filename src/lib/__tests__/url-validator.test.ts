@@ -12,10 +12,18 @@ import {
   getAllowedDomains,
 } from '../url-validator';
 
-type LocationMock = { href: string };
+type LocationMock = {
+  href: string;
+  assign: ReturnType<typeof vi.fn>;
+};
 
 function mockLocation(href = ''): LocationMock {
-  const loc: LocationMock = { href };
+  const loc: LocationMock = {
+    href,
+    assign: vi.fn((url: string) => {
+      loc.href = url;
+    }),
+  };
   Object.defineProperty(window, 'location', {
     configurable: true,
     writable: true,
@@ -104,7 +112,7 @@ describe('url-validator', () => {
 
       safeRedirect('https://geniuspay.io/checkout/123');
 
-      expect(loc.href).toBe('https://geniuspay.io/checkout/123');
+      expect(loc.assign).toHaveBeenCalledWith('https://geniuspay.io/checkout/123');
     });
 
     it('devrait appeler onError pour une URL invalide', () => {
@@ -122,7 +130,7 @@ describe('url-validator', () => {
 
       safeRedirect('https://evil.com/steal');
 
-      expect(loc.href).toBe('/dashboard');
+      expect(loc.assign).toHaveBeenCalledWith('/dashboard');
     });
   });
 

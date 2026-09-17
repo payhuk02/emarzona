@@ -30,6 +30,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { generateProductUrl } from '@/lib/store-utils';
+import { softNavigate } from '@/lib/navigation/soft-navigate';
 import { buildServicePublicPath } from '@/lib/service/resolve-service-product-route';
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useMarketplaceFavorites } from '@/hooks/useMarketplaceFavorites';
@@ -651,10 +652,10 @@ export default function CustomerMyWishlist() {
         return;
       }
 
-      // Navigation selon le type de produit
+      // Navigation selon le type de produit (SPA same-origin via softNavigate)
       switch (productType) {
         case 'digital':
-          window.location.href = generateProductUrl(storeSlug, product.slug);
+          softNavigate(navigate, generateProductUrl(storeSlug, product.slug));
           break;
         case 'physical':
           navigate(`/physical/${product.id}`);
@@ -671,7 +672,7 @@ export default function CustomerMyWishlist() {
           navigate(`/artist/${product.id}`);
           break;
         default:
-          window.location.href = generateProductUrl(storeSlug, product.slug);
+          softNavigate(navigate, generateProductUrl(storeSlug, product.slug));
       }
       logger.info('Navigation vers produit depuis wishlist', {
         productId: product.id,

@@ -423,7 +423,7 @@ const AdminDisputes = () => {
                     Pour créer la table &apos;disputes&apos;, exécutez la migration SQL sur
                     Supabase.
                   </p>
-                  <Button onClick={() => window.location.reload()} className="w-full">
+                  <Button onClick={() => void fetchDisputes()} className="w-full">
                     Rafraîchir la page après migration
                   </Button>
                 </div>
@@ -431,7 +431,7 @@ const AdminDisputes = () => {
             )}
             {!showMigrationHelp && (
               <CardContent>
-                <Button onClick={() => window.location.reload()} className="w-full">
+                <Button onClick={() => void fetchDisputes()} className="w-full">
                   Réessayer
                 </Button>
               </CardContent>

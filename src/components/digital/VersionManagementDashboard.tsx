@@ -98,7 +98,7 @@ export function VersionManagementDashboard({
   onCreateVersion,
   onEditVersion,
 }: VersionManagementDashboardProps) {
-  const { data: versions, isLoading } = useProductVersions(productId);
+  const { data: versions, isLoading, refetch: refetchVersions } = useProductVersions(productId);
   const { mutate: deleteVersion } = useDeleteVersion();
   const { mutate: notifyCustomers } = useNotifyCustomers();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -216,8 +216,7 @@ export function VersionManagementDashboard({
                 digitalProductId={digitalProductId}
                 productId={productId}
                 onSuccess={() => {
-                  // Refresh versions list
-                  window.location.reload();
+                  void refetchVersions();
                 }}
               />
             )}

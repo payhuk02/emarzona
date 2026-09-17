@@ -164,7 +164,7 @@ export const DashboardErrorHandler = ({
             },
             {
               label: 'Vérifier la connexion',
-              onClick: () => window.location.reload(),
+              onClick: handleRetry,
               variant: 'ghost' as const,
               icon: <Wifi className="h-4 w-4" />,
             },
@@ -187,8 +187,8 @@ export const DashboardErrorHandler = ({
               disabled: isRetrying,
             },
             {
-              label: 'Actualiser la page',
-              onClick: () => window.location.reload(),
+              label: 'Actualiser',
+              onClick: handleRetry,
               variant: 'ghost' as const,
             },
           ],

@@ -58,6 +58,7 @@ const AIProductRecommendations: React.FC<AIProductRecommendationsProps> = ({
     data: recommendations,
     isLoading,
     error,
+    refetch: refetchRecommendations,
   } = useAIRecommendations({
     userId,
     productId: currentProductId,
@@ -234,7 +235,9 @@ const AIProductRecommendations: React.FC<AIProductRecommendationsProps> = ({
                 variant="outline"
                 size="sm"
                 className="mt-4"
-                onClick={() => window.location.reload()}
+                onClick={() => {
+                  void refetchRecommendations();
+                }}
               >
                 Réessayer
               </Button>

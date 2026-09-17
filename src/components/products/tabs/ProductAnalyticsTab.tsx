@@ -88,6 +88,7 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
     error: analyticsError,
     isRealTimeActive,
     setIsRealTimeActive,
+    loadAnalytics,
     updateAnalytics,
     changePercentages,
   } = useProductAnalytics(formData.id);
@@ -184,7 +185,9 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => window.location.reload()}
+                  onClick={() => {
+                    void loadAnalytics();
+                  }}
                   className="bg-gray-700/50 border-gray-600 text-white hover:bg-gray-700 hover:text-white min-h-[44px]"
                   aria-label="Rafraîchir les données"
                 >

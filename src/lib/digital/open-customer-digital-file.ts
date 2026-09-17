@@ -1,6 +1,7 @@
 import { redeemDownloadToken } from '@/lib/digital/redeem-download';
 import { buildDownloadRedeemPageUrl } from '@/lib/digital/drm-policy';
 import { parseFileRef } from '@/lib/digital/storage-ref';
+import { softNavigateTo } from '@/lib/navigation/soft-navigate';
 
 export type GeneratedDownloadLink = {
   url?: string | null;
@@ -44,7 +45,7 @@ export async function openCustomerDigitalFile(
   if (redeemPageUrl) {
     const opened = window.open(redeemPageUrl, '_blank', 'noopener,noreferrer');
     if (!opened) {
-      window.location.assign(redeemPageUrl);
+      softNavigateTo(redeemPageUrl);
     }
     return { mode: 'redeem-page' };
   }

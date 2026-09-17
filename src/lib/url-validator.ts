@@ -152,9 +152,9 @@ export function safeRedirect(url: string, onError?: (error: string) => void): vo
   const result = validateRedirectUrl(url);
 
   if (result.isValid) {
-    // URL valide, redirection sécurisée
+    // URL valide : SPA same-origin, hard assign sinon (paiement / sous-domaine)
     logger.info('✅ Redirection sécurisée vers:', { url });
-    window.location.href = url;
+    softNavigateTo(url);
   } else {
     // URL invalide, bloquer et notifier
     logger.error('🚨 SECURITY: Redirection bloquée vers URL non autorisée', {

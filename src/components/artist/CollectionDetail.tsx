@@ -25,6 +25,7 @@ import {
   buildTenantCollectionUrl,
   shouldRedirectCollectionToTenant,
 } from '@/lib/storefront/collection-tenant-redirect';
+import { softNavigateTo } from '@/lib/navigation/soft-navigate';
 
 const COLLECTION_PRODUCT_FIELDS =
   'id, store_id, name, slug, description, short_description, price, compare_at_price, currency, image_url, images, product_type, is_active, is_draft, created_at, updated_at';
@@ -58,7 +59,7 @@ export const CollectionDetail = () => {
       storeSlug: searchParams.get('store')!,
       collectionSlug: collectionSlug!,
     });
-    window.location.replace(target);
+    softNavigateTo(target);
   }, [searchParams, collectionSlug]);
 
   const {

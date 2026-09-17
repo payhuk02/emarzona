@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { getPlatformUrl } from '@/lib/auth-routes';
+import { softNavigateTo } from '@/lib/navigation/soft-navigate';
 
 /**
  * Sur *.myemarzona.shop, /vendor/messaging n'existe pas côté boutique :
@@ -10,7 +11,7 @@ export function RedirectToPlatformVendorMessaging() {
   const { pathname, search } = useLocation();
 
   useEffect(() => {
-    window.location.replace(getPlatformUrl(`${pathname}${search}`));
+    softNavigateTo(getPlatformUrl(`${pathname}${search}`));
   }, [pathname, search]);
 
   return (

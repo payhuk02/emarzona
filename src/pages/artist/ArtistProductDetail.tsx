@@ -65,6 +65,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { logger } from '@/lib/logger';
 import { useAnalyticsTracking } from '@/hooks/useProductAnalytics';
 import { useWishlistToggle } from '@/hooks/wishlist/useWishlistToggle';
+import { useCreateReview } from '@/hooks/useReviews';
 import { SEOMeta, ProductSchema } from '@/components/seo';
 // Lazy load ArtistCertificateDisplay (composant lourd, utilisé dans onglet)
 const ArtistCertificateDisplay = lazy(() =>
@@ -91,6 +92,7 @@ const ArtistProductDetail = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
+  const createReview = useCreateReview();
   const [quantity, setQuantity] = useState(1);
   const [isBuying, setIsBuying] = useState(false);
   const [showDedicationForm, setShowDedicationForm] = useState(false);
@@ -1069,9 +1071,9 @@ const ArtistProductDetail = () => {
                   <ReviewForm
                     productId={productId!}
                     productType="artist"
-                    onSubmit={() => {
-                      // Refresh reviews after submission
-                      window.location.reload();
+                    isLoading={createReview.isPending}
+                    onSubmit={data => {
+                      createReview.mutate(data);
                     }}
                   />
                 </Suspense>

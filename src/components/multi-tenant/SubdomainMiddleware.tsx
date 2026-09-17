@@ -15,6 +15,7 @@ import { logger } from '@/lib/logger';
 import { useStoreContext } from '@/contexts/StoreContext';
 import { StoreNotFound } from './StoreNotFound';
 import { StoreSubdomainRoutes } from '@/routes/storeSubdomainRoutes';
+import { softNavigateTo } from '@/lib/navigation/soft-navigate';
 import { Loader2 } from 'lucide-react';
 
 interface SubdomainMiddlewareProps {
@@ -60,7 +61,7 @@ export function SubdomainMiddleware({ children }: SubdomainMiddlewareProps) {
   // Rediriger l'apex myemarzona.shop vers emarzona.com
   useEffect(() => {
     if (subdomainInfo.isStoreDomain && !subdomainInfo.isSubdomain && !subdomainInfo.subdomain) {
-      window.location.replace('https://www.emarzona.com');
+      softNavigateTo('https://www.emarzona.com');
     }
   }, [subdomainInfo]);
 
@@ -72,7 +73,7 @@ export function SubdomainMiddleware({ children }: SubdomainMiddlewareProps) {
 
   useEffect(() => {
     if (isReservedSubdomain) {
-      window.location.replace('https://www.emarzona.com');
+      softNavigateTo('https://www.emarzona.com');
     }
   }, [isReservedSubdomain]);
 

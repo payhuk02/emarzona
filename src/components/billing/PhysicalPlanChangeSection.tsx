@@ -12,6 +12,7 @@ import {
   initiatePhysicalPlanChange,
   previewPhysicalPlanChange,
 } from '@/lib/billing/physical-plan-change';
+import { safeRedirect } from '@/lib/url-validator';
 import type { PhysicalPlanSlug } from '@/lib/billing/physical-plan-capabilities';
 import { ArrowUp, ArrowDown, Loader2 } from 'lucide-react';
 
@@ -120,7 +121,13 @@ export function PhysicalPlanChangeSection({
                       );
 
                       if (result.checkoutUrl) {
-                        window.location.href = result.checkoutUrl;
+                        safeRedirect(result.checkoutUrl, () => {
+                          toast({
+                            title: 'URL de paiement invalide',
+                            description: 'Impossible de rediriger vers le paiement.',
+                            variant: 'destructive',
+                          });
+                        });
                         return;
                       }
 

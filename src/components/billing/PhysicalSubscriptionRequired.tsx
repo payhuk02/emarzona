@@ -25,6 +25,7 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { initiateBillingCheckout } from '@/lib/billing/initiate-billing-payment';
+import { safeRedirect } from '@/lib/url-validator';
 
 type PhysicalSubscriptionRequiredProps = {
   storeId: string;
@@ -218,7 +219,13 @@ export function PhysicalSubscriptionRequired({
                       planSlug: plan.slug,
                     });
 
-                    window.location.href = checkoutUrl;
+                    safeRedirect(checkoutUrl, () => {
+                      toast({
+                        title: 'URL de paiement invalide',
+                        description: 'Impossible de rediriger vers le paiement.',
+                        variant: 'destructive',
+                      });
+                    });
                   } catch (e: unknown) {
                     toast({
                       title: 'Erreur checkout',

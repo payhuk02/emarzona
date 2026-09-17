@@ -72,13 +72,9 @@ export function CommercePageErrorBoundary({
   return (
     <ErrorBoundary
       resetKey={resetKey}
-      fallback={
-        <CommercePageFallback
-          pageName={pageName}
-          homeHref={homeHref}
-          onRetry={() => window.location.reload()}
-        />
-      }
+      fallback={({ reset }) => (
+        <CommercePageFallback pageName={pageName} homeHref={homeHref} onRetry={reset} />
+      )}
     >
       {children}
     </ErrorBoundary>

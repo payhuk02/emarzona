@@ -18,8 +18,9 @@ const PERM_GUARD_TIMEOUT_MS = 15_000;
 export function AdminRoutePermissionGuard({ children }: AdminRoutePermissionGuardProps) {
   const location = useLocation();
   const navigate = useNavigate();
-  const { can, isSuperAdmin, loading, platformRole, error } = useCurrentAdminPermissions();
+  const { can, isSuperAdmin, loading, platformRole, error, refresh } = useCurrentAdminPermissions();
   const [timedOut, setTimedOut] = useState(false);
+  const [retryNonce, setRetryNonce] = useState(0);
 
   const allowed = canAccessAdminPath(location.pathname, can, isSuperAdmin);
 
@@ -28,9 +29,10 @@ export function AdminRoutePermissionGuard({ children }: AdminRoutePermissionGuar
       setTimedOut(false);
       return;
     }
+    setTimedOut(false);
     const timer = window.setTimeout(() => setTimedOut(true), PERM_GUARD_TIMEOUT_MS);
     return () => window.clearTimeout(timer);
-  }, [loading]);
+  }, [loading, retryNonce]);
 
   useEffect(() => {
     if (loading) return;
@@ -52,7 +54,14 @@ export function AdminRoutePermissionGuard({ children }: AdminRoutePermissionGuar
               Le chargement des permissions prend trop de temps
               {error ? ` (${error})` : ''}.
             </p>
-            <Button type="button" variant="outline" onClick={() => window.location.reload()}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setRetryNonce(n => n + 1);
+                void refresh();
+              }}
+            >
               Réessayer
             </Button>
           </>

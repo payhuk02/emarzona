@@ -14,7 +14,7 @@ export const FeatureErrorBoundary = ({
 }: FeatureErrorBoundaryProps) => {
   return (
     <ErrorBoundary
-      fallback={
+      fallback={({ reset }) => (
         <div className="flex flex-col items-center justify-center p-6 bg-red-50 dark:bg-red-950/20 rounded-xl border border-red-200 dark:border-red-900/50">
           <AlertCircle className="w-8 h-8 text-red-500 mb-2" />
           <h3 className="font-medium text-red-700 dark:text-red-400 text-center">
@@ -28,12 +28,12 @@ export const FeatureErrorBoundary = ({
             variant="outline"
             size="sm"
             className="border-red-200 hover:bg-red-100 text-red-700 dark:border-red-800 dark:hover:bg-red-900 dark:text-red-300"
-            onClick={() => window.location.reload()}
+            onClick={reset}
           >
-            Recharger la page
+            Réessayer
           </Button>
         </div>
-      }
+      )}
     >
       {children}
     </ErrorBoundary>

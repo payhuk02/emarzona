@@ -5,7 +5,7 @@
  * Utilise react-three-fiber et drei pour afficher des modèles 3D
  */
 
-import { Suspense, useState, useEffect } from 'react';
+import { Suspense, useState, useEffect, useRef } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Html, useProgress } from '@react-three/drei';
 import { Card, CardContent } from '@/components/ui/card';
@@ -86,6 +86,7 @@ export const Artwork3DViewer = ({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showThumbnail, setShowThumbnail] = useState(true);
+  const controlsRef = useRef<{ reset: () => void } | null>(null);
 
   useEffect(() => {
     if (onView) {
@@ -105,8 +106,7 @@ export const Artwork3DViewer = ({
   };
 
   const handleResetCamera = () => {
-    // Réinitialiser la caméra (sera géré par OrbitControls)
-    window.location.reload(); // Solution simple, à améliorer
+    controlsRef.current?.reset();
   };
 
   if (error) {
@@ -165,6 +165,7 @@ export const Artwork3DViewer = ({
 
                 {showControls && (
                   <OrbitControls
+                    ref={controlsRef}
                     autoRotate={autoRotate}
                     autoRotateSpeed={1}
                     enableZoom={true}

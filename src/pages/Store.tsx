@@ -62,13 +62,12 @@ class StoreErrorBoundary extends Component<
             <Button
               onClick={() => {
                 this.setState({ hasError: false, error: null });
-                window.location.reload();
               }}
               variant="outline"
               className="gap-2"
             >
               <RefreshCw className="h-4 w-4" />
-              Recharger la page
+              Réessayer
             </Button>
           </CardContent>
         </Card>

@@ -6,6 +6,7 @@ import {
   getPlatformLoginUrl,
   getPlatformRegisterUrl,
 } from '@/lib/auth-routes';
+import { softNavigateTo } from '@/lib/navigation/soft-navigate';
 
 const REGISTER_PATHS = new Set([
   AUTH_REGISTER_PATH,
@@ -24,7 +25,7 @@ export function RedirectToPlatformAuth() {
 
   useEffect(() => {
     const target = REGISTER_PATHS.has(pathname) ? getPlatformRegisterUrl() : getPlatformLoginUrl();
-    window.location.replace(target);
+    softNavigateTo(target);
   }, [pathname]);
 
   return (

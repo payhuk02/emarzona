@@ -13,6 +13,7 @@ import {
 } from '@/lib/sponsorship/marketplace-sponsorship';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
+import { safeRedirect } from '@/lib/url-validator';
 
 const SKUS_KEY = ['marketplace-sponsorship-skus'] as const;
 
@@ -92,7 +93,13 @@ export function useCheckoutPaidSponsorship() {
     },
     onSuccess: checkoutUrl => {
       void qc.invalidateQueries({ queryKey: ['marketplace-sponsorships', selectedStore?.id] });
-      window.location.href = checkoutUrl;
+      safeRedirect(checkoutUrl, () => {
+        toast({
+          title: 'URL de paiement invalide',
+          description: 'Impossible de rediriger vers le paiement.',
+          variant: 'destructive',
+        });
+      });
     },
     onError: (error: Error) => {
       logger.error('checkoutPaidSponsorship failed', { error });

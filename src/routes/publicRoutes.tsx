@@ -3,6 +3,7 @@ import { lazyPage } from '@/routes/lazyPage';
 import { Route, Navigate } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
 import { generateStoreUrl, generateProductUrl } from '@/lib/store-utils';
+import { softNavigateTo } from '@/lib/navigation/soft-navigate';
 import { Loader2 } from 'lucide-react';
 import { CommercePageErrorBoundary } from '@/components/errors/CommercePageErrorBoundary';
 
@@ -145,7 +146,7 @@ const StoreRedirectToSubdomain = () => {
   const { slug } = useParams<{ slug: string }>();
   useEffect(() => {
     if (slug) {
-      window.location.href = generateStoreUrl(slug);
+      softNavigateTo(generateStoreUrl(slug));
     }
   }, [slug]);
   return (
@@ -163,7 +164,7 @@ const StoreProductRedirectToSubdomain = () => {
   const { slug, productSlug } = useParams<{ slug: string; productSlug: string }>();
   useEffect(() => {
     if (slug && productSlug) {
-      window.location.href = generateProductUrl(slug, productSlug);
+      softNavigateTo(generateProductUrl(slug, productSlug));
     }
   }, [slug, productSlug]);
   return (
@@ -182,7 +183,7 @@ const StoreLegalRedirectToSubdomain = () => {
   useEffect(() => {
     if (slug && page) {
       const storeUrl = generateStoreUrl(slug);
-      window.location.href = `${storeUrl}/legal/${page}`;
+      softNavigateTo(`${storeUrl}/legal/${page}`);
     }
   }, [slug, page]);
   return (
@@ -200,7 +201,7 @@ const OldProductRouteRedirect = () => {
   const { slug, productSlug } = useParams<{ slug: string; productSlug: string }>();
   useEffect(() => {
     if (slug && productSlug) {
-      window.location.href = generateProductUrl(slug, productSlug);
+      softNavigateTo(generateProductUrl(slug, productSlug));
     }
   }, [slug, productSlug]);
   return (

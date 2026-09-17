@@ -11,6 +11,7 @@ import { Loader2, AlertCircle } from '@/components/icons';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Card, CardContent } from '@/components/ui/card';
 import { logger } from '@/lib/logger';
+import { softNavigate } from '@/lib/navigation/soft-navigate';
 
 export const ShortLinkRedirect = () => {
   const { code } = useParams<{ code: string }>();
@@ -69,8 +70,8 @@ export const ShortLinkRedirect = () => {
           })
           .eq('id', matchingLink.id);
 
-        // Rediriger vers l'URL cible
-        window.location.href = matchingLink.target_url;
+        // Rediriger vers l'URL cible (SPA same-origin, hard sinon)
+        softNavigate(navigate, matchingLink.target_url);
       } catch (err: unknown) {
         logger.error('Error in short link redirect:', err);
         setError('Une erreur est survenue lors de la redirection');

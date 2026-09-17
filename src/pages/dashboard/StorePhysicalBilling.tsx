@@ -16,6 +16,7 @@ import { useStorePhysicalAccess } from '@/hooks/billing/useStorePhysicalAccess';
 import { useSubscriptionInvoices } from '@/hooks/billing/useSubscriptionInvoices';
 import { useSubscriptionBillingMandate } from '@/hooks/billing/useSubscriptionBillingMandate';
 import { initiateSubscriptionRenewalCheckout } from '@/lib/billing/subscription-renewal';
+import { safeRedirect } from '@/lib/url-validator';
 import { PhysicalPlanChangeSection } from '@/components/billing/PhysicalPlanChangeSection';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -232,7 +233,13 @@ export default function StorePhysicalBilling() {
                       user.email,
                       (user.user_metadata?.full_name as string | undefined) ?? undefined
                     );
-                    window.location.href = url;
+                    safeRedirect(url, () => {
+                      toast({
+                        title: 'URL de paiement invalide',
+                        description: 'Impossible de rediriger vers le paiement.',
+                        variant: 'destructive',
+                      });
+                    });
                   } catch (e: unknown) {
                     toast({
                       title: 'Erreur',

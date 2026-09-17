@@ -7,6 +7,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
+import { safeRedirect } from '@/lib/url-validator';
 
 export interface ArtistProductAuction {
   id: string;
@@ -791,7 +792,13 @@ export function usePayAuctionWin() {
     },
     onSuccess: result => {
       if (result.checkoutUrl) {
-        window.location.href = result.checkoutUrl;
+        safeRedirect(result.checkoutUrl, () => {
+          toast({
+            title: 'URL de paiement invalide',
+            description: 'Impossible de rediriger vers le paiement.',
+            variant: 'destructive',
+          });
+        });
       }
     },
     onError: (error: Error) => {

@@ -70,6 +70,7 @@ export function UserFriendlyErrorToast({
       // Actions par défaut
       switch (action) {
         case 'refresh':
+          // Dernier recours si le parent ne fournit pas onAction
           window.location.reload();
           break;
         case 'retry':

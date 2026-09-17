@@ -47,7 +47,11 @@ const Trending = () => {
   const headerRef = useScrollAnimation<HTMLDivElement>();
   const filtersRef = useScrollAnimation<HTMLDivElement>();
 
-  const { data: trendingData, isLoading } = useTrendingRecommendations({
+  const {
+    data: trendingData,
+    isLoading,
+    refetch: refetchTrending,
+  } = useTrendingRecommendations({
     limit: 20,
     enabled: !!selectedStoreId,
   });
@@ -278,7 +282,13 @@ const Trending = () => {
                     <p className="text-muted-foreground mb-4">
                       Les tendances se mettent à jour en temps réel. Revenez plus tard !
                     </p>
-                    <Button onClick={() => window.location.reload()}>Actualiser</Button>
+                    <Button
+                      onClick={() => {
+                        void refetchTrending();
+                      }}
+                    >
+                      Actualiser
+                    </Button>
                   </div>
                 )}
               </CardContent>

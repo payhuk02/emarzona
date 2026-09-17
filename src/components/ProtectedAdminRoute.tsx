@@ -15,15 +15,17 @@ export const ProtectedAdminRoute = ({ children }: { children: ReactNode }) => {
   const { user, loading } = authContext || { user: null, loading: true };
   const { isAdmin, isLoading: isAdminLoading } = useAdmin();
   const [timedOut, setTimedOut] = useState(false);
+  const [retryNonce, setRetryNonce] = useState(0);
 
   useEffect(() => {
     if (!loading && !isAdminLoading) {
       setTimedOut(false);
       return;
     }
+    setTimedOut(false);
     const timer = setTimeout(() => setTimedOut(true), ADMIN_CHECK_TIMEOUT_MS);
     return () => clearTimeout(timer);
-  }, [loading, isAdminLoading]);
+  }, [loading, isAdminLoading, retryNonce]);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -43,7 +45,7 @@ export const ProtectedAdminRoute = ({ children }: { children: ReactNode }) => {
           <p className="text-muted-foreground">
             La vérification des droits administrateur prend plus de temps que prévu.
           </p>
-          <Button type="button" variant="outline" onClick={() => window.location.reload()}>
+          <Button type="button" variant="outline" onClick={() => setRetryNonce(n => n + 1)}>
             Réessayer
           </Button>
         </div>

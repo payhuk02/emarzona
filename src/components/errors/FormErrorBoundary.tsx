@@ -102,17 +102,17 @@ export class FormErrorBoundary extends Component<Props, State> {
             <AlertDescription className="mt-2 space-y-3">
               <p>
                 Le formulaire{formName && ` "${formName}"`} rencontre des erreurs répétées. Veuillez
-                rafraîchir la page ou contacter le support si le problème persiste.
+                réessayer ou contacter le support si le problème persiste.
               </p>
               <div className="flex gap-2">
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => window.location.reload()}
+                  onClick={() => this.setState({ hasError: false, error: null, errorCount: 0 })}
                   className="gap-2"
                 >
                   <RefreshCw className="h-3 w-3" />
-                  Rafraîchir la page
+                  Réessayer
                 </Button>
               </div>
             </AlertDescription>

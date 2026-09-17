@@ -8,7 +8,7 @@ import { logger } from '@/lib/logger';
 
 interface GamificationErrorBoundaryProps {
   children: ReactNode;
-  fallback?: ReactNode;
+  fallback?: ReactNode | ((api: { reset: () => void }) => ReactNode);
   onError?: (error: Error, errorInfo: React.ErrorInfo) => void;
 }
 
@@ -40,7 +40,7 @@ export class GamificationErrorBoundary extends Component<
     };
   }
 
-  componentDidCatch(_error: Error, errorInfo: React.ErrorInfo): void {
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
     // Log avec logger
     if (process.env.NODE_ENV === 'development') {
       logger.error('Gamification Error', { error, errorInfo });
@@ -68,6 +68,9 @@ export class GamificationErrorBoundary extends Component<
     if (this.state.hasError) {
       // Si un fallback personnalisé est fourni, l'utiliser
       if (this.props.fallback) {
+        if (typeof this.props.fallback === 'function') {
+          return this.props.fallback({ reset: this.handleReset });
+        }
         return this.props.fallback;
       }
 

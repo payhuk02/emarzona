@@ -21,6 +21,7 @@ import { safeRedirect } from '@/lib/url-validator';
 import { requestGuestCustomerAccess } from '@/lib/checkout/guest-customer-access';
 import { resolveCustomerPortalPath } from '@/lib/checkout/guest-payment-return';
 import { detectSubdomain } from '@/lib/subdomain-detector';
+import { softNavigateTo } from '@/lib/navigation/soft-navigate';
 
 type ConfirmationState = 'loading' | 'confirmed' | 'pending' | 'failed';
 type GuestAccessState = 'idle' | 'loading' | 'redirecting' | 'failed';
@@ -66,7 +67,7 @@ const PaymentSuccess = () => {
   const navigateToPlatform = (path: string) => {
     const info = detectSubdomain();
     if (info.isStoreDomain || info.isCustomDomain) {
-      window.location.href = `https://www.emarzona.com${path}`;
+      softNavigateTo(`https://www.emarzona.com${path}`);
     } else {
       navigate(path);
     }

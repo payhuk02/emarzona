@@ -11,11 +11,9 @@ import { GamificationDashboard } from '@/components/gamification/GamificationDas
 import { GamificationErrorBoundary } from '@/components/gamification/GamificationErrorBoundary';
 import { Trophy } from 'lucide-react';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
-import { useNavigate } from 'react-router-dom';
 
 export default function GamificationPage() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const headerRef = useScrollAnimation<HTMLDivElement>();
 
   return (
@@ -53,7 +51,7 @@ export default function GamificationPage() {
 
         {/* ErrorBoundary simplifié pour capturer les erreurs avec fallback autonome */}
         <GamificationErrorBoundary
-          fallback={
+          fallback={({ reset }) => (
             <div className="m-4 rounded-lg border border-red-200 bg-red-50 p-6 dark:border-red-800 dark:bg-red-900/10">
               <div className="flex items-start gap-4">
                 <div className="flex-shrink-0">
@@ -77,7 +75,8 @@ export default function GamificationPage() {
                     Une erreur s'est produite lors du chargement de la page de gamification.
                   </p>
                   <button
-                    onClick={() => navigate(0)}
+                    type="button"
+                    onClick={reset}
                     className="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 sm:px-4 py-1.5 sm:py-2 text-[10px] sm:text-xs md:text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
                   >
                     <svg
@@ -93,12 +92,12 @@ export default function GamificationPage() {
                         d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
                       />
                     </svg>
-                    Recharger la page
+                    Réessayer
                   </button>
                 </div>
               </div>
             </div>
-          }
+          )}
         >
           <GamificationDashboard />
         </GamificationErrorBoundary>

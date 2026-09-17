@@ -16,7 +16,7 @@ import { softNavigateTo } from '@/lib/navigation/soft-navigate';
 
 interface Props {
   children: ReactNode;
-  fallback?: ReactNode;
+  fallback?: ReactNode | ((api: { reset: () => void; reload: () => void }) => ReactNode);
   onError?: (error: Error, errorInfo: ErrorInfo) => void;
   showDetails?: boolean;
   /** Change à chaque navigation pour effacer un état d'erreur obsolète */
@@ -96,6 +96,12 @@ export class ErrorBoundary extends Component<Props, State> {
     if (this.state.hasError) {
       // Utiliser le fallback personnalisé si fourni
       if (this.props.fallback) {
+        if (typeof this.props.fallback === 'function') {
+          return this.props.fallback({
+            reset: this.handleReset,
+            reload: this.handleReload,
+          });
+        }
         return this.props.fallback;
       }
 
