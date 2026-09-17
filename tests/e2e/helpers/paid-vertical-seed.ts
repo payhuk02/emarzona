@@ -125,15 +125,17 @@ async function ensureCourseEnrollment(
   buyerId: string,
   orderId: string
 ): Promise<void> {
-  const { error } = await admin.from('course_enrollments').insert({
-    course_id: courseId,
-    product_id: productId,
-    user_id: buyerId,
-    order_id: orderId,
-    status: 'active',
-    total_lessons: 0,
-    progress_percentage: 0,
-  });
+  const { error } = await retryOnTransientPostgrest(() =>
+    admin.from('course_enrollments').insert({
+      course_id: courseId,
+      product_id: productId,
+      user_id: buyerId,
+      order_id: orderId,
+      status: 'active',
+      total_lessons: 0,
+      progress_percentage: 0,
+    })
+  );
 
   if (error) throw error;
 }
@@ -169,43 +171,45 @@ export async function seedPaidCourseFixture(
 
   if (productError || !product) throw productError ?? new Error('product insert failed');
 
-  const { data: course, error: courseError } = await admin
-    .from('courses')
-    .insert({ product_id: product.id })
-    .select('id')
-    .single();
+  const { data: course, error: courseError } = await retryOnTransientPostgrest(() =>
+    admin.from('courses').insert({ product_id: product.id }).select('id').single()
+  );
 
   if (courseError || !course) throw courseError ?? new Error('course insert failed');
 
   const customerId = await createCustomer(admin, store.id, buyer);
   const orderNumber = resolveOrderNumber(runId);
 
-  const { data: order, error: orderError } = await admin
-    .from('orders')
-    .insert({
-      store_id: store.id,
-      customer_id: customerId,
-      order_number: orderNumber,
-      total_amount: 7500,
-      currency: 'XOF',
-      payment_status: 'paid',
-      status: 'completed',
-      payment_type: 'full',
-    })
-    .select('id')
-    .single();
+  const { data: order, error: orderError } = await retryOnTransientPostgrest(() =>
+    admin
+      .from('orders')
+      .insert({
+        store_id: store.id,
+        customer_id: customerId,
+        order_number: orderNumber,
+        total_amount: 7500,
+        currency: 'XOF',
+        payment_status: 'paid',
+        status: 'completed',
+        payment_type: 'full',
+      })
+      .select('id')
+      .single()
+  );
 
   if (orderError || !order) throw orderError ?? new Error('order insert failed');
 
-  const { error: itemError } = await admin.from('order_items').insert({
-    order_id: order.id,
-    product_id: product.id,
-    product_type: 'course',
-    product_name: product.name,
-    quantity: 1,
-    unit_price: 7500,
-    total_price: 7500,
-  });
+  const { error: itemError } = await retryOnTransientPostgrest(() =>
+    admin.from('order_items').insert({
+      order_id: order.id,
+      product_id: product.id,
+      product_type: 'course',
+      product_name: product.name,
+      quantity: 1,
+      unit_price: 7500,
+      total_price: 7500,
+    })
+  );
 
   if (itemError) throw itemError;
 
@@ -253,21 +257,23 @@ export async function seedPaidArtistFixture(
 
   if (productError || !product) throw productError ?? new Error('product insert failed');
 
-  const { data: artistProduct, error: artistError } = await admin
-    .from('artist_products')
-    .insert({
-      product_id: product.id,
-      store_id: store.id,
-      artist_type: 'visual_artist',
-      artist_name: 'E2E Artiste',
-      artwork_title: productName,
-      artwork_edition_type: 'original',
-      certificate_of_authenticity: true,
-      requires_shipping: false,
-      artwork_link_url: 'https://example.com/e2e-artwork',
-    })
-    .select('id')
-    .single();
+  const { data: artistProduct, error: artistError } = await retryOnTransientPostgrest(() =>
+    admin
+      .from('artist_products')
+      .insert({
+        product_id: product.id,
+        store_id: store.id,
+        artist_type: 'visual_artist',
+        artist_name: 'E2E Artiste',
+        artwork_title: productName,
+        artwork_edition_type: 'original',
+        certificate_of_authenticity: true,
+        requires_shipping: false,
+        artwork_link_url: 'https://example.com/e2e-artwork',
+      })
+      .select('id')
+      .single()
+  );
 
   if (artistError || !artistProduct)
     throw artistError ?? new Error('artist_products insert failed');
@@ -275,52 +281,58 @@ export async function seedPaidArtistFixture(
   const customerId = await createCustomer(admin, store.id, buyer);
   const orderNumber = resolveOrderNumber(runId);
 
-  const { data: order, error: orderError } = await admin
-    .from('orders')
-    .insert({
-      store_id: store.id,
-      customer_id: customerId,
-      order_number: orderNumber,
-      total_amount: 12000,
-      currency: 'XOF',
-      payment_status: 'paid',
-      status: 'completed',
-      payment_type: 'full',
-    })
-    .select('id')
-    .single();
+  const { data: order, error: orderError } = await retryOnTransientPostgrest(() =>
+    admin
+      .from('orders')
+      .insert({
+        store_id: store.id,
+        customer_id: customerId,
+        order_number: orderNumber,
+        total_amount: 12000,
+        currency: 'XOF',
+        payment_status: 'paid',
+        status: 'completed',
+        payment_type: 'full',
+      })
+      .select('id')
+      .single()
+  );
 
   if (orderError || !order) throw orderError ?? new Error('order insert failed');
 
-  const { error: itemError } = await admin.from('order_items').insert({
-    order_id: order.id,
-    product_id: product.id,
-    product_type: 'artist',
-    product_name: product.name,
-    quantity: 1,
-    unit_price: 12000,
-    total_price: 12000,
-  });
+  const { error: itemError } = await retryOnTransientPostgrest(() =>
+    admin.from('order_items').insert({
+      order_id: order.id,
+      product_id: product.id,
+      product_type: 'artist',
+      product_name: product.name,
+      quantity: 1,
+      unit_price: 12000,
+      total_price: 12000,
+    })
+  );
 
   if (itemError) throw itemError;
 
   const verificationCode = `E2E${runId.slice(-6).toUpperCase()}`;
-  const { error: certError } = await admin.from('artist_product_certificates').insert({
-    order_id: order.id,
-    product_id: product.id,
-    artist_product_id: artistProduct.id,
-    user_id: buyer.id,
-    buyer_name: 'E2E Buyer',
-    buyer_email: buyer.email,
-    certificate_number: `CERT-${runId}`,
-    verification_code: verificationCode,
-    is_public: true,
-    artwork_title: productName,
-    artist_name: 'E2E Artiste',
-    purchase_date: new Date().toISOString().slice(0, 10),
-    is_valid: true,
-    is_generated: true,
-  });
+  const { error: certError } = await retryOnTransientPostgrest(() =>
+    admin.from('artist_product_certificates').insert({
+      order_id: order.id,
+      product_id: product.id,
+      artist_product_id: artistProduct.id,
+      user_id: buyer.id,
+      buyer_name: 'E2E Buyer',
+      buyer_email: buyer.email,
+      certificate_number: `CERT-${runId}`,
+      verification_code: verificationCode,
+      is_public: true,
+      artwork_title: productName,
+      artist_name: 'E2E Artiste',
+      purchase_date: new Date().toISOString().slice(0, 10),
+      is_valid: true,
+      is_generated: true,
+    })
+  );
   if (certError) throw certError;
 
   return {

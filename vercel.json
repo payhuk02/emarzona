@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/api/posthog-analytics-query",
+      "destination": "/api/health?__route=posthog-analytics-query"
+    },
+    {
       "source": "/sitemap.xml",
       "destination": "/api/sitemap"
     },
