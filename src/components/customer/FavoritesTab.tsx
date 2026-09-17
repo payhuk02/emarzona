@@ -7,25 +7,46 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Heart, ShoppingCart, Trash2, ExternalLink } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
+type FavoriteProduct = {
+  id: string;
+  name: string;
+  description: string | null;
+  price: number | null;
+  currency: string | null;
+  image_url: string | null;
+  slug: string;
+  store_id: string | null;
+  is_active: boolean | null;
+  store: { id: string; name: string } | null;
+};
+
+type FavoriteRow = {
+  id: string;
+  created_at: string;
+  product: FavoriteProduct | null;
+};
+
+function errorMessage(error: unknown): string {
+  if (error instanceof Error && error.message) return error.message;
+  return 'Impossible de retirer le produit des favoris';
+}
+
 export const FavoritesTab = () => {
-  const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Récupérer les favoris
   const { data: favorites, isLoading } = useQuery({
     queryKey: ['userFavorites'],
-    queryFn: async () => {
+    queryFn: async (): Promise<FavoriteRow[]> => {
       const {
         data: { user },
       } = await supabase.auth.getUser();
@@ -57,11 +78,10 @@ export const FavoritesTab = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data || [];
+      return (data || []) as FavoriteRow[];
     },
   });
 
-  // Supprimer un favori
   const removeFavorite = useMutation({
     mutationFn: async (productId: string) => {
       const {
@@ -84,10 +104,10 @@ export const FavoritesTab = () => {
         description: 'Le produit a été retiré de vos favoris',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de retirer le produit des favoris',
+        description: errorMessage(error),
         variant: 'destructive',
       });
     },
@@ -120,7 +140,9 @@ export const FavoritesTab = () => {
           <p className="text-muted-foreground mb-4">
             Vous n'avez pas encore de produits dans vos favoris
           </p>
-          <Button onClick={() => navigate('/marketplace')}>Découvrir les produits</Button>
+          <Button asChild>
+            <Link to="/marketplace">Découvrir les produits</Link>
+          </Button>
         </div>
       </Card>
     );
@@ -128,7 +150,7 @@ export const FavoritesTab = () => {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {favorites.map((favorite: any) => {
+      {favorites.map(favorite => {
         const product = favorite.product;
         if (!product) return null;
 
@@ -173,17 +195,17 @@ export const FavoritesTab = () => {
                 </div>
               </div>
               <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  className="flex-1"
-                  onClick={() => navigate(`/products/${product.slug}`)}
-                >
-                  <ExternalLink className="h-4 w-4 mr-2" />
-                  Voir
+                <Button asChild variant="outline" className="flex-1">
+                  <Link to={`/products/${product.slug}`}>
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Voir
+                  </Link>
                 </Button>
-                <Button className="flex-1" onClick={() => navigate(`/products/${product.slug}`)}>
-                  <ShoppingCart className="h-4 w-4 mr-2" />
-                  Acheter
+                <Button asChild className="flex-1">
+                  <Link to={`/products/${product.slug}`}>
+                    <ShoppingCart className="h-4 w-4 mr-2" />
+                    Acheter
+                  </Link>
                 </Button>
               </div>
               <div className="text-xs text-muted-foreground">

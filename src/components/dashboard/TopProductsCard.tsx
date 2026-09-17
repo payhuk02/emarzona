@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Package } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { PRODUCT_TYPE_CONFIG, type ProductType } from '@/constants/product-types';
 import { LazyImage } from '@/components/ui/lazy-image';
@@ -28,7 +28,6 @@ const TopProductsCardComponent = ({ products, variant = 'default' }: TopProducts
   const shellClass = isPremium
     ? 'dashboard-premium-panel h-full flex flex-col'
     : 'dashboard-inner-card border-border/50 shadow-none';
-  const navigate = useNavigate();
 
   if (products.length === 0) {
     return (
@@ -74,14 +73,11 @@ const TopProductsCardComponent = ({ products, variant = 'default' }: TopProducts
               </>
             )}
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate('/dashboard/products')}
-            className="gap-1 h-9 sm:h-10 text-sm shrink-0"
-          >
-            Voir tout
-            <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4" />
+          <Button asChild variant="ghost" size="sm" className="gap-1 h-9 sm:h-10 text-sm shrink-0">
+            <Link to="/dashboard/products">
+              Voir tout
+              <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4" />
+            </Link>
           </Button>
         </div>
       </HeaderWrap>
@@ -90,15 +86,15 @@ const TopProductsCardComponent = ({ products, variant = 'default' }: TopProducts
       >
         <div className={isPremium ? 'space-y-0' : 'space-y-4'}>
           {products.map((product, index) => (
-            <div
+            <Link
               key={product.id}
+              to="/dashboard/products"
               className={cn(
                 'cursor-pointer transition-colors touch-manipulation',
                 isPremium
                   ? 'dashboard-product-row'
                   : 'flex items-center gap-3 p-2 sm:p-3 md:p-4 rounded-lg border hover:bg-muted/50 min-h-[50px] sm:min-h-[60px]'
               )}
-              onClick={() => navigate('/dashboard/products')}
             >
               <div
                 className={cn(
@@ -167,7 +163,7 @@ const TopProductsCardComponent = ({ products, variant = 'default' }: TopProducts
                   </p>
                 </div>
               )}
-            </div>
+            </Link>
           ))}
         </div>
       </ContentWrap>

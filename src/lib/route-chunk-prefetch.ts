@@ -36,6 +36,12 @@ const ROUTE_CHUNK_IMPORTS: Record<string, RouteChunkImporter> = {
   '/recommendations': () => import('@/pages/Recommendations'),
   '/discover': () => import('@/pages/Discover'),
   '/trending': () => import('@/pages/Trending'),
+  '/admin': () => import('@/pages/admin/AdminDashboard'),
+  '/admin/users': () => import('@/pages/admin/AdminUsers'),
+  '/admin/stores': () => import('@/pages/admin/AdminStores'),
+  '/admin/orders': () => import('@/pages/admin/AdminOrders'),
+  '/admin/products': () => import('@/pages/admin/AdminProducts'),
+  '/notifications': () => import('@/pages/notifications/NotificationsManagement'),
 };
 
 const prefetched = new Set<string>();

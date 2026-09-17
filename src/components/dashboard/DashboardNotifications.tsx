@@ -9,9 +9,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Bell, Activity, Settings, Users } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { formatLocaleDateTime } from '@/lib/i18n/locale-format';
+import type { DashboardStats } from '@/hooks/useDashboardStats';
 
 interface DashboardNotification {
   id: string;
@@ -34,7 +34,6 @@ interface DashboardNotificationsProps {
 export const DashboardNotifications = React.memo<DashboardNotificationsProps>(
   ({ notifications, notificationsEnabled, stats, onViewStore, onManageCustomers, onSettings }) => {
     const { t, i18n } = useTranslation();
-    const navigate = useNavigate();
     const bottomRef = useScrollAnimation<HTMLDivElement>();
 
     return (

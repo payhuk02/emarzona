@@ -3,7 +3,7 @@
  * Composant léger : pas de stats, notifications ni realtime.
  */
 
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { STORE_CREATE_PATH } from '@/lib/store/store-create-path';
 import { AppPageShell } from '@/components/layout/AppPageShell';
 import { useTranslation } from 'react-i18next';
@@ -16,7 +16,6 @@ import { SIDEBAR_PREF_KEYS, writeSidebarJsonPref } from '@/lib/navigation/sideba
 
 export function DashboardOnboarding() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const { getValue } = usePageCustomization('dashboard');
 
   return (
@@ -51,15 +50,17 @@ export function DashboardOnboarding() {
                     )}
                   </p>
                   <Button
-                    onClick={() => navigate(STORE_CREATE_PATH)}
+                    asChild
                     className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white min-h-[44px] text-sm touch-manipulation gap-2"
                   >
-                    <Store className="h-4 w-4" aria-hidden />
-                    {getValue(
-                      'dashboard.createStoreButton',
-                      'dashboard.createStoreButton',
-                      'Creer ma boutique'
-                    )}
+                    <Link to={STORE_CREATE_PATH}>
+                      <Store className="h-4 w-4" aria-hidden />
+                      {getValue(
+                        'dashboard.createStoreButton',
+                        'dashboard.createStoreButton',
+                        'Creer ma boutique'
+                      )}
+                    </Link>
                   </Button>
                 </CardContent>
               </Card>
@@ -79,23 +80,26 @@ export function DashboardOnboarding() {
                     )}
                   </p>
                   <Button
+                    asChild
                     variant="outline"
-                    onClick={() => {
-                      persistSidebarPersona('buyer');
-                      writeSidebarJsonPref(SIDEBAR_PREF_KEYS.personaOnboarded, true);
-                      navigate('/account/hub');
-                    }}
                     className="w-full min-h-[44px] text-sm touch-manipulation gap-2"
                   >
-                    <User className="h-4 w-4" aria-hidden />
-                    {t('dashboard.onboardingBuyerAccount', 'Acceder a Mon Espace Client')}
+                    <Link
+                      to="/account/hub"
+                      onClick={() => {
+                        persistSidebarPersona('buyer');
+                        writeSidebarJsonPref(SIDEBAR_PREF_KEYS.personaOnboarded, true);
+                      }}
+                    >
+                      <User className="h-4 w-4" aria-hidden />
+                      {t('dashboard.onboardingBuyerAccount', 'Acceder a Mon Espace Client')}
+                    </Link>
                   </Button>
-                  <Button
-                    onClick={() => navigate('/marketplace')}
-                    className="w-full min-h-[44px] text-sm touch-manipulation gap-2"
-                  >
-                    <ShoppingBag className="h-4 w-4" aria-hidden />
-                    {t('dashboard.onboardingBuyerMarketplace', 'Continuer mes achats')}
+                  <Button asChild className="w-full min-h-[44px] text-sm touch-manipulation gap-2">
+                    <Link to="/marketplace">
+                      <ShoppingBag className="h-4 w-4" aria-hidden />
+                      {t('dashboard.onboardingBuyerMarketplace', 'Continuer mes achats')}
+                    </Link>
                   </Button>
                 </CardContent>
               </Card>

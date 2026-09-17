@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Activity, ShoppingCart, Package, User, CreditCard } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
@@ -21,7 +21,6 @@ interface DashboardRecentActivityProps {
 export const DashboardRecentActivity = React.memo<DashboardRecentActivityProps>(
   ({ activities }) => {
     const { t } = useTranslation();
-    const navigate = useNavigate();
     const list = activities.slice(0, 6);
 
     return (
@@ -66,12 +65,10 @@ export const DashboardRecentActivity = React.memo<DashboardRecentActivityProps>(
             })
           )}
         </div>
-        <Button
-          variant="outline"
-          className="w-full mt-5 text-sm sm:text-base min-h-[44px]"
-          onClick={() => navigate('/dashboard/analytics')}
-        >
-          {t('dashboard.recentActivity.viewAll', "Voir toute l'activité")}
+        <Button asChild variant="outline" className="w-full mt-5 text-sm sm:text-base min-h-[44px]">
+          <Link to="/dashboard/analytics">
+            {t('dashboard.recentActivity.viewAll', "Voir toute l'activité")}
+          </Link>
         </Button>
       </div>
     );

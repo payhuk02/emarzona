@@ -5,7 +5,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ChevronDown, Lock } from 'lucide-react';
 import {
@@ -92,7 +92,12 @@ function MegaMenuLink({
   }
 
   return (
-    <NavLink to={item.url} onClick={() => onAfterNavigate?.()} className={linkClassName}>
+    <NavLink
+      to={item.url}
+      onClick={() => onAfterNavigate?.()}
+      onMouseEnter={() => prefetchRouteChunk(item.url)}
+      className={linkClassName}
+    >
       {renderContent()}
     </NavLink>
   );
@@ -340,7 +345,6 @@ function MobileDomainDrawer({
 
 export function HorizontalContextNav() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const { isAdmin } = useAdmin();
   const { persona: sidebarPersona } = useSidebarPersona(isAdmin);
   const handlePlanLockedNav = usePlanLockNavAction();
@@ -354,11 +358,9 @@ export function HorizontalContextNav() {
     (item: HorizontalNavLink) => {
       if (item.locked) {
         handlePlanLockedNav(item.title, item.url);
-        return;
       }
-      navigate(item.url);
     },
-    [navigate, handlePlanLockedNav]
+    [handlePlanLockedNav]
   );
 
   if (domains.length === 0) return null;

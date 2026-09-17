@@ -25,6 +25,7 @@ import type { NavSection, SidebarPersona } from '@/config/navigation.types';
 import { useSidebarPersona } from '@/hooks/useSidebarPersona';
 import { useSidebarNavigation } from '@/hooks/useSidebarNavigation';
 import { recordNavClick, sortEntriesByNavFrequency } from '@/hooks/useNavigationAnalytics';
+import { prefetchRouteChunk } from '@/lib/route-chunk-prefetch';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -427,6 +428,7 @@ export function AppSidebar() {
                                 to={item.url}
                                 end
                                 onClick={() => recordNavClick(item.url)}
+                                onMouseEnter={() => prefetchRouteChunk(getNavItemPath(item.url))}
                                 className="flex items-center gap-2 w-full"
                               >
                                 <IconComponent
@@ -484,6 +486,7 @@ export function AppSidebar() {
                               end
                               data-sidebar-path={item.url.split('?')[0]}
                               onClick={() => recordNavClick(item.url)}
+                              onMouseEnter={() => prefetchRouteChunk(getNavItemPath(item.url))}
                               className={
                                 isNavLinkActive(item.url)
                                   ? `transition-all duration-200 group relative flex items-center ${NAV_LINK_ACTIVE}`

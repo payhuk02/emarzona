@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Bell, ChevronRight } from 'lucide-react';
 
@@ -21,7 +21,6 @@ interface DashboardNotificationsStripProps {
 export const DashboardNotificationsStrip = React.memo<DashboardNotificationsStripProps>(
   ({ notifications, unreadCount, enabled }) => {
     const { t } = useTranslation();
-    const navigate = useNavigate();
 
     if (!enabled || (notifications.length === 0 && unreadCount === 0)) {
       return null;
@@ -47,14 +46,13 @@ export const DashboardNotificationsStrip = React.memo<DashboardNotificationsStri
               )}
             </h2>
           </div>
-          <button
-            type="button"
-            onClick={() => navigate('/notifications')}
+          <Link
+            to="/notifications"
             className="inline-flex items-center gap-1 text-sm font-medium text-violet-700 hover:underline"
           >
             {t('common.viewAll', 'Tout voir')}
             <ChevronRight className="h-4 w-4" aria-hidden />
-          </button>
+          </Link>
         </div>
         {latest.length > 0 ? (
           <ul className="space-y-2">

@@ -2,7 +2,7 @@
  * P1-1 — Hub acheteur : actions cross-type depuis /account ou /account/hub
  */
 
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCustomerHubSummary } from '@/hooks/customer/useCustomerHubSummary';
@@ -71,7 +71,6 @@ const HUB_ACTIONS = [
 ] as const;
 
 export function CustomerHubQuickActions() {
-  const navigate = useNavigate();
   const { t } = useTranslation();
   const { user } = useAuth();
   const { data: hub } = useCustomerHubSummary(user?.id, 1, true);
@@ -101,20 +100,22 @@ export function CustomerHubQuickActions() {
             return (
               <Button
                 key={action.path}
+                asChild
                 variant="outline"
                 className="h-auto min-h-[44px] justify-start gap-3 px-3 py-3 text-left touch-manipulation"
-                onClick={() => navigate(action.path)}
               >
-                <Icon className="h-5 w-5 shrink-0 text-primary" aria-hidden />
-                <span className="flex-1 min-w-0">
-                  <span className="block text-sm font-medium truncate">
-                    {t(action.labelKey, action.defaultLabel)}
+                <Link to={action.path}>
+                  <Icon className="h-5 w-5 shrink-0 text-primary" aria-hidden />
+                  <span className="flex-1 min-w-0">
+                    <span className="block text-sm font-medium truncate">
+                      {t(action.labelKey, action.defaultLabel)}
+                    </span>
+                    <span className="block text-xs text-muted-foreground truncate">
+                      {t(action.descriptionKey, action.defaultDescription)}
+                    </span>
                   </span>
-                  <span className="block text-xs text-muted-foreground truncate">
-                    {t(action.descriptionKey, action.defaultDescription)}
-                  </span>
-                </span>
-                <ArrowRight className="h-4 w-4 shrink-0 opacity-60" aria-hidden />
+                  <ArrowRight className="h-4 w-4 shrink-0 opacity-60" aria-hidden />
+                </Link>
               </Button>
             );
           })}

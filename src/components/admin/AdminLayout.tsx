@@ -2,7 +2,7 @@ import { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { RequireAAL2 } from '@/components/admin/RequireAAL2';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useAdminMFA } from '@/hooks/useAdminMFA';
@@ -12,6 +12,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useCurrentAdminPermissions } from '@/hooks/useCurrentAdminPermissions';
 import { ADMIN_NAV_SECTIONS, filterAdminNavSections } from '@/lib/admin/admin-nav';
+import { prefetchRouteChunk } from '@/lib/route-chunk-prefetch';
 import { Menu, X } from 'lucide-react';
 import { AdminBreadcrumb } from '@/components/admin/AdminBreadcrumb';
 
@@ -24,7 +25,6 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
   const isMobile = useIsMobile();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const navigate = useNavigate();
   const location = useLocation();
   const mainRef = useRef<HTMLElement>(null);
   const { user } = useAuth();
@@ -55,11 +55,6 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
     const active = menuItems.find(item => item.path === location.pathname);
     return active?.label ?? 'Administration';
   }, [location.pathname, menuItems]);
-
-  const goTo = (path: string) => {
-    navigate(path);
-    setMobileMenuOpen(false);
-  };
 
   return (
     <div className="app-premium-admin min-h-screen bg-gradient-to-br from-background to-muted/20">
@@ -135,12 +130,20 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
                     return (
                       <Button
                         key={item.path}
+                        asChild
                         variant={isActive ? 'default' : 'ghost'}
                         className="w-full justify-start gap-3 min-h-11"
-                        onClick={() => goTo(item.path)}
                       >
-                        <Icon className="h-5 w-5" aria-hidden="true" />
-                        <span>{item.label}</span>
+                        <NavLink
+                          to={item.path}
+                          end={item.path === '/admin'}
+                          aria-label={item.label}
+                          onClick={() => setMobileMenuOpen(false)}
+                          onMouseEnter={() => prefetchRouteChunk(item.path)}
+                        >
+                          <Icon className="h-5 w-5" aria-hidden="true" />
+                          <span>{item.label}</span>
+                        </NavLink>
                       </Button>
                     );
                   })}
@@ -219,15 +222,22 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
                     return (
                       <Button
                         key={item.path}
+                        asChild
                         variant={isActive ? 'default' : 'ghost'}
                         className={cn(
                           'w-full justify-start gap-3 min-h-11',
                           !sidebarOpen && 'justify-center'
                         )}
-                        onClick={() => navigate(item.path)}
                       >
-                        <Icon className="h-5 w-5" aria-hidden="true" />
-                        {sidebarOpen && <span>{item.label}</span>}
+                        <NavLink
+                          to={item.path}
+                          end={item.path === '/admin'}
+                          aria-label={item.label}
+                          onMouseEnter={() => prefetchRouteChunk(item.path)}
+                        >
+                          <Icon className="h-5 w-5" aria-hidden="true" />
+                          {sidebarOpen && <span>{item.label}</span>}
+                        </NavLink>
                       </Button>
                     );
                   })}

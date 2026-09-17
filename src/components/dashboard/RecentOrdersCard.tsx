@@ -5,7 +5,7 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { formatFcfa } from '@/lib/format-currency';
 import { PRODUCT_TYPE_CONFIG, type ProductType } from '@/constants/product-types';
@@ -43,7 +43,6 @@ const STATUS_LABELS: Record<string, { label: string; className: string }> = {
 };
 
 const RecentOrdersCardComponent = ({ orders, variant = 'default' }: RecentOrdersCardProps) => {
-  const navigate = useNavigate();
   const isPremium = variant === 'premium';
 
   const getStatusBadge = (status: string) => {
@@ -119,29 +118,26 @@ const RecentOrdersCardComponent = ({ orders, variant = 'default' }: RecentOrders
               </>
             )}
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate('/dashboard/orders')}
-            className="gap-1 text-sm shrink-0"
-          >
-            Voir tout
-            <ArrowRight className="h-4 w-4" />
+          <Button asChild variant="ghost" size="sm" className="gap-1 text-sm shrink-0">
+            <Link to="/dashboard/orders">
+              Voir tout
+              <ArrowRight className="h-4 w-4" />
+            </Link>
           </Button>
         </div>
       </HeaderWrap>
       <ContentWrap className={cn(!isPremium && 'p-3 sm:p-4 md:p-6 pt-0', isPremium && 'flex-1')}>
         <div className={isPremium ? 'space-y-0' : 'space-y-4'}>
           {orders.map(order => (
-            <div
+            <Link
               key={order.id}
+              to="/dashboard/orders"
               className={cn(
                 'cursor-pointer transition-colors touch-manipulation',
                 isPremium
                   ? 'dashboard-order-row hover:bg-muted/30'
                   : 'flex items-center justify-between p-2 sm:p-3 md:p-4 rounded-lg border hover:bg-muted/50 min-h-[50px] sm:min-h-[60px]'
               )}
-              onClick={() => navigate('/dashboard/orders')}
             >
               {isPremium ? (
                 <>
@@ -217,7 +213,7 @@ const RecentOrdersCardComponent = ({ orders, variant = 'default' }: RecentOrders
                   </div>
                 </>
               )}
-            </div>
+            </Link>
           ))}
         </div>
       </ContentWrap>

@@ -5,8 +5,38 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useAdmin } from '@/hooks/useAdmin';
 import { AdminRoutePermissionGuard } from '@/components/admin/AdminRoutePermissionGuard';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const ADMIN_CHECK_TIMEOUT_MS = 20_000;
+
+/** Fallback auth admin : chrome plausible, pas de spinner plein écran brutal. */
+function AdminAuthLoadingFallback() {
+  return (
+    <div
+      className="flex min-h-screen w-full bg-gradient-to-br from-background to-muted/20"
+      aria-busy="true"
+      aria-live="polite"
+      data-testid="admin-auth-loading"
+    >
+      <div className="hidden md:block w-64 shrink-0 border-r border-border bg-background/80 p-4 space-y-3">
+        <Skeleton className="h-6 w-32" />
+        {Array.from({ length: 8 }).map((_, i) => (
+          <Skeleton key={i} className="h-10 w-full rounded-md" />
+        ))}
+      </div>
+      <div className="flex min-w-0 flex-1 flex-col">
+        <div className="h-14 shrink-0 border-b border-border px-4 flex items-center md:hidden">
+          <Skeleton className="h-5 w-40" />
+        </div>
+        <div className="flex-1 space-y-4 p-4 md:p-6">
+          <Skeleton className="h-8 w-56" />
+          <Skeleton className="h-4 w-72 max-w-full" />
+          <Skeleton className="h-48 w-full rounded-lg" />
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export const ProtectedAdminRoute = ({ children }: { children: ReactNode }) => {
   const navigate = useNavigate();
@@ -54,14 +84,7 @@ export const ProtectedAdminRoute = ({ children }: { children: ReactNode }) => {
   }
 
   if (loading || isAdminLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background to-muted">
-        <div className="text-center space-y-4">
-          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
-          <p className="text-muted-foreground">Vérification des droits administrateur...</p>
-        </div>
-      </div>
-    );
+    return <AdminAuthLoadingFallback />;
   }
 
   if (!user || !isAdmin) {

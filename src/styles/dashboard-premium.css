@@ -215,11 +215,11 @@
 }
 
 .dashboard-order-row {
-  @apply grid grid-cols-[2.5rem_minmax(0,1fr)] sm:grid-cols-[2.5rem_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 py-3.5 border-b border-border/40 last:border-0 transition-colors duration-150 rounded-lg px-1 -mx-1;
+  @apply grid grid-cols-[2.5rem_minmax(0,1fr)] sm:grid-cols-[2.5rem_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 py-3.5 border-b border-border/40 last:border-0 transition-colors duration-150 rounded-lg px-1 -mx-1 text-inherit no-underline;
 }
 
 .dashboard-product-row {
-  @apply grid grid-cols-[2rem_2.5rem_minmax(0,1fr)] sm:grid-cols-[2rem_2.75rem_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 py-3.5 border-b border-border/40 last:border-0 transition-colors duration-150 rounded-lg px-1 -mx-1;
+  @apply grid grid-cols-[2rem_2.5rem_minmax(0,1fr)] sm:grid-cols-[2rem_2.75rem_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 py-3.5 border-b border-border/40 last:border-0 transition-colors duration-150 rounded-lg px-1 -mx-1 text-inherit no-underline;
 }
 
 .dashboard-activity-row {
@@ -288,9 +288,9 @@
   @apply text-red-400;
 }
 
-/* Action tiles */
+/* Action tiles — button ou Link SPA */
 .dashboard-action-tile {
-  @apply rounded-xl border p-3.5 sm:p-4 text-left transition-colors touch-manipulation min-h-[4.5rem] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
+  @apply flex flex-col rounded-xl border p-3.5 sm:p-4 text-left text-inherit no-underline transition-colors touch-manipulation min-h-[4.5rem] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
 }
 
 .dashboard-quick-actions {

@@ -11,7 +11,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { PeriodFilter, type PeriodType } from '@/components/dashboard/PeriodFilter';
 import { usePageCustomization } from '@/hooks/usePageCustomization';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
 interface DashboardHeaderProps {
@@ -42,7 +42,6 @@ export const DashboardHeader = React.memo<DashboardHeaderProps>(
   }) => {
     const { t } = useTranslation();
     const { getValue } = usePageCustomization('dashboard');
-    const navigate = useNavigate();
     const headerRef = useScrollAnimation<HTMLDivElement>();
 
     return (
@@ -79,22 +78,22 @@ export const DashboardHeader = React.memo<DashboardHeaderProps>(
             {/* Notifications Bell - Desktop */}
             <div className="hidden sm:block relative">
               <Button
+                asChild
                 variant="ghost"
                 size="sm"
                 className="min-h-[44px] min-w-[44px] p-0 relative touch-manipulation"
-                aria-label="Notifications"
-                title="Notifications"
-                onClick={() => navigate('/notifications')}
               >
-                <Bell className="h-5 w-5" aria-hidden="true" />
-                {unreadCount > 0 && (
-                  <Badge
-                    variant="destructive"
-                    className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs font-semibold"
-                  >
-                    {unreadCount > 99 ? '99+' : unreadCount}
-                  </Badge>
-                )}
+                <Link to="/notifications" aria-label="Notifications" title="Notifications">
+                  <Bell className="h-5 w-5" aria-hidden="true" />
+                  {unreadCount > 0 && (
+                    <Badge
+                      variant="destructive"
+                      className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs font-semibold"
+                    >
+                      {unreadCount > 99 ? '99+' : unreadCount}
+                    </Badge>
+                  )}
+                </Link>
               </Button>
             </div>
 
@@ -161,16 +160,14 @@ export const DashboardHeader = React.memo<DashboardHeaderProps>(
                   {/* Notifications on Mobile */}
                   {unreadCount > 0 && (
                     <div className="space-y-2">
-                      <Button
-                        variant="ghost"
-                        className="w-full justify-start min-h-[44px]"
-                        onClick={() => navigate('/notifications')}
-                      >
-                        <Bell className="h-4 w-4 mr-2" aria-hidden="true" />
-                        <span className="flex-1">Notifications</span>
-                        <Badge variant="destructive" className="ml-2">
-                          {unreadCount > 99 ? '99+' : unreadCount}
-                        </Badge>
+                      <Button asChild variant="ghost" className="w-full justify-start min-h-[44px]">
+                        <Link to="/notifications">
+                          <Bell className="h-4 w-4 mr-2" aria-hidden="true" />
+                          <span className="flex-1">Notifications</span>
+                          <Badge variant="destructive" className="ml-2">
+                            {unreadCount > 99 ? '99+' : unreadCount}
+                          </Badge>
+                        </Link>
                       </Button>
                     </div>
                   )}

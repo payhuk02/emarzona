@@ -4,7 +4,7 @@
 import { useEffect, useState } from 'react';
 import { Check, ChevronDown, Plus, Store as StoreIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { useStoreContext, type Store } from '@/contexts/StoreContext';
 import { STORE_CREATE_PATH } from '@/lib/store/store-create-path';
@@ -106,9 +106,8 @@ export function SidebarStoreSwitcher({ isCollapsed }: SidebarStoreSwitcherProps)
 
   if (!displayStore) {
     return (
-      <button
-        type="button"
-        onClick={() => navigate(STORE_CREATE_PATH)}
+      <Link
+        to={STORE_CREATE_PATH}
         className={cn(
           'flex items-center gap-2 rounded-xl border border-dashed border-border bg-muted/20 px-2 py-1.5 text-left transition-colors hover:bg-accent hover:text-foreground min-w-0',
           isCollapsed ? 'justify-center p-1.5' : 'w-full'
@@ -126,7 +125,7 @@ export function SidebarStoreSwitcher({ isCollapsed }: SidebarStoreSwitcherProps)
         {!isCollapsed && (
           <span className="truncate text-sm font-medium">{t('sidebar.chrome.createStore')}</span>
         )}
-      </button>
+      </Link>
     );
   }
 

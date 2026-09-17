@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   AlertCircle,
@@ -44,7 +44,6 @@ export const DashboardActionCenter = React.memo<DashboardActionCenterProps>(
     unreadNotifications = 0,
   }) => {
     const { t } = useTranslation();
-    const navigate = useNavigate();
 
     const items: ActionItem[] = [
       {
@@ -122,9 +121,8 @@ export const DashboardActionCenter = React.memo<DashboardActionCenterProps>(
           </div>
           <div className="flex flex-wrap gap-2 shrink-0">
             {unreadNotifications > 0 && (
-              <button
-                type="button"
-                onClick={() => navigate('/notifications')}
+              <Link
+                to="/notifications"
                 className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-2.5 sm:px-3 py-1.5 text-sm font-medium hover:bg-muted/60 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 aria-label={t('dashboard.actions.notificationsAria', '{{count}} notifications', {
                   count: unreadNotifications,
@@ -137,7 +135,7 @@ export const DashboardActionCenter = React.memo<DashboardActionCenterProps>(
                 <span className="hidden sm:inline">
                   {t('dashboard.actions.notificationsShort', 'notif.')}
                 </span>
-              </button>
+              </Link>
             )}
             {storeUrl && (
               <a
@@ -167,10 +165,9 @@ export const DashboardActionCenter = React.memo<DashboardActionCenterProps>(
             {items.map(item => {
               const Icon = item.icon;
               return (
-                <button
+                <Link
                   key={item.id}
-                  type="button"
-                  onClick={() => navigate(item.href)}
+                  to={item.href}
                   className={cn('dashboard-action-tile', toneClasses[item.tone])}
                 >
                   <div className="flex items-center justify-between gap-2 mb-2">
@@ -180,7 +177,7 @@ export const DashboardActionCenter = React.memo<DashboardActionCenterProps>(
                   <span className="text-sm sm:text-base font-medium leading-snug line-clamp-2">
                     {item.label}
                   </span>
-                </button>
+                </Link>
               );
             })}
           </div>
