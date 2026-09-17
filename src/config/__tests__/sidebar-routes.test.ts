@@ -18,7 +18,8 @@ function loadRegisteredRoutePatterns(): string[] {
   );
   const patterns: string[] = [];
   for (const re of [
-    /(?:prAuth|pr|protectedRoute|accountPage)\(\s*['`]([^'`]+)['`]/g,
+    // Aligné sur platform-routes-audit : adminRoutes utilise page('/admin/...')
+    /\b(?:pr(?:Auth)?|page|protectedRoute|accountPage)\(\s*['`]([^'`]+)['`]/g,
     /path=["']([^"']+)["']/g,
   ]) {
     let match: RegExpExecArray | null;
