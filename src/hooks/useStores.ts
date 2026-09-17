@@ -42,6 +42,28 @@ async function upsertStoreAppearance(row: Record<string, unknown>) {
   return error;
 }
 
+function isTransientStoreCreateError(
+  error: {
+    code?: string;
+    message?: string;
+  } | null
+): boolean {
+  if (!error) return false;
+  if (
+    error.code === '57014' ||
+    error.code === '25P02' ||
+    error.code === '08006' ||
+    error.code === 'PGRST000' ||
+    error.code === 'PGRST001' ||
+    error.code === 'PGRST002'
+  ) {
+    return true;
+  }
+  return /statement timeout|canceling statement|aborted|connection refused|upstream connect/i.test(
+    error.message || ''
+  );
+}
+
 // Lecture : utiliser uniquement les colonnes réellement présentes en base (évite
 // « column … does not exist » quand la prod n’a pas encore toutes les migrations).
 // L’interface `Store` garde les champs optionnels pour ce qui manque.
@@ -379,18 +401,35 @@ export const useStores = () => {
           typeof insertPayload.description === 'string' ? insertPayload.description : null,
       });
 
-      const { data, error } = await supabase
-        .from('stores')
-        .insert([storeInsertPayload as unknown as StoreInsert])
-        .select('id, name, slug, user_id, commerce_type, created_at')
-        .single();
+      let data: {
+        id: string;
+        name: string;
+        slug: string;
+        user_id: string;
+        commerce_type: string;
+        created_at: string;
+      } | null = null;
+      let error: { code?: string; message: string; details?: string; hint?: string } | null = null;
+      for (let attempt = 1; attempt <= 4; attempt += 1) {
+        const result = await supabase
+          .from('stores')
+          .insert([storeInsertPayload as unknown as StoreInsert])
+          .select('id, name, slug, user_id, commerce_type, created_at')
+          .single();
+        data = result.data;
+        error = result.error;
+        if (!error || !isTransientStoreCreateError(error) || attempt === 4) {
+          break;
+        }
+        await new Promise(resolve => setTimeout(resolve, 1_000 * attempt));
+      }
 
-      if (error) {
+      if (error || !data) {
         logger.error('Erreur create store (PostgREST)', {
-          code: (error as { code?: string }).code,
-          message: error.message,
-          details: (error as { details?: string }).details,
-          hint: (error as { hint?: string }).hint,
+          code: (error as { code?: string } | null)?.code,
+          message: error?.message,
+          details: (error as { details?: string } | null)?.details,
+          hint: (error as { hint?: string } | null)?.hint,
           columns: Object.keys(storeInsertPayload),
         });
         throw new Error(toUserErrorMessage(error) || 'Impossible de créer la boutique');

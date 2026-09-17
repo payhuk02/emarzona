@@ -497,32 +497,50 @@ export async function submitStoreExpressCreate(page: Page): Promise<void> {
   const createButton = page.getByTestId('store-express-create-submit');
   await expect(createButton).toBeEnabled({ timeout: 30_000 });
 
-  // Shared E2E / UI flake: first click sometimes does not fire POST — retry once.
-  let response: Awaited<ReturnType<Page['waitForResponse']>> | null = null;
-  for (let attempt = 1; attempt <= 2; attempt += 1) {
-    const createResponsePromise = page.waitForResponse(
-      res => res.url().includes('/rest/v1/stores') && res.request().method() === 'POST',
-      { timeout: 45_000 }
+  // Shared E2E pooler flake: client retries 57014; wait for 2xx (or hard failure).
+  const maxAttempts = 3;
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    const responsePromise = page.waitForResponse(
+      async res => {
+        if (!res.url().includes('/rest/v1/stores') || res.request().method() !== 'POST') {
+          return false;
+        }
+        if (res.status() >= 200 && res.status() < 300) return true;
+        const body = await res.text().catch(() => '');
+        // Ignore transient failures so we keep waiting for client-side retries.
+        return !isTransientExpressCreateFailure(res.status(), body);
+      },
+      { timeout: 75_000 }
     );
+
     await createButton.click();
-    response = await createResponsePromise.catch(() => null);
-    if (response) break;
-    if (attempt < 2) {
-      await page.waitForTimeout(750);
-      await acceptTermsDialogIfVisible(page);
-      await expect(createButton).toBeEnabled({ timeout: 10_000 });
+    const response = await responsePromise.catch(() => null);
+
+    if (response && response.status() >= 200 && response.status() < 300) {
+      await afterCreateUrl;
+      return;
     }
-  }
 
-  if (!response) {
-    throw new Error(`Express store create POST never fired — url=${page.url()}`);
-  }
-  if (response.status() < 200 || response.status() >= 300) {
-    const body = await response.text().catch(() => '');
-    throw new Error(`Express store create failed: ${response.status()} ${body}`);
-  }
+    if (response) {
+      const body = await response.text().catch(() => '');
+      throw new Error(`Express store create failed: ${response.status()} ${body}`);
+    }
 
-  await afterCreateUrl;
+    if (attempt === maxAttempts) {
+      throw new Error(`Express store create POST never succeeded — url=${page.url()}`);
+    }
+
+    await page.waitForTimeout(1_000 * attempt);
+    await acceptTermsDialogIfVisible(page);
+    await expect(createButton).toBeEnabled({ timeout: 15_000 });
+  }
+}
+
+function isTransientExpressCreateFailure(status: number, body: string): boolean {
+  if (status === 408 || status === 429 || status >= 502) return true;
+  return /57014|25P02|08006|PGRST000|PGRST001|PGRST002|statement timeout|canceling statement|aborted|connection refused|upstream connect/i.test(
+    body
+  );
 }
 
 export async function waitForStoreExpressCreateForm(page: Page): Promise<void> {
