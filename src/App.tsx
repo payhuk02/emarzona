@@ -314,22 +314,19 @@ const AppContent = () => {
         <Suspense fallback={null}>
           <PlatformVisitorTracker />
         </Suspense>
-        <Suspense fallback={<RouteChunkFallback />}>
-          {(() => {
-            const routes = (
-              <Routes>
-                {publicRoutes}
-                <Route element={<AuthenticatedAppLayout />}>
-                  {customerRoutes}
-                  {dashboardRoutes}
-                </Route>
-                {dashboardRedirectRoutes}
-                {adminRoutes}
-              </Routes>
-            );
-            return usePremiumTheme ? <AppPremiumShell>{routes}</AppPremiumShell> : routes;
-          })()}
-        </Suspense>
+        <AppPremiumShell enabled={usePremiumTheme}>
+          <Suspense fallback={<RouteChunkFallback />}>
+            <Routes>
+              {publicRoutes}
+              <Route element={<AuthenticatedAppLayout />}>
+                {customerRoutes}
+                {dashboardRoutes}
+              </Route>
+              {dashboardRedirectRoutes}
+              {adminRoutes}
+            </Routes>
+          </Suspense>
+        </AppPremiumShell>
         <Suspense fallback={null}>
           <CookieConsentBanner />
           <CrispChat />
