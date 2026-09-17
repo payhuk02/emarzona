@@ -234,9 +234,9 @@ export const SELLER_PREFIX_INCONSISTENCIES: readonly {
   { path: '/inventory', suggestedPrefix: '/dashboard/inventory', status: 'redirect' },
 ];
 
-/** Patterns d'extraction — pr / prAuth, accountPage (customer), protectedRoute, Route path=. */
+/** Patterns d'extraction — pr / prAuth / page, accountPage (customer), protectedRoute, Route path=. */
 export const ROUTE_PATH_EXTRACTION_PATTERNS: readonly RegExp[] = [
-  /\bpr(?:Auth)?\(\s*['"]([^'"]+)['"]/g,
+  /\b(?:pr(?:Auth)?|page)\(\s*['"]([^'"]+)['"]/g,
   /\baccountPage\(\s*['"]([^'"]+)['"]/g,
   /\bprotectedRoute\(\s*['"]([^'"]+)['"]/g,
   /<Route\s+path=["']([^"']+)["']/g,
