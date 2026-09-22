@@ -1,6 +1,7 @@
 /**
  * Layout discovery acheteur — shell unifié si connecté, PremiumNav pour invités.
- * Si déjà sous BuyerDiscoveryShellLayout (route parent), passe-through contenu seul.
+ * Si déjà sous BuyerDiscoveryShellLayout (route parent), passe-through avec
+ * ancêtre .landing-premium.marketplace-premium pour les styles mp-*.
  */
 
 import { lazy, ReactNode, Suspense } from 'react';
@@ -41,15 +42,20 @@ export function BuyerDiscoveryPageLayout({
   authenticated,
   mainAriaLabel,
   children,
-  guestClassName = 'min-h-screen overflow-x-hidden bg-background',
-  shellMainClassName = 'overflow-x-hidden',
+  guestClassName = 'landing-premium marketplace-premium min-h-screen overflow-x-hidden bg-background',
+  shellMainClassName = 'landing-premium marketplace-premium overflow-x-hidden',
   guestPremiumNav = true,
 }: BuyerDiscoveryPageLayoutProps) {
   const outletCtx = useOutletContext<BuyerDiscoveryOutletContext | undefined>();
 
-  // Chrome déjà fourni par BuyerDiscoveryShellLayout — contenu seul
+  // Chrome déjà fourni par BuyerDiscoveryShellLayout — conserver l’ancêtre premium
   if (outletCtx?.discoveryChromeActive) {
-    return <>{children}</>;
+    const wrapClass = outletCtx.authenticated ? shellMainClassName : cn(guestClassName, 'min-h-0');
+    return (
+      <div className={wrapClass} aria-label={mainAriaLabel}>
+        {children}
+      </div>
+    );
   }
 
   if (authenticated) {
@@ -62,7 +68,7 @@ export function BuyerDiscoveryPageLayout({
 
   return (
     <div
-      className={cn('landing-premium', guestClassName)}
+      className={cn('landing-premium marketplace-premium', guestClassName)}
       role="main"
       id="main-content"
       aria-label={mainAriaLabel}

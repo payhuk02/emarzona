@@ -4,7 +4,8 @@ import {
   useUserProductRecommendations,
   ProductRecommendation,
 } from '@/hooks/useProductRecommendations';
-import ProductCardModern from './ProductCardModern';
+import UnifiedProductCard from '@/components/products/UnifiedProductCard';
+import { transformToUnifiedProduct } from '@/lib/product-transform';
 import { SameStoreProductsSection } from './SameStoreProductsSection';
 import { ProductGrid } from '@/components/ui/ProductGrid';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -18,6 +19,31 @@ interface ProductRecommendationsProps {
   showFrequentlyBoughtTogether?: boolean;
   title?: string;
   className?: string;
+}
+
+function mapRecommendationToProduct(rec: ProductRecommendation) {
+  return transformToUnifiedProduct({
+    id: rec.product_id,
+    store_id: rec.store_id,
+    name: rec.product_name,
+    slug: rec.product_slug,
+    image_url: rec.image_url,
+    price: rec.price,
+    promotional_price: rec.promotional_price,
+    currency: rec.currency,
+    category: rec.category,
+    product_type: rec.product_type,
+    rating: rec.rating,
+    reviews_count: rec.reviews_count,
+    purchases_count: rec.purchases_count,
+    stores: {
+      id: rec.store_id,
+      name: rec.store_name,
+      slug: rec.store_slug,
+      logo_url: null,
+    },
+    created_at: new Date().toISOString(),
+  } as Parameters<typeof transformToUnifiedProduct>[0]);
 }
 
 /**
@@ -35,45 +61,22 @@ const ProductRecommendationsComponent: React.FC<ProductRecommendationsProps> = (
     error,
   } = useProductRecommendations(productId, limit, true);
 
-  // Transformer les recommandations en format ProductCardModern
   const products = useMemo(() => {
     if (!recommendations) return [];
-
-    return recommendations.map((rec: ProductRecommendation) => ({
-      id: rec.product_id,
-      store_id: rec.store_id,
-      name: rec.product_name,
-      slug: rec.product_slug,
-      image_url: rec.image_url,
-      price: rec.price,
-      promotional_price: rec.promotional_price,
-      currency: rec.currency,
-      category: rec.category,
-      product_type: rec.product_type,
-      rating: rec.rating,
-      reviews_count: rec.reviews_count,
-      purchases_count: rec.purchases_count,
-      stores: {
-        id: rec.store_id,
-        name: rec.store_name,
-        slug: rec.store_slug,
-        logo_url: null,
-      },
-      created_at: new Date().toISOString(),
-    }));
+    return recommendations.map(mapRecommendationToProduct);
   }, [recommendations]);
 
   if (error) {
-    return null; // Ne pas afficher d'erreur, simplement ne pas afficher la section
+    return null;
   }
 
   if (isLoading) {
     return (
       <div className={className}>
-        <Card>
+        <Card className="border-[var(--lp-border-light)] bg-[var(--lp-surface-elevated)] shadow-none">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-blue-500" />
+              <Sparkles className="h-5 w-5 text-[var(--lp-blue)]" />
               {title}
             </CardTitle>
           </CardHeader>
@@ -90,25 +93,28 @@ const ProductRecommendationsComponent: React.FC<ProductRecommendationsProps> = (
   }
 
   if (!products || products.length === 0) {
-    return null; // Ne pas afficher si aucune recommandation
+    return null;
   }
 
   return (
     <div className={className}>
-      <Card>
+      <Card className="border-[var(--lp-border-light)] bg-[var(--lp-surface-elevated)] shadow-none">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-blue-500" />
+            <Sparkles className="h-5 w-5 text-[var(--lp-blue)]" />
             {title}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <ProductGrid>
             {products.map(product => (
-              <ProductCardModern
+              <UnifiedProductCard
                 key={product.id}
                 product={product}
-                storeSlug={product.stores?.slug || 'default'}
+                variant="marketplace"
+                showAffiliate
+                showActions
+                className="h-full"
               />
             ))}
           </ProductGrid>
@@ -120,7 +126,6 @@ const ProductRecommendationsComponent: React.FC<ProductRecommendationsProps> = (
 
 ProductRecommendationsComponent.displayName = 'ProductRecommendationsComponent';
 
-// Optimisation avec React.memo pour éviter les re-renders inutiles
 export const ProductRecommendations = React.memo(
   ProductRecommendationsComponent,
   (prevProps, nextProps) => {
@@ -140,16 +145,12 @@ interface SameStoreProductsProps extends ProductRecommendationsProps {
   storeName?: string;
 }
 
-/**
- * Autres produits de la même boutique
- */
 const FrequentlyBoughtTogetherComponent: React.FC<SameStoreProductsProps> = props => (
   <SameStoreProductsSection {...props} withCard />
 );
 
 FrequentlyBoughtTogetherComponent.displayName = 'FrequentlyBoughtTogetherComponent';
 
-// Optimisation avec React.memo pour éviter les re-renders inutiles
 export const FrequentlyBoughtTogether = React.memo(
   FrequentlyBoughtTogetherComponent,
   (prevProps, nextProps) => {
@@ -171,9 +172,6 @@ interface PersonalizedRecommendationsProps {
   className?: string;
 }
 
-/**
- * Composant pour afficher les recommandations personnalisées pour l'utilisateur
- */
 const PersonalizedRecommendationsComponent: React.FC<PersonalizedRecommendationsProps> = ({
   userId,
   limit = 6,
@@ -185,40 +183,15 @@ const PersonalizedRecommendationsComponent: React.FC<PersonalizedRecommendations
     error,
   } = useUserProductRecommendations(userId, limit, !!userId);
 
-  // Transformer les recommandations en format ProductCardModern
   const products = useMemo(() => {
     if (!recommendations) return [];
-
-    return recommendations.map((rec: ProductRecommendation) => ({
-      id: rec.product_id,
-      store_id: rec.store_id,
-      name: rec.product_name,
-      slug: rec.product_slug,
-      image_url: rec.image_url,
-      price: rec.price,
-      promotional_price: rec.promotional_price,
-      currency: rec.currency,
-      category: rec.category,
-      product_type: rec.product_type,
-      rating: rec.rating,
-      reviews_count: rec.reviews_count,
-      purchases_count: rec.purchases_count,
-      stores: {
-        id: rec.store_id,
-        name: rec.store_name,
-        slug: rec.store_slug,
-        logo_url: null,
-      },
-      created_at: new Date().toISOString(),
-    }));
+    return recommendations.map(mapRecommendationToProduct);
   }, [recommendations]);
 
-  // Ne pas afficher si pas d'userId, mais ignorer les erreurs (fonction peut ne pas exister)
   if (!userId) {
     return null;
   }
 
-  // Si erreur, ne pas afficher mais ne pas bloquer le reste de la page
   if (error) {
     return null;
   }
@@ -226,10 +199,10 @@ const PersonalizedRecommendationsComponent: React.FC<PersonalizedRecommendations
   if (isLoading) {
     return (
       <div className={className}>
-        <Card>
+        <Card className="border-[var(--lp-border-light)] bg-[var(--lp-surface-elevated)] shadow-none">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-green-500" />
+              <TrendingUp className="h-5 w-5 text-[var(--lp-blue)]" />
               Recommandé pour vous
             </CardTitle>
           </CardHeader>
@@ -251,20 +224,23 @@ const PersonalizedRecommendationsComponent: React.FC<PersonalizedRecommendations
 
   return (
     <div className={className}>
-      <Card>
+      <Card className="border-[var(--lp-border-light)] bg-[var(--lp-surface-elevated)] shadow-none">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-green-500" />
+            <TrendingUp className="h-5 w-5 text-[var(--lp-blue)]" />
             Recommandé pour vous
           </CardTitle>
         </CardHeader>
         <CardContent>
           <ProductGrid>
             {products.map(product => (
-              <ProductCardModern
+              <UnifiedProductCard
                 key={product.id}
                 product={product}
-                storeSlug={product.stores?.slug || 'default'}
+                variant="marketplace"
+                showAffiliate
+                showActions
+                className="h-full"
               />
             ))}
           </ProductGrid>
@@ -276,7 +252,6 @@ const PersonalizedRecommendationsComponent: React.FC<PersonalizedRecommendations
 
 PersonalizedRecommendationsComponent.displayName = 'PersonalizedRecommendationsComponent';
 
-// Optimisation avec React.memo pour éviter les re-renders inutiles
 export const PersonalizedRecommendations = React.memo(
   PersonalizedRecommendationsComponent,
   (prevProps, nextProps) => {

@@ -62,6 +62,7 @@ interface MarketplaceProductsSectionProps {
   error: string | null;
   hasLoadedOnce: boolean;
   isLoadingProducts: boolean;
+  viewMode?: 'grid' | 'list';
   pagination: {
     currentPage: number;
     itemsPerPage: number;
@@ -85,6 +86,7 @@ export const MarketplaceProductsSection = React.memo<MarketplaceProductsSectionP
     error,
     hasLoadedOnce,
     isLoadingProducts,
+    viewMode = 'grid',
     pagination,
     onRetry,
     onPageChange,
@@ -97,6 +99,7 @@ export const MarketplaceProductsSection = React.memo<MarketplaceProductsSectionP
     /** Ref ancre pagination — pas d'animation scroll (contenu critique toujours visible). */
     const productsRef = useRef<HTMLDivElement>(null);
     const eagerImageCount = 2;
+    const isList = viewMode === 'list';
 
     // Calculer le nombre total de pages
     const totalPages = Math.ceil(pagination.totalItems / pagination.itemsPerPage);
@@ -116,17 +119,17 @@ export const MarketplaceProductsSection = React.memo<MarketplaceProductsSectionP
       [products]
     );
 
-    // ✅ OPTIMISATION: Mémoriser le rendu des produits pour ProductGrid
+    // ✅ OPTIMISATION: Mémoriser le rendu des produits
     const renderedProducts = useMemo(
       () =>
         transformedProducts.map((unifiedProduct, index) => (
           <UnifiedProductCard
             key={unifiedProduct.id}
             product={unifiedProduct}
-            variant="marketplace"
+            variant={isList ? 'compact' : 'marketplace'}
             showAffiliate={true}
             showActions={true}
-            className="h-full"
+            className={isList ? 'w-full' : 'h-full'}
             imagePriority={index < eagerImageCount}
             onAction={(action, prod) => {
               if (action === 'view') {
@@ -137,7 +140,7 @@ export const MarketplaceProductsSection = React.memo<MarketplaceProductsSectionP
             }}
           />
         )),
-      [transformedProducts, onBuyProduct, eagerImageCount]
+      [transformedProducts, onBuyProduct, eagerImageCount, isList]
     );
 
     const showInitialSkeleton =
@@ -185,7 +188,7 @@ export const MarketplaceProductsSection = React.memo<MarketplaceProductsSectionP
               role="alert"
               aria-live="polite"
             >
-              <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-red-500/10 mx-auto mb-4 flex items-center justify-center">
+              <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-lg bg-red-500/10 mx-auto mb-4 flex items-center justify-center">
                 <AlertCircle className="h-8 w-8 sm:h-10 sm:w-10 text-red-500" aria-hidden="true" />
               </div>
               <h3 className="mp-empty-state text-xl sm:text-2xl font-semibold mb-2">
@@ -196,7 +199,7 @@ export const MarketplaceProductsSection = React.memo<MarketplaceProductsSectionP
               </p>
               <Button
                 onClick={onRetry}
-                className="lp-btn-primary rounded-full h-10 sm:h-12 px-4 sm:px-8 text-xs sm:text-sm"
+                className="lp-btn-primary rounded-lg h-10 sm:h-12 px-4 sm:px-8 text-xs sm:text-sm"
                 aria-label={t('marketplace.error.retry', 'Réessayer')}
               >
                 {t('marketplace.error.retry', 'Réessayer')}
@@ -224,7 +227,7 @@ export const MarketplaceProductsSection = React.memo<MarketplaceProductsSectionP
                   aria-live="polite"
                   aria-label={t('marketplace.filtering', 'Mise à jour des produits...')}
                 >
-                  <div className="flex items-center gap-2 rounded-full bg-background/90 px-4 py-2 shadow-md border">
+                  <div className="flex items-center gap-2 rounded-md bg-background/90 px-4 py-2 shadow-md border">
                     <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
                     <span className="text-sm text-muted-foreground">
                       {t('marketplace.filtering', 'Mise à jour...')}
@@ -232,7 +235,13 @@ export const MarketplaceProductsSection = React.memo<MarketplaceProductsSectionP
                   </div>
                 </div>
               )}
-              <ProductGrid>{renderedProducts}</ProductGrid>
+              {isList ? (
+                <div className="mp-product-list flex flex-col gap-3 sm:gap-4">
+                  {renderedProducts}
+                </div>
+              ) : (
+                <ProductGrid>{renderedProducts}</ProductGrid>
+              )}
 
               {/* Pagination */}
               {totalPages > 1 && (
@@ -294,7 +303,7 @@ export const MarketplaceProductsSection = React.memo<MarketplaceProductsSectionP
             </div>
           ) : (
             <div className="mp-empty-state text-center py-12 sm:py-16 lg:py-20 px-2">
-              <div className="h-20 w-20 sm:h-24 sm:w-24 rounded-full bg-[var(--lp-surface-muted)] mx-auto mb-4 sm:mb-6 flex items-center justify-center">
+              <div className="h-20 w-20 sm:h-24 sm:w-24 rounded-lg bg-[var(--lp-surface-muted)] mx-auto mb-4 sm:mb-6 flex items-center justify-center">
                 <AlertCircle
                   className="h-10 w-10 sm:h-12 sm:w-12 text-[var(--lp-text-muted)]"
                   aria-hidden="true"

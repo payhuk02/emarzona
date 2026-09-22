@@ -15,7 +15,6 @@ import { ArrowRight, Users, Sparkles } from '@/components/icons';
 import { Link } from 'react-router-dom';
 import { StoreCreateCtaLink } from '@/components/store/StoreCreateCtaLink';
 import { useToast } from '@/hooks/use-toast';
-import { PremiumNav } from '@/components/landing/premium/PremiumNav';
 import { ContextualFilters } from '@/components/marketplace/ContextualFilters';
 import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
@@ -204,13 +203,14 @@ const MarketplacePage = () => {
       filters.productType === 'artist' && filters.certificateOfAuthenticity ? true : null,
   };
 
+  // Recherche dédiée uniquement hors catalogue unifié (évite double-fetch RPC + search_products)
   const { data: searchResults, isLoading: searchLoading } = useProductSearch(
     debouncedSearch,
     searchFilters,
     {
       limit: pagination.itemsPerPage,
       offset: (pagination.currentPage - 1) * pagination.itemsPerPage,
-      enabled: !!hasSearchQuery && debouncedSearch.trim().length > 0,
+      enabled: !!hasSearchQuery && debouncedSearch.trim().length > 0 && !shouldUseUnifiedRpc,
     }
   );
 
@@ -473,7 +473,7 @@ const MarketplacePage = () => {
     [toast, navigate, user, finalUserId, authLoading]
   );
 
-  // Partage de produit (utilisé par ProductCardModern)
+  // Partage de produit
   // Note: Cette fonction est disponible mais peut ne pas être utilisée directement ici
 
   // ✅ REFACTORING: totalPages, canGoPrevious, canGoNext sont maintenant fournis par useMarketplacePagination
@@ -601,7 +601,7 @@ const MarketplacePage = () => {
         shellMainClassName="landing-premium marketplace-premium overflow-x-hidden"
         guestPremiumNav={false}
       >
-        {/* Skip to main content link for keyboard navigation (invités) */}
+        {/* Skip to main content — invités : nav déjà fournie par BuyerDiscoveryShellLayout */}
         {!useAuthenticatedShell && (
           <a
             href="#main-content"
@@ -611,8 +611,6 @@ const MarketplacePage = () => {
             {t('marketplace.hero.skipToMain', 'Aller au contenu principal')}
           </a>
         )}
-
-        {!useAuthenticatedShell && <PremiumNav />}
 
         {/* Breadcrumb Navigation */}
         <div
@@ -700,7 +698,7 @@ const MarketplacePage = () => {
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="text-center sm:text-left">
                 <h2 id="style-quiz-title" className="text-lg sm:text-xl mb-2">
-                  🎨 Découvrez Votre Style Unique
+                  Découvrez votre style unique
                 </h2>
                 <p id="style-quiz-description" className="text-sm max-w-md">
                   Répondez à quelques questions et recevez des recommandations personnalisées
@@ -710,7 +708,7 @@ const MarketplacePage = () => {
               <Button
                 asChild
                 size="lg"
-                className="lp-btn-primary rounded-full px-6 py-3"
+                className="lp-btn-primary rounded-lg px-6 py-3"
                 aria-label={t('marketplace.quiz.button', 'Commencer le quiz de style personnalisé')}
               >
                 <Link to="/personalization/quiz" className="flex items-center space-x-2">
@@ -904,7 +902,7 @@ const MarketplacePage = () => {
                               : [...filters.tags, tag];
                             updateFilter({ tags: newTags });
                           }}
-                          className={`px-2 sm:px-3 py-1 rounded-full text-xs transition-all duration-300 ${
+                          className={`px-2 sm:px-3 py-1 rounded-md text-xs transition-colors ${
                             filters.tags.includes(tag) ? 'mp-chip mp-chip--active' : 'mp-chip'
                           }`}
                         >
@@ -947,8 +945,10 @@ const MarketplacePage = () => {
           error={catalogError}
           hasLoadedOnce={hasLoadedOnce}
           isLoadingProducts={isLoadingProducts}
+          viewMode={filters.viewMode}
           pagination={pagination}
           onRetry={() => {
+            queryClient.invalidateQueries({ queryKey: ['marketplace-catalog'] });
             queryClient.invalidateQueries({ queryKey: ['marketplace-products'] });
             queryClient.invalidateQueries({ queryKey: ['filtered-digital-products'] });
             queryClient.invalidateQueries({ queryKey: ['filtered-physical-products'] });
@@ -1003,7 +1003,7 @@ const MarketplacePage = () => {
               <StoreCreateCtaLink className="w-full sm:w-auto">
                 <Button
                   size="lg"
-                  className="lp-btn-primary rounded-full h-11 sm:h-12 px-8 w-full sm:w-auto"
+                  className="lp-btn-primary rounded-lg h-11 sm:h-12 px-8 w-full sm:w-auto"
                 >
                   {getValue('marketplace.cta.startFree')}
                   <ArrowRight className="ml-2 h-4 w-4" />
@@ -1012,7 +1012,7 @@ const MarketplacePage = () => {
               <Link to="/community" className="w-full sm:w-auto">
                 <Button
                   size="lg"
-                  className="lp-btn-outline rounded-full h-11 sm:h-12 px-8 w-full sm:w-auto"
+                  className="lp-btn-outline rounded-lg h-11 sm:h-12 px-8 w-full sm:w-auto"
                 >
                   <Users className="mr-2 h-4 w-4" />
                   {getValue('marketplace.cta.joinCommunity')}

@@ -5,7 +5,7 @@
  * Date: 31 Janvier 2025
  */
 
-import { useMemo } from 'react';
+import { useMemo, type ComponentType } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FilterState } from '@/types/marketplace';
 import {
@@ -17,7 +17,6 @@ import {
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Download,
   Package,
@@ -59,7 +58,7 @@ export function ContextualFilters({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Sous-type digital */}
             <div>
-              <Label className="text-sm font-medium mb-2 block text-slate-300">
+              <Label className="text-sm font-medium mb-2 block text-[var(--lp-text)]">
                 <Download className="inline h-4 w-4 mr-2" />
                 Sous-type
               </Label>
@@ -69,7 +68,7 @@ export function ContextualFilters({
                   onFiltersChange({ digitalSubType: value === 'all' ? undefined : value })
                 }
               >
-                <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                <SelectTrigger className="mp-select h-10 border-[var(--lp-border-light)] bg-[var(--lp-surface-elevated)] text-[var(--lp-text)]">
                   <SelectValue placeholder="Tous les sous-types" />
                 </SelectTrigger>
                 <SelectContent>
@@ -97,9 +96,12 @@ export function ContextualFilters({
                 onCheckedChange={checked =>
                   onFiltersChange({ instantDelivery: checked as boolean })
                 }
-                className="border-slate-600 data-[state=checked]:bg-blue-600"
+                className="border-[var(--lp-border-light)] data-[state=checked]:bg-[var(--lp-blue)]"
               />
-              <Label htmlFor="instantDelivery" className="text-sm text-slate-300 cursor-pointer">
+              <Label
+                htmlFor="instantDelivery"
+                className="text-sm text-[var(--lp-text-muted)] cursor-pointer"
+              >
                 Livraison instantanée uniquement
               </Label>
             </div>
@@ -111,7 +113,7 @@ export function ContextualFilters({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Disponibilité stock */}
             <div>
-              <Label className="text-sm font-medium mb-2 block text-slate-300">
+              <Label className="text-sm font-medium mb-2 block text-[var(--lp-text)]">
                 <Package className="inline h-4 w-4 mr-2" />
                 Disponibilité
               </Label>
@@ -126,7 +128,7 @@ export function ContextualFilters({
                   })
                 }
               >
-                <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                <SelectTrigger className="mp-select h-10 border-[var(--lp-border-light)] bg-[var(--lp-surface-elevated)] text-[var(--lp-text)]">
                   <SelectValue placeholder="Toutes les disponibilités" />
                 </SelectTrigger>
                 <SelectContent>
@@ -140,7 +142,7 @@ export function ContextualFilters({
 
             {/* Livraison */}
             <div>
-              <Label className="text-sm font-medium mb-2 block text-slate-300">
+              <Label className="text-sm font-medium mb-2 block text-[var(--lp-text)]">
                 <Truck className="inline h-4 w-4 mr-2" />
                 Livraison
               </Label>
@@ -153,7 +155,7 @@ export function ContextualFilters({
                   })
                 }
               >
-                <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                <SelectTrigger className="mp-select h-10 border-[var(--lp-border-light)] bg-[var(--lp-surface-elevated)] text-[var(--lp-text)]">
                   <SelectValue placeholder="Tous les types de livraison" />
                 </SelectTrigger>
                 <SelectContent>
@@ -167,14 +169,16 @@ export function ContextualFilters({
 
             {/* Catégorie physique */}
             <div>
-              <Label className="text-sm font-medium mb-2 block text-slate-300">Catégorie</Label>
+              <Label className="text-sm font-medium mb-2 block text-[var(--lp-text)]">
+                Catégorie
+              </Label>
               <Select
                 value={filters.physicalCategory || 'all'}
                 onValueChange={value =>
                   onFiltersChange({ physicalCategory: value === 'all' ? undefined : value })
                 }
               >
-                <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                <SelectTrigger className="mp-select h-10 border-[var(--lp-border-light)] bg-[var(--lp-surface-elevated)] text-[var(--lp-text)]">
                   <SelectValue placeholder="Toutes les catégories" />
                 </SelectTrigger>
                 <SelectContent>
@@ -197,7 +201,7 @@ export function ContextualFilters({
         return (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label className="text-sm font-medium mb-2 block text-slate-300">
+              <Label className="text-sm font-medium mb-2 block text-[var(--lp-text)]">
                 <Layers className="inline h-4 w-4 mr-2" />
                 Catégorie
               </Label>
@@ -211,7 +215,7 @@ export function ContextualFilters({
                   })
                 }
               >
-                <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                <SelectTrigger className="mp-select h-10 border-[var(--lp-border-light)] bg-[var(--lp-surface-elevated)] text-[var(--lp-text)]">
                   <SelectValue placeholder="Toutes les catégories" />
                 </SelectTrigger>
                 <SelectContent>
@@ -226,7 +230,7 @@ export function ContextualFilters({
             </div>
 
             <div>
-              <Label className="text-sm font-medium mb-2 block text-slate-300">
+              <Label className="text-sm font-medium mb-2 block text-[var(--lp-text)]">
                 Sous-catégorie
               </Label>
               <Select
@@ -239,7 +243,7 @@ export function ContextualFilters({
                 }}
                 disabled={!filters.serviceParentCategoryId}
               >
-                <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                <SelectTrigger className="mp-select h-10 border-[var(--lp-border-light)] bg-[var(--lp-surface-elevated)] text-[var(--lp-text)]">
                   <SelectValue placeholder="Toutes les sous-catégories" />
                 </SelectTrigger>
                 <SelectContent>
@@ -255,7 +259,7 @@ export function ContextualFilters({
 
             {/* Type de service */}
             <div>
-              <Label className="text-sm font-medium mb-2 block text-slate-300">
+              <Label className="text-sm font-medium mb-2 block text-[var(--lp-text)]">
                 <Calendar className="inline h-4 w-4 mr-2" />
                 Type de service
               </Label>
@@ -265,7 +269,7 @@ export function ContextualFilters({
                   onFiltersChange({ serviceType: value === 'all' ? undefined : value })
                 }
               >
-                <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                <SelectTrigger className="mp-select h-10 border-[var(--lp-border-light)] bg-[var(--lp-surface-elevated)] text-[var(--lp-text)]">
                   <SelectValue placeholder="Tous les types" />
                 </SelectTrigger>
                 <SelectContent>
@@ -281,7 +285,7 @@ export function ContextualFilters({
 
             {/* Localisation */}
             <div>
-              <Label className="text-sm font-medium mb-2 block text-slate-300">
+              <Label className="text-sm font-medium mb-2 block text-[var(--lp-text)]">
                 <MapPin className="inline h-4 w-4 mr-2" />
                 Localisation
               </Label>
@@ -296,7 +300,7 @@ export function ContextualFilters({
                   })
                 }
               >
-                <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                <SelectTrigger className="mp-select h-10 border-[var(--lp-border-light)] bg-[var(--lp-surface-elevated)] text-[var(--lp-text)]">
                   <SelectValue placeholder="Toutes les localisations" />
                 </SelectTrigger>
                 <SelectContent>
@@ -316,9 +320,12 @@ export function ContextualFilters({
                 onCheckedChange={checked =>
                   onFiltersChange({ calendarAvailable: checked as boolean })
                 }
-                className="border-slate-600 data-[state=checked]:bg-blue-600"
+                className="border-[var(--lp-border-light)] data-[state=checked]:bg-[var(--lp-blue)]"
               />
-              <Label htmlFor="calendarAvailable" className="text-sm text-slate-300 cursor-pointer">
+              <Label
+                htmlFor="calendarAvailable"
+                className="text-sm text-[var(--lp-text-muted)] cursor-pointer"
+              >
                 Calendrier disponible
               </Label>
             </div>
@@ -330,7 +337,7 @@ export function ContextualFilters({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Niveau de difficulté */}
             <div>
-              <Label className="text-sm font-medium mb-2 block text-slate-300">
+              <Label className="text-sm font-medium mb-2 block text-[var(--lp-text)]">
                 <GraduationCap className="inline h-4 w-4 mr-2" />
                 Niveau
               </Label>
@@ -345,7 +352,7 @@ export function ContextualFilters({
                   })
                 }
               >
-                <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                <SelectTrigger className="mp-select h-10 border-[var(--lp-border-light)] bg-[var(--lp-surface-elevated)] text-[var(--lp-text)]">
                   <SelectValue placeholder="Tous les niveaux" />
                 </SelectTrigger>
                 <SelectContent>
@@ -359,7 +366,7 @@ export function ContextualFilters({
 
             {/* Type d'accès */}
             <div>
-              <Label className="text-sm font-medium mb-2 block text-slate-300">
+              <Label className="text-sm font-medium mb-2 block text-[var(--lp-text)]">
                 <Clock className="inline h-4 w-4 mr-2" />
                 Type d'accès
               </Label>
@@ -372,7 +379,7 @@ export function ContextualFilters({
                   })
                 }
               >
-                <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                <SelectTrigger className="mp-select h-10 border-[var(--lp-border-light)] bg-[var(--lp-surface-elevated)] text-[var(--lp-text)]">
                   <SelectValue placeholder="Tous les types d'accès" />
                 </SelectTrigger>
                 <SelectContent>
@@ -385,7 +392,9 @@ export function ContextualFilters({
 
             {/* Durée totale */}
             <div>
-              <Label className="text-sm font-medium mb-2 block text-slate-300">Durée totale</Label>
+              <Label className="text-sm font-medium mb-2 block text-[var(--lp-text)]">
+                Durée totale
+              </Label>
               <Select
                 value={filters.courseDuration || 'all'}
                 onValueChange={value =>
@@ -395,7 +404,7 @@ export function ContextualFilters({
                   })
                 }
               >
-                <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                <SelectTrigger className="mp-select h-10 border-[var(--lp-border-light)] bg-[var(--lp-surface-elevated)] text-[var(--lp-text)]">
                   <SelectValue placeholder="Toutes les durées" />
                 </SelectTrigger>
                 <SelectContent>
@@ -415,7 +424,7 @@ export function ContextualFilters({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Type d'artiste */}
             <div>
-              <Label className="text-sm font-medium mb-2 block text-slate-300">
+              <Label className="text-sm font-medium mb-2 block text-[var(--lp-text)]">
                 <Palette className="inline h-4 w-4 mr-2" />
                 Type d'artiste
               </Label>
@@ -425,7 +434,7 @@ export function ContextualFilters({
                   onFiltersChange({ artistType: value === 'all' ? undefined : value })
                 }
               >
-                <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                <SelectTrigger className="mp-select h-10 border-[var(--lp-border-light)] bg-[var(--lp-surface-elevated)] text-[var(--lp-text)]">
                   <SelectValue placeholder="Tous les types" />
                 </SelectTrigger>
                 <SelectContent>
@@ -442,7 +451,7 @@ export function ContextualFilters({
 
             {/* Type d'édition */}
             <div>
-              <Label className="text-sm font-medium mb-2 block text-slate-300">
+              <Label className="text-sm font-medium mb-2 block text-[var(--lp-text)]">
                 <Award className="inline h-4 w-4 mr-2" />
                 Type d'édition
               </Label>
@@ -457,7 +466,7 @@ export function ContextualFilters({
                   })
                 }
               >
-                <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                <SelectTrigger className="mp-select h-10 border-[var(--lp-border-light)] bg-[var(--lp-surface-elevated)] text-[var(--lp-text)]">
                   <SelectValue placeholder="Tous les types" />
                 </SelectTrigger>
                 <SelectContent>
@@ -478,11 +487,11 @@ export function ContextualFilters({
                 onCheckedChange={checked =>
                   onFiltersChange({ certificateOfAuthenticity: checked as boolean })
                 }
-                className="border-slate-600 data-[state=checked]:bg-blue-600"
+                className="border-[var(--lp-border-light)] data-[state=checked]:bg-[var(--lp-blue)]"
               />
               <Label
                 htmlFor="certificateOfAuthenticity"
-                className="text-sm text-slate-300 cursor-pointer flex items-center gap-2"
+                className="text-sm text-[var(--lp-text-muted)] cursor-pointer flex items-center gap-2"
               >
                 <Shield className="h-4 w-4" />
                 Certificat d'authenticité uniquement
@@ -491,7 +500,9 @@ export function ContextualFilters({
 
             {/* Disponibilité */}
             <div>
-              <Label className="text-sm font-medium mb-2 block text-slate-300">Disponibilité</Label>
+              <Label className="text-sm font-medium mb-2 block text-[var(--lp-text)]">
+                Disponibilité
+              </Label>
               <Select
                 value={filters.artworkAvailability || 'all'}
                 onValueChange={value =>
@@ -501,7 +512,7 @@ export function ContextualFilters({
                   })
                 }
               >
-                <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                <SelectTrigger className="mp-select h-10 border-[var(--lp-border-light)] bg-[var(--lp-surface-elevated)] text-[var(--lp-text)]">
                   <SelectValue placeholder="Toutes les disponibilités" />
                 </SelectTrigger>
                 <SelectContent>
@@ -532,7 +543,7 @@ export function ContextualFilters({
   };
 
   const getProductTypeIcon = (type: string) => {
-    const icons: Record<string, React.ComponentType<{ className?: string }>> = {
+    const icons: Record<string, ComponentType<{ className?: string }>> = {
       digital: Download,
       physical: Package,
       service: Calendar,
@@ -549,14 +560,12 @@ export function ContextualFilters({
   const Icon = getProductTypeIcon(productType);
 
   return (
-    <Card className="bg-slate-800/80 backdrop-blur-sm border-slate-600 mt-4">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-base font-semibold text-white flex items-center gap-2">
-          <Icon className="h-5 w-5" />
-          Filtres spécifiques - {getProductTypeLabel(productType)}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="pt-0">{typeSpecificFilters}</CardContent>
-    </Card>
+    <div className="mp-contextual-filters mt-4 rounded-lg border border-[var(--lp-border-light)] bg-[var(--lp-surface-elevated)] p-4 sm:p-5">
+      <h3 className="mp-controls__title text-base font-semibold text-[var(--lp-text)] flex items-center gap-2 mb-4">
+        <Icon className="h-5 w-5 text-[var(--lp-blue)]" aria-hidden />
+        Filtres spécifiques — {getProductTypeLabel(productType)}
+      </h3>
+      {typeSpecificFilters}
+    </div>
   );
 }

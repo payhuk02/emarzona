@@ -73,7 +73,7 @@ export function BuyerDiscoveryShellLayout() {
   }
 
   return (
-    <div className="landing-premium min-h-screen overflow-x-hidden bg-background">
+    <div className="landing-premium marketplace-premium min-h-screen overflow-x-hidden bg-background">
       <Suspense fallback={<GuestNavFallback />}>
         <PremiumNav />
       </Suspense>

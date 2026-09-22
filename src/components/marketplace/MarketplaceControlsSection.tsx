@@ -73,13 +73,13 @@ export const MarketplaceControlsSection = React.memo<MarketplaceControlsSectionP
                 </Button>
               </div>
 
-              <div className="flex items-center gap-1 rounded-full border border-[var(--lp-border-light)] p-1 bg-[var(--lp-surface-elevated)]">
+              <div className="flex items-center gap-1 rounded-lg border border-[var(--lp-border-light)] p-1 bg-[var(--lp-surface-elevated)]">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => onFilterChange({ viewMode: 'grid' })}
                   className={cn(
-                    'rounded-full h-9 px-3',
+                    'rounded-md h-9 px-3',
                     filters.viewMode === 'grid' && 'mp-chip--active'
                   )}
                   aria-label={t('marketplace.view.grid')}
@@ -92,7 +92,7 @@ export const MarketplaceControlsSection = React.memo<MarketplaceControlsSectionP
                   size="sm"
                   onClick={() => onFilterChange({ viewMode: 'list' })}
                   className={cn(
-                    'rounded-full h-9 px-3',
+                    'rounded-md h-9 px-3',
                     filters.viewMode === 'list' && 'mp-chip--active'
                   )}
                   aria-label={t('marketplace.view.list')}

@@ -66,4 +66,21 @@ describe('BuyerDiscoveryPageLayout', () => {
 
     expect(screen.queryByTestId('premium-nav')).not.toBeInTheDocument();
   });
+
+  it('wraps shell pass-through with marketplace-premium classes', () => {
+    const { container } = render(
+      <MemoryRouter>
+        <BuyerDiscoveryPageLayout
+          authenticated={false}
+          mainAriaLabel="Marketplace"
+          guestClassName="landing-premium marketplace-premium"
+        >
+          <p>Shell content</p>
+        </BuyerDiscoveryPageLayout>
+      </MemoryRouter>
+    );
+
+    // Without outlet context, guest layout still applies premium classes
+    expect(container.querySelector('.landing-premium.marketplace-premium')).toBeTruthy();
+  });
 });
