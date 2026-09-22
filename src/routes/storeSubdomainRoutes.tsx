@@ -6,16 +6,22 @@
  * Le slug n'apparaît PAS dans l'URL (il est fourni via StoreSlugContext).
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, lazy, Suspense } from 'react';
 import { lazyPage } from '@/routes/lazyPage';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import { StoreSlugProvider } from '@/contexts/StoreSlugContext';
-import { StorefrontAppLayout } from '@/components/layout/StorefrontAppLayout';
 import { RedirectToPlatformAuth } from '@/components/auth/RedirectToPlatformAuth';
 import { RedirectToPlatformVendorMessaging } from '@/components/auth/RedirectToPlatformVendorMessaging';
 import { CommercePageErrorBoundary } from '@/components/errors/CommercePageErrorBoundary';
 import { FeatureErrorBoundary } from '@/components/monitoring/FeatureErrorBoundary';
 import { registerSoftNavigate } from '@/lib/navigation/soft-navigate';
+import { RouteOutletSuspense } from '@/components/navigation/RouteChunkFallback';
+
+const StorefrontAppLayout = lazy(() =>
+  import('@/components/layout/StorefrontAppLayout').then(m => ({
+    default: m.StorefrontAppLayout,
+  }))
+);
 
 const Storefront = lazyPage(() => import('@/pages/Storefront'));
 const ProductDetail = lazyPage(() => import('@/pages/ProductDetail'));
@@ -56,7 +62,13 @@ export function StoreSubdomainRoutes({ storeSlug }: StoreSubdomainRoutesProps) {
     <StoreSlugProvider slug={storeSlug}>
       <SoftNavigateRegistrar />
       <Routes>
-        <Route element={<StorefrontAppLayout />}>
+        <Route
+          element={
+            <RouteOutletSuspense>
+              <StorefrontAppLayout />
+            </RouteOutletSuspense>
+          }
+        >
           {/* Root = Storefront de la boutique */}
           <Route path="/" element={<Storefront />} />
 

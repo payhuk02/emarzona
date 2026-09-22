@@ -8,15 +8,19 @@
  * Date: 1 Février 2025
  */
 
-import { useEffect, ReactNode } from 'react';
+import { useEffect, ReactNode, lazy, Suspense } from 'react';
 import { useCurrentStoreBySubdomain } from '@/hooks/useStoreBySubdomain';
 import { detectSubdomain, RESERVED_SUBDOMAINS } from '@/lib/subdomain-detector';
 import { logger } from '@/lib/logger';
 import { useStoreContext } from '@/contexts/StoreContext';
 import { StoreNotFound } from './StoreNotFound';
-import { StoreSubdomainRoutes } from '@/routes/storeSubdomainRoutes';
 import { softNavigateTo } from '@/lib/navigation/soft-navigate';
 import { Loader2 } from 'lucide-react';
+
+/** Hors app-core plateforme — StorefrontAppLayout / StoreHeader ne doivent pas grossir index-*.js. */
+const StoreSubdomainRoutes = lazy(() =>
+  import('@/routes/storeSubdomainRoutes').then(m => ({ default: m.StoreSubdomainRoutes }))
+);
 
 interface SubdomainMiddlewareProps {
   children: ReactNode;
@@ -131,7 +135,20 @@ export function SubdomainMiddleware({ children }: SubdomainMiddlewareProps) {
     }
 
     // ✅ Store trouvée : afficher les routes de boutique au lieu des routes plateforme
-    return <StoreSubdomainRoutes storeSlug={storeSlug} />;
+    return (
+      <Suspense
+        fallback={
+          <div className="flex min-h-screen items-center justify-center">
+            <div className="flex flex-col items-center space-y-4">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <p className="text-muted-foreground">Chargement de la boutique...</p>
+            </div>
+          </div>
+        }
+      >
+        <StoreSubdomainRoutes storeSlug={storeSlug} />
+      </Suspense>
+    );
   }
 
   // Domaine plateforme : afficher les routes normales

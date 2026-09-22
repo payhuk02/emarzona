@@ -126,11 +126,15 @@ describe('url-validator', () => {
     });
 
     it("devrait rediriger vers /dashboard si pas de callback d'erreur", () => {
-      const loc = mockLocation('');
+      mockLocation('');
+      const pushState = vi.spyOn(window.history, 'pushState');
 
       safeRedirect('https://evil.com/steal');
 
-      expect(loc.assign).toHaveBeenCalledWith('/dashboard');
+      // softNavigateTo relatif sans registrant → pushState (pas location.assign)
+      expect(pushState).toHaveBeenCalledWith(null, '', '/dashboard');
+      expect(window.location.assign).not.toHaveBeenCalled();
+      pushState.mockRestore();
     });
   });
 

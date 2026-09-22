@@ -6,7 +6,6 @@
 
 import { Outlet } from 'react-router-dom';
 import { lazy, Suspense } from 'react';
-import { PremiumNav } from '@/components/landing/premium/PremiumNav';
 import { Skeleton } from '@/components/ui/skeleton';
 import { RouteOutletSuspense } from '@/components/navigation/RouteChunkFallback';
 import { useAuth } from '@/contexts/AuthContext';
@@ -14,6 +13,10 @@ import '@/styles/landing-premium.css';
 
 const AppPageShell = lazy(() =>
   import('@/components/layout/AppPageShell').then(m => ({ default: m.AppPageShell }))
+);
+
+const PremiumNav = lazy(() =>
+  import('@/components/landing/premium/PremiumNav').then(m => ({ default: m.PremiumNav }))
 );
 
 export type BuyerDiscoveryOutletContext = {
@@ -43,6 +46,12 @@ function AuthShellFallback() {
   );
 }
 
+function GuestNavFallback() {
+  return (
+    <div className="h-[var(--lp-nav-offset)] shrink-0 border-b border-border/40" aria-hidden />
+  );
+}
+
 export function BuyerDiscoveryShellLayout() {
   const { user, loading: authLoading } = useAuth();
 
@@ -65,7 +74,9 @@ export function BuyerDiscoveryShellLayout() {
 
   return (
     <div className="landing-premium min-h-screen overflow-x-hidden bg-background">
-      <PremiumNav />
+      <Suspense fallback={<GuestNavFallback />}>
+        <PremiumNav />
+      </Suspense>
       <div className="pt-[var(--lp-nav-offset)]">
         <main id="main-content" role="main" tabIndex={-1} className="outline-none">
           <RouteOutletSuspense>

@@ -108,9 +108,13 @@ import { publicRoutes } from '@/routes/publicRoutes';
 import { customerRoutes } from '@/routes/customerRoutes';
 import { dashboardRoutes, dashboardRedirectRoutes } from '@/routes/dashboardRoutes';
 import { adminRoutes } from '@/routes/adminRoutes';
-import { PublicAppLayout } from '@/components/layout/PublicAppLayout';
 
-/** Shell auth hors du chunk index — évite AppSidebar dans app-core (budget 340 KB). */
+/** Layouts hors du chunk index — budget app-core 340 KB. */
+const PublicAppLayout = lazy(() =>
+  import('@/components/layout/PublicAppLayout').then(m => ({
+    default: m.PublicAppLayout,
+  }))
+);
 const AuthenticatedAppLayout = lazy(() =>
   import('@/components/layout/AuthenticatedAppLayout').then(m => ({
     default: m.AuthenticatedAppLayout,

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, lazy } from 'react';
 import { lazyPage } from '@/routes/lazyPage';
 import { Route, Navigate } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
@@ -6,7 +6,13 @@ import { generateStoreUrl, generateProductUrl } from '@/lib/store-utils';
 import { softNavigateTo } from '@/lib/navigation/soft-navigate';
 import { Loader2 } from 'lucide-react';
 import { CommercePageErrorBoundary } from '@/components/errors/CommercePageErrorBoundary';
-import { BuyerDiscoveryShellLayout } from '@/components/layout/BuyerDiscoveryShellLayout';
+
+/** Hors app-core — PremiumNav / discovery shell ne doivent pas grossir index-*.js. */
+const BuyerDiscoveryShellLayout = lazy(() =>
+  import('@/components/layout/BuyerDiscoveryShellLayout').then(m => ({
+    default: m.BuyerDiscoveryShellLayout,
+  }))
+);
 
 // Pages publiques
 const Landing = lazyPage(() => import('@/pages/Landing'));
