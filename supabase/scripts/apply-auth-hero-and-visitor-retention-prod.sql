@@ -18,6 +18,7 @@ DECLARE
   src_images jsonb;
   media_images jsonb := '{}'::jsonb;
   carousel jsonb;
+  sell_ways jsonb;
   v_url text;
   v_key text;
 BEGIN
@@ -51,6 +52,13 @@ BEGIN
      AND jsonb_typeof(carousel) = 'object'
      AND carousel <> '{}'::jsonb THEN
     media_images := media_images || jsonb_build_object('landingCarousel', carousel);
+  END IF;
+
+  sell_ways := src_images -> 'landingSellWays';
+  IF sell_ways IS NOT NULL
+     AND jsonb_typeof(sell_ways) = 'object'
+     AND sell_ways <> '{}'::jsonb THEN
+    media_images := media_images || jsonb_build_object('landingSellWays', sell_ways);
   END IF;
 
   IF media_images = '{}'::jsonb THEN

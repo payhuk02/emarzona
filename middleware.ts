@@ -558,6 +558,20 @@ async function fetchHtmlBypass(req: Request): Promise<Response> {
   );
 }
 
+/** Drop origin CDN freshness headers so Vercel/CF don't keep a multi-day HTML HIT. */
+function stripInheritedCacheValidators(headers: Headers): void {
+  for (const key of [
+    'age',
+    'etag',
+    'last-modified',
+    'x-vercel-cache',
+    'x-vercel-id',
+    'cf-cache-status',
+  ]) {
+    headers.delete(key);
+  }
+}
+
 function buildCspHtmlResponse(
   html: string,
   res: Response,
@@ -566,6 +580,7 @@ function buildCspHtmlResponse(
   const nonce = generateCspNonce();
   const body = injectScriptNonces(html, nonce);
   const headers = new Headers(res.headers);
+  stripInheritedCacheValidators(headers);
   headers.set('content-type', 'text/html; charset=utf-8');
   applyCspResponseHeaders(headers, nonce);
   for (const [key, value] of Object.entries(extraHeaders)) {
@@ -619,10 +634,11 @@ export default async function middleware(req: Request): Promise<Response | undef
     if (!ct.includes('text/html')) return res;
     const html = await res.text();
 
-    // Keep HTML edge cache short so hashed /assets/* from a previous deploy
-    // cannot outlive the deployment that published them.
+    // Short CDN TTL only — never inherit multi-day Age/ETag from origin static HTML.
     return buildCspHtmlResponse(html, res, {
-      'cache-control': 'public, max-age=0, s-maxage=60, stale-while-revalidate=300',
+      'cache-control': 'public, max-age=0, must-revalidate',
+      'cdn-cache-control': 'max-age=60, stale-while-revalidate=300',
+      'vercel-cdn-cache-control': 'max-age=60, stale-while-revalidate=300',
       'x-edge-caching': 'swr-enabled',
     });
   }
@@ -650,7 +666,9 @@ export default async function middleware(req: Request): Promise<Response | undef
     const html = await res.text();
     const rewritten = injectMeta(html, meta);
     return buildCspHtmlResponse(rewritten, res, {
-      'cache-control': 'public, max-age=300, s-maxage=600',
+      'cache-control': 'public, max-age=0, must-revalidate',
+      'cdn-cache-control': 'max-age=600, stale-while-revalidate=300',
+      'vercel-cdn-cache-control': 'max-age=600, stale-while-revalidate=300',
       'x-prerendered': 'bot',
       'x-seo-cache': cache,
     });

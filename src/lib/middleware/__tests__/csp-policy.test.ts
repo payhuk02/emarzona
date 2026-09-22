@@ -17,4 +17,9 @@ describe('csp-policy', () => {
     expect(header).toContain('https://*.i.posthog.com');
     expect(header).toContain('https://*.posthog.com');
   });
+
+  it('connect-src allows self (covers /cdn-cgi challenge same-origin)', () => {
+    const header = buildCspHeader('n');
+    expect(header).toMatch(/connect-src[^;]*'self'/);
+  });
 });

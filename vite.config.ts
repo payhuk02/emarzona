@@ -7,6 +7,7 @@ import { compression } from 'vite-plugin-compression2';
 import type { Plugin } from 'vite';
 import { inlineCriticalCSS } from './vite-plugins/inline-critical-css';
 import { injectSwCacheVersion } from './vite-plugins/inject-sw-cache-version';
+import { lowercaseHashedAssetNames } from './vite-plugins/lowercase-hashed-asset-names';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
@@ -165,6 +166,7 @@ export default defineConfig(({ mode }) => {
           deleteOriginalAssets: false,
         }),
       isProduction && injectSwCacheVersion(buildId),
+      isProduction && lowercaseHashedAssetNames(),
     ].filter(Boolean),
     resolve: {
       alias: { '@': path.resolve(__dirname, './src') },

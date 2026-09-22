@@ -82,6 +82,43 @@ Cache Level: Cache Everything
 Edge TTL: 1 year
 ```
 
+### Règle 6 — JS/CSS boutiques (même TTL)
+
+```
+URL: *.myemarzona.shop/js/*
+Cache Level: Cache Everything
+Edge TTL: 1 year
+```
+
+### Règle 7 — Ne jamais challenger les assets build
+
+Bot Fight / Super Bot Fight / WAF : **Skip** ou **Allow** pour :
+
+```
+*.myemarzona.shop/js/*
+*.myemarzona.shop/assets/*
+*.myemarzona.shop/fonts/*
+*emarzona.com/js/*
+*emarzona.com/assets/*
+*emarzona.com/fonts/*
+```
+
+Sinon Cloudflare peut renvoyer **403** + CSP `connect-src 'none'` sur un chunk (page blanche SPA).
+
+### Règle 8 — Ne pas cacher les 404 assets
+
+Cache Rules : pour `/js/*` et `/assets/*`, condition **Response Status Code equals 200** avant Cache Everything.
+Les 404 (mauvais hash / casse) ne doivent **jamais** être mis en cache `immutable` un an.
+
+### Script automatisé (purge + skip bots)
+
+```powershell
+$env:CLOUDFLARE_API_TOKEN = '<Zone.Cache Purge + Zone.WAF Edit>'
+# optionnel si le lookup zone échoue :
+# $env:CLOUDFLARE_ZONE_ID = '<zone id myemarzona.shop>'
+node scripts/cloudflare-purge-and-skip-bots.mjs
+```
+
 ---
 
 ## 6. Headers alignés Vercel
