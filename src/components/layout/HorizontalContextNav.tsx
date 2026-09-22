@@ -5,7 +5,8 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
+import { SoftNavLink } from '@/components/navigation/SoftLink';
 import { useTranslation } from 'react-i18next';
 import { ChevronDown, Lock } from 'lucide-react';
 import {
@@ -92,14 +93,9 @@ function MegaMenuLink({
   }
 
   return (
-    <NavLink
-      to={item.url}
-      onClick={() => onAfterNavigate?.()}
-      onMouseEnter={() => prefetchRouteChunk(item.url)}
-      className={linkClassName}
-    >
+    <SoftNavLink to={item.url} onClick={() => onAfterNavigate?.()} className={linkClassName}>
       {renderContent()}
-    </NavLink>
+    </SoftNavLink>
   );
 }
 
@@ -214,17 +210,15 @@ function DesktopDomainItem({
 
   if (isDirectLink && domain.rootPath) {
     return (
-      <NavLink
+      <SoftNavLink
         to={domain.rootPath}
         className={cn(
           domainTriggerClass,
           domain.isActive && 'bg-primary/10 text-primary shadow-none'
         )}
-        onMouseEnter={() => prefetchRouteChunk(domain.rootPath!)}
-        onFocus={() => prefetchRouteChunk(domain.rootPath!)}
       >
         <span className="overflow-visible">{domain.shortLabel}</span>
-      </NavLink>
+      </SoftNavLink>
     );
   }
 
@@ -288,7 +282,7 @@ function MobileDomainDrawer({
 
   if (isDirectLink && domain.rootPath) {
     return (
-      <NavLink
+      <SoftNavLink
         to={domain.rootPath}
         className={cn(
           'inline-flex h-10 shrink-0 items-center gap-1.5 rounded-full px-3 text-sm font-medium whitespace-nowrap',
@@ -297,7 +291,7 @@ function MobileDomainDrawer({
       >
         {DomainIcon ? <DomainIcon className="h-4 w-4 shrink-0" aria-hidden /> : null}
         {domain.shortLabel}
-      </NavLink>
+      </SoftNavLink>
     );
   }
 

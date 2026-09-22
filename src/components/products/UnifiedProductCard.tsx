@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 import React, { useMemo, useCallback, useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { SoftLink } from '@/components/navigation/SoftLink';
 import { generateProductUrl, generatePaymentUrl } from '@/lib/store-utils';
 import {
   resolveMarketplaceProductCardUrl,
@@ -434,7 +434,7 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
           isPremiumCard ? 'mp-product-card__image' : 'bg-muted/30'
         )}
       >
-        <Link to={productUrl} className="block w-full h-full" onClick={trackSponsoredClick}>
+        <SoftLink to={productUrl} className="block w-full h-full" onClick={trackSponsoredClick}>
           {product.type === 'artist' && allArtistImages.length > 1 ? (
             <ArtistImageCarousel
               images={allArtistImages}
@@ -499,7 +499,7 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
               )}
             </div>
           )}
-        </Link>
+        </SoftLink>
 
         {/* Absolute top-left artist badges */}
         {product.type === 'artist' && (
@@ -516,14 +516,14 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2">
           {(isDigital || isArtist || isCourse) && (
             <Button size="sm" asChild>
-              <Link to={productUrl} onClick={trackSponsoredClick}>
+              <SoftLink to={productUrl} onClick={trackSponsoredClick}>
                 {isArtist ? (
                   <Palette className="h-4 w-4 mr-2" />
                 ) : (
                   <Play className="h-4 w-4 mr-2" />
                 )}
                 Découvrir
-              </Link>
+              </SoftLink>
             </Button>
           )}
 
@@ -573,7 +573,7 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
 
           {product.type !== 'service' && (
             <Button size="sm" variant="secondary" asChild>
-              <Link
+              <SoftLink
                 to={productUrl}
                 onClick={() => {
                   trackSponsoredClick();
@@ -582,7 +582,7 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
               >
                 <Eye className="h-4 w-4 mr-2" />
                 Voir
-              </Link>
+              </SoftLink>
             </Button>
           )}
         </div>
@@ -671,7 +671,7 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
         )}
 
         {/* Title */}
-        <Link to={productUrl} onClick={trackSponsoredClick}>
+        <SoftLink to={productUrl} onClick={trackSponsoredClick}>
           <h3
             id={`product-title-${product.id}`}
             className={cn(
@@ -684,7 +684,7 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
           >
             {productName}
           </h3>
-        </Link>
+        </SoftLink>
 
         {product.type === 'physical' && physicalCheckoutDisplay && (
           <PhysicalCheckoutMethodBadge paymentOptions={product.payment_options} className="mb-2" />

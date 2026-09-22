@@ -54,7 +54,7 @@ export function usePrefetchRoutes(options: PrefetchRoutesOptions = {}) {
 
     const prefetchedHover = new Set<string>();
 
-    const handleMouseEnter = (e: MouseEvent) => {
+    const prefetchFromEvent = (e: Event, label: 'hover' | 'focus') => {
       const target = e.target;
       if (!target || !(target instanceof Element)) return;
 
@@ -67,14 +67,21 @@ export function usePrefetchRoutes(options: PrefetchRoutesOptions = {}) {
         prefetchedHover.add(pathname);
         const started = prefetchRouteChunk(pathname);
         if (started) {
-          logger.debug(`Prefetched route chunk (hover): ${pathname}`);
+          logger.debug(`Prefetched route chunk (${label}): ${pathname}`);
         }
       } catch {
         // Liens externes ou href invalides
       }
     };
 
+    const handleMouseEnter = (e: MouseEvent) => prefetchFromEvent(e, 'hover');
+    const handleFocusIn = (e: FocusEvent) => prefetchFromEvent(e, 'focus');
+
     document.addEventListener('mouseenter', handleMouseEnter, true);
-    return () => document.removeEventListener('mouseenter', handleMouseEnter, true);
+    document.addEventListener('focusin', handleFocusIn, true);
+    return () => {
+      document.removeEventListener('mouseenter', handleMouseEnter, true);
+      document.removeEventListener('focusin', handleFocusIn, true);
+    };
   }, [enabled, hoverRoutes]);
 }

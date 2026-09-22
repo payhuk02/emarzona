@@ -4,7 +4,6 @@ import { Route, Navigate } from 'react-router-dom';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { SellerRoutePermissionGuard } from '@/components/billing/SellerRoutePermissionGuard';
 import { SellerLegacyPathRedirect } from '@/routes/SellerLegacyPathRedirect';
-import { RouteOutletSuspense } from '@/components/navigation/RouteChunkFallback';
 import { logger } from '@/lib/logger';
 
 /** Page seller sous AuthenticatedAppLayout (garde plan au niveau page). */
@@ -13,9 +12,7 @@ const pr = (path: string, Component: React.LazyExoticComponent<React.ComponentTy
     path={path}
     element={
       <SellerRoutePermissionGuard>
-        <RouteOutletSuspense>
-          <Component />
-        </RouteOutletSuspense>
+        <Component />
       </SellerRoutePermissionGuard>
     }
   />

@@ -77,8 +77,10 @@ export function useFilteredDigitalProducts(options: FilteredProductsOptions) {
       }
     },
     enabled: enabled && filters.productType === 'digital',
-    staleTime: 30000, // 30 secondes
-    gcTime: 300000, // 5 minutes (anciennement cacheTime)
+    staleTime: 5 * 60 * 1000, // 5 minutes — listes marketplace
+    gcTime: 10 * 60 * 1000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -142,8 +144,10 @@ export function useFilteredPhysicalProducts(options: FilteredProductsOptions) {
       }
     },
     enabled: enabled && filters.productType === 'physical',
-    staleTime: 30000,
-    gcTime: 300000,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -212,8 +216,10 @@ export function useFilteredServiceProducts(options: FilteredProductsOptions) {
       }
     },
     enabled: enabled && filters.productType === 'service',
-    staleTime: 30000,
-    gcTime: 300000,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -278,8 +284,10 @@ export function useFilteredCourseProducts(options: FilteredProductsOptions) {
       }
     },
     enabled: enabled && filters.productType === 'course',
-    staleTime: 30000,
-    gcTime: 300000,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -345,8 +353,10 @@ export function useFilteredArtistProducts(options: FilteredProductsOptions) {
       }
     },
     enabled: enabled && filters.productType === 'artist',
-    staleTime: 30000,
-    gcTime: 300000,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
 }
 

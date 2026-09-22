@@ -137,6 +137,7 @@ export function useMarketplaceCatalog({
     staleTime: MARKETPLACE_CACHE_SOFT_STALE_MS,
     gcTime: cacheStrategies.products.gcTime,
     refetchOnWindowFocus: cacheStrategies.products.refetchOnWindowFocus,
+    refetchOnMount: cacheStrategies.products.refetchOnMount,
     placeholderData: previous => previous,
     structuralSharing: true,
     retry: 2,

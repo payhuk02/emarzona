@@ -32,6 +32,7 @@ import type { Store } from '@/hooks/useStores';
 import { useLCPPreload } from '@/hooks/useLCPPreload';
 import { useAdaptiveLoading } from '@/hooks/useAdaptiveLoading';
 import { useStoreSlug } from '@/contexts/StoreSlugContext';
+import { useStorefrontShell } from '@/contexts/StorefrontShellContext';
 import { generateStoreUrl, generateProductUrl } from '@/lib/store-utils';
 import { buildCheckoutUrl } from '@/lib/checkout/checkout-route';
 import { detectSubdomain } from '@/lib/subdomain-detector';
@@ -57,6 +58,8 @@ const StorefrontPage = ({ previewMode = false, storeOverride = null }: Storefron
   const { slug: paramSlug } = useParams<{ slug: string }>();
   const contextSlug = useStoreSlug();
   const slug = paramSlug || contextSlug;
+  const storefrontShell = useStorefrontShell();
+  const chromeFromLayout = Boolean(storefrontShell?.chromeProvided) && !previewMode;
   const { getValue } = usePageCustomization('storefront');
   const navigate = useNavigate();
   const [store, setStore] = useState<Store | null>(null);
@@ -491,7 +494,7 @@ const StorefrontPage = ({ previewMode = false, storeOverride = null }: Storefron
         />
       )}
 
-      <StoreThemeProvider store={store}>
+      <StoreThemeProvider store={chromeFromLayout ? null : store}>
         {previewMode && (
           <div
             className="sticky top-0 z-50 border-b border-amber-300/40 bg-amber-50 px-4 py-2 text-center text-sm text-amber-950 dark:border-amber-500/30 dark:bg-amber-950/80 dark:text-amber-100"
@@ -501,10 +504,16 @@ const StorefrontPage = ({ previewMode = false, storeOverride = null }: Storefron
           </div>
         )}
         <div
-          className="min-h-screen flex flex-col overflow-x-hidden store-theme-active"
-          style={{ backgroundColor: store?.background_color || undefined }}
+          className={
+            chromeFromLayout
+              ? 'flex flex-col overflow-x-hidden'
+              : 'min-h-screen flex flex-col overflow-x-hidden store-theme-active'
+          }
+          style={
+            chromeFromLayout ? undefined : { backgroundColor: store?.background_color || undefined }
+          }
         >
-          {store && (
+          {!chromeFromLayout && store && (
             <StoreHeader
               store={
                 {
@@ -739,7 +748,7 @@ const StorefrontPage = ({ previewMode = false, storeOverride = null }: Storefron
             </div>
           </main>
 
-          {store && (
+          {store && !chromeFromLayout && (
             <StoreFooter
               storeName={store.name}
               facebook_url={store.facebook_url || undefined}

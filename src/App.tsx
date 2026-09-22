@@ -108,6 +108,7 @@ import { publicRoutes } from '@/routes/publicRoutes';
 import { customerRoutes } from '@/routes/customerRoutes';
 import { dashboardRoutes, dashboardRedirectRoutes } from '@/routes/dashboardRoutes';
 import { adminRoutes } from '@/routes/adminRoutes';
+import { PublicAppLayout } from '@/components/layout/PublicAppLayout';
 
 /** Shell auth hors du chunk index — évite AppSidebar dans app-core (budget 340 KB). */
 const AuthenticatedAppLayout = lazy(() =>
@@ -317,7 +318,7 @@ const AppContent = () => {
         <AppPremiumShell enabled={usePremiumTheme}>
           <Suspense fallback={<RouteChunkFallback />}>
             <Routes>
-              {publicRoutes}
+              <Route element={<PublicAppLayout />}>{publicRoutes}</Route>
               <Route element={<AuthenticatedAppLayout />}>
                 {customerRoutes}
                 {dashboardRoutes}
@@ -346,9 +347,22 @@ const AppContent = () => {
 const queryClient = createOptimizedQueryClient();
 const persister = createIDBPersister('emarzona-react-query');
 
+/** Aligné sur cacheStrategies.products.gcTime — évite vague de refetch post-hydrate. */
+const PERSIST_MAX_AGE_MS = 30 * 60 * 1000;
+
 const App = () => (
   <HelmetProvider>
-    <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
+    <PersistQueryClientProvider
+      client={queryClient}
+      persistOptions={{
+        persister,
+        maxAge: PERSIST_MAX_AGE_MS,
+        dehydrateOptions: {
+          shouldDehydrateQuery: query =>
+            query.state.status === 'success' && query.state.fetchStatus !== 'fetching',
+        },
+      }}
+    >
       <TooltipProvider>
         <Toaster />
         <BrowserRouter

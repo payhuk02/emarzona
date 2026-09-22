@@ -4,6 +4,7 @@ import {
   softNavigateTo,
   registerSoftNavigate,
   isAbsoluteHttpUrl,
+  toSoftNavTarget,
 } from '@/lib/navigation/soft-navigate';
 
 describe('softNavigate', () => {
@@ -29,6 +30,14 @@ describe('softNavigate', () => {
     expect(isAbsoluteHttpUrl('https://x.com/a')).toBe(true);
   });
 
+  it('toSoftNavTarget normalise same-origin', () => {
+    expect(toSoftNavTarget('/dashboard')).toBe('/dashboard');
+    expect(toSoftNavTarget('https://www.emarzona.com/marketplace?q=1')).toBe('/marketplace?q=1');
+    expect(toSoftNavTarget('https://shop.myemarzona.shop/p')).toBe(
+      'https://shop.myemarzona.shop/p'
+    );
+  });
+
   it('utilise navigate pour les chemins relatifs', () => {
     softNavigate(navigate, '/dashboard/orders');
     expect(navigate).toHaveBeenCalledWith('/dashboard/orders');
@@ -52,18 +61,35 @@ describe('softNavigate', () => {
     expect(navigate).toHaveBeenCalledWith('/account/orders');
   });
 
-  it('softNavigateTo sans registrant hard-assigne un chemin relatif', () => {
+  it('softNavigateTo sans registrant pushState + popstate (pas assign)', () => {
+    const pushState = vi.spyOn(window.history, 'pushState');
+    const dispatch = vi.spyOn(window, 'dispatchEvent');
     softNavigateTo('/login');
-    expect(window.location.assign).toHaveBeenCalledWith('/login');
+    expect(window.location.assign).not.toHaveBeenCalled();
+    expect(pushState).toHaveBeenCalled();
+    expect(dispatch).toHaveBeenCalledWith(expect.any(PopStateEvent));
     expect(navigate).not.toHaveBeenCalled();
+    pushState.mockRestore();
+    dispatch.mockRestore();
   });
 
-  it('registerSoftNavigate(null) désenregistre', () => {
+  it('softNavigateTo sans registrant normalise same-origin absolu', () => {
+    const pushState = vi.spyOn(window.history, 'pushState');
+    softNavigateTo('https://www.emarzona.com/login');
+    expect(window.location.assign).not.toHaveBeenCalled();
+    expect(pushState).toHaveBeenCalledWith(null, '', '/login');
+    pushState.mockRestore();
+  });
+
+  it('registerSoftNavigate(null) désenregistre puis pushState relatif', () => {
+    const pushState = vi.spyOn(window.history, 'pushState');
     registerSoftNavigate(navigate);
     registerSoftNavigate(null);
     softNavigateTo('/dashboard');
     expect(navigate).not.toHaveBeenCalled();
-    expect(window.location.assign).toHaveBeenCalledWith('/dashboard');
+    expect(window.location.assign).not.toHaveBeenCalled();
+    expect(pushState).toHaveBeenCalled();
+    pushState.mockRestore();
   });
 });
 
@@ -100,7 +126,6 @@ describe('redirectToPlatformLogin on-platform', () => {
     expect(navigate).toHaveBeenCalledWith('/login');
     expect(window.location.assign).not.toHaveBeenCalled();
 
-    // also covers softTo path when used directly
     softTo('/register');
     expect(navigate).toHaveBeenCalledWith('/register');
   });

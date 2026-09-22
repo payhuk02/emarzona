@@ -21,8 +21,8 @@ const CACHE_PREFIX = 'marketplace_';
 const CACHE_VERSION = '1.2.1';
 /** TTL max en localStorage (données encore affichables). */
 export const MARKETPLACE_CACHE_HARD_TTL_MS = 10 * 60 * 1000;
-/** Au-delà de ce délai, React Query refetch en arrière-plan (SWR). */
-export const MARKETPLACE_CACHE_SOFT_STALE_MS = 90 * 1000;
+/** Au-delà de ce délai, React Query refetch en arrière-plan (SWR). Aligné ~5–10 min pour nav fluide. */
+export const MARKETPLACE_CACHE_SOFT_STALE_MS = 5 * 60 * 1000;
 const DEFAULT_TTL = MARKETPLACE_CACHE_HARD_TTL_MS;
 
 /**

@@ -16,6 +16,41 @@ export function registerSoftNavigate(navigate: NavigateFunction | null): void {
 }
 
 /**
+ * Chemins relatifs ou URL same-origin → chemin SPA.
+ * URL cross-origin inchangée (hard nav volontaire).
+ */
+export function toSoftNavTarget(to: string): string {
+  const target = to?.trim();
+  if (!target) return target;
+
+  if (!isAbsoluteHttpUrl(target)) {
+    return target;
+  }
+
+  try {
+    const url = new URL(target);
+    if (typeof window !== 'undefined' && url.origin === window.location.origin) {
+      return `${url.pathname}${url.search}${url.hash}`;
+    }
+  } catch {
+    /* URL invalide */
+  }
+
+  return target;
+}
+
+/**
+ * Soft nav sans registrant RR : pushState + popstate pour mettre à jour BrowserRouter
+ * sans recharger le boot (évite location.assign).
+ */
+function softPushState(pathWithSearchHash: string): void {
+  if (typeof window === 'undefined') return;
+  const next = pathWithSearchHash.startsWith('/') ? pathWithSearchHash : `/${pathWithSearchHash}`;
+  window.history.pushState(window.history.state, '', next);
+  window.dispatchEvent(new PopStateEvent('popstate', { state: window.history.state }));
+}
+
+/**
  * Navigue en client-side si chemin relatif ou même origine ;
  * sinon assign hard (sous-domaine boutique / domaine custom).
  */
@@ -23,25 +58,16 @@ export function softNavigate(navigate: NavigateFunction, to: string): void {
   const target = to?.trim();
   if (!target) return;
 
-  if (!isAbsoluteHttpUrl(target)) {
-    navigate(target);
+  const soft = toSoftNavTarget(target);
+  if (!isAbsoluteHttpUrl(soft)) {
+    navigate(soft);
     return;
   }
 
-  try {
-    const url = new URL(target);
-    if (typeof window !== 'undefined' && url.origin === window.location.origin) {
-      navigate(`${url.pathname}${url.search}${url.hash}`);
-      return;
-    }
-  } catch {
-    /* URL invalide — fallback */
-  }
-
-  window.location.assign(target);
+  window.location.assign(soft);
 }
 
-/** Soft nav sans hook — utilise le navigate enregistré, sinon hard assign. */
+/** Soft nav sans hook — utilise le navigate enregistré, sinon pushState (relatif) / assign. */
 export function softNavigateTo(to: string): void {
   const target = to?.trim();
   if (!target) return;
@@ -51,20 +77,11 @@ export function softNavigateTo(to: string): void {
     return;
   }
 
-  if (!isAbsoluteHttpUrl(target)) {
-    window.location.assign(target);
+  const soft = toSoftNavTarget(target);
+  if (!isAbsoluteHttpUrl(soft)) {
+    softPushState(soft);
     return;
   }
 
-  try {
-    const url = new URL(target);
-    if (typeof window !== 'undefined' && url.origin === window.location.origin) {
-      window.location.assign(`${url.pathname}${url.search}${url.hash}`);
-      return;
-    }
-  } catch {
-    /* fall through */
-  }
-
-  window.location.assign(target);
+  window.location.assign(soft);
 }

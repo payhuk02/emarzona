@@ -6,6 +6,7 @@ import { generateStoreUrl, generateProductUrl } from '@/lib/store-utils';
 import { softNavigateTo } from '@/lib/navigation/soft-navigate';
 import { Loader2 } from 'lucide-react';
 import { CommercePageErrorBoundary } from '@/components/errors/CommercePageErrorBoundary';
+import { BuyerDiscoveryShellLayout } from '@/components/layout/BuyerDiscoveryShellLayout';
 
 // Pages publiques
 const Landing = lazyPage(() => import('@/pages/Landing'));
@@ -228,29 +229,36 @@ export const publicRoutes = (
     <Route path="/auth/login" element={<Navigate to="/login" replace />} />
     <Route path="/auth/signup" element={<Navigate to="/register" replace />} />
     <Route path="/auth/sso/:storeSlug" element={<StoreSsoLoginPage />} />
-    <Route
-      path="/marketplace"
-      element={
-        <CommercePageErrorBoundary pageName="le marketplace">
-          <Marketplace />
-        </CommercePageErrorBoundary>
-      }
-    />
-    <Route
-      path="/marketplace/category/:categorySlug"
-      element={
-        <CommercePageErrorBoundary pageName="le marketplace">
-          <Marketplace />
-        </CommercePageErrorBoundary>
-      }
-    />
-    <Route path="/recommendations" element={<Recommendations />} />
-    <Route path="/recommendations/history-based" element={<HistoryBasedRecommendations />} />
-    <Route path="/discover" element={<Discover />} />
-    <Route path="/trending" element={<Trending />} />
+
+    {/* Discovery — chrome persistant (auth AppPageShell / guest PremiumNav) */}
+    <Route element={<BuyerDiscoveryShellLayout />}>
+      <Route
+        path="/marketplace"
+        element={
+          <CommercePageErrorBoundary pageName="le marketplace">
+            <Marketplace />
+          </CommercePageErrorBoundary>
+        }
+      />
+      <Route
+        path="/marketplace/category/:categorySlug"
+        element={
+          <CommercePageErrorBoundary pageName="le marketplace">
+            <Marketplace />
+          </CommercePageErrorBoundary>
+        }
+      />
+      <Route path="/recommendations" element={<Recommendations />} />
+      <Route path="/recommendations/history-based" element={<HistoryBasedRecommendations />} />
+      <Route path="/discover" element={<Discover />} />
+      <Route path="/trending" element={<Trending />} />
+      <Route path="/community" element={<CommunityPage />} />
+      <Route path="/products/compare" element={<ProductsCompare />} />
+      <Route path="/auctions" element={<AuctionsListPage />} />
+    </Route>
+
     <Route path="/personalization/quiz" element={<StyleQuizPage />} />
     <Route path="/personalization/recommendations" element={<PersonalizedRecommendationsPage />} />
-    <Route path="/community" element={<CommunityPage />} />
     <Route path="/cart" element={<Navigate to="/marketplace" replace />} />
     <Route path="/cart-old" element={<Navigate to="/marketplace" replace />} />
     <Route
@@ -319,7 +327,6 @@ export const publicRoutes = (
     {/* Produits publics */}
     <Route path="/digital/search" element={<DigitalProductsSearch />} />
     <Route path="/digital/compare" element={<DigitalProductsCompare />} />
-    <Route path="/products/compare" element={<ProductsCompare />} />
     <Route path="/download/:token" element={<SecureDownloadPage />} />
     <Route path="/digital/:productId" element={<DigitalProductDetail />} />
     <Route path="/wishlist/shared/:token" element={<SharedWishlist />} />
@@ -339,7 +346,6 @@ export const publicRoutes = (
     {/* Collections & Enchères */}
     <Route path="/collections" element={<CollectionsPage />} />
     <Route path="/collections/:collectionSlug" element={<CollectionDetail />} />
-    <Route path="/auctions" element={<AuctionsListPage />} />
     <Route path="/auctions/:slug" element={<AuctionDetailPage />} />
     <Route path="/verify/:code" element={<VerifyCertificatePage />} />
 

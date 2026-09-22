@@ -1,12 +1,14 @@
 /**
  * Layout discovery acheteur — shell unifié si connecté, PremiumNav pour invités.
- * AppPageShell est lazy pour ne pas tirer AppSidebar dans les chunks marketplace invités.
+ * Si déjà sous BuyerDiscoveryShellLayout (route parent), passe-through contenu seul.
  */
 
 import { lazy, ReactNode, Suspense } from 'react';
+import { useOutletContext } from 'react-router-dom';
 import { PremiumNav } from '@/components/landing/premium/PremiumNav';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
+import type { BuyerDiscoveryOutletContext } from '@/components/layout/BuyerDiscoveryShellLayout';
 import '@/styles/landing-premium.css';
 
 const AppPageShell = lazy(() =>
@@ -43,6 +45,13 @@ export function BuyerDiscoveryPageLayout({
   shellMainClassName = 'overflow-x-hidden',
   guestPremiumNav = true,
 }: BuyerDiscoveryPageLayoutProps) {
+  const outletCtx = useOutletContext<BuyerDiscoveryOutletContext | undefined>();
+
+  // Chrome déjà fourni par BuyerDiscoveryShellLayout — contenu seul
+  if (outletCtx?.discoveryChromeActive) {
+    return <>{children}</>;
+  }
+
   if (authenticated) {
     return (
       <Suspense fallback={<AuthShellFallback />}>

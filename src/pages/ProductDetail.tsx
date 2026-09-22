@@ -3,6 +3,8 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { VendorMessagingLink } from '@/components/vendor/VendorMessagingLink';
 import { supabase } from '@/integrations/supabase/client';
 import { useStoreSlug } from '@/contexts/StoreSlugContext';
+import { useStorefrontShell } from '@/contexts/StorefrontShellContext';
+import { SoftLink } from '@/components/navigation/SoftLink';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
@@ -41,6 +43,7 @@ import { productImageAlt } from '@/lib/accessibility/productImageAlt';
 import { CountdownTimer } from '@/components/ui/countdown-timer';
 import { PhysicalProductWhatsAppButton } from '@/components/physical/PhysicalProductWhatsAppButton';
 import { PhysicalProductDeliveryEstimate } from '@/components/physical/PhysicalProductDeliveryEstimate';
+import { PhysicalProductShippingDetails } from '@/components/physical/PhysicalProductShippingDetails';
 import { CustomFieldsDisplay } from '@/components/products/CustomFieldsDisplay';
 import { ProductVariantSelector } from '@/components/products/ProductVariantSelector';
 import { SEOMeta, ProductSchema, BreadcrumbSchema } from '@/components/seo';
@@ -162,6 +165,7 @@ const ProductDetails = () => {
   const { slug: paramSlug, productSlug } = useParams<{ slug: string; productSlug: string }>();
   const contextSlug = useStoreSlug();
   const slug = paramSlug || contextSlug;
+  const chromeFromLayout = Boolean(useStorefrontShell()?.chromeProvided);
   const { getValue } = usePageCustomization('productDetail');
   const navigate = useNavigate();
   const [product, setProduct] = useState<ExtendedProduct | null>(null);
@@ -561,7 +565,7 @@ const ProductDetails = () => {
               </Button>
             )}
             {slug && (
-              <Link to={generateStoreUrl(slug)}>
+              <SoftLink to={chromeFromLayout ? '/' : generateStoreUrl(slug)}>
                 <Button
                   variant="outline"
                   className="w-full sm:w-auto touch-manipulation min-h-[44px] text-sm sm:text-base"
@@ -570,18 +574,20 @@ const ProductDetails = () => {
                   <span className="hidden sm:inline">Retour à la boutique</span>
                   <span className="sm:hidden">Boutique</span>
                 </Button>
-              </Link>
+              </SoftLink>
             )}
-            <Link to="/marketplace">
-              <Button
-                variant="outline"
-                className="w-full sm:w-auto touch-manipulation min-h-[44px] text-sm sm:text-base"
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                <span className="hidden sm:inline">Retour au marketplace</span>
-                <span className="sm:hidden">Marketplace</span>
-              </Button>
-            </Link>
+            {!chromeFromLayout && (
+              <SoftLink to="/marketplace">
+                <Button
+                  variant="outline"
+                  className="w-full sm:w-auto touch-manipulation min-h-[44px] text-sm sm:text-base"
+                >
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  <span className="hidden sm:inline">Retour au marketplace</span>
+                  <span className="sm:hidden">Marketplace</span>
+                </Button>
+              </SoftLink>
+            )}
           </div>
         </div>
       </div>
@@ -632,32 +638,56 @@ const ProductDetails = () => {
         <FAQSchema faqs={product.faqs as unknown as { question: string; answer: string }[]} />
       )}
 
-      <StoreThemeProvider store={store as ThemedStore}>
-        <div className="min-h-screen flex flex-col bg-background store-theme-active">
-          {/* Header */}
-          <header
-            ref={headerRef}
-            className="border-b bg-card shadow-sm sticky top-0 z-10"
-            role="banner"
-          >
-            <div className="max-w-6xl mx-auto px-3 sm:px-4 py-2 sm:py-3">
-              <Link
-                to={generateStoreUrl(store.slug, store.subdomain)}
-                className="inline-flex items-center text-xs sm:text-sm text-muted-foreground hover:text-primary transition-colors touch-manipulation min-h-[44px]"
-                aria-label={`Retour à la boutique ${store.name}`}
-              >
-                <ArrowLeft
-                  className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2"
-                  aria-hidden="true"
-                />
-                <span className="hidden sm:inline">Retour à {store.name}</span>
-                <span className="sm:hidden">Retour</span>
-              </Link>
-            </div>
-          </header>
+      <StoreThemeProvider store={chromeFromLayout ? null : (store as ThemedStore)}>
+        <div
+          className={
+            chromeFromLayout
+              ? 'flex flex-col bg-background'
+              : 'min-h-screen flex flex-col bg-background store-theme-active'
+          }
+        >
+          {/* Header — omis si chrome layout boutique (StoreHeader persistant) */}
+          {!chromeFromLayout && (
+            <header
+              ref={headerRef}
+              className="border-b bg-card shadow-sm sticky top-0 z-10"
+              role="banner"
+            >
+              <div className="max-w-6xl mx-auto px-3 sm:px-4 py-2 sm:py-3">
+                <SoftLink
+                  to={generateStoreUrl(store.slug, store.subdomain)}
+                  className="inline-flex items-center text-xs sm:text-sm text-muted-foreground hover:text-primary transition-colors touch-manipulation min-h-[44px]"
+                  aria-label={`Retour à la boutique ${store.name}`}
+                >
+                  <ArrowLeft
+                    className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2"
+                    aria-hidden="true"
+                  />
+                  <span className="hidden sm:inline">Retour à {store.name}</span>
+                  <span className="sm:hidden">Retour</span>
+                </SoftLink>
+              </div>
+            </header>
+          )}
 
           {/* Contenu principal */}
           <main className="flex-1" role="main">
+            {chromeFromLayout && (
+              <div className="max-w-6xl mx-auto px-3 sm:px-4 pt-3 sm:pt-4">
+                <SoftLink
+                  to="/"
+                  className="inline-flex items-center text-xs sm:text-sm text-muted-foreground hover:text-primary transition-colors touch-manipulation min-h-[44px]"
+                  aria-label={`Retour à la boutique ${store.name}`}
+                >
+                  <ArrowLeft
+                    className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2"
+                    aria-hidden="true"
+                  />
+                  <span className="hidden sm:inline">Retour à {store.name}</span>
+                  <span className="sm:hidden">Retour</span>
+                </SoftLink>
+              </div>
+            )}
             <div className="max-w-6xl mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 md:gap-8 mb-8 sm:mb-10 md:mb-12 lg:items-start">
                 {/* 🖼️ Galerie d'images inspirée du design professionnel - Image principale à gauche, miniatures à droite */}
@@ -713,12 +743,16 @@ const ProductDetails = () => {
                           {/* ✅ Format 1536x1024 (ratio 3:2) - Style identique au Marketplace */}
                           {/* ✅ Alignée en haut au même niveau que le titre */}
                           <div className="relative w-full aspect-[3/2] overflow-hidden bg-muted/30 border-2 border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-300 group">
-                            <Link
-                              to={generateProductUrl(
-                                store.slug,
-                                product.slug || '',
-                                store.subdomain
-                              )}
+                            <SoftLink
+                              to={
+                                chromeFromLayout
+                                  ? `/products/${product.slug || ''}`
+                                  : generateProductUrl(
+                                      store.slug,
+                                      product.slug || '',
+                                      store.subdomain
+                                    )
+                              }
                               className="block w-full h-full"
                             >
                               {currentImage && (
@@ -734,7 +768,7 @@ const ProductDetails = () => {
                                   height={1024}
                                 />
                               )}
-                            </Link>
+                            </SoftLink>
 
                             {/* Fallback icon (si pas d'image) */}
                             {!currentImage && (
@@ -1505,24 +1539,26 @@ const ProductDetails = () => {
             </div>
           </main>
 
-          {/* Pied de page */}
-          <Suspense fallback={null}>
-            <StoreFooter
-              storeName={store.name}
-              facebook_url={(store as Store & { facebook_url?: string | null }).facebook_url}
-              instagram_url={(store as Store & { instagram_url?: string | null }).instagram_url}
-              twitter_url={(store as Store & { twitter_url?: string | null }).twitter_url}
-              linkedin_url={(store as Store & { linkedin_url?: string | null }).linkedin_url}
-              youtube_url={(store as Store & { youtube_url?: string | null }).youtube_url}
-              tiktok_url={(store as Store & { tiktok_url?: string | null }).tiktok_url}
-              pinterest_url={(store as Store & { pinterest_url?: string | null }).pinterest_url}
-              snapchat_url={(store as Store & { snapchat_url?: string | null }).snapchat_url}
-              discord_url={(store as Store & { discord_url?: string | null }).discord_url}
-              twitch_url={(store as Store & { twitch_url?: string | null }).twitch_url}
-              store={store as ThemedStore}
-              storeSlug={store.slug}
-            />
-          </Suspense>
+          {/* Pied de page — omis si chrome layout boutique */}
+          {!chromeFromLayout && (
+            <Suspense fallback={null}>
+              <StoreFooter
+                storeName={store.name}
+                facebook_url={(store as Store & { facebook_url?: string | null }).facebook_url}
+                instagram_url={(store as Store & { instagram_url?: string | null }).instagram_url}
+                twitter_url={(store as Store & { twitter_url?: string | null }).twitter_url}
+                linkedin_url={(store as Store & { linkedin_url?: string | null }).linkedin_url}
+                youtube_url={(store as Store & { youtube_url?: string | null }).youtube_url}
+                tiktok_url={(store as Store & { tiktok_url?: string | null }).tiktok_url}
+                pinterest_url={(store as Store & { pinterest_url?: string | null }).pinterest_url}
+                snapchat_url={(store as Store & { snapchat_url?: string | null }).snapchat_url}
+                discord_url={(store as Store & { discord_url?: string | null }).discord_url}
+                twitch_url={(store as Store & { twitch_url?: string | null }).twitch_url}
+                store={store as ThemedStore}
+                storeSlug={store.slug}
+              />
+            </Suspense>
+          )}
         </div>
       </StoreThemeProvider>
     </>

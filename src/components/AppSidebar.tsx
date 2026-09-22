@@ -1,7 +1,8 @@
 import { LayoutDashboard, Search, Plus } from '@/components/icons';
 import { Circle, Lock, ShoppingBag, Key, Package } from 'lucide-react';
 import { usePlatformLogo } from '@/hooks/usePlatformLogo';
-import { NavLink, Link, useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { SoftNavLink, SoftLink } from '@/components/navigation/SoftLink';
 import { SidebarCollapsibleSection } from '@/components/sidebar/SidebarCollapsibleSection';
 import { SidebarNavCommandPalette } from '@/components/sidebar/SidebarNavCommandPalette';
 import { SidebarPersonaSwitch } from '@/components/sidebar/SidebarPersonaSwitch';
@@ -25,7 +26,6 @@ import type { NavSection, SidebarPersona } from '@/config/navigation.types';
 import { useSidebarPersona } from '@/hooks/useSidebarPersona';
 import { useSidebarNavigation } from '@/hooks/useSidebarNavigation';
 import { recordNavClick, sortEntriesByNavFrequency } from '@/hooks/useNavigationAnalytics';
-import { prefetchRouteChunk } from '@/lib/route-chunk-prefetch';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -276,7 +276,7 @@ export function AppSidebar() {
       <div className={cn('shrink-0 border-b border-border', isCollapsed ? 'p-2' : 'px-3 py-2.5')}>
         {persona === 'seller' ? (
           <div className={cn('flex flex-col', isCollapsed ? 'items-center gap-2' : 'gap-2')}>
-            <Link
+            <SoftLink
               to={logoHome}
               className={cn(
                 'flex items-center gap-1.5 group transition-opacity duration-200 hover:opacity-90 min-w-0',
@@ -303,14 +303,14 @@ export function AppSidebar() {
               {!isCollapsed && (
                 <EmarzonaBrandName className="text-base tracking-tight sm:text-lg font-bold" />
               )}
-            </Link>
+            </SoftLink>
             <div className={cn('min-w-0', isCollapsed ? 'w-full flex justify-center' : 'w-full')}>
               <SidebarStoreSwitcher isCollapsed={isCollapsed} />
             </div>
           </div>
         ) : (
           <div className="flex items-center gap-2 min-h-[2.75rem]">
-            <Link
+            <SoftLink
               to={logoHome}
               className="flex items-center gap-1.5 group transition-opacity duration-200 hover:opacity-90 shrink-0"
               aria-label={t(logoAriaKey)}
@@ -337,7 +337,7 @@ export function AppSidebar() {
               {!isCollapsed && (
                 <EmarzonaBrandName className="hidden text-lg tracking-tight sm:inline" />
               )}
-            </Link>
+            </SoftLink>
             {isCollapsed ? (
               <Button
                 variant="ghost"
@@ -424,11 +424,10 @@ export function AppSidebar() {
                                 isDashboardActive ? NAV_LINK_ACTIVE : NAV_LINK_INACTIVE
                               }`}
                             >
-                              <NavLink
+                              <SoftNavLink
                                 to={item.url}
                                 end
                                 onClick={() => recordNavClick(item.url)}
-                                onMouseEnter={() => prefetchRouteChunk(getNavItemPath(item.url))}
                                 className="flex items-center gap-2 w-full"
                               >
                                 <IconComponent
@@ -438,7 +437,7 @@ export function AppSidebar() {
                                 {!isCollapsed && (
                                   <span className="flex-1 font-bold">{item.title}</span>
                                 )}
-                              </NavLink>
+                              </SoftNavLink>
                             </SidebarMenuButton>
                           </SidebarMenuItem>
                         );
@@ -481,12 +480,11 @@ export function AppSidebar() {
                       return (
                         <SidebarMenuItem key={`${section.label}-${item.title}-${item.url}`}>
                           <SidebarMenuButton asChild tooltip={item.title}>
-                            <NavLink
+                            <SoftNavLink
                               to={parseNavTo(resolveNavHref(item.url))}
                               end
                               data-sidebar-path={item.url.split('?')[0]}
                               onClick={() => recordNavClick(item.url)}
-                              onMouseEnter={() => prefetchRouteChunk(getNavItemPath(item.url))}
                               className={
                                 isNavLinkActive(item.url)
                                   ? `transition-all duration-200 group relative flex items-center ${NAV_LINK_ACTIVE}`
@@ -502,7 +500,7 @@ export function AppSidebar() {
                               ) : (
                                 <span className="sr-only">{item.title}</span>
                               )}
-                            </NavLink>
+                            </SoftNavLink>
                           </SidebarMenuButton>
                         </SidebarMenuItem>
                       );
@@ -520,7 +518,7 @@ export function AppSidebar() {
               <SidebarMenu>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild tooltip={t('sidebar.chrome.adminBackToDashboard')}>
-                    <NavLink
+                    <SoftNavLink
                       to="/dashboard"
                       className={`${NAV_LINK_INACTIVE} transition-all duration-200`}
                     >
@@ -529,7 +527,7 @@ export function AppSidebar() {
                       {isCollapsed && (
                         <span className="sr-only">{t('sidebar.chrome.adminBackToDashboard')}</span>
                       )}
-                    </NavLink>
+                    </SoftNavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               </SidebarMenu>
@@ -569,7 +567,7 @@ export function AppSidebar() {
                       return (
                         <SidebarMenuItem key={`${section.label}-${item.title}-${item.url}`}>
                           <SidebarMenuButton asChild tooltip={item.title}>
-                            <NavLink
+                            <SoftNavLink
                               to={parseNavTo(item.url)}
                               end
                               onClick={() => recordNavClick(item.url)}
@@ -588,7 +586,7 @@ export function AppSidebar() {
                               ) : (
                                 <span className="sr-only">{item.title}</span>
                               )}
-                            </NavLink>
+                            </SoftNavLink>
                           </SidebarMenuButton>
                         </SidebarMenuItem>
                       );

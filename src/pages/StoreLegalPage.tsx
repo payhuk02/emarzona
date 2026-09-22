@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useStoreSlug } from '@/contexts/StoreSlugContext';
+import { useStorefrontShell } from '@/contexts/StorefrontShellContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, FileText } from 'lucide-react';
@@ -17,7 +18,7 @@ import StoreFooter from '@/components/storefront/StoreFooter';
 import { useStoreTheme } from '@/hooks/useStoreTheme';
 import type { Store, StoreLegalPages } from '@/hooks/useStores';
 import { logger } from '@/lib/logger';
-import { generateStoreUrl } from '@/lib/store-utils';
+import { softNavigate } from '@/lib/navigation/soft-navigate';
 import { hasLegalPageContent } from '@/lib/admin/storeFooterLinksConfig';
 
 const LEGAL_PAGE_TITLES: Record<string, string> = {
@@ -49,6 +50,7 @@ export const StoreLegalPage = () => {
   const { slug: paramSlug, page } = useParams<{ slug: string; page: string }>();
   const contextSlug = useStoreSlug();
   const slug = paramSlug || contextSlug;
+  const chromeFromLayout = Boolean(useStorefrontShell()?.chromeProvided);
   const navigate = useNavigate();
   const [store, setStore] = useState<Store | null>(null);
   const [loading, setLoading] = useState(true);
@@ -57,6 +59,8 @@ export const StoreLegalPage = () => {
   const [pageTitle, setPageTitle] = useState<string>('');
 
   const theme = useStoreTheme(store);
+
+  const goHome = () => softNavigate(navigate, '/');
 
   useEffect(() => {
     if (!slug || !page) {
@@ -97,7 +101,6 @@ export const StoreLegalPage = () => {
 
           setStore(storeData);
 
-          // Extraire le contenu de la page légale
           const legalPages = storeData.legal_pages as StoreLegalPages | null;
           if (legalPages && hasLegalPageContent(legalPages, pageKey)) {
             setLegalContent(legalPages[pageKey] || null);
@@ -127,6 +130,14 @@ export const StoreLegalPage = () => {
   }, [slug, page]);
 
   if (loading) {
+    if (chromeFromLayout) {
+      return (
+        <div className="max-w-4xl mx-auto px-4 py-8">
+          <Skeleton className="h-8 w-64 mb-6" />
+          <Skeleton className="h-96 w-full" />
+        </div>
+      );
+    }
     return (
       <StoreThemeProvider store={null}>
         <div className="min-h-screen">
@@ -141,25 +152,85 @@ export const StoreLegalPage = () => {
   }
 
   if (error || !store || !legalContent) {
+    const errorBody = (
+      <div className="text-center max-w-md mx-auto px-4">
+        <FileText className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+        <h1 className="text-2xl font-bold mb-2">Page introuvable</h1>
+        <p className="text-muted-foreground mb-6">
+          {error || "Cette page légale n'est pas disponible."}
+        </p>
+        {store && (
+          <Button onClick={goHome}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Retour à la boutique
+          </Button>
+        )}
+      </div>
+    );
+
+    if (chromeFromLayout) {
+      return <div className="flex-1 flex items-center justify-center py-16">{errorBody}</div>;
+    }
+
     return (
       <StoreThemeProvider store={store}>
         <div className="min-h-screen flex items-center justify-center bg-background">
-          <div className="text-center max-w-md mx-auto px-4">
-            <FileText className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-            <h1 className="text-2xl font-bold mb-2">Page introuvable</h1>
-            <p className="text-muted-foreground mb-6">
-              {error || "Cette page légale n'est pas disponible."}
-            </p>
-            {store && (
-              <Button onClick={() => navigate(generateStoreUrl(store.slug, store.subdomain))}>
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Retour à la boutique
-              </Button>
-            )}
-          </div>
+          {errorBody}
         </div>
       </StoreThemeProvider>
     );
+  }
+
+  const legalMain = (
+    <main className="flex-1 bg-background">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <Button
+          variant="ghost"
+          onClick={goHome}
+          className="mb-6"
+          style={{ color: theme.linkColor }}
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Retour à la boutique
+        </Button>
+
+        <Card className="animate-fade-in">
+          <CardContent className="pt-6">
+            <h1
+              className="text-2xl sm:text-3xl font-bold mb-6"
+              style={{
+                color: theme.textColor,
+                fontFamily: theme.headingFont,
+              }}
+            >
+              {pageTitle}
+            </h1>
+            <div
+              className="prose prose-sm sm:prose max-w-none"
+              style={{
+                color: theme.textColor,
+                fontFamily: theme.bodyFont,
+              }}
+            >
+              <div
+                className="whitespace-pre-wrap"
+                style={{
+                  color: theme.textColor,
+                  fontFamily: theme.bodyFont,
+                  lineHeight: theme.lineHeight,
+                }}
+              >
+                {legalContent}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </main>
+  );
+
+  if (chromeFromLayout) {
+    return legalMain;
   }
 
   return (
@@ -187,51 +258,7 @@ export const StoreLegalPage = () => {
           />
         )}
 
-        <main className="flex-1 bg-background">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-            <Button
-              variant="ghost"
-              onClick={() => navigate(generateStoreUrl(store.slug, store.subdomain))}
-              className="mb-6"
-              style={{ color: theme.linkColor }}
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Retour à la boutique
-            </Button>
-
-            <Card className="animate-fade-in">
-              <CardContent className="pt-6">
-                <h1
-                  className="text-2xl sm:text-3xl font-bold mb-6"
-                  style={{
-                    color: theme.textColor,
-                    fontFamily: theme.headingFont,
-                  }}
-                >
-                  {pageTitle}
-                </h1>
-                <div
-                  className="prose prose-sm sm:prose max-w-none"
-                  style={{
-                    color: theme.textColor,
-                    fontFamily: theme.bodyFont,
-                  }}
-                >
-                  <div
-                    className="whitespace-pre-wrap"
-                    style={{
-                      color: theme.textColor,
-                      fontFamily: theme.bodyFont,
-                      lineHeight: theme.lineHeight,
-                    }}
-                  >
-                    {legalContent}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </main>
+        {legalMain}
 
         {store && (
           <StoreFooter

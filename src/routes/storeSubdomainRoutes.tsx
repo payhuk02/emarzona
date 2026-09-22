@@ -6,15 +6,17 @@
  * Le slug n'apparaît PAS dans l'URL (il est fourni via StoreSlugContext).
  */
 
-import React, { Suspense, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { lazyPage } from '@/routes/lazyPage';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import { StoreSlugProvider } from '@/contexts/StoreSlugContext';
+import { StorefrontAppLayout } from '@/components/layout/StorefrontAppLayout';
 import { RedirectToPlatformAuth } from '@/components/auth/RedirectToPlatformAuth';
 import { RedirectToPlatformVendorMessaging } from '@/components/auth/RedirectToPlatformVendorMessaging';
 import { CommercePageErrorBoundary } from '@/components/errors/CommercePageErrorBoundary';
 import { FeatureErrorBoundary } from '@/components/monitoring/FeatureErrorBoundary';
 import { registerSoftNavigate } from '@/lib/navigation/soft-navigate';
+
 const Storefront = lazyPage(() => import('@/pages/Storefront'));
 const ProductDetail = lazyPage(() => import('@/pages/ProductDetail'));
 const ServiceDetail = lazyPage(() => import('@/pages/service/ServiceDetail'));
@@ -39,15 +41,6 @@ interface StoreSubdomainRoutesProps {
   storeSlug: string;
 }
 
-const LoadingFallback = () => (
-  <div className="flex min-h-screen items-center justify-center">
-    <div className="flex flex-col items-center space-y-4">
-      <div className="h-8 w-8 animate-spin emz-page-spinner rounded-full border-4 border-primary border-t-transparent"></div>
-      <p className="text-muted-foreground text-base">Chargement...</p>
-    </div>
-  </div>
-);
-
 /** Enregistre softNavigateTo pour le tree boutique (AppContent n'est pas monté). */
 function SoftNavigateRegistrar() {
   const navigate = useNavigate();
@@ -62,8 +55,8 @@ export function StoreSubdomainRoutes({ storeSlug }: StoreSubdomainRoutesProps) {
   return (
     <StoreSlugProvider slug={storeSlug}>
       <SoftNavigateRegistrar />
-      <Suspense fallback={<LoadingFallback />}>
-        <Routes>
+      <Routes>
+        <Route element={<StorefrontAppLayout />}>
           {/* Root = Storefront de la boutique */}
           <Route path="/" element={<Storefront />} />
 
@@ -80,7 +73,6 @@ export function StoreSubdomainRoutes({ storeSlug }: StoreSubdomainRoutesProps) {
           <Route path="/connexion" element={<RedirectToPlatformAuth />} />
           <Route path="/register" element={<RedirectToPlatformAuth />} />
           <Route path="/signup" element={<RedirectToPlatformAuth />} />
-          <Route path="/inscription" element={<RedirectToPlatformAuth />} />
           <Route path="/auth" element={<RedirectToPlatformAuth />} />
           <Route path="/auth/login" element={<RedirectToPlatformAuth />} />
           <Route path="/auth/signup" element={<RedirectToPlatformAuth />} />
@@ -129,8 +121,8 @@ export function StoreSubdomainRoutes({ storeSlug }: StoreSubdomainRoutesProps) {
 
           {/* 404 */}
           <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Suspense>
+        </Route>
+      </Routes>
     </StoreSlugProvider>
   );
 }

@@ -97,6 +97,8 @@ export function useMarketplaceFacets({
     initialDataUpdatedAt: cachedFacets?.fetchedAt,
     staleTime: MARKETPLACE_CACHE_SOFT_STALE_MS,
     gcTime: 5 * 60 * 1000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
 }
 

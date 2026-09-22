@@ -30,7 +30,7 @@ export const createOptimizedQueryClient = (): QueryClient => {
         // Refetch : Comportement de refetch
         refetchOnWindowFocus: false, // Ne pas refetch au focus (améliore les perfs)
         refetchOnReconnect: true, // Refetch à la reconnexion
-        refetchOnMount: true, // Refetch au montage si stale
+        refetchOnMount: false, // Évite vague de refetch à chaque navigation SPA
 
         // Network mode
         networkMode: 'online', // Seulement si en ligne
@@ -85,11 +85,12 @@ export const cacheStrategies = {
     gcTime: 30 * 60 * 1000, // 30 minutes
   },
 
-  // Produits (cache agressif car changent peu)
+  // Produits (cache agressif — listes marketplace / catalogue)
   products: {
     staleTime: 10 * 60 * 1000, // 10 minutes
     gcTime: 30 * 60 * 1000, // 30 minutes
     refetchOnWindowFocus: false,
+    refetchOnMount: false as const,
   },
 
   // Commandes (changements fréquents)

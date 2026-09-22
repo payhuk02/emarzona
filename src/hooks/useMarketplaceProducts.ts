@@ -722,7 +722,7 @@ export function useMarketplaceProducts({
       }
     : undefined;
 
-  // SWR : cache local pour le 1er paint, refetch RPC si données > 90s
+  // SWR : cache local pour le 1er paint, refetch RPC si données > soft stale (5 min)
   const query = useQuery({
     queryKey,
     queryFn: () =>
@@ -738,6 +738,7 @@ export function useMarketplaceProducts({
     staleTime: MARKETPLACE_CACHE_SOFT_STALE_MS,
     gcTime: cacheStrategies.products.gcTime,
     refetchOnWindowFocus: cacheStrategies.products.refetchOnWindowFocus,
+    refetchOnMount: cacheStrategies.products.refetchOnMount,
     // ✅ OPTIMISATION: Garder les données précédentes pendant le chargement (pagination fluide)
     placeholderData: previousData => previousData,
     // ✅ OPTIMISATION: Partage structurel pour éviter re-renders

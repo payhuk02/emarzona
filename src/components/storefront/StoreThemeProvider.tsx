@@ -2,9 +2,10 @@
  * StoreThemeProvider
  * Injecte les styles CSS dynamiques basés sur les personnalisations de la boutique
  * Utilise des CSS variables pour permettre une personnalisation complète
+ * Imbriqué (layout boutique) : passe-through sans réinjecter / démonter les styles.
  */
 
-import { useEffect, useRef } from 'react';
+import { createContext, useContext, useEffect, useRef } from 'react';
 import {
   useStoreTheme,
   getBorderRadiusValue,
@@ -19,17 +20,27 @@ interface StoreThemeProviderProps {
   children: React.ReactNode;
 }
 
+const StoreThemeActiveContext = createContext(false);
+
 export const StoreThemeProvider = ({ store, children }: StoreThemeProviderProps) => {
+  const nested = useContext(StoreThemeActiveContext);
   const theme = useStoreTheme(store);
   const styleRef = useRef<HTMLStyleElement | null>(null);
 
   useEffect(() => {
+    if (nested) return;
+
     // Créer ou récupérer l'élément <style>
     if (!styleRef.current) {
-      const styleElement = document.createElement('style');
-      styleElement.id = 'store-theme-styles';
-      document.head.appendChild(styleElement);
-      styleRef.current = styleElement;
+      const existing = document.getElementById('store-theme-styles');
+      if (existing instanceof HTMLStyleElement) {
+        styleRef.current = existing;
+      } else {
+        const styleElement = document.createElement('style');
+        styleElement.id = 'store-theme-styles';
+        document.head.appendChild(styleElement);
+        styleRef.current = styleElement;
+      }
     }
 
     // Générer les CSS variables et règles
@@ -47,19 +58,21 @@ export const StoreThemeProvider = ({ store, children }: StoreThemeProviderProps)
         styleRef.current = null;
       }
     };
-  }, [theme]);
+  }, [theme, nested]);
 
   // Charger les polices Google Fonts si nécessaire
   useEffect(() => {
+    if (nested) return;
     const fonts = new Set([theme.headingFont, theme.bodyFont]);
     fonts.forEach(font => {
       if (font && font !== 'Inter') {
         loadGoogleFont(font);
       }
     });
-  }, [theme.headingFont, theme.bodyFont]);
+  }, [theme.headingFont, theme.bodyFont, nested]);
 
   useEffect(() => {
+    if (nested) return;
     document.body.classList.add('store-theme-active');
     const restoreFavicon = applyStoreFavicon(store);
 
@@ -67,9 +80,15 @@ export const StoreThemeProvider = ({ store, children }: StoreThemeProviderProps)
       document.body.classList.remove('store-theme-active');
       restoreFavicon();
     };
-  }, [store?.id, store?.favicon_url, store?.apple_touch_icon_url, store?.logo_url]);
+  }, [store?.id, store?.favicon_url, store?.apple_touch_icon_url, store?.logo_url, nested]);
 
-  return <>{children}</>;
+  if (nested) {
+    return <>{children}</>;
+  }
+
+  return (
+    <StoreThemeActiveContext.Provider value={true}>{children}</StoreThemeActiveContext.Provider>
+  );
 };
 
 /**

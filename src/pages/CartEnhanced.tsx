@@ -9,8 +9,9 @@
  * - UX mobile améliorée
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, type ReactNode } from 'react';
 import { AppPageShell } from '@/components/layout/AppPageShell';
+import { useStorefrontShell } from '@/contexts/StorefrontShellContext';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -33,6 +34,20 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { cn } from '@/lib/utils';
+
+function CartPageFrame({
+  children,
+  mainClassName,
+}: {
+  children: ReactNode;
+  mainClassName: string;
+}) {
+  const storefrontShell = useStorefrontShell();
+  if (storefrontShell?.chromeProvided) {
+    return <div className={cn('w-full', mainClassName)}>{children}</div>;
+  }
+  return <AppPageShell mainClassName={mainClassName}>{children}</AppPageShell>;
+}
 
 export default function CartEnhanced() {
   // ✅ PERFORMANCE: Preload image LCP (logo ou image générique du panier)
@@ -108,7 +123,7 @@ export default function CartEnhanced() {
 
   if (isLoading) {
     return (
-      <AppPageShell mainClassName="p-6">
+      <CartPageFrame mainClassName="p-6">
         <div className="max-w-7xl mx-auto space-y-6">
           <Skeleton className="h-8 w-64" />
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -120,22 +135,22 @@ export default function CartEnhanced() {
             <Skeleton className="h-96" />
           </div>
         </div>
-      </AppPageShell>
+      </CartPageFrame>
     );
   }
 
   if (isEmpty) {
     return (
-      <AppPageShell mainClassName="p-6">
+      <CartPageFrame mainClassName="p-6">
         <div className="max-w-4xl mx-auto">
           <CartEmpty />
         </div>
-      </AppPageShell>
+      </CartPageFrame>
     );
   }
 
   return (
-    <AppPageShell mainClassName="p-3 sm:p-4 md:p-6 lg:p-8">
+    <CartPageFrame mainClassName="p-3 sm:p-4 md:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto space-y-4 sm:space-y-5 md:space-y-6">
         {/* Header avec animations */}
         <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-500">
@@ -251,6 +266,6 @@ export default function CartEnhanced() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </AppPageShell>
+    </CartPageFrame>
   );
 }
