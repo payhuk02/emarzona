@@ -105,6 +105,22 @@ Bot Fight / Super Bot Fight / WAF : **Skip** ou **Allow** pour :
 
 Sinon Cloudflare peut renvoyer **403** + CSP `connect-src 'none'` sur un chunk (page blanche SPA).
 
+#### Critique — Bot Fight Mode (plan Free)
+
+Les Custom Rules **ne peuvent pas skip Bot Fight Mode** (seulement Super Bot Fight Mode).
+
+Si tu vois encore `/cdn-cgi/challenge-platform` + **403** sur `/js/*.js` :
+
+1. Dashboard → zone **myemarzona.shop** → **Security** → **Bots**
+2. **Bot Fight Mode** → **Off**  
+   — ou, si Super Bot Fight Mode :
+   - Definitely / Likely automated → **Allow**
+   - **Static resource protection** → **Off**
+   - **JavaScript detections** → **Off**
+3. Relancer `node scripts/cloudflare-purge-and-skip-bots.mjs`
+
+Sans cette étape, les boutiques `*.myemarzona.shop` restent en page blanche (mobile / DevTools).
+
 ### Règle 8 — Ne pas cacher les 404 assets
 
 Cache Rules : pour `/js/*` et `/assets/*`, condition **Response Status Code equals 200** avant Cache Everything.

@@ -1,46 +1,51 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { mkdirSync, writeFileSync, readFileSync, rmSync, readdirSync } from 'fs';
+import { join } from 'path';
 import { lowercaseHashedAssetNames } from '../lowercase-hashed-asset-names';
 
-describe('lowercaseHashedAssetNames', () => {
-  it('lowercases mixed-case content hashes and rewrites chunk imports', () => {
-    const plugin = lowercaseHashedAssetNames();
-    const generateBundle = plugin.generateBundle;
-    expect(typeof generateBundle).toBe('function');
+const TMP = join(process.cwd(), 'tmp-lowercase-hash-test');
 
-    const bundle: Record<
-      string,
-      | { type: 'chunk'; fileName: string; code: string }
-      | { type: 'asset'; fileName: string; source: string }
-    > = {
-      'js/scroll-area-DgOUHq0B.js': {
-        type: 'chunk',
-        fileName: 'js/scroll-area-DgOUHq0B.js',
-        code: 'export default 1',
-      },
-      'js/index-AbCdEfGh.js': {
-        type: 'chunk',
-        fileName: 'js/index-AbCdEfGh.js',
-        code: 'import("./scroll-area-DgOUHq0B.js")',
-      },
-    };
+describe('lowercaseHashedAssetNames closeBundle', () => {
+  beforeEach(() => {
+    rmSync(TMP, { recursive: true, force: true });
+  });
 
-    // @ts-expect-error minimal rollup context for unit test
-    generateBundle.call(
-      {
-        error: (m: string) => {
-          throw new Error(m);
-        },
-      },
-      {},
-      bundle
+  afterEach(() => {
+    rmSync(TMP, { recursive: true, force: true });
+  });
+
+  it('renames hashed assets and rewrites mapDeps-style references', () => {
+    const fakeRoot = TMP;
+    mkdirSync(join(fakeRoot, 'dist', 'js'), { recursive: true });
+    mkdirSync(join(fakeRoot, 'dist', 'assets'), { recursive: true });
+
+    writeFileSync(join(fakeRoot, 'dist', 'assets', 'product-banners-C4UQKZLn.css'), 'body{}');
+    writeFileSync(
+      join(fakeRoot, 'dist', 'js', 'index-AbCdEfGh.js'),
+      'const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/product-banners-C4UQKZLn.css"])))=>i.map(i=>d[i]);'
     );
 
-    expect(bundle['js/scroll-area-DgOUHq0B.js']).toBeUndefined();
-    expect(bundle['js/scroll-area-dgouhq0b.js']).toBeDefined();
-    expect(bundle['js/index-abcdefgh.js']?.type).toBe('chunk');
-    if (bundle['js/index-abcdefgh.js']?.type === 'chunk') {
-      expect(bundle['js/index-abcdefgh.js'].code).toContain('scroll-area-dgouhq0b.js');
-      expect(bundle['js/index-abcdefgh.js'].code).not.toContain('DgOUHq0B');
+    const realCwd = process.cwd();
+    process.chdir(fakeRoot);
+    try {
+      const plugin = lowercaseHashedAssetNames();
+      // @ts-expect-error rollup hook context unused
+      plugin.closeBundle();
+
+      const assets = readdirSync(join(fakeRoot, 'dist', 'assets'));
+      const jsFiles = readdirSync(join(fakeRoot, 'dist', 'js'));
+
+      expect(assets).toContain('product-banners-c4uqkzln.css');
+      expect(assets.some(f => f.includes('C4UQKZLn'))).toBe(false);
+
+      expect(jsFiles).toContain('index-abcdefgh.js');
+      expect(jsFiles.some(f => f.includes('AbCdEfGh'))).toBe(false);
+
+      const idx = readFileSync(join(fakeRoot, 'dist', 'js', 'index-abcdefgh.js'), 'utf8');
+      expect(idx).toContain('assets/product-banners-c4uqkzln.css');
+      expect(idx).not.toContain('C4UQKZLn');
+    } finally {
+      process.chdir(realCwd);
     }
   });
 });
