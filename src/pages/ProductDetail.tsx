@@ -801,7 +801,7 @@ const ProductDetails = () => {
                 {/* Infos produit */}
                 <div ref={detailsRef} className="space-y-4 sm:space-y-5 md:space-y-6 lg:pt-0">
                   <h1
-                    className="text-xl sm:text-2xl md:text-3xl font-bold leading-tight"
+                    className="text-xl sm:text-2xl md:text-3xl font-bold leading-snug tracking-tight"
                     id="product-title"
                   >
                     {product.name}

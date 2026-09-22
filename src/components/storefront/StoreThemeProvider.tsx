@@ -78,6 +78,14 @@ export const StoreThemeProvider = ({ store, children }: StoreThemeProviderProps)
 const generateThemeCSS = (theme: StoreTheme): string => {
   const borderRadius = getBorderRadiusValue(theme.borderRadius);
   const shadow = getShadowValue(theme.shadowIntensity);
+  const rawLineHeight = parseFloat(String(theme.lineHeight));
+  const safeLineHeight = Number.isFinite(rawLineHeight)
+    ? String(Math.min(2.2, Math.max(1.4, rawLineHeight)))
+    : '1.6';
+  const rawTracking = parseFloat(String(theme.letterSpacing));
+  const safeLetterSpacing = Number.isFinite(rawTracking)
+    ? `${Math.min(0.05, Math.max(-0.02, rawTracking))}em`
+    : theme.letterSpacing || '0';
 
   return `
     :root {
@@ -110,8 +118,8 @@ const generateThemeCSS = (theme: StoreTheme): string => {
       --store-heading-h1: ${theme.headingSizeH1};
       --store-heading-h2: ${theme.headingSizeH2};
       --store-heading-h3: ${theme.headingSizeH3};
-      --store-line-height: ${theme.lineHeight};
-      --store-letter-spacing: ${theme.letterSpacing};
+      --store-line-height: ${safeLineHeight};
+      --store-letter-spacing: ${safeLetterSpacing};
       
       /* Layout */
       --store-product-grid-columns: ${theme.productGridColumns};
@@ -140,14 +148,20 @@ const generateThemeCSS = (theme: StoreTheme): string => {
 
     .store-theme-active h1 {
       font-size: var(--store-heading-h1);
+      /* Ne pas hériter d’un line-height body trop bas (titres multi-lignes qui se chevauchent) */
+      line-height: 1.3;
+      letter-spacing: -0.01em;
     }
 
     .store-theme-active h2 {
       font-size: var(--store-heading-h2);
+      line-height: 1.35;
+      letter-spacing: -0.01em;
     }
 
     .store-theme-active h3 {
       font-size: var(--store-heading-h3);
+      line-height: 1.4;
     }
 
     /* Liens personnalisés */

@@ -353,7 +353,9 @@ export default function DigitalProductDetail() {
                 {/* Title & Price */}
                 <div>
                   <div className="flex items-start justify-between gap-2 mb-2">
-                    <h1 className="text-lg sm:text-2xl md:text-3xl font-bold">{product.name}</h1>
+                    <h1 className="text-lg sm:text-2xl md:text-3xl font-bold leading-snug tracking-tight">
+                      {product.name}
+                    </h1>
                     {categoryLabel && (
                       <Badge variant="secondary" className="shrink-0">
                         {categoryLabel}

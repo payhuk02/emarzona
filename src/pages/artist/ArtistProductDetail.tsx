@@ -484,7 +484,10 @@ const ArtistProductDetail = () => {
                 </Badge>
               )}
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold mb-2" id="product-title">
+            <h1
+              className="text-2xl sm:text-3xl font-bold mb-2 leading-snug tracking-tight"
+              id="product-title"
+            >
               {product?.name}
             </h1>
             {product?.artist?.artwork_title && (
