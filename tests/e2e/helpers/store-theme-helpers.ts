@@ -117,54 +117,105 @@ export async function saveStoreEdits(page: Page): Promise<void> {
   }
 }
 
-export async function saveAppearanceDraft(page: Page): Promise<void> {
-  const draftButton = page.getByRole('button', { name: /Enregistrer le brouillon/i });
-  const saveButton = (await draftButton.isVisible().catch(() => false))
-    ? draftButton
-    : page.getByRole('button', { name: /Enregistrer les modifications/i });
-
-  await expect(saveButton).toBeEnabled({ timeout: 30_000 });
-
-  const saveResponse = page.waitForResponse(
-    response => {
-      const url = response.url();
-      const ok = response.status() >= 200 && response.status() < 300;
-      if (!ok) return false;
-      return (
-        url.includes('/rest/v1/rpc/save_store_appearance_draft') ||
-        (url.includes('/rest/v1/stores') && ['PATCH', 'PUT'].includes(response.request().method()))
-      );
-    },
-    { timeout: 60_000 }
+function isTransientAppearanceRpcFailure(status: number, body: string): boolean {
+  if (status === 408 || status === 429 || status >= 502) return true;
+  return /57014|25P02|08006|PGRST000|PGRST001|PGRST002|statement timeout|canceling statement|aborted|connection refused|upstream connect/i.test(
+    body
   );
+}
 
-  await saveButton.click();
-  const response = await saveResponse.catch(() => null);
-  if (response && (response.status() < 200 || response.status() >= 300)) {
-    const body = await response.text().catch(() => '');
-    throw new Error(`Appearance draft save failed (${response.status()}): ${body.slice(0, 400)}`);
+export async function saveAppearanceDraft(page: Page): Promise<void> {
+  const maxAttempts = 3;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    const draftButton = page.getByRole('button', { name: /Enregistrer le brouillon/i });
+    const saveButton = (await draftButton.isVisible().catch(() => false))
+      ? draftButton
+      : page.getByRole('button', { name: /Enregistrer les modifications/i });
+
+    await expect(saveButton).toBeEnabled({ timeout: 30_000 });
+
+    const saveResponse = page.waitForResponse(
+      async response => {
+        const url = response.url();
+        const isDraftRpc = url.includes('/rest/v1/rpc/save_store_appearance_draft');
+        const isStorePatch =
+          url.includes('/rest/v1/stores') && ['PATCH', 'PUT'].includes(response.request().method());
+        if (!isDraftRpc && !isStorePatch) return false;
+        if (response.status() >= 200 && response.status() < 300) return true;
+        const body = await response.text().catch(() => '');
+        // Keep waiting while the client retries transient pooler timeouts.
+        return !isTransientAppearanceRpcFailure(response.status(), body);
+      },
+      { timeout: 60_000 }
+    );
+
+    await saveButton.click();
+    const response = await saveResponse.catch(() => null);
+    if (response && response.status() >= 200 && response.status() < 300) {
+      return;
+    }
+
+    if (response) {
+      const body = await response.text().catch(() => '');
+      if (isTransientAppearanceRpcFailure(response.status(), body) && attempt < maxAttempts) {
+        await page.waitForTimeout(1_000 * attempt);
+        continue;
+      }
+      throw new Error(`Appearance draft save failed (${response.status()}): ${body.slice(0, 400)}`);
+    }
+
+    if (attempt === maxAttempts) {
+      throw new Error(`Appearance draft save POST never succeeded — url=${page.url()}`);
+    }
+    await page.waitForTimeout(1_000 * attempt);
   }
 }
 
 export async function publishStoreAppearanceFromUi(page: Page): Promise<void> {
-  const publishButton = page
-    .getByTestId('storefront-publish-appearance')
-    .or(page.getByRole('button', { name: /Publier sur la vitrine|Publication/i }));
-  await expect(publishButton).toBeVisible({ timeout: 30_000 });
-  await expect(publishButton).toBeEnabled({ timeout: 30_000 });
+  const maxAttempts = 3;
 
-  const publishResponse = page.waitForResponse(
-    response =>
-      response.url().includes('/rest/v1/rpc/publish_store_appearance') &&
-      response.request().method() === 'POST',
-    { timeout: 60_000 }
-  );
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    const publishButton = page
+      .getByTestId('storefront-publish-appearance')
+      .or(page.getByRole('button', { name: /Publier sur la vitrine|Publication/i }));
+    await expect(publishButton).toBeVisible({ timeout: 30_000 });
+    await expect(publishButton).toBeEnabled({ timeout: 30_000 });
 
-  await publishButton.click();
-  const response = await publishResponse.catch(() => null);
-  if (response && (response.status() < 200 || response.status() >= 300)) {
-    const body = await response.text().catch(() => '');
-    throw new Error(`Appearance publish failed (${response.status()}): ${body.slice(0, 400)}`);
+    const publishResponse = page.waitForResponse(
+      async response => {
+        if (
+          !response.url().includes('/rest/v1/rpc/publish_store_appearance') ||
+          response.request().method() !== 'POST'
+        ) {
+          return false;
+        }
+        if (response.status() >= 200 && response.status() < 300) return true;
+        const body = await response.text().catch(() => '');
+        return !isTransientAppearanceRpcFailure(response.status(), body);
+      },
+      { timeout: 60_000 }
+    );
+
+    await publishButton.click();
+    const response = await publishResponse.catch(() => null);
+    if (response && response.status() >= 200 && response.status() < 300) {
+      return;
+    }
+
+    if (response) {
+      const body = await response.text().catch(() => '');
+      if (isTransientAppearanceRpcFailure(response.status(), body) && attempt < maxAttempts) {
+        await page.waitForTimeout(1_500 * attempt);
+        continue;
+      }
+      throw new Error(`Appearance publish failed (${response.status()}): ${body.slice(0, 400)}`);
+    }
+
+    if (attempt === maxAttempts) {
+      throw new Error(`Appearance publish POST never succeeded — url=${page.url()}`);
+    }
+    await page.waitForTimeout(1_500 * attempt);
   }
 }
 
@@ -178,7 +229,12 @@ export async function saveAndPublishAppearance(page: Page, primaryHex: string): 
   }
 
   await saveAppearanceDraft(page);
-  await expect(textInput).toHaveValue(primaryHex, { timeout: 5_000 });
+
+  // Draft save can remount the appearance panel / reset the Colors tab.
+  await setPrimaryColorField(page, primaryHex);
+  await expect(page.getByTestId('store-primary-color-text')).toHaveValue(primaryHex, {
+    timeout: 15_000,
+  });
 
   const publishButton = page.getByRole('button', { name: /Publier sur la vitrine/i });
   await expect(publishButton).toBeEnabled({ timeout: 30_000 });

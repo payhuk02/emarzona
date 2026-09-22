@@ -12,7 +12,7 @@ import {
   loginAsSeededUser,
 } from '../shared/e2e-test-config';
 import { retryOnTransientPostgrest } from './supabase-schema-cache-retry';
-import { withAuthAdminRetry } from './auth-admin-retry';
+import { createConfirmedE2EUser } from './auth-admin-retry';
 import { waitForStoresLoaded, prepareSellerDashboardChrome } from './seller-dashboard-setup';
 import { createNodeSupabaseClient } from './create-node-supabase-client';
 import { resolveE2ESupabaseUrl } from './e2e-supabase-guard';
@@ -49,19 +49,8 @@ export async function createE2EVendor(
   const email = `${prefix}-${runId}@example.com`;
   const password = `E2E!${runId}aA1`;
 
-  const created = await withAuthAdminRetry(`createE2EVendor(${email})`, async () => {
-    const result = await admin.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true,
-    });
-    if (result.error || !result.data.user) {
-      throw result.error ?? new Error('createUser failed');
-    }
-    return result.data;
-  });
-
-  const userId = created.user!.id;
+  const created = await createConfirmedE2EUser(admin, email, password);
+  const userId = created.user.id;
   await seedTermsConsent(admin, userId);
 
   const { data: storeData, error: storeError } = await retryOnTransientPostgrest(() =>

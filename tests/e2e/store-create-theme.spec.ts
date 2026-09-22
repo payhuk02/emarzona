@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { createNodeSupabaseClient } from './helpers/create-node-supabase-client';
 import { assertSafeE2ESupabaseUrl, resolveE2ESupabaseUrl } from './helpers/e2e-supabase-guard';
-import { withAuthAdminRetry } from './helpers/auth-admin-retry';
+import { createConfirmedE2EUser } from './helpers/auth-admin-retry';
 import {
   acceptTermsDialogIfVisible,
   assertStorePrimaryColorInDb,
@@ -64,21 +64,8 @@ test.describe('Store create → customize → storefront theme (E2E)', () => {
     const storeName = `E2E Theme ${runId}`;
     const storeSlug = slugify(storeName);
 
-    const created = await withAuthAdminRetry(
-      `store-create-theme createUser(${email})`,
-      async () => {
-        const result = await admin.auth.admin.createUser({
-          email,
-          password,
-          email_confirm: true,
-        });
-        if (result.error || !result.data.user) {
-          throw result.error ?? new Error('createUser failed');
-        }
-        return result.data;
-      }
-    );
-    const userId = created.user!.id;
+    const created = await createConfirmedE2EUser(admin, email, password);
+    const userId = created.user.id;
 
     await seedTermsConsent(admin, userId);
 

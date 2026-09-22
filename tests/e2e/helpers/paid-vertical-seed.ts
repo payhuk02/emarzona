@@ -4,7 +4,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { E2E_TEST_CONFIG } from '../shared/e2e-test-config';
 import { assertSafeE2ESupabaseUrl, resolveE2ESupabaseUrl } from './e2e-supabase-guard';
-import { withAuthAdminRetry } from './auth-admin-retry';
+import { createConfirmedE2EUser } from './auth-admin-retry';
 import { retryOnTransientPostgrest } from './supabase-schema-cache-retry';
 
 export type SeededUser = { id: string; email: string; password: string };
@@ -48,17 +48,8 @@ export async function createE2EUser(
   email: string,
   password: string = E2E_TEST_CONFIG.seededUserPassword
 ): Promise<SeededUser> {
-  return withAuthAdminRetry(`createUser(${email})`, async () => {
-    const { data, error } = await admin.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true,
-    });
-    if (error || !data.user?.id) {
-      throw error ?? new Error(`createUser failed for ${email}`);
-    }
-    return { id: data.user.id, email, password };
-  });
+  const created = await createConfirmedE2EUser(admin, email, password);
+  return { id: created.user.id, email, password };
 }
 
 async function createStore(
