@@ -29,8 +29,9 @@ import {
 } from '@/components/ui/table';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useNavigate, Link } from 'react-router-dom';
-import { generateProductUrl } from '@/lib/store-utils';
+import { useNavigate } from 'react-router-dom';
+import { SoftLink } from '@/components/navigation/SoftLink';
+import { resolveMarketplaceProductCardUrl } from '@/lib/seo/product-public-url';
 import { useMarketplaceFavorites } from '@/hooks/useMarketplaceFavorites';
 import { buildCheckoutUrl } from '@/lib/checkout/checkout-route';
 import {
@@ -121,7 +122,8 @@ export default function MyFavorites() {
             stores:store_id (
               id,
               name,
-              slug
+              slug,
+              subdomain
             )
           )
         `
@@ -490,16 +492,24 @@ export default function MyFavorites() {
                         {/* Actions */}
                         <div className="flex gap-2">
                           <Button variant="outline" size="sm" className="flex-1" asChild>
-                            <Link
-                              to={generateProductUrl(
-                                product.stores?.slug || '',
-                                product.slug,
-                                product.stores?.subdomain
+                            <SoftLink
+                              to={resolveMarketplaceProductCardUrl(
+                                {
+                                  id: product.id,
+                                  slug: product.slug,
+                                  product_type: product.product_type,
+                                },
+                                product.stores?.slug
+                                  ? {
+                                      slug: product.stores.slug,
+                                      subdomain: product.stores?.subdomain,
+                                    }
+                                  : null
                               )}
                             >
                               <Eye className="h-4 w-4 mr-2" />
                               Voir
-                            </Link>
+                            </SoftLink>
                           </Button>
                           <Button
                             size="sm"
@@ -570,16 +580,24 @@ export default function MyFavorites() {
                                 </div>
                                 <div className="flex gap-2">
                                   <Button variant="outline" size="sm" asChild>
-                                    <Link
-                                      to={generateProductUrl(
-                                        product.stores?.slug || '',
-                                        product.slug,
-                                        product.stores?.subdomain
+                                    <SoftLink
+                                      to={resolveMarketplaceProductCardUrl(
+                                        {
+                                          id: product.id,
+                                          slug: product.slug,
+                                          product_type: product.product_type,
+                                        },
+                                        product.stores?.slug
+                                          ? {
+                                              slug: product.stores.slug,
+                                              subdomain: product.stores?.subdomain,
+                                            }
+                                          : null
                                       )}
                                     >
                                       <Eye className="h-4 w-4 mr-2" />
                                       Voir
-                                    </Link>
+                                    </SoftLink>
                                   </Button>
                                   <Button size="sm" onClick={() => handleAddToCart(product)}>
                                     <ShoppingBag className="h-4 w-4 mr-2" />

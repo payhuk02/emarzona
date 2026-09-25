@@ -11,7 +11,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Heart, ShoppingCart, Trash2, ExternalLink } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { SoftLink } from '@/components/navigation/SoftLink';
+import { resolveMarketplaceProductCardUrl } from '@/lib/seo/product-public-url';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -26,7 +27,8 @@ type FavoriteProduct = {
   slug: string;
   store_id: string | null;
   is_active: boolean | null;
-  store: { id: string; name: string } | null;
+  product_type: string | null;
+  store: { id: string; name: string; slug?: string; subdomain?: string | null } | null;
 };
 
 type FavoriteRow = {
@@ -67,9 +69,12 @@ export const FavoritesTab = () => {
             slug,
             store_id,
             is_active,
+            product_type,
             store:stores (
               id,
-              name
+              name,
+              slug,
+              subdomain
             )
           )
         `
@@ -196,16 +201,38 @@ export const FavoritesTab = () => {
               </div>
               <div className="flex gap-2">
                 <Button asChild variant="outline" className="flex-1">
-                  <Link to={`/products/${product.slug}`}>
+                  <SoftLink
+                    to={resolveMarketplaceProductCardUrl(
+                      {
+                        id: product.id,
+                        slug: product.slug,
+                        product_type: product.product_type,
+                      },
+                      product.store?.slug
+                        ? { slug: product.store.slug, subdomain: product.store.subdomain }
+                        : null
+                    )}
+                  >
                     <ExternalLink className="h-4 w-4 mr-2" />
                     Voir
-                  </Link>
+                  </SoftLink>
                 </Button>
                 <Button asChild className="flex-1">
-                  <Link to={`/products/${product.slug}`}>
+                  <SoftLink
+                    to={resolveMarketplaceProductCardUrl(
+                      {
+                        id: product.id,
+                        slug: product.slug,
+                        product_type: product.product_type,
+                      },
+                      product.store?.slug
+                        ? { slug: product.store.slug, subdomain: product.store.subdomain }
+                        : null
+                    )}
+                  >
                     <ShoppingCart className="h-4 w-4 mr-2" />
                     Acheter
-                  </Link>
+                  </SoftLink>
                 </Button>
               </div>
               <div className="text-xs text-muted-foreground">

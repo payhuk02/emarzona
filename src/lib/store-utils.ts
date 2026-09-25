@@ -89,6 +89,57 @@ export const generateProductUrl = (
   return `${protocol}://${subdomain}.myemarzona.shop/products/${productSlug}`;
 };
 
+export type StorefrontItemRef = {
+  id: string;
+  slug?: string | null;
+  product_type?: string | null;
+};
+
+/** Origine plateforme pour les verticales sans route boutique (ex. cours LMS). */
+export const PLATFORM_WWW_ORIGIN = 'https://www.emarzona.com';
+
+/**
+ * Chemin relatif sur le host boutique (*.myemarzona.shop), par verticale.
+ * Aligné sur `storeSubdomainRoutes` : /products, /service, /artist.
+ * Course → null (LMS uniquement sur www).
+ */
+export function buildStorefrontItemPath(product: StorefrontItemRef): string | null {
+  const type = product.product_type;
+  if (type === 'course') {
+    return null;
+  }
+  if (type === 'service') {
+    const segment = product.slug?.trim() || product.id;
+    return `/service/${segment}`;
+  }
+  if (type === 'artist') {
+    return `/artist/${product.id}`;
+  }
+  const segment = product.slug?.trim() || product.id;
+  return `/products/${segment}`;
+}
+
+/**
+ * URL absolue d'un item sur la boutique vendeur (*.myemarzona.shop ou domaine custom).
+ * Les cours (LMS) pointent vers www.emarzona.com/courses/:slug — pas de route cours sur le sous-domaine.
+ */
+export function generateStorefrontItemUrl(
+  storeSlug: string,
+  product: StorefrontItemRef,
+  storeSubdomain?: string | null,
+  customDomain?: string
+): string {
+  if (product.product_type === 'course') {
+    const slug = product.slug?.trim();
+    if (slug) return `${PLATFORM_WWW_ORIGIN}/courses/${slug}`;
+    return `${PLATFORM_WWW_ORIGIN}/courses/${product.id}`;
+  }
+
+  const base = generateStoreUrl(storeSlug, storeSubdomain, customDomain);
+  const path = buildStorefrontItemPath(product);
+  return `${base}${path ?? `/products/${product.slug?.trim() || product.id}`}`;
+}
+
 /**
  * Génère l'URL premium de paiement d'un produit.
  * Exemple: `https://digitallog.myemarzona.shop/pay/mon-produit`

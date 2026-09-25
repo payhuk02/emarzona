@@ -29,9 +29,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
-import { generateProductUrl } from '@/lib/store-utils';
+import { generateStorefrontItemUrl } from '@/lib/store-utils';
 import { softNavigate } from '@/lib/navigation/soft-navigate';
-import { buildServicePublicPath } from '@/lib/service/resolve-service-product-route';
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useMarketplaceFavorites } from '@/hooks/useMarketplaceFavorites';
 import { buildCheckoutUrl } from '@/lib/checkout/checkout-route';
@@ -652,28 +651,15 @@ export default function CustomerMyWishlist() {
         return;
       }
 
-      // Navigation selon le type de produit (SPA same-origin via softNavigate)
-      switch (productType) {
-        case 'digital':
-          softNavigate(navigate, generateProductUrl(storeSlug, product.slug));
-          break;
-        case 'physical':
-          navigate(`/physical/${product.id}`);
-          break;
-        case 'service':
-          navigate(buildServicePublicPath({ id: product.id, slug: product.slug }));
-          break;
-        case 'course':
-          // Route correcte pour cours : /courses/:slug (utilise slug, pas id)
-          navigate(`/courses/${product.slug}`);
-          break;
-        case 'artist':
-          // Route pour œuvres d'artiste : /artist/:id
-          navigate(`/artist/${product.id}`);
-          break;
-        default:
-          softNavigate(navigate, generateProductUrl(storeSlug, product.slug));
-      }
+      // Navigation selon le type de produit — boutique *.myemarzona.shop quand store connu
+      softNavigate(
+        navigate,
+        generateStorefrontItemUrl(storeSlug, {
+          id: product.id,
+          slug: product.slug,
+          product_type: productType,
+        })
+      );
       logger.info('Navigation vers produit depuis wishlist', {
         productId: product.id,
         productType,

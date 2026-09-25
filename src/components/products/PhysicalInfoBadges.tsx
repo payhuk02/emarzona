@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Ruler } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Link } from 'react-router-dom';
-import { generateProductUrl } from '@/lib/store-utils';
+import { generateStorefrontItemUrl } from '@/lib/store-utils';
 
 /**
  * Badge Guide des tailles
@@ -44,11 +44,16 @@ export function PhysicalSizeChartBadge({
   };
 
   // Lien vers le guide des tailles (sera sur la page produit détaillée)
-  const sizeChartUrl = storeSlug
-    ? `${generateProductUrl(storeSlug, productSlug)}/size-chart`
-    : productSlug
-      ? `/products/${productSlug}#size-chart`
-      : '#size-chart';
+  const sizeChartUrl =
+    storeSlug && productSlug
+      ? `${generateStorefrontItemUrl(storeSlug, {
+          id: productSlug,
+          slug: productSlug,
+          product_type: 'physical',
+        })}/size-chart`
+      : productSlug
+        ? `/products/${productSlug}#size-chart`
+        : '#size-chart';
 
   return (
     <Badge

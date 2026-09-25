@@ -1,7 +1,7 @@
 /**
  * Actions marketplace — CTA principal, option « Voir » (hors services), contact vendeur.
  */
-import { Link } from 'react-router-dom';
+import { SoftLink } from '@/components/navigation/SoftLink';
 import { VendorMessagingLink } from '@/components/vendor/VendorMessagingLink';
 import { Button } from '@/components/ui/button';
 import { Eye, MessageCircle, MessageSquare, ShoppingCart, Calendar, Loader2 } from 'lucide-react';
@@ -107,7 +107,7 @@ export function MarketplaceProductCardActions({
           )}
           asChild
         >
-          <Link
+          <SoftLink
             to={productUrl}
             aria-label={`Voir les détails de ${productName}`}
             onClick={() => onView?.()}
@@ -115,7 +115,7 @@ export function MarketplaceProductCardActions({
           >
             <Eye className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" aria-hidden="true" />
             <span className="truncate">Voir</span>
-          </Link>
+          </SoftLink>
         </Button>
       )}
 

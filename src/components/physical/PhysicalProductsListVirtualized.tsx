@@ -18,6 +18,8 @@ interface PhysicalProductsListVirtualizedProps {
   products: (PhysicalProduct & { product?: unknown })[];
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
+  storeSlug?: string;
+  storeSubdomain?: string | null;
   className?: string;
   itemHeight?: number;
   containerHeight?: string;
@@ -27,6 +29,8 @@ const PhysicalProductsListVirtualizedComponent = ({
   products,
   onEdit,
   onDelete,
+  storeSlug,
+  storeSubdomain,
   className,
   itemHeight = 300,
   containerHeight = '600px',
@@ -87,7 +91,13 @@ const PhysicalProductsListVirtualizedComponent = ({
                 }}
               >
                 <div className="p-2">
-                  <PhysicalProductCard product={product} onEdit={onEdit} onDelete={onDelete} />
+                  <PhysicalProductCard
+                    product={product}
+                    onEdit={onEdit}
+                    onDelete={onDelete}
+                    storeSlug={storeSlug}
+                    storeSubdomain={storeSubdomain}
+                  />
                 </div>
               </div>
             );

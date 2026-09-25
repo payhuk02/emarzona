@@ -16,7 +16,7 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { updateSEOMetadata, generateSchemaOrg } from '@/lib/seo-enhancements';
-import { generateStoreUrl, generateProductUrl } from '@/lib/store-utils';
+import { generateStoreUrl, generateStorefrontItemUrl } from '@/lib/store-utils';
 import { getDynamicOgImage } from '@/lib/og-image';
 
 export interface UseSEOOptions {
@@ -57,7 +57,7 @@ export interface UseSEOOptions {
    */
   schema?: {
     type: 'Product' | 'Organization' | 'WebSite' | 'BreadcrumbList' | 'Article';
-    data: Record<string, any>;
+    data: Record<string, unknown>;
   };
   /**
    * Breadcrumb items pour générer le schema
@@ -169,6 +169,7 @@ export function useSEO(options: UseSEOOptions = {}) {
  * Hook pour générer automatiquement les métadonnées SEO d'un produit
  */
 export function useProductSEO(product: {
+  id?: string;
   name: string;
   description: string;
   price: number;
@@ -176,14 +177,22 @@ export function useProductSEO(product: {
   image?: string;
   slug: string;
   storeSlug?: string;
+  storeSubdomain?: string | null;
+  product_type?: string | null;
   availability?: 'instock' | 'outofstock' | 'preorder';
   sku?: string;
   category?: string;
 }) {
-  const location = useLocation();
-
   const canonicalUrl = product.storeSlug
-    ? generateProductUrl(product.storeSlug, product.slug)
+    ? generateStorefrontItemUrl(
+        product.storeSlug,
+        {
+          id: product.id || product.slug,
+          slug: product.slug,
+          product_type: product.product_type,
+        },
+        product.storeSubdomain
+      )
     : `${window.location.origin}/products/${product.slug}`;
 
   // Image OG : visuel produit si dispo, sinon image dynamique générée par l'edge function

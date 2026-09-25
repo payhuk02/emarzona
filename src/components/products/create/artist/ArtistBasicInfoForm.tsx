@@ -39,7 +39,7 @@ import type { ArtistProductFormData, ArtistSocialLinks, EditionType } from '@/ty
 import { ARTIST_EDITION_TYPE_OPTIONS } from '@/lib/artist-product-publish-validation';
 import { useSpaceInputFix } from '@/hooks/useSpaceInputFix';
 import { logger } from '@/lib/logger';
-import { generateProductUrl } from '@/lib/store-utils';
+import { generateStorefrontItemUrl } from '@/lib/store-utils';
 import { AIContentGenerator } from '@/components/products/AIContentGenerator';
 import { buildSeoFromGenerated, mergeImages } from '@/lib/ai-product-apply';
 import { ArtistFormField } from './ArtistFormField';
@@ -106,8 +106,8 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate, storeSlug }: ArtistBasic
   };
 
   /**
-   * Générer l'URL de la page produit à partir du titre de l'œuvre
-   * Format: https://[subdomain].myemarzona.shop/products/[slug]
+   * Générer l'URL de la page produit à partir du titre de l'œuvre.
+   * Route artist : /artist/:id — avant création on utilise le slug comme segment provisoire.
    */
   const generateUrlFromTitle = (title: string): string => {
     if (!title || title.trim().length < 2) {
@@ -115,9 +115,13 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate, storeSlug }: ArtistBasic
     }
     const slug = generateSlug(title);
     if (storeSlug) {
-      return generateProductUrl(storeSlug, slug);
+      return generateStorefrontItemUrl(storeSlug, {
+        id: slug,
+        slug,
+        product_type: 'artist',
+      });
     }
-    return `${window.location.origin}/products/${slug}`;
+    return `${window.location.origin}/artist/${slug}`;
   };
 
   /**

@@ -6,7 +6,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { generateProductUrl } from '@/lib/store-utils';
+import { generateStorefrontItemUrl } from '@/lib/store-utils';
 import { useToast } from '@/hooks/use-toast';
 import {
   AffiliateLink,
@@ -180,7 +180,8 @@ export const useAffiliateLinks = (
             slug,
             store_id,
             name,
-            store:stores!inner(id, slug)
+            product_type,
+            store:stores!inner(id, slug, subdomain)
           )
         `
         )
@@ -298,10 +299,21 @@ export const useAffiliateLinks = (
         }
       }
 
-      // Générer l'URL complète avec le slug du store
-      const baseUrl = window.location.origin;
+      // Générer l'URL complète avec le slug du store (*.myemarzona.shop selon verticale)
       const storeSlug = settingsData.product.store?.slug || settingsData.product.store_id;
-      const productUrl = generateProductUrl(storeSlug, settingsData.product.slug);
+      const storeRow = settingsData.product.store as
+        | { slug?: string; subdomain?: string | null }
+        | null
+        | undefined;
+      const productUrl = generateStorefrontItemUrl(
+        storeSlug,
+        {
+          id: formData.product_id,
+          slug: settingsData.product.slug,
+          product_type: (settingsData.product as { product_type?: string | null }).product_type,
+        },
+        storeRow?.subdomain
+      );
       const fullUrl = `${productUrl}?aff=${linkCode}`;
 
       // Créer le lien

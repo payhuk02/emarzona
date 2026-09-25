@@ -100,7 +100,7 @@ export const ADMIN_ADVANCED_TOOL_CATEGORIES: AdminToolCategory[] = [
       {
         label: 'Webhooks produit physique',
         description: 'Événements stock et expédition.',
-        path: '/dashboard/physical-webhooks',
+        path: '/dashboard/webhooks',
         icon: Webhook,
         scope: 'vendor',
       },
@@ -121,7 +121,7 @@ export const ADMIN_ADVANCED_TOOL_CATEGORIES: AdminToolCategory[] = [
       {
         label: 'Règles intelligentes (boutique)',
         description: 'Automatisations par boutique (contexte vendeur).',
-        path: '/dashboard/smart-notifications',
+        path: '/settings/notifications',
         icon: Bell,
         scope: 'vendor',
       },

@@ -38,16 +38,32 @@ describe('product-public-url', () => {
     );
   });
 
-  it('resolveMarketplaceProductCardUrl prefers www paths for typed products', () => {
+  it('resolveMarketplaceProductCardUrl prefers store subdomain when store is known', () => {
     expect(
       resolveMarketplaceProductCardUrl(
         { id: 's1', slug: 'identite-visuelle', product_type: 'service' },
+        { slug: 'ecom-web', subdomain: 'ecom-web' }
+      )
+    ).toBe('https://ecom-web.myemarzona.shop/service/identite-visuelle');
+    expect(
+      resolveMarketplaceProductCardUrl(
+        { id: 'd1', slug: 'ebook', product_type: 'digital' },
         { slug: 'ecom-web' }
       )
+    ).toBe('https://ecom-web.myemarzona.shop/products/ebook');
+  });
+
+  it('resolveMarketplaceProductCardUrl falls back to www path without store', () => {
+    expect(
+      resolveMarketplaceProductCardUrl({
+        id: 's1',
+        slug: 'identite-visuelle',
+        product_type: 'service',
+      })
     ).toBe('/service/identite-visuelle');
   });
 
-  it('resolveMarketplaceProductCardUrl falls back to storefront URL', () => {
+  it('resolveMarketplaceProductCardUrl falls back to storefront URL for untyped products', () => {
     expect(
       resolveMarketplaceProductCardUrl(
         { id: 'g1', slug: 'misc', product_type: 'generic' },
@@ -62,7 +78,7 @@ describe('product-public-url', () => {
     ).toBe('/service/identite-visuelle');
     expect(
       resolveStoreProductCardUrl({ id: 'c1', slug: 'mon-cours', product_type: 'course' })
-    ).toBe('/courses/mon-cours');
+    ).toBe('https://www.emarzona.com/courses/mon-cours');
     expect(resolveStoreProductCardUrl({ id: 'a1', slug: 'oeuvre', product_type: 'artist' })).toBe(
       '/artist/a1'
     );

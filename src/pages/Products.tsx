@@ -1116,6 +1116,7 @@ const Products = () => {
                               key={product.id}
                               product={product}
                               storeSlug={store.slug}
+                              storeSubdomain={store.subdomain}
                               onEdit={() => handleProductEdit(product)}
                               onDelete={() => setDeletingProductId(product.id)}
                               onToggleStatus={() => handleToggleStatus(product.id)}
@@ -1151,6 +1152,7 @@ const Products = () => {
                             <ProductListView
                               product={product}
                               storeSlug={store.slug}
+                              storeSubdomain={store.subdomain}
                               onEdit={() => handleProductEdit(product)}
                               onDelete={() => setDeletingProductId(product.id)}
                               onToggleStatus={() => handleToggleStatus(product.id)}

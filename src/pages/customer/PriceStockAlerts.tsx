@@ -52,7 +52,21 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { generateProductUrl } from '@/lib/store-utils';
+import { generateStorefrontItemUrl } from '@/lib/store-utils';
+
+function alertProductUrl(
+  product: NonNullable<PriceAlert['products']> | NonNullable<StockAlert['products']>
+): string {
+  return generateStorefrontItemUrl(
+    product.stores?.slug || 'default',
+    {
+      id: product.id,
+      slug: product.slug,
+      product_type: product.product_type,
+    },
+    product.stores?.subdomain
+  );
+}
 
 export default function PriceStockAlerts() {
   const [userId, setUserId] = useState<string | null>(null);
@@ -436,11 +450,7 @@ export default function PriceStockAlerts() {
                               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                                 {product.image_url && (
                                   <Link
-                                    to={generateProductUrl(
-                                      product.stores?.slug || 'default',
-                                      product.slug || product.id,
-                                      product.stores?.subdomain
-                                    )}
+                                    to={alertProductUrl(product)}
                                     className="flex-shrink-0 self-start"
                                   >
                                     <div className="relative w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-lg overflow-hidden bg-gradient-to-br from-purple-500/10 to-pink-500/5 border border-purple-500/20">
@@ -455,11 +465,7 @@ export default function PriceStockAlerts() {
                                 <div className="flex-1 min-w-0 space-y-2 sm:space-y-3">
                                   <div>
                                     <Link
-                                      to={generateProductUrl(
-                                        product.stores?.slug || 'default',
-                                        product.slug,
-                                        product.stores?.subdomain
-                                      )}
+                                      to={alertProductUrl(product)}
                                       className="hover:text-primary transition-colors"
                                     >
                                       <h3 className="font-semibold text-sm sm:text-base md:text-lg mb-1 sm:mb-2 break-words line-clamp-2">
@@ -504,13 +510,7 @@ export default function PriceStockAlerts() {
                                     asChild
                                     className="min-h-[44px] touch-manipulation text-xs sm:text-sm flex-1 sm:flex-none"
                                   >
-                                    <Link
-                                      to={generateProductUrl(
-                                        product.stores?.slug || 'default',
-                                        product.slug,
-                                        product.stores?.subdomain
-                                      )}
-                                    >
+                                    <Link to={alertProductUrl(product)}>
                                       <ExternalLink className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
                                       <span className="hidden sm:inline">Voir</span>
                                       <span className="sm:hidden">Voir</span>
@@ -591,11 +591,7 @@ export default function PriceStockAlerts() {
                               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                                 {product.image_url && (
                                   <Link
-                                    to={generateProductUrl(
-                                      product.stores?.slug || 'default',
-                                      product.slug || product.id,
-                                      product.stores?.subdomain
-                                    )}
+                                    to={alertProductUrl(product)}
                                     className="flex-shrink-0 self-start"
                                   >
                                     <div className="relative w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-lg overflow-hidden bg-gradient-to-br from-purple-500/10 to-pink-500/5 border border-purple-500/20">
@@ -610,11 +606,7 @@ export default function PriceStockAlerts() {
                                 <div className="flex-1 min-w-0 space-y-2 sm:space-y-3">
                                   <div>
                                     <Link
-                                      to={generateProductUrl(
-                                        product.stores?.slug || 'default',
-                                        product.slug,
-                                        product.stores?.subdomain
-                                      )}
+                                      to={alertProductUrl(product)}
                                       className="hover:text-primary transition-colors"
                                     >
                                       <h3 className="font-semibold text-sm sm:text-base md:text-lg mb-1 sm:mb-2 break-words line-clamp-2">
@@ -644,13 +636,7 @@ export default function PriceStockAlerts() {
                                     asChild
                                     className="min-h-[44px] touch-manipulation text-xs sm:text-sm flex-1 sm:flex-none"
                                   >
-                                    <Link
-                                      to={generateProductUrl(
-                                        product.stores?.slug || 'default',
-                                        product.slug,
-                                        product.stores?.subdomain
-                                      )}
-                                    >
+                                    <Link to={alertProductUrl(product)}>
                                       <ExternalLink className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
                                       <span className="hidden sm:inline">Voir</span>
                                       <span className="sm:hidden">Voir</span>

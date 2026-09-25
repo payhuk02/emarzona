@@ -29,6 +29,8 @@ import { resolveServiceDisplayPrice } from '@/lib/service/service-pricing';
 import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
 import { buildServicePublicPath } from '@/lib/service/resolve-service-product-route';
+import { generateStorefrontItemUrl } from '@/lib/store-utils';
+import { softNavigate } from '@/lib/navigation/soft-navigate';
 import { PAID_REVENUE_ELIGIBLE_STATUSES } from '@/lib/orders/order-status';
 
 function recommendationPriceDisplay(service: {
@@ -385,7 +387,21 @@ export const ServiceRecommendations = ({
           <Card
             key={service.id}
             className="group hover:shadow-lg transition-shadow cursor-pointer"
-            onClick={() => navigate(buildServicePublicPath({ id: service.id, slug: service.slug }))}
+            onClick={() => {
+              const storeSlug = service.stores?.slug;
+              if (storeSlug) {
+                softNavigate(
+                  navigate,
+                  generateStorefrontItemUrl(storeSlug, {
+                    id: service.id,
+                    slug: service.slug,
+                    product_type: 'service',
+                  })
+                );
+                return;
+              }
+              navigate(buildServicePublicPath({ id: service.id, slug: service.slug }));
+            }}
           >
             <div className="aspect-video bg-muted rounded-t-lg overflow-hidden">
               {service.image_url ? (
@@ -556,7 +572,21 @@ export const BookedTogetherRecommendations = ({
           <Card
             key={service.id}
             className="group hover:shadow-lg transition-shadow cursor-pointer"
-            onClick={() => navigate(buildServicePublicPath({ id: service.id, slug: service.slug }))}
+            onClick={() => {
+              const storeSlug = service.stores?.slug;
+              if (storeSlug) {
+                softNavigate(
+                  navigate,
+                  generateStorefrontItemUrl(storeSlug, {
+                    id: service.id,
+                    slug: service.slug,
+                    product_type: 'service',
+                  })
+                );
+                return;
+              }
+              navigate(buildServicePublicPath({ id: service.id, slug: service.slug }));
+            }}
           >
             <div className="aspect-video bg-muted rounded-t-lg overflow-hidden">
               {service.image_url ? (

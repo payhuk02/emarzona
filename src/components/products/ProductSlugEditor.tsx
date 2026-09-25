@@ -1,14 +1,16 @@
-import { useState, useEffect } from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Pencil, Check, X, Copy, ExternalLink } from "lucide-react";
-import { generateSlug, generateProductUrl } from "@/lib/store-utils";
-import { useToast } from "@/hooks/use-toast";
+import { useState, useEffect } from 'react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Pencil, Check, X, Copy, ExternalLink } from 'lucide-react';
+import { generateSlug, generateStorefrontItemUrl } from '@/lib/store-utils';
+import { useToast } from '@/hooks/use-toast';
 
 interface ProductSlugEditorProps {
   productName: string;
   currentSlug: string;
   storeSlug: string;
+  productId?: string;
+  productType?: string | null;
   onSlugChange: (slug: string) => void;
   onCheckAvailability: (slug: string) => Promise<boolean>;
   disabled?: boolean;
@@ -18,6 +20,8 @@ const ProductSlugEditor = ({
   productName,
   currentSlug,
   storeSlug,
+  productId,
+  productType,
   onSlugChange,
   onCheckAvailability,
   disabled = false,
@@ -82,37 +86,42 @@ const ProductSlugEditor = ({
     setSlug(normalized);
   };
 
-  const productUrl = generateProductUrl(storeSlug, slug || currentSlug);
+  const effectiveSlug = slug || currentSlug;
+  const productUrl = generateStorefrontItemUrl(storeSlug, {
+    id: productId || effectiveSlug,
+    slug: effectiveSlug,
+    product_type: productType || 'digital',
+  });
 
   const handleCopyLink = async () => {
     try {
       await navigator.clipboard.writeText(productUrl);
       toast({
-        title: "Lien copié",
-        description: "Le lien du produit a été copié dans le presse-papiers",
+        title: 'Lien copié',
+        description: 'Le lien du produit a été copié dans le presse-papiers',
       });
-    } catch (error) {
+    } catch (_error) {
       toast({
-        title: "Erreur",
-        description: "Impossible de copier le lien",
-        variant: "destructive",
+        title: 'Erreur',
+        description: 'Impossible de copier le lien',
+        variant: 'destructive',
       });
     }
   };
 
   const handlePreview = () => {
-    window.open(productUrl, "_blank");
+    window.open(productUrl, '_blank');
   };
 
   return (
     <div className="space-y-2">
       <label className="text-sm font-medium">Lien du produit</label>
-      
+
       <div className="flex gap-2">
         <div className="flex-1 relative">
           <Input
             value={slug}
-            onChange={(e) => handleSlugInput(e.target.value)}
+            onChange={e => handleSlugInput(e.target.value)}
             disabled={!isEditing || disabled}
             placeholder="nom-du-produit"
             className="pr-8"
@@ -198,9 +207,3 @@ const ProductSlugEditor = ({
 };
 
 export default ProductSlugEditor;
-
-
-
-
-
-

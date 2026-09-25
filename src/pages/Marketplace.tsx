@@ -12,7 +12,7 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { ArrowRight, Users, Sparkles } from '@/components/icons';
-import { Link } from 'react-router-dom';
+import { SoftLink } from '@/components/navigation/SoftLink';
 import { StoreCreateCtaLink } from '@/components/store/StoreCreateCtaLink';
 import { useToast } from '@/hooks/use-toast';
 import { ContextualFilters } from '@/components/marketplace/ContextualFilters';
@@ -51,7 +51,7 @@ import { MarketplaceHeroSection } from '@/components/marketplace/MarketplaceHero
 import { MarketplaceControlsSection } from '@/components/marketplace/MarketplaceControlsSection';
 import { MarketplaceProductsSection } from '@/components/marketplace/MarketplaceProductsSection';
 import { useLCPPreload } from '@/hooks/useLCPPreload';
-import { generateProductUrl } from '@/lib/store-utils';
+import { generateStorefrontItemUrl } from '@/lib/store-utils';
 import { useMarketplaceFacets } from '@/hooks/useMarketplaceFacets';
 import { buildMarketplaceBreadcrumbs, buildMarketplaceSEO } from '@/lib/marketplace-seo';
 import { BuyerDiscoveryPageLayout } from '@/components/layout/BuyerDiscoveryPageLayout';
@@ -542,11 +542,23 @@ const MarketplacePage = () => {
     return displayProducts.slice(0, 20).map(product => ({
       id: product.id,
       name: product.name,
-      url: generateProductUrl(
-        product.stores?.slug || 'default',
-        product.slug || product.id,
-        product.stores?.subdomain
-      ),
+      url: product.stores?.slug
+        ? generateStorefrontItemUrl(
+            product.stores.slug,
+            {
+              id: product.id,
+              slug: product.slug,
+              product_type: product.product_type,
+            },
+            product.stores && 'subdomain' in product.stores
+              ? (product.stores as { subdomain?: string | null }).subdomain
+              : undefined
+          )
+        : generateStorefrontItemUrl('default', {
+            id: product.id,
+            slug: product.slug || product.id,
+            product_type: product.product_type,
+          }),
       image: product.image_url || undefined,
       description: product.short_description || product.description || undefined,
       price: product.promotional_price || product.price,
@@ -711,11 +723,11 @@ const MarketplacePage = () => {
                 className="lp-btn-primary rounded-lg px-6 py-3"
                 aria-label={t('marketplace.quiz.button', 'Commencer le quiz de style personnalisé')}
               >
-                <Link to="/personalization/quiz" className="flex items-center space-x-2">
+                <SoftLink to="/personalization/quiz" className="flex items-center space-x-2">
                   <Sparkles className="h-5 w-5" aria-hidden="true" />
                   <span>Faire le Quiz</span>
                   <ArrowRight className="h-4 w-4" aria-hidden="true" />
-                </Link>
+                </SoftLink>
               </Button>
             </div>
           </div>
@@ -1009,7 +1021,7 @@ const MarketplacePage = () => {
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </StoreCreateCtaLink>
-              <Link to="/community" className="w-full sm:w-auto">
+              <SoftLink to="/community" className="w-full sm:w-auto">
                 <Button
                   size="lg"
                   className="lp-btn-outline rounded-lg h-11 sm:h-12 px-8 w-full sm:w-auto"
@@ -1017,7 +1029,7 @@ const MarketplacePage = () => {
                   <Users className="mr-2 h-4 w-4" />
                   {getValue('marketplace.cta.joinCommunity')}
                 </Button>
-              </Link>
+              </SoftLink>
             </div>
           </div>
         </section>

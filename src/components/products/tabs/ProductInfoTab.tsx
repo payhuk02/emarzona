@@ -69,7 +69,7 @@ import { getCategoriesForProductType, type CategoryOption } from '@/constants/pr
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-import { generateSlug, generateProductUrl } from '@/lib/store-utils';
+import { generateSlug, generateStorefrontItemUrl } from '@/lib/store-utils';
 import { useToast } from '@/hooks/use-toast';
 import { useSlugAvailability } from '@/hooks/useSlugAvailability';
 import { ProductTypeSelector } from './ProductInfoTab/ProductTypeSelector';
@@ -217,10 +217,14 @@ export const ProductInfoTab = ({
     [formData.name, formData.slug, updateFormData]
   );
 
-  // URL du produit (URL publique par défaut : nomboutique.nomdedomaineplateforme.com/nomdeproduit)
+  // URL du produit (URL publique par défaut : nomboutique.myemarzona.shop/… selon verticale)
   const productUrl =
     storeSlug && formData.slug
-      ? generateProductUrl(storeSlug, formData.slug)
+      ? generateStorefrontItemUrl(storeSlug, {
+          id: formData.slug,
+          slug: formData.slug,
+          product_type: formData.product_type || 'digital',
+        })
       : window.location.origin;
 
   // Copie de l'URL du produit

@@ -35,9 +35,17 @@ interface PhysicalProductCardProps {
   product: PhysicalProduct & { product?: Product };
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
+  storeSlug?: string;
+  storeSubdomain?: string | null;
 }
 
-const PhysicalProductCardComponent = ({ product, onEdit, onDelete }: PhysicalProductCardProps) => {
+const PhysicalProductCardComponent = ({
+  product,
+  onEdit,
+  onDelete,
+  storeSlug,
+  storeSubdomain,
+}: PhysicalProductCardProps) => {
   const navigate = useNavigate();
   const { data: inventory } = useInventory(product.id);
   const [_userId, setUserId] = useState<string | null>(null);
@@ -116,9 +124,10 @@ const PhysicalProductCardComponent = ({ product, onEdit, onDelete }: PhysicalPro
               slug: product.product?.slug || product.id,
               name: product.product?.name,
               is_active: product.product?.is_active,
+              product_type: 'physical',
             }}
-            storeSlug={product.product?.store?.slug}
-            storeSubdomain={product.product?.store?.subdomain}
+            storeSlug={storeSlug || product.product?.store?.slug}
+            storeSubdomain={storeSubdomain ?? product.product?.store?.subdomain}
             onEdit={id => onEdit?.(product.product_id || product.product?.id || id)}
             onDelete={() => onDelete?.(product.id)}
             triggerProps={{
@@ -273,6 +282,8 @@ interface PhysicalProductsGridProps {
   loading?: boolean;
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
+  storeSlug?: string;
+  storeSubdomain?: string | null;
 }
 
 // ✅ PHASE 6: Optimiser PhysicalProductsGrid avec React.memo pour éviter re-renders inutiles
@@ -281,6 +292,8 @@ const PhysicalProductsGridComponent = ({
   loading,
   onEdit,
   onDelete,
+  storeSlug,
+  storeSubdomain,
 }: PhysicalProductsGridProps) => {
   if (loading) {
     return (
@@ -321,6 +334,8 @@ const PhysicalProductsGridComponent = ({
           product={product}
           onEdit={onEdit}
           onDelete={onDelete}
+          storeSlug={storeSlug}
+          storeSubdomain={storeSubdomain}
         />
       ))}
     </div>

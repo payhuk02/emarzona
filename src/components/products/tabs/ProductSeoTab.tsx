@@ -30,7 +30,7 @@ import {
   Tablet,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { generateProductUrl } from '@/lib/store-utils';
+import { generateStorefrontItemUrl } from '@/lib/store-utils';
 
 interface ProductSeoFormData {
   meta_title?: string;
@@ -82,15 +82,19 @@ export const ProductSeoTab = ({ formData, updateFormData, storeSlug }: ProductSe
   const productSlug = (formData.slug as string) || '';
   const defaultProductUrl =
     storeSlug && productSlug
-      ? generateProductUrl(storeSlug, productSlug)
-      : 'https://votreboutique.nomdedomaineplateforme.com/nom-de-produit';
+      ? generateStorefrontItemUrl(storeSlug, {
+          id: productSlug,
+          slug: productSlug,
+          product_type: (formData as { product_type?: string }).product_type || 'digital',
+        })
+      : 'https://votreboutique.myemarzona.shop/products/nom-de-produit';
 
   // Analyser le SEO
   const analyzeSEO = useCallback(() => {
-    let  score= 0;
-    const  issues: string[] = [];
-    const  suggestions: string[] = [];
-    const  keywords: string[] = [];
+    let score = 0;
+    const issues: string[] = [];
+    const suggestions: string[] = [];
+    const keywords: string[] = [];
 
     // Titre SEO (20 points)
     if (formData.meta_title && (formData.meta_title as string).length > 0) {
@@ -284,7 +288,7 @@ export const ProductSeoTab = ({ formData, updateFormData, storeSlug }: ProductSe
               size="sm"
               onClick={() => setActivePreview('tablet')}
             >
-              <Tablet  className ="h-4 w-4" />
+              <Tablet className="h-4 w-4" />
             </Button>
             <Button
               variant={activePreview === 'mobile' ? 'default' : 'outline'}
@@ -723,9 +727,3 @@ export const ProductSeoTab = ({ formData, updateFormData, storeSlug }: ProductSe
     </div>
   );
 };
-
-
-
-
-
-

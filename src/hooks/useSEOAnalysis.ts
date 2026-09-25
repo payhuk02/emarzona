@@ -1,10 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { analyzeSEO, SEOAnalysis } from '@/lib/seo-analyzer';
-import { generateStoreUrl, generateProductUrl } from '@/lib/store-utils';
+import { generateStoreUrl, generateStorefrontItemUrl } from '@/lib/store-utils';
 
 const PRODUCT_SEO_FIELDS =
-  'id, store_id, name, slug, description, meta_title, meta_description, meta_keywords, image_url, images';
+  'id, store_id, name, slug, description, meta_title, meta_description, meta_keywords, image_url, images, product_type';
 
 export interface SEOPageData {
   id: string;
@@ -27,7 +27,7 @@ export const useSEOAnalysis = (userId?: string) => {
       const { data: stores, error: storesError } = await supabase
         .from('stores')
         .select(
-          'id, name, slug, description, about, meta_title, meta_description, meta_keywords, logo_url'
+          'id, name, slug, subdomain, description, about, meta_title, meta_description, meta_keywords, logo_url'
         )
         .eq('user_id', userId);
 
@@ -94,7 +94,17 @@ export const useSEOAnalysis = (userId?: string) => {
               id: product.id,
               type: 'product',
               name: product.name,
-              url: store ? generateProductUrl(store.slug, product.slug) : '#',
+              url: store
+                ? generateStorefrontItemUrl(
+                    store.slug,
+                    {
+                      id: product.id,
+                      slug: product.slug,
+                      product_type: product.product_type,
+                    },
+                    store.subdomain
+                  )
+                : '#',
               analysis,
               lastAnalyzed: new Date(),
             });
@@ -106,7 +116,17 @@ export const useSEOAnalysis = (userId?: string) => {
                 page_id: product.id,
                 title: product.name,
                 description: product.description,
-                url: store ? generateProductUrl(store.slug, product.slug) : '#',
+                url: store
+                  ? generateStorefrontItemUrl(
+                      store.slug,
+                      {
+                        id: product.id,
+                        slug: product.slug,
+                        product_type: product.product_type,
+                      },
+                      store.subdomain
+                    )
+                  : '#',
                 seo_score: analysis.score.overall,
                 updated_at: new Date().toISOString(),
               },

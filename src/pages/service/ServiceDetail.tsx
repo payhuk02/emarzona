@@ -120,6 +120,8 @@ import {
 } from '@/lib/service/service-detail-labels';
 import { parseServiceCheckoutOptions } from '@/lib/service/service-checkout-display';
 import { buildServicePublicPath, isProductUuid } from '@/lib/service/resolve-service-product-route';
+import { generateStorefrontItemUrl } from '@/lib/store-utils';
+import { softNavigate } from '@/lib/navigation/soft-navigate';
 
 const APPOINTMENT_DATE_FORMATTER = new Intl.DateTimeFormat('fr-FR', {
   weekday: 'long',
@@ -131,7 +133,7 @@ const APPOINTMENT_DATE_FORMATTER = new Intl.DateTimeFormat('fr-FR', {
 const PRODUCT_SERVICE_FIELDS =
   'id, store_id, slug, name, description, short_description, category, category_id, tags, product_type, is_active, price, promotional_price, currency, image_url, images, created_at, updated_at, payment_options, pricing_model, licensing_type, license_terms, faqs, whatsapp_number, whatsapp_enabled, product_affiliate_settings!left(affiliate_enabled, commission_rate)';
 const PRODUCT_SERVICE_SELECT = PRODUCT_SERVICE_FIELDS;
-const STORE_PUBLIC_FIELDS = 'id, name, slug, logo_url';
+const STORE_PUBLIC_FIELDS = 'id, name, slug, subdomain, logo_url';
 const SERVICE_PRODUCT_FIELDS =
   'id, product_id, service_type, duration_minutes, location_type, location_address, meeting_url, timezone, buffer_time_before, buffer_time_after, max_bookings_per_day, require_approval, max_participants, advance_booking_days, fulfillment_mode, brief_fields, category_attributes, pricing_type, deposit_required, deposit_amount, deposit_type, allow_booking_cancellation, cancellation_deadline_hours, requires_staff, created_at, updated_at';
 const SERVICE_STAFF_FIELDS =
@@ -201,8 +203,13 @@ export default function ServiceDetail() {
 
       const productId = productData.id;
 
-      let storePublic: { id: string; name: string; slug: string; logo_url: string | null } | null =
-        null;
+      let storePublic: {
+        id: string;
+        name: string;
+        slug: string;
+        subdomain: string | null;
+        logo_url: string | null;
+      } | null = null;
       if (productData?.store_id) {
         const { data: storeRow } = await supabase
           .from('stores_public')
@@ -734,7 +741,13 @@ export default function ServiceDetail() {
       isGigService);
   const showProjectOrderPanel = showProject && (hasPublishedPackages || hasActiveExtras);
   const showSimpleCheckout = !showAppointment && !showProjectOrderPanel;
-  const serviceUrl = `${window.location.origin}${buildServicePublicPath(service)}`;
+  const serviceUrl = service.store?.slug
+    ? generateStorefrontItemUrl(
+        service.store.slug,
+        { id: service.id, slug: service.slug, product_type: 'service' },
+        service.store.subdomain
+      )
+    : `${window.location.origin}${buildServicePublicPath(service)}`;
 
   const projectPaymentOptions = (service?.payment_options ?? null) as
     | import('@/lib/service/service-project-milestones').ServicePaymentOptionsWithMilestones
@@ -1487,14 +1500,25 @@ export default function ServiceDetail() {
                             </p>
                           )}
                           <Button
-                            onClick={() =>
-                              navigate(
-                                buildServicePublicPath({
-                                  id: service.paid_product.id,
-                                  slug: service.paid_product.slug,
-                                })
-                              )
-                            }
+                            onClick={() => {
+                              const target = {
+                                id: service.paid_product.id,
+                                slug: service.paid_product.slug,
+                                product_type: 'service' as const,
+                              };
+                              if (service.store?.slug) {
+                                softNavigate(
+                                  navigate,
+                                  generateStorefrontItemUrl(
+                                    service.store.slug,
+                                    target,
+                                    service.store.subdomain
+                                  )
+                                );
+                                return;
+                              }
+                              navigate(buildServicePublicPath(target));
+                            }}
                             className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
                             size="sm"
                           >
@@ -1522,14 +1546,25 @@ export default function ServiceDetail() {
                             complète.
                           </p>
                           <Button
-                            onClick={() =>
-                              navigate(
-                                buildServicePublicPath({
-                                  id: service.free_product.id,
-                                  slug: service.free_product.slug,
-                                })
-                              )
-                            }
+                            onClick={() => {
+                              const target = {
+                                id: service.free_product.id,
+                                slug: service.free_product.slug,
+                                product_type: 'service' as const,
+                              };
+                              if (service.store?.slug) {
+                                softNavigate(
+                                  navigate,
+                                  generateStorefrontItemUrl(
+                                    service.store.slug,
+                                    target,
+                                    service.store.subdomain
+                                  )
+                                );
+                                return;
+                              }
+                              navigate(buildServicePublicPath(target));
+                            }}
                             className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
                             size="sm"
                             variant="outline"

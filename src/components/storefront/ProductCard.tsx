@@ -44,7 +44,7 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { VendorMessagingLink } from '@/components/vendor/VendorMessagingLink';
-import { generateProductUrl } from '@/lib/store-utils';
+import { generateStorefrontItemUrl } from '@/lib/store-utils';
 import { ResponsiveProductImage } from '@/components/ui/ResponsiveProductImage';
 import { initiateMarketplaceDirectBuy } from '@/lib/marketplace/initiate-direct-buy';
 import { supabase } from '@/integrations/supabase/client';
@@ -69,9 +69,10 @@ import {
 interface ProductCardProps {
   product: ExtendedProduct & Partial<UnifiedProduct>;
   storeSlug: string;
+  storeSubdomain?: string | null;
 }
 
-const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
+const ProductCardComponent = ({ product, storeSlug, storeSubdomain }: ProductCardProps) => {
   const [loading, setLoading] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
   const [isZoomOpen, setIsZoomOpen] = useState(false);
@@ -80,6 +81,20 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
   const { toast } = useToast();
   const isDigital = product.product_type === 'digital';
   const extendedProduct = product as ExtendedProduct;
+
+  const productPublicUrl = useMemo(
+    () =>
+      generateStorefrontItemUrl(
+        storeSlug,
+        {
+          id: product.id,
+          slug: product.slug,
+          product_type: product.product_type,
+        },
+        storeSubdomain
+      ),
+    [storeSlug, storeSubdomain, product.id, product.slug, product.product_type]
+  );
 
   // Récupérer l'utilisateur pour les alertes
   useEffect(() => {
@@ -271,10 +286,7 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
     >
       {/* Image avec overlay et badges - Prend plus d'espace, contenu repoussé en bas */}
       <div className="product-image-container relative overflow-hidden bg-muted/30 flex-grow group">
-        <Link
-          to={generateProductUrl(storeSlug, product.slug || '')}
-          className="block w-full h-full"
-        >
+        <Link to={productPublicUrl} className="block w-full h-full">
           <ResponsiveProductImage
             src={product.image_url || '/placeholder.svg'}
             alt={product.name}
@@ -292,13 +304,13 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
         {isDigital && (
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 [@media(hover:none)]:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2">
             <Button size="sm" variant="secondary" asChild>
-              <Link to={generateProductUrl(storeSlug, product.slug || '')}>
+              <Link to={productPublicUrl}>
                 <Eye className="h-4 w-4 mr-2" />
                 Voir
               </Link>
             </Button>
             <Button size="sm" asChild>
-              <Link to={generateProductUrl(storeSlug, product.slug || '')}>
+              <Link to={productPublicUrl}>
                 <Play className="h-4 w-4 mr-2" />
                 Découvrir
               </Link>
@@ -418,7 +430,7 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
       {/* Contenu de la carte - Repoussé en bas pour laisser plus d'espace à l'image */}
       <CardContent className="p-4 sm:p-5 flex-shrink-0 flex flex-col gap-2 sm:gap-3">
         {/* Titre du produit */}
-        <Link to={generateProductUrl(storeSlug, product.slug || '')}>
+        <Link to={productPublicUrl}>
           <h3 className="font-semibold text-lg text-white mb-3 line-clamp-2 leading-tight">
             {product.name}
           </h3>
@@ -684,10 +696,7 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
             className="product-action-button flex-1 h-10 text-white bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 border-amber-500 transition-all duration-200"
             asChild
           >
-            <Link
-              to={generateProductUrl(storeSlug, product.slug || '')}
-              className="flex items-center justify-center gap-1.5"
-            >
+            <Link to={productPublicUrl} className="flex items-center justify-center gap-1.5">
               <Eye className="h-4 w-4 text-white" />
               <span className="font-medium text-white">Voir</span>
             </Link>

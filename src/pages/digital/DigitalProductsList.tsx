@@ -9,7 +9,7 @@
 import { useState, useMemo, useCallback, useEffect, useRef, lazy, Suspense } from 'react';
 import { AppPageShell } from '@/components/layout/AppPageShell';
 import { useNavigate } from 'react-router-dom';
-import { generatePaymentUrl, generateProductUrl } from '@/lib/store-utils';
+import { generatePaymentUrl, generateStorefrontItemUrl } from '@/lib/store-utils';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -1230,9 +1230,13 @@ export const DigitalProductsList = () => {
                                         onValueChange={action => {
                                           const url =
                                             store?.slug && product?.slug
-                                              ? generateProductUrl(
+                                              ? generateStorefrontItemUrl(
                                                   store.slug,
-                                                  product.slug || product.id,
+                                                  {
+                                                    id: product.id,
+                                                    slug: product.slug || product.id,
+                                                    product_type: 'digital',
+                                                  },
                                                   store.subdomain
                                                 )
                                               : '';

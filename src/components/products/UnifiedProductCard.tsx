@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 import React, { useMemo, useCallback, useState, useEffect, useRef } from 'react';
 import { SoftLink } from '@/components/navigation/SoftLink';
-import { generateProductUrl, generatePaymentUrl } from '@/lib/store-utils';
+import { generateStorefrontItemUrl, generatePaymentUrl } from '@/lib/store-utils';
 import {
   resolveMarketplaceProductCardUrl,
   resolveStoreProductCardUrl,
@@ -278,6 +278,7 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
     },
     price: priceInfo.price,
     storeSlug: product.store?.slug,
+    storeSubdomain: product.store?.subdomain,
   });
 
   const productUrl = useMemo(() => {
@@ -294,9 +295,19 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
         product_type: product.type,
       });
     }
-    return product.store?.slug
-      ? generateProductUrl(product.store.slug, product.slug, product.store?.subdomain)
-      : `/products/${product.slug}`;
+    // compact / dashboard / autres : toujours type-aware dès qu'un store est connu
+    if (product.store?.slug) {
+      return generateStorefrontItemUrl(
+        product.store.slug,
+        { id: product.id, slug: product.slug, product_type: product.type },
+        product.store.subdomain
+      );
+    }
+    return resolveMarketplaceProductCardUrl({
+      id: product.id,
+      slug: product.slug,
+      product_type: product.type,
+    });
   }, [variant, product.id, product.slug, product.type, product.store]);
 
   const paymentUrl = useMemo(

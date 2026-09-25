@@ -32,11 +32,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { generateProductUrl } from '@/lib/store-utils';
+import { generateStorefrontItemUrl } from '@/lib/store-utils';
 
 interface ProductListViewProps {
   product: Product;
   storeSlug: string;
+  storeSubdomain?: string | null;
   onEdit: () => void;
   onDelete: () => void;
   onToggleStatus?: () => void;
@@ -49,6 +50,7 @@ interface ProductListViewProps {
 const ProductListView = ({
   product,
   storeSlug,
+  storeSubdomain,
   onEdit,
   onDelete,
   onToggleStatus,
@@ -61,10 +63,19 @@ const ProductListView = ({
   const { toast } = useToast();
   const [imageError, setImageError] = useState(false);
 
-  // Mémoriser l'URL du produit
+  // Mémoriser l'URL du produit (*.myemarzona.shop selon verticale)
   const productUrl = useMemo(
-    () => generateProductUrl(storeSlug, product.slug),
-    [storeSlug, product.slug]
+    () =>
+      generateStorefrontItemUrl(
+        storeSlug,
+        {
+          id: product.id,
+          slug: product.slug,
+          product_type: product.product_type,
+        },
+        storeSubdomain
+      ),
+    [storeSlug, storeSubdomain, product.id, product.slug, product.product_type]
   );
 
   // Calculer les informations de stock - mémorisé
@@ -249,8 +260,12 @@ const ProductListView = ({
                   let currentPrice = product.price || 0;
                   let crossedOutPrice: number | null = null;
 
-                  const backendPromotionalPrice = (product as any).promotional_price;
-                  const backendCompareAtPrice = (product as any).compare_at_price;
+                  const pricing = product as Product & {
+                    promotional_price?: number | null;
+                    compare_at_price?: number | null;
+                  };
+                  const backendPromotionalPrice = pricing.promotional_price;
+                  const backendCompareAtPrice = pricing.compare_at_price;
 
                   if (backendPromotionalPrice && backendPromotionalPrice < product.price) {
                     currentPrice = backendPromotionalPrice;

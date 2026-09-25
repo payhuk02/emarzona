@@ -22,6 +22,8 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { softNavigate } from '@/lib/navigation/soft-navigate';
+import { generateStorefrontItemUrl } from '@/lib/store-utils';
 import { buildServicePublicPath } from '@/lib/service/resolve-service-product-route';
 import type { ServiceProduct } from '@/hooks/service';
 import { ResponsiveProductImage } from '@/components/ui/ResponsiveProductImage';
@@ -251,14 +253,21 @@ const ServiceCardComponent = ({
       <CardFooter className="pt-3">
         <Button
           className="w-full"
-          onClick={() =>
-            navigate(
-              buildServicePublicPath({
-                id: service.product_id || service.product?.id || service.id,
-                slug: service.product?.slug,
-              })
-            )
-          }
+          onClick={() => {
+            const productRef = {
+              id: service.product_id || service.product?.id || service.id,
+              slug: service.product?.slug,
+              product_type: 'service' as const,
+            };
+            if (storeSlug) {
+              softNavigate(
+                navigate,
+                generateStorefrontItemUrl(storeSlug, productRef, storeSubdomain)
+              );
+              return;
+            }
+            navigate(buildServicePublicPath(productRef));
+          }}
         >
           <Calendar className="h-4 w-4 mr-2" />
           Réserver
@@ -284,6 +293,7 @@ const ServiceCard = React.memo(ServiceCardComponent, (prevProps, nextProps) => {
     prevProps.service.category_attributes === nextProps.service.category_attributes &&
     prevProps.showActions === nextProps.showActions &&
     prevProps.storeSlug === nextProps.storeSlug &&
+    prevProps.storeSubdomain === nextProps.storeSubdomain &&
     prevProps.onEdit === nextProps.onEdit &&
     prevProps.onDelete === nextProps.onDelete &&
     prevProps.onDuplicate === nextProps.onDuplicate &&

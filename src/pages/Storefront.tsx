@@ -33,7 +33,7 @@ import { useLCPPreload } from '@/hooks/useLCPPreload';
 import { useAdaptiveLoading } from '@/hooks/useAdaptiveLoading';
 import { useStoreSlug } from '@/contexts/StoreSlugContext';
 import { useStorefrontShell } from '@/contexts/StorefrontShellContext';
-import { generateStoreUrl, generateProductUrl } from '@/lib/store-utils';
+import { generateStoreUrl, generateStorefrontItemUrl } from '@/lib/store-utils';
 import { buildCheckoutUrl } from '@/lib/checkout/checkout-route';
 import { detectSubdomain } from '@/lib/subdomain-detector';
 import { redirectToPlatformLogin } from '@/lib/auth-routes';
@@ -317,7 +317,15 @@ const StorefrontPage = ({ previewMode = false, storeOverride = null }: Storefron
       return {
         id: product.id,
         name: product.name,
-        url: generateProductUrl(store.slug, product.slug || '', store.subdomain),
+        url: generateStorefrontItemUrl(
+          store.slug,
+          {
+            id: product.id,
+            slug: product.slug || '',
+            product_type: product.product_type,
+          },
+          store.subdomain
+        ),
         image: product.image_url || undefined,
         description: productExtras.short_description || product.description || undefined,
         price: productExtras.promotional_price || product.price || undefined,

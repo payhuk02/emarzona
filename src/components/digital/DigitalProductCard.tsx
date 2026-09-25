@@ -42,7 +42,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { generateProductUrl } from '@/lib/store-utils';
+import { SoftLink } from '@/components/navigation/SoftLink';
+import { generateStorefrontItemUrl } from '@/lib/store-utils';
+import { resolveStoreProductCardUrl } from '@/lib/seo/product-public-url';
 import { resolveDigitalDisplayPrice } from '@/lib/digital/digital-product-display';
 
 interface DigitalProductCardProps {
@@ -132,6 +134,22 @@ const DigitalProductCardComponent = ({
     product.promotional_price
   );
 
+  const productPublicUrl = store?.slug
+    ? generateStorefrontItemUrl(
+        store.slug,
+        {
+          id: product.id,
+          slug: product.slug,
+          product_type: 'digital',
+        },
+        store.subdomain
+      )
+    : resolveStoreProductCardUrl({
+        id: product.id,
+        slug: product.slug,
+        product_type: 'digital',
+      });
+
   // Gérer les favoris
   const handleFavorite = useCallback(
     (e: React.MouseEvent) => {
@@ -179,7 +197,7 @@ const DigitalProductCardComponent = ({
     >
       {/* Image/Icon - Ratio 3:2 aligné avec le format produit 1536×1024 */}
       <div className="relative aspect-[3/2] bg-gradient-to-br from-primary/10 to-primary/5 overflow-hidden">
-        <Link to={`/products/${product.slug}`} className="block w-full h-full">
+        <SoftLink to={productPublicUrl} className="block w-full h-full">
           <ResponsiveProductImage
             src={product.image_url}
             alt={product.name}
@@ -198,21 +216,21 @@ const DigitalProductCardComponent = ({
               </div>
             }
           />
-        </Link>
+        </SoftLink>
 
         {/* Overlay gradient au hover - Style comme CourseProductCard */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2">
           <Button size="sm" variant="secondary" asChild>
-            <Link to={`/products/${product.slug}`}>
+            <SoftLink to={productPublicUrl}>
               <Eye className="h-4 w-4 mr-2" />
               Voir
-            </Link>
+            </SoftLink>
           </Button>
           <Button size="sm" asChild>
-            <Link to={`/products/${product.slug}`}>
+            <SoftLink to={productPublicUrl}>
               <Play className="h-4 w-4 mr-2" />
               Découvrir
-            </Link>
+            </SoftLink>
           </Button>
           {product.image_url && (
             <Button
@@ -281,6 +299,7 @@ const DigitalProductCardComponent = ({
                 slug: product.slug,
                 name: product.name,
                 is_active: product.is_active,
+                product_type: 'digital',
               }}
               storeSlug={store?.slug}
               storeSubdomain={store?.subdomain}
@@ -321,13 +340,7 @@ const DigitalProductCardComponent = ({
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
-            <Link
-              to={
-                store?.slug && product.slug
-                  ? generateProductUrl(store.slug, product.slug, store.subdomain)
-                  : `/products/${product.slug}`
-              }
-            >
+            <SoftLink to={productPublicUrl}>
               <h3
                 className={cn(
                   'font-semibold truncate hover:text-primary transition-colors mb-3',
@@ -336,7 +349,7 @@ const DigitalProductCardComponent = ({
               >
                 {product.name}
               </h3>
-            </Link>
+            </SoftLink>
 
             {/* Badge Featured - Placé après le titre */}
             {isFeatured && (
@@ -459,16 +472,10 @@ const DigitalProductCardComponent = ({
               </Link>
             </Button>
             <Button variant="outline" className="flex-1" asChild>
-              <Link
-                to={
-                  store?.slug && product.slug
-                    ? generateProductUrl(store.slug, product.slug, store.subdomain)
-                    : `/products/${product.slug}`
-                }
-              >
+              <SoftLink to={productPublicUrl}>
                 <FileText className="h-4 w-4 mr-2" />
                 Détails
-              </Link>
+              </SoftLink>
             </Button>
             {onDownload ? (
               <Button className="flex-1" onClick={onDownload}>
@@ -477,15 +484,7 @@ const DigitalProductCardComponent = ({
               </Button>
             ) : (
               <Button className="flex-1" asChild>
-                <Link
-                  to={
-                    store?.slug && product.slug
-                      ? generateProductUrl(store.slug, product.slug, store.subdomain)
-                      : `/products/${product.slug}`
-                  }
-                >
-                  Acheter
-                </Link>
+                <SoftLink to={productPublicUrl}>Acheter</SoftLink>
               </Button>
             )}
           </div>

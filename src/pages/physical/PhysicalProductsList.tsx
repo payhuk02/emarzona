@@ -198,12 +198,16 @@ export const PhysicalProductsList = () => {
               <PhysicalProductsGrid
                 products={[]}
                 loading={true}
+                storeSlug={store?.slug}
+                storeSubdomain={store?.subdomain}
                 onEdit={id => navigate(`/dashboard/products/${id}/edit`)}
                 onDelete={id => setDeleteProductId(id)}
               />
             ) : (filteredProducts?.length || 0) > 50 ? (
               <PhysicalProductsListVirtualized
                 products={filteredProducts || []}
+                storeSlug={store?.slug}
+                storeSubdomain={store?.subdomain}
                 onEdit={id => navigate(`/dashboard/products/${id}/edit`)}
                 onDelete={id => setDeleteProductId(id)}
                 itemHeight={300}
@@ -213,6 +217,8 @@ export const PhysicalProductsList = () => {
               <PhysicalProductsGrid
                 products={filteredProducts || []}
                 loading={false}
+                storeSlug={store?.slug}
+                storeSubdomain={store?.subdomain}
                 onEdit={id => navigate(`/dashboard/products/${id}/edit`)}
                 onDelete={id => setDeleteProductId(id)}
               />

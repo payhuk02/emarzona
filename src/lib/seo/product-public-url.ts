@@ -1,8 +1,9 @@
 /**
- * URLs publiques produit sur www.emarzona.com (marketplace / catalogue plateforme).
- * Les boutiques vendeurs utilisent *.myemarzona.shop/products/:slug (voir store-utils).
+ * URLs publiques produit.
+ * - Boutique vendeur : *.myemarzona.shop (prioritaire dès qu'un store est connu)
+ * - www.emarzona.com : chemins marketplace / catalogue plateforme (fallback)
  */
-import { generateProductUrl } from '@/lib/store-utils';
+import { generateStorefrontItemUrl } from '@/lib/store-utils';
 import { buildServicePublicPath } from '@/lib/service/resolve-service-product-route';
 
 export const WWW_SITE_ORIGIN = 'https://www.emarzona.com';
@@ -51,28 +52,35 @@ export interface MarketplaceCardStoreRef {
   subdomain?: string | null;
 }
 
-/** Lien « Voir » sur une carte marketplace — chemin www si disponible, sinon boutique. */
+/**
+ * Lien « Voir » sur une carte marketplace — boutique *.myemarzona.shop si store connu,
+ * sinon chemin www.
+ */
 export function resolveMarketplaceProductCardUrl(
   product: MarketplaceProductRef,
   store?: MarketplaceCardStoreRef | null
 ): string {
+  if (store?.slug) {
+    return generateStorefrontItemUrl(store.slug, product, store.subdomain);
+  }
+
   const marketplacePath = buildWwwProductPublicPath(product);
   if (marketplacePath) return marketplacePath;
 
-  if (store?.slug && product.slug) {
-    return generateProductUrl(store.slug, product.slug, store.subdomain);
+  if (product.slug) {
+    return `/products/${product.slug}`;
   }
-
-  return product.slug ? `/products/${product.slug}` : `/products/${product.id}`;
+  return `/products/${product.id}`;
 }
 
 /** Lien carte produit sur la boutique (*.myemarzona.shop) — chemins relatifs sur le sous-domaine. */
 export function resolveStoreProductCardUrl(product: MarketplaceProductRef): string {
+  if (product.product_type === 'course' && product.slug) {
+    // LMS uniquement sur www — SoftLink hard-nav cross-origin
+    return `${WWW_SITE_ORIGIN}/courses/${product.slug}`;
+  }
   if (product.product_type === 'service') {
     return buildServicePublicPath(product);
-  }
-  if (product.product_type === 'course' && product.slug) {
-    return `/courses/${product.slug}`;
   }
   if (product.product_type === 'artist') {
     return `/artist/${product.id}`;

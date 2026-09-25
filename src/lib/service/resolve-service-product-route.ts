@@ -5,7 +5,7 @@ export function isProductUuid(value: string | undefined | null): boolean {
   return UUID_RE.test(value);
 }
 
-/** Chemin public marketplace pour une prestation service. */
+/** Chemin relatif public service (host boutique ou www). Préférer generateStorefrontItemUrl pour les liens absolus. */
 export function buildServicePublicPath(product: { id: string; slug?: string | null }): string {
   const segment = product.slug?.trim() || product.id;
   return `/service/${segment}`;

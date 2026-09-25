@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo, useCallback, lazy, Suspense } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { VendorMessagingLink } from '@/components/vendor/VendorMessagingLink';
 import { supabase } from '@/integrations/supabase/client';
 import { useStoreSlug } from '@/contexts/StoreSlugContext';
@@ -61,7 +61,8 @@ import { cn } from '@/lib/utils';
 import type { ProductFAQ } from '@/types/product-form';
 import type { Product } from '@/types/marketplace';
 import type { Store } from '@/hooks/useStore';
-import { generateStoreUrl, generateProductUrl, generatePaymentUrl } from '@/lib/store-utils';
+import { generateStoreUrl, generateStorefrontItemUrl, generatePaymentUrl } from '@/lib/store-utils';
+import { resolveStoreProductCardUrl } from '@/lib/seo/product-public-url';
 import { buildCheckoutUrl } from '@/lib/checkout/checkout-route';
 import { toUserErrorMessage } from '@/lib/user-error-message';
 import { sanitizeProductDescription } from '@/lib/html-sanitizer';
@@ -261,9 +262,18 @@ const ProductDetails = () => {
       } else {
         const product = productData[0];
 
-        // Legacy /products/:slug links for artist works → rich PDP
+        // Legacy /products/:slug → PDP riche selon la verticale
         if (product.product_type === 'artist') {
           navigate(`/artist/${product.id}`, { replace: true });
+          return;
+        }
+        if (product.product_type === 'service') {
+          navigate(`/service/${product.slug?.trim() || product.id}`, { replace: true });
+          return;
+        }
+        if (product.product_type === 'course' && product.slug?.trim()) {
+          // LMS uniquement sur www (pas de route cours sur le sous-domaine boutique)
+          window.location.replace(`https://www.emarzona.com/courses/${product.slug.trim()}`);
           return;
         }
 
@@ -333,7 +343,17 @@ const ProductDetails = () => {
   // Calculs et hooks AVANT les early returns
   const productUrl = useMemo(
     () =>
-      product && store ? generateProductUrl(store.slug, product.slug || '', store.subdomain) : '',
+      product && store
+        ? generateStorefrontItemUrl(
+            store.slug,
+            {
+              id: product.id,
+              slug: product.slug,
+              product_type: product.product_type,
+            },
+            store.subdomain
+          )
+        : '',
     [product, store]
   );
 
@@ -746,10 +766,18 @@ const ProductDetails = () => {
                             <SoftLink
                               to={
                                 chromeFromLayout
-                                  ? `/products/${product.slug || ''}`
-                                  : generateProductUrl(
+                                  ? resolveStoreProductCardUrl({
+                                      id: product.id,
+                                      slug: product.slug,
+                                      product_type: product.product_type,
+                                    })
+                                  : generateStorefrontItemUrl(
                                       store.slug,
-                                      product.slug || '',
+                                      {
+                                        id: product.id,
+                                        slug: product.slug,
+                                        product_type: product.product_type,
+                                      },
                                       store.subdomain
                                     )
                               }
@@ -985,8 +1013,12 @@ const ProductDetails = () => {
                               {product.preview_content_description}
                             </p>
                           )}
-                          <Link
-                            to={`/products/${product.paid_product?.slug || product.paid_product?.id}`}
+                          <SoftLink
+                            to={resolveStoreProductCardUrl({
+                              id: product.paid_product?.id || '',
+                              slug: product.paid_product?.slug,
+                              product_type: product.paid_product?.product_type,
+                            })}
                             className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-colors font-medium text-xs sm:text-sm touch-manipulation min-h-[44px] w-full sm:w-auto justify-center sm:justify-start"
                           >
                             <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
@@ -998,7 +1030,7 @@ const ProductDetails = () => {
                               )}
                               )
                             </span>
-                          </Link>
+                          </SoftLink>
                         </div>
                       </div>
                     </div>
@@ -1020,15 +1052,19 @@ const ProductDetails = () => {
                             Téléchargez gratuitement un aperçu de ce produit avant d'acheter la
                             version complète.
                           </p>
-                          <Link
-                            to={`/products/${product.free_product?.slug || product.free_product?.id}`}
+                          <SoftLink
+                            to={resolveStoreProductCardUrl({
+                              id: product.free_product?.id || '',
+                              slug: product.free_product?.slug,
+                              product_type: product.free_product?.product_type,
+                            })}
                             className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:from-green-700 hover:to-emerald-700 transition-colors font-medium text-xs sm:text-sm touch-manipulation min-h-[44px] w-full sm:w-auto justify-center sm:justify-start"
                           >
                             <Gift className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
                             <span className="break-words">
                               Télécharger la version preview gratuite
                             </span>
-                          </Link>
+                          </SoftLink>
                         </div>
                       </div>
                     </div>

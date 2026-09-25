@@ -11,7 +11,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useSharedWishlist } from '@/hooks/wishlist/useWishlistShare';
 import { useNavigate } from 'react-router-dom';
-import { buildServicePublicPath } from '@/lib/service/resolve-service-product-route';
+import { softNavigate } from '@/lib/navigation/soft-navigate';
+import { generateStorefrontItemUrl } from '@/lib/store-utils';
 import {
   Heart,
   Package,
@@ -46,7 +47,7 @@ export default function SharedWishlist() {
 
   interface WishlistProductItem {
     product_type: string;
-    stores?: { slug: string };
+    stores?: { slug: string; subdomain?: string | null };
     id: string;
     slug?: string;
   }
@@ -63,22 +64,14 @@ export default function SharedWishlist() {
       return;
     }
 
-    switch (productType) {
-      case 'digital':
-        navigate(`/digital/${product.id}`);
-        break;
-      case 'physical':
-        navigate(`/products/physical/${product.id}`);
-        break;
-      case 'service':
-        navigate(buildServicePublicPath({ id: product.id, slug: product.slug }));
-        break;
-      case 'course':
-        navigate(`/courses/${product.id}`);
-        break;
-      default:
-        navigate(`/marketplace/${storeSlug}/${product.slug || product.id}`);
-    }
+    softNavigate(
+      navigate,
+      generateStorefrontItemUrl(
+        storeSlug,
+        { id: product.id, slug: product.slug, product_type: productType },
+        product.stores?.subdomain
+      )
+    );
   };
 
   if (isLoading) {

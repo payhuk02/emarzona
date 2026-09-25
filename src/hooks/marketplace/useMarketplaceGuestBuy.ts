@@ -8,6 +8,8 @@ import {
 } from '@/lib/marketplace-product-cta';
 import { buildCheckoutUrl } from '@/lib/checkout/checkout-route';
 import { buildServicePublicPath } from '@/lib/service/resolve-service-product-route';
+import { generateStorefrontItemUrl } from '@/lib/store-utils';
+import { softNavigate } from '@/lib/navigation/soft-navigate';
 import type { GuestCustomerInfo } from '@/components/checkout/GuestPurchaseDialog';
 
 export type MarketplaceBuyProduct = {
@@ -24,12 +26,14 @@ type UseMarketplaceGuestBuyOptions = {
   product: MarketplaceBuyProduct;
   price: number;
   storeSlug?: string;
+  storeSubdomain?: string | null;
 };
 
 export function useMarketplaceGuestBuy({
   product,
   price: _price,
   storeSlug,
+  storeSubdomain,
 }: UseMarketplaceGuestBuyOptions) {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -37,6 +41,20 @@ export function useMarketplaceGuestBuy({
   const [guestOpen, setGuestOpen] = useState(false);
 
   const cta = getMarketplaceProductCTA(product.product_type, product.payment_options);
+
+  const servicePublicUrl = useCallback(
+    (query?: string) => {
+      const path = storeSlug
+        ? generateStorefrontItemUrl(
+            storeSlug,
+            { id: product.id, slug: product.slug, product_type: 'service' },
+            storeSubdomain
+          )
+        : buildServicePublicPath({ id: product.id, slug: product.slug });
+      return query ? `${path}?${query}` : path;
+    },
+    [product.id, product.slug, storeSlug, storeSubdomain]
+  );
 
   const proceedWithCustomer = useCallback(
     async (customer: GuestCustomerInfo) => {
@@ -54,9 +72,7 @@ export function useMarketplaceGuestBuy({
         if (cta.action === 'service') {
           const params = new URLSearchParams({ guestEmail: customer.email });
           if (customer.fullName) params.set('guestName', customer.fullName);
-          navigate(
-            `${buildServicePublicPath({ id: product.id, slug: product.slug })}?${params.toString()}`
-          );
+          softNavigate(navigate, servicePublicUrl(params.toString()));
           return;
         }
 
@@ -90,7 +106,7 @@ export function useMarketplaceGuestBuy({
         setGuestOpen(false);
       }
     },
-    [cta.action, navigate, product, storeSlug, toast]
+    [cta.action, navigate, product, storeSlug, toast, servicePublicUrl]
   );
 
   const handleBuyClick = useCallback(async () => {
@@ -105,7 +121,7 @@ export function useMarketplaceGuestBuy({
 
     // Services : fiche complète (formules, brief, calendrier) avant paiement — style Fiverr/ComeUp
     if (cta.action === 'service') {
-      navigate(buildServicePublicPath({ id: product.id, slug: product.slug }));
+      softNavigate(navigate, servicePublicUrl());
       return;
     }
 
@@ -122,7 +138,15 @@ export function useMarketplaceGuestBuy({
     }
 
     setGuestOpen(true);
-  }, [cta.action, navigate, proceedWithCustomer, product.id, product.store_id, toast]);
+  }, [
+    cta.action,
+    navigate,
+    proceedWithCustomer,
+    product.id,
+    product.store_id,
+    servicePublicUrl,
+    toast,
+  ]);
 
   return {
     product,

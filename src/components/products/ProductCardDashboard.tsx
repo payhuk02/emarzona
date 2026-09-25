@@ -34,11 +34,12 @@ import { useState } from 'react';
 import { getStockInfo, formatStockQuantity } from '@/lib/stockUtils';
 import { LazyImage } from '@/components/ui/LazyImage';
 import { getImageAttributesForPreset } from '@/lib/image-transform';
-import { generateProductUrl } from '@/lib/store-utils';
+import { generateStorefrontItemUrl } from '@/lib/store-utils';
 
 interface ProductCardDashboardProps {
   product: Product;
   storeSlug: string;
+  storeSubdomain?: string | null;
   onEdit: () => void;
   onDelete: () => void;
   onToggleStatus?: () => void;
@@ -51,6 +52,7 @@ interface ProductCardDashboardProps {
 const ProductCardDashboardComponent = ({
   product,
   storeSlug,
+  storeSubdomain,
   onEdit,
   onDelete,
   onToggleStatus,
@@ -62,7 +64,15 @@ const ProductCardDashboardComponent = ({
   const { toast } = useToast();
   const [imageError, setImageError] = useState(false);
 
-  const productUrl = generateProductUrl(storeSlug, product.slug);
+  const productUrl = generateStorefrontItemUrl(
+    storeSlug,
+    {
+      id: product.id,
+      slug: product.slug,
+      product_type: product.product_type,
+    },
+    storeSubdomain
+  );
 
   // Calculer les informations de stock
   const stockInfo = getStockInfo(
@@ -326,9 +336,10 @@ const ProductCardDashboardComponent = ({
               slug: product.slug,
               name: product.name,
               is_active: product.is_active,
+              product_type: product.product_type,
             }}
             storeSlug={storeSlug}
-            storeSubdomain={undefined /* Si disponible dans les props, sinon undefined */}
+            storeSubdomain={storeSubdomain}
             onEdit={onEdit ? () => onEdit() : undefined}
             onDelete={onDelete ? () => onDelete() : undefined}
             onDuplicate={onDuplicate ? () => onDuplicate() : undefined}
@@ -359,6 +370,7 @@ const ProductCardDashboard = React.memo(ProductCardDashboardComponent, (prevProp
     prevProps.product.rating === nextProps.product.rating &&
     prevProps.product.reviews_count === nextProps.product.reviews_count &&
     prevProps.storeSlug === nextProps.storeSlug &&
+    prevProps.storeSubdomain === nextProps.storeSubdomain &&
     prevProps.isSelected === nextProps.isSelected &&
     prevProps.onEdit === nextProps.onEdit &&
     prevProps.onDelete === nextProps.onDelete &&

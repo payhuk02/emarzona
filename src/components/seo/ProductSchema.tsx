@@ -6,7 +6,7 @@
 
 import { Helmet } from 'react-helmet-async';
 import { logger } from '@/lib/logger';
-import { generateStoreUrl, generateProductUrl } from '@/lib/store-utils';
+import { generateStoreUrl, generateStorefrontItemUrl } from '@/lib/store-utils';
 
 interface ProductSchemaProps {
   product: {
@@ -25,11 +25,13 @@ interface ProductSchemaProps {
     created_at?: string;
     licensing_type?: 'standard' | 'plr' | 'copyrighted';
     license_terms?: string | null;
+    product_type?: string | null;
   };
   store: {
     name: string;
     slug: string;
     logo_url?: string;
+    subdomain?: string | null;
   };
   url?: string; // Optionnel, sera généré automatiquement si non fourni
 }
@@ -41,22 +43,29 @@ export const ProductSchema = ({ product, store, url }: ProductSchemaProps) => {
     return null;
   }
 
-  // Générer l'URL par défaut si non fournie
-  const defaultUrl = product.slug 
-    ? generateProductUrl(store.slug, product.slug, store.subdomain)
+  // Générer l'URL par défaut si non fournie (chemins verticaux boutique)
+  const defaultUrl = product.id
+    ? generateStorefrontItemUrl(
+        store.slug,
+        {
+          id: product.id,
+          slug: product.slug,
+          product_type: product.product_type,
+        },
+        store.subdomain
+      )
     : generateStoreUrl(store.slug, store.subdomain);
   const providedUrl = url || defaultUrl;
-  
+
   // Construire l'URL complète
-  const fullUrl = providedUrl.startsWith('http') 
-    ? providedUrl 
+  const fullUrl = providedUrl.startsWith('http')
+    ? providedUrl
     : `https://www.emarzona.com${providedUrl}`;
-  
+
   // Images du produit
-  const productImages = [
-    product.image_url,
-    ...(product.images?.map(img => img.url) || [])
-  ].filter(Boolean);
+  const productImages = [product.image_url, ...(product.images?.map(img => img.url) || [])].filter(
+    Boolean
+  );
 
   // Schema.org Product
   const productSchema = {
@@ -66,16 +75,16 @@ export const ProductSchema = ({ product, store, url }: ProductSchemaProps) => {
     description: product.description || `${product.name} - Disponible sur Emarzona`,
     image: productImages,
     url: fullUrl,
-    
+
     // SKU et identifiants
     sku: product.id,
     productID: product.id,
-    
+
     // Catégorie
     ...(product.category && {
-      category: product.category
+      category: product.category,
     }),
-    
+
     // Prix
     offers: {
       '@type': 'Offer',
@@ -83,40 +92,45 @@ export const ProductSchema = ({ product, store, url }: ProductSchemaProps) => {
       priceCurrency: product.currency || 'XOF',
       price: product.price,
       priceValidUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      availability: product.is_active !== false ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+      availability:
+        product.is_active !== false
+          ? 'https://schema.org/InStock'
+          : 'https://schema.org/OutOfStock',
       seller: {
         '@type': 'Organization',
         name: store.name,
         url: generateStoreUrl(store.slug, store.subdomain),
         ...(store.logo_url && {
-          logo: store.logo_url
-        })
-      }
+          logo: store.logo_url,
+        }),
+      },
     },
-    
+
     // Avis et notes
-    ...(product.rating && product.reviews_count && {
-      aggregateRating: {
-        '@type': 'AggregateRating',
-        ratingValue: product.rating.toFixed(1),
-        reviewCount: product.reviews_count,
-        bestRating: '5',
-        worstRating: '1'
-      }
-    }),
-    
+    ...(product.rating &&
+      product.reviews_count && {
+        aggregateRating: {
+          '@type': 'AggregateRating',
+          ratingValue: product.rating.toFixed(1),
+          reviewCount: product.reviews_count,
+          bestRating: '5',
+          worstRating: '1',
+        },
+      }),
+
     // Marque/Vendeur
     brand: {
       '@type': 'Brand',
-      name: store.name
+      name: store.name,
     },
     isFamilyFriendly: true,
     ...(product.licensing_type && {
-      license: product.licensing_type === 'plr'
-        ? 'Private Label Rights (PLR)'
-        : product.licensing_type === 'copyrighted'
-        ? 'All Rights Reserved'
-        : 'Standard License'
+      license:
+        product.licensing_type === 'plr'
+          ? 'Private Label Rights (PLR)'
+          : product.licensing_type === 'copyrighted'
+            ? 'All Rights Reserved'
+            : 'Standard License',
     }),
     // Licensing as additionalProperty for SEO context
     ...(product.licensing_type && {
@@ -124,13 +138,13 @@ export const ProductSchema = ({ product, store, url }: ProductSchemaProps) => {
         {
           '@type': 'PropertyValue',
           name: 'licensing_type',
-          value: product.licensing_type
+          value: product.licensing_type,
         },
         ...(product.license_terms
           ? [{ '@type': 'PropertyValue', name: 'license_terms', value: product.license_terms }]
-          : [])
-      ]
-    })
+          : []),
+      ],
+    }),
   };
 
   // Schema.org BreadcrumbList
@@ -142,46 +156,36 @@ export const ProductSchema = ({ product, store, url }: ProductSchemaProps) => {
         '@type': 'ListItem',
         position: 1,
         name: 'Accueil',
-        item: 'https://www.emarzona.com'
+        item: 'https://www.emarzona.com',
       },
       {
         '@type': 'ListItem',
         position: 2,
         name: 'Marketplace',
-        item: 'https://www.emarzona.com/marketplace'
+        item: 'https://www.emarzona.com/marketplace',
       },
       {
         '@type': 'ListItem',
         position: 3,
         name: store.name,
-        item: generateStoreUrl(store.slug, store.subdomain)
+        item: generateStoreUrl(store.slug, store.subdomain),
       },
       {
         '@type': 'ListItem',
         position: 4,
         name: product.name,
-        item: fullUrl
-      }
-    ]
+        item: fullUrl,
+      },
+    ],
   };
 
   return (
     <Helmet>
       {/* Product Schema */}
-      <script type="application/ld+json">
-        {JSON.stringify(productSchema)}
-      </script>
-      
+      <script type="application/ld+json">{JSON.stringify(productSchema)}</script>
+
       {/* Breadcrumb Schema */}
-      <script type="application/ld+json">
-        {JSON.stringify(breadcrumbSchema)}
-      </script>
+      <script type="application/ld+json">{JSON.stringify(breadcrumbSchema)}</script>
     </Helmet>
   );
 };
-
-
-
-
-
-

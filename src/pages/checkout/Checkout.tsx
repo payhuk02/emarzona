@@ -11,6 +11,8 @@ import { safeRedirect } from '@/lib/url-validator';
 import { logger } from '@/lib/logger';
 import { useLCPPreload } from '@/hooks/useLCPPreload';
 import { buildServicePublicPath } from '@/lib/service/resolve-service-product-route';
+import { generateStorefrontItemUrl } from '@/lib/store-utils';
+import { softNavigate } from '@/lib/navigation/soft-navigate';
 import { detectSubdomain } from '@/lib/subdomain-detector';
 import { normalizePhoneForPayment } from '@/lib/validation';
 import { CheckoutChrome } from '@/components/checkout/CheckoutChrome';
@@ -761,9 +763,14 @@ const Checkout = () => {
                 'Choisissez un créneau sur la fiche du service avant de payer, ou une formule projet.',
               variant: 'destructive',
             });
-            navigate(
-              `${buildServicePublicPath({ id: product.id, slug: product.slug })}?${params.toString()}`
-            );
+            const serviceReturnUrl = store?.slug
+              ? generateStorefrontItemUrl(
+                  store.slug,
+                  { id: product.id, slug: product.slug, product_type: 'service' },
+                  store.subdomain
+                )
+              : buildServicePublicPath({ id: product.id, slug: product.slug });
+            softNavigate(navigate, `${serviceReturnUrl}?${params.toString()}`);
             setSubmitting(false);
             return;
           }

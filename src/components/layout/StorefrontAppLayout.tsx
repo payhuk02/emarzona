@@ -12,27 +12,9 @@ import { RouteOutletSuspense } from '@/components/navigation/RouteChunkFallback'
 import { useScrollRestoration } from '@/hooks/useScrollRestoration';
 import { useCurrentStoreBySubdomain } from '@/hooks/useStoreBySubdomain';
 import { StorefrontShellProvider } from '@/contexts/StorefrontShellContext';
+import { shouldShowStoreChrome, shouldShowStoreHeader } from '@/lib/storefront/storefront-chrome';
 import type { Store as ThemedStore } from '@/hooks/useStores';
 import type { Store as HeaderStore } from '@/hooks/useStore';
-
-/** Pas de chrome boutique sur checkout / paiements (plein contenu). */
-function shouldShowStoreChrome(pathname: string): boolean {
-  if (pathname.startsWith('/checkout')) return false;
-  if (pathname.startsWith('/pay')) return false;
-  if (pathname.startsWith('/payment')) return false;
-  if (
-    pathname === '/login' ||
-    pathname === '/connexion' ||
-    pathname === '/register' ||
-    pathname === '/signup' ||
-    pathname === '/auth' ||
-    pathname.startsWith('/auth/')
-  ) {
-    return false;
-  }
-  if (pathname.startsWith('/vendor/messaging')) return false;
-  return true;
-}
 
 export function StorefrontAppLayout() {
   useScrollRestoration();
@@ -40,6 +22,7 @@ export function StorefrontAppLayout() {
   // Résout via le host réel (subdomain / custom domain), pas le slug — aligné middleware RQ cache
   const { data: store, isLoading: storeLoading } = useCurrentStoreBySubdomain();
   const showChrome = shouldShowStoreChrome(location.pathname);
+  const showHeader = shouldShowStoreHeader(location.pathname);
 
   const shellValue = useMemo(
     () =>
@@ -73,7 +56,7 @@ export function StorefrontAppLayout() {
           className="min-h-screen flex flex-col overflow-x-hidden store-theme-active"
           style={{ backgroundColor: store?.background_color || undefined }}
         >
-          {showChrome && headerStore && <StoreHeader store={headerStore} />}
+          {showHeader && headerStore && <StoreHeader store={headerStore} />}
 
           <div className="flex-1 flex flex-col min-w-0">
             <RouteOutletSuspense>

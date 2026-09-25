@@ -27,10 +27,12 @@ export interface PriceAlert {
     price: number;
     promotional_price: number | null;
     currency: string;
+    product_type?: string | null;
     stores?: {
       id: string;
       name: string;
       slug: string;
+      subdomain?: string | null;
     };
   };
 }
@@ -52,10 +54,12 @@ export interface StockAlert {
     promotional_price: number | null;
     currency: string;
     stock_quantity: number | null;
+    product_type?: string | null;
     stores?: {
       id: string;
       name: string;
       slug: string;
+      subdomain?: string | null;
     };
   };
 }
@@ -83,10 +87,12 @@ export function usePriceAlerts(userId: string | null) {
               price,
               promotional_price,
               currency,
+              product_type,
               stores!inner (
                 id,
                 name,
-                slug
+                slug,
+                subdomain
               )
             )
           `
@@ -134,10 +140,12 @@ export function useStockAlerts(userId: string | null) {
               promotional_price,
               currency,
               store_id,
+              product_type,
               stores!inner (
                 id,
                 name,
-                slug
+                slug,
+                subdomain
               )
             )
           `

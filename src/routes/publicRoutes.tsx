@@ -261,10 +261,13 @@ export const publicRoutes = (
       <Route path="/community" element={<CommunityPage />} />
       <Route path="/products/compare" element={<ProductsCompare />} />
       <Route path="/auctions" element={<AuctionsListPage />} />
+      <Route path="/personalization/quiz" element={<StyleQuizPage />} />
+      <Route
+        path="/personalization/recommendations"
+        element={<PersonalizedRecommendationsPage />}
+      />
     </Route>
 
-    <Route path="/personalization/quiz" element={<StyleQuizPage />} />
-    <Route path="/personalization/recommendations" element={<PersonalizedRecommendationsPage />} />
     <Route path="/cart" element={<Navigate to="/marketplace" replace />} />
     <Route path="/cart-old" element={<Navigate to="/marketplace" replace />} />
     <Route
@@ -389,8 +392,11 @@ export const publicRoutes = (
     {/* Test i18n (dev only) */}
     {import.meta.env.DEV && <Route path="/i18n-test" element={<I18nTest />} />}
 
-    {/* Premium Link Access */}
-    <Route path="/:storeSlug/:productSlug/:licenseType" element={<PremiumUnlockPage />} />
+    {/* Premium Link Access — licenseType borné pour ne pas avaler les 3-segments inconnus */}
+    <Route
+      path="/:storeSlug/:productSlug/:licenseType(single|multi|unlimited|standard|plr|copyrighted)"
+      element={<PremiumUnlockPage />}
+    />
 
     {/* Fallback */}
     <Route path="*" element={<NotFound />} />

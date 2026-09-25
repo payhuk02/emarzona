@@ -14,6 +14,8 @@ import { SEOMeta } from '@/components/seo';
 import { useServiceCategoryTree } from '@/hooks/useServiceCategories';
 import { formatServiceCategoryLabel } from '@/lib/services/service-categories';
 import { buildServicePublicPath } from '@/lib/service/resolve-service-product-route';
+import { generateStorefrontItemUrl } from '@/lib/store-utils';
+import { SoftLink } from '@/components/navigation/SoftLink';
 import { ServiceListingAttributeBadges } from '@/components/service/ServiceListingAttributeBadges';
 import { useFilteredServiceProducts } from '@/hooks/useFilteredProducts';
 import { formatCurrency } from '@/lib/utils';
@@ -196,9 +198,23 @@ export default function ServicesCategoryListing() {
                     />
                   </div>
                   <Button asChild size="sm" className="min-h-[40px]">
-                    <Link to={buildServicePublicPath({ id: product.id, slug: product.slug })}>
+                    <SoftLink
+                      to={
+                        product.stores?.slug
+                          ? generateStorefrontItemUrl(
+                              product.stores.slug,
+                              {
+                                id: product.id,
+                                slug: product.slug,
+                                product_type: 'service',
+                              },
+                              (product.stores as { subdomain?: string | null }).subdomain
+                            )
+                          : buildServicePublicPath({ id: product.id, slug: product.slug })
+                      }
+                    >
                       Voir
-                    </Link>
+                    </SoftLink>
                   </Button>
                 </CardContent>
               </Card>

@@ -128,6 +128,7 @@ export default function SellerCoursesList() {
                         slug: course.slug || course.id, // Fallback to id if slug is missing
                         name: course.name,
                         is_active: course.is_active,
+                        product_type: 'course',
                       }}
                       storeSlug={store?.slug}
                       storeSubdomain={store?.subdomain}

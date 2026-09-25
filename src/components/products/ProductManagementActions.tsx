@@ -14,11 +14,12 @@ import {
   EyeOff,
   DollarSign,
 } from 'lucide-react';
-import { generateProductUrl } from '@/lib/store-utils';
+import { generateStorefrontItemUrl, generatePaymentUrl } from '@/lib/store-utils';
 import { buildWwwProductPublicPath } from '@/lib/seo/product-public-url';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { softNavigate } from '@/lib/navigation/soft-navigate';
 
 export interface ProductManagementActionsProps {
   product: {
@@ -73,20 +74,32 @@ export const ProductManagementActions: React.FC<ProductManagementActionsProps> =
   const [menuKey, setMenuKey] = React.useState(0);
 
   const productUrl = React.useMemo(() => {
+    if (storeSlug) {
+      return generateStorefrontItemUrl(
+        storeSlug,
+        {
+          id: product.id,
+          slug: product.slug,
+          product_type: product.product_type,
+        },
+        storeSubdomain
+      );
+    }
     const marketplacePath = buildWwwProductPublicPath({
       id: product.id,
       slug: product.slug,
       product_type: product.product_type,
     });
     if (marketplacePath) return marketplacePath;
-    return storeSlug && product.slug
-      ? generateProductUrl(storeSlug, product.slug, storeSubdomain)
-      : `/products/${product.slug || product.id}`;
+    return product.slug ? `/products/${product.slug}` : `/products/${product.id}`;
   }, [storeSlug, product.slug, product.id, product.product_type, storeSubdomain]);
 
   const checkoutUrl = React.useMemo(() => {
+    if (storeSlug && product.slug) {
+      return generatePaymentUrl(storeSlug, product.slug, storeSubdomain);
+    }
     return `${window.location.origin}/checkout/${product.id}`;
-  }, [product.id]);
+  }, [storeSlug, storeSubdomain, product.slug, product.id]);
 
   const fullProductUrl = productUrl.startsWith('http')
     ? productUrl
@@ -122,7 +135,7 @@ export const ProductManagementActions: React.FC<ProductManagementActionsProps> =
         onQuickView?.(product.id);
         break;
       case 'view-product':
-        window.open(productUrl, '_blank', 'noopener,noreferrer');
+        softNavigate(navigate, productUrl);
         break;
       case 'analytics':
         navigate(`/dashboard/services/${product.id}/analytics`);
