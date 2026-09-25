@@ -5,7 +5,7 @@
  * Composant pour saisir et valider un code promo dans le checkout
  */
 
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -49,7 +49,6 @@ export const CouponInput = ({
   const [categoryIds, setCategoryIds] = useState<string[]>([]);
   const [collectionIds, setCollectionIds] = useState<string[]>([]);
   const { toast } = useToast();
-  const lastAutoAppliedCodeRef = useRef<string | null>(null);
 
   // Déterminer la liste de produits à utiliser
   const productIds = useMemo(() => {
@@ -142,7 +141,6 @@ export const CouponInput = ({
     const code = String(validation.code || couponCode)
       .toUpperCase()
       .trim();
-    lastAutoAppliedCodeRef.current = code;
     onApply(validation.promotion_id, discountAmount, code);
 
     setCouponCode('');
@@ -152,29 +150,7 @@ export const CouponInput = ({
     });
   };
 
-  // Dès qu'un code est valide côté serveur, l'appliquer au total + paiement
-  // (évite l'écran « code valide » sans impact sur le Total / MoneyFusion).
-  useEffect(() => {
-    if (appliedCouponId) return;
-    if (!validation?.valid || isValidating) return;
-
-    const discountAmount = Number(validation.discount_amount);
-    if (!validation.promotion_id || !Number.isFinite(discountAmount) || discountAmount <= 0) {
-      return;
-    }
-
-    const code = String(validation.code || couponCode)
-      .toUpperCase()
-      .trim();
-    if (!code || lastAutoAppliedCodeRef.current === code) return;
-
-    lastAutoAppliedCodeRef.current = code;
-    onApply(validation.promotion_id, discountAmount, code);
-    setCouponCode('');
-  }, [validation, isValidating, appliedCouponId, couponCode, onApply]);
-
   const handleRemove = () => {
-    lastAutoAppliedCodeRef.current = null;
     setCouponCode('');
     onRemove();
     toast({

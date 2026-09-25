@@ -77,32 +77,7 @@ describe('CouponInput', () => {
     ).toBeInTheDocument();
   });
 
-  it('auto-applies when server validation becomes valid', async () => {
-    const onApply = vi.fn();
-
-    mockUseValidate.mockReturnValue({
-      data: {
-        valid: true,
-        promotion_id: 'promo-1',
-        discount_amount: 1750,
-        code: 'PROMO24',
-        order_total_after: 1750,
-      },
-      isLoading: false,
-    });
-
-    render(
-      <CouponInput storeId="store-1" orderAmount={3500} onApply={onApply} onRemove={vi.fn()} />
-    );
-
-    await userEvent.type(getCouponInput(), 'PROMO24');
-
-    await waitFor(() => {
-      expect(onApply).toHaveBeenCalledWith('promo-1', 1750, 'PROMO24');
-    });
-  });
-
-  it('should validate and apply coupon', async () => {
+  it('should validate and apply coupon only when Appliquer is clicked', async () => {
     const onApply = vi.fn();
 
     mockUseValidate.mockReturnValue({
@@ -120,9 +95,17 @@ describe('CouponInput', () => {
     );
 
     await userEvent.type(getCouponInput(), 'SAVE20');
+    expect(onApply).not.toHaveBeenCalled();
+
+    fireEvent.click(getApplyButton());
 
     await waitFor(() => {
       expect(onApply).toHaveBeenCalledWith('promo-1', 2000, 'SAVE20');
+      expect(mockToast).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: '✅ Code appliqué',
+        })
+      );
     });
   });
 
