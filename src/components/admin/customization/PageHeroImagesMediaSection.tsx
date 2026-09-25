@@ -73,9 +73,15 @@ function HeroCard({
             {isCustom ? 'Remplacer' : 'Uploader'}
           </Button>
           {isCustom && (
-            <Button size="sm" variant="ghost" disabled={busy} onClick={onReset}>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={busy}
+              onClick={onReset}
+              className="text-destructive border-destructive/30"
+            >
               <RotateCcw className="mr-2 h-4 w-4" />
-              Image par défaut
+              Supprimer
             </Button>
           )}
         </div>
@@ -154,8 +160,8 @@ function HeroGroup({
       await reset.mutateAsync({ slug, currentUrl });
       onChange?.();
       toast({
-        title: 'Image réinitialisée',
-        description: 'La page utilise à nouveau le visuel par défaut.',
+        title: 'Image supprimée',
+        description: 'La personnalisation a été retirée. Le visuel par défaut est utilisé.',
       });
     } catch (error) {
       logger.error('Hero image reset failed', { error, slug });

@@ -199,6 +199,15 @@ export const mediaSchema = z
         authHero: urlSchema,
         landingPlatformHero: urlSchema.optional(),
         landingPlatformHeroLeft: urlSchema.optional(),
+        landingPlatformHeroCarousel: z
+          .object({
+            physical: urlSchema.optional(),
+            digital: urlSchema.optional(),
+            service: urlSchema.optional(),
+            courses: urlSchema.optional(),
+            artist: urlSchema.optional(),
+          })
+          .optional(),
         landingCarousel: z.record(z.string(), urlSchema).optional(),
         landingAdapt: urlSchema,
         landingGlobe: urlSchema,

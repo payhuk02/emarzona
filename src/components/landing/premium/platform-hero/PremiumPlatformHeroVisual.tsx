@@ -9,8 +9,8 @@ interface PremiumPlatformHeroVisualProps {
   ctaLabel: string;
 }
 
-/** Monte le fond décoratif après idle pour ne pas concurrencer le LCP. */
-function DeferredLeftBackground({ src, alt }: { src: string; alt: string }) {
+/** Monte le fond décoratif après idle pour ne pas concurrencer le LCP portrait. */
+function DeferredAtmosphereBackground({ src, alt }: { src: string; alt: string }) {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
@@ -40,26 +40,42 @@ export function PremiumPlatformHeroVisual({
   leftBackgroundAlt = '',
   ctaLabel: _ctaLabel,
 }: PremiumPlatformHeroVisualProps) {
+  const hasPortrait = Boolean(backgroundUrl);
+  // Sans portrait LCP : le fond e-commerçants devient l’image LCP (eager).
+  const atmosphereEager = !hasPortrait && Boolean(leftBackgroundUrl);
+
   return (
     <div className="lp-platform-hero__visual absolute inset-0 h-full w-full">
-      {/* Fond bleu : couvre tout le hero (y compris sous la nav) */}
       {leftBackgroundUrl ? (
         <div className="lp-platform-hero__left-bg pointer-events-none absolute inset-0 z-0">
-          <DeferredLeftBackground src={leftBackgroundUrl} alt={leftBackgroundAlt} />
+          {atmosphereEager ? (
+            <PremiumPlatformHeroBackground
+              src={leftBackgroundUrl}
+              alt={leftBackgroundAlt}
+              variant="left"
+            />
+          ) : (
+            <DeferredAtmosphereBackground src={leftBackgroundUrl} alt={leftBackgroundAlt} />
+          )}
         </div>
       ) : null}
 
-      {/* Photo femme : zone sous la nav, entière via object-contain */}
+      {/* Ombre professionnelle : lisibilité texte + profondeur cinématographique */}
+      <div
+        className="lp-platform-hero__shadow pointer-events-none absolute inset-0 z-[2]"
+        aria-hidden
+      />
+
       {backgroundUrl ? (
-        <div className="lp-platform-hero__photo-layer pointer-events-none absolute inset-x-0 bottom-0 z-[1] top-[var(--lp-nav-offset,4.25rem)]">
+        <div className="lp-platform-hero__photo-layer pointer-events-none absolute inset-x-0 bottom-0 z-[3] top-[var(--lp-nav-offset,4.25rem)]">
           <PremiumPlatformHeroBackground src={backgroundUrl} alt={backgroundAlt} />
         </div>
-      ) : (
+      ) : !leftBackgroundUrl ? (
         <div
           className="lp-platform-hero__visual-fallback pointer-events-none absolute inset-0 z-[1]"
           aria-hidden
         />
-      )}
+      ) : null}
     </div>
   );
 }

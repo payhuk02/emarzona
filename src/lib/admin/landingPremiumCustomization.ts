@@ -49,8 +49,13 @@ export interface LandingPremiumSection {
 
 const lp = landingPremiumFR;
 
-function text(id: string, label: string, defaultValue: string): LandingPremiumElement {
-  return { id, label, type: 'text', defaultValue };
+function text(
+  id: string,
+  label: string,
+  defaultValue: string,
+  description?: string
+): LandingPremiumElement {
+  return { id, label, type: 'text', defaultValue, description };
 }
 
 function area(id: string, label: string, defaultValue: string): LandingPremiumElement {
@@ -136,45 +141,176 @@ export const LANDING_PREMIUM_SECTIONS: LandingPremiumSection[] = [
     name: 'Hero plateforme (bandeau haut)',
     icon: Home,
     elements: [
-      text('platformHero.titleLine1', 'Titre H1 — ligne 1', lp.platformHero.titleLine1),
-      text('platformHero.titleLine2', 'Titre H1 — ligne 2', lp.platformHero.titleLine2),
-      area(
-        'platformHero.subtitle',
-        'Sous-titre (optionnel, laisser vide pour masquer)',
-        lp.platformHero.subtitle
-      ),
-      text('platformHero.ctaLabel', 'Texte bouton CTA', lp.platformHero.ctaLabel),
-      color('platformHero.backgroundColor', 'Couleur de fond', '#0a1628', {
+      // —— Style global ——
+      color('platformHero.titleColor', 'Couleur du titre', '#f97316'),
+      color('platformHero.subtitleColor', 'Couleur du sous-titre', '#0f0f12'),
+      color('platformHero.chipTextColor', 'Couleur des chips (verticales)', '#0f0f12'),
+      color('platformHero.backgroundColor', 'Couleur de fond (fallback)', '#08080a', {
         clearable: true,
-        description:
-          'Optionnel. Cliquez sur Supprimer ou videz le champ pour le dégradé bleu nuit par défaut.',
+        description: 'Fond derrière les slides si une image est masquée.',
       }),
-      color('platformHero.textColor', 'Couleur du texte', '#f4f3f0'),
-      color('platformHero.ctaBackgroundColor', 'Couleur bouton CTA', '#f97316'),
-      color('platformHero.ctaTextColor', 'Couleur texte bouton CTA', '#ffffff'),
+      color('platformHero.accentColor', 'Couleur accent (barre de progression)', '#f97316'),
       text(
-        'platformHero.backgroundAlt',
-        'Alt image arrière-plan droit',
-        lp.platformHero.backgroundAlt
+        'platformHero.titleFontSizeMin',
+        'Titre — taille min (mobile)',
+        '1.85',
+        'Nombre = rem (ex. 1.85). Ou valeur CSS : 2rem, 32px, clamp(…).'
       ),
       text(
-        'platformHero.leftBackgroundAlt',
-        'Alt image arrière-plan gauche',
-        lp.platformHero.leftBackgroundAlt
+        'platformHero.titleFontSizeMax',
+        'Titre — taille max (desktop)',
+        '6.5',
+        'Agrandir / diminuer le titre sur grand écran. Nombre = rem.'
       ),
+      text(
+        'platformHero.subtitleFontSizeMin',
+        'Sous-titre — taille min (mobile)',
+        '1',
+        'Nombre = rem. Ou valeur CSS complète.'
+      ),
+      text(
+        'platformHero.subtitleFontSizeMax',
+        'Sous-titre — taille max (desktop)',
+        '2.35',
+        'Agrandir / diminuer le sous-titre sur desktop. Nombre = rem.'
+      ),
+      text(
+        'platformHero.chipFontSize',
+        'Chips — taille du texte',
+        '0.9375',
+        'Taille des libellés des 5 verticales. Nombre = rem.'
+      ),
+      text('platformHero.titleFontWeight', 'Titre — graisse', '700', 'Ex. 400, 600, 700, 800.'),
+      text(
+        'platformHero.subtitleFontWeight',
+        'Sous-titre — graisse',
+        '700',
+        'Ex. 400, 600, 700, 800.'
+      ),
+      text(
+        'platformHero.carouselNavLabel',
+        'Libellé navigation carrousel',
+        lp.platformHero.carouselNavLabel
+      ),
+      text('platformHero.ariaLabel', 'Aria-label section hero', lp.platformHero.ariaLabel),
+      // —— Slide 1 · Physique ——
       text(
         'platformHero.checks.physical',
-        'Check — Produits physiques',
+        'Chip — Produits physiques',
         lp.platformHero.checks.physical
       ),
       text(
+        'platformHero.slides.physical.titleLine1',
+        'Physique — Titre ligne 1',
+        lp.platformHero.slides.physical.titleLine1
+      ),
+      text(
+        'platformHero.slides.physical.titleLine2',
+        'Physique — Titre ligne 2',
+        lp.platformHero.slides.physical.titleLine2
+      ),
+      area(
+        'platformHero.slides.physical.subtitle',
+        'Physique — Sous-titre',
+        lp.platformHero.slides.physical.subtitle
+      ),
+      text(
+        'platformHero.slides.physical.alt',
+        'Physique — Alt image',
+        lp.platformHero.slides.physical.alt
+      ),
+      // —— Slide 2 · Digital ——
+      text(
         'platformHero.checks.digital',
-        'Check — Produits digitaux',
+        'Chip — Produits digitaux',
         lp.platformHero.checks.digital
       ),
-      text('platformHero.checks.service', 'Check — Services', lp.platformHero.checks.service),
-      text('platformHero.checks.courses', 'Check — Cours en ligne', lp.platformHero.checks.courses),
-      text('platformHero.checks.artist', "Check — Œuvres d'artiste", lp.platformHero.checks.artist),
+      text(
+        'platformHero.slides.digital.titleLine1',
+        'Digital — Titre ligne 1',
+        lp.platformHero.slides.digital.titleLine1
+      ),
+      text(
+        'platformHero.slides.digital.titleLine2',
+        'Digital — Titre ligne 2',
+        lp.platformHero.slides.digital.titleLine2
+      ),
+      area(
+        'platformHero.slides.digital.subtitle',
+        'Digital — Sous-titre',
+        lp.platformHero.slides.digital.subtitle
+      ),
+      text(
+        'platformHero.slides.digital.alt',
+        'Digital — Alt image',
+        lp.platformHero.slides.digital.alt
+      ),
+      // —— Slide 3 · Services ——
+      text('platformHero.checks.service', 'Chip — Services', lp.platformHero.checks.service),
+      text(
+        'platformHero.slides.service.titleLine1',
+        'Services — Titre ligne 1',
+        lp.platformHero.slides.service.titleLine1
+      ),
+      text(
+        'platformHero.slides.service.titleLine2',
+        'Services — Titre ligne 2',
+        lp.platformHero.slides.service.titleLine2
+      ),
+      area(
+        'platformHero.slides.service.subtitle',
+        'Services — Sous-titre',
+        lp.platformHero.slides.service.subtitle
+      ),
+      text(
+        'platformHero.slides.service.alt',
+        'Services — Alt image',
+        lp.platformHero.slides.service.alt
+      ),
+      // —— Slide 4 · Cours ——
+      text('platformHero.checks.courses', 'Chip — Cours en ligne', lp.platformHero.checks.courses),
+      text(
+        'platformHero.slides.courses.titleLine1',
+        'Cours — Titre ligne 1',
+        lp.platformHero.slides.courses.titleLine1
+      ),
+      text(
+        'platformHero.slides.courses.titleLine2',
+        'Cours — Titre ligne 2',
+        lp.platformHero.slides.courses.titleLine2
+      ),
+      area(
+        'platformHero.slides.courses.subtitle',
+        'Cours — Sous-titre',
+        lp.platformHero.slides.courses.subtitle
+      ),
+      text(
+        'platformHero.slides.courses.alt',
+        'Cours — Alt image',
+        lp.platformHero.slides.courses.alt
+      ),
+      // —— Slide 5 · Artiste ——
+      text('platformHero.checks.artist', "Chip — Œuvres d'artiste", lp.platformHero.checks.artist),
+      text(
+        'platformHero.slides.artist.titleLine1',
+        'Artiste — Titre ligne 1',
+        lp.platformHero.slides.artist.titleLine1
+      ),
+      text(
+        'platformHero.slides.artist.titleLine2',
+        'Artiste — Titre ligne 2',
+        lp.platformHero.slides.artist.titleLine2
+      ),
+      area(
+        'platformHero.slides.artist.subtitle',
+        'Artiste — Sous-titre',
+        lp.platformHero.slides.artist.subtitle
+      ),
+      text(
+        'platformHero.slides.artist.alt',
+        'Artiste — Alt image',
+        lp.platformHero.slides.artist.alt
+      ),
     ],
   },
   {

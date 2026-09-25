@@ -59,6 +59,13 @@ export const LANDING_SELL_WAY_FORMAT: MediaPixelFormat = {
   ratio: '4:3',
 };
 
+/** Carrousel hero plateforme — 5 verticales plein cadre (16:9). */
+export const PLATFORM_HERO_CAROUSEL_FORMAT: MediaPixelFormat = {
+  width: 1920,
+  height: 1080,
+  ratio: '16:9',
+};
+
 /** Carrousel PremiumHero — hero-carousel-*.webp + SLIDE_WIDTH/HEIGHT. */
 export const LANDING_CAROUSEL_FORMAT: MediaPixelFormat = {
   width: 640,

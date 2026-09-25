@@ -152,13 +152,47 @@
     }
   },
   "platformHero": {
+    "eyebrow": "Emarzona",
     "ariaLabel": "Emarzona ecosystem introduction",
     "titleLine1": "The #1",
     "titleLine2": "Modern E-commerce Platform",
     "subtitle": "",
     "ctaLabel": "Start for free",
     "backgroundAlt": "Professional using the Emarzona platform",
-    "leftBackgroundAlt": "Emarzona platform illustration",
+    "leftBackgroundAlt": "E-commerce sellers and freelancers working on Emarzona",
+    "carouselNavLabel": "Choose a product vertical",
+    "slides": {
+      "physical": {
+        "titleLine1": "Sell your",
+        "titleLine2": "physical products",
+        "subtitle": "Inventory, shipping and tracking — a storefront ready for real commerce.",
+        "alt": "Logistics team packing orders in a modern warehouse"
+      },
+      "digital": {
+        "titleLine1": "Deliver",
+        "titleLine2": "digital products",
+        "subtitle": "Ebooks, software, templates — instant, secure downloads.",
+        "alt": "Product team collaborating on a laptop in a bright office"
+      },
+      "service": {
+        "titleLine1": "Offer your",
+        "titleLine2": "premium services",
+        "subtitle": "Consultations, bookings and payments — seamless from start to finish.",
+        "alt": "Consulting team in a meeting around a conference table"
+      },
+      "courses": {
+        "titleLine1": "Teach with",
+        "titleLine2": "online courses",
+        "subtitle": "Cohorts, lessons and certificates — from creation to sale.",
+        "alt": "Instructor and teaching team preparing an online course"
+      },
+      "artist": {
+        "titleLine1": "Showcase your",
+        "titleLine2": "artwork",
+        "subtitle": "Gallery, editions and sales — put your creations in the spotlight.",
+        "alt": "Artist and collaborator presenting a work in a studio"
+      }
+    },
     "checks": {
       "physical": "Physical products",
       "digital": "Digital products",
@@ -332,6 +366,10 @@
       { "title": "Referrals", "desc": "Referral program with automatic commissions." },
       { "title": "Affiliates", "desc": "Affiliate network and tracked links for every product." },
       { "title": "Marketplace", "desc": "Visibility on Emarzona marketplace and your store." },
+      {
+        "title": "Sponsorship",
+        "desc": "Boost your products with sponsored placements."
+      },
       { "title": "Email marketing", "desc": "Campaigns, sequences and cart recovery." },
       { "title": "Built-in AI", "desc": "Recommendations and insights to optimize sales." },
       {

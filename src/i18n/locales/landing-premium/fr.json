@@ -152,13 +152,47 @@
     }
   },
   "platformHero": {
+    "eyebrow": "Emarzona",
     "ariaLabel": "Présentation de l'écosystème Emarzona",
     "titleLine1": "Plateforme N°1 de",
     "titleLine2": "E-commerce moderne",
     "subtitle": "",
     "ctaLabel": "Démarrer gratuitement",
     "backgroundAlt": "Professionnelle utilisant la plateforme Emarzona",
-    "leftBackgroundAlt": "Illustration de la plateforme Emarzona",
+    "leftBackgroundAlt": "E-commerçants et freelancers au travail sur Emarzona",
+    "carouselNavLabel": "Choisir une verticale produit",
+    "slides": {
+      "physical": {
+        "titleLine1": "Vendez vos",
+        "titleLine2": "produits physiques",
+        "subtitle": "Stock, livraison et suivi — une boutique prête pour le commerce réel.",
+        "alt": "Équipe logistique emballant des commandes dans un entrepôt moderne"
+      },
+      "digital": {
+        "titleLine1": "Livrez des",
+        "titleLine2": "produits digitaux",
+        "subtitle": "Ebooks, logiciels, templates — téléchargement instantané et sécurisé.",
+        "alt": "Équipe produit collaborant sur un laptop dans un bureau lumineux"
+      },
+      "service": {
+        "titleLine1": "Proposez vos",
+        "titleLine2": "services premium",
+        "subtitle": "Consultations, prestations et agendas — réservation et paiement fluides.",
+        "alt": "Équipe de consultants en réunion autour d'une table de conférence"
+      },
+      "courses": {
+        "titleLine1": "Enseignez avec",
+        "titleLine2": "vos cours en ligne",
+        "subtitle": "Formations, cohortes et certificats — de la création à la vente.",
+        "alt": "Formateur et équipe pédagogique préparant un cours en ligne"
+      },
+      "artist": {
+        "titleLine1": "Exposez vos",
+        "titleLine2": "œuvres d'artiste",
+        "subtitle": "Galerie, éditions et ventes — mettez vos créations en lumière.",
+        "alt": "Artiste et collaborateur présentant une œuvre dans un atelier"
+      }
+    },
     "checks": {
       "physical": "Produits physiques",
       "digital": "Produits digitaux",
@@ -336,6 +370,10 @@
       {
         "title": "Marketplace",
         "desc": "Visibilité sur le marketplace Emarzona et votre boutique."
+      },
+      {
+        "title": "Sponsorisation",
+        "desc": "Mettez vos produits en avant avec des placements sponsorisés."
       },
       { "title": "Marketing e-mail", "desc": "Campagnes, séquences et récupération de paniers." },
       { "title": "IA intégrée", "desc": "Recommandations et insights pour optimiser vos ventes." },

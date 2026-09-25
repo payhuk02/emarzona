@@ -95,7 +95,7 @@ function SellWayBlock({
     <div
       className={`lp-sell-way-visual relative mx-auto w-full max-w-full lg:mx-0 lp-reveal lp-reveal--soft-scale ${visualFrom}`}
     >
-      <div className="lp-sell-way-photo relative h-full w-full overflow-hidden rounded-2xl shadow-[0_32px_64px_-32px_rgba(0,0,0,0.25)]">
+      <div className="lp-sell-way-photo relative w-full overflow-hidden rounded-2xl shadow-[0_32px_64px_-32px_rgba(0,0,0,0.25)]">
         <picture>
           {!hasCustom ? (
             <source
@@ -114,7 +114,7 @@ function SellWayBlock({
             sizes="(max-width: 1024px) 100vw, 50vw"
             decoding="async"
             data-no-mobile-opt
-            className="lp-sell-way-photo__img h-full w-full object-cover"
+            className="lp-sell-way-photo__img h-full w-full object-contain"
           />
         </picture>
       </div>
@@ -171,7 +171,7 @@ function SellWayBlock({
       className={`lp-sell-way-block ${muted ? 'lp-section-muted' : 'bg-[var(--lp-surface)]'} ${blockReveal}`}
     >
       <div
-        className={`lp-sell-way-pair mx-auto grid max-w-7xl gap-10 px-4 sm:gap-12 sm:px-5 lg:grid-cols-2 lg:items-stretch lg:gap-16 lg:px-8 ${
+        className={`lp-sell-way-pair mx-auto grid max-w-7xl gap-10 px-4 sm:gap-12 sm:px-5 lg:grid-cols-2 lg:items-center lg:gap-16 lg:px-8 ${
           imageLeft ? '' : 'lg:[&>*:first-child]:order-2'
         }`}
       >
