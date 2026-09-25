@@ -2,7 +2,7 @@
 export function SponsoredProductsSectionFallback() {
   return (
     <section
-      className="lp-section-pad lp-section-muted lp-sponsored-section border-y border-[var(--lp-border-light)]"
+      className="lp-section-pad lp-section-muted lp-sponsored-section border-y border-[var(--lp-border-light)] aria-busy-skeleton"
       aria-busy="true"
       data-busy-quiet=""
       aria-label="Chargement des produits sponsorisés"

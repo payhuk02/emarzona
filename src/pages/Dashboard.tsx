@@ -339,7 +339,8 @@ const DashboardWithStore = ({ store, storeLoading }: DashboardWithStoreProps) =>
                 'transition-opacity duration-200',
                 isUpdating && 'opacity-60 pointer-events-none'
               )}
-              aria-busy={isUpdating}
+              aria-busy={isUpdating || undefined}
+              data-busy-quiet={isUpdating ? '' : undefined}
             >
               <DashboardStats stats={stats} />
             </div>

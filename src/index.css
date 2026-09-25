@@ -604,9 +604,10 @@ All colors MUST be HSL.
     z-index: 10;
   }
 
-  /* 10. Indicateurs de chargement accessibles (inline / petits blocs uniquement).
-     Les sections avec skeleton dédié utilisent .aria-busy-skeleton pour éviter
-     un spinner ::before collé à gauche du conteneur pleine largeur. */
+  /* 10. Indicateurs de chargement accessibles — boutons / contrôles uniquement.
+     Les conteneurs page/skeleton (aria-busy sur un div plein largeur) ne doivent
+     PAS recevoir de ::before : ça produisait un spinner collé à gauche.
+     Opt-out : data-busy-quiet | .aria-busy-skeleton (spinner dédié / skeleton). */
   @keyframes spin-accessible {
     from {
       transform: rotate(0deg);
@@ -616,7 +617,9 @@ All colors MUST be HSL.
     }
   }
 
-  [aria-busy='true']::before {
+  button[aria-busy='true']:not([data-busy-quiet]):not(.aria-busy-skeleton)::before,
+  [role='button'][aria-busy='true']:not([data-busy-quiet]):not(.aria-busy-skeleton)::before,
+  a[aria-busy='true']:not([data-busy-quiet]):not(.aria-busy-skeleton)::before {
     content: '';
     display: inline-block;
     width: 1em;

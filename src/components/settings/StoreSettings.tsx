@@ -541,7 +541,6 @@ export const StoreSettings = ({
               <StoreFormWizard
                 onSuccess={() => {
                   void refreshStores();
-                  setActiveTab('list');
                 }}
               />
             </div>

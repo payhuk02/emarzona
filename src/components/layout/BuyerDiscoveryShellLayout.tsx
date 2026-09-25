@@ -36,7 +36,11 @@ export const BUYER_DISCOVERY_OUTLET_CONTEXT_GUEST: BuyerDiscoveryOutletContext =
 
 function AuthShellFallback() {
   return (
-    <div className="flex min-h-screen w-full bg-background" aria-busy="true">
+    <div
+      className="aria-busy-skeleton flex min-h-screen w-full bg-background"
+      data-busy-quiet
+      aria-busy="true"
+    >
       <div className="hidden md:block w-14 shrink-0 border-r border-border bg-muted/30" />
       <div className="flex min-w-0 flex-1 flex-col p-6 space-y-4">
         <Skeleton className="h-8 w-48" />

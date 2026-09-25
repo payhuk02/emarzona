@@ -23,8 +23,9 @@ export function OutletChunkFallback() {
   useTrackChunkPending();
   return (
     <div
-      className="flex w-full flex-col gap-4 p-4 md:p-6"
+      className="aria-busy-skeleton flex w-full flex-col gap-4 p-4 md:p-6"
       data-testid="outlet-chunk-fallback"
+      data-busy-quiet
       aria-busy="true"
       aria-live="polite"
     >
@@ -48,7 +49,12 @@ export function RouteOutletSuspense({ children }: { children: ReactNode }) {
 function DashboardRouteSkeleton() {
   useTrackChunkPending();
   return (
-    <div className="flex min-h-screen w-full bg-background" aria-busy="true" aria-live="polite">
+    <div
+      className="aria-busy-skeleton flex min-h-screen w-full bg-background"
+      data-busy-quiet
+      aria-busy="true"
+      aria-live="polite"
+    >
       <div className="hidden md:block w-14 shrink-0 border-r border-border bg-muted/30" />
       <div className="flex min-w-0 flex-1 flex-col">
         <div className="h-14 shrink-0 border-b border-border px-4 flex items-center">
@@ -71,7 +77,12 @@ function DashboardRouteSkeleton() {
 function AccountRouteSkeleton() {
   useTrackChunkPending();
   return (
-    <div className="flex min-h-screen w-full bg-background" aria-busy="true" aria-live="polite">
+    <div
+      className="aria-busy-skeleton flex min-h-screen w-full bg-background"
+      data-busy-quiet
+      aria-busy="true"
+      aria-live="polite"
+    >
       <div className="hidden md:block w-56 shrink-0 border-r border-border p-4 space-y-3">
         <Skeleton className="h-6 w-32" />
         {Array.from({ length: 6 }).map((_, i) => (
@@ -91,7 +102,8 @@ function PublicRouteSkeleton() {
   useTrackChunkPending();
   return (
     <div
-      className="flex min-h-[50vh] w-full flex-col items-center justify-center gap-4 p-8"
+      className="aria-busy-skeleton flex min-h-[50vh] w-full flex-col items-center justify-center gap-4 p-8"
+      data-busy-quiet
       aria-busy="true"
       aria-live="polite"
     >

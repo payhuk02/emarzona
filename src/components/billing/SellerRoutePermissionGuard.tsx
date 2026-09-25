@@ -27,8 +27,9 @@ type SellerRoutePermissionGuardProps = {
 function GuardLoadingFallback() {
   return (
     <div
-      className="flex min-h-[40vh] w-full flex-col gap-4 p-6"
+      className="aria-busy-skeleton flex min-h-[40vh] w-full flex-col gap-4 p-6"
       data-testid="seller-route-guard-loading"
+      data-busy-quiet
       aria-busy="true"
       aria-live="polite"
     >

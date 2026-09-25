@@ -13,7 +13,8 @@ const ADMIN_CHECK_TIMEOUT_MS = 20_000;
 function AdminAuthLoadingFallback() {
   return (
     <div
-      className="flex min-h-screen w-full bg-gradient-to-br from-background to-muted/20"
+      className="aria-busy-skeleton flex min-h-screen w-full bg-gradient-to-br from-background to-muted/20"
+      data-busy-quiet
       aria-busy="true"
       aria-live="polite"
       data-testid="admin-auth-loading"

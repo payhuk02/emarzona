@@ -1014,6 +1014,7 @@ const CreateArtistProductWizardComponent = ({
                 className="w-full sm:w-auto min-h-[44px] touch-manipulation"
                 aria-label={isSaving ? 'Publication en cours...' : 'Publier le produit'}
                 aria-busy={isSaving}
+                data-busy-quiet={isSaving ? '' : undefined}
               >
                 {isSaving ? (
                   <>

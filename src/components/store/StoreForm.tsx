@@ -55,9 +55,11 @@ import {
   STORE_COMMERCE_TYPE_LABELS,
   type StoreCommerceType,
 } from '@/constants/store-commerce-types';
-import { resolveStoreCommerceTypeFromStore } from '@/lib/commerce/store-capability-map';
+import {
+  resolveStoreCommerceTypeFromStore,
+  getPrimaryProductCreatePath,
+} from '@/lib/commerce/store-capability-map';
 import { useStoreCommerceTypeGuard } from '@/hooks/useStoreCommerceTypeGuard';
-import { getStoreCustomizationPath } from '@/lib/commerce/store-vertical-config';
 import { isStoreSlugAvailable } from '@/lib/store/create-store-service';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
@@ -860,7 +862,11 @@ const StoreForm = ({
 
           await refreshStores();
           setSelectedStoreId(createdStore.id);
-          navigate(getStoreCustomizationPath(createdStore.id), { replace: true });
+          toast({
+            title: t('store.express.createdTitle', 'Boutique créée'),
+            description: t('store.express.createdDesc', 'Créez maintenant votre premier produit.'),
+          });
+          navigate(getPrimaryProductCreatePath(commerceType), { replace: true });
         }
 
         onSuccess();

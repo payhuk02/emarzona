@@ -117,7 +117,8 @@ export const SearchInput = ({
         placeholder={placeholder}
         disabled={disabled}
         aria-label={ariaLabel || placeholder}
-        aria-busy={isSearching}
+        aria-busy={isSearching || undefined}
+        data-busy-quiet={isSearching ? '' : undefined}
         className={cn(
           showSearchIcon && 'pl-10',
           showClearButton && hasValue && 'pr-20',

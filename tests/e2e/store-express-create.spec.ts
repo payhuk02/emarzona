@@ -50,7 +50,7 @@ test.describe('Store express create (E2E)', () => {
     test.skip(true, message);
   });
 
-  test('express path creates store and redirects to store customization', async ({
+  test('express path creates store and redirects to product wizard for vertical', async ({
     page,
   }, testInfo) => {
     const admin = createNodeSupabaseClient(supabaseUrl!, supabaseServiceKey!);
@@ -113,10 +113,7 @@ test.describe('Store express create (E2E)', () => {
       .eq('store_id', storeId!)
       .maybeSingle();
 
-    const landedOnStoreCustomize = /\/dashboard\/store(\?|$|\/)/.test(page.url());
-    const landedOnOnboarding = /\/dashboard\/onboarding\//.test(page.url());
-    const landedOnDashboard = /\/dashboard(\?|$|\/)/.test(page.url());
-    expect(landedOnStoreCustomize || landedOnOnboarding || landedOnDashboard).toBeTruthy();
+    expect(page.url()).toMatch(/\/dashboard\/products\/new\/digital/);
 
     expect(storeError).toBeNull();
     expect(storeRow?.name).toBe(storeName);

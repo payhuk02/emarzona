@@ -1,5 +1,6 @@
 /**
- * Wizard multi-étapes pour la création de boutique
+ * Wizard multi-étapes pour la création de boutique.
+ * À la création, StoreForm redirige vers le wizard produit de la verticale.
  */
 
 import { useState, useCallback } from 'react';
@@ -22,7 +23,6 @@ export const StoreFormWizard = ({ onSuccess, initialData }: StoreFormWizardProps
   const steps = useStoreWizardSteps();
   const [currentStep, setCurrentStep] = useState(1);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
-  const [formSubmitted, setFormSubmitted] = useState(false);
 
   const progress = (currentStep / steps.length) * 100;
 
@@ -48,29 +48,10 @@ export const StoreFormWizard = ({ onSuccess, initialData }: StoreFormWizardProps
     [steps.length]
   );
 
-  const handleFormSuccess = useCallback(() => {
-    setFormSubmitted(true);
-    onSuccess();
-  }, [onSuccess]);
-
   const isStepCompleted = (stepId: number) => completedSteps.has(stepId);
   const isStepActive = (stepId: number) => currentStep === stepId;
   const canGoToStep = (stepId: number) =>
     isStepCompleted(stepId) || stepId === currentStep + 1 || stepId <= currentStep;
-
-  if (formSubmitted) {
-    return (
-      <Card>
-        <CardContent className="pt-6">
-          <div className="text-center py-12">
-            <CheckCircle2 className="h-16 w-16 text-green-500 mx-auto mb-4" />
-            <h3 className="text-2xl font-bold mb-2">{t('store.wizard.successTitle')}</h3>
-            <p className="text-muted-foreground">{t('store.wizard.successDescription')}</p>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
 
   return (
     <div className="space-y-6">
@@ -141,7 +122,7 @@ export const StoreFormWizard = ({ onSuccess, initialData }: StoreFormWizardProps
 
       <div className="space-y-4">
         <StoreForm
-          onSuccess={handleFormSuccess}
+          onSuccess={onSuccess}
           initialData={initialData}
           wizardMode={true}
           wizardStep={steps[currentStep - 1]?.key}

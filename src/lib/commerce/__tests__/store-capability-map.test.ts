@@ -94,6 +94,8 @@ describe('store-capability-map', () => {
 
   it('maps primary product create path per commerce type', () => {
     expect(getPrimaryProductCreatePath('physical')).toBe('/dashboard/products/new/physical');
+    expect(getPrimaryProductCreatePath('digital')).toBe('/dashboard/products/new/digital');
+    expect(getPrimaryProductCreatePath('service')).toBe('/dashboard/products/new/service');
     expect(getPrimaryProductCreatePath('course')).toBe('/dashboard/courses/new');
     expect(getPrimaryProductCreatePath('artist')).toBe('/dashboard/products/new/artist');
   });

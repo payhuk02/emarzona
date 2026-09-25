@@ -454,10 +454,13 @@ export async function submitStoreWizardCreate(page: Page): Promise<void> {
   });
   await acceptTermsDialogIfVisible(page);
 
-  // Express/wizard create now lands on store customization, not onboarding.
-  const afterCreateUrl = page.waitForURL(/\/dashboard\/store(\?|$|\/)/, {
-    timeout: 90_000,
-  });
+  // Express/wizard create lands on the product creation wizard for the store vertical.
+  const afterCreateUrl = page.waitForURL(
+    /\/dashboard\/(products\/new\/(physical|digital|service|artist)|courses\/new)(\?|$|\/)/,
+    {
+      timeout: 90_000,
+    }
+  );
 
   const waitForCreatePost = () =>
     page.waitForResponse(
@@ -545,10 +548,13 @@ export async function submitStoreExpressCreate(page: Page): Promise<void> {
   });
   await acceptTermsDialogIfVisible(page);
 
-  // Post-create redirect: /dashboard/store?storeId=… (customization), not onboarding.
-  const afterCreateUrl = page.waitForURL(/\/dashboard\/store(\?|$|\/)/, {
-    timeout: 90_000,
-  });
+  // Post-create redirect: wizard produit selon la verticale (plus customization store).
+  const afterCreateUrl = page.waitForURL(
+    /\/dashboard\/(products\/new\/(physical|digital|service|artist)|courses\/new)(\?|$|\/)/,
+    {
+      timeout: 90_000,
+    }
+  );
 
   const createButton = page.getByTestId('store-express-create-submit');
   await expect(createButton).toBeEnabled({ timeout: 30_000 });

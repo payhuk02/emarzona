@@ -33,10 +33,8 @@ import {
   STORE_COMMERCE_TYPE_LABELS,
   type StoreCommerceType,
 } from '@/constants/store-commerce-types';
-import {
-  getStoreCustomizationPath,
-  getStoreVerticalProfile,
-} from '@/lib/commerce/store-vertical-config';
+import { getStoreVerticalProfile } from '@/lib/commerce/store-vertical-config';
+import { getPrimaryProductCreatePath } from '@/lib/commerce/store-capability-map';
 import { getRecommendedThemeTemplates, type StoreThemeTemplate } from '@/lib/store-theme-templates';
 import { isStoreSlugAvailable } from '@/lib/store/create-store-service';
 import { normalizeExpressSlugPreview } from '@/lib/store/store-express-create-schema';
@@ -232,7 +230,11 @@ export function StoreExpressCreateForm({
         });
 
         setSelectedStoreId(createdStore.id);
-        navigate(getStoreCustomizationPath(createdStore.id), { replace: true });
+        toast({
+          title: t('store.express.createdTitle', 'Boutique créée'),
+          description: t('store.express.createdDesc', 'Créez maintenant votre premier produit.'),
+        });
+        navigate(getPrimaryProductCreatePath(commerceType), { replace: true });
         onSuccess?.();
       } catch (error: unknown) {
         const message = toUserErrorMessage(error) || t('store.form.common.unknownError');
