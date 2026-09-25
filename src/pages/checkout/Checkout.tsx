@@ -489,10 +489,15 @@ const Checkout = () => {
 
   const handleCouponApply = useCallback(
     (couponId: string, discountAmount: number, code: string) => {
-      setAppliedCouponCode({
-        id: couponId,
-        discountAmount,
-        code: code || '',
+      setAppliedCouponCode(prev => {
+        if (prev?.id === couponId && prev.code === code && prev.discountAmount === discountAmount) {
+          return prev;
+        }
+        return {
+          id: couponId,
+          discountAmount,
+          code: code || '',
+        };
       });
       localStorage.setItem(
         'applied_coupon',
@@ -936,6 +941,7 @@ const Checkout = () => {
             ? {
                 couponCode: appliedCouponCode.code,
                 couponDiscountAmount: appliedCouponCode.discountAmount,
+                promotionId: appliedCouponCode.id,
               }
             : undefined,
           serviceOptions: appliedCouponCode ? { couponCode: appliedCouponCode.code } : undefined,
