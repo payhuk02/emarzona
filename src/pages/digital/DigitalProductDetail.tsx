@@ -392,17 +392,6 @@ export default function DigitalProductDetail() {
 
                 <Separator />
 
-                {/* Reviews Summary (compact) */}
-                <div className="py-2">
-                  <ProductReviewsSummary
-                    productId={productId || ''}
-                    productType="digital"
-                    compact
-                  />
-                </div>
-
-                <Separator />
-
                 {/* Access Status & Actions */}
                 <div className="space-y-4">
                   {hasAccess ? (

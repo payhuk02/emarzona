@@ -8,6 +8,8 @@
 
 import { useParams, useNavigate, useSearchParams, Link, useLocation } from 'react-router-dom';
 import { PublicPremiumChrome } from '@/components/layout/PublicPremiumChrome';
+import { SoftLink } from '@/components/navigation/SoftLink';
+import { useStorefrontShell } from '@/contexts/StorefrontShellContext';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { SafeHTML } from '@/components/security/SafeHTML';
@@ -154,6 +156,7 @@ export default function ServiceDetail() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
+  const chromeFromLayout = Boolean(useStorefrontShell()?.chromeProvided);
   const { tree: serviceCategoryTree, data: serviceCategoryRows = [] } = useServiceCategoryTree();
   // Type pour le créneau horaire sélectionné
   interface TimeSlot {
@@ -821,14 +824,28 @@ export default function ServiceDetail() {
         {faqs.length > 0 && <FAQSchema faqs={faqs} />}
 
         {/* Back Button */}
-        <Button
-          variant="ghost"
-          className="mb-4 sm:mb-6 -ml-2 min-h-11"
-          onClick={() => navigate(-1)}
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Retour
-        </Button>
+        {chromeFromLayout ? (
+          <SoftLink
+            to="/"
+            className="inline-flex items-center mb-4 sm:mb-6 -ml-2 min-h-11 px-3 rounded-md text-sm font-medium hover:bg-accent hover:text-accent-foreground"
+            aria-label={`Retour à la boutique ${service.store?.name || ''}`.trim()}
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            <span className="hidden sm:inline">
+              Retour{service.store?.name ? ` à ${service.store.name}` : ''}
+            </span>
+            <span className="sm:hidden">Retour</span>
+          </SoftLink>
+        ) : (
+          <Button
+            variant="ghost"
+            className="mb-4 sm:mb-6 -ml-2 min-h-11"
+            onClick={() => navigate(-1)}
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Retour
+          </Button>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 min-w-0">
           {/* Left & Center: Service Info */}
